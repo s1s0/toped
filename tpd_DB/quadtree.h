@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tpd_DB/quadtree.h $
+//           $URL$
 //  Creation date: Sun Mar 07 2004
 //         Author: Svilen Krustev - s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 187 $
-//          $Date: 2005-07-11 22:29:06 +0100 (Mon, 11 Jul 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 
 #ifndef QUADTREE_H

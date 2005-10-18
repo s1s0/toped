@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tpd_DB/tedcell.h $
+//           $URL$
 //  Creation date: Sun Apr 18 11:33:54 BST 2004
 //         Author: Svilen Krustev - s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 219 $
-//          $Date: 2005-10-01 12:39:14 +0100 (Sat, 01 Oct 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
    
 #ifndef TEDCELL_H_INCLUDED

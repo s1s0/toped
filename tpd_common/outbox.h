@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tpd_common/outbox.h $
+//           $URL$
 //  Creation date: Mon May 10 23:13:03 BST 2004
 //     Created by: Svilen Krustev - s_krustev@yahoo.com
 //      Copyright: (C) 2004 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 172 $
-//          $Date: 2005-06-29 01:12:09 +0100 (Wed, 29 Jun 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 #ifndef OUTBOX_H_INCLUDED
 #define OUTBOX_H_INCLUDED

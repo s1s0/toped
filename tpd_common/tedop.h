@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/branches/toped_wx/lib_design/src/tedop.h $
+//           $URL$
 //        Created: Tue Sep 28 2004
 //         Author: s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 145 $
-//          $Date: 2005-05-23 00:34:14 +0100 (Mon, 23 May 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 #ifndef TEDOP_H_INCLUDED
 #define TEDOP_H_INCLUDED

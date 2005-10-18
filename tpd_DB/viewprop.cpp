@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tpd_DB/viewprop.cpp $
+//           $URL$
 //  Creation date: Sun Sep 29 2002
 //     Created by: Svilen Krustev - s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 218 $
-//          $Date: 2005-09-30 23:04:05 +0100 (Fri, 30 Sep 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 
 #include <sstream>

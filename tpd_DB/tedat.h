@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tpd_DB/tedat.h $
+//           $URL$
 //  Creation date: Tue Feb 25 2003
 //         Author: Svilen Krustev - s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 213 $
-//          $Date: 2005-09-26 21:45:08 +0100 (Mon, 26 Sep 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 #ifndef TEDAT_H
 #define TEDAT_H

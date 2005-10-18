@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/src/avl_def.h $
+//           $URL$
 //        Created: Tue Sep 28 2004
 //         Author: s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 103 $
-//          $Date: 2005-01-11 00:08:39 +0000 (Tue, 11 Jan 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //---------------------------------------------------------------------------                
 // This file is a part of avl.h 
 // libavl - library for manipulation of binary trees.

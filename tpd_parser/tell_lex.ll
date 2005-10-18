@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tpd_parser/tell_lex.ll $
+//           $URL$
 //  Creation date: Fri Nov 08 2002
 //     Created by: Svilen Krustev - s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 228 $
-//          $Date: 2005-10-16 11:03:08 +0100 (Sun, 16 Oct 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //---------------------------------------------------------------------------
 // A non-reentrant parser for tell
 //===========================================================================*/
