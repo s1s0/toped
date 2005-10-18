@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tpd_DB/logicop.h $
+//           $URL$
 //        Created: Mon Oct 01 2004
 //         Author: s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 165 $
-//          $Date: 2005-06-18 12:59:28 +0100 (Sat, 18 Jun 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 #ifndef LOGICOP_H_INCLUDED
 #define LOGICOP_H_INCLUDED
