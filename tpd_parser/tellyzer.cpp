@@ -27,7 +27,7 @@
 #include <sstream>
 #include <algorithm>
 #include "tellyzer.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 
 //-----------------------------------------------------------------------------
 // Definition of tell debug macros

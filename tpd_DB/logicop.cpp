@@ -24,13 +24,14 @@
 //        $Author$
 //===========================================================================
 
+#include "../tpd_common/common.h"
 #include <math.h>
 #include <algorithm>
 #include <assert.h>
 #include <sstream>
 #include "logicop.h"
 #include "tedat.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 
 //-----------------------------------------------------------------------------
 // The declaratoin of the avl related functions. They are declared originally
@@ -200,7 +201,7 @@ unsigned logicop::plysegment::normalize(const TP* p1, const TP* p2) {
    unsigned numcross = crosspoints.size();
    if (crosspoints.size() > 1) {
       SortLine functor(p1,p2);
-      sort(crosspoints.begin(), crosspoints.end(), functor);
+	  std::sort(crosspoints.begin(), crosspoints.end(), functor);
    }
    return numcross;
 }
@@ -466,7 +467,8 @@ logicop::EventQueue::EventQueue( const segmentlist& seg1, const segmentlist& seg
    _equeue = avl_create(E_compare, NULL, NULL);
    // Initialize event queue with edge segment endpoints
    avl_traverser trav;
-   for (unsigned cnt=0; cnt < seg1.size(); cnt++) {
+	unsigned cnt;
+   for ( cnt=0; cnt < seg1.size(); cnt++) {
       Event* evt = new LEvent(seg1[cnt]);
       void* retitem =  avl_t_insert(&trav,_equeue,evt);
       assert(evt == retitem);
@@ -474,7 +476,7 @@ logicop::EventQueue::EventQueue( const segmentlist& seg1, const segmentlist& seg
       retitem =  avl_t_insert(&trav,_equeue,evt);
       assert(evt == retitem);
    }
-   for (unsigned cnt=0; cnt < seg2.size(); cnt++) {
+   for ( cnt=0; cnt < seg2.size(); cnt++) {
       Event* evt = new LEvent(seg2[cnt]);
       void* retitem =  avl_t_insert(&trav,_equeue,evt);
       assert(evt == retitem);

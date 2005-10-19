@@ -31,7 +31,7 @@
 #include <wx/glcanvas.h>
 #include <wx/laywin.h>
  
-#include "ted_prompt.h"
+#include "../tpd_parser/ted_prompt.h"
 #include "layoutcanvas.h"
 #include "tui.h"
 #include "browsers.h"

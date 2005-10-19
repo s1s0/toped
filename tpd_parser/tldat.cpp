@@ -194,12 +194,13 @@ telldata::ttlist::ttlist(const telldata::ttlist& cobj) : tell_var(cobj.get_type(
 const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cobj) {
 //   _ltype = cobj._ltype;
    unsigned count = _mlist.size();
-   for (unsigned i = 0; i < count; i++) 
+   unsigned i;
+   for (i = 0; i < count; i++) 
       delete _mlist[i];
    _mlist.clear();   
    count = cobj._mlist.size();
    _mlist.reserve(count);
-   for (unsigned i = 0; i < count; i++) 
+   for (i = 0; i < count; i++) 
       _mlist.push_back(cobj._mlist[i]->selfcopy());
    return *this;   
 }

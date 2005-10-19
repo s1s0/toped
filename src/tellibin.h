@@ -26,8 +26,8 @@
 
 #ifndef  TELLIBIN_H
 #define  TELLIBIN_H
-#include "tellyzer.h"
-#include "tedstd.h"
+#include "../tpd_parser/tellyzer.h"
+#include "../tpd_DB/tedstd.h"
 
 /*Two ways for arguments checking of the standard functions*/
 // First one is to build the argumentmap structure in the

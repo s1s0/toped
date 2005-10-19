@@ -25,7 +25,7 @@
 //===========================================================================
 #include <wx/wx.h>
 #include "toped.h"
-#include "viewprop.h"
+#include "../tpd_DB/viewprop.h"
 #include "tellibin.h"
 #include "datacenter.h"
 

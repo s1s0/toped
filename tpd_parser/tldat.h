@@ -30,8 +30,9 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include "tedat.h"
-#include "ttt.h"
+#include "../tpd_common/common.h"
+#include "../tpd_DB/tedat.h"
+#include "../tpd_common/ttt.h"
 
 #define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool) && !(op & telldata::tn_listmask))
 #define TLISTOF(op) (op | telldata::tn_listmask)

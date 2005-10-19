@@ -27,8 +27,8 @@
 #define LOGICOP_H_INCLUDED
 
 #include <vector>
-#include "ttt.h"
-#include "avl_def.h"
+#include "../tpd_common/ttt.h"
+#include "../tpd_common/avl_def.h"
 
 namespace logicop {
    

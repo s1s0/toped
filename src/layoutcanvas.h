@@ -30,7 +30,7 @@
 #include <string>
 #include <wx/glcanvas.h>
 #include <wx/cursor.h>
-#include "ttt.h"
+#include "../tpd_common/ttt.h"
 
 //==============================================================================   
 // WX window ID's

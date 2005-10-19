@@ -23,12 +23,12 @@
 //          $Date$
 //        $Author$
 //===========================================================================
-
+#include "../tpd_common/common.h"
 #include <sstream>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "viewprop.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 
 GLubyte cell_mark_bmp[30] = {0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x18, 0x18,
                              0x24, 0x48, 0x42, 0x84, 0x81, 0x02, 0x42, 0x84, 0x24, 0x48, 

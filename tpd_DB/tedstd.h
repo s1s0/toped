@@ -28,8 +28,11 @@
 #define TEDSTD_H_INCLUDED
 
 #include <string>
-#include "ttt.h"
+#include "../tpd_common/common.h"
+#include "../tpd_common/ttt.h"
+#ifndef WIN32
 #include "config.h"
+#endif
 
 #if (SIZEOF_TIME_T == 8)
    #define TIME_TPD unsigned int
