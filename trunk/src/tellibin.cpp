@@ -27,13 +27,13 @@
 #include <math.h>
 #include <sstream>
 #include "tellibin.h"
-#include "ted_prompt.h"
-#include "tedat.h"
+#include "../tpd_parser/ted_prompt.h"
+#include "../tpd_DB/tedat.h"
 #include "layoutcanvas.h"
 #include "datacenter.h"
 #include "browsers.h"
-#include "viewprop.h"
-#include "tedop.h"
+#include "../tpd_DB/viewprop.h"
+#include "../tpd_common/tedop.h"
 #include "toped.h"
 
 //#define TEUNDO_DEBUG_ON
@@ -2520,20 +2520,21 @@ void tellstdfunc::stdMOVESEL::undo() {
       ATDB->unselect_fromList(get_ttlaylist(failed));
       ATDB->unselect_fromList(get_ttlaylist(added));
       laydata::selectList* fadead[3];
-      for (byte i = 0; i < 3; fadead[i++] = new laydata::selectList());
+	  byte i;
+      for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
       ATDB->move_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale),fadead);
       //SGREM Here - an internal check can be done - all 3 of the fadead lists
       // MUST be empty, otherwise - got knows what's wrong!
-      for (byte i = 0; i < 3; delete fadead[i++]);
+      for (i = 0; i < 3; delete fadead[i++]);
       ATDB->select_fromList(get_ttlaylist(failed));
       // put back the replaced (deleted) shapes
       ATDB->addlist(get_shlaylist(deleted));
       // and select them
       ATDB->select_fromList(get_ttlaylist(deleted));
       // delete the added shapes
-      for (word i = 0 ; i < added->mlist().size(); i++) {
-         ATDB->destroy_this(static_cast<telldata::ttlayout*>(added->mlist()[i])->data(),
-                           static_cast<telldata::ttlayout*>(added->mlist()[i])->layer());
+      for (word j = 0 ; j < added->mlist().size(); j++) {
+         ATDB->destroy_this(static_cast<telldata::ttlayout*>(added->mlist()[j])->data(),
+                           static_cast<telldata::ttlayout*>(added->mlist()[j])->layer());
       }
    DATC->unlockDB();   
    delete failed;
@@ -2553,14 +2554,15 @@ int tellstdfunc::stdMOVESEL::execute() {
    // move_selected returns 3 select lists : Failed/Deleted/Added
    // This is because of the modify operations
    laydata::selectList* fadead[3];
-   for (byte i = 0; i < 3; fadead[i++] = new laydata::selectList());
+   byte i;
+   for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->move_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
       // save for undo operations ... 
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
       UNDOPstack.push_front(make_ttlaylist(fadead[2])); // and added
-      for (byte i = 0; i < 3; delete fadead[i++]);
+      for (i = 0; i < 3; delete fadead[i++]);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    //delete p1; delete p2; undo will delete them
@@ -2998,7 +3000,8 @@ int tellstdfunc::lgcMERGE::execute() {
       //merge returns 2 Attic lists -> Delete/AddMerged
       // create and initialize them here
       laydata::atticList* dasao[2];
-      for (byte i = 0; i < 2; dasao[i++] = new laydata::atticList());
+	  byte i;
+      for (i = 0; i < 2; dasao[i++] = new laydata::atticList());
       // create a list of currently selected shapes
       laydata::tdtdesign* ATDB = DATC->lockDB();
          telldata::ttlist* listselected = make_ttlaylist(ATDB->shapesel());
@@ -3019,7 +3022,7 @@ int tellstdfunc::lgcMERGE::execute() {
             delete listselected;
          }   
       // clean-up the lists
-      for (byte i = 0; i < 2; delete dasao[i++]);
+      for (i = 0; i < 2; delete dasao[i++]);
    }
    UpdateLV();
    return EXEC_NEXT;

@@ -28,7 +28,7 @@
 
 #include <stdio.h>
 #include <vector>
-#include "ttt.h"
+#include "../tpd_common/ttt.h"
 
 //GDS data types
 #define gdsDT_NODATA       0

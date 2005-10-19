@@ -29,7 +29,7 @@
 #include <math.h>
 #include "tui.h"
 #include "datacenter.h"
-#include "viewprop.h"
+#include "../tpd_DB/viewprop.h"
 
 extern DataCenter*                DATC;
 extern layprop::ViewProperties*   Properties;

@@ -27,7 +27,8 @@
 #include <math.h>
 #include <sstream>
 #include "tedstd.h"
-#include "outbox.h"
+#include "../tpd_common/common.h"
+#include "../tpd_common/outbox.h"
 #include "tedesign.h"
 
 //-----------------------------------------------------------------------------

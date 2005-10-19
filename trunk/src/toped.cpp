@@ -29,7 +29,7 @@
 #include <math.h>
 #include "toped.h"
 #include "datacenter.h"
-#include "viewprop.h"
+#include "../tpd_DB/viewprop.h"
 #include "tui.h"
 
 extern const wxEventType         wxEVT_MARKERPOSITION;
@@ -195,11 +195,13 @@ END_EVENT_TABLE()
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
-   initMenuBar();
+   //initMenuBar();
    initView();
 //   initToolBar();
    CreateStatusBar();
    SetStatusText( wxT( "Toped loaded..." ) );
+   //??? Put initMenuBar() to the end because in Windows it crashes
+   initMenuBar();
 }
 
 tui::TopedFrame::~TopedFrame() {

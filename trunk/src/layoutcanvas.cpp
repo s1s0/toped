@@ -26,11 +26,16 @@
 
 #include <math.h>
 #include <wx/wx.h>
+
+#if WIN32
+#include <wx/image.h>
+#endif
+
 #include "layoutcanvas.h"
-#include "viewprop.h"
+#include "../tpd_DB/viewprop.h"
 #include "datacenter.h"
-#include "ted_prompt.h"
-#include "tedat.h"
+#include "../tpd_parser/ted_prompt.h"
+#include "../tpd_DB/tedat.h"
 
 extern layprop::ViewProperties*  Properties;
 extern DataCenter*               DATC;
@@ -86,12 +91,21 @@ void tui::LayoutCanvas::initializeGL() {
 //   glClearColor(0.5,0.5,0.5,0.5);
 //    object = makeObject();		// Generate display lists
    // Create a couple of common callback functions
+#ifndef WIN32
    gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_BEGIN,
                                    (GLvoid(*)())&glBegin);
    gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_VERTEX,
                                    (GLvoid(*)())&laydata::tdtdata::polyVertex);
    gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
                                                 &glEnd);
+#else 
+   gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_BEGIN,
+                                   (GLvoid(__stdcall *)())&glBegin);
+   gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_VERTEX,
+                                   (GLvoid(__stdcall *)())&laydata::tdtdata::polyVertex);
+   gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
+                                                &glEnd);
+#endif
    // The next call needs to be fitted in some kind of GL descructor
    // gluDeleteTess(tessellObj);
    
@@ -304,7 +318,9 @@ void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
 void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
    tmp_wnd = false;
    int4b stepDB = Properties->stepDB();
-   if ((abs(presspoint.x() - ScrMARK.x())  > stepDB) or
+   //???Svilen, repalce or with ||. What is it "or"?
+   //if ((abs(presspoint.x() - ScrMARK.x())  > stepDB) or
+   if ((abs(presspoint.x() - ScrMARK.x())  > stepDB) ||
        (abs(presspoint.y() - ScrMARK.y())  > stepDB))   {
       // if dragging ...
       wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
@@ -497,15 +513,16 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
                           col_black,
                           col_white);
 
+   delete [] bits;
+   delete [] maskBits;
+   delete col_black;
+   delete col_white;
 #else 
    Image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_X, HotX-HotAdjust );
    Image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_Y, HotY-HotAdjust );
    pCursor = new wxCursor( Image );
 #endif
-   delete [] bits;
-   delete [] maskBits;
-   delete col_black;
-   delete col_white;
+
    return pCursor;
 }
 

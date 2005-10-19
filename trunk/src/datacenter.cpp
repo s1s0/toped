@@ -27,9 +27,9 @@
 #include <sstream>
 #include "datacenter.h"
 #include "browsers.h"
-#include "tedat.h"
-#include "outbox.h"
-#include "viewprop.h"
+#include "../tpd_DB/tedat.h"
+#include "../tpd_common/outbox.h"
+#include "../tpd_DB/viewprop.h"
 
 extern   layprop::ViewProperties*   Properties;
 extern   wxMutex                    DBLock;

@@ -34,7 +34,7 @@
 #include <wx/listctrl.h>
 #include <wx/treectrl.h>
 #include <string>
-#include "tedesign.h"
+#include "../tpd_DB/tedesign.h"
 #include "gds_io.h"
 
 namespace browsers {

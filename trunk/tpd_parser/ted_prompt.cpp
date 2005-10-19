@@ -31,7 +31,27 @@
 //-----------------------------------------------------------------------------
 // Some external definitions
 //-----------------------------------------------------------------------------
+//??? I need help in this place
+#ifdef WIN32
+typedef unsigned int yy_size_t;
+struct yy_buffer_state
+	{
+	FILE *yy_input_file;
+	char *yy_ch_buf;		/* input buffer */
+	char *yy_buf_pos;		/* current position in input buffer */
+	yy_size_t yy_buf_size;
+	int yy_n_chars;
+	int yy_is_our_buffer;
+	int yy_is_interactive;
+	int yy_at_bol;
+	int yy_fill_buffer;
+	int yy_buffer_status;
+	};
+extern yy_buffer_state* tell_scan_string(const char *str);
+#else
 extern void* tell_scan_string(const char *str);
+#endif
+
 extern void my_delete_yy_buffer( void* b );
 extern int tellparse(); // Calls the bison generated parser
 extern YYLTYPE telllloc; // parser current location - global variable, defined in bison
@@ -196,6 +216,9 @@ void* console::parse_thread::Entry() {
    my_delete_yy_buffer( b );
    Mutex.Unlock();
 //   wxLogMessage(_T("Mutex unlocked"));
+    //???Svilen, I dont know that returns this function
+   return NULL;
+
 };
 
 //==============================================================================
@@ -259,7 +282,7 @@ void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
          _history_position = _cmd_history.begin();
       else _history_position++;
    if (_cmd_history.end() == _history_position) SetValue("");
-   else SetValue(*_history_position);
+   else SetValue(*_history_position->c_str());
 }
 
 void console::ted_cmd::parseCommand(wxString cmd) {

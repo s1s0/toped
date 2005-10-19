@@ -24,12 +24,13 @@
 //        $Author$
 //===========================================================================
 
+#include "../tpd_common/common.h"
 #include <sstream>
 #include "tedesign.h"
 #include "tedat.h"
-#include "tedop.h"
+#include "../tpd_common/tedop.h"
 #include "viewprop.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 
 laydata::editcellstack laydata::editobject::_editstack;    //! the stack of all previously edited (opened) cells
 //-----------------------------------------------------------------------------

@@ -26,12 +26,13 @@
 #include <sstream>
 #include <iostream>
 #include <math.h>
+#include <algorithm>
 #include <GL/glut.h>
 #include "tedat.h"
 #include "tedcell.h"
 #include "logicop.h"
-#include "tedop.h"
-#include "outbox.h"
+#include "../tpd_common/tedop.h"
+#include "../tpd_common/outbox.h"
 
 GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
                            0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 
@@ -1522,7 +1523,7 @@ void laydata::valid_poly::normalize() {
    for (i = 0, j = 1; i < size; i++, j = (j+1) % size) 
       area += _plist[i].x()*_plist[j].y() - _plist[j].x()*_plist[i].y();
    if (area < 0)  {
-      reverse(_plist.begin(),_plist.end());
+	   std::reverse(_plist.begin(),_plist.end());
       _status |= laydata::shp_clock;
    }
 }

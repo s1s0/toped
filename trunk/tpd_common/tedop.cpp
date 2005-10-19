@@ -116,7 +116,7 @@ tedop::EventQueue::EventQueue( const segmentlist& segments ) {
       equeue.push_back(new LEvent(segments[i]));
       equeue.push_back(new REvent(segments[i]));
    }
-   sort(equeue.begin(), equeue.end(), E_compare);
+   std::sort(equeue.begin(), equeue.end(), E_compare);
 }
 
 bool tedop::EventQueue::check_valid( SweepLine& SL ) {

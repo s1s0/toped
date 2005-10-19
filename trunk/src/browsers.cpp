@@ -27,9 +27,9 @@
 //===========================================================================
 
 #include "browsers.h"
-#include "viewprop.h"
+#include "../tpd_DB/viewprop.h"
 #include "layoutcanvas.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 #include "toped.h"
 #include "tui.h"
 #include "../ui/activelay.xpm"
@@ -672,7 +672,7 @@ void  browsers::layerbrowser::OnXXXSelected(wxCommandEvent& WXUNUSED(event)) {
       default: assert(false);
    }
    wxString cmd;
-   cmd << tl_command << "({";
+   cmd << tl_command.c_str() << "({";
    //swipe the selected items
    wxListItem info;
    long item = -1;
@@ -685,6 +685,6 @@ void  browsers::layerbrowser::OnXXXSelected(wxCommandEvent& WXUNUSED(event)) {
       _layerlist->GetItem(info);
       cmd << " " << info.GetText() << ",";
    }
-   cmd.RemoveLast(); cmd << "}, " << tl_option << ");";
+   cmd.RemoveLast(); cmd << "}, " << tl_option.c_str() << ");";
    Console->parseCommand(cmd);
 }

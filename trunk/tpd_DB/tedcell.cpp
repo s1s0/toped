@@ -30,8 +30,8 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "tedesign.h"
-#include "tedop.h"
-#include "outbox.h"
+#include "../tpd_common/tedop.h"
+#include "../tpd_common/outbox.h"
 #include <iostream>
 extern layprop::ViewProperties*   Properties;
 
@@ -769,13 +769,14 @@ bool laydata::tdtcell::cutpoly_selected(pointlist& plst, atticList** dasao) {
       // initialize the corresponding 3 shape lists -> one per attic list
       // DElete/CUt/REst/
       shapeList* decure[3];
-      for (byte i = 0; i < 3; decure[i++] = new shapeList());
+	  byte i;
+      for (i = 0; i < 3; decure[i++] = new shapeList());
       // omit the layer if there are no fully selected shapes 
       if (0 == getFullySelected(CL->second)) continue;
       // do the clipping
       _layers[CL->first]->cutpoly_selected(plst, cut_ovl, decure);
       // add the shapelists to the collection, but only if they are not empty
-      for (byte i = 0; i < 3; i++) {
+      for (i = 0; i < 3; i++) {
          if (decure[i]->empty()) delete decure[i];
          else (*(dasao[i]))[CL->first] = decure[i];
       }   
@@ -1168,7 +1169,7 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB) {
       nameList *children_upd = rehash_children();
       std::pair<nameList::iterator,nameList::iterator> diff;
       do {
-         diff = mismatch(children_upd->begin(), children_upd->end(), _children.begin());
+		  diff = std::mismatch(children_upd->begin(), children_upd->end(), _children.begin());
          if (diff.second != _children.end()) {
             childref = ATDB->checkcell(*(diff.second));
             // remove it from the hierarchy
