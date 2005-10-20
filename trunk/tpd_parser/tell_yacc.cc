@@ -128,12 +128,12 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 39 "tell_yacc.yy"
+#line 39 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
 
 #include <sstream>
 #include "tellyzer.h"
 #include "ted_prompt.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 /* Switch on verbose error reporting messages*/
 #define YYERROR_VERBOSE 1
 /*Current command block - defined in tellyzer.cpp*/
@@ -178,7 +178,7 @@ void tellerror (std::string s);
 #endif
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 162 "tell_yacc.yy"
+#line 162 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
 typedef union YYSTYPE {
    float                    real;
    bool                     ptypedef;
@@ -191,7 +191,7 @@ typedef union YYSTYPE {
    parsercmd::cmdFUNC      *pfblock;
 } YYSTYPE;
 /* Line 190 of yacc.c.  */
-#line 195 "tell_yacc.cc"
+#line 195 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.cc"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -215,7 +215,7 @@ typedef struct YYLTYPE
 
 
 /* Line 213 of yacc.c.  */
-#line 219 "tell_yacc.cc"
+#line 219 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.cc"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -1328,17 +1328,17 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 197 "tell_yacc.yy"
+#line 197 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 3:
-#line 198 "tell_yacc.yy"
+#line 198 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 4:
-#line 202 "tell_yacc.yy"
+#line 202 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
     if (!yynerrs)  CMDBlock->execute();
     else           CMDBlock->cleaner();
@@ -1346,22 +1346,22 @@ yyreduce:
     break;
 
   case 5:
-#line 206 "tell_yacc.yy"
+#line 206 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 6:
-#line 207 "tell_yacc.yy"
+#line 207 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {tellerror("Unexpected symbol", (yylsp[0]));}
     break;
 
   case 7:
-#line 208 "tell_yacc.yy"
+#line 208 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->cleaner();}
     break;
 
   case 8:
-#line 212 "tell_yacc.yy"
+#line 212 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          /*Create a new variableMAP structure containing the arguments*/
          arglist = new parsercmd::argumentLIST;
@@ -1370,7 +1370,7 @@ yyreduce:
     break;
 
   case 9:
-#line 217 "tell_yacc.yy"
+#line 217 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          /*Check whether such a function is already defined */
          if (NULL != CMDBlock->funcDefined((yyvsp[-4].parsestr),arglist)) {
@@ -1382,7 +1382,7 @@ yyreduce:
     break;
 
   case 10:
-#line 225 "tell_yacc.yy"
+#line 225 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          if ((telldata::tn_void != (yyvsp[-7].pttname)) && (0 == returns)) 
             tellerror("function must return a value", (yyloc));
@@ -1395,7 +1395,7 @@ yyreduce:
     break;
 
   case 11:
-#line 237 "tell_yacc.yy"
+#line 237 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock = new parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
@@ -1403,7 +1403,7 @@ yyreduce:
     break;
 
   case 12:
-#line 241 "tell_yacc.yy"
+#line 241 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          (yyval.pblock) = CMDBlock;
          CMDBlock = CMDBlock->popblk();
@@ -1411,7 +1411,7 @@ yyreduce:
     break;
 
   case 13:
-#line 248 "tell_yacc.yy"
+#line 248 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock = new parsercmd::cmdFUNC(arglist,funcretype);
          CMDBlock->pushblk();
@@ -1419,7 +1419,7 @@ yyreduce:
     break;
 
   case 14:
-#line 252 "tell_yacc.yy"
+#line 252 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          (yyval.pfblock) = static_cast<parsercmd::cmdFUNC*>(CMDBlock);
          CMDBlock = CMDBlock->popblk();
@@ -1427,7 +1427,7 @@ yyreduce:
     break;
 
   case 15:
-#line 259 "tell_yacc.yy"
+#line 259 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       if      (!arglist) tellerror("return statement outside function body", (yylsp[0]));
       else if (funcretype != telldata::tn_void) tellerror("value expected", (yylsp[0]));
@@ -1437,7 +1437,7 @@ yyreduce:
     break;
 
   case 16:
-#line 265 "tell_yacc.yy"
+#line 265 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       if (!arglist) tellerror("return statement outside function body", (yylsp[-1]));
       else if (funcretype != (yyvsp[0].pttname)) tellerror("return type different from function type", (yylsp[0]));
@@ -1447,7 +1447,7 @@ yyreduce:
     break;
 
   case 17:
-#line 274 "tell_yacc.yy"
+#line 274 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          if (telldata::tn_bool != (yyvsp[-2].pttname)) tellerror("bool type expected",(yylsp[-2]));
          else CMDBlock->pushcmd(new parsercmd::cmdIFELSE((yyvsp[0].pblock), NULL));
@@ -1455,7 +1455,7 @@ yyreduce:
     break;
 
   case 18:
-#line 279 "tell_yacc.yy"
+#line 279 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          if (telldata::tn_bool != (yyvsp[-4].pttname)) tellerror("bool type expected",(yylsp[-4]));
          else CMDBlock->pushcmd(new parsercmd::cmdIFELSE((yyvsp[-2].pblock),(yyvsp[0].pblock)));
@@ -1463,7 +1463,7 @@ yyreduce:
     break;
 
   case 19:
-#line 286 "tell_yacc.yy"
+#line 286 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock = new parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
@@ -1471,7 +1471,7 @@ yyreduce:
     break;
 
   case 20:
-#line 290 "tell_yacc.yy"
+#line 290 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          condBlock = CMDBlock;
          CMDBlock = CMDBlock->popblk();
@@ -1480,14 +1480,14 @@ yyreduce:
     break;
 
   case 21:
-#line 295 "tell_yacc.yy"
+#line 295 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock->pushcmd(new parsercmd::cmdWHILE(condBlock,(yyvsp[0].pblock)));
    }
     break;
 
   case 22:
-#line 301 "tell_yacc.yy"
+#line 301 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock = new parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
@@ -1495,7 +1495,7 @@ yyreduce:
     break;
 
   case 23:
-#line 305 "tell_yacc.yy"
+#line 305 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          condBlock = CMDBlock;
          CMDBlock = CMDBlock->popblk();
@@ -1505,62 +1505,62 @@ yyreduce:
     break;
 
   case 24:
-#line 314 "tell_yacc.yy"
+#line 314 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 25:
-#line 315 "tell_yacc.yy"
+#line 315 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 26:
-#line 319 "tell_yacc.yy"
+#line 319 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { }
     break;
 
   case 27:
-#line 320 "tell_yacc.yy"
+#line 320 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { }
     break;
 
   case 28:
-#line 321 "tell_yacc.yy"
+#line 321 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
     break;
 
   case 29:
-#line 322 "tell_yacc.yy"
+#line 322 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
     break;
 
   case 30:
-#line 323 "tell_yacc.yy"
+#line 323 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
     break;
 
   case 31:
-#line 324 "tell_yacc.yy"
+#line 324 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
     break;
 
   case 32:
-#line 325 "tell_yacc.yy"
+#line 325 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {/*keep the return value in the stack*/}
     break;
 
   case 33:
-#line 326 "tell_yacc.yy"
+#line 326 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
     break;
 
   case 34:
-#line 327 "tell_yacc.yy"
+#line 327 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { }
     break;
 
   case 35:
-#line 331 "tell_yacc.yy"
+#line 331 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
         argmap = new parsercmd::argumentMAP;
         argmapstack.push(argmap);
@@ -1568,7 +1568,7 @@ yyreduce:
     break;
 
   case 36:
-#line 335 "tell_yacc.yy"
+#line 335 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody((yyvsp[-4].parsestr),(yyvsp[-1].parguments));
       if (fc) {
@@ -1585,76 +1585,76 @@ yyreduce:
     break;
 
   case 37:
-#line 351 "tell_yacc.yy"
+#line 351 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {tell_lvalue = tellvar;}
     break;
 
   case 38:
-#line 352 "tell_yacc.yy"
+#line 352 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       (yyval.pttname) = parsercmd::Assign(tell_lvalue, (yyvsp[0].pttname), (yylsp[-2]));
    }
     break;
 
   case 39:
-#line 358 "tell_yacc.yy"
+#line 358 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.parguments) = argmap;}
     break;
 
   case 40:
-#line 359 "tell_yacc.yy"
+#line 359 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.parguments) = argmap;}
     break;
 
   case 41:
-#line 363 "tell_yacc.yy"
+#line 363 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.parguments) = argmap;
       argmap->push_back((yyvsp[0].pttname));}
     break;
 
   case 42:
-#line 365 "tell_yacc.yy"
+#line 365 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.parguments) = argmap;
       argmap->push_back((yyvsp[0].pttname));}
     break;
 
   case 43:
-#line 370 "tell_yacc.yy"
+#line 370 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 44:
-#line 371 "tell_yacc.yy"
+#line 371 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 45:
-#line 372 "tell_yacc.yy"
+#line 372 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 46:
-#line 376 "tell_yacc.yy"
+#line 376 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 47:
-#line 377 "tell_yacc.yy"
+#line 377 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 48:
-#line 381 "tell_yacc.yy"
+#line 381 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 49:
-#line 382 "tell_yacc.yy"
+#line 382 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 50:
-#line 386 "tell_yacc.yy"
+#line 386 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       tellvar = parsercmd::newTellvar((yyvsp[-1].pttname), (yylsp[-1]));
       arglist->push_back(new parsercmd::argumentTYPE((yyvsp[0].parsestr),tellvar));
@@ -1663,17 +1663,17 @@ yyreduce:
     break;
 
   case 51:
-#line 394 "tell_yacc.yy"
+#line 394 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 52:
-#line 395 "tell_yacc.yy"
+#line 395 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 53:
-#line 399 "tell_yacc.yy"
+#line 399 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       tellvar = CMDBlock->getID((yyvsp[0].parsestr));
       if (tellvar) (yyval.pttname) = tellvar->get_type();
@@ -1683,7 +1683,7 @@ yyreduce:
     break;
 
   case 54:
-#line 408 "tell_yacc.yy"
+#line 408 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[-1].pttname);
       telldata::tell_var* v = CMDBlock->getID((yyvsp[0].parsestr), true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
@@ -1697,7 +1697,7 @@ yyreduce:
     break;
 
   case 55:
-#line 421 "tell_yacc.yy"
+#line 421 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       if (!tellstruct->addfield((yyvsp[0].parsestr), (yyvsp[-1].pttname), CMDBlock->gettypeID((yyvsp[0].parsestr)))) {
          tellerror("field with this name already defined in this strucutre", (yylsp[0]));
@@ -1708,57 +1708,57 @@ yyreduce:
     break;
 
   case 56:
-#line 431 "tell_yacc.yy"
+#line 431 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 57:
-#line 432 "tell_yacc.yy"
+#line 432 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[-1].pttname) | telldata::tn_listmask;}
     break;
 
   case 58:
-#line 436 "tell_yacc.yy"
+#line 436 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_void;}
     break;
 
   case 59:
-#line 437 "tell_yacc.yy"
+#line 437 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_real;}
     break;
 
   case 60:
-#line 438 "tell_yacc.yy"
+#line 438 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_int;}
     break;
 
   case 61:
-#line 439 "tell_yacc.yy"
+#line 439 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_bool;}
     break;
 
   case 62:
-#line 440 "tell_yacc.yy"
+#line 440 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_pnt;}
     break;
 
   case 63:
-#line 441 "tell_yacc.yy"
+#line 441 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_box;}
     break;
 
   case 64:
-#line 442 "tell_yacc.yy"
+#line 442 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_string;}
     break;
 
   case 65:
-#line 443 "tell_yacc.yy"
+#line 443 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_layout;}
     break;
 
   case 66:
-#line 444 "tell_yacc.yy"
+#line 444 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
         telldata::tell_type* ttype = CMDBlock->gettypeID((yyvsp[0].parsestr));
         if (NULL == ttype)  {
@@ -1769,7 +1769,7 @@ yyreduce:
     break;
 
   case 67:
-#line 454 "tell_yacc.yy"
+#line 454 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
         tellstruct = CMDBlock->requesttypeID((yyvsp[0].parsestr));
         if (NULL == tellstruct) {
@@ -1780,7 +1780,7 @@ yyreduce:
     break;
 
   case 68:
-#line 461 "tell_yacc.yy"
+#line 461 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
         if ((yyvsp[-1].ptypedef)) CMDBlock->addlocaltype((yyvsp[-4].parsestr),tellstruct);
         else delete tellstruct;
@@ -1789,24 +1789,24 @@ yyreduce:
     break;
 
   case 69:
-#line 469 "tell_yacc.yy"
+#line 469 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { (yyval.ptypedef) = (yyvsp[0].ptypedef);      }
     break;
 
   case 70:
-#line 470 "tell_yacc.yy"
+#line 470 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { (yyval.ptypedef) = (yyvsp[-2].ptypedef) && (yyvsp[0].ptypedef);}
     break;
 
   case 71:
-#line 475 "tell_yacc.yy"
+#line 475 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { (yyval.pttname) = (yyvsp[0].pttname) | telldata::tn_listmask;
       listlength++;
    }
     break;
 
   case 72:
-#line 478 "tell_yacc.yy"
+#line 478 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { (yyval.pttname) = (yyvsp[-2].pttname);
       if ((yyvsp[-2].pttname) != ((yyvsp[0].pttname) | telldata::tn_listmask))
                            tellerror("list members must be the same type",(yylsp[0]));
@@ -1815,37 +1815,37 @@ yyreduce:
     break;
 
   case 73:
-#line 486 "tell_yacc.yy"
+#line 486 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       (yyval.pttname) = parsercmd::newDataStructure((yyvsp[-3].pttname),(yyvsp[-1].pttname),(yylsp[-3]),(yylsp[-1]));
    }
     break;
 
   case 74:
-#line 489 "tell_yacc.yy"
+#line 489 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { listlength = 0;}
     break;
 
   case 75:
-#line 490 "tell_yacc.yy"
+#line 490 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { (yyval.pttname) = (yyvsp[-1].pttname);
         CMDBlock->pushcmd(new parsercmd::cmdLIST((yyvsp[-1].pttname), listlength));
    }
     break;
 
   case 76:
-#line 496 "tell_yacc.yy"
+#line 496 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
     break;
 
   case 77:
-#line 498 "tell_yacc.yy"
+#line 498 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 78:
-#line 502 "tell_yacc.yy"
+#line 502 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       if       (telldata::tn_box == (yyvsp[-1].pttname)) {
          CMDBlock->pushcmd(new parsercmd::cmdWINDOWFIELD((yyvsp[0].parsestr),(yylsp[0])));
@@ -1865,159 +1865,159 @@ yyreduce:
     break;
 
   case 79:
-#line 522 "tell_yacc.yy"
+#line 522 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 80:
-#line 523 "tell_yacc.yy"
+#line 523 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"||",(yylsp[-2]),(yylsp[-1]));}
     break;
 
   case 81:
-#line 527 "tell_yacc.yy"
+#line 527 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 82:
-#line 528 "tell_yacc.yy"
+#line 528 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"&&",(yylsp[-2]),(yylsp[-1]));}
     break;
 
   case 83:
-#line 532 "tell_yacc.yy"
+#line 532 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 84:
-#line 533 "tell_yacc.yy"
+#line 533 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"==",(yylsp[-2]),(yylsp[-1]));}
     break;
 
   case 85:
-#line 534 "tell_yacc.yy"
+#line 534 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"!=",(yylsp[-2]),(yylsp[-1]));}
     break;
 
   case 86:
-#line 538 "tell_yacc.yy"
+#line 538 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 87:
-#line 539 "tell_yacc.yy"
+#line 539 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"<",(yylsp[-2]),(yylsp[-1]));}
     break;
 
   case 88:
-#line 540 "tell_yacc.yy"
+#line 540 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),">",(yylsp[-2]),(yylsp[-1]));}
     break;
 
   case 89:
-#line 541 "tell_yacc.yy"
+#line 541 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"<=",(yylsp[-2]),(yylsp[-1]));}
     break;
 
   case 90:
-#line 542 "tell_yacc.yy"
+#line 542 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),">=",(yylsp[-2]),(yylsp[-1]));}
     break;
 
   case 91:
-#line 546 "tell_yacc.yy"
+#line 546 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 92:
-#line 547 "tell_yacc.yy"
+#line 547 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::Plus((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
     break;
 
   case 93:
-#line 548 "tell_yacc.yy"
+#line 548 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::Minus((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
     break;
 
   case 94:
-#line 552 "tell_yacc.yy"
+#line 552 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 95:
-#line 553 "tell_yacc.yy"
+#line 553 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::Multiply((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
     break;
 
   case 96:
-#line 554 "tell_yacc.yy"
+#line 554 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::Divide((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
     break;
 
   case 97:
-#line 558 "tell_yacc.yy"
+#line 558 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 98:
-#line 559 "tell_yacc.yy"
+#line 559 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::UMinus((yyvsp[0].pttname),(yylsp[0]));}
     break;
 
   case 99:
-#line 563 "tell_yacc.yy"
+#line 563 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_real;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttreal((yyvsp[0].real)),true));}
     break;
 
   case 100:
-#line 565 "tell_yacc.yy"
+#line 565 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_int;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttint((yyvsp[0].integer)),true));}
     break;
 
   case 101:
-#line 567 "tell_yacc.yy"
+#line 567 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_bool;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(true),true));}
     break;
 
   case 102:
-#line 569 "tell_yacc.yy"
+#line 569 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_bool;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(false),true));}
     break;
 
   case 103:
-#line 571 "tell_yacc.yy"
+#line 571 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_string;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttstring((yyvsp[0].parsestr)),true));
                                                                 delete [] (yyvsp[0].parsestr);}
     break;
 
   case 104:
-#line 574 "tell_yacc.yy"
+#line 574 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
     break;
 
   case 105:
-#line 576 "tell_yacc.yy"
+#line 576 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 106:
-#line 577 "tell_yacc.yy"
+#line 577 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 107:
-#line 578 "tell_yacc.yy"
+#line 578 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[-1].pttname);}
     break;
 
   case 108:
-#line 579 "tell_yacc.yy"
+#line 579 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {tellerror("Unexpected symbol", (yylsp[0]));}
     break;
 
@@ -2025,7 +2025,7 @@ yyreduce:
     }
 
 /* Line 1037 of yacc.c.  */
-#line 2029 "tell_yacc.cc"
+#line 2029 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.cc"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -2260,7 +2260,7 @@ yyreturn:
 }
 
 
-#line 582 "tell_yacc.yy"
+#line 582 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
 
 /*-------------------------------------------------------------------------*/
 int yyerror (char *s) {  /* Called by yyparse on error */

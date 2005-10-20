@@ -206,11 +206,8 @@ int parsercmd::EOfile() {
       /* get the previous file record from the array */
       parsercmd::lexer_files* prev = include_stack[--include_stack_ptr];
       /* take care to free the memory from the current file name */
-      #ifndef WIN32
-		//??? 
-	  if (telllloc.filename) delete telllloc.filename;
-	#endif
-	  /* restore the error location object*/
+      if (telllloc.filename) delete [] telllloc.filename;
+      /* restore the error location object*/
       telllloc = *(prev->location);
       /* delete the current file buffer (I suppose file is also closed)*/
       yy_delete_buffer( YY_CURRENT_BUFFER );

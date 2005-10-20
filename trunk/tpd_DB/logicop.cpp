@@ -24,13 +24,13 @@
 //        $Author$
 //===========================================================================
 
-#include "../tpd_common/common.h"
 #include <math.h>
 #include <algorithm>
 #include <assert.h>
 #include <sstream>
 #include "logicop.h"
 #include "tedat.h"
+#include "../tpd_common/ttt.h"
 #include "../tpd_common/outbox.h"
 
 //-----------------------------------------------------------------------------

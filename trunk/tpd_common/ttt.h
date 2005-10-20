@@ -32,6 +32,13 @@
 #include <stack>
 #include <list>
 #include <assert.h>
+
+#if WIN32
+   #include <windows.h>
+   #define rint floor
+   #define remainder fmod
+   #pragma warning( disable : 4786 ) 
+#endif
 //#include "config.h"
 //#define MIN_X        (int4b)0x80000001      //  -2 147 483 647
 //#define MAX_X        (int4b)0x7FFFFFFF      //   2 147 483 643

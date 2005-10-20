@@ -216,9 +216,7 @@ void* console::parse_thread::Entry() {
    my_delete_yy_buffer( b );
    Mutex.Unlock();
 //   wxLogMessage(_T("Mutex unlocked"));
-    //???Svilen, I dont know that returns this function
    return NULL;
-
 };
 
 //==============================================================================
