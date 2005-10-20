@@ -293,3 +293,5 @@ screenSetup();
 newdesign("seed");
 newcell("crop");
 opencell("crop");
+struct circle {point center; real radius};
+circle c1;

@@ -40,7 +40,7 @@ void telldata::ttreal::set_value(tell_var* rt) {
 void telldata::ttreal::echo(std::string& wstr) {
    std::ostringstream ost;
    ost << value();
-   wstr = ost.str();
+   wstr += ost.str();
 }
 
 const telldata::ttreal& telldata::ttreal::operator = (const ttreal& a) {
@@ -60,7 +60,7 @@ void telldata::ttint::set_value(tell_var* rt) {
 void telldata::ttint::echo(std::string& wstr) {
    std::ostringstream ost;
    ost << value();
-   wstr = ost.str();
+   wstr += ost.str();
 }
 
 const telldata::ttint& telldata::ttint::operator = (const ttint& a) {
@@ -87,10 +87,8 @@ void telldata::ttbool::set_value(tell_var* rt) {
 }
 
 void telldata::ttbool::echo(std::string& wstr) {
-   std::ostringstream ost;
-   if (_value) ost << "true";
-   else        ost << "false";
-   wstr = ost.str();
+   if (_value) wstr += "true";
+   else        wstr += "false";
 }
 
 //=============================================================================
@@ -102,7 +100,7 @@ void telldata::ttpnt::set_value(tell_var* rt) {
 void telldata::ttpnt::echo(std::string& wstr) {
    std::ostringstream ost;
    ost << "X = " << x() << ": Y = " << y();
-   wstr = ost.str();
+   wstr += ost.str();
 }
 
 const telldata::ttpnt& telldata::ttpnt::operator = (const ttpnt& a) {
@@ -135,7 +133,7 @@ void telldata::ttwnd::echo(std::string& wstr) {
    std::ostringstream ost;
    ost << "P1: X = " << p1().x() << ": Y = " << p1().y() << " ; " <<
           "P2: X = " << p2().x() << ": Y = " << p2().y() ;
-   wstr = ost.str();
+   wstr += ost.str();
 }
 
 const telldata::ttwnd& telldata::ttwnd::operator = (const ttwnd& a) {
@@ -174,7 +172,7 @@ void telldata::ttlayout::echo(std::string& wstr) {
    ost << "layer " << _layer << " :";
    _data->info(ost);
    if (_selp) ost << " - partially selected";
-   wstr = ost.str();
+   wstr += ost.str();
 }
 
 void telldata::ttlayout::set_value(tell_var* data) {
@@ -215,7 +213,7 @@ void telldata::ttlist::echo(std::string& wstr) {
          ost  <<"\n" << "[" << i << "]" << " : " << wstr;
       }
    }
-   wstr = ost.str();
+   wstr += ost.str();
 }
 
 void telldata::ttlist::set_value(tell_var* rt) {
@@ -227,6 +225,7 @@ telldata::ttlist::~ttlist() {
       delete _mlist[i];
 }
 
+//=============================================================================
 telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
    telldata::tell_var* nvar;
    if (ID & telldata::tn_listmask) nvar = new telldata::ttlist(ID & ~telldata::tn_listmask);
@@ -259,6 +258,7 @@ bool telldata::tell_type::addfield(std::string fname, typeID fID, const tell_typ
    else return false;
 }
 
+//=============================================================================
 telldata::user_struct::user_struct(const tell_type* tltypedef) : tell_var(tltypedef->ID()) {
    const recfieldsMAP& typefields = tltypedef->fields();
    for (recfieldsMAP::const_iterator CI = typefields.begin(); CI != typefields.end(); CI++)
@@ -270,8 +270,12 @@ telldata::user_struct::user_struct(const user_struct& cobj) : tell_var(cobj.get_
       _fieldmap[CI->first] = CI->second->selfcopy();
 }
 
-void telldata::user_struct::echo(std::string&) {
-// I'm lazyyyyyy
+void telldata::user_struct::echo(std::string& wstr) {
+   wstr += "struct members:\n";
+   for (variableMAP::const_iterator CI = _fieldmap.begin(); CI != _fieldmap.end(); CI++) {
+      wstr += CI->first; wstr += ": "; CI->second->echo(wstr);
+      wstr += "\n";
+   }
 }
 
 void telldata::user_struct::set_value(tell_var* value) {

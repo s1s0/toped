@@ -56,7 +56,7 @@ namespace parsercmd {
       int          first_column;
       int          last_line;
       int          last_column;
-      char*  filename;
+      char*        filename;
    };
    // Used by lexer to include multiply files and for error tracing
    class lexer_files {
@@ -332,11 +332,11 @@ namespace parsercmd {
       void                    cleaner();
       virtual void            addFUNC(std::string, cmdSTDFUNC*);
       void                    addID(char*&, telldata::tell_var*);
-//      telldata::tell_type*    newtypeID(char*&);
       void                    addlocaltype(char*&, telldata::tell_type*);
       telldata::tell_type*    requesttypeID(char*&);
-      telldata::tell_type*    gettypeID(char*&);
+      const telldata::tell_type*    getTypeByName(char*&) const;
       telldata::tell_var*     getID(char*&, bool local=false);
+      telldata::tell_var*     newTellvar(telldata::typeID, yyltype);
       cmdSTDFUNC*  const      funcDefined(char*&,argumentLIST*) const;
       cmdSTDFUNC*  const      getFuncBody(char*&,argumentMAP*) const;
       void                    pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
@@ -345,6 +345,7 @@ namespace parsercmd {
       functionMAP const       funcMAP() const {return _funcMAP;};
       virtual                ~cmdBLOCK();
    protected:
+      const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
       telldata::variableMAP   VARlocal;  // list of local variables
       telldata::typeMAP       TYPElocal; // list of local types
       cmdQUEUE                cmdQ;      // list of commands
@@ -430,7 +431,6 @@ namespace parsercmd {
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Assign(telldata::tell_var*, telldata::typeID, yyltype);
    telldata::typeID BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
-   telldata::tell_var* newTellvar(telldata::typeID, yyltype);
 
 }   
 

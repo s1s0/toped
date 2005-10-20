@@ -384,7 +384,7 @@ funcneargument:
 
 funcargument:
      telltypeID tknIDENTIFIER              {
-      tellvar = parsercmd::newTellvar($1, @1);
+      tellvar = CMDBlock->newTellvar($1, @1);
       arglist->push_back(new parsercmd::argumentTYPE($2,tellvar));
       delete [] $2;
    }
@@ -409,7 +409,7 @@ variabledeclaration:
       telldata::tell_var* v = CMDBlock->getID($2, true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
-         tellvar = parsercmd::newTellvar($1, @1);
+         tellvar = CMDBlock->newTellvar($1, @1);
          CMDBlock->addID($2,tellvar); 
       }
       else tellerror("variable already defined in this scope", @1);
@@ -419,7 +419,7 @@ variabledeclaration:
 
 fielddeclaration:
      telltype  tknIDENTIFIER                 {
-      if (!tellstruct->addfield($2, $1, CMDBlock->gettypeID($2))) {
+      if (!tellstruct->addfield($2, $1, CMDBlock->getTypeByName($2))) {
          tellerror("field with this name already defined in this strucutre", @2);
          $$ = false; // indicates that definition fails
       }
@@ -442,7 +442,7 @@ telltype:
    | tknSTRINGdef                          {$$ = telldata::tn_string;}
    | tknLAYOUTdef                          {$$ = telldata::tn_layout;}
    | tknIDENTIFIER                         {
-        telldata::tell_type* ttype = CMDBlock->gettypeID($1);
+        const telldata::tell_type* ttype = CMDBlock->getTypeByName($1);
         if (NULL == ttype)  {
            tellerror("Bad type specifier", @1);YYABORT;
         }
