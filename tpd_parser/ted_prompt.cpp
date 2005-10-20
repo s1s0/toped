@@ -280,7 +280,7 @@ void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
          _history_position = _cmd_history.begin();
       else _history_position++;
    if (_cmd_history.end() == _history_position) SetValue("");
-   else SetValue(*_history_position->c_str());
+   else SetValue(*_history_position);
 }
 
 void console::ted_cmd::parseCommand(wxString cmd) {

@@ -1656,7 +1656,7 @@ yyreduce:
   case 50:
 #line 386 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
-      tellvar = parsercmd::newTellvar((yyvsp[-1].pttname), (yylsp[-1]));
+      tellvar = CMDBlock->newTellvar((yyvsp[-1].pttname), (yylsp[-1]));
       arglist->push_back(new parsercmd::argumentTYPE((yyvsp[0].parsestr),tellvar));
       delete [] (yyvsp[0].parsestr);
    }
@@ -1688,7 +1688,7 @@ yyreduce:
       telldata::tell_var* v = CMDBlock->getID((yyvsp[0].parsestr), true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
-         tellvar = parsercmd::newTellvar((yyvsp[-1].pttname), (yylsp[-1]));
+         tellvar = CMDBlock->newTellvar((yyvsp[-1].pttname), (yylsp[-1]));
          CMDBlock->addID((yyvsp[0].parsestr),tellvar); 
       }
       else tellerror("variable already defined in this scope", (yylsp[-1]));
@@ -1699,7 +1699,7 @@ yyreduce:
   case 55:
 #line 421 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
-      if (!tellstruct->addfield((yyvsp[0].parsestr), (yyvsp[-1].pttname), CMDBlock->gettypeID((yyvsp[0].parsestr)))) {
+      if (!tellstruct->addfield((yyvsp[0].parsestr), (yyvsp[-1].pttname), CMDBlock->getTypeByName((yyvsp[0].parsestr)))) {
          tellerror("field with this name already defined in this strucutre", (yylsp[0]));
          (yyval.ptypedef) = false; // indicates that definition fails
       }
@@ -1760,7 +1760,7 @@ yyreduce:
   case 66:
 #line 444 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
-        telldata::tell_type* ttype = CMDBlock->gettypeID((yyvsp[0].parsestr));
+        const telldata::tell_type* ttype = CMDBlock->getTypeByName((yyvsp[0].parsestr));
         if (NULL == ttype)  {
            tellerror("Bad type specifier", (yylsp[0]));YYABORT;
         }

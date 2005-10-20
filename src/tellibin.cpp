@@ -56,14 +56,7 @@ extern const wxEventType         wxEVT_MOUSE_INPUT;
 
 //=============================================================================
 int tellstdfunc::stdECHO::argsOK(argumentMAP* amap) {
-   return (!((amap->size() == 1) && (((*amap)[0] == telldata::tn_real      ) ||
-                                      ((*amap)[0] == telldata::tn_int       ) ||
-                                      ((*amap)[0] == telldata::tn_bool      ) ||
-                                      ((*amap)[0] == telldata::tn_pnt       ) ||
-                                      ((*amap)[0] == telldata::tn_box       ) ||
-                                      ((*amap)[0] == telldata::tn_layout    ) ||
-                                      ((*amap)[0] &  telldata::tn_listmask  ) ||
-                                      ((*amap)[0] == telldata::tn_string    ))));
+   return (!(amap->size() == 1));
 }
 
 std::string tellstdfunc::stdECHO::callingConv() {

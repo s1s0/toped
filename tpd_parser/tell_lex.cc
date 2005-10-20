@@ -501,9 +501,9 @@ char *yytext;
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 6 $
-//          $Date: 2005-10-19 20:08:05 +0100 (Wed, 19 Oct 2005) $
-//        $Author: gaitukevich $
+//      $Revision: 7 $
+//          $Date: 2005-10-20 02:08:05 +0100 (Thu, 20 Oct 2005) $
+//        $Author: s_krustev $
 //---------------------------------------------------------------------------
 // A non-reentrant parser for tell
 //===========================================================================*/
@@ -532,7 +532,7 @@ namespace parsercmd {
    void     location_lines(YYLTYPE *loc, int num);
    char*    charcopy(std::string source, bool quotes = false);
    unsigned getllint(char* source);
-   int      includefile(const char* name, FILE* &handler);
+   int      includefile(char* name, FILE* &handler);
    int      EOfile();
 }
 using namespace parsercmd;
@@ -1996,7 +1996,7 @@ unsigned parsercmd::getllint(char* source) {
 //=============================================================================
 // File include handling
 //=============================================================================
-int parsercmd::includefile(const char* name, FILE* &handler) {
+int parsercmd::includefile(char* name, FILE* &handler) {
    FILE* newfilehandle;
    int retvalue = 0;
    if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )

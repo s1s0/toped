@@ -506,15 +506,6 @@ void parsercmd::cmdBLOCK::addID(char*& name, telldata::tell_var* var) {
    VARlocal[name] = var;
 }
 
-// telldata::tell_type* parsercmd::cmdBLOCK::newtypeID(char*& ttypename) {
-//    if (TYPElocal.end() == TYPElocal.find(ttypename)) {
-//       telldata::tell_type* ntype = new telldata::tell_type(_next_lcl_typeID++);
-//       TYPElocal[ttypename] = ntype;
-//       return ntype;
-//    }
-//    else return NULL;
-// }
-
 void parsercmd::cmdBLOCK::addlocaltype(char*& ttypename, telldata::tell_type* ntype) {
    assert(TYPElocal.end() == TYPElocal.find(ttypename));
    _next_lcl_typeID = ntype->ID() + 1;
@@ -529,7 +520,7 @@ telldata::tell_type* parsercmd::cmdBLOCK::requesttypeID(char*& ttypename) {
    else return NULL;
 }
 
-telldata::tell_type* parsercmd::cmdBLOCK::gettypeID(char*& ttypename) {
+const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByName(char*& ttypename) const {
    TELL_DEBUG(***gettypeID***);
    // Roll back the blockSTACK until name is found. return NULL otherwise
    typedef blockSTACK::const_iterator BS;
@@ -538,6 +529,38 @@ telldata::tell_type* parsercmd::cmdBLOCK::gettypeID(char*& ttypename) {
    for (BS cmd = blkstart; cmd != blkend; cmd++) {
         if ((*cmd)->TYPElocal.end() != TYPElocal.find(ttypename))
             return (*cmd)->TYPElocal[ttypename];
+   }
+   return NULL;
+}
+
+const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID ID) const {
+   TELL_DEBUG(***getTypeByID***);
+   // Roll back the blockSTACK until name is found. return NULL otherwise
+   typedef blockSTACK::const_iterator BS;
+   BS blkstart = _blocks.begin();
+   BS blkend   = _blocks.end();
+   typedef telldata::typeMAP::const_iterator CT;
+   for (BS cmd = blkstart; cmd != blkend; cmd++) 
+      for (CT ctp = (*cmd)->TYPElocal.begin(); ctp != (*cmd)->TYPElocal.end(); ctp++)
+         if (ID == ctp->second->ID()) return ctp->second;
+}
+
+telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype loc) {
+   if (ID & telldata::tn_listmask) return(new telldata::ttlist(ID));
+   else
+   switch (ID) {
+      case   telldata::tn_real: return(new telldata::ttreal());
+      case    telldata::tn_int: return(new telldata::ttint());
+      case   telldata::tn_bool: return(new telldata::ttbool());
+      case    telldata::tn_pnt: return(new telldata::ttpnt());
+      case    telldata::tn_box: return(new telldata::ttwnd());
+      case telldata::tn_string: return(new telldata::ttstring());
+      case telldata::tn_layout: return(new telldata::ttlayout());
+      default: {
+         const telldata::tell_type* utype = getTypeByID(ID);
+         if (NULL == utype) tellerror("Bad type specifier", loc);
+         else return (new telldata::user_struct(utype));
+      }
    }
    return NULL;
 }
@@ -763,22 +786,6 @@ parsercmd::cmdMAIN::~cmdMAIN(){
    _funcMAP.clear();
 };
 
-//=============================================================================
-telldata::tell_var* parsercmd::newTellvar(telldata::typeID type, yyltype loc) {
-   if (type & telldata::tn_listmask) return(new telldata::ttlist(type));
-   else
-   switch (type) {
-      case   telldata::tn_real: return(new telldata::ttreal());
-      case    telldata::tn_int: return(new telldata::ttint());
-      case   telldata::tn_bool: return(new telldata::ttbool());
-      case    telldata::tn_pnt: return(new telldata::ttpnt());
-      case    telldata::tn_box: return(new telldata::ttwnd());
-      case telldata::tn_string: return(new telldata::ttstring());
-      case telldata::tn_layout: return(new telldata::ttlayout());
-             default: tellerror("Bad type specifier", loc);
-   }
-   return NULL;
-}
 
 //=============================================================================
 telldata::typeID parsercmd::newDataStructure(telldata::typeID op1, telldata::typeID op2,
