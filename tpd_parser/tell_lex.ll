@@ -51,7 +51,7 @@ namespace parsercmd {
    void     location_lines(YYLTYPE *loc, int num);
    char*    charcopy(std::string source, bool quotes = false);
    unsigned getllint(char* source);
-   int      includefile(const char* name, FILE* &handler);
+   int      includefile(char* name, FILE* &handler);
    int      EOfile();
 }
 using namespace parsercmd;
@@ -175,7 +175,7 @@ unsigned parsercmd::getllint(char* source) {
 //=============================================================================
 // File include handling
 //=============================================================================
-int parsercmd::includefile(const char* name, FILE* &handler) {
+int parsercmd::includefile(char* name, FILE* &handler) {
    FILE* newfilehandle;
    int retvalue = 0;
    if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )
@@ -207,7 +207,7 @@ int parsercmd::EOfile() {
       parsercmd::lexer_files* prev = include_stack[--include_stack_ptr];
       /* take care to free the memory from the current file name */
       if (telllloc.filename) delete [] telllloc.filename;
-      /* restore the error location object*/
+	  /* restore the error location object*/
       telllloc = *(prev->location);
       /* delete the current file buffer (I suppose file is also closed)*/
       yy_delete_buffer( YY_CURRENT_BUFFER );

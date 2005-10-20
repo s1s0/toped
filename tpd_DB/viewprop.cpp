@@ -23,6 +23,7 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+#include "../tpd_common/ttt.h"
 #include <sstream>
 #include <GL/gl.h>
 #include <GL/glu.h>

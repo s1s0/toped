@@ -56,7 +56,7 @@ namespace parsercmd {
       int          first_column;
       int          last_line;
       int          last_column;
-      const char*  filename;
+      char*  filename;
    };
    // Used by lexer to include multiply files and for error tracing
    class lexer_files {
