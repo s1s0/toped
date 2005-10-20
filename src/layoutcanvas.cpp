@@ -318,8 +318,6 @@ void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
 void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
    tmp_wnd = false;
    int4b stepDB = Properties->stepDB();
-   //???Svilen, repalce or with ||. What is it "or"?
-   //if ((abs(presspoint.x() - ScrMARK.x())  > stepDB) or
    if ((abs(presspoint.x() - ScrMARK.x())  > stepDB) ||
        (abs(presspoint.y() - ScrMARK.y())  > stepDB))   {
       // if dragging ...

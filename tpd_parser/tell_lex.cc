@@ -478,7 +478,7 @@ static char *yy_last_accepting_cpos;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "tell_lex.ll"
+#line 1 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 #define INITIAL 0
 /*===========================================================================
 //                                                                          =
@@ -493,7 +493,7 @@ char *yytext;
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tpd_parser/tell_lex.ll $
+//           $URL: svn+ssh://s_krustev@svn.berlios.de/svnroot/repos/toped/trunk/tpd_parser/tell_lex.ll $
 //  Creation date: Fri Nov 08 2002
 //     Created by: Svilen Krustev - s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -501,16 +501,16 @@ char *yytext;
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 228 $
-//          $Date: 2005-10-16 11:03:08 +0100 (Sun, 16 Oct 2005) $
-//        $Author: skr $
+//      $Revision: 6 $
+//          $Date: 2005-10-19 20:08:05 +0100 (Wed, 19 Oct 2005) $
+//        $Author: gaitukevich $
 //---------------------------------------------------------------------------
 // A non-reentrant parser for tell
 //===========================================================================*/
 /* Define the (exclusive) start condition when the parser includes a file */
 #define incl 1
 
-#line 33 "tell_lex.ll"
+#line 33 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 #include <stdio.h>
 #include <string.h>
 #include "tellyzer.h"
@@ -535,8 +535,9 @@ namespace parsercmd {
    int      includefile(const char* name, FILE* &handler);
    int      EOfile();
 }
+using namespace parsercmd;
 extern YYLTYPE telllloc;
-#line 540 "tell_lex.cc"
+#line 541 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -687,7 +688,7 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 59 "tell_lex.ll"
+#line 60 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 
  /*******************************************************************************
      This section contains local definitions and also actions executable at each
@@ -695,7 +696,7 @@ YY_DECL
 /* Mark the current position as a start of the next token */
 location_step(&telllloc);
  /*******************************************************************************/
-#line 699 "tell_lex.cc"
+#line 700 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.cc"
 
 	if ( yy_init )
 		{
@@ -780,27 +781,27 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 66 "tell_lex.ll"
+#line 67 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 location_step(&telllloc);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 67 "tell_lex.ll"
+#line 68 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 location_lines(&telllloc,yyleng);location_step(&telllloc);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 68 "tell_lex.ll"
+#line 69 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 location_lines(&telllloc,1);/* comment line */
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 69 "tell_lex.ll"
+#line 70 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 BEGIN(incl);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 70 "tell_lex.ll"
+#line 71 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { /*first change the scanner state, otherwise there
                              is a risk to remain in <incl>*/
                            BEGIN(INITIAL); 
@@ -808,264 +809,264 @@ YY_RULE_SETUP
                               yyterminate(); }
 	YY_BREAK
 case YY_STATE_EOF(incl):
-#line 75 "tell_lex.ll"
+#line 76 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { BEGIN(INITIAL); return tknERROR; }                              
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 76 "tell_lex.ll"
+#line 77 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { if (!parsercmd::EOfile()) yyterminate();}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 77 "tell_lex.ll"
+#line 78 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknVOIDdef;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 78 "tell_lex.ll"
+#line 79 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknREALdef;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 79 "tell_lex.ll"
+#line 80 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknINTdef;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 80 "tell_lex.ll"
+#line 81 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknBOOLdef;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 81 "tell_lex.ll"
+#line 82 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknPOINTdef;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 82 "tell_lex.ll"
+#line 83 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknBOXdef;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 83 "tell_lex.ll"
+#line 84 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknSTRINGdef;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 84 "tell_lex.ll"
+#line 85 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknLAYOUTdef;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 85 "tell_lex.ll"
+#line 86 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknLISTdef;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 86 "tell_lex.ll"
+#line 87 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknRETURN;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 87 "tell_lex.ll"
+#line 88 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknTRUE;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 88 "tell_lex.ll"
+#line 89 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknFALSE;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 89 "tell_lex.ll"
+#line 90 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknIF;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 90 "tell_lex.ll"
+#line 91 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknELSE;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 91 "tell_lex.ll"
+#line 92 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknWHILE;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 92 "tell_lex.ll"
+#line 93 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknREPEAT;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 93 "tell_lex.ll"
+#line 94 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknSTRUCTdef;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 94 "tell_lex.ll"
+#line 95 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknUNTIL;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 95 "tell_lex.ll"
+#line 96 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.parsestr = parsercmd::charcopy(yytext, true);
                            return tknSTRING;                               }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 97 "tell_lex.ll"
+#line 98 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.parsestr = parsercmd::charcopy("1");return tknFIELD;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 98 "tell_lex.ll"
+#line 99 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.parsestr = parsercmd::charcopy("2");return tknFIELD;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 99 "tell_lex.ll"
+#line 100 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.parsestr = parsercmd::charcopy("x");return tknFIELD;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 100 "tell_lex.ll"
+#line 101 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.parsestr = parsercmd::charcopy("y");return tknFIELD;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 101 "tell_lex.ll"
+#line 102 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknLEQ;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 102 "tell_lex.ll"
+#line 103 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknGEQ;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 103 "tell_lex.ll"
+#line 104 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknEQ;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 104 "tell_lex.ll"
+#line 105 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknNEQ;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 105 "tell_lex.ll"
+#line 106 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknAND;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 106 "tell_lex.ll"
+#line 107 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknOR;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 107 "tell_lex.ll"
+#line 108 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '(';
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 108 "tell_lex.ll"
+#line 109 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return ')';
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 109 "tell_lex.ll"
+#line 110 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '[';
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 110 "tell_lex.ll"
+#line 111 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return ']';
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 111 "tell_lex.ll"
+#line 112 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '{';
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 112 "tell_lex.ll"
+#line 113 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '}';
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 113 "tell_lex.ll"
+#line 114 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '<';
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 114 "tell_lex.ll"
+#line 115 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '>';
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 115 "tell_lex.ll"
+#line 116 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return ',';
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 116 "tell_lex.ll"
+#line 117 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '+';
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 117 "tell_lex.ll"
+#line 118 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '-';
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 118 "tell_lex.ll"
+#line 119 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '*';
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 119 "tell_lex.ll"
+#line 120 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '/';
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 120 "tell_lex.ll"
+#line 121 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return '=';
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 121 "tell_lex.ll"
+#line 122 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return ';';
 	YY_BREAK
 case 50:
-#line 123 "tell_lex.ll"
+#line 124 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 case 51:
 YY_RULE_SETUP
-#line 123 "tell_lex.ll"
+#line 124 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.integer = parsercmd::getllint(yytext); return tknINT;}
 	YY_BREAK
 case 52:
-#line 125 "tell_lex.ll"
+#line 126 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 case 53:
 YY_RULE_SETUP
-#line 125 "tell_lex.ll"
+#line 126 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.real = atof(yytext); return tknREAL;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 126 "tell_lex.ll"
+#line 127 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.parsestr = parsercmd::charcopy(yytext);return tknIDENTIFIER;}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 127 "tell_lex.ll"
+#line 128 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknERROR;
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 128 "tell_lex.ll"
+#line 129 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 ECHO;
 	YY_BREAK
-#line 1069 "tell_lex.cc"
+#line 1070 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.cc"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1945,7 +1946,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 128 "tell_lex.ll"
+#line 129 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 
 /**************************************************************************/
 /*Support functions for the flex parser*/
@@ -2026,7 +2027,7 @@ int parsercmd::EOfile() {
       /* get the previous file record from the array */
       parsercmd::lexer_files* prev = include_stack[--include_stack_ptr];
       /* take care to free the memory from the current file name */
-      if (telllloc.filename) delete (telllloc.filename);
+      if (telllloc.filename) delete [] telllloc.filename;
       /* restore the error location object*/
       telllloc = *(prev->location);
       /* delete the current file buffer (I suppose file is also closed)*/

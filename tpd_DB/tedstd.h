@@ -28,7 +28,6 @@
 #define TEDSTD_H_INCLUDED
 
 #include <string>
-#include "../tpd_common/common.h"
 #include "../tpd_common/ttt.h"
 #ifndef WIN32
 #include "config.h"

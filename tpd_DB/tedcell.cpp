@@ -769,7 +769,7 @@ bool laydata::tdtcell::cutpoly_selected(pointlist& plst, atticList** dasao) {
       // initialize the corresponding 3 shape lists -> one per attic list
       // DElete/CUt/REst/
       shapeList* decure[3];
-	  byte i;
+      byte i;
       for (i = 0; i < 3; decure[i++] = new shapeList());
       // omit the layer if there are no fully selected shapes 
       if (0 == getFullySelected(CL->second)) continue;

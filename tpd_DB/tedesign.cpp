@@ -24,8 +24,8 @@
 //        $Author$
 //===========================================================================
 
-#include "../tpd_common/common.h"
 #include <sstream>
+#include "../tpd_common/ttt.h"
 #include "tedesign.h"
 #include "tedat.h"
 #include "../tpd_common/tedop.h"

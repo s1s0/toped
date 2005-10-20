@@ -195,12 +195,11 @@ END_EVENT_TABLE()
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
-   //initMenuBar();
    initView();
 //   initToolBar();
    CreateStatusBar();
    SetStatusText( wxT( "Toped loaded..." ) );
-   //??? Put initMenuBar() to the end because in Windows it crashes
+   //Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
 }
 

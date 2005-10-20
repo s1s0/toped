@@ -28,7 +28,7 @@
 #include <sstream>
 #include <string>
 #include "gds_io.h"
-#include "../tpd_common/common.h"
+#include "../tpd_common/ttt.h"
 #include "../tpd_common/outbox.h"
 
 static GDSin::GDSFile*        InFile    = NULL;
