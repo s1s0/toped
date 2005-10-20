@@ -113,10 +113,6 @@ SOURCE=.\avl_def.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\common.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\outbox.h
 # End Source File
 # Begin Source File

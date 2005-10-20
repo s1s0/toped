@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib winmm.lib wxzlib.lib wxpng.lib wxjpeg.lib wxtiff.lib wxexpat.lib wxbase25.lib wxbase25_net.lib wxmsw25_core.lib wxmsw25_adv.lib wxmsw25_html.lib wxbase25_xml.lib wxmsw25_gl.lib wxregex.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libci.lib" /nodefaultlib:"msvcrt.lib" /libpath:"c:\wxWindows\lib" /libpath:"c:\wxWindows\contrib\lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib winmm.lib wxmsw26_xrc.lib wxregex.lib wxzlib.lib wxpng.lib wxjpeg.lib wxtiff.lib wxexpat.lib wxbase26.lib wxbase26_net.lib wxmsw26_core.lib wxmsw26_adv.lib wxmsw26_html.lib wxbase26_xml.lib wxmsw26_gl.lib glut32.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libci.lib" /nodefaultlib:"msvcrt.lib" /libpath:"c:\wxWindows\lib" /libpath:"c:\wxWindows\contrib\lib"
 
 !ELSEIF  "$(CFG)" == "toped - Win32 Debug"
 

@@ -76,7 +76,8 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
       case MT_DESIGNNAME:
          *this << rply_mark << " Design " << evt.GetString() <<"\n";
          break;
-      default:assert(false);
+      default:
+         assert(false);
    }   
    long int endPos = GetLastPosition();
    SetStyle(startPos,endPos,wxTextAttr(logColour));
