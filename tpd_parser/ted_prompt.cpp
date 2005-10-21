@@ -23,7 +23,7 @@
 //          $Date$
 //        $Author$
 //===========================================================================
-
+#include <string>
 #include <wx/regex.h>
 #include "ted_prompt.h"
 #include "tell_yacc.h"
@@ -48,6 +48,7 @@ struct yy_buffer_state
 	int yy_buffer_status;
 	};
 extern yy_buffer_state* tell_scan_string(const char *str);
+
 #else
 extern void* tell_scan_string(const char *str);
 #endif
@@ -280,7 +281,11 @@ void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
          _history_position = _cmd_history.begin();
       else _history_position++;
    if (_cmd_history.end() == _history_position) SetValue("");
-   else SetValue(*_history_position);
+   else 
+   {
+      const char * Str =  _history_position->c_str();
+      SetValue(wxString(Str, strlen(Str)));
+   }
 }
 
 void console::ted_cmd::parseCommand(wxString cmd) {
