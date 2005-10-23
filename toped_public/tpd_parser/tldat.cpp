@@ -288,3 +288,11 @@ void telldata::user_struct::set_value(tell_var* value) {
    }
 }
 
+telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
+   std::string fieldName(fname); fieldName.erase(0,1);
+   if (_fieldmap.end() == _fieldmap.find(fieldName)) return NULL;
+   else {
+      telldata::tell_var* retvar = _fieldmap[fieldName];
+      return retvar;
+   }
+}

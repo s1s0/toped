@@ -88,6 +88,7 @@ namespace parsercmd {
 // argumentLIST- ???
 // argumentMAP - ???
 //-----------------------------------------------------------------------------
+   class argumentID;
    typedef  std::multimap<std::string, cmdSTDFUNC*>      functionMAP;
    typedef  std::deque<cmdBLOCK*>                        blockSTACK;
    typedef  std::deque<cmdVIRTUAL*>                      cmdQUEUE;
@@ -96,7 +97,22 @@ namespace parsercmd {
    typedef  std::deque<telldata::tell_var*>              UNDOPerandQUEUE;
    typedef  std::pair<std::string,telldata::tell_var*>   argumentTYPE;
    typedef  std::deque<argumentTYPE*>                    argumentLIST;
-   typedef  std::deque<telldata::typeID>                 argumentMAP;
+//   typedef  std::deque<telldata::typeID>                 argumentMAP;
+   typedef  std::deque<argumentID>                       argumentQ;
+
+   class argumentID {
+   public:
+                        argumentID(telldata::typeID ID = telldata::tn_NULL) :
+                                                         _ID(ID), _child(NULL){};
+                        argumentID(argumentQ* child);
+                       ~argumentID() {if (NULL != _child) delete _child;}
+      telldata::typeID  operator () () const        {return _ID;}
+      void              addChild(argumentQ* child)  {_child = child;}
+      argumentQ*        child() const               {return _child;};
+   private:
+      telldata::typeID  _ID;
+      argumentQ*        _child;
+   };
 
    /*** cmdVIRTUAL **************************************************************
    > virtual class inherited by all tell classes
@@ -325,33 +341,34 @@ namespace parsercmd {
    ******************************************************************************/
    class cmdBLOCK:public virtual cmdVIRTUAL {
    public:
-                              cmdBLOCK();
-                              cmdBLOCK(telldata::typeID lltID) :
+                                 cmdBLOCK();
+                                 cmdBLOCK(telldata::typeID lltID) :
                                                             _next_lcl_typeID(lltID){};
-      int                     execute();
-      void                    cleaner();
-      virtual void            addFUNC(std::string, cmdSTDFUNC*);
-      void                    addID(char*&, telldata::tell_var*);
-      void                    addlocaltype(char*&, telldata::tell_type*);
-      telldata::tell_type*    requesttypeID(char*&);
-      const telldata::tell_type*    getTypeByName(char*&) const;
-      telldata::tell_var*     getID(char*&, bool local=false);
-      telldata::tell_var*     newTellvar(telldata::typeID, yyltype);
-      cmdSTDFUNC*  const      funcDefined(char*&,argumentLIST*) const;
-      cmdSTDFUNC*  const      getFuncBody(char*&,argumentMAP*) const;
-      void                    pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
-      void                    pushblk()                {_blocks.push_front(this);};
-      cmdBLOCK*               popblk();
-      functionMAP const       funcMAP() const {return _funcMAP;};
-      virtual                ~cmdBLOCK();
+      int                        execute();
+      void                       cleaner();
+      virtual void               addFUNC(std::string, cmdSTDFUNC*);
+      void                       addID(char*&, telldata::tell_var*);
+      void                       addlocaltype(char*&, telldata::tell_type*);
+      telldata::tell_type*       requesttypeID(char*&);
+      const telldata::tell_type* getTypeByName(char*&) const;
+//      telldata::typeID*          checkfield(telldata::typeID, char*&, yyltype) const;
+      telldata::tell_var*        getID(char*&, bool local=false);
+      telldata::tell_var*        newTellvar(telldata::typeID, yyltype);
+      cmdSTDFUNC*  const         funcDefined(char*&,argumentLIST*) const;
+      cmdSTDFUNC*  const         getFuncBody(char*&, argumentQ*) const;
+      void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
+      void                       pushblk()                {_blocks.push_front(this);};
+      cmdBLOCK*                  popblk();
+      functionMAP const          funcMAP() const {return _funcMAP;};
+      virtual                   ~cmdBLOCK();
    protected:
       const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
-      telldata::variableMAP   VARlocal;  // list of local variables
-      telldata::typeMAP       TYPElocal; // list of local types
-      cmdQUEUE                cmdQ;      // list of commands
-      static blockSTACK      _blocks;
-      static functionMAP     _funcMAP;
-      telldata::typeID       _next_lcl_typeID;
+      telldata::variableMAP      VARlocal;  // list of local variables
+      telldata::typeMAP          TYPElocal; // list of local types
+      cmdQUEUE                   cmdQ;      // list of commands
+      static blockSTACK         _blocks;
+      static functionMAP        _funcMAP;
+      telldata::typeID          _next_lcl_typeID;
    };
 
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
@@ -364,7 +381,7 @@ namespace parsercmd {
       virtual void            undo_cleanup();
       virtual std::string     callingConv() = 0;
 //      virtual void         add2LogFile() = 0;
-      virtual int             argsOK(argumentMAP* amap);
+      virtual int             argsOK(argumentQ* amap);
       telldata::typeID        gettype() const {return returntype;};
       virtual                ~cmdSTDFUNC();
    protected:
@@ -429,7 +446,7 @@ namespace parsercmd {
    telldata::typeID  Minus(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Multiply(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, yyltype, yyltype);
-   telldata::typeID  Assign(telldata::tell_var*, telldata::typeID, yyltype);
+   telldata::typeID  Assign(telldata::tell_var*, argumentID*, yyltype);
    telldata::typeID BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
 
 }   

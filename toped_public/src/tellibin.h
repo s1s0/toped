@@ -57,7 +57,7 @@
    public:                                                        \
       name(telldata::typeID retype):cmdSTDFUNC(NULL,retype) {};   \
       int         execute();                                      \
-      int         argsOK(argumentMAP* amap);                      \
+      int         argsOK(argumentQ* amap);                        \
       std::string callingConv();                                  \
    };
 #endif
@@ -70,7 +70,7 @@
       int         execute();                                      \
       void        undo();                                         \
       void        undo_cleanup();                                 \
-      int         argsOK(argumentMAP* amap);                      \
+      int         argsOK(argumentQ* amap);                        \
       std::string callingConv();                                  \
    };
 #endif
@@ -81,14 +81,14 @@
    public:                                                        \
       name(telldata::typeID retype):father(retype) {};            \
       int         execute();                                      \
-      int         argsOK(argumentMAP* amap);                      \
+      int         argsOK(argumentQ* amap);                        \
       std::string callingConv();                                  \
    };
 #endif
 
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
-   using parsercmd::argumentMAP;
+   using parsercmd::argumentQ;
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 

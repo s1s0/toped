@@ -57,9 +57,9 @@ telldata::tell_var *tell_lvalue = NULL;
 /*Current tell struct */
 telldata::tell_type *tellstruct = NULL;
 /* used for argument type checking during function call parse */
-parsercmd::argumentMAP   *argmap  = NULL;
+parsercmd::argumentQ   *argmap  = NULL;
 /*taking care when a function is called from the argument list of another call*/
-std::stack<parsercmd::argumentMAP*>  argmapstack;
+std::stack<parsercmd::argumentQ*>  argmapstack;
 /* current function type (during function definition)*/
 telldata::typeID funcretype;
 /*number of return statements encountered*/
@@ -166,7 +166,8 @@ Ooops! Second thought!
    char                    *parsestr;
    telldata::typeID         pttname;
    parsercmd::argumentLIST *pfarguments;
-   parsercmd::argumentMAP  *parguments;
+//   parsercmd::argumentQ    *parguments;
+   parsercmd::argumentID   *parguments;
    parsercmd::cmdBLOCK     *pblock;
    parsercmd::cmdFUNC      *pfblock;
 }
@@ -182,12 +183,12 @@ Ooops! Second thought!
 %token <integer>       tknINT
 /* parser types*/
 %type <pttname>        primaryexpression unaryexpression
-%type <pttname>        multiexpression addexpression expression argument
-%type <pttname>        assignment fieldtype fieldlval structure funccall
+%type <pttname>        multiexpression addexpression expression
+%type <pttname>        assignment fieldname funccall
 %type <pttname>        lvalue telltype telltypeID variable variabledeclaration
-%type <pttname>        andexpression eqexpression relexpression telllist
+%type <pttname>        andexpression eqexpression relexpression 
 %type <pfarguments>    funcarguments
-%type <parguments>     arguments nearguments
+%type <parguments>     structure nearguments arguments argument
 %type <pblock>         block
 %type <pfblock>        funcblock
 %type <ptypedef>       fielddeclaration typedefstruct
@@ -223,7 +224,7 @@ funcdefinition:
          }
       }
      funcblock                             {
-         if ((telldata::tn_void != $1) && (0 == returns)) 
+         if ((telldata::tn_void != $1) && (0 == returns))
             tellerror("function must return a value", @$);
          else {
             CMDBlock->addFUNC(std::string($2),$8);
@@ -264,7 +265,7 @@ returnstatement :
    }
    | tknRETURN  argument                   {
       if (!arglist) tellerror("return statement outside function body", @1);
-      else if (funcretype != $2) tellerror("return type different from function type", @2);
+      else if (funcretype != (*$2)()) tellerror("return type different from function type", @2);
       else CMDBlock->pushcmd(new parsercmd::cmdRETURN());
       returns++;
    }
@@ -329,11 +330,11 @@ statement:
 
 funccall:
      tknIDENTIFIER '('                     {
-        argmap = new parsercmd::argumentMAP;
+        argmap = new parsercmd::argumentQ;
         argmapstack.push(argmap);
    }
       arguments ')'                        {
-      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4);
+      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4->child());
       if (fc) {
          CMDBlock->pushcmd(new parsercmd::cmdFUNCCALL(fc,$1));
          $$ = fc->gettype();
@@ -350,28 +351,38 @@ funccall:
 assignment:
      lvalue '='                            {tell_lvalue = tellvar;}
    argument                                {
+      /*because of the structure that has a common tn_usertypes type, here we are
+      doing the type checking, using the type of the lvalue*/
       $$ = parsercmd::Assign(tell_lvalue, $4, @2);
    }
 ;
 
 arguments:
-                                           {$$ = argmap;}
-    | nearguments                          {$$ = argmap;}
-;
-
-nearguments : 
-     argument                              {$$ = argmap;
-      argmap->push_back($1);}
-   | nearguments ',' argument              {$$ = argmap;
-      argmap->push_back($3);}
+                                           {$$ = new parsercmd::argumentID();}
+    | nearguments                          {$$ = $1;}
 ;
 
 argument :
-     funccall                              {$$ = $1;}
-   | expression                            {$$ = $1;}
-   | assignment                            {$$ = $1;}
+     funccall                              {$$ = new parsercmd::argumentID($1);}
+   | expression                            {$$ = new parsercmd::argumentID($1);}
+   | assignment                            {$$ = new parsercmd::argumentID($1);}
+   | structure                             {$$ = $1;}
 ;
 
+nearguments :
+     argument                              {$$ = $1; argmap->push_back(*$1); /*SGREM!!! MEMORY LEAKEAGE HERE because of the default copy constructor of argumentID*/}
+   | nearguments ',' argument              {$$ = $1; argmap->push_back(*$3);}
+;
+
+/*
+argumentlist:
+     '('                     {
+        argmap = new parsercmd::argumentMAP;
+        argmapstack.push(argmap);
+   }
+      nearguments ')'                      {$$ = argmap;}
+;
+*/
 funcarguments:
                                            {}
    | funcneargument                        {}
@@ -391,7 +402,7 @@ funcargument:
 ;
 
 lvalue:
-     variable                              {$$ = $1;}
+     variable                               {$$ = $1;}
    | variabledeclaration                    {$$ = $1;}
 ;
 
@@ -402,6 +413,7 @@ variable:
       else tellerror("variable not defined in this scope", @1);
       delete [] $1;
    }
+   | fieldname                             {$$ = $1;}
 ;
 
 variabledeclaration:
@@ -470,7 +482,17 @@ typedefstruct:
    | typedefstruct ';' fielddeclaration   { $$ = $1 && $3;}
 ;
 
+fieldname:
+     variable tknFIELD              {
+      assert(NULL != tellvar);
+      tellvar = tellvar->field_var($2);
+      if (tellvar) $$ = tellvar->get_type();
+      else tellerror("Bad field identifier", @2);
+      delete [] $2;
+    }
+;
 
+/*
 telllist:
      argument                              { $$ = $1 | telldata::tn_listmask;
       listlength++;
@@ -481,25 +503,60 @@ telllist:
       else  listlength++;
    }
 ;
-/*==EXPRESSION===============================================================*/
+*/
 structure:
+     '{'                                  {
+        argmap = new parsercmd::argumentQ;
+        argmapstack.push(argmap);
+   }
+      nearguments '}'                     {
+        /*Important note!. Here we will get a list of components that could be
+          a tell list or some kind of tell struct or even tell list of tell struct.
+          There is no way at this moment to determine the type of the input structure
+          for (seems) obvious reasons. So - the type check and the eventual pushcmd
+          are postponed untill we get the recepient - i.e. the lvalue or the
+          function call. For now $$ is assigned tn_usertypes, which means that the
+          type is not determined yet*/
+//        $$ = telldata::tn_usertypes;
+////           parsercmd::argumentID *parent = new parsercmd::argumentID(telldata::tn_usertypes);
+//           parent->addChild(argmap);
+//           argmap = argmapstack.top();
+//           argmap->push_back(*parent);
+// or
+//           parsercmd::argumentQ* oldarglist = argmap;
+        $$ = new parsercmd::argumentID(argmap);
+        argmapstack.pop();
+        argmap = argmapstack.top();
+//        }
+   }
+;
+/*     $$ = getArgmapType($3);
+     //if the type of structure is a list
+     if ($$ & telldata::tn_listmask)
+        CMDBlock->pushcmd(new parsercmd::cmdLIST($$, $$->size()));
+   }*/
+/*   | '{'                                  { listlength = 0;}
+     telllist '}'                         { $$ = $3;
+        CMDBlock->pushcmd(new parsercmd::cmdLIST($3, listlength));
+   }*/
+
+
+/*==EXPRESSION===============================================================*/
+/*
+
      '(' argument ',' argument ')'    {
       $$ = parsercmd::newDataStructure($2,$4,@2,@4);
    }
-   | '{'                                  { listlength = 0;}
-     telllist '}'                         { $$ = $3;
-        CMDBlock->pushcmd(new parsercmd::cmdLIST($3, listlength));
-   }
-;
+   |
 
-fieldlval:
+structfieldvar:
      variable                             {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
-   | fieldtype                            {$$ = $1;}
+   | fieldname                            {$$ = $1;}
 ;
 
-fieldtype:
-     fieldlval tknFIELD                   {
+fieldname:
+     structfieldvar tknFIELD                   {
       if       (telldata::tn_box == $1) {
          CMDBlock->pushcmd(new parsercmd::cmdWINDOWFIELD($2,@2));
          $$ = telldata::tn_pnt;
@@ -516,7 +573,7 @@ fieldtype:
       delete [] $2;
    }
 ;
-
+*/
 /*orexpression*/
 expression : 
      andexpression                         {$$ = $1;}
@@ -573,8 +630,7 @@ primaryexpression :
                                                                 delete [] $1;}
    | variable                              {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
-   | structure                             {$$ = $1;}
-   | fieldtype                             {$$ = $1;}
+/*   | structure                             {$$ = $1;}*/
    | '(' expression ')'                    {$$ = $2;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
 ;

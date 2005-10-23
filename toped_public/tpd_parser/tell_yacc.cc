@@ -150,9 +150,9 @@ telldata::tell_var *tell_lvalue = NULL;
 /*Current tell struct */
 telldata::tell_type *tellstruct = NULL;
 /* used for argument type checking during function call parse */
-parsercmd::argumentMAP   *argmap  = NULL;
+parsercmd::argumentQ   *argmap  = NULL;
 /*taking care when a function is called from the argument list of another call*/
-std::stack<parsercmd::argumentMAP*>  argmapstack;
+std::stack<parsercmd::argumentQ*>  argmapstack;
 /* current function type (during function definition)*/
 telldata::typeID funcretype;
 /*number of return statements encountered*/
@@ -186,12 +186,13 @@ typedef union YYSTYPE {
    char                    *parsestr;
    telldata::typeID         pttname;
    parsercmd::argumentLIST *pfarguments;
-   parsercmd::argumentMAP  *parguments;
+//   parsercmd::argumentQ    *parguments;
+   parsercmd::argumentID   *parguments;
    parsercmd::cmdBLOCK     *pblock;
    parsercmd::cmdFUNC      *pfblock;
 } YYSTYPE;
 /* Line 190 of yacc.c.  */
-#line 195 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.cc"
+#line 196 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.cc"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -215,7 +216,7 @@ typedef struct YYLTYPE
 
 
 /* Line 213 of yacc.c.  */
-#line 219 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.cc"
+#line 220 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.cc"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -317,18 +318,18 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state. */
-#define YYFINAL  65
+#define YYFINAL  64
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   244
+#define YYLAST   215
 
 /* YYNTOKENS -- Number of terminals. */
 #define YYNTOKENS  46
 /* YYNNTS -- Number of nonterminals. */
-#define YYNNTS  51
+#define YYNNTS  49
 /* YYNRULES -- Number of rules. */
-#define YYNRULES  108
+#define YYNRULES  103
 /* YYNRULES -- Number of states. */
-#define YYNSTATES  168
+#define YYNSTATES  160
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -380,13 +381,13 @@ static const unsigned short int yyprhs[] =
       19,    28,    29,    34,    35,    40,    42,    45,    51,    59,
       60,    61,    69,    70,    78,    80,    84,    85,    87,    89,
       91,    93,    95,    97,    99,   101,   102,   108,   109,   114,
-     115,   117,   119,   123,   125,   127,   129,   130,   132,   134,
-     138,   141,   143,   145,   147,   150,   153,   155,   158,   160,
-     162,   164,   166,   168,   170,   172,   174,   176,   177,   184,
-     186,   190,   192,   196,   202,   203,   208,   210,   212,   215,
-     217,   221,   223,   227,   229,   233,   237,   239,   243,   247,
-     251,   255,   257,   261,   265,   267,   271,   275,   277,   280,
-     282,   284,   286,   288,   290,   292,   294,   296,   300
+     115,   117,   119,   121,   123,   125,   127,   131,   132,   134,
+     136,   140,   143,   145,   147,   149,   151,   154,   157,   159,
+     162,   164,   166,   168,   170,   172,   174,   176,   178,   180,
+     181,   188,   190,   194,   197,   198,   203,   205,   209,   211,
+     215,   217,   221,   225,   227,   231,   235,   239,   243,   245,
+     249,   253,   255,   259,   263,   265,   268,   270,   272,   274,
+     276,   278,   280,   284
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS. */
@@ -396,49 +397,47 @@ static const yysigned_char yyrhs[] =
       -1,    49,    -1,     3,    -1,     1,    -1,    -1,    -1,    79,
       28,    34,    50,    72,    35,    51,    54,    -1,    -1,    36,
       53,    63,    37,    -1,    -1,    36,    55,    63,    37,    -1,
-      19,    -1,    19,    71,    -1,     4,    34,    89,    35,    52,
-      -1,     4,    34,    89,    35,    52,     5,    52,    -1,    -1,
-      -1,     6,    34,    59,    89,    35,    60,    52,    -1,    -1,
-       7,    52,     8,    34,    62,    89,    35,    -1,    64,    -1,
+      19,    -1,    19,    70,    -1,     4,    34,    87,    35,    52,
+      -1,     4,    34,    87,    35,    52,     5,    52,    -1,    -1,
+      -1,     6,    34,    59,    87,    35,    60,    52,    -1,    -1,
+       7,    52,     8,    34,    62,    87,    35,    -1,    64,    -1,
       63,    33,    64,    -1,    -1,    77,    -1,    67,    -1,    57,
       -1,    58,    -1,    61,    -1,    56,    -1,    65,    -1,    81,
       -1,    -1,    28,    34,    66,    69,    35,    -1,    -1,    75,
-      38,    68,    71,    -1,    -1,    70,    -1,    71,    -1,    70,
-      39,    71,    -1,    65,    -1,    89,    -1,    67,    -1,    -1,
-      73,    -1,    74,    -1,    73,    39,    74,    -1,    79,    28,
-      -1,    76,    -1,    77,    -1,    28,    -1,    79,    28,    -1,
-      80,    28,    -1,    80,    -1,    80,    18,    -1,    10,    -1,
-      11,    -1,    13,    -1,    12,    -1,    14,    -1,    15,    -1,
-      16,    -1,    17,    -1,    28,    -1,    -1,     9,    28,    82,
-      36,    83,    37,    -1,    78,    -1,    83,    33,    78,    -1,
-      71,    -1,    84,    39,    71,    -1,    34,    71,    39,    71,
-      35,    -1,    -1,    36,    86,    84,    37,    -1,    76,    -1,
-      88,    -1,    87,    29,    -1,    90,    -1,    89,    27,    90,
-      -1,    91,    -1,    90,    26,    91,    -1,    92,    -1,    91,
-      24,    92,    -1,    91,    25,    92,    -1,    93,    -1,    92,
-      40,    93,    -1,    92,    41,    93,    -1,    92,    22,    93,
-      -1,    92,    23,    93,    -1,    94,    -1,    93,    42,    94,
-      -1,    93,    43,    94,    -1,    95,    -1,    94,    44,    95,
-      -1,    94,    45,    95,    -1,    96,    -1,    43,    96,    -1,
-      31,    -1,    32,    -1,    20,    -1,    21,    -1,    30,    -1,
-      76,    -1,    85,    -1,    88,    -1,    34,    89,    35,    -1,
-       3,    -1
+      38,    68,    70,    -1,    -1,    71,    -1,    65,    -1,    87,
+      -1,    67,    -1,    85,    -1,    70,    -1,    71,    39,    70,
+      -1,    -1,    73,    -1,    74,    -1,    73,    39,    74,    -1,
+      79,    28,    -1,    76,    -1,    77,    -1,    28,    -1,    84,
+      -1,    79,    28,    -1,    80,    28,    -1,    80,    -1,    80,
+      18,    -1,    10,    -1,    11,    -1,    13,    -1,    12,    -1,
+      14,    -1,    15,    -1,    16,    -1,    17,    -1,    28,    -1,
+      -1,     9,    28,    82,    36,    83,    37,    -1,    78,    -1,
+      83,    33,    78,    -1,    76,    29,    -1,    -1,    36,    86,
+      71,    37,    -1,    88,    -1,    87,    27,    88,    -1,    89,
+      -1,    88,    26,    89,    -1,    90,    -1,    89,    24,    90,
+      -1,    89,    25,    90,    -1,    91,    -1,    90,    40,    91,
+      -1,    90,    41,    91,    -1,    90,    22,    91,    -1,    90,
+      23,    91,    -1,    92,    -1,    91,    42,    92,    -1,    91,
+      43,    92,    -1,    93,    -1,    92,    44,    93,    -1,    92,
+      45,    93,    -1,    94,    -1,    43,    94,    -1,    31,    -1,
+      32,    -1,    20,    -1,    21,    -1,    30,    -1,    76,    -1,
+      34,    87,    35,    -1,     3,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   197,   197,   198,   202,   206,   207,   208,   212,   217,
-     212,   237,   237,   248,   248,   259,   265,   274,   279,   286,
-     290,   286,   301,   301,   314,   315,   319,   320,   321,   322,
-     323,   324,   325,   326,   327,   331,   331,   351,   351,   358,
-     359,   363,   365,   370,   371,   372,   376,   377,   381,   382,
-     386,   394,   395,   399,   408,   421,   431,   432,   436,   437,
-     438,   439,   440,   441,   442,   443,   444,   454,   454,   469,
-     470,   475,   478,   486,   489,   489,   496,   498,   502,   522,
-     523,   527,   528,   532,   533,   534,   538,   539,   540,   541,
-     542,   546,   547,   548,   552,   553,   554,   558,   559,   563,
-     565,   567,   569,   571,   574,   576,   577,   578,   579
+       0,   198,   198,   199,   203,   207,   208,   209,   213,   218,
+     213,   238,   238,   249,   249,   260,   266,   275,   280,   287,
+     291,   287,   302,   302,   315,   316,   320,   321,   322,   323,
+     324,   325,   326,   327,   328,   332,   332,   352,   352,   361,
+     362,   366,   367,   368,   369,   373,   374,   387,   388,   392,
+     393,   397,   405,   406,   410,   416,   420,   433,   443,   444,
+     448,   449,   450,   451,   452,   453,   454,   455,   456,   466,
+     466,   481,   482,   486,   508,   508,   579,   580,   584,   585,
+     589,   590,   591,   595,   596,   597,   598,   599,   603,   604,
+     605,   609,   610,   611,   615,   616,   620,   622,   624,   626,
+     628,   631,   634,   635
 };
 #endif
 
@@ -458,13 +457,12 @@ static const char *const yytname[] =
   "@2", "block", "@3", "funcblock", "@4", "returnstatement", "ifstatement",
   "whilestatement", "@5", "@6", "repeatstatement", "@7", "statements",
   "statement", "funccall", "@8", "assignment", "@9", "arguments",
-  "nearguments", "argument", "funcarguments", "funcneargument",
+  "argument", "nearguments", "funcarguments", "funcneargument",
   "funcargument", "lvalue", "variable", "variabledeclaration",
   "fielddeclaration", "telltypeID", "telltype", "recorddefinition", "@10",
-  "typedefstruct", "telllist", "structure", "@11", "fieldlval",
-  "fieldtype", "expression", "andexpression", "eqexpression",
-  "relexpression", "addexpression", "multiexpression", "unaryexpression",
-  "primaryexpression", 0
+  "typedefstruct", "fieldname", "structure", "@11", "expression",
+  "andexpression", "eqexpression", "relexpression", "addexpression",
+  "multiexpression", "unaryexpression", "primaryexpression", 0
 };
 #endif
 
@@ -488,13 +486,13 @@ static const unsigned char yyr1[] =
       49,    53,    52,    55,    54,    56,    56,    57,    57,    59,
       60,    58,    62,    61,    63,    63,    64,    64,    64,    64,
       64,    64,    64,    64,    64,    66,    65,    68,    67,    69,
-      69,    70,    70,    71,    71,    71,    72,    72,    73,    73,
-      74,    75,    75,    76,    77,    78,    79,    79,    80,    80,
-      80,    80,    80,    80,    80,    80,    80,    82,    81,    83,
-      83,    84,    84,    85,    86,    85,    87,    87,    88,    89,
-      89,    90,    90,    91,    91,    91,    92,    92,    92,    92,
-      92,    93,    93,    93,    94,    94,    94,    95,    95,    96,
-      96,    96,    96,    96,    96,    96,    96,    96,    96
+      69,    70,    70,    70,    70,    71,    71,    72,    72,    73,
+      73,    74,    75,    75,    76,    76,    77,    78,    79,    79,
+      80,    80,    80,    80,    80,    80,    80,    80,    80,    82,
+      81,    83,    83,    84,    86,    85,    87,    87,    88,    88,
+      89,    89,    89,    90,    90,    90,    90,    90,    91,    91,
+      91,    92,    92,    92,    93,    93,    94,    94,    94,    94,
+      94,    94,    94,    94
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -504,13 +502,13 @@ static const unsigned char yyr2[] =
        8,     0,     4,     0,     4,     1,     2,     5,     7,     0,
        0,     7,     0,     7,     1,     3,     0,     1,     1,     1,
        1,     1,     1,     1,     1,     0,     5,     0,     4,     0,
-       1,     1,     3,     1,     1,     1,     0,     1,     1,     3,
-       2,     1,     1,     1,     2,     2,     1,     2,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     0,     6,     1,
-       3,     1,     3,     5,     0,     4,     1,     1,     2,     1,
-       3,     1,     3,     1,     3,     3,     1,     3,     3,     3,
-       3,     1,     3,     3,     1,     3,     3,     1,     2,     1,
-       1,     1,     1,     1,     1,     1,     1,     3,     1
+       1,     1,     1,     1,     1,     1,     3,     0,     1,     1,
+       3,     2,     1,     1,     1,     1,     2,     2,     1,     2,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     0,
+       6,     1,     3,     2,     0,     4,     1,     3,     1,     3,
+       1,     3,     3,     1,     3,     3,     3,     3,     1,     3,
+       3,     1,     3,     3,     1,     2,     1,     1,     1,     1,
+       1,     1,     3,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -518,132 +516,122 @@ static const unsigned char yyr2[] =
    means the default is an error.  */
 static const unsigned char yydefact[] =
 {
-       0,     7,     6,     0,     0,     0,     0,    58,    59,    61,
-      60,    62,    63,    64,    65,    15,    53,     0,     2,     5,
-      32,    29,    30,    31,     0,    33,    28,     0,    51,    27,
-       0,    56,    34,     0,    19,    11,     0,    67,   108,   101,
-     102,   103,    99,   100,     0,    74,     0,    43,    45,    16,
-     104,    52,     0,   105,     0,   106,    44,    79,    81,    83,
-      86,    91,    94,    97,    35,     1,     3,     4,    37,    54,
-      57,    53,   104,     0,     0,    26,     0,     0,     0,    44,
-       0,    98,    54,    78,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,    39,     0,     8,     0,
-       0,     0,    24,    22,     0,     0,   107,    71,     0,    80,
-      82,    84,    85,    89,    90,    87,    88,    92,    93,    95,
-      96,     0,    40,    41,    38,    46,    17,    20,    26,    12,
-       0,    66,    69,     0,     0,     0,    75,     0,    36,     0,
-       0,    47,    48,     0,     0,     0,    25,     0,    55,     0,
-      68,    73,    72,    42,     9,     0,    50,    18,    21,    23,
-      70,     0,    49,    13,    10,    26,     0,    14
+       0,     7,     6,     0,     0,     0,     0,    60,    61,    63,
+      62,    64,    65,    66,    67,    15,    54,     0,     2,     5,
+      32,    29,    30,    31,     0,    33,    28,     0,    52,    27,
+       0,    58,    34,    55,     0,    19,    11,     0,    69,   103,
+      98,    99,   100,    96,    97,     0,    74,     0,    41,    43,
+      16,   101,    53,     0,    44,    42,    76,    78,    80,    83,
+      88,    91,    94,    35,     1,     3,     4,    37,    73,    56,
+      59,    54,   101,     0,     0,    26,     0,     0,     0,     0,
+      95,    56,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,    39,     0,     8,     0,     0,     0,
+      24,    22,     0,   102,    45,     0,    77,    79,    81,    82,
+      86,    87,    84,    85,    89,    90,    92,    93,     0,    40,
+      38,    47,    17,    20,    26,    12,     0,    68,    71,     0,
+       0,    75,     0,    36,     0,    48,    49,     0,     0,     0,
+      25,     0,    57,     0,    70,    46,     9,     0,    51,    18,
+      21,    23,    72,     0,    50,    13,    10,    26,     0,    14
 };
 
 /* YYDEFGOTO[NTERM-NUM]. */
 static const short int yydefgoto[] =
 {
-      -1,    17,    18,    19,   125,   161,    36,    75,   164,   165,
-      20,    21,    22,    74,   145,    23,   130,   101,    24,    47,
-      96,    48,    97,   121,   122,    49,   140,   141,   142,    27,
-      72,    51,   132,    52,    31,    32,    77,   134,   108,    53,
-      80,    54,    55,    56,    57,    58,    59,    60,    61,    62,
-      63
+      -1,    17,    18,    19,   121,   153,    37,    75,   156,   157,
+      20,    21,    22,    74,   139,    23,   126,    99,    24,    25,
+      94,    26,    95,   118,   104,   105,   134,   135,   136,    27,
+      72,    29,   128,    53,    31,    32,    77,   130,    33,    54,
+      79,    55,    56,    57,    58,    59,    60,    61,    62
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -95
+#define YYPACT_NINF -100
 static const short int yypact[] =
 {
-     181,   -95,   -95,   -25,    -6,   -13,     5,   -95,   -95,   -95,
-     -95,   -95,   -95,   -95,   -95,   143,    -7,   107,   -95,   -95,
-     -95,   -95,   -95,   -95,    17,   -95,   -95,    -3,   -95,    28,
-      44,    61,   -95,     9,   -95,   -95,    80,   -95,   -95,   -95,
-     -95,   -95,   -95,   -95,   143,   -95,    53,   -95,   -95,   -95,
-      -4,   -95,    67,   -95,    69,    71,    79,    83,    24,    -9,
-      22,    46,   -95,   -95,   -95,   -95,   -95,   -95,   -95,    78,
-     -95,   -95,    86,    33,     9,   206,    91,   100,    88,    34,
-     143,   -95,   -95,   -95,     9,     9,     9,     9,     9,     9,
-       9,     9,     9,     9,     9,     9,   143,   143,   -95,   -13,
-      35,   -11,   -95,   -95,   216,   143,   -95,   -95,    -1,    83,
-      24,    -9,    -9,    22,    22,    22,    22,    46,    46,   -95,
-     -95,   103,   102,   -95,   -95,   216,   142,   -95,   206,   -95,
-       9,   -95,   -95,   120,    14,   114,   -95,   143,   -95,   143,
-     115,   112,   -95,   124,   -13,   -13,   -95,    36,   -95,   216,
-     -95,   -95,   -95,   -95,   -95,   216,   -95,   -95,   -95,   -95,
-     -95,   125,   -95,   -95,   -95,   206,    49,   -95
+     162,  -100,  -100,   -20,    -6,    24,    18,  -100,  -100,  -100,
+    -100,  -100,  -100,  -100,  -100,   124,    14,    98,  -100,  -100,
+    -100,  -100,  -100,  -100,    29,  -100,  -100,    31,    42,    35,
+      62,    75,  -100,  -100,     9,  -100,  -100,    88,  -100,  -100,
+    -100,  -100,  -100,  -100,  -100,     9,  -100,    33,  -100,  -100,
+    -100,   -19,  -100,    78,  -100,    76,    90,   104,    36,   100,
+     102,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,    84,
+    -100,  -100,    42,    20,     9,   187,    86,    94,    22,   124,
+    -100,  -100,     9,     9,     9,     9,     9,     9,     9,     9,
+       9,     9,     9,     9,   124,   124,  -100,    24,    45,    -2,
+    -100,  -100,    10,  -100,  -100,   -26,    90,   104,    36,    36,
+     100,   100,   100,   100,   102,   102,  -100,  -100,   116,   114,
+    -100,    10,   128,  -100,   187,  -100,     9,  -100,  -100,   131,
+      41,  -100,   124,  -100,   129,   141,  -100,   142,    24,    24,
+    -100,    65,  -100,    10,  -100,  -100,  -100,    10,  -100,  -100,
+    -100,  -100,  -100,   150,  -100,  -100,  -100,   187,    54,  -100
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const short int yypgoto[] =
 {
-     -95,   -95,   152,   -95,   -95,   -95,   -91,   -95,   -95,   -95,
-     -95,   -95,   -95,   -95,   -95,   -95,   -95,    13,   -71,     1,
-     -95,     2,   -95,   -95,   -95,   -38,   -95,   -95,    15,   -95,
-       0,     3,    23,     7,   -94,   -95,   -95,   -95,   -95,   -95,
-     -95,   -95,   -95,   -28,    92,    95,     6,    54,    11,    39,
-     135
+    -100,  -100,   170,  -100,  -100,  -100,   -88,  -100,  -100,  -100,
+    -100,  -100,  -100,  -100,  -100,  -100,  -100,    32,   -68,   -13,
+    -100,   -11,  -100,  -100,    -7,   111,  -100,  -100,    60,  -100,
+       0,    -9,    49,     1,   -99,  -100,  -100,  -100,  -100,  -100,
+    -100,   -29,   106,   125,   -51,    96,    59,    69,   163
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
-#define YYTABLE_NINF -78
+#define YYTABLE_NINF -69
 static const short int yytable[] =
 {
-      28,    25,    26,    29,   102,    73,    78,    30,   126,    33,
-     133,   -66,    38,    88,    89,    50,    79,    28,    25,    26,
-      29,   -66,   128,    35,    30,   -76,   129,    64,    34,    39,
-      40,    90,    91,    37,   -51,    68,   136,    71,   137,    41,
-      42,    43,   107,    44,    50,    45,   100,   149,    86,    87,
-      67,   150,    46,   157,   158,   133,    38,   146,   123,   124,
-      84,    84,    84,    84,    92,    93,   -52,   135,    99,   106,
-     127,   159,    69,    39,    40,    28,    25,    26,    29,    70,
-      50,    71,   128,    41,    42,    43,   167,    44,    76,    45,
-      94,    95,   111,   112,   102,    82,    50,    50,    83,   152,
-     -77,   153,   147,   117,   118,    50,    84,    65,     1,    85,
-       2,     3,    98,     4,     5,   -76,     6,     7,     8,     9,
-      10,    11,    12,    13,    14,   103,    15,   105,    28,    25,
-      26,    29,   143,   119,   120,    16,   104,    50,   138,    50,
-     -26,   139,   113,   114,   115,   116,    38,   144,   148,   151,
-     154,   155,   156,     7,     8,     9,    10,    11,    12,    13,
-      14,   163,   143,    39,    40,    28,    25,    26,    29,    66,
-     162,    16,   160,    41,    42,    43,   109,    44,   166,    45,
-     110,    81,     1,     0,     2,     3,    46,     4,     5,     0,
-       6,     7,     8,     9,    10,    11,    12,    13,    14,     0,
-      15,     0,     0,     0,     0,     0,     0,     0,     0,    16,
-       3,     0,     4,     5,   -26,     6,     7,     8,     9,    10,
-      11,    12,    13,    14,     0,    15,     7,     8,     9,    10,
-      11,    12,    13,    14,    16,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,   131
+      28,    30,    48,   129,    49,    73,    52,   100,    50,   122,
+      68,   131,    39,   132,    34,    51,    78,    28,    30,   -52,
+       7,     8,     9,    10,    11,    12,    13,    14,    35,    40,
+      41,   124,   -68,   108,   109,   125,    39,    71,   127,    42,
+      43,    44,   -68,    45,   129,    98,    38,    82,    63,    82,
+     149,   150,    47,    40,    41,    97,   140,   103,    86,    87,
+      36,    71,    66,    42,    43,    44,    48,    45,    49,    67,
+      52,    68,    82,   -53,   143,    28,    88,    89,   144,    51,
+     123,    48,    48,    49,    49,    52,    52,   124,   120,   100,
+      69,   159,    82,    70,    51,    51,    76,   141,    64,     1,
+     151,     2,     3,    82,     4,     5,    81,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,    83,    15,    96,    48,
+     101,    49,   137,    52,    28,   145,    16,    39,    84,    85,
+     102,   -26,    51,   138,     7,     8,     9,    10,    11,    12,
+      13,    14,    90,    91,    40,    41,    92,    93,   137,   114,
+     115,   133,    16,   132,    42,    43,    44,    28,    45,   142,
+      46,   116,   117,     1,   146,     2,     3,    47,     4,     5,
+     148,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+     147,    15,   110,   111,   112,   113,   155,    65,   106,   158,
+      16,     3,   152,     4,     5,   -26,     6,     7,     8,     9,
+      10,    11,    12,    13,    14,   119,    15,   154,   107,     0,
+      80,     0,     0,     0,     0,    16
 };
 
 static const short int yycheck[] =
 {
-       0,     0,     0,     0,    75,    33,    44,     0,    99,    34,
-     104,    18,     3,    22,    23,    15,    44,    17,    17,    17,
-      17,    28,    33,    36,    17,    29,    37,    34,    34,    20,
-      21,    40,    41,    28,    38,    38,    37,    28,    39,    30,
-      31,    32,    80,    34,    44,    36,    74,    33,    24,    25,
-      33,    37,    43,   144,   145,   149,     3,   128,    96,    97,
-      27,    27,    27,    27,    42,    43,    38,   105,    35,    35,
-      35,    35,    28,    20,    21,    75,    75,    75,    75,    18,
-      80,    28,    33,    30,    31,    32,    37,    34,     8,    36,
-      44,    45,    86,    87,   165,    28,    96,    97,    29,   137,
-      29,   139,   130,    92,    93,   105,    27,     0,     1,    26,
-       3,     4,    34,     6,     7,    29,     9,    10,    11,    12,
-      13,    14,    15,    16,    17,    34,    19,    39,   128,   128,
-     128,   128,   125,    94,    95,    28,    36,   137,    35,   139,
-      33,    39,    88,    89,    90,    91,     3,     5,    28,    35,
-      35,    39,    28,    10,    11,    12,    13,    14,    15,    16,
-      17,    36,   155,    20,    21,   165,   165,   165,   165,    17,
-     155,    28,   149,    30,    31,    32,    84,    34,   165,    36,
-      85,    46,     1,    -1,     3,     4,    43,     6,     7,    -1,
-       9,    10,    11,    12,    13,    14,    15,    16,    17,    -1,
-      19,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    28,
-       4,    -1,     6,     7,    33,     9,    10,    11,    12,    13,
-      14,    15,    16,    17,    -1,    19,    10,    11,    12,    13,
-      14,    15,    16,    17,    28,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    28
+       0,     0,    15,   102,    15,    34,    15,    75,    15,    97,
+      29,    37,     3,    39,    34,    15,    45,    17,    17,    38,
+      10,    11,    12,    13,    14,    15,    16,    17,    34,    20,
+      21,    33,    18,    84,    85,    37,     3,    28,    28,    30,
+      31,    32,    28,    34,   143,    74,    28,    27,    34,    27,
+     138,   139,    43,    20,    21,    35,   124,    35,    22,    23,
+      36,    28,    33,    30,    31,    32,    79,    34,    79,    38,
+      79,    29,    27,    38,    33,    75,    40,    41,    37,    79,
+      35,    94,    95,    94,    95,    94,    95,    33,    95,   157,
+      28,    37,    27,    18,    94,    95,     8,   126,     0,     1,
+      35,     3,     4,    27,     6,     7,    28,     9,    10,    11,
+      12,    13,    14,    15,    16,    17,    26,    19,    34,   132,
+      34,   132,   121,   132,   124,   132,    28,     3,    24,    25,
+      36,    33,   132,     5,    10,    11,    12,    13,    14,    15,
+      16,    17,    42,    43,    20,    21,    44,    45,   147,    90,
+      91,    35,    28,    39,    30,    31,    32,   157,    34,    28,
+      36,    92,    93,     1,    35,     3,     4,    43,     6,     7,
+      28,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      39,    19,    86,    87,    88,    89,    36,    17,    82,   157,
+      28,     4,   143,     6,     7,    33,     9,    10,    11,    12,
+      13,    14,    15,    16,    17,    94,    19,   147,    83,    -1,
+      47,    -1,    -1,    -1,    -1,    28
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -653,20 +641,19 @@ static const unsigned char yystos[] =
        0,     1,     3,     4,     6,     7,     9,    10,    11,    12,
       13,    14,    15,    16,    17,    19,    28,    47,    48,    49,
       56,    57,    58,    61,    64,    65,    67,    75,    76,    77,
-      79,    80,    81,    34,    34,    36,    52,    28,     3,    20,
-      21,    30,    31,    32,    34,    36,    43,    65,    67,    71,
-      76,    77,    79,    85,    87,    88,    89,    90,    91,    92,
-      93,    94,    95,    96,    34,     0,    48,    33,    38,    28,
-      18,    28,    76,    89,    59,    53,     8,    82,    71,    89,
-      86,    96,    28,    29,    27,    26,    24,    25,    22,    23,
-      40,    41,    42,    43,    44,    45,    66,    68,    34,    35,
-      89,    63,    64,    34,    36,    39,    35,    71,    84,    90,
-      91,    92,    92,    93,    93,    93,    93,    94,    94,    95,
-      95,    69,    70,    71,    71,    50,    52,    35,    33,    37,
-      62,    28,    78,    80,    83,    71,    37,    39,    35,    39,
-      72,    73,    74,    79,     5,    60,    64,    89,    28,    33,
-      37,    35,    71,    71,    35,    39,    28,    52,    52,    35,
-      78,    51,    74,    36,    54,    55,    63,    37
+      79,    80,    81,    84,    34,    34,    36,    52,    28,     3,
+      20,    21,    30,    31,    32,    34,    36,    43,    65,    67,
+      70,    76,    77,    79,    85,    87,    88,    89,    90,    91,
+      92,    93,    94,    34,     0,    48,    33,    38,    29,    28,
+      18,    28,    76,    87,    59,    53,     8,    82,    87,    86,
+      94,    28,    27,    26,    24,    25,    22,    23,    40,    41,
+      42,    43,    44,    45,    66,    68,    34,    35,    87,    63,
+      64,    34,    36,    35,    70,    71,    88,    89,    90,    90,
+      91,    91,    91,    91,    92,    92,    93,    93,    69,    71,
+      70,    50,    52,    35,    33,    37,    62,    28,    78,    80,
+      83,    37,    39,    35,    72,    73,    74,    79,     5,    60,
+      64,    87,    28,    33,    37,    70,    35,    39,    28,    52,
+      52,    35,    78,    51,    74,    36,    54,    55,    63,    37
 };
 
 #if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
@@ -1328,17 +1315,17 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 197 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {}
-    break;
-
-  case 3:
 #line 198 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
+  case 3:
+#line 199 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {}
+    break;
+
   case 4:
-#line 202 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 203 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
     if (!yynerrs)  CMDBlock->execute();
     else           CMDBlock->cleaner();
@@ -1346,22 +1333,22 @@ yyreduce:
     break;
 
   case 5:
-#line 206 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 207 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 6:
-#line 207 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 208 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {tellerror("Unexpected symbol", (yylsp[0]));}
     break;
 
   case 7:
-#line 208 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 209 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->cleaner();}
     break;
 
   case 8:
-#line 212 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 213 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          /*Create a new variableMAP structure containing the arguments*/
          arglist = new parsercmd::argumentLIST;
@@ -1370,7 +1357,7 @@ yyreduce:
     break;
 
   case 9:
-#line 217 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 218 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          /*Check whether such a function is already defined */
          if (NULL != CMDBlock->funcDefined((yyvsp[-4].parsestr),arglist)) {
@@ -1382,9 +1369,9 @@ yyreduce:
     break;
 
   case 10:
-#line 225 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 226 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
-         if ((telldata::tn_void != (yyvsp[-7].pttname)) && (0 == returns)) 
+         if ((telldata::tn_void != (yyvsp[-7].pttname)) && (0 == returns))
             tellerror("function must return a value", (yyloc));
          else {
             CMDBlock->addFUNC(std::string((yyvsp[-6].parsestr)),(yyvsp[0].pfblock));
@@ -1395,7 +1382,7 @@ yyreduce:
     break;
 
   case 11:
-#line 237 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 238 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock = new parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
@@ -1403,7 +1390,7 @@ yyreduce:
     break;
 
   case 12:
-#line 241 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 242 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          (yyval.pblock) = CMDBlock;
          CMDBlock = CMDBlock->popblk();
@@ -1411,7 +1398,7 @@ yyreduce:
     break;
 
   case 13:
-#line 248 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 249 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock = new parsercmd::cmdFUNC(arglist,funcretype);
          CMDBlock->pushblk();
@@ -1419,7 +1406,7 @@ yyreduce:
     break;
 
   case 14:
-#line 252 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 253 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          (yyval.pfblock) = static_cast<parsercmd::cmdFUNC*>(CMDBlock);
          CMDBlock = CMDBlock->popblk();
@@ -1427,7 +1414,7 @@ yyreduce:
     break;
 
   case 15:
-#line 259 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 260 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       if      (!arglist) tellerror("return statement outside function body", (yylsp[0]));
       else if (funcretype != telldata::tn_void) tellerror("value expected", (yylsp[0]));
@@ -1437,17 +1424,17 @@ yyreduce:
     break;
 
   case 16:
-#line 265 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 266 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       if (!arglist) tellerror("return statement outside function body", (yylsp[-1]));
-      else if (funcretype != (yyvsp[0].pttname)) tellerror("return type different from function type", (yylsp[0]));
+      else if (funcretype != (*(yyvsp[0].parguments))()) tellerror("return type different from function type", (yylsp[0]));
       else CMDBlock->pushcmd(new parsercmd::cmdRETURN());
       returns++;
    }
     break;
 
   case 17:
-#line 274 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 275 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          if (telldata::tn_bool != (yyvsp[-2].pttname)) tellerror("bool type expected",(yylsp[-2]));
          else CMDBlock->pushcmd(new parsercmd::cmdIFELSE((yyvsp[0].pblock), NULL));
@@ -1455,7 +1442,7 @@ yyreduce:
     break;
 
   case 18:
-#line 279 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 280 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          if (telldata::tn_bool != (yyvsp[-4].pttname)) tellerror("bool type expected",(yylsp[-4]));
          else CMDBlock->pushcmd(new parsercmd::cmdIFELSE((yyvsp[-2].pblock),(yyvsp[0].pblock)));
@@ -1463,7 +1450,7 @@ yyreduce:
     break;
 
   case 19:
-#line 286 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 287 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock = new parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
@@ -1471,7 +1458,7 @@ yyreduce:
     break;
 
   case 20:
-#line 290 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 291 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          condBlock = CMDBlock;
          CMDBlock = CMDBlock->popblk();
@@ -1480,14 +1467,14 @@ yyreduce:
     break;
 
   case 21:
-#line 295 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 296 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock->pushcmd(new parsercmd::cmdWHILE(condBlock,(yyvsp[0].pblock)));
    }
     break;
 
   case 22:
-#line 301 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 302 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          CMDBlock = new parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
@@ -1495,7 +1482,7 @@ yyreduce:
     break;
 
   case 23:
-#line 305 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 306 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
          condBlock = CMDBlock;
          CMDBlock = CMDBlock->popblk();
@@ -1505,72 +1492,72 @@ yyreduce:
     break;
 
   case 24:
-#line 314 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {}
-    break;
-
-  case 25:
 #line 315 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
-  case 26:
-#line 319 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    { }
+  case 25:
+#line 316 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {}
     break;
 
-  case 27:
+  case 26:
 #line 320 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { }
     break;
 
-  case 28:
+  case 27:
 #line 321 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
+    { }
     break;
 
-  case 29:
+  case 28:
 #line 322 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
     break;
 
-  case 30:
+  case 29:
 #line 323 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
     break;
 
-  case 31:
+  case 30:
 #line 324 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
     break;
 
-  case 32:
+  case 31:
 #line 325 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
+    break;
+
+  case 32:
+#line 326 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {/*keep the return value in the stack*/}
     break;
 
   case 33:
-#line 326 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 327 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
     break;
 
   case 34:
-#line 327 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 328 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { }
     break;
 
   case 35:
-#line 331 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 332 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
-        argmap = new parsercmd::argumentMAP;
+        argmap = new parsercmd::argumentQ;
         argmapstack.push(argmap);
    }
     break;
 
   case 36:
-#line 335 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 336 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
-      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody((yyvsp[-4].parsestr),(yyvsp[-1].parguments));
+      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody((yyvsp[-4].parsestr),(yyvsp[-1].parguments)->child());
       if (fc) {
          CMDBlock->pushcmd(new parsercmd::cmdFUNCCALL(fc,(yyvsp[-4].parsestr)));
          (yyval.pttname) = fc->gettype();
@@ -1585,76 +1572,81 @@ yyreduce:
     break;
 
   case 37:
-#line 351 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 352 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {tell_lvalue = tellvar;}
     break;
 
   case 38:
-#line 352 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 353 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
-      (yyval.pttname) = parsercmd::Assign(tell_lvalue, (yyvsp[0].pttname), (yylsp[-2]));
+      /*because of the structure that has a common tn_usertypes type, here we are
+      doing the type checking, using the type of the lvalue*/
+      (yyval.pttname) = parsercmd::Assign(tell_lvalue, (yyvsp[0].parguments), (yylsp[-2]));
    }
     break;
 
   case 39:
-#line 358 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.parguments) = argmap;}
+#line 361 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.parguments) = new parsercmd::argumentID();}
     break;
 
   case 40:
-#line 359 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.parguments) = argmap;}
+#line 362 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.parguments) = (yyvsp[0].parguments);}
     break;
 
   case 41:
-#line 363 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.parguments) = argmap;
-      argmap->push_back((yyvsp[0].pttname));}
+#line 366 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.parguments) = new parsercmd::argumentID((yyvsp[0].pttname));}
     break;
 
   case 42:
-#line 365 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.parguments) = argmap;
-      argmap->push_back((yyvsp[0].pttname));}
+#line 367 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.parguments) = new parsercmd::argumentID((yyvsp[0].pttname));}
     break;
 
   case 43:
-#line 370 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
+#line 368 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.parguments) = new parsercmd::argumentID((yyvsp[0].pttname));}
     break;
 
   case 44:
-#line 371 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
+#line 369 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.parguments) = (yyvsp[0].parguments);}
     break;
 
   case 45:
-#line 372 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
+#line 373 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.parguments) = (yyvsp[0].parguments); argmap->push_back(*(yyvsp[0].parguments)); /*SGREM!!! MEMORY LEAKEAGE HERE because of the default copy constructor of argumentID*/}
     break;
 
   case 46:
-#line 376 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {}
+#line 374 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.parguments) = (yyvsp[-2].parguments); argmap->push_back(*(yyvsp[0].parguments));}
     break;
 
   case 47:
-#line 377 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 387 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 48:
-#line 381 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 388 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 49:
-#line 382 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 392 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {}
     break;
 
   case 50:
-#line 386 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 393 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {}
+    break;
+
+  case 51:
+#line 397 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       tellvar = CMDBlock->newTellvar((yyvsp[-1].pttname), (yylsp[-1]));
       arglist->push_back(new parsercmd::argumentTYPE((yyvsp[0].parsestr),tellvar));
@@ -1662,18 +1654,18 @@ yyreduce:
    }
     break;
 
-  case 51:
-#line 394 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
-    break;
-
   case 52:
-#line 395 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 405 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 53:
-#line 399 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 406 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = (yyvsp[0].pttname);}
+    break;
+
+  case 54:
+#line 410 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       tellvar = CMDBlock->getID((yyvsp[0].parsestr));
       if (tellvar) (yyval.pttname) = tellvar->get_type();
@@ -1682,8 +1674,13 @@ yyreduce:
    }
     break;
 
-  case 54:
-#line 408 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 55:
+#line 416 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = (yyvsp[0].pttname);}
+    break;
+
+  case 56:
+#line 420 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[-1].pttname);
       telldata::tell_var* v = CMDBlock->getID((yyvsp[0].parsestr), true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
@@ -1696,8 +1693,8 @@ yyreduce:
    }
     break;
 
-  case 55:
-#line 421 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 57:
+#line 433 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
       if (!tellstruct->addfield((yyvsp[0].parsestr), (yyvsp[-1].pttname), CMDBlock->getTypeByName((yyvsp[0].parsestr)))) {
          tellerror("field with this name already defined in this strucutre", (yylsp[0]));
@@ -1707,58 +1704,58 @@ yyreduce:
    }
     break;
 
-  case 56:
-#line 431 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 58:
+#line 443 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
-  case 57:
-#line 432 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 59:
+#line 444 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[-1].pttname) | telldata::tn_listmask;}
     break;
 
-  case 58:
-#line 436 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 60:
+#line 448 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_void;}
     break;
 
-  case 59:
-#line 437 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 61:
+#line 449 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_real;}
     break;
 
-  case 60:
-#line 438 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 62:
+#line 450 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_int;}
     break;
 
-  case 61:
-#line 439 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 63:
+#line 451 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_bool;}
     break;
 
-  case 62:
-#line 440 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 64:
+#line 452 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_pnt;}
     break;
 
-  case 63:
-#line 441 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 65:
+#line 453 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_box;}
     break;
 
-  case 64:
-#line 442 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 66:
+#line 454 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_string;}
     break;
 
-  case 65:
-#line 443 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 67:
+#line 455 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_layout;}
     break;
 
-  case 66:
-#line 444 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 68:
+#line 456 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
         const telldata::tell_type* ttype = CMDBlock->getTypeByName((yyvsp[0].parsestr));
         if (NULL == ttype)  {
@@ -1768,8 +1765,8 @@ yyreduce:
       }
     break;
 
-  case 67:
-#line 454 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 69:
+#line 466 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
         tellstruct = CMDBlock->requesttypeID((yyvsp[0].parsestr));
         if (NULL == tellstruct) {
@@ -1779,8 +1776,8 @@ yyreduce:
      }
     break;
 
-  case 68:
-#line 461 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 70:
+#line 473 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
         if ((yyvsp[-1].ptypedef)) CMDBlock->addlocaltype((yyvsp[-4].parsestr),tellstruct);
         else delete tellstruct;
@@ -1788,236 +1785,203 @@ yyreduce:
      }
     break;
 
-  case 69:
-#line 469 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 71:
+#line 481 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     { (yyval.ptypedef) = (yyvsp[0].ptypedef);      }
     break;
 
-  case 70:
-#line 470 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    { (yyval.ptypedef) = (yyvsp[-2].ptypedef) && (yyvsp[0].ptypedef);}
-    break;
-
-  case 71:
-#line 475 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    { (yyval.pttname) = (yyvsp[0].pttname) | telldata::tn_listmask;
-      listlength++;
-   }
-    break;
-
   case 72:
-#line 478 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    { (yyval.pttname) = (yyvsp[-2].pttname);
-      if ((yyvsp[-2].pttname) != ((yyvsp[0].pttname) | telldata::tn_listmask))
-                           tellerror("list members must be the same type",(yylsp[0]));
-      else  listlength++;
-   }
+#line 482 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    { (yyval.ptypedef) = (yyvsp[-2].ptypedef) && (yyvsp[0].ptypedef);}
     break;
 
   case 73:
 #line 486 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {
-      (yyval.pttname) = parsercmd::newDataStructure((yyvsp[-3].pttname),(yyvsp[-1].pttname),(yylsp[-3]),(yylsp[-1]));
-   }
+      assert(NULL != tellvar);
+      tellvar = tellvar->field_var((yyvsp[0].parsestr));
+      if (tellvar) (yyval.pttname) = tellvar->get_type();
+      else tellerror("Bad field identifier", (yylsp[0]));
+      delete [] (yyvsp[0].parsestr);
+    }
     break;
 
   case 74:
-#line 489 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    { listlength = 0;}
+#line 508 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {
+        argmap = new parsercmd::argumentQ;
+        argmapstack.push(argmap);
+   }
     break;
 
   case 75:
-#line 490 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    { (yyval.pttname) = (yyvsp[-1].pttname);
-        CMDBlock->pushcmd(new parsercmd::cmdLIST((yyvsp[-1].pttname), listlength));
+#line 512 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {
+        /*Important note!. Here we will get a list of components that could be
+          a tell list or some kind of tell struct or even tell list of tell struct.
+          There is no way at this moment to determine the type of the input structure
+          for (seems) obvious reasons. So - the type check and the eventual pushcmd
+          are postponed untill we get the recepient - i.e. the lvalue or the
+          function call. For now $$ is assigned tn_usertypes, which means that the
+          type is not determined yet*/
+//        $$ = telldata::tn_usertypes;
+////           parsercmd::argumentID *parent = new parsercmd::argumentID(telldata::tn_usertypes);
+//           parent->addChild(argmap);
+//           argmap = argmapstack.top();
+//           argmap->push_back(*parent);
+// or
+//           parsercmd::argumentQ* oldarglist = argmap;
+        (yyval.parguments) = new parsercmd::argumentID(argmap);
+        argmapstack.pop();
+        argmap = argmapstack.top();
+//        }
    }
     break;
 
   case 76:
-#line 496 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
+#line 579 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 77:
-#line 498 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
-    break;
-
-  case 78:
-#line 502 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {
-      if       (telldata::tn_box == (yyvsp[-1].pttname)) {
-         CMDBlock->pushcmd(new parsercmd::cmdWINDOWFIELD((yyvsp[0].parsestr),(yylsp[0])));
-         (yyval.pttname) = telldata::tn_pnt;
-      }
-      else if  (telldata::tn_pnt == (yyvsp[-1].pttname)) {
-         CMDBlock->pushcmd(new parsercmd::cmdPOINTFIELD((yyvsp[0].parsestr),(yylsp[0])));
-         (yyval.pttname) = telldata::tn_real;
-      }
-      else {
-         std::ostringstream ost;
-         ost <<  (yyvsp[-1].pttname) << " type has no fields ";
-         tellerror(ost.str().c_str(), (yylsp[-1]));
-      }
-      delete [] (yyvsp[0].parsestr);
-   }
-    break;
-
-  case 79:
-#line 522 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
-    break;
-
-  case 80:
-#line 523 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 580 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"||",(yylsp[-2]),(yylsp[-1]));}
     break;
 
-  case 81:
-#line 527 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 78:
+#line 584 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
-  case 82:
-#line 528 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 79:
+#line 585 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"&&",(yylsp[-2]),(yylsp[-1]));}
     break;
 
+  case 80:
+#line 589 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = (yyvsp[0].pttname);}
+    break;
+
+  case 81:
+#line 590 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"==",(yylsp[-2]),(yylsp[-1]));}
+    break;
+
+  case 82:
+#line 591 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"!=",(yylsp[-2]),(yylsp[-1]));}
+    break;
+
   case 83:
-#line 532 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 595 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 84:
-#line 533 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"==",(yylsp[-2]),(yylsp[-1]));}
-    break;
-
-  case 85:
-#line 534 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"!=",(yylsp[-2]),(yylsp[-1]));}
-    break;
-
-  case 86:
-#line 538 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
-    break;
-
-  case 87:
-#line 539 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 596 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"<",(yylsp[-2]),(yylsp[-1]));}
     break;
 
-  case 88:
-#line 540 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 85:
+#line 597 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),">",(yylsp[-2]),(yylsp[-1]));}
     break;
 
-  case 89:
-#line 541 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 86:
+#line 598 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),"<=",(yylsp[-2]),(yylsp[-1]));}
     break;
 
-  case 90:
-#line 542 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 87:
+#line 599 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::BoolEx((yyvsp[-2].pttname),(yyvsp[0].pttname),">=",(yylsp[-2]),(yylsp[-1]));}
     break;
 
+  case 88:
+#line 603 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = (yyvsp[0].pttname);}
+    break;
+
+  case 89:
+#line 604 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = parsercmd::Plus((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
+    break;
+
+  case 90:
+#line 605 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = parsercmd::Minus((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
+    break;
+
   case 91:
-#line 546 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 609 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 92:
-#line 547 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = parsercmd::Plus((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
+#line 610 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = parsercmd::Multiply((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
     break;
 
   case 93:
-#line 548 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = parsercmd::Minus((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
+#line 611 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+    {(yyval.pttname) = parsercmd::Divide((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
     break;
 
   case 94:
-#line 552 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 615 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);}
     break;
 
   case 95:
-#line 553 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = parsercmd::Multiply((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
-    break;
-
-  case 96:
-#line 554 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = parsercmd::Divide((yyvsp[-2].pttname),(yyvsp[0].pttname),(yylsp[-2]),(yylsp[0]));}
-    break;
-
-  case 97:
-#line 558 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
-    break;
-
-  case 98:
-#line 559 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 616 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = parsercmd::UMinus((yyvsp[0].pttname),(yylsp[0]));}
     break;
 
-  case 99:
-#line 563 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 96:
+#line 620 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_real;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttreal((yyvsp[0].real)),true));}
     break;
 
-  case 100:
-#line 565 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 97:
+#line 622 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_int;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttint((yyvsp[0].integer)),true));}
     break;
 
-  case 101:
-#line 567 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 98:
+#line 624 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_bool;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(true),true));}
     break;
 
-  case 102:
-#line 569 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 99:
+#line 626 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_bool;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(false),true));}
     break;
 
-  case 103:
-#line 571 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 100:
+#line 628 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = telldata::tn_string;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttstring((yyvsp[0].parsestr)),true));
                                                                 delete [] (yyvsp[0].parsestr);}
     break;
 
-  case 104:
-#line 574 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 101:
+#line 631 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[0].pttname);
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
     break;
 
-  case 105:
-#line 576 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
-    break;
-
-  case 106:
-#line 577 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {(yyval.pttname) = (yyvsp[0].pttname);}
-    break;
-
-  case 107:
-#line 578 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 102:
+#line 634 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {(yyval.pttname) = (yyvsp[-1].pttname);}
     break;
 
-  case 108:
-#line 579 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+  case 103:
+#line 635 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
     {tellerror("Unexpected symbol", (yylsp[0]));}
     break;
 
@@ -2025,7 +1989,7 @@ yyreduce:
     }
 
 /* Line 1037 of yacc.c.  */
-#line 2029 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.cc"
+#line 1993 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.cc"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -2260,7 +2224,7 @@ yyreturn:
 }
 
 
-#line 582 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
+#line 638 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
 
 /*-------------------------------------------------------------------------*/
 int yyerror (char *s) {  /* Called by yyparse on error */

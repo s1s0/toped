@@ -59,6 +59,19 @@ parsercmd::UNDOPerandQUEUE    parsercmd::cmdSTDFUNC::UNDOPstack;
 // UNDO command queue
 parsercmd::undoQUEUE          parsercmd::cmdSTDFUNC::UNDOcmdQ;
 
+
+parsercmd::argumentID::argumentID(argumentQ* child) {
+   _child = child;
+   telldata::typeID alistID = (*_child)[0]();
+   for(argumentQ::const_iterator CA = _child->begin(); CA != _child->end(); CA ++) {
+      if (alistID != (*CA)()) {
+         alistID = telldata::tn_usertypes; break;
+      }
+   }
+   if (telldata::tn_usertypes != alistID) _ID = TLISTOF(alistID);
+   else                                   _ID = alistID;
+}
+
 real parsercmd::cmdVIRTUAL::getOpValue(operandSTACK& OPs) {
    real value = 0;
    telldata::tell_var *op = OPs.top();OPs.pop();
@@ -543,8 +556,22 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::type
    for (BS cmd = blkstart; cmd != blkend; cmd++) 
       for (CT ctp = (*cmd)->TYPElocal.begin(); ctp != (*cmd)->TYPElocal.end(); ctp++)
          if (ID == ctp->second->ID()) return ctp->second;
+   return NULL;
 }
-
+/*
+telldata::typeID* parsercmd::cmdBLOCK::checkfield(telldata::typeID ID, char*& fname, yyltype loc) const {
+   telldata::tell_type* stype = getTypeByID(ID);
+   if (NULL != stype) {
+      telldata::tell_type* ftype = stype.getfieldtype(fname);
+      if (NULL != ftype)
+         return ftype->ID();
+      else 
+         tellerror("Bad field name", loc);
+   }
+   else tellerror("Variable has no fields", loc);
+   return telldata::tn_void;
+}
+*/
 telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype loc) {
    if (ID & telldata::tn_listmask) return(new telldata::ttlist(ID));
    else
@@ -605,13 +632,13 @@ parsercmd::cmdBLOCK::~cmdBLOCK() {
 
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
-                                        (char*& fn, argumentMAP* amap) const {
+                                        (char*& fn, argumentQ* amap) const {
    cmdSTDFUNC *fbody;
    typedef functionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
    for (MM fb = range.first; fb != range.second; fb++) {
       fbody = fb->second;
-      if (0 == fbody->argsOK(amap)) 
+      if (0 == fbody->argsOK(amap))
          return fbody;
    }
    return NULL;
@@ -620,7 +647,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
                                         (char*& fn, argumentLIST* alst) const {
    // convert argumentLIST to argumentMAP
-   argumentMAP amap;
+   argumentQ amap;
    typedef argumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++) {
       amap.push_back((*arg)->second->get_type()); }
@@ -629,21 +656,21 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
 }
 
 //=============================================================================
-int parsercmd::cmdSTDFUNC::argsOK(argumentMAP* amap) {
+int parsercmd::cmdSTDFUNC::argsOK(argumentQ* amap) {
 // This is supposed to be called only by user defined functions.
 // Standard functions will overwrite this function although they
 // also can use it
    int i = amap->size();
    if (i != arguments->size()) return -1;
    while (i-- > 0) {
-      if (!NUMBER_TYPE((*amap)[i])) {
+      if (!NUMBER_TYPE( (*amap)[i]() )) {
          // for non-number types there is no internal conversion,
          // so check strictly the type
-         if ((*amap)[i] != (*arguments)[i]->second->get_type()) break;
+         if ((*amap)[i]() != (*arguments)[i]->second->get_type()) break;
       }
       else // for number types - allow compatablity
          if (!NUMBER_TYPE((*arguments)[i]->second->get_type())) break;
-         else if ((*amap)[i] > (*arguments)[i]->second->get_type()) break;
+         else if ((*amap)[i]() > (*arguments)[i]->second->get_type()) break;
    }
    return (i+1);
 }
@@ -776,7 +803,7 @@ void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)  {
    _funcMAP.insert(std::make_pair(fname,cQ));
 }
 
-parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {
+parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes + 1) {
    pushblk();
 };
 
@@ -964,14 +991,14 @@ telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
    return telldata::tn_void;
 }
 
-telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::typeID op2,
+telldata::typeID parsercmd::Assign(telldata::tell_var* lval, argumentID* op2,
                                                                  yyltype loc) {
    if (!lval) {
       tellerror("Lvalue undefined in assign statement", loc);
       return telldata::tn_void;
    }   
    telldata::typeID op1 = lval->get_type();
-   if ((op1 == op2) || (NUMBER_TYPE(op1) && NUMBER_TYPE(op2))) {
+   if ((op1 == (*op2)()) || (NUMBER_TYPE(op1) && NUMBER_TYPE((*op2)()))) {
       CMDBlock->pushcmd(new parsercmd::cmdASSIGN(lval));
       return op1;
    }

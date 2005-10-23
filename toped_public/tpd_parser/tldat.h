@@ -42,14 +42,15 @@
 //=============================================================================
 namespace telldata {   
    typedef unsigned int typeID;
-   const typeID tn_void       = 0 ;
-   const typeID tn_int        = 1 ;
-   const typeID tn_real       = 2 ;
-   const typeID tn_bool       = 3 ;
-   const typeID tn_string     = 4 ;
-   const typeID tn_pnt        = 5 ;
-   const typeID tn_box        = 6 ;
-   const typeID tn_layout     = 7 ;
+   const typeID tn_NULL       = 0 ;
+   const typeID tn_void       = 1 ;
+   const typeID tn_int        = 2 ;
+   const typeID tn_real       = 3 ;
+   const typeID tn_bool       = 4 ;
+   const typeID tn_string     = 5 ;
+   const typeID tn_pnt        = 6 ;
+   const typeID tn_box        = 7 ;
+   const typeID tn_layout     = 8 ;
    const typeID tn_usertypes  = 10;
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
@@ -70,6 +71,7 @@ namespace telldata {
       virtual void         echo(std::string&) = 0;
       virtual const typeID get_type() const {return _ID;}
       virtual void         set_value(tell_var*) = 0;
+      virtual tell_var*    field_var(char*& fname) {return NULL;}
       virtual             ~tell_var() {};
    protected:
       typeID              _ID;
@@ -240,6 +242,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       tell_var*            selfcopy() const  {return new user_struct(*this);}
       void                 echo(std::string&);
       void                 set_value(tell_var*);
+      tell_var*            field_var(char*& fname);
    protected:
       variableMAP         _fieldmap;
    };
