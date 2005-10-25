@@ -88,7 +88,6 @@ namespace parsercmd {
 // argumentLIST- ???
 // argumentMAP - ???
 //-----------------------------------------------------------------------------
-   class argumentID;
    typedef  std::multimap<std::string, cmdSTDFUNC*>      functionMAP;
    typedef  std::deque<cmdBLOCK*>                        blockSTACK;
    typedef  std::deque<cmdVIRTUAL*>                      cmdQUEUE;
@@ -97,22 +96,7 @@ namespace parsercmd {
    typedef  std::deque<telldata::tell_var*>              UNDOPerandQUEUE;
    typedef  std::pair<std::string,telldata::tell_var*>   argumentTYPE;
    typedef  std::deque<argumentTYPE*>                    argumentLIST;
-//   typedef  std::deque<telldata::typeID>                 argumentMAP;
-   typedef  std::deque<argumentID>                       argumentQ;
 
-   class argumentID {
-   public:
-                        argumentID(telldata::typeID ID = telldata::tn_NULL) :
-                                                         _ID(ID), _child(NULL){};
-                        argumentID(argumentQ* child);
-                       ~argumentID() {if (NULL != _child) delete _child;}
-      telldata::typeID  operator () () const        {return _ID;}
-      void              addChild(argumentQ* child)  {_child = child;}
-      argumentQ*        child() const               {return _child;};
-   private:
-      telldata::typeID  _ID;
-      argumentQ*        _child;
-   };
 
    /*** cmdVIRTUAL **************************************************************
    > virtual class inherited by all tell classes
@@ -288,7 +272,8 @@ namespace parsercmd {
 
    class cmdLIST:public cmdVIRTUAL {
    public:
-      cmdLIST(telldata::typeID ttn, unsigned length): _ttype(ttn), _length(length) {};
+//      cmdLIST(telldata::typeID ttn, unsigned length): _ttype(ttn), _length(length) {};
+      cmdLIST(telldata::argumentID* ttn): _ttype((*ttn)()), _length(ttn->child()->size()) {};
       int execute();
    private:
       telldata::typeID  _ttype;
@@ -351,18 +336,18 @@ namespace parsercmd {
       void                       addlocaltype(char*&, telldata::tell_type*);
       telldata::tell_type*       requesttypeID(char*&);
       const telldata::tell_type* getTypeByName(char*&) const;
+      const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
 //      telldata::typeID*          checkfield(telldata::typeID, char*&, yyltype) const;
       telldata::tell_var*        getID(char*&, bool local=false);
       telldata::tell_var*        newTellvar(telldata::typeID, yyltype);
       cmdSTDFUNC*  const         funcDefined(char*&,argumentLIST*) const;
-      cmdSTDFUNC*  const         getFuncBody(char*&, argumentQ*) const;
+      cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
       functionMAP const          funcMAP() const {return _funcMAP;};
       virtual                   ~cmdBLOCK();
    protected:
-      const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
       telldata::variableMAP      VARlocal;  // list of local variables
       telldata::typeMAP          TYPElocal; // list of local types
       cmdQUEUE                   cmdQ;      // list of commands
@@ -381,7 +366,7 @@ namespace parsercmd {
       virtual void            undo_cleanup();
       virtual std::string     callingConv() = 0;
 //      virtual void         add2LogFile() = 0;
-      virtual int             argsOK(argumentQ* amap);
+      virtual int             argsOK(telldata::argumentQ* amap);
       telldata::typeID        gettype() const {return returntype;};
       virtual                ~cmdSTDFUNC();
    protected:
@@ -434,6 +419,7 @@ namespace parsercmd {
       cmdMAIN();
       int   execute();
       void  addFUNC(std::string fname , cmdSTDFUNC* cQ);
+      void  addGlobalType(char*, telldata::tell_type*);
       ~cmdMAIN();
    };
 
@@ -446,10 +432,9 @@ namespace parsercmd {
    telldata::typeID  Minus(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Multiply(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, yyltype, yyltype);
-   telldata::typeID  Assign(telldata::tell_var*, argumentID*, yyltype);
+   telldata::typeID  Assign(telldata::tell_var*, telldata::argumentID*, yyltype);
    telldata::typeID BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
-
-}   
+}
 
 namespace console{
    class toped_logfile {

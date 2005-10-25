@@ -104,8 +104,8 @@ typedef union YYSTYPE {
    char                    *parsestr;
    telldata::typeID         pttname;
    parsercmd::argumentLIST *pfarguments;
-//   parsercmd::argumentQ    *parguments;
-   parsercmd::argumentID   *parguments;
+    telldata::argumentQ    *plarguments;
+    telldata::argumentID   *parguments;
    parsercmd::cmdBLOCK     *pblock;
    parsercmd::cmdFUNC      *pfblock;
 } YYSTYPE;

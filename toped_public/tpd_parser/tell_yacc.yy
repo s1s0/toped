@@ -57,9 +57,9 @@ telldata::tell_var *tell_lvalue = NULL;
 /*Current tell struct */
 telldata::tell_type *tellstruct = NULL;
 /* used for argument type checking during function call parse */
-parsercmd::argumentQ   *argmap  = NULL;
+telldata::argumentQ   *argmap  = NULL;
 /*taking care when a function is called from the argument list of another call*/
-std::stack<parsercmd::argumentQ*>  argmapstack;
+std::stack<telldata::argumentQ*>  argmapstack;
 /* current function type (during function definition)*/
 telldata::typeID funcretype;
 /*number of return statements encountered*/
@@ -166,8 +166,8 @@ Ooops! Second thought!
    char                    *parsestr;
    telldata::typeID         pttname;
    parsercmd::argumentLIST *pfarguments;
-//   parsercmd::argumentQ    *parguments;
-   parsercmd::argumentID   *parguments;
+    telldata::argumentQ    *plarguments;
+    telldata::argumentID   *parguments;
    parsercmd::cmdBLOCK     *pblock;
    parsercmd::cmdFUNC      *pfblock;
 }
@@ -188,7 +188,8 @@ Ooops! Second thought!
 %type <pttname>        lvalue telltype telltypeID variable variabledeclaration
 %type <pttname>        andexpression eqexpression relexpression 
 %type <pfarguments>    funcarguments
-%type <parguments>     structure nearguments arguments argument
+%type <parguments>     structure arguments argument
+%type <plarguments>    nearguments 
 %type <pblock>         block
 %type <pfblock>        funcblock
 %type <ptypedef>       fielddeclaration typedefstruct
@@ -330,7 +331,7 @@ statement:
 
 funccall:
      tknIDENTIFIER '('                     {
-        argmap = new parsercmd::argumentQ;
+        argmap = new telldata::argumentQ;
         argmapstack.push(argmap);
    }
       arguments ')'                        {
@@ -358,20 +359,21 @@ assignment:
 ;
 
 arguments:
-                                           {$$ = new parsercmd::argumentID();}
-    | nearguments                          {$$ = $1;}
+                                           {$$ = new telldata::argumentID();}
+    | nearguments                          {$$ = new telldata::argumentID($1);}
 ;
 
 argument :
-     funccall                              {$$ = new parsercmd::argumentID($1);}
-   | expression                            {$$ = new parsercmd::argumentID($1);}
-   | assignment                            {$$ = new parsercmd::argumentID($1);}
+     funccall                              {$$ = new telldata::argumentID($1);}
+   | expression                            {$$ = new telldata::argumentID($1);}
+   | assignment                            {$$ = new telldata::argumentID($1);}
    | structure                             {$$ = $1;}
 ;
 
+/*SGREM!!! MEMORY LEAKEAGE HERE because of the default copy constructor of argumentID*/
 nearguments :
-     argument                              {$$ = $1; argmap->push_back(*$1); /*SGREM!!! MEMORY LEAKEAGE HERE because of the default copy constructor of argumentID*/}
-   | nearguments ',' argument              {$$ = $1; argmap->push_back(*$3);}
+     argument                              {argmap->push_back(*$1); $$ = argmap;}
+   | nearguments ',' argument              {argmap->push_back(*$3); $$ = argmap;}
 ;
 
 /*
@@ -431,7 +433,7 @@ variabledeclaration:
 
 fielddeclaration:
      telltype  tknIDENTIFIER                 {
-      if (!tellstruct->addfield($2, $1, CMDBlock->getTypeByName($2))) {
+      if (!tellstruct->addfield($2, $1, CMDBlock->getTypeByID($1))) {
          tellerror("field with this name already defined in this strucutre", @2);
          $$ = false; // indicates that definition fails
       }
@@ -492,21 +494,9 @@ fieldname:
     }
 ;
 
-/*
-telllist:
-     argument                              { $$ = $1 | telldata::tn_listmask;
-      listlength++;
-   }
-   | telllist ',' argument                 { $$ = $1;
-      if ($1 != ($3 | telldata::tn_listmask))
-                           tellerror("list members must be the same type",@3);
-      else  listlength++;
-   }
-;
-*/
 structure:
      '{'                                  {
-        argmap = new parsercmd::argumentQ;
+        argmap = new telldata::argumentQ;
         argmapstack.push(argmap);
    }
       nearguments '}'                     {
@@ -515,31 +505,15 @@ structure:
           There is no way at this moment to determine the type of the input structure
           for (seems) obvious reasons. So - the type check and the eventual pushcmd
           are postponed untill we get the recepient - i.e. the lvalue or the
-          function call. For now $$ is assigned tn_usertypes, which means that the
-          type is not determined yet*/
-//        $$ = telldata::tn_usertypes;
-////           parsercmd::argumentID *parent = new parsercmd::argumentID(telldata::tn_usertypes);
-//           parent->addChild(argmap);
-//           argmap = argmapstack.top();
-//           argmap->push_back(*parent);
-// or
-//           parsercmd::argumentQ* oldarglist = argmap;
-        $$ = new parsercmd::argumentID(argmap);
+          function call. $$ is assigned to argumentID, that caries the whole argument
+          queue listed in structure*/
+        $$ = new telldata::argumentID(argmap);
+        
         argmapstack.pop();
-        argmap = argmapstack.top();
-//        }
+        if (argmapstack.size()) argmap = argmapstack.top();
+        else argmap = NULL;
    }
 ;
-/*     $$ = getArgmapType($3);
-     //if the type of structure is a list
-     if ($$ & telldata::tn_listmask)
-        CMDBlock->pushcmd(new parsercmd::cmdLIST($$, $$->size()));
-   }*/
-/*   | '{'                                  { listlength = 0;}
-     telllist '}'                         { $$ = $3;
-        CMDBlock->pushcmd(new parsercmd::cmdLIST($3, listlength));
-   }*/
-
 
 /*==EXPRESSION===============================================================*/
 /*

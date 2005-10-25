@@ -258,6 +258,53 @@ bool telldata::tell_type::addfield(std::string fname, typeID fID, const tell_typ
    else return false;
 }
 
+void telldata::tell_type::userStructCheck(argumentID* inarg) const {
+   argumentQ* arglist = inarg->child();
+   unsigned argument_size = arglist->size();
+   unsigned fields_size = _fields.size();
+   // first check that both lists have the same size
+   if (argument_size != fields_size) return;
+//   if ((arglist->size()) != _fields.size()) return;
+   recfieldsMAP::const_iterator CF;
+   argumentQ::iterator    CA;
+   for (CF = _fields.begin(), CA = arglist->begin();
+             (CF != _fields.end() && CA != arglist->end()); CF ++, CA++) {
+      typeID the_type = CF->second;
+      typeID the_argument = (*CA)();
+      bool boza = the_type == the_argument;
+      if ( (*CA)() == tn_usertypes) {
+         // make sure we have that type defined!
+         assert(_tIDMAP.end() != _tIDMAP.find(CF->second));
+         const tell_type *tty = (_tIDMAP.find(CF->second)->second);
+         tty->userStructCheck(&(*CA));
+      }
+      if (!NUMBER_TYPE( CF->second )) {
+         // for non-number types there is no internal conversion,
+         // so check strictly the type
+         if ( (*CA)() != CF->second) return; // no match
+      }
+      else // for number types - allow compatablity (int to real only)
+         if (!NUMBER_TYPE( (*CA)() )) return; // no match
+         else if (CF->second < (*CA)() ) return; // no match
+   }
+   // all fields match => we can assign a known ID to the argumentID
+   inarg->_ID = _ID;
+}
+
+//=============================================================================
+telldata::point_type::point_type() {
+   _ID = telldata::tn_pnt;
+   addfield("x", telldata::tn_real, NULL);
+   addfield("y", telldata::tn_real, NULL);
+};
+
+//=============================================================================
+telldata::box_type::box_type(point_type* pfld) {
+   _ID = telldata::tn_box;
+   addfield("p1", telldata::tn_pnt, pfld);
+   addfield("p2", telldata::tn_pnt, pfld);
+};
+
 //=============================================================================
 telldata::user_struct::user_struct(const tell_type* tltypedef) : tell_var(tltypedef->ID()) {
    const recfieldsMAP& typefields = tltypedef->fields();
@@ -296,3 +343,30 @@ telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
       return retvar;
    }
 }
+
+//=============================================================================
+telldata::argumentID::argumentID(argumentQ* child) {
+   _child = child; /*
+   telldata::typeID alistID = (*_child)[0]();
+   for(argumentQ::const_iterator CA = _child->begin(); CA != _child->end(); CA ++) {
+      if (alistID != (*CA)()) {
+         alistID = telldata::tn_usertypes; break;
+      }
+   }
+   if (telldata::tn_usertypes != alistID) _ID = TLISTOF(alistID);
+   else                                   _ID = alistID;*/
+   _ID = telldata::tn_usertypes;
+}
+
+telldata::argumentID::argumentID(const argumentID& obj2copy) {
+   _ID = obj2copy();
+   if (NULL == obj2copy.child()) 
+      _child = NULL;
+   else {
+      _child = new argumentQ;
+      for(argumentQ::const_iterator CA = obj2copy.child()->begin(); CA != obj2copy.child()->end(); CA ++)
+         _child->push_back(*CA);
+   }
+}
+
+
