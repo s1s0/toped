@@ -354,7 +354,7 @@ void DataCenter::tmp_draw(const layprop::DrawProperties& drawprop,
                               TP base, TP oldp, TP newp, bool first) {
    if (_TEDDB) {
 //      _TEDDB->check_active();
-//      while (wxMUTEX_NO_ERROR != DBLock.TryLock());
+      while (wxMUTEX_NO_ERROR != DBLock.TryLock());
       _TEDDB->tmp_draw(drawprop, base, oldp, newp, first);
       DBLock.Unlock();
    }
