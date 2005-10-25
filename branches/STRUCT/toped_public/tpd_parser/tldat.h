@@ -35,7 +35,9 @@
 
 #define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool) && !(op & telldata::tn_listmask))
 #define TLISTOF(op) (op | telldata::tn_listmask)
-#define TLUSER_TYPE(op) (op > telldata::tn_layout)
+#define TLISALIST(op) (op & telldata::tn_listmask)
+#define TLUSER_TYPE(op) (op > telldata::tn_usertypes)
+#define TLUNKNOWN_TYPE(op) (op == telldata::tn_usertypes)
 
 //=============================================================================
 // TELL types
@@ -57,12 +59,44 @@ namespace telldata {
    class tell_var;
    class tell_type;
    class ttint;
-   
+   class argumentID;
+
    typedef std::map<std::string, typeID    > recfieldsMAP;
    typedef std::map<std::string, tell_type*> typeMAP;
    typedef std::map<std::string, tell_var* > variableMAP;
-   typedef std::vector<tell_var*> memlist;
+   typedef std::vector<tell_var*>            memlist;
+   typedef std::deque<argumentID>            argumentQ;
 
+
+/*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the locally defined user types
+in a form <typename - tell_type>. Every user type (telldata::tell_type), maintains a table (map) to the
+user defined types (telldata::tell_type) used in this type in a form <ID - tell_type. The latter is
+updated by addfield method. Thus the tell_type can execute its own copy constructor*/
+   class tell_type {
+   public:
+                           tell_type() {}
+                           tell_type(typeID ID) : _ID(ID) {assert(TLUSER_TYPE(ID));}
+      bool                 addfield(std::string, typeID, const tell_type* utype);
+      const recfieldsMAP&  fields() const {return _fields;}
+      const typeID         ID() const {return _ID;}
+      tell_var*            initfield(const typeID) const;
+      void                 userStructCheck(argumentID*) const;
+      typedef std::map<const typeID, const tell_type*> typeIDMAP;
+   protected:
+      typeID               _ID;
+      recfieldsMAP         _fields;
+      typeIDMAP            _tIDMAP;
+   };
+
+   class point_type : public tell_type {
+   public:
+                           point_type();
+   };
+
+   class box_type : public tell_type {
+   public:
+                           box_type(point_type*);
+   };
 
    class tell_var {
    public:
@@ -122,47 +156,6 @@ namespace telldata {
       bool  _value;
    };
 
-   class ttpnt:public tell_var {
-   public:
-                         ttpnt( real xpos=0, real ypos=0) : tell_var(tn_pnt), _x(xpos), _y(ypos) {}
-                         ttpnt(const ttpnt& cobj) : tell_var(tn_pnt), _x(cobj.x()), _y(cobj.y()) {};
-      const ttpnt&       operator = (const ttpnt&);
-      const ttpnt&       operator *= (CTM op2);
-      bool               operator == (ttpnt op2) {return ((_x == op2.x()) && (_y==op2.y()));};
-      friend const ttpnt operator*( const ttpnt &, CTM & );
-      friend const ttpnt operator-( const ttpnt &, ttpnt & );
-      void               echo(std::string&);
-      void               set_value(tell_var*);
-      real               x() const           {return _x;};
-      real               y() const           {return _y;};
-      tell_var*          selfcopy() const    {return new ttpnt(_x, _y);};
-      void               scale(real sf)      {_x *= sf;_y *= sf;};
-   private:
-      real     _x;
-      real     _y;
-   };
-
-
-   class ttwnd:public tell_var {
-   public:   
-                         ttwnd( real bl_x=0.0, real bl_y=0.0, 
-                           real tr_x=0.0, real tr_y=0.0) : tell_var(tn_box), _p1(bl_x,bl_y),
-                                                           _p2(tr_x, tr_y) {};
-                         ttwnd( ttpnt tl, ttpnt br) : tell_var(tn_box), _p1(tl),_p2(br) {};
-                         ttwnd(const ttwnd& cobj) : tell_var(tn_box), 
-                                          _p1(cobj.p1()), _p2(cobj.p2()) {};
-      const ttwnd&       operator = (const ttwnd&);
-      void               echo(std::string&);
-      void               set_value(tell_var*);
-      const ttpnt&       p1() const          {return _p1;};
-      const ttpnt&       p2() const          {return _p2;};
-      tell_var*          selfcopy() const    {return new ttwnd(_p1, _p2);};
-      void               scale(real sf)      {_p1.scale(sf); _p1.scale(sf);};
-   private:
-      ttpnt _p1;
-      ttpnt _p2;
-   };
-
    class ttstring: public tell_var {
    public:
                          ttstring() : tell_var(tn_string) {}
@@ -217,23 +210,6 @@ namespace telldata {
    private:
       memlist           _mlist;    // the list itself
    };
-/*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the locally defined user types
-in a form <typename - tell_type>. Every user type (telldata::tell_type), maintains a table (map) to the
-user defined types (telldata::tell_type) used in this type in a form <ID - tell_type. The latter is
-updated by addfield method. Thus the tell_type can execute its own copy constructor*/
-   class tell_type {
-   public:
-                           tell_type(typeID ID) : _ID(ID) {assert(TLUSER_TYPE(ID));}
-      bool                 addfield(std::string, typeID, const tell_type* utype);
-      const recfieldsMAP&  fields() const {return _fields;}
-      const typeID         ID() const {return _ID;}
-      tell_var*            initfield(const typeID) const;
-      typedef std::map<typeID, const tell_type*> typeIDMAP;
-   protected:
-      typeID               _ID;
-      recfieldsMAP         _fields;
-      typeIDMAP            _tIDMAP;
-   };
 
    class user_struct : public tell_var {
    public:
@@ -247,6 +223,63 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       variableMAP         _fieldmap;
    };
 
+   
+   class ttpnt:public tell_var {
+   public:
+                         ttpnt( real xpos=0, real ypos=0) : tell_var(tn_pnt), _x(xpos), _y(ypos) {}
+                         ttpnt(const ttpnt& cobj) : tell_var(tn_pnt), _x(cobj.x()), _y(cobj.y()) {};
+      const ttpnt&       operator = (const ttpnt&);
+      const ttpnt&       operator *= (CTM op2);
+      bool               operator == (ttpnt op2) {return ((_x == op2.x()) && (_y==op2.y()));};
+      friend const ttpnt operator*( const ttpnt &, CTM & );
+      friend const ttpnt operator-( const ttpnt &, ttpnt & );
+      void               echo(std::string&);
+      void               set_value(tell_var*);
+      real               x() const           {return _x;};
+      real               y() const           {return _y;};
+      tell_var*          selfcopy() const    {return new ttpnt(_x, _y);};
+      void               scale(real sf)      {_x *= sf;_y *= sf;};
+   private:
+      real     _x;
+      real     _y;
+   };
+
+
+   class ttwnd:public tell_var {
+   public:   
+                         ttwnd( real bl_x=0.0, real bl_y=0.0, 
+                           real tr_x=0.0, real tr_y=0.0) : tell_var(tn_box), _p1(bl_x,bl_y),
+                                                           _p2(tr_x, tr_y) {};
+                         ttwnd( ttpnt tl, ttpnt br) : tell_var(tn_box), _p1(tl),_p2(br) {};
+                         ttwnd(const ttwnd& cobj) : tell_var(tn_box), 
+                                          _p1(cobj.p1()), _p2(cobj.p2()) {};
+      const ttwnd&       operator = (const ttwnd&);
+      void               echo(std::string&);
+      void               set_value(tell_var*);
+      const ttpnt&       p1() const          {return _p1;};
+      const ttpnt&       p2() const          {return _p2;};
+      tell_var*          selfcopy() const    {return new ttwnd(_p1, _p2);};
+      void               scale(real sf)      {_p1.scale(sf); _p1.scale(sf);};
+   private:
+      ttpnt _p1;
+      ttpnt _p2;
+   };
+
+   class argumentID {
+   public:
+                        argumentID(telldata::typeID ID = telldata::tn_NULL) :
+                                                         _ID(ID), _child(NULL){};
+                        argumentID(argumentQ* child);
+                        argumentID(const argumentID&);
+                       ~argumentID() {if (NULL != _child) delete _child;}
+      telldata::typeID  operator () () const        {return _ID;}
+      void              addChild(argumentQ* child)  {_child = child;}
+      argumentQ*        child() const               {return _child;};
+      friend void tell_type::userStructCheck(argumentID*) const;
+   private:
+      telldata::typeID  _ID;
+      argumentQ*        _child;
+   };
 }
 
 #endif

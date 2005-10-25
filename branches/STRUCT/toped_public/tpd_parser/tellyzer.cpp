@@ -60,18 +60,6 @@ parsercmd::UNDOPerandQUEUE    parsercmd::cmdSTDFUNC::UNDOPstack;
 parsercmd::undoQUEUE          parsercmd::cmdSTDFUNC::UNDOcmdQ;
 
 
-parsercmd::argumentID::argumentID(argumentQ* child) {
-   _child = child;
-   telldata::typeID alistID = (*_child)[0]();
-   for(argumentQ::const_iterator CA = _child->begin(); CA != _child->end(); CA ++) {
-      if (alistID != (*CA)()) {
-         alistID = telldata::tn_usertypes; break;
-      }
-   }
-   if (telldata::tn_usertypes != alistID) _ID = TLISTOF(alistID);
-   else                                   _ID = alistID;
-}
-
 real parsercmd::cmdVIRTUAL::getOpValue(operandSTACK& OPs) {
    real value = 0;
    telldata::tell_var *op = OPs.top();OPs.pop();
@@ -632,22 +620,23 @@ parsercmd::cmdBLOCK::~cmdBLOCK() {
 
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
-                                        (char*& fn, argumentQ* amap) const {
-   cmdSTDFUNC *fbody;
+                                        (char*& fn, telldata::argumentQ* amap) const {
+   cmdSTDFUNC *fbody = NULL;
    typedef functionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
+   telldata::argumentQ* arguMap = (NULL == amap) ? new telldata::argumentQ : amap;
    for (MM fb = range.first; fb != range.second; fb++) {
       fbody = fb->second;
-      if (0 == fbody->argsOK(amap))
-         return fbody;
+      if (0 == fbody->argsOK(arguMap)) break;
    }
-   return NULL;
+   if (NULL == amap) delete arguMap;
+   return fbody;
 }
 
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
                                         (char*& fn, argumentLIST* alst) const {
    // convert argumentLIST to argumentMAP
-   argumentQ amap;
+   telldata::argumentQ amap;
    typedef argumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++) {
       amap.push_back((*arg)->second->get_type()); }
@@ -656,7 +645,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
 }
 
 //=============================================================================
-int parsercmd::cmdSTDFUNC::argsOK(argumentQ* amap) {
+int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
 // This is supposed to be called only by user defined functions.
 // Standard functions will overwrite this function although they
 // also can use it
@@ -806,6 +795,11 @@ void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)  {
 parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes + 1) {
    pushblk();
 };
+
+void  parsercmd::cmdMAIN::addGlobalType(char* ttypename, telldata::tell_type* ntype) {
+   assert(TYPElocal.end() == TYPElocal.find(ttypename));
+   TYPElocal[ttypename] = ntype;
+}
 
 parsercmd::cmdMAIN::~cmdMAIN(){
    for (functionMAP::iterator FMI = _funcMAP.begin(); FMI != _funcMAP.end(); FMI ++)
@@ -991,17 +985,26 @@ telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
    return telldata::tn_void;
 }
 
-telldata::typeID parsercmd::Assign(telldata::tell_var* lval, argumentID* op2,
+telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentID* op2,
                                                                  yyltype loc) {
    if (!lval) {
       tellerror("Lvalue undefined in assign statement", loc);
       return telldata::tn_void;
    }   
    telldata::typeID op1 = lval->get_type();
+   // Here if user structure is used - clarify that it is compatible
+   if (TLUNKNOWN_TYPE((*op2)())) {
+      const telldata::tell_type* vartype = CMDBlock->getTypeByID(lval->get_type());
+      if (NULL != vartype) vartype->userStructCheck(op2);
+   }
    if ((op1 == (*op2)()) || (NUMBER_TYPE(op1) && NUMBER_TYPE((*op2)()))) {
+      if (TLISALIST((*op2)())) {
+        CMDBlock->pushcmd(new parsercmd::cmdLIST(op2));
+      }
       CMDBlock->pushcmd(new parsercmd::cmdASSIGN(lval));
       return op1;
    }
+//   else if (TLUNKNOWN_TYPE((*op2)()) && userStructCheck(lval, op2)) {}
    else {
       tellerror("Operands must be the same type", loc);
       return telldata::tn_void;
@@ -1067,6 +1070,7 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
 //         else {tellerror("unexepected operand type",loc1);return telldata::tn_void;}
 //         break;
 }
+
 
 //-----------------------------------------------------------------------------
 // class toped_logfile

@@ -88,7 +88,7 @@
 
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
-   using parsercmd::argumentQ;
+   using telldata::argumentQ;
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 

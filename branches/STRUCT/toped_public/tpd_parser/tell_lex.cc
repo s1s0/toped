@@ -486,7 +486,7 @@ char *yytext;
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: svn+ssh://s_krustev@svn.berlios.de/svnroot/repos/toped/trunk/tpd_parser/tell_lex.ll $
+//           $URL: svn+ssh://s_krustev@svn.berlios.de/svnroot/repos/toped/branches/STRUCT/toped_public/tpd_parser/tell_lex.ll $
 //  Creation date: Fri Nov 08 2002
 //     Created by: Svilen Krustev - s_krustev@yahoo.com
 //      Copyright: (C) 2001-2004 by Svilen Krustev
@@ -494,8 +494,8 @@ char *yytext;
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 9 $
-//          $Date: 2005-10-21 00:57:21 +0100 (Fri, 21 Oct 2005) $
+//      $Revision: 12 $
+//          $Date: 2005-10-23 22:20:47 +0100 (Sun, 23 Oct 2005) $
 //        $Author: s_krustev $
 //---------------------------------------------------------------------------
 // A non-reentrant parser for tell
