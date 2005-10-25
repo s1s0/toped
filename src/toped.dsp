@@ -274,15 +274,15 @@ SOURCE=.\wx\msw\wx.manifest
 # End Source File
 # Begin Source File
 
-SOURCE=..\Debug\tpd_common.lib
+SOURCE=..\Debug\tpd_commond.lib
 # End Source File
 # Begin Source File
 
-SOURCE=..\Debug\TPD_DB.lib
+SOURCE=..\Debug\TPD_DBd.lib
 # End Source File
 # Begin Source File
 
-SOURCE=..\Debug\tpd_parser.lib
+SOURCE=..\Debug\tpd_parserd.lib
 # End Source File
 # End Target
 # End Project
