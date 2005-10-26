@@ -36,8 +36,8 @@
 #define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool) && !(op & telldata::tn_listmask))
 #define TLISTOF(op) (op | telldata::tn_listmask)
 #define TLISALIST(op) (op & telldata::tn_listmask)
-#define TLUSER_TYPE(op) (op > telldata::tn_usertypes)
-#define TLUNKNOWN_TYPE(op) (op == telldata::tn_usertypes)
+#define TLCOMPOSIT_TYPE(op) (op > telldata::tn_composite)
+#define TLUNKNOWN_TYPE(op) (op == telldata::tn_composite)
 
 //=============================================================================
 // TELL types
@@ -50,10 +50,11 @@ namespace telldata {
    const typeID tn_real       = 3 ;
    const typeID tn_bool       = 4 ;
    const typeID tn_string     = 5 ;
-   const typeID tn_pnt        = 6 ;
-   const typeID tn_box        = 7 ;
-   const typeID tn_layout     = 8 ;
-   const typeID tn_usertypes  = 10;
+   const typeID tn_layout     = 6 ;
+   const typeID tn_composite  = 10;
+   const typeID tn_pnt        = 11;
+   const typeID tn_box        = 12;
+   const typeID tn_usertypes  = 16;
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
    class tell_var;
@@ -74,13 +75,13 @@ user defined types (telldata::tell_type) used in this type in a form <ID - tell_
 updated by addfield method. Thus the tell_type can execute its own copy constructor*/
    class tell_type {
    public:
-                           tell_type() {}
-                           tell_type(typeID ID) : _ID(ID) {assert(TLUSER_TYPE(ID));}
+                           tell_type(typeID ID) : _ID(ID) {assert(TLCOMPOSIT_TYPE(ID));}
       bool                 addfield(std::string, typeID, const tell_type* utype);
       const recfieldsMAP&  fields() const {return _fields;}
       const typeID         ID() const {return _ID;}
       tell_var*            initfield(const typeID) const;
       void                 userStructCheck(argumentID*) const;
+      void                 userStructListCheck(argumentID*) const;
       typedef std::map<const typeID, const tell_type*> typeIDMAP;
    protected:
       typeID               _ID;
@@ -269,9 +270,11 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
    public:
                         argumentID(telldata::typeID ID = telldata::tn_NULL) :
                                                          _ID(ID), _child(NULL){};
-                        argumentID(argumentQ* child);
+                        argumentID(argumentQ* child) :  _ID(telldata::tn_composite),
+                                                        _child(child) {}
                         argumentID(const argumentID&);
                        ~argumentID() {if (NULL != _child) delete _child;}
+      void              toList();
       telldata::typeID  operator () () const        {return _ID;}
       void              addChild(argumentQ* child)  {_child = child;}
       argumentQ*        child() const               {return _child;};

@@ -233,21 +233,29 @@ namespace parsercmd {
       telldata::tell_var* _var;
    };
 
-   class cmdPOINTFIELD:public cmdVIRTUAL {
-   public:
-      cmdPOINTFIELD(char* f, yyltype loc);
-      int execute();
-   private:
-      char     _field;
-   };
+//   class cmdPOINTFIELD:public cmdVIRTUAL {
+//   public:
+//      cmdPOINTFIELD(char* f, yyltype loc);
+//      int execute();
+//   private:
+//      char     _field;
+//   };
+//   class cmdWINDOWFIELD:public cmdVIRTUAL {
+//   public:
+//      cmdWINDOWFIELD(char* f, yyltype loc);
+//      int execute();
+//   private:
+//      char     _field;
+//   };
+//   class cmdPOINT:public cmdVIRTUAL {
+//   public:
+//      int execute();
+//   };
+//   class cmdWINDOW:public cmdVIRTUAL {
+//   public:
+//      int execute();
+//   };
 
-   class cmdWINDOWFIELD:public cmdVIRTUAL {
-   public:
-      cmdWINDOWFIELD(char* f, yyltype loc);
-      int execute();
-   private:
-      char     _field;
-   };
 
    class cmdPUSH:public cmdVIRTUAL {
    public:
@@ -260,19 +268,8 @@ namespace parsercmd {
       bool                 _constant;
    };
 
-   class cmdPOINT:public cmdVIRTUAL {
-   public:
-      int execute();
-   };
-
-   class cmdWINDOW:public cmdVIRTUAL {
-   public:
-      int execute();
-   };
-
    class cmdLIST:public cmdVIRTUAL {
    public:
-//      cmdLIST(telldata::typeID ttn, unsigned length): _ttype(ttn), _length(length) {};
       cmdLIST(telldata::argumentID* ttn): _ttype((*ttn)()), _length(ttn->child()->size()) {};
       int execute();
    private:
@@ -280,6 +277,14 @@ namespace parsercmd {
       unsigned       _length;
    };
 
+   class cmdSTRUCT: public cmdVIRTUAL {
+   public:
+      cmdSTRUCT(telldata::typeID ID) : _ID(ID) {}
+      int execute();
+   private:
+      telldata::typeID  _ID;
+   };
+   
    class cmdRETURN:public cmdVIRTUAL {
    public:
       int execute()  {return EXEC_RETURN;};
@@ -337,7 +342,6 @@ namespace parsercmd {
       telldata::tell_type*       requesttypeID(char*&);
       const telldata::tell_type* getTypeByName(char*&) const;
       const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
-//      telldata::typeID*          checkfield(telldata::typeID, char*&, yyltype) const;
       telldata::tell_var*        getID(char*&, bool local=false);
       telldata::tell_var*        newTellvar(telldata::typeID, yyltype);
       cmdSTDFUNC*  const         funcDefined(char*&,argumentLIST*) const;
@@ -426,7 +430,7 @@ namespace parsercmd {
 //   telldata::typeID newBox(telldata::type, telldata::type, telldata::type,
 //                            telldata::type, yyltype, yyltype, yyltype, yyltype);
 //   telldata::typeID newPoint(telldata::type, telldata::type, yyltype, yyltype);
-   telldata::typeID newDataStructure(telldata::typeID, telldata::typeID, yyltype, yyltype);
+//   telldata::typeID newDataStructure(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID UMinus(telldata::typeID, yyltype);
    telldata::typeID   Plus(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Minus(telldata::typeID, telldata::typeID, yyltype, yyltype);

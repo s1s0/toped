@@ -260,23 +260,26 @@ bool telldata::tell_type::addfield(std::string fname, typeID fID, const tell_typ
 
 void telldata::tell_type::userStructCheck(argumentID* inarg) const {
    argumentQ* arglist = inarg->child();
-   unsigned argument_size = arglist->size();
-   unsigned fields_size = _fields.size();
    // first check that both lists have the same size
-   if (argument_size != fields_size) return;
-//   if ((arglist->size()) != _fields.size()) return;
+   if (arglist->size() != _fields.size()) return;
    recfieldsMAP::const_iterator CF;
    argumentQ::iterator    CA;
    for (CF = _fields.begin(), CA = arglist->begin();
              (CF != _fields.end() && CA != arglist->end()); CF ++, CA++) {
-      typeID the_type = CF->second;
-      typeID the_argument = (*CA)();
-      bool boza = the_type == the_argument;
-      if ( (*CA)() == tn_usertypes) {
-         // make sure we have that type defined!
-         assert(_tIDMAP.end() != _tIDMAP.find(CF->second));
-         const tell_type *tty = (_tIDMAP.find(CF->second)->second);
-         tty->userStructCheck(&(*CA));
+      if ( TLUNKNOWN_TYPE( (*CA)() ) ) {
+         if (TLISALIST(CF->second)) {// check the list fields
+            telldata::typeID basetype = CF->second & ~telldata::tn_listmask;
+            assert(_tIDMAP.end() != _tIDMAP.find(basetype));
+            // call in recursion the userStructCheck method of the child 
+            const tell_type *tty = (_tIDMAP.find(basetype)->second);
+            tty->userStructListCheck(&(*CA));
+         }
+         else {
+            assert(_tIDMAP.end() != _tIDMAP.find(CF->second));
+            // call in recursion the userStructCheck method of the child 
+            const tell_type *tty = (_tIDMAP.find(CF->second)->second);
+            tty->userStructCheck(&(*CA));
+         }
       }
       if (!NUMBER_TYPE( CF->second )) {
          // for non-number types there is no internal conversion,
@@ -291,16 +294,21 @@ void telldata::tell_type::userStructCheck(argumentID* inarg) const {
    inarg->_ID = _ID;
 }
 
+void telldata::tell_type::userStructListCheck(argumentID* inarg) const {
+   argumentQ* arglist = inarg->child();
+   for (argumentQ::iterator CA = arglist->begin(); CA != arglist->end(); CA++) {
+      if ( TLUNKNOWN_TYPE( (*CA)() ) ) userStructCheck(&(*CA));
+   }
+   inarg->toList();
+}
 //=============================================================================
-telldata::point_type::point_type() {
-   _ID = telldata::tn_pnt;
+telldata::point_type::point_type() : tell_type(telldata::tn_pnt) {
    addfield("x", telldata::tn_real, NULL);
    addfield("y", telldata::tn_real, NULL);
 };
 
 //=============================================================================
-telldata::box_type::box_type(point_type* pfld) {
-   _ID = telldata::tn_box;
+telldata::box_type::box_type(point_type* pfld) : tell_type(telldata::tn_box) {
    addfield("p1", telldata::tn_pnt, pfld);
    addfield("p2", telldata::tn_pnt, pfld);
 };
@@ -345,19 +353,6 @@ telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
 }
 
 //=============================================================================
-telldata::argumentID::argumentID(argumentQ* child) {
-   _child = child; /*
-   telldata::typeID alistID = (*_child)[0]();
-   for(argumentQ::const_iterator CA = _child->begin(); CA != _child->end(); CA ++) {
-      if (alistID != (*CA)()) {
-         alistID = telldata::tn_usertypes; break;
-      }
-   }
-   if (telldata::tn_usertypes != alistID) _ID = TLISTOF(alistID);
-   else                                   _ID = alistID;*/
-   _ID = telldata::tn_usertypes;
-}
-
 telldata::argumentID::argumentID(const argumentID& obj2copy) {
    _ID = obj2copy();
    if (NULL == obj2copy.child()) 
@@ -369,4 +364,10 @@ telldata::argumentID::argumentID(const argumentID& obj2copy) {
    }
 }
 
-
+void telldata::argumentID::toList() {
+   telldata::typeID alistID = (*_child)[0]();
+   for(argumentQ::const_iterator CA = _child->begin(); CA != _child->end(); CA ++) {
+      if (alistID != (*CA)()) return;
+   }
+   _ID = TLISTOF(alistID);
+}

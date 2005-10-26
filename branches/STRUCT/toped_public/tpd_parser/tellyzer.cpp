@@ -390,72 +390,68 @@ int parsercmd::cmdPUSH::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdPOINT::execute() {
-   TELL_DEBUG(cmdPOINT);
-   real y= getOpValue();
-   real x= getOpValue();
-   OPstack.push(new telldata::ttpnt(x, y));
-   return EXEC_NEXT;
-}
+//int parsercmd::cmdPOINT::execute() {
+//   TELL_DEBUG(cmdPOINT);
+//   real y= getOpValue();
+//   real x= getOpValue();
+//   OPstack.push(new telldata::ttpnt(x, y));
+//   return EXEC_NEXT;
+//}
 
 //=============================================================================
-parsercmd::cmdPOINTFIELD::cmdPOINTFIELD(char* f, yyltype loc) {
-   if (('x' != *f) && ('y' != *f)) 
-      tellerror("bad field name. 'x' or 'y' expected", loc);
-   else _field = *f;
-//   delete f;
-}
+//parsercmd::cmdPOINTFIELD::cmdPOINTFIELD(char* f, yyltype loc) {
+//   if (('x' != *f) && ('y' != *f)) 
+//      tellerror("bad field name. 'x' or 'y' expected", loc);
+//   else _field = *f;
+////   delete f;
+//}
 
-int parsercmd::cmdPOINTFIELD::execute() {
-   TELL_DEBUG(cmdPOINTFIELD);
-   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttreal *e;
-   if ('x' == _field) e = new telldata::ttreal(p->x());
-   else               e = new telldata::ttreal(p->y());
-   OPstack.push(e);
-   delete p;
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-parsercmd::cmdWINDOWFIELD::cmdWINDOWFIELD(char* f, yyltype loc) {
-   if (('1' != *f) && ('2' != *f)) 
-      tellerror("bad field name. 'p1' or 'p2' expected", loc);
-   else _field = *f;
-//   delete f;
-}
-
-int parsercmd::cmdWINDOWFIELD::execute() {
-   TELL_DEBUG(cmdWINDOWFIELD);
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *p;
-   if ('1' == _field) p = new telldata::ttpnt(w->p1().x(),w->p1().y() );
-   else               p = new telldata::ttpnt(w->p2().x(),w->p2().y() );
-   OPstack.push(p);
-   delete w;
-   return EXEC_NEXT;
-}
+//int parsercmd::cmdPOINTFIELD::execute() {
+//   TELL_DEBUG(cmdPOINTFIELD);
+//   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+//   telldata::ttreal *e;
+//   if ('x' == _field) e = new telldata::ttreal(p->x());
+//   else               e = new telldata::ttreal(p->y());
+//   OPstack.push(e);
+//   delete p;
+//   return EXEC_NEXT;
+//}
 
 //=============================================================================
-int parsercmd::cmdWINDOW::execute() {
-   TELL_DEBUG(cmdWINDOW);
-   telldata::ttwnd *w;
-//   if ('p' == _from) {
-      telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-      telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-      w = new telldata::ttwnd(p1->x(),p1->y(),p2->x(),p2->y());
-      delete p1; delete p2;
-//   }
-//   else {
-//      real y2= getOpValue();
-//      real x2= getOpValue();
-//      real y1= getOpValue();
-//      real x1= getOpValue();
-//      w = new ttwnd(x1,y1,x2,y2);
-//   }
-   OPstack.push(w);
-   return EXEC_NEXT;
+//parsercmd::cmdWINDOWFIELD::cmdWINDOWFIELD(char* f, yyltype loc) {
+//   if (('1' != *f) && ('2' != *f)) 
+//      tellerror("bad field name. 'p1' or 'p2' expected", loc);
+//   else _field = *f;
+////   delete f;
+//}
+
+//int parsercmd::cmdWINDOWFIELD::execute() {
+//   TELL_DEBUG(cmdWINDOWFIELD);
+//   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+//   telldata::ttpnt *p;
+//   if ('1' == _field) p = new telldata::ttpnt(w->p1().x(),w->p1().y() );
+//   else               p = new telldata::ttpnt(w->p2().x(),w->p2().y() );
+//   OPstack.push(p);
+//   delete w;
+//   return EXEC_NEXT;
+//}
+
+//=============================================================================
+//int parsercmd::cmdWINDOW::execute() {
+//   TELL_DEBUG(cmdWINDOW);
+//   telldata::ttwnd *w;
+//      telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+//      telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+//      w = new telldata::ttwnd(p1->x(),p1->y(),p2->x(),p2->y());
+//      delete p1; delete p2;
+//   OPstack.push(w);
+//   return EXEC_NEXT;
+//}
+
+int parsercmd::cmdSTRUCT::execute() {
+   assert(false);
 }
+
 
 //=============================================================================
 int parsercmd::cmdLIST::execute() {
@@ -792,7 +788,7 @@ void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)  {
    _funcMAP.insert(std::make_pair(fname,cQ));
 }
 
-parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes + 1) {
+parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {
    pushblk();
 };
 
@@ -809,24 +805,24 @@ parsercmd::cmdMAIN::~cmdMAIN(){
 
 
 //=============================================================================
-telldata::typeID parsercmd::newDataStructure(telldata::typeID op1, telldata::typeID op2,
-                                                  yyltype loc1, yyltype loc2) {
-   yyltype loc;
-   if (NUMBER_TYPE(op1))
-      if (NUMBER_TYPE(op2)) {
-         CMDBlock->pushcmd(new parsercmd::cmdPOINT());
-         return telldata::tn_pnt; }
-      else loc = loc2;
-   else
-      if (telldata::tn_pnt == op1)
-         if (telldata::tn_pnt == op2) {
-            CMDBlock->pushcmd(new parsercmd::cmdWINDOW());
-            return telldata::tn_box; }
-         else loc = loc2;
-      else loc = loc1;
-   tellerror("unexepected operand type",loc);
-   return telldata::tn_void;
-}
+//telldata::typeID parsercmd::(telldata::typeID op1, telldata::typeID op2,
+//                                                  yyltype loc1, yyltype loc2) {
+//   yyltype loc;
+//   if (NUMBER_TYPE(op1))
+//      if (NUMBER_TYPE(op2)) {
+//         CMDBlock->pushcmd(new parsercmd::cmdPOINT());
+//         return telldata::tn_pnt; }
+//      else loc = loc2;
+//   else
+//      if (telldata::tn_pnt == op1)
+//         if (telldata::tn_pnt == op2) {
+//            CMDBlock->pushcmd(new parsercmd::cmdWINDOW());
+//            return telldata::tn_box; }
+//         else loc = loc2;
+//      else loc = loc1;
+//   tellerror("unexepected operand type",loc);
+//  return telldata::tn_void;
+//}
 
 //=============================================================================
 telldata::typeID parsercmd::UMinus(telldata::typeID op1, yyltype loc1) {
@@ -993,13 +989,37 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentI
    }   
    telldata::typeID op1 = lval->get_type();
    // Here if user structure is used - clarify that it is compatible
+   // The thing is that op2 could be a struct of a struct list or a list of
+   // tell basic types. This should be checked in the following order:
+   // 1. Get the type of the recipient (lval)
+   // 2. If it is a list
+   //    a) strip the list atribute and get the type of the list component
+   //    b) if the type of the lval list component is compound (struct list), check the
+   //       input structure for struct list
+   //    c) if the type of the list component is basic, check directly that
+   //       op2 is a list
+   // 3. If it is not a list
+   //    a) if the type of the lval is compound (struct list), check the
+   //       input structure for struct 
    if (TLUNKNOWN_TYPE((*op2)())) {
-      const telldata::tell_type* vartype = CMDBlock->getTypeByID(lval->get_type());
-      if (NULL != vartype) vartype->userStructCheck(op2);
+      telldata::typeID lvalID = lval->get_type();
+      const telldata::tell_type* vartype;
+      if (TLISALIST(lvalID)) { // we have a list lval
+          vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
+          if (NULL != vartype) vartype->userStructListCheck(op2);
+          else op2->toList();
+      }
+      else { // we have a struct only
+         vartype = CMDBlock->getTypeByID(lvalID);
+         if (NULL != vartype) vartype->userStructCheck(op2);
+      }
    }
    if ((op1 == (*op2)()) || (NUMBER_TYPE(op1) && NUMBER_TYPE((*op2)()))) {
       if (TLISALIST((*op2)())) {
         CMDBlock->pushcmd(new parsercmd::cmdLIST(op2));
+      }
+      if (TLCOMPOSIT_TYPE((*op2)())) {
+        CMDBlock->pushcmd(new parsercmd::cmdSTRUCT( (*op2)() ) );
       }
       CMDBlock->pushcmd(new parsercmd::cmdASSIGN(lval));
       return op1;
