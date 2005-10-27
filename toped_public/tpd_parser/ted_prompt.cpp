@@ -94,7 +94,7 @@ void console::patternNormalize(wxString& str) {
 }
 
 //==============================================================================
-console::miniParser::miniParser(parsercmd::operandSTACK *cs,telldata::typeID et) {
+console::miniParser::miniParser(telldata::operandSTACK *cs,telldata::typeID et) {
    client_stack = cs;  _wait4type = et;
 }
 
@@ -294,7 +294,7 @@ void console::ted_cmd::parseCommand(wxString cmd) {
 }
    
 
-void console::ted_cmd::waitGUInput(parsercmd::operandSTACK *clst,telldata::typeID ttype) {
+void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst,telldata::typeID ttype) {
    puc = new miniParser(clst, ttype);_numpoints = 0;
    _mouseIN_OK = true;
    _guinput.Clear();

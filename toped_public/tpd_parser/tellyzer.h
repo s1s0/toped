@@ -92,8 +92,6 @@ namespace parsercmd {
    typedef  std::deque<cmdBLOCK*>                        blockSTACK;
    typedef  std::deque<cmdVIRTUAL*>                      cmdQUEUE;
    typedef  std::deque<cmdSTDFUNC*>                      undoQUEUE;
-   typedef  std::stack<telldata::tell_var*>              operandSTACK;
-   typedef  std::deque<telldata::tell_var*>              UNDOPerandQUEUE;
    typedef  std::pair<std::string,telldata::tell_var*>   argumentTYPE;
    typedef  std::deque<argumentTYPE*>                    argumentLIST;
 
@@ -112,19 +110,19 @@ namespace parsercmd {
    public:
 //      cmdVIRTUAL(yyltype loc): _loc(loc) {}
       virtual int  execute() = 0;
-              real getOpValue(operandSTACK& OPs = OPstack);
-              word getWordValue(operandSTACK& OPs = OPstack);
-              byte getByteValue(operandSTACK& OPs = OPstack);
-       std::string getStringValue(operandSTACK& OPs = OPstack);
-              bool getBoolValue(operandSTACK& OPs = OPstack);
-              real getOpValue(UNDOPerandQUEUE&, bool);
-              word getWordValue(UNDOPerandQUEUE&, bool);
-              byte getByteValue(UNDOPerandQUEUE&, bool);
-       std::string getStringValue(UNDOPerandQUEUE&, bool);
-              bool getBoolValue(UNDOPerandQUEUE&, bool);
+              real getOpValue(telldata::operandSTACK& OPs = OPstack);
+              word getWordValue(telldata::operandSTACK& OPs = OPstack);
+              byte getByteValue(telldata::operandSTACK& OPs = OPstack);
+       std::string getStringValue(telldata::operandSTACK& OPs = OPstack);
+              bool getBoolValue(telldata::operandSTACK& OPs = OPstack);
+              real getOpValue(telldata::UNDOPerandQUEUE&, bool);
+              word getWordValue(telldata::UNDOPerandQUEUE&, bool);
+              byte getByteValue(telldata::UNDOPerandQUEUE&, bool);
+       std::string getStringValue(telldata::UNDOPerandQUEUE&, bool);
+              bool getBoolValue(telldata::UNDOPerandQUEUE&, bool);
       virtual ~cmdVIRTUAL() {};        
    protected:
-      static operandSTACK      OPstack;      // Operand stack
+      static telldata::operandSTACK      OPstack;      // Operand stack
 //      yyltype                  _loc;
    };
 
@@ -376,7 +374,7 @@ namespace parsercmd {
    protected:
       argumentLIST*           arguments;
       telldata::typeID        returntype;
-      static UNDOPerandQUEUE  UNDOPstack;   // undo operand stack
+      static telldata::UNDOPerandQUEUE  UNDOPstack;   // undo operand stack
       static undoQUEUE        UNDOcmdQ;     // undo command stack
    };
 
