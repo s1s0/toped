@@ -53,14 +53,14 @@ parsercmd::functionMAP        parsercmd::cmdBLOCK::_funcMAP;
 // Table of current nested blocks
 parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
 // Operand stack
-parsercmd::operandSTACK       parsercmd::cmdVIRTUAL::OPstack;
+telldata::operandSTACK       parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
-parsercmd::UNDOPerandQUEUE    parsercmd::cmdSTDFUNC::UNDOPstack;
+telldata::UNDOPerandQUEUE     parsercmd::cmdSTDFUNC::UNDOPstack;
 // UNDO command queue
 parsercmd::undoQUEUE          parsercmd::cmdSTDFUNC::UNDOcmdQ;
 
 
-real parsercmd::cmdVIRTUAL::getOpValue(operandSTACK& OPs) {
+real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs) {
    real value = 0;
    telldata::tell_var *op = OPs.top();OPs.pop();
    if (op->get_type() == telldata::tn_real) 
@@ -71,7 +71,7 @@ real parsercmd::cmdVIRTUAL::getOpValue(operandSTACK& OPs) {
    return value;
 }
 
-real parsercmd::cmdVIRTUAL::getOpValue(UNDOPerandQUEUE& OPs, bool front) {
+real parsercmd::cmdVIRTUAL::getOpValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    real value = 0;
    telldata::tell_var *op;
    if (front) {op = OPs.front();OPs.pop_front();}
@@ -84,7 +84,7 @@ real parsercmd::cmdVIRTUAL::getOpValue(UNDOPerandQUEUE& OPs, bool front) {
    return value;
 }
 
-word parsercmd::cmdVIRTUAL::getWordValue(operandSTACK& OPs) {
+word parsercmd::cmdVIRTUAL::getWordValue(telldata::operandSTACK& OPs) {
    telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
    word value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_WORD_VALUE))
@@ -94,7 +94,7 @@ word parsercmd::cmdVIRTUAL::getWordValue(operandSTACK& OPs) {
    return value;
 }
 
-word parsercmd::cmdVIRTUAL::getWordValue(UNDOPerandQUEUE& OPs, bool front) {
+word parsercmd::cmdVIRTUAL::getWordValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    telldata::ttint  *op;
    if (front) {op = static_cast<telldata::ttint*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();} 
@@ -106,7 +106,7 @@ word parsercmd::cmdVIRTUAL::getWordValue(UNDOPerandQUEUE& OPs, bool front) {
    return value;
 }
 
-byte parsercmd::cmdVIRTUAL::getByteValue(operandSTACK& OPs) {
+byte parsercmd::cmdVIRTUAL::getByteValue(telldata::operandSTACK& OPs) {
    telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
    byte value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_BYTE_VALUE))
@@ -116,7 +116,7 @@ byte parsercmd::cmdVIRTUAL::getByteValue(operandSTACK& OPs) {
    return value;
 }
 
-byte parsercmd::cmdVIRTUAL::getByteValue(UNDOPerandQUEUE& OPs, bool front) {
+byte parsercmd::cmdVIRTUAL::getByteValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    telldata::ttint  *op;
    if (front) {op = static_cast<telldata::ttint*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();}
@@ -128,14 +128,14 @@ byte parsercmd::cmdVIRTUAL::getByteValue(UNDOPerandQUEUE& OPs, bool front) {
    return value;
 }
 
-std::string parsercmd::cmdVIRTUAL::getStringValue(operandSTACK& OPs) {
+std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::operandSTACK& OPs) {
    telldata::ttstring  *op = static_cast<telldata::ttstring*>(OPs.top());OPs.pop();
    std::string value = op->value();
    delete op;
    return value;
 }
 
-std::string parsercmd::cmdVIRTUAL::getStringValue(UNDOPerandQUEUE& OPs, bool front) {
+std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    telldata::ttstring  *op;
    if (front) {op = static_cast<telldata::ttstring*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttstring*>(OPs.back());OPs.pop_back();}
@@ -144,14 +144,14 @@ std::string parsercmd::cmdVIRTUAL::getStringValue(UNDOPerandQUEUE& OPs, bool fro
    return value;
 }
 
-bool parsercmd::cmdVIRTUAL::getBoolValue(operandSTACK& OPs) {
+bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::operandSTACK& OPs) {
    telldata::ttbool  *op = static_cast<telldata::ttbool*>(OPs.top());OPs.pop();
    bool value = op->value();
    delete op;
    return value;
 }
 
-bool parsercmd::cmdVIRTUAL::getBoolValue(UNDOPerandQUEUE& OPs, bool front) {
+bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    telldata::ttbool  *op;
    if (front) {op = static_cast<telldata::ttbool*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttbool*>(OPs.back());OPs.pop_back();}
@@ -449,7 +449,11 @@ int parsercmd::cmdPUSH::execute() {
 //}
 
 int parsercmd::cmdSTRUCT::execute() {
-   assert(false);
+   const telldata::tell_type *stype = CMDBlock->getTypeByID(_ID);
+   assert(NULL != stype);
+   telldata::user_struct *ustrct = new telldata::user_struct(stype, OPstack);
+   OPstack.push(ustrct);
+   return EXEC_NEXT;
 }
 
 

@@ -226,6 +226,11 @@ telldata::ttlist::~ttlist() {
 }
 
 //=============================================================================
+telldata::tell_var* telldata::tell_type::initfield(const typeID ID, operandSTACK& OPStack) const {
+   assert(_tIDMAP.end() != _tIDMAP.find(ID));
+   return new user_struct(_tIDMAP.find(ID)->second,OPStack);
+}
+
 telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
    telldata::tell_var* nvar;
    if (ID & telldata::tn_listmask) nvar = new telldata::ttlist(ID & ~telldata::tn_listmask);
@@ -319,6 +324,23 @@ telldata::user_struct::user_struct(const tell_type* tltypedef) : tell_var(tltype
    for (recfieldsMAP::const_iterator CI = typefields.begin(); CI != typefields.end(); CI++)
       _fieldmap[CI->first] = tltypedef->initfield(CI->second);
 }
+
+telldata::user_struct::user_struct(const tell_type* tltypedef, operandSTACK& OPStack) :
+                                                                tell_var(tltypedef->ID()) {
+   const recfieldsMAP& typefields = tltypedef->fields();
+   for (recfieldsMAP::const_iterator CI = typefields.begin(); CI != typefields.end(); CI++) {
+      if (CI->second < tn_composite) {
+         _fieldmap[CI->first] = OPStack.top(); OPStack.pop();
+      }
+      else if (TLISALIST(CI->second)) {
+         assert(true); // push a list here
+      }
+      else {
+         _fieldmap[CI->first] = tltypedef->initfield(CI->second, OPStack);
+      }
+   }
+}
+
 
 telldata::user_struct::user_struct(const user_struct& cobj) : tell_var(cobj.get_type()) {
    for (variableMAP::const_iterator CI = cobj._fieldmap.begin(); CI != cobj._fieldmap.end(); CI++)

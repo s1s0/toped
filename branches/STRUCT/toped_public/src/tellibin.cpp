@@ -1599,7 +1599,7 @@ int tellstdfunc::stdDRAWWIRE::execute() {
    word     la = getWordValue();
    real      w = getOpValue();
    real DBscale = Properties->DBscale();
-   if (!tellstdfunc::waitGUInput(static_cast<int>(rint(w * DBscale)), &OPstack)) 
+   if (!tellstdfunc::waitGUInput(static_cast<int>(rint(w * DBscale)), &OPstack))
       return EXEC_RETURN;
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
@@ -3174,7 +3174,7 @@ telldata::ttint* tellstdfunc::CurrentLayer() {
    input type = -3 - copy. Two points expected. Fully selected shapes will be
                      moved on the screen with the marker.
 */
-bool tellstdfunc::waitGUInput(int input_type, parsercmd::operandSTACK *OPstack) {
+bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack) {
    // Create a temporary object in the tdtdesign
    try {DATC->mouseStart(input_type);}
    catch (EXPTN) {return false;}   

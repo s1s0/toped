@@ -67,6 +67,9 @@ namespace telldata {
    typedef std::map<std::string, tell_var* > variableMAP;
    typedef std::vector<tell_var*>            memlist;
    typedef std::deque<argumentID>            argumentQ;
+   typedef  std::stack<telldata::tell_var*>  operandSTACK;
+   typedef  std::deque<telldata::tell_var*>  UNDOPerandQUEUE;
+   
 
 
 /*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the locally defined user types
@@ -80,6 +83,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       const recfieldsMAP&  fields() const {return _fields;}
       const typeID         ID() const {return _ID;}
       tell_var*            initfield(const typeID) const;
+      tell_var*            initfield(const typeID, operandSTACK&) const;
       void                 userStructCheck(argumentID*) const;
       void                 userStructListCheck(argumentID*) const;
       typedef std::map<const typeID, const tell_type*> typeIDMAP;
@@ -215,6 +219,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
    class user_struct : public tell_var {
    public:
                            user_struct(const tell_type*);
+                           user_struct(const tell_type*, operandSTACK&);
                            user_struct(const user_struct&);
       tell_var*            selfcopy() const  {return new user_struct(*this);}
       void                 echo(std::string&);

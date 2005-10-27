@@ -186,7 +186,7 @@ namespace tellstdfunc {
 
 //   laydata::tdtdesign*  currentDesign();
    telldata::ttint*     CurrentLayer();
-   bool                 waitGUInput(int, parsercmd::operandSTACK *);
+   bool                 waitGUInput(int, telldata::operandSTACK *);
    pointlist&           t2tpoints(telldata::ttlist *, real);
    telldata::ttlist*    make_ttlaylist(laydata::selectList*);
    telldata::ttlist*    make_ttlaylist(laydata::atticList*);
