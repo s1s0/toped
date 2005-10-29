@@ -118,7 +118,7 @@ telldata::box_type::box_type(point_type* pfld) : tell_type(telldata::tn_box) {
 };
 
 //=============================================================================
-void telldata::ttreal::set_value(tell_var* rt) {
+void telldata::ttreal::assign(tell_var* rt) {
    if (rt->get_type() == tn_real)
       _value = static_cast<ttreal*>(rt)->value();
    else if (rt->get_type() == tn_int)
@@ -142,7 +142,7 @@ const telldata::ttreal& telldata::ttreal::operator = (const ttint& a) {
    return *this;
 }
 //=============================================================================
-void telldata::ttint::set_value(tell_var* rt) {
+void telldata::ttint::assign(tell_var* rt) {
    _value = static_cast<ttint*>(rt)->value();
 }
 
@@ -171,7 +171,7 @@ const telldata::ttbool& telldata::ttbool::operator = (const ttbool& a) {
    return *this;
 }
 
-void telldata::ttbool::set_value(tell_var* rt) {
+void telldata::ttbool::assign(tell_var* rt) {
    _value = static_cast<ttbool*>(rt)->value();
 }
 
@@ -186,7 +186,7 @@ const telldata::ttstring& telldata::ttstring::operator = (const ttstring& a) {
    return *this;
 }
 
-void telldata::ttstring::set_value(tell_var* value) {
+void telldata::ttstring::assign(tell_var* value) {
    _value = static_cast<ttstring*>(value)->_value;
 }
 
@@ -219,7 +219,7 @@ void telldata::ttlayout::echo(std::string& wstr) {
    wstr += ost.str();
 }
 
-void telldata::ttlayout::set_value(tell_var* data) {
+void telldata::ttlayout::assign(tell_var* data) {
    _data = static_cast<ttlayout*>(data)->_data;
    _selp = static_cast<ttlayout*>(data)->_selp;
 }
@@ -260,7 +260,7 @@ void telldata::ttlist::echo(std::string& wstr) {
    wstr += ost.str();
 }
 
-void telldata::ttlist::set_value(tell_var* rt) {
+void telldata::ttlist::assign(tell_var* rt) {
    _mlist = static_cast<ttlist*>(rt)->mlist();
 }
 
@@ -310,6 +310,11 @@ telldata::user_struct::user_struct(const user_struct& cobj) : tell_var(cobj.get_
       _fieldList.push_back(structRECNAME(CI->first, CI->second->selfcopy()));
 }
 
+telldata::user_struct::~user_struct() {
+   for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++)
+      delete CI->second;
+}
+
 void telldata::user_struct::echo(std::string& wstr) {
    wstr += "struct members:\n";
    for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++) {
@@ -318,7 +323,7 @@ void telldata::user_struct::echo(std::string& wstr) {
    }
 }
 
-void telldata::user_struct::set_value(tell_var* value) {
+void telldata::user_struct::assign(tell_var* value) {
    user_struct* n_value = static_cast<telldata::user_struct*>(value);
    for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++) {
       // find the corresponding field in n_value and get the tell_var
@@ -331,7 +336,7 @@ void telldata::user_struct::set_value(tell_var* value) {
          }
       }
       assert(NULL != fieldvar);
-      CI->second->set_value(fieldvar);
+      CI->second->assign(fieldvar);
    }
 }
 
@@ -346,9 +351,21 @@ telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
 }
 
 //=============================================================================
-void telldata::ttpnt::set_value(tell_var* rt) {
-   _x = static_cast<ttpnt*>(rt)->x();
-   _y = static_cast<ttpnt*>(rt)->y();
+telldata::ttpnt::ttpnt (real x, real y) : user_struct(telldata::tn_pnt),
+                                         _x(new ttreal(x)), _y(new ttreal(y)) {
+   _fieldList.push_back(structRECNAME("x", _x));
+   _fieldList.push_back(structRECNAME("y", _y));
+}
+
+telldata::ttpnt::ttpnt(const ttpnt& invar) : user_struct(telldata::tn_pnt) ,
+                         _x(new ttreal(invar.x())), _y(new ttreal(invar.y())) {
+   _fieldList.push_back(structRECNAME("x", _x));
+   _fieldList.push_back(structRECNAME("y", _y));
+}
+
+void telldata::ttpnt::assign(tell_var* rt) {
+   _x->_value = static_cast<ttpnt*>(rt)->x();
+   _y->_value = static_cast<ttpnt*>(rt)->y();
 }
 
 void telldata::ttpnt::echo(std::string& wstr) {
@@ -358,29 +375,34 @@ void telldata::ttpnt::echo(std::string& wstr) {
 }
 
 const telldata::ttpnt& telldata::ttpnt::operator = (const ttpnt& a) {
-   _x = a.x();_y = a.y();
+   _x->_value = a.x(); _y->_value = a.y();
    return *this;
-}
-
-const telldata::ttpnt& telldata::ttpnt::operator *= (CTM op2) {
-   _x = op2.a() * x() + op2.c() * y() + op2.tx();
-   _y = op2.b() * x() + op2.d() * y() + op2.ty();
-   return *this;
-}
-
-const telldata::ttpnt operator*( const telldata::ttpnt &op1, CTM &op2 ) {
-   return telldata::ttpnt( op2.a() * op1.x() + op2.c() * op1.y() + op2.tx(),
-                op2.b() * op1.x() + op2.d() * op1.y() + op2.ty());
-}
-
-const telldata::ttpnt operator-( const telldata::ttpnt &op1, telldata::ttpnt &op2 ) {
-   return telldata::ttpnt( op2.x() - op1.x(), op2.y() * op1.y());
 }
 
 //=============================================================================
-void telldata::ttwnd::set_value(tell_var* rt) {
-   _p1 = static_cast<ttwnd*>(rt)->p1();
-   _p2 = static_cast<ttwnd*>(rt)->p2();
+telldata::ttwnd::ttwnd( real bl_x, real bl_y, real tr_x, real tr_y ) :
+                                                       user_struct(tn_box),
+                                       _p1(new telldata::ttpnt(bl_x,bl_y)),
+                                       _p2(new telldata::ttpnt(tr_x,tr_y)) {
+   _fieldList.push_back(structRECNAME("p1", _p1));
+   _fieldList.push_back(structRECNAME("p2", _p2));
+}
+
+telldata::ttwnd::ttwnd( ttpnt bl, ttpnt tr ) : user_struct(tn_box),
+                 _p1(new telldata::ttpnt(bl)), _p2(new telldata::ttpnt(tr)) {
+   _fieldList.push_back(structRECNAME("p1", _p1));
+   _fieldList.push_back(structRECNAME("p2", _p2));
+}
+
+telldata::ttwnd::ttwnd(const ttwnd& cobj) : user_struct(tn_box),
+    _p1(new telldata::ttpnt(cobj.p1())), _p2(new telldata::ttpnt(cobj.p2())) {
+   _fieldList.push_back(structRECNAME("p1", _p1));
+   _fieldList.push_back(structRECNAME("p2", _p2));
+}
+
+void telldata::ttwnd::assign(tell_var* rt) {
+   (*_p1) = static_cast<ttwnd*>(rt)->p1();
+   (*_p2) = static_cast<ttwnd*>(rt)->p2();
 }
 
 void telldata::ttwnd::echo(std::string& wstr) {
@@ -391,7 +413,7 @@ void telldata::ttwnd::echo(std::string& wstr) {
 }
 
 const telldata::ttwnd& telldata::ttwnd::operator = (const ttwnd& a) {
-   _p1 = a.p1();_p2 = a.p2();
+   (*_p1) = a.p1(); (*_p2) = a.p2();
    return *this;
 }
 

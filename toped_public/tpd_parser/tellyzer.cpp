@@ -675,7 +675,7 @@ int parsercmd::cmdFUNC::execute() {
       // get a value from the operand stack
       telldata::tell_var* argval = OPstack.top();
       // replace the value of the local variable with the argument value
-      argvar->set_value(argval);
+      argvar->assign(argval);
       OPstack.pop();
    }
    LogFile << "// Executing UDF " << LogFile.getFN();LogFile.flush();   
