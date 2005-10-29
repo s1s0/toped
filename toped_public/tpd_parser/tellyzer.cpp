@@ -384,7 +384,7 @@ int parsercmd::cmdASSIGN::execute() {
 //=============================================================================
 int parsercmd::cmdPUSH::execute() {
    // The temptation here is to put the constants in the operand stack directly,
-   // i.e. without self-copy. It is wrong though - for many cases - for example
+   // i.e. without self-copy. It is wrong though - for many reasons - for example
    // for conditional block "while (count > 0)". It should be executed many 
    // times but the variable will exists only the first time, because it will 
    // be cleaned-up from the operand stack after the first execution
@@ -393,114 +393,49 @@ int parsercmd::cmdPUSH::execute() {
    return EXEC_NEXT;
 }
 
-//=============================================================================
-//int parsercmd::cmdPOINT::execute() {
-//   TELL_DEBUG(cmdPOINT);
-//   real y= getOpValue();
-//   real x= getOpValue();
-//   OPstack.push(new telldata::ttpnt(x, y));
-//   return EXEC_NEXT;
-//}
-
-//=============================================================================
-//parsercmd::cmdPOINTFIELD::cmdPOINTFIELD(char* f, yyltype loc) {
-//   if (('x' != *f) && ('y' != *f)) 
-//      tellerror("bad field name. 'x' or 'y' expected", loc);
-//   else _field = *f;
-////   delete f;
-//}
-
-//int parsercmd::cmdPOINTFIELD::execute() {
-//   TELL_DEBUG(cmdPOINTFIELD);
-//   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-//   telldata::ttreal *e;
-//   if ('x' == _field) e = new telldata::ttreal(p->x());
-//   else               e = new telldata::ttreal(p->y());
-//   OPstack.push(e);
-//   delete p;
-//   return EXEC_NEXT;
-//}
-
-//=============================================================================
-//parsercmd::cmdWINDOWFIELD::cmdWINDOWFIELD(char* f, yyltype loc) {
-//   if (('1' != *f) && ('2' != *f)) 
-//      tellerror("bad field name. 'p1' or 'p2' expected", loc);
-//   else _field = *f;
-////   delete f;
-//}
-
-//int parsercmd::cmdWINDOWFIELD::execute() {
-//   TELL_DEBUG(cmdWINDOWFIELD);
-//   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-//   telldata::ttpnt *p;
-//   if ('1' == _field) p = new telldata::ttpnt(w->p1().x(),w->p1().y() );
-//   else               p = new telldata::ttpnt(w->p2().x(),w->p2().y() );
-//   OPstack.push(p);
-//   delete w;
-//   return EXEC_NEXT;
-//}
-
-//=============================================================================
-//int parsercmd::cmdWINDOW::execute() {
-//   TELL_DEBUG(cmdWINDOW);
-//   telldata::ttwnd *w;
-//      telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-//      telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-//      w = new telldata::ttwnd(p1->x(),p1->y(),p2->x(),p2->y());
-//      delete p1; delete p2;
-//   OPstack.push(w);
-//   return EXEC_NEXT;
-//}
 
 int parsercmd::cmdSTRUCT::execute() {
-   const telldata::tell_type *stype = CMDBlock->getTypeByID( (*_arg)() );
-   assert(NULL != stype);
-
-   telldata::tell_var *ustrct;
-   switch( (*_arg)() ) {
-      case telldata::tn_pnt: {
-         telldata::ttint* y = static_cast<telldata::ttint*>(OPstack.top());
-         OPstack.pop();
-         telldata::ttint* x = static_cast<telldata::ttint*>(OPstack.top());
-         OPstack.pop();
-         ustrct = new telldata::ttpnt(x->value(), y->value());
-         delete x; delete y;
-         break;
+   if (TLISALIST( (*_arg)() )) {
+      telldata::typeID comptype = (*_arg)() & ~telldata::tn_listmask;
+      telldata::ttlist *pl = new telldata::ttlist(comptype);
+      unsigned llength = _arg->child()->size();
+      pl->reserve(llength);
+      telldata::tell_var  *p;
+      for (unsigned i = 0; i < llength; i++) {
+         p = OPstack.top();OPstack.pop();
+         pl->add(p); //Dont delete p; here! And don't get confused!
       }
-      case telldata::tn_box: {
-         telldata::ttpnt* p2 = static_cast<telldata::ttpnt*>(OPstack.top());
-         OPstack.pop();
-         telldata::ttpnt* p1 = static_cast<telldata::ttpnt*>(OPstack.top());
-         OPstack.pop();
-         ustrct = new telldata::ttwnd(*p1, *p2);
-         delete p1; delete p2;
-         break;
+      pl->reverse();
+      OPstack.push(pl);
+   }
+   else {
+      const telldata::tell_type *stype = CMDBlock->getTypeByID( (*_arg)() );
+      assert(NULL != stype);
+      telldata::tell_var *ustrct;
+      switch( (*_arg)() ) {
+         case telldata::tn_pnt: {
+            telldata::ttint* y = static_cast<telldata::ttint*>(OPstack.top());
+            OPstack.pop();
+            telldata::ttint* x = static_cast<telldata::ttint*>(OPstack.top());
+            OPstack.pop();
+            ustrct = new telldata::ttpnt(x->value(), y->value());
+            delete x; delete y;
+            break;
+         }
+         case telldata::tn_box: {
+            telldata::ttpnt* p2 = static_cast<telldata::ttpnt*>(OPstack.top());
+            OPstack.pop();
+            telldata::ttpnt* p1 = static_cast<telldata::ttpnt*>(OPstack.top());
+            OPstack.pop();
+            ustrct = new telldata::ttwnd(*p1, *p2);
+            delete p1; delete p2;
+            break;
+         }
+         default:ustrct = new telldata::user_struct(stype, OPstack);
       }
-      default:ustrct = new telldata::user_struct(stype, OPstack);
+   //   telldata::user_struct *ustrct = new telldata::user_struct(stype, OPstack);
+      OPstack.push(ustrct);
    }
-//   telldata::user_struct *ustrct = new telldata::user_struct(stype, OPstack);
-   OPstack.push(ustrct);
-   return EXEC_NEXT;
-}
-
-
-//=============================================================================
-parsercmd::cmdLIST::cmdLIST(telldata::argumentID* ttn) {
-  _ttype = (*ttn)() & ~telldata::tn_listmask ;
-  _length = ttn->child()->size();
-}
-
-int parsercmd::cmdLIST::execute() {
-   TELL_DEBUG(cmdLIST);
-   telldata::ttlist *pl = new telldata::ttlist(_ttype);
-   pl->reserve(_length);
-   telldata::tell_var  *p;
-   for (unsigned i = 0; i < _length; i++) {
-      p = OPstack.top();OPstack.pop();
-      pl->add(p); //Dont delete p; here! And don't get confused!
-   }
-   pl->reverse(); 
-   OPstack.push(pl);
    return EXEC_NEXT;
 }
 
@@ -843,27 +778,6 @@ parsercmd::cmdMAIN::~cmdMAIN(){
       delete FMI->second;
    _funcMAP.clear();
 };
-
-
-//=============================================================================
-//telldata::typeID parsercmd::(telldata::typeID op1, telldata::typeID op2,
-//                                                  yyltype loc1, yyltype loc2) {
-//   yyltype loc;
-//   if (NUMBER_TYPE(op1))
-//      if (NUMBER_TYPE(op2)) {
-//         CMDBlock->pushcmd(new parsercmd::cmdPOINT());
-//         return telldata::tn_pnt; }
-//      else loc = loc2;
-//   else
-//      if (telldata::tn_pnt == op1)
-//         if (telldata::tn_pnt == op2) {
-//            CMDBlock->pushcmd(new parsercmd::cmdWINDOW());
-//            return telldata::tn_box; }
-//         else loc = loc2;
-//      else loc = loc1;
-//   tellerror("unexepected operand type",loc);
-//  return telldata::tn_void;
-//}
 
 //=============================================================================
 telldata::typeID parsercmd::UMinus(telldata::typeID op1, yyltype loc1) {

@@ -231,30 +231,6 @@ namespace parsercmd {
       telldata::tell_var* _var;
    };
 
-//   class cmdPOINTFIELD:public cmdVIRTUAL {
-//   public:
-//      cmdPOINTFIELD(char* f, yyltype loc);
-//      int execute();
-//   private:
-//      char     _field;
-//   };
-//   class cmdWINDOWFIELD:public cmdVIRTUAL {
-//   public:
-//      cmdWINDOWFIELD(char* f, yyltype loc);
-//      int execute();
-//   private:
-//      char     _field;
-//   };
-//   class cmdPOINT:public cmdVIRTUAL {
-//   public:
-//      int execute();
-//   };
-//   class cmdWINDOW:public cmdVIRTUAL {
-//   public:
-//      int execute();
-//   };
-
-
    class cmdPUSH:public cmdVIRTUAL {
    public:
       cmdPUSH(telldata::tell_var *v, bool constant=false):
@@ -266,18 +242,8 @@ namespace parsercmd {
       bool                 _constant;
    };
 
-   class cmdLIST:public cmdVIRTUAL {
-   public:
-      cmdLIST(telldata::argumentID* ttn);//: _ttype((*ttn)()), _length(ttn->child()->size()) {};
-      int execute();
-   private:
-      telldata::typeID  _ttype;
-      unsigned       _length;
-   };
-
    class cmdSTRUCT: public cmdVIRTUAL {
    public:
-//      cmdSTRUCT(telldata::typeID ID) : _ID(ID) {}
       cmdSTRUCT(telldata::argumentID* arg) : _arg(arg) {}
       int execute();
    private:
@@ -427,10 +393,6 @@ namespace parsercmd {
       ~cmdMAIN();
    };
 
-//   telldata::typeID newBox(telldata::type, telldata::type, telldata::type,
-//                            telldata::type, yyltype, yyltype, yyltype, yyltype);
-//   telldata::typeID newPoint(telldata::type, telldata::type, yyltype, yyltype);
-//   telldata::typeID newDataStructure(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID UMinus(telldata::typeID, yyltype);
    telldata::typeID   Plus(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Minus(telldata::typeID, telldata::typeID, yyltype, yyltype);

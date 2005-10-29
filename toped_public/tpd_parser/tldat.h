@@ -75,10 +75,14 @@ namespace telldata {
    
 
 
-/*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the locally defined user types
-in a form <typename - tell_type>. Every user type (telldata::tell_type), maintains a table (map) to the
-user defined types (telldata::tell_type) used in this type in a form <ID - tell_type. The latter is
-updated by addfield method. Thus the tell_type can execute its own copy constructor*/
+   //==============================================================================
+   /*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the
+     locally defined user types in a form <typename - tell_type>. Every user type
+     (telldata::tell_type), maintains a table (map) to the user defined types
+     (telldata::tell_type) used in this type in a form <ID - tell_type. The latter is
+     updated by addfield method. Thus the tell_type can execute its own copy
+     constructor
+   */
    class tell_type {
    public:
                            tell_type(typeID ID) : _ID(ID) {assert(TLCOMPOSIT_TYPE(ID));}
@@ -86,7 +90,6 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       const recfieldsID&   fields() const {return _fields;}
       const typeID         ID() const {return _ID;}
       tell_var*            initfield(const typeID) const;
-//      tell_var*            initfield(const typeID, operandSTACK&) const;
       void                 userStructCheck(argumentID*) const;
       void                 userStructListCheck(argumentID*) const;
       typedef std::map<const typeID, const tell_type*> typeIDMAP;
@@ -96,16 +99,19 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       typeIDMAP            _tIDMAP;
    };
 
+   //==============================================================================
    class point_type : public tell_type {
    public:
                            point_type();
    };
 
+   //==============================================================================
    class box_type : public tell_type {
    public:
                            box_type(point_type*);
    };
 
+   //==============================================================================
    class tell_var {
    public:
                            tell_var(typeID ID) : _ID(ID) {}
@@ -119,6 +125,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       typeID              _ID;
    };
 
+   //==============================================================================
    class ttreal:public tell_var {
    public:
                            ttreal(real  num=0.0) : tell_var(tn_real), _value(num) {}
@@ -134,6 +141,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       real  _value;
    };
 
+   //==============================================================================
    class ttint:public tell_var {
    public:
                          ttint(int4b  num = 0) : tell_var(tn_int), _value(num) { }
@@ -149,6 +157,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       int4b  _value;
    };
 
+   //==============================================================================
    class ttbool:public tell_var {
    public:
                          ttbool(bool value = false) : tell_var(tn_bool), _value(value) {}
@@ -164,6 +173,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       bool  _value;
    };
 
+   //==============================================================================
    class ttstring: public tell_var {
    public:
                          ttstring() : tell_var(tn_string) {}
@@ -179,6 +189,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       std::string        _value;
    };
 
+   //==============================================================================
    class ttlayout: public tell_var {
    public:
                         ttlayout(): tell_var(tn_layout), _data(NULL), _layer(65535), _selp(NULL) {};
@@ -200,6 +211,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       SGBitSet*         _selp; // selected points;
    };
 
+   //==============================================================================
    class ttlist:public tell_var {
    public:
                         ttlist(typeID ltype): tell_var(ltype) {};
@@ -219,6 +231,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       memlist           _mlist;    // the list itself
    };
 
+   //==============================================================================
    class user_struct : public tell_var {
    public:
                            user_struct(const tell_type*);
@@ -233,7 +246,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       recfieldsNAME        _fieldList;
    };
 
-   
+   //==============================================================================
    class ttpnt:public tell_var {
    public:
                          ttpnt( real xpos=0, real ypos=0) : tell_var(tn_pnt), _x(xpos), _y(ypos) {}
@@ -254,7 +267,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       real     _y;
    };
 
-
+   //==============================================================================
    class ttwnd:public tell_var {
    public:   
                          ttwnd( real bl_x=0.0, real bl_y=0.0, 
@@ -275,6 +288,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       ttpnt _p2;
    };
 
+   //==============================================================================
    class argumentID {
    public:
                         argumentID(telldata::typeID ID = telldata::tn_NULL) :
