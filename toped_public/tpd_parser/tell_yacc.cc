@@ -1617,12 +1617,12 @@ yyreduce:
 
   case 45:
 #line 375 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {argmap->push_back(*(yyvsp[0].parguments)); (yyval.plarguments) = argmap;}
+    {argmap->push_back((yyvsp[0].parguments)); (yyval.plarguments) = argmap;}
     break;
 
   case 46:
 #line 376 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {argmap->push_back(*(yyvsp[0].parguments)); (yyval.plarguments) = argmap;}
+    {argmap->push_back((yyvsp[0].parguments)); (yyval.plarguments) = argmap;}
     break;
 
   case 47:
@@ -1825,7 +1825,7 @@ yyreduce:
           function call. $$ is assigned to argumentID, that caries the whole argument
           queue listed in structure*/
         (yyval.parguments) = new telldata::argumentID(argmap);
-        
+        CMDBlock->pushcmd(new parsercmd::cmdSTRUCT((yyval.parguments)));
         argmapstack.pop();
         if (argmapstack.size()) argmap = argmapstack.top();
         else argmap = NULL;

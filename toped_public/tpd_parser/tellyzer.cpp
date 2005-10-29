@@ -369,9 +369,13 @@ int parsercmd::cmdASSIGN::execute() {
          *(static_cast<telldata::ttlayout*>(_var)) = *(static_cast<telldata::ttlayout*>(op));
          OPstack.push(new telldata::ttlayout(*static_cast<telldata::ttlayout*>(_var)));
          break;
-      default: 
-         tellerror("Bad or unsupported type in assign statement");
-         break; 
+      default:
+         if (NULL != CMDBlock->getTypeByID(typeis)) {
+            static_cast<telldata::user_struct*>(_var)->assign(op);
+            OPstack.push(_var->selfcopy());
+         }
+         else 
+            tellerror("Bad or unsupported type in assign statement");
    }
    delete op;
    return EXEC_NEXT;
@@ -449,15 +453,43 @@ int parsercmd::cmdPUSH::execute() {
 //}
 
 int parsercmd::cmdSTRUCT::execute() {
-   const telldata::tell_type *stype = CMDBlock->getTypeByID(_ID);
+   const telldata::tell_type *stype = CMDBlock->getTypeByID( (*_arg)() );
    assert(NULL != stype);
-   telldata::user_struct *ustrct = new telldata::user_struct(stype, OPstack);
+
+   telldata::tell_var *ustrct;
+   switch( (*_arg)() ) {
+      case telldata::tn_pnt: {
+         telldata::ttint* y = static_cast<telldata::ttint*>(OPstack.top());
+         OPstack.pop();
+         telldata::ttint* x = static_cast<telldata::ttint*>(OPstack.top());
+         OPstack.pop();
+         ustrct = new telldata::ttpnt(x->value(), y->value());
+         delete x; delete y;
+         break;
+      }
+      case telldata::tn_box: {
+         telldata::ttpnt* p2 = static_cast<telldata::ttpnt*>(OPstack.top());
+         OPstack.pop();
+         telldata::ttpnt* p1 = static_cast<telldata::ttpnt*>(OPstack.top());
+         OPstack.pop();
+         ustrct = new telldata::ttwnd(*p1, *p2);
+         delete p1; delete p2;
+         break;
+      }
+      default:ustrct = new telldata::user_struct(stype, OPstack);
+   }
+//   telldata::user_struct *ustrct = new telldata::user_struct(stype, OPstack);
    OPstack.push(ustrct);
    return EXEC_NEXT;
 }
 
 
 //=============================================================================
+parsercmd::cmdLIST::cmdLIST(telldata::argumentID* ttn) {
+  _ttype = (*ttn)() & ~telldata::tn_listmask ;
+  _length = ttn->child()->size();
+}
+
 int parsercmd::cmdLIST::execute() {
    TELL_DEBUG(cmdLIST);
    telldata::ttlist *pl = new telldata::ttlist(_ttype);
@@ -609,6 +641,11 @@ void parsercmd::cmdBLOCK::cleaner() {
    }
 }
 
+//void parsercmd::cmdBLOCK::pushCompositeCmd(telldata::typeID ID) {
+//   telldata::tell_type* comptype = getTypeByID(ID);
+//   
+//}
+
 parsercmd::cmdBLOCK::~cmdBLOCK() {
    for (cmdQUEUE::iterator CMDI = cmdQ.begin(); CMDI != cmdQ.end(); CMDI++)
       delete *CMDI;
@@ -639,7 +676,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
    telldata::argumentQ amap;
    typedef argumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++) {
-      amap.push_back((*arg)->second->get_type()); }
+      amap.push_back(new telldata::argumentID((*arg)->second->get_type())); }
    // call
    return getFuncBody(fn,&amap);
 }
@@ -652,14 +689,14 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
    int i = amap->size();
    if (i != arguments->size()) return -1;
    while (i-- > 0) {
-      if (!NUMBER_TYPE( (*amap)[i]() )) {
+      if (!NUMBER_TYPE( (*(*amap)[i])() )) {
          // for non-number types there is no internal conversion,
          // so check strictly the type
-         if ((*amap)[i]() != (*arguments)[i]->second->get_type()) break;
+         if ((*(*amap)[i])() != (*arguments)[i]->second->get_type()) break;
       }
       else // for number types - allow compatablity
          if (!NUMBER_TYPE((*arguments)[i]->second->get_type())) break;
-         else if ((*amap)[i]() > (*arguments)[i]->second->get_type()) break;
+         else if ((*(*amap)[i])() > (*arguments)[i]->second->get_type()) break;
    }
    return (i+1);
 }
@@ -1019,12 +1056,13 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentI
       }
    }
    if ((op1 == (*op2)()) || (NUMBER_TYPE(op1) && NUMBER_TYPE((*op2)()))) {
-      if (TLISALIST((*op2)())) {
-        CMDBlock->pushcmd(new parsercmd::cmdLIST(op2));
-      }
-      if (TLCOMPOSIT_TYPE((*op2)())) {
-        CMDBlock->pushcmd(new parsercmd::cmdSTRUCT( (*op2)() ) );
-      }
+//      if (TLISALIST((*op2)())) {
+//        CMDBlock->pushcmd(new parsercmd::cmdLIST(op2));
+//      }
+//      else if (TLCOMPOSIT_TYPE((*op2)())) {
+//        CMDBlock->pushCompositeCmd( (*op)() );
+//        CMDBlock->pushcmd(new parsercmd::cmdSTRUCT( (*op2)() ) );
+//      }
       CMDBlock->pushcmd(new parsercmd::cmdASSIGN(lval));
       return op1;
    }

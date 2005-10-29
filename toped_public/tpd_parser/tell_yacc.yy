@@ -372,8 +372,8 @@ argument :
 
 /*SGREM!!! MEMORY LEAKEAGE HERE because of the default copy constructor of argumentID*/
 nearguments :
-     argument                              {argmap->push_back(*$1); $$ = argmap;}
-   | nearguments ',' argument              {argmap->push_back(*$3); $$ = argmap;}
+     argument                              {argmap->push_back($1); $$ = argmap;}
+   | nearguments ',' argument              {argmap->push_back($3); $$ = argmap;}
 ;
 
 /*
@@ -508,7 +508,7 @@ structure:
           function call. $$ is assigned to argumentID, that caries the whole argument
           queue listed in structure*/
         $$ = new telldata::argumentID(argmap);
-        
+        CMDBlock->pushcmd(new parsercmd::cmdSTRUCT($$));
         argmapstack.pop();
         if (argmapstack.size()) argmap = argmapstack.top();
         else argmap = NULL;

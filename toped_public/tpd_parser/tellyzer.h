@@ -268,7 +268,7 @@ namespace parsercmd {
 
    class cmdLIST:public cmdVIRTUAL {
    public:
-      cmdLIST(telldata::argumentID* ttn): _ttype((*ttn)()), _length(ttn->child()->size()) {};
+      cmdLIST(telldata::argumentID* ttn);//: _ttype((*ttn)()), _length(ttn->child()->size()) {};
       int execute();
    private:
       telldata::typeID  _ttype;
@@ -277,10 +277,11 @@ namespace parsercmd {
 
    class cmdSTRUCT: public cmdVIRTUAL {
    public:
-      cmdSTRUCT(telldata::typeID ID) : _ID(ID) {}
+//      cmdSTRUCT(telldata::typeID ID) : _ID(ID) {}
+      cmdSTRUCT(telldata::argumentID* arg) : _arg(arg) {}
       int execute();
    private:
-      telldata::typeID  _ID;
+      telldata::argumentID*  _arg;
    };
    
    class cmdRETURN:public cmdVIRTUAL {
@@ -345,6 +346,7 @@ namespace parsercmd {
       cmdSTDFUNC*  const         funcDefined(char*&,argumentLIST*) const;
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
+//      void                       pushCompositeCmd(telldata::typeID);
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
       functionMAP const          funcMAP() const {return _funcMAP;};
