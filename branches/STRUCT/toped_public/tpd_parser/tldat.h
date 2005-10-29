@@ -62,13 +62,16 @@ namespace telldata {
    class ttint;
    class argumentID;
 
-   typedef std::map<std::string, typeID    > recfieldsMAP;
+   typedef std::pair<std::string, typeID>    structRECID;
+   typedef std::pair<std::string, tell_var*> structRECNAME;
+   typedef std::deque<structRECID>           recfieldsID;
+   typedef std::deque<structRECNAME>         recfieldsNAME;
    typedef std::map<std::string, tell_type*> typeMAP;
    typedef std::map<std::string, tell_var* > variableMAP;
    typedef std::vector<tell_var*>            memlist;
-   typedef std::deque<argumentID>            argumentQ;
-   typedef  std::stack<telldata::tell_var*>  operandSTACK;
-   typedef  std::deque<telldata::tell_var*>  UNDOPerandQUEUE;
+   typedef std::deque<argumentID*>           argumentQ;
+   typedef std::stack<telldata::tell_var*>   operandSTACK;
+   typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
    
 
 
@@ -80,16 +83,16 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
    public:
                            tell_type(typeID ID) : _ID(ID) {assert(TLCOMPOSIT_TYPE(ID));}
       bool                 addfield(std::string, typeID, const tell_type* utype);
-      const recfieldsMAP&  fields() const {return _fields;}
+      const recfieldsID&   fields() const {return _fields;}
       const typeID         ID() const {return _ID;}
       tell_var*            initfield(const typeID) const;
-      tell_var*            initfield(const typeID, operandSTACK&) const;
+//      tell_var*            initfield(const typeID, operandSTACK&) const;
       void                 userStructCheck(argumentID*) const;
       void                 userStructListCheck(argumentID*) const;
       typedef std::map<const typeID, const tell_type*> typeIDMAP;
    protected:
       typeID               _ID;
-      recfieldsMAP         _fields;
+      recfieldsID          _fields;
       typeIDMAP            _tIDMAP;
    };
 
@@ -168,7 +171,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
                          ttstring(const std::string& value): tell_var(tn_string), _value(value) {};
                          ttstring(const ttstring& cobj) : tell_var(tn_string), _value(cobj.value()){};
       const ttstring&    operator = (const ttstring&);
-      void               echo(std::string& wstr) {wstr = _value;};
+      void               echo(std::string& wstr);// {wstr += _value;};
       void               set_value(tell_var*);
       tell_var*          selfcopy() const    {return new ttstring(_value);}
       const std::string  value() const       {return _value;};
@@ -183,7 +186,7 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
                          SGBitSet* selp = NULL): tell_var(tn_layout), _data(pdat), _layer(lay),
                                                                 _selp(selp) {};
                         ttlayout(const ttlayout& cobj);
-      const ttlayout&   operator = (const ttlayout&);                        
+      const ttlayout&   operator = (const ttlayout&);
       void              echo(std::string& wstr);
       void              set_value(tell_var*);
       tell_var*         selfcopy() const {return new ttlayout(*this);};
@@ -225,8 +228,9 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
       void                 echo(std::string&);
       void                 set_value(tell_var*);
       tell_var*            field_var(char*& fname);
+      void                 assign(tell_var* val) {set_value(val);}
    protected:
-      variableMAP         _fieldmap;
+      recfieldsNAME        _fieldList;
    };
 
    
@@ -291,26 +295,3 @@ updated by addfield method. Thus the tell_type can execute its own copy construc
 }
 
 #endif
-/*   typedef enum {
-      tn_void        = 0x00,
-      tn_num_mask    = 0x10,  // number mask
-      tn_int         = 0x11,
-      tn_real        = 0x12,
-      tn_other_mask  = 0x20,  // non arithmetic type mask
-      tn_bool        = 0x21,
-      tn_string      = 0x22,
-   //   tn_struct_mask = 0x40,  // data structure mask
-      tn_pnt         = 0x41,
-      tn_box         = 0x42,
-      tn_layout      = 0x48,
-      //---------------------
-      tn_list_mask   = 0x80,
-      tn_int_list    = 0x91,
-      tn_real_list   = 0x92,
-      tn_bool_list   = 0xA1,
-      tn_string_list = 0xA2,
-      tn_pnt_list    = 0xC1,
-      tn_box_list    = 0xC2,
-      tn_layout_list = 0xC8 
-   } type;*/
-   
