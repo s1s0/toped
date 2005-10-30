@@ -33,9 +33,7 @@ To be done!!!
   * Function redefinition
   * TELL lists and their manupulation
     - think about indexing operatons on the lists - adding, removing components
-  * The rubbish with the selfcopy methods in tell_type needs to be fixed using
-    copy constructors - see Stroustrup
-  * break, continue, jump/goto statements and label (for the fucking jump)
+  * break, continue, jump/goto statements and label (for the f.... jump)
   * return statements when there are multiply paths
   * logical operations between figures in TELL! (maybe Toped engine should be used here)
   * Think about the recursive functions!
