@@ -321,64 +321,21 @@ int parsercmd::cmdSTACKRST::execute() {
 }
 
 //=============================================================================
-// I don't like this rubbish, but it works.
-// Virtual operator can't be defined (we need '=' here), but
-// we still can think about virtual function -> assign for example
 int parsercmd::cmdASSIGN::execute() {
    TELL_DEBUG(cmdREALASSIGN);
    telldata::tell_var *op = OPstack.top();OPstack.pop();
    telldata::typeID typeis = _var->get_type();
-   if (typeis & telldata::tn_listmask) {
-      *(static_cast<telldata::ttlist*>(_var)) = *(static_cast<telldata::ttlist*>(op));
-      OPstack.push(new telldata::ttlist(*static_cast<telldata::ttlist*>(_var)));
-//      OPstack.push(static_cast<telldata::ttlist*>(_var)->selfcopy());
+   if (TLISALIST(typeis)) {
+      typeis = typeis & ~telldata::tn_listmask;
    }
-   else
-   switch (typeis) {
-      case telldata::tn_real:
-         if (op->get_type() == telldata::tn_real) 
-            *(static_cast<telldata::ttreal*>(_var)) = *(static_cast<telldata::ttreal*>(op));
-         else if (op->get_type() == telldata::tn_int)
-            *(static_cast<telldata::ttreal*>(_var)) = *(static_cast<telldata::ttint*>(op));
-         OPstack.push(new telldata::ttreal(*static_cast<telldata::ttreal*>(_var)));
-         break;
-      case telldata::tn_int:
-         if (op->get_type() == telldata::tn_real) 
-            *(static_cast<telldata::ttint*>(_var)) = *(static_cast<telldata::ttreal*>(op));
-         else if (op->get_type() == telldata::tn_int)
-            *(static_cast<telldata::ttint*>(_var)) = *(static_cast<telldata::ttint*>(op));
-         OPstack.push(new telldata::ttint(*static_cast<telldata::ttint*>(_var)));
-         break;
-      case   telldata::tn_bool: 
-         *(static_cast<telldata::ttbool*>(_var)) = *(static_cast<telldata::ttbool*>(op));
-         OPstack.push(new telldata::ttbool(*static_cast<telldata::ttbool*>(_var)));
-         break;
-      case   telldata::tn_pnt: 
-         *(static_cast<telldata::ttpnt*>(_var)) = *(static_cast<telldata::ttpnt*>(op));
-         OPstack.push(new telldata::ttpnt(*static_cast<telldata::ttpnt*>(_var)));
-         break;
-      case   telldata::tn_box: 
-         *(static_cast<telldata::ttwnd*>(_var)) = *(static_cast<telldata::ttwnd*>(op));
-         OPstack.push(new telldata::ttwnd(*static_cast<telldata::ttwnd*>(_var)));
-         break;
-      case telldata::tn_string:
-         *(static_cast<telldata::ttstring*>(_var)) = *(static_cast<telldata::ttstring*>(op));
-         OPstack.push(new telldata::ttstring(*static_cast<telldata::ttstring*>(_var)));
-         break;
-      case telldata::tn_layout:
-         *(static_cast<telldata::ttlayout*>(_var)) = *(static_cast<telldata::ttlayout*>(op));
-         OPstack.push(new telldata::ttlayout(*static_cast<telldata::ttlayout*>(_var)));
-         break;
-      default:
-         if (NULL != CMDBlock->getTypeByID(typeis)) {
-            static_cast<telldata::user_struct*>(_var)->assign(op);
-            OPstack.push(_var->selfcopy());
-         }
-         else 
-            tellerror("Bad or unsupported type in assign statement");
+   if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
+      tellerror("Bad or unsupported type in assign statement");
+   else {
+      _var->assign(op); OPstack.push(_var->selfcopy());
    }
    delete op;
    return EXEC_NEXT;
+
 }
 
 //=============================================================================
@@ -393,49 +350,54 @@ int parsercmd::cmdPUSH::execute() {
    return EXEC_NEXT;
 }
 
+telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
+   telldata::typeID comptype = (*_arg)() & ~telldata::tn_listmask;
+   telldata::ttlist *pl = new telldata::ttlist(comptype);
+   unsigned llength = _arg->child()->size();
+   pl->reserve(llength);
+   telldata::tell_var  *p;
+   for (unsigned i = 0; i < llength; i++) {
+      p = OPstack.top();OPstack.pop();
+      pl->add(p); //Dont delete p; here! And don't get confused!
+   }
+   pl->reverse();
+   return pl;
+}
+
+telldata::tell_var* parsercmd::cmdSTRUCT::getPnt() {
+   telldata::ttreal* y = static_cast<telldata::ttreal*>(OPstack.top());
+   OPstack.pop();
+   telldata::ttreal* x = static_cast<telldata::ttreal*>(OPstack.top());
+   OPstack.pop();
+   telldata::tell_var *ustrct = new telldata::ttpnt(x->value(), y->value());
+   delete x; delete y;
+   return ustrct;
+}
+
+telldata::tell_var* parsercmd::cmdSTRUCT::getBox() {
+   telldata::ttpnt* p2 = static_cast<telldata::ttpnt*>(OPstack.top());
+   OPstack.pop();
+   telldata::ttpnt* p1 = static_cast<telldata::ttpnt*>(OPstack.top());
+   OPstack.pop();
+   telldata::tell_var *ustrct = new telldata::ttwnd(*p1, *p2);
+   delete p1; delete p2;
+   return ustrct;
+}
+
 
 int parsercmd::cmdSTRUCT::execute() {
-   if (TLISALIST( (*_arg)() )) {
-      telldata::typeID comptype = (*_arg)() & ~telldata::tn_listmask;
-      telldata::ttlist *pl = new telldata::ttlist(comptype);
-      unsigned llength = _arg->child()->size();
-      pl->reserve(llength);
-      telldata::tell_var  *p;
-      for (unsigned i = 0; i < llength; i++) {
-         p = OPstack.top();OPstack.pop();
-         pl->add(p); //Dont delete p; here! And don't get confused!
-      }
-      pl->reverse();
-      OPstack.push(pl);
-   }
+   telldata::tell_var *ustrct;
+   if (TLISALIST( (*_arg)() )) ustrct = getList();
    else {
       const telldata::tell_type *stype = CMDBlock->getTypeByID( (*_arg)() );
       assert(NULL != stype);
-      telldata::tell_var *ustrct;
       switch( (*_arg)() ) {
-         case telldata::tn_pnt: {
-            telldata::ttint* y = static_cast<telldata::ttint*>(OPstack.top());
-            OPstack.pop();
-            telldata::ttint* x = static_cast<telldata::ttint*>(OPstack.top());
-            OPstack.pop();
-            ustrct = new telldata::ttpnt(x->value(), y->value());
-            delete x; delete y;
-            break;
-         }
-         case telldata::tn_box: {
-            telldata::ttpnt* p2 = static_cast<telldata::ttpnt*>(OPstack.top());
-            OPstack.pop();
-            telldata::ttpnt* p1 = static_cast<telldata::ttpnt*>(OPstack.top());
-            OPstack.pop();
-            ustrct = new telldata::ttwnd(*p1, *p2);
-            delete p1; delete p2;
-            break;
-         }
+         case telldata::tn_pnt: ustrct = getPnt(); break;
+         case telldata::tn_box: ustrct = getBox(); break;
          default:ustrct = new telldata::user_struct(stype, OPstack);
       }
-   //   telldata::user_struct *ustrct = new telldata::user_struct(stype, OPstack);
-      OPstack.push(ustrct);
    }
+   OPstack.push(ustrct);
    return EXEC_NEXT;
 }
 
@@ -970,17 +932,9 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentI
       }
    }
    if ((op1 == (*op2)()) || (NUMBER_TYPE(op1) && NUMBER_TYPE((*op2)()))) {
-//      if (TLISALIST((*op2)())) {
-//        CMDBlock->pushcmd(new parsercmd::cmdLIST(op2));
-//      }
-//      else if (TLCOMPOSIT_TYPE((*op2)())) {
-//        CMDBlock->pushCompositeCmd( (*op)() );
-//        CMDBlock->pushcmd(new parsercmd::cmdSTRUCT( (*op2)() ) );
-//      }
       CMDBlock->pushcmd(new parsercmd::cmdASSIGN(lval));
       return op1;
    }
-//   else if (TLUNKNOWN_TYPE((*op2)()) && userStructCheck(lval, op2)) {}
    else {
       tellerror("Operands must be the same type", loc);
       return telldata::tn_void;
@@ -1087,7 +1041,7 @@ console::toped_logfile& console::toped_logfile::operator<< (const real _r) {
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttpnt& _p) {
-   _file << "(" << _p.x() << "," << _p.y() << ")";
+   _file << "{" << _p.x() << "," << _p.y() << "}";
    return *this;
 }
 
@@ -1096,8 +1050,8 @@ console::toped_logfile& console::toped_logfile::operator<< (const std::string& _
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttwnd& _w) {
-   _file << "((" << _w.p1().x() << "," << _w.p1().y() << ")," <<
-         "(" << _w.p2().x() << "," << _w.p2().y() << "))";
+   _file << "{{" << _w.p1().x() << "," << _w.p1().y() << "}," <<
+         "{" << _w.p2().x() << "," << _w.p2().y() << "}}";
    return *this;
 }
 

@@ -143,7 +143,10 @@ const telldata::ttreal& telldata::ttreal::operator = (const ttint& a) {
 }
 //=============================================================================
 void telldata::ttint::assign(tell_var* rt) {
-   _value = static_cast<ttint*>(rt)->value();
+   if (rt->get_type() == tn_real)
+      _value = static_cast<ttreal*>(rt)->value();
+   else if (rt->get_type() == tn_int)
+      _value = static_cast<ttint*>(rt)->value();
 }
 
 void telldata::ttint::echo(std::string& wstr) {
@@ -234,7 +237,6 @@ telldata::ttlist::ttlist(const telldata::ttlist& cobj) : tell_var(cobj.get_type(
 }
 
 const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cobj) {
-//   _ltype = cobj._ltype;
    unsigned count = _mlist.size();
    unsigned i;
    for (i = 0; i < count; i++) 
@@ -244,24 +246,24 @@ const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cob
    _mlist.reserve(count);
    for (i = 0; i < count; i++) 
       _mlist.push_back(cobj._mlist[i]->selfcopy());
-   return *this;   
+   return *this;
 }
 
 void telldata::ttlist::echo(std::string& wstr) {
    std::ostringstream ost;
-   if (_mlist.empty()) {ost << "empty list";}
+   if (_mlist.empty()) {wstr += "empty list";}
    else {
-      ost << "list members:";
+      wstr += " list members: { ";
       for (unsigned i = 0; i < _mlist.size(); i++) {
+         if (i > 0)  wstr += " , ";
          (_mlist[i])->echo(wstr);
-         ost  <<"\n" << "[" << i << "]" << " : " << wstr;
       }
+      wstr += " } ";
    }
-   wstr += ost.str();
 }
 
 void telldata::ttlist::assign(tell_var* rt) {
-   _mlist = static_cast<ttlist*>(rt)->mlist();
+   this->operator = (*(static_cast<ttlist*>(rt)));
 }
 
 telldata::ttlist::~ttlist() {
@@ -370,7 +372,7 @@ void telldata::ttpnt::assign(tell_var* rt) {
 
 void telldata::ttpnt::echo(std::string& wstr) {
    std::ostringstream ost;
-   ost << "X = " << x() << ": Y = " << y();
+   ost << "{X = " << x() << ", Y = " << y() << "}";
    wstr += ost.str();
 }
 

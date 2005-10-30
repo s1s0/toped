@@ -247,6 +247,9 @@ namespace parsercmd {
       cmdSTRUCT(telldata::argumentID* arg) : _arg(arg) {}
       int execute();
    private:
+      telldata::tell_var*     getList();
+      telldata::tell_var*     getPnt();
+      telldata::tell_var*     getBox();
       telldata::argumentID*  _arg;
    };
    

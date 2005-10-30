@@ -36,8 +36,8 @@
 namespace console {
    typedef std::list<std::string>   stringList;
    const wxString real_tmpl      = "[-+]?([[:digit:]]+(\\.[[:digit:]]*)?|(\\.[[:digit:]]+))";
-   const wxString point_tmpl     = "\\("+ real_tmpl+","+ real_tmpl+"\\)";
-   const wxString box_tmpl       = "\\("+point_tmpl+","+point_tmpl+"\\)";
+   const wxString point_tmpl     = "\\{"+ real_tmpl+","+ real_tmpl+"\\}";
+   const wxString box_tmpl       = "\\{"+point_tmpl+","+point_tmpl+"\\}";
    const wxString pointlist_tmpl = "\\{"+point_tmpl+"(,"+point_tmpl+"){1,}\\}";
 
    bool patternFound(const wxString templ,  wxString str);
