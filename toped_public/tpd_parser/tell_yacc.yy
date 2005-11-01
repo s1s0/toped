@@ -352,8 +352,8 @@ funccall:
 assignment:
      lvalue '='                            {tell_lvalue = tellvar;}
    argument                                {
-      /*because of the structure that has a common tn_usertypes type, here we are
-      doing the type checking, using the type of the lvalue*/
+      /*because of the (possible) structure that has an unknown yet tn_usertypes type,
+      here we are doing the type checking, using the type of the lvalue*/
       $$ = parsercmd::Assign(tell_lvalue, $4, @2);
    }
 ;
@@ -376,15 +376,6 @@ nearguments :
    | nearguments ',' argument              {argmap->push_back($3); $$ = argmap;}
 ;
 
-/*
-argumentlist:
-     '('                     {
-        argmap = new parsercmd::argumentMAP;
-        argmapstack.push(argmap);
-   }
-      nearguments ')'                      {$$ = argmap;}
-;
-*/
 funcarguments:
                                            {}
    | funcneargument                        {}
@@ -516,38 +507,6 @@ structure:
 ;
 
 /*==EXPRESSION===============================================================*/
-/*
-
-     '(' argument ',' argument ')'    {
-      $$ = parsercmd::newDataStructure($2,$4,@2,@4);
-   }
-   |
-
-structfieldvar:
-     variable                             {$$ = $1;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
-   | fieldname                            {$$ = $1;}
-;
-
-fieldname:
-     structfieldvar tknFIELD                   {
-      if       (telldata::tn_box == $1) {
-         CMDBlock->pushcmd(new parsercmd::cmdWINDOWFIELD($2,@2));
-         $$ = telldata::tn_pnt;
-      }
-      else if  (telldata::tn_pnt == $1) {
-         CMDBlock->pushcmd(new parsercmd::cmdPOINTFIELD($2,@2));
-         $$ = telldata::tn_real;
-      }
-      else {
-         std::ostringstream ost;
-         ost <<  $1 << " type has no fields ";
-         tellerror(ost.str().c_str(), @1);
-      }
-      delete [] $2;
-   }
-;
-*/
 /*orexpression*/
 expression : 
      andexpression                         {$$ = $1;}

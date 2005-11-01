@@ -365,10 +365,10 @@ telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
 }
 
 telldata::tell_var* parsercmd::cmdSTRUCT::getPnt() {
-   telldata::ttreal* y = static_cast<telldata::ttreal*>(OPstack.top());
-   OPstack.pop();
-   telldata::ttreal* x = static_cast<telldata::ttreal*>(OPstack.top());
-   OPstack.pop();
+   telldata::ttreal* y = new telldata::ttreal(); y->assign(OPstack.top());
+   delete OPstack.top(); OPstack.pop();
+   telldata::ttreal* x = new telldata::ttreal(); x->assign(OPstack.top());
+   delete OPstack.top(); OPstack.pop();
    telldata::tell_var *ustrct = new telldata::ttpnt(x->value(), y->value());
    delete x; delete y;
    return ustrct;
@@ -580,22 +580,86 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
 
 //=============================================================================
 int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
-// This is supposed to be called only by user defined functions.
-// Standard functions will overwrite this function although they
-// also can use it
+// This function is rather twisted, but this seems the only way to deal with
+// anonimous user defined structures handled over as input function arguments.
+// Otherwise we have to restrict significantly the input arguments rules for
+// functions. Here is the problem.
+// Functoins in tell can be overloaded. In the same time we can have user defined
+// structures, that have coincidental fields - for example the fields of the point
+// structure coincides with the fields of an user structure defined as
+// struct sameAsPoint{real a, real z}
+// And on top of this we can have two overloaded functions, that have as a first
+// argument a variables of type point and sameAsPoint respectively. The problem
+// comes when the function is called with anonymous arguments (not with variables),
+// which type can not be determined without the type of the function parameter.
+// Here is the idea
+// 1. If an unknown type appears in the argument list
+//  a) Create a copy of the argument using argumentID copy constructor#
+//  b) Check that the new argument matches the type of the function parameter and
+//     if so:
+//     - assign (adjust) the type of the argument to the type of the parameter
+//     - push the argument in the temporary structures
+//  c) If the argument doesn't match, bail-out, but don't forget to clean-up the
+//     the copies of the previously checked arguments
+// 2. When the entire argument list is checked and it matches the corresponding
+//    function parameter types, use the saved list of adjusted arguments to readjust
+//    the original user defined argument types, which will be used to execute
+//    properly the cmdSTRUCTS commands already pushed into the command stach during
+//    the bison parsing
+// There is one remaining problem here. It is still possible to have two or even more
+// overloaded functions defined with effectively the same parameter list. In this case,
+// when that function is called with anonymous argument(s) the tellyzer will invoke the
+// first function body that matches the entire list of input arguments. This will be most
+// likely undefined. To prevent this we need beter checks during the function definition
+// parsing
    int i = amap->size();
    if (i != arguments->size()) return -1;
+   telldata::argumentQ UnknownArgsCopy;
    while (i-- > 0) {
-      if (!NUMBER_TYPE( (*(*amap)[i])() )) {
+      telldata::typeID cargID = (*(*amap)[i])();
+      telldata::argumentID* carg = TLUNKNOWN_TYPE(cargID) ?
+                        new telldata::argumentID((*((*amap)[i]))) : ((*amap)[i]);
+      telldata::typeID lvalID = (*arguments)[i]->second->get_type();
+      if (TLUNKNOWN_TYPE(cargID)) {
+         const telldata::tell_type* vartype;
+         if (TLISALIST(lvalID)) { // we have a list lval
+            vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
+            if (NULL != vartype) vartype->userStructListCheck(carg);
+            else (*amap)[i]->toList();
+         }
+         else { // we have a struct only
+            vartype = CMDBlock->getTypeByID(lvalID);
+            if (NULL != vartype) vartype->userStructCheck(carg);
+         }
+      }
+
+      if (!NUMBER_TYPE( (*carg)() )) {
          // for non-number types there is no internal conversion,
          // so check strictly the type
-         if ((*(*amap)[i])() != (*arguments)[i]->second->get_type()) break;
+         if ( (*carg)() != lvalID) break;
+         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) UnknownArgsCopy.push_back(carg);
       }
       else // for number types - allow compatablity
-         if (!NUMBER_TYPE((*arguments)[i]->second->get_type())) break;
-         else if ((*(*amap)[i])() > (*arguments)[i]->second->get_type()) break;
+         if (!NUMBER_TYPE(lvalID)) break;
+         else if ( (*carg)() > lvalID) break;
+         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) UnknownArgsCopy.push_back(carg);
    }
-   return (i+1);
+   i++;
+   if (UnknownArgsCopy.size() > 0) {
+      if (i > 0) {
+         while (UnknownArgsCopy.size() > 0) {
+            delete UnknownArgsCopy.front(); UnknownArgsCopy.pop_front();
+         }
+      }
+      for (telldata::argumentQ::iterator CA = amap->begin(); CA != amap->end(); CA++) {
+         if ( TLUNKNOWN_TYPE((**CA)()) ) {
+            (*CA)->adjustID(UnknownArgsCopy.front());
+            delete UnknownArgsCopy.front(); UnknownArgsCopy.pop_front();
+         }
+      }
+      assert(UnknownArgsCopy.size() == 0);
+   }
+   return (i);
 }
 
 void parsercmd::cmdSTDFUNC::undo_cleanup() {

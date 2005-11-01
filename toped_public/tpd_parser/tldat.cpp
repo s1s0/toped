@@ -423,15 +423,15 @@ const telldata::ttwnd& telldata::ttwnd::operator = (const ttwnd& a) {
 telldata::argumentID::argumentID(const argumentID& obj2copy) {
    // TODO This copy constructor should not be needed anymore
    // to be removed after the debug of the tell structures
-   assert(false);
-/*   _ID = obj2copy();
+//   assert(false);
+   _ID = obj2copy();
    if (NULL == obj2copy.child()) 
       _child = NULL;
    else {
       _child = new argumentQ;
       for(argumentQ::const_iterator CA = obj2copy.child()->begin(); CA != obj2copy.child()->end(); CA ++)
          _child->push_back(*CA);
-   }*/
+   }
 }
 
 void telldata::argumentID::toList() {
@@ -440,4 +440,15 @@ void telldata::argumentID::toList() {
       if (alistID != (*(*CA))()) return;
    }
    _ID = TLISTOF(alistID);
+}
+
+void telldata::argumentID::adjustID(const argumentID* obj2copy) {
+   if (NULL != obj2copy->child()) {
+      assert(obj2copy->child()->size() == _child->size());
+      argumentQ::const_iterator CA, CB;
+      for(CA =            _child->begin(), CB = obj2copy->child()->begin() ;
+                                                      CA != _child->end() ; CA ++, CB++)
+         (*CA)->adjustID(*CB);
+   }
+   _ID = obj2copy->_ID;
 }
