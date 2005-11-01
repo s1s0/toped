@@ -72,11 +72,8 @@ int tellstdfunc::stdECHO::execute() {
 }
 
 //=============================================================================
-//tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(tell_typename retype) :
-//                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {}
-
-int tellstdfunc::stdTELLSTATUS::argsOK(argumentQ* amap) {
-   return amap->size();
+tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdTELLSTATUS::callingConv() {
@@ -97,8 +94,8 @@ int tellstdfunc::stdTELLSTATUS::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdREPORTSLCTD::argsOK(argumentQ* amap) {
-   return amap->size();
+tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdREPORTSLCTD::callingConv() {
@@ -113,9 +110,10 @@ int tellstdfunc::stdREPORTSLCTD::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdREPORTLAY::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_string  ) &&
-                                     ((*(*amap)[1])() == telldata::tn_bool     ))));
+tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
 std::string tellstdfunc::stdREPORTLAY::callingConv() {
@@ -161,8 +159,8 @@ int tellstdfunc::stdREPORTLAYc::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdUNDO::argsOK(argumentQ* amap) {
-   return amap->size();
+tellstdfunc::stdUNDO::stdUNDO(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdUNDO::callingConv() {
@@ -182,11 +180,8 @@ int tellstdfunc::stdUNDO::execute() {
 }
 
 //=============================================================================
-//tellstdfunc::stdGETCW::stdGETCW(tell_varname retype) :
-//                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {}
-
-int tellstdfunc::stdREDRAW::argsOK(argumentQ* amap) {
-   return amap->size();
+tellstdfunc::stdREDRAW::stdREDRAW(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdREDRAW::callingConv() {
@@ -200,14 +195,10 @@ int tellstdfunc::stdREDRAW::execute() {
 }
 
 //=============================================================================
-//tellstdfunc::stdZOOMWIN::stdZOOMWIN(tell_typename retype) :
-//                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-//   arguments->push_back(new argumentTYPE("", new ttwnd()));
-//}
-
-int tellstdfunc::stdZOOMWIN::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_pnt     ) &&
-                                     ((*(*amap)[1])() == telldata::tn_pnt     ))));
+tellstdfunc::stdZOOMWIN::stdZOOMWIN(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
 std::string tellstdfunc::stdZOOMWIN::callingConv() {
@@ -249,8 +240,8 @@ int tellstdfunc::stdZOOMWINb::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdZOOMALL::argsOK(argumentQ* amap) {
-   return amap->size();
+tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdZOOMALL::callingConv() {
@@ -647,8 +638,9 @@ int tellstdfunc::stdLOCKLAYERS::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdNEWDESIGN::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_string)));
+tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
 std::string tellstdfunc::stdNEWDESIGN::callingConv() {
@@ -1863,9 +1855,9 @@ int tellstdfunc::stdSHAPEANGLE::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::getPOINT::argsOK(argumentQ* amap) {
-   return amap->size();
-};
+tellstdfunc::getPOINT::getPOINT(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+}
 
 std::string tellstdfunc::getPOINT::callingConv() {
    return "(  )";
@@ -1887,9 +1879,9 @@ int tellstdfunc::getPOINT::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::getPOINTLIST::argsOK(argumentQ* amap) {
-   return amap->size();
-};
+tellstdfunc::getPOINTLIST::getPOINTLIST(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+}
 
 std::string tellstdfunc::getPOINTLIST::callingConv() {
    return "(  )";
@@ -3021,9 +3013,10 @@ int tellstdfunc::lgcMERGE::execute() {
    return EXEC_NEXT;
 }
 //=============================================================================
-int tellstdfunc::GDSread::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && (((*(*amap)[0])() == telldata::tn_string ))));
-};
+tellstdfunc::GDSread::GDSread(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
 
 std::string tellstdfunc::GDSread::callingConv() {
    return "( string )";
@@ -3043,9 +3036,10 @@ int tellstdfunc::GDSread::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::TDTread::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && (((*(*amap)[0])() == telldata::tn_string ))));
-};
+tellstdfunc::TDTread::TDTread(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
 
 std::string tellstdfunc::TDTread::callingConv() {
    return "( string )";
@@ -3068,9 +3062,10 @@ int tellstdfunc::TDTread::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::TDTsaveas::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && (((*(*amap)[0])() == telldata::tn_string ))));
-};
+tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
 
 std::string tellstdfunc::TDTsaveas::callingConv() {
    return "( string )";
@@ -3084,9 +3079,9 @@ int tellstdfunc::TDTsaveas::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::TDTsave::argsOK(argumentQ* amap) {
-   return amap->size();
-};
+tellstdfunc::TDTsave::TDTsave(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+}
 
 std::string tellstdfunc::TDTsave::callingConv() {
    return "( )";
@@ -3101,11 +3096,12 @@ int tellstdfunc::TDTsave::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::GDSconvert::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 3) && (((*(*amap)[0])() == telldata::tn_string ) &&
-                                     ((*(*amap)[1])() == telldata::tn_bool   ) &&
-                                     ((*(*amap)[2])() == telldata::tn_bool   ))));
-};
+tellstdfunc::GDSconvert::GDSconvert(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+}
 
 std::string tellstdfunc::GDSconvert::callingConv() {
    return "( string, bool, bool )";
@@ -3125,9 +3121,10 @@ int tellstdfunc::GDSconvert::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::GDSreportlay::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && (((*(*amap)[0])() == telldata::tn_string ))));
-};
+tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
 
 std::string tellstdfunc::GDSreportlay::callingConv() {
    return "( string )";
@@ -3141,8 +3138,8 @@ int tellstdfunc::GDSreportlay::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::GDSclose::argsOK(argumentQ* amap) {
-   return amap->size();
+tellstdfunc::GDSclose::GDSclose(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::GDSclose::callingConv() {

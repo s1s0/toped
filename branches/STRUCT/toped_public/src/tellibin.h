@@ -62,6 +62,16 @@
    };
 #endif
 
+#ifndef TELL_STDCMD_CLASSC
+#define TELL_STDCMD_CLASSC(name)                                  \
+   class name : public cmdSTDFUNC {                               \
+   public:                                                        \
+      name(telldata::typeID retype);                              \
+      int         execute();                                      \
+      std::string callingConv();                                  \
+   };
+#endif
+
 #ifndef TELL_STDCMD_CLASSA_UNDO
 #define TELL_STDCMD_CLASSA_UNDO(name)                             \
    class name : public cmdSTDFUNC {                               \
@@ -86,6 +96,7 @@
    };
 #endif
 
+
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
@@ -93,24 +104,24 @@ namespace tellstdfunc {
    using parsercmd::argumentTYPE;
 
    TELL_STDCMD_CLASSA(stdECHO          )
-   TELL_STDCMD_CLASSA(stdTELLSTATUS    )
-   TELL_STDCMD_CLASSA(stdUNDO          )
-   TELL_STDCMD_CLASSA(stdREDRAW        )
-   TELL_STDCMD_CLASSA(stdZOOMWIN       )
+   TELL_STDCMD_CLASSC(stdTELLSTATUS    )
+   TELL_STDCMD_CLASSC(stdUNDO          )
+   TELL_STDCMD_CLASSC(stdREDRAW        )
+   TELL_STDCMD_CLASSC(stdZOOMWIN       )
    TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN   )
-   TELL_STDCMD_CLASSA(stdZOOMALL       )
-   TELL_STDCMD_CLASSA(TDTread          )       // reset undo buffers
-   TELL_STDCMD_CLASSA(TDTsave          )
-   TELL_STDCMD_CLASSA(TDTsaveas        )
-   TELL_STDCMD_CLASSA(GDSread          )
-   TELL_STDCMD_CLASSA(GDSconvert       )
-   TELL_STDCMD_CLASSA(GDSreportlay     )
-   TELL_STDCMD_CLASSA(GDSclose         )
-   TELL_STDCMD_CLASSA(getPOINT         )
-   TELL_STDCMD_CLASSA(getPOINTLIST     )
-   TELL_STDCMD_CLASSA(stdNEWDESIGN     )       // reset undo buffers
-   TELL_STDCMD_CLASSA(stdREPORTSLCTD   )
-   TELL_STDCMD_CLASSA(stdREPORTLAY     )
+   TELL_STDCMD_CLASSC(stdZOOMALL       )
+   TELL_STDCMD_CLASSC(TDTread          )       // reset undo buffers
+   TELL_STDCMD_CLASSC(TDTsave          )
+   TELL_STDCMD_CLASSC(TDTsaveas        )
+   TELL_STDCMD_CLASSC(GDSread          )
+   TELL_STDCMD_CLASSC(GDSconvert       )
+   TELL_STDCMD_CLASSC(GDSreportlay     )
+   TELL_STDCMD_CLASSC(GDSclose         )
+   TELL_STDCMD_CLASSC(getPOINT         )
+   TELL_STDCMD_CLASSC(getPOINTLIST     )
+   TELL_STDCMD_CLASSC(stdNEWDESIGN     )       // reset undo buffers
+   TELL_STDCMD_CLASSC(stdREPORTSLCTD   )
+   TELL_STDCMD_CLASSC(stdREPORTLAY     )
    TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
    //
    TELL_STDCMD_CLASSA_UNDO(stdLAYPROP     )  //

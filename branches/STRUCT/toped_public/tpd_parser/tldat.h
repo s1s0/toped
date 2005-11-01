@@ -305,6 +305,7 @@ namespace telldata {
                            argumentID(const argumentID&);
                           ~argumentID() {if (NULL != _child) delete _child;}
       void                 toList();
+      void                 adjustID(const argumentID*);
       telldata::typeID     operator () () const        {return _ID;}
       void                 addChild(argumentQ* child)  {_child = child;}
       argumentQ*           child() const               {return _child;};
