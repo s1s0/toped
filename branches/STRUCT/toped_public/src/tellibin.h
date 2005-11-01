@@ -29,25 +29,34 @@
 #include "../tpd_parser/tellyzer.h"
 #include "../tpd_DB/tedstd.h"
 
-/*Two ways for arguments checking of the standard functions*/
-// First one is to build the argumentmap structure in the
-// constructor and not to define argsOK function. (see the commented examples
-// for stdTELLSTATUS, stdGETCW, stdZOOMIN in the tellibin.cpp file). The argsOK
-// function of the parent cmdSTDFUNC will check the arguments.
+//-----------------------------------------------------------------------------
+//    === Two ways for arguments checking of the standard functions ===
+//
+// First one is to build the argumentmap structure in the constructor and not
+// define argsOK and callingConv methods. The argsOK method of the parent
+// cmdSTDFUNC will check the arguments.
+//
 // Second one is not to build argumentmap map (i.e. to leave arguments=NULL)
-// and to define argsOK. This is more flexible and looks like takes less space-
-// at least a function parameters do not need to be allocated. They are
-// anonymous anyway, so can not be used. Besides, internal function like echo
-// for example, that should be flexible enough to take any type parameters can
-// not be defined easily using argumrntmap structure.
-// The contradiction here is the support methods like callingConv, that in the 
-// second case have to be defined for each of the internal standard functions
-// are boring to code because generally speaking they are not doing any real
-// job, they need to be consistent with arsOK and this can be a source of
-// stupid and silly mistakes.
-// Once the decision is to do something wrong then let's do it right!
-// To avoid boring class definition here we going to use the preprocessor
-// with two types of definitions 
+// and to define argsOK. This one seems more flexible and looks like it takes
+// less space - at least a function parameters do not need to be allocated. They
+// are anonymous anyway, so their names can not be used.
+// After implementation of the tell structures however this way looks like more
+// hassle, because of the anonymous arguments. We need to deal "per case" with
+// the pain of determining the type of those arguments, and this is not the error
+// proof way. Besides in this case additional virtual method callingConv() has to
+// be defined for every class.
+//
+// Bottom line, we are using the first way and the parent argsOK method for
+// the majority of the functions. The exception here are functions like echo (the
+// only exception ?) that should be flexible enough to get any type of parameters.
+// It is defined using the second way.
+//
+// == Declaration of the standard functions using macro definitions ==
+//
+// To avoid boring and trivial class declaration here some preprocessor macros
+// are used. Hope that in this case there is more convinience than harm using
+// macroses
+// with the following types of definitions
 // TELL_STDCMD_CLASSA - inherit directly cmdSTDFUNC
 // TELL_STDCMD_CLASSB - inherit some other class - usually form CLASSA
 
@@ -89,9 +98,8 @@
 #define TELL_STDCMD_CLASSB(name, father)                          \
    class name : public father {                                   \
    public:                                                        \
-      name(telldata::typeID retype):father(retype) {};            \
+      name(telldata::typeID retype);                              \
       int         execute();                                      \
-      int         argsOK(argumentQ* amap);                        \
       std::string callingConv();                                  \
    };
 #endif

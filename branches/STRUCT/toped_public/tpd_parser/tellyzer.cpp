@@ -594,17 +594,17 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
 // which type can not be determined without the type of the function parameter.
 // Here is the idea
 // 1. If an unknown type appears in the argument list
-//  a) Create a copy of the argument using argumentID copy constructor#
+//  a) Create a copy of the argument using argumentID copy constructor
 //  b) Check that the new argument matches the type of the function parameter and
 //     if so:
 //     - assign (adjust) the type of the argument to the type of the parameter
-//     - push the argument in the temporary structures
+//     - push the argument in the temporary structure
 //  c) If the argument doesn't match, bail-out, but don't forget to clean-up the
 //     the copies of the previously checked arguments
 // 2. When the entire argument list is checked and it matches the corresponding
 //    function parameter types, use the saved list of adjusted arguments to readjust
 //    the original user defined argument types, which will be used to execute
-//    properly the cmdSTRUCTS commands already pushed into the command stach during
+//    properly the cmdSTRUCT commands already pushed into the command stack during
 //    the bison parsing
 // There is one remaining problem here. It is still possible to have two or even more
 // overloaded functions defined with effectively the same parameter list. In this case,
@@ -615,6 +615,9 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
    int i = amap->size();
    if (i != arguments->size()) return -1;
    telldata::argumentQ UnknownArgsCopy;
+   // :) - some fun here, but it might be confusing - '--' postfix operation is executed
+   // always after the comparison, but before the cycle body. So. if all the arguments
+   // are checked (match), the cycle ends-up with i == -1;
    while (i-- > 0) {
       telldata::typeID cargID = (*(*amap)[i])();
       telldata::argumentID* carg = TLUNKNOWN_TYPE(cargID) ?
@@ -666,7 +669,7 @@ void parsercmd::cmdSTDFUNC::undo_cleanup() {
    if (UNDOcmdQ.size() > 20) {
       UNDOcmdQ.back()->undo_cleanup(); UNDOcmdQ.pop_back();
    }
-}   
+}
 
 parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
    if (NULL == arguments) return;
