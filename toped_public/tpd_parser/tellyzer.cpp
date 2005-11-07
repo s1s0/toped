@@ -562,6 +562,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    for (MM fb = range.first; fb != range.second; fb++) {
       fbody = fb->second;
       if (0 == fbody->argsOK(arguMap)) break;
+      else fbody = NULL;
    }
    if (NULL == amap) delete arguMap;
    return fbody;
