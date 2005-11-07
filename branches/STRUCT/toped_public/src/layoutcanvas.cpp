@@ -353,7 +353,7 @@ void tui::LayoutCanvas::OnMouseLeftUp(wxMouseEvent& WXUNUSED(event)) {
 void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event) {
    wxString ws;
    wxCommandEvent eventMOUSEACCEL(wxEVT_MOUSE_ACCEL);
-   ws.sprintf("(%3.2f,%3.2f)",ScrMARK.x()*Properties->UU(), ScrMARK.y()*Properties->UU());
+   ws.sprintf("{%3.2f,%3.2f}",ScrMARK.x()*Properties->UU(), ScrMARK.y()*Properties->UU());
    eventMOUSEACCEL.SetString(ws);
    eventMOUSEACCEL.SetInt(event.ShiftDown() ? 0 : 1);
    wxPostEvent(this, eventMOUSEACCEL);

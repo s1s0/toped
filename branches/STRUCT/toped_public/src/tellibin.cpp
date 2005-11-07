@@ -261,12 +261,13 @@ int tellstdfunc::stdZOOMALL::execute() {
    return EXEC_NEXT;
 }
 //=============================================================================
-int tellstdfunc::stdLAYPROP::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 4) && (((*(*amap)[0])() == telldata::tn_string ) &&
-                                     ((*(*amap)[1])() == telldata::tn_int    ) &&
-                                     ((*(*amap)[2])() == telldata::tn_string ) &&
-                                     ((*(*amap)[3])() == telldata::tn_string ))));
-};
+tellstdfunc::stdLAYPROP::stdLAYPROP(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
 
 std::string tellstdfunc::stdLAYPROP::callingConv() {
    return "( string, int, string, string )";
@@ -292,13 +293,14 @@ int tellstdfunc::stdLAYPROP::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdCOLORDEF::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 5) && (((*(*amap)[0])() == telldata::tn_string ) &&
-                                     ((*(*amap)[1])() == telldata::tn_int    ) &&
-                                     ((*(*amap)[2])() == telldata::tn_int    ) &&
-                                     ((*(*amap)[3])() == telldata::tn_int    ) &&
-                                     ((*(*amap)[4])() == telldata::tn_int    ))));
-};
+tellstdfunc::stdCOLORDEF::stdCOLORDEF(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+}
 
 std::string tellstdfunc::stdCOLORDEF::callingConv() {
    return "( string, int, int, int, int)";
@@ -324,10 +326,12 @@ int tellstdfunc::stdCOLORDEF::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdFILLDEF::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_string  ) &&
-                                     ((*(*amap)[1])() == TLISTOF(telldata::tn_int)))));
-};
+tellstdfunc::stdFILLDEF::stdFILLDEF(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
+}
 
 std::string tellstdfunc::stdFILLDEF::callingConv() {
    return "( string, int list)";
@@ -366,9 +370,11 @@ int tellstdfunc::stdFILLDEF::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdHIDELAYER::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_int ) &&
-                                     ((*(*amap)[1])() == telldata::tn_bool ))));
+tellstdfunc::stdHIDELAYER::stdHIDELAYER(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
 std::string tellstdfunc::stdHIDELAYER::callingConv() {
@@ -408,8 +414,10 @@ int tellstdfunc::stdHIDELAYER::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdHIDECELLMARK::argsOK(argumentQ* amap)  {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_bool )));
+tellstdfunc::stdHIDECELLMARK::stdHIDECELLMARK(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
 std::string tellstdfunc::stdHIDECELLMARK::callingConv() {
@@ -444,8 +452,10 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdHIDETEXTMARK::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_bool )));
+tellstdfunc::stdHIDETEXTMARK::stdHIDETEXTMARK(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
 std::string tellstdfunc::stdHIDETEXTMARK::callingConv() {
@@ -481,9 +491,11 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdHIDELAYERS::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == TLISTOF(telldata::tn_int)) &&
-                                     ((*(*amap)[1])() == telldata::tn_bool ))));
+tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
 std::string tellstdfunc::stdHIDELAYERS::callingConv() {
@@ -540,9 +552,11 @@ int tellstdfunc::stdHIDELAYERS::execute() {
    return EXEC_NEXT;
 }
 //=============================================================================
-int tellstdfunc::stdLOCKLAYER::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_int ) &&
-                                     ((*(*amap)[1])() == telldata::tn_bool ))));
+tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
 std::string tellstdfunc::stdLOCKLAYER::callingConv() {
@@ -581,9 +595,11 @@ int tellstdfunc::stdLOCKLAYER::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdLOCKLAYERS::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == TLISTOF(telldata::tn_int )) &&
-                                     ((*(*amap)[1])() == telldata::tn_bool ))));
+tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
 std::string tellstdfunc::stdLOCKLAYERS::callingConv() {
@@ -662,8 +678,10 @@ int tellstdfunc::stdNEWDESIGN::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdNEWCELL::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_string)));
+tellstdfunc::stdNEWCELL::stdNEWCELL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
 std::string tellstdfunc::stdNEWCELL::callingConv() {
@@ -692,8 +710,10 @@ int tellstdfunc::stdNEWCELL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdOPENCELL::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_string)));
+tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
 std::string tellstdfunc::stdOPENCELL::callingConv() {
@@ -752,8 +772,10 @@ int tellstdfunc::stdOPENCELL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdEDITPUSH::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_pnt)));
+tellstdfunc::stdEDITPUSH::stdEDITPUSH(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
 std::string tellstdfunc::stdEDITPUSH::callingConv() {
@@ -802,8 +824,9 @@ int tellstdfunc::stdEDITPUSH::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdEDITPOP::argsOK(argumentQ* amap) {
-   return amap->size();
+tellstdfunc::stdEDITPOP::stdEDITPOP(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
 }
 
 std::string tellstdfunc::stdEDITPOP::callingConv() {
@@ -848,8 +871,9 @@ int tellstdfunc::stdEDITPOP::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdEDITPREV::argsOK(argumentQ* amap) {
-   return amap->size();
+tellstdfunc::stdEDITPREV::stdEDITPREV(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
 }
 
 std::string tellstdfunc::stdEDITPREV::callingConv() {
@@ -894,8 +918,9 @@ int tellstdfunc::stdEDITPREV::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdEDITTOP::argsOK(argumentQ* amap) {
-   return amap->size();
+tellstdfunc::stdEDITTOP::stdEDITTOP(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+
 }
 
 std::string tellstdfunc::stdEDITTOP::callingConv() {
@@ -940,12 +965,13 @@ int tellstdfunc::stdEDITTOP::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdCELLREF::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 5) && (((*(*amap)[0])() == telldata::tn_string ) &&
-                                     ((*(*amap)[1])() == telldata::tn_pnt    ) &&
-                                      (NUMBER_TYPE((*(*amap)[2])()) ) &&
-                                     ((*(*amap)[3])() == telldata::tn_bool   ) &&
-                                      (NUMBER_TYPE((*(*amap)[4])()) ))));
+tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
 std::string tellstdfunc::stdCELLREF::callingConv() {
@@ -990,16 +1016,17 @@ int tellstdfunc::stdCELLREF::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdCELLAREF::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 9) && (((*(*amap)[0])() == telldata::tn_string ) &&
-                                     ((*(*amap)[1])() == telldata::tn_pnt    ) &&
-                                      (NUMBER_TYPE((*(*amap)[2])())          ) &&
-                                     ((*(*amap)[3])() == telldata::tn_bool   ) &&
-                                      (NUMBER_TYPE((*(*amap)[4])())          ) &&
-                                     ((*(*amap)[5])() == telldata::tn_int    ) &&
-                                     ((*(*amap)[6])() == telldata::tn_int    ) &&
-                                      (NUMBER_TYPE((*(*amap)[7])())          ) &&
-                                      (NUMBER_TYPE((*(*amap)[8])())          ))));
+tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
 std::string tellstdfunc::stdCELLAREF::callingConv() {
@@ -1054,8 +1081,9 @@ int tellstdfunc::stdCELLAREF::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdUSINGLAYER::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_int)));
+tellstdfunc::stdUSINGLAYER::stdUSINGLAYER(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 std::string tellstdfunc::stdUSINGLAYER::callingConv() {
@@ -1094,7 +1122,7 @@ int tellstdfunc::stdUSINGLAYER::execute() {
 
 //=============================================================================
 tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype) :
-                                                        stdUSINGLAYER(retype) {
+                            stdUSINGLAYER(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
@@ -1117,9 +1145,10 @@ int tellstdfunc::stdUSINGLAYER_S::execute() {
   }
 }
 //=============================================================================
-int tellstdfunc::stdADDBOX::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_box ) &&
-                                     ((*(*amap)[1])() == telldata::tn_int ))));
+tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 std::string tellstdfunc::stdADDBOX::callingConv() {
@@ -1163,7 +1192,7 @@ int tellstdfunc::stdADDBOX::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype) :
-                                                            stdADDBOX(retype) {
+                                stdADDBOX(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
@@ -1177,8 +1206,9 @@ int tellstdfunc::stdADDBOX_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdDRAWBOX::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_int )));
+tellstdfunc::stdDRAWBOX::stdDRAWBOX(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 std::string tellstdfunc::stdDRAWBOX::callingConv() {
@@ -1225,7 +1255,7 @@ int tellstdfunc::stdDRAWBOX::execute() {
 
 //=============================================================================
 tellstdfunc::stdDRAWBOX_D::stdDRAWBOX_D(telldata::typeID retype) :
-                                                           stdDRAWBOX(retype) {
+                               stdDRAWBOX(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdDRAWBOX_D::callingConv() {
@@ -1238,11 +1268,12 @@ int tellstdfunc::stdDRAWBOX_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdADDBOXr::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 4) && (((*(*amap)[0])() == telldata::tn_pnt     ) &&
-                                       NUMBER_TYPE((*(*amap)[1])())    &&
-                                       NUMBER_TYPE((*(*amap)[2])())    &&
-                                      ((*(*amap)[3])() == telldata::tn_int     ))));
+tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 std::string tellstdfunc::stdADDBOXr::callingConv() {
@@ -1290,7 +1321,7 @@ int tellstdfunc::stdADDBOXr::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype) :
-                                                           stdADDBOXr(retype) {
+                               stdADDBOXr(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
@@ -1306,10 +1337,11 @@ int tellstdfunc::stdADDBOXr_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdADDBOXp::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 3) && (((*(*amap)[0])() == telldata::tn_pnt     ) &&
-                                     ((*(*amap)[1])() == telldata::tn_pnt     ) &&
-                                     ((*(*amap)[2])() == telldata::tn_int     ))));
+tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 std::string tellstdfunc::stdADDBOXp::callingConv() {
@@ -1355,7 +1387,7 @@ int tellstdfunc::stdADDBOXp::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype) :
-                                                           stdADDBOXp(retype) {
+                               stdADDBOXp(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
@@ -1370,9 +1402,10 @@ int tellstdfunc::stdADDBOXp_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdADDPOLY::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == TLISTOF(telldata::tn_pnt  )) &&
-                                     ((*(*amap)[1])() == telldata::tn_int       ))));
+tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 std::string tellstdfunc::stdADDPOLY::callingConv() {
@@ -1421,7 +1454,7 @@ int tellstdfunc::stdADDPOLY::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDPOLY_D::stdADDPOLY_D(telldata::typeID retype) :
-                                                           stdADDPOLY(retype) {
+                               stdADDPOLY(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
 }
 
@@ -1435,8 +1468,9 @@ int tellstdfunc::stdADDPOLY_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdDRAWPOLY::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_int       )));
+tellstdfunc::stdDRAWPOLY::stdDRAWPOLY(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 std::string tellstdfunc::stdDRAWPOLY::callingConv() {
@@ -1487,7 +1521,7 @@ int tellstdfunc::stdDRAWPOLY::execute() {
 
 //=============================================================================
 tellstdfunc::stdDRAWPOLY_D::stdDRAWPOLY_D(telldata::typeID retype) :
-                                                          stdDRAWPOLY(retype) {
+                              stdDRAWPOLY(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdDRAWPOLY_D::callingConv() {
@@ -1500,10 +1534,11 @@ int tellstdfunc::stdDRAWPOLY_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdADDWIRE::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 3) && (((*(*amap)[0])() == TLISTOF(telldata::tn_pnt )) &&
-                                      (NUMBER_TYPE((*(*amap)[1])()) ) &&
-                                     ((*(*amap)[2])() == telldata::tn_int       ))));
+tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 std::string tellstdfunc::stdADDWIRE::callingConv() {
@@ -1554,7 +1589,7 @@ int tellstdfunc::stdADDWIRE::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDWIRE_D::stdADDWIRE_D(telldata::typeID retype) :
-                                                           stdADDWIRE(retype) {
+                               stdADDWIRE(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
@@ -1569,9 +1604,10 @@ int tellstdfunc::stdADDWIRE_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdDRAWWIRE::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_real      ) &&
-                                      (NUMBER_TYPE((*(*amap)[1])()) ))));
+tellstdfunc::stdDRAWWIRE::stdDRAWWIRE(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 std::string tellstdfunc::stdDRAWWIRE::callingConv() {
@@ -1624,7 +1660,7 @@ int tellstdfunc::stdDRAWWIRE::execute() {
 
 //=============================================================================
 tellstdfunc::stdDRAWWIRE_D::stdDRAWWIRE_D(telldata::typeID retype) :
-                                                          stdDRAWWIRE(retype) {
+                              stdDRAWWIRE(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
@@ -1638,13 +1674,14 @@ int tellstdfunc::stdDRAWWIRE_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdADDTEXT::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 6) && (((*(*amap)[0])() == telldata::tn_string ) &&
-                                     ((*(*amap)[1])() == telldata::tn_int    ) &&
-                                     ((*(*amap)[2])() == telldata::tn_pnt    ) &&
-                                      (NUMBER_TYPE((*(*amap)[3])()) ) &&
-                                     ((*(*amap)[4])() == telldata::tn_bool   ) &&
-                                      (NUMBER_TYPE((*(*amap)[5])()) ))));
+tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
 std::string tellstdfunc::stdADDTEXT::callingConv() {
@@ -1693,11 +1730,12 @@ int tellstdfunc::stdADDTEXT::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdGRIDDEF::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 3) && (((*(*amap)[0])() == telldata::tn_int   ) &&
-                                     (NUMBER_TYPE((*(*amap)[1])())) &&
-                                     ((*(*amap)[2])() == telldata::tn_string))));
-};
+tellstdfunc::stdGRIDDEF::stdGRIDDEF(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
 
 std::string tellstdfunc::stdGRIDDEF::callingConv() {
    return "( int, real, string )";
@@ -1721,10 +1759,11 @@ int tellstdfunc::stdGRIDDEF::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdGRID::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_int   ) &&
-                                     ((*(*amap)[1])() == telldata::tn_bool  ))));
-};
+tellstdfunc::stdGRID::stdGRID(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+}
 
 std::string tellstdfunc::stdGRID::callingConv() {
    return "( int, bool )";
@@ -1757,9 +1796,10 @@ int tellstdfunc::stdGRID::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdSTEP::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((NUMBER_TYPE((*(*amap)[0])())))));
-};
+tellstdfunc::stdSTEP::stdSTEP(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+}
 
 std::string tellstdfunc::stdSTEP::callingConv() {
    return "( real )";
@@ -1786,9 +1826,10 @@ int tellstdfunc::stdSTEP::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdAUTOPAN::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_bool )));
-};
+tellstdfunc::stdAUTOPAN::stdAUTOPAN(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+}
 
 std::string tellstdfunc::stdAUTOPAN::callingConv() {
    return "( bool )";
@@ -1823,9 +1864,10 @@ int tellstdfunc::stdAUTOPAN::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdSHAPEANGLE::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_int )));
-};
+tellstdfunc::stdSHAPEANGLE::stdSHAPEANGLE(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+}
 
 std::string tellstdfunc::stdSHAPEANGLE::callingConv() {
    return "( int )";
@@ -1919,9 +1961,10 @@ int tellstdfunc::getPOINTLIST::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdSELECT::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_box )));
-};
+tellstdfunc::stdSELECT::stdSELECT(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+}
 
 std::string tellstdfunc::stdSELECT::callingConv() {
    return "( box )";
@@ -1966,7 +2009,7 @@ int tellstdfunc::stdSELECT::execute() {
 
 //=============================================================================
 tellstdfunc::stdSELECT_I::stdSELECT_I(telldata::typeID retype) :
-                                                            stdSELECT(retype) {
+                                stdSELECT(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdSELECT_I::callingConv() {
@@ -1980,9 +2023,10 @@ int tellstdfunc::stdSELECT_I::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdSELECT_TL::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == TLISTOF(telldata::tn_layout))));
-};
+tellstdfunc::stdSELECT_TL::stdSELECT_TL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_layout)));
+}
 
 std::string tellstdfunc::stdSELECT_TL::callingConv() {
    return "( layout_list )";
@@ -2007,9 +2051,10 @@ int tellstdfunc::stdSELECT_TL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdSELECTIN::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_pnt )));
-};
+tellstdfunc::stdSELECTIN::stdSELECTIN(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+}
 
 std::string tellstdfunc::stdSELECTIN::callingConv() {
    return "( point )";
@@ -2032,6 +2077,7 @@ void tellstdfunc::stdSELECTIN::undo() {
 
 int tellstdfunc::stdSELECTIN::execute() {
    // get the data from the stack
+   assert(telldata::tn_pnt == OPstack.top()->get_type());
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = Properties->DBscale();
    TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
@@ -2051,9 +2097,10 @@ int tellstdfunc::stdSELECTIN::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdPNTSELECT::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_box )));
-};
+tellstdfunc::stdPNTSELECT::stdPNTSELECT(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+}
 
 std::string tellstdfunc::stdPNTSELECT::callingConv() {
    return "( box )";
@@ -2098,7 +2145,7 @@ int tellstdfunc::stdPNTSELECT::execute() {
 
 //=============================================================================
 tellstdfunc::stdPNTSELECT_I::stdPNTSELECT_I(telldata::typeID retype) :
-                                                         stdPNTSELECT(retype) {
+                             stdPNTSELECT(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdPNTSELECT_I::callingConv() {
@@ -2112,9 +2159,10 @@ int tellstdfunc::stdPNTSELECT_I::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdUNSELECT::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_box )));
-};
+tellstdfunc::stdUNSELECT::stdUNSELECT(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+}
 
 std::string tellstdfunc::stdUNSELECT::callingConv() {
    return "( box )";
@@ -2159,7 +2207,7 @@ int tellstdfunc::stdUNSELECT::execute() {
 
 //=============================================================================
 tellstdfunc::stdUNSELECT_I::stdUNSELECT_I(telldata::typeID retype) :
-                                                          stdUNSELECT(retype) {
+                              stdUNSELECT(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdUNSELECT_I::callingConv() {
@@ -2173,12 +2221,13 @@ int tellstdfunc::stdUNSELECT_I::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdUNSELECT_TL::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == TLISTOF(telldata::tn_layout))));
-};
+tellstdfunc::stdUNSELECT_TL::stdUNSELECT_TL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_layout)));
+}
 
 std::string tellstdfunc::stdUNSELECT_TL::callingConv() {
-   return "( layout_list )";
+   return "( layout list )";
 }
 
 void tellstdfunc::stdUNSELECT_TL::undo() {
@@ -2200,9 +2249,10 @@ int tellstdfunc::stdUNSELECT_TL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdUNSELECTIN::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_pnt )));
-};
+tellstdfunc::stdUNSELECTIN::stdUNSELECTIN(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+}
 
 std::string tellstdfunc::stdUNSELECTIN::callingConv() {
    return "( point )";
@@ -2225,6 +2275,7 @@ void tellstdfunc::stdUNSELECTIN::undo() {
 
 int tellstdfunc::stdUNSELECTIN::execute() {
    // get the data from the stack
+   assert(telldata::tn_pnt == OPstack.top()->get_type());
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = Properties->DBscale();
    TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
@@ -2244,9 +2295,10 @@ int tellstdfunc::stdUNSELECTIN::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdPNTUNSELECT::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && ((*(*amap)[0])() == telldata::tn_box )));
-};
+tellstdfunc::stdPNTUNSELECT::stdPNTUNSELECT(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+}
 
 std::string tellstdfunc::stdPNTUNSELECT::callingConv() {
    return "( box )";
@@ -2291,7 +2343,7 @@ int tellstdfunc::stdPNTUNSELECT::execute() {
 
 //=============================================================================
 tellstdfunc::stdPNTUNSELECT_I::stdPNTUNSELECT_I(telldata::typeID retype) :
-                                                       stdPNTUNSELECT(retype) {
+                           stdPNTUNSELECT(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdPNTUNSELECT_I::callingConv() {
@@ -2305,9 +2357,9 @@ int tellstdfunc::stdPNTUNSELECT_I::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdSELECTALL::argsOK(argumentQ* amap) {
-   return amap->size();
-};
+tellstdfunc::stdSELECTALL::stdSELECTALL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+}
 
 std::string tellstdfunc::stdSELECTALL::callingConv() {
    return "(  )";
@@ -2342,9 +2394,9 @@ int tellstdfunc::stdSELECTALL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdUNSELECTALL::argsOK(argumentQ* amap) {
-   return amap->size();
-};
+tellstdfunc::stdUNSELECTALL::stdUNSELECTALL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+}
 
 std::string tellstdfunc::stdUNSELECTALL::callingConv() {
    return "(  )";
@@ -2377,9 +2429,9 @@ int tellstdfunc::stdUNSELECTALL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdDELETESEL::argsOK(argumentQ* amap) {
-   return amap->size();
-};
+tellstdfunc::stdDELETESEL::stdDELETESEL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+}
 
 std::string tellstdfunc::stdDELETESEL::callingConv() {
    return "(  )";
@@ -2415,10 +2467,11 @@ int tellstdfunc::stdDELETESEL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdCOPYSEL::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_pnt     ) &&
-                                      (*(*amap)[1])() == telldata::tn_pnt     )));
-};
+tellstdfunc::stdCOPYSEL::stdCOPYSEL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+}
 
 std::string tellstdfunc::stdCOPYSEL::callingConv() {
    return "( point , point )";
@@ -2459,7 +2512,7 @@ int tellstdfunc::stdCOPYSEL::execute() {
 
 //=============================================================================
 tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype) :
-                                                           stdCOPYSEL(retype) {
+                               stdCOPYSEL(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdCOPYSEL_D::callingConv() {
@@ -2478,10 +2531,11 @@ int tellstdfunc::stdCOPYSEL_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdMOVESEL::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_pnt     ) &&
-                                     ((*(*amap)[1])() == telldata::tn_pnt     ))));
-};
+tellstdfunc::stdMOVESEL::stdMOVESEL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+}
 
 std::string tellstdfunc::stdMOVESEL::callingConv() {
    return "( point , point )";
@@ -2566,7 +2620,7 @@ int tellstdfunc::stdMOVESEL::execute() {
 
 //=============================================================================
 tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype) :
-                                                           stdMOVESEL(retype) {
+                               stdMOVESEL(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::stdMOVESEL_D::callingConv() {
@@ -2585,10 +2639,11 @@ int tellstdfunc::stdMOVESEL_D::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdROTATESEL::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 2) && (((*(*amap)[0])() == telldata::tn_pnt     ) &&
-                                     ((NUMBER_TYPE((*(*amap)[1])()) )     ))));
-};
+tellstdfunc::stdROTATESEL::stdROTATESEL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+}
 
 std::string tellstdfunc::stdROTATESEL::callingConv() {
    return "( point , real )";
@@ -2629,9 +2684,10 @@ int tellstdfunc::stdROTATESEL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdFLIPXSEL::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && (((*(*amap)[0])() == telldata::tn_pnt     ))));
-};
+tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+}
 
 std::string tellstdfunc::stdFLIPXSEL::callingConv() {
    return "( point )";
@@ -2668,9 +2724,10 @@ int tellstdfunc::stdFLIPXSEL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdFLIPYSEL::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && (((*(*amap)[0])() == telldata::tn_pnt     ))));
-};
+tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+}
 
 std::string tellstdfunc::stdFLIPYSEL::callingConv() {
    return "( point )";
@@ -2707,9 +2764,10 @@ int tellstdfunc::stdFLIPYSEL::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdGROUP::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && (((*(*amap)[0])() == telldata::tn_string  ))));
-};
+tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
 
 std::string tellstdfunc::stdGROUP::callingConv() {
    return "( string )";
@@ -2748,9 +2806,9 @@ int tellstdfunc::stdGROUP::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::stdUNGROUP::argsOK(argumentQ* amap) {
-   return amap->size();
-};
+tellstdfunc::stdUNGROUP::stdUNGROUP(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+}
 
 std::string tellstdfunc::stdUNGROUP::callingConv() {
    return "( )";
@@ -2824,9 +2882,10 @@ int tellstdfunc::stdUNGROUP::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::lgcCUTPOLY::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 1) && (((*(*amap)[0])() == TLISTOF(telldata::tn_pnt)))));
-};
+tellstdfunc::lgcCUTPOLY::lgcCUTPOLY(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
+}
 
 std::string tellstdfunc::lgcCUTPOLY::callingConv() {
    return "( point list )";
@@ -2926,7 +2985,7 @@ int tellstdfunc::lgcCUTPOLY::execute() {
 
 //=============================================================================
 tellstdfunc::lgcCUTPOLY_I::lgcCUTPOLY_I(telldata::typeID retype) :
-                                                           lgcCUTPOLY(retype) {
+                               lgcCUTPOLY(new parsercmd::argumentLIST,retype) {
 }
 
 std::string tellstdfunc::lgcCUTPOLY_I::callingConv() {
@@ -2944,9 +3003,9 @@ int tellstdfunc::lgcCUTPOLY_I::execute() {
 }
 
 //=============================================================================
-int tellstdfunc::lgcMERGE::argsOK(argumentQ* amap) {
-   return amap->size();
-};
+tellstdfunc::lgcMERGE::lgcMERGE(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+}
 
 std::string tellstdfunc::lgcMERGE::callingConv() {
    return "( )";

@@ -64,17 +64,6 @@
 #define TELL_STDCMD_CLASSA(name)                                  \
    class name : public cmdSTDFUNC {                               \
    public:                                                        \
-      name(telldata::typeID retype):cmdSTDFUNC(NULL,retype) {};   \
-      int         execute();                                      \
-      int         argsOK(argumentQ* amap);                        \
-      std::string callingConv();                                  \
-   };
-#endif
-
-#ifndef TELL_STDCMD_CLASSC
-#define TELL_STDCMD_CLASSC(name)                                  \
-   class name : public cmdSTDFUNC {                               \
-   public:                                                        \
       name(telldata::typeID retype);                              \
       int         execute();                                      \
       std::string callingConv();                                  \
@@ -85,12 +74,26 @@
 #define TELL_STDCMD_CLASSA_UNDO(name)                             \
    class name : public cmdSTDFUNC {                               \
    public:                                                        \
-      name(telldata::typeID retype):cmdSTDFUNC(NULL,retype) {};   \
+      name(telldata::typeID retype);                              \
       int         execute();                                      \
       void        undo();                                         \
       void        undo_cleanup();                                 \
-      int         argsOK(argumentQ* amap);                        \
       std::string callingConv();                                  \
+   };
+#endif
+
+#ifndef TELL_STDCMD_CLASSF_UNDO
+#define TELL_STDCMD_CLASSF_UNDO(name)                             \
+   class name : public cmdSTDFUNC {                               \
+   public:                                                        \
+      name(telldata::typeID retype);                              \
+      int         execute();                                      \
+      void        undo();                                         \
+      void        undo_cleanup();                                 \
+      std::string callingConv();                                  \
+   protected:                                                     \
+      name(parsercmd::argumentLIST* al,telldata::typeID retype) : \
+                                         cmdSTDFUNC(al,retype) {};\
    };
 #endif
 
@@ -104,6 +107,17 @@
    };
 #endif
 
+#ifndef TELL_STDCMD_CLASSC
+#define TELL_STDCMD_CLASSC(name)                                  \
+   class name : public cmdSTDFUNC {                               \
+   public:                                                        \
+      name(telldata::typeID retype):cmdSTDFUNC(NULL,retype) {};   \
+      int         execute();                                      \
+      int         argsOK(argumentQ* amap);                        \
+      std::string callingConv();                                  \
+   };
+#endif
+
 
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
@@ -111,25 +125,25 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 
-   TELL_STDCMD_CLASSA(stdECHO          )
-   TELL_STDCMD_CLASSC(stdTELLSTATUS    )
-   TELL_STDCMD_CLASSC(stdUNDO          )
-   TELL_STDCMD_CLASSC(stdREDRAW        )
-   TELL_STDCMD_CLASSC(stdZOOMWIN       )
+   TELL_STDCMD_CLASSC(stdECHO          )
+   TELL_STDCMD_CLASSA(stdTELLSTATUS    )
+   TELL_STDCMD_CLASSA(stdUNDO          )
+   TELL_STDCMD_CLASSA(stdREDRAW        )
+   TELL_STDCMD_CLASSA(stdZOOMWIN       )
    TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN   )
-   TELL_STDCMD_CLASSC(stdZOOMALL       )
-   TELL_STDCMD_CLASSC(TDTread          )       // reset undo buffers
-   TELL_STDCMD_CLASSC(TDTsave          )
-   TELL_STDCMD_CLASSC(TDTsaveas        )
-   TELL_STDCMD_CLASSC(GDSread          )
-   TELL_STDCMD_CLASSC(GDSconvert       )
-   TELL_STDCMD_CLASSC(GDSreportlay     )
-   TELL_STDCMD_CLASSC(GDSclose         )
-   TELL_STDCMD_CLASSC(getPOINT         )
-   TELL_STDCMD_CLASSC(getPOINTLIST     )
-   TELL_STDCMD_CLASSC(stdNEWDESIGN     )       // reset undo buffers
-   TELL_STDCMD_CLASSC(stdREPORTSLCTD   )
-   TELL_STDCMD_CLASSC(stdREPORTLAY     )
+   TELL_STDCMD_CLASSA(stdZOOMALL       )
+   TELL_STDCMD_CLASSA(TDTread          )       // reset undo buffers
+   TELL_STDCMD_CLASSA(TDTsave          )
+   TELL_STDCMD_CLASSA(TDTsaveas        )
+   TELL_STDCMD_CLASSA(GDSread          )
+   TELL_STDCMD_CLASSA(GDSconvert       )
+   TELL_STDCMD_CLASSA(GDSreportlay     )
+   TELL_STDCMD_CLASSA(GDSclose         )
+   TELL_STDCMD_CLASSA(getPOINT         )
+   TELL_STDCMD_CLASSA(getPOINTLIST     )
+   TELL_STDCMD_CLASSA(stdNEWDESIGN     )       // reset undo buffers
+   TELL_STDCMD_CLASSA(stdREPORTSLCTD   )
+   TELL_STDCMD_CLASSA(stdREPORTLAY     )
    TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
    //
    TELL_STDCMD_CLASSA_UNDO(stdLAYPROP     )  //
@@ -149,40 +163,40 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdEDITTOP     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCELLREF     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCELLAREF    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  )  // undo - implemented**
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOX      )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWBOX     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXp     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDPOLY     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWPOLY    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDWIRE     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWWIRE    )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdUSINGLAYER  )  // undo - implemented**
+   TELL_STDCMD_CLASSF_UNDO(stdADDBOX      )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdDRAWBOX     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdADDBOXr     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdADDBOXp     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdADDPOLY     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdDRAWPOLY    )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdADDWIRE     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdDRAWWIRE    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdADDTEXT     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGRIDDEF     )  //
    TELL_STDCMD_CLASSA_UNDO(stdGRID        )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSTEP        )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdAUTOPAN     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSHAPEANGLE  )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdSELECT      )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdSELECT      )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSELECTIN    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSELECT_TL   )  //
-   TELL_STDCMD_CLASSA_UNDO(stdPNTSELECT   )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdPNTSELECT   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSELECTALL   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECT    )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdUNSELECT    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNSELECTIN  )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNSELECT_TL )  //
-   TELL_STDCMD_CLASSA_UNDO(stdPNTUNSELECT )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdPNTUNSELECT )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNSELECTALL )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdCOPYSEL     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdMOVESEL     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdCOPYSEL     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdMOVESEL     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdROTATESEL   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdFLIPXSEL    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdFLIPYSEL    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdDELETESEL   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGROUP       )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNGROUP     )  // undo - implemented* WAITS for ATDB->remove_cell() !!!
-   TELL_STDCMD_CLASSA_UNDO(lgcCUTPOLY     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(lgcCUTPOLY     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcMERGE       )  // undo - implemented
    //
    TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     )
