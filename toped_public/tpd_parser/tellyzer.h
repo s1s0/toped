@@ -255,7 +255,11 @@ namespace parsercmd {
    
    class cmdRETURN:public cmdVIRTUAL {
    public:
+      cmdRETURN(telldata::typeID tID) : _retype(tID) {};
+      bool checkRetype(telldata::argumentID* arg);
       int execute()  {return EXEC_RETURN;};
+   private:
+      telldata::typeID  _retype;
    };
 
    class cmdFUNCCALL: public cmdVIRTUAL {
