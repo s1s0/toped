@@ -341,8 +341,7 @@ namespace parsercmd {
       // Next method - not virtual to save some hassle writing a plenty of empty methods
       virtual void            undo() {}; 
       virtual void            undo_cleanup();
-      virtual std::string     callingConv() = 0;
-//      virtual void         add2LogFile() = 0;
+      std::string             callingConv();
       virtual int             argsOK(telldata::argumentQ* amap);
       telldata::typeID        gettype() const {return returntype;};
       virtual                ~cmdSTDFUNC();
@@ -356,8 +355,7 @@ namespace parsercmd {
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
    public:
       cmdFUNC(argumentLIST* vm, telldata::typeID tt);
-      std::string             callingConv();
-//      void                 add2LogFile() {};
+//      std::string             callingConv();
       int                     execute();
    };
 
@@ -407,6 +405,7 @@ namespace parsercmd {
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Assign(telldata::tell_var*, telldata::argumentID*, yyltype);
    telldata::typeID BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
+   void             ClearArgumentList(argumentLIST*);
 }
 
 namespace console{

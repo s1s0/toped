@@ -64,6 +64,8 @@ std::stack<telldata::argumentQ*>  argmapstack;
 telldata::typeID funcretype;
 /*number of return statements encountered*/
 int returns = 0;
+/*number of errors in a function defintion*/
+int funcdeferrors = 0;
 /*number of poits of the current polygon*/
 unsigned listlength = 0;
 void tellerror(std::string s, parsercmd::yyltype loc);
@@ -209,28 +211,34 @@ entrance:
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
    | error                                 {CMDBlock->cleaner();}
 ;
-   
+
 funcdefinition:
      telltypeID tknIDENTIFIER '('        {
          /*Create a new variableMAP structure containing the arguments*/
          arglist = new parsercmd::argumentLIST;
-         funcretype = $1;returns = 0;
+         funcretype = $1;returns = 0;funcdeferrors = 0;
       }
      funcarguments ')'                     {
          /*Check whether such a function is already defined */
          if (NULL != CMDBlock->funcDefined($2,arglist)) {
             tellerror("function already defined",@$); 
             delete [] $2;
+            parsercmd::ClearArgumentList(arglist); delete(arglist); arglist = NULL;
             YYABORT;
          }
       }
      funcblock                             {
-         if ((telldata::tn_void != $1) && (0 == returns))
+         if ((telldata::tn_void != $1) && (0 == returns)) {
             tellerror("function must return a value", @$);
-         else {
-            CMDBlock->addFUNC(std::string($2),$8);
-            arglist = NULL;/*release arglist variable*/            
+            delete($8);// arglist is cleard by the cmdSTDFUNC destructor
          }
+         else  if (funcdeferrors > 0) {
+            tellerror("function definition is ignored because of the errors above", @$);
+            delete($8);// arglist is cleard by the cmdSTDFUNC destructor
+         }
+         else
+            CMDBlock->addFUNC(std::string($2),$8);
+         arglist = NULL;
          delete [] $2;
    }
 ;
@@ -591,19 +599,21 @@ int yyerror (char *s) {  /* Called by yyparse on error */
 }
 
 void tellerror (std::string s, YYLTYPE loc) {
-   yynerrs++;
+   if (NULL != arglist) funcdeferrors++;
+   else                 yynerrs++;
    std::ostringstream ost;
    ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
    if (loc.filename) {
       std::string fn = loc.filename;
       ost << "in file \"" << fn << "\" : ";
-   }   
+   }
    ost << s;
    tell_log(console::MT_ERROR,ost.str().c_str());
 }
 
 void tellerror (std::string s) {
-   yynerrs++;
+   if (NULL != arglist) funcdeferrors++;
+   else                 yynerrs++;
    std::ostringstream ost;
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column << ": " << s;
    tell_log(console::MT_ERROR,ost.str().c_str());

@@ -27,9 +27,6 @@ To be done!!!
   
   TELL related
   ------------
-  * When during the parsing an error is found in the block, the entire
-    block instruction queue should be cleaned-up. If this block is a 
-    function, then this functoin should not be considered as defined.
   * Function redefinition
   * TELL lists and their manupulation
     - think about indexing operatons on the lists - adding, removing components
