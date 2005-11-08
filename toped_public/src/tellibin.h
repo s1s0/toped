@@ -66,7 +66,6 @@
    public:                                                        \
       name(telldata::typeID retype);                              \
       int         execute();                                      \
-      std::string callingConv();                                  \
    };
 #endif
 
@@ -78,7 +77,6 @@
       int         execute();                                      \
       void        undo();                                         \
       void        undo_cleanup();                                 \
-      std::string callingConv();                                  \
    };
 #endif
 
@@ -90,7 +88,6 @@
       int         execute();                                      \
       void        undo();                                         \
       void        undo_cleanup();                                 \
-      std::string callingConv();                                  \
    protected:                                                     \
       name(parsercmd::argumentLIST* al,telldata::typeID retype) : \
                                          cmdSTDFUNC(al,retype) {};\
@@ -103,7 +100,6 @@
    public:                                                        \
       name(telldata::typeID retype);                              \
       int         execute();                                      \
-      std::string callingConv();                                  \
    };
 #endif
 

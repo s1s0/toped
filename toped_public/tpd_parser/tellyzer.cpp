@@ -691,13 +691,31 @@ void parsercmd::cmdSTDFUNC::undo_cleanup() {
    }
 }
 
+std::string parsercmd::cmdSTDFUNC::callingConv() {
+   std::ostringstream ost;
+   int argnum = arguments->size();
+   ost << "( ";
+   for (int i = 0; i != argnum; i++) {
+      //get the argument name
+      switch ((*arguments)[i]->second->get_type() & ~telldata::tn_listmask) {
+        case telldata::tn_int    : ost << "int"        ; break;
+        case telldata::tn_real   : ost << "real"       ; break;
+        case telldata::tn_bool   : ost << "bool"       ; break;
+        case telldata::tn_string : ost << "string"     ; break;
+        case telldata::tn_pnt    : ost << "point"      ; break;
+        case telldata::tn_box    : ost << "box"        ; break;
+        default                  : ost << "?usertype?";
+      };
+      if ((*arguments)[i]->second->get_type() & telldata::tn_listmask) 
+        ost << " list";
+      if (i < argnum - 1) ost << " , ";
+   }
+   ost << " )";
+   return ost.str();
+}
+
 parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
-   if (NULL == arguments) return;
-   for (argumentLIST::iterator ALI = arguments->begin(); ALI != arguments->end(); ALI++) {
-      delete (*ALI)->second;
-      delete (*ALI);
-   }   
-   arguments->clear();   
+   ClearArgumentList(arguments);
    delete arguments;
 }   
 
@@ -730,29 +748,6 @@ int parsercmd::cmdFUNC::execute() {
    LogFile << "// Executing UDF " << LogFile.getFN();LogFile.flush();   
    cmdBLOCK::execute();
    return EXEC_NEXT;
-}
-
-std::string parsercmd::cmdFUNC::callingConv() {
-   std::ostringstream ost;
-   int argnum = arguments->size();
-   ost << "( ";
-   for (int i = 0; i != argnum; i++) {
-      //get the argument name
-      switch ((*arguments)[i]->second->get_type() & ~telldata::tn_listmask) {
-        case telldata::tn_int    : ost << "int"        ; break;
-        case telldata::tn_real   : ost << "real"       ; break;
-        case telldata::tn_bool   : ost << "bool"       ; break;
-        case telldata::tn_string : ost << "string"     ; break;
-        case telldata::tn_pnt    : ost << "point"      ; break;
-        case telldata::tn_box    : ost << "box"        ; break;
-        default                  : ost << "?usertype?";
-      };
-      if ((*arguments)[i]->second->get_type() & telldata::tn_listmask) 
-        ost << " list";
-      if (i < argnum - 1) ost << " , ";
-   }
-   ost << " )";
-   return ost.str();
 }
 
 //=============================================================================
@@ -1088,6 +1083,14 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
 //         break;
 }
 
+void parsercmd::ClearArgumentList(argumentLIST* alst) {
+   if (NULL == alst) return;
+   for (argumentLIST::iterator ALI = alst->begin(); ALI != alst->end(); ALI++) {
+      delete (*ALI)->second;
+      delete (*ALI);
+   }
+   alst->clear();
+}
 
 //-----------------------------------------------------------------------------
 // class toped_logfile

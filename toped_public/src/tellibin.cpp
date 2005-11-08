@@ -76,10 +76,6 @@ tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdTELLSTATUS::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdTELLSTATUS::execute() {
    telldata::tell_var *y;
    std::string news;
@@ -98,10 +94,6 @@ tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdREPORTSLCTD::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdREPORTSLCTD::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->report_selected();
@@ -114,10 +106,6 @@ tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-}
-
-std::string tellstdfunc::stdREPORTLAY::callingConv() {
-   return "( string , bool )";
 }
 
 int tellstdfunc::stdREPORTLAY::execute() {
@@ -148,10 +136,6 @@ tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
-std::string tellstdfunc::stdREPORTLAYc::callingConv() {
-   return "( bool )";
-}
-
 int tellstdfunc::stdREPORTLAYc::execute() {
    bool recursive = getBoolValue();
    OPstack.push(new telldata::ttstring(""));
@@ -162,10 +146,6 @@ int tellstdfunc::stdREPORTLAYc::execute() {
 //=============================================================================
 tellstdfunc::stdUNDO::stdUNDO(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
-
-std::string tellstdfunc::stdUNDO::callingConv() {
-   return "(  )";
 }
 
 int tellstdfunc::stdUNDO::execute() {
@@ -185,10 +165,6 @@ tellstdfunc::stdREDRAW::stdREDRAW(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdREDRAW::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdREDRAW::execute() {
    wxPaintEvent upde(wxEVT_PAINT);
    wxPostEvent(Toped->view(), upde);
@@ -200,10 +176,6 @@ tellstdfunc::stdZOOMWIN::stdZOOMWIN(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-}
-
-std::string tellstdfunc::stdZOOMWIN::callingConv() {
-   return "( point, point )";
 }
 
 int tellstdfunc::stdZOOMWIN::execute() {
@@ -225,10 +197,6 @@ tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
-std::string tellstdfunc::stdZOOMWINb::callingConv() {
-   return "( box )";
-}
-
 int tellstdfunc::stdZOOMWINb::execute() {
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = Properties->DBscale();
@@ -244,10 +212,6 @@ int tellstdfunc::stdZOOMWINb::execute() {
 //=============================================================================
 tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
-
-std::string tellstdfunc::stdZOOMALL::callingConv() {
-   return "(  )";
 }
 
 int tellstdfunc::stdZOOMALL::execute() {
@@ -267,10 +231,6 @@ tellstdfunc::stdLAYPROP::stdLAYPROP(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-}
-
-std::string tellstdfunc::stdLAYPROP::callingConv() {
-   return "( string, int, string, string )";
 }
 
 void tellstdfunc::stdLAYPROP::undo_cleanup() {
@@ -302,10 +262,6 @@ tellstdfunc::stdCOLORDEF::stdCOLORDEF(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
-std::string tellstdfunc::stdCOLORDEF::callingConv() {
-   return "( string, int, int, int, int)";
-}
-
 void tellstdfunc::stdCOLORDEF::undo_cleanup() {
 }
 
@@ -328,13 +284,8 @@ int tellstdfunc::stdCOLORDEF::execute() {
 //=============================================================================
 tellstdfunc::stdFILLDEF::stdFILLDEF(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
-}
-
-std::string tellstdfunc::stdFILLDEF::callingConv() {
-   return "( string, int list)";
 }
 
 void tellstdfunc::stdFILLDEF::undo_cleanup() {
@@ -372,13 +323,8 @@ int tellstdfunc::stdFILLDEF::execute() {
 //=============================================================================
 tellstdfunc::stdHIDELAYER::stdHIDELAYER(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-}
-
-std::string tellstdfunc::stdHIDELAYER::callingConv() {
-   return "( word , bool )";
 }
 
 void tellstdfunc::stdHIDELAYER::undo_cleanup() {
@@ -416,12 +362,7 @@ int tellstdfunc::stdHIDELAYER::execute() {
 //=============================================================================
 tellstdfunc::stdHIDECELLMARK::stdHIDECELLMARK(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-}
-
-std::string tellstdfunc::stdHIDECELLMARK::callingConv() {
-   return "( bool )";
 }
 
 void tellstdfunc::stdHIDECELLMARK::undo_cleanup() {
@@ -454,12 +395,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
 //=============================================================================
 tellstdfunc::stdHIDETEXTMARK::stdHIDETEXTMARK(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-}
-
-std::string tellstdfunc::stdHIDETEXTMARK::callingConv() {
-   return "( bool )";
 }
 
 void tellstdfunc::stdHIDETEXTMARK::undo_cleanup() {
@@ -496,10 +432,6 @@ tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype) :
 
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-}
-
-std::string tellstdfunc::stdHIDELAYERS::callingConv() {
-   return "( word list, bool )";
 }
 
 void tellstdfunc::stdHIDELAYERS::undo_cleanup() {
@@ -559,10 +491,6 @@ tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
-std::string tellstdfunc::stdLOCKLAYER::callingConv() {
-   return "( word , bool )";
-}
-
 void tellstdfunc::stdLOCKLAYER::undo_cleanup() {
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
@@ -600,10 +528,6 @@ tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype) :
 
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-}
-
-std::string tellstdfunc::stdLOCKLAYERS::callingConv() {
-   return "( word list, bool )";
 }
 
 void tellstdfunc::stdLOCKLAYERS::undo_cleanup() {
@@ -661,10 +585,6 @@ tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-std::string tellstdfunc::stdNEWDESIGN::callingConv() {
-   return "( string )";
-}
-
 int tellstdfunc::stdNEWDESIGN::execute() {
    std::string nm = getStringValue();
    DATC->newDesign(nm);
@@ -680,12 +600,7 @@ int tellstdfunc::stdNEWDESIGN::execute() {
 //=============================================================================
 tellstdfunc::stdNEWCELL::stdNEWCELL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-}
-
-std::string tellstdfunc::stdNEWCELL::callingConv() {
-   return "( string )";
 }
 
 void tellstdfunc::stdNEWCELL::undo_cleanup() {
@@ -712,12 +627,7 @@ int tellstdfunc::stdNEWCELL::execute() {
 //=============================================================================
 tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-}
-
-std::string tellstdfunc::stdOPENCELL::callingConv() {
-   return "( string )";
 }
 
 void tellstdfunc::stdOPENCELL::undo_cleanup() {
@@ -774,12 +684,7 @@ int tellstdfunc::stdOPENCELL::execute() {
 //=============================================================================
 tellstdfunc::stdEDITPUSH::stdEDITPUSH(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-}
-
-std::string tellstdfunc::stdEDITPUSH::callingConv() {
-   return "( point )";
 }
 
 void tellstdfunc::stdEDITPUSH::undo_cleanup() {
@@ -829,10 +734,6 @@ tellstdfunc::stdEDITPOP::stdEDITPOP(telldata::typeID retype) :
 
 }
 
-std::string tellstdfunc::stdEDITPOP::callingConv() {
-   return "( )";
-}
-
 void tellstdfunc::stdEDITPOP::undo_cleanup() {
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete selected; //ttlist does not have active destructor
@@ -876,10 +777,6 @@ tellstdfunc::stdEDITPREV::stdEDITPREV(telldata::typeID retype) :
 
 }
 
-std::string tellstdfunc::stdEDITPREV::callingConv() {
-   return "( )";
-}
-
 void tellstdfunc::stdEDITPREV::undo_cleanup() {
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete selected; //ttlist does not have active destructor
@@ -921,10 +818,6 @@ int tellstdfunc::stdEDITPREV::execute() {
 tellstdfunc::stdEDITTOP::stdEDITTOP(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 
-}
-
-std::string tellstdfunc::stdEDITTOP::callingConv() {
-   return "( )";
 }
 
 void tellstdfunc::stdEDITTOP::undo_cleanup() {
@@ -972,10 +865,6 @@ tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-}
-
-std::string tellstdfunc::stdCELLREF::callingConv() {
-   return "( string, point, real, bool, real )";
 }
 
 void tellstdfunc::stdCELLREF::undo_cleanup() {
@@ -1027,10 +916,6 @@ tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-}
-
-std::string tellstdfunc::stdCELLAREF::callingConv() {
-   return "( string, point, real, bool, real, int, int, real, real)";
 }
 
 void tellstdfunc::stdCELLAREF::undo_cleanup() {
@@ -1086,10 +971,6 @@ tellstdfunc::stdUSINGLAYER::stdUSINGLAYER(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
-std::string tellstdfunc::stdUSINGLAYER::callingConv() {
-   return "( int )";
-}
-
 void tellstdfunc::stdUSINGLAYER::undo_cleanup() {
    getWordValue(UNDOPstack, false);
 }
@@ -1126,10 +1007,6 @@ tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-std::string tellstdfunc::stdUSINGLAYER_S::callingConv() {
-  return "( string )";
-}
-
 int tellstdfunc::stdUSINGLAYER_S::execute() {
   std::string layname = getStringValue();
   word layno = Properties->getlayerNo(layname);
@@ -1149,10 +1026,6 @@ tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-}
-
-std::string tellstdfunc::stdADDBOX::callingConv() {
-   return "( box, int )";
 }
 
 void tellstdfunc::stdADDBOX::undo_cleanup() {
@@ -1196,10 +1069,6 @@ tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
-std::string tellstdfunc::stdADDBOX_D::callingConv() {
-   return "( box )";
-}
-
 int tellstdfunc::stdADDBOX_D::execute() {
    OPstack.push(CurrentLayer());
    return stdADDBOX::execute();
@@ -1209,10 +1078,6 @@ int tellstdfunc::stdADDBOX_D::execute() {
 tellstdfunc::stdDRAWBOX::stdDRAWBOX(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-}
-
-std::string tellstdfunc::stdDRAWBOX::callingConv() {
-   return "( int )";
 }
 
 void tellstdfunc::stdDRAWBOX::undo_cleanup() {
@@ -1258,10 +1123,6 @@ tellstdfunc::stdDRAWBOX_D::stdDRAWBOX_D(telldata::typeID retype) :
                                stdDRAWBOX(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdDRAWBOX_D::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdDRAWBOX_D::execute() {
    OPstack.push(CurrentLayer());
    return stdDRAWBOX::execute();
@@ -1274,10 +1135,6 @@ tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-}
-
-std::string tellstdfunc::stdADDBOXr::callingConv() {
-   return "( point, real, real, int )";
 }
 
 void tellstdfunc::stdADDBOXr::undo_cleanup() {
@@ -1327,10 +1184,6 @@ tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
-std::string tellstdfunc::stdADDBOXr_D::callingConv() {
-   return "( point, real, real )";
-}
-
 int tellstdfunc::stdADDBOXr_D::execute() {
    OPstack.push(CurrentLayer());
    return stdADDBOXr::execute();
@@ -1342,10 +1195,6 @@ tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-}
-
-std::string tellstdfunc::stdADDBOXp::callingConv() {
-   return "( point, point, int )";
 }
 
 void tellstdfunc::stdADDBOXp::undo_cleanup() {
@@ -1392,10 +1241,6 @@ tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
-std::string tellstdfunc::stdADDBOXp_D::callingConv() {
-   return "( point, point )";
-}
-
 int tellstdfunc::stdADDBOXp_D::execute() {
    OPstack.push(CurrentLayer());
    return stdADDBOXp::execute();
@@ -1406,10 +1251,6 @@ tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-}
-
-std::string tellstdfunc::stdADDPOLY::callingConv() {
-   return "( point list, int )";
 }
 
 void tellstdfunc::stdADDPOLY::undo_cleanup() {
@@ -1458,10 +1299,6 @@ tellstdfunc::stdADDPOLY_D::stdADDPOLY_D(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
 }
 
-std::string tellstdfunc::stdADDPOLY_D::callingConv() {
-   return "( point list )";
-}
-
 int tellstdfunc::stdADDPOLY_D::execute() {
    OPstack.push(CurrentLayer());
    return stdADDPOLY::execute();
@@ -1471,10 +1308,6 @@ int tellstdfunc::stdADDPOLY_D::execute() {
 tellstdfunc::stdDRAWPOLY::stdDRAWPOLY(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-}
-
-std::string tellstdfunc::stdDRAWPOLY::callingConv() {
-   return "( int )";
 }
 
 void tellstdfunc::stdDRAWPOLY::undo_cleanup() {
@@ -1524,10 +1357,6 @@ tellstdfunc::stdDRAWPOLY_D::stdDRAWPOLY_D(telldata::typeID retype) :
                               stdDRAWPOLY(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdDRAWPOLY_D::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdDRAWPOLY_D::execute() {
    OPstack.push(CurrentLayer());
    return stdDRAWPOLY::execute();
@@ -1539,10 +1368,6 @@ tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-}
-
-std::string tellstdfunc::stdADDWIRE::callingConv() {
-   return "( point list, real, int )";
 }
 
 void tellstdfunc::stdADDWIRE::undo_cleanup() {
@@ -1594,10 +1419,6 @@ tellstdfunc::stdADDWIRE_D::stdADDWIRE_D(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
-std::string tellstdfunc::stdADDWIRE_D::callingConv() {
-   return "( point list, real )";
-}
-
 int tellstdfunc::stdADDWIRE_D::execute() {
    OPstack.push(CurrentLayer());
    return stdADDWIRE::execute();
@@ -1608,10 +1429,6 @@ tellstdfunc::stdDRAWWIRE::stdDRAWWIRE(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-}
-
-std::string tellstdfunc::stdDRAWWIRE::callingConv() {
-   return "( real, int )";
 }
 
 void tellstdfunc::stdDRAWWIRE::undo_cleanup() {
@@ -1664,10 +1481,6 @@ tellstdfunc::stdDRAWWIRE_D::stdDRAWWIRE_D(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
-std::string tellstdfunc::stdDRAWWIRE_D::callingConv() {
-   return "( real )";
-}
-
 int tellstdfunc::stdDRAWWIRE_D::execute() {
    OPstack.push(CurrentLayer());
    return stdDRAWWIRE::execute();
@@ -1682,10 +1495,6 @@ tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-}
-
-std::string tellstdfunc::stdADDTEXT::callingConv() {
-   return "( string, int, point, real, bool, real)";
 }
 
 void tellstdfunc::stdADDTEXT::undo_cleanup() {
@@ -1737,10 +1546,6 @@ tellstdfunc::stdGRIDDEF::stdGRIDDEF(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-std::string tellstdfunc::stdGRIDDEF::callingConv() {
-   return "( int, real, string )";
-}
-
 void tellstdfunc::stdGRIDDEF::undo_cleanup() {
 }
 
@@ -1763,10 +1568,6 @@ tellstdfunc::stdGRID::stdGRID(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-}
-
-std::string tellstdfunc::stdGRID::callingConv() {
-   return "( int, bool )";
 }
 
 void tellstdfunc::stdGRID::undo_cleanup() {
@@ -1801,10 +1602,6 @@ tellstdfunc::stdSTEP::stdSTEP(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
-std::string tellstdfunc::stdSTEP::callingConv() {
-   return "( real )";
-}
-
 void tellstdfunc::stdSTEP::undo_cleanup() {
    getOpValue(UNDOPstack, false);
 }
@@ -1829,10 +1626,6 @@ int tellstdfunc::stdSTEP::execute() {
 tellstdfunc::stdAUTOPAN::stdAUTOPAN(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-}
-
-std::string tellstdfunc::stdAUTOPAN::callingConv() {
-   return "( bool )";
 }
 
 void tellstdfunc::stdAUTOPAN::undo_cleanup() {
@@ -1867,10 +1660,6 @@ int tellstdfunc::stdAUTOPAN::execute() {
 tellstdfunc::stdSHAPEANGLE::stdSHAPEANGLE(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-}
-
-std::string tellstdfunc::stdSHAPEANGLE::callingConv() {
-   return "( int )";
 }
 
 void tellstdfunc::stdSHAPEANGLE::undo_cleanup() {
@@ -1910,10 +1699,6 @@ tellstdfunc::getPOINT::getPOINT(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::getPOINT::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::getPOINT::execute() {
    // Here - try a hollow lock/unlock the database just to check that it exists
    // The use of this function should be deprecated
@@ -1932,10 +1717,6 @@ int tellstdfunc::getPOINT::execute() {
 //=============================================================================
 tellstdfunc::getPOINTLIST::getPOINTLIST(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
-
-std::string tellstdfunc::getPOINTLIST::callingConv() {
-   return "(  )";
 }
 
 int tellstdfunc::getPOINTLIST::execute() {
@@ -1964,10 +1745,6 @@ int tellstdfunc::getPOINTLIST::execute() {
 tellstdfunc::stdSELECT::stdSELECT(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
-}
-
-std::string tellstdfunc::stdSELECT::callingConv() {
-   return "( box )";
 }
 
 void tellstdfunc::stdSELECT::undo_cleanup() {
@@ -2012,10 +1789,6 @@ tellstdfunc::stdSELECT_I::stdSELECT_I(telldata::typeID retype) :
                                 stdSELECT(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdSELECT_I::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
@@ -2026,10 +1799,6 @@ int tellstdfunc::stdSELECT_I::execute() {
 tellstdfunc::stdSELECT_TL::stdSELECT_TL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_layout)));
-}
-
-std::string tellstdfunc::stdSELECT_TL::callingConv() {
-   return "( layout_list )";
 }
 
 void tellstdfunc::stdSELECT_TL::undo_cleanup() {
@@ -2054,10 +1823,6 @@ int tellstdfunc::stdSELECT_TL::execute() {
 tellstdfunc::stdSELECTIN::stdSELECTIN(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-}
-
-std::string tellstdfunc::stdSELECTIN::callingConv() {
-   return "( point )";
 }
 
 void tellstdfunc::stdSELECTIN::undo_cleanup() {
@@ -2102,10 +1867,6 @@ tellstdfunc::stdPNTSELECT::stdPNTSELECT(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
-std::string tellstdfunc::stdPNTSELECT::callingConv() {
-   return "( box )";
-}
-
 void tellstdfunc::stdPNTSELECT::undo_cleanup() {
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete w;
@@ -2148,10 +1909,6 @@ tellstdfunc::stdPNTSELECT_I::stdPNTSELECT_I(telldata::typeID retype) :
                              stdPNTSELECT(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdPNTSELECT_I::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdPNTSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
@@ -2162,10 +1919,6 @@ int tellstdfunc::stdPNTSELECT_I::execute() {
 tellstdfunc::stdUNSELECT::stdUNSELECT(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
-}
-
-std::string tellstdfunc::stdUNSELECT::callingConv() {
-   return "( box )";
 }
 
 void tellstdfunc::stdUNSELECT::undo_cleanup() {
@@ -2210,10 +1963,6 @@ tellstdfunc::stdUNSELECT_I::stdUNSELECT_I(telldata::typeID retype) :
                               stdUNSELECT(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdUNSELECT_I::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdUNSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
@@ -2224,10 +1973,6 @@ int tellstdfunc::stdUNSELECT_I::execute() {
 tellstdfunc::stdUNSELECT_TL::stdUNSELECT_TL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_layout)));
-}
-
-std::string tellstdfunc::stdUNSELECT_TL::callingConv() {
-   return "( layout list )";
 }
 
 void tellstdfunc::stdUNSELECT_TL::undo() {
@@ -2252,10 +1997,6 @@ int tellstdfunc::stdUNSELECT_TL::execute() {
 tellstdfunc::stdUNSELECTIN::stdUNSELECTIN(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-}
-
-std::string tellstdfunc::stdUNSELECTIN::callingConv() {
-   return "( point )";
 }
 
 void tellstdfunc::stdUNSELECTIN::undo_cleanup() {
@@ -2300,10 +2041,6 @@ tellstdfunc::stdPNTUNSELECT::stdPNTUNSELECT(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
-std::string tellstdfunc::stdPNTUNSELECT::callingConv() {
-   return "( box )";
-}
-
 void tellstdfunc::stdPNTUNSELECT::undo_cleanup() {
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete w;
@@ -2346,10 +2083,6 @@ tellstdfunc::stdPNTUNSELECT_I::stdPNTUNSELECT_I(telldata::typeID retype) :
                            stdPNTUNSELECT(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdPNTUNSELECT_I::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdPNTUNSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
@@ -2359,10 +2092,6 @@ int tellstdfunc::stdPNTUNSELECT_I::execute() {
 //=============================================================================
 tellstdfunc::stdSELECTALL::stdSELECTALL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
-
-std::string tellstdfunc::stdSELECTALL::callingConv() {
-   return "(  )";
 }
 
 void tellstdfunc::stdSELECTALL::undo_cleanup() {
@@ -2398,10 +2127,6 @@ tellstdfunc::stdUNSELECTALL::stdUNSELECTALL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdUNSELECTALL::callingConv() {
-   return "(  )";
-}
-
 void tellstdfunc::stdUNSELECTALL::undo_cleanup() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
@@ -2431,10 +2156,6 @@ int tellstdfunc::stdUNSELECTALL::execute() {
 //=============================================================================
 tellstdfunc::stdDELETESEL::stdDELETESEL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
-
-std::string tellstdfunc::stdDELETESEL::callingConv() {
-   return "(  )";
 }
 
 void tellstdfunc::stdDELETESEL::undo_cleanup() {
@@ -2471,10 +2192,6 @@ tellstdfunc::stdCOPYSEL::stdCOPYSEL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-}
-
-std::string tellstdfunc::stdCOPYSEL::callingConv() {
-   return "( point , point )";
 }
 
 void tellstdfunc::stdCOPYSEL::undo_cleanup() {
@@ -2515,10 +2232,6 @@ tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype) :
                                stdCOPYSEL(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdCOPYSEL_D::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdCOPYSEL_D::execute() {
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(-3, &OPstack)) return EXEC_RETURN;
@@ -2535,10 +2248,6 @@ tellstdfunc::stdMOVESEL::stdMOVESEL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-}
-
-std::string tellstdfunc::stdMOVESEL::callingConv() {
-   return "( point , point )";
 }
 
 void tellstdfunc::stdMOVESEL::undo_cleanup() {
@@ -2623,10 +2332,6 @@ tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype) :
                                stdMOVESEL(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::stdMOVESEL_D::callingConv() {
-   return "(  )";
-}
-
 int tellstdfunc::stdMOVESEL_D::execute() {
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(-2, &OPstack)) return EXEC_RETURN;
@@ -2643,10 +2348,6 @@ tellstdfunc::stdROTATESEL::stdROTATESEL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-}
-
-std::string tellstdfunc::stdROTATESEL::callingConv() {
-   return "( point , real )";
 }
 
 void tellstdfunc::stdROTATESEL::undo_cleanup() {
@@ -2689,10 +2390,6 @@ tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
-std::string tellstdfunc::stdFLIPXSEL::callingConv() {
-   return "( point )";
-}
-
 void tellstdfunc::stdFLIPXSEL::undo_cleanup() {
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete p1;
@@ -2727,10 +2424,6 @@ int tellstdfunc::stdFLIPXSEL::execute() {
 tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-}
-
-std::string tellstdfunc::stdFLIPYSEL::callingConv() {
-   return "( point )";
 }
 
 void tellstdfunc::stdFLIPYSEL::undo_cleanup() {
@@ -2769,10 +2462,6 @@ tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-std::string tellstdfunc::stdGROUP::callingConv() {
-   return "( string )";
-}
-
 void tellstdfunc::stdGROUP::undo_cleanup() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
@@ -2808,10 +2497,6 @@ int tellstdfunc::stdGROUP::execute() {
 //=============================================================================
 tellstdfunc::stdUNGROUP::stdUNGROUP(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
-
-std::string tellstdfunc::stdUNGROUP::callingConv() {
-   return "( )";
 }
 
 void tellstdfunc::stdUNGROUP::undo_cleanup() {
@@ -2885,10 +2570,6 @@ int tellstdfunc::stdUNGROUP::execute() {
 tellstdfunc::lgcCUTPOLY::lgcCUTPOLY(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
-}
-
-std::string tellstdfunc::lgcCUTPOLY::callingConv() {
-   return "( point list )";
 }
 
 void tellstdfunc::lgcCUTPOLY::undo_cleanup() {
@@ -2988,10 +2669,6 @@ tellstdfunc::lgcCUTPOLY_I::lgcCUTPOLY_I(telldata::typeID retype) :
                                lgcCUTPOLY(new parsercmd::argumentLIST,retype) {
 }
 
-std::string tellstdfunc::lgcCUTPOLY_I::callingConv() {
-   return "( )";
-}
-
 int tellstdfunc::lgcCUTPOLY_I::execute() {
    if (DATC->numselected() == 0) {
       tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
@@ -3005,10 +2682,6 @@ int tellstdfunc::lgcCUTPOLY_I::execute() {
 //=============================================================================
 tellstdfunc::lgcMERGE::lgcMERGE(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
-
-std::string tellstdfunc::lgcMERGE::callingConv() {
-   return "( )";
 }
 
 void tellstdfunc::lgcMERGE::undo_cleanup() {
@@ -3086,10 +2759,6 @@ tellstdfunc::GDSread::GDSread(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-std::string tellstdfunc::GDSread::callingConv() {
-   return "( string )";
-}
-
 int tellstdfunc::GDSread::execute() {
    std::string name = getStringValue();
    std::list<std::string> top_cell_list;
@@ -3107,10 +2776,6 @@ int tellstdfunc::GDSread::execute() {
 tellstdfunc::TDTread::TDTread(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-}
-
-std::string tellstdfunc::TDTread::callingConv() {
-   return "( string )";
 }
 
 int tellstdfunc::TDTread::execute() {
@@ -3135,10 +2800,6 @@ tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-std::string tellstdfunc::TDTsaveas::callingConv() {
-   return "( string )";
-}
-
 int tellstdfunc::TDTsaveas::execute() {
    std::string name = getStringValue();
    DATC->TDTwrite(name.c_str());
@@ -3149,10 +2810,6 @@ int tellstdfunc::TDTsaveas::execute() {
 //=============================================================================
 tellstdfunc::TDTsave::TDTsave(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
-
-std::string tellstdfunc::TDTsave::callingConv() {
-   return "( )";
 }
 
 int tellstdfunc::TDTsave::execute() {
@@ -3171,11 +2828,6 @@ tellstdfunc::GDSconvert::GDSconvert(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
-std::string tellstdfunc::GDSconvert::callingConv() {
-   return "( string, bool, bool )";
-   /*name, recursive, overwrite*/
-}
- 
 int tellstdfunc::GDSconvert::execute() {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
@@ -3194,10 +2846,6 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-std::string tellstdfunc::GDSreportlay::callingConv() {
-   return "( string )";
-}
- 
 int tellstdfunc::GDSreportlay::execute() {
    std::string name = getStringValue();
    DATC->reportGDSlay(name.c_str());
@@ -3208,10 +2856,6 @@ int tellstdfunc::GDSreportlay::execute() {
 //=============================================================================
 tellstdfunc::GDSclose::GDSclose(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
-
-std::string tellstdfunc::GDSclose::callingConv() {
-   return "( )";
 }
 
 int tellstdfunc::GDSclose::execute() {
