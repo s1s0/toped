@@ -59,7 +59,12 @@ DEFINE_EVENT_TYPE(wxEVT_MOUSE_INPUT)
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_ZOOM)
 
 void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
-   // Internal variables first - Can't think of any for the moment
+   // First the internal types
+   telldata::point_type* pntype = new telldata::point_type();
+   telldata::box_type*   bxtype = new telldata::box_type(pntype);
+   mblock->addGlobalType("point"     , pntype);
+   mblock->addGlobalType("box"       , bxtype);
+   // Internal variables next - Can't think of any for the moment
 //   mblock->addID("$_CW", new ttwnd(Toped->_view->lp_BL, Toped->_view->lp_TR));
    //--------------------------------------------------------------------------
    // tell functions

@@ -300,25 +300,25 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	*yy_cp = '\0'; \
 	yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 56
-#define YY_END_OF_BUFFER 57
-static yyconst short int yy_accept[141] =
+#define YY_NUM_RULES 53
+#define YY_END_OF_BUFFER 54
+static yyconst short int yy_accept[138] =
     {   0,
-       54,   54,    0,    0,   57,   55,    1,    2,   55,   55,
-       54,   55,   35,   36,   46,   44,   43,   45,   55,   47,
-       51,   51,   49,   41,   48,   42,   37,   38,   55,   54,
-       54,   54,   54,   54,   54,   54,   54,   54,   54,   54,
-       54,   39,   55,   40,   56,   56,    1,    2,   32,    0,
-       24,   54,   33,   53,    0,   27,   28,    0,   52,   51,
-       54,   29,   31,   30,    0,   54,   54,   54,   18,   54,
-       54,   54,   54,   54,   54,   54,   54,   54,   54,   34,
-        0,    5,   25,   26,    0,    3,   52,   50,    0,   54,
-       11,   54,   54,    8,   54,   54,   54,   54,   54,   54,
+        0,    0,    0,    0,   54,   52,    1,    2,   52,   52,
+       52,   32,   33,   43,   41,   40,   42,   52,   44,   48,
+       48,   46,   38,   45,   39,   51,   34,   35,   52,   51,
+       51,   51,   51,   51,   51,   51,   51,   51,   51,   51,
+       51,   36,   52,   37,   53,   53,    1,    2,   29,    0,
+       24,   30,   50,   25,    0,   49,   48,    0,   26,   28,
+       27,   51,    0,   51,   51,   51,   18,   51,   51,   51,
+       51,   51,   51,   51,   51,   51,   51,   31,    0,    5,
+       25,    0,    3,   49,   47,    0,   51,   11,   51,   51,
+        8,   51,   51,   51,   51,   51,   51,   51,   51,   51,
 
-       54,   54,   54,   54,   54,    0,    9,   19,   54,   54,
-       14,   54,    7,   54,   54,   54,   54,   16,   54,    6,
-       54,    0,   17,   54,   10,   54,   54,   54,   54,   23,
-       20,    0,   13,   21,   15,   12,   22,    0,    4,    0
+       51,   51,    0,    9,   19,   51,   51,   14,   51,    7,
+       51,   51,   51,   51,   16,   51,    6,   51,    0,   17,
+       51,   10,   51,   51,   51,   51,   23,   20,    0,   13,
+       21,   15,   12,   22,    0,    4,    0
     } ;
 
 static yyconst int yy_ec[256] =
@@ -326,17 +326,17 @@ static yyconst int yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    2,    4,    5,    1,    6,    1,    7,    1,    8,
-        9,   10,   11,   12,   13,   14,   15,   16,   17,   18,
-       19,   19,   19,   19,   19,   19,   19,    1,   20,   21,
-       22,   23,    1,    1,   24,   24,   24,   24,   24,   24,
-        6,    6,    6,    6,    6,    6,    6,    6,    6,   25,
-        6,    6,    6,    6,    6,    6,    6,   26,   27,    6,
-       28,    1,   29,    1,    6,   30,   31,   32,   33,   34,
+        1,    2,    4,    5,    1,    1,    1,    6,    1,    7,
+        8,    9,   10,   11,   12,   13,   14,   15,   16,   16,
+       16,   16,   16,   16,   16,   16,   16,    1,   17,   18,
+       19,   20,    1,    1,   21,   21,   21,   21,   21,   21,
+       22,   22,   22,   22,   22,   22,   22,   22,   22,   22,
+       22,   22,   22,   22,   22,   22,   22,   22,   22,   22,
+       23,    1,   24,    1,   22,   25,   26,   27,   28,   29,
 
-       35,   36,   37,   38,   39,    6,    6,   40,    6,   41,
-       42,   43,    6,   44,   45,   46,   47,   48,   49,   50,
-       51,    6,   52,   53,   54,    1,    1,    1,    1,    1,
+       30,   31,   32,   33,   34,   22,   22,   35,   22,   36,
+       37,   38,   22,   39,   40,   41,   42,   43,   44,   45,
+       46,   22,   47,   48,   49,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -353,118 +353,111 @@ static yyconst int yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst int yy_meta[55] =
+static yyconst int yy_meta[50] =
     {   0,
-        1,    1,    1,    1,    1,    2,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    2,    2,    2,    2,    1,
-        1,    1,    1,    2,    2,    2,    2,    1,    1,    1,
-        2,    2,    2,    2,    2,    2,    2,    2,    2,    2,
-        2,    2,    2,    2,    2,    2,    2,    2,    2,    2,
-        2,    1,    1,    1
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    2,    2,    1,    1,    1,    1,
+        2,    3,    1,    1,    1,    2,    2,    2,    2,    2,
+        2,    3,    3,    3,    3,    3,    3,    3,    3,    3,
+        3,    3,    3,    3,    3,    3,    1,    1,    1
     } ;
 
 static yyconst short int yy_base[146] =
     {   0,
-        0,    0,  195,  194,  198,  201,  195,  193,  173,  189,
-        0,  186,  201,  201,  201,  201,  201,  201,   39,  177,
-       53,   59,  201,  169,  168,  167,  201,  201,  149,  145,
-      146,  154,   27,   48,  142,  148,  136,  137,  139,  137,
-      140,  201,  124,  201,  201,  171,  173,  171,  201,  168,
-      201,    0,  201,   43,   63,  201,  201,  169,   67,   77,
-       88,  201,  201,  201,  130,   50,  125,  129,    0,  122,
-      116,  121,  126,   67,  120,  116,  116,  122,  121,  201,
-      154,  201,  201,  201,  155,  201,   98,    0,  124,  116,
-        0,  120,  109,    0,  111,  106,  110,  110,  114,  101,
+        0,    0,  167,  166,  170,  173,  167,  165,  148,  161,
+      159,  173,  173,  173,  173,  173,  173,   35,  150,   39,
+       43,  173,  144,  143,  142,    0,  173,  173,  126,  122,
+      123,  131,   26,   27,  119,  125,  113,  114,  116,  114,
+      117,  173,  101,  173,  173,  143,  145,  143,  173,  140,
+      173,  173,   48,    0,  141,   50,   54,    0,  173,  173,
+      173,    0,  107,   23,  102,  106,    0,   99,   93,   98,
+      103,   45,   97,   93,   93,   99,   98,  173,  126,  173,
+        0,  127,  173,   57,    0,  101,   93,    0,   97,   86,
+        0,   88,   83,   87,   87,   91,   78,   40,   89,   84,
 
-       62,  112,  107,  111,  104,  103,    0,    0,  107,   94,
-        0,   94,    0,  108,   94,   96,  103,    0,   95,    0,
-       99,   86,    0,   72,    0,   65,   67,   65,   53,    0,
-        0,   63,    0,    0,    0,    0,    0,   53,  201,  201,
-      124,  126,   72,  128,  130
+       88,   81,   80,    0,    0,   84,   71,    0,   71,    0,
+       85,   71,   73,   80,    0,   72,    0,   76,   63,    0,
+       44,    0,   40,   44,   47,   37,    0,    0,   48,    0,
+        0,    0,    0,    0,   46,  173,  173,   86,   89,   91,
+       93,   96,   98,  101,   73
     } ;
 
 static yyconst short int yy_def[146] =
     {   0,
-      140,    1,  141,  141,  140,  140,  140,  140,  140,  142,
-      143,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      143,  143,  140,  140,  140,  140,  140,  140,  140,  143,
-      143,  143,  143,  143,  143,  143,  143,  143,  143,  143,
-      143,  140,  140,  140,  140,  144,  140,  140,  140,  142,
-      140,  143,  140,  140,  140,  140,  140,  145,  140,  143,
-      143,  140,  140,  140,  140,  143,  143,  143,  143,  143,
-      143,  143,  143,  143,  143,  143,  143,  143,  143,  140,
-      144,  140,  140,  140,  145,  140,  140,   61,  140,  143,
-      143,  143,  143,  143,  143,  143,  143,  143,  143,  143,
+      137,    1,  138,  138,  137,  137,  137,  137,  137,  139,
+      137,  137,  137,  137,  137,  137,  137,  140,  137,  137,
+      137,  137,  137,  137,  137,  141,  137,  137,  137,  141,
+      141,  141,  141,  141,  141,  141,  141,  141,  141,  141,
+      141,  137,  137,  137,  137,  142,  137,  137,  137,  139,
+      137,  137,  137,  143,  144,  137,  137,  145,  137,  137,
+      137,  141,  137,  141,  141,  141,  141,  141,  141,  141,
+      141,  141,  141,  141,  141,  141,  141,  137,  142,  137,
+      143,  144,  137,  137,  145,  137,  141,  141,  141,  141,
+      141,  141,  141,  141,  141,  141,  141,  141,  141,  141,
 
-      143,  143,  143,  143,  143,  140,  143,  143,  143,  143,
-      143,  143,  143,  143,  143,  143,  143,  143,  143,  143,
-      143,  140,  143,  143,  143,  143,  143,  143,  143,  143,
-      143,  140,  143,  143,  143,  143,  143,  140,  140,    0,
-      140,  140,  140,  140,  140
+      141,  141,  137,  141,  141,  141,  141,  141,  141,  141,
+      141,  141,  141,  141,  141,  141,  141,  141,  137,  141,
+      141,  141,  141,  141,  141,  141,  141,  141,  137,  141,
+      141,  141,  141,  141,  137,  137,    0,  137,  137,  137,
+      137,  137,  137,  137,  137
     } ;
 
-static yyconst short int yy_nxt[256] =
+static yyconst short int yy_nxt[223] =
     {   0,
         6,    7,    8,    9,   10,   11,   12,   13,   14,   15,
-       16,   17,   18,   19,   20,   21,   22,   22,   22,   23,
-       24,   25,   26,   11,   11,   11,   11,   27,   28,   29,
-       11,   30,   11,   11,   31,   32,   11,   11,   33,   34,
-       11,   11,   35,   36,   37,   38,   39,   40,   41,   11,
-       11,   42,   43,   44,   54,   54,   54,   54,   54,   54,
-       54,   54,   69,   55,   56,   57,   59,   70,   60,   60,
-       60,   60,   59,   52,   60,   60,   60,   60,   71,   83,
-       84,   55,   87,   87,   87,   87,   72,  139,   56,   57,
-       59,   90,   60,   60,   60,   60,  138,   98,  137,   91,
+       16,   17,   18,   19,   20,   21,   22,   23,   24,   25,
+       26,   26,   27,   28,   29,   26,   30,   26,   26,   31,
+       32,   26,   26,   33,   34,   26,   26,   35,   36,   37,
+       38,   39,   40,   41,   26,   26,   42,   43,   44,   53,
+       53,   56,   69,   57,   57,   56,   67,   57,   57,   87,
+       70,   68,   53,   53,   84,   84,   56,   88,   57,   57,
+       95,   84,   84,  113,   85,  136,  135,  134,  133,  132,
+      131,  114,   96,   58,  130,   97,   45,   45,   45,   50,
+       50,   50,   54,   54,   62,   62,   79,   79,   79,   81,
 
-      116,  136,   61,   88,   88,   88,   88,  135,  117,   99,
-      134,   88,  100,   87,   87,   87,   87,  133,   88,   88,
-       88,   88,   88,   88,   45,   45,   50,   50,   81,   81,
-       85,   85,  132,  131,  130,  129,  128,  127,  126,  125,
-      124,  123,  122,  121,  120,  119,  118,  115,  114,  113,
-      112,  111,  110,  109,  108,  107,  106,   86,   82,  105,
-      104,  103,  102,  101,   97,   96,   95,   94,   93,   92,
-       89,   86,   51,   48,   47,   82,   80,   79,   78,   77,
-       76,   75,   74,   73,   68,   67,   66,   65,   64,   63,
-       62,   58,   53,   51,   49,   48,   47,  140,   46,   46,
+       81,   82,   82,   82,  129,  128,  127,  126,  125,  124,
+      123,  122,  121,  120,  119,  118,  117,  116,  115,  112,
+      111,  110,  109,  108,  107,  106,  105,  104,  103,   83,
+       80,  102,  101,  100,   99,   98,   94,   93,   92,   91,
+       90,   89,   86,   83,   51,   48,   47,   80,   78,   77,
+       76,   75,   74,   73,   72,   71,   66,   65,   64,   63,
+       61,   60,   59,   55,   52,   51,   49,   48,   47,  137,
+       46,   46,    5,  137,  137,  137,  137,  137,  137,  137,
+      137,  137,  137,  137,  137,  137,  137,  137,  137,  137,
+      137,  137,  137,  137,  137,  137,  137,  137,  137,  137,
 
-        5,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140
+      137,  137,  137,  137,  137,  137,  137,  137,  137,  137,
+      137,  137,  137,  137,  137,  137,  137,  137,  137,  137,
+      137,  137
     } ;
 
-static yyconst short int yy_chk[256] =
+static yyconst short int yy_chk[223] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,   19,   19,   19,   19,   54,   54,
-       54,   54,   33,   19,   19,   19,   21,   33,   21,   21,
-       21,   21,   22,  143,   22,   22,   22,   22,   34,   55,
-       55,   19,   59,   59,   59,   59,   34,  138,   19,   19,
-       60,   66,   60,   60,   60,   60,  132,   74,  129,   66,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,   18,
+       18,   20,   34,   20,   20,   21,   33,   21,   21,   64,
+       34,   33,   53,   53,   56,   56,   57,   64,   57,   57,
+       72,   84,   84,   98,  145,  135,  129,  126,  125,  124,
+      123,   98,   72,   20,  121,   72,  138,  138,  138,  139,
+      139,  139,  140,  140,  141,  141,  142,  142,  142,  143,
 
-      101,  128,   21,   61,   61,   61,   61,  127,  101,   74,
-      126,   61,   74,   87,   87,   87,   87,  124,   61,   61,
-       61,   61,   61,   61,  141,  141,  142,  142,  144,  144,
-      145,  145,  122,  121,  119,  117,  116,  115,  114,  112,
-      110,  109,  106,  105,  104,  103,  102,  100,   99,   98,
-       97,   96,   95,   93,   92,   90,   89,   85,   81,   79,
-       78,   77,   76,   75,   73,   72,   71,   70,   68,   67,
-       65,   58,   50,   48,   47,   46,   43,   41,   40,   39,
-       38,   37,   36,   35,   32,   31,   30,   29,   26,   25,
-       24,   20,   12,   10,    9,    8,    7,    5,    4,    3,
+      143,  144,  144,  144,  119,  118,  116,  114,  113,  112,
+      111,  109,  107,  106,  103,  102,  101,  100,   99,   97,
+       96,   95,   94,   93,   92,   90,   89,   87,   86,   82,
+       79,   77,   76,   75,   74,   73,   71,   70,   69,   68,
+       66,   65,   63,   55,   50,   48,   47,   46,   43,   41,
+       40,   39,   38,   37,   36,   35,   32,   31,   30,   29,
+       25,   24,   23,   19,   11,   10,    9,    8,    7,    5,
+        4,    3,  137,  137,  137,  137,  137,  137,  137,  137,
+      137,  137,  137,  137,  137,  137,  137,  137,  137,  137,
+      137,  137,  137,  137,  137,  137,  137,  137,  137,  137,
 
-      140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
-      140,  140,  140,  140,  140
+      137,  137,  137,  137,  137,  137,  137,  137,  137,  137,
+      137,  137,  137,  137,  137,  137,  137,  137,  137,  137,
+      137,  137
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -501,8 +494,8 @@ char *yytext;
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 7 $
-//          $Date: 2005-10-20 02:08:05 +0100 (Thu, 20 Oct 2005) $
+//      $Revision: 9 $
+//          $Date: 2005-10-21 00:57:21 +0100 (Fri, 21 Oct 2005) $
 //        $Author: s_krustev $
 //---------------------------------------------------------------------------
 // A non-reentrant parser for tell
@@ -510,7 +503,7 @@ char *yytext;
 /* Define the (exclusive) start condition when the parser includes a file */
 #define incl 1
 
-#line 33 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 34 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 #include <stdio.h>
 #include <string.h>
 #include "tellyzer.h"
@@ -537,7 +530,7 @@ namespace parsercmd {
 }
 using namespace parsercmd;
 extern YYLTYPE telllloc;
-#line 541 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.cc"
+#line 534 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -688,7 +681,7 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 60 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 61 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 
  /*******************************************************************************
      This section contains local definitions and also actions executable at each
@@ -696,7 +689,7 @@ YY_DECL
 /* Mark the current position as a start of the next token */
 location_step(&telllloc);
  /*******************************************************************************/
-#line 700 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.cc"
+#line 693 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.cc"
 
 	if ( yy_init )
 		{
@@ -747,13 +740,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 141 )
+				if ( yy_current_state >= 138 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 201 );
+		while ( yy_base[yy_current_state] != 173 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -781,27 +774,27 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 67 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 68 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 location_step(&telllloc);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 68 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 69 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 location_lines(&telllloc,yyleng);location_step(&telllloc);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 69 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 70 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 location_lines(&telllloc,1);/* comment line */
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 70 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 71 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 BEGIN(incl);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 71 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 72 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { /*first change the scanner state, otherwise there
                              is a risk to remain in <incl>*/
                            BEGIN(INITIAL); 
@@ -809,264 +802,249 @@ YY_RULE_SETUP
                               yyterminate(); }
 	YY_BREAK
 case YY_STATE_EOF(incl):
-#line 76 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 77 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { BEGIN(INITIAL); return tknERROR; }                              
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 77 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 78 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { if (!parsercmd::EOfile()) yyterminate();}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 78 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 79 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknVOIDdef;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 79 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 80 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknREALdef;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 80 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 81 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknINTdef;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 81 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 82 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknBOOLdef;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 82 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 83 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknPOINTdef;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 83 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 84 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknBOXdef;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 84 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 85 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknSTRINGdef;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 85 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 86 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknLAYOUTdef;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 86 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 87 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknLISTdef;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 87 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 88 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknRETURN;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 88 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 89 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknTRUE;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 89 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 90 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknFALSE;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 90 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 91 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknIF;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 91 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 92 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknELSE;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 92 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 93 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknWHILE;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 93 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 94 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknREPEAT;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 94 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 95 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknSTRUCTdef;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 95 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 96 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknUNTIL;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 96 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 97 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.parsestr = parsercmd::charcopy(yytext, true);
                            return tknSTRING;                               }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 98 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-{ telllval.parsestr = parsercmd::charcopy("1");return tknFIELD;}
+#line 99 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+{ telllval.parsestr = parsercmd::charcopy(yytext);return tknFIELD;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 99 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-{ telllval.parsestr = parsercmd::charcopy("2");return tknFIELD;}
+#line 100 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return tknLEQ;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 100 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-{ telllval.parsestr = parsercmd::charcopy("x");return tknFIELD;}
+#line 101 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return tknGEQ;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 101 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-{ telllval.parsestr = parsercmd::charcopy("y");return tknFIELD;}
+#line 102 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return tknEQ;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 102 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return tknLEQ;
+#line 103 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return tknNEQ;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 103 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return tknGEQ;
+#line 104 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return tknAND;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 104 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return tknEQ;
+#line 105 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return tknOR;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 105 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return tknNEQ;
+#line 106 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '(';
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 106 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return tknAND;
+#line 107 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return ')';
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 107 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return tknOR;
+#line 108 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '[';
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 108 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '(';
+#line 109 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return ']';
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 109 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return ')';
+#line 110 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '{';
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 110 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '[';
+#line 111 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '}';
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 111 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return ']';
+#line 112 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '<';
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 112 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '{';
+#line 113 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '>';
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 113 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '}';
+#line 114 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return ',';
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 114 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '<';
+#line 115 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '+';
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 115 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '>';
+#line 116 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '-';
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 116 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return ',';
+#line 117 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '*';
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 117 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '+';
+#line 118 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '/';
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 118 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '-';
+#line 119 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+return '=';
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 119 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '*';
-	YY_BREAK
-case 47:
-YY_RULE_SETUP
 #line 120 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '/';
-	YY_BREAK
-case 48:
-YY_RULE_SETUP
-#line 121 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-return '=';
-	YY_BREAK
-case 49:
-YY_RULE_SETUP
-#line 122 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return ';';
 	YY_BREAK
-case 50:
-#line 124 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-case 51:
+case 47:
+#line 122 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+case 48:
 YY_RULE_SETUP
-#line 124 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 122 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.integer = parsercmd::getllint(yytext); return tknINT;}
 	YY_BREAK
-case 52:
-#line 126 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
-case 53:
+case 49:
+#line 124 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+case 50:
 YY_RULE_SETUP
-#line 126 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 124 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.real = atof(yytext); return tknREAL;}
 	YY_BREAK
-case 54:
+case 51:
 YY_RULE_SETUP
-#line 127 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 125 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 { telllval.parsestr = parsercmd::charcopy(yytext);return tknIDENTIFIER;}
 	YY_BREAK
-case 55:
+case 52:
 YY_RULE_SETUP
-#line 128 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 126 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 return tknERROR;
 	YY_BREAK
-case 56:
+case 53:
 YY_RULE_SETUP
-#line 129 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 127 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 ECHO;
 	YY_BREAK
-#line 1070 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.cc"
+#line 1048 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.cc"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1356,7 +1334,7 @@ static yy_state_type yy_get_previous_state()
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 141 )
+			if ( yy_current_state >= 138 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1391,11 +1369,11 @@ yy_state_type yy_current_state;
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 141 )
+		if ( yy_current_state >= 138 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 140);
+	yy_is_jam = (yy_current_state == 137);
 
 	return yy_is_jam ? 0 : yy_current_state;
 	}
@@ -1946,7 +1924,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 129 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
+#line 127 "/troy_home/skr_local/toped_public/tpd_parser/tell_lex.ll"
 
 /**************************************************************************/
 /*Support functions for the flex parser*/
@@ -2028,7 +2006,7 @@ int parsercmd::EOfile() {
       parsercmd::lexer_files* prev = include_stack[--include_stack_ptr];
       /* take care to free the memory from the current file name */
       if (telllloc.filename) delete [] telllloc.filename;
-      /* restore the error location object*/
+	  /* restore the error location object*/
       telllloc = *(prev->location);
       /* delete the current file buffer (I suppose file is also closed)*/
       yy_delete_buffer( YY_CURRENT_BUFFER );
@@ -2039,3 +2017,9 @@ int parsercmd::EOfile() {
   }
   return 0;
 }
+/*
+"."[Pp]"1"               { telllval.parsestr = parsercmd::charcopy("1");return tknFIELD;}
+"."[Pp]"2"               { telllval.parsestr = parsercmd::charcopy("2");return tknFIELD;}
+"."[Xx]                  { telllval.parsestr = parsercmd::charcopy("x");return tknFIELD;}
+"."[Yy]                  { telllval.parsestr = parsercmd::charcopy("y");return tknFIELD;}
+*/

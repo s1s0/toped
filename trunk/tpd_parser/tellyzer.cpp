@@ -53,13 +53,14 @@ parsercmd::functionMAP        parsercmd::cmdBLOCK::_funcMAP;
 // Table of current nested blocks
 parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
 // Operand stack
-parsercmd::operandSTACK       parsercmd::cmdVIRTUAL::OPstack;
+telldata::operandSTACK       parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
-parsercmd::UNDOPerandQUEUE    parsercmd::cmdSTDFUNC::UNDOPstack;
+telldata::UNDOPerandQUEUE     parsercmd::cmdSTDFUNC::UNDOPstack;
 // UNDO command queue
 parsercmd::undoQUEUE          parsercmd::cmdSTDFUNC::UNDOcmdQ;
 
-real parsercmd::cmdVIRTUAL::getOpValue(operandSTACK& OPs) {
+
+real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs) {
    real value = 0;
    telldata::tell_var *op = OPs.top();OPs.pop();
    if (op->get_type() == telldata::tn_real) 
@@ -70,7 +71,7 @@ real parsercmd::cmdVIRTUAL::getOpValue(operandSTACK& OPs) {
    return value;
 }
 
-real parsercmd::cmdVIRTUAL::getOpValue(UNDOPerandQUEUE& OPs, bool front) {
+real parsercmd::cmdVIRTUAL::getOpValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    real value = 0;
    telldata::tell_var *op;
    if (front) {op = OPs.front();OPs.pop_front();}
@@ -83,7 +84,7 @@ real parsercmd::cmdVIRTUAL::getOpValue(UNDOPerandQUEUE& OPs, bool front) {
    return value;
 }
 
-word parsercmd::cmdVIRTUAL::getWordValue(operandSTACK& OPs) {
+word parsercmd::cmdVIRTUAL::getWordValue(telldata::operandSTACK& OPs) {
    telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
    word value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_WORD_VALUE))
@@ -93,7 +94,7 @@ word parsercmd::cmdVIRTUAL::getWordValue(operandSTACK& OPs) {
    return value;
 }
 
-word parsercmd::cmdVIRTUAL::getWordValue(UNDOPerandQUEUE& OPs, bool front) {
+word parsercmd::cmdVIRTUAL::getWordValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    telldata::ttint  *op;
    if (front) {op = static_cast<telldata::ttint*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();} 
@@ -105,7 +106,7 @@ word parsercmd::cmdVIRTUAL::getWordValue(UNDOPerandQUEUE& OPs, bool front) {
    return value;
 }
 
-byte parsercmd::cmdVIRTUAL::getByteValue(operandSTACK& OPs) {
+byte parsercmd::cmdVIRTUAL::getByteValue(telldata::operandSTACK& OPs) {
    telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
    byte value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_BYTE_VALUE))
@@ -115,7 +116,7 @@ byte parsercmd::cmdVIRTUAL::getByteValue(operandSTACK& OPs) {
    return value;
 }
 
-byte parsercmd::cmdVIRTUAL::getByteValue(UNDOPerandQUEUE& OPs, bool front) {
+byte parsercmd::cmdVIRTUAL::getByteValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    telldata::ttint  *op;
    if (front) {op = static_cast<telldata::ttint*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();}
@@ -127,14 +128,14 @@ byte parsercmd::cmdVIRTUAL::getByteValue(UNDOPerandQUEUE& OPs, bool front) {
    return value;
 }
 
-std::string parsercmd::cmdVIRTUAL::getStringValue(operandSTACK& OPs) {
+std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::operandSTACK& OPs) {
    telldata::ttstring  *op = static_cast<telldata::ttstring*>(OPs.top());OPs.pop();
    std::string value = op->value();
    delete op;
    return value;
 }
 
-std::string parsercmd::cmdVIRTUAL::getStringValue(UNDOPerandQUEUE& OPs, bool front) {
+std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    telldata::ttstring  *op;
    if (front) {op = static_cast<telldata::ttstring*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttstring*>(OPs.back());OPs.pop_back();}
@@ -143,14 +144,14 @@ std::string parsercmd::cmdVIRTUAL::getStringValue(UNDOPerandQUEUE& OPs, bool fro
    return value;
 }
 
-bool parsercmd::cmdVIRTUAL::getBoolValue(operandSTACK& OPs) {
+bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::operandSTACK& OPs) {
    telldata::ttbool  *op = static_cast<telldata::ttbool*>(OPs.top());OPs.pop();
    bool value = op->value();
    delete op;
    return value;
 }
 
-bool parsercmd::cmdVIRTUAL::getBoolValue(UNDOPerandQUEUE& OPs, bool front) {
+bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
    telldata::ttbool  *op;
    if (front) {op = static_cast<telldata::ttbool*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttbool*>(OPs.back());OPs.pop_back();}
@@ -320,66 +321,27 @@ int parsercmd::cmdSTACKRST::execute() {
 }
 
 //=============================================================================
-// I don't like this rubbish, but it works.
-// Virtual operator can't be defined (we need '=' here), but
-// we still can think about virtual function -> assign for example
 int parsercmd::cmdASSIGN::execute() {
    TELL_DEBUG(cmdREALASSIGN);
    telldata::tell_var *op = OPstack.top();OPstack.pop();
    telldata::typeID typeis = _var->get_type();
-   if (typeis & telldata::tn_listmask) {
-      *(static_cast<telldata::ttlist*>(_var)) = *(static_cast<telldata::ttlist*>(op));
-      OPstack.push(new telldata::ttlist(*static_cast<telldata::ttlist*>(_var)));
-//      OPstack.push(static_cast<telldata::ttlist*>(_var)->selfcopy());
+   if (TLISALIST(typeis)) {
+      typeis = typeis & ~telldata::tn_listmask;
    }
-   else
-   switch (typeis) {
-      case telldata::tn_real:
-         if (op->get_type() == telldata::tn_real) 
-            *(static_cast<telldata::ttreal*>(_var)) = *(static_cast<telldata::ttreal*>(op));
-         else if (op->get_type() == telldata::tn_int)
-            *(static_cast<telldata::ttreal*>(_var)) = *(static_cast<telldata::ttint*>(op));
-         OPstack.push(new telldata::ttreal(*static_cast<telldata::ttreal*>(_var)));
-         break;
-      case telldata::tn_int:
-         if (op->get_type() == telldata::tn_real) 
-            *(static_cast<telldata::ttint*>(_var)) = *(static_cast<telldata::ttreal*>(op));
-         else if (op->get_type() == telldata::tn_int)
-            *(static_cast<telldata::ttint*>(_var)) = *(static_cast<telldata::ttint*>(op));
-         OPstack.push(new telldata::ttint(*static_cast<telldata::ttint*>(_var)));
-         break;
-      case   telldata::tn_bool: 
-         *(static_cast<telldata::ttbool*>(_var)) = *(static_cast<telldata::ttbool*>(op));
-         OPstack.push(new telldata::ttbool(*static_cast<telldata::ttbool*>(_var)));
-         break;
-      case   telldata::tn_pnt: 
-         *(static_cast<telldata::ttpnt*>(_var)) = *(static_cast<telldata::ttpnt*>(op));
-         OPstack.push(new telldata::ttpnt(*static_cast<telldata::ttpnt*>(_var)));
-         break;
-      case   telldata::tn_box: 
-         *(static_cast<telldata::ttwnd*>(_var)) = *(static_cast<telldata::ttwnd*>(op));
-         OPstack.push(new telldata::ttwnd(*static_cast<telldata::ttwnd*>(_var)));
-         break;
-      case telldata::tn_string:
-         *(static_cast<telldata::ttstring*>(_var)) = *(static_cast<telldata::ttstring*>(op));
-         OPstack.push(new telldata::ttstring(*static_cast<telldata::ttstring*>(_var)));
-         break;
-      case telldata::tn_layout:
-         *(static_cast<telldata::ttlayout*>(_var)) = *(static_cast<telldata::ttlayout*>(op));
-         OPstack.push(new telldata::ttlayout(*static_cast<telldata::ttlayout*>(_var)));
-         break;
-      default: 
-         tellerror("Bad or unsupported type in assign statement");
-         break; 
+   if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
+      tellerror("Bad or unsupported type in assign statement");
+   else {
+      _var->assign(op); OPstack.push(_var->selfcopy());
    }
    delete op;
    return EXEC_NEXT;
+
 }
 
 //=============================================================================
 int parsercmd::cmdPUSH::execute() {
    // The temptation here is to put the constants in the operand stack directly,
-   // i.e. without self-copy. It is wrong though - for many cases - for example
+   // i.e. without self-copy. It is wrong though - for many reasons - for example
    // for conditional block "while (count > 0)". It should be executed many 
    // times but the variable will exists only the first time, because it will 
    // be cleaned-up from the operand stack after the first execution
@@ -388,86 +350,54 @@ int parsercmd::cmdPUSH::execute() {
    return EXEC_NEXT;
 }
 
-//=============================================================================
-int parsercmd::cmdPOINT::execute() {
-   TELL_DEBUG(cmdPOINT);
-   real y= getOpValue();
-   real x= getOpValue();
-   OPstack.push(new telldata::ttpnt(x, y));
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-parsercmd::cmdPOINTFIELD::cmdPOINTFIELD(char* f, yyltype loc) {
-   if (('x' != *f) && ('y' != *f)) 
-      tellerror("bad field name. 'x' or 'y' expected", loc);
-   else _field = *f;
-//   delete f;
-}
-
-int parsercmd::cmdPOINTFIELD::execute() {
-   TELL_DEBUG(cmdPOINTFIELD);
-   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttreal *e;
-   if ('x' == _field) e = new telldata::ttreal(p->x());
-   else               e = new telldata::ttreal(p->y());
-   OPstack.push(e);
-   delete p;
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-parsercmd::cmdWINDOWFIELD::cmdWINDOWFIELD(char* f, yyltype loc) {
-   if (('1' != *f) && ('2' != *f)) 
-      tellerror("bad field name. 'p1' or 'p2' expected", loc);
-   else _field = *f;
-//   delete f;
-}
-
-int parsercmd::cmdWINDOWFIELD::execute() {
-   TELL_DEBUG(cmdWINDOWFIELD);
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *p;
-   if ('1' == _field) p = new telldata::ttpnt(w->p1().x(),w->p1().y() );
-   else               p = new telldata::ttpnt(w->p2().x(),w->p2().y() );
-   OPstack.push(p);
-   delete w;
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-int parsercmd::cmdWINDOW::execute() {
-   TELL_DEBUG(cmdWINDOW);
-   telldata::ttwnd *w;
-//   if ('p' == _from) {
-      telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-      telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-      w = new telldata::ttwnd(p1->x(),p1->y(),p2->x(),p2->y());
-      delete p1; delete p2;
-//   }
-//   else {
-//      real y2= getOpValue();
-//      real x2= getOpValue();
-//      real y1= getOpValue();
-//      real x1= getOpValue();
-//      w = new ttwnd(x1,y1,x2,y2);
-//   }
-   OPstack.push(w);
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-int parsercmd::cmdLIST::execute() {
-   TELL_DEBUG(cmdLIST);
-   telldata::ttlist *pl = new telldata::ttlist(_ttype);
-   pl->reserve(_length);
+telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
+   telldata::typeID comptype = (*_arg)() & ~telldata::tn_listmask;
+   telldata::ttlist *pl = new telldata::ttlist(comptype);
+   unsigned llength = _arg->child()->size();
+   pl->reserve(llength);
    telldata::tell_var  *p;
-   for (unsigned i = 0; i < _length; i++) {
+   for (unsigned i = 0; i < llength; i++) {
       p = OPstack.top();OPstack.pop();
       pl->add(p); //Dont delete p; here! And don't get confused!
    }
-   pl->reverse(); 
-   OPstack.push(pl);
+   pl->reverse();
+   return pl;
+}
+
+telldata::tell_var* parsercmd::cmdSTRUCT::getPnt() {
+   telldata::ttreal* y = new telldata::ttreal(); y->assign(OPstack.top());
+   delete OPstack.top(); OPstack.pop();
+   telldata::ttreal* x = new telldata::ttreal(); x->assign(OPstack.top());
+   delete OPstack.top(); OPstack.pop();
+   telldata::tell_var *ustrct = new telldata::ttpnt(x->value(), y->value());
+   delete x; delete y;
+   return ustrct;
+}
+
+telldata::tell_var* parsercmd::cmdSTRUCT::getBox() {
+   telldata::ttpnt* p2 = static_cast<telldata::ttpnt*>(OPstack.top());
+   OPstack.pop();
+   telldata::ttpnt* p1 = static_cast<telldata::ttpnt*>(OPstack.top());
+   OPstack.pop();
+   telldata::tell_var *ustrct = new telldata::ttwnd(*p1, *p2);
+   delete p1; delete p2;
+   return ustrct;
+}
+
+
+int parsercmd::cmdSTRUCT::execute() {
+   telldata::tell_var *ustrct;
+   if (TLISALIST( (*_arg)() )) ustrct = getList();
+   else {
+      const telldata::tell_type *stype = CMDBlock->getTypeByID( (*_arg)() );
+      assert(NULL != stype);
+      switch( (*_arg)() ) {
+         case telldata::tn_pnt: ustrct = getPnt(); break;
+         case telldata::tn_box: ustrct = getBox(); break;
+         default:ustrct = new telldata::user_struct(stype, OPstack);
+      }
+   }
+   OPstack.push(ustrct);
    return EXEC_NEXT;
 }
 
@@ -482,6 +412,24 @@ int parsercmd::cmdFUNCCALL::execute() {
    return fresult;
 }
 
+//=============================================================================
+bool parsercmd::cmdRETURN::checkRetype(telldata::argumentID* arg) {
+   if (NULL == arg) return (_retype == telldata::tn_void);
+
+   if (TLUNKNOWN_TYPE((*arg)())) {
+      const telldata::tell_type* vartype;
+      if (TLISALIST(_retype)) { // we have a list lval
+          vartype = CMDBlock->getTypeByID(_retype & ~telldata::tn_listmask);
+          if (NULL != vartype) vartype->userStructListCheck(arg);
+          else arg->toList();
+      }
+      else { // we have a struct only
+         vartype = CMDBlock->getTypeByID(_retype);
+         if (NULL != vartype) vartype->userStructCheck(arg);
+      }
+   }
+   return ((_retype == (*arg)()) || (NUMBER_TYPE(_retype) && NUMBER_TYPE((*arg)())));
+}
 //=============================================================================
 parsercmd::cmdBLOCK::cmdBLOCK() {
    assert(!_blocks.empty());
@@ -543,8 +491,22 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::type
    for (BS cmd = blkstart; cmd != blkend; cmd++) 
       for (CT ctp = (*cmd)->TYPElocal.begin(); ctp != (*cmd)->TYPElocal.end(); ctp++)
          if (ID == ctp->second->ID()) return ctp->second;
+   return NULL;
 }
-
+/*
+telldata::typeID* parsercmd::cmdBLOCK::checkfield(telldata::typeID ID, char*& fname, yyltype loc) const {
+   telldata::tell_type* stype = getTypeByID(ID);
+   if (NULL != stype) {
+      telldata::tell_type* ftype = stype.getfieldtype(fname);
+      if (NULL != ftype)
+         return ftype->ID();
+      else 
+         tellerror("Bad field name", loc);
+   }
+   else tellerror("Variable has no fields", loc);
+   return telldata::tn_void;
+}
+*/
 telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype loc) {
    if (ID & telldata::tn_listmask) return(new telldata::ttlist(ID));
    else
@@ -605,62 +567,155 @@ parsercmd::cmdBLOCK::~cmdBLOCK() {
 
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
-                                        (char*& fn, argumentMAP* amap) const {
-   cmdSTDFUNC *fbody;
+                                        (char*& fn, telldata::argumentQ* amap) const {
+   cmdSTDFUNC *fbody = NULL;
    typedef functionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
+   telldata::argumentQ* arguMap = (NULL == amap) ? new telldata::argumentQ : amap;
    for (MM fb = range.first; fb != range.second; fb++) {
       fbody = fb->second;
-      if (0 == fbody->argsOK(amap)) 
-         return fbody;
+      if (0 == fbody->argsOK(arguMap)) break;
+      else fbody = NULL;
    }
-   return NULL;
+   if (NULL == amap) delete arguMap;
+   return fbody;
 }
 
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
                                         (char*& fn, argumentLIST* alst) const {
    // convert argumentLIST to argumentMAP
-   argumentMAP amap;
+   telldata::argumentQ amap;
    typedef argumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++) {
-      amap.push_back((*arg)->second->get_type()); }
+      amap.push_back(new telldata::argumentID((*arg)->second->get_type())); }
    // call
    return getFuncBody(fn,&amap);
 }
 
 //=============================================================================
-int parsercmd::cmdSTDFUNC::argsOK(argumentMAP* amap) {
-// This is supposed to be called only by user defined functions.
-// Standard functions will overwrite this function although they
-// also can use it
+int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
+// This function is rather twisted, but this seems the only way to deal with
+// anonimous user defined structures handled over as input function arguments.
+// Otherwise we have to restrict significantly the input arguments rules for
+// functions. Here is the problem.
+// Functoins in tell can be overloaded. In the same time we can have user defined
+// structures, that have coincidental fields - for example the fields of the point
+// structure coincides with the fields of an user structure defined as
+// struct sameAsPoint{real a, real z}
+// And on top of this we can have two overloaded functions, that have as a first
+// argument a variables of type point and sameAsPoint respectively. The problem
+// comes when the function is called with anonymous arguments (not with variables),
+// which type can not be determined without the type of the function parameter.
+// Here is the idea
+// 1. If an unknown type appears in the argument list
+//  a) Create a copy of the argument using argumentID copy constructor
+//  b) Check that the new argument matches the type of the function parameter and
+//     if so:
+//     - assign (adjust) the type of the argument to the type of the parameter
+//     - push the argument in the temporary structure
+//  c) If the argument doesn't match, bail-out, but don't forget to clean-up the
+//     the copies of the previously checked arguments
+// 2. When the entire argument list is checked and it matches the corresponding
+//    function parameter types, use the saved list of adjusted arguments to readjust
+//    the original user defined argument types, which will be used to execute
+//    properly the cmdSTRUCT commands already pushed into the command stack during
+//    the bison parsing
+// There is one remaining problem here. It is still possible to have two or even more
+// overloaded functions defined with effectively the same parameter list. In this case,
+// when that function is called with anonymous argument(s) the tellyzer will invoke the
+// first function body that matches the entire list of input arguments. This will be most
+// likely undefined. To prevent this we need beter checks during the function definition
+// parsing
    int i = amap->size();
    if (i != arguments->size()) return -1;
+   telldata::argumentQ UnknownArgsCopy;
+   // :) - some fun here, but it might be confusing - '--' postfix operation is executed
+   // always after the comparison, but before the cycle body. So. if all the arguments
+   // are checked (match), the cycle ends-up with i == -1;
    while (i-- > 0) {
-      if (!NUMBER_TYPE((*amap)[i])) {
+      telldata::typeID cargID = (*(*amap)[i])();
+      telldata::argumentID* carg = TLUNKNOWN_TYPE(cargID) ?
+                        new telldata::argumentID((*((*amap)[i]))) : ((*amap)[i]);
+      telldata::typeID lvalID = (*arguments)[i]->second->get_type();
+      if (TLUNKNOWN_TYPE(cargID)) {
+         const telldata::tell_type* vartype;
+         if (TLISALIST(lvalID)) { // we have a list lval
+            vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
+            if (NULL != vartype) vartype->userStructListCheck(carg);
+            else carg->toList();
+         }
+         else { // we have a struct only
+            vartype = CMDBlock->getTypeByID(lvalID);
+            if (NULL != vartype) vartype->userStructCheck(carg);
+         }
+      }
+
+      if (!NUMBER_TYPE( (*carg)() )) {
          // for non-number types there is no internal conversion,
          // so check strictly the type
-         if ((*amap)[i] != (*arguments)[i]->second->get_type()) break;
+         if ( (*carg)() != lvalID) {
+            if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) delete carg;
+            break;
+         }
+         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) UnknownArgsCopy.push_back(carg);
       }
-      else // for number types - allow compatablity
-         if (!NUMBER_TYPE((*arguments)[i]->second->get_type())) break;
-         else if ((*amap)[i] > (*arguments)[i]->second->get_type()) break;
+      else {// for number types - allow compatablity
+         if ((!NUMBER_TYPE(lvalID)) || ( (*carg)() > lvalID)) {
+            if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) delete carg;
+            break;
+         }
+         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) UnknownArgsCopy.push_back(carg);
+      }
    }
-   return (i+1);
+   i++;
+   if (UnknownArgsCopy.size() > 0) {
+      if (i > 0) {
+         while (UnknownArgsCopy.size() > 0) {
+            delete UnknownArgsCopy.front(); UnknownArgsCopy.pop_front();
+         }
+      }
+      for (telldata::argumentQ::iterator CA = amap->begin(); CA != amap->end(); CA++) {
+         if ( TLUNKNOWN_TYPE((**CA)()) ) {
+            (*CA)->adjustID(UnknownArgsCopy.front());
+            delete UnknownArgsCopy.front(); UnknownArgsCopy.pop_front();
+         }
+      }
+      assert(UnknownArgsCopy.size() == 0);
+   }
+   return (i);
 }
 
 void parsercmd::cmdSTDFUNC::undo_cleanup() {
    if (UNDOcmdQ.size() > 20) {
       UNDOcmdQ.back()->undo_cleanup(); UNDOcmdQ.pop_back();
    }
-}   
+}
+
+std::string parsercmd::cmdSTDFUNC::callingConv() {
+   std::ostringstream ost;
+   int argnum = arguments->size();
+   ost << "( ";
+   for (int i = 0; i != argnum; i++) {
+      //get the argument name
+      switch ((*arguments)[i]->second->get_type() & ~telldata::tn_listmask) {
+        case telldata::tn_int    : ost << "int"        ; break;
+        case telldata::tn_real   : ost << "real"       ; break;
+        case telldata::tn_bool   : ost << "bool"       ; break;
+        case telldata::tn_string : ost << "string"     ; break;
+        case telldata::tn_pnt    : ost << "point"      ; break;
+        case telldata::tn_box    : ost << "box"        ; break;
+        default                  : ost << "?usertype?";
+      };
+      if ((*arguments)[i]->second->get_type() & telldata::tn_listmask) 
+        ost << " list";
+      if (i < argnum - 1) ost << " , ";
+   }
+   ost << " )";
+   return ost.str();
+}
 
 parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
-   if (NULL == arguments) return;
-   for (argumentLIST::iterator ALI = arguments->begin(); ALI != arguments->end(); ALI++) {
-      delete (*ALI)->second;
-      delete (*ALI);
-   }   
-   arguments->clear();   
+   ClearArgumentList(arguments);
    delete arguments;
 }   
 
@@ -687,35 +742,12 @@ int parsercmd::cmdFUNC::execute() {
       // get a value from the operand stack
       telldata::tell_var* argval = OPstack.top();
       // replace the value of the local variable with the argument value
-      argvar->set_value(argval);
+      argvar->assign(argval);
       OPstack.pop();
    }
    LogFile << "// Executing UDF " << LogFile.getFN();LogFile.flush();   
    cmdBLOCK::execute();
    return EXEC_NEXT;
-}
-
-std::string parsercmd::cmdFUNC::callingConv() {
-   std::ostringstream ost;
-   int argnum = arguments->size();
-   ost << "( ";
-   for (int i = 0; i != argnum; i++) {
-      //get the argument name
-      switch ((*arguments)[i]->second->get_type() & ~telldata::tn_listmask) {
-        case telldata::tn_int    : ost << "int"        ; break;
-        case telldata::tn_real   : ost << "real"       ; break;
-        case telldata::tn_bool   : ost << "bool"       ; break;
-        case telldata::tn_string : ost << "string"     ; break;
-        case telldata::tn_pnt    : ost << "point"      ; break;
-        case telldata::tn_box    : ost << "box"        ; break;
-        default                  : ost << "?usertype?";
-      };
-      if ((*arguments)[i]->second->get_type() & telldata::tn_listmask) 
-        ost << " list";
-      if (i < argnum - 1) ost << " , ";
-   }
-   ost << " )";
-   return ost.str();
 }
 
 //=============================================================================
@@ -780,32 +812,16 @@ parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {
    pushblk();
 };
 
+void  parsercmd::cmdMAIN::addGlobalType(char* ttypename, telldata::tell_type* ntype) {
+   assert(TYPElocal.end() == TYPElocal.find(ttypename));
+   TYPElocal[ttypename] = ntype;
+}
+
 parsercmd::cmdMAIN::~cmdMAIN(){
    for (functionMAP::iterator FMI = _funcMAP.begin(); FMI != _funcMAP.end(); FMI ++)
       delete FMI->second;
    _funcMAP.clear();
 };
-
-
-//=============================================================================
-telldata::typeID parsercmd::newDataStructure(telldata::typeID op1, telldata::typeID op2,
-                                                  yyltype loc1, yyltype loc2) {
-   yyltype loc;
-   if (NUMBER_TYPE(op1))
-      if (NUMBER_TYPE(op2)) {
-         CMDBlock->pushcmd(new parsercmd::cmdPOINT());
-         return telldata::tn_pnt; }
-      else loc = loc2;
-   else
-      if (telldata::tn_pnt == op1)
-         if (telldata::tn_pnt == op2) {
-            CMDBlock->pushcmd(new parsercmd::cmdWINDOW());
-            return telldata::tn_box; }
-         else loc = loc2;
-      else loc = loc1;
-   tellerror("unexepected operand type",loc);
-   return telldata::tn_void;
-}
 
 //=============================================================================
 telldata::typeID parsercmd::UMinus(telldata::typeID op1, yyltype loc1) {
@@ -964,16 +980,42 @@ telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
    return telldata::tn_void;
 }
 
-telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::typeID op2,
+telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentID* op2,
                                                                  yyltype loc) {
    if (!lval) {
       tellerror("Lvalue undefined in assign statement", loc);
       return telldata::tn_void;
-   }   
-   telldata::typeID op1 = lval->get_type();
-   if ((op1 == op2) || (NUMBER_TYPE(op1) && NUMBER_TYPE(op2))) {
+   }
+//   telldata::typeID op1 = lval->get_type();
+   telldata::typeID lvalID = lval->get_type();
+   // Here if user structure is used - clarify that it is compatible
+   // The thing is that op2 could be a struct of a struct list or a list of
+   // tell basic types. This should be checked in the following order:
+   // 1. Get the type of the recipient (lval)
+   // 2. If it is a list
+   //    a) strip the list atribute and get the type of the list component
+   //    b) if the type of the lval list component is compound (struct list), check the
+   //       input structure for struct list
+   //    c) if the type of the list component is basic, check directly that
+   //       op2 is a list
+   // 3. If it is not a list
+   //    a) if the type of the lval is compound (struct list), check the
+   //       input structure for struct 
+   if (TLUNKNOWN_TYPE((*op2)())) {
+      const telldata::tell_type* vartype;
+      if (TLISALIST(lvalID)) { // we have a list lval
+          vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
+          if (NULL != vartype) vartype->userStructListCheck(op2);
+          else op2->toList();
+      }
+      else { // we have a struct only
+         vartype = CMDBlock->getTypeByID(lvalID);
+         if (NULL != vartype) vartype->userStructCheck(op2);
+      }
+   }
+   if ((lvalID == (*op2)()) || (NUMBER_TYPE(lvalID) && NUMBER_TYPE((*op2)()))) {
       CMDBlock->pushcmd(new parsercmd::cmdASSIGN(lval));
-      return op1;
+      return lvalID;
    }
    else {
       tellerror("Operands must be the same type", loc);
@@ -1041,6 +1083,15 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
 //         break;
 }
 
+void parsercmd::ClearArgumentList(argumentLIST* alst) {
+   if (NULL == alst) return;
+   for (argumentLIST::iterator ALI = alst->begin(); ALI != alst->end(); ALI++) {
+      delete (*ALI)->second;
+      delete (*ALI);
+   }
+   alst->clear();
+}
+
 //-----------------------------------------------------------------------------
 // class toped_logfile
 //-----------------------------------------------------------------------------
@@ -1080,7 +1131,7 @@ console::toped_logfile& console::toped_logfile::operator<< (const real _r) {
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttpnt& _p) {
-   _file << "(" << _p.x() << "," << _p.y() << ")";
+   _file << "{" << _p.x() << "," << _p.y() << "}";
    return *this;
 }
 
@@ -1089,8 +1140,8 @@ console::toped_logfile& console::toped_logfile::operator<< (const std::string& _
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttwnd& _w) {
-   _file << "((" << _w.p1().x() << "," << _w.p1().y() << ")," <<
-         "(" << _w.p2().x() << "," << _w.p2().y() << "))";
+   _file << "{{" << _w.p1().x() << "," << _w.p1().y() << "}," <<
+         "{" << _w.p2().x() << "," << _w.p2().y() << "}}";
    return *this;
 }
 
