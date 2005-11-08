@@ -260,14 +260,26 @@ funcblock :
 returnstatement :
      tknRETURN                             {
       if      (!arglist) tellerror("return statement outside function body", @1);
-      else if (funcretype != telldata::tn_void) tellerror("value expected", @1);
-      else CMDBlock->pushcmd(new parsercmd::cmdRETURN());
+      else {
+         parsercmd::cmdRETURN* rcmd = new parsercmd::cmdRETURN(funcretype);
+         if (rcmd->checkRetype(NULL)) CMDBlock->pushcmd(rcmd);
+         else {
+            tellerror("return value expected", @1);
+            delete rcmd;
+         }
+      }
       returns++;
    }
    | tknRETURN  argument                   {
       if (!arglist) tellerror("return statement outside function body", @1);
-      else if (funcretype != (*$2)()) tellerror("return type different from function type", @2);
-      else CMDBlock->pushcmd(new parsercmd::cmdRETURN());
+      else {
+         parsercmd::cmdRETURN* rcmd = new parsercmd::cmdRETURN(funcretype);
+         if (rcmd->checkRetype($2)) CMDBlock->pushcmd(rcmd);
+         else {
+            tellerror("return type different from function type", @2);
+            delete rcmd;
+         }
+      }
       returns++;
    }
 ;
