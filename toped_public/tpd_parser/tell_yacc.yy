@@ -47,8 +47,6 @@
 extern parsercmd::cmdBLOCK*       CMDBlock;
 /*Global console object*/
 extern console::ted_cmd*           Console;
-/*Current condition block */
-parsercmd::cmdBLOCK* condBlock = NULL;
 /*Argument list structure used in function definitions*/
 parsercmd::argumentLIST  *arglist = NULL;
 /*Current tell variable name*/
@@ -310,11 +308,11 @@ whilestatement:
          CMDBlock->pushblk();
       }
      expression ')'                 {
-         condBlock = CMDBlock;
-         CMDBlock = CMDBlock->popblk();
          if (telldata::tn_bool != $4) tellerror("bool type expected", @4);
       }
      block {
+         parsercmd::cmdBLOCK* condBlock = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
          CMDBlock->pushcmd(new parsercmd::cmdWHILE(condBlock,$7));
    }
 ;
@@ -325,10 +323,13 @@ repeatstatement:
          CMDBlock->pushblk();
       }
      expression ')'                 {
-         condBlock = CMDBlock;
+         parsercmd::cmdBLOCK* condBlock = CMDBlock;
          CMDBlock = CMDBlock->popblk();
-         if (telldata::tn_bool != $6) tellerror("bool type expected", @6);
-         CMDBlock->pushcmd(new parsercmd::cmdREPEAT(condBlock,$2));
+         if (telldata::tn_bool != $6) {
+            tellerror("bool type expected", @6);
+            delete condBlock;
+         }
+         else CMDBlock->pushcmd(new parsercmd::cmdREPEAT(condBlock,$2));
    }
 ;
 
