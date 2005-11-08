@@ -85,16 +85,16 @@ void console::patternNormalize(wxString& str) {
    assert(regex.Compile("[[:space:]]$"));
    regex.ReplaceAll(&str,"");
    //remove spaces before brackets and separators
-   assert(regex.Compile("([[:space:]])([\\(\\)\\,\\-\\+])"));
+   assert(regex.Compile("([[:space:]])([\\{\\}\\,\\-\\+])"));
    regex.ReplaceAll(&str,"\\2");
    // remove spaces after brackets and separators
-   assert(regex.Compile("([\\(\\)\\,\\-\\+])([[:space:]])"));
+   assert(regex.Compile("([\\{\\}\\,\\-\\+])([[:space:]])"));
    regex.ReplaceAll(&str,"\\1");
 
 }
 
 //==============================================================================
-console::miniParser::miniParser(parsercmd::operandSTACK *cs,telldata::typeID et) {
+console::miniParser::miniParser(telldata::operandSTACK *cs,telldata::typeID et) {
    client_stack = cs;  _wait4type = et;
 }
 
@@ -140,10 +140,10 @@ bool console::miniParser::getBox() {
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
-   assert(src_tmpl.Compile("^\\({2}"));
-   src_tmpl.ReplaceAll(&exp,"(");    
-   assert(src_tmpl.Compile("\\){2}$"));
-   src_tmpl.ReplaceAll(&exp,")");    
+   assert(src_tmpl.Compile("^\\{{2}"));
+   src_tmpl.ReplaceAll(&exp,"{");
+   assert(src_tmpl.Compile("\\}{2}$"));
+   src_tmpl.ReplaceAll(&exp,"}");
    // now we are going to extract the points
    assert(src_tmpl.Compile(point_tmpl));
    telldata::ttpnt pp[2];
@@ -294,7 +294,7 @@ void console::ted_cmd::parseCommand(wxString cmd) {
 }
    
 
-void console::ted_cmd::waitGUInput(parsercmd::operandSTACK *clst,telldata::typeID ttype) {
+void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst,telldata::typeID ttype) {
    puc = new miniParser(clst, ttype);_numpoints = 0;
    _mouseIN_OK = true;
    _guinput.Clear();
@@ -355,12 +355,12 @@ void console::ted_cmd::OnGUInput(wxCommandEvent& evt) {
 void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    wxString ost1, ost2;
    // prepare the point string for the input log window
-   ost1 << "( "<< p.x() << " , " << p.y() << " )";
+   ost1 << "{ "<< p.x() << " , " << p.y() << " }";
    // take care about the entry brackets ...
    if (_numpoints == 0) 
       switch (puc->wait4type()) {
-         case TLISTOF(telldata::tn_pnt): ost2 << "{ " << ost1; break;
-         case         telldata::tn_box : ost2 << "( " << ost1; break;
+         case TLISTOF(telldata::tn_pnt):
+         case         telldata::tn_box : ost2 << "{ " << ost1; break;
          default                       : ost2 << ost1;
       }
    // ... and separators between the points
@@ -383,8 +383,8 @@ void console::ted_cmd::mouseRB() {
    // put the proper closing bracket
    wxString close;
    switch (puc->wait4type()) {
-      case TLISTOF(telldata::tn_pnt): close = " }"; break;
-      case         telldata::tn_box : close = " )"; break;
+      case TLISTOF(telldata::tn_pnt):
+      case         telldata::tn_box : close = " }"; break;
       default         : close = ""  ;
    }
    // print it

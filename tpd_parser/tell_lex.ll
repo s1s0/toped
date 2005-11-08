@@ -28,7 +28,8 @@
 
 /* Define the (exclusive) start condition when the parser includes a file */
 %x incl
-lex_string  \"[^"]*\"
+lex_string        \"[^"]*\"
+lex_identifier    [a-zA-Z_][a-zA-Z0-9_]*
 %{ /**************************************************************************/
 #include <stdio.h>
 #include <string.h>
@@ -95,10 +96,7 @@ struct                     return tknSTRUCTdef;
 until                      return tknUNTIL;
 {lex_string}             { telllval.parsestr = parsercmd::charcopy(yytext, true);
                            return tknSTRING;                               }
-"."[Pp]"1"               { telllval.parsestr = parsercmd::charcopy("1");return tknFIELD;}
-"."[Pp]"2"               { telllval.parsestr = parsercmd::charcopy("2");return tknFIELD;}
-"."[Xx]                  { telllval.parsestr = parsercmd::charcopy("x");return tknFIELD;}
-"."[Yy]                  { telllval.parsestr = parsercmd::charcopy("y");return tknFIELD;}
+"."{lex_identifier}      { telllval.parsestr = parsercmd::charcopy(yytext);return tknFIELD;}
 "<="                       return tknLEQ;
 ">="                       return tknGEQ;
 "=="                       return tknEQ;
@@ -124,7 +122,7 @@ until                      return tknUNTIL;
 [0-9]+                   { telllval.integer = parsercmd::getllint(yytext); return tknINT;}
 [0-9]+"."[0-9]*   |
 [0-9]*"."[0-9]+       	 { telllval.real = atof(yytext); return tknREAL;}
-[a-zA-Z0-9_$]*           { telllval.parsestr = parsercmd::charcopy(yytext);return tknIDENTIFIER;}
+{lex_identifier}         { telllval.parsestr = parsercmd::charcopy(yytext);return tknIDENTIFIER;}
 .     	             	   return tknERROR;
 %% 
 /**************************************************************************/
@@ -218,3 +216,9 @@ int parsercmd::EOfile() {
   }
   return 0;
 }
+/*
+"."[Pp]"1"               { telllval.parsestr = parsercmd::charcopy("1");return tknFIELD;}
+"."[Pp]"2"               { telllval.parsestr = parsercmd::charcopy("2");return tknFIELD;}
+"."[Xx]                  { telllval.parsestr = parsercmd::charcopy("x");return tknFIELD;}
+"."[Yy]                  { telllval.parsestr = parsercmd::charcopy("y");return tknFIELD;}
+*/

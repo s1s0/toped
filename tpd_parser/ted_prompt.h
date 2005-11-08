@@ -36,8 +36,8 @@
 namespace console {
    typedef std::list<std::string>   stringList;
    const wxString real_tmpl      = "[-+]?([[:digit:]]+(\\.[[:digit:]]*)?|(\\.[[:digit:]]+))";
-   const wxString point_tmpl     = "\\("+ real_tmpl+","+ real_tmpl+"\\)";
-   const wxString box_tmpl       = "\\("+point_tmpl+","+point_tmpl+"\\)";
+   const wxString point_tmpl     = "\\{"+ real_tmpl+","+ real_tmpl+"\\}";
+   const wxString box_tmpl       = "\\{"+point_tmpl+","+point_tmpl+"\\}";
    const wxString pointlist_tmpl = "\\{"+point_tmpl+"(,"+point_tmpl+"){1,}\\}";
 
    bool patternFound(const wxString templ,  wxString str);
@@ -45,14 +45,14 @@ namespace console {
 
    class miniParser {
    public:
-      miniParser(parsercmd::operandSTACK *,telldata::typeID);
+      miniParser(telldata::operandSTACK *,telldata::typeID);
       bool              getGUInput(wxString expression);
       telldata::typeID  wait4type() { return _wait4type;};
    private:
       bool getPoint();
       bool getBox();
       bool getList();
-      parsercmd::operandSTACK *client_stack;
+      telldata::operandSTACK *client_stack;
       telldata::typeID         _wait4type;
       wxString                  exp;
    };
@@ -71,7 +71,7 @@ namespace console {
                               ted_cmd(wxWindow*);
                              ~ted_cmd();
       void                    parseCommand(wxString);
-      void                    waitGUInput(parsercmd::operandSTACK*,telldata::typeID);
+      void                    waitGUInput(telldata::operandSTACK*,telldata::typeID);
       void                    getGUInput(bool from_keyboard = true);
       wxCondition*            threadWaits4;
       miniParser*             puc; // parse user coordinates

@@ -29,25 +29,34 @@
 #include "../tpd_parser/tellyzer.h"
 #include "../tpd_DB/tedstd.h"
 
-/*Two ways for arguments checking of the standard functions*/
-// First one is to build the argumentmap structure in the
-// constructor and not to define argsOK function. (see the commented examples
-// for stdTELLSTATUS, stdGETCW, stdZOOMIN in the tellibin.cpp file). The argsOK
-// function of the parent cmdSTDFUNC will check the arguments.
+//-----------------------------------------------------------------------------
+//    === Two ways for arguments checking of the standard functions ===
+//
+// First one is to build the argumentmap structure in the constructor and not
+// define argsOK and callingConv methods. The argsOK method of the parent
+// cmdSTDFUNC will check the arguments.
+//
 // Second one is not to build argumentmap map (i.e. to leave arguments=NULL)
-// and to define argsOK. This is more flexible and looks like takes less space-
-// at least a function parameters do not need to be allocated. They are
-// anonymous anyway, so can not be used. Besides, internal function like echo
-// for example, that should be flexible enough to take any type parameters can
-// not be defined easily using argumrntmap structure.
-// The contradiction here is the support methods like callingConv, that in the 
-// second case have to be defined for each of the internal standard functions
-// are boring to code because generally speaking they are not doing any real
-// job, they need to be consistent with arsOK and this can be a source of
-// stupid and silly mistakes.
-// Once the decision is to do something wrong then let's do it right!
-// To avoid boring class definition here we going to use the preprocessor
-// with two types of definitions 
+// and to define argsOK. This one seems more flexible and looks like it takes
+// less space - at least a function parameters do not need to be allocated. They
+// are anonymous anyway, so their names can not be used.
+// After implementation of the tell structures however this way looks like more
+// hassle, because of the anonymous arguments. We need to deal "per case" with
+// the pain of determining the type of those arguments, and this is not the error
+// proof way. Besides in this case additional virtual method callingConv() has to
+// be defined for every class.
+//
+// Bottom line, we are using the first way and the parent argsOK method for
+// the majority of the functions. The exception here are functions like echo (the
+// only exception ?) that should be flexible enough to get any type of parameters.
+// It is defined using the second way.
+//
+// == Declaration of the standard functions using macro definitions ==
+//
+// To avoid boring and trivial class declaration here some preprocessor macros
+// are used. Hope that in this case there is more convinience than harm using
+// macroses
+// with the following types of definitions
 // TELL_STDCMD_CLASSA - inherit directly cmdSTDFUNC
 // TELL_STDCMD_CLASSB - inherit some other class - usually form CLASSA
 
@@ -55,10 +64,8 @@
 #define TELL_STDCMD_CLASSA(name)                                  \
    class name : public cmdSTDFUNC {                               \
    public:                                                        \
-      name(telldata::typeID retype):cmdSTDFUNC(NULL,retype) {};   \
+      name(telldata::typeID retype);                              \
       int         execute();                                      \
-      int         argsOK(argumentMAP* amap);                      \
-      std::string callingConv();                                  \
    };
 #endif
 
@@ -66,12 +73,24 @@
 #define TELL_STDCMD_CLASSA_UNDO(name)                             \
    class name : public cmdSTDFUNC {                               \
    public:                                                        \
-      name(telldata::typeID retype):cmdSTDFUNC(NULL,retype) {};   \
+      name(telldata::typeID retype);                              \
       int         execute();                                      \
       void        undo();                                         \
       void        undo_cleanup();                                 \
-      int         argsOK(argumentMAP* amap);                      \
-      std::string callingConv();                                  \
+   };
+#endif
+
+#ifndef TELL_STDCMD_CLASSF_UNDO
+#define TELL_STDCMD_CLASSF_UNDO(name)                             \
+   class name : public cmdSTDFUNC {                               \
+   public:                                                        \
+      name(telldata::typeID retype);                              \
+      int         execute();                                      \
+      void        undo();                                         \
+      void        undo_cleanup();                                 \
+   protected:                                                     \
+      name(parsercmd::argumentLIST* al,telldata::typeID retype) : \
+                                         cmdSTDFUNC(al,retype) {};\
    };
 #endif
 
@@ -79,20 +98,30 @@
 #define TELL_STDCMD_CLASSB(name, father)                          \
    class name : public father {                                   \
    public:                                                        \
-      name(telldata::typeID retype):father(retype) {};            \
+      name(telldata::typeID retype);                              \
       int         execute();                                      \
-      int         argsOK(argumentMAP* amap);                      \
+   };
+#endif
+
+#ifndef TELL_STDCMD_CLASSC
+#define TELL_STDCMD_CLASSC(name)                                  \
+   class name : public cmdSTDFUNC {                               \
+   public:                                                        \
+      name(telldata::typeID retype):cmdSTDFUNC(NULL,retype) {};   \
+      int         execute();                                      \
+      int         argsOK(argumentQ* amap);                        \
       std::string callingConv();                                  \
    };
 #endif
 
+
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
-   using parsercmd::argumentMAP;
+   using telldata::argumentQ;
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 
-   TELL_STDCMD_CLASSA(stdECHO          )
+   TELL_STDCMD_CLASSC(stdECHO          )
    TELL_STDCMD_CLASSA(stdTELLSTATUS    )
    TELL_STDCMD_CLASSA(stdUNDO          )
    TELL_STDCMD_CLASSA(stdREDRAW        )
@@ -130,40 +159,40 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdEDITTOP     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCELLREF     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCELLAREF    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  )  // undo - implemented**
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOX      )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWBOX     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXp     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDPOLY     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWPOLY    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDWIRE     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWWIRE    )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdUSINGLAYER  )  // undo - implemented**
+   TELL_STDCMD_CLASSF_UNDO(stdADDBOX      )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdDRAWBOX     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdADDBOXr     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdADDBOXp     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdADDPOLY     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdDRAWPOLY    )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdADDWIRE     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdDRAWWIRE    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdADDTEXT     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGRIDDEF     )  //
    TELL_STDCMD_CLASSA_UNDO(stdGRID        )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSTEP        )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdAUTOPAN     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSHAPEANGLE  )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdSELECT      )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdSELECT      )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSELECTIN    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSELECT_TL   )  //
-   TELL_STDCMD_CLASSA_UNDO(stdPNTSELECT   )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdPNTSELECT   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSELECTALL   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECT    )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdUNSELECT    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNSELECTIN  )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNSELECT_TL )  //
-   TELL_STDCMD_CLASSA_UNDO(stdPNTUNSELECT )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdPNTUNSELECT )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNSELECTALL )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdCOPYSEL     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdMOVESEL     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdCOPYSEL     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(stdMOVESEL     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdROTATESEL   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdFLIPXSEL    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdFLIPYSEL    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdDELETESEL   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGROUP       )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNGROUP     )  // undo - implemented* WAITS for ATDB->remove_cell() !!!
-   TELL_STDCMD_CLASSA_UNDO(lgcCUTPOLY     )  // undo - implemented
+   TELL_STDCMD_CLASSF_UNDO(lgcCUTPOLY     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcMERGE       )  // undo - implemented
    //
    TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     )
@@ -186,7 +215,7 @@ namespace tellstdfunc {
 
 //   laydata::tdtdesign*  currentDesign();
    telldata::ttint*     CurrentLayer();
-   bool                 waitGUInput(int, parsercmd::operandSTACK *);
+   bool                 waitGUInput(int, telldata::operandSTACK *);
    pointlist&           t2tpoints(telldata::ttlist *, real);
    telldata::ttlist*    make_ttlaylist(laydata::selectList*);
    telldata::ttlist*    make_ttlaylist(laydata::atticList*);
