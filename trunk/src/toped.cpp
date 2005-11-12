@@ -527,7 +527,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
 
 void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
    wxFileDialog dlg2(this, "Select a file", "", "", 
-      "Stream files |*.sf; *.gds",
+      "Stream files |*.sf;*.gds",
       wxOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       SetStatusText("Parsing GDS file...");
