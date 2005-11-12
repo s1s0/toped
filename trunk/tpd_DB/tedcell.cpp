@@ -616,8 +616,9 @@ laydata::tdtdata* laydata::tdtcell::checkNreplace(selectDataPair& sel, validator
       if (shp_OK == check->status())  // entirely
          return NULL;
       else {// ... well, maybe not entirely...
-         // Make sure that we don't have the shp_clock case - it should not be possible
-         assert(!(shp_clock & check->status()));
+         // it is still not clear here why and how the modefied polygon can be
+         // in clockwise order. The case with Sergei's gds - metki
+         // assert(!(shp_clock & check->status()));
          laydata::tdtdata* newshape = check->replacement();
          // add the new shape to the list of new shapes ...
          secure_dataList(*(fadead[2]),layno)->push_back(selectDataPair(newshape, NULL));

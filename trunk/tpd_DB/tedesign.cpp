@@ -89,7 +89,7 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(word la, pointlist& pl) {
       tell_log(console::MT_ERROR, ost.str().c_str());
       pl.clear();
       return NULL;
-   }   
+   }
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    // get rid of the original point list

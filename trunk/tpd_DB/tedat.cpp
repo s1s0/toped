@@ -539,7 +539,7 @@ laydata::tdtpoly::tdtpoly(TEDrecord* const tedfile) : tdtdata(){
    _plist.reserve(numpoints);
    for (word i = 0 ; i < numpoints; i++) {
       _plist.push_back(tedfile->getTP()); if (!tedfile->status()) return;
-   }   
+   }
 }
 
 void laydata::tdtpoly::openGL_draw(ctmstack& transtack, 
@@ -634,7 +634,7 @@ void laydata::tdtpoly::unselect_points(DBbox& select_in, SGBitSet* pntlst) {
 
 laydata::validator* laydata::tdtpoly::move(const CTM& trans, const SGBitSet* plst) {
    if (plst) {
-      pointlist nshape = movePointsSelected(plst, trans);
+      pointlist& nshape = movePointsSelected(plst, trans);
       laydata::valid_poly* check = new laydata::valid_poly(nshape);
       if (laydata::shp_OK == check->status()) {
          // assign the modified pointlist ONLY if the resulting shape is perfect
@@ -753,7 +753,7 @@ pointlist& laydata::tdtpoly::movePointsSelected(const SGBitSet* pset,
       seg0 = seg1;
    }
    return (*mlist);
-}                   
+}
 
 //-----------------------------------------------------------------------------
 // class tdtwire
@@ -1529,7 +1529,7 @@ void laydata::valid_poly::normalize() {
 }
 
 /*! Implements  algorithm to check that the polygon is not
-simple crossing. Alters the laydata::shp_cross bit of _status if the polygon 
+self crossing. Alters the laydata::shp_cross bit of _status if the polygon
 is selfcrossing
 */ 
 void laydata::valid_poly::selfcrossing() {

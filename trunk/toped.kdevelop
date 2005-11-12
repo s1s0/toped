@@ -78,7 +78,7 @@
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs>../../tll/tcase.tll</programargs>
+      <programargs>../../tll/seed.tll</programargs>
       <gdbpath/>
       <configGdbScript/>
       <runShellScript/>
