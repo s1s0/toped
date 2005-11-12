@@ -283,7 +283,7 @@ void screenSetup() {
    definegrid(2, 10  , "yellow"  );
    grid(0,true);
    grid(1,true);
-   step(0.01);
+   step(0.5);
    autopan(true);
    shapeangle(45);
 }

@@ -245,7 +245,7 @@ namespace GDSin {
    public:
       GDSpolygon(GDSFile *cf, GDSdata *lst);
       byte           GetGDSDatatype(){return gds_BOUNDARY;};
-      pointlist      GetPlist()      {return _plist;}
+      pointlist&     GetPlist()      {return _plist;}
       virtual       ~GDSpolygon() {};
    protected:
       word           numpoints;
@@ -274,7 +274,7 @@ namespace GDSin {
    public:
       GDSpath(GDSFile *cf, GDSdata *lst);
       byte           GetGDSDatatype(){return gds_PATH;};
-      pointlist      GetPlist()      {return _plist;};
+      pointlist&     GetPlist()      {return _plist;};
       int4b          Get_width()     {return width;};
       virtual       ~GDSpath() {};
    protected:

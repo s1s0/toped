@@ -157,7 +157,8 @@ bool tedop::LEvent::check_valid(SweepLine& SL) const {
 // class REvent
 //-----------------------------------------------------------------------------
 bool tedop::REvent::check_valid(SweepLine& SL) const {
-   if (SL.intersect(_seg->above, _seg->below)) return false;
+   if (SL.intersect(_seg->above, _seg->below))
+      return false;
    SL.remove(_seg);
    return true;
 }
@@ -241,7 +242,7 @@ bool tedop::SweepLine::coincideOK( plysegment* line, plysegment* cross, float lp
    // non-crossing.
    float lambdaL = (0 == lps) ? getLambda(line->lP, line->rP, cross->lP) : 0;
    float lambdaR = (0 == rps) ? getLambda(line->lP, line->rP, cross->rP) : 0;
-   // filter-out all cases when both lines have no common points
+   // filter-out all cases when the segments have no common points
    if (((0 != lps) || (lambdaL < 0)) && ((0 != rps) || (lambdaR < 0))) return true;
    // filter-out the cases when both lines have exactly one common point
    // and it is an edge point of both segmets
@@ -250,8 +251,8 @@ bool tedop::SweepLine::coincideOK( plysegment* line, plysegment* cross, float lp
    if ((!Ljoint && Rjoint) || (!Rjoint && Ljoint)) return true;
    // now start checking the coincidence case
    //get the _plist index of the points in segment cross
-   int indxLP = (*(cross->lP) == _plist[cross->edge]) ? cross->edge : cross->edge + 1;
-   int indxRP = (*(cross->rP) == _plist[cross->edge]) ? cross->edge : cross->edge + 1;
+   unsigned indxLP = (*(cross->lP) == _plist[cross->edge]) ? cross->edge : cross->edge + 1;
+   unsigned indxRP = (*(cross->rP) == _plist[cross->edge]) ? cross->edge : cross->edge + 1;
    // make sure they are not the same
    assert(indxLP != indxRP);
    // we'll pickup the neighbour of the point(s) laying on the line and will
@@ -261,10 +262,10 @@ bool tedop::SweepLine::coincideOK( plysegment* line, plysegment* cross, float lp
       // they look so weird, to keep the indexes within [0:_numv-1] boundaries
       bool indxpos = indxLP > indxRP;
       if (0 == lps)
-         if (indxpos) ++indxLP % _numv;
+         if (indxpos) indxLP = ++indxLP % _numv;
          else (0==indxLP) ? indxLP = _numv-1 : indxLP--;
       if (0 == rps)
-         if (!indxpos) ++indxRP % _numv;
+         if (!indxpos) indxRP = ++indxRP % _numv;
          else (0==indxRP) ? indxRP = _numv-1 : indxRP--;
       // calculate lps/rps with the new points   
       lps = isLeft(line->lP, line->rP, &_plist[indxLP]);

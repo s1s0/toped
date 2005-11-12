@@ -58,14 +58,14 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
       typedef GDSin::ChildStructure::iterator CI;
       for (CI ci = nextofkin.begin(); ci != nextofkin.end(); ci++)
          structure((*ci)->Get_StrName(), recursive, overwrite);
-   }      
+   }
    // check that destination structure with this name exists
    laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
    std::ostringstream ost; ost << "GDS import: ";
    if (NULL != dst_structure) {
       if (overwrite) {
          /*SGREM! Erase the existing structure and convert*/
-         ost << "Warning! Structure "<< gname << " should be overwritten, but not implemented...";
+         ost << "Warning! Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
       }
    // Don't report this , except maybe in case of a verbose or similar option is introduced
    // On a large GDS file those messages are simply anoying
@@ -107,9 +107,9 @@ void GDSin::gds2ted::box(GDSin::GDSbox* /*wd*/, laydata::tdtcell* /*dst*/) {
 void GDSin::gds2ted::polygon(GDSin::GDSpolygon* wd, laydata::tdtcell* dst) {
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
                                           (dst->securelayer(wd->GetLayer()));
-   pointlist pl = wd->GetPlist();
+   pointlist &pl = wd->GetPlist();
    laydata::valid_poly check(pl);
-   
+
    if (!check.valid()) {
       std::ostringstream ost; ost << "Layer " << wd->GetLayer();
       ost << ": Polygon check fails - " << check.failtype();
@@ -118,7 +118,6 @@ void GDSin::gds2ted::polygon(GDSin::GDSpolygon* wd, laydata::tdtcell* dst) {
    else pl = check.get_validated() ;
    if (check.box()) {
       wl->addbox(new TP(pl[0]), new TP(pl[2]),false);
-//      pl.clear();
    }
    else wl->addpoly(pl,false);
 }
@@ -126,9 +125,9 @@ void GDSin::gds2ted::polygon(GDSin::GDSpolygon* wd, laydata::tdtcell* dst) {
 void GDSin::gds2ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst) {
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
                                           (dst->securelayer(wd->GetLayer()));
-   pointlist pl = wd->GetPlist();
+   pointlist &pl = wd->GetPlist();
    laydata::valid_wire check(pl, wd->Get_width());
-   
+
    if (!check.valid()) {
       std::ostringstream ost; ost << "Layer " << wd->GetLayer();
       ost << ": Wire check fails - " << check.failtype();
