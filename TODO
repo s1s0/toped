@@ -61,11 +61,7 @@ Dialog stuff
    
 Documentation
 ==============
-  * report functions
   * TELL status function
-  * void usinglayer(string)
-  * Circular references 
-  * gdsimport should returns string list with the names of the top structures  
 
 
 Seems OK
