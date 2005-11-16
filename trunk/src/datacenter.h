@@ -67,7 +67,7 @@ public:
    void                       mousePoint(TP p);
    void                       mouseStop();
    void                       openGL_draw(const layprop::DrawProperties&);
-   void                       tmp_draw(const layprop::DrawProperties&, TP, TP, TP, bool);
+   void                       tmp_draw(const layprop::DrawProperties&, TP, TP);
    const laydata::cellList&   cells();
    
    std::string                tedfilename() const  {return _tedfilename;};

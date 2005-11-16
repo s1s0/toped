@@ -124,8 +124,6 @@ namespace tui {
       bool           mouse_input;    // Indicates that a mouse input is expected
       bool           rubber_band;    // Indicates that moving or changing objects must be drawn
       bool           restricted_move;// when mouse cotrolled input
-      bool           FirstView;     //Indicates that OnpaintGL will be call first time or after resizing
-                                    //we need FirstView for correct visualisation temporary images
       wxCursor*      crossCur;
       //
       void           wnd_paint();

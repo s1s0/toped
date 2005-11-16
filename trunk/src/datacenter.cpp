@@ -350,11 +350,11 @@ void DataCenter::openGL_draw(const layprop::DrawProperties& drawprop) {
 }
 
 void DataCenter::tmp_draw(const layprop::DrawProperties& drawprop,
-                              TP base, TP oldp, TP newp, bool first) {
+                              TP base, TP newp) {
    if (_TEDDB) {
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-      _TEDDB->tmp_draw(drawprop, base, oldp, newp, first);
+      _TEDDB->tmp_draw(drawprop, base, newp);
       DBLock.Unlock();
    }
 // 

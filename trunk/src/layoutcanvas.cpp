@@ -78,7 +78,6 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    rubber_band = false;
    restricted_move = false;
    invalid_window = false;
-   FirstView = true;
    initializeGL();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
@@ -107,7 +106,6 @@ void tui::LayoutCanvas::initializeGL() {
    gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
                                                 &glEnd);
 #endif
-   FirstView = true;
    // The next call needs to be fitted in some kind of GL descructor
    // gluDeleteTess(tessellObj);
    
@@ -147,7 +145,6 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 //   glLoadIdentity();
 //   glFrustum( -1.0, 1.0, -1.0, 1.0, 5.0, 15.0 );
    glMatrixMode( GL_MODELVIEW );
-   FirstView = true;
    glClear(GL_ACCUM_BUFFER_BIT);
    invalid_window = true;
 }
@@ -171,15 +168,11 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
       glClear(GL_COLOR_BUFFER_BIT);
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      if (FirstView) 
-      {
-         FirstView = false;
-         glClear(GL_ACCUM_BUFFER_BIT);
-      }
+      glClear(GL_ACCUM_BUFFER_BIT);
       Properties->drawGrid();
       DATC->openGL_draw(Properties->drawprop());    // draw data
       glAccum(GL_LOAD, 1.0);
-      if (rubber_band) rubber_paint();         
+      if (rubber_band) rubber_paint();
       invalid_window = false;
    }
    else if (tmp_wnd) 
@@ -194,23 +187,17 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
 }
 
 void tui::LayoutCanvas::wnd_paint() {
-   //glEnable(GL_COLOR_LOGIC_OP);
-   //glLogicOp(GL_XOR);
    glAccum(GL_RETURN, 1.0);
    glColor4f(0.3, 0.3, 0.3, 0.5); // gray
    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
    glRecti(presspoint.x(),presspoint.y(), n_ScrMARKold.x(), n_ScrMARKold.y());
    glRecti(presspoint.x(),presspoint.y(), n_ScrMARK.x(), n_ScrMARK.y());
-   //glDisable(GL_COLOR_LOGIC_OP);
 }
 
 void tui::LayoutCanvas::rubber_paint() {
-   //glEnable(GL_COLOR_LOGIC_OP);
-   //glLogicOp(GL_XOR);
    glAccum(GL_RETURN, 1.0);
    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-   DATC->tmp_draw(Properties->drawprop(), releasepoint, n_ScrMARKold, n_ScrMARK, invalid_window);
-   //glDisable(GL_COLOR_LOGIC_OP);
+   DATC->tmp_draw(Properties->drawprop(), releasepoint, n_ScrMARK);
 }
 
 void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
