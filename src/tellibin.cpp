@@ -1348,7 +1348,7 @@ int tellstdfunc::stdDRAWPOLY::execute() {
       OPstack.push(new telldata::ttlayout());
    }
    delete pl;
-   UpdateLV();   
+   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -1408,7 +1408,7 @@ int tellstdfunc::stdADDWIRE::execute() {
       OPstack.push(new telldata::ttlayout());
    }
    delete pl;
-   UpdateLV();   
+   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -1472,6 +1472,7 @@ int tellstdfunc::stdDRAWWIRE::execute() {
       OPstack.push(new telldata::ttlayout());
    }
    delete pl;
+   UpdateLV();
    return EXEC_NEXT;
 }
 

@@ -32,7 +32,8 @@
 #include "viewprop.h"
 #include "../tpd_common/outbox.h"
 
-laydata::editcellstack laydata::editobject::_editstack;    //! the stack of all previously edited (opened) cells
+//! the stack of all previously edited (opened) cells
+laydata::editcellstack laydata::editobject::_editstack;
 //-----------------------------------------------------------------------------
 // class tdtdesign
 //-----------------------------------------------------------------------------
@@ -233,29 +234,16 @@ void laydata::tdtdesign::openGL_draw(const layprop::DrawProperties& drawprop) {
 }
 
 void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
-                                          TP base, TP oldp, TP newp, bool first) {
+                                          TP base, TP newp) {
    ctmqueue tmp_stack;
    if (_tmpdata) {
       glColor4f(0.5, 0.5, 0.5, 0.5);
-      if (!first) {
-         // after window repaint, old position is not redrawn
-         tmp_stack.push_front(CTM(oldp - base,1,0,false));
-         _tmpdata->tmp_draw(drawprop, tmp_stack, NULL, true);
-      }   
       tmp_stack.push_front(CTM(newp - base,1,0,false));
       _tmpdata->tmp_draw(drawprop, tmp_stack,NULL,true);
    }
    else if ((drawprop.currentop() != layprop::op_none) && _target.checkedit()) {
       base *= _target.rARTM();
       newp *= _target.rARTM();
-      if (!first) {
-         // after window repaint, old position is not redrawn
-         oldp *= _target.rARTM();
-         tmp_stack.push_front(CTM(_target.ARTM()));
-         tmp_stack.push_front(CTM(oldp - base,1,0,false)*_target.ARTM());
-         _target.edit()->tmp_draw(drawprop, tmp_stack, true);
-         tmp_stack.clear();
-      }   
       tmp_stack.push_front(CTM(_target.ARTM()));
       tmp_stack.push_front(CTM(newp - base,1,0,false)*_target.ARTM());
       _target.edit()->tmp_draw(drawprop, tmp_stack, true);
