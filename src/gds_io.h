@@ -192,8 +192,7 @@ namespace GDSin {
    > GetLastInLay()      - ...
    > GetLayer()         - ...
    ******************************************************************************/
-   class   GDSdata
-   {
+   class   GDSdata {
    public:
       GDSdata(GDSdata* lst);
       void            ReadPLEX(GDSrecord* cr);
@@ -213,18 +212,15 @@ namespace GDSin {
       int2b            singletype;
    };
 
-   class   GDSbox:public GDSdata
-   // >>> Constructor -------------------
-   //
-   // >>> Data fields -------------------
-   //
-   // >>> Methods -----------------------
-   //
-   {
+   class   GDSbox:public GDSdata {
    public:
-      GDSbox(GDSFile *cf, GDSdata *lst);
-      byte   GetGDSDatatype(){return gds_BOX;};
-/*       laydata::tdtdata* toTED(); */
+                     GDSbox(GDSFile *cf, GDSdata *lst);
+      byte           GetGDSDatatype(){return gds_BOX;};
+      pointlist&     GetPlist()      {return _plist;}
+      virtual       ~GDSbox() {};
+   protected:
+      int2b          boxtype;
+      pointlist      _plist;
    };
 
    /*** GDSpolygon **************************************************************

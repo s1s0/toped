@@ -118,10 +118,12 @@ bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
          rlc = (char*)var;
          if (len > 0){
             for (word i = 0; i < len; rlc[i] = record[curnum*len+i++]);
-            rlc[len] = 0x0;}
-         else{
+            rlc[len] = 0x0;
+         }
+         else {
             for (word i = 0; i < reclen; rlc[i] = record[i++]);
-            rlc[reclen] = 0x0;}
+            rlc[reclen] = 0x0;
+         }
          break;
    }
    return true;
@@ -401,7 +403,7 @@ GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst) {
                AddLog('U',"NODE");
                delete cr;break;
             case gds_STRCLASS://SGREM skipped record !!!
-               AddLog('U',"STRCLASS");// CADANCE internal use only               
+               AddLog('U',"STRCLASS");// CADANCE internal use only
                delete cr;break;
             case gds_STRNAME:
                if (cr->Get_reclen() > 64)
@@ -503,34 +505,36 @@ void GDSin::GDSdata::ReadELFLAGS(GDSrecord *cr) {
 // class GDSbox
 //==============================================================================
 GDSin::GDSbox::GDSbox(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
-   //SGREM this function is never checked !!!
    GDSrecord* cr = NULL;
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
-      switch (cr->Get_rectype())
-      {
-         case gds_ELFLAGS:
-            delete cr; break;
-         case gds_PLEX:
-            delete cr; break;
-         case gds_LAYER:
-            delete cr; break;
-
-         case gds_BOXTYPE:
-            delete cr; break;
-         case gds_XY:
-            delete cr; break;
-         case gds_ENDEL:
-            delete cr; break;
-         default:{
-            //parse error - not expected record type
-            AddLog('E',"Wrong record type in the current context");
-            delete cr;return;
+         switch (cr->Get_rectype()) {
+            case gds_ELFLAGS:ReadELFLAGS(cr);// seems that it's not used
+               delete cr; break;
+            case gds_PLEX:   ReadPLEX(cr);// seems that it's not used
+               delete cr; break;
+            case gds_LAYER: cr->Ret_Data(&layer);
+               delete cr; break;
+            case gds_BOXTYPE:cr->Ret_Data(&boxtype);// Don't know what is this !!!
+               delete cr; break;
+            case gds_XY: word numpoints = (cr->Get_reclen())/8 - 1;
+                  // one point less because fist and last point coincide
+                  assert(numpoints == 4);
+                  _plist.reserve(numpoints);
+                  for(word i = 0; i < numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
+               delete cr; break;
+            case gds_ENDEL://end of element, exit point
+               delete cr;return;
+            default:{
+               //parse error - not expected record type
+               AddLog('E',"Wrong record type in the current context");
+               delete cr;return;
+            }
          }
-      }
+      else {AddLog('E',"Unexpected end of file");return;}
    }
-   while (cr->Get_rectype() != gds_ENDEL);
+   while (true);
 }
 
 // laydata::tdtdata* GDSin::GDSbox::toTED() {

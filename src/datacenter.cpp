@@ -101,7 +101,20 @@ void GDSin::gds2ted::convert(GDSin::GDSstructure* src, laydata::tdtcell* dst) {
 //   dst->secure_layprop();
 }
 
-void GDSin::gds2ted::box(GDSin::GDSbox* /*wd*/, laydata::tdtcell* /*dst*/) {
+void GDSin::gds2ted::box(GDSin::GDSbox* wd, laydata::tdtcell* dst) {
+   laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
+                                          (dst->securelayer(wd->GetLayer()));
+   pointlist &pl = wd->GetPlist();
+   laydata::valid_poly check(pl);
+
+   if (!check.valid()) {
+      std::ostringstream ost; ost << "Layer " << wd->GetLayer();
+      ost << ": Polygon check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str().c_str());
+   }   
+   else pl = check.get_validated() ;
+   assert(check.box());
+   wl->addbox(new TP(pl[0]), new TP(pl[2]),false);
 }
 
 void GDSin::gds2ted::polygon(GDSin::GDSpolygon* wd, laydata::tdtcell* dst) {
