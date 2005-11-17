@@ -36,7 +36,6 @@ namespace GDSin {
       void structure(const char* gname, bool recursive, bool overwrite);
    protected:
       void                 convert(GDSin::GDSstructure*, laydata::tdtcell*);
-      void                 box(GDSin::GDSbox*, laydata::tdtcell*);
       void                 polygon(GDSin::GDSpolygon*, laydata::tdtcell*);
       void                 path(GDSin::GDSpath*, laydata::tdtcell*);
       void                 ref(GDSin::GDSref*, laydata::tdtcell*);
