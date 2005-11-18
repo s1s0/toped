@@ -82,6 +82,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
    OnZoom(eventZOOM);
+   ap_trigger = 10;
 }
 
 void tui::LayoutCanvas::initializeGL() {
@@ -188,7 +189,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
 
 void tui::LayoutCanvas::wnd_paint() {
    glAccum(GL_RETURN, 1.0);
-   glColor4f(0.3, 0.3, 0.3, 0.5); // gray
+   glColor4f(0.7, 0.7, 0.7, 0.2); // gray
    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
    glRecti(presspoint.x(),presspoint.y(), n_ScrMARKold.x(), n_ScrMARKold.y());
    glRecti(presspoint.x(),presspoint.y(), n_ScrMARK.x(), n_ScrMARK.y());
@@ -262,29 +263,33 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event) {
    int4b stepDB = Properties->stepDB();
    ScrMARK.roundTO(stepDB);
    if (Properties->autopan() && mouse_input && !invalid_window) {
+      CTM LayCTMR(_LayCTM.Reversed());
+      TP sp_BL     =     lp_BL * LayCTMR;
+      TP sp_TR     =     lp_TR * LayCTMR;
+      TP s_ScrMARK = n_ScrMARK * LayCTMR;
       TP nsp;
-            if((n_ScrMARK.x() - lp_BL.x()) < stepDB)  {
+      if      (abs(s_ScrMARK.x() - sp_BL.x()) < ap_trigger)  {
                wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
                eventZOOM.SetInt(ZOOM_LEFT);
                OnZoom(eventZOOM);
                nsp = ScrMARK * _LayCTM.Reversed();
                WarpPointer(nsp.x(),nsp.y());return;
-            }   
-      else  if((lp_TR.x() - n_ScrMARK.x()) < stepDB) {
+            }
+      else  if(abs(sp_TR.x() - s_ScrMARK.x()) < ap_trigger) {
                wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
                eventZOOM.SetInt(ZOOM_RIGHT);
                OnZoom(eventZOOM);
                nsp = ScrMARK * _LayCTM.Reversed();
                WarpPointer(nsp.x(),nsp.y());return;
             }   
-      else  if((lp_BL.y() - n_ScrMARK.y()) < stepDB) {
+      else  if(abs(sp_BL.y() - s_ScrMARK.y()) < ap_trigger) {
                wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
                eventZOOM.SetInt(ZOOM_UP);
                OnZoom(eventZOOM);
                nsp = ScrMARK * _LayCTM.Reversed();
                WarpPointer(nsp.x(),nsp.y());return;
             }   
-      else  if((n_ScrMARK.y() - lp_TR.y()) < stepDB) {
+      else  if(abs(s_ScrMARK.y() - sp_TR.y()) < ap_trigger) {
                wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
                eventZOOM.SetInt(ZOOM_DOWN);
                OnZoom(eventZOOM);

@@ -116,6 +116,7 @@ void tui::CanvasStatus::setSelected(wxString numsel) {
 BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_NEW          , tui::TopedFrame::OnNewDesign   )
    EVT_MENU( TMFILE_OPEN         , tui::TopedFrame::OnTDTRead     )
+   EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
    EVT_MENU( TMGDS_OPEN          , tui::TopedFrame::OnGDSRead     )
    EVT_MENU( TMGDS_IMPORT        , tui::TopedFrame::OnGDSimport   )
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
@@ -221,6 +222,7 @@ void tui::TopedFrame::initMenuBar() {
    fileMenu=new wxMenu();
    fileMenu->Append(TMFILE_NEW   , wxT("New ...\tCTRL-N")    , wxT("Create new design"));
    fileMenu->Append(TMFILE_OPEN  , wxT("Open ...\tCTRL-O")   , wxT("Open a TDT file"));
+   fileMenu->Append(TMFILE_INCLUDE, wxT("Include ...")       , wxT("Include a TELL file"));
    fileMenu->AppendSeparator();
    fileMenu->Append(TMGDS_OPEN   , wxT("GDS parse")  , wxT("Parse GDS file"));
    fileMenu->Append(TMGDS_IMPORT , wxT("GDS import") , wxT("Import GDS structure"));
@@ -497,7 +499,7 @@ void tui::TopedFrame::OnNewDesign(wxCommandEvent& evt) {
    }
    else SetStatusText("New file not created");
 }
-      
+
 void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
    if (DATC->modified()) {
       wxMessageDialog dlg1(this,
@@ -523,6 +525,21 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
       SetTitle(dlg2.GetFilename());
    }
    else SetStatusText("Opening aborted");
+}
+
+void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
+   SetStatusText("Including command file...");
+   wxFileDialog dlg2(this, "Select a file", "", "", 
+      "Tell files |*.tll",
+      wxOPEN);
+   if (wxID_OK == dlg2.ShowModal()) {
+      wxString filename = dlg2.GetFilename();
+      wxString ost;
+      ost << "`include \"" << dlg2.GetDirectory() << "/" << dlg2.GetFilename() << "\";";
+      _cmdline->parseCommand(ost);
+      SetStatusText(dlg2.GetFilename() + " parsed");
+   }
+   else SetStatusText("include aborted");
 }
 
 void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {

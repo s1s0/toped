@@ -102,6 +102,7 @@ namespace tui {
       // Menu 
       void   OnNewDesign(wxCommandEvent&);
       void     OnTDTRead(wxCommandEvent&);
+      void    OnTELLRead(wxCommandEvent&);
       void     OnGDSRead(wxCommandEvent&);
       void   OnGDSimport(wxCommandEvent&);
       void    OnGDSclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("gdsclose();");};
@@ -175,6 +176,7 @@ namespace tui {
 typedef enum  {
    TMFILE_NEW = 100        ,
    TMFILE_OPEN             ,
+   TMFILE_INCLUDE          ,
    TMGDS_OPEN              ,
    TMGDS_IMPORT            ,
    TMGDS_CLOSE             ,
