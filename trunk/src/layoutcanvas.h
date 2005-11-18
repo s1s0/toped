@@ -115,7 +115,8 @@ namespace tui {
       TP             n_ScrMARKold; // Normalized Old marker position  in DB units
       TP             lp_BL;        // bottom left corner of the current visual window
       TP             lp_TR;        // top right corner of the current visual window
-      double         WH_ratio;     // width/height ratio of the screen as reported by the openGL 
+      double         WH_ratio;     // width/height ratio of the screen as reported by the openGL
+      word           ap_trigger;   // autopan trigger limit
       TP             presspoint;   // store the location where a mouse button has been pressed
       TP             releasepoint; // store the location where a mouse button has been released
       void           update_viewport();
