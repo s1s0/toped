@@ -60,6 +60,16 @@ namespace tui {
       ZOOM_EMPTY          ,
    } ZOOM_TYPE;
    
+   typedef enum  {
+      CM_CONTINUE  = 0    ,
+      CM_ABORT            ,
+      CM_CANCEL_LAST      ,
+      CM_CLOSE            ,
+      CM_CMDLIST1         ,
+      CM_CMDLIST2         ,
+      CM_CMDLIST3
+   } CONTEXT_MENU_TYPE;
+   
    typedef enum {
       POS_X = 0x01,
       POS_Y = 0x02,
@@ -101,10 +111,15 @@ namespace tui {
       void           OnMouseRightUp(wxMouseEvent&);
       void           OnMouseRightDown(wxMouseEvent&);
       void           OnMouseLeftUp(wxMouseEvent&);
+      void           OnMouseMiddleUp(wxMouseEvent&);
       void           OnMouseLeftDown(wxMouseEvent&);
       void           OnMouseLeftDClick(wxMouseEvent&);
       void           OnZoom(wxCommandEvent&);
       void           OnMouseIN(wxCommandEvent&);
+      void           OnCMcontinue(wxCommandEvent&);
+      void           OnCMabort(wxCommandEvent&);
+      void           OnCMcancel(wxCommandEvent&);
+      void           OnCMclose(wxCommandEvent&);
       void           initializeGL();
    private:
       void           CursorControl(bool, bool);
@@ -124,7 +139,8 @@ namespace tui {
       bool           invalid_window; // Indicates canvas needs repainting due to a change of the zoom
       bool           mouse_input;    // Indicates that a mouse input is expected
       bool           rubber_band;    // Indicates that moving or changing objects must be drawn
-      bool           restricted_move;// when mouse cotrolled input
+      bool           restricted_move;// when mouse controlled input
+      word           numPntsEntered; // Number of entered points - for context menus
       wxCursor*      crossCur;
       //
       void           wnd_paint();

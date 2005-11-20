@@ -79,11 +79,12 @@ namespace console {
       void                    getCommand(wxCommandEvent&);
       void                    getCommandA();
       void                    OnGUInput(wxCommandEvent&);
-      void                    mouseLB(const telldata::ttpnt& p);
-      void                    mouseRB();
       bool                    mouseIN_OK() const {return _mouseIN_OK;};
    private:
       void                    OnKeyUP(wxKeyEvent&);
+      void                    cancelLastPoint();
+      void                    mouseLB(const telldata::ttpnt& p);
+      void                    mouseRB();
       word                    _numpoints;
       bool                    _mouseIN_OK;
       wxString                _guinput;

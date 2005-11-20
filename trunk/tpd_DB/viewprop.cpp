@@ -299,7 +299,7 @@ const layprop::LayoutGrid* layprop::ViewProperties::grid(byte No) const {
       gridlist::const_iterator cg = _grid.find(No);
       return cg->second;
    }
-   else return NULL;   
+   else return NULL;
 }
 
 void layprop::ViewProperties::setGrid(byte No, real step, std::string colname) {
@@ -321,9 +321,18 @@ bool layprop::ViewProperties::viewGrid(byte No, bool status) {
 }
 
 void layprop::ViewProperties::setCurrentOp(int actop) {
-   if       (-2 == actop)  _drawprop._currentop = op_move;
+   if (actop > 0) _drawprop._currentop = op_dwire;
+   else
+      switch (actop) {
+         case  0: _drawprop._currentop = op_dbox;break;
+         case -1: _drawprop._currentop = op_dpoly;break;
+         case -2: _drawprop._currentop = op_move;break;
+         case -3: _drawprop._currentop = op_copy;break;
+         default: _drawprop._currentop = op_none;
+      }
+/*   if       (-2 == actop)  _drawprop._currentop = op_move;
    else if  (-3 == actop)  _drawprop._currentop = op_copy;
-   else                    _drawprop._currentop = op_none;
+   else                    _drawprop._currentop = op_none;*/
 }
 
 void layprop::ViewProperties::drawGrid() const{

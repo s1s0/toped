@@ -57,6 +57,7 @@ namespace laydata {
       void           recreate_hierarchy();
       void           mouseStart(int input_type);
       void           mousePoint(TP p);
+      void           mousePointCancel(TP&);
       void           mouseStop();
       void           select_inBox(TP*, TP*, bool pntsel = false);
       atticList*     change_select(TP*, bool select = true);

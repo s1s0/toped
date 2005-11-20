@@ -77,7 +77,7 @@ namespace laydata {
    //! Add a point to the tdtdata object. Used to handle the objects under construction on the screen.
       virtual   void       addpoint(TP ) {};
    //! Removes a point from the tdtdata object. Used to handle the objects under construction on the screen.
-      virtual   void       rmpoint() {};
+      virtual   void       rmpoint(TP&) {};
    //! A pointer to the OpenGL object tesselator
       static GLUtriangulatorObj *tessellObj; 
    //! The pointer to the user callback function for openGL polygon tessellation
@@ -119,8 +119,8 @@ namespace laydata {
                              SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 info(std::ostringstream&) const;
       void                 write(TEDrecord* const tedfile) const;
-      void                 addpoint(TP p);
-      void                 rmpoint();
+      void                 addpoint(TP);
+      void                 rmpoint(TP&);
       word                 numpoints() const {return 4;};
       void                 polycut(pointlist&, shapeList**);
 //      tdtdata*             polymerge(tdtdata*);
@@ -154,7 +154,7 @@ namespace laydata {
       void                 info(std::ostringstream&) const;
       void                 write(TEDrecord* const tedfile) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
-      void                 rmpoint() {_plist.pop_back();};
+      void                 rmpoint(TP&);
       word                 numpoints() const {return _plist.size();};
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**);
@@ -187,7 +187,7 @@ namespace laydata {
       void                 info(std::ostringstream&) const;
       void                 write(TEDrecord* const tedfile) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
-      void                 rmpoint() {_plist.pop_back();};
+      void                 rmpoint(TP&);
       word                 numpoints() const {return _plist.size();};
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**){};

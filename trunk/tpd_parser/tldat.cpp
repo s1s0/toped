@@ -421,9 +421,6 @@ const telldata::ttwnd& telldata::ttwnd::operator = (const ttwnd& a) {
 
 //=============================================================================
 telldata::argumentID::argumentID(const argumentID& obj2copy) {
-   // TODO This copy constructor should not be needed anymore
-   // to be removed after the debug of the tell structures
-//   assert(false);
    _ID = obj2copy();
    if (NULL == obj2copy.child()) 
       _child = NULL;

@@ -63,6 +63,7 @@ public:
    void                       unlockDB();
    unsigned int               numselected() const;
    void                       mouseStart(int input_type);
+   void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
    void                       mouseStop();
    void                       openGL_draw(const layprop::DrawProperties&);

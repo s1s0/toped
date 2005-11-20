@@ -330,6 +330,10 @@ void DataCenter::mousePoint(TP p) {
    if (_TEDDB) _TEDDB->mousePoint(p);
 }
 
+void DataCenter::mousePointCancel(TP& lp) {
+   if (_TEDDB) return _TEDDB->mousePointCancel(lp);
+}
+
 void DataCenter::mouseStop() {
    if (_TEDDB) _TEDDB->mouseStop();
    else throw EXPTNactive_DB();
