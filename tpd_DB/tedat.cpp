@@ -438,18 +438,14 @@ DBbox laydata::tdtbox::overlap() const {
 void  laydata::tdtbox::addpoint(TP p) {
    if (!_p1) _p1 = new TP(p);
    else {
-      if (_p2) delete _p2;
+      if (_p2) delete _p2; // This line seems to be redundant
       _p2 = new TP(p);
-   }   
+   }
 }
 
-void  laydata::tdtbox::rmpoint() {
-   if (_p2) {
-      delete _p2; _p2 = NULL;
-   }
-   else if (_p1) {
-      delete _p1; _p1 = NULL;
-   }
+void  laydata::tdtbox::rmpoint(TP& lp) {
+   if (NULL != _p2) {delete _p2; _p2 = NULL;}
+   if (NULL != _p1) {delete _p1; _p1 = NULL;}
 };
 
 const pointlist laydata::tdtbox::shape2poly() {
@@ -606,6 +602,12 @@ void laydata::tdtpoly::tmp_draw(const layprop::DrawProperties&, ctmqueue& transt
       ptlist.clear();
    }      
 }
+
+void laydata::tdtpoly::rmpoint(TP& lp) {
+   assert(_plist.size() > 1);
+   _plist.pop_back();
+   lp = _plist.back();
+};
 
 void  laydata::tdtpoly::draw_select(CTM trans, const SGBitSet* pslist) const {
    if (sh_selected == status())
@@ -913,6 +915,13 @@ void laydata::tdtwire::tmp_draw(const layprop::DrawProperties& drawprop,
    glEnd();
    ptlist.clear();
 }
+
+void  laydata::tdtwire::rmpoint(TP& lp) {
+   assert(_plist.size() > 0);
+   _plist.pop_back();
+   lp = _plist.back();
+};
+
 
 void  laydata::tdtwire::draw_select(CTM trans, const SGBitSet* pslist) const {
    if (sh_selected == status())

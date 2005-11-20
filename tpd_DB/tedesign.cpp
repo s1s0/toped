@@ -292,10 +292,13 @@ void laydata::tdtdesign::mousePoint(TP p) {
    if (_tmpdata) _tmpdata->addpoint(p);
 }
 
+void laydata::tdtdesign::mousePointCancel(TP& lp) {
+   if (_tmpdata) _tmpdata->rmpoint(lp);
+}
+
 void laydata::tdtdesign::mouseStop() {
    if (_tmpdata) delete _tmpdata;
    _tmpdata = NULL;
-//   _tellop = op_none;
 }
 
 void laydata::tdtdesign::select_inBox(TP* p1, TP* p2, bool pntsel) {

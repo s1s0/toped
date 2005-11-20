@@ -289,6 +289,7 @@ void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
 }
 
 void console::ted_cmd::parseCommand(wxString cmd) {
+   if (NULL != puc) return; // don't accept commands during shape input sessions
    SetValue(cmd);
    getCommandA();
 }
@@ -313,9 +314,9 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
       Clear();
    }   
    else   command = _guinput;
-   if (puc->getGUInput(command)) { //parse the data from the prompt
+   //parse the data from the prompt
+   if (puc->getGUInput(command)) {
       //if the proper pattern was found
-//      setColor(darkGreen);
       Disconnect(-1, wxEVT_COMMAND_ENTER);
       delete puc; puc = NULL;
       _mouseIN_OK = true;
@@ -323,33 +324,32 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
       threadWaits4->Signal();
    }
    else {
+      tell_log(MT_ERROR, "Bad input data, Try again...");
       tell_log(MT_GUIPROMPT);
-      // SGREM !! Error message here!!
-//      setColor(red);
-//      append(gui_prompt);
-//      if (telldata::tn_pnt_list == puc->wait4type()) {
-//         int para, index;
-//         getCursorPosition(&para,&index);
-//         insertAt("{ ",paragraphs()-1,3);
-//      }
    }
    _guinput.Clear();
+   _numpoints = 0;
 }
 
 void console::ted_cmd::OnGUInput(wxCommandEvent& evt) {
-   if (-1 == evt.GetInt()) {
-      Disconnect(-1, wxEVT_COMMAND_ENTER);
-      delete puc; puc = NULL;
-      _mouseIN_OK = false;
-      // wake-up the thread expecting this data
-      threadWaits4->Signal();
-   }   
-   else if (0 == evt.GetInt()) {
-      telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
-      mouseLB(*p);
+   switch (evt.GetInt()) {
+      case -2: cancelLastPoint();break;
+      case -1:   // abort current  mouse input
+         Disconnect(-1, wxEVT_COMMAND_ENTER);
+         delete puc; puc = NULL;
+         _mouseIN_OK = false;
+         tell_log(MT_WARNING, "input aborted");
+         tell_log(MT_EOL);
+         // wake-up the thread expecting this data
+         threadWaits4->Signal();
+         break;
+      case  0:  // left mouse button
+         telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
+         mouseLB(*p);
+         break;
+      case  2: mouseRB(); break;
+      default: assert(false);
    }
-   else if (2 == evt.GetInt())
-      mouseRB();
 }
 
 void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
@@ -375,7 +375,7 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    if ( (_numpoints == 1) && (telldata::tn_pnt == puc->wait4type())
      || (_numpoints == 2) && (telldata::tn_box == puc->wait4type())) mouseRB();
 }
-      
+
 void console::ted_cmd::mouseRB() {
    // End of input is not accepted if ... 
    if ( (_numpoints == 0) 
@@ -395,6 +395,15 @@ void console::ted_cmd::mouseRB() {
    // and go parse it
    getGUInput(false); // from GUI
    _guinput.Clear();
+}
+
+void console::ted_cmd::cancelLastPoint() {
+   tell_log(MT_WARNING, "last point canceled");
+   int pos = _guinput.Find('{',true);
+   _guinput = _guinput.Left(pos-2);
+   if (_numpoints > 0) _numpoints--;
+   tell_log(MT_GUIPROMPT);
+   tell_log(MT_GUIINPUT, _guinput);
 }
 
 console::ted_cmd::~ted_cmd() {
