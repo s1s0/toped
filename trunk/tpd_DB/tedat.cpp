@@ -604,9 +604,9 @@ void laydata::tdtpoly::tmp_draw(const layprop::DrawProperties&, ctmqueue& transt
 }
 
 void laydata::tdtpoly::rmpoint(TP& lp) {
-   assert(_plist.size() > 1);
+   assert(_plist.size() > 0);
    _plist.pop_back();
-   lp = _plist.back();
+   if (_plist.size() > 0) lp = _plist.back();
 };
 
 void  laydata::tdtpoly::draw_select(CTM trans, const SGBitSet* pslist) const {
@@ -919,7 +919,7 @@ void laydata::tdtwire::tmp_draw(const layprop::DrawProperties& drawprop,
 void  laydata::tdtwire::rmpoint(TP& lp) {
    assert(_plist.size() > 0);
    _plist.pop_back();
-   lp = _plist.back();
+   if (_plist.size() > 0) lp = _plist.back();
 };
 
 
