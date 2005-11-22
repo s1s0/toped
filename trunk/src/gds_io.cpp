@@ -153,7 +153,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
       return; 
    }
 //   file_length = _filelength(GDSfh->_file);
-   // The size of GDSII files is originaly multiple of 2048. This is 
+   // The size of GDSII files is originaly multiple by 2048. This is
    // coming from the acient years when this format was supposed to be written 
    // on the magnetic tapes. In order to keep the tradition it's a good idea 
    // to check the file size and to issue a warning if it is not multiple on 2048.
