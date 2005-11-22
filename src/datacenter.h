@@ -43,7 +43,7 @@ namespace GDSin {
       void                 text(GDSin::GDStext*, laydata::tdtcell*);
       GDSin::GDSFile*      _src_lib;
       laydata::tdtdesign*  _dst_lib;
-      real                 coeff; // DBU difference   
+      real                 coeff; // DBU difference
    };
 }
 

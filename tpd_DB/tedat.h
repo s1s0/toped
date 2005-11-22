@@ -81,7 +81,11 @@ namespace laydata {
    //! A pointer to the OpenGL object tesselator
       static GLUtriangulatorObj *tessellObj; 
    //! The pointer to the user callback function for openGL polygon tessellation
+#ifdef WIN32
+      static GLvoid CALLBACK polyVertex(GLvoid *);
+#else
       static GLvoid polyVertex(GLvoid *);
+#endif
    //! Returns the next tdtdata object ot NULL if it doesn't exists
       tdtdata*             next() const         {return _next;};
    //! Changes the pointer to the next tdtddata object
