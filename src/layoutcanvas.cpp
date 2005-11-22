@@ -66,12 +66,12 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_MIDDLE_UP        ( tui::LayoutCanvas::OnMouseMiddleUp   )
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_ZOOM, wxID_ANY, tui::LayoutCanvas::OnZoom)
    EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT, wxID_ANY, tui::LayoutCanvas::OnMouseIN)
-   
-   EVT_MENU(   CM_CONTINUE, LayoutCanvas::OnCMcontinue)
-   EVT_MENU(      CM_ABORT, LayoutCanvas::OnCMabort   )
-   EVT_MENU(CM_CANCEL_LAST, LayoutCanvas::OnCMcancel  )
-   EVT_MENU(      CM_CLOSE, LayoutCanvas::OnCMclose   )
-   
+
+   EVT_MENU(   CM_CONTINUE, LayoutCanvas::OnCMcontinue      )
+   EVT_MENU(      CM_ABORT, LayoutCanvas::OnCMabort         )
+   EVT_MENU(CM_CANCEL_LAST, LayoutCanvas::OnCMcancel        )
+   EVT_MENU(      CM_CLOSE, LayoutCanvas::OnCMclose         )
+   EVT_MENU(      CM_AGAIN, LayoutCanvas::OnRepeatLastCmd   )
 END_EVENT_TABLE()
 
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(parent,
@@ -85,7 +85,6 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    rubber_band = false;
    restricted_move = false;
    invalid_window = false;
-   numPntsEntered = 0;
    initializeGL();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
@@ -263,7 +262,7 @@ void tui::LayoutCanvas::EventMouseClick(int button) {
    wxPostEvent(Console, eventButtonUP);
    // send the point to the current temporary object in the data base
    if (0 == button) {
-      DATC->mousePoint(releasepoint);numPntsEntered++;
+      DATC->mousePoint(releasepoint);
    }
 }
 
@@ -345,60 +344,78 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
    else {
    // Context menu here
       wxMenu menu;
-      switch (Properties->drawprop().currentop()) {
-         case layprop::op_dbox:
-         case layprop::op_move:
-         case layprop::op_copy:
-            if (numPntsEntered > 0) {
-               menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
-            }
-            menu.Append(CM_CONTINUE, wxT("Continue"));
-            menu.Append(   CM_ABORT, wxT("Abort"));
-            break;
-         case layprop::op_dpoly:
-            if (numPntsEntered > 3) {
-               menu.Append(CM_CLOSE, wxT("Close polygon"));
-            }
-            if (numPntsEntered > 0) {
-               menu.Append(CM_CANCEL_LAST, wxT("Cancel last point"));
-            }
-            menu.Append(CM_CONTINUE, wxT("Continue"));
-            menu.Append(   CM_ABORT, wxT("Abort"));
-            break;
-         case layprop::op_dwire:
-            if (numPntsEntered > 1) {
-               menu.Append(CM_CLOSE, wxT("Finish wire"));
-            }
-            if (numPntsEntered > 0) {
-               menu.Append(CM_CANCEL_LAST, wxT("Cancel last point"));
-            }
-            menu.Append(CM_CONTINUE, wxT("Continue"));
-            menu.Append(   CM_ABORT, wxT("Abort"));
-            break;
-         default:
-            menu.Append(CM_CMDLIST1, wxT("Menu 1"));
-            menu.Append(CM_CMDLIST2, wxT("Menu 2"));
-            break;
+      if ( NULL != Console->puc) {
+         switch (Properties->drawprop().currentop()) {
+            case layprop::op_dbox:
+               if (Console->numpoints() > 0) {
+                  menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
+               }
+               menu.Append(CM_CONTINUE, wxT("Continue"));
+               menu.Append(   CM_ABORT, wxT("Abort"));
+               break;
+            case layprop::op_dpoly:
+               if (Console->numpoints() > 3) {
+                  menu.Append(CM_CLOSE, wxT("Close polygon"));
+               }
+               if (Console->numpoints() > 1) {
+                  menu.Append(CM_CANCEL_LAST, wxT("Cancel last point"));
+               }
+               else if (Console->numpoints() > 0) {
+                  menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
+               }
+               menu.Append(CM_CONTINUE, wxT("Continue"));
+               menu.Append(   CM_ABORT, wxT("Abort"));
+               break;
+            case layprop::op_dwire:
+               if (Console->numpoints() > 1) {
+                  menu.Append(CM_CLOSE, wxT("Finish wire"));
+               }
+               if (Console->numpoints() > 1) {
+                  menu.Append(CM_CANCEL_LAST, wxT("Cancel last point"));
+               }
+               else if (Console->numpoints() > 0) {
+                  menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
+               }
+               menu.Append(CM_CONTINUE, wxT("Continue"));
+               menu.Append(   CM_ABORT, wxT("Abort"));
+               break;
+//            case layprop::op_move:
+//            case layprop::op_copy:
+            default:
+               menu.Append(CM_CONTINUE, wxT("Continue"));
+               menu.Append(   CM_ABORT, wxT("Abort"));
          }
-         TP s_ScrMARK = ScrMARK * _LayCTM.Reversed();
-         PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
-/*      if ( (layprop::op_dbox  == Properties->drawprop().currentop()) ||
-           (layprop::op_dpoly == Properties->drawprop().currentop()) ||
-           (layprop::op_dwire == Properties->drawprop().currentop())      ) { 
-      }*/
-/*      else if ( (layprop::op_move == Properties->drawprop().currentop()) ||
-                (layprop::op_copy == Properties->drawprop().currentop()) ) {
       }
-      else {
-         TP s_ScrMARK = ScrMARK * _LayCTM.Reversed();
-         wxMenu menu;
-         menu.Append(1000, wxT("Menu 1"));
-         menu.Append(1001, wxT("Menu 2"));
-         PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
-      }*/
+      else { // no user input expected
+         menu.Append(   CM_AGAIN, wxT(Console->lastCommand()));
+         menu.Append(TMEDIT_UNDO, wxT("undo"));
+         menu.AppendSeparator();
+         if (DATC->numselected() > 0) {
+            menu.Append(    TMEDIT_MOVE, wxT("move"  ));
+            menu.Append(    TMEDIT_COPY, wxT("copy"  ));
+            menu.Append(TMEDIT_ROTATE90, wxT("rotate"));
+            menu.Append(   TMEDIT_FLIPX, wxT("flipX" ));
+            menu.Append(   TMEDIT_FLIPY, wxT("flipY" ));
+         }
+         else {
+            menu.Append(     TMDRAW_BOX, wxT("box"   ));
+            menu.Append(    TMDRAW_POLY, wxT("poly"  ));
+            menu.Append(    TMDRAW_WIRE, wxT("wire"  ));
+            menu.Append(    TMDRAW_TEXT, wxT("text"  ));
+         }
+         menu.AppendSeparator();
+         menu.Append( TMSEL_SELECT_IN, wxT("select"     ));
+         menu.Append(TMSEL_PSELECT_IN, wxT("part select"));
+         if (DATC->numselected() > 0) {
+            menu.Append( TMSEL_UNSELECT_IN, wxT("unselect"     ));
+            menu.Append(TMSEL_PUNSELECT_IN, wxT("part unselect"));
+         }
+      }
+      TP s_ScrMARK = ScrMARK * _LayCTM.Reversed();
+      PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
    }
 }
-   
+
 void tui::LayoutCanvas::OnMouseLeftDown(wxMouseEvent& WXUNUSED(event)) {
 //   presspoint = ScrMARK;
 //   mouseIN(true);
@@ -500,9 +517,9 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt) {
       restricted_move = (Properties->marker_angle() != 0) && 
                               ((evt.GetInt() > 0) || (evt.GetInt() == -1));
       eventABORTEN.SetInt(STS_ABORTENABLE);
-   }   
+   }
    else {
-      mouse_input = false;numPntsEntered = 0;
+      mouse_input = false;
       rubber_band = false;
       restricted_move = false;
       Properties->setCurrentOp(layprop::op_none);
@@ -513,7 +530,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt) {
       eventPOSITION.SetInt(DEL_X);
       wxPostEvent(this, eventPOSITION);
       eventABORTEN.SetInt(STS_ABORTDISABLE);
-   }   
+   }
    wxPostEvent(this, eventABORTEN);
 }
 
@@ -527,17 +544,17 @@ void tui::LayoutCanvas::OnCMabort(wxCommandEvent& WXUNUSED(event)) {
    eventButtonUP.SetClientData((void*)NULL);
    eventButtonUP.SetInt(-1);
    wxPostEvent(Console, eventButtonUP);
+   Refresh();
 }
 
 void tui::LayoutCanvas::OnCMcancel(wxCommandEvent& WXUNUSED(event)) {
    //Post an event to notify the console
-   if (numPntsEntered > 0) {
+   if (Console->numpoints() > 0) {
       wxCommandEvent eventCancelLast(wxEVT_COMMAND_ENTER);
       eventCancelLast.SetInt(-2);
       wxPostEvent(Console, eventCancelLast);
       // remove the point from the current temporary object in the data base
       DATC->mousePointCancel(releasepoint);
-      numPntsEntered--;
       rubber_paint();
    }
 }
@@ -547,6 +564,9 @@ void tui::LayoutCanvas::OnCMclose(wxCommandEvent& WXUNUSED(event)) {
    EventMouseClick(2);
 }
 
+void tui::LayoutCanvas::OnRepeatLastCmd(wxCommandEvent& WXUNUSED(event)){
+   Console->parseCommand(Console->lastCommand());
+}
 tui::LayoutCanvas::~LayoutCanvas(){
    delete crossCur;
 //   delete (laydata::tdtdata::tessellObj);
@@ -587,7 +607,7 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
    for (i=0; i<imagebitcount; i++) {
       bits[i] = 0;
       i8 = i * 8;
-        
+
       cMask = 1;
       for (j=0; j<8; j++) {
          if (rgbBits[(i8+j)*3+2] < 127)
@@ -599,7 +619,7 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
    for (i=0; i<imagebitcount; i++) {
       maskBits[i] = 0x0;
       i8 = i * 8;
-      
+
       cMask = 1;
       for (j=0; j<8; j++) {
          if (rgbBits[(i8+j)*3] < 127 || rgbBits[(i8+j)*3+1] > 127)
@@ -610,7 +630,7 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
 
    wxColour* col_black = new wxColour(  0,   0,   0);
    wxColour* col_white = new wxColour(255, 255, 255);
-   
+
    pCursor = new wxCursor((const char *)bits, w, h,
                           HotX-HotAdjust, HotY-HotAdjust,
                           (const char *)maskBits,
@@ -629,6 +649,3 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
 
    return pCursor;
 }
-
-
-

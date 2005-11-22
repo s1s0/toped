@@ -80,6 +80,8 @@ namespace console {
       void                    getCommandA();
       void                    OnGUInput(wxCommandEvent&);
       bool                    mouseIN_OK() const {return _mouseIN_OK;};
+      word                    numpoints() const {return _numpoints;}
+      const char*             lastCommand() const {return _cmd_history.rbegin()->c_str();}
    private:
       void                    OnKeyUP(wxKeyEvent&);
       void                    cancelLastPoint();

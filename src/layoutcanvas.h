@@ -47,7 +47,81 @@
 //-----------------------------------------------------------------------------
 
 namespace tui {
-   
+typedef enum  {
+   TMFILE_NEW = 100        ,
+   TMFILE_OPEN             ,
+   TMFILE_INCLUDE          ,
+   TMGDS_OPEN              ,
+   TMGDS_IMPORT            ,
+   TMGDS_CLOSE             ,
+   TMFILE_SAVE             ,
+   TMFILE_SAVEAS           ,
+   TMFILE_EXIT             ,
+
+   TMEDIT_UNDO             ,
+   TMEDIT_COPY             ,
+   TMEDIT_MOVE             ,
+   TMEDIT_DELETE           ,
+   TMEDIT_ROTATE90         ,
+   TMEDIT_FLIPX            ,
+   TMEDIT_FLIPY            ,
+   TMEDIT_POLYCUT          ,
+   TMEDIT_MERGE            ,
+
+   TMVIEW_VIEWTOOLBAR      ,
+   TMVIEW_VIEWSTATUSBAR    ,
+   TMVIEW_ZOOMIN           ,
+   TMVIEW_ZOOMOUT          ,
+   TMVIEW_ZOOMALL          ,
+   TMVIEW_PANLEFT          ,
+   TMVIEW_PANRIGHT         ,
+   TMVIEW_PANUP            ,
+   TMVIEW_PANDOWN          ,
+
+   TMCELL_NEW              ,
+   TMCELL_OPEN             ,
+   TMCELL_PUSH             ,
+   TMCELL_POP              ,
+   TMCELL_TOP              ,
+   TMCELL_PREV             ,
+   TMCELL_REF_M            ,
+   TMCELL_REF_B            ,
+   TMCELL_AREF_M           ,
+   TMCELL_AREF_B           ,
+   TMCELL_REPORTLAY        ,
+   TMCELL_GROUP            ,
+   TMCELL_UNGROUP          ,
+
+   TMDRAW_BOX              ,
+   TMDRAW_POLY             ,
+   TMDRAW_WIRE             ,
+   TMDRAW_TEXT             ,
+
+   TMSEL_SELECT_IN         ,
+   TMSEL_PSELECT_IN        ,
+   TMSEL_SELECT_ALL        ,
+   TMSEL_UNSELECT_IN       ,
+   TMSEL_PUNSELECT_IN      ,
+   TMSEL_UNSELECT_ALL      ,
+
+   TMSET_STEP              ,
+   TMSET_AUTOPAN           ,
+   TMSET_GRIDDEF           ,
+   TMSET_GRID0             ,
+   TMSET_GRID1             ,
+   TMSET_GRID2             ,
+   TMSET_CELLMARK          ,
+   TMSET_TEXTMARK          ,
+   TMSET_MARKER0           ,
+   TMSET_MARKER45          ,
+   TMSET_MARKER90          ,
+   TMSET_MARKER            ,
+
+   TMHELP_ABOUTAPP         ,
+   TBSTAT_ABORT
+} TOPED_MENUID;
+
+
    typedef enum  {
       ZOOM_WINDOW  = 0    ,
       ZOOM_WINDOWM        ,
@@ -59,24 +133,22 @@ namespace tui {
       ZOOM_DOWN           ,
       ZOOM_EMPTY          ,
    } ZOOM_TYPE;
-   
+
    typedef enum  {
       CM_CONTINUE  = 0    ,
       CM_ABORT            ,
       CM_CANCEL_LAST      ,
       CM_CLOSE            ,
-      CM_CMDLIST1         ,
-      CM_CMDLIST2         ,
-      CM_CMDLIST3
+      CM_AGAIN
    } CONTEXT_MENU_TYPE;
-   
+
    typedef enum {
       POS_X = 0x01,
       POS_Y = 0x02,
       DEL_X = 0x10,
       DEL_Y = 0x20,
    } POSITION_TYPE;
-   
+
    typedef enum {
       STS_SELECTED      ,
       STS_ABORTENABLE   ,
@@ -97,7 +169,8 @@ namespace tui {
       STS_ANGLE_45      ,
       STS_ANGLE_90
    } STATUSLINE_TYPE;
-   
+
+
    //=============================================================================
    class LayoutCanvas : public wxGLCanvas  {
    public: 
@@ -120,6 +193,7 @@ namespace tui {
       void           OnCMabort(wxCommandEvent&);
       void           OnCMcancel(wxCommandEvent&);
       void           OnCMclose(wxCommandEvent&);
+      void           OnRepeatLastCmd(wxCommandEvent&);
       void           initializeGL();
    private:
       void           CursorControl(bool, bool);
@@ -140,7 +214,6 @@ namespace tui {
       bool           mouse_input;    // Indicates that a mouse input is expected
       bool           rubber_band;    // Indicates that moving or changing objects must be drawn
       bool           restricted_move;// when mouse controlled input
-      word           numPntsEntered; // Number of entered points - for context menus
       wxCursor*      crossCur;
       //
       void           wnd_paint();

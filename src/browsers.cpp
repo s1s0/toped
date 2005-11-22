@@ -193,11 +193,11 @@ void browsers::GDSbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
    RBcellID = id;
    if ( id.IsOk() && (id != GetRootItem()))   {
       wxString RBcellname = GetItemText(id);
-      menu.Append(TMGDS_IMPORT, wxT("Import " + RBcellname));
+      menu.Append(tui::TMGDS_IMPORT, wxT("Import " + RBcellname));
       menu.Append(GDSTree_ReportLay, wxT("Report layers used in " + RBcellname));
    }
    else {
-      menu.Append(TMGDS_CLOSE, wxT("Close GDS")); // will be catched up in toped.cpp
+      menu.Append(tui::TMGDS_CLOSE, wxT("Close GDS")); // will be catched up in toped.cpp
    }
    PopupMenu(&menu, pt);
 }
@@ -213,7 +213,7 @@ BEGIN_EVENT_TABLE(browsers::TDTbrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( ID_TPD_CELLTREE, browsers::TDTbrowser::OnItemRightClick)
    EVT_RIGHT_UP(browsers::TDTbrowser::OnBlankRMouseUp)
    EVT_MENU(CellTree_OpenCell, browsers::TDTbrowser::OnWXOpenCell)
-   EVT_MENU(TMCELL_REPORTLAY, browsers::TDTbrowser::OnReportUsedLayers)
+   EVT_MENU(tui::TMCELL_REPORTLAY, browsers::TDTbrowser::OnReportUsedLayers)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::TDTbrowser::OnCommand)
 END_EVENT_TABLE()
 //==============================================================================
@@ -295,12 +295,12 @@ void browsers::TDTbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
     if ( id.IsOk() && (id != GetRootItem()))   {
       wxString RBcellname = GetItemText(id);
       menu.Append(CellTree_OpenCell, wxT("Open " + RBcellname));
-      menu.Append(TMCELL_REF_B , wxT("Add reference to " + RBcellname));
-      menu.Append(TMCELL_AREF_B, wxT("Add array of " + RBcellname));
-      menu.Append(TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
+      menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
+      menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
+      menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
     }
     else {
-      menu.Append(TMCELL_NEW, wxT("New cell")); // will be catched up in toped.cpp
+      menu.Append(tui::TMCELL_NEW, wxT("New cell")); // will be catched up in toped.cpp
     }
     PopupMenu(&menu, pt);
 }
