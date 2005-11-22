@@ -318,7 +318,7 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
 //-----------------------------------------------------------------------------
 // class tdtbox
 //-----------------------------------------------------------------------------
-laydata::tdtbox::tdtbox(TEDrecord* const tedfile) : tdtdata() {
+laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata() {
    _p1 = new TP(tedfile->getTP()); if (!tedfile->status()) return;
    _p2 = new TP(tedfile->getTP()); if (!tedfile->status()) return;
    normalize();
@@ -423,7 +423,7 @@ void laydata::tdtbox::info(std::ostringstream& ost) const {
    ost << ");";
 }
 
-void laydata::tdtbox::write(TEDrecord* const tedfile) const {
+void laydata::tdtbox::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_BOX);
    tedfile->putTP(_p1);
    tedfile->putTP(_p2);
@@ -530,7 +530,7 @@ laydata::tdtbox::~tdtbox() {
 //-----------------------------------------------------------------------------
 // class tdtpoly
 //-----------------------------------------------------------------------------
-laydata::tdtpoly::tdtpoly(TEDrecord* const tedfile) : tdtdata(){
+laydata::tdtpoly::tdtpoly(TEDfile* const tedfile) : tdtdata(){
    word numpoints = tedfile->getWord(); if (!tedfile->status()) return;
    _plist.reserve(numpoints);
    for (word i = 0 ; i < numpoints; i++) {
@@ -714,7 +714,7 @@ void laydata::tdtpoly::info(std::ostringstream& ost) const {
    ost << ");";
 }
 
-void laydata::tdtpoly::write(TEDrecord* const tedfile) const {
+void laydata::tdtpoly::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_POLY);
    tedfile->putWord(_plist.size());
    for (word i = 0; i < _plist.size(); i++)
@@ -760,7 +760,7 @@ pointlist& laydata::tdtpoly::movePointsSelected(const SGBitSet* pset,
 //-----------------------------------------------------------------------------
 // class tdtwire
 //-----------------------------------------------------------------------------
-laydata::tdtwire::tdtwire(TEDrecord* const tedfile) : tdtdata() {
+laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata() {
    word numpoints = tedfile->getWord();  if (!tedfile->status()) return;
    _width = tedfile->getWord();  if (!tedfile->status()) return;
    _plist.reserve(numpoints);
@@ -1030,7 +1030,7 @@ void laydata::tdtwire::info(std::ostringstream& ost) const {
    ost << ");";
 }
 
-void laydata::tdtwire::write(TEDrecord* const tedfile) const {
+void laydata::tdtwire::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_WIRE);
    tedfile->putWord(_plist.size());
    tedfile->putWord(_width);
@@ -1089,7 +1089,7 @@ pointlist& laydata::tdtwire::movePointsSelected(const SGBitSet* pset,
 //-----------------------------------------------------------------------------
 // class tdtcellref
 //-----------------------------------------------------------------------------
-laydata::tdtcellref::tdtcellref(TEDrecord* const tedfile) {
+laydata::tdtcellref::tdtcellref(TEDfile* const tedfile) {
    // read the name of the referenced cell
    std::string cellrefname = tedfile->getString(); if (!tedfile->status()) return;
    // get the cell definition pointer and register the cellrefname as a child 
@@ -1153,7 +1153,7 @@ void laydata::tdtcellref::info(std::ostringstream& ost) const {
    ost << _translation.tx() << " , " << _translation.ty() << ")";
 }
 
-void laydata::tdtcellref::write(TEDrecord* const tedfile) const {
+void laydata::tdtcellref::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_CELLREF);
    tedfile->putString(_structure->first);
    tedfile->putCTM(_translation);
@@ -1205,7 +1205,7 @@ DBbox laydata::tdtcellref::overlap() const {
 //-----------------------------------------------------------------------------
 // class tdtcellaref
 //-----------------------------------------------------------------------------
-laydata::tdtcellaref::tdtcellaref(TEDrecord* const tedfile) : tdtcellref(tedfile) {
+laydata::tdtcellaref::tdtcellaref(TEDfile* const tedfile) : tdtcellref(tedfile) {
    // get the matrix properties
    _stepX = tedfile->get4b();  if (!tedfile->status()) return;
    _stepY = tedfile->get4b();  if (!tedfile->status()) return;
@@ -1291,7 +1291,7 @@ void laydata::tdtcellaref::info(std::ostringstream& ost) const {
    ost <<         _rows << " x " << _stepY << "]";
 }
 
-void laydata::tdtcellaref::write(TEDrecord* const tedfile) const {
+void laydata::tdtcellaref::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_CELLAREF);
    tedfile->putString(_structure->first);
    tedfile->putCTM(_translation);
@@ -1343,7 +1343,7 @@ laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata() {
    
 }
    
-laydata::tdttext::tdttext(TEDrecord* const tedfile) : tdtdata() {
+laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata() {
    _width = 0;
    _text = tedfile->getString(); if (!tedfile->status()) return;
    _translation = tedfile->getCTM();  if (!tedfile->status()) return;
@@ -1439,7 +1439,7 @@ void  laydata::tdttext::draw_select(CTM trans, const SGBitSet*) const {
 void laydata::tdttext::info(std::ostringstream&) const {
 }
 
-void laydata::tdttext::write(TEDrecord* const tedfile) const {
+void laydata::tdttext::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_TEXT);
    tedfile->putString(_text);
    tedfile->putCTM(_translation);

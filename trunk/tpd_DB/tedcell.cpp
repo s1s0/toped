@@ -177,7 +177,7 @@ laydata::tdtcell::tdtcell(std::string name) {
    _name = name; _orphan = true;
 };
 
-laydata::tdtcell::tdtcell(TEDrecord* const tedfile, std::string name) : _name(name) ,
+laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name) : _name(name) ,
                                                                _orphan(true) {
    byte recordtype;
    word  layno;
@@ -376,7 +376,7 @@ laydata::tdtcellref* laydata::tdtcell::getcellover(TP pnt, ctmstack& transtack, 
    return NULL;
 }      
     
-void laydata::tdtcell::write(TEDrecord* const tedfile, TDTHierTree* const root) const {
+void laydata::tdtcell::write(TEDfile* const tedfile, TDTHierTree* const root) const {
    // We going to write the cells in hierarchical order. Children - first!
    laydata::TDTHierTree* Child= root->GetChild();
    while (Child) {

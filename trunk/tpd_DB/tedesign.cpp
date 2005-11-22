@@ -45,7 +45,7 @@ laydata::tdtdesign::tdtdesign(std::string name, real DBU, real UU) {
    _hiertree = NULL;
 }
 
-void laydata::tdtdesign::read(TEDrecord* const tedfile) {
+void laydata::tdtdesign::read(TEDfile* const tedfile) {
    std::string cellname;
    while (tedf_CELL == tedfile->getByte()) {
       cellname = tedfile->getString(); if (!tedfile->status()) return;
@@ -251,7 +251,7 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
    }   
 }
 
-void laydata::tdtdesign::write(TEDrecord* const tedfile) {
+void laydata::tdtdesign::write(TEDfile* const tedfile) {
    tedfile->putByte(tedf_DESIGN);
    tedfile->putString(_name);
    tedfile->putReal(_DBU);

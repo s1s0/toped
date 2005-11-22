@@ -43,7 +43,7 @@ laydata::quadTree::quadTree() : _overlap(DEFAULT_OVL_BOX){
 /*! Used for reading the quadTree from the TDT file. A new shape is added to 
 the tree using the put() method. Entire tree is recreated when there is no more
 data to read using resort() method.*/
-laydata::quadTree::quadTree(TEDrecord* const tedfile) : _overlap(DEFAULT_OVL_BOX) {
+laydata::quadTree::quadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX) {
    _quads[0] = _quads[1] = _quads[2] = _quads[3] = NULL;
    _first = NULL;_invalid = false;
    byte recordtype;
@@ -484,7 +484,7 @@ byte laydata::quadTree::biggest(float* array) const {
 The idea about store a sorted data does not seems to be appropriate for TDT
 format. It is TOPED internal affair. Format might be used by somebody else - 
  you never know - do you?*/
-void laydata::quadTree::write(TEDrecord* const tedfile) const {
+void laydata::quadTree::write(TEDfile* const tedfile) const {
    tdtdata* wdt = _first;
    while(wdt) {
       wdt->write(tedfile); wdt = wdt->next();

@@ -203,7 +203,7 @@ DataCenter::~DataCenter() {
 }
 
 bool DataCenter::TDTread(std::string filename) {
-   laydata::TEDrecord tempin(filename.c_str());
+   laydata::TEDfile tempin(filename.c_str());
    if (tempin.status()) {
       delete _TEDDB;//Erase existing data
       _tedfilename = filename;
@@ -228,7 +228,7 @@ bool DataCenter::TDTread(std::string filename) {
 void DataCenter::TDTwrite(const char* filename) {
    std::string nfn;
    if (filename)  _tedfilename = filename;
-   laydata::TEDrecord tempin(_TEDDB, _tedfilename);
+   laydata::TEDfile tempin(_TEDDB, _tedfilename);
    _tedtimestamp = tempin.timestamp();
    _neversaved = false;
 }
