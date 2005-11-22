@@ -90,7 +90,7 @@ namespace laydata {
       shp_4pnts      = 0x80  // less than 4 points 
    } shape_status;
    
-   class TEDrecord;
+   class TEDfile;
    class tdtdata;
    class editobject;
    class tdtcell;
@@ -126,10 +126,10 @@ namespace laydata {
    };
    
 //==============================================================================
-   class   TEDrecord {
+   class   TEDfile {
    public:
-                           TEDrecord(const char*); // for reading
-                           TEDrecord(tdtdesign*, std::string&); // for writing
+                           TEDfile(const char*); // for reading
+                           TEDfile(tdtdesign*, std::string&); // for writing
       std::string          getString();
       void                 putString(std::string str);
       real                 getReal();

@@ -35,8 +35,8 @@ namespace laydata {
    public:
                      tdtdesign(std::string,real DBU = 1e-9, real UU = 1e-3);
                     ~tdtdesign();                            
-      void           read(TEDrecord* const tedfile);
-      void           write(TEDrecord* const tedfile);
+      void           read(TEDfile* const tedfile);
+      void           write(TEDfile* const tedfile);
       tdtcell*       addcell(std::string name);
       tdtdata*       addbox(word la, TP* p1, TP* p2);
       tdtdata*       addpoly(word la, pointlist& pl);
@@ -99,7 +99,7 @@ namespace laydata {
       bool           modified;
       void          (*btreeAddMember)(const char*, const char*, int action);
       void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
-      friend         class TEDrecord;
+      friend         class TEDfile;
       friend         void tdtcell::updateHierarchy(tdtdesign*);
       friend         bool tdtcell::addchild(tdtdesign*, tdtcell*);
    private:

@@ -83,7 +83,7 @@ namespace laydata {
    class tdtcell  {
    public:
                            tdtcell(std::string name);
-                           tdtcell(TEDrecord* const tedfile, std::string name);
+                           tdtcell(TEDfile* const tedfile, std::string name);
                           ~tdtcell(); 
       void                 openGL_draw(ctmstack&, const layprop::DrawProperties&,
                                                           bool active=false) const;
@@ -96,7 +96,7 @@ namespace laydata {
                               int4b stepX, int4b stepY, word columns, word rows, 
                                                               bool sortnow = true);
       bool                 addchild(tdtdesign*, tdtcell*);
-      void                 write(TEDrecord* const, TDTHierTree* const) const;
+      void                 write(TEDfile* const, TDTHierTree* const) const;
       TDTHierTree*         hierout(TDTHierTree*& Htree, tdtcell* parent, 
                                                            cellList* celldefs);
       DBbox                overlap() const;

@@ -67,7 +67,7 @@ namespace laydata {
    //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&) const = 0;
    //! Write the tdtdata object in file.
-      virtual   void       write(TEDrecord* const tedfile) const = 0;
+      virtual   void       write(TEDfile* const tedfile) const = 0;
    //!
       virtual   bool       point_inside(const TP);
    //! shape cut with the input polygon
@@ -111,7 +111,7 @@ namespace laydata {
                            tdtbox() : tdtdata(), _p1(NULL), _p2(NULL) {};
                               tdtbox(TP* p1, TP* p2) : tdtdata(), _p1(p1), 
                                                          _p2(p2) {normalize();};
-                           tdtbox(TEDrecord* const tedfile);
+                           tdtbox(TEDfile* const tedfile);
                           ~tdtbox();
       DBbox                overlap() const;
       validator*           move(const CTM&, const SGBitSet* plst = NULL);
@@ -122,7 +122,7 @@ namespace laydata {
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                              SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 info(std::ostringstream&) const;
-      void                 write(TEDrecord* const tedfile) const;
+      void                 write(TEDfile* const tedfile) const;
       void                 addpoint(TP);
       void                 rmpoint(TP&);
       word                 numpoints() const {return 4;};
@@ -145,7 +145,7 @@ namespace laydata {
    public:
                            tdtpoly():tdtdata() {};
                            tdtpoly(pointlist& plist) : tdtdata(), _plist(plist) {};
-                           tdtpoly(TEDrecord* const tedfile);
+                           tdtpoly(TEDfile* const tedfile);
 //                          ~tdtpoly() {};
       DBbox                overlap() const;
       validator*           move(const CTM&, const SGBitSet* plst = NULL);
@@ -156,7 +156,7 @@ namespace laydata {
                               SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 draw_select(CTM,const SGBitSet* = NULL) const;
       void                 info(std::ostringstream&) const;
-      void                 write(TEDrecord* const tedfile) const;
+      void                 write(TEDfile* const tedfile) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
       void                 rmpoint(TP&);
       word                 numpoints() const {return _plist.size();};
@@ -178,7 +178,7 @@ namespace laydata {
                            tdtwire(word width) : tdtdata(), _width(width) {};
                            tdtwire(pointlist& plist, word width) : tdtdata(), 
                                                 _plist(plist) , _width(width) {};
-                           tdtwire(TEDrecord* const tedfile);
+                           tdtwire(TEDfile* const tedfile);
 //                          ~tdtwire() {};
       DBbox                overlap() const;
       validator*           move(const CTM&, const SGBitSet* plst = NULL);
@@ -189,7 +189,7 @@ namespace laydata {
                               SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 draw_select(CTM,const SGBitSet* = NULL) const;
       void                 info(std::ostringstream&) const;
-      void                 write(TEDrecord* const tedfile) const;
+      void                 write(TEDfile* const tedfile) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
       void                 rmpoint(TP&);
       word                 numpoints() const {return _plist.size();};
@@ -216,7 +216,7 @@ namespace laydata {
    public:
                            tdtcellref(refnamepair str, CTM trans) : tdtdata(), 
                                           _structure(str), _translation(trans) {};
-                           tdtcellref(TEDrecord* const tedfile);
+                           tdtcellref(TEDfile* const tedfile);
 //                          ~tdtcellref() {};
       DBbox                overlap() const;
       validator*           move(const CTM& trans, const SGBitSet*) {
@@ -230,7 +230,7 @@ namespace laydata {
                               SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 draw_select(CTM,const SGBitSet* = NULL) const;
       void                 info(std::ostringstream&) const;
-      void                 write(TEDrecord* const tedfile) const;
+      void                 write(TEDfile* const tedfile) const;
       virtual void         ungroup(tdtdesign*, tdtcell*, atticList*);
       std::string          cellname() const {return _structure->first;};
       tdtcell*             structure() const{return _structure->second;};
@@ -255,7 +255,7 @@ namespace laydata {
                               int4b stepY, word cols, word rows) : 
                               tdtcellref(str, trans), _stepX(stepX), _stepY(stepY), 
                                                        _cols(cols), _rows(rows) {};
-                           tdtcellaref(TEDrecord* const tedfile);
+                           tdtcellaref(TEDfile* const tedfile);
 //                          ~tdtcellaref() {};
       DBbox                overlap() const;
       DBbox                clear_overlap() const;
@@ -264,7 +264,7 @@ namespace laydata {
                                                                 _cols, _rows);};
       void                 openGL_draw(ctmstack&, const layprop::DrawProperties&) const;
       void                 info(std::ostringstream&) const;
-      void                 write(TEDrecord* const tedfile) const;
+      void                 write(TEDfile* const tedfile) const;
       void                 ungroup(tdtdesign*, tdtcell*, atticList*);
    private:   
       bool                 aref_visible(ctmstack&, const layprop::DrawProperties&, int*) const;
@@ -278,7 +278,7 @@ namespace laydata {
    class tdttext : public tdtdata  {
    public:
                            tdttext(std::string text, CTM trans);
-                           tdttext(TEDrecord* const tedfile);
+                           tdttext(TEDfile* const tedfile);
 //                          ~tdttext() {};
       DBbox                overlap() const;
       validator*           move(const CTM& trans, const SGBitSet*) {
@@ -291,7 +291,7 @@ namespace laydata {
                               SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 draw_select(CTM,const SGBitSet* = NULL) const;
       void                 info(std::ostringstream&) const;
-      void                 write(TEDrecord* const tedfile) const;
+      void                 write(TEDfile* const tedfile) const;
       word                 numpoints() const {return 1;};
       void                 polycut(pointlist&, shapeList**){};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};

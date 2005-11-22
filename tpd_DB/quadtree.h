@@ -59,14 +59,14 @@ namespace laydata {
    class quadTree {
    public:
                            quadTree();
-                           quadTree(TEDrecord* const tedfile);
+                           quadTree(TEDfile* const tedfile);
       virtual             ~quadTree();
       virtual void         openGL_draw(ctmstack&, const layprop::DrawProperties&,
                                                             const dataList*) const;
       virtual void         tmp_draw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(tdtdata* shape);
       void                 put(tdtdata* shape);
-      void                 write(TEDrecord* const tedfile) const;
+      void                 write(TEDfile* const tedfile) const;
       void                 select_inBox(DBbox&, dataList*, bool);
       void                 select_fromList(dataList*, dataList*);
       void                 select_all(dataList*, bool mark = true);
@@ -113,7 +113,7 @@ functionality is mostly implemented in the parent class.
    class tdtlayer : public quadTree {
    public:
                            tdtlayer() : quadTree() {};
-                           tdtlayer(TEDrecord* const tedfile) : 
+                           tdtlayer(TEDfile* const tedfile) :
                                                             quadTree(tedfile) {};
                           ~tdtlayer() {freememory();};                                  
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue& ) const;

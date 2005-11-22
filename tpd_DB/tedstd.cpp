@@ -65,9 +65,9 @@ PSegment& PSegment::ortho(TP p) {
    return *seg;
 }
 //-----------------------------------------------------------------------------
-// class TEDrecord
+// class TEDfile
 //-----------------------------------------------------------------------------
-laydata::TEDrecord::TEDrecord(const char* filename) {
+laydata::TEDfile::TEDfile(const char* filename) {
    _numread = 0;_position = 0;_design = NULL;
    if (NULL == (_file = fopen(filename, "rb"))) {
       std::string news = "File \"";
@@ -97,7 +97,7 @@ laydata::TEDrecord::TEDrecord(const char* filename) {
    fclose(_file);
 }
 
-laydata::TEDrecord::TEDrecord(tdtdesign* design, std::string& filename) {
+laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) {
    _design = design;
    if (NULL == (_file = fopen(filename.c_str(), "wb"))) {
       std::string news = "File \"";
@@ -112,7 +112,7 @@ laydata::TEDrecord::TEDrecord(tdtdesign* design, std::string& filename) {
    fclose(_file);
 }
 
-byte laydata::TEDrecord::getByte() {
+byte laydata::TEDfile::getByte() {
    byte result;
    byte length = sizeof(byte);
    if (1 == (_numread = fread(&result, length, 1, _file)))
@@ -121,7 +121,7 @@ byte laydata::TEDrecord::getByte() {
    return result;
 }
 
-word laydata::TEDrecord::getWord() {
+word laydata::TEDfile::getWord() {
    word result;
    byte length = sizeof(word);
    if (1 == (_numread = fread(&result, length, 1, _file)))
@@ -130,11 +130,11 @@ word laydata::TEDrecord::getWord() {
    return result;
 }
 
-void laydata::TEDrecord::putWord(const word data) {
+void laydata::TEDfile::putWord(const word data) {
    fwrite(&data,2,1,_file);
 }   
 
-int4b laydata::TEDrecord::get4b() {
+int4b laydata::TEDfile::get4b() {
    int4b result;
    byte length = sizeof(int4b);
    if (1 == (_numread = fread(&result, length, 1, _file)))
@@ -143,11 +143,11 @@ int4b laydata::TEDrecord::get4b() {
    return result;
 }
 
-void laydata::TEDrecord::put4b(const int4b data) {
+void laydata::TEDfile::put4b(const int4b data) {
    fwrite(&data,4,1,_file);
 }   
 
-real laydata::TEDrecord::getReal() {
+real laydata::TEDfile::getReal() {
    real result;
    byte length = sizeof(real);
    if (1 == (_numread = fread(&result, length, 1, _file)))
@@ -156,36 +156,36 @@ real laydata::TEDrecord::getReal() {
    return result;
 }
 
-void laydata::TEDrecord::putReal(const real data) {
+void laydata::TEDfile::putReal(const real data) {
    fwrite(&data, sizeof(real), 1, _file);
 }
 
 
-void laydata::TEDrecord::getTime() {
+void laydata::TEDfile::getTime() {
    byte timesize = sizeof(TIME_TPD);
    _numread = fread(&_timestamp, timesize,1, _file);
    if (_numread == 1) _position += timesize;
    else _status = false;
 }
 
-void laydata::TEDrecord::putTime() {
+void laydata::TEDfile::putTime() {
    byte timesize = sizeof(TIME_TPD);
    _timestamp = time(NULL);
    fwrite(&_timestamp,timesize,1,_file);
 }
 
-TP laydata::TEDrecord::getTP() {
+TP laydata::TEDfile::getTP() {
    TP deferr;
    int4b x = get4b(); if (!_status) return deferr;
    int4b y = get4b(); if (!_status) return deferr;
    return TP(x,y);
 }
 
-void laydata::TEDrecord::putTP(const TP* p) {
+void laydata::TEDfile::putTP(const TP* p) {
    put4b(p->x()); put4b(p->y());
 }
 
-CTM laydata::TEDrecord::getCTM() {
+CTM laydata::TEDfile::getCTM() {
    CTM deferr;
    real _a  = getReal(); if (!_status) return deferr;
    real _b  = getReal(); if (!_status) return deferr;
@@ -196,7 +196,7 @@ CTM laydata::TEDrecord::getCTM() {
    return CTM(_a, _b, _c, _d, _tx, _ty);
 }
 
-void laydata::TEDrecord::putCTM(const CTM matrix) {
+void laydata::TEDfile::putCTM(const CTM matrix) {
    putReal(matrix.a());
    putReal(matrix.b());
    putReal(matrix.c());
@@ -205,7 +205,7 @@ void laydata::TEDrecord::putCTM(const CTM matrix) {
    putReal(matrix.ty());
 }
 
-std::string laydata::TEDrecord::getString() {
+std::string laydata::TEDfile::getString() {
    std::string str;
    byte length = getByte();
    if (_status) {
@@ -221,14 +221,14 @@ std::string laydata::TEDrecord::getString() {
    return str;
 }
 
-void laydata::TEDrecord::putString(std::string str) {
+void laydata::TEDfile::putString(std::string str) {
 //   byte len = str.length();
 //   fwrite(&len, 1,1, _file);
    putByte(str.length());
    fputs(str.c_str(), _file);
 }
 
-void laydata::TEDrecord::registercellread(std::string cellname, tdtcell* cell) {
+void laydata::TEDfile::registercellread(std::string cellname, tdtcell* cell) {
    if (_design->_cells.end() != _design->_cells.find(cellname)) 
    // There are several possiblirities here:
    // 1. Cell has been referenced before the definition takes place
@@ -256,11 +256,11 @@ void laydata::TEDrecord::registercellread(std::string cellname, tdtcell* cell) {
    _design->_cells[cellname] = cell;
 }
 
-void laydata::TEDrecord::registercellwritten(std::string cellname) {
+void laydata::TEDfile::registercellwritten(std::string cellname) {
    _childnames.push_back(cellname);
 }   
 
-bool laydata::TEDrecord::checkcellwritten(std::string cellname) {
+bool laydata::TEDfile::checkcellwritten(std::string cellname) {
    for (nameList::const_iterator i = _childnames.begin();
                                  i != _childnames.end(); i++)
       if (cellname == *i) return true;
@@ -268,7 +268,7 @@ bool laydata::TEDrecord::checkcellwritten(std::string cellname) {
 //   return (_childnames.end() != _childnames.find(cellname));
 }   
 
-laydata::refnamepair laydata::TEDrecord::getcellinstance(std::string cellname) {
+laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname) {
    // register the name of the referenced cell in the list of children
    _childnames.push_back(cellname);
    // link the cells instances with their definitions
@@ -298,7 +298,7 @@ laydata::refnamepair laydata::TEDrecord::getcellinstance(std::string cellname) {
    return _design->_cells.find(cellname);
 }
 
-void laydata::TEDrecord::get_cellchildnames(laydata::nameList* cnames) {
+void laydata::TEDfile::get_cellchildnames(laydata::nameList* cnames) {
    // leave only the unique names in the children's list
    _childnames.sort(); _childnames.unique();
    // Be very very careful with the copy constructors and assignment of the 
