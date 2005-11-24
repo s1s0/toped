@@ -331,7 +331,7 @@ void DataCenter::mousePoint(TP p) {
 }
 
 void DataCenter::mousePointCancel(TP& lp) {
-   if (_TEDDB) return _TEDDB->mousePointCancel(lp);
+   if (_TEDDB)  _TEDDB->mousePointCancel(lp);
 }
 
 void DataCenter::mouseStop() {
