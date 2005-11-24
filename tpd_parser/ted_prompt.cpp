@@ -343,10 +343,11 @@ void console::ted_cmd::OnGUInput(wxCommandEvent& evt) {
          // wake-up the thread expecting this data
          threadWaits4->Signal();
          break;
-      case  0:  // left mouse button
+      case  0:  {// left mouse button
          telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
          mouseLB(*p);
          break;
+         }
       case  2: mouseRB(); break;
       default: assert(false);
    }

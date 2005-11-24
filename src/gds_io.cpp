@@ -518,12 +518,14 @@ GDSin::GDSbox::GDSbox(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
                delete cr; break;
             case gds_BOXTYPE:cr->Ret_Data(&boxtype);// Don't know what is this !!!
                delete cr; break;
-            case gds_XY: word numpoints = (cr->Get_reclen())/8 - 1;
-                  // one point less because fist and last point coincide
-                  assert(numpoints == 4);
-                  _plist.reserve(numpoints);
-                  for(word i = 0; i < numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
+            case gds_XY: {
+               word numpoints = (cr->Get_reclen())/8 - 1;
+               // one point less because fist and last point coincide
+               assert(numpoints == 4);
+               _plist.reserve(numpoints);
+               for(word i = 0; i < numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
                delete cr; break;
+               }
             case gds_ENDEL://end of element, exit point
                delete cr;return;
             default:{

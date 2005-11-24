@@ -521,7 +521,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
       wxString ost;
       ost << "tdtread(\"" << dlg2.GetDirectory() << "/" << dlg2.GetFilename() << "\");";
       _cmdline->parseCommand(ost);
-      SetStatusText("File "+dlg2.GetFilename()+" loded");
+      SetStatusText("File "+dlg2.GetFilename()+" loaded");
       SetTitle(dlg2.GetFilename());
    }
    else SetStatusText("Opening aborted");
