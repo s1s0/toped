@@ -122,6 +122,7 @@ namespace GDSin {
    typedef std::vector<GDSstructure*>     ChildStructure;
    typedef SGHierTree<GDSstructure>       GDSHierTree;
 
+   typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
 
    /*** GDSrecord ***************************************************************
    >>> Constructor --------------------------------------------------------------
@@ -151,12 +152,15 @@ namespace GDSin {
    class   GDSrecord
    {
    public:
-      GDSrecord(FILE* Gf, word rl, byte rt, byte dt);
+                GDSrecord(FILE* Gf, word rl, byte rt, byte dt);
+                GDSrecord(byte rt, byte dt, word rl);
       byte      Get_rectype() {return rectype;}
       byte*     Get_record()  {return record;}
       word      Get_reclen()  {return reclen;}
       bool      Ret_Data(void* var, word curnum = 0, byte len = 0);
+      word      flush(FILE* Gf);
       bool      isvalid;
+      void      add_int2b(word);
       ~GDSrecord();
    protected:
       word      reclen;
@@ -165,8 +169,17 @@ namespace GDSin {
       byte*     record;
    private:
       word      numread;
+      word      index;
    };
 
+//#define gdsDT_NODATA       0
+//#define gdsDT_BIT          1
+//#define gdsDT_INT2B        2
+//#define gdsDT_INT4B        3
+//#define gdsDT_REAL4B       4
+//#define gdsDT_REAL8B       5
+//#define gdsDT_ASCII        6
+   
    /*** GDSdata *****************************************************************
    > This class is inherited by all GDSII data classes
    >>> Constructor --------------------------------------------------------------
@@ -557,7 +570,9 @@ namespace GDSin {
    {
    public:
       GDSFile(const char*fn);
+      GDSFile(std::string, TIME_TPD);
       GDSrecord*     GetNextRecord();
+      GDSrecord*     GDSFile::SetNextRecord(byte rectype);
       double         Get_LibUnits();
       double         Get_UserUnits();
       std::string    Get_libname() const {return library->Get_name();}
@@ -571,9 +586,10 @@ namespace GDSin {
       void           GetHierTree(); // temporary
       ~GDSFile();
    protected:
+      void           SetTimes(GDSrecord* wr);
       void           GetTimes(GDSrecord* wr);
       FILE*          GDSfh;
-      char*          filename;
+      std::string    filename;
       int2b          StreamVersion;
       int2b          libdirsize;
       char           srfname[256];
@@ -583,7 +599,8 @@ namespace GDSin {
       GDSHierTree*   HierTree; // Tree of instance hierarchy
       int            GDSIIerrors;
       int            GDSIIwarnings;
-      struct time{word Year,Month,Day,Hour,Min,Sec;} t_modif, t_access;
+      GDStime        t_modif;
+      GDStime        t_access;
    };
 
    // Function definition

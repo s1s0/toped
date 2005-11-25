@@ -67,7 +67,7 @@ PSegment& PSegment::ortho(TP p) {
 //-----------------------------------------------------------------------------
 // class TEDfile
 //-----------------------------------------------------------------------------
-laydata::TEDfile::TEDfile(const char* filename) {
+laydata::TEDfile::TEDfile(const char* filename) { // reading
    _numread = 0;_position = 0;_design = NULL;
    if (NULL == (_file = fopen(filename, "rb"))) {
       std::string news = "File \"";
@@ -97,7 +97,7 @@ laydata::TEDfile::TEDfile(const char* filename) {
    fclose(_file);
 }
 
-laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) {
+laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) { //writing
    _design = design;
    if (NULL == (_file = fopen(filename.c_str(), "wb"))) {
       std::string news = "File \"";

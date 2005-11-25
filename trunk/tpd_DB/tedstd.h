@@ -33,12 +33,6 @@
 #include "config.h"
 #endif
 
-#if (SIZEOF_TIME_T == 8)
-   #define TIME_TPD unsigned int
-#else
-   #define TIME_TPD time_t
-#endif
-
 //==============================================================================
 // Toped DaTa (TDT) file markers
 //==============================================================================

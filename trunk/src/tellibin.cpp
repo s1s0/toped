@@ -2782,7 +2782,8 @@ tellstdfunc::TDTread::TDTread(telldata::typeID retype) :
 int tellstdfunc::TDTread::execute() {
    std::string name = getStringValue();
    if (DATC->TDTread(name)) {
-      std::string time(ctime(DATC->tedtimestamp()));
+      time_t ftime = DATC->tedtimestamp();
+      std::string time(ctime(&ftime));
       time.erase(time.length()-1,1); // remove the trailing \n
       LogFile << LogFile.getFN() << "(\""<< name << "\",\"" <<  time <<
                                                         "\");"; LogFile.flush();
@@ -2815,7 +2816,8 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype) :
 
 int tellstdfunc::TDTsave::execute() {
    DATC->TDTwrite();
-   std::string time(ctime(DATC->tedtimestamp()));
+   time_t ftime = DATC->tedtimestamp();
+   std::string time(ctime(&ftime));
    time.erase(time.length()-1,1); // remove the trailing \n
    LogFile << LogFile.getFN() << "(\"" <<  time << "\");"; LogFile.flush();
    return EXEC_NEXT;
@@ -2838,6 +2840,21 @@ int tellstdfunc::GDSconvert::execute() {
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << recur << "," << 
                                                   over << ");"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::GDSexport::GDSexport(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::GDSexport::execute() {
+   std::string name = getStringValue();
+   DATC->lockDB(false);
+      DATC->GDSexport(name);
+   DATC->unlockDB();
+   LogFile << LogFile.getFN() << "(\""<< name << ");"; LogFile.flush();
    return EXEC_NEXT;
 }
 

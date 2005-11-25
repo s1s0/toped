@@ -52,6 +52,7 @@ public:
                               DataCenter();
                              ~DataCenter(); 
    void                       GDSparse(std::string filename, std::list<std::string>&);
+   void                       GDSexport(std::string&);
    void                       importGDScell(const char* name, bool recur, bool over);
    void                       reportGDSlay(const char* name);
    GDSin::GDSstructure*       GDSstructures();
@@ -73,13 +74,13 @@ public:
    std::string                tedfilename() const  {return _tedfilename;};
    bool                       neversaved()  const  {return _neversaved;}; 
    bool                       modified() const     {return (NULL == _TEDDB) ? false : _TEDDB->modified;}; 
-   const time_t*              tedtimestamp() const {return &_tedtimestamp;};
+   TIME_TPD                   tedtimestamp() const {return _tedtimestamp;};
 protected:
    laydata::tdtdesign*        _TEDDB;      // toped data base
    GDSin::GDSFile*            _GDSDB;      // GDS parsed data
    std::string                _tedfilename;
    bool                       _neversaved;
-   time_t                     _tedtimestamp;
+   TIME_TPD                   _tedtimestamp;
 };
 
 #endif

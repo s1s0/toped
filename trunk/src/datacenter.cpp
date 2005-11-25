@@ -216,11 +216,10 @@ bool DataCenter::TDTread(std::string filename) {
       browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
       // Update Canvas scale
       Properties->setUU(_TEDDB->UU());
-      
       return true;
-   }   
+   }
    else {
-      delete tempin.design();
+      // don't clear the tempin.design. It is already done in tempin read constructor
       return false;
    }   
 }
@@ -231,6 +230,12 @@ void DataCenter::TDTwrite(const char* filename) {
    laydata::TEDfile tempin(_TEDDB, _tedfilename);
    _tedtimestamp = tempin.timestamp();
    _neversaved = false;
+}
+
+void DataCenter::GDSexport(std::string& filename) {
+   std::string nfn;
+   GDSin::GDSFile gdsex(_tedfilename, _tedtimestamp);
+   _TEDDB->GDSwrite(gdsex);
 }
 
 void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells) {

@@ -50,6 +50,11 @@
 #define DEFAULT_OVL_BOX DBbox(TP(0,0))
 #define DEFAULT_ZOOM_BOX DBbox(TP(-2000,-2000), TP(20000,20000))
 
+#if (SIZEOF_TIME_T == 8)
+   #define TIME_TPD unsigned int
+#else
+   #define TIME_TPD time_t
+#endif
 //=============================================================================
 // General type declations (compatability)
 //=============================================================================
