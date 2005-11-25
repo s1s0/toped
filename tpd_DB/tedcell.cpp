@@ -376,11 +376,13 @@ laydata::tdtcellref* laydata::tdtcell::getcellover(TP pnt, ctmstack& transtack, 
    return NULL;
 }      
     
-void laydata::tdtcell::write(TEDfile* const tedfile, TDTHierTree* const root) const {
+void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, TDTHierTree* const root) const {
    // We going to write the cells in hierarchical order. Children - first!
    laydata::TDTHierTree* Child= root->GetChild();
    while (Child) {
-      tedfile->design()->getcellnamepair(Child->GetItem()->name())->second->write(tedfile, Child);
+//      tedfile->design()->getcellnamepair(Child->GetItem()->name())->second->write(tedfile, Child);
+      allcells.find(Child->GetItem()->name())->second->write(tedfile, allcells, Child);
+//      allcells[Child->GetItem()->name()]->write(tedfile, Child);
       Child = Child->GetBrother();
 	}
    // If no more children and the cell has not been written yet

@@ -259,11 +259,15 @@ void laydata::tdtdesign::write(TEDfile* const tedfile) {
    //
    laydata::TDTHierTree* root = _hiertree->GetFirstRoot();
    while (root) {
-      _cells[root->GetItem()->name()]->write(tedfile, root);
+      _cells[root->GetItem()->name()]->write(tedfile, _cells, root);
       root = root->GetNextRoot();
    }
    tedfile->putByte(tedf_DESIGNEND);
    modified = false;
+}
+
+void laydata::tdtdesign::GDSwrite(GDSin::GDSFile&) const {
+
 }
 
 void laydata::tdtdesign::recreate_hierarchy() {

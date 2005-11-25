@@ -96,7 +96,7 @@ namespace laydata {
                               int4b stepX, int4b stepY, word columns, word rows, 
                                                               bool sortnow = true);
       bool                 addchild(tdtdesign*, tdtcell*);
-      void                 write(TEDfile* const, TDTHierTree* const) const;
+      void                 write(TEDfile* const, const cellList&, TDTHierTree* const) const;
       TDTHierTree*         hierout(TDTHierTree*& Htree, tdtcell* parent, 
                                                            cellList* celldefs);
       DBbox                overlap() const;

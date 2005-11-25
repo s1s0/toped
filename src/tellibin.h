@@ -133,6 +133,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(TDTsaveas        )
    TELL_STDCMD_CLASSA(GDSread          )
    TELL_STDCMD_CLASSA(GDSconvert       )
+   TELL_STDCMD_CLASSA(GDSexport        )
    TELL_STDCMD_CLASSA(GDSreportlay     )
    TELL_STDCMD_CLASSA(GDSclose         )
    TELL_STDCMD_CLASSA(getPOINT         )

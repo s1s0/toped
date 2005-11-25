@@ -82,6 +82,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("newcell"          ,(new                  tellstdfunc::stdNEWCELL(telldata::tn_void)));
    mblock->addFUNC("gdsread"          ,(new          tellstdfunc::GDSread(TLISTOF(telldata::tn_string))));
    mblock->addFUNC("gdsimport"        ,(new                  tellstdfunc::GDSconvert(telldata::tn_void)));
+   mblock->addFUNC("gdsexport"        ,(new                   tellstdfunc::GDSexport(telldata::tn_void)));
    mblock->addFUNC("gdsclose"         ,(new                    tellstdfunc::GDSclose(telldata::tn_void)));
    mblock->addFUNC("tdtread"          ,(new                     tellstdfunc::TDTread(telldata::tn_void)));
    mblock->addFUNC("tdtsave"          ,(new                     tellstdfunc::TDTsave(telldata::tn_void)));

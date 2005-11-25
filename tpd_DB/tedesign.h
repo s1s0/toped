@@ -28,7 +28,7 @@
 #define TEDESIGN_H_INCLUDED
 
 #include "tedcell.h"
-
+#include "../src/gds_io.h"
 namespace laydata {
 
    class tdtdesign {
@@ -94,6 +94,7 @@ namespace laydata {
       TDTHierTree*   hiertree()        const {return _hiertree;};
       const cellList& cells()          const {return _cells;};
       bool           collect_usedlays(std::string, bool, usedlayList&) const;
+      void           GDSwrite(GDSin::GDSFile&) const;
       //
 //      const ACTIVE_OP tellop()         const {return _tellop;};
       bool           modified;
