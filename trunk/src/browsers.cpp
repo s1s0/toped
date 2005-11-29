@@ -47,7 +47,7 @@ extern const wxEventType          wxEVT_CMD_BROWSER;
 browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) : 
                                        wxListCtrl(parent, id, pos, size, style) {
-   InsertColumn(0, " No");
+   InsertColumn(0, "  No    ");
    InsertColumn(1, "     Name     ");
    InsertColumn(2, " S ");
    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
@@ -81,7 +81,20 @@ browsers::topedlay_list::~topedlay_list() {
 
 void browsers::topedlay_list::addlayer(wxString name, word layno) {
    wxString num; num.Printf(_T("%3d"), layno);
+   wxListItem old;
+   int i, item;
+   long oldno;
+   wxString oldtext;
    wxListItem row;
+
+   item = -1;
+   for(;;) {
+      item = GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+      if (item == -1) break;
+      oldno = GetItemData(item);
+      if (oldno == layno) DeleteItem(item);
+   }
+
    row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
    row.SetData(layno); row.SetText(num); row.SetId(GetItemCount());
    row.SetFont(_llfont_normal);
