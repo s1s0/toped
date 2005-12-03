@@ -200,9 +200,10 @@ private:
    TP    _p2;
 };
 
-typedef  std::vector<TP>  pointlist;
-typedef  std::stack<CTM>  ctmstack;
-typedef  std::deque<CTM>  ctmqueue;
+typedef  std::vector<TP>         pointlist;
+typedef  std::stack<CTM>         ctmstack;
+typedef  std::deque<CTM>         ctmqueue;
+typedef  std::list<std::string>  nameList;
 
 //=============================================================================
 template <class TYPE> class SGHierTree {

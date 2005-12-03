@@ -160,9 +160,14 @@ namespace GDSin {
       bool      Ret_Data(void* var, word curnum = 0, byte len = 0);
       word      flush(FILE* Gf);
       bool      isvalid;
-      void      add_int2b(word);
+      void      add_int2b(const word);
+      void      add_int4b(const int4b);
+      void      add_real8b(const real);
+      void      add_ascii(const char*);
       ~GDSrecord();
    protected:
+      byte*     ieee2gds(double);
+      double    gds2ieee(byte*);
       word      reclen;
       byte      rectype;
       byte      datatype;
@@ -572,9 +577,12 @@ namespace GDSin {
       GDSFile(const char*fn);
       GDSFile(std::string, TIME_TPD);
       GDSrecord*     GetNextRecord();
-      GDSrecord*     GDSFile::SetNextRecord(byte rectype);
+      GDSrecord*     GDSFile::SetNextRecord(byte rectype, word reclen = 0);
       double         Get_LibUnits();
       double         Get_UserUnits();
+      void           SetTimes(GDSrecord* wr);
+      bool           checkCellWritten(std::string);
+      void           registerCellWritten(std::string);
       std::string    Get_libname() const {return library->Get_name();}
       GDSstructure*  GetStructure(const char* selection);
       GDSHierTree*   HierOut() {return (HierTree = library->HierOut());};
@@ -584,9 +592,10 @@ namespace GDSin {
       int            Inc_GDSIIwarnings() {return ++GDSIIwarnings;};
       GDSstructure*  Get_structures() {return library->Get_Fstruct();};
       void           GetHierTree(); // temporary
+      void           flush(GDSrecord*);
+      void           closeFile() {if (NULL != GDSfh) {fclose(GDSfh); GDSfh = NULL;}}
       ~GDSFile();
    protected:
-      void           SetTimes(GDSrecord* wr);
       void           GetTimes(GDSrecord* wr);
       FILE*          GDSfh;
       std::string    filename;
@@ -597,6 +606,7 @@ namespace GDSin {
       long           file_length;
       long           file_pos;
       GDSHierTree*   HierTree; // Tree of instance hierarchy
+      nameList       _childnames;
       int            GDSIIerrors;
       int            GDSIIwarnings;
       GDStime        t_modif;

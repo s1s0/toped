@@ -236,6 +236,7 @@ void DataCenter::GDSexport(std::string& filename) {
    std::string nfn;
    GDSin::GDSFile gdsex(_tedfilename, _tedtimestamp);
    _TEDDB->GDSwrite(gdsex);
+   gdsex.closeFile();
 }
 
 void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells) {
