@@ -32,6 +32,7 @@
 #ifndef WIN32
 #include "config.h"
 #endif
+#include "../src/gds_io.h"
 
 //==============================================================================
 // Toped DaTa (TDT) file markers
@@ -95,7 +96,6 @@ namespace laydata {
    typedef  std::map<word, dataList*>               selectList;
    typedef  std::list<tdtdata*>                     shapeList;
    typedef  std::map<word,shapeList*>               atticList;
-   typedef  std::list<std::string>                  nameList;
    typedef  std::map<std::string, tdtcell*>         cellList;
    typedef  cellList::const_iterator                refnamepair;
    typedef  std::deque<const tdtcellref*>           cellrefstack;

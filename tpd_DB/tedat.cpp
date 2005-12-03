@@ -428,7 +428,26 @@ void laydata::tdtbox::write(TEDfile* const tedfile) const {
    tedfile->putTP(_p1);
    tedfile->putTP(_p2);
 }
-   
+
+void laydata::tdtbox::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+{
+   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_LAYER);
+   wr->add_int2b(lay);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_DATATYPE);
+   wr->add_int2b(0);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_XY,5);
+   wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
+   wr->add_int4b(_p1->x());wr->add_int4b(_p2->y());
+   wr->add_int4b(_p2->x());wr->add_int4b(_p2->y());
+   wr->add_int4b(_p2->x());wr->add_int4b(_p1->y());
+   wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_ENDEL);
+   gdsf.flush(wr);
+}
+
 DBbox laydata::tdtbox::overlap() const {
    DBbox ovl = DBbox(*_p1);
    ovl.overlap(*_p2);
@@ -520,7 +539,7 @@ pointlist& laydata::tdtbox::movePointsSelected(const SGBitSet* pset,
       seg0 = seg1;
    }
    return (*mlist);
-}                   
+}
 
 laydata::tdtbox::~tdtbox() {
    if (_p1) delete _p1; 
@@ -600,7 +619,7 @@ void laydata::tdtpoly::tmp_draw(const layprop::DrawProperties&, ctmqueue& transt
          glVertex2i(ptlist[i].x(), ptlist[i].y());
       glEnd();
       ptlist.clear();
-   }      
+   }
 }
 
 void laydata::tdtpoly::rmpoint(TP& lp) {
@@ -617,7 +636,7 @@ void  laydata::tdtpoly::draw_select(CTM trans, const SGBitSet* pslist) const {
       assert(pslist);
       for (word i = 0; i < _plist.size(); i++)
          if (pslist->check(i)) draw_select_mark(_plist[i] * trans);
-   }      
+   }
 }
 
 void  laydata::tdtpoly::select_points(DBbox& select_in, SGBitSet* pntlst) {
@@ -719,6 +738,25 @@ void laydata::tdtpoly::write(TEDfile* const tedfile) const {
    tedfile->putWord(_plist.size());
    for (word i = 0; i < _plist.size(); i++)
       tedfile->putTP(&_plist[i]);
+}
+
+void laydata::tdtpoly::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+{
+   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_LAYER);
+   wr->add_int2b(lay);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_DATATYPE);
+   wr->add_int2b(0);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_XY,_plist.size()+1);
+   for (word i = 0; i < _plist.size(); i++)
+   {
+      wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
+   }
+   wr->add_int4b(_plist[0].x());wr->add_int4b(_plist[0].y());
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_ENDEL);
+   gdsf.flush(wr);
 }
 
 DBbox laydata::tdtpoly::overlap() const {
@@ -1038,6 +1076,25 @@ void laydata::tdtwire::write(TEDfile* const tedfile) const {
       tedfile->putTP(&_plist[i]);
 }
 
+void laydata::tdtwire::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+{
+   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_PATH);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_LAYER);
+   wr->add_int2b(lay);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_DATATYPE);
+   wr->add_int2b(0);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_XY,_plist.size()+1);
+   for (word i = 0; i < _plist.size(); i++)
+   {
+      wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
+   }
+   wr->add_int4b(_plist[0].x());wr->add_int4b(_plist[0].y());
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_ENDEL);
+   gdsf.flush(wr);
+}
+
 DBbox laydata::tdtwire::overlap() const {
    DBbox ovl = DBbox(_plist[0]);
    DBbox* ln1 = endPnts(_plist[0],_plist[1], true);
@@ -1157,6 +1214,27 @@ void laydata::tdtcellref::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_CELLREF);
    tedfile->putString(_structure->first);
    tedfile->putCTM(_translation);
+}
+
+void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+{
+/*   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_SREF);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_SNAME, _structure->first.size());
+   wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);*/
+/*   wr = gdsf.SetNextRecord(gds_STRANS);
+
+   wr->add_int2b(0);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_XY,_plist.size()+1);
+   for (word i = 0; i < _plist.size(); i++)
+   {
+      wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
+   }
+   wr->add_int4b(_plist[0].x());wr->add_int4b(_plist[0].y());
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_ENDEL);
+   gdsf.flush(wr);
+   */
 }
 
 void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticList* nshp) {
@@ -1301,6 +1379,12 @@ void laydata::tdtcellaref::write(TEDfile* const tedfile) const {
    tedfile->putWord(_cols);
 }
 
+void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+{
+/*   wr = gdsf.SetNextRecord(gds_ENDEL);
+   gdsf.flush(wr);*/
+}
+
 void  laydata::tdtcellaref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, laydata::atticList* nshp) {
    for (word i = 0; i < _cols; i++)
       for(word j = 0; j < _rows; j++) {
@@ -1443,6 +1527,12 @@ void laydata::tdttext::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_TEXT);
    tedfile->putString(_text);
    tedfile->putCTM(_translation);
+}
+
+void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+{
+/*   wr = gdsf.SetNextRecord(gds_ENDEL);
+   gdsf.flush(wr);*/
 }
 
 DBbox laydata::tdttext::overlap() const {

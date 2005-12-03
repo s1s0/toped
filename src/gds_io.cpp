@@ -113,24 +113,8 @@ bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
          *rld = sign*(mantissa/pow(2,24)) * pow(16, exponent-64);
          break;
       }
-      case gdsDT_REAL8B:{// 8-bit real
-         byte i;
-         _sg_int8 sign = (0x80 & record[curnum])? -1:1; //sign
-         byte exponent = 0x7f & record[curnum]; // exponent
-         _dbl_word mantissa0 = 0; // mantissa LSByte
-         _sg_int32 mantissa1 = 0; // mantissa MSByte
-         byte* mant = (byte*)&mantissa0;// take the memory possition
-         for (i = 0; i < 4; i++)
-            mant[i] = record[curnum+7-i];
-         mant = (byte*)&mantissa1;
-         for (i = 0; i < 3; i++)
-            mant[i] = record[curnum+3-i];
-         mant[3] = 0x0;
-         double *rld = (double*)var; // assign pointer
-
-         *rld = sign*((mantissa1*pow(2,32)+mantissa0)/pow(2,56)) *
-            pow(16,exponent-64);
-         break;
+      case gdsDT_REAL8B:{// 8-byte real
+         *(double*)var = gds2ieee(record);
       }
       case gdsDT_ASCII:// String
          rlc = (char*)var;
@@ -147,13 +131,140 @@ bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
    return true;
 }
 
-void GDSin::GDSrecord::add_int2b(word data) {
+double GDSin::GDSrecord::gds2ieee(byte* gds) {
+   // zero is an exception (as always!) so check it first
+   byte zerocheck;
+   for (zerocheck = 0; zerocheck < 8; zerocheck++)
+      if (0x00 != gds[zerocheck]) break;
+   if (8 == zerocheck) return 0;
+   // adjusting the exponent
+   byte expcw [2] = {gds[1],gds[0]};
+   word& expc = *((word*)&expcw);
+   // IEEE has 2x exponent, while GDSII has 16x. To compensate
+   // we need to multiply the exponent by 4, but, IEEE has 4 bits
+   // wider exponent, so we need to shift GDS exp right by 4 positons.
+   // in result, we are shifting right by two positions
+   expc >>= 2;
+   // fill-up the two leftmost positions of the exponent with
+   // bits opposite to the excess bit
+   // and also copy the excess bit
+   if (!(0x40 & gds[0])){expc |= 0x3000; expc &= 0xBFFF;}
+   else                 {expc &= 0xCFFF; expc |= 0x4000;}
+   // clean-up
+   expc &= 0x7FC0; // clean-up
+   // compensate the difference in the excess notation
+   expc -= 0x10;
+   // Now normalize the mantissa - shift left until first 1 drops-out
+   // The last byte will get some rubbish in it's LSBits, but it 
+   // shouldn't matter because last four buts of the mantissa will be
+   // chopped-out
+   byte carry;
+   do {
+      carry = gds[1] & 0x80;
+      for (byte i = 1; i < 7; i++) {
+         gds[i] <<= 1;
+         gds[i] |= (gds[i+1] >> 7); //carry
+      }
+      expc -= 0x10;
+   } while (0 == carry);
+   // copy the sign bit
+   if    (0x80 & gds[0]) expc |= 0x8000;
+   else                  expc &= 0x7FFF;
+   // transfer the result into a new 8 byte string ...
+   // ... copy the exponent first
+   byte ieee[8];
+   ieee[7] = expcw[1];ieee[6] = expcw[0];
+   //... then copy the mantissa
+   for  (byte i = 1; i <7; i++ ) {
+      ieee[6-i] = (gds[i] << 4) | (gds[i+1] >> 4);
+   }
+   // last nibble of the mantissa
+   ieee[6] |= gds[1] >> 4;
+   // that should be it !
+   return *((double*)&ieee);
+}
+
+byte* GDSin::GDSrecord::ieee2gds(double inval) {
+   byte* ieee = ((byte*)&inval);
+   byte* gds = new byte[8];
+   // zero is an exception (as always!) so check it first
+   if (0 == inval) {
+      for (byte i = 0; i < 8; gds[i++] = 0x00);
+      return gds;
+   }
+   //copy the mantissa
+   for  (byte i = 1; i < 7; i++ ) {
+      gds[i] = (ieee[7-i] << 4) | (ieee[6-i] >> 4);
+   }
+   gds[7] = ieee[0] << 4;
+   // adjusting the exponent
+   byte expcw [2] = {ieee[6],ieee[7]};
+   word& expc = *((word*)&expcw);
+   expc &= 0x7FF0; // clean-up
+   //compensate the difference in excess notations
+   expc += 0x10;
+   // Now normalize the mantissa - shift right until the two LSBit of
+   // the exponent are 00. First shift should introduce 1 on the leftmost
+   // position of the manissa to take in mind the explicit 1 in the ieee
+   // notation
+   gds[0] = 0x01; 
+   do {
+      for (byte i = 7; i > 0; i--) {
+         gds[i] >>= 1;
+         gds[i] |= (gds[i-1] << 7); //carry
+      }
+      gds[0] = 0x00; 
+      expc += 0x10;
+   } while (0 != (expc & 0x0030));
+   //make sure we are not trying to convert a number bigger than the one 
+   //that GDS notation can cope with
+   // copy the excess bit
+   if (!(0x4000 & expc)) expc &= 0xEFFF;
+   else                  expc |= 0x1000;
+   // now multiply the exponent by 4 to convert in the 16x GDS exponent
+   // here we are loosing silently the two most significant bits from the
+   // ieee exponent. 
+   expc <<= 2;
+   // copy the sign bit
+   if   (0x80 & ieee[7])  expc |= 0x8000;
+   else                   expc &= 0x7FFF;
+   gds[0] = expcw[1];
+   return gds;
+}
+
+void GDSin::GDSrecord::add_int2b(const word data)
+{
    byte* recpointer = (byte*)&data;
    record[index++] = recpointer[1];
    record[index++] = recpointer[0];
 }
 
-GDSin::GDSrecord::~GDSrecord() {
+void GDSin::GDSrecord::add_int4b(const int4b data)
+{
+   byte* recpointer = (byte*)&data;
+   record[index++] = recpointer[3];
+   record[index++] = recpointer[2];
+   record[index++] = recpointer[1];
+   record[index++] = recpointer[0];
+}
+
+void GDSin::GDSrecord::add_ascii(const char* data)
+{
+   assert((reclen-4) == strlen(data));
+   word strindex = 0;
+   while (index < reclen)
+      record[index++] = data[strindex++];
+}
+
+void GDSin::GDSrecord::add_real8b(const real data)
+{
+   byte* gdsreal = ieee2gds(data);
+   for (byte i = 0; i < 8; i++) record[index++] = gdsreal[i];
+   delete [] gdsreal;
+}
+
+GDSin::GDSrecord::~GDSrecord()
+{
    delete[] record;
 }
 
@@ -206,13 +317,13 @@ GDSin::GDSFile::GDSFile(const char* fn) {
                library = new GDSlibrary(this, wr);
                //build the hierarchy tree
                library->SetHierarchy();
-               fclose(GDSfh);// close the input stream
+               closeFile();// close the input stream
 //               prgrs_pos = file_length;
 //               prgrs->SetPos(prgrs_pos); // fullfill progress indicator
                AddLog('O',"Done");
                delete wr; return; // go out
             default:   //parse error - not expected record type
-               AddLog('E',"Wrong record type in the current context");
+               AddLog('E',"GDS header - wrong record type in the current context");
                delete wr;return;
          }
       else   {AddLog('E',"Unexpected end of file");return;}
@@ -255,10 +366,10 @@ GDSin::GDSFile::GDSFile(std::string fn, TIME_TPD acctime) {
    GDSrecord* wr = NULL;
    // ... GDS header
    wr = SetNextRecord(gds_HEADER); wr->add_int2b(StreamVersion);
-   file_pos += wr->flush(GDSfh); delete wr;
+   flush(wr);
    //write BGNLIB record
    wr = SetNextRecord(gds_BGNLIB); SetTimes(wr);
-   file_pos += wr->flush(GDSfh); delete wr;
+   flush(wr);
 }
 
 void GDSin::GDSFile::GetTimes(GDSrecord *wr) {
@@ -317,34 +428,34 @@ GDSin::GDSrecord* GDSin::GDSFile::GetNextRecord() {
    else return NULL;// error during read in
 }
 
-GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype) {
+GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
    byte datatype;
    switch (rectype) {
-      case gds_HEADER         :return new GDSrecord(rectype, gdsDT_INT2B, 2);
-      case gds_BGNLIB         :return new GDSrecord(rectype, gdsDT_INT2B, 24);
-      case gds_LIBNAME        :datatype = gdsDT_ASCII;break;
-      case gds_UNITS          :datatype = gdsDT_REAL8B;break;
-      case gds_ENDLIB         :datatype = gdsDT_NODATA;break;
-      case gds_BGNSTR         :datatype = gdsDT_INT2B;break;
-      case gds_STRNAME        :datatype = gdsDT_ASCII;break;
-      case gds_ENDSTR         :datatype = gdsDT_NODATA;break;
-      case gds_BOUNDARY       :datatype = gdsDT_NODATA;break;
-      case gds_PATH           :datatype = gdsDT_NODATA;break;
-      case gds_SREF           :datatype = gdsDT_NODATA;break;
+      case gds_HEADER         :return new GDSrecord(rectype, gdsDT_INT2B , 2);
+      case gds_BGNLIB         :return new GDSrecord(rectype, gdsDT_INT2B , 24);
+      case gds_ENDLIB         :return new GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_LIBNAME        :return new GDSrecord(rectype, gdsDT_ASCII , reclen);
+      case gds_UNITS          :return new GDSrecord(rectype, gdsDT_REAL8B, 16);
+      case gds_BGNSTR         :return new GDSrecord(rectype, gdsDT_INT2B , 24);
+      case gds_STRNAME        :return new GDSrecord(rectype, gdsDT_ASCII , reclen);
+      case gds_ENDSTR         :return new GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_BOUNDARY       :return new GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_PATH           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_SREF           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
       case gds_AREF           :datatype = gdsDT_NODATA;break;
       case gds_TEXT           :datatype = gdsDT_NODATA;break;
-      case gds_LAYER          :datatype = gdsDT_INT2B;break;
-      case gds_DATATYPE       :datatype = gdsDT_INT2B;break;
+      case gds_LAYER          :return new GDSrecord(rectype, gdsDT_INT2B, 2);
+      case gds_DATATYPE       :return new GDSrecord(rectype, gdsDT_INT2B, 2);
+      case gds_XY             :return new GDSrecord(rectype, gdsDT_INT4B, 8*reclen);
       case gds_WIDTH          :datatype = gdsDT_INT4B;break;
-      case gds_XY             :datatype = gdsDT_INT4B;break;
-      case gds_ENDEL          :datatype = gdsDT_NODATA;break;
-      case gds_SNAME          :datatype = gdsDT_ASCII;break;
+      case gds_ENDEL          :return new GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_SNAME          :return new GDSrecord(rectype, gdsDT_ASCII, reclen);
       case gds_COLROW         :datatype = gdsDT_INT2B;break;
       case gds_NODE           :datatype = gdsDT_NODATA;break;
       case gds_TEXTTYPE       :datatype = gdsDT_INT2B;break;
       case gds_PRESENTATION   :datatype = gdsDT_BIT;break;
       case gds_STRING         :datatype = gdsDT_ASCII;break;
-      case gds_STRANS         :datatype = gdsDT_BIT;break;
+      case gds_STRANS         :return new GDSrecord(rectype, gdsDT_BIT, 2);
       case gds_MAG            :datatype = gdsDT_REAL8B;break;
       case gds_ANGLE          :datatype = gdsDT_REAL8B;break;
       case gds_REFLIBS        :datatype = gdsDT_ASCII;break;
@@ -396,6 +507,26 @@ GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype) {
    }
    return new GDSrecord(rectype, datatype,0);
 }
+
+bool GDSin::GDSFile::checkCellWritten(std::string cellname)
+{
+   for (nameList::const_iterator i = _childnames.begin();
+                                 i != _childnames.end(); i++)
+      if (cellname == *i) return true;
+   return false;      
+//   return (_childnames.end() != _childnames.find(cellname));
+}
+
+void GDSin::GDSFile::registerCellWritten(std::string cellname)
+{
+   _childnames.push_back(cellname);
+}
+
+void GDSin::GDSFile::flush(GDSrecord* wr)
+{
+   file_pos += wr->flush(GDSfh);delete wr;
+}
+
 
 GDSin::GDSstructure* GDSin::GDSFile::GetStructure(const char* selection) {
    GDSstructure* Wstrct = library->Get_Fstruct();
@@ -475,7 +606,7 @@ GDSin::GDSlibrary::GDSlibrary(GDSFile* cf, GDSrecord* cr) {
             case gds_ENDLIB://end of library, exit form the procedure
                delete cr;return;
             default://parse error - not expected record type
-               AddLog('E',"Wrong record type in the current context");
+               AddLog('E',"GDS Library - wrong record type in the current context");
                delete cr;return;
          }
       else {AddLog('E',"Unexpected end of file");return;}
@@ -600,7 +731,7 @@ GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst) {
                   NULL == Compbylay[i] ? Allay[i] = false:Allay[i] = true;
                delete cr;return;
             default://parse error - not expected record type
-               AddLog('E',"Wrong record type in the current context");
+               AddLog('E',"GDS structure - wrong record type in the current context");
                delete cr;return;
          }
       else
@@ -689,7 +820,7 @@ GDSin::GDSbox::GDSbox(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
                delete cr;return;
             default:{
                //parse error - not expected record type
-               AddLog('E',"Wrong record type in the current context");
+               AddLog('E',"GDS box - wrong record type in the current context");
                delete cr;return;
             }
          }
@@ -729,7 +860,7 @@ GDSin::GDSpolygon::GDSpolygon(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
             case gds_ENDEL://end of element, exit point
                delete cr;return;
             default://parse error - not expected record type
-               AddLog('E',"Wrong record type in the current context");
+               AddLog('E',"GDS boundary - wrong record type in the current context");
                delete cr;return;
          }
       else {AddLog('E',"Unexpected end of file");return;}
@@ -783,7 +914,7 @@ GDSin::GDSpath::GDSpath(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
                }   
                delete cr;return;
             default://parse error - not expected record type
-               AddLog('E',"Wrong record type in the current context");
+               AddLog('E',"GDS path - wrong record type in the current context");
                delete cr;return;
          }
       else {AddLog('E',"Unexpected end of file");return;}
@@ -865,7 +996,7 @@ GDSin::GDStext::GDStext(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
             case gds_ENDEL://end of element, exit point
                delete cr;return;
             default://parse error - not expected record type
-               AddLog('E',"Wrong record type in the current context");
+               AddLog('E',"GDS text - wrong record type in the current context");
                delete cr;return;
          }
       else {AddLog('E',"Unexpected end of file");return;}
@@ -923,7 +1054,7 @@ GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
 //               tmtrx = new PSCTM(magn_point,magnification,angle,reflection);
                delete cr;return;
             default://parse error - not expected record type
-               AddLog('E',"Wrong record type in the current context");
+               AddLog('E',"GDS sref - wrong record type in the current context");
                delete cr;return;
          }
       else   {AddLog('E',"Unexpected end of file");return;}
@@ -978,7 +1109,7 @@ GDSin::GDSaref::GDSaref(GDSFile* cf, GDSdata *lst):GDSref(lst) {
 //               tmtrx = new PSCTM(magn_point,magnification,angle,reflection);
                delete cr;return;
             default://parse error - not expected record type
-               AddLog('E',"Wrong record type in the current context");
+               AddLog('E',"GDS aref - wrong record type in the current context");
                delete cr;return;
          }
       else {AddLog('E',"Unexpected end of file");return;}

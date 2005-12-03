@@ -401,11 +401,36 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, T
    tedfile->registercellwritten(_name);
 }
 
+void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
+                                                            TDTHierTree* const root) const
+{
+   // We going to write the cells in hierarchical order. Children - first!
+   laydata::TDTHierTree* Child= root->GetChild();
+   while (Child)
+   {
+      allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child);
+      Child = Child->GetBrother();
+   }
+   // If no more children and the cell has not been written yet
+   if (gdsf.checkCellWritten(_name)) return;
+   //
+   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BGNSTR);
+   gdsf.SetTimes(wr);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_STRNAME, _name.size());
+   wr->add_ascii(_name.c_str()); gdsf.flush(wr);
+   // and now the layers
+   laydata::layerList::const_iterator wl;
+   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+      wl->second->GDSwrite(gdsf, wl->first);
+   wr = gdsf.SetNextRecord(gds_ENDSTR);gdsf.flush(wr);
+   gdsf.registerCellWritten(_name);
+}
+
 laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree, 
                                            tdtcell* parent, cellList* celldefs) {
    // collecting hierarchical information
    Htree = new TDTHierTree(this, parent, Htree);
-   laydata::nameList::const_iterator wn;
+   nameList::const_iterator wn;
    for (wn = _children.begin(); wn != _children.end(); wn++) 
       (*celldefs)[*wn]->hierout(Htree, this, celldefs); // yahoooo!
    return  Htree;
@@ -1127,7 +1152,7 @@ _dbl_word laydata::tdtcell::getFullySelected(dataList* lslct) const {
    return numselected;      
 }
 
-laydata::nameList* laydata::tdtcell::rehash_children() {
+nameList* laydata::tdtcell::rehash_children() {
    // the actual list of names of the referenced cells
    nameList *cellnames = new nameList(); 
    // get the cells layer

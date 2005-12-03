@@ -18,7 +18,7 @@
 //    Description: wxWidget version
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -66,7 +66,8 @@ namespace laydata {
       virtual void         tmp_draw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(tdtdata* shape);
       void                 put(tdtdata* shape);
-      void                 write(TEDfile* const tedfile) const;
+      void                 write(TEDfile* const) const;
+      void                 GDSwrite(GDSin::GDSFile&, word const) const;
       void                 select_inBox(DBbox&, dataList*, bool);
       void                 select_fromList(dataList*, dataList*);
       void                 select_all(dataList*, bool mark = true);

@@ -492,7 +492,18 @@ void laydata::quadTree::write(TEDfile* const tedfile) const {
    for(byte i = 0; i < 4; i++) 
       if (_quads[i]) _quads[i]->write(tedfile);
 }
-   
+
+/*! Write the contents of the quadTree in a GDS file.\n
+Nothing special here - effectively the same as wrie method*/
+void laydata::quadTree::GDSwrite(GDSin::GDSFile& gdsf, word lay) const {
+   tdtdata* wdt = _first;
+   while(wdt) {
+      wdt->GDSwrite(gdsf,lay); wdt = wdt->next();
+   }   
+   for(byte i = 0; i < 4; i++) 
+      if (_quads[i]) _quads[i]->GDSwrite(gdsf,lay);
+}
+
 /*! Draw the contents of the container on the screen using the virtual 
 openGL_draw methods of the tdtddata objects. This happens only if 
 the current quadTree object is visible. Current clip region data is

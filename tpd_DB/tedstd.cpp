@@ -298,7 +298,7 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname) {
    return _design->_cells.find(cellname);
 }
 
-void laydata::TEDfile::get_cellchildnames(laydata::nameList* cnames) {
+void laydata::TEDfile::get_cellchildnames(nameList* cnames) {
    // leave only the unique names in the children's list
    _childnames.sort(); _childnames.unique();
    // Be very very careful with the copy constructors and assignment of the 
