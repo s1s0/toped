@@ -563,6 +563,10 @@ parsercmd::cmdBLOCK::~cmdBLOCK() {
    for (telldata::variableMAP::iterator VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
       delete VMI->second;
    VARlocal.clear();
+   for (telldata::typeMAP::iterator TMI = TYPElocal.begin(); TMI != TYPElocal.end(); TMI++)
+      delete TMI->second;
+   TYPElocal.clear();
+
 }
 
 //=============================================================================
