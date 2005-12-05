@@ -114,7 +114,7 @@ bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
          break;
       }
       case gdsDT_REAL8B:{// 8-byte real
-         *(double*)var = gds2ieee(record);
+         *(double*)var = gds2ieee(record);break;
       }
       case gdsDT_ASCII:// String
          rlc = (char*)var;
@@ -442,43 +442,44 @@ GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
       case gds_BOUNDARY       :return new GDSrecord(rectype, gdsDT_NODATA, 0);
       case gds_PATH           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
       case gds_SREF           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
-      case gds_AREF           :datatype = gdsDT_NODATA;break;
-      case gds_TEXT           :datatype = gdsDT_NODATA;break;
+      case gds_AREF           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_TEXT           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
       case gds_LAYER          :return new GDSrecord(rectype, gdsDT_INT2B, 2);
       case gds_DATATYPE       :return new GDSrecord(rectype, gdsDT_INT2B, 2);
       case gds_XY             :return new GDSrecord(rectype, gdsDT_INT4B, 8*reclen);
-      case gds_WIDTH          :datatype = gdsDT_INT4B;break;
+      case gds_WIDTH          :return new GDSrecord(rectype, gdsDT_INT4B, 4);
       case gds_ENDEL          :return new GDSrecord(rectype, gdsDT_NODATA, 0);
       case gds_SNAME          :return new GDSrecord(rectype, gdsDT_ASCII, reclen);
-      case gds_COLROW         :datatype = gdsDT_INT2B;break;
-      case gds_NODE           :datatype = gdsDT_NODATA;break;
-      case gds_TEXTTYPE       :datatype = gdsDT_INT2B;break;
-      case gds_PRESENTATION   :datatype = gdsDT_BIT;break;
-      case gds_STRING         :datatype = gdsDT_ASCII;break;
+      case gds_COLROW         :return new GDSrecord(rectype, gdsDT_INT2B , 4);
+      case gds_TEXTTYPE       :return new GDSrecord(rectype, gdsDT_INT2B, 2);
+      case gds_STRING         :return new GDSrecord(rectype, gdsDT_ASCII, reclen);
       case gds_STRANS         :return new GDSrecord(rectype, gdsDT_BIT, 2);
-      case gds_MAG            :datatype = gdsDT_REAL8B;break;
-      case gds_ANGLE          :datatype = gdsDT_REAL8B;break;
-      case gds_REFLIBS        :datatype = gdsDT_ASCII;break;
-      case gds_FONTS          :datatype = gdsDT_ASCII;break;
-      case gds_PATHTYPE       :datatype = gdsDT_INT2B;break;
-      case gds_GENERATION     :datatype = gdsDT_INT2B;break;
-      case gds_ATTRTABLE      :datatype = gdsDT_ASCII;break;
-      case gds_ELFLAGS        :datatype = gdsDT_BIT;break;
-      case gds_NODETYPE       :datatype = gdsDT_INT2B;break;
-      case gds_PROPATTR       :datatype = gdsDT_INT2B;break;
-      case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;
-      case gds_FORMAT         :datatype = gdsDT_INT2B;break;
-      case gds_BORDER         :datatype = gdsDT_NODATA;break;
-      case gds_SOFTFENCE      :datatype = gdsDT_NODATA;break;
-      case gds_HARDFENCE      :datatype = gdsDT_NODATA;break;
-      case gds_SOFTWIRE       :datatype = gdsDT_NODATA;break;
-      case gds_HARDWIRE       :datatype = gdsDT_NODATA;break;
-      case gds_PATHPORT       :datatype = gdsDT_NODATA;break;
-      case gds_NODEPORT       :datatype = gdsDT_NODATA;break;
-      case gds_USERCONSTRAINT :datatype = gdsDT_NODATA;break;
-      case gds_SPACER_ERROR   :datatype = gdsDT_NODATA;break;
-      case gds_CONTACT        :datatype = gdsDT_NODATA;break;
+      case gds_MAG            :return new GDSrecord(rectype, gdsDT_REAL8B, 8);
+      case gds_ANGLE          :return new GDSrecord(rectype, gdsDT_REAL8B, 8);
                        default: assert(false); //the rest should not be used
+//       case gds_NODE           :datatype = gdsDT_NODATA;break;
+//       case gds_PRESENTATION   :datatype = gdsDT_BIT;break;
+//       case gds_REFLIBS        :datatype = gdsDT_ASCII;break;
+//       case gds_FONTS          :datatype = gdsDT_ASCII;break;
+//       case gds_PATHTYPE       :datatype = gdsDT_INT2B;break;
+//       case gds_GENERATION     :datatype = gdsDT_INT2B;break;
+//       case gds_ATTRTABLE      :datatype = gdsDT_ASCII;break;
+//       case gds_ELFLAGS        :datatype = gdsDT_BIT;break;
+//       case gds_NODETYPE       :datatype = gdsDT_INT2B;break;
+//       case gds_PROPATTR       :datatype = gdsDT_INT2B;break;
+//       case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;
+//       case gds_FORMAT         :datatype = gdsDT_INT2B;break;
+//       case gds_BORDER         :datatype = gdsDT_NODATA;break;
+//       case gds_SOFTFENCE      :datatype = gdsDT_NODATA;break;
+//       case gds_HARDFENCE      :datatype = gdsDT_NODATA;break;
+//       case gds_SOFTWIRE       :datatype = gdsDT_NODATA;break;
+//       case gds_HARDWIRE       :datatype = gdsDT_NODATA;break;
+//       case gds_PATHPORT       :datatype = gdsDT_NODATA;break;
+//       case gds_NODEPORT       :datatype = gdsDT_NODATA;break;
+//       case gds_USERCONSTRAINT :datatype = gdsDT_NODATA;break;
+//       case gds_SPACER_ERROR   :datatype = gdsDT_NODATA;break;
+//       case gds_CONTACT        :datatype = gdsDT_NODATA;break;
+
 /*
       case gds_BOX            :datatype = gdsDT_NODATA;break;
       case gds_BOXTYPE        :datatype = gdsDT_INT2B;break;
@@ -1030,7 +1031,6 @@ GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
          switch (cr->Get_rectype()) {
             case gds_ELFLAGS: ReadELFLAGS(cr);// seems that it's not used
                delete cr;break;
-
             case gds_PLEX:   ReadPLEX(cr); // seems that it's not used
                delete cr;break;
             case gds_SNAME:

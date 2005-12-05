@@ -374,8 +374,8 @@ laydata::tdtcellref* laydata::tdtcell::getcellover(TP pnt, ctmstack& transtack, 
       }
    }
    return NULL;
-}      
-    
+}
+
 void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, TDTHierTree* const root) const {
    // We going to write the cells in hierarchical order. Children - first!
    laydata::TDTHierTree* Child= root->GetChild();

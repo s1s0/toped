@@ -368,3 +368,39 @@ CTM CTM::operator = (const CTM op2) {
    return *this;
 }
 
+void CTM::toGDS(TP& trans, real& rot, real& scale, bool& flipX) const 
+{
+   // Assuming that every CTM can be represented as a result
+   // of 4 consequitive operations - scale,translate, flipX and rotate,
+   // this algo is extracting the scale, translation, roatatoin and
+   // flip values of these oprations.
+   // Second presumption here is for the scale value returned. It is that
+   // scX and scY are always the same
+   // if denom is 0, then something is wrong with the whole 
+   // conversion
+   real denom = _a * _d - _b * _c;
+   assert(denom != 0);
+   real scX = sqrt(_a * _a + _b * _b);
+   real scY = sqrt(_c * _c + _d * _d);
+   scale = scX;
+   // rotation
+   const long double Pi = 3.1415926535897932384626433832795;
+   if (0 == _a)
+      rot = round(asin(_b / scX) * 180 / Pi);
+   else if (0 == _b)
+      rot = round(acos(_a / scX) * 180 / Pi);
+   else 
+   { // none of the coefficients is 0
+      rot = round(atan(_b / _a) * 180 / Pi);
+      if (_b < 0) rot += 180;
+   }
+   if (rot < 0) rot +=180;
+   // flip
+   if ((_a * _d) != 0) 
+      flipX = ((_a * _d) > 0) ? false : true;
+   else if ((_b * _c) != 0)
+      flipX = ((_b * _c) < 0) ? false : true;
+   // translation
+   trans.setX(static_cast<int4b>(round((_tx * _d - _ty * _c) / denom))); 
+   trans.setY(static_cast<int4b>(round((_ty * _a - _tx * _b) / denom)));
+}
