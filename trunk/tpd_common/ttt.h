@@ -36,6 +36,7 @@
 #if WIN32
    #include <windows.h>
    #define rint floor
+   #define round floor
    #define remainder fmod
    #pragma warning( disable : 4786 ) 
 #endif
