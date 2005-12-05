@@ -134,6 +134,7 @@ public:
    CTM  FlipY(real X=0)           {return (*this *= CTM(-1,0,0,1,2*X,0));};
    CTM  Rotate(real alfa);
    CTM  Reversed() const;
+   void toGDS(TP&, real&, real&, bool&) const;
    void setCTM(real a, real b, real c, real d, real tx, real ty)
                           {_a = a; _b = b; _c = c; _d = d; _tx = tx; _ty = ty;};
    CTM  operator =  (const CTM op2);

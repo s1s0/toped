@@ -1084,6 +1084,8 @@ void laydata::tdtwire::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
    wr->add_int2b(lay);gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_DATATYPE);
    wr->add_int2b(0);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_WIDTH);
+   wr->add_int4b(_width);gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_XY,_plist.size()+1);
    for (word i = 0; i < _plist.size(); i++)
    {
@@ -1218,23 +1220,27 @@ void laydata::tdtcellref::write(TEDfile* const tedfile) const {
 
 void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
 {
-/*   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_SREF);
+   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_SREF);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_SNAME, _structure->first.size());
-   wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);*/
-/*   wr = gdsf.SetNextRecord(gds_STRANS);
-
-   wr->add_int2b(0);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_XY,_plist.size()+1);
-   for (word i = 0; i < _plist.size(); i++)
-   {
-      wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
-   }
-   wr->add_int4b(_plist[0].x());wr->add_int4b(_plist[0].y());
+   wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);
+   TP trans;
+   real rotation, scale;
+   bool flipX;
+   _translation.toGDS(trans,rotation,scale,flipX);
+   wr = gdsf.SetNextRecord(gds_STRANS);
+   if (flipX) wr->add_int2b(0x0000);
+   else       wr->add_int2b(0x8000);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_MAG);
+   wr->add_real8b(scale);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_ANGLE);
+   wr->add_real8b(rotation);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_XY,1);
+   wr->add_int4b(trans.x());wr->add_int4b(trans.y());
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_ENDEL);
    gdsf.flush(wr);
-   */
 }
 
 void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticList* nshp) {
@@ -1381,8 +1387,32 @@ void laydata::tdtcellaref::write(TEDfile* const tedfile) const {
 
 void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
 {
-/*   wr = gdsf.SetNextRecord(gds_ENDEL);
-   gdsf.flush(wr);*/
+   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_AREF);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_SNAME, _structure->first.size());
+   wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);
+   TP trans;
+   real rotation, scale;
+   bool flipX;
+   _translation.toGDS(trans,rotation,scale,flipX);
+   wr = gdsf.SetNextRecord(gds_STRANS);
+   if (flipX) wr->add_int2b(0x0000);
+   else       wr->add_int2b(0x8000);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_MAG);
+   wr->add_real8b(scale);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_ANGLE);
+   wr->add_real8b(rotation);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_COLROW);
+   wr->add_int2b(_cols);wr->add_int2b(_rows);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_XY,3);
+   wr->add_int4b(trans.x());wr->add_int4b(trans.y());
+   wr->add_int4b(trans.x() + _cols * _stepX);wr->add_int4b(trans.y());
+   wr->add_int4b(trans.x());wr->add_int4b(trans.y() + _rows * _stepY);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_ENDEL);
+   gdsf.flush(wr);
 }
 
 void  laydata::tdtcellaref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, laydata::atticList* nshp) {
@@ -1531,8 +1561,31 @@ void laydata::tdttext::write(TEDfile* const tedfile) const {
 
 void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
 {
-/*   wr = gdsf.SetNextRecord(gds_ENDEL);
-   gdsf.flush(wr);*/
+   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_TEXT);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_LAYER);
+   wr->add_int2b(lay);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_TEXTTYPE);
+   wr->add_int2b(0);gdsf.flush(wr);
+   TP trans;
+   real rotation, scale;
+   bool flipX;
+   _translation.toGDS(trans,rotation,scale,flipX);
+   wr = gdsf.SetNextRecord(gds_STRANS);
+   if (flipX) wr->add_int2b(0x0000);
+   else       wr->add_int2b(0x8000);
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_MAG);
+   wr->add_real8b(scale);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_ANGLE);
+   wr->add_real8b(rotation);gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_XY,1);
+   wr->add_int4b(trans.x());wr->add_int4b(trans.y());
+   gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_STRING, _text.size());
+   wr->add_ascii(_text.c_str());gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_ENDEL);
+   gdsf.flush(wr);
 }
 
 DBbox laydata::tdttext::overlap() const {
