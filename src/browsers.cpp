@@ -443,7 +443,10 @@ void browsers::TDTbrowser::copyItem(const wxTreeItemId item, const wxTreeItemId 
    }
 }
 
-
+browsers::TDTbrowser::~TDTbrowser()
+{
+   delete _imageList;
+}
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::browserTAB, wxNotebook)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::browserTAB::OnCommand)

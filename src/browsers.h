@@ -131,6 +131,7 @@ namespace browsers {
                         const wxPoint& pos = wxDefaultPosition, 
                         const wxSize& size = wxDefaultSize,
                         long style = wxTR_DEFAULT_STYLE);
+                        ~TDTbrowser();
       void              collectInfo(const wxString, laydata::TDTHierTree*);
       void              initialize();
       wxString          selectedCellname() const {if (RBcellID.IsOk()) 
