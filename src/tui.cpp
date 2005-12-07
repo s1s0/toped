@@ -374,3 +374,37 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
 
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
+
+tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+      wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
+   _recursive = new wxCheckBox(this, -1, "Export recursively");
+   _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      laydata::cellList const cll = ATDB->cells();
+      laydata::cellList::const_iterator CL;
+      for (CL = cll.begin(); CL != cll.end(); CL++) {
+         _nameList->Append(wxString(CL->first.c_str()));
+      }
+   DATC->unlockDB();
+   if (init != "") _nameList->SetStringSelection(init,true);
+   // The window layout
+   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   // First line up the important things
+   wxBoxSizer *spin_sizer = new wxBoxSizer( wxVERTICAL );
+   //   spin_sizer->Add(0,0,1); //
+   spin_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
+   // Buttons
+   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add( new wxButton( this, wxID_OK, "OK" ), 0, wxALL, 10 );
+   button_sizer->Add(0,0,1); // 
+   button_sizer->Add( new wxButton( this, wxID_CANCEL, "Cancel" ), 0, wxALL, 10 );
+   // TOP sizer
+   topsizer->Add(_nameList, 1, wxEXPAND );
+   topsizer->Add(spin_sizer, 0, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+
+   SetSizer( topsizer );      // use the sizer for layout
+
+   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+}

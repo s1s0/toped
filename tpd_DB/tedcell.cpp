@@ -402,14 +402,17 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, T
 }
 
 void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
-                                                            TDTHierTree* const root, real UU) const
+                                         TDTHierTree* const root, real UU, bool recur) const
 {
    // We going to write the cells in hierarchical order. Children - first!
-   laydata::TDTHierTree* Child= root->GetChild();
-   while (Child)
+   if (recur)
    {
-      allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child, UU);
-      Child = Child->GetBrother();
+      laydata::TDTHierTree* Child= root->GetChild();
+      while (Child)
+      {
+         allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child, UU, recur);
+         Child = Child->GetBrother();
+      }
    }
    // If no more children and the cell has not been written yet
    if (gdsf.checkCellWritten(_name)) return;

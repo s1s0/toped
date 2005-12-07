@@ -119,6 +119,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
    EVT_MENU( TMGDS_OPEN          , tui::TopedFrame::OnGDSRead     )
    EVT_MENU( TMGDS_IMPORT        , tui::TopedFrame::OnGDSimport   )
+   EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnGDSexportLIB)
+   EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportTOP)
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
@@ -219,14 +221,19 @@ tui::TopedFrame::~TopedFrame() {
 void tui::TopedFrame::initMenuBar() {
    //---------------------------------------------------------------------------
    // menuBar entry fileMenu
+   gdsMenu=new wxMenu();
+   gdsMenu->Append(TMGDS_OPEN   , wxT("parse")  , wxT("Parse GDS file"));
+   gdsMenu->Append(TMGDS_IMPORT , wxT("import") , wxT("Import GDS structure"));
+   gdsMenu->Append(TMGDS_EXPORTL, wxT("export library") , wxT("Export library to GDS"));
+   gdsMenu->Append(TMGDS_EXPORTC, wxT("export cell") , wxT("Export cell to GDS"));
+   gdsMenu->Append(TMGDS_CLOSE  , wxT("close")  , wxT("Clear the parsed GDS file from memory"));
+   
    fileMenu=new wxMenu();
    fileMenu->Append(TMFILE_NEW   , wxT("New ...\tCTRL-N")    , wxT("Create new design"));
    fileMenu->Append(TMFILE_OPEN  , wxT("Open ...\tCTRL-O")   , wxT("Open a TDT file"));
    fileMenu->Append(TMFILE_INCLUDE, wxT("Include ...")       , wxT("Include a TELL file"));
    fileMenu->AppendSeparator();
-   fileMenu->Append(TMGDS_OPEN   , wxT("GDS parse")  , wxT("Parse GDS file"));
-   fileMenu->Append(TMGDS_IMPORT , wxT("GDS import") , wxT("Import GDS structure"));
-   fileMenu->Append(TMGDS_CLOSE  , wxT("GDS close")  , wxT("Clear the parsed GDS file from memory"));
+   fileMenu->Append(TMGDS_MENU   , wxT("GDS") , gdsMenu , wxT("Define marker movement"));
    fileMenu->AppendSeparator();
    fileMenu->Append(TMFILE_SAVE  , wxT("Save\tCTRL-S")       , wxT("Save the database"));
    fileMenu->Append(TMFILE_SAVEAS, wxT("Save as ..."), wxT("Save the database under a new name"));
@@ -579,7 +586,7 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
    SetStatusText("Saving database under new filename...");
-   wxFileDialog dlg2(this, "Select a file", "", "", 
+   wxFileDialog dlg2(this, "Save a design in a file", "", "",
       "Toped files |*.tdt",
       wxSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
@@ -638,6 +645,53 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event)) {
       _cmdline->parseCommand(ost);
    }
    delete dlg;
+}
+
+void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
+   SetStatusText("Exporting database to GDS file...");
+   wxFileDialog dlg2(this, "Export design to GDS file", "", "",
+      "GDS files |*.sf;*.gds",
+      wxSAVE);
+   if (wxID_OK == dlg2.ShowModal()) {
+      wxString filename = dlg2.GetFilename();
+      wxString ost;
+      ost << "gdsexport(\"" << dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\");";
+      _cmdline->parseCommand(ost);
+      SetStatusText("Design exported to: "+dlg2.GetFilename());
+   }
+   else SetStatusText("GDS export aborted");
+}
+
+void tui::TopedFrame::OnGDSexportTOP(wxCommandEvent& WXUNUSED(event)) {
+   SetStatusText("Exporting a cell to GDS file...");
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getGDSexport* dlg = NULL;
+   try {
+      dlg = new tui::getGDSexport(this, -1, "GDS export cell", pos, _browsers->TDTSelectedCellName());
+   }
+   catch (EXPTN) {delete dlg;return;}
+   std::string cellname;
+   bool recur;
+   if ( dlg->ShowModal() == wxID_OK ) {
+      cellname = dlg->get_selectedcell();
+      recur = dlg->get_recursive();
+      delete dlg;
+   }
+   else {delete dlg;return;}
+   wxFileDialog dlg2(this, "Exporting "+cellname+" to GDS file", "", cellname+".gds", 
+      "GDS files |*.sf;*.gds",
+      wxSAVE);
+   if (wxID_OK == dlg2.ShowModal()) {
+      wxString filename = dlg2.GetFilename();
+      wxString ost;
+      ost << "gdsexport(\"" << cellname << "\" , " <<
+                        (recur ? "true" : "false") << ",\"" <<
+                        dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\");";
+      _cmdline->parseCommand(ost);
+      SetStatusText("Design exported to: "+dlg2.GetFilename());
+   }
+   else SetStatusText("GDS export aborted");
 }
 
 void tui::TopedFrame::OnCellRef_B(wxCommandEvent& WXUNUSED(event)) {

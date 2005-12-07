@@ -140,6 +140,18 @@ namespace tui {
       wxCheckBox*    _recursive;
       wxListBox*     _nameList;
    };
+
+   class getGDSexport : public wxDialog {
+   public:
+                     getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title,
+                                                                  wxPoint pos, wxString init);
+      wxString       get_selectedcell() const {return _nameList->GetStringSelection();};
+      bool           get_recursive()    const {return _recursive->GetValue();};
+   private:
+      wxCheckBox*    _recursive;
+      wxListBox*     _nameList;
+   };
+
 }
 #endif
 

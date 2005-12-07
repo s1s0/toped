@@ -310,10 +310,12 @@ void browsers::TDTbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
       menu.Append(CellTree_OpenCell, wxT("Open " + RBcellname));
       menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
       menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
+      menu.Append(tui::TMGDS_EXPORTC, wxT("export " + RBcellname + " to GDS"));
       menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
     }
     else {
       menu.Append(tui::TMCELL_NEW, wxT("New cell")); // will be catched up in toped.cpp
+      menu.Append(tui::TMGDS_EXPORTL, wxT("GDS export"));
     }
     PopupMenu(&menu, pt);
 }

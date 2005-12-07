@@ -235,7 +235,14 @@ void DataCenter::TDTwrite(const char* filename) {
 void DataCenter::GDSexport(std::string& filename) {
    std::string nfn;
    GDSin::GDSFile gdsex(filename, _tedtimestamp);
-   _TEDDB->GDSwrite(gdsex);
+   _TEDDB->GDSwrite(gdsex, NULL, true);
+   gdsex.closeFile();
+}
+
+void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& filename) {
+   std::string nfn;
+   GDSin::GDSFile gdsex(filename, _tedtimestamp);
+   _TEDDB->GDSwrite(gdsex, cell, recur);
    gdsex.closeFile();
 }
 
