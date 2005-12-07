@@ -291,5 +291,5 @@ void screenSetup() {
 layerSetup();
 screenSetup();
 newdesign("seed");
-newcell("crop");
-opencell("crop");
+//newcell("crop");
+//opencell("crop");

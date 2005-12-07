@@ -69,7 +69,7 @@ namespace laydata {
    //! Write the tdtdata object in TDT file.
       virtual   void       write(TEDfile* const tedfile) const = 0;
    //! Write the tdtdata object in GDS file.
-      virtual   void       GDSwrite(GDSin::GDSFile&, word) const = 0;
+      virtual   void       GDSwrite(GDSin::GDSFile&, word, real) const = 0;
    //!
       virtual   bool       point_inside(const TP);
    //! shape cut with the input polygon
@@ -125,7 +125,7 @@ namespace laydata {
                              SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GDSFile&, word) const;
+      void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 addpoint(TP);
       void                 rmpoint(TP&);
       word                 numpoints() const {return 4;};
@@ -160,7 +160,7 @@ namespace laydata {
       void                 draw_select(CTM,const SGBitSet* = NULL) const;
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GDSFile&, word) const;
+      void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
       void                 rmpoint(TP&);
       word                 numpoints() const {return _plist.size();};
@@ -194,7 +194,7 @@ namespace laydata {
       void                 draw_select(CTM,const SGBitSet* = NULL) const;
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GDSFile&, word) const;
+      void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
       void                 rmpoint(TP&);
       word                 numpoints() const {return _plist.size();};
@@ -236,7 +236,7 @@ namespace laydata {
       void                 draw_select(CTM,const SGBitSet* = NULL) const;
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GDSFile&, word) const;
+      void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       virtual void         ungroup(tdtdesign*, tdtcell*, atticList*);
       std::string          cellname() const {return _structure->first;};
       tdtcell*             structure() const{return _structure->second;};
@@ -271,7 +271,7 @@ namespace laydata {
       void                 openGL_draw(ctmstack&, const layprop::DrawProperties&) const;
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GDSFile&, word) const;
+      void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 ungroup(tdtdesign*, tdtcell*, atticList*);
    private:   
       bool                 aref_visible(ctmstack&, const layprop::DrawProperties&, int*) const;
@@ -299,7 +299,7 @@ namespace laydata {
       void                 draw_select(CTM,const SGBitSet* = NULL) const;
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GDSFile&, word) const;
+      void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       word                 numpoints() const {return 1;};
       void                 polycut(pointlist&, shapeList**){};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};

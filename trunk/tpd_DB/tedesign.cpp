@@ -276,7 +276,7 @@ void laydata::tdtdesign::GDSwrite(GDSin::GDSFile& gdsf) {
    //
    laydata::TDTHierTree* root = _hiertree->GetFirstRoot();
    while (root) {
-      _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root);
+      _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root, _UU);
       root = root->GetNextRoot();
    }
    wr = gdsf.SetNextRecord(gds_ENDLIB);gdsf.flush(wr);

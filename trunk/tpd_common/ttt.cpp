@@ -230,9 +230,9 @@ DBbox DBbox::getcorner(byte corner) {
    return DBbox(_p1.x(),_p1.y(),
                  static_cast<int4b>(rint((_p2.x() + _p1.x()) / 2)), 
                  static_cast<int4b>(rint((_p2.y() + _p1.y()) / 2)));
-   }              
+   }
 }
-   
+
 DBbox DBbox::operator * (const CTM& op2) const {
    TP np1(int4b(op2.a() * _p1.x() + op2.c() * _p1.y() + op2.tx()),
           int4b(op2.b() * _p1.x() + op2.d() * _p1.y() + op2.ty()));
@@ -339,8 +339,7 @@ CTM::CTM(TP dp, real scale, real rotation,bool reflX) {
 }
 
 CTM CTM::Rotate(real alfa) {// alfa - in degrees
-   const long double Pi = 3.1415926535897932384626433832795;
-   long double alfaG = (Pi/180)*alfa;// translate in radians
+   double alfaG = (alfa * M_PI / 180.0);// translate in radians
    return (*this *= CTM(cos(alfaG),sin(alfaG),-sin(alfaG),cos(alfaG),0,0));
 }
 
@@ -371,36 +370,23 @@ CTM CTM::operator = (const CTM op2) {
 void CTM::toGDS(TP& trans, real& rot, real& scale, bool& flipX) const 
 {
    // Assuming that every CTM can be represented as a result
-   // of 4 consequitive operations - scale,translate, flipX and rotate,
-   // this algo is extracting the scale, translation, roatatoin and
+   // of 4 consequitive operations - flipX, rotate, scale and translate,
+   // this function is extracting the scale, translation, roatatoin and
    // flip values of these oprations.
    // Second presumption here is for the scale value returned. It is that
    // scX and scY are always the same
-   // if denom is 0, then something is wrong with the whole 
-   // conversion
-   real denom = _a * _d - _b * _c;
-   assert(denom != 0);
-   real scX = sqrt(_a * _a + _b * _b);
-   real scY = sqrt(_c * _c + _d * _d);
+   real scX = sqrt(_a * _a + _c * _c);
+   real scY = sqrt(_b * _b + _d * _d);
    scale = scX;
    // rotation
-   const long double Pi = 3.1415926535897932384626433832795;
-   if (0 == _a)
-      rot = round(asin(_b / scX) * 180 / Pi);
-   else if (0 == _b)
-      rot = round(acos(_a / scX) * 180 / Pi);
-   else 
-   { // none of the coefficients is 0
-      rot = round(atan(_b / _a) * 180 / Pi);
-      if (_b < 0) rot += 180;
-   }
-   if (rot < 0) rot +=180;
+   rot = round(atan2(_b , _a) * 180.0 / M_PI);
+   // if (rot < 0) rot = 180 + abs(rot);
    // flip
-   if ((_a * _d) != 0) 
+   if (fabs(_a * _d) > fabs(_b * _c))
       flipX = ((_a * _d) > 0) ? false : true;
-   else if ((_b * _c) != 0)
+   else
       flipX = ((_b * _c) < 0) ? false : true;
    // translation
-   trans.setX(static_cast<int4b>(round((_tx * _d - _ty * _c) / denom))); 
-   trans.setY(static_cast<int4b>(round((_ty * _a - _tx * _b) / denom)));
+   trans.setX(static_cast<int4b>(_tx));
+   trans.setY(static_cast<int4b>(_ty));
 }

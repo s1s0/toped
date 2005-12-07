@@ -67,7 +67,7 @@ namespace laydata {
       void                 add(tdtdata* shape);
       void                 put(tdtdata* shape);
       void                 write(TEDfile* const) const;
-      void                 GDSwrite(GDSin::GDSFile&, word const) const;
+      void                 GDSwrite(GDSin::GDSFile&, word const, real UU) const;
       void                 select_inBox(DBbox&, dataList*, bool);
       void                 select_fromList(dataList*, dataList*);
       void                 select_all(dataList*, bool mark = true);

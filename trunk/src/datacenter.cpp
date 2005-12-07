@@ -234,7 +234,7 @@ void DataCenter::TDTwrite(const char* filename) {
 
 void DataCenter::GDSexport(std::string& filename) {
    std::string nfn;
-   GDSin::GDSFile gdsex(_tedfilename, _tedtimestamp);
+   GDSin::GDSFile gdsex(filename, _tedtimestamp);
    _TEDDB->GDSwrite(gdsex);
    gdsex.closeFile();
 }

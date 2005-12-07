@@ -402,13 +402,13 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, T
 }
 
 void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
-                                                            TDTHierTree* const root) const
+                                                            TDTHierTree* const root, real UU) const
 {
    // We going to write the cells in hierarchical order. Children - first!
    laydata::TDTHierTree* Child= root->GetChild();
    while (Child)
    {
-      allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child);
+      allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child, UU);
       Child = Child->GetBrother();
    }
    // If no more children and the cell has not been written yet
@@ -421,7 +421,7 @@ void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
-      wl->second->GDSwrite(gdsf, wl->first);
+      wl->second->GDSwrite(gdsf, wl->first, UU);
    wr = gdsf.SetNextRecord(gds_ENDSTR);gdsf.flush(wr);
    gdsf.registerCellWritten(_name);
 }

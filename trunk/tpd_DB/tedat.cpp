@@ -429,7 +429,7 @@ void laydata::tdtbox::write(TEDfile* const tedfile) const {
    tedfile->putTP(_p2);
 }
 
-void laydata::tdtbox::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+void laydata::tdtbox::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
 {
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
    gdsf.flush(wr);
@@ -740,7 +740,7 @@ void laydata::tdtpoly::write(TEDfile* const tedfile) const {
       tedfile->putTP(&_plist[i]);
 }
 
-void laydata::tdtpoly::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+void laydata::tdtpoly::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
 {
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
    gdsf.flush(wr);
@@ -1076,7 +1076,7 @@ void laydata::tdtwire::write(TEDfile* const tedfile) const {
       tedfile->putTP(&_plist[i]);
 }
 
-void laydata::tdtwire::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+void laydata::tdtwire::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
 {
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_PATH);
    gdsf.flush(wr);
@@ -1086,12 +1086,11 @@ void laydata::tdtwire::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
    wr->add_int2b(0);gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_WIDTH);
    wr->add_int4b(_width);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_XY,_plist.size()+1);
+   wr = gdsf.SetNextRecord(gds_XY,_plist.size());
    for (word i = 0; i < _plist.size(); i++)
    {
       wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
    }
-   wr->add_int4b(_plist[0].x());wr->add_int4b(_plist[0].y());
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_ENDEL);
    gdsf.flush(wr);
@@ -1218,7 +1217,7 @@ void laydata::tdtcellref::write(TEDfile* const tedfile) const {
    tedfile->putCTM(_translation);
 }
 
-void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
 {
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_SREF);
    gdsf.flush(wr);
@@ -1229,8 +1228,8 @@ void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
    bool flipX;
    _translation.toGDS(trans,rotation,scale,flipX);
    wr = gdsf.SetNextRecord(gds_STRANS);
-   if (flipX) wr->add_int2b(0x0000);
-   else       wr->add_int2b(0x8000);
+   if (flipX) wr->add_int2b(0x8000);
+   else       wr->add_int2b(0x0000);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_MAG);
    wr->add_real8b(scale);gdsf.flush(wr);
@@ -1385,7 +1384,7 @@ void laydata::tdtcellaref::write(TEDfile* const tedfile) const {
    tedfile->putWord(_cols);
 }
 
-void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
 {
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_AREF);
    gdsf.flush(wr);
@@ -1396,8 +1395,8 @@ void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
    bool flipX;
    _translation.toGDS(trans,rotation,scale,flipX);
    wr = gdsf.SetNextRecord(gds_STRANS);
-   if (flipX) wr->add_int2b(0x0000);
-   else       wr->add_int2b(0x8000);
+   if (flipX) wr->add_int2b(0x8000);
+   else       wr->add_int2b(0x0000);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_MAG);
    wr->add_real8b(scale);gdsf.flush(wr);
@@ -1559,7 +1558,7 @@ void laydata::tdttext::write(TEDfile* const tedfile) const {
    tedfile->putCTM(_translation);
 }
 
-void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
+void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
 {
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_TEXT);
    gdsf.flush(wr);
@@ -1572,11 +1571,11 @@ void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay) const
    bool flipX;
    _translation.toGDS(trans,rotation,scale,flipX);
    wr = gdsf.SetNextRecord(gds_STRANS);
-   if (flipX) wr->add_int2b(0x0000);
-   else       wr->add_int2b(0x8000);
+   if (flipX) wr->add_int2b(0x8000);
+   else       wr->add_int2b(0x0000);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_MAG);
-   wr->add_real8b(scale);gdsf.flush(wr);
+   wr->add_real8b(scale * OPENGL_FONT_UNIT * UU);gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_ANGLE);
    wr->add_real8b(rotation);gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_XY,1);
