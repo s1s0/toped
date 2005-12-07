@@ -266,7 +266,7 @@ void laydata::tdtdesign::write(TEDfile* const tedfile) {
    modified = false;
 }
 
-void laydata::tdtdesign::GDSwrite(GDSin::GDSFile& gdsf) {
+void laydata::tdtdesign::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recur) {
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_LIBNAME, _name.size());
    wr->add_ascii(_name.c_str()); gdsf.flush(wr);
 
@@ -274,10 +274,18 @@ void laydata::tdtdesign::GDSwrite(GDSin::GDSFile& gdsf) {
    wr->add_real8b(_UU); wr->add_real8b(_DBU);
    gdsf.flush(wr);
    //
-   laydata::TDTHierTree* root = _hiertree->GetFirstRoot();
-   while (root) {
-      _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root, _UU);
-      root = root->GetNextRoot();
+   if (NULL == top)
+   {
+      laydata::TDTHierTree* root = _hiertree->GetFirstRoot();
+      while (root) {
+         _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root, _UU, recur);
+         root = root->GetNextRoot();
+      }
+   }
+   else
+   {
+      laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
+      top->GDSwrite(gdsf, _cells, root_cell, _UU, recur);
    }
    wr = gdsf.SetNextRecord(gds_ENDLIB);gdsf.flush(wr);
 }

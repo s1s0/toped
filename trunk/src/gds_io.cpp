@@ -457,6 +457,8 @@ GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
       case gds_MAG            :return new GDSrecord(rectype, gdsDT_REAL8B, 8);
       case gds_ANGLE          :return new GDSrecord(rectype, gdsDT_REAL8B, 8);
                        default: assert(false); //the rest should not be used
+//----------------------------------------------------------------------------------
+// The record types below are not used currently in GDS export
 //       case gds_NODE           :datatype = gdsDT_NODATA;break;
 //       case gds_PRESENTATION   :datatype = gdsDT_BIT;break;
 //       case gds_REFLIBS        :datatype = gdsDT_ASCII;break;
@@ -481,6 +483,7 @@ GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
 //       case gds_CONTACT        :datatype = gdsDT_NODATA;break;
 
 /*
+      deprecated, should not be used for export
       case gds_BOX            :datatype = gdsDT_NODATA;break;
       case gds_BOXTYPE        :datatype = gdsDT_INT2B;break;
       case gds_PLEX           :datatype = gdsDT_INT4B;break;

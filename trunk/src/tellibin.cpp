@@ -2844,17 +2844,52 @@ int tellstdfunc::GDSconvert::execute() {
 }
 
 //=============================================================================
-tellstdfunc::GDSexport::GDSexport(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-int tellstdfunc::GDSexport::execute() {
-   std::string name = getStringValue();
+int tellstdfunc::GDSexportLIB::execute()
+{
+   std::string filename = getStringValue();
    DATC->lockDB(false);
-      DATC->GDSexport(name);
+      DATC->GDSexport(filename);
    DATC->unlockDB();
-   LogFile << LogFile.getFN() << "(\""<< name << ");"; LogFile.flush();
+   LogFile << LogFile.getFN() << "(\""<< filename << ");"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::GDSexportTOP::execute()
+{
+   std::string filename = getStringValue();
+   bool  recur = getBoolValue();
+   std::string cellname = getStringValue();
+   laydata::tdtcell *excell = NULL;
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      excell = ATDB->checkcell(cellname);
+      if (NULL != excell)
+         DATC->GDSexport(excell, recur, filename);
+   DATC->unlockDB();
+   if (NULL != excell)
+   {
+      LogFile << LogFile.getFN() << "(\""<< cellname << "\"," << recur << ",\"" << filename << "\");";
+      LogFile.flush();
+   }
+   else
+   {
+      std::string message = "Cell " + cellname + " not found in the database";
+      tell_log(console::MT_ERROR,message.c_str());
+   }
    return EXEC_NEXT;
 }
 

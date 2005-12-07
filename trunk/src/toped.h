@@ -92,6 +92,7 @@ namespace tui {
       wxMenu*                 selectMenu;
       wxMenu*                 settingsMenu;
       wxMenu*                 markerMenu;
+      wxMenu*                 gdsMenu;
       wxMenu*                 helpMenu;
       // Sash layout stuff
       wxSashLayoutWindow*     mS_browsers;
@@ -105,6 +106,8 @@ namespace tui {
       void    OnTELLRead(wxCommandEvent&);
       void     OnGDSRead(wxCommandEvent&);
       void   OnGDSimport(wxCommandEvent&);
+      void   OnGDSexportLIB(wxCommandEvent&);
+      void   OnGDSexportTOP(wxCommandEvent&);
       void    OnGDSclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("gdsclose();");};
       void     OnTDTSave(wxCommandEvent&);
       void   OnTDTSaveAs(wxCommandEvent&);

@@ -97,7 +97,8 @@ namespace laydata {
                                                               bool sortnow = true);
       bool                 addchild(tdtdesign*, tdtcell*);
       void                 write(TEDfile* const, const cellList&, TDTHierTree* const) const;
-      void                 GDSwrite(GDSin::GDSFile&, const cellList&, TDTHierTree* const, real) const;
+      void                 GDSwrite(GDSin::GDSFile&, const cellList&,
+                                                TDTHierTree* const, real, bool) const;
       TDTHierTree*         hierout(TDTHierTree*& Htree, tdtcell* parent, 
                                                            cellList* celldefs);
       DBbox                overlap() const;
