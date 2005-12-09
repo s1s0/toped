@@ -200,7 +200,7 @@ bool TopedApp::OnInit() {
 }
 
 int TopedApp::OnExit() {
-   delete CMDBlock;
+   delete CMDBlock; 
    delete DATC;
    delete Properties;
    return 0;

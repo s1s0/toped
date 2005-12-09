@@ -348,6 +348,12 @@ GDSin::GDSFile::GDSFile(std::string fn, TIME_TPD acctime) {
    }//
    time_t acctim_N = acctime;
    tm* broken_time = localtime(&acctim_N);
+   if (broken_time == NULL)
+   {
+      std::ostringstream info;
+      info << "Error during defining time";
+      tell_log(console::MT_ERROR,info.str().c_str());
+   }
    t_access.Year  = broken_time->tm_year;
    t_access.Month = broken_time->tm_mon;
    t_access.Day   = broken_time->tm_mday;

@@ -288,8 +288,17 @@ void screenSetup() {
    shapeangle(45);
 }
 
+void bug() 
+{
+   addbox( { { 0 , 0 } , { 10 , 10 } });
+   select({8.00,6.00});
+   rotate({8.00, 6.00},90);
+   polycut( { { 4 , -5 } , { 8 , -5 } , { 8 , 5 } , { 4 , 5 } });
+
+
+}
 layerSetup();
 screenSetup();
 newdesign("seed");
-//newcell("crop");
-//opencell("crop");
+newcell("crop");
+opencell("crop");
