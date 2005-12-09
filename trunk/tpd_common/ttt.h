@@ -38,9 +38,12 @@
    #define rint floor
    #define round floor
    #define remainder fmod
+   #define M_PI   3.1415926535897932384626433832795
    #pragma warning( disable : 4786 ) 
-#endif
+#else
 #include "config.h"
+#endif
+
 //#define MIN_X        (int4b)0x80000001      //  -2 147 483 647
 //#define MAX_X        (int4b)0x7FFFFFFF      //   2 147 483 643
 //#define MIN_Y        (int4b)0x80000001      //  -2 147 483 647

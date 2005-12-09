@@ -195,6 +195,7 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
 DataCenter::DataCenter() {
    _GDSDB = NULL; _TEDDB = NULL;
    _tedfilename = "unnamed";
+    time(&_tedtimestamp);
 }
    
 DataCenter::~DataCenter() {
@@ -234,6 +235,8 @@ void DataCenter::TDTwrite(const char* filename) {
 
 void DataCenter::GDSexport(std::string& filename) {
    std::string nfn;
+   //Get actual time
+   time(&_tedtimestamp);
    GDSin::GDSFile gdsex(filename, _tedtimestamp);
    _TEDDB->GDSwrite(gdsex, NULL, true);
    gdsex.closeFile();
@@ -241,6 +244,8 @@ void DataCenter::GDSexport(std::string& filename) {
 
 void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& filename) {
    std::string nfn;
+   //Get actual time
+   time(&_tedtimestamp);
    GDSin::GDSFile gdsex(filename, _tedtimestamp);
    _TEDDB->GDSwrite(gdsex, cell, recur);
    gdsex.closeFile();

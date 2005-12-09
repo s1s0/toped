@@ -679,15 +679,17 @@ void tui::TopedFrame::OnGDSexportTOP(wxCommandEvent& WXUNUSED(event)) {
       delete dlg;
    }
    else {delete dlg;return;}
-   wxFileDialog dlg2(this, "Exporting "+cellname+" to GDS file", "", cellname+".gds", 
-      "GDS files |*.sf;*.gds",
+   std::string str = std::string("Exporting ")+cellname+" to GDS file";
+   std::string fullCellName = cellname+".gds";
+   wxFileDialog dlg2(this, wxT(str.c_str()), "", wxT(fullCellName.c_str()), 
+      wxT("GDS files |*.sf;*.gds"),
       wxSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
-      ost << "gdsexport(\"" << cellname << "\" , " <<
+      ost << "gdsexport(\"" << cellname.c_str() << "\" , " <<
                         (recur ? "true" : "false") << ",\"" <<
-                        dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\");";
+                        (dlg2.GetDirectory()).c_str() << "/" <<(dlg2.GetFilename()).c_str() << "\");";
       _cmdline->parseCommand(ost);
       SetStatusText("Design exported to: "+dlg2.GetFilename());
    }
