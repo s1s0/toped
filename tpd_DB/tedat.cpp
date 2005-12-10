@@ -407,6 +407,7 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, const SGBitSet* plst
 void laydata::tdtbox::transfer(const CTM& trans) {
    *_p1 *= trans;
    *_p2 *= trans;
+   normalize();
 }
 
 laydata::tdtdata* laydata::tdtbox::copy(const CTM& trans) {
