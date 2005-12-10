@@ -293,10 +293,15 @@ void bug()
    addbox( { { 0 , 0 } , { 10 , 10 } });
    select({8.00,6.00});
    rotate({8.00, 6.00},90);
-   polycut( { { 4 , -5 } , { 8 , -5 } , { 8 , 5 } , { 4 , 5 } });
-
-
+   // Bug in the cut/merge algo here when cutting polygon edge coincides 
+   // with the box edge
+   //polycut( { { 4 , -5 } , { 8 , -5 } , { 8 , 5 } , { 4 , 5 } });
+   // Alternatively as a temporary workaround...
+   polycut( { { 3 , -5 } , { 8 , -5 } , { 8 , 5 } , { 3 , 5 } });
+   // for Pi shape,
+   //polycut({ { 5.5 , -2.5 } , { 5.5 , 6 } , { 12.5 , 6 } , { 12.5 , -2.5 } });
 }
+
 layerSetup();
 screenSetup();
 newdesign("seed");
