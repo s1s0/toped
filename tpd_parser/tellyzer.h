@@ -120,7 +120,7 @@ namespace parsercmd {
               byte getByteValue(telldata::UNDOPerandQUEUE&, bool);
        std::string getStringValue(telldata::UNDOPerandQUEUE&, bool);
               bool getBoolValue(telldata::UNDOPerandQUEUE&, bool);
-      virtual ~cmdVIRTUAL() {};        
+      virtual ~cmdVIRTUAL() {};
    protected:
       static telldata::operandSTACK      OPstack;      // Operand stack
 //      yyltype                  _loc;
@@ -236,7 +236,7 @@ namespace parsercmd {
       cmdPUSH(telldata::tell_var *v, bool constant=false):
                         _var(v),  _constant(constant) {};
       int execute();
-      ~cmdPUSH() {if (_constant) delete _var;};
+      virtual ~cmdPUSH() {if (_constant) delete _var;};
    private:
       telldata::tell_var* _var;
       bool                 _constant;
@@ -246,6 +246,7 @@ namespace parsercmd {
    public:
       cmdSTRUCT(telldata::argumentID* arg) : _arg(arg) {}
       int execute();
+      virtual ~cmdSTRUCT() {/*if (NULL != _arg) {*/delete _arg;/*_arg = NULL;}*/}
    private:
       telldata::tell_var*     getList();
       telldata::tell_var*     getPnt();
@@ -363,7 +364,7 @@ namespace parsercmd {
    public:
       cmdIFELSE(cmdBLOCK* tb, cmdBLOCK* fb):trueblock(tb),falseblock(fb) {};
       int                     execute();
-      ~cmdIFELSE() {delete trueblock; delete falseblock;}
+      virtual ~cmdIFELSE() {delete trueblock; delete falseblock;}
    private:
       cmdBLOCK*               trueblock;
       cmdBLOCK*               falseblock;
@@ -373,7 +374,7 @@ namespace parsercmd {
    public:
       cmdWHILE(cmdBLOCK* cnd, cmdBLOCK* bd):condblock(cnd),body(bd) {};
       int                  execute();
-      ~cmdWHILE() {delete condblock; delete body;}
+      virtual ~cmdWHILE() {delete condblock; delete body;}
    private:
       cmdBLOCK *condblock;
       cmdBLOCK *body;
@@ -383,7 +384,7 @@ namespace parsercmd {
    public:
       cmdREPEAT(cmdBLOCK* cnd, cmdBLOCK* bd):condblock(cnd),body(bd) {};
       int                  execute();
-      ~cmdREPEAT() {delete condblock; delete body;}
+      virtual ~cmdREPEAT() {delete condblock; delete body;}
    private:
       cmdBLOCK *condblock;
       cmdBLOCK *body;
@@ -395,7 +396,7 @@ namespace parsercmd {
       int   execute();
       void  addFUNC(std::string fname , cmdSTDFUNC* cQ);
       void  addGlobalType(char*, telldata::tell_type*);
-      ~cmdMAIN();
+      virtual ~cmdMAIN();
    };
 
    telldata::typeID UMinus(telldata::typeID, yyltype);

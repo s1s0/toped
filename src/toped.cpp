@@ -208,7 +208,7 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
 
 tui::TopedFrame::~TopedFrame() {
    delete _laycanvas;
-   delete _cmdline;      // tell command input window
+   delete _cmdline;   // tell command input window
    delete _GLstatus;
    delete _browsers;  // tell definitions browser
    delete mS_browsers;

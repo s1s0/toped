@@ -350,6 +350,7 @@ int parsercmd::cmdPUSH::execute() {
    return EXEC_NEXT;
 }
 
+//=============================================================================
 telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
    telldata::typeID comptype = (*_arg)() & ~telldata::tn_listmask;
    telldata::ttlist *pl = new telldata::ttlist(comptype);
@@ -639,7 +640,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
    while (i-- > 0) {
       telldata::typeID cargID = (*(*amap)[i])();
       telldata::argumentID* carg = TLUNKNOWN_TYPE(cargID) ?
-                        new telldata::argumentID((*((*amap)[i]))) : ((*amap)[i]);
+                        new telldata::argumentID(*((*amap)[i])) : ((*amap)[i]);
       telldata::typeID lvalID = (*arguments)[i]->second->get_type();
       if (TLUNKNOWN_TYPE(cargID)) {
          const telldata::tell_type* vartype;

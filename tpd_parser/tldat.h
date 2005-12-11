@@ -72,8 +72,8 @@ namespace telldata {
    typedef std::deque<argumentID*>           argumentQ;
    typedef std::stack<telldata::tell_var*>   operandSTACK;
    typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
-   
 
+   void  argumentQClear(argumentQ*);
 
    //==============================================================================
    /*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the
@@ -303,7 +303,7 @@ namespace telldata {
                            argumentID(argumentQ* child) :  _ID(telldata::tn_composite),
                                                         _child(child) {}
                            argumentID(const argumentID&);
-                          ~argumentID() {if (NULL != _child) delete _child;}
+                           ~argumentID();
       void                 toList();
       void                 adjustID(const argumentID*);
       telldata::typeID     operator () () const        {return _ID;}

@@ -420,27 +420,33 @@ const telldata::ttwnd& telldata::ttwnd::operator = (const ttwnd& a) {
 }
 
 //=============================================================================
-telldata::argumentID::argumentID(const argumentID& obj2copy) {
+telldata::argumentID::argumentID(const argumentID& obj2copy)
+{
    _ID = obj2copy();
    if (NULL == obj2copy.child()) 
       _child = NULL;
-   else {
+   else
+   {
       _child = new argumentQ;
       for(argumentQ::const_iterator CA = obj2copy.child()->begin(); CA != obj2copy.child()->end(); CA ++)
-         _child->push_back(*CA);
+         _child->push_back(new argumentID(**CA));
    }
 }
 
-void telldata::argumentID::toList() {
+void telldata::argumentID::toList()
+{
    telldata::typeID alistID = (*(*_child)[0])();
-   for(argumentQ::const_iterator CA = _child->begin(); CA != _child->end(); CA ++) {
+   for(argumentQ::const_iterator CA = _child->begin(); CA != _child->end(); CA ++)
+   {
       if (alistID != (*(*CA))()) return;
    }
    _ID = TLISTOF(alistID);
 }
 
-void telldata::argumentID::adjustID(const argumentID* obj2copy) {
-   if (NULL != obj2copy->child()) {
+void telldata::argumentID::adjustID(const argumentID* obj2copy)
+{
+   if (NULL != obj2copy->child())
+   {
       assert(obj2copy->child()->size() == _child->size());
       argumentQ::const_iterator CA, CB;
       for(CA =            _child->begin(), CB = obj2copy->child()->begin() ;
@@ -449,3 +455,23 @@ void telldata::argumentID::adjustID(const argumentID* obj2copy) {
    }
    _ID = obj2copy->_ID;
 }
+
+telldata::argumentID::~argumentID()
+{
+   if (NULL != _child)
+   {
+      argumentQClear(_child);
+      delete(_child);
+//      _child = NULL;
+   }
+}
+
+void  telldata::argumentQClear(argumentQ* queue)
+{
+   if (NULL == queue) return;
+   for(argumentQ::iterator AQI = queue->begin(); AQI != queue->end(); AQI++)
+      // another call of the destructor will take care for composite types
+      if (!TLCOMPOSIT_TYPE((**AQI)())) delete *AQI;
+   queue->clear();
+}
+

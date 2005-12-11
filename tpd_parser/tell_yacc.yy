@@ -188,8 +188,8 @@ Ooops! Second thought!
 %type <pttname>        lvalue telltype telltypeID variable variabledeclaration
 %type <pttname>        andexpression eqexpression relexpression 
 %type <pfarguments>    funcarguments
-%type <parguments>     structure arguments argument
-%type <plarguments>    nearguments 
+%type <parguments>     structure argument
+%type <plarguments>    nearguments arguments
 %type <pblock>         block
 %type <pfblock>        funcblock
 %type <ptypedef>       fielddeclaration typedefstruct
@@ -356,15 +356,15 @@ funccall:
         argmapstack.push(argmap);
    }
       arguments ')'                        {
-      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4->child());
+      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4);
       if (fc) {
          CMDBlock->pushcmd(new parsercmd::cmdFUNCCALL(fc,$1));
          $$ = fc->gettype();
       }
       else tellerror("unknown function name or wrong parameter list",@1);
       argmapstack.pop();
-      argmap->clear(); delete argmap;
-      if (argmapstack.size()) argmap = argmapstack.top();
+      argumentQClear(argmap); delete argmap;
+      if (argmapstack.size() > 0) argmap = argmapstack.top();
       else argmap = NULL;
       delete [] $1;
    }
@@ -380,8 +380,8 @@ assignment:
 ;
 
 arguments:
-                                           {$$ = new telldata::argumentID();}
-    | nearguments                          {$$ = new telldata::argumentID($1);}
+                                           {$$ = NULL;}
+    | nearguments                          {$$ = $1;}
 ;
 
 argument :
@@ -391,7 +391,6 @@ argument :
    | structure                             {$$ = $1;}
 ;
 
-/*SGREM!!! MEMORY LEAKEAGE HERE because of the default copy constructor of argumentID*/
 nearguments :
      argument                              {argmap->push_back($1); $$ = argmap;}
    | nearguments ',' argument              {argmap->push_back($3); $$ = argmap;}
@@ -516,13 +515,13 @@ structure:
           a tell list or some kind of tell struct or even tell list of tell struct.
           There is no way at this moment to determine the type of the input structure
           for (seems) obvious reasons. So - the type check and the eventual pushcmd
-          are postponed untill we get the recepient - i.e. the lvalue or the
+          are postponed untill we get the recepient - i.e. the lvalue in assign or the
           function call. $$ is assigned to argumentID, that caries the whole argument
           queue listed in structure*/
         $$ = new telldata::argumentID(argmap);
         CMDBlock->pushcmd(new parsercmd::cmdSTRUCT($$));
         argmapstack.pop();
-        if (argmapstack.size()) argmap = argmapstack.top();
+        if (argmapstack.size() > 0) argmap = argmapstack.top();
         else argmap = NULL;
    }
 ;
@@ -584,7 +583,6 @@ primaryexpression :
                                                                 delete [] $1;}
    | variable                              {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
-/*   | structure                             {$$ = $1;}*/
    | '(' expression ')'                    {$$ = $2;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
 ;

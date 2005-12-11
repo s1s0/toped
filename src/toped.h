@@ -62,7 +62,7 @@ namespace tui {
    public:
                               TopedFrame(const wxString& , const wxPoint& , 
                                                                const wxSize&);
-                             ~TopedFrame();                                                               
+                             ~TopedFrame();
       void                    OnSize(wxSizeEvent& event);
       void                    OnSashDrag(wxSashEvent& event);
       void                    OnPositionMessage(wxCommandEvent&);
@@ -134,12 +134,12 @@ namespace tui {
       void OnCellUngroup(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("ungroup();");};
 
       void        OnUndo(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("undo();");};
-      void      OnzoomIn(wxCommandEvent& WXUNUSED(event));// {_laycanvas->zoomIn();};
-      void     OnzoomOut(wxCommandEvent& WXUNUSED(event));// {_laycanvas->zoomOut();};
-      void     OnpanLeft(wxCommandEvent& WXUNUSED(event));// {_laycanvas->panLeft();};
-      void    OnpanRight(wxCommandEvent& WXUNUSED(event));// {_laycanvas->panRight();};
-      void       OnpanUp(wxCommandEvent& WXUNUSED(event));// {_laycanvas->panUp();};
-      void     OnpanDown(wxCommandEvent& WXUNUSED(event));// {_laycanvas->panDown();};
+      void      OnzoomIn(wxCommandEvent& WXUNUSED(event));
+      void     OnzoomOut(wxCommandEvent& WXUNUSED(event));
+      void     OnpanLeft(wxCommandEvent& WXUNUSED(event));
+      void    OnpanRight(wxCommandEvent& WXUNUSED(event));
+      void       OnpanUp(wxCommandEvent& WXUNUSED(event));
+      void     OnpanDown(wxCommandEvent& WXUNUSED(event));
       void     OnZoomAll(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("zoomall();");};
       void     OnDrawBox(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("addbox();");};
       void    OnDrawPoly(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("addpoly();");};

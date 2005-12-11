@@ -339,8 +339,7 @@ CTM::CTM(TP dp, real scale, real rotation,bool reflX) {
 }
 
 CTM CTM::Rotate(real alfa) {// alfa - in degrees
-   double temp = (double) alfa; 
-   double alfaG = (temp * M_PI / 180.0);// translate in radians
+   double alfaG = (alfa * M_PI / 180.0);// translate in radians
    return (*this *= CTM(cos(alfaG),sin(alfaG),-sin(alfaG),cos(alfaG),0,0));
 }
 
@@ -363,9 +362,9 @@ CTM CTM::operator * (const CTM op2) const{
 }
 
 CTM CTM::operator = (const CTM op2) {
-   _a = op2.a();_b = op2.b();_c = op2.c();_d = op2.d(); 
+   _a = op2.a();_b = op2.b();_c = op2.c();_d = op2.d();
    _tx = op2.tx();_ty = op2.ty();
-   return *this; 
+   return *this;
 }
 
 void CTM::toGDS(TP& trans, real& rot, real& scale, bool& flipX) const 
@@ -376,11 +375,10 @@ void CTM::toGDS(TP& trans, real& rot, real& scale, bool& flipX) const
    // flip values of these oprations.
    // Second presumption here is for the scale value returned. It is that
    // scX and scY are always the same
-   real scX = sqrt(_a * _a + _c * _c);   
+   real scX = sqrt(_a * _a + _c * _c);
    real scY = sqrt(_b * _b + _d * _d);
    scale = scX;
    // rotation
-   real rot1= atan2(_b , _a);
    rot = round(atan2(_b , _a) * 180.0 / M_PI);
    // if (rot < 0) rot = 180 + abs(rot);
    // flip
@@ -392,16 +390,3 @@ void CTM::toGDS(TP& trans, real& rot, real& scale, bool& flipX) const
    trans.setX(static_cast<int4b>(_tx));
    trans.setY(static_cast<int4b>(_ty));
 }
-
-#if WIN32
-
-double round(double x)
-{
-   double ret;
-   int y=int(x);
-
-   if((x-double(y))>=0.5) ret = y+1; else ret = y;
-   return ret;
-}
-
-#endif
