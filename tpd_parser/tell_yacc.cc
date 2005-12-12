@@ -1638,12 +1638,12 @@ yyreduce:
 
   case 45:
 #line 395 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {argmap->push_back((yyvsp[0].parguments)); (yyval.plarguments) = argmap;}
+    {argmap->push_back(*(yyvsp[0].parguments)); (yyval.plarguments) = argmap;}
     break;
 
   case 46:
 #line 396 "/troy_home/skr_local/toped_public/tpd_parser/tell_yacc.yy"
-    {argmap->push_back((yyvsp[0].parguments)); (yyval.plarguments) = argmap;}
+    {argmap->push_back(*(yyvsp[0].parguments)); (yyval.plarguments) = argmap;}
     break;
 
   case 47:
@@ -1845,9 +1845,9 @@ yyreduce:
           are postponed untill we get the recepient - i.e. the lvalue in assign or the
           function call. $$ is assigned to argumentID, that caries the whole argument
           queue listed in structure*/
-        (yyval.parguments) = new telldata::argumentID(argmap, NULL);
-        parsercmd::cmdSTRUCT* struct_command = new parsercmd::cmdSTRUCT((yyval.parguments));
+        parsercmd::cmdSTRUCT* struct_command = new parsercmd::cmdSTRUCT();
         CMDBlock->pushcmd(struct_command);
+        (yyval.parguments) = new telldata::argumentID(argmap, struct_command);
         argmapstack.pop();
         if (argmapstack.size() > 0) argmap = argmapstack.top();
         else argmap = NULL;
