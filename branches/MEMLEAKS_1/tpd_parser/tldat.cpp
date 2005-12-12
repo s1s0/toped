@@ -62,21 +62,21 @@ bool telldata::tell_type::addfield(std::string fname, typeID fID, const tell_typ
     return true;
 }
 
-void telldata::tell_type::userStructCheck(argumentID* inarg) const {
-   argumentQ* arglist = inarg->child();
+void telldata::tell_type::userStructCheck(const argumentID& inarg) const {
+   const argumentQ& arglist = inarg.child();
    // first check that both lists have the same size
-   if (arglist->size() != _fields.size()) return;
+   if (arglist.size() != _fields.size()) return;
    recfieldsID::const_iterator CF;
-   argumentQ::iterator    CA;
-   for (CF = _fields.begin(), CA = arglist->begin();
-             (CF != _fields.end() && CA != arglist->end()); CF ++, CA++) {
-      if ( TLUNKNOWN_TYPE( (*(*CA))() ) ) {
+   argumentQ::const_iterator CA;
+   for (CF = _fields.begin(), CA = arglist.begin();
+             (CF != _fields.end() && CA != arglist.end()); CF ++, CA++) {
+      if ( TLUNKNOWN_TYPE( (*CA)() ) ) {
          if (TLISALIST(CF->second)) {// check the list fields
             telldata::typeID basetype = CF->second & ~telldata::tn_listmask;
             assert(_tIDMAP.end() != _tIDMAP.find(basetype));
             // call in recursion the userStructCheck method of the child 
             const tell_type *tty = (_tIDMAP.find(basetype)->second);
-            tty->userStructListCheck(*CA);
+            tty->userStructListCheck((*CA));
          }
          else {
             assert(_tIDMAP.end() != _tIDMAP.find(CF->second));
@@ -88,22 +88,22 @@ void telldata::tell_type::userStructCheck(argumentID* inarg) const {
       if (!NUMBER_TYPE( CF->second )) {
          // for non-number types there is no internal conversion,
          // so check strictly the type
-         if ( (*(*CA))() != CF->second) return; // no match
+         if ( (*CA)() != CF->second) return; // no match
       }
       else // for number types - allow compatablity (int to real only)
-         if (!NUMBER_TYPE( (*(*CA))() )) return; // no match
-         else if (CF->second < (*(*CA))() ) return; // no match
+         if (!NUMBER_TYPE( (*CA)() )) return; // no match
+         else if (CF->second < (*CA)() ) return; // no match
    }
    // all fields match => we can assign a known ID to the argumentID
-   inarg->_ID = _ID;
+   inarg._ID = _ID;
 }
 
-void telldata::tell_type::userStructListCheck(argumentID* inarg) const {
-   argumentQ* arglist = inarg->child();
-   for (argumentQ::iterator CA = arglist->begin(); CA != arglist->end(); CA++) {
-      if ( TLUNKNOWN_TYPE( (*(*CA))() ) ) userStructCheck(*CA);
+void telldata::tell_type::userStructListCheck(const argumentID& inarg) const {
+   const argumentQ& arglist = inarg.child();
+   for (argumentQ::const_iterator CA = arglist.begin(); CA != arglist.end(); CA++) {
+      if ( TLUNKNOWN_TYPE( (*CA)() ) ) userStructCheck(*CA);
    }
-   inarg->toList();
+   inarg.toList();
 }
 //=============================================================================
 telldata::point_type::point_type() : tell_type(telldata::tn_pnt) {
@@ -424,55 +424,54 @@ telldata::argumentID::argumentID(const argumentID& obj2copy)
 {
    _ID = obj2copy();
    _command = obj2copy._command;
-   if (NULL == obj2copy.child()) 
-      _child = NULL;
-   else
+   if (0 < obj2copy.child().size())
    {
-      _child = new argumentQ;
-      for(argumentQ::const_iterator CA = obj2copy.child()->begin(); CA != obj2copy.child()->end(); CA ++)
-         _child->push_back(new argumentID(**CA));
+      for(argumentQ::const_iterator CA = obj2copy.child().begin(); CA != obj2copy.child().end(); CA ++)
+         _child.push_back(*CA);
    }
 }
 
 void telldata::argumentID::toList()
 {
-   telldata::typeID alistID = (*(*_child)[0])();
-   for(argumentQ::const_iterator CA = _child->begin(); CA != _child->end(); CA ++)
+   telldata::typeID alistID = _child[0]();
+   for(argumentQ::const_iterator CA = _child.begin(); CA != _child.end(); CA ++)
    {
-      if (alistID != (*(*CA))()) return;
+      if (alistID != (*CA)()) return;
    }
    _ID = TLISTOF(alistID);
 }
 
-void telldata::argumentID::adjustID(const argumentID* obj2copy)
+void telldata::argumentID::adjustID(const argumentID& obj2copy)
 {
-   if (NULL != obj2copy->child())
+   if (0 != obj2copy.child().size())
    {
-      assert(obj2copy->child()->size() == _child->size());
-      argumentQ::const_iterator CA, CB;
-      for(CA =            _child->begin(), CB = obj2copy->child()->begin() ;
-                                                      CA != _child->end() ; CA ++, CB++)
-         (*CA)->adjustID(*CB);
+      assert(obj2copy.child().size() == _child.size());
+      argumentQ::const_iterator CB;
+      argumentQ::iterator CA;
+      for(CA = _child.begin(), CB = obj2copy.child().begin() ;
+                                                      CA != _child.end() ; CA ++, CB++)
+         CA->adjustID(*CB);
    }
-   _ID = obj2copy->_ID;
+   _ID = obj2copy._ID;
+   _command = obj2copy._command;
 }
 
 telldata::argumentID::~argumentID()
 {
-   if (NULL != _child)
-   {
-      argumentQClear(_child);
-      delete(_child);
+//   if (NULL != _child)
+//   {
+//      argumentQClear(_child);
+//      delete(_child);
 //      _child = NULL;
-   }
+//   }
 }
 
 void  telldata::argumentQClear(argumentQ* queue)
 {
-   if (NULL == queue) return;
+/*   if (NULL == queue) return;
    for(argumentQ::iterator AQI = queue->begin(); AQI != queue->end(); AQI++)
       // another call of the destructor will take care for composite types
       if (!TLCOMPOSIT_TYPE((**AQI)())) delete *AQI;
-   queue->clear();
+   queue->clear();*/
 }
 

@@ -354,7 +354,7 @@ int parsercmd::cmdPUSH::execute() {
 telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
    telldata::typeID comptype = (*_arg)() & ~telldata::tn_listmask;
    telldata::ttlist *pl = new telldata::ttlist(comptype);
-   unsigned llength = _arg->child()->size();
+   unsigned llength = _arg->child().size();
    pl->reserve(llength);
    telldata::tell_var  *p;
    for (unsigned i = 0; i < llength; i++) {
@@ -421,12 +421,12 @@ bool parsercmd::cmdRETURN::checkRetype(telldata::argumentID* arg) {
       const telldata::tell_type* vartype;
       if (TLISALIST(_retype)) { // we have a list lval
           vartype = CMDBlock->getTypeByID(_retype & ~telldata::tn_listmask);
-          if (NULL != vartype) vartype->userStructListCheck(arg);
+          if (NULL != vartype) vartype->userStructListCheck(*arg);
           else arg->toList();
       }
       else { // we have a struct only
          vartype = CMDBlock->getTypeByID(_retype);
-         if (NULL != vartype) vartype->userStructCheck(arg);
+         if (NULL != vartype) vartype->userStructCheck(*arg);
       }
    }
    return ((_retype == (*arg)()) || (NUMBER_TYPE(_retype) && NUMBER_TYPE((*arg)())));
@@ -587,12 +587,13 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
 }
 
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
-                                        (char*& fn, argumentLIST* alst) const {
+                                        (char*& fn, argumentLIST* alst) const
+{
    // convert argumentLIST to argumentMAP
    telldata::argumentQ amap;
    typedef argumentLIST::const_iterator AT;
-   for (AT arg = alst->begin(); arg != alst->end(); arg++) {
-      amap.push_back(new telldata::argumentID((*arg)->second->get_type())); }
+   for (AT arg = alst->begin(); arg != alst->end(); arg++)
+      amap.push_back((*arg)->second->get_type());
    // call
    return getFuncBody(fn,&amap);
 }
@@ -638,20 +639,22 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
    // always after the comparison, but before the cycle body. So. if all the arguments
    // are checked (match), the cycle ends-up with i == -1;
    while (i-- > 0) {
-      telldata::typeID cargID = (*(*amap)[i])();
-      telldata::argumentID* carg = TLUNKNOWN_TYPE(cargID) ?
-                        new telldata::argumentID(*((*amap)[i])) : ((*amap)[i]);
+      telldata::typeID cargID = (*amap)[i]();
+      telldata::argumentID* carg = (TLUNKNOWN_TYPE(cargID)) ?
+                              new telldata::argumentID(((*amap)[i])) : &((*amap)[i]);
+//      telldata::argumentID* carg = TLUNKNOWN_TYPE(cargID) ?
+//                        new telldata::argumentID(((*amap)[i])) : ((*amap)[i]);
       telldata::typeID lvalID = (*arguments)[i]->second->get_type();
       if (TLUNKNOWN_TYPE(cargID)) {
          const telldata::tell_type* vartype;
          if (TLISALIST(lvalID)) { // we have a list lval
             vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
-            if (NULL != vartype) vartype->userStructListCheck(carg);
+            if (NULL != vartype) vartype->userStructListCheck(*carg);
             else carg->toList();
          }
          else { // we have a struct only
             vartype = CMDBlock->getTypeByID(lvalID);
-            if (NULL != vartype) vartype->userStructCheck(carg);
+            if (NULL != vartype) vartype->userStructCheck(*carg);
          }
       }
 
@@ -659,35 +662,36 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
          // for non-number types there is no internal conversion,
          // so check strictly the type
          if ( (*carg)() != lvalID) {
-            if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) delete carg;
+            if (TLUNKNOWN_TYPE( (*amap)[i]() )) delete carg;
             break;
          }
-         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) UnknownArgsCopy.push_back(carg);
+         else if (TLUNKNOWN_TYPE( (*amap)[i]() )) UnknownArgsCopy.push_back(*carg);
       }
       else {// for number types - allow compatablity
          if ((!NUMBER_TYPE(lvalID)) || ( (*carg)() > lvalID)) {
-            if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) delete carg;
+            if (TLUNKNOWN_TYPE( (*amap)[i]() )) delete carg;
             break;
          }
-         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() )) UnknownArgsCopy.push_back(carg);
+         else if (TLUNKNOWN_TYPE( (*amap)[i]() )) UnknownArgsCopy.push_back(*carg);
       }
    }
    i++;
    if (UnknownArgsCopy.size() > 0)
    {
       if (i > 0)
-      {
-         while (UnknownArgsCopy.size() > 0)
-         {
-            delete UnknownArgsCopy.front(); UnknownArgsCopy.pop_front();
-         }
-      }
+         UnknownArgsCopy.clear();
+//      {
+//         while (UnknownArgsCopy.size() > 0)
+//         {
+//            delete UnknownArgsCopy.front(); UnknownArgsCopy.pop_front();
+//         }
+//      }
       else
          for (telldata::argumentQ::iterator CA = amap->begin(); CA != amap->end(); CA++)
-            if ( TLUNKNOWN_TYPE((**CA)()) )
+            if ( TLUNKNOWN_TYPE((*CA)()) )
             {
-               (*CA)->adjustID(UnknownArgsCopy.back());
-               delete UnknownArgsCopy.back(); UnknownArgsCopy.pop_back();
+               CA->adjustID(UnknownArgsCopy.back());
+               UnknownArgsCopy.pop_back();
             }
       assert(UnknownArgsCopy.size() == 0);
    }
@@ -1014,12 +1018,12 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentI
       const telldata::tell_type* vartype;
       if (TLISALIST(lvalID)) { // we have a list lval
           vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
-          if (NULL != vartype) vartype->userStructListCheck(op2);
+          if (NULL != vartype) vartype->userStructListCheck(*op2);
           else op2->toList();
       }
       else { // we have a struct only
          vartype = CMDBlock->getTypeByID(lvalID);
-         if (NULL != vartype) vartype->userStructCheck(op2);
+         if (NULL != vartype) vartype->userStructCheck(*op2);
       }
    }
    if ((lvalID == (*op2)()) || (NUMBER_TYPE(lvalID) && NUMBER_TYPE((*op2)()))) {
