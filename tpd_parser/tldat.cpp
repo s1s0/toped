@@ -423,6 +423,7 @@ const telldata::ttwnd& telldata::ttwnd::operator = (const ttwnd& a) {
 telldata::argumentID::argumentID(const argumentID& obj2copy)
 {
    _ID = obj2copy();
+   _command = obj2copy._command;
    if (NULL == obj2copy.child()) 
       _child = NULL;
    else
