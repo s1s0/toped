@@ -299,9 +299,10 @@ namespace telldata {
    class argumentID {
    public:
                            argumentID(telldata::typeID ID = telldata::tn_NULL) :
-                                                         _ID(ID), _child(NULL){};
-                           argumentID(argumentQ* child) :  _ID(telldata::tn_composite),
-                                                        _child(child) {}
+                                            _ID(ID), _child(NULL), _command(NULL){};
+                           argumentID(argumentQ* child, void* cmd) :
+                                           _ID(telldata::tn_composite),
+                                                    _child(child), _command(cmd) {};
                            argumentID(const argumentID&);
                            ~argumentID();
       void                 toList();
@@ -313,6 +314,7 @@ namespace telldata {
    private:
       telldata::typeID     _ID;
       argumentQ*           _child;
+      void*                _command;
    };
 }
 

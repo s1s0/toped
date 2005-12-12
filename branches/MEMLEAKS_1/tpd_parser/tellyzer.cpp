@@ -673,18 +673,22 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
       }
    }
    i++;
-   if (UnknownArgsCopy.size() > 0) {
-      if (i > 0) {
-         while (UnknownArgsCopy.size() > 0) {
+   if (UnknownArgsCopy.size() > 0)
+   {
+      if (i > 0)
+      {
+         while (UnknownArgsCopy.size() > 0)
+         {
             delete UnknownArgsCopy.front(); UnknownArgsCopy.pop_front();
          }
       }
-      for (telldata::argumentQ::iterator CA = amap->begin(); CA != amap->end(); CA++) {
-         if ( TLUNKNOWN_TYPE((**CA)()) ) {
-            (*CA)->adjustID(UnknownArgsCopy.front());
-            delete UnknownArgsCopy.front(); UnknownArgsCopy.pop_front();
-         }
-      }
+      else
+         for (telldata::argumentQ::iterator CA = amap->begin(); CA != amap->end(); CA++)
+            if ( TLUNKNOWN_TYPE((**CA)()) )
+            {
+               (*CA)->adjustID(UnknownArgsCopy.back());
+               delete UnknownArgsCopy.back(); UnknownArgsCopy.pop_back();
+            }
       assert(UnknownArgsCopy.size() == 0);
    }
    return (i);

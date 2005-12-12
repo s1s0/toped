@@ -518,8 +518,9 @@ structure:
           are postponed untill we get the recepient - i.e. the lvalue in assign or the
           function call. $$ is assigned to argumentID, that caries the whole argument
           queue listed in structure*/
-        $$ = new telldata::argumentID(argmap);
-        CMDBlock->pushcmd(new parsercmd::cmdSTRUCT($$));
+        $$ = new telldata::argumentID(argmap, NULL);
+        parsercmd::cmdSTRUCT* struct_command = new parsercmd::cmdSTRUCT($$);
+        CMDBlock->pushcmd(struct_command);
         argmapstack.pop();
         if (argmapstack.size() > 0) argmap = argmapstack.top();
         else argmap = NULL;
