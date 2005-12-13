@@ -132,7 +132,7 @@ int tellstdfunc::stdREPORTLAY::execute() {
 
 //=============================================================================
 tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype) :
-                                                         stdREPORTLAY(retype) {
+                              stdREPORTLAY(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
@@ -193,7 +193,7 @@ int tellstdfunc::stdZOOMWIN::execute() {
 
 //=============================================================================
 tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype) :
-                                                            stdZOOMWIN(retype) {
+                                stdZOOMWIN(new parsercmd::argumentLIST,retype) {
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
