@@ -57,31 +57,28 @@
 // are used. Hope that in this case there is more convinience than harm using
 // macroses
 // with the following types of definitions
-// TELL_STDCMD_CLASSA - inherit directly cmdSTDFUNC
-// TELL_STDCMD_CLASSB - inherit some other class - usually form CLASSA
 
+
+// TELL_STDCMD_CLASSA      - inherit directly cmdSTDFUNC - no UNDO
+// The extra protected constructor is used by the inheritance class
+// (if the class is inherited) because of the argument checks
 #ifndef TELL_STDCMD_CLASSA
 #define TELL_STDCMD_CLASSA(name)                                  \
    class name : public cmdSTDFUNC {                               \
    public:                                                        \
       name(telldata::typeID retype);                              \
       int         execute();                                      \
+   protected:                                                     \
+      name(parsercmd::argumentLIST* al,telldata::typeID retype) : \
+                                         cmdSTDFUNC(al,retype) {};\
    };
 #endif
 
+// TELL_STDCMD_CLASSA      - inherit directly cmdSTDFUNC - with UNDO
+// The extra protected constructor is used by the inheritance class
+// (if the class is inherited) because of the argument checks
 #ifndef TELL_STDCMD_CLASSA_UNDO
 #define TELL_STDCMD_CLASSA_UNDO(name)                             \
-   class name : public cmdSTDFUNC {                               \
-   public:                                                        \
-      name(telldata::typeID retype);                              \
-      int         execute();                                      \
-      void        undo();                                         \
-      void        undo_cleanup();                                 \
-   };
-#endif
-
-#ifndef TELL_STDCMD_CLASSF_UNDO
-#define TELL_STDCMD_CLASSF_UNDO(name)                             \
    class name : public cmdSTDFUNC {                               \
    public:                                                        \
       name(telldata::typeID retype);                              \
@@ -94,6 +91,11 @@
    };
 #endif
 
+// TELL_STDCMD_CLASSA - inherits one of the above class types,
+// and is using the UNDO functionality of its ancestor.
+// The classes of this type MUST use the protected constructor of their
+// ancestor, otherwise the argiment checks will get screwed-up.
+// used for overloaded functions
 #ifndef TELL_STDCMD_CLASSB
 #define TELL_STDCMD_CLASSB(name, father)                          \
    class name : public father {                                   \
@@ -103,6 +105,8 @@
    };
 #endif
 
+// Using different type of argument checking. Only echo is defined
+// of this class - see the comments on top of the file
 #ifndef TELL_STDCMD_CLASSC
 #define TELL_STDCMD_CLASSC(name)                                  \
    class name : public cmdSTDFUNC {                               \
@@ -161,40 +165,40 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdEDITTOP     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCELLREF     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCELLAREF    )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdUSINGLAYER  )  // undo - implemented**
-   TELL_STDCMD_CLASSF_UNDO(stdADDBOX      )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdDRAWBOX     )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdADDBOXr     )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdADDBOXp     )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdADDPOLY     )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdDRAWPOLY    )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdADDWIRE     )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdDRAWWIRE    )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  )  // undo - implemented**
+   TELL_STDCMD_CLASSA_UNDO(stdADDBOX      )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdDRAWBOX     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdADDBOXp     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdADDPOLY     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdDRAWPOLY    )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdADDWIRE     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdDRAWWIRE    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdADDTEXT     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGRIDDEF     )  //
    TELL_STDCMD_CLASSA_UNDO(stdGRID        )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSTEP        )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdAUTOPAN     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSHAPEANGLE  )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdSELECT      )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdSELECT      )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSELECTIN    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSELECT_TL   )  //
-   TELL_STDCMD_CLASSF_UNDO(stdPNTSELECT   )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdPNTSELECT   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSELECTALL   )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdUNSELECT    )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdUNSELECT    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNSELECTIN  )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNSELECT_TL )  //
-   TELL_STDCMD_CLASSF_UNDO(stdPNTUNSELECT )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdPNTUNSELECT )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNSELECTALL )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdCOPYSEL     )  // undo - implemented
-   TELL_STDCMD_CLASSF_UNDO(stdMOVESEL     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdCOPYSEL     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdMOVESEL     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdROTATESEL   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdFLIPXSEL    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdFLIPYSEL    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdDELETESEL   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGROUP       )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNGROUP     )  // undo - implemented* WAITS for ATDB->remove_cell() !!!
-   TELL_STDCMD_CLASSF_UNDO(lgcCUTPOLY     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(lgcCUTPOLY     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcMERGE       )  // undo - implemented
    //
    TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     )
