@@ -233,22 +233,24 @@ void DataCenter::TDTwrite(const char* filename) {
    _neversaved = false;
 }
 
-void DataCenter::GDSexport(std::string& filename) {
+void DataCenter::GDSexport(std::string& filename)
+{
    std::string nfn;
    //Get actual time
    _tedtimestamp = time(NULL);
    GDSin::GDSFile gdsex(filename, _tedtimestamp);
    _TEDDB->GDSwrite(gdsex, NULL, true);
-   gdsex.closeFile();
+   gdsex.updateLastRecord();gdsex.closeFile();
 }
 
-void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& filename) {
+void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& filename)
+{
    std::string nfn;
    //Get actual time
    _tedtimestamp = time(NULL);
    GDSin::GDSFile gdsex(filename, _tedtimestamp);
    _TEDDB->GDSwrite(gdsex, cell, recur);
-   gdsex.closeFile();
+   gdsex.updateLastRecord();gdsex.closeFile();
 }
 
 void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells) {

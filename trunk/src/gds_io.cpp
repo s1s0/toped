@@ -565,6 +565,15 @@ void GDSin::GDSFile::GetHierTree() {
    }   
 }
 
+void GDSin::GDSFile::updateLastRecord()
+{
+   word num_zeroes = 2048 - (file_pos % 2048);
+   byte record = 0x00;
+   word bytes_written = fwrite(&record,1, num_zeroes, GDSfh);
+   assert(bytes_written == num_zeroes);
+   file_pos += bytes_written;
+}
+
 GDSin::GDSFile::~GDSFile() {
    delete library;
 }

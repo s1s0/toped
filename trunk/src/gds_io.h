@@ -594,6 +594,7 @@ namespace GDSin {
       void           GetHierTree(); // temporary
       void           flush(GDSrecord*);
       void           closeFile() {if (NULL != GDSfh) {fclose(GDSfh); GDSfh = NULL;}}
+      void           updateLastRecord();
       ~GDSFile();
    protected:
       void           GetTimes(GDSrecord* wr);
