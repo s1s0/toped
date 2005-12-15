@@ -196,7 +196,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
 
 void tui::LayoutCanvas::wnd_paint() {
    glAccum(GL_RETURN, 1.0);
-   glColor4f(0.7, 0.7, 0.7, 0.2); // gray
+   glColor4f(0.7, 0.7, 0.7, 0.4); // gray
    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
    glRecti(presspoint.x(),presspoint.y(), n_ScrMARKold.x(), n_ScrMARKold.y());
    glRecti(presspoint.x(),presspoint.y(), n_ScrMARK.x(), n_ScrMARK.y());

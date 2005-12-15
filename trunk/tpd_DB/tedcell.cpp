@@ -149,7 +149,14 @@ bool laydata::editobject::previous(const bool undo) {
    editobject* prev = _editstack.front();
    _activeref = prev->_activeref;
    _activecell = prev->_activecell;
-   _peditchain = new cellrefstack(*(prev->_peditchain));
+   cellrefstack* peditchain= prev->_peditchain;
+   if (peditchain==NULL)
+   {
+      _peditchain = new cellrefstack;
+   }
+   else
+   _peditchain = new cellrefstack(*peditchain);
+   //_peditchain = new cellrefstack(*(prev->_peditchain));
    _viewcell = prev->_viewcell;
    _ARTM = prev->_ARTM;
    if (undo) {
