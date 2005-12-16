@@ -414,18 +414,20 @@ void  laydata::tdtbox::unselect_points(DBbox& select_in, SGBitSet* pntlst) {
 laydata::validator* laydata::tdtbox::move(const CTM& trans, const SGBitSet* plst)
 {
    if (plst)
-   {
+   {// used for modify
       pointlist nshape = movePointsSelected(plst, trans);
       *_p1 = nshape[0]; *_p2 = nshape[2];
       normalize();
       return NULL;
    }
    else
-   {
+   {// used for rotate
       laydata::valid_box* check = new valid_box(*_p1, *_p2 ,trans);
-      if (laydata::shp_box == check->status()) {
-         // modify the box ONLY if the resulting box is perfect
+      if (laydata::shp_box & check->status()) {
+         // modify the box ONLY if we're going to get a box
          transfer(trans);
+         delete check;
+         return NULL;
       }
       // in all other cases keep the original box, depending on the check->status()
       // the shape will be replaced, or marked as failed to rotate
@@ -684,20 +686,48 @@ void laydata::tdtpoly::unselect_points(DBbox& select_in, SGBitSet* pntlst) {
    pntlst->check_neighbours_set(false);   
 }
 
-laydata::validator* laydata::tdtpoly::move(const CTM& trans, const SGBitSet* plst) {
-   if (plst) {
+laydata::validator* laydata::tdtpoly::move(const CTM& trans, const SGBitSet* plst)
+{
+   if (plst)
+   {// modify i.e. move when only part of the polygon is selected
+    // should get here only
       pointlist& nshape = movePointsSelected(plst, trans);
       laydata::valid_poly* check = new laydata::valid_poly(nshape);
       if (laydata::shp_OK == check->status()) {
          // assign the modified pointlist ONLY if the resulting shape is perfect
          _plist.clear(); _plist = nshape;
       }
-      // in all other cases keep the origical pointlist, depending on the check->status()
+      // in all other cases keep the original pointlist, depending on the check->status()
       // the shape will be replaced, or marked as failed to modify
       return check;
    }
-   else transfer(trans);
-   return NULL;
+   else
+   {// move when the whole shape is modified should get here.
+      if (_plist.size() > 4)
+      {
+         transfer(trans);
+         return NULL;
+      }
+      else
+      {  // The whole gymnastics is because of the Rotate operation (on angles <> 90)
+         // Rotated box is converted to polygon. Means that polygon after rotatoin could
+         // produce a box
+         pointlist* mlist = new pointlist(_plist);
+         for (unsigned i = 0; i < _plist.size(); i++)
+            (*mlist)[i] *= trans;
+         //TODO: It's a waste of resources to recheck every polygon again. What we need here is
+         // only check for box. Validation classes has to be optimized
+         laydata::valid_poly* check = new laydata::valid_poly(*mlist);
+         if (!(laydata::shp_box & check->status()))
+         {
+            // leave the modified pointlist ONLY if the resulting shape is not a box
+            _plist.clear(); _plist = *mlist;
+            delete check;
+            return NULL;
+         }
+         else return check;
+      }
+   }
 }
 
 void laydata::tdtpoly::transfer(const CTM& trans) {
