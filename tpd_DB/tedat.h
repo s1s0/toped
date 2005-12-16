@@ -315,6 +315,17 @@ namespace laydata {
 
 //==============================================================================
 
+   class valid_box  : public validator {
+   public:
+                        valid_box(const TP&, const TP&, const CTM&);
+      laydata::tdtdata* replacement();
+      char*             failtype();
+      real              area() {return _area;}
+   private:
+      real              _area;
+   };
+
+   //===========================================================================
    class valid_poly : public validator {
    public:
                         valid_poly(const pointlist&);
@@ -326,7 +337,7 @@ namespace laydata {
       void              normalize();
       void              selfcrossing();
    };
-   
+
    //===========================================================================
    class valid_wire : public validator {
    public:
@@ -343,9 +354,9 @@ namespace laydata {
    //===========================================================================
    int            xangle(TP&, TP&);
    
-   void draw_select_marks(DBbox box);
+   void draw_select_marks(const DBbox&, const CTM&);
    void draw_select_mark(const TP&);
-   void draw_overlapping_box(const DBbox&, const GLushort);
+   void draw_overlapping_box(const DBbox&, const CTM&, const GLushort);
    tdtdata* polymerge(const pointlist&, const pointlist&);
    tdtdata* createValidShape(const pointlist&);
 }

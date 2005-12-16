@@ -252,7 +252,6 @@ bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtcell* child) {
 
 void laydata::tdtcell::openGL_draw(ctmstack& transtack, const layprop::DrawProperties& drawprop, bool active) const {
    // Draw figures
-//   std::cout << "rendering "<< _name << "... \n";
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++) {
       if (0 < lay->first)
@@ -733,14 +732,82 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
    else return false;
 }
 
+bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& trans, selectList** fadead)
+{
+   DBbox old_overlap = overlap();
+   validator* checkS = NULL;
+   // for every single layer selected
+   for (selectList::const_iterator CL = _shapesel.begin(); 
+                                                  CL != _shapesel.end(); CL++)
+   {
+      assert((_layers.end() != _layers.find(CL->first)));
+      // before all remove the selected and partially shapes 
+      // from the data holders ...
+      if (_layers[CL->first]->delete_marked()) 
+         // ... and validate quadTrees if needed
+         if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
+
+      // now for every single shape...
+      dataList* lslct = _shapesel[CL->first];
+      dataList::iterator DI = lslct->begin();
+      while (DI != lslct->end())
+      {
+         // .. restore the status byte, of the fully selected shapes, because
+         // it was modified to sh_deleted from the quadtree::delete_selected method
+         if (sh_partsel != DI->first->status())
+         {
+            DI->first->set_status(sh_selected);
+            // ... rotate it ...
+            if (NULL != (checkS = DI->first->move(trans, DI->second)))
+            {// box->polygon conversion has been performed and a shape needs validation
+               laydata::tdtdata *newshape = NULL;
+               if (NULL != (newshape = checkNreplace(*DI, checkS, CL->first, fadead)))
+               {
+                  // remove the shape from list of selected shapes - dont delete the list of
+                  // selected points BECAUSE it is (could be) used in UNDO
+                  DI = lslct->erase(DI);
+                  _layers[CL->first]->add(newshape);
+               }
+               else
+               {
+                  _layers[CL->first]->add(DI->first);
+                  DI++;
+               }
+            }
+            else
+            {// no conversion, so just add the shape back to the data holder
+               _layers[CL->first]->add(DI->first);
+               DI++;
+            }
+         }
+      }
+      _layers[CL->first]->resort();
+      // at the end, if the container of the selected shapes is empty -
+      if (lslct->empty())
+      {
+         delete lslct; _shapesel.erase(_shapesel.find(CL->first));
+      }
+
+   }
+   // Invalidate parents if the overlapping box has changed
+   DBbox new_overlap = overlap();
+   float areaold = old_overlap.area();
+   float areanew = new_overlap.area();
+   if (areaold != areanew)
+   {
+      invalidateParents(ATDB);return true;
+   }
+   else return false;
+}
+
 bool laydata::tdtcell::transfer_selected(laydata::tdtdesign* ATDB, const CTM& trans) {
    DBbox old_overlap = overlap();
    // for every single layer selected
-   for (selectList::const_iterator CL = _shapesel.begin(); 
+   for (selectList::const_iterator CL = _shapesel.begin();
                                                   CL != _shapesel.end(); CL++) {
       assert((_layers.end() != _layers.find(CL->first)));
       // before all, remove the selected shapes from the data holders ...
-      if (_layers[CL->first]->delete_marked()) 
+      if (_layers[CL->first]->delete_marked())
          // ... and validate quadTrees if needed
          if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
       // now for every single shape...
@@ -754,7 +821,7 @@ bool laydata::tdtcell::transfer_selected(laydata::tdtdesign* ATDB, const CTM& tr
             DI->first->transfer(trans);
             // ... and add it back to the data Holder
             _layers[CL->first]->add(DI->first);
-         }   
+         }
       }
       _layers[CL->first]->resort();
    }

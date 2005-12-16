@@ -362,20 +362,21 @@ void laydata::tdtdesign::copy_selected( TP p1, TP p2) {
    }   
 }   
 
-void laydata::tdtdesign::move_selected( TP p1, TP p2, selectList** fadead) {
+void laydata::tdtdesign::move_selected( TP p1, TP p2, selectList** fadead)
+{
    CTM trans;
    p1 *= _target.rARTM();
    p2 *= _target.rARTM();
    int4b dX = p2.x() - p1.x();
    int4b dY = p2.y() - p1.y();
    trans.Translate(dX,dY);
-   if (_target.edit()->move_selected(this, trans, fadead)) {
+   if (_target.edit()->move_selected(this, trans, fadead))
       // needs validation
       do {} while(validate_cells());
-   }   
 }   
 
-void laydata::tdtdesign::rotate_selected( TP p, real angle) {
+void laydata::tdtdesign::rotate_selected( TP p, real angle, selectList** fadead)
+{
    // Things to remember...
    // To deal with edit in place, you have to :
    // - get the current translation matrix of the active cell
@@ -390,10 +391,9 @@ void laydata::tdtdesign::rotate_selected( TP p, real angle) {
    trans.Rotate(angle);
    trans.Translate(p.x(),p.y());
    trans *= _target.rARTM();
-   if (_target.edit()->transfer_selected(this, trans)) {
+   if (_target.edit()->rotate_selected(this, trans, fadead))
       // needs validation
       do {} while(validate_cells());
-   }   
 }   
 
 void laydata::tdtdesign::flip_selected( TP p, bool Xaxis) {

@@ -2282,7 +2282,7 @@ void tellstdfunc::stdMOVESEL::undo() {
       for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
       ATDB->move_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale),fadead);
       //SGREM Here - an internal check can be done - all 3 of the fadead lists
-      // MUST be empty, otherwise - got knows what's wrong!
+      // MUST be empty, otherwise - god knows what's wrong!
       for (i = 0; i < 3; delete fadead[i++]);
       ATDB->select_fromList(get_ttlaylist(failed));
       // put back the replaced (deleted) shapes
@@ -2359,14 +2359,40 @@ void tellstdfunc::stdROTATESEL::undo_cleanup() {
 
 void tellstdfunc::stdROTATESEL::undo() {
    TEUNDO_DEBUG("rotate(point real) UNDO");
+   telldata::ttlist* added = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::ttlist* deleted = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::ttlist* failed = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
    real   angle  = 360 - getOpValue(UNDOPstack, true);
    real DBscale = Properties->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle);
+      ATDB->unselect_fromList(get_ttlaylist(failed));
+      ATDB->unselect_fromList(get_ttlaylist(added));
+      laydata::selectList* fadead[3];
+      byte i;
+      for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
+      ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
+      //SGREM Here - an internal check can be done - all 3 of the fadead lists
+      // MUST be empty, otherwise - god knows what's wrong!
+      for (i = 0; i < 3; delete fadead[i++]);
+      ATDB->select_fromList(get_ttlaylist(failed));
+      // put back the replaced (deleted) shapes
+      ATDB->addlist(get_shlaylist(deleted));
+      // and select them
+      ATDB->select_fromList(get_ttlaylist(deleted));
+      // delete the added shapes
+      for (word j = 0 ; j < added->mlist().size(); j++) {
+         ATDB->destroy_this(static_cast<telldata::ttlayout*>(added->mlist()[j])->data(),
+                           static_cast<telldata::ttlayout*>(added->mlist()[j])->layer());
+      }
+//      ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle);
+   
    DATC->unlockDB();
-   delete p1; 
-   UpdateLV();   
+   delete failed;
+   delete deleted;
+   delete added;
+   delete p1;
+   UpdateLV();
 }
 
 int tellstdfunc::stdROTATESEL::execute() {
@@ -2376,8 +2402,20 @@ int tellstdfunc::stdROTATESEL::execute() {
    UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = Properties->DBscale();
+   // rotate_selected returns 3 select lists : Failed/Deleted/Added
+   // This is because of the box rotation in which case box has to be converted to polygon
+   laydata::selectList* fadead[3];
+   byte i;
+   for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle);
+      ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
+      // save for undo operations ... 
+      UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
+      UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
+      UNDOPstack.push_front(make_ttlaylist(fadead[2])); // and added
+      for (i = 0; i < 3; delete fadead[i++]);
+//   laydata::tdtdesign* ATDB = DATC->lockDB();
+//      ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << "," << angle << ");"; LogFile.flush();
    //delete p1; undo will delete them

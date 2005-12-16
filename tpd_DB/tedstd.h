@@ -107,6 +107,7 @@ namespace laydata {
    public:
                            validator(const pointlist& plist) : _status(shp_OK), 
                                                             _plist(plist) {};
+                           validator() : _status(shp_OK) {};
       bool                 valid()           {return _status < shp_null;};
       byte                 status()          {return _status;};
       bool                 box()             {return _status & shp_box;};

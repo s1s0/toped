@@ -113,6 +113,7 @@ namespace laydata {
       bool                 addlist(tdtdesign*, atticList*);
       bool                 copy_selected(tdtdesign*, const CTM&);
       bool                 move_selected(tdtdesign*, const CTM&, selectList**);
+      bool                 rotate_selected(laydata::tdtdesign*, const CTM&, selectList**);
       bool                 transfer_selected(tdtdesign*, const CTM&);
       bool                 delete_selected(tdtdesign*, atticList*);
       bool                 destroy_this(tdtdesign*, tdtdata* ds, word la);
