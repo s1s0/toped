@@ -677,11 +677,11 @@ laydata::tdtdata* laydata::tdtcell::checkNreplacePoly(selectDataPair& sel, valid
 laydata::tdtdata* laydata::tdtcell::checkNreplaceBox(selectDataPair& sel, validator* check,
                                              word layno, selectList** fadead) {
    if (check->valid())
-   { // shape is valid ...
+   { // shape is valid, but obviously not a box (if it gets here)
       laydata::tdtdata* newshape = check->replacement();
       // add the new shape to the list of new shapes ...
       secure_dataList(*(fadead[2]),layno)->push_back(selectDataPair(newshape, NULL));
-      // ... and put the initial shape(that is to be modified) in the
+      // ... and put the initial shape(that has been modified) in the
       // list of deleted shapes
       secure_dataList(*(fadead[1]),layno)->push_back(selectDataPair(sel.first, sel.second));
       return newshape;
@@ -705,7 +705,7 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
          // ... and validate quadTrees if needed
          if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
       // now for every single shape...
-      
+
       dataList* lslct = _shapesel[CL->first];
       dataList::iterator DI = lslct->begin();
       while (DI != lslct->end()) {
@@ -717,8 +717,7 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
             // modify has been performed and a shape needs validation
             laydata::tdtdata *newshape = NULL;
             if (NULL != (newshape = checkNreplacePoly(*DI, checkS, CL->first, fadead))) {
-               // remove the shape from list of selected shapes - dont delete the list of
-               // selected points BECAUSE it is (could be) used in UNDO
+               // remove the shape from list of selected shapes and mark it as selected
                DI = lslct->erase(DI);
                _layers[CL->first]->add(newshape);
             }
@@ -737,8 +736,8 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
       // at the end, if the container of the selected shapes is empty -
       if (lslct->empty()) {
          delete lslct; _shapesel.erase(_shapesel.find(CL->first));
-      }   
-      
+      }
+
    }
    // Invalidate parents if the overlapping box has changed
    DBbox new_overlap = overlap();
@@ -785,6 +784,7 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
                   // selected points BECAUSE it is (could be) used in UNDO
                   DI = lslct->erase(DI);
                   _layers[CL->first]->add(newshape);
+                  newshape->set_status(sh_selected);
                }
                else
                {
