@@ -650,7 +650,7 @@ laydata::dataList* laydata::tdtcell::secure_dataList(selectList& slst, word layn
    return ssl;
 }
 
-laydata::tdtdata* laydata::tdtcell::checkNreplace(selectDataPair& sel, validator* check, 
+laydata::tdtdata* laydata::tdtcell::checkNreplacePoly(selectDataPair& sel, validator* check, 
                                              word layno, selectList** fadead) {
    if (check->valid()) { // shape is valid ...
       if (shp_OK == check->status())  // entirely
@@ -667,6 +667,24 @@ laydata::tdtdata* laydata::tdtcell::checkNreplace(selectDataPair& sel, validator
          secure_dataList(*(fadead[1]),layno)->push_back(selectDataPair(sel.first, sel.second));
          return newshape;
       }
+   }
+   else {// the produced shape is invalid, so keep the old one and add it to the list of failed
+      secure_dataList(*(fadead[0]),layno)->push_back(selectDataPair(sel.first, sel.second));
+      return NULL;
+   }
+}
+
+laydata::tdtdata* laydata::tdtcell::checkNreplaceBox(selectDataPair& sel, validator* check,
+                                             word layno, selectList** fadead) {
+   if (check->valid())
+   { // shape is valid ...
+      laydata::tdtdata* newshape = check->replacement();
+      // add the new shape to the list of new shapes ...
+      secure_dataList(*(fadead[2]),layno)->push_back(selectDataPair(newshape, NULL));
+      // ... and put the initial shape(that is to be modified) in the
+      // list of deleted shapes
+      secure_dataList(*(fadead[1]),layno)->push_back(selectDataPair(sel.first, sel.second));
+      return newshape;
    }
    else {// the produced shape is invalid, so keep the old one and add it to the list of failed
       secure_dataList(*(fadead[0]),layno)->push_back(selectDataPair(sel.first, sel.second));
@@ -698,7 +716,7 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
          if (NULL != (checkS = DI->first->move(trans, DI->second))) {
             // modify has been performed and a shape needs validation
             laydata::tdtdata *newshape = NULL;
-            if (NULL != (newshape = checkNreplace(*DI, checkS, CL->first, fadead))) {
+            if (NULL != (newshape = checkNreplacePoly(*DI, checkS, CL->first, fadead))) {
                // remove the shape from list of selected shapes - dont delete the list of
                // selected points BECAUSE it is (could be) used in UNDO
                DI = lslct->erase(DI);
@@ -759,9 +777,9 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
             DI->first->set_status(sh_selected);
             // ... rotate it ...
             if (NULL != (checkS = DI->first->move(trans, DI->second)))
-            {// box->polygon conversion has been performed and a shape needs validation
+            {// box->polygon conversion has been performed
                laydata::tdtdata *newshape = NULL;
-               if (NULL != (newshape = checkNreplace(*DI, checkS, CL->first, fadead)))
+               if (NULL != (newshape = checkNreplaceBox(*DI, checkS, CL->first, fadead)))
                {
                   // remove the shape from list of selected shapes - dont delete the list of
                   // selected points BECAUSE it is (could be) used in UNDO
@@ -780,6 +798,7 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
                DI++;
             }
          }
+         else DI++;
       }
       _layers[CL->first]->resort();
       // at the end, if the container of the selected shapes is empty -

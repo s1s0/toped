@@ -391,7 +391,8 @@ void laydata::tdtdesign::rotate_selected( TP p, real angle, selectList** fadead)
    trans.Rotate(angle);
    trans.Translate(p.x(),p.y());
    trans *= _target.rARTM();
-   if (_target.edit()->rotate_selected(this, trans, fadead))
+//   if (_target.edit()->rotate_selected(this, trans, fadead))
+   if (_target.edit()->transfer_selected(this, trans))
       // needs validation
       do {} while(validate_cells());
 }   
