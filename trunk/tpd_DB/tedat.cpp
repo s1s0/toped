@@ -331,14 +331,31 @@ void laydata::tdtbox::normalize() {
 }   
 
 void laydata::tdtbox::openGL_draw(ctmstack& transtack, 
-                                          const layprop::DrawProperties& drawprop) const {
+                                          const layprop::DrawProperties& drawprop) const
+{
    if (!((_p1) && (_p2))) return;
+   TP ptlist[4];
+   ptlist[0] = (*_p1) * transtack.top();
+   ptlist[1] = TP(_p2->x(), _p1->y()) * transtack.top();
+   ptlist[2] = (*_p2) * transtack.top();
+   ptlist[3] = TP(_p1->x(), _p2->y()) * transtack.top();
    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-   TP pt1 = (*_p1) * transtack.top();
-   TP pt2 = (*_p2) * transtack.top();
-   glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
+   glBegin(GL_LINE_LOOP);
+   int i;
+   for (i = 0; i < 4; i++)
+      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   glEnd();
    if (drawprop.getCurrentFill()) {
-      glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
+      // Start tessellation
+      gluTessBeginPolygon(tessellObj, NULL);
+      GLdouble pv[3]; 
+      pv[2] = 0;
+      for (i = 0; i < 4; i++) {
+         pv[0] = ptlist[i].x(); pv[1] = ptlist[i].y();
+         gluTessVertex(tessellObj,pv,&ptlist[i]);
+      }
+      gluTessEndPolygon(tessellObj);
+      // End tesselation
       glDisable(GL_POLYGON_STIPPLE);
    }
 }
@@ -368,7 +385,7 @@ void laydata::tdtbox::tmp_draw(const layprop::DrawProperties&, ctmqueue& transta
 }
 
 void  laydata::tdtbox::draw_select(CTM trans,const SGBitSet* pslist) const {
-   if       (sh_selected == status()) draw_select_marks(overlap() * trans);
+   if       (sh_selected == status()) draw_select_marks(overlap() , trans);
    else if (  sh_partsel == status()) {
       assert(pslist);
       if (pslist->check(0)) draw_select_mark(*_p1 * trans);
@@ -1159,10 +1176,9 @@ laydata::tdtcellref::tdtcellref(TEDfile* const tedfile) {
 }
 
 bool laydata::tdtcellref::ref_visible(ctmstack& transtack, const layprop::DrawProperties& drawprop) const {
-   // Get the areal. What is important here - overlap() will return a zero-area box using the
-   // reference point, so this should be catched from the MIN_VISUAL_AREA check
-   // SGREM !! So, if a referenced structure doesn't exists, we'll draw nothing!!
-   DBbox areal = overlap() * transtack.top();
+   if (!structure()) return false;
+   DBbox obox = structure()->overlap();
+   DBbox areal = obox * _translation * transtack.top();
    areal.normalize();
    // check that the cell (or part of it) is in the visual window
    DBbox clip = drawprop.clipRegion();
@@ -1175,7 +1191,7 @@ bool laydata::tdtcellref::ref_visible(ctmstack& transtack, const layprop::DrawPr
    // draw the cell mark ...
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    // ... and the overlapping box
-   draw_overlapping_box(areal, 0xf18f);
+   draw_overlapping_box(obox, newtrans , 0xf18f);
    // push the new translation in the stack
    transtack.push(newtrans);
    return true;
@@ -1188,7 +1204,7 @@ void laydata::tdtcellref::openGL_draw(ctmstack& transtack, const layprop::DrawPr
       // edit in place is active
       byte crchain = const_cast<layprop::DrawProperties&>(drawprop).popref(this);
       structure()->openGL_draw(transtack, drawprop, crchain == 2);
-      // push is done in the ref_visible(), befire returning true
+      // push is done in the ref_visible(), before returning true
       transtack.pop();
       if (crchain) const_cast<layprop::DrawProperties&>(drawprop).pushref(this);
    }
@@ -1204,7 +1220,7 @@ void laydata::tdtcellref::tmp_draw(const layprop::DrawProperties& drawprop,
 }
 
 void  laydata::tdtcellref::draw_select(CTM trans, const SGBitSet*) const {
-   if (sh_selected == status()) draw_select_marks(overlap() * trans);
+   if (sh_selected == status()) draw_select_marks(structure()->overlap() , trans*_translation);
 }
 
 void laydata::tdtcellref::info(std::ostringstream& ost) const {
@@ -1320,7 +1336,7 @@ bool laydata::tdtcellaref::aref_visible(ctmstack& transtack, const layprop::Draw
    // draw the cell mark ...
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::array_mark);
    // ... and the overlapping box
-   draw_overlapping_box(array_overlap * newtrans, 0xf18f);
+   draw_overlapping_box(array_overlap, newtrans, 0xf18f);
    // now check that a single structure is big enough to be visible
    DBbox structure_overlap = structure()->overlap();
    DBbox minareal = structure_overlap * transtack.top() * drawprop.ScrCTM();
@@ -1495,8 +1511,9 @@ void laydata::tdttext::openGL_draw(ctmstack& transtack,
    // font translation matrix
    CTM ftmtrx =  _translation * transtack.top();
    int4b height = static_cast<int4b>(rint(OPENGL_FONT_UNIT));
-   DBbox wsquare = DBbox(TP(),TP(height, height)) * ftmtrx; 
-   wsquare = wsquare * drawprop.ScrCTM();
+//   DBbox wsquare = DBbox(TP(),TP(height, height)) * ftmtrx; 
+//   wsquare = wsquare * drawprop.ScrCTM();
+   valid_box wsquare(TP(),TP(height, height), ftmtrx * drawprop.ScrCTM());
    TP bindt;
    if (wsquare.area() > MIN_VISUAL_AREA) {
       bindt = TP(static_cast<int4b>(rint(_translation.tx())), 
@@ -1513,7 +1530,9 @@ void laydata::tdttext::openGL_draw(ctmstack& transtack,
       glPopMatrix();
       float cclr[4];
       glGetFloatv(GL_CURRENT_COLOR, cclr);
-      draw_overlapping_box(overlap() * transtack.top(), 0x3030);
+
+      DBbox obox(TP(),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT))));
+      draw_overlapping_box(obox, ftmtrx, 0x3030);
       drawprop.draw_reference_marks(bindt, layprop::text_mark);
       glColor4f(cclr[0], cclr[1], cclr[2], cclr[3]);
    }
@@ -1547,7 +1566,8 @@ void laydata::tdttext::tmp_draw(const layprop::DrawProperties& drawprop,
 }
 
 void  laydata::tdttext::draw_select(CTM trans, const SGBitSet*) const {
-   if (sh_selected == status()) draw_select_marks(overlap() * trans);
+   if (sh_selected == status()) draw_select_marks(
+      DBbox(TP(),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT)))) ,trans * _translation);
 }
 
 void laydata::tdttext::info(std::ostringstream&) const {
@@ -1593,6 +1613,46 @@ DBbox laydata::tdttext::overlap() const {
                                                                    _translation;
 }
 
+
+//-----------------------------------------------------------------------------
+// class valid_box
+//-----------------------------------------------------------------------------
+laydata::valid_box::valid_box(const TP& p1, const TP& p2, const CTM& trans) : validator()
+{
+   _plist.push_back(p1*trans);
+   _plist.push_back(TP(p2.x(), p1.y())*trans);
+   _plist.push_back(p2*trans);
+   _plist.push_back(TP(p1.x(), p2.y())*trans);
+   word i,j;
+   _area = 0;
+   for (i = 0, j = 1; i < 4; i++, j = (j+1) % 4)
+      _area += _plist[i].x()*_plist[j].y() - _plist[j].x()*_plist[i].y();
+   if (_area < 0)
+   {
+      std::reverse(_plist.begin(),_plist.end());
+      _status |= laydata::shp_clock;
+   }
+   if ((_area == 0) || (_plist[0] == _plist[1]))
+      _status |= laydata::shp_null;
+   else if (0 == remainder(xangle(_plist[0], _plist[1]),90.0))
+      _status |= laydata::shp_box;
+   _area = fabs(_area);
+}
+
+laydata::tdtdata* laydata::valid_box::replacement()
+{
+   if (box()) {
+      TP* p1= new TP(_plist[0]); TP* p2= new TP(_plist[2]);
+      return new laydata::tdtbox(p1, p2);
+   }
+   else return new laydata::tdtpoly(_plist);
+}
+
+char* laydata::valid_box::failtype()
+{
+   if      (!(_status & shp_box))  return "Rotated box";
+   else return "OK";
+}
 
 //-----------------------------------------------------------------------------
 // class valid_poly
@@ -1840,24 +1900,36 @@ void laydata::draw_select_mark(const TP& pnt) {
    glBitmap(15,15,7,7,0,0, select_mark);
 }
 
-void laydata::draw_select_marks(DBbox box) {
+void laydata::draw_select_marks(const DBbox& areal, const CTM& trans) {
+   TP ptlist[4];
+   ptlist[0] = areal.p1() * trans;
+   ptlist[1] = TP(areal.p2().x(), areal.p1().y()) * trans;
+   ptlist[2] = areal.p2() * trans;
+   ptlist[3] = TP(areal.p1().x(), areal.p2().y()) * trans;
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-   glRasterPos2i(box.p1().x(), box.p1().y());
-   glBitmap(15,15,7,7,0,0, select_mark);
-   glRasterPos2i(box.p1().x(), box.p2().y());
-   glBitmap(15,15,7,7,0,0, select_mark);
-   glRasterPos2i(box.p2().x(), box.p1().y());
-   glBitmap(15,15,7,7,0,0, select_mark);
-   glRasterPos2i(box.p2().x(), box.p2().y());
-   glBitmap(15,15,7,7,0,0, select_mark);
+   for (byte i = 0; i < 4; i++)
+   {
+      glRasterPos2i(ptlist[i].x(), ptlist[i].y());
+      glBitmap(15,15,7,7,0,0, select_mark);
+   }
 }
 
-void laydata::draw_overlapping_box(const DBbox& areal, const GLushort stipple) {
+void laydata::draw_overlapping_box(const DBbox& areal, const CTM& trans, const GLushort stipple)
+{
+   TP ptlist[4];
+   ptlist[0] = areal.p1() * trans;
+   ptlist[1] = TP(areal.p2().x(), areal.p1().y()) * trans;
+   ptlist[2] = areal.p2() * trans;
+   ptlist[3] = TP(areal.p1().x(), areal.p2().y()) * trans;
    glColor4f(1.0, 1.0, 1.0, 0.5);
    glLineStipple(1,stipple);
    glEnable(GL_LINE_STIPPLE);
    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-   glRecti(areal.p1().x(), areal.p1().y(), areal.p2().x(), areal.p2().y());
+   glBegin(GL_LINE_LOOP);
+   int i;
+   for (i = 0; i < 4; i++)
+      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   glEnd();
    glDisable(GL_LINE_STIPPLE);
 }
 

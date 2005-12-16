@@ -64,7 +64,7 @@ namespace laydata {
       void           unselect_inBox(TP*, TP*, bool pntsel = false);
       void           copy_selected( TP p1, TP p2);
       void           move_selected( TP p1, TP p2, selectList**);
-      void           rotate_selected( TP p, real angle);
+      void           rotate_selected( TP p, real angle, selectList**);
       void           flip_selected( TP p, bool Xaxis);
       void           delete_selected(laydata::atticList*);
       void           destroy_this(tdtdata* ds, word la);
