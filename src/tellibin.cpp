@@ -2354,6 +2354,13 @@ tellstdfunc::stdROTATESEL::stdROTATESEL(telldata::typeID retype) :
 void tellstdfunc::stdROTATESEL::undo_cleanup() {
    getOpValue(UNDOPstack, false);
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::ttlist* failed = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::ttlist* deleted = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::ttlist* added = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   clean_ttlaylist(deleted);
+   delete added;
+   delete deleted;
+   delete failed;
    delete p1;
 }
 

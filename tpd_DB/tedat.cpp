@@ -411,14 +411,27 @@ void  laydata::tdtbox::unselect_points(DBbox& select_in, SGBitSet* pntlst) {
    if (select_in.inside(TP(_p1->x(), _p2->y())))  pntlst->reset(3);
 }
 
-laydata::validator* laydata::tdtbox::move(const CTM& trans, const SGBitSet* plst) {
-   if (plst) {
+laydata::validator* laydata::tdtbox::move(const CTM& trans, const SGBitSet* plst)
+{
+   if (plst)
+   {
       pointlist nshape = movePointsSelected(plst, trans);
       *_p1 = nshape[0]; *_p2 = nshape[2];
       normalize();
+      return NULL;
    }
-   else transfer(trans);
-   return NULL;
+   else
+   {
+      laydata::valid_box* check = new valid_box(*_p1, *_p2 ,trans);
+      if (laydata::shp_box == check->status()) {
+         // modify the box ONLY if the resulting box is perfect
+         transfer(trans);
+      }
+      // in all other cases keep the original box, depending on the check->status()
+      // the shape will be replaced, or marked as failed to rotate
+      return check;
+   }
+
 }
 
 void laydata::tdtbox::transfer(const CTM& trans) {

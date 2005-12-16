@@ -143,7 +143,8 @@ namespace laydata {
       nameList*            rehash_children();
       shapeList*           mergeprep(word);
       bool                 unselect_pointlist(selectDataPair&, selectDataPair&);
-      tdtdata*             checkNreplace(selectDataPair&, validator*, word, selectList**);
+      tdtdata*             checkNreplacePoly(selectDataPair&, validator*, word, selectList**);
+      tdtdata*             checkNreplaceBox(selectDataPair&, validator*, word, selectList**);
       dataList*            secure_dataList(selectList&, word);
       std::string          _name;
       bool                 _orphan;
