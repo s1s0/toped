@@ -237,7 +237,7 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
                                           TP base, TP newp) {
    ctmqueue tmp_stack;
    if (_tmpdata) {
-      glColor4f(0.5, 0.5, 0.5, 0.5);
+      glColor4f(1.0, 1.0, 1.0, 0.7);
       tmp_stack.push_front(CTM(newp - base,1,0,false));
       _tmpdata->tmp_draw(drawprop, tmp_stack,NULL,true);
    }

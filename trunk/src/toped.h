@@ -106,6 +106,7 @@ namespace tui {
       void    OnTELLRead(wxCommandEvent&);
       void     OnGDSRead(wxCommandEvent&);
       void   OnGDSimport(wxCommandEvent&);
+      void   OnGDStranslate(wxCommandEvent&);
       void   OnGDSexportLIB(wxCommandEvent&);
       void   OnGDSexportTOP(wxCommandEvent&);
       void    OnGDSclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("gdsclose();");};

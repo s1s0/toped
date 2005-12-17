@@ -261,9 +261,10 @@ void console::ted_cmd::getCommandA() {
       _cmd_history.push_back(command.c_str());
       _history_position = _cmd_history.end();
       Clear();
-      parse_thread *pthrd = new parse_thread(command);
+      parse_thread *pthrd = new parse_thread(command, _wait?wxTHREAD_JOINABLE:wxTHREAD_DETACHED	);
       pthrd->Create();
       pthrd->Run();
+      if (_wait) pthrd->Wait();
    }   
 }
 
@@ -288,7 +289,8 @@ void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
    }
 }
 
-void console::ted_cmd::parseCommand(wxString cmd) {
+void console::ted_cmd::parseCommand(wxString cmd, bool wait) {
+   _wait = wait;
    if (NULL != puc) return; // don't accept commands during shape input sessions
    SetValue(cmd);
    getCommandA();

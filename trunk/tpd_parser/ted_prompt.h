@@ -59,7 +59,8 @@ namespace console {
 
    class parse_thread : public wxThread {
    public:
-      parse_thread(wxString& cmd) : wxThread(wxTHREAD_DETACHED),command(cmd){};
+      parse_thread(wxString& cmd, wxThreadKind kind=wxTHREAD_DETACHED):
+                                    wxThread(kind),command(cmd){};
    protected:
       void*                   Entry();
       wxString                command;
@@ -70,7 +71,7 @@ namespace console {
    public:
                               ted_cmd(wxWindow*);
                              ~ted_cmd();
-      void                    parseCommand(wxString);
+      void                    parseCommand(wxString, bool wait=false);
       void                    waitGUInput(telldata::operandSTACK*,telldata::typeID);
       void                    getGUInput(bool from_keyboard = true);
       wxCondition*            threadWaits4;
@@ -93,6 +94,7 @@ namespace console {
       stringList              _cmd_history;
       stringList::const_iterator _history_position;
 //      console::ted_log*       _logW;
+      bool                    _wait; //flag fo joinable thread
       DECLARE_EVENT_TABLE();
    };
 

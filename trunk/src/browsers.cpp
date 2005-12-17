@@ -206,7 +206,7 @@ void browsers::GDSbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
    RBcellID = id;
    if ( id.IsOk() && (id != GetRootItem()))   {
       wxString RBcellname = GetItemText(id);
-      menu.Append(tui::TMGDS_IMPORT, wxT("Import " + RBcellname));
+      menu.Append(tui::TMGDS_TRANSLATE, wxT("Translate " + RBcellname));
       menu.Append(GDSTree_ReportLay, wxT("Report layers used in " + RBcellname));
    }
    else {
