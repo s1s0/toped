@@ -56,6 +56,7 @@ typedef enum  {
    TMGDS_IMPORT            ,
    TMGDS_EXPORTL           ,
    TMGDS_EXPORTC           ,
+   TMGDS_TRANSLATE         ,
    TMGDS_CLOSE             ,
    TMFILE_SAVE             ,
    TMFILE_SAVEAS           ,
