@@ -110,7 +110,8 @@ namespace browsers {
       void              collectInfo(const wxString, GDSin::GDSHierTree*);
       wxString          selectedCellname() const {if (RBcellID.IsOk())
                                        return GetItemText(RBcellID); else return "";}
-      protected:
+      wxString          getTopCellName(void);
+   protected:
       void              collectChildren(GDSin::GDSHierTree *root, 
                                                    wxTreeItemId& lroot);
    private:
@@ -174,6 +175,7 @@ namespace browsers {
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
+      wxString          TDTGDSTopCellName() const {return _GDSstruct->getTopCellName();};
    private:
       void              OnCommand(wxCommandEvent&);
       void              OnTELLaddTDTtab(const wxString, laydata::TDTHierTree*);

@@ -37,6 +37,7 @@
 #include "../ui/cell_normal.xpm"
 #include "../ui/cell_expanded.xpm"
 
+
 extern console::ted_cmd*          Console;
 extern layprop::ViewProperties*   Properties;
 extern browsers::browserTAB*      Browsers;
@@ -82,7 +83,7 @@ browsers::topedlay_list::~topedlay_list() {
 void browsers::topedlay_list::addlayer(wxString name, word layno) {
    wxString num; num.Printf(_T("%3d"), layno);
    wxListItem old;
-   int i, item;
+   int item;
    long oldno;
    wxString oldtext;
    wxListItem row;
@@ -199,6 +200,36 @@ void browsers::GDSbrowser::OnItemRightClick(wxTreeEvent& event) {
 void browsers::GDSbrowser::OnBlankRMouseUp(wxMouseEvent& event) {
    wxPoint pt = event.GetPosition();
    ShowMenu(HitTest(pt), pt);
+}
+
+//Return first founded top cell name
+wxString browsers::GDSbrowser::getTopCellName(void)
+{
+   wxString cellName;
+   wxTreeItemId root, item;
+   wxTreeItemIdValue cookie;
+
+   root = GetRootItem();//Get GDS library name
+   if (!(root.IsOk()))
+   {
+      return cellName;
+   }
+
+   item = this->GetFirstChild(root, cookie);
+   if (!(item.IsOk()))
+   {  
+      return cellName;
+   }
+
+   cellName = this->GetItemText(item);
+   item = this->GetNextChild(root, cookie);
+
+   if (item.IsOk())
+   {  
+      throw EXPTNmanyTopCellsGDS();
+   }
+
+   return cellName;
 }
 
 void browsers::GDSbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {

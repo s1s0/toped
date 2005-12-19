@@ -346,6 +346,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
    _overwrite = new wxCheckBox(this, -1, "Overwrite existing cells");
    _recursive = new wxCheckBox(this, -1, "Import recursively");
+   _recursive->SetValue(true);
    _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    GDSin::GDSstructure* gdss = DATC->GDSstructures();
    while (gdss) {
