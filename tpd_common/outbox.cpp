@@ -113,3 +113,8 @@ EXPTNactive_GDS::EXPTNactive_GDS() {
    std::string news = "No GDS structure in memory. Parse first";
    tell_log(console::MT_ERROR,news.c_str());
 };
+
+EXPTNmanyTopCellsGDS::EXPTNmanyTopCellsGDS() {
+   std::string news = "There are more then one top cells into GDS structure.\n Use advanced operations with this GDS";
+   tell_log(console::MT_ERROR,news.c_str());
+};

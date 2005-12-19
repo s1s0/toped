@@ -88,4 +88,10 @@ class EXPTNactive_GDS : public EXPTN  {
    public:
       EXPTNactive_GDS();
 };
+
+class EXPTNmanyTopCellsGDS : public EXPTN  {
+   public:
+      EXPTNmanyTopCellsGDS();
+};
+
 #endif
