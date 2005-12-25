@@ -506,6 +506,12 @@ wxString browsers::browserTAB::TDTSelectedGDSName() const {
    else return wxT("");
 }
 
+wxString browsers::browserTAB::TDTGDSTopCellName() const {
+   if (NULL != _GDSstruct)
+      return _GDSstruct->getTopCellName();
+   else return wxT("");
+}
+
 void browsers::browserTAB::OnCommand(wxCommandEvent& event) {
    int command = event.GetInt();
    switch (command) {
