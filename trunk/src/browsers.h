@@ -175,7 +175,7 @@ namespace browsers {
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
-      wxString          TDTGDSTopCellName() const {return _GDSstruct->getTopCellName();};
+      wxString          TDTGDSTopCellName() const;
    private:
       void              OnCommand(wxCommandEvent&);
       void              OnTELLaddTDTtab(const wxString, laydata::TDTHierTree*);

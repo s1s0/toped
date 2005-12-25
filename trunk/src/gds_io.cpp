@@ -462,6 +462,8 @@ GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
       case gds_STRANS         :return new GDSrecord(rectype, gdsDT_BIT, 2);
       case gds_MAG            :return new GDSrecord(rectype, gdsDT_REAL8B, 8);
       case gds_ANGLE          :return new GDSrecord(rectype, gdsDT_REAL8B, 8);
+      case gds_PROPATTR       :datatype = gdsDT_INT2B;break;
+      case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;
                        default: assert(false); //the rest should not be used
 //----------------------------------------------------------------------------------
 // The record types below are not used currently in GDS export
@@ -474,8 +476,8 @@ GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
 //       case gds_ATTRTABLE      :datatype = gdsDT_ASCII;break;
 //       case gds_ELFLAGS        :datatype = gdsDT_BIT;break;
 //       case gds_NODETYPE       :datatype = gdsDT_INT2B;break;
-//       case gds_PROPATTR       :datatype = gdsDT_INT2B;break;
-//       case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;
+//       case gds_PROPATTR       :datatype = gdsDT_INT2B;break;//
+//       case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;//
 //       case gds_FORMAT         :datatype = gdsDT_INT2B;break;
 //       case gds_BORDER         :datatype = gdsDT_NODATA;break;
 //       case gds_SOFTFENCE      :datatype = gdsDT_NODATA;break;
@@ -1042,6 +1044,8 @@ GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
    abs_angl=abs_magn=reflection=false;
    refstr = NULL;
    magnification = 1.0; angle = 0.0;
+   int tmp; //Dummy variable. Use for gds_PROPATTR
+   char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
    GDSrecord* cr = NULL;
    do {//start reading
       cr = cf->GetNextRecord();
@@ -1071,6 +1075,13 @@ GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
                // before exiting, init Current Translation Matrix
 //               tmtrx = new PSCTM(magn_point,magnification,angle,reflection);
                delete cr;return;
+            //??? Do not implemented yet+++++
+            case gds_PROPATTR:
+               cr->Ret_Data(&tmp);
+               delete cr; break;
+            //??? Do not implemented yet+++++
+            case gds_PROPVALUE:cr->Ret_Data(&tmp2);
+               delete cr; break;
             default://parse error - not expected record type
                AddLog('E',"GDS sref - wrong record type in the current context");
                delete cr;return;
