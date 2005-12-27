@@ -64,6 +64,7 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_LEFT_UP          ( tui::LayoutCanvas::OnMouseLeftUp     )
    EVT_LEFT_DCLICK      ( tui::LayoutCanvas::OnMouseLeftDClick )
    EVT_MIDDLE_UP        ( tui::LayoutCanvas::OnMouseMiddleUp   )
+   EVT_CHAR             ( tui::LayoutCanvas::OnChar)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_ZOOM, wxID_ANY, tui::LayoutCanvas::OnZoom)
    EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT, wxID_ANY, tui::LayoutCanvas::OnMouseIN)
 
@@ -450,6 +451,46 @@ void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& event) {
    menu.Append(1000, wxT("Menu Item 1"));
    menu.Append(1001, wxT("Menu Item 2"));
    PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
+}
+
+void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
+{
+   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   int x = event.GetKeyCode();
+   switch(event.GetKeyCode())
+   {
+   case WXK_LEFT:
+   case '4':
+      eventZOOM.SetInt(ZOOM_LEFT);
+      OnZoom(eventZOOM);
+      break;
+   case WXK_RIGHT:
+   case '6':
+      eventZOOM.SetInt(ZOOM_RIGHT);
+      OnZoom(eventZOOM);
+      break;
+   case WXK_UP:
+   case '8':
+      eventZOOM.SetInt(ZOOM_UP);
+      OnZoom(eventZOOM);
+      break;
+   case WXK_DOWN:
+   case '2':
+      eventZOOM.SetInt(ZOOM_DOWN);
+      OnZoom(eventZOOM);
+      break;
+   case '+':
+      eventZOOM.SetInt(ZOOM_IN);
+      OnZoom(eventZOOM);
+      break;
+   case '-':
+      eventZOOM.SetInt(ZOOM_OUTs);
+      OnZoom(eventZOOM);
+      break;
+   default:
+      event.Skip();
+      return;
+   }
 }
 
 void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
