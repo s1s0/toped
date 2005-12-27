@@ -191,6 +191,7 @@ typedef enum  {
       void           OnMouseMiddleUp(wxMouseEvent&);
       void           OnMouseLeftDown(wxMouseEvent&);
       void           OnMouseLeftDClick(wxMouseEvent&);
+      void           OnChar(wxKeyEvent&);
       void           OnZoom(wxCommandEvent&);
       void           OnMouseIN(wxCommandEvent&);
       void           OnCMcontinue(wxCommandEvent&);
