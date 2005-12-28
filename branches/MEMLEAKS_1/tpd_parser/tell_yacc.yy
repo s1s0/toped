@@ -363,7 +363,7 @@ funccall:
       }
       else tellerror("unknown function name or wrong parameter list",@1);
       argmapstack.pop();
-      argumentQClear(argmap); delete argmap;
+      delete argmap;
       if (argmapstack.size() > 0) argmap = argmapstack.top();
       else argmap = NULL;
       delete [] $1;
@@ -522,6 +522,7 @@ structure:
         CMDBlock->pushcmd(struct_command);
         $$ = new telldata::argumentID(argmap, struct_command);
         argmapstack.pop();
+        delete argmap;
         if (argmapstack.size() > 0) argmap = argmapstack.top();
         else argmap = NULL;
    }

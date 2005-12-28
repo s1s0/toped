@@ -421,12 +421,14 @@ bool parsercmd::cmdRETURN::checkRetype(telldata::argumentID* arg) {
       const telldata::tell_type* vartype;
       if (TLISALIST(_retype)) { // we have a list lval
           vartype = CMDBlock->getTypeByID(_retype & ~telldata::tn_listmask);
-          if (NULL != vartype) vartype->userStructListCheck(*arg);
+//          if (NULL != vartype) vartype->userStructListCheck(*arg);
+          if (NULL != vartype) arg->userStructListCheck(*vartype);
           else arg->toList();
       }
       else { // we have a struct only
          vartype = CMDBlock->getTypeByID(_retype);
-         if (NULL != vartype) vartype->userStructCheck(*arg);
+//         if (NULL != vartype) vartype->userStructCheck(*arg);
+         if (NULL != vartype) arg->userStructCheck(*vartype);
       }
    }
    return ((_retype == (*arg)()) || (NUMBER_TYPE(_retype) && NUMBER_TYPE((*arg)())));
@@ -649,12 +651,13 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap) {
          const telldata::tell_type* vartype;
          if (TLISALIST(lvalID)) { // we have a list lval
             vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
-            if (NULL != vartype) vartype->userStructListCheck(*carg);
+//            if (NULL != vartype) vartype->userStructListCheck(*carg);
+            if (NULL != vartype) carg->userStructListCheck(*vartype);
             else carg->toList();
          }
          else { // we have a struct only
             vartype = CMDBlock->getTypeByID(lvalID);
-            if (NULL != vartype) vartype->userStructCheck(*carg);
+            if (NULL != vartype) carg->userStructCheck(*vartype);
          }
       }
 
@@ -1018,12 +1021,13 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentI
       const telldata::tell_type* vartype;
       if (TLISALIST(lvalID)) { // we have a list lval
           vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
-          if (NULL != vartype) vartype->userStructListCheck(*op2);
+          if (NULL != vartype) op2->userStructListCheck(*vartype);
           else op2->toList();
       }
       else { // we have a struct only
          vartype = CMDBlock->getTypeByID(lvalID);
-         if (NULL != vartype) vartype->userStructCheck(*op2);
+//         if (NULL != vartype) vartype->userStructCheck(*op2);
+         if (NULL != vartype) op2->userStructCheck(*vartype);
       }
    }
    if ((lvalID == (*op2)()) || (NUMBER_TYPE(lvalID) && NUMBER_TYPE((*op2)()))) {
