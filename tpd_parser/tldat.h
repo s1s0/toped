@@ -73,7 +73,7 @@ namespace telldata {
    typedef std::stack<telldata::tell_var*>   operandSTACK;
    typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
 
-   void  argumentQClear(argumentQ*);
+//   void  argumentQClear(argumentQ*);
 
    //==============================================================================
    /*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the
@@ -87,11 +87,10 @@ namespace telldata {
    public:
                            tell_type(typeID ID) : _ID(ID) {assert(TLCOMPOSIT_TYPE(ID));}
       bool                 addfield(std::string, typeID, const tell_type* utype);
-      const recfieldsID&   fields() const {return _fields;}
-      const typeID         ID() const {return _ID;}
       tell_var*            initfield(const typeID) const;
-      void                 userStructCheck(const argumentID&) const;
-      void                 userStructListCheck(const argumentID&) const;
+      const tell_type*     findtype(const typeID) const;
+      const recfieldsID&   fields() const    {return _fields;}
+      const typeID         ID() const        {return _ID;}
       typedef std::map<const typeID, const tell_type*> typeIDMAP;
    protected:
       typeID               _ID;
@@ -300,16 +299,17 @@ namespace telldata {
    public:
                            argumentID(telldata::typeID ID = telldata::tn_NULL) :
                                                           _ID(ID), _command(NULL){};
-                           argumentID(argumentQ* child, void* cmd); //:
-//                                           _ID(telldata::tn_composite),
-//                                                    _child(child), _command(cmd) {};
+                           argumentID(argumentQ* child, void* cmd) :
+                                           _ID(telldata::tn_composite),
+                                                    _child(*child), _command(cmd) {};
                            argumentID(const argumentID&);
-                           ~argumentID();
+                           ~argumentID()               {_child.clear();}
       void                 toList();
       void                 adjustID(const argumentID&);
+      void                 userStructCheck(const telldata::tell_type&);
+      void                 userStructListCheck(const telldata::tell_type&);
       telldata::typeID     operator () () const        {return _ID;}
       const argumentQ&     child() const               {return _child;};
-      friend void tell_type::userStructCheck(const argumentID&) const;
    private:
       telldata::typeID     _ID;
       argumentQ            _child;

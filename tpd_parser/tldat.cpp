@@ -62,7 +62,13 @@ bool telldata::tell_type::addfield(std::string fname, typeID fID, const tell_typ
     return true;
 }
 
-void telldata::tell_type::userStructCheck(const argumentID& inarg) const {
+const telldata::tell_type* telldata::tell_type::findtype(const typeID basetype) const
+{
+   assert(_tIDMAP.end() != _tIDMAP.find(basetype));
+   return _tIDMAP.find(basetype)->second;
+}
+
+/*void telldata::tell_type::userStructCheck(const argumentID& inarg) const {
    const argumentQ& arglist = inarg.child();
    // first check that both lists have the same size
    if (arglist.size() != _fields.size()) return;
@@ -104,7 +110,7 @@ void telldata::tell_type::userStructListCheck(const argumentID& inarg) const {
       if ( TLUNKNOWN_TYPE( (*CA)() ) ) userStructCheck(*CA);
    }
    inarg.toList();
-}
+}*/
 //=============================================================================
 telldata::point_type::point_type() : tell_type(telldata::tn_pnt) {
    addfield("x", telldata::tn_real, NULL);
@@ -456,22 +462,56 @@ void telldata::argumentID::adjustID(const argumentID& obj2copy)
    _command = obj2copy._command;
 }
 
-telldata::argumentID::~argumentID()
-{
-//   if (NULL != _child)
-//   {
-//      argumentQClear(_child);
-//      delete(_child);
-//      _child = NULL;
-//   }
+void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype) {
+   const telldata::recfieldsID& recfields = vartype.fields();
+   // first check that both lists have the same size
+   if (_child.size() != recfields.size()) return;
+   recfieldsID::const_iterator CF;
+   argumentQ::iterator CA;
+   for (CF = recfields.begin(), CA = _child.begin();
+             (CF != recfields.end() && CA != _child.end()); CF ++, CA++) {
+      if ( TLUNKNOWN_TYPE( (*CA)() ) ) {
+         if (TLISALIST(CF->second)) {// check the list fields
+            telldata::typeID basetype = CF->second & ~telldata::tn_listmask;
+            // call in recursion the userStructCheck method of the child
+            CA->userStructListCheck(*(vartype.findtype(basetype)));
+         }
+         else {
+            // call in recursion the userStructCheck method of the child
+            CA->userStructCheck(*(vartype.findtype(CF->second)));
+         }
+      }
+      if (!NUMBER_TYPE( CF->second )) {
+         // for non-number types there is no internal conversion,
+         // so check strictly the type
+         if ( (*CA)() != CF->second) return; // no match
+      }
+      else // for number types - allow compatablity (int to real only)
+         if (!NUMBER_TYPE( (*CA)() )) return; // no match
+         else if (CF->second < (*CA)() ) return; // no match
+   }
+   // all fields match => we can assign a known ID to the argumentID
+   _ID = vartype.ID();
 }
 
-void  telldata::argumentQClear(argumentQ* queue)
-{
-/*   if (NULL == queue) return;
-   for(argumentQ::iterator AQI = queue->begin(); AQI != queue->end(); AQI++)
-      // another call of the destructor will take care for composite types
-      if (!TLCOMPOSIT_TYPE((**AQI)())) delete *AQI;
-   queue->clear();*/
+void telldata::argumentID::userStructListCheck(const telldata::tell_type& vartype) {
+   for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++) {
+      if ( TLUNKNOWN_TYPE( (*CA)() ) ) CA->userStructCheck(vartype);
+   }
+   toList();
 }
+
+/*telldata::argumentID::~argumentID()
+{
+      _child.clear();
+}
+*/
+// void  telldata::argumentQClear(argumentQ* queue)
+// {
+//    if (NULL == queue) return;
+//    for(argumentQ::iterator AQI = queue->begin(); AQI != queue->end(); AQI++)
+//       // another call of the destructor will take care for composite types
+//       if (!TLCOMPOSIT_TYPE((**AQI)())) delete *AQI;
+//    queue->clear();
+// }
 
