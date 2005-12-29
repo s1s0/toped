@@ -244,17 +244,15 @@ namespace  parsercmd {
 
    class cmdSTRUCT: public cmdVIRTUAL {
    public:
-//      cmdSTRUCT(telldata::argumentID* arg = NULL) : _arg(arg) {}
-      cmdSTRUCT() : _arg(NULL) {}
-      int execute();
-      virtual ~cmdSTRUCT() {/*if (NULL != _arg) {*/delete _arg;/*_arg = NULL;}*/}
+               cmdSTRUCT() : _arg(NULL) {}
+      void     setargID(telldata::argumentID* arg) {_arg = new telldata::argumentID(*arg);}
+      virtual ~cmdSTRUCT()                         {if (NULL != _arg) delete _arg;}
+      int      execute();
    private:
       telldata::tell_var*     getList();
-      telldata::tell_var*     getPnt();
-      telldata::tell_var*     getBox();
       telldata::argumentID*  _arg;
    };
-   
+
    class cmdRETURN:public cmdVIRTUAL {
    public:
       cmdRETURN(telldata::typeID tID) : _retype(tID) {};

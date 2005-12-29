@@ -261,7 +261,8 @@ namespace telldata {
    public:
                            ttpnt (real x=0, real y=0);
                            ttpnt(const ttpnt&);
-      tell_var*            selfcopy() const    {return new ttpnt(*this);}
+                           ttpnt(operandSTACK& OPStack);
+                           tell_var*            selfcopy() const    {return new ttpnt(*this);}
       void                 echo(std::string&);
       void                 assign(tell_var*);
       real                 x() const           {return _x->value();}
@@ -281,6 +282,7 @@ namespace telldata {
                            ttwnd( real bl_x=0.0, real bl_y=0.0,
                                   real tr_x=0.0, real tr_y=0.0);
                            ttwnd( ttpnt tl, ttpnt br);
+                           ttwnd(operandSTACK& OPStack);
                            ttwnd(const ttwnd& cobj);
       tell_var*            selfcopy() const    {return new ttwnd(*this);};
       void                 echo(std::string&);
@@ -300,16 +302,17 @@ namespace telldata {
                            argumentID(telldata::typeID ID = telldata::tn_NULL) :
                                                           _ID(ID), _command(NULL){};
                            argumentID(argumentQ* child, void* cmd) :
-                                           _ID(telldata::tn_composite),
+                                                         _ID(telldata::tn_composite),
                                                     _child(*child), _command(cmd) {};
                            argumentID(const argumentID&);
                            ~argumentID()               {_child.clear();}
-      void                 toList();
+      void                 toList(bool);
       void                 adjustID(const argumentID&);
-      void                 userStructCheck(const telldata::tell_type&);
-      void                 userStructListCheck(const telldata::tell_type&);
+      void                 userStructCheck(const telldata::tell_type&, bool);
+      void                 userStructListCheck(const telldata::tell_type&, bool);
       telldata::typeID     operator () () const        {return _ID;}
-      const argumentQ&     child() const               {return _child;};
+      const argumentQ&     child() const               {return _child;}
+//      void*                command()                   {return _command;}
    private:
       telldata::typeID     _ID;
       argumentQ            _child;
