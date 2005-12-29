@@ -169,6 +169,11 @@
       <inlineGet>true</inlineGet>
       <inlineSet>true</inlineSet>
     </creategettersetter>
+    <qt>
+      <used>false</used>
+      <version>3</version>
+      <root>/usr/lib64/qt-3.3</root>
+    </qt>
   </kdevcppsupport>
   <kdevfileview>
     <groups>
