@@ -78,7 +78,7 @@
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs>../../tll/ml1.tll</programargs>
+      <programargs>../../tll/tcase.tll</programargs>
       <gdbpath></gdbpath>
       <configGdbScript></configGdbScript>
       <runShellScript></runShellScript>
@@ -145,6 +145,8 @@
       <type ext="ui" />
       <type ext="cpp" />
       <type ext="h" />
+      <type ext="ll" />
+      <type ext="yy" />
     </useglobaltypes>
   </kdevfilecreate>
   <kdevcppsupport>

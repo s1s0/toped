@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // Definition of tell debug macros
 //-----------------------------------------------------------------------------
-//#define TELL_DEBUG_ON
+#define TELL_DEBUG_ON
 #ifdef TELL_DEBUG_ON
 #define TELL_DEBUG(a)  printf("%s \n", #a);
 #else
@@ -367,6 +367,7 @@ telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
 
 int parsercmd::cmdSTRUCT::execute()
 {
+   TELL_DEBUG(cmdSTRUCT);
    if (NULL == _arg)
    {
       tellerror("Stucture arguments not evaluated properly. Internal parser error");
@@ -627,8 +628,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
    while (i-- > 0) 
    {
       telldata::typeID cargID = (*amap)[i]();
-      telldata::argumentID* carg = (TLUNKNOWN_TYPE(cargID)) ?
-                              new telldata::argumentID(((*amap)[i])) : &((*amap)[i]);
+      telldata::argumentID carg((*amap)[i]);
       telldata::typeID lvalID = (*arguments)[i]->second->get_type();
       if (TLUNKNOWN_TYPE(cargID)) 
       {
@@ -636,35 +636,33 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
          if (TLISALIST(lvalID)) 
          { // we have a list lval
             vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
-            if (NULL != vartype) carg->userStructListCheck(*vartype, false);
-            else carg->toList(false);
+            if (NULL != vartype) carg.userStructListCheck(*vartype, false);
+            else carg.toList(false);
          }
          else 
          { // we have a struct only
             vartype = CMDBlock->getTypeByID(lvalID);
-            if (NULL != vartype) carg->userStructCheck(*vartype, false);
+            if (NULL != vartype) carg.userStructCheck(*vartype, false);
          }
       }
 
-      if (!NUMBER_TYPE( (*carg)() )) 
+      if (!NUMBER_TYPE( carg() )) 
       {
          // for non-number types there is no internal conversion,
          // so check strictly the type
-         if ( (*carg)() != lvalID) 
+         if ( carg() != lvalID) 
          {
-            if (TLUNKNOWN_TYPE( (*amap)[i]() )) delete carg;
-            break;
+            if (TLUNKNOWN_TYPE( (*amap)[i]() )) break;
          }
-         else if (TLUNKNOWN_TYPE( (*amap)[i]() )) UnknownArgsCopy.push_back(*carg);
+         else if (TLUNKNOWN_TYPE( (*amap)[i]() )) UnknownArgsCopy.push_back(carg);
       }
       else 
       {// for number types - allow compatablity
-         if ((!NUMBER_TYPE(lvalID)) || ( (*carg)() > lvalID)) 
+         if ((!NUMBER_TYPE(lvalID)) || ( carg() > lvalID)) 
          {
-            if (TLUNKNOWN_TYPE( (*amap)[i]() )) delete carg;
-            break;
+            if (TLUNKNOWN_TYPE( (*amap)[i]() )) break;
          }
-         else if (TLUNKNOWN_TYPE( (*amap)[i]() )) UnknownArgsCopy.push_back(*carg);
+         else if (TLUNKNOWN_TYPE( (*amap)[i]() )) UnknownArgsCopy.push_back(carg);
       }
    }
    i++;
@@ -741,7 +739,7 @@ int parsercmd::cmdFUNC::execute() {
       telldata::tell_var* argval = OPstack.top();
       // replace the value of the local variable with the argument value
       argvar->assign(argval);
-      OPstack.pop();
+      delete argval;OPstack.pop();
    }
    LogFile << "// Executing UDF " << LogFile.getFN();LogFile.flush();   
    cmdBLOCK::execute();

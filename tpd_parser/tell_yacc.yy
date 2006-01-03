@@ -376,6 +376,7 @@ assignment:
       /*because of the (possible) structure that has an unknown yet tn_usertypes type,
       here we are doing the type checking, using the type of the lvalue*/
       $$ = parsercmd::Assign(tell_lvalue, $4, @2);
+      delete $4;
    }
 ;
 
@@ -392,8 +393,8 @@ argument :
 ;
 
 nearguments :
-     argument                              {argmap->push_back(*$1); $$ = argmap;}
-   | nearguments ',' argument              {argmap->push_back(*$3); $$ = argmap;}
+     argument                              {argmap->push_back(*$1); delete $1; $$ = argmap;}
+   | nearguments ',' argument              {argmap->push_back(*$3); delete $3; $$ = argmap;}
 ;
 
 funcarguments:
@@ -449,6 +450,7 @@ fielddeclaration:
          $$ = false; // indicates that definition fails
       }
       else $$ = true;
+      delete [] $2;
    }
 ;
 
@@ -472,6 +474,7 @@ telltype:
            tellerror("Bad type specifier", @1);YYABORT;
         }
         else $$ = ttype->ID();
+        delete [] $1;
       }
 ;
 
@@ -480,6 +483,7 @@ recorddefinition:
         tellstruct = CMDBlock->requesttypeID($2);
         if (NULL == tellstruct) {
            tellerror("type with this name already defined", @1);
+           delete [] $2;
            YYABORT;
         }
      }
@@ -487,6 +491,7 @@ recorddefinition:
         if ($5) CMDBlock->addlocaltype($2,tellstruct);
         else delete tellstruct;
         tellstruct = NULL;
+        delete [] $2;
      }
 ;
 
