@@ -251,8 +251,8 @@ telldata::user_struct::user_struct(const tell_type* tltypedef, operandSTACK& OPs
    {// for every member of the structure
       if (CI->second < tn_usertypes) 
       { // buid-in type or structure
-         _fieldList.push_back(structRECNAME(CI->first,OPstack.top()));
-         OPstack.pop();
+         _fieldList.push_back(structRECNAME(CI->first,OPstack.top()->selfcopy()));
+         delete(OPstack.top());OPstack.pop();
       }
       else if (TLISALIST(CI->second)) {
          assert(true); // push a list here
@@ -260,9 +260,9 @@ telldata::user_struct::user_struct(const tell_type* tltypedef, operandSTACK& OPs
       else 
       {// user type
          assert(OPstack.top()->get_type() == CI->second);
-         _fieldList.push_back(structRECNAME(CI->first,
-                                       new user_struct(*static_cast<user_struct*>(OPstack.top()))));
-         OPstack.pop();
+         _fieldList.push_back(structRECNAME(CI->first,OPstack.top()->selfcopy()));
+//                                       new user_struct(*static_cast<user_struct*>(OPstack.top()))));
+         delete(OPstack.top());OPstack.pop();
       }
    }
 }
@@ -376,9 +376,9 @@ telldata::ttwnd::ttwnd(const ttwnd& cobj) : user_struct(tn_box),
 
 telldata::ttwnd::ttwnd(operandSTACK& OPstack) : user_struct(telldata::tn_box) 
 {
-    _p2 = static_cast<telldata::ttpnt*>(OPstack.top());
+    _p2 = static_cast<telldata::ttpnt*>(OPstack.top()->selfcopy());
     OPstack.pop();
-    _p1 = static_cast<telldata::ttpnt*>(OPstack.top());
+    _p1 = static_cast<telldata::ttpnt*>(OPstack.top()->selfcopy());
     OPstack.pop();
     _fieldList.push_back(structRECNAME("p1", _p1));
     _fieldList.push_back(structRECNAME("p2", _p2));
@@ -480,14 +480,9 @@ void telldata::argumentID::adjustID(const argumentID& obj2copy)
       argumentQ::iterator CA;
       for(CA = _child.begin(), CB = obj2copy.child().begin() ;
                                                       CA != _child.end() ; CA ++, CB++)
-         CA->adjustID(*CB);
+         if (TLUNKNOWN_TYPE((*CA)())) CA->adjustID(*CB);
    }
-   if (TLUNKNOWN_TYPE(_ID))
-   {
       _ID = obj2copy._ID;
       static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
-   }
-   else 
-      assert(_ID == obj2copy._ID);
 }
 
