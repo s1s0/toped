@@ -185,8 +185,9 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
    
    EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
+   EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
+   EVT_CLOSE(tui::TopedFrame::OnClose)
    EVT_SIZE( TopedFrame::OnSize )
-   EVT_BUTTON(TBSTAT_ABORT     , tui::TopedFrame::OnAbort       )
    EVT_SASH_DRAGGED_RANGE(ID_WIN_BROWSERS, ID_WIN_CANVAS, tui::TopedFrame::OnSashDrag)
    EVT_TECUSTOM_COMMAND(wxEVT_MARKERPOSITION, wxID_ANY, tui::TopedFrame::OnPositionMessage)
    EVT_TECUSTOM_COMMAND(wxEVT_CNVSSTATUSLINE, wxID_ANY, tui::TopedFrame::OnUpdateStatusLine)
@@ -205,6 +206,35 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    SetStatusText( wxT( "Toped loaded..." ) );
    //Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
+}
+
+void tui::TopedFrame::OnClose(wxCloseEvent& WXUNUSED(event))
+{
+   delete this;
+/*   bool wxWindowBase::Close(bool force)
+   {
+      wxCloseEvent event(wxEVT_CLOSE_WINDOW, m_windowId);
+      event.SetEventObject(this);
+      event.SetCanVeto(!force);
+
+    // return false if window wasn't closed because the application vetoed the
+    // close event
+      return GetEventHandler()->ProcessEvent(event) && !event.GetVeto();
+   }*/
+//    delete _laycanvas;
+//    delete _cmdline;      // tell command input window
+//    delete _GLstatus;
+//    delete _browsers;     // tell definitions browser
+/*    mS_browsers->Close();
+    mS_GLstatus->Close();
+    mS_command->Close();
+    mS_log->Close();
+    mS_canvas->Close();*/
+//    delete mS_browsers;
+//    delete mS_GLstatus;
+//    delete mS_command;
+//    delete mS_log;
+//    delete mS_canvas;
 }
 
 tui::TopedFrame::~TopedFrame() {

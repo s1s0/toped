@@ -376,9 +376,12 @@ telldata::ttwnd::ttwnd(const ttwnd& cobj) : user_struct(tn_box),
 
 telldata::ttwnd::ttwnd(operandSTACK& OPstack) : user_struct(telldata::tn_box) 
 {
-    _p2 = static_cast<telldata::ttpnt*>(OPstack.top()->selfcopy());
+   // Here - just get the pointer to the points in the stack...
+    _p2 = static_cast<telldata::ttpnt*>(OPstack.top());
+    // .. that's why - don't delete them. The alternative -
+    // - to make a selfcopy and then to delete the original from the OPstack
     OPstack.pop();
-    _p1 = static_cast<telldata::ttpnt*>(OPstack.top()->selfcopy());
+    _p1 = static_cast<telldata::ttpnt*>(OPstack.top());
     OPstack.pop();
     _fieldList.push_back(structRECNAME("p1", _p1));
     _fieldList.push_back(structRECNAME("p2", _p2));

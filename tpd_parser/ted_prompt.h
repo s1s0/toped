@@ -45,13 +45,13 @@ namespace console {
 
    class miniParser {
    public:
-      miniParser(telldata::operandSTACK *,telldata::typeID);
-      bool              getGUInput(wxString expression);
-      telldata::typeID  wait4type() { return _wait4type;};
+                              miniParser(telldata::operandSTACK *,telldata::typeID);
+      bool                    getGUInput(wxString expression);
+      telldata::typeID        wait4type() { return _wait4type;};
    private:
-      bool getPoint();
-      bool getBox();
-      bool getList();
+      bool                    getPoint();
+      bool                    getBox();
+      bool                    getList();
       telldata::operandSTACK *client_stack;
       telldata::typeID         _wait4type;
       wxString                  exp;
@@ -70,7 +70,7 @@ namespace console {
    class ted_cmd : public wxTextCtrl {
    public:
                               ted_cmd(wxWindow*);
-                             ~ted_cmd();
+      virtual                ~ted_cmd();
       void                    parseCommand(wxString, bool wait=false);
       void                    waitGUInput(telldata::operandSTACK*,telldata::typeID);
       void                    getGUInput(bool from_keyboard = true);
