@@ -484,7 +484,7 @@ void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
       OnZoom(eventZOOM);
       break;
    case '-':
-      eventZOOM.SetInt(ZOOM_OUTs);
+      eventZOOM.SetInt(ZOOM_OUT);
       OnZoom(eventZOOM);
       break;
    default:
