@@ -40,14 +40,14 @@ namespace tui {
    //-----------------------------------------------------------------------------
    class CanvasStatus : public wxPanel {
    public:
-           CanvasStatus(wxWindow*);
-          ~CanvasStatus();
-      void setXpos(wxString);
-      void setYpos(wxString);
-      void setdXpos(wxString);
-      void setdYpos(wxString);
-      void setSelected(wxString);
-      void btn_abort_enable(bool state) {_abort->Enable(state);};
+                           CanvasStatus(wxWindow*);
+      virtual             ~CanvasStatus();
+      void                 setXpos(wxString);
+      void                 setYpos(wxString);
+      void                 setdXpos(wxString);
+      void                 setdYpos(wxString);
+      void                 setSelected(wxString);
+      void                 btn_abort_enable(bool state) {_abort->Enable(state);};
    private:
       wxStaticText*        X_pos;
       wxStaticText*        Y_pos;
@@ -62,7 +62,8 @@ namespace tui {
    public:
                               TopedFrame(const wxString& , const wxPoint& , 
                                                                const wxSize&);
-                             ~TopedFrame();                                                               
+      void                    OnClose(wxCloseEvent&);
+      virtual                ~TopedFrame();
       void                    OnSize(wxSizeEvent& event);
       void                    OnSashDrag(wxSashEvent& event);
       void                    OnPositionMessage(wxCommandEvent&);

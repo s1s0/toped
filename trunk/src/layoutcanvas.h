@@ -179,7 +179,7 @@ typedef enum  {
    class LayoutCanvas : public wxGLCanvas  {
    public: 
                      LayoutCanvas(wxWindow *parent, int* attribList);
-                    ~LayoutCanvas();
+      virtual       ~LayoutCanvas();
    protected:
       void           OnpaintGL(wxPaintEvent& event);
       void           OnresizeGL(wxSizeEvent& event);
