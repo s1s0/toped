@@ -46,7 +46,7 @@
 int yylex(void);
 int yyerror (char *s);
 
-namespace parsercmd {
+namespace  parsercmd {
    class cmdVIRTUAL;
    class cmdSTDFUNC;
    class cmdBLOCK;
@@ -244,15 +244,15 @@ namespace parsercmd {
 
    class cmdSTRUCT: public cmdVIRTUAL {
    public:
-      cmdSTRUCT(telldata::argumentID* arg) : _arg(arg) {}
-      int execute();
+               cmdSTRUCT() : _arg(NULL) {}
+      void     setargID(telldata::argumentID* arg) {_arg = new telldata::argumentID(*arg);}
+      virtual ~cmdSTRUCT()                         {if (NULL != _arg) delete _arg;}
+      int      execute();
    private:
       telldata::tell_var*     getList();
-      telldata::tell_var*     getPnt();
-      telldata::tell_var*     getBox();
       telldata::argumentID*  _arg;
    };
-   
+
    class cmdRETURN:public cmdVIRTUAL {
    public:
       cmdRETURN(telldata::typeID tID) : _retype(tID) {};

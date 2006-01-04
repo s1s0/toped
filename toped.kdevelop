@@ -9,8 +9,8 @@
     <ignoreparts/>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
-    <versioncontrol>kdevsubversion</versioncontrol>
+    <description></description>
+    <versioncontrol/>
     <secondaryLanguages/>
   </general>
   <kdevautoproject>
@@ -79,10 +79,10 @@
     <general>
       <dbgshell>libtool</dbgshell>
       <programargs>../../tll/tcase.tll</programargs>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -145,6 +145,8 @@
       <type ext="ui" />
       <type ext="cpp" />
       <type ext="h" />
+      <type ext="ll" />
+      <type ext="yy" />
     </useglobaltypes>
   </kdevfilecreate>
   <kdevcppsupport>
@@ -162,13 +164,18 @@
       <headerCompletionDelay>250</headerCompletionDelay>
     </codecompletion>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
       <inlineGet>true</inlineGet>
       <inlineSet>true</inlineSet>
     </creategettersetter>
+    <qt>
+      <used>false</used>
+      <version>3</version>
+      <root>/usr/lib64/qt-3.3</root>
+    </qt>
   </kdevcppsupport>
   <kdevfileview>
     <groups>
@@ -199,7 +206,7 @@
     <projectdoc>
       <docsystem>Doxygen Documentation Collection</docsystem>
       <docurl>doc/API/html/hier.tag</docurl>
-      <usermanualurl/>
+      <usermanualurl></usermanualurl>
     </projectdoc>
   </kdevdocumentation>
   <dist>
