@@ -188,8 +188,8 @@ Ooops! Second thought!
 %type <pttname>        lvalue telltype telltypeID variable variabledeclaration
 %type <pttname>        andexpression eqexpression relexpression 
 %type <pfarguments>    funcarguments
-%type <parguments>     structure arguments argument
-%type <plarguments>    nearguments 
+%type <parguments>     structure argument
+%type <plarguments>    nearguments arguments
 %type <pblock>         block
 %type <pfblock>        funcblock
 %type <ptypedef>       fielddeclaration typedefstruct
@@ -356,15 +356,15 @@ funccall:
         argmapstack.push(argmap);
    }
       arguments ')'                        {
-      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4->child());
+      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4);
       if (fc) {
          CMDBlock->pushcmd(new parsercmd::cmdFUNCCALL(fc,$1));
          $$ = fc->gettype();
       }
       else tellerror("unknown function name or wrong parameter list",@1);
       argmapstack.pop();
-      argmap->clear(); delete argmap;
-      if (argmapstack.size()) argmap = argmapstack.top();
+      delete argmap;
+      if (argmapstack.size() > 0) argmap = argmapstack.top();
       else argmap = NULL;
       delete [] $1;
    }
@@ -376,12 +376,13 @@ assignment:
       /*because of the (possible) structure that has an unknown yet tn_usertypes type,
       here we are doing the type checking, using the type of the lvalue*/
       $$ = parsercmd::Assign(tell_lvalue, $4, @2);
+      delete $4;
    }
 ;
 
 arguments:
-                                           {$$ = new telldata::argumentID();}
-    | nearguments                          {$$ = new telldata::argumentID($1);}
+                                           {$$ = NULL;}
+    | nearguments                          {$$ = $1;}
 ;
 
 argument :
@@ -393,8 +394,8 @@ argument :
 
 /*SGREM!!! MEMORY LEAKEAGE HERE because of the default copy constructor of argumentID*/
 nearguments :
-     argument                              {argmap->push_back($1); $$ = argmap;}
-   | nearguments ',' argument              {argmap->push_back($3); $$ = argmap;}
+     argument                              {argmap->push_back(*$1); delete $1; $$ = argmap;}
+   | nearguments ',' argument              {argmap->push_back(*$3); delete $3; $$ = argmap;}
 ;
 
 funcarguments:
@@ -450,6 +451,7 @@ fielddeclaration:
          $$ = false; // indicates that definition fails
       }
       else $$ = true;
+      delete [] $2;
    }
 ;
 
@@ -473,6 +475,7 @@ telltype:
            tellerror("Bad type specifier", @1);YYABORT;
         }
         else $$ = ttype->ID();
+        delete [] $1;
       }
 ;
 
@@ -481,6 +484,7 @@ recorddefinition:
         tellstruct = CMDBlock->requesttypeID($2);
         if (NULL == tellstruct) {
            tellerror("type with this name already defined", @1);
+           delete [] $2;
            YYABORT;
         }
      }
@@ -488,6 +492,7 @@ recorddefinition:
         if ($5) CMDBlock->addlocaltype($2,tellstruct);
         else delete tellstruct;
         tellstruct = NULL;
+        delete [] $2;
      }
 ;
 
@@ -519,10 +524,12 @@ structure:
           are postponed untill we get the recepient - i.e. the lvalue or the
           function call. $$ is assigned to argumentID, that caries the whole argument
           queue listed in structure*/
-        $$ = new telldata::argumentID(argmap);
-        CMDBlock->pushcmd(new parsercmd::cmdSTRUCT($$));
+        parsercmd::cmdSTRUCT* struct_command = new parsercmd::cmdSTRUCT();
+        CMDBlock->pushcmd(struct_command);
+        $$ = new telldata::argumentID(argmap, struct_command);
         argmapstack.pop();
-        if (argmapstack.size()) argmap = argmapstack.top();
+        delete argmap;
+        if (argmapstack.size() > 0) argmap = argmapstack.top();
         else argmap = NULL;
    }
 ;

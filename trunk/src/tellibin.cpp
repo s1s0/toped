@@ -68,6 +68,7 @@ int tellstdfunc::stdECHO::execute() {
    std::string news;
    p->echo(news);
    tell_log(console::MT_INFO,news.c_str());
+   delete p;
    return EXEC_NEXT;
 }
 

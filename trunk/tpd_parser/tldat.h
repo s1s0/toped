@@ -69,11 +69,10 @@ namespace telldata {
    typedef std::map<std::string, tell_type*> typeMAP;
    typedef std::map<std::string, tell_var* > variableMAP;
    typedef std::vector<tell_var*>            memlist;
-   typedef std::deque<argumentID*>           argumentQ;
+   typedef std::deque<argumentID>            argumentQ;
    typedef std::stack<telldata::tell_var*>   operandSTACK;
    typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
    
-
 
    //==============================================================================
    /*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the
@@ -87,11 +86,10 @@ namespace telldata {
    public:
                            tell_type(typeID ID) : _ID(ID) {assert(TLCOMPOSIT_TYPE(ID));}
       bool                 addfield(std::string, typeID, const tell_type* utype);
-      const recfieldsID&   fields() const {return _fields;}
-      const typeID         ID() const {return _ID;}
       tell_var*            initfield(const typeID) const;
-      void                 userStructCheck(argumentID*) const;
-      void                 userStructListCheck(argumentID*) const;
+      const tell_type*     findtype(const typeID) const;
+      const recfieldsID&   fields() const    {return _fields;}
+      const typeID         ID() const        {return _ID;}
       typedef std::map<const typeID, const tell_type*> typeIDMAP;
    protected:
       typeID               _ID;
@@ -262,7 +260,8 @@ namespace telldata {
    public:
                            ttpnt (real x=0, real y=0);
                            ttpnt(const ttpnt&);
-      tell_var*            selfcopy() const    {return new ttpnt(*this);}
+                           ttpnt(operandSTACK& OPStack);
+                           tell_var*            selfcopy() const    {return new ttpnt(*this);}
       void                 echo(std::string&);
       void                 assign(tell_var*);
       real                 x() const           {return _x->value();}
@@ -282,6 +281,7 @@ namespace telldata {
                            ttwnd( real bl_x=0.0, real bl_y=0.0,
                                   real tr_x=0.0, real tr_y=0.0);
                            ttwnd( ttpnt tl, ttpnt br);
+                           ttwnd(operandSTACK& OPStack);
                            ttwnd(const ttwnd& cobj);
       tell_var*            selfcopy() const    {return new ttwnd(*this);};
       void                 echo(std::string&);
@@ -299,20 +299,23 @@ namespace telldata {
    class argumentID {
    public:
                            argumentID(telldata::typeID ID = telldata::tn_NULL) :
-                                                         _ID(ID), _child(NULL){};
-                           argumentID(argumentQ* child) :  _ID(telldata::tn_composite),
-                                                        _child(child) {}
+                                                          _ID(ID), _command(NULL){};
+                           argumentID(argumentQ* child, void* cmd) :
+                                                         _ID(telldata::tn_composite),
+                                                    _child(*child), _command(cmd) {};
                            argumentID(const argumentID&);
-                          ~argumentID() {if (NULL != _child) delete _child;}
-      void                 toList();
-      void                 adjustID(const argumentID*);
+                           ~argumentID()               {_child.clear();}
+      void                 toList(bool);
+      void                 adjustID(const argumentID&);
+      void                 userStructCheck(const telldata::tell_type&, bool);
+      void                 userStructListCheck(const telldata::tell_type&, bool);
       telldata::typeID     operator () () const        {return _ID;}
-      void                 addChild(argumentQ* child)  {_child = child;}
-      argumentQ*           child() const               {return _child;};
-      friend void tell_type::userStructCheck(argumentID*) const;
+      const argumentQ&     child() const               {return _child;}
+//      void*                command()                   {return _command;}
    private:
       telldata::typeID     _ID;
-      argumentQ*           _child;
+      argumentQ            _child;
+      void*                _command;
    };
 }
 
