@@ -27,6 +27,7 @@
 #include <sstream>
 #include <algorithm>
 #include "tellyzer.h"
+#include "tldat.h"
 #include "../tpd_common/outbox.h"
 
 //-----------------------------------------------------------------------------
@@ -581,7 +582,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
       amap.push_back(new telldata::argumentID((*arg)->second->get_type()));
    // call
    parsercmd::cmdSTDFUNC* body = getFuncBody(fn,&amap);
-   argQClear(&amap);
+   telldata::argQClear(&amap);
    return body;
 }
 

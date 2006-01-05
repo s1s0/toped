@@ -362,7 +362,7 @@ funccall:
          $$ = fc->gettype();
       }
       else tellerror("unknown function name or wrong parameter list",@1);
-      argQClear(argmap);
+      telldata::argQClear(argmap);
       argmapstack.pop();
       delete argmap;
       if (argmapstack.size() > 0) argmap = argmapstack.top();
