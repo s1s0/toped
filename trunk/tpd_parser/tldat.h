@@ -69,7 +69,7 @@ namespace telldata {
    typedef std::map<std::string, tell_type*> typeMAP;
    typedef std::map<std::string, tell_var* > variableMAP;
    typedef std::vector<tell_var*>            memlist;
-   typedef std::deque<argumentID>            argumentQ;
+   typedef std::deque<argumentID*>           argumentQ;
    typedef std::stack<telldata::tell_var*>   operandSTACK;
    typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
    
@@ -304,19 +304,20 @@ namespace telldata {
                                                          _ID(telldata::tn_composite),
                                                     _child(*child), _command(cmd) {};
                            argumentID(const argumentID&);
-                           ~argumentID()               {_child.clear();}
+                           ~argumentID();//               {_child.clear();}
       void                 toList(bool);
       void                 adjustID(const argumentID&);
       void                 userStructCheck(const telldata::tell_type&, bool);
       void                 userStructListCheck(const telldata::tell_type&, bool);
       telldata::typeID     operator () () const        {return _ID;}
       const argumentQ&     child() const               {return _child;}
-//      void*                command()                   {return _command;}
    private:
       telldata::typeID     _ID;
       argumentQ            _child;
       void*                _command;
    };
+
+   void argQClear(argumentQ*);
 }
 
 #endif

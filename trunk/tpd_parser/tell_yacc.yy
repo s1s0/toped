@@ -362,6 +362,7 @@ funccall:
          $$ = fc->gettype();
       }
       else tellerror("unknown function name or wrong parameter list",@1);
+      argQClear(argmap);
       argmapstack.pop();
       delete argmap;
       if (argmapstack.size() > 0) argmap = argmapstack.top();
@@ -394,8 +395,8 @@ argument :
 
 /*SGREM!!! MEMORY LEAKEAGE HERE because of the default copy constructor of argumentID*/
 nearguments :
-     argument                              {argmap->push_back(*$1); delete $1; $$ = argmap;}
-   | nearguments ',' argument              {argmap->push_back(*$3); delete $3; $$ = argmap;}
+      argument                             {argmap->push_back($1); $$ = argmap;}
+   | nearguments ',' argument              {argmap->push_back($3); $$ = argmap;}
 ;
 
 funcarguments:
@@ -527,6 +528,7 @@ structure:
         parsercmd::cmdSTRUCT* struct_command = new parsercmd::cmdSTRUCT();
         CMDBlock->pushcmd(struct_command);
         $$ = new telldata::argumentID(argmap, struct_command);
+        //argQClear(argmap);
         argmapstack.pop();
         delete argmap;
         if (argmapstack.size() > 0) argmap = argmapstack.top();
