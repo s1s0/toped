@@ -578,9 +578,11 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
    telldata::argumentQ amap;
    typedef argumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++)
-      amap.push_back((*arg)->second->get_type());
+      amap.push_back(new telldata::argumentID((*arg)->second->get_type()));
    // call
-   return getFuncBody(fn,&amap);
+   parsercmd::cmdSTDFUNC* body = getFuncBody(fn,&amap);
+   argQClear(&amap);
+   return body;
 }
 
 //=============================================================================
@@ -626,8 +628,8 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
    // are checked (match), the cycle ends-up with i == -1;
    while (i-- > 0) 
    {
-      telldata::typeID cargID = (*amap)[i]();
-      telldata::argumentID carg((*amap)[i]);
+      telldata::typeID cargID = (*(*amap)[i])();
+      telldata::argumentID carg((*(*amap)[i]));
       telldata::typeID lvalID = (*arguments)[i]->second->get_type();
       if (TLUNKNOWN_TYPE(cargID)) 
       {
@@ -650,27 +652,32 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
          // so check strictly the type
          if ( carg() != lvalID) 
             break;
-         else if (TLUNKNOWN_TYPE( (*amap)[i]() ))
-            UnknownArgsCopy.push_back(carg);
+         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() ))
+            UnknownArgsCopy.push_back(new telldata::argumentID(carg));
       }
       else 
       {  // for number types - allow compatablity
          if ((!NUMBER_TYPE(lvalID)) || ( carg() > lvalID)) 
             break;
-         else if (TLUNKNOWN_TYPE( (*amap)[i]() ))
-            UnknownArgsCopy.push_back(carg);
+         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() ))
+            UnknownArgsCopy.push_back(new telldata::argumentID(carg));
       }
    }
    i++;
    if (UnknownArgsCopy.size() > 0)
    {
-      if (i > 0) UnknownArgsCopy.clear();
+      if (i > 0)
+      {
+         for (telldata::argumentQ::iterator CA = UnknownArgsCopy.begin(); CA != UnknownArgsCopy.end(); CA++)
+            delete (*CA);
+         UnknownArgsCopy.clear();
+      }
       else
          for (telldata::argumentQ::iterator CA = amap->begin(); CA != amap->end(); CA++)
-            if ( TLUNKNOWN_TYPE((*CA)()) )
+            if ( TLUNKNOWN_TYPE((**CA)()) )
             {
-               CA->adjustID(UnknownArgsCopy.back());
-               UnknownArgsCopy.pop_back();
+               (*CA)->adjustID(*(UnknownArgsCopy.back()));
+               delete UnknownArgsCopy.back(); UnknownArgsCopy.pop_back();
             }
       assert(UnknownArgsCopy.size() == 0);
    }

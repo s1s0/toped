@@ -411,16 +411,16 @@ telldata::argumentID::argumentID(const argumentID& obj2copy) {
    if (0 < obj2copy.child().size())
    {
       for(argumentQ::const_iterator CA = obj2copy.child().begin(); CA != obj2copy.child().end(); CA ++)
-         _child.push_back(*CA);
+         _child.push_back(new argumentID(**CA));
    }
 }
 
 void telldata::argumentID::toList(bool cmdUpdate)
 {
-   telldata::typeID alistID = _child[0]();
+   telldata::typeID alistID = (*(_child[0]))();
    for(argumentQ::const_iterator CA = _child.begin(); CA != _child.end(); CA ++)
    {
-      if (alistID != (*CA)()) return;
+      if (alistID != (**CA)()) return;
    }
    _ID = TLISTOF(alistID);
    if (cmdUpdate)
@@ -437,27 +437,27 @@ void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, b
    for (CF = recfields.begin(), CA = _child.begin();
              (CF != recfields.end() && CA != _child.end()); CF ++, CA++)
    {
-      if ( TLUNKNOWN_TYPE( (*CA)() ) )
+      if ( TLUNKNOWN_TYPE( (**CA)() ) )
          if (TLISALIST(CF->second))
          {// check the list fields
             telldata::typeID basetype = CF->second & ~telldata::tn_listmask;
             // call in recursion the userStructCheck method of the child
-            CA->userStructListCheck(*(vartype.findtype(basetype)), cmdUpdate);
+            (*CA)->userStructListCheck(*(vartype.findtype(basetype)), cmdUpdate);
          }
          else
          {
             // call in recursion the userStructCheck method of the child
-            CA->userStructCheck(*(vartype.findtype(CF->second)), cmdUpdate);
+            (*CA)->userStructCheck(*(vartype.findtype(CF->second)), cmdUpdate);
          }
       if (!NUMBER_TYPE( CF->second ))
       {
          // for non-number types there is no internal conversion,
          // so check strictly the type
-         if ( (*CA)() != CF->second) return; // no match
+         if ( (**CA)() != CF->second) return; // no match
       }
       else // for number types - allow compatablity (int to real only)
-         if (!NUMBER_TYPE( (*CA)() )) return; // no match
-         else if (CF->second < (*CA)() ) return; // no match
+         if (!NUMBER_TYPE( (**CA)() )) return; // no match
+         else if (CF->second < (**CA)() ) return; // no match
    }
    // all fields match => we can assign a known ID to the argumentID
    _ID = vartype.ID();
@@ -468,7 +468,7 @@ void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, b
 void telldata::argumentID::userStructListCheck(const telldata::tell_type& vartype, bool cmdUpdate) 
 {
    for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++) 
-      if ( TLUNKNOWN_TYPE( (*CA)() ) ) CA->userStructCheck(vartype, cmdUpdate);
+      if ( TLUNKNOWN_TYPE( (**CA)() ) ) (*CA)->userStructCheck(vartype, cmdUpdate);
 
    toList(cmdUpdate);
 }
@@ -482,8 +482,22 @@ void telldata::argumentID::adjustID(const argumentID& obj2copy)
       argumentQ::iterator CA;
       for(CA = _child.begin(), CB = obj2copy.child().begin() ;
                                                       CA != _child.end() ; CA ++, CB++)
-         if (TLUNKNOWN_TYPE((*CA)())) CA->adjustID(*CB);
+         if (TLUNKNOWN_TYPE((**CA)())) (*CA)->adjustID(**CB);
    }
       _ID = obj2copy._ID;
       static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
+}
+
+telldata::argumentID::~argumentID()
+{
+   for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++)
+      delete (*CA);
+   _child.clear();
+}
+
+void telldata::argQClear(argumentQ* queue)
+{
+   for (argumentQ::iterator CA = queue->begin(); CA != queue->end(); CA++)
+      delete (*CA);
+   queue->clear();
 }
