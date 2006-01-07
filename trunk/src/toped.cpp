@@ -208,40 +208,39 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initMenuBar();
 }
 
-void tui::TopedFrame::OnClose(wxCloseEvent& WXUNUSED(event))
+void tui::TopedFrame::OnClose(wxCloseEvent& event)
 {
-   delete this;
-/*   bool wxWindowBase::Close(bool force)
+   if (event.CanVeto())
    {
-      wxCloseEvent event(wxEVT_CLOSE_WINDOW, m_windowId);
-      event.SetEventObject(this);
-      event.SetCanVeto(!force);
-
-    // return false if window wasn't closed because the application vetoed the
-    // close event
-      return GetEventHandler()->ProcessEvent(event) && !event.GetVeto();
-   }*/
-//    delete _laycanvas;
-//    delete _cmdline;      // tell command input window
-//    delete _GLstatus;
-//    delete _browsers;     // tell definitions browser
-/*    mS_browsers->Close();
-    mS_GLstatus->Close();
-    mS_command->Close();
-    mS_log->Close();
-    mS_canvas->Close();*/
-//    delete mS_browsers;
-//    delete mS_GLstatus;
-//    delete mS_command;
-//    delete mS_log;
-//    delete mS_canvas;
+      if (DATC->modified()) {
+         wxMessageDialog dlg1(this,
+                              "Save the current design before closing?\n(Cancel to continue the session)",
+                              "Current design contains unsaved data",
+                              wxYES_NO | wxCANCEL | wxICON_QUESTION);
+         switch (dlg1.ShowModal()) {
+            case wxID_YES:{
+               wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, m_windowId);
+               event.SetEventObject(this);
+               //GetEventHandler()->ProcessEvent(event);
+               OnTDTSave(event);
+            }
+            case wxID_NO: break;
+            case wxID_CANCEL: {
+               event.Veto(TRUE);
+               return;
+            }
+         }
+      }
+      delete this;
+   }
+   else delete this;
 }
 
 tui::TopedFrame::~TopedFrame() {
    delete _laycanvas;
-   delete _cmdline;      // tell command input window
+   delete _cmdline;
    delete _GLstatus;
-   delete _browsers;  // tell definitions browser
+   delete _browsers;
    delete mS_browsers;
    delete mS_GLstatus;
    delete mS_command;
@@ -473,7 +472,7 @@ void tui::TopedFrame::initView() {
 
 
 void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
-   Close(TRUE);
+   Close(FALSE);
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
