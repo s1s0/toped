@@ -39,8 +39,8 @@ namespace laydata {
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       tdtcell*       addcell(std::string name);
       tdtdata*       addbox(word la, TP* p1, TP* p2);
-      tdtdata*       addpoly(word la, pointlist& pl);
-      tdtdata*       addwire(word la, pointlist& pl, word w);
+      tdtdata*       addpoly(word, const pointlist*);
+      tdtdata*       addwire(word, const pointlist*, word);
       tdtdata*       addtext(word la, std::string& text, CTM& ori);
       tdtdata*       addcellref(std::string& name, CTM& ori);
       tdtdata*       addcellaref(std::string& name, CTM& ori, int4b stepX, 

@@ -1279,7 +1279,9 @@ int tellstdfunc::stdADDPOLY::execute() {
       UNDOPstack.push_front(new telldata::ttint(la));
       real DBscale = Properties->DBscale();
       laydata::tdtdesign* ATDB = DATC->lockDB();
-         telldata::ttlayout* ply = new telldata::ttlayout(ATDB->addpoly(la,t2tpoints(pl,DBscale)), la);
+         pointlist* plst = t2tpoints(pl,DBscale);
+         telldata::ttlayout* ply = new telldata::ttlayout(ATDB->addpoly(la,plst), la);
+         delete plst;
       DATC->unlockDB();
       OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
       LogFile << LogFile.getFN() << "("<< *pl << "," << la << ");"; 
@@ -1339,7 +1341,9 @@ int tellstdfunc::stdDRAWPOLY::execute() {
       UNDOPstack.push_front(new telldata::ttint(la));
       real DBscale = Properties->DBscale();
       laydata::tdtdesign* ATDB = DATC->lockDB();
-         telldata::ttlayout* ply = new telldata::ttlayout(ATDB->addpoly(la,t2tpoints(pl,DBscale)), la);
+         pointlist* plst = t2tpoints(pl,DBscale);
+         telldata::ttlayout* ply = new telldata::ttlayout(ATDB->addpoly(la,plst), la);
+         delete plst;
       DATC->unlockDB();
       OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
       LogFile << "addpoly("<< *pl << "," << la << ");"; LogFile.flush();
@@ -1397,8 +1401,10 @@ int tellstdfunc::stdADDWIRE::execute() {
       UNDOPstack.push_front(new telldata::ttint(la));
       real DBscale = Properties->DBscale();
       laydata::tdtdesign* ATDB = DATC->lockDB();
-         telldata::ttlayout* wr = new telldata::ttlayout(ATDB->addwire(la,t2tpoints(pl,DBscale),
+         pointlist* plst = t2tpoints(pl,DBscale);
+         telldata::ttlayout* wr = new telldata::ttlayout(ATDB->addwire(la,plst,
                                     static_cast<word>(rint(w * DBscale))), la);
+         delete plst;
       DATC->unlockDB();
       OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
       LogFile << LogFile.getFN() << "("<< *pl << "," << w << "," << la << ");"; 
@@ -1461,8 +1467,10 @@ int tellstdfunc::stdDRAWWIRE::execute() {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(la));
       laydata::tdtdesign* ATDB = DATC->lockDB();
-         telldata::ttlayout* wr = new telldata::ttlayout(ATDB->addwire(la,t2tpoints(pl,DBscale),
+         pointlist* plst = t2tpoints(pl,DBscale);
+         telldata::ttlayout* wr = new telldata::ttlayout(ATDB->addwire(la,plst,
                                     static_cast<word>(rint(w * DBscale))), la);
+         delete plst;
       DATC->unlockDB();
       OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
       LogFile << "addwire(" << *pl << "," << w << "," << la << ");"; 
@@ -2669,11 +2677,12 @@ int tellstdfunc::lgcCUTPOLY::execute() {
       // get the data from the stack
       telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
       real DBscale = Properties->DBscale();
-      pointlist plist = t2tpoints(pl,DBscale);
-      laydata::valid_poly check(plist);
+      pointlist *plist = t2tpoints(pl,DBscale);
+      laydata::valid_poly check(*plist);
+      delete plist;
       if (!check.valid()) {
          tell_log(console::MT_ERROR, "Invalid cutting polygon encountered");
-      }   
+      }
       else {
          //cutpoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,  
          // create and initialize them here
@@ -3008,7 +3017,7 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack) {
    return Toped->cmdline()->mouseIN_OK();
 }
 
-pointlist& tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
+pointlist* tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
    pointlist *plDB = new pointlist();
    plDB->reserve(pl->size());
    telldata::ttpnt* pt;
@@ -3016,7 +3025,7 @@ pointlist& tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
       pt = static_cast<telldata::ttpnt*>((pl->mlist())[i]);
       plDB->push_back(TP(pt->x(), pt->y(), DBscale));
    }
-   return *plDB;
+   return plDB;
 }   
 
 telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::selectList* shapesel) {

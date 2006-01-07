@@ -285,6 +285,7 @@ returnstatement :
             tellerror("return type different from function type", @2);
             delete rcmd;
          }
+         delete $2;
       }
       returns++;
    }
@@ -393,7 +394,6 @@ argument :
    | structure                             {$$ = $1;}
 ;
 
-/*SGREM!!! MEMORY LEAKEAGE HERE because of the default copy constructor of argumentID*/
 nearguments :
       argument                             {argmap->push_back($1); $$ = argmap;}
    | nearguments ',' argument              {argmap->push_back($3); $$ = argmap;}
@@ -593,7 +593,6 @@ primaryexpression :
                                                                 delete [] $1;}
    | variable                              {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
-/*   | structure                             {$$ = $1;}*/
    | '(' expression ')'                    {$$ = $2;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
 ;
