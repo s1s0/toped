@@ -761,6 +761,7 @@ int parsercmd::cmdIFELSE::execute() {
    telldata::ttbool *cond = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
    if (cond->value())   retexec =  trueblock->execute();
    else if (falseblock) retexec = falseblock->execute();
+   delete cond;
    return retexec;
 }
 

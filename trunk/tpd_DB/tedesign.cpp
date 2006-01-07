@@ -82,48 +82,41 @@ laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2) {
    return actlay->addbox(p1,p2);
 }
 
-laydata::tdtdata* laydata::tdtdesign::addpoly(word la, pointlist& pl) {
-   laydata::valid_poly check(pl);
+laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
+   laydata::valid_poly check(*pl);
    if (!check.valid()) {
       std::ostringstream ost; 
       ost << "Polygon check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str().c_str());
-      pl.clear();
       return NULL;
    }
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
-   // get rid of the original point list
-   pl.clear();
-   pl = check.get_validated();
+   pointlist vpl = check.get_validated();
    if (check.box()) {
-      TP* p1= new TP(pl[0] *_target.rARTM());
-      TP* p2= new TP(pl[2] *_target.rARTM());
-      pl.clear();
+      TP* p1= new TP(vpl[0] *_target.rARTM());
+      TP* p2= new TP(vpl[2] *_target.rARTM());
       return actlay->addbox(p1,p2);
    }
-   for(pointlist::iterator PL = pl.begin(); PL != pl.end(); PL++)
+   for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
-   return actlay->addpoly(pl);
+   return actlay->addpoly(vpl);
 }
 
-laydata::tdtdata* laydata::tdtdesign::addwire(word la, pointlist& pl, word w) {
-   laydata::valid_wire check(pl,w);
+laydata::tdtdata* laydata::tdtdesign::addwire(word la, const pointlist* pl, word w) {
+   laydata::valid_wire check(*pl,w);
    if (!check.valid()) {
       std::ostringstream ost; 
       ost << "Wire check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str().c_str());
-      pl.clear();
       return NULL;
    }   
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
-   // get rid of the original point list
-   pl.clear();
-   pl = check.get_validated();
-   for(pointlist::iterator PL = pl.begin(); PL != pl.end(); PL++)
+   pointlist vpl = check.get_validated();
+   for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
-   return actlay->addwire(pl,w);
+   return actlay->addwire(vpl,w);
 }
 
 laydata::tdtdata* laydata::tdtdesign::addtext(word la, std::string& text, CTM& ori) {

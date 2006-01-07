@@ -265,7 +265,7 @@ void console::ted_cmd::getCommandA() {
       pthrd->Create();
       pthrd->Run();
       if (_wait) pthrd->Wait();
-   }   
+   }
 }
 
 void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {

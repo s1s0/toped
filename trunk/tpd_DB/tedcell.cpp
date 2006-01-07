@@ -210,7 +210,8 @@ laydata::quadTree* laydata::tdtcell::securelayer(word layno) {
 }
 
 laydata::tdtcellref* laydata::tdtcell::addcellref(laydata::tdtdesign* ATDB,
-                                 refnamepair str, CTM trans, bool sortnow) {
+                                 refnamepair str, CTM trans, bool sortnow) 
+{
    if (!addchild(ATDB, str->second)) return NULL;
    quadTree *cellreflayer = securelayer(0);
    laydata::tdtcellref* cellref = new tdtcellref(str, trans);
@@ -1382,11 +1383,12 @@ void laydata::tdtcell::collect_usedlays(const tdtdesign* ATDB, bool recursive, u
       laylist.push_back(CL->first);
 }
 
-laydata::tdtcell::~tdtcell() {
-   word bozaNO;
-   for (layerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++) {
-      bozaNO = lay->first;
+laydata::tdtcell::~tdtcell() 
+{
+   for (layerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++) 
+   {
+      if (0 == lay->first) lay->second->freememory();
       delete lay->second;
-   }   
+   }
    _layers.clear();
-}      
+}
