@@ -33,7 +33,6 @@
 #include "../tpd_common/outbox.h"
 
 static GDSin::GDSFile*        InFile    = NULL;
-
 //==============================================================================
 GDSin::GDSrecord::GDSrecord(FILE* Gf, word rl, byte rt, byte dt) {
    reclen = rl;rectype = rt;datatype = dt;
@@ -272,7 +271,7 @@ GDSin::GDSrecord::~GDSrecord()
 // class GDSFile
 //==============================================================================
 GDSin::GDSFile::GDSFile(const char* fn) {
-   InFile = this;HierTree = NULL;
+   InFile = this; _hierTree = NULL;
    GDSIIwarnings = GDSIIerrors = 0;
    filename = fn;
    file_pos = 0;
@@ -321,10 +320,13 @@ GDSin::GDSFile::GDSFile(const char* fn) {
 //               prgrs_pos = file_length;
 //               prgrs->SetPos(prgrs_pos); // fullfill progress indicator
                AddLog('O',"Done");
-               delete wr; return; // go out
+               delete wr; 
+               _hierTree = library->HierOut();
+               return; // go out
             default:   //parse error - not expected record type
                AddLog('E',"GDS header - wrong record type in the current context");
-               delete wr;return;
+               delete wr;
+               return;
          }
       else   {AddLog('E',"Unexpected end of file");return;}
    }   
@@ -332,7 +334,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
 }
 
 GDSin::GDSFile::GDSFile(std::string fn, TIME_TPD acctime) {
-   InFile = this;HierTree = NULL;
+   InFile = this;_hierTree = NULL;
    GDSIIwarnings = GDSIIerrors = 0;
    filename = fn;//initializing
    file_pos = 0;
@@ -557,15 +559,15 @@ double GDSin::GDSFile::Get_UserUnits() {
    return library->Get_UU();
 }
 
-void GDSin::GDSFile::GetHierTree() {
-//   GDSstructure* boza = HierTree->GetNextRoot();
-   GDSHierTree* root = HierTree->GetFirstRoot();
-   std::string tab = "   ";
-   while (root){
-      PrintChildren(root, &tab);
-      root = root->GetNextRoot();
-   }   
-}
+// void GDSin::GDSFile::GetHierTree() {
+// //   GDSstructure* boza = HierTree->GetNextRoot();
+//    GDSHierTree* root = _hierTree->GetFirstRoot();
+//    std::string tab = "   ";
+//    while (root){
+//       PrintChildren(root, &tab);
+//       root = root->GetNextRoot();
+//    }   
+// }
 
 void GDSin::GDSFile::updateLastRecord()
 {
@@ -576,8 +578,16 @@ void GDSin::GDSFile::updateLastRecord()
    file_pos += bytes_written;
 }
 
-GDSin::GDSFile::~GDSFile() {
+GDSin::GDSFile::~GDSFile() 
+{
    delete library;
+   // get rid of the hierarchy tree
+   GDSHierTree* droot;
+   while (_hierTree) 
+   {
+      droot = _hierTree; _hierTree = droot->GetLast();
+      delete droot;
+   }
 }
 
 //==============================================================================

@@ -585,13 +585,14 @@ namespace GDSin {
       void           registerCellWritten(std::string);
       std::string    Get_libname() const {return library->Get_name();}
       GDSstructure*  GetStructure(const char* selection);
-      GDSHierTree*   HierOut() {return (HierTree = library->HierOut());};
+      void           HierOut() {_hierTree = library->HierOut();};
+      GDSHierTree*   hierTree() {return _hierTree;}
       int            GetReadErrors() {return GDSIIerrors;};
       int            GetGDSIIwarnings() {return GDSIIwarnings;};
       int            Inc_GDSIIerrors() {return ++GDSIIerrors;};
       int            Inc_GDSIIwarnings() {return ++GDSIIwarnings;};
       GDSstructure*  Get_structures() {return library->Get_Fstruct();};
-      void           GetHierTree(); // temporary
+//      void           GetHierTree(); // temporary
       void           flush(GDSrecord*);
       void           closeFile() {if (NULL != GDSfh) {fclose(GDSfh); GDSfh = NULL;}}
       void           updateLastRecord();
@@ -606,7 +607,7 @@ namespace GDSin {
       GDSlibrary*    library;
       long           file_length;
       long           file_pos;
-      GDSHierTree*   HierTree; // Tree of instance hierarchy
+      GDSHierTree*   _hierTree; // Tree of instance hierarchy
       nameList       _childnames;
       int            GDSIIerrors;
       int            GDSIIwarnings;

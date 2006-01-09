@@ -32,16 +32,18 @@
 #include "../tpd_common/outbox.h"
 #include "toped.h"
 #include "tui.h"
+#include "datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
 #include "../ui/cell_normal.xpm"
 #include "../ui/cell_expanded.xpm"
 
 
-extern console::ted_cmd*          Console;
-extern layprop::ViewProperties*   Properties;
-extern browsers::browserTAB*      Browsers;
-extern const wxEventType          wxEVT_CMD_BROWSER;
+extern console::ted_cmd*         Console;
+extern layprop::ViewProperties*  Properties;
+extern DataCenter*               DATC;
+extern browsers::browserTAB*     Browsers;
+extern const wxEventType         wxEVT_CMD_BROWSER;
 
 
 //==============================================================================
@@ -168,10 +170,12 @@ BEGIN_EVENT_TABLE(browsers::GDSbrowser, wxTreeCtrl)
    EVT_RIGHT_UP(browsers::GDSbrowser::OnBlankRMouseUp)
 END_EVENT_TABLE()
 //==============================================================================
-void browsers::GDSbrowser::collectInfo(const wxString libname, GDSin::GDSHierTree* gdsH) {
-   AddRoot(libname);
-   if (!gdsH) return; // new, empty design 
-   GDSin::GDSHierTree* root = gdsH->GetFirstRoot();
+void browsers::GDSbrowser::collectInfo() {
+   GDSin::GDSFile* AGDSDB = DATC->lockGDS(false);
+   if (NULL == AGDSDB) return;
+   AddRoot(AGDSDB->Get_libname());
+   if (NULL == AGDSDB->hierTree()) return; // new, empty design 
+   GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot();
    wxTreeItemId nroot;
    while (root){
       nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->Get_StrName()));
@@ -179,6 +183,7 @@ void browsers::GDSbrowser::collectInfo(const wxString libname, GDSin::GDSHierTre
       collectChildren(root, nroot);
       root = root->GetNextRoot();
    }
+   DATC->unlockGDS();
 //   Toped->Resize();
 }
       
@@ -512,13 +517,14 @@ wxString browsers::browserTAB::TDTGDSTopCellName() const {
    else return wxT("");
 }
 
-void browsers::browserTAB::OnCommand(wxCommandEvent& event) {
+void browsers::browserTAB::OnCommand(wxCommandEvent& event) 
+{
    int command = event.GetInt();
-   switch (command) {
+   switch (command) 
+   {
       case BT_ADDTDT_TAB:OnTELLaddTDTtab(event.GetString(), 
                             (laydata::TDTHierTree*)event.GetClientData());break;
-      case BT_ADDGDS_TAB:OnTELLaddGDStab(event.GetString(), 
-                            (GDSin::GDSHierTree*)event.GetClientData());break;
+      case BT_ADDGDS_TAB:OnTELLaddGDStab();break;
       case BT_CLEARGDS_TAB:OnTELLclearGDStab(); break;
    }
 }
@@ -528,13 +534,13 @@ void browsers::browserTAB::OnTELLaddTDTtab(const wxString libname, laydata::TDTH
    _TDTstruct->collectInfo(libname, tdtH);
 }
 
-void browsers::browserTAB::OnTELLaddGDStab(const wxString libname, GDSin::GDSHierTree* gdsH) {
+void browsers::browserTAB::OnTELLaddGDStab() {
    if (!_GDSstruct) {
       _GDSstruct = new GDSbrowser(this, ID_GDS_CELLTREE);
       AddPage(_GDSstruct, "GDS");
    }
    else _GDSstruct->DeleteAllItems();
-   _GDSstruct->collectInfo(libname, gdsH);
+   _GDSstruct->collectInfo();
 }
 
 void browsers::browserTAB::OnTELLclearGDStab() {
@@ -581,11 +587,9 @@ void browsers::addTDTtab(std::string libname, laydata::TDTHierTree* tdtH) {
    wxPostEvent(Browsers, eventADDTAB);
 }
 
-void browsers::addGDStab(std::string libname, GDSin::GDSHierTree* gdsH) {
+void browsers::addGDStab() {
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(BT_ADDGDS_TAB);
-   eventADDTAB.SetClientData((void*) gdsH);
-   eventADDTAB.SetString(wxString(libname.c_str()));
    wxPostEvent(Browsers, eventADDTAB);
 }
 

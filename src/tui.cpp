@@ -348,11 +348,13 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive = new wxCheckBox(this, -1, "Import recursively");
    _recursive->SetValue(true);
    _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   GDSin::GDSstructure* gdss = DATC->GDSstructures();
-   while (gdss) {
-      _nameList->Append(wxString(gdss->Get_StrName()));
-      gdss = gdss->GetLast();
-   }
+   GDSin::GDSFile* AGDSDB = DATC->lockGDS();
+      GDSin::GDSstructure* gdss = AGDSDB->Get_structures();
+      while (gdss) {
+         _nameList->Append(wxString(gdss->Get_StrName()));
+         gdss = gdss->GetLast();
+      }
+   DATC->unlockGDS();
    if (init != "") _nameList->SetStringSelection(init,true);
    // The window layout
    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );

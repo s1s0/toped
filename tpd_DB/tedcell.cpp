@@ -185,15 +185,20 @@ laydata::tdtcell::tdtcell(std::string name) {
 };
 
 laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name) : _name(name) ,
-                                                               _orphan(true) {
+                                                               _orphan(true) 
+{
    byte recordtype;
    word  layno;
    // now get the layers
-   while (tedf_CELLEND != (recordtype = tedfile->getByte())) {
-      switch (recordtype) {
+   while (tedf_CELLEND != (recordtype = tedfile->getByte())) 
+   {
+      switch (recordtype) 
+      {
          case    tedf_LAYER: 
             layno = tedfile->getWord(); if (!tedfile->status()) return;
-            _layers[layno] = new tdtlayer(tedfile);if (!tedfile->status()) return;
+            if (0 != layno)  _layers[layno] = new tdtlayer(tedfile);
+            else             _layers[layno] = new quadTree(tedfile); 
+            if (!tedfile->status()) return;
             if (0 == layno) tedfile->get_cellchildnames(&_children);
             break;
          default: {/*Error unexpected record type*/}
@@ -201,10 +206,12 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name) : _name(name
    }
 }
 
-laydata::quadTree* laydata::tdtcell::securelayer(word layno) {
-   if (_layers.end() == _layers.find(layno)) {
-      if (layno)  _layers[layno] = new tdtlayer();
-      else        _layers[layno] = new quadTree(); 
+laydata::quadTree* laydata::tdtcell::securelayer(word layno) 
+{
+   if (_layers.end() == _layers.find(layno)) 
+   {
+      if (0 != layno)  _layers[layno] = new tdtlayer();
+      else             _layers[layno] = new quadTree(); 
    }
    return _layers[layno];
 }
@@ -299,7 +306,7 @@ void laydata::tdtcell::tmp_draw(const layprop::DrawProperties& drawprop,
          }
       transtack.pop_front();
    }
-}         
+}
 
 bool laydata::tdtcell::getshapeover(TP pnt) {
    laydata::tdtdata* shape = NULL;
@@ -1387,7 +1394,8 @@ laydata::tdtcell::~tdtcell()
 {
    for (layerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++) 
    {
-      if (0 == lay->first) lay->second->freememory();
+      if (0 == lay->first) 
+         lay->second->freememory();
       delete lay->second;
    }
    _layers.clear();
