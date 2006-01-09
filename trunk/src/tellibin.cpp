@@ -2825,6 +2825,9 @@ int tellstdfunc::GDSread::execute() {
                                               CN != top_cell_list.end(); CN ++)
       topcells->add(new telldata::ttstring(*CN));
    OPstack.push(topcells);
+//   GDSin::GDSFile* AGDSDB = DATC->lockGDS();
+   browsers::addGDStab();
+//   DATC->unlockGDS();
    LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
    return EXEC_NEXT;
 }
@@ -2957,8 +2960,23 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype) :
 
 int tellstdfunc::GDSreportlay::execute() {
    std::string name = getStringValue();
-   DATC->reportGDSlay(name.c_str());
-   LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+   GDSin::GDSFile* AGDSDB = DATC->lockGDS();
+      GDSin::GDSstructure *src_structure = AGDSDB->GetStructure(name.c_str());
+      std::ostringstream ost; 
+      if (!src_structure) {
+         ost << "GDS structure named \"" << name << "\" does not exists";
+         tell_log(console::MT_ERROR,ost.str().c_str());
+      }
+      else 
+      {
+         ost << "GDS layers found in \"" << name <<"\": ";
+         for(int i = 0 ; i < GDS_MAX_LAYER ; i++)
+            if (src_structure->Get_Allay(i)) ost << i << " ";
+         tell_log(console::MT_INFO,ost.str().c_str());
+         LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+      }
+   DATC->unlockGDS();
+   //   DATC->reportGDSlay(name.c_str());
    return EXEC_NEXT;
 }
 

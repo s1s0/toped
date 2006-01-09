@@ -268,11 +268,13 @@ bool laydata::TEDfile::checkcellwritten(std::string cellname) {
 //   return (_childnames.end() != _childnames.find(cellname));
 }   
 
-laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname) {
+laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname) 
+{
    // register the name of the referenced cell in the list of children
    _childnames.push_back(cellname);
    // link the cells instances with their definitions
-   if (_design->_cells.end() == _design->_cells.find(cellname)) {
+   if (_design->_cells.end() == _design->_cells.find(cellname)) 
+   {
    // Attention! In this case we've parsed a cell reference, before
    // the cell is defined. This might means:
    //   1. Cell is referenced, but simply not defined. 
@@ -288,13 +290,13 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname) {
    // tdttcellref class and its ancestors
       _design->_cells[cellname] = NULL;
    }   
-   else {
+   else 
+   {
       // Mark that the cell definition is referenced, i.e. it is not the top 
       // of the tree (orphan flag in the tdtcell), BUT just in case it is
       // not empty yet
-      if (_design->_cells[cellname])
-         _design->_cells[cellname]->parentfound();
-   }      
+      _design->_cells[cellname]->parentfound();
+   }
    return _design->_cells.find(cellname);
 }
 

@@ -521,6 +521,7 @@ laydata::tdtdesign::~tdtdesign() {
    for( editcellstack::iterator CECS = _target._editstack.begin();
                                 CECS != _target._editstack.end(); CECS++)
       delete (*CECS);
+   _target._editstack.clear();
    // get rid of the hierarchy tree
    TDTHierTree* droot;
    while (_hiertree) {

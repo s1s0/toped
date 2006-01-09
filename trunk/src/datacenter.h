@@ -55,14 +55,14 @@ public:
    void                       GDSexport(std::string&);
    void                       GDSexport(laydata::tdtcell*, bool, std::string&);
    void                       importGDScell(const char* name, bool recur, bool over);
-   void                       reportGDSlay(const char* name);
-   GDSin::GDSstructure*       GDSstructures();
    void                       GDSclose();
    bool                       TDTread(std::string filename);
    void                       TDTwrite(const char* filename = NULL);
    void                       newDesign(std::string name);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
+   GDSin::GDSFile*            lockGDS(bool throwexception = true);
    void                       unlockDB();
+   void                       unlockGDS();
    unsigned int               numselected() const;
    void                       mouseStart(int input_type);
    void                       mousePointCancel(TP&);

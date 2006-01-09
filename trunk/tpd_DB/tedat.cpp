@@ -1157,24 +1157,24 @@ void laydata::tdtwire::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
-DBbox laydata::tdtwire::overlap() const {
-   DBbox ovl = DBbox(_plist[0]);
+DBbox laydata::tdtwire::overlap() const 
+{
+   word nump = _plist.size();
    DBbox* ln1 = endPnts(_plist[0],_plist[1], true);
-   DBbox* ln2;
-   word i;
-   for (i = 1; i < _plist.size() - 1; i++) {
-      ln2 = mdlPnts(_plist[i-1],_plist[i],_plist[i+1]);
-      if (ln1) {
-         ovl.overlap(*ln1);
-         delete ln1; 
+   DBbox ovl = *ln1;delete ln1;
+   if (nump > 2) 
+   {
+      DBbox* ln2 = NULL;
+      for (word i = 1; i < nump - 1; i++) 
+      {
+         ln2 = mdlPnts(_plist[i-1],_plist[i],_plist[i+1]);
+         ovl.overlap(*ln2);
+         delete ln2; 
       }
-      ln1 = ln2;
    }
-   ln2 = endPnts(_plist[i-1],_plist[i],false);
-   if (ln2) {
-      ovl.overlap(*ln2);
-      delete ln2; 
-   }
+   ln1 = endPnts(_plist[nump-2],_plist[nump-1],false);
+   ovl.overlap(*ln1);
+   delete ln1; 
    return ovl;
 }
 

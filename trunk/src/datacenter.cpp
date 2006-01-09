@@ -33,6 +33,7 @@
 
 extern   layprop::ViewProperties*   Properties;
 extern   wxMutex                    DBLock;
+         wxMutex                    GDSLock;
 
 //-----------------------------------------------------------------------------
 // class gds2ted
@@ -253,49 +254,39 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
    gdsex.updateLastRecord();gdsex.closeFile();
 }
 
-void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells) {
-    // parse the GDS file
-    _GDSDB = new GDSin::GDSFile(filename.c_str());
-    // Build the hierarchy tree of the GDS DB and add a browser TAB
-    browsers::addGDStab(_GDSDB->Get_libname(), _GDSDB->HierOut());
-
-    GDSin::GDSHierTree* root = _GDSDB->HierOut()->GetFirstRoot();
-    do {
-       topcells.push_back(std::string(root->GetItem()->Get_StrName()));
-    } while (NULL != (root = root->GetNextRoot()));
+void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells) 
+{
+   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
+   // parse the GDS file
+   _GDSDB = new GDSin::GDSFile(filename.c_str());
+   // generate the hierarchy tree of cells
+   _GDSDB->HierOut();
+   // Build the hierarchy tree of the GDS DB and add a browser TAB
+//   browsers::addGDStab(_GDSDB->Get_libname(), _GDSDB->hierTree());
+//   browsers::addGDStab();
+   GDSin::GDSHierTree* root = _GDSDB->hierTree()->GetFirstRoot();
+   do 
+   {
+      topcells.push_back(std::string(root->GetItem()->Get_StrName()));
+   } while (NULL != (root = root->GetNextRoot()));
+   unlockGDS();
 }
 
 void DataCenter::importGDScell(const char* name, bool recur, bool over) {
-   if (_GDSDB) {
+   lockGDS();
       GDSin::gds2ted converter(_GDSDB, _TEDDB);
       converter.structure(name, recur, over);
       _TEDDB->modified = true;
       browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
-   }
-   else throw EXPTNactive_GDS();
-}
-
-void DataCenter::reportGDSlay(const char* name) {
-   if (_GDSDB) {
-      GDSin::GDSstructure *src_structure = _GDSDB->GetStructure(name);
-      std::ostringstream ost; 
-      if (!src_structure) {
-         ost << "GDS structure named \"" << name << "\" does not exists";
-         tell_log(console::MT_ERROR,ost.str().c_str());
-         return;
-      }
-      ost << "GDS layers found in \"" << name <<"\": ";
-      for(int i = 0 ; i < GDS_MAX_LAYER ; i++)
-         if (src_structure->Get_Allay(i)) ost << i << " ";
-      tell_log(console::MT_INFO,ost.str().c_str());
-   }
-   else throw EXPTNactive_GDS();
+   unlockGDS();
 }
 
 void DataCenter::GDSclose() {
    browsers::clearGDStab();
-   if (NULL != _GDSDB) delete _GDSDB;
-   _GDSDB = NULL;
+   lockGDS();
+      delete _GDSDB;
+      _GDSDB = NULL;
+   unlockGDS();
 }
 
 void DataCenter::newDesign(std::string name) {
@@ -320,17 +311,43 @@ void DataCenter::newDesign(std::string name) {
    
 }
 
-laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell) {
-   if (_TEDDB) {
+laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell) 
+{
+   if (_TEDDB) 
+   {
       if (checkACTcell) _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
       return _TEDDB;
    }
-   else throw EXPTNactive_DB();      
+   else throw EXPTNactive_DB();
 }
 
-void DataCenter::unlockDB() {
+void DataCenter::unlockDB() 
+{
    DBLock.Unlock();
+}
+
+GDSin::GDSFile* DataCenter::lockGDS(bool throwexception) 
+{
+   // Carefull HERE! When GDS is locked form the min thread
+   // (GDS browser), then there is no catch pending -i.e.
+   // throwing an exception will make the things worse
+   // When it is locked from the parser command - then exception
+   // is fine 
+   if (_GDSDB) 
+   {
+      while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
+      return _GDSDB;
+   }
+   else {
+      if (throwexception) throw EXPTNactive_GDS();
+      else return NULL;
+   }
+}
+
+void DataCenter::unlockGDS() 
+{
+   GDSLock.Unlock();
 }
 
 unsigned int DataCenter::numselected() const {
@@ -388,8 +405,3 @@ const laydata::cellList& DataCenter::cells() {
    else throw EXPTNactive_DB();
 };
 
-
-GDSin::GDSstructure* DataCenter::GDSstructures() {
-   if (_GDSDB) return _GDSDB->Get_structures();
-   else throw EXPTNactive_GDS();
-}

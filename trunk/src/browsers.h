@@ -107,7 +107,7 @@ namespace browsers {
                         const wxPoint& pos = wxDefaultPosition, 
                         const wxSize& size = wxDefaultSize,
                         long style = wxTR_DEFAULT_STYLE):wxTreeCtrl(parent, id, pos, size, style) {};
-      void              collectInfo(const wxString, GDSin::GDSHierTree*);
+      void              collectInfo();
       wxString          selectedCellname() const {if (RBcellID.IsOk())
                                        return GetItemText(RBcellID); else return "";}
       wxString          getTopCellName(void);
@@ -179,7 +179,7 @@ namespace browsers {
    private:
       void              OnCommand(wxCommandEvent&);
       void              OnTELLaddTDTtab(const wxString, laydata::TDTHierTree*);
-      void              OnTELLaddGDStab(const wxString, GDSin::GDSHierTree*);
+      void              OnTELLaddGDStab();
       void              OnTELLclearGDStab();
       GDSbrowser      *_GDSstruct;
       TDTbrowser      *_TDTstruct;
@@ -192,7 +192,7 @@ namespace browsers {
    void layer_add(const std::string, const word);
    void layer_default(const word, const word);
    void addTDTtab(std::string libname, laydata::TDTHierTree* tdtH);
-   void addGDStab(std::string libname, GDSin::GDSHierTree* gdsH);
+   void addGDStab();
    void clearGDStab();
    void celltree_open(const std::string);
    void celltree_highlight(const std::string);
