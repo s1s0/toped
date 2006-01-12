@@ -261,9 +261,8 @@ void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells
    _GDSDB = new GDSin::GDSFile(filename.c_str());
    // generate the hierarchy tree of cells
    _GDSDB->HierOut();
-   // Build the hierarchy tree of the GDS DB and add a browser TAB
-//   browsers::addGDStab(_GDSDB->Get_libname(), _GDSDB->hierTree());
-//   browsers::addGDStab();
+   // add GDS tab in the browser
+   browsers::addGDStab();
    GDSin::GDSHierTree* root = _GDSDB->hierTree()->GetFirstRoot();
    do 
    {

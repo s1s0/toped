@@ -94,7 +94,7 @@
 // TELL_STDCMD_CLASSA - inherits one of the above class types,
 // and is using the UNDO functionality of its ancestor.
 // The classes of this type MUST use the protected constructor of their
-// ancestor, otherwise the argiment checks will get screwed-up.
+// ancestor, otherwise the argument checks will get screwed-up.
 // used for overloaded functions
 #ifndef TELL_STDCMD_CLASSB
 #define TELL_STDCMD_CLASSB(name, father)                          \

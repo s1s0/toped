@@ -237,10 +237,10 @@ void tui::TopedFrame::OnClose(wxCloseEvent& event)
 }
 
 tui::TopedFrame::~TopedFrame() {
-   delete _laycanvas;
-   delete _cmdline;
-   delete _GLstatus;
-   delete _browsers;
+//   delete _laycanvas;
+//   delete _cmdline;
+//   delete _GLstatus;
+//   delete _browsers;
    delete mS_browsers;
    delete mS_GLstatus;
    delete mS_command;

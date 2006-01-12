@@ -321,7 +321,6 @@ GDSin::GDSFile::GDSFile(const char* fn) {
 //               prgrs->SetPos(prgrs_pos); // fullfill progress indicator
                AddLog('O',"Done");
                delete wr; 
-               _hierTree = library->HierOut();
                return; // go out
             default:   //parse error - not expected record type
                AddLog('E',"GDS header - wrong record type in the current context");
