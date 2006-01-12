@@ -2825,9 +2825,6 @@ int tellstdfunc::GDSread::execute() {
                                               CN != top_cell_list.end(); CN ++)
       topcells->add(new telldata::ttstring(*CN));
    OPstack.push(topcells);
-//   GDSin::GDSFile* AGDSDB = DATC->lockGDS();
-   browsers::addGDStab();
-//   DATC->unlockGDS();
    LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
    return EXEC_NEXT;
 }

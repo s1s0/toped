@@ -67,11 +67,11 @@ namespace browsers {
    //===========================================================================
    class topedlay_list : public wxListCtrl {
    public:
-      topedlay_list(wxWindow* parent, wxWindowID id = -1,
-                    const wxPoint& pos = wxDefaultPosition,
-                    const wxSize& size = wxDefaultSize,
-                    long style = wxLC_REPORT | wxLC_HRULES);
-      ~topedlay_list();
+                     topedlay_list(wxWindow* parent, wxWindowID id = -1,
+                        const wxPoint& pos = wxDefaultPosition,
+                        const wxSize& size = wxDefaultSize,
+                        long style = wxLC_REPORT | wxLC_HRULES);
+      virtual      ~topedlay_list();
       void                 addlayer(wxString, word);
       void                 defaultLayer(word, word);
       void                 hideLayer(word, bool);
@@ -86,6 +86,7 @@ namespace browsers {
    class layerbrowser : public wxPanel {
    public:
                            layerbrowser(wxWindow* parent, wxWindowID id);
+      virtual             ~layerbrowser();
       topedlay_list*       layerlist() const {return _layerlist;};
    private:
       void                 OnNewLayer(wxCommandEvent&);
@@ -170,7 +171,7 @@ namespace browsers {
                         browserTAB(wxWindow *parent, wxWindowID id = -1,
         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, 
                                                                   long style = 0);
-      virtual          ~browserTAB() {};
+      virtual          ~browserTAB();// {};
       topedlay_list*    TDTlayers() const    {return _TDTlayers->layerlist();};
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};

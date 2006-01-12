@@ -79,7 +79,8 @@ browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
 
 browsers::topedlay_list::~topedlay_list() {
    delete _imageList;
-}    
+   DeleteAllItems();
+}
 
 
 void browsers::topedlay_list::addlayer(wxString name, word layno) {
@@ -161,7 +162,6 @@ void browsers::topedlay_list::lockLayer(word layno, bool lock) {
       RefreshItem(ID);
    }   
 }
-
 
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::GDSbrowser, wxTreeCtrl)
@@ -484,6 +484,7 @@ void browsers::TDTbrowser::copyItem(const wxTreeItemId item, const wxTreeItemId 
 browsers::TDTbrowser::~TDTbrowser()
 {
    delete _imageList;
+   DeleteAllItems();
 }
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::browserTAB, wxNotebook)
@@ -500,10 +501,12 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    _GDSstruct = NULL;
 }
 
-//browsers::browserTAB::~browserTAB() {
+browsers::browserTAB::~browserTAB() {
 //   It appears that wx is calling automatically the destructors of the
 //   child windows, so no need to call them here
-//}
+//   delete _TDTstruct; _TDTstruct = NULL;
+//   delete _TDTlayers; _TDTlayers = NULL;
+}
 
 wxString browsers::browserTAB::TDTSelectedGDSName() const {
    if (NULL != _GDSstruct)
@@ -546,8 +549,8 @@ void browsers::browserTAB::OnTELLaddGDStab() {
 void browsers::browserTAB::OnTELLclearGDStab() {
    if (_GDSstruct) {
       _GDSstruct->DeleteAllItems();
-      _GDSstruct = NULL;
       DeletePage(2);
+      _GDSstruct = NULL;
    }
 }
 
@@ -676,6 +679,11 @@ browsers::layerbrowser::layerbrowser(wxWindow* parent, wxWindowID id) :
    SetSizerAndFit(thesizer);
    thesizer->SetSizeHints( this );
    //
+}
+
+browsers::layerbrowser::~layerbrowser()
+{
+   delete _layerlist;
 }
 
 void browsers::layerbrowser::OnActiveLayer(wxListEvent& event) {
