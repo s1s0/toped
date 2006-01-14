@@ -405,3 +405,53 @@ double round(double x)
 }
 
 #endif
+
+//Return true, if argument - space or equivalent; 
+//else return false
+//space requires for split function
+bool space(char c)
+{
+	return isspace(c);
+}
+
+//Return false, if argument - space or equivalent; 
+//else return true
+//space requires for split function
+bool not_space(char c)
+{
+   return !isspace(c);
+}
+
+bool isDelimit(char c, char d)
+{
+   return (c==d)? true: false;
+}
+
+
+std::vector<std::string> split (const std::string& str, char delim)
+{
+   typedef std::string::const_iterator iter;
+   std::vector<std::string> ret;
+	
+	iter i = str.begin();
+   //Ignore leader spaces
+   i = std::find_if(i, str.end(), not_space);
+	while(i != str.end())
+	{
+		
+      //Ignore delimiter
+      i = std::find_if(i, str.end(), std::bind2nd (std::not_equal_to<char>() , delim));
+      //find out the end of next word 
+
+      iter j = std::find_if(i, str.end(), std::bind2nd (std::equal_to<char>() , delim));
+
+      //Copy character from range [i, j)
+      if(i != str.end())
+         ret.push_back(std::string(i, j));
+		i=j;
+
+   }
+
+   return ret;
+
+}

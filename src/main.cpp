@@ -24,6 +24,11 @@
 //        $Author$
 //===========================================================================
 #include <wx/wx.h>
+
+#if WIN32 
+#include <crtdbg.h>
+#endif
+
 #include "toped.h"
 #include "../tpd_DB/viewprop.h"
 #include "tellibin.h"
@@ -166,6 +171,8 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("addpoly"          ,(new             tellstdfunc::stdDRAWPOLY_D(telldata::tn_layout)));
    mblock->addFUNC("addwire"          ,(new               tellstdfunc::stdDRAWWIRE(telldata::tn_layout)));
    mblock->addFUNC("addwire"          ,(new             tellstdfunc::stdDRAWWIRE_D(telldata::tn_layout)));
+
+   mblock->addFUNC("addmenu"          ,(new                  tellstdfunc::stdADDMENU(telldata::tn_void)));
 }
 
 class TopedApp : public wxApp {
@@ -175,6 +182,29 @@ public:
 };
 
 bool TopedApp::OnInit() {
+//Memory leakages check for Windows
+/*  #ifdef _DEBUG
+  int tmpDbgFlag;
+
+  HANDLE hLogFile=CreateFile("log.txt",GENERIC_WRITE,FILE_SHARE_WRITE,
+    NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
+  _CrtSetReportMode(_CRT_ASSERT,_CRTDBG_MODE_FILE|_CRTDBG_MODE_WNDW|_CRTDBG_MODE_DEBUG);
+  _CrtSetReportMode(_CRT_WARN,_CRTDBG_MODE_FILE|_CRTDBG_MODE_DEBUG);
+  _CrtSetReportMode(_CRT_ERROR,_CRTDBG_MODE_FILE|_CRTDBG_MODE_WNDW|_CRTDBG_MODE_DEBUG);
+
+  _CrtSetReportFile(_CRT_ASSERT,hLogFile);
+  _CrtSetReportFile(_CRT_WARN,hLogFile);
+  _CrtSetReportFile(_CRT_ERROR,hLogFile);
+
+
+  tmpDbgFlag=_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+  tmpDbgFlag|=_CRTDBG_ALLOC_MEM_DF;
+  tmpDbgFlag|=_CRTDBG_DELAY_FREE_MEM_DF;
+  tmpDbgFlag|=_CRTDBG_LEAK_CHECK_DF;
+  _CrtSetDbgFlag(tmpDbgFlag);
+  //_CrtSetBreakAlloc(5919);
+#endif*/
+
    Properties = new layprop::ViewProperties();
    Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50),
    wxSize(1200,900) );

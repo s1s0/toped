@@ -122,7 +122,8 @@ typedef enum  {
    TMSET_MARKER            ,
 
    TMHELP_ABOUTAPP         ,
-   TBSTAT_ABORT
+   TBSTAT_ABORT            ,
+   TMDUMMY = 500
 } TOPED_MENUID;
 
 

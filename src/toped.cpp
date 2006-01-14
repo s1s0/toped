@@ -185,6 +185,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
    
    EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
+   EVT_MENU_RANGE(TMDUMMY, TMDUMMY+500 , tui::TopedFrame::OnMenu  )
    EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
    EVT_CLOSE(tui::TopedFrame::OnClose)
    EVT_SIZE( TopedFrame::OnSize )
@@ -204,6 +205,7 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
 //   initToolBar();
    CreateStatusBar();
    SetStatusText( wxT( "Toped loaded..." ) );
+   _resourceCenter = new ResourceCenter;
    //Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
 }
@@ -246,6 +248,7 @@ tui::TopedFrame::~TopedFrame() {
    delete mS_command;
    delete mS_log;
    delete mS_canvas;
+   delete _resourceCenter;
 }
 
 void tui::TopedFrame::initMenuBar() {
@@ -375,6 +378,12 @@ void tui::TopedFrame::initMenuBar() {
    // default menu values
    settingsMenu->Check(TMSET_CELLMARK,true);
    settingsMenu->Check(TMSET_TEXTMARK,true);
+
+   wxMenuBar *menuBar=GetMenuBar();
+
+   _resourceCenter->appendMenu("Script/ADD BOX", "", "addbox();");
+   _resourceCenter->appendMenu("Script/Script2/ADD POLY", "", "addpoly();");
+   _resourceCenter->buildMenu(menuBar);
 }
 /*
 void TopedFrame::initToolBar() {
@@ -949,6 +958,11 @@ void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
    ost << "shapeangle(90);";
    _cmdline->parseCommand(ost);   
+}
+
+void tui::TopedFrame::OnMenu(wxCommandEvent& event) 
+{
+   _resourceCenter->executeMenu(event.GetId());
 }
 
 void tui::TopedFrame::OnAbort(wxCommandEvent& WXUNUSED(event)) {

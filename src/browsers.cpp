@@ -173,7 +173,7 @@ END_EVENT_TABLE()
 void browsers::GDSbrowser::collectInfo() {
    GDSin::GDSFile* AGDSDB = DATC->lockGDS(false);
    if (NULL == AGDSDB) return;
-   AddRoot(AGDSDB->Get_libname());
+   AddRoot((AGDSDB->Get_libname()).c_str());
    if (NULL == AGDSDB->hierTree()) return; // new, empty design 
    GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot();
    wxTreeItemId nroot;

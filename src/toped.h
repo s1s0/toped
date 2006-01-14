@@ -69,7 +69,8 @@ namespace tui {
       void                    OnPositionMessage(wxCommandEvent&);
       void                    OnQuit (wxCommandEvent&);
       void                    OnAbout(wxCommandEvent&);
-
+      wxMenuBar*              getMenuBar(void) {return GetMenuBar();};
+      ResourceCenter*         getResourceCenter(void) {return _resourceCenter;};
       console::ted_log*       logwin()   const {return _cmdlog;};
       LayoutCanvas*           view()     const {return _laycanvas;};
       console::ted_cmd*       cmdline()  const {return _cmdline;};
@@ -83,6 +84,7 @@ namespace tui {
       LayoutCanvas*           _laycanvas;
       CanvasStatus*           _GLstatus;
       browsers::browserTAB*   _browsers;  // tell definitions browser
+      ResourceCenter *_resourceCenter;
       //Menu stuff
       wxMenuBar*              menuBar;
       wxMenu*                 fileMenu;
@@ -95,6 +97,7 @@ namespace tui {
       wxMenu*                 markerMenu;
       wxMenu*                 gdsMenu;
       wxMenu*                 helpMenu;
+
       // Sash layout stuff
       wxSashLayoutWindow*     mS_browsers;
       wxSashLayoutWindow*     mS_GLstatus;
@@ -164,6 +167,8 @@ namespace tui {
       void     OnMarker0(wxCommandEvent&);
       void    OnMarker45(wxCommandEvent&);
       void    OnMarker90(wxCommandEvent&);
+
+      void    OnMenu(wxCommandEvent&);
 
       void  OnGridDefine(wxCommandEvent&);
       //
