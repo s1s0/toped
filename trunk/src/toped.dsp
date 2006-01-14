@@ -113,6 +113,10 @@ SOURCE=.\main.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\resourcecenter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\tellibin.cpp
 # End Source File
 # Begin Source File
@@ -142,6 +146,10 @@ SOURCE=.\gds_io.h
 # Begin Source File
 
 SOURCE=.\layoutcanvas.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\resourcecenter.h
 # End Source File
 # Begin Source File
 

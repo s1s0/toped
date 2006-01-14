@@ -381,4 +381,7 @@ bool  SGHierTree<TYPE>::removeParent(TYPE* comp, TYPE* prnt, SGHierTree*& lst) {
    return false;
 }
 
+
+std::vector<std::string> split (const std::string& str, char delim);
+
 #endif

@@ -35,6 +35,7 @@
 #include "../tpd_DB/viewprop.h"
 #include "../tpd_common/tedop.h"
 #include "toped.h"
+#include "resourcecenter.h"
 
 //#define TEUNDO_DEBUG_ON
 #ifdef TEUNDO_DEBUG_ON
@@ -2985,6 +2986,38 @@ tellstdfunc::GDSclose::GDSclose(telldata::typeID retype) :
 int tellstdfunc::GDSclose::execute() {
    DATC->GDSclose();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdADDMENU::stdADDMENU(telldata::typeID retype) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+void tellstdfunc::stdADDMENU::undo_cleanup() 
+{
+/*???Not implemented yet*/
+}
+
+void tellstdfunc::stdADDMENU::undo() 
+{
+/*???Not implemented yet*/
+}
+
+int tellstdfunc::stdADDMENU::execute() 
+{
+   std::string function = getStringValue();
+   std::string hotKey   = getStringValue();
+   std::string menu     = getStringValue();
+
+   wxMenuBar *menuBar      = Toped->getMenuBar();
+   tui::ResourceCenter *resourceCenter = Toped->getResourceCenter();
+   resourceCenter->appendMenu(menu, hotKey, function);
+   resourceCenter->buildMenu(menuBar);
+
    return EXEC_NEXT;
 }
 

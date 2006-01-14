@@ -217,6 +217,8 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdPNTUNSELECT_I, stdPNTUNSELECT)
    TELL_STDCMD_CLASSB(lgcCUTPOLY_I    , lgcCUTPOLY    )
    TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER )  //
+
+   TELL_STDCMD_CLASSA_UNDO(stdADDMENU       )
        
 
 //   laydata::tdtdesign*  currentDesign();

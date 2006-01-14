@@ -32,6 +32,7 @@
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
 #include "../tpd_common/ttt.h"
+#include "resourcecenter.h"
 
 namespace tui {
    class getSize : public wxDialog {
