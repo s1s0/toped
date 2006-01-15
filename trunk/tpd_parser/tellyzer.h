@@ -427,6 +427,7 @@ namespace console{
          toped_logfile&    operator<< (const telldata::ttlist& _tl);
          toped_logfile&    flush();
       private:
+         std::string        make_time();
          std::fstream     _file;
          std::string      _funcname;
    };

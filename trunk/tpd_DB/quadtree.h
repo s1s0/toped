@@ -114,8 +114,7 @@ functionality is mostly implemented in the parent class.
    class tdtlayer : public quadTree {
    public:
                            tdtlayer() : quadTree() {};
-                           tdtlayer(TEDfile* const tedfile) :
-                                                            quadTree(tedfile) {};
+                           tdtlayer(TEDfile* const tedfile) : quadTree(tedfile) {};
                           ~tdtlayer() {freememory();};
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue& ) const;
       tdtdata*             addbox(TP* p1, TP* p2, bool sortnow = true);

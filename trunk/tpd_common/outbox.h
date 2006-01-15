@@ -94,4 +94,9 @@ class EXPTNmanyTopCellsGDS : public EXPTN  {
       EXPTNmanyTopCellsGDS();
 };
 
+class EXPTNreadTDT : public EXPTN {
+   public:
+      EXPTNreadTDT();
+};
+
 #endif

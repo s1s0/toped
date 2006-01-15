@@ -332,7 +332,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
    while (true);
 }
 
-GDSin::GDSFile::GDSFile(std::string fn, TIME_TPD acctime) {
+GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
    InFile = this;_hierTree = NULL;
    GDSIIwarnings = GDSIIerrors = 0;
    filename = fn;//initializing
@@ -557,16 +557,6 @@ double GDSin::GDSFile::Get_LibUnits() {
 double GDSin::GDSFile::Get_UserUnits() {
    return library->Get_UU();
 }
-
-// void GDSin::GDSFile::GetHierTree() {
-// //   GDSstructure* boza = HierTree->GetNextRoot();
-//    GDSHierTree* root = _hierTree->GetFirstRoot();
-//    std::string tab = "   ";
-//    while (root){
-//       PrintChildren(root, &tab);
-//       root = root->GetNextRoot();
-//    }   
-// }
 
 void GDSin::GDSFile::updateLastRecord()
 {

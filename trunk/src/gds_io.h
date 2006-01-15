@@ -575,7 +575,7 @@ namespace GDSin {
    {
    public:
       GDSFile(const char*fn);
-      GDSFile(std::string, TIME_TPD);
+      GDSFile(std::string, time_t);
       GDSrecord*     GetNextRecord();
       GDSrecord*     GDSFile::SetNextRecord(byte rectype, word reclen = 0);
       double         Get_LibUnits();
@@ -592,7 +592,6 @@ namespace GDSin {
       int            Inc_GDSIIerrors() {return ++GDSIIerrors;};
       int            Inc_GDSIIwarnings() {return ++GDSIIwarnings;};
       GDSstructure*  Get_structures() {return library->Get_Fstruct();};
-//      void           GetHierTree(); // temporary
       void           flush(GDSrecord*);
       void           closeFile() {if (NULL != GDSfh) {fclose(GDSfh); GDSfh = NULL;}}
       void           updateLastRecord();

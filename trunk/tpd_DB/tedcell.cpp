@@ -195,13 +195,12 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name) : _name(name
       switch (recordtype) 
       {
          case    tedf_LAYER: 
-            layno = tedfile->getWord(); if (!tedfile->status()) return;
+            layno = tedfile->getWord();
             if (0 != layno)  _layers[layno] = new tdtlayer(tedfile);
             else             _layers[layno] = new quadTree(tedfile); 
-            if (!tedfile->status()) return;
             if (0 == layno) tedfile->get_cellchildnames(&_children);
             break;
-         default: {/*Error unexpected record type*/}
+         default: throw EXPTNreadTDT();
       }
    }
 }

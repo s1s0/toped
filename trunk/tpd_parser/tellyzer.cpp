@@ -1125,9 +1125,26 @@ void console::toped_logfile::init() {
    _file << LFH_SEPARATOR << std::endl;
    _file << LFH_REVISION  << "0.3" << std::endl;
    _file << LFH_ENVIRONM  << "Bali go" << std::endl;
-   _file << LFH_TIMESTAMP << "Bali go 2" << std::endl;
+   _file << LFH_TIMESTAMP << make_time() << std::endl;
    _file << LFH_SEPARATOR << std::endl;
 }
+
+std::string console::toped_logfile::make_time() {
+   time_t current_time = time(NULL);
+   tm* broken_time = localtime(&current_time);
+   std::string info;
+   if (broken_time == NULL)
+      info = "Error : time can't be rerieved properly";
+   else
+   {
+      char* btm = new char[256];
+      strftime(btm, 256, "%d-%m-%Y %T", broken_time);
+      info = btm;
+      delete btm;
+   }
+   return info;
+}
+
 
 console::toped_logfile& console::toped_logfile::operator<< (const byte _i) {
    _file << static_cast<unsigned short>(_i) ; return *this;

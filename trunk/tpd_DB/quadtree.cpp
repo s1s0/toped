@@ -27,6 +27,7 @@
 #include "quadtree.h"
 #include "tedat.h"
 #include "viewprop.h"
+#include "outbox.h"
 
 #include "iostream"
 
@@ -43,29 +44,24 @@ laydata::quadTree::quadTree() : _overlap(DEFAULT_OVL_BOX){
 /*! Used for reading the quadTree from the TDT file. A new shape is added to 
 the tree using the put() method. Entire tree is recreated when there is no more
 data to read using resort() method.*/
-laydata::quadTree::quadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX) {
+laydata::quadTree::quadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX) 
+{
    _quads[0] = _quads[1] = _quads[2] = _quads[3] = NULL;
    _first = NULL;_invalid = false;
    byte recordtype;
    while (tedf_LAYEREND != (recordtype = tedfile->getByte())) 
-      switch (recordtype) {   
-         case  tedf_BOX: put(new tdtbox(tedfile));
-               if (!tedfile->status()) return;break;
-         case tedf_POLY: put(new tdtpoly(tedfile));
-               if (!tedfile->status()) return;break;
-         case tedf_WIRE: put(new tdtwire(tedfile));
-               if (!tedfile->status()) return;break;
-         case tedf_TEXT: put(new tdttext(tedfile));
-               if (!tedfile->status()) return;break;
-         case tedf_CELLREF: put(new tdtcellref(tedfile));
-               if (!tedfile->status()) return;break;
-         case tedf_CELLAREF: put(new tdtcellaref(tedfile));
-               if (!tedfile->status()) return;break;
+      switch (recordtype) 
+      {
+         case      tedf_BOX: put(new tdtbox(tedfile));break;
+         case     tedf_POLY: put(new tdtpoly(tedfile));break;
+         case     tedf_WIRE: put(new tdtwire(tedfile));break;
+         case     tedf_TEXT: put(new tdttext(tedfile));break;
+         case  tedf_CELLREF: put(new tdtcellref(tedfile));break;
+         case tedf_CELLAREF: put(new tdtcellaref(tedfile));break;
          //--------------------------------------------------
-         default: /*Error - unexpected record type*/ 
-               if (!tedfile->status()) return;break;
+         default: throw EXPTNreadTDT();
       }
-   resort();   
+   resort();
 }
 
 /*! Add a single layout object shape into the quadTree. 

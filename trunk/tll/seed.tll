@@ -304,6 +304,6 @@ void bug()
 
 layerSetup();
 screenSetup();
-//newdesign("seed");
-//newcell("crop");
-//opencell("crop");
+newdesign("seed");
+newcell("crop");
+opencell("crop");
