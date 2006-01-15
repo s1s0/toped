@@ -13,13 +13,13 @@ void tui::ResourceCenter::buildMenu(wxMenuBar *menuBar)
    wxMenuItem *menuItem;
    int menuID;
    std::vector<std::string> menuNames;// = split
-   MenuItemHandler *mItem;
+//   MenuItemHandler *mItem;
    int id;
    std::string menustring;
    //looks all saved menus
-   for(std::vector <MenuItemHandler>::iterator it=_menus.begin(); it!=_menus.end(); it++)
+   for(std::vector <MenuItemHandler>::iterator mItem=_menus.begin(); mItem!=_menus.end(); mItem++)
    {
-      mItem = it;
+//      mItem = it;
       //only for unshown menus
       if (mItem->inserted()== false)
       {
@@ -93,10 +93,10 @@ void tui::ResourceCenter::appendMenu(std::string menuItem, std::string hotKey, s
 
 void tui::ResourceCenter::executeMenu(int ID1)
 {
-   MenuItemHandler *mItem;
-   for(std::vector <MenuItemHandler>::iterator it=_menus.begin(); it!=_menus.end(); it++)
+//   MenuItemHandler *mItem;
+   for(std::vector <MenuItemHandler>::iterator mItem=_menus.begin(); mItem!=_menus.end(); mItem++)
    {
-      mItem = it;
+//      mItem = it;
       if ((mItem->ID())==ID1) 
       Console->parseCommand((mItem->function()).c_str());
    }
