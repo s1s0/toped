@@ -206,24 +206,30 @@ DataCenter::~DataCenter() {
 
 bool DataCenter::TDTread(std::string filename) {
    laydata::TEDfile tempin(filename.c_str());
-   if (tempin.status()) {
-      delete _TEDDB;//Erase existing data
-      _tedfilename = filename;
-      _neversaved = false;
-      _tedtimestamp = tempin.timestamp();
-      _TEDDB = tempin.design();
-      _TEDDB->btreeAddMember    = &browsers::treeAddMember;
-      _TEDDB->btreeRemoveMember = &browsers::treeRemoveMember;
-      // get the hierarchy
-      browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
-      // Update Canvas scale
-      Properties->setUU(_TEDDB->UU());
-      return true;
+   if (!tempin.status()) return false;
+   try 
+   {
+      tempin.read();
    }
-   else {
-      // don't clear the tempin.design. It is already done in tempin read constructor
+   catch (EXPTNreadTDT) 
+   {
+      tempin.closeF();
+      tempin.cleanup();
       return false;
-   }   
+   }
+   tempin.closeF();
+   delete _TEDDB;//Erase existing data
+   _tedfilename = filename;
+   _neversaved = false;
+   _tedtimestamp = tempin.timestamp();
+   _TEDDB = tempin.design();
+   _TEDDB->btreeAddMember    = &browsers::treeAddMember;
+   _TEDDB->btreeRemoveMember = &browsers::treeRemoveMember;
+   // get the hierarchy
+   browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
+   // Update Canvas scale
+   Properties->setUU(_TEDDB->UU());
+   return true;
 }
 
 void DataCenter::TDTwrite(const char* filename) {

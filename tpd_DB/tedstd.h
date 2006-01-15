@@ -38,8 +38,9 @@
 // Toped DaTa (TDT) file markers
 //==============================================================================
 #define TED_LEADSTRING     "TED"
-#define TED_REVISION       "0.5"
-#define tedf_FILEHEADER    0x03
+#define tedf_REVISION      0x02
+#define tedf_TIMECREATED   0x03
+#define tedf_TIMEUPDATED   0x04
 #define tedf_DESIGN        0x80
 #define tedf_DESIGNEND     0x81
 #define tedf_CELL          0x82
@@ -125,6 +126,9 @@ namespace laydata {
    public:
                            TEDfile(const char*); // for reading
                            TEDfile(tdtdesign*, std::string&); // for writing
+      void                 closeF() {fclose(_file);};
+      void                 read();
+      void                 cleanup();
       std::string          getString();
       void                 putString(std::string str);
       real                 getReal();
@@ -147,17 +151,19 @@ namespace laydata {
       bool                 status() const  {return _status;};
       word                 numread() const {return _numread;};
       tdtdesign*           design() const  {return _design;};
-      TIME_TPD             timestamp() const {return _timestamp;};
+      time_t               timestamp() const {return _timestamp;};
    protected:
       bool                 _status;
       word                 _numread;
    private:
-      void                 getTime(); 
-      void                 putTime(); 
+      void                 getTime();
+      void                 putTime();
+      void                 getRevision();
+      void                 putRevision();
       long int             _position;
       FILE*                _file;
-      std::string          _leadstr;
-      std::string          _revision;
+      word                 _revision;
+      word                 _subrevision;
       time_t               _timestamp;
       tdtdesign*           _design;
       nameList             _childnames;

@@ -73,32 +73,33 @@ laydata::TEDfile::TEDfile(const char* filename) { // reading
       std::string news = "File \"";
       news += filename; news += "\" not found or unaccessable";
       tell_log(console::MT_ERROR,news.c_str());
-      _status = false; return;
+      _status = false; 
    }
    else _status = true;
-   _leadstr = getString();
-   _revision = getString();
+}
+
+void laydata::TEDfile::read() {
+   // Get the leading string 
+   std::string _leadstr = getString();
+   if (TED_LEADSTRING != _leadstr) throw EXPTNreadTDT();
+   // Get format revision
+   getRevision();
+   // Get file time stamps
    getTime();
 //   checkIntegrity();
-   if (tedf_DESIGN == getByte()) {
-      std::string name = getString(); if (!status()) return;
-      real         DBU = getReal();   if (!status()) return;
-      real          UU = getReal();   if (!status()) return;
-      tell_log(console::MT_DESIGNNAME, name.c_str());
-      _design = new tdtdesign(name,DBU,UU);
-      _design->read(this);
-      if (!status()) {
-         delete _design; _design = NULL;
-      }   
-      //Design end marker is read already in tdtdesign so don't search it here
-      //byte designend = getByte(); 
-   }
-   else _status = false;
-   fclose(_file);
+   if (tedf_DESIGN != getByte()) throw EXPTNreadTDT();
+   std::string name = getString();
+   real         DBU = getReal();
+   real          UU = getReal();
+   tell_log(console::MT_DESIGNNAME, name.c_str());
+   _design = new tdtdesign(name,DBU,UU);
+   _design->read(this);
+   //Design end marker is read already in tdtdesign so don't search it here
+   //byte designend = getByte(); 
 }
 
 laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) { //writing
-   _design = design;
+   _design = design;_revision=0;_subrevision=6;
    if (NULL == (_file = fopen(filename.c_str(), "wb"))) {
       std::string news = "File \"";
       news += filename.c_str(); news += "\" can not be created";
@@ -106,54 +107,125 @@ laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) { //writing
       return;
    }   
    putString(TED_LEADSTRING);
-   putString(TED_REVISION);
+   putRevision();
    putTime();
    _design->write(this);
    fclose(_file);
 }
 
-byte laydata::TEDfile::getByte() {
+void laydata::TEDfile::cleanup() 
+{
+   if (NULL != _design) delete _design;
+}
+
+byte laydata::TEDfile::getByte() 
+{
    byte result;
    byte length = sizeof(byte);
-   if (1 == (_numread = fread(&result, length, 1, _file)))
-      _position += length;
-   else _status = false;
+   if (1 != (_numread = fread(&result, length, 1, _file)))
+      throw EXPTNreadTDT();
+   _position += length;
    return result;
 }
 
-word laydata::TEDfile::getWord() {
+word laydata::TEDfile::getWord() 
+{
    word result;
    byte length = sizeof(word);
-   if (1 == (_numread = fread(&result, length, 1, _file)))
-      _position += length;
-   else _status = false;
+   if (1 != (_numread = fread(&result, length, 1, _file)))
+      throw EXPTNreadTDT();
+   _position += length;
    return result;
 }
 
-void laydata::TEDfile::putWord(const word data) {
-   fwrite(&data,2,1,_file);
-}   
-
-int4b laydata::TEDfile::get4b() {
+int4b laydata::TEDfile::get4b() 
+{
    int4b result;
    byte length = sizeof(int4b);
-   if (1 == (_numread = fread(&result, length, 1, _file)))
-      _position += length;
-   else _status = false;
+   if (1 != (_numread = fread(&result, length, 1, _file)))
+      throw EXPTNreadTDT();
+   _position += length;
    return result;
 }
-
-void laydata::TEDfile::put4b(const int4b data) {
-   fwrite(&data,4,1,_file);
-}   
 
 real laydata::TEDfile::getReal() {
    real result;
    byte length = sizeof(real);
-   if (1 == (_numread = fread(&result, length, 1, _file)))
-      _position += length;
-   else _status = false;
+   if (1 != (_numread = fread(&result, length, 1, _file)))
+      throw EXPTNreadTDT();
+   _position += length;
    return result;
+}
+
+std::string laydata::TEDfile::getString() 
+{
+   std::string str;
+   byte length = getByte();
+   char* strc = new char[length+1];
+   _numread = fread(strc, length, 1, _file);
+   strc[length] = 0x00;
+   if (_numread != 1) 
+   {
+      delete[] strc;
+      throw EXPTNreadTDT();
+   }
+   _position += length; str = strc;
+   delete[] strc;
+   return str;
+}
+
+TP laydata::TEDfile::getTP() 
+{
+   int4b x = get4b();
+   int4b y = get4b();
+   return TP(x,y);
+}
+
+CTM laydata::TEDfile::getCTM() 
+{
+   real _a  = getReal();
+   real _b  = getReal();
+   real _c  = getReal();
+   real _d  = getReal();
+   real _tx = getReal();
+   real _ty = getReal();
+   return CTM(_a, _b, _c, _d, _tx, _ty);
+}
+
+void laydata::TEDfile::getTime() 
+{
+   tm broken_time;
+   if (tedf_TIMECREATED  != getByte()) throw EXPTNreadTDT();
+   broken_time.tm_mday = get4b();
+   broken_time.tm_mon  = get4b();
+   broken_time.tm_year = get4b();
+   broken_time.tm_hour = get4b();
+   broken_time.tm_min  = get4b();
+   broken_time.tm_sec  = get4b();
+   _timestamp = mktime(&broken_time);
+   if (tedf_TIMEUPDATED  != getByte()) throw EXPTNreadTDT();
+   //TODO   NOT USED at the moment ! -> for recovery operations!
+   broken_time.tm_mday = get4b();
+   broken_time.tm_mon  = get4b();
+   broken_time.tm_year = get4b();
+   broken_time.tm_hour = get4b();
+   broken_time.tm_min  = get4b();
+   broken_time.tm_sec  = get4b();
+}
+
+void laydata::TEDfile::getRevision()
+{
+   if (tedf_REVISION  != getByte()) throw EXPTNreadTDT();
+   _revision = getWord();
+   _subrevision = getWord();
+}
+
+void laydata::TEDfile::putWord(const word data) {
+   fwrite(&data,2,1,_file);
+}
+
+void laydata::TEDfile::put4b(const int4b data) {
+   fwrite(&data,4,1,_file);
 }
 
 void laydata::TEDfile::putReal(const real data) {
@@ -161,39 +233,36 @@ void laydata::TEDfile::putReal(const real data) {
 }
 
 
-void laydata::TEDfile::getTime() {
-   byte timesize = sizeof(TIME_TPD);
-   _numread = fread(&_timestamp, timesize,1, _file);
-   if (_numread == 1) _position += timesize;
-   else _status = false;
-}
-
-void laydata::TEDfile::putTime() {
-   byte timesize = sizeof(TIME_TPD);
+void laydata::TEDfile::putTime() 
+{
    _timestamp = time(NULL);
-   fwrite(&_timestamp,timesize,1,_file);
+   tm* broken_time = localtime(&_timestamp);
+   putByte(tedf_TIMECREATED);
+   put4b(broken_time->tm_mday);
+   put4b(broken_time->tm_mon);
+   put4b(broken_time->tm_year);
+   put4b(broken_time->tm_hour);
+   put4b(broken_time->tm_min);
+   put4b(broken_time->tm_sec);
+   //TODO   NOT USED at the moment ! -> for recovery operations!
+   putByte(tedf_TIMEUPDATED);
+   put4b(broken_time->tm_mday);
+   put4b(broken_time->tm_mon);
+   put4b(broken_time->tm_year);
+   put4b(broken_time->tm_hour);
+   put4b(broken_time->tm_min);
+   put4b(broken_time->tm_sec);
 }
 
-TP laydata::TEDfile::getTP() {
-   TP deferr;
-   int4b x = get4b(); if (!_status) return deferr;
-   int4b y = get4b(); if (!_status) return deferr;
-   return TP(x,y);
+void laydata::TEDfile::putRevision() 
+{
+   putByte(tedf_REVISION);
+   putWord(_revision);
+   putWord(_subrevision);
 }
 
 void laydata::TEDfile::putTP(const TP* p) {
    put4b(p->x()); put4b(p->y());
-}
-
-CTM laydata::TEDfile::getCTM() {
-   CTM deferr;
-   real _a  = getReal(); if (!_status) return deferr;
-   real _b  = getReal(); if (!_status) return deferr;
-   real _c  = getReal(); if (!_status) return deferr;
-   real _d  = getReal(); if (!_status) return deferr;
-   real _tx = getReal(); if (!_status) return deferr;
-   real _ty = getReal(); if (!_status) return deferr;
-   return CTM(_a, _b, _c, _d, _tx, _ty);
 }
 
 void laydata::TEDfile::putCTM(const CTM matrix) {
@@ -203,22 +272,6 @@ void laydata::TEDfile::putCTM(const CTM matrix) {
    putReal(matrix.d());
    putReal(matrix.tx());
    putReal(matrix.ty());
-}
-
-std::string laydata::TEDfile::getString() {
-   std::string str;
-   byte length = getByte();
-   if (_status) {
-      char* strc = new char[length+1];
-      _numread = fread(strc, length, 1, _file);
-      strc[length] = 0x00;
-      if (_numread == 1) {
-         _position += length; str = strc;
-      }   
-      else _status = false;
-      delete[] strc;
-   }
-   return str;
 }
 
 void laydata::TEDfile::putString(std::string str) {

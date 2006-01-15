@@ -45,19 +45,18 @@ laydata::tdtdesign::tdtdesign(std::string name, real DBU, real UU) {
    _hiertree = NULL;
 }
 
-void laydata::tdtdesign::read(TEDfile* const tedfile) {
+void laydata::tdtdesign::read(TEDfile* const tedfile) 
+{
    std::string cellname;
-   while (tedf_CELL == tedfile->getByte()) {
-      cellname = tedfile->getString(); if (!tedfile->status()) return;
+   while (tedf_CELL == tedfile->getByte()) 
+   {
+      cellname = tedfile->getString();
       tell_log(console::MT_CELLNAME, cellname.c_str());
-//      laydata::AddLog('C', cellname);
       tedfile->registercellread(cellname, new tdtcell(tedfile, cellname));
-      if (!tedfile->status()) return;
    }
    recreate_hierarchy();
    _tmpdata = NULL;
    modified = false;
-//   AddLog('N', "Done");
    tell_log(console::MT_INFO, "Done");
 }
 

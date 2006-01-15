@@ -377,10 +377,10 @@ void CTM::toGDS(TP& trans, real& rot, real& scale, bool& flipX) const
    // Second presumption here is for the scale value returned. It is that
    // scX and scY are always the same
    real scX = sqrt(_a * _a + _c * _c);   
-   real scY = sqrt(_b * _b + _d * _d);
+//   real scY = sqrt(_b * _b + _d * _d);
    scale = scX;
    // rotation
-   real rot1= atan2(_b , _a);
+//   real rot1= atan2(_b , _a);
    rot = round(atan2(_b , _a) * 180.0 / M_PI);
    // if (rot < 0) rot = 180 + abs(rot);
    // flip
@@ -432,13 +432,13 @@ std::vector<std::string> split (const std::string& str, char delim)
 {
    typedef std::string::const_iterator iter;
    std::vector<std::string> ret;
-	
-	iter i = str.begin();
+
+   iter i = str.begin();
    //Ignore leader spaces
    i = std::find_if(i, str.end(), not_space);
-	while(i != str.end())
-	{
-		
+   while(i != str.end())
+   {
+
       //Ignore delimiter
       i = std::find_if(i, str.end(), std::bind2nd (std::not_equal_to<char>() , delim));
       //find out the end of next word 
@@ -448,7 +448,7 @@ std::vector<std::string> split (const std::string& str, char delim)
       //Copy character from range [i, j)
       if(i != str.end())
          ret.push_back(std::string(i, j));
-		i=j;
+   i=j;
 
    }
 

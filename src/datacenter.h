@@ -75,13 +75,13 @@ public:
    std::string                tedfilename() const  {return _tedfilename;};
    bool                       neversaved()  const  {return _neversaved;}; 
    bool                       modified() const     {return (NULL == _TEDDB) ? false : _TEDDB->modified;}; 
-   TIME_TPD                   tedtimestamp() const {return _tedtimestamp;};
+   time_t                     tedtimestamp() const {return _tedtimestamp;};
 protected:
    laydata::tdtdesign*        _TEDDB;      // toped data base
    GDSin::GDSFile*            _GDSDB;      // GDS parsed data
    std::string                _tedfilename;
    bool                       _neversaved;
-   TIME_TPD                   _tedtimestamp;
+   time_t                     _tedtimestamp;
 };
 
 #endif

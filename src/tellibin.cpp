@@ -74,6 +74,30 @@ int tellstdfunc::stdECHO::execute() {
 }
 
 //=============================================================================
+/*int tellstdfunc::stdDATE::argsOK(argumentQ* amap) {
+   return (!((amap->size() == 6) && ( ((*(*amap)[0])() == telldata::tn_int     ) &&
+                                      ((*(*amap)[1])() == telldata::tn_int     ) &&
+                                      ((*(*amap)[2])() == telldata::tn_int     ) &&
+                                      ((*(*amap)[3])() == telldata::tn_int     ) &&
+                                      ((*(*amap)[4])() == telldata::tn_int     ) &&
+                                      ((*(*amap)[5])() == telldata::tn_int     ) &&
+                                      ((*(*amap)[6])() == telldata::tn_int     ))));
+};
+
+std::string tellstdfunc::stdDATE::callingConv() {
+   return "(byte, string, word, byte ,byte, byte)";
+}
+
+int tellstdfunc::stdDATE::execute() {
+   word        sec = getWordValue();
+   word        min = getWordValue();
+   word       hour = getWordValue();
+   word       year = getWordValue();
+   word      month = getWordValue();
+   word       date = getWordValue();
+   return EXEC_NEXT;
+}*/
+//=============================================================================
 tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
@@ -1543,7 +1567,8 @@ int tellstdfunc::stdADDTEXT::execute() {
    DATC->unlockDB();
    OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
    LogFile << LogFile.getFN() << "(\"" << text << "\"," << la << "," << *rpnt <<
-           "," << angle << "," << flip << "," << magn << ");";LogFile.flush();
+         "," << angle << "," << LogFile._2bool(flip) << "," << magn << ");";
+   LogFile.flush();
    delete rpnt;
    UpdateLV();   
    return EXEC_NEXT;
@@ -1663,7 +1688,7 @@ int tellstdfunc::stdAUTOPAN::execute() {
    wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
    eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
    wxPostEvent(Toped, eventGRIDUPD);
-   LogFile << LogFile.getFN() << "(" << autop << ");"; LogFile.flush();
+   LogFile << LogFile.getFN() << "(" << LogFile._2bool(autop) << ");"; LogFile.flush();
    return EXEC_NEXT;
 }
 
@@ -2848,8 +2873,8 @@ int tellstdfunc::TDTread::execute() {
       UNDOcmdQ.clear();
       while (!UNDOPstack.empty()) {
          delete UNDOPstack.front(); UNDOPstack.pop_front();
-      }   
-   }                                                           
+      }
+   }
    return EXEC_NEXT;
 }
 
@@ -2895,8 +2920,8 @@ int tellstdfunc::GDSconvert::execute() {
    DATC->lockDB(false);
       DATC->importGDScell(name.c_str(), recur, over);
    DATC->unlockDB();
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << recur << "," << 
-                                                  over << ");"; LogFile.flush();
+   LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur) 
+         << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    return EXEC_NEXT;
 }
 
@@ -2939,7 +2964,8 @@ int tellstdfunc::GDSexportTOP::execute()
    DATC->unlockDB();
    if (NULL != excell)
    {
-      LogFile << LogFile.getFN() << "(\""<< cellname << "\"," << recur << ",\"" << filename << "\");";
+      LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
+            << LogFile._2bool(recur) << ",\"" << filename << "\");";
       LogFile.flush();
    }
    else

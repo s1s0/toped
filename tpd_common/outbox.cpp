@@ -118,3 +118,8 @@ EXPTNmanyTopCellsGDS::EXPTNmanyTopCellsGDS() {
    std::string news = "There are more then one top cells into GDS structure.\n Use advanced operations with this GDS";
    tell_log(console::MT_ERROR,news.c_str());
 };
+
+EXPTNreadTDT::EXPTNreadTDT() {
+   std::string news = "Error in TDT file";
+   tell_log(console::MT_ERROR,news.c_str());
+};

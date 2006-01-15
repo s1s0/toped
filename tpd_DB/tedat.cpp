@@ -318,9 +318,10 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
 //-----------------------------------------------------------------------------
 // class tdtbox
 //-----------------------------------------------------------------------------
-laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata() {
-   _p1 = new TP(tedfile->getTP()); if (!tedfile->status()) return;
-   _p2 = new TP(tedfile->getTP()); if (!tedfile->status()) return;
+laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata() 
+{
+   _p1 = new TP(tedfile->getTP());
+   _p2 = new TP(tedfile->getTP());
    normalize();
 }
 
@@ -582,12 +583,12 @@ laydata::tdtbox::~tdtbox() {
 //-----------------------------------------------------------------------------
 // class tdtpoly
 //-----------------------------------------------------------------------------
-laydata::tdtpoly::tdtpoly(TEDfile* const tedfile) : tdtdata(){
-   word numpoints = tedfile->getWord(); if (!tedfile->status()) return;
+laydata::tdtpoly::tdtpoly(TEDfile* const tedfile) : tdtdata()
+{
+   word numpoints = tedfile->getWord();
    _plist.reserve(numpoints);
-   for (word i = 0 ; i < numpoints; i++) {
-      _plist.push_back(tedfile->getTP()); if (!tedfile->status()) return;
-   }
+   for (word i = 0 ; i < numpoints; i++) 
+      _plist.push_back(tedfile->getTP());
 }
 
 void laydata::tdtpoly::openGL_draw(ctmstack& transtack, 
@@ -859,13 +860,13 @@ pointlist& laydata::tdtpoly::movePointsSelected(const SGBitSet* pset,
 //-----------------------------------------------------------------------------
 // class tdtwire
 //-----------------------------------------------------------------------------
-laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata() {
-   word numpoints = tedfile->getWord();  if (!tedfile->status()) return;
-   _width = tedfile->getWord();  if (!tedfile->status()) return;
+laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata() 
+{
+   word numpoints = tedfile->getWord();
+   _width = tedfile->getWord();
    _plist.reserve(numpoints);
-   for (word i = 0 ; i < numpoints; i++) {
-      _plist.push_back(tedfile->getTP()); if (!tedfile->status()) return;
-   }   
+   for (word i = 0 ; i < numpoints; i++) 
+      _plist.push_back(tedfile->getTP());
 }
 
 DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const {
@@ -1208,14 +1209,15 @@ pointlist& laydata::tdtwire::movePointsSelected(const SGBitSet* pset,
 //-----------------------------------------------------------------------------
 // class tdtcellref
 //-----------------------------------------------------------------------------
-laydata::tdtcellref::tdtcellref(TEDfile* const tedfile) {
+laydata::tdtcellref::tdtcellref(TEDfile* const tedfile) 
+{
    // read the name of the referenced cell
-   std::string cellrefname = tedfile->getString(); if (!tedfile->status()) return;
+   std::string cellrefname = tedfile->getString();
    // get the cell definition pointer and register the cellrefname as a child 
    // to the currently parsed cell
    _structure = tedfile->getcellinstance(cellrefname);
    // get the translation   
-   _translation = tedfile->getCTM();//if (!tedfile->status()) return;
+   _translation = tedfile->getCTM();
 }
 
 bool laydata::tdtcellref::ref_visible(ctmstack& transtack, const layprop::DrawProperties& drawprop) const {
@@ -1348,12 +1350,13 @@ DBbox laydata::tdtcellref::overlap() const {
 //-----------------------------------------------------------------------------
 // class tdtcellaref
 //-----------------------------------------------------------------------------
-laydata::tdtcellaref::tdtcellaref(TEDfile* const tedfile) : tdtcellref(tedfile) {
+laydata::tdtcellaref::tdtcellaref(TEDfile* const tedfile) : tdtcellref(tedfile) 
+{
    // get the matrix properties
-   _stepX = tedfile->get4b();  if (!tedfile->status()) return;
-   _stepY = tedfile->get4b();  if (!tedfile->status()) return;
-   _rows  = tedfile->getWord();if (!tedfile->status()) return;
-   _cols  = tedfile->getWord();if (!tedfile->status()) return;
+   _stepX = tedfile->get4b();
+   _stepY = tedfile->get4b();
+   _rows  = tedfile->getWord();
+   _cols  = tedfile->getWord();
 }
 
 bool laydata::tdtcellaref::aref_visible(ctmstack& transtack, const layprop::DrawProperties& drawprop, int* stst) const {
@@ -1516,10 +1519,11 @@ laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata() {
    
 }
    
-laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata() {
+laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata() 
+{
    _width = 0;
-   _text = tedfile->getString(); if (!tedfile->status()) return;
-   _translation = tedfile->getCTM();  if (!tedfile->status()) return;
+   _text = tedfile->getString();
+   _translation = tedfile->getCTM();
    for (unsigned i = 0; i < _text.length(); i++) 
       _width += glutStrokeWidth(GLUT_STROKE_ROMAN, _text[i]);
 }
