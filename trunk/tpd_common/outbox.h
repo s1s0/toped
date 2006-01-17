@@ -71,6 +71,19 @@ namespace console {
 }
    void tell_log(console::LOG_TYPE, const char* = NULL);
 
+class  TpdTime
+{
+   public:
+      TpdTime(time_t stdCTime) : _stdCTime(stdCTime){};
+      TpdTime(std::string);
+      std::string operator () ();
+      time_t            stdCTime() const {return _stdCTime;}
+   protected:
+      void              patternNormalize(wxString& str);
+      bool              getStdCTime(wxString& exp);
+      time_t            _stdCTime;
+};
+
 
 class EXPTN {};
  

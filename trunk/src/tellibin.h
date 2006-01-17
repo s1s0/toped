@@ -126,7 +126,6 @@ namespace tellstdfunc {
    using parsercmd::argumentTYPE;
 
    TELL_STDCMD_CLASSC(stdECHO          )
-//   TELL_STDCMD_CLASSC(stdDATE          )
    TELL_STDCMD_CLASSA(stdTELLSTATUS    )
    TELL_STDCMD_CLASSA(stdUNDO          )
    TELL_STDCMD_CLASSA(stdREDRAW        )
@@ -220,7 +219,6 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER )  //
 
    TELL_STDCMD_CLASSA_UNDO(stdADDMENU       )
-       
 
 //   laydata::tdtdesign*  currentDesign();
    telldata::ttint*     CurrentLayer();

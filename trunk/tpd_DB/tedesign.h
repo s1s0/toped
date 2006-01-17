@@ -32,8 +32,8 @@ namespace laydata {
 
    class tdtdesign {
    public:
-                     tdtdesign(std::string,real DBU = 1e-9, real UU = 1e-3);
-                    ~tdtdesign();                            
+      tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);
+      ~tdtdesign();
       void           read(TEDfile* const tedfile);
       void           write(TEDfile* const tedfile);
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
@@ -93,6 +93,8 @@ namespace laydata {
       real           UU()              const {return _UU;};
       TDTHierTree*   hiertree()        const {return _hiertree;};
       const cellList& cells()          const {return _cells;};
+      time_t         created()         const {return _created;}
+      time_t         lastUpdated()     const {return _lastUpdated;}
       bool           collect_usedlays(std::string, bool, usedlayList&) const;
       //
 //      const ACTIVE_OP tellop()         const {return _tellop;};
@@ -111,6 +113,8 @@ namespace laydata {
       TDTHierTree*   _hiertree;     // 
       tdtdata*       _tmpdata;      // pointer to a data under construction - for view purposes
       editobject     _target;       // edit/view target <- introduced with pedit operations
+      time_t         _created;
+      time_t         _lastUpdated;
 
    };
 }

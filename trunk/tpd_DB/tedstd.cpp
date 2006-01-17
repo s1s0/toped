@@ -92,7 +92,7 @@ void laydata::TEDfile::read() {
    real         DBU = getReal();
    real          UU = getReal();
    tell_log(console::MT_DESIGNNAME, name.c_str());
-   _design = new tdtdesign(name,DBU,UU);
+   _design = new tdtdesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in tdtdesign so don't search it here
    //byte designend = getByte(); 
@@ -202,15 +202,21 @@ void laydata::TEDfile::getTime()
    broken_time.tm_hour = get4b();
    broken_time.tm_min  = get4b();
    broken_time.tm_sec  = get4b();
-   _timestamp = mktime(&broken_time);
+   _created = mktime(&broken_time);
    if (tedf_TIMEUPDATED  != getByte()) throw EXPTNreadTDT();
-   //TODO   NOT USED at the moment ! -> for recovery operations!
    broken_time.tm_mday = get4b();
    broken_time.tm_mon  = get4b();
    broken_time.tm_year = get4b();
    broken_time.tm_hour = get4b();
    broken_time.tm_min  = get4b();
    broken_time.tm_sec  = get4b();
+   _lastUpdated = mktime(&broken_time);
+   std::string news = "Project created: ";
+   TpdTime timec(_created); news += timec();
+   tell_log(console::MT_INFO,news.c_str());
+   news = "Last updated: ";
+   TpdTime timeu(_lastUpdated); news += timeu();
+   tell_log(console::MT_INFO,news.c_str());
 }
 
 void laydata::TEDfile::getRevision()
@@ -218,6 +224,9 @@ void laydata::TEDfile::getRevision()
    if (tedf_REVISION  != getByte()) throw EXPTNreadTDT();
    _revision = getWord();
    _subrevision = getWord();
+   std::ostringstream ost; 
+   ost << "TDT format revision: " << _revision << "." << _subrevision;
+   tell_log(console::MT_INFO,ost.str().c_str());
 }
 
 void laydata::TEDfile::putWord(const word data) {
@@ -235,8 +244,8 @@ void laydata::TEDfile::putReal(const real data) {
 
 void laydata::TEDfile::putTime() 
 {
-   _timestamp = time(NULL);
-   tm* broken_time = localtime(&_timestamp);
+   time_t ctime = _design->created();
+   tm* broken_time = localtime(&ctime);
    putByte(tedf_TIMECREATED);
    put4b(broken_time->tm_mday);
    put4b(broken_time->tm_mon);
@@ -244,7 +253,10 @@ void laydata::TEDfile::putTime()
    put4b(broken_time->tm_hour);
    put4b(broken_time->tm_min);
    put4b(broken_time->tm_sec);
-   //TODO   NOT USED at the moment ! -> for recovery operations!
+   //
+   _lastUpdated = time(NULL);
+   _design->_lastUpdated = _lastUpdated;
+   broken_time = localtime(&_lastUpdated);
    putByte(tedf_TIMEUPDATED);
    put4b(broken_time->tm_mday);
    put4b(broken_time->tm_mon);

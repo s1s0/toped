@@ -25,6 +25,7 @@
 //===========================================================================
 #include <string>
 #include <wx/log.h>
+#include <wx/regex.h>
 #include "outbox.h"
 //const modificator is not accepted from the compiler for some reason.
 //Actually the problem is with the extern declarations in other files
@@ -98,7 +99,90 @@ void tell_log(console::LOG_TYPE lt, const char* msg) {
    wxLog::OnLog(lt, msg, time(NULL));
 }
 
+//=============================================================================
+std::string TpdTime::TpdTime::operator () ()
+{
+   tm* broken_time = localtime(&_stdCTime);
+   assert(broken_time != NULL);
+   char* btm = new char[256];
+   strftime(btm, 256, "%d-%m-%Y %T", broken_time);
+   std::string info = btm;
+   delete btm;
+   return info;
+}
 
+TpdTime::TpdTime(std::string str_time)
+{
+   wxString wxstr_time(str_time);
+   patternNormalize(wxstr_time);
+   getStdCTime(wxstr_time);
+}
+
+void TpdTime::patternNormalize(wxString& str) {
+   wxRegEx regex;
+   // replace tabs with spaces
+   assert(regex.Compile("\\t"));
+   regex.ReplaceAll(&str," ");
+   // remove continious spaces
+   assert(regex.Compile("[[:space:]]{2,}"));
+   regex.ReplaceAll(&str,"");
+   //remove leading spaces
+   assert(regex.Compile("^[[:space:]]"));
+   regex.ReplaceAll(&str,"");
+   // remove trailing spaces
+   assert(regex.Compile("[[:space:]]$"));
+   regex.ReplaceAll(&str,"");
+   //remove spaces before separators
+   assert(regex.Compile("([[:space:]])([\\-\\:])"));
+   regex.ReplaceAll(&str,"\\2");
+   // remove spaces after separators
+   assert(regex.Compile("([\\-\\:])([[:space:]])"));
+   regex.ReplaceAll(&str,"\\1");
+
+}
+
+bool TpdTime::getStdCTime(wxString& exp) {
+   const wxString tmpl2digits      = "[[:digit:]]{2,2}";
+   const wxString tmpl4digits      = "[[:digit:]]{4,4}";
+   const wxString tmplDate         = tmpl2digits+"\\-"+tmpl2digits+"\\-"+tmpl4digits;
+   const wxString tmplTime         = tmpl2digits+"\\:"+tmpl2digits+"\\:"+tmpl2digits;
+   wxRegEx src_tmpl(tmplDate+"[[:space:]]"+tmplTime);
+   assert(src_tmpl.IsValid());
+   // search the entire pattern
+   if (!src_tmpl.Matches(exp)) return false;
+   tm broken_time;
+   // get the date
+   assert(src_tmpl.Compile(tmpl2digits));
+   src_tmpl.Matches(exp);
+   broken_time.tm_mday = atoi(src_tmpl.GetMatch(exp).c_str());
+   src_tmpl.ReplaceFirst(&exp,"");
+   // get month
+   src_tmpl.Matches(exp);
+   broken_time.tm_mon = atoi(src_tmpl.GetMatch(exp).c_str()) - 1;
+   src_tmpl.ReplaceFirst(&exp,"");
+   // get year
+   assert(src_tmpl.Compile(tmpl4digits));
+   src_tmpl.Matches(exp);
+   broken_time.tm_year = atoi(src_tmpl.GetMatch(exp).c_str()) - 1900;
+   src_tmpl.ReplaceFirst(&exp,"");
+   // now the time - first hour
+   assert(src_tmpl.Compile(tmpl2digits));
+   src_tmpl.Matches(exp);
+   broken_time.tm_hour = atoi(src_tmpl.GetMatch(exp).c_str());
+   src_tmpl.ReplaceFirst(&exp,"");
+   // minutes
+   src_tmpl.Matches(exp);
+   broken_time.tm_min = atoi(src_tmpl.GetMatch(exp).c_str());
+   src_tmpl.ReplaceFirst(&exp,"");
+   // and seconds
+   src_tmpl.Matches(exp);
+   broken_time.tm_sec = atoi(src_tmpl.GetMatch(exp).c_str());
+   //
+   _stdCTime = mktime(&broken_time);
+   return true;
+}
+
+//=============================================================================
 EXPTNactive_cell::EXPTNactive_cell() {
    std::string news = "No active cell. Use opencell(\"<name>\") to select one";
    tell_log(console::MT_ERROR,news.c_str());
