@@ -100,7 +100,7 @@ void tell_log(console::LOG_TYPE lt, const char* msg) {
 }
 
 //=============================================================================
-std::string TpdTime::TpdTime::operator () ()
+std::string TpdTime::operator () ()
 {
    tm* broken_time = localtime(&_stdCTime);
    assert(broken_time != NULL);
@@ -113,7 +113,7 @@ std::string TpdTime::TpdTime::operator () ()
 
 TpdTime::TpdTime(std::string str_time)
 {
-   wxString wxstr_time(str_time);
+   wxString wxstr_time(str_time.c_str());
    patternNormalize(wxstr_time);
    getStdCTime(wxstr_time);
 }

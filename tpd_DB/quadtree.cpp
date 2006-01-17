@@ -27,7 +27,7 @@
 #include "quadtree.h"
 #include "tedat.h"
 #include "viewprop.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 
 #include "iostream"
 
