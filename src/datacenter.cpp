@@ -196,7 +196,6 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
 DataCenter::DataCenter() {
    _GDSDB = NULL; _TEDDB = NULL;
    _tedfilename = "unnamed";
-   _tedtimestamp = time(NULL);
 }
    
 DataCenter::~DataCenter() {
@@ -221,7 +220,6 @@ bool DataCenter::TDTread(std::string filename) {
    delete _TEDDB;//Erase existing data
    _tedfilename = filename;
    _neversaved = false;
-   _tedtimestamp = tempin.timestamp();
    _TEDDB = tempin.design();
    _TEDDB->btreeAddMember    = &browsers::treeAddMember;
    _TEDDB->btreeRemoveMember = &browsers::treeRemoveMember;
@@ -236,7 +234,6 @@ void DataCenter::TDTwrite(const char* filename) {
    std::string nfn;
    if (filename)  _tedfilename = filename;
    laydata::TEDfile tempin(_TEDDB, _tedfilename);
-   _tedtimestamp = tempin.timestamp();
    _neversaved = false;
 }
 
@@ -244,8 +241,7 @@ void DataCenter::GDSexport(std::string& filename)
 {
    std::string nfn;
    //Get actual time
-   _tedtimestamp = time(NULL);
-   GDSin::GDSFile gdsex(filename, _tedtimestamp);
+   GDSin::GDSFile gdsex(filename, time(NULL));
    _TEDDB->GDSwrite(gdsex, NULL, true);
    gdsex.updateLastRecord();gdsex.closeFile();
 }
@@ -254,8 +250,7 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
 {
    std::string nfn;
    //Get actual time
-   _tedtimestamp = time(NULL);
-   GDSin::GDSFile gdsex(filename, _tedtimestamp);
+   GDSin::GDSFile gdsex(filename, time(NULL));
    _TEDDB->GDSwrite(gdsex, cell, recur);
    gdsex.updateLastRecord();gdsex.closeFile();
 }
@@ -294,8 +289,10 @@ void DataCenter::GDSclose() {
    unlockGDS();
 }
 
-void DataCenter::newDesign(std::string name) {
-   if (_TEDDB) {
+void DataCenter::newDesign(std::string name, time_t created) 
+{
+   if (_TEDDB) 
+   {
       // Checks before closing(save?) available only when the command is launched 
       // via GUI(void TopedFrame::OnNewDesign(). If the command is typed directly 
       // on the command line, or parsed from file - no checks are executed.
@@ -305,15 +302,15 @@ void DataCenter::newDesign(std::string name) {
       // but there is still a chance to restore everything - using the log file.
       delete _TEDDB;
    }   
-   _TEDDB = new laydata::tdtdesign(name);
+   _TEDDB = new laydata::tdtdesign(name, created, 0);
    _TEDDB->btreeAddMember    = &browsers::treeAddMember;
    _TEDDB->btreeRemoveMember = &browsers::treeRemoveMember;
-    
+
    browsers::addTDTtab(name, _TEDDB->hiertree());
    _tedfilename = name + ".tdt";
    _neversaved = true;
    Properties->setUU(_TEDDB->UU());
-   
+
 }
 
 laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell) 

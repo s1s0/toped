@@ -37,12 +37,15 @@ laydata::editcellstack laydata::editobject::_editstack;
 //-----------------------------------------------------------------------------
 // class tdtdesign
 //-----------------------------------------------------------------------------
-laydata::tdtdesign::tdtdesign(std::string name, real DBU, real UU) {
+laydata::tdtdesign::tdtdesign(std::string name, time_t created, time_t lastUpdated, 
+                              real DBU, real UU) {
    _name = name;
    _DBU  = DBU; _UU   = UU;
    _tmpdata = NULL;
    modified = false;
    _hiertree = NULL;
+   _created = created;
+   _lastUpdated = lastUpdated;
 }
 
 void laydata::tdtdesign::read(TEDfile* const tedfile) 

@@ -58,7 +58,7 @@ public:
    void                       GDSclose();
    bool                       TDTread(std::string filename);
    void                       TDTwrite(const char* filename = NULL);
-   void                       newDesign(std::string name);
+   void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    GDSin::GDSFile*            lockGDS(bool throwexception = true);
    void                       unlockDB();
@@ -75,13 +75,11 @@ public:
    std::string                tedfilename() const  {return _tedfilename;};
    bool                       neversaved()  const  {return _neversaved;}; 
    bool                       modified() const     {return (NULL == _TEDDB) ? false : _TEDDB->modified;}; 
-   time_t                     tedtimestamp() const {return _tedtimestamp;};
 protected:
    laydata::tdtdesign*        _TEDDB;      // toped data base
    GDSin::GDSFile*            _GDSDB;      // GDS parsed data
    std::string                _tedfilename;
    bool                       _neversaved;
-   time_t                     _tedtimestamp;
 };
 
 #endif

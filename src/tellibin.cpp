@@ -74,30 +74,6 @@ int tellstdfunc::stdECHO::execute() {
 }
 
 //=============================================================================
-/*int tellstdfunc::stdDATE::argsOK(argumentQ* amap) {
-   return (!((amap->size() == 6) && ( ((*(*amap)[0])() == telldata::tn_int     ) &&
-                                      ((*(*amap)[1])() == telldata::tn_int     ) &&
-                                      ((*(*amap)[2])() == telldata::tn_int     ) &&
-                                      ((*(*amap)[3])() == telldata::tn_int     ) &&
-                                      ((*(*amap)[4])() == telldata::tn_int     ) &&
-                                      ((*(*amap)[5])() == telldata::tn_int     ) &&
-                                      ((*(*amap)[6])() == telldata::tn_int     ))));
-};
-
-std::string tellstdfunc::stdDATE::callingConv() {
-   return "(byte, string, word, byte ,byte, byte)";
-}
-
-int tellstdfunc::stdDATE::execute() {
-   word        sec = getWordValue();
-   word        min = getWordValue();
-   word       hour = getWordValue();
-   word       year = getWordValue();
-   word      month = getWordValue();
-   word       date = getWordValue();
-   return EXEC_NEXT;
-}*/
-//=============================================================================
 tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
 }
@@ -613,13 +589,17 @@ tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype) :
 
 int tellstdfunc::stdNEWDESIGN::execute() {
    std::string nm = getStringValue();
-   DATC->newDesign(nm);
+   DATC->newDesign(nm, time(NULL));
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      TpdTime timec(ATDB->created());
+   DATC->unlockDB();
    // reset UNDO buffers;
    UNDOcmdQ.clear();
    while (!UNDOPstack.empty()) {
       delete UNDOPstack.front(); UNDOPstack.pop_front();
-   }   
-   LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+   }
+   LogFile << LogFile.getFN() << "(\""<< nm << "\" , \"" << timec() <<
+         "\");"; LogFile.flush();
    return EXEC_NEXT;
 }
 
@@ -2864,11 +2844,12 @@ tellstdfunc::TDTread::TDTread(telldata::typeID retype) :
 int tellstdfunc::TDTread::execute() {
    std::string name = getStringValue();
    if (DATC->TDTread(name)) {
-      time_t ftime = DATC->tedtimestamp();
-      std::string time(ctime(&ftime));
-      time.erase(time.length()-1,1); // remove the trailing \n
-      LogFile << LogFile.getFN() << "(\""<< name << "\",\"" <<  time <<
-                                                        "\");"; LogFile.flush();
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         TpdTime timec(ATDB->created());
+         TpdTime timeu(ATDB->lastUpdated());
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "(\""<< name << "\",\"" <<  timec() <<
+            "\",\"" <<  timeu() << "\");"; LogFile.flush();
       // reset UNDO buffers;
       UNDOcmdQ.clear();
       while (!UNDOPstack.empty()) {
@@ -2887,7 +2868,12 @@ tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype) :
 int tellstdfunc::TDTsaveas::execute() {
    std::string name = getStringValue();
    DATC->TDTwrite(name.c_str());
-   LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      TpdTime timec(ATDB->created());
+      TpdTime timeu(ATDB->lastUpdated());
+   DATC->unlockDB();
+   LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << timec() <<
+         "\" , \"" << timeu() << "\");"; LogFile.flush();
    return EXEC_NEXT;
 }
 
@@ -2898,10 +2884,12 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype) :
 
 int tellstdfunc::TDTsave::execute() {
    DATC->TDTwrite();
-   time_t ftime = DATC->tedtimestamp();
-   std::string time(ctime(&ftime));
-   time.erase(time.length()-1,1); // remove the trailing \n
-   LogFile << LogFile.getFN() << "(\"" <<  time << "\");"; LogFile.flush();
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      TpdTime timec(ATDB->created());
+      TpdTime timeu(ATDB->lastUpdated());
+   DATC->unlockDB();
+   LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" << 
+         timeu() << "\");"; LogFile.flush();
    return EXEC_NEXT;
 }
 

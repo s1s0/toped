@@ -151,8 +151,9 @@ namespace laydata {
       bool                 status() const  {return _status;};
       word                 numread() const {return _numread;};
       tdtdesign*           design() const  {return _design;};
-      time_t               timestamp() const {return _timestamp;};
-   protected:
+      time_t               created() const {return _created;};
+      time_t               lastUpdated() const {return _lastUpdated;};
+      protected:
       bool                 _status;
       word                 _numread;
    private:
@@ -164,7 +165,8 @@ namespace laydata {
       FILE*                _file;
       word                 _revision;
       word                 _subrevision;
-      time_t               _timestamp;
+      time_t               _created;
+      time_t               _lastUpdated;
       tdtdesign*           _design;
       nameList             _childnames;
    };
