@@ -1104,6 +1104,8 @@ void tellstdfunc::stdDRAWBOX::undo() {
 }
 
 int tellstdfunc::stdDRAWBOX::execute() {
+   DATC->lockDB();
+   DATC->unlockDB();
    UNDOcmdQ.push_front(this);
    word     la = getWordValue();
    UNDOPstack.push_front(new telldata::ttint(la));
