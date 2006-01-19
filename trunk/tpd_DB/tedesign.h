@@ -71,7 +71,7 @@ namespace laydata {
       bool           group_selected(std::string name);
       shapeList*     ungroup_prep();
       atticList*     ungroup_this(shapeList*);
-      bool           cutpoly(pointlist& pl, atticList** dasao) {return _target.edit()->cutpoly_selected(pl,dasao);};
+      bool           cutpoly(pointlist& pl, atticList** dasao);
       bool           merge(atticList** dasao) {return _target.edit()->merge_selected(dasao);};
       unsigned int   numselected();
       DBbox          activeoverlap();
