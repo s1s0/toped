@@ -370,6 +370,13 @@ void laydata::tdtdesign::move_selected( TP p1, TP p2, selectList** fadead)
       do {} while(validate_cells());
 }   
 
+bool laydata::tdtdesign::cutpoly(pointlist& pl, atticList** dasao)
+{
+   for (pointlist::iterator CP = pl.begin(); CP != pl.end(); CP ++)
+      (*CP) *= _target.rARTM();
+   return _target.edit()->cutpoly_selected(pl,dasao); 
+}
+
 void laydata::tdtdesign::rotate_selected( TP p, real angle, selectList** fadead)
 {
    // Things to remember...
