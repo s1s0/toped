@@ -47,6 +47,8 @@ GDSin::GDSrecord::GDSrecord(FILE* Gf, word rl, byte rt, byte dt) {
 GDSin::GDSrecord::GDSrecord(byte rt, byte dt, word rl) {
    rectype = rt;datatype = dt;
    reclen = rl+4; index = 0;
+   // compensation for odd length ASCII string
+   if ((gdsDT_ASCII == datatype) && (rl % 2)) reclen++;
    record = new byte[reclen];
    add_int2b(reclen);
    record[index++] = rectype;
@@ -248,11 +250,14 @@ void GDSin::GDSrecord::add_int4b(const int4b data)
 }
 
 void GDSin::GDSrecord::add_ascii(const char* data)
-{
-   assert((reclen-4) == strlen(data));
+{  
+   word slen = strlen(data);
+   bool compensate = (slen % 2);
    word strindex = 0;
-   while (index < reclen)
+   while (strindex < slen)
       record[index++] = data[strindex++];
+   if (compensate) record[index++] = 0x00;
+   assert(compensate ? ((reclen-4) == slen+1) : ((reclen-4) == slen) );
 }
 
 void GDSin::GDSrecord::add_real8b(const real data)
