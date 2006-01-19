@@ -1104,13 +1104,11 @@ void tellstdfunc::stdDRAWBOX::undo() {
 }
 
 int tellstdfunc::stdDRAWBOX::execute() {
-   DATC->lockDB();
-   DATC->unlockDB();
-   UNDOcmdQ.push_front(this);
    word     la = getWordValue();
-   UNDOPstack.push_front(new telldata::ttint(la));
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(new telldata::ttint(la));
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = Properties->DBscale();
