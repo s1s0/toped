@@ -111,7 +111,6 @@ namespace browsers {
       void              collectInfo();
       wxString          selectedCellname() const {if (RBcellID.IsOk())
                                        return GetItemText(RBcellID); else return "";}
-      wxString          getTopCellName(void);
    protected:
       void              collectChildren(GDSin::GDSHierTree *root, 
                                                    wxTreeItemId& lroot);
@@ -146,8 +145,6 @@ namespace browsers {
       wxTreeItemId      top_structure;
       wxTreeItemId      active_structure;
       wxImageList*      _imageList;
-//      wxFont            _llfont_normal;
-//      wxFont            _llfont_bold;
       void              OnCommand(wxCommandEvent&);
       void              OnItemRightClick(wxTreeEvent&);
       void              OnBlankRMouseUp(wxMouseEvent&);
@@ -176,7 +173,6 @@ namespace browsers {
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
-      wxString          TDTGDSTopCellName() const;
    private:
       void              OnCommand(wxCommandEvent&);
       void              OnTELLaddTDTtab(const wxString, laydata::TDTHierTree*);

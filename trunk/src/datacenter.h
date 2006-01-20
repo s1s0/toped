@@ -54,7 +54,7 @@ public:
    void                       GDSparse(std::string filename, std::list<std::string>&);
    void                       GDSexport(std::string&);
    void                       GDSexport(laydata::tdtcell*, bool, std::string&);
-   void                       importGDScell(const char* name, bool recur, bool over);
+   void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
    bool                       TDTread(std::string filename);
    void                       TDTwrite(const char* filename = NULL);
