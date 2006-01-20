@@ -2894,19 +2894,56 @@ int tellstdfunc::TDTsave::execute() {
 }
 
 //=============================================================================
-tellstdfunc::GDSconvert::GDSconvert(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+tellstdfunc::GDSconvertAll::GDSconvertAll(telldata::typeID retype) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) 
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_string)));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
-int tellstdfunc::GDSconvert::execute() {
+int tellstdfunc::GDSconvertAll::execute() 
+{
+   bool  over  = getBoolValue();
+   bool  recur = getBoolValue();
+   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   nameList top_cells;
+   for (unsigned i = 0; i < pl->size(); i++)
+   {
+      // IF THIS doesn't compile for Windows, use the lines below instead
+      // ... and clean-up!
+      top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
+//      const std::string name = (static_cast<telldata::ttstring*>((pl->mlist())[i]))->value();
+//      top_cells.push_back(std::string(name.c_str()));
+   }
+   DATC->lockDB(false);
+      DATC->importGDScell(top_cells, recur, over);
+   DATC->unlockDB();
+   LogFile << LogFile.getFN() << "(\""<< *pl << "\"," << LogFile._2bool(recur) 
+         << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   delete pl;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::GDSconvert::GDSconvert(telldata::typeID retype) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype) 
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+
+}
+
+int tellstdfunc::GDSconvert::execute() 
+{
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
    std::string name = getStringValue();
+   nameList top_cells;
+   top_cells.push_back(name.c_str());
    DATC->lockDB(false);
-      DATC->importGDScell(name.c_str(), recur, over);
+   DATC->importGDScell(top_cells, recur, over);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur) 
          << "," << LogFile._2bool(over) << ");"; LogFile.flush();
@@ -3116,8 +3153,8 @@ void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
    //  - Second - the best place to clean-up the lists is of course inside
    // telldata::ttlayout class, however they don't know shit about laydata::tdtdata
    // though with a strange error message compiler claims that destructors will 
-   // not be called - and I have no other choise except to belive it.
-   // This if course is because of the separation of the project on modules
+   // not be called - and I have no other choice except to belive it.
+   // This of course is because of the separation of the project on modules
    for (word i = 0 ; i < llist->mlist().size(); i++) {
       delete (static_cast<telldata::ttlayout*>(llist->mlist()[i])->data());
    }

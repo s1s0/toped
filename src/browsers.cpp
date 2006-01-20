@@ -207,36 +207,6 @@ void browsers::GDSbrowser::OnBlankRMouseUp(wxMouseEvent& event) {
    ShowMenu(HitTest(pt), pt);
 }
 
-//Return first founded top cell name
-wxString browsers::GDSbrowser::getTopCellName(void)
-{
-   wxString cellName;
-   wxTreeItemId root, item;
-   wxTreeItemIdValue cookie;
-
-   root = GetRootItem();//Get GDS library name
-   if (!(root.IsOk()))
-   {
-      return cellName;
-   }
-
-   item = this->GetFirstChild(root, cookie);
-   if (!(item.IsOk()))
-   {  
-      return cellName;
-   }
-
-   cellName = this->GetItemText(item);
-   item = this->GetNextChild(root, cookie);
-
-   if (item.IsOk())
-   {  
-      throw EXPTNmanyTopCellsGDS();
-   }
-
-   return cellName;
-}
-
 void browsers::GDSbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
    wxMenu menu;
    RBcellID = id;
@@ -511,12 +481,6 @@ browsers::browserTAB::~browserTAB() {
 wxString browsers::browserTAB::TDTSelectedGDSName() const {
    if (NULL != _GDSstruct)
       return _GDSstruct->selectedCellname();
-   else return wxT("");
-}
-
-wxString browsers::browserTAB::TDTGDSTopCellName() const {
-   if (NULL != _GDSstruct)
-      return _GDSstruct->getTopCellName();
    else return wxT("");
 }
 

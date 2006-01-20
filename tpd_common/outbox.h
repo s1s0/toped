@@ -102,11 +102,11 @@ class EXPTNactive_GDS : public EXPTN  {
       EXPTNactive_GDS();
 };
 
-class EXPTNmanyTopCellsGDS : public EXPTN  {
+/*class EXPTNexisting_GDS : public EXPTN  {
    public:
       EXPTNmanyTopCellsGDS();
 };
-
+*/
 class EXPTNreadTDT : public EXPTN {
    public:
       EXPTNreadTDT();

@@ -257,7 +257,6 @@ void tui::TopedFrame::initMenuBar() {
    gdsMenu=new wxMenu();
    gdsMenu->Append(TMGDS_OPEN   , wxT("parse")  , wxT("Parse GDS file"));
    gdsMenu->Append(TMGDS_TRANSLATE , wxT("translate to library") , wxT("Import GDS structure"));
-   gdsMenu->Append(TMGDS_EXPORTL, wxT("export library") , wxT("Export library to GDS"));
    gdsMenu->Append(TMGDS_EXPORTC, wxT("export cell") , wxT("Export cell to GDS"));
    gdsMenu->Append(TMGDS_CLOSE  , wxT("close")  , wxT("Clear the parsed GDS file from memory"));
    
@@ -268,7 +267,7 @@ void tui::TopedFrame::initMenuBar() {
    fileMenu->AppendSeparator();
    fileMenu->Append(TMGDS_EXPORTL, wxT("Export library to GDS") , wxT("Export library to GDS"));
    fileMenu->Append(TMGDS_IMPORT , wxT("Import GDS to library") , wxT("Import GDS structure"));
-   fileMenu->Append(TMGDS_MENU   , wxT("Advanced GDS operations") , gdsMenu , wxT("Define marker movement"));
+   fileMenu->Append(TMGDS_MENU   , wxT("Advanced GDS operations") , gdsMenu , wxT("More granulated GDS related functions"));
    fileMenu->AppendSeparator();
    fileMenu->Append(TMFILE_SAVE  , wxT("Save\tCTRL-S")       , wxT("Save the database"));
    fileMenu->Append(TMFILE_SAVEAS, wxT("Save as ..."), wxT("Save the database under a new name"));
@@ -599,8 +598,7 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
       ost << "gdsread(\"" << dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\");";
-      _cmdline->parseCommand(ost, true);
-//      _cmdline->parseCommand(ost);
+      _cmdline->parseCommand(ost);
       SetStatusText("Stream "+dlg2.GetFilename()+" loded");
    }
    else SetStatusText("Parsing aborted");
@@ -691,30 +689,21 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
 {
-   OnGDSRead(evt);
-
-  // OnGDStranslate(evt);
-   wxString topCellName;
-
+   wxFileDialog dlg2(this, "Select a file", "", "", 
+                     "Stream files |*.sf;*.gds",
+                     wxOPEN);
+   if (wxID_OK != dlg2.ShowModal()) 
+   {
+      SetStatusText("Parsing aborted"); return;
+   }
+   SetStatusText("Importing GDS file...");
+   wxString filename = dlg2.GetFilename();
+   wxString ost_int;
+   ost_int << "gdsread(\"" << dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\")";
    wxString ost;
-   try
-   {
-      topCellName = _browsers->TDTGDSTopCellName();
-   }
-   catch (EXPTN) 
-   {
-      ost<<"There are more then one top cells into GDS structure\n"
-         <<"Use advanced operations menu with this GDS";
-      wxMessageBox(ost);
-      OnGDSclose(evt);
-      return;
-   }
-   
-   ost << "gdsimport(\"" << topCellName << "\" , "
-          <<  "true"    << " , "
-          <<  "true"    <<");";
-      _cmdline->parseCommand(ost);
-   OnGDSclose(evt);
+   ost << "gdsimport(" << ost_int << ", true, true );gdsclose();";
+   _cmdline->parseCommand(ost);
+   SetStatusText("Stream "+dlg2.GetFilename()+" imported");
 }
 
 void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {

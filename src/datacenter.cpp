@@ -257,6 +257,12 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
 
 void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells) 
 {
+   if (_GDSDB) 
+   {
+      std::string news = "Removing existing GDS data from memory...";
+      tell_log(console::MT_WARNING,news.c_str());
+      GDSclose();
+   }
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    // parse the GDS file
    _GDSDB = new GDSin::GDSFile(filename.c_str());
@@ -272,10 +278,11 @@ void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells
    unlockGDS();
 }
 
-void DataCenter::importGDScell(const char* name, bool recur, bool over) {
+void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over) {
    lockGDS();
       GDSin::gds2ted converter(_GDSDB, _TEDDB);
-      converter.structure(name, recur, over);
+      for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
+         converter.structure(CN->c_str(), recur, over);
       _TEDDB->modified = true;
       browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
    unlockGDS();
@@ -331,7 +338,7 @@ void DataCenter::unlockDB()
 
 GDSin::GDSFile* DataCenter::lockGDS(bool throwexception) 
 {
-   // Carefull HERE! When GDS is locked form the min thread
+   // Carefull HERE! When GDS is locked form the main thread
    // (GDS browser), then there is no catch pending -i.e.
    // throwing an exception will make the things worse
    // When it is locked from the parser command - then exception

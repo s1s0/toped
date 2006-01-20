@@ -18,7 +18,7 @@
 //    Description: wxWidget version
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -91,7 +91,7 @@
    };
 #endif
 
-// TELL_STDCMD_CLASSA - inherits one of the above class types,
+// TELL_STDCMD_CLASSB - inherits one of the above class types,
 // and is using the UNDO functionality of its ancestor.
 // The classes of this type MUST use the protected constructor of their
 // ancestor, otherwise the argument checks will get screwed-up.
@@ -136,6 +136,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(TDTsave          )
    TELL_STDCMD_CLASSA(TDTsaveas        )
    TELL_STDCMD_CLASSA(GDSread          )
+   TELL_STDCMD_CLASSA(GDSconvertAll    )
    TELL_STDCMD_CLASSA(GDSconvert       )
    TELL_STDCMD_CLASSA(GDSexportLIB     )
    TELL_STDCMD_CLASSA(GDSexportTOP     )
