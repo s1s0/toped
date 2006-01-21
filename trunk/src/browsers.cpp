@@ -231,6 +231,7 @@ void browsers::GDSbrowser::OnGDSreportlay(wxCommandEvent& WXUNUSED(event)) {
 BEGIN_EVENT_TABLE(browsers::TDTbrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( ID_TPD_CELLTREE, browsers::TDTbrowser::OnItemRightClick)
    EVT_RIGHT_UP(browsers::TDTbrowser::OnBlankRMouseUp)
+   EVT_LEFT_DCLICK(browsers::TDTbrowser::OnLMouseDblClk)
    EVT_MENU(CellTree_OpenCell, browsers::TDTbrowser::OnWXOpenCell)
    EVT_MENU(tui::TMCELL_REPORTLAY, browsers::TDTbrowser::OnReportUsedLayers)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::TDTbrowser::OnCommand)
@@ -308,6 +309,19 @@ void browsers::TDTbrowser::OnBlankRMouseUp(wxMouseEvent& event) {
    ShowMenu(HitTest(pt), pt);
 }
 
+void browsers::TDTbrowser::OnLMouseDblClk(wxMouseEvent& event)
+{
+   wxPoint pt = event.GetPosition();
+   wxTreeItemId id = HitTest(pt);
+   if (id.IsOk() && (id != GetRootItem()))
+   {
+      wxString ost; 
+      ost << "opencell(\"" << GetItemText(id) <<"\");";
+      Console->parseCommand(ost);
+
+   }
+
+}
 void browsers::TDTbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
     wxMenu menu;
     RBcellID = id;
