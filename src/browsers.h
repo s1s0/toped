@@ -148,6 +148,7 @@ namespace browsers {
       void              OnCommand(wxCommandEvent&);
       void              OnItemRightClick(wxTreeEvent&);
       void              OnBlankRMouseUp(wxMouseEvent&);
+      void              OnLMouseDblClk(wxMouseEvent&);
       void              OnWXOpenCell(wxCommandEvent&);
       void              OnWXCellARef(wxCommandEvent&);
       void              OnReportUsedLayers(wxCommandEvent&);
