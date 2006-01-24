@@ -1,3 +1,20 @@
+0.8 release
+============
+  * lists as a record fields - this is not implemented and has to be in order to close 
+    record handling. tell operations on lists - for the future releases.
+  * Function redefinition - required !
+  * revive the function parser
+  * Exception handling in the parser for user function calls (bug 6096)
+  * crash recovery using toped.log file. This could be too much work. Requires introduction of wxfiles
+  * environmental variable handling in flex (for include files)
+  * location of the log files - difference between crashed sessions and normally closed ones
+  * update the web
+  * include the documentation in the packages (tarball and rpm)
+  * include example tll files in the packages
+  * Update all file headers and authors file
+  * implement dbclose() and finish the undo procedures that depend on it.
+
+  
 To be done!!!
 ====================
   * MEMORY LEAKAGE DEBUG!
@@ -11,8 +28,6 @@ To be done!!!
   * Online hierarhy tree maintanence still has troubles - especially when
     deleting the stuff from the top level. Check and debug!
   * Draw selected figures using separate property definition.
-  * real->int conversion in TELL -> check do we really don't have something like this
-    if yes - fix the documentation
   * select edge with double click - needs algo for edge proximity. The same algo
     can be used for editpush selecting (optional?)
   * getpointlist(PARAMETERS) - general management of temporary images from TELL
@@ -27,7 +42,6 @@ To be done!!!
   
   TELL related
   ------------
-  * Function redefinition
   * TELL lists and their manupulation
     - think about indexing operatons on the lists - adding, removing components
   * break, continue, jump/goto statements and label (for the f.... jump)
@@ -47,7 +61,6 @@ To be done!!!
   To be implemented in the language:
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   * box blow - it's there but not implemented - box + real
-  * assign to field - window->point, point->coordinate
 
 Dialog stuff
 ============
@@ -61,8 +74,13 @@ Dialog stuff
    
 Documentation
 ==============
-  * GDS export functoins
+  * GDS import/export functoins
   * TELL status function
+  * real->int conversion in TELL -> check do we really don't have something like this
+    if yes - fix the documentation
+  * assign to field - window->point, point->coordinate
+
+  
 
 
 Seems OK
