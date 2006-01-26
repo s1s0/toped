@@ -114,14 +114,14 @@ void tui::CanvasStatus::setSelected(wxString numsel) {
    
 // The TopedFrame event table (TOPED main event table)
 BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
-   EVT_MENU( TMFILE_NEW          , tui::TopedFrame::OnNewDesign   )
+  /* EVT_MENU( TMFILE_NEW          , tui::TopedFrame::OnNewDesign   )
    EVT_MENU( TMFILE_OPEN         , tui::TopedFrame::OnTDTRead     )
-   EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
+   EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTDTRead    )
    EVT_MENU( TMGDS_OPEN          , tui::TopedFrame::OnGDSRead     )
    EVT_MENU( TMGDS_TRANSLATE     , tui::TopedFrame::OnGDStranslate)
    EVT_MENU( TMGDS_IMPORT       , tui::TopedFrame::OnGDSimport)
    EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnGDSexportLIB)
-   EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportTOP)
+   EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDStranslate)
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
@@ -170,7 +170,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSEL_PUNSELECT_IN  , tui::TopedFrame::OnPunselectIn )
    EVT_MENU( TMSEL_UNSELECT_ALL  , tui::TopedFrame::OnUnselectAll )
    
-
+*/
    EVT_MENU( TMSET_STEP          , tui::TopedFrame::OnStep        )
    EVT_MENU( TMSET_AUTOPAN       , tui::TopedFrame::OnAutopan     )
    EVT_MENU( TMSET_GRIDDEF       , tui::TopedFrame::OnGridDefine  )
@@ -184,7 +184,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
    
-   EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
+  // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+500 , tui::TopedFrame::OnMenu  )
    EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
    EVT_CLOSE(tui::TopedFrame::OnClose)
@@ -254,28 +254,58 @@ tui::TopedFrame::~TopedFrame() {
 void tui::TopedFrame::initMenuBar() {
    //---------------------------------------------------------------------------
    // menuBar entry fileMenu
-   gdsMenu=new wxMenu();
+   /*gdsMenu=new wxMenu();
    gdsMenu->Append(TMGDS_OPEN   , wxT("parse")  , wxT("Parse GDS file"));
    gdsMenu->Append(TMGDS_TRANSLATE , wxT("translate to library") , wxT("Import GDS structure"));
    gdsMenu->Append(TMGDS_EXPORTC, wxT("export cell") , wxT("Export cell to GDS"));
    gdsMenu->Append(TMGDS_CLOSE  , wxT("close")  , wxT("Clear the parsed GDS file from memory"));
+   */
    
-   fileMenu=new wxMenu();
+
+   /*fileMenu=new wxMenu();
    fileMenu->Append(TMFILE_NEW   , wxT("New ...\tCTRL-N")    , wxT("Create new design"));
    fileMenu->Append(TMFILE_OPEN  , wxT("Open ...\tCTRL-O")   , wxT("Open a TDT file"));
    fileMenu->Append(TMFILE_INCLUDE, wxT("Include ...")       , wxT("Include a TELL file"));
    fileMenu->AppendSeparator();
    fileMenu->Append(TMGDS_EXPORTL, wxT("Export library to GDS") , wxT("Export library to GDS"));
    fileMenu->Append(TMGDS_IMPORT , wxT("Import GDS to library") , wxT("Import GDS structure"));
-   fileMenu->Append(TMGDS_MENU   , wxT("Advanced GDS operations") , gdsMenu , wxT("More granulated GDS related functions"));
+   //fileMenu->Append(TMGDS_MENU   , wxT("Advanced GDS operations") , gdsMenu , wxT("More granulated GDS related functions"));
    fileMenu->AppendSeparator();
    fileMenu->Append(TMFILE_SAVE  , wxT("Save\tCTRL-S")       , wxT("Save the database"));
    fileMenu->Append(TMFILE_SAVEAS, wxT("Save as ..."), wxT("Save the database under a new name"));
    fileMenu->AppendSeparator();
-   fileMenu->Append(TMFILE_EXIT  , wxT("Exit")       , wxT("Exit Toped"));
+   fileMenu->Append(TMFILE_EXIT  , wxT("Exit")       , wxT("Exit Toped"));*/
+
+   menuBar = new wxMenuBar();
+   SetMenuBar( menuBar );
+
+   _resourceCenter->appendMenu("&File/New ...\tCTRL-N",  "", &tui::TopedFrame::OnNewDesign );
+   _resourceCenter->appendMenu("&File/Open ...\tCTRL-O", "", &tui::TopedFrame::OnTDTRead );
+   _resourceCenter->appendMenu("&File/Include ...",      "", &tui::TopedFrame::OnTELLRead );
+   _resourceCenter->appendMenuSeparator("&File");
+   _resourceCenter->appendMenu("&File/Export library to GDS","",  &tui::TopedFrame::OnGDSexportLIB );
+   _resourceCenter->appendMenu("&File/Import GDS to library","",  &tui::TopedFrame::OnGDSimport );
+   
+   _resourceCenter->appendMenu("&File/Advanced GDS operations/parse",   
+            "", &tui::TopedFrame::OnGDSRead );
+   _resourceCenter->appendMenu("&File/Advanced GDS operations/translate to library",   
+            "", &tui::TopedFrame::OnGDStranslate );
+   _resourceCenter->appendMenu("&File/Advanced GDS operations/export cell",   
+            "", &tui::TopedFrame::OnGDStranslate );
+   _resourceCenter->appendMenu("&File/Advanced GDS operations/close",   
+            "", &tui::TopedFrame::OnGDSclose );
+   _resourceCenter->appendMenuSeparator("&File");
+   
+   _resourceCenter->appendMenu("&File/Save\tCTRL-S","",  &tui::TopedFrame::OnTDTSave );
+   _resourceCenter->appendMenu("&File/Save as ...","",  &tui::TopedFrame::OnTDTSaveAs );
+   _resourceCenter->appendMenuSeparator("&File");
+   _resourceCenter->appendMenu("&File/Exit","",  &tui::TopedFrame::OnQuit );
+
+   
+
    //---------------------------------------------------------------------------
    // menuBar entry editMenu
-   editMenu=new wxMenu();
+   /*editMenu=new wxMenu();
    editMenu->Append(TMEDIT_UNDO  , wxT("Undo\tCTRL-Z")  , wxT("Undo last operation"));
    editMenu->AppendSeparator();
    editMenu->Append(TMEDIT_COPY  , wxT("Copy\tCTRL-C")  , wxT("Copy selected shapes"));
@@ -287,10 +317,23 @@ void tui::TopedFrame::initMenuBar() {
    editMenu->Append(TMEDIT_FLIPY, wxT("Flip Y\tCTRL-Y"), wxT("Flip selected shapes towards X axis "));
    editMenu->Append(TMEDIT_POLYCUT, wxT("Cut with poly\tCTRL-U"), wxT("Cut selected shapes with a polygon "));
    editMenu->Append(TMEDIT_MERGE, wxT("Merge\tCTRL-G"), wxT("Merge selected shpes"));
-   
+   */
+   _resourceCenter->appendMenu("&Edit/Undo\tCTRL-Z","",  &tui::TopedFrame::OnUndo );
+   _resourceCenter->appendMenuSeparator("Edit");
+   _resourceCenter->appendMenu("&Edit/Copy\tCTRL-C","",  &tui::TopedFrame::OnCopy );
+   _resourceCenter->appendMenu("&Edit/Move\tCTRL-M","",  &tui::TopedFrame::OnMove );
+   _resourceCenter->appendMenu("&Edit/Delete\tCTRL-D","",  &tui::TopedFrame::OnDelete );
+   _resourceCenter->appendMenuSeparator("Edit");
+   _resourceCenter->appendMenu("&Edit/Rotate 90\tCTRL-9","",  &tui::TopedFrame::OnRotate );
+   _resourceCenter->appendMenu("&Edit/Flip X\tCTRL-X","",  &tui::TopedFrame::OnFlipX );
+   _resourceCenter->appendMenu("&Edit/Flip Y\tCTRL-Y","",  &tui::TopedFrame::OnFlipY );
+   _resourceCenter->appendMenu("&Edit/Cut with poly\tCTRL-U","",  &tui::TopedFrame::OnPolyCut );
+   _resourceCenter->appendMenu("&Edit/Merge\tCTRL-G","",  &tui::TopedFrame::OnMerge );
+
+
    //---------------------------------------------------------------------------
    // menuBar entry viewMenu
-   viewMenu=new wxMenu();
+   /*viewMenu=new wxMenu();
    viewMenu->AppendCheckItem(TMVIEW_VIEWTOOLBAR  , wxT("Toolbar")  , wxT("Show/Hide the tool bar"));
    viewMenu->AppendCheckItem(TMVIEW_VIEWSTATUSBAR, wxT("Statusbar"), wxT("Show/Hide the status bar"));
    viewMenu->AppendSeparator();
@@ -304,10 +347,23 @@ void tui::TopedFrame::initMenuBar() {
    viewMenu->Append(TMVIEW_PANDOWN , wxT("Pan down\tSHIFT-DOWN") , wxT("Move the view window down"));
    viewMenu->AppendSeparator();
    viewMenu->Check(TMVIEW_VIEWTOOLBAR, true);
-   viewMenu->Check(TMVIEW_VIEWSTATUSBAR, true);
+   viewMenu->Check(TMVIEW_VIEWSTATUSBAR, true);*/
+
+    //???Add Toolbar & StatusBar check Item
+
+   _resourceCenter->appendMenu("&View/Zoom in\tF2","",  &tui::TopedFrame::OnzoomIn );
+   _resourceCenter->appendMenu("&View/Zoom out\tF3","",  &tui::TopedFrame::OnzoomOut );
+   _resourceCenter->appendMenu("&View/Zoom all\tF4","",  &tui::TopedFrame::OnZoomAll );
+   _resourceCenter->appendMenuSeparator("View");
+   _resourceCenter->appendMenu("&View/Pan left\tSHIFT-LEFT","",  &tui::TopedFrame::OnpanLeft );
+   _resourceCenter->appendMenu("&View/Pan right\tSHIFT-RIGHT","",  &tui::TopedFrame::OnpanRight );
+   _resourceCenter->appendMenu("&View/Pan up\tSHIFT-UP","",  &tui::TopedFrame::OnpanUp );
+   _resourceCenter->appendMenu("&View/Pan down\tSHIFT-DOWN","",  &tui::TopedFrame::OnpanDown );
+   _resourceCenter->appendMenuSeparator("View");
+
    //---------------------------------------------------------------------------
    // menuBar entry Cell
-   cellMenu=new wxMenu();
+   /*cellMenu=new wxMenu();
    cellMenu->Append(TMCELL_NEW      , wxT("New Cell") , wxT("Create anew cell"));
    cellMenu->Append(TMCELL_OPEN     , wxT("Open Cell") , wxT("Open existing cell for editing"));
    cellMenu->AppendSeparator();
@@ -321,16 +377,38 @@ void tui::TopedFrame::initMenuBar() {
    cellMenu->AppendSeparator();
    cellMenu->Append(TMCELL_GROUP    , wxT("Group Cell") , wxT("Group selected shapes in a cell"));
    cellMenu->Append(TMCELL_UNGROUP  , wxT("Unroup Cell") , wxT("Ungroup selected cell references"));
+   */
+   _resourceCenter->appendMenu("&Cell/New Cell","",  &tui::TopedFrame::OnCellNew );
+   _resourceCenter->appendMenu("&Cell/Open Cell","",  &tui::TopedFrame::OnCellOpen );
+   _resourceCenter->appendMenuSeparator("Cell");
+   _resourceCenter->appendMenu("&Cell/Edit Push\tF9","",  &tui::TopedFrame::OnCellPush );
+   _resourceCenter->appendMenu("&Cell/Edit Previous\tCtrl-F9","",  &tui::TopedFrame::OnCellPrev );
+   _resourceCenter->appendMenu("&Cell/Edit Pop\tF10","",  &tui::TopedFrame::OnCellPop );
+   _resourceCenter->appendMenu("&Cell/Edit Top\tCtrl-F10","",  &tui::TopedFrame::OnCellTop );
+   _resourceCenter->appendMenuSeparator("Cell");
+   _resourceCenter->appendMenu("&Cell/Cell Reference\tCtrl-R","",  &tui::TopedFrame::OnCellRef_M );
+   _resourceCenter->appendMenu("&Cell/Array of References\tAlt-R","",  &tui::TopedFrame::OnCellARef_M );
+   _resourceCenter->appendMenuSeparator("Cell");
+   _resourceCenter->appendMenu("&Cell/Group Cell","",  &tui::TopedFrame::OnCellGroup );
+   _resourceCenter->appendMenu("&Cell/Unroup Cell","",  &tui::TopedFrame::OnCellUngroup );
+
    //---------------------------------------------------------------------------
    // menuBar entry Draw
-   drawMenu=new wxMenu();
+   /*drawMenu=new wxMenu();
    drawMenu->Append(TMDRAW_BOX , wxT("Box\tCTRL-B")     , wxT("Create new box on the current layer"));
    drawMenu->Append(TMDRAW_POLY, wxT("Polygon\tCTRL-L") , wxT("Create new polygon on the current layer"));
    drawMenu->Append(TMDRAW_WIRE, wxT("Wire ...\tCTRL-W"), wxT("Create new wire on the current layer"));
    drawMenu->Append(TMDRAW_TEXT, wxT("Text ...\tCTRL-T"), wxT("Add text on the current layer"));
+   */
+   _resourceCenter->appendMenu("&Draw/Box\tCTRL-B",      "", &tui::TopedFrame::OnDrawBox );
+   _resourceCenter->appendMenu("&Draw/Polygon\tCTRL-L",  "", &tui::TopedFrame::OnDrawPoly );
+   _resourceCenter->appendMenu("&Draw/Wire ...\tCTRL-W", "", &tui::TopedFrame::OnDrawWire );
+   _resourceCenter->appendMenu("&Draw/Text ...\tCTRL-T", "", &tui::TopedFrame::OnDrawText );
+   
+
    //---------------------------------------------------------------------------
    // menuBar entry Modify
-   selectMenu=new wxMenu();
+   /*selectMenu=new wxMenu();
    selectMenu->Append(TMSEL_SELECT_IN   , wxT("Select\tCTRL-I")        , wxT("Select objects"));
    selectMenu->Append(TMSEL_PSELECT_IN  , wxT("Part select\tCTRL-P")  , wxT("Select object edges"));
    selectMenu->Append(TMSEL_SELECT_ALL  , wxT("Select all\tCTRL-A")    , wxT("Select all objects in the current cell"));
@@ -338,6 +416,17 @@ void tui::TopedFrame::initMenuBar() {
    selectMenu->Append(TMSEL_UNSELECT_IN , wxT("Unselect\tALT-I")      , wxT("Unselect objects"));
    selectMenu->Append(TMSEL_PUNSELECT_IN, wxT("Part unselect\tALT-P"), wxT("Unselect object edges"));
    selectMenu->Append(TMSEL_UNSELECT_ALL, wxT("Unselect all\tALT-A")  , wxT("Unselect all"));
+   */
+
+   _resourceCenter->appendMenu("&Select/Select\tCTRL-I", "", &tui::TopedFrame::OnSelectIn );
+   _resourceCenter->appendMenu("&Select/Part select\tCTRL-P", "", &tui::TopedFrame::OnPselectIn );
+   _resourceCenter->appendMenu("&Select/Select all\tCTRL-A", "", &tui::TopedFrame::OnSelectAll );
+   _resourceCenter->appendMenuSeparator("Select");
+   _resourceCenter->appendMenu("&Select/Unselect\tALT-I", "", &tui::TopedFrame::OnUnselectIn );
+   _resourceCenter->appendMenu("&Select/Part unselect\tALT-P", "", &tui::TopedFrame::OnPunselectIn );
+   _resourceCenter->appendMenu("&Select/Unselect all\tALT-A", "", &tui::TopedFrame::OnUnselectAll );
+   
+
    //---------------------------------------------------------------------------
    // menuBar entry Settings
    // first the sub menu
@@ -360,29 +449,29 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
    //---------------------------------------------------------------------------
    // menuBar entry helpMenu
-   helpMenu=new wxMenu();
+   /*helpMenu=new wxMenu();
    helpMenu->Append(TMHELP_ABOUTAPP       , wxT("About")          , wxT("About TOPED"));
+   */
+   _resourceCenter->appendMenu("&Help/About", "", &tui::TopedFrame::OnAbout );
+   
    //---------------------------------------------------------------------------
    // MENUBAR CONFIGURATION
-   menuBar = new wxMenuBar();
-   menuBar->Append(fileMenu      , wxT("&File"  ));
-   menuBar->Append(editMenu      , wxT("&Edit"  ));
-   menuBar->Append(viewMenu      , wxT("&View"  ));
-   menuBar->Append(cellMenu      , wxT("&Cell"  ));
-   menuBar->Append(drawMenu      , wxT("&Draw"  ));
-   menuBar->Append(selectMenu    , wxT("&Select"));
-   menuBar->Append(settingsMenu  , wxT("Se&ttings"));
-   menuBar->Append(helpMenu      , wxT("&Help"  ));
-   SetMenuBar( menuBar );
+   //menuBar = new wxMenuBar();
+   //menuBar->Append(fileMenu      , wxT("&File"  ));
+   //menuBar->Append(editMenu      , wxT("&Edit"  ));
+   //menuBar->Append(viewMenu      , wxT("&View"  ));
+   //menuBar->Append(cellMenu      , wxT("&Cell"  ));
+   //menuBar->Append(drawMenu      , wxT("&Draw"  ));
+   //menuBar->Append(selectMenu    , wxT("&Select"));
+    //menuBar->Append(helpMenu      , wxT("&Help"  ));
+   //SetMenuBar( menuBar );
    // default menu values
-   settingsMenu->Check(TMSET_CELLMARK,true);
-   settingsMenu->Check(TMSET_TEXTMARK,true);
-
-   wxMenuBar *menuBar=GetMenuBar();
-
-   _resourceCenter->appendMenu("Script/ADD BOX", "", "addbox();");
-   _resourceCenter->appendMenu("Script/Script2/ADD POLY", "", "addpoly();");
+   //settingsMenu->Check(TMSET_CELLMARK,true);
+   //settingsMenu->Check(TMSET_TEXTMARK,true);
    _resourceCenter->buildMenu(menuBar);
+  
+   menuBar->Insert(menuBar->GetMenuCount()-1,settingsMenu  , wxT("Se&ttings"));
+  
 }
 /*
 void TopedFrame::initToolBar() {
