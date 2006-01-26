@@ -123,7 +123,9 @@ typedef enum  {
 
    TMHELP_ABOUTAPP         ,
    TBSTAT_ABORT            ,
-   TMDUMMY = 500
+   //Warning!!! Do not use IDs between TMDUMMY and TMDUMMY_END
+   TMDUMMY = 500           ,
+   TMDUMMY_END = 11000
 } TOPED_MENUID;
 
 
