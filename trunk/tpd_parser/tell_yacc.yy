@@ -446,8 +446,10 @@ variabledeclaration:
 ;
 
 fielddeclaration:
-     telltype  tknIDENTIFIER                 {
-      if (!tellstruct->addfield($2, $1, CMDBlock->getTypeByID($1))) {
+     telltypeID  tknIDENTIFIER              {
+      const telldata::tell_type* ftype =
+            CMDBlock->getTypeByID($1 & ~telldata::tn_listmask);
+      if (!tellstruct->addfield($2, $1, ftype)) {
          tellerror("field with this name already defined in this strucutre", @2);
          $$ = false; // indicates that definition fails
       }

@@ -249,21 +249,9 @@ telldata::user_struct::user_struct(const tell_type* tltypedef, operandSTACK& OPs
    const recfieldsID& typefields = tltypedef->fields();
    for (recfieldsID::const_reverse_iterator CI = typefields.rbegin(); CI != typefields.rend(); CI++) 
    {// for every member of the structure
-      if (CI->second < tn_usertypes) 
-      { // buid-in type or structure
-         _fieldList.push_back(structRECNAME(CI->first,OPstack.top()->selfcopy()));
-         delete(OPstack.top());OPstack.pop();
-      }
-      else if (TLISALIST(CI->second)) {
-         assert(true); // push a list here
-      }
-      else 
-      {// user type
-         assert(OPstack.top()->get_type() == CI->second);
-         _fieldList.push_back(structRECNAME(CI->first,OPstack.top()->selfcopy()));
-//                                       new user_struct(*static_cast<user_struct*>(OPstack.top()))));
-         delete(OPstack.top());OPstack.pop();
-      }
+      assert(OPstack.top()->get_type() == CI->second);
+      _fieldList.push_back(structRECNAME(CI->first,OPstack.top()->selfcopy()));
+      delete(OPstack.top());OPstack.pop();
    }
 }
 
@@ -440,15 +428,14 @@ void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, b
       if ( TLUNKNOWN_TYPE( (**CA)() ) )
          if (TLISALIST(CF->second))
          {// check the list fields
-            telldata::typeID basetype = CF->second & ~telldata::tn_listmask;
-            // call in recursion the userStructCheck method of the child
-            (*CA)->userStructListCheck(*(vartype.findtype(basetype)), cmdUpdate);
+            if (TLCOMPOSIT_TYPE((CF->second) & ~telldata::tn_listmask))
+               (*CA)->userStructListCheck(*(vartype.findtype(CF->second)), cmdUpdate);
+            else
+               (*CA)->toList(cmdUpdate);
          }
          else
-         {
             // call in recursion the userStructCheck method of the child
             (*CA)->userStructCheck(*(vartype.findtype(CF->second)), cmdUpdate);
-         }
       if (!NUMBER_TYPE( CF->second ))
       {
          // for non-number types there is no internal conversion,

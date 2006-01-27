@@ -480,20 +480,7 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::type
          if (ID == ctp->second->ID()) return ctp->second;
    return NULL;
 }
-/*
-telldata::typeID* parsercmd::cmdBLOCK::checkfield(telldata::typeID ID, char*& fname, yyltype loc) const {
-   telldata::tell_type* stype = getTypeByID(ID);
-   if (NULL != stype) {
-      telldata::tell_type* ftype = stype.getfieldtype(fname);
-      if (NULL != ftype)
-         return ftype->ID();
-      else 
-         tellerror("Bad field name", loc);
-   }
-   else tellerror("Variable has no fields", loc);
-   return telldata::tn_void;
-}
-*/
+
 telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype loc) {
    if (ID & telldata::tn_listmask) return(new telldata::ttlist(ID));
    else
