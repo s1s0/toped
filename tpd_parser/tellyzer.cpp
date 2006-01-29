@@ -513,6 +513,13 @@ void parsercmd::cmdBLOCK::addFUNC(std::string, cmdSTDFUNC* cQ) {
    if (cQ)    delete cQ;
 }
 
+bool parsercmd::cmdBLOCK::addUSERFUNC(std::string, cmdSTDFUNC* cQ, argumentLIST*) {
+   TELL_DEBUG(addFUNC);
+   tellerror("Nested function definitions are not allowed");
+   if (cQ)    delete cQ;
+   return false;
+}
+
 int parsercmd::cmdBLOCK::execute() {
    TELL_DEBUG(cmdBLOCK_execute);
    int retexec = EXEC_NEXT; // to secure an empty block
@@ -559,18 +566,41 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    return fbody;
 }
 
-parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::funcDefined
-                                        (char*& fn, argumentLIST* alst) const
+bool  parsercmd::cmdBLOCK::funcValidate(const std::string& fn, argumentLIST* alst)
 {
    // convert argumentLIST to argumentMAP
-   telldata::argumentQ amap;
+   telldata::argumentQ arguMap;
    typedef argumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++)
-      amap.push_back(new telldata::argumentID((*arg)->second->get_type()));
-   // call
-   parsercmd::cmdSTDFUNC* body = getFuncBody(fn,&amap);
-   telldata::argQClear(&amap);
-   return body;
+      arguMap.push_back(new telldata::argumentID((*arg)->second->get_type()));
+   // get the function definitions with this name
+   typedef functionMAP::iterator MM;
+   std::pair<MM,MM> range = _funcMAP.equal_range(fn);
+   bool allow_definition = true;
+   for (MM fb = range.first; fb != range.second; fb++)
+   {
+      if (0 == fb->second->argsOK(&arguMap))
+      {// if function with this name and parameter list is already defined
+         if (fb->second->internal())
+         {
+            // can't redefine internal function
+            allow_definition = false;
+            break;
+         }
+         else
+         {
+            // TODO Warning - function will be redefined!
+            delete (fb->second);
+            _funcMAP.erase(fb);
+            std::ostringstream ost;
+            ost << "Warning! User function \""<< fn <<"\" is redefined";
+            tell_log(console::MT_WARNING, ost.str().c_str());
+            break;
+         }
+      }
+   }
+   telldata::argQClear(&arguMap);
+   return allow_definition;
 }
 
 //=============================================================================
@@ -608,7 +638,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 // first function body that matches the entire list of input arguments. This will be most
 // likely undefined. To prevent this we need beter checks during the function definition
 // parsing
-   int i = amap->size();
+   unsigned i = amap->size();
    if (i != arguments->size()) return -1;
    telldata::argumentQ UnknownArgsCopy;
    // :) - some fun here, but it might be confusing - '--' postfix operation is executed
@@ -796,8 +826,21 @@ int parsercmd::cmdMAIN::execute() {
    return retexec;
 }
 
-void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)  {
+void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
+{
    _funcMAP.insert(std::make_pair(fname,cQ));
+}
+
+bool parsercmd::cmdMAIN::addUSERFUNC(std::string fname , cmdSTDFUNC* cQ,
+                                                          argumentLIST* arglst)
+{
+   /*Check whether such a function is already defined */
+   if (CMDBlock->funcValidate(fname.c_str(),arglst))
+   {
+      _funcMAP.insert(std::make_pair(fname,cQ));
+      return true;
+   }
+   else return false;
 }
 
 parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {

@@ -216,26 +216,21 @@ funcdefinition:
          arglist = new parsercmd::argumentLIST;
          funcretype = $1;returns = 0;funcdeferrors = 0;
       }
-     funcarguments ')'                     {
-         /*Check whether such a function is already defined */
-         if (NULL != CMDBlock->funcDefined($2,arglist)) {
-            tellerror("function already defined",@$); 
-            delete [] $2;
-            parsercmd::ClearArgumentList(arglist); delete(arglist); arglist = NULL;
-            YYABORT;
-         }
-      }
-     funcblock                             {
+     funcarguments ')'  funcblock        {
          if ((telldata::tn_void != $1) && (0 == returns)) {
             tellerror("function must return a value", @$);
-            delete($8);// arglist is cleard by the cmdSTDFUNC destructor
+            delete($7);// arglist is cleared by the cmdSTDFUNC destructor
          }
          else  if (funcdeferrors > 0) {
             tellerror("function definition is ignored because of the errors above", @$);
-            delete($8);// arglist is cleard by the cmdSTDFUNC destructor
+            delete($7);// arglist is cleard by the cmdSTDFUNC destructor
          }
-         else
-            CMDBlock->addFUNC(std::string($2),$8);
+         else {
+            if (!CMDBlock->addUSERFUNC(std::string($2),$7,arglist)) {
+               tellerror("can't redefine internal function",@$);
+               delete ($7);
+            }
+         }
          arglist = NULL;
          delete [] $2;
    }
@@ -629,4 +624,13 @@ void tellerror (std::string s) {
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column << ": " << s;
    tell_log(console::MT_ERROR,ost.str().c_str());
 }
-
+// 
+// {
+//          /*Check whether such a function is already defined */
+//          if (NULL != CMDBlock->funcDefined($2,arglist)) {
+//             tellerror("function already defined",@$);
+//             delete [] $2;
+//             parsercmd::ClearArgumentList(arglist); delete(arglist); arglist = NULL;
+//             YYABORT;
+// }
+// }
