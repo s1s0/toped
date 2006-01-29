@@ -309,6 +309,7 @@ namespace  parsercmd {
       int                        execute();
       void                       cleaner();
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
+      virtual bool               addUSERFUNC(std::string, cmdSTDFUNC*, argumentLIST*);
       void                       addID(char*&, telldata::tell_var*);
       void                       addlocaltype(char*&, telldata::tell_type*);
       telldata::tell_type*       requesttypeID(char*&);
@@ -316,10 +317,9 @@ namespace  parsercmd {
       const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(char*&, bool local=false);
       telldata::tell_var*        newTellvar(telldata::typeID, yyltype);
-      cmdSTDFUNC*  const         funcDefined(char*&,argumentLIST*) const;
+      bool                       funcValidate(const std::string& ,argumentLIST*);
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
-//      void                       pushCompositeCmd(telldata::typeID);
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
       functionMAP const          funcMAP() const {return _funcMAP;};
@@ -336,7 +336,7 @@ namespace  parsercmd {
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
                               cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt):
-                                                   arguments(vm), returntype(tt) {};
+   arguments(vm), returntype(tt) {};
       virtual int             execute() = 0;
       // Next method - not virtual to save some hassle writing a plenty of empty methods
       virtual void            undo() {}; 
@@ -345,11 +345,13 @@ namespace  parsercmd {
       virtual int             argsOK(telldata::argumentQ* amap);
       telldata::typeID        gettype() const {return returntype;};
       virtual                ~cmdSTDFUNC();
+      virtual bool            internal() {return true;}
    protected:
       argumentLIST*           arguments;
       telldata::typeID        returntype;
       static telldata::UNDOPerandQUEUE  UNDOPstack;   // undo operand stack
       static undoQUEUE        UNDOcmdQ;     // undo command stack
+      bool                    _buildin;
    };
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
@@ -357,6 +359,7 @@ namespace  parsercmd {
       cmdFUNC(argumentLIST* vm, telldata::typeID tt);
 //      std::string             callingConv();
       int                     execute();
+      bool                    internal() {return false;}
    };
 
    class cmdIFELSE: public cmdVIRTUAL {
@@ -393,7 +396,8 @@ namespace  parsercmd {
    public:
       cmdMAIN();
       int   execute();
-      void  addFUNC(std::string fname , cmdSTDFUNC* cQ);
+      void  addFUNC(std::string, cmdSTDFUNC*);
+      bool  addUSERFUNC(std::string, cmdSTDFUNC*, argumentLIST*);
       void  addGlobalType(char*, telldata::tell_type*);
       ~cmdMAIN();
    };
