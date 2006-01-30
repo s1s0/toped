@@ -31,7 +31,8 @@ namespace tui
       MenuItemHandler(void);
       MenuItemHandler(int ID, std::string menuItem, std::string hotKey, std::string function);
       MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod);
-
+      MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString);
+      virtual ~MenuItemHandler() {};
       std::string    menuItem(void) { return _menuItem;};
       std::string    hotKey(void)   { return _hotKey;};
       std::string    function(void) { return _function;};
@@ -46,6 +47,7 @@ namespace tui
       std::string _menuItem; 
       std::string _hotKey;
       std::string _function;
+      std::string _helpString;
       bool        _inserted;
       callbackMethod _method;
    };
@@ -60,6 +62,10 @@ namespace tui
 
       MenuItem(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod)
          :MenuItemHandler(ID, menuItem, hotKey, cbMethod) {};
+
+      MenuItem(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString)
+         :MenuItemHandler(ID, menuItem, hotKey, cbMethod, helpString) {};
+      virtual ~MenuItem() {};
    };
 
    class MenuItemSeparator:public MenuItemHandler
@@ -67,6 +73,7 @@ namespace tui
    public:
       MenuItemSeparator(void);
       MenuItemSeparator(std::string menuItem);
+      virtual ~MenuItemSeparator() {};
       
       virtual void create(wxMenuBar *menuBar);
    };
@@ -84,6 +91,7 @@ namespace tui
       //!IMPORTANT after appending call buildMenu()
       void appendMenu(std::string menuItem, std::string hotKey, std::string function);
       void appendMenu(std::string menuItem, std::string hotKey, callbackMethod cbMethod);
+      void appendMenu(std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString);
       void appendMenuSeparator(std::string menuItem);
       void executeMenu(int ID);
       
