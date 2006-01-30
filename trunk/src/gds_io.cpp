@@ -833,6 +833,10 @@ GDSin::GDSbox::GDSbox(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
                delete cr; break;
             case gds_BOXTYPE:cr->Ret_Data(&boxtype);// Don't know what is this !!!
                delete cr; break;
+            case gds_PROPATTR: AddLog('W',"GDS box - PROPATTR record ignored");
+               delete cr;break;
+            case gds_PROPVALUE: AddLog('W',"GDS box - PROPVALUE record ignored");
+               delete cr;break;
             case gds_XY: {
                word numpoints = (cr->Get_reclen())/8 - 1;
                // one point less because fist and last point coincide
@@ -876,6 +880,10 @@ GDSin::GDSpolygon::GDSpolygon(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
             case gds_LAYER: cr->Ret_Data(&layer);
                delete cr;break;
             case gds_DATATYPE: cr->Ret_Data(&singletype);
+               delete cr;break;
+            case gds_PROPATTR: AddLog('W',"GDS boundary - PROPATTR record ignored");
+               delete cr;break;
+            case gds_PROPVALUE: AddLog('W',"GDS boundary - PROPVALUE record ignored");
                delete cr;break;
             case gds_XY: numpoints = (cr->Get_reclen())/8 - 1;
                // one point less because fist and last point coincide
@@ -923,6 +931,10 @@ GDSin::GDSpath::GDSpath(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
             case gds_BGNEXTN:   cr->Ret_Data(&bgnextn);
                delete cr;break;
             case gds_ENDEXTN:   cr->Ret_Data(&endextn);
+               delete cr;break;
+            case gds_PROPATTR: AddLog('W',"GDS path - PROPATTR record ignored");
+               delete cr;break;
+            case gds_PROPVALUE: AddLog('W',"GDS path - PROPVALUE record ignored");
                delete cr;break;
             case gds_XY:numpoints = (cr->Get_reclen())/8;
                _plist.reserve(numpoints);
@@ -997,6 +1009,10 @@ GDSin::GDStext::GDStext(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
             case gds_PATHTYPE: cr->Ret_Data(&pathtype);// ??? for test ???
                delete cr;break;
             case gds_WIDTH: cr->Ret_Data(&width);// seems not to be used
+               delete cr;break;
+            case gds_PROPATTR: AddLog('W',"GDS text - PROPATTR record ignored");
+               delete cr;break;
+            case gds_PROPVALUE: AddLog('W',"GDS text - PROPVALUE record ignored");
                delete cr;break;
             case gds_PRESENTATION:
                cr->Ret_Data(&ba,0,16);
