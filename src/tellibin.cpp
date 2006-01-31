@@ -1106,7 +1106,7 @@ void tellstdfunc::stdDRAWBOX::undo() {
 int tellstdfunc::stdDRAWBOX::execute() {
    word     la = getWordValue();
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
+   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(new telldata::ttint(la));
    // get the data from the stack
@@ -1338,7 +1338,7 @@ void tellstdfunc::stdDRAWPOLY::undo() {
 int tellstdfunc::stdDRAWPOLY::execute() {
    word     la = getWordValue();
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-1, &OPstack)) return EXEC_RETURN;
+   if (!tellstdfunc::waitGUInput(-1, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() > 3) {
@@ -1465,7 +1465,7 @@ int tellstdfunc::stdDRAWWIRE::execute() {
    real      w = getOpValue();
    real DBscale = Properties->DBscale();
    if (!tellstdfunc::waitGUInput(static_cast<int>(rint(w * DBscale)), &OPstack))
-      return EXEC_RETURN;
+      return EXEC_ABORT;
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() > 1) {
@@ -1807,7 +1807,7 @@ tellstdfunc::stdSELECT_I::stdSELECT_I(telldata::typeID retype) :
 
 int tellstdfunc::stdSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
+   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
    else return stdSELECT::execute();
 }
 
@@ -1927,7 +1927,7 @@ tellstdfunc::stdPNTSELECT_I::stdPNTSELECT_I(telldata::typeID retype) :
 
 int tellstdfunc::stdPNTSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
+   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
    return stdPNTSELECT::execute();
 }
 
@@ -1981,7 +1981,7 @@ tellstdfunc::stdUNSELECT_I::stdUNSELECT_I(telldata::typeID retype) :
 
 int tellstdfunc::stdUNSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
+   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
    else return stdUNSELECT::execute();
 }
 
@@ -2101,7 +2101,7 @@ tellstdfunc::stdPNTUNSELECT_I::stdPNTUNSELECT_I(telldata::typeID retype) :
 
 int tellstdfunc::stdPNTUNSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_RETURN;
+   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
    else return stdPNTUNSELECT::execute();
 }
 
@@ -2250,7 +2250,7 @@ tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype) :
 
 int tellstdfunc::stdCOPYSEL_D::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-3, &OPstack)) return EXEC_RETURN;
+   if (!tellstdfunc::waitGUInput(-3, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    OPstack.push(new telldata::ttpnt(w->p1().x(), w->p1().y()));
@@ -2350,7 +2350,7 @@ tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype) :
 
 int tellstdfunc::stdMOVESEL_D::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-2, &OPstack)) return EXEC_RETURN;
+   if (!tellstdfunc::waitGUInput(-2, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    OPstack.push(new telldata::ttpnt(w->p1().x(), w->p1().y()));
@@ -2738,7 +2738,7 @@ int tellstdfunc::lgcCUTPOLY_I::execute() {
       return EXEC_NEXT;
    }
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-1, &OPstack)) return EXEC_RETURN;
+   if (!tellstdfunc::waitGUInput(-1, &OPstack)) return EXEC_ABORT;
    return lgcCUTPOLY::execute();
 }
 
@@ -3094,7 +3094,7 @@ telldata::ttint* tellstdfunc::CurrentLayer() {
 bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack) {
    // Create a temporary object in the tdtdesign
    try {DATC->mouseStart(input_type);}
-   catch (EXPTN) {return false;}   
+   catch (EXPTN) {return false;}
    // flag the prompt that we expect a list of points & handle a pointer to
    // the operand stack
    if ((input_type == 0) || (input_type < -1))

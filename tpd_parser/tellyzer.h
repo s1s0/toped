@@ -37,6 +37,7 @@
 
 #define  EXEC_NEXT      0
 #define  EXEC_RETURN    1
+#define  EXEC_ABORT     2
 
 #define YYLTYPE parsercmd::yyltype
 

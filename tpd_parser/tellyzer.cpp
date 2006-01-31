@@ -389,12 +389,13 @@ int parsercmd::cmdSTRUCT::execute()
 }
 
 //=============================================================================
-int parsercmd::cmdFUNCCALL::execute() {
+int parsercmd::cmdFUNCCALL::execute()
+{
    TELL_DEBUG(cmdFUNC);
    LogFile.setFN(funcname);
    int fresult;
    try {fresult = funcbody->execute();}
-   catch (EXPTN) {return EXEC_RETURN;}
+   catch (EXPTN) {return EXEC_ABORT;}
    funcbody->cmdSTDFUNC::undo_cleanup();
    return fresult;
 }
@@ -589,7 +590,6 @@ bool  parsercmd::cmdBLOCK::funcValidate(const std::string& fn, argumentLIST* als
          }
          else
          {
-            // TODO Warning - function will be redefined!
             delete (fb->second);
             _funcMAP.erase(fb);
             std::ostringstream ost;
@@ -767,8 +767,9 @@ int parsercmd::cmdFUNC::execute() {
       delete argval;OPstack.pop();
    }
    LogFile << "// Executing UDF " << LogFile.getFN();LogFile.flush();   
-   cmdBLOCK::execute();
-   return EXEC_NEXT;
+   int retexec = cmdBLOCK::execute();
+   if (EXEC_ABORT == retexec) return retexec;
+   else return EXEC_NEXT;
 }
 
 //=============================================================================
@@ -815,10 +816,12 @@ int parsercmd::cmdREPEAT::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdMAIN::execute() {
+int parsercmd::cmdMAIN::execute()
+{
    TELL_DEBUG(cmdMAIN_execute);
    int retexec = EXEC_NEXT;
-   while (!cmdQ.empty()) {
+   while (!cmdQ.empty())
+   {
       cmdVIRTUAL *a = cmdQ.front();cmdQ.pop_front();
       if (EXEC_NEXT == retexec) retexec = a->execute();
       delete a;
