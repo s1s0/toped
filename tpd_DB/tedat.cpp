@@ -1405,6 +1405,13 @@ bool laydata::tdtcellaref::aref_visible(ctmstack& transtack, const layprop::Draw
           (int) rint((clip.p1().y() - array_overlap.p1().y()) / cstepY) : 0;
       stst[1] = stst[0] + (int) rint((visual_box.p2().x() - visual_box.p1().x()) / cstepX);
       stst[3] = stst[2] + (int) rint((visual_box.p2().y() - visual_box.p1().y()) / cstepY);
+      // add an extra row/column from both sides to ensure visibility of the`
+      // border areas
+      stst[0] -= (0 == stst[0]) ? 0 : 1;
+      stst[2] -= (0 == stst[2]) ? 0 : 1;
+      stst[1] += (_cols == stst[1]) ? 0 : 1;
+      stst[3] += (_rows == stst[3]) ? 0 : 1;
+
    }
    return true;
 }
