@@ -1,10 +1,12 @@
-0.8 release
+TODO for 0.8 release
 ============
-  * lists as a record fields - this is not implemented and has to be in order to close 
+> * lists as a record fields - this is not implemented and has to be in order to close
     record handling. tell operations on lists - for the future releases.
-  * Function redefinition - required !
+> * Function redefinition - required !
+> * Exception handling in the parser for user function calls (bug 6096)
+> * Array drawing (bug 6161)
+> * implement removecell() and finish the undo procedures that depend on it.
   * revive the function parser
-  * Exception handling in the parser for user function calls (bug 6096)
   * crash recovery using toped.log file. This could be too much work. Requires introduction of wxfiles
   * environmental variable handling in flex (for include files)
   * location of the log files - difference between crashed sessions and normally closed ones
@@ -12,9 +14,7 @@
   * include the documentation in the packages (tarball and rpm)
   * include example tll files in the packages
   * Update all file headers and authors file
-  * implement dbclose() and finish the undo procedures that depend on it.
 
-  
 To be done!!!
 ====================
   * MEMORY LEAKAGE DEBUG!

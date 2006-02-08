@@ -609,27 +609,90 @@ tellstdfunc::stdNEWCELL::stdNEWCELL(telldata::typeID retype) :
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-void tellstdfunc::stdNEWCELL::undo_cleanup() {
+void tellstdfunc::stdNEWCELL::undo_cleanup()
+{
+   getStringValue(UNDOPstack, false);
 }
 
-void tellstdfunc::stdNEWCELL::undo() {
+void tellstdfunc::stdNEWCELL::undo()
+{
+   // get the name of the new cell
+   std::string  nm = getStringValue(UNDOPstack, true);
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+   assert(ATDB->removecell(nm,NULL));
+   DATC->unlockDB();
 }
 
-int tellstdfunc::stdNEWCELL::execute() {
+int tellstdfunc::stdNEWCELL::execute()
+{
    std::string nm = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      if (!ATDB->addcell(nm)) {
-         std::string news = "Cell \"";
-         news += nm; news += "\" already exists";
-         tell_log(console::MT_ERROR,news.c_str());
-      }
-      else {
-         LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
-      }
+   laydata::tdtcell* new_cell = ATDB->addcell(nm);
    DATC->unlockDB();
+   if (NULL != new_cell)
+   {
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(new telldata::ttstring(nm));
+      LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+   }
+   else
+   {
+      std::string news = "Cell \"";
+      news += nm; news += "\" already exists";
+      tell_log(console::MT_ERROR,news.c_str());
+   }
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::stdREMOVECELL::stdREMOVECELL(telldata::typeID retype) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+void tellstdfunc::stdREMOVECELL::undo_cleanup()
+{
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   getStringValue(UNDOPstack, false);
+   delete pl;
+}
+
+void tellstdfunc::stdREMOVECELL::undo()
+{
+   TEUNDO_DEBUG("removecell( string ) UNDO");
+   // get the contents of the removed cell
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   // get the name of the removed cell
+   std::string  nm = getStringValue(UNDOPstack, true);
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+   // first add a cell
+   laydata::tdtcell* restored_cell = ATDB->addcell(nm);
+   assert(NULL != restored_cell);
+   // add the cell contents back
+   // no validation required, because the cell is not referenced
+   restored_cell->addlist(ATDB, get_shlaylist(pl));
+   DATC->unlockDB();
+   // finally - clean-up behind
+   delete pl;
+}
+
+int tellstdfunc::stdREMOVECELL::execute()
+{
+   std::string nm = getStringValue();
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   laydata::atticList* cell_contents = new laydata::atticList();
+   bool removed = ATDB->removecell(nm,cell_contents);
+   DATC->unlockDB();
+   if (removed)
+   {  // removal has been successfull
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(new telldata::ttstring(nm));
+      UNDOPstack.push_front(make_ttlaylist(cell_contents));
+      LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+   }
+   return EXEC_NEXT;
+}
 //=============================================================================
 tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype) :
                                cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
@@ -2526,33 +2589,37 @@ tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype) :
 
 void tellstdfunc::stdGROUP::undo_cleanup() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   getStringValue(UNDOPstack, false);
    delete pl;
 }
 
 void tellstdfunc::stdGROUP::undo() {
    TEUNDO_DEBUG("group(string) UNDO");
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   // get the name of the removed cell
+   std::string  name = getStringValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->select_fromList(get_ttlaylist(pl));
       ATDB->ungroup_this(ATDB->ungroup_prep());
+      assert(ATDB->removecell(name,NULL));
    DATC->unlockDB();
    delete pl;
-//   SGREM HERE!!! Delete the cell (not just the reference!) Wait for ATDB->remove_cell()
-   UpdateLV();   
+   UpdateLV();
 }
 
 int tellstdfunc::stdGROUP::execute() {
    std::string name = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      if (ATDB->group_selected(name)) {
-         UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
-/*-!-*/  DATC->unlockDB();
-         LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
-         UpdateLV();   
-      }
-      else
-/*-!-*/  DATC->unlockDB();
+   bool group_sucessful = ATDB->group_selected(name);
+   DATC->unlockDB();
+   if (group_sucessful)
+   {
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(new telldata::ttstring(name));
+      UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
+      LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+      UpdateLV();
+   }
    return EXEC_NEXT;
 }
 

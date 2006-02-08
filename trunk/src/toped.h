@@ -112,7 +112,7 @@ namespace tui {
       void   OnGDSimport(wxCommandEvent&);
       void   OnGDStranslate(wxCommandEvent&);
       void   OnGDSexportLIB(wxCommandEvent&);
-      void   OnGDSexportTOP(wxCommandEvent&);
+      void   OnGDSexportCELL(wxCommandEvent&);
       void    OnGDSclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("gdsclose();");};
       void     OnTDTSave(wxCommandEvent&);
       void   OnTDTSaveAs(wxCommandEvent&);

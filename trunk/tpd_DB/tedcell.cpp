@@ -1319,6 +1319,30 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB) {
    }
 }   
 
+void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const {
+   // Check that there are referenced cells
+   if (_layers.end() != _layers.find(0))
+   {
+      tdtcell* childref;
+      assert(!_children.empty());
+      // remove all children from the hierarchy tree
+      for (nameList::const_iterator CN = _children.begin(); CN != _children.end(); CN++)
+      {
+         childref = ATDB->checkcell(*CN);
+         childref->_orphan = ATDB->_hiertree->removeParent(
+               childref, this, ATDB->_hiertree);
+         ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(),
+                                 childref->orphan());
+      }
+   }
+   // remove this form _hiertree
+   ATDB->_hiertree->removeRootItem(this, ATDB->_hiertree);
+   // and browser tab
+   ATDB->btreeRemoveMember(name().c_str(), NULL, false);
+   // don't clear children, the cell will be moved to Attic
+   //_children.clear();
+}
+
 unsigned int laydata::tdtcell::numselected() {
    unsigned int num = 0;
    dataList *lslct;

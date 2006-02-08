@@ -211,8 +211,8 @@ typedef  std::list<std::string>  nameList;
 //=============================================================================
 template <class TYPE> class SGHierTree {
 public:
-   SGHierTree(TYPE* comp, TYPE* prnt, SGHierTree* lst);
-   SGHierTree(TYPE* comp, SGHierTree* lst) {
+   SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst);
+   SGHierTree(const TYPE* comp, SGHierTree* lst) {
       component = comp; last = lst;
    };
    SGHierTree*   GetFirstRoot() {
@@ -225,27 +225,28 @@ public:
       while (wv && (wv->parent)) wv = wv->last;
       return wv;
    };
-   SGHierTree*  GetMember(TYPE* comp) {
+   SGHierTree*  GetMember(const TYPE* comp) {
       SGHierTree* wv = this;
       while (wv && (wv->component != comp)) 
          wv = wv->last;
       return wv;
    };
-   SGHierTree*  GetNextMember(TYPE* comp) {
+   SGHierTree*  GetNextMember(const TYPE* comp) {
       SGHierTree* wv = this->last;
       while (wv && (wv->component != comp)) wv = wv->last;
       return wv;
    };
-   int            addParent(TYPE* comp, TYPE* prnt, SGHierTree*& lst);
-   bool           removeParent(TYPE* comp, TYPE* prnt, SGHierTree*& lst);
-   bool           checkAncestors(TYPE* comp, TYPE* prnt, SGHierTree*& lst);
+   int            addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
+   bool           removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
+   bool           removeRootItem(const TYPE*comp, SGHierTree*& lst);
+   bool           checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    SGHierTree*    GetBrother()         {return brother;};
    SGHierTree*    GetChild()           {return Fchild;};
    SGHierTree*    Getparent()          {return parent;};
    SGHierTree*    GetLast()            {return last;};
-   TYPE*          GetItem()            {return component;};
+   const TYPE*    GetItem()            {return component;};
 protected:
-   TYPE          *component; // points to the component 
+   const TYPE     *component; // points to the component
    SGHierTree*    last;      // last in the linear list of components
    SGHierTree*    parent;    // points up
    SGHierTree*    brother;   // points right
@@ -254,8 +255,8 @@ protected:
 
 // The constructor
 template <class TYPE>
-SGHierTree<TYPE>::SGHierTree(TYPE* comp, TYPE* prnt, SGHierTree* lst) {
-   component = comp;last = lst; 
+SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst) {
+   component = comp;last = lst;
    SGHierTree* wv = last;
    // look for parent
    if (prnt) {
@@ -275,7 +276,7 @@ SGHierTree<TYPE>::SGHierTree(TYPE* comp, TYPE* prnt, SGHierTree* lst) {
 };
 
 template <class TYPE> 
-    bool SGHierTree<TYPE>::checkAncestors(TYPE* comp, TYPE* prnt, SGHierTree*& lst) {
+    bool SGHierTree<TYPE>::checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
    // returns true  -> prnt is already an ancestor of the comp
    //         false -> otherwise
   SGHierTree* wv = lst->GetMember(comp);
@@ -292,7 +293,7 @@ template <class TYPE>
 };
 
 template <class TYPE>
-int SGHierTree<TYPE>::addParent(TYPE* comp, TYPE* prnt, SGHierTree*& lst) {
+int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
    // returns 0 -> nothin's changed (this parent is already in the list)
    //         1 -> first parrent added (component use to be orphan)
    //         2 -> new parent added
@@ -330,12 +331,12 @@ int SGHierTree<TYPE>::addParent(TYPE* comp, TYPE* prnt, SGHierTree*& lst) {
 };
 
 template <class TYPE>
-bool  SGHierTree<TYPE>::removeParent(TYPE* comp, TYPE* prnt, SGHierTree*& lst) {
+bool  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
    SGHierTree* citem;
    SGHierTree* check;
    SGHierTree* cparent = lst->GetMember(prnt);
    while (cparent) {
-      // first unlink comp form its brothers, because comp will be deleted
+      // first unlink comp from its brothers, because comp will be deleted
       assert(cparent->Fchild);
       if (cparent->Fchild->GetItem() == comp) {
          citem = cparent->Fchild;
@@ -376,6 +377,34 @@ bool  SGHierTree<TYPE>::removeParent(TYPE* comp, TYPE* prnt, SGHierTree*& lst) {
    return false;
 }
 
+/*! Requires root childless item */
+template <class TYPE>
+bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
+{
+   SGHierTree* wv = lst;
+   SGHierTree* wvp = NULL;
+   while (wv)
+   {// Find the coponent and its place in the list
+      if (wv->component != comp)
+      {
+         wvp = wv;
+         wv = wv->last;
+      }
+      else
+      {// make sure that's a root component
+         assert(NULL == wv->parent);
+         // make sure that it's childless
+         assert(NULL == wv->Fchild);
+         // unlink it from the list
+         if (wvp) wvp->last = wv->last;
+         else lst = wv->last;
+         // finally we can delete the comp
+         delete wv;
+         return true;
+      }
+   }
+   return false;
+}
 
 std::vector<std::string> split (const std::string& str, char delim);
 

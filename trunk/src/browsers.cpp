@@ -320,8 +320,9 @@ void browsers::TDTbrowser::OnLMouseDblClk(wxMouseEvent& event)
       Console->parseCommand(ost);
 
    }
-
+   else event.Skip();
 }
+
 void browsers::TDTbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
     wxMenu menu;
     RBcellID = id;
@@ -396,9 +397,11 @@ void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname,
    }
 }
 
-void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentname, bool orphan) {
+void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentname, bool orphan)
+{
    wxTreeItemId newparent;
-   if (orphan) {
+   if (orphan)
+   {
       wxTreeItemId item;
       findItem(cellname, item, GetRootItem());
       copyItem(item,GetRootItem());
@@ -408,8 +411,27 @@ void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentna
       DeleteChildren(item);
       Delete(item);
    }
-   else
-      while (findItem(parentname, newparent, GetRootItem())) {
+   else if ("" == parentname)
+   {// no parent => we are removing the cell, not it's reference
+      wxTreeItemId item;
+      assert(findItem(cellname, item, GetRootItem()));
+      // copy all children
+      // This part is "in case". The thing is that children should have been
+      // removed already, by tdtcell::removePrep
+      wxTreeItemIdValue cookie;
+      wxTreeItemId child = GetFirstChild(item,cookie);
+      while (child.IsOk())
+      {
+         copyItem(child, GetRootItem());
+         child = GetNextChild(item,cookie);
+      }
+      // finally delete the item and it's children
+      DeleteChildren(item);
+      Delete(item);
+   }
+   else 
+      while (findItem(parentname, newparent, GetRootItem()))
+      {
          wxTreeItemId item;
          assert(findItem(cellname, item, newparent));
          DeleteChildren(item);
@@ -621,6 +643,7 @@ BEGIN_EVENT_TABLE(browsers::layerbrowser, wxPanel)
    EVT_BUTTON(BT_LAYER_DO, browsers::layerbrowser::OnXXXSelected)
    EVT_BUTTON(BT_LAYER_SELECTWILD,browsers::layerbrowser::OnSelectWild)
    EVT_LIST_ITEM_ACTIVATED(ID_TPD_LAYERS, browsers::layerbrowser::OnActiveLayer)
+   EVT_LIST_ITEM_RIGHT_CLICK(ID_TPD_LAYERS,browsers::layerbrowser::OnShowHideLayer)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::layerbrowser::OnCommand)
 END_EVENT_TABLE()
 //====================================================================
@@ -664,7 +687,8 @@ browsers::layerbrowser::~layerbrowser()
    delete _layerlist;
 }
 
-void browsers::layerbrowser::OnActiveLayer(wxListEvent& event) {
+void browsers::layerbrowser::OnActiveLayer(wxListEvent& event)
+{
    wxListItem info;
    info.SetId(event.GetIndex()); info.SetMask(wxLIST_MASK_TEXT);
    if (_layerlist->GetItem(info) ) {
@@ -675,7 +699,8 @@ void browsers::layerbrowser::OnActiveLayer(wxListEvent& event) {
    }
 }
 
-void browsers::layerbrowser::OnCommand(wxCommandEvent& event) {
+void browsers::layerbrowser::OnCommand(wxCommandEvent& event)
+{
    int* command = (int*)event.GetClientData();
    switch (*command) {
       case BT_LAYER_DEFAULT:_layerlist->defaultLayer((word)event.GetExtraLong(), (word)event.GetInt());break;
@@ -692,7 +717,8 @@ void browsers::layerbrowser::OnNewLayer(wxCommandEvent& WXUNUSED(event)) {
 void  browsers::layerbrowser::OnEditLayer(wxCommandEvent& WXUNUSED(event)) {
 }
 
-void  browsers::layerbrowser::OnSelectWild(wxCommandEvent& WXUNUSED(event)) {
+void  browsers::layerbrowser::OnSelectWild(wxCommandEvent& WXUNUSED(event))
+{
    long actionmask = (0 == action_wild->GetSelection()) ?
                               wxLIST_STATE_SELECTED : ~wxLIST_STATE_SELECTED;
    //swipe all items
@@ -706,7 +732,8 @@ void  browsers::layerbrowser::OnSelectWild(wxCommandEvent& WXUNUSED(event)) {
    }
 }
 
-void  browsers::layerbrowser::OnXXXSelected(wxCommandEvent& WXUNUSED(event)) {
+void  browsers::layerbrowser::OnXXXSelected(wxCommandEvent& WXUNUSED(event))
+{
    std::string tl_command;
    std::string tl_option;
    switch (action_select->GetSelection()) {
@@ -732,4 +759,26 @@ void  browsers::layerbrowser::OnXXXSelected(wxCommandEvent& WXUNUSED(event)) {
    }
    cmd.RemoveLast(); cmd << "}, " << tl_option.c_str() << ");";
    Console->parseCommand(cmd);
+}
+
+
+void browsers::layerbrowser::OnShowHideLayer(wxListEvent& event)
+{
+/*   wxListItem info;
+   info.SetId(event.GetIndex()); info.SetMask(wxLIST_MASK_TEXT);
+   if (_layerlist->GetItem(info) )
+   {
+      bool on_off;
+   // for some reason - colours can't be compared properly
+   // what is m_refData ?? in wxColour?
+   wxColour itemcol = info.GetTextColour();
+      wxColour black(*wxBLACK);
+      if (itemcol == black) on_off = false;
+      else on_off = true;
+      wxString cmd;
+      cmd << "hidelayer(" << info.GetText() << " , " <<
+            (on_off ? "true" : "false") <<");";
+      Console->parseCommand(cmd);
+   }
+*/
 }

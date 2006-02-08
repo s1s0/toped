@@ -480,7 +480,7 @@ namespace GDSin {
       bool              RegisterStructure(GDSstructure* ws);
       GDSHierTree*      HierOut(GDSHierTree* Htree, GDSstructure* parent);
       GDSstructure*     GetLast(){return last;}
-      char*             Get_StrName(){return strname;}
+      const char*       Get_StrName()const {return strname;}
       GDSdata*          Get_Fdata(){return Fdata;};
       bool              Get_Allay(byte i){return Allay[i];};
       ~GDSstructure();
@@ -617,6 +617,6 @@ namespace GDSin {
    // Function definition
      TP   get_TP(GDSrecord* cr, word curnum = 0, byte len=4);
      void AddLog(char logtype, const char* message);
-     void PrintChildren(GDSin::GDSHierTree*, std::string*);
+//     void PrintChildren(GDSin::GDSHierTree*, std::string*);
 }   
 #endif // !defined(GDSIO_H_INCLUDED)

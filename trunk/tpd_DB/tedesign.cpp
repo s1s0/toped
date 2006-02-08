@@ -76,6 +76,49 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name) {
    }
 }
 
+bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel)
+{
+   if (_cells.end() == _cells.find(name))
+   {
+      std::string news = "Cell \"";
+      news += name; news += "\" doesn't exists";
+      tell_log(console::MT_ERROR,news.c_str());
+      return false; // cell doesn't exists
+   }
+   else
+   {
+      TDTHierTree* ccl = _hiertree->GetMember(_cells[name]);
+      if (ccl->Getparent())
+      {
+         std::string news = "Cell \"";
+         news += name; news += "\" is referenced and can't be removed";
+         tell_log(console::MT_ERROR,news.c_str());
+         return false;
+      }
+      else if (_target.edit()->name() == name)
+      {
+         tell_log(console::MT_ERROR,"Active cell can't be removed");
+         return false;
+      }
+      else
+      {
+         modified = true;
+         // get the cell by name
+         tdtcell* remcl = _cells[name];
+         // update the _hiertree
+         remcl->removePrep(this);
+         // remove the cell from the list of all design cells
+         _cells.erase(_cells.find(name));
+         //empty the contents of the removed cell and return it in atticList
+         remcl->select_all();
+         remcl->delete_selected(this, fsel); // validation is not required here
+         // finally - delete the cell. Cell is already empty
+         delete remcl;
+         return true;
+      }
+   }
+}
+
 laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2) {
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
