@@ -134,6 +134,7 @@ namespace laydata {
       selectList*          shapesel()        {return &_shapesel;};
       selectList*          copy_selist() const;
       void                 updateHierarchy(tdtdesign*);
+      void                 removePrep(laydata::tdtdesign* ATDB) const;
       void                 report_selected() const;
       void                 collect_usedlays(const tdtdesign*, bool, usedlayList&) const;
    private:

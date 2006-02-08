@@ -95,6 +95,7 @@ namespace browsers {
       void                 OnCommand(wxCommandEvent&);
       void                 OnActiveLayer(wxListEvent&);
       void                 OnSelectWild(wxCommandEvent&);
+      void                 OnShowHideLayer(wxListEvent&);
       wxChoice*            action_select;
       wxChoice*            action_wild;
       topedlay_list*       _layerlist;

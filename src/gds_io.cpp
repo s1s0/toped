@@ -1179,7 +1179,7 @@ int GDSin::GDSaref::Get_Ystep() {
 }
 
 //-----------------------------------------------------------------------------
-void GDSin::PrintChildren(GDSin::GDSHierTree* parent, std::string* tabnum){
+/*void GDSin::PrintChildren(GDSin::GDSHierTree* parent, std::string* tabnum){
    GDSstructure* cs = parent->GetItem();
    std::string mytab(*tabnum);
    std::string outname(mytab);
@@ -1196,7 +1196,7 @@ void GDSin::PrintChildren(GDSin::GDSHierTree* parent, std::string* tabnum){
       Child = Child->GetBrother();
    }
 }
-
+*/
 //-----------------------------------------------------------------------------
 TP GDSin::get_TP(GDSin::GDSrecord *cr, word curnum, byte len) {
    int4b GDS_X, GDS_Y;

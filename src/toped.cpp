@@ -118,10 +118,12 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_OPEN         , tui::TopedFrame::OnTDTRead     )
    EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
    EVT_MENU( TMGDS_OPEN          , tui::TopedFrame::OnGDSRead     )
-   EVT_MENU( TMGDS_TRANSLATE     , tui::TopedFrame::OnGDSexportTOP)
    EVT_MENU( TMGDS_IMPORT        , tui::TopedFrame::OnGDSimport   )
+   
+   EVT_MENU( TMGDS_TRANSLATE     , tui::TopedFrame::OnGDStranslate)
    EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnGDSexportLIB)
-   EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDStranslate)
+   EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
+   
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
@@ -248,7 +250,7 @@ tui::TopedFrame::~TopedFrame() {
    delete mS_command;
    delete mS_log;
    delete mS_canvas;
-   delete _resourceCenter;
+//   delete _resourceCenter;
 }
 
 void tui::TopedFrame::initMenuBar() {
@@ -291,7 +293,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&File/Advanced GDS operations/translate to library",   
             "", &tui::TopedFrame::OnGDStranslate, "Import GDS structure" );
    _resourceCenter->appendMenu("&File/Advanced GDS operations/export cell",   
-            "", &tui::TopedFrame::OnGDStranslate, "Export cell to GDS" );
+            "", &tui::TopedFrame::OnGDSexportCELL, "Export cell to GDS" );
    _resourceCenter->appendMenu("&File/Advanced GDS operations/close",   
             "", &tui::TopedFrame::OnGDSclose, "Clear the parsed GDS file from memory" );
    _resourceCenter->appendMenuSeparator("&File");
@@ -790,7 +792,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
    wxString ost_int;
    ost_int << "gdsread(\"" << dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\")";
    wxString ost;
-   ost << "gdsimport(" << ost_int << ", true, true );gdsclose();";
+   ost << "gdsimport(" << ost_int << ", true, false );gdsclose();";
    _cmdline->parseCommand(ost);
    SetStatusText("Stream "+dlg2.GetFilename()+" imported");
 }
@@ -810,7 +812,7 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
    else SetStatusText("GDS export aborted");
 }
 
-void tui::TopedFrame::OnGDSexportTOP(wxCommandEvent& WXUNUSED(event)) {
+void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    SetStatusText("Exporting a cell to GDS file...");
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);

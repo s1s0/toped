@@ -158,7 +158,8 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdHIDETEXTMARK)  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdLOCKLAYER   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdLOCKLAYERS  )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdNEWCELL     )  // * WAITS for ATDB->remove_cell() !!!
+   TELL_STDCMD_CLASSA_UNDO(stdNEWCELL     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdREMOVECELL  )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdOPENCELL    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdEDITPUSH    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdEDITPOP     )  // undo - implemented
@@ -198,7 +199,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdFLIPYSEL    )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdDELETESEL   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGROUP       )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNGROUP     )  // undo - implemented* WAITS for ATDB->remove_cell() !!!
+   TELL_STDCMD_CLASSA_UNDO(stdUNGROUP     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcCUTPOLY     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcMERGE       )  // undo - implemented
    //

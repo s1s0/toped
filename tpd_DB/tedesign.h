@@ -38,6 +38,7 @@ namespace laydata {
       void           write(TEDfile* const tedfile);
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       tdtcell*       addcell(std::string name);
+      bool           removecell(std::string&, laydata::atticList*);
       tdtdata*       addbox(word la, TP* p1, TP* p2);
       tdtdata*       addpoly(word, const pointlist*);
       tdtdata*       addwire(word, const pointlist*, word);
@@ -103,6 +104,7 @@ namespace laydata {
       void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
       friend         class TEDfile;
       friend         void tdtcell::updateHierarchy(tdtdesign*);
+      friend         void tdtcell::removePrep(tdtdesign*) const;
       friend         bool tdtcell::addchild(tdtdesign*, tdtcell*);
    private:
       bool           validate_cells();
