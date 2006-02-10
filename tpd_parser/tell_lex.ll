@@ -33,6 +33,7 @@ lex_identifier    [a-zA-Z_][a-zA-Z0-9_]*
 %{ /**************************************************************************/
 #include <stdio.h>
 #include <string.h>
+#include <wx/filename.h>
 #include "tellyzer.h"
 #include "tell_yacc.h"
 #include "ted_prompt.h"
@@ -173,16 +174,32 @@ unsigned parsercmd::getllint(char* source) {
 //=============================================================================
 // File include handling
 //=============================================================================
-int parsercmd::includefile(char* name, FILE* &handler) {
-   FILE* newfilehandle;
+int parsercmd::includefile(char* name, FILE* &handler)
+{
    int retvalue = 0;
    if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )
       tell_log(console::MT_ERROR,"Too many nested includes");
-   else {
-      newfilehandle = fopen(name, "r");
-      if (! newfilehandle)
-         tell_log(console::MT_ERROR,"Included file can not be open");
-      else {   
+   else
+   {
+      FILE* newfilehandle;
+      wxFileName* inclFN = new wxFileName(wxString(name));
+      inclFN->Normalize();
+      std::string nfname = inclFN->IsOk() ? inclFN->GetFullPath().c_str() : name;
+      std::string infomsg;
+      if (!inclFN->IsOk() || !inclFN->FileExists())
+      {
+         infomsg = "File \"" + nfname + "\" not found";
+         tell_log(console::MT_ERROR,infomsg.c_str());
+      }
+      else if (NULL == (newfilehandle = fopen(nfname.c_str(), "r")))
+      {
+         infomsg = "File \"" + nfname + "\" can't be open";
+         tell_log(console::MT_ERROR,infomsg.c_str());
+      }
+      else
+      {
+         infomsg = "Parsing \"" + nfname + "\" ...";
+         tell_log(console::MT_INFO,infomsg.c_str());
          handler = newfilehandle;
          /* create a new record with file handler and location objects*/
          include_stack[include_stack_ptr++] = new parsercmd::lexer_files(
@@ -195,8 +212,9 @@ int parsercmd::includefile(char* name, FILE* &handler) {
          telllloc.filename = name;
          retvalue = 1;
       }
+      delete inclFN;
    }
-   return retvalue;   
+   return retvalue;
 }
 
 int parsercmd::EOfile() {
