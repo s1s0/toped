@@ -18,7 +18,7 @@
 //    Description: wxWidget version
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -27,11 +27,10 @@
 #include <wx/log.h>
 #include <wx/regex.h>
 #include "outbox.h"
-//const modificator is not accepted from the compiler for some reason.
-//Actually the problem is with the extern declarations in other files
-//const wxEventType wxEVT_LOG_ERRMESSAGE = wxNewEventType();
-extern const wxEventType      wxEVT_LOG_ERRMESSAGE;
 
+extern const wxEventType      wxEVT_LOG_ERRMESSAGE;
+extern const wxEventType      wxEVT_FUNC_BROWSER;
+extern console::TELLFuncList* CmdList;
 //==============================================================================
 // The ted_log event table
 BEGIN_EVENT_TABLE( console::ted_log, wxTextCtrl )
@@ -97,6 +96,73 @@ void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t ti
 
 void tell_log(console::LOG_TYPE lt, const char* msg) {
    wxLog::OnLog(lt, msg, time(NULL));
+}
+
+//==============================================================================
+BEGIN_EVENT_TABLE( console::TELLFuncList, wxListCtrl )
+   EVT_TECUSTOM_COMMAND(wxEVT_FUNC_BROWSER, -1, TELLFuncList::OnCommand)
+END_EVENT_TABLE()
+
+console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
+   const wxPoint& pos, const wxSize& size, long style) :
+      wxListCtrl(parent, id, pos, size, style)
+{
+   InsertColumn(0, "type");
+   InsertColumn(1, "name");
+   InsertColumn(2, "arguments");
+   SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+   SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
+   SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
+}
+
+
+console::TELLFuncList::~TELLFuncList()
+{
+   DeleteAllItems();
+}
+
+void console::TELLFuncList::addFunc(wxString name, wxString arguments)
+{
+   wxListItem row;
+   row.SetColumn(1);
+   row.SetMask(wxLIST_MASK_TEXT);
+   row.SetText(name.c_str());
+   row.SetId(GetItemCount());
+   long inum = InsertItem(row);
+   SetColumnWidth(1, wxLIST_AUTOSIZE);
+   //
+   row.SetColumn(2);
+   row.SetMask(wxLIST_MASK_TEXT);
+   row.SetText(arguments.c_str());
+   SetItem(row);
+   SetColumnWidth(2, wxLIST_AUTOSIZE);
+}
+
+void console::TELLFuncList::OnCommand(wxCommandEvent& event)
+{
+   int command = event.GetInt();
+   switch (command) {
+      case console::FT_FUNCTION_ADD:
+      {
+         wxString *args = (wxString*)event.GetClientData();
+         FT_FUNCTION_ADD:addFunc(event.GetString(), *args);
+         delete args;
+         break;
+      }
+   default: assert(false);
+   }
+}
+
+//=============================================================================
+void console::TellFnAdd(const std::string name, const std::string arguments)
+{
+//   int* bt = new int(console::FT_FUNCTION_ADD);
+   wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
+   eventFUNCTION_ADD.SetString(name.c_str());
+   wxString* args = new wxString(arguments.c_str());
+   eventFUNCTION_ADD.SetClientData(args);
+   eventFUNCTION_ADD.SetInt(FT_FUNCTION_ADD);
+   wxPostEvent(CmdList, eventFUNCTION_ADD);
 }
 
 //=============================================================================

@@ -37,6 +37,7 @@
 tui::TopedFrame*                 Toped = NULL;
 layprop::ViewProperties*         Properties = NULL;
 browsers::browserTAB*            Browsers = NULL;
+console::TELLFuncList*           CmdList = NULL;
 DataCenter*                      DATC = NULL;
 // from ted_prompt (console)
 parsercmd::cmdBLOCK*             CMDBlock = NULL;
@@ -53,6 +54,7 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_MOUSE_ACCEL   , 10004)
     DECLARE_EVENT_TYPE(wxEVT_MOUSE_INPUT   , 10005)
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_ZOOM   , 10006)
+    DECLARE_EVENT_TYPE(wxEVT_FUNC_BROWSER  , 10007)
 END_DECLARE_EVENT_TYPES()
 
 DEFINE_EVENT_TYPE(wxEVT_MARKERPOSITION)
@@ -62,6 +64,7 @@ DEFINE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE) // -> to go to ted_prompt.cpp !
 DEFINE_EVENT_TYPE(wxEVT_MOUSE_ACCEL)
 DEFINE_EVENT_TYPE(wxEVT_MOUSE_INPUT)
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_ZOOM)
+DEFINE_EVENT_TYPE(wxEVT_FUNC_BROWSER)
 
 void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    // First the internal types
@@ -215,6 +218,7 @@ bool TopedApp::OnInit() {
    delete wxLog::SetActiveTarget(logWindow);
 
    Browsers = Toped->browsers();
+   CmdList = Toped->cmdlist();
    DATC = new DataCenter();
    // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
    CMDBlock = new parsercmd::cmdMAIN();

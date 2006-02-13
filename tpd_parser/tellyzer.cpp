@@ -832,6 +832,7 @@ int parsercmd::cmdMAIN::execute()
 void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
 {
    _funcMAP.insert(std::make_pair(fname,cQ));
+   console::TellFnAdd(fname, cQ->callingConv());
 }
 
 bool parsercmd::cmdMAIN::addUSERFUNC(std::string fname , cmdSTDFUNC* cQ,
@@ -841,6 +842,7 @@ bool parsercmd::cmdMAIN::addUSERFUNC(std::string fname , cmdSTDFUNC* cQ,
    if (CMDBlock->funcValidate(fname.c_str(),arglst))
    {
       _funcMAP.insert(std::make_pair(fname,cQ));
+      console::TellFnAdd(fname, cQ->callingConv());
       return true;
    }
    else return false;

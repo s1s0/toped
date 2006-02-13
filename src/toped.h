@@ -30,7 +30,6 @@
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 #include <wx/laywin.h>
- 
 #include "../tpd_parser/ted_prompt.h"
 #include "layoutcanvas.h"
 #include "tui.h"
@@ -69,22 +68,24 @@ namespace tui {
       void                    OnPositionMessage(wxCommandEvent&);
       void                    OnQuit (wxCommandEvent&);
       void                    OnAbout(wxCommandEvent&);
-      wxMenuBar*              getMenuBar(void) {return GetMenuBar();};
-      ResourceCenter*         getResourceCenter(void) {return _resourceCenter;};
-      console::ted_log*       logwin()   const {return _cmdlog;};
-      LayoutCanvas*           view()     const {return _laycanvas;};
-      console::ted_cmd*       cmdline()  const {return _cmdline;};
-      browsers::browserTAB*   browsers() const {return _browsers;};
+      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
+      ResourceCenter*         getResourceCenter(void) {return _resourceCenter;}
+      console::ted_log*       logwin()   const {return _cmdlog;}
+      LayoutCanvas*           view()     const {return _laycanvas;}
+      console::ted_cmd*       cmdline()  const {return _cmdline;}
+      browsers::browserTAB*   browsers() const {return _browsers;}
+      console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
    private:
       void                    initMenuBar();
       void                    initToolBar();
       void                    initView();
       console::ted_log*       _cmdlog;       // log window
+      console::TELLFuncList*  _cmdbrowser;
       console::ted_cmd*       _cmdline;      // tell command input window
       LayoutCanvas*           _laycanvas;
       CanvasStatus*           _GLstatus;
-      browsers::browserTAB*   _browsers;  // tell definitions browser
-      ResourceCenter *_resourceCenter;
+      browsers::browserTAB*   _browsers;  // TDT/GDS/layer browsers
+      ResourceCenter*         _resourceCenter;
       //Menu stuff
       wxMenuBar*              menuBar;
       wxMenu*                 fileMenu;

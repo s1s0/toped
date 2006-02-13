@@ -48,6 +48,10 @@ namespace console {
       MT_EOL
    } LOG_TYPE;
 
+   typedef enum {
+      FT_FUNCTION_ADD
+   } FUNCTION_BROWSER_TYPE;
+   
    class ted_log : public wxTextCtrl  {
    public: 
                         ted_log(wxWindow *parent);
@@ -68,6 +72,22 @@ namespace console {
       wxTextCtrl*  _tellLOGW;
    };
    
+   //===========================================================================
+   class TELLFuncList : public wxListCtrl
+   {
+      public:
+         TELLFuncList(wxWindow* parent, wxWindowID id = -1,
+                      const wxPoint& pos = wxDefaultPosition,
+                      const wxSize& size = wxDefaultSize,
+                      long style = wxLC_REPORT | wxLC_HRULES);
+         virtual             ~TELLFuncList();
+         void                 addFunc(wxString, wxString);
+         void                 OnCommand(wxCommandEvent&);
+         DECLARE_EVENT_TABLE();
+   };
+
+   void TellFnAdd(const std::string, const std::string);
+
 }
    void tell_log(console::LOG_TYPE, const char* = NULL);
 
@@ -83,7 +103,6 @@ class  TpdTime
       bool              getStdCTime(wxString& exp);
       time_t            _stdCTime;
 };
-
 
 class EXPTN {};
  

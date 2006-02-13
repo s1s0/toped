@@ -543,7 +543,13 @@ void tui::TopedFrame::initView() {
    mS_log->SetOrientation(wxLAYOUT_HORIZONTAL);
    mS_log->SetAlignment(wxLAYOUT_BOTTOM);
    mS_log->SetSashVisible(wxSASH_TOP, TRUE);
-   _cmdlog = new console::ted_log(mS_log);
+   //
+   wxNotebook* logpane = new wxNotebook(mS_log, -1, wxDefaultPosition, wxDefaultSize, wxNB_RIGHT);
+   _cmdlog = new console::ted_log(logpane);
+   logpane->AddPage(_cmdlog, "Log");
+   _cmdbrowser = new console::TELLFuncList(logpane);
+   logpane->AddPage(_cmdbrowser, "Lib");
+
    //----------------------------------------------------------------------------
    // the openGL window
    //---------------------------------------------------------------------------- 
