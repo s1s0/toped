@@ -27,6 +27,7 @@
 #define OUTBOX_H_INCLUDED
 
 #include <wx/wx.h>
+#include <wx/listctrl.h>
 #include <iostream>
 
 #define EVT_TECUSTOM_COMMAND(cmd, id, fn) \

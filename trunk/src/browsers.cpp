@@ -30,7 +30,7 @@
 #include "../tpd_DB/viewprop.h"
 #include "layoutcanvas.h"
 #include "../tpd_common/outbox.h"
-#include "ted_prompt.h"
+#include "../tpd_parser/ted_prompt.h"
 #include "tui.h"
 #include "datacenter.h"
 #include "../ui/activelay.xpm"

@@ -23,6 +23,15 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name tpd_common
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TPD_DB
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name tpd_parser
+    End Project Dependency
 }}}
 
 ###############################################################################
