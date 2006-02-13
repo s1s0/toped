@@ -124,13 +124,20 @@ console::TELLFuncList::~TELLFuncList()
 void console::TELLFuncList::addFunc(wxString name, wxString arguments)
 {
    wxListItem row;
+#ifndef WIN32
+   //???Under windows this string leads to crash toped with 
+   //Debug: C:\wxWindows\src\msw\listctrl.cpp(1531):
+   //assert "m_count==ListView_GetItemCount(GetHwnd())" failed: m_count should match ListView_GetItemCount 
    row.SetColumn(1);
+#endif
    row.SetMask(wxLIST_MASK_TEXT);
    row.SetText(name.c_str());
    row.SetId(GetItemCount());
+
    long inum = InsertItem(row);
+  
    SetColumnWidth(1, wxLIST_AUTOSIZE);
-   //
+
    row.SetColumn(2);
    row.SetMask(wxLIST_MASK_TEXT);
    row.SetText(arguments.c_str());
