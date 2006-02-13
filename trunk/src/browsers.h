@@ -64,6 +64,7 @@ namespace browsers {
       CellTree_OpenCell = 1000,
       GDSTree_ReportLay
    };
+
    //===========================================================================
    class topedlay_list : public wxListCtrl {
    public:
@@ -81,7 +82,7 @@ namespace browsers {
       wxFont               _llfont_normal;
       wxFont               _llfont_bold;
    };
-   
+
    //===========================================================================
    class layerbrowser : public wxPanel {
    public:

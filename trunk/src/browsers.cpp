@@ -30,7 +30,7 @@
 #include "../tpd_DB/viewprop.h"
 #include "layoutcanvas.h"
 #include "../tpd_common/outbox.h"
-#include "toped.h"
+#include "ted_prompt.h"
 #include "tui.h"
 #include "datacenter.h"
 #include "../ui/activelay.xpm"
@@ -44,7 +44,6 @@ extern layprop::ViewProperties*  Properties;
 extern DataCenter*               DATC;
 extern browsers::browserTAB*     Browsers;
 extern const wxEventType         wxEVT_CMD_BROWSER;
-
 
 //==============================================================================
 browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
@@ -84,21 +83,15 @@ browsers::topedlay_list::~topedlay_list() {
 
 
 void browsers::topedlay_list::addlayer(wxString name, word layno) {
-   wxString num; num.Printf(_T("%3d"), layno);
-   wxListItem old;
-   int item;
-   long oldno;
-   wxString oldtext;
-   wxListItem row;
-
-   item = -1;
+   int item = -1;
    for(;;) {
       item = GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
       if (item == -1) break;
-      oldno = GetItemData(item);
+      long oldno = GetItemData(item);
       if (oldno == layno) DeleteItem(item);
    }
-
+   wxString num; num.Printf(_T("%3d"), layno);
+   wxListItem row;
    row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
    row.SetData(layno); row.SetText(num); row.SetId(GetItemCount());
    row.SetFont(_llfont_normal);

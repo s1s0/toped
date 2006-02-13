@@ -8,7 +8,7 @@ TODO for 0.8 release
 > * implement removecell() and finish the undo procedures that depend on it.
   * revive the function parser
   * crash recovery using toped.log file. This could be too much work. Requires introduction of wxfiles
-  * environmental variable handling in flex (for include files)
+> * environmental variable handling in flex (for include files)
   * location of the log files - difference between crashed sessions and normally closed ones
   * update the web
   * include the documentation in the packages (tarball and rpm)
