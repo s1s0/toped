@@ -74,7 +74,9 @@ namespace console {
    };
    
    //===========================================================================
-   class TELLFuncList : public wxListCtrl
+//   static int wxCALLBACK wxListCompareFunction(long, long, long);
+   
+   class TELLFuncList : public wxListView
    {
       public:
          TELLFuncList(wxWindow* parent, wxWindowID id = -1,
@@ -82,12 +84,12 @@ namespace console {
                       const wxSize& size = wxDefaultSize,
                       long style = wxLC_REPORT | wxLC_HRULES);
          virtual             ~TELLFuncList();
-         void                 addFunc(wxString, wxString);
+         void                 addFunc(wxString, wxString, bool);
          void                 OnCommand(wxCommandEvent&);
          DECLARE_EVENT_TABLE();
    };
 
-   void TellFnAdd(const std::string, const std::string);
+   void TellFnAdd(const std::string, const std::string, bool sort);
 
 }
    void tell_log(console::LOG_TYPE, const char* = NULL);

@@ -99,13 +99,29 @@ void tell_log(console::LOG_TYPE lt, const char* msg) {
 }
 
 //==============================================================================
+static int wxCALLBACK wxListCompareFunction(long item1, long item2, long sortData)
+{
+   wxListItem li1, li2;
+   li1.SetMask(wxLIST_MASK_TEXT);
+   li1.SetColumn(1);
+   li1.SetId(CmdList->FindItem(-1, item1));
+   CmdList->GetItem(li1);
+   li2.SetMask(wxLIST_MASK_TEXT);
+   li2.SetColumn(1);
+   li2.SetId(CmdList->FindItem(-1, item2));
+   CmdList->GetItem(li2);
+   wxString s1 = li1.GetText();
+   wxString s2 = li2.GetText();
+   return s1.CompareTo(s2.c_str());
+}
+
 BEGIN_EVENT_TABLE( console::TELLFuncList, wxListCtrl )
    EVT_TECUSTOM_COMMAND(wxEVT_FUNC_BROWSER, -1, TELLFuncList::OnCommand)
 END_EVENT_TABLE()
 
 console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
-      wxListCtrl(parent, id, pos, size, style)
+      wxListView(parent, id, pos, size, style)
 {
    InsertColumn(0, "type");
    InsertColumn(1, "name");
@@ -121,21 +137,24 @@ console::TELLFuncList::~TELLFuncList()
    DeleteAllItems();
 }
 
-void console::TELLFuncList::addFunc(wxString name, wxString arguments)
+void console::TELLFuncList::addFunc(wxString name, wxString arguments, bool sort)
 {
    wxListItem row;
-#ifndef WIN32
+//#ifndef WIN32
    //???Under windows this string leads to crash toped with 
    //Debug: C:\wxWindows\src\msw\listctrl.cpp(1531):
    //assert "m_count==ListView_GetItemCount(GetHwnd())" failed: m_count should match ListView_GetItemCount 
+//   row.SetColumn(1);
+//#endif
+   row.SetMask(wxLIST_MASK_DATA);
+   row.SetId(GetItemCount());
+   row.SetData(GetItemCount());
+   long inum = InsertItem(row);
+   //
    row.SetColumn(1);
-#endif
    row.SetMask(wxLIST_MASK_TEXT);
    row.SetText(name.c_str());
-   row.SetId(GetItemCount());
-
-   long inum = InsertItem(row);
-  
+   SetItem(row);
    SetColumnWidth(1, wxLIST_AUTOSIZE);
 
    row.SetColumn(2);
@@ -143,6 +162,8 @@ void console::TELLFuncList::addFunc(wxString name, wxString arguments)
    row.SetText(arguments.c_str());
    SetItem(row);
    SetColumnWidth(2, wxLIST_AUTOSIZE);
+   if (sort)
+      SortItems(wxListCompareFunction,0);
 }
 
 void console::TELLFuncList::OnCommand(wxCommandEvent& event)
@@ -152,7 +173,7 @@ void console::TELLFuncList::OnCommand(wxCommandEvent& event)
       case console::FT_FUNCTION_ADD:
       {
          wxString *args = (wxString*)event.GetClientData();
-         FT_FUNCTION_ADD:addFunc(event.GetString(), *args);
+         FT_FUNCTION_ADD:addFunc(event.GetString(), *args, event.GetExtraLong());
          delete args;
          break;
       }
@@ -161,7 +182,7 @@ void console::TELLFuncList::OnCommand(wxCommandEvent& event)
 }
 
 //=============================================================================
-void console::TellFnAdd(const std::string name, const std::string arguments)
+void console::TellFnAdd(const std::string name, const std::string arguments, bool sort)
 {
 //   int* bt = new int(console::FT_FUNCTION_ADD);
    wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
@@ -169,6 +190,7 @@ void console::TellFnAdd(const std::string name, const std::string arguments)
    wxString* args = new wxString(arguments.c_str());
    eventFUNCTION_ADD.SetClientData(args);
    eventFUNCTION_ADD.SetInt(FT_FUNCTION_ADD);
+   eventFUNCTION_ADD.SetExtraLong(sort);
    wxPostEvent(CmdList, eventFUNCTION_ADD);
 }
 
