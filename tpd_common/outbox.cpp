@@ -137,63 +137,65 @@ console::TELLFuncList::~TELLFuncList()
    DeleteAllItems();
 }
 
-void console::TELLFuncList::addFunc(wxString name, wxString arguments, bool sort)
+void console::TELLFuncList::addFunc(wxString name, void* arguments)
 {
+   ArgList* arglist = static_cast<ArgList*>(arguments);
    wxListItem row;
-//#ifndef WIN32
-   //???Under windows this string leads to crash toped with 
-   //Debug: C:\wxWindows\src\msw\listctrl.cpp(1531):
-   //assert "m_count==ListView_GetItemCount(GetHwnd())" failed: m_count should match ListView_GetItemCount 
-//   row.SetColumn(1);
-//#endif
-   row.SetMask(wxLIST_MASK_DATA);
+   row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
    row.SetId(GetItemCount());
    row.SetData(GetItemCount());
+   row.SetText(arglist->front());arglist->pop_front();
    long inum = InsertItem(row);
+   SetColumnWidth(0, wxLIST_AUTOSIZE);
    //
    row.SetColumn(1);
    row.SetMask(wxLIST_MASK_TEXT);
    row.SetText(name.c_str());
    SetItem(row);
    SetColumnWidth(1, wxLIST_AUTOSIZE);
-
+   //
+   std::string strlist("( ");
+   while (!arglist->empty())
+   {
+      strlist += arglist->front();arglist->pop_front();
+      if (arglist->size()) strlist += " , ";
+   }
+   strlist += " )";
+   //
    row.SetColumn(2);
    row.SetMask(wxLIST_MASK_TEXT);
-   row.SetText(arguments.c_str());
+   row.SetText(strlist.c_str());
    SetItem(row);
    SetColumnWidth(2, wxLIST_AUTOSIZE);
-   if (sort)
-      SortItems(wxListCompareFunction,0);
 }
 
 void console::TELLFuncList::OnCommand(wxCommandEvent& event)
 {
    int command = event.GetInt();
-   switch (command) {
-      case console::FT_FUNCTION_ADD:
-      {
-         wxString *args = (wxString*)event.GetClientData();
-         FT_FUNCTION_ADD:addFunc(event.GetString(), *args, event.GetExtraLong());
-         delete args;
-         break;
-      }
-   default: assert(false);
+   switch (command)
+   {
+      case console::FT_FUNCTION_ADD:addFunc(event.GetString(), event.GetClientData()); break;
+      case console::FT_FUNCTION_SORT:SortItems(wxListCompareFunction,0); break;
+      default: assert(false);
    }
 }
 
 //=============================================================================
-void console::TellFnAdd(const std::string name, const std::string arguments, bool sort)
+void console::TellFnAdd(const std::string name, void* arguments)
 {
-//   int* bt = new int(console::FT_FUNCTION_ADD);
    wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
    eventFUNCTION_ADD.SetString(name.c_str());
-   wxString* args = new wxString(arguments.c_str());
-   eventFUNCTION_ADD.SetClientData(args);
+   eventFUNCTION_ADD.SetClientData(arguments);
    eventFUNCTION_ADD.SetInt(FT_FUNCTION_ADD);
-   eventFUNCTION_ADD.SetExtraLong(sort);
    wxPostEvent(CmdList, eventFUNCTION_ADD);
 }
 
+void console::TellFnSort()
+{
+   wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
+   eventFUNCTION_ADD.SetInt(FT_FUNCTION_SORT);
+   wxPostEvent(CmdList, eventFUNCTION_ADD);
+}
 //=============================================================================
 std::string TpdTime::operator () ()
 {

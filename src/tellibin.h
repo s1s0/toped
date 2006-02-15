@@ -114,7 +114,7 @@
       name(telldata::typeID retype):cmdSTDFUNC(NULL,retype) {};   \
       int         execute();                                      \
       int         argsOK(argumentQ* amap);                        \
-      std::string callingConv();                                  \
+      nameList*   callingConv(const telldata::typeMAP*);          \
    };
 #endif
 

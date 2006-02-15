@@ -1,14 +1,14 @@
 TODO for 0.8 release
-============
+=====================
 > * lists as a record fields - this is not implemented and has to be in order to close
     record handling. tell operations on lists - for the future releases.
 > * Function redefinition - required !
 > * Exception handling in the parser for user function calls (bug 6096)
 > * Array drawing (bug 6161)
 > * implement removecell() and finish the undo procedures that depend on it.
-  * revive the function parser
-  * crash recovery using toped.log file. This could be too much work. Requires introduction of wxfiles
+> * revive the function parser
 > * environmental variable handling in flex (for include files)
+  * crash recovery using toped.log file. Requires introduction of wxfiles
   * location of the log files - difference between crashed sessions and normally closed ones
   * update the web
   * include the documentation in the packages (tarball and rpm)
@@ -76,9 +76,10 @@ Documentation
 ==============
   * GDS import/export functoins
   * TELL status function
-  * real->int conversion in TELL -> check do we really don't have something like this
-    if yes - fix the documentation
+  * real->int conversion in TELL -> fix the documentation
   * assign to field - window->point, point->coordinate
+  * removecell
+  * addmenu
 
   
 

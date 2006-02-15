@@ -42,7 +42,7 @@
 //=============================================================================
 // TELL types
 //=============================================================================
-namespace telldata {   
+namespace telldata {
    typedef unsigned int typeID;
    const typeID tn_NULL       = 0 ;
    const typeID tn_void       = 1 ;
@@ -318,6 +318,7 @@ namespace telldata {
    };
 
    void argQClear(argumentQ*);
+   std::string echoType( const telldata::typeID, const telldata::typeMAP*);
 }
 
 #endif

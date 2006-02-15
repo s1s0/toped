@@ -29,6 +29,7 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <iostream>
+#include <list>
 
 #define EVT_TECUSTOM_COMMAND(cmd, id, fn) \
     DECLARE_EVENT_TABLE_ENTRY( \
@@ -50,7 +51,8 @@ namespace console {
    } LOG_TYPE;
 
    typedef enum {
-      FT_FUNCTION_ADD
+      FT_FUNCTION_ADD  ,
+      FT_FUNCTION_SORT
    } FUNCTION_BROWSER_TYPE;
    
    class ted_log : public wxTextCtrl  {
@@ -72,10 +74,8 @@ namespace console {
       void         DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp);
       wxTextCtrl*  _tellLOGW;
    };
-   
+
    //===========================================================================
-//   static int wxCALLBACK wxListCompareFunction(long, long, long);
-   
    class TELLFuncList : public wxListView
    {
       public:
@@ -84,12 +84,15 @@ namespace console {
                       const wxSize& size = wxDefaultSize,
                       long style = wxLC_REPORT | wxLC_HRULES);
          virtual             ~TELLFuncList();
-         void                 addFunc(wxString, wxString, bool);
+         void                 addFunc(wxString, void*);
          void                 OnCommand(wxCommandEvent&);
          DECLARE_EVENT_TABLE();
+      protected:
+         typedef std::list<std::string> ArgList;
    };
 
-   void TellFnAdd(const std::string, const std::string, bool sort);
+   void TellFnAdd(const std::string, void*);
+   void TellFnSort();
 
 }
    void tell_log(console::LOG_TYPE, const char* = NULL);

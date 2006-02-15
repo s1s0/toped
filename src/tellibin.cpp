@@ -60,8 +60,11 @@ int tellstdfunc::stdECHO::argsOK(argumentQ* amap) {
    return (!(amap->size() == 1));
 }
 
-std::string tellstdfunc::stdECHO::callingConv() {
-   return "(<...anything...>)";
+nameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*) {
+   nameList* argtypes = new nameList();
+   argtypes->push_back("void");
+   argtypes->push_back("<...anything...>");
+   return argtypes;
 }
 
 int tellstdfunc::stdECHO::execute() {
