@@ -708,27 +708,15 @@ void parsercmd::cmdSTDFUNC::undo_cleanup() {
    }
 }
 
-std::string parsercmd::cmdSTDFUNC::callingConv() {
-   std::ostringstream ost;
+//std::string parsercmd::cmdSTDFUNC::callingConv() {
+nameList* parsercmd::cmdSTDFUNC::callingConv(const telldata::typeMAP* lclTypeDef)
+{
+   nameList* argtypes = new nameList();
+   argtypes->push_back(telldata::echoType(gettype(), lclTypeDef));
    int argnum = arguments->size();
-   ost << "( ";
-   for (int i = 0; i != argnum; i++) {
-      //get the argument name
-      switch ((*arguments)[i]->second->get_type() & ~telldata::tn_listmask) {
-        case telldata::tn_int    : ost << "int"        ; break;
-        case telldata::tn_real   : ost << "real"       ; break;
-        case telldata::tn_bool   : ost << "bool"       ; break;
-        case telldata::tn_string : ost << "string"     ; break;
-        case telldata::tn_pnt    : ost << "point"      ; break;
-        case telldata::tn_box    : ost << "box"        ; break;
-        default                  : ost << "?usertype?";
-      };
-      if ((*arguments)[i]->second->get_type() & telldata::tn_listmask) 
-        ost << " list";
-      if (i < argnum - 1) ost << " , ";
-   }
-   ost << " )";
-   return ost.str();
+   for (int i = 0; i != argnum; i++)
+      argtypes->push_back(telldata::echoType((*arguments)[i]->second->get_type(), lclTypeDef));
+   return argtypes;
 }
 
 parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
@@ -832,7 +820,7 @@ int parsercmd::cmdMAIN::execute()
 void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
 {
    _funcMAP.insert(std::make_pair(fname,cQ));
-   console::TellFnAdd(fname, cQ->callingConv(),false);
+   console::TellFnAdd(fname, cQ->callingConv(NULL));
 }
 
 bool parsercmd::cmdMAIN::addUSERFUNC(std::string fname , cmdSTDFUNC* cQ,
@@ -842,7 +830,8 @@ bool parsercmd::cmdMAIN::addUSERFUNC(std::string fname , cmdSTDFUNC* cQ,
    if (CMDBlock->funcValidate(fname.c_str(),arglst))
    {
       _funcMAP.insert(std::make_pair(fname,cQ));
-      console::TellFnAdd(fname, cQ->callingConv(),true);
+      console::TellFnAdd(fname, cQ->callingConv(&TYPElocal));
+      console::TellFnSort();
       return true;
    }
    else return false;

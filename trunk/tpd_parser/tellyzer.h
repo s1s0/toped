@@ -341,7 +341,7 @@ namespace  parsercmd {
       virtual int             execute() = 0;
       virtual void            undo() {};
       virtual void            undo_cleanup();
-      virtual std::string     callingConv();
+      virtual nameList*       callingConv(const telldata::typeMAP*);
       virtual int             argsOK(telldata::argumentQ* amap);
       telldata::typeID        gettype() const {return returntype;};
       virtual                ~cmdSTDFUNC();

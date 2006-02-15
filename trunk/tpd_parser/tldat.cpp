@@ -488,3 +488,39 @@ void telldata::argQClear(argumentQ* queue)
       delete (*CA);
    queue->clear();
 }
+
+std::string telldata::echoType( const telldata::typeID tID,
+                                 const telldata::typeMAP* lclTypeDef)
+{
+   std::string atype;
+   switch (tID & ~telldata::tn_listmask)
+   {
+      case telldata::tn_void  : atype = "void"  ; break;
+      case telldata::tn_int   : atype = "int"   ; break;
+      case telldata::tn_real  : atype = "real"  ; break;
+      case telldata::tn_bool  : atype = "bool"  ; break;
+      case telldata::tn_string: atype = "string"; break;
+      case telldata::tn_layout: atype = "layout"; break;
+      case telldata::tn_pnt   : atype = "point" ; break;
+      case telldata::tn_box   : atype = "box"   ; break;
+      default                 :
+      {
+         atype = "?UNKNOWN TYPE?";
+         if (NULL != lclTypeDef)
+         {
+            for( telldata::typeMAP::const_iterator CT = lclTypeDef->begin();
+                 CT != lclTypeDef->end(); CT++)
+            {
+               if (tID == CT->second->ID())
+               {
+                  atype = CT->first; break;
+               }
+            }
+         }
+      }
+   }
+   if (tID & telldata::tn_listmask)
+      atype +=" list";
+   return atype;
+}
+

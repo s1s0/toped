@@ -178,6 +178,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("addwire"          ,(new             tellstdfunc::stdDRAWWIRE_D(telldata::tn_layout)));
 
    mblock->addFUNC("addmenu"          ,(new                  tellstdfunc::stdADDMENU(telldata::tn_void)));
+   console::TellFnSort();
 }
 
 class TopedApp : public wxApp {
