@@ -117,6 +117,7 @@ namespace tui {
       void    OnGDSclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("gdsclose();");};
       void     OnTDTSave(wxCommandEvent&);
       void   OnTDTSaveAs(wxCommandEvent&);
+      void OnTDTSnapshot(wxCommandEvent&);
       void        OnCopy(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("copy();");};
       void        OnMove(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("move();");};
       void      OnDelete(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("delete();");};

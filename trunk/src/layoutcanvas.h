@@ -30,6 +30,7 @@
 #include <string>
 #include <wx/glcanvas.h>
 #include <wx/cursor.h>
+#include <wx/image.h>
 #include "../tpd_common/ttt.h"
 
 //==============================================================================   
@@ -183,6 +184,7 @@ typedef enum  {
    public: 
                      LayoutCanvas(wxWindow *parent, int* attribList);
       virtual       ~LayoutCanvas();
+      wxImage        snapshot(void);
    protected:
       void           OnpaintGL(wxPaintEvent& event);
       void           OnresizeGL(wxSizeEvent& event);
