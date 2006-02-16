@@ -144,7 +144,7 @@ void console::TELLFuncList::addFunc(wxString name, void* arguments)
    row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
    row.SetId(GetItemCount());
    row.SetData(GetItemCount());
-   row.SetText(arglist->front());arglist->pop_front();
+   row.SetText((arglist->front()).c_str());arglist->pop_front();
    long inum = InsertItem(row);
    SetColumnWidth(0, wxLIST_AUTOSIZE);
    //

@@ -26,6 +26,7 @@
 
 #include <wx/sizer.h>
 #include <wx/filename.h>
+#include <wx/image.h>
 #include <math.h>
 #include "toped.h"
 #include "datacenter.h"
@@ -297,9 +298,11 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&File/Advanced GDS operations/close",   
             "", &tui::TopedFrame::OnGDSclose, "Clear the parsed GDS file from memory" );
    _resourceCenter->appendMenuSeparator("&File");
-   
+      
    _resourceCenter->appendMenu("&File/Save\tCTRL-S","",  &tui::TopedFrame::OnTDTSave,  "Save the database");
    _resourceCenter->appendMenu("&File/Save as ...","",  &tui::TopedFrame::OnTDTSaveAs, "Save the database under a new name" );
+   _resourceCenter->appendMenuSeparator("&File");
+   _resourceCenter->appendMenu("&File/Snapshot ...","",  &tui::TopedFrame::OnTDTSnapshot, "Export screen to picture" );
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Exit","",  &tui::TopedFrame::OnQuit, "Exit Toped" );
 
@@ -734,6 +737,12 @@ void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
       SetStatusText("Design saved in file: "+dlg2.GetFilename());
    }   
    else SetStatusText("Saving aborted");
+}
+
+void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent&)
+{
+   wxImage image = _laycanvas->snapshot();
+
 }
 
 void tui::TopedFrame::OnCellNew(wxCommandEvent& WXUNUSED(event)) {

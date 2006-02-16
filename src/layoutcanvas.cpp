@@ -93,6 +93,41 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    ap_trigger = 10;
 }
 
+wxImage   tui::LayoutCanvas::snapshot(void)
+{
+   int width, height;
+   
+   int nv[4];
+   glGetIntegerv(GL_VIEWPORT, nv);
+   width = nv[2];
+   height = nv[3];
+   void *buffer = malloc(3*(width+1)*(height+1));
+
+   glReadBuffer(GL_BACK);
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+   glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);//GL_BGRA_EXT
+   wxImage image=wxImage(width, height, true);
+   for (int j=0; j<(height-1); j++)
+      for (int i=0; i<(width-1); i++)
+      
+      {
+         unsigned char* cbuf = (unsigned char *)(buffer);
+         cbuf = cbuf +3*(i+j*width);
+         unsigned char r = *(cbuf+0);
+         unsigned char g = *(cbuf+1);
+         unsigned char b = *(cbuf+2);
+
+         image.SetRGB(i, height-j-1, r, g, b);
+      }
+   //image.SetData((unsigned char*)buffer, true);
+ 
+    image.SaveFile("sex.bmp"); 
+   
+   
+   wxImage image2;
+   return image2;
+}
+
 void tui::LayoutCanvas::initializeGL() {
    // OpenGL clear to black
 //   if (format().rgba()) glClearColor(0.0,0.0,0.0,0.0);
