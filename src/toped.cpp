@@ -282,9 +282,9 @@ void tui::TopedFrame::initMenuBar() {
    menuBar = new wxMenuBar();
    SetMenuBar( menuBar );
 
-   _resourceCenter->appendMenu("&File/New ...\tCTRL-N",  "", &tui::TopedFrame::OnNewDesign,  "Create new design");
-   _resourceCenter->appendMenu("&File/Open ...\tCTRL-O", "", &tui::TopedFrame::OnTDTRead, "Open a TDT file" );
-   _resourceCenter->appendMenu("&File/Include ...",      "", &tui::TopedFrame::OnTELLRead, "Include a TELL file" );
+   _resourceCenter->appendMenu("&File/New ...",    "CTRL-N", &tui::TopedFrame::OnNewDesign,  "Create new design");
+   _resourceCenter->appendMenu("&File/Open ...",   "CTRL-O", &tui::TopedFrame::OnTDTRead, "Open a TDT file" );
+   _resourceCenter->appendMenu("&File/Include ...","",      &tui::TopedFrame::OnTELLRead, "Include a TELL file" );
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Export library to GDS","",  &tui::TopedFrame::OnGDSexportLIB, "Export library to GDS");
    _resourceCenter->appendMenu("&File/Import GDS to library","",  &tui::TopedFrame::OnGDSimport, "Import GDS structure" );
@@ -299,12 +299,12 @@ void tui::TopedFrame::initMenuBar() {
             "", &tui::TopedFrame::OnGDSclose, "Clear the parsed GDS file from memory" );
    _resourceCenter->appendMenuSeparator("&File");
       
-   _resourceCenter->appendMenu("&File/Save\tCTRL-S","",  &tui::TopedFrame::OnTDTSave,  "Save the database");
+   _resourceCenter->appendMenu("&File/Save",       "CTRL-S",  &tui::TopedFrame::OnTDTSave,  "Save the database");
    _resourceCenter->appendMenu("&File/Save as ...","",  &tui::TopedFrame::OnTDTSaveAs, "Save the database under a new name" );
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Snapshot ...","",  &tui::TopedFrame::OnTDTSnapshot, "Export screen to picture" );
    _resourceCenter->appendMenuSeparator("&File");
-   _resourceCenter->appendMenu("&File/Exit","",  &tui::TopedFrame::OnQuit, "Exit Toped" );
+   _resourceCenter->appendMenu("&File/Exit",        "",  &tui::TopedFrame::OnQuit, "Exit Toped" );
 
    
 
@@ -323,17 +323,17 @@ void tui::TopedFrame::initMenuBar() {
    editMenu->Append(TMEDIT_POLYCUT, wxT("Cut with poly\tCTRL-U"), wxT("Cut selected shapes with a polygon "));
    editMenu->Append(TMEDIT_MERGE, wxT("Merge\tCTRL-G"), wxT("Merge selected shpes"));
    */
-   _resourceCenter->appendMenu("&Edit/Undo\tCTRL-Z","",  &tui::TopedFrame::OnUndo, "Undo last operation" );
+   _resourceCenter->appendMenu("&Edit/Undo",       "CTRL-Z",  &tui::TopedFrame::OnUndo, "Undo last operation" );
    _resourceCenter->appendMenuSeparator("Edit");
-   _resourceCenter->appendMenu("&Edit/Copy\tCTRL-C","",  &tui::TopedFrame::OnCopy, "Copy selected shapes" );
-   _resourceCenter->appendMenu("&Edit/Move\tCTRL-M","",  &tui::TopedFrame::OnMove, "Move selected shapes" );
-   _resourceCenter->appendMenu("&Edit/Delete\tCTRL-D","",  &tui::TopedFrame::OnDelete, "Delete selected shapes" );
+   _resourceCenter->appendMenu("&Edit/Copy",       "CTRL-C",  &tui::TopedFrame::OnCopy, "Copy selected shapes" );
+   _resourceCenter->appendMenu("&Edit/Move",       "CTRL-M",  &tui::TopedFrame::OnMove, "Move selected shapes" );
+   _resourceCenter->appendMenu("&Edit/Delete",     "CTRL-D",  &tui::TopedFrame::OnDelete, "Delete selected shapes" );
    _resourceCenter->appendMenuSeparator("Edit");
-   _resourceCenter->appendMenu("&Edit/Rotate 90\tCTRL-9","",  &tui::TopedFrame::OnRotate, "Rotate selected shapes on 90 deg. counter clockwise ");
-   _resourceCenter->appendMenu("&Edit/Flip X\tCTRL-X","",  &tui::TopedFrame::OnFlipX, "Flip selected shapes towards X axis " );
-   _resourceCenter->appendMenu("&Edit/Flip Y\tCTRL-Y","",  &tui::TopedFrame::OnFlipY, "Flip selected shapes towards Y axis " );
-   _resourceCenter->appendMenu("&Edit/Cut with poly\tCTRL-U","",  &tui::TopedFrame::OnPolyCut, "Cut selected shapes with a polygon " );
-   _resourceCenter->appendMenu("&Edit/Merge\tCTRL-G","",  &tui::TopedFrame::OnMerge, "Merge selected shpes" );
+   _resourceCenter->appendMenu("&Edit/Rotate 90",  "CTRL-9",  &tui::TopedFrame::OnRotate, "Rotate selected shapes on 90 deg. counter clockwise ");
+   _resourceCenter->appendMenu("&Edit/Flip X",     "CTRL-X",  &tui::TopedFrame::OnFlipX, "Flip selected shapes towards X axis " );
+   _resourceCenter->appendMenu("&Edit/Flip Y",     "CTRL-Y",  &tui::TopedFrame::OnFlipY, "Flip selected shapes towards Y axis " );
+   _resourceCenter->appendMenu("&Edit/Cut with poly","CTRL-U",  &tui::TopedFrame::OnPolyCut, "Cut selected shapes with a polygon " );
+   _resourceCenter->appendMenu("&Edit/Merge",      "CTRL-G",  &tui::TopedFrame::OnMerge, "Merge selected shpes" );
 
 
    //---------------------------------------------------------------------------
@@ -356,14 +356,14 @@ void tui::TopedFrame::initMenuBar() {
 
     //???Add Toolbar & StatusBar check Item
 
-   _resourceCenter->appendMenu("&View/Zoom in\tF2","",  &tui::TopedFrame::OnzoomIn, "Zoom in current window" );
-   _resourceCenter->appendMenu("&View/Zoom out\tF3","",  &tui::TopedFrame::OnzoomOut, "Zoom out current window" );
-   _resourceCenter->appendMenu("&View/Zoom all\tF4","",  &tui::TopedFrame::OnZoomAll, "Zoom the current cell" );
+   _resourceCenter->appendMenu("&View/Zoom in", "F2",  &tui::TopedFrame::OnzoomIn, "Zoom in current window" );
+   _resourceCenter->appendMenu("&View/Zoom out","F3",  &tui::TopedFrame::OnzoomOut, "Zoom out current window" );
+   _resourceCenter->appendMenu("&View/Zoom all","F4",  &tui::TopedFrame::OnZoomAll, "Zoom the current cell" );
    _resourceCenter->appendMenuSeparator("View");
-   _resourceCenter->appendMenu("&View/Pan left\tSHIFT-LEFT","",  &tui::TopedFrame::OnpanLeft, "Move the view window left" );
-   _resourceCenter->appendMenu("&View/Pan right\tSHIFT-RIGHT","",  &tui::TopedFrame::OnpanRight, "Move the view window right" );
-   _resourceCenter->appendMenu("&View/Pan up\tSHIFT-UP","",  &tui::TopedFrame::OnpanUp, "Move the view window up" );
-   _resourceCenter->appendMenu("&View/Pan down\tSHIFT-DOWN","",  &tui::TopedFrame::OnpanDown, "Move the view window down" );
+   _resourceCenter->appendMenu("&View/Pan left",   "SHIFT-LEFT",  &tui::TopedFrame::OnpanLeft, "Move the view window left" );
+   _resourceCenter->appendMenu("&View/Pan right",  "SHIFT-RIGHT", &tui::TopedFrame::OnpanRight, "Move the view window right" );
+   _resourceCenter->appendMenu("&View/Pan up",     "SHIFT-UP",    &tui::TopedFrame::OnpanUp, "Move the view window up" );
+   _resourceCenter->appendMenu("&View/Pan down",   "SHIFT-DOWN",  &tui::TopedFrame::OnpanDown, "Move the view window down" );
    _resourceCenter->appendMenuSeparator("View");
 
    //---------------------------------------------------------------------------
@@ -383,19 +383,19 @@ void tui::TopedFrame::initMenuBar() {
    cellMenu->Append(TMCELL_GROUP    , wxT("Group Cell") , wxT("Group selected shapes in a cell"));
    cellMenu->Append(TMCELL_UNGROUP  , wxT("Unroup Cell") , wxT("Ungroup selected cell references"));
    */
-   _resourceCenter->appendMenu("&Cell/New Cell","",  &tui::TopedFrame::OnCellNew, "Create a new cell" );
-   _resourceCenter->appendMenu("&Cell/Open Cell","",  &tui::TopedFrame::OnCellOpen, "Open existing cell for editing" );
+   _resourceCenter->appendMenu("&Cell/New Cell",      "",   &tui::TopedFrame::OnCellNew, "Create a new cell" );
+   _resourceCenter->appendMenu("&Cell/Open Cell",     "",   &tui::TopedFrame::OnCellOpen, "Open existing cell for editing" );
    _resourceCenter->appendMenuSeparator("Cell");
-   _resourceCenter->appendMenu("&Cell/Edit Push\tF9","",  &tui::TopedFrame::OnCellPush, "Edit in place" );
-   _resourceCenter->appendMenu("&Cell/Edit Previous\tCtrl-F9","",  &tui::TopedFrame::OnCellPrev, "Edit in place" );
-   _resourceCenter->appendMenu("&Cell/Edit Pop\tF10","",  &tui::TopedFrame::OnCellPop, "Edit in place" );
-   _resourceCenter->appendMenu("&Cell/Edit Top\tCtrl-F10","",  &tui::TopedFrame::OnCellTop, "Edit in place" );
+   _resourceCenter->appendMenu("&Cell/Edit Push",     "F9", &tui::TopedFrame::OnCellPush, "Edit in place" );
+   _resourceCenter->appendMenu("&Cell/Edit Previous", "Ctrl-F9",  &tui::TopedFrame::OnCellPrev, "Edit in place" );
+   _resourceCenter->appendMenu("&Cell/Edit Pop",      "F10",&tui::TopedFrame::OnCellPop, "Edit in place" );
+   _resourceCenter->appendMenu("&Cell/Edit Top","Ctrl-F10", &tui::TopedFrame::OnCellTop, "Edit in place" );
    _resourceCenter->appendMenuSeparator("Cell");
-   _resourceCenter->appendMenu("&Cell/Cell Reference\tCtrl-R","",  &tui::TopedFrame::OnCellRef_M, "Cell reference" );
-   _resourceCenter->appendMenu("&Cell/Array of References\tAlt-R","",  &tui::TopedFrame::OnCellARef_M,  "Array of cell references");
+   _resourceCenter->appendMenu("&Cell/Cell Reference",      "Ctrl-R",   &tui::TopedFrame::OnCellRef_M, "Cell reference" );
+   _resourceCenter->appendMenu("&Cell/Array of References", "Alt-R",    &tui::TopedFrame::OnCellARef_M,  "Array of cell references");
    _resourceCenter->appendMenuSeparator("Cell");
-   _resourceCenter->appendMenu("&Cell/Group Cell","",  &tui::TopedFrame::OnCellGroup, "Group selected shapes in a cell" );
-   _resourceCenter->appendMenu("&Cell/Unroup Cell","",  &tui::TopedFrame::OnCellUngroup, "Ungroup selected cell references" );
+   _resourceCenter->appendMenu("&Cell/Group Cell",    "",  &tui::TopedFrame::OnCellGroup, "Group selected shapes in a cell" );
+   _resourceCenter->appendMenu("&Cell/Unroup Cell",   "",  &tui::TopedFrame::OnCellUngroup, "Ungroup selected cell references" );
 
    //---------------------------------------------------------------------------
    // menuBar entry Draw
@@ -405,10 +405,10 @@ void tui::TopedFrame::initMenuBar() {
    drawMenu->Append(TMDRAW_WIRE, wxT("Wire ...\tCTRL-W"), wxT("Create new wire on the current layer"));
    drawMenu->Append(TMDRAW_TEXT, wxT("Text ...\tCTRL-T"), wxT("Add text on the current layer"));
    */
-   _resourceCenter->appendMenu("&Draw/Box\tCTRL-B",      "", &tui::TopedFrame::OnDrawBox, "Create new box on the current layer" );
-   _resourceCenter->appendMenu("&Draw/Polygon\tCTRL-L",  "", &tui::TopedFrame::OnDrawPoly, "Create new polygon on the current layer" );
-   _resourceCenter->appendMenu("&Draw/Wire ...\tCTRL-W", "", &tui::TopedFrame::OnDrawWire, "Create new wire on the current layer" );
-   _resourceCenter->appendMenu("&Draw/Text ...\tCTRL-T", "", &tui::TopedFrame::OnDrawText, "Add text on the current layer" );
+   _resourceCenter->appendMenu("&Draw/Box",      "CTRL-B", &tui::TopedFrame::OnDrawBox, "Create new box on the current layer" );
+   _resourceCenter->appendMenu("&Draw/Polygon",  "CTRL-L", &tui::TopedFrame::OnDrawPoly, "Create new polygon on the current layer" );
+   _resourceCenter->appendMenu("&Draw/Wire ...", "CTRL-W", &tui::TopedFrame::OnDrawWire, "Create new wire on the current layer" );
+   _resourceCenter->appendMenu("&Draw/Text ...", "CTRL-T", &tui::TopedFrame::OnDrawText, "Add text on the current layer" );
    
 
    //---------------------------------------------------------------------------
@@ -423,13 +423,13 @@ void tui::TopedFrame::initMenuBar() {
    selectMenu->Append(TMSEL_UNSELECT_ALL, wxT("Unselect all\tALT-A")  , wxT("Unselect all"));
    */
 
-   _resourceCenter->appendMenu("&Select/Select\tCTRL-I", "", &tui::TopedFrame::OnSelectIn, "Select objects"  );
-   _resourceCenter->appendMenu("&Select/Part select\tCTRL-P", "", &tui::TopedFrame::OnPselectIn, "Select object edges" );
-   _resourceCenter->appendMenu("&Select/Select all\tCTRL-A", "", &tui::TopedFrame::OnSelectAll, "Select all objects in the current cell" );
+   _resourceCenter->appendMenu("&Select/Select",      "CTRL-I", &tui::TopedFrame::OnSelectIn, "Select objects"  );
+   _resourceCenter->appendMenu("&Select/Part select", "CTRL-P", &tui::TopedFrame::OnPselectIn, "Select object edges" );
+   _resourceCenter->appendMenu("&Select/Select all",  "CTRL-A", &tui::TopedFrame::OnSelectAll, "Select all objects in the current cell" );
    _resourceCenter->appendMenuSeparator("Select");
-   _resourceCenter->appendMenu("&Select/Unselect\tALT-I", "", &tui::TopedFrame::OnUnselectIn, "Unselect objects" );
-   _resourceCenter->appendMenu("&Select/Part unselect\tALT-P", "", &tui::TopedFrame::OnPunselectIn, "Unselect object edges" );
-   _resourceCenter->appendMenu("&Select/Unselect all\tALT-A", "", &tui::TopedFrame::OnUnselectAll, "Unselect all" );
+   _resourceCenter->appendMenu("&Select/Unselect",    "ALT-I", &tui::TopedFrame::OnUnselectIn, "Unselect objects" );
+   _resourceCenter->appendMenu("&Select/Part unselect","ALT-P", &tui::TopedFrame::OnPunselectIn, "Unselect object edges" );
+   _resourceCenter->appendMenu("&Select/Unselect all", "ALT-A", &tui::TopedFrame::OnUnselectAll, "Unselect all" );
    
 
    //---------------------------------------------------------------------------
