@@ -16,46 +16,33 @@ tui::MenuItemHandler::MenuItemHandler(void)
 tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, std::string function)
    :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(function), _method(NULL) 
 {
-   _inserted = false;
+   _inserted   =  false;
+   _changed    =  false;
 }
 
 tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod)
    :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(""), _method(cbMethod) 
 {
-   _inserted = false;
+   _inserted   =  false;
+   _changed    =  false;
 }
 
 tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString)
    :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(""), _method(cbMethod), _helpString(helpString) 
 {
-      _inserted = false;
+      _inserted   =  false;
+      _changed    =  false;
 }
 
-void tui::MenuItemHandler::create(wxMenuBar *menuBar)
-{
+//Build intermediate menu item (from top menu)
+//Returns place where we need insert our menu item
+wxMenu* tui::MenuItemHandler::buildPath(wxMenuBar *menuBar, const std::vector<std::string> &menuNames)
+{  
    wxMenu* menu, *menu2;
    wxMenuItem *menuItem;
    int menuID;
-   std::vector<std::string> menuNames;
 
-   int id;
-   std::string menustring;
-   
-   id = _ID;
-   menustring = _menuItem;
-   menuNames = split(menustring, '/');
-         
-   if (menuNames.size()==0) return;
 
-   if (menuNames.size()==1)
-   {
-      //Create new item in main menu
-      menu = new wxMenu();
-      menuBar->Insert(menuBar->GetMenuCount()-1, menu, menuNames[0].c_str());
-      _inserted = true;
-      return;
-   }
-         
    //First item - Top Menu 
    std::string menuString =menuNames[0];
    menuID = menuBar->FindMenu(menuString.c_str());
@@ -85,14 +72,111 @@ void tui::MenuItemHandler::create(wxMenuBar *menuBar)
             menu = menuItem->GetSubMenu();
          }
       }
-      
-      //last item
-      menuItem = new wxMenuItem(menu, _ID, (*(menuNames.end()-1)).c_str(), _helpString.c_str());
-         
-      menu->Append(menuItem);
-            
-      _inserted = true;
+      return menu;
 }
+
+
+
+
+void tui::MenuItemHandler::create(wxMenuBar *menuBar)
+{
+   wxMenu* menu;
+   wxMenuItem *menuItem;
+   std::vector<std::string> menuNames;
+
+   menuNames = split(_menuItem, '/');
+
+   
+         
+   if (menuNames.size()==0) return;
+
+   if (menuNames.size()==1)
+   {
+      //Create new item in main menu
+      menu = new wxMenu();
+      menuBar->Insert(menuBar->GetMenuCount()-1, menu, menuNames[0].c_str());
+      _inserted = true;
+      return;
+   }
+   
+   menu = buildPath(menuBar, menuNames);
+         
+   //last item
+   std::string insertedString = *(menuNames.end()-1);
+   if (_hotKey !="") insertedString=insertedString+"\t"+_hotKey;
+   
+   menuItem = new wxMenuItem(menu, _ID, insertedString.c_str(), _helpString.c_str());
+        
+   menu->Append(menuItem);
+            
+   _inserted = true;
+}
+
+void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
+{
+
+   wxMenu* menu;
+   wxMenuItem *menuItem;
+   std::vector<std::string> menuNames;
+
+   menuNames = split(_menuItem, '/');
+
+   
+         
+   if (menuNames.size()==0) return;
+
+   if (menuNames.size()==1)
+   {
+      //Create new item in main menu
+      menu = new wxMenu();
+      menuBar->Insert(menuBar->GetMenuCount()-1, menu, menuNames[0].c_str());
+      _inserted = true;
+      return;
+   }
+   
+   menu = buildPath(menuBar, menuNames);
+         
+   //last item
+   std::string insertedString = *(menuNames.end()-1);
+   if (_hotKey !="") insertedString=insertedString+"\t"+_hotKey;
+   
+   int index = menu->FindItem(insertedString.c_str());
+   
+   menuItem = menu->FindItem(index);
+   if ((index==wxNOT_FOUND)||(menuItem==NULL))
+   {
+      std::ostringstream ost;
+      ost<<"Error during menu redefining";
+      tell_log(console::MT_ERROR,ost.str().c_str());
+      return;
+   }
+   menuItem->SetText(insertedString.c_str());
+   menuItem->SetHelp(_helpString.c_str());
+   //menuItem = new wxMenuItem(menu, _ID, insertedString.c_str(), _helpString.c_str());
+    
+   //menu->Append(menuItem);
+            
+   _inserted = true;
+   _changed = false;
+};
+
+void  tui::MenuItemHandler::changeInterior(std::string hotKey, std::string function, callbackMethod cbMethod, std::string helpString)
+{
+   _hotKey = hotKey;
+   if (function!="") 
+   {
+      _function = function;
+      _method = NULL;
+   }
+   else 
+   {
+      _method = cbMethod;
+   }
+   _helpString = helpString;
+   _changed = true;
+}
+
+
 
 tui::MenuItem::MenuItem(void)
    :MenuItemHandler()
@@ -111,9 +195,7 @@ tui::MenuItemSeparator::MenuItemSeparator(std::string menuItem)
 
 void tui::MenuItemSeparator::create(wxMenuBar *menuBar)
 {
-   wxMenu* menu, *menu2;
-   wxMenuItem *menuItem;
-   int menuID;
+   wxMenu* menu;
    std::vector<std::string> menuNames;// = split
    std::string menustring;
 
@@ -122,34 +204,7 @@ void tui::MenuItemSeparator::create(wxMenuBar *menuBar)
          
    if (menuNames.size()==0) return;
 
-   //First item - Top Menu 
-   std::string menuString =menuNames[0];
-   menuID = menuBar->FindMenu(menuString.c_str());
-   if (wxNOT_FOUND == menuID)
-   {
-      // create at the left of Help menu
-      menu = new wxMenu();
-      menuBar->Insert(menuBar->GetMenuCount()-1, menu, menuString.c_str());
-      menuID = menuBar->FindMenu(menuString.c_str());
-   }
-   
-   menu = menuBar->GetMenu(menuID);
-   //intermediate menu items - create if does not exists
-   for (unsigned int j=1; j<(menuNames.size()); j++)
-   {
-      menuID=menu->FindItem(menuNames[j].c_str());
-      menuItem = menu->FindItem(menuID, &menu2);
-      if ((wxNOT_FOUND == menuID) || (menu2 == NULL))
-      {
-         menu2 = new wxMenu();
-         menu->Append(TMDUMMY /*+ _menuCount*/, menuNames[j].c_str(), menu2);
-         menu = menu2;
-      }
-      else
-      {
-         menu = menuItem->GetSubMenu();// menu2;
-      }
-   }
+   menu = buildPath(menuBar, menuNames);
       
    menu->AppendSeparator();
             
@@ -193,45 +248,87 @@ void tui::ResourceCenter::buildMenu(wxMenuBar *menuBar)
       {
          (*mItem)->create(menuBar);
       }
+
+      //only for changed menus
+      if ((*mItem)->changed()== true)
+      {
+         (*mItem)->recreate(menuBar);
+      }
+
    }
 }
 
-void tui::ResourceCenter::appendMenu(std::string menuItem, std::string hotKey, std::string function)
+bool tui::ResourceCenter::checkExistence(const tui::MenuItemHandler &item)
+{
+   bool ret=false;  
+   std::ostringstream ost;
+   for(itemList::iterator mItem=_menus.begin(); mItem!=_menus.end(); mItem++)
+   {
+      if (((*mItem)->menuItem()).compare(item.menuItem())==0)
+      {
+         ost<<"Menu item redefining\n";
+         tell_log(console::MT_WARNING,ost.str().c_str());
+
+         (*mItem)->changeInterior(item.hotKey(), item.function(), item.method(), item.helpString());
+         
+         
+         ret = true;
+         continue;
+      }
+      
+      if (item.hotKey()!="")
+      {
+         if (((*mItem)->hotKey()).compare(item.hotKey())==0)
+         {
+            ost<<"Hot key redefining for menu "+(*mItem)->menuItem();
+            tell_log(console::MT_WARNING,ost.str().c_str());
+            (*mItem)->changeInterior("");//, "", item.method, item.helpString);
+            (*mItem)->setChanged(true);
+         }
+      }
+   }
+   return ret;
+}
+
+void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::string &hotKey, const std::string &function)
 {
    int ID = TMDUMMY + _menuCount;
-
-   //???Here need to find already existed menus and hot-keys
-
 
    MenuItemHandler* mItem = new MenuItem(ID, menuItem, hotKey, function);
-   _menus.push_back(mItem);
-   _menuCount++;
+   if (!checkExistence(*mItem))
+   {
+      _menus.push_back(mItem);
+      _menuCount++;
+   }
+
 }
 
-void tui::ResourceCenter::appendMenu(std::string menuItem, std::string hotKey, callbackMethod cbMethod)
+void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod)
 {
    int ID = TMDUMMY + _menuCount;
-
-   //???Here need to find already existed menus and hot-keys
 
    MenuItemHandler* mItem= new MenuItem(ID, menuItem, hotKey, cbMethod);
-   _menus.push_back(mItem);
-   _menuCount++;
+   if (!checkExistence(*mItem))
+   {
+      _menus.push_back(mItem);
+      _menuCount++;
+   }
 }
 
-void tui::ResourceCenter::appendMenu(std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString)
+void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod, const std::string &helpString)
 {
    int ID = TMDUMMY + _menuCount;
 
-   //???Here need to find already existed menus and hot-keys
-
    MenuItemHandler* mItem= new MenuItem(ID, menuItem, hotKey, cbMethod, helpString);
-   _menus.push_back(mItem);
-   _menuCount++;
+   if (!checkExistence(*mItem))
+   {
+      _menus.push_back(mItem);
+      _menuCount++;
+   }
    
 };
 
-void tui::ResourceCenter::appendMenuSeparator(std::string menuItem)
+void tui::ResourceCenter::appendMenuSeparator(const std::string &menuItem)
 {
    MenuItemHandler* mItem= new MenuItemSeparator(menuItem);
    _menus.push_back(mItem);
