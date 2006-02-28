@@ -708,7 +708,6 @@ void parsercmd::cmdSTDFUNC::undo_cleanup() {
    }
 }
 
-//std::string parsercmd::cmdSTDFUNC::callingConv() {
 nameList* parsercmd::cmdSTDFUNC::callingConv(const telldata::typeMAP* lclTypeDef)
 {
    nameList* argtypes = new nameList();
