@@ -734,6 +734,16 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, const SGBitSet* pls
 void laydata::tdtpoly::transfer(const CTM& trans) {
    for (unsigned i = 0; i < _plist.size(); i++) 
       _plist[i] *= trans;
+   // normalize - taken 1:1 form valid_poly class
+   // TODO: Again - validation classes has to be optimized
+   real area = 0;
+   word size = _plist.size();
+   word i,j;
+   for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
+      area += _plist[i].x()*_plist[j].y() - _plist[j].x()*_plist[i].y();
+   if (area < 0)  {
+      std::reverse(_plist.begin(),_plist.end());
+   }
 }
 
 laydata::tdtdata* laydata::tdtpoly::copy(const CTM& trans) {
@@ -1757,7 +1767,7 @@ void laydata::valid_poly::angles() {
    word cp3 = 1;
    int ang;
    pointlist::iterator cp = _plist.begin();
-   while (cp != _plist.end()) {
+   while ((cp != _plist.end()) && (_plist.size() > 2)) {
       ang = abs(xangle(_plist[cp2], _plist[cp3]) - xangle(_plist[cp2], _plist[cp1]));
       if ((0 == ang) || (180 == ang)) {
          cp = _plist.erase(cp);
