@@ -53,6 +53,7 @@ namespace tui
       virtual void recreate(wxMenuBar *menuBar);
     protected:
       wxMenu* buildPath(wxMenuBar *menuBar, const std::vector<std::string> &menuNames);
+      
       int         _ID; 
       std::string _menuItem; 
       std::string _hotKey;
@@ -107,6 +108,10 @@ namespace tui
       void executeMenu(int ID);
       bool checkExistence(const tui::MenuItemHandler & item);
    private:
+      //produce lowercase string and exclude unwanted character
+      std::string simplify(std::string str, char ch);
+
+
       itemList _menus;
       int _menuCount; //quantity of menu items;
       
