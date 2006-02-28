@@ -169,9 +169,10 @@ void  tui::MenuItemHandler::changeInterior(std::string hotKey, std::string funct
       _method = NULL;
    }
    else 
-   {
-      _method = cbMethod;
-   }
+      if (cbMethod!= NULL)
+         {
+            _method = cbMethod;
+         }
    _helpString = helpString;
    _changed = true;
 }
@@ -262,23 +263,41 @@ bool tui::ResourceCenter::checkExistence(const tui::MenuItemHandler &item)
 {
    bool ret=false;  
    std::ostringstream ost;
+
+   std::string curStr, itemStr;
+   itemStr = item.menuItem();
+   
+   //convert menuItem into lowercase and remove char '&'
+   itemStr = simplify(itemStr, '&');
+   
+   std::string itemHotKey = simplify(item.hotKey(), '-');
+   itemHotKey = simplify(itemHotKey, '+');
+   
    for(itemList::iterator mItem=_menus.begin(); mItem!=_menus.end(); mItem++)
    {
-      if (((*mItem)->menuItem()).compare(item.menuItem())==0)
+      curStr = (*mItem)->menuItem();
+         
+      //convert menuItem into lowercase and remove char '&'
+      curStr = simplify(curStr, '&');
+
+      if (itemStr.compare(curStr)==0)
       {
          ost<<"Menu item redefining\n";
          tell_log(console::MT_WARNING,ost.str().c_str());
 
          (*mItem)->changeInterior(item.hotKey(), item.function(), item.method(), item.helpString());
-         
-         
+                  
          ret = true;
          continue;
       }
       
       if (item.hotKey()!="")
       {
-         if (((*mItem)->hotKey()).compare(item.hotKey())==0)
+         
+         std::string mItemHotKey = simplify((*mItem)->hotKey(), '-');
+         mItemHotKey = simplify(mItemHotKey, '+');
+
+         if (mItemHotKey.compare(itemHotKey)==0)
          {
             ost<<"Hot key redefining for menu "+(*mItem)->menuItem();
             tell_log(console::MT_WARNING,ost.str().c_str());
@@ -290,11 +309,30 @@ bool tui::ResourceCenter::checkExistence(const tui::MenuItemHandler &item)
    return ret;
 }
 
+//produce lowercase string and exclude unwanted character
+std::string tui::ResourceCenter::simplify(std::string str, char ch)
+{
+   std::transform(str.begin(), str.end(), str.begin(), tolower);
+   std::string::iterator curIter;
+   curIter = std::find_if(str.begin(), str.end(), std::bind2nd(std::equal_to<char>(), ch));
+   if (curIter != str.end())
+   {
+      str.erase(curIter);
+   }
+
+   return str;
+}
+
 void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::string &hotKey, const std::string &function)
 {
    int ID = TMDUMMY + _menuCount;
 
-   MenuItemHandler* mItem = new MenuItem(ID, menuItem, hotKey, function);
+   //Set first character in top menu into uppercase
+   //it need for simplicity
+   std::string str = menuItem;
+   str[0] = toupper(str[0]);
+
+   MenuItemHandler* mItem = new MenuItem(ID, str, hotKey, function);
    if (!checkExistence(*mItem))
    {
       _menus.push_back(mItem);
@@ -307,7 +345,13 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
 {
    int ID = TMDUMMY + _menuCount;
 
-   MenuItemHandler* mItem= new MenuItem(ID, menuItem, hotKey, cbMethod);
+   //Set first character in top menu into uppercase
+   //it need for simplicity
+   std::string str = menuItem;
+   str[0] = toupper(str[0]);
+  
+
+   MenuItemHandler* mItem= new MenuItem(ID, str, hotKey, cbMethod);
    if (!checkExistence(*mItem))
    {
       _menus.push_back(mItem);
@@ -319,7 +363,12 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
 {
    int ID = TMDUMMY + _menuCount;
 
-   MenuItemHandler* mItem= new MenuItem(ID, menuItem, hotKey, cbMethod, helpString);
+   //Set first character in top menu into uppercase
+   //it need for simplicity
+   std::string str = menuItem;
+   str[0] = toupper(str[0]);
+  
+   MenuItemHandler* mItem= new MenuItem(ID, str, hotKey, cbMethod, helpString);
    if (!checkExistence(*mItem))
    {
       _menus.push_back(mItem);

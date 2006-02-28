@@ -732,8 +732,8 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, const SGBitSet* pls
 }
 
 void laydata::tdtpoly::transfer(const CTM& trans) {
-   for (unsigned i = 0; i < _plist.size(); i++) 
-      _plist[i] *= trans;
+   for (unsigned ii = 0; ii < _plist.size(); ii++) 
+      _plist[ii] *= trans;
    // normalize - taken 1:1 form valid_poly class
    // TODO: Again - validation classes has to be optimized
    real area = 0;
