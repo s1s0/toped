@@ -292,14 +292,60 @@ void bug()
 {
    addbox( { { 0 , 0 } , { 10 , 10 } });
    select({8.00,6.00});
-   rotate({8.00, 6.00},90);
+//   rotate({8.00, 6.00},90);
    // Bug in the cut/merge algo here when cutting polygon edge coincides 
    // with the box edge
-   //polycut( { { 4 , -5 } , { 8 , -5 } , { 8 , 5 } , { 4 , 5 } });
+//   polycut( { { 4 , -5 } , { 8 , -5 } , { 8 , 5 } , { 4 , 5 } });
+   polycut( { { 0 , 1 } , { 0 , 5 } , { 5 , 5 } , { 5 , 1 } });
    // Alternatively as a temporary workaround...
-   polycut( { { 3 , -5 } , { 8 , -5 } , { 8 , 5 } , { 3 , 5 } });
+//   polycut( { { 3 , -5 } , { 8 , -5 } , { 8 , 5 } , { 3 , 5 } });
    // for Pi shape,
    //polycut({ { 5.5 , -2.5 } , { 5.5 , 6 } , { 12.5 , 6 } , { 12.5 , -2.5 } });
+}
+
+void edge_cut1() 
+{
+   addbox( { { 0 , 0 } , { 10 , 10 } });
+   select({5.00,5.00});
+   polycut( { { 0 , 4 } , { 0 , 6 } , { 3 , 6 } , { 3 , 4 } });
+   unselect_all();
+   select({5.00,5.00});
+   polycut( { { 4 , 0 } , { 6 , 0 } , { 6 , 3 } , { 4 , 3 } });
+   unselect_all();
+   select({5.00,5.00});
+   polycut( { { 10 , 4 } , { 10 , 6 } , { 7 , 6 } , { 7 , 4 } });
+   unselect_all();
+   select({5.00,5.00});
+   polycut( { { 4 , 10 } , { 6 , 10 } , { 6 , 7 } , { 4 , 7 } });
+   unselect_all();
+}
+
+void edge_cut2() 
+{
+   addbox( { { 0 , 0 } , { 10 , 10 } });
+   select({5.00,5.00});
+   polycut( { { 0 , -1 } , { 0 , 4 } , { 3 , 4 } , { 3 , -1 } });
+   unselect_all();
+//   select({5.00,5.00});
+//   polycut( { { 11 , 0 } , { 6 , 0 } , { 6 , 3 } , { 11 , 3 } });
+//   unselect_all();
+//   select({5.00,5.00});
+//   polycut( { { 7 , 11 } , { 10 , 11 } , { 10 , 6 } , { 7 , 6 } });
+//   unselect_all();
+   select({5.00,5.00});
+   polycut( { { -1 , 10 } , { -1 , 7 } , { 4 , 7 } , { 4 , 10 } });
+   unselect_all();
+}
+
+void edge_cut3() 
+{
+   addbox( { { 0 , 0 } , { 10 , 10 } });
+//   addbox( { { 10 , -3 } , { 20 , 13 } });
+//   addbox( { { 10 , 3 } , { 20 , 7 } });
+   addbox( { { -5 , 8 } , { 0 , 2 } });
+   select({5,5});
+   select({-3,5});
+//   polycut( { { -1 , 6 } , { -1 , 4 } , { 4 , 4 } , { 4 , 5 } , { 0 , 5} , { 0 , 6} });
 }
 
 layerSetup();
