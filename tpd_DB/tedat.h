@@ -347,7 +347,7 @@ namespace laydata {
    private:
       void              angles();
       void              identical();
-      void              normalize();
+//      void              normalize();
       void              selfcrossing();
       word              _width;
    };
