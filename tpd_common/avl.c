@@ -34,7 +34,7 @@
    and memory allocator |allocator|.
    Returns |NULL| if memory allocation failed. */
 struct avl_table *
-avl_create (avl_comparison_func *compare, void *param,
+avl_create (avl_comparison_func *compare, const void *param,
             struct libavl_allocator *allocator)
 {
   struct avl_table *tree;
