@@ -31,7 +31,7 @@
 #include "../tpd_common/avl_def.h"
 
 namespace logicop {
-   
+   typedef enum {revent_pri = 0, cevent_pri = 1, levent_pri = 2} EventPriority;
    class SweepLine;
    class BindCollection;
    class CEvent;
@@ -241,7 +241,7 @@ namespace logicop {
       //! Return the oposite vertex (not the event one)
       virtual const TP* overtex() const = 0;
       //! Return the event priority
-      virtual const byte epriority() const = 0;
+      virtual const EventPriority epriority() const = 0;
       //! Perform the operations as defined in the Bentley-Ottman algorithm
       virtual void      swipe4cross(SweepLine&, avl_table*) {assert(false);};
       //! Generate binding points of a hole polygon
@@ -271,7 +271,7 @@ namespace logicop {
       //! Return the oposite vertex (not the event one)
       const TP*          overtex() const {return _seg->rP;}
       //! Return the event priority
-      const byte         epriority() const {return 1;}
+      const EventPriority epriority() const {return levent_pri;}
       //! Perform the operations as defined by Bentley-Ottman for left point
       void               swipe4cross(SweepLine&, avl_table*);
       //! Perform the operations for binding point generation
@@ -300,7 +300,7 @@ namespace logicop {
       //! Return the oposite vertex (not the event one)
       const TP*          overtex() const {return _seg->lP;}
       //! Return the event priority
-      const byte         epriority() const {return 0;}
+      const EventPriority epriority() const {return revent_pri;}
       //! Perform the operations as defined by Bentley-Ottman for right point
       void               swipe4cross(SweepLine&, avl_table*);
       //! Perform the operations for binding point generation
@@ -330,7 +330,7 @@ namespace logicop {
       //! Return the oposite vertex (not the event one)
       const TP*          overtex() const {assert(false); return NULL;}
       //! Return the event priority
-      const byte         epriority() const {return 2;}
+      const EventPriority epriority() const {return cevent_pri;}
       //! Perform the operations as defined by Bentley-Ottman for cross point
       void               swipe4cross(SweepLine&, avl_table*);
       //! Return -1 as polygon number for the cross event

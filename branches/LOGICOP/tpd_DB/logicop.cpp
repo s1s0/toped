@@ -608,8 +608,8 @@ int logicop::EventQueue::E_compare( const void* v1, const void* v2, void*)
       return (pe1->epriority() > pe2->epriority()) ? -1 : 1;
    // appears that we have same events with the same event vertexes,
    // so we'll try to sort them by their opposite vertices
-   // but just in case that's not cross-event (0 priority)
-   if (2 == pe1->epriority()) return 0; // the only case to return 0!
+   // but just in case that's not cross-event
+   if (logicop::cevent_pri == pe1->epriority()) return 0;
    result = logicop::xyorder(pe2->overtex(),pe1->overtex());
    if (0 != result) return result;
    // if still here -> these should be coinciding edges of different
@@ -744,7 +744,7 @@ logicop::CEvent* logicop::SweepLine::coinsideCheck(plysegment* line,
    // deal with the cases when the line have exactly one common point with cross,
    // i.e one of the edge points of cross lies on line
    if      ((0==lps) && (0!=rps))
-      return new CEvent(line, cross,cross->lP, false);
+      return new CEvent(cross, line,cross->lP, false);
    else if ((0!=lps) && (0==rps))
       return new CEvent(cross, line,cross->rP, false);
 
@@ -908,9 +908,9 @@ int logicop::SweepLine::compare_seg(const void* o1, const void* o2, void* param)
       compare = yxorder(seg0->lP, seg1->lP);
    else if ((crossP == seg0_PT) && (rightP == seg1_PT))
    {
-      if (0 == (*curE)->epriority())
+      if (logicop::revent_pri == (*curE)->epriority())
          compare = yxorder(seg0->rP, curP);
-      else if (2 == (*curE)->epriority())
+      else if (logicop::cevent_pri == (*curE)->epriority())
       {
          CEvent* boza = static_cast<CEvent*>(*curE);
          if (((seg0 == boza->above()) || (seg1 == boza->above())) &&
@@ -929,9 +929,9 @@ int logicop::SweepLine::compare_seg(const void* o1, const void* o2, void* param)
    }
    else if ((rightP == seg0_PT) && (crossP == seg1_PT))
    {
-      if (0 == (*curE)->epriority())
+      if (logicop::revent_pri == (*curE)->epriority())
          compare = yxorder(curP, seg1->rP);
-      else if (2 == (*curE)->epriority())
+      else if (logicop::cevent_pri == (*curE)->epriority())
       {
          CEvent* boza = static_cast<CEvent*>(*curE);
          if (((seg0 == boza->above()) || (seg1 == boza->above())) &&
