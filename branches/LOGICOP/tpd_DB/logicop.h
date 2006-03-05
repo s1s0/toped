@@ -252,7 +252,7 @@ namespace logicop {
       virtual int       edgeNo() const = 0;
       //! Check the input crossing event and adds it to the event queue
       void               checkNupdate(avl_table*, plysegment*, plysegment*, 
-                                                       CEvent*, bool check=true);
+                                      CEvent*, bool check=true);
       virtual           ~Event() {};
    };
    
@@ -271,7 +271,7 @@ namespace logicop {
       //! Return the oposite vertex (not the event one)
       const TP*          overtex() const {return _seg->rP;}
       //! Return the event priority
-      virtual const byte epriority() const {return 1;}
+      const byte         epriority() const {return 1;}
       //! Perform the operations as defined by Bentley-Ottman for left point
       void               swipe4cross(SweepLine&, avl_table*);
       //! Perform the operations for binding point generation
@@ -300,7 +300,7 @@ namespace logicop {
       //! Return the oposite vertex (not the event one)
       const TP*          overtex() const {return _seg->lP;}
       //! Return the event priority
-      virtual const byte epriority() const {return 2;}
+      const byte         epriority() const {return 0;}
       //! Perform the operations as defined by Bentley-Ottman for right point
       void               swipe4cross(SweepLine&, avl_table*);
       //! Perform the operations for binding point generation
@@ -330,7 +330,7 @@ namespace logicop {
       //! Return the oposite vertex (not the event one)
       const TP*          overtex() const {assert(false); return NULL;}
       //! Return the event priority
-      virtual const byte epriority() const {return 0;}
+      const byte         epriority() const {return 2;}
       //! Perform the operations as defined by Bentley-Ottman for cross point
       void               swipe4cross(SweepLine&, avl_table*);
       //! Return -1 as polygon number for the cross event
@@ -338,13 +338,16 @@ namespace logicop {
       //! Return -1 as edge number for the cross event
       int                edgeNo() const {return -1;};
       //! Return a pointer to the crossing point #_cp
-      TP*                cp() const {return _cp;};
-   protected:   
+//      TP*                cp() const {return _cp;};
+      bool               swaponly() const {return _swaponly;}
+      const plysegment*  below() const {return _below;}
+      const plysegment*  above() const {return _above;}
+      protected:
       //! A pointer to the first crossing segment
       plysegment*       _above;
       //! A pointer to the second crossing segment
       plysegment*       _below;
-      bool              _edge;
+      bool              _swaponly;
       //! A pointer to the crossing point produced by the #_above/#_below pair of polygon segments
       TP*               _cp;
    };
@@ -400,7 +403,7 @@ namespace logicop {
       //!Perform the swap of the input segments
       void              swap(plysegment*&, plysegment*&);
       //! set the _current_param
-      void              set_currentP(const TP* cP) {_curP = *cP;};
+      void              set_curE(const Event* cE) {_curE = cE;};
    private:
       //!The callback function used as a sort creteria by the AVL tree
       static int        compare_seg(const void*, const void*, void*);
@@ -414,9 +417,9 @@ namespace logicop {
       //! An AVL tree structure containing the segments currently in the sweep line
       avl_table*        _tree;
       //!Current x position of the sweep line
-      static TP   _curP;
-      const pointlist   _plist0;
-      const pointlist   _plist1;
+      static const Event*     _curE;
+      const  pointlist  _plist0;
+      const  pointlist  _plist1;
    };
          
    typedef std::list<pointlist*> pcollection; // point list collection

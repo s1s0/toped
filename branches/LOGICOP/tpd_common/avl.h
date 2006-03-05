@@ -30,7 +30,7 @@
 #include "avl_def.h"
 
 /* Table functions. */
-struct avl_table *avl_create (avl_comparison_func *, void *,
+struct avl_table *avl_create (avl_comparison_func *, const void *,
                               struct libavl_allocator *);
 struct avl_table *avl_copy (const struct avl_table *, avl_copy_func *,
                             avl_item_func *, struct libavl_allocator *);

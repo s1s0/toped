@@ -479,26 +479,64 @@ void merge_test4() {
    addbox({8.2,47.2},{25.2,30.2},8);   
 }   
 
+void edge_cut1()
+{
+   newcell("edge_cut1");
+   opencell("edge_cut1");
+   addbox( { { 0 , 0 } , { 10 , 10 } });
+   select({5.00,5.00});
+   polycut( { { 0 , 4 } , { 0 , 6 } , { 3 , 6 } , { 3 , 4 } });
+   unselect_all();
+   select({5.00,5.00});
+   polycut( { { 4 , 0 } , { 6 , 0 } , { 6 , 3 } , { 4 , 3 } });
+   unselect_all();
+   select({5.00,5.00});
+   polycut( { { 10 , 4 } , { 10 , 6 } , { 7 , 6 } , { 7 , 4 } });
+   unselect_all();
+   select({5.00,5.00});
+   polycut( { { 4 , 10 } , { 6 , 10 } , { 6 , 7 } , { 4 , 7 } });
+   unselect_all();
+}
+
+void edge_merge() 
+{
+   newcell("edge_merge");
+   opencell("edge_merge");
+   addbox( { { 0 , 0 } , { 10 , 10 } });
+//   addbox( { { 10 , -3 } , { 20 , 13 } });
+//   addbox( { { 10 , 3 } , { 20 , 7 } });
+   addbox( { { -5 , 8 } , { 0 , 2 } });
+//   addbox( { { 2 , 10 } , { 8 , 17 } });
+   select({5,5});
+//   select({15,5});
+   select({-3,5});
+//   select({5,15});
+//   polycut( { { -1 , 6 } , { -1 , 4 } , { 4 , 4 } , { 4 , 5 } , { 0 , 5} , { 0 , 6} });
+//   merge();
+}
+
 
 layerSetup();
 screenSetup();
 newdesign("layout_logic");
-cut_test1();
-cut_test2();
-cut_test3();
-cut_test4();
-cut_test5();
-cut_test6();
-cut_test7();
-cut_test1A();
-cut_test2A();
-cut_test3A();
-//cut_test1B();
-cut_test2B();
-merge_test1();
-merge_test2();
-merge_test3();
-merge_test4();
+//cut_test1();
+//cut_test2();
+//cut_test3();
+//cut_test4();
+//cut_test5();
+//cut_test6();
+//cut_test7();
+//cut_test1A();
+//cut_test2A();
+//cut_test3A();
+////cut_test1B();
+//cut_test2B();
+//merge_test1();
+//merge_test2();
+//merge_test3();
+//merge_test4();
+//edge_cut1();
+edge_merge();
 zoomall();
 
 //opencell("top");
