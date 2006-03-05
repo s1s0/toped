@@ -510,7 +510,6 @@ void edge_merge()
    select({5,5});
 //   select({15,5});
    select({-3,5});
-//   select({5,15});
 //   polycut( { { -1 , 6 } , { -1 , 4 } , { 4 , 4 } , { 4 , 5 } , { 0 , 5} , { 0 , 6} });
 //   merge();
 }
