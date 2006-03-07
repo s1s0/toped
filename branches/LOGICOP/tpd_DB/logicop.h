@@ -410,7 +410,9 @@ namespace logicop {
       //!Determines the lexicographical order of two points comparing Y first. 
       static int        yxorder(const TP*, const TP*);
 
-      CEvent*           coinsideCheck(plysegment*, plysegment*, float, float);
+      const TP*         joiningSegments(plysegment*, plysegment*, float, float);
+      CEvent*           oneLineSegments(plysegment*, plysegment*);
+//      CEvent*           coinsideCheck(plysegment*, plysegment*, float, float);
       float             getLambda( const TP*, const TP*, const TP*);
       TP*               getMiddle(const TP*, const TP*);
 
