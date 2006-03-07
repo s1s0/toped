@@ -488,14 +488,14 @@ void edge_cut1()
    polycut( { { 0 , 4 } , { 0 , 6 } , { 3 , 6 } , { 3 , 4 } });
    unselect_all();
    select({5.00,5.00});
-   polycut( { { 4 , 0 } , { 6 , 0 } , { 6 , 3 } , { 4 , 3 } });
-   unselect_all();
-   select({5.00,5.00});
-   polycut( { { 10 , 4 } , { 10 , 6 } , { 7 , 6 } , { 7 , 4 } });
-   unselect_all();
-   select({5.00,5.00});
-   polycut( { { 4 , 10 } , { 6 , 10 } , { 6 , 7 } , { 4 , 7 } });
-   unselect_all();
+//   polycut( { { 4 , 0 } , { 6 , 0 } , { 6 , 3 } , { 4 , 3 } });
+//   unselect_all();
+//   select({5.00,5.00});
+//   polycut( { { 10 , 4 } , { 10 , 6 } , { 7 , 6 } , { 7 , 4 } });
+//   unselect_all();
+//   select({5.00,5.00});
+//   polycut( { { 4 , 10 } , { 6 , 10 } , { 6 , 7 } , { 4 , 7 } });
+//   unselect_all();
 }
 
 void edge_merge() 
@@ -503,13 +503,15 @@ void edge_merge()
    newcell("edge_merge");
    opencell("edge_merge");
    addbox( { { 0 , 0 } , { 10 , 10 } });
-//   addbox( { { 10 , -3 } , { 20 , 13 } });
-//   addbox( { { 10 , 3 } , { 20 , 7 } });
-   addbox( { { -5 , 8 } , { 0 , 2 } });
-//   addbox( { { 2 , 10 } , { 8 , 17 } });
    select({5,5});
-//   select({15,5});
+   addbox( { { 10 , 3 } , { 15 , 7 } });
+   select({13,5});
+   addbox( { { -5 , 3 } , {  0 , 7 } });
    select({-3,5});
+   addbox( { { 3 , -5 } , { 7 , 0 } });
+   select({5,-3});
+   addbox( { { 3 , 10 } , { 7 , 15 } });
+   select({5,13});
 //   polycut( { { -1 , 6 } , { -1 , 4 } , { 4 , 4 } , { 4 , 5 } , { 0 , 5} , { 0 , 6} });
 //   merge();
 }
