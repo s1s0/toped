@@ -112,8 +112,8 @@ bool logicop::VPoint::inside(const pointlist& plist)
    for (unsigned i = 0; i < size ; i++)
    {
       p0 = plist[i]; p1 = plist[(i+1) % size];
-      if (((p0.y() <= _cp->y()) && (p1.y() >  _cp->y())) 
-        ||((p0.y() >  _cp->y()) && (p1.y() <= _cp->y())) )
+      if (((p0.y() <= _cp->y()) && (p1.y() >=  _cp->y()))
+        ||((p0.y() >=  _cp->y()) && (p1.y() <= _cp->y())) )
       {
          float tngns = (float) (_cp->y() - p0.y())/(p1.y() - p0.y());
          if (_cp->x() <= p0.x() + tngns * (p1.x() - p0.x()))
@@ -549,6 +549,10 @@ void logicop::EventQueue::swipe4cross(SweepLine& SL) {
    while (trav.avl_node != NULL) {
       evt = (Event*)trav.avl_node->avl_data;
       SL.set_curE(evt);
+      evt->_pending = false;
+#ifdef BO_DEBUG
+      printf("         EVENT POINT = ( %i , %i ) ===========\n", evt->evertex()->x(), evt->evertex()->y());
+#endif
       evt->swipe4cross(SL, _equeue);
       avl_t_next(&trav);
    }
@@ -603,6 +607,9 @@ int logicop::EventQueue::E_compare( const void* v1, const void* v2, void*)
    Event*  pe2 = (Event*)v2;
    int result =  logicop::xyorder(pe1->evertex(),pe2->evertex());
    if (0 != result) return result;
+
+   if (pe1->_pending != pe2->_pending)
+      return (pe1->_pending) ? 1 : -1;
    // if the event vertexes are equal, sort them by event priority
    // eporiority 0 is bigger than epriority 1
    if (pe1->epriority() != pe2->epriority())
@@ -909,9 +916,30 @@ int logicop::SweepLine::compare_seg(const void* o1, const void* o2, void* param)
          // if none of them is vertical -> compare lP/lP
          compare = yxorder(seg0->lP, seg1->lP);
    }
-   else if (((crossP == seg0_PT) && (leftP == seg1_PT)) ||
-            ((leftP == seg0_PT) && (crossP == seg1_PT)))
-      compare = yxorder(seg0->lP, seg1->lP);
+   else if ((crossP == seg0_PT) && (leftP == seg1_PT))
+   {
+      if       ((0 == dX0) && (0 != dX1))
+         // if seg0 is vertical -> compare its lP with current point
+         compare = yxorder(seg0->lP, curP);
+      else if ((0 != dX0) && (0 == dX1))
+         // if seg1 is vertical -> compare its lP with current point
+         compare = yxorder(seg0->rP, curP);
+      else
+         // if none of them is vertical -> compare lP/lP
+         compare = yxorder(seg0->lP, seg1->lP);
+   }
+   else if ((leftP == seg0_PT) && (crossP == seg1_PT))
+   {
+      if       ((0 == dX1) && (0 != dX0))
+         // if seg0 is vertical -> compare its lP with current point
+         compare = yxorder(curP, seg1->lP);
+      else if ((0 != dX1) && (0 == dX0))
+         // if seg1 is vertical -> compare its lP with current point
+         compare = yxorder(curP, seg1->rP);
+      else
+         // if none of them is vertical -> compare lP/lP
+         compare = yxorder(seg0->lP, seg1->lP);
+   }
    else if ((crossP == seg0_PT) && (rightP == seg1_PT))
    {
       if (logicop::revent_pri == (*curE)->epriority())
