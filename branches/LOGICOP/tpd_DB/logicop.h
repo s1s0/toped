@@ -31,7 +31,7 @@
 #include "../tpd_common/avl_def.h"
 
 namespace logicop {
-   typedef enum {revent_pri = 0, cevent_pri = 1, levent_pri = 2} EventPriority;
+   typedef enum {revent_pri = 0, levent_pri = 1, cevent_pri = 2 } EventPriority;
    class SweepLine;
    class BindCollection;
    class CEvent;
@@ -236,6 +236,7 @@ namespace logicop {
    Class does not define neither a default constructor nor destructor */
    class Event {
    public:
+                     Event() :_pending(true){};
       //! Return the event vertex
       virtual const TP* evertex() const = 0;
       //! Return the oposite vertex (not the event one)
@@ -254,6 +255,7 @@ namespace logicop {
       void               checkNupdate(avl_table*, plysegment*, plysegment*, 
                                       CEvent*, bool check=true);
       virtual           ~Event() {};
+      bool              _pending;
    };
    
    //===========================================================================
@@ -265,7 +267,7 @@ namespace logicop {
    class LEvent : public Event {
    public:
       //! The constructor of the left event - it just initialises the #_seg pointer
-                         LEvent(plysegment* seg) : _seg(seg) {};
+                         LEvent(plysegment* seg) : Event(), _seg(seg) {};
       //! Return the event vertex
       const TP*          evertex() const {return _seg->lP;}
       //! Return the oposite vertex (not the event one)
@@ -294,7 +296,7 @@ namespace logicop {
    class REvent : public Event {
    public:
       //! The constructor of the right event - it just initialises the #_seg pointer
-                         REvent(plysegment* seg) : _seg(seg) {};
+                         REvent(plysegment* seg) : Event(), _seg(seg) {};
       //! Return the event vertex
       const TP*          evertex() const {return _seg->rP;};
       //! Return the oposite vertex (not the event one)
