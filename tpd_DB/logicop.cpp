@@ -34,8 +34,8 @@
 #include "../tpd_common/outbox.h"
 
 #define BO_DEBUG
-#define BO_print(a) printf("Event %s :polygon %i, segment %i, lP (%i,%i), rP (%i,%i)  \n" , \
-#a, _seg->polyNo, _seg->edge , _seg->lP->x(), _seg->lP->y(), _seg->rP->x(),_seg->rP->y());
+#define BO_print(a) printf("Event %s :segment %i, polygon %i, lP (%i,%i), rP (%i,%i)  \n" , \
+#a, _seg->edge, _seg->polyNo , _seg->lP->x(), _seg->lP->y(), _seg->rP->x(),_seg->rP->y());
 
 #define BO_above_below \
 if (NULL != _seg->above)\
@@ -543,6 +543,9 @@ way. Program will bomb out here if a new event has not been inserted properly.
 Some kind of try-catch mechanism should be implemented.*/
 void logicop::EventQueue::swipe4cross(SweepLine& SL) {
 // see the comment around find parameter in the E_compare
+#ifdef BO_DEBUG
+      printf("***************** START SWIPING ******************\n");
+#endif
    Event* evt;
    avl_traverser trav;
    avl_t_first(&trav,_equeue);
@@ -551,9 +554,56 @@ void logicop::EventQueue::swipe4cross(SweepLine& SL) {
       SL.set_curE(evt);
       evt->_pending = false;
 #ifdef BO_DEBUG
-      printf("         EVENT POINT = ( %i , %i ) ===========\n", evt->evertex()->x(), evt->evertex()->y());
+      printf("______________ POINT = ( %i , %i ) ___________\n", evt->evertex()->x(), evt->evertex()->y());
 #endif
-      evt->swipe4cross(SL, _equeue);
+      // look ahead to deal with the Cross points generated on top of the
+      // right points
+      bool bypass_event = false;
+      if (logicop::cevent_pri == evt->epriority())
+      {
+         avl_traverser forw_trav = trav;
+         avl_t_next(&forw_trav);
+         if (NULL != forw_trav.avl_node)
+         {
+            Event* nextevt = (Event*)forw_trav.avl_node->avl_data;
+            while (*(evt->evertex()) == *(nextevt->evertex()))
+            {
+               if (logicop::revent_pri == nextevt->epriority())
+               {
+                  bypass_event = true;
+                  break;
+               }
+               avl_t_next(&forw_trav);
+               if (NULL == forw_trav.avl_node) break;
+               nextevt = (Event*)forw_trav.avl_node->avl_data;
+            }
+         }
+      }
+      if (!bypass_event)
+         evt->swipe4cross(SL, _equeue);
+      
+      //Dealing with the Cross points generated on top of the Left points
+      if (logicop::levent_pri == evt->epriority())
+      {
+         avl_traverser back_trav = trav;
+         avl_t_prev(&back_trav);
+         if (NULL != back_trav.avl_node)
+         {
+            Event* prevevt = (Event*)back_trav.avl_node->avl_data;
+            while (*(evt->evertex()) == *(prevevt->evertex()))
+            {
+               if ((logicop::cevent_pri == prevevt->epriority()) && prevevt->_pending)
+               {
+                  prevevt->_pending = false;
+                  prevevt->swipe4cross(SL, _equeue);
+                  break;
+               }
+               avl_t_prev(&back_trav);
+               if (NULL == back_trav.avl_node) break;
+               prevevt = (Event*)back_trav.avl_node->avl_data;
+            }
+         }
+      }
       avl_t_next(&trav);
    }
 }
@@ -608,8 +658,8 @@ int logicop::EventQueue::E_compare( const void* v1, const void* v2, void*)
    int result =  logicop::xyorder(pe1->evertex(),pe2->evertex());
    if (0 != result) return result;
 
-   if (pe1->_pending != pe2->_pending)
-      return (pe1->_pending) ? 1 : -1;
+//   if (pe1->_pending != pe2->_pending)
+//      return (pe1->_pending) ? 1 : -1;
    // if the event vertexes are equal, sort them by event priority
    // eporiority 0 is bigger than epriority 1
    if (pe1->epriority() != pe2->epriority())
@@ -942,7 +992,8 @@ int logicop::SweepLine::compare_seg(const void* o1, const void* o2, void* param)
    }
    else if ((crossP == seg0_PT) && (rightP == seg1_PT))
    {
-      if (logicop::revent_pri == (*curE)->epriority())
+      compare = yxorder(seg0->rP, curP);
+/*      if (logicop::revent_pri == (*curE)->epriority())
          compare = yxorder(seg0->rP, curP);
       else if (logicop::cevent_pri == (*curE)->epriority())
       {
@@ -953,7 +1004,7 @@ int logicop::SweepLine::compare_seg(const void* o1, const void* o2, void* param)
          else
             compare = yxorder(seg0->rP, curP);
       }
-      else assert(false);
+      else assert(false);*/
 /*      if (0 == (*curE)->epriority()) // REvent
          compare = yxorder(seg0->rP, curP);
       else if (2 == (*curE)->epriority()) //CEvent
@@ -963,7 +1014,8 @@ int logicop::SweepLine::compare_seg(const void* o1, const void* o2, void* param)
    }
    else if ((rightP == seg0_PT) && (crossP == seg1_PT))
    {
-      if (logicop::revent_pri == (*curE)->epriority())
+      compare = yxorder(curP, seg0->rP);
+/*      if (logicop::revent_pri == (*curE)->epriority())
          compare = yxorder(curP, seg1->rP);
       else if (logicop::cevent_pri == (*curE)->epriority())
       {
@@ -974,7 +1026,7 @@ int logicop::SweepLine::compare_seg(const void* o1, const void* o2, void* param)
          else
             compare = yxorder(curP, seg1->rP);
       }
-      else assert(false);
+      else assert(false);*/
 /*      
       if (0 == (*curE)->epriority())
          compare = yxorder(curP, seg1->rP);// REvent
