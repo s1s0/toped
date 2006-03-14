@@ -485,9 +485,9 @@ void edge_cut1()
    opencell("edge_cut1");
    addbox( { { 0 , 0 } , { 10 , 10 } });
    select({5.00,5.00});
-   polycut( { { 0 , 4 } , { 0 , 6 } , { 3 , 6 } , { 3 , 4 } });
-   unselect_all();
-   select({5.00,5.00});
+//   polycut( { { 0 , 4 } , { 0 , 6 } , { 3 , 6 } , { 3 , 4 } });
+//   unselect_all();
+//   select({5.00,5.00});
 //   polycut( { { 4 , 0 } , { 6 , 0 } , { 6 , 3 } , { 4 , 3 } });
 //   unselect_all();
 //   select({5.00,5.00});
@@ -536,8 +536,8 @@ newdesign("layout_logic");
 //merge_test2();
 //merge_test3();
 //merge_test4();
-//edge_cut1();
-edge_merge();
+edge_cut1();
+//edge_merge();
 zoomall();
 
 //opencell("top");
