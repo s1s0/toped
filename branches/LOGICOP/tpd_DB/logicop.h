@@ -180,6 +180,7 @@ namespace logicop {
       unsigned          normalize(const TP*, const TP*);
       //! Dump lP and crosspoints in a VPoint list
       void              dump_points(VPoint*&);
+      bool              trivial() const {return (lP == rP);}
       //! keeps track of the edge numbers
       int               edge;
       //! A pointer to the segment left point
@@ -330,7 +331,7 @@ namespace logicop {
       //! Return the event vertex - in this case cross point
       const TP*          evertex() const {return _cp;};
       //! Return the oposite vertex (not the event one)
-      const TP*          overtex() const {assert(false); return NULL;}
+      const TP*          overtex() const {return NULL;}
       //! Return the event priority
       const EventPriority epriority() const {return cevent_pri;}
       //! Perform the operations as defined by Bentley-Ottman for cross point
@@ -411,7 +412,7 @@ namespace logicop {
       static int        compare_seg(const void*, const void*, void*);
       //!Determines the lexicographical order of two points comparing Y first. 
       static int        yxorder(const TP*, const TP*);
-
+      static int        orientation(const TP*, const TP*, const TP*);
       const TP*         joiningSegments(plysegment*, plysegment*, float, float);
       CEvent*           oneLineSegments(plysegment*, plysegment*);
 //      CEvent*           coinsideCheck(plysegment*, plysegment*, float, float);
