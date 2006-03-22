@@ -446,7 +446,7 @@ void merge_test1() {
    addbox({{5,5},{15,15}}, 2);
    select_all();
    merge();
-}   
+}
 
 void merge_test2() {
    newcell("merge_test2");
@@ -522,7 +522,7 @@ screenSetup();
 newdesign("layout_logic");
 //cut_test1();
 //cut_test2();
-cut_test3();//*
+//cut_test3();
 //cut_test4();
 //cut_test5();
 //cut_test6();
@@ -532,7 +532,7 @@ cut_test3();//*
 //cut_test3A();
 ////cut_test1B();
 //cut_test2B();
-//merge_test1();
+merge_test1();
 //merge_test2();
 //merge_test3();
 //merge_test4();

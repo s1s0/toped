@@ -9,6 +9,7 @@ namespace polycross
 {
    int xyorder(const TP*, const TP*);
    class YQ;
+   class XQ;
    //===========================================================================
    // VPoint
    //===========================================================================
@@ -74,15 +75,16 @@ namespace polycross
          CPoint*           insertcrosspoint(const TP*);
          unsigned          normalize(const TP*, const TP*);
 //          void              dump_points(VPoint*&);
-         int               edge;
-         const TP*         lP;
-         const TP*         rP;
-         crossCList        crosspoints;
-         char              polyNo;
          unsigned          threadID() {return _threadID;}
          void              set_threadID(unsigned ID) {_threadID = ID;}
+         TP*               checkIntersect(polysegment*);
+         const TP*         lP;
+         const TP*         rP;
       protected:
          unsigned          _threadID;
+         crossCList        crosspoints;
+         char              polyNo;
+         int               edge;
    };
 
    //===========================================================================
@@ -100,6 +102,7 @@ namespace polycross
          VPoint*           dump_points();
       private:
          Segments          _segs;
+         const pointlist*  _originalPL;
    };
    
    //===========================================================================
@@ -166,6 +169,7 @@ namespace polycross
          EventVertex(TEvent*);
          const TP*         operator () () {return _evertex;};
          void              addEvent(TEvent*);
+         void              sweep(YQ&, XQ&);
       private:
          typedef std::list<TEvent*> Events;
          Events            _events;
@@ -216,11 +220,14 @@ namespace polycross
       public:
          typedef std::map<int,SegmentThread*> Threads;
          YQ(DBbox&);
-         void              beginThread(polysegment*);
-         void              endThread(unsigned);
-         void              modifyThread(unsigned, polysegment*);
+         SegmentThread*    beginThread(polysegment*);
+         SegmentThread*    endThread(unsigned);
+         SegmentThread*    modifyThread(unsigned, polysegment*);
       private:
+         BottomSentinel*   _bottomSentinel;
+         TopSentinel*      _topSentinel;
          int               sCompare(const polysegment*, const polysegment*);
+         int               orientation(const TP*, const TP*, const TP*);
          Threads           _cthreads;
          int               _lastThreadID;
    };
@@ -233,15 +240,36 @@ namespace polycross
          XQ(const segmentlist &, const segmentlist&);
          void              sweep();
       protected:
+         BottomSentinel*   _bottomSentinel;
+         TopSentinel*      _topSentinel;
          void              createEvents(const segmentlist&, byte);
          static int        E_compare( const void*, const void*, void* );
          avl_table*        _xqueue;
-         YQ*               sweepline;
-         DBbox             overlap;
+         YQ*               _sweepline;
+         DBbox             _overlap;
          TP                _bottom_left;
          TP                _top_right;
    };
 
+   //===========================================================================
+   class logic
+   {
+      public:
+         logic(const pointlist&, const pointlist&);
+//         bool              AND(pcollection&);
+//         bool              ANDNOT(pcollection&);
+//         bool              OR(pcollection&);
+//         void              reset_visited();
+      private:
+//         pointlist*        hole2simple(const pointlist&, const pointlist&);
+         //
+//         VPoint*           getFirstOutside(const pointlist&, VPoint*);
+         const pointlist&  _poly1;
+         const pointlist&  _poly2;
+//         VPoint*           _shape1;
+//         VPoint*           _shape2;
+//         unsigned          _crossp;
+   };
 }
 
 #endif
