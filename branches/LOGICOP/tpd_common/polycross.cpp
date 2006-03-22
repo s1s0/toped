@@ -1,6 +1,10 @@
 #include <algorithm>
 #include "polycross.h"
 
+#define BO2_DEBUG
+#define BO_print(a) printf("Event %s :segment %i, polygon %i, lP (%i,%i), rP (%i,%i)  \n" , \
+#a, _seg->edge, _seg->polyNo , _seg->lP->x(), _seg->lP->y(), _seg->rP->x(),_seg->rP->y());
+
 //-----------------------------------------------------------------------------
 // The declaratoin of the avl related functions. They are declared originally
 // in avl.h and redeclared here in C++ manner with extern "C" clause
@@ -10,10 +14,10 @@ extern "C" {
 //   void       avl_destroy (struct avl_table *, avl_item_func *);
 //   void*      avl_t_next (avl_traverser *);
 //   void*      avl_t_prev (avl_traverser *);
-//   void*      avl_delete (avl_table *, const void *);
+   void*      avl_delete (avl_table *, const void *);
 //   void*      avl_t_find (avl_traverser *, avl_table *, void *);
 //   void*      avl_t_insert (avl_traverser *, avl_table *, void *);
-//   void*      avl_t_first (avl_traverser *, avl_table *);
+   void*      avl_t_first (avl_traverser *, avl_table *);
 //   void*      avl_t_replace (avl_traverser *, void *);
 }
 
@@ -100,7 +104,7 @@ bool polycross::SortLine::operator() (CPoint* cp1, CPoint* cp2) {
 polycross::polysegment::polysegment(const TP* p1, const TP* p2, int num, char plyn) {
    if (xyorder(p1, p2) < 0) { lP = p1; rP = p2; }
    else                     { lP = p2; rP = p1; }
-   edge = num; polyNo = plyn;
+   edge = num; polyNo = plyn;_threadID = 0;
 }
 
 polycross::CPoint* polycross::polysegment::insertcrosspoint(const TP* pnt) {
@@ -126,6 +130,73 @@ unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2) {
 // }
 
 //==============================================================================
+// class segmentlist
+
+polycross::segmentlist::segmentlist(const pointlist& plst, byte plyn) {
+   _originalPL = &plst;
+   unsigned plysize = plst.size();
+   _segs.reserve(plysize);
+   for (unsigned i = 0; i < plysize; i++)
+      _segs.push_back(new polysegment(&(plst[i]),&(plst[(i+1)%plysize]),i, plyn));
+}
+
+// polycross::BPoint* logicop::segmentlist::insertbindpoint(unsigned segno, const TP* point) {
+//    return _segs[segno]->insertbindpoint(point);
+// }
+
+polycross::segmentlist::~segmentlist() {
+   for (unsigned i = 0; i < _segs.size(); i++)
+      delete _segs[i];
+   _segs.clear();
+}
+
+unsigned polycross::segmentlist::normalize(const pointlist& plst) {
+   unsigned numcross = 0;
+   unsigned plysize = plst.size();
+   for (unsigned i = 0; i < plysize; i++)
+      numcross += _segs[i]->normalize(&(plst[i]),&(plst[(i+1)%plysize]));
+   return numcross;
+}
+
+// polycross::VPoint* polycross::segmentlist::dump_points() {
+//    VPoint* vlist = NULL;
+//    for (unsigned i = 0; i < _segs.size(); i++)
+//       _segs[i]->dump_points(vlist);
+//    logicop::VPoint* lastV = vlist;
+//    VPoint* centinel = NULL;
+//    while (vlist->prev())  {
+//       if (-1 == vlist->visited()) centinel = vlist;
+//       vlist = vlist->prev();
+//    }
+//    lastV->set_next(vlist);
+//    vlist->set_prev(lastV);
+//    if (NULL != centinel) {
+//       VPoint* vwork = centinel;
+//       do {
+//          if (-1 == vwork->visited()) {
+//             //here visited == 0 means only that the object is Cpoint.
+//             VPoint* tbdel = NULL;
+//             if ((*vwork->cp()) == (*vwork->prev()->cp())) {
+//                tbdel = vwork->prev();
+//                vwork->set_prev(vwork->prev()->prev());
+//                vwork->prev()->set_next(vwork);
+//             }
+//             else if ((*vwork->cp()) == (*vwork->next()->cp())) {
+//                tbdel = vwork->next();
+//                vwork->set_next(vwork->next()->next());
+//                vwork->next()->set_prev(vwork);
+//             }
+//             vwork = vwork->next();
+//             if (tbdel) delete tbdel;
+//          }
+//          else vwork = vwork->next();
+//       } while (centinel != vwork);
+//    }
+//    return vlist;
+// }
+
+
+//==============================================================================
 // TbEvent
 
 polycross::TbEvent::TbEvent (polysegment* seg1, polysegment* seg2, byte shapeID):
@@ -138,8 +209,13 @@ polycross::TbEvent::TbEvent (polysegment* seg1, polysegment* seg2, byte shapeID)
 
 void polycross::TbEvent::sweep (YQ& sweepline)
 {
-   sweepline.beginThread(_tseg1);
-   sweepline.beginThread(_tseg2);
+#ifdef BO2_DEBUG
+      printf("Begin 2 threads\n");
+#endif
+   SegmentThread* thr1 = sweepline.beginThread(_tseg1);
+   TP* CPA = _tseg1->checkIntersect(thr1->threadAbove()->cseg());
+   TP* CPB = _tseg1->checkIntersect(thr1->threadBelow()->cseg());
+   SegmentThread* thr2 = sweepline.beginThread(_tseg2);
 }
 
 //==============================================================================
@@ -155,8 +231,11 @@ polycross::TeEvent::TeEvent (polysegment* seg1, polysegment* seg2, byte shapeID)
 
 void polycross::TeEvent::sweep (YQ& sweepline)
 {
-   sweepline.endThread(_tseg1->threadID());
-   sweepline.endThread(_tseg2->threadID());
+#ifdef BO2_DEBUG
+      printf("End 2 threads\n");
+#endif
+   SegmentThread* thr1 = sweepline.endThread(_tseg1->threadID());
+   SegmentThread* thr2 = sweepline.endThread(_tseg2->threadID());
 }
 
 //==============================================================================
@@ -180,8 +259,11 @@ polycross::TmEvent::TmEvent (polysegment* seg1, polysegment* seg2, byte shapeID)
 
 void polycross::TmEvent::sweep (YQ& sweepline)
 {
+#ifdef BO2_DEBUG
+      printf("Modify thread\n");
+#endif
    assert(0 != _tseg1->threadID());
-   sweepline.modifyThread(_tseg1->threadID(), _tseg2);
+   SegmentThread* thr = sweepline.modifyThread(_tseg1->threadID(), _tseg2);
 }
 
 
@@ -200,6 +282,17 @@ void polycross::EventVertex::addEvent(TEvent* tevent)
          _events.front()->shapeID() == tevent->shapeID());
 }
 
+void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq)
+{
+#ifdef BO2_DEBUG
+      printf("______________ POINT = ( %i , %i ) ___________\n", _evertex->x(), _evertex->y());
+#endif
+   while (!_events.empty())
+   {
+      TEvent* cevent = _events.front(); _events.pop_front();
+      cevent->sweep(sweepline);
+   }
+}
 //===========================================================================
 // Segment Thread
 polycross::polysegment* polycross::SegmentThread::set_cseg(polysegment* cs)
@@ -217,29 +310,42 @@ polycross:: YQ::YQ(DBbox& overlap)
    TP* br = new TP(overlap.p2().x()+1, overlap.p1().y()-1);
    TP* tl = new TP(overlap.p1().x()-1, overlap.p2().y()+1);
    TP* tr = new TP(overlap.p2().x()+1, overlap.p2().y()+1);
-   _cthreads[-2] = new BottomSentinel(new polysegment(bl, br, -1, 0));
-   _cthreads[-1] = new TopSentinel(new polysegment(tl, tr, -1, 0));
+   _bottomSentinel = new BottomSentinel(new polysegment(bl, br, -1, 0));
+   _cthreads[-2] = _bottomSentinel;
+   _topSentinel = new TopSentinel(new polysegment(tl, tr, -1, 0));
+   _cthreads[-1] = _topSentinel;
+   _bottomSentinel->set_threadAbove(_topSentinel);
+   _topSentinel->set_threadBelow(_bottomSentinel);
    _lastThreadID = 0;
 }
 
-void polycross::YQ::beginThread(polycross::polysegment* startseg)
+/**
+ * Insert a new segment thread in the YQ
+ * @param startseg the first segment of the thread that became current
+ * @return the created thread
+ */
+polycross::SegmentThread* polycross::YQ::beginThread(polycross::polysegment* startseg)
 {
    assert(0 == startseg->threadID());
-   Threads::const_iterator CT = _cthreads.begin();
-   SegmentThread* below = NULL;
-   SegmentThread* above = NULL;
-   while ((CT != _cthreads.end()) && (sCompare(startseg, CT->second->cseg()) < 0))
-   {
-      below = CT->second;above = below->threadAbove();
-      CT++;
-   }
-   assert(NULL != below);
-   assert(NULL != above);
-   _cthreads[++_lastThreadID] = new SegmentThread(startseg, above, below);
+   SegmentThread* above = _bottomSentinel;
+   while (sCompare(startseg, above->cseg()) > 0)
+      above = above->threadAbove();
+   
+   SegmentThread* below = above->threadBelow();
+   SegmentThread* newthread = new SegmentThread(startseg, below, above);
+   above->set_threadBelow(newthread);
+   below->set_threadAbove(newthread);
+   _cthreads[++_lastThreadID] = newthread;
    startseg->set_threadID(_lastThreadID);
+   return newthread;
 }
 
-void polycross::YQ::endThread(unsigned threadID)
+/**
+ * Removes a segment thread from YQ and relinks its neighbours accordingly
+ * @param threadID The ID of the thread to be removed
+ * @return the thread that use to be below the one removed
+ */
+polycross::SegmentThread* polycross::YQ::endThread(unsigned threadID)
 {
    // get the thread from the _cthreads
    Threads::iterator threadP = _cthreads.find(threadID);
@@ -254,9 +360,16 @@ void polycross::YQ::endThread(unsigned threadID)
    prevT->set_threadAbove(thread->threadAbove());
    // erase it
    _cthreads.erase(threadP);
+   return prevT;
 }
 
-void polycross::YQ::modifyThread(unsigned threadID, polysegment* newsegment)
+/**
+ * Replaces the current segment in a segment thread
+ * @param threadID the target segment thread
+ * @param newsegment the new segment - to replace the existing one
+ * @return the segment thread
+ */
+polycross::SegmentThread* polycross::YQ::modifyThread(unsigned threadID, polysegment* newsegment)
 {
    // get the thread from the _cthreads
    Threads::iterator threadP = _cthreads.find(threadID);
@@ -265,18 +378,43 @@ void polycross::YQ::modifyThread(unsigned threadID, polysegment* newsegment)
    newsegment->set_threadID(threadID);
    polysegment* oldsegment = thread->set_cseg(newsegment);
    oldsegment->set_threadID(0);
+   return thread;
 }
 
+int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
+{
+   // Current point is always lp of seg0
+   assert(seg0 != seg1);
+   //
+   int ori;
+   ori = orientation(seg1->lP, seg1->rP, seg0->lP);
+   if (ori != 0) return ori;
+   // if it is a crossing point -> compare the slope
+   ori = orientation(seg1->lP, seg1->rP, seg0->rP);
+   if (ori != 0) return ori;
+   // if it is still the same => we have coinciding segments
+   assert(false);
+}
+
+int polycross::YQ::orientation(const TP* p1, const TP* p2, const TP* p3)
+{
+   // twice the "orientated" area of the enclosed triangle
+   float area = (p1->x() - p3->x()) * (p2->y() - p3->y()) -
+         (p2->x() - p3->x()) * (p1->y() - p3->y());
+   if (0 == area) return 0;
+   else
+      return (area > 0) ? 1 : -1;
+}
 //==============================================================================
 // XQ
 
 polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
-      overlap(*(seg1[0]->lP))
+      _overlap(*(seg1[0]->lP))
 {
    _xqueue = avl_create(E_compare, NULL, NULL);
    createEvents(seg1,1);
    createEvents(seg2,2);
-   sweepline = new YQ(overlap);
+   _sweepline = new YQ(_overlap);
 }
 
 void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
@@ -294,8 +432,8 @@ void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
       else
          evt = new TmEvent(seg[s1], seg[s2], shapeID);
       // update overlapping box
-      overlap.overlap(*(seg[s1]->lP));
-      overlap.overlap(*(seg[s1]->rP));
+      _overlap.overlap(*(seg[s1]->lP));
+      _overlap.overlap(*(seg[s1]->rP));
       // now create the vertex with the event inside
       EventVertex* vrtx = new EventVertex(evt);
       // and try to stick it in the AVL tree
@@ -316,3 +454,37 @@ int polycross::XQ::E_compare( const void* v1, const void* v2, void*)
    return xyorder(p1,p2);
 }
 
+void polycross::XQ::sweep()
+{
+// see the comment around find parameter in the E_compare
+#ifdef BO2_DEBUG
+      printf("***************** START SWIPING ******************\n");
+#endif
+   EventVertex* evtlist;
+   avl_traverser trav;
+   while (NULL != avl_t_first(&trav,_xqueue))
+   {
+      evtlist = (EventVertex*)trav.avl_node->avl_data;
+      evtlist->sweep(*_sweepline, *this);
+      avl_delete(_xqueue,evtlist);
+   }
+
+}
+//==============================================================================
+// logic
+
+polycross::logic::logic(const pointlist& poly1, const pointlist& poly2) :
+      _poly1(poly1), _poly2(poly2)
+{
+   segmentlist _segl1(poly1,0);
+   segmentlist _segl2(poly2,1);
+   XQ* _eq = new XQ(_segl1, _segl2); // create the event queue
+   _eq->sweep();
+/*   unsigned crossp1 = _segl1.normalize(poly1);
+   unsigned crossp2 = _segl2.normalize(poly2);
+   assert(crossp1 == crossp2);
+   _crossp = crossp1;
+   delete _eq;
+   _shape1 = _segl1.dump_points();
+   _shape2 = _segl2.dump_points();*/
+}
