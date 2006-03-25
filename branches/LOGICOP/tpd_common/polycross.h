@@ -8,6 +8,8 @@
 namespace polycross
 {
    int xyorder(const TP*, const TP*);
+   int orientation(const TP*, const TP*, const TP*);
+   float getLambda( const TP* p1, const TP* p2, const TP* p);
    class YQ;
    class XQ;
    //===========================================================================
@@ -72,19 +74,26 @@ namespace polycross
       public:
          typedef std::vector<CPoint*> crossCList;
          polysegment(const TP*, const TP*, int, char);
-         CPoint*           insertcrosspoint(const TP*);
+         CPoint*           insertCrossPoint(const TP*);
          unsigned          normalize(const TP*, const TP*);
 //          void              dump_points(VPoint*&);
-         unsigned          threadID() {return _threadID;}
-         void              set_threadID(unsigned ID) {_threadID = ID;}
+         unsigned          threadID() const           {return _threadID;}
+         void              set_threadID(unsigned ID)  {_threadID = ID;}
+         const TP*         lP() const                 {return _lP;}
+         const TP*         rP() const                 {return _rP;}
+         byte              polyNo() const             {return _polyNo;}
+         int               edge() const               {return _edge;}
          TP*               checkIntersect(polysegment*);
-         const TP*         lP;
-         const TP*         rP;
       protected:
+         TP*               joiningSegments(polysegment*, float, float);
+         TP*               oneLineSegments(polysegment*);
+         TP*               getCross(polysegment*);
          unsigned          _threadID;
          crossCList        crosspoints;
-         char              polyNo;
-         int               edge;
+         byte              _polyNo;
+         int               _edge;
+         const TP*         _lP;
+         const TP*         _rP;
    };
 
    //===========================================================================
@@ -112,7 +121,8 @@ namespace polycross
    {
       public:
          TEvent(byte shapeID) : _shapeID(shapeID) {};
-         virtual void      sweep(YQ&) = 0;
+         virtual void      sweep(XQ&, YQ&) = 0;
+         void              insertCrossPoint(TP*, polysegment*, polysegment*, XQ&);
          const TP*         evertex() {return _evertex;}
          byte              shapeID() {return _shapeID;}
          virtual          ~TEvent() {};
@@ -128,7 +138,7 @@ namespace polycross
    {
       public:
          TbEvent(polysegment*, polysegment*, byte);
-         void              sweep(YQ&);
+         void              sweep(XQ&, YQ&);
       private:
          polysegment*      _tseg1;
          polysegment*      _tseg2;
@@ -141,7 +151,7 @@ namespace polycross
    {
       public:
          TeEvent(polysegment*, polysegment*, byte);
-         void              sweep(YQ&);
+         void              sweep(XQ&, YQ&);
       private:
          polysegment*      _tseg1;
          polysegment*      _tseg2;
@@ -154,12 +164,26 @@ namespace polycross
    {
       public:
          TmEvent(polysegment*, polysegment*, byte);
-         void              sweep(YQ&);
+         void              sweep(XQ&, YQ&);
       private:
          polysegment*      _tseg1;
          polysegment*      _tseg2;
    };
 
+   //===========================================================================
+   // Thread cross event
+   //===========================================================================
+   class TcEvent : public TEvent
+   {
+      public:
+         TcEvent(TP* ev, unsigned tAID, unsigned tBID): TEvent(0), 
+                     _threadAboveID(tAID), _threadBelowID(tBID) {_evertex = ev;}
+         void              sweep(XQ&, YQ&);
+      private:
+         unsigned          _threadAboveID;
+         unsigned          _threadBelowID;
+   };
+   
    //===========================================================================
    // Event Vertex - could be more than one event
    //===========================================================================
@@ -223,11 +247,12 @@ namespace polycross
          SegmentThread*    beginThread(polysegment*);
          SegmentThread*    endThread(unsigned);
          SegmentThread*    modifyThread(unsigned, polysegment*);
+         SegmentThread*    swapThreads(unsigned, unsigned);
+         SegmentThread*    getThread(unsigned);
       private:
          BottomSentinel*   _bottomSentinel;
          TopSentinel*      _topSentinel;
          int               sCompare(const polysegment*, const polysegment*);
-         int               orientation(const TP*, const TP*, const TP*);
          Threads           _cthreads;
          int               _lastThreadID;
    };
@@ -239,6 +264,7 @@ namespace polycross
       public:
          XQ(const segmentlist &, const segmentlist&);
          void              sweep();
+         void              addCrossEvent(TP*, unsigned, unsigned);
       protected:
          BottomSentinel*   _bottomSentinel;
          TopSentinel*      _topSentinel;
