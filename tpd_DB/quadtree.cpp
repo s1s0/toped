@@ -340,7 +340,7 @@ laydata::tdtdata* laydata::quadTree::merge_selected(tdtdata*& shapeRef) {
           ((sh_selected == wdt->status()) || (sh_merged == wdt->status())) && 
           (overlapRef.cliparea(wdt->overlap()) != 0)) {
          // go and merge it
-         mergeres = new_polymerge(wdt->shape2poly(), shapeRef->shape2poly());
+         mergeres = polymerge(wdt->shape2poly(), shapeRef->shape2poly());
          if (NULL != mergeres) {
             // If the merge produce a result - return the result and
             // substitute the shapeRef with its merged counterpart

@@ -76,7 +76,7 @@ namespace polycross
          polysegment(const TP*, const TP*, int, char);
          CPoint*           insertCrossPoint(const TP*);
          unsigned          normalize(const TP*, const TP*);
-//          void              dump_points(VPoint*&);
+         void              dump_points(polycross::VPoint*&);
          unsigned          threadID() const           {return _threadID;}
          void              set_threadID(unsigned ID)  {_threadID = ID;}
          const TP*         lP() const                 {return _lP;}

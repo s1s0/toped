@@ -29,6 +29,7 @@
 #include <vector>
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/avl_def.h"
+#include "../tpd_common/polycross.h"
 
 namespace logicop {
    typedef enum {revent_pri = 0, levent_pri = 1, cevent_pri = 2 } EventPriority;
@@ -463,15 +464,15 @@ namespace logicop {
       //! Convert a polygon with hole to simple polygon
       pointlist*        hole2simple(const pointlist&, const pointlist&);
       //
-      VPoint*           getFirstOutside(const pointlist&, VPoint*);
+      polycross::VPoint* getFirstOutside(const pointlist&, polycross::VPoint*);
       //! The first input polygon
       const pointlist&  _poly1;
       //! The second input polygon
       const pointlist&  _poly2;
       //! The raw data, corresponding to _poly1, used by all logic methods
-      VPoint*           _shape1;
+      polycross::VPoint* _shape1;
       //! The raw data, corresponding to _poly2, used by all logic methods
-      VPoint*           _shape2;
+      polycross::VPoint* _shape2;
       //! Number of crossing points found from the constructor
       unsigned          _crossp;
    };

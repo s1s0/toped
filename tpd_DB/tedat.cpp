@@ -31,7 +31,6 @@
 #include "tedat.h"
 #include "tedcell.h"
 #include "logicop.h"
-#include "../tpd_common/polycross.h"
 #include "../tpd_common/tedop.h"
 #include "../tpd_common/outbox.h"
 
@@ -1957,14 +1956,6 @@ laydata::tdtdata* laydata::polymerge(const pointlist& _plist0, const pointlist& 
       return new laydata::tdtpoly(**merge_shape.begin());
    }
    else return NULL;
-}
-
-laydata::tdtdata* laydata::new_polymerge(const pointlist& _plist0, const pointlist& _plist1)
-{
-   if(_plist0.empty() || _plist1.empty()) return NULL;
-//   logicop::pcollection merge_shape;
-   polycross::logic operation(_plist0, _plist1);
-   return NULL;
 }
 
 void laydata::draw_select_mark(const TP& pnt) {
