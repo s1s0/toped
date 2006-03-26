@@ -335,8 +335,8 @@ void cut_test3() {
    addpoly({{0,0},{10,0},{10,5},{5,5},{5,10},{0,10}},4);
    select({{-3,-3},{13,13}});
    addpoly({{-1.5,-1},{5.5,-1},{5.5,1.5},{12,1.5},{12,7.5},{3,7.5},{3,5},{-1.5,5}},2);
-//   polycut({{-1.5,-1},{5.5,-1},{5.5,1.5},{12,1.5},{12,7.5},{3,7.5},{3,5},{-1.5,5}});
-//   move({0,0},{15,0});
+   polycut({{-1.5,-1},{5.5,-1},{5.5,1.5},{12,1.5},{12,7.5},{3,7.5},{3,5},{-1.5,5}});
+   move({0,0},{15,0});
 }
 
 void cut_test4() {
@@ -527,12 +527,12 @@ newdesign("layout_logic");
 //cut_test5();
 //cut_test6();
 //cut_test7();
-//cut_test1A();//*
+//cut_test1A(); // swipe4bind -> test is bombing-out
 //cut_test2A();
 //cut_test3A();
 ////cut_test1B();
 //cut_test2B();
-merge_test1();
+//merge_test1();
 //merge_test2();
 //merge_test3();
 //merge_test4();
