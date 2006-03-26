@@ -147,11 +147,11 @@ unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2) {
    return numcross;
 }
 
-// void polycross::polysegment::dump_points(VPoint*& vlist) {
-//    vlist = new VPoint(lP, vlist);
-//    for (unsigned i = 0; i < crosspoints.size(); i++)
-//       crosspoints[i]->linkage(vlist);
-// }
+void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
+   vlist = new VPoint(_lP, vlist);
+   for (unsigned i = 0; i < crosspoints.size(); i++)
+      crosspoints[i]->linkage(vlist);
+}
 
 TP* polycross::polysegment::checkIntersect(polysegment* ccand)
 {
@@ -259,42 +259,42 @@ unsigned polycross::segmentlist::normalize(const pointlist& plst) {
    return numcross;
 }
 
-// polycross::VPoint* polycross::segmentlist::dump_points() {
-//    VPoint* vlist = NULL;
-//    for (unsigned i = 0; i < _segs.size(); i++)
-//       _segs[i]->dump_points(vlist);
-//    logicop::VPoint* lastV = vlist;
-//    VPoint* centinel = NULL;
-//    while (vlist->prev())  {
-//       if (-1 == vlist->visited()) centinel = vlist;
-//       vlist = vlist->prev();
-//    }
-//    lastV->set_next(vlist);
-//    vlist->set_prev(lastV);
-//    if (NULL != centinel) {
-//       VPoint* vwork = centinel;
-//       do {
-//          if (-1 == vwork->visited()) {
-//             //here visited == 0 means only that the object is Cpoint.
-//             VPoint* tbdel = NULL;
-//             if ((*vwork->cp()) == (*vwork->prev()->cp())) {
-//                tbdel = vwork->prev();
-//                vwork->set_prev(vwork->prev()->prev());
-//                vwork->prev()->set_next(vwork);
-//             }
-//             else if ((*vwork->cp()) == (*vwork->next()->cp())) {
-//                tbdel = vwork->next();
-//                vwork->set_next(vwork->next()->next());
-//                vwork->next()->set_prev(vwork);
-//             }
-//             vwork = vwork->next();
-//             if (tbdel) delete tbdel;
-//          }
-//          else vwork = vwork->next();
-//       } while (centinel != vwork);
-//    }
-//    return vlist;
-// }
+polycross::VPoint* polycross::segmentlist::dump_points() {
+   VPoint* vlist = NULL;
+   for (unsigned i = 0; i < _segs.size(); i++)
+      _segs[i]->dump_points(vlist);
+   polycross::VPoint* lastV = vlist;
+   VPoint* centinel = NULL;
+   while (vlist->prev())  {
+      if (-1 == vlist->visited()) centinel = vlist;
+      vlist = vlist->prev();
+   }
+   lastV->set_next(vlist);
+   vlist->set_prev(lastV);
+   if (NULL != centinel) {
+      VPoint* vwork = centinel;
+      do {
+         if (-1 == vwork->visited()) {
+            //here visited == 0 means only that the object is Cpoint.
+            VPoint* tbdel = NULL;
+            if ((*vwork->cp()) == (*vwork->prev()->cp())) {
+               tbdel = vwork->prev();
+               vwork->set_prev(vwork->prev()->prev());
+               vwork->prev()->set_next(vwork);
+            }
+            else if ((*vwork->cp()) == (*vwork->next()->cp())) {
+               tbdel = vwork->next();
+               vwork->set_next(vwork->next()->next());
+               vwork->next()->set_prev(vwork);
+            }
+            vwork = vwork->next();
+            if (tbdel) delete tbdel;
+         }
+         else vwork = vwork->next();
+      } while (centinel != vwork);
+   }
+   return vlist;
+}
 
 //==============================================================================
 // TEvent
@@ -752,11 +752,11 @@ polycross::logic::logic(const pointlist& poly1, const pointlist& poly2) :
    segmentlist _segl2(poly2,2);
    XQ* _eq = new XQ(_segl1, _segl2); // create the event queue
    _eq->sweep();
-   unsigned crossp1 = _segl1.normalize(poly1);
+/*   unsigned crossp1 = _segl1.normalize(poly1);
    unsigned crossp2 = _segl2.normalize(poly2);
    assert(crossp1 == crossp2);
    _crossp = crossp1;
    delete _eq;
    _shape1 = _segl1.dump_points();
-   _shape2 = _segl2.dump_points();
+   _shape2 = _segl2.dump_points();*/
 }

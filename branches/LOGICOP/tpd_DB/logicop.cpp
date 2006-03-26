@@ -1222,11 +1222,17 @@ between them. These data structures will be used in all subsequently called
 methods, implementing the actual logic operations*/
 logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
                                                 _poly1(poly1), _poly2(poly2) {
-   segmentlist _segl1(poly1,0);
-   segmentlist _segl2(poly2,1);
-   EventQueue* _eq = new EventQueue(_segl1, _segl2); // create the event queue
-   SweepLine   _sl(poly1, poly2);
-   _eq->swipe4cross(_sl);
+//   segmentlist _segl1(poly1,0);
+//   segmentlist _segl2(poly2,1);
+//   EventQueue* _eq = new EventQueue(_segl1, _segl2); // create the event queue
+//   SweepLine   _sl(poly1, poly2);
+//   _eq->swipe4cross(_sl);
+
+   polycross::segmentlist _segl1(poly1,1);
+   polycross::segmentlist _segl2(poly2,2);
+   polycross::XQ* _eq = new polycross::XQ(_segl1, _segl2); // create the event queue
+   _eq->sweep();
+
    unsigned crossp1 = _segl1.normalize(poly1);
    unsigned crossp2 = _segl2.normalize(poly2);
    assert(crossp1 == crossp2);
@@ -1241,8 +1247,8 @@ the raw data #_shape1 and #_shape2 can be reused, but has to be recycled beforeh
 This method is traversing both fields and invokes VPoint::reset_visited() in 
 order to reinitialize the CPoint::_visited fields*/
 void logicop::logic::reset_visited() {
-   VPoint* centinel = _shape1;
-   VPoint* looper = centinel;
+   polycross::VPoint* centinel = _shape1;
+   polycross::VPoint* looper = centinel;
    do {
       looper->reset_visited();
       looper = looper->next();
@@ -1260,7 +1266,7 @@ input polygons. Method returns false if no output shapes are generated, and
 true otherwise*/
 bool logicop::logic::AND(pcollection& plycol) {
    bool result = false;
-   VPoint* centinel = NULL;
+   polycross::VPoint* centinel = NULL;
    if (0 == _crossp) {
       // If there are no crossing points found, this still does not mean
       // that the operation will fail. Polygons might be fully overlapping...
@@ -1273,7 +1279,7 @@ bool logicop::logic::AND(pcollection& plycol) {
       // If we've got here means that one of the polygons is completely 
       // overlapped by the other one. So we need to return the inner one
       pointlist *shgen = new pointlist();
-      VPoint* vpnt = centinel;
+      polycross::VPoint* vpnt = centinel;
       do {
          shgen->push_back(TP(vpnt->cp()->x(), vpnt->cp()->y()));
          vpnt = vpnt->next();
@@ -1286,11 +1292,11 @@ bool logicop::logic::AND(pcollection& plycol) {
    centinel = getFirstOutside(_poly2, _shape1);
    if (NULL == centinel) centinel = getFirstOutside(_poly1, _shape2);
    assert(centinel);   
-   VPoint* collector = centinel;
+   polycross::VPoint* collector = centinel;
    do {
       if (0 == collector->visited()) {
          pointlist *shgen = new pointlist();
-         VPoint* pickup = collector;
+         polycross::VPoint* pickup = collector;
          do {
             pickup = pickup->follower(direction);
             shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
@@ -1309,7 +1315,7 @@ input polygons. Method returns false if no output shapes are generated, and
 true otherwise*/
 bool logicop::logic::ANDNOT(pcollection& plycol) {
    bool result = false;
-   VPoint* centinel = NULL;
+   polycross::VPoint* centinel = NULL;
    if (0 == _crossp) {
       // If there are no crossing points found, this still does not mean
       // that the operation will fail. Polygons might be overlapping...
@@ -1333,11 +1339,11 @@ bool logicop::logic::ANDNOT(pcollection& plycol) {
    else direction = true; /*next*/
    assert(centinel);   
    //   
-   VPoint* collector = centinel;
+   polycross::VPoint* collector = centinel;
    do {
       if (0 == collector->visited()) {
          pointlist *shgen = new pointlist();
-         VPoint* pickup = collector;
+         polycross::VPoint* pickup = collector;
          do {
             pickup = pickup->follower(direction, true);
             shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
@@ -1356,7 +1362,7 @@ input polygons. Method returns false if no output shapes are generated, and
 true otherwise*/
 bool logicop::logic::OR(pcollection& plycol) {
    bool result = false;
-   VPoint* centinel = NULL;
+   polycross::VPoint* centinel = NULL;
    if (0 == _crossp) {
       // If there are no crossing points found, this still does not mean
       // that the operation will fail. Polygons might be fully overlapping...
@@ -1369,7 +1375,7 @@ bool logicop::logic::OR(pcollection& plycol) {
       // If we've got here means that one of the polygons is completely 
       // overlapped by the other one. So we need to return the outer one
       pointlist *shgen = new pointlist();
-      VPoint* vpnt = centinel;
+      polycross::VPoint* vpnt = centinel;
       do {
          shgen->push_back(TP(vpnt->cp()->x(), vpnt->cp()->y()));
          vpnt = vpnt->next();
@@ -1382,12 +1388,12 @@ bool logicop::logic::OR(pcollection& plycol) {
    centinel = getFirstOutside(_poly2, _shape1);
    if (NULL == centinel) centinel = getFirstOutside(_poly1, _shape2);
    assert(centinel);   
-   VPoint* collector = centinel;
+   polycross::VPoint* collector = centinel;
    bool direction = true; /*next*/
    do {
       if (0 == collector->visited()) {
          pointlist *shgen = new pointlist();
-         VPoint* pickup = collector;
+         polycross::VPoint* pickup = collector;
          direction = (0 == lclcol.size());
          do {
             pickup = pickup->follower(direction);
@@ -1411,7 +1417,7 @@ bool logicop::logic::OR(pcollection& plycol) {
 }
 
       
-logicop::VPoint* logicop::logic::getFirstOutside(const pointlist& plist, VPoint* init) {
+polycross::VPoint* logicop::logic::getFirstOutside(const pointlist& plist, polycross::VPoint* init) {
    unsigned plysize = plist.size();
    unsigned count = 0;
    while (init->inside(plist)) {
