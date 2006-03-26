@@ -140,8 +140,8 @@ namespace polycross
          TbEvent(polysegment*, polysegment*, byte);
          void              sweep(XQ&, YQ&);
       private:
-         polysegment*      _tseg1;
-         polysegment*      _tseg2;
+         polysegment*      _aseg;
+         polysegment*      _bseg;
    };
 
    //===========================================================================
@@ -153,8 +153,8 @@ namespace polycross
          TeEvent(polysegment*, polysegment*, byte);
          void              sweep(XQ&, YQ&);
       private:
-         polysegment*      _tseg1;
-         polysegment*      _tseg2;
+         polysegment*      _aseg;
+         polysegment*      _bseg;
    };
 
    //===========================================================================
