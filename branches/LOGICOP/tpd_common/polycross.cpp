@@ -316,41 +316,57 @@ polycross::TbEvent::TbEvent (polysegment* seg1, polysegment* seg2, byte shapeID)
       TEvent( shapeID )
 {
    assert(seg1->lP() == seg2->lP());
-   _tseg1 = seg1; _tseg2 = seg2;
+   int ori = orientation(seg2->lP(), seg2->rP(), seg1->rP());
+   assert (0 != ori);
+   if (ori > 0)
+   {
+      _aseg = seg1; _bseg = seg2;
+   }
+   else
+   {
+      _aseg = seg2; _bseg = seg1;
+   }
    _evertex = seg1->lP();
 }
 
 void polycross::TbEvent::sweep(XQ& eventQ, YQ& sweepline)
 {
+   // create the threads
+   SegmentThread* athr = sweepline.beginThread(_aseg);
+   SegmentThread* bthr = sweepline.beginThread(_bseg);
+   assert(athr->threadAbove() != bthr);
+   assert(bthr->threadBelow() != athr);
 #ifdef BO2_DEBUG
-      printf("Begin 2 threads :\n");
+   printf("Begin 2 threads :\n");
+   BO_printseg(_aseg)
+   BO_printseg(_bseg)
 #endif
-   // first segment - create thread...
-   SegmentThread* thr1 = sweepline.beginThread(_tseg1);
-   // ...check for intersection with the thread above ...
-   TP* CP1A = _tseg1->checkIntersect(thr1->threadAbove()->cseg());
+   // in all cases check:
+   TP* CP1A = _aseg->checkIntersect(athr->threadAbove()->cseg());
    if (NULL != CP1A)
-      insertCrossPoint(CP1A, thr1->threadAbove()->cseg(), _tseg1, eventQ);
-   // ... and the thread below ...
-   TP* CP1B = _tseg1->checkIntersect(thr1->threadBelow()->cseg());
+      insertCrossPoint(CP1A, athr->threadAbove()->cseg(), _aseg, eventQ);
+   TP* CP1B = _bseg->checkIntersect(bthr->threadBelow()->cseg());
    if (NULL != CP1B)
-      insertCrossPoint(CP1B, _tseg1, thr1->threadBelow()->cseg(), eventQ);
-   
-
-   // now - second segment - create thread...
-   SegmentThread* thr2 = sweepline.beginThread(_tseg2);
-   // ...check for intersection with the thread above ...
-   TP* CP2A = _tseg2->checkIntersect(thr2->threadAbove()->cseg());
-   if (NULL != CP2A)
-      insertCrossPoint(CP2A, thr2->threadAbove()->cseg(), _tseg2, eventQ);
-   // ... and the thread below ...
-   TP* CP2B = _tseg1->checkIntersect(thr2->threadBelow()->cseg());
-   if (NULL != CP2B)
-      insertCrossPoint(CP2B, _tseg2, thr2->threadBelow()->cseg(), eventQ);
-#ifdef BO2_DEBUG
-   BO_printseg(_tseg1)
-   BO_printseg(_tseg2)
-#endif
+      insertCrossPoint(CP1B, _bseg, bthr->threadBelow()->cseg(), eventQ);
+   // check that the new threads are neighbours
+   if ((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr))
+   {
+      // neighbours - check the case when left points are also crossing points
+      if ((NULL != CP1A) && ((*CP1A) == *(_aseg->lP())))
+         insertCrossPoint(CP1A, athr->threadAbove()->cseg(), _bseg, eventQ);
+      if ((NULL != CP1B) && ((*CP1B) == *(_bseg->lP())))
+         insertCrossPoint(CP1B, _bseg, bthr->threadBelow()->cseg(), eventQ);
+   }
+   else
+   {
+      // not neighbours - check the rest
+      CP1A = _aseg->checkIntersect(athr->threadBelow()->cseg());
+      if (NULL != CP1A)
+         insertCrossPoint(CP1A, _aseg, athr->threadBelow()->cseg(), eventQ);
+      CP1B = _bseg->checkIntersect(bthr->threadAbove()->cseg());
+      if (NULL != CP1B)
+         insertCrossPoint(CP1B, bthr->threadAbove()->cseg(), _bseg, eventQ);
+   }
 }
 
 //==============================================================================
@@ -360,35 +376,59 @@ polycross::TeEvent::TeEvent (polysegment* seg1, polysegment* seg2, byte shapeID)
       TEvent( shapeID )
 {
    assert(seg1->rP() == seg2->rP());
-   _tseg1 = seg1; _tseg2 = seg2;
+//   _tseg1 = seg1; _tseg2 = seg2;
+
+   int ori = orientation(seg2->lP(), seg2->rP(), seg1->lP());
+   assert (0 != ori);
+   if (ori > 0)
+   {
+      _aseg = seg1; _bseg = seg2;
+   }
+   else
+   {
+      _aseg = seg2; _bseg = seg1;
+   }
    _evertex = seg1->rP();
+
 }
 
 void polycross::TeEvent::sweep (XQ& eventQ, YQ& sweepline)
 {
 #ifdef BO2_DEBUG
-      printf("End 2 threads\n");
+   printf("End 2 threads\n");
+   BO_printseg(_aseg)
+   BO_printseg(_bseg)
 #endif
-   // ...check for intersection of the threads above and below ...
-   SegmentThread* tA = sweepline.getThread(_tseg1->threadID());
-   TP* CPA = tA->threadBelow()->cseg()->checkIntersect(tA->threadAbove()->cseg());
-   if (NULL != CPA)
-      insertCrossPoint(CPA, tA->threadAbove()->cseg(), tA->threadBelow()->cseg(), eventQ);
-   // remove the thread
-//   SegmentThread* thr1 = sweepline.endThread(_tseg1->threadID());
-   sweepline.endThread(_tseg1->threadID());
-   
-   SegmentThread* tB = sweepline.getThread(_tseg2->threadID());
-   TP* CPB = tB->threadBelow()->cseg()->checkIntersect(tB->threadAbove()->cseg());
-   if (NULL != CPB)
-      insertCrossPoint(CPB, tB->threadAbove()->cseg(), tB->threadBelow()->cseg(), eventQ);
-   // remove the thread
-//   SegmentThread* thr2 = sweepline.endThread(_tseg2->threadID());
-   sweepline.endThread(_tseg2->threadID());
-#ifdef BO2_DEBUG
-   BO_printseg(_tseg1)
-   BO_printseg(_tseg2)
-#endif
+   SegmentThread* athr = sweepline.getThread(_aseg->threadID());
+   SegmentThread* bthr = sweepline.getThread(_bseg->threadID());
+   assert(athr->threadAbove() != bthr);
+   assert(bthr->threadBelow() != athr);
+   if ((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr))
+   {
+      // neighbours - check the case when right points are also crossing points
+      TP* CP1A = _aseg->checkIntersect(bthr->threadBelow()->cseg());
+      if (NULL != CP1A)
+         insertCrossPoint(CP1A, _aseg, bthr->threadBelow()->cseg(), eventQ);
+      TP* CP1B = _bseg->checkIntersect(athr->threadAbove()->cseg());
+      if (NULL != CP1B)
+         insertCrossPoint(CP1B, athr->threadAbove()->cseg(), _bseg, eventQ);
+      TP* CP1C = athr->threadAbove()->cseg()->checkIntersect(bthr->threadBelow()->cseg());
+      if (NULL != CP1C)
+         insertCrossPoint(CP1C, athr->threadAbove()->cseg(), bthr->threadBelow()->cseg(), eventQ);
+
+   }
+   else
+   {
+      // not neighbours - check both neighbours
+      TP* CP1A = athr->threadAbove()->cseg()->checkIntersect(athr->threadBelow()->cseg());
+      if (NULL != CP1A)
+         insertCrossPoint(CP1A, athr->threadAbove()->cseg(), athr->threadBelow()->cseg(), eventQ);
+      TP* CP1B = bthr->threadAbove()->cseg()->checkIntersect(bthr->threadBelow()->cseg());
+      if (NULL != CP1B)
+         insertCrossPoint(CP1B, bthr->threadAbove()->cseg(), bthr->threadBelow()->cseg(), eventQ);
+   }
+   sweepline.endThread(_aseg->threadID());
+   sweepline.endThread(_bseg->threadID());
 }
 
 //==============================================================================
@@ -413,7 +453,9 @@ polycross::TmEvent::TmEvent (polysegment* seg1, polysegment* seg2, byte shapeID)
 void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline)
 {
 #ifdef BO2_DEBUG
-      printf("Modify thread\n");
+   printf("Modify thread\n");
+   BO_printseg(_tseg1)
+   BO_printseg(_tseg2)
 #endif
    assert(0 != _tseg1->threadID());
    SegmentThread* thr = sweepline.modifyThread(_tseg1->threadID(), _tseg2);
@@ -426,10 +468,6 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline)
    TP* CPB = thr->cseg()->checkIntersect(thr->threadBelow()->cseg());
    if (NULL != CPB)
       insertCrossPoint(CPB, thr->cseg(), thr->threadBelow()->cseg(), eventQ);
-#ifdef BO2_DEBUG
-   BO_printseg(_tseg1)
-   BO_printseg(_tseg2)
-#endif
 }
 
 //==============================================================================
@@ -582,7 +620,7 @@ polycross::SegmentThread* polycross::YQ::swapThreads(unsigned tAID, unsigned tBI
    SegmentThread* tBelow = tiBelow->second;
    // relink above/below threads
 #ifdef BO2_DEBUG
-      printf("Swap threads\n");
+      printf("Swap threads => CROSSING POINT\n");
       BO_printseg(tAbove->cseg());
       BO_printseg(tBelow->cseg());
 #endif
@@ -671,7 +709,7 @@ void polycross::XQ::addCrossEvent(TP* CP, unsigned thr1, unsigned thr2)
    TcEvent* evt = new TcEvent(CP, thr1, thr2);
    // now create the vertex with the event inside
    EventVertex* vrtx = new EventVertex(evt);
-      // and try to stick it in the AVL tree
+   // and try to stick it in the AVL tree
    void** retitem =  avl_probe(_xqueue,vrtx);
    if ((*retitem) != vrtx)
    {
@@ -714,11 +752,11 @@ polycross::logic::logic(const pointlist& poly1, const pointlist& poly2) :
    segmentlist _segl2(poly2,2);
    XQ* _eq = new XQ(_segl1, _segl2); // create the event queue
    _eq->sweep();
-/*   unsigned crossp1 = _segl1.normalize(poly1);
+   unsigned crossp1 = _segl1.normalize(poly1);
    unsigned crossp2 = _segl2.normalize(poly2);
    assert(crossp1 == crossp2);
    _crossp = crossp1;
    delete _eq;
    _shape1 = _segl1.dump_points();
-   _shape2 = _segl2.dump_points();*/
+   _shape2 = _segl2.dump_points();
 }
