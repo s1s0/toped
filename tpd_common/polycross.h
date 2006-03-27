@@ -84,10 +84,11 @@ namespace polycross
          const TP*         rP() const                 {return _rP;}
          byte              polyNo() const             {return _polyNo;}
          int               edge() const               {return _edge;}
-         TP*               checkIntersect(polysegment*);
+         TP*               checkIntersect(polysegment*, XQ&);
       protected:
          TP*               joiningSegments(polysegment*, float, float);
-         TP*               oneLineSegments(polysegment*);
+         TP*               oneLineSegments(polysegment*, XQ&);
+         TP*               getMiddle(const TP*, const TP*);
          TP*               getCross(polysegment*);
          unsigned          _threadID;
          crossCList        crosspoints;
@@ -110,6 +111,7 @@ namespace polycross
          unsigned          size() const {return _segs.size();};
          unsigned          normalize(const pointlist&);
          VPoint*           dump_points();
+         const pointlist*  originalPL() const {return _originalPL;}
       private:
          Segments          _segs;
          const pointlist*  _originalPL;
@@ -272,6 +274,8 @@ namespace polycross
          XQ(const segmentlist &, const segmentlist&);
          void              sweep();
          void              addCrossEvent(TP*, unsigned, unsigned);
+         const pointlist*  opl1() const {return _osl1->originalPL();}
+         const pointlist*  opl2() const {return _osl2->originalPL();}
       protected:
          BottomSentinel*   _bottomSentinel;
          TopSentinel*      _topSentinel;
@@ -282,27 +286,10 @@ namespace polycross
          DBbox             _overlap;
          TP                _bottom_left;
          TP                _top_right;
+         const segmentlist* _osl1;
+         const segmentlist* _osl2;
    };
 
-   //===========================================================================
-   class logic
-   {
-      public:
-         logic(const pointlist&, const pointlist&);
-//         bool              AND(pcollection&);
-//         bool              ANDNOT(pcollection&);
-//         bool              OR(pcollection&);
-//         void              reset_visited();
-      private:
-//         pointlist*        hole2simple(const pointlist&, const pointlist&);
-         //
-//         VPoint*           getFirstOutside(const pointlist&, VPoint*);
-         const pointlist&  _poly1;
-         const pointlist&  _poly2;
-//         VPoint*           _shape1;
-//         VPoint*           _shape2;
-//         unsigned          _crossp;
-   };
 }
 
 #endif
