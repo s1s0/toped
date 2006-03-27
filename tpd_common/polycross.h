@@ -10,6 +10,7 @@ namespace polycross
    int xyorder(const TP*, const TP*);
    int orientation(const TP*, const TP*, const TP*);
    float getLambda( const TP* p1, const TP* p2, const TP* p);
+   typedef std::list<unsigned> ThreadList;
    class YQ;
    class XQ;
    //===========================================================================
@@ -113,7 +114,7 @@ namespace polycross
          Segments          _segs;
          const pointlist*  _originalPL;
    };
-   
+
    //===========================================================================
    // Thread event - pure virtual
    //===========================================================================
@@ -121,7 +122,7 @@ namespace polycross
    {
       public:
          TEvent(byte shapeID) : _shapeID(shapeID) {};
-         virtual bool      sweep(XQ&, YQ&, bool) = 0;
+         virtual void      sweep(XQ&, YQ&, ThreadList&) = 0;
          void              insertCrossPoint(TP*, polysegment*, polysegment*, XQ&);
          const TP*         evertex() {return _evertex;}
          byte              shapeID() {return _shapeID;}
@@ -138,7 +139,7 @@ namespace polycross
    {
       public:
          TbEvent(polysegment*, polysegment*, byte);
-         bool              sweep(XQ&, YQ&, bool);
+         void              sweep(XQ&, YQ&, ThreadList&);
       private:
          polysegment*      _aseg;
          polysegment*      _bseg;
@@ -151,7 +152,7 @@ namespace polycross
    {
       public:
          TeEvent(polysegment*, polysegment*, byte);
-         bool              sweep(XQ&, YQ&, bool);
+         void              sweep(XQ&, YQ&, ThreadList&);
       private:
          polysegment*      _aseg;
          polysegment*      _bseg;
@@ -164,7 +165,7 @@ namespace polycross
    {
       public:
          TmEvent(polysegment*, polysegment*, byte);
-         bool              sweep(XQ&, YQ&, bool);
+         void              sweep(XQ&, YQ&, ThreadList&);
       private:
          polysegment*      _tseg1;
          polysegment*      _tseg2;
@@ -178,8 +179,8 @@ namespace polycross
       public:
          TcEvent(TP* ev, unsigned tAID, unsigned tBID): TEvent(0), 
                      _threadAboveID(tAID), _threadBelowID(tBID) {_evertex = ev;}
-         bool              sweep(XQ&, YQ&, bool);
-         bool        operator == (const TcEvent&) const;
+         void              sweep(XQ&, YQ&, ThreadList&);
+         bool              operator == (const TcEvent&) const;
       private:
          unsigned          _threadAboveID;
          unsigned          _threadBelowID;
@@ -202,6 +203,7 @@ namespace polycross
          Events            _events;
          CrossEvents       _crossevents;
          const TP*         _evertex;
+         ThreadList        _threadsSweeped;
    };
 
    //===========================================================================
