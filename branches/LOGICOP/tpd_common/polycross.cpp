@@ -150,10 +150,15 @@ unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2) {
 void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
    vlist = new VPoint(_lP, vlist);
    for (unsigned i = 0; i < crosspoints.size(); i++)
+   {
       crosspoints[i]->linkage(vlist);
+#ifdef BO2_DEBUG
+      printf("( %i , %i )\n", crosspoints[i]->cp()->x(), crosspoints[i]->cp()->y());
+#endif
+   }
 }
 
-TP* polycross::polysegment::checkIntersect(polysegment* ccand)
+TP* polycross::polysegment::checkIntersect(polysegment* ccand, XQ& eventQ)
 {
    // check that the cross candidate is not a sentinel segment
    // check for polygon edges belonging to the same polygon
@@ -164,7 +169,7 @@ TP* polycross::polysegment::checkIntersect(polysegment* ccand)
    lsign = orientation(lP(), rP(), ccand->lP());
    rsign = orientation(lP(), rP(), ccand->rP());
    // do the case when both segments lie on the same line
-   if ((lsign == 0) && (rsign == 0)) assert(false);//return oneLineSegments(ccand);
+   if ((lsign == 0) && (rsign == 0)) return oneLineSegments(ccand, eventQ);
    rlmul = lsign*rsign;
    if      (0  < rlmul)  return NULL;// not crossing
    if (0 == rlmul) return joiningSegments(ccand, lsign, rsign);
@@ -180,7 +185,6 @@ TP* polycross::polysegment::checkIntersect(polysegment* ccand)
    // at this point - the only possibility is that they intersect
    // so - create a cross event 
    return getCross(ccand);
-   
 }
 
 TP* polycross::polysegment::joiningSegments(polysegment* cross, float lps, float rps)
@@ -230,6 +234,81 @@ TP* polycross::polysegment::getCross(polysegment* cseg)
    return new TP((int)rint(X),(int)rint(Y));
 }
 
+TP* polycross::polysegment::oneLineSegments(polysegment* below, XQ& eventQ)
+{
+   float lambdaL = getLambda(lP(), rP(), below->lP());
+   float lambdaR = getLambda(lP(), rP(), below->rP());
+   // coinsiding vertexes - not dealing with them at the moment YET!
+   if (0 == lambdaL * lambdaR) return NULL;
+   bool swaped = false;
+   // first of all cases when neither of the lines is enclosing the other one
+   // here we are generating "hidden" cross point, right in the moddle of their
+   // coinsiding segment
+   if ((lambdaL < 0) && (lambdaR > 0))
+      return NULL;//getMiddle(lP(), below->rP());
+   if ((lambdaL > 0) && (lambdaR < 0))
+      return NULL;//getMiddle(below->lP(), rP());
+   if ((lambdaL < 0) && (lambdaR < 0))
+   {
+      // below edge points are outside the above segment, this however
+      // could mean that below fully encloses above
+      lambdaL = getLambda(below->lP(), below->rP(), lP());
+      lambdaR = getLambda(below->lP(), below->rP(), rP());
+      if ((lambdaL < 0) && (lambdaR < 0)) return NULL;
+      swaped = true;
+   }
+   // now the cases when one of the lines encloses fully the other one
+   polysegment* outside = swaped ? below : this;
+   polysegment* inside  = swaped ? this : below;
+   // get the original polygon to which enclosed segment belongs to
+   const pointlist* insideP = (1 == (swaped ?  polyNo() : below->polyNo())) ?
+         eventQ.opl1() : eventQ.opl2();
+   // ... and get the locate the inside segment in that sequence
+   int numv = insideP->size();
+   unsigned indxLP = (*(inside->lP()) == (*insideP)[inside->edge()]) ?
+         inside->edge() : (inside->edge() + 1) % numv;
+   unsigned indxRP = (*(inside->rP()) == (*insideP)[inside->edge()]) ?
+         inside->edge() : (inside->edge() + 1) % numv;
+   // make sure they are not the same
+   assert(indxLP != indxRP);
+
+   // we'll pickup the neighbouring point(s) of the inside segment and will
+   // recalculate the lps/rps for them.
+   bool indxpos = indxLP > indxRP;
+   float lps, rps;
+   do
+   {
+      // the code below just increments/decrements the indexes in the point sequence
+      // they look so weird, to keep the indexes within [0:_numv-1] boundaries
+      if (0 == lps)
+      {
+         if (indxpos) indxLP = ++indxLP % numv;
+         else (0==indxLP) ? indxLP = numv-1 : indxLP--;
+      }
+      if (0 == rps)
+      {
+         if (!indxpos) indxRP = ++indxRP % numv;
+         else (0==indxRP) ? indxRP = numv-1 : indxRP--;
+      }
+      // calculate lps/rps with the new points
+      lps = orientation(outside->lP(), outside->rP(), &((*insideP)[indxLP]));
+      rps = orientation(outside->lP(), outside->rP(), &((*insideP)[indxRP]));
+   } while (0 == (lps * rps));
+   // When segments are crossing (because of the direction of their neightbours),
+   // then a crossing point is introduced in the midle of the internal segment
+   if   (lps*rps > 0) return NULL;
+   else return getMiddle(inside->lP(), inside->rP());
+//   return new CEvent(above, below, getMiddle(inside->lP, inside->rP), (lps*rps > 0) ? true : false);
+}
+
+TP* polycross::polysegment::getMiddle(const TP* p1, const TP* p2)
+{
+   int4b x = (p2->x() + p1->x()) / 2;
+   int4b y = (p2->y() + p1->y()) / 2;
+   return new TP(x,y);
+}
+
+
 //==============================================================================
 // class segmentlist
 
@@ -259,30 +338,40 @@ unsigned polycross::segmentlist::normalize(const pointlist& plst) {
    return numcross;
 }
 
-polycross::VPoint* polycross::segmentlist::dump_points() {
+polycross::VPoint* polycross::segmentlist::dump_points()
+{
    VPoint* vlist = NULL;
+#ifdef BO2_DEBUG
+      printf("---------------Crossing points found-----------\n");
+#endif
    for (unsigned i = 0; i < _segs.size(); i++)
       _segs[i]->dump_points(vlist);
    polycross::VPoint* lastV = vlist;
    VPoint* centinel = NULL;
-   while (vlist->prev())  {
+   while (vlist->prev())
+   {
       if (-1 == vlist->visited()) centinel = vlist;
       vlist = vlist->prev();
    }
    lastV->set_next(vlist);
    vlist->set_prev(lastV);
-   if (NULL != centinel) {
+   if (NULL != centinel)
+   {  // for binding points
       VPoint* vwork = centinel;
-      do {
-         if (-1 == vwork->visited()) {
+      do
+      {
+         if (-1 == vwork->visited())
+         {
             //here visited == 0 means only that the object is Cpoint.
             VPoint* tbdel = NULL;
-            if ((*vwork->cp()) == (*vwork->prev()->cp())) {
+            if ((*vwork->cp()) == (*vwork->prev()->cp()))
+            {
                tbdel = vwork->prev();
                vwork->set_prev(vwork->prev()->prev());
                vwork->prev()->set_next(vwork);
             }
-            else if ((*vwork->cp()) == (*vwork->next()->cp())) {
+            else if ((*vwork->cp()) == (*vwork->next()->cp()))
+            {
                tbdel = vwork->next();
                vwork->set_next(vwork->next()->next());
                vwork->next()->set_prev(vwork);
@@ -347,9 +436,9 @@ void polycross::TbEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl)
 #endif
    // in all cases check:
    TP *CP1A, *CP1B;
-   if ((CP1A = _aseg->checkIntersect(athr->threadAbove()->cseg())))
+   if ((CP1A = _aseg->checkIntersect(athr->threadAbove()->cseg(), eventQ)))
       insertCrossPoint(CP1A, athr->threadAbove()->cseg(), _aseg, eventQ);
-   if ((CP1B = _bseg->checkIntersect(bthr->threadBelow()->cseg())))
+   if ((CP1B = _bseg->checkIntersect(bthr->threadBelow()->cseg(), eventQ)))
       insertCrossPoint(CP1B, _bseg, bthr->threadBelow()->cseg(), eventQ);
    // check that the new threads are neighbours
    if ((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr))
@@ -363,9 +452,9 @@ void polycross::TbEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    else
    {
       // not neighbours - check the rest
-      if ((CP1A = _aseg->checkIntersect(athr->threadBelow()->cseg())))
+      if ((CP1A = _aseg->checkIntersect(athr->threadBelow()->cseg(), eventQ)))
          insertCrossPoint(CP1A, _aseg, athr->threadBelow()->cseg(), eventQ);
-      if ((CP1B = _bseg->checkIntersect(bthr->threadAbove()->cseg())))
+      if ((CP1B = _bseg->checkIntersect(bthr->threadAbove()->cseg(), eventQ)))
          insertCrossPoint(CP1B, bthr->threadAbove()->cseg(), _bseg, eventQ);
    }
 }
@@ -405,23 +494,23 @@ void polycross::TeEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    if ((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr))
    {
       // neighbours - check the case when right points are also crossing points
-      TP* CP1A = _aseg->checkIntersect(bthr->threadBelow()->cseg());
+      TP* CP1A = _aseg->checkIntersect(bthr->threadBelow()->cseg(), eventQ);
       if ((NULL != CP1A) && (*CP1A == *(_aseg->rP())))
          insertCrossPoint(CP1A, _aseg, bthr->threadBelow()->cseg(), eventQ);
-      TP* CP1B = _bseg->checkIntersect(athr->threadAbove()->cseg());
+      TP* CP1B = _bseg->checkIntersect(athr->threadAbove()->cseg(), eventQ);
       if ((NULL != CP1B) && (*CP1B == *(_bseg->rP())))
          insertCrossPoint(CP1B, athr->threadAbove()->cseg(), _bseg, eventQ);
       // and new neighbours
-      if ((CP = athr->threadAbove()->cseg()->checkIntersect(bthr->threadBelow()->cseg())))
+      if ((CP = athr->threadAbove()->cseg()->checkIntersect(bthr->threadBelow()->cseg(), eventQ)))
          insertCrossPoint(CP, athr->threadAbove()->cseg(), bthr->threadBelow()->cseg(), eventQ);
 
    }
    else
    {
       // not neighbours - check both neighbours
-      if ((CP = athr->threadAbove()->cseg()->checkIntersect(athr->threadBelow()->cseg())))
+      if ((CP = athr->threadAbove()->cseg()->checkIntersect(athr->threadBelow()->cseg(), eventQ)))
          insertCrossPoint(CP, athr->threadAbove()->cseg(), athr->threadBelow()->cseg(), eventQ);
-      if ((CP = bthr->threadAbove()->cseg()->checkIntersect(bthr->threadBelow()->cseg())))
+      if ((CP = bthr->threadAbove()->cseg()->checkIntersect(bthr->threadBelow()->cseg(), eventQ)))
          insertCrossPoint(CP, bthr->threadAbove()->cseg(), bthr->threadBelow()->cseg(), eventQ);
    }
    sweepline.endThread(_aseg->threadID());
@@ -466,7 +555,7 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    // check for intersections of the neighbours with the new segment
    // and whether or not threads should be swapped
    TP* CP;
-   if((CP = thr->cseg()->checkIntersect(thr->threadAbove()->cseg())))
+   if((CP = thr->cseg()->checkIntersect(thr->threadAbove()->cseg(), eventQ)))
    {
       insertCrossPoint(CP, thr->threadAbove()->cseg(), thr->cseg(), eventQ);
       if ((*CP) == *(_tseg2->lP()))
@@ -478,7 +567,7 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
       }
    }
 
-   if ((CP = thr->cseg()->checkIntersect(thr->threadBelow()->cseg())))
+   if ((CP = thr->cseg()->checkIntersect(thr->threadBelow()->cseg(), eventQ)))
    {
       insertCrossPoint(CP, thr->cseg(), thr->threadBelow()->cseg(), eventQ);
       if ((*CP) == *(_tseg2->lP()))
@@ -504,19 +593,20 @@ void polycross::TcEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl)
 #endif
       return;
    }
+#ifdef BO2_DEBUG
+      printf("SWAPPING threads % i and %i\n", _threadAboveID, _threadBelowID);
+#endif
    SegmentThread* below = sweepline.swapThreads(_threadAboveID, _threadBelowID);
    SegmentThread* above = below->threadAbove();
 #ifdef BO2_DEBUG
-      printf("SWAPPING threads % i and %i\n", _threadAboveID, _threadBelowID);
-      sweepline.report();
+   sweepline.report();
 #endif
-
    // check for intersections with the new neighbours
    TP* CP;
-   if ((CP = below->cseg()->checkIntersect(below->threadBelow()->cseg())))
+   if ((CP = below->cseg()->checkIntersect(below->threadBelow()->cseg(), eventQ)))
       insertCrossPoint(CP, below->cseg(), below->threadBelow()->cseg(), eventQ);
 
-   if ((CP = above->cseg()->checkIntersect(above->threadAbove()->cseg())))
+   if ((CP = above->cseg()->checkIntersect(above->threadAbove()->cseg(), eventQ)))
       insertCrossPoint(CP, above->threadAbove()->cseg(), above->cseg(), eventQ);
 }
 
@@ -715,7 +805,21 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    ori = orientation(seg1->lP(), seg1->rP(), seg0->rP());
    if (ori != 0) return ori;
    // if it is still the same => we have coinciding segments
-   assert(false);
+   int order;
+//    if       (*(seg0->rP()) != *(seg1->rP()))
+//       order = xyorder(seg0->rP(), seg1->rP());
+//    else if  (*(seg0->lP()) != *(seg1->lP()))
+//       order = xyorder(seg1->lP(), seg0->lP());
+
+   if       (*(seg0->lP()) != *(seg1->lP()))
+         order = xyorder(seg0->lP(), seg1->lP());
+   else if  (*(seg0->rP()) != *(seg1->rP()))
+      order = xyorder(seg1->rP(), seg0->rP());
+
+   else
+      order = (seg0->edge() > seg1->edge()) ? 1 : -1;
+   assert(0 != order);
+   return order;
 }
 
 
@@ -735,6 +839,8 @@ void polycross::YQ::report()
 polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
       _overlap(*(seg1[0]->lP()))
 {
+   _osl1 = &seg1;
+   _osl2 = &seg2;
    _xqueue = avl_create(E_compare, NULL, NULL);
    createEvents(seg1,1);
    createEvents(seg2,2);
@@ -807,23 +913,4 @@ void polycross::XQ::sweep()
       evtlist->sweep(*_sweepline, *this);
       avl_delete(_xqueue,evtlist);
    }
-}
-
-//==============================================================================
-// logic
-
-polycross::logic::logic(const pointlist& poly1, const pointlist& poly2) :
-      _poly1(poly1), _poly2(poly2)
-{
-   segmentlist _segl1(poly1,1);
-   segmentlist _segl2(poly2,2);
-   XQ* _eq = new XQ(_segl1, _segl2); // create the event queue
-   _eq->sweep();
-/*   unsigned crossp1 = _segl1.normalize(poly1);
-   unsigned crossp2 = _segl2.normalize(poly2);
-   assert(crossp1 == crossp2);
-   _crossp = crossp1;
-   delete _eq;
-   _shape1 = _segl1.dump_points();
-   _shape2 = _segl2.dump_points();*/
 }

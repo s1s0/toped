@@ -503,35 +503,49 @@ void edge_cut1()
    opencell("edge_cut1");
    addbox( { { 0 , 0 } , { 10 , 10 } });
    select({5.00,5.00});
-//   polycut( { { 0 , 4 } , { 0 , 6 } , { 3 , 6 } , { 3 , 4 } });
-//   unselect_all();
-//   select({5.00,5.00});
-//   polycut( { { 4 , 0 } , { 6 , 0 } , { 6 , 3 } , { 4 , 3 } });
-//   unselect_all();
-//   select({5.00,5.00});
-//   polycut( { { 10 , 4 } , { 10 , 6 } , { 7 , 6 } , { 7 , 4 } });
-//   unselect_all();
-//   select({5.00,5.00});
-//   polycut( { { 4 , 10 } , { 6 , 10 } , { 6 , 7 } , { 4 , 7 } });
-//   unselect_all();
+   polycut( { { 0 , 4 } , { 0 , 6 } , { 3 , 6 } , { 3 , 4 } });
+   move({0,0},{15,0});
+   unselect_all();
+
+   select({5.00,5.00});
+   polycut( { { 4 , 0 } , { 6 , 0 } , { 6 , 3 } , { 4 , 3 } });
+   move({0,0},{15,0});
+   unselect_all();
+
+   select({5.00,5.00});
+   polycut( { { 10 , 4 } , { 10 , 6 } , { 7 , 6 } , { 7 , 4 } });
+   move({0,0},{15,0});
+   unselect_all();
+
+   select({5.00,5.00});
+   polycut( { { 4 , 10 } , { 6 , 10 } , { 6 , 7 } , { 4 , 7 } });
+   move({0,0},{15,0});
+   unselect_all();
 }
 
-void edge_merge() 
-{
-   newcell("edge_merge");
-   opencell("edge_merge");
-   addbox( { { 0 , 0 } , { 10 , 10 } });
-   select({5,5});
-   addbox( { { 10 , 3 } , { 15 , 7 } });
-   select({13,5});
-   addbox( { { -5 , 3 } , {  0 , 7 } });
-   select({-3,5});
-   addbox( { { 3 , -5 } , { 7 , 0 } });
-   select({5,-3});
-   addbox( { { 3 , 10 } , { 7 , 15 } });
-   select({5,13});
-//   polycut( { { -1 , 6 } , { -1 , 4 } , { 4 , 4 } , { 4 , 5 } , { 0 , 5} , { 0 , 6} });
+void edge_merge2() {
+   newcell("edge_merge2");
+   opencell("edge_merge2");
+   addbox({{0,0} , {10,10}},2);
+   addpoly({{-2,4},{0,4},{0,6},{3,6},{3,-2},{-2,-2}},2);
+   addpoly({{4,3},{4,0},{6,0},{6,-2},{12,-2},{12,3}},2);
+   addpoly({{7,4},{10,4},{10,6},{12,6},{12,12},{7,12}},2);   
+   addpoly({{6,7},{6,10},{4,10},{4,12},{-2,12},{-2,7}},2);
+//   select_all();
 //   merge();
+}
+
+void edge_merge1() 
+{
+   newcell("edge_merge1");
+   opencell("edge_merge1");
+   addbox( { { 0 , 0 } , { 10 , 10 } });
+   addbox( { { 10 , 3 } , { 15 , 7 } });
+   addbox( { { -5 , 3 } , {  0 , 7 } });
+   addbox( { { 3 , -5 } , { 7 , 0 } });
+   addbox( { { 3 , 10 } , { 7 , 15 } });
+   select_all();
+   merge();
 }
 
 
@@ -548,7 +562,7 @@ newdesign("layout_logic");
 //cut_test1A();
 //cut_test2A();
 //cut_test3A();
-cut_test3B();
+//cut_test3B();
 ////cut_test1B();
 //*cut_test2B();
 //merge_test1();
@@ -556,7 +570,8 @@ cut_test3B();
 //merge_test3();
 //merge_test4();
 //edge_cut1();
-//edge_merge();
+//edge_merge1();
+edge_merge2();
 //zoomall();
 
 //opencell("top");
