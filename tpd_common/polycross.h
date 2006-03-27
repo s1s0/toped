@@ -121,7 +121,7 @@ namespace polycross
    {
       public:
          TEvent(byte shapeID) : _shapeID(shapeID) {};
-         virtual void      sweep(XQ&, YQ&) = 0;
+         virtual bool      sweep(XQ&, YQ&, bool) = 0;
          void              insertCrossPoint(TP*, polysegment*, polysegment*, XQ&);
          const TP*         evertex() {return _evertex;}
          byte              shapeID() {return _shapeID;}
@@ -138,7 +138,7 @@ namespace polycross
    {
       public:
          TbEvent(polysegment*, polysegment*, byte);
-         void              sweep(XQ&, YQ&);
+         bool              sweep(XQ&, YQ&, bool);
       private:
          polysegment*      _aseg;
          polysegment*      _bseg;
@@ -151,7 +151,7 @@ namespace polycross
    {
       public:
          TeEvent(polysegment*, polysegment*, byte);
-         void              sweep(XQ&, YQ&);
+         bool              sweep(XQ&, YQ&, bool);
       private:
          polysegment*      _aseg;
          polysegment*      _bseg;
@@ -164,7 +164,7 @@ namespace polycross
    {
       public:
          TmEvent(polysegment*, polysegment*, byte);
-         void              sweep(XQ&, YQ&);
+         bool              sweep(XQ&, YQ&, bool);
       private:
          polysegment*      _tseg1;
          polysegment*      _tseg2;
@@ -178,7 +178,8 @@ namespace polycross
       public:
          TcEvent(TP* ev, unsigned tAID, unsigned tBID): TEvent(0), 
                      _threadAboveID(tAID), _threadBelowID(tBID) {_evertex = ev;}
-         void              sweep(XQ&, YQ&);
+         bool              sweep(XQ&, YQ&, bool);
+         bool        operator == (const TcEvent&) const;
       private:
          unsigned          _threadAboveID;
          unsigned          _threadBelowID;
@@ -193,10 +194,13 @@ namespace polycross
          EventVertex(TEvent*);
          const TP*         operator () () {return _evertex;};
          void              addEvent(TEvent*);
+         void              addCrossEvent(TcEvent*);
          void              sweep(YQ&, XQ&);
       private:
          typedef std::list<TEvent*> Events;
+         typedef std::list<TcEvent*> CrossEvents;
          Events            _events;
+         CrossEvents       _crossevents;
          const TP*         _evertex;
    };
 
@@ -249,6 +253,7 @@ namespace polycross
          SegmentThread*    modifyThread(unsigned, polysegment*);
          SegmentThread*    swapThreads(unsigned, unsigned);
          SegmentThread*    getThread(unsigned);
+         void              report();
       private:
          BottomSentinel*   _bottomSentinel;
          TopSentinel*      _topSentinel;

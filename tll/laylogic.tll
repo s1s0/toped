@@ -413,7 +413,25 @@ void cut_test3A() {
    addpoly({{0,5},{5,0},{10,5},{5,10}},4);
    polycut({{0,5},{5,0},{10,5},{5,10}});
    move({0,0},{15,0});
-}   
+}
+
+void cut_test3B() {
+   newcell("cut_test3B");
+   opencell("cut_test3B");
+//   point list pgon4= {{ -2,  3 },{  0,  3 },{  3, 0 },{  3, -2 },{ 7, -2 },{ 7,  0 }, 
+//                      { 10,  3 },{ 12,  3 },{ 12, 7 },{  1,  7 },{ 7, 10 },{ 7, 12 }, 
+//                      {  3, 12 },{  3, 10 },{  0, 7 },{ -2,  7 }};
+   point list pgon4= { { -2 , 7 } , { 0 , 7 } , { 3 , 10 } , { 3 , 12 } , { 7 , 12 } , 
+                       { 7 , 10 } , { 10 , 7 } , { 12 , 7 } , { 12 , 3 } , { 10 , 3 } , 
+                       { 7 , 0 } , { 7 , -2 } , { 3 , -2 } , { 3 , 0 } , { 0 , 3 } , { -2 , 3 } };
+   point list pgon2= {{0,0},{10,0},{10,10},{0,10}};
+   addpoly(pgon4, 4);
+   select_all();
+   addpoly(pgon2, 2);
+   polycut(pgon2);
+   move({0,0},{15,0});
+}
+   
 
 void cut_test1B() {
    opencell("cell_1");
@@ -527,11 +545,12 @@ newdesign("layout_logic");
 //cut_test5();
 //cut_test6();
 //cut_test7();
-//cut_test1A(); // swipe4bind -> test is bombing-out
+//cut_test1A();
 //cut_test2A();
-//cut_test3A();
+cut_test3A();
+//cut_test3B();
 ////cut_test1B();
-//cut_test2B();
+//*cut_test2B();
 //merge_test1();
 //merge_test2();
 //merge_test3();
