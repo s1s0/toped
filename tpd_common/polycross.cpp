@@ -444,10 +444,14 @@ void polycross::TbEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    if ((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr))
    {
       // neighbours - check the case when left points are also crossing points
-      if ((NULL != CP1A) && ((*CP1A) == *(_aseg->lP())))
+      // this is also the case when one of the input segments coincides with
+      // and existing segment
+      CP1A = _bseg->checkIntersect(athr->threadAbove()->cseg(), eventQ);
+      if ((NULL != CP1A) && ((*CP1A) == *(_bseg->lP())))
          insertCrossPoint(CP1A, athr->threadAbove()->cseg(), _bseg, eventQ);
-      if ((NULL != CP1B) && ((*CP1B) == *(_bseg->lP())))
-         insertCrossPoint(CP1B, _bseg, bthr->threadBelow()->cseg(), eventQ);
+      CP1B = _aseg->checkIntersect(bthr->threadBelow()->cseg(), eventQ);
+      if ((NULL != CP1B) && ((*CP1B) == *(_aseg->lP())))
+         insertCrossPoint(CP1B, _aseg, bthr->threadBelow()->cseg(), eventQ);
    }
    else
    {
@@ -806,16 +810,16 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    if (ori != 0) return ori;
    // if it is still the same => we have coinciding segments
    int order;
-//    if       (*(seg0->rP()) != *(seg1->rP()))
-//       order = xyorder(seg0->rP(), seg1->rP());
-//    else if  (*(seg0->lP()) != *(seg1->lP()))
-//       order = xyorder(seg1->lP(), seg0->lP());
-
-   if       (*(seg0->lP()) != *(seg1->lP()))
-         order = xyorder(seg0->lP(), seg1->lP());
-   else if  (*(seg0->rP()) != *(seg1->rP()))
-      order = xyorder(seg1->rP(), seg0->rP());
-
+   // like that ....
+   if       (*(seg0->rP()) != *(seg1->rP()))
+      order = xyorder(seg0->rP(), seg1->rP());
+   else if  (*(seg0->lP()) != *(seg1->lP()))
+      order = xyorder(seg1->lP(), seg0->lP());
+   // or like that - both ways it should work
+//    if       (*(seg0->lP()) != *(seg1->lP()))
+//          order = xyorder(seg0->lP(), seg1->lP());
+//    else if  (*(seg0->rP()) != *(seg1->rP()))
+//       order = xyorder(seg1->rP(), seg0->rP());
    else
       order = (seg0->edge() > seg1->edge()) ? 1 : -1;
    assert(0 != order);
