@@ -32,7 +32,7 @@
 #include "../tpd_common/polycross.h"
 
 namespace logicop {
-   typedef enum {revent_pri = 0, levent_pri = 1, cevent_pri = 2 } EventPriority;
+   
    class SweepLine;
    class BindCollection;
    class CEvent;
@@ -181,7 +181,6 @@ namespace logicop {
       unsigned          normalize(const TP*, const TP*);
       //! Dump lP and crosspoints in a VPoint list
       void              dump_points(VPoint*&);
-      bool              trivial() const {return (lP == rP);}
       //! keeps track of the edge numbers
       int               edge;
       //! A pointer to the segment left point
@@ -238,13 +237,8 @@ namespace logicop {
    Class does not define neither a default constructor nor destructor */
    class Event {
    public:
-                     Event() :_pending(true){};
       //! Return the event vertex
       virtual const TP* evertex() const = 0;
-      //! Return the oposite vertex (not the event one)
-      virtual const TP* overtex() const = 0;
-      //! Return the event priority
-      virtual const EventPriority epriority() const = 0;
       //! Perform the operations as defined in the Bentley-Ottman algorithm
       virtual void      swipe4cross(SweepLine&, avl_table*) {assert(false);};
       //! Generate binding points of a hole polygon
@@ -255,9 +249,8 @@ namespace logicop {
       virtual int       edgeNo() const = 0;
       //! Check the input crossing event and adds it to the event queue
       void               checkNupdate(avl_table*, plysegment*, plysegment*, 
-                                      CEvent*, bool check=true);
+                                                       CEvent*, bool check=true);
       virtual           ~Event() {};
-      bool              _pending;
    };
    
    //===========================================================================
@@ -269,13 +262,9 @@ namespace logicop {
    class LEvent : public Event {
    public:
       //! The constructor of the left event - it just initialises the #_seg pointer
-                         LEvent(plysegment* seg) : Event(), _seg(seg) {};
+                         LEvent(plysegment* seg) : _seg(seg) {};
       //! Return the event vertex
-      const TP*          evertex() const {return _seg->lP;}
-      //! Return the oposite vertex (not the event one)
-      const TP*          overtex() const {return _seg->rP;}
-      //! Return the event priority
-      const EventPriority epriority() const {return levent_pri;}
+      const TP*          evertex() const {return _seg->lP;};
       //! Perform the operations as defined by Bentley-Ottman for left point
       void               swipe4cross(SweepLine&, avl_table*);
       //! Perform the operations for binding point generation
@@ -298,13 +287,9 @@ namespace logicop {
    class REvent : public Event {
    public:
       //! The constructor of the right event - it just initialises the #_seg pointer
-                         REvent(plysegment* seg) : Event(), _seg(seg) {};
+                         REvent(plysegment* seg) : _seg(seg) {};
       //! Return the event vertex
       const TP*          evertex() const {return _seg->rP;};
-      //! Return the oposite vertex (not the event one)
-      const TP*          overtex() const {return _seg->lP;}
-      //! Return the event priority
-      const EventPriority epriority() const {return revent_pri;}
       //! Perform the operations as defined by Bentley-Ottman for right point
       void               swipe4cross(SweepLine&, avl_table*);
       //! Perform the operations for binding point generation
@@ -328,13 +313,8 @@ namespace logicop {
    public:
       //! The cross event constructor
                          CEvent(plysegment*, plysegment*);
-                         CEvent(plysegment*, plysegment*, const TP*, bool);
       //! Return the event vertex - in this case cross point
       const TP*          evertex() const {return _cp;};
-      //! Return the oposite vertex (not the event one)
-      const TP*          overtex() const {return NULL;}
-      //! Return the event priority
-      const EventPriority epriority() const {return cevent_pri;}
       //! Perform the operations as defined by Bentley-Ottman for cross point
       void               swipe4cross(SweepLine&, avl_table*);
       //! Return -1 as polygon number for the cross event
@@ -342,18 +322,14 @@ namespace logicop {
       //! Return -1 as edge number for the cross event
       int                edgeNo() const {return -1;};
       //! Return a pointer to the crossing point #_cp
-//      TP*                cp() const {return _cp;};
-      bool               swaponly() const {return _swaponly;}
-      const plysegment*  below() const {return _below;}
-      const plysegment*  above() const {return _above;}
-      protected:
+      TP*                cp() const {return _cp;};
+   protected:   
+      //! A pointer to the crossing point produced by the #_above/#_below pair of polygon segments
+      TP*               _cp;
       //! A pointer to the first crossing segment
       plysegment*       _above;
       //! A pointer to the second crossing segment
       plysegment*       _below;
-      bool              _swaponly;
-      //! A pointer to the crossing point produced by the #_above/#_below pair of polygon segments
-      TP*               _cp;
    };
 
    //===========================================================================
@@ -395,7 +371,7 @@ namespace logicop {
    class SweepLine {
    public:
       //! Default and the only constructor
-                        SweepLine(const pointlist&, const pointlist&);
+                        SweepLine();
       //! The destructor of the sweep line
                        ~SweepLine(); 
       //!Add a segment to the sweep line
@@ -407,26 +383,17 @@ namespace logicop {
       //!Perform the swap of the input segments
       void              swap(plysegment*&, plysegment*&);
       //! set the _current_param
-      void              set_curE(const Event* cE) {_curE = cE;};
+      void              set_currentP(const TP* cP) {_curP = *cP;};
    private:
       //!The callback function used as a sort creteria by the AVL tree
       static int        compare_seg(const void*, const void*, void*);
       //!Determines the lexicographical order of two points comparing Y first. 
       static int        yxorder(const TP*, const TP*);
-      static int        orientation(const TP*, const TP*, const TP*);
-      const TP*         joiningSegments(plysegment*, plysegment*, float, float);
-      CEvent*           oneLineSegments(plysegment*, plysegment*);
-//      CEvent*           coinsideCheck(plysegment*, plysegment*, float, float);
-      float             getLambda( const TP*, const TP*, const TP*);
-      TP*               getMiddle(const TP*, const TP*);
-
       //! An AVL tree structure containing the segments currently in the sweep line
       avl_table*        _tree;
       //!Current x position of the sweep line
-      static const Event*     _curE;
-      const  pointlist  _plist0;
-      const  pointlist  _plist1;
-   };
+      static TP   _curP;
+   };     
          
    typedef std::list<pointlist*> pcollection; // point list collection
    //===========================================================================

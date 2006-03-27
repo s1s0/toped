@@ -33,24 +33,11 @@
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/outbox.h"
 
-#define BO_DEBUG
-#define BO_print(a) printf("Event %s :segment %i, polygon %i, lP (%i,%i), rP (%i,%i)  \n" , \
-#a, _seg->edge, _seg->polyNo , _seg->lP->x(), _seg->lP->y(), _seg->rP->x(),_seg->rP->y());
-
-#define BO_above_below \
-if (NULL != _seg->above)\
-   printf("---above: %i(%i)\n", _seg->above->edge, _seg->above->polyNo);\
-else\
-   printf("---above: NULL\n");\
-if (NULL != _seg->below)\
-   printf("---below: %i(%i)\n", _seg->below->edge, _seg->below->polyNo);\
-else\
-   printf("---below: NULL\n");
 //-----------------------------------------------------------------------------
 // The declaratoin of the avl related functions. They are declared originally
 // in avl.h and redeclared here in C++ manner with extern "C" clause
 extern "C" {
-   avl_table* avl_create (avl_comparison_func *, const void *, libavl_allocator *);
+   avl_table* avl_create (avl_comparison_func *, void *, libavl_allocator *);
    void       avl_destroy (struct avl_table *, avl_item_func *);
    void*      avl_t_next (avl_traverser *);
    void*      avl_t_prev (avl_traverser *);
@@ -60,7 +47,7 @@ extern "C" {
    void*      avl_t_first (avl_traverser *, avl_table *);
    void*      avl_t_replace (avl_traverser *, void *);
 }   
-   const logicop::Event*  logicop::SweepLine::_curE = NULL;
+   TP   logicop::SweepLine::_curP;
 
 //==============================================================================
 /*! Determines the lexicographical order of two points comparing X first. 
@@ -104,19 +91,16 @@ Count the number of times that ray crosses the polygon boundary edges. If this
 number is odd or 1 - means that the point is inside, if it is even or 0 - point
 is outside.
  */
-bool logicop::VPoint::inside(const pointlist& plist)
-{
+bool logicop::VPoint::inside(const pointlist& plist) {
    TP p0, p1;
    byte cc = 0;
    unsigned size = plist.size();
-   for (unsigned i = 0; i < size ; i++)
-   {
+   for (unsigned i = 0; i < size ; i++) {
       p0 = plist[i]; p1 = plist[(i+1) % size];
-      if (((p0.y() <= _cp->y()) && (p1.y() >=  _cp->y()))
-        ||((p0.y() >=  _cp->y()) && (p1.y() <= _cp->y())) )
-      {
+      if (((p0.y() <= _cp->y()) && (p1.y() >  _cp->y())) 
+        ||((p0.y() >  _cp->y()) && (p1.y() <= _cp->y())) ) {
          float tngns = (float) (_cp->y() - p0.y())/(p1.y() - p0.y());
-         if (_cp->x() <= p0.x() + tngns * (p1.x() - p0.x()))
+         if (_cp->x() < p0.x() + tngns * (p1.x() - p0.x()))
             cc++;
       }
    }
@@ -134,7 +118,7 @@ logicop::VPoint* logicop::VPoint::follower(bool& direction, bool) {
 //-----------------------------------------------------------------------------
 /*! The actual #CPoint objects are created during the Bentley-Ottmann algorithm
 when a crossing point is digitized (in plysegment::insertcrosspoint() method)
-At that time this object can not be linked properly in a #VPoint list at least
+At this time this object can not be linked properly in a #VPoint list at least
 because plysegments are not normalized yet. That is why they must be re-linked
 afterwards during plysegment::dump_points(). This method is doing the job*/
 void logicop::CPoint::linkage(VPoint*& prev) {
@@ -190,7 +174,6 @@ logicop::plysegment::plysegment(const TP* p1, const TP* p2, int num, char plyn) 
    above = below = NULL;
    edge = num;
    polyNo = plyn;
-//   _processed = false;
 }
 /*! The method creates a new #CPoint object from the input pnt and adds it to the 
 crosspoints array. The input point is assumed to be unique. Method is called by
@@ -341,31 +324,25 @@ new polygons.\n
 I am stil not sure that this class is the best place for this method - just see
 the number of the input parameters*/
 void logicop::Event::checkNupdate(avl_table* EQ, plysegment* above, 
-                                  plysegment* below, CEvent* evt, bool check)
-{
+                                  plysegment* below, CEvent* evt, bool check) {
    avl_traverser trav;
    bool insert;
-   if (check)
-   {
+   if (check) {
       void* retitem =  avl_t_find(&trav, EQ, evt);
       insert = (NULL == retitem);
    }
    else insert = true;
-   if (insert)
-   {
+   if (insert) {
       void* retitem = avl_t_insert(&trav,EQ,evt);
       assert(retitem == evt);
-      if  (!evt->swaponly())
-      {
-         CPoint* cpsegA = above->insertcrosspoint(evt->evertex());
-         CPoint* cpsegB = below->insertcrosspoint(evt->evertex());
-         cpsegA->linkto(cpsegB);
-         cpsegB->linkto(cpsegA);
-      }
+      CPoint* cpsegA = above->insertcrosspoint(evt->cp());
+      CPoint* cpsegB = below->insertcrosspoint(evt->cp());
+      cpsegA->linkto(cpsegB);
+      cpsegB->linkto(cpsegA);
    }
-   else delete evt;
+   else 
+      delete evt;   
 }
-
 //-----------------------------------------------------------------------------
 // class LEvent
 //-----------------------------------------------------------------------------
@@ -375,10 +352,6 @@ checked for crossing points with its neighbours*/
 void logicop::LEvent::swipe4cross(SweepLine& SL, avl_table* EQ) {
    SL.add(_seg);
    CEvent* evt;
-#ifdef BO_DEBUG
-BO_print(ENTER)
-BO_above_below
-#endif
    if ((evt = SL.intersect(_seg->above, _seg))) 
       checkNupdate(EQ, _seg->above, _seg, evt,false);
    if ((evt = SL.intersect(_seg, _seg->below)))
@@ -410,10 +383,6 @@ segment from the SweepLine, after checking its above/below neightbours for
 crossing. */
 void logicop::REvent::swipe4cross(SweepLine& SL, avl_table* EQ) {
    CEvent* evt;
-#ifdef BO_DEBUG
-BO_print(EXIT)
-BO_above_below
-#endif
    if ((evt = SL.intersect(_seg->above, _seg->below))) 
       checkNupdate(EQ, _seg->above, _seg->below, evt);
    SL.remove(_seg);
@@ -448,9 +417,8 @@ is taken for division by 0 case when A or B coefficients are 0. It
 is important to note as well that the calculations must be done in floting
 point expressions, otherwise the hell might brake loose.
 */
-logicop::CEvent::CEvent(plysegment* above, plysegment* below) :
-      Event(), _above(above), _below(below), _swaponly(false)
-{
+logicop::CEvent::CEvent(plysegment* above, plysegment* below) : _above(above), 
+                                                                _below(below){
    real A1 = _above->rP->y() - _above->lP->y();
    real A2 = _below->rP->y() - _below->lP->y();
    real B1 = _above->lP->x() - _above->rP->x();
@@ -463,13 +431,11 @@ logicop::CEvent::CEvent(plysegment* above, plysegment* below) :
    // segments will coinside if    A1/A2 == B1/B2 == C1/C2
    // segments will be paraller if A1/A2 == B1/B2 != C1/C2
    real X,Y;
-   if ((0 != A1) && (0 != B2))
-   {
+   if ((0 != A1) && (0 != B2)) {
       X = - ((C1 - (B1/B2) * C2) / (A1 - (B1/B2) * A2));
       Y = - ((C2 - (A2/A1) * C1) / (B2 - (A2/A1) * B1));
    }   
-   else if ((0 != B1) && (0 != A2))
-   {
+   else if ((0 != B1) && (0 != A2)) {
       X = - (C2 - (B2/B1) * C1) / (A2 - (B2/B1) * A1);
       Y = - (C1 - (A1/A2) * C2) / (B1 - (A1/A2) * B2);
    }
@@ -477,28 +443,13 @@ logicop::CEvent::CEvent(plysegment* above, plysegment* below) :
    _cp = new TP((int)rint(X),(int)rint(Y));
 }
 
-logicop::CEvent::CEvent(plysegment* above, plysegment* below, const TP* cp, bool swo) :
-      Event(), _above(above), _below(below), _swaponly(swo), _cp(new TP(*cp))
-{
-}
-
-
 /*! Implements Bentley-Ottmann operations for cross point event. Swaps the 
 above/below segments first calling SweepLine::swap() and then checks the 
 segment pair for new crossing points with their new neightbours*/
 void logicop::CEvent::swipe4cross(SweepLine& SL, avl_table* EQ) {
-   // swap the place of the segments, unless the cross points
-   // is an edge of a certain segment
-#ifdef BO_DEBUG
-printf("Event CROSS: Segment above %i(%i); Segment below %i(%i), point (%i,%i)\n",
-       _above->edge, _above->polyNo, _below->edge, _below->polyNo, _cp->x(), _cp->y());
-#endif
+   // first swap the place of the segments
    SL.swap(_above, _below);
    CEvent* evt;
-#ifdef BO_DEBUG
-printf(" Segments above/below SWAPPED\n");
-#endif
-   // check for crossing points between the new neighbours after the swap
    if ((evt = SL.intersect(_above->above, _above)))
       checkNupdate(EQ, _above->above, _above, evt);
    if ((evt = SL.intersect(_below, _below->below)))
@@ -543,69 +494,15 @@ way. Program will bomb out here if a new event has not been inserted properly.
 Some kind of try-catch mechanism should be implemented.*/
 void logicop::EventQueue::swipe4cross(SweepLine& SL) {
 // see the comment around find parameter in the E_compare
-#ifdef BO_DEBUG
-      printf("***************** START SWIPING ******************\n");
-#endif
    Event* evt;
    avl_traverser trav;
    avl_t_first(&trav,_equeue);
    while (trav.avl_node != NULL) {
       evt = (Event*)trav.avl_node->avl_data;
-      SL.set_curE(evt);
-      evt->_pending = false;
-#ifdef BO_DEBUG
-      printf("______________ POINT = ( %i , %i ) ___________\n", evt->evertex()->x(), evt->evertex()->y());
-#endif
-      // look ahead to deal with the Cross points generated on top of the
-      // right points
-      bool bypass_event = false;
-      if (logicop::cevent_pri == evt->epriority())
-      {
-         avl_traverser forw_trav = trav;
-         avl_t_next(&forw_trav);
-         if (NULL != forw_trav.avl_node)
-         {
-            Event* nextevt = (Event*)forw_trav.avl_node->avl_data;
-            while (*(evt->evertex()) == *(nextevt->evertex()))
-            {
-               if (logicop::revent_pri == nextevt->epriority())
-               {
-                  bypass_event = true;
-                  break;
-               }
-               avl_t_next(&forw_trav);
-               if (NULL == forw_trav.avl_node) break;
-               nextevt = (Event*)forw_trav.avl_node->avl_data;
-            }
-         }
-      }
-      if (!bypass_event)
-         evt->swipe4cross(SL, _equeue);
-      
-      //Dealing with the Cross points generated on top of the Left points
-      if (logicop::levent_pri == evt->epriority())
-      {
-         avl_traverser back_trav = trav;
-         avl_t_prev(&back_trav);
-         if (NULL != back_trav.avl_node)
-         {
-            Event* prevevt = (Event*)back_trav.avl_node->avl_data;
-            while (*(evt->evertex()) == *(prevevt->evertex()))
-            {
-               if ((logicop::cevent_pri == prevevt->epriority()) && prevevt->_pending)
-               {
-                  prevevt->_pending = false;
-                  prevevt->swipe4cross(SL, _equeue);
-                  break;
-               }
-               avl_t_prev(&back_trav);
-               if (NULL == back_trav.avl_node) break;
-               prevevt = (Event*)back_trav.avl_node->avl_data;
-            }
-         }
-      }
+      SL.set_currentP(evt->evertex());
+      evt->swipe4cross(SL, _equeue);
       avl_t_next(&trav);
-   }
+   }   
 }
 
 void logicop::EventQueue::swipe4bind(SweepLine& SL, BindCollection& BC) {
@@ -614,7 +511,7 @@ void logicop::EventQueue::swipe4bind(SweepLine& SL, BindCollection& BC) {
    avl_t_first(&trav,_equeue);
    while (trav.avl_node != NULL) {
       evt = (Event*)trav.avl_node->avl_data;
-      SL.set_curE(evt);
+      SL.set_currentP(evt->evertex());
       evt->swipe4bind(SL, BC);
       avl_t_next(&trav);
    }   
@@ -651,33 +548,10 @@ the polygons we are processing (non-selfcrossing, simple) can't have two pair
 of segments crossing at the same point. It seems so obvious to me, because if 
 four segments are crossing the same point then every two of them will cross each
 other - i.e. both input polygons will be self-crossing */
-int logicop::EventQueue::E_compare( const void* v1, const void* v2, void*)
-{
+int logicop::EventQueue::E_compare( const void* v1, const void* v2, void*) {
    Event*  pe1 = (Event*)v1;
    Event*  pe2 = (Event*)v2;
-   int result =  logicop::xyorder(pe1->evertex(),pe2->evertex());
-   if (0 != result) return result;
-
-//   if (pe1->_pending != pe2->_pending)
-//      return (pe1->_pending) ? 1 : -1;
-   // if the event vertexes are equal, sort them by event priority
-   // eporiority 0 is bigger than epriority 1
-   if (pe1->epriority() != pe2->epriority())
-      return (pe1->epriority() > pe2->epriority()) ? -1 : 1;
-   // appears that we have same events with the same event vertexes,
-   // so we'll try to sort them by their opposite vertices
-   // but just in case that's not cross-event
-   if (logicop::cevent_pri == pe1->epriority()) return 0;
-   result = logicop::xyorder(pe1->overtex(),pe2->overtex());
-   if (0 != result) return result;
-   // if still here -> these should be coinciding edges of different
-   // polygons, so let's compare the polygon numbers
-   if (pe1->polyNo() != pe2->polyNo())
-      return (pe1->polyNo() > pe2->polyNo()) ? 1 : -1;
-   else
-      return 0;
-   //
-/*   // first compare the points
+   // first compare the points
    int result =  logicop::xyorder(pe1->evertex(),pe2->evertex());
    if (result != 0) return result;
    // if they are equal, sort them by the polygon index
@@ -686,8 +560,10 @@ int logicop::EventQueue::E_compare( const void* v1, const void* v2, void*)
    // if they belong to the same polygon, sort them by edge number
    if (pe1->edgeNo() != pe2->edgeNo())
       return (pe1->edgeNo() > pe2->edgeNo()) ? -1 : 1;
-   return 0;*/
-}
+//   if (pe1->eventType() != pe2->eventType())
+//      return (pe1->eventType() > pe2->eventType()) ? -1 : 1;
+   return 0;
+ }
  
 /*! avl_destroy call this function for every item in the tree.*/
 void logicop::EventQueue::destroy_event(void* item, void*) {
@@ -705,11 +581,9 @@ logicop::EventQueue::~EventQueue() {
 //-----------------------------------------------------------------------------
 /*! The only valuable thing done during construction is the initialisation of the 
 AVL tree */ 
-logicop::SweepLine::SweepLine(const pointlist& plist0, const pointlist& plist1) :
-      _plist0(plist0), _plist1(plist1)
-{
-    _tree = avl_create(compare_seg, &_curE, NULL);
-}
+logicop::SweepLine::SweepLine(){
+    _tree = avl_create(compare_seg, &_curP, NULL);
+}    
 
 /*!The AVL tree is detroyed here. The segment members are not destroyed here, they 
 will be used later to gather the cross points*/
@@ -744,7 +618,6 @@ void logicop::SweepLine::remove(plysegment* seg) {
    plysegment* np = (plysegment*)avl_t_prev(&trav);
    if (NULL != np) np->above = seg->above;
    avl_delete(_tree,seg);
-//   seg->_processed = true;
 }
 /*!
 The method is using isLeft() function to do the job. Segments that belong to 
@@ -758,401 +631,126 @@ logicop::CEvent* logicop::SweepLine::intersect(plysegment* above, plysegment* be
    if (above->polyNo == below->polyNo)  return NULL;
    // Now test for intersection point exsistence
    float lsign, rsign, rlmul;
-   //check that both below endpoints are on the same side of above segment
    lsign = isLeft(above->lP, above->rP, below->lP);
    rsign = isLeft(above->lP, above->rP, below->rP);
-   // do the case when both segments lie on the same line
-   if ((lsign == 0) && (rsign == 0)) return oneLineSegments(above, below);
+   //check that both s2 endpoints are on the same side of s1
    rlmul = lsign*rsign;
-   if      (0  < rlmul)  return NULL;// not crossing
-   if (0 == rlmul)
-   {
-      const TP* crossPoint = joiningSegments(above, below, lsign, rsign);
-      if (NULL != crossPoint)
-         return new CEvent(above, below, crossPoint, false);
-      else return NULL;
+   if      (0  < rlmul)  return NULL;
+   else if (0 == rlmul) {
+      int boza = 1;
+      boza++;
+      return NULL;
    }
-   //now check that both above endpoints are on the same side of below segment
    lsign = isLeft(below->lP, below->rP, above->lP);
    rsign = isLeft(below->lP, below->rP, above->rP);
-   // lsign == rsign == 0 case here should not be possible
-   assert(!((lsign == 0) && (rsign == 0)));
+   //check that both s1 endpoints are on the same side of s2
    rlmul = lsign*rsign;
-   if      (0  < rlmul) return NULL;
-   if (0 == rlmul)
-   {
-      const TP* crossPoint = joiningSegments(below, above, lsign, rsign);
-      if (NULL != crossPoint)
-         return new CEvent(above, below, crossPoint, false);
-      else return NULL;
+   if      (0  < rlmul)  return NULL;
+   else if (0 == rlmul) {
+      int boza = 1;
+      boza++;
+      return NULL;
    }
    // at this point - the only possibility is that they intersect
    // so - create a cross event 
    return new CEvent(above,below);
 }
 
-const TP* logicop::SweepLine::joiningSegments(plysegment* line,
-      plysegment* cross, float lps, float rps)
-{
-   // getLambda returns : < 0  the point is outside the segment
-   //                     = 0  the point coinsides with one of the
-   //                          segment endpoints
-   //                     > 0  the point is inside the segment
-   if (0 == lps)
-   {
-      if (0 >= getLambda(line->lP, line->rP, cross->lP)) return NULL;
-      else return cross->lP;
-   }
-   else if(0 == rps)
-   {
-      if (0 >= getLambda(line->lP, line->rP, cross->rP)) return NULL;
-      else return cross->rP;
-   }
-   assert(false);
-}
 
-logicop::CEvent* logicop::SweepLine::oneLineSegments(plysegment* above,
-      plysegment* below)
-{
-   float lambdaL = getLambda(above->lP, above->rP, below->lP);
-   float lambdaR = getLambda(above->lP, above->rP, below->rP);
-   // coinsiding vertexes - not dealing with them at the moment YET!
-   if (0 == lambdaL * lambdaR) return NULL;
-   bool swaped = false;
-   // first of all cases when neither of the lines is enclosing the other one
-   // here we are generating "hidden" cross point, right in the moddle of their
-   // coinsiding segment
-   if ((lambdaL < 0) && (lambdaR > 0))
-      return new CEvent(above, below, getMiddle(above->lP, below->rP), false);
-   if ((lambdaL > 0) && (lambdaR < 0))
-      return new CEvent(above, below, getMiddle(below->lP, above->rP), false);
-   if ((lambdaL < 0) && (lambdaR < 0))
-   {
-      // below edge points are outside the above segment, this however
-      // could mean that below fully encloses above
-      lambdaL = getLambda(below->lP, below->rP, above->lP);
-      lambdaR = getLambda(below->lP, below->rP, above->rP);
-      if ((lambdaL < 0) && (lambdaR < 0)) return NULL;
-      swaped = true;
-   }
-   // now the cases when one of the lines encloses fully the other one
-   plysegment* outside = swaped ? below : above;
-   plysegment* inside  = swaped ? above : below;
-   // get the original polygon to which enclosed segment belongs to
-   const pointlist& insideP = (0 == (swaped ?  above->polyNo : below->polyNo)) ?
-         _plist0 : _plist1;
-   // ... and get the locate the inside segment in that sequence
-   unsigned indxLP = (*(inside->lP) == insideP[inside->edge]) ? inside->edge : inside->edge + 1;
-   unsigned indxRP = (*(inside->rP) == insideP[inside->edge]) ? inside->edge : inside->edge + 1;
-   // make sure they are not the same
-   assert(indxLP != indxRP);
-
-   // we'll pickup the neighbouring point(s) of the inside segment and will
-   // recalculate the lps/rps for them.
-   int numv = insideP.size();
-   bool indxpos = indxLP > indxRP;
-   float lps, rps;
-   do
-   {
-      // the code below just increments/decrements the indexes in the point sequence
-      // they look so weird, to keep the indexes within [0:_numv-1] boundaries
-      if (0 == lps)
-         if (indxpos) indxLP = ++indxLP % numv;
-      else (0==indxLP) ? indxLP = numv-1 : indxLP--;
-      if (0 == rps)
-         if (!indxpos) indxRP = ++indxRP % numv;
-      else (0==indxRP) ? indxRP = numv-1 : indxRP--;
-      // calculate lps/rps with the new points
-      lps = isLeft(outside->lP, outside->rP, &insideP[indxLP]);
-      rps = isLeft(outside->lP, outside->rP, &insideP[indxRP]);
-   } while (0 == (lps * rps));
-   // In all cases an event is introduced here. When segments are just touching - no
-   // cross point, but segments still have to be swapped to keep AVL segment tree
-   // healthy.
-   // When segments are crossing (because of the direction of their neightbours), then
-   // a real crossing point is introduced.
-   // In both cases the even is calculated in the midle of the internal segment
-   return new CEvent(above, below, getMiddle(inside->lP, inside->rP), (lps*rps > 0) ? true : false);
-}
-
-
-TP* logicop::SweepLine::getMiddle(const TP* p1, const TP* p2)
-{
-   int4b x = (p2->x() + p1->x()) / 2;
-   int4b y = (p2->y() + p1->y()) / 2;
-   return new TP(x,y);
-}
-
-float logicop::SweepLine::getLambda( const TP* p1, const TP* p2, const TP* p)
-{
-   float denomX = p2->x() - p->x();
-   float denomY = p2->y() - p->y();
-   float lambda;
-   if      (0 != denomX) lambda = (p->x() - p1->x()) / denomX;
-   else if (0 != denomY) lambda = (p->y() - p1->y()) / denomY;
-   // point coincides with the lp vertex of the segment
-   else lambda = 0;
-   return lambda;
-}
-
-/*! Compare function can be called by the AVL in 3 cases:
-   - Insert -> then we have a Left event and a new segment has to be fitted
-               into the tree
-   - Cross  -> in this case we're doing search of already existing segments
-               in the database
-   - Remove -> on right event we have to find the segment to remove
-
-   In all cases - the o1 parameter contains the target segment and the current
-   point is a part of that segment. Then we can  adopt the following strategy
-   - use the orienttation test (current point towards segment 1) as universal
-     criteria. The result of that test will be 0 for cross points, but also for
-     coinsiding and touching cases
-   - Current point lies on segment 1 as well, then check before all that the
-     segments don't have the same orientation - i.e. that they do not coincide.
-     If the segments don't coincide, then:
-     -- if current point is a left point of o0(segment 0) extend the segment 0
-        left point with epsilon (i.e. move the left point of the segment 0) and
-        test the orientation once again
-     -- if current point is cross point of o0 (segment 0) use seg0.leftPoint
-        instead of current point to test the orientation
-     -- if current point is a right point of segment 0, then:
-        --- for cross events - use seg0.left Point
-        --- for right events - extend seg0.rightPoint with epsilon and test the
-            orientation once again
-     If the segments coinside, then:
-     -- for left and cross events - check which left point is closer to the
-        current point.
-     -- for right events - check which right point is  closer to the current point
-*/
-int logicop::SweepLine::compare_seg(const void* o0, const void* o1, void* param) {
-   Event** curE = static_cast<Event**>(param);
-   const TP* curP = (*curE)->evertex();
-   const TP* opoP = (*curE)->overtex();
-   const plysegment* seg0 = (plysegment*)o0;
-   const plysegment* seg1 = (plysegment*)o1;
+/*! It is clear, that segements has to be sorted vertically, but
+it is far from obvious (to me) what does it means.  Function checks whether 
+the input two segments belong to the same polygon and if so, it is calling 
+yxorder() function for left points first. If they coincide, yxorder is called
+ for the right points.\n
+If segments belong to different polygons, then isLeft() function is called 
+again for left points first and if they coincide - for the right points 
+of the segements. \n
+Function returns 1 if o1 is above o2 and -1 otherwise. Function must be 
+declared as static, otherwise can not be used as a callback*/
+int logicop::SweepLine::compare_seg(const void* o1, const void* o2, void* param) {
+   TP* curP = (TP*)param;
+   const plysegment* seg0 = (plysegment*)o1;
+   const plysegment* seg1 = (plysegment*)o2;
    // first check that we are comparing one and the same segments,
    // and return equal immediately
    if ((seg0->polyNo == seg1->polyNo) && (seg0->edge == seg1->edge))
       return 0;
-   //
-   int ori;
-   ori = orientation(seg1->lP, seg1->rP, curP);
-   if (ori != 0) return ori;
-   // OK, curP lies on seg1 as well. Before all take care of the segments
-   // belonging to the same polygon - sort them using the opposite point of seg0
-   if (seg0->polyNo == seg1->polyNo)
-   {
-      // Here we use the condition that input polygons can't be self-crossing
-      assert(NULL != opoP);
-      if ((*curP) == (*seg1->lP))
-         ori = -orientation(seg0->lP, seg0->rP, seg1->rP);
-      else 
-         ori = -orientation(seg0->lP, seg0->rP, seg1->lP);
-      assert(ori != 0);
-      return ori;
-   }
-   // check that segments doesn't overlap
-   bool ovl;
-   if (NULL != opoP) ovl = (0 == orientation(seg1->lP, seg1->rP, opoP));
-   else ovl = ( (0 == orientation(seg1->lP, seg1->rP, seg0->lP)) &&
-                (0 == orientation(seg1->lP, seg1->rP, seg0->rP))     );
-   if (!ovl)
-   {// non overlapping, different polygons, edge points case
-      if       (logicop::levent_pri == (*curE)->epriority())
-         // left event - the segments will be swapped by the following cross event
-         ori = -orientation(seg1->lP, seg1->rP, seg0->rP);
-      else if (logicop::revent_pri == (*curE)->epriority())
-         // right event - at this moment the segments should be already swapped
-         ori = -orientation(seg1->lP, seg1->rP, seg0->lP);
+   // Then get the current Y of both segments using their line equations
+   real dX0 = seg0->rP->x() - seg0->lP->x();
+   real dX1 = seg1->rP->x() - seg1->lP->x();
+   real dY0 = seg0->rP->y() - seg0->lP->y();
+   real dY1 = seg1->rP->y() - seg1->lP->y();
+   real Y0, Y1;
+   if (dX0 != 0) 
+      Y0 = (dY0/dX0)*(curP->x() - seg0->lP->x()) + seg0->lP->y();
+   else Y0 = curP->y();
+   if (dX1 != 0) 
+      Y1 = (dY1/dX1)*(curP->x() - seg1->lP->x()) + seg1->lP->y();
+   else Y1 = curP->y();
+   // if we've got different Y's - great!    
+   if (Y0 != Y1)  return (Y0 > Y1) ? 1 : -1;
+   // Calculated Y coordinaes are the same, so lets the fun begin
+   typedef enum{leftP, crossP, rightP} entry_PT;
+   entry_PT seg0_PT, seg1_PT;
+   // first of all get a clear idea what the crossP is to both 
+   // segments - it is lP, rP, or somewhere in the middle
+   if       ((*curP) == (*seg0->lP)) seg0_PT = leftP;
+   else if ((*curP) == (*seg0->rP)) seg0_PT = rightP;
+   else                             seg0_PT = crossP;
+   if       ((*curP) == (*seg1->lP)) seg1_PT = leftP;
+   else if ((*curP) == (*seg1->rP)) seg1_PT = rightP;
+   else                             seg1_PT = crossP;
+   // Having done this, check all the possibilities...
+   int4b compare;
+   if       ((leftP == seg0_PT) && (leftP == seg1_PT)) 
+      // lP/lP -> compare rP/rP
+      compare = yxorder(seg0->rP, seg1->rP);
+   else if ((rightP == seg0_PT) && (rightP == seg1_PT))
+      // rP/rP -> compare lP/lP
+      compare = yxorder(seg0->lP, seg1->lP);
+   else if ((leftP == seg0_PT) && (rightP == seg1_PT))
+      // lP/rP -> compare rP/rP
+      compare = yxorder(seg0->rP, seg1->rP);
+   else if ((rightP == seg0_PT) && (leftP == seg1_PT))
+      // rP/lP -> compare rP/rP
+      compare = yxorder(seg0->rP, seg1->rP);
+   else if ((crossP == seg0_PT) && (crossP == seg1_PT))
+      // two crossing points - here the fun is even bigger
+      if       (0 == dX0)
+         // if seg0 is vertical -> compare its lP with current point
+         compare = yxorder(seg0->lP, curP);
+      else if (0 == dX1)
+         // if seg1 is vertical -> compare its lP with current point
+         compare = yxorder(curP, seg1->lP);
       else
-      {// it's a cross event - so get a clear picture where it is exactly
-         // segments are about to be swapped
-         if       ((*curP) == (*seg0->lP))
-            // cross point, but coincides with the left point - as left event above
-            ori = -orientation(seg1->lP, seg1->rP, seg0->rP);
-         else if ((*curP) == (*seg0->rP))
-            // cross point, but coincides with the right point
-            ori =  orientation(seg1->lP, seg1->rP, seg0->lP);
-         else
-            // regular cross event - use the left point
-            ori =  orientation(seg1->lP, seg1->rP, seg0->lP);
+         // if none of them is vertical -> compare lP/lP
+         compare = yxorder(seg0->lP, seg1->lP);
+   else if ((crossP == seg0_PT) || (crossP == seg1_PT)) {
+      if   (0 == (compare = yxorder(seg0->rP, seg1->rP)))
+         compare = yxorder(seg0->lP, seg1->lP);
+   }
+//   else if ((crossP == seg0_PT) && (leftP == seg1_PT))
+//      compare = yxorder(seg0->rP, seg1->rP);
+//   else if ((leftP == seg0_PT) && (crossP == seg1_PT))
+//      compare = yxorder(seg0->rP, seg1->rP);
+//   else if ((crossP == seg0_PT) && (rightP == seg1_PT))
+//      compare = yxorder(seg0->lP, seg1->lP);
+//   else if ((rightP == seg0_PT) && (crossP == seg1_PT))
+//      compare = yxorder(seg0->lP, seg1->lP);
+   else assert(0);
+   if (0 == compare) {
+      // at this point it appears that the two segments are identical,
+      // so sort them by polygon or segment number 
+      assert((*(seg0->lP) == *(seg1->lP)) && (*(seg0->rP) == *(seg1->rP)));
+      if (seg0->polyNo != seg1->polyNo) 
+         compare = (seg0->polyNo > seg1->polyNo) ? 1 : -1;
+      else {
+         assert(seg0->edge != seg1->edge);
+         compare = (seg0->edge > seg1->edge) ? 1 : -1;
       }
-      assert (0 != ori);
-      return (ori);
-   }
-   else
-   {// segments from different polygons - coincide
-      assert(false);
-   }
-
-   
-/*   int oriL, oriR;
-   orientation(seg1->lP, seg1->rP, seg0->rP);
-   else if (curP == seg1->lP) ori = orientation(seg0->lP, seg0->rP, curP);
-   else
-      assert(false);
-   if ((ori != 0) || seg1->trivial() || seg1->trivial()) return ori;
-   // if it is a crossing point -> compare the slope
-   ori = orientation(seg1->lP, seg1->rP, seg0->rP);
-   if (ori != 0) return ori;
-   // if it is still the same => we have coinciding segments
-   assert(false);*/
+   }   
+   return compare;      
 }
-
-///*! It is clear, that segements has to be sorted vertically, but
-//it is far from obvious (to me) what does it means.  Function checks whether 
-//the input two segments belong to the same polygon and if so, it is calling 
-//yxorder() function for left points first. If they coincide, yxorder is called
-// for the right points.\n
-//If segments belong to different polygons, then isLeft() function is called 
-//again for left points first and if they coincide - for the right points 
-//of the segements. \n
-//Function returns 1 if o1 is above o2 and -1 otherwise. Function must be 
-//declared as static, otherwise can not be used as a callback*/
-// int logicop::SweepLine::compare_seg(const void* o1, const void* o2, void* param) {
-//    Event** curE = static_cast<Event**>(param);
-//    const TP* curP = (*curE)->evertex();
-//    const plysegment* seg0 = (plysegment*)o1;
-//    const plysegment* seg1 = (plysegment*)o2;
-//    // first check that we are comparing one and the same segments,
-//    // and return equal immediately
-//    if ((seg0->polyNo == seg1->polyNo) && (seg0->edge == seg1->edge))
-//       return 0;
-//    // Then get the current Y of both segments using their line equations
-//    real dX0 = seg0->rP->x() - seg0->lP->x();
-//    real dX1 = seg1->rP->x() - seg1->lP->x();
-//    real dY0 = seg0->rP->y() - seg0->lP->y();
-//    real dY1 = seg1->rP->y() - seg1->lP->y();
-//    real Y0, Y1;
-//    if (dX0 != 0) 
-//       Y0 = (dY0/dX0)*(curP->x() - seg0->lP->x()) + seg0->lP->y();
-//    else Y0 = curP->y();
-//    if (dX1 != 0) 
-//       Y1 = (dY1/dX1)*(curP->x() - seg1->lP->x()) + seg1->lP->y();
-//    else Y1 = curP->y();
-//    // if we've got different Y's - great!    
-//    if (Y0 != Y1)  return (Y0 > Y1) ? 1 : -1;
-//    // Calculated Y coordinaes are the same, so lets the fun begin
-//    typedef enum{leftP, crossP, rightP} entry_PT;
-//    entry_PT seg0_PT, seg1_PT;
-//    // first of all get a clear idea what the crossP is to both 
-//    // segments - it is lP, rP, or somewhere in the middle
-//    if       ((*curP) == (*seg0->lP)) seg0_PT = leftP;
-//    else if ((*curP) == (*seg0->rP)) seg0_PT = rightP;
-//    else                             seg0_PT = crossP;
-//    if       ((*curP) == (*seg1->lP)) seg1_PT = leftP;
-//    else if ((*curP) == (*seg1->rP)) seg1_PT = rightP;
-//    else                             seg1_PT = crossP;
-//    // Having done this, check all the possibilities...
-//    int4b compare;
-//    if       ((leftP == seg0_PT) && (leftP == seg1_PT)) 
-//       // lP/lP -> compare rP/rP
-//       compare = yxorder(seg0->rP, seg1->rP);
-//    else if ((rightP == seg0_PT) && (rightP == seg1_PT))
-//       // rP/rP -> compare lP/lP
-//       compare = yxorder(seg0->lP, seg1->lP);
-//    else if ((leftP == seg0_PT) && (rightP == seg1_PT))
-//       // lP/rP -> compare rP/rP
-//       compare = yxorder(seg0->rP, seg1->rP);
-//    else if ((rightP == seg0_PT) && (leftP == seg1_PT))
-//       // rP/lP -> compare rP/rP
-//       compare = yxorder(seg0->rP, seg1->rP);
-//    else if ((crossP == seg0_PT) && (crossP == seg1_PT))
-//    {
-//       // two crossing points - here the fun is even bigger
-//       if       ((0 == dX0) && (0 != dX1))
-//          // if seg0 is vertical -> compare its lP with current point
-//          compare = yxorder(seg0->lP, curP);
-//       else if ((0 != dX0) && (0 == dX1))
-//          // if seg1 is vertical -> compare its lP with current point
-//          compare = yxorder(curP, seg1->lP);
-//       else
-//          // if none of them is vertical -> compare lP/lP
-//          compare = yxorder(seg0->lP, seg1->lP);
-//    }
-//    else if ((crossP == seg0_PT) && (leftP == seg1_PT))
-//    {
-//       if       ((0 == dX0) && (0 != dX1))
-//          // if seg0 is vertical -> compare its lP with current point
-//          compare = yxorder(seg0->lP, curP);
-//       else if ((0 != dX0) && (0 == dX1))
-//          // if seg1 is vertical -> compare its lP with current point
-//          compare = yxorder(seg0->rP, curP);
-//       else
-//          // if none of them is vertical -> compare lP/lP
-//          compare = yxorder(seg0->lP, seg1->lP);
-//    }
-//    else if ((leftP == seg0_PT) && (crossP == seg1_PT))
-//    {
-//       if       ((0 == dX1) && (0 != dX0))
-//          // if seg0 is vertical -> compare its lP with current point
-//          compare = yxorder(curP, seg1->lP);
-//       else if ((0 != dX1) && (0 == dX0))
-//          // if seg1 is vertical -> compare its lP with current point
-//          compare = yxorder(curP, seg1->rP);
-//       else
-//          // if none of them is vertical -> compare lP/lP
-//          compare = yxorder(seg0->lP, seg1->lP);
-//    }
-//    else if ((crossP == seg0_PT) && (rightP == seg1_PT))
-//    {
-//       compare = yxorder(seg0->rP, curP);
-// /*      if (logicop::revent_pri == (*curE)->epriority())
-//          compare = yxorder(seg0->rP, curP);
-//       else if (logicop::cevent_pri == (*curE)->epriority())
-//       {
-//          CEvent* boza = static_cast<CEvent*>(*curE);
-//          if (((seg0 == boza->above()) || (seg1 == boza->above())) &&
-//                ((seg0 == boza->below()) || (seg1 == boza->below())))
-//             compare = yxorder(seg0->lP, seg1->lP);
-//          else
-//             compare = yxorder(seg0->rP, curP);
-//       }
-//       else assert(false);*/
-// /*      if (0 == (*curE)->epriority()) // REvent
-//          compare = yxorder(seg0->rP, curP);
-//       else if (2 == (*curE)->epriority()) //CEvent
-//          compare = yxorder(seg0->lP, curP);
-//       else
-//          assert(false);*/
-//    }
-//    else if ((rightP == seg0_PT) && (crossP == seg1_PT))
-//    {
-//       compare = yxorder(curP, seg0->rP);
-// /*      if (logicop::revent_pri == (*curE)->epriority())
-//          compare = yxorder(curP, seg1->rP);
-//       else if (logicop::cevent_pri == (*curE)->epriority())
-//       {
-//          CEvent* boza = static_cast<CEvent*>(*curE);
-//          if (((seg0 == boza->above()) || (seg1 == boza->above())) &&
-//                ((seg0 == boza->below()) || (seg1 == boza->below())))
-//             compare = yxorder(seg0->lP, seg1->lP);
-//          else
-//             compare = yxorder(curP, seg1->rP);
-//       }
-//       else assert(false);*/
-// /*      
-//       if (0 == (*curE)->epriority())
-//          compare = yxorder(curP, seg1->rP);// REvent
-//       else if (2 == (*curE)->epriority())
-//          compare = yxorder(curP, seg1->lP);// CEvent
-//       else
-//          assert(false);*/
-//    }
-//    else assert(false);
-//    if (0 == compare) {
-//       // at this point it appears that the two segments are identical,
-//       // so sort them by polygon or segment number 
-//       assert((*(seg0->lP) == *(seg1->lP)) && (*(seg0->rP) == *(seg1->rP)));
-//       if (seg0->polyNo != seg1->polyNo) 
-//          compare = (seg0->polyNo > seg1->polyNo) ? 1 : -1;
-//       else {
-//          assert(seg0->edge != seg1->edge);
-//          compare = (seg0->edge > seg1->edge) ? 1 : -1;
-//       }
-//    }   
-//    return compare;      
-// }
 
 /*! Used in the compare_seg() method when both input segments belong to the 
 same polygon. Returns:
@@ -1170,16 +768,6 @@ int logicop::SweepLine::yxorder(const TP* p1, const TP* p2) {
    return 0;
 }
 
-int logicop::SweepLine::orientation(const TP* p1, const TP* p2, const TP* p3)
-{
-   // twice the "orientated" area of the enclosed triangle
-   float area = (p1->x() - p3->x()) * (p2->y() - p3->y()) -
-         (p2->x() - p3->x()) * (p1->y() - p3->y());
-   if (0 == area) return 0;
-   else
-      return (area > 0) ? 1 : -1;
-}
-
 /*!When an intersection point is rendered, the segments that it belongs to 
 must be swapped according to the Bentley-Ottmann algorithm. This method performs
 the swapping in three steps:
@@ -1192,7 +780,6 @@ the swapping in three steps:
 I've tried to have some fun with the above/below pointers, but it almost turn
 into a nightmare. So if you are not sure what happens, don't mess around*/
 void logicop::SweepLine::swap(plysegment*& above, plysegment*& below) {
-//   if (above->_processed || below->_processed) return;
    // first  fix the pointers of the neighbor segments
    if (below->below) below->below->above = above;
    if (above->above) above->above->below = below;
@@ -1411,7 +998,7 @@ bool logicop::logic::OR(pcollection& plycol) {
    while (0 < lclcol.size()) {
       respoly = hole2simple(*respoly, *(lclcol.front()));
       lclcol.pop_front();
-   }
+   }   
    plycol.push_back(respoly);
    return result;
 }
@@ -1422,9 +1009,10 @@ polycross::VPoint* logicop::logic::getFirstOutside(const pointlist& plist, polyc
    unsigned count = 0;
    while (init->inside(plist)) {
       init = init->next();
-      if (count++ > plysize) return NULL;
+      if (count++ > plysize) break;
    }
-   return init;
+   if (count > plysize) return NULL;
+   else return init;
 }   
 
 
@@ -1432,7 +1020,7 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
    segmentlist _segl0(outside,0);
    segmentlist _segl1(inside,1);
    EventQueue* _eq = new EventQueue(_segl0, _segl1); // create the event queue
-   SweepLine   _sl(outside,inside);
+   SweepLine   _sl;
    BindCollection BC;
    _eq->swipe4bind(_sl, BC);
    BindSegment* sbc = BC.get_highest();
