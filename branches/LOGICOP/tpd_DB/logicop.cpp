@@ -998,7 +998,7 @@ bool logicop::logic::OR(pcollection& plycol) {
    while (0 < lclcol.size()) {
       respoly = hole2simple(*respoly, *(lclcol.front()));
       lclcol.pop_front();
-   }   
+   }
    plycol.push_back(respoly);
    return result;
 }
