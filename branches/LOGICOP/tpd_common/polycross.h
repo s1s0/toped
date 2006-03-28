@@ -121,18 +121,20 @@ namespace polycross
       public:
          TEvent(byte shapeID) : _shapeID(shapeID) {};
          virtual void      sweep(XQ&, YQ&, ThreadList&) = 0;
-         void              insertCrossPoint(TP*, polysegment*, polysegment*, XQ&);
          const TP*         evertex() {return _evertex;}
          byte              shapeID() {return _shapeID;}
          virtual          ~TEvent() {};
       protected:
          TP*               checkIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
+         byte              _shapeID;
+         const TP*         _evertex;
+      private:
+         void              insertCrossPoint(TP*, polysegment*, polysegment*,
+                                            XQ&, bool dontswap = false);
          TP*               joiningSegments(polysegment*, polysegment*, float, float);
          TP*               oneLineSegments(polysegment*, polysegment*, XQ&);
          TP*               getCross(polysegment*, polysegment*);
          TP*               getMiddle(const TP*, const TP*);
-         byte              _shapeID;
-         const TP*         _evertex;
    };
 
    //===========================================================================
