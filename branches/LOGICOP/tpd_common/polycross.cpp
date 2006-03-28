@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "polycross.h"
 
-//#define BO2_DEBUG
+#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -131,6 +131,13 @@ polycross::polysegment::polysegment(const TP* p1, const TP* p2, int num, char pl
    _edge = num; _polyNo = plyn;_threadID = 0;
 }
 
+/**
+ * The method creates a new #CPoint object from the input pnt and adds it to the
+crosspoints array. The input point is assumed to be unique. Method is called by
+Event::insertCrossPoint() only.
+ * @param pnt the new cross point - assumed to be unique
+ * @return the #CPoint that will be linked to its counterpart by the caller
+ */
 polycross::CPoint* polycross::polysegment::insertCrossPoint(const TP* pnt) {
    CPoint* cp = new CPoint(pnt);
    crosspoints.push_back(cp);
@@ -238,15 +245,17 @@ polycross::VPoint* polycross::segmentlist::dump_points()
 // TEvent
 
 /**
- * 
+ * The method is using orientation() function to do the job. Segments that belong to
+the same polygon are not checked and method returns NULL. \n
+In case segments intersect, the method calls insertCrossPoint() method. 
  * @param above 
  * @param below 
  * @param eventQ Event queue that will take the new crossing event.
  * @param iff represent the conditional point - if the crossing point found has
 the same coordinates as iff point, then a new event will be added to the event
-queue. This is used for touching points, i.e. iff can be only one of the vertexes
-of the input segments
- * @return 
+queue. This is used for touching points, i.e. iff can be only a vertex of the
+input segments
+ * @return the corssing point between segments if it exists. Otherwise - NULL
  */
 TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
                                        XQ& eventQ, const TP* iff)
@@ -312,12 +321,12 @@ TP* polycross::TEvent::joiningSegments(polysegment* above, polysegment* below, f
    //                     > 0  the point is inside the segment
    if (0 == lps)
    {
-      if (0 >= getLambda(above->lP(), above->rP(), below->lP())) return NULL;
+      if (0 > getLambda(above->lP(), above->rP(), below->lP())) return NULL;
       else return new TP(*(below->lP()));
    }
    else if(0 == rps)
    {
-      if (0 >= getLambda(above->lP(), above->rP(), below->rP())) return NULL;
+      if (0 > getLambda(above->lP(), above->rP(), below->rP())) return NULL;
       else return new TP(*(below->rP()));
    }
    assert(false);
@@ -390,6 +399,19 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, X
 //   return new CEvent(above, below, getMiddle(inside->lP, inside->rP), (lps*rps > 0) ? true : false);
 }
 
+/**
+ * Here a crossing point #_cp is calculated from the input segments. The
+function assumes that the input two segments definitely cross each other.
+It is called only from TEvent::checkIntersect() in case the check for crossing
+segments is positive.\n
+Crossing point is calculated from general line equations Ax+By+C=0. A care
+is taken for division by 0 case when A or B coefficients are 0. It 
+is important to note as well that the calculations must be done in floting
+point expressions, otherwise the hell might brake loose.
+ * @param above first input segment
+ * @param below second input segment
+ * @return the crossing point between the input segments
+ */
 TP* polycross::TEvent::getCross(polysegment* above, polysegment* below)
 {
    real A1 = above->rP()->y() - above->lP()->y();
@@ -426,6 +448,18 @@ TP* polycross::TEvent::getMiddle(const TP* p1, const TP* p2)
    return new TP(x,y);
 }
 
+/**
+ * After a crossing point has been discovered, this method inserts it in each
+of the input segments after what they are linked to each other as well. This
+data will be used later, outside the Bentley-Ottmann algorithm to form the
+new polygons. The method also creates a cross event (#TcEvent), but only if
+dontswap is false.
+* @param CP the crossing point
+ * @param above first segment
+ * @param below second segment
+ * @param eventQ the event queue that will assept the possible cross event
+ * @param dontswap if *true* a cross event is not created
+ */
 void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
                                  polysegment* below, XQ& eventQ, bool dontswap)
 {

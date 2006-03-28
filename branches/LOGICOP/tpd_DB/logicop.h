@@ -35,7 +35,6 @@ namespace logicop {
    
    class SweepLine;
    class BindCollection;
-   class CEvent;
    class logic;
    //===========================================================================
    // Bentley-Ottmann alghorithm related definitions      
@@ -111,7 +110,7 @@ namespace logicop {
       //! Return always true - crossing points are always considered inside both polygons
       bool              inside(const pointlist&) {return true;}
       //! Returns the value of the _visited field
-      char              visited() const {return _visited;} 
+      char              visited() const {return _visited;}
       //! Initialises the _link field pointing to the corresponding CPoint in the other polygon
       void              linkto(CPoint* link) {_link = link;}
       //! Initialises _visited field to 0
@@ -173,9 +172,7 @@ namespace logicop {
       typedef std::vector<CPoint*> crossCList;
       //! The only constructor of the class
                         plysegment(const TP*, const TP*, int, char);
-      //! Add a new cross point for this segment to the crosspoints array 
-      CPoint*           insertcrosspoint(const TP*);
-      //! Add a new bind point for this segment to the crosspoints array 
+      //! Add a new bind point for this segment to the crosspoints array
       BPoint*           insertbindpoint(const TP*);
       //! sort the crosspoints array
       unsigned          normalize(const TP*, const TP*);
@@ -239,17 +236,12 @@ namespace logicop {
    public:
       //! Return the event vertex
       virtual const TP* evertex() const = 0;
-      //! Perform the operations as defined in the Bentley-Ottman algorithm
-      virtual void      swipe4cross(SweepLine&, avl_table*) {assert(false);};
       //! Generate binding points of a hole polygon
       virtual void      swipe4bind(SweepLine&, BindCollection&) {assert(false);};
       //! Return the polygon number for this event
       virtual char      polyNo() const = 0;
       //! Return the edge number for this event
       virtual int       edgeNo() const = 0;
-      //! Check the input crossing event and adds it to the event queue
-      void               checkNupdate(avl_table*, plysegment*, plysegment*, 
-                                                       CEvent*, bool check=true);
       virtual           ~Event() {};
    };
    
@@ -265,8 +257,6 @@ namespace logicop {
                          LEvent(plysegment* seg) : _seg(seg) {};
       //! Return the event vertex
       const TP*          evertex() const {return _seg->lP;};
-      //! Perform the operations as defined by Bentley-Ottman for left point
-      void               swipe4cross(SweepLine&, avl_table*);
       //! Perform the operations for binding point generation
       void               swipe4bind(SweepLine&, BindCollection&);
       //! Return the polygon number for this event
@@ -291,7 +281,7 @@ namespace logicop {
       //! Return the event vertex
       const TP*          evertex() const {return _seg->rP;};
       //! Perform the operations as defined by Bentley-Ottman for right point
-      void               swipe4cross(SweepLine&, avl_table*);
+//      void               swipe4cross(SweepLine&, avl_table*);
       //! Perform the operations for binding point generation
       void               swipe4bind(SweepLine&, BindCollection&);
       //! Return the polygon number for this event
@@ -301,35 +291,6 @@ namespace logicop {
    protected:   
       //! A pointer to the polygon segment assigned to this event
       plysegment*        _seg;
-   };
-   
-   //===========================================================================
-   // CEvent
-   //===========================================================================
-   /*! Implements the functionality required by the EventQueue when a cross
-   point event is digitized in the event queue. Inherits the Event class and has 
-   a slightly different structure compared with LEvent and REvent classes. */
-   class CEvent : public Event {
-   public:
-      //! The cross event constructor
-                         CEvent(plysegment*, plysegment*);
-      //! Return the event vertex - in this case cross point
-      const TP*          evertex() const {return _cp;};
-      //! Perform the operations as defined by Bentley-Ottman for cross point
-      void               swipe4cross(SweepLine&, avl_table*);
-      //! Return -1 as polygon number for the cross event
-      char               polyNo() const {return -1;};
-      //! Return -1 as edge number for the cross event
-      int                edgeNo() const {return -1;};
-      //! Return a pointer to the crossing point #_cp
-      TP*                cp() const {return _cp;};
-   protected:   
-      //! A pointer to the crossing point produced by the #_above/#_below pair of polygon segments
-      TP*               _cp;
-      //! A pointer to the first crossing segment
-      plysegment*       _above;
-      //! A pointer to the second crossing segment
-      plysegment*       _below;
    };
 
    //===========================================================================
@@ -346,8 +307,6 @@ namespace logicop {
    public:
       //! The constructor of the event queue
                         EventQueue(const segmentlist&, const segmentlist&);
-      //! EventQueue traverser for crossing points
-      void              swipe4cross(SweepLine&);
       //! EventQueue traverser for binding points
       void              swipe4bind(SweepLine&, BindCollection&);
       //! The destructor
@@ -378,8 +337,6 @@ namespace logicop {
       void              add(plysegment*);
       //!Remove a segemnt form the sweep line
       void              remove(plysegment*);
-      //!Determines whether the input two segments intersect
-      CEvent*           intersect(plysegment*, plysegment*);
       //!Perform the swap of the input segments
       void              swap(plysegment*&, plysegment*&);
       //! set the _current_param

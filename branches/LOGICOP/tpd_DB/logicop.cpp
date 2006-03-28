@@ -175,15 +175,6 @@ logicop::plysegment::plysegment(const TP* p1, const TP* p2, int num, char plyn) 
    edge = num;
    polyNo = plyn;
 }
-/*! The method creates a new #CPoint object from the input pnt and adds it to the 
-crosspoints array. The input point is assumed to be unique. Method is called by
-Event::checkNupdate() only, and returns the new #CPoint that will be linked to its
-counterpart by the caller*/
-logicop::CPoint* logicop::plysegment::insertcrosspoint(const TP* pnt) {
-   CPoint* cp = new CPoint(pnt);
-   crosspoints.push_back(cp);
-   return cp;
-}
 
 logicop::BPoint* logicop::plysegment::insertbindpoint(const TP* pnt) {
    BPoint* cp = new BPoint(pnt);
@@ -264,7 +255,7 @@ unsigned logicop::segmentlist::normalize(const pointlist& plst) {
    unsigned plysize = plst.size();
    for (unsigned i = 0; i < plysize; i++)
       numcross += _segs[i]->normalize(&(plst[i]),&(plst[(i+1)%plysize]));
-   return numcross;   
+   return numcross;
 }
 
 /*! This method returns properly sorted dual linked list of all vertices 
@@ -309,55 +300,11 @@ logicop::VPoint* logicop::segmentlist::dump_points() {
    }   
    return vlist;
 }
-      
-//-----------------------------------------------------------------------------
-// class Event
-//-----------------------------------------------------------------------------
-/*! This is the only non-virtual method of this class. After a crossing point has 
-been discovered and a CEvent created this method checks whether this event is not
-already in the event queue. See the description of EventQueue::E_compare(). If the 
-event is not already there it is added, otherwise, it is deleted.\n
-The other important thing is that if the event is unique, the cross point is added 
-to each of the input segments after what they are linked to each other as well. 
-This data will be used later, outside the Bentley-Ottmann algorithm to form the 
-new polygons.\n
-I am stil not sure that this class is the best place for this method - just see
-the number of the input parameters*/
-void logicop::Event::checkNupdate(avl_table* EQ, plysegment* above, 
-                                  plysegment* below, CEvent* evt, bool check) {
-   avl_traverser trav;
-   bool insert;
-   if (check) {
-      void* retitem =  avl_t_find(&trav, EQ, evt);
-      insert = (NULL == retitem);
-   }
-   else insert = true;
-   if (insert) {
-      void* retitem = avl_t_insert(&trav,EQ,evt);
-      assert(retitem == evt);
-      CPoint* cpsegA = above->insertcrosspoint(evt->cp());
-      CPoint* cpsegB = below->insertcrosspoint(evt->cp());
-      cpsegA->linkto(cpsegB);
-      cpsegB->linkto(cpsegA);
-   }
-   else 
-      delete evt;   
-}
+
+
 //-----------------------------------------------------------------------------
 // class LEvent
 //-----------------------------------------------------------------------------
-/*! Implements Bentley-Ottmann operations for left point event. A new segment
-is added to the sweep line using SweepLine::add() after what the segment is 
-checked for crossing points with its neighbours*/
-void logicop::LEvent::swipe4cross(SweepLine& SL, avl_table* EQ) {
-   SL.add(_seg);
-   CEvent* evt;
-   if ((evt = SL.intersect(_seg->above, _seg))) 
-      checkNupdate(EQ, _seg->above, _seg, evt,false);
-   if ((evt = SL.intersect(_seg, _seg->below)))
-      checkNupdate(EQ, _seg, _seg->below, evt,false);
-}
-
 void logicop::LEvent::swipe4bind(SweepLine& SL, BindCollection& BC) {
    SL.add(_seg);
    // action is taken only for points in the second polygon
@@ -378,16 +325,6 @@ void logicop::LEvent::swipe4bind(SweepLine& SL, BindCollection& BC) {
 //-----------------------------------------------------------------------------
 // class REvent
 //-----------------------------------------------------------------------------
-/*! Implements Bentley-Ottmann operations for right point event. Removes the 
-segment from the SweepLine, after checking its above/below neightbours for 
-crossing. */
-void logicop::REvent::swipe4cross(SweepLine& SL, avl_table* EQ) {
-   CEvent* evt;
-   if ((evt = SL.intersect(_seg->above, _seg->below))) 
-      checkNupdate(EQ, _seg->above, _seg->below, evt);
-   SL.remove(_seg);
-}
-
 void logicop::REvent::swipe4bind(SweepLine& SL, BindCollection& BC) {
    // action is taken only for points in the second polygon
    if (1 == _seg->polyNo) {
@@ -403,57 +340,6 @@ void logicop::REvent::swipe4bind(SweepLine& SL, BindCollection& BC) {
       }
    }   
    SL.remove(_seg);
-}
-
-//-----------------------------------------------------------------------------
-// class CEvent
-//-----------------------------------------------------------------------------
-/*! Here a crossing point #_cp is calculated from the input segments. The 
-constructor assumes that the input two segments definitely cross each other.
-It is called only from SweepLine::intersect() only if the check for crossing
-segments is positive.\n
-Crossing point is calculated from general line equations Ax+By+C=0. A care
-is taken for division by 0 case when A or B coefficients are 0. It 
-is important to note as well that the calculations must be done in floting
-point expressions, otherwise the hell might brake loose.
-*/
-logicop::CEvent::CEvent(plysegment* above, plysegment* below) : _above(above), 
-                                                                _below(below){
-   real A1 = _above->rP->y() - _above->lP->y();
-   real A2 = _below->rP->y() - _below->lP->y();
-   real B1 = _above->lP->x() - _above->rP->x();
-   real B2 = _below->lP->x() - _below->rP->x();
-   real C1 = -(A1*_above->lP->x() + B1*_above->lP->y());
-   real C2 = -(A2*_below->lP->x() + B2*_below->lP->y());
-   assert((A1 != 0) || (A2 != 0));
-   assert((B1 != 0) || (B2 != 0));
-   //SGREM
-   // segments will coinside if    A1/A2 == B1/B2 == C1/C2
-   // segments will be paraller if A1/A2 == B1/B2 != C1/C2
-   real X,Y;
-   if ((0 != A1) && (0 != B2)) {
-      X = - ((C1 - (B1/B2) * C2) / (A1 - (B1/B2) * A2));
-      Y = - ((C2 - (A2/A1) * C1) / (B2 - (A2/A1) * B1));
-   }   
-   else if ((0 != B1) && (0 != A2)) {
-      X = - (C2 - (B2/B1) * C1) / (A2 - (B2/B1) * A1);
-      Y = - (C1 - (A1/A2) * C2) / (B1 - (A1/A2) * B2);
-   }
-   else assert(0);   
-   _cp = new TP((int)rint(X),(int)rint(Y));
-}
-
-/*! Implements Bentley-Ottmann operations for cross point event. Swaps the 
-above/below segments first calling SweepLine::swap() and then checks the 
-segment pair for new crossing points with their new neightbours*/
-void logicop::CEvent::swipe4cross(SweepLine& SL, avl_table* EQ) {
-   // first swap the place of the segments
-   SL.swap(_above, _below);
-   CEvent* evt;
-   if ((evt = SL.intersect(_above->above, _above)))
-      checkNupdate(EQ, _above->above, _above, evt);
-   if ((evt = SL.intersect(_below, _below->below)))
-      checkNupdate(EQ, _below, _below->below, evt);
 }
 
 //-----------------------------------------------------------------------------
@@ -484,25 +370,6 @@ logicop::EventQueue::EventQueue( const segmentlist& seg1, const segmentlist& seg
       retitem =  avl_t_insert(&trav,_equeue,evt);
       assert(evt == retitem);
    }
-}
-
-/*!This method is actually executing Bentley-Ottman algorithm. It traverses 
-the event queue and calls swipe4cross methods of every Event. It should be noted
-that the _equeue is dynamically updated with the crossing events by the same
-swipe4cross methods. \n The method is sensible to the updates in the tree in a wierd
-way. Program will bomb out here if a new event has not been inserted properly.
-Some kind of try-catch mechanism should be implemented.*/
-void logicop::EventQueue::swipe4cross(SweepLine& SL) {
-// see the comment around find parameter in the E_compare
-   Event* evt;
-   avl_traverser trav;
-   avl_t_first(&trav,_equeue);
-   while (trav.avl_node != NULL) {
-      evt = (Event*)trav.avl_node->avl_data;
-      SL.set_currentP(evt->evertex());
-      evt->swipe4cross(SL, _equeue);
-      avl_t_next(&trav);
-   }   
 }
 
 void logicop::EventQueue::swipe4bind(SweepLine& SL, BindCollection& BC) {
@@ -619,43 +486,6 @@ void logicop::SweepLine::remove(plysegment* seg) {
    if (NULL != np) np->above = seg->above;
    avl_delete(_tree,seg);
 }
-/*!
-The method is using isLeft() function to do the job. Segments that belong to 
-the same polygon are not checked and method returns NULL. The same result is 
-obtained if one of the input segmens is NULL. \n
-In case segments intersect, the method creates and returns a new CEvent.*/
-logicop::CEvent* logicop::SweepLine::intersect(plysegment* above, plysegment* below) {
-   // check both segments exists
-   if ((NULL == above) || (NULL == below)) return NULL;
-   // check for polygon edges belonging to the same polygon
-   if (above->polyNo == below->polyNo)  return NULL;
-   // Now test for intersection point exsistence
-   float lsign, rsign, rlmul;
-   lsign = isLeft(above->lP, above->rP, below->lP);
-   rsign = isLeft(above->lP, above->rP, below->rP);
-   //check that both s2 endpoints are on the same side of s1
-   rlmul = lsign*rsign;
-   if      (0  < rlmul)  return NULL;
-   else if (0 == rlmul) {
-      int boza = 1;
-      boza++;
-      return NULL;
-   }
-   lsign = isLeft(below->lP, below->rP, above->lP);
-   rsign = isLeft(below->lP, below->rP, above->rP);
-   //check that both s1 endpoints are on the same side of s2
-   rlmul = lsign*rsign;
-   if      (0  < rlmul)  return NULL;
-   else if (0 == rlmul) {
-      int boza = 1;
-      boza++;
-      return NULL;
-   }
-   // at this point - the only possibility is that they intersect
-   // so - create a cross event 
-   return new CEvent(above,below);
-}
-
 
 /*! It is clear, that segements has to be sorted vertically, but
 it is far from obvious (to me) what does it means.  Function checks whether 
@@ -809,12 +639,6 @@ between them. These data structures will be used in all subsequently called
 methods, implementing the actual logic operations*/
 logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
                                                 _poly1(poly1), _poly2(poly2) {
-//   segmentlist _segl1(poly1,0);
-//   segmentlist _segl2(poly2,1);
-//   EventQueue* _eq = new EventQueue(_segl1, _segl2); // create the event queue
-//   SweepLine   _sl(poly1, poly2);
-//   _eq->swipe4cross(_sl);
-
    polycross::segmentlist _segl1(poly1,1);
    polycross::segmentlist _segl2(poly2,2);
    polycross::XQ* _eq = new polycross::XQ(_segl1, _segl2); // create the event queue
