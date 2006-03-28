@@ -1746,6 +1746,9 @@ laydata::tdtdata* laydata::valid_poly::replacement() {
 }   
 
 void laydata::valid_poly::identical() {
+//   printf("************ All points of a polygon before identical **********\n");
+//   for (pointlist::iterator CP = _plist.begin(); CP != _plist.end(); CP++)
+//      printf("(%i, %i)\n", CP->x(), CP->y());
    pointlist::iterator cp1 = _plist.end(); cp1--;
    pointlist::iterator cp2 = _plist.begin();
    while (cp2 != _plist.end()) {
@@ -1756,6 +1759,9 @@ void laydata::valid_poly::identical() {
       else { cp1 = cp2; cp2++;};
    }
    if (0 == _plist.size()) _status |= laydata::shp_null; // 0 unequal points
+//   printf("************ All points of a polygon after identical **********\n");
+//   for (pointlist::iterator CP = _plist.begin(); CP != _plist.end(); CP++)
+//      printf("(%i, %i)\n", CP->x(), CP->y());
 }
 
 /*! Checks the polygon angles. Filters out intermediate points. Flags
@@ -1768,7 +1774,12 @@ void laydata::valid_poly::angles() {
    int ang;
    pointlist::iterator cp = _plist.begin();
    while ((cp != _plist.end()) && (_plist.size() > 2)) {
-      ang = abs(xangle(_plist[cp2], _plist[cp3]) - xangle(_plist[cp2], _plist[cp1]));
+      // additional condition added, because "identical" can't foresee
+      // identical points that have another one in the middle (0-180 angle)
+      if ((_plist[cp2] == _plist[cp3]) || (_plist[cp2] == _plist[cp1]))
+         ang = 0;
+      else
+         ang = abs(xangle(_plist[cp2], _plist[cp3]) - xangle(_plist[cp2], _plist[cp1]));
       if ((0 == ang) || (180 == ang)) {
          cp = _plist.erase(cp);
          _status |= laydata::shp_line;
@@ -1907,6 +1918,8 @@ char* laydata::valid_wire::failtype() {
 /*! Returns the angle between the line and the X axis
 */
 int laydata::xangle(TP& p1, TP& p2) {
+//   printf("-- Calculating angle between X axis and (%i, %i) - (%i, %i) line\n",
+//          p1.x(), p1.y(), p2.x(), p2.y());
    const long double Pi = 3.1415926535897932384626433832795;
    if (p1.x() == p2.x()) { //vertcal line
       assert(p1.y() != p2.y()); // make sure both points do not coinside
@@ -1948,12 +1961,8 @@ laydata::tdtdata* laydata::polymerge(const pointlist& _plist0, const pointlist& 
    logicop::logic operation(_plist0, _plist1);
    if (operation.OR(merge_shape)) {
       assert(1 == merge_shape.size());
- //      logicop::pcollection::const_iterator CI;
- //      // add the resulting cut_shapes to the_cut shapeList
- //      for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++) {
- //         decure[1]->push_back(new laydata::tdtpoly(**CI));
- //      }
-      return new laydata::tdtpoly(**merge_shape.begin());
+      return createValidShape(**merge_shape.begin());
+//      return new laydata::tdtpoly(**merge_shape.begin());
    }
    else return NULL;
 }
