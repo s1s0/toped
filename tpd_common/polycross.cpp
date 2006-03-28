@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "polycross.h"
 
-#define BO2_DEBUG
+//#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -266,13 +266,14 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
    if ((lsign == 0) && (rsign == 0))
    {
       if ((iff == NULL) && ((CrossPoint = oneLineSegments(above, below, eventQ))))
-         insertCrossPoint(CrossPoint, above, below, eventQ);
+         insertCrossPoint(CrossPoint, above, below, eventQ, true);
       return CrossPoint;
    }
    rlmul = lsign*rsign;
    if      (0  < rlmul)  return NULL;// not crossing
    if (0 == rlmul)
    {
+      // possibly touching segments
       CrossPoint = joiningSegments(above, below, lsign, rsign);
       if ( (NULL != CrossPoint) && ((NULL == iff) || (*CrossPoint == *iff)) )
          insertCrossPoint(CrossPoint, above, below, eventQ);
@@ -288,11 +289,13 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
    if      (0  < rlmul) return NULL;
    if (0 == rlmul)
    {
+      // possibly touching segments
       CrossPoint = joiningSegments(below, above, lsign, rsign);
       if ( (NULL != CrossPoint) && ((NULL == iff) || (*CrossPoint == *iff)) )
          insertCrossPoint(CrossPoint, above, below, eventQ);
       return CrossPoint;
    }
+   
    // at this point - the only possibility is that they intersect
    // so - create a cross event
    CrossPoint = getCross(above, below);
@@ -424,14 +427,20 @@ TP* polycross::TEvent::getMiddle(const TP* p1, const TP* p2)
 }
 
 void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
-                                         polysegment* below, XQ& eventQ)
+                                 polysegment* below, XQ& eventQ, bool dontswap)
 {
    assert(NULL != CP);
    CPoint* cpsegA = above->insertCrossPoint(CP);
    CPoint* cpsegB = below->insertCrossPoint(CP);
    cpsegA->linkto(cpsegB);
    cpsegB->linkto(cpsegA);
-   eventQ.addCrossEvent(CP, above->threadID(), below->threadID());
+#ifdef BO2_DEBUG
+   printf("**Cross point (%i,%i) inserted between segments below :\n", CP->x(), CP->y());
+   BO_printseg(above)
+   BO_printseg(below)
+#endif
+   if (!dontswap)
+      eventQ.addCrossEvent(CP, above->threadID(), below->threadID());
 }
 
 //==============================================================================
@@ -584,7 +593,8 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
          polysegment* aseg = thr->threadAbove()->cseg();
          int ori1 = orientation(aseg->lP(), aseg->rP(), _tseg1->lP());
          int ori2 = orientation(aseg->lP(), aseg->rP(), _tseg2->rP());
-         if (ori1 == ori2) threadl.push_back(_tseg2->threadID());
+         if ((ori1 == ori2) || (0 == ori1 * ori2))
+            threadl.push_back(_tseg2->threadID());
       }
    }
 
@@ -595,7 +605,8 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
          polysegment* bseg = thr->threadBelow()->cseg();
          int ori1 = orientation(bseg->lP(), bseg->rP(), _tseg1->lP());
          int ori2 = orientation(bseg->lP(), bseg->rP(), _tseg2->rP());
-         if (ori1 == ori2) threadl.push_back(_tseg2->threadID());
+         if ((ori1 == ori2) || (0 == ori1 * ori2))
+            threadl.push_back(_tseg2->threadID());
       }
    }
 }

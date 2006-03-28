@@ -531,8 +531,8 @@ void edge_merge2() {
    addpoly({{4,3},{4,0},{6,0},{6,-2},{12,-2},{12,3}},2);
    addpoly({{7,4},{10,4},{10,6},{12,6},{12,12},{7,12}},2);   
    addpoly({{6,7},{6,10},{4,10},{4,12},{-2,12},{-2,7}},2);
-//   select_all();
-//   merge();
+   select_all();
+   merge();
 }
 
 void edge_merge1() 
@@ -549,30 +549,35 @@ void edge_merge1()
 }
 
 
+void all_tests()
+{
+   cut_test1();
+   cut_test2();
+   cut_test3();
+   cut_test4();
+   cut_test5();
+   cut_test6();
+   cut_test7();
+   cut_test1A();
+   cut_test2A();
+   cut_test3A();
+   cut_test3B();
+   //cut_test1B();
+   cut_test2B(); // * pending to fix processing after BOM
+   merge_test1();
+   merge_test2();
+   merge_test3();
+   merge_test4();
+   edge_cut1();
+   edge_merge1();
+   edge_merge2();
+   zoomall();
+}
+
 layerSetup();
 screenSetup();
 newdesign("layout_logic");
-//cut_test1();
-//cut_test2();
-//cut_test3();
-//cut_test4();
-//cut_test5();
-//cut_test6();
-//cut_test7();
-//cut_test1A();
-//cut_test2A();
-//cut_test3A();
-//cut_test3B();
-////cut_test1B();
-//*cut_test2B();
-//merge_test1();
-//merge_test2();
-//merge_test3();
-//merge_test4();
-//edge_cut1();
-//edge_merge1();
-edge_merge2();
-//zoomall();
+all_tests();
 
 //opencell("top");
 //addpoly({{-9.5,21.5},{-9.5,33},{15,33},{15,21.5},{10.5,21.5},{10.5,28},{5.5,28},{5.5,21.5},{0,21.5},{0,28},{-6,28},{-6,21.5}},2);
