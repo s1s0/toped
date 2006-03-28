@@ -86,10 +86,6 @@ namespace polycross
          int               edge() const               {return _edge;}
          TP*               checkIntersect(polysegment*, XQ&);
       protected:
-         TP*               joiningSegments(polysegment*, float, float);
-         TP*               oneLineSegments(polysegment*, XQ&);
-         TP*               getMiddle(const TP*, const TP*);
-         TP*               getCross(polysegment*);
          unsigned          _threadID;
          crossCList        crosspoints;
          byte              _polyNo;
@@ -130,6 +126,11 @@ namespace polycross
          byte              shapeID() {return _shapeID;}
          virtual          ~TEvent() {};
       protected:
+         TP*               checkIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
+         TP*               joiningSegments(polysegment*, polysegment*, float, float);
+         TP*               oneLineSegments(polysegment*, polysegment*, XQ&);
+         TP*               getCross(polysegment*, polysegment*);
+         TP*               getMiddle(const TP*, const TP*);
          byte              _shapeID;
          const TP*         _evertex;
    };
