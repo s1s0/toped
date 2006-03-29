@@ -112,29 +112,34 @@ class  TpdTime
 
 class EXPTN {};
  
-class EXPTNactive_cell : public EXPTN {
+class EXPTNactive_cell : public EXPTN
+{
    public:
       EXPTNactive_cell();
 };
 
-class EXPTNactive_DB : public EXPTN  {
+class EXPTNactive_DB : public EXPTN
+{
    public:
       EXPTNactive_DB();
 };
 
-class EXPTNactive_GDS : public EXPTN  {
+class EXPTNactive_GDS : public EXPTN
+{
    public:
       EXPTNactive_GDS();
 };
 
-/*class EXPTNexisting_GDS : public EXPTN  {
-   public:
-      EXPTNmanyTopCellsGDS();
-};
-*/
-class EXPTNreadTDT : public EXPTN {
+class EXPTNreadTDT : public EXPTN
+{
    public:
       EXPTNreadTDT();
+};
+
+class EXPTNpolyCross : public EXPTN
+{
+   public:
+      EXPTNpolyCross(std::string);
 };
 
 #endif
