@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 // ------------------------------------------------------------------------ =
-//           $URL: svn+ssh://s_krustev@svn.berlios.de/svnroot/repos/toped/branches/LOGICOP/tpd_DB/logicop.h $
+//           $URL$
 //        Created: Tue Mar 21 2006
 //         Author: s_krustev@yahoo.com
 //      Copyright: (C) 2001-2006 by Svilen Krustev
@@ -19,9 +19,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
-//      $Revision: 137 $
-//          $Date: 2006-03-29 01:09:04 +0100 (Wed, 29 Mar 2006) $
-//        $Author: s_krustev $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 
 #ifndef PLYCROSS_H_INCLUDED
