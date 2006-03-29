@@ -33,13 +33,14 @@
 
 namespace polycross
 {
-   int xyorder(const TP*, const TP*);
-   int orientation(const TP*, const TP*, const TP*);
-   float getLambda( const TP* p1, const TP* p2, const TP* p);
-   typedef std::list<unsigned> ThreadList;
    class YQ;
    class XQ;
    class BindCollection;
+   typedef std::list<unsigned> ThreadList;
+   
+   int xyorder(const TP*, const TP*);
+   int orientation(const TP*, const TP*, const TP*);
+   float getLambda( const TP* p1, const TP* p2, const TP* p);
    //===========================================================================
    // VPoint
    //===========================================================================
@@ -281,21 +282,7 @@ namespace polycross
          SegmentThread*    _threadAbove;
    };
 
-   class BottomSentinel : public SegmentThread
-   {
-      public:
-         BottomSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
-         SegmentThread*    threadBelow()  {assert(false);}
-         ~BottomSentinel() { delete _cseg;}
-   };
 
-   class TopSentinel : public SegmentThread
-   {
-      public:
-         TopSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
-         SegmentThread*    threadAbove()  {assert(false);}
-         ~TopSentinel() { delete _cseg;}
-   };
    //===========================================================================
    // Y queue
    //===========================================================================
@@ -311,6 +298,21 @@ namespace polycross
          SegmentThread*    getThread(unsigned);
          void              report();
       private:
+         class TopSentinel : public SegmentThread
+         {
+            public:
+               TopSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
+               SegmentThread*    threadAbove()  {assert(false);}
+               ~TopSentinel() { delete _cseg;}
+         };
+         class BottomSentinel : public SegmentThread
+         {
+            public:
+               BottomSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
+               SegmentThread*    threadBelow()  {assert(false);}
+               ~BottomSentinel() { delete _cseg;}
+         };
+
          BottomSentinel*   _bottomSentinel;
          TopSentinel*      _topSentinel;
          int               sCompare(const polysegment*, const polysegment*);
@@ -330,8 +332,6 @@ namespace polycross
          const pointlist*  opl1() const {return _osl1->originalPL();}
          const pointlist*  opl2() const {return _osl2->originalPL();}
       protected:
-         BottomSentinel*   _bottomSentinel;
-         TopSentinel*      _topSentinel;
          void              createEvents(const segmentlist&, byte);
          static int        E_compare( const void*, const void*, void* );
          avl_table*        _xqueue;
@@ -366,9 +366,9 @@ namespace polycross
    };
    
    //===========================================================================
-   // Bind segment
+   // BindCollection
    //===========================================================================
-   class BindCollection
+class BindCollection
    {
       public:
          void              update_BL(polysegment*, unsigned, const TP*);

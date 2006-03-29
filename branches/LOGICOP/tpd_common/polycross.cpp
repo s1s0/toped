@@ -27,6 +27,7 @@
 #include <math.h>
 #include <algorithm>
 #include "polycross.h"
+#include "outbox.h"
 
 #define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
@@ -340,7 +341,8 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
    lsign = orientation(below->lP(), below->rP(), above->lP());
    rsign = orientation(below->lP(), below->rP(), above->rP());
    // lsign == rsign == 0 case here should not be possible
-   assert(!((lsign == 0) && (rsign == 0)));
+   if ((lsign == 0) && (rsign == 0))
+      throw EXPTNpolyCross("Segments shouldn't coincide at this point");
    rlmul = lsign*rsign;
    if      (0  < rlmul) return NULL;
    if (0 == rlmul)
@@ -360,6 +362,14 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
    return CrossPoint;
 }
 
+/**
+ * Method should be called with one of lps/rps parameters equal to 0
+ * @param above 
+ * @param below 
+ * @param lps 
+ * @param rps 
+ * @return 
+ */
 TP* polycross::TEvent::joiningSegments(polysegment* above, polysegment* below, float lps, float rps)
 {
    if (0 == lps)
@@ -404,14 +414,15 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, X
    // get the original polygon to which enclosed segment belongs to
    const pointlist* insideP = (1 == (swaped ?  above->polyNo() : below->polyNo())) ?
          eventQ.opl1() : eventQ.opl2();
-   // ... and get the locate the inside segment in that sequence
+   // ... and get the location of the inside segment in that sequence
    int numv = insideP->size();
    unsigned indxLP = (*(inside->lP()) == (*insideP)[inside->edge()]) ?
          inside->edge() : (inside->edge() + 1) % numv;
    unsigned indxRP = (*(inside->rP()) == (*insideP)[inside->edge()]) ?
          inside->edge() : (inside->edge() + 1) % numv;
    // make sure they are not the same
-   assert(indxLP != indxRP);
+   if (indxLP == indxRP)
+      throw EXPTNpolyCross("Can't locate properly the inside segment");
 
    // we'll pickup the neighbouring point(s) of the inside segment and will
    // recalculate the lps/rps for them.
@@ -439,7 +450,6 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, X
    // then a crossing point is introduced in the midle of the internal segment
    if   (lps*rps > 0) return NULL;
    else return getMiddle(inside->lP(), inside->rP());
-//   return new CEvent(above, below, getMiddle(inside->lP, inside->rP), (lps*rps > 0) ? true : false);
 }
 
 /**
@@ -479,7 +489,8 @@ TP* polycross::TEvent::getCross(polysegment* above, polysegment* below)
       X = - (C2 - (B2/B1) * C1) / (A2 - (B2/B1) * A1);
       Y = - (C1 - (A1/A2) * C2) / (B1 - (A1/A2) * B2);
    }
-   else assert(0);
+   else
+      throw EXPTNpolyCross("Input segments don't have a crossing point");
    return new TP((int)rint(X),(int)rint(Y));
 }
 
@@ -526,9 +537,11 @@ void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
 polycross::TbEvent::TbEvent (polysegment* seg1, polysegment* seg2, byte shapeID):
       TEvent( shapeID )
 {
-   assert(seg1->lP() == seg2->lP());
+   if (seg1->lP() != seg2->lP())
+      throw EXPTNpolyCross("Invalid input segments in thread begin");
    int ori = orientation(seg2->lP(), seg2->rP(), seg1->rP());
-   assert (0 != ori);
+   if (0 == ori)
+      throw EXPTNpolyCross("Invalid input segments in thread begin");
    if (ori > 0)
    {
       _aseg = seg1; _bseg = seg2;
@@ -545,8 +558,8 @@ void polycross::TbEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    // create the threads
    SegmentThread* athr = sweepline.beginThread(_aseg);
    SegmentThread* bthr = sweepline.beginThread(_bseg);
-   assert(athr->threadAbove() != bthr);
-   assert(bthr->threadBelow() != athr);
+   if ((athr->threadAbove() == bthr) || (bthr->threadBelow() == athr))
+      throw EXPTNpolyCross("Invalid segment sort in thread begin");
    threadl.push_back(_aseg->threadID());
    threadl.push_back(_bseg->threadID());
 #ifdef BO2_DEBUG
@@ -581,12 +594,13 @@ void polycross::TbEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
    // create the threads
    SegmentThread* athr = sweepline.beginThread(_aseg);
    SegmentThread* bthr = sweepline.beginThread(_bseg);
-   assert(athr->threadAbove() != bthr);
-   assert(bthr->threadBelow() != athr);
+   if ((athr->threadAbove() == bthr) || (bthr->threadBelow() == athr))
+      throw EXPTNpolyCross("Invalid segment sort in thread begin - bind");
    // action is taken only for points in the second polygon
    if (1 == _aseg->polyNo() == _bseg->polyNo()) return;
    // assuming that the polygons are not crossing ...
-   assert((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr));
+   if (!((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr)))
+      throw EXPTNpolyCross("Crossing input polygons in bind algo - begin");
    // if left point is above and the neighbour above is from polygon 1
    if ((_aseg->lP()->y() >= _aseg->rP()->y()) &&
         (1 == athr->threadAbove()->cseg()->polyNo()))
@@ -603,11 +617,11 @@ void polycross::TbEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 polycross::TeEvent::TeEvent (polysegment* seg1, polysegment* seg2, byte shapeID):
       TEvent( shapeID )
 {
-   assert(seg1->rP() == seg2->rP());
-//   _tseg1 = seg1; _tseg2 = seg2;
-
+   if (seg1->rP() != seg2->rP())
+      throw EXPTNpolyCross("Invalid input segments in thread end");
    int ori = orientation(seg2->lP(), seg2->rP(), seg1->lP());
-   assert (0 != ori);
+   if (0 == ori)
+      throw EXPTNpolyCross("Invalid input segments in thread end");
    if (ori > 0)
    {
       _aseg = seg1; _bseg = seg2;
@@ -626,8 +640,8 @@ void polycross::TeEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    threadl.push_back(_bseg->threadID());
    SegmentThread* athr = sweepline.getThread(_aseg->threadID());
    SegmentThread* bthr = sweepline.getThread(_bseg->threadID());
-   assert(athr->threadAbove() != bthr);
-   assert(bthr->threadBelow() != athr);
+   if ((athr->threadAbove() == bthr) || (bthr->threadBelow() == athr))
+      throw EXPTNpolyCross("Invalid segment sort in thread end");
    if ((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr))
    {
       // neighbours - check the case when right points are also crossing points
@@ -657,13 +671,14 @@ void polycross::TeEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 {
    SegmentThread* athr = sweepline.getThread(_aseg->threadID());
    SegmentThread* bthr = sweepline.getThread(_bseg->threadID());
-   assert(athr->threadAbove() != bthr);
-   assert(bthr->threadBelow() != athr);
+   if ((athr->threadAbove() == bthr) || (bthr->threadBelow() == athr))
+      throw EXPTNpolyCross("Invalid segment sort in thread end - bind");
    // action is taken only for points in the second polygon
    if (2 == _aseg->polyNo() == _bseg->polyNo())
    {
       // assuming that the polygons are not crossing ...
-      assert((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr));
+      if (!((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr)))
+         throw EXPTNpolyCross("Crossing input polygons in bind algo - end");
       // if right point is above and the neighbour above is from polygon 1
       if ((_aseg->lP()->y() <= _aseg->rP()->y()) &&
             (1 == athr->threadAbove()->cseg()->polyNo()))
@@ -694,7 +709,9 @@ polycross::TmEvent::TmEvent (polysegment* seg1, polysegment* seg2, byte shapeID)
       _tseg1 = seg2; _tseg2 = seg1;
       _evertex = seg2->rP();
    }
-   else assert(false);
+   else
+      throw EXPTNpolyCross("Invalid input segments in thread modify");
+
 }
 
 void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
@@ -704,7 +721,8 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    BO_printseg(_tseg1)
    BO_printseg(_tseg2)
 #endif
-   assert(0 != _tseg1->threadID());
+   if (0 == _tseg1->threadID())
+      EXPTNpolyCross("Sorted segment expected here");
    SegmentThread* thr = sweepline.modifyThread(_tseg1->threadID(), _tseg2);
 
    // check for intersections of the neighbours with the new segment
@@ -737,7 +755,8 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
 
 void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 {
-   assert(0 != _tseg1->threadID());
+   if (0 == _tseg1->threadID())
+      EXPTNpolyCross("Sorted segment expected here - bind");
    SegmentThread* thr = sweepline.modifyThread(_tseg1->threadID(), _tseg2);
    
    // action is taken only for points in the second polygon
@@ -894,7 +913,8 @@ polycross:: YQ::YQ(DBbox& overlap)
  */
 polycross::SegmentThread* polycross::YQ::beginThread(polycross::polysegment* startseg)
 {
-   assert(0 == startseg->threadID());
+   if (0 != startseg->threadID())
+      EXPTNpolyCross("Unsorted segment expected here");
    SegmentThread* above = _bottomSentinel;
    while (sCompare(startseg, above->cseg()) > 0)
       above = above->threadAbove();
@@ -917,14 +937,17 @@ polycross::SegmentThread* polycross::YQ::endThread(unsigned threadID)
 {
    // get the thread from the _cthreads
    Threads::iterator threadP = _cthreads.find(threadID);
-   assert(_cthreads.end() != threadP);
+   if (_cthreads.end() == threadP)
+      EXPTNpolyCross("Segment thread not found in YQ - end");
    SegmentThread* thread = threadP->second;
    // relink above/below threads
    SegmentThread* nextT = thread->threadAbove();
-   assert(NULL != nextT);
+   if (NULL == nextT)
+      EXPTNpolyCross("Unable to remove the segment thread properly");
    nextT->set_threadBelow(thread->threadBelow());
    SegmentThread* prevT = thread->threadBelow();
-   assert(NULL != prevT);
+   if (NULL == prevT)
+      EXPTNpolyCross("Unable to remove the segment thread properly");
    prevT->set_threadAbove(thread->threadAbove());
    // erase it
    _cthreads.erase(threadP);
@@ -941,7 +964,8 @@ polycross::SegmentThread* polycross::YQ::modifyThread(unsigned threadID, polyseg
 {
    // get the thread from the _cthreads
    Threads::iterator threadP = _cthreads.find(threadID);
-   assert(_cthreads.end() != threadP);
+   if (_cthreads.end() == threadP)
+      EXPTNpolyCross("Segment thread not found in YQ - modify");
    SegmentThread* thread = threadP->second;
    newsegment->set_threadID(threadID);
    polysegment* oldsegment = thread->set_cseg(newsegment);
@@ -960,13 +984,17 @@ polycross::SegmentThread* polycross::YQ::swapThreads(unsigned tAID, unsigned tBI
    // get the threads from the _cthreads
    Threads::iterator tiAbove = _cthreads.find(tAID);
    Threads::iterator tiBelow = _cthreads.find(tBID);
-   assert(_cthreads.end() != tiAbove);
-   assert(_cthreads.end() != tiBelow);
+   if (_cthreads.end() == tiAbove)
+      EXPTNpolyCross("Segment thread not found in YQ - swap");
+   if (_cthreads.end() == tiBelow)
+      EXPTNpolyCross("Segment thread not found in YQ - swap");
    SegmentThread* tAbove = tiAbove->second;
    SegmentThread* tBelow = tiBelow->second;
    // relink above/below threads
-   assert(tAbove == tBelow->threadAbove());
-   assert(tBelow == tAbove->threadBelow());
+   if (tAbove != tBelow->threadAbove())
+      EXPTNpolyCross("Unable to swap the segment threads properly");
+   if (tBelow != tAbove->threadBelow())
+      EXPTNpolyCross("Unable to swap the segment threads properly");
    // first  fix the pointers of the neighboring threads
    tBelow->threadBelow()->set_threadAbove(tAbove);
    tAbove->threadAbove()->set_threadBelow(tBelow);
@@ -983,14 +1011,16 @@ polycross::SegmentThread* polycross::YQ::swapThreads(unsigned tAID, unsigned tBI
 polycross::SegmentThread* polycross::YQ::getThread(unsigned tID)
 {
    Threads::iterator ti = _cthreads.find(tID);
-   assert(_cthreads.end() != ti);
+   if (_cthreads.end() == ti)
+      EXPTNpolyCross("Segment thread not found in YQ - get");
    return ti->second;
 }
 
 int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
 {
    // Current point is always lp of seg0
-   assert(seg0 != seg1);
+   if (seg0 == seg1)
+      EXPTNpolyCross("Different segments expected here");
    //
    int ori;
    ori = orientation(seg1->lP(), seg1->rP(), seg0->lP());
@@ -1012,7 +1042,8 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
 //       order = xyorder(seg1->rP(), seg0->rP());
    else
       order = (seg0->edge() > seg1->edge()) ? 1 : -1;
-   assert(0 != order);
+   if (0 == order)
+      EXPTNpolyCross("Segments undistinguishable");
    return order;
 }
 
@@ -1122,7 +1153,6 @@ void polycross::XQ::sweep2bind(BindCollection& bindColl) {
       avl_delete(_xqueue,evtlist);
    }
 }
-
 
 //==============================================================================
 // BindCollection
