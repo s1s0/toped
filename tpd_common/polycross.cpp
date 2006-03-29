@@ -1,3 +1,29 @@
+//===========================================================================
+//                                                                          =
+//   This program is free software; you can redistribute it and/or modify   =
+//   it under the terms of the GNU General Public License as published by   =
+//   the Free Software Foundation; either version 2 of the License, or      =
+//   (at your option) any later version.                                    =
+// ------------------------------------------------------------------------ =
+//                  TTTTT    OOO    PPPP    EEEE    DDDD                    =
+//                  T T T   O   O   P   P   E       D   D                   =
+//                    T    O     O  PPPP    EEE     D    D                  =
+//                    T     O   O   P       E       D   D                   =
+//                    T      OOO    P       EEEEE   DDDD                    =
+// ------------------------------------------------------------------------ =
+//           $URL: svn+ssh://s_krustev@svn.berlios.de/svnroot/repos/toped/branches/LOGICOP/tpd_DB/logicop.cpp $
+//        Created: Tue Mar 21 2006
+//         Author: s_krustev@yahoo.com
+//      Copyright: (C) 2001-2006 by Svilen Krustev
+//    Description: Modified Bentley-Ottman algorithm
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision: 137 $
+//          $Date: 2006-03-29 01:09:04 +0100 (Wed, 29 Mar 2006) $
+//        $Author: s_krustev $
+//===========================================================================
+
 #include <math.h>
 #include <algorithm>
 #include "polycross.h"
@@ -13,14 +39,8 @@ SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
 extern "C" {
    avl_table* avl_create (avl_comparison_func *, const void *, libavl_allocator *);
    void **avl_probe (struct avl_table *, void *);
-//   void       avl_destroy (struct avl_table *, avl_item_func *);
-//   void*      avl_t_next (avl_traverser *);
-//   void*      avl_t_prev (avl_traverser *);
    void*      avl_delete (avl_table *, const void *);
-//   void*      avl_t_find (avl_traverser *, avl_table *, void *);
-//   void*      avl_t_insert (avl_traverser *, avl_table *, void *);
    void*      avl_t_first (avl_traverser *, avl_table *);
-//   void*      avl_t_replace (avl_traverser *, void *);
 }
 
 //==============================================================================
@@ -787,8 +807,8 @@ polycross::EventVertex::EventVertex(TEvent* tevent)
 void polycross::EventVertex::addEvent(TEvent* tevent)
 {
 #ifdef BO2_DEBUG
-      printf("++New event added in vertex ( %i , %i ) on top of the pending %i +++++\n",
-             _evertex->x(), _evertex->y(), _events.size());
+      printf("++New event added in vertex ( %i , %i ) on top of the pending %u +++++\n",
+             _evertex->x(), _evertex->y(), unsigned(_events.size()));
 #endif
    _events.push_back(tevent);
 }
@@ -799,8 +819,8 @@ void polycross::EventVertex::addCrossEvent(TcEvent* tevent)
         CE != _crossevents.end(); CE++)
       if ((**CE) == *tevent) return;
 #ifdef BO2_DEBUG
-      printf("++New cross event added in vertex ( %i , %i ) on top of the pending %i +++++\n",
-             _evertex->x(), _evertex->y(), _crossevents.size());
+      printf("++New cross event added in vertex ( %i , %i ) on top of the pending %u +++++\n",
+             _evertex->x(), _evertex->y(), unsigned(_crossevents.size()));
 #endif
    _crossevents.push_back(tevent);
 }
@@ -819,7 +839,8 @@ void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq)
    _threadsSweeped.unique();
 #ifdef BO2_DEBUG
       if (!_crossevents.empty())
-         printf("  %i cross event(s) encountered in this point initially \n", _crossevents.size());
+         printf("  %u cross event(s) encountered in this point initially \n",
+                unsigned(_crossevents.size()));
 #endif
    while (!_crossevents.empty())
    {

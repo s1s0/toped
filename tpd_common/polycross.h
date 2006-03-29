@@ -1,3 +1,29 @@
+//===========================================================================
+//                                                                          =
+//   This program is free software; you can redistribute it and/or modify   =
+//   it under the terms of the GNU General Public License as published by   =
+//   the Free Software Foundation; either version 2 of the License, or      =
+//   (at your option) any later version.                                    =
+// ------------------------------------------------------------------------ =
+//                  TTTTT    OOO    PPPP    EEEE    DDDD                    =
+//                  T T T   O   O   P   P   E       D   D                   =
+//                    T    O     O  PPPP    EEE     D    D                  =
+//                    T     O   O   P       E       D   D                   =
+//                    T      OOO    P       EEEEE   DDDD                    =
+// ------------------------------------------------------------------------ =
+//           $URL: svn+ssh://s_krustev@svn.berlios.de/svnroot/repos/toped/branches/LOGICOP/tpd_DB/logicop.h $
+//        Created: Tue Mar 21 2006
+//         Author: s_krustev@yahoo.com
+//      Copyright: (C) 2001-2006 by Svilen Krustev
+//    Description: Modified Bentley-Ottman algorithm
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision: 137 $
+//          $Date: 2006-03-29 01:09:04 +0100 (Wed, 29 Mar 2006) $
+//        $Author: s_krustev $
+//===========================================================================
+
 #ifndef PLYCROSS_H_INCLUDED
 #define PLYCROSS_H_INCLUDED
 
