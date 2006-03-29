@@ -404,7 +404,7 @@ namespace logicop {
    class BindSegment {
    public:
                         BindSegment(unsigned p0s, unsigned p1s, const TP* p0p, const TP* p1p,
-                        real dist) : _poly0seg(p0s), _poly1seg(p1s), _poly0pnt(p0p), 
+                        real dist) : _poly0seg(p0s), _poly1seg(p1s), _poly0pnt(p0p),
                                                   _poly1pnt(p1p), _distance(dist) {};
       unsigned          poly0seg() { return _poly0seg;};
       unsigned          poly1seg() { return _poly1seg;};

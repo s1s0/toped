@@ -28,10 +28,9 @@ extern "C" {
  * Determines the lexicographical order of two points comparing X first. 
  * @param p1 - first point for comparison
  * @param p2 - second point for comparison
- * @return
-   - +1 -> p1  > p2
-   - -1 -> p1  < p2
-   -  0 -> p1 == p2
+ * @return +1 -> p1  > p2
+           -1 -> p1  < p2
+            0 -> p1 == p2
  */
 int polycross::xyorder(const TP* p1, const TP* p2) {
    // first check that the pointers are the same
@@ -55,6 +54,17 @@ int polycross::orientation(const TP* p1, const TP* p2, const TP* p3)
       return (area > 0) ? 1 : -1;
 }
 
+/**
+ * Cheeck whether point p lies inside the segment defined by p1 and p2. The
+function assumes that p lies on the line defined by p1 and p2
+ * @param p1 first point defining the input segment
+ * @param p2 second point defining the input segment
+ * @param p the point to be checked
+ * @return < 0  the point is outside the segment
+           = 0  the point coinsides with one of the segment endpoints
+           > 0  the point is inside the segment
+
+ */
 float polycross::getLambda( const TP* p1, const TP* p2, const TP* p)
 {
    float denomX = p2->x() - p->x();
@@ -115,6 +125,16 @@ polycross::VPoint* polycross::CPoint::follower(bool& direction, bool modify) {
 }
 
 //==============================================================================
+// class CPoint
+polycross::VPoint* polycross::BPoint::follower(bool& direction, bool modify) {
+   if (modify) {
+      direction = !direction;
+      return direction ? _next : _prev;
+   }
+   else return _link;
+}
+
+//==============================================================================
 // SortLine
 
 bool polycross::SortLine::operator() (CPoint* cp1, CPoint* cp2) {
@@ -165,6 +185,13 @@ void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
    }
 }
 
+polycross::BPoint* polycross::polysegment::insertBindPoint(const TP* pnt)
+{
+   BPoint* cp = new BPoint(pnt);
+   crosspoints.push_back(cp);
+   return cp;
+}
+
 //==============================================================================
 // class segmentlist
 
@@ -176,9 +203,9 @@ polycross::segmentlist::segmentlist(const pointlist& plst, byte plyn) {
       _segs.push_back(new polysegment(&(plst[i]),&(plst[(i+1)%plysize]),i, plyn));
 }
 
-// polycross::BPoint* logicop::segmentlist::insertbindpoint(unsigned segno, const TP* point) {
-//    return _segs[segno]->insertbindpoint(point);
-// }
+polycross::BPoint* polycross::segmentlist::insertbindpoint(unsigned segno, const TP* point) {
+    return _segs[segno]->insertBindPoint(point);
+}
 
 polycross::segmentlist::~segmentlist() {
    for (unsigned i = 0; i < _segs.size(); i++)
@@ -315,10 +342,6 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
 
 TP* polycross::TEvent::joiningSegments(polysegment* above, polysegment* below, float lps, float rps)
 {
-   // getLambda returns : < 0  the point is outside the segment
-   //                     = 0  the point coinsides with one of the
-   //                          segment endpoints
-   //                     > 0  the point is inside the segment
    if (0 == lps)
    {
       if (0 > getLambda(above->lP(), above->rP(), below->lP())) return NULL;
@@ -532,6 +555,28 @@ void polycross::TbEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    }
 }
 
+
+void polycross::TbEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
+{
+   // create the threads
+   SegmentThread* athr = sweepline.beginThread(_aseg);
+   SegmentThread* bthr = sweepline.beginThread(_bseg);
+   assert(athr->threadAbove() != bthr);
+   assert(bthr->threadBelow() != athr);
+   // action is taken only for points in the second polygon
+   if (1 == _aseg->polyNo() == _bseg->polyNo()) return;
+   // assuming that the polygons are not crossing ...
+   assert((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr));
+   // if left point is above and the neighbour above is from polygon 1
+   if ((_aseg->lP()->y() >= _aseg->rP()->y()) &&
+        (1 == athr->threadAbove()->cseg()->polyNo()))
+      bindColl.update_BL(athr->threadAbove()->cseg(), _aseg->edge(), _aseg->lP());
+   // if the left point is below and the neighbour below is from polygon 1
+   if ((_bseg->lP()->y() <= _bseg->rP()->y()) &&
+        (1 == bthr->threadBelow()->cseg()->polyNo()))
+      bindColl.update_BL(bthr->threadBelow()->cseg(), _bseg->edge(), _bseg->lP());
+}
+
 //==============================================================================
 // TeEvent
 
@@ -586,6 +631,31 @@ void polycross::TeEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    BO_printseg(_bseg)
    sweepline.report();
 #endif
+}
+
+void polycross::TeEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
+{
+   SegmentThread* athr = sweepline.getThread(_aseg->threadID());
+   SegmentThread* bthr = sweepline.getThread(_bseg->threadID());
+   assert(athr->threadAbove() != bthr);
+   assert(bthr->threadBelow() != athr);
+   // action is taken only for points in the second polygon
+   if (2 == _aseg->polyNo() == _bseg->polyNo())
+   {
+      // assuming that the polygons are not crossing ...
+      assert((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr));
+      // if right point is above and the neighbour above is from polygon 1
+      if ((_aseg->lP()->y() <= _aseg->rP()->y()) &&
+            (1 == athr->threadAbove()->cseg()->polyNo()))
+         bindColl.update_BL(athr->threadAbove()->cseg(), _aseg->edge(), _aseg->rP());
+      // if the right point is below and the neighbour below is from polygon 1
+      if ((_bseg->lP()->y() >= _bseg->rP()->y()) &&
+            (1 == bthr->threadBelow()->cseg()->polyNo()))
+         bindColl.update_BL(bthr->threadBelow()->cseg(), _bseg->edge(), _bseg->rP());
+   }
+   // delete the threads
+   sweepline.endThread(_aseg->threadID());
+   sweepline.endThread(_bseg->threadID());
 }
 
 //==============================================================================
@@ -643,6 +713,35 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
             threadl.push_back(_tseg2->threadID());
       }
    }
+}
+
+void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
+{
+   assert(0 != _tseg1->threadID());
+   SegmentThread* thr = sweepline.modifyThread(_tseg1->threadID(), _tseg2);
+   
+   // action is taken only for points in the second polygon
+   if (1 == _tseg1->polyNo() == _tseg2->polyNo()) return;
+   
+   // first for _tseg1 
+   // if right point is above and the neighbour above is from polygon 1
+   if ((_tseg1->lP()->y() <= _tseg1->rP()->y()) &&
+        (1 == thr->threadAbove()->cseg()->polyNo()))
+      bindColl.update_BL(thr->threadAbove()->cseg(), _tseg1->edge(), _tseg1->rP());
+   // if the right point is below and the neighbour below is from polygon 1
+   if ((_tseg1->lP()->y() >= _tseg1->rP()->y()) &&
+        (1 == thr->threadBelow()->cseg()->polyNo()))
+      bindColl.update_BL(thr->threadBelow()->cseg(), _tseg1->edge(), _tseg1->rP());
+   
+   // then for _tseg2
+   // if left point is above and the neighbour above is from polygon 1
+   if ((_tseg2->lP()->y() >= _tseg2->rP()->y()) &&
+        (1 == thr->threadAbove()->cseg()->polyNo()))
+      bindColl.update_BL(thr->threadAbove()->cseg(), _tseg2->edge(), _tseg2->lP());
+   // if the left point is below and the neighbour below is from polygon 1
+   if ((_tseg2->lP()->y() <= _tseg2->rP()->y()) &&
+        (1 == thr->threadBelow()->cseg()->polyNo()))
+      bindColl.update_BL(thr->threadBelow()->cseg(), _tseg2->edge(), _tseg2->lP());
 }
 
 //==============================================================================
@@ -728,6 +827,19 @@ void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq)
       cevent->sweep(eventq, sweepline, _threadsSweeped);
    }
 }
+
+void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)
+{
+#ifdef BO2_DEBUG
+   printf("______________ POINT = ( %i , %i ) ___________\n", _evertex->x(), _evertex->y());
+#endif
+   while (!_events.empty())
+   {
+      TEvent* cevent = _events.front(); _events.pop_front();
+      cevent->sweep2bind(sweepline, bindColl);
+   }
+}
+
 //===========================================================================
 // Segment Thread
 polycross::polysegment* polycross::SegmentThread::set_cseg(polysegment* cs)
@@ -894,9 +1006,9 @@ void polycross::YQ::report()
       current = current->threadBelow();
    }
 }
+
 //==============================================================================
 // XQ
-
 polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
       _overlap(*(seg1[0]->lP()))
 {
@@ -974,4 +1086,80 @@ void polycross::XQ::sweep()
       evtlist->sweep(*_sweepline, *this);
       avl_delete(_xqueue,evtlist);
    }
+}
+
+void polycross::XQ::sweep2bind(BindCollection& bindColl) {
+#ifdef BO2_DEBUG
+      printf("***************** START BIND SWIPING ******************\n");
+#endif
+   EventVertex* evtlist;
+   avl_traverser trav;
+   while (NULL != avl_t_first(&trav,_xqueue))
+   {
+      evtlist = (EventVertex*)trav.avl_node->avl_data;
+      evtlist->sweep2bind(*_sweepline, bindColl);
+      avl_delete(_xqueue,evtlist);
+   }
+}
+
+
+//==============================================================================
+// BindCollection
+void polycross::BindCollection::update_BL(polysegment* outseg, unsigned poly1seg,
+                                          const TP* poly1pnt)
+{
+   unsigned poly0seg = outseg->edge();
+   // calculate the distance between the point poly1pnt and the segment poly0seg
+   // first calculate the coefficients of the poly0seg line equation
+   real A = outseg->rP()->y() - outseg->lP()->y();
+   real B = outseg->lP()->x() - outseg->rP()->x();
+   real C = -(A*outseg->lP()->x() + B*outseg->lP()->y());
+   assert((A != 0) || (B != 0));
+   // find the point poly0pnt where the perpendicular from poly1pnt to
+   // poly0seg crosses the latter
+   real line1 = A*poly1pnt->x() + B*poly1pnt->y() + C;
+   real denom = A*A + B*B;
+   real X = poly1pnt->x() - (A / denom) * line1;
+   real Y = poly1pnt->y() - (B / denom) * line1;
+   TP* poly0pnt = new TP((int)rint(X),(int)rint(Y));
+   // if the point lies inside the segment
+   if (getLambda(outseg->lP(), outseg->rP(), poly0pnt) >= 0)
+   {
+      // get the distance
+      real distance = fabs(line1 / sqrt(denom));
+      // and if it's shorter than already stored one, for this segment
+      // or of no distance calculated fro this segment
+      if (is_shorter(poly0seg, distance))
+         // store the data
+         _blist.push_back(new BindSegment(poly0seg, poly1seg, poly0pnt, poly1pnt, distance));
+      else delete poly0pnt;
+   }
+   else delete poly0pnt;
+}
+
+bool polycross::BindCollection::is_shorter(unsigned segno, real dist)
+{
+   for (BindList::iterator BI = _blist.begin(); BI != _blist.end(); BI++)
+   {
+      if ((*BI)->poly0seg() == segno)
+      {
+         if ((*BI)->distance() > dist)
+         {
+            delete (*BI);
+            _blist.erase(BI);
+            return true;
+         }
+         else return false;
+      }
+   }
+   return true;
+}
+
+polycross::BindSegment* polycross::BindCollection::get_highest()
+{
+   BindList::iterator BI = _blist.begin();
+   BindSegment* shseg = *BI;
+   while (++BI != _blist.end())
+      if ((*BI)->poly1pnt()->y() > shseg->poly1pnt()->y()) shseg = *BI;
+   return shseg;
 }

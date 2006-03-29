@@ -841,32 +841,32 @@ polycross::VPoint* logicop::logic::getFirstOutside(const pointlist& plist, polyc
 
 
 pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside) {
-   segmentlist _segl0(outside,0);
-   segmentlist _segl1(inside,1);
-   EventQueue* _eq = new EventQueue(_segl0, _segl1); // create the event queue
-   SweepLine   _sl;
-   BindCollection BC;
-   _eq->swipe4bind(_sl, BC);
-   BindSegment* sbc = BC.get_highest();
+   polycross::segmentlist _seg1(outside,1);
+   polycross::segmentlist _seg2(inside  ,2);
+   polycross::XQ* _eq = new polycross::XQ(_seg1, _seg2); // create the event queue
+   polycross::BindCollection BC;
+   
+   _eq->sweep2bind(BC);
+   polycross::BindSegment* sbc = BC.get_highest();
    //insert 2 crossing points and link them
-   BPoint* cpsegA = _segl0.insertbindpoint(sbc->poly0seg(), sbc->poly0pnt());
-   BPoint* cpsegB = _segl1.insertbindpoint(sbc->poly1seg(), sbc->poly1pnt());
+   polycross::BPoint* cpsegA = _seg1.insertbindpoint(sbc->poly0seg(), sbc->poly0pnt());
+   polycross::BPoint* cpsegB = _seg2.insertbindpoint(sbc->poly1seg(), sbc->poly1pnt());
    cpsegA->linkto(cpsegB);
    cpsegB->linkto(cpsegA);
 
    // normalize the segment lists
-   _segl0.normalize(outside);
-   _segl1.normalize(inside);
+   _seg1.normalize(outside);
+   _seg2.normalize(inside);
    // dump the new polygons in VList terms
-   VPoint* outshape = _segl0.dump_points();
-                      _segl1.dump_points();
+   polycross::VPoint* outshape = _seg1.dump_points();
+   _seg2.dump_points();
    
    // traverse and form the resulting shape
-   VPoint* centinel = outshape;
+   polycross::VPoint* centinel = outshape;
    pointlist *shgen = new pointlist();
    bool direction = true; /*next*/
-   VPoint* pickup = centinel;
-   VPoint* prev = centinel->prev();
+   polycross::VPoint* pickup = centinel;
+   polycross::VPoint* prev = centinel->prev();
    bool modify = false;
    do {
       shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
@@ -882,50 +882,119 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
       std::ostringstream ost;
       ost << ": Resulting shape is invalid - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str().c_str());
-   }   
+   }
    else {
       if (laydata::shp_OK != check.status())
          *shgen = check.get_validated();
-   }         
+   }
    
    return shgen;
 }
 
-void logicop::BindCollection::update_BL(plysegment* outseg, Event* evt) {
+// pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside) {
+//    segmentlist _segl0(outside,0);
+//    segmentlist _segl1(inside,1);
+//    EventQueue* _eq = new EventQueue(_segl0, _segl1); // create the event queue
+//    SweepLine   _sl;
+//    BindCollection BC;
+//    _eq->swipe4bind(_sl, BC);
+//    BindSegment* sbc = BC.get_highest();
+//    //insert 2 crossing points and link them
+//    BPoint* cpsegA = _segl0.insertbindpoint(sbc->poly0seg(), sbc->poly0pnt());
+//    BPoint* cpsegB = _segl1.insertbindpoint(sbc->poly1seg(), sbc->poly1pnt());
+//    cpsegA->linkto(cpsegB);
+//    cpsegB->linkto(cpsegA);
+// 
+//    // normalize the segment lists
+//    _segl0.normalize(outside);
+//    _segl1.normalize(inside);
+//    // dump the new polygons in VList terms
+//    VPoint* outshape = _segl0.dump_points();
+//                       _segl1.dump_points();
+//    
+//    // traverse and form the resulting shape
+//    VPoint* centinel = outshape;
+//    pointlist *shgen = new pointlist();
+//    bool direction = true; /*next*/
+//    VPoint* pickup = centinel;
+//    VPoint* prev = centinel->prev();
+//    bool modify = false;
+//    do {
+//       shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
+//       modify = (-1 == prev->visited());
+//       prev = pickup;
+//       pickup = pickup->follower(direction, modify);
+//    } while (pickup != centinel);
+// 
+//    // Validate the resulting polygon
+//    laydata::valid_poly check(*shgen);
+// //   delete shgen;
+//    if (!check.valid()) {
+//       std::ostringstream ost;
+//       ost << ": Resulting shape is invalid - " << check.failtype();
+//       tell_log(console::MT_ERROR, ost.str().c_str());
+//    }   
+//    else {
+//       if (laydata::shp_OK != check.status())
+//          *shgen = check.get_validated();
+//    }         
+//    
+//    return shgen;
+// }
+
+void logicop::BindCollection::update_BL(plysegment* outseg, Event* evt)
+{
    unsigned poly0seg = outseg->edge;
    unsigned poly1seg = evt->edgeNo();
    const TP* poly1pnt = evt->evertex();
+   // calculate the distance between the point poly1pnt and the segment poly0seg
+   // first calculate the coefficients of the poly0seg line equation
    real A = outseg->rP->y() - outseg->lP->y();
    real B = outseg->lP->x() - outseg->rP->x();
    real C = -(A*outseg->lP->x() + B*outseg->lP->y());
    assert((A != 0) || (B != 0));
+   // find the point poly0pnt where the perpendicular from poly1pnt to
+   // poly0seg crosses the latter
    real line1 = A*poly1pnt->x() + B*poly1pnt->y() + C;
    real denom = A*A + B*B;
    real X = poly1pnt->x() - (A / denom) * line1;
    real Y = poly1pnt->y() - (B / denom) * line1;
    TP* poly0pnt = new TP((int)rint(X),(int)rint(Y));
-   if (isLeft(outseg->lP, outseg->rP, poly0pnt) == 0) {
+   // if the point lies inside the segment
+   if (isLeft(outseg->lP, outseg->rP, poly0pnt) == 0)
+   {
+      // get the distance
       real distance = fabs(line1 / sqrt(denom));
+      // and if it's shorter than already stored one for this segment
+      // or of no distance calculated fro this segment
       if (is_shorter(poly0seg, distance))
+         // store the data
          _blist.push_back(new BindSegment(poly0seg, poly1seg, poly0pnt, poly1pnt, distance));
       else delete poly0pnt;
    }
    else delete poly0pnt;
 }
 
-bool logicop::BindCollection::is_shorter(unsigned segno, real dist) {
+bool logicop::BindCollection::is_shorter(unsigned segno, real dist)
+{
    for (BindList::iterator BI = _blist.begin(); BI != _blist.end(); BI++)
+   {
       if ((*BI)->poly0seg() == segno)
-         if ((*BI)->distance() > dist) {
+      {
+         if ((*BI)->distance() > dist)
+         {
             delete (*BI);
             _blist.erase(BI);
             return true;
          }
          else return false;
-   return true;      
+      }
+   }
+   return true;
 }
 
-logicop::BindSegment* logicop::BindCollection::get_highest() {
+logicop::BindSegment* logicop::BindCollection::get_highest()
+{
    BindList::iterator BI = _blist.begin();
    logicop::BindSegment* shseg = *BI;
    while (++BI != _blist.end())
