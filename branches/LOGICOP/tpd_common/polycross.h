@@ -13,6 +13,7 @@ namespace polycross
    typedef std::list<unsigned> ThreadList;
    class YQ;
    class XQ;
+   class BindCollection;
    //===========================================================================
    // VPoint
    //===========================================================================
@@ -56,6 +57,20 @@ namespace polycross
    };
 
    //===========================================================================
+   // CPoint
+   //===========================================================================
+   class BPoint : public CPoint
+   {
+      public:
+      //! Creates a new BPoint simply by calling the CPoint constructor
+         BPoint(const TP* cp) : CPoint(cp) {};
+      //! Returns always 1 - VPoint is considered always visited
+         char              visited() const      {return -1;}
+      //! Returns the following point for the currently generated polygon
+         VPoint*           follower(bool& direction, bool modify = false);
+   };
+
+   //===========================================================================
    // SortLine
    //===========================================================================
    class SortLine
@@ -76,6 +91,7 @@ namespace polycross
          typedef std::vector<CPoint*> crossCList;
          polysegment(const TP*, const TP*, int, char);
          CPoint*           insertCrossPoint(const TP*);
+         BPoint*           insertBindPoint(const TP* pnt);
          unsigned          normalize(const TP*, const TP*);
          void              dump_points(polycross::VPoint*&);
          unsigned          threadID() const           {return _threadID;}
@@ -107,6 +123,7 @@ namespace polycross
          unsigned          size() const {return _segs.size();};
          unsigned          normalize(const pointlist&);
          VPoint*           dump_points();
+         BPoint*           insertbindpoint(unsigned segno, const TP* point);
          const pointlist*  originalPL() const {return _originalPL;}
       private:
          Segments          _segs;
@@ -121,6 +138,7 @@ namespace polycross
       public:
          TEvent(byte shapeID) : _shapeID(shapeID) {};
          virtual void      sweep(XQ&, YQ&, ThreadList&) = 0;
+         virtual void      sweep2bind(YQ&, BindCollection&) = 0;
          const TP*         evertex() {return _evertex;}
          byte              shapeID() {return _shapeID;}
          virtual          ~TEvent() {};
@@ -145,6 +163,7 @@ namespace polycross
       public:
          TbEvent(polysegment*, polysegment*, byte);
          void              sweep(XQ&, YQ&, ThreadList&);
+         void              sweep2bind(YQ&, BindCollection&);
       private:
          polysegment*      _aseg;
          polysegment*      _bseg;
@@ -158,6 +177,7 @@ namespace polycross
       public:
          TeEvent(polysegment*, polysegment*, byte);
          void              sweep(XQ&, YQ&, ThreadList&);
+         void              sweep2bind(YQ&, BindCollection&);
       private:
          polysegment*      _aseg;
          polysegment*      _bseg;
@@ -171,6 +191,7 @@ namespace polycross
       public:
          TmEvent(polysegment*, polysegment*, byte);
          void              sweep(XQ&, YQ&, ThreadList&);
+         void              sweep2bind(YQ&, BindCollection&);
       private:
          polysegment*      _tseg1;
          polysegment*      _tseg2;
@@ -185,6 +206,7 @@ namespace polycross
          TcEvent(TP* ev, unsigned tAID, unsigned tBID): TEvent(0), 
                      _threadAboveID(tAID), _threadBelowID(tBID) {_evertex = ev;}
          void              sweep(XQ&, YQ&, ThreadList&);
+         void              sweep2bind(YQ&, BindCollection&) {assert(false);}
          bool              operator == (const TcEvent&) const;
       private:
          unsigned          _threadAboveID;
@@ -202,6 +224,7 @@ namespace polycross
          void              addEvent(TEvent*);
          void              addCrossEvent(TcEvent*);
          void              sweep(YQ&, XQ&);
+         void              sweep2bind(YQ&, BindCollection&);
       private:
          typedef std::list<TEvent*> Events;
          typedef std::list<TcEvent*> CrossEvents;
@@ -276,6 +299,7 @@ namespace polycross
       public:
          XQ(const segmentlist &, const segmentlist&);
          void              sweep();
+         void              sweep2bind(BindCollection&);
          void              addCrossEvent(TP*, unsigned, unsigned);
          const pointlist*  opl1() const {return _osl1->originalPL();}
          const pointlist*  opl2() const {return _osl2->originalPL();}
@@ -291,6 +315,42 @@ namespace polycross
          TP                _top_right;
          const segmentlist* _osl1;
          const segmentlist* _osl2;
+   };
+
+   //===========================================================================
+   // Bind segment
+   //===========================================================================
+   class BindSegment
+   {
+      public:
+         BindSegment(unsigned p0s, unsigned p1s, const TP* p0p, const TP* p1p,
+                     real dist) : _poly0seg(p0s), _poly1seg(p1s), _poly0pnt(p0p),
+         _poly1pnt(p1p), _distance(dist) {};
+         unsigned          poly0seg() { return _poly0seg;};
+         unsigned          poly1seg() { return _poly1seg;};
+         const TP*         poly0pnt() const {return _poly0pnt;}
+         const TP*         poly1pnt() const {return _poly1pnt;}
+         real              distance() { return _distance;};
+      private:
+         unsigned          _poly0seg;
+         unsigned          _poly1seg;
+         const TP*         _poly0pnt;
+         const TP*         _poly1pnt;
+         real              _distance;
+   };
+   
+   //===========================================================================
+   // Bind segment
+   //===========================================================================
+   class BindCollection
+   {
+      public:
+         void              update_BL(polysegment*, unsigned, const TP*);
+         BindSegment*      get_highest();
+      private:
+         typedef std::list<BindSegment*> BindList;
+         bool              is_shorter(unsigned segno, real dist);
+         BindList          _blist;
    };
 
 }
