@@ -375,8 +375,8 @@ void cut_test7() {
    addbox({{0,0},{10,10}},2);
    select_all();
    addbox({{0,0},{5,5}},4);
-//   polycut({{0,0},{0,5},{10,5},{10,0}});
-//   move({0,0},{15,0});
+   polycut({{0,0},{0,5},{5,5},{5,0}});
+   move({0,0},{15,0});
 }
 
 void cut_test1A() {
@@ -523,6 +523,35 @@ void edge_cut1()
    unselect_all();
 }
 
+void edge_cut2() {
+   newcell("edge_cut2");
+   opencell("edge_cut2");
+   addbox({{0,0} , {10,10}},2);
+   select({5.00,5.00});
+   addpoly({{-2,4},{0,4},{0,6},{3,6},{3,-2},{-2,-2}},4);
+   polycut({{-2,4},{0,4},{0,6},{3,6},{3,-2},{-2,-2}});
+   move({0,0},{15,0});
+   unselect_all();
+
+   select({5.00,5.00});
+   addpoly({{4,3},{4,0},{6,0},{6,-2},{12,-2},{12,3}},4);
+   polycut({{4,3},{4,0},{6,0},{6,-2},{12,-2},{12,3}});
+   move({0,0},{15,0});
+   unselect_all();
+
+   select({5.00,5.00});
+   addpoly({{7,4},{10,4},{10,6},{12,6},{12,12},{7,12}},4);
+   polycut({{7,4},{10,4},{10,6},{12,6},{12,12},{7,12}});
+   move({0,0},{15,0});
+   unselect_all();
+
+   select({5.00,5.00});
+   addpoly({{6,7},{6,10},{4,10},{4,12},{-2,12},{-2,7}},4);
+   polycut({{6,7},{6,10},{4,10},{4,12},{-2,12},{-2,7}});
+   move({0,0},{15,0});
+   unselect_all();
+}
+
 void edge_merge2() {
    newcell("edge_merge2");
    opencell("edge_merge2");
@@ -534,6 +563,7 @@ void edge_merge2() {
    select_all();
    merge();
 }
+
 
 void edge_merge1() 
 {
@@ -569,6 +599,7 @@ void all_tests()
    merge_test3();
    merge_test4();
    edge_cut1();
+   edge_cut2();
    edge_merge1();
    edge_merge2();
    zoomall();
@@ -577,9 +608,9 @@ void all_tests()
 layerSetup();
 screenSetup();
 newdesign("layout_logic");
-//all_tests();
 newcell("boza");
 opencell("boza");
+//all_tests();
 
 //opencell("top");
 //addpoly({{-9.5,21.5},{-9.5,33},{15,33},{15,21.5},{10.5,21.5},{10.5,28},{5.5,28},{5.5,21.5},{0,21.5},{0,28},{-6,28},{-6,21.5}},2);

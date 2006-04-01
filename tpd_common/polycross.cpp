@@ -475,7 +475,6 @@ TP* polycross::TEvent::getCross(polysegment* above, polysegment* below)
    real C2 = -(A2*below->lP()->x() + B2*below->lP()->y());
    assert((A1 != 0) || (A2 != 0));
    assert((B1 != 0) || (B2 != 0));
-   //SGREM
    // segments will coinside if    A1/A2 == B1/B2 == C1/C2
    // segments will be paraller if A1/A2 == B1/B2 != C1/C2
    real X,Y;
@@ -1030,16 +1029,16 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    if (ori != 0) return ori;
    // if it is still the same => we have coinciding segments
    int order;
-   // like that ....
-   if       (*(seg0->rP()) != *(seg1->rP()))
+   // like that .... malta cross case fails !
+/*   if       (*(seg0->rP()) != *(seg1->rP()))
       order = xyorder(seg0->rP(), seg1->rP());
    else if  (*(seg0->lP()) != *(seg1->lP()))
-      order = xyorder(seg1->lP(), seg0->lP());
+      order = xyorder(seg1->lP(), seg0->lP());*/
    // or like that - both ways it should work
-//    if       (*(seg0->lP()) != *(seg1->lP()))
-//          order = xyorder(seg0->lP(), seg1->lP());
-//    else if  (*(seg0->rP()) != *(seg1->rP()))
-//       order = xyorder(seg1->rP(), seg0->rP());
+   if       (*(seg0->lP()) != *(seg1->lP()))
+         order = xyorder(seg0->lP(), seg1->lP());
+   else if  (*(seg0->rP()) != *(seg1->rP()))
+      order = xyorder(seg1->rP(), seg0->rP());
    else
       order = (seg0->edge() > seg1->edge()) ? 1 : -1;
    if (0 == order)

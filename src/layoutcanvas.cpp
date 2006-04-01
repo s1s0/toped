@@ -201,7 +201,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
    #endif
    SetCurrent();
    update_viewport();
-//   SGREM !! Check somewhere that RGBA mode is available!?
+   //@TODO !! Check somewhere that RGBA mode is available!?
    // CTM matrix stuff
    glLoadIdentity();
    glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
