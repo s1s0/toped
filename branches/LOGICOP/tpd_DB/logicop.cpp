@@ -45,7 +45,11 @@ logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
    polycross::segmentlist _segl1(poly1,1);
    polycross::segmentlist _segl2(poly2,2);
    polycross::XQ* _eq = new polycross::XQ(_segl1, _segl2); // create the event queue
-   _eq->sweep();
+   try
+   {
+      _eq->sweep();
+   }
+   catch (EXPTNpolyCross) {return;}
 
    unsigned crossp1 = _segl1.normalize(poly1);
    unsigned crossp2 = _segl2.normalize(poly2);

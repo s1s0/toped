@@ -716,7 +716,7 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, const SGBitSet* pls
          pointlist* mlist = new pointlist(_plist);
          for (unsigned i = 0; i < _plist.size(); i++)
             (*mlist)[i] *= trans;
-         //TODO: It's a waste of resources to recheck every polygon again. What we need here is
+         //@TODO: It's a waste of resources to recheck every polygon again. What we need here is
          // only check for box. Validation classes has to be optimized
          laydata::valid_poly* check = new laydata::valid_poly(*mlist);
          if (!(laydata::shp_box & check->status()))
@@ -735,7 +735,7 @@ void laydata::tdtpoly::transfer(const CTM& trans) {
    for (unsigned i = 0; i < _plist.size(); i++) 
       _plist[i] *= trans;
    // normalize - taken 1:1 form valid_poly class
-   // TODO: Again - validation classes has to be optimized
+   // @TODO: Again - validation classes has to be optimized
    real area = 0;
    word size = _plist.size();
    word i,j;
@@ -910,7 +910,7 @@ DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of the segment 2
    // the corrections
    double denom = x32 * y21 - x21 * y32;
-//SGREM !!! THINK about next two lines!!!    They are wrong !!!
+// @fixme THINK about next two lines!!!    They are wrong !!!
    if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
    if (0 == L2) return NULL;
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
