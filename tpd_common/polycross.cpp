@@ -394,7 +394,7 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, X
    // coinsiding vertexes - register crossing point only if segments do not overlap
    // (apart from the common point)
    if (0 == lambdaL == lambdaR)
-      // coinsiding segments
+      // fully coinsiding segments
       return NULL;
    if ((0 == lambdaL) && (0 > lambdaR))
    {
@@ -427,9 +427,9 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, X
    // here we are generating "hidden" cross point, right in the middle of their
    // coinsiding segment
    if ((lambdaL < 0) && (lambdaR > 0))
-      return NULL;//getMiddle(lP(), below->rP());
+      return getMiddle(above->lP(), below->rP()); // return NULL;//
    if ((lambdaL > 0) && (lambdaR < 0))
-      return NULL;//getMiddle(below->lP(), rP());
+      return getMiddle(below->lP(), above->rP()); // return NULL;
    if ((lambdaL < 0) && (lambdaR < 0))
    {
       // below edge points are outside the above segment, this however
@@ -671,12 +671,9 @@ void polycross::TeEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
       throw EXPTNpolyCross("Invalid segment sort in thread end");
    if ((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr))
    {
-      // neighbours - check the case when right points are also crossing points
-      checkIntersect(_aseg, bthr->threadBelow()->cseg(), eventQ, _aseg->rP());
-      checkIntersect(athr->threadAbove()->cseg(), _bseg, eventQ, _bseg->rP());
-      // and new neighbours
+      // if the segments that are about to be removed are neighbours -
+      // check only their external neighbours
       checkIntersect(athr->threadAbove()->cseg(), bthr->threadBelow()->cseg(), eventQ);
-
    }
    else
    {
@@ -684,6 +681,10 @@ void polycross::TeEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
       checkIntersect(athr->threadAbove()->cseg(), athr->threadBelow()->cseg(), eventQ);
       checkIntersect(bthr->threadAbove()->cseg(), bthr->threadBelow()->cseg(), eventQ);
    }
+   // in all cases - check the case when right points are also crossing points
+   checkIntersect(_aseg, bthr->threadBelow()->cseg(), eventQ, _aseg->rP());
+   checkIntersect(athr->threadAbove()->cseg(), _bseg, eventQ, _bseg->rP());
+   // remove segment threads from the sweep line
    sweepline.endThread(_aseg->threadID());
    sweepline.endThread(_bseg->threadID());
 #ifdef BO2_DEBUG
