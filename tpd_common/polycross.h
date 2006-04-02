@@ -37,6 +37,7 @@ namespace polycross
    class XQ;
    class BindCollection;
    typedef std::list<unsigned> ThreadList;
+   typedef enum {_endE, _modifyE, _beginE, _crossE} EventTypes;
    
    int xyorder(const TP*, const TP*);
    int orientation(const TP*, const TP*, const TP*);
@@ -246,17 +247,15 @@ namespace polycross
    class EventVertex
    {
       public:
-         EventVertex(TEvent*);
+         EventVertex(const TP* evertex) : _evertex(evertex) {};
          const TP*         operator () () {return _evertex;};
-         void              addEvent(TEvent*);
-         void              addCrossEvent(TcEvent*);
+         void              addEvent(TEvent*, EventTypes);
          void              sweep(YQ&, XQ&);
          void              sweep2bind(YQ&, BindCollection&);
       private:
          typedef std::list<TEvent*> Events;
-         typedef std::list<TcEvent*> CrossEvents;
-         Events            _events;
-         CrossEvents       _crossevents;
+         typedef std::map<int, Events> AllEvents;
+         AllEvents         _events;
          const TP*         _evertex;
          ThreadList        _threadsSweeped;
    };
