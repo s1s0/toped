@@ -509,22 +509,29 @@ const pointlist laydata::tdtbox::shape2poly() {
    return _plist;
 };
 
-void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure) {
+void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
+{
    pointlist _plist = shape2poly();
    // and proceed in the same was as for the polygon
+   logicop::logic* operation;
+   try
+   {
+      operation = new logicop::logic(_plist, cutter);
+   }
+   catch (EXPTNpolyCross) {delete operation;return;}
    logicop::pcollection cut_shapes;
-   logicop::logic operation(_plist, cutter);
    laydata::tdtdata* newshape;
-   if (operation.AND(cut_shapes)) {
+   if (operation->AND(cut_shapes))
+   {
       logicop::pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut shapeList
       for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++) 
          if (NULL != (newshape = createValidShape(**CI)))
             decure[1]->push_back(newshape);
       // if there is a cut - there will be (most likely) be cut remains as well
-      operation.reset_visited();
+      operation->reset_visited();
       logicop::pcollection rest_shapes;
-      if (operation.ANDNOT(rest_shapes))
+      if (operation->ANDNOT(rest_shapes))
          // add the resulting cut remainings to the_rest shapeList
          for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++) 
             if (NULL != (newshape = createValidShape(**CI)))
@@ -532,6 +539,7 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure) {
       // and finally add this to the_delete shapelist
       decure[0]->push_back(this);
    }
+   delete operation;
 }
 
 pointlist& laydata::tdtbox::movePointsSelected(const SGBitSet* pset, 
@@ -771,20 +779,27 @@ bool laydata::tdtpoly::point_inside(TP pnt) {
    return (cc & 0x01) ? true : false;
 }
 
-void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure) {
+void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
+{
+   logicop::logic* operation;
+   try
+   {
+      operation = new logicop::logic(_plist, cutter);
+   }
+   catch (EXPTNpolyCross) {delete operation;return;}
    logicop::pcollection cut_shapes;
-   logicop::logic operation(_plist, cutter);
    laydata::tdtdata* newshape;
-   if (operation.AND(cut_shapes)) {
+   if (operation->AND(cut_shapes))
+   {
       logicop::pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut shapeList
       for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
          if (NULL != (newshape = createValidShape(**CI)))
             decure[1]->push_back(newshape);
       // if there is a cut - there should be cut remains as well
-      operation.reset_visited();
+      operation->reset_visited();
       logicop::pcollection rest_shapes;
-      if (operation.ANDNOT(rest_shapes))
+      if (operation->ANDNOT(rest_shapes))
          // add the resulting cut remainings to the_rest shapeList
          for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++) 
             if (NULL != (newshape = createValidShape(**CI)))
@@ -792,6 +807,7 @@ void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure) {
       // and finally add this to the_delete shapelist
       decure[0]->push_back(this);
    }
+   delete operation;
 }
 
 void laydata::tdtpoly::info(std::ostringstream& ost) const {
@@ -1957,14 +1973,21 @@ laydata::tdtdata* laydata::createValidShape(const pointlist& pl) {
 
 laydata::tdtdata* laydata::polymerge(const pointlist& _plist0, const pointlist& _plist1) {
    if(_plist0.empty() || _plist1.empty()) return NULL;
+   logicop::logic* operation;
+   try
+   {
+      operation = new logicop::logic(_plist0, _plist1);
+   }
+   catch (EXPTNpolyCross) {delete operation;return NULL;}
    logicop::pcollection merge_shape;
-   logicop::logic operation(_plist0, _plist1);
-   if (operation.OR(merge_shape)) {
+   laydata::tdtdata* resShape = NULL;
+   if (operation->OR(merge_shape)) {
       assert(1 == merge_shape.size());
-      return createValidShape(**merge_shape.begin());
+      resShape = createValidShape(**merge_shape.begin());
 //      return new laydata::tdtpoly(**merge_shape.begin());
    }
-   else return NULL;
+   delete operation;
+   return resShape;
 }
 
 void laydata::draw_select_mark(const TP& pnt) {

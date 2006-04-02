@@ -44,17 +44,16 @@ logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
                                                 _poly1(poly1), _poly2(poly2) {
    polycross::segmentlist _segl1(poly1,1);
    polycross::segmentlist _segl2(poly2,2);
-   polycross::XQ* _eq = new polycross::XQ(_segl1, _segl2); // create the event queue
-   try
-   {
-      _eq->sweep();
-   }
-   catch (EXPTNpolyCross) {return;}
-
+   // create the event queue
+   polycross::XQ* _eq = new polycross::XQ(_segl1, _segl2);
+   // BO modified algorithm
+   _eq->sweep();
    unsigned crossp1 = _segl1.normalize(poly1);
    unsigned crossp2 = _segl2.normalize(poly2);
    assert(crossp1 == crossp2);
    _crossp = crossp1;
+   if (1 == _crossp)
+      throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
    delete _eq;
    _shape1 = _segl1.dump_points();
    _shape2 = _segl2.dump_points();
