@@ -363,7 +363,9 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
 }
 
 /**
- * Method should be called with one of lps/rps parameters equal to 0
+ * Method should be called with one of lps/rps parameters equal to 0. Crossing
+point is returned only if it is not an end point of both segments.
+
  * @param above 
  * @param below 
  * @param lps 
@@ -374,12 +376,12 @@ TP* polycross::TEvent::joiningSegments(polysegment* above, polysegment* below, f
 {
    if (0 == lps)
    {
-      if (0 > getLambda(above->lP(), above->rP(), below->lP())) return NULL;
+      if (0 >= getLambda(above->lP(), above->rP(), below->lP())) return NULL;
       else return new TP(*(below->lP()));
    }
    else if(0 == rps)
    {
-      if (0 > getLambda(above->lP(), above->rP(), below->rP())) return NULL;
+      if (0 >= getLambda(above->lP(), above->rP(), below->rP())) return NULL;
       else return new TP(*(below->rP()));
    }
    assert(false);
@@ -389,11 +391,40 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, X
 {
    float lambdaL = getLambda(above->lP(), above->rP(), below->lP());
    float lambdaR = getLambda(above->lP(), above->rP(), below->rP());
-   // coinsiding vertexes - not dealing with them at the moment YET!
-   if (0 == lambdaL * lambdaR) return NULL;
+   // coinsiding vertexes - register crossing point only if segments do not overlap
+   // (apart from the common point)
+   if (0 == lambdaL == lambdaR)
+      // coinsiding segments
+      return NULL;
+   if ((0 == lambdaL) && (0 > lambdaR))
+   {
+      float lambda2;
+      if (*(below->lP()) == *(above->lP()))
+         lambda2 = getLambda(below->lP(), below->rP(), above->rP());
+      else 
+         lambda2 = getLambda(below->lP(), below->rP(), above->lP());
+      if (0 > lambda2)
+         // segment below extends segment above
+         return new TP(*(below->lP()));
+      else
+         return NULL;
+   }
+   if ((0 == lambdaR) && (0 > lambdaL))
+   {
+      float lambda2;
+      if (*(below->rP()) == *(above->lP()))
+         lambda2 = getLambda(below->lP(), below->rP(), above->rP());
+      else
+         lambda2 = getLambda(below->lP(), below->rP(), above->lP());
+      if (0 > lambda2)
+         // segment above extends segment below
+         return new TP(*(below->rP()));
+      else
+         return NULL;
+   }
    bool swaped = false;
    // first of all cases when neither of the lines is enclosing the other one
-   // here we are generating "hidden" cross point, right in the moddle of their
+   // here we are generating "hidden" cross point, right in the middle of their
    // coinsiding segment
    if ((lambdaL < 0) && (lambdaR > 0))
       return NULL;//getMiddle(lP(), below->rP());
@@ -527,7 +558,7 @@ void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
    BO_printseg(below)
 #endif
    if (!dontswap)
-      eventQ.addCrossEvent(CP, above->threadID(), below->threadID());
+   eventQ.addCrossEvent(CP, above->threadID(), below->threadID());
 }
 
 //==============================================================================
@@ -571,20 +602,17 @@ void polycross::TbEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    checkIntersect(athr->threadAbove()->cseg(), _aseg, eventQ);
    checkIntersect(_bseg, bthr->threadBelow()->cseg(), eventQ);
    // check that the new threads are neighbours
-   if ((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr))
-   {
-      // neighbours - check the case when left points are also crossing points
-      // this is also the case when one of the input segments coincides with
-      // an existing segment
-      checkIntersect(_aseg, bthr->threadBelow()->cseg(), eventQ, _aseg->lP());
-      checkIntersect(athr->threadAbove()->cseg(), _bseg, eventQ, _bseg->lP());
-   }
-   else
+   if (!((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr)))
    {
       // not neighbours - check the rest
       checkIntersect(_aseg, athr->threadBelow()->cseg(), eventQ);
       checkIntersect(bthr->threadAbove()->cseg(), _bseg, eventQ);
    }
+   // check the case when left points are also crossing points
+   // this is also the case when one of the input segments coincides with
+   // an existing segment
+   checkIntersect(_aseg, bthr->threadBelow()->cseg(), eventQ, _aseg->lP());
+   checkIntersect(athr->threadAbove()->cseg(), _bseg, eventQ, _bseg->lP());
 }
 
 
@@ -817,53 +845,42 @@ bool polycross::TcEvent::operator == (const TcEvent& event) const
 //==============================================================================
 // EventVertex
 
-polycross::EventVertex::EventVertex(TEvent* tevent)
+void polycross::EventVertex::addEvent(TEvent* tevent, EventTypes etype)
 {
-   _evertex = tevent->evertex(); _events.push_back(tevent);
-}
-
-void polycross::EventVertex::addEvent(TEvent* tevent)
-{
+   assert(NULL != tevent);
+   Events& simevents = _events[etype];
+   if (_crossE == etype)
+   {
+      // Don't double the cross events -> do we really need this after all?
+      for (Events::const_iterator CE=simevents.begin();
+            CE != simevents.end(); CE++)
+         if (*(static_cast<TcEvent*>(*CE)) == *(static_cast<TcEvent*>(tevent)))
+            return;
+   }
 #ifdef BO2_DEBUG
       printf("++New event added in vertex ( %i , %i ) on top of the pending %u +++++\n",
-             _evertex->x(), _evertex->y(), unsigned(_events.size()));
+             _evertex->x(), _evertex->y(), unsigned(simevents.size()));
 #endif
-   _events.push_back(tevent);
+   simevents.push_back(tevent);
 }
 
-void polycross::EventVertex::addCrossEvent(TcEvent* tevent)
-{
-   for (CrossEvents::const_iterator CE=_crossevents.begin();
-        CE != _crossevents.end(); CE++)
-      if ((**CE) == *tevent) return;
-#ifdef BO2_DEBUG
-      printf("++New cross event added in vertex ( %i , %i ) on top of the pending %u +++++\n",
-             _evertex->x(), _evertex->y(), unsigned(_crossevents.size()));
-#endif
-   _crossevents.push_back(tevent);
-}
 
 void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq)
 {
 #ifdef BO2_DEBUG
    printf("______________ POINT = ( %i , %i ) ___________\n", _evertex->x(), _evertex->y());
 #endif
-   while (!_events.empty())
+   for( int cetype = _endE; cetype <= _crossE; cetype++)
    {
-      TEvent* cevent = _events.front(); _events.pop_front();
-      cevent->sweep(eventq, sweepline, _threadsSweeped);
-   }
-   _threadsSweeped.sort();
-   _threadsSweeped.unique();
-#ifdef BO2_DEBUG
-      if (!_crossevents.empty())
-         printf("  %u cross event(s) encountered in this point initially \n",
-                unsigned(_crossevents.size()));
-#endif
-   while (!_crossevents.empty())
-   {
-      TcEvent* cevent = _crossevents.front(); _crossevents.pop_front();
-      cevent->sweep(eventq, sweepline, _threadsSweeped);
+      if (_events.end() != _events.find(cetype))
+      {
+         Events& simEvents = _events[cetype];
+         while (!simEvents.empty())
+         {
+            TEvent* cevent = simEvents.front(); simEvents.pop_front();
+            cevent->sweep(eventq, sweepline, _threadsSweeped);
+         }
+      }
    }
 }
 
@@ -872,10 +889,17 @@ void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 #ifdef BO2_DEBUG
    printf("______________ POINT = ( %i , %i ) ___________\n", _evertex->x(), _evertex->y());
 #endif
-   while (!_events.empty())
+   for( int cetype = _endE; cetype <= _crossE; cetype++)
    {
-      TEvent* cevent = _events.front(); _events.pop_front();
-      cevent->sweep2bind(sweepline, bindColl);
+      if (_events.end() != _events.find(cetype))
+      {
+         Events& simEvents = _events[cetype];
+         while (!simEvents.empty())
+         {
+            TEvent* cevent = simEvents.front(); simEvents.pop_front();
+            cevent->sweep2bind(sweepline, bindColl);
+         }
+      }
    }
 }
 
@@ -1038,7 +1062,7 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    if       (*(seg0->lP()) != *(seg1->lP()))
          order = xyorder(seg0->lP(), seg1->lP());
    else if  (*(seg0->rP()) != *(seg1->rP()))
-      order = xyorder(seg1->rP(), seg0->rP());
+      order = xyorder(seg0->rP(), seg1->rP());
    else
       order = (seg0->edge() > seg1->edge()) ? 1 : -1;
    if (0 == order)
@@ -1075,29 +1099,38 @@ void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
 {
    unsigned s1, s2;
    TEvent*      evt;
+   EventTypes   etype;
    for(s1 = 0, s2 = 1 ; s1 < seg.size(); s1++, ++s2 %= seg.size())
    {
       // determine the type of event from the neighboring segments
       // and create the thread event
       if (seg[s1]->lP() == seg[s2]->lP())
+      {
          evt = new TbEvent(seg[s1], seg[s2], shapeID);
+         etype = _beginE;
+      }
       else if (seg[s1]->rP() == seg[s2]->rP())
+      {
          evt = new TeEvent(seg[s1], seg[s2], shapeID);
+         etype = _endE;
+      }
       else
+      {
          evt = new TmEvent(seg[s1], seg[s2], shapeID);
+         etype = _modifyE;
+      }
       // update overlapping box
       _overlap.overlap(*(seg[s1]->lP()));
       _overlap.overlap(*(seg[s1]->rP()));
       // now create the vertex with the event inside
-      EventVertex* vrtx = new EventVertex(evt);
+      EventVertex* vrtx = new EventVertex(evt->evertex());
       // and try to stick it in the AVL tree
       void** retitem =  avl_probe(_xqueue,vrtx);
       if ((*retitem) != vrtx)
-      {
          // coinsiding vertexes from different polygons
-         static_cast<EventVertex*>(*retitem)->addEvent(evt);
          delete(vrtx);
-      }
+      // finally add the event itself
+      static_cast<EventVertex*>(*retitem)->addEvent(evt,etype);
    }
 }
 
@@ -1105,15 +1138,15 @@ void polycross::XQ::addCrossEvent(TP* CP, unsigned thr1, unsigned thr2)
 {
    TcEvent* evt = new TcEvent(CP, thr1, thr2);
    // now create the vertex with the event inside
-   EventVertex* vrtx = new EventVertex(evt);
+   EventVertex* vrtx = new EventVertex(evt->evertex());
    // and try to stick it in the AVL tree
    void** retitem =  avl_probe(_xqueue,vrtx);
    if ((*retitem) != vrtx)
    {
       // coinsiding vertexes from different polygons
-      static_cast<EventVertex*>(*retitem)->addCrossEvent(evt);
       delete(vrtx);
    }
+   static_cast<EventVertex*>(*retitem)->addEvent(evt, _crossE);
 }
 
 int polycross::XQ::E_compare( const void* v1, const void* v2, void*)
