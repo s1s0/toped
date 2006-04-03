@@ -178,7 +178,7 @@ namespace polycross
          void              insertCrossPoint(TP*, polysegment*, polysegment*,
                                             XQ&, bool dontswap = false);
          TP*               joiningSegments(polysegment*, polysegment*, float, float);
-         TP*               oneLineSegments(polysegment*, polysegment*, XQ&);
+         TP*               oneLineSegments(polysegment*, polysegment*, YQ*);
          TP*               getCross(polysegment*, polysegment*);
          TP*               getMiddle(const TP*, const TP*);
    };
@@ -289,13 +289,15 @@ namespace polycross
    {
       public:
          typedef std::map<int,SegmentThread*> Threads;
-         YQ(DBbox&);
+         YQ(DBbox&, const segmentlist*, const segmentlist*);
          SegmentThread*    beginThread(polysegment*);
          SegmentThread*    endThread(unsigned);
          SegmentThread*    modifyThread(unsigned, polysegment*);
          SegmentThread*    swapThreads(unsigned, unsigned);
          SegmentThread*    getThread(unsigned);
          void              report();
+         const pointlist*  opl1() const {return _osl1->originalPL();}
+         const pointlist*  opl2() const {return _osl2->originalPL();}
       private:
          class TopSentinel : public SegmentThread
          {
@@ -317,6 +319,8 @@ namespace polycross
          int               sCompare(const polysegment*, const polysegment*);
          Threads           _cthreads;
          int               _lastThreadID;
+         const segmentlist* _osl1;
+         const segmentlist* _osl2;
    };
 
    //===========================================================================
@@ -328,8 +332,7 @@ namespace polycross
          void              sweep();
          void              sweep2bind(BindCollection&);
          void              addCrossEvent(TP*, unsigned, unsigned);
-         const pointlist*  opl1() const {return _osl1->originalPL();}
-         const pointlist*  opl2() const {return _osl2->originalPL();}
+         YQ*               sweepline() {return _sweepline;}
       protected:
          void              createEvents(const segmentlist&, byte);
          static int        E_compare( const void*, const void*, void* );
@@ -338,8 +341,6 @@ namespace polycross
          DBbox             _overlap;
          TP                _bottom_left;
          TP                _top_right;
-         const segmentlist* _osl1;
-         const segmentlist* _osl2;
    };
 
    //===========================================================================
