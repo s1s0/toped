@@ -116,6 +116,9 @@ namespace layprop {
       void              setCurrentColor(word layno);
       void              setGridColor(std::string colname) const;
       bool              getCurrentFill() const;
+      //returns fill pattern 32x32 for asked layer
+      byte*             getFill(word layno) const;
+      tellRGB*          getColor(word layno);
       bool              layerHidden(word layno) const;
       bool              layerLocked(word layno) const;
       const CTM&        ScrCTM() const                   {return  _ScrCTM;};

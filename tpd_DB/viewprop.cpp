@@ -99,6 +99,41 @@ void layprop::DrawProperties::setCurrentColor(word layno) {
    glColor4f(0.5, 0.5, 0.5, 0.5);
 }
 
+byte* layprop::DrawProperties::getFill(word layno) const
+{
+   if ((_layset.end() != _layset.find(layno)) ) 
+   {
+      // The 3 lines below are doing effectively
+      // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
+      // but the problem is const stuff (discards qualifiers)
+      // They are ugly, but don't know how to do it better
+      // Similar fo layerLocked and layerHidden
+      laySetList::const_iterator ilayset = _layset.find(layno);
+      fillMAP::const_iterator ifillset;
+      if (_layfill.end() == (ifillset = _layfill.find(ilayset->second->getfill())))
+         return NULL;
+      byte* ifill = ifillset->second;
+           
+      return ifill;
+   }   
+   else return NULL;
+
+}
+
+layprop::tellRGB* layprop::DrawProperties::getColor(word layno) 
+{
+   if (_layset.end() != _layset.find(layno)) 
+   {
+      tellRGB* gcol = _laycolors[_layset[layno]->getcolor()];
+      if (gcol) 
+      {
+         return gcol;
+      }   
+      
+   }   
+   return NULL;
+}
+
 bool  layprop::DrawProperties::layerHidden(word layno) const {
    if (_layset.end() != _layset.find(layno)) {
       laySetList::const_iterator ilayset = _layset.find(layno);

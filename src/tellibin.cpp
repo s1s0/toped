@@ -251,7 +251,7 @@ int tellstdfunc::stdLAYPROP::execute() {
    std::string name = getStringValue();
    // error message - included in the method
    Properties->addlayer(name, gdsN, col, fill);
-   browsers::layer_add(name,gdsN);
+   browsers::layer_add(name,gdsN, col, fill);
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" << 
                                col << "\",\"" << fill <<"\");";LogFile.flush();
    return EXEC_NEXT;
