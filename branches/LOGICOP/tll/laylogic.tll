@@ -599,19 +599,6 @@ void edge_cut4() {
 //   unselect_all();
 }
 
-void edge_merge2() {
-   newcell("edge_merge2");
-   opencell("edge_merge2");
-   addbox({{0,0} , {10,10}},2);
-   addpoly({{-2,4},{0,4},{0,6},{3,6},{3,-2},{-2,-2}},2);
-   addpoly({{4,3},{4,0},{6,0},{6,-2},{12,-2},{12,3}},2);
-   addpoly({{7,4},{10,4},{10,6},{12,6},{12,12},{7,12}},2);   
-   addpoly({{6,7},{6,10},{4,10},{4,12},{-2,12},{-2,7}},2);
-   select_all();
-   merge();
-}
-
-
 void edge_merge1() 
 {
    newcell("edge_merge1");
@@ -625,6 +612,41 @@ void edge_merge1()
    merge();
 }
 
+void edge_merge2() {
+   newcell("edge_merge2");
+   opencell("edge_merge2");
+   addbox({{0,0} , {10,10}},2);
+   addpoly({{-2,4},{0,4},{0,6},{3,6},{3,-2},{-2,-2}},2);
+   addpoly({{4,3},{4,0},{6,0},{6,-2},{12,-2},{12,3}},2);
+   addpoly({{7,4},{10,4},{10,6},{12,6},{12,12},{7,12}},2);   
+   addpoly({{6,7},{6,10},{4,10},{4,12},{-2,12},{-2,7}},2);
+   select_all();
+   merge();
+}
+
+void edge_merge3() {
+   newcell("edge_merge3");
+   opencell("edge_merge3");
+   addbox({{0,0} , {10,10}},2);
+   addbox({{10,0} , {20,10}},2);
+   addbox({{0,10} , {10,20}},2);
+   addbox({{0,0} , {-10,10}},2);
+   addbox({{0,0} , {10,-10}},2);
+   select_all();
+   merge();
+}
+
+void edge_merge4() {
+   newcell("edge_merge4");
+   opencell("edge_merge4");
+   select_all();
+   addpoly({{7,0},{10,3},{10,7},{7,10},{3,10},{0,7},{0,3},{3,0}}, 2);
+   addpoly({{10,7},{12,9},{9,12},{7,10}}, 2);
+   addpoly({{9,-2},{12,1},{10,3},{7,0}}, 2);
+   addpoly({{3,10},{1,12},{-2,9},{0,7}}, 2);//{ { 0 , 7 } , { -2 , 9 } , { 1 , 12 } , { 3 , 10 } }
+   addpoly({{3,0},{1,-2 },{-2,1},{0,3}}, 2);
+//   merge();
+}
 
 void all_tests()
 {
@@ -648,6 +670,7 @@ void all_tests()
    edge_cut3();
    edge_merge1();
    edge_merge2();
+   edge_merge3();
    zoomall();
 }
 
@@ -656,7 +679,8 @@ screenSetup();
 newdesign("layout_logic");
 newcell("boza");
 opencell("boza");
-all_tests();
+edge_merge4();
+//all_tests();
 
 //opencell("top");
 //addpoly({{-9.5,21.5},{-9.5,33},{15,33},{15,21.5},{10.5,21.5},{10.5,28},{5.5,28},{5.5,21.5},{0,21.5},{0,28},{-6,28},{-6,21.5}},2);
