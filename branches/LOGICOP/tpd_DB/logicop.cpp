@@ -181,7 +181,8 @@ bool logicop::logic::OR(pcollection& plycol) {
    bool result = false;
    polycross::VPoint* centinel = NULL;
    if (0 == _crossp) {
-      // If there are no crossing points found, this still does not mean
+      return false;
+/*      // If there are no crossing points found, this still does not mean
       // that the operation will fail. Polygons might be fully overlapping...
       // Check that a random point from poly1 is inside poly2 ...
       if       (_shape1->inside(_poly2)) centinel = _shape2;
@@ -198,7 +199,7 @@ bool logicop::logic::OR(pcollection& plycol) {
          vpnt = vpnt->next();
       }while (centinel != vpnt);
       plycol.push_back(shgen);
-      return true;
+      return true;*/
    }
    pcollection lclcol; // local collection of the resulting shapes
    // get first external and non crossing  point

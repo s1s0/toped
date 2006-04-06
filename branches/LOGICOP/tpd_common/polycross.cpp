@@ -98,6 +98,13 @@ float polycross::getLambda( const TP* p1, const TP* p2, const TP* p)
    return lambda;
 }
 
+bool polycross::coinsidingSegm(const TP* pa, const TP* pb, const TP* pc)
+{
+   if (0 != orientation(pa, pb, pc)) return false;
+   if ((getLambda(pa, pb, pc) >= 0) || (getLambda(pa, pc, pb) >= 0))
+      return true;
+   else return false;
+}
 //==============================================================================
 // VPoint
 polycross::VPoint::VPoint(const TP* point, VPoint* prev) : _cp(point), _prev(prev)
@@ -565,7 +572,7 @@ void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
    BO_printseg(below)
 #endif
    if (!dontswap)
-   eventQ.addCrossEvent(CP, above->threadID(), below->threadID());
+   eventQ.addCrossEvent(CP, above, below);
 }
 
 //==============================================================================
@@ -736,12 +743,12 @@ polycross::TmEvent::TmEvent (polysegment* seg1, polysegment* seg2, byte shapeID)
 {
    if       (seg1->rP() == seg2->lP())
    {
-      _tseg1 = seg1; _tseg2 = seg2;
+      _aseg = seg1; _bseg = seg2;
       _evertex = seg1->rP();
    }
    else if (seg2->rP() == seg1->lP())
    {
-      _tseg1 = seg2; _tseg2 = seg1;
+      _aseg = seg2; _bseg = seg1;
       _evertex = seg2->rP();
    }
    else
@@ -753,69 +760,69 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
 {
 #ifdef BO2_DEBUG
    printf("Modify thread\n");
-   BO_printseg(_tseg1)
-   BO_printseg(_tseg2)
+   BO_printseg(_aseg)
+   BO_printseg(_bseg)
 #endif
-   if (0 == _tseg1->threadID())
+   if (0 == _aseg->threadID())
       EXPTNpolyCross("Sorted segment expected here");
-   SegmentThread* thr = sweepline.modifyThread(_tseg1->threadID(), _tseg2);
+   SegmentThread* thr = sweepline.modifyThread(_aseg->threadID(), _bseg);
 
    // check for intersections of the neighbours with the new segment
    // and whether or not threads should be swapped
    TP* CP;
    if((CP = checkIntersect(thr->threadAbove()->cseg(), thr->cseg(), eventQ)))
    {
-      if ((*CP) == *(_tseg2->lP()))
+      if ((*CP) == *(_bseg->lP()))
       {
          polysegment* aseg = thr->threadAbove()->cseg();
-         int ori1 = orientation(aseg->lP(), aseg->rP(), _tseg1->lP());
-         int ori2 = orientation(aseg->lP(), aseg->rP(), _tseg2->rP());
+         int ori1 = orientation(aseg->lP(), aseg->rP(), _aseg->lP());
+         int ori2 = orientation(aseg->lP(), aseg->rP(), _bseg->rP());
          if ((ori1 == ori2) || (0 == ori1 * ori2))
-            threadl.push_back(_tseg2->threadID());
+            threadl.push_back(_bseg->threadID());
       }
    }
 
    if ((CP = checkIntersect(thr->cseg(), thr->threadBelow()->cseg(), eventQ)))
    {
-      if ((*CP) == *(_tseg2->lP()))
+      if ((*CP) == *(_bseg->lP()))
       {
          polysegment* bseg = thr->threadBelow()->cseg();
-         int ori1 = orientation(bseg->lP(), bseg->rP(), _tseg1->lP());
-         int ori2 = orientation(bseg->lP(), bseg->rP(), _tseg2->rP());
+         int ori1 = orientation(bseg->lP(), bseg->rP(), _aseg->lP());
+         int ori2 = orientation(bseg->lP(), bseg->rP(), _bseg->rP());
          if ((ori1 == ori2) || (0 == ori1 * ori2))
-            threadl.push_back(_tseg2->threadID());
+            threadl.push_back(_bseg->threadID());
       }
    }
 }
 
 void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 {
-   if (0 == _tseg1->threadID())
+   if (0 == _aseg->threadID())
       EXPTNpolyCross("Sorted segment expected here - bind");
-   SegmentThread* thr = sweepline.modifyThread(_tseg1->threadID(), _tseg2);
+   SegmentThread* thr = sweepline.modifyThread(_aseg->threadID(), _bseg);
    
    // action is taken only for points in the second polygon
-   if (1 == _tseg1->polyNo() == _tseg2->polyNo()) return;
+   if (1 == _aseg->polyNo() == _bseg->polyNo()) return;
    
-   // first for _tseg1 
+   // first for _aseg 
    // if right point is above and the neighbour above is from polygon 1
-   if ((_tseg1->lP()->y() <= _tseg1->rP()->y()) &&
+   if ((_aseg->lP()->y() <= _aseg->rP()->y()) &&
         (1 == thr->threadAbove()->cseg()->polyNo()))
-      bindColl.update_BL(thr->threadAbove()->cseg(), _tseg1->edge(), _tseg1->rP());
+      bindColl.update_BL(thr->threadAbove()->cseg(), _aseg->edge(), _aseg->rP());
    // if the right point is below and the neighbour below is from polygon 1
-   if ((_tseg1->lP()->y() >= _tseg1->rP()->y()) &&
+   if ((_aseg->lP()->y() >= _aseg->rP()->y()) &&
         (1 == thr->threadBelow()->cseg()->polyNo()))
-      bindColl.update_BL(thr->threadBelow()->cseg(), _tseg1->edge(), _tseg1->rP());
+      bindColl.update_BL(thr->threadBelow()->cseg(), _aseg->edge(), _aseg->rP());
    
-   // then for _tseg2
+   // then for _bseg
    // if left point is above and the neighbour above is from polygon 1
-   if ((_tseg2->lP()->y() >= _tseg2->rP()->y()) &&
+   if ((_bseg->lP()->y() >= _bseg->rP()->y()) &&
         (1 == thr->threadAbove()->cseg()->polyNo()))
-      bindColl.update_BL(thr->threadAbove()->cseg(), _tseg2->edge(), _tseg2->lP());
+      bindColl.update_BL(thr->threadAbove()->cseg(), _bseg->edge(), _bseg->lP());
    // if the left point is below and the neighbour below is from polygon 1
-   if ((_tseg2->lP()->y() <= _tseg2->rP()->y()) &&
+   if ((_bseg->lP()->y() <= _bseg->rP()->y()) &&
         (1 == thr->threadBelow()->cseg()->polyNo()))
-      bindColl.update_BL(thr->threadBelow()->cseg(), _tseg2->edge(), _tseg2->lP());
+      bindColl.update_BL(thr->threadBelow()->cseg(), _bseg->edge(), _bseg->lP());
 }
 
 //==============================================================================
@@ -823,18 +830,18 @@ void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 
 void polycross::TcEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl)
 {
-   if ((threadl.end() != std::find(threadl.begin(), threadl.end(),_threadAboveID)) ||
-       (threadl.end() != std::find(threadl.begin(), threadl.end(),_threadBelowID)))
+   if ((threadl.end() != std::find(threadl.begin(), threadl.end(),_threadAbove)) ||
+        (threadl.end() != std::find(threadl.begin(), threadl.end(),_threadBelow)))
    {
 #ifdef BO2_DEBUG
-      printf("SKIP swapping threads %i and % i \n", _threadAboveID, _threadBelowID);
+      printf("SKIP swapping threads %i and % i \n", _threadAbove, _threadBelow);
 #endif
       return;
    }
 #ifdef BO2_DEBUG
-      printf("SWAPPING threads % i and %i\n", _threadAboveID, _threadBelowID);
+      printf("SWAPPING threads % i and %i\n", _threadAbove, _threadBelow);
 #endif
-   SegmentThread* below = sweepline.swapThreads(_threadAboveID, _threadBelowID);
+   SegmentThread* below = sweepline.swapThreads(_threadAbove, _threadBelow);
    SegmentThread* above = below->threadAbove();
 #ifdef BO2_DEBUG
    sweepline.report();
@@ -846,8 +853,8 @@ void polycross::TcEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl)
 
 bool polycross::TcEvent::operator == (const TcEvent& event) const
 {
-   return ((_threadAboveID == event._threadAboveID) &&
-         (_threadBelowID == event._threadBelowID)   );
+   return ((_threadAbove == event._threadAbove) &&
+         (_threadBelow == event._threadBelow)   );
 }
 
 //==============================================================================
@@ -878,6 +885,7 @@ void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq)
 #ifdef BO2_DEBUG
    printf("______________ POINT = ( %i , %i ) ___________\n", _evertex->x(), _evertex->y());
 #endif
+   Events nonCrossE;
    for( int cetype = _endE; cetype <= _crossE; cetype++)
    {
       if (_events.end() != _events.find(cetype))
@@ -887,9 +895,34 @@ void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq)
          {
             TEvent* cevent = simEvents.front(); simEvents.pop_front();
             cevent->sweep(eventq, sweepline, _threadsSweeped);
+            if (_crossE != cetype)
+               nonCrossE.push_back(cevent);
+//            else delete cevent;
          }
       }
    }
+   // now - the post-check. All segments belonging to non cross events should be
+   // checked for joining points beween each other
+   for (Events::iterator CE1 = nonCrossE.begin(); CE1 != nonCrossE.end(); CE1++)
+      for (Events::iterator CE2 = CE1; CE2 != nonCrossE.end(); CE2++)
+         CheckBEM(eventq, **CE1, **CE2);
+}
+
+void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
+{
+   if (thr1.aseg()->polyNo() == thr2.aseg()->polyNo()) return;
+   bool sa1sa2 = coinsidingSegm(thr1.evertex(), thr1.avertex(), thr2.avertex());
+   bool sa1sb2 = coinsidingSegm(thr1.evertex(), thr1.avertex(), thr2.bvertex());
+   bool sb1sa2 = coinsidingSegm(thr1.evertex(), thr1.bvertex(), thr2.avertex());
+   bool sb1sb2 = coinsidingSegm(thr1.evertex(), thr1.bvertex(), thr2.bvertex());
+   if (sa1sa2)
+      thr1.insertCrossPoint(new TP(*(thr1.evertex())), thr1.bseg(), thr2.bseg(), eventq, true );
+   else if (sa1sb2)
+      thr1.insertCrossPoint(new TP(*(thr1.evertex())), thr1.bseg(), thr2.aseg(), eventq, true );
+   else if (sb1sa2)
+      thr1.insertCrossPoint(new TP(*(thr1.evertex())), thr1.aseg(), thr2.bseg(), eventq, true );
+   else if (sb1sb2)
+      thr1.insertCrossPoint(new TP(*(thr1.evertex())), thr1.aseg(), thr2.bseg(), eventq, true );
 }
 
 void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)
@@ -1160,9 +1193,9 @@ void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
    }
 }
 
-void polycross::XQ::addCrossEvent(TP* CP, unsigned thr1, unsigned thr2)
+void polycross::XQ::addCrossEvent(TP* CP, polysegment* aseg, polysegment* bseg)
 {
-   TcEvent* evt = new TcEvent(CP, thr1, thr2);
+   TcEvent* evt = new TcEvent(CP, aseg, bseg);
    // now create the vertex with the event inside
    EventVertex* vrtx = new EventVertex(evt->evertex());
    // and try to stick it in the AVL tree
