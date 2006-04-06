@@ -518,7 +518,7 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
    {
       operation = new logicop::logic(_plist, cutter);
    }
-   catch (EXPTNpolyCross) {delete operation;return;}
+   catch (EXPTNpolyCross) {return;}
    logicop::pcollection cut_shapes;
    laydata::tdtdata* newshape;
    if (operation->AND(cut_shapes))
@@ -786,7 +786,7 @@ void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
    {
       operation = new logicop::logic(_plist, cutter);
    }
-   catch (EXPTNpolyCross) {delete operation;return;}
+   catch (EXPTNpolyCross) {return;}
    logicop::pcollection cut_shapes;
    laydata::tdtdata* newshape;
    if (operation->AND(cut_shapes))
@@ -1978,7 +1978,7 @@ laydata::tdtdata* laydata::polymerge(const pointlist& _plist0, const pointlist& 
    {
       operation = new logicop::logic(_plist0, _plist1);
    }
-   catch (EXPTNpolyCross) {delete operation;return NULL;}
+   catch (EXPTNpolyCross) {return NULL;}
    logicop::pcollection merge_shape;
    laydata::tdtdata* resShape = NULL;
    if (operation->OR(merge_shape)) {

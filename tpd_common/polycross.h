@@ -36,12 +36,14 @@ namespace polycross
    class YQ;
    class XQ;
    class BindCollection;
+   class TEvent;
    typedef std::list<unsigned> ThreadList;
    typedef enum {_endE, _modifyE, _beginE, _crossE} EventTypes;
    
    int xyorder(const TP*, const TP*);
    int orientation(const TP*, const TP*, const TP*);
    float getLambda( const TP* p1, const TP* p2, const TP* p);
+   bool coinsidingSegm(const TP*, const TP*, const TP*);
    //===========================================================================
    // VPoint
    //===========================================================================
@@ -159,24 +161,51 @@ namespace polycross
    };
 
    //===========================================================================
+   // Event Vertex - could be more than one event
+   //===========================================================================
+   class EventVertex
+   {
+      public:
+         EventVertex(const TP* evertex) : _evertex(evertex) {};
+         const TP*         operator () () {return _evertex;};
+         void              addEvent(TEvent*, EventTypes);
+         void              sweep(YQ&, XQ&);
+         void              sweep2bind(YQ&, BindCollection&);
+         void              CheckBEM(XQ&, TEvent&, TEvent&);
+      private:
+         typedef std::list<TEvent*> Events;
+         typedef std::map<int, Events> AllEvents;
+         AllEvents         _events;
+         const TP*         _evertex;
+         ThreadList        _threadsSweeped;
+   };
+
+   //===========================================================================
    // Thread event - pure virtual
    //===========================================================================
    class TEvent
    {
       public:
+         friend void EventVertex::CheckBEM(XQ&, TEvent&, TEvent&);
          TEvent(byte shapeID) : _shapeID(shapeID) {};
          virtual void      sweep(XQ&, YQ&, ThreadList&) = 0;
          virtual void      sweep2bind(YQ&, BindCollection&) = 0;
+         virtual const TP* avertex() = 0;
+         virtual const TP* bvertex() = 0;
          const TP*         evertex() {return _evertex;}
          byte              shapeID() {return _shapeID;}
+         polysegment*      aseg() {return _aseg;}
+         polysegment*      bseg() {return _bseg;}
          virtual          ~TEvent() {};
       protected:
          TP*               checkIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
          byte              _shapeID;
          const TP*         _evertex;
-      private:
          void              insertCrossPoint(TP*, polysegment*, polysegment*,
                                             XQ&, bool dontswap = false);
+         polysegment*      _aseg;
+         polysegment*      _bseg;
+      private:
          TP*               joiningSegments(polysegment*, polysegment*, float, float);
          TP*               oneLineSegments(polysegment*, polysegment*, YQ*);
          TP*               getCross(polysegment*, polysegment*);
@@ -192,9 +221,8 @@ namespace polycross
          TbEvent(polysegment*, polysegment*, byte);
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&);
-      private:
-         polysegment*      _aseg;
-         polysegment*      _bseg;
+         const TP*         avertex() {return _aseg->rP();}
+         const TP*         bvertex() {return _bseg->rP();};
    };
 
    //===========================================================================
@@ -206,9 +234,8 @@ namespace polycross
          TeEvent(polysegment*, polysegment*, byte);
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&);
-      private:
-         polysegment*      _aseg;
-         polysegment*      _bseg;
+         const TP*         avertex() {return _aseg->lP();}
+         const TP*         bvertex() {return _bseg->lP();}
    };
 
    //===========================================================================
@@ -220,9 +247,8 @@ namespace polycross
          TmEvent(polysegment*, polysegment*, byte);
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&);
-      private:
-         polysegment*      _tseg1;
-         polysegment*      _tseg2;
+         const TP*         avertex() {return _aseg->lP();}
+         const TP*         bvertex() {return _bseg->rP();}
    };
 
    //===========================================================================
@@ -231,35 +257,19 @@ namespace polycross
    class TcEvent : public TEvent
    {
       public:
-         TcEvent(TP* ev, unsigned tAID, unsigned tBID): TEvent(0), 
-                     _threadAboveID(tAID), _threadBelowID(tBID) {_evertex = ev;}
+         TcEvent(TP* ev, polysegment* aseg, polysegment* bseg): TEvent(0),
+            _threadAbove(aseg->threadID()),_threadBelow(bseg->threadID())
+               {_aseg = aseg; _bseg = bseg;  _evertex = ev;}
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&) {assert(false);}
+         const TP*         avertex() {assert(false);}
+         const TP*         bvertex() {assert(false);}
          bool              operator == (const TcEvent&) const;
       private:
-         unsigned          _threadAboveID;
-         unsigned          _threadBelowID;
+         unsigned          _threadAbove;
+         unsigned          _threadBelow;
    };
    
-   //===========================================================================
-   // Event Vertex - could be more than one event
-   //===========================================================================
-   class EventVertex
-   {
-      public:
-         EventVertex(const TP* evertex) : _evertex(evertex) {};
-         const TP*         operator () () {return _evertex;};
-         void              addEvent(TEvent*, EventTypes);
-         void              sweep(YQ&, XQ&);
-         void              sweep2bind(YQ&, BindCollection&);
-      private:
-         typedef std::list<TEvent*> Events;
-         typedef std::map<int, Events> AllEvents;
-         AllEvents         _events;
-         const TP*         _evertex;
-         ThreadList        _threadsSweeped;
-   };
-
    //===========================================================================
    // Segment Thread
    //===========================================================================
@@ -331,7 +341,7 @@ namespace polycross
          XQ(const segmentlist &, const segmentlist&);
          void              sweep();
          void              sweep2bind(BindCollection&);
-         void              addCrossEvent(TP*, unsigned, unsigned);
+         void              addCrossEvent(TP*, polysegment*, polysegment*);
          YQ*               sweepline() {return _sweepline;}
       protected:
          void              createEvents(const segmentlist&, byte);

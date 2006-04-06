@@ -671,6 +671,7 @@ void all_tests()
    edge_merge1();
    edge_merge2();
    edge_merge3();
+   edge_merge4();
    zoomall();
 }
 
@@ -679,7 +680,7 @@ screenSetup();
 newdesign("layout_logic");
 newcell("boza");
 opencell("boza");
-edge_merge4();
+//
 //all_tests();
 
 //opencell("top");
