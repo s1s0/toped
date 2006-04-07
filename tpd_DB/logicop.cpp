@@ -179,13 +179,23 @@ input polygons. Method returns false if no output shapes are generated, and
 true otherwise*/
 bool logicop::logic::OR(pcollection& plycol) {
    bool result = false;
+   pcollection lclcol; // local collection of the resulting shapes
    polycross::VPoint* centinel = NULL;
-   if (0 == _crossp) {
-      return false;
-/*      // If there are no crossing points found, this still does not mean
+   if (0 != _crossp)
+   {
+      // get first external and non crossing  point
+      centinel = getFirstOutside(_poly2, _shape1);
+      if (NULL == centinel) centinel = getFirstOutside(_poly1, _shape2);
+      // shapes are fully overlapping if centinel is not found
+   }
+   if ((0 == _crossp) || (NULL == centinel))
+   {
+      // for fully overlapping polygons - get any of them
+      if       (NULL == centinel)        centinel = _shape2;
+      // If there are no crossing points found, this still does not mean
       // that the operation will fail. Polygons might be fully overlapping...
       // Check that a random point from poly1 is inside poly2 ...
-      if       (_shape1->inside(_poly2)) centinel = _shape2;
+      else if  (_shape1->inside(_poly2)) centinel = _shape2;
       // ... if not, check that a random point from poly2 is inside poly1 ...
       else if (_shape2->inside(_poly1)) centinel = _shape1;
       // ... if not - polygons does not have any common area
@@ -199,13 +209,10 @@ bool logicop::logic::OR(pcollection& plycol) {
          vpnt = vpnt->next();
       }while (centinel != vpnt);
       plycol.push_back(shgen);
-      return true;*/
+      return true;
    }
-   pcollection lclcol; // local collection of the resulting shapes
-   // get first external and non crossing  point
-   centinel = getFirstOutside(_poly2, _shape1);
-   if (NULL == centinel) centinel = getFirstOutside(_poly1, _shape2);
-   assert(centinel);   
+   
+   assert(centinel);
    polycross::VPoint* collector = centinel;
    bool direction = true; /*next*/
    do {
@@ -224,27 +231,44 @@ bool logicop::logic::OR(pcollection& plycol) {
       collector = collector->next();
    } while (collector != centinel);
    if (!result) return result;
+   // Validate all resulting polygons
+   pcollection lclvalidated;
+   while (!lclcol.empty())
+   {
+      pointlist* csh = lclcol.front();
+      laydata::valid_poly check(*csh);
+      delete csh; lclcol.pop_front();
+      if (check.valid())
+         lclvalidated.push_back(new pointlist(check.get_validated()));
+   }
+   if (lclvalidated.empty()) return false;
    // Convert all collected shapes to a single normalized polygon
-   pointlist* respoly = lclcol.front();lclcol.pop_front();
-   while (0 < lclcol.size()) {
-      respoly = hole2simple(*respoly, *(lclcol.front()));
-      lclcol.pop_front();
+   pointlist* respoly = lclvalidated.front();lclvalidated.pop_front();
+   while (0 < lclvalidated.size()) {
+      respoly = hole2simple(*respoly, *(lclvalidated.front()));
+      lclvalidated.pop_front();
    }
    plycol.push_back(respoly);
    return result;
 }
 
       
-polycross::VPoint* logicop::logic::getFirstOutside(const pointlist& plist, polycross::VPoint* init) {
-   unsigned plysize = plist.size();
-   unsigned count = 0;
-   while (init->inside(plist)) {
-      init = init->next();
-      if (count++ > plysize) break;
-   }
-   if (count > plysize) return NULL;
-   else return init;
-}   
+/**
+ * Get the first point from the init sequence, that lies outside the polygon given by plst
+ * @param plist 
+ * @param init 
+ * @return 
+ */
+polycross::VPoint* logicop::logic::getFirstOutside(const pointlist& plist, polycross::VPoint* init)
+{
+   polycross::VPoint *cpoint = init;
+   do
+   {
+      if (!cpoint->inside(plist, true)) return cpoint;
+      else cpoint = cpoint->next();
+   } while (cpoint != init);
+   return NULL;
+}
 
 
 pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside) {
