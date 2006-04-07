@@ -574,29 +574,30 @@ void edge_cut4() {
    newcell("edge_cut4");
    opencell("edge_cut4");
    addbox({{0,0} , {10,10}},2);
-   select({5.00,5.00});
-//   addpoly({{0,0},{0,4},{10,4},{10,0}},4);
-//   polycut({{0,0},{0,4},{10,4},{10,0}});
-//   move({0,0},{15,0});
-//   unselect_all();
 
    select({5.00,5.00});
-   addpoly({{0,0},{4,0},{4,10},{0,10}},4);
-   polycut({{0,0},{4,0},{4,10},{0,10}});
-//   move({0,0},{15,0});
-//   unselect_all();
+   addpoly({{0,0},{3,0},{3,10},{0,10}},4);
+   polycut({{0,0},{3,0},{3,10},{0,10}});
+   move({0,0},{15,0});
+   unselect_all();
 //
-//   select({5.00,5.00});
-//   addpoly({{6,10},{6,6},{10,6},{10,10}},4);
-//   polycut({{6,10},{6,6},{10,6},{10,10}});
-//   move({0,0},{15,0});
-//   unselect_all();
+   select({5.00,5.00});
+   addpoly({{3,7},{3,10},{10,10},{10,7}},4);
+   polycut({{3,7},{3,10},{10,10},{10,7}});
+   move({0,0},{15,0});
+   unselect_all();
 //
-//   select({5.00,5.00});
-//   addpoly({{0,6},{0,10},{4,10},{4,6}},4);
-//   polycut({{0,6},{0,10},{4,10},{4,6}});
-//   move({0,0},{15,0});
-//   unselect_all();
+   select({5.00,5.00});
+   addpoly({{10,0},{10,7},{7,7},{7,0}},4);
+   polycut({{10,0},{10,7},{7,7},{7,0}});
+   move({0,0},{15,0});
+   unselect_all();
+
+   select({5.00,5.00});
+   addpoly({{3,0},{7,0},{7,3},{3,3}},4);
+   polycut({{3,0},{7,0},{7,3},{3,3}});
+   move({0,0},{15,0});
+   unselect_all();
 }
 
 void edge_merge1() 
@@ -639,13 +640,13 @@ void edge_merge3() {
 void edge_merge4() {
    newcell("edge_merge4");
    opencell("edge_merge4");
-   select_all();
    addpoly({{7,0},{10,3},{10,7},{7,10},{3,10},{0,7},{0,3},{3,0}}, 2);
    addpoly({{10,7},{12,9},{9,12},{7,10}}, 2);
    addpoly({{9,-2},{12,1},{10,3},{7,0}}, 2);
    addpoly({{3,10},{1,12},{-2,9},{0,7}}, 2);//{ { 0 , 7 } , { -2 , 9 } , { 1 , 12 } , { 3 , 10 } }
    addpoly({{3,0},{1,-2 },{-2,1},{0,3}}, 2);
-//   merge();
+   select_all();
+   merge();
 }
 
 void all_tests()
@@ -668,6 +669,7 @@ void all_tests()
    edge_cut1();
    edge_cut2();
    edge_cut3();
+   edge_cut4();
    edge_merge1();
    edge_merge2();
    edge_merge3();

@@ -112,7 +112,7 @@ polycross::VPoint::VPoint(const TP* point, VPoint* prev) : _cp(point), _prev(pre
    if (_prev) _prev->_next = this;
 }
 
-bool polycross::VPoint::inside(const pointlist& plist)
+bool polycross::VPoint::inside(const pointlist& plist, bool touching)
 {
    TP p0, p1;
    byte cc = 0;
@@ -123,9 +123,18 @@ bool polycross::VPoint::inside(const pointlist& plist)
       if (((p0.y() <= _cp->y()) && (p1.y() >=  _cp->y()))
             ||((p0.y() >=  _cp->y()) && (p1.y() <= _cp->y())) )
       {
-         float tngns = (float) (_cp->y() - p0.y())/(p1.y() - p0.y());
-         if (_cp->x() <= p0.x() + tngns * (p1.x() - p0.x()))
-            cc++;
+         int ori = orientation(&p0, &p1, _cp);
+         if ((0==ori) && (getLambda(&p0, &p1, _cp) >= 0))
+         {
+            if (touching) return true;
+            else return false;
+         }
+         else
+         {
+            float tngns = (float) (_cp->y() - p0.y())/(p1.y() - p0.y());
+            if (_cp->x() <= p0.x() + tngns * (p1.x() - p0.x()))
+               cc++;
+         }
       }
    }
    return (cc & 0x01) ? true : false;

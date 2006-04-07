@@ -53,7 +53,7 @@ namespace polycross
          VPoint(const TP* cp) : _cp(cp),_next(NULL),_prev(NULL) {};
          VPoint(const TP* cp, VPoint* prev);
          virtual VPoint*  follower(bool& direction, bool modify = false);
-         virtual bool     inside(const pointlist&);
+         virtual bool     inside(const pointlist&, bool touching = false);
          virtual char     visited() const      {return 1;}
          virtual void     reset_visited()      {};
          const TP*         cp() const           {return _cp;};
@@ -76,7 +76,7 @@ namespace polycross
       public:
          CPoint(const TP* cp) : VPoint(cp),_link(NULL),_visited(0) {};
          virtual VPoint*  follower(bool& direction, bool modify = false);
-         bool              inside(const pointlist&) {return true;}
+         bool              inside(const pointlist&, bool touching = false) {return true;}
          char              visited() const {return _visited;}
          void              linkto(CPoint* link) {_link = link;}
          void              reset_visited() {_visited = 0;};
