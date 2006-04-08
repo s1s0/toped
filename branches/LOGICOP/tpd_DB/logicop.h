@@ -67,6 +67,8 @@ namespace logicop {
       //! Convert a polygon with hole to simple polygon
       pointlist*        hole2simple(const pointlist&, const pointlist&);
       //
+      void              getShape(pcollection&, polycross::VPoint*);
+      //
       polycross::VPoint* getFirstOutside(const pointlist&, polycross::VPoint*);
       //! The first input polygon
       const pointlist&  _poly1;
