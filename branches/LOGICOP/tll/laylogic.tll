@@ -649,7 +649,7 @@ void edge_merge4() {
    merge();
 }
 
-void all_tests()
+void all_cut()
 {
    cut_test1();
    cut_test2();
@@ -662,19 +662,30 @@ void all_tests()
    cut_test3A();
    cut_test3B();
    cut_test2B();
-   merge_test1();
-   merge_test2();
-   merge_test3();
-   merge_test4();
    edge_cut1();
    edge_cut2();
    edge_cut3();
    edge_cut4();
+   zoomall();
+}
+
+void all_merge()
+{
+   merge_test1();
+   merge_test2();
+   merge_test3();
+   merge_test4();
    edge_merge1();
    edge_merge2();
    edge_merge3();
    edge_merge4();
    zoomall();
+}
+
+void all_tests()
+{
+   all_cut();
+   all_merge();
 }
 
 layerSetup();

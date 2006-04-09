@@ -120,6 +120,8 @@ namespace polycross
       public:
          typedef std::vector<CPoint*> crossCList;
          polysegment(const TP*, const TP*, int, char);
+         ~polysegment();
+         void              freeMem();
          CPoint*           insertCrossPoint(const TP*);
          BPoint*           insertBindPoint(const TP* pnt);
          unsigned          normalize(const TP*, const TP*);
@@ -300,6 +302,7 @@ namespace polycross
       public:
          typedef std::map<int,SegmentThread*> Threads;
          YQ(DBbox&, const segmentlist*, const segmentlist*);
+         ~YQ();
          SegmentThread*    beginThread(polysegment*);
          SegmentThread*    endThread(unsigned);
          SegmentThread*    modifyThread(unsigned, polysegment*);
@@ -314,14 +317,14 @@ namespace polycross
             public:
                TopSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
                SegmentThread*    threadAbove()  {assert(false);}
-               ~TopSentinel() { delete _cseg;}
+               ~TopSentinel() { _cseg->freeMem();delete _cseg;}
          };
          class BottomSentinel : public SegmentThread
          {
             public:
                BottomSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
                SegmentThread*    threadBelow()  {assert(false);}
-               ~BottomSentinel() { delete _cseg;}
+               ~BottomSentinel() { _cseg->freeMem(); delete _cseg;}
          };
 
          BottomSentinel*   _bottomSentinel;
@@ -339,6 +342,7 @@ namespace polycross
    class XQ {
       public:
          XQ(const segmentlist &, const segmentlist&);
+         ~XQ();
          void              sweep();
          void              sweep2bind(BindCollection&);
          void              addCrossEvent(TP*, polysegment*, polysegment*);
