@@ -69,6 +69,8 @@ namespace logicop {
       //
       void              getShape(pcollection&, polycross::VPoint*);
       //
+      void              reorderCross();
+      //
       polycross::VPoint* getFirstOutside(const pointlist&, polycross::VPoint*);
       //! The first input polygon
       const pointlist&  _poly1;

@@ -57,8 +57,30 @@ logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
    delete _eq;
    _shape1 = _segl1.dump_points();
    _shape2 = _segl2.dump_points();
+   reorderCross();
 }
 
+void logicop::logic::reorderCross()
+{
+   polycross::VPoint* centinel = _shape1;
+   polycross::VPoint* looper = centinel;
+   do
+   {
+      if (!looper->visited() && !looper->next()->visited())
+         looper->checkNreorder();
+      looper = looper->next();
+   }
+   while (centinel != looper);
+   centinel = _shape2;
+   looper = centinel;
+   do
+   {
+      if (!looper->visited() && !looper->next()->visited())
+         looper->checkNreorder();
+      looper = looper->next();
+   }
+   while (centinel != looper);
+}
 /*!If more than one logical operatoin has to be executed over the input shapes
 the raw data #_shape1 and #_shape2 can be reused, but has to be recycled beforehand
 This method is traversing both fields and invokes VPoint::reset_visited() in 

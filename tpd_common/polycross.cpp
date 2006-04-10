@@ -169,9 +169,8 @@ bool polycross::VPoint::inside(const pointlist& plist, bool touching)
                float tngns = (float) (_cp->y() - p0.y())/(p1.y() - p0.y());
                float calcx = p0.x() + tngns * (p1.x() - p0.x());
                if (_cp->x() <= calcx)
-                  if ((_cp->y() == p0.y()) || (_cp->y() == p1.y()))
-                     // ray touches the segment
-                     cc++;
+                  // if ray touches the segment
+                  if ((_cp->y() == p0.y()) || (_cp->y() == p1.y())) cc++;
                   // ray crosses the segment
                   else cc+=2;
             }
@@ -204,8 +203,23 @@ polycross::VPoint* polycross::CPoint::follower(bool& direction, bool modify) {
    return flw;
 }
 
+void polycross::CPoint::checkNreorder()
+{
+   CPoint* nextCross = static_cast<CPoint*>(_next);
+   if (*(_cp) == (*(nextCross->_cp)))
+   {
+      if (nextCross->_link != _link->next()->next())
+      {
+         //swap the links
+         CPoint* swpL = _link;
+         _link = nextCross->_link; nextCross->_link->_link = this;
+         nextCross->_link = swpL; swpL->_link = nextCross;
+      }
+   }
+}
+
 //==============================================================================
-// class CPoint
+// class BPoint
 polycross::VPoint* polycross::BPoint::follower(bool& direction, bool modify) {
    if (modify) {
       direction = !direction;
@@ -219,10 +233,11 @@ polycross::VPoint* polycross::BPoint::follower(bool& direction, bool modify) {
 
 bool polycross::SortLine::operator() (CPoint* cp1, CPoint* cp2) {
    assert(direction != 0);
+   int ord = xyorder(cp1->cp(), cp2->cp());
    if (direction > 0)
-      return (xyorder(cp1->cp(), cp2->cp()) > 0);
+      return (ord >= 0);
    else
-      return (xyorder(cp1->cp(), cp2->cp()) <= 0);
+      return (ord < 0);
 /*   if (direction == xyorder(cp1->cp(), cp2->cp()))  return true;
    else                                             return false;*/
 }
