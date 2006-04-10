@@ -693,6 +693,7 @@ screenSetup();
 newdesign("layout_logic");
 newcell("boza");
 opencell("boza");
+//cut_test3A();
 //
 //all_tests();
 

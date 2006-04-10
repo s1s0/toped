@@ -56,6 +56,7 @@ namespace polycross
          virtual bool     inside(const pointlist&, bool touching = false);
          virtual char     visited() const      {return 1;}
          virtual void     reset_visited()      {};
+         virtual void     checkNreorder()       {assert(false);}
          const TP*         cp() const           {return _cp;};
          VPoint*           next() const         {return _next;};
          VPoint*           prev() const         {return _prev;};
@@ -81,6 +82,7 @@ namespace polycross
          void              linkto(CPoint* link) {_link = link;}
          void              reset_visited() {_visited = 0;};
          void              linkage(VPoint*& prev);
+         void              checkNreorder();
       protected:
          CPoint*           _link;
          char              _visited;
