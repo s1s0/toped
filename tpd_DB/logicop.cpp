@@ -66,18 +66,28 @@ void logicop::logic::reorderCross()
    polycross::VPoint* looper = centinel;
    do
    {
-      if (!looper->visited() && !looper->next()->visited())
-         looper->checkNreorder();
-      looper = looper->next();
+      // for every non-crossing point which has cross point neightbors and
+      // all 3 points coincide
+      if (looper->visited() &&
+          (!looper->prev()->visited() && !looper->next()->visited()) &&
+           (*looper->prev()->cp() == *looper->next()->cp()) )
+      {
+         looper = looper->checkNreorder();
+      }
+      else looper = looper->next();
    }
    while (centinel != looper);
    centinel = _shape2;
    looper = centinel;
    do
    {
-      if (!looper->visited() && !looper->next()->visited())
-         looper->checkNreorder();
-      looper = looper->next();
+      if (looper->visited() &&
+          (!looper->prev()->visited() && !looper->next()->visited()) &&
+          (*looper->prev()->cp() == *looper->next()->cp()) )
+      {
+         looper = looper->checkNreorder();
+      }
+      else looper = looper->next();
    }
    while (centinel != looper);
 }

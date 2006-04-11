@@ -406,22 +406,6 @@ void cut_test3A() {
    move({0,0},{15,0});
 }
 
-void cut_test3B() {
-   // piercing edge points
-   newcell("cut_test3B");
-   opencell("cut_test3B");
-   point list pgon4= { { -2 , 7 } , { 0 , 7 } , { 3 , 10 } , { 3 , 12 } , { 7 , 12 } , 
-                       { 7 , 10 } , { 10 , 7 } , { 12 , 7 } , { 12 , 3 } , { 10 , 3 } , 
-                       { 7 , 0 } , { 7 , -2 } , { 3 , -2 } , { 3 , 0 } , { 0 , 3 } , { -2 , 3 } };
-   point list pgon2= {{0,0},{10,0},{10,10},{0,10}};
-   addpoly(pgon4, 4);
-   select_all();
-   addpoly(pgon2, 2);
-   polycut(pgon2);
-   move({0,0},{15,0});
-}
-   
-
 void cut_test1B() {
    opencell("cell_1");
    select({{28,23},{48.5,-5}});
@@ -445,6 +429,30 @@ void cut_test2B() {
    polycut(malta);
    move({0,0},{15,0});
 }   
+
+void cut_test3B() {
+   // piercing edge points
+   newcell("cut_test3B");
+   opencell("cut_test3B");
+   point list pgon4= { { -2 , 7 } , { 0 , 7 } , { 3 , 10 } , { 3 , 12 } , { 7 , 12 } , 
+                       { 7 , 10 } , { 10 , 7 } , { 12 , 7 } , { 12 , 3 } , { 10 , 3 } , 
+                       { 7 , 0 } , { 7 , -2 } , { 3 , -2 } , { 3 , 0 } , { 0 , 3 } , { -2 , 3 } };
+   point list pgon2= {{0,0},{10,0},{10,10},{0,10}};
+   addpoly(pgon4, 4);
+   select_all();
+   addpoly(pgon2, 2);
+   polycut(pgon2);
+   move({0,0},{15,0});
+}
+   
+void cut_test4B() {
+   // bowtie
+   newcell("cut_test4B");
+   opencell("cut_test4B");
+   addpoly({{4,10},{5,10},{8,7},{11,10},{12,10},{12,4},{11,4},{8,7},{5,4},{4,4}},2);
+   select({5.5,6.5});
+//   polycut({{3,7},{13,7},{13,2.5},{3,2.5}});
+}
 
 void merge_test1() {
    newcell("merge_test1");
@@ -660,8 +668,8 @@ void all_cut()
    cut_test1A();
    cut_test2A();
    cut_test3A();
-   cut_test3B();
    cut_test2B();
+   cut_test3B();
    edge_cut1();
    edge_cut2();
    edge_cut3();
