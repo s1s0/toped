@@ -203,19 +203,46 @@ polycross::VPoint* polycross::CPoint::follower(bool& direction, bool modify) {
    return flw;
 }
 
-void polycross::CPoint::checkNreorder()
+polycross::VPoint* polycross::VPoint::checkNreorder()
 {
    CPoint* nextCross = static_cast<CPoint*>(_next);
-   if (*(_cp) == (*(nextCross->_cp)))
+   CPoint* prevCross = static_cast<CPoint*>(_prev);
+   assert(*(prevCross->cp()) == *(nextCross->cp()));
+   CPoint* nextCrossCouple = nextCross->link();
+   CPoint* prevCrossCouple = prevCross->link();
+   if (prevCrossCouple->next() != nextCrossCouple)
    {
-      if (nextCross->_link != _link->next()->next())
-      {
-         //swap the links
-         CPoint* swpL = _link;
-         _link = nextCross->_link; nextCross->_link->_link = this;
-         nextCross->_link = swpL; swpL->_link = nextCross;
-      }
+      // swap the links
+      prevCross->linkto(nextCrossCouple); nextCrossCouple->linkto(prevCross);
+      nextCross->linkto(prevCrossCouple); prevCrossCouple->linkto(nextCross);
+      nextCrossCouple = nextCross->link();
+      prevCrossCouple = prevCross->link();
    }
+   // now check for piercing edge cross points
+   VPoint* pV = prevCross;
+   while (!pV->visited()) pV = pV->prev();
+   VPoint *nV = nextCross;
+   while (!nV->visited()) nV = nV->next();
+   VPoint* spV = prevCrossCouple;
+   while (!spV->visited()) spV = spV->prev();
+   VPoint *snV = nextCrossCouple;
+   while (!snV->visited()) snV = snV->next();
+   int oriP = orientation(spV->cp(), snV->cp(), pV->cp());
+   int oriN = orientation(spV->cp(), snV->cp(), nV->cp());
+   assert(0 != oriP);
+   assert(0 != oriN);
+   if (oriP != oriN)
+   {
+      // we have a piercing edge cross - so let's do
+      prevCross->prev()->set_next(nextCross);
+      nextCross->set_prev(prevCross->prev());
+      prevCrossCouple->prev()->set_next(nextCrossCouple);
+      nextCrossCouple->set_prev(prevCrossCouple->prev());
+      delete prevCrossCouple;
+      delete prevCross;
+      delete this;
+   }
+   return nextCross;
 }
 
 //==============================================================================
@@ -237,7 +264,7 @@ bool polycross::SortLine::operator() (CPoint* cp1, CPoint* cp2) {
    if (direction > 0)
       return (ord >= 0);
    else
-      return (ord < 0);
+      return (ord <= 0);
 /*   if (direction == xyorder(cp1->cp(), cp2->cp()))  return true;
    else                                             return false;*/
 }
