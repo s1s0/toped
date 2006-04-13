@@ -55,6 +55,8 @@ namespace logicop {
    public:
       //! The class constructor preparing all data fields
                         logic(const pointlist&, const pointlist&);
+      //! Do Benttley-Ottman modified
+      void              findCrossingPoints();
       //! Perform logic AND and returns the result in plycol
       bool              AND(pcollection&);
       //! Perform logic ANDNOT and returns the result in plycol
@@ -71,6 +73,8 @@ namespace logicop {
       //
       void              reorderCross();
       //
+      polycross::VPoint* checkCoinciding(const pointlist&, polycross::VPoint*);
+      //
       polycross::VPoint* getFirstOutside(const pointlist&, polycross::VPoint*);
       //! The first input polygon
       const pointlist&  _poly1;
@@ -82,6 +86,9 @@ namespace logicop {
       polycross::VPoint* _shape2;
       //! Number of crossing points found from the constructor
       unsigned          _crossp;
+      polycross::segmentlist* _segl1;
+      polycross::segmentlist* _segl2;
+      
    };
    
 }
