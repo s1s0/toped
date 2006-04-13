@@ -42,21 +42,25 @@ between them. These data structures will be used in all subsequently called
 methods, implementing the actual logic operations*/
 logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
                                                 _poly1(poly1), _poly2(poly2) {
-   polycross::segmentlist _segl1(poly1,1);
-   polycross::segmentlist _segl2(poly2,2);
-   // create the event queue
-   polycross::XQ* _eq = new polycross::XQ(_segl1, _segl2);
+   _segl1 = new polycross::segmentlist(poly1,1);
+   _segl2 = new polycross::segmentlist(poly2,2);
+}
+   
+void logicop::logic::findCrossingPoints()
+{
+// create the event queue
+   polycross::XQ* _eq = new polycross::XQ(*_segl1, *_segl2);
    // BO modified algorithm
    _eq->sweep();
-   unsigned crossp1 = _segl1.normalize(poly1);
-   unsigned crossp2 = _segl2.normalize(poly2);
+   unsigned crossp1 = _segl1->normalize(_poly1);
+   unsigned crossp2 = _segl2->normalize(_poly2);
    assert(crossp1 == crossp2);
    _crossp = crossp1;
    if (1 == _crossp)
       throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
    delete _eq;
-   _shape1 = _segl1.dump_points();
-   _shape2 = _segl2.dump_points();
+   _shape1 = _segl1->dump_points();
+   _shape2 = _segl2->dump_points();
    reorderCross();
 }
 
@@ -123,9 +127,7 @@ bool logicop::logic::AND(pcollection& plycol) {
       if ((NULL == (centinel = getFirstOutside(_poly2, _shape1))) &&
            (NULL == (centinel = getFirstOutside(_poly1, _shape2))) )
       {
-         // shapes are coinciding if centinel is not found at
-         // this point - so get any of the shapes and return it as a result
-         getShape(plycol, _shape1);return true;
+         assert(false);
       }
    }
    else
@@ -133,12 +135,12 @@ bool logicop::logic::AND(pcollection& plycol) {
       // If there are no crossing points found, this still does not mean
       // that the operation will fail. Polygons might be fully overlapping...
       // Check that an arbitraty point from poly1 is inside poly2 ...
-      if  (_shape1->inside(_poly2)) centinel = _shape1;
+      if      (_shape1->inside(_poly2)) centinel = _shape1;
       // ... if not, check that an arbitrary point from poly2 is inside poly1 ...
       else if (_shape2->inside(_poly1)) centinel = _shape2;
-      // ... if not - polygons does not have any common area
-      else return false;
-      // If we've got here means that one of the polygons is completely 
+      // ... if not - still insysting - check that the polygons coincides
+      else if (NULL == (centinel = checkCoinciding(_poly1, _shape2))) return false;
+      // If we've got here means that one of the polygons is completely
       // overlapped by the other one. So we need to return the outer one
       getShape(plycol, centinel); return true;
    }
@@ -174,9 +176,7 @@ bool logicop::logic::ANDNOT(pcollection& plycol) {
       // get first external and non crossing  point
       if (NULL == (centinel = getFirstOutside(_poly1, _shape2)))
          if  (NULL == (centinel = getFirstOutside(_poly2, _shape1)))
-            // shapes are coinciding if centinel is not found at
-            // this point - so return nothing
-            return false;
+            assert(false);
          else
             direction = false; /*prev*/
       else
@@ -229,9 +229,7 @@ bool logicop::logic::OR(pcollection& plycol) {
       if ((NULL == (centinel = getFirstOutside(_poly2, _shape1))) &&
           (NULL == (centinel = getFirstOutside(_poly1, _shape2))) )
       {
-         // shapes are coinciding if centinel is not found at
-         // this point - so get any of the shapes and return it as a result
-         getShape(plycol, _shape1);return true;
+         assert(false);
       }
    }
    else
@@ -242,8 +240,8 @@ bool logicop::logic::OR(pcollection& plycol) {
       if  (_shape1->inside(_poly2)) centinel = _shape2;
       // ... if not, check that an arbitrary point from poly2 is inside poly1 ...
       else if (_shape2->inside(_poly1)) centinel = _shape1;
-      // ... if not - polygons does not have any common area
-      else return false;
+      // ... if not - still insysting - check that the polygons coincides
+      else if (NULL == (centinel = checkCoinciding(_poly1, _shape2))) return false;
       // If we've got here means that one of the polygons is completely 
       // overlapped by the other one. So we need to return the outer one
       getShape(plycol, centinel); return true;
@@ -318,6 +316,16 @@ polycross::VPoint* logicop::logic::getFirstOutside(const pointlist& plist, polyc
    return NULL;
 }
 
+polycross::VPoint* logicop::logic::checkCoinciding(const pointlist& plist, polycross::VPoint* init)
+{
+   polycross::VPoint *cpoint = init;
+   do
+   {
+      if (!cpoint->inside(plist, true)) return NULL;
+      else cpoint = cpoint->next();
+   } while (cpoint != init);
+   return init;
+}
 
 pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside) {
    polycross::segmentlist _seg1(outside,1);

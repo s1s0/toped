@@ -29,7 +29,7 @@
 #include "polycross.h"
 #include "outbox.h"
 
-#define BO2_DEBUG
+//#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -510,37 +510,10 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
 {
    float lambdaL = getLambda(above->lP(), above->rP(), below->lP());
    float lambdaR = getLambda(above->lP(), above->rP(), below->rP());
-   // coinsiding vertexes - register crossing point only if segments do not overlap
-   // (apart from the common point)
-   if (0 == lambdaL == lambdaR)
-      // fully coinsiding segments
-      return NULL;
-   if ((0 == lambdaL) && (0 > lambdaR))
-   {
-      float lambda2;
-      if (*(below->lP()) == *(above->lP()))
-         lambda2 = getLambda(below->lP(), below->rP(), above->rP());
-      else 
-         lambda2 = getLambda(below->lP(), below->rP(), above->lP());
-      if (0 > lambda2)
-         // segment below extends segment above
-         return new TP(*(below->lP()));
-      else
-         return NULL;
-   }
-   if ((0 == lambdaR) && (0 > lambdaL))
-   {
-      float lambda2;
-      if (*(below->rP()) == *(above->lP()))
-         lambda2 = getLambda(below->lP(), below->rP(), above->rP());
-      else
-         lambda2 = getLambda(below->lP(), below->rP(), above->lP());
-      if (0 > lambda2)
-         // segment above extends segment below
-         return new TP(*(below->rP()));
-      else
-         return NULL;
-   }
+   // coinciding or touching segments -> don't generate anything.
+   // The post-process of begin/end/modify events in a single vertex should
+   // take proper care about those cases
+   if (0 == (lambdaL * lambdaR)) return NULL;
    bool swaped = false;
    // first of all cases when neither of the lines is enclosing the other one
    // here we are generating "hidden" cross point, right in the middle of their
