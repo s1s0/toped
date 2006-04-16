@@ -69,8 +69,8 @@ int polycross::xyorder(const TP* p1, const TP* p2) {
 int polycross::orientation(const TP* p1, const TP* p2, const TP* p3)
 {
    // twice the "orientated" area of the enclosed triangle
-   float area = (p1->x() - p3->x()) * (p2->y() - p3->y()) -
-         (p2->x() - p3->x()) * (p1->y() - p3->y());
+   real area = (real(p1->x()) - real(p3->x())) * (real(p2->y()) - real(p3->y())) -
+         (real(p2->x()) - real(p3->x())) * (real(p1->y()) - real(p3->y()));
    if (0 == area) return 0;
    else
       return (area > 0) ? 1 : -1;
@@ -92,8 +92,8 @@ float polycross::getLambda( const TP* p1, const TP* p2, const TP* p)
    float denomX = p2->x() - p->x();
    float denomY = p2->y() - p->y();
    float lambda;
-   if      (0 != denomX) lambda = (p->x() - p1->x()) / denomX;
-   else if (0 != denomY) lambda = (p->y() - p1->y()) / denomY;
+   if      (0 != denomX) lambda = real(p->x() - p1->x()) / denomX;
+   else if (0 != denomY) lambda = real(p->y() - p1->y()) / denomY;
    // point coincides with the lp vertex of the segment
    else lambda = 0;
    return lambda;
@@ -265,8 +265,6 @@ bool polycross::SortLine::operator() (CPoint* cp1, CPoint* cp2) {
       return (ord >= 0);
    else
       return (ord <= 0);
-/*   if (direction == xyorder(cp1->cp(), cp2->cp()))  return true;
-   else                                             return false;*/
 }
 
 //==============================================================================

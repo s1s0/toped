@@ -135,7 +135,6 @@ namespace polycross
          const TP*         rP() const                 {return _rP;}
          byte              polyNo() const             {return _polyNo;}
          int               edge() const               {return _edge;}
-         TP*               checkIntersect(polysegment*, XQ&);
       protected:
          unsigned          _threadID;
          crossCList        crosspoints;
