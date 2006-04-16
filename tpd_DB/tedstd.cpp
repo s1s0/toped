@@ -41,7 +41,6 @@ PSegment::PSegment(TP p1,TP p2) {
 }
 
 byte PSegment::crossP(PSegment seg, TP& crossp) {
-   //SGREM
    // segments will coinside if    A1/A2 == B1/B2 == C1/C2
    // segments will be parallel if A1/A2 == B1/B2 != C1/C2
    if (0 == (_A*seg._B - seg._A*_B)) return 1;

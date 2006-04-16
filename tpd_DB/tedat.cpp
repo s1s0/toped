@@ -509,13 +509,20 @@ const pointlist laydata::tdtbox::shape2poly() {
    return _plist;
 };
 
-void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure) {
+void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
+{
    pointlist _plist = shape2poly();
    // and proceed in the same was as for the polygon
-   logicop::pcollection cut_shapes;
    logicop::logic operation(_plist, cutter);
+   try
+   {
+      operation.findCrossingPoints();
+   }
+   catch (EXPTNpolyCross) {return;}
+   logicop::pcollection cut_shapes;
    laydata::tdtdata* newshape;
-   if (operation.AND(cut_shapes)) {
+   if (operation.AND(cut_shapes))
+   {
       logicop::pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut shapeList
       for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++) 
@@ -716,7 +723,7 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, const SGBitSet* pls
          pointlist* mlist = new pointlist(_plist);
          for (unsigned i = 0; i < _plist.size(); i++)
             (*mlist)[i] *= trans;
-         //TODO: It's a waste of resources to recheck every polygon again. What we need here is
+         //@TODO: It's a waste of resources to recheck every polygon again. What we need here is
          // only check for box. Validation classes has to be optimized
          laydata::valid_poly* check = new laydata::valid_poly(*mlist);
          if (!(laydata::shp_box & check->status()))
@@ -732,10 +739,10 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, const SGBitSet* pls
 }
 
 void laydata::tdtpoly::transfer(const CTM& trans) {
-   for (unsigned ii = 0; ii < _plist.size(); ii++) 
-      _plist[ii] *= trans;
+   for (unsigned i = 0; i < _plist.size(); i++) 
+      _plist[i] *= trans;
    // normalize - taken 1:1 form valid_poly class
-   // TODO: Again - validation classes has to be optimized
+   // @TODO: Again - validation classes has to be optimized
    real area = 0;
    word size = _plist.size();
    word i,j;
@@ -771,11 +778,18 @@ bool laydata::tdtpoly::point_inside(TP pnt) {
    return (cc & 0x01) ? true : false;
 }
 
-void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure) {
-   logicop::pcollection cut_shapes;
+void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
+{
    logicop::logic operation(_plist, cutter);
+   try
+   {
+      operation.findCrossingPoints();
+   }
+   catch (EXPTNpolyCross) {return;}
+   logicop::pcollection cut_shapes;
    laydata::tdtdata* newshape;
-   if (operation.AND(cut_shapes)) {
+   if (operation.AND(cut_shapes))
+   {
       logicop::pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut shapeList
       for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
@@ -910,7 +924,7 @@ DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of the segment 2
    // the corrections
    double denom = x32 * y21 - x21 * y32;
-//SGREM !!! THINK about next two lines!!!    They are wrong !!!
+// @fixme THINK about next two lines!!!    They are wrong !!!
    if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
    if (0 == L2) return NULL;
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
@@ -1722,11 +1736,6 @@ char* laydata::valid_box::failtype()
 // class valid_poly
 //-----------------------------------------------------------------------------
 laydata::valid_poly::valid_poly(const pointlist& plist) : validator(plist) { 
-   // first check whether adjacent points coincide and remove them
-   // this will remove the last point if it coincides with the first one
-   identical();
-   if (_status > 0x10) return;
-   // now check the angles of the polygon & whether the polygon is a box
    angles();
    if (_status > 0x10) return;
    selfcrossing();
@@ -1743,52 +1752,66 @@ laydata::tdtdata* laydata::valid_poly::replacement() {
    }
    else newshape = new laydata::tdtpoly(_plist);
    return newshape;
-}   
-
-void laydata::valid_poly::identical() {
-   pointlist::iterator cp1 = _plist.end(); cp1--;
-   pointlist::iterator cp2 = _plist.begin();
-   while (cp2 != _plist.end()) {
-      if (*cp1 == *cp2) {
-         cp2 = _plist.erase(cp2);
-         _status |= laydata::shp_ident;
-      }
-      else { cp1 = cp2; cp2++;};
-   }
-   if (0 == _plist.size()) _status |= laydata::shp_null; // 0 unequal points
 }
 
-/*! Checks the polygon angles. Filters out intermediate points. Flags
-    a box if found. Flags an error if acute angle is digitized
-*/
-void laydata::valid_poly::angles() {
-   word cp1 = _plist.size() - 1;
-   word cp2 = 0;
-   word cp3 = 1;
-   int ang;
-   pointlist::iterator cp = _plist.begin();
-   while ((cp != _plist.end()) && (_plist.size() > 2)) {
-      ang = abs(xangle(_plist[cp2], _plist[cp3]) - xangle(_plist[cp2], _plist[cp1]));
-      if ((0 == ang) || (180 == ang)) {
-         cp = _plist.erase(cp);
-         _status |= laydata::shp_line;
-         cp3 = cp3 % _plist.size(); // !!
-      }   
-      else if (ang < 90 || ang > 270) {
-         _status |= laydata::shp_acute;
-         return;
-      }   
-      else {
-         cp1 = cp2; cp2 = cp3; cp3 = ((cp3 + 1) % _plist.size());cp++;
+/**
+ * Checks the polygon angles. Filters out intermediate points if 0 or 180 deg
+   anngle is found as well as coinciding points. Function also flags a box if
+   found as well as the acute angles
+ */
+void laydata::valid_poly::angles()
+{
+   pointlist::iterator cp1 = _plist.end(); cp1--;
+   pointlist::iterator cp2 = _plist.begin();
+   real pAngle, cAngle; //
+   bool pAngleValid = false;
+   bool loopCompleted = false;
+   int exitcnt = 0;
+   do
+   {
+      bool eraseP1 = false;
+      if (*cp1 == *cp2)
+         eraseP1 = true;
+      else
+      {
+         cAngle = xangle(*cp1, *cp2);
+         if (pAngleValid)
+         {
+            real ang = abs(cAngle - pAngle);
+            if ((0 == ang) || (180 == ang))
+               eraseP1 = true;
+            else if (ang < 90 || ang > 270)
+               _status |= laydata::shp_acute;
+         }
+         pAngleValid = true;
+         pAngle = cAngle;
       }
-   }
-   // check the resulting shape has more than 4 vertexes
-   if (_plist.size() < 4) {_status = 0x80; return;}
+      if (eraseP1)
+      {
+         _plist.erase(cp1);
+         _status |= laydata::shp_ident;
+      }
+      else
+      {
+         cp1 = cp2; cp2++;
+      }
+      if (_plist.end() == cp2)
+      {
+         cp2 = _plist.begin();
+         loopCompleted = true;
+      }
+      else if (_plist.end() == cp1)
+         cp1--;
+      if (loopCompleted) exitcnt++;
+   } while((exitcnt < 2) && (_plist.size() > 2));
+   // check for a single segment
+   if (_plist.size() < 3)
+      _status |= shp_null;
    // finally check whether it's a box - if any segment of 4 vertex polygon
    // (already checked for acute angles) has an angle towards x axis
    // that is multiply on 90 - then it should be a box
-   if ((4 == _plist.size()) && 
-                        (0 == remainder(xangle(_plist[cp2], _plist[cp3]),90.0)))
+   else if ((4 == _plist.size()) && (!(_status & shp_acute)) &&
+        (0 == remainder(cAngle,90.0)))
       _status |= laydata::shp_box;
 }
 
@@ -1798,7 +1821,10 @@ void laydata::valid_poly::normalize() {
    word i,j;
    for (i = 0, j = 1; i < size; i++, j = (j+1) % size) 
       area += _plist[i].x()*_plist[j].y() - _plist[j].x()*_plist[i].y();
-   if (area < 0)  {
+   if (area == 0) {
+      _status |= shp_null; return;
+   }
+   else if (area < 0)  {
 	   std::reverse(_plist.begin(),_plist.end());
       _status |= laydata::shp_clock;
    }
@@ -1820,10 +1846,9 @@ void laydata::valid_poly::selfcrossing() {
 }
 
 char* laydata::valid_poly::failtype() {
-   if      (_status & shp_null)  return "Zero area";
-   else if (_status & shp_acute) return "Acute angle";
+   if      (_status & shp_null) return "NULL area polygon";
    else if (_status & shp_cross) return "Self-crossing";
-   else if (_status & shp_4pnts) return "Unsuficcient points";
+//   else if (_status & shp_acute) return "Acute angle";
    else return "OK";
 }   
 
@@ -1832,50 +1857,57 @@ char* laydata::valid_poly::failtype() {
 //-----------------------------------------------------------------------------
 laydata::valid_wire::valid_wire(const pointlist& plist, word width) : 
                                      validator(plist), _width(width) { 
-   // first check whether adjacent points coincide and remove them
-   identical();
-   if (_status > 0x10) return;
-   // now check the angles of the wire
    angles();
    if (_status > 0x10) return;
    selfcrossing();
 }
 
-void laydata::valid_wire::identical() {
-   pointlist::iterator cp1 = _plist.begin();
-   pointlist::iterator cp2 = cp1;cp2++;
-   while (cp2 != _plist.end()) {
-      if (*cp1 == *cp2) {
-         cp2 = _plist.erase(cp2);
+/*! Checks the wire angles. Filters out intermediate and coinciding points.
+Flags acute angles and null wires
+ */
+void laydata::valid_wire::angles()
+{
+   // check for a single point
+   if (_plist.size() < 2) _status |= shp_null;
+   pointlist::iterator cp2 = _plist.begin();
+   pointlist::iterator cp1 = cp2; cp2++;
+   real pAngle, cAngle; //
+   bool pAngleValid = false;
+   do
+   {
+      bool eraseP1 = false;
+      if (*cp1 == *cp2)
+         eraseP1 = true;
+      else
+      {
+         cAngle = xangle(*cp1, *cp2);
+         if (pAngleValid)
+         {
+            real ang = abs(cAngle - pAngle);
+            if ((0 == ang) || (180 == ang))
+               eraseP1 = true;
+            else if (ang < 90 || ang > 270)
+               _status |= laydata::shp_acute;
+         }
+         pAngleValid = true;
+         pAngle = cAngle;
+      }
+      if (eraseP1)
+      {
+         _plist.erase(cp1);
          _status |= laydata::shp_ident;
       }
-      else {cp1 = cp2;cp2++;}
+      else
+      {
+         cp1 = cp2; cp2++;
+      }
    }
-   if (0 == _plist.size()) _status |= laydata::shp_null; // 0 unequal points
+   while(cp2 != _plist.end());
+   if (((_plist.size() == 2) && (*(_plist.begin()) == *(_plist.end()--))) ||
+            (_plist.size() < 2))
+      _status |= shp_null;
 }
 
-/*! Checks the wire angles. Filters out intermediate points. 
-Flags an error if acute angle is digitized
-*/
-void laydata::valid_wire::angles() {
-   word cp3 = 2;
-   int ang;
-   pointlist::iterator cp = _plist.begin();cp++;
-   while (cp3 < _plist.size()) {
-      ang = abs(xangle(_plist[cp3-1], _plist[cp3]) - xangle(_plist[cp3-1], _plist[cp3-2]));
-      if ((0 == ang) || (180 == ang)) {
-         cp = _plist.erase(cp);
-         _status |= laydata::shp_line;
-      }   
-      else if (ang < 90 || ang > 270) {
-         _status |= laydata::shp_acute;
-         return;
-      }   
-      else {cp3++;cp++;}
-   }
-   // check the resulting shape has more than 4 vertexes
-   if (_plist.size() < 2) {_status = 0x80; return;}
-}
 
 /*! Implements  algorithm to check that the wire is not simple crossing. 
 Alters the laydata::shp_cross bit of _status if the wire is selfcrossing
@@ -1897,9 +1929,8 @@ laydata::tdtdata* laydata::valid_wire::replacement() {
 
 char* laydata::valid_wire::failtype() {
 //   if (_status & shp_null)  return "Zero area";
-   if      (_status & shp_acute) return "Acute angle";
-   else if (_status & shp_cross) return "Self-crossing";
-   else if (_status & shp_4pnts) return "Unsuficcient points";
+   if      (_status & shp_cross) return "Self-crossing";
+   else if (_status & shp_null ) return "Unsuficcient points";
    else return "OK";
 }   
 
@@ -1907,6 +1938,8 @@ char* laydata::valid_wire::failtype() {
 /*! Returns the angle between the line and the X axis
 */
 int laydata::xangle(TP& p1, TP& p2) {
+//   printf("-- Calculating angle between X axis and (%i, %i) - (%i, %i) line\n",
+//          p1.x(), p1.y(), p2.x(), p2.y());
    const long double Pi = 3.1415926535897932384626433832795;
    if (p1.x() == p2.x()) { //vertcal line
       assert(p1.y() != p2.y()); // make sure both points do not coinside
@@ -1944,18 +1977,20 @@ laydata::tdtdata* laydata::createValidShape(const pointlist& pl) {
 
 laydata::tdtdata* laydata::polymerge(const pointlist& _plist0, const pointlist& _plist1) {
    if(_plist0.empty() || _plist1.empty()) return NULL;
-   logicop::pcollection merge_shape;
    logicop::logic operation(_plist0, _plist1);
+   try
+   {
+      operation.findCrossingPoints();
+   }
+   catch (EXPTNpolyCross) {return NULL;}
+   logicop::pcollection merge_shape;
+   laydata::tdtdata* resShape = NULL;
    if (operation.OR(merge_shape)) {
       assert(1 == merge_shape.size());
- //      logicop::pcollection::const_iterator CI;
- //      // add the resulting cut_shapes to the_cut shapeList
- //      for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++) {
- //         decure[1]->push_back(new laydata::tdtpoly(**CI));
- //      }
-      return new laydata::tdtpoly(**merge_shape.begin());
+      resShape = createValidShape(**merge_shape.begin());
+//      return new laydata::tdtpoly(**merge_shape.begin());
    }
-   else return NULL;
+   return resShape;
 }
 
 void laydata::draw_select_mark(const TP& pnt) {

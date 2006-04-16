@@ -102,7 +102,7 @@ bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
          rlb[3] = record[curnum+0];
          break;
       case gdsDT_REAL4B:{// 4-bit real 
-         // SGREM!!! not used and never checked !!!!
+         // WARNING!!! not used and never checked !!!!
          _sg_int8 sign = (0x80 & record[curnum])? -1:1; //sign
          byte exponent = 0x7f & record[curnum]; // exponent
          _sg_int32 mantissa = 0; // mantissa
@@ -597,19 +597,19 @@ GDSin::GDSlibrary::GDSlibrary(GDSFile* cf, GDSrecord* cr) {
       cr = cf->GetNextRecord();
       if (cr)
          switch (cr->Get_rectype())   {
-            case gds_FORMAT://SGREM skipped record !!!
+            case gds_FORMAT:// skipped record !!!
                AddLog('U',"FORMAT");
                delete cr;break;
-            case gds_MASK://SGREM skipped record !!!
+            case gds_MASK:// skipped record !!!
                AddLog('U',"MASK");
                delete cr;break;
-            case gds_ENDMASKS://SGREM skipped record !!!
+            case gds_ENDMASKS:// skipped record !!!
                AddLog('U',"ENDMASKS");
                delete cr;break;
-            case gds_REFLIBS://SGREM skipped record !!!
+            case gds_REFLIBS:// skipped record !!!
                AddLog('U',"REFLIBS");
                delete cr;break;
-            case gds_ATTRTABLE://SGREM skipped record !!!
+            case gds_ATTRTABLE:// skipped record !!!
                AddLog('U',"ATTRTABLE");
                delete cr;break;
             case gds_FONTS:// Read fonts
@@ -711,13 +711,13 @@ GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst) {
       cr = cf->GetNextRecord();
       if (cr)
          switch (cr->Get_rectype()) {
-            case gds_NODE://SGREM skipped record !!!
+            case gds_NODE:// skipped record !!!
                AddLog('U',"NODE");
                delete cr;break;
-            case gds_PROPATTR://SGREM skipped record !!!
+            case gds_PROPATTR:// skipped record !!!
                AddLog('U',"NODE");
                delete cr;break;
-            case gds_STRCLASS://SGREM skipped record !!!
+            case gds_STRCLASS:// skipped record !!!
                AddLog('U',"STRCLASS");// CADANCE internal use only
                delete cr;break;
             case gds_STRNAME:
@@ -857,11 +857,6 @@ GDSin::GDSbox::GDSbox(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
    }
    while (true);
 }
-
-// laydata::tdtdata* GDSin::GDSbox::toTED() {
-//    /*SGREM Shall we manifest something like gds type never checked ?! */
-//    return NULL;
-// }
 
 //==============================================================================
 // class GDSpolygon
