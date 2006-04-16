@@ -1736,11 +1736,6 @@ char* laydata::valid_box::failtype()
 // class valid_poly
 //-----------------------------------------------------------------------------
 laydata::valid_poly::valid_poly(const pointlist& plist) : validator(plist) { 
-   // first check whether adjacent points coincide and remove them
-   // this will remove the last point if it coincides with the first one
-   identical();
-   if (_status > 0x10) return;
-   // now check the angles of the polygon & whether the polygon is a box
    angles();
    if (_status > 0x10) return;
    selfcrossing();
@@ -1757,66 +1752,66 @@ laydata::tdtdata* laydata::valid_poly::replacement() {
    }
    else newshape = new laydata::tdtpoly(_plist);
    return newshape;
-}   
-
-void laydata::valid_poly::identical()
-{
-//   printf("************ All points of a polygon before identical **********\n");
-//   for (pointlist::iterator CP = _plist.begin(); CP != _plist.end(); CP++)
-//      printf("(%i, %i)\n", CP->x(), CP->y());
-   pointlist::iterator cp1 = _plist.end(); cp1--;
-   pointlist::iterator cp2 = _plist.begin();
-   while (cp2 != _plist.end())
-   {
-      if (*cp1 == *cp2)
-      {
-         cp2 = _plist.erase(cp2);
-         _status |= laydata::shp_ident;
-      }
-      else { cp1 = cp2; cp2++;};
-   }
-   if (_plist.size() < 3) _status |= laydata::shp_null; // 0 unequal points
-//   printf("************ All points of a polygon after identical **********\n");
-//   for (pointlist::iterator CP = _plist.begin(); CP != _plist.end(); CP++)
-//      printf("(%i, %i)\n", CP->x(), CP->y());
 }
 
-/*! Checks the polygon angles. Filters out intermediate points. Flags
-    a box if found. Flags an error if acute angle is digitized
-*/
-void laydata::valid_poly::angles() {
-   word cp1 = _plist.size() - 1;
-   word cp2 = 0;
-   word cp3 = 1;
-   int ang;
-   pointlist::iterator cp = _plist.begin();
+/**
+ * Checks the polygon angles. Filters out intermediate points if 0 or 180 deg
+   anngle is found as well as coinciding points. Function also flags a box if
+   found as well as the acute angles
+ */
+void laydata::valid_poly::angles()
+{
+   pointlist::iterator cp1 = _plist.end(); cp1--;
+   pointlist::iterator cp2 = _plist.begin();
+   real pAngle, cAngle; //
+   bool pAngleValid = false;
+   bool loopCompleted = false;
+   int exitcnt = 0;
    do
    {
-      // additional condition added, because "identical" can't foresee
-      // identical points that have another one in the middle (0-180 angle)
-      if ((_plist[cp2] == _plist[cp3]) || (_plist[cp2] == _plist[cp1]))
-         ang = 0;
+      bool eraseP1 = false;
+      if (*cp1 == *cp2)
+         eraseP1 = true;
       else
-         ang = abs(xangle(_plist[cp2], _plist[cp3]) - xangle(_plist[cp2], _plist[cp1]));
-      
-      if ((0 == ang) || (180 == ang)) {
-         cp = _plist.erase(cp);
+      {
+         cAngle = xangle(*cp1, *cp2);
+         if (pAngleValid)
+         {
+            real ang = abs(cAngle - pAngle);
+            if ((0 == ang) || (180 == ang))
+               eraseP1 = true;
+            else if (ang < 90 || ang > 270)
+               _status |= laydata::shp_acute;
+         }
+         pAngleValid = true;
+         pAngle = cAngle;
+      }
+      if (eraseP1)
+      {
+         _plist.erase(cp1);
          _status |= laydata::shp_ident;
-         cp2 = cp2 % _plist.size();
-         cp3 = (cp2 + 1) % _plist.size(); // !!
       }
-      else {
-         if (ang < 90 || ang > 270) _status |= laydata::shp_acute;
-         cp1 = cp2; cp2 = cp3; cp3 = ((cp3 + 1) % _plist.size());cp++;
+      else
+      {
+         cp1 = cp2; cp2++;
       }
-   }while ((cp3 != 1) && (_plist.size() > 2));
-   // check the resulting shape has more than 4 vertexes
-   if (_plist.size() < 3) {_status |= shp_null; return;}
+      if (_plist.end() == cp2)
+      {
+         cp2 = _plist.begin();
+         loopCompleted = true;
+      }
+      else if (_plist.end() == cp1)
+         cp1--;
+      if (loopCompleted) exitcnt++;
+   } while((exitcnt < 2) && (_plist.size() > 2));
+   // check for a single segment
+   if (_plist.size() < 3)
+      _status |= shp_null;
    // finally check whether it's a box - if any segment of 4 vertex polygon
    // (already checked for acute angles) has an angle towards x axis
    // that is multiply on 90 - then it should be a box
-   if ((4 == _plist.size()) && (!(_status & shp_acute)) &&
-                        (0 == remainder(xangle(_plist[cp2], _plist[cp3]),90.0)))
+   else if ((4 == _plist.size()) && (!(_status & shp_acute)) &&
+        (0 == remainder(cAngle,90.0)))
       _status |= laydata::shp_box;
 }
 
@@ -1862,50 +1857,57 @@ char* laydata::valid_poly::failtype() {
 //-----------------------------------------------------------------------------
 laydata::valid_wire::valid_wire(const pointlist& plist, word width) : 
                                      validator(plist), _width(width) { 
-   // first check whether adjacent points coincide and remove them
-   identical();
-   if (_status > 0x10) return;
-   // now check the angles of the wire
    angles();
    if (_status > 0x10) return;
    selfcrossing();
 }
 
-void laydata::valid_wire::identical() {
-   pointlist::iterator cp1 = _plist.begin();
-   pointlist::iterator cp2 = cp1;cp2++;
-   while (cp2 != _plist.end()) {
-      if (*cp1 == *cp2) {
-         cp2 = _plist.erase(cp2);
+/*! Checks the wire angles. Filters out intermediate and coinciding points.
+Flags acute angles and null wires
+ */
+void laydata::valid_wire::angles()
+{
+   // check for a single point
+   if (_plist.size() < 2) _status |= shp_null;
+   pointlist::iterator cp2 = _plist.begin();
+   pointlist::iterator cp1 = cp2; cp2++;
+   real pAngle, cAngle; //
+   bool pAngleValid = false;
+   do
+   {
+      bool eraseP1 = false;
+      if (*cp1 == *cp2)
+         eraseP1 = true;
+      else
+      {
+         cAngle = xangle(*cp1, *cp2);
+         if (pAngleValid)
+         {
+            real ang = abs(cAngle - pAngle);
+            if ((0 == ang) || (180 == ang))
+               eraseP1 = true;
+            else if (ang < 90 || ang > 270)
+               _status |= laydata::shp_acute;
+         }
+         pAngleValid = true;
+         pAngle = cAngle;
+      }
+      if (eraseP1)
+      {
+         _plist.erase(cp1);
          _status |= laydata::shp_ident;
       }
-      else {cp1 = cp2;cp2++;}
+      else
+      {
+         cp1 = cp2; cp2++;
+      }
    }
-   if (0 == _plist.size()) _status |= laydata::shp_null; // 0 unequal points
+   while(cp2 != _plist.end());
+   if (((_plist.size() == 2) && (*(_plist.begin()) == *(_plist.end()--))) ||
+            (_plist.size() < 2))
+      _status |= shp_null;
 }
 
-/*! Checks the wire angles. Filters out intermediate points. 
-Flags an error if acute angle is digitized
-*/
-void laydata::valid_wire::angles() {
-   word cp3 = 2;
-   int ang;
-   pointlist::iterator cp = _plist.begin();cp++;
-   while (cp3 < _plist.size()) {
-      ang = abs(xangle(_plist[cp3-1], _plist[cp3]) - xangle(_plist[cp3-1], _plist[cp3-2]));
-      if ((0 == ang) || (180 == ang)) {
-         cp = _plist.erase(cp);
-         _status |= laydata::shp_ident;
-      }   
-      else if (ang < 90 || ang > 270) {
-         _status |= laydata::shp_acute;
-         return;
-      }   
-      else {cp3++;cp++;}
-   }
-   // check the resulting shape has more than 4 vertexes
-   if (_plist.size() < 2) {_status = 0x80; return;}
-}
 
 /*! Implements  algorithm to check that the wire is not simple crossing. 
 Alters the laydata::shp_cross bit of _status if the wire is selfcrossing
