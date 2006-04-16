@@ -123,17 +123,27 @@ namespace browsers {
    public:
       LayerButton(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxBU_AUTODRAW, const wxValidator& validator = wxDefaultValidator, const wxString& name = "button", LayerInfo *layer = NULL);
       ~LayerButton();
-      void OnClick(wxMouseEvent &event);
+      void OnLeftClick(wxMouseEvent &event);
+      void OnMiddleClick(wxMouseEvent &event);
       //Call when other button is selected
       void unselect(void);
       void select(void);
 
       
    private:
+      void preparePicture(wxBitmap &pict);
+
       LayerInfo   *_layer;
-      wxBitmap    *picture;
-      wxBitmap    *selectedPicture;
+
+      wxBitmap    *_picture;
+
+
+      wxBrush     *_brush;
+      wxPen       *_pen;
       bool        _selected;
+      bool        _hidden;
+      bool        _locked;
+      
    DECLARE_EVENT_TABLE();
    };
 
