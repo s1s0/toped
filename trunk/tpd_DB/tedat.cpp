@@ -1777,7 +1777,7 @@ void laydata::valid_poly::angles()
          cAngle = xangle(*cp1, *cp2);
          if (pAngleValid)
          {
-            real ang = abs(cAngle - pAngle);
+            real ang = fabs(cAngle - pAngle);
             if ((0 == ang) || (180 == ang))
                eraseP1 = true;
             else if (ang < 90 || ang > 270)
@@ -1820,7 +1820,8 @@ void laydata::valid_poly::normalize() {
    word size = _plist.size();
    word i,j;
    for (i = 0, j = 1; i < size; i++, j = (j+1) % size) 
-      area += _plist[i].x()*_plist[j].y() - _plist[j].x()*_plist[i].y();
+      area += real(_plist[i].x()) * real(_plist[j].y()) -
+            real(_plist[j].x()) * real(_plist[i].y());
    if (area == 0) {
       _status |= shp_null; return;
    }
@@ -1883,7 +1884,7 @@ void laydata::valid_wire::angles()
          cAngle = xangle(*cp1, *cp2);
          if (pAngleValid)
          {
-            real ang = abs(cAngle - pAngle);
+            real ang = fabs(cAngle - pAngle);
             if ((0 == ang) || (180 == ang))
                eraseP1 = true;
             else if (ang < 90 || ang > 270)

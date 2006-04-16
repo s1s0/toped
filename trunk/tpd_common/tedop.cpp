@@ -257,7 +257,8 @@ bool tedop::SweepLine::coincideOK( plysegment* line, plysegment* cross, float lp
    assert(indxLP != indxRP);
    // we'll pickup the neighbour of the point(s) laying on the line and will
    // recalculate the lps/rps for them. 
-   bool indxpos = indxLP > indxRP;
+   bool indxpos = (indxLP == ((indxRP + 1) % _numv));
+   
    do {
       // the code below just increments/decrements the indexes in the point sequence
       // they look so weird, to keep the indexes within [0:_numv-1] boundaries
@@ -306,32 +307,3 @@ int tedop::SweepLine::compare_seg(const void* o1, const void* o2, void*) {
    }
    return order;
 }
-
-// #include <functional>
-// #include <algorithm>
-// #include <iterator>
-// 
-// template< typename BidirectionalIterator, typename Compare >
-// void quick_sort( BidirectionalIterator first, BidirectionalIterator last, Compare cmp ) {
-//   if( first != last ) {
-//     BidirectionalIterator left  = first;
-//     BidirectionalIterator right = last;
-//     BidirectionalIterator pivot = left++;
-// 
-//     while( left != right ) {
-//       if( cmp( *left, *pivot ) ) {
-//          ++left;
-//       } else {
-//          while( (left != --right) && cmp( *pivot, *right ) )
-//            ;
-//          std::iter_swap( left, right );
-//       }
-//     }
-// 
-//     --left;
-//     std::iter_swap( first, left );
-// 
-//     quick_sort( first, left, cmp );
-//     quick_sort( right, last, cmp );
-//   }
-// }
