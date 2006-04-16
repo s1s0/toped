@@ -333,7 +333,6 @@ namespace laydata {
       char*             failtype();
    private:
       void              angles();
-      void              identical();
       void              normalize();
       void              selfcrossing();
    };
@@ -346,8 +345,6 @@ namespace laydata {
       char*             failtype();
    private:
       void              angles();
-      void              identical();
-//      void              normalize();
       void              selfcrossing();
       word              _width;
    };
