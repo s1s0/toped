@@ -654,21 +654,22 @@ browsers::LayerInfo::LayerInfo(const std::string &name, const word layno, const 
 
 BEGIN_EVENT_TABLE(browsers::LayerButton, wxBitmapButton)
    //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
-   EVT_LEFT_DOWN(LayerButton::OnClick)
+   EVT_LEFT_DOWN(LayerButton::OnLeftClick)
+   EVT_MIDDLE_DOWN(LayerButton::OnMiddleClick)
 END_EVENT_TABLE()
 
 browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos , const wxSize& size, long style , const wxValidator& validator , const wxString& name, LayerInfo *layer)
 {
    
-   _layer = layer;
-   _selected = false;
+   _layer   = layer;
+   _selected= false;
+   _hidden  = false;
+   _locked  = false;  
 
-   wxMemoryDC DC;
-   wxBrush *brush;
+   
    std::string caption;
    
-   picture = new wxBitmap(198, 28, -1);
-   selectedPicture = new wxBitmap(198, 28, -1);
+   _picture = new wxBitmap(size.GetWidth(), size.GetHeight(), -1);
 
    byte *ifill=Properties->drawprop().getFill(layer->layno());
    layprop::tellRGB *col = Properties->drawprop().getColor(layer->layno());
@@ -699,94 +700,169 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
       //Recreate bitmap with new color
       stipplebrush = new wxBitmap(image, 1);
 
-      brush = new wxBrush(	*stipplebrush);
+      _brush = new wxBrush(	*stipplebrush);
       
    }
    else
    {
-      brush = new wxBrush(*wxBLACK_BRUSH);
+      _brush = new wxBrush(*wxBLACK_BRUSH);
    }
 
-   DC.SetBrush(*brush);
-       
-   wxPen *pen = new wxPen();
-           
+   _pen = new wxPen();    
             
    if (col!=NULL)
    {
-      pen->SetColour(color);
+      _pen->SetColour(color);
    }
             
-   //***Draw main picture***         
-   DC.SelectObject(*picture);
-   DC.SetBackground(*wxBLACK_BRUSH);
-   DC.SetPen(*pen);
-   DC.SetTextForeground(*wxWHITE);
+   //***Draw main picture***   
+   preparePicture(*_picture);
    
-   DC.Clear();
-   DC.DrawRectangle(1, 1, 49, 49);
-   caption = layer->name()+ "   sv_";
-   DC.DrawText(caption.c_str(), 60, 0);
-   DC.SelectObject(wxNullBitmap);
-
-
-   //***Draw picture for selected mode***         
-   DC.SelectObject(*selectedPicture);
-   DC.SetBackground(*wxWHITE_BRUSH);
-   DC.SetPen(*pen);
-   DC.SetTextForeground(*wxBLACK);
-   
-   DC.Clear();
-   DC.DrawRectangle(1, 1, 49, 49);
-   caption = layer->name()+ "   sv_";
-   DC.DrawText(layer->name().c_str(), 60, 0);
-   DC.SelectObject(wxNullBitmap);
-
-
-   Create(parent, id, *picture, pos, size, style, validator, name);
+   Create(parent, id, *_picture, pos, size, style, validator, name);
 }
+
+void browsers::LayerButton::preparePicture(wxBitmap &pict)
+{
+   wxMemoryDC DC;
+   wxFont font;
+   
+
+   font = DC.GetFont();
+   font.SetPointSize(8);
+   const int fontWidth = font.GetPointSize();
+  
+   
+
+   DC.SetBrush(*_brush);
+   DC.SelectObject(pict);
+   
+   DC.SetPen(*_pen);
+
+   if (_selected)
+   {
+      DC.SetBackground(*wxWHITE);
+      DC.SetTextForeground(*wxBLACK);
+   }
+   else
+   {
+      DC.SetBackground(*wxBLACK);
+      DC.SetTextForeground(*wxWHITE);
+
+   }
+
+   std::string infoString = "s";
+   if (_hidden)
+   {
+      infoString += " ";
+   }
+   else
+   {
+      infoString += "v";
+   }
+
+   infoString += " ";
+
+   if (_locked)
+   {
+      infoString += "l";
+   }
+   else
+   {
+      infoString += " ";
+   }
+   
+   DC.Clear(); 
+
+   DC.DrawText(infoString.c_str(), 5, 0);
+   int h,w;
+   DC.GetTextExtent(infoString.c_str(), &w, &h);
+
+   DC.DrawRectangle(5*fontWidth, 1, 49, 49);
+   std::string caption = _layer->name();
+   DC.DrawText(caption.c_str(), 5*fontWidth+50, 0);
+   
+   DC.SelectObject(wxNullBitmap);
+}
+
 
 browsers::LayerButton::~LayerButton()
 {
-   delete picture;
-   delete selectedPicture;
+   delete _picture;
+
+   delete _brush;
+   delete _pen;
    delete _layer;
 }
 
-void browsers::LayerButton::OnClick(wxMouseEvent &event)
+void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
 {
 
+   if (event.ShiftDown())
+   //Lock layer
+   {
+      _locked = !_locked;
+      wxString cmd;
+      cmd << "locklayer("<<_layer->layno()<<", ";
+      if (_locked) cmd<<"true"<<");";
+      else cmd <<"false"<<");";
+      Console->parseCommand(cmd);
+
+      preparePicture(*_picture);
+      SetBitmapLabel(*_picture);
+   }
+   else
+   //Select layer
+   {
+      wxString cmd;
+      cmd << "usinglayer("<<_layer->layno()<<");";
+      Console->parseCommand(cmd);
+
+      if (!_selected)
+      {
+         select();
+   
+         //Next block uses for unselect previous button
+         int bt = BT_LAYER_SELECT;
+         wxCommandEvent eventLAYER_SELECT(wxEVT_CMD_BROWSER);
+   
+         eventLAYER_SELECT.SetExtraLong(_layer->layno());
+   
+         eventLAYER_SELECT.SetInt(bt);
+         wxPostEvent(Browsers->layers(), eventLAYER_SELECT);
+      }
+   }
+}
+
+void browsers::LayerButton::OnMiddleClick(wxMouseEvent &event)
+{
+   _hidden = !_hidden;
+
    wxString cmd;
-   cmd << "usinglayer("<<_layer->layno()<<");";
+   cmd << "hidelayer("<<_layer->layno()<<", ";
+   if (_hidden) cmd<<"true"<<");";
+   else cmd <<"false"<<");";
    Console->parseCommand(cmd);
 
-   if (!_selected)
-   {
-      select();
-   
-      int bt = BT_LAYER_SELECT;
-      wxCommandEvent eventLAYER_SELECT(wxEVT_CMD_BROWSER);
-   
-      eventLAYER_SELECT.SetExtraLong(_layer->layno());
-   
-      eventLAYER_SELECT.SetInt(bt);
-      wxPostEvent(Browsers->layers(), eventLAYER_SELECT);
-      
-   }
-   
+   preparePicture(*_picture);
+   SetBitmapLabel(*_picture);
+
 }
 
 void browsers::LayerButton::select(void)
 {
    _selected = true;
-   SetBitmapLabel(*selectedPicture);
+   preparePicture(*_picture);
+   SetBitmapLabel(*_picture);
 }
 
 void browsers::LayerButton::unselect(void)
 {
    _selected = false;
-   SetBitmapLabel(*picture);
+   preparePicture(*_picture);
+   SetBitmapLabel(*_picture);
 }
+
+
 
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::LayerBrowser2, wxPanel)
