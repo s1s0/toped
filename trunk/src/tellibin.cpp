@@ -2362,7 +2362,7 @@ void tellstdfunc::stdMOVESEL::undo() {
 	  byte i;
       for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
       ATDB->move_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale),fadead);
-      //SGREM Here - an internal check can be done - all 3 of the fadead lists
+      //@TODO Here - an internal check can be done - all 3 of the fadead lists
       // MUST be empty, otherwise - god knows what's wrong!
       for (i = 0; i < 3; delete fadead[i++]);
       ATDB->select_fromList(get_ttlaylist(failed));
@@ -2461,7 +2461,7 @@ void tellstdfunc::stdROTATESEL::undo()
       byte i;
       for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
       ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
-      //SGREM Here - an internal check can be done - all 3 of the fadead lists
+      //@TODO Here - an internal check can be done - all 3 of the fadead lists
       // MUST be empty, otherwise - god knows what's wrong!
       for (i = 0; i < 3; delete fadead[i++]);
       ATDB->select_fromList(get_ttlaylist(failed));

@@ -78,7 +78,7 @@
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs>$TLL_DIR/tcase.tll</programargs>
+      <programargs>$TLL_DIR/laylogic.tll</programargs>
       <gdbpath/>
       <configGdbScript/>
       <runShellScript/>

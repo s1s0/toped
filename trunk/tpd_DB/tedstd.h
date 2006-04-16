@@ -76,14 +76,13 @@ namespace laydata {
    typedef enum { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } SH_STATUS;
    typedef enum {
       shp_OK         = 0x00,
-      shp_ident      = 0x01, // identical points removed
-      shp_line       = 0x02, // 3 points in line - middle removed
-      shp_clock      = 0x04, // poits reordered to get antoclockwise order
-      shp_box        = 0x08, // shape is a box
-      shp_null       = 0x10, // 0 area - points are not forming a polygon
-      shp_acute      = 0x20, // acute angle 
-      shp_cross      = 0x40, // self crossing sequence
-      shp_4pnts      = 0x80  // less than 4 points 
+      shp_ident      = 0x01, // identical or one line points removed
+      shp_clock      = 0x02, // poits reordered to get antoclockwise order
+      shp_box        = 0x04, // shape is a box
+      shp_acute      = 0x08, // acute angle
+      // critical
+      shp_null       = 0x40, // 0 area - points are not forming a polygon
+      shp_cross      = 0x80, // self crossing sequence
    } shape_status;
    
    class TEDfile;

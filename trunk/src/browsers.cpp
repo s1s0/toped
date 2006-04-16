@@ -57,7 +57,7 @@ browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
    _imageList = new wxImageList(16, 16, TRUE);
 #ifdef __WXMSW__
-/*TODO : Under windows - resource loading*/
+/*@TODO : Under windows - resource loading*/
 //    m_imageListNormal->Add( wxIcon(_T("icon1"), wxBITMAP_TYPE_ICO_RESOURCE) );
 //
 #else

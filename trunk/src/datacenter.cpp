@@ -65,7 +65,7 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
    std::ostringstream ost; ost << "GDS import: ";
    if (NULL != dst_structure) {
       if (overwrite) {
-         /*SGREM! Erase the existing structure and convert*/
+         /*@TODO Erase the existing structure and convert*/
          ost << "Warning! Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
       }
    // Don't report this , except maybe in case of a verbose or similar option is introduced
@@ -133,7 +133,7 @@ void GDSin::gds2ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst) {
       tell_log(console::MT_ERROR, ost.str().c_str());
    }   
    else pl = check.get_validated() ;
-/* SGREM !!! GDS path type here!!!! */
+   /* @TODO !!! GDS path type here!!!! */
    wl->addwire(pl, wd->Get_width(),false);
 }
 
@@ -183,7 +183,7 @@ void GDSin::gds2ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst) {
 void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
                                        (dst->securelayer(wd->GetLayer()));
-   // SGREM absolute magnification, absolute angle should be reflected somehow!!!
+   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
    wl->addtext(wd->GetText(), 
                CTM(wd->GetMagn_point(), 
                    wd->GetMagnification() / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
