@@ -326,7 +326,7 @@ polycross::polysegment::~polysegment()
 
 void polycross::polysegment::freeMem()
 {
-   delete _lP; delete _rP;
+//   delete _lP; delete _rP;
 }
 
 //==============================================================================
