@@ -55,6 +55,7 @@ namespace logicop {
    public:
       //! The class constructor preparing all data fields
                         logic(const pointlist&, const pointlist&);
+                        ~logic();
       //! Do Benttley-Ottman modified
       void              findCrossingPoints();
       //! Perform logic AND and returns the result in plycol

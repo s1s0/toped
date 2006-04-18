@@ -76,6 +76,7 @@ namespace polycross
    {
       public:
          CPoint(const TP* cp) : VPoint(cp),_link(NULL),_visited(0) {};
+         ~CPoint(){};
          virtual VPoint*  follower(bool& direction, bool modify = false);
          bool              inside(const pointlist&, bool touching = false) {return true;}
          char              visited() const {return _visited;}
@@ -124,7 +125,6 @@ namespace polycross
          typedef std::vector<CPoint*> crossCList;
          polysegment(const TP*, const TP*, int, char);
          ~polysegment();
-         void              freeMem();
          CPoint*           insertCrossPoint(const TP*);
          BPoint*           insertBindPoint(const TP* pnt);
          unsigned          normalize(const TP*, const TP*);
@@ -319,14 +319,14 @@ namespace polycross
             public:
                TopSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
                SegmentThread*    threadAbove()  {assert(false);}
-               ~TopSentinel() { _cseg->freeMem();delete _cseg;}
+               ~TopSentinel() {delete _cseg;}
          };
          class BottomSentinel : public SegmentThread
          {
             public:
                BottomSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
                SegmentThread*    threadBelow()  {assert(false);}
-               ~BottomSentinel() { _cseg->freeMem(); delete _cseg;}
+               ~BottomSentinel() {delete _cseg;}
          };
 
          BottomSentinel*   _bottomSentinel;
@@ -336,6 +336,11 @@ namespace polycross
          int               _lastThreadID;
          const segmentlist* _osl1;
          const segmentlist* _osl2;
+         TP*               _blSent;
+         TP*               _brSent;
+         TP*               _tlSent;
+         TP*               _trSent;
+         
    };
 
    //===========================================================================

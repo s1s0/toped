@@ -377,3 +377,24 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
    
    return shgen;
 }
+
+logicop::logic::~logic()
+{
+   polycross::VPoint* centinel = _shape1;
+   polycross::VPoint* cpnt;
+   do 
+   {
+      cpnt = _shape1->next();
+      delete _shape1; _shape1 = cpnt;
+   }
+   while (_shape1 != centinel);
+   centinel = _shape2;
+   do
+   {
+      cpnt = _shape2->next();
+      delete _shape2; _shape2 = cpnt;
+   }
+   while (_shape2 != centinel);
+   delete _segl1;
+   delete _segl2;
+}

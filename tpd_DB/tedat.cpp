@@ -526,16 +526,18 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
       logicop::pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut shapeList
       for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++) 
-         if (NULL != (newshape = createValidShape(**CI)))
+         if (NULL != (newshape = createValidShape(*CI)))
             decure[1]->push_back(newshape);
+      cut_shapes.clear();
       // if there is a cut - there will be (most likely) be cut remains as well
       operation.reset_visited();
       logicop::pcollection rest_shapes;
       if (operation.ANDNOT(rest_shapes))
          // add the resulting cut remainings to the_rest shapeList
          for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++) 
-            if (NULL != (newshape = createValidShape(**CI)))
+            if (NULL != (newshape = createValidShape(*CI)))
                decure[2]->push_back(newshape);
+      rest_shapes.clear();
       // and finally add this to the_delete shapelist
       decure[0]->push_back(this);
    }
@@ -793,16 +795,18 @@ void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
       logicop::pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut shapeList
       for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
-         if (NULL != (newshape = createValidShape(**CI)))
+         if (NULL != (newshape = createValidShape(*CI)))
             decure[1]->push_back(newshape);
+      cut_shapes.clear();
       // if there is a cut - there should be cut remains as well
       operation.reset_visited();
       logicop::pcollection rest_shapes;
       if (operation.ANDNOT(rest_shapes))
          // add the resulting cut remainings to the_rest shapeList
          for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++) 
-            if (NULL != (newshape = createValidShape(**CI)))
+            if (NULL != (newshape = createValidShape(*CI)))
                decure[2]->push_back(newshape);
+      rest_shapes.clear();
       // and finally add this to the_delete shapelist
       decure[0]->push_back(this);
    }
@@ -1958,8 +1962,9 @@ int laydata::xangle(TP& p1, TP& p2) {
 //-----------------------------------------------------------------------------
 // other...
 //-----------------------------------------------------------------------------
-laydata::tdtdata* laydata::createValidShape(const pointlist& pl) {
-   laydata::valid_poly check(pl);
+laydata::tdtdata* laydata::createValidShape(pointlist* pl) {
+   laydata::valid_poly check(*pl);
+   delete pl;
    if (!check.valid()) {
       std::ostringstream ost;
       ost << "Resulting shape is invalid - " << check.failtype();
@@ -1988,7 +1993,7 @@ laydata::tdtdata* laydata::polymerge(const pointlist& _plist0, const pointlist& 
    laydata::tdtdata* resShape = NULL;
    if (operation.OR(merge_shape)) {
       assert(1 == merge_shape.size());
-      resShape = createValidShape(**merge_shape.begin());
+      resShape = createValidShape(*merge_shape.begin());
 //      return new laydata::tdtpoly(**merge_shape.begin());
    }
    return resShape;
