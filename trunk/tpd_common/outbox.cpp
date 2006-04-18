@@ -160,6 +160,7 @@ void console::TELLFuncList::addFunc(wxString name, void* arguments)
       strlist += arglist->front();arglist->pop_front();
       if (arglist->size()) strlist += " , ";
    }
+   delete arglist;
    strlist += " )";
    //
    row.SetColumn(2);

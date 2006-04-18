@@ -238,9 +238,11 @@ polycross::VPoint* polycross::VPoint::checkNreorder()
       nextCross->set_prev(prevCross->prev());
       prevCrossCouple->prev()->set_next(nextCrossCouple);
       nextCrossCouple->set_prev(prevCrossCouple->prev());
-      delete prevCrossCouple;
+      // DON'T delete here the crossing points!. They will get deleted
+      // by the polysegment destructor
+/*      delete prevCrossCouple;
       delete prevCross;
-      delete this;
+      delete this;*/
    }
    return nextCross;
 }
@@ -320,13 +322,8 @@ polycross::BPoint* polycross::polysegment::insertBindPoint(const TP* pnt)
 
 polycross::polysegment::~polysegment()
 {
-   //for (unsigned i = 0; i < crosspoints.size(); i++)
-   //   delete (crosspoints[i]);
-}
-
-void polycross::polysegment::freeMem()
-{
-//   delete _lP; delete _rP;
+//   for (unsigned i = 0; i < crosspoints.size(); i++)
+//      delete (crosspoints[i]);
 }
 
 //==============================================================================
@@ -1043,13 +1040,13 @@ polycross:: YQ::YQ(DBbox& overlap, const segmentlist* seg1, const segmentlist* s
 {
    _osl1 = seg1;
    _osl2 = seg2;
-   TP* bl = new TP(overlap.p1().x()-1, overlap.p1().y()-1);
-   TP* br = new TP(overlap.p2().x()+1, overlap.p1().y()-1);
-   TP* tl = new TP(overlap.p1().x()-1, overlap.p2().y()+1);
-   TP* tr = new TP(overlap.p2().x()+1, overlap.p2().y()+1);
-   _bottomSentinel = new BottomSentinel(new polysegment(bl, br, -1, 0));
+   _blSent = new TP(overlap.p1().x()-1, overlap.p1().y()-1);
+   _brSent = new TP(overlap.p2().x()+1, overlap.p1().y()-1);
+   _tlSent = new TP(overlap.p1().x()-1, overlap.p2().y()+1);
+   _trSent = new TP(overlap.p2().x()+1, overlap.p2().y()+1);
+   _bottomSentinel = new BottomSentinel(new polysegment(_blSent, _brSent, -1, 0));
    _cthreads[-2] = _bottomSentinel;
-   _topSentinel = new TopSentinel(new polysegment(tl, tr, -1, 0));
+   _topSentinel = new TopSentinel(new polysegment(_tlSent, _trSent, -1, 0));
    _cthreads[-1] = _topSentinel;
    _bottomSentinel->set_threadAbove(_topSentinel);
    _topSentinel->set_threadBelow(_bottomSentinel);
@@ -1101,6 +1098,7 @@ polycross::SegmentThread* polycross::YQ::endThread(unsigned threadID)
    prevT->set_threadAbove(thread->threadAbove());
    // erase it
    _cthreads.erase(threadP);
+   delete(threadP->second);
    return prevT;
 }
 
@@ -1229,6 +1227,10 @@ polycross::YQ::~YQ()
 {
    delete _topSentinel;
    delete _bottomSentinel;
+   delete _blSent;
+   delete _brSent;
+   delete _tlSent;
+   delete _trSent;
 }
 
 //==============================================================================

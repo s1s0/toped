@@ -2771,23 +2771,28 @@ int tellstdfunc::lgcCUTPOLY::execute() {
                UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
                // unselect everything
                ATDB->unselect_all();
+
+               telldata::ttlist* shdeleted = make_ttlaylist(dasao[0]);
                // select the shapes to delete & delete them ...
-               ATDB->select_fromList(get_ttlaylist(make_ttlaylist(dasao[0])));
+               ATDB->select_fromList(get_ttlaylist(shdeleted));
                laydata::atticList* sh_delist = new laydata::atticList();
                ATDB->delete_selected(sh_delist);
                // ... not forgetting to save them in the undo data stack for undo
                UNDOPstack.push_front(make_ttlaylist(sh_delist));
                // clean-up the delete attic list
-               delete dasao[0];
+               delete sh_delist; delete shdeleted;
                // add the result of the cut...
+               telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
+               telldata::ttlist* shaddonly = make_ttlaylist(dasao[2]);
                ATDB->addlist(dasao[1]);
-               UNDOPstack.push_front(make_ttlaylist(dasao[1]));
+               UNDOPstack.push_front(shaddselect);
                // ... the cut-offs ....
                ATDB->addlist(dasao[2]);
-               UNDOPstack.push_front(make_ttlaylist(dasao[2]));
+               UNDOPstack.push_front(shaddonly);
                // and finally select the_cut
-               ATDB->select_fromList(get_ttlaylist(make_ttlaylist(dasao[1])));
+               ATDB->select_fromList(get_ttlaylist(shaddselect));
                LogFile << "polycut("<< *pl << ");"; LogFile.flush();
+               delete dasao[0]; delete dasao[1]; delete dasao[2];
             }
          DATC->unlockDB();
       }

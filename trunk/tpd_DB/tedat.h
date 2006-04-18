@@ -355,7 +355,7 @@ namespace laydata {
    void draw_select_mark(const TP&);
    void draw_overlapping_box(const DBbox&, const CTM&, const GLushort);
    tdtdata* polymerge(const pointlist&, const pointlist&);
-   tdtdata* createValidShape(const pointlist&);
+   tdtdata* createValidShape(pointlist*);
 }
    
 #endif
