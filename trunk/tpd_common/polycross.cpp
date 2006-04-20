@@ -1302,8 +1302,10 @@ void polycross::XQ::addCrossEvent(TP* CP, polysegment* aseg, polysegment* bseg)
 
 int polycross::XQ::E_compare( const void* v1, const void* v2, void*)
 {
-   const TP*  p1 = (*(EventVertex*)v1)();
-   const TP*  p2 = (*(EventVertex*)v2)();
+   //const TP*  p1 = (*(EventVertex*)v1)();
+   //const TP*  p2 = (*(EventVertex*)v2)();
+   const TP* p1 = (*static_cast<const EventVertex*>(v1))();
+   const TP* p2 = (*static_cast<const EventVertex*>(v2))();
    return xyorder(p1,p2);
 }
 
@@ -1319,8 +1321,9 @@ void polycross::XQ::sweep()
    {
       evtlist = (EventVertex*)trav.avl_node->avl_data;
       evtlist->sweep(*_sweepline, *this);
-      delete evtlist;
       avl_delete(_xqueue,evtlist);
+      delete evtlist;
+      
    }
 }
 
