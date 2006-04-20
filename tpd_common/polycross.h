@@ -84,7 +84,7 @@ namespace polycross
          CPoint*           link() const {return _link;}
          void              reset_visited() {_visited = 0;};
          void              linkage(VPoint*& prev);
-         VPoint*           checkNreorder()       {assert(false);}
+         VPoint*           checkNreorder()       {assert(false); return NULL;}
       protected:
          CPoint*           _link;
          char              _visited;
@@ -171,7 +171,7 @@ namespace polycross
    {
       public:
          EventVertex(const TP* evertex) : _evertex(evertex) {};
-         const TP*         operator () () {return _evertex;};
+         const TP*         operator () () const {return _evertex;};
          void              addEvent(TEvent*, EventTypes);
          void              sweep(YQ&, XQ&);
          void              sweep2bind(YQ&, BindCollection&);
@@ -266,8 +266,8 @@ namespace polycross
                {_aseg = aseg; _bseg = bseg;  _evertex = ev;}
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&) {assert(false);}
-         const TP*         avertex() {assert(false);}
-         const TP*         bvertex() {assert(false);}
+         const TP*         avertex() {assert(false); return NULL;}
+         const TP*         bvertex() {assert(false); return NULL;}
          bool              operator == (const TcEvent&) const;
       private:
          unsigned          _threadAbove;
@@ -318,14 +318,14 @@ namespace polycross
          {
             public:
                TopSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
-               SegmentThread*    threadAbove()  {assert(false);}
+               SegmentThread*    threadAbove()  {assert(false); return NULL;}
                ~TopSentinel() {delete _cseg;}
          };
          class BottomSentinel : public SegmentThread
          {
             public:
                BottomSentinel(polysegment* cseg) : SegmentThread(cseg,NULL,NULL) {};
-               SegmentThread*    threadBelow()  {assert(false);}
+               SegmentThread*    threadBelow()  {assert(false); return NULL;}
                ~BottomSentinel() {delete _cseg;}
          };
 
