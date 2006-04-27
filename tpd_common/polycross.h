@@ -76,7 +76,7 @@ namespace polycross
    {
       public:
          CPoint(const TP* cp) : VPoint(cp),_link(NULL),_visited(0) {};
-         ~CPoint(){};
+         ~CPoint(){delete _cp;}
          virtual VPoint*  follower(bool& direction, bool modify = false);
          bool              inside(const pointlist&, bool touching = false) {return true;}
          char              visited() const {return _visited;}
@@ -171,6 +171,7 @@ namespace polycross
    {
       public:
          EventVertex(const TP* evertex) : _evertex(evertex) {};
+         polycross::EventVertex::~EventVertex();
          const TP*         operator () () const {return _evertex;};
          void              addEvent(TEvent*, EventTypes);
          void              sweep(YQ&, XQ&);
@@ -264,6 +265,7 @@ namespace polycross
          TcEvent(TP* ev, polysegment* aseg, polysegment* bseg): TEvent(0),
             _threadAbove(aseg->threadID()),_threadBelow(bseg->threadID())
                {_aseg = aseg; _bseg = bseg;  _evertex = ev;}
+               ~TcEvent() { delete _evertex; }
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&) {assert(false);}
          const TP*         avertex() {assert(false); return NULL;}
