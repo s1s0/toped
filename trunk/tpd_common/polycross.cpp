@@ -636,8 +636,8 @@ void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
                                  polysegment* below, XQ& eventQ, bool dontswap)
 {
    assert(NULL != CP);
-   CPoint* cpsegA = above->insertCrossPoint(CP);
-   CPoint* cpsegB = below->insertCrossPoint(CP);
+   CPoint* cpsegA = above->insertCrossPoint(new TP(CP->x(), CP->y()));
+   CPoint* cpsegB = below->insertCrossPoint(new TP(CP->x(), CP->y()));
    cpsegA->linkto(cpsegB);
    cpsegB->linkto(cpsegA);
 #ifdef BO2_DEBUG
@@ -646,7 +646,7 @@ void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
    BO_printseg(below)
 #endif
    if (!dontswap)
-   eventQ.addCrossEvent(CP, above, below);
+      eventQ.addCrossEvent(CP, above, below);
 }
 
 //==============================================================================
@@ -965,13 +965,10 @@ void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq)
       if (_events.end() != _events.find(cetype))
       {
          Events& simEvents = _events[cetype];
-         while (!simEvents.empty())
-         {
-            TEvent* cevent = simEvents.front(); simEvents.pop_front();
-            cevent->sweep(eventq, sweepline, _threadsSweeped);
+         for( Events::iterator CE = simEvents.begin(); CE != simEvents.end() ; CE++){
+            (*CE)->sweep(eventq, sweepline, _threadsSweeped);
             if (_crossE != cetype)
-               nonCrossE.push_back(cevent);
-            else delete cevent;
+               nonCrossE.push_back(*CE);
          }
       }
    }
@@ -980,13 +977,6 @@ void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq)
    for (Events::iterator CE1 = nonCrossE.begin(); CE1 != nonCrossE.end(); CE1++)
       for (Events::iterator CE2 = CE1; CE2 != nonCrossE.end(); CE2++)
          CheckBEM(eventq, **CE1, **CE2);
-   // delete all remaining events
-   while (!nonCrossE.empty())
-   {
-      TEvent* cevent = nonCrossE.front(); nonCrossE.pop_front();
-      delete cevent;
-   }
-   
 }
 
 void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
@@ -1021,6 +1011,19 @@ void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)
             TEvent* cevent = simEvents.front(); simEvents.pop_front();
             cevent->sweep2bind(sweepline, bindColl);
          }
+      }
+   }
+}
+
+polycross::EventVertex::~EventVertex()
+{
+   for( int cetype = _endE; cetype <= _crossE; cetype++)
+   {
+      Events& simEvents = _events[cetype];
+      while (!simEvents.empty())
+      {
+         TEvent* cevent = simEvents.front(); simEvents.pop_front();
+         delete cevent;
       }
    }
 }
