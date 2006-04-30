@@ -205,7 +205,7 @@ std::string TpdTime::operator () ()
    char* btm = new char[256];
    strftime(btm, 256, "%d-%m-%Y %T", broken_time);
    std::string info = btm;
-   delete btm;
+   delete [] btm;
    return info;
 }
 
