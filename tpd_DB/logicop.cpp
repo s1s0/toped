@@ -330,24 +330,25 @@ polycross::VPoint* logicop::logic::checkCoinciding(const pointlist& plist, polyc
 pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside) {
    polycross::segmentlist _seg1(outside,1);
    polycross::segmentlist _seg2(inside  ,2);
-   polycross::XQ* _eq = new polycross::XQ(_seg1, _seg2); // create the event queue
+//   polycross::XQ* _eq = new polycross::XQ(_seg1, _seg2); // create the event queue
+   polycross::XQ _eq(_seg1, _seg2); // create the event queue
    polycross::BindCollection BC;
    
-   _eq->sweep2bind(BC);
+   _eq.sweep2bind(BC);
    polycross::BindSegment* sbc = BC.get_highest();
-   //insert 2 crossing points and link them
-   polycross::BPoint* cpsegA = _seg1.insertbindpoint(sbc->poly0seg(), sbc->poly0pnt());
-   polycross::BPoint* cpsegB = _seg2.insertbindpoint(sbc->poly1seg(), sbc->poly1pnt());
+   //insert 2 bind points and link them
+   polycross::BPoint* cpsegA = _seg1.insertBindPoint(sbc->poly0seg(), sbc->poly0pnt());
+   polycross::BPoint* cpsegB = _seg2.insertBindPoint(sbc->poly1seg(), sbc->poly1pnt());
    cpsegA->linkto(cpsegB);
    cpsegB->linkto(cpsegA);
-
    // normalize the segment lists
    _seg1.normalize(outside);
    _seg2.normalize(inside);
+   //
+//   delete _eq;
    // dump the new polygons in VList terms
    polycross::VPoint* outshape = _seg1.dump_points();
-   _seg2.dump_points();
-   
+   /*polycross::VPoint*  inshape = */_seg2.dump_points();
    // traverse and form the resulting shape
    polycross::VPoint* centinel = outshape;
    pointlist *shgen = new pointlist();
@@ -361,7 +362,23 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
       prev = pickup;
       pickup = pickup->follower(direction, modify);
    } while (pickup != centinel);
-
+   // clean-up dumped points
+/*   centinel = outshape;
+   polycross::VPoint* cpnt;
+   do
+   {
+      cpnt = outshape->next();
+      delete outshape; outshape = cpnt;
+   }
+   while (outshape != centinel);
+   centinel = inshape;
+   do
+   {
+      cpnt = inshape->next();
+      delete inshape; inshape = cpnt;
+   }
+   while (inshape != centinel);*/
+   
    // Validate the resulting polygon
    laydata::valid_poly check(*shgen);
 //   delete shgen;

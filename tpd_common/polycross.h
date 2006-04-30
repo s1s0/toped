@@ -76,7 +76,7 @@ namespace polycross
    {
       public:
          CPoint(const TP* cp) : VPoint(cp),_link(NULL),_visited(0) {};
-         ~CPoint(){delete _cp;}
+         virtual ~CPoint() {delete _cp;}
          virtual VPoint*  follower(bool& direction, bool modify = false);
          bool              inside(const pointlist&, bool touching = false) {return true;}
          char              visited() const {return _visited;}
@@ -157,7 +157,7 @@ namespace polycross
          unsigned          size() const {return _segs.size();};
          unsigned          normalize(const pointlist&);
          VPoint*           dump_points();
-         BPoint*           insertbindpoint(unsigned segno, const TP* point);
+         BPoint*           insertBindPoint(unsigned segno, const TP* point);
          const pointlist*  originalPL() const {return _originalPL;}
       private:
          Segments          _segs;
@@ -375,6 +375,7 @@ namespace polycross
          BindSegment(unsigned p0s, unsigned p1s, const TP* p0p, const TP* p1p,
                      real dist) : _poly0seg(p0s), _poly1seg(p1s), _poly0pnt(p0p),
          _poly1pnt(p1p), _distance(dist) {};
+         ~BindSegment() {delete _poly0pnt;}
          unsigned          poly0seg() { return _poly0seg;};
          unsigned          poly1seg() { return _poly1seg;};
          const TP*         poly0pnt() const {return _poly0pnt;}
@@ -394,6 +395,7 @@ namespace polycross
 class BindCollection
    {
       public:
+         ~BindCollection();
          void              update_BL(polysegment*, unsigned, const TP*);
          BindSegment*      get_highest();
       private:

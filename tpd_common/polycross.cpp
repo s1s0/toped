@@ -337,7 +337,7 @@ polycross::segmentlist::segmentlist(const pointlist& plst, byte plyn) {
       _segs.push_back(new polysegment(&(plst[i]),&(plst[(i+1)%plysize]),i, plyn));
 }
 
-polycross::BPoint* polycross::segmentlist::insertbindpoint(unsigned segno, const TP* point) {
+polycross::BPoint* polycross::segmentlist::insertBindPoint(unsigned segno, const TP* point) {
     return _segs[segno]->insertBindPoint(point);
 }
 
@@ -542,7 +542,8 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
    // recalculate the lps/rps for them.
    bool indxpos = (indxLP == ((indxRP + 1) % numv));
 //   bool indxpos = indxLP > indxRP;
-   float lps, rps;
+   float lps = 0.0;
+   float rps = 0.0;
    do
    {
       // make sure indexes are not the same
@@ -1006,11 +1007,8 @@ void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)
       if (_events.end() != _events.find(cetype))
       {
          Events& simEvents = _events[cetype];
-         while (!simEvents.empty())
-         {
-            TEvent* cevent = simEvents.front(); simEvents.pop_front();
-            cevent->sweep2bind(sweepline, bindColl);
-         }
+         for( Events::iterator CE = simEvents.begin(); CE != simEvents.end() ; CE++)
+            (*CE)->sweep2bind(sweepline, bindColl);
       }
    }
 }
@@ -1341,6 +1339,7 @@ void polycross::XQ::sweep2bind(BindCollection& bindColl) {
       evtlist = (EventVertex*)trav.avl_node->avl_data;
       evtlist->sweep2bind(*_sweepline, bindColl);
       avl_delete(_xqueue,evtlist);
+      delete evtlist;
    }
 }
 
@@ -1409,4 +1408,11 @@ polycross::BindSegment* polycross::BindCollection::get_highest()
    while (++BI != _blist.end())
       if ((*BI)->poly1pnt()->y() > shseg->poly1pnt()->y()) shseg = *BI;
    return shseg;
+}
+
+polycross::BindCollection::~BindCollection()
+{
+   for (BindList::iterator BL = _blist.begin(); BL != _blist.end(); BL++)
+      delete (*BL);
+   _blist.clear();
 }
