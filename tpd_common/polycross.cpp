@@ -438,7 +438,7 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
       if ((iff == NULL) &&
            ((CrossPoint = oneLineSegments(above, below, eventQ.sweepline()))))
          insertCrossPoint(CrossPoint, above, below, eventQ, true);
-      return CrossPoint;
+      return NULL;
    }
    rlmul = lsign*rsign;
    if      (0  < rlmul)  return NULL;// not crossing
@@ -446,9 +446,19 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
    {
       // possibly touching segments
       CrossPoint = joiningSegments(above, below, lsign, rsign);
-      if ( (NULL != CrossPoint) && ((NULL == iff) || (*CrossPoint == *iff)) )
-         insertCrossPoint(CrossPoint, above, below, eventQ);
+      if (NULL != CrossPoint)
+      {
+         if ((NULL == iff) || (*CrossPoint == *iff))
+            insertCrossPoint(CrossPoint, above, below, eventQ);
+         else
+         {
+            delete CrossPoint;CrossPoint = NULL;
+         }
+      }
       return CrossPoint;
+/*      if ( (NULL != CrossPoint) && ((NULL == iff) || (*CrossPoint == *iff)) )
+         insertCrossPoint(CrossPoint, above, below, eventQ);
+      return CrossPoint;*/
    }
 
    //now check that both above endpoints are on the same side of below segment
@@ -463,16 +473,28 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
    {
       // possibly touching segments
       CrossPoint = joiningSegments(below, above, lsign, rsign);
-      if ( (NULL != CrossPoint) && ((NULL == iff) || (*CrossPoint == *iff)) )
-         insertCrossPoint(CrossPoint, above, below, eventQ);
+      if (NULL != CrossPoint)
+      {
+         if ((NULL == iff) || (*CrossPoint == *iff))
+            insertCrossPoint(CrossPoint, above, below, eventQ);
+         else
+         {
+            delete CrossPoint;CrossPoint = NULL;
+         }
+      }
       return CrossPoint;
+/*      if ( (NULL != CrossPoint) && ((NULL == iff) || (*CrossPoint == *iff)) )
+         insertCrossPoint(CrossPoint, above, below, eventQ);
+      return CrossPoint;*/
    }
    
    // at this point - the only possibility is that they intersect
    // so - create a cross event
-   CrossPoint = getCross(above, below);
    if (NULL == iff)
+   {
+      CrossPoint = getCross(above, below);
       insertCrossPoint(CrossPoint, above, below, eventQ);
+   }
    return CrossPoint;
 }
 
@@ -637,8 +659,8 @@ void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
                                  polysegment* below, XQ& eventQ, bool dontswap)
 {
    assert(NULL != CP);
-   CPoint* cpsegA = above->insertCrossPoint(new TP(CP->x(), CP->y()));
-   CPoint* cpsegB = below->insertCrossPoint(new TP(CP->x(), CP->y()));
+   CPoint* cpsegA = above->insertCrossPoint(CP);
+   CPoint* cpsegB = below->insertCrossPoint(CP);
    cpsegA->linkto(cpsegB);
    cpsegB->linkto(cpsegA);
 #ifdef BO2_DEBUG
@@ -648,6 +670,8 @@ void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
 #endif
    if (!dontswap)
       eventQ.addCrossEvent(CP, above, below);
+   else 
+      delete CP;
 }
 
 //==============================================================================
@@ -945,7 +969,10 @@ void polycross::EventVertex::addEvent(TEvent* tevent, EventTypes etype)
       for (Events::const_iterator CE=simevents.begin();
             CE != simevents.end(); CE++)
          if (*(static_cast<TcEvent*>(*CE)) == *(static_cast<TcEvent*>(tevent)))
+         {
+            delete tevent;
             return;
+         }
    }
 #ifdef BO2_DEBUG
       printf("++New event added in vertex ( %i , %i ) on top of the pending %u +++++\n",
