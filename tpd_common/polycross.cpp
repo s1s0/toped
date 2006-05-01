@@ -238,11 +238,10 @@ polycross::VPoint* polycross::VPoint::checkNreorder()
       nextCross->set_prev(prevCross->prev());
       prevCrossCouple->prev()->set_next(nextCrossCouple);
       nextCrossCouple->set_prev(prevCrossCouple->prev());
-      // DON'T delete here the crossing points!. They will get deleted
-      // by the polysegment destructor
-/*      delete prevCrossCouple;
+      // delete here the removed crossing points
+      delete prevCrossCouple;
       delete prevCross;
-      delete this;*/
+      delete this;
    }
    return nextCross;
 }
@@ -404,6 +403,13 @@ polycross::VPoint* polycross::segmentlist::dump_points()
 
 //==============================================================================
 // TEvent
+void polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
+                                    XQ& eventQ, const TP* iff)
+{
+   TP* rep = getIntersect(above, below, eventQ, iff);
+   if (rep != NULL)
+      delete rep;
+}
 
 /**
  * The method is using orientation() function to do the job. Segments that belong to
@@ -418,7 +424,7 @@ queue. This is used for touching points, i.e. iff can be only a vertex of the
 input segments
  * @return the corssing point between segments if it exists. Otherwise - NULL
  */
-TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
+TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
                                        XQ& eventQ, const TP* iff)
 {
    TP* CrossPoint = NULL;
@@ -438,7 +444,7 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
       if ((iff == NULL) &&
            ((CrossPoint = oneLineSegments(above, below, eventQ.sweepline()))))
          insertCrossPoint(CrossPoint, above, below, eventQ, true);
-      return NULL;
+      return CrossPoint;
    }
    rlmul = lsign*rsign;
    if      (0  < rlmul)  return NULL;// not crossing
@@ -456,9 +462,6 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
          }
       }
       return CrossPoint;
-/*      if ( (NULL != CrossPoint) && ((NULL == iff) || (*CrossPoint == *iff)) )
-         insertCrossPoint(CrossPoint, above, below, eventQ);
-      return CrossPoint;*/
    }
 
    //now check that both above endpoints are on the same side of below segment
@@ -483,9 +486,6 @@ TP* polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
          }
       }
       return CrossPoint;
-/*      if ( (NULL != CrossPoint) && ((NULL == iff) || (*CrossPoint == *iff)) )
-         insertCrossPoint(CrossPoint, above, below, eventQ);
-      return CrossPoint;*/
    }
    
    // at this point - the only possibility is that they intersect
@@ -670,8 +670,6 @@ void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
 #endif
    if (!dontswap)
       eventQ.addCrossEvent(CP, above, below);
-   else 
-      delete CP;
 }
 
 //==============================================================================
@@ -869,7 +867,7 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
    // check for intersections of the neighbours with the new segment
    // and whether or not threads should be swapped
    TP* CP;
-   if((CP = checkIntersect(thr->threadAbove()->cseg(), thr->cseg(), eventQ)))
+   if((CP = getIntersect(thr->threadAbove()->cseg(), thr->cseg(), eventQ)))
    {
       if ((*CP) == *(_bseg->lP()))
       {
@@ -879,9 +877,10 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
          if ((ori1 == ori2) || (0 == ori1 * ori2))
             threadl.push_back(_bseg->threadID());
       }
+      delete CP;
    }
 
-   if ((CP = checkIntersect(thr->cseg(), thr->threadBelow()->cseg(), eventQ)))
+   if ((CP = getIntersect(thr->cseg(), thr->threadBelow()->cseg(), eventQ)))
    {
       if ((*CP) == *(_bseg->lP()))
       {
@@ -891,6 +890,7 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl)
          if ((ori1 == ori2) || (0 == ori1 * ori2))
             threadl.push_back(_bseg->threadID());
       }
+      delete CP;
    }
 }
 
@@ -1051,6 +1051,7 @@ polycross::EventVertex::~EventVertex()
          delete cevent;
       }
    }
+   delete _evertex;
 }
 
 //===========================================================================
