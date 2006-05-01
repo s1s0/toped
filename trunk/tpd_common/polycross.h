@@ -170,7 +170,8 @@ namespace polycross
    class EventVertex
    {
       public:
-         EventVertex(const TP* evertex) : _evertex(evertex) {};
+         EventVertex(const TP* evertex) :
+            _evertex(new TP(evertex->x(), evertex->y())) {};
          polycross::EventVertex::~EventVertex();
          const TP*         operator () () const {return _evertex;};
          void              addEvent(TEvent*, EventTypes);
@@ -203,7 +204,8 @@ namespace polycross
          polysegment*      bseg() {return _bseg;}
          virtual          ~TEvent() {};
       protected:
-         TP*               checkIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
+         TP*               getIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
+         void              checkIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
          byte              _shapeID;
          const TP*         _evertex;
          void              insertCrossPoint(TP*, polysegment*, polysegment*,
@@ -264,7 +266,7 @@ namespace polycross
       public:
          TcEvent(TP* ev, polysegment* aseg, polysegment* bseg): TEvent(0),
             _threadAbove(aseg->threadID()),_threadBelow(bseg->threadID())
-               {_aseg = aseg; _bseg = bseg;  _evertex = ev;}
+            {_aseg = aseg; _bseg = bseg;  _evertex = new TP(ev->x(), ev->y());}
                ~TcEvent() { delete _evertex; }
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&) {assert(false);}
