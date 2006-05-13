@@ -279,8 +279,11 @@ bool logicop::logic::OR(pcollection& plycol) {
    // Convert all collected shapes to a single normalized polygon
    pointlist* respoly = lclvalidated.front();lclvalidated.pop_front();
    while (0 < lclvalidated.size()) {
-      respoly = hole2simple(*respoly, *(lclvalidated.front()));
+      pointlist* curpolyA = respoly;
+      pointlist* curpolyB = lclvalidated.front();
+      respoly = hole2simple(*curpolyA, *curpolyB);
       lclvalidated.pop_front();
+      delete curpolyA; delete curpolyB;
    }
    plycol.push_back(respoly);
    return result;
@@ -345,10 +348,9 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
    _seg1.normalize(outside);
    _seg2.normalize(inside);
    //
-//   delete _eq;
    // dump the new polygons in VList terms
    polycross::VPoint* outshape = _seg1.dump_points();
-   /*polycross::VPoint*  inshape = */_seg2.dump_points();
+   polycross::VPoint*  inshape = _seg2.dump_points();
    // traverse and form the resulting shape
    polycross::VPoint* centinel = outshape;
    pointlist *shgen = new pointlist();
@@ -363,22 +365,8 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
       pickup = pickup->follower(direction, modify);
    } while (pickup != centinel);
    // clean-up dumped points
-/*   centinel = outshape;
-   polycross::VPoint* cpnt;
-   do
-   {
-      cpnt = outshape->next();
-      delete outshape; outshape = cpnt;
-   }
-   while (outshape != centinel);
-   centinel = inshape;
-   do
-   {
-      cpnt = inshape->next();
-      delete inshape; inshape = cpnt;
-   }
-   while (inshape != centinel);*/
-   
+   cleanupDumped(outshape);
+   cleanupDumped(inshape);
    // Validate the resulting polygon
    laydata::valid_poly check(*shgen);
 //   delete shgen;
@@ -391,27 +379,25 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
       if (laydata::shp_OK != check.status())
          *shgen = check.get_validated();
    }
-   
    return shgen;
+}
+
+void logicop::logic::cleanupDumped(polycross::VPoint* centinel)
+{
+   polycross::VPoint* shape = centinel;
+   polycross::VPoint* cpnt;
+   do
+   {
+      cpnt = shape->next();
+      delete shape; shape = cpnt;
+   }
+   while (shape != centinel);
 }
 
 logicop::logic::~logic()
 {
-   polycross::VPoint* centinel = _shape1;
-   polycross::VPoint* cpnt;
-   do 
-   {
-      cpnt = _shape1->next();
-      delete _shape1; _shape1 = cpnt;
-   }
-   while (_shape1 != centinel);
-   centinel = _shape2;
-   do
-   {
-      cpnt = _shape2->next();
-      delete _shape2; _shape2 = cpnt;
-   }
-   while (_shape2 != centinel);
+   cleanupDumped(_shape1);
+   cleanupDumped(_shape2);
    delete _segl1;
    delete _segl2;
 }

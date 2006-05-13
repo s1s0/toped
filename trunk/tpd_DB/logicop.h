@@ -77,6 +77,8 @@ namespace logicop {
       polycross::VPoint* checkCoinciding(const pointlist&, polycross::VPoint*);
       //
       polycross::VPoint* getFirstOutside(const pointlist&, polycross::VPoint*);
+      //
+      void              cleanupDumped(polycross::VPoint*);
       //! The first input polygon
       const pointlist&  _poly1;
       //! The second input polygon
