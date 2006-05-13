@@ -624,7 +624,7 @@ dontswap is false.
  * @param eventQ the event queue that will assept the possible cross event
  * @param dontswap if *true* a cross event is not created
  */
-void polycross::TEvent::insertCrossPoint(TP* CP, polysegment* above,
+void polycross::TEvent::insertCrossPoint(const TP* CP, polysegment* above,
                                  polysegment* below, XQ& eventQ, bool dontswap)
 {
    assert(NULL != CP);
@@ -984,13 +984,13 @@ void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
    bool sb1sa2 = coinsidingSegm(thr1.evertex(), thr1.bvertex(), thr2.avertex());
    bool sb1sb2 = coinsidingSegm(thr1.evertex(), thr1.bvertex(), thr2.bvertex());
    if ((sa1sa2) && (!(sa1sb2 || sb1sa2 ||sb1sb2)))
-      thr1.insertCrossPoint(new TP(*(thr1.evertex())), thr1.bseg(), thr2.bseg(), eventq, true );
+      thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );
    else if ((sa1sb2) && (!(sa1sa2 || sb1sa2 ||sb1sb2)))
-      thr1.insertCrossPoint(new TP(*(thr1.evertex())), thr1.bseg(), thr2.aseg(), eventq, true );
+      thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.aseg(), eventq, true );
    else if ((sb1sa2) && (!(sa1sa2 || sa1sb2 || sb1sb2)))
-      thr1.insertCrossPoint(new TP(*(thr1.evertex())), thr1.aseg(), thr2.bseg(), eventq, true );
+      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.bseg(), eventq, true );
    else if ((sb1sb2) && (!(sa1sa2 || sa1sb2 || sb1sa2)))
-      thr1.insertCrossPoint(new TP(*(thr1.evertex())), thr1.aseg(), thr2.bseg(), eventq, true );
+      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.bseg(), eventq, true );
 }
 
 void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)
@@ -1283,7 +1283,7 @@ void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
    }
 }
 
-void polycross::XQ::addCrossEvent(TP* CP, polysegment* aseg, polysegment* bseg)
+void polycross::XQ::addCrossEvent(const TP* CP, polysegment* aseg, polysegment* bseg)
 {
    TcEvent* evt = new TcEvent(CP, aseg, bseg);
    // now create the vertex with the event inside

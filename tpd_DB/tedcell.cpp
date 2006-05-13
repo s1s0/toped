@@ -636,6 +636,7 @@ bool laydata::tdtcell::addlist(laydata::tdtdesign* ATDB, atticList* nlst) {
       }
       wl->invalidate();
    }
+   delete nlst;
    validate_layers(); // because put is used
    // Invalidate parents if the overlapping box has changed
    DBbox new_overlap = overlap();

@@ -2792,7 +2792,8 @@ int tellstdfunc::lgcCUTPOLY::execute() {
                // and finally select the_cut
                ATDB->select_fromList(get_ttlaylist(shaddselect));
                LogFile << "polycut("<< *pl << ");"; LogFile.flush();
-               delete dasao[0]; delete dasao[1]; delete dasao[2];
+               delete dasao[0];
+               // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addlist
             }
          DATC->unlockDB();
       }
