@@ -363,41 +363,10 @@ polycross::VPoint* polycross::segmentlist::dump_points()
    for (unsigned i = 0; i < _segs.size(); i++)
       _segs[i]->dump_points(vlist);
    polycross::VPoint* lastV = vlist;
-   VPoint* centinel = NULL;
    while (vlist->prev())
-   {
-      if (-1 == vlist->visited()) centinel = vlist;
       vlist = vlist->prev();
-   }
    lastV->set_next(vlist);
    vlist->set_prev(lastV);
-   if (NULL != centinel)
-   {  // for binding points
-      VPoint* vwork = centinel;
-      do
-      {
-         if (-1 == vwork->visited())
-         {
-            //here visited == 0 means only that the object is Cpoint.
-            VPoint* tbdel = NULL;
-            if ((*vwork->cp()) == (*vwork->prev()->cp()))
-            {
-               tbdel = vwork->prev();
-               vwork->set_prev(vwork->prev()->prev());
-               vwork->prev()->set_next(vwork);
-            }
-            else if ((*vwork->cp()) == (*vwork->next()->cp()))
-            {
-               tbdel = vwork->next();
-               vwork->set_next(vwork->next()->next());
-               vwork->next()->set_prev(vwork);
-            }
-            vwork = vwork->next();
-            if (tbdel) delete tbdel;
-         }
-         else vwork = vwork->next();
-      } while (centinel != vwork);
-   }
    return vlist;
 }
 
