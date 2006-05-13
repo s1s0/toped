@@ -732,10 +732,14 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, const SGBitSet* pls
          {
             // leave the modified pointlist ONLY if the resulting shape is not a box
             _plist.clear(); _plist = *mlist;
-            delete check;
+            delete check; delete mlist;
             return NULL;
          }
-         else return check;
+         else
+         {
+            delete mlist;
+            return check;
+         }
       }
    }
 }
