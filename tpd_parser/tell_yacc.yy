@@ -203,11 +203,11 @@ input:
 entrance:
      statement ';'                         {
     if (!yynerrs)  CMDBlock->execute();
-    else           CMDBlock->cleaner();
+    else           CMDBlock = CMDBlock->cleaner();
    }
    | funcdefinition                        {}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
-   | error                                 {CMDBlock->cleaner();}
+   | error                                 {CMDBlock = CMDBlock->cleaner();/*yynerrs = 0;*/}
 ;
 
 funcdefinition:
@@ -223,11 +223,10 @@ funcdefinition:
          }
          else  if (funcdeferrors > 0) {
             tellerror("function definition is ignored because of the errors above", @$);
-            delete($7);// arglist is cleard by the cmdSTDFUNC destructor
+            delete($7);// arglist is cleared by the cmdSTDFUNC destructor
          }
          else {
             if (!CMDBlock->addUSERFUNC(std::string($2),$7,arglist)) {
-               tellerror("can't redefine internal function",@$);
                delete ($7);
             }
          }

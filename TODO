@@ -27,6 +27,7 @@ To be done!!!
   * layer fill control - command and menu
   * Online hierarhy tree maintanence still has troubles - especially when
     deleting the stuff from the top level. Check and debug!
+  * Parser needs well defined error recovery policy
   * Draw selected figures using separate property definition.
   * select edge with double click - needs algo for edge proximity. The same algo
     can be used for editpush selecting (optional?)
