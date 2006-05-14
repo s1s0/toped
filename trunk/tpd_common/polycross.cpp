@@ -203,14 +203,14 @@ polycross::VPoint* polycross::CPoint::follower(bool& direction, bool modify) {
    return flw;
 }
 
-polycross::VPoint* polycross::VPoint::checkNreorder()
+polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape)
 {
    CPoint* nextCross = static_cast<CPoint*>(_next);
    CPoint* prevCross = static_cast<CPoint*>(_prev);
    assert(*(prevCross->cp()) == *(nextCross->cp()));
    CPoint* nextCrossCouple = nextCross->link();
    CPoint* prevCrossCouple = prevCross->link();
-   if (prevCrossCouple->next() != nextCrossCouple)
+   if (!(*(prevCrossCouple->next()->cp()) == *(nextCrossCouple->cp())))
    {
       // swap the links
       prevCross->linkto(nextCrossCouple); nextCrossCouple->linkto(prevCross);
@@ -219,23 +219,25 @@ polycross::VPoint* polycross::VPoint::checkNreorder()
       prevCrossCouple = prevCross->link();
    }
    // now check for piercing edge cross points
-   VPoint* pV = prevCross;
-   while (!pV->visited()) pV = pV->prev();
-   VPoint *nV = nextCross;
-   while (!nV->visited()) nV = nV->next();
-   VPoint* spV = prevCrossCouple;
-   while (!spV->visited()) spV = spV->prev();
-   VPoint *snV = nextCrossCouple;
-   while (!snV->visited()) snV = snV->next();
+   VPoint* pV = prevCross->prev();
+   VPoint *nV = nextCross->next();
+   VPoint* spV = prevCrossCouple->prev();
+   VPoint *snV = nextCrossCouple->next();
    int oriP = orientation(spV->cp(), snV->cp(), pV->cp());
    int oriN = orientation(spV->cp(), snV->cp(), nV->cp());
    assert(0 != oriP);
    assert(0 != oriN);
    if (oriP != oriN)
    {
-      // we have a piercing edge cross - so let's do
+      // we have a piercing edge cross - so let's remove the redundant points
       prevCross->prev()->set_next(nextCross);
       nextCross->set_prev(prevCross->prev());
+      if (prevCrossCouple->next() != nextCrossCouple)
+      {
+         if (pairedShape == prevCrossCouple->next())
+            pairedShape = nextCrossCouple;
+         delete (prevCrossCouple->next());
+      }
       prevCrossCouple->prev()->set_next(nextCrossCouple);
       nextCrossCouple->set_prev(prevCrossCouple->prev());
       // delete here the removed crossing points
@@ -990,7 +992,24 @@ void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
    else if ((sb1sa2) && (!(sa1sa2 || sa1sb2 || sb1sb2)))
       thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.bseg(), eventq, true );
    else if ((sb1sb2) && (!(sa1sa2 || sa1sb2 || sb1sa2)))
-      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.bseg(), eventq, true );
+      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.aseg(), eventq, true );
+   else if (!(sa1sa2 || sa1sb2 || sb1sa2 || sb1sb2))
+   {
+      float lsign, rsign, rlmul;
+      //check for threads, crossing in the event vertex point
+      lsign = orientation(thr1.avertex(), thr1.bvertex(), thr2.avertex());
+      rsign = orientation(thr1.avertex(), thr1.bvertex(), thr2.bvertex());
+      rlmul = lsign * rsign;
+      if      (0  < rlmul)  return;// not crossing
+      assert(rlmul); // could not be touching or coinciding
+      lsign = orientation(thr2.avertex(), thr2.bvertex(), thr1.avertex());
+      rsign = orientation(thr2.avertex(), thr2.bvertex(), thr1.bvertex());
+      rlmul = lsign * rsign;
+      if      (0  < rlmul)  return;// not crossing
+      assert(rlmul); // could not be touching or coinciding
+      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.aseg(), eventq, true );
+      thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );
+   }
 }
 
 void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)

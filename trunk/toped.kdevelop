@@ -78,7 +78,7 @@
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs>$TLL_DIR/ml4.tll</programargs>
+      <programargs>$TLL_DIR/laylogic.tll</programargs>
       <gdbpath></gdbpath>
       <configGdbScript></configGdbScript>
       <runShellScript></runShellScript>
