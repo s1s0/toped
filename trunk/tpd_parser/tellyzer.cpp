@@ -517,7 +517,6 @@ void parsercmd::cmdBLOCK::addFUNC(std::string, cmdSTDFUNC* cQ) {
 bool parsercmd::cmdBLOCK::addUSERFUNC(std::string, cmdSTDFUNC* cQ, argumentLIST*) {
    TELL_DEBUG(addFUNC);
    tellerror("Nested function definitions are not allowed");
-   if (cQ)    delete cQ;
    return false;
 }
 
@@ -530,12 +529,19 @@ int parsercmd::cmdBLOCK::execute() {
    return retexec;
 }
 
-void parsercmd::cmdBLOCK::cleaner() {
+parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner() {
    TELL_DEBUG(cmdBLOCK_cleaner);
    while (!cmdQ.empty()) {
       cmdVIRTUAL *a = cmdQ.front();cmdQ.pop_front();
       delete a;
    }
+   if (_blocks.size() > 1)
+   {
+      parsercmd::cmdBLOCK* dblk = _blocks.front(); _blocks.pop_front();
+      delete dblk;
+      return _blocks.front();
+   }
+   else return this;
 }
 
 parsercmd::cmdBLOCK::~cmdBLOCK() {
@@ -833,7 +839,12 @@ bool parsercmd::cmdMAIN::addUSERFUNC(std::string fname , cmdSTDFUNC* cQ,
       console::TellFnSort();
       return true;
    }
-   else return false;
+   else
+   {
+      std::string msg = "can't redefine internal function \"" + fname + "\"";
+      tellerror(msg);
+      return false;
+   }
 }
 
 parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {

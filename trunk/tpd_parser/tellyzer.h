@@ -308,7 +308,7 @@ namespace  parsercmd {
                                  cmdBLOCK(telldata::typeID lltID) :
                                                             _next_lcl_typeID(lltID){};
       int                        execute();
-      void                       cleaner();
+      cmdBLOCK*                  cleaner();
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
       virtual bool               addUSERFUNC(std::string, cmdSTDFUNC*, argumentLIST*);
       void                       addID(char*&, telldata::tell_var*);
