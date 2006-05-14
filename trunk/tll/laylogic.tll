@@ -610,6 +610,20 @@ void edge_cut4() {
    unselect_all();
 }
 
+void edge_cut5()
+{
+   newcell("edge_cut5");
+   opencell("edge_cut5");
+   addpoly({{0,0},{0,10},{5,10},{10,5},{5,0}},2);
+   select({5,5});
+   polycut({{5,-1},{5,11}, {11,11}, {11,-1}});
+   move({0,0},{15,0});
+//    addpoly( { { 0 , 36 } , { 9 , 36 } , { 9 , 28 } , { 4 , 28 } , { 0 , 32 } }, 2);
+//    select({6.50,30.50});
+//    addpoly({ { 0 , 28.5 } , { 3.5 , 32 } , { 0 , 32 } , { -1.5 , 30.5 } }, 4);
+//    polycut({ { 0 , 28.5 } , { 3.5 , 32 } , { 0 , 32 } , { -1.5 , 30.5 } });
+}
+
 void edge_merge1() 
 {
    newcell("edge_merge1");
@@ -676,6 +690,7 @@ void all_cut()
    edge_cut2();
    edge_cut3();
    edge_cut4();
+   edge_cut5();
    zoomall();
 }
 
@@ -690,14 +705,6 @@ void all_merge()
    edge_merge3();
    edge_merge4();
    zoomall();
-}
-
-void polycrash()
-{
-    addpoly( { { 0 , 36 } , { 9 , 36 } , { 9 , 28 } , { 4 , 28 } , { 0 , 32 } }, 2);
-    select({6.50,30.50});
-    addpoly({ { 0 , 28.5 } , { 3.5 , 32 } , { 0 , 32 } , { -1.5 , 30.5 } }, 4);
-//    polycut({ { 0 , 28.5 } , { 3.5 , 32 } , { 0 , 32 } , { -1.5 , 30.5 } });
 }
 
 void all_tests()

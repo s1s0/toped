@@ -44,6 +44,8 @@ logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
                                                 _poly1(poly1), _poly2(poly2) {
    _segl1 = new polycross::segmentlist(poly1,1);
    _segl2 = new polycross::segmentlist(poly2,2);
+   _shape1 = NULL;
+   _shape2 = NULL;
 }
    
 void logicop::logic::findCrossingPoints()
@@ -68,7 +70,13 @@ void logicop::logic::reorderCross()
 {
    polycross::VPoint* centinel = _shape1;
    polycross::VPoint* looper = centinel;
+   unsigned shape1Num = 0;
    do
+   {
+      shape1Num++;
+      looper = looper->next();
+   } while (centinel != looper);
+   for(unsigned loopcount = 0; loopcount < shape1Num; loopcount++)
    {
       // for every non-crossing point which has cross point neightbors and
       // all 3 points coincide
@@ -80,10 +88,18 @@ void logicop::logic::reorderCross()
       }
       else looper = looper->next();
    }
-   while (centinel != looper);
+   _shape1 = looper;
+   
    centinel = _shape2;
    looper = centinel;
+   unsigned shape2Num = 0;
    do
+   {
+      shape2Num++;
+      looper = looper->next();
+   } while (centinel != looper);
+
+   for(unsigned loopcount = 0; loopcount < shape2Num; loopcount++)
    {
       if (looper->visited() &&
           (!looper->prev()->visited() && !looper->next()->visited()) &&
@@ -93,7 +109,7 @@ void logicop::logic::reorderCross()
       }
       else looper = looper->next();
    }
-   while (centinel != looper);
+   _shape2 = looper;
 }
 /*!If more than one logical operatoin has to be executed over the input shapes
 the raw data #_shape1 and #_shape2 can be reused, but has to be recycled beforehand
@@ -333,7 +349,6 @@ polycross::VPoint* logicop::logic::checkCoinciding(const pointlist& plist, polyc
 pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside) {
    polycross::segmentlist _seg1(outside,1);
    polycross::segmentlist _seg2(inside  ,2);
-//   polycross::XQ* _eq = new polycross::XQ(_seg1, _seg2); // create the event queue
    polycross::XQ _eq(_seg1, _seg2); // create the event queue
    polycross::BindCollection BC;
    
@@ -396,8 +411,8 @@ void logicop::logic::cleanupDumped(polycross::VPoint* centinel)
 
 logicop::logic::~logic()
 {
-   cleanupDumped(_shape1);
-   cleanupDumped(_shape2);
+   if (NULL != _shape1) cleanupDumped(_shape1);
+   if (NULL != _shape2) cleanupDumped(_shape2);
    delete _segl1;
    delete _segl2;
 }
