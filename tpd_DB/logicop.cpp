@@ -84,7 +84,7 @@ void logicop::logic::reorderCross()
           (!looper->prev()->visited() && !looper->next()->visited()) &&
            (*looper->prev()->cp() == *looper->next()->cp()) )
       {
-         looper = looper->checkNreorder();
+         looper = looper->checkNreorder(_shape2);
       }
       else looper = looper->next();
    }
@@ -105,7 +105,7 @@ void logicop::logic::reorderCross()
           (!looper->prev()->visited() && !looper->next()->visited()) &&
           (*looper->prev()->cp() == *looper->next()->cp()) )
       {
-         looper = looper->checkNreorder();
+         looper = looper->checkNreorder(_shape1);
       }
       else looper = looper->next();
    }
