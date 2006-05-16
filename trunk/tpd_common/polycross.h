@@ -185,7 +185,7 @@ namespace polycross
          typedef std::list<TEvent*> Events;
          typedef std::map<int, Events> AllEvents;
          AllEvents         _events;
-         const TP*         _evertex;
+         TP*               _evertex;
          ThreadList        _threadsSweeped;
    };
 
