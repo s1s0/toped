@@ -133,6 +133,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN   )
    TELL_STDCMD_CLASSA(stdZOOMALL       )
    TELL_STDCMD_CLASSA(TDTread          )       // reset undo buffers
+   TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread   )
    TELL_STDCMD_CLASSA(TDTsave          )
    TELL_STDCMD_CLASSA(TDTsaveas        )
    TELL_STDCMD_CLASSA(GDSread          )

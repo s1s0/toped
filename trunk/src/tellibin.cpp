@@ -2913,16 +2913,54 @@ int tellstdfunc::GDSread::execute() {
 
 //=============================================================================
 tellstdfunc::TDTread::TDTread(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-int tellstdfunc::TDTread::execute() {
+int tellstdfunc::TDTread::execute()
+{
    std::string name = getStringValue();
    if (DATC->TDTread(name)) {
       laydata::tdtdesign* ATDB = DATC->lockDB(false);
          TpdTime timec(ATDB->created());
          TpdTime timeu(ATDB->lastUpdated());
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "(\""<< name << "\",\"" <<  timec() <<
+            "\",\"" <<  timeu() << "\");"; LogFile.flush();
+      // reset UNDO buffers;
+      UNDOcmdQ.clear();
+      while (!UNDOPstack.empty()) {
+         delete UNDOPstack.front(); UNDOPstack.pop_front();
+      }
+   }
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::TDTreadIFF::TDTreadIFF(telldata::typeID retype) :
+      TDTread(new parsercmd::argumentLIST,retype)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+
+int tellstdfunc::TDTreadIFF::execute()
+{
+   TpdTime timeSaved(getStringValue());
+   TpdTime timeCreated(getStringValue());
+   std::string name = getStringValue();
+   if (!(timeSaved.status() && timeCreated.status()))
+   {
+      tell_log(console::MT_ERROR,"Bad time format in read command");
+   }
+   else if (DATC->TDTread(name, &timeCreated, &timeSaved))
+   {
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      TpdTime timec(ATDB->created());
+      TpdTime timeu(ATDB->lastUpdated());
       DATC->unlockDB();
       LogFile << LogFile.getFN() << "(\""<< name << "\",\"" <<  timec() <<
             "\",\"" <<  timeu() << "\");"; LogFile.flush();

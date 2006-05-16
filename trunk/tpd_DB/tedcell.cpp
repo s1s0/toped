@@ -200,7 +200,7 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name) : _name(name
             else             _layers[layno] = new quadTree(tedfile); 
             if (0 == layno) tedfile->get_cellchildnames(&_children);
             break;
-         default: throw EXPTNreadTDT();
+         default: throw EXPTNreadTDT("LAYER record type expected");
       }
    }
 }

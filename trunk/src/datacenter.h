@@ -56,7 +56,7 @@ public:
    void                       GDSexport(laydata::tdtcell*, bool, std::string&);
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
-   bool                       TDTread(std::string filename);
+   bool                       TDTread(std::string, TpdTime* timeCreated = NULL, TpdTime* timeSaved = NULL);
    void                       TDTwrite(const char* filename = NULL);
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
