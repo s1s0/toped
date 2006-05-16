@@ -77,16 +77,16 @@ laydata::TEDfile::TEDfile(const char* filename) { // reading
    else _status = true;
 }
 
-void laydata::TEDfile::read() {
+void laydata::TEDfile::read(TpdTime* timeCreated, TpdTime* timeSaved) {
    // Get the leading string 
    std::string _leadstr = getString();
-   if (TED_LEADSTRING != _leadstr) throw EXPTNreadTDT();
+   if (TED_LEADSTRING != _leadstr) throw EXPTNreadTDT("Bad leading record");
    // Get format revision
    getRevision();
    // Get file time stamps
-   getTime();
+   getTime(timeCreated, timeSaved);
 //   checkIntegrity();
-   if (tedf_DESIGN != getByte()) throw EXPTNreadTDT();
+   if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
    real         DBU = getReal();
    real          UU = getReal();
@@ -122,7 +122,7 @@ byte laydata::TEDfile::getByte()
    byte result;
    byte length = sizeof(byte);
    if (1 != (_numread = fread(&result, length, 1, _file)))
-      throw EXPTNreadTDT();
+      throw EXPTNreadTDT("Wrong number of bytes read");
    _position += length;
    return result;
 }
@@ -132,7 +132,7 @@ word laydata::TEDfile::getWord()
    word result;
    byte length = sizeof(word);
    if (1 != (_numread = fread(&result, length, 1, _file)))
-      throw EXPTNreadTDT();
+      throw EXPTNreadTDT("Wrong number of bytes read");
    _position += length;
    return result;
 }
@@ -142,7 +142,7 @@ int4b laydata::TEDfile::get4b()
    int4b result;
    byte length = sizeof(int4b);
    if (1 != (_numread = fread(&result, length, 1, _file)))
-      throw EXPTNreadTDT();
+      throw EXPTNreadTDT("Wrong number of bytes read");
    _position += length;
    return result;
 }
@@ -151,7 +151,7 @@ real laydata::TEDfile::getReal() {
    real result;
    byte length = sizeof(real);
    if (1 != (_numread = fread(&result, length, 1, _file)))
-      throw EXPTNreadTDT();
+      throw EXPTNreadTDT("Wrong number of bytes read");
    _position += length;
    return result;
 }
@@ -166,7 +166,7 @@ std::string laydata::TEDfile::getString()
    if (_numread != 1) 
    {
       delete[] strc;
-      throw EXPTNreadTDT();
+      throw EXPTNreadTDT("Wrong number of bytes read");
    }
    _position += length; str = strc;
    delete[] strc;
@@ -191,10 +191,10 @@ CTM laydata::TEDfile::getCTM()
    return CTM(_a, _b, _c, _d, _tx, _ty);
 }
 
-void laydata::TEDfile::getTime() 
+void laydata::TEDfile::getTime(TpdTime* timeCreated, TpdTime* timeSaved)
 {
    tm broken_time;
-   if (tedf_TIMECREATED  != getByte()) throw EXPTNreadTDT();
+   if (tedf_TIMECREATED  != getByte()) throw EXPTNreadTDT("Expecting TIMECREATED record");
    broken_time.tm_mday = get4b();
    broken_time.tm_mon  = get4b();
    broken_time.tm_year = get4b();
@@ -202,7 +202,7 @@ void laydata::TEDfile::getTime()
    broken_time.tm_min  = get4b();
    broken_time.tm_sec  = get4b();
    _created = mktime(&broken_time);
-   if (tedf_TIMEUPDATED  != getByte()) throw EXPTNreadTDT();
+   if (tedf_TIMEUPDATED  != getByte()) throw EXPTNreadTDT("Expecting TIMEUPDATED record");
    broken_time.tm_mday = get4b();
    broken_time.tm_mon  = get4b();
    broken_time.tm_year = get4b();
@@ -216,11 +216,20 @@ void laydata::TEDfile::getTime()
    news = "Last updated: ";
    TpdTime timeu(_lastUpdated); news += timeu();
    tell_log(console::MT_INFO,news.c_str());
+   if ((timeCreated != NULL) && (timeSaved != NULL))
+   {
+      if (*timeCreated != timec)
+         throw EXPTNreadTDT("time stamp \"Project created \" doesn't match");
+      if (*timeSaved != timeu)
+      {
+         throw EXPTNreadTDT("time stamp \"Last updated \" doesn't match");
+      }
+   }
 }
 
 void laydata::TEDfile::getRevision()
 {
-   if (tedf_REVISION  != getByte()) throw EXPTNreadTDT();
+   if (tedf_REVISION  != getByte()) throw EXPTNreadTDT("Expecting REVISION record");
    _revision = getWord();
    _subrevision = getWord();
    std::ostringstream ost; 

@@ -203,14 +203,14 @@ DataCenter::~DataCenter() {
    if (NULL != _TEDDB) delete _TEDDB;
 }
 
-bool DataCenter::TDTread(std::string filename) {
+bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated, TpdTime* timeSaved) {
    laydata::TEDfile tempin(filename.c_str());
    if (!tempin.status()) return false;
-   try 
+   try
    {
-      tempin.read();
+      tempin.read(timeCreated, timeSaved);
    }
-   catch (EXPTNreadTDT) 
+   catch (EXPTNreadTDT)
    {
       tempin.closeF();
       tempin.cleanup();

@@ -103,11 +103,15 @@ class  TpdTime
       TpdTime(time_t stdCTime) : _stdCTime(stdCTime){};
       TpdTime(std::string);
       std::string operator () ();
+      bool operator == (TpdTime& arg1) const {return _stdCTime == arg1._stdCTime;}
+      bool operator != (TpdTime& arg1) const {return _stdCTime != arg1._stdCTime;}
       time_t            stdCTime() const {return _stdCTime;}
+      bool              status() const {return _status;}
    protected:
       void              patternNormalize(wxString& str);
       bool              getStdCTime(wxString& exp);
       time_t            _stdCTime;
+      bool              _status;
 };
 
 class EXPTN {};
@@ -133,7 +137,7 @@ class EXPTNactive_GDS : public EXPTN
 class EXPTNreadTDT : public EXPTN
 {
    public:
-      EXPTNreadTDT();
+      EXPTNreadTDT(std::string);
 };
 
 class EXPTNpolyCross : public EXPTN

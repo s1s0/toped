@@ -78,7 +78,7 @@
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs>$TLL_DIR/laylogic.tll</programargs>
+      <programargs>/ahome/troyhome/skr_local/toped_public/debug/src/example_toped.log</programargs>
       <gdbpath></gdbpath>
       <configGdbScript></configGdbScript>
       <runShellScript></runShellScript>

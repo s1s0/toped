@@ -59,7 +59,7 @@ laydata::quadTree::quadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX)
          case  tedf_CELLREF: put(new tdtcellref(tedfile));break;
          case tedf_CELLAREF: put(new tdtcellaref(tedfile));break;
          //--------------------------------------------------
-         default: throw EXPTNreadTDT();
+         default: throw EXPTNreadTDT("Unexpected record type");
       }
    resort();
 }

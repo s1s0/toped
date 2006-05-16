@@ -29,9 +29,7 @@
 
 #include <string>
 #include "../tpd_common/ttt.h"
-#ifndef WIN32
-#include "config.h"
-#endif
+#include "../tpd_common/outbox.h"
 #include "../src/gds_io.h"
 
 //==============================================================================
@@ -126,7 +124,7 @@ namespace laydata {
                            TEDfile(const char*); // for reading
                            TEDfile(tdtdesign*, std::string&); // for writing
       void                 closeF() {fclose(_file);};
-      void                 read();
+      void                 read(TpdTime* timeCreated, TpdTime* timeSaved);
       void                 cleanup();
       std::string          getString();
       void                 putString(std::string str);
@@ -156,7 +154,7 @@ namespace laydata {
       bool                 _status;
       word                 _numread;
    private:
-      void                 getTime();
+      void                 getTime(TpdTime* timeCreated, TpdTime* timeSaved);
       void                 putTime();
       void                 getRevision();
       void                 putRevision();

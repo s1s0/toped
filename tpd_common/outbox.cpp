@@ -213,7 +213,7 @@ TpdTime::TpdTime(std::string str_time)
 {
    wxString wxstr_time(str_time.c_str());
    patternNormalize(wxstr_time);
-   getStdCTime(wxstr_time);
+   _status = getStdCTime(wxstr_time);
 }
 
 void TpdTime::patternNormalize(wxString& str) {
@@ -296,8 +296,9 @@ EXPTNactive_GDS::EXPTNactive_GDS() {
    tell_log(console::MT_ERROR,news.c_str());
 };
 
-EXPTNreadTDT::EXPTNreadTDT() {
-   std::string news = "Error in TDT file";
+EXPTNreadTDT::EXPTNreadTDT(std::string info) {
+   std::string news = "Error parsing TDT file =>";
+   news += info;
    tell_log(console::MT_ERROR,news.c_str());
 };
 
