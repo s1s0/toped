@@ -268,9 +268,10 @@ namespace polycross
    {
       public:
          TcEvent(const TP* ev, polysegment* aseg, polysegment* bseg): TEvent(0),
-            _threadAbove(aseg->threadID()),_threadBelow(bseg->threadID())
-            {_aseg = aseg; _bseg = bseg;  _evertex = new TP(ev->x(), ev->y());}
-               ~TcEvent() { delete _evertex; }
+         _threadAbove(aseg->threadID()),_threadBelow(bseg->threadID()),
+         _eventvertex(ev->x(), ev->y())
+            {_aseg = aseg; _bseg = bseg;  _evertex = &_eventvertex;}
+//               ~TcEvent() { delete _evertex; }
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&) {assert(false);}
          const TP*         avertex() {assert(false); return NULL;}
@@ -279,6 +280,7 @@ namespace polycross
       private:
          unsigned          _threadAbove;
          unsigned          _threadBelow;
+         TP                _eventvertex;
    };
    
    //===========================================================================
@@ -377,7 +379,7 @@ namespace polycross
    class BindSegment
    {
       public:
-         BindSegment(unsigned p0s, unsigned p1s, const TP* p0p, const TP* p1p,
+         BindSegment(unsigned p0s, unsigned p1s, TP* p0p, const TP* p1p,
                      real dist) : _poly0seg(p0s), _poly1seg(p1s), _poly0pnt(p0p),
          _poly1pnt(p1p), _distance(dist) {};
          ~BindSegment() {delete _poly0pnt;}
@@ -389,7 +391,7 @@ namespace polycross
       private:
          unsigned          _poly0seg;
          unsigned          _poly1seg;
-         const TP*         _poly0pnt;
+               TP*         _poly0pnt;
          const TP*         _poly1pnt;
          real              _distance;
    };
