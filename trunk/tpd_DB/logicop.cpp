@@ -76,7 +76,8 @@ void logicop::logic::reorderCross()
       shape1Num++;
       looper = looper->next();
    } while (centinel != looper);
-   for(unsigned loopcount = 0; loopcount < shape1Num; loopcount++)
+   unsigned loopcount;
+   for(loopcount = 0; loopcount < shape1Num; loopcount++)
    {
       // for every non-crossing point which has cross point neightbors and
       // all 3 points coincide
@@ -99,7 +100,7 @@ void logicop::logic::reorderCross()
       looper = looper->next();
    } while (centinel != looper);
 
-   for(unsigned loopcount = 0; loopcount < shape2Num; loopcount++)
+   for(loopcount = 0; loopcount < shape2Num; loopcount++)
    {
       if (looper->visited() &&
           (!looper->prev()->visited() && !looper->next()->visited()) &&
