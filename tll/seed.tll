@@ -288,18 +288,41 @@ void screenSetup() {
    shapeangle(45);
 }
 
-void bug() 
+void bug1() 
 {
-   addbox( { { 0 , 0 } , { 10 , 10 } });
-   select({8.00,6.00});
-   rotate({8.00, 6.00},90);
-   // Bug in the cut/merge algo here when cutting polygon edge coincides 
-   // with the box edge
-   //polycut( { { 4 , -5 } , { 8 , -5 } , { 8 , 5 } , { 4 , 5 } });
-   // Alternatively as a temporary workaround...
-   polycut( { { 3 , -5 } , { 8 , -5 } , { 8 , 5 } , { 3 , 5 } });
-   // for Pi shape,
-   //polycut({ { 5.5 , -2.5 } , { 5.5 , 6 } , { 12.5 , 6 } , { 12.5 , -2.5 } });
+   newcell("bug1");
+   opencell("bug1");
+   addbox( { { 2 , 7 } , { 18 , 17.5 } }, 2);
+   select({8.50,8.50});
+   rotate({ 2 , 7 },30);
+   select({3.50,8.00});
+   addpoly( { { 1.5 , 5.5 } , { 4 , 5.5 } , { 4 , 7 } , { 2 , 7 } , { 1.5 , 7 } }, 4);
+//   polycut( { { 1.5 , 5.5 } , { 4 , 5.5 } , { 4 , 7 } , { 2 , 7 } , { 1.5 , 7 } });
+}
+
+void bug2() 
+{
+   newcell("bug2");
+   opencell("bug2");
+   addbox( { { 2 , 7 } , { 18 , 17.5 } },2);
+   select({8.50,8.50});
+   rotate({ 2 , 7 },30);
+   select({3.50,8.00});
+   addpoly({ { 2.5 , 6 } , { 3 , 6 } , { 3 , 7.5 } , { 2 , 7.5 } , { 2 , 7 } , { 2.5 , 7 } }, 4);
+//   polycut({ { 2.5 , 6 } , { 3 , 6 } , { 3 , 7.5 } , { 2 , 7.5 } , { 2 , 7 } , { 2.5 , 7 } });
+}
+
+void bug3()
+{
+   newcell("bug3");
+   opencell("bug3");
+   addbox( { { 2 , 7 } , { 18 , 17.5 } });
+   select({8.50,8.50});
+   rotate({ 2 , 7 },30);
+   select({3.50,8.00});
+   addpoly( { { 2.5 , 10 } , { 5.5 , 10 } , { 5.5 , 8.5 } , { 2 , 8.5 } , { 2 , 7 } , { 1.5 , 7 } , { 1.5 ,
+   10 } },4);
+//   polycut( { { 2.5 , 10 } , { 5.5 , 10 } , { 5.5 , 8.5 } , { 2 , 8.5 } , { 2 , 7 } , { 1.5 , 7 } , { 1.5 , 10 } });
 }
 
 layerSetup();
