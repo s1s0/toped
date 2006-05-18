@@ -59,48 +59,48 @@
 // with the following types of definitions
 
 
-// TELL_STDCMD_CLASSA      - inherit directly cmdSTDFUNC - no UNDO
+// TELL_STDCMD_CLASSA      - inherits directly cmdSTDFUNC - no UNDO
 // The extra protected constructor is used by the inheritance class
 // (if the class is inherited) because of the argument checks
 #ifndef TELL_STDCMD_CLASSA
 #define TELL_STDCMD_CLASSA(name)                                  \
    class name : public cmdSTDFUNC {                               \
    public:                                                        \
-      name(telldata::typeID retype);                              \
+      name(telldata::typeID retype, bool eor);                    \
       int         execute();                                      \
    protected:                                                     \
-      name(parsercmd::argumentLIST* al,telldata::typeID retype) : \
-                                         cmdSTDFUNC(al,retype) {};\
+      name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor) : \
+                                         cmdSTDFUNC(al,retype,eor) {};\
    };
 #endif
 
-// TELL_STDCMD_CLASSA      - inherit directly cmdSTDFUNC - with UNDO
+// TELL_STDCMD_CLASSA_UNDO - inherits directly cmdSTDFUNC - with UNDO
 // The extra protected constructor is used by the inheritance class
 // (if the class is inherited) because of the argument checks
 #ifndef TELL_STDCMD_CLASSA_UNDO
 #define TELL_STDCMD_CLASSA_UNDO(name)                             \
    class name : public cmdSTDFUNC {                               \
    public:                                                        \
-      name(telldata::typeID retype);                              \
+      name(telldata::typeID retype, bool eor);                    \
       int         execute();                                      \
       void        undo();                                         \
       void        undo_cleanup();                                 \
    protected:                                                     \
-      name(parsercmd::argumentLIST* al,telldata::typeID retype) : \
-                                         cmdSTDFUNC(al,retype) {};\
+      name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor) : \
+                                         cmdSTDFUNC(al,retype, eor) {};\
    };
 #endif
 
 // TELL_STDCMD_CLASSB - inherits one of the above class types,
 // and is using the UNDO functionality of its ancestor.
 // The classes of this type MUST use the protected constructor of their
-// ancestor, otherwise the argument checks will get screwed-up.
+// ancestor, otherwise the argument checks will be screwed-up.
 // used for overloaded functions
 #ifndef TELL_STDCMD_CLASSB
 #define TELL_STDCMD_CLASSB(name, father)                          \
    class name : public father {                                   \
    public:                                                        \
-      name(telldata::typeID retype);                              \
+      name(telldata::typeID retype, bool eor);                    \
       int         execute();                                      \
    };
 #endif
@@ -111,7 +111,7 @@
 #define TELL_STDCMD_CLASSC(name)                                  \
    class name : public cmdSTDFUNC {                               \
    public:                                                        \
-      name(telldata::typeID retype):cmdSTDFUNC(NULL,retype) {};   \
+      name(telldata::typeID retype, bool eor):cmdSTDFUNC(NULL,retype,eor) {};   \
       int         execute();                                      \
       int         argsOK(argumentQ* amap);                        \
       nameList*   callingConv(const telldata::typeMAP*);          \
@@ -145,7 +145,8 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(GDSclose         )
    TELL_STDCMD_CLASSA(getPOINT         )
    TELL_STDCMD_CLASSA(getPOINTLIST     )
-   TELL_STDCMD_CLASSA(stdNEWDESIGN     )       // reset undo buffers
+   TELL_STDCMD_CLASSA(stdNEWDESIGNd    )              // reset undo buffers
+   TELL_STDCMD_CLASSB(stdNEWDESIGN   , stdNEWDESIGNd) // reset undo buffers
    TELL_STDCMD_CLASSA(stdREPORTSLCTD   )
    TELL_STDCMD_CLASSA(stdREPORTLAY     )
    TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )

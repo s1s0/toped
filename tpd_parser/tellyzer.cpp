@@ -735,7 +735,7 @@ parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
 
 //=============================================================================
 parsercmd::cmdFUNC::cmdFUNC(argumentLIST* vm, telldata::typeID tt):
-                                                cmdSTDFUNC(vm,tt), cmdBLOCK() {
+                                                cmdSTDFUNC(vm,tt,true), cmdBLOCK() {
    // copy the arguments in the structure of the local variables
    typedef argumentLIST::const_iterator AT;
    for (AT arg = arguments->begin(); arg != arguments->end(); arg++) {

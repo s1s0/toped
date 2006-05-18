@@ -336,8 +336,8 @@ namespace  parsercmd {
 
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
-                              cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt):
-   arguments(vm), returntype(tt) {};
+                              cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
+   arguments(vm), returntype(tt), _execOnRecovery(eor) {};
       virtual int             execute() = 0;
       virtual void            undo() {};
       virtual void            undo_cleanup();
@@ -346,12 +346,14 @@ namespace  parsercmd {
       telldata::typeID        gettype() const {return returntype;};
       virtual                ~cmdSTDFUNC();
       virtual bool            internal() {return true;}
+      bool                    execOnRecovery() {return _execOnRecovery;}
    protected:
       argumentLIST*           arguments;
       telldata::typeID        returntype;
       static telldata::UNDOPerandQUEUE  UNDOPstack;   // undo operand stack
       static undoQUEUE        UNDOcmdQ;     // undo command stack
       bool                    _buildin;
+      bool                    _execOnRecovery;
    };
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
