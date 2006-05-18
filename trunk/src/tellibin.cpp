@@ -77,9 +77,9 @@ int tellstdfunc::stdECHO::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdTELLSTATUS::execute() {
    telldata::tell_var *y;
@@ -95,9 +95,9 @@ int tellstdfunc::stdTELLSTATUS::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdREPORTSLCTD::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -107,8 +107,9 @@ int tellstdfunc::stdREPORTSLCTD::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
@@ -136,8 +137,9 @@ int tellstdfunc::stdREPORTLAY::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype) :
-                              stdREPORTLAY(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype, bool eor) :
+      stdREPORTLAY(new parsercmd::argumentLIST,retype, eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
@@ -149,9 +151,9 @@ int tellstdfunc::stdREPORTLAYc::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdUNDO::stdUNDO(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdUNDO::stdUNDO(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdUNDO::execute() {
    if (UNDOcmdQ.size() > 0) {
@@ -166,9 +168,9 @@ int tellstdfunc::stdUNDO::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdREDRAW::stdREDRAW(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdREDRAW::stdREDRAW(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdREDRAW::execute() {
    wxPaintEvent upde(wxEVT_PAINT);
@@ -177,8 +179,9 @@ int tellstdfunc::stdREDRAW::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdZOOMWIN::stdZOOMWIN(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdZOOMWIN::stdZOOMWIN(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
@@ -197,8 +200,9 @@ int tellstdfunc::stdZOOMWIN::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype) :
-                                stdZOOMWIN(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype, bool eor) :
+      stdZOOMWIN(new parsercmd::argumentLIST,retype, eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
@@ -215,9 +219,9 @@ int tellstdfunc::stdZOOMWINb::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+{}
 
 int tellstdfunc::stdZOOMALL::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -230,8 +234,9 @@ int tellstdfunc::stdZOOMALL::execute() {
    return EXEC_NEXT;
 }
 //=============================================================================
-tellstdfunc::stdLAYPROP::stdLAYPROP(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdLAYPROP::stdLAYPROP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
@@ -258,8 +263,9 @@ int tellstdfunc::stdLAYPROP::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdCOLORDEF::stdCOLORDEF(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdCOLORDEF::stdCOLORDEF(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
@@ -287,8 +293,9 @@ int tellstdfunc::stdCOLORDEF::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdFILLDEF::stdFILLDEF(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdFILLDEF::stdFILLDEF(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
 }
@@ -326,8 +333,9 @@ int tellstdfunc::stdFILLDEF::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdHIDELAYER::stdHIDELAYER(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdHIDELAYER::stdHIDELAYER(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST, retype, eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
@@ -365,8 +373,9 @@ int tellstdfunc::stdHIDELAYER::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdHIDECELLMARK::stdHIDECELLMARK(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdHIDECELLMARK::stdHIDECELLMARK(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,true)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
@@ -398,8 +407,9 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdHIDETEXTMARK::stdHIDETEXTMARK(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdHIDETEXTMARK::stdHIDETEXTMARK(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
@@ -432,8 +442,9 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
 
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
@@ -489,9 +500,9 @@ int tellstdfunc::stdHIDELAYERS::execute() {
    return EXEC_NEXT;
 }
 //=============================================================================
-tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
+tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
@@ -528,8 +539,9 @@ int tellstdfunc::stdLOCKLAYER::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
 
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
@@ -585,30 +597,46 @@ int tellstdfunc::stdLOCKLAYERS::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype, bool eor) :
+      stdNEWDESIGNd(new parsercmd::argumentLIST,retype, eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-int tellstdfunc::stdNEWDESIGN::execute() {
+int tellstdfunc::stdNEWDESIGN::execute()
+{
+   TpdTime timeCreated(time(NULL));
+   OPstack.push(new telldata::ttstring(timeCreated()));
+   return stdNEWDESIGNd::execute();
+}
+
+//=============================================================================
+tellstdfunc::stdNEWDESIGNd::stdNEWDESIGNd(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::stdNEWDESIGNd::execute()
+{
+   TpdTime timeCreated(getStringValue());
    std::string nm = getStringValue();
-   DATC->newDesign(nm, time(NULL));
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      TpdTime timec(ATDB->created());
-   DATC->unlockDB();
-   // reset UNDO buffers;
+   DATC->newDesign(nm, timeCreated.stdCTime());
+// reset UNDO buffers;
    UNDOcmdQ.clear();
    while (!UNDOPstack.empty()) {
       delete UNDOPstack.front(); UNDOPstack.pop_front();
    }
-   LogFile << LogFile.getFN() << "(\""<< nm << "\" , \"" << timec() <<
+   LogFile << LogFile.getFN() << "(\""<< nm << "\" , \"" << timeCreated() <<
          "\");"; LogFile.flush();
    return EXEC_NEXT;
 }
 
-//=============================================================================
-tellstdfunc::stdNEWCELL::stdNEWCELL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+      //=============================================================================
+tellstdfunc::stdNEWCELL::stdNEWCELL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
@@ -648,8 +676,8 @@ int tellstdfunc::stdNEWCELL::execute()
 }
 
 //=============================================================================
-tellstdfunc::stdREMOVECELL::stdREMOVECELL(telldata::typeID retype) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype)
+tellstdfunc::stdREMOVECELL::stdREMOVECELL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
@@ -697,8 +725,9 @@ int tellstdfunc::stdREMOVECELL::execute()
    return EXEC_NEXT;
 }
 //=============================================================================
-tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
@@ -754,8 +783,9 @@ int tellstdfunc::stdOPENCELL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdEDITPUSH::stdEDITPUSH(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdEDITPUSH::stdEDITPUSH(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
@@ -801,10 +831,9 @@ int tellstdfunc::stdEDITPUSH::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdEDITPOP::stdEDITPOP(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
-}
+tellstdfunc::stdEDITPOP::stdEDITPOP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 void tellstdfunc::stdEDITPOP::undo_cleanup() {
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
@@ -844,10 +873,9 @@ int tellstdfunc::stdEDITPOP::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdEDITPREV::stdEDITPREV(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
-}
+tellstdfunc::stdEDITPREV::stdEDITPREV(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 void tellstdfunc::stdEDITPREV::undo_cleanup() {
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
@@ -887,10 +915,9 @@ int tellstdfunc::stdEDITPREV::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdEDITTOP::stdEDITTOP(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-
-}
+tellstdfunc::stdEDITTOP::stdEDITTOP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+{}
 
 void tellstdfunc::stdEDITTOP::undo_cleanup() {
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
@@ -930,8 +957,9 @@ int tellstdfunc::stdEDITTOP::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
@@ -977,8 +1005,9 @@ int tellstdfunc::stdCELLREF::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
@@ -1038,8 +1067,9 @@ int tellstdfunc::stdCELLAREF::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdUSINGLAYER::stdUSINGLAYER(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdUSINGLAYER::stdUSINGLAYER(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
@@ -1074,8 +1104,9 @@ int tellstdfunc::stdUSINGLAYER::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype) :
-                            stdUSINGLAYER(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor) :
+      stdUSINGLAYER(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
@@ -1094,8 +1125,9 @@ int tellstdfunc::stdUSINGLAYER_S::execute() {
   }
 }
 //=============================================================================
-tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
@@ -1136,8 +1168,9 @@ int tellstdfunc::stdADDBOX::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype) :
-                                stdADDBOX(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype, bool eor) :
+      stdADDBOX(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
@@ -1147,8 +1180,9 @@ int tellstdfunc::stdADDBOX_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdDRAWBOX::stdDRAWBOX(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdDRAWBOX::stdDRAWBOX(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
@@ -1191,9 +1225,9 @@ int tellstdfunc::stdDRAWBOX::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdDRAWBOX_D::stdDRAWBOX_D(telldata::typeID retype) :
-                               stdDRAWBOX(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdDRAWBOX_D::stdDRAWBOX_D(telldata::typeID retype, bool eor) :
+      stdDRAWBOX(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdDRAWBOX_D::execute() {
    OPstack.push(CurrentLayer());
@@ -1201,8 +1235,9 @@ int tellstdfunc::stdDRAWBOX_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
@@ -1249,8 +1284,9 @@ int tellstdfunc::stdADDBOXr::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype) :
-                               stdADDBOXr(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype, bool eor) :
+      stdADDBOXr(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
@@ -1262,8 +1298,9 @@ int tellstdfunc::stdADDBOXr_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
@@ -1307,8 +1344,9 @@ int tellstdfunc::stdADDBOXp::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype) :
-                               stdADDBOXp(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype, bool eor) :
+      stdADDBOXp(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
@@ -1319,8 +1357,9 @@ int tellstdfunc::stdADDBOXp_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
@@ -1368,8 +1407,9 @@ int tellstdfunc::stdADDPOLY::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDPOLY_D::stdADDPOLY_D(telldata::typeID retype) :
-                               stdADDPOLY(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDPOLY_D::stdADDPOLY_D(telldata::typeID retype, bool eor) :
+      stdADDPOLY(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
 }
 
@@ -1379,8 +1419,9 @@ int tellstdfunc::stdADDPOLY_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdDRAWPOLY::stdDRAWPOLY(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdDRAWPOLY::stdDRAWPOLY(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
@@ -1429,9 +1470,9 @@ int tellstdfunc::stdDRAWPOLY::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdDRAWPOLY_D::stdDRAWPOLY_D(telldata::typeID retype) :
-                              stdDRAWPOLY(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdDRAWPOLY_D::stdDRAWPOLY_D(telldata::typeID retype, bool eor) :
+      stdDRAWPOLY(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdDRAWPOLY_D::execute() {
    OPstack.push(CurrentLayer());
@@ -1439,8 +1480,9 @@ int tellstdfunc::stdDRAWPOLY_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
@@ -1491,8 +1533,9 @@ int tellstdfunc::stdADDWIRE::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDWIRE_D::stdADDWIRE_D(telldata::typeID retype) :
-                               stdADDWIRE(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDWIRE_D::stdADDWIRE_D(telldata::typeID retype, bool eor) :
+      stdADDWIRE(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
@@ -1503,8 +1546,9 @@ int tellstdfunc::stdADDWIRE_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdDRAWWIRE::stdDRAWWIRE(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdDRAWWIRE::stdDRAWWIRE(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
@@ -1557,8 +1601,9 @@ int tellstdfunc::stdDRAWWIRE::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdDRAWWIRE_D::stdDRAWWIRE_D(telldata::typeID retype) :
-                              stdDRAWWIRE(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdDRAWWIRE_D::stdDRAWWIRE_D(telldata::typeID retype, bool eor) :
+      stdDRAWWIRE(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
@@ -1568,8 +1613,9 @@ int tellstdfunc::stdDRAWWIRE_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
@@ -1621,8 +1667,9 @@ int tellstdfunc::stdADDTEXT::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdGRIDDEF::stdGRIDDEF(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdGRIDDEF::stdGRIDDEF(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
@@ -1646,8 +1693,9 @@ int tellstdfunc::stdGRIDDEF::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdGRID::stdGRID(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdGRID::stdGRID(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
@@ -1679,8 +1727,9 @@ int tellstdfunc::stdGRID::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdSTEP::stdSTEP(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdSTEP::stdSTEP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
@@ -1705,8 +1754,9 @@ int tellstdfunc::stdSTEP::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdAUTOPAN::stdAUTOPAN(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdAUTOPAN::stdAUTOPAN(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
 }
 
@@ -1739,8 +1789,9 @@ int tellstdfunc::stdAUTOPAN::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdSHAPEANGLE::stdSHAPEANGLE(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdSHAPEANGLE::stdSHAPEANGLE(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
@@ -1777,9 +1828,9 @@ int tellstdfunc::stdSHAPEANGLE::execute() {
 }
 
 //=============================================================================
-tellstdfunc::getPOINT::getPOINT(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::getPOINT::getPOINT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::getPOINT::execute() {
    // Here - try a hollow lock/unlock the database just to check that it exists
@@ -1797,9 +1848,9 @@ int tellstdfunc::getPOINT::execute() {
 }
 
 //=============================================================================
-tellstdfunc::getPOINTLIST::getPOINTLIST(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::getPOINTLIST::getPOINTLIST(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::getPOINTLIST::execute() {
    // Here - try a hollow lock/unlock the database just to check that it exists
@@ -1824,8 +1875,9 @@ int tellstdfunc::getPOINTLIST::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdSELECT::stdSELECT(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdSELECT::stdSELECT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
@@ -1867,9 +1919,9 @@ int tellstdfunc::stdSELECT::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdSELECT_I::stdSELECT_I(telldata::typeID retype) :
-                                stdSELECT(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdSELECT_I::stdSELECT_I(telldata::typeID retype, bool eor) :
+      stdSELECT(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
@@ -1878,8 +1930,9 @@ int tellstdfunc::stdSELECT_I::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdSELECT_TL::stdSELECT_TL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdSELECT_TL::stdSELECT_TL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_layout)));
 }
 
@@ -1902,8 +1955,9 @@ int tellstdfunc::stdSELECT_TL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdSELECTIN::stdSELECTIN(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdSELECTIN::stdSELECTIN(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
@@ -1944,8 +1998,9 @@ int tellstdfunc::stdSELECTIN::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdPNTSELECT::stdPNTSELECT(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdPNTSELECT::stdPNTSELECT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
@@ -1987,9 +2042,9 @@ int tellstdfunc::stdPNTSELECT::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdPNTSELECT_I::stdPNTSELECT_I(telldata::typeID retype) :
-                             stdPNTSELECT(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdPNTSELECT_I::stdPNTSELECT_I(telldata::typeID retype, bool eor) :
+      stdPNTSELECT(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdPNTSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
@@ -1998,8 +2053,9 @@ int tellstdfunc::stdPNTSELECT_I::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdUNSELECT::stdUNSELECT(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdUNSELECT::stdUNSELECT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
@@ -2041,9 +2097,9 @@ int tellstdfunc::stdUNSELECT::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdUNSELECT_I::stdUNSELECT_I(telldata::typeID retype) :
-                              stdUNSELECT(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdUNSELECT_I::stdUNSELECT_I(telldata::typeID retype, bool eor) :
+      stdUNSELECT(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdUNSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
@@ -2052,8 +2108,9 @@ int tellstdfunc::stdUNSELECT_I::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdUNSELECT_TL::stdUNSELECT_TL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdUNSELECT_TL::stdUNSELECT_TL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_layout)));
 }
 
@@ -2076,8 +2133,9 @@ int tellstdfunc::stdUNSELECT_TL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdUNSELECTIN::stdUNSELECTIN(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdUNSELECTIN::stdUNSELECTIN(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
@@ -2118,8 +2176,9 @@ int tellstdfunc::stdUNSELECTIN::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdPNTUNSELECT::stdPNTUNSELECT(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdPNTUNSELECT::stdPNTUNSELECT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
 }
 
@@ -2161,9 +2220,9 @@ int tellstdfunc::stdPNTUNSELECT::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdPNTUNSELECT_I::stdPNTUNSELECT_I(telldata::typeID retype) :
-                           stdPNTUNSELECT(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdPNTUNSELECT_I::stdPNTUNSELECT_I(telldata::typeID retype, bool eor) :
+      stdPNTUNSELECT(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdPNTUNSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
@@ -2172,9 +2231,9 @@ int tellstdfunc::stdPNTUNSELECT_I::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdSELECTALL::stdSELECTALL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdSELECTALL::stdSELECTALL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 void tellstdfunc::stdSELECTALL::undo_cleanup() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
@@ -2205,9 +2264,9 @@ int tellstdfunc::stdSELECTALL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdUNSELECTALL::stdUNSELECTALL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdUNSELECTALL::stdUNSELECTALL(telldata::typeID retype, bool eor) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 void tellstdfunc::stdUNSELECTALL::undo_cleanup() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
@@ -2236,9 +2295,9 @@ int tellstdfunc::stdUNSELECTALL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdDELETESEL::stdDELETESEL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdDELETESEL::stdDELETESEL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 void tellstdfunc::stdDELETESEL::undo_cleanup() {
    telldata::ttlist* und = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
@@ -2270,8 +2329,9 @@ int tellstdfunc::stdDELETESEL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdCOPYSEL::stdCOPYSEL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdCOPYSEL::stdCOPYSEL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
@@ -2310,9 +2370,9 @@ int tellstdfunc::stdCOPYSEL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype) :
-                               stdCOPYSEL(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype, bool eor) :
+      stdCOPYSEL(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdCOPYSEL_D::execute() {
    // stop the thread and wait for input from the GUI
@@ -2326,8 +2386,9 @@ int tellstdfunc::stdCOPYSEL_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdMOVESEL::stdMOVESEL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdMOVESEL::stdMOVESEL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
@@ -2410,9 +2471,9 @@ int tellstdfunc::stdMOVESEL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype) :
-                               stdMOVESEL(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype, bool eor) :
+      stdMOVESEL(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::stdMOVESEL_D::execute() {
    // stop the thread and wait for input from the GUI
@@ -2426,8 +2487,9 @@ int tellstdfunc::stdMOVESEL_D::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdROTATESEL::stdROTATESEL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdROTATESEL::stdROTATESEL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
@@ -2513,8 +2575,9 @@ int tellstdfunc::stdROTATESEL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
@@ -2549,8 +2612,9 @@ int tellstdfunc::stdFLIPXSEL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
@@ -2585,8 +2649,9 @@ int tellstdfunc::stdFLIPYSEL::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
@@ -2627,9 +2692,9 @@ int tellstdfunc::stdGROUP::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdUNGROUP::stdUNGROUP(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::stdUNGROUP::stdUNGROUP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 void tellstdfunc::stdUNGROUP::undo_cleanup() {
    telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
@@ -2699,8 +2764,9 @@ int tellstdfunc::stdUNGROUP::execute() {
 }
 
 //=============================================================================
-tellstdfunc::lgcCUTPOLY::lgcCUTPOLY(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::lgcCUTPOLY::lgcCUTPOLY(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
 }
 
@@ -2804,9 +2870,9 @@ int tellstdfunc::lgcCUTPOLY::execute() {
 }
 
 //=============================================================================
-tellstdfunc::lgcCUTPOLY_I::lgcCUTPOLY_I(telldata::typeID retype) :
-                               lgcCUTPOLY(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::lgcCUTPOLY_I::lgcCUTPOLY_I(telldata::typeID retype, bool eor) :
+      lgcCUTPOLY(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::lgcCUTPOLY_I::execute() {
    if (DATC->numselected() == 0) {
@@ -2819,9 +2885,9 @@ int tellstdfunc::lgcCUTPOLY_I::execute() {
 }
 
 //=============================================================================
-tellstdfunc::lgcMERGE::lgcMERGE(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::lgcMERGE::lgcMERGE(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 void tellstdfunc::lgcMERGE::undo_cleanup() {
    telldata::ttlist* pl3 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
@@ -2893,8 +2959,9 @@ int tellstdfunc::lgcMERGE::execute() {
    return EXEC_NEXT;
 }
 //=============================================================================
-tellstdfunc::GDSread::GDSread(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::GDSread::GDSread(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
@@ -2912,8 +2979,8 @@ int tellstdfunc::GDSread::execute() {
 }
 
 //=============================================================================
-tellstdfunc::TDTread::TDTread(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype)
+tellstdfunc::TDTread::TDTread(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
@@ -2938,8 +3005,8 @@ int tellstdfunc::TDTread::execute()
 }
 
 //=============================================================================
-tellstdfunc::TDTreadIFF::TDTreadIFF(telldata::typeID retype) :
-      TDTread(new parsercmd::argumentLIST,retype)
+tellstdfunc::TDTreadIFF::TDTreadIFF(telldata::typeID retype, bool eor) :
+      TDTread(new parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
@@ -2974,8 +3041,9 @@ int tellstdfunc::TDTreadIFF::execute()
 }
 
 //=============================================================================
-tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
@@ -2992,9 +3060,9 @@ int tellstdfunc::TDTsaveas::execute() {
 }
 
 //=============================================================================
-tellstdfunc::TDTsave::TDTsave(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::TDTsave::execute() {
    DATC->TDTwrite();
@@ -3008,8 +3076,8 @@ int tellstdfunc::TDTsave::execute() {
 }
 
 //=============================================================================
-tellstdfunc::GDSconvertAll::GDSconvertAll(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) 
+tellstdfunc::GDSconvertAll::GDSconvertAll(telldata::typeID retype, bool eor) :
+                              cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor) 
 {
    arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_string)));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
@@ -3040,8 +3108,8 @@ int tellstdfunc::GDSconvertAll::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSconvert::GDSconvert(telldata::typeID retype) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype) 
+tellstdfunc::GDSconvert::GDSconvert(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor) 
 {
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
@@ -3065,8 +3133,8 @@ int tellstdfunc::GDSconvert::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype)
+tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
@@ -3082,8 +3150,8 @@ int tellstdfunc::GDSexportLIB::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype)
+tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
@@ -3116,8 +3184,9 @@ int tellstdfunc::GDSexportTOP::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
@@ -3144,9 +3213,9 @@ int tellstdfunc::GDSreportlay::execute() {
 }
 
 //=============================================================================
-tellstdfunc::GDSclose::GDSclose(telldata::typeID retype) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
-}
+tellstdfunc::GDSclose::GDSclose(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
 
 int tellstdfunc::GDSclose::execute() {
    DATC->GDSclose();
@@ -3155,8 +3224,9 @@ int tellstdfunc::GDSclose::execute() {
 }
 
 //=============================================================================
-tellstdfunc::stdADDMENU::stdADDMENU(telldata::typeID retype) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype) {
+tellstdfunc::stdADDMENU::stdADDMENU(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
