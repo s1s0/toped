@@ -34,7 +34,7 @@
 extern   layprop::ViewProperties*   Properties;
 extern   wxMutex                    DBLock;
          wxMutex                    GDSLock;
-
+extern   bool                       ignoreModeOn;
 //-----------------------------------------------------------------------------
 // class gds2ted
 //-----------------------------------------------------------------------------
@@ -203,12 +203,48 @@ DataCenter::~DataCenter() {
    if (NULL != _TEDDB) delete _TEDDB;
 }
 
-bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated, TpdTime* timeSaved) {
+bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated,
+                         TpdTime* timeSaved)
+{
    laydata::TEDfile tempin(filename.c_str());
    if (!tempin.status()) return false;
+
+   std::string news = "Project created: ";
+   TpdTime timec(tempin.created()); news += timec();
+   tell_log(console::MT_INFO,news.c_str());
+   news = "Last updated: ";
+   TpdTime timeu(tempin.lastUpdated()); news += timeu();
+   tell_log(console::MT_INFO,news.c_str());
+   // File created time stamp must match exactly, otherwise it means
+   // that we're reading not exactly the same file that is requested
+   if ((NULL != timeCreated) && (*timeCreated != timec))
+   {
+      news = "time stamp \"Project created \" doesn't match";
+      tell_log(console::MT_ERROR,news.c_str());
+      tempin.closeF();
+      return false;
+   }
+   if (NULL != timeSaved)
+   {
+      if (timeu.stdCTime() < timeSaved->stdCTime())
+      {
+         news = "time stamp \"Last updated \" is too old.";
+         tell_log(console::MT_ERROR,news.c_str());
+         tempin.closeF();
+         return false;
+      }
+      else if (timeu.stdCTime() > timeSaved->stdCTime())
+      {
+         news = "time stamp \"Last updated \" is is newer than requested.";
+         news +="Some of the following commands will be ignored";
+         tell_log(console::MT_WARNING,news.c_str());
+         //Start ignoring
+         //@FIXME ignoreModeOn = true;
+      }
+   }
    try
    {
-      tempin.read(timeCreated, timeSaved);
+      tempin.read();
    }
    catch (EXPTNreadTDT)
    {
@@ -230,11 +266,36 @@ bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated, TpdTime* ti
    return true;
 }
 
-void DataCenter::TDTwrite(const char* filename) {
-   std::string nfn;
+bool DataCenter::TDTwrite(const char* filename, TpdTime* timeCreated,
+                          TpdTime* timeSaved)
+{
+   std::string news;
+   // File created time stamp must match exactly, otherwise it means
+   // that we're saving not exactly the same file that is requested
+   if ((NULL != timeCreated) && (timeCreated->stdCTime() != _TEDDB->created()))
+   {
+      news = "time stamp \"Project created \" doesn't match. File save aborted";
+      tell_log(console::MT_ERROR,news.c_str());
+      return false;
+   }
+   if (NULL != timeSaved)
+   {
+      if (_TEDDB->lastUpdated() <= timeSaved->stdCTime())
+      {
+         news = "Database is older or doesn't contain new data, File save operation ignored";
+         tell_log(console::MT_WARNING,news.c_str());
+         _neversaved = false;
+         return false;
+      }
+      else 
+      {
+         //@FIXME ignoreModeOn = false;
+      }
+   }
    if (filename)  _tedfilename = filename;
    laydata::TEDfile tempin(_TEDDB, _tedfilename);
    _neversaved = false;
+   return true;
 }
 
 void DataCenter::GDSexport(std::string& filename)

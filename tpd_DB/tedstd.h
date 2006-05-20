@@ -124,7 +124,7 @@ namespace laydata {
                            TEDfile(const char*); // for reading
                            TEDfile(tdtdesign*, std::string&); // for writing
       void                 closeF() {fclose(_file);};
-      void                 read(TpdTime* timeCreated, TpdTime* timeSaved);
+      void                 read();
       void                 cleanup();
       std::string          getString();
       void                 putString(std::string str);
@@ -154,7 +154,8 @@ namespace laydata {
       bool                 _status;
       word                 _numread;
    private:
-      void                 getTime(TpdTime* timeCreated, TpdTime* timeSaved);
+      void                 getFHeader();
+      void                 getTime();
       void                 putTime();
       void                 getRevision();
       void                 putRevision();

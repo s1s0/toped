@@ -42,6 +42,8 @@ DataCenter*                      DATC = NULL;
 // from ted_prompt (console)
 parsercmd::cmdBLOCK*             CMDBlock = NULL;
 extern console::ted_cmd*         Console;
+bool                             ignoreModeOn;
+      
 
 //-----------------------------------------------------------------------------
 console::toped_logfile     LogFile;
@@ -99,6 +101,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("tdtread"          ,(new                     tellstdfunc::TDTread(telldata::tn_void, true)));
    mblock->addFUNC("tdtread"          ,(new                  tellstdfunc::TDTreadIFF(telldata::tn_void, true)));
    mblock->addFUNC("tdtsave"          ,(new                     tellstdfunc::TDTsave(telldata::tn_void, true)));
+   mblock->addFUNC("tdtsave"          ,(new                  tellstdfunc::TDTsaveIFF(telldata::tn_void, true)));
    mblock->addFUNC("tdtsaveas"        ,(new                   tellstdfunc::TDTsaveas(telldata::tn_void, true)));
    mblock->addFUNC("opencell"         ,(new                 tellstdfunc::stdOPENCELL(telldata::tn_void,false)));
    mblock->addFUNC("editpush"         ,(new                 tellstdfunc::stdEDITPUSH(telldata::tn_void,false)));
@@ -152,10 +155,10 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    //--------------------------------------------------------------------------
    // toped specific functons
    //--------------------------------------------------------------------------
-   mblock->addFUNC("redraw"           ,(new                   tellstdfunc::stdREDRAW(telldata::tn_void,false)));
-   mblock->addFUNC("zoom"             ,(new                  tellstdfunc::stdZOOMWIN(telldata::tn_void,false)));
-   mblock->addFUNC("zoom"             ,(new                 tellstdfunc::stdZOOMWINb(telldata::tn_void,false)));
-   mblock->addFUNC("zoomall"          ,(new                  tellstdfunc::stdZOOMALL(telldata::tn_void,false)));
+   mblock->addFUNC("redraw"           ,(new                   tellstdfunc::stdREDRAW(telldata::tn_void, true)));
+   mblock->addFUNC("zoom"             ,(new                  tellstdfunc::stdZOOMWIN(telldata::tn_void, true)));
+   mblock->addFUNC("zoom"             ,(new                 tellstdfunc::stdZOOMWINb(telldata::tn_void, true)));
+   mblock->addFUNC("zoomall"          ,(new                  tellstdfunc::stdZOOMALL(telldata::tn_void, true)));
    mblock->addFUNC("layprop"          ,(new                  tellstdfunc::stdLAYPROP(telldata::tn_void, true)));
    mblock->addFUNC("hidelayer"        ,(new                tellstdfunc::stdHIDELAYER(telldata::tn_void, true)));
    mblock->addFUNC("hidelayer"        ,(new               tellstdfunc::stdHIDELAYERS(telldata::tn_void, true)));
@@ -183,7 +186,8 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    console::TellFnSort();
 }
 
-class TopedApp : public wxApp {
+class TopedApp : public wxApp
+{
 public:
    virtual bool OnInit();
    virtual int  OnExit();
@@ -212,7 +216,7 @@ bool TopedApp::OnInit() {
   _CrtSetDbgFlag(tmpDbgFlag);
   //_CrtSetBreakAlloc(5919);
 #endif*/
-
+   ignoreModeOn = false;
    Properties = new layprop::ViewProperties();
    Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50),
    wxSize(1200,900) );
