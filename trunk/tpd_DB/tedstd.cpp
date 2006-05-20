@@ -72,20 +72,34 @@ laydata::TEDfile::TEDfile(const char* filename) { // reading
       std::string news = "File \"";
       news += filename; news += "\" not found or unaccessable";
       tell_log(console::MT_ERROR,news.c_str());
-      _status = false; 
+      _status = false; return;
    }
-   else _status = true;
+   try
+   {
+      getFHeader();
+   }
+   catch (EXPTNreadTDT)
+   {
+      fclose(_file);
+      _status = false;
+      return;
+   }
+   _status = true;
 }
 
-void laydata::TEDfile::read(TpdTime* timeCreated, TpdTime* timeSaved) {
+void laydata::TEDfile::getFHeader()
+{
    // Get the leading string 
    std::string _leadstr = getString();
    if (TED_LEADSTRING != _leadstr) throw EXPTNreadTDT("Bad leading record");
    // Get format revision
    getRevision();
    // Get file time stamps
-   getTime(timeCreated, timeSaved);
+   getTime(/*timeCreated, timeSaved*/);
 //   checkIntegrity();
+}
+
+void laydata::TEDfile::read() {
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
    real         DBU = getReal();
@@ -191,7 +205,7 @@ CTM laydata::TEDfile::getCTM()
    return CTM(_a, _b, _c, _d, _tx, _ty);
 }
 
-void laydata::TEDfile::getTime(TpdTime* timeCreated, TpdTime* timeSaved)
+void laydata::TEDfile::getTime()
 {
    tm broken_time;
    if (tedf_TIMECREATED  != getByte()) throw EXPTNreadTDT("Expecting TIMECREATED record");
@@ -210,21 +224,6 @@ void laydata::TEDfile::getTime(TpdTime* timeCreated, TpdTime* timeSaved)
    broken_time.tm_min  = get4b();
    broken_time.tm_sec  = get4b();
    _lastUpdated = mktime(&broken_time);
-   std::string news = "Project created: ";
-   TpdTime timec(_created); news += timec();
-   tell_log(console::MT_INFO,news.c_str());
-   news = "Last updated: ";
-   TpdTime timeu(_lastUpdated); news += timeu();
-   tell_log(console::MT_INFO,news.c_str());
-   if ((timeCreated != NULL) && (timeSaved != NULL))
-   {
-      if (*timeCreated != timec)
-         throw EXPTNreadTDT("time stamp \"Project created \" doesn't match");
-      if (*timeSaved != timeu)
-      {
-         throw EXPTNreadTDT("time stamp \"Last updated \" doesn't match");
-      }
-   }
 }
 
 void laydata::TEDfile::getRevision()

@@ -3076,6 +3076,32 @@ int tellstdfunc::TDTsave::execute() {
 }
 
 //=============================================================================
+tellstdfunc::TDTsaveIFF::TDTsaveIFF(telldata::typeID retype, bool eor) :
+      TDTsave(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::TDTsaveIFF::execute() {
+   TpdTime timeSaved(getStringValue());
+   TpdTime timeCreated(getStringValue());
+   if (!(timeSaved.status() && timeCreated.status()))
+   {
+      tell_log(console::MT_ERROR,"Bad time format in read command");
+   }
+   else if (DATC->TDTwrite(DATC->tedfilename().c_str(), &timeCreated, &timeSaved))
+   {   
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      TpdTime timec(ATDB->created());
+      TpdTime timeu(ATDB->lastUpdated());
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
+            timeu() << "\");"; LogFile.flush();
+   }
+   return EXEC_NEXT;
+}
+//=============================================================================
 tellstdfunc::GDSconvertAll::GDSconvertAll(telldata::typeID retype, bool eor) :
                               cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor) 
 {

@@ -45,12 +45,12 @@ extern void tellerror(std::string s);
 
 extern parsercmd::cmdBLOCK*       CMDBlock;
 extern console::toped_logfile     LogFile;
-
+extern bool                       ignoreModeOn;
 //-----------------------------------------------------------------------------
 // Initialize some static members
 //-----------------------------------------------------------------------------
 // Table of defined functions
-parsercmd::functionMAP        parsercmd::cmdBLOCK::_funcMAP;    
+parsercmd::functionMAP        parsercmd::cmdBLOCK::_funcMAP;
 // Table of current nested blocks
 parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
 // Operand stack
@@ -394,6 +394,7 @@ int parsercmd::cmdFUNCCALL::execute()
    TELL_DEBUG(cmdFUNC);
    LogFile.setFN(funcname);
    int fresult;
+   if (ignoreModeOn && !funcbody->execOnRecovery()) return EXEC_NEXT;
    try {fresult = funcbody->execute();}
    catch (EXPTN) {return EXEC_ABORT;}
    funcbody->cmdSTDFUNC::undo_cleanup();
