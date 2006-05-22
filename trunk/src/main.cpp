@@ -208,7 +208,7 @@ void TopedApp::GetLogDir()
             info += " defined in $TPDLOG_DIR doesn't exists";
          }
          info += ". Log file will be created in the current directory \"";
-         info += wxGetCwd();
+         info += wxGetCwd()+"\"";
          tell_log(console::MT_WARNING,info.c_str());
          tpdLogDir = ".";
       }
@@ -228,7 +228,8 @@ void TopedApp::GetLogDir()
 bool TopedApp::GetLogFileName()
 {
    bool status = false;
-   wxFileName* logFN = new wxFileName(std::string(tpdLogDir + "/toped_session.log"));
+   std::string fullName = tpdLogDir + "/toped_session.log";
+   wxFileName* logFN = new wxFileName(fullName.c_str());
    logFN->Normalize();
    if (logFN->IsOk())
    {
@@ -257,11 +258,12 @@ void TopedApp::FinishSessionLog()
    tm* broken_time = localtime(&timeNow);
    char* btm = new char[256];
    strftime(btm, 256, "_%y%m%d_%H%M%S", broken_time);
-   wxFileName* lFN = new wxFileName(std::string(tpdLogDir + "/tpd" + btm + ".log"));
+   std::string fullName = tpdLogDir + "/tpd" + btm + ".log";
+   wxFileName* lFN = new wxFileName(fullName.c_str());
    delete btm;
    lFN->Normalize();
    assert(lFN->IsOk());
-   wxRenameFile(logFileName, lFN->GetFullPath());
+   wxRenameFile(logFileName.c_str(), lFN->GetFullPath());
 }
 
 bool TopedApp::OnInit() {
@@ -315,7 +317,7 @@ bool TopedApp::OnInit() {
       if (wxID_NO == dlg1->ShowModal()) return FALSE;
       delete dlg1;
       wxString inputfile;
-      inputfile << "`include \"" << logFileName << "\"";
+      inputfile << "`include \"" << logFileName.c_str() << "\"";
       Console->parseCommand(inputfile, true);
       tell_log(console::MT_WARNING,"Previous session recovered.");
       set_ignoreOnRecovery(false);
