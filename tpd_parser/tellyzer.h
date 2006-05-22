@@ -417,8 +417,8 @@ namespace console{
    class toped_logfile {
       public:
          toped_logfile() {};
-         ~toped_logfile();
-         void              init();
+         void              close();
+         void              init(const std::string logFileName, bool append = false);
          void              setFN(std::string fn) {_funcname = fn;};
          std::string       getFN() const {return _funcname;};
          std::string       _2bool(bool b) {return b ? "true" : "false";};
