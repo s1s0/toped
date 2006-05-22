@@ -45,7 +45,6 @@ extern void tellerror(std::string s);
 
 extern parsercmd::cmdBLOCK*       CMDBlock;
 extern console::toped_logfile     LogFile;
-extern bool                       ignoreModeOn;
 //-----------------------------------------------------------------------------
 // Initialize some static members
 //-----------------------------------------------------------------------------
@@ -392,9 +391,14 @@ int parsercmd::cmdSTRUCT::execute()
 int parsercmd::cmdFUNCCALL::execute()
 {
    TELL_DEBUG(cmdFUNC);
-   LogFile.setFN(funcname);
    int fresult;
-   if (ignoreModeOn && !funcbody->execOnRecovery()) return EXEC_NEXT;
+   if (wxGetApp().ignoreOnRecovery() && !funcbody->execOnRecovery())
+   {
+      std::string info = funcname + " ignored";
+      tell_log(console::MT_INFO, info.c_str());
+      return EXEC_NEXT;
+   }
+   LogFile.setFN(funcname);
    try {fresult = funcbody->execute();}
    catch (EXPTN) {return EXEC_ABORT;}
    funcbody->cmdSTDFUNC::undo_cleanup();
@@ -1151,18 +1155,30 @@ void parsercmd::ClearArgumentList(argumentLIST* alst) {
 #define LFH_REVISION  "//    TOPED revision: "
 #define LFH_ENVIRONM  "// Current directory: "
 #define LFH_TIMESTAMP "//   Session started: "
+#define LFH_RECOSTAMP "// Session recovered: "
 
-void console::toped_logfile::init() {
-   std::string logfilename = "toped.log";
-   TpdTime timec(time(NULL));
-   _file.open(logfilename.c_str(), std::ios::out);
-   _file << LFH_SEPARATOR << std::endl;
-   _file << LFH_HEADER    << std::endl;
-   _file << LFH_SEPARATOR << std::endl;
-   _file << LFH_REVISION  << "0.7" << std::endl;
-   _file << LFH_ENVIRONM  << "Bali go" << std::endl;
-   _file << LFH_TIMESTAMP << timec() << std::endl;
-   _file << LFH_SEPARATOR << std::endl;
+void console::toped_logfile::init(const std::string logFileName, bool append)
+{
+   if (append)
+   {
+      _file.open(logFileName.c_str(), std::ios::out | std::ios::app);
+      TpdTime timec(time(NULL));
+      _file << LFH_SEPARATOR << std::endl;
+      _file << LFH_RECOSTAMP << timec() << std::endl;
+      _file << LFH_SEPARATOR << std::endl;
+   }
+   else
+   {
+      _file.open(logFileName.c_str(), std::ios::out);
+      TpdTime timec(time(NULL));
+      _file << LFH_SEPARATOR << std::endl;
+      _file << LFH_HEADER    << std::endl;
+      _file << LFH_SEPARATOR << std::endl;
+      _file << LFH_REVISION  << "0.7" << std::endl;
+      _file << LFH_ENVIRONM  << wxGetCwd() << std::endl;
+      _file << LFH_TIMESTAMP << timec() << std::endl;
+      _file << LFH_SEPARATOR << std::endl;
+   }
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const byte _i) {
@@ -1230,7 +1246,8 @@ console::toped_logfile& console::toped_logfile::flush() {
    _file << std::endl; return *this;
 }
  
-console::toped_logfile::~toped_logfile() {
+void console::toped_logfile::close()
+{
    _file.close();
 }
 

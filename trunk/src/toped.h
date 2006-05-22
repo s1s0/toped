@@ -184,6 +184,5 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 }
-
 #endif
 

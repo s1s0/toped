@@ -95,6 +95,7 @@ namespace console {
    void TellFnSort();
 
 }
+
    void tell_log(console::LOG_TYPE, const char* = NULL);
 
 class  TpdTime
@@ -145,5 +146,24 @@ class EXPTNpolyCross : public EXPTN
    public:
       EXPTNpolyCross(std::string);
 };
+
+class TopedApp : public wxApp
+{
+   public:
+      virtual bool   OnInit();
+      virtual int    OnExit();
+      bool           ignoreOnRecovery() { return _ignoreOnRecovery;}
+      void           set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
+   protected:
+      bool           GetLogFileName();
+      bool           CheckCrashLog();
+      void           GetLogDir();
+      void           FinishSessionLog();
+      std::string    logFileName;
+      std::string    tpdLogDir;
+      bool           _ignoreOnRecovery;
+};
+
+DECLARE_APP(TopedApp)
 
 #endif

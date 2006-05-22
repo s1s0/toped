@@ -3013,7 +3013,6 @@ tellstdfunc::TDTreadIFF::TDTreadIFF(telldata::typeID retype, bool eor) :
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
-
 int tellstdfunc::TDTreadIFF::execute()
 {
    TpdTime timeSaved(getStringValue());
@@ -3049,8 +3048,11 @@ tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::TDTsaveas::execute() {
    std::string name = getStringValue();
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      ATDB->unselect_all();
+   DATC->unlockDB();
    DATC->TDTwrite(name.c_str());
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   ATDB = DATC->lockDB(false);
       TpdTime timec(ATDB->created());
       TpdTime timeu(ATDB->lastUpdated());
    DATC->unlockDB();
@@ -3065,8 +3067,11 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::TDTsave::execute() {
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      ATDB->unselect_all();
+   DATC->unlockDB();
    DATC->TDTwrite();
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   ATDB = DATC->lockDB(false);
       TpdTime timec(ATDB->created());
       TpdTime timeu(ATDB->lastUpdated());
    DATC->unlockDB();
@@ -3090,14 +3095,20 @@ int tellstdfunc::TDTsaveIFF::execute() {
    {
       tell_log(console::MT_ERROR,"Bad time format in read command");
    }
-   else if (DATC->TDTwrite(DATC->tedfilename().c_str(), &timeCreated, &timeSaved))
-   {   
-      laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      TpdTime timec(ATDB->created());
-      TpdTime timeu(ATDB->lastUpdated());
+   else
+   {
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+         ATDB->unselect_all();
       DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
-            timeu() << "\");"; LogFile.flush();
+      if (DATC->TDTwrite(DATC->tedfilename().c_str(), &timeCreated, &timeSaved))
+      {   
+         ATDB = DATC->lockDB(false);
+            TpdTime timec(ATDB->created());
+            TpdTime timeu(ATDB->lastUpdated());
+         DATC->unlockDB();
+         LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
+               timeu() << "\");"; LogFile.flush();
+      }
    }
    return EXEC_NEXT;
 }

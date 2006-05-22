@@ -34,7 +34,6 @@
 extern   layprop::ViewProperties*   Properties;
 extern   wxMutex                    DBLock;
          wxMutex                    GDSLock;
-extern   bool                       ignoreModeOn;
 //-----------------------------------------------------------------------------
 // class gds2ted
 //-----------------------------------------------------------------------------
@@ -239,7 +238,7 @@ bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated,
          news +="Some of the following commands will be ignored";
          tell_log(console::MT_WARNING,news.c_str());
          //Start ignoring
-         //@FIXME ignoreModeOn = true;
+         wxGetApp().set_ignoreOnRecovery(true);
       }
    }
    try
@@ -280,16 +279,19 @@ bool DataCenter::TDTwrite(const char* filename, TpdTime* timeCreated,
    }
    if (NULL != timeSaved)
    {
-      if (_TEDDB->lastUpdated() <= timeSaved->stdCTime())
+      if (_TEDDB->lastUpdated() < timeSaved->stdCTime())
       {
          news = "Database is older or doesn't contain new data, File save operation ignored";
          tell_log(console::MT_WARNING,news.c_str());
          _neversaved = false;
          return false;
       }
-      else 
+      else if (_TEDDB->lastUpdated() > timeSaved->stdCTime())
+         wxGetApp().set_ignoreOnRecovery(false);
+      else
       {
-         //@FIXME ignoreModeOn = false;
+         wxGetApp().set_ignoreOnRecovery(false);
+         return false;
       }
    }
    if (filename)  _tedfilename = filename;

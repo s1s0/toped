@@ -24,6 +24,8 @@
 //        $Author$
 //===========================================================================
 #include <wx/wx.h>
+#include <wx/filefn.h>
+#include <wx/filename.h>
 
 #if WIN32 
 #include <crtdbg.h>
@@ -42,11 +44,9 @@ DataCenter*                      DATC = NULL;
 // from ted_prompt (console)
 parsercmd::cmdBLOCK*             CMDBlock = NULL;
 extern console::ted_cmd*         Console;
-bool                             ignoreModeOn;
-      
+console::toped_logfile           LogFile;
 
 //-----------------------------------------------------------------------------
-console::toped_logfile     LogFile;
 
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_MARKERPOSITION, 10000)
@@ -97,17 +97,17 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("gdsimport"        ,(new                  tellstdfunc::GDSconvert(telldata::tn_void, true)));
    mblock->addFUNC("gdsexport"        ,(new                tellstdfunc::GDSexportLIB(telldata::tn_void,false)));
    mblock->addFUNC("gdsexport"        ,(new                tellstdfunc::GDSexportTOP(telldata::tn_void,false)));
-   mblock->addFUNC("gdsclose"         ,(new                    tellstdfunc::GDSclose(telldata::tn_void,false)));
+   mblock->addFUNC("gdsclose"         ,(new                    tellstdfunc::GDSclose(telldata::tn_void, true)));
    mblock->addFUNC("tdtread"          ,(new                     tellstdfunc::TDTread(telldata::tn_void, true)));
    mblock->addFUNC("tdtread"          ,(new                  tellstdfunc::TDTreadIFF(telldata::tn_void, true)));
    mblock->addFUNC("tdtsave"          ,(new                     tellstdfunc::TDTsave(telldata::tn_void, true)));
    mblock->addFUNC("tdtsave"          ,(new                  tellstdfunc::TDTsaveIFF(telldata::tn_void, true)));
    mblock->addFUNC("tdtsaveas"        ,(new                   tellstdfunc::TDTsaveas(telldata::tn_void, true)));
-   mblock->addFUNC("opencell"         ,(new                 tellstdfunc::stdOPENCELL(telldata::tn_void,false)));
-   mblock->addFUNC("editpush"         ,(new                 tellstdfunc::stdEDITPUSH(telldata::tn_void,false)));
-   mblock->addFUNC("editpop"          ,(new                  tellstdfunc::stdEDITPOP(telldata::tn_void,false)));
-   mblock->addFUNC("edittop"          ,(new                  tellstdfunc::stdEDITTOP(telldata::tn_void,false)));
-   mblock->addFUNC("editprev"         ,(new                 tellstdfunc::stdEDITPREV(telldata::tn_void,false)));
+   mblock->addFUNC("opencell"         ,(new                 tellstdfunc::stdOPENCELL(telldata::tn_void, true)));
+   mblock->addFUNC("editpush"         ,(new                 tellstdfunc::stdEDITPUSH(telldata::tn_void, true)));
+   mblock->addFUNC("editpop"          ,(new                  tellstdfunc::stdEDITPOP(telldata::tn_void, true)));
+   mblock->addFUNC("edittop"          ,(new                  tellstdfunc::stdEDITTOP(telldata::tn_void, true)));
+   mblock->addFUNC("editprev"         ,(new                 tellstdfunc::stdEDITPREV(telldata::tn_void, true)));
    mblock->addFUNC("usinglayer"       ,(new               tellstdfunc::stdUSINGLAYER(telldata::tn_void, true)));
    mblock->addFUNC("usinglayer"       ,(new             tellstdfunc::stdUSINGLAYER_S(telldata::tn_void, true)));
    mblock->addFUNC("addbox"           ,(new                 tellstdfunc::stdADDBOX(telldata::tn_layout,false)));
@@ -186,12 +186,83 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    console::TellFnSort();
 }
 
-class TopedApp : public wxApp
+void TopedApp::GetLogDir()
 {
-public:
-   virtual bool OnInit();
-   virtual int  OnExit();
-};
+   wxFileName* logDIR = new wxFileName("$TPDLOG_DIR");
+   logDIR->Normalize();
+   std::string info;
+   if (logDIR->IsOk())
+   {
+      bool exist = logDIR->DirExists();
+      wxString dirName = logDIR->GetName();
+      if (!exist)
+      {
+         if (dirName == "$TPDLOG_DIR")
+         {
+            info = "Environment variable $TPDLOG_DIR is not defined";
+         }
+         else
+         {
+            info = "Directory ";
+            info += logDIR->GetFullPath();
+            info += " defined in $TPDLOG_DIR doesn't exists";
+         }
+         info += ". Log file will be created in the current directory \"";
+         info += wxGetCwd();
+         tell_log(console::MT_WARNING,info.c_str());
+         tpdLogDir = ".";
+      }
+      else
+         tpdLogDir = logDIR->GetFullPath().c_str();
+   }
+   else
+   {
+      info = "Can't evaluate properly \"$TPDLOG_DIR\" env. variable";
+      info += ". Log file will be created in the current directory \"";
+      tell_log(console::MT_WARNING,info.c_str());
+      tpdLogDir = ".";
+   }
+   delete logDIR;
+}
+
+bool TopedApp::GetLogFileName()
+{
+   bool status = false;
+   wxFileName* logFN = new wxFileName(std::string(tpdLogDir + "/toped_session.log"));
+   logFN->Normalize();
+   if (logFN->IsOk())
+   {
+      logFileName = logFN->GetFullPath().c_str();
+      status =  true;
+   }
+   else status = false;
+   delete logFN;
+   return status;
+}
+
+bool TopedApp::CheckCrashLog()
+{
+   if (wxFileExists(logFileName.c_str()))
+   {
+      tell_log(console::MT_WARNING,"Last session didn't exit normally. Starting recovery...");
+      return true;
+   }
+   else return false;
+}
+
+void TopedApp::FinishSessionLog()
+{
+   LogFile.close();
+   time_t timeNow = time(NULL);
+   tm* broken_time = localtime(&timeNow);
+   char* btm = new char[256];
+   strftime(btm, 256, "_%y%m%d_%H%M%S", broken_time);
+   wxFileName* lFN = new wxFileName(std::string(tpdLogDir + "/tpd" + btm + ".log"));
+   delete btm;
+   lFN->Normalize();
+   assert(lFN->IsOk());
+   wxRenameFile(logFileName, lFN->GetFullPath());
+}
 
 bool TopedApp::OnInit() {
 //Memory leakages check for Windows
@@ -216,7 +287,7 @@ bool TopedApp::OnInit() {
   _CrtSetDbgFlag(tmpDbgFlag);
   //_CrtSetBreakAlloc(5919);
 #endif*/
-   ignoreModeOn = false;
+   _ignoreOnRecovery = false;
    Properties = new layprop::ViewProperties();
    Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50),
    wxSize(1200,900) );
@@ -232,12 +303,33 @@ bool TopedApp::OnInit() {
    InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
    Toped->Show(TRUE);
    SetTopWindow(Toped);
-   LogFile.init();
-//   wxLog::AddTraceMask("thread");
-   if (1 < argc) {
+   //
+   GetLogDir();
+   if (!GetLogFileName()) return FALSE;
+   if (CheckCrashLog())
+   {
+      wxMessageDialog* dlg1 = new  wxMessageDialog(Toped,
+            "Last session didn't exit normally. Start recovery?\n\n WARNING! Recovery mode is experimental.\nMake sure that you've backed-up your database before proceeding",
+            "Toped",
+            wxYES_NO | wxICON_WARNING);
+      if (wxID_NO == dlg1->ShowModal()) return FALSE;
+      delete dlg1;
       wxString inputfile;
-      inputfile << "`include \"" << argv[1] << "\"";
-      Console->parseCommand(inputfile);
+      inputfile << "`include \"" << logFileName << "\"";
+      Console->parseCommand(inputfile, true);
+      tell_log(console::MT_WARNING,"Previous session recovered.");
+      set_ignoreOnRecovery(false);
+      LogFile.init(logFileName, true);
+   }
+   else
+   {
+      LogFile.init(logFileName);
+      //   wxLog::AddTraceMask("thread");
+      if (1 < argc) {
+         wxString inputfile;
+         inputfile << "`include \"" << argv[1] << "\"";
+         Console->parseCommand(inputfile);
+      }
    }
    return TRUE;
 }
@@ -246,6 +338,7 @@ int TopedApp::OnExit() {
    delete CMDBlock; 
    delete DATC;
    delete Properties;
+   FinishSessionLog();
    return 0;
 }
 
