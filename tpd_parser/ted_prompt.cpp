@@ -261,10 +261,22 @@ void console::ted_cmd::getCommandA() {
       _cmd_history.push_back(command.c_str());
       _history_position = _cmd_history.end();
       Clear();
-      parse_thread *pthrd = new parse_thread(command, _wait?wxTHREAD_JOINABLE:wxTHREAD_DETACHED	);
-      pthrd->Create();
-      pthrd->Run();
-      if (_wait) pthrd->Wait();
+      if (_wait)
+      { //@FIXME executing the parser without thread
+         telllloc.first_column = telllloc.first_line = 1;
+         telllloc.last_column  = telllloc.last_line  = 1;
+         telllloc.filename = NULL;
+         void* b = tell_scan_string( command.c_str() );
+         tellparse();
+         my_delete_yy_buffer( b );
+      }
+      else
+      {
+         parse_thread *pthrd = new parse_thread(command, _wait?wxTHREAD_JOINABLE:wxTHREAD_DETACHED	);
+         pthrd->Create();
+         pthrd->Run();
+         if (_wait) pthrd->Wait();
+      }
    }
 }
 
