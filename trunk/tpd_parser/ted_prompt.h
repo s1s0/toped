@@ -71,7 +71,7 @@ namespace console {
    public:
                               ted_cmd(wxWindow*);
       virtual                ~ted_cmd();
-      void                    parseCommand(wxString, bool wait=false);
+      void                    parseCommand(wxString, bool thread=true);
       void                    waitGUInput(telldata::operandSTACK*,telldata::typeID);
       void                    getGUInput(bool from_keyboard = true);
       wxCondition*            threadWaits4;
@@ -93,8 +93,7 @@ namespace console {
       wxString                _guinput;
       stringList              _cmd_history;
       stringList::const_iterator _history_position;
-//      console::ted_log*       _logW;
-      bool                    _wait; //flag fo joinable thread
+      bool                    _thread; //flag fo detached thread
       DECLARE_EVENT_TABLE();
    };
 

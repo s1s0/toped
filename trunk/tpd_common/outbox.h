@@ -159,6 +159,7 @@ class TopedApp : public wxApp
       bool           CheckCrashLog();
       void           GetLogDir();
       void           FinishSessionLog();
+      void           SaveIgnoredCrashLog();
       std::string    logFileName;
       std::string    tpdLogDir;
       bool           _ignoreOnRecovery;

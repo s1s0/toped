@@ -209,12 +209,14 @@ void* console::parse_thread::Entry() {
 //   wxLogMessage(_T("Mutex try to lock..."));
    while (wxMUTEX_NO_ERROR != Mutex.TryLock());
 //   wxLogMessage(_T("Mutex locked!"));
+   
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
    void* b = tell_scan_string( command.c_str() );
    tellparse();
    my_delete_yy_buffer( b );
+   
    Mutex.Unlock();
 //   wxLogMessage(_T("Mutex unlocked"));
    return NULL;
@@ -261,8 +263,10 @@ void console::ted_cmd::getCommandA() {
       _cmd_history.push_back(command.c_str());
       _history_position = _cmd_history.end();
       Clear();
-      if (_wait)
-      { //@FIXME executing the parser without thread
+      if (!_thread)
+      { // executing the parser without thread
+         // essentially the same code as in parse_thread::Entry, but
+         // without the mutexes
          telllloc.first_column = telllloc.first_line = 1;
          telllloc.last_column  = telllloc.last_line  = 1;
          telllloc.filename = NULL;
@@ -272,10 +276,12 @@ void console::ted_cmd::getCommandA() {
       }
       else
       {
-         parse_thread *pthrd = new parse_thread(command, _wait?wxTHREAD_JOINABLE:wxTHREAD_DETACHED	);
+         // executing the parser in a separate thread
+         //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
+         parse_thread *pthrd = new parse_thread(command);
          pthrd->Create();
          pthrd->Run();
-         if (_wait) pthrd->Wait();
+//         if (_wait) pthrd->Wait();
       }
    }
 }
@@ -301,8 +307,8 @@ void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
    }
 }
 
-void console::ted_cmd::parseCommand(wxString cmd, bool wait) {
-   _wait = wait;
+void console::ted_cmd::parseCommand(wxString cmd, bool thread) {
+   _thread = thread;
    if (NULL != puc) return; // don't accept commands during shape input sessions
    SetValue(cmd);
    getCommandA();

@@ -75,7 +75,7 @@ location_step(&telllloc);
                            BEGIN(INITIAL); 
                            if (! parsercmd::includefile(parsercmd::charcopy(yytext, true), yyin)) 
                               yyterminate(); }
-<incl><<EOF>>            { BEGIN(INITIAL); return tknERROR; }                              
+<incl><<EOF>>            { BEGIN(INITIAL); return tknERROR; }
 <<EOF>>                  { if (!parsercmd::EOfile()) yyterminate();}
 void                       return tknVOIDdef;
 real                       return tknREALdef;
@@ -217,21 +217,25 @@ int parsercmd::includefile(char* name, FILE* &handler)
    return retvalue;
 }
 
-int parsercmd::EOfile() {
-   if ( include_stack_ptr > 0 ) {
+int parsercmd::EOfile()
+{
+   if ( include_stack_ptr > 0 )
+   {
       /* get the previous file record from the array */
       parsercmd::lexer_files* prev = include_stack[--include_stack_ptr];
       /* take care to free the memory from the current file name */
       if (telllloc.filename) delete [] telllloc.filename;
 	  /* restore the error location object*/
       telllloc = *(prev->location);
-      /* delete the current file buffer (I suppose file is also closed)*/
+     /*close the file*/
+      fclose(YY_CURRENT_BUFFER->yy_input_file);
+     /* delete the current file buffer (the function below doesn't close it)*/
       yy_delete_buffer( YY_CURRENT_BUFFER );
       /* switch to the restored buffer */
       yy_switch_to_buffer(static_cast<YY_BUFFER_STATE>(prev->lexfilehandler));
       delete prev;
       return 1;
-  }
+   }
   return 0;
 }
 /*
