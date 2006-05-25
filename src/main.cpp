@@ -251,19 +251,30 @@ bool TopedApp::CheckCrashLog()
    else return false;
 }
 
-void TopedApp::FinishSessionLog()
+void TopedApp::SaveIgnoredCrashLog()
 {
-   LogFile.close();
    time_t timeNow = time(NULL);
    tm* broken_time = localtime(&timeNow);
    char* btm = new char[256];
    strftime(btm, 256, "_%y%m%d_%H%M%S", broken_time);
-   std::string fullName = tpdLogDir + "/tpd" + btm + ".log";
+   std::string fullName = tpdLogDir + "/crash" + btm + ".log";
    wxFileName* lFN = new wxFileName(fullName.c_str());
-   delete btm;
+   delete [] btm;
    lFN->Normalize();
    assert(lFN->IsOk());
    wxRenameFile(logFileName.c_str(), lFN->GetFullPath());
+   delete lFN;
+}
+
+void TopedApp::FinishSessionLog()
+{
+   LogFile.close();
+   std::string fullName = tpdLogDir + "/tpd_previous.log";
+   wxFileName* lFN = new wxFileName(fullName.c_str());
+   lFN->Normalize();
+   assert(lFN->IsOk());
+   wxRenameFile(logFileName.c_str(), lFN->GetFullPath());
+   delete lFN;
 }
 
 bool TopedApp::OnInit() {
@@ -291,8 +302,7 @@ bool TopedApp::OnInit() {
 #endif*/
    _ignoreOnRecovery = false;
    Properties = new layprop::ViewProperties();
-   Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50),
-   wxSize(1200,900) );
+   Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
    console::ted_log_ctrl *logWindow = new console::ted_log_ctrl(Toped->logwin());
    delete wxLog::SetActiveTarget(logWindow);
@@ -308,17 +318,23 @@ bool TopedApp::OnInit() {
    //
    GetLogDir();
    if (!GetLogFileName()) return FALSE;
+   bool recovery_mode = false;
    if (CheckCrashLog())
    {
       wxMessageDialog* dlg1 = new  wxMessageDialog(Toped,
             "Last session didn't exit normally. Start recovery?\n\n WARNING! Recovery mode is experimental.\nMake sure that you've backed-up your database before proceeding",
             "Toped",
             wxYES_NO | wxICON_WARNING);
-      if (wxID_NO == dlg1->ShowModal()) return FALSE;
+      if (wxID_YES == dlg1->ShowModal())
+         recovery_mode = true;
       delete dlg1;
+      if (!recovery_mode) SaveIgnoredCrashLog();
+   }
+   if (recovery_mode)
+   {
       wxString inputfile;
       inputfile << "`include \"" << logFileName.c_str() << "\"";
-      Console->parseCommand(inputfile, true);
+      Console->parseCommand(inputfile, false);
       tell_log(console::MT_WARNING,"Previous session recovered.");
       set_ignoreOnRecovery(false);
       LogFile.init(logFileName, true);
