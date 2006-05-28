@@ -77,12 +77,13 @@ Documentation
 ==============
   * GDS import/export functoins
   * TELL status function
-  * real->int conversion in TELL -> fix the documentation
-  * assign to field - window->point, point->coordinate
   * removecell
   * addmenu
-  * Crash recovery and log files
-
+  * Customizable editor menus
+--------
+> * TELL environmental variables
+> * Crash recovery and log files
+> * Validation - changed. Acute angle is allowed
   
 
 

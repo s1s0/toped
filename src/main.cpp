@@ -188,24 +188,28 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
 
 void TopedApp::GetLogDir()
 {
-   wxFileName* logDIR = new wxFileName("$TPDLOG_DIR");
+   wxFileName* logDIR = new wxFileName("$TPD_LOCAL/");
    logDIR->Normalize();
+   wxString dirName = logDIR->GetPath();
    std::string info;
+   bool undefined = dirName.Matches("*$TPD_LOCAL*");
+   if (!undefined)
+   {
+      logDIR->AppendDir("log");
+      logDIR->Normalize();
+   }
    if (logDIR->IsOk())
    {
       bool exist = logDIR->DirExists();
-      wxString dirName = logDIR->GetName();
       if (!exist)
       {
-         if (dirName == "$TPDLOG_DIR")
-         {
-            info = "Environment variable $TPDLOG_DIR is not defined";
-         }
+         if (undefined)
+            info = "Environment variable $TPD_LOCAL is not defined";
          else
          {
             info = "Directory ";
             info += logDIR->GetFullPath();
-            info += " defined in $TPDLOG_DIR doesn't exists";
+            info += " doesn't exists";
          }
          info += ". Log file will be created in the current directory \"";
          info += wxGetCwd()+"\"";
@@ -217,7 +221,7 @@ void TopedApp::GetLogDir()
    }
    else
    {
-      info = "Can't evaluate properly \"$TPDLOG_DIR\" env. variable";
+      info = "Can't evaluate properly \"$TPD_LOCAL\" env. variable";
       info += ". Log file will be created in the current directory \"";
       tell_log(console::MT_WARNING,info.c_str());
       tpdLogDir = ".";
@@ -228,7 +232,7 @@ void TopedApp::GetLogDir()
 bool TopedApp::GetLogFileName()
 {
    bool status = false;
-   std::string fullName = tpdLogDir + "/toped_session.log";
+   std::string fullName = tpdLogDir + "toped_session.log";
    wxFileName* logFN = new wxFileName(fullName.c_str());
    logFN->Normalize();
    if (logFN->IsOk())
@@ -345,7 +349,7 @@ bool TopedApp::OnInit() {
       //   wxLog::AddTraceMask("thread");
       if (1 < argc) {
          wxString inputfile;
-         inputfile << "`include \"" << argv[1] << "\"";
+         inputfile << "#include \"" << argv[1] << "\"";
          Console->parseCommand(inputfile);
       }
    }

@@ -69,7 +69,7 @@ location_step(&telllloc);
 [ \t]+                     location_step(&telllloc);
 \n+                        location_lines(&telllloc,yyleng);location_step(&telllloc);
 "//".*\n                   location_lines(&telllloc,1);/* comment line */
-`include                   BEGIN(incl);
+#include                   BEGIN(incl);
 <incl>{lex_string}       { /*first change the scanner state, otherwise there
                              is a risk to remain in <incl>*/
                            BEGIN(INITIAL); 
