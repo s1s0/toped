@@ -75,8 +75,8 @@ namespace polycross
    class CPoint : public VPoint
    {
       public:
-         CPoint(const TP* cp) : _crossingP(cp->x(), cp->y()),
-            VPoint(&_crossingP),_link(NULL),_visited(0) {};
+         CPoint(const TP* cp) : VPoint(&_crossingP), _link(NULL), _visited(0),
+         _crossingP(cp->x(), cp->y()) {};
 //         virtual ~CPoint() {delete _cp;}
          virtual VPoint*  follower(bool& direction, bool modify = false);
          bool              inside(const pointlist&, bool touching = false) {return true;}

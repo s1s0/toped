@@ -263,10 +263,10 @@ bool tedop::SweepLine::coincideOK( plysegment* line, plysegment* cross, float lp
       // the code below just increments/decrements the indexes in the point sequence
       // they look so weird, to keep the indexes within [0:_numv-1] boundaries
       if (0 == lps)
-         if (indxpos) indxLP = ++indxLP % _numv;
+         if (indxpos) indxLP = (indxLP+1) % _numv;
          else (0==indxLP) ? indxLP = _numv-1 : indxLP--;
       if (0 == rps)
-         if (!indxpos) indxRP = ++indxRP % _numv;
+         if (!indxpos) indxRP = (indxRP+1) % _numv;
          else (0==indxRP) ? indxRP = _numv-1 : indxRP--;
       // calculate lps/rps with the new points   
       lps = isLeft(line->lP, line->rP, &_plist[indxLP]);
