@@ -75,12 +75,12 @@ Dialog stuff
    
 Documentation
 ==============
-  * GDS import/export functoins
   * TELL status function
-  * removecell
   * addmenu
   * Customizable editor menus
 --------
+> * removecell
+> * GDS import/export functoins
 > * TELL environmental variables
 > * Crash recovery and log files
 > * Validation - changed. Acute angle is allowed

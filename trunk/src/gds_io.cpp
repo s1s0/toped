@@ -120,7 +120,7 @@ bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
       case gdsDT_ASCII:// String
          rlc = (char*)var;
          if (len > 0){
-            for (word i = 0; i < len; rlc[i] = record[curnum*len+i++]);
+            for (word i = 0; i < len; rlc[i] = record[curnum*len+i], i++);
             rlc[len] = 0x0;
          }
          else {

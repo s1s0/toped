@@ -491,7 +491,6 @@ void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& event) {
 void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
 {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-   int x = event.GetKeyCode();
    switch(event.GetKeyCode())
    {
    case WXK_LEFT:

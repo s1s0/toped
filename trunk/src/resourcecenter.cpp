@@ -28,7 +28,7 @@ tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string 
 }
 
 tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString)
-   :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(""), _method(cbMethod), _helpString(helpString) 
+   :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(""), _helpString(helpString), _method(cbMethod)
 {
       _inserted   =  false;
       _changed    =  false;
@@ -299,7 +299,7 @@ bool tui::ResourceCenter::checkExistence(const tui::MenuItemHandler &item)
 
          if (mItemHotKey.compare(itemHotKey)==0)
          {
-            ost<<"Hot key redefining for menu "+(*mItem)->menuItem();
+            ost<<"Hot key redefined for menu item "+(*mItem)->menuItem();
             tell_log(console::MT_WARNING,ost.str().c_str());
             (*mItem)->changeInterior("");//, "", item.method, item.helpString);
             (*mItem)->setChanged(true);

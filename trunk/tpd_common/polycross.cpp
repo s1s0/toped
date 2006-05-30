@@ -547,12 +547,12 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
       // they look so weird, to keep the indexes within [0:_numv-1] boundaries
       if (0 == lps)
       {
-         if (indxpos) indxLP = ++indxLP % numv;
+         if (indxpos) indxLP = (indxLP+1) % numv;
          else (0==indxLP) ? indxLP = numv-1 : indxLP--;
       }
       if (0 == rps)
       {
-         if (!indxpos) indxRP = ++indxRP % numv;
+         if (!indxpos) indxRP = (indxRP+1) % numv;
          else (0==indxRP) ? indxRP = numv-1 : indxRP--;
       }
       // calculate lps/rps with the new points
@@ -1208,7 +1208,7 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    bool indxpos = (indxRP == ((indxLP + 1) % numv));
    // we are going to get the next point in the sequence and use it to 
    // determine the position that we need
-   if (indxpos) indxRP = ++indxRP % numv;
+   if (indxpos) indxRP = (indxRP+1) % numv;
    else (0==indxRP) ? indxRP = numv-1 : indxRP--;
    
    ori = orientation(seg1->lP(), seg1->rP(), &((*plist0)[indxRP]));
