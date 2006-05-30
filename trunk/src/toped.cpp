@@ -150,6 +150,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    
    EVT_MENU( TMCELL_NEW          , tui::TopedFrame::OnCellNew     )
    EVT_MENU( TMCELL_OPEN         , tui::TopedFrame::OnCellOpen    )
+   EVT_MENU( TMCELL_REMOVE       , tui::TopedFrame::OnCellRemove  )
    EVT_MENU( TMCELL_PUSH         , tui::TopedFrame::OnCellPush    )
    EVT_MENU( TMCELL_PREV         , tui::TopedFrame::OnCellPrev    )
    EVT_MENU( TMCELL_POP          , tui::TopedFrame::OnCellPop     )
@@ -384,7 +385,8 @@ void tui::TopedFrame::initMenuBar() {
    cellMenu->Append(TMCELL_UNGROUP  , wxT("Unroup Cell") , wxT("Ungroup selected cell references"));
    */
    _resourceCenter->appendMenu("&Cell/New Cell",      "",   &tui::TopedFrame::OnCellNew, "Create a new cell" );
-   _resourceCenter->appendMenu("&Cell/Open Cell",     "",   &tui::TopedFrame::OnCellOpen, "Open existing cell for editing" );
+   _resourceCenter->appendMenu("&Cell/Open Cell",     "",   &tui::TopedFrame::OnCellOpen,    "Open existing cell for editing" );
+   _resourceCenter->appendMenu("&Cell/Remove Cell",   "",   &tui::TopedFrame::OnCellRemove,  "Remove existing cell" );
    _resourceCenter->appendMenuSeparator("Cell");
    _resourceCenter->appendMenu("&Cell/Edit Push",     "F9", &tui::TopedFrame::OnCellPush, "Edit in place" );
    _resourceCenter->appendMenu("&Cell/Edit Previous", "Ctrl-F9",  &tui::TopedFrame::OnCellPrev, "Edit in place" );
@@ -682,7 +684,7 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
-      ost << "`include \"" << dlg2.GetDirectory() << "/" << dlg2.GetFilename() << "\";";
+      ost << "#include \"" << dlg2.GetDirectory() << "/" << dlg2.GetFilename() << "\";";
       _cmdline->parseCommand(ost);
       SetStatusText(dlg2.GetFilename() + " parsed");
    }
@@ -769,6 +771,23 @@ void tui::TopedFrame::OnCellOpen(wxCommandEvent& WXUNUSED(event)) {
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
       ost << "opencell(\"" << dlg->get_selectedcell() << "\");";
+      _cmdline->parseCommand(ost);
+   }
+   delete dlg;
+}
+
+void tui::TopedFrame::OnCellRemove(wxCommandEvent&)
+{
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getCellOpen* dlg = NULL;
+   try {
+      dlg = new tui::getCellOpen(this, -1, "Cell Remove", pos, "");
+   }
+   catch (EXPTN) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK ) {
+      wxString ost;
+      ost << "removecell(\"" << dlg->get_selectedcell() << "\");";
       _cmdline->parseCommand(ost);
    }
    delete dlg;

@@ -337,7 +337,7 @@ bool TopedApp::OnInit() {
    if (recovery_mode)
    {
       wxString inputfile;
-      inputfile << "`include \"" << logFileName.c_str() << "\"";
+      inputfile << "#include \"" << logFileName.c_str() << "\"";
       Console->parseCommand(inputfile, false);
       tell_log(console::MT_WARNING,"Previous session recovered.");
       set_ignoreOnRecovery(false);

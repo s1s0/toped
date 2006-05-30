@@ -85,6 +85,7 @@ typedef enum  {
 
    TMCELL_NEW              ,
    TMCELL_OPEN             ,
+   TMCELL_REMOVE           ,
    TMCELL_PUSH             ,
    TMCELL_POP              ,
    TMCELL_TOP              ,
