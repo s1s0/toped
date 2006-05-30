@@ -129,6 +129,7 @@ namespace tui {
 
       void     OnCellNew(wxCommandEvent&);
       void    OnCellOpen(wxCommandEvent&);
+      void    OnCellRemove(wxCommandEvent&);
       void    OnCellPush(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("editpush(getpoint());");};
       void     OnCellPop(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("editpop();");};
       void     OnCellTop(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand("edittop();");};
