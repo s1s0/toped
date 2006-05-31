@@ -1,4 +1,4 @@
-# these are the headers for your project
+# these are the headers for the project
 noinst_HEADERS = browsers.h gds_io.h layoutcanvas.h toped.h tui.h \
 	datacenter.h tellibin.h resourcecenter.h
 

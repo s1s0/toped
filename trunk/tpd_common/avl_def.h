@@ -10,19 +10,9 @@
 //                    T    O     O  PPPP    EEE     D    D                  =
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
+//                                                                          =
+//                                                                          =
 // ------------------------------------------------------------------------ =
-//           $URL$
-//        Created: Tue Sep 28 2004
-//         Author: s_krustev@yahoo.com
-//      Copyright: (C) 2001-2004 by Svilen Krustev
-//    Description: Toped shape operations
-//---------------------------------------------------------------------------
-//  Revision info
-//---------------------------------------------------------------------------                
-//      $Revision$
-//          $Date$
-//        $Author$
-//---------------------------------------------------------------------------                
 // This file is a part of avl.h 
 // libavl - library for manipulation of binary trees.
 //   Copyright (C) 1998-2002 Free Software Foundation, Inc.
@@ -30,7 +20,14 @@
 //   The author may be contacted at <blp@gnu.org> on the Internet, or
 //   write to Ben Pfaff, Stanford University, Computer Science Dept., 353
 //   Serra Mall, Stanford CA 94305, USA.
-//===========================================================================
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------                
+//           $URL$
+//      $Revision$
+//          $Date$
+//        $Author$
+//---------------------------------------------------------------------------                
 #ifndef AVL_DEF
 #define AVL_DEF
 

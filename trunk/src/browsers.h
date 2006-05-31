@@ -10,12 +10,14 @@
 //                    T    O     O  PPPP    EEE     D    D                  =
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Mon Aug 11 2003
-//         Author: Svilen Krustev - s_krustev@yahoo.com
-//      Copyright: (C) 2003 by Svilen Krustev
-//    Description: Tell function definition browser, GDSII hierarchy browser
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: GDSII/TDT hierarchy browser, layer browser, TELL fuction
+//                 definition browser
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                

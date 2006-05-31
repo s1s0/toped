@@ -10,12 +10,13 @@
 //                    T    O     O  PPPP    EEE     D    D                  =
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//  Creation date: Sep 14 1999
-//     Created by: Svilen Krustev - s_krustev@yahoo.com
-//      Copyright: (C) 2001-2004 by Svilen Krustev
-//    Description: wxWidget version
+//        Created: Sep 14 1999
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: GDSII parser
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                

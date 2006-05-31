@@ -10,12 +10,13 @@
 //                    T    O     O  PPPP    EEE     D    D                  =
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//  Creation date: Mon Apr 28 22:09:54 BST 2003
-//     Created by: Svilen Krustev - s_krustev@yahoo.com
-//      Copyright: (C) 2001-2004 by Svilen Krustev
-//    Description: wxWidget version
+//        Created: Mon Apr 28 22:09:54 BST 2003
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Basic common Toped types&classes
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                

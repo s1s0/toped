@@ -10,12 +10,13 @@
 //                    T    O     O  PPPP    EEE     D    D                  =
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//  Creation date: Wed Dec 26 2001
-//     Created by: Svilen Krustev - s_krustev@yahoo.com
-//      Copyright: (C) 2001-2004 by Svilen Krustev
-//    Description: wx port of the QT version layoutcanvas.cpp
+//        Created: Wed Dec 26 2001
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Canvas control
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
