@@ -10,11 +10,12 @@
 //                    T    O     O  PPPP    EEE     D    D                  =
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //          $URL$
 //       Created: Thu Jun 17 2004
-//        Author: Svilen Krustev - s_krustev@yahoo.com
-//     Copyright: (C) 2004 by Svilen Krustev
+//    Originator: Svilen Krustev - skr@toped.org.uk
 //   Description: Tell user interface classes
 //---------------------------------------------------------------------------
 //  Revision info

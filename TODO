@@ -10,13 +10,13 @@ TODO for 0.8 release
 > * environmental variable handling in flex (for include files)
 > * crash recovery using toped.log file. Requires introduction of wxfiles
 > * location of the log files - difference between crashed sessions and normally closed ones
-  * update the web
+> * update the web
   * include the documentation in the packages (tarball and rpm)
   * include example tll files in the packages
-  * Update all file headers and authors file
+> * Update all file headers and authors file
 
-To be done!!!
-====================
+General
+=========
   * MEMORY LEAKAGE DEBUG!
   * Initial (default) values of grids, step etc. When a new design is created and
     grids and steps (and what else) are not explicitly defined, the editr is
@@ -54,10 +54,6 @@ To be done!!!
     tellyzer block. May be something like a error report structure
     will be appropriate? Error numbers with error messages etc. -
     It will be much easier to document them eventually in the future!
-  * tell function parser (in the tab view) behaves funny after the refresh operation
-    It is highly likely that this functionality will be moved in a different place
-    however it apparently needs attention
-  * Run time error handling (roll the stack over and bail out?)
 
   To be implemented in the language:
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,16 +72,6 @@ Dialog stuff
 Documentation
 ==============
   * TELL status function
-  * addmenu
-  * Customizable editor menus
---------
-> * removecell
-> * GDS import/export functoins
-> * TELL environmental variables
-> * Crash recovery and log files
-> * Validation - changed. Acute angle is allowed
-  
-
 
 Seems OK
 ========
@@ -95,8 +81,7 @@ Seems OK
     types of variables resulting from select operations. Seems the dataList
     structures will remain in the heap. Of course TOPED objects should not be
     desctructed!
-
-
+  * TELL Run time error handling - exceptions
 
 Global options of the editor
 ============================
@@ -120,21 +105,4 @@ return a normalized result. That is NOT the case at the moment and the reason
 is to save some operations and CPU time (to gain speed) during the drawing, 
 because ussually overlap call is followed by a CTM multiplication and the 
 normalization is needed after this.
-
-Funny things from the past...
-===============================
-  * Qt - mouse button seems to be set after the button release. What about dragging?
-    How to understand what button is pressed?
-  * In tellibin.cpp the "real DBscale = 1/design->UU();" stay on a lot of
-    places, however if I try to include it in tdtdesign class as a function
-    the result looses the precision ?!?
-  * kdevelop 2.1 has a problem with showing strings during the
-    debug session - remeber string variables case with the trailing chars?
-  * The debugger is not very accurate in showing some pointer values - the
-    case with the toped colours
-  * Very strange problem with math functions - for the second time. I spend
-    a night debugging the result of a simple sqrt function that was returning
-    always ??? nan ??? - debugger problem ??? Suddenly the things went OK
-    just from nothing... It looks like something with includes or libraries.
-    The first time it was with round function
 

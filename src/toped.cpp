@@ -10,12 +10,13 @@
 //                    T    O     O  PPPP    EEE     D    D                  =
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//  Creation date: Thu May  6 22:04:50 BST 2004
-//     Created by: Svilen Krustev - s_krustev@yahoo.com
-//      Copyright: (C) 2001-2004 by Svilen Krustev
-//    Description: wxWidget version
+//        Created: Thu May  6 22:04:50 BST 2004
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Main Toped framework
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
@@ -586,8 +587,8 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
-   wxMessageBox( wxT( "A wxWidget port of the TOPED from QT" ),
-                  wxT( "About current state of wxToped" ), wxOK | wxICON_INFORMATION, this );
+   wxMessageBox( wxT( "Toped ver. 0.8\n\nOpen source IC layout editor \n(c) 2001-2006 Toped developers\nwww.toped.org.uk" ),
+                  wxT( "About Toped" ), wxOK | wxICON_INFORMATION, this );
 }
 
 

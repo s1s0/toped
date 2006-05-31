@@ -10,12 +10,13 @@
 //                    T    O     O  PPPP    EEE     D    D                  =
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//  Creation date: Sun May 22 15:43:49 BST 2005
-//     Created by: Svilen Krustev - s_krustev@yahoo.com
-//      Copyright: (C) 2001-2005 by Svilen Krustev
-//    Description: wxWidget version
+//        Created: Sun May 22 15:43:49 BST 2005
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Basic definitions and file handling of TDT data base
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
