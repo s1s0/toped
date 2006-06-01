@@ -125,7 +125,7 @@ bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
             rlc[len] = 0x0;
          }
          else {
-            for (word i = 0; i < reclen; rlc[i] = record[i++]);
+            for (word i = 0; i < reclen; rlc[i] = record[i], i++);
             rlc[reclen] = 0x0;
          }
          break;
@@ -277,7 +277,7 @@ GDSin::GDSrecord::~GDSrecord()
 // class GDSFile
 //==============================================================================
 GDSin::GDSFile::GDSFile(const char* fn) {
-   InFile = this; _hierTree = NULL;
+   InFile = this; _hierTree = NULL;_status = false;
    GDSIIwarnings = GDSIIerrors = 0;
    filename = fn;
    file_pos = 0;
@@ -325,6 +325,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
                closeFile();// close the input stream
 //               prgrs_pos = file_length;
 //               prgrs->SetPos(prgrs_pos); // fullfill progress indicator
+               _status = true;
                AddLog('O',"Done");
                delete wr; 
                return; // go out

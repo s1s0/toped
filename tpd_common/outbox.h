@@ -149,6 +149,8 @@ class EXPTNpolyCross : public EXPTN
       EXPTNpolyCross(std::string);
 };
 
+bool expandFileName(std::string&);
+
 class TopedApp : public wxApp
 {
    public:
