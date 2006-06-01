@@ -330,6 +330,7 @@ void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    // parse the GDS file
    _GDSDB = new GDSin::GDSFile(filename.c_str());
+   if (!_GDSDB->status()) return;
    // generate the hierarchy tree of cells
    _GDSDB->HierOut();
    // add GDS tab in the browser

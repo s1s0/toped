@@ -28,6 +28,8 @@
 #include <string>
 #include <wx/log.h>
 #include <wx/regex.h>
+#include <wx/filefn.h>
+#include <wx/filename.h>
 #include "outbox.h"
 
 extern const wxEventType      wxEVT_LOG_ERRMESSAGE;
@@ -282,6 +284,21 @@ bool TpdTime::getStdCTime(wxString& exp) {
    return true;
 }
 
+bool expandFileName( std::string& filename)
+{
+   wxFileName fName(filename.c_str());
+   fName.Normalize();
+   if (fName.IsOk())
+   {
+      wxString dirName = fName.GetFullPath();
+      if (!dirName.Matches("*$*"))
+      {
+         filename = fName.GetFullPath();
+         return true;
+      }
+   }
+   return false;
+}
 //=============================================================================
 EXPTNactive_cell::EXPTNactive_cell() {
    std::string news = "No active cell. Use opencell(\"<name>\") to select one";
@@ -309,3 +326,4 @@ EXPTNpolyCross::EXPTNpolyCross(std::string info) {
    news += info;
    tell_log(console::MT_ERROR,news.c_str());
 };
+

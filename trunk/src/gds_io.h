@@ -596,6 +596,7 @@ namespace GDSin {
       void           flush(GDSrecord*);
       void           closeFile() {if (NULL != GDSfh) {fclose(GDSfh); GDSfh = NULL;}}
       void           updateLastRecord();
+      bool           status() {return _status;};
       ~GDSFile();
    protected:
       void           GetTimes(GDSrecord* wr);
@@ -613,6 +614,7 @@ namespace GDSin {
       int            GDSIIwarnings;
       GDStime        t_modif;
       GDStime        t_access;
+      bool           _status;
    };
 
    // Function definition

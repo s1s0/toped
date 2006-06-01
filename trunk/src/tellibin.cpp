@@ -2967,15 +2967,23 @@ tellstdfunc::GDSread::GDSread(telldata::typeID retype, bool eor) :
 }
 
 int tellstdfunc::GDSread::execute() {
-   std::string name = getStringValue();
-   std::list<std::string> top_cell_list;
-   DATC->GDSparse(name, top_cell_list);
-   telldata::ttlist* topcells = new telldata::ttlist(telldata::tn_string);
-   for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
-                                              CN != top_cell_list.end(); CN ++)
-      topcells->add(new telldata::ttstring(*CN));
-   OPstack.push(topcells);
-   LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+   std::string filename = getStringValue();
+   if (expandFileName(filename))
+   {
+      std::list<std::string> top_cell_list;
+      DATC->GDSparse(filename, top_cell_list);
+      telldata::ttlist* topcells = new telldata::ttlist(telldata::tn_string);
+      for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
+                                                CN != top_cell_list.end(); CN ++)
+         topcells->add(new telldata::ttstring(*CN));
+      OPstack.push(topcells);
+      LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info.c_str());
+   }
    return EXEC_NEXT;
 }
 
@@ -2988,19 +2996,27 @@ tellstdfunc::TDTread::TDTread(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::TDTread::execute()
 {
-   std::string name = getStringValue();
-   if (DATC->TDTread(name)) {
-      laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         TpdTime timec(ATDB->created());
-         TpdTime timeu(ATDB->lastUpdated());
-      DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< name << "\",\"" <<  timec() <<
-            "\",\"" <<  timeu() << "\");"; LogFile.flush();
-      // reset UNDO buffers;
-      UNDOcmdQ.clear();
-      while (!UNDOPstack.empty()) {
-         delete UNDOPstack.front(); UNDOPstack.pop_front();
+   std::string filename = getStringValue();
+   if (expandFileName(filename))
+   {
+      if (DATC->TDTread(filename)) {
+         laydata::tdtdesign* ATDB = DATC->lockDB(false);
+            TpdTime timec(ATDB->created());
+            TpdTime timeu(ATDB->lastUpdated());
+         DATC->unlockDB();
+         LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
+               "\",\"" <<  timeu() << "\");"; LogFile.flush();
+         // reset UNDO buffers;
+         UNDOcmdQ.clear();
+         while (!UNDOPstack.empty()) {
+            delete UNDOPstack.front(); UNDOPstack.pop_front();
+         }
       }
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info.c_str());
    }
    return EXEC_NEXT;
 }
@@ -3018,24 +3034,32 @@ int tellstdfunc::TDTreadIFF::execute()
 {
    TpdTime timeSaved(getStringValue());
    TpdTime timeCreated(getStringValue());
-   std::string name = getStringValue();
+   std::string filename = getStringValue();
    if (!(timeSaved.status() && timeCreated.status()))
    {
       tell_log(console::MT_ERROR,"Bad time format in read command");
    }
-   else if (DATC->TDTread(name, &timeCreated, &timeSaved))
+   else if (expandFileName(filename))
    {
-      laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      TpdTime timec(ATDB->created());
-      TpdTime timeu(ATDB->lastUpdated());
-      DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< name << "\",\"" <<  timec() <<
-            "\",\"" <<  timeu() << "\");"; LogFile.flush();
-      // reset UNDO buffers;
-      UNDOcmdQ.clear();
-      while (!UNDOPstack.empty()) {
-         delete UNDOPstack.front(); UNDOPstack.pop_front();
+      if (DATC->TDTread(filename, &timeCreated, &timeSaved))
+      {
+         laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         TpdTime timec(ATDB->created());
+         TpdTime timeu(ATDB->lastUpdated());
+         DATC->unlockDB();
+         LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
+               "\",\"" <<  timeu() << "\");"; LogFile.flush();
+         // reset UNDO buffers;
+         UNDOcmdQ.clear();
+         while (!UNDOPstack.empty()) {
+            delete UNDOPstack.front(); UNDOPstack.pop_front();
+         }
       }
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info.c_str());
    }
    return EXEC_NEXT;
 }
@@ -3048,17 +3072,25 @@ tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype, bool eor) :
 }
 
 int tellstdfunc::TDTsaveas::execute() {
-   std::string name = getStringValue();
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->unselect_all();
-   DATC->unlockDB();
-   DATC->TDTwrite(name.c_str());
-   ATDB = DATC->lockDB(false);
-      TpdTime timec(ATDB->created());
-      TpdTime timeu(ATDB->lastUpdated());
-   DATC->unlockDB();
-   LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << timec() <<
-         "\" , \"" << timeu() << "\");"; LogFile.flush();
+   std::string filename = getStringValue();
+   if (expandFileName(filename))
+   {
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+         ATDB->unselect_all();
+      DATC->unlockDB();
+      DATC->TDTwrite(filename.c_str());
+      ATDB = DATC->lockDB(false);
+         TpdTime timec(ATDB->created());
+         TpdTime timeu(ATDB->lastUpdated());
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "(\""<< filename << "\" , \"" << timec() <<
+            "\" , \"" << timeu() << "\");"; LogFile.flush();
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info.c_str());
+   }
    return EXEC_NEXT;
 }
 
@@ -3130,11 +3162,7 @@ int tellstdfunc::GDSconvertAll::execute()
    nameList top_cells;
    for (unsigned i = 0; i < pl->size(); i++)
    {
-      // IF THIS doesn't compile for Windows, use the lines below instead
-      // ... and clean-up!
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
-//      const std::string name = (static_cast<telldata::ttstring*>((pl->mlist())[i]))->value();
-//      top_cells.push_back(std::string(name.c_str()));
    }
    DATC->lockDB(false);
       DATC->importGDScell(top_cells, recur, over);
@@ -3180,10 +3208,18 @@ tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
 int tellstdfunc::GDSexportLIB::execute()
 {
    std::string filename = getStringValue();
-   DATC->lockDB(false);
-      DATC->GDSexport(filename);
-   DATC->unlockDB();
-   LogFile << LogFile.getFN() << "(\""<< filename << ");"; LogFile.flush();
+   if (expandFileName(filename))
+   {
+      DATC->lockDB(false);
+         DATC->GDSexport(filename);
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "(\""<< filename << ");"; LogFile.flush();
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info.c_str());
+   }
    return EXEC_NEXT;
 }
 
@@ -3201,23 +3237,32 @@ int tellstdfunc::GDSexportTOP::execute()
    std::string filename = getStringValue();
    bool  recur = getBoolValue();
    std::string cellname = getStringValue();
-   laydata::tdtcell *excell = NULL;
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      excell = ATDB->checkcell(cellname);
-      if (NULL != excell)
-         DATC->GDSexport(excell, recur, filename);
-   DATC->unlockDB();
-   if (NULL != excell)
+   if (expandFileName(filename))
    {
-      LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
-            << LogFile._2bool(recur) << ",\"" << filename << "\");";
-      LogFile.flush();
+      laydata::tdtcell *excell = NULL;
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         excell = ATDB->checkcell(cellname);
+         if (NULL != excell)
+            DATC->GDSexport(excell, recur, filename);
+      DATC->unlockDB();
+      if (NULL != excell)
+      {
+         LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
+               << LogFile._2bool(recur) << ",\"" << filename << "\");";
+         LogFile.flush();
+      }
+      else
+      {
+         std::string message = "Cell " + cellname + " not found in the database";
+         tell_log(console::MT_ERROR,message.c_str());
+      }
    }
    else
    {
-      std::string message = "Cell " + cellname + " not found in the database";
-      tell_log(console::MT_ERROR,message.c_str());
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info.c_str());
    }
+      
    return EXEC_NEXT;
 }
 
