@@ -738,7 +738,21 @@ void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
       wxT("Toped files |*.tdt"),
       wxSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
-      wxString filename = dlg2.GetFilename();
+      wxString filename = dlg2.GetPath();
+      wxFileName checkedFileName(filename);
+      assert(checkedFileName.IsOk());
+      if (checkedFileName.FileExists())
+      {
+         wxMessageDialog dlg1(this,
+         wxT("File ") + filename + wxT(" already exists. Overwrite ?"),
+         wxT("Toped"),
+         wxYES_NO | wxICON_QUESTION);
+         if (wxID_NO==dlg1.ShowModal()) 
+         {
+            SetStatusText(wxT("Saving aborted"));
+            return;
+         }
+      }
       wxString ost;
       ost << wxT("tdtsaveas(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
