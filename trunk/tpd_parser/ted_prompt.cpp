@@ -303,8 +303,6 @@ void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
       if (_cmd_history.end() == _history_position) SetValue(wxT(""));
    else 
    {
-//      const char * Str =  _history_position->c_str();
-//      SetValue(wxString(Str, strlen(Str)));
       SetValue(wxString(_history_position->c_str(), wxConvUTF8));
    }
 }
