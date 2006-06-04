@@ -390,7 +390,7 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
    if (!check.valid()) {
       std::ostringstream ost;
       ost << ": Resulting shape is invalid - " << check.failtype();
-      tell_log(console::MT_ERROR, ost.str().c_str());
+      tell_log(console::MT_ERROR, ost.str());
    }
    else {
       if (laydata::shp_OK != check.status())

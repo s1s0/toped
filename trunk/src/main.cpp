@@ -192,7 +192,7 @@ void TopedApp::GetLogDir()
    wxFileName* logDIR = new wxFileName(wxT("$TPD_LOCAL/"));
    logDIR->Normalize();
    wxString dirName = logDIR->GetPath();
-   std::string info;
+   wxString info;
    bool undefined = dirName.Matches(wxT("*$TPD_LOCAL*"));
    if (!undefined)
    {
@@ -205,16 +205,14 @@ void TopedApp::GetLogDir()
       if (!exist)
       {
          if (undefined)
-            info = "Environment variable $TPD_LOCAL is not defined";
+            info = wxT("Environment variable $TPD_LOCAL is not defined");
          else
          {
-            info = "Directory ";
-            info += logDIR->GetFullPath().mb_str();
-            info += " doesn't exists";
+            info << wxT("Directory ") << logDIR->GetFullPath() << wxT(" doesn't exists");
          }
-         info += ". Log file will be created in the current directory \"";
-         info += std::string(wxGetCwd().mb_str()) + "\"";
-         tell_log(console::MT_WARNING,info.c_str());
+         info << wxT(". Log file will be created in the current directory \"");
+         info << wxGetCwd() << wxT("\"");
+         tell_log(console::MT_WARNING,info);
          tpdLogDir = wxT(".");
       }
       else
@@ -222,9 +220,9 @@ void TopedApp::GetLogDir()
    }
    else
    {
-      info = "Can't evaluate properly \"$TPD_LOCAL\" env. variable";
-      info += ". Log file will be created in the current directory \"";
-      tell_log(console::MT_WARNING,info.c_str());
+      info = wxT("Can't evaluate properly \"$TPD_LOCAL\" env. variable");
+      info << wxT(". Log file will be created in the current directory \"");
+      tell_log(console::MT_WARNING,info);
       tpdLogDir = wxT(".");
    }
    delete logDIR;

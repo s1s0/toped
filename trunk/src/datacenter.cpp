@@ -50,7 +50,7 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
    if (!src_structure) {
       std::string news = "GDS structure named \"";
       news += gname; news += "\" does not exists";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
       return;
    }
    // proceed with children first
@@ -75,13 +75,13 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
    }
    else {
       ost << "Importing structure " << gname << "...";
-      tell_log(console::MT_INFO,ost.str().c_str());
+      tell_log(console::MT_INFO,ost.str());
       // first create a new cell
       dst_structure = _dst_lib->addcell(gname);
       // now call the cell converter
       convert(src_structure, dst_structure);
    }
-   tell_log(console::MT_INFO,ost.str().c_str());
+   tell_log(console::MT_INFO,ost.str());
 }
 
 void GDSin::gds2ted::convert(GDSin::GDSstructure* src, laydata::tdtcell* dst) {
@@ -112,7 +112,7 @@ void GDSin::gds2ted::polygon(GDSin::GDSpolygon* wd, laydata::tdtcell* dst) {
    if (!check.valid()) {
       std::ostringstream ost; ost << "Layer " << wd->GetLayer();
       ost << ": Polygon check fails - " << check.failtype();
-      tell_log(console::MT_ERROR, ost.str().c_str());
+      tell_log(console::MT_ERROR, ost.str());
    }   
    else pl = check.get_validated() ;
    if (check.box()) {
@@ -130,7 +130,7 @@ void GDSin::gds2ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst) {
    if (!check.valid()) {
       std::ostringstream ost; ost << "Layer " << wd->GetLayer();
       ost << ": Wire check fails - " << check.failtype();
-      tell_log(console::MT_ERROR, ost.str().c_str());
+      tell_log(console::MT_ERROR, ost.str());
    }   
    else pl = check.get_validated() ;
    /* @TODO !!! GDS path type here!!!! */
@@ -153,7 +153,7 @@ void GDSin::gds2ted::ref(GDSin::GDSref* wd, laydata::tdtcell* dst) {
    else {
       std::string news = "Referenced structure \"";
       news += wd->GetStrname(); news += "\" not found. Reference ignored";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
    }
    // How about structures defined, but not parsed yet????
 }
@@ -175,7 +175,7 @@ void GDSin::gds2ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst) {
    else {
       std::string news = "Referenced structure \"";
       news += wd->GetStrname(); news += "\" not found. Reference ignored";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
    }
    // How about structures defined, but not parsed yet????
 }
@@ -211,16 +211,16 @@ bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated,
 
    std::string news = "Project created: ";
    TpdTime timec(tempin.created()); news += timec();
-   tell_log(console::MT_INFO,news.c_str());
+   tell_log(console::MT_INFO,news);
    news = "Last updated: ";
    TpdTime timeu(tempin.lastUpdated()); news += timeu();
-   tell_log(console::MT_INFO,news.c_str());
+   tell_log(console::MT_INFO,news);
    // File created time stamp must match exactly, otherwise it means
    // that we're reading not exactly the same file that is requested
    if ((NULL != timeCreated) && (*timeCreated != timec))
    {
       news = "time stamp \"Project created \" doesn't match";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
       tempin.closeF();
       return false;
    }
@@ -229,7 +229,7 @@ bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated,
       if (timeu.stdCTime() < timeSaved->stdCTime())
       {
          news = "time stamp \"Last updated \" is too old.";
-         tell_log(console::MT_ERROR,news.c_str());
+         tell_log(console::MT_ERROR,news);
          tempin.closeF();
          return false;
       }
@@ -237,7 +237,7 @@ bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated,
       {
          news = "time stamp \"Last updated \" is is newer than requested.";
          news +="Some of the following commands will be ignored";
-         tell_log(console::MT_WARNING,news.c_str());
+         tell_log(console::MT_WARNING,news);
          //Start ignoring
          wxGetApp().set_ignoreOnRecovery(true);
       }
@@ -275,7 +275,7 @@ bool DataCenter::TDTwrite(const char* filename, TpdTime* timeCreated,
    if ((NULL != timeCreated) && (timeCreated->stdCTime() != _TEDDB->created()))
    {
       news = "time stamp \"Project created \" doesn't match. File save aborted";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
       return false;
    }
    if (NULL != timeSaved)
@@ -283,7 +283,7 @@ bool DataCenter::TDTwrite(const char* filename, TpdTime* timeCreated,
       if (_TEDDB->lastUpdated() < timeSaved->stdCTime())
       {
          news = "Database is older or doesn't contain new data, File save operation ignored";
-         tell_log(console::MT_WARNING,news.c_str());
+         tell_log(console::MT_WARNING,news);
          _neversaved = false;
          return false;
       }
@@ -324,7 +324,7 @@ void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells
    if (_GDSDB) 
    {
       std::string news = "Removing existing GDS data from memory...";
-      tell_log(console::MT_WARNING,news.c_str());
+      tell_log(console::MT_WARNING,news);
       GDSclose();
    }
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());

@@ -288,7 +288,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
    if (!(GDSfh = fopen(filename.c_str(),"rb"))) {// open the input file
       std::ostringstream info;
       info << "File "<< fn <<" can NOT be opened";
-      tell_log(console::MT_ERROR,info.str().c_str());
+      tell_log(console::MT_ERROR,info.str());
       return;
    }
 //   file_length = _filelength(GDSfh->_file);
@@ -352,7 +352,7 @@ GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
    if (!(GDSfh = fopen(filename.c_str(),"wb"))) {// open the output file
       std::ostringstream info;
       info << "File "<< fn <<" can NOT be opened";
-      tell_log(console::MT_ERROR,info.str().c_str());
+      tell_log(console::MT_ERROR,info.str());
    }//
    time_t acctim_N = acctime;
    tm* broken_time = localtime(&acctim_N);
@@ -360,7 +360,7 @@ GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
    {
       std::ostringstream info;
       info << "Error during defining time";
-      tell_log(console::MT_ERROR,info.str().c_str());
+      tell_log(console::MT_ERROR,info.str());
    }
    t_access.Year  = broken_time->tm_year;
    t_access.Month = broken_time->tm_mon;
@@ -1240,5 +1240,5 @@ void GDSin::AddLog(char logtype, const char* message){
       }
       default: ost << message;
    }
-   tell_log(console::MT_INFO,ost.str().c_str());
+   tell_log(console::MT_INFO,ost.str());
 } 

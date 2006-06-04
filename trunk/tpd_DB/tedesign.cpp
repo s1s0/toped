@@ -55,7 +55,7 @@ void laydata::tdtdesign::read(TEDfile* const tedfile)
    while (tedf_CELL == tedfile->getByte()) 
    {
       cellname = tedfile->getString();
-      tell_log(console::MT_CELLNAME, cellname.c_str());
+      tell_log(console::MT_CELLNAME, cellname);
       tedfile->registercellread(cellname, new tdtcell(tedfile, cellname));
    }
    recreate_hierarchy();
@@ -83,7 +83,7 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel)
    {
       std::string news = "Cell \"";
       news += name; news += "\" doesn't exists";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
       return false; // cell doesn't exists
    }
    else
@@ -93,7 +93,7 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel)
       {
          std::string news = "Cell \"";
          news += name; news += "\" is referenced and can't be removed";
-         tell_log(console::MT_ERROR,news.c_str());
+         tell_log(console::MT_ERROR,news);
          return false;
       }
       else if (_target.edit()->name() == name)
@@ -133,7 +133,7 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
    if (!check.valid()) {
       std::ostringstream ost; 
       ost << "Polygon check fails - " << check.failtype();
-      tell_log(console::MT_ERROR, ost.str().c_str());
+      tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
@@ -154,7 +154,7 @@ laydata::tdtdata* laydata::tdtdesign::addwire(word la, const pointlist* pl, word
    if (!check.valid()) {
       std::ostringstream ost; 
       ost << "Wire check fails - " << check.failtype();
-      tell_log(console::MT_ERROR, ost.str().c_str());
+      tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }   
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
@@ -186,7 +186,7 @@ laydata::tdtdata* laydata::tdtdesign::addcellref(std::string& name, CTM& ori) {
    else {
       std::string news = "Cell \"";
       news += name; news += "\" is not defined";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
       return NULL;
    }
 }
@@ -207,7 +207,7 @@ laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori,
    else {
       std::string news = "Cell \"";
       news += name; news += "\" is not defined";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
       return NULL;
    }
 }
@@ -563,7 +563,7 @@ bool laydata::tdtdesign::collect_usedlays(std::string cellname, bool recursive, 
       for(usedlayList::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
          ost << " " << *CL << " ";
       ost << "}";
-      tell_log(console::MT_INFO, ost.str().c_str());
+      tell_log(console::MT_INFO, ost.str());
       return true;
    }
    else return false;

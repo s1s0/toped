@@ -72,7 +72,7 @@ laydata::TEDfile::TEDfile(const char* filename) { // reading
    if (NULL == (_file = fopen(filename, "rb"))) {
       std::string news = "File \"";
       news += filename; news += "\" not found or unaccessable";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
       _status = false; return;
    }
    try
@@ -105,7 +105,7 @@ void laydata::TEDfile::read() {
    std::string name = getString();
    real         DBU = getReal();
    real          UU = getReal();
-   tell_log(console::MT_DESIGNNAME, name.c_str());
+   tell_log(console::MT_DESIGNNAME, name);
    _design = new tdtdesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in tdtdesign so don't search it here
@@ -117,7 +117,7 @@ laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) { //writing
    if (NULL == (_file = fopen(filename.c_str(), "wb"))) {
       std::string news = "File \"";
       news += filename.c_str(); news += "\" can not be created";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
       return;
    }   
    putString(TED_LEADSTRING);
@@ -216,6 +216,7 @@ void laydata::TEDfile::getTime()
    broken_time.tm_hour = get4b();
    broken_time.tm_min  = get4b();
    broken_time.tm_sec  = get4b();
+   broken_time.tm_isdst = -1;
    _created = mktime(&broken_time);
    if (tedf_TIMEUPDATED  != getByte()) throw EXPTNreadTDT("Expecting TIMEUPDATED record");
    broken_time.tm_mday = get4b();
@@ -224,6 +225,7 @@ void laydata::TEDfile::getTime()
    broken_time.tm_hour = get4b();
    broken_time.tm_min  = get4b();
    broken_time.tm_sec  = get4b();
+   broken_time.tm_isdst = -1;
    _lastUpdated = mktime(&broken_time);
 }
 
@@ -234,7 +236,7 @@ void laydata::TEDfile::getRevision()
    _subrevision = getWord();
    std::ostringstream ost; 
    ost << "TDT format revision: " << _revision << "." << _subrevision;
-   tell_log(console::MT_INFO,ost.str().c_str());
+   tell_log(console::MT_INFO,ost.str());
 }
 
 void laydata::TEDfile::putWord(const word data) {

@@ -402,7 +402,7 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, T
    // If no more children and the cell has not been written yet
    if (tedfile->checkcellwritten(_name)) return;
    std::string message = "...writing " + _name;
-   tell_log(console::MT_INFO, message.c_str());
+   tell_log(console::MT_INFO, message);
    tedfile->putByte(tedf_CELL);
    tedfile->putString(_name);
    // and now the layers
@@ -434,7 +434,7 @@ void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
    if (gdsf.checkCellWritten(_name)) return;
    //
    std::string message = "...converting " + _name;
-   tell_log(console::MT_INFO, message.c_str());
+   tell_log(console::MT_INFO, message);
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BGNSTR);
    gdsf.SetTimes(wr);gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_STRNAME, _name.size());
@@ -1400,7 +1400,7 @@ void laydata::tdtcell::report_selected() const {
          std::ostringstream ost;
          ost << "layer " << CL->first << " : ";
          DP->first->info(ost);
-         tell_log(console::MT_INFO, ost.str().c_str());
+         tell_log(console::MT_INFO, ost.str());
       }
    }
 }

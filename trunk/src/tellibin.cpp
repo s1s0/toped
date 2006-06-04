@@ -72,7 +72,7 @@ int tellstdfunc::stdECHO::execute() {
    telldata::tell_var *p = OPstack.top();OPstack.pop();
    std::string news;
    p->echo(news);
-   tell_log(console::MT_INFO,news.c_str());
+   tell_log(console::MT_INFO,news);
    delete p;
    return EXEC_NEXT;
 }
@@ -88,10 +88,10 @@ int tellstdfunc::stdTELLSTATUS::execute() {
    while (OPstack.size()) {
       y = OPstack.top(); OPstack.pop();
       y->echo(news);
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
    }
    news = "Bottom of the operand stack reached";
-   tell_log(console::MT_ERROR,news.c_str());
+   tell_log(console::MT_ERROR,news);
    return EXEC_NEXT;
 }
 
@@ -131,7 +131,7 @@ int tellstdfunc::stdREPORTLAY::execute() {
    else {
       std::string news = "cell \"";
       news += cellname; news += "\" doesn't exists";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
    }
    OPstack.push(tllull);
    return EXEC_NEXT;
@@ -163,7 +163,7 @@ int tellstdfunc::stdUNDO::execute() {
    }
    else {
       std::string news = "UNDO buffer is empty";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
    }   
    return EXEC_NEXT;
 }
@@ -481,7 +481,7 @@ int tellstdfunc::stdHIDELAYERS::execute() {
       if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1)) {
          std::ostringstream info;
          info << "Layer number "<< i <<" out of range ... ignored";
-         tell_log(console::MT_WARNING,info.str().c_str());
+         tell_log(console::MT_WARNING,info.str());
       }
       else if (laynumber->value() == Properties->curlay()) {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
@@ -578,7 +578,7 @@ int tellstdfunc::stdLOCKLAYERS::execute() {
       if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1)) {
          std::ostringstream info;
          info << "Layer number "<< i <<" out of range ... ignored";
-         tell_log(console::MT_WARNING,info.str().c_str());
+         tell_log(console::MT_WARNING,info.str());
       }
       else if (laynumber->value() == Properties->curlay()) {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
@@ -671,7 +671,7 @@ int tellstdfunc::stdNEWCELL::execute()
    {
       std::string news = "Cell \"";
       news += nm; news += "\" already exists";
-      tell_log(console::MT_ERROR,news.c_str());
+      tell_log(console::MT_ERROR,news);
    }
    return EXEC_NEXT;
 }
@@ -777,7 +777,7 @@ int tellstdfunc::stdOPENCELL::execute() {
 /*-!-*/  DATC->unlockDB();
          std::string news = "cell \"";
          news += nm; news += "\" doesn't exists";
-         tell_log(console::MT_ERROR,news.c_str());
+         tell_log(console::MT_ERROR,news);
          if (selected) delete selected;
       }
    return EXEC_NEXT;
@@ -1121,7 +1121,7 @@ int tellstdfunc::stdUSINGLAYER_S::execute() {
   else {// no layer with this name
     std::string news = "layer \"";
     news += layname; news += "\" is not defined";
-    tell_log(console::MT_ERROR,news.c_str());
+    tell_log(console::MT_ERROR,news);
     return EXEC_NEXT;
   }
 }
@@ -2982,7 +2982,7 @@ int tellstdfunc::GDSread::execute() {
    else
    {
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
-      tell_log(console::MT_ERROR,info.c_str());
+      tell_log(console::MT_ERROR,info);
    }
    return EXEC_NEXT;
 }
@@ -3016,7 +3016,7 @@ int tellstdfunc::TDTread::execute()
    else
    {
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
-      tell_log(console::MT_ERROR,info.c_str());
+      tell_log(console::MT_ERROR,info);
    }
    return EXEC_NEXT;
 }
@@ -3059,7 +3059,7 @@ int tellstdfunc::TDTreadIFF::execute()
    else
    {
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
-      tell_log(console::MT_ERROR,info.c_str());
+      tell_log(console::MT_ERROR,info);
    }
    return EXEC_NEXT;
 }
@@ -3089,7 +3089,7 @@ int tellstdfunc::TDTsaveas::execute() {
    else
    {
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
-      tell_log(console::MT_ERROR,info.c_str());
+      tell_log(console::MT_ERROR,info);
    }
    return EXEC_NEXT;
 }
@@ -3218,7 +3218,7 @@ int tellstdfunc::GDSexportLIB::execute()
    else
    {
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
-      tell_log(console::MT_ERROR,info.c_str());
+      tell_log(console::MT_ERROR,info);
    }
    return EXEC_NEXT;
 }
@@ -3254,13 +3254,13 @@ int tellstdfunc::GDSexportTOP::execute()
       else
       {
          std::string message = "Cell " + cellname + " not found in the database";
-         tell_log(console::MT_ERROR,message.c_str());
+         tell_log(console::MT_ERROR,message);
       }
    }
    else
    {
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
-      tell_log(console::MT_ERROR,info.c_str());
+      tell_log(console::MT_ERROR,info);
    }
       
    return EXEC_NEXT;
@@ -3280,14 +3280,14 @@ int tellstdfunc::GDSreportlay::execute() {
       std::ostringstream ost; 
       if (!src_structure) {
          ost << "GDS structure named \"" << name << "\" does not exists";
-         tell_log(console::MT_ERROR,ost.str().c_str());
+         tell_log(console::MT_ERROR,ost.str());
       }
       else 
       {
          ost << "GDS layers found in \"" << name <<"\": ";
          for(int i = 0 ; i < GDS_MAX_LAYER ; i++)
             if (src_structure->Get_Allay(i)) ost << i << " ";
-         tell_log(console::MT_INFO,ost.str().c_str());
+         tell_log(console::MT_INFO,ost.str());
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
       }
    DATC->unlockGDS();

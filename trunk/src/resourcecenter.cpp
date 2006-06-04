@@ -173,8 +173,8 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
    if ((index==wxNOT_FOUND)||(menuItem==NULL))
    {
       std::ostringstream ost;
-      ost<<"Error during menu redefining";
-      tell_log(console::MT_ERROR,ost.str().c_str());
+      ost<<"Error redefining menu";
+      tell_log(console::MT_ERROR,ost.str());
       return;
    }
    menuItem->SetText(wxString(insertedString.c_str(), wxConvUTF8));
@@ -310,7 +310,7 @@ bool tui::ResourceCenter::checkExistence(const tui::MenuItemHandler &item)
       if (itemStr.compare(curStr)==0)
       {
          ost<<"Menu item redefining\n";
-         tell_log(console::MT_WARNING,ost.str().c_str());
+         tell_log(console::MT_WARNING,ost.str());
 
          (*mItem)->changeInterior(item.hotKey(), item.function(), item.method(), item.helpString());
                   
@@ -327,7 +327,7 @@ bool tui::ResourceCenter::checkExistence(const tui::MenuItemHandler &item)
          if (mItemHotKey.compare(itemHotKey)==0)
          {
             ost<<"Hot key redefined for menu item "+(*mItem)->menuItem();
-            tell_log(console::MT_WARNING,ost.str().c_str());
+            tell_log(console::MT_WARNING,ost.str());
             (*mItem)->changeInterior("");//, "", item.method, item.helpString);
             (*mItem)->setChanged(true);
          }
