@@ -3476,7 +3476,7 @@ laydata::atticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
 
 void tellstdfunc::UpdateLV() {
    wxString ws;
-   ws.sprintf("%d",DATC->numselected());
+   ws.sprintf(wxT("%d"),DATC->numselected());
    wxCommandEvent eventUPDATESEL(wxEVT_CNVSSTATUSLINE);
    eventUPDATESEL.SetInt(tui::STS_SELECTED);
    eventUPDATESEL.SetString(ws);

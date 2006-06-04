@@ -84,5 +84,5 @@ AC_CHECK_SIZEOF(char)
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(long)
 
-AC_CONFIG_FILES([Makefile tpd_common/Makefile tpd_parser/Makefile tpd_DB/Makefile src/Makefile ])
+AC_CONFIG_FILES([Makefile tpd_common/Makefile tpd_parser/Makefile tpd_DB/Makefile src/Makefile tll/Makefile])
 AC_OUTPUT

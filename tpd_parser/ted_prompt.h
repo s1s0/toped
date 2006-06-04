@@ -36,10 +36,10 @@
 
 namespace console {
    typedef std::list<std::string>   stringList;
-   const wxString real_tmpl      = "[-+]?([[:digit:]]+(\\.[[:digit:]]*)?|(\\.[[:digit:]]+))";
-   const wxString point_tmpl     = "\\{"+ real_tmpl+","+ real_tmpl+"\\}";
-   const wxString box_tmpl       = "\\{"+point_tmpl+","+point_tmpl+"\\}";
-   const wxString pointlist_tmpl = "\\{"+point_tmpl+"(,"+point_tmpl+"){1,}\\}";
+   const wxString real_tmpl      = wxT("[-+]?([[:digit:]]+(\\.[[:digit:]]*)?|(\\.[[:digit:]]+))");
+   const wxString point_tmpl     = wxT("\\{")+ real_tmpl+wxT(",")+ real_tmpl+wxT("\\}");
+   const wxString box_tmpl       = wxT("\\{")+point_tmpl+wxT(",")+point_tmpl+wxT("\\}");
+   const wxString pointlist_tmpl = wxT("\\{")+point_tmpl+wxT("(,")+point_tmpl+wxT("){1,}\\}");
 
    bool patternFound(const wxString templ,  wxString str);
    void patternNormalize(wxString& str);

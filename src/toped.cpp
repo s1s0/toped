@@ -48,35 +48,35 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent) : wxPanel( parent, -1,
    wxFont fontX = GetFont();
    fontX.SetWeight(wxBOLD);
    SetFont(fontX);
-   _abort = new wxButton(this, TBSTAT_ABORT, "Abort");
+   _abort = new wxButton(this, TBSTAT_ABORT, wxT("Abort"));
    _abort->Disable();
    SetBackgroundColour(wxColour("BLACK"));
    SetForegroundColour(wxColour("CYAN"));
-   X_pos = new wxStaticText(this, -1, "0.00", wxDefaultPosition, wxSize(80,20), 
+   X_pos = new wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   Y_pos = new wxStaticText(this, -1, "0.00", wxDefaultPosition, wxSize(80,20), 
+   Y_pos = new wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dX = new wxStaticText(this, -1, "", wxDefaultPosition, wxSize(80,20), 
+   _dX = new wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(80,20),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dY = new wxStaticText(this, -1, "", wxDefaultPosition, wxSize(100,20), 
+   _dY = new wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(100,20),
                                                    wxST_NO_AUTORESIZE/* | wxALIGN_RIGHT*/);
    
-   _selected = new wxStaticText(this, -1, "0", wxDefaultPosition, wxSize(40,20), 
+   _selected = new wxStaticText(this, -1, wxT("0"), wxDefaultPosition, wxSize(40,20),
                                                    wxST_NO_AUTORESIZE | wxALIGN_LEFT);
    wxBoxSizer *thesizer = new wxBoxSizer( wxHORIZONTAL );
    thesizer->Add(_abort, 0, wxALL | wxALIGN_CENTER, 3);
    thesizer->Add(10,0,1);  
-   thesizer->Add(new wxStaticText(this, -1, "Selected: "), 0, wxALIGN_CENTER, 3 );
+   thesizer->Add(new wxStaticText(this, -1, wxT("Selected: ")), 0, wxALIGN_CENTER, 3 );
    thesizer->Add(_selected, 0, wxALIGN_CENTER, 3 );
 //   thesizer->Add(10,0,1);  
-   thesizer->Add(new wxStaticText(this, -1, "dX: "), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(new wxStaticText(this, -1, wxT("dX: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
    thesizer->Add(_dX, 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(new wxStaticText(this, -1, "dY: "), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(new wxStaticText(this, -1, wxT("dY: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
    thesizer->Add(_dY, 0, wxALIGN_CENTER, 3 );
 //   thesizer->Add(20,0,1);  
-   thesizer->Add(new wxStaticText(this, -1, "X: "), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(new wxStaticText(this, -1, wxT("X: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
    thesizer->Add(X_pos, 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(new wxStaticText(this, -1, "Y: "), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(new wxStaticText(this, -1, wxT("Y: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
    thesizer->Add(Y_pos, 0, wxALIGN_CENTER, 3 );
    SetSizerAndFit(thesizer);
 }
@@ -221,8 +221,8 @@ void tui::TopedFrame::OnClose(wxCloseEvent& event)
    {
       if (DATC->modified()) {
          wxMessageDialog dlg1(this,
-                              "Save the current design before closing?\n(Cancel to continue the session)",
-                              "Current design contains unsaved data",
+                              wxT("Save the current design before closing?\n(Cancel to continue the session)"),
+                              wxT("Current design contains unsaved data"),
                               wxYES_NO | wxCANCEL | wxICON_QUESTION);
          switch (dlg1.ShowModal()) {
             case wxID_YES:{
@@ -552,9 +552,9 @@ void tui::TopedFrame::initView() {
    //
    wxNotebook* logpane = new wxNotebook(mS_log, -1, wxDefaultPosition, wxDefaultSize, wxNB_RIGHT);
    _cmdlog = new console::ted_log(logpane);
-   logpane->AddPage(_cmdlog, "Log");
+   logpane->AddPage(_cmdlog, wxT("Log"));
    _cmdbrowser = new console::TELLFuncList(logpane);
-   logpane->AddPage(_cmdbrowser, "Lib");
+   logpane->AddPage(_cmdbrowser, wxT("Lib"));
 
    //----------------------------------------------------------------------------
    // the openGL window
@@ -628,8 +628,8 @@ void tui::TopedFrame::OnPositionMessage(wxCommandEvent& evt) {
 void tui::TopedFrame::OnNewDesign(wxCommandEvent& evt) {
    if (DATC->modified()) {
       wxMessageDialog dlg1(this,
-         "Current design contains unsaved data",
-         "Save the current design before creating a new one?",
+         wxT("Current design contains unsaved data"),
+         wxT("Save the current design before creating a new one?"),
          wxYES_NO | wxCANCEL | wxICON_QUESTION);
       switch (dlg1.ShowModal()) {
          case wxID_YES:OnTDTSave(evt);
@@ -638,23 +638,23 @@ void tui::TopedFrame::OnNewDesign(wxCommandEvent& evt) {
       }
    }
    wxTextEntryDialog dlg2(this,
-      "Name the new design",
-      "Design name:");
+      wxT("Name the new design"),
+      wxT("Design name:"));
    wxString dname, ost;
-   if ((wxID_OK == dlg2.ShowModal()) && ((dname = dlg2.GetValue()) != "")) {
-      SetStatusText("Creating new file...");
-      ost << "newdesign(\"" << dname << "\");";
+   if ((wxID_OK == dlg2.ShowModal()) && ((dname = dlg2.GetValue()) != wxT(""))) {
+      SetStatusText(wxT("Creating new file..."));
+      ost << wxT("newdesign(\"") << dname << wxT("\");");
       _cmdline->parseCommand(ost);
       SetTitle(dname);
    }
-   else SetStatusText("New file not created");
+   else SetStatusText(wxT("New file not created"));
 }
 
 void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
    if (DATC->modified()) {
       wxMessageDialog dlg1(this,
-         "Current design contains unsaved data",
-         "Save the current design before creating a new one?",
+         wxT("Current design contains unsaved data"),
+         wxT("Save the current design before creating a new one?"),
          wxYES_NO | wxCANCEL | wxICON_QUESTION);
       switch (dlg1.ShowModal()) {
          case wxID_YES:OnTDTSave(evt);
@@ -662,61 +662,65 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
          case wxID_CANCEL: return;
       }
    }
-   SetStatusText("Opening file...");
-   wxFileDialog dlg2(this, "Select a file", "", "", 
-      "Toped files |*.tdt",
+   SetStatusText(wxT("Opening file..."));
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+      wxT("Toped files |*.tdt"),
       wxOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
-      ost << "tdtread(\"" << dlg2.GetDirectory() << "/" << dlg2.GetFilename() << "\");";
+      ost << wxT("tdtread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
-      SetStatusText("File "+dlg2.GetFilename()+" loaded");
+      wxString ost1;
+      ost1 << wxT("File ") << dlg2.GetFilename() << wxT(" loaded");
+      SetStatusText(ost1);
       SetTitle(dlg2.GetFilename());
    }
-   else SetStatusText("Opening aborted");
+   else SetStatusText(wxT("Opening aborted"));
 }
 
 void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
-   SetStatusText("Including command file...");
-   wxFileDialog dlg2(this, "Select a file", "", "", 
-      "Tell files |*.tll",
+   SetStatusText(wxT("Including command file..."));
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+      wxT("Tell files |*.tll"),
       wxOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
-      ost << "#include \"" << dlg2.GetDirectory() << "/" << dlg2.GetFilename() << "\";";
+      ost << wxT("#include \"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\";");
       _cmdline->parseCommand(ost);
-      SetStatusText(dlg2.GetFilename() + " parsed");
+      SetStatusText(dlg2.GetFilename() + wxT(" parsed"));
    }
-   else SetStatusText("include aborted");
+   else SetStatusText(wxT("include aborted"));
 }
 
 void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
-   wxFileDialog dlg2(this, "Select a file", "", "", 
-      "Stream files |*.sf;*.gds",
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+                     wxT("Stream files |*.sf;*.gds"),
       wxOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
-      SetStatusText("Parsing GDS file...");
+      SetStatusText(wxT("Parsing GDS file..."));
       wxString filename = dlg2.GetFilename();
       wxString ost;
-      ost << "gdsread(\"" << dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\");";
+      ost << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
-      SetStatusText("Stream "+dlg2.GetFilename()+" loded");
+      wxString ost1;
+      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loded");
+      SetStatusText(ost1);
    }
-   else SetStatusText("Parsing aborted");
+   else SetStatusText(wxT("Parsing aborted"));
 }
 
 void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
    wxString ost; 
-   ost << "tdtsave();";
-   SetStatusText("Saving file...");
-   wxFileName datafile(wxString(DATC->tedfilename().c_str()));
+   ost << wxT("tdtsave();");
+   SetStatusText(wxT("Saving file..."));
+   wxFileName datafile(wxString(DATC->tedfilename().c_str(), wxConvUTF8));
    assert(datafile.IsOk());
    if (datafile.FileExists() && DATC->neversaved()) {
       wxMessageDialog dlg1(this,
-         "File "+ wxString(DATC->tedfilename().c_str()) + " already exists. Overwrite ?",
-         "Toped",
+      wxT("File ")+ wxString(DATC->tedfilename().c_str(), wxConvUTF8) + wxT(" already exists. Overwrite ?"),
+         wxT("Toped"),
          wxYES_NO | wxICON_QUESTION);
       switch (dlg1.ShowModal()) {
          case wxID_YES:_cmdline->parseCommand(ost); //Overwrite;
@@ -724,22 +728,22 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
       }
    }
    else _cmdline->parseCommand(ost);;
-   SetStatusText("Design saved");
+   SetStatusText(wxT("Design saved"));
 }
 
 void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
-   SetStatusText("Saving database under new filename...");
-   wxFileDialog dlg2(this, "Save a design in a file", "", "",
-      "Toped files |*.tdt",
+   SetStatusText(wxT("Saving database under new filename..."));
+   wxFileDialog dlg2(this, wxT("Save a design in a file"), wxT(""), wxT(""),
+      wxT("Toped files |*.tdt"),
       wxSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
-      ost << "tdtsaveas(\"" << dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\");";
+      ost << wxT("tdtsaveas(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
-      SetStatusText("Design saved in file: "+dlg2.GetFilename());
+      SetStatusText(wxT("Design saved in file: ")+dlg2.GetFilename());
    }   
-   else SetStatusText("Saving aborted");
+   else SetStatusText(wxT("Saving aborted"));
 }
 
 void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent&)
@@ -750,15 +754,15 @@ void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent&)
 
 void tui::TopedFrame::OnCellNew(wxCommandEvent& WXUNUSED(event)) {
    wxTextEntryDialog dlg2(this,
-      "Cell name:",
-      "Create new cell");
+      wxT("Cell name:"),
+      wxT("Create new cell"));
    wxString cname, ost;
-   if ((wxID_OK == dlg2.ShowModal()) && ((cname = dlg2.GetValue()) != "")) {
-      SetStatusText("Creating new cell...");
-      ost << "newcell(\"" << cname << "\");";
+   if ((wxID_OK == dlg2.ShowModal()) && ((cname = dlg2.GetValue()) != wxT(""))) {
+      SetStatusText(wxT("Creating new cell..."));
+      ost << wxT("newcell(\"") << cname << wxT("\");");
       _cmdline->parseCommand(ost);
    }
-   else SetStatusText("New cell not created");
+   else SetStatusText(wxT("New cell not created"));
 }
 
 void tui::TopedFrame::OnCellOpen(wxCommandEvent& WXUNUSED(event)) {
@@ -766,12 +770,12 @@ void tui::TopedFrame::OnCellOpen(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getCellOpen* dlg = NULL;
    try {
-      dlg = new tui::getCellOpen(this, -1, "Cell Open", pos, "");
+      dlg = new tui::getCellOpen(this, -1, wxT("Cell Open"), pos, wxT(""));
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
-      ost << "opencell(\"" << dlg->get_selectedcell() << "\");";
+      ost << wxT("opencell(\"") << dlg->get_selectedcell() << wxT("\");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
@@ -783,12 +787,12 @@ void tui::TopedFrame::OnCellRemove(wxCommandEvent&)
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getCellOpen* dlg = NULL;
    try {
-      dlg = new tui::getCellOpen(this, -1, "Cell Remove", pos, "");
+      dlg = new tui::getCellOpen(this, -1, wxT("Cell Remove"), pos, wxT(""));
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
-      ost << "removecell(\"" << dlg->get_selectedcell() << "\");";
+      ost << wxT("removecell(\"") << dlg->get_selectedcell() << wxT("\");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
@@ -799,15 +803,15 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getGDSimport* dlg = NULL;
    try {
-      dlg = new tui::getGDSimport(this, -1, "Import GDS structure", pos,
+      dlg = new tui::getGDSimport(this, -1, wxT("Import GDS structure"), pos,
                                           _browsers->TDTSelectedGDSName());
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
-      ost << "gdsimport(\"" << dlg->get_selectedcell() << "\" , "
-          << (dlg->get_recursive() ? "true" : "false")   << " , "
-          << (dlg->get_overwrite() ? "true" : "false")   <<");";
+      ost << wxT("gdsimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
+          << (dlg->get_recursive() ? wxT("true") : wxT("false"))   << wxT(" , ")
+          << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
@@ -815,48 +819,48 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
 {
-   wxFileDialog dlg2(this, "Select a file", "", "", 
-                     "Stream files |*.sf;*.gds",
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), 
+                     wxT("Stream files |*.sf;*.gds"),
                      wxOPEN);
    if (wxID_OK != dlg2.ShowModal()) 
    {
-      SetStatusText("Parsing aborted"); return;
+      SetStatusText(wxT("Parsing aborted")); return;
    }
-   SetStatusText("Importing GDS file...");
+   SetStatusText(wxT("Importing GDS file..."));
    wxString filename = dlg2.GetFilename();
    wxString ost_int;
-   ost_int << "gdsread(\"" << dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\")";
+   ost_int << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
    wxString ost;
-   ost << "gdsimport(" << ost_int << ", true, false );gdsclose();";
+   ost << wxT("gdsimport(") << ost_int << wxT(", true, false );gdsclose();");
    _cmdline->parseCommand(ost);
-   SetStatusText("Stream "+dlg2.GetFilename()+" imported");
+   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
 
 void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
-   SetStatusText("Exporting database to GDS file...");
-   wxFileDialog dlg2(this, "Export design to GDS file", "", "",
-      "GDS files |*.sf;*.gds",
+   SetStatusText(wxT("Exporting database to GDS file..."));
+   wxFileDialog dlg2(this, wxT("Export design to GDS file"), wxT(""), wxT(""),
+      wxT("GDS files |*.sf;*.gds"),
       wxSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
-      ost << "gdsexport(\"" << dlg2.GetDirectory() << "/" <<dlg2.GetFilename() << "\");";
+      ost << wxT("gdsexport(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
-      SetStatusText("Design exported to: "+dlg2.GetFilename());
+      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
-   else SetStatusText("GDS export aborted");
+   else SetStatusText(wxT("GDS export aborted"));
 }
 
 void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
-   SetStatusText("Exporting a cell to GDS file...");
+   SetStatusText(wxT("Exporting a cell to GDS file..."));
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getGDSexport* dlg = NULL;
    try {
-      dlg = new tui::getGDSexport(this, -1, "GDS export cell", pos, _browsers->TDTSelectedCellName());
+      dlg = new tui::getGDSexport(this, -1, wxT("GDS export cell"), pos, _browsers->TDTSelectedCellName());
    }
    catch (EXPTN) {delete dlg;return;}
-   std::string cellname;
+   wxString cellname;
    bool recur;
    if ( dlg->ShowModal() == wxID_OK ) {
       cellname = dlg->get_selectedcell();
@@ -864,21 +868,23 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
       delete dlg;
    }
    else {delete dlg;return;}
-   std::string str = std::string("Exporting ")+cellname+" to GDS file";
-   std::string fullCellName = cellname+".gds";
-   wxFileDialog dlg2(this, wxT(str.c_str()), "", wxT(fullCellName.c_str()), 
+   wxString oststr;
+   oststr <<wxT("Exporting ") << cellname << wxT(" to GDS file");
+   wxString fullCellName;
+   fullCellName << cellname << wxT(".gds");
+   wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
       wxT("GDS files |*.sf;*.gds"),
       wxSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
-      ost << "gdsexport(\"" << cellname.c_str() << "\" , " <<
-                        (recur ? "true" : "false") << ",\"" <<
-                        (dlg2.GetDirectory()).c_str() << "/" <<(dlg2.GetFilename()).c_str() << "\");";
+      ost << wxT("gdsexport(\"") << cellname.c_str() << wxT("\" , ") <<
+                        (recur ? wxT("true") : wxT("false")) << wxT(",\"") <<
+                        (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str() << wxT("\");");
       _cmdline->parseCommand(ost);
-      SetStatusText("Design exported to: "+dlg2.GetFilename());
+      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
-   else SetStatusText("GDS export aborted");
+   else SetStatusText(wxT("GDS export aborted"));
 }
 
 void tui::TopedFrame::OnCellRef_B(wxCommandEvent& WXUNUSED(event)) {
@@ -886,7 +892,7 @@ void tui::TopedFrame::OnCellRef_B(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void tui::TopedFrame::OnCellRef_M(wxCommandEvent& WXUNUSED(event)) {
-   CellRef("");
+   CellRef(wxT(""));
 }
 
 void tui::TopedFrame::OnCellARef_B(wxCommandEvent& WXUNUSED(event)) {
@@ -894,7 +900,7 @@ void tui::TopedFrame::OnCellARef_B(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void tui::TopedFrame::OnCellARef_M(wxCommandEvent& WXUNUSED(event)) {
-   CellARef("");
+   CellARef(wxT(""));
 }
 
 void tui::TopedFrame::CellRef(wxString clname) {
@@ -902,15 +908,15 @@ void tui::TopedFrame::CellRef(wxString clname) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getCellRef* dlg = NULL;
    try {
-      dlg = new tui::getCellRef(this, -1, "Cell Reference", pos, clname);
+      dlg = new tui::getCellRef(this, -1, wxT("Cell Reference"), pos, clname);
    }
    catch (EXPTN) {delete dlg;return;}   
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
-      ost << "cellref(\"" << dlg->get_selectedcell() <<"\",getpoint()," 
-          <<                     dlg->get_angle() << "," 
-          << (dlg->get_flip() ? "true" : "false") << ","
-          <<                                "1"  << ");";
+      ost << wxT("cellref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),") 
+          <<                     dlg->get_angle() << wxT(",") 
+          << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
+          <<                                wxT("1")  << wxT(");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
@@ -921,19 +927,19 @@ void tui::TopedFrame::CellARef(wxString clname) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getCellARef* dlg = NULL;
    try {
-      dlg = new tui::getCellARef(this, -1, "Array of References", pos, clname);
+      dlg = new tui::getCellARef(this, -1, wxT("Array of References"), pos, clname);
    }
    catch (EXPTN) {delete dlg; return;}   
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
-      ost << "cellaref(\"" << dlg->get_selectedcell() <<"\",getpoint()," 
-          <<                     dlg->get_angle() << "," 
-          << (dlg->get_flip() ? "true" : "false") << ","
-          <<                                 "1"  << ","
-          <<                       dlg->get_col() << "," 
-          <<                       dlg->get_row() << "," 
-          <<                     dlg->get_stepX() << "," 
-          <<                     dlg->get_stepY() << ");";
+      ost << wxT("cellaref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),") 
+          <<                     dlg->get_angle() << wxT(",") 
+          << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
+          <<                                 wxT("1")  << wxT(",")
+          <<                       dlg->get_col() << wxT(",") 
+          <<                       dlg->get_row() << wxT(",") 
+          <<                     dlg->get_stepX() << wxT(",") 
+          <<                     dlg->get_stepY() << wxT(");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
@@ -946,15 +952,15 @@ void tui::TopedFrame::OnCellGroup(wxCommandEvent& WXUNUSED(event)) {
    DATC->unlockDB();
    //
    wxTextEntryDialog dlg2(this,
-      "Cell name:",
-      "Create new cell from selected components");
+      wxT("Cell name:"),
+      wxT("Create new cell from selected components"));
    wxString cname, ost;
-   if ((wxID_OK == dlg2.ShowModal()) && ((cname = dlg2.GetValue()) != "")) {
-      SetStatusText("Grouping in a new cell...");
-      ost << "group(\"" << cname << "\");";
+   if ((wxID_OK == dlg2.ShowModal()) && ((cname = dlg2.GetValue()) != wxT(""))) {
+      SetStatusText(wxT("Grouping in a new cell..."));
+      ost << wxT("group(\"") << cname << wxT("\");");
       _cmdline->parseCommand(ost);
    }
-   else SetStatusText("Groupping canceled");
+   else SetStatusText(wxT("Groupping canceled"));
 }
 
 void tui::TopedFrame::OnDrawWire(wxCommandEvent& WXUNUSED(event)) {
@@ -962,11 +968,11 @@ void tui::TopedFrame::OnDrawWire(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getSize* dlg = NULL;
    try {
-      dlg = new tui::getSize(this, -1, "Wire width", pos);
+      dlg = new tui::getSize(this, -1, wxT("Wire width"), pos);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
-      wxString ost; ost << "addwire("<<dlg->value()<<");";
+      wxString ost; ost << wxT("addwire(")<<dlg->value()<<wxT(");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
@@ -977,17 +983,17 @@ void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);   
    tui::getTextdlg* dlg = NULL;
    try {
-      dlg = new tui::getTextdlg(this, -1, "Add text", pos);
+      dlg = new tui::getTextdlg(this, -1, wxT("Add text"), pos);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
-      wxString ost; ost << "addtext(\""
-                        << dlg->get_text()                      << "\","
-                        << Properties->curlay()                 << ","
-                        << "getpoint(),"
-                        << dlg->get_angle()                     << ","
-                        << (dlg->get_flip() ? "true" : "false") << ","
-                        << dlg->get_size()                      << ");";
+      wxString ost; ost << wxT("addtext(\"")
+                        << dlg->get_text()                      << wxT("\",")
+                        << Properties->curlay()                 << wxT(",")
+                        << wxT("getpoint(),")
+                        << dlg->get_angle()                     << wxT(",")
+                        << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
+                        << dlg->get_size()                      << wxT(");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
@@ -996,9 +1002,9 @@ void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
 void tui::TopedFrame::OnStep(wxCommandEvent& WXUNUSED(event)) {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getStep dlg(this, -1, "Step size", pos, Properties->step());
+   tui::getStep dlg(this, -1, wxT("Step size"), pos, Properties->step());
    if ( dlg.ShowModal() == wxID_OK ) {
-      wxString ost; ost << "step("<<dlg.value()<<");";
+      wxString ost; ost << wxT("step(")<<dlg.value()<<wxT(");");
       _cmdline->parseCommand(ost);
    }
 }
@@ -1011,67 +1017,69 @@ void tui::TopedFrame::OnGridDefine(wxCommandEvent& WXUNUSED(event)) {
       else                                    grid[i] = 0.0;
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getGrid dlg(this, -1, "Grid size", pos, grid[0], grid[1], grid[2]);
+   tui::getGrid dlg(this, -1, wxT("Grid size"), pos, grid[0], grid[1], grid[2]);
    if ( dlg.ShowModal() == wxID_OK ) {
       wxString ost; 
-      ost << "definegrid(0,"<<dlg.grid0()<<",\"white\");";
-      ost << "definegrid(1,"<<dlg.grid1()<<",\"white\");";
-      ost << "definegrid(2,"<<dlg.grid2()<<",\"white\");";
+      ost << wxT("definegrid(0,")<<dlg.grid0()<<wxT(",\"white\");");
+      ost << wxT("definegrid(1,")<<dlg.grid1()<<wxT(",\")white\");");
+      ost << wxT("definegrid(2,")<<dlg.grid2()<<wxT(",\")white\");");
       _cmdline->parseCommand(ost);
    }
 }
 
 void tui::TopedFrame::OnGrid0(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
-   ost << "grid(0," << (settingsMenu->IsChecked(TMSET_GRID0) ? "true" : "false") << ");";
+   ost << wxT("grid(0,") << (settingsMenu->IsChecked(TMSET_GRID0) ? wxT("true") : wxT("false")) << wxT(");");
    _cmdline->parseCommand(ost);   
 }
 
 void tui::TopedFrame::OnGrid1(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
-   ost << "grid(1," << (settingsMenu->IsChecked(TMSET_GRID1) ? "true" : "false") << ");";
+   ost << wxT("grid(1,") << (settingsMenu->IsChecked(TMSET_GRID1) ? wxT("true") : wxT("false")) << wxT(");");
    _cmdline->parseCommand(ost);   
 }
 
 void tui::TopedFrame::OnGrid2(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
-   ost << "grid(2," << (settingsMenu->IsChecked(TMSET_GRID2) ? "true" : "false") << ");";
+   ost << wxT("grid(2,") << (settingsMenu->IsChecked(TMSET_GRID2) ? wxT("true") : wxT("false")) << wxT(");");
    _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnCellMark(wxCommandEvent& WXUNUSED(event)){
   wxString ost;
-  ost << "hidecellmarks(" << (settingsMenu->IsChecked(TMSET_CELLMARK) ? "false" : "true") << ");";
+  ost << wxT("hidecellmarks(") << (settingsMenu->IsChecked(TMSET_CELLMARK) ? wxT("false") : wxT("true")) <<
+  wxT(");");
   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnTextMark(wxCommandEvent& WXUNUSED(event)){
   wxString ost;
-  ost << "hidetextmarks(" << (settingsMenu->IsChecked(TMSET_TEXTMARK) ? "false" : "true") << ");";
+  ost << wxT("hidetextmarks(") << (settingsMenu->IsChecked(TMSET_TEXTMARK) ? wxT("false") : wxT("true")) <<
+  wxT(");");
   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnAutopan(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
-   ost << "autopan("<< (settingsMenu->IsChecked(TMSET_AUTOPAN) ? "true" : "false") << ");";
+   ost << wxT("autopan(")<< (settingsMenu->IsChecked(TMSET_AUTOPAN) ? wxT("true") : wxT("false")) << wxT(");");
    _cmdline->parseCommand(ost);   
 }
 
 void tui::TopedFrame::OnMarker0(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
-   ost << "shapeangle(0);";
+   ost << wxT("shapeangle(0);");
    _cmdline->parseCommand(ost);   
 }
 
 void tui::TopedFrame::OnMarker45(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
-   ost << "shapeangle(45);";
+   ost << wxT("shapeangle(45);");
    _cmdline->parseCommand(ost);   
 }
 
 void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
-   ost << "shapeangle(90);";
+   ost << wxT("shapeangle(90);");
    _cmdline->parseCommand(ost);   
 }
 
@@ -1114,11 +1122,11 @@ void tui::TopedFrame::OnUpdateStatusLine(wxCommandEvent& evt) {
 void  tui::TopedFrame::OnMouseAccel(wxCommandEvent& evt) {
    wxString ost;
    if (0 == evt.GetInt())
-      ost << "unselect(";
+      ost << wxT("unselect(");
    else if (1 == evt.GetInt())
-      ost << "select(";
+      ost << wxT("select(");
    else return;
-   ost << evt.GetString() << ");";   
+   ost << evt.GetString() << wxT(");");   
    _cmdline->parseCommand(ost);   
 }
 

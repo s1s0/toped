@@ -189,14 +189,14 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
 
 void TopedApp::GetLogDir()
 {
-   wxFileName* logDIR = new wxFileName("$TPD_LOCAL/");
+   wxFileName* logDIR = new wxFileName(wxT("$TPD_LOCAL/"));
    logDIR->Normalize();
    wxString dirName = logDIR->GetPath();
    std::string info;
-   bool undefined = dirName.Matches("*$TPD_LOCAL*");
+   bool undefined = dirName.Matches(wxT("*$TPD_LOCAL*"));
    if (!undefined)
    {
-      logDIR->AppendDir("log");
+      logDIR->AppendDir(wxT("log"));
       logDIR->Normalize();
    }
    if (logDIR->IsOk())
@@ -209,23 +209,23 @@ void TopedApp::GetLogDir()
          else
          {
             info = "Directory ";
-            info += logDIR->GetFullPath();
+            info += logDIR->GetFullPath().mb_str();
             info += " doesn't exists";
          }
          info += ". Log file will be created in the current directory \"";
-         info += wxGetCwd()+"\"";
+         info += std::string(wxGetCwd().mb_str()) + "\"";
          tell_log(console::MT_WARNING,info.c_str());
-         tpdLogDir = ".";
+         tpdLogDir = wxT(".");
       }
       else
-         tpdLogDir = logDIR->GetFullPath().c_str();
+         tpdLogDir = logDIR->GetFullPath();
    }
    else
    {
       info = "Can't evaluate properly \"$TPD_LOCAL\" env. variable";
       info += ". Log file will be created in the current directory \"";
       tell_log(console::MT_WARNING,info.c_str());
-      tpdLogDir = ".";
+      tpdLogDir = wxT(".");
    }
    delete logDIR;
 }
@@ -233,12 +233,13 @@ void TopedApp::GetLogDir()
 bool TopedApp::GetLogFileName()
 {
    bool status = false;
-   std::string fullName = tpdLogDir + "toped_session.log";
-   wxFileName* logFN = new wxFileName(fullName.c_str());
+   wxString fullName;
+   fullName << tpdLogDir << wxT("toped_session.log");
+   wxFileName* logFN = new wxFileName(fullName);
    logFN->Normalize();
    if (logFN->IsOk())
    {
-      logFileName = logFN->GetFullPath().c_str();
+      logFileName = logFN->GetFullPath();
       status =  true;
    }
    else status = false;
@@ -248,7 +249,7 @@ bool TopedApp::GetLogFileName()
 
 bool TopedApp::CheckCrashLog()
 {
-   if (wxFileExists(logFileName.c_str()))
+   if (wxFileExists(logFileName))
    {
       tell_log(console::MT_WARNING,"Last session didn't exit normally. Starting recovery...");
       return true;
@@ -262,7 +263,8 @@ void TopedApp::SaveIgnoredCrashLog()
    tm* broken_time = localtime(&timeNow);
    char* btm = new char[256];
    strftime(btm, 256, "_%y%m%d_%H%M%S", broken_time);
-   std::string fullName = tpdLogDir + "/crash" + btm + ".log";
+   wxString fullName;
+   fullName << tpdLogDir + wxT("/crash") + wxString(btm, wxConvUTF8) + wxT(".log");
    wxFileName* lFN = new wxFileName(fullName.c_str());
    delete [] btm;
    lFN->Normalize();
@@ -274,7 +276,8 @@ void TopedApp::SaveIgnoredCrashLog()
 void TopedApp::FinishSessionLog()
 {
    LogFile.close();
-   std::string fullName = tpdLogDir + "/tpd_previous.log";
+   wxString fullName;
+   fullName << tpdLogDir << wxT("/tpd_previous.log");
    wxFileName* lFN = new wxFileName(fullName.c_str());
    lFN->Normalize();
    assert(lFN->IsOk());
@@ -327,8 +330,8 @@ bool TopedApp::OnInit() {
    if (CheckCrashLog())
    {
       wxMessageDialog* dlg1 = new  wxMessageDialog(Toped,
-            "Last session didn't exit normally. Start recovery?\n\n WARNING! Recovery mode is experimental.\nMake sure that you've backed-up your database before proceeding",
-            "Toped",
+            wxT("Last session didn't exit normally. Start recovery?\n\n WARNING! Recovery mode is experimental.\nMake sure that you've backed-up your database before proceeding"),
+            wxT("Toped"),
             wxYES_NO | wxICON_WARNING);
       if (wxID_YES == dlg1->ShowModal())
          recovery_mode = true;
@@ -338,19 +341,19 @@ bool TopedApp::OnInit() {
    if (recovery_mode)
    {
       wxString inputfile;
-      inputfile << "#include \"" << logFileName.c_str() << "\"";
+      inputfile << wxT("#include \"") << logFileName.c_str() << wxT("\"");
       Console->parseCommand(inputfile, false);
       tell_log(console::MT_WARNING,"Previous session recovered.");
       set_ignoreOnRecovery(false);
-      LogFile.init(logFileName, true);
+      LogFile.init(std::string(logFileName.mb_str()), true);
    }
    else
    {
-      LogFile.init(logFileName);
+      LogFile.init(std::string(logFileName.mb_str()));
       //   wxLog::AddTraceMask("thread");
       if (1 < argc) {
          wxString inputfile;
-         inputfile << "#include \"" << argv[1] << "\"";
+         inputfile << wxT("#include \"") << argv[1] << wxT("\"");
          Console->parseCommand(inputfile);
       }
    }
