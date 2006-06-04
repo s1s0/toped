@@ -1,18 +1,18 @@
 //===========================================================================
 //                                                                          =
-//  License terms and conditions - not clear yet                            =
 // ------------------------------------------------------------------------ =
 //                      TTTTT    EEEE     L       L                         =
 //                      T T T    E        L       L                         =
 //                        T      EEE      L       L                         =
 //                        T      E        L       L                         =
 //                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL: http://perun/tpd_svn/trunk/toped_wx/tll/topedmain.tll $
-//  Creation date: Tue Jun 28 13:16:45 BST 2005
-//     Created by: Svilen Krustev - s_krustev@yahoo.com
-//      Copyright: (C) 2001-2005 by Svilen Krustev
-//    Description: 
+//        Created: Tue Jun 28 13:16:45 BST 2005
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Basic screen setup for Toped
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
