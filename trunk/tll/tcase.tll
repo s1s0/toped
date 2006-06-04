@@ -1,18 +1,18 @@
 //===========================================================================
 //                                                                          =
-//  License terms and conditions - not clear yet                            =
 // ------------------------------------------------------------------------ =
 //                      TTTTT    EEEE     L       L                         =
 //                      T T T    E        L       L                         =
 //                        T      EEE      L       L                         =
 //                        T      E        L       L                         =
 //                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL: http://perun/tpd_svn/trunk/toped_wx/tll/test.tll $
-//  Creation date: Fri Nov 08 2002
-//     Created by: Svilen Krustev - s_krustev@yahoo.com
-//      Copyright: (C) 2001-2004 by Svilen Krustev
-//    Description: 
+//        Created: Fri Nov 08 2002
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Some basic tests of the script and the editor
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
