@@ -1,0 +1,27 @@
+Toped release 0.8 changes and updates
+=======================================
+
+General
+--------
+* GDSII output
+* crash recovery using log files - still need extensive tests
+* Customizable menus
+* log and crash files location and policy
+* environmental variables are now recognized and expanded in all functions working with files
+* some context menus
+* Bug and memory leakeage fixes
+
+Updates in the TELL script
+---------------------------
+* Introduction of user defined structures (records).
+* Redefinition of functions is now allowed
+* Improved handling of the errors during TELL parsing
+
+Graphics and database handling
+--------------------------------
+* merge/cut logical operations algorithm is rewritten from scratch - in particular
+  the search for crossing points
+* validation checks are changed. Acute angle is not flagged anymore as an error
+* Drawing of the arrays is optimized and is much faster
+* function parser is added in the program - at the moment with limited fuctionality
+* removecell()
