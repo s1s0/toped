@@ -72,26 +72,26 @@ wxMenu* tui::MenuItemHandler::buildPath(wxMenuBar *menuBar, const std::vector<st
 
    //First item - Top Menu 
    std::string menuString =menuNames[0];
-   menuID = menuBar->FindMenu(menuString.c_str());
+   menuID = menuBar->FindMenu(wxString(menuString.c_str(), wxConvUTF8));
    if (wxNOT_FOUND == menuID)
       {
          // create at the left of Help menu
          menu = new wxMenu();
-         menuBar->Insert(menuBar->GetMenuCount()-1, menu, menuString.c_str());
-         menuID = menuBar->FindMenu(menuString.c_str());
+         menuBar->Insert(menuBar->GetMenuCount()-1, menu, wxString(menuString.c_str(), wxConvUTF8));
+         menuID = menuBar->FindMenu(wxString(menuString.c_str(), wxConvUTF8));
       }
       
       menu = menuBar->GetMenu(menuID);
       //intermediate menu items - create if does not exists
       for (unsigned int j=1; j<(menuNames.size()-1); j++)
       {
-         menuID=menu->FindItem(menuNames[j].c_str());
+         menuID=menu->FindItem(wxString(menuNames[j].c_str(), wxConvUTF8));
          menuItem = menu->FindItem(menuID, &menu2);
             
          if ((wxNOT_FOUND == menuID) || (menu2 == NULL))
          {
             menu2 = new wxMenu();
-            menu->Append(_ID+10000 , menuNames[j].c_str(), menu2);
+            menu->Append(_ID+10000 , wxString(menuNames[j].c_str(), wxConvUTF8), menu2);
             menu = menu2;
          }
          else
@@ -121,7 +121,7 @@ void tui::MenuItemHandler::create(wxMenuBar *menuBar)
    {
       //Create new item in main menu
       menu = new wxMenu();
-      menuBar->Insert(menuBar->GetMenuCount()-1, menu, menuNames[0].c_str());
+      menuBar->Insert(menuBar->GetMenuCount()-1, menu, wxString(menuNames[0].c_str(), wxConvUTF8));
       _inserted = true;
       return;
    }
@@ -132,7 +132,7 @@ void tui::MenuItemHandler::create(wxMenuBar *menuBar)
    std::string insertedString = *(menuNames.end()-1);
    if (_hotKey !="") insertedString=insertedString+"\t"+_hotKey;
    
-   menuItem = new wxMenuItem(menu, _ID, insertedString.c_str(), _helpString.c_str());
+   menuItem = new wxMenuItem(menu, _ID, wxString(insertedString.c_str(), wxConvUTF8), wxString(_helpString.c_str(), wxConvUTF8));
         
    menu->Append(menuItem);
             
@@ -156,7 +156,7 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
    {
       //Create new item in main menu
       menu = new wxMenu();
-      menuBar->Insert(menuBar->GetMenuCount()-1, menu, menuNames[0].c_str());
+      menuBar->Insert(menuBar->GetMenuCount()-1, menu, wxString(menuNames[0].c_str(), wxConvUTF8));
       _inserted = true;
       return;
    }
@@ -167,7 +167,7 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
    std::string insertedString = *(menuNames.end()-1);
    if (_hotKey !="") insertedString=insertedString+"\t"+_hotKey;
    
-   int index = menu->FindItem(insertedString.c_str());
+   int index = menu->FindItem(wxString(insertedString.c_str(), wxConvUTF8));
    
    menuItem = menu->FindItem(index);
    if ((index==wxNOT_FOUND)||(menuItem==NULL))
@@ -177,8 +177,8 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
       tell_log(console::MT_ERROR,ost.str().c_str());
       return;
    }
-   menuItem->SetText(insertedString.c_str());
-   menuItem->SetHelp(_helpString.c_str());
+   menuItem->SetText(wxString(insertedString.c_str(), wxConvUTF8));
+   menuItem->SetHelp(wxString(_helpString.c_str(), wxConvUTF8));
    //menuItem = new wxMenuItem(menu, _ID, insertedString.c_str(), _helpString.c_str());
     
    //menu->Append(menuItem);
@@ -260,12 +260,12 @@ void tui::ResourceCenter::buildMenu(wxMenuBar *menuBar)
    std::string menustring;
 
    //Try to create Help menu
-   menuID = menuBar->FindMenu("&Help");
+   menuID = menuBar->FindMenu(wxT("&Help"));
    if (wxNOT_FOUND == menuID)
    {
       // create Help menu on most right
       menu = new wxMenu();
-      menuBar->Insert(menuBar->GetMenuCount(), menu, "&Help");
+      menuBar->Insert(menuBar->GetMenuCount(), menu, wxT("&Help"));
    }
 
    //looks all saved menus
@@ -421,7 +421,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
          //Priority - user defined function
          if (!((*mItem)->function()).empty())
          {
-            Console->parseCommand(((*mItem)->function()).c_str());
+            Console->parseCommand(wxString(((*mItem)->function()).c_str(), wxConvUTF8));
          }
          else
          {

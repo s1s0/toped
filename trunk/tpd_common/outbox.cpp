@@ -41,11 +41,12 @@ BEGIN_EVENT_TABLE( console::ted_log, wxTextCtrl )
    EVT_TECUSTOM_COMMAND(wxEVT_LOG_ERRMESSAGE, -1, ted_log::OnLOGMessage)
 END_EVENT_TABLE()
 
-console::ted_log::ted_log(wxWindow *parent): wxTextCtrl( parent, -1, "",
-   wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER) {
-   cmd_mark = "=> ";
-   gui_mark = ">> ";
-   rply_mark = "<= ";
+console::ted_log::ted_log(wxWindow *parent): wxTextCtrl( parent, -1, wxT(""),
+   wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER)
+{
+   cmd_mark = wxT("=> ");
+   gui_mark = wxT(">> ");
+   rply_mark = wxT("<= ");
 }
 
 void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
@@ -53,32 +54,32 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
    long int startPos = GetLastPosition();
    switch (evt.GetInt()) {
       case    MT_INFO:
-         *this << rply_mark << evt.GetString() <<"\n";
+         *this << rply_mark << evt.GetString() << wxT("\n");
          logColour = *wxBLUE;
 //         logColour = *wxGREEN;
          break;
       case   MT_ERROR:
-         *this << rply_mark << evt.GetString() <<"\n";
+         *this << rply_mark << evt.GetString() << wxT("\n");
          logColour = *wxRED;
          break;
       case MT_COMMAND:
-         *this << cmd_mark << evt.GetString() <<"\n";
+         *this << cmd_mark << evt.GetString() << wxT("\n");
          break;
       case MT_GUIPROMPT:
          *this << gui_mark; break;
       case MT_GUIINPUT:
          *this << evt.GetString();break;
       case MT_EOL:
-         *this << "\n"; break;
+         *this << wxT("\n"); break;
       case MT_WARNING:
-         *this << rply_mark << evt.GetString() <<"\n";
+         *this << rply_mark << evt.GetString() << wxT("\n");
          logColour = *wxCYAN;
          break;
       case MT_CELLNAME:
-         *this << rply_mark << " Cell " << evt.GetString() <<"\n";
+         *this << rply_mark << wxT(" Cell ") << evt.GetString() << wxT("\n");
          break;
       case MT_DESIGNNAME:
-         *this << rply_mark << " Design " << evt.GetString() <<"\n";
+         *this << rply_mark << wxT(" Design ") << evt.GetString() << wxT("\n");
          break;
       default:
          assert(false);
@@ -98,8 +99,14 @@ void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t ti
    }
 }
 
-void tell_log(console::LOG_TYPE lt, const char* msg) {
-   wxLog::OnLog(lt, msg, time(NULL));
+void tell_log(console::LOG_TYPE lt, const char* msg)
+{
+   wxLog::OnLog(lt, wxString(msg, wxConvUTF8), time(NULL));
+}
+
+void tell_log(console::LOG_TYPE lt, const std::string& msg)
+{
+   wxLog::OnLog(lt, wxString(msg.c_str(), wxConvUTF8), time(NULL));
 }
 
 //==============================================================================
@@ -127,9 +134,9 @@ console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
       wxListView(parent, id, pos, size, style)
 {
-   InsertColumn(0, "type");
-   InsertColumn(1, "name");
-   InsertColumn(2, "arguments");
+   InsertColumn(0, wxT("type"));
+   InsertColumn(1, wxT("name"));
+   InsertColumn(2, wxT("arguments"));
    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
    SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
@@ -148,7 +155,7 @@ void console::TELLFuncList::addFunc(wxString name, void* arguments)
    row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
    row.SetId(GetItemCount());
    row.SetData(GetItemCount());
-   row.SetText((arglist->front()).c_str());arglist->pop_front();
+   row.SetText( wxString((arglist->front()).c_str(), wxConvUTF8));arglist->pop_front();
    InsertItem(row);
    SetColumnWidth(0, wxLIST_AUTOSIZE);
    //
@@ -158,18 +165,18 @@ void console::TELLFuncList::addFunc(wxString name, void* arguments)
    SetItem(row);
    SetColumnWidth(1, wxLIST_AUTOSIZE);
    //
-   std::string strlist("( ");
+   wxString strlist(wxT("( "));
    while (!arglist->empty())
    {
-      strlist += arglist->front();arglist->pop_front();
-      if (arglist->size()) strlist += " , ";
+      strlist << wxString(arglist->front().c_str(), wxConvUTF8);arglist->pop_front();
+      if (arglist->size()) strlist << wxT(" , ");
    }
    delete arglist;
-   strlist += " )";
+   strlist << wxT(" )");
    //
    row.SetColumn(2);
    row.SetMask(wxLIST_MASK_TEXT);
-   row.SetText(strlist.c_str());
+   row.SetText(strlist);
    SetItem(row);
    SetColumnWidth(2, wxLIST_AUTOSIZE);
 }
@@ -189,7 +196,7 @@ void console::TELLFuncList::OnCommand(wxCommandEvent& event)
 void console::TellFnAdd(const std::string name, void* arguments)
 {
    wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
-   eventFUNCTION_ADD.SetString(name.c_str());
+   eventFUNCTION_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
    eventFUNCTION_ADD.SetClientData(arguments);
    eventFUNCTION_ADD.SetInt(FT_FUNCTION_ADD);
    wxPostEvent(CmdList, eventFUNCTION_ADD);
@@ -215,7 +222,7 @@ std::string TpdTime::operator () ()
 
 TpdTime::TpdTime(std::string str_time)
 {
-   wxString wxstr_time(str_time.c_str());
+   wxString wxstr_time(str_time.c_str(), wxConvUTF8);
    patternNormalize(wxstr_time);
    _status = getStdCTime(wxstr_time);
 }
@@ -223,32 +230,32 @@ TpdTime::TpdTime(std::string str_time)
 void TpdTime::patternNormalize(wxString& str) {
    wxRegEx regex;
    // replace tabs with spaces
-   assert(regex.Compile("\\t"));
-   regex.ReplaceAll(&str," ");
+   assert(regex.Compile(wxT("\\t")));
+   regex.ReplaceAll(&str,wxT(" "));
    // remove continious spaces
-   assert(regex.Compile("[[:space:]]{2,}"));
-   regex.ReplaceAll(&str,"");
+   assert(regex.Compile(wxT("[[:space:]]{2,}")));
+   regex.ReplaceAll(&str,wxT(""));
    //remove leading spaces
-   assert(regex.Compile("^[[:space:]]"));
-   regex.ReplaceAll(&str,"");
+   assert(regex.Compile(wxT("^[[:space:]]")));
+   regex.ReplaceAll(&str,wxT(""));
    // remove trailing spaces
-   assert(regex.Compile("[[:space:]]$"));
-   regex.ReplaceAll(&str,"");
+   assert(regex.Compile(wxT("[[:space:]]$")));
+   regex.ReplaceAll(&str,wxT(""));
    //remove spaces before separators
-   assert(regex.Compile("([[:space:]])([\\-\\:])"));
-   regex.ReplaceAll(&str,"\\2");
+   assert(regex.Compile(wxT("([[:space:]])([\\-\\:])")));
+   regex.ReplaceAll(&str,wxT("\\2"));
    // remove spaces after separators
-   assert(regex.Compile("([\\-\\:])([[:space:]])"));
-   regex.ReplaceAll(&str,"\\1");
+   assert(regex.Compile(wxT("([\\-\\:])([[:space:]])")));
+   regex.ReplaceAll(&str,wxT("\\1"));
 
 }
 
 bool TpdTime::getStdCTime(wxString& exp) {
-   const wxString tmpl2digits      = "[[:digit:]]{2,2}";
-   const wxString tmpl4digits      = "[[:digit:]]{4,4}";
-   const wxString tmplDate         = tmpl2digits+"\\-"+tmpl2digits+"\\-"+tmpl4digits;
-   const wxString tmplTime         = tmpl2digits+"\\:"+tmpl2digits+"\\:"+tmpl2digits;
-   wxRegEx src_tmpl(tmplDate+"[[:space:]]"+tmplTime);
+   const wxString tmpl2digits      = wxT("[[:digit:]]{2,2}");
+   const wxString tmpl4digits      = wxT("[[:digit:]]{4,4}");
+   const wxString tmplDate         = tmpl2digits+wxT("\\-")+tmpl2digits+wxT("\\-")+tmpl4digits;
+   const wxString tmplTime         = tmpl2digits+wxT("\\:")+tmpl2digits+wxT("\\:")+tmpl2digits;
+   wxRegEx src_tmpl(tmplDate+wxT("[[:space:]]")+tmplTime);
    assert(src_tmpl.IsValid());
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
@@ -256,29 +263,29 @@ bool TpdTime::getStdCTime(wxString& exp) {
    // get the date
    assert(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
-   broken_time.tm_mday = atoi(src_tmpl.GetMatch(exp).c_str());
-   src_tmpl.ReplaceFirst(&exp,"");
+   broken_time.tm_mday = atoi(src_tmpl.GetMatch(exp).mb_str());
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
    // get month
    src_tmpl.Matches(exp);
-   broken_time.tm_mon = atoi(src_tmpl.GetMatch(exp).c_str()) - 1;
-   src_tmpl.ReplaceFirst(&exp,"");
+   broken_time.tm_mon = atoi(src_tmpl.GetMatch(exp).mb_str()) - 1;
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
    // get year
    assert(src_tmpl.Compile(tmpl4digits));
    src_tmpl.Matches(exp);
-   broken_time.tm_year = atoi(src_tmpl.GetMatch(exp).c_str()) - 1900;
-   src_tmpl.ReplaceFirst(&exp,"");
+   broken_time.tm_year = atoi(src_tmpl.GetMatch(exp).mb_str()) - 1900;
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
    // now the time - first hour
    assert(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
-   broken_time.tm_hour = atoi(src_tmpl.GetMatch(exp).c_str());
-   src_tmpl.ReplaceFirst(&exp,"");
+   broken_time.tm_hour = atoi(src_tmpl.GetMatch(exp).mb_str());
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
    // minutes
    src_tmpl.Matches(exp);
-   broken_time.tm_min = atoi(src_tmpl.GetMatch(exp).c_str());
-   src_tmpl.ReplaceFirst(&exp,"");
+   broken_time.tm_min = atoi(src_tmpl.GetMatch(exp).mb_str());
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
    // and seconds
    src_tmpl.Matches(exp);
-   broken_time.tm_sec = atoi(src_tmpl.GetMatch(exp).c_str());
+   broken_time.tm_sec = atoi(src_tmpl.GetMatch(exp).mb_str());
    //
    _stdCTime = mktime(&broken_time);
    return true;
@@ -286,14 +293,14 @@ bool TpdTime::getStdCTime(wxString& exp) {
 
 bool expandFileName( std::string& filename)
 {
-   wxFileName fName(filename.c_str());
+   wxFileName fName(wxString(filename.c_str(), wxConvUTF8));
    fName.Normalize();
    if (fName.IsOk())
    {
       wxString dirName = fName.GetFullPath();
-      if (!dirName.Matches("*$*"))
+      if (!dirName.Matches(wxT("*$*")))
       {
-         filename = fName.GetFullPath();
+         filename = fName.GetFullPath().mb_str();
          return true;
       }
    }

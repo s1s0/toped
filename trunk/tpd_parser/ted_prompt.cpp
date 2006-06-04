@@ -25,8 +25,8 @@
 //        $Author$
 //===========================================================================
 #include <string>
-#include <wx/regex.h>
 #include "ted_prompt.h"
+#include <wx/regex.h>
 #include "tell_yacc.h"
 
 //-----------------------------------------------------------------------------
@@ -74,23 +74,23 @@ bool console::patternFound(const wxString templ,  wxString str) {
 void console::patternNormalize(wxString& str) {
    wxRegEx regex;
    // replace tabs with spaces
-   assert(regex.Compile("\\t"));
-   regex.ReplaceAll(&str," ");
+   assert(regex.Compile(wxT("\\t")));
+   regex.ReplaceAll(&str,wxT(" "));
    // remove continious spaces
-   assert(regex.Compile("[[:space:]]{2,}"));
-   regex.ReplaceAll(&str,"");
+   assert(regex.Compile(wxT("[[:space:]]{2,}")));
+   regex.ReplaceAll(&str,wxT(""));
    //remove leading spaces
-   assert(regex.Compile("^[[:space:]]"));
-   regex.ReplaceAll(&str,"");
+   assert(regex.Compile(wxT("^[[:space:]]")));
+   regex.ReplaceAll(&str,wxT(""));
    // remove trailing spaces
-   assert(regex.Compile("[[:space:]]$"));
-   regex.ReplaceAll(&str,"");
+   assert(regex.Compile(wxT("[[:space:]]$")));
+   regex.ReplaceAll(&str,wxT(""));
    //remove spaces before brackets and separators
-   assert(regex.Compile("([[:space:]])([\\{\\}\\,\\-\\+])"));
-   regex.ReplaceAll(&str,"\\2");
+   assert(regex.Compile(wxT("([[:space:]])([\\{\\}\\,\\-\\+])")));
+   regex.ReplaceAll(&str,wxT("\\2"));
    // remove spaces after brackets and separators
-   assert(regex.Compile("([\\{\\}\\,\\-\\+])([[:space:]])"));
-   regex.ReplaceAll(&str,"\\1");
+   assert(regex.Compile(wxT("([\\{\\}\\,\\-\\+])([[:space:]])")));
+   regex.ReplaceAll(&str,wxT("\\1"));
 
 }
 
@@ -123,7 +123,7 @@ bool console::miniParser::getPoint() {
    // The expression is greedy and if you try to get simply the second match,
    // then, you might get the fractional part of the first coord as second 
    // coordinate, so remove and match again - not quie elegant, but works
-   src_tmpl.ReplaceFirst(&exp,"");
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
    src_tmpl.Matches(exp);
    wxString p2s = src_tmpl.GetMatch(exp);
    double p1,p2;
@@ -141,23 +141,23 @@ bool console::miniParser::getBox() {
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
-   assert(src_tmpl.Compile("^\\{{2}"));
-   src_tmpl.ReplaceAll(&exp,"{");
-   assert(src_tmpl.Compile("\\}{2}$"));
-   src_tmpl.ReplaceAll(&exp,"}");
+   assert(src_tmpl.Compile(wxT("^\\{{2}")));
+   src_tmpl.ReplaceAll(&exp,wxT("{"));
+   assert(src_tmpl.Compile(wxT("\\}{2}$")));
+   src_tmpl.ReplaceAll(&exp,wxT("}"));
    // now we are going to extract the points
    assert(src_tmpl.Compile(point_tmpl));
    telldata::ttpnt pp[2];
    for (int i = 0; i < 2; i++) {
       if (!src_tmpl.Matches(exp)) return false;
       wxString ps = src_tmpl.GetMatch(exp);
-      src_tmpl.ReplaceFirst(&exp,"");
+      src_tmpl.ReplaceFirst(&exp,wxT(""));
       
       wxRegEx crd_tmpl(real_tmpl);
       assert(crd_tmpl.IsValid());
       crd_tmpl.Matches(ps);
       wxString p1s = crd_tmpl.GetMatch(ps);
-      crd_tmpl.ReplaceFirst(&ps,"");
+      crd_tmpl.ReplaceFirst(&ps,wxT(""));
       crd_tmpl.Matches(ps);
       wxString p2s = crd_tmpl.GetMatch(ps);
       double p1,p2;
@@ -175,22 +175,22 @@ bool console::miniParser::getList() {
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
-   assert(src_tmpl.Compile("^\\{"));
-   src_tmpl.ReplaceAll(&exp,"");    
-   assert(src_tmpl.Compile("\\}$"));
-   src_tmpl.ReplaceAll(&exp,"");    
+   assert(src_tmpl.Compile(wxT("^\\{")));
+   src_tmpl.ReplaceAll(&exp,wxT(""));    
+   assert(src_tmpl.Compile(wxT("\\}$")));
+   src_tmpl.ReplaceAll(&exp,wxT(""));    
    // now we are going to extract the points
    assert(src_tmpl.Compile(point_tmpl));
    telldata::ttlist *pl = new telldata::ttlist(telldata::tn_pnt);
    telldata::ttpnt* pp = NULL;
    while (src_tmpl.Matches(exp)) {
       wxString ps = src_tmpl.GetMatch(exp);
-      src_tmpl.ReplaceFirst(&exp,"");
+      src_tmpl.ReplaceFirst(&exp,wxT(""));
       wxRegEx crd_tmpl(real_tmpl);
       assert(crd_tmpl.IsValid());
       crd_tmpl.Matches(ps);
       wxString p1s = crd_tmpl.GetMatch(ps);
-      crd_tmpl.ReplaceFirst(&ps,"");
+      crd_tmpl.ReplaceFirst(&ps,wxT(""));
       crd_tmpl.Matches(ps);
       wxString p2s = crd_tmpl.GetMatch(ps);
       double p1,p2;
@@ -214,7 +214,7 @@ void* console::parse_thread::Entry() {
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
-   void* b = tell_scan_string( command.c_str() );
+   void* b = tell_scan_string( command.mb_str() );
    tellparse();
    my_delete_yy_buffer( b );
    
@@ -232,8 +232,8 @@ END_EVENT_TABLE()
 
 //==============================================================================
 console::ted_cmd::ted_cmd(wxWindow *parent) :
-   wxTextCtrl( parent, -1, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxNO_BORDER),
-   puc(NULL), _numpoints(0) {
+      wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
+                  wxTE_PROCESS_ENTER | wxNO_BORDER), puc(NULL), _numpoints(0) {
    
    threadWaits4 = new wxCondition(Mutex);
    assert(threadWaits4->IsOk());
@@ -246,8 +246,8 @@ void console::ted_cmd::getCommand(wxCommandEvent& WXUNUSED(event)) {
    if (puc)  getGUInput(); // run the local GUInput parser
    else {
       wxString command = GetValue();
-      tell_log(MT_COMMAND, command.c_str());
-      _cmd_history.push_back(command.c_str());
+      tell_log(MT_COMMAND, command.mb_str());
+      _cmd_history.push_back(std::string(command.mb_str()));
       _history_position = _cmd_history.end();
       Clear();
       parse_thread *pthrd = new parse_thread(command);
@@ -260,8 +260,8 @@ void console::ted_cmd::getCommandA() {
    if (puc)  getGUInput(); // run the local GUInput parser
    else {
       wxString command = GetValue();
-      tell_log(MT_COMMAND, command.c_str());
-      _cmd_history.push_back(command.c_str());
+      tell_log(MT_COMMAND, command.mb_str());
+      _cmd_history.push_back(std::string(command.mb_str()));
       _history_position = _cmd_history.end();
       Clear();
       if (!_thread)
@@ -271,7 +271,7 @@ void console::ted_cmd::getCommandA() {
          telllloc.first_column = telllloc.first_line = 1;
          telllloc.last_column  = telllloc.last_line  = 1;
          telllloc.filename = NULL;
-         void* b = tell_scan_string( command.c_str() );
+         void* b = tell_scan_string( command.mb_str() );
          tellparse();
          my_delete_yy_buffer( b );
       }
@@ -300,11 +300,12 @@ void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
       if (_cmd_history.end() == _history_position)
          _history_position = _cmd_history.begin();
       else _history_position++;
-   if (_cmd_history.end() == _history_position) SetValue("");
+      if (_cmd_history.end() == _history_position) SetValue(wxT(""));
    else 
    {
-      const char * Str =  _history_position->c_str();
-      SetValue(wxString(Str, strlen(Str)));
+//      const char * Str =  _history_position->c_str();
+//      SetValue(wxString(Str, strlen(Str)));
+      SetValue(wxString(_history_position->c_str(), wxConvUTF8));
    }
 }
 
@@ -330,7 +331,7 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
    wxString command;
    if (from_keyboard) { // input is from keyboard
       command = GetValue();
-      tell_log(MT_GUIINPUT, command.c_str());
+      tell_log(MT_GUIINPUT, command.mb_str());
       tell_log(MT_EOL);
       Clear();
    }   
@@ -377,18 +378,18 @@ void console::ted_cmd::OnGUInput(wxCommandEvent& evt) {
 void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    wxString ost1, ost2;
    // prepare the point string for the input log window
-   ost1 << "{ "<< p.x() << " , " << p.y() << " }";
+   ost1 << wxT("{ ")<< p.x() << wxT(" , ") << p.y() << wxT(" }");
    // take care about the entry brackets ...
    if (_numpoints == 0) 
       switch (puc->wait4type()) {
          case TLISTOF(telldata::tn_pnt):
-         case         telldata::tn_box : ost2 << "{ " << ost1; break;
+         case         telldata::tn_box : ost2 << wxT("{ ") << ost1; break;
          default                       : ost2 << ost1;
       }
    // ... and separators between the points
-   else ost2 << " , " << ost1;
+   else ost2 << wxT(" , ") << ost1;
    // print the current point in the log window
-   tell_log(MT_GUIINPUT, ost2.c_str());
+   tell_log(MT_GUIINPUT, ost2.mb_str());
    // and update the current input string
    _guinput << ost2;
    // actualize the number of points entered
@@ -406,11 +407,11 @@ void console::ted_cmd::mouseRB() {
    wxString close;
    switch (puc->wait4type()) {
       case TLISTOF(telldata::tn_pnt):
-      case         telldata::tn_box : close = " }"; break;
-      default         : close = ""  ;
+      case         telldata::tn_box : close = wxT(" }"); break;
+      default         : close = wxT("")  ;
    }
    // print it
-   tell_log(MT_GUIINPUT, close.c_str());
+   tell_log(MT_GUIINPUT, close.mb_str());
    tell_log(MT_EOL);
    // and update the current input string
    _guinput << close;
@@ -425,7 +426,7 @@ void console::ted_cmd::cancelLastPoint() {
    _guinput = _guinput.Left(pos-2);
    if (_numpoints > 0) _numpoints--;
    tell_log(MT_GUIPROMPT);
-   tell_log(MT_GUIINPUT, _guinput);
+   tell_log(MT_GUIINPUT, _guinput.mb_str());
 }
 
 console::ted_cmd::~ted_cmd() {

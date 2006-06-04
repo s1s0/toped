@@ -99,6 +99,7 @@ namespace console {
 }
 
    void tell_log(console::LOG_TYPE, const char* = NULL);
+   void tell_log(console::LOG_TYPE, const std::string&);
 
 class  TpdTime
 {
@@ -164,8 +165,8 @@ class TopedApp : public wxApp
       void           GetLogDir();
       void           FinishSessionLog();
       void           SaveIgnoredCrashLog();
-      std::string    logFileName;
-      std::string    tpdLogDir;
+      wxString       logFileName;
+      wxString       tpdLogDir;
       bool           _ignoreOnRecovery;
 };
 

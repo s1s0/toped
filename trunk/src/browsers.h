@@ -114,7 +114,7 @@ namespace browsers {
                         long style = wxTR_DEFAULT_STYLE):wxTreeCtrl(parent, id, pos, size, style) {};
       void              collectInfo();
       wxString          selectedCellname() const {if (RBcellID.IsOk())
-                                       return GetItemText(RBcellID); else return "";}
+         return GetItemText(RBcellID); else return wxT("");}
    protected:
       void              collectChildren(GDSin::GDSHierTree *root, 
                                                    wxTreeItemId& lroot);
@@ -140,7 +140,7 @@ namespace browsers {
       void              collectInfo(const wxString, laydata::TDTHierTree*);
       void              initialize();
       wxString          selectedCellname() const {if (RBcellID.IsOk()) 
-                                   return GetItemText(RBcellID); else return "";}
+         return GetItemText(RBcellID); else return wxT("");}
    protected:
       void              collectChildren(laydata::TDTHierTree *root, 
                                                  wxTreeItemId& lroot);

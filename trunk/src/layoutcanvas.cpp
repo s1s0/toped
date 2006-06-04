@@ -77,7 +77,7 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
 END_EVENT_TABLE()
 
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(parent,
-   ID_TPD_CANVAS, wxDefaultPosition, wxDefaultSize, 0,"LayoutCanvas", attribList){
+   ID_TPD_CANVAS, wxDefaultPosition, wxDefaultSize, 0,wxT("LayoutCanvas"), attribList){
 
    crossCur = MakeCursor(crosscursor,16, 16);
    //crossCur = new wxCursor((const char*)crosscursor,16, 16);
@@ -122,7 +122,7 @@ wxImage   tui::LayoutCanvas::snapshot(void)
       }
    //image.SetData((unsigned char*)buffer, true);
  
-    image.SaveFile("sex.bmp"); 
+   image.SaveFile(wxT("snapshot.bmp"));
    
    
    wxImage image2;
@@ -276,12 +276,12 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
 void tui::LayoutCanvas::UpdateCoordWin(int coord, POSITION_TYPE postype, int dcoord, POSITION_TYPE dpostype) {
    wxString ws;
    wxCommandEvent eventPOSITION(wxEVT_MARKERPOSITION);
-   ws.sprintf("%3.2f",coord*Properties->UU());
+   ws.sprintf(wxT("%3.2f"),coord*Properties->UU());
    eventPOSITION.SetString(ws);
    eventPOSITION.SetInt(postype);
    wxPostEvent(this, eventPOSITION);
    if (rubber_band) {
-      ws.sprintf("%3.2f",dcoord*Properties->UU());
+      ws.sprintf(wxT("%3.2f"),dcoord*Properties->UU());
       eventPOSITION.SetString(ws);
       eventPOSITION.SetInt(dpostype);
       wxPostEvent(this, eventPOSITION);
@@ -424,7 +424,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
          }
       }
       else { // no user input expected
-         menu.Append(   CM_AGAIN, wxT(Console->lastCommand()));
+         menu.Append(   CM_AGAIN, wxString(Console->lastCommand(), wxConvUTF8));
          menu.Append(TMEDIT_UNDO, wxT("undo"));
          menu.AppendSeparator();
          if (DATC->numselected() > 0) {
@@ -475,7 +475,7 @@ void tui::LayoutCanvas::OnMouseLeftUp(wxMouseEvent& WXUNUSED(event)) {
 void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event) {
    wxString ws;
    wxCommandEvent eventMOUSEACCEL(wxEVT_MOUSE_ACCEL);
-   ws.sprintf("{%3.2f,%3.2f}",ScrMARK.x()*Properties->UU(), ScrMARK.y()*Properties->UU());
+   ws.sprintf(wxT("{%3.2f,%3.2f}"),ScrMARK.x()*Properties->UU(), ScrMARK.y()*Properties->UU());
    eventMOUSEACCEL.SetString(ws);
    eventMOUSEACCEL.SetInt(event.ShiftDown() ? 0 : 1);
    wxPostEvent(this, eventMOUSEACCEL);
@@ -600,7 +600,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt) {
       restricted_move = false;
       Properties->setCurrentOp(layprop::op_none);
       wxCommandEvent eventPOSITION(wxEVT_MARKERPOSITION);
-      eventPOSITION.SetString("");
+      eventPOSITION.SetString(wxT(""));
       eventPOSITION.SetInt(DEL_Y);
       wxPostEvent(this, eventPOSITION);
       eventPOSITION.SetInt(DEL_X);
@@ -641,7 +641,7 @@ void tui::LayoutCanvas::OnCMclose(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void tui::LayoutCanvas::OnRepeatLastCmd(wxCommandEvent& WXUNUSED(event)){
-   Console->parseCommand(Console->lastCommand());
+   Console->parseCommand(wxString(Console->lastCommand(), wxConvUTF8));
 }
 tui::LayoutCanvas::~LayoutCanvas(){
    delete crossCur;
