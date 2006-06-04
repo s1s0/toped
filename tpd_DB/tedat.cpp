@@ -1973,7 +1973,7 @@ laydata::tdtdata* laydata::createValidShape(pointlist* pl) {
    if (!check.valid()) {
       std::ostringstream ost;
       ost << "Resulting shape is invalid - " << check.failtype();
-      tell_log(console::MT_ERROR, ost.str().c_str());
+      tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }
    laydata::tdtdata* newshape;

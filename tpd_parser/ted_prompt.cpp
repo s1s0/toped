@@ -246,7 +246,7 @@ void console::ted_cmd::getCommand(wxCommandEvent& WXUNUSED(event)) {
    if (puc)  getGUInput(); // run the local GUInput parser
    else {
       wxString command = GetValue();
-      tell_log(MT_COMMAND, command.mb_str());
+      tell_log(MT_COMMAND, command);
       _cmd_history.push_back(std::string(command.mb_str()));
       _history_position = _cmd_history.end();
       Clear();
@@ -260,7 +260,7 @@ void console::ted_cmd::getCommandA() {
    if (puc)  getGUInput(); // run the local GUInput parser
    else {
       wxString command = GetValue();
-      tell_log(MT_COMMAND, command.mb_str());
+      tell_log(MT_COMMAND, command);
       _cmd_history.push_back(std::string(command.mb_str()));
       _history_position = _cmd_history.end();
       Clear();
@@ -331,7 +331,7 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
    wxString command;
    if (from_keyboard) { // input is from keyboard
       command = GetValue();
-      tell_log(MT_GUIINPUT, command.mb_str());
+      tell_log(MT_GUIINPUT, command);
       tell_log(MT_EOL);
       Clear();
    }   
@@ -389,7 +389,7 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    // ... and separators between the points
    else ost2 << wxT(" , ") << ost1;
    // print the current point in the log window
-   tell_log(MT_GUIINPUT, ost2.mb_str());
+   tell_log(MT_GUIINPUT, ost2);
    // and update the current input string
    _guinput << ost2;
    // actualize the number of points entered
@@ -411,7 +411,7 @@ void console::ted_cmd::mouseRB() {
       default         : close = wxT("")  ;
    }
    // print it
-   tell_log(MT_GUIINPUT, close.mb_str());
+   tell_log(MT_GUIINPUT, close);
    tell_log(MT_EOL);
    // and update the current input string
    _guinput << close;
@@ -426,7 +426,7 @@ void console::ted_cmd::cancelLastPoint() {
    _guinput = _guinput.Left(pos-2);
    if (_numpoints > 0) _numpoints--;
    tell_log(MT_GUIPROMPT);
-   tell_log(MT_GUIINPUT, _guinput.mb_str());
+   tell_log(MT_GUIINPUT, _guinput);
 }
 
 console::ted_cmd::~ted_cmd() {

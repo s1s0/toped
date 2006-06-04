@@ -225,18 +225,18 @@ void layprop::ViewProperties::addlayer(std::string name, word layno, std::string
    if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col))) {
       std::ostringstream ost;
       ost << "Warning! Color \""<<col<<"\" is not defined";
-      tell_log(console::MT_WARNING,ost.str().c_str());
+      tell_log(console::MT_WARNING,ost.str());
    }
    if ((fill != "") && (_drawprop._layfill.end() == _drawprop._layfill.find(fill))) {
       std::ostringstream ost;
       ost << "Warning! Fill \""<<fill<<"\" is not defined";
-      tell_log(console::MT_WARNING, ost.str().c_str());
+      tell_log(console::MT_WARNING, ost.str());
    }
    if (_drawprop._layset.end() != _drawprop._layset.find(layno)) {
       delete _drawprop._layset[layno];
       std::ostringstream ost;
       ost << "Warning! Layer "<<layno<<" redefined";
-      tell_log(console::MT_WARNING, ost.str().c_str());
+      tell_log(console::MT_WARNING, ost.str());
    }   
    _drawprop._layset[layno] = new LayerSettings(name,col,fill);
    DBLock.Unlock();
@@ -248,7 +248,7 @@ void layprop::ViewProperties::addcolor(std::string name, byte R, byte G, byte B,
       delete _drawprop._laycolors[name];
       std::ostringstream ost;
       ost << "Warning! Color \""<<name<<"\" redefined";
-      tell_log(console::MT_WARNING, ost.str().c_str());
+      tell_log(console::MT_WARNING, ost.str());
    }
    tellRGB* col = new tellRGB(R,G,B,A);
    _drawprop._laycolors[name] = col;
@@ -261,7 +261,7 @@ void layprop::ViewProperties::addfill(std::string name, byte* ptrn) {
       delete [] _drawprop._layfill[name];
       std::ostringstream ost;
       ost << "Warning! Fill \""<<name<<"\" redefined";
-      tell_log(console::MT_WARNING, ost.str().c_str());
+      tell_log(console::MT_WARNING, ost.str());
    }
    _drawprop._layfill[name] = ptrn;
    DBLock.Unlock();

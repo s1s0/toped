@@ -25,6 +25,7 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+#include <time.h>
 #include <string>
 #include <wx/log.h>
 #include <wx/regex.h>
@@ -107,6 +108,11 @@ void tell_log(console::LOG_TYPE lt, const char* msg)
 void tell_log(console::LOG_TYPE lt, const std::string& msg)
 {
    wxLog::OnLog(lt, wxString(msg.c_str(), wxConvUTF8), time(NULL));
+}
+
+void tell_log(console::LOG_TYPE lt, const wxString& msg)
+{
+   wxLog::OnLog(lt, msg, time(NULL));
 }
 
 //==============================================================================
@@ -257,36 +263,44 @@ bool TpdTime::getStdCTime(wxString& exp) {
    const wxString tmplTime         = tmpl2digits+wxT("\\:")+tmpl2digits+wxT("\\:")+tmpl2digits;
    wxRegEx src_tmpl(tmplDate+wxT("[[:space:]]")+tmplTime);
    assert(src_tmpl.IsValid());
+   long conversion;
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    tm broken_time;
    // get the date
    assert(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
-   broken_time.tm_mday = atoi(src_tmpl.GetMatch(exp).mb_str());
+   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   broken_time.tm_mday = conversion;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // get month
    src_tmpl.Matches(exp);
-   broken_time.tm_mon = atoi(src_tmpl.GetMatch(exp).mb_str()) - 1;
+   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   broken_time.tm_mon = conversion - 1;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // get year
    assert(src_tmpl.Compile(tmpl4digits));
    src_tmpl.Matches(exp);
-   broken_time.tm_year = atoi(src_tmpl.GetMatch(exp).mb_str()) - 1900;
+   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   broken_time.tm_year = conversion - 1900;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // now the time - first hour
    assert(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
-   broken_time.tm_hour = atoi(src_tmpl.GetMatch(exp).mb_str());
+   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   broken_time.tm_hour = conversion; 
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // minutes
    src_tmpl.Matches(exp);
-   broken_time.tm_min = atoi(src_tmpl.GetMatch(exp).mb_str());
+   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   broken_time.tm_min = conversion;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // and seconds
    src_tmpl.Matches(exp);
-   broken_time.tm_sec = atoi(src_tmpl.GetMatch(exp).mb_str());
+   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   broken_time.tm_sec = conversion;
    //
+   broken_time.tm_isdst = -1;
    _stdCTime = mktime(&broken_time);
    return true;
 }
@@ -309,28 +323,28 @@ bool expandFileName( std::string& filename)
 //=============================================================================
 EXPTNactive_cell::EXPTNactive_cell() {
    std::string news = "No active cell. Use opencell(\"<name>\") to select one";
-   tell_log(console::MT_ERROR,news.c_str());
+   tell_log(console::MT_ERROR,news);
 };
 
 EXPTNactive_DB::EXPTNactive_DB() {
    std::string news = "No active database. Create or load one";
-   tell_log(console::MT_ERROR,news.c_str());
+   tell_log(console::MT_ERROR,news);
 };
 
 EXPTNactive_GDS::EXPTNactive_GDS() {
    std::string news = "No GDS structure in memory. Parse first";
-   tell_log(console::MT_ERROR,news.c_str());
+   tell_log(console::MT_ERROR,news);
 };
 
 EXPTNreadTDT::EXPTNreadTDT(std::string info) {
    std::string news = "Error parsing TDT file =>";
    news += info;
-   tell_log(console::MT_ERROR,news.c_str());
+   tell_log(console::MT_ERROR,news);
 };
 
 EXPTNpolyCross::EXPTNpolyCross(std::string info) {
    std::string news = "Internal error - polygon cross =>";
    news += info;
-   tell_log(console::MT_ERROR,news.c_str());
+   tell_log(console::MT_ERROR,news);
 };
 

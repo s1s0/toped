@@ -396,7 +396,7 @@ int parsercmd::cmdFUNCCALL::execute()
    if (wxGetApp().ignoreOnRecovery() && !funcbody->execOnRecovery())
    {
       std::string info = funcname + " ignored";
-      tell_log(console::MT_INFO, info.c_str());
+      tell_log(console::MT_INFO, info);
       return EXEC_NEXT;
    }
    LogFile.setFN(funcname);
@@ -606,7 +606,7 @@ bool  parsercmd::cmdBLOCK::funcValidate(const std::string& fn, argumentLIST* als
             _funcMAP.erase(fb);
             std::ostringstream ost;
             ost << "Warning! User function \""<< fn <<"\" is redefined";
-            tell_log(console::MT_WARNING, ost.str().c_str());
+            tell_log(console::MT_WARNING, ost.str());
             break;
          }
       }

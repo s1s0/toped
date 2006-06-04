@@ -100,6 +100,7 @@ namespace console {
 
    void tell_log(console::LOG_TYPE, const char* = NULL);
    void tell_log(console::LOG_TYPE, const std::string&);
+   void tell_log(console::LOG_TYPE, const wxString&);
 
 class  TpdTime
 {

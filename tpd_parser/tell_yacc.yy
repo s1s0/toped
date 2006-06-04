@@ -600,7 +600,7 @@ int yyerror (char *s) {  /* Called by yyparse on error */
    std::ostringstream ost;
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column
        << ": " << s;
-   tell_log(console::MT_ERROR,ost.str().c_str());
+   tell_log(console::MT_ERROR,ost.str());
    return 0;
 }
 
@@ -614,7 +614,7 @@ void tellerror (std::string s, YYLTYPE loc) {
       ost << "in file \"" << fn << "\" : ";
    }
    ost << s;
-   tell_log(console::MT_ERROR,ost.str().c_str());
+   tell_log(console::MT_ERROR,ost.str());
 }
 
 void tellerror (std::string s) {
@@ -622,7 +622,7 @@ void tellerror (std::string s) {
    else                 yynerrs++;
    std::ostringstream ost;
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column << ": " << s;
-   tell_log(console::MT_ERROR,ost.str().c_str());
+   tell_log(console::MT_ERROR,ost.str());
 }
 // 
 // {

@@ -190,17 +190,17 @@ int parsercmd::includefile(char* name, FILE* &handler)
       if (!inclFN->IsOk() || !inclFN->FileExists())
       {
          infomsg = "File \"" + nfname + "\" not found";
-         tell_log(console::MT_ERROR,infomsg.c_str());
+         tell_log(console::MT_ERROR,infomsg);
       }
       else if (NULL == (newfilehandle = fopen(nfname.c_str(), "r")))
       {
          infomsg = "File \"" + nfname + "\" can't be open";
-         tell_log(console::MT_ERROR,infomsg.c_str());
+         tell_log(console::MT_ERROR,infomsg);
       }
       else
       {
          infomsg = "Parsing \"" + nfname + "\" ...";
-         tell_log(console::MT_INFO,infomsg.c_str());
+         tell_log(console::MT_INFO,infomsg);
          handler = newfilehandle;
          /* create a new record with file handler and location objects*/
          include_stack[include_stack_ptr++] = new parsercmd::lexer_files(
