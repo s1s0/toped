@@ -739,20 +739,12 @@ void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
       wxSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();
-      wxFileName checkedFileName(filename);
-      assert(checkedFileName.IsOk());
-      if (checkedFileName.FileExists())
+      if(!checkFileOverwriting(filename))
       {
-         wxMessageDialog dlg1(this,
-         wxT("File ") + filename + wxT(" already exists. Overwrite ?"),
-         wxT("Toped"),
-         wxYES_NO | wxICON_QUESTION);
-         if (wxID_NO==dlg1.ShowModal()) 
-         {
-            SetStatusText(wxT("Saving aborted"));
-            return;
-         }
+         SetStatusText(wxT("Saving aborted"));
+         return;
       }
+
       wxString ost;
       ost << wxT("tdtsaveas(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
@@ -857,7 +849,12 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
       wxT("GDS files |*.sf;*.gds"),
       wxSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
-      wxString filename = dlg2.GetFilename();
+      wxString filename = dlg2.GetPath();
+      if(!checkFileOverwriting(filename))
+      {
+         SetStatusText(wxT("GDS export aborted"));
+         return;
+      }
       wxString ost;
       ost << wxT("gdsexport(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
@@ -891,7 +888,12 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
       wxT("GDS files |*.sf;*.gds"),
       wxSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
-      wxString filename = dlg2.GetFilename();
+      wxString filename = dlg2.GetPath();
+      if(!checkFileOverwriting(filename))
+      {
+         SetStatusText(wxT("GDS export aborted"));
+         return;
+      }
       wxString ost;
       ost << wxT("gdsexport(\"") << cellname.c_str() << wxT("\" , ") <<
                         (recur ? wxT("true") : wxT("false")) << wxT(",\"") <<
@@ -1180,3 +1182,21 @@ void tui::TopedFrame::OnpanDown(wxCommandEvent& WXUNUSED(event)) {
    eventZOOM.SetInt(ZOOM_DOWN);
    wxPostEvent(_laycanvas, eventZOOM);
 }
+
+bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
+{
+   bool ret;
+   wxFileName checkedFileName(fileName);
+   assert(checkedFileName.IsOk());
+   if (checkedFileName.FileExists())
+   {
+      wxMessageDialog dlg1(this,
+      wxT("File ") + fileName + wxT(" already exists. Overwrite ?"),
+      wxT("Toped"),
+      wxYES_NO | wxICON_QUESTION);
+      if (wxID_NO==dlg1.ShowModal()) ret = false; else ret = true;
+      return ret;
+   }
+
+}
+      

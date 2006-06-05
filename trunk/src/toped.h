@@ -80,6 +80,7 @@ namespace tui {
       void                    initMenuBar();
       void                    initToolBar();
       void                    initView();
+      bool                    checkFileOverwriting(const wxString& fileName);
       console::ted_log*       _cmdlog;       // log window
       console::TELLFuncList*  _cmdbrowser;
       console::ted_cmd*       _cmdline;      // tell command input window
