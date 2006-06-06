@@ -167,9 +167,9 @@ bool polycross::VPoint::inside(const pointlist& plist, bool touching)
             }
             else
             {
-               float tngns = (float) (_cp->y() - p0.y())/(p1.y() - p0.y());
-               float calcx = p0.x() + tngns * (p1.x() - p0.x());
-               if (_cp->x() <= calcx)
+               float tngns = (float) (_cp->y() - p0.y())/ (float)(p1.y() - p0.y());
+               float calcx = (float) p0.x() + tngns * (float)(p1.x() - p0.x());
+               if ((float)_cp->x() <= calcx)
                   // if ray touches the segment
                   if ((_cp->y() == p0.y()) || (_cp->y() == p1.y())) cc++;
                   // ray crosses the segment
