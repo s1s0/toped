@@ -1600,7 +1600,7 @@ void laydata::tdttext::openGL_draw(ctmstack& transtack,
    int4b height = static_cast<int4b>(rint(OPENGL_FONT_UNIT));
 //   DBbox wsquare = DBbox(TP(),TP(height, height)) * ftmtrx; 
 //   wsquare = wsquare * drawprop.ScrCTM();
-   valid_box wsquare(TP(),TP(height, height), ftmtrx * drawprop.ScrCTM());
+   valid_box wsquare(TP(0, 0),TP(height, height), ftmtrx * drawprop.ScrCTM());
    TP bindt;
    if (wsquare.area() > MIN_VISUAL_AREA) {
       bindt = TP(static_cast<int4b>(rint(_translation.tx())), 
@@ -1618,7 +1618,7 @@ void laydata::tdttext::openGL_draw(ctmstack& transtack,
       float cclr[4];
       glGetFloatv(GL_CURRENT_COLOR, cclr);
 
-      DBbox obox(TP(),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT))));
+      DBbox obox(TP(0, 0),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT))));
       draw_overlapping_box(obox, ftmtrx, 0x3030);
       drawprop.draw_reference_marks(bindt, layprop::text_mark);
       glColor4f(cclr[0], cclr[1], cclr[2], cclr[3]);
