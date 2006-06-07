@@ -165,7 +165,7 @@ bool polycross::VPoint::inside(const pointlist& plist, bool touching)
                      ||((p0.y() >=  _cp->y()) && (p1.y() <= _cp->y())) ))
                   cc+=2;
             }
-            else
+            else if (p1.y() != p0.y())
             {
                float tngns = (float) (_cp->y() - p0.y())/ (float)(p1.y() - p0.y());
                float calcx = (float) p0.x() + tngns * (float)(p1.x() - p0.x());
