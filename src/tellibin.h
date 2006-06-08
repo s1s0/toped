@@ -69,6 +69,8 @@
    public:                                                        \
       name(telldata::typeID retype, bool eor);                    \
       int         execute();                                      \
+      void        undo() {};                                      \
+      void        undo_cleanup() {};                              \
    protected:                                                     \
       name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor) : \
                                          cmdSTDFUNC(al,retype,eor) {};\
@@ -114,6 +116,8 @@
    public:                                                        \
       name(telldata::typeID retype, bool eor):cmdSTDFUNC(NULL,retype,eor) {};   \
       int         execute();                                      \
+      void        undo() {};                                      \
+      void        undo_cleanup() {};                              \
       int         argsOK(argumentQ* amap);                        \
       nameList*   callingConv(const telldata::typeMAP*);          \
    };

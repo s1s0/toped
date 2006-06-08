@@ -280,8 +280,14 @@ void console::ted_cmd::getCommandA() {
          // executing the parser in a separate thread
          //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
          parse_thread *pthrd = new parse_thread(command);
-         pthrd->Create();
-         pthrd->Run();
+         wxThreadError result = pthrd->Create();
+         if (wxTHREAD_NO_ERROR == result)
+            pthrd->Run();
+         else
+         {
+            tell_log( MT_ERROR, "Can't execute the command in a separate thread");
+            delete(pthrd);
+         }
 //         if (_wait) pthrd->Wait();
       }
    }

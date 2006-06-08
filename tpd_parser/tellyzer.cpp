@@ -56,9 +56,9 @@ parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
 // Operand stack
 telldata::operandSTACK       parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
-telldata::UNDOPerandQUEUE     parsercmd::cmdSTDFUNC::UNDOPstack;
+telldata::UNDOPerandQUEUE     parsercmd::cmdVIRTUAL::UNDOPstack;
 // UNDO command queue
-parsercmd::undoQUEUE          parsercmd::cmdSTDFUNC::UNDOcmdQ;
+parsercmd::undoQUEUE          parsercmd::cmdVIRTUAL::UNDOcmdQ;
 
 
 real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs) {
@@ -402,7 +402,7 @@ int parsercmd::cmdFUNCCALL::execute()
    LogFile.setFN(funcname);
    try {fresult = funcbody->execute();}
    catch (EXPTN) {return EXEC_ABORT;}
-   funcbody->cmdSTDFUNC::undo_cleanup();
+   funcbody->reduce_undo_stack();
    return fresult;
 }
 
@@ -714,7 +714,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
    return (i);
 }
 
-void parsercmd::cmdSTDFUNC::undo_cleanup() {
+void parsercmd::cmdSTDFUNC::reduce_undo_stack() {
    if (UNDOcmdQ.size() > 20) {
       UNDOcmdQ.back()->undo_cleanup(); UNDOcmdQ.pop_back();
    }
@@ -731,10 +731,6 @@ nameList* parsercmd::cmdSTDFUNC::callingConv(const telldata::typeMAP* lclTypeDef
 }
 
 parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
-   while (UNDOcmdQ.size() > 0)
-   {
-      UNDOcmdQ.back()->undo_cleanup();UNDOcmdQ.pop_back();
-   }
    ClearArgumentList(arguments);
    delete arguments;
 }   
@@ -863,6 +859,10 @@ void  parsercmd::cmdMAIN::addGlobalType(char* ttypename, telldata::tell_type* nt
 }
 
 parsercmd::cmdMAIN::~cmdMAIN(){
+   while (UNDOcmdQ.size() > 0)
+   {
+      UNDOcmdQ.back()->undo_cleanup();UNDOcmdQ.pop_back();
+   }
    for (functionMAP::iterator FMI = _funcMAP.begin(); FMI != _funcMAP.end(); FMI ++)
       delete FMI->second;
    _funcMAP.clear();
