@@ -122,9 +122,11 @@ namespace  parsercmd {
               byte getByteValue(telldata::UNDOPerandQUEUE&, bool);
        std::string getStringValue(telldata::UNDOPerandQUEUE&, bool);
               bool getBoolValue(telldata::UNDOPerandQUEUE&, bool);
-      virtual ~cmdVIRTUAL() {};        
+      virtual ~cmdVIRTUAL() {};
    protected:
-      static telldata::operandSTACK      OPstack;      // Operand stack
+      static telldata::operandSTACK       OPstack;      // Operand stack
+      static telldata::UNDOPerandQUEUE    UNDOPstack;   // undo operand stack
+      static undoQUEUE                    UNDOcmdQ;     // undo command stack
 //      yyltype                  _loc;
    };
 
@@ -340,8 +342,9 @@ namespace  parsercmd {
                               cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
    arguments(vm), returntype(tt), _execOnRecovery(eor) {};
       virtual int             execute() = 0;
-      virtual void            undo() {};
-      virtual void            undo_cleanup();
+      virtual void            undo() = 0;
+      virtual void            undo_cleanup() = 0;
+      void                    reduce_undo_stack();
       virtual nameList*       callingConv(const telldata::typeMAP*);
       virtual int             argsOK(telldata::argumentQ* amap);
       telldata::typeID        gettype() const {return returntype;};
@@ -351,8 +354,6 @@ namespace  parsercmd {
    protected:
       argumentLIST*           arguments;
       telldata::typeID        returntype;
-      static telldata::UNDOPerandQUEUE  UNDOPstack;   // undo operand stack
-      static undoQUEUE        UNDOcmdQ;     // undo command stack
       bool                    _buildin;
       bool                    _execOnRecovery;
    };
@@ -362,6 +363,8 @@ namespace  parsercmd {
       cmdFUNC(argumentLIST* vm, telldata::typeID tt);
       int                     execute();
       bool                    internal() {return false;}
+      void                    undo() {};
+      void                    undo_cleanup() {};
    };
 
    class cmdIFELSE: public cmdVIRTUAL {

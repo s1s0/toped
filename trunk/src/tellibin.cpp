@@ -651,7 +651,7 @@ void tellstdfunc::stdNEWCELL::undo()
    // get the name of the new cell
    std::string  nm = getStringValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-   assert(ATDB->removecell(nm,NULL));
+   ATDB->removecell(nm,NULL);
    DATC->unlockDB();
 }
 
