@@ -349,10 +349,15 @@ bool TopedApp::OnInit() {
    {
       LogFile.init(std::string(logFileName.mb_str()));
       //   wxLog::AddTraceMask("thread");
-      if (1 < argc) {
+      if (1 < argc) 
+      {
          wxString inputfile;
-         inputfile << wxT("#include \"") << argv[1] << wxT("\"");
-         Console->parseCommand(inputfile);
+         for (int i=1; i<argc; i++)
+         {
+            inputfile.Clear();
+            inputfile << wxT("#include \"") << argv[i] << wxT("\"");
+            Console->parseCommand(inputfile, false);
+         }
       }
    }
    return TRUE;
