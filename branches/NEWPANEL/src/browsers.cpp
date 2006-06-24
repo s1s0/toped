@@ -189,6 +189,7 @@ void browsers::GDSbrowser::collectChildren(GDSin::GDSHierTree *root, wxTreeItemI
       collectChildren(Child, nroot);
       Child = Child->GetBrother();
 	}
+
 }
 
 void browsers::GDSbrowser::OnItemRightClick(wxTreeEvent& event) {
@@ -276,7 +277,7 @@ void browsers::TDTbrowser::collectChildren(laydata::TDTHierTree *root, wxTreeIte
       SetItemTextColour(nroot,*wxLIGHT_GREY);
       collectChildren(Child, nroot);
       Child = Child->GetBrother();
-	}
+}
 }
 
 void browsers::TDTbrowser::OnCommand(wxCommandEvent& event) {
@@ -684,8 +685,8 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
       image = stipplebrush->ConvertToImage();
       int w = image.GetWidth();
       int h = image.GetHeight();
-
-      //Change white color for current one
+#ifdef WIN32
+ //Change white color for current one
       for (int i=0; i<w; i++)
          for (int j=0; j<h; j++)
          {
@@ -694,18 +695,22 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
                image.SetRGB(i, j, col->red(), col->green(), col->blue());
             }
          }
-
+    
       delete stipplebrush;
 
       //Recreate bitmap with new color
       stipplebrush = new wxBitmap(image, 1);
+#endif
 
       _brush = new wxBrush(	*stipplebrush);
       
    }
    else
    {
-      _brush = new wxBrush(*wxBLACK_BRUSH);
+      if (NULL != col)
+         _brush = new wxBrush(color, wxTRANSPARENT);
+      else
+         _brush = new wxBrush(*wxLIGHT_GREY, wxTRANSPARENT);
    }
 
    _pen = new wxPen();    
@@ -713,6 +718,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    if (col!=NULL)
    {
       _pen->SetColour(color);
+      _brush->SetColour(color);
    }
             
    //***Draw main picture***   
@@ -725,17 +731,15 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
 {
    wxMemoryDC DC;
    wxFont font;
+   DC.SelectObject(pict);
    
 
    font = DC.GetFont();
-   font.SetPointSize(8);
+   font.SetPointSize(6);
    const int fontWidth = font.GetPointSize();
   
-   
 
    DC.SetBrush(*_brush);
-   DC.SelectObject(pict);
-   
    DC.SetPen(*_pen);
 
    if (_selected)
@@ -777,9 +781,9 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    int h,w;
    DC.GetTextExtent(infoString.c_str(), &w, &h);
 
-   DC.DrawRectangle(5*fontWidth, 1, 49, 49);
+   DC.DrawRectangle(5*fontWidth, 1, 40, 49);
    std::string caption = _layer->name();
-   DC.DrawText(caption.c_str(), 5*fontWidth+50, 0);
+   DC.DrawText(caption.c_str(), 5*fontWidth+40, 0);
    
    DC.SelectObject(wxNullBitmap);
 }
@@ -878,9 +882,10 @@ END_EVENT_TABLE()
 
 
 browsers::LayerBrowser2::LayerBrowser2(wxWindow* parent, wxWindowID id) 
-   :wxPanel(parent, id) 
+   :wxScrolledWindow(parent, id, wxDefaultPosition, wxDefaultSize,wxVSCROLL) 
 {
    _buttonCount = 0;
+   SetScrollbars(0, 50, 0, 50);
 }
 
 browsers::LayerBrowser2::~LayerBrowser2() 
