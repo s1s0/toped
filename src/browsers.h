@@ -148,7 +148,7 @@ namespace browsers {
    };
 
    typedef std::map <word, LayerButton*> layerButtonMap;
-   class LayerBrowser2 : public wxPanel {
+   class LayerBrowser2 : public wxScrolledWindow {
    public:
                            LayerBrowser2(wxWindow* parent, wxWindowID id);
       virtual             ~LayerBrowser2();
