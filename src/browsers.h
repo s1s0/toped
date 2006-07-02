@@ -60,6 +60,9 @@ namespace browsers {
       BT_ADDTDT_TAB,
       BT_ADDGDS_TAB,
       BT_CLEARGDS_TAB,
+      BT_CELLS_HIER,
+      BT_CELLS_FLAT
+
    } BROWSER_EVT_TYPE;
    
    enum {
@@ -129,8 +132,32 @@ namespace browsers {
       DECLARE_EVENT_TABLE();
    };
 
+   class CellBrowser: public wxTreeCtrl
+   {
+   public:
+      CellBrowser(wxWindow* parent, wxWindowID id = -1, 
+                        const wxPoint& pos = wxDefaultPosition, 
+                        const wxSize& size = wxDefaultSize,
+                        long style = wxTR_DEFAULT_STYLE);
+      virtual           ~CellBrowser();
+      void              ShowMenu(wxTreeItemId id, const wxPoint& pt);
+      bool              findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent);
+      void              copyItem(const wxTreeItemId, const wxTreeItemId);
+      void              highlightChildren(wxTreeItemId, wxColour);
+   private:
+      wxTreeItemId      RBcellID;
+      wxTreeItemId      top_structure;
+      wxTreeItemId      active_structure;
+
+      void              OnItemRightClick(wxTreeEvent&);
+      void              OnLMouseDblClk(wxMouseEvent&);
+      void              OnWXOpenCell(wxCommandEvent&);
+      void              OnBlankRMouseUp(wxMouseEvent&);
+
+      DECLARE_EVENT_TABLE();
+   };
    //===========================================================================
-   class TDTbrowser : public wxTreeCtrl {
+   class TDTbrowser : public wxPanel {
    public:
                         TDTbrowser(wxWindow* parent, wxWindowID id = -1, 
                         const wxPoint& pos = wxDefaultPosition, 
@@ -140,30 +167,29 @@ namespace browsers {
       void              collectInfo(const wxString, laydata::TDTHierTree*);
       void              initialize();
       wxString          selectedCellname() const {if (RBcellID.IsOk()) 
-         return GetItemText(RBcellID); else return wxT("");}
+         return hCellBrowser->GetItemText(RBcellID); else return wxT("");}
    protected:
       void              collectChildren(laydata::TDTHierTree *root, 
                                                  wxTreeItemId& lroot);
    private:
-      wxTreeItemId      RBcellID;
-      wxTreeItemId      top_structure;
-      wxTreeItemId      active_structure;
+      wxTreeItemId      RBcellID;//+
+      wxTreeItemId      top_structure;//+
+      wxTreeItemId      active_structure;//+
       wxImageList*      _imageList;
+      CellBrowser*      hCellBrowser;//Hierarchy cell browser
+      CellBrowser*      fCellBrowser;//Flat cell browser
+      //std::list<std::string>  cellNames;
+      //laydata::TDTHierTree*   tree;
+      wxString          libName;
       void              OnCommand(wxCommandEvent&);
-      void              OnItemRightClick(wxTreeEvent&);
-      void              OnBlankRMouseUp(wxMouseEvent&);
-      void              OnLMouseDblClk(wxMouseEvent&);
-      void              OnWXOpenCell(wxCommandEvent&);
       void              OnWXCellARef(wxCommandEvent&);
       void              OnReportUsedLayers(wxCommandEvent&);
       void              OnTELLopencell(wxString);
       void              OnTELLhighlightcell(wxString);
       void              OnTELLaddcell(wxString, wxString, int);
       void              OnTELLremovecell(wxString, wxString, bool);
-      void              ShowMenu(wxTreeItemId id, const wxPoint& pt);
-      void              highlightChlidren(wxTreeItemId, wxColour);
-      bool              findItem(const wxString, wxTreeItemId&, const wxTreeItemId);
-      void              copyItem(const wxTreeItemId, const wxTreeItemId);
+      void              OnHierView(wxCommandEvent&);
+      void              OnFlatView(wxCommandEvent&);
       DECLARE_EVENT_TABLE();
    };
 
