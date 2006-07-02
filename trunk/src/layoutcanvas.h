@@ -45,7 +45,9 @@
 #define ID_TPD_CANVAS      105
 #define ID_TPD_LAYERS      106
 #define ID_TPD_CELLTREE    107
-#define ID_GDS_CELLTREE    108
+#define ID_TPD_CELLTREE_H  108
+#define ID_TPD_CELLTREE_F  109
+#define ID_GDS_CELLTREE    110
 //-----------------------------------------------------------------------------
 
 namespace tui {
