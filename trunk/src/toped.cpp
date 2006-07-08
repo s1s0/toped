@@ -705,7 +705,7 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
       ost << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
       wxString ost1;
-      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loded");
+      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loaded");
       SetStatusText(ost1);
    }
    else SetStatusText(wxT("Parsing aborted"));
