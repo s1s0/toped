@@ -158,51 +158,44 @@ void browsers::topedlay_list::lockLayer(word layno, bool lock) {
    }   
 }
 
-//==============================================================================
-BEGIN_EVENT_TABLE(browsers::GDSbrowser, wxTreeCtrl)
-   EVT_TREE_ITEM_RIGHT_CLICK( ID_TPD_CELLTREE, browsers::GDSbrowser::OnItemRightClick)
-   EVT_MENU(GDSTree_ReportLay, browsers::GDSbrowser::OnGDSreportlay)
-   EVT_RIGHT_UP(browsers::GDSbrowser::OnBlankRMouseUp)
+BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, CellBrowser)
+   EVT_RIGHT_UP(browsers::CellBrowser::OnBlankRMouseUp)
+   EVT_MENU(GDSTree_ReportLay, browsers::GDSCellBrowser::OnGDSreportlay)
+   EVT_LEFT_DCLICK(browsers::GDSCellBrowser::OnLMouseDblClk)
 END_EVENT_TABLE()
-//==============================================================================
-void browsers::GDSbrowser::collectInfo() {
-   GDSin::GDSFile* AGDSDB = DATC->lockGDS(false);
-   if (NULL == AGDSDB) return;
-   AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
-   if (NULL == AGDSDB->hierTree()) return; // new, empty design 
-   GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot();
-   wxTreeItemId nroot;
-   while (root){
-      nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
-//      SetItemTextColour(nroot,*wxLIGHT_GREY);
-      collectChildren(root, nroot);
-      root = root->GetNextRoot();
-   }
-   DATC->unlockGDS();
-//   Toped->Resize();
-}
-      
-void browsers::GDSbrowser::collectChildren(GDSin::GDSHierTree *root, wxTreeItemId& lroot) {
-   GDSin::GDSHierTree* Child= root->GetChild();
-   wxTreeItemId nroot;
-   while (Child) {
-      nroot = AppendItem(lroot, wxString(Child->GetItem()->Get_StrName(), wxConvUTF8));
-//      SetItemTextColour(nroot,*wxLIGHT_GREY);
-      collectChildren(Child, nroot);
-      Child = Child->GetBrother();
-	}
+
+browsers::GDSCellBrowser::GDSCellBrowser(wxWindow *parent, wxWindowID id, 
+   const wxPoint& pos, const wxSize& size, long style) : 
+                                       CellBrowser(parent, id, pos, size, style )
+{
+
 }
 
-void browsers::GDSbrowser::OnItemRightClick(wxTreeEvent& event) {
+void browsers::GDSCellBrowser::OnItemRightClick(wxTreeEvent& event)
+{
    ShowMenu(event.GetItem(), event.GetPoint());
 }
 
-void browsers::GDSbrowser::OnBlankRMouseUp(wxMouseEvent& event) {
+void browsers::GDSCellBrowser::OnBlankRMouseUp(wxMouseEvent& event)
+{
    wxPoint pt = event.GetPosition();
    ShowMenu(HitTest(pt), pt);
 }
 
-void browsers::GDSbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
+void browsers::GDSCellBrowser::OnLMouseDblClk(wxMouseEvent& event)
+{
+   //Empty
+   //Use for overwriting CellBrowser::OnLMouseDblClk
+}
+
+void browsers::GDSCellBrowser::OnGDSreportlay(wxCommandEvent& WXUNUSED(event)) {
+   wxString ost;
+   ost << wxT("report_gdslayers(\"") << GetItemText(RBcellID) <<wxT("\");");
+   Console->parseCommand(ost);
+}
+
+void browsers::GDSCellBrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt)
+{
    wxMenu menu;
    RBcellID = id;
    if ( id.IsOk() && (id != GetRootItem()))   {
@@ -216,11 +209,125 @@ void browsers::GDSbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
    PopupMenu(&menu, pt);
 }
 
-void browsers::GDSbrowser::OnGDSreportlay(wxCommandEvent& WXUNUSED(event)) {
-   wxString ost;
-   ost << wxT("report_gdslayers(\"") << GetItemText(RBcellID) <<wxT("\");");
-   Console->parseCommand(ost);
+
+//==============================================================================
+BEGIN_EVENT_TABLE(browsers::GDSbrowser, wxPanel)
+//   EVT_TREE_ITEM_RIGHT_CLICK( ID_TPD_CELLTREE, browsers::GDSbrowser::OnItemRightClick)
+//   EVT_MENU(GDSTree_ReportLay, browsers::GDSbrowser::OnGDSreportlay)
+//   EVT_RIGHT_UP(browsers::GDSbrowser::OnBlankRMouseUp)
+   EVT_BUTTON(BT_CELLS_HIER2, browsers::GDSbrowser::OnHierView)
+   EVT_BUTTON(BT_CELLS_FLAT2, browsers::GDSbrowser::OnFlatView)
+END_EVENT_TABLE()
+//==============================================================================
+browsers::GDSbrowser::GDSbrowser(wxWindow *parent, wxWindowID id, 
+                        const wxPoint& pos , 
+                        const wxSize& size ,
+                        long style ):wxPanel(parent, id, pos, size, style)
+{
+   wxBoxSizer *thesizer = new wxBoxSizer( wxVERTICAL );
+      
+   wxBoxSizer *sizer1 = new wxBoxSizer( wxHORIZONTAL );
+   
+   sizer1->Add(new wxButton( this, BT_CELLS_HIER2, wxT("Hier") ), 1, wxEXPAND|wxBOTTOM, 3);
+   sizer1->Add(new wxButton( this, BT_CELLS_FLAT2, wxT("Flat") ), 1, wxEXPAND|wxBOTTOM, 3);
+   
+   fCellBrowser = new GDSCellBrowser(this, ID_TPD_CELLTREE_F2,pos, size, style);
+   
+   hCellBrowser = new GDSCellBrowser(this, ID_TPD_CELLTREE_H2, pos, size, style);
+   
+   thesizer->Add(hCellBrowser, 1, wxEXPAND | wxBOTTOM);
+   thesizer->Add(fCellBrowser, 1, wxEXPAND | wxBOTTOM);
+   fCellBrowser->Hide();
+   thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
+
+   SetSizerAndFit(thesizer);
+   thesizer->SetSizeHints( this );
 }
+void browsers::GDSbrowser::collectInfo() {
+   GDSin::GDSFile* AGDSDB = DATC->lockGDS(false);
+   if (NULL == AGDSDB) return;
+   hCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
+   fCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
+  
+   if (NULL == AGDSDB->hierTree()) return; // new, empty design 
+   GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot();
+   wxTreeItemId nroot;
+   while (root){
+      nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
+    
+      nroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
+//      SetItemTextColour(nroot,*wxLIGHT_GREY);
+      collectChildren(root, nroot);
+      root = root->GetNextRoot();
+   }
+   DATC->unlockGDS();
+//   Toped->Resize();
+}
+      
+void browsers::GDSbrowser::DeleteAllItems(void)
+{
+   hCellBrowser->DeleteAllItems();
+   fCellBrowser->DeleteAllItems();
+}
+
+void browsers::GDSbrowser::collectChildren(GDSin::GDSHierTree *root, wxTreeItemId& lroot) {
+   GDSin::GDSHierTree* Child= root->GetChild();
+   wxTreeItemId nroot;
+   while (Child) {
+      nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(Child->GetItem()->Get_StrName(), wxConvUTF8));
+      nroot = hCellBrowser->AppendItem(lroot, wxString(Child->GetItem()->Get_StrName(), wxConvUTF8));
+//      SetItemTextColour(nroot,*wxLIGHT_GREY);
+      
+      collectChildren(Child, nroot);
+      Child = Child->GetBrother();
+	}
+}
+
+void browsers::GDSbrowser::OnItemRightClick(wxTreeEvent& event) {
+   //ShowMenu(event.GetItem(), event.GetPoint());
+}
+
+void browsers::GDSbrowser::OnBlankRMouseUp(wxMouseEvent& event) {
+  // wxPoint pt = event.GetPosition();
+  // ShowMenu(HitTest(pt), pt);
+}
+
+void browsers::GDSbrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
+  /* wxMenu menu;
+   RBcellID = id;
+   if ( id.IsOk() && (id != hCellBrowser->GetRootItem()))   {
+      wxString RBcellname = hCellBrowser->GetItemText(id);
+      menu.Append(tui::TMGDS_TRANSLATE, wxT("Translate " + RBcellname));
+      menu.Append(GDSTree_ReportLay, wxT("Report layers used in " + RBcellname));
+   }
+   else {
+      menu.Append(tui::TMGDS_CLOSE, wxT("Close GDS")); // will be catched up in toped.cpp
+   }
+   PopupMenu(&menu, pt);*/
+}
+
+void browsers::GDSbrowser::OnGDSreportlay(wxCommandEvent& WXUNUSED(event)) {
+/*   wxString ost;
+   ost << wxT("report_gdslayers(\"") << hCellBrowser->GetItemText(RBcellID) <<wxT("\");");
+   Console->parseCommand(ost);*/
+}
+
+void browsers::GDSbrowser::OnFlatView(wxCommandEvent& event)
+{
+   hCellBrowser->Hide();
+   fCellBrowser->Show();
+   (this->GetSizer())->Layout();
+}
+
+void browsers::GDSbrowser::OnHierView(wxCommandEvent& event)
+{
+   fCellBrowser->Hide();
+
+   hCellBrowser->Show();
+   (this->GetSizer())->Layout();
+}
+
+
 
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::CellBrowser, wxTreeCtrl)
@@ -233,8 +340,7 @@ END_EVENT_TABLE()
 
 browsers::CellBrowser::CellBrowser(wxWindow *parent, wxWindowID id, 
    const wxPoint& pos, const wxSize& size, long style) : 
-                                       wxTreeCtrl(parent, id, pos, size, 
-                                          style | wxTR_FULL_ROW_HIGHLIGHT)
+   wxTreeCtrl(parent, id, pos, size, style | wxTR_FULL_ROW_HIGHLIGHT)
 {
 
 }
