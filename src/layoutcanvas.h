@@ -48,6 +48,8 @@
 #define ID_TPD_CELLTREE_H  108
 #define ID_TPD_CELLTREE_F  109
 #define ID_GDS_CELLTREE    110
+#define ID_TPD_CELLTREE_H2 111
+#define ID_TPD_CELLTREE_F2 112
 //-----------------------------------------------------------------------------
 
 namespace tui {
