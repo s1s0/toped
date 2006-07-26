@@ -172,11 +172,7 @@ namespace browsers {
       GDSCellBrowser*   hCellBrowser;//Hierarchy cell browser
       GDSCellBrowser*   fCellBrowser;//Flat cell browser
       void              OnCommand(wxCommandEvent&);
-      void              OnItemRightClick(wxTreeEvent&);
-      void              OnBlankRMouseUp(wxMouseEvent&);
       void              OnWXImportCell(wxCommandEvent&);
-      void              ShowMenu(wxTreeItemId id, const wxPoint& pt);
-      void              OnGDSreportlay(wxCommandEvent& WXUNUSED(event));
       void              OnHierView(wxCommandEvent&);
       void              OnFlatView(wxCommandEvent&);
       DECLARE_EVENT_TABLE();
