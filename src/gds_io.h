@@ -578,7 +578,7 @@ namespace GDSin {
       GDSFile(const char*fn);
       GDSFile(std::string, time_t);
       GDSrecord*     GetNextRecord();
-      GDSrecord*     GDSFile::SetNextRecord(byte rectype, word reclen = 0);
+      GDSrecord*     SetNextRecord(byte rectype, word reclen = 0);
       double         Get_LibUnits();
       double         Get_UserUnits();
       void           SetTimes(GDSrecord* wr);
