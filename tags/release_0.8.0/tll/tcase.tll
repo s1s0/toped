@@ -21,7 +21,7 @@
 //        $Author: skr $
 //===========================================================================
 
-#include "$TPD_LOCAL/tll/seed.tll"
+#include "$TLL_DIR/seed.tll"
 // Some DRC rules defined as global variables
 real _actOverCont = 1.5;
 real _mincont = 2;
@@ -42,18 +42,13 @@ box MOStran(point bound, real W, real L) {
    // gate
    point gateB = {bound.x + (activeW - L)/2, bound.y -_polyOverActive};
    addbox(gateB, L,  W + 2*_polyOverActive,4); // as above
-   // add contacts...
-   point contBL = bound -| _actOverCont;
-   point contBR = bound |- _actOverCont;
-   contBR = {contBR.x + activeW, contBR.y};
-   point metlBL = contBL |_  _metalovercont;
-   point metlBR = contBR  _|  _metalovercont;
-   
-//   box test_box = {{0,0},(0,0}} -| _mincont;
-   
-   box zerobox = {{0,0},{0,0}};
-   box contactL = zerobox -| _mincont;
-   box contactR = zerobox |- _mincont;
+   // add contacts
+   point contBL = {bound.x + _actOverCont, bound.y + _actOverCont};
+   point contBR = {bound.x + activeW - _actOverCont, bound.y + _actOverCont};
+   point metlBL = {contBL.x - _metalovercont, contBL.y - _metalovercont};
+   point metlBR = {contBR.x + _metalovercont, contBR.y - _metalovercont};
+   box contactL = {{0,0},{ _mincont,_mincont}};
+   box contactR = {{0,0},{-_mincont,_mincont}};
    // calculate the number of contacts
    if (W < 2*_actOverCont + _mincont) {echo("Can't fit even a single contact !")}
    else {
@@ -203,40 +198,6 @@ void testtexts() {
    addtext("Toped", 4, { 0, 90},   0, false, 20);
 }
 
-void shifttest() {
-
-   newcell("shifttest");
-   opencell("shifttest");
-   point a = {10,10};
-   point aSW = a |_ 1;
-   point aSE = a _| 1;
-   point aNE = a -| 1;
-   point aNW = a |- 1;
-   addpoly({aSW,aSE,aNE,aNW},6);
-      
-   point b = {2,3};
-   point bSW = a |_ b;
-   point bSE = a _| b;
-   point bNE = a -| b;
-   point bNW = a |- b;
-   addpoly({bSW,bSE,bNE,bNW},6);
-   
-   box c = {{15,10},{15,10}};
-   box cSW = c |_ 1;
-   box cSE = c _| 1;
-   box cNE = c -| 1;
-   box cNW = c |- 1;
-   addbox(cSW,2); addbox(cSE,4); addbox(cNW,7); addbox(cNE,8); 
-
-   box d = {{20,10},{20,10}};
-   box dSW = d |_ b;
-   box dSE = d _| b;
-   box dNE = d -| b;
-   box dNW = d |- b;
-   addbox(dSW,2); addbox(dSE,4); addbox(dNW,7); addbox(dNE,8); 
-
-}
-
 void addbox()
 {
    echo("Internal function addbox() redefined. This line should never be seen on tell log");
@@ -250,7 +211,7 @@ point list pl1 =
 {{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}};
 addpoly(pl1,2);
 testcellrefs();
-//testtexts();
+testtexts();
 newcell("cell_1");
 opencell("cell_1");
 Invertor({0,0},10,3,30,3);
