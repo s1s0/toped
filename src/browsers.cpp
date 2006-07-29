@@ -159,7 +159,7 @@ void browsers::topedlay_list::lockLayer(word layno, bool lock) {
 }
 
 BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, CellBrowser)
-   EVT_RIGHT_UP(browsers::CellBrowser::OnBlankRMouseUp)
+   EVT_RIGHT_UP(browsers::GDSCellBrowser::OnBlankRMouseUp)
    EVT_MENU(GDSTree_ReportLay, browsers::GDSCellBrowser::OnGDSreportlay)
    EVT_LEFT_DCLICK(browsers::GDSCellBrowser::OnLMouseDblClk)
 END_EVENT_TABLE()
@@ -275,7 +275,7 @@ void browsers::GDSbrowser::collectChildren(GDSin::GDSHierTree *root, wxTreeItemI
    wxTreeItemId temp;
 
    while (Child) {
-      if (!fCellBrowser->findItem(wxString(Child->GetItem()->Get_StrName()), temp, fCellBrowser-> GetRootItem()))
+      if (!fCellBrowser->findItem(wxString(Child->GetItem()->Get_StrName(), wxConvUTF8), temp, fCellBrowser-> GetRootItem()))
       {
          nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(Child->GetItem()->Get_StrName(), wxConvUTF8));
       }
@@ -503,7 +503,7 @@ void browsers::TDTbrowser::collectChildren(laydata::TDTHierTree *root, wxTreeIte
    while (Child) 
    {
       //Flat
-      if (!fCellBrowser->findItem(wxString(Child->GetItem()->name().c_str()), temp, fCellBrowser-> GetRootItem()))
+      if (!fCellBrowser->findItem(wxString(Child->GetItem()->name().c_str(), wxConvUTF8), temp, fCellBrowser-> GetRootItem()))
       {
          fCellBrowser->SetItemImage(lroot,0,wxTreeItemIcon_Normal);
          fCellBrowser->SetItemImage(lroot,1,wxTreeItemIcon_Expanded);

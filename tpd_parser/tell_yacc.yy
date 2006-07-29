@@ -165,7 +165,7 @@ Ooops! Second thought!
    bool                     ptypedef;
    int                      integer;
    char                    *parsestr;
-   telldata::typeID         pttname;
+    telldata::typeID        pttname;
    parsercmd::argumentLIST *pfarguments;
     telldata::argumentQ    *plarguments;
     telldata::argumentID   *parguments;
@@ -175,10 +175,11 @@ Ooops! Second thought!
 %start input
 /*---------------------------------------------------------------------------*/
 %token                 tknERROR
-%token	              tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknSTRUCTdef
+%token	               tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknSTRUCTdef
 %token                 tknVOIDdef tknREALdef tknBOOLdef tknINTdef tknPOINTdef 
 %token                 tknBOXdef tknSTRINGdef tknLAYOUTdef tknLISTdef tknRETURN
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ tknAND tknOR
+%token                 tknSW tknSE tknNE tknNW
 %token <parsestr>      tknIDENTIFIER tknFIELD tknSTRING
 %token <real>          tknREAL
 %token <integer>       tknINT
@@ -186,8 +187,8 @@ Ooops! Second thought!
 %type <pttname>        primaryexpression unaryexpression
 %type <pttname>        multiexpression addexpression expression
 %type <pttname>        assignment fieldname funccall
-%type <pttname>        lvalue telltype telltypeID variable variabledeclaration
-%type <pttname>        andexpression eqexpression relexpression 
+%type <pttname>        lvalue telltype telltypeID variable anonymousvar
+%type <pttname>        variabledeclaration andexpression eqexpression relexpression 
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument
 %type <plarguments>    nearguments arguments
@@ -533,6 +534,17 @@ structure:
    }
 ;
 
+anonymousvar:
+     telltypeID   structure               {
+      // the structure is without a type at this moment, so here we do the type checking
+      if (parsercmd::StructTypeCheck($1, $2, @2)) {
+         tellvar = CMDBlock->newTellvar($1, @1);
+         $$ = $1;
+      }
+      else tellerror("Type mismatch", @2);
+   }
+;
+
 /*==EXPRESSION===============================================================*/
 /*orexpression*/
 expression : 
@@ -563,6 +575,10 @@ addexpression:
      multiexpression                       {$$ = $1;}
    | addexpression '+' multiexpression     {$$ = parsercmd::Plus($1,$3,@1,@3);}
    | addexpression '-' multiexpression     {$$ = parsercmd::Minus($1,$3,@1,@3);}
+   | addexpression tknNE multiexpression   {$$ = parsercmd::PointMv($1,$3,@1,@3,+1,+1);}
+   | addexpression tknNW multiexpression   {$$ = parsercmd::PointMv($1,$3,@1,@3,-1,+1);}
+   | addexpression tknSE multiexpression   {$$ = parsercmd::PointMv($1,$3,@1,@3,+1,-1);}
+   | addexpression tknSW multiexpression   {$$ = parsercmd::PointMv($1,$3,@1,@3,-1,-1);}
 ;
 
 multiexpression : 
@@ -589,6 +605,8 @@ primaryexpression :
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttstring($1),true));
                                                                 delete [] $1;}
    | variable                              {$$ = $1;
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
+   | anonymousvar                          {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
    | '(' expression ')'                    {$$ = $2;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
