@@ -242,24 +242,43 @@ tellstdfunc::stdLAYPROP::stdLAYPROP(telldata::typeID retype, bool eor) :
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
    arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-}
-
-void tellstdfunc::stdLAYPROP::undo_cleanup() {
-}
-
-void tellstdfunc::stdLAYPROP::undo() {
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
 }
 
 int tellstdfunc::stdLAYPROP::execute() {
-   std::string fill = getStringValue();
-   std::string col  = getStringValue();
-   word        gdsN = getWordValue();
-   std::string name = getStringValue();
+   std::string sline = getStringValue();
+   std::string fill  = getStringValue();
+   std::string col   = getStringValue();
+   word        gdsN  = getWordValue();
+   std::string name  = getStringValue();
    // error message - included in the method
-   Properties->addlayer(name, gdsN, col, fill);
+   Properties->addlayer(name, gdsN, col, fill, sline);
    browsers::layer_add(name,gdsN);
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" << 
-                               col << "\",\"" << fill <<"\");";LogFile.flush();
+         col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdLINEDEF::stdLINEDEF(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+}
+
+int tellstdfunc::stdLINEDEF::execute() {
+   byte width       = getByteValue();
+   byte patscale    = getByteValue();
+   word pattern     = getWordValue();
+   std::string col  = getStringValue();
+   std::string name = getStringValue();
+   Properties->addline(name, col, pattern, patscale, width);
+   LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << col << "\","
+         << pattern << " , " << patscale << " , " << width << ");";LogFile.flush();
    return EXEC_NEXT;
 }
 

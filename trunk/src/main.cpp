@@ -169,6 +169,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("locklayer"        ,(new               tellstdfunc::stdLOCKLAYERS(telldata::tn_void, true)));
    mblock->addFUNC("definecolor"      ,(new                 tellstdfunc::stdCOLORDEF(telldata::tn_void, true)));
    mblock->addFUNC("definefill"       ,(new                  tellstdfunc::stdFILLDEF(telldata::tn_void, true)));
+   mblock->addFUNC("defineline"       ,(new                  tellstdfunc::stdLINEDEF(telldata::tn_void, true)));
    mblock->addFUNC("definegrid"       ,(new                  tellstdfunc::stdGRIDDEF(telldata::tn_void, true)));
    mblock->addFUNC("step"             ,(new                     tellstdfunc::stdSTEP(telldata::tn_void, true)));
    mblock->addFUNC("grid"             ,(new                     tellstdfunc::stdGRID(telldata::tn_void, true)));

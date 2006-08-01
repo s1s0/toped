@@ -341,12 +341,14 @@ void laydata::tdtbox::openGL_draw(ctmstack& transtack,
    ptlist[1] = TP(_p2->x(), _p1->y()) * transtack.top();
    ptlist[2] = (*_p2) * transtack.top();
    ptlist[3] = TP(_p1->x(), _p2->y()) * transtack.top();
+//   drawprop.setLineProps(sh_selected == status());
    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
    glBegin(GL_LINE_LOOP);
    int i;
    for (i = 0; i < 4; i++)
       glVertex2i(ptlist[i].x(), ptlist[i].y());
    glEnd();
+//   drawprop.setLineProps();
    if (drawprop.getCurrentFill()) {
       // Start tessellation
       gluTessBeginPolygon(tessellObj, NULL);

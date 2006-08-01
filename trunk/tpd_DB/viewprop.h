@@ -61,37 +61,56 @@ namespace layprop {
    public:
                         tellRGB(byte red, byte green, byte blue, byte alpha) :
                            _red(red), _green(green), _blue(blue), _alpha(alpha) {};
-      byte              red()   {return _red;     };
-      byte              green() {return _green;   };
-      byte              blue()  {return _blue;    };
-      byte              alpha() {return _alpha;   };
-   protected:
+      byte              red()   const {return _red;     };
+      byte              green() const {return _green;   };
+      byte              blue()  const {return _blue;    };
+      byte              alpha() const {return _alpha;   };
+   private:
       byte              _red;
       byte              _green;
       byte              _blue;
       byte              _alpha;
    };
 
-   typedef  std::map<byte       , LayoutGrid*>  gridlist;
-   typedef  std::map<std::string, tellRGB*   >  colorMAP;
-   typedef  std::map<std::string, byte*      >  fillMAP;
+   class LineSettings
+   {
+      public:
+         LineSettings(std::string color, word pattern, byte patscale, byte width) :
+            _color(color), _pattern(pattern), _patscale(patscale), _width(width) {};
+         std::string    color()     const {return _color;   }
+         word           pattern()   const {return _pattern; }
+         byte           patscale()  const {return _patscale;}
+         byte           width()     const {return _width;   }
+      private:
+         std::string    _color;
+         word           _pattern;
+         byte           _patscale;
+         byte           _width;
+   };
+
+   typedef  std::map<byte       , LayoutGrid*   >  gridlist;
+   typedef  std::map<std::string, tellRGB*      >  colorMAP;
+   typedef  std::map<std::string, byte*         >  fillMAP;
+   typedef  std::map<std::string, LineSettings* >  lineMAP;
 
    //=============================================================================
    class LayerSettings  {
    public:
-      LayerSettings(std::string name, std::string color, std::string filltype): 
-                                 _name(name), _color(color), _filltype(filltype), 
+      LayerSettings(std::string name, std::string color, std::string filltype, std::string sline): 
+                                 _name(name), _color(color), _filltype(filltype), _sline(sline),
                                                 _hidden(false), _locked(false) {};
-      std::string       getcolor() const {return _color;};
-      std::string       getfill()  const {return _filltype;};
-      std::string       name()     const {return _name;};
-      bool              hidden()   const {return _hidden;}; 
-      bool              locked()   const {return _locked;}; 
+      std::string       getcolor() const {return _color;}
+      std::string       getfill()  const {return _filltype;}
+      std::string       name()     const {return _name;}
+      std::string       sline()    const {return _sline;}
+      bool              hidden()   const {return _hidden;}
+      bool              locked()   const {return _locked;}
       friend class ViewProperties;
    private:
       std::string       _name;
       std::string       _color;
       std::string       _filltype;
+      std::string       _sline;
       bool              _hidden;
       bool              _locked;
    };
@@ -117,6 +136,7 @@ namespace layprop {
       void              setCurrentColor(word layno);
       void              setGridColor(std::string colname) const;
       bool              getCurrentFill() const;
+      void              setLineProps(bool selected = false) const;
       bool              layerHidden(word layno) const;
       bool              layerLocked(word layno) const;
       const CTM&        ScrCTM() const                   {return  _ScrCTM;};
@@ -133,6 +153,7 @@ namespace layprop {
       laySetList        _layset;
       colorMAP          _laycolors;
       fillMAP           _layfill;
+      lineMAP           _lineset;
       DBbox             _clipRegion;
       CTM               _ScrCTM;
       bool              _cellmarks_hidden;
@@ -167,9 +188,11 @@ namespace layprop {
                         ViewProperties();
                        ~ViewProperties(); 
       void              addlayer(std::string name, word layno, std::string col,
-                                                               std::string fill);
+                                 std::string fill, std::string sline);
       void              addcolor(std::string name, byte R, byte G, byte B, byte A);
       void              addfill(std::string name, byte *ptrn);
+      void              addline(std::string name, std::string col, word pattern,
+                                 byte patscale, byte width);
       void              hideLayer(word layno, bool hide);
       void              lockLayer(word layno, bool lock);
       bool              selectable(word layno) const;
