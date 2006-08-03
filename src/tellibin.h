@@ -157,10 +157,9 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdREPORTLAY     )
    TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
    //
-   TELL_STDCMD_CLASSA(stdLAYPROP       )  //
+   TELL_STDCMD_CLASSA_UNDO(stdLAYPROP     )  //
    TELL_STDCMD_CLASSA_UNDO(stdCOLORDEF    )  //
    TELL_STDCMD_CLASSA_UNDO(stdFILLDEF     )  //
-   TELL_STDCMD_CLASSA(stdLINEDEF     )  //
    TELL_STDCMD_CLASSA_UNDO(stdHIDELAYER   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdHIDELAYERS  )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdHIDECELLMARK)  // undo - implemented

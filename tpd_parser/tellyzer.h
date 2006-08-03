@@ -157,48 +157,12 @@ namespace  parsercmd {
       int _sign;
    };
 
-   class cmdSHIFTPNT3:public cmdVIRTUAL {
-   public:
-      cmdSHIFTPNT3(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
-   private:
-      int _signX;
-      int _signY;
-   };
-
-   class cmdSHIFTPNT4:public cmdVIRTUAL {
-   public:
-      cmdSHIFTPNT4(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
-   private:
-      int _signX;
-      int _signY;
-   };
-
    class cmdSHIFTBOX:public cmdVIRTUAL {
    public:
       cmdSHIFTBOX(int sign = 1):_sign(sign) {};
       int execute();
    private:
       int _sign;
-   };
-
-   class cmdSHIFTBOX3:public cmdVIRTUAL {
-   public:
-      cmdSHIFTBOX3(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
-   private:
-      int _signX;
-      int _signY;
-   };
-
-   class cmdSHIFTBOX4:public cmdVIRTUAL {
-   public:
-      cmdSHIFTBOX4(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
-   private:
-      int _signX;
-      int _signY;
    };
 
    class cmdMULTIPLY:public cmdVIRTUAL {
@@ -446,14 +410,11 @@ namespace  parsercmd {
    telldata::typeID UMinus(telldata::typeID, yyltype);
    telldata::typeID   Plus(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Minus(telldata::typeID, telldata::typeID, yyltype, yyltype);
-   telldata::typeID  PointMv(telldata::typeID, telldata::typeID, yyltype, yyltype, int, int);
    telldata::typeID  Multiply(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Assign(telldata::tell_var*, telldata::argumentID*, yyltype);
-   telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
-
-   bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);
-   void              ClearArgumentList(argumentLIST*);
+   telldata::typeID BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
+   void             ClearArgumentList(argumentLIST*);
 }
 
 namespace console{

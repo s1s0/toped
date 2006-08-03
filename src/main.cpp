@@ -169,7 +169,6 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("locklayer"        ,(new               tellstdfunc::stdLOCKLAYERS(telldata::tn_void, true)));
    mblock->addFUNC("definecolor"      ,(new                 tellstdfunc::stdCOLORDEF(telldata::tn_void, true)));
    mblock->addFUNC("definefill"       ,(new                  tellstdfunc::stdFILLDEF(telldata::tn_void, true)));
-   mblock->addFUNC("defineline"       ,(new                  tellstdfunc::stdLINEDEF(telldata::tn_void, true)));
    mblock->addFUNC("definegrid"       ,(new                  tellstdfunc::stdGRIDDEF(telldata::tn_void, true)));
    mblock->addFUNC("step"             ,(new                     tellstdfunc::stdSTEP(telldata::tn_void, true)));
    mblock->addFUNC("grid"             ,(new                     tellstdfunc::stdGRID(telldata::tn_void, true)));
@@ -350,15 +349,10 @@ bool TopedApp::OnInit() {
    {
       LogFile.init(std::string(logFileName.mb_str()));
       //   wxLog::AddTraceMask("thread");
-      if (1 < argc) 
-      {
+      if (1 < argc) {
          wxString inputfile;
-         for (int i=1; i<argc; i++)
-         {
-            inputfile.Clear();
-            inputfile << wxT("#include \"") << argv[i] << wxT("\"");
-            Console->parseCommand(inputfile, false);
-         }
+         inputfile << wxT("#include \"") << argv[1] << wxT("\"");
+         Console->parseCommand(inputfile);
       }
    }
    return TRUE;

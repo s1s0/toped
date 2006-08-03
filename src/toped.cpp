@@ -569,17 +569,9 @@ void tui::TopedFrame::initView() {
 #ifdef __WXMSW__
    int *gl_attrib = NULL;
 #else
-   int gl_attrib[20] = { WX_GL_RGBA             ,
-                         WX_GL_MIN_RED          , 2,
-                         WX_GL_MIN_GREEN        , 2,
-                         WX_GL_MIN_BLUE         , 2,
-                         WX_GL_MIN_ALPHA        , 2,
-                         WX_GL_MIN_ACCUM_RED    , 2,
-                         WX_GL_MIN_ACCUM_GREEN  , 2,
-                         WX_GL_MIN_ACCUM_BLUE   , 2,
-                         WX_GL_MIN_ACCUM_ALPHA  , 2,
-//                         WX_GL_DEPTH_SIZE    , 1,
-                         WX_GL_DOUBLEBUFFER     ,
+   int gl_attrib[20] = { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
+            WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1,
+            WX_GL_DOUBLEBUFFER,
 #  ifdef __WXMAC__
             GL_NONE };
 #  else
@@ -713,7 +705,7 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
       ost << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
       wxString ost1;
-      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loaded");
+      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loded");
       SetStatusText(ost1);
    }
    else SetStatusText(wxT("Parsing aborted"));
@@ -1193,7 +1185,7 @@ void tui::TopedFrame::OnpanDown(wxCommandEvent& WXUNUSED(event)) {
 
 bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
 {
-   bool ret=true;
+   bool ret;
    wxFileName checkedFileName(fileName);
    assert(checkedFileName.IsOk());
    if (checkedFileName.FileExists())
@@ -1203,7 +1195,8 @@ bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
       wxT("Toped"),
       wxYES_NO | wxICON_QUESTION);
       if (wxID_NO==dlg1.ShowModal()) ret = false; else ret = true;
+      return ret;
    }
-   return ret;
+
 }
       

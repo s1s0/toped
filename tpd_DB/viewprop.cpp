@@ -139,34 +139,6 @@ bool layprop::DrawProperties::getCurrentFill() const {
    else return false;
 }
 
-void layprop::DrawProperties::setLineProps(bool selected) const
-{
-   laySetList::const_iterator ilayset;
-   if (selected)
-   {
-      ilayset = _layset.find(_drawinglayer);
-      lineMAP::const_iterator ilineset = _lineset.find(ilayset->second->sline());
-      if (_lineset.end() != ilineset)
-      {
-         std::string colorname = ilineset->second->color();
-         colorMAP::const_iterator gcol;
-         if (("" != colorname) && (_laycolors.end() != (gcol = _laycolors.find(colorname))))
-            glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
-         glLineWidth(ilineset->second->width());glEnable(GL_LINE_SMOOTH);glEnable(GL_LINE_STIPPLE);
-         glLineStipple(ilineset->second->patscale(),ilineset->second->pattern());
-         return;
-      }
-   }
-   if (_layset.end() != (ilayset = _layset.find(_drawinglayer)))
-   {
-      colorMAP::const_iterator gcol = _laycolors.find(ilayset->second->getcolor());
-      if (gcol != _laycolors.end())
-         glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
-   }
-   else glColor4f(0.5, 0.5, 0.5, 0.5);
-   glLineWidth(1);glDisable(GL_LINE_SMOOTH);glDisable(GL_LINE_STIPPLE);
-}
-
 void  layprop::DrawProperties::blockfill(laydata::cellrefstack* refstack) {
    _blockfill = true;
    _refstack = refstack;
@@ -236,7 +208,7 @@ layprop::DrawProperties::~DrawProperties() {
 
 //=============================================================================
 layprop::ViewProperties::ViewProperties() {
-   addlayer(std::string("_$teLayer_cell"),0,"","","");
+   addlayer(std::string("_$teLayer_cell"),0,"","");
    _step = 1;_curlay = 1;
    setUU(1);
    _marker_angle = 0;
@@ -248,7 +220,7 @@ bool layprop::ViewProperties::selectable(word layno) const {
 }
 
 void layprop::ViewProperties::addlayer(std::string name, word layno, std::string col,
-                                       std::string fill, std::string sline) {
+                                                             std::string fill) {
    while (wxMUTEX_NO_ERROR != DBLock.TryLock());
    if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col))) {
       std::ostringstream ost;
@@ -260,36 +232,13 @@ void layprop::ViewProperties::addlayer(std::string name, word layno, std::string
       ost << "Warning! Fill \""<<fill<<"\" is not defined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   if ((sline != "") && (_drawprop._lineset.end() == _drawprop._lineset.find(sline))) {
-      std::ostringstream ost;
-      ost << "Warning! Line \""<<sline<<"\" is not defined";
-      tell_log(console::MT_WARNING, ost.str());
-   }
    if (_drawprop._layset.end() != _drawprop._layset.find(layno)) {
       delete _drawprop._layset[layno];
       std::ostringstream ost;
       ost << "Warning! Layer "<<layno<<" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }   
-   _drawprop._layset[layno] = new LayerSettings(name,col,fill,sline);
-   DBLock.Unlock();
-}
-
-void layprop::ViewProperties::addline(std::string name, std::string col, word pattern,
-                                       byte patscale, byte width) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-   if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col))) {
-      std::ostringstream ost;
-      ost << "Warning! Color \""<<col<<"\" is not defined";
-      tell_log(console::MT_WARNING,ost.str());
-   }
-   if (_drawprop._lineset.end() != _drawprop._lineset.find(name)) {
-      delete _drawprop._lineset[name];
-      std::ostringstream ost;
-      ost << "Warning! Line "<< name <<" redefined";
-      tell_log(console::MT_WARNING, ost.str());
-   }
-   _drawprop._lineset[name] = new LineSettings(col,pattern,patscale,width);
+   _drawprop._layset[layno] = new LayerSettings(name,col,fill);
    DBLock.Unlock();
 }
 
