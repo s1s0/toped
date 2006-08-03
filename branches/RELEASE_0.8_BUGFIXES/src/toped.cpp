@@ -1038,8 +1038,8 @@ void tui::TopedFrame::OnGridDefine(wxCommandEvent& WXUNUSED(event)) {
    if ( dlg.ShowModal() == wxID_OK ) {
       wxString ost; 
       ost << wxT("definegrid(0,")<<dlg.grid0()<<wxT(",\"white\");");
-      ost << wxT("definegrid(1,")<<dlg.grid1()<<wxT(",\")white\");");
-      ost << wxT("definegrid(2,")<<dlg.grid2()<<wxT(",\")white\");");
+      ost << wxT("definegrid(1,")<<dlg.grid1()<<wxT(",\"white\");");
+      ost << wxT("definegrid(2,")<<dlg.grid2()<<wxT(",\"white\");");
       _cmdline->parseCommand(ost);
    }
 }
