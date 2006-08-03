@@ -16,13 +16,13 @@
   <kdevautoproject>
     <general>
       <activetarget>src/toped</activetarget>
-      <useconfiguration>debug</useconfiguration>
+      <useconfiguration>optimized</useconfiguration>
     </general>
     <run>
       <mainprogram>src/toped</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs>../../tll/seed.tll</programargs>
+      <programargs></programargs>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars/>
