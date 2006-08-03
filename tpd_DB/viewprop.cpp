@@ -81,11 +81,15 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0) {
 }
 
 void layprop::DrawProperties::setGridColor(std::string colname) const{
-   tellRGB* gcol = _laycolors.find(colname)->second;
-   if (gcol)
-      glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
-   else // put a default gray color if color is not found
-      glColor4f(0.5, 0.5, 0.5, 0.5);
+   if (_laycolors.end() != _laycolors.find(colname))
+   {
+      tellRGB* gcol = _laycolors.find(colname)->second;
+      if (gcol)
+         glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
+      return;
+   }
+   // put a default gray color if color is not found
+   glColor4f(0.5, 0.5, 0.5, 0.5);
 }      
 
 void layprop::DrawProperties::setCurrentColor(word layno) {
