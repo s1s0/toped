@@ -19,6 +19,29 @@ AC_PROG_LEX
 CPPFLAGS="$CPPFLAGS -Wall -g -fexceptions"
 CFLAGS="$CFLAGS -Wall -g -fexceptions"
 
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS([stddef.h stdlib.h string.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIZE_T
+
+# Checks for library functions.
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([pow rint sqrt strtoul])
+
+# Checks for size of the types
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(time_t)
+AC_CHECK_SIZEOF(char)
+AC_CHECK_SIZEOF(short)
+AC_CHECK_SIZEOF(long)
+
 # Checks for libraries.
 
 #Check openGL
@@ -60,29 +83,6 @@ AX_CHECK_GLUT
 #Check for wx gl library and for wx threads
 #...
 
-
-# Checks for header files.
-AC_HEADER_STDC
-AC_CHECK_HEADERS([stddef.h stdlib.h string.h unistd.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_STDBOOL
-AC_C_CONST
-AC_C_INLINE
-AC_TYPE_SIZE_T
-
-# Checks for library functions.
-AC_FUNC_ERROR_AT_LINE
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
-AC_CHECK_FUNCS([pow rint sqrt strtoul])
-
-# Checks for size of the types
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(time_t)
-AC_CHECK_SIZEOF(char)
-AC_CHECK_SIZEOF(short)
-AC_CHECK_SIZEOF(long)
 
 AC_CONFIG_FILES([Makefile tpd_common/Makefile tpd_parser/Makefile tpd_DB/Makefile src/Makefile tll/Makefile])
 AC_OUTPUT
