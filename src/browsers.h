@@ -122,11 +122,12 @@ namespace browsers {
       bool              findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent);
       void              copyItem(const wxTreeItemId, const wxTreeItemId);
       void              highlightChildren(wxTreeItemId, wxColour);
+      wxTreeItemId      activeStructure(void) {return _activeStructure;};
    protected:
       wxTreeItemId      RBcellID;
    private:
       wxTreeItemId      top_structure;
-      wxTreeItemId      active_structure;
+      wxTreeItemId      _activeStructure;
 
       void              OnItemRightClick(wxTreeEvent&);
       void              OnLMouseDblClk(wxMouseEvent&);
@@ -168,6 +169,8 @@ namespace browsers {
       void              collectChildren(GDSin::GDSHierTree *root, 
                                                    wxTreeItemId& lroot);
    private:
+      wxButton*         _hierButton;
+      wxButton*         _flatButton;
       wxTreeItemId      RBcellID;
       GDSCellBrowser*   hCellBrowser;//Hierarchy cell browser
       GDSCellBrowser*   fCellBrowser;//Flat cell browser
@@ -203,6 +206,8 @@ namespace browsers {
       CellBrowser*      fCellBrowser;//Flat cell browser
       //laydata::TDTHierTree*   tree;
       wxString          libName;
+      wxButton*         _hierButton;
+      wxButton*         _flatButton;
       void              OnCommand(wxCommandEvent&);
       void              OnWXCellARef(wxCommandEvent&);
       void              OnReportUsedLayers(wxCommandEvent&);

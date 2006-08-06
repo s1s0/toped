@@ -224,9 +224,16 @@ browsers::GDSbrowser::GDSbrowser(wxWindow *parent, wxWindowID id,
    wxBoxSizer *thesizer = new wxBoxSizer( wxVERTICAL );
       
    wxBoxSizer *sizer1 = new wxBoxSizer( wxHORIZONTAL );
-   
-   sizer1->Add(new wxButton( this, BT_CELLS_HIER2, wxT("Hier") ), 1, wxEXPAND|wxBOTTOM, 3);
-   sizer1->Add(new wxButton( this, BT_CELLS_FLAT2, wxT("Flat") ), 1, wxEXPAND|wxBOTTOM, 3);
+   _hierButton = new wxButton( this, BT_CELLS_HIER2, wxT("Hier") );
+   //Set bold font for _hierButton
+   wxFont font = _hierButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _hierButton->SetFont(font);
+
+   _flatButton = new wxButton( this, BT_CELLS_FLAT2, wxT("Flat") );
+
+   sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
+   sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
    
    fCellBrowser = new GDSCellBrowser(this, ID_TPD_CELLTREE_F2,pos, size, style);
    
@@ -292,6 +299,16 @@ void browsers::GDSbrowser::OnFlatView(wxCommandEvent& event)
    hCellBrowser->Hide();
    fCellBrowser->Show();
    (this->GetSizer())->Layout();
+   if (hCellBrowser->IsExpanded(hCellBrowser->GetRootItem()))
+   {
+      fCellBrowser->Expand(fCellBrowser->GetRootItem());
+   }
+   //Set normal font for  _hierButton 
+   //Set bold font for _flatButton;
+   wxFont font = _flatButton->GetFont();
+   _hierButton->SetFont(font);
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _flatButton->SetFont(font);
 }
 
 void browsers::GDSbrowser::OnHierView(wxCommandEvent& event)
@@ -300,6 +317,16 @@ void browsers::GDSbrowser::OnHierView(wxCommandEvent& event)
 
    hCellBrowser->Show();
    (this->GetSizer())->Layout();
+   /*if (hCellBrowser->IsExpanded(fCellBrowser->GetRootItem()))
+   {
+      hCellBrowser->Expand(hCellBrowser->GetRootItem());
+   }*/
+      //Set bold  font for  _hierButton 
+   //Set normal  font for _flatButton;
+   wxFont font = _hierButton->GetFont();
+   _flatButton->SetFont(font);
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _hierButton->SetFont(font);
 }
 
 
@@ -342,7 +369,7 @@ void browsers::CellBrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
 
 void browsers::CellBrowser::OnWXOpenCell(wxCommandEvent& event)
 {
-   active_structure = top_structure = RBcellID;
+   _activeStructure = top_structure = RBcellID;
    wxString ost; 
    ost << wxT("opencell(\"") << GetItemText(RBcellID) <<wxT("\");");
    Console->parseCommand(ost);
@@ -368,7 +395,6 @@ void  browsers::CellBrowser::OnLMouseDblClk(wxMouseEvent& event)
       wxString ost; 
       ost << wxT("opencell(\"") << GetItemText(id) <<wxT("\");");
       Console->parseCommand(ost);
-
    }
    else 
       event.Skip();
@@ -437,8 +463,15 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
       
    wxBoxSizer *sizer1 = new wxBoxSizer( wxHORIZONTAL );
    
-   sizer1->Add(new wxButton( this, BT_CELLS_HIER, wxT("Hier") ), 1, wxEXPAND|wxBOTTOM, 3);
-   sizer1->Add(new wxButton( this, BT_CELLS_FLAT, wxT("Flat") ), 1, wxEXPAND|wxBOTTOM, 3);
+   _hierButton = new wxButton( this, BT_CELLS_HIER, wxT("Hier") );
+   //Set bold font for _hierButton
+   wxFont font = _hierButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _hierButton->SetFont(font);
+
+   _flatButton = new wxButton( this, BT_CELLS_FLAT, wxT("Flat") );
+   sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
+   sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
    fCellBrowser = new CellBrowser(this, ID_TPD_CELLTREE_F,pos, size, style);
    
    hCellBrowser = new CellBrowser(this, ID_TPD_CELLTREE_H, pos, size, style);
@@ -542,6 +575,17 @@ void browsers::TDTbrowser::OnFlatView(wxCommandEvent& event)
    hCellBrowser->Hide();
    fCellBrowser->Show();
    (this->GetSizer())->Layout();
+   if (hCellBrowser->IsExpanded(hCellBrowser->GetRootItem()))
+   {
+      fCellBrowser->Expand(fCellBrowser->GetRootItem());
+   }
+   
+   //Set normal font for  _hierButton 
+   //Set bold font for _flatButton;
+   wxFont font = _flatButton->GetFont();
+   _hierButton->SetFont(font);
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _flatButton->SetFont(font);
 }
 
 void browsers::TDTbrowser::OnHierView(wxCommandEvent& event)
@@ -550,6 +594,17 @@ void browsers::TDTbrowser::OnHierView(wxCommandEvent& event)
 
    hCellBrowser->Show();
    (this->GetSizer())->Layout();
+   /*if (fCellBrowser->IsExpanded(fCellBrowser->GetRootItem()))
+   {
+      hCellBrowser->Expand(hCellBrowser->activeStructure());
+   }*/
+
+   //Set bold  font for  _hierButton 
+   //Set normal  font for _flatButton;
+   wxFont font = _hierButton->GetFont();
+   _flatButton->SetFont(font);
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _hierButton->SetFont(font);
 }
 
 /*void browsers::TDTbrowser::OnWXOpenCell(wxCommandEvent& WXUNUSED(event)) {
