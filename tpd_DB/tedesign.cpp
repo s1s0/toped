@@ -264,11 +264,11 @@ laydata::tdtcell* laydata::tdtdesign::checkcell(std::string name) {
    else return NULL;
 }   
 
-void laydata::tdtdesign::openGL_draw(const layprop::DrawProperties& drawprop) {
+void laydata::tdtdesign::openGL_draw(layprop::DrawProperties& drawprop) {
    if (_target.checkedit()) {
       ctmstack transtack;
-      transtack.push(CTM());
-      _target.view()->openGL_draw(transtack, drawprop, _target.iscell());
+      drawprop.initCTMstack();
+      _target.view()->openGL_draw(drawprop, _target.iscell());
    }
 }
 

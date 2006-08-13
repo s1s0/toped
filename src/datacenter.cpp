@@ -450,7 +450,7 @@ void DataCenter::mouseStop() {
    else throw EXPTNactive_DB();
 }
 
-void DataCenter::openGL_draw(const layprop::DrawProperties& drawprop) {
+void DataCenter::openGL_draw(layprop::DrawProperties& drawprop) {
 // Maybe we need another try/catch in the layoutcanvas ?   
    if (_TEDDB) {
 //      _TEDDB->check_active();

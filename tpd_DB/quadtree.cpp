@@ -506,12 +506,12 @@ openGL_draw methods of the tdtddata objects. This happens only if
 the current quadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. Draws also the select marks in case shape is
 selected. \n This is the cherry of the quadTree algorithm cake*/
-void laydata::quadTree::openGL_draw(ctmstack& transtack, const layprop::DrawProperties& drawprop,
+void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
                                                    const dataList* slst) const {
    if (empty()) return;
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
-   DBbox areal = _overlap * transtack.top(); 
+   DBbox areal = _overlap * drawprop.topCTM(); 
    areal.normalize();
    if (clip.cliparea(areal) == 0) return;
    else {
@@ -525,26 +525,26 @@ void laydata::quadTree::openGL_draw(ctmstack& transtack, const layprop::DrawProp
    // Seems the bargain is worth it.
    if (slst)
       while(wdt) {
-         wdt->openGL_draw(transtack,drawprop);
+         wdt->openGL_draw(drawprop);
          // in case the shape is somehow selected...
-         if       (sh_selected == wdt->status()) wdt->draw_select(transtack.top());
+         if       (sh_selected == wdt->status()) wdt->draw_select(drawprop.topCTM());
          else if  (sh_partsel == wdt->status()) {
             dataList::const_iterator SI;
             for (SI = slst->begin(); SI != slst->end(); SI++)
                if (SI->first == wdt) break;
             assert(SI != slst->end());
-            wdt->draw_select(transtack.top(), SI->second);
+            wdt->draw_select(drawprop.topCTM(), SI->second);
          }   
          wdt = wdt->next();
       }
    else
       // if there are no selected shapes
       while(wdt) {
-         wdt->openGL_draw(transtack,drawprop);
+         wdt->openGL_draw(drawprop);
          wdt = wdt->next();
       }
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->openGL_draw(transtack, drawprop, slst);
+      if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst);
 }
 
 /*! Temporary draw of the container contents on the screen using the virtual 

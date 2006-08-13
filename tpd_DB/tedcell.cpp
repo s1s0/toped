@@ -258,7 +258,7 @@ bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtcell* child) {
    return true;
 }
 
-void laydata::tdtcell::openGL_draw(ctmstack& transtack, const layprop::DrawProperties& drawprop, bool active) const {
+void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool active) const {
    // Draw figures
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++) {
@@ -270,9 +270,9 @@ void laydata::tdtcell::openGL_draw(ctmstack& transtack, const layprop::DrawPrope
       // _shapesel[lay->first] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
       if ((active) && (_shapesel.end() != (dlst = _shapesel.find(lay->first))))
-         lay->second->openGL_draw(transtack,drawprop,dlst->second);
+         lay->second->openGL_draw(drawprop,dlst->second);
       else
-         lay->second->openGL_draw(transtack,drawprop, NULL);
+         lay->second->openGL_draw(drawprop, NULL);
    }
 }
 

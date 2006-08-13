@@ -119,6 +119,8 @@ bool  layprop::DrawProperties::layerLocked(word layno) const {
 }
 
 bool layprop::DrawProperties::getCurrentFill() const {
+   if (0 == _drawinglayer)
+      return true;
    if ((_layset.end() != _layset.find(_drawinglayer)) && !_blockfill) {
       // The 3 lines below are doing effectively
       // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
