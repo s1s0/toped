@@ -1185,7 +1185,7 @@ void tui::TopedFrame::OnpanDown(wxCommandEvent& WXUNUSED(event)) {
 
 bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
 {
-   bool ret;
+   bool ret=true;
    wxFileName checkedFileName(fileName);
    assert(checkedFileName.IsOk());
    if (checkedFileName.FileExists())
@@ -1195,8 +1195,7 @@ bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
       wxT("Toped"),
       wxYES_NO | wxICON_QUESTION);
       if (wxID_NO==dlg1.ShowModal()) ret = false; else ret = true;
-      return ret;
    }
-
+   return ret;
 }
       
