@@ -1404,7 +1404,7 @@ void tellstdfunc::stdADDPOLY::undo() {
 int tellstdfunc::stdADDPOLY::execute() {
    word     la = getWordValue();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   if (pl->size() > 3) {
+   if (pl->size() >= 3) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(la));
       real DBscale = Properties->DBscale();
@@ -1418,7 +1418,7 @@ int tellstdfunc::stdADDPOLY::execute() {
       LogFile.flush();
    }
    else {
-      tell_log(console::MT_ERROR,"At least 4 points expected to create a polygon");
+      tell_log(console::MT_ERROR,"At least 3 points expected to create a polygon");
       OPstack.push(new telldata::ttlayout());
    }
    delete pl;
@@ -1468,7 +1468,7 @@ int tellstdfunc::stdDRAWPOLY::execute() {
    if (!tellstdfunc::waitGUInput(-1, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   if (pl->size() > 3) {
+   if (pl->size() >= 3) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(la));
       real DBscale = Properties->DBscale();
@@ -1481,7 +1481,7 @@ int tellstdfunc::stdDRAWPOLY::execute() {
       LogFile << "addpoly("<< *pl << "," << la << ");"; LogFile.flush();
    }
    else {
-      tell_log(console::MT_ERROR,"At least 4 points expected to create a polygon");
+      tell_log(console::MT_ERROR,"At least 3 points expected to create a polygon");
       OPstack.push(new telldata::ttlayout());
    }
    delete pl;

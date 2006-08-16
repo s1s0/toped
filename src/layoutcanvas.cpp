@@ -391,7 +391,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
             case layprop::op_dpoly:
-               if (Console->numpoints() > 3) {
+               if (Console->numpoints() >= 3) {
                   menu.Append(CM_CLOSE, wxT("Close polygon"));
                }
                if (Console->numpoints() > 1) {
