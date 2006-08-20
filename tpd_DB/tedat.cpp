@@ -316,6 +316,36 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
    return false;
 }
 
+   // Some thoughts here about the drawing optimization.
+   // For optimal drawing speed we have to fulfill several requirements
+   // 1. Data processing has to be minimized - i.e. calculations of
+   //    the overlapping boxes, wire generation etc. has to be performed
+   //    once. The same concerns the coordinate conversion.
+   // 2. Minimize the altertion of the line&fill styles and colors, i.e.
+   //    Objects with the same drawing properties have to be groupped
+   //    together
+   // (The structure of the database in memory is out of discussion here)
+   // Achieving the first objective is simple - calculation are performed
+   // once in openGL_precalc() and then reused in the rest of the openGL_*
+   // functions. It is quite not clear however where is the balance here,
+   // because calculations might be cheaper than the memory access in
+   // terms of CPU cycles.
+   // The second objective seems to be a problem though
+   // - drawing color as a rule is the same for the entire layer.
+   //   -- this means that the reference marks and overlapping boxes of the
+   //      texts shold be drawn in the color of the layer (not in gray) 
+   //   -- for the reference marks of the cell references as well as for
+   //      their overlapping boxes this will be a problem because we'll
+   //      have to change the color for one box only (and one mark)
+   // - line style - here the things are more compicated. The partially
+   //   selected shapes will certainly need a change in the line style
+   //   and possibly even the color. This also means that the tricks with
+   //   drawing first the unslected shapes and then the selected ones
+   //   will barely improve the things - how many shapes will be grouped
+   //   in a single quadree cell? - they shouldn't be much if the quadtree
+   //   algo works properly. Then why bother ?
+   //
+
 //-----------------------------------------------------------------------------
 // class tdtbox
 //-----------------------------------------------------------------------------
@@ -376,22 +406,17 @@ void laydata::tdtbox::openGL_drawsel(const pointlist& ptlist, const SGBitSet* ps
    }
 }
 
-void laydata::tdtbox::openGL_postclean(pointlist& ptlist) const
-{
-   ptlist.clear();
-}
-
-void laydata::tdtbox::openGL_draw(layprop::DrawProperties& drawprop) const
-{
-   pointlist points;
-   openGL_precalc(drawprop, points);
-   openGL_drawline(drawprop, points);
-   if (drawprop.getCurrentFill())
-      openGL_drawfill(drawprop, points);
-   if (sh_selected == status())
-      openGL_drawsel(points, NULL);
-   openGL_postclean(points);
-}
+// void laydata::tdtbox::openGL_draw(layprop::DrawProperties& drawprop) const
+// {
+//    pointlist points;
+//    openGL_precalc(drawprop, points);
+//    openGL_drawline(drawprop, points);
+//    if (drawprop.getCurrentFill())
+//       openGL_drawfill(drawprop, points);
+//    if (sh_selected == status())
+//       openGL_drawsel(points, NULL);
+//    openGL_postclean(points);
+// }
 
 void laydata::tdtbox::tmp_draw(const layprop::DrawProperties&, ctmqueue& transtack,
                               SGBitSet* plst, bool under_construct) const {
@@ -415,9 +440,6 @@ void laydata::tdtbox::tmp_draw(const layprop::DrawProperties&, ctmqueue& transta
       }   
       glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
    }
-}
-
-void  laydata::tdtbox::draw_select(CTM trans,const SGBitSet* pslist) const {
 }
 
 void  laydata::tdtbox::select_points(DBbox& select_in, SGBitSet* pntlst) {
@@ -667,22 +689,17 @@ void laydata::tdtpoly::openGL_drawsel(const pointlist& ptlist, const SGBitSet* p
    }
 }
 
-void laydata::tdtpoly::openGL_postclean(pointlist& ptlist) const
-{
-   ptlist.clear();
-}
-
-void laydata::tdtpoly::openGL_draw(layprop::DrawProperties& drawprop) const
-{
-   pointlist points;
-   openGL_precalc(drawprop, points);
-   openGL_drawline(drawprop, points);
-   if (drawprop.getCurrentFill())
-      openGL_drawfill(drawprop, points);
-   if (sh_selected == status())
-      openGL_drawsel(points, NULL);
-   openGL_postclean(points);
-}
+// void laydata::tdtpoly::openGL_draw(layprop::DrawProperties& drawprop) const
+// {
+//    pointlist points;
+//    openGL_precalc(drawprop, points);
+//    openGL_drawline(drawprop, points);
+//    if (drawprop.getCurrentFill())
+//       openGL_drawfill(drawprop, points);
+//    if (sh_selected == status())
+//       openGL_drawsel(points, NULL);
+//    openGL_postclean(points);
+// }
 
 void laydata::tdtpoly::tmp_draw(const layprop::DrawProperties&, ctmqueue& transtack,
                                  SGBitSet* plst, bool under_construct) const {
@@ -726,9 +743,6 @@ void laydata::tdtpoly::rmpoint(TP& lp) {
    _plist.pop_back();
    if (_plist.size() > 0) lp = _plist.back();
 };
-
-void  laydata::tdtpoly::draw_select(CTM trans, const SGBitSet* pslist) const {
-}
 
 void  laydata::tdtpoly::select_points(DBbox& select_in, SGBitSet* pntlst) {
    for (word i = 0; i < _plist.size(); i++) 
@@ -1068,22 +1082,17 @@ void laydata::tdtwire::openGL_drawsel(const pointlist& ptlist, const SGBitSet* p
    }
 }
 
-void laydata::tdtwire::openGL_postclean(pointlist& ptlist) const
-{
-   ptlist.clear();
-}
-
-void laydata::tdtwire::openGL_draw(layprop::DrawProperties& drawprop) const
-{
-   pointlist points;
-   openGL_precalc(drawprop, points);
-   openGL_drawline(drawprop, points);
-   if (drawprop.getCurrentFill())
-      openGL_drawfill(drawprop, points);
-   if (sh_selected == status())
-      openGL_drawsel(points, NULL);
-   openGL_postclean(points);
-}
+// void laydata::tdtwire::openGL_draw(layprop::DrawProperties& drawprop) const
+// {
+//    pointlist points;
+//    openGL_precalc(drawprop, points);
+//    openGL_drawline(drawprop, points);
+//    if (drawprop.getCurrentFill())
+//       openGL_drawfill(drawprop, points);
+//    if (sh_selected == status())
+//       openGL_drawsel(points, NULL);
+//    openGL_postclean(points);
+// }
 
 void laydata::tdtwire::tmp_draw(const layprop::DrawProperties& drawprop,
                ctmqueue& transtack, SGBitSet* plst, bool under_construct) const
@@ -1119,7 +1128,7 @@ void laydata::tdtwire::tmp_draw(const layprop::DrawProperties& drawprop,
    openGL_drawline(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
 //      if (drawprop.getCurrentFill())
 //         openGL_drawfill(ptlist);
-   openGL_postclean(ptlist);
+   ptlist.clear();
 }
 
 void laydata::tdtwire::precalc(pointlist& ptlist, _dbl_word num_points) const
@@ -1155,9 +1164,6 @@ void  laydata::tdtwire::rmpoint(TP& lp) {
    _plist.pop_back();
    if (_plist.size() > 0) lp = _plist.back();
 };
-
-void  laydata::tdtwire::draw_select(CTM trans, const SGBitSet* pslist) const {
-}
 
 bool laydata::tdtwire::point_inside(TP pnt)
 {
@@ -1398,7 +1404,7 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);
    drawprop.pushCTM(newtrans);
    // draw the cell mark ...
-   drawprop.setCurrentColor(0);
+//   drawprop.setCurrentColor(0);
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
 }
 
@@ -1424,7 +1430,7 @@ void laydata::tdtcellref::openGL_drawfill(layprop::DrawProperties& drawprop, con
    byte crchain = const_cast<layprop::DrawProperties&>(drawprop).popref(this);
    structure()->openGL_draw(drawprop, crchain == 2);
    // push is done in the precalc()
-   drawprop.popCTM();
+//   drawprop.popCTM();
    if (crchain) const_cast<layprop::DrawProperties&>(drawprop).pushref(this);
 }
 
@@ -1435,31 +1441,33 @@ void laydata::tdtcellref::openGL_drawsel(const pointlist& ptlist, const SGBitSet
          draw_select_mark(ptlist[i]);
 }
 
-void laydata::tdtcellref::openGL_postclean(pointlist& ptlist) const
+void laydata::tdtcellref::openGL_postclean(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
+   if (0 == ptlist.size()) return;
    ptlist.clear();
+   // get the font matrix out of the stack (pushed in precalc)
+   drawprop.popCTM();
 }
-
-void laydata::tdtcellref::openGL_draw(layprop::DrawProperties& drawprop) const {
-   pointlist points;
-   openGL_precalc(drawprop, points);
-   openGL_drawline(drawprop, points);
-   if (drawprop.getCurrentFill())
-      openGL_drawfill(drawprop, points);
-   if (sh_selected == status())
-      openGL_drawsel(points, NULL);
-   openGL_postclean(points);
-/*   // first check that the entire cell has to be drawn
-   if (ref_visible(transtack,drawprop)) {
-      // draw the structure itself. Pop/push ref stuff is when
-      // edit in place is active
-      byte crchain = const_cast<layprop::DrawProperties&>(drawprop).popref(this);
-      structure()->openGL_draw(transtack, drawprop, crchain == 2);
-      // push is done in the ref_visible(), before returning true
-      transtack.pop();
-      if (crchain) const_cast<layprop::DrawProperties&>(drawprop).pushref(this);
-   }*/
-}
+// void laydata::tdtcellref::openGL_draw(layprop::DrawProperties& drawprop) const {
+//    pointlist points;
+//    openGL_precalc(drawprop, points);
+//    openGL_drawline(drawprop, points);
+//    if (drawprop.getCurrentFill())
+//       openGL_drawfill(drawprop, points);
+//    if (sh_selected == status())
+//       openGL_drawsel(points, NULL);
+//    openGL_postclean(points);
+// /*   // first check that the entire cell has to be drawn
+//    if (ref_visible(transtack,drawprop)) {
+//       // draw the structure itself. Pop/push ref stuff is when
+//       // edit in place is active
+//       byte crchain = const_cast<layprop::DrawProperties&>(drawprop).popref(this);
+//       structure()->openGL_draw(transtack, drawprop, crchain == 2);
+//       // push is done in the ref_visible(), before returning true
+//       transtack.pop();
+//       if (crchain) const_cast<layprop::DrawProperties&>(drawprop).pushref(this);
+//    }*/
+// }
 
 void laydata::tdtcellref::tmp_draw(const layprop::DrawProperties& drawprop,
                  ctmqueue& transtack, SGBitSet*, bool under_construct) const {
@@ -1468,10 +1476,6 @@ void laydata::tdtcellref::tmp_draw(const layprop::DrawProperties& drawprop,
       transtack.push_front(_translation * transtack.front());
       structure()->tmp_draw(drawprop, transtack);
    }   
-}
-
-void  laydata::tdtcellref::draw_select(CTM trans, const SGBitSet*) const {
-//   if (sh_selected == status()) draw_select_marks(structure()->overlap() , trans*_translation);
 }
 
 void laydata::tdtcellref::info(std::ostringstream& ost) const {
@@ -1626,6 +1630,11 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
 {
    // make sure that the referenced structure exists
    if (NULL == structure()) return;
+   if (0 != drawprop.drawinglayer())
+   {
+      int boza = drawprop.drawinglayer();
+      boza++;
+   }
    // Get the areal of entire matrix, but NOT TRANSLATED !
    DBbox array_overlap = clear_overlap();
    // Calculate the CTM for the array
@@ -1644,6 +1653,7 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
 
    // If we get here - means that the array (or part of it) is visible
    // draw the cell mark ...
+//   drawprop.setCurrentColor(0);
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::array_mark);
    // ... and the overlapping box
    // If we get here - means that the cell (or part of it) is visible
@@ -1657,6 +1667,8 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    // now check that a single structure is big enough to be visible
    DBbox structure_overlap = structure()->overlap();
    DBbox minareal = structure_overlap * drawprop.topCTM() * drawprop.ScrCTM();
+   // We are going to draw "something", so push the new translation matrix in the stack
+   drawprop.pushCTM(newtrans);
    if (minareal.area() < MIN_VISUAL_AREA)
    {
       ptlist.push_back(TP(0,0));
@@ -1664,8 +1676,6 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    }
    else
    {
-      // We are going to draw cells, so push the new translation matrix in the stack
-      drawprop.pushCTM(newtrans);
       // now calculate the start/stop values of the visible references in the matrix
       if (-1 == mutual_position) {
          // entire matrix is visible
@@ -1728,7 +1738,7 @@ void laydata::tdtcellaref::openGL_drawfill(layprop::DrawProperties& drawprop, co
       }
    }
    // push is done in the precalc()
-   drawprop.popCTM();
+//   drawprop.popCTM();
 }
 
 void laydata::tdtcellaref::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
@@ -1738,38 +1748,33 @@ void laydata::tdtcellaref::openGL_drawsel(const pointlist& ptlist, const SGBitSe
          draw_select_mark(ptlist[i]);
 }
 
-void laydata::tdtcellaref::openGL_postclean(pointlist& ptlist) const
-{
-   ptlist.clear();
-}
-
-void laydata::tdtcellaref::openGL_draw(layprop::DrawProperties& drawprop) const {
-   pointlist points;
-   openGL_precalc(drawprop, points);
-   openGL_drawline(drawprop, points);
-   if (drawprop.getCurrentFill())
-      openGL_drawfill(drawprop, points);
-   if (sh_selected == status())
-      openGL_drawsel(points, NULL);
-   openGL_postclean(points);
-/*   int stst[4];
-   // now check that the entire cell array has to be drawn
-   if (aref_visible(drawprop, stst)) {
-      for (int i = stst[0]; i < stst[1]; i++) // start/stop rows
-         for(int j = stst[2]; j < stst[3]; j++) { // start/stop columns
-            // for each of the visual array figures...
-            // ... get the translation matrix ...
-            CTM refCTM(TP(_stepX * i , _stepY * j ), 1, 0, false);
-            refCTM *= drawprop.topCTM();
-            // ...draw the structure itself, not forgeting to push/pop the refCTM
-            drawprop.pushCTM(refCTM);
-            structure()->openGL_draw(drawprop);
-            drawprop.popCTM();
-         }
-      // push is done in the aref_visible(), before returning true
-      drawprop.popCTM();
-   }*/
-}
+// void laydata::tdtcellaref::openGL_draw(layprop::DrawProperties& drawprop) const {
+//    pointlist points;
+//    openGL_precalc(drawprop, points);
+//    openGL_drawline(drawprop, points);
+//    if (drawprop.getCurrentFill())
+//       openGL_drawfill(drawprop, points);
+//    if (sh_selected == status())
+//       openGL_drawsel(points, NULL);
+//    openGL_postclean(points);
+// /*   int stst[4];
+//    // now check that the entire cell array has to be drawn
+//    if (aref_visible(drawprop, stst)) {
+//       for (int i = stst[0]; i < stst[1]; i++) // start/stop rows
+//          for(int j = stst[2]; j < stst[3]; j++) { // start/stop columns
+//             // for each of the visual array figures...
+//             // ... get the translation matrix ...
+//             CTM refCTM(TP(_stepX * i , _stepY * j ), 1, 0, false);
+//             refCTM *= drawprop.topCTM();
+//             // ...draw the structure itself, not forgeting to push/pop the refCTM
+//             drawprop.pushCTM(refCTM);
+//             structure()->openGL_draw(drawprop);
+//             drawprop.popCTM();
+//          }
+//       // push is done in the aref_visible(), before returning true
+//       drawprop.popCTM();
+//    }*/
+// }
 
 void laydata::tdtcellaref::info(std::ostringstream& ost) const {
    ost << "cell \"" << _structure->first << "\" - array reference @ (";
@@ -1872,26 +1877,6 @@ laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata()
 
 void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
-}
-
-void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
-{
-}
-
-void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
-{
-}
-
-void laydata::tdttext::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
-{
-}
-
-void laydata::tdttext::openGL_postclean(pointlist& ptlist) const
-{
-   ptlist.clear();
-}
-
-void laydata::tdttext::openGL_draw(layprop::DrawProperties& drawprop) const {
    //  Things to remember...
    // Font has to be translated using its own matrix in which
    // tx/ty are forced to zero. Below they are not used (and not zeroed)
@@ -1924,28 +1909,138 @@ void laydata::tdttext::openGL_draw(layprop::DrawProperties& drawprop) const {
 //   wsquare = wsquare * drawprop.ScrCTM();
    valid_box wsquare(TP(0, 0),TP(height, height), ftmtrx * drawprop.ScrCTM());
    TP bindt;
-   if (wsquare.area() > MIN_VISUAL_AREA) {
-      bindt = TP(static_cast<int4b>(rint(_translation.tx())), 
-                 static_cast<int4b>(rint(_translation.ty())) ) * drawprop.topCTM();
-      glPushMatrix();
-      double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
-                            ftmtrx.c(), ftmtrx.d(),0,0,
-                                     0,          0,0,0,
-                             bindt.x(),  bindt.y(),0,1};
-      glMultMatrixd(ori_mtrx);                             
-      for (unsigned i = 0; i < _text.length(); i++) {
-         glutStrokeCharacter(GLUT_STROKE_ROMAN, _text[i]);
-      }   
-      glPopMatrix();
-      float cclr[4];
-      glGetFloatv(GL_CURRENT_COLOR, cclr);
-
+   if (wsquare.area() > MIN_VISUAL_AREA)
+   {
+      // If we get here - means that the text is visible
+      // get the text overlapping box ...
       DBbox obox(TP(0, 0),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT))));
-      draw_overlapping_box(obox, ftmtrx, 0x3030);
-      drawprop.draw_reference_marks(bindt, layprop::text_mark);
-      glColor4f(cclr[0], cclr[1], cclr[2], cclr[3]);
+      ptlist.reserve(5);
+      ptlist.push_back(obox.p1() * ftmtrx);
+      ptlist.push_back(TP(obox.p2().x(), obox.p1().y()) * ftmtrx);
+      ptlist.push_back(obox.p2() * ftmtrx);
+      ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * ftmtrx);
+      // ... and text bounding point (see the comment above)
+      ptlist.push_back(TP(static_cast<int4b>(rint(_translation.tx())),
+                          static_cast<int4b>(rint(_translation.ty())) ) * drawprop.topCTM());
+      // push the font matrix - will be used for text drawing
+      drawprop.pushCTM(ftmtrx);
    }
 }
+
+void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+{
+   if (0 == ptlist.size()) return;
+   // draw the overlapping box
+//   float cclr[4];
+//   glGetFloatv(GL_CURRENT_COLOR, cclr);
+//      DBbox obox(TP(0, 0),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT))));
+//   draw_overlapping_box(obox, ftmtrx, 0x3030);
+//   glColor4f(1.0, 1.0, 1.0, 0.5);
+   glLineStipple(1,0x3030);
+   glEnable(GL_LINE_STIPPLE);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   glBegin(GL_LINE_LOOP);
+   for (unsigned i = 0; i < 4; i++)
+      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   glEnd();
+   glDisable(GL_LINE_STIPPLE);
+   
+   drawprop.draw_reference_marks(ptlist[4], layprop::text_mark);
+//   glColor4f(cclr[0], cclr[1], cclr[2], cclr[3]);
+}
+
+void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+{
+   if (0 == ptlist.size()) return;
+   glPushMatrix();
+   double ori_mtrx[] = { drawprop.topCTM().a(), drawprop.topCTM().b(),0,0,
+                         drawprop.topCTM().c(), drawprop.topCTM().d(),0,0,
+                                             0,                     0,0,0,
+                                 ptlist[4].x(),         ptlist[4].y(),0,1};
+   glMultMatrixd(ori_mtrx);
+   for (unsigned i = 0; i < _text.length(); i++)
+      glutStrokeCharacter(GLUT_STROKE_ROMAN, _text[i]);
+   glPopMatrix();
+}
+
+void laydata::tdttext::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
+{
+   if (sh_selected == status())
+      for (unsigned i = 0; i < 4; i++)
+         draw_select_mark(ptlist[i]);
+}
+
+void laydata::tdttext::openGL_postclean(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+{
+   if (0 == ptlist.size()) return;
+   ptlist.clear();
+   // get the font matrix out of the stack (pushed in precalc)
+   drawprop.popCTM();
+}
+
+// void laydata::tdttext::openGL_draw(layprop::DrawProperties& drawprop) const {
+//    //  Things to remember...
+//    // Font has to be translated using its own matrix in which
+//    // tx/ty are forced to zero. Below they are not used (and not zeroed)
+//    // because of the conversion to the openGL matrix. 
+//    // The text binding point is multiplied ALONE with the current
+//    // translation matrix, but NEVER with the font matrix.
+//    // All this as far as I remember is described in the PS manual
+//    // OpenGL seems to have more primitive font handling - no offense
+//    // IMHO.
+//    // The other "discovery" for the GLUT font rendering...
+//    // They are talking in the doc's that stroke fonts can vary from
+//    // 119.05 units down to 33.33 units. It is not quite clear however
+//    // how big (in pixels say) is one unit. After a lot of experiments
+//    // it appears that if you draw a character with font scale = 1, then
+//    // you will get a font with height 119.05 units. In order to translate 
+//    // the font to DBU's I need to multiply it by DBU and divide it to 119.05
+//    // This is done in the tellibin - int tellstdfunc::stdADDTEXT::execute()
+//    // Things to consider ...
+//    // Independently of the orientation (and flip) font matrix 
+//    // can be trimmed always so that texts to appear either left-to-right
+//    // or bottom-to top (Remember Catena?). In order to compensate the text 
+//    // placement, the binding point (justification) can be compensated
+//    // And the last, but not the least...
+//    // GDSII text justification
+//    //====================================================================
+// /*   // font translation matrix
+//    CTM ftmtrx =  _translation * drawprop.topCTM();
+//    int4b height = static_cast<int4b>(rint(OPENGL_FONT_UNIT));
+// //   DBbox wsquare = DBbox(TP(),TP(height, height)) * ftmtrx; 
+// //   wsquare = wsquare * drawprop.ScrCTM();
+//    valid_box wsquare(TP(0, 0),TP(height, height), ftmtrx * drawprop.ScrCTM());
+//    TP bindt;
+//    if (wsquare.area() > MIN_VISUAL_AREA) {
+//       bindt = TP(static_cast<int4b>(rint(_translation.tx())),
+//                  static_cast<int4b>(rint(_translation.ty())) ) * drawprop.topCTM();
+//       glPushMatrix();
+//       double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
+//                             ftmtrx.c(), ftmtrx.d(),0,0,
+//                                      0,          0,0,0,
+//                              bindt.x(),  bindt.y(),0,1};
+//       glMultMatrixd(ori_mtrx);
+//       for (unsigned i = 0; i < _text.length(); i++) {
+//          glutStrokeCharacter(GLUT_STROKE_ROMAN, _text[i]);
+//       }   
+//       glPopMatrix();
+//       float cclr[4];
+//       glGetFloatv(GL_CURRENT_COLOR, cclr);
+// 
+//       DBbox obox(TP(0, 0),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT))));
+//       draw_overlapping_box(obox, ftmtrx, 0x3030);
+//       drawprop.draw_reference_marks(bindt, layprop::text_mark);
+//       glColor4f(cclr[0], cclr[1], cclr[2], cclr[3]);
+//    }*/
+//    pointlist points;
+//    openGL_precalc(drawprop, points);
+//    openGL_drawline(drawprop, points);
+// //   if (drawprop.getCurrentFill())
+//       openGL_drawfill(drawprop, points);
+//    if (sh_selected == status())
+//       openGL_drawsel(points, NULL);
+//    openGL_postclean(points);
+// }
 
 void laydata::tdttext::tmp_draw(const layprop::DrawProperties& drawprop,
                ctmqueue& transtack, SGBitSet*, bool under_construct) const {
@@ -1969,17 +2064,9 @@ void laydata::tdttext::tmp_draw(const layprop::DrawProperties& drawprop,
       glMultMatrixd(ori_mtrx);                             
       for (unsigned i = 0; i < _text.length(); i++) {
          glutStrokeCharacter(GLUT_STROKE_ROMAN, _text[i]);
-      }   
+      }
       glPopMatrix();
    }
-}
-
-void  laydata::tdttext::draw_select(CTM trans, const SGBitSet*) const {
-   if (sh_selected == status()) draw_select_marks(
-      DBbox(TP(),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT)))) ,trans * _translation);
-}
-
-void laydata::tdttext::info(std::ostringstream&) const {
 }
 
 void laydata::tdttext::write(TEDfile* const tedfile) const {
@@ -2022,6 +2109,8 @@ DBbox laydata::tdttext::overlap() const {
                                                                    _translation;
 }
 
+void laydata::tdttext::info(std::ostringstream& ost) const {
+}
 
 //-----------------------------------------------------------------------------
 // class valid_box
@@ -2332,36 +2421,17 @@ void laydata::draw_select_mark(const TP& pnt) {
    glBitmap(15,15,7,7,0,0, select_mark);
 }
 
-void laydata::draw_select_marks(const DBbox& areal, const CTM& trans) {
-   TP ptlist[4];
-   ptlist[0] = areal.p1() * trans;
-   ptlist[1] = TP(areal.p2().x(), areal.p1().y()) * trans;
-   ptlist[2] = areal.p2() * trans;
-   ptlist[3] = TP(areal.p1().x(), areal.p2().y()) * trans;
-   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-   for (byte i = 0; i < 4; i++)
-   {
-      glRasterPos2i(ptlist[i].x(), ptlist[i].y());
-      glBitmap(15,15,7,7,0,0, select_mark);
-   }
-}
-
-void laydata::draw_overlapping_box(const DBbox& areal, const CTM& trans, const GLushort stipple)
-{
-   TP ptlist[4];
-   ptlist[0] = areal.p1() * trans;
-   ptlist[1] = TP(areal.p2().x(), areal.p1().y()) * trans;
-   ptlist[2] = areal.p2() * trans;
-   ptlist[3] = TP(areal.p1().x(), areal.p2().y()) * trans;
-   glColor4f(1.0, 1.0, 1.0, 0.5);
-   glLineStipple(1,stipple);
-   glEnable(GL_LINE_STIPPLE);
-   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-   glBegin(GL_LINE_LOOP);
-   int i;
-   for (i = 0; i < 4; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
-}
+// void laydata::draw_select_marks(const DBbox& areal, const CTM& trans) {
+//    TP ptlist[4];
+//    ptlist[0] = areal.p1() * trans;
+//    ptlist[1] = TP(areal.p2().x(), areal.p1().y()) * trans;
+//    ptlist[2] = areal.p2() * trans;
+//    ptlist[3] = TP(areal.p1().x(), areal.p2().y()) * trans;
+//    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//    for (byte i = 0; i < 4; i++)
+//    {
+//       glRasterPos2i(ptlist[i].x(), ptlist[i].y());
+//       glBitmap(15,15,7,7,0,0, select_mark);
+//    }
+// }
 
