@@ -262,17 +262,19 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
    // Draw figures
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++) {
-      if (0 < lay->first)
-         if (!drawprop.layerHidden(lay->first))
-            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay->first);
-         else continue;
+//      if (0 < lay->first)
+      word curlayno = lay->first;
+      if (!drawprop.layerHidden(curlayno))
+         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(curlayno);
+      else continue;
       // fancy like this (dlist iterator) , besause a simple
-      // _shapesel[lay->first] complains about loosing qualifiers (const)
+      // _shapesel[curlayno] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
-      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(lay->first))))
-         lay->second->openGL_draw(drawprop,dlst->second);
+      bool fill = drawprop.getCurrentFill();
+      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
+         lay->second->openGL_draw(drawprop,dlst->second, fill);
       else
-         lay->second->openGL_draw(drawprop, NULL);
+         lay->second->openGL_draw(drawprop, NULL, fill);
    }
 }
 

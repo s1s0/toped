@@ -507,7 +507,7 @@ the current quadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. Draws also the select marks in case shape is
 selected. \n This is the cherry of the quadTree algorithm cake*/
 void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
-                                                   const dataList* slst) const {
+                                                   const dataList* slst, bool fill) const {
    if (empty()) return;
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
@@ -520,7 +520,53 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
 //      std::cout << "  ... with area " << areal.area() << "\n";
    }
    tdtdata* wdt = _first;
+//   bool fill = drawprop.getCurrentFill();
    // The drawing will be faster like this for the cells without selected shapes
+   // that will be the wast majority of the cases. A bit bigger code though.
+   // Seems the bargain is worth it.
+   if (slst)
+   {
+      while(wdt)
+      {
+         pointlist points;
+         // precalculate drawing data
+         wdt->openGL_precalc(drawprop, points);
+         // draw the shape fill (contents of refs, arefs and texts)
+         if (fill) wdt->openGL_drawfill(drawprop, points);
+         // draw the outline of the shapes and overlapping boxes 
+         if       (sh_selected == wdt->status()) wdt->openGL_drawsel(points, NULL);
+         else if  (sh_partsel  == wdt->status())
+         {
+            dataList::const_iterator SI;
+            for (SI = slst->begin(); SI != slst->end(); SI++)
+               if (SI->first == wdt) break;
+            assert(SI != slst->end());
+            wdt->openGL_drawsel(points, SI->second);
+         }
+         else wdt->openGL_drawline(drawprop, points);
+         wdt->openGL_postclean(drawprop, points);
+         wdt = wdt->next();
+      }
+   }
+   else
+   {
+      // if there are no selected shapes
+      while(wdt)
+      {
+         pointlist points;
+         // precalculate drawing data
+         wdt->openGL_precalc(drawprop, points);
+         // draw the shape fill (contents of refs, arefs and texts)
+         if (fill) wdt->openGL_drawfill(drawprop, points);
+         // draw the outline of the shapes and overlapping boxes
+         wdt->openGL_drawline(drawprop, points);
+         // clean-up
+         wdt->openGL_postclean(drawprop, points);
+         wdt = wdt->next();
+      }
+   }
+   
+/*   // The drawing will be faster like this for the cells without selected shapes
    // that will be the wast majority of the cases. A bit bigger code though.
    // Seems the bargain is worth it.
    if (slst)
@@ -542,9 +588,9 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
       while(wdt) {
          wdt->openGL_draw(drawprop);
          wdt = wdt->next();
-      }
+      }*/
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst);
+      if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst, fill);
 }
 
 /*! Temporary draw of the container contents on the screen using the virtual 
