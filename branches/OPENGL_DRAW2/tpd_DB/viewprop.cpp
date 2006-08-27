@@ -136,7 +136,7 @@ bool layprop::DrawProperties::getCurrentFill() const {
       byte* ifill = ifillset->second;
       glEnable(GL_POLYGON_STIPPLE);
 //      glEnable(GL_POLYGON_SMOOTH); //- for solid fill
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       glPolygonStipple(ifill);
       return true;
    }   

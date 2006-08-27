@@ -250,32 +250,34 @@ void colorSetup() {
    definecolor("green_2"      ,127, 255, 0  , 178);
    definecolor("bg_1"         ,224, 224, 224, 178);
 //              name       color  pattern pscale width
-   defineline("selected", "", 0x5555,   5  ,   4);
+   defineline("selected1", "", 0x5555,   5  ,	5);
+   defineline("selected2", "", 0xf18f,   2  ,	5);
+   defineline("selected3", "", 0xcfcf,   2  ,   5);
 }
 
 void layerSetup() {
     colorSetup();
     fillSetup();
 //    	     name    	 GDS  Colour       Fill              Selected
-   layprop("NWELL"      ,1  ,"yellow"      ,"Dots1"          , "selected" );
-   layprop("ACTIVE"     ,2  ,"blue"        ,"diagStripeBack" , "selected" );
-   layprop("UNKWN_1"    ,3  ,"darkGray"    ,""               , "selected" );
-   layprop("POLY"       ,4  ,"red"         ,"diagPatrnForw"  , "selected" );
-   layprop("N_IMPL"     ,5  ,"white"       ,""               , "selected" );
-   layprop("P_IMPL"     ,6  ,"magenta"     ,""               , "selected" );
-   layprop("CONTACT"    ,7  ,"white"       ,"diagStripeForw" , "selected" );   
-   layprop("METAL1"     ,8  ,"green"       ,"diagPatrnBack"  , "selected" );
-   layprop("PASS"       ,9  ,"darkGray"    ,""               , "selected" );
-   layprop("UNKWN_2"    ,10 ,"white"       ,""               , "selected" );
-   layprop("UNKWN_3"    ,11 ,"white"       ,""               , "selected" );
-   layprop("UNKWN_3"    ,12 ,"white"       ,""               , "selected" );
-   layprop("P_FIELD"    ,13 ,"white"       ,""               , "selected" );
-   layprop("POLY1"      ,14 ,"cyan"        ,"Cross1"         , "selected" );  
-   layprop("FUSE"       ,15 ,"white"       ,""               , "selected" );  
-   layprop("VIA12"      ,17 ,"lightGray"   ,""               , "selected" );
-   layprop("METAL2"     ,18 ,"darkMagenta" ,""               , "selected" );
+   layprop("NWELL"      ,1  ,"yellow"      ,"Dots1"          , "selected3" );
+   layprop("ACTIVE"     ,2  ,"blue"        ,"diagStripeBack" , "selected3" );
+   layprop("UNKWN_1"    ,3  ,"darkGray"    ,""               , "selected3" );
+   layprop("POLY"       ,4  ,"red"         ,"diagPatrnForw"  , "selected2" );
+   layprop("N_IMPL"     ,5  ,"white"       ,""               , "selected3" );
+   layprop("P_IMPL"     ,6  ,"magenta"     ,""               , "selected3" );
+   layprop("CONTACT"    ,7  ,"white"       ,"diagStripeForw" , "selected3" );   
+   layprop("METAL1"     ,8  ,"green"       ,"diagPatrnBack"  , "selected3" );
+   layprop("PASS"       ,9  ,"darkGray"    ,""               , "selected3" );
+   layprop("UNKWN_2"    ,10 ,"white"       ,""               , "selected3" );
+   layprop("UNKWN_3"    ,11 ,"white"       ,""               , "selected3" );
+   layprop("UNKWN_3"    ,12 ,"white"       ,""               , "selected3" );
+   layprop("P_FIELD"    ,13 ,"white"       ,""               , "selected3" );
+   layprop("POLY1"      ,14 ,"cyan"        ,"Cross1"         , "selected3" );  
+   layprop("FUSE"       ,15 ,"white"       ,""               , "selected3" );  
+   layprop("VIA12"      ,17 ,"lightGray"   ,""               , "selected3" );
+   layprop("METAL2"     ,18 ,"darkMagenta" ,""               , "selected3" );
    layprop("TEXT"       ,60 ,"yellow"      ,""               , ""         );
-   layprop("SCRIBE_LANE",63 ,"white"       ,""               , "selected" );
+   layprop("SCRIBE_LANE",63 ,"white"       ,""               , "selected3" );
 }
 
 void screenSetup() {

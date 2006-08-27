@@ -534,16 +534,22 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
          // draw the shape fill (contents of refs, arefs and texts)
          if (fill) wdt->openGL_drawfill(drawprop, points);
          // draw the outline of the shapes and overlapping boxes 
-         if       (sh_selected == wdt->status()) wdt->openGL_drawsel(points, NULL);
-         else if  (sh_partsel  == wdt->status())
+         wdt->openGL_drawline(drawprop, points);
+         if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
          {
-            dataList::const_iterator SI;
-            for (SI = slst->begin(); SI != slst->end(); SI++)
-               if (SI->first == wdt) break;
-            assert(SI != slst->end());
-            wdt->openGL_drawsel(points, SI->second);
+            drawprop.setLineProps(true);
+            if       (sh_selected == wdt->status())
+               wdt->openGL_drawsel(points, NULL);
+            else if  (sh_partsel  == wdt->status())
+            {
+               dataList::const_iterator SI;
+               for (SI = slst->begin(); SI != slst->end(); SI++)
+                  if (SI->first == wdt) break;
+               assert(SI != slst->end());
+               wdt->openGL_drawsel(points, SI->second);
+            }
+            drawprop.setLineProps(false);
          }
-         else wdt->openGL_drawline(drawprop, points);
          wdt->openGL_postclean(drawprop, points);
          wdt = wdt->next();
       }
