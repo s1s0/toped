@@ -131,6 +131,7 @@ void GDSin::gds2ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst) {
       std::ostringstream ost; ost << "Layer " << wd->GetLayer();
       ost << ": Wire check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
+      return;
    }   
    else pl = check.get_validated() ;
    /* @TODO !!! GDS path type here!!!! */

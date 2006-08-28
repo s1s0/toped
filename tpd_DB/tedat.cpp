@@ -1089,6 +1089,16 @@ void laydata::tdtwire::openGL_drawsel(const pointlist& ptlist, const SGBitSet* p
             glVertex2i(ptlist[(i+1)%numpoints].x(), ptlist[(i+1)%numpoints].y());
          }
       }
+      if (pslist->check(0))
+      {// if only the first is selected
+         glVertex2i(ptlist[numpoints].x(), ptlist[numpoints].y());
+         glVertex2i(ptlist[numpoints+1].x(), ptlist[numpoints+1].y());
+      }
+      if (pslist->check(numpoints-1))
+      {// if only the last is selected
+         glVertex2i(ptlist[3*numpoints-1].x(), ptlist[3*numpoints-1].y());
+         glVertex2i(ptlist[3*numpoints-2].x(), ptlist[3*numpoints-2].y());
+      }
       glEnd();
    }
 }
