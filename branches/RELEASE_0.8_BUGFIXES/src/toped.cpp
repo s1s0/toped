@@ -29,6 +29,7 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <math.h>
+#include <GL/glut.h>
 #include "toped.h"
 #include "datacenter.h"
 #include "../tpd_DB/viewprop.h"
@@ -569,9 +570,17 @@ void tui::TopedFrame::initView() {
 #ifdef __WXMSW__
    int *gl_attrib = NULL;
 #else
-   int gl_attrib[20] = { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
-            WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1,
-            WX_GL_DOUBLEBUFFER,
+   int gl_attrib[20] = { WX_GL_RGBA             ,
+                         WX_GL_MIN_RED          , 2,
+                         WX_GL_MIN_GREEN        , 2,
+                         WX_GL_MIN_BLUE         , 2,
+                         WX_GL_MIN_ALPHA        , 2,
+                         WX_GL_MIN_ACCUM_RED    , 2,
+                         WX_GL_MIN_ACCUM_GREEN  , 2,
+                         WX_GL_MIN_ACCUM_BLUE   , 2,
+                         WX_GL_MIN_ACCUM_ALPHA  , 2,
+//                         WX_GL_DEPTH_SIZE    , 1,
+                         WX_GL_DOUBLEBUFFER     ,
 #  ifdef __WXMAC__
             GL_NONE };
 #  else
@@ -579,6 +588,15 @@ void tui::TopedFrame::initView() {
 #  endif
 #endif
    _laycanvas = new LayoutCanvas(mS_canvas, gl_attrib);
+//   int argc = wxGetApp().argc;
+//   char** argv;
+//   for(int i = 0; i < argc; i++)
+//   {
+//      char boza = new
+//      argv[i] = wxGetApp().argv;
+   char** argv;
+   int argc = 0;
+   glutInit(&argc,argv);
 }
 
 
