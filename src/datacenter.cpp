@@ -53,27 +53,31 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
       tell_log(console::MT_ERROR,news);
       return;
    }
-   // proceed with children first
-   if (recursive) {
-      GDSin::ChildStructure nextofkin = src_structure->children;
-      typedef GDSin::ChildStructure::iterator CI;
-      for (CI ci = nextofkin.begin(); ci != nextofkin.end(); ci++)
-         structure((*ci)->Get_StrName(), recursive, overwrite);
-   }
    // check that destination structure with this name exists
    laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
    std::ostringstream ost; ost << "GDS import: ";
    if (NULL != dst_structure) {
       if (overwrite) {
          /*@TODO Erase the existing structure and convert*/
-         ost << "Warning! Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
+         ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
+         tell_log(console::MT_WARNING,ost.str());
       }
    // Don't report this , except maybe in case of a verbose or similar option is introduced
    // On a large GDS file those messages are simply anoying
-   //   else
-   //      ost << "Structure "<< gname << " already exists. Omitted";
+      else
+      {
+         ost << "Structure "<< gname << " already exists. Omitted";
+         tell_log(console::MT_INFO,ost.str());
+      }
    }
    else {
+      // proceed with children first
+      if (recursive) {
+         GDSin::ChildStructure nextofkin = src_structure->children;
+         typedef GDSin::ChildStructure::iterator CI;
+         for (CI ci = nextofkin.begin(); ci != nextofkin.end(); ci++)
+            structure((*ci)->Get_StrName(), recursive, overwrite);
+      }
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
@@ -81,7 +85,6 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
       // now call the cell converter
       convert(src_structure, dst_structure);
    }
-   tell_log(console::MT_INFO,ost.str());
 }
 
 void GDSin::gds2ted::convert(GDSin::GDSstructure* src, laydata::tdtcell* dst) {
