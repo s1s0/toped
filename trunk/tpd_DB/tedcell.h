@@ -86,7 +86,7 @@ namespace laydata {
                            tdtcell(std::string name);
                            tdtcell(TEDfile* const tedfile, std::string name);
                           ~tdtcell(); 
-      void                 openGL_draw(ctmstack&, const layprop::DrawProperties&,
+      void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;

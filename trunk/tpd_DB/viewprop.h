@@ -146,8 +146,14 @@ namespace layprop {
       void              unblockfill();
       void              pushref(const laydata::tdtcellref*);
       byte              popref(const laydata::tdtcellref*);
+      void              initCTMstack()       {_transtack.push(CTM());}
+      void              clearCTMstack()      {while (!_transtack.empty()) _transtack.pop();}
+      void              pushCTM(CTM& last)   {_transtack.push(last);}
+      void              popCTM()             {_transtack.pop();}
+      CTM&              topCTM()            {assert(_transtack.size());return _transtack.top();}
       void              draw_reference_marks(const TP&, const binding_marks) const;
       word              getlayerNo(std::string name) const;
+      word              drawinglayer() const {return _drawinglayer;}
       friend class ViewProperties;
    protected:
       laySetList        _layset;
@@ -161,8 +167,9 @@ namespace layprop {
    private:
       bool              _blockfill;
       laydata::cellrefstack*  _refstack;
-      word              _drawinglayer; 
-      ACTIVE_OP         _currentop; 
+      ctmstack          _transtack;
+      word              _drawinglayer;
+      ACTIVE_OP         _currentop;
    };
 
    //==============================================================================

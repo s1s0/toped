@@ -131,6 +131,7 @@ void GDSin::gds2ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst) {
       std::ostringstream ost; ost << "Layer " << wd->GetLayer();
       ost << ": Wire check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
+      return;
    }   
    else pl = check.get_validated() ;
    /* @TODO !!! GDS path type here!!!! */
@@ -450,7 +451,7 @@ void DataCenter::mouseStop() {
    else throw EXPTNactive_DB();
 }
 
-void DataCenter::openGL_draw(const layprop::DrawProperties& drawprop) {
+void DataCenter::openGL_draw(layprop::DrawProperties& drawprop) {
 // Maybe we need another try/catch in the layoutcanvas ?   
    if (_TEDDB) {
 //      _TEDDB->check_active();
