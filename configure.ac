@@ -72,8 +72,8 @@ AX_CHECK_GLUT
  AM_PATH_WXCONFIG(2.6.2, wxWin=1,,std gl)
  if test "$wxWin" != 1 || test "$wx_ver_ok" != "yes"; then
     AC_MSG_ERROR([
-	    wxWindows ver.2.6.2 or later must be installed on your system
-	    Please install or update your wxWindows
+       wxWindows ver.2.6.2 or later must be installed on your system
+       Please install or update your wxWindows
     ])
  else
     CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
