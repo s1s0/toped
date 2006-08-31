@@ -100,12 +100,14 @@ void layprop::DrawProperties::setCurrentColor(word layno) {
    glColor4f(0.5, 0.5, 0.5, 0.5);
 }
 
-bool  layprop::DrawProperties::layerHidden(word layno) const {
+bool  layprop::DrawProperties::layerHidden(word layno) const
+{
+   if (0 == layno) return false;
    if (_layset.end() != _layset.find(layno)) {
       laySetList::const_iterator ilayset = _layset.find(layno);
       return ilayset->second->hidden();
       //return _layset[layno]->hidden(); - see the comment in getCurrentFill
-   }      
+   }
    return true;
 }
    
@@ -119,6 +121,8 @@ bool  layprop::DrawProperties::layerLocked(word layno) const {
 }
 
 bool layprop::DrawProperties::getCurrentFill() const {
+   if (0 == _drawinglayer)
+      return true;
    if ((_layset.end() != _layset.find(_drawinglayer)) && !_blockfill) {
       // The 3 lines below are doing effectively
       // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
@@ -132,7 +136,7 @@ bool layprop::DrawProperties::getCurrentFill() const {
       byte* ifill = ifillset->second;
       glEnable(GL_POLYGON_STIPPLE);
 //      glEnable(GL_POLYGON_SMOOTH); //- for solid fill
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       glPolygonStipple(ifill);
       return true;
    }   
@@ -200,18 +204,28 @@ byte layprop::DrawProperties::popref(const laydata::tdtcellref* cref) {
    return 0;
 }
 
-void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_marks mark_type) const {
+void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_marks mark_type) const
+{
    GLubyte* the_mark;
    switch (mark_type) {
       case  cell_mark:if (_cellmarks_hidden) return;
-                      else the_mark = cell_mark_bmp;break;
+                      else
+                      {
+                         glColor4f(1.0, 1.0, 1.0, 0.8);
+                         the_mark = cell_mark_bmp;
+                         break;
+                      }
       case array_mark:if (_cellmarks_hidden) return;
-                      else the_mark = array_mark_bmp;break;
+                      else
+                      {
+                         glColor4f(1.0, 1.0, 1.0, 0.8);
+                         the_mark = array_mark_bmp;
+                         break;
+                      }
       case  text_mark:if (_textmarks_hidden) return;
                       else the_mark = text_mark_bmp;break;
       default: assert(false);
    }
-   glColor4f(1.0, 1.0, 1.0, 0.8);
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
    glRasterPos2i(p0.x(),p0.y());
    glBitmap(16,16,7,7,0,0, the_mark);

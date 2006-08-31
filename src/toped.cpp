@@ -29,6 +29,7 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <math.h>
+#include <GL/glut.h>
 #include "toped.h"
 #include "datacenter.h"
 #include "../tpd_DB/viewprop.h"
@@ -587,6 +588,9 @@ void tui::TopedFrame::initView() {
 #  endif
 #endif
    _laycanvas = new LayoutCanvas(mS_canvas, gl_attrib);
+   char** argv;
+   int argc = 0;
+   glutInit(&argc,argv);
 }
 
 

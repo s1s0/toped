@@ -234,14 +234,15 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
 void tui::LayoutCanvas::wnd_paint() {
    glAccum(GL_RETURN, 1.0);
    glColor4f(0.7, 0.7, 0.7, 0.4); // gray
-   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-   glRecti(presspoint.x(),presspoint.y(), n_ScrMARKold.x(), n_ScrMARKold.y());
+   glDisable(GL_POLYGON_STIPPLE);
+   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
    glRecti(presspoint.x(),presspoint.y(), n_ScrMARK.x(), n_ScrMARK.y());
+   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
+   glEnable(GL_POLYGON_STIPPLE);
 }
 
 void tui::LayoutCanvas::rubber_paint() {
    glAccum(GL_RETURN, 1.0);
-   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
    DATC->tmp_draw(Properties->drawprop(), releasepoint, n_ScrMARK);
 }
 
