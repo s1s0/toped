@@ -42,9 +42,8 @@ namespace layprop {
    class LayoutGrid {
    public:
                         LayoutGrid(real st, std::string cl) :_step(st), _color(cl), 
-                                                                  _visual(true) {};
-      void              Init(real st, std::string cl) {_step = st; _color = cl; 
-                                                                  _visual = true;};
+                                                                  _visual(false) {};
+      void              Init(real st, std::string cl) {_step = st; _color = cl;}
       void              Draw(const DrawProperties&, const real);
       real              step() const           {return _step;};
       bool              visual() const         {return _visual;};

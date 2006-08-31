@@ -1734,15 +1734,20 @@ void tellstdfunc::stdGRID::undo() {
 }
 
 int tellstdfunc::stdGRID::execute() {
-   UNDOcmdQ.push_front(this);
    bool  visu     = getBoolValue();
    byte    no     = getByteValue();
-   UNDOPstack.push_front(new telldata::ttint(no));
-   UNDOPstack.push_front(new telldata::ttbool(Properties->grid(no)->visual()));
-   gridON(no,visu);
-   UpdateLV();   
-   LogFile << LogFile.getFN() << "(" << no << "," << LogFile._2bool(visu) << ");";
-   LogFile.flush();
+   if (NULL != Properties->grid(no))
+   {
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(new telldata::ttint(no));
+      UNDOPstack.push_front(new telldata::ttbool(Properties->grid(no)->visual()));
+      gridON(no,visu);
+      UpdateLV();
+      LogFile << LogFile.getFN() << "(" << no << "," << LogFile._2bool(visu) << ");";
+      LogFile.flush();
+   }
+   else
+      tell_log(console::MT_ERROR,"Grid is not defined. Use definegrid(...) first");
    return EXEC_NEXT;
 }
 
