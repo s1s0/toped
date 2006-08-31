@@ -277,19 +277,23 @@ void laydata::tdtdesign::openGL_draw(layprop::DrawProperties& drawprop) {
 void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
                                           TP base, TP newp) {
    ctmqueue tmp_stack;
-   if (_tmpdata) {
+   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   if (_tmpdata)
+   {
       glColor4f(1.0, 1.0, 1.0, 0.7);
       tmp_stack.push_front(CTM(newp - base,1,0,false));
       _tmpdata->tmp_draw(drawprop, tmp_stack,NULL,true);
    }
-   else if ((drawprop.currentop() != layprop::op_none) && _target.checkedit()) {
+   else if ((drawprop.currentop() != layprop::op_none) && _target.checkedit())
+   {
       base *= _target.rARTM();
       newp *= _target.rARTM();
       tmp_stack.push_front(CTM(_target.ARTM()));
       tmp_stack.push_front(CTM(newp - base,1,0,false)*_target.ARTM());
       _target.edit()->tmp_draw(drawprop, tmp_stack, true);
       tmp_stack.clear();
-   }   
+   }
+   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void laydata::tdtdesign::write(TEDfile* const tedfile) {
