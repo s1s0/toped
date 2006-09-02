@@ -409,7 +409,7 @@ void  laydata::tdtbox::unselect_points(DBbox& select_in, SGBitSet* pntlst) {
    if (sh_selected == _status) pntlst->setall();
    if (select_in.inside(*_p1))  pntlst->reset(0);
    if (select_in.inside(TP(_p2->x(), _p1->y())))  pntlst->reset(1);
-   if (select_in.inside(*_p2))  pntlst->reset(3);
+   if (select_in.inside(*_p2))  pntlst->reset(2);
    if (select_in.inside(TP(_p1->x(), _p2->y())))  pntlst->reset(3);
 }
 
