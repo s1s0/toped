@@ -75,8 +75,8 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0) {
    _blockfill = false;
    _currentop = op_none;
    _drawinglayer = 0;
-   _cellmarks_hidden = false;
-   _textmarks_hidden = false;
+   _cellmarks_hidden = true;
+   _textmarks_hidden = true;
    _refstack = NULL;
 }
 
