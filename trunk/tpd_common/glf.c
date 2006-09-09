@@ -66,7 +66,7 @@ struct glf_font
 
 /* ------------- Main variables -------------- */
 
-static float SymbolDist = 0.2f;  /* Distance between symbols (Variable constant) */
+static float SymbolDist = 0.1f;  /* Distance between symbols (Variable constant) */
 static float SymbolDepth = 0.2f; /* Symbol Depth in 3D space (Variable constant) */
 static float SpaceSize = 2.0f;   /* Space size (Variable constant)               */
 static float RotateAngle = 0.0f; /* Rotate angle for string (vector font) */
@@ -85,7 +85,7 @@ static GLuint	m_direction;	/* String direction (vector fonts) */
 
 static char		console_msg = GLF_NO;
 static char		texturing = GLF_NO;
-static char		contouring = GLF_NO;
+static char		contouring = GLF_YES;
 static struct	color contouring_color;
 
 /* Console mode variables */
@@ -143,7 +143,7 @@ void glfInit()
 	console_msg = GLF_NO;
 	ap = GLF_CENTER;		/* Set anchor point to center of each symbol */
 	texturing = GLF_NO;		/* By default texturing is NOT Enabled */
-	contouring = GLF_NO;	/* By default contouring is NOT Enabled */
+	contouring = GLF_YES;	/* By default contouring is NOT Enabled */
 	memset(&contouring_color, 0, sizeof(struct color));
 	conData = NULL;
 	glfSetConsoleParam(40, 20);
@@ -297,7 +297,7 @@ static int ReadFont(char *font_name, struct glf_font *glff)
 | Return value: GLF_ERROR  - if error
 |               >=0 - returned font descriptor (load success)
 */
-int glfLoadFont(char *font_name)
+int glfLoadFont(const char *font_name)
 {
 	int i;
 	char flag; /* Temporary flag */
@@ -465,26 +465,26 @@ static void DrawString(char *s, void (*funct) (char s))
 	if (RotateAngle != 0.0f) glRotatef(RotateAngle, 0, 0, 1);
 
 	/* Correct string position */
-	if (m_string_center)
-	{
-		switch (m_direction)
-		{
-			case GLF_LEFT : glTranslatef(-distance/2, 0, 0); break;
-			case GLF_RIGHT : glTranslatef(distance/2, 0, 0); break;
-			case GLF_UP : glTranslatef(0, distance/2, 0); break;
-			case GLF_DOWN : glTranslatef(0, -distance/2, 0); break;
-		}
-	}
-	else if (s[0] != ' ')
-	{
-		switch (m_direction)
-		{
-			case GLF_LEFT : glTranslatef(-(1-(float)fabs(fonts[curfont]->symbols[s[0]]->leftx)), 0, 0); break;
-			case GLF_RIGHT : glTranslatef((1-(float)fabs(fonts[curfont]->symbols[s[0]]->rightx)), 0, 0); break;
-			case GLF_UP : glTranslatef(0, (1-(float)fabs(fonts[curfont]->symbols[s[0]]->topy)), 0); break;
-			case GLF_DOWN : glTranslatef(0, -(1-(float)fabs(fonts[curfont]->symbols[s[0]]->bottomy)), 0); break;
-		}
-	}
+// 	if (m_string_center)
+// 	{
+// 		switch (m_direction)
+// 		{
+// 			case GLF_LEFT : glTranslatef(-distance/2, 0, 0); break;
+// 			case GLF_RIGHT : glTranslatef(distance/2, 0, 0); break;
+// 			case GLF_UP : glTranslatef(0, distance/2, 0); break;
+// 			case GLF_DOWN : glTranslatef(0, -distance/2, 0); break;
+// 		}
+// 	}
+// 	else if (s[0] != ' ')
+// 	{
+// 		switch (m_direction)
+// 		{
+// 			case GLF_LEFT : glTranslatef(-(1-(float)fabs(fonts[curfont]->symbols[s[0]]->leftx)), 0, 0); break;
+// 			case GLF_RIGHT : glTranslatef((1-(float)fabs(fonts[curfont]->symbols[s[0]]->rightx)), 0, 0); break;
+// 			case GLF_UP : glTranslatef(0, (1-(float)fabs(fonts[curfont]->symbols[s[0]]->topy)), 0); break;
+// 			case GLF_DOWN : glTranslatef(0, -(1-(float)fabs(fonts[curfont]->symbols[s[0]]->bottomy)), 0); break;
+// 		}
+// 	}
 
 	/* Start to draw our string */
 	for (i=0; i<(int)strlen(s); i++)
@@ -554,7 +554,7 @@ static void DrawString(char *s, void (*funct) (char s))
 	glPopMatrix();
 }
 
-void glfDrawWiredString(char *s)
+void glfDrawWiredString(const char *s)
 {
 	DrawString(s, &glfDrawWiredSymbol);
 }
@@ -603,9 +603,9 @@ void glfDrawSolidSymbol(char s)
 	if (contouring == GLF_YES) 
 	{
 		glGetFloatv(GL_CURRENT_COLOR, temp_color);
-		glColor4f(contouring_color.r, contouring_color.g, contouring_color.b, contouring_color.a);
+//		glColor4f(contouring_color.r, contouring_color.g, contouring_color.b, contouring_color.a);
 		glfDrawWiredSymbol(s);
-		glColor4fv(temp_color);
+//		glColor4fv(temp_color);
 	}
 }
 
@@ -620,7 +620,7 @@ void glfDrawSolidSymbolF(int font_descriptor, char s)
 	curfont = temp;
 }
 
-void glfDrawSolidString(char *s)
+void glfDrawSolidString(const char *s)
 {
 	DrawString(s, &glfDrawSolidSymbol);
 }
@@ -905,7 +905,7 @@ void glfGetStringBoundsF(int fd, char *s, float *minx, float *miny, float *maxx,
 	}
 }
 
-void glfGetStringBounds(char *s, float *minx, float *miny, float *maxx, float *maxy)
+void glfGetStringBounds(const char *s, float *minx, float *miny, float *maxx, float *maxy)
 {
 	glfGetStringBoundsF(curfont, s, minx, miny, maxx, maxy);
 }

@@ -52,7 +52,7 @@ double round(double x);
 //#define MAX_X        (int4b)0x7FFFFFFF      //   2 147 483 643
 //#define MIN_Y        (int4b)0x80000001      //  -2 147 483 647
 //#define MAX_Y        (int4b)0x7FFFFFFF      //   2 147 483 647
-#define OPENGL_FONT_UNIT   119.05
+#define OPENGL_FONT_UNIT   128
 #define MIN_VISUAL_AREA    10   // that would be 10 pixels
 #define MAX_OVL_BOX  DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y) // maximum overlapping box
 #define DEFAULT_OVL_BOX DBbox(TP(0,0))

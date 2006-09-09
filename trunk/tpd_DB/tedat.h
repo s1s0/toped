@@ -353,7 +353,7 @@ namespace laydata {
    private:   
       std::string         _text;
       CTM                 _translation;
-      word                _width; 
+      DBbox               _overlap;
    };
 
 //==============================================================================

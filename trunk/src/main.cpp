@@ -19,7 +19,7 @@
 //    Description: Top file in the project
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -36,6 +36,7 @@
 #include "../tpd_DB/viewprop.h"
 #include "tellibin.h"
 #include "datacenter.h"
+#include "../tpd_common/glf.h"
 
 tui::TopedFrame*                 Toped = NULL;
 layprop::ViewProperties*         Properties = NULL;
@@ -322,7 +323,26 @@ bool TopedApp::OnInit() {
    InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
    Toped->Show(TRUE);
    SetTopWindow(Toped);
+
+   //@FIXME initializing glf library - temporary here
+   glfInit();
+   wxString fontFile = wxT("$TPD_LOCAL/fonts/arial1.glf");
+   wxFileName fontFN(fontFile);
+   fontFN.Normalize();
+   if (!(fontFN.IsOk() && (-1 != glfLoadFont(fontFN.GetFullPath().mb_str()))))
+   {
+      wxMessageDialog* dlg1 = new  wxMessageDialog(Toped,
+            wxT("Font library \"$TPD_LOCAL/fonts/arial1.glf\" not found or corrupted. \n Toped will be unstable.\n Continue?"),
+            wxT("Toped"),
+            wxYES_NO | wxICON_WARNING);
+      if (wxID_NO == dlg1->ShowModal())
+         return false;
+      delete dlg1;
+      std::string info("Font library \"$TPD_LOCAL/fonts/arial1.glf\" is not loaded. All text objects will not be properly processed");
+      tell_log(console::MT_ERROR,info);
+   }
    //
+
    GetLogDir();
    if (!GetLogFileName()) return FALSE;
    bool recovery_mode = false;
