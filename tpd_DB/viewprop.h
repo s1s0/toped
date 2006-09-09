@@ -149,7 +149,7 @@ namespace layprop {
       void              clearCTMstack()      {while (!_transtack.empty()) _transtack.pop();}
       void              pushCTM(CTM& last)   {_transtack.push(last);}
       void              popCTM()             {_transtack.pop();}
-      CTM&              topCTM()            {assert(_transtack.size());return _transtack.top();}
+      const CTM&        topCTM() const      {assert(_transtack.size());return _transtack.top();}
       void              draw_reference_marks(const TP&, const binding_marks) const;
       word              getlayerNo(std::string name) const;
       word              drawinglayer() const {return _drawinglayer;}

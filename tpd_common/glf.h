@@ -60,30 +60,30 @@ void glfInit();
 void glfClose();
 
 /* Font loading/unloading functions */
-int	glfLoadFont(char *font_name);			/* Load Vector font to memory */
-int	glfLoadBMFFont(char *FName);			/* Load Bitmap font to memory */
-int	glfUnloadFont();						/* Unload font from memory */
-int glfUnloadBMFFont();						/* Unload current BMF font */
+int	glfLoadFont(const char *font_name);		/* Load Vector font to memory */
+int	glfLoadBMFFont(char *FName);			   /* Load Bitmap font to memory */
+int	glfUnloadFont();						      /* Unload font from memory */
+int glfUnloadBMFFont();						      /* Unload current BMF font */
 int	glfUnloadFontD(int font_descriptor);	/* Unload font by font_descriptor */
 int	glfUnloadBMFFontD(int bmf_descriptor);	/* Unload BMF font by bmf_descriptor */
 
 /* Text drawing functions */
 /* --------- Vector Fonts ---------------- */
-void glfDrawWiredSymbol(char s);    /* Draw wired symbol    */
-void glfDrawWiredString(char *s);   /* Draw wired string    */
-void glfDrawSolidSymbol(char s);    /* Draw solid symbol    */
-void glfDrawSolidString(char *s);   /* Draw wired string    */
-void glfDraw3DWiredSymbol(char s);  /* Draw 3D wired symbol */
-void glfDraw3DWiredString(char *s); /* Draw 3D wired string */
-void glfDraw3DSolidSymbol(char s);  /* Draw 3D solid symbol */
-void glfDraw3DSolidString(char *s); /* Draw 3D solid string */
+void glfDrawWiredSymbol(char s);          /* Draw wired symbol    */
+void glfDrawWiredString(const char *s);   /* Draw wired string    */
+void glfDrawSolidSymbol(char s);          /* Draw solid symbol    */
+void glfDrawSolidString(const char *s);   /* Draw wired string    */
+void glfDraw3DWiredSymbol(char s);        /* Draw 3D wired symbol */
+void glfDraw3DWiredString(char *s);       /* Draw 3D wired string */
+void glfDraw3DSolidSymbol(char s);        /* Draw 3D solid symbol */
+void glfDraw3DSolidString(char *s);       /* Draw 3D solid string */
 
 /* --------- Bitmap Fonts ---------------- */
 void glfStartBitmapDrawing();       /* Must be called before bitmap text drawing */
 void glfStopBitmapDrawing();        /* Must be called after bitmap text drawing */
 void glfDrawBSymbol(char s);        /* Draw one symbol by bitmapped font */
 void glfDrawBString(char *s);       /* Draw string by bitmapped font */
-void glfDrawBMaskSymbol(char s);	/* Draw one symbol by bitmapped font (using mask) */
+void glfDrawBMaskSymbol(char s);	   /* Draw one symbol by bitmapped font (using mask) */
 void glfDrawBMaskString(char *s);	/* Draw string by bitmapped font (using mask) */
 
 
@@ -99,7 +99,7 @@ void glfDraw3DSolidStringF(int font_descriptor, char *s);
 
 /* Text control functions */
 void glfGetStringBoundsF(int fd, char *s, float *minx, float *miny, float *maxx, float *maxy);
-void glfGetStringBounds(char *s, float *minx, float *miny, float *maxx, float *maxy);
+void glfGetStringBounds(const char *s, float *minx, float *miny, float *maxx, float *maxy);
 
 void  glfSetSymbolSpace(float sp);   /* Set space between symbols */
 float glfGetSymbolSpace();           /* Get space between symbols */

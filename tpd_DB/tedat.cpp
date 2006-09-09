@@ -28,12 +28,12 @@
 #include <iostream>
 #include <math.h>
 #include <algorithm>
-#include <GL/glut.h>
 #include "tedat.h"
 #include "tedcell.h"
 #include "logicop.h"
 #include "../tpd_common/tedop.h"
 #include "../tpd_common/outbox.h"
+#include "../tpd_common/glf.h"
 
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 
@@ -453,7 +453,7 @@ void  laydata::tdtbox::unselect_points(DBbox& select_in, SGBitSet* pntlst) {
    if (sh_selected == _status) pntlst->setall();
    if (select_in.inside(*_p1))  pntlst->reset(0);
    if (select_in.inside(TP(_p2->x(), _p1->y())))  pntlst->reset(1);
-   if (select_in.inside(*_p2))  pntlst->reset(3);
+   if (select_in.inside(*_p2))  pntlst->reset(2);
    if (select_in.inside(TP(_p1->x(), _p2->y())))  pntlst->reset(3);
 }
 
@@ -1824,21 +1824,20 @@ DBbox laydata::tdtcellaref::clear_overlap() const {
 //-----------------------------------------------------------------------------
 // class tdttext
 //-----------------------------------------------------------------------------
-laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata() {
+laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata(), _overlap(TP()) {
    _text = text; _translation = trans;
-   _width = 0;
-   for (unsigned i = 0; i < _text.length(); i++) 
-      _width += glutStrokeWidth(GLUT_STROKE_ROMAN, _text[i]);
-   
+   float minx, miny, maxx, maxy;
+   glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
+   _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
 }
    
-laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata() 
+laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata(), _overlap(TP()) 
 {
-   _width = 0;
    _text = tedfile->getString();
    _translation = tedfile->getCTM();
-   for (unsigned i = 0; i < _text.length(); i++) 
-      _width += glutStrokeWidth(GLUT_STROKE_ROMAN, _text[i]);
+   float minx, miny, maxx, maxy;
+   glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
+   _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
 }
 
 
@@ -1869,26 +1868,27 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    // And the last, but not the least...
    // GDSII text justification
    //====================================================================
+   // the correction is needed to fix the bottom left corner of the
+   // text overlapping box to the binding point. glf library normally
+   // draws the first symbol centerd around the bounding point
+   CTM correction;
+   correction.Translate(-_overlap.p1().x(), -_overlap.p1().y());
+   DBbox _over = _overlap * correction;
    // font translation matrix
    CTM ftmtrx =  _translation * drawprop.topCTM();
-   int4b height = static_cast<int4b>(rint(OPENGL_FONT_UNIT));
-//   DBbox wsquare = DBbox(TP(),TP(height, height)) * ftmtrx; 
-//   wsquare = wsquare * drawprop.ScrCTM();
-   valid_box wsquare(TP(0, 0),TP(height, height), ftmtrx * drawprop.ScrCTM());
-   TP bindt;
+   valid_box wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT), ftmtrx * drawprop.ScrCTM());
    if (wsquare.area() > MIN_VISUAL_AREA)
    {
       // If we get here - means that the text is visible
       // get the text overlapping box ...
-      DBbox obox(TP(0, 0),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT))));
       ptlist.reserve(5);
-      ptlist.push_back(obox.p1() * ftmtrx);
-      ptlist.push_back(TP(obox.p2().x(), obox.p1().y()) * ftmtrx);
-      ptlist.push_back(obox.p2() * ftmtrx);
-      ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * ftmtrx);
+      ptlist.push_back(_over.p1() * ftmtrx);
+      ptlist.push_back(TP(_over.p2().x(), _over.p1().y()) * ftmtrx);
+      ptlist.push_back(_over.p2() * ftmtrx);
+      ptlist.push_back(TP(_over.p1().x(), _over.p2().y()) * ftmtrx);
       // ... and text bounding point (see the comment above)
-      ptlist.push_back(TP(static_cast<int4b>(rint(_translation.tx())),
-                          static_cast<int4b>(rint(_translation.ty())) ) * drawprop.topCTM());
+      ptlist.push_back(TP(static_cast<int4b>(_translation.tx()),
+                       static_cast<int4b>(_translation.ty()))  * drawprop.topCTM());
       // push the font matrix - will be used for text drawing
       drawprop.pushCTM(ftmtrx);
    }
@@ -1898,11 +1898,6 @@ void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const 
 {
    if (0 == ptlist.size()) return;
    // draw the overlapping box
-//   float cclr[4];
-//   glGetFloatv(GL_CURRENT_COLOR, cclr);
-//      DBbox obox(TP(0, 0),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT))));
-//   draw_overlapping_box(obox, ftmtrx, 0x3030);
-//   glColor4f(1.0, 1.0, 1.0, 0.5);
    glLineStipple(1,0x3030);
    glEnable(GL_LINE_STIPPLE);
    glBegin(GL_LINE_LOOP);
@@ -1912,7 +1907,6 @@ void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const 
    glDisable(GL_LINE_STIPPLE);
    
    drawprop.draw_reference_marks(ptlist[4], layprop::text_mark);
-//   glColor4f(cclr[0], cclr[1], cclr[2], cclr[3]);
 }
 
 void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -1924,8 +1918,15 @@ void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const 
                                              0,                     0,0,0,
                                  ptlist[4].x(),         ptlist[4].y(),0,1};
    glMultMatrixd(ori_mtrx);
-   for (unsigned i = 0; i < _text.length(); i++)
-      glutStrokeCharacter(GLUT_STROKE_ROMAN, _text[i]);
+   // correction of the glf shift - as explained in the openGL_precalc above
+   glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
+   // The only difference between glut and glf appears to be the size:-
+   // glf is not using the font unit, so we need to scale it back up (see below)
+   // but... it uses real numbers - that is not what we need. That's why -
+   // keeping the font unit will help to convert the font metrics back to
+   // integer coordinates
+   glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
+   glfDrawSolidString(_text.c_str());
    glPopMatrix();
 }
 
@@ -1949,28 +1950,28 @@ void laydata::tdttext::openGL_postclean(layprop::DrawProperties& drawprop, point
 }
 
 void laydata::tdttext::tmp_draw(const layprop::DrawProperties& drawprop,
-               ctmqueue& transtack, SGBitSet*, bool under_construct) const {
+               ctmqueue& transtack, SGBitSet*, bool under_construct) const
+{
    if (under_construct) return;
    //====================================================================
    // font translation matrix
-   CTM trans = transtack.front();
-   CTM ftmtrx =  _translation * trans;
-   int4b height = static_cast<int4b>(rint(OPENGL_FONT_UNIT));
-   DBbox wsquare = DBbox(TP(),TP(height, height)) * ftmtrx; 
-   wsquare = wsquare * drawprop.ScrCTM();
-   TP bindt;
-   if (wsquare.area() > MIN_VISUAL_AREA) {
-      bindt = TP(static_cast<int4b>(rint(_translation.tx())), 
-                 static_cast<int4b>(rint(_translation.ty())) ) * trans;
+   CTM ftmtrx =  _translation * transtack.front();
+   valid_box wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT), ftmtrx * drawprop.ScrCTM());
+   if (wsquare.area() > MIN_VISUAL_AREA)
+   {
+      // ... and text bounding point (see the comment above)
+      TP boundPoint = TP(static_cast<int4b>(_translation.tx()),
+                         static_cast<int4b>(_translation.ty()))  * transtack.front();
       glPushMatrix();
-      double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
-                            ftmtrx.c(), ftmtrx.d(),0,0,
-                                     0,          0,0,0,
-                             bindt.x(),  bindt.y(),0,1};
-      glMultMatrixd(ori_mtrx);                             
-      for (unsigned i = 0; i < _text.length(); i++) {
-         glutStrokeCharacter(GLUT_STROKE_ROMAN, _text[i]);
-      }
+      double ori_mtrx[] = { _translation.a(), _translation.b(),0,0,
+                            _translation.c(), _translation.d(),0,0,
+                                           0,                0,0,0,
+                              boundPoint.x(),   boundPoint.y(),0,1};
+      glMultMatrixd(ori_mtrx);
+      // correction of the glf shift - as explained in the openGL_precalc above
+      glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
+      glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
+      glfDrawWiredString(_text.c_str());
       glPopMatrix();
    }
 }
@@ -2011,8 +2012,7 @@ void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
 }
 
 DBbox laydata::tdttext::overlap() const {
-   return DBbox(TP(),TP(_width,static_cast<int4b>(rint(OPENGL_FONT_UNIT)))) * 
-                                                                   _translation;
+   return (_overlap * _translation);
 }
 
 void laydata::tdttext::info(std::ostringstream& ost) const {

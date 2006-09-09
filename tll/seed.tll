@@ -276,8 +276,9 @@ void layerSetup() {
    layprop("FUSE"       ,15 ,"white"       ,""               , "selected3" );  
    layprop("VIA12"      ,17 ,"lightGray"   ,""               , "selected3" );
    layprop("METAL2"     ,18 ,"darkMagenta" ,""               , "selected3" );
-   layprop("TEXT"       ,60 ,"yellow"      ,""               , ""         );
-   layprop("SCRIBE_LANE",63 ,"white"       ,""               , "selected3" );
+   layprop("TEXT"       ,60 ,"darkGray"    ,""               , "selected1" );
+   layprop("TEXT"       ,62 ,"yellow"      ,"horiHash"       , "selected2" );
+   layprop("SCRIBE_LANE",63 ,"white"       ,""       	     , "selected3" );
 }
 
 void screenSetup() {
