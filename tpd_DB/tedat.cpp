@@ -330,7 +330,15 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
    // functions. It is quite not clear however where is the balance here,
    // because calculations might be cheaper than the memory access in
    // terms of CPU cycles.
-   // The second objective seems to be a problem though
+   // There is a big exception here - texts. Esspecially solid texts
+   // As all other shapes every symbol should be drawn twice - once the
+   // outline (wired symbol in glf terms) and then the fill (the solid part)
+   // Here data processing is done twice. To avoid this - we have to
+   // code glf procedures that follow the rule 1 - i.e. to calculate first
+   // the entire string in terms of polygons and then to draw the lines
+   // and the fill as appripriate using the new data. 
+   //
+   // The second objective seems to be a problem as well
    // - drawing color as a rule is the same for the entire layer.
    //   -- this means that the reference marks and overlapping boxes of the
    //      texts shold be drawn in the color of the layer (not in gray) 
@@ -1907,6 +1915,23 @@ void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const 
    glDisable(GL_LINE_STIPPLE);
    
    drawprop.draw_reference_marks(ptlist[4], layprop::text_mark);
+   // draw the text itself
+   glPushMatrix();
+   double ori_mtrx[] = { drawprop.topCTM().a(), drawprop.topCTM().b(),0,0,
+                         drawprop.topCTM().c(), drawprop.topCTM().d(),0,0,
+                                             0,                     0,0,0,
+                                 ptlist[4].x(),         ptlist[4].y(),0,1};
+   glMultMatrixd(ori_mtrx);
+   // correction of the glf shift - as explained in the openGL_precalc above
+   glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
+   // The only difference between glut and glf appears to be the size:-
+   // glf is not using the font unit, so we need to scale it back up (see below)
+   // but... it uses real numbers - that is not what we need. That's why -
+   // keeping the font unit will help to convert the font metrics back to
+   // integer coordinates
+   glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
+   glfDrawTopedString(_text.c_str(),0);
+   glPopMatrix();
 }
 
 void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -1926,7 +1951,7 @@ void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const 
    // keeping the font unit will help to convert the font metrics back to
    // integer coordinates
    glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-   glfDrawSolidString(_text.c_str());
+   glfDrawTopedString(_text.c_str(),1);
    glPopMatrix();
 }
 
