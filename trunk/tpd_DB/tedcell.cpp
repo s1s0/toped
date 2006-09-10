@@ -27,13 +27,14 @@
 
 #include <iostream>
 #include <sstream>
+#include <iostream>
 #include "tedcell.h"
 #include "tedat.h"
 #include "viewprop.h"
 #include "tedesign.h"
 #include "../tpd_common/tedop.h"
 #include "../tpd_common/outbox.h"
-#include <iostream>
+#include "../tpd_common/glf.h"
 extern layprop::ViewProperties*   Properties;
 
 laydata::editobject::editobject() {
@@ -271,6 +272,8 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
       bool fill = drawprop.getCurrentFill();
+//      if (fill) glfEnable(GLF_FILLING);
+//      else      glfDisable(GLF_FILLING);
       if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
          lay->second->openGL_draw(drawprop,dlst->second, fill);
       else

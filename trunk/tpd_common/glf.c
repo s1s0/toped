@@ -85,7 +85,8 @@ static GLuint	m_direction;	/* String direction (vector fonts) */
 
 static char		console_msg = GLF_NO;
 static char		texturing = GLF_NO;
-static char		contouring = GLF_YES;
+static char		contouring = GLF_NO;
+static char    filling = GLF_YES;
 static struct	color contouring_color;
 
 /* Console mode variables */
@@ -143,8 +144,9 @@ void glfInit()
 	console_msg = GLF_NO;
 	ap = GLF_CENTER;		/* Set anchor point to center of each symbol */
 	texturing = GLF_NO;		/* By default texturing is NOT Enabled */
-	contouring = GLF_YES;	/* By default contouring is NOT Enabled */
-	memset(&contouring_color, 0, sizeof(struct color));
+	contouring = GLF_NO;	/* By default contouring is NOT Enabled */
+   filling = GLF_YES;   /* By default fill is Enabled */
+   memset(&contouring_color, 0, sizeof(struct color));
 	conData = NULL;
 	glfSetConsoleParam(40, 20);
 	glfConsoleClear();
@@ -398,6 +400,37 @@ void glfDrawWiredSymbol(char s)
 	}
 }
 
+
+// void (char s)
+// {
+//    int i, cur_line;
+//    float *tvp; /* temporary vertex pointer */
+//    float x, y;
+//   
+//    if ((curfont < 0) || (fonts[curfont] == NULL)) return;
+//    if (fonts[curfont]->symbols[s] == NULL) return;
+// 
+//    glBegin(GL_LINE_LOOP);
+//    tvp = fonts[curfont]->symbols[s]->vdata;
+//    cur_line = 0;
+//    for (i=0; i<fonts[curfont]->symbols[s]->vertexs; i++)
+//    {
+//       x = *tvp++;
+//       y = *tvp++;
+//       glVertex2f(x, y);
+//       if (fonts[curfont]->symbols[s]->ldata[cur_line] == i)
+//       {
+//          glEnd();
+//          cur_line++;
+//          if (cur_line < fonts[curfont]->symbols[s]->lines) glBegin(GL_LINE_LOOP);
+//          else break; /* No more lines */
+//       }
+//    }
+//    /* Draw fill, if enabled */
+//    if (filling == GLF_YES)
+//       glfDrawSolidSymbol(s);
+// }
+
 /* Draw wired symbol by font_descriptor */
 void glfDrawWiredSymbolF(int font_descriptor, char s)
 {
@@ -409,7 +442,7 @@ void glfDrawWiredSymbolF(int font_descriptor, char s)
 	curfont = temp;
 }
 
-static void DrawString(char *s, void (*funct) (char s))
+static void DrawString(const char *s, void (*funct) (char s))
 {
 	int i;
 	float sda, sdb;
@@ -559,6 +592,39 @@ void glfDrawWiredString(const char *s)
 	DrawString(s, &glfDrawWiredSymbol);
 }
 
+
+void glfDrawTopedString(const char *s, unsigned char fill)
+{
+//   DrawString(s, &glfDrawTopedSymbol);
+   int i;
+   float sda, sdb;
+
+   if ((!s) || (!*s) || (curfont == -1)) return;
+   void(* symbfunc) (char*) = (fill) ? &glfDrawSolidSymbol : &glfDrawWiredSymbol;
+   glPushMatrix();
+   
+   /* Start to draw the string */
+   for (i=0; i<(int)strlen(s); i++)
+   {
+      if (s[i] != ' ') (* symbfunc)(s[i]);
+      if ((fonts[curfont]->symbols[s[i]] == NULL) || (s[i] == ' '))
+         glTranslatef(SpaceSize, 0, 0);
+      else if (i < ((int)strlen(s)-1))
+      {
+         if (s[i+1] == ' ')
+            glTranslatef(SymbolDist, 0, 0);
+         else
+         {
+            if (fonts[curfont]->symbols[s[i+1]] == NULL) continue;
+            sda = (float)fabs(fonts[curfont]->symbols[s[i]]->rightx);
+            sdb = (float)fabs(fonts[curfont]->symbols[s[i+1]]->leftx);
+            glTranslatef(sda+sdb+SymbolDist, 0, 0);
+         }
+      }
+   }
+   glPopMatrix();
+}
+
 /* Draw wired string by font_descriptor */
 void glfDrawWiredStringF(int font_descriptor, char *s)
 {
@@ -599,14 +665,14 @@ void glfDrawSolidSymbol(char s)
 	}
 	glEnd();
 
-	/* Draw contour, if enabled */
-	if (contouring == GLF_YES) 
-	{
-		glGetFloatv(GL_CURRENT_COLOR, temp_color);
+   //	/* Draw contour, if enabled */
+	//if (contouring == GLF_YES)
+	//{
+//		glGetFloatv(GL_CURRENT_COLOR, temp_color);
 //		glColor4f(contouring_color.r, contouring_color.g, contouring_color.b, contouring_color.a);
-		glfDrawWiredSymbol(s);
+//		glfDrawWiredSymbol(s);
 //		glColor4fv(temp_color);
-	}
+	//}
 }
 
 /* Draw solid symbol by font_descriptor */
@@ -975,6 +1041,7 @@ void glfEnable(int what)
 		case GLF_TEXTURING: texturing = GLF_YES; break;
 		case GLF_CONSOLE_CURSOR: conCursor = GLF_YES; break;
 		case GLF_CONTOURING: contouring = GLF_YES; break;
+//      case GLF_FILLING: filling = GLF_YES; break;
 	}
 }
 
@@ -986,7 +1053,8 @@ void glfDisable(int what)
 		case GLF_TEXTURING: texturing = GLF_NO; break;
 		case GLF_CONSOLE_CURSOR: conCursor = GLF_NO; break;
 		case GLF_CONTOURING: contouring = GLF_NO; break;
-	}
+//      case GLF_FILLING: filling = GLF_NO; break;
+   }
 }
 
 /* ---------------- Console functions ---------------------- */

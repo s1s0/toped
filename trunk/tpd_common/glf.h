@@ -34,6 +34,7 @@ extern "C" {
 #define GLF_CONSOLE_MESSAGES 10
 #define GLF_TEXTURING        11
 #define GLF_CONTOURING       12
+//#define GLF_FILLING          13
 
 #define GLF_LEFT_UP          20
 #define GLF_LEFT_CENTER      21
@@ -63,7 +64,7 @@ void glfClose();
 int	glfLoadFont(const char *font_name);		/* Load Vector font to memory */
 int	glfLoadBMFFont(char *FName);			   /* Load Bitmap font to memory */
 int	glfUnloadFont();						      /* Unload font from memory */
-int glfUnloadBMFFont();						      /* Unload current BMF font */
+int   glfUnloadBMFFont();						   /* Unload current BMF font */
 int	glfUnloadFontD(int font_descriptor);	/* Unload font by font_descriptor */
 int	glfUnloadBMFFontD(int bmf_descriptor);	/* Unload BMF font by bmf_descriptor */
 
@@ -71,6 +72,8 @@ int	glfUnloadBMFFontD(int bmf_descriptor);	/* Unload BMF font by bmf_descriptor 
 /* --------- Vector Fonts ---------------- */
 void glfDrawWiredSymbol(char s);          /* Draw wired symbol    */
 void glfDrawWiredString(const char *s);   /* Draw wired string    */
+void glfDrawTopedString(const char *s, unsigned char fill);
+//void glfDrawTopedSymbol(char s);
 void glfDrawSolidSymbol(char s);          /* Draw solid symbol    */
 void glfDrawSolidString(const char *s);   /* Draw wired string    */
 void glfDraw3DWiredSymbol(char s);        /* Draw 3D wired symbol */
