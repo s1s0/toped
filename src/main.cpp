@@ -145,8 +145,11 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("copy"             ,(new       tellstdfunc::stdCOPYSEL(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("copy"             ,(new     tellstdfunc::stdCOPYSEL_D(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("rotate"           ,(new                tellstdfunc::stdROTATESEL(telldata::tn_void,false)));
+   mblock->addFUNC("rotate"           ,(new              tellstdfunc::stdROTATESEL_D(telldata::tn_void,false)));
    mblock->addFUNC("flipX"            ,(new                 tellstdfunc::stdFLIPXSEL(telldata::tn_void,false)));
+   mblock->addFUNC("flipX"            ,(new               tellstdfunc::stdFLIPXSEL_D(telldata::tn_void,false)));
    mblock->addFUNC("flipY"            ,(new                 tellstdfunc::stdFLIPYSEL(telldata::tn_void,false)));
+   mblock->addFUNC("flipY"            ,(new               tellstdfunc::stdFLIPYSEL_D(telldata::tn_void,false)));
    mblock->addFUNC("delete"           ,(new                tellstdfunc::stdDELETESEL(telldata::tn_void,false)));
    mblock->addFUNC("group"            ,(new                    tellstdfunc::stdGROUP(telldata::tn_void,false)));
    mblock->addFUNC("ungroup"          ,(new                  tellstdfunc::stdUNGROUP(telldata::tn_void,false)));

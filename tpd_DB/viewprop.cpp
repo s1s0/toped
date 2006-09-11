@@ -390,15 +390,15 @@ void layprop::ViewProperties::setCurrentOp(int actop) {
    if (actop > 0) _drawprop._currentop = op_dwire;
    else
       switch (actop) {
-         case  0: _drawprop._currentop = op_dbox;break;
-         case -1: _drawprop._currentop = op_dpoly;break;
-         case -2: _drawprop._currentop = op_move;break;
-         case -3: _drawprop._currentop = op_copy;break;
+         case  0: _drawprop._currentop = op_dbox  ;break;
+         case -1: _drawprop._currentop = op_dpoly ;break;
+         case -2: _drawprop._currentop = op_move  ;break;
+         case -3: _drawprop._currentop = op_copy  ;break;
+         case -4: _drawprop._currentop = op_flipX ;break;
+         case -5: _drawprop._currentop = op_flipY ;break;
+         case -6: _drawprop._currentop = op_rotate;break;
          default: _drawprop._currentop = op_none;
       }
-/*   if       (-2 == actop)  _drawprop._currentop = op_move;
-   else if  (-3 == actop)  _drawprop._currentop = op_copy;
-   else                    _drawprop._currentop = op_none;*/
 }
 
 void layprop::ViewProperties::drawGrid() const{

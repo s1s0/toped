@@ -2515,13 +2515,13 @@ int tellstdfunc::stdMOVESEL_D::execute() {
 tellstdfunc::stdROTATESEL::stdROTATESEL(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
 }
 
 void tellstdfunc::stdROTATESEL::undo_cleanup() {
-   getOpValue(UNDOPstack, false);
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+   getOpValue(UNDOPstack, false);
    telldata::ttlist* failed = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    telldata::ttlist* deleted = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    telldata::ttlist* added = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
@@ -2538,8 +2538,8 @@ void tellstdfunc::stdROTATESEL::undo()
    telldata::ttlist* added = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttlist* deleted = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttlist* failed = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
    real   angle  = 360 - getOpValue(UNDOPstack, true);
+   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
    real DBscale = Properties->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->unselect_fromList(get_ttlaylist(failed));
@@ -2572,10 +2572,10 @@ void tellstdfunc::stdROTATESEL::undo()
 
 int tellstdfunc::stdROTATESEL::execute() {
    UNDOcmdQ.push_front(this);
-   real   angle  = getOpValue();
-   UNDOPstack.push_front(new telldata::ttreal(angle));
    UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   real   angle  = getOpValue();
+   UNDOPstack.push_front(new telldata::ttreal(angle));
    real DBscale = Properties->DBscale();
    // rotate_selected returns 3 select lists : Failed/Deleted/Added
    // This is because of the box rotation in which case box has to be converted to polygon
@@ -2598,6 +2598,20 @@ int tellstdfunc::stdROTATESEL::execute() {
    UpdateLV();   
    return EXEC_NEXT;
 }
+
+//=============================================================================
+tellstdfunc::stdROTATESEL_D::stdROTATESEL_D(telldata::typeID retype, bool eor) :
+      stdROTATESEL(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+}
+
+int tellstdfunc::stdROTATESEL_D::execute() {
+// stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(-6, &OPstack)) return EXEC_ABORT;
+   return stdROTATESEL::execute();
+}
+
 
 //=============================================================================
 tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype, bool eor) :
@@ -2637,6 +2651,17 @@ int tellstdfunc::stdFLIPXSEL::execute() {
 }
 
 //=============================================================================
+tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
+      stdFLIPXSEL(new parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::stdFLIPXSEL_D::execute() {
+   // stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(-4, &OPstack)) return EXEC_ABORT;
+   return stdFLIPXSEL::execute();
+}
+
+//=============================================================================
 tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
@@ -2671,6 +2696,17 @@ int tellstdfunc::stdFLIPYSEL::execute() {
    //delete p1; undo will delete them
    UpdateLV();   
    return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
+      stdFLIPYSEL(new parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::stdFLIPYSEL_D::execute() {
+   // stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(-5, &OPstack)) return EXEC_ABORT;
+   return stdFLIPYSEL::execute();
 }
 
 //=============================================================================
@@ -3379,18 +3415,24 @@ telldata::ttint* tellstdfunc::CurrentLayer() {
                      be shown
    input_type = -2 - move. Two points expected. Selected and partially selected 
                      objects will be moved on the screen with the marker
-   input type = -3 - copy. Two points expected. Fully selected shapes will be
+   input_type = -3 - copy. Two points expected. Fully selected shapes will be
                      moved on the screen with the marker.
+   input_type = -4 - flipX. One point expected only
+   input_type = -5 - flipY. One point expected only
+   input_type = -6 - rotate. One point expected
 */
 bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack) {
-   // Create a temporary object in the tdtdesign
+   // Create a temporary object in the tdtdesign (only if a new object is created, i.e. box,wire,polygon)
    try {DATC->mouseStart(input_type);}
    catch (EXPTN) {return false;}
    // flag the prompt that we expect a list of points & handle a pointer to
    // the operand stack
-   if ((input_type == 0) || (input_type < -1))
-        Toped->cmdline()->waitGUInput(OPstack, telldata::tn_box);
-   else Toped->cmdline()->waitGUInput(OPstack, TLISTOF(telldata::tn_pnt));
+   if ((input_type == 0) || (input_type == -2) || (input_type == -3))
+      Toped->cmdline()->waitGUInput(OPstack, telldata::tn_box);
+   else if ((input_type == -4) || (input_type == -5) || (input_type == -6))
+      Toped->cmdline()->waitGUInput(OPstack, telldata::tn_pnt);
+   else
+      Toped->cmdline()->waitGUInput(OPstack, TLISTOF(telldata::tn_pnt));
    // flag the canvas that a mouse input will be required
    wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(input_type);

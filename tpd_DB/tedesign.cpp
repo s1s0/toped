@@ -286,10 +286,33 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
    }
    else if ((drawprop.currentop() != layprop::op_none) && _target.checkedit())
    {
-      base *= _target.rARTM();
-      newp *= _target.rARTM();
-      tmp_stack.push_front(CTM(_target.ARTM()));
-      tmp_stack.push_front(CTM(newp - base,1,0,false)*_target.ARTM());
+      if ((layprop::op_copy == drawprop.currentop()) || (layprop::op_move == drawprop.currentop()))
+      {
+         base *= _target.rARTM();
+         newp *= _target.rARTM();
+         tmp_stack.push_front(CTM(_target.ARTM()));
+         tmp_stack.push_front(CTM(newp - base,1,0,false)*_target.ARTM());
+      }
+      else if ((layprop::op_flipX == drawprop.currentop()) || (layprop::op_flipY == drawprop.currentop()))
+      {
+         CTM newpos = _target.ARTM();
+         tmp_stack.push_front(newpos);
+         if (layprop::op_flipX == drawprop.currentop())
+            newpos.FlipX(newp.y());
+         else
+            newpos.FlipY(newp.x());
+         tmp_stack.push_front(newpos * _target.rARTM());
+      }
+      else if (layprop::op_rotate == drawprop.currentop())
+      {
+         CTM newpos = _target.rARTM();
+         newp *= _target.rARTM();
+//         tmp_stack.push_front(newpos);
+         newpos.Translate(-newp.x(),-newp.y());
+         newpos.Rotate(90);
+         newpos.Translate(newp.x(),newp.y());
+         tmp_stack.push_front(newpos * _target.ARTM());
+      }
       _target.edit()->tmp_draw(drawprop, tmp_stack, true);
       tmp_stack.clear();
    }
