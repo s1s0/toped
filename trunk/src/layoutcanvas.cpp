@@ -87,6 +87,8 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    rubber_band = false;
    restricted_move = false;
    invalid_window = false;
+   reperX = false;
+   reperY = false;
    initializeGL();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
@@ -244,6 +246,22 @@ void tui::LayoutCanvas::wnd_paint() {
 void tui::LayoutCanvas::rubber_paint() {
    glAccum(GL_RETURN, 1.0);
    DATC->tmp_draw(Properties->drawprop(), releasepoint, n_ScrMARK);
+   if (reperX || reperY)
+   {
+      glColor4f(1, 1, 1, .5);
+      glBegin(GL_LINES);
+      if (reperX)
+      {
+         glVertex2i(lp_BL.x(), ScrMARK.y()) ;
+         glVertex2i(lp_TR.x(), ScrMARK.y());
+      }
+      if (reperY)
+      {
+         glVertex2i(ScrMARK.x() , lp_BL.y()) ;
+         glVertex2i(ScrMARK.x() , lp_TR.y());
+      }
+      glEnd();
+   }
 }
 
 void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
@@ -362,7 +380,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event) {
    if (deltaY > 0) 
       UpdateCoordWin(ScrMARK.y(), POS_Y, (n_ScrMARK.y() - releasepoint.y()), DEL_Y);
    if ((tmp_wnd || mouse_input)) Refresh();//updateGL();
-}   
+}
       
 void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
    presspoint = ScrMARK;
@@ -586,19 +604,29 @@ void tui::LayoutCanvas::update_viewport() {
    glClearColor(0,0,0,0);
 }
 
-void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt) {
+void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
+{
    wxCommandEvent eventABORTEN(wxEVT_CNVSSTATUSLINE);
-   if (1 == evt.GetExtraLong()) {
+   if (1 == evt.GetExtraLong())
+   { // start mouse input
       mouse_input = true;
       Properties->setCurrentOp(evt.GetInt());
+      //restricted_move will be true for wire and polygon
       restricted_move = (Properties->marker_angle() != 0) && 
                               ((evt.GetInt() > 0) || (evt.GetInt() == -1));
       eventABORTEN.SetInt(STS_ABORTENABLE);
+      reperX = (-4 == evt.GetInt());
+      reperY = (-5 == evt.GetInt());
+      if (reperX || reperY || (-6 == evt.GetInt()))
+         rubber_band = true;
    }
-   else {
+   else
+   { // stop mouse input
       mouse_input = false;
       rubber_band = false;
       restricted_move = false;
+      reperX = false;
+      reperY = false;
       Properties->setCurrentOp(layprop::op_none);
       wxCommandEvent eventPOSITION(wxEVT_MARKERPOSITION);
       eventPOSITION.SetString(wxT(""));

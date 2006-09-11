@@ -34,7 +34,7 @@
 namespace layprop {
 
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
-   typedef enum {op_none = -4, op_copy, op_move, op_dpoly, op_dbox, op_dwire} ACTIVE_OP;
+   typedef enum {op_none = -7, op_rotate, op_flipY, op_flipX, op_copy, op_move, op_dpoly, op_dbox, op_dwire} ACTIVE_OP;
 
    class ViewProperties;
    class DrawProperties;

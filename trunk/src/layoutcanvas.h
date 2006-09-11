@@ -236,6 +236,8 @@ typedef enum  {
       void           rubber_paint();
       void           UpdateCoordWin(int coord, POSITION_TYPE postype, int dcoord, POSITION_TYPE dpostype);
       void           EventMouseClick(int button);
+      bool           reperX;         // Draw a cursor line across the window parallel to the X axis
+      bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       DECLARE_EVENT_TABLE();
    };
 
