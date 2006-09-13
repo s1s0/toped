@@ -594,9 +594,11 @@ void tui::TopedFrame::initView() {
 //   {
 //      char boza = new
 //      argv[i] = wxGetApp().argv;
+#ifndef WIN32
    char** argv;
    int argc = 0;
    glutInit(&argc,argv);
+#endif
 }
 
 
