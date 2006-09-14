@@ -1,0 +1,230 @@
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+// ------------------------------------------------------------------------ =
+//           $URL: http://perun/tpd_svn/trunk/toped_wx/tll/test.tll $
+//        Created: Fri Nov 08 2002
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Some basic tests of the script and the editor
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------                
+//      $Revision: 218 $
+//          $Date: 2005-09-30 23:04:05 +0100 (Fri, 30 Sep 2005) $
+//        $Author: skr $
+//===========================================================================
+
+#include "$TPD_LOCAL/tll/seed.tll"
+
+// Some DRC rules defined as global variables
+real _actOverCont = 1.5;
+real _mincont = 2;
+real _contspace = 2.5;
+real _gate2cont = 2.5;
+real _polyOverActive = 2;
+real _nwelltonactive = 9;
+real _welloverpwell = 3;
+real _wellovernwell = 1;
+real _metalovercont = 1;
+real _polyovercont = 1.5;
+real _implantoveract = 2;
+
+box MOStran(point bound, real W, real L) {
+   // active
+   real activeW = L + 2*_gate2cont + 2*_mincont + 2*_actOverCont;
+   addbox(bound,activeW,W,2);
+   // gate
+   point gateB = {bound.x + (activeW - L)/2, bound.y -_polyOverActive};
+   addbox(gateB, L,  W + 2*_polyOverActive,4); // as above
+   // add contacts
+   point contBL = {bound.x + _actOverCont, bound.y + _actOverCont};
+   point contBR = {bound.x + activeW - _actOverCont, bound.y + _actOverCont};
+   point metlBL = {contBL.x - _metalovercont, contBL.y - _metalovercont};
+   point metlBR = {contBR.x + _metalovercont, contBR.y - _metalovercont};
+   box contactL = {{0,0},{ _mincont,_mincont}};
+   box contactR = {{0,0},{-_mincont,_mincont}};
+   // calculate the number of contacts
+   if (W < 2*_actOverCont + _mincont) {echo("Can't fit even a single contact !")}
+   else {
+      usinglayer(7);
+      real numconts = (W - 2*_actOverCont) / (_mincont + _contspace);
+      while (numconts > 0) {
+         addbox(contactL+contBL); 
+         addbox(contactR+contBR);
+         contBL.y = contBL.y + _contspace + _mincont;
+         contBR.y = contBR.y + _contspace + _mincont;
+         numconts = numconts - 1;
+      };
+      usinglayer(8);
+      point metlTL = {contBL.x + _metalovercont + _mincont , contBL.y - _contspace + _metalovercont};
+      point metlTR = {contBR.x - _metalovercont - _mincont , contBR.y - _contspace + _metalovercont};
+      addbox(metlBL, metlTL);
+      addbox(metlBR, metlTR);
+   };
+   return {{bound.x, bound.y}, {bound.x + activeW, bound.y + W}};
+}
+
+void Invertor(point bound, real NW, real NL, real PW, real PL) {
+   MOStran(bound,NW,NL);
+   bound.y = bound.y + NW + _nwelltonactive + _welloverpwell;
+   box ptrActive = MOStran(bound,PW,PL);
+   //
+   //   ptrActive.p1 = ptrActive.p1 - _welloverpwell;
+   //   ptrActive.p2 = ptrActive.p2 + _welloverpwell;
+   point wBL = {ptrActive.p1.x - _welloverpwell , ptrActive.p1.y - _welloverpwell  };
+   point wBR = {ptrActive.p2.x + _welloverpwell , ptrActive.p2.y + _welloverpwell  };
+   point iBL = {ptrActive.p1.x - _implantoveract, ptrActive.p1.y - _implantoveract };
+   point iBR = {ptrActive.p2.x + _implantoveract, ptrActive.p2.y + _implantoveract };
+   usinglayer(1);
+   addbox(wBL,wBR);
+   usinglayer(6);
+   addbox(iBL,iBR);
+}   
+   
+void CheckLists() {
+   point list p1 = {{0,0},{2,0},{2,1},{1,1},{1,2},{0,2}};
+   real  a0 = 11;
+   real  a1 = 12;
+   real  a2 = 13;
+   real  a3 = 14;
+   point list p2;
+   p2 = {{a0,a0},{a3,a0},{a3,a3},{a1,a3},{a1,a1},{a2,a1},{a2,a2},{a1,a2},{a1,a3},{a0,a3}};
+   usinglayer(1);
+   addpoly(p1);
+   addpoly(p2);
+   point list p3 = {{20,10}, {22,10}, {22,12}, {24,12}, {26,14}, {28,14}, {30,12}, {30,10}};
+   usinglayer(8);
+   addwire(p3,1);
+   addwire({{-5,0},{-5,40}, {40,40}, {40,0}},2);
+   addwire({{-5,0},{40,0}},2);
+   addwire({{35,5},{35,30}},2);
+}
+
+void whiletest() {
+   real a = 10;
+   bool b = true;
+   while (a > 0) {
+      echo(a); a = a - 1;
+   };
+
+   while (b) {
+      echo(a); 
+      a = a + 1; 
+      b = a < 5;
+   };
+   int i = 10;
+   while (i > 0) {
+      echo("outer cycle reports -> ");echo(i); i = i - 1;
+      int j = 10;
+      while (j > 0) {
+         echo("inner -> ");echo(j); j = j - 1;
+      }
+   }
+}
+
+void repeattest() {
+   real a = 10;
+   bool b = true;
+   repeat {
+      echo(a); a = a - 1;
+   } until (a > 0);
+
+   repeat {
+      echo(a); 
+      a = a + 1; 
+      b = a < 5;
+   } until (b);
+   int i = 10;
+   repeat {
+      echo("outer cycle reports -> ");echo(i); i = i - 1;
+      int j = 10;
+      repeat {
+         echo("inner -> ");echo(j); j = j - 1;
+      } until (j > 0);
+   } until (i > 0)      
+//   repeat {} until(a);
+}
+
+void testcellrefs() {
+   newcell("cellrefs");
+   opencell("cellrefs");
+   cellref("Fcell", {10,10},   0, false, 1.0);
+   cellref("Fcell", {10,10},  90, false, 1.0);
+   cellref("Fcell", {10,10}, 180, false, 1.0);
+   cellref("Fcell", {10,10}, 270, false, 1.0);
+   cellref("Fcell", {40,10},   0,  true, 1.0);
+   cellref("Fcell", {40,10},  90,  true, 1.0);
+   cellref("Fcell", {40,10}, 180,  true, 1.0);
+   cellref("Fcell", {40,10}, 270,  true, 1.0);
+
+   cellref("Fcell", {10,40},  45, false, 1.0);
+   cellref("Fcell", {10,40}, 135, false, 1.0);
+   cellref("Fcell", {10,40}, 225, false, 1.0);
+   cellref("Fcell", {10,40}, 315, false, 1.0);
+   cellref("Fcell", {40,40},  45,  true, 1.0);
+   cellref("Fcell", {40,40}, 135,  true, 1.0);
+   cellref("Fcell", {40,40}, 225,  true, 1.0);
+   cellref("Fcell", {40,40}, 315,  true, 1.0);
+   redraw();
+}
+
+void testtexts() {
+   newcell("textrefs");
+   opencell("textrefs");
+   addtext("Toped text test", 4, {10,10},   0, false, 2);
+   addtext("Toped text test", 4, {10,10},  90, false, 2);
+   addtext("Toped text test", 4, {10,10}, 180, false, 2);
+   addtext("Toped text test", 4, {10,10}, 270, false, 2);
+   addtext("Toped text test", 4, {40,15},   0,  true, 2);
+   addtext("Toped text test", 4, {40,15},  90,  true, 2);
+   addtext("Toped text test", 4, {40,15}, 180,  true, 2);
+   addtext("Toped text test", 4, {40,15}, 270,  true, 2);
+
+   addtext("Toped text test", 4, {10,40},  45, false, 2);
+   addtext("Toped text test", 4, {10,40}, 135, false, 2);
+   addtext("Toped text test", 4, {10,40}, 225, false, 2);
+   addtext("Toped text test", 4, {10,40}, 315, false, 2);
+   addtext("Toped text test", 4, {40,40},  45,  true, 2);
+   addtext("Toped text test", 4, {40,40}, 135,  true, 2);
+   addtext("Toped text test", 4, {40,40}, 225,  true, 2);
+   addtext("Toped text test", 4, {40,40}, 315,  true, 2);
+
+   addtext("Toped", 4, { 0, 90},   0, false, 20);
+}
+
+void addbox()
+{
+   echo("Internal function addbox() redefined. This line should never be seen on tell log");
+   
+}
+
+
+newcell("Fcell");
+opencell("Fcell");
+point list pl1 =
+{{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}};
+addpoly(pl1,2);
+testcellrefs();
+testtexts();
+newcell("cell_1");
+opencell("cell_1");
+Invertor({0,0},10,3,30,3);
+Invertor({30,0},20,2,60,2);
+cellref("Fcell", {60,30}, 270,  true, 1.0);
+opencell("crop");
+cellref("cellrefs",{10,100},0,false,1);
+
+//cellref("textrefs",{70,10},0,false,1);
+//cellref("cell_1",{120,  0},180,true ,1);
+//cellref("cell_1",{  0,  0},  0,false,1);
+//cellref("cell_1",{120,-20},  0,true ,1);
+//cellref("cell_1",{  0,-20},  0,true ,1);
+
+
