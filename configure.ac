@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(toped, 0.8)
+AC_INIT(toped, 0.8.1)
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.cpp])
@@ -59,6 +59,13 @@ AX_CHECK_GLU
       LDFLAGS="$LDFLAGS $GLU_LIBS"
        CFLAGS="$CFLAGS $GLU_CFLAGS"
    fi     
+AX_CHECK_GLUT
+   if test "$no_glut" == "yes"; then
+      AC_MSG_ERROR([(GLUT) openGL utility toolkit not found])
+   else
+      LDFLAGS="$LDFLAGS $GLUT_LIBS"
+       CFLAGS="$CFLAGS $GLUT_CFLAGS"
+   fi     
 
 #Check wxWidgets
  AM_OPTIONS_WXCONFIG
@@ -73,7 +80,6 @@ AX_CHECK_GLU
     CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
     LDFLAGS="$LDFLAGS $WX_LIBS"
  fi
-
 #Check for wx gl library and for wx threads
 #...
 

@@ -81,11 +81,15 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0) {
 }
 
 void layprop::DrawProperties::setGridColor(std::string colname) const{
-   tellRGB* gcol = _laycolors.find(colname)->second;
-   if (gcol)
-      glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
-   else // put a default gray color if color is not found
-      glColor4f(0.5, 0.5, 0.5, 0.5);
+   if (_laycolors.end() != _laycolors.find(colname))
+   {
+      tellRGB* gcol = _laycolors.find(colname)->second;
+      if (gcol)
+         glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
+      return;
+   }
+   // put a default gray color if color is not found
+   glColor4f(0.5, 0.5, 0.5, 0.5);
 }      
 
 void layprop::DrawProperties::setCurrentColor(word layno) {
@@ -100,14 +104,12 @@ void layprop::DrawProperties::setCurrentColor(word layno) {
    glColor4f(0.5, 0.5, 0.5, 0.5);
 }
 
-bool  layprop::DrawProperties::layerHidden(word layno) const
-{
-   if (0 == layno) return false;
+bool  layprop::DrawProperties::layerHidden(word layno) const {
    if (_layset.end() != _layset.find(layno)) {
       laySetList::const_iterator ilayset = _layset.find(layno);
       return ilayset->second->hidden();
       //return _layset[layno]->hidden(); - see the comment in getCurrentFill
-   }
+   }      
    return true;
 }
    
@@ -121,8 +123,6 @@ bool  layprop::DrawProperties::layerLocked(word layno) const {
 }
 
 bool layprop::DrawProperties::getCurrentFill() const {
-   if (0 == _drawinglayer)
-      return true;
    if ((_layset.end() != _layset.find(_drawinglayer)) && !_blockfill) {
       // The 3 lines below are doing effectively
       // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
@@ -136,39 +136,11 @@ bool layprop::DrawProperties::getCurrentFill() const {
       byte* ifill = ifillset->second;
       glEnable(GL_POLYGON_STIPPLE);
 //      glEnable(GL_POLYGON_SMOOTH); //- for solid fill
-//      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       glPolygonStipple(ifill);
       return true;
    }   
    else return false;
-}
-
-void layprop::DrawProperties::setLineProps(bool selected) const
-{
-   laySetList::const_iterator ilayset;
-   if (selected)
-   {
-      ilayset = _layset.find(_drawinglayer);
-      lineMAP::const_iterator ilineset = _lineset.find(ilayset->second->sline());
-      if (_lineset.end() != ilineset)
-      {
-         std::string colorname = ilineset->second->color();
-         colorMAP::const_iterator gcol;
-         if (("" != colorname) && (_laycolors.end() != (gcol = _laycolors.find(colorname))))
-            glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
-         glLineWidth(ilineset->second->width());glEnable(GL_LINE_SMOOTH);glEnable(GL_LINE_STIPPLE);
-         glLineStipple(ilineset->second->patscale(),ilineset->second->pattern());
-         return;
-      }
-   }
-   if (_layset.end() != (ilayset = _layset.find(_drawinglayer)))
-   {
-      colorMAP::const_iterator gcol = _laycolors.find(ilayset->second->getcolor());
-      if (gcol != _laycolors.end())
-         glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
-   }
-   else glColor4f(0.5, 0.5, 0.5, 0.5);
-   glLineWidth(1);glDisable(GL_LINE_SMOOTH);glDisable(GL_LINE_STIPPLE);
 }
 
 void  layprop::DrawProperties::blockfill(laydata::cellrefstack* refstack) {
@@ -204,28 +176,18 @@ byte layprop::DrawProperties::popref(const laydata::tdtcellref* cref) {
    return 0;
 }
 
-void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_marks mark_type) const
-{
+void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_marks mark_type) const {
    GLubyte* the_mark;
    switch (mark_type) {
       case  cell_mark:if (_cellmarks_hidden) return;
-                      else
-                      {
-                         glColor4f(1.0, 1.0, 1.0, 0.8);
-                         the_mark = cell_mark_bmp;
-                         break;
-                      }
+                      else the_mark = cell_mark_bmp;break;
       case array_mark:if (_cellmarks_hidden) return;
-                      else
-                      {
-                         glColor4f(1.0, 1.0, 1.0, 0.8);
-                         the_mark = array_mark_bmp;
-                         break;
-                      }
+                      else the_mark = array_mark_bmp;break;
       case  text_mark:if (_textmarks_hidden) return;
                       else the_mark = text_mark_bmp;break;
       default: assert(false);
    }
+   glColor4f(1.0, 1.0, 1.0, 0.8);
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
    glRasterPos2i(p0.x(),p0.y());
    glBitmap(16,16,7,7,0,0, the_mark);
@@ -250,7 +212,7 @@ layprop::DrawProperties::~DrawProperties() {
 
 //=============================================================================
 layprop::ViewProperties::ViewProperties() {
-   addlayer(std::string("_$teLayer_cell"),0,"","","");
+   addlayer(std::string("_$teLayer_cell"),0,"","");
    _step = 1;_curlay = 1;
    setUU(1);
    _marker_angle = 0;
@@ -262,7 +224,7 @@ bool layprop::ViewProperties::selectable(word layno) const {
 }
 
 void layprop::ViewProperties::addlayer(std::string name, word layno, std::string col,
-                                       std::string fill, std::string sline) {
+                                                             std::string fill) {
    while (wxMUTEX_NO_ERROR != DBLock.TryLock());
    if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col))) {
       std::ostringstream ost;
@@ -274,36 +236,13 @@ void layprop::ViewProperties::addlayer(std::string name, word layno, std::string
       ost << "Warning! Fill \""<<fill<<"\" is not defined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   if ((sline != "") && (_drawprop._lineset.end() == _drawprop._lineset.find(sline))) {
-      std::ostringstream ost;
-      ost << "Warning! Line \""<<sline<<"\" is not defined";
-      tell_log(console::MT_WARNING, ost.str());
-   }
    if (_drawprop._layset.end() != _drawprop._layset.find(layno)) {
       delete _drawprop._layset[layno];
       std::ostringstream ost;
       ost << "Warning! Layer "<<layno<<" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }   
-   _drawprop._layset[layno] = new LayerSettings(name,col,fill,sline);
-   DBLock.Unlock();
-}
-
-void layprop::ViewProperties::addline(std::string name, std::string col, word pattern,
-                                       byte patscale, byte width) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-   if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col))) {
-      std::ostringstream ost;
-      ost << "Warning! Color \""<<col<<"\" is not defined";
-      tell_log(console::MT_WARNING,ost.str());
-   }
-   if (_drawprop._lineset.end() != _drawprop._lineset.find(name)) {
-      delete _drawprop._lineset[name];
-      std::ostringstream ost;
-      ost << "Warning! Line "<< name <<" redefined";
-      tell_log(console::MT_WARNING, ost.str());
-   }
-   _drawprop._lineset[name] = new LineSettings(col,pattern,patscale,width);
+   _drawprop._layset[layno] = new LayerSettings(name,col,fill);
    DBLock.Unlock();
 }
 
@@ -390,15 +329,15 @@ void layprop::ViewProperties::setCurrentOp(int actop) {
    if (actop > 0) _drawprop._currentop = op_dwire;
    else
       switch (actop) {
-         case  0: _drawprop._currentop = op_dbox  ;break;
-         case -1: _drawprop._currentop = op_dpoly ;break;
-         case -2: _drawprop._currentop = op_move  ;break;
-         case -3: _drawprop._currentop = op_copy  ;break;
-         case -4: _drawprop._currentop = op_flipX ;break;
-         case -5: _drawprop._currentop = op_flipY ;break;
-         case -6: _drawprop._currentop = op_rotate;break;
+         case  0: _drawprop._currentop = op_dbox;break;
+         case -1: _drawprop._currentop = op_dpoly;break;
+         case -2: _drawprop._currentop = op_move;break;
+         case -3: _drawprop._currentop = op_copy;break;
          default: _drawprop._currentop = op_none;
       }
+/*   if       (-2 == actop)  _drawprop._currentop = op_move;
+   else if  (-3 == actop)  _drawprop._currentop = op_copy;
+   else                    _drawprop._currentop = op_none;*/
 }
 
 void layprop::ViewProperties::drawGrid() const{

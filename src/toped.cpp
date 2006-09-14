@@ -29,6 +29,7 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <math.h>
+#include <GL/glut.h>
 #include "toped.h"
 #include "datacenter.h"
 #include "../tpd_DB/viewprop.h"
@@ -587,6 +588,17 @@ void tui::TopedFrame::initView() {
 #  endif
 #endif
    _laycanvas = new LayoutCanvas(mS_canvas, gl_attrib);
+//   int argc = wxGetApp().argc;
+//   char** argv;
+//   for(int i = 0; i < argc; i++)
+//   {
+//      char boza = new
+//      argv[i] = wxGetApp().argv;
+#ifndef WIN32
+   char** argv;
+   int argc = 0;
+   glutInit(&argc,argv);
+#endif
 }
 
 
@@ -595,7 +607,7 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
-   wxMessageBox( wxT( "Toped ver. 0.8\n\nOpen source IC layout editor \n(c) 2001-2006 Toped developers\nwww.toped.org.uk" ),
+   wxMessageBox( wxT( "Toped ver. 0.8.1\n\nOpen source IC layout editor \n(c) 2001-2006 Toped developers\nwww.toped.org.uk" ),
                   wxT( "About Toped" ), wxOK | wxICON_INFORMATION, this );
 }
 
@@ -713,7 +725,7 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
       ost << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
       wxString ost1;
-      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loaded");
+      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loded");
       SetStatusText(ost1);
    }
    else SetStatusText(wxT("Parsing aborted"));
@@ -1046,8 +1058,8 @@ void tui::TopedFrame::OnGridDefine(wxCommandEvent& WXUNUSED(event)) {
    if ( dlg.ShowModal() == wxID_OK ) {
       wxString ost; 
       ost << wxT("definegrid(0,")<<dlg.grid0()<<wxT(",\"white\");");
-      ost << wxT("definegrid(1,")<<dlg.grid1()<<wxT(",\")white\");");
-      ost << wxT("definegrid(2,")<<dlg.grid2()<<wxT(",\")white\");");
+      ost << wxT("definegrid(1,")<<dlg.grid1()<<wxT(",\"white\");");
+      ost << wxT("definegrid(2,")<<dlg.grid2()<<wxT(",\"white\");");
       _cmdline->parseCommand(ost);
    }
 }
@@ -1206,3 +1218,4 @@ bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
    }
    return ret;
 }
+      

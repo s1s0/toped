@@ -27,14 +27,13 @@
 
 #include <iostream>
 #include <sstream>
-#include <iostream>
 #include "tedcell.h"
 #include "tedat.h"
 #include "viewprop.h"
 #include "tedesign.h"
 #include "../tpd_common/tedop.h"
 #include "../tpd_common/outbox.h"
-#include "../tpd_common/glf.h"
+#include <iostream>
 extern layprop::ViewProperties*   Properties;
 
 laydata::editobject::editobject() {
@@ -259,25 +258,21 @@ bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtcell* child) {
    return true;
 }
 
-void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool active) const {
+void laydata::tdtcell::openGL_draw(ctmstack& transtack, const layprop::DrawProperties& drawprop, bool active) const {
    // Draw figures
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++) {
-//      if (0 < lay->first)
-      word curlayno = lay->first;
-      if (!drawprop.layerHidden(curlayno))
-         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(curlayno);
-      else continue;
+      if (0 < lay->first)
+         if (!drawprop.layerHidden(lay->first))
+            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay->first);
+         else continue;
       // fancy like this (dlist iterator) , besause a simple
-      // _shapesel[curlayno] complains about loosing qualifiers (const)
+      // _shapesel[lay->first] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
-      bool fill = drawprop.getCurrentFill();
-//      if (fill) glfEnable(GLF_FILLING);
-//      else      glfDisable(GLF_FILLING);
-      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
-         lay->second->openGL_draw(drawprop,dlst->second, fill);
+      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(lay->first))))
+         lay->second->openGL_draw(transtack,drawprop,dlst->second);
       else
-         lay->second->openGL_draw(drawprop, NULL, fill);
+         lay->second->openGL_draw(transtack,drawprop, NULL);
    }
 }
 

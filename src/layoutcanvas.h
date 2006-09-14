@@ -45,11 +45,7 @@
 #define ID_TPD_CANVAS      105
 #define ID_TPD_LAYERS      106
 #define ID_TPD_CELLTREE    107
-#define ID_TPD_CELLTREE_H  108
-#define ID_TPD_CELLTREE_F  109
-#define ID_GDS_CELLTREE    110
-#define ID_TPD_CELLTREE_H2 111
-#define ID_TPD_CELLTREE_F2 112
+#define ID_GDS_CELLTREE    108
 //-----------------------------------------------------------------------------
 
 namespace tui {
@@ -236,8 +232,6 @@ typedef enum  {
       void           rubber_paint();
       void           UpdateCoordWin(int coord, POSITION_TYPE postype, int dcoord, POSITION_TYPE dpostype);
       void           EventMouseClick(int button);
-      bool           reperX;         // Draw a cursor line across the window parallel to the X axis
-      bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       DECLARE_EVENT_TABLE();
    };
 

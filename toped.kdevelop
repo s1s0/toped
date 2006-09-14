@@ -9,8 +9,8 @@
     <ignoreparts/>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
-    <versioncontrol/>
+    <description></description>
+    <versioncontrol>kdevsubversion</versioncontrol>
     <secondaryLanguages/>
   </general>
   <kdevautoproject>
@@ -22,10 +22,12 @@
       <mainprogram>src/toped</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs>../../tll/asc.tll</programargs>
+      <programargs>$TPD_LOCAL/tll/tcase.tll</programargs>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
-      <envvars/>
+      <envvars>
+        <envvar value="/mercury_home/skr_local/RELEASE_0.8_BUGFIXES" name="TPD_LOCAL" />
+      </envvars>
     </run>
     <configurations>
       <optimized>
@@ -59,7 +61,7 @@
         <ccompilerbinary/>
         <cxxcompilerbinary/>
         <f77compilerbinary/>
-        <cflags>-O0 -g3 -pg</cflags>
+        <cflags/>
         <f77flags/>
       </debug>
     </configurations>
@@ -78,11 +80,11 @@
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs>$TPD_LOCAL/tll/tcase.tll</programargs>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <programargs>../../tll/tcase.tll</programargs>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -164,7 +166,7 @@
       <headerCompletionDelay>250</headerCompletionDelay>
     </codecompletion>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>

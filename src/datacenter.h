@@ -72,7 +72,7 @@ public:
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
    void                       mouseStop();
-   void                       openGL_draw(layprop::DrawProperties&);
+   void                       openGL_draw(const layprop::DrawProperties&);
    void                       tmp_draw(const layprop::DrawProperties&, TP, TP);
    const laydata::cellList&   cells();
    

@@ -19,7 +19,7 @@
 //    Description: Top file in the project
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------                
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -36,7 +36,6 @@
 #include "../tpd_DB/viewprop.h"
 #include "tellibin.h"
 #include "datacenter.h"
-#include "../tpd_common/glf.h"
 
 tui::TopedFrame*                 Toped = NULL;
 layprop::ViewProperties*         Properties = NULL;
@@ -145,11 +144,8 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("copy"             ,(new       tellstdfunc::stdCOPYSEL(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("copy"             ,(new     tellstdfunc::stdCOPYSEL_D(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("rotate"           ,(new                tellstdfunc::stdROTATESEL(telldata::tn_void,false)));
-   mblock->addFUNC("rotate"           ,(new              tellstdfunc::stdROTATESEL_D(telldata::tn_void,false)));
    mblock->addFUNC("flipX"            ,(new                 tellstdfunc::stdFLIPXSEL(telldata::tn_void,false)));
-   mblock->addFUNC("flipX"            ,(new               tellstdfunc::stdFLIPXSEL_D(telldata::tn_void,false)));
    mblock->addFUNC("flipY"            ,(new                 tellstdfunc::stdFLIPYSEL(telldata::tn_void,false)));
-   mblock->addFUNC("flipY"            ,(new               tellstdfunc::stdFLIPYSEL_D(telldata::tn_void,false)));
    mblock->addFUNC("delete"           ,(new                tellstdfunc::stdDELETESEL(telldata::tn_void,false)));
    mblock->addFUNC("group"            ,(new                    tellstdfunc::stdGROUP(telldata::tn_void,false)));
    mblock->addFUNC("ungroup"          ,(new                  tellstdfunc::stdUNGROUP(telldata::tn_void,false)));
@@ -173,7 +169,6 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("locklayer"        ,(new               tellstdfunc::stdLOCKLAYERS(telldata::tn_void, true)));
    mblock->addFUNC("definecolor"      ,(new                 tellstdfunc::stdCOLORDEF(telldata::tn_void, true)));
    mblock->addFUNC("definefill"       ,(new                  tellstdfunc::stdFILLDEF(telldata::tn_void, true)));
-   mblock->addFUNC("defineline"       ,(new                  tellstdfunc::stdLINEDEF(telldata::tn_void, true)));
    mblock->addFUNC("definegrid"       ,(new                  tellstdfunc::stdGRIDDEF(telldata::tn_void, true)));
    mblock->addFUNC("step"             ,(new                     tellstdfunc::stdSTEP(telldata::tn_void, true)));
    mblock->addFUNC("grid"             ,(new                     tellstdfunc::stdGRID(telldata::tn_void, true)));
@@ -326,26 +321,7 @@ bool TopedApp::OnInit() {
    InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
    Toped->Show(TRUE);
    SetTopWindow(Toped);
-
-   //@FIXME initializing glf library - temporary here
-   glfInit();
-   wxString fontFile = wxT("$TPD_LOCAL/fonts/arial1.glf");
-   wxFileName fontFN(fontFile);
-   fontFN.Normalize();
-   if (!(fontFN.IsOk() && (-1 != glfLoadFont(fontFN.GetFullPath().mb_str()))))
-   {
-      wxMessageDialog* dlg1 = new  wxMessageDialog(Toped,
-            wxT("Font library \"$TPD_LOCAL/fonts/arial1.glf\" not found or corrupted. \n Toped will be unstable.\n Continue?"),
-            wxT("Toped"),
-            wxYES_NO | wxICON_WARNING);
-      if (wxID_NO == dlg1->ShowModal())
-         return false;
-      delete dlg1;
-      std::string info("Font library \"$TPD_LOCAL/fonts/arial1.glf\" is not loaded. All text objects will not be properly processed");
-      tell_log(console::MT_ERROR,info);
-   }
    //
-
    GetLogDir();
    if (!GetLogFileName()) return FALSE;
    bool recovery_mode = false;
@@ -373,15 +349,10 @@ bool TopedApp::OnInit() {
    {
       LogFile.init(std::string(logFileName.mb_str()));
       //   wxLog::AddTraceMask("thread");
-      if (1 < argc) 
-      {
+      if (1 < argc) {
          wxString inputfile;
-         for (int i=1; i<argc; i++)
-         {
-            inputfile.Clear();
-            inputfile << wxT("#include \"") << argv[i] << wxT("\"");
-            Console->parseCommand(inputfile, false);
-         }
+         inputfile << wxT("#include \"") << argv[1] << wxT("\"");
+         Console->parseCommand(inputfile);
       }
    }
    return TRUE;
