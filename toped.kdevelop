@@ -22,10 +22,12 @@
       <mainprogram>src/toped</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs/>
+      <programargs>$TPD_LOCAL/tll/tcase.tll</programargs>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
-      <envvars/>
+      <envvars>
+        <envvar value="/mercury_home/skr_local/RELEASE_0.8_BUGFIXES" name="TPD_LOCAL" />
+      </envvars>
     </run>
     <configurations>
       <optimized>
@@ -206,7 +208,7 @@
     <projectdoc>
       <docsystem>Doxygen Documentation Collection</docsystem>
       <docurl>doc/API/html/hier.tag</docurl>
-      <usermanualurl></usermanualurl>
+      <usermanualurl/>
     </projectdoc>
   </kdevdocumentation>
   <dist>
