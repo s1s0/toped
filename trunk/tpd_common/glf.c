@@ -195,7 +195,7 @@ static int LittleEndian()
 |	Return: GLF_OK - if all OK
 |	Return: GLF_ERROR - if any error 
 */
-static int ReadFont(char *font_name, struct glf_font *glff)
+static int ReadFont(const char *font_name, struct glf_font *glff)
 {
 
 	FILE *fontf;
@@ -600,7 +600,7 @@ void glfDrawTopedString(const char *s, unsigned char fill)
    float sda, sdb;
 
    if ((!s) || (!*s) || (curfont == -1)) return;
-   void(* symbfunc) (char*) = (fill) ? &glfDrawSolidSymbol : &glfDrawWiredSymbol;
+   void(* symbfunc) (char) = (fill) ? &glfDrawSolidSymbol : &glfDrawWiredSymbol;
    glPushMatrix();
    
    /* Start to draw the string */
@@ -919,7 +919,7 @@ void glfDraw3DSolidStringF(int font_descriptor, char *s)
 }
 
 /* Get the size a string will have on screen */
-void glfGetStringBoundsF(int fd, char *s, float *minx, float *miny, float *maxx, float *maxy)
+void glfGetStringBoundsF(int fd, const char *s, float *minx, float *miny, float *maxx, float *maxy)
 {
 	struct glf_font *font;
 	int i;

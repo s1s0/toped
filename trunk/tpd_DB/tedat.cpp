@@ -24,6 +24,11 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+#ifdef WIN32
+//For GUI application with glf we need "windows.h"
+#include <windows.h>
+#endif 
+
 #include <sstream>
 #include <iostream>
 #include <math.h>
