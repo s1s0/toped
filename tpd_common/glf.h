@@ -101,7 +101,7 @@ void glfDraw3DSolidSymbolF(int font_descriptor, char s);
 void glfDraw3DSolidStringF(int font_descriptor, char *s);
 
 /* Text control functions */
-void glfGetStringBoundsF(int fd, char *s, float *minx, float *miny, float *maxx, float *maxy);
+void glfGetStringBoundsF(int fd, const char *s, float *minx, float *miny, float *maxx, float *maxy);
 void glfGetStringBounds(const char *s, float *minx, float *miny, float *maxx, float *maxy);
 
 void  glfSetSymbolSpace(float sp);   /* Set space between symbols */
