@@ -1218,4 +1218,3 @@ bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
    }
    return ret;
 }
-      
