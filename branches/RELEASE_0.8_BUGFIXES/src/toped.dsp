@@ -101,10 +101,6 @@ SOURCE=.\datacenter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\gds_io.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\layoutcanvas.cpp
 # End Source File
 # Begin Source File
@@ -138,10 +134,6 @@ SOURCE=.\browsers.h
 # Begin Source File
 
 SOURCE=.\datacenter.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gds_io.h
 # End Source File
 # Begin Source File
 

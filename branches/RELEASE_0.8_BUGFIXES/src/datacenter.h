@@ -28,7 +28,7 @@
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
 #include "../tpd_DB/tedesign.h"
-#include "gds_io.h"
+#include "../tpd_DB/gds_io.h"
 
 namespace GDSin {
    class gds2ted {
