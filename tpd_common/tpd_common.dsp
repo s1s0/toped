@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /YX /FD /GZ /Tp"../tpd_common/glf.c" /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x419 /d "_DEBUG"
 # ADD RSC /l 0x419 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -86,26 +86,6 @@ LIB32=link.exe -lib
 # Begin Source File
 
 SOURCE=.\avl.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\glf.c
-
-!IF  "$(CFG)" == "tpd_common - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "tpd_common - Win32 Debug"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build
-InputPath=.\glf.c
-
-"./Debug/glf.obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl /c /Tpglf.c /D"WIN32" /Fo"./Debug/glf.obj"
-
-# End Custom Build
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -134,10 +114,6 @@ SOURCE=.\avl.h
 # Begin Source File
 
 SOURCE=.\avl_def.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\glf.h
 # End Source File
 # Begin Source File
 

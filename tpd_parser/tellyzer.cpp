@@ -43,9 +43,15 @@
 
 extern void tellerror(std::string s, parsercmd::yyltype loc);
 extern void tellerror(std::string s);
+// Declared here to avoid "undefined symbol" errors reported by 
+// ldd -r for tpd_parser.so
+// According to wxWidgets (app.h)
+// this macro can be used multiple times and just allows you to use wxGetApp()
+// function
+//DECLARE_APP(TopedApp)
 
-extern parsercmd::cmdBLOCK*       CMDBlock;
-extern console::toped_logfile     LogFile;
+parsercmd::cmdBLOCK*       CMDBlock = NULL;
+console::toped_logfile     LogFile;
 //-----------------------------------------------------------------------------
 // Initialize some static members
 //-----------------------------------------------------------------------------
@@ -54,11 +60,14 @@ parsercmd::functionMAP        parsercmd::cmdBLOCK::_funcMAP;
 // Table of current nested blocks
 parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
 // Operand stack
-telldata::operandSTACK       parsercmd::cmdVIRTUAL::OPstack;
+telldata::operandSTACK        parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
 telldata::UNDOPerandQUEUE     parsercmd::cmdVIRTUAL::UNDOPstack;
 // UNDO command queue
 parsercmd::undoQUEUE          parsercmd::cmdVIRTUAL::UNDOcmdQ;
+
+bool parsercmd::cmdSTDFUNC::_ignoreOnRecovery = false;
+
 
 
 real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs) {
@@ -192,31 +201,9 @@ int parsercmd::cmdSHIFTPNT::execute() {
 //=============================================================================
 int parsercmd::cmdSHIFTPNT2::execute() {
    TELL_DEBUG(cmdSHIFTPNT2);
+   telldata::ttpnt  *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *p  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *r  = new telldata::ttpnt(p->x()+_sign*p1->x(),p->y()+_sign*p1->y());
-   delete p; delete p1;
-   OPstack.push(r);
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-int parsercmd::cmdSHIFTPNT3::execute() {
-   TELL_DEBUG(cmdSHIFTPNT3);
-   real shift = getOpValue();
-   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *r = new telldata::ttpnt(p->x()+_signX*shift,p->y()+_signY*shift);
-   delete p; 
-   OPstack.push(r);
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-int parsercmd::cmdSHIFTPNT4::execute() {
-   TELL_DEBUG(cmdSHIFTPNT4);
-   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *p  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt* r = new telldata::ttpnt(p->x()+_signX*p1->x(),p->y()+_signY*p1->y());
+   telldata::ttpnt* r = new telldata::ttpnt(p->x()+_sign*p1->x(),p->y()+_sign*p1->y());
    delete p; delete p1;
    OPstack.push(r);
    return EXEC_NEXT;
@@ -229,59 +216,6 @@ int parsercmd::cmdSHIFTBOX::execute() {
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    telldata::ttwnd* r = new telldata::ttwnd(w->p1().x() + _sign*p->x(),w->p1().y() + _sign*p->y(),
                         w->p2().x() + _sign*p->x(),w->p2().y() + _sign*p->y());
-   OPstack.push(r);
-   delete p; delete w;
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-int parsercmd::cmdSHIFTBOX3::execute() {
-   TELL_DEBUG(cmdSHIFTBOX3);
-   real shift = getOpValue();
-//   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   telldata::ttwnd* r;
-   if  (1 == _signX) 
-      if (1 == _signY)
-         r = new telldata::ttwnd(w->p1().x()          , w->p1().y()         ,
-                                 w->p2().x() + shift  , w->p2().y() + shift  );
-      else
-         r = new telldata::ttwnd(w->p1().x()          , w->p1().y() - shift ,
-                                 w->p2().x() + shift  , w->p2().y()          );
-   else 
-      if (1 == _signY)
-         r = new telldata::ttwnd(w->p1().x() - shift  , w->p1().y()          ,
-                                 w->p2().x()          , w->p2().y() + shift   );
-      else
-         r = new telldata::ttwnd(w->p1().x() - shift  , w->p1().y() - shift  ,
-                                 w->p2().x()          , w->p2().y()           );
-
-   OPstack.push(r);
-   delete w;
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-int parsercmd::cmdSHIFTBOX4::execute() {
-   TELL_DEBUG(cmdSHIFTBOX4);
-   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   telldata::ttwnd* r;
-   if  (1 == _signX) 
-      if (1 == _signY)
-         r = new telldata::ttwnd(w->p1().x()          , w->p1().y()         ,
-                                 w->p2().x() + p->x() , w->p2().y() + p->y() );
-      else
-         r = new telldata::ttwnd(w->p1().x()          , w->p1().y() - p->y(),
-                                 w->p2().x() + p->x() , w->p2().y()          );
-   else 
-      if (1 == _signY)
-         r = new telldata::ttwnd(w->p1().x() - p->x() , w->p1().y()          ,
-                                 w->p2().x()          , w->p2().y() + p->y()  );
-      else
-         r = new telldata::ttwnd(w->p1().x() - p->x() , w->p1().y() - p->y() ,
-                                 w->p2().x()          , w->p2().y()           );
-
    OPstack.push(r);
    delete p; delete w;
    return EXEC_NEXT;
@@ -468,7 +402,7 @@ int parsercmd::cmdFUNCCALL::execute()
 {
    TELL_DEBUG(cmdFUNC);
    int fresult;
-   if (wxGetApp().ignoreOnRecovery() && !funcbody->execOnRecovery())
+   if (funcbody->ignoreOnRecovery() && !funcbody->execOnRecovery())
    {
       std::string info = funcname + " ignored";
       tell_log(console::MT_INFO, info);
@@ -790,7 +724,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 }
 
 void parsercmd::cmdSTDFUNC::reduce_undo_stack() {
-   if (UNDOcmdQ.size() > 100) {
+   if (UNDOcmdQ.size() > 20) {
       UNDOcmdQ.back()->undo_cleanup(); UNDOcmdQ.pop_back();
    }
 }
@@ -933,6 +867,11 @@ void  parsercmd::cmdMAIN::addGlobalType(char* ttypename, telldata::tell_type* nt
    TYPElocal[ttypename] = ntype;
 }
 
+void parsercmd::cmdMAIN::recoveryDone()
+{
+   cmdSTDFUNC::_ignoreOnRecovery = false;
+}
+
 parsercmd::cmdMAIN::~cmdMAIN(){
    while (UNDOcmdQ.size() > 0)
    {
@@ -1027,32 +966,6 @@ telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
    return telldata::tn_void;
 }
 
-telldata::typeID parsercmd::PointMv(telldata::typeID op1, telldata::typeID op2,
-                                   yyltype loc1, yyltype loc2, int xdir, int ydir) {
-   switch (op1)   {
-      case telldata::tn_pnt:
-         switch(op2) {
-            case telldata::tn_int:
-            case telldata::tn_real:CMDBlock->pushcmd(new parsercmd::cmdSHIFTPNT3(xdir,ydir));
-                           return telldata::tn_pnt;
-            case    telldata::tn_pnt:CMDBlock->pushcmd(new parsercmd::cmdSHIFTPNT4(xdir,ydir));
-                           return telldata::tn_pnt;
-                  default: tellerror("unexepected operand type",loc2);break;
-         };break;
-      case telldata::tn_box:
-         switch(op2) {
-            case telldata::tn_int:
-            case telldata::tn_real:CMDBlock->pushcmd(new parsercmd::cmdSHIFTBOX3(xdir,ydir));
-                        return telldata::tn_box;
-            case telldata::tn_pnt:CMDBlock->pushcmd(new parsercmd::cmdSHIFTBOX4(xdir,ydir));
-                        return telldata::tn_box;
-                  default: tellerror("unexepected operand type",loc2); break;
-         };break;
-      default: tellerror("unexepected operand type",loc1);break;
-   }
-   return telldata::tn_void;
-}
-
 //=============================================================================
 //     *//    |real |point| box |
 //------------+-----+-----+-----+
@@ -1124,25 +1037,6 @@ telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
       default: tellerror("unexepected operand type",loc1);break;
    }
    return telldata::tn_void;
-}
-
-bool parsercmd::StructTypeCheck(telldata::typeID targett, 
-                                      telldata::argumentID* op2, yyltype loc)
-{
-   assert(TLUNKNOWN_TYPE((*op2)()));
-   const telldata::tell_type* vartype;
-   if (TLISALIST(targett))
-   { // we have a list lval
-      vartype = CMDBlock->getTypeByID(targett & ~telldata::tn_listmask);
-      if (NULL != vartype) op2->userStructListCheck(*vartype, true);
-      else op2->toList(true);
-   }
-   else
-   { // we have a struct only
-      vartype = CMDBlock->getTypeByID(targett);
-      if (NULL != vartype) op2->userStructCheck(*vartype, true);
-   }
-   return (targett == (*op2)());
 }
 
 telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentID* op2,

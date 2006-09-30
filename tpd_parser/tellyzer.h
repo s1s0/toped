@@ -157,48 +157,12 @@ namespace  parsercmd {
       int _sign;
    };
 
-   class cmdSHIFTPNT3:public cmdVIRTUAL {
-   public:
-      cmdSHIFTPNT3(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
-   private:
-      int _signX;
-      int _signY;
-   };
-
-   class cmdSHIFTPNT4:public cmdVIRTUAL {
-   public:
-      cmdSHIFTPNT4(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
-   private:
-      int _signX;
-      int _signY;
-   };
-
    class cmdSHIFTBOX:public cmdVIRTUAL {
    public:
       cmdSHIFTBOX(int sign = 1):_sign(sign) {};
       int execute();
    private:
       int _sign;
-   };
-
-   class cmdSHIFTBOX3:public cmdVIRTUAL {
-   public:
-      cmdSHIFTBOX3(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
-   private:
-      int _signX;
-      int _signY;
-   };
-
-   class cmdSHIFTBOX4:public cmdVIRTUAL {
-   public:
-      cmdSHIFTBOX4(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
-   private:
-      int _signX;
-      int _signY;
    };
 
    class cmdMULTIPLY:public cmdVIRTUAL {
@@ -373,25 +337,40 @@ namespace  parsercmd {
       telldata::typeID          _next_lcl_typeID;
    };
 
+   class cmdMAIN:public cmdBLOCK {
+   public:
+                     cmdMAIN();
+      int            execute();
+      void           addFUNC(std::string, cmdSTDFUNC*);
+      bool           addUSERFUNC(std::string, cmdSTDFUNC*, argumentLIST*);
+      void           addGlobalType(char*, telldata::tell_type*);
+      void           recoveryDone();
+      ~cmdMAIN();
+   };
+
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
-                              cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
+                                 cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
    arguments(vm), returntype(tt), _execOnRecovery(eor) {};
-      virtual int             execute() = 0;
-      virtual void            undo() = 0;
-      virtual void            undo_cleanup() = 0;
-      void                    reduce_undo_stack();
-      virtual nameList*       callingConv(const telldata::typeMAP*);
-      virtual int             argsOK(telldata::argumentQ* amap);
-      telldata::typeID        gettype() const {return returntype;};
-      virtual                ~cmdSTDFUNC();
-      virtual bool            internal() {return true;}
-      bool                    execOnRecovery() {return _execOnRecovery;}
+      virtual int                execute() = 0;
+      virtual void               undo() = 0;
+      virtual void               undo_cleanup() = 0;
+      void                       reduce_undo_stack();
+      virtual nameList*          callingConv(const telldata::typeMAP*);
+      virtual int                argsOK(telldata::argumentQ* amap);
+      telldata::typeID           gettype() const {return returntype;};
+      virtual bool               internal() {return true;}
+      bool                       execOnRecovery() {return _execOnRecovery;}
+      bool                       ignoreOnRecovery() { return _ignoreOnRecovery;}
+      void                       set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
+      virtual                   ~cmdSTDFUNC();
+      friend void cmdMAIN::recoveryDone();	
    protected:
-      argumentLIST*           arguments;
-      telldata::typeID        returntype;
-      bool                    _buildin;
-      bool                    _execOnRecovery;
+      argumentLIST*              arguments;
+      telldata::typeID           returntype;
+      bool                      _buildin;
+      bool                      _execOnRecovery;
+      static bool               _ignoreOnRecovery;
    };
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
@@ -433,27 +412,14 @@ namespace  parsercmd {
       cmdBLOCK *body;
    };
 
-   class cmdMAIN:public cmdBLOCK {
-   public:
-      cmdMAIN();
-      int   execute();
-      void  addFUNC(std::string, cmdSTDFUNC*);
-      bool  addUSERFUNC(std::string, cmdSTDFUNC*, argumentLIST*);
-      void  addGlobalType(char*, telldata::tell_type*);
-      ~cmdMAIN();
-   };
-
    telldata::typeID UMinus(telldata::typeID, yyltype);
    telldata::typeID   Plus(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Minus(telldata::typeID, telldata::typeID, yyltype, yyltype);
-   telldata::typeID  PointMv(telldata::typeID, telldata::typeID, yyltype, yyltype, int, int);
    telldata::typeID  Multiply(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Assign(telldata::tell_var*, telldata::argumentID*, yyltype);
-   telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
-
-   bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);
-   void              ClearArgumentList(argumentLIST*);
+   telldata::typeID BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
+   void             ClearArgumentList(argumentLIST*);
 }
 
 namespace console{

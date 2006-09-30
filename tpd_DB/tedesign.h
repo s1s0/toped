@@ -54,7 +54,7 @@ namespace laydata {
       bool           editpop();
       bool           edittop();
       tdtcell*       checkcell(std::string name);
-      void           openGL_draw(layprop::DrawProperties&);
+      void           openGL_draw(const layprop::DrawProperties&);
       void           tmp_draw(const layprop::DrawProperties&, TP, TP);
       void           recreate_hierarchy();
       void           mouseStart(int input_type);

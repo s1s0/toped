@@ -19,7 +19,7 @@
 //    Description: Top file in the project
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------                
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -36,39 +36,19 @@
 #include "../tpd_DB/viewprop.h"
 #include "tellibin.h"
 #include "datacenter.h"
-#include "../tpd_common/glf.h"
 
 tui::TopedFrame*                 Toped = NULL;
-layprop::ViewProperties*         Properties = NULL;
 browsers::browserTAB*            Browsers = NULL;
-console::TELLFuncList*           CmdList = NULL;
 DataCenter*                      DATC = NULL;
 // from ted_prompt (console)
-parsercmd::cmdBLOCK*             CMDBlock = NULL;
+extern layprop::ViewProperties*  Properties;
+extern parsercmd::cmdBLOCK*      CMDBlock;
+extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
-console::toped_logfile           LogFile;
+extern console::TELLFuncList*    CmdList;
+//console::TELLFuncList*           CmdLst = NULL;
 
 //-----------------------------------------------------------------------------
-
-BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_MARKERPOSITION, 10000)
-    DECLARE_EVENT_TYPE(wxEVT_CNVSSTATUSLINE, 10001)
-    DECLARE_EVENT_TYPE(wxEVT_CMD_BROWSER   , 10002)
-    DECLARE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE, 10003)
-    DECLARE_EVENT_TYPE(wxEVT_MOUSE_ACCEL   , 10004)
-    DECLARE_EVENT_TYPE(wxEVT_MOUSE_INPUT   , 10005)
-    DECLARE_EVENT_TYPE(wxEVT_CANVAS_ZOOM   , 10006)
-    DECLARE_EVENT_TYPE(wxEVT_FUNC_BROWSER  , 10007)
-END_DECLARE_EVENT_TYPES()
-
-DEFINE_EVENT_TYPE(wxEVT_MARKERPOSITION)
-DEFINE_EVENT_TYPE(wxEVT_CNVSSTATUSLINE)
-DEFINE_EVENT_TYPE(wxEVT_CMD_BROWSER)
-DEFINE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE) // -> to go to ted_prompt.cpp !
-DEFINE_EVENT_TYPE(wxEVT_MOUSE_ACCEL)
-DEFINE_EVENT_TYPE(wxEVT_MOUSE_INPUT)
-DEFINE_EVENT_TYPE(wxEVT_CANVAS_ZOOM)
-DEFINE_EVENT_TYPE(wxEVT_FUNC_BROWSER)
 
 void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    // First the internal types
@@ -145,11 +125,8 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("copy"             ,(new       tellstdfunc::stdCOPYSEL(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("copy"             ,(new     tellstdfunc::stdCOPYSEL_D(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("rotate"           ,(new                tellstdfunc::stdROTATESEL(telldata::tn_void,false)));
-   mblock->addFUNC("rotate"           ,(new              tellstdfunc::stdROTATESEL_D(telldata::tn_void,false)));
    mblock->addFUNC("flipX"            ,(new                 tellstdfunc::stdFLIPXSEL(telldata::tn_void,false)));
-   mblock->addFUNC("flipX"            ,(new               tellstdfunc::stdFLIPXSEL_D(telldata::tn_void,false)));
    mblock->addFUNC("flipY"            ,(new                 tellstdfunc::stdFLIPYSEL(telldata::tn_void,false)));
-   mblock->addFUNC("flipY"            ,(new               tellstdfunc::stdFLIPYSEL_D(telldata::tn_void,false)));
    mblock->addFUNC("delete"           ,(new                tellstdfunc::stdDELETESEL(telldata::tn_void,false)));
    mblock->addFUNC("group"            ,(new                    tellstdfunc::stdGROUP(telldata::tn_void,false)));
    mblock->addFUNC("ungroup"          ,(new                  tellstdfunc::stdUNGROUP(telldata::tn_void,false)));
@@ -173,7 +150,6 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("locklayer"        ,(new               tellstdfunc::stdLOCKLAYERS(telldata::tn_void, true)));
    mblock->addFUNC("definecolor"      ,(new                 tellstdfunc::stdCOLORDEF(telldata::tn_void, true)));
    mblock->addFUNC("definefill"       ,(new                  tellstdfunc::stdFILLDEF(telldata::tn_void, true)));
-   mblock->addFUNC("defineline"       ,(new                  tellstdfunc::stdLINEDEF(telldata::tn_void, true)));
    mblock->addFUNC("definegrid"       ,(new                  tellstdfunc::stdGRIDDEF(telldata::tn_void, true)));
    mblock->addFUNC("step"             ,(new                     tellstdfunc::stdSTEP(telldata::tn_void, true)));
    mblock->addFUNC("grid"             ,(new                     tellstdfunc::stdGRID(telldata::tn_void, true)));
@@ -191,6 +167,25 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("addmenu"          ,(new                  tellstdfunc::stdADDMENU(telldata::tn_void, true)));
    console::TellFnSort();
 }
+
+class TopedApp : public wxApp
+{
+   public:
+      virtual bool   OnInit();
+      virtual int    OnExit();
+//      bool           ignoreOnRecovery() { return _ignoreOnRecovery;}
+//      void           set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
+   protected:
+      bool           GetLogFileName();
+      bool           CheckCrashLog();
+      void           GetLogDir();
+      void           FinishSessionLog();
+      void           SaveIgnoredCrashLog();
+      wxString       logFileName;
+      wxString       tpdLogDir;
+//      bool           _ignoreOnRecovery;
+};
+
 
 void TopedApp::GetLogDir()
 {
@@ -311,7 +306,6 @@ bool TopedApp::OnInit() {
   _CrtSetDbgFlag(tmpDbgFlag);
   //_CrtSetBreakAlloc(5919);
 #endif*/
-   _ignoreOnRecovery = false;
    Properties = new layprop::ViewProperties();
    Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
@@ -324,28 +318,10 @@ bool TopedApp::OnInit() {
    // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
    CMDBlock = new parsercmd::cmdMAIN();
    InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
+
    Toped->Show(TRUE);
    SetTopWindow(Toped);
-
-   //@FIXME initializing glf library - temporary here
-   glfInit();
-   wxString fontFile = wxT("$TPD_LOCAL/fonts/arial1.glf");
-   wxFileName fontFN(fontFile);
-   fontFN.Normalize();
-   if (!(fontFN.IsOk() && (-1 != glfLoadFont(fontFN.GetFullPath().mb_str()))))
-   {
-      wxMessageDialog* dlg1 = new  wxMessageDialog(Toped,
-            wxT("Font library \"$TPD_LOCAL/fonts/arial1.glf\" not found or corrupted. \n Toped will be unstable.\n Continue?"),
-            wxT("Toped"),
-            wxYES_NO | wxICON_WARNING);
-      if (wxID_NO == dlg1->ShowModal())
-         return false;
-      delete dlg1;
-      std::string info("Font library \"$TPD_LOCAL/fonts/arial1.glf\" is not loaded. All text objects will not be properly processed");
-      tell_log(console::MT_ERROR,info);
-   }
    //
-
    GetLogDir();
    if (!GetLogFileName()) return FALSE;
    bool recovery_mode = false;
@@ -366,22 +342,17 @@ bool TopedApp::OnInit() {
       inputfile << wxT("#include \"") << logFileName.c_str() << wxT("\"");
       Console->parseCommand(inputfile, false);
       tell_log(console::MT_WARNING,"Previous session recovered.");
-      set_ignoreOnRecovery(false);
+      static_cast<parsercmd::cmdMAIN*>(CMDBlock)->recoveryDone();
       LogFile.init(std::string(logFileName.mb_str()), true);
    }
    else
    {
       LogFile.init(std::string(logFileName.mb_str()));
       //   wxLog::AddTraceMask("thread");
-      if (1 < argc) 
-      {
+      if (1 < argc) {
          wxString inputfile;
-         for (int i=1; i<argc; i++)
-         {
-            inputfile.Clear();
-            inputfile << wxT("#include \"") << argv[i] << wxT("\"");
-            Console->parseCommand(inputfile, false);
-         }
+         inputfile << wxT("#include \"") << argv[1] << wxT("\"");
+         Console->parseCommand(inputfile);
       }
    }
    return TRUE;
@@ -397,4 +368,4 @@ int TopedApp::OnExit() {
 
 // Starting macro
 IMPLEMENT_APP(TopedApp)
-
+//DECLARE_APP(TopedApp)

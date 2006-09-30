@@ -32,6 +32,7 @@
 #include "../tpd_common/outbox.h"
 #include "../tpd_DB/viewprop.h"
 
+//DECLARE_APP(TopedApp)
 extern   layprop::ViewProperties*   Properties;
 extern   wxMutex                    DBLock;
          wxMutex                    GDSLock;
@@ -206,12 +207,13 @@ DataCenter::~DataCenter() {
    if (NULL != _GDSDB) delete _GDSDB;
    if (NULL != _TEDDB) delete _TEDDB;
 }
-
-bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated,
-                         TpdTime* timeSaved)
+bool DataCenter::TDTcheckread(const std::string filename,
+    const TpdTime& timeCreated, const TpdTime& timeSaved, bool& start_ignoring)
 {
+   bool retval = false;
+   start_ignoring = false;
    laydata::TEDfile tempin(filename.c_str());
-   if (!tempin.status()) return false;
+   if (!tempin.status()) return retval;
 
    std::string news = "Project created: ";
    TpdTime timec(tempin.created()); news += timec();
@@ -221,31 +223,34 @@ bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated,
    tell_log(console::MT_INFO,news);
    // File created time stamp must match exactly, otherwise it means
    // that we're reading not exactly the same file that is requested
-   if ((NULL != timeCreated) && (*timeCreated != timec))
+   if (timeCreated != timec)
    {
       news = "time stamp \"Project created \" doesn't match";
       tell_log(console::MT_ERROR,news);
-      tempin.closeF();
-      return false;
    }
-   if (NULL != timeSaved)
+   if (timeu.stdCTime() < timeSaved.stdCTime())
    {
-      if (timeu.stdCTime() < timeSaved->stdCTime())
-      {
-         news = "time stamp \"Last updated \" is too old.";
-         tell_log(console::MT_ERROR,news);
-         tempin.closeF();
-         return false;
-      }
-      else if (timeu.stdCTime() > timeSaved->stdCTime())
-      {
-         news = "time stamp \"Last updated \" is is newer than requested.";
-         news +="Some of the following commands will be ignored";
-         tell_log(console::MT_WARNING,news);
-         //Start ignoring
-         wxGetApp().set_ignoreOnRecovery(true);
-      }
+      news = "time stamp \"Last updated \" is too old.";
+      tell_log(console::MT_ERROR,news);
    }
+   else if (timeu.stdCTime() > timeSaved.stdCTime())
+   {
+      news = "time stamp \"Last updated \" is is newer than requested.";
+      news +="Some of the following commands will be ignored";
+      tell_log(console::MT_WARNING,news);
+      //Start ignoring
+      start_ignoring = true;
+      retval = true;
+   }
+   tempin.closeF();
+   return retval;
+} 
+
+bool DataCenter::TDTread(std::string filename)
+{
+   laydata::TEDfile tempin(filename.c_str());
+   if (!tempin.status()) return false;
+
    try
    {
       tempin.read();
@@ -270,35 +275,41 @@ bool DataCenter::TDTread(std::string filename, TpdTime* timeCreated,
    return true;
 }
 
-bool DataCenter::TDTwrite(const char* filename, TpdTime* timeCreated,
-                          TpdTime* timeSaved)
+bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
 {
    std::string news;
+   stop_ignoring = false;
    // File created time stamp must match exactly, otherwise it means
    // that we're saving not exactly the same file that is requested
-   if ((NULL != timeCreated) && (timeCreated->stdCTime() != _TEDDB->created()))
+   if (timeCreated.stdCTime() != _TEDDB->created())
    {
       news = "time stamp \"Project created \" doesn't match. File save aborted";
       tell_log(console::MT_ERROR,news);
       return false;
    }
-   if (NULL != timeSaved)
+   if (_TEDDB->lastUpdated() < timeSaved.stdCTime())
    {
-      if (_TEDDB->lastUpdated() < timeSaved->stdCTime())
-      {
-         news = "Database is older or doesn't contain new data, File save operation ignored";
-         tell_log(console::MT_WARNING,news);
-         _neversaved = false;
-         return false;
-      }
-      else if (_TEDDB->lastUpdated() > timeSaved->stdCTime())
-         wxGetApp().set_ignoreOnRecovery(false);
-      else
-      {
-         wxGetApp().set_ignoreOnRecovery(false);
-         return false;
-      }
+      news = "Database in memory is older than the file. File save operation ignored.";
+      tell_log(console::MT_WARNING,news);
+      _neversaved = false;
+      return false;
    }
+   else if (_TEDDB->lastUpdated() > timeSaved.stdCTime())
+      // database in memory is newer than the file - save has to go ahead
+      // ignore on recovery has to stop
+      stop_ignoring = true;
+   else
+   {
+      // database in memory is exactly the same as the file. The save 
+      // is going to be spared, ignore on recovery though has to stop
+      stop_ignoring = true;
+      return false;
+   }
+   return true;
+}
+
+bool DataCenter::TDTwrite(const char* filename)
+{
    if (filename)  _tedfilename = filename;
    laydata::TEDfile tempin(_TEDDB, _tedfilename);
    _neversaved = false;
@@ -454,7 +465,7 @@ void DataCenter::mouseStop() {
    else throw EXPTNactive_DB();
 }
 
-void DataCenter::openGL_draw(layprop::DrawProperties& drawprop) {
+void DataCenter::openGL_draw(const layprop::DrawProperties& drawprop) {
 // Maybe we need another try/catch in the layoutcanvas ?   
    if (_TEDDB) {
 //      _TEDDB->check_active();

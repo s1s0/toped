@@ -153,24 +153,4 @@ class EXPTNpolyCross : public EXPTN
 
 bool expandFileName(std::string&);
 
-class TopedApp : public wxApp
-{
-   public:
-      virtual bool   OnInit();
-      virtual int    OnExit();
-      bool           ignoreOnRecovery() { return _ignoreOnRecovery;}
-      void           set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
-   protected:
-      bool           GetLogFileName();
-      bool           CheckCrashLog();
-      void           GetLogDir();
-      void           FinishSessionLog();
-      void           SaveIgnoredCrashLog();
-      wxString       logFileName;
-      wxString       tpdLogDir;
-      bool           _ignoreOnRecovery;
-};
-
-DECLARE_APP(TopedApp)
-
 #endif
