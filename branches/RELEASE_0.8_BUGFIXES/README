@@ -1,3 +1,10 @@
+Release 0.8.2
+---------------
+Structural changes to fix the problems with libraries, reported by ldd tool. This was
+reported during the package checks for fedora extras. Thanks to Chitlesh GOORAH and
+Mamoru Tasaka.
+No functional updates or bugfixes
+
 Release 0.8.1
 ---------------
 This release contains only fixes of some critical (and not so critical) bugs in release 0.8.
