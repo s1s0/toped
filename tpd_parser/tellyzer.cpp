@@ -43,9 +43,15 @@
 
 extern void tellerror(std::string s, parsercmd::yyltype loc);
 extern void tellerror(std::string s);
+// Declared here to avoid "undefined symbol" errors reported by 
+// ldd -r for tpd_parser.so
+// According to wxWidgets (app.h)
+// this macro can be used multiple times and just allows you to use wxGetApp()
+// function
+//DECLARE_APP(TopedApp)
 
-extern parsercmd::cmdBLOCK*       CMDBlock;
-extern console::toped_logfile     LogFile;
+parsercmd::cmdBLOCK*       CMDBlock = NULL;
+console::toped_logfile     LogFile;
 //-----------------------------------------------------------------------------
 // Initialize some static members
 //-----------------------------------------------------------------------------
@@ -54,11 +60,14 @@ parsercmd::functionMAP        parsercmd::cmdBLOCK::_funcMAP;
 // Table of current nested blocks
 parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
 // Operand stack
-telldata::operandSTACK       parsercmd::cmdVIRTUAL::OPstack;
+telldata::operandSTACK        parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
 telldata::UNDOPerandQUEUE     parsercmd::cmdVIRTUAL::UNDOPstack;
 // UNDO command queue
 parsercmd::undoQUEUE          parsercmd::cmdVIRTUAL::UNDOcmdQ;
+
+bool parsercmd::cmdSTDFUNC::_ignoreOnRecovery = false;
+
 
 
 real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs) {
@@ -468,7 +477,7 @@ int parsercmd::cmdFUNCCALL::execute()
 {
    TELL_DEBUG(cmdFUNC);
    int fresult;
-   if (wxGetApp().ignoreOnRecovery() && !funcbody->execOnRecovery())
+   if (funcbody->ignoreOnRecovery() && !funcbody->execOnRecovery())
    {
       std::string info = funcname + " ignored";
       tell_log(console::MT_INFO, info);
@@ -931,6 +940,11 @@ parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {
 void  parsercmd::cmdMAIN::addGlobalType(char* ttypename, telldata::tell_type* ntype) {
    assert(TYPElocal.end() == TYPElocal.find(ttypename));
    TYPElocal[ttypename] = ntype;
+}
+
+void parsercmd::cmdMAIN::recoveryDone()
+{
+   cmdSTDFUNC::_ignoreOnRecovery = false;
 }
 
 parsercmd::cmdMAIN::~cmdMAIN(){

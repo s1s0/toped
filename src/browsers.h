@@ -37,7 +37,7 @@
 #include <wx/treectrl.h>
 #include <string>
 #include "../tpd_DB/tedesign.h"
-#include "gds_io.h"
+#include "../tpd_DB/gds_io.h"
 
 namespace browsers {
    typedef enum {

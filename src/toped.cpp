@@ -29,6 +29,7 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <math.h>
+#include "config.h"
 #include "toped.h"
 #include "datacenter.h"
 #include "../tpd_DB/viewprop.h"
@@ -595,8 +596,13 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
-   wxMessageBox( wxT( "Toped ver. 0.8\n\nOpen source IC layout editor \n(c) 2001-2006 Toped developers\nwww.toped.org.uk" ),
-                  wxT( "About Toped" ), wxOK | wxICON_INFORMATION, this );
+   wxString ost; 
+   ost << wxT("Toped ver. ");
+   ost << wxT(PACKAGE_VERSION);
+   ost << wxT("\n\nOpen source IC layout editor \n");
+   ost << wxT("(c) 2001-2006 Toped developers\nwww.toped.org.uk \n");
+
+   wxMessageBox( ost, wxT( "About Toped" ), wxOK | wxICON_INFORMATION, this );
 }
 
 

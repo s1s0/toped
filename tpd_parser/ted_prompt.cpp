@@ -60,7 +60,7 @@ extern YYLTYPE telllloc; // parser current location - global variable, defined i
 wxMutex              Mutex;
 
 
-extern const wxEventType    wxEVT_LOG_ERRMESSAGE;
+//extern const wxEventType    wxEVT_LOG_ERRMESSAGE;
 console::ted_cmd*           Console = NULL;
 
 //==============================================================================

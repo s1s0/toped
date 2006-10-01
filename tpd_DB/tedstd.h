@@ -31,7 +31,7 @@
 #include <string>
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/outbox.h"
-#include "../src/gds_io.h"
+#include "gds_io.h"
 
 //==============================================================================
 // Toped DaTa (TDT) file markers

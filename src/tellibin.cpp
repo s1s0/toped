@@ -3101,8 +3101,10 @@ int tellstdfunc::TDTreadIFF::execute()
    }
    else if (expandFileName(filename))
    {
-      if (DATC->TDTread(filename, &timeCreated, &timeSaved))
+      bool start_ignoring = false;
+      if (DATC->TDTcheckread(filename, timeCreated, timeSaved, start_ignoring))
       {
+         DATC->TDTread(filename);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
          TpdTime timec(ATDB->created());
          TpdTime timeu(ATDB->lastUpdated());
@@ -3115,6 +3117,7 @@ int tellstdfunc::TDTreadIFF::execute()
             delete UNDOPstack.front(); UNDOPstack.pop_front();
          }
       }
+      if (start_ignoring) set_ignoreOnRecovery(true);
    }
    else
    {
@@ -3193,8 +3196,10 @@ int tellstdfunc::TDTsaveIFF::execute() {
       laydata::tdtdesign* ATDB = DATC->lockDB();
          ATDB->unselect_all();
       DATC->unlockDB();
-      if (DATC->TDTwrite(DATC->tedfilename().c_str(), &timeCreated, &timeSaved))
-      {   
+      bool stop_ignoring = false;
+      if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
+      {
+         DATC->TDTwrite(DATC->tedfilename().c_str());
          ATDB = DATC->lockDB(false);
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
@@ -3202,6 +3207,7 @@ int tellstdfunc::TDTsaveIFF::execute() {
          LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
                timeu() << "\");"; LogFile.flush();
       }
+      if (stop_ignoring) set_ignoreOnRecovery(false); 
    }
    return EXEC_NEXT;
 }
