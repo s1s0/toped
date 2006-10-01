@@ -373,25 +373,40 @@ namespace  parsercmd {
       telldata::typeID          _next_lcl_typeID;
    };
 
+   class cmdMAIN:public cmdBLOCK {
+   public:
+                     cmdMAIN();
+      int            execute();
+      void           addFUNC(std::string, cmdSTDFUNC*);
+      bool           addUSERFUNC(std::string, cmdSTDFUNC*, argumentLIST*);
+      void           addGlobalType(char*, telldata::tell_type*);
+      void           recoveryDone();
+      ~cmdMAIN();
+   };
+
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
-                              cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
+                                 cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
    arguments(vm), returntype(tt), _execOnRecovery(eor) {};
-      virtual int             execute() = 0;
-      virtual void            undo() = 0;
-      virtual void            undo_cleanup() = 0;
-      void                    reduce_undo_stack();
-      virtual nameList*       callingConv(const telldata::typeMAP*);
-      virtual int             argsOK(telldata::argumentQ* amap);
-      telldata::typeID        gettype() const {return returntype;};
-      virtual                ~cmdSTDFUNC();
-      virtual bool            internal() {return true;}
-      bool                    execOnRecovery() {return _execOnRecovery;}
+      virtual int                execute() = 0;
+      virtual void               undo() = 0;
+      virtual void               undo_cleanup() = 0;
+      void                       reduce_undo_stack();
+      virtual nameList*          callingConv(const telldata::typeMAP*);
+      virtual int                argsOK(telldata::argumentQ* amap);
+      telldata::typeID           gettype() const {return returntype;};
+      virtual bool               internal() {return true;}
+      bool                       execOnRecovery() {return _execOnRecovery;}
+      bool                       ignoreOnRecovery() { return _ignoreOnRecovery;}
+      void                       set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
+      virtual                   ~cmdSTDFUNC();
+      friend void cmdMAIN::recoveryDone();	
    protected:
-      argumentLIST*           arguments;
-      telldata::typeID        returntype;
-      bool                    _buildin;
-      bool                    _execOnRecovery;
+      argumentLIST*              arguments;
+      telldata::typeID           returntype;
+      bool                      _buildin;
+      bool                      _execOnRecovery;
+      static bool               _ignoreOnRecovery;
    };
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
@@ -431,16 +446,6 @@ namespace  parsercmd {
    private:
       cmdBLOCK *condblock;
       cmdBLOCK *body;
-   };
-
-   class cmdMAIN:public cmdBLOCK {
-   public:
-      cmdMAIN();
-      int   execute();
-      void  addFUNC(std::string, cmdSTDFUNC*);
-      bool  addUSERFUNC(std::string, cmdSTDFUNC*, argumentLIST*);
-      void  addGlobalType(char*, telldata::tell_type*);
-      ~cmdMAIN();
    };
 
    telldata::typeID UMinus(telldata::typeID, yyltype);

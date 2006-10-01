@@ -28,7 +28,7 @@
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
 #include "../tpd_DB/tedesign.h"
-#include "gds_io.h"
+#include "../tpd_DB/gds_io.h"
 
 namespace GDSin {
    class gds2ted {
@@ -57,11 +57,10 @@ public:
    void                       GDSexport(laydata::tdtcell*, bool, std::string&);
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
-   bool                       TDTread(std::string, TpdTime* timeCreated = NULL,
-                                      TpdTime* timeSaved = NULL);
-   bool                       TDTwrite(const char* filename = NULL,
-                                       TpdTime* timeCreated = NULL,
-                                       TpdTime* timeSaved = NULL);
+   bool                       TDTread(std::string);
+   bool                       TDTwrite(const char* filename = NULL);
+   bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&); 
+   bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    GDSin::GDSFile*            lockGDS(bool throwexception = true);

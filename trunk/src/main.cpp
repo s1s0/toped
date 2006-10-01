@@ -39,36 +39,17 @@
 #include "../tpd_common/glf.h"
 
 tui::TopedFrame*                 Toped = NULL;
-layprop::ViewProperties*         Properties = NULL;
 browsers::browserTAB*            Browsers = NULL;
-console::TELLFuncList*           CmdList = NULL;
 DataCenter*                      DATC = NULL;
 // from ted_prompt (console)
-parsercmd::cmdBLOCK*             CMDBlock = NULL;
+extern layprop::ViewProperties*  Properties;
+extern parsercmd::cmdBLOCK*      CMDBlock;
+extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
-console::toped_logfile           LogFile;
+extern console::TELLFuncList*    CmdList;
+//console::TELLFuncList*           CmdLst = NULL;
 
 //-----------------------------------------------------------------------------
-
-BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_MARKERPOSITION, 10000)
-    DECLARE_EVENT_TYPE(wxEVT_CNVSSTATUSLINE, 10001)
-    DECLARE_EVENT_TYPE(wxEVT_CMD_BROWSER   , 10002)
-    DECLARE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE, 10003)
-    DECLARE_EVENT_TYPE(wxEVT_MOUSE_ACCEL   , 10004)
-    DECLARE_EVENT_TYPE(wxEVT_MOUSE_INPUT   , 10005)
-    DECLARE_EVENT_TYPE(wxEVT_CANVAS_ZOOM   , 10006)
-    DECLARE_EVENT_TYPE(wxEVT_FUNC_BROWSER  , 10007)
-END_DECLARE_EVENT_TYPES()
-
-DEFINE_EVENT_TYPE(wxEVT_MARKERPOSITION)
-DEFINE_EVENT_TYPE(wxEVT_CNVSSTATUSLINE)
-DEFINE_EVENT_TYPE(wxEVT_CMD_BROWSER)
-DEFINE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE) // -> to go to ted_prompt.cpp !
-DEFINE_EVENT_TYPE(wxEVT_MOUSE_ACCEL)
-DEFINE_EVENT_TYPE(wxEVT_MOUSE_INPUT)
-DEFINE_EVENT_TYPE(wxEVT_CANVAS_ZOOM)
-DEFINE_EVENT_TYPE(wxEVT_FUNC_BROWSER)
 
 void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    // First the internal types
@@ -192,6 +173,25 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    console::TellFnSort();
 }
 
+class TopedApp : public wxApp
+{
+   public:
+      virtual bool   OnInit();
+      virtual int    OnExit();
+//      bool           ignoreOnRecovery() { return _ignoreOnRecovery;}
+//      void           set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
+   protected:
+      bool           GetLogFileName();
+      bool           CheckCrashLog();
+      void           GetLogDir();
+      void           FinishSessionLog();
+      void           SaveIgnoredCrashLog();
+      wxString       logFileName;
+      wxString       tpdLogDir;
+//      bool           _ignoreOnRecovery;
+};
+
+
 void TopedApp::GetLogDir()
 {
    wxFileName* logDIR = new wxFileName(wxT("$TPD_LOCAL/"));
@@ -311,7 +311,6 @@ bool TopedApp::OnInit() {
   _CrtSetDbgFlag(tmpDbgFlag);
   //_CrtSetBreakAlloc(5919);
 #endif*/
-   _ignoreOnRecovery = false;
    Properties = new layprop::ViewProperties();
    Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
@@ -324,6 +323,7 @@ bool TopedApp::OnInit() {
    // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
    CMDBlock = new parsercmd::cmdMAIN();
    InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
+
    Toped->Show(TRUE);
    SetTopWindow(Toped);
 
@@ -366,7 +366,7 @@ bool TopedApp::OnInit() {
       inputfile << wxT("#include \"") << logFileName.c_str() << wxT("\"");
       Console->parseCommand(inputfile, false);
       tell_log(console::MT_WARNING,"Previous session recovered.");
-      set_ignoreOnRecovery(false);
+      static_cast<parsercmd::cmdMAIN*>(CMDBlock)->recoveryDone();
       LogFile.init(std::string(logFileName.mb_str()), true);
    }
    else
@@ -397,4 +397,4 @@ int TopedApp::OnExit() {
 
 // Starting macro
 IMPLEMENT_APP(TopedApp)
-
+//DECLARE_APP(TopedApp)
