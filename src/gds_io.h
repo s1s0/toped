@@ -619,7 +619,7 @@ namespace GDSin {
 
    // Function definition
      TP   get_TP(GDSrecord* cr, word curnum = 0, byte len=4);
-     void AddLog(char logtype, const char* message);
+     void AddLog(char logtype, const char* message, const int number = 0);
 //     void PrintChildren(GDSin::GDSHierTree*, std::string*);
 }   
 #endif // !defined(GDSIO_H_INCLUDED)

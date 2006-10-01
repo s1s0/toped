@@ -1092,12 +1092,14 @@ GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
                // before exiting, init Current Translation Matrix
 //               tmtrx = new PSCTM(magn_point,magnification,angle,reflection);
                delete cr;return;
-            //??? Do not implemented yet+++++
+            //TODO Not implemented yet+++++
             case gds_PROPATTR:
                cr->Ret_Data(&tmp);
                delete cr; break;
-            //??? Do not implemented yet+++++
-            case gds_PROPVALUE:cr->Ret_Data(&tmp2);
+            //TODO Not implemented yet+++++
+            case gds_PROPVALUE:
+               cr->Ret_Data(&tmp2);
+               AddLog('A',tmp2, tmp);
                delete cr; break;
             default://parse error - not expected record type
                AddLog('E',"GDS sref - wrong record type in the current context");
@@ -1117,6 +1119,8 @@ GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
 //==============================================================================
 GDSin::GDSaref::GDSaref(GDSFile* cf, GDSdata *lst):GDSref(lst) {
    word ba;
+   int tmp; //Dummy variable. Use for gds_PROPATTR
+   char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
    //initializing
    GDSrecord* cr = NULL;   
    do {//start reading
@@ -1154,6 +1158,15 @@ GDSin::GDSaref::GDSaref(GDSFile* cf, GDSdata *lst):GDSref(lst) {
                // before exiting, init Current Translation Matrix
 //               tmtrx = new PSCTM(magn_point,magnification,angle,reflection);
                delete cr;return;
+            //TODO not implemented yet+++++
+            case gds_PROPATTR:
+               cr->Ret_Data(&tmp);
+               delete cr; break;
+            //TODO not implemented yet+++++
+            case gds_PROPVALUE:
+               cr->Ret_Data(&tmp2);
+               AddLog('A',tmp2, tmp);
+               delete cr; break;
             default://parse error - not expected record type
                AddLog('E',"GDS aref - wrong record type in the current context");
                delete cr;return;
@@ -1203,7 +1216,7 @@ TP GDSin::get_TP(GDSin::GDSrecord *cr, word curnum, byte len) {
 }
 
 //-----------------------------------------------------------------------------
-void GDSin::AddLog(char logtype, const char* message){
+void GDSin::AddLog(char logtype, const char* message, const int number){
    std::ostringstream ost; 
    switch (logtype){
       case 'B':{
@@ -1237,6 +1250,9 @@ void GDSin::AddLog(char logtype, const char* message){
       }
       case 'M':{
          ost << "Invalid line  " << message << " ... skipped"; break;
+      }
+      case 'A':{
+         ost << "Property attribute  " << number << " with value " << message << " ignored" ; break;
       }
       default: ost << message;
    }
