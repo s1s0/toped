@@ -38,6 +38,31 @@ namespace layprop {
 
    class ViewProperties;
    class DrawProperties;
+
+   //=============================================================================
+   class SDLine {
+   public:
+                        SDLine(TP& p1,TP& p2);// : _p1(p1), _p2(p2) {};
+      void              draw(CTM&) const;
+   protected:
+      TP                _p1;
+      TP                _p2;
+      std::string       _value;
+      TP                _center;
+   };
+
+   //=============================================================================
+   class SupplementaryData {
+   public:
+                        SupplementaryData() {};
+      void              addRuler(TP&, TP&);
+      void              clearRulers();
+      void              drawRulers(CTM&);
+      typedef std::list<SDLine> ruler_collection;
+   protected:
+      ruler_collection  _rulers;
+   };
+
    //=============================================================================
    class LayoutGrid {
    public:
@@ -226,6 +251,9 @@ namespace layprop {
       void              setClipRegion(DBbox clipR)       {_drawprop._clipRegion = clipR;};
       DrawProperties&   drawprop()                       {return _drawprop;};
       void              setCurrentOp(int actop);
+      void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2);}
+      void              clearRulers()                    {_supp_data.clearRulers();}
+      void              drawRulers(CTM& layCTM)          {_supp_data.drawRulers(layCTM);}
       //
    protected:
       DrawProperties    _drawprop;
@@ -237,7 +265,8 @@ namespace layprop {
       real              _step;         // current marker step
       word              _curlay;       // current drawing layer
       bool              _autopan;      // view window moves automatically during shape drawing
-      byte              _marker_angle; // angle of restriction during shape drawing (0,45,90) 
+      byte              _marker_angle; // angle of restriction during shape drawing (0,45,90)
+      SupplementaryData _supp_data;    // supplementary data
    };
 }
 #endif
