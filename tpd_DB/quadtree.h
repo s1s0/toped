@@ -29,6 +29,7 @@
 #define QUADTREE_H
 
 #include "tedstd.h"
+#include "gds_io.h"
 
 namespace laydata {
 

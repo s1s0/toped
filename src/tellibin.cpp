@@ -138,6 +138,39 @@ int tellstdfunc::stdREPORTLAY::execute() {
 }
 
 //=============================================================================
+tellstdfunc::stdDISTANCE::stdDISTANCE(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
+}
+
+int tellstdfunc::stdDISTANCE::execute()
+{
+   // get the data from the stack
+   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+//   real DBscale = Properties->DBscale();
+
+   telldata::ttpnt* p1 = NULL;
+   telldata::ttpnt* p2 = NULL;
+   for (unsigned i = 0; i < pl->size(); i++) {
+      p1 = p2;
+      p2 = static_cast<telldata::ttpnt*>((pl->mlist())[i]);
+      if (NULL != p1)
+      {
+         TP ap1 = TP(p1->x(),p1->y(), Properties->DBscale());
+         TP ap2 = TP(p2->x(),p2->y(), Properties->DBscale());
+         Properties->addRuler(ap1,ap2);
+         std::ostringstream info;
+         info << "Distance {" << p1->x() << " , " << p1->y() <<"}  -  {"
+                              << p2->x() << " , " << p2->y() <<"}  is ";
+         tell_log(console::MT_WARNING,info.str());
+      }
+   }
+
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype, bool eor) :
       stdREPORTLAY(new parsercmd::argumentLIST,retype, eor)
 {
@@ -1887,7 +1920,7 @@ int tellstdfunc::getPOINTLIST::execute() {
    Toped->cmdline()->waitGUInput(&OPstack, TLISTOF(telldata::tn_pnt));
    // 
    wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
-   eventMOUSEIN.SetInt(0);
+   eventMOUSEIN.SetInt(-1);
    eventMOUSEIN.SetExtraLong(1);
    wxPostEvent(Toped->view(), eventMOUSEIN);
    // force the thread in wait condition until the ted_prompt has our data

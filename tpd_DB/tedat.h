@@ -34,6 +34,7 @@
 #include <GL/glu.h>
 #include "tedstd.h"
 #include "viewprop.h"
+#include "gds_io.h"
 
 namespace laydata {
 

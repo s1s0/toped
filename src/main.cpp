@@ -142,6 +142,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    // toped specific functons
    //--------------------------------------------------------------------------
    mblock->addFUNC("redraw"           ,(new                   tellstdfunc::stdREDRAW(telldata::tn_void, true)));
+   mblock->addFUNC("distance"         ,(new                 tellstdfunc::stdDISTANCE(telldata::tn_void, true)));
    mblock->addFUNC("zoom"             ,(new                  tellstdfunc::stdZOOMWIN(telldata::tn_void, true)));
    mblock->addFUNC("zoom"             ,(new                 tellstdfunc::stdZOOMWINb(telldata::tn_void, true)));
    mblock->addFUNC("zoomall"          ,(new                  tellstdfunc::stdZOOMALL(telldata::tn_void, true)));

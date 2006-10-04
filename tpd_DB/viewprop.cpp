@@ -30,6 +30,7 @@
 #include <GL/glu.h>
 #include "viewprop.h"
 #include "../tpd_common/outbox.h"
+#include "../tpd_common/glf.h"
 
 GLubyte cell_mark_bmp[30] = {0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x18, 0x18,
                              0x24, 0x48, 0x42, 0x84, 0x81, 0x02, 0x42, 0x84, 0x24, 0x48, 
@@ -45,14 +46,66 @@ GLubyte array_mark_bmp[30]= {0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x1
 
 layprop::ViewProperties*         Properties = NULL;
 
-//*****************************************************************************
-// class LayoutGrid
-//*****************************************************************************
 #define _GRID_LIMIT  5    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 extern const wxEventType         wxEVT_CNVSSTATUSLINE;
        wxMutex                   DBLock;
 
+layprop::SDLine::SDLine(TP& p1,TP& p2) : _p1(p1), _p2(p2)
+{
+   double distY = p1.y() - p2.y();
+   double distX = p1.x() - p2.x();
+   double distZ = sqrt(distY*distY + distX * distX);
+   std::ostringstream strdist;
+   strdist << distZ * Properties->UU();
+   _value = strdist.str();
+   _center = TP((p1.x() + p2.x()) / 2, (p1.y() + p2.y()) / 2 );
+};
 
+void layprop::SDLine::draw(CTM& LayCTM) const
+{
+
+   DBbox pixelbox = DBbox(TP(),TP(15,15)) * LayCTM;
+   double scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
+
+   glPushMatrix();
+   glTranslatef(_center.x(), _center.y(), 0);
+   glScalef(scaledpix, scaledpix, 1);
+   glColor4f(1, 1, 1, 0.7); // gray
+   glDisable(GL_POLYGON_STIPPLE);
+   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
+
+   glfDrawSolidString(_value.c_str());
+
+   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
+   glEnable(GL_POLYGON_STIPPLE);
+   glPopMatrix();
+
+   glBegin(GL_LINES);
+   glVertex2i(_p1.x(), _p1.y()) ;
+   glVertex2i(_p2.x(), _p2.y());
+   glEnd();
+
+}
+
+void layprop::SupplementaryData::addRuler(TP& p1, TP& p2)
+{
+   _rulers.push_front(SDLine(p1,p2));
+}
+
+void layprop::SupplementaryData::clearRulers()
+{
+   _rulers.clear();
+}
+
+void layprop::SupplementaryData::drawRulers(CTM& LayCTM)
+{
+   for(ruler_collection::const_iterator RA = _rulers.begin(); RA != _rulers.end(); RA++)
+      RA->draw(LayCTM);
+}
+
+//*****************************************************************************
+// class LayoutGrid
+//*****************************************************************************
 void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscale) {
    int gridstep = (int)rint(_step / DBscale);
    if (_visual && ( abs((int)(drawprop.ScrCTM().a() * gridstep)) > _GRID_LIMIT)) {

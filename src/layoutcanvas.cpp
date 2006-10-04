@@ -26,6 +26,7 @@
 //===========================================================================
 
 #include <math.h>
+#include <sstream>
 #include <wx/wx.h>
 
 #if WIN32
@@ -37,6 +38,7 @@
 #include "datacenter.h"
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_DB/tedat.h"
+//#include "../tpd_common/glf.h"
 
 extern layprop::ViewProperties*  Properties;
 extern DataCenter*               DATC;
@@ -218,6 +220,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
       glClear(GL_ACCUM_BUFFER_BIT);
       Properties->drawGrid();
       DATC->openGL_draw(Properties->drawprop());    // draw data
+      Properties->drawRulers(_LayCTM);
       glAccum(GL_LOAD, 1.0);
       if (rubber_band) rubber_paint();
       invalid_window = false;
@@ -262,6 +265,29 @@ void tui::LayoutCanvas::rubber_paint() {
       }
       glEnd();
    }
+
+/*   double distY = n_ScrMARK.y() - releasepoint.y();
+   double distX = n_ScrMARK.x() - releasepoint.x();
+   double distZ = sqrt(distY*distY + distX * distX);
+   std::ostringstream strdist;
+   strdist << distZ * Properties->UU();
+
+   DBbox pixelbox = DBbox(TP(),TP(15,15)) * _LayCTM;
+   double scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
+
+   glPushMatrix();
+   glTranslatef(n_ScrMARK.x(), n_ScrMARK.y(), 0);
+   glScalef(scaledpix, scaledpix, 1);
+   glColor4f(1, 1, 1, 0.7); // gray
+   glDisable(GL_POLYGON_STIPPLE);
+   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
+
+   glfDrawSolidString(strdist.str().c_str());
+
+   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
+   glEnable(GL_POLYGON_STIPPLE);
+   glPopMatrix();
+*/
 }
 
 void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
@@ -379,6 +405,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event) {
       UpdateCoordWin(ScrMARK.x(), POS_X, (n_ScrMARK.x() - releasepoint.x()), DEL_X);
    if (deltaY > 0) 
       UpdateCoordWin(ScrMARK.y(), POS_Y, (n_ScrMARK.y() - releasepoint.y()), DEL_Y);
+
    if ((tmp_wnd || mouse_input)) Refresh();//updateGL();
 }
       
