@@ -131,11 +131,12 @@ public:
    CTM(real va,real vb,real vc,real vd,real vtx,real vty) :
     _a(va), _b(vb), _c(vc), _d(vd), _tx(vtx), _ty(vty) {};
 //   CTM(const CTM& mtrx) { *this = *mtrx;};
-   CTM  Translate(real X, real Y) {return (*this *= CTM(1,0,0,1,X,Y));};
-   CTM  Scale(real X, real Y)     {return (*this *= CTM(X,0,0,Y,0,0));};
-   CTM  FlipX(real Y=0)           {return (*this *= CTM(1,0,0,-1,0,2*Y));};
-   CTM  FlipY(real X=0)           {return (*this *= CTM(-1,0,0,1,2*X,0));};
-   CTM  Rotate(real alfa);
+   CTM  Translate(real X, real Y) {return (*this *= CTM(1,0,0,1,X,Y));}
+   CTM  Scale(real X, real Y)     {return (*this *= CTM(X,0,0,Y,0,0));}
+   CTM  FlipX(real Y=0)           {return (*this *= CTM(1,0,0,-1,0,2*Y));}
+   CTM  FlipY(real X=0)           {return (*this *= CTM(-1,0,0,1,2*X,0));}
+   CTM  Rotate(const real);
+   CTM  Rotate(const real, const TP&);
    CTM  Reversed() const;
    void toGDS(TP&, real&, real&, bool&) const;
    void setCTM(real a, real b, real c, real d, real tx, real ty)
@@ -162,8 +163,8 @@ public:
    void     roundTO(int4b step);
    void     move(int4b dX, int4b dY) {_x += dX; _y += dY;};
    void     info(std::ostringstream&) const;
-   int4b    x()  const {return _x;};
-   int4b    y()  const {return _y;};
+   const int4b    x()  const {return _x;};
+   const int4b    y()  const {return _y;};
    TP operator * ( const CTM& ) const;
    TP operator *= ( const CTM& );
    TP operator = ( const TP& np)        {_x = np.x(); _y = np.y(); return *this;};
@@ -193,12 +194,25 @@ public:
    bool  inside(const TP& );
    float area(); 
    DBbox getcorner(byte corner);
-   TP    p1()  const {return _p1;};
-   TP    p2()  const {return _p2;};
+   const TP&    p1()  const {return _p1;};
+   const TP&    p2()  const {return _p2;};
    DBbox operator * (const CTM&) const;
    DBbox operator = (const DBbox&);
    bool  operator == (const DBbox&) const;
    bool  operator != (const DBbox&) const;
+private:
+   TP    _p1;
+   TP    _p2;
+};
+//==============================================================================   
+class DBline {
+public:
+   DBline(const DBline& ln) :    _p1(ln.p1()) , _p2(ln.p2()) {};
+   DBline(const TP& p1, const TP& p2): _p1(p1), _p2(p2)      {};
+   const TP&    p1()  const {return _p1;};
+   const TP&    p2()  const {return _p2;};
+   DBline operator *  (const CTM&) const;
+   DBline operator  =  (const DBline&);
 private:
    TP    _p1;
    TP    _p2;
