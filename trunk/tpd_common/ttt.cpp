@@ -239,13 +239,13 @@ DBbox DBbox::operator * (const CTM& op2) const {
           int4b(op2.b() * _p1.x() + op2.d() * _p1.y() + op2.ty()));
    TP np2(int4b(op2.a() * _p2.x() + op2.c() * _p2.y() + op2.tx()),
           int4b(op2.b() * _p2.x() + op2.d() * _p2.y() + op2.ty()));
-   return DBbox(np1, np2);       
+   return DBbox(np1, np2);
 }
 
 DBbox DBbox::operator = (const DBbox& bx) {
    _p1 = bx.p1();
    _p2 = bx.p2();
-   return *this;       
+   return *this;
 }
 
 bool  DBbox::operator == (const DBbox& bx) const {
@@ -254,6 +254,25 @@ bool  DBbox::operator == (const DBbox& bx) const {
 
 bool  DBbox::operator != (const DBbox& bx) const {
    return (!((_p1 == bx.p1()) && (_p2 == bx.p2())));
+}
+
+//-----------------------------------------------------------------------------
+// class DBline
+//-----------------------------------------------------------------------------
+DBline DBline::operator *  (const CTM& op2) const
+{
+   TP np1(int4b(op2.a() * _p1.x() + op2.c() * _p1.y() + op2.tx()),
+          int4b(op2.b() * _p1.x() + op2.d() * _p1.y() + op2.ty()));
+   TP np2(int4b(op2.a() * _p2.x() + op2.c() * _p2.y() + op2.tx()),
+          int4b(op2.b() * _p2.x() + op2.d() * _p2.y() + op2.ty()));
+   return DBline(np1, np2);
+}
+
+DBline DBline::operator  =  (const DBline& ln)
+{
+   _p1 = ln.p1();
+   _p2 = ln.p2();
+   return *this;
 }
 
 //-----------------------------------------------------------------------------
@@ -339,10 +358,17 @@ CTM::CTM(TP dp, real scale, real rotation,bool reflX) {
    Translate((real) dp.x(),(real) dp.y());
 }
 
-CTM CTM::Rotate(real alfa) {// alfa - in degrees
+CTM CTM::Rotate(const real alfa) {// alfa - in degrees
    double temp = (double) alfa; 
    double alfaG = (temp * M_PI / 180.0);// translate in radians
    return (*this *= CTM(cos(alfaG),sin(alfaG),-sin(alfaG),cos(alfaG),0,0));
+}
+
+CTM CTM::Rotate(const real alfa, const TP& center) // alfa - in degrees
+{
+   Translate(-center.x(), -center.y());
+   Rotate(alfa);
+   Translate( center.x(),  center.y());
 }
 
 CTM CTM::Reversed() const {

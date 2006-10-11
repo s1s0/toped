@@ -42,13 +42,16 @@ namespace layprop {
    //=============================================================================
    class SDLine {
    public:
-                        SDLine(TP& p1,TP& p2);// : _p1(p1), _p2(p2) {};
-      void              draw(CTM&) const;
+                        SDLine(const TP& p1,const TP& p2);
+      void              draw(const CTM&, real) const;
    protected:
-      TP                _p1;
-      TP                _p2;
+      typedef std::list<DBline> LineList;
+      unsigned          nonius(const DBline&, const DBline&, real, LineList& llst) const;
+      DBline            _ln;
       std::string       _value;
       TP                _center;
+      double            _length;
+      real              _A, _B, _C;
    };
 
    //=============================================================================
@@ -57,7 +60,7 @@ namespace layprop {
                         SupplementaryData() {};
       void              addRuler(TP&, TP&);
       void              clearRulers();
-      void              drawRulers(CTM&);
+      void              drawRulers(CTM&, real);
       typedef std::list<SDLine> ruler_collection;
    protected:
       ruler_collection  _rulers;
@@ -253,7 +256,7 @@ namespace layprop {
       void              setCurrentOp(int actop);
       void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2);}
       void              clearRulers()                    {_supp_data.clearRulers();}
-      void              drawRulers(CTM& layCTM)          {_supp_data.drawRulers(layCTM);}
+      void              drawRulers(CTM& layCTM)          {_supp_data.drawRulers(layCTM, _step);}
       //
    protected:
       DrawProperties    _drawprop;

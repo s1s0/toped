@@ -50,29 +50,56 @@ layprop::ViewProperties*         Properties = NULL;
 extern const wxEventType         wxEVT_CNVSSTATUSLINE;
        wxMutex                   DBLock;
 
-layprop::SDLine::SDLine(TP& p1,TP& p2) : _p1(p1), _p2(p2)
+layprop::SDLine::SDLine(const TP& p1,const TP& p2) : _ln(p1,p2)
 {
-   double distY = p1.y() - p2.y();
-   double distX = p1.x() - p2.x();
-   double distZ = sqrt(distY*distY + distX * distX);
+   _A = _ln.p2().y() - _ln.p1().y();
+   _B = _ln.p1().x() - _ln.p2().x();
+   _C = -(_A*_ln.p1().x() + _B*_ln.p1().y());
+   _length = sqrt(_A*_A + _B*_B);
    std::ostringstream strdist;
-   strdist << distZ * Properties->UU();
+   strdist << _length * Properties->UU();
    _value = strdist.str();
-   _center = TP((p1.x() + p2.x()) / 2, (p1.y() + p2.y()) / 2 );
+   _center = TP((_ln.p1().x() + _ln.p2().x()) / 2, (_ln.p1().y() + _ln.p2().y()) / 2 );
 };
 
-void layprop::SDLine::draw(CTM& LayCTM) const
+void layprop::SDLine::draw(const CTM& LayCTM, const real _step) const
 {
+   // Side ticks (segments) has to be with constant size. The next 3 lines
+   // are generating a segment with the size 15 screen pixels centered in
+   // the {0,0} point of the canvas (logical coords)
+   // the coeffitients 1e3/1e-3 are picked ramdomly in a try to reduce the
+   // error
+   DBline tick_sample = DBline(TP(0,0),TP(0,7,1e3)) * LayCTM;
+   double tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
+   DBline long_mark(TP(0,-tick_size, 1e-3),TP(0,tick_size, 1e-3));
+   tick_sample = DBline(TP(0,0),TP(0,3,1e3)) * LayCTM;
+   tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
+   DBline short_mark(TP(0,-tick_size, 1e-3),TP(0,tick_size, 1e-3));
 
-   DBbox pixelbox = DBbox(TP(),TP(15,15)) * LayCTM;
-   double scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
+   LineList noni_list;
+   nonius(short_mark, long_mark, _step, noni_list);
 
-   glPushMatrix();
-   glTranslatef(_center.x(), _center.y(), 0);
-   glScalef(scaledpix, scaledpix, 1);
    glColor4f(1, 1, 1, 0.7); // gray
    glDisable(GL_POLYGON_STIPPLE);
    glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
+   glBegin(GL_LINE);glLineWidth(2);
+   for (LineList::const_iterator CL = noni_list.begin(); CL != noni_list.end(); CL++)
+   {
+      glVertex2i(CL->p1().x(),CL->p1().y()); 
+      glVertex2i(CL->p2().x(),CL->p2().y());
+   }
+   glVertex2i(_ln.p1().x(), _ln.p1().y());
+   glVertex2i(_ln.p2().x(), _ln.p2().y());
+   glEnd();
+   glLineWidth(1);
+   DBbox pixelbox = DBbox(TP(),TP(15,15)) * LayCTM;
+   double scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
+
+   glColor4f(1, 1, 1, 0.7); // gray
+   glPushMatrix();
+   glTranslatef(_center.x(), _center.y(), 0);
+   glScalef(scaledpix, scaledpix, 1);
+   glRotatef(atan2(-_A , _B)* 180.0 / M_PI, 0,0,1);
 
    glfDrawSolidString(_value.c_str());
 
@@ -80,11 +107,69 @@ void layprop::SDLine::draw(CTM& LayCTM) const
    glEnable(GL_POLYGON_STIPPLE);
    glPopMatrix();
 
-   glBegin(GL_LINES);
-   glVertex2i(_p1.x(), _p1.y()) ;
-   glVertex2i(_p2.x(), _p2.y());
-   glEnd();
+//    double x_dist, y_dist;
+//    if (_ln.p1().x() == _ln.p2().x())
+//       x_dist = _ln.p1().x();
+//    else
+//       x_dist = _ln.p1().x() - (_step * 1000 * _B) / sqrt(_A*_A + _B*_B);
+// 
+//    if (_ln.p1().y() == _ln.p2().y())
+//       y_dist = _ln.p1().y();
+//    else
+//       y_dist = _ln.p1().y() + (_step * 1000 * _A) / sqrt(_A*_A + _B*_B);
+// 
+//    TP one_step(x_dist,y_dist,1);
+//   CTM cm;
+//   cm.Rotate(90, _ln.p1());
+//   TP segl1 = one_step * cm;
+//   cm.Rotate(180, _ln.p1());
+//   TP segl2 = one_step * cm;
 
+//   CTM cm2;
+//   cm2.Translate(_ln.p2().x() - _ln.p1().x(), _ln.p2().y() - _ln.p1().y());
+//   TP segl3 = segl1 * cm2;
+//   TP segl4 = segl2 * cm2;
+//      glVertex2i(segl1.x(), segl1.y());
+//      glVertex2i(segl2.x(), segl2.y());
+//      glVertex2i(segl4.x(), segl4.y());
+//      glVertex2i(segl3.x(), segl3.y());
+
+}
+
+unsigned layprop::SDLine::nonius(const DBline& short_mark, const DBline& long_mark,
+                                 real step, LineList& llst) const
+{
+   // get the angle coefficient of the ruler and calculate the corresponing
+   // functions - will be used below
+   real angle_rad = atan2(-_A , _B);
+   real sinus     = sin(angle_rad);
+   real cosinus   = cos(angle_rad);
+   real angle     = angle_rad * 180.0 / M_PI;
+   //step - converted to DBU
+   step *= Properties->DBscale();
+   // prepare the translation matrix for the edge point
+   CTM tmtrx;
+   tmtrx.Rotate(angle);
+   tmtrx.Translate(_ln.p2().x(), _ln.p2().y());
+   unsigned numtics;
+   for( numtics = 0 ; numtics * step < _length ; numtics++ )
+   {
+      // for each tick - get the deltas ...
+      int4b deltaX = (int4b) rint(numtics * step * cosinus);
+      int4b deltaY = (int4b) rint(numtics * step * sinus);
+      // ... calculate the translation ...
+      CTM pmtrx = tmtrx;
+      pmtrx.Translate(deltaX, deltaY);
+      // ... create a new tick and move it to its position
+      if (numtics % 5)
+         llst.push_back(DBline(short_mark * pmtrx));
+      else
+         llst.push_back(DBline(long_mark * pmtrx));
+   }
+   // don't forget the opposite edge point
+   tmtrx.Translate(_ln.p1().x() - _ln.p2().x(), _ln.p1().y() - _ln.p2().y());
+   llst.push_back(DBline(long_mark * tmtrx));
+   return ++numtics;
 }
 
 void layprop::SupplementaryData::addRuler(TP& p1, TP& p2)
@@ -97,10 +182,10 @@ void layprop::SupplementaryData::clearRulers()
    _rulers.clear();
 }
 
-void layprop::SupplementaryData::drawRulers(CTM& LayCTM)
+void layprop::SupplementaryData::drawRulers(CTM& LayCTM, real step)
 {
    for(ruler_collection::const_iterator RA = _rulers.begin(); RA != _rulers.end(); RA++)
-      RA->draw(LayCTM);
+      RA->draw(LayCTM, step);
 }
 
 //*****************************************************************************
