@@ -321,7 +321,25 @@ void console::ted_cmd::parseCommand(wxString cmd, bool thread) {
 }
    
 
-void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst,telldata::typeID ttype) {
+void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE_OP input_type)
+{
+   telldata::typeID ttype;
+   switch (input_type)
+   {
+      case console::op_line   :
+      case console::op_dbox   :
+      case console::op_copy   :
+      case console::op_move   : ttype = telldata::tn_box; break;
+      case console::op_rotate :
+      case console::op_flipY  :
+      case console::op_flipX  :
+      case console::op_point  : ttype = telldata::tn_pnt; break;
+      default:ttype = TLISTOF(telldata::tn_pnt); break;
+//      case console::op_dpoly  :
+//      case console::op_dwire  : ttype = TLISTOF(telldata::tn_pnt); break;
+//      console::op_line     ,
+//      default: assert(false);
+   }
    puc = new miniParser(clst, ttype);_numpoints = 0;
    _mouseIN_OK = true;
    _guinput.Clear();

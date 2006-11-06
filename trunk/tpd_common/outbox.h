@@ -57,6 +57,21 @@ namespace console {
       FT_FUNCTION_SORT
    } FUNCTION_BROWSER_TYPE;
    
+   typedef enum
+   {
+      op_none = -9,
+      op_point    ,
+      op_line     ,
+      op_rotate   ,
+      op_flipY    ,
+      op_flipX    ,
+      op_copy     ,
+      op_move     ,
+      op_dpoly    ,
+      op_dbox     ,
+      op_dwire
+   } ACTIVE_OP;
+   
    class ted_log : public wxTextCtrl  {
    public: 
                         ted_log(wxWindow *parent);

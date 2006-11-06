@@ -79,17 +79,18 @@ namespace laydata {
       DBbox          activeoverlap();
       //
       void           check_active();
-      void           select_fromList(selectList* ss) {_target.edit()->select_fromList(ss);};
-      void           unselect_fromList(selectList* ss) {_target.edit()->unselect_fromList(ss);};
+      void           select_fromList(selectList* ss) {_target.edit()->select_fromList(ss, _target.viewprop());};
+      void           unselect_fromList(selectList* ss) {_target.edit()->unselect_fromList(ss, _target.viewprop());};
       void           unselect_all()    const {_target.edit()->unselect_all(false);};
       selectList*    shapesel()        const {return _target.edit()->shapesel();};
       selectList*    copy_selist()     const {return _target.edit()->copy_selist();};
       unsigned int   numselected()     const {return _target.edit()->numselected();};
-      void           select_all()      const {       _target.edit()->select_all();};
+      void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
       void           report_selected() const {       _target.edit()->report_selected();};
       quadTree*      targetlayer(word layno) {return _target.edit()->securelayer(layno);};
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       std::string    activecellname()  const {return _target.name();};
+      void           assign_properties(layprop::ViewProperties& viewprop) {_target.init_viewprop(&viewprop);}
       //
       std::string    name()            const {return _name;};
       real           UU()              const {return _UU;};

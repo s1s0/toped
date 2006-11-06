@@ -42,7 +42,6 @@ tui::TopedFrame*                 Toped = NULL;
 browsers::browserTAB*            Browsers = NULL;
 DataCenter*                      DATC = NULL;
 // from ted_prompt (console)
-extern layprop::ViewProperties*  Properties;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
@@ -142,7 +141,9 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    // toped specific functons
    //--------------------------------------------------------------------------
    mblock->addFUNC("redraw"           ,(new                   tellstdfunc::stdREDRAW(telldata::tn_void, true)));
-   mblock->addFUNC("distance"         ,(new                 tellstdfunc::stdDISTANCE(telldata::tn_void, true)));
+   mblock->addFUNC("addruler"         ,(new                 tellstdfunc::stdDISTANCE(telldata::tn_void, true)));
+   mblock->addFUNC("addruler"         ,(new               tellstdfunc::stdDISTANCE_D(telldata::tn_void, true)));
+   mblock->addFUNC("clearrulers"      ,(new              tellstdfunc::stdCLEARRULERS(telldata::tn_void, true)));
    mblock->addFUNC("zoom"             ,(new                  tellstdfunc::stdZOOMWIN(telldata::tn_void, true)));
    mblock->addFUNC("zoom"             ,(new                 tellstdfunc::stdZOOMWINb(telldata::tn_void, true)));
    mblock->addFUNC("zoomall"          ,(new                  tellstdfunc::stdZOOMALL(telldata::tn_void, true)));
@@ -161,7 +162,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("grid"             ,(new                     tellstdfunc::stdGRID(telldata::tn_void, true)));
    mblock->addFUNC("autopan"          ,(new                  tellstdfunc::stdAUTOPAN(telldata::tn_void, true)));
    mblock->addFUNC("shapeangle"       ,(new               tellstdfunc::stdSHAPEANGLE(telldata::tn_void, true)));
-   mblock->addFUNC("getpoint"         ,(new                     tellstdfunc::getPOINT(telldata::tn_pnt,false)));
+   mblock->addFUNC("getpoint"         ,(new                    tellstdfunc::getPOINT(telldata::tn_pnt ,false)));
    mblock->addFUNC("getpointlist"     ,(new        tellstdfunc::getPOINTLIST(TLISTOF(telldata::tn_pnt),false)));
    mblock->addFUNC("addbox"           ,(new                tellstdfunc::stdDRAWBOX(telldata::tn_layout,false)));
    mblock->addFUNC("addbox"           ,(new              tellstdfunc::stdDRAWBOX_D(telldata::tn_layout,false)));
@@ -312,7 +313,7 @@ bool TopedApp::OnInit() {
   _CrtSetDbgFlag(tmpDbgFlag);
   //_CrtSetBreakAlloc(5919);
 #endif*/
-   Properties = new layprop::ViewProperties();
+   DATC = new DataCenter();
    Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
    console::ted_log_ctrl *logWindow = new console::ted_log_ctrl(Toped->logwin());
@@ -320,7 +321,6 @@ bool TopedApp::OnInit() {
 
    Browsers = Toped->browsers();
    CmdList = Toped->cmdlist();
-   DATC = new DataCenter();
    // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
    CMDBlock = new parsercmd::cmdMAIN();
    InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
@@ -391,7 +391,6 @@ bool TopedApp::OnInit() {
 int TopedApp::OnExit() {
    delete CMDBlock; 
    delete DATC;
-   delete Properties;
    FinishSessionLog();
    return 0;
 }

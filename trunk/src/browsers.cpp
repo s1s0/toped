@@ -42,7 +42,6 @@
 
 
 extern console::ted_cmd*         Console;
-extern layprop::ViewProperties*  Properties;
 extern DataCenter*               DATC;
 extern browsers::browserTAB*     Browsers;
 extern const wxEventType         wxEVT_CMD_BROWSER;

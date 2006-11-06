@@ -73,7 +73,7 @@ namespace console {
                               ted_cmd(wxWindow*);
       virtual                ~ted_cmd();
       void                    parseCommand(wxString, bool thread=true);
-      void                    waitGUInput(telldata::operandSTACK*,telldata::typeID);
+      void                    waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP);
       void                    getGUInput(bool from_keyboard = true);
       wxCondition*            threadWaits4;
       miniParser*             puc; // parse user coordinates

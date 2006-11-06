@@ -31,12 +31,15 @@
 #include <string>
 #include "quadtree.h"
 
+namespace layprop {
+   class ViewProperties;
+}
+
 namespace laydata {
 
 //==============================================================================
    class tdtcellref;
    class tdtcellaref;
-
    typedef  std::map<word, quadTree*>               layerList;
    typedef  SGHierTree<tdtcell>                     TDTHierTree;
 
@@ -70,14 +73,19 @@ namespace laydata {
       const CTM            rARTM() const     {return _ARTM.Reversed();};
       const CTM            ARTM() const      {return _ARTM;};
       bool                 iscell() const    {return _activeref == NULL;};
+      layprop::ViewProperties& viewprop() const {return *_viewprop;}
+      void                 init_viewprop(layprop::ViewProperties* viewprop) {_viewprop = viewprop;}
       static editcellstack _editstack;    //! the stack of all previously edited (opened) cells
    private:
       void                 reset();
+      void                 unblockfill();
+      void                 blockfill();
       tdtcell*             _activecell;   //! the curently active cell
       tdtcell*             _viewcell;     //! current topview cell - if edit in place is active
       tdtcellref*          _activeref;    //! current topview reference - if edit in place is active
       cellrefstack*        _peditchain;   //! the path from _viewcell to the _activeref (_activecell)
       CTM                  _ARTM;         //! active reference (cell) translation matrix
+      static layprop::ViewProperties* _viewprop;
    };
 
 //==============================================================================
@@ -103,13 +111,15 @@ namespace laydata {
       TDTHierTree*         hierout(TDTHierTree*& Htree, tdtcell* parent, 
                                                            cellList* celldefs);
       DBbox                overlap() const;
-      void                 select_inBox(DBbox, bool pntsel = false);
+      void                 select_inBox(DBbox, layprop::ViewProperties&, bool pntsel = false);
 //      void                 select_inside(const TP);
-      void                 select_fromList(selectList*);
-      void                 select_all(bool select_locked = false);
+      void                 select_fromList(selectList*, layprop::ViewProperties&);
+//      void                 select_all(bool select_locked = false);
+      void                 select_all(layprop::ViewProperties&);
+      void                 full_select();
       void                 select_this(tdtdata*, word);
-      void                 unselect_inBox(DBbox, bool);
-      void                 unselect_fromList(selectList*);
+      void                 unselect_inBox(DBbox, bool, layprop::ViewProperties&);
+      void                 unselect_fromList(selectList*, layprop::ViewProperties&);
       void                 unselect_all(bool destroy=false);
       bool                 addlist(tdtdesign*, atticList*);
       bool                 copy_selected(tdtdesign*, const CTM&);
@@ -126,9 +136,8 @@ namespace laydata {
       unsigned int         numselected();
       bool                 cutpoly_selected(pointlist&,atticList**);
       bool                 merge_selected(atticList**);
-      bool                 getshapeover(TP);
-      atticList*           changeselect(TP, SH_STATUS status);
-      tdtcellref*          getcellover(TP, ctmstack&, cellrefstack*);
+      atticList*           changeselect(TP, SH_STATUS status, layprop::ViewProperties&);
+      tdtcellref*          getcellover(TP, ctmstack&, cellrefstack*, layprop::ViewProperties&);
       void                 parentfound()     {_orphan = false;};
       bool                 orphan() const    {return _orphan;};
       std::string          name() const      {return _name;};
@@ -139,6 +148,7 @@ namespace laydata {
       void                 report_selected() const;
       void                 collect_usedlays(const tdtdesign*, bool, usedlayList&) const;
    private:
+      bool                 getshapeover(TP, layprop::ViewProperties&);
       void                 store_inAttic(atticList&);
       void                 invalidateParents(tdtdesign*);
       _dbl_word            getFullySelected(dataList*) const;
