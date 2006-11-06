@@ -34,12 +34,14 @@
 #include "../tpd_common/outbox.h"
 
 //! the stack of all previously edited (opened) cells
-laydata::editcellstack laydata::editobject::_editstack;
+laydata::editcellstack      laydata::editobject::_editstack;
+layprop::ViewProperties*    laydata::editobject::_viewprop = NULL;
+
 //-----------------------------------------------------------------------------
 // class tdtdesign
 //-----------------------------------------------------------------------------
-laydata::tdtdesign::tdtdesign(std::string name, time_t created, time_t lastUpdated, 
-                              real DBU, real UU) {
+laydata::tdtdesign::tdtdesign(std::string name, time_t created,
+                              time_t lastUpdated, real DBU, real UU) {
    _name = name;
    _DBU  = DBU; _UU   = UU;
    _tmpdata = NULL;
@@ -47,6 +49,7 @@ laydata::tdtdesign::tdtdesign(std::string name, time_t created, time_t lastUpdat
    _hiertree = NULL;
    _created = created;
    _lastUpdated = lastUpdated;
+//   _target.init_viewprop(&viewprop);
 }
 
 void laydata::tdtdesign::read(TEDfile* const tedfile) 
@@ -111,7 +114,7 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel)
          // remove the cell from the list of all design cells
          _cells.erase(_cells.find(name));
          //empty the contents of the removed cell and return it in atticList
-         remcl->select_all();
+         remcl->full_select();
          remcl->delete_selected(this, fsel); // validation is not required here
          // finally - delete the cell. Cell is already empty
          delete remcl;
@@ -235,7 +238,7 @@ bool laydata::tdtdesign::editpush(const TP& pnt) {
       tdtcell* oldtvcell = _target.view();
       // Find the new active reference
       laydata::tdtcellref *new_activeref =
-                      oldtvcell->getcellover(pnt,transtack,crstack);
+                      oldtvcell->getcellover(pnt,transtack,crstack,_target.viewprop());
       if (new_activeref) {
          // Set the new active reference and the chain to it
          _target.push(new_activeref,oldtvcell,crstack,transtack.top());
@@ -284,26 +287,26 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
       tmp_stack.push_front(CTM(newp - base,1,0,false));
       _tmpdata->tmp_draw(drawprop, tmp_stack,NULL,true);
    }
-   else if ((drawprop.currentop() != layprop::op_none) && _target.checkedit())
+   else if ((drawprop.currentop() != console::op_none) && _target.checkedit())
    {
-      if ((layprop::op_copy == drawprop.currentop()) || (layprop::op_move == drawprop.currentop()))
+      if ((console::op_copy == drawprop.currentop()) || (console::op_move == drawprop.currentop()))
       {
          base *= _target.rARTM();
          newp *= _target.rARTM();
          tmp_stack.push_front(CTM(_target.ARTM()));
          tmp_stack.push_front(CTM(newp - base,1,0,false)*_target.ARTM());
       }
-      else if ((layprop::op_flipX == drawprop.currentop()) || (layprop::op_flipY == drawprop.currentop()))
+      else if ((console::op_flipX == drawprop.currentop()) || (console::op_flipY == drawprop.currentop()))
       {
          CTM newpos = _target.ARTM();
 //         tmp_stack.push_front(newpos);
-         if (layprop::op_flipX == drawprop.currentop())
+         if (console::op_flipX == drawprop.currentop())
             newpos.FlipX(newp.y());
          else
             newpos.FlipY(newp.x());
          tmp_stack.push_front(newpos * _target.rARTM());
       }
-      else if (layprop::op_rotate == drawprop.currentop())
+      else if (console::op_rotate == drawprop.currentop())
       {
          CTM newpos = _target.ARTM();
          tmp_stack.push_front(_target.ARTM());
@@ -373,8 +376,8 @@ void laydata::tdtdesign::recreate_hierarchy() {
 
 void laydata::tdtdesign::mouseStart(int input_type) {
    if      ( 0  < input_type)  _tmpdata = new tdtwire(input_type);
-   else if ( 0 == input_type)  _tmpdata = new tdtbox();
-   else if (-1 == input_type)  _tmpdata = new tdtpoly();
+   else if ( console::op_dbox  == input_type)  _tmpdata = new tdtbox();
+   else if ( console::op_dpoly == input_type)  _tmpdata = new tdtpoly();
 //   else if (-2 == input_type)  _tellop = op_move;
 //   else if (-3 == input_type)  _tellop = op_copy;
 }
@@ -396,14 +399,14 @@ void laydata::tdtdesign::select_inBox(TP* p1, TP* p2, bool pntsel) {
    if (_target.checkedit()) {
       DBbox select_in((*p1)*_target.rARTM(), (*p2)*_target.rARTM());
       select_in.normalize();
-      _target.edit()->select_inBox(select_in, pntsel);
+      _target.edit()->select_inBox(select_in, _target.viewprop(), pntsel);
    }
 }
 
 laydata::atticList* laydata::tdtdesign::change_select(TP* p1, bool select) {
    if (_target.checkedit()) {
       TP selp = (*p1) * _target.rARTM();
-      return _target.edit()->changeselect(selp, select ? sh_selected:sh_active);
+      return _target.edit()->changeselect(selp, select ? sh_selected:sh_active, _target.viewprop());
    }
    else return NULL;
 }
@@ -412,7 +415,7 @@ void laydata::tdtdesign::unselect_inBox(TP* p1, TP* p2, bool pntsel) {
    if (_target.checkedit()) {
       DBbox unselect_in((*p1)*_target.rARTM(), (*p2)*_target.rARTM());
       unselect_in.normalize();
-      _target.edit()->unselect_inBox(unselect_in, pntsel);
+      _target.edit()->unselect_inBox(unselect_in, pntsel, _target.viewprop());
    }
 }
 

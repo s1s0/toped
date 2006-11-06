@@ -1523,7 +1523,7 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
    tdtdata *data_copy;
    shapeList* ssl;
    // select all the shapes of the referenced tdtcell
-   structure()->select_all(true);
+   structure()->full_select();
    for (selectList::const_iterator CL = structure()->shapesel()->begin();
                                    CL != structure()->shapesel()->end(); CL++) {
       // secure the target layer

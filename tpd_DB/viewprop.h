@@ -34,15 +34,14 @@
 namespace layprop {
 
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
-   typedef enum {op_none = -7, op_rotate, op_flipY, op_flipX, op_copy, op_move, op_dpoly, op_dbox, op_dwire} ACTIVE_OP;
-
+   
    class ViewProperties;
    class DrawProperties;
 
    //=============================================================================
    class SDLine {
    public:
-                        SDLine(const TP& p1,const TP& p2);
+                        SDLine(const TP& p1,const TP& p2, const real);
       void              draw(const CTM&, real) const;
    protected:
       typedef std::list<DBline> LineList;
@@ -58,9 +57,10 @@ namespace layprop {
    class SupplementaryData {
    public:
                         SupplementaryData() {};
-      void              addRuler(TP&, TP&);
+      void              addRuler(TP&, TP&, const real);
       void              clearRulers();
-      void              drawRulers(CTM&, real);
+      void              drawRulers(const CTM&, real);
+//      void              tmpRulerInit();
       typedef std::list<SDLine> ruler_collection;
    protected:
       ruler_collection  _rulers;
@@ -158,45 +158,45 @@ namespace layprop {
    */
    class DrawProperties {
    public:
-                        DrawProperties();
-                       ~DrawProperties();
-      void              setCurrentColor(word layno);
-      void              setGridColor(std::string colname) const;
-      bool              getCurrentFill() const;
-      void              setLineProps(bool selected = false) const;
-      bool              layerHidden(word layno) const;
-      bool              layerLocked(word layno) const;
-      const CTM&        ScrCTM() const                   {return  _ScrCTM;};
-      const DBbox&      clipRegion() const               {return _clipRegion;};
-      ACTIVE_OP         currentop() const                {return _currentop;}
-      void              blockfill(laydata::cellrefstack*);
-      void              unblockfill();
-      void              pushref(const laydata::tdtcellref*);
-      byte              popref(const laydata::tdtcellref*);
-      void              initCTMstack()       {_transtack.push(CTM());}
-      void              clearCTMstack()      {while (!_transtack.empty()) _transtack.pop();}
-      void              pushCTM(CTM& last)   {_transtack.push(last);}
-      void              popCTM()             {_transtack.pop();}
-      const CTM&        topCTM() const      {assert(_transtack.size());return _transtack.top();}
-      void              draw_reference_marks(const TP&, const binding_marks) const;
-      word              getlayerNo(std::string name) const;
-      word              drawinglayer() const {return _drawinglayer;}
+                           DrawProperties();
+                          ~DrawProperties();
+      void                 setCurrentColor(word layno);
+      void                 setGridColor(std::string colname) const;
+      bool                 getCurrentFill() const;
+      void                 setLineProps(bool selected = false) const;
+      bool                 layerHidden(word layno) const;
+      bool                 layerLocked(word layno) const;
+      const CTM&           ScrCTM() const                   {return  _ScrCTM;};
+      const DBbox&         clipRegion() const               {return _clipRegion;};
+      console::ACTIVE_OP   currentop() const                {return _currentop;}
+      void                 blockfill(laydata::cellrefstack*);
+      void                 unblockfill();
+      void                 pushref(const laydata::tdtcellref*);
+      byte                 popref(const laydata::tdtcellref*);
+      void                 initCTMstack()       {_transtack.push(CTM());}
+      void                 clearCTMstack()      {while (!_transtack.empty()) _transtack.pop();}
+      void                 pushCTM(CTM& last)   {_transtack.push(last);}
+      void                 popCTM()             {_transtack.pop();}
+      const CTM&           topCTM() const      {assert(_transtack.size());return _transtack.top();}
+      void                 draw_reference_marks(const TP&, const binding_marks) const;
+      word                 getlayerNo(std::string name) const;
+      word                 drawinglayer() const {return _drawinglayer;}
       friend class ViewProperties;
    protected:
-      laySetList        _layset;
-      colorMAP          _laycolors;
-      fillMAP           _layfill;
-      lineMAP           _lineset;
-      DBbox             _clipRegion;
-      CTM               _ScrCTM;
-      bool              _cellmarks_hidden;
-      bool              _textmarks_hidden;
+      laySetList           _layset;
+      colorMAP             _laycolors;
+      fillMAP              _layfill;
+      lineMAP              _lineset;
+      DBbox                _clipRegion;
+      CTM                  _ScrCTM;
+      bool                 _cellmarks_hidden;
+      bool                 _textmarks_hidden;
    private:
-      bool              _blockfill;
+      bool                 _blockfill;
       laydata::cellrefstack*  _refstack;
-      ctmstack          _transtack;
-      word              _drawinglayer;
-      ACTIVE_OP         _currentop;
+      ctmstack             _transtack;
+      word                 _drawinglayer;
+      console::ACTIVE_OP   _currentop;
    };
 
    //==============================================================================
@@ -237,26 +237,26 @@ namespace layprop {
       void              drawGrid() const;
       void              setcellmarks_hidden(bool hide);
       void              settextmarks_hidden(bool hide);
-      void              setstep(real st)                 {_step = st;};
-      real              step() const                     {return _step;};
-      int4b             stepDB() const                   {return (word)rint(_step*_DBscale);};
-      void              defaultlayer(word layno)         {_curlay = layno;};
-      word              curlay() const                   {return _curlay;};
-      word              getlayerNo(std::string name) const {return _drawprop.getlayerNo(name);};
-      void              setUU(real);//                  {_DBscale = DB;};
-      real              UU() const                       {return _UU;};
-      real              DBscale() const                  {return _DBscale;};
-      void              setautopan(bool status)          {_autopan = status;};
-      bool              autopan() const                  {return _autopan;};
-      void              setmarker_angle(byte angle)      {_marker_angle = angle;};
-      byte              marker_angle() const             {return _marker_angle;};
-      void              setScrCTM(CTM ScrCTM)            {_drawprop._ScrCTM = ScrCTM;};
-      void              setClipRegion(DBbox clipR)       {_drawprop._clipRegion = clipR;};
-      DrawProperties&   drawprop()                       {return _drawprop;};
-      void              setCurrentOp(int actop);
-      void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2);}
+      void              setstep(real st)                 {_step = st;}
+      real              step() const                     {return _step;}
+      int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
+      word              getlayerNo(std::string name) const {return _drawprop.getlayerNo(name);}
+      void              setUU(real);//                  {_DBscale = DB;}
+      real              UU() const                       {return _UU;}
+      real              DBscale() const                  {return _DBscale;}
+      void              setautopan(bool status)          {_autopan = status;}
+      bool              autopan() const                  {return _autopan;}
+      void              setmarker_angle(byte angle)      {_marker_angle = angle;}
+      byte              marker_angle() const             {return _marker_angle;}
+      void              setScrCTM(CTM ScrCTM)            {_drawprop._ScrCTM = ScrCTM;}
+      void              setClipRegion(DBbox clipR)       {_drawprop._clipRegion = clipR;}
+      DrawProperties&   drawprop()                       {return _drawprop;}
+      void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2,_UU);}
       void              clearRulers()                    {_supp_data.clearRulers();}
-      void              drawRulers(CTM& layCTM)          {_supp_data.drawRulers(layCTM, _step);}
+      void              drawRulers(const CTM& layCTM)    {_supp_data.drawRulers(layCTM, stepDB());}
+      void              setCurrentOp(console::ACTIVE_OP);
+      console::ACTIVE_OP currentop() const               {return _drawprop.currentop();}
+
       //
    protected:
       DrawProperties    _drawprop;
@@ -266,7 +266,6 @@ namespace layprop {
                                        // not to read it with every mouse move  
       gridlist          _grid;         // the list of grids as defined by the tell command
       real              _step;         // current marker step
-      word              _curlay;       // current drawing layer
       bool              _autopan;      // view window moves automatically during shape drawing
       byte              _marker_angle; // angle of restriction during shape drawing (0,45,90)
       SupplementaryData _supp_data;    // supplementary data

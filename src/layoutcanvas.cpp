@@ -40,7 +40,6 @@
 #include "../tpd_DB/tedat.h"
 //#include "../tpd_common/glf.h"
 
-extern layprop::ViewProperties*  Properties;
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
 extern const wxEventType         wxEVT_MARKERPOSITION;
@@ -218,9 +217,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
-      Properties->drawGrid();
-      DATC->openGL_draw(Properties->drawprop());    // draw data
-      Properties->drawRulers(_LayCTM);
+      DATC->openGL_draw(_LayCTM);    // draw data
       glAccum(GL_LOAD, 1.0);
       if (rubber_band) rubber_paint();
       invalid_window = false;
@@ -248,7 +245,7 @@ void tui::LayoutCanvas::wnd_paint() {
 
 void tui::LayoutCanvas::rubber_paint() {
    glAccum(GL_RETURN, 1.0);
-   DATC->tmp_draw(Properties->drawprop(), releasepoint, n_ScrMARK);
+   DATC->tmp_draw(releasepoint, n_ScrMARK);
    if (reperX || reperY)
    {
       glColor4f(1, 1, 1, .5);
@@ -305,7 +302,7 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
    // The sign actually is the sign of the tangens. To avoud troubles with the division by zero,
    // it is easier and faster to obtain the sign like this
    int sign = ((sdX * sdY) >= 0) ? 1 : -1;
-   bool _45deg = (Properties->marker_angle() == 45);
+   bool _45deg = (DATC->marker_angle() == 45);
    if (dX > dY) {
       if (_45deg && (dX < 2*dY)) n_ScrMARK.setY( sign*sdX + releasepoint.y() );
       else                       n_ScrMARK.setY( releasepoint.y() );
@@ -321,12 +318,12 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
 void tui::LayoutCanvas::UpdateCoordWin(int coord, POSITION_TYPE postype, int dcoord, POSITION_TYPE dpostype) {
    wxString ws;
    wxCommandEvent eventPOSITION(wxEVT_MARKERPOSITION);
-   ws.sprintf(wxT("%3.2f"),coord*Properties->UU());
+   ws.sprintf(wxT("%3.2f"),coord*DATC->UU());
    eventPOSITION.SetString(ws);
    eventPOSITION.SetInt(postype);
    wxPostEvent(this, eventPOSITION);
    if (rubber_band) {
-      ws.sprintf(wxT("%3.2f"),dcoord*Properties->UU());
+      ws.sprintf(wxT("%3.2f"),dcoord*DATC->UU());
       eventPOSITION.SetString(ws);
       eventPOSITION.SetInt(dpostype);
       wxPostEvent(this, eventPOSITION);
@@ -336,8 +333,8 @@ void tui::LayoutCanvas::UpdateCoordWin(int coord, POSITION_TYPE postype, int dco
 void tui::LayoutCanvas::EventMouseClick(int button) {
    wxCommandEvent eventButtonUP(wxEVT_COMMAND_ENTER);
 
-   telldata::ttpnt* ttp = new telldata::ttpnt(releasepoint.x()*Properties->UU(),
-                                              releasepoint.y()*Properties->UU());
+   telldata::ttpnt* ttp = new telldata::ttpnt(releasepoint.x()*DATC->UU(),
+                                              releasepoint.y()*DATC->UU());
    //Post an event to notify the console
    eventButtonUP.SetClientData((void*)ttp);
    eventButtonUP.SetInt(button);
@@ -352,9 +349,9 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event) {
    ScrMARKold = ScrMARK;
    // get a current position
    ScrMARK = TP(event.GetX(),event.GetY()) * _LayCTM ;
-   int4b stepDB = Properties->stepDB();
+   int4b stepDB = DATC->stepDB();
    ScrMARK.roundTO(stepDB);
-   if (Properties->autopan() && mouse_input && !invalid_window) {
+   if (DATC->autopan() && mouse_input && !invalid_window) {
       CTM LayCTMR(_LayCTM.Reversed());
       TP sp_BL     =     lp_BL * LayCTMR;
       TP sp_TR     =     lp_TR * LayCTMR;
@@ -416,7 +413,7 @@ void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
 
 void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
    tmp_wnd = false;
-   int4b stepDB = Properties->stepDB();
+   int4b stepDB = DATC->stepDB();
    if ((abs(presspoint.x() - ScrMARK.x())  > stepDB) ||
        (abs(presspoint.y() - ScrMARK.y())  > stepDB))   {
       // if dragging ...
@@ -428,15 +425,15 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
    // Context menu here
       wxMenu menu;
       if ( NULL != Console->puc) {
-         switch (Properties->drawprop().currentop()) {
-            case layprop::op_dbox:
+         switch (DATC->currentop()) {
+            case console::op_dbox:
                if (Console->numpoints() > 0) {
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
                }
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
-            case layprop::op_dpoly:
+            case console::op_dpoly:
                if (Console->numpoints() >= 3) {
                   menu.Append(CM_CLOSE, wxT("Close polygon"));
                }
@@ -449,7 +446,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
-            case layprop::op_dwire:
+            case console::op_dwire:
                if (Console->numpoints() > 1) {
                   menu.Append(CM_CLOSE, wxT("Finish wire"));
                }
@@ -462,8 +459,8 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
-//            case layprop::op_move:
-//            case layprop::op_copy:
+//            case console::op_move:
+//            case console::op_copy:
             default:
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
@@ -521,7 +518,7 @@ void tui::LayoutCanvas::OnMouseLeftUp(wxMouseEvent& WXUNUSED(event)) {
 void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event) {
    wxString ws;
    wxCommandEvent eventMOUSEACCEL(wxEVT_MOUSE_ACCEL);
-   ws.sprintf(wxT("{%3.2f,%3.2f}"),ScrMARK.x()*Properties->UU(), ScrMARK.y()*Properties->UU());
+   ws.sprintf(wxT("{%3.2f,%3.2f}"),ScrMARK.x()*DATC->UU(), ScrMARK.y()*DATC->UU());
    eventMOUSEACCEL.SetString(ws);
    eventMOUSEACCEL.SetInt(event.ShiftDown() ? 0 : 1);
    wxPostEvent(this, eventMOUSEACCEL);
@@ -616,7 +613,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    double ty = ((box->p1().y() + box->p2().y()) - H*sc) / 2;
    _LayCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);
    _LayCTM.FlipX((box->p1().y() + box->p2().y())/2);  // flip Y coord towards the center
-   Properties->setScrCTM(_LayCTM.Reversed());
+   DATC->setScrCTM(_LayCTM.Reversed());
    invalid_window = true;
    delete box;
    Refresh();
@@ -627,7 +624,7 @@ void tui::LayoutCanvas::update_viewport() {
    GetClientSize(&W,&H);
    lp_BL = TP(0,0)  * _LayCTM;
    lp_TR = TP(W, H) * _LayCTM;
-   Properties->setClipRegion(DBbox(lp_BL.x(),lp_TR.y(), lp_TR.x(), lp_BL.y()));
+   DATC->setClipRegion(DBbox(lp_BL.x(),lp_TR.y(), lp_TR.x(), lp_BL.y()));
    glClearColor(0,0,0,0);
 }
 
@@ -637,14 +634,17 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
    if (1 == evt.GetExtraLong())
    { // start mouse input
       mouse_input = true;
-      Properties->setCurrentOp(evt.GetInt());
+      console::ACTIVE_OP actop;
+      if (evt.GetInt() > 0) actop = console::op_dwire;
+      else                  actop = (console::ACTIVE_OP)evt.GetInt();
+      DATC->setCurrentOp(actop);
       //restricted_move will be true for wire and polygon
-      restricted_move = (Properties->marker_angle() != 0) && 
-                              ((evt.GetInt() > 0) || (evt.GetInt() == -1));
+      restricted_move = (DATC->marker_angle() != 0) &&
+            ((actop > 0) || (actop == console::op_dpoly));
       eventABORTEN.SetInt(STS_ABORTENABLE);
-      reperX = (-4 == evt.GetInt());
-      reperY = (-5 == evt.GetInt());
-      if (reperX || reperY || (-6 == evt.GetInt()))
+      reperX = (console::op_flipX == actop);
+      reperY = (console::op_flipY == actop);
+      if (reperX || reperY || (console::op_rotate == actop))
          rubber_band = true;
    }
    else
@@ -654,7 +654,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       restricted_move = false;
       reperX = false;
       reperY = false;
-      Properties->setCurrentOp(layprop::op_none);
+      DATC->setCurrentOp(console::op_none);
       wxCommandEvent eventPOSITION(wxEVT_MARKERPOSITION);
       eventPOSITION.SetString(wxT(""));
       eventPOSITION.SetInt(DEL_Y);

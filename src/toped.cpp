@@ -41,7 +41,6 @@ extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
 
 extern DataCenter*               DATC;
-extern layprop::ViewProperties*  Properties;
 extern console::ted_cmd*         Console;
 
 tui::CanvasStatus::CanvasStatus(wxWindow* parent) : wxPanel( parent, -1,
@@ -1015,7 +1014,7 @@ void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost; ost << wxT("addtext(\"")
                         << dlg->get_text()                      << wxT("\",")
-                        << Properties->curlay()                 << wxT(",")
+                        << DATC->curlay()                       << wxT(",")
                         << wxT("getpoint(),")
                         << dlg->get_angle()                     << wxT(",")
                         << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
@@ -1028,7 +1027,7 @@ void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
 void tui::TopedFrame::OnStep(wxCommandEvent& WXUNUSED(event)) {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getStep dlg(this, -1, wxT("Step size"), pos, Properties->step());
+   tui::getStep dlg(this, -1, wxT("Step size"), pos, DATC->step());
    if ( dlg.ShowModal() == wxID_OK ) {
       wxString ost; ost << wxT("step(")<<dlg.value()<<wxT(");");
       _cmdline->parseCommand(ost);
@@ -1039,7 +1038,7 @@ void tui::TopedFrame::OnGridDefine(wxCommandEvent& WXUNUSED(event)) {
    real grid[3];
    const layprop::LayoutGrid *gr  = NULL;
    for (byte i = 0; i < 3; i++)
-      if (NULL != (gr = Properties->grid(i))) grid[i] = gr->step();
+      if (NULL != (gr = DATC->grid(i))) grid[i] = gr->step();
       else                                    grid[i] = 0.0;
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);

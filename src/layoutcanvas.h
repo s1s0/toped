@@ -184,7 +184,6 @@ typedef enum  {
       STS_ANGLE_90
    } STATUSLINE_TYPE;
 
-
    //=============================================================================
    class LayoutCanvas : public wxGLCanvas  {
    public: 

@@ -369,6 +369,7 @@ CTM CTM::Rotate(const real alfa, const TP& center) // alfa - in degrees
    Translate(-center.x(), -center.y());
    Rotate(alfa);
    Translate( center.x(),  center.y());
+   return *this;
 }
 
 CTM CTM::Reversed() const {

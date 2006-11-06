@@ -44,28 +44,25 @@ GLubyte array_mark_bmp[30]= {0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x1
                              0x20, 0x08, 0x50, 0x0A, 0x8F, 0xE2, 0x44, 0x44, 0x22, 0x88, 
                              0x11, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00};
 
-layprop::ViewProperties*         Properties = NULL;
-
 #define _GRID_LIMIT  5    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 extern const wxEventType         wxEVT_CNVSSTATUSLINE;
-       wxMutex                   DBLock;
 
-layprop::SDLine::SDLine(const TP& p1,const TP& p2) : _ln(p1,p2)
+layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
 {
    _A = _ln.p2().y() - _ln.p1().y();
    _B = _ln.p1().x() - _ln.p2().x();
    _C = -(_A*_ln.p1().x() + _B*_ln.p1().y());
    _length = sqrt(_A*_A + _B*_B);
    std::ostringstream strdist;
-   strdist << _length * Properties->UU();
+   strdist << _length * UU;
    _value = strdist.str();
    _center = TP((_ln.p1().x() + _ln.p2().x()) / 2, (_ln.p1().y() + _ln.p2().y()) / 2 );
 };
 
 void layprop::SDLine::draw(const CTM& LayCTM, const real _step) const
 {
-   // Side ticks (segments) has to be with constant size. The next 3 lines
-   // are generating a segment with the size 15 screen pixels centered in
+   // Side ticks (segments) has to be with constant size. The next lines
+   // are generating a segment with the size 7/3 screen pixels centered in
    // the {0,0} point of the canvas (logical coords)
    // the coeffitients 1e3/1e-3 are picked ramdomly in a try to reduce the
    // error
@@ -137,7 +134,7 @@ void layprop::SDLine::draw(const CTM& LayCTM, const real _step) const
 }
 
 unsigned layprop::SDLine::nonius(const DBline& short_mark, const DBline& long_mark,
-                                 real step, LineList& llst) const
+                                 const real step, LineList& llst) const
 {
    // get the angle coefficient of the ruler and calculate the corresponing
    // functions - will be used below
@@ -146,7 +143,7 @@ unsigned layprop::SDLine::nonius(const DBline& short_mark, const DBline& long_ma
    real cosinus   = cos(angle_rad);
    real angle     = angle_rad * 180.0 / M_PI;
    //step - converted to DBU
-   step *= Properties->DBscale();
+   //step *= Properties->DBscale();
    // prepare the translation matrix for the edge point
    CTM tmtrx;
    tmtrx.Rotate(angle);
@@ -172,9 +169,9 @@ unsigned layprop::SDLine::nonius(const DBline& short_mark, const DBline& long_ma
    return ++numtics;
 }
 
-void layprop::SupplementaryData::addRuler(TP& p1, TP& p2)
+void layprop::SupplementaryData::addRuler(TP& p1, TP& p2, real UU)
 {
-   _rulers.push_front(SDLine(p1,p2));
+   _rulers.push_front(SDLine(p1,p2,UU));
 }
 
 void layprop::SupplementaryData::clearRulers()
@@ -182,7 +179,7 @@ void layprop::SupplementaryData::clearRulers()
    _rulers.clear();
 }
 
-void layprop::SupplementaryData::drawRulers(CTM& LayCTM, real step)
+void layprop::SupplementaryData::drawRulers(const CTM& LayCTM, real step)
 {
    for(ruler_collection::const_iterator RA = _rulers.begin(); RA != _rulers.end(); RA++)
       RA->draw(LayCTM, step);
@@ -214,7 +211,7 @@ void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscal
 //=============================================================================
 layprop::DrawProperties::DrawProperties() : _clipRegion(0,0) {
    _blockfill = false;
-   _currentop = op_none;
+   _currentop = console::op_none;
    _drawinglayer = 0;
    _cellmarks_hidden = true;
    _textmarks_hidden = true;
@@ -392,7 +389,7 @@ layprop::DrawProperties::~DrawProperties() {
 //=============================================================================
 layprop::ViewProperties::ViewProperties() {
    addlayer(std::string("_$teLayer_cell"),0,"","","");
-   _step = 1;_curlay = 1;
+   _step = 1;
    setUU(1);
    _marker_angle = 0;
    _autopan = false;
@@ -404,7 +401,6 @@ bool layprop::ViewProperties::selectable(word layno) const {
 
 void layprop::ViewProperties::addlayer(std::string name, word layno, std::string col,
                                        std::string fill, std::string sline) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
    if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col))) {
       std::ostringstream ost;
       ost << "Warning! Color \""<<col<<"\" is not defined";
@@ -427,12 +423,10 @@ void layprop::ViewProperties::addlayer(std::string name, word layno, std::string
       tell_log(console::MT_WARNING, ost.str());
    }   
    _drawprop._layset[layno] = new LayerSettings(name,col,fill,sline);
-   DBLock.Unlock();
 }
 
 void layprop::ViewProperties::addline(std::string name, std::string col, word pattern,
                                        byte patscale, byte width) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
    if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col))) {
       std::ostringstream ost;
       ost << "Warning! Color \""<<col<<"\" is not defined";
@@ -445,11 +439,9 @@ void layprop::ViewProperties::addline(std::string name, std::string col, word pa
       tell_log(console::MT_WARNING, ost.str());
    }
    _drawprop._lineset[name] = new LineSettings(col,pattern,patscale,width);
-   DBLock.Unlock();
 }
 
 void layprop::ViewProperties::addcolor(std::string name, byte R, byte G, byte B, byte A) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
    if (_drawprop._laycolors.end() != _drawprop._laycolors.find(name)) {
       delete _drawprop._laycolors[name];
       std::ostringstream ost;
@@ -458,11 +450,9 @@ void layprop::ViewProperties::addcolor(std::string name, byte R, byte G, byte B,
    }
    tellRGB* col = new tellRGB(R,G,B,A);
    _drawprop._laycolors[name] = col;
-   DBLock.Unlock();
 }
 
 void layprop::ViewProperties::addfill(std::string name, byte* ptrn) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
    if (_drawprop._layfill.end() != _drawprop._layfill.find(name)) {
       delete [] _drawprop._layfill[name];
       std::ostringstream ost;
@@ -470,35 +460,26 @@ void layprop::ViewProperties::addfill(std::string name, byte* ptrn) {
       tell_log(console::MT_WARNING, ost.str());
    }
    _drawprop._layfill[name] = ptrn;
-   DBLock.Unlock();
 }
 
 void  layprop::ViewProperties::hideLayer(word layno, bool hide) {
    // No error messages here, because of possible range use
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
    if (_drawprop._layset.end() != _drawprop._layset.find(layno))
       _drawprop._layset[layno]->_hidden = hide;
-   DBLock.Unlock();
 }
 
 void  layprop::ViewProperties::lockLayer(word layno, bool lock) {
    // No error messages here, because of possible range use
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
    if (_drawprop._layset.end() != _drawprop._layset.find(layno))
       _drawprop._layset[layno]->_locked = lock;
-   DBLock.Unlock();
 }
 
 void layprop::ViewProperties::setcellmarks_hidden(bool hide) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-      _drawprop._cellmarks_hidden = hide;
-   DBLock.Unlock();
+   _drawprop._cellmarks_hidden = hide;
 }
 
 void layprop::ViewProperties::settextmarks_hidden(bool hide) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-      _drawprop._textmarks_hidden = hide;
-   DBLock.Unlock();
+   _drawprop._textmarks_hidden = hide;
 }
 
 const layprop::LayoutGrid* layprop::ViewProperties::grid(byte No) const {
@@ -510,36 +491,16 @@ const layprop::LayoutGrid* layprop::ViewProperties::grid(byte No) const {
 }
 
 void layprop::ViewProperties::setGrid(byte No, real step, std::string colname) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
    if (_grid.end() != _grid.find(No)) // if this grid No is already defined
       _grid[No]->Init(step,colname);
    else // define a new grid
       _grid[No] = new layprop::LayoutGrid(step, colname);
-   DBLock.Unlock();
 }
 
 bool layprop::ViewProperties::viewGrid(byte No, bool status) {
-   while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-   if (_grid.end() != _grid.find(No)) 
+   if (_grid.end() != _grid.find(No))
       _grid[No]->turnover(status);
    else status = false;
-   DBLock.Unlock();
-   return status;
-}
-
-void layprop::ViewProperties::setCurrentOp(int actop) {
-   if (actop > 0) _drawprop._currentop = op_dwire;
-   else
-      switch (actop) {
-         case  0: _drawprop._currentop = op_dbox  ;break;
-         case -1: _drawprop._currentop = op_dpoly ;break;
-         case -2: _drawprop._currentop = op_move  ;break;
-         case -3: _drawprop._currentop = op_copy  ;break;
-         case -4: _drawprop._currentop = op_flipX ;break;
-         case -5: _drawprop._currentop = op_flipY ;break;
-         case -6: _drawprop._currentop = op_rotate;break;
-         default: _drawprop._currentop = op_none;
-      }
 }
 
 void layprop::ViewProperties::drawGrid() const{
@@ -552,6 +513,13 @@ void layprop::ViewProperties::setUU(real UU) {
    _UU = UU;
    _DBscale = 1/UU;
 };
+
+void layprop::ViewProperties::setCurrentOp(console::ACTIVE_OP actop)
+{
+   _drawprop._currentop = actop;
+//   if (console::op_line == actop)
+//      _supp_data.tmpRulerInit();
+}
 
 layprop::ViewProperties::~ViewProperties() {
    for(gridlist::iterator GI = _grid.begin(); GI != _grid.end(); GI++)

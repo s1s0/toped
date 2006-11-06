@@ -33,7 +33,6 @@
 #include "../tpd_DB/viewprop.h"
 
 extern DataCenter*                DATC;
-extern layprop::ViewProperties*   Properties;
 
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::sgSpinButton, wxSpinButton)
@@ -73,7 +72,7 @@ tui::getSize::getSize(wxFrame *parent, wxWindowID id, const wxString &title, wxP
    _wxText = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    spin_sizer->Add(10,10,0);
    spin_sizer->Add(_wxText, 1, wxEXPAND, 0);
-   spin_sizer->Add(new sgSpinButton(this, _wxText, Properties->step(), 1, 10, 2, 3), 0, 0, 0);
+   spin_sizer->Add(new sgSpinButton(this, _wxText, DATC->step(), 1, 10, 2, 3), 0, 0, 0);
    spin_sizer->Add(10,10,0);
    // Buttons
    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
@@ -271,14 +270,14 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    step_sizer->Add(_stepX, 0, wxALL | wxALIGN_CENTER, 0);
-   step_sizer->Add(new sgSpinButton(this, _stepX, Properties->step(), 2, 200, 2, 3),
+   step_sizer->Add(new sgSpinButton(this, _stepX, DATC->step(), 2, 200, 2, 3),
                                                   0, wxALL | wxALIGN_CENTER, 0);
    step_sizer->Add(0,0,1); // 
    step_sizer->Add( new wxStaticText(this, -1, wxT("step Y:"), 
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    step_sizer->Add(_stepY, 0, wxALL | wxALIGN_CENTER, 0);
-   step_sizer->Add(new sgSpinButton(this, _stepY, Properties->step(), 2, 200, 2, 3),
+   step_sizer->Add(new sgSpinButton(this, _stepY, DATC->step(), 2, 200, 2, 3),
                                                   0, wxALL | wxALIGN_CENTER, 0);
    
    step_sizer->Add(0,0,1); // 
@@ -315,7 +314,7 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    spin_sizer->Add(_size, 0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(new sgSpinButton(this, _size, Properties->step(), 1, 20, 2, 3),
+   spin_sizer->Add(new sgSpinButton(this, _size, DATC->step(), 1, 20, 2, 3),
                                                   0, wxALL | wxALIGN_CENTER, 0);
    spin_sizer->Add(0,0,1); // 
    

@@ -157,6 +157,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdREPORTLAY     )
    TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
    TELL_STDCMD_CLASSA(stdDISTANCE      )
+   TELL_STDCMD_CLASSA(stdCLEARRULERS   )
 
    //
    TELL_STDCMD_CLASSA(stdLAYPROP       )  //
@@ -233,10 +234,12 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdFLIPXSEL_D   , stdFLIPXSEL   )
    TELL_STDCMD_CLASSB(stdFLIPYSEL_D   , stdFLIPYSEL   )
    TELL_STDCMD_CLASSB(stdROTATESEL_D  , stdROTATESEL  )
+   TELL_STDCMD_CLASSB(stdDISTANCE_D   , stdDISTANCE   )
 
    TELL_STDCMD_CLASSA_UNDO(stdADDMENU       )
 
-//   laydata::tdtdesign*  currentDesign();
+
+         //   laydata::tdtdesign*  currentDesign();
    telldata::ttint*     CurrentLayer();
    bool                 waitGUInput(int, telldata::operandSTACK *);
    pointlist*           t2tpoints(telldata::ttlist *, real);

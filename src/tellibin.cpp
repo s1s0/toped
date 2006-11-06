@@ -45,7 +45,6 @@
 #define TEUNDO_DEBUG(a) 
 #endif
 
-extern layprop::ViewProperties*  Properties;
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
 extern tui::TopedFrame*          Toped;
@@ -148,7 +147,7 @@ int tellstdfunc::stdDISTANCE::execute()
 {
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-//   real DBscale = Properties->DBscale();
+//   real DBscale = DATC->DBscale();
 
    telldata::ttpnt* p1 = NULL;
    telldata::ttpnt* p2 = NULL;
@@ -157,16 +156,48 @@ int tellstdfunc::stdDISTANCE::execute()
       p2 = static_cast<telldata::ttpnt*>((pl->mlist())[i]);
       if (NULL != p1)
       {
-         TP ap1 = TP(p1->x(),p1->y(), Properties->DBscale());
-         TP ap2 = TP(p2->x(),p2->y(), Properties->DBscale());
-         Properties->addRuler(ap1,ap2);
-         std::ostringstream info;
+         TP ap1 = TP(p1->x(),p1->y(), DATC->DBscale());
+         TP ap2 = TP(p2->x(),p2->y(), DATC->DBscale());
+         DATC->addRuler(ap1,ap2);
+/*         std::ostringstream info;
          info << "Distance {" << p1->x() << " , " << p1->y() <<"}  -  {"
                               << p2->x() << " , " << p2->y() <<"}  is ";
-         tell_log(console::MT_WARNING,info.str());
+         tell_log(console::MT_WARNING,info.str());*/
       }
    }
 
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdDISTANCE_D::stdDISTANCE_D(telldata::typeID retype, bool eor) :
+      stdDISTANCE(new parsercmd::argumentLIST,retype,eor)
+{
+}
+
+int tellstdfunc::stdDISTANCE_D::execute()
+{
+   // stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(console::op_line, &OPstack)) return EXEC_ABORT;
+   // get the data from the stack
+   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   telldata::ttlist* plst = new telldata::ttlist(telldata::tn_pnt);
+   plst->add(new telldata::ttpnt(w->p1().x(), w->p1().y()));
+   plst->add(new telldata::ttpnt(w->p2().x(), w->p2().y()));
+   OPstack.push(plst);
+   delete w;
+   return stdDISTANCE::execute();
+
+}
+
+//=============================================================================
+tellstdfunc::stdCLEARRULERS::stdCLEARRULERS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::stdCLEARRULERS::execute()
+{
+   DATC->clearRulers();
    return EXEC_NEXT;
 }
 
@@ -223,7 +254,7 @@ tellstdfunc::stdZOOMWIN::stdZOOMWIN(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdZOOMWIN::execute() {
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    DBbox* box = new DBbox(TP(p1->x(), p1->y(), DBscale), 
                           TP(p2->x(), p2->y(), DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
@@ -242,7 +273,7 @@ tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdZOOMWINb::execute() {
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    DBbox* box = new DBbox(TP(w->p1().x(), w->p1().y(), DBscale), 
                           TP(w->p2().x(), w->p2().y(), DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
@@ -285,7 +316,7 @@ int tellstdfunc::stdLAYPROP::execute() {
    word        gdsN  = getWordValue();
    std::string name  = getStringValue();
    // error message - included in the method
-   Properties->addlayer(name, gdsN, col, fill, sline);
+   DATC->addlayer(name, gdsN, col, fill, sline);
    browsers::layer_add(name,gdsN);
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" << 
          col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
@@ -309,7 +340,7 @@ int tellstdfunc::stdLINEDEF::execute() {
    word pattern     = getWordValue();
    std::string col  = getStringValue();
    std::string name = getStringValue();
-   Properties->addline(name, col, pattern, patscale, width);
+   DATC->addline(name, col, pattern, patscale, width);
    LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << col << "\","
          << pattern << " , " << patscale << " , " << width << ");";LogFile.flush();
    return EXEC_NEXT;
@@ -339,7 +370,7 @@ int tellstdfunc::stdCOLORDEF::execute() {
    byte         colR = getByteValue();
    std::string  name = getStringValue();
    // error message - included in the method
-   Properties->addcolor(name, colR, colG, colB, sat);
+   DATC->addcolor(name, colR, colG, colB, sat);
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," << 
                        colG << "," << colB << "," << sat << ");";LogFile.flush();
    return EXEC_NEXT;
@@ -377,7 +408,7 @@ int tellstdfunc::stdFILLDEF::execute() {
          else ptrn[i] = cmpnt->value();
       }
       // error message - included in the method
-      Properties->addfill(name, ptrn);
+      DATC->addfill(name, ptrn);
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << *sl << ");";
       LogFile.flush();
    }
@@ -402,18 +433,18 @@ void tellstdfunc::stdHIDELAYER::undo() {
    TEUNDO_DEBUG("hidelayer( word , bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
    word        layno = getWordValue(UNDOPstack,true);
-   Properties->hideLayer(layno, hide);
+   DATC->hideLayer(layno, hide);
    browsers::layer_status(browsers::BT_LAYER_HIDE, layno, hide);
 }
 
 int tellstdfunc::stdHIDELAYER::execute() {
    bool        hide  = getBoolValue();
    word        layno = getWordValue();
-   if (layno != Properties->curlay()) {
+   if (layno != DATC->curlay()) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(layno));
       UNDOPstack.push_front(new telldata::ttbool(!hide));
-      Properties->hideLayer(layno, hide);
+      DATC->hideLayer(layno, hide);
       browsers::layer_status(browsers::BT_LAYER_HIDE, layno, hide);
       LogFile << LogFile.getFN() << "("<< layno << "," << 
                  LogFile._2bool(hide) << ");"; LogFile.flush();
@@ -439,7 +470,7 @@ void tellstdfunc::stdHIDECELLMARK::undo_cleanup() {
 void tellstdfunc::stdHIDECELLMARK::undo() {
    TEUNDO_DEBUG("hide_cellmarks( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   Properties->setcellmarks_hidden(hide);
+   DATC->setcellmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
@@ -450,7 +481,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
    bool        hide  = getBoolValue();
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(new telldata::ttbool(!hide));
-   Properties->setcellmarks_hidden(hide);
+   DATC->setcellmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
@@ -473,7 +504,7 @@ void tellstdfunc::stdHIDETEXTMARK::undo_cleanup() {
 void tellstdfunc::stdHIDETEXTMARK::undo() {
    TEUNDO_DEBUG("hide_textmarks( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   Properties->settextmarks_hidden(hide);
+   DATC->settextmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
@@ -485,7 +516,7 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
    bool        hide  = getBoolValue();
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(new telldata::ttbool(!hide));
-   Properties->settextmarks_hidden(hide);
+   DATC->settextmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
@@ -516,7 +547,7 @@ void tellstdfunc::stdHIDELAYERS::undo() {
    telldata::ttint *laynumber;
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      Properties->hideLayer(laynumber->value(), hide);
+      DATC->hideLayer(laynumber->value(), hide);
       browsers::layer_status(browsers::BT_LAYER_HIDE, laynumber->value(), hide);
    }
    delete sl;
@@ -535,11 +566,11 @@ int tellstdfunc::stdHIDELAYERS::execute() {
          info << "Layer number "<< i <<" out of range ... ignored";
          tell_log(console::MT_WARNING,info.str());
       }
-      else if (laynumber->value() == Properties->curlay()) {
+      else if (laynumber->value() == DATC->curlay()) {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
       }
       else {
-         Properties->hideLayer(laynumber->value(), hide);
+         DATC->hideLayer(laynumber->value(), hide);
          browsers::layer_status(browsers::BT_LAYER_HIDE, laynumber->value(), hide);
          undolaylist->add(new telldata::ttint(*laynumber));
       }
@@ -569,18 +600,18 @@ void tellstdfunc::stdLOCKLAYER::undo() {
    TEUNDO_DEBUG("locklayer( word , bool ) UNDO");
    bool        lock  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
-   Properties->lockLayer(layno, lock);
+   DATC->lockLayer(layno, lock);
    browsers::layer_status(browsers::BT_LAYER_LOCK, layno, lock);
 }
 
 int tellstdfunc::stdLOCKLAYER::execute() {
    bool        lock  = getBoolValue();
    word        layno = getWordValue();
-   if (layno != Properties->curlay()) {
+   if (layno != DATC->curlay()) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(layno));
       UNDOPstack.push_front(new telldata::ttbool(!lock));
-      Properties->lockLayer(layno, lock);
+      DATC->lockLayer(layno, lock);
       browsers::layer_status(browsers::BT_LAYER_LOCK, layno, lock);
       LogFile << LogFile.getFN() << "("<< layno << "," << 
                  LogFile._2bool(lock) << ");"; LogFile.flush();
@@ -613,7 +644,7 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
    telldata::ttint *laynumber;
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      Properties->lockLayer(laynumber->value(), lock);
+      DATC->lockLayer(laynumber->value(), lock);
       browsers::layer_status(browsers::BT_LAYER_LOCK, laynumber->value(), lock);
    }
    delete sl;
@@ -625,18 +656,18 @@ int tellstdfunc::stdLOCKLAYERS::execute() {
    UNDOcmdQ.push_front(this);
    telldata::ttlist* undolaylist = new telldata::ttlist(telldata::tn_int);
    telldata::ttint *laynumber;
-   for (int4b i = 0; i < sl->size() ; i++) {
+   for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1)) {
          std::ostringstream info;
          info << "Layer number "<< i <<" out of range ... ignored";
          tell_log(console::MT_WARNING,info.str());
       }
-      else if (laynumber->value() == Properties->curlay()) {
+      else if (laynumber->value() == DATC->curlay()) {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
       }
       else {
-         Properties->lockLayer(laynumber->value(), lock);
+         DATC->lockLayer(laynumber->value(), lock);
          browsers::layer_status(browsers::BT_LAYER_LOCK, laynumber->value(), lock);
          undolaylist->add(new telldata::ttint(*laynumber));
       }
@@ -861,7 +892,7 @@ void tellstdfunc::stdEDITPUSH::undo() {
 
 int tellstdfunc::stdEDITPUSH::execute() {
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP p1DB = TP(p1->x(), p1->y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
@@ -1043,7 +1074,7 @@ int tellstdfunc::stdCELLREF::execute() {
    real   angle  = getOpValue();
    telldata::ttpnt  *rpnt  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlayout* cl = new telldata::ttlayout(ATDB->addcellref(name,ori), 0);
@@ -1101,7 +1132,7 @@ int tellstdfunc::stdCELLAREF::execute() {
    telldata::ttpnt  *rpnt  = 
                      static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    stepX = rint(stepX * DBscale);
    stepY = rint(stepY * DBscale);
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
@@ -1133,25 +1164,25 @@ void tellstdfunc::stdUSINGLAYER::undo_cleanup() {
 void tellstdfunc::stdUSINGLAYER::undo() {
    TEUNDO_DEBUG("usinglayer( int ) UNDO");
    word layno = getWordValue(UNDOPstack, true);
-   browsers::layer_default(layno, Properties->curlay());
-   Properties->defaultlayer(layno);
+   browsers::layer_default(layno, DATC->curlay());
+   DATC->defaultlayer(layno);
 }
 
 int tellstdfunc::stdUSINGLAYER::execute() {
    word layno = getWordValue();
    // Unlock and Unhide the layer(if needed)
-   if (Properties->drawprop().layerHidden(layno)) {
-      Properties->hideLayer(layno, false);
+   if (DATC->layerHidden(layno)) {
+      DATC->hideLayer(layno, false);
       browsers::layer_status(browsers::BT_LAYER_HIDE, layno, false);
    }   
-   if (Properties->drawprop().layerLocked(layno)) {
-      Properties->lockLayer(layno, false);
+   if (DATC->layerLocked(layno)) {
+      DATC->lockLayer(layno, false);
       browsers::layer_status(browsers::BT_LAYER_LOCK, layno, false);
    }   
-   browsers::layer_default(layno, Properties->curlay());
+   browsers::layer_default(layno, DATC->curlay());
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttint(Properties->curlay()));
-   Properties->defaultlayer(layno);
+   UNDOPstack.push_front(new telldata::ttint(DATC->curlay()));
+   DATC->defaultlayer(layno);
    LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
    return EXEC_NEXT;
 }
@@ -1165,7 +1196,7 @@ tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor)
 
 int tellstdfunc::stdUSINGLAYER_S::execute() {
   std::string layname = getStringValue();
-  word layno = Properties->getlayerNo(layname);
+  word layno = DATC->getlayerNo(layname);
   if (layno > 0) {
     OPstack.push(new telldata::ttint(layno));
     return stdUSINGLAYER::execute();
@@ -1207,7 +1238,7 @@ int tellstdfunc::stdADDBOX::execute() {
    word la = getWordValue();
    UNDOPstack.push_front(new telldata::ttint(la));
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -1259,12 +1290,12 @@ void tellstdfunc::stdDRAWBOX::undo() {
 int tellstdfunc::stdDRAWBOX::execute() {
    word     la = getWordValue();
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(new telldata::ttint(la));
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -1322,7 +1353,7 @@ int tellstdfunc::stdADDBOXr::execute() {
    real width  = getOpValue();
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt  p2 = telldata::ttpnt(p1->x()+width,p1->y()+heigth);
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = new TP(p2.x() , p2.y() , DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -1382,7 +1413,7 @@ int tellstdfunc::stdADDBOXp::execute() {
    UNDOPstack.push_front(new telldata::ttint(la));
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = new TP(p2->x(), p2->y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -1440,7 +1471,7 @@ int tellstdfunc::stdADDPOLY::execute() {
    if (pl->size() >= 3) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(la));
-      real DBscale = Properties->DBscale();
+      real DBscale = DATC->DBscale();
       laydata::tdtdesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* ply = new telldata::ttlayout(ATDB->addpoly(la,plst), la);
@@ -1498,13 +1529,13 @@ void tellstdfunc::stdDRAWPOLY::undo() {
 int tellstdfunc::stdDRAWPOLY::execute() {
    word     la = getWordValue();
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-1, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_dpoly, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() >= 3) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(la));
-      real DBscale = Properties->DBscale();
+      real DBscale = DATC->DBscale();
       laydata::tdtdesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* ply = new telldata::ttlayout(ATDB->addpoly(la,plst), la);
@@ -1565,7 +1596,7 @@ int tellstdfunc::stdADDWIRE::execute() {
    if (pl->size() > 1) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(la));
-      real DBscale = Properties->DBscale();
+      real DBscale = DATC->DBscale();
       laydata::tdtdesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* wr = new telldata::ttlayout(ATDB->addwire(la,plst,
@@ -1626,7 +1657,7 @@ void tellstdfunc::stdDRAWWIRE::undo() {
 int tellstdfunc::stdDRAWWIRE::execute() {
    word     la = getWordValue();
    real      w = getOpValue();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    if (!tellstdfunc::waitGUInput(static_cast<int>(rint(w * DBscale)), &OPstack))
       return EXEC_ABORT;
    // get the data from the stack
@@ -1704,7 +1735,7 @@ int tellstdfunc::stdADDTEXT::execute() {
    word      la  = getWordValue();
    UNDOPstack.push_front(new telldata::ttint(la));
    std::string text = getStringValue();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), 
                                      magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -1738,7 +1769,7 @@ int tellstdfunc::stdGRIDDEF::execute() {
    std::string  colname = getStringValue();
    real    step    = getOpValue();
    byte    no      = getByteValue();
-   Properties->setGrid(no,step,colname);
+   DATC->setGrid(no,step,colname);
    UpdateLV();   
    LogFile << LogFile.getFN() << "(" << no << "," << step << ",\"" << 
                                               colname << "\");";LogFile.flush();
@@ -1769,11 +1800,11 @@ void tellstdfunc::stdGRID::undo() {
 int tellstdfunc::stdGRID::execute() {
    bool  visu     = getBoolValue();
    byte    no     = getByteValue();
-   if (NULL != Properties->grid(no))
+   if (NULL != DATC->grid(no))
    {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(no));
-      UNDOPstack.push_front(new telldata::ttbool(Properties->grid(no)->visual()));
+      UNDOPstack.push_front(new telldata::ttbool(DATC->grid_visual(no)));
       gridON(no,visu);
       UpdateLV();
       LogFile << LogFile.getFN() << "(" << no << "," << LogFile._2bool(visu) << ");";
@@ -1797,16 +1828,16 @@ void tellstdfunc::stdSTEP::undo_cleanup() {
 
 void tellstdfunc::stdSTEP::undo() {
    TEUNDO_DEBUG("step() UNDO");
-   Properties->setstep(getOpValue(UNDOPstack,true));
+   DATC->setstep(getOpValue(UNDOPstack,true));
 }
 
 int tellstdfunc::stdSTEP::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttreal(Properties->step()));
+   UNDOPstack.push_front(new telldata::ttreal(DATC->step()));
    //
    real    step    = getOpValue();
-   Properties->setstep(step);
+   DATC->setstep(step);
    LogFile << LogFile.getFN() << "(" << step << ");"; LogFile.flush();
    return EXEC_NEXT;
 }
@@ -1825,7 +1856,7 @@ void tellstdfunc::stdAUTOPAN::undo_cleanup() {
 void tellstdfunc::stdAUTOPAN::undo() {
    TEUNDO_DEBUG("autopan() UNDO");
    bool autop = getBoolValue(UNDOPstack, true);
-   Properties->setautopan(autop);
+   DATC->setautopan(autop);
    wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
    eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
    wxPostEvent(Toped, eventGRIDUPD);
@@ -1835,10 +1866,10 @@ void tellstdfunc::stdAUTOPAN::undo() {
 int tellstdfunc::stdAUTOPAN::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttbool(Properties->autopan()));
+   UNDOPstack.push_front(new telldata::ttbool(DATC->autopan()));
    //
    bool autop    = getBoolValue();
-   Properties->setautopan(autop);
+   DATC->setautopan(autop);
    wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
    eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
    wxPostEvent(Toped, eventGRIDUPD);
@@ -1860,7 +1891,7 @@ void tellstdfunc::stdSHAPEANGLE::undo_cleanup() {
 void tellstdfunc::stdSHAPEANGLE::undo() {
    TEUNDO_DEBUG("shapeangle() UNDO");
    byte angle    = getByteValue(UNDOPstack,true);
-   Properties->setmarker_angle(angle);
+   DATC->setmarker_angle(angle);
 }
 
 int tellstdfunc::stdSHAPEANGLE::execute() {
@@ -1868,9 +1899,9 @@ int tellstdfunc::stdSHAPEANGLE::execute() {
    if ((angle == 0) || (angle == 45) || (angle == 90)) {
       // prepare undo first
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttint(Properties->marker_angle()));
+      UNDOPstack.push_front(new telldata::ttint(DATC->marker_angle()));
       //
-      Properties->setmarker_angle(angle);
+      DATC->setmarker_angle(angle);
       wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
       if       (angle == 0)  eventGRIDUPD.SetInt(tui::STS_ANGLE_0);
       else if  (angle == 45) eventGRIDUPD.SetInt(tui::STS_ANGLE_45);
@@ -1897,7 +1928,7 @@ int tellstdfunc::getPOINT::execute() {
    DATC->unlockDB();
    // flag the prompt that we expect a single point & handle a pointer to
    // the operand stack
-   Toped->cmdline()->waitGUInput(&OPstack, telldata::tn_pnt);
+   Toped->cmdline()->waitGUInput(&OPstack, console::op_point);
    // force the thread in wait condition until the ted_prompt has our data
    Toped->cmdline()->threadWaits4->Wait();
    // ... and continue when the thread is woken up
@@ -1917,7 +1948,7 @@ int tellstdfunc::getPOINTLIST::execute() {
    DATC->unlockDB();
    // flag the prompt that we expect a list of points & handle a pointer to
    // the operand stack
-   Toped->cmdline()->waitGUInput(&OPstack, TLISTOF(telldata::tn_pnt));
+   Toped->cmdline()->waitGUInput(&OPstack, console::op_dpoly);
    // 
    wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(-1);
@@ -1947,7 +1978,7 @@ void tellstdfunc::stdSELECT::undo_cleanup() {
 void tellstdfunc::stdSELECT::undo() {
    TEUNDO_DEBUG("select(box) UNDO");
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.front());UNDOPstack.pop_front();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -1962,7 +1993,7 @@ int tellstdfunc::stdSELECT::execute() {
    UNDOPstack.push_front(OPstack.top());
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -1983,7 +2014,7 @@ tellstdfunc::stdSELECT_I::stdSELECT_I(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    else return stdSELECT::execute();
 }
 
@@ -2038,7 +2069,7 @@ int tellstdfunc::stdSELECTIN::execute() {
    // get the data from the stack
    assert(telldata::tn_pnt == OPstack.top()->get_type());
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::atticList* selectedl = ATDB->change_select(p1DB,true);
@@ -2070,7 +2101,7 @@ void tellstdfunc::stdPNTSELECT::undo_cleanup() {
 void tellstdfunc::stdPNTSELECT::undo() {
    TEUNDO_DEBUG("pselect(box) UNDO");
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.front());UNDOPstack.pop_front();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -2085,7 +2116,7 @@ int tellstdfunc::stdPNTSELECT::execute() {
    UNDOPstack.push_front(OPstack.top());
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -2106,7 +2137,7 @@ tellstdfunc::stdPNTSELECT_I::stdPNTSELECT_I(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdPNTSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    return stdPNTSELECT::execute();
 }
 
@@ -2125,7 +2156,7 @@ void tellstdfunc::stdUNSELECT::undo_cleanup() {
 void tellstdfunc::stdUNSELECT::undo() {
    TEUNDO_DEBUG("unselect(box) UNDO");
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.front());UNDOPstack.pop_front();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -2140,7 +2171,7 @@ int tellstdfunc::stdUNSELECT::execute() {
    UNDOPstack.push_front(OPstack.top());
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -2161,7 +2192,7 @@ tellstdfunc::stdUNSELECT_I::stdUNSELECT_I(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdUNSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    else return stdUNSELECT::execute();
 }
 
@@ -2216,7 +2247,7 @@ int tellstdfunc::stdUNSELECTIN::execute() {
    // get the data from the stack
    assert(telldata::tn_pnt == OPstack.top()->get_type());
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::atticList* selectedl = ATDB->change_select(p1DB,false);
@@ -2248,7 +2279,7 @@ void tellstdfunc::stdPNTUNSELECT::undo_cleanup() {
 void tellstdfunc::stdPNTUNSELECT::undo() {
    TEUNDO_DEBUG("punselect(box) UNDO");
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.front());UNDOPstack.pop_front();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -2263,7 +2294,7 @@ int tellstdfunc::stdPNTUNSELECT::execute() {
    UNDOPstack.push_front(OPstack.top());
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -2284,7 +2315,7 @@ tellstdfunc::stdPNTUNSELECT_I::stdPNTUNSELECT_I(telldata::typeID retype, bool eo
 
 int tellstdfunc::stdPNTUNSELECT_I::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(0, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    else return stdPNTUNSELECT::execute();
 }
 
@@ -2415,7 +2446,7 @@ int tellstdfunc::stdCOPYSEL::execute() {
    UNDOcmdQ.push_front(this);
    telldata::ttpnt    *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
       ATDB->copy_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale));
@@ -2434,7 +2465,7 @@ tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCOPYSEL_D::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-3, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_copy, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    OPstack.push(new telldata::ttpnt(w->p1().x(), w->p1().y()));
@@ -2473,7 +2504,7 @@ void tellstdfunc::stdMOVESEL::undo() {
    telldata::ttpnt    *p2 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
    
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->unselect_fromList(get_ttlaylist(failed));
       ATDB->unselect_fromList(get_ttlaylist(added));
@@ -2508,7 +2539,7 @@ int tellstdfunc::stdMOVESEL::execute() {
    telldata::ttpnt    *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    // move_selected returns 3 select lists : Failed/Deleted/Added
    // This is because of the modify operations
    laydata::selectList* fadead[3];
@@ -2535,7 +2566,7 @@ tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdMOVESEL_D::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-2, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_move, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    OPstack.push(new telldata::ttpnt(w->p1().x(), w->p1().y()));
@@ -2573,7 +2604,7 @@ void tellstdfunc::stdROTATESEL::undo()
    telldata::ttlist* failed = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    real   angle  = 360 - getOpValue(UNDOPstack, true);
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->unselect_fromList(get_ttlaylist(failed));
       ATDB->unselect_fromList(get_ttlaylist(added));
@@ -2609,7 +2640,7 @@ int tellstdfunc::stdROTATESEL::execute() {
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real   angle  = getOpValue();
    UNDOPstack.push_front(new telldata::ttreal(angle));
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    // rotate_selected returns 3 select lists : Failed/Deleted/Added
    // This is because of the box rotation in which case box has to be converted to polygon
    // Failed shapes here should not exist but no explicit check for this
@@ -2641,7 +2672,7 @@ tellstdfunc::stdROTATESEL_D::stdROTATESEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdROTATESEL_D::execute() {
 // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-6, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_rotate, &OPstack)) return EXEC_ABORT;
    return stdROTATESEL::execute();
 }
 
@@ -2661,7 +2692,7 @@ void tellstdfunc::stdFLIPXSEL::undo_cleanup() {
 void tellstdfunc::stdFLIPXSEL::undo() {
    TEUNDO_DEBUG("flipX(point) UNDO");
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), true);
    DATC->unlockDB();
@@ -2673,7 +2704,7 @@ int tellstdfunc::stdFLIPXSEL::execute() {
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), true);
    DATC->unlockDB();
@@ -2690,7 +2721,7 @@ tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPXSEL_D::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-4, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_flipX, &OPstack)) return EXEC_ABORT;
    return stdFLIPXSEL::execute();
 }
 
@@ -2709,7 +2740,7 @@ void tellstdfunc::stdFLIPYSEL::undo_cleanup() {
 void tellstdfunc::stdFLIPYSEL::undo() {
    TEUNDO_DEBUG("flipY(point) UNDO");
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), false);
    DATC->unlockDB();
@@ -2721,7 +2752,7 @@ int tellstdfunc::stdFLIPYSEL::execute() {
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = Properties->DBscale();
+   real DBscale = DATC->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), false);
    DATC->unlockDB();
@@ -2738,7 +2769,7 @@ tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPYSEL_D::execute() {
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-5, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_flipY, &OPstack)) return EXEC_ABORT;
    return stdFLIPYSEL::execute();
 }
 
@@ -2912,7 +2943,7 @@ int tellstdfunc::lgcCUTPOLY::execute() {
    else {
       // get the data from the stack
       telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-      real DBscale = Properties->DBscale();
+      real DBscale = DATC->DBscale();
       pointlist *plist = t2tpoints(pl,DBscale);
       laydata::valid_poly check(*plist);
       delete plist;
@@ -2974,7 +3005,7 @@ int tellstdfunc::lgcCUTPOLY_I::execute() {
       return EXEC_NEXT;
    }
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(-1, &OPstack)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_dpoly, &OPstack)) return EXEC_ABORT;
    return lgcCUTPOLY::execute();
 }
 
@@ -3441,7 +3472,7 @@ int tellstdfunc::stdADDMENU::execute()
 //=============================================================================
 telldata::ttint* tellstdfunc::CurrentLayer() {
    word cl = 0;
-   cl = Properties->curlay();
+   cl = DATC->curlay();
    return (new telldata::ttint(cl));
 }
 
@@ -3464,14 +3495,9 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack) {
    // Create a temporary object in the tdtdesign (only if a new object is created, i.e. box,wire,polygon)
    try {DATC->mouseStart(input_type);}
    catch (EXPTN) {return false;}
-   // flag the prompt that we expect a list of points & handle a pointer to
+   // flag the prompt what type of data is expected & handle a pointer to
    // the operand stack
-   if ((input_type == 0) || (input_type == -2) || (input_type == -3))
-      Toped->cmdline()->waitGUInput(OPstack, telldata::tn_box);
-   else if ((input_type == -4) || (input_type == -5) || (input_type == -6))
-      Toped->cmdline()->waitGUInput(OPstack, telldata::tn_pnt);
-   else
-      Toped->cmdline()->waitGUInput(OPstack, TLISTOF(telldata::tn_pnt));
+   Toped->cmdline()->waitGUInput(OPstack, (console::ACTIVE_OP)input_type);
    // flag the canvas that a mouse input will be required
    wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(input_type);
@@ -3596,7 +3622,7 @@ void tellstdfunc::RefreshGL() {
 
 void tellstdfunc::gridON(byte No, bool status) {
    wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
-   status = Properties->viewGrid(No, status);
+   status = DATC->viewGrid(No, status);
    switch (No) {
       case 0: eventGRIDUPD.SetInt((status ? tui::STS_GRID0_ON : tui::STS_GRID0_OFF)); break;
       case 1: eventGRIDUPD.SetInt((status ? tui::STS_GRID1_ON : tui::STS_GRID1_OFF)); break;

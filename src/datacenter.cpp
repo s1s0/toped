@@ -32,10 +32,6 @@
 #include "../tpd_common/outbox.h"
 #include "../tpd_DB/viewprop.h"
 
-//DECLARE_APP(TopedApp)
-extern   layprop::ViewProperties*   Properties;
-extern   wxMutex                    DBLock;
-         wxMutex                    GDSLock;
 //-----------------------------------------------------------------------------
 // class gds2ted
 //-----------------------------------------------------------------------------
@@ -201,6 +197,7 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
 DataCenter::DataCenter() {
    _GDSDB = NULL; _TEDDB = NULL;
    _tedfilename = "unnamed";
+   _curlay = 1;
 }
    
 DataCenter::~DataCenter() {
@@ -271,7 +268,7 @@ bool DataCenter::TDTread(std::string filename)
    // get the hierarchy
    browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
    // Update Canvas scale
-   Properties->setUU(_TEDDB->UU());
+   _properties.setUU(_TEDDB->UU());
    return true;
 }
 
@@ -390,13 +387,14 @@ void DataCenter::newDesign(std::string name, time_t created)
       delete _TEDDB;
    }   
    _TEDDB = new laydata::tdtdesign(name, created, 0);
+   _TEDDB->assign_properties(_properties);
    _TEDDB->btreeAddMember    = &browsers::treeAddMember;
    _TEDDB->btreeRemoveMember = &browsers::treeRemoveMember;
 
    browsers::addTDTtab(name, _TEDDB->hiertree());
    _tedfilename = name + ".tdt";
    _neversaved = true;
-   Properties->setUU(_TEDDB->UU());
+   _properties.setUU(_TEDDB->UU());
 
 }
 
@@ -445,6 +443,7 @@ unsigned int DataCenter::numselected() const {
 }
 
 void DataCenter::mouseStart(int input_type) {
+   if (console::op_line == input_type) return;
    if (_TEDDB) {
       _TEDDB->check_active();
       _TEDDB->mouseStart(input_type);
@@ -465,24 +464,27 @@ void DataCenter::mouseStop() {
    else throw EXPTNactive_DB();
 }
 
-void DataCenter::openGL_draw(layprop::DrawProperties& drawprop) {
+void DataCenter::openGL_draw(const CTM& layCTM) {
 // Maybe we need another try/catch in the layoutcanvas ?   
    if (_TEDDB) {
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-      _TEDDB->openGL_draw(drawprop);
+      while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+      _properties.drawGrid();
+      _TEDDB->openGL_draw(_properties.drawprop());
+      _properties.drawRulers(layCTM);
       DBLock.Unlock();
+      PROPLock.Unlock();
    }
 // 
 //   else throw EXPTNactive_DB();      
 }
 
-void DataCenter::tmp_draw(const layprop::DrawProperties& drawprop,
-                              TP base, TP newp) {
+void DataCenter::tmp_draw(TP base, TP newp) {
    if (_TEDDB) {
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-      _TEDDB->tmp_draw(drawprop, base, newp);
+      _TEDDB->tmp_draw(_properties.drawprop(), base, newp);
       DBLock.Unlock();
    }
 // 
@@ -494,3 +496,90 @@ const laydata::cellList& DataCenter::cells() {
    else throw EXPTNactive_DB();
 };
 
+
+void DataCenter::addlayer(std::string name, word layno, std::string col,
+                                       std::string fill, std::string sline)
+
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.addlayer(name, layno, col, fill, sline);
+   PROPLock.Unlock();
+}
+
+void DataCenter::addline(std::string name, std::string col, word pattern,
+                                      byte patscale, byte width)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.addline(name, col, pattern, patscale, width);
+   PROPLock.Unlock();
+}
+
+void DataCenter::addcolor(std::string name, byte R, byte G, byte B, byte A)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.addcolor(name, R, G, B, A);
+   PROPLock.Unlock();
+}
+
+void DataCenter::addfill(std::string name, byte *ptrn)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.addfill(name, ptrn);
+   PROPLock.Unlock();
+}
+
+void DataCenter::hideLayer(word layno, bool hide)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.hideLayer(layno, hide);
+   PROPLock.Unlock();
+}
+
+void DataCenter::lockLayer(word layno, bool lock)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.lockLayer(layno, lock);
+   PROPLock.Unlock();
+}
+
+void DataCenter::setcellmarks_hidden(bool hide)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.setcellmarks_hidden(hide);
+   PROPLock.Unlock();
+}
+
+void DataCenter::settextmarks_hidden(bool hide)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.settextmarks_hidden(hide);
+   PROPLock.Unlock();
+}
+
+void DataCenter::setGrid(byte No, real step, std::string colname)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.setGrid(No, step, colname);
+   PROPLock.Unlock();
+}
+
+bool DataCenter::viewGrid(byte No, bool status)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.viewGrid(No, status);
+   PROPLock.Unlock();
+}
+
+void DataCenter::addRuler(TP& p1, TP& p2)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.addRuler(p1, p2);
+   PROPLock.Unlock();
+}
+
+void DataCenter::clearRulers()
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.clearRulers();
+   PROPLock.Unlock();
+}
