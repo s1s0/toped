@@ -452,14 +452,21 @@ void DataCenter::mouseStart(int input_type) {
 }
 
 void DataCenter::mousePoint(TP p) {
-   if (_TEDDB) _TEDDB->mousePoint(p);
+   if (console::op_line == currentop())
+      _properties.mousePoint(p);
+   else if (_TEDDB)
+      _TEDDB->mousePoint(p);
 }
 
 void DataCenter::mousePointCancel(TP& lp) {
-   if (_TEDDB)  _TEDDB->mousePointCancel(lp);
+   if (console::op_line == currentop()) return;
+   if (_TEDDB)
+      _TEDDB->mousePointCancel(lp);
 }
 
 void DataCenter::mouseStop() {
+   if (console::op_line == currentop())
+      _properties.mouseStop();
    if (_TEDDB) _TEDDB->mouseStop();
    else throw EXPTNactive_DB();
 }
@@ -480,8 +487,14 @@ void DataCenter::openGL_draw(const CTM& layCTM) {
 //   else throw EXPTNactive_DB();      
 }
 
-void DataCenter::tmp_draw(TP base, TP newp) {
-   if (_TEDDB) {
+void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp) {
+   if (console::op_line == currentop()) {
+      // ruller
+      while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+      _properties.tmp_draw(layCTM, base, newp);
+      PROPLock.Unlock();
+   }
+   else if (_TEDDB) {
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
       _TEDDB->tmp_draw(_properties.drawprop(), base, newp);

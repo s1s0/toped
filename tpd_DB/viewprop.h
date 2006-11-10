@@ -42,28 +42,34 @@ namespace layprop {
    class SDLine {
    public:
                         SDLine(const TP& p1,const TP& p2, const real);
-      void              draw(const CTM&, real) const;
-   protected:
+      void              draw(const DBline&, const DBline&, const DBline&, const double, const real) const;
+   private:
       typedef std::list<DBline> LineList;
       unsigned          nonius(const DBline&, const DBline&, real, LineList& llst) const;
       DBline            _ln;
       std::string       _value;
       TP                _center;
       double            _length;
-      real              _A, _B, _C;
+      real              _sinus;
+      real              _cosinus;
+      real              _angle;
    };
 
    //=============================================================================
    class SupplementaryData {
    public:
-                        SupplementaryData() {};
+                        SupplementaryData() {_tmp_base = NULL;}
       void              addRuler(TP&, TP&, const real);
       void              clearRulers();
       void              drawRulers(const CTM&, real);
-//      void              tmpRulerInit();
+      void              tmp_draw(const TP&, const TP&, real, const CTM&, const real);
+      void              mousePoint(const TP&);
+      void              mouseStop();
       typedef std::list<SDLine> ruler_collection;
    protected:
+      void              getConsts(const CTM&, DBline&, DBline&, DBline&, double&);
       ruler_collection  _rulers;
+      TP*               _tmp_base;
    };
 
    //=============================================================================
@@ -235,8 +241,8 @@ namespace layprop {
       void              setGrid(byte, real, std::string);
       bool              viewGrid(byte, bool);
       void              drawGrid() const;
-      void              setcellmarks_hidden(bool hide);
-      void              settextmarks_hidden(bool hide);
+      void              setcellmarks_hidden(bool hide)   {_drawprop._cellmarks_hidden = hide;}
+      void              settextmarks_hidden(bool hide)   {_drawprop._textmarks_hidden = hide;}
       void              setstep(real st)                 {_step = st;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
@@ -254,7 +260,12 @@ namespace layprop {
       void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2,_UU);}
       void              clearRulers()                    {_supp_data.clearRulers();}
       void              drawRulers(const CTM& layCTM)    {_supp_data.drawRulers(layCTM, stepDB());}
-      void              setCurrentOp(console::ACTIVE_OP);
+      void              tmp_draw(const CTM& layCTM, const TP& base, const TP& newp)
+                                                         {_supp_data.tmp_draw( base, newp, _UU, layCTM, stepDB());}
+      void              mousePoint(const TP& lp)         {_supp_data.mousePoint(lp);}
+      void              mouseStop()                      {_supp_data.mouseStop();}
+      void              setCurrentOp(console::ACTIVE_OP actop) {_drawprop._currentop = actop;}
+
       console::ACTIVE_OP currentop() const               {return _drawprop.currentop();}
 
       //
