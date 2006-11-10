@@ -207,6 +207,7 @@ private:
 //==============================================================================   
 class DBline {
 public:
+   DBline(): _p1(TP()), _p2(TP()) {};
    DBline(const DBline& ln) :    _p1(ln.p1()) , _p2(ln.p2()) {};
    DBline(const TP& p1, const TP& p2): _p1(p1), _p2(p2)      {};
    const TP&    p1()  const {return _p1;};

@@ -245,7 +245,7 @@ void tui::LayoutCanvas::wnd_paint() {
 
 void tui::LayoutCanvas::rubber_paint() {
    glAccum(GL_RETURN, 1.0);
-   DATC->tmp_draw(releasepoint, n_ScrMARK);
+   DATC->tmp_draw(_LayCTM, releasepoint, n_ScrMARK);
    if (reperX || reperY)
    {
       glColor4f(1, 1, 1, .5);

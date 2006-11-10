@@ -49,7 +49,6 @@ laydata::tdtdesign::tdtdesign(std::string name, time_t created,
    _hiertree = NULL;
    _created = created;
    _lastUpdated = lastUpdated;
-//   _target.init_viewprop(&viewprop);
 }
 
 void laydata::tdtdesign::read(TEDfile* const tedfile) 
