@@ -172,9 +172,9 @@ namespace layprop {
       void                 setLineProps(bool selected = false) const;
       bool                 layerHidden(word layno) const;
       bool                 layerLocked(word layno) const;
-      const CTM&           ScrCTM() const                   {return  _ScrCTM;};
-      const DBbox&         clipRegion() const               {return _clipRegion;};
-      console::ACTIVE_OP   currentop() const                {return _currentop;}
+      const CTM&           ScrCTM() const       {return  _ScrCTM;};
+      const DBbox&         clipRegion() const   {return _clipRegion;};
+      console::ACTIVE_OP   currentop() const    {return _currentop;}
       void                 blockfill(laydata::cellrefstack*);
       void                 unblockfill();
       void                 pushref(const laydata::tdtcellref*);
@@ -183,26 +183,26 @@ namespace layprop {
       void                 clearCTMstack()      {while (!_transtack.empty()) _transtack.pop();}
       void                 pushCTM(CTM& last)   {_transtack.push(last);}
       void                 popCTM()             {_transtack.pop();}
-      const CTM&           topCTM() const      {assert(_transtack.size());return _transtack.top();}
+      const CTM&           topCTM() const       {assert(_transtack.size());return _transtack.top();}
       void                 draw_reference_marks(const TP&, const binding_marks) const;
       word                 getlayerNo(std::string name) const;
       word                 drawinglayer() const {return _drawinglayer;}
       friend class ViewProperties;
    protected:
-      laySetList           _layset;
-      colorMAP             _laycolors;
-      fillMAP              _layfill;
-      lineMAP              _lineset;
-      DBbox                _clipRegion;
-      CTM                  _ScrCTM;
-      bool                 _cellmarks_hidden;
-      bool                 _textmarks_hidden;
+      laySetList              _layset;
+      colorMAP                _laycolors;
+      fillMAP                 _layfill;
+      lineMAP                 _lineset;
+      DBbox                   _clipRegion;
+      CTM                     _ScrCTM;
+      bool                    _cellmarks_hidden;
+      bool                    _textmarks_hidden;
    private:
-      bool                 _blockfill;
+      bool                    _blockfill;
       laydata::cellrefstack*  _refstack;
-      ctmstack             _transtack;
-      word                 _drawinglayer;
-      console::ACTIVE_OP   _currentop;
+      ctmstack                _transtack;
+      word                    _drawinglayer;
+      console::ACTIVE_OP      _currentop;
    };
 
    //==============================================================================
@@ -227,12 +227,10 @@ namespace layprop {
    public:
                         ViewProperties();
                        ~ViewProperties(); 
-      void              addlayer(std::string name, word layno, std::string col,
-                                 std::string fill, std::string sline);
+      void              addlayer(std::string, word, std::string, std::string, std::string);
       void              addcolor(std::string name, byte R, byte G, byte B, byte A);
       void              addfill(std::string name, byte *ptrn);
-      void              addline(std::string name, std::string col, word pattern,
-                                 byte patscale, byte width);
+      void              addline(std::string, std::string, word, byte, byte);
       void              hideLayer(word layno, bool hide);
       void              lockLayer(word layno, bool lock);
       bool              selectable(word layno) const;
@@ -241,22 +239,25 @@ namespace layprop {
       void              setGrid(byte, real, std::string);
       bool              viewGrid(byte, bool);
       void              drawGrid() const;
-      void              setcellmarks_hidden(bool hide)   {_drawprop._cellmarks_hidden = hide;}
-      void              settextmarks_hidden(bool hide)   {_drawprop._textmarks_hidden = hide;}
+      void              setUU(real);
       void              setstep(real st)                 {_step = st;}
+      void              setautopan(bool status)          {_autopan = status;}
+      void              setmarker_angle(byte angle)      {_marker_angle = angle;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
       word              getlayerNo(std::string name) const {return _drawprop.getlayerNo(name);}
-      void              setUU(real);//                  {_DBscale = DB;}
       real              UU() const                       {return _UU;}
       real              DBscale() const                  {return _DBscale;}
-      void              setautopan(bool status)          {_autopan = status;}
       bool              autopan() const                  {return _autopan;}
-      void              setmarker_angle(byte angle)      {_marker_angle = angle;}
       byte              marker_angle() const             {return _marker_angle;}
+      DrawProperties&   drawprop()                       {return _drawprop;}
+      void              setcellmarks_hidden(bool hide)   {_drawprop._cellmarks_hidden = hide;}
+      void              settextmarks_hidden(bool hide)   {_drawprop._textmarks_hidden = hide;}
       void              setScrCTM(CTM ScrCTM)            {_drawprop._ScrCTM = ScrCTM;}
       void              setClipRegion(DBbox clipR)       {_drawprop._clipRegion = clipR;}
-      DrawProperties&   drawprop()                       {return _drawprop;}
+      void              setCurrentOp(console::ACTIVE_OP actop)
+                                                         {_drawprop._currentop = actop;}
+
       void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2,_UU);}
       void              clearRulers()                    {_supp_data.clearRulers();}
       void              drawRulers(const CTM& layCTM)    {_supp_data.drawRulers(layCTM, stepDB());}
@@ -264,8 +265,6 @@ namespace layprop {
                                                          {_supp_data.tmp_draw( base, newp, _UU, layCTM, stepDB());}
       void              mousePoint(const TP& lp)         {_supp_data.mousePoint(lp);}
       void              mouseStop()                      {_supp_data.mouseStop();}
-      void              setCurrentOp(console::ACTIVE_OP actop) {_drawprop._currentop = actop;}
-
       console::ACTIVE_OP currentop() const               {return _drawprop.currentop();}
 
       //
