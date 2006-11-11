@@ -75,36 +75,37 @@ public:
    void                       openGL_draw(const CTM&);
    void                       tmp_draw(const CTM&, TP, TP);
    const laydata::cellList&   cells();
+   void                       defaultlayer(word layno)
+                                                      {_curlay = layno;}
+   word                       curlay() const          {return _curlay;}
+   std::string                tedfilename() const     {return _tedfilename;};
+   bool                       neversaved()  const     {return _neversaved;}; 
+   bool                       modified() const        {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
    
-   std::string                tedfilename() const  {return _tedfilename;};
-   bool                       neversaved()  const  {return _neversaved;}; 
-   bool                       modified() const     {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
-
-   void                       defaultlayer(word layno)         {_curlay = layno;}
-   word                       curlay() const                   {return _curlay;}
-
-   bool                       autopan() const      {return _properties.autopan();}
-   const real                 step() const         {return _properties.step();}
-   const layprop::LayoutGrid* grid(byte gn) const  {return _properties.grid(gn);}
-   const int4b                stepDB() const       {return _properties.stepDB();}
-   const real                 UU() const           {return _properties.UU();}
-   const real                 DBscale() const      {return _properties.DBscale();}
+   bool                       autopan() const         {return _properties.autopan();}
+   const real                 step() const            {return _properties.step();}
+   const layprop::LayoutGrid* grid(byte gn) const     {return _properties.grid(gn);}
+   const int4b                stepDB() const          {return _properties.stepDB();}
+   const real                 UU() const              {return _properties.UU();}
+   const real                 DBscale() const         {return _properties.DBscale();}
    word                       getlayerNo(std::string name) const
-                                                   {return _properties.getlayerNo(name);}
-   byte                       marker_angle() const {return _properties.marker_angle();}
+                                                      {return _properties.getlayerNo(name);}
+   byte                       marker_angle() const    {return _properties.marker_angle();}
    bool                       layerHidden(word layno) {return _properties.drawprop().layerHidden(layno);}
    bool                       layerLocked(word layno) {return _properties.drawprop().layerLocked(layno);}
-   bool                       grid_visual(word no) {return grid(no)->visual();}
+   bool                       grid_visual(word no)    {return grid(no)->visual();}
    
 
-   void                       setautopan(bool status)
-                                                   {_properties.setautopan(status);}
+   void                       setautopan(bool status) {_properties.setautopan(status);}
    void                       setmarker_angle(byte angle)
-                                                   {_properties.setmarker_angle(angle);}
-   void                       setstep(real st)     {_properties.setstep(st);}
+                                                      {_properties.setmarker_angle(angle);}
+   void                       setstep(real st)        {_properties.setstep(st);}
    void                       setClipRegion(DBbox clipR)
-                                                   {_properties.setClipRegion(clipR);}
-   void                       setScrCTM(CTM ScrCTM){_properties.setScrCTM(ScrCTM);}
+                                                      {_properties.setClipRegion(clipR);}
+   void                       setScrCTM(CTM ScrCTM)   {_properties.setScrCTM(ScrCTM);}
+   void                       setCurrentOp(console::ACTIVE_OP op)
+                                                      {_properties.setCurrentOp(op);}
+   const console::ACTIVE_OP   currentop() const       {return _properties.currentop();}
 
    void                       addlayer(std::string, word, std::string, std::string, std::string);
    void                       addline(std::string, std::string, word, byte, byte);
@@ -118,15 +119,12 @@ public:
    bool                       viewGrid(byte, bool);
    void                       addRuler(TP&, TP&);
    void                       clearRulers();
-   void                       setCurrentOp(console::ACTIVE_OP op) {_properties.setCurrentOp(op);}
-   const console::ACTIVE_OP   currentop() const {return _properties.currentop();}
 
 
 protected:
    laydata::tdtdesign*        _TEDDB;      // toped data base
    GDSin::GDSFile*            _GDSDB;      // GDS parsed data
    layprop::ViewProperties    _properties; //
-   //   layprop::DrawProperties    _drawprop;   //
    
    std::string                _tedfilename;
    bool                       _neversaved;
