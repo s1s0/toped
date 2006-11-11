@@ -579,8 +579,9 @@ void DataCenter::setGrid(byte No, real step, std::string colname)
 bool DataCenter::viewGrid(byte No, bool status)
 {
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
-   _properties.viewGrid(No, status);
+   status = _properties.viewGrid(No, status);
    PROPLock.Unlock();
+   return status;
 }
 
 void DataCenter::addRuler(TP& p1, TP& p2)
