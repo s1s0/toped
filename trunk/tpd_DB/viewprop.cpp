@@ -514,6 +514,7 @@ bool layprop::ViewProperties::viewGrid(byte No, bool status) {
    if (_grid.end() != _grid.find(No))
       _grid[No]->turnover(status);
    else status = false;
+   return status;
 }
 
 void layprop::ViewProperties::drawGrid() const{

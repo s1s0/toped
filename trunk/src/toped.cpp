@@ -1120,7 +1120,8 @@ void tui::TopedFrame::OnAbort(wxCommandEvent& WXUNUSED(event)) {
    wxPostEvent(Console, eventButtonUP);
 }
 
-void tui::TopedFrame::OnUpdateStatusLine(wxCommandEvent& evt) {
+void tui::TopedFrame::OnUpdateStatusLine(wxCommandEvent& evt)
+{
    switch (evt.GetInt()) {
       case STS_SELECTED    : _GLstatus->setSelected(evt.GetString());break;
       case STS_ABORTENABLE : _GLstatus->btn_abort_enable(true);break;
