@@ -58,7 +58,7 @@ public:
    void                       GDSexport(laydata::tdtcell*, bool, std::string&);
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
-   bool                       TDTread(std::string);
+   bool                       TDTread(std::string, std::list<std::string>& topcells);
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&); 
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
@@ -107,7 +107,8 @@ public:
                                                       {_properties.setCurrentOp(op);}
    const console::ACTIVE_OP   currentop() const       {return _properties.currentop();}
 
-   void                       addlayer(std::string, word, std::string, std::string, std::string);
+   bool                       addlayer(std::string, word, std::string, std::string, std::string);
+   bool                       addlayer(std::string, word);
    void                       addline(std::string, std::string, word, byte, byte);
    void                       addcolor(std::string, byte, byte, byte, byte);
    void                       addfill(std::string, byte*);

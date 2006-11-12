@@ -251,6 +251,7 @@ namespace tellstdfunc {
    void                 UpdateLV();
    void                 RefreshGL();
    void                 gridON(byte No, bool status);
+   void                 updateLayerDefinitions(laydata::tdtdesign*, nameList&);
 }
 
 #endif

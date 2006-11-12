@@ -277,7 +277,7 @@ GDSin::GDSrecord::~GDSrecord()
 // class GDSFile
 //==============================================================================
 GDSin::GDSFile::GDSFile(const char* fn) {
-   InFile = this; _hierTree = NULL;_status = false;
+   InFile = this; _hiertree = NULL;_status = false;
    GDSIIwarnings = GDSIIerrors = 0;
    filename = fn;
    file_pos = 0;
@@ -340,7 +340,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
 }
 
 GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
-   InFile = this;_hierTree = NULL;
+   InFile = this;_hiertree = NULL;
    GDSIIwarnings = GDSIIerrors = 0;
    filename = fn;//initializing
    file_pos = 0;
@@ -579,9 +579,9 @@ GDSin::GDSFile::~GDSFile()
    delete library;
    // get rid of the hierarchy tree
    GDSHierTree* droot;
-   while (_hierTree) 
+   while (_hiertree)
    {
-      droot = _hierTree; _hierTree = droot->GetLast();
+      droot = _hiertree; _hiertree = droot->GetLast();
       delete droot;
    }
 }

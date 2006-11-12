@@ -3124,10 +3124,13 @@ int tellstdfunc::TDTread::execute()
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      if (DATC->TDTread(filename)) {
+      nameList top_cell_list;
+      if (DATC->TDTread(filename, top_cell_list))
+      {
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
+            updateLayerDefinitions(ATDB, top_cell_list);
          DATC->unlockDB();
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
@@ -3169,10 +3172,12 @@ int tellstdfunc::TDTreadIFF::execute()
       bool start_ignoring = false;
       if (DATC->TDTcheckread(filename, timeCreated, timeSaved, start_ignoring))
       {
-         DATC->TDTread(filename);
+         std::list<std::string> top_cell_list;
+         DATC->TDTread(filename, top_cell_list);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
          TpdTime timec(ATDB->created());
          TpdTime timeu(ATDB->lastUpdated());
+         updateLayerDefinitions(ATDB, top_cell_list);
          DATC->unlockDB();
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
@@ -3295,8 +3300,9 @@ int tellstdfunc::GDSconvertAll::execute()
    {
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
    }
-   DATC->lockDB(false);
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
       DATC->importGDScell(top_cells, recur, over);
+      updateLayerDefinitions(ATDB, top_cells);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "(\""<< *pl << "\"," << LogFile._2bool(recur) 
          << "," << LogFile._2bool(over) << ");"; LogFile.flush();
@@ -3321,8 +3327,9 @@ int tellstdfunc::GDSconvert::execute()
    std::string name = getStringValue();
    nameList top_cells;
    top_cells.push_back(name.c_str());
-   DATC->lockDB(false);
-   DATC->importGDScell(top_cells, recur, over);
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      DATC->importGDScell(top_cells, recur, over);
+      updateLayerDefinitions(ATDB, top_cells);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur) 
          << "," << LogFile._2bool(over) << ");"; LogFile.flush();
@@ -3631,6 +3638,21 @@ void tellstdfunc::gridON(byte No, bool status) {
       default: assert(false);
    }
    wxPostEvent(Toped->view(), eventGRIDUPD);
+}
+
+void tellstdfunc::updateLayerDefinitions(laydata::tdtdesign* ATDB, nameList& top_cells)
+{
+   // get all the layers used in the design and define them using the default definition
+   laydata::usedlayList ull;
+   for(nameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
+      ATDB->collect_usedlays(*CTC, true, ull);
+   std::unique(ull.begin(),ull.end());
+   for(laydata::usedlayList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
+   {
+      if (0 == *CUL) continue;
+      if (DATC->addlayer("__undefined",*CUL))
+         browsers::layer_add("__undefined",*CUL);
+   }
 }
 
 /*

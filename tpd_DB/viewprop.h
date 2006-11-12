@@ -227,7 +227,8 @@ namespace layprop {
    public:
                         ViewProperties();
                        ~ViewProperties(); 
-      void              addlayer(std::string, word, std::string, std::string, std::string);
+      bool              addlayer(std::string, word, std::string, std::string, std::string);
+      bool              addlayer(std::string, word);
       void              addcolor(std::string name, byte R, byte G, byte B, byte A);
       void              addfill(std::string name, byte *ptrn);
       void              addline(std::string, std::string, word, byte, byte);
