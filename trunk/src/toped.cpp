@@ -34,11 +34,16 @@
 #include "datacenter.h"
 #include "../tpd_DB/viewprop.h"
 #include "tui.h"
+#include "../ui/red_lamp.xpm"
+#include "../ui/green_lamp.xpm"
+#include "../ui/blue_lamp.xpm"
 
-extern const wxEventType         wxEVT_MARKERPOSITION;
-extern const wxEventType         wxEVT_CNVSSTATUSLINE;
+extern const wxEventType         wxEVT_CNVSSTATUS;
+extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
+extern const wxEventType         wxEVT_TPDSTATUS;
+
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -113,7 +118,52 @@ void tui::CanvasStatus::setdYpos(wxString coordY){
 void tui::CanvasStatus::setSelected(wxString numsel) {
    _selected->SetLabel(numsel);
 }
-   
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(tui::TopedStatus, wxStatusBar)
+    EVT_SIZE(tui::TopedStatus::OnSize)
+END_EVENT_TABLE()
+
+tui::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, wxID_ANY)
+{
+   const unsigned Field_Max = 3;
+   static const int widths[Field_Max] = { -1, -1, 32 };
+
+    SetFieldsCount(Field_Max);
+    SetStatusWidths(Field_Max, widths);
+    _lamp = new wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
+}
+
+void tui::TopedStatus::OnThreadON(wxString cmd)
+{
+   SetStatusText(cmd,1);
+   _lamp->SetBitmap(wxIcon(red_lamp));
+}
+
+void tui::TopedStatus::OnThreadWait()
+{
+//   SetStatusText(wxT("Ready..."),1);
+   _lamp->SetBitmap(wxIcon(blue_lamp));
+}
+
+void tui::TopedStatus::OnThreadOFF()
+{
+   SetStatusText(wxT("Ready..."),1);
+   _lamp->SetBitmap(wxIcon(green_lamp));
+}
+
+void tui::TopedStatus::OnSize(wxSizeEvent& event)
+{
+    wxRect rect;
+    GetFieldRect(2, rect);
+    wxSize size = _lamp->GetSize();
+
+    _lamp->Move(rect.x + (rect.width - size.x) / 2,
+                rect.y + (rect.height - size.y) / 2);
+
+    event.Skip();
+}
+
+//-----------------------------------------------------------------------------
 // The TopedFrame event table (TOPED main event table)
 BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_NEW          , tui::TopedFrame::OnNewDesign   )
@@ -189,15 +239,19 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
    
-  // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
+   EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
+   EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
+  
+      // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+500 , tui::TopedFrame::OnMenu  )
    EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
    EVT_CLOSE(tui::TopedFrame::OnClose)
    EVT_SIZE( TopedFrame::OnSize )
    EVT_SASH_DRAGGED_RANGE(ID_WIN_BROWSERS, ID_WIN_CANVAS, tui::TopedFrame::OnSashDrag)
-   EVT_TECUSTOM_COMMAND(wxEVT_MARKERPOSITION, wxID_ANY, tui::TopedFrame::OnPositionMessage)
-   EVT_TECUSTOM_COMMAND(wxEVT_CNVSSTATUSLINE, wxID_ANY, tui::TopedFrame::OnUpdateStatusLine)
-   EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL   , wxID_ANY, tui::TopedFrame::OnMouseAccel)
+   EVT_TECUSTOM_COMMAND(wxEVT_TPDSTATUS  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
+   EVT_TECUSTOM_COMMAND(wxEVT_CNVSSTATUS , wxID_ANY, tui::TopedFrame::OnCanvasStatus)
+   EVT_TECUSTOM_COMMAND(wxEVT_SETINGSMENU, wxID_ANY, tui::TopedFrame::OnUpdateSettingsMenu)
+   EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
    
    
 END_EVENT_TABLE()
@@ -208,9 +262,11 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
 {
    initView();
 //   initToolBar();
-   CreateStatusBar();
-   SetStatusText( wxT( "Toped loaded..." ) );
+//   CreateStatusBar();
+   _toped_status = new TopedStatus(this);
+   SetStatusBar(_toped_status);
    _resourceCenter = new ResourceCenter;
+   SetStatusText( wxT( "Toped loaded..." ) );
    //Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
 }
@@ -254,6 +310,7 @@ tui::TopedFrame::~TopedFrame() {
    delete mS_log;
    delete mS_canvas;
 //   delete _resourceCenter;
+//   delete _toped_status;
 }
 
 void tui::TopedFrame::initMenuBar() {
@@ -460,6 +517,9 @@ void tui::TopedFrame::initMenuBar() {
    /*helpMenu=new wxMenu();
    helpMenu->Append(TMHELP_ABOUTAPP       , wxT("About")          , wxT("About TOPED"));
    */
+   _resourceCenter->appendMenu("&Other/Add Ruler"   , "", &tui::TopedFrame::OnAddRuler, "Add new ruler" );
+   _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
+   
    _resourceCenter->appendMenu("&Help/About", "", &tui::TopedFrame::OnAbout, "About TOPED" );
    
    //---------------------------------------------------------------------------
@@ -595,7 +655,7 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
-   wxMessageBox( wxT( "Toped ver. 0.8\n\nOpen source IC layout editor \n(c) 2001-2006 Toped developers\nwww.toped.org.uk" ),
+   wxMessageBox( wxT( "Toped ver. 0.8.x\n\nOpen source IC layout editor \n(c) 2001-2006 Toped developers\nwww.toped.org.uk" ),
                   wxT( "About Toped" ), wxOK | wxICON_INFORMATION, this );
 }
 
@@ -618,19 +678,34 @@ void tui::TopedFrame::OnSashDrag(wxSashEvent& event) {
    layout.LayoutFrame(this, mS_canvas);
 }
 
-void tui::TopedFrame::OnSize(wxSizeEvent& WXUNUSED(event)) {
+void tui::TopedFrame::OnSize(wxSizeEvent& WXUNUSED(event))
+{
    wxLayoutAlgorithm layout;
    layout.LayoutFrame(this, mS_canvas);
 }
 
-void tui::TopedFrame::OnPositionMessage(wxCommandEvent& evt) {
-   switch ((POSITION_TYPE)evt.GetInt()) {
-      case POS_X: _GLstatus->setXpos(evt.GetString()); break;
-      case POS_Y: _GLstatus->setYpos(evt.GetString()); break;
-      case DEL_X: _GLstatus->setdXpos(evt.GetString()); break;
-      case DEL_Y: _GLstatus->setdYpos(evt.GetString()); break;
+void tui::TopedFrame::OnCanvasStatus(wxCommandEvent& evt)
+{
+   switch (evt.GetInt()) {
+      case CNVS_POS_X       : _GLstatus->setXpos(evt.GetString()); break;
+      case CNVS_POS_Y       : _GLstatus->setYpos(evt.GetString()); break;
+      case CNVS_DEL_X       : _GLstatus->setdXpos(evt.GetString()); break;
+      case CNVS_DEL_Y       : _GLstatus->setdYpos(evt.GetString()); break;
+      case CNVS_SELECTED    : _GLstatus->setSelected(evt.GetString());break;
+      case CNVS_ABORTENABLE : _GLstatus->btn_abort_enable(true);break;
+      case CNVS_ABORTDISABLE: _GLstatus->btn_abort_enable(false);break;
       default: assert(false);
    }   
+}
+
+void tui::TopedFrame::OnTopedStatus(wxCommandEvent& evt)
+{
+   switch (evt.GetInt()) {
+      case console::TSTS_THREADON    : _toped_status->OnThreadON(evt.GetString()); break;
+      case console::TSTS_THREADWAIT  : _toped_status->OnThreadWait(); break;
+      case console::TSTS_THREADOFF   : _toped_status->OnThreadOFF(); break;
+      default: assert(false);
+   }
 }
 
 void tui::TopedFrame::OnNewDesign(wxCommandEvent& evt) {
@@ -680,8 +755,8 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
       ost << wxT("tdtread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
       wxString ost1;
-      ost1 << wxT("File ") << dlg2.GetFilename() << wxT(" loaded");
-      SetStatusText(ost1);
+//      ost1 << wxT("File ") << dlg2.GetFilename() << wxT(" loaded");
+//      SetStatusText(ost1);
       SetTitle(dlg2.GetFilename());
    }
    else SetStatusText(wxT("Opening aborted"));
@@ -697,7 +772,7 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
       wxString ost;
       ost << wxT("#include \"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\";");
       _cmdline->parseCommand(ost);
-      SetStatusText(dlg2.GetFilename() + wxT(" parsed"));
+//      SetStatusText(dlg2.GetFilename() + wxT(" parsed"));
    }
    else SetStatusText(wxT("include aborted"));
 }
@@ -712,9 +787,9 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
       wxString ost;
       ost << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
-      wxString ost1;
-      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loaded");
-      SetStatusText(ost1);
+//      wxString ost1;
+//      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loaded");
+//      SetStatusText(ost1);
    }
    else SetStatusText(wxT("Parsing aborted"));
 }
@@ -737,7 +812,7 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
       }
    }
    else _cmdline->parseCommand(ost);;
-   SetStatusText(wxT("Design saved"));
+//   SetStatusText(wxT("Design saved"));
 }
 
 void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
@@ -756,7 +831,7 @@ void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
       wxString ost;
       ost << wxT("tdtsaveas(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
-      SetStatusText(wxT("Design saved in file: ")+dlg2.GetFilename());
+//      SetStatusText(wxT("Design saved in file: ")+dlg2.GetFilename());
    }   
    else SetStatusText(wxT("Saving aborted"));
 }
@@ -848,7 +923,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
    wxString ost;
    ost << wxT("gdsimport(") << ost_int << wxT(", true, false );gdsclose();");
    _cmdline->parseCommand(ost);
-   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
+//   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
 
 void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
@@ -866,7 +941,7 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
       wxString ost;
       ost << wxT("gdsexport(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
-      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
+//      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("GDS export aborted"));
 }
@@ -907,7 +982,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
                         (recur ? wxT("true") : wxT("false")) << wxT(",\"") <<
                         (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str() << wxT("\");");
       _cmdline->parseCommand(ost);
-      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
+//      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("GDS export aborted"));
 }
@@ -1120,12 +1195,9 @@ void tui::TopedFrame::OnAbort(wxCommandEvent& WXUNUSED(event)) {
    wxPostEvent(Console, eventButtonUP);
 }
 
-void tui::TopedFrame::OnUpdateStatusLine(wxCommandEvent& evt)
+void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
 {
    switch (evt.GetInt()) {
-      case STS_SELECTED    : _GLstatus->setSelected(evt.GetString());break;
-      case STS_ABORTENABLE : _GLstatus->btn_abort_enable(true);break;
-      case STS_ABORTDISABLE: _GLstatus->btn_abort_enable(false);break;
       case STS_GRID0_ON    : settingsMenu->Check(TMSET_GRID0,true );break;
       case STS_GRID0_OFF   : settingsMenu->Check(TMSET_GRID0,false);break;
       case STS_GRID1_ON    : settingsMenu->Check(TMSET_GRID1,true );break;

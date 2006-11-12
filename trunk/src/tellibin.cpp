@@ -50,9 +50,10 @@ extern console::toped_logfile    LogFile;
 extern tui::TopedFrame*          Toped;
 
 
-extern const wxEventType         wxEVT_CNVSSTATUSLINE;
+extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
+extern const wxEventType         wxEVT_CNVSSTATUS;
 
 
 //=============================================================================
@@ -471,7 +472,7 @@ void tellstdfunc::stdHIDECELLMARK::undo() {
    TEUNDO_DEBUG("hide_cellmarks( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
    DATC->setcellmarks_hidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
    UpdateLV();
@@ -482,7 +483,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(new telldata::ttbool(!hide));
    DATC->setcellmarks_hidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
@@ -505,7 +506,7 @@ void tellstdfunc::stdHIDETEXTMARK::undo() {
    TEUNDO_DEBUG("hide_textmarks( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
    DATC->settextmarks_hidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
@@ -517,7 +518,7 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(new telldata::ttbool(!hide));
    DATC->settextmarks_hidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
@@ -1857,7 +1858,7 @@ void tellstdfunc::stdAUTOPAN::undo() {
    TEUNDO_DEBUG("autopan() UNDO");
    bool autop = getBoolValue(UNDOPstack, true);
    DATC->setautopan(autop);
-   wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
    wxPostEvent(Toped, eventGRIDUPD);
 
@@ -1870,7 +1871,7 @@ int tellstdfunc::stdAUTOPAN::execute() {
    //
    bool autop    = getBoolValue();
    DATC->setautopan(autop);
-   wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
    wxPostEvent(Toped, eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(autop) << ");"; LogFile.flush();
@@ -1902,7 +1903,7 @@ int tellstdfunc::stdSHAPEANGLE::execute() {
       UNDOPstack.push_front(new telldata::ttint(DATC->marker_angle()));
       //
       DATC->setmarker_angle(angle);
-      wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
+      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
       if       (angle == 0)  eventGRIDUPD.SetInt(tui::STS_ANGLE_0);
       else if  (angle == 45) eventGRIDUPD.SetInt(tui::STS_ANGLE_45);
       else if  (angle == 90) eventGRIDUPD.SetInt(tui::STS_ANGLE_90);
@@ -3608,8 +3609,8 @@ laydata::atticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
 void tellstdfunc::UpdateLV() {
    wxString ws;
    ws.sprintf(wxT("%d"),DATC->numselected());
-   wxCommandEvent eventUPDATESEL(wxEVT_CNVSSTATUSLINE);
-   eventUPDATESEL.SetInt(tui::STS_SELECTED);
+   wxCommandEvent eventUPDATESEL(wxEVT_CNVSSTATUS);
+   eventUPDATESEL.SetInt(tui::CNVS_SELECTED);
    eventUPDATESEL.SetString(ws);
    wxPostEvent(Toped->view(), eventUPDATESEL);
    RefreshGL();
@@ -3621,7 +3622,7 @@ void tellstdfunc::RefreshGL() {
 }
 
 void tellstdfunc::gridON(byte No, bool status) {
-   wxCommandEvent eventGRIDUPD(wxEVT_CNVSSTATUSLINE);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    status = DATC->viewGrid(No, status);
    switch (No) {
       case 0: eventGRIDUPD.SetInt((status ? tui::STS_GRID0_ON : tui::STS_GRID0_OFF)); break;

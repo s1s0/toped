@@ -62,6 +62,7 @@ wxMutex              Mutex;
 
 //extern const wxEventType    wxEVT_LOG_ERRMESSAGE;
 console::ted_cmd*           Console = NULL;
+extern const wxEventType    wxEVT_TPDSTATUS;
 
 //==============================================================================
 bool console::patternFound(const wxString templ,  wxString str) {
@@ -215,14 +216,30 @@ void* console::parse_thread::Entry() {
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
    void* b = tell_scan_string( command.mb_str() );
+   StatusBusy(command);
    tellparse();
    my_delete_yy_buffer( b );
    
    Mutex.Unlock();
+   StatusReady();
 //   wxLogMessage(_T("Mutex unlocked"));
    return NULL;
 };
 
+void console::parse_thread::StatusBusy(wxString& sts_cmd)
+{
+   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   eventSTATUSUPD.SetInt(TSTS_THREADON);
+   eventSTATUSUPD.SetString(wxString(sts_cmd.c_str(), wxConvUTF8));
+   wxPostEvent(_status_wnd, eventSTATUSUPD);
+}
+
+void console::parse_thread::StatusReady()
+{
+   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   eventSTATUSUPD.SetInt(TSTS_THREADOFF);
+   wxPostEvent(_status_wnd, eventSTATUSUPD);
+}
 //==============================================================================
 // The ted_cmd event table
 BEGIN_EVENT_TABLE( console::ted_cmd, wxTextCtrl )
@@ -233,8 +250,9 @@ END_EVENT_TABLE()
 //==============================================================================
 console::ted_cmd::ted_cmd(wxWindow *parent) :
       wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
-                  wxTE_PROCESS_ENTER | wxNO_BORDER), puc(NULL), _numpoints(0) {
-   
+                  wxTE_PROCESS_ENTER | wxNO_BORDER), puc(NULL), _numpoints(0)
+{
+   _parent = parent;
    threadWaits4 = new wxCondition(Mutex);
    assert(threadWaits4->IsOk());
    _mouseIN_OK = true;
@@ -250,7 +268,7 @@ void console::ted_cmd::getCommand(wxCommandEvent& WXUNUSED(event)) {
       _cmd_history.push_back(std::string(command.mb_str()));
       _history_position = _cmd_history.end();
       Clear();
-      parse_thread *pthrd = new parse_thread(command);
+      parse_thread *pthrd = new parse_thread(command,_parent);
       pthrd->Create();
       pthrd->Run();
    }   
@@ -279,7 +297,7 @@ void console::ted_cmd::getCommandA() {
       {
          // executing the parser in a separate thread
          //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
-         parse_thread *pthrd = new parse_thread(command);
+         parse_thread *pthrd = new parse_thread(command,_parent);
          wxThreadError result = pthrd->Create();
          if (wxTHREAD_NO_ERROR == result)
             pthrd->Run();
@@ -347,6 +365,11 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
    Connect(-1, wxEVT_COMMAND_ENTER,
            (wxObjectEventFunction) (wxEventFunction)
            (wxCommandEventFunction)&ted_cmd::OnGUInput);
+   
+   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   eventSTATUSUPD.SetInt(TSTS_THREADWAIT);
+   wxPostEvent(_parent, eventSTATUSUPD);
+   
 }
 
 void console::ted_cmd::getGUInput(bool from_keyboard) {
