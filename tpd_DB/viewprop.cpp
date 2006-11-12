@@ -45,7 +45,7 @@ GLubyte array_mark_bmp[30]= {0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x1
                              0x11, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00};
 
 #define _GRID_LIMIT  5    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
-extern const wxEventType         wxEVT_CNVSSTATUSLINE;
+extern const wxEventType         wxEVT_SETTINGSMENU;
 
 layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
 {

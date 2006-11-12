@@ -1,10 +1,9 @@
 General
 =========
   * MEMORY LEAKAGE DEBUG!
-  * Autopan doesn't seems to work fine, because it depends probably
-    on the _step in View properties. Must depend on the absolute proxomity in screen
-    pixesld to the edge of the canvas
+  * Theread status and status line in general.
   * layer fill control - command and menu
+  * No visualization for addtext() (_tmpdata MouseStart requires additional parameters?)
   * Online hierarhy tree maintanence still has troubles - especially when
     deleting the stuff from the top level. Check and debug!
   * Parser needs well defined error recovery policy
@@ -19,6 +18,9 @@ General
     Think about it. Pointetrs are unapropriate of course.
   * Think about improving the TEDAT text readability manipulating the orientation
   * Optional validation - warning/error menu - acute angle case.
+  * Autopan doesn't seems to work fine, because it depends probably
+    on the _step in View properties. Must depend on the absolute proxomity in screen
+    pixesld to the edge of the canvas
   
   TELL related
   ------------

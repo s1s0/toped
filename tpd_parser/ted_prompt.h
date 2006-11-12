@@ -35,6 +35,12 @@
 #include "../tpd_common/outbox.h"
 
 namespace console {
+   typedef enum {
+      TSTS_THREADON     ,
+      TSTS_THREADWAIT   ,
+      TSTS_THREADOFF
+   }TOPEDSTATUS_TYPE;
+
    typedef std::list<std::string>   stringList;
    const wxString real_tmpl      = wxT("[-+]?([[:digit:]]+(\\.[[:digit:]]*)?|(\\.[[:digit:]]+))");
    const wxString point_tmpl     = wxT("\\{")+ real_tmpl+wxT(",")+ real_tmpl+wxT("\\}");
@@ -60,11 +66,14 @@ namespace console {
 
    class parse_thread : public wxThread {
    public:
-      parse_thread(wxString& cmd, wxThreadKind kind=wxTHREAD_DETACHED):
-                                    wxThread(kind),command(cmd){};
+      parse_thread(wxString& cmd, wxWindow* status_wnd, wxThreadKind kind=wxTHREAD_DETACHED):
+                                    wxThread(kind),command(cmd), _status_wnd(status_wnd){};
    protected:
       void*                   Entry();
+      void                    StatusBusy(wxString&);
+      void                    StatusReady();
       wxString                command;
+      wxWindow*               _status_wnd;
    };
 
 
@@ -95,6 +104,7 @@ namespace console {
       stringList              _cmd_history;
       stringList::const_iterator _history_position;
       bool                    _thread; //flag fo detached thread
+      wxWindow*               _parent;
       DECLARE_EVENT_TABLE();
    };
 

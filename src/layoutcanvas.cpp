@@ -42,10 +42,10 @@
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
-extern const wxEventType         wxEVT_MARKERPOSITION;
+extern const wxEventType         wxEVT_CNVSSTATUS;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
-extern const wxEventType         wxEVT_CNVSSTATUSLINE;
+extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
 
 
@@ -315,9 +315,9 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
    }
 }
 
-void tui::LayoutCanvas::UpdateCoordWin(int coord, POSITION_TYPE postype, int dcoord, POSITION_TYPE dpostype) {
+void tui::LayoutCanvas::UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype) {
    wxString ws;
-   wxCommandEvent eventPOSITION(wxEVT_MARKERPOSITION);
+   wxCommandEvent eventPOSITION(wxEVT_CNVSSTATUS);
    ws.sprintf(wxT("%3.2f"),coord*DATC->UU());
    eventPOSITION.SetString(ws);
    eventPOSITION.SetInt(postype);
@@ -399,9 +399,9 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event) {
    //
    CursorControl(event.ShiftDown(), event.ControlDown());
    if (deltaX > 0) 
-      UpdateCoordWin(ScrMARK.x(), POS_X, (n_ScrMARK.x() - releasepoint.x()), DEL_X);
+      UpdateCoordWin(ScrMARK.x(), CNVS_POS_X, (n_ScrMARK.x() - releasepoint.x()), CNVS_DEL_X);
    if (deltaY > 0) 
-      UpdateCoordWin(ScrMARK.y(), POS_Y, (n_ScrMARK.y() - releasepoint.y()), DEL_Y);
+      UpdateCoordWin(ScrMARK.y(), CNVS_POS_Y, (n_ScrMARK.y() - releasepoint.y()), CNVS_DEL_Y);
 
    if ((tmp_wnd || mouse_input)) Refresh();//updateGL();
 }
@@ -630,7 +630,7 @@ void tui::LayoutCanvas::update_viewport() {
 
 void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
 {
-   wxCommandEvent eventABORTEN(wxEVT_CNVSSTATUSLINE);
+   wxCommandEvent eventABORTEN(wxEVT_CNVSSTATUS);
    if (1 == evt.GetExtraLong())
    { // start mouse input
       mouse_input = true;
@@ -641,7 +641,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       //restricted_move will be true for wire and polygon
       restricted_move = (DATC->marker_angle() != 0) &&
             ((actop > 0) || (actop == console::op_dpoly));
-      eventABORTEN.SetInt(STS_ABORTENABLE);
+      eventABORTEN.SetInt(CNVS_ABORTENABLE);
       reperX = (console::op_flipX == actop);
       reperY = (console::op_flipY == actop);
       if (reperX || reperY || (console::op_rotate == actop))
@@ -655,13 +655,13 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       reperX = false;
       reperY = false;
       DATC->setCurrentOp(console::op_none);
-      wxCommandEvent eventPOSITION(wxEVT_MARKERPOSITION);
+      wxCommandEvent eventPOSITION(wxEVT_CNVSSTATUS);
       eventPOSITION.SetString(wxT(""));
-      eventPOSITION.SetInt(DEL_Y);
+      eventPOSITION.SetInt(CNVS_DEL_Y);
       wxPostEvent(this, eventPOSITION);
-      eventPOSITION.SetInt(DEL_X);
+      eventPOSITION.SetInt(CNVS_DEL_X);
       wxPostEvent(this, eventPOSITION);
-      eventABORTEN.SetInt(STS_ABORTDISABLE);
+      eventABORTEN.SetInt(CNVS_ABORTDISABLE);
    }
    wxPostEvent(this, eventABORTEN);
 }
