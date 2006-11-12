@@ -243,7 +243,7 @@ bool DataCenter::TDTcheckread(const std::string filename,
    return retval;
 } 
 
-bool DataCenter::TDTread(std::string filename)
+bool DataCenter::TDTread(std::string filename, std::list<std::string>& topcells)
 {
    laydata::TEDfile tempin(filename.c_str());
    if (!tempin.status()) return false;
@@ -267,6 +267,13 @@ bool DataCenter::TDTread(std::string filename)
    _TEDDB->btreeRemoveMember = &browsers::treeRemoveMember;
    // get the hierarchy
    browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
+   // extract the root cells
+   laydata::TDTHierTree* root = _TEDDB->hiertree()->GetFirstRoot();
+   do 
+   {
+      topcells.push_back(std::string(root->GetItem()->name()));
+   } while (NULL != (root = root->GetNextRoot()));
+   
    // Update Canvas scale
    _properties.setUU(_TEDDB->UU());
    return true;
@@ -347,7 +354,7 @@ void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells
    _GDSDB->HierOut();
    // add GDS tab in the browser
    browsers::addGDStab();
-   GDSin::GDSHierTree* root = _GDSDB->hierTree()->GetFirstRoot();
+   GDSin::GDSHierTree* root = _GDSDB->hiertree()->GetFirstRoot();
    do 
    {
       topcells.push_back(std::string(root->GetItem()->Get_StrName()));
@@ -510,13 +517,24 @@ const laydata::cellList& DataCenter::cells() {
 };
 
 
-void DataCenter::addlayer(std::string name, word layno, std::string col,
+bool DataCenter::addlayer(std::string name, word layno, std::string col,
                                        std::string fill, std::string sline)
 
 {
+   bool status;
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
-   _properties.addlayer(name, layno, col, fill, sline);
+   status = _properties.addlayer(name, layno, col, fill, sline);
    PROPLock.Unlock();
+   return status;
+}
+
+bool DataCenter::addlayer(std::string name, word layno)
+{
+   bool status;
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   status = _properties.addlayer(name, layno);
+   PROPLock.Unlock();
+   return status;
 }
 
 void DataCenter::addline(std::string name, std::string col, word pattern,

@@ -76,7 +76,7 @@ void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, co
 
    glColor4f(1, 1, 1, 0.7); // gray
    glDisable(GL_POLYGON_STIPPLE);
-   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
+//   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
    glBegin(GL_LINE);glLineWidth(2);
    // draw the nonius ...
    for (LineList::const_iterator CL = noni_list.begin(); CL != noni_list.end(); CL++)
@@ -420,30 +420,48 @@ bool layprop::ViewProperties::selectable(word layno) const {
    return (!_drawprop.layerHidden(layno) && !_drawprop.layerLocked(layno));
 }
 
-void layprop::ViewProperties::addlayer(std::string name, word layno, std::string col,
-                                       std::string fill, std::string sline) {
-   if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col))) {
+bool layprop::ViewProperties::addlayer(std::string name, word layno, std::string col,
+                                       std::string fill, std::string sline)
+{
+   if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col)))
+   {
       std::ostringstream ost;
       ost << "Warning! Color \""<<col<<"\" is not defined";
       tell_log(console::MT_WARNING,ost.str());
    }
-   if ((fill != "") && (_drawprop._layfill.end() == _drawprop._layfill.find(fill))) {
+   if ((fill != "") && (_drawprop._layfill.end() == _drawprop._layfill.find(fill)))
+   {
       std::ostringstream ost;
       ost << "Warning! Fill \""<<fill<<"\" is not defined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   if ((sline != "") && (_drawprop._lineset.end() == _drawprop._lineset.find(sline))) {
+   if ((sline != "") && (_drawprop._lineset.end() == _drawprop._lineset.find(sline)))
+   {
       std::ostringstream ost;
       ost << "Warning! Line \""<<sline<<"\" is not defined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   if (_drawprop._layset.end() != _drawprop._layset.find(layno)) {
+   bool new_layer = true;
+   if (_drawprop._layset.end() != _drawprop._layset.find(layno))
+   {
+      new_layer = false;
       delete _drawprop._layset[layno];
       std::ostringstream ost;
       ost << "Warning! Layer "<<layno<<" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }   
    _drawprop._layset[layno] = new LayerSettings(name,col,fill,sline);
+   return new_layer;
+}
+
+bool layprop::ViewProperties::addlayer(std::string name, word layno)
+{
+   if (_drawprop._layset.end() == _drawprop._layset.find(layno))
+   {
+      _drawprop._layset[layno] = new LayerSettings(name,"","","");
+      return true;
+   }
+   return false;
 }
 
 void layprop::ViewProperties::addline(std::string name, std::string col, word pattern,

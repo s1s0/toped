@@ -252,8 +252,8 @@ void browsers::GDSbrowser::collectInfo() {
    hCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
    fCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
   
-   if (NULL == AGDSDB->hierTree()) return; // new, empty design 
-   GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot();
+   if (NULL == AGDSDB->hiertree()) return; // new, empty design
+   GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot();
    wxTreeItemId nroot;
    while (root){
       nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
