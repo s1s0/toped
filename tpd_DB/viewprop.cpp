@@ -397,6 +397,16 @@ word layprop::DrawProperties::getlayerNo(std::string name) const {
   return 0;
 }
 
+std::string layprop::DrawProperties::getlayerName(word layno) const
+{
+   laySetList::const_iterator CL = _layset.find(layno);
+   if (_layset.end() != CL)
+   {
+      return CL->second->name();
+   }
+   else return "";
+}
+
 layprop::DrawProperties::~DrawProperties() {
    for (laySetList::iterator LSI = _layset.begin(); LSI != _layset.end(); LSI++)
       delete LSI->second;

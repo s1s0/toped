@@ -90,6 +90,8 @@ public:
    const real                 DBscale() const         {return _properties.DBscale();}
    word                       getlayerNo(std::string name) const
                                                       {return _properties.getlayerNo(name);}
+   std::string                getlayerName(word layno) const
+                                                      {return _properties.getlayerName(layno);}
    byte                       marker_angle() const    {return _properties.marker_angle();}
    bool                       layerHidden(word layno) {return _properties.drawprop().layerHidden(layno);}
    bool                       layerLocked(word layno) {return _properties.drawprop().layerLocked(layno);}
