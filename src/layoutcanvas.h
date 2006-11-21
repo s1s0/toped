@@ -188,6 +188,28 @@ namespace tui {
    } SETTINGSMENU_TYPE;
 
    //=============================================================================
+   class StatusLine
+   {
+      public:
+                    StatusLine():_Xcoord(TP()),_Ycoord(TP()) {};
+      void          update(const int4b, const CTM&);
+      void          draw();
+      void          update_coords(const TP&);
+      private:
+         TP             _sb_BL;
+         TP             _sb_TR;
+         double         _scaledpix;
+         TP             _cX;
+         TP             _cY;
+         TP             _dX;
+         TP             _dY;
+         TP             _wcX;
+         TP             _wcY;
+         DBbox          _Xcoord;
+         DBbox          _Ycoord;
+         TP             _cp;
+   };
+   //=============================================================================
    class LayoutCanvas : public wxGLCanvas  {
    public: 
                      LayoutCanvas(wxWindow *parent, int* attribList);
@@ -215,6 +237,7 @@ namespace tui {
       void           initializeGL();
    private:
       void           CursorControl(bool, bool);
+//      void           drawInterim(const TP&);
       CTM            _LayCTM;      // Layout translation matrix
       TP             ScrMARK;      // Current marker position in DB units
       TP             ScrMARKold;   // Old marker position  in DB units
@@ -240,6 +263,7 @@ namespace tui {
       void           EventMouseClick(int button);
       bool           reperX;         // Draw a cursor line across the window parallel to the X axis
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
+//      StatusLine     _status_line;
       DECLARE_EVENT_TABLE();
    };
 
