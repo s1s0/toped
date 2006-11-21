@@ -46,6 +46,29 @@ extern DataCenter*               DATC;
 extern browsers::browserTAB*     Browsers;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 
+int wxCALLBACK wxListCompareFunction(long item1, long item2, long column)
+{
+   if (1 == column)
+   {
+      std::string name1 = DATC->getlayerName( item1);
+      std::string name2 = DATC->getlayerName( item2);
+      return (name1 > name2);
+   }
+   else
+   {
+    // inverse the order
+    if (item1 < item2)
+        return -1;
+    if (item1 > item2)
+        return 1;
+    return 0;
+   }
+}
+
+BEGIN_EVENT_TABLE(browsers::topedlay_list, wxListCtrl)
+   EVT_LIST_COL_CLICK(ID_TPD_LAYERS, browsers::topedlay_list::OnSort)
+END_EVENT_TABLE()
+
 //==============================================================================
 browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) : 
@@ -98,6 +121,7 @@ void browsers::topedlay_list::addlayer(wxString name, word layno) {
    row.SetFont(_llfont_normal);
    long inum = InsertItem(row);
    SetItem(inum, 1, name);
+   SetItemData(inum, layno);
    // second column is reserved for active/lock icon
    row.SetColumn(2); row.SetId(inum); row.SetMask(wxLIST_MASK_IMAGE);
    row.SetImage(-1); // No icon assigned initially
@@ -154,8 +178,15 @@ void browsers::topedlay_list::lockLayer(word layno, bool lock) {
       info.SetImage((lock ? 1 : -1));
       SetItem(info);
       RefreshItem(ID);
-   }   
+   }
 }
+
+void browsers::topedlay_list::OnSort(wxListEvent& event)
+{
+    long col = event.GetColumn();
+    SortItems(wxListCompareFunction, col);
+}
+
 
 BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, CellBrowser)
    EVT_RIGHT_UP(browsers::GDSCellBrowser::OnBlankRMouseUp)

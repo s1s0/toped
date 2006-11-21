@@ -186,6 +186,7 @@ namespace layprop {
       const CTM&           topCTM() const       {assert(_transtack.size());return _transtack.top();}
       void                 draw_reference_marks(const TP&, const binding_marks) const;
       word                 getlayerNo(std::string name) const;
+      std::string          getlayerName(word layno) const;
       word                 drawinglayer() const {return _drawinglayer;}
       friend class ViewProperties;
    protected:
@@ -247,6 +248,7 @@ namespace layprop {
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
       word              getlayerNo(std::string name) const {return _drawprop.getlayerNo(name);}
+      std::string       getlayerName(word layno) const   {return _drawprop.getlayerName(layno);}
       real              UU() const                       {return _UU;}
       real              DBscale() const                  {return _DBscale;}
       bool              autopan() const                  {return _autopan;}

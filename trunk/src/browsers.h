@@ -84,10 +84,12 @@ namespace browsers {
       void                 defaultLayer(word, word);
       void                 hideLayer(word, bool);
       void                 lockLayer(word, bool);
+      void                 OnSort(wxListEvent&);
    private:
       wxImageList*         _imageList;
       wxFont               _llfont_normal;
       wxFont               _llfont_bold;
+      DECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
