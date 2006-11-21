@@ -38,7 +38,7 @@
 #include "datacenter.h"
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_DB/tedat.h"
-//#include "../tpd_common/glf.h"
+#include "../tpd_common/glf.h"
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -51,6 +51,98 @@ extern const wxEventType         wxEVT_CANVAS_ZOOM;
 
 #include "../ui/crosscursor.xpm"
 
+//tui::CanvasStatus::CanvasStatus(){};
+void tui::StatusLine::update(const int4b width, const CTM& _LayCTM)
+{
+   _sb_BL = TP(0,0)       * _LayCTM;
+   _sb_TR = TP(width, 30) * _LayCTM;
+   
+   DBbox pixelbox = DBbox(TP(),TP(14,14)) * _LayCTM;
+   _scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
+   _cY = TP(width-150, 17) * _LayCTM;
+   _cX = TP(width-300, 17) * _LayCTM;
+   _dY = TP(width-450, 17) * _LayCTM;
+   _dX = TP(width-600, 17) * _LayCTM;
+   _Ycoord = DBbox(TP(width - 130, 28), TP(width -   2, 2)) * _LayCTM;
+   _Xcoord = DBbox(TP(width - 280, 28), TP(width - 162, 2)) * _LayCTM;
+   _wcY = TP(width-120, 16) * _LayCTM;
+   _wcX = TP(width-270, 16) * _LayCTM;
+}
+
+void tui::StatusLine::draw()
+{
+   glColor4f(1,1,1,.7);
+   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
+   glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
+   glRecti(_sb_TR.x(), _sb_TR.y(), _sb_BL.x(), _sb_BL.y());
+
+   glColor4f(0,0,0,1);
+   glPushMatrix();
+   glTranslatef(_cY.x(), _cY.y(), 0);
+   glScalef(_scaledpix, _scaledpix, 1);
+   glfDrawSolidString("Y:");
+   glPopMatrix();
+   
+   glPushMatrix();
+   glTranslatef(_cX.x(), _cX.y(), 0);
+   glScalef(_scaledpix, _scaledpix, 1);
+   glfDrawSolidString("X:");
+   glPopMatrix();
+
+   glPushMatrix();
+   glTranslatef(_dY.x(), _dY.y(), 0);
+   glScalef(_scaledpix, _scaledpix, 1);
+   glfDrawSolidString("dX:");
+   glPopMatrix();
+   
+   glPushMatrix();
+   glTranslatef(_dX.x(), _dX.y(), 0);
+   glScalef(_scaledpix, _scaledpix, 1);
+   glfDrawSolidString("dX:");
+   glPopMatrix();
+   
+   update_coords(_cp);
+}
+//      private:
+//         TP             _sb_BL;
+//         TP             _sb_TR;
+//         real           _scaledpix;
+//   };
+
+void tui::StatusLine::update_coords(const TP& cp)
+{
+   _cp = cp;
+   glColor4f(0,0,0,1);
+   glRecti(_Xcoord.p1().x(), _Xcoord.p1().y(), _Xcoord.p2().x(), _Xcoord.p2().y());
+   glRecti(_Ycoord.p1().x(), _Ycoord.p1().y(), _Ycoord.p2().x(), _Ycoord.p2().y());
+
+//   glScissor( _Xcoord.p1().x(), _Xcoord.p1().y(), _Xcoord.p2().x() - _Xcoord.p1().x(), _Xcoord.p2().y() - _Xcoord.p1().y() );
+//   glEnable(GL_SCISSOR_TEST);
+//   
+   glColor4f(0,1,1,1);
+
+   wxString wsX;
+   wsX.sprintf(wxT("%6d"),_cp.x());
+   wxString wsY;
+   wsY.sprintf(wxT("%6d"),_cp.y());
+
+//
+//   glClear(GL_COLOR_BUFFER_BIT);
+ //  
+   glPushMatrix();
+   glTranslatef(_wcX.x(), _wcX.y(), 0);
+   glScalef(_scaledpix, _scaledpix, 1);
+   glfDrawSolidString(wsX.mb_str());
+   glPopMatrix();
+   
+   glPushMatrix();
+   glTranslatef(_wcY.x(), _wcY.y(), 0);
+   glScalef(_scaledpix, _scaledpix, 1);
+   glfDrawSolidString(wsY.mb_str());
+   glPopMatrix();
+//   glDisable(GL_SCISSOR_TEST);
+   
+}
 //=============================================================================
 // class LayoutCanvas
 //=============================================================================
@@ -95,6 +187,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    eventZOOM.SetInt(ZOOM_EMPTY);
    OnZoom(eventZOOM);
    ap_trigger = 10;
+   glfInit();
 }
 
 wxImage   tui::LayoutCanvas::snapshot(void)
@@ -204,12 +297,13 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
       if (!GetContext()) return;
    #endif
    SetCurrent();
-   update_viewport();
-   //@TODO !! Check somewhere that RGBA mode is available!?
-   // CTM matrix stuff
-   glLoadIdentity();
-   glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
-   if (invalid_window || !(tmp_wnd || rubber_band)) {
+   if (invalid_window || !(tmp_wnd || rubber_band))
+   {
+      update_viewport();
+      //@TODO !! Check somewhere that RGBA mode is available!?
+      // CTM matrix stuff
+      glLoadIdentity();
+      glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
       // invalid_window indicates zooming. If that is false and the rest two 
       // variables are not set, means that the system request repaint 
       // In both cases - the entire window is redrawn
@@ -218,11 +312,12 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
       DATC->openGL_draw(_LayCTM);    // draw data
+//      _status_line.draw();
       glAccum(GL_LOAD, 1.0);
       if (rubber_band) rubber_paint();
       invalid_window = false;
    }
-   else if (tmp_wnd) 
+   else if (tmp_wnd)
       // zooming using the mouse
       wnd_paint();
    else if (n_ScrMARKold != n_ScrMARK) 
@@ -230,8 +325,20 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
       // so the paint will be invoked only if we have something new to show on 
       //the screen
       rubber_paint();
+   
    SwapBuffers();
 }
+
+// void tui::LayoutCanva+s::drawInterim(const TP& cp)
+// {
+//    wxPaintDC dc(this);
+//    #ifndef __WXMOTIF__
+//       if (!GetContext()) return;
+//    #endif
+//    SetCurrent();
+//    _status_line.update_coords(cp);
+//    SwapBuffers();
+// }
 
 void tui::LayoutCanvas::wnd_paint() {
    glAccum(GL_RETURN, 1.0);
@@ -243,7 +350,8 @@ void tui::LayoutCanvas::wnd_paint() {
    glEnable(GL_POLYGON_STIPPLE);
 }
 
-void tui::LayoutCanvas::rubber_paint() {
+void tui::LayoutCanvas::rubber_paint()
+{
    glAccum(GL_RETURN, 1.0);
    DATC->tmp_draw(_LayCTM, releasepoint, n_ScrMARK);
    if (reperX || reperY)
@@ -262,29 +370,6 @@ void tui::LayoutCanvas::rubber_paint() {
       }
       glEnd();
    }
-
-/*   double distY = n_ScrMARK.y() - releasepoint.y();
-   double distX = n_ScrMARK.x() - releasepoint.x();
-   double distZ = sqrt(distY*distY + distX * distX);
-   std::ostringstream strdist;
-   strdist << distZ * Properties->UU();
-
-   DBbox pixelbox = DBbox(TP(),TP(15,15)) * _LayCTM;
-   double scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
-
-   glPushMatrix();
-   glTranslatef(n_ScrMARK.x(), n_ScrMARK.y(), 0);
-   glScalef(scaledpix, scaledpix, 1);
-   glColor4f(1, 1, 1, 0.7); // gray
-   glDisable(GL_POLYGON_STIPPLE);
-   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
-
-   glfDrawSolidString(strdist.str().c_str());
-
-   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
-   glEnable(GL_POLYGON_STIPPLE);
-   glPopMatrix();
-*/
 }
 
 void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
@@ -403,6 +488,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event) {
    if (deltaY > 0) 
       UpdateCoordWin(ScrMARK.y(), CNVS_POS_Y, (n_ScrMARK.y() - releasepoint.y()), CNVS_DEL_Y);
 
+//   drawInterim(ScrMARK);
    if ((tmp_wnd || mouse_input)) Refresh();//updateGL();
 }
       
@@ -624,6 +710,7 @@ void tui::LayoutCanvas::update_viewport() {
    GetClientSize(&W,&H);
    lp_BL = TP(0,0)  * _LayCTM;
    lp_TR = TP(W, H) * _LayCTM;
+//   _status_line.update(W, _LayCTM);
    DATC->setClipRegion(DBbox(lp_BL.x(),lp_TR.y(), lp_TR.x(), lp_BL.y()));
    glClearColor(0,0,0,0);
 }

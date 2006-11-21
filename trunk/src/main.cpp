@@ -328,8 +328,6 @@ bool TopedApp::OnInit() {
    Toped->Show(TRUE);
    SetTopWindow(Toped);
 
-   //@FIXME initializing glf library - temporary here
-   glfInit();
    wxString fontFile = wxT("$TPD_LOCAL/fonts/arial1.glf");
    wxFileName fontFN(fontFile);
    fontFN.Normalize();
