@@ -127,7 +127,8 @@ namespace tui {
       TMSET_MARKER45      ,
       TMSET_MARKER90      ,
       TMSET_MARKER        ,
-
+      TMSET_DEFLAY        ,
+      
       TMADD_RULER         ,
       TMCLEAR_RULERS      ,
       

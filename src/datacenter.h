@@ -122,6 +122,9 @@ public:
    bool                       viewGrid(byte, bool);
    void                       addRuler(TP&, TP&);
    void                       clearRulers();
+   void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
+   void                       all_fills(nameList& filist)   const {_properties.all_fills(filist);  }
+   void                       all_lines(nameList& linelist) const {_properties.all_lines(linelist);}
 
 
 protected:

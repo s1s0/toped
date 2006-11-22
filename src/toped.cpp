@@ -238,7 +238,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER0       , tui::TopedFrame::OnMarker0     )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
-   
+   EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
+         
    EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
   
@@ -512,6 +513,8 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendCheckItem(TMSET_TEXTMARK , wxT("Text marks"), wxT("Draw/Hide Text marks"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
+   settingsMenu->AppendSeparator();
+   settingsMenu->Append         (TMSET_DEFLAY   , wxT("Define Layer") , wxT("Define a layer"));
    //---------------------------------------------------------------------------
    // menuBar entry helpMenu
    /*helpMenu=new wxMenu();
@@ -1183,7 +1186,17 @@ void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
    _cmdline->parseCommand(ost);   
 }
 
-void tui::TopedFrame::OnMenu(wxCommandEvent& event) 
+void tui::TopedFrame::OnDefineLayer(wxCommandEvent&)
+{
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, 1);
+   if ( dlg.ShowModal() == wxID_OK ) {
+//      _cmdline->parseCommand(ost);
+   }
+}
+
+void tui::TopedFrame::OnMenu(wxCommandEvent& event)
 {
    _resourceCenter->executeMenu(event.GetId());
 }

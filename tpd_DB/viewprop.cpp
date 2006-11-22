@@ -407,6 +407,24 @@ std::string layprop::DrawProperties::getlayerName(word layno) const
    else return "";
 }
 
+void layprop::ViewProperties::all_colors(nameList& colist) const
+{
+   for( colorMAP::const_iterator CI = _drawprop._laycolors.begin(); CI != _drawprop._laycolors.end(); CI++)
+      colist.push_front(CI->first);
+}
+
+void layprop::ViewProperties::all_fills(nameList& filist) const
+{
+   for( fillMAP::const_iterator CI = _drawprop._layfill.begin(); CI != _drawprop._layfill.end(); CI++)
+      filist.push_front(CI->first);
+}
+
+void layprop::ViewProperties::all_lines(nameList& linelist) const
+{
+   for( lineMAP::const_iterator CI = _drawprop._lineset.begin(); CI != _drawprop._lineset.end(); CI++)
+      linelist.push_front(CI->first);
+}
+
 layprop::DrawProperties::~DrawProperties() {
    for (laySetList::iterator LSI = _layset.begin(); LSI != _layset.end(); LSI++)
       delete LSI->second;

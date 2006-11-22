@@ -154,6 +154,17 @@ namespace tui {
       wxListBox*     _nameList;
    };
 
+   class defineLayer : public wxDialog {
+   public:
+                     defineLayer(wxFrame *parent, wxWindowID id, const wxString &title,
+                                                                  wxPoint pos, word init);
+   private:
+      wxTextCtrl*    _layno;
+      wxTextCtrl*    _layname;
+      wxComboBox*    _colors;
+      wxComboBox*    _fills;
+      wxComboBox*    _lines;
+   };
 }
 #endif
 

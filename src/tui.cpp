@@ -411,3 +411,85 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
 
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
+
+//==============================================================================
+tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+   word init) : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
+   _layno    = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT);
+   _layname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+   
+   nameList all_names;
+   wxArrayString all_strings;
+   DATC->all_colors(all_names);
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   {
+      all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+   }
+   _colors   = new wxComboBox( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,all_strings, wxCB_READONLY | wxCB_SORT);
+   
+   all_names.clear();
+   all_strings.Clear();
+   DATC->all_fills(all_names);
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   {
+      all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+   }
+   _fills   = new wxComboBox( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
+   
+   all_names.clear();
+   all_strings.Clear();
+   DATC->all_lines(all_names);
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   {
+      all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+   }
+   _lines   = new wxComboBox( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
+   
+   // The window layout
+   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   // 
+   wxBoxSizer *line1_sizer = new wxBoxSizer( wxHORIZONTAL );
+   
+   line1_sizer->Add( new wxStaticText(this, -1, wxT("Number:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_RIGHT, 10);
+   line1_sizer->Add(_layno, 0, wxALL | wxALIGN_CENTER, 0);
+//   line1_sizer->Add(0,0,1); //
+   line1_sizer->Add( new wxStaticText(this, -1, wxT("Color:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_RIGHT, 10);
+   line1_sizer->Add(_colors, 0, wxALL | wxALIGN_CENTER, 0);
+   
+   wxBoxSizer *line2_sizer = new wxBoxSizer( wxHORIZONTAL );
+   line2_sizer->Add( new wxStaticText(this, -1, wxT("Name:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_RIGHT, 10);
+   line2_sizer->Add(_layname, 0, wxALL | wxALIGN_CENTER, 0);
+   line2_sizer->Add(0,0,1); //
+   line2_sizer->Add( new wxStaticText(this, -1, wxT("Fill:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_RIGHT, 10);
+   line2_sizer->Add(_fills, 0, wxALL | wxALIGN_CENTER, 0);
+   
+   wxBoxSizer *line3_sizer = new wxBoxSizer( wxHORIZONTAL );
+   line3_sizer->Add(0,0,1); //
+   line3_sizer->Add( new wxStaticText(this, -1, wxT("Line:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_RIGHT, 10);
+   line3_sizer->Add(_lines, 0, wxALL | wxALIGN_CENTER, 0);
+   // Buttons
+   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add(0,0,1); // 
+   button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   // TOP sizer
+//   topsizer->Add(_text, 1, wxEXPAND | wxALIGN_CENTER, 10 );
+   topsizer->Add(line1_sizer, 0, wxEXPAND );
+   topsizer->Add(line2_sizer, 0, wxEXPAND );
+   topsizer->Add(line3_sizer, 0, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+
+   SetSizer( topsizer );      // use the sizer for layout
+
+   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+}
