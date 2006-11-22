@@ -269,6 +269,9 @@ namespace layprop {
       void              mousePoint(const TP& lp)         {_supp_data.mousePoint(lp);}
       void              mouseStop()                      {_supp_data.mouseStop();}
       console::ACTIVE_OP currentop() const               {return _drawprop.currentop();}
+      void              all_colors(nameList&) const;
+      void              all_fills(nameList&) const;
+      void              all_lines(nameList&) const;
 
       //
    protected:

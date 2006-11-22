@@ -189,7 +189,7 @@ namespace tui {
       void     OnMarker0(wxCommandEvent&);
       void    OnMarker45(wxCommandEvent&);
       void    OnMarker90(wxCommandEvent&);
-
+      void OnDefineLayer(wxCommandEvent&);
       void    OnMenu(wxCommandEvent&);
 
       void  OnGridDefine(wxCommandEvent&);
