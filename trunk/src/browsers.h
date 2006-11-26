@@ -49,8 +49,6 @@ namespace browsers {
       BT_LAYER_DO,
       BT_LAYER_SELECTWILD,
       BT_LAYER_ACTIONWILD,
-      BT_LAYER_NEW,
-      BT_LAYER_EDIT,
       BT_CELL_OPEN,
       BT_CELL_HIGHLIGHT,
       BT_CELL_REF,
@@ -68,8 +66,13 @@ namespace browsers {
    } BROWSER_EVT_TYPE;
    
    enum {
-      CellTree_OpenCell = 1000,
-      GDSTree_ReportLay
+      CELLTREEOPENCELL  = 1000,
+      GDSTREEREPORTLAY        ,
+      LAYERHIDESELECTED       ,
+      LAYERSHOWSELECTED       ,
+      LAYERLOCKSELECTED       ,
+      LAYERUNLOCKSELECTED     ,
+      LAYERCURRENTSELECTED
    };
 
    //===========================================================================
@@ -98,14 +101,22 @@ namespace browsers {
                            layerbrowser(wxWindow* parent, wxWindowID id);
       virtual             ~layerbrowser();
       topedlay_list*       layerlist() const {return _layerlist;};
+      word                 getFirstSelected();
    private:
       void                 OnNewLayer(wxCommandEvent&);
       void                 OnEditLayer(wxCommandEvent&);
       void                 OnXXXSelected(wxCommandEvent&);
       void                 OnCommand(wxCommandEvent&);
-      void                 OnActiveLayer(wxListEvent&);
+      void                 OnActiveLayerL(wxListEvent&);
+      void                 OnActiveLayerM(wxCommandEvent&);
       void                 OnSelectWild(wxCommandEvent&);
-      void                 OnShowHideLayer(wxListEvent&);
+      void                 OnItemRightClick(wxListEvent&);
+      void                 OnHideSelected(wxCommandEvent&);
+      void                 OnShowSelected(wxCommandEvent&);
+      void                 OnLockSelected(wxCommandEvent&);
+      void                 OnUnlockSelected(wxCommandEvent&);
+      wxString             getAllSelected();
+      
       wxChoice*            action_select;
       wxChoice*            action_wild;
       topedlay_list*       _layerlist;
@@ -231,6 +242,7 @@ namespace browsers {
       virtual          ~browserTAB();// {};
       topedlay_list*    TDTlayers() const    {return _TDTlayers->layerlist();};
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
+      word              TDTSelectedLayNo()   {return _TDTlayers->getFirstSelected();}
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
    private:

@@ -253,13 +253,15 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_CNVSSTATUS , wxID_ANY, tui::TopedFrame::OnCanvasStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_SETINGSMENU, wxID_ANY, tui::TopedFrame::OnUpdateSettingsMenu)
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
-   
-   
 END_EVENT_TABLE()
 
+// See the FIXME note in the bootom of brawsers.cpp
+//   EVT_COMMAND(wxID_ANY, wxEVT_INIT_DIALOG , tui::TopedFrame::OnDefineLayer )
+   
+   
 
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
-                            const wxSize& size ) : wxFrame((wxFrame *)NULL, -1, title, pos, size)
+                            const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
 {
    initView();
 //   initToolBar();
@@ -1188,11 +1190,19 @@ void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
 {
+   word layno = _browsers->TDTSelectedLayNo();
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, event.GetInt());
+   tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno);
    if ( dlg.ShowModal() == wxID_OK ) {
-//      _cmdline->parseCommand(ost);
+      wxString ost;
+      ost      << wxT("layprop(\"") << dlg.layname()
+               << wxT("\" , ")      << dlg.layno()
+               << wxT(" , \"")      << dlg.color()
+               << wxT("\" , \"")    << dlg.fill()
+               << wxT("\" , \"")    << dlg.line()
+               << wxT("\");");
+      _cmdline->parseCommand(ost);
    }
 }
 

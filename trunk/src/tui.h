@@ -185,12 +185,14 @@ namespace tui {
       void           OnColorChanged(wxCommandEvent&);
       void           OnFillChanged(wxCommandEvent&);
       void           OnLineChanged(wxCommandEvent&);
-//      void           OnDefineColor(wxCommandEvent&);
-//      void           OnDefineFill(wxCommandEvent&);
-//      void           OnDefineLine(wxCommandEvent&);
+      wxString       layno()       {return _layno;}
+      wxString       layname()     {return _layname;}
+      wxString       color()       {return _colors->GetValue();}
+      wxString       fill()        {return _fills->GetValue();}
+      wxString       line()        {return _lines->GetValue();}
    private:
-      wxTextCtrl*    _layno;
-      wxTextCtrl*    _layname;
+      wxString       _layno;
+      wxString       _layname;
       wxComboBox*    _colors;
       wxComboBox*    _fills;
       wxComboBox*    _lines;
