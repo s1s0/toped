@@ -34,8 +34,19 @@
 #include <wx/spinbutt.h>
 #include "../tpd_common/ttt.h"
 #include "resourcecenter.h"
+#include "../tpd_DB/viewprop.h"
 
 namespace tui {
+   
+   enum {
+      COLOR_COMBO = 100 ,
+      FILL_COMBO        ,
+      LINE_COMBO    //    ,
+//      COLOR_DEFINE      ,
+//      FILL_DEFINE       ,
+//      LINE_DEFINE
+   };
+   
    class getSize : public wxDialog {
    public:
       getSize(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos );
@@ -154,16 +165,45 @@ namespace tui {
       wxListBox*     _nameList;
    };
 
+   class layset_sample : public wxWindow {
+   public:
+                     layset_sample(wxWindow*, wxWindowID, wxPoint, wxSize, word);
+      void           setColor(word);
+      void           setColor(const layprop::tellRGB*);
+      void           setFill(word);
+      void           setFill(const byte*);
+      void           OnPaint(wxPaintEvent&);
+   protected:
+      wxColour       _color;
+      wxBrush        _brush;
+      DECLARE_EVENT_TABLE();
+   };
+
    class defineLayer : public wxDialog {
    public:
-                     defineLayer(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos, word init);
+                     defineLayer(wxFrame*, wxWindowID, const wxString&, wxPoint, word);
+      void           OnColorChanged(wxCommandEvent&);
+      void           OnFillChanged(wxCommandEvent&);
+      void           OnLineChanged(wxCommandEvent&);
+//      void           OnDefineColor(wxCommandEvent&);
+//      void           OnDefineFill(wxCommandEvent&);
+//      void           OnDefineLine(wxCommandEvent&);
    private:
       wxTextCtrl*    _layno;
       wxTextCtrl*    _layname;
       wxComboBox*    _colors;
       wxComboBox*    _fills;
       wxComboBox*    _lines;
+      layset_sample* _sample;
+      DECLARE_EVENT_TABLE();
+   };
+   
+   class defineColor : public wxDialog {
+   public:
+                     defineColor(wxFrame *parent, wxWindowID id, const wxString &title,
+                                                                  wxPoint pos, word init);
+   private:
+      layprop::tellRGB* _color;
    };
 }
 #endif

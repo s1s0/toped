@@ -88,10 +88,10 @@ public:
    const int4b                stepDB() const          {return _properties.stepDB();}
    const real                 UU() const              {return _properties.UU();}
    const real                 DBscale() const         {return _properties.DBscale();}
-   word                       getlayerNo(std::string name) const
-                                                      {return _properties.getlayerNo(name);}
-   std::string                getlayerName(word layno) const
-                                                      {return _properties.getlayerName(layno);}
+   word                       getLayerNo(std::string name) const
+                                                      {return _properties.getLayerNo(name);}
+   std::string                getLayerName(word layno) const
+                                                      {return _properties.getLayerName(layno);}
    byte                       marker_angle() const    {return _properties.marker_angle();}
    bool                       layerHidden(word layno) {return _properties.drawprop().layerHidden(layno);}
    bool                       layerLocked(word layno) {return _properties.drawprop().layerLocked(layno);}
@@ -125,6 +125,12 @@ public:
    void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
    void                       all_fills(nameList& filist)   const {_properties.all_fills(filist);  }
    void                       all_lines(nameList& linelist) const {_properties.all_lines(linelist);}
+   const byte*                getFill(word layno) {return _properties.drawprop().getFill(layno);}
+   const byte*                getFill(std::string fill_name) {return _properties.drawprop().getFill(fill_name);}
+   const layprop::tellRGB*    getColor(word layno) {return _properties.drawprop().getColor(layno);}
+   const layprop::tellRGB*    getColor(std::string color_name) {return _properties.drawprop().getColor(color_name);}
+   const std::string          getColorName(word layno) {return _properties.drawprop().getColorName(layno);}
+   const std::string          getFillName(word layno) {return _properties.drawprop().getFillName(layno);}
 
 
 protected:

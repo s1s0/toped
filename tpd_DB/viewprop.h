@@ -130,10 +130,10 @@ namespace layprop {
    class LayerSettings  {
    public:
       LayerSettings(std::string name, std::string color, std::string filltype, std::string sline): 
-                                 _name(name), _color(color), _filltype(filltype), _sline(sline),
+                                 _name(name), _color(color), _fill(filltype), _sline(sline),
                                                 _hidden(false), _locked(false) {};
-      std::string       getcolor() const {return _color;}
-      std::string       getfill()  const {return _filltype;}
+      std::string       color()    const {return _color;}
+      std::string       fill()     const {return _fill;}
       std::string       name()     const {return _name;}
       std::string       sline()    const {return _sline;}
       bool              hidden()   const {return _hidden;}
@@ -142,7 +142,7 @@ namespace layprop {
    private:
       std::string       _name;
       std::string       _color;
-      std::string       _filltype;
+      std::string       _fill;
       std::string       _sline;
       bool              _hidden;
       bool              _locked;
@@ -185,9 +185,15 @@ namespace layprop {
       void                 popCTM()             {_transtack.pop();}
       const CTM&           topCTM() const       {assert(_transtack.size());return _transtack.top();}
       void                 draw_reference_marks(const TP&, const binding_marks) const;
-      word                 getlayerNo(std::string name) const;
-      std::string          getlayerName(word layno) const;
+      word                 getLayerNo(std::string name) const;
+      std::string          getLayerName(word layno) const;
+      std::string          getColorName(word layno) const;
+      std::string          getFillName(word layno) const;
       word                 drawinglayer() const {return _drawinglayer;}
+      const byte*          getFill(word layno) const;
+      const byte*          getFill(std::string) const;
+      const layprop::tellRGB* getColor(word layno) const;
+      const layprop::tellRGB* getColor(std::string) const;
       friend class ViewProperties;
    protected:
       laySetList              _layset;
@@ -247,8 +253,8 @@ namespace layprop {
       void              setmarker_angle(byte angle)      {_marker_angle = angle;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
-      word              getlayerNo(std::string name) const {return _drawprop.getlayerNo(name);}
-      std::string       getlayerName(word layno) const   {return _drawprop.getlayerName(layno);}
+      word              getLayerNo(std::string name) const {return _drawprop.getLayerNo(name);}
+      std::string       getLayerName(word layno) const   {return _drawprop.getLayerName(layno);}
       real              UU() const                       {return _UU;}
       real              DBscale() const                  {return _DBscale;}
       bool              autopan() const                  {return _autopan;}
