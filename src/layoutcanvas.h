@@ -34,25 +34,26 @@
 #include <wx/image.h>
 #include "../tpd_common/ttt.h"
 
-//==============================================================================   
-// WX window ID's
-//==============================================================================   
-#define ID_WIN_BROWSERS    100
-#define ID_WIN_GLSTATUS    101
-#define ID_WIN_COMMAND     102
-#define ID_WIN_LOG         103
-#define ID_WIN_CANVAS      104
-#define ID_TPD_CANVAS      105
-#define ID_TPD_LAYERS      106
-#define ID_TPD_CELLTREE    107
-#define ID_TPD_CELLTREE_H  108
-#define ID_TPD_CELLTREE_F  109
-#define ID_GDS_CELLTREE    110
-#define ID_TPD_CELLTREE_H2 111
-#define ID_TPD_CELLTREE_F2 112
-//-----------------------------------------------------------------------------
-
 namespace tui {
+   typedef enum
+   {
+      ID_WIN_TOPED  = 100 ,
+      ID_WIN_BROWSERS     ,
+      ID_WIN_GLSTATUS     ,
+      ID_WIN_COMMAND      ,
+      ID_WIN_LOG          ,
+      ID_WIN_CANVAS       ,
+      ID_TPD_CANVAS       ,
+      ID_TPD_LAYERS       ,
+      ID_TPD_CELLTREE     ,
+      ID_TPD_CELLTREE_H   ,
+      ID_TPD_CELLTREE_F   ,
+      ID_GDS_CELLTREE     ,
+      ID_TPD_CELLTREE_H2  ,
+      ID_TPD_CELLTREE_F2
+   } WX_WINDOW_IDS_TYPE;
+   
+
    typedef enum  {
       TMFILE_NEW = 100    ,
       TMFILE_OPEN         ,

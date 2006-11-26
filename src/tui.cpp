@@ -486,20 +486,24 @@ BEGIN_EVENT_TABLE(tui::defineLayer, wxDialog)
 END_EVENT_TABLE()
 
 tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
-   word init) : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
-   _layno    = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT);
-   _layname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+   word init) : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+{
    wxString init_color = wxT("");
    wxString init_fill = wxT("");
    if (init > 0)
    {
-      _layno->SetEditable(false);
-      wxString lno;
-      lno << init;
-      _layno->SetValue(lno);
-      _layname->SetValue(wxString(DATC->getLayerName(init).c_str(), wxConvUTF8));
+      _layno << init;
+      _layname = wxString(DATC->getLayerName(init).c_str(), wxConvUTF8);
       init_color = wxString(DATC->getColorName(init).c_str(), wxConvUTF8);
       init_fill = wxString(DATC->getFillName(init).c_str(), wxConvUTF8);
+   }
+   wxTextCtrl* dwlayno    = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                           wxTextValidator(wxFILTER_NUMERIC, &_layno));
+   wxTextCtrl* dwlayname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 0,
+                                          wxTextValidator(wxFILTER_ASCII, &_layname));
+   if (init > 0)
+   {
+      dwlayno->SetEditable(false);
    }
    _sample   = new layset_sample( this, -1, wxDefaultPosition, wxDefaultSize, init);
    nameList all_names;
@@ -535,11 +539,11 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    line1_sizer->Add( new wxStaticText(this, -1, wxT("Number:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 1, wxALL | wxALIGN_RIGHT, 5);
-   line1_sizer->Add(_layno, 1, wxALL | wxALIGN_CENTER, 5);
+   line1_sizer->Add(dwlayno, 1, wxALL | wxALIGN_CENTER, 5);
    line1_sizer->Add( new wxStaticText(this, -1, wxT("Name:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 1, wxALL | wxALIGN_RIGHT, 5);
-   line1_sizer->Add(_layname, 2, wxALL | wxALIGN_CENTER, 5);
+   line1_sizer->Add(dwlayname, 2, wxALL | wxALIGN_CENTER, 5);
    //
    wxBoxSizer *col1_sizer = new wxBoxSizer( wxVERTICAL );
    col1_sizer->Add( new wxStaticText(this, -1, wxT("Color:"),
