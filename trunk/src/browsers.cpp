@@ -50,8 +50,8 @@ int wxCALLBACK wxListCompareFunction(long item1, long item2, long column)
 {
    if (1 == column)
    {
-      std::string name1 = DATC->getlayerName( item1);
-      std::string name2 = DATC->getlayerName( item2);
+      std::string name1 = DATC->getLayerName( item1);
+      std::string name2 = DATC->getLayerName( item2);
       return (name1 > name2);
    }
    else

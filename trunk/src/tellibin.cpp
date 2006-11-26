@@ -1197,7 +1197,7 @@ tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor)
 
 int tellstdfunc::stdUSINGLAYER_S::execute() {
   std::string layname = getStringValue();
-  word layno = DATC->getlayerNo(layname);
+  word layno = DATC->getLayerNo(layname);
   if (layno > 0) {
     OPstack.push(new telldata::ttint(layno));
     return stdUSINGLAYER::execute();

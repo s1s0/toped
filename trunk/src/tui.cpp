@@ -28,9 +28,9 @@
 //===========================================================================
 
 #include <math.h>
+#include <wx/colordlg.h>
 #include "tui.h"
 #include "datacenter.h"
-#include "../tpd_DB/viewprop.h"
 
 extern DataCenter*                DATC;
 
@@ -413,11 +413,95 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
 }
 
 //==============================================================================
+BEGIN_EVENT_TABLE(tui::layset_sample, wxWindow)
+   EVT_PAINT(tui::layset_sample::OnPaint)
+END_EVENT_TABLE()
+
+tui::layset_sample::layset_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
+   wxSize size, word init) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
+{
+   setColor(init);
+   setFill(init);
+}
+
+void tui::layset_sample::setColor(const layprop::tellRGB *col)
+{
+   if (NULL != col)
+      _color.Set(col->red(), col->green(), col->blue());
+   else
+      _color.Set(0,0,0);
+}
+
+void tui::layset_sample::setColor(word layno)
+{
+   if (0 == layno)
+      _color.Set(0,0,0);
+   else
+      setColor(DATC->getColor(layno));
+}
+
+void tui::layset_sample::setFill(const byte* fill)
+{
+   if (NULL != fill)
+   {
+      wxBitmap stipplebrush((char  *)fill, 32, 32, 1);
+      _brush = wxBrush(stipplebrush);
+   }
+   else
+   {
+      _brush = wxBrush();
+   }
+}
+
+void tui::layset_sample::setFill(word layno)
+{
+   if (0 == layno)
+      _brush = wxBrush();
+   else
+      setFill(DATC->getFill(layno));
+}
+
+void tui::layset_sample::OnPaint(wxPaintEvent&)
+{
+   wxPaintDC dc(this);
+   dc.SetBackground(*wxBLACK);
+   _brush.SetColour(_color);
+   wxPen pen(_color);
+   dc.SetPen(pen);
+   dc.SetBrush(_brush);
+   dc.Clear();
+   wxCoord w, h;
+   dc.GetSize(&w, &h);
+   dc.DrawRectangle(3, 3, w-6, h-6);
+}
+
+//==============================================================================
+BEGIN_EVENT_TABLE(tui::defineLayer, wxDialog)
+   EVT_COMBOBOX(COLOR_COMBO, tui::defineLayer::OnColorChanged)
+   EVT_COMBOBOX(FILL_COMBO, tui::defineLayer::OnFillChanged  )
+   EVT_COMBOBOX(LINE_COMBO, tui::defineLayer::OnLineChanged  )
+//   EVT_BUTTON(COLOR_DEFINE, tui::defineLayer::OnDefineColor  )
+//   EVT_BUTTON(FILL_DEFINE , tui::defineLayer::OnDefineFill   )
+//   EVT_BUTTON(LINE_DEFINE , tui::defineLayer::OnDefineLine   )
+END_EVENT_TABLE()
+
 tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
    word init) : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
    _layno    = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT);
    _layname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-   
+   wxString init_color = wxT("");
+   wxString init_fill = wxT("");
+   if (init > 0)
+   {
+      _layno->SetEditable(false);
+      wxString lno;
+      lno << init;
+      _layno->SetValue(lno);
+      _layname->SetValue(wxString(DATC->getLayerName(init).c_str(), wxConvUTF8));
+      init_color = wxString(DATC->getColorName(init).c_str(), wxConvUTF8);
+      init_fill = wxString(DATC->getFillName(init).c_str(), wxConvUTF8);
+   }
+   _sample   = new layset_sample( this, -1, wxDefaultPosition, wxDefaultSize, init);
    nameList all_names;
    wxArrayString all_strings;
    DATC->all_colors(all_names);
@@ -425,7 +509,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    {
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
    }
-   _colors   = new wxComboBox( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,all_strings, wxCB_READONLY | wxCB_SORT);
+   _colors   = new wxComboBox( this, COLOR_COMBO, init_color, wxDefaultPosition, wxDefaultSize,all_strings, wxCB_READONLY | wxCB_SORT);
    
    all_names.clear();
    all_strings.Clear();
@@ -434,7 +518,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    {
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
    }
-   _fills   = new wxComboBox( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
+   _fills   = new wxComboBox( this, FILL_COMBO, init_fill, wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
    
    all_names.clear();
    all_strings.Clear();
@@ -443,53 +527,125 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    {
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
    }
-   _lines   = new wxComboBox( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
+   _lines   = new wxComboBox( this, LINE_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
    
    // The window layout
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-   // 
    wxBoxSizer *line1_sizer = new wxBoxSizer( wxHORIZONTAL );
    
    line1_sizer->Add( new wxStaticText(this, -1, wxT("Number:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_RIGHT, 10);
-   line1_sizer->Add(_layno, 0, wxALL | wxALIGN_CENTER, 0);
-//   line1_sizer->Add(0,0,1); //
-   line1_sizer->Add( new wxStaticText(this, -1, wxT("Color:"),
+                                                1, wxALL | wxALIGN_RIGHT, 5);
+   line1_sizer->Add(_layno, 1, wxALL | wxALIGN_CENTER, 5);
+   line1_sizer->Add( new wxStaticText(this, -1, wxT("Name:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                1, wxALL | wxALIGN_RIGHT, 5);
+   line1_sizer->Add(_layname, 2, wxALL | wxALIGN_CENTER, 5);
+   //
+   wxBoxSizer *col1_sizer = new wxBoxSizer( wxVERTICAL );
+   col1_sizer->Add( new wxStaticText(this, -1, wxT("Color:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_RIGHT, 10);
-   line1_sizer->Add(_colors, 0, wxALL | wxALIGN_CENTER, 0);
+   col1_sizer->Add( new wxStaticText(this, -1, wxT("Fill:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_RIGHT, 10);
+   col1_sizer->Add( new wxStaticText(this, -1, wxT("Line:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_RIGHT, 10);
+
+   wxBoxSizer *col2_sizer = new wxBoxSizer( wxVERTICAL );
+   col2_sizer->Add(_colors, 0, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+   col2_sizer->Add(_fills , 0, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+   col2_sizer->Add(_lines , 0, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+   
+/*   wxBoxSizer *col3_sizer = new wxBoxSizer( wxVERTICAL );
+   col3_sizer->Add(new wxButton(this, COLOR_DEFINE, wxT("New")) , 0, wxALL, 2);
+   col3_sizer->Add(new wxButton(this, FILL_DEFINE , wxT("New")) , 0, wxALL, 2);
+   col3_sizer->Add(new wxButton(this, LINE_DEFINE , wxT("New")) , 0, wxALL, 2);*/
    
    wxBoxSizer *line2_sizer = new wxBoxSizer( wxHORIZONTAL );
-   line2_sizer->Add( new wxStaticText(this, -1, wxT("Name:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_RIGHT, 10);
-   line2_sizer->Add(_layname, 0, wxALL | wxALIGN_CENTER, 0);
-   line2_sizer->Add(0,0,1); //
-   line2_sizer->Add( new wxStaticText(this, -1, wxT("Fill:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_RIGHT, 10);
-   line2_sizer->Add(_fills, 0, wxALL | wxALIGN_CENTER, 0);
-   
-   wxBoxSizer *line3_sizer = new wxBoxSizer( wxHORIZONTAL );
-   line3_sizer->Add(0,0,1); //
-   line3_sizer->Add( new wxStaticText(this, -1, wxT("Line:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_RIGHT, 10);
-   line3_sizer->Add(_lines, 0, wxALL | wxALIGN_CENTER, 0);
+   line2_sizer->Add(col1_sizer, 0, wxEXPAND);
+   line2_sizer->Add(col2_sizer, 2, wxEXPAND);
+/*   line2_sizer->Add(col3_sizer, 1, wxEXPAND);*/
+   line2_sizer->Add( _sample  , 1, wxEXPAND,10);
+//   line3_sizer->Add(0,0,1); //
    // Buttons
    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(0,0,1); // 
    button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-//   topsizer->Add(_text, 1, wxEXPAND | wxALIGN_CENTER, 10 );
+   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
    topsizer->Add(line1_sizer, 0, wxEXPAND );
    topsizer->Add(line2_sizer, 0, wxEXPAND );
-   topsizer->Add(line3_sizer, 0, wxEXPAND );
    topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
 
    SetSizer( topsizer );      // use the sizer for layout
 
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+}
+
+void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
+{
+    wxString color_name = cmdevent.GetString();
+    const layprop::tellRGB* color = DATC->getColor(std::string(color_name.fn_str()));
+    _sample->setColor(color);
+    _sample->Refresh();
+}
+
+// void tui::defineLayer::OnDefineColor(wxCommandEvent& cmdevent)
+// {
+//    nameList all_names;
+//    wxColourData data;
+//    DATC->all_colors(all_names);
+//    word colnum = 0;
+//    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+//    {
+//       const layprop::tellRGB* tell_color= DATC->getColor(*CI);
+//       wxColour colour(tell_color->red(), tell_color->green(), tell_color->blue());
+//       if (16 == colnum)
+//       {
+//          data.SetColour(colour); break;
+//       }
+//       else
+//          data.SetCustomColour(colnum++, colour);
+//    }
+//   wxColourDialog dialog(this, &data);
+//   if (dialog.ShowModal() == wxID_OK)
+//   {
+//     wxColourData retData = dialog.GetColourData();
+//     wxColour col = retData.GetColour();
+// //    wxBrush brush(col, wxSOLID);
+// //    myWindow->SetBackground(brush);
+// //    myWindow->Clear();
+// //    myWindow->Refresh();
+//   }
+// }
+
+void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
+{
+    wxString fill_name = cmdevent.GetString();
+    const byte* fill = DATC->getFill(std::string(fill_name.fn_str()));
+    _sample->setFill(fill);
+    _sample->Refresh();
+}
+
+// void tui::defineLayer::OnDefineFill(wxCommandEvent& cmdevent)
+// {
+// }
+
+void tui::defineLayer::OnLineChanged(wxCommandEvent& cmdevent)
+{
+    wxString line = _T("Line selected -> ");
+    line += cmdevent.GetString();
+    wxLogMessage(line);
+}
+
+// void tui::defineLayer::OnDefineLine(wxCommandEvent& cmdevent)
+// {
+// }
+
+//==============================================================================
+tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+   word init) : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
+
 }

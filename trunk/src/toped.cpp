@@ -1186,11 +1186,11 @@ void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
    _cmdline->parseCommand(ost);   
 }
 
-void tui::TopedFrame::OnDefineLayer(wxCommandEvent&)
+void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
 {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, 1);
+   tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, event.GetInt());
    if ( dlg.ShowModal() == wxID_OK ) {
 //      _cmdline->parseCommand(ost);
    }
