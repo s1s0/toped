@@ -417,11 +417,27 @@ BEGIN_EVENT_TABLE(tui::layset_sample, wxWindow)
    EVT_PAINT(tui::layset_sample::OnPaint)
 END_EVENT_TABLE()
 
+/*! This control has to draw a simple box using the selected layer properties -
+  color, fill, line style using wx drawing engine. It appears not
+  straight forward to mimic the openGL properties with wxPaintDC.
+ - with color - the transparency (alpha channel) is missing and I'm not sure
+   is it possible to do something about this.
+ - fill - this seem to be relatively trivial using wxBitmap. That's of course
+   because I had already similar code from Sergey.
+ - line - here is the fun. It appears that stipple pen is not implemented
+   (wxGTK 2.6.3), so bitmaps can't be used. So I had to implement manually
+   the openGL line pattern using wxDash concept, that is not documented. It
+   appears to have some strange "default" behaviour - the dash size is scaled
+   with the line width. To avoid this one have to draw with line width 1 multiple
+   times. The speed is not an issue here - so the only remaining thing is the
+   strange looking code.
+*/
 tui::layset_sample::layset_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
    wxSize size, word init) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
 {
    setColor(init);
    setFill(init);
+   setLine(init);
 }
 
 void tui::layset_sample::setColor(const layprop::tellRGB *col)
@@ -461,18 +477,84 @@ void tui::layset_sample::setFill(word layno)
       setFill(DATC->getFill(layno));
 }
 
+void tui::layset_sample::setLine(word layno)
+{
+   if (0 == layno)
+      _pen = wxPen();
+   else
+      setLine(DATC->getLine(layno));
+}
+
+void tui::layset_sample::setLine(const layprop::LineSettings* line)
+{
+   _dashes.clear();
+   if (NULL != line)
+   {
+//      _pen.SetStipple(stipplepen); <- not implemented in wxGTK??
+      _linew = line->width();
+      _pen = wxPen(_color, 1, wxUSER_DASH);
+      word pattern = line->pattern();
+      bool current_pen = ((pattern & 0x0001) > 0);
+      byte pixels = 0;
+      for( byte i = 0; i < 16; i++)
+      {
+         word mask = 0x0001 << i;
+         if (((pattern & mask) > 0) ^ current_pen)
+         {
+            _dashes.push_back(pixels * line->patscale());
+            current_pen = (pattern & mask);
+            pixels = 1;
+         }
+         else
+            pixels++;
+      }
+      if (_dashes.size() % 2)
+         _dashes.push_back(pixels * line->patscale());
+      else
+         _dashes[0] += pixels * line->patscale();
+   }
+   else
+   {
+      _pen = wxPen();
+      _linew = 1;
+   }
+}
+
+void tui::layset_sample::drawOutline(wxPaintDC& dc, wxCoord w, wxCoord h)
+{
+   _pen.SetColour(_color);
+   if (_dashes.size() > 0)
+   {
+      wxDash dash1[16];
+      for( word i = 0; i < _dashes.size(); i++)
+      {
+         dash1[i] = _dashes[i];
+      }
+      _pen.SetDashes(_dashes.size(),dash1);
+      _pen.SetCap(wxCAP_BUTT);
+      dc.SetPen(_pen);
+      for (word i = 0; i < _linew; i++)
+      {
+         dc.DrawLine(0  , i  , w  , i  );
+         dc.DrawLine(w-i, 0  , w-i, h  );
+         dc.DrawLine(w  , h-i, 0  , h-i);
+         dc.DrawLine(i  , h  , i  , 0  );
+      }
+   }
+}
+
 void tui::layset_sample::OnPaint(wxPaintEvent&)
 {
    wxPaintDC dc(this);
    dc.SetBackground(*wxBLACK);
    _brush.SetColour(_color);
-   wxPen pen(_color);
-   dc.SetPen(pen);
+
    dc.SetBrush(_brush);
    dc.Clear();
    wxCoord w, h;
    dc.GetSize(&w, &h);
    dc.DrawRectangle(3, 3, w-6, h-6);
+   drawOutline(dc, w, h);
 }
 
 //==============================================================================
@@ -490,12 +572,14 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 {
    wxString init_color = wxT("");
    wxString init_fill = wxT("");
+   wxString init_line = wxT("");
    if (init > 0)
    {
       _layno << init;
       _layname = wxString(DATC->getLayerName(init).c_str(), wxConvUTF8);
       init_color = wxString(DATC->getColorName(init).c_str(), wxConvUTF8);
       init_fill = wxString(DATC->getFillName(init).c_str(), wxConvUTF8);
+      init_line = wxString(DATC->getLineName(init).c_str(), wxConvUTF8);
    }
    wxTextCtrl* dwlayno    = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_layno));
@@ -531,7 +615,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    {
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
    }
-   _lines   = new wxComboBox( this, LINE_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
+   _lines   = new wxComboBox( this, LINE_COMBO, init_line, wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
    
    // The window layout
    wxBoxSizer *line1_sizer = new wxBoxSizer( wxHORIZONTAL );
@@ -596,6 +680,27 @@ void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
     _sample->Refresh();
 }
 
+void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
+{
+    wxString fill_name = cmdevent.GetString();
+    const byte* fill = DATC->getFill(std::string(fill_name.fn_str()));
+    _sample->setFill(fill);
+    _sample->Refresh();
+}
+
+void tui::defineLayer::OnLineChanged(wxCommandEvent& cmdevent)
+{
+    wxString line_name = cmdevent.GetString();
+    const layprop::LineSettings* line = DATC->getLine(std::string(line_name.fn_str()));
+    _sample->setLine(line);
+    _sample->Refresh();
+}
+
+//==============================================================================
+tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+   word init) : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
+
+}
 // void tui::defineLayer::OnDefineColor(wxCommandEvent& cmdevent)
 // {
 //    nameList all_names;
@@ -625,31 +730,3 @@ void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
 //   }
 // }
 
-void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
-{
-    wxString fill_name = cmdevent.GetString();
-    const byte* fill = DATC->getFill(std::string(fill_name.fn_str()));
-    _sample->setFill(fill);
-    _sample->Refresh();
-}
-
-// void tui::defineLayer::OnDefineFill(wxCommandEvent& cmdevent)
-// {
-// }
-
-void tui::defineLayer::OnLineChanged(wxCommandEvent& cmdevent)
-{
-    wxString line = _T("Line selected -> ");
-    line += cmdevent.GetString();
-    wxLogMessage(line);
-}
-
-// void tui::defineLayer::OnDefineLine(wxCommandEvent& cmdevent)
-// {
-// }
-
-//==============================================================================
-tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
-   word init) : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
-
-}

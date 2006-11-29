@@ -172,10 +172,16 @@ namespace tui {
       void           setColor(const layprop::tellRGB*);
       void           setFill(word);
       void           setFill(const byte*);
+      void           setLine(word);
+      void           setLine(const layprop::LineSettings*);
       void           OnPaint(wxPaintEvent&);
    protected:
-      wxColour       _color;
-      wxBrush        _brush;
+      void           drawOutline(wxPaintDC&, wxCoord, wxCoord);
+      wxColour             _color;
+      wxBrush              _brush;
+      wxPen                _pen;
+      std::vector<byte>    _dashes;
+      byte                 _linew;
       DECLARE_EVENT_TABLE();
    };
 
