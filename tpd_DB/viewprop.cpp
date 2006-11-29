@@ -427,6 +427,16 @@ std::string layprop::DrawProperties::getFillName(word layno) const
    else return "";
 }
 
+std::string layprop::DrawProperties::getLineName(word layno) const
+{
+   laySetList::const_iterator CL = _layset.find(layno);
+   if (_layset.end() != CL)
+   {
+      return CL->second->sline();
+   }
+   else return "";
+}
+
 void layprop::ViewProperties::all_colors(nameList& colist) const
 {
    for( colorMAP::const_iterator CI = _drawprop._laycolors.begin(); CI != _drawprop._laycolors.end(); CI++)
@@ -445,6 +455,28 @@ void layprop::ViewProperties::all_lines(nameList& linelist) const
       linelist.push_front(CI->first);
 }
 
+const layprop::LineSettings* layprop::DrawProperties::getLine(word layno) const
+{
+   laySetList::const_iterator layer_set = _layset.find(layno);
+   if (_layset.end() == layer_set) return NULL;
+   lineMAP::const_iterator line = _lineset.find(layer_set->second->sline());
+   if (_lineset.end() == line) return NULL;
+   return line->second;
+// All the stuff above is equivalent to 
+//   return _layfill[_layset[layno]->sline()];
+// but is safer and preserves constness
+}
+
+const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_name) const
+{
+   lineMAP::const_iterator line = _lineset.find(line_name);
+   if (_lineset.end() == line) return NULL;
+   return line->second;
+// All the stuff above is equivalent to 
+//   return _layfill[_layset[layno]->sline()];
+// but is safer and preserves constness
+}
+
 const byte* layprop::DrawProperties::getFill(word layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
@@ -453,7 +485,7 @@ const byte* layprop::DrawProperties::getFill(word layno) const
    if (_layfill.end() == fill_set) return NULL;
    return fill_set->second;
 // All the stuff above is equivalent to 
-//   return _layfill[_layset[layno]->getfill()];
+//   return _layfill[_layset[layno]->fill()];
 // but is safer and preserves constness
 }
 
@@ -475,7 +507,7 @@ const layprop::tellRGB* layprop::DrawProperties::getColor(word layno) const
    if (_laycolors.end() == col_set) return NULL;
    return col_set->second;
 // All the stuff above is equivalent to 
-//   return _laycolors[_layset[layno]->getcolor()];
+//   return _laycolors[_layset[layno]->color()];
 // but is safer and preserves constness
 }
 

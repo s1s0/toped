@@ -164,36 +164,39 @@ namespace layprop {
    */
    class DrawProperties {
    public:
-                           DrawProperties();
-                          ~DrawProperties();
-      void                 setCurrentColor(word layno);
-      void                 setGridColor(std::string colname) const;
-      bool                 getCurrentFill() const;
-      void                 setLineProps(bool selected = false) const;
-      bool                 layerHidden(word layno) const;
-      bool                 layerLocked(word layno) const;
-      const CTM&           ScrCTM() const       {return  _ScrCTM;};
-      const DBbox&         clipRegion() const   {return _clipRegion;};
-      console::ACTIVE_OP   currentop() const    {return _currentop;}
-      void                 blockfill(laydata::cellrefstack*);
-      void                 unblockfill();
-      void                 pushref(const laydata::tdtcellref*);
-      byte                 popref(const laydata::tdtcellref*);
-      void                 initCTMstack()       {_transtack.push(CTM());}
-      void                 clearCTMstack()      {while (!_transtack.empty()) _transtack.pop();}
-      void                 pushCTM(CTM& last)   {_transtack.push(last);}
-      void                 popCTM()             {_transtack.pop();}
-      const CTM&           topCTM() const       {assert(_transtack.size());return _transtack.top();}
-      void                 draw_reference_marks(const TP&, const binding_marks) const;
-      word                 getLayerNo(std::string name) const;
-      std::string          getLayerName(word layno) const;
-      std::string          getColorName(word layno) const;
-      std::string          getFillName(word layno) const;
-      word                 drawinglayer() const {return _drawinglayer;}
-      const byte*          getFill(word layno) const;
-      const byte*          getFill(std::string) const;
-      const layprop::tellRGB* getColor(word layno) const;
-      const layprop::tellRGB* getColor(std::string) const;
+                              DrawProperties();
+                             ~DrawProperties();
+      void                    setCurrentColor(word layno);
+      void                    setGridColor(std::string colname) const;
+      bool                    getCurrentFill() const;
+      void                    setLineProps(bool selected = false) const;
+      bool                    layerHidden(word layno) const;
+      bool                    layerLocked(word layno) const;
+      const CTM&              ScrCTM() const       {return  _ScrCTM;};
+      const DBbox&            clipRegion() const   {return _clipRegion;};
+      console::ACTIVE_OP      currentop() const    {return _currentop;}
+      void                    blockfill(laydata::cellrefstack*);
+      void                    unblockfill();
+      void                    pushref(const laydata::tdtcellref*);
+      byte                    popref(const laydata::tdtcellref*);
+      void                    initCTMstack()       {_transtack.push(CTM());}
+      void                    clearCTMstack()      {while (!_transtack.empty()) _transtack.pop();}
+      void                    pushCTM(CTM& last)   {_transtack.push(last);}
+      void                    popCTM()             {_transtack.pop();}
+      const CTM&              topCTM() const       {assert(_transtack.size());return _transtack.top();}
+      void                    draw_reference_marks(const TP&, const binding_marks) const;
+      word                    getLayerNo(std::string name) const;
+      std::string             getLayerName(word layno) const;
+      std::string             getColorName(word layno) const;
+      std::string             getFillName(word layno) const;
+      std::string             getLineName(word layno) const;
+      word                    drawinglayer() const {return _drawinglayer;}
+      const byte*             getFill(word layno) const;
+      const byte*             getFill(std::string) const;
+      const tellRGB*          getColor(word layno) const;
+      const tellRGB*          getColor(std::string) const;
+      const LineSettings*     getLine(word layno) const;
+      const LineSettings*     getLine(std::string) const;
       friend class ViewProperties;
    protected:
       laySetList              _layset;
