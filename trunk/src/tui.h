@@ -37,16 +37,14 @@
 #include "../tpd_DB/viewprop.h"
 
 namespace tui {
-   
+
    enum {
       COLOR_COMBO = 100 ,
       FILL_COMBO        ,
-      LINE_COMBO    //    ,
-//      COLOR_DEFINE      ,
-//      FILL_DEFINE       ,
-//      LINE_DEFINE
+      LINE_COMBO        ,
+      DRAW_SELECTED
    };
-   
+
    class getSize : public wxDialog {
    public:
       getSize(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos );
@@ -174,6 +172,7 @@ namespace tui {
       void           setFill(const byte*);
       void           setLine(word);
       void           setLine(const layprop::LineSettings*);
+      void           setSelected(bool selected) {_selected = selected;}
       void           OnPaint(wxPaintEvent&);
    protected:
       void           drawOutline(wxPaintDC&, wxCoord, wxCoord);
@@ -182,15 +181,18 @@ namespace tui {
       wxPen                _pen;
       std::vector<byte>    _dashes;
       byte                 _linew;
+      bool                 _selected;
       DECLARE_EVENT_TABLE();
    };
 
    class defineLayer : public wxDialog {
    public:
                      defineLayer(wxFrame*, wxWindowID, const wxString&, wxPoint, word);
+                    ~defineLayer();
       void           OnColorChanged(wxCommandEvent&);
       void           OnFillChanged(wxCommandEvent&);
       void           OnLineChanged(wxCommandEvent&);
+      void           OnSelectedChanged(wxCommandEvent&);
       wxString       layno()       {return _layno;}
       wxString       layname()     {return _layname;}
       wxString       color()       {return _colors->GetValue();}
@@ -203,6 +205,7 @@ namespace tui {
       wxComboBox*    _fills;
       wxComboBox*    _lines;
       layset_sample* _sample;
+      wxCheckBox*    _selected;
       DECLARE_EVENT_TABLE();
    };
    

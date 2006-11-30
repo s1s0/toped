@@ -438,6 +438,7 @@ tui::layset_sample::layset_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
    setColor(init);
    setFill(init);
    setLine(init);
+   _selected = false;
 }
 
 void tui::layset_sample::setColor(const layprop::tellRGB *col)
@@ -553,15 +554,25 @@ void tui::layset_sample::OnPaint(wxPaintEvent&)
    dc.Clear();
    wxCoord w, h;
    dc.GetSize(&w, &h);
-   dc.DrawRectangle(3, 3, w-6, h-6);
-   drawOutline(dc, w, h);
+   if (_selected)
+   {
+      dc.DrawRectangle(3, 3, w-6, h-6);
+      drawOutline(dc, w, h);
+   }
+   else
+   {
+      wxPen lclPen(_color);
+      dc.SetPen(lclPen);
+      dc.DrawRectangle(2, 2, w-4, h-4);
+   }
 }
 
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineLayer, wxDialog)
-   EVT_COMBOBOX(COLOR_COMBO, tui::defineLayer::OnColorChanged)
-   EVT_COMBOBOX(FILL_COMBO, tui::defineLayer::OnFillChanged  )
-   EVT_COMBOBOX(LINE_COMBO, tui::defineLayer::OnLineChanged  )
+   EVT_COMBOBOX(COLOR_COMBO  , tui::defineLayer::OnColorChanged   )
+   EVT_COMBOBOX(FILL_COMBO   , tui::defineLayer::OnFillChanged    )
+   EVT_COMBOBOX(LINE_COMBO   , tui::defineLayer::OnLineChanged    )
+   EVT_CHECKBOX(DRAW_SELECTED, tui::defineLayer::OnSelectedChanged)
 //   EVT_BUTTON(COLOR_DEFINE, tui::defineLayer::OnDefineColor  )
 //   EVT_BUTTON(FILL_DEFINE , tui::defineLayer::OnDefineFill   )
 //   EVT_BUTTON(LINE_DEFINE , tui::defineLayer::OnDefineLine   )
@@ -594,18 +605,14 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    wxArrayString all_strings;
    DATC->all_colors(all_names);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
-   {
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
-   }
    _colors   = new wxComboBox( this, COLOR_COMBO, init_color, wxDefaultPosition, wxDefaultSize,all_strings, wxCB_READONLY | wxCB_SORT);
    
    all_names.clear();
    all_strings.Clear();
    DATC->all_fills(all_names);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
-   {
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
-   }
    _fills   = new wxComboBox( this, FILL_COMBO, init_fill, wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
    
    all_names.clear();
@@ -644,20 +651,15 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    col2_sizer->Add(_colors, 0, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
    col2_sizer->Add(_fills , 0, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
    col2_sizer->Add(_lines , 0, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
-   
-/*   wxBoxSizer *col3_sizer = new wxBoxSizer( wxVERTICAL );
-   col3_sizer->Add(new wxButton(this, COLOR_DEFINE, wxT("New")) , 0, wxALL, 2);
-   col3_sizer->Add(new wxButton(this, FILL_DEFINE , wxT("New")) , 0, wxALL, 2);
-   col3_sizer->Add(new wxButton(this, LINE_DEFINE , wxT("New")) , 0, wxALL, 2);*/
-   
+
    wxBoxSizer *line2_sizer = new wxBoxSizer( wxHORIZONTAL );
    line2_sizer->Add(col1_sizer, 0, wxEXPAND);
    line2_sizer->Add(col2_sizer, 2, wxEXPAND);
-/*   line2_sizer->Add(col3_sizer, 1, wxEXPAND);*/
    line2_sizer->Add( _sample  , 1, wxEXPAND,10);
-//   line3_sizer->Add(0,0,1); //
    // Buttons
    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
+   _selected = new wxCheckBox(this, DRAW_SELECTED, wxT("selected"));
+   button_sizer->Add(_selected, 0, wxALL | wxALIGN_LEFT | wxEXPAND, 5);
    button_sizer->Add(0,0,1); // 
    button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
@@ -694,6 +696,22 @@ void tui::defineLayer::OnLineChanged(wxCommandEvent& cmdevent)
     const layprop::LineSettings* line = DATC->getLine(std::string(line_name.fn_str()));
     _sample->setLine(line);
     _sample->Refresh();
+}
+
+void tui::defineLayer::OnSelectedChanged(wxCommandEvent& cmdevent)
+{
+    bool selected = cmdevent.GetInt();
+    _sample->setSelected(selected);
+    _sample->Refresh();
+}
+
+tui::defineLayer::~defineLayer()
+{
+   delete _colors;
+   delete _fills;
+   delete _lines;
+   delete _sample;
+   delete _selected;
 }
 
 //==============================================================================

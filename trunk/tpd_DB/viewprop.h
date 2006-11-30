@@ -149,7 +149,7 @@ namespace layprop {
    };
 
    typedef  std::map<word, LayerSettings*>      laySetList;
-      
+
    //==============================================================================
    /*! This class serves as a carying case for all drawing properties during the
    drawing of the database. The fields of DrawProperties can be split logically 
