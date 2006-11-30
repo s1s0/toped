@@ -247,15 +247,20 @@ void layprop::DrawProperties::setGridColor(std::string colname) const{
       glColor4f(0.5, 0.5, 0.5, 0.5);
 }      
 
-void layprop::DrawProperties::setCurrentColor(word layno) {
+void layprop::DrawProperties::setCurrentColor(word layno)
+{
    _drawinglayer = layno;
-   if (_layset.end() != _layset.find(layno)) {
-      tellRGB* gcol = _laycolors[_layset[layno]->color()];
-      if (gcol) {
-         glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
-         return;
-      }   
-   }   
+   if (_layset.end() != _layset.find(layno))
+   {
+      if (_laycolors.end() != _laycolors.find(_layset[layno]->color()))
+      {
+         tellRGB* gcol = _laycolors[_layset[layno]->color()];
+         if (gcol) {
+            glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
+            return;
+         }
+      } 
+   }
    glColor4f(0.5, 0.5, 0.5, 0.5);
 }
 
@@ -440,19 +445,19 @@ std::string layprop::DrawProperties::getLineName(word layno) const
 void layprop::ViewProperties::all_colors(nameList& colist) const
 {
    for( colorMAP::const_iterator CI = _drawprop._laycolors.begin(); CI != _drawprop._laycolors.end(); CI++)
-      colist.push_front(CI->first);
+      colist.push_back(CI->first);
 }
 
 void layprop::ViewProperties::all_fills(nameList& filist) const
 {
    for( fillMAP::const_iterator CI = _drawprop._layfill.begin(); CI != _drawprop._layfill.end(); CI++)
-      filist.push_front(CI->first);
+      filist.push_back(CI->first);
 }
 
 void layprop::ViewProperties::all_lines(nameList& linelist) const
 {
    for( lineMAP::const_iterator CI = _drawprop._lineset.begin(); CI != _drawprop._lineset.end(); CI++)
-      linelist.push_front(CI->first);
+      linelist.push_back(CI->first);
 }
 
 const layprop::LineSettings* layprop::DrawProperties::getLine(word layno) const
