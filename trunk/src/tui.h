@@ -42,7 +42,10 @@ namespace tui {
       COLOR_COMBO = 100 ,
       FILL_COMBO        ,
       LINE_COMBO        ,
-      DRAW_SELECTED
+      DRAW_SELECTED     ,
+      ID_NEWCOL         ,
+      ID_EDITCOL        ,
+      ID_COLIST
    };
 
    class getSize : public wxDialog {
@@ -209,12 +212,38 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
    
+   class color_sample : public wxWindow {
+   public:
+                     color_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string);
+      void           setColor(const layprop::tellRGB*);
+      void           OnPaint(wxPaintEvent&);
+   protected:
+      wxColour             _color;
+      DECLARE_EVENT_TABLE();
+   };
+   
    class defineColor : public wxDialog {
    public:
                      defineColor(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos, word init);
+                                                                  wxPoint pos);
+      void           OnDefineColor(wxCommandEvent&);
+      void           OnColorSelected(wxCommandEvent&);
    private:
       layprop::tellRGB* _color;
+      wxListBox*        _colorList;
+      wxTextCtrl*       _dwcolname;
+      color_sample*     _colorsample;
+      wxString          _colname;
+      wxString          _red;
+      wxString          _green;
+      wxString          _blue;
+      wxString          _alpha;
+      wxTextCtrl*       _c_red;
+      wxTextCtrl*       _c_green;
+      wxTextCtrl*       _c_blue;
+      wxTextCtrl*       _c_alpha;
+      
+      DECLARE_EVENT_TABLE();
    };
 }
 #endif

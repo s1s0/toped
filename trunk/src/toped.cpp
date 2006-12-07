@@ -239,6 +239,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
    EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
+   EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
          
    EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
@@ -517,6 +518,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_DEFLAY   , wxT("Define Layer") , wxT("Define a layer"));
+   settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color") , wxT("Define a drawing color"));
    //---------------------------------------------------------------------------
    // menuBar entry helpMenu
    /*helpMenu=new wxMenu();
@@ -1194,7 +1196,8 @@ void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno);
-   if ( dlg.ShowModal() == wxID_OK ) {
+   if ( dlg.ShowModal() == wxID_OK )
+   {
       wxString ost;
       ost      << wxT("layprop(\"") << dlg.layname()
                << wxT("\" , ")      << dlg.layno()
@@ -1203,6 +1206,24 @@ void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
                << wxT("\" , \"")    << dlg.line()
                << wxT("\");");
       _cmdline->parseCommand(ost);
+   }
+}
+
+void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
+{
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::defineColor dlg(this, -1, wxT("Define Color"), pos);
+   if ( dlg.ShowModal() == wxID_OK )
+   {
+//      wxString ost;
+//      ost      << wxT("layprop(\"") << dlg.layname()
+//               << wxT("\" , ")      << dlg.layno()
+//               << wxT(" , \"")      << dlg.color()
+//               << wxT("\" , \"")    << dlg.fill()
+//               << wxT("\" , \"")    << dlg.line()
+//               << wxT("\");");
+//      _cmdline->parseCommand(ost);
    }
 }
 

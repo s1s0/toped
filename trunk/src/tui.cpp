@@ -715,36 +715,169 @@ tui::defineLayer::~defineLayer()
 }
 
 //==============================================================================
-tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
-   word init) : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
+BEGIN_EVENT_TABLE(tui::color_sample, wxWindow)
+   EVT_PAINT(tui::color_sample::OnPaint)
+END_EVENT_TABLE()
 
+tui::color_sample::color_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
+   wxSize size, std::string init) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
+{
+   setColor(DATC->getColor(init));
 }
-// void tui::defineLayer::OnDefineColor(wxCommandEvent& cmdevent)
-// {
-//    nameList all_names;
-//    wxColourData data;
-//    DATC->all_colors(all_names);
-//    word colnum = 0;
-//    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
-//    {
-//       const layprop::tellRGB* tell_color= DATC->getColor(*CI);
-//       wxColour colour(tell_color->red(), tell_color->green(), tell_color->blue());
-//       if (16 == colnum)
-//       {
-//          data.SetColour(colour); break;
-//       }
-//       else
-//          data.SetCustomColour(colnum++, colour);
-//    }
-//   wxColourDialog dialog(this, &data);
-//   if (dialog.ShowModal() == wxID_OK)
-//   {
-//     wxColourData retData = dialog.GetColourData();
-//     wxColour col = retData.GetColour();
-// //    wxBrush brush(col, wxSOLID);
-// //    myWindow->SetBackground(brush);
-// //    myWindow->Clear();
-// //    myWindow->Refresh();
-//   }
-// }
 
+void tui::color_sample::setColor(const layprop::tellRGB *col)
+{
+   if (NULL != col)
+      _color.Set(col->red(), col->green(), col->blue());
+   else
+      _color.Set(0,0,0);
+}
+
+void tui::color_sample::OnPaint(wxPaintEvent&)
+{
+   wxPaintDC dc(this);
+   dc.SetBackground(*wxBLACK);
+   wxBrush _brush(_color);
+
+   dc.SetBrush(_brush);
+   dc.Clear();
+   wxCoord w, h;
+   dc.GetSize(&w, &h);
+   dc.DrawRectangle(0, 0, w, h);
+}
+//==============================================================================
+BEGIN_EVENT_TABLE(tui::defineColor, wxDialog)
+   EVT_BUTTON(ID_EDITCOL, tui::defineColor::OnDefineColor    )
+   EVT_LISTBOX(ID_COLIST, tui::defineColor::OnColorSelected  )
+//   EVT_BUTTON(FILL_DEFINE , tui::defineLayer::OnDefineFill   )
+//   EVT_BUTTON(LINE_DEFINE , tui::defineLayer::OnDefineLine   )
+END_EVENT_TABLE()
+
+tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) :
+      wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+{
+   nameList all_names;
+   DATC->all_colors(all_names);
+   _colorList = new wxListBox(this, ID_COLIST, wxDefaultPosition, wxSize(-1,200));
+   std::string init_color = *(all_names.begin());
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   {
+      _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
+   }
+   _dwcolname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
+                                          wxTextValidator(wxFILTER_ASCII, &_colname));
+   _colorsample = new color_sample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color);
+   
+   _c_red    = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                           wxTextValidator(wxFILTER_NUMERIC, &_red));
+   _c_green  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                           wxTextValidator(wxFILTER_NUMERIC, &_green));
+   _c_blue   = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                           wxTextValidator(wxFILTER_NUMERIC, &_blue));
+   _c_alpha  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                           wxTextValidator(wxFILTER_NUMERIC, &_alpha));
+   
+//   button_sizer->Add( new wxButton( this, ID_NEWCOL , wxT("New")   ), 0, wxALL, 5 );
+   wxBoxSizer *hsizer0 = new wxBoxSizer( wxHORIZONTAL );
+   hsizer0->Add( _dwcolname   , 0, wxALL | wxEXPAND, 5);
+   hsizer0->Add( new wxButton( this, ID_EDITCOL  , wxT("Edit")    ), 0, wxALL, 5 );
+   
+   wxBoxSizer *hsizer1 = new wxBoxSizer( wxHORIZONTAL );
+   hsizer1->Add( new wxStaticText(this, -1, wxT("R:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                1, wxALL | wxALIGN_RIGHT, 5);
+   hsizer1->Add( _c_red   , 0, wxALL | wxEXPAND, 5);
+   wxBoxSizer *hsizer2 = new wxBoxSizer( wxHORIZONTAL );
+   hsizer2->Add( new wxStaticText(this, -1, wxT("G:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                1, wxALL | wxALIGN_RIGHT, 5);
+   hsizer2->Add( _c_green   , 0, wxALL | wxEXPAND, 5);
+   wxBoxSizer *hsizer3 = new wxBoxSizer( wxHORIZONTAL );
+   hsizer3->Add( new wxStaticText(this, -1, wxT("B:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                1, wxALL | wxALIGN_RIGHT, 5);
+   hsizer3->Add( _c_blue   , 0, wxALL | wxEXPAND, 5);
+   wxBoxSizer *hsizer4 = new wxBoxSizer( wxHORIZONTAL );
+   hsizer4->Add( new wxStaticText(this, -1, wxT("A:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                1, wxALL | wxALIGN_RIGHT, 5);
+   hsizer4->Add( _c_alpha   , 0, wxALL | wxEXPAND, 5);
+   
+   wxBoxSizer *vsizer2 = new wxBoxSizer( wxVERTICAL );
+   vsizer2->Add( _colorsample , 0, wxALL | wxEXPAND, 5);
+   vsizer2->Add( hsizer1   , 0, wxEXPAND);
+   vsizer2->Add( hsizer2   , 0, wxEXPAND);
+   vsizer2->Add( hsizer3   , 0, wxEXPAND);
+   vsizer2->Add( hsizer4   , 0, wxEXPAND);
+   
+   // Buttons
+   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add(0,0,1); // 
+   button_sizer->Add( new wxButton( this, wxID_OK    , wxT("OK")     ), 0, wxALL, 5 );
+   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 5 );
+
+   wxBoxSizer *vsizer3 = new wxBoxSizer( wxHORIZONTAL );
+   vsizer3->Add( _colorList   , 0, wxALL | wxEXPAND, 5);
+   vsizer3->Add( vsizer2      , 0, wxEXPAND );
+   
+   wxBoxSizer *top_sizer = new wxBoxSizer( wxVERTICAL );
+   top_sizer->Add( hsizer0      , 0, wxEXPAND );
+   top_sizer->Add( vsizer3      , 0, wxEXPAND );
+   top_sizer->Add( button_sizer , 0, wxEXPAND );
+   
+   SetSizer( top_sizer );      // use the sizer for layout
+
+   top_sizer->SetSizeHints( this );   // set size hints to honour minimum size
+   
+}
+
+void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
+{
+   nameList all_names;
+   wxColourData data;
+   DATC->all_colors(all_names);
+   word colnum = 0;
+   const layprop::tellRGB* tell_color;
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   {
+      tell_color= DATC->getColor(*CI);
+      wxColour colour(tell_color->red(), tell_color->green(), tell_color->blue());
+      if (16 == colnum)
+         break;
+      else
+         data.SetCustomColour(colnum++, colour);
+   }
+   tell_color= DATC->getColor(std::string(_dwcolname->GetValue().fn_str()));
+   if (NULL != tell_color)
+   {
+      wxColour colour(tell_color->red(), tell_color->green(), tell_color->blue());
+      data.SetColour(colour);
+   }
+   
+   wxColourDialog dialog(this, &data);
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxColourData retData = dialog.GetColourData();
+      wxColour col = retData.GetColour();
+   }
+}
+
+void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
+{
+    wxString color_name = cmdevent.GetString();
+   _dwcolname->SetValue(color_name);
+   const layprop::tellRGB* scol = DATC->getColor(std::string(color_name.fn_str()));
+   _colorsample->setColor(scol);
+   
+   wxString channel;
+   channel << scol->red();
+   _c_red->SetValue(channel);channel.Clear();
+   channel << scol->green();
+   _c_green->SetValue(channel);channel.Clear();
+   channel << scol->blue();
+   _c_blue->SetValue(channel);channel.Clear();
+   channel << scol->alpha();
+   _c_alpha->SetValue(channel);channel.Clear();
+   
+   _colorsample->Refresh();
+}
