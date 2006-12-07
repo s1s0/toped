@@ -129,10 +129,11 @@ namespace tui {
       TMSET_MARKER90      ,
       TMSET_MARKER        ,
       TMSET_DEFLAY        ,
-      
+      TMSET_DEFCOLOR      ,
+
       TMADD_RULER         ,
       TMCLEAR_RULERS      ,
-      
+
       TMHELP_ABOUTAPP     ,
       TBSTAT_ABORT        ,
       //Warning!!! Do not use IDs between TMDUMMY and TMDUMMY_END
