@@ -29,10 +29,12 @@
 
 #include <math.h>
 #include <wx/colordlg.h>
+#include <wx/regex.h>
 #include "tui.h"
 #include "datacenter.h"
 
 extern DataCenter*                DATC;
+
 
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::sgSpinButton, wxSpinButton)
@@ -747,10 +749,13 @@ void tui::color_sample::OnPaint(wxPaintEvent&)
 }
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineColor, wxDialog)
-   EVT_BUTTON(ID_EDITCOL, tui::defineColor::OnDefineColor    )
-   EVT_LISTBOX(ID_COLIST, tui::defineColor::OnColorSelected  )
-//   EVT_BUTTON(FILL_DEFINE , tui::defineLayer::OnDefineFill   )
-//   EVT_BUTTON(LINE_DEFINE , tui::defineLayer::OnDefineLine   )
+   EVT_LISTBOX(ID_COLIST   , tui::defineColor::OnColorSelected    )
+   EVT_BUTTON(ID_EDITCOL   , tui::defineColor::OnDefineColor      )
+   EVT_BUTTON(ID_NEWCOL    , tui::defineColor::OnColorNameAdded   )
+   EVT_BUTTON(ID_BTNAPPLY  , tui::defineColor::OnApply            )
+   EVT_TEXT(ID_REDVAL      , tui::defineColor::OnColorPropChanged )
+   EVT_TEXT(ID_GREENVAL    , tui::defineColor::OnColorPropChanged )
+   EVT_TEXT(ID_BLUEVAL     , tui::defineColor::OnColorPropChanged )
 END_EVENT_TABLE()
 
 tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) :
@@ -758,29 +763,29 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 {
    nameList all_names;
    DATC->all_colors(all_names);
-   _colorList = new wxListBox(this, ID_COLIST, wxDefaultPosition, wxSize(-1,200));
+   _colorList = new wxListBox(this, ID_COLIST, wxDefaultPosition, wxSize(-1,200), 0, NULL, wxLB_SORT);
    std::string init_color = *(all_names.begin());
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
+      _allColors[*CI] = new layprop::tellRGB(*(DATC->getColor(*CI)));
    }
-   _dwcolname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
+   _dwcolname  = new wxTextCtrl( this, ID_COLNAME, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_colname));
    _colorsample = new color_sample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color);
    
-   _c_red    = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _c_red    = new wxTextCtrl( this, ID_REDVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_red));
-   _c_green  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _c_green  = new wxTextCtrl( this, ID_GREENVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_green));
-   _c_blue   = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _c_blue   = new wxTextCtrl( this, ID_BLUEVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_blue));
    _c_alpha  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_alpha));
    
-//   button_sizer->Add( new wxButton( this, ID_NEWCOL , wxT("New")   ), 0, wxALL, 5 );
-   wxBoxSizer *hsizer0 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *hsizer0 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Color") );
    hsizer0->Add( _dwcolname   , 0, wxALL | wxEXPAND, 5);
-   hsizer0->Add( new wxButton( this, ID_EDITCOL  , wxT("Edit")    ), 0, wxALL, 5 );
+   hsizer0->Add( new wxButton( this, ID_NEWCOL  , wxT("Add")    ), 0, wxALL, 5 );
    
    wxBoxSizer *hsizer1 = new wxBoxSizer( wxHORIZONTAL );
    hsizer1->Add( new wxStaticText(this, -1, wxT("R:"),
@@ -802,6 +807,10 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 1, wxALL | wxALIGN_RIGHT, 5);
    hsizer4->Add( _c_alpha   , 0, wxALL | wxEXPAND, 5);
+
+   wxBoxSizer *hsizer5 = new wxBoxSizer( wxHORIZONTAL );
+   hsizer5->Add(new wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+   hsizer5->Add(new wxButton( this, ID_EDITCOL  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
    
    wxBoxSizer *vsizer2 = new wxBoxSizer( wxVERTICAL );
    vsizer2->Add( _colorsample , 0, wxALL | wxEXPAND, 5);
@@ -809,14 +818,15 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
    vsizer2->Add( hsizer2   , 0, wxEXPAND);
    vsizer2->Add( hsizer3   , 0, wxEXPAND);
    vsizer2->Add( hsizer4   , 0, wxEXPAND);
+   vsizer2->Add( hsizer5   , 0, wxEXPAND);
    
    // Buttons
    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(0,0,1); // 
-   button_sizer->Add( new wxButton( this, wxID_OK    , wxT("OK")     ), 0, wxALL, 5 );
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 5 );
+   button_sizer->Add( new wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
+   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
 
-   wxBoxSizer *vsizer3 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *vsizer3 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Color") );
    vsizer3->Add( _colorList   , 0, wxALL | wxEXPAND, 5);
    vsizer3->Add( vsizer2      , 0, wxEXPAND );
    
@@ -840,34 +850,44 @@ void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
    const layprop::tellRGB* tell_color;
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
-      tell_color= DATC->getColor(*CI);
+      tell_color= getColor(*CI);
       wxColour colour(tell_color->red(), tell_color->green(), tell_color->blue());
       if (16 == colnum)
          break;
       else
          data.SetCustomColour(colnum++, colour);
    }
-   tell_color= DATC->getColor(std::string(_dwcolname->GetValue().fn_str()));
-   if (NULL != tell_color)
-   {
-      wxColour colour(tell_color->red(), tell_color->green(), tell_color->blue());
-      data.SetColour(colour);
-   }
-   
+   wxString s_red   =   _c_red->GetValue();
+   wxString s_green = _c_green->GetValue();
+   wxString s_blue  =  _c_blue->GetValue();
+   unsigned long d_red;    s_red.ToULong(&d_red);
+   unsigned long d_green;s_green.ToULong(&d_green);
+   unsigned long d_blue;  s_blue.ToULong(&d_blue);
+   wxColour colour(d_red, d_green, d_blue);
+   data.SetColour(colour);
+
    wxColourDialog dialog(this, &data);
    if (dialog.ShowModal() == wxID_OK)
    {
       wxColourData retData = dialog.GetColourData();
       wxColour col = retData.GetColour();
+   
+      wxString channel;
+      channel << col.Red();
+      _c_red->SetValue(channel);channel.Clear();
+      channel << col.Green();
+      _c_green->SetValue(channel);channel.Clear();
+      channel << col.Blue();
+      _c_blue->SetValue(channel);channel.Clear();
+      layprop::tellRGB* scol = new layprop::tellRGB(col.Red(), col.Green(), col.Blue(),178);
+      _colorsample->setColor(scol);
    }
 }
 
 void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
 {
     wxString color_name = cmdevent.GetString();
-   _dwcolname->SetValue(color_name);
-   const layprop::tellRGB* scol = DATC->getColor(std::string(color_name.fn_str()));
-   _colorsample->setColor(scol);
+   const layprop::tellRGB* scol = getColor(std::string(color_name.fn_str()));
    
    wxString channel;
    channel << scol->red();
@@ -879,5 +899,108 @@ void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
    channel << scol->alpha();
    _c_alpha->SetValue(channel);channel.Clear();
    
+}
+
+void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(cmdevent))
+{
+   wxString s_red   =   _c_red->GetValue();
+   wxString s_green = _c_green->GetValue();
+   wxString s_blue  =  _c_blue->GetValue();
+   wxString s_alpha = _c_alpha->GetValue();
+   unsigned long d_red;    s_red.ToULong(&d_red);
+   unsigned long d_green;s_green.ToULong(&d_green);
+   unsigned long d_blue;  s_blue.ToULong(&d_blue);
+   unsigned long d_alpha;s_alpha.ToULong(&d_alpha);
+   
+   layprop::tellRGB* scol = new layprop::tellRGB(d_red, d_green, d_blue, d_alpha);
+   _colorsample->setColor(scol);
+   
    _colorsample->Refresh();
+}
+
+void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
+{
+   wxString color_name = _dwcolname->GetValue();
+   nameNormalize(color_name);
+   if ((wxT("") == color_name) || (wxT(" ") == color_name))
+   {
+      wxString msg;
+      msg << wxT("Empty color name.");
+      wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
+   }
+   else if (_allColors.end() != _allColors.find(std::string(color_name.fn_str())))
+   {
+      wxString msg;
+      msg << wxT("Color \"") << color_name << wxT("\" is already defined.");
+      wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
+   }
+   else
+   {
+      layprop::tellRGB* newcol = new layprop::tellRGB(0,0,0,178);
+      std::string s_newcol = std::string(color_name.fn_str());
+      _allColors[s_newcol] = newcol;
+      int index = _colorList->Append(color_name);
+      _colorList->Select(index);
+      wxCommandEvent clrsel;
+      clrsel.SetString(color_name);
+      OnColorSelected(clrsel);
+      _colorList->SetFirstItem(color_name);
+   }
+}
+
+void tui::defineColor::nameNormalize(wxString& str)
+{
+   wxRegEx regex;
+   // replace tabs with spaces
+   assert(regex.Compile(wxT("\\t")));
+   regex.ReplaceAll(&str,wxT(" "));
+   // remove continious spaces
+   assert(regex.Compile(wxT("[[:space:]]{2,}")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove leading spaces
+   assert(regex.Compile(wxT("^[[:space:]]")));
+   regex.ReplaceAll(&str,wxT(""));
+   // remove trailing spaces
+   assert(regex.Compile(wxT("[[:space:]]$")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove spaces before brackets and separators
+}
+
+const layprop::tellRGB* tui::defineColor::getColor(std::string color_name) const
+{
+   colorMAP::const_iterator col_set = _allColors.find(color_name);
+   if (_allColors.end() == col_set) return NULL;
+   return col_set->second;
+}
+
+void tui::defineColor::OnApply(wxCommandEvent& cmdevent)
+{
+   wxString s_name  = _colorList->GetStringSelection();
+   wxString s_red   =   _c_red->GetValue();
+   wxString s_green = _c_green->GetValue();
+   wxString s_blue  =  _c_blue->GetValue();
+   wxString s_alpha = _c_alpha->GetValue();
+   unsigned long d_red;    s_red.ToULong(&d_red);
+   unsigned long d_green;s_green.ToULong(&d_green);
+   unsigned long d_blue;  s_blue.ToULong(&d_blue);
+   unsigned long d_alpha;s_alpha.ToULong(&d_alpha);
+   
+   layprop::tellRGB* scol = new layprop::tellRGB(d_red, d_green, d_blue, d_alpha);
+   std::string ss_name(s_name.fn_str());
+   if (_allColors.end() != _allColors.find(ss_name))
+   {
+      delete _allColors[ss_name];
+      _allColors[ss_name] = scol;
+   }
+}
+
+tui::defineColor::~defineColor()
+{
+   delete _colorList;
+   delete _dwcolname;
+   delete _colorsample;
+   delete _c_red;
+   delete _c_green;
+   delete _c_blue;
+   delete _c_alpha;
 }
