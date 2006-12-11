@@ -45,7 +45,13 @@ namespace tui {
       DRAW_SELECTED     ,
       ID_NEWCOL         ,
       ID_EDITCOL        ,
-      ID_COLIST
+      ID_COLIST         ,
+      ID_REDVAL         ,
+      ID_GREENVAL       ,
+      ID_BLUEVAL        ,
+      ID_COLNAME        ,
+      ID_BTNEDIT        ,
+      ID_BTNAPPLY
    };
 
    class getSize : public wxDialog {
@@ -224,24 +230,32 @@ namespace tui {
    
    class defineColor : public wxDialog {
    public:
+      typedef  std::map<std::string, layprop::tellRGB*>  colorMAP;
                      defineColor(wxFrame *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos);
+                    ~defineColor();
       void           OnDefineColor(wxCommandEvent&);
       void           OnColorSelected(wxCommandEvent&);
+      void           OnApply(wxCommandEvent&);
+      void           OnColorPropChanged(wxCommandEvent&);
+      void           OnColorNameAdded(wxCommandEvent&);
+      colorMAP&      allColors() {return _allColors;}
    private:
-      layprop::tellRGB* _color;
-      wxListBox*        _colorList;
-      wxTextCtrl*       _dwcolname;
-      color_sample*     _colorsample;
-      wxString          _colname;
-      wxString          _red;
-      wxString          _green;
-      wxString          _blue;
-      wxString          _alpha;
-      wxTextCtrl*       _c_red;
-      wxTextCtrl*       _c_green;
-      wxTextCtrl*       _c_blue;
-      wxTextCtrl*       _c_alpha;
+      void                    nameNormalize(wxString&);
+      const layprop::tellRGB* getColor(std::string color_name) const;
+      colorMAP                _allColors;
+      wxListBox*              _colorList;
+      wxTextCtrl*             _dwcolname;
+      color_sample*           _colorsample;
+      wxString                _colname;
+      wxString                _red;
+      wxString                _green;
+      wxString                _blue;
+      wxString                _alpha;
+      wxTextCtrl*             _c_red;
+      wxTextCtrl*             _c_green;
+      wxTextCtrl*             _c_blue;
+      wxTextCtrl*             _c_alpha;
       
       DECLARE_EVENT_TABLE();
    };

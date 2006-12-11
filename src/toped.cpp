@@ -1213,17 +1213,22 @@ void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
 {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::defineColor dlg(this, -1, wxT("Define Color"), pos);
+   tui::defineColor dlg(this, -1, wxT("Color Definitions"), pos);
    if ( dlg.ShowModal() == wxID_OK )
    {
-//      wxString ost;
-//      ost      << wxT("layprop(\"") << dlg.layname()
-//               << wxT("\" , ")      << dlg.layno()
-//               << wxT(" , \"")      << dlg.color()
-//               << wxT("\" , \"")    << dlg.fill()
-//               << wxT("\" , \"")    << dlg.line()
-//               << wxT("\");");
-//      _cmdline->parseCommand(ost);
+      layprop::colorMAP colors = dlg.allColors();
+      for(layprop::colorMAP::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
+      {
+         wxString ost;
+         layprop::tellRGB* coldef = CC->second;
+         ost   << wxT("definecolor(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+               << wxT("\" , ")      << coldef->red()
+               << wxT(" , ")        << coldef->green()
+               << wxT(" , ")        << coldef->blue()
+               << wxT(" , ")        << coldef->alpha()
+               << wxT(");");
+         _cmdline->parseCommand(ost);
+      }
    }
 }
 
