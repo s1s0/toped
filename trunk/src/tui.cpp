@@ -749,9 +749,9 @@ void tui::color_sample::OnPaint(wxPaintEvent&)
 }
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineColor, wxDialog)
-   EVT_LISTBOX(ID_COLIST   , tui::defineColor::OnColorSelected    )
-   EVT_BUTTON(ID_EDITCOL   , tui::defineColor::OnDefineColor      )
-   EVT_BUTTON(ID_NEWCOL    , tui::defineColor::OnColorNameAdded   )
+   EVT_LISTBOX(ID_ITEMLIST , tui::defineColor::OnColorSelected    )
+   EVT_BUTTON(ID_BTNEDIT   , tui::defineColor::OnDefineColor      )
+   EVT_BUTTON(ID_NEWITEM   , tui::defineColor::OnColorNameAdded   )
    EVT_BUTTON(ID_BTNAPPLY  , tui::defineColor::OnApply            )
    EVT_TEXT(ID_REDVAL      , tui::defineColor::OnColorPropChanged )
    EVT_TEXT(ID_GREENVAL    , tui::defineColor::OnColorPropChanged )
@@ -763,14 +763,14 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 {
    nameList all_names;
    DATC->all_colors(all_names);
-   _colorList = new wxListBox(this, ID_COLIST, wxDefaultPosition, wxSize(-1,200), 0, NULL, wxLB_SORT);
+   _colorList = new wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(-1,200), 0, NULL, wxLB_SORT);
    std::string init_color = *(all_names.begin());
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
       _allColors[*CI] = new layprop::tellRGB(*(DATC->getColor(*CI)));
    }
-   _dwcolname  = new wxTextCtrl( this, ID_COLNAME, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
+   _dwcolname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_colname));
    _colorsample = new color_sample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color);
    
@@ -785,7 +785,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
    
    wxBoxSizer *hsizer0 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Color") );
    hsizer0->Add( _dwcolname   , 0, wxALL | wxEXPAND, 5);
-   hsizer0->Add( new wxButton( this, ID_NEWCOL  , wxT("Add")    ), 0, wxALL, 5 );
+   hsizer0->Add( new wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
    
    wxBoxSizer *hsizer1 = new wxBoxSizer( wxHORIZONTAL );
    hsizer1->Add( new wxStaticText(this, -1, wxT("R:"),
@@ -810,7 +810,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 
    wxBoxSizer *hsizer5 = new wxBoxSizer( wxHORIZONTAL );
    hsizer5->Add(new wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
-   hsizer5->Add(new wxButton( this, ID_EDITCOL  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+   hsizer5->Add(new wxButton( this, ID_BTNEDIT  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
    
    wxBoxSizer *vsizer2 = new wxBoxSizer( wxVERTICAL );
    vsizer2->Add( _colorsample , 0, wxALL | wxEXPAND, 5);
@@ -952,7 +952,7 @@ void tui::defineColor::nameNormalize(wxString& str)
 {
    wxRegEx regex;
    // replace tabs with spaces
-   assert(regex.Compile(wxT("\\t")));
+   assert(regex.Compile(wxT("\t")));
    regex.ReplaceAll(&str,wxT(" "));
    // remove continious spaces
    assert(regex.Compile(wxT("[[:space:]]{2,}")));
@@ -1003,4 +1003,383 @@ tui::defineColor::~defineColor()
    delete _c_green;
    delete _c_blue;
    delete _c_alpha;
+}
+
+//==============================================================================
+BEGIN_EVENT_TABLE(tui::pattern_canvas, wxWindow)
+   EVT_PAINT(tui::pattern_canvas::OnPaint)
+   EVT_LEFT_UP (tui::pattern_canvas::OnMouseLeftUp)
+   EVT_RIGHT_UP(tui::pattern_canvas::OnMouseRightUp)
+END_EVENT_TABLE()
+
+tui::pattern_canvas::pattern_canvas(wxWindow *parent, wxWindowID id, wxPoint pos,
+      wxSize size, const byte* init) :  wxWindow(parent, id, pos, size, wxNO_BORDER)
+{
+   if (NULL != init)
+      for(byte i = 0; i < 128; i++)
+         _pattern[i] = init[i];
+   else
+      Clear();
+   _brushsize = 1;
+}
+
+void tui::pattern_canvas::Clear()
+{
+   for(byte i = 0; i < 128; i++)
+      _pattern[i] = 0x00;
+}
+
+void tui::pattern_canvas::Fill()
+{
+   for(byte i = 0; i < 128; i++)
+      _pattern[i] = 0xff;
+}
+
+void tui::pattern_canvas::OnPaint(wxPaintEvent&)
+{
+   wxPaintDC dc(this);
+   dc.SetBackground(*wxWHITE);
+   wxPen pen(*wxBLACK);
+   dc.SetPen(pen);
+   dc.Clear();
+   wxCoord w, h;
+   dc.GetSize(&w, &h);
+   dc.DrawRectangle(0, 0, w, h);
+   //draw the grid
+   for (word i = 7; i < h; i+=8)
+      dc.DrawLine(0  , i  , w  , i  );
+   for (word j = 7; j < w; j+=8)
+      dc.DrawLine(j  , 0  , j  , h  );
+   // now draw the pattern
+   wxBrush brush(*wxBLUE);
+   dc.SetBrush(brush);
+   for (byte i = 0; i < 128; i++)
+      for (byte k = 0; k < 8; k++)
+         if (_pattern[i] & (0x80 >> k))
+         {
+            dc.DrawRectangle(((i%4) * 8 + k) * 8, (i/4) * 8, 8, 8 );
+         }
+}
+
+void tui::pattern_canvas::OnMouseLeftUp(wxMouseEvent& event)
+{
+   int cshift;
+   switch (_brushsize)
+   {
+      case 3: cshift = -1;break;
+      case 5: cshift = -2;break;
+      default: cshift = 0;
+   }
+   wxPoint position = event.GetPosition();
+   for (int bsizex = 0; bsizex < _brushsize; bsizex++)
+      for (int bsizey = 0; bsizey < _brushsize; bsizey++)
+      {
+         int xpnt  = (int)rint(position.x / 8)  + bsizex + cshift;
+         int yindx = (int)rint(position.y / 8)  + bsizey + cshift;
+         int xindx = (int)rint(xpnt / 8);
+         if ((xpnt > 31) || (yindx > 31) || (xpnt < 0) || (yindx < 0)) continue;
+         _pattern[(yindx * 4 + xindx) % 128] |= (byte)(0x80 >> (xpnt % 8));
+      }
+   Refresh();
+}
+
+void tui::pattern_canvas::OnMouseRightUp(wxMouseEvent& event)
+{
+   int cshift;
+   switch (_brushsize)
+   {
+      case 3: cshift = -1;break;
+      case 5: cshift = -2;break;
+      default: cshift = 0;
+   }
+   wxPoint position = event.GetPosition();
+   for (int bsizex = 0; bsizex < _brushsize; bsizex++)
+      for (int bsizey = 0; bsizey < _brushsize; bsizey++)
+      {
+         int xpnt  = (int)rint(position.x / 8)  + bsizex + cshift;
+         int yindx = (int)rint(position.y / 8)  + bsizey + cshift;
+         int xindx = (int)rint(xpnt / 8);
+         if ((xpnt > 31) || (yindx > 31) || (xpnt < 0) || (yindx < 0)) continue;
+         _pattern[(yindx * 4 + xindx) % 128] &= ~(byte)(0x80 >> (xpnt % 8));
+      }
+   Refresh();
+}
+
+//==============================================================================
+BEGIN_EVENT_TABLE(tui::drawFillDef, wxDialog)
+   EVT_BUTTON( ID_BTNCLEAR    , tui::drawFillDef::OnClear)
+   EVT_BUTTON( ID_BTNFILL     , tui::drawFillDef::OnFill )
+   EVT_RADIOBOX(ID_RADIOBSIZE , tui::drawFillDef::OnBrushSize)
+END_EVENT_TABLE()
+
+tui::drawFillDef::drawFillDef(wxWindow *parent, wxWindowID id, const wxString &title,
+   wxPoint pos, const byte* init): wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+{
+    static const wxString brushsize[] =
+    {
+        wxT("1"),
+        wxT("3x3"),
+        wxT("5x5"),
+    };
+
+    _radioBrushSize = new wxRadioBox(this, ID_RADIOBSIZE, wxT("Brush size"),
+                                   wxDefaultPosition, wxDefaultSize,
+                                   WXSIZEOF(brushsize), brushsize);
+
+   
+   wxBoxSizer *vsizer1 = new wxBoxSizer( wxVERTICAL );
+   vsizer1->Add( _radioBrushSize , 0, wxALL, 5);
+   vsizer1->Add(new wxButton( this, ID_BTNCLEAR , wxT(" Clear ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ),
+                0, wxALL | wxALIGN_RIGHT, 5);
+   vsizer1->Add(new wxButton( this, ID_BTNFILL  , wxT(" Fill  "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ),
+                0, wxALL | wxALIGN_RIGHT, 5);
+   
+   _sampleDraw = new pattern_canvas(this, -1, wxDefaultPosition, wxSize(256,256), init);
+   
+   wxBoxSizer *hsizer1 = new wxBoxSizer( wxHORIZONTAL );
+   hsizer1->Add( _sampleDraw , 0, wxALL, 5);
+   hsizer1->Add( vsizer1   , 0, wxEXPAND);
+   
+   wxBoxSizer *hsizer2 = new wxBoxSizer( wxHORIZONTAL );
+   hsizer2->Add(0,0,1);
+   hsizer2->Add(new wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5);
+   hsizer2->Add(new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 5);
+   
+   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   topsizer->Add( hsizer1 , 0, wxEXPAND);
+   topsizer->Add( hsizer2 , 0, wxEXPAND);
+   
+   SetSizer( topsizer );      // use the sizer for layout
+
+   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+   
+}
+
+void tui::drawFillDef::OnClear(wxCommandEvent& WXUNUSED(event))
+{
+   _sampleDraw->Clear();
+   _sampleDraw->Refresh();
+}
+
+void tui::drawFillDef::OnFill(wxCommandEvent& WXUNUSED(event))
+{
+   _sampleDraw->Fill();
+   _sampleDraw->Refresh();
+}
+
+void tui::drawFillDef::OnBrushSize(wxCommandEvent& event)
+{
+   byte bsize;
+   switch (event.GetInt())
+   {
+      case 0: bsize = 1;break;
+      case 1: bsize = 3;break;
+      case 2: bsize = 5;break;
+      default: bsize = 1;
+   }
+   _sampleDraw->setBrushSize(bsize);
+}
+
+tui::drawFillDef::~drawFillDef()
+{
+   delete _sampleDraw;
+}
+
+
+//==============================================================================
+BEGIN_EVENT_TABLE(tui::fill_sample, wxWindow)
+   EVT_PAINT(tui::fill_sample::OnPaint)
+END_EVENT_TABLE()
+
+tui::fill_sample::fill_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
+   wxSize size, std::string init) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
+{
+   setFill(DATC->getFill(init));
+}
+
+void tui::fill_sample::setFill(const byte* fill)
+{
+   if (NULL != fill)
+   {
+      wxBitmap stipplebrush((char  *)fill, 32, 32, 1);
+      _brush = wxBrush(stipplebrush);
+   }
+   else
+   {
+      _brush = wxBrush();
+   }
+   _brush.SetColour(*wxWHITE);
+}
+
+void tui::fill_sample::OnPaint(wxPaintEvent&)
+{
+   wxPaintDC dc(this);
+   dc.SetBackground(*wxBLACK);
+
+   dc.SetBrush(_brush);
+   dc.Clear();
+   wxCoord w, h;
+   dc.GetSize(&w, &h);
+   dc.DrawRectangle(0, 0, w, h);
+}
+
+//==============================================================================
+BEGIN_EVENT_TABLE(tui::defineFill, wxDialog)
+   EVT_LISTBOX(ID_ITEMLIST     , tui::defineFill::OnFillSelected   )
+    EVT_BUTTON(ID_BTNEDIT      , tui::defineFill::OnDefineFill     )
+    EVT_BUTTON(ID_NEWITEM      , tui::defineFill::OnFillNameAdded  )
+    EVT_BUTTON(ID_BTNAPPLY     , tui::defineFill::OnApply          )
+END_EVENT_TABLE()
+
+tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) :
+      wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+{
+   nameList all_names;
+   DATC->all_fills(all_names);
+   _fillList = new wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(-1,200), 0, NULL, wxLB_SORT);
+   std::string init_color = *(all_names.begin());
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   {
+      _fillList->Append(wxString(CI->c_str(), wxConvUTF8));
+      byte* pat = new byte[128];
+      fillcopy(DATC->getFill(*CI), pat);
+      _allFills[*CI] = pat;
+   }
+   _dwfilname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
+                                          wxTextValidator(wxFILTER_ASCII, &_filname));
+   _fillsample = new fill_sample( this, -1, wxDefaultPosition, wxSize(-1,150), init_color);
+   
+   wxBoxSizer *hsizer0 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Fill") );
+   hsizer0->Add( _dwfilname   , 0, wxALL | wxEXPAND, 5);
+   hsizer0->Add( new wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
+   
+   wxBoxSizer *hsizer5 = new wxBoxSizer( wxHORIZONTAL );
+   hsizer5->Add(new wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+   hsizer5->Add(new wxButton( this, ID_BTNEDIT  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+   
+   wxBoxSizer *vsizer2 = new wxBoxSizer( wxVERTICAL );
+   vsizer2->Add( _fillsample , 0, wxALL | wxEXPAND, 5);
+   vsizer2->Add( hsizer5   , 0, wxEXPAND);
+   
+   // Buttons
+   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add(0,0,1); // 
+   button_sizer->Add( new wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
+   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
+
+   wxBoxSizer *vsizer3 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Pattern") );
+   vsizer3->Add( _fillList   , 0, wxALL | wxEXPAND, 5);
+   vsizer3->Add( vsizer2      , 0, wxEXPAND );
+   
+   wxBoxSizer *top_sizer = new wxBoxSizer( wxVERTICAL );
+   top_sizer->Add( hsizer0      , 0, wxEXPAND );
+   top_sizer->Add( vsizer3      , 0, wxEXPAND );
+   top_sizer->Add( button_sizer , 0, wxEXPAND );
+   
+   SetSizer( top_sizer );      // use the sizer for layout
+
+   top_sizer->SetSizeHints( this );   // set size hints to honour minimum size
+   
+}
+
+void tui::defineFill::nameNormalize(wxString& str)
+{
+   wxRegEx regex;
+   // replace tabs with spaces
+   assert(regex.Compile(wxT("\t")));
+   regex.ReplaceAll(&str,wxT(" "));
+   // remove continious spaces
+   assert(regex.Compile(wxT("[[:space:]]{2,}")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove leading spaces
+   assert(regex.Compile(wxT("^[[:space:]]")));
+   regex.ReplaceAll(&str,wxT(""));
+   // remove trailing spaces
+   assert(regex.Compile(wxT("[[:space:]]$")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove spaces before brackets and separators
+}
+
+void tui::defineFill::OnFillSelected(wxCommandEvent& cmdevent)
+{
+    wxString fill_name = cmdevent.GetString();
+    fillcopy(getFill(std::string(fill_name.fn_str())),_current_pattern);
+   _fillsample->setFill(_current_pattern);
+   _fillsample->Refresh();
+}
+
+void tui::defineFill::OnApply(wxCommandEvent& WXUNUSED(cmdevent))
+{
+   wxString s_name  = _fillList->GetStringSelection();
+   std::string ss_name(s_name.fn_str());
+   if (_allFills.end() != _allFills.find(ss_name))
+   {
+      fillcopy(_current_pattern, _allFills[ss_name]);
+   }
+}
+
+void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
+{
+   wxString fill_name = _dwfilname->GetValue();
+   nameNormalize(fill_name);
+   if ((wxT("") == fill_name) || (wxT(" ") == fill_name))
+   {
+      wxString msg;
+      msg << wxT("Empty fill name.");
+      wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
+   }
+   else if (_allFills.end() != _allFills.find(std::string(fill_name.fn_str())))
+   {
+      wxString msg;
+      msg << wxT("Pattern \"") << fill_name << wxT("\" is already defined.");
+      wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
+   }
+   else
+   {
+      std::string s_newcol = std::string(fill_name.fn_str());
+      byte* newpat = new byte[128];
+      for(byte i = 0; i< 128; i++)
+         newpat[i] = 0x55 << ((byte)(i/4)%2);
+      _allFills[s_newcol] = newpat;
+      int index = _fillList->Append(fill_name);
+      _fillList->Select(index);
+      wxCommandEvent clrsel;
+      clrsel.SetString(fill_name);
+      OnFillSelected(clrsel);
+      _fillList->SetFirstItem(fill_name);
+   }
+}
+
+void tui::defineFill::OnDefineFill(wxCommandEvent& cmdevent)
+{
+//   const byte* initpat = getFill(_current_pattern);
+   drawFillDef dialog(this, -1, wxT("Define Pattern"), wxDefaultPosition, _current_pattern);
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      fillcopy(dialog.pattern(),_current_pattern);
+      _fillsample->setFill(_current_pattern);
+      _fillsample->Refresh();
+   }
+}
+
+const byte* tui::defineFill::getFill(const std::string fill_name) const
+{
+   fillMAP::const_iterator fill_set = _allFills.find(fill_name);
+   if (_allFills.end() == fill_set) return NULL;
+   return fill_set->second;
+}
+
+void tui::defineFill::fillcopy(const byte* pattern, byte* nfill)
+{
+   for(byte i = 0; i < 128; i++)
+      nfill[i] = pattern[i];
+}
+
+tui::defineFill::~defineFill()
+{
+   delete _fillList;
+   delete _dwfilname;
+   delete _fillsample;
+   for(fillMAP::const_iterator CI = _allFills.begin(); CI != _allFills.end(); CI++)
+      delete[] CI->second;
 }

@@ -130,6 +130,7 @@ namespace tui {
       TMSET_MARKER        ,
       TMSET_DEFLAY        ,
       TMSET_DEFCOLOR      ,
+      TMSET_DEFFILL       ,
 
       TMADD_RULER         ,
       TMCLEAR_RULERS      ,
