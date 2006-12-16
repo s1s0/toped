@@ -43,15 +43,16 @@ namespace tui {
       FILL_COMBO        ,
       LINE_COMBO        ,
       DRAW_SELECTED     ,
-      ID_NEWCOL         ,
-      ID_EDITCOL        ,
-      ID_COLIST         ,
+      ID_NEWITEM        ,
+      ID_ITEMLIST       ,
       ID_REDVAL         ,
       ID_GREENVAL       ,
       ID_BLUEVAL        ,
-      ID_COLNAME        ,
       ID_BTNEDIT        ,
-      ID_BTNAPPLY
+      ID_BTNAPPLY       ,
+      ID_BTNCLEAR       ,
+      ID_BTNFILL        ,
+      ID_RADIOBSIZE
    };
 
    class getSize : public wxDialog {
@@ -228,7 +229,8 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
    
-   class defineColor : public wxDialog {
+   class defineColor : public wxDialog
+   {
    public:
       typedef  std::map<std::string, layprop::tellRGB*>  colorMAP;
                      defineColor(wxFrame *parent, wxWindowID id, const wxString &title,
@@ -257,6 +259,74 @@ namespace tui {
       wxTextCtrl*             _c_blue;
       wxTextCtrl*             _c_alpha;
       
+      DECLARE_EVENT_TABLE();
+   };
+
+   class pattern_canvas : public wxWindow {
+   public:
+                     pattern_canvas(wxWindow*, wxWindowID, wxPoint, wxSize, const byte*);
+      void           OnPaint(wxPaintEvent&);
+      void           Clear();
+      void           Fill();
+      void           setBrushSize(byte bsize) {_brushsize = bsize;}
+      byte*          pattern() {return _pattern;}
+   protected:
+      void           OnMouseLeftUp(wxMouseEvent& event);
+      void           OnMouseRightUp(wxMouseEvent& event);
+   private:
+      byte           _pattern[128];
+      byte           _brushsize;
+      DECLARE_EVENT_TABLE();
+   };
+
+   class drawFillDef : public wxDialog {
+   public:
+                     drawFillDef(wxWindow *parent, wxWindowID id, const wxString &title,
+                                                                  wxPoint pos, const byte*);
+      byte*          pattern() {return _sampleDraw->pattern();}
+                    ~drawFillDef();
+   protected:
+      void              OnClear(wxCommandEvent&);
+      void              OnFill(wxCommandEvent&);
+      void              OnBrushSize(wxCommandEvent&);
+      pattern_canvas*   _sampleDraw;
+      wxRadioBox*       _radioBrushSize;
+      DECLARE_EVENT_TABLE();
+   };
+
+   class fill_sample : public wxWindow {
+   public:
+                     fill_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string);
+      void           setFill(const byte*);
+      void           OnPaint(wxPaintEvent&);
+   protected:
+      wxBrush        _brush;
+      DECLARE_EVENT_TABLE();
+   };
+   
+   class defineFill : public wxDialog
+   {
+   public:
+      typedef  std::map<std::string, byte*         >  fillMAP;
+                     defineFill(wxFrame *parent, wxWindowID id, const wxString &title,
+                                                                  wxPoint pos);
+                    ~defineFill();
+      void           OnDefineFill(wxCommandEvent&);
+      void           OnFillSelected(wxCommandEvent&);
+      void           OnApply(wxCommandEvent&);
+      void           OnFillNameAdded(wxCommandEvent&);
+      fillMAP&       allPatterns() {return _allFills;}
+   private:
+      void           nameNormalize(wxString&);
+      void           fillcopy(const byte*, byte*);
+      const byte*    getFill(const std::string) const;
+      fillMAP        _allFills;
+      wxListBox*     _fillList;
+      wxTextCtrl*    _dwfilname;
+      fill_sample*   _fillsample;
+      wxString       _filname;
+      byte           _current_pattern[128];
+
       DECLARE_EVENT_TABLE();
    };
 }

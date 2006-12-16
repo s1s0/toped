@@ -256,7 +256,7 @@ TpdTime::TpdTime(std::string str_time)
 void TpdTime::patternNormalize(wxString& str) {
    wxRegEx regex;
    // replace tabs with spaces
-   assert(regex.Compile(wxT("\\t")));
+   assert(regex.Compile(wxT("\t")));
    regex.ReplaceAll(&str,wxT(" "));
    // remove continious spaces
    assert(regex.Compile(wxT("[[:space:]]{2,}")));

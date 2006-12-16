@@ -75,7 +75,7 @@ bool console::patternFound(const wxString templ,  wxString str) {
 void console::patternNormalize(wxString& str) {
    wxRegEx regex;
    // replace tabs with spaces
-   assert(regex.Compile(wxT("\\t")));
+   assert(regex.Compile(wxT("\t")));
    regex.ReplaceAll(&str,wxT(" "));
    // remove continious spaces
    assert(regex.Compile(wxT("[[:space:]]{2,}")));
