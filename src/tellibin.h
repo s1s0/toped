@@ -158,6 +158,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
    TELL_STDCMD_CLASSA(stdDISTANCE      )
    TELL_STDCMD_CLASSA(stdCLEARRULERS   )
+   TELL_STDCMD_CLASSA(stdPROPSAVE      )
 
    //
    TELL_STDCMD_CLASSA(stdLAYPROP       )  //

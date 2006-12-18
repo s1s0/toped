@@ -203,6 +203,20 @@ int tellstdfunc::stdCLEARRULERS::execute()
 }
 
 //=============================================================================
+tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::stdPROPSAVE::execute()
+{
+   std::string fname = getStringValue();
+   DATC->saveProperties(fname);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype, bool eor) :
       stdREPORTLAY(new parsercmd::argumentLIST,retype, eor)
 {

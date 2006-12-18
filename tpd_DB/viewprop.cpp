@@ -24,10 +24,13 @@
 //          $Date$
 //        $Author$
 //===========================================================================
-#include "../tpd_common/ttt.h"
 #include <sstream>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include "../tpd_common/ttt.h"
 #include "viewprop.h"
 #include "../tpd_common/outbox.h"
 #include "../tpd_common/glf.h"
@@ -442,24 +445,6 @@ std::string layprop::DrawProperties::getLineName(word layno) const
    else return "";
 }
 
-void layprop::ViewProperties::all_colors(nameList& colist) const
-{
-   for( colorMAP::const_iterator CI = _drawprop._laycolors.begin(); CI != _drawprop._laycolors.end(); CI++)
-      colist.push_back(CI->first);
-}
-
-void layprop::ViewProperties::all_fills(nameList& filist) const
-{
-   for( fillMAP::const_iterator CI = _drawprop._layfill.begin(); CI != _drawprop._layfill.end(); CI++)
-      filist.push_back(CI->first);
-}
-
-void layprop::ViewProperties::all_lines(nameList& linelist) const
-{
-   for( lineMAP::const_iterator CI = _drawprop._lineset.begin(); CI != _drawprop._lineset.end(); CI++)
-      linelist.push_back(CI->first);
-}
-
 const layprop::LineSettings* layprop::DrawProperties::getLine(word layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
@@ -524,6 +509,71 @@ const layprop::tellRGB* layprop::DrawProperties::getColor(std::string color_name
 // All the stuff above is equivalent to 
 //   return _laycolors[color_name];
 // but is safer and preserves constness
+}
+
+void layprop::DrawProperties::savePatterns(FILE* prop_file) const
+{
+   fillMAP::const_iterator CI;
+   fprintf(prop_file, "void  fillSetup() {\n");
+   for( CI = _layfill.begin(); CI != _layfill.end(); CI++)
+   {
+      fprintf(prop_file, "   int list %s = {\n", CI->first.c_str());
+      byte* patdef = CI->second;
+      for (byte i = 0; i < 16; i++)
+      {
+         fprintf(prop_file, "      ");
+         for (byte j = 0; j < 8; j++)
+         {
+            if (127 == i*8+j)
+               fprintf(prop_file, "0x%02x  "  , patdef[127]);
+            else
+               fprintf(prop_file, "0x%02x ,", patdef[i*8+j]);
+         }
+         fprintf(prop_file, "\n");
+      }
+      fprintf(prop_file, "   };\n\n");
+   }
+   for( CI = _layfill.begin(); CI != _layfill.end(); CI++)
+   {
+      fprintf(prop_file, "   definefill(\"%s\", %s );\n", CI->first.c_str(), CI->first.c_str());
+   }
+   fprintf(prop_file, "}\n\n");
+}
+
+void layprop::DrawProperties::saveColors(FILE* prop_file) const
+{
+   colorMAP::const_iterator CI;
+   fprintf(prop_file, "void  colorSetup() {\n");
+   for( CI = _laycolors.begin(); CI != _laycolors.end(); CI++)
+   {
+      tellRGB* the_color = CI->second;
+      fprintf(prop_file, "   definecolor(\"%s\", %3d, %3d, %3d, %3d);\n",
+            CI->first.c_str() ,
+            the_color->red()  ,
+            the_color->green(),
+            the_color->blue() ,
+            the_color->alpha()
+      );
+   }
+   fprintf(prop_file, "}\n\n");
+}
+
+void layprop::DrawProperties::saveLayers(FILE* prop_file) const
+{
+   laySetList::const_iterator CI;
+   fprintf(prop_file, "void  layerSetup() {\n");
+   fprintf(prop_file, "   colorSetup(); fillSetup();\n");
+   for( CI = _layset.begin(); CI != _layset.end(); CI++)
+   {
+      LayerSettings* the_layer = CI->second;
+      fprintf(prop_file, "   layprop(\"%s\", %d , \"%s\", \"%s\", \"%s\");\n",
+            the_layer->name().c_str()  ,
+            CI->first                  ,
+            the_layer->color().c_str() ,
+            the_layer->fill().c_str()  ,
+            the_layer->sline().c_str()  );
+   }
+   fprintf(prop_file, "}\n\n");
 }
 
 layprop::DrawProperties::~DrawProperties() {
@@ -670,10 +720,67 @@ void layprop::ViewProperties::drawGrid() const{
       p->second->Draw(_drawprop, _UU);
 }
 
+void layprop::ViewProperties::all_colors(nameList& colist) const
+{
+   for( colorMAP::const_iterator CI = _drawprop._laycolors.begin(); CI != _drawprop._laycolors.end(); CI++)
+      colist.push_back(CI->first);
+}
+
+void layprop::ViewProperties::all_fills(nameList& filist) const
+{
+   for( fillMAP::const_iterator CI = _drawprop._layfill.begin(); CI != _drawprop._layfill.end(); CI++)
+      filist.push_back(CI->first);
+}
+
+void layprop::ViewProperties::all_lines(nameList& linelist) const
+{
+   for( lineMAP::const_iterator CI = _drawprop._lineset.begin(); CI != _drawprop._lineset.end(); CI++)
+      linelist.push_back(CI->first);
+}
+
 void layprop::ViewProperties::setUU(real UU) {
    _UU = UU;
    _DBscale = 1/UU;
 };
+
+void layprop::ViewProperties::saveScreenProps(FILE* prop_file) const
+{
+   fprintf(prop_file, "void  screenSetup() {\n");
+   gridlist::const_iterator GLS;
+   if (_grid.end() != (GLS = _grid.find(0)))
+   {
+      fprintf(prop_file, "  definegrid(0, %f , \"%s\");\n", GLS->second->step(), GLS->second->color().c_str());
+      fprintf(prop_file, "  grid(0,%s);\n",GLS->second->visual() ? "true" : "false");
+   }
+   if (_grid.end() != (GLS = _grid.find(1)))
+   {
+      fprintf(prop_file, "  definegrid(1, %f , \"%s\");\n", GLS->second->step(), GLS->second->color().c_str());
+      fprintf(prop_file, "  grid(1,%s);\n",GLS->second->visual() ? "true" : "false");
+   }
+   if (_grid.end() != (GLS = _grid.find(2)))
+   {
+      fprintf(prop_file, "  definegrid(2, %f , \"%s\");\n", GLS->second->step(), GLS->second->color().c_str());
+      fprintf(prop_file, "  grid(2,%s);\n",GLS->second->visual() ? "true" : "false");
+   }
+   fprintf(prop_file, "  step(%f);\n",_step);
+   fprintf(prop_file, "  autopan(%s);\n",_autopan ? "true" : "false");
+   fprintf(prop_file, "  shapeangle(%d);\n",_marker_angle);
+   fprintf(prop_file, "}\n\n");
+}
+
+
+void layprop::ViewProperties::saveProperties(std::string filename) const
+{
+   FILE * prop_file;
+   prop_file = fopen(filename.c_str(),"wt");
+   // file header here
+   _drawprop.savePatterns(prop_file);
+   _drawprop.saveColors(prop_file);
+   _drawprop.saveLayers(prop_file);
+   saveScreenProps(prop_file);
+   fprintf(prop_file, "layerSetup();screenSetup();\n\n");
+   fclose(prop_file);
+}
 
 layprop::ViewProperties::~ViewProperties() {
    for(gridlist::iterator GI = _grid.begin(); GI != _grid.end(); GI++)
