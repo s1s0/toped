@@ -79,8 +79,9 @@ namespace layprop {
                                                                   _visual(false) {};
       void              Init(real st, std::string cl) {_step = st; _color = cl;}
       void              Draw(const DrawProperties&, const real);
-      real              step() const           {return _step;};
-      bool              visual() const         {return _visual;};
+      real              step() const           {return _step;}
+      bool              visual() const         {return _visual;}
+      std::string       color() const          {return _color;}
       void              turnover(bool state)   { _visual = state;};
    private:
       real              _step;
@@ -207,6 +208,10 @@ namespace layprop {
       CTM                     _ScrCTM;
       bool                    _cellmarks_hidden;
       bool                    _textmarks_hidden;
+      void                    savePatterns(FILE*) const;
+      void                    saveColors(FILE*) const;
+      void                    saveLayers(FILE*) const;
+      
    private:
       bool                    _blockfill;
       laydata::cellrefstack*  _refstack;
@@ -245,6 +250,7 @@ namespace layprop {
       void              hideLayer(word layno, bool hide);
       void              lockLayer(word layno, bool lock);
       bool              selectable(word layno) const;
+      void              saveProperties(std::string) const;
       //      
       const LayoutGrid* grid(byte) const;
       void              setGrid(byte, real, std::string);
@@ -286,6 +292,7 @@ namespace layprop {
    protected:
       DrawProperties    _drawprop;
    private:
+      void               saveScreenProps(FILE*) const;
       real              _DBscale; 
       real              _UU;           // The scale of the data base. It is doubled here, on order 
                                        // not to read it with every mouse move  

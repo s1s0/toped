@@ -170,8 +170,9 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("addpoly"          ,(new             tellstdfunc::stdDRAWPOLY_D(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(new               tellstdfunc::stdDRAWWIRE(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(new             tellstdfunc::stdDRAWWIRE_D(telldata::tn_layout,false)));
-
+   mblock->addFUNC("propsave"         ,(new                 tellstdfunc::stdPROPSAVE(telldata::tn_void, true)));
    mblock->addFUNC("addmenu"          ,(new                  tellstdfunc::stdADDMENU(telldata::tn_void, true)));
+   
    console::TellFnSort();
 }
 
@@ -256,7 +257,7 @@ bool TopedApp::CheckCrashLog()
 {
    if (wxFileExists(logFileName))
    {
-      tell_log(console::MT_WARNING,"Last session didn't exit normally. Starting recovery...");
+      tell_log(console::MT_WARNING,"Previous session didn't exit normally.");
       return true;
    }
    else return false;
@@ -356,11 +357,14 @@ bool TopedApp::OnInit() {
             wxYES_NO | wxICON_WARNING);
       if (wxID_YES == dlg1->ShowModal())
          recovery_mode = true;
+      else
+         tell_log(console::MT_WARNING,"Recovery rejected.");
       delete dlg1;
       if (!recovery_mode) SaveIgnoredCrashLog();
    }
    if (recovery_mode)
    {
+      tell_log(console::MT_WARNING,"Starting recovery ...");
       wxString inputfile;
       inputfile << wxT("#include \"") << logFileName.c_str() << wxT("\"");
       Console->parseCommand(inputfile, false);

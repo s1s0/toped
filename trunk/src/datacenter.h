@@ -75,6 +75,8 @@ public:
    void                       openGL_draw(const CTM&);
    void                       tmp_draw(const CTM&, TP, TP);
    const laydata::cellList&   cells();
+   void                       saveProperties(std::string fname)
+                                                      {_properties.saveProperties(fname);}
    void                       defaultlayer(word layno)
                                                       {_curlay = layno;}
    word                       curlay() const          {return _curlay;}
