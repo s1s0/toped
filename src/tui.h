@@ -52,7 +52,10 @@ namespace tui {
       ID_BTNAPPLY       ,
       ID_BTNCLEAR       ,
       ID_BTNFILL        ,
-      ID_RADIOBSIZE
+      ID_RADIOBSIZE     ,
+      ID_CBDEFCOLOR     ,
+      ID_CBDEFPATTERN   ,
+      ID_CBDEFLINE
    };
 
    class getSize : public wxDialog {
@@ -203,11 +206,14 @@ namespace tui {
       void           OnFillChanged(wxCommandEvent&);
       void           OnLineChanged(wxCommandEvent&);
       void           OnSelectedChanged(wxCommandEvent&);
+      void           OnDefaultColor(wxCommandEvent&);
+      void           OnDefaultPattern(wxCommandEvent&);
+      void           OnDefaultLine(wxCommandEvent&);
       wxString       layno()       {return _layno;}
       wxString       layname()     {return _layname;}
-      wxString       color()       {return _colors->GetValue();}
-      wxString       fill()        {return _fills->GetValue();}
-      wxString       line()        {return _lines->GetValue();}
+      wxString       color();//       {return _colors->GetValue();}
+      wxString       fill();//        {return _fills->GetValue();}
+      wxString       line();//        {return _lines->GetValue();}
    private:
       wxString       _layno;
       wxString       _layname;

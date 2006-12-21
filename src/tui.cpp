@@ -491,9 +491,19 @@ void tui::layset_sample::setLine(word layno)
 void tui::layset_sample::setLine(const layprop::LineSettings* line)
 {
    _dashes.clear();
-   if (NULL != line)
+   if (NULL == line)
    {
-//      _pen.SetStipple(stipplepen); <- not implemented in wxGTK??
+      _pen = wxPen();
+      _linew = 1;
+   }
+   else if (0xffff == line->pattern())
+   {
+      _pen = wxPen(_color);
+      _linew = line->width();
+   }
+   else
+   {
+      //_pen.SetStipple(stipplepen); <- not implemented in wxGTK??
       _linew = line->width();
       _pen = wxPen(_color, 1, wxUSER_DASH);
       word pattern = line->pattern();
@@ -516,11 +526,6 @@ void tui::layset_sample::setLine(const layprop::LineSettings* line)
       else
          _dashes[0] += pixels * line->patscale();
    }
-   else
-   {
-      _pen = wxPen();
-      _linew = 1;
-   }
 }
 
 void tui::layset_sample::drawOutline(wxPaintDC& dc, wxCoord w, wxCoord h)
@@ -535,14 +540,14 @@ void tui::layset_sample::drawOutline(wxPaintDC& dc, wxCoord w, wxCoord h)
       }
       _pen.SetDashes(_dashes.size(),dash1);
       _pen.SetCap(wxCAP_BUTT);
-      dc.SetPen(_pen);
-      for (word i = 0; i < _linew; i++)
-      {
-         dc.DrawLine(0  , i  , w  , i  );
-         dc.DrawLine(w-i, 0  , w-i, h  );
-         dc.DrawLine(w  , h-i, 0  , h-i);
-         dc.DrawLine(i  , h  , i  , 0  );
-      }
+   }
+   dc.SetPen(_pen);
+   for (word i = 1; i <= _linew; i++)
+   {
+      dc.DrawLine(1  , i  , w  , i  );
+      dc.DrawLine(w-i, 1  , w-i, h  );
+      dc.DrawLine(w  , h-i, 1  , h-i);
+      dc.DrawLine(i  , h  , i  , 1  );
    }
 }
 
@@ -571,13 +576,13 @@ void tui::layset_sample::OnPaint(wxPaintEvent&)
 
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineLayer, wxDialog)
-   EVT_COMBOBOX(COLOR_COMBO  , tui::defineLayer::OnColorChanged   )
-   EVT_COMBOBOX(FILL_COMBO   , tui::defineLayer::OnFillChanged    )
-   EVT_COMBOBOX(LINE_COMBO   , tui::defineLayer::OnLineChanged    )
-   EVT_CHECKBOX(DRAW_SELECTED, tui::defineLayer::OnSelectedChanged)
-//   EVT_BUTTON(COLOR_DEFINE, tui::defineLayer::OnDefineColor  )
-//   EVT_BUTTON(FILL_DEFINE , tui::defineLayer::OnDefineFill   )
-//   EVT_BUTTON(LINE_DEFINE , tui::defineLayer::OnDefineLine   )
+   EVT_COMBOBOX(COLOR_COMBO      , tui::defineLayer::OnColorChanged   )
+   EVT_COMBOBOX(FILL_COMBO       , tui::defineLayer::OnFillChanged    )
+   EVT_COMBOBOX(LINE_COMBO       , tui::defineLayer::OnLineChanged    )
+   EVT_CHECKBOX(DRAW_SELECTED    , tui::defineLayer::OnSelectedChanged)
+   EVT_CHECKBOX(ID_CBDEFCOLOR    , tui::defineLayer::OnDefaultColor   )
+   EVT_CHECKBOX(ID_CBDEFPATTERN  , tui::defineLayer::OnDefaultPattern )
+   EVT_CHECKBOX(ID_CBDEFLINE     , tui::defineLayer::OnDefaultLine    )
 END_EVENT_TABLE()
 
 tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
@@ -594,6 +599,9 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
       init_fill = wxString(DATC->getFillName(init).c_str(), wxConvUTF8);
       init_line = wxString(DATC->getLineName(init).c_str(), wxConvUTF8);
    }
+   bool no_color = (wxT("") == init_color);
+   bool no_fill = (wxT("") == init_fill);
+   bool no_line = (wxT("") == init_line);
    wxTextCtrl* dwlayno    = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_layno));
    wxTextCtrl* dwlayname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 0,
@@ -608,14 +616,19 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    DATC->all_colors(all_names);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+   if (no_color)
+      init_color = wxString(all_names.begin()->c_str(), wxConvUTF8);
    _colors   = new wxComboBox( this, COLOR_COMBO, init_color, wxDefaultPosition, wxDefaultSize,all_strings, wxCB_READONLY | wxCB_SORT);
-   
+   _colors->SetStringSelection(init_color);
    all_names.clear();
    all_strings.Clear();
    DATC->all_fills(all_names);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+   if (no_fill)
+      init_fill = wxString(all_names.begin()->c_str(), wxConvUTF8);
    _fills   = new wxComboBox( this, FILL_COMBO, init_fill, wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
+   _fills->SetStringSelection(init_fill);
    
    all_names.clear();
    all_strings.Clear();
@@ -624,52 +637,68 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    {
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
    }
-   _lines   = new wxComboBox( this, LINE_COMBO, init_line, wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
+   if (no_line)
+      init_line = wxString(all_names.begin()->c_str(), wxConvUTF8);
+   _lines   = new wxComboBox( this, LINE_COMBO, init_line, wxDefaultPosition, wxDefaultSize, all_strings,wxCB_READONLY | wxCB_SORT);
+   _lines->SetStringSelection(init_line);
    
    // The window layout
    wxBoxSizer *line1_sizer = new wxBoxSizer( wxHORIZONTAL );
-   
-   line1_sizer->Add( new wxStaticText(this, -1, wxT("Number:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                1, wxALL | wxALIGN_RIGHT, 5);
-   line1_sizer->Add(dwlayno, 1, wxALL | wxALIGN_CENTER, 5);
-   line1_sizer->Add( new wxStaticText(this, -1, wxT("Name:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                1, wxALL | wxALIGN_RIGHT, 5);
-   line1_sizer->Add(dwlayname, 2, wxALL | wxALIGN_CENTER, 5);
+   line1_sizer->Add( new wxStaticText(this, -1, wxT("Number:"), wxDefaultPosition, wxDefaultSize),
+                                                0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
+   line1_sizer->Add(dwlayno, 1, wxRIGHT | wxALIGN_CENTER, 5);
+   line1_sizer->Add( new wxStaticText(this, -1, wxT("Name:"),  wxDefaultPosition, wxDefaultSize),
+                                                0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
+   line1_sizer->Add(dwlayname, 2, wxRIGHT | wxALIGN_CENTER, 5);
    //
-   wxBoxSizer *col1_sizer = new wxBoxSizer( wxVERTICAL );
-   col1_sizer->Add( new wxStaticText(this, -1, wxT("Color:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_RIGHT, 10);
-   col1_sizer->Add( new wxStaticText(this, -1, wxT("Fill:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_RIGHT, 10);
-   col1_sizer->Add( new wxStaticText(this, -1, wxT("Line:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_RIGHT, 10);
+   wxBoxSizer *color_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Color"));
+   color_sizer->Add(_colors, 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+   color_sizer->Add(new wxCheckBox(this, ID_CBDEFCOLOR, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
+   if (no_color)
+   {
+      static_cast<wxCheckBox*>(FindWindow(ID_CBDEFCOLOR))->SetValue(true);
+      _colors->Enable(false);
+   }
+   wxBoxSizer *fill_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Pattern"));
+   fill_sizer->Add(_fills , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+   fill_sizer->Add(new wxCheckBox(this, ID_CBDEFPATTERN, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
+   if (no_fill)
+   {
+      static_cast<wxCheckBox*>(FindWindow(ID_CBDEFPATTERN))->SetValue(true);
+      _fills->Enable(false);
+   }
+   wxBoxSizer *line_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Selected Line"));
+   line_sizer->Add(_lines , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+   line_sizer->Add(new wxCheckBox(this, ID_CBDEFLINE, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
+   if (no_line)
+   {
+      static_cast<wxCheckBox*>(FindWindow(ID_CBDEFLINE))->SetValue(true);
+      _lines->Enable(false);
+   }
 
    wxBoxSizer *col2_sizer = new wxBoxSizer( wxVERTICAL );
-   col2_sizer->Add(_colors, 0, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
-   col2_sizer->Add(_fills , 0, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
-   col2_sizer->Add(_lines , 0, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
-
+   col2_sizer->Add(color_sizer, 0, wxEXPAND);
+   col2_sizer->Add(fill_sizer , 0, wxEXPAND);
+   col2_sizer->Add(line_sizer , 0, wxEXPAND);
+   
+   _selected = new wxCheckBox(this, DRAW_SELECTED, wxT("selected"));
+   wxBoxSizer *col3_sizer = new wxStaticBoxSizer( wxVERTICAL, this, wxT("Sample") );
+   col3_sizer->Add( _sample  , 1, wxEXPAND);
+   col3_sizer->Add(_selected , 0, wxALL | wxALIGN_LEFT | wxEXPAND, 5);
+   
    wxBoxSizer *line2_sizer = new wxBoxSizer( wxHORIZONTAL );
-   line2_sizer->Add(col1_sizer, 0, wxEXPAND);
-   line2_sizer->Add(col2_sizer, 2, wxEXPAND);
-   line2_sizer->Add( _sample  , 1, wxEXPAND,10);
+   line2_sizer->Add(col2_sizer, 3, wxEXPAND | wxALL, 5);
+   line2_sizer->Add(col3_sizer, 1, wxEXPAND | wxALL, 5);
    // Buttons
    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   _selected = new wxCheckBox(this, DRAW_SELECTED, wxT("selected"));
-   button_sizer->Add(_selected, 0, wxALL | wxALIGN_LEFT | wxEXPAND, 5);
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-   topsizer->Add(line1_sizer, 0, wxEXPAND );
-   topsizer->Add(line2_sizer, 0, wxEXPAND );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(line1_sizer , 0, wxEXPAND | wxTOP, 5 );
+   topsizer->Add(line2_sizer , 0, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -678,33 +707,95 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 
 void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
 {
-    wxString color_name = cmdevent.GetString();
-    const layprop::tellRGB* color = DATC->getColor(std::string(color_name.fn_str()));
-    _sample->setColor(color);
-    _sample->Refresh();
+   wxString color_name = cmdevent.GetString();
+   const layprop::tellRGB* color = DATC->getColor(std::string(color_name.fn_str()));
+   _sample->setColor(color);
+   _sample->Refresh();
 }
 
 void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
 {
-    wxString fill_name = cmdevent.GetString();
-    const byte* fill = DATC->getFill(std::string(fill_name.fn_str()));
-    _sample->setFill(fill);
-    _sample->Refresh();
+   wxString fill_name = cmdevent.GetString();
+   const byte* fill = DATC->getFill(std::string(fill_name.fn_str()));
+   _sample->setFill(fill);
+   _sample->Refresh();
 }
 
 void tui::defineLayer::OnLineChanged(wxCommandEvent& cmdevent)
 {
-    wxString line_name = cmdevent.GetString();
-    const layprop::LineSettings* line = DATC->getLine(std::string(line_name.fn_str()));
-    _sample->setLine(line);
-    _sample->Refresh();
+   wxString line_name = cmdevent.GetString();
+   const layprop::LineSettings* line = DATC->getLine(std::string(line_name.fn_str()));
+   _sample->setLine(line);
+   _sample->Refresh();
 }
 
 void tui::defineLayer::OnSelectedChanged(wxCommandEvent& cmdevent)
 {
-    bool selected = cmdevent.GetInt();
-    _sample->setSelected(selected);
-    _sample->Refresh();
+   bool selected = cmdevent.GetInt();
+   _sample->setSelected(selected);
+   _sample->Refresh();
+}
+void tui::defineLayer::OnDefaultColor(wxCommandEvent& cmdevent)
+{
+   bool selected = cmdevent.GetInt();
+   _colors->Enable(!selected);
+   const layprop::tellRGB* color;
+   if (selected)
+      color = DATC->getColor(std::string(""));
+   else
+      color = DATC->getColor(std::string(_colors->GetStringSelection().fn_str()));
+   _sample->setColor(color);
+   _sample->Refresh();
+}
+
+void tui::defineLayer::OnDefaultPattern(wxCommandEvent& cmdevent)
+{
+   bool selected = cmdevent.GetInt();
+   _fills->Enable(!selected);
+   const byte* fill;
+   if (selected)
+      fill = DATC->getFill(std::string(""));
+   else
+      fill = DATC->getFill(std::string(_fills->GetStringSelection().fn_str()));
+   _sample->setFill(fill);
+   _sample->Refresh();
+}
+
+void tui::defineLayer::OnDefaultLine(wxCommandEvent& cmdevent)
+{
+   bool selected = cmdevent.GetInt();
+   _lines->Enable(!selected);
+   const layprop::LineSettings* line;
+   if (selected)
+      line = DATC->getLine(std::string(""));
+   else
+      line = DATC->getLine(std::string(_lines->GetStringSelection().fn_str()));
+   _sample->setLine(line);
+   _sample->Refresh();
+}
+
+wxString tui::defineLayer::color()
+{
+   if (static_cast<wxCheckBox*>(FindWindow(ID_CBDEFCOLOR))->IsChecked())
+      return wxT("");
+   else
+      return _colors->GetValue();
+}
+
+wxString tui::defineLayer::fill()
+{
+   if (static_cast<wxCheckBox*>(FindWindow(ID_CBDEFPATTERN))->IsChecked())
+      return wxT("");
+   else
+      return _fills->GetValue();
+}
+
+wxString tui::defineLayer::line()
+{
+   if (static_cast<wxCheckBox*>(FindWindow(ID_CBDEFLINE))->IsChecked())
+      return wxT("");
+   else
+      return _lines->GetValue();
 }
 
 tui::defineLayer::~defineLayer()
@@ -1039,16 +1130,22 @@ void tui::pattern_canvas::OnPaint(wxPaintEvent&)
 {
    wxPaintDC dc(this);
    dc.SetBackground(*wxWHITE);
-   wxPen pen(*wxBLACK);
+   wxPen pen(*wxLIGHT_GREY);
    dc.SetPen(pen);
    dc.Clear();
    wxCoord w, h;
    dc.GetSize(&w, &h);
    dc.DrawRectangle(0, 0, w, h);
    //draw the grid
-   for (word i = 7; i < h; i+=8)
+   for (word i = 8; i < h; i+=8)
       dc.DrawLine(0  , i  , w  , i  );
-   for (word j = 7; j < w; j+=8)
+   for (word j = 8; j < w; j+=8)
+      dc.DrawLine(j  , 0  , j  , h  );
+   pen.SetColour(*wxBLACK);
+   dc.SetPen(pen);
+   for (word i = 64; i < h; i+=64)
+      dc.DrawLine(0  , i  , w  , i  );
+   for (word j = 64; j < w; j+=64)
       dc.DrawLine(j  , 0  , j  , h  );
    // now draw the pattern
    wxBrush brush(*wxBLUE);

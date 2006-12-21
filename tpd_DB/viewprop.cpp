@@ -47,6 +47,27 @@ GLubyte array_mark_bmp[30]= {0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x1
                              0x20, 0x08, 0x50, 0x0A, 0x8F, 0xE2, 0x44, 0x44, 0x22, 0x88, 
                              0x11, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00};
 
+const layprop::tellRGB        layprop::DrawProperties::_defaultColor(127,127,127,127);
+const layprop::LineSettings   layprop::DrawProperties::_defaultSeline("", 0xffff, 1, 3);
+const byte                    layprop::DrawProperties::_defaultFill [128] = {
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 #define _GRID_LIMIT  5    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 extern const wxEventType         wxEVT_SETTINGSMENU;
 
@@ -247,7 +268,7 @@ void layprop::DrawProperties::setGridColor(std::string colname) const{
    if (gcol)
       glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
    else // put a default gray color if color is not found
-      glColor4f(0.5, 0.5, 0.5, 0.5);
+      glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
 }      
 
 void layprop::DrawProperties::setCurrentColor(word layno)
@@ -264,7 +285,7 @@ void layprop::DrawProperties::setCurrentColor(word layno)
          }
       } 
    }
-   glColor4f(0.5, 0.5, 0.5, 0.5);
+      glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
 }
 
 bool  layprop::DrawProperties::layerHidden(word layno) const
@@ -287,15 +308,17 @@ bool  layprop::DrawProperties::layerLocked(word layno) const {
    return true;
 }
 
-bool layprop::DrawProperties::getCurrentFill() const {
+bool layprop::DrawProperties::getCurrentFill() const
+{
    if (0 == _drawinglayer)
       return true;
-   if ((_layset.end() != _layset.find(_drawinglayer)) && !_blockfill) {
+   if ((_layset.end() != _layset.find(_drawinglayer)) && !_blockfill)
+   {
       // The 3 lines below are doing effectively
       // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
       // but the problem is const stuff (discards qualifiers)
       // They are ugly, but don't know how to do it better
-      // Similar fo layerLocked and layerHidden
+      // Similar for layerLocked and layerHidden
       laySetList::const_iterator ilayset = _layset.find(_drawinglayer);
       fillMAP::const_iterator ifillset;
       if (_layfill.end() == (ifillset = _layfill.find(ilayset->second->fill())))
@@ -306,7 +329,7 @@ bool layprop::DrawProperties::getCurrentFill() const {
 //      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       glPolygonStipple(ifill);
       return true;
-   }   
+   }
    else return false;
 }
 
@@ -317,16 +340,18 @@ void layprop::DrawProperties::setLineProps(bool selected) const
    {
       ilayset = _layset.find(_drawinglayer);
       lineMAP::const_iterator ilineset = _lineset.find(ilayset->second->sline());
+      const LineSettings* seline;
       if (_lineset.end() != ilineset)
-      {
-         std::string colorname = ilineset->second->color();
-         colorMAP::const_iterator gcol;
-         if (("" != colorname) && (_laycolors.end() != (gcol = _laycolors.find(colorname))))
-            glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
-         glLineWidth(ilineset->second->width());glEnable(GL_LINE_SMOOTH);glEnable(GL_LINE_STIPPLE);
-         glLineStipple(ilineset->second->patscale(),ilineset->second->pattern());
-         return;
-      }
+         seline = ilineset->second;
+      else
+         seline = &_defaultSeline;
+      std::string colorname = seline->color();
+      colorMAP::const_iterator gcol;
+      if (("" != colorname) && (_laycolors.end() != (gcol = _laycolors.find(colorname))))
+         glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
+      glLineWidth(seline->width());glEnable(GL_LINE_SMOOTH);glEnable(GL_LINE_STIPPLE);
+      glLineStipple(seline->patscale(),seline->pattern());
+      return;
    }
    if (_layset.end() != (ilayset = _layset.find(_drawinglayer)))
    {
@@ -334,7 +359,9 @@ void layprop::DrawProperties::setLineProps(bool selected) const
       if (gcol != _laycolors.end())
          glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
    }
-   else glColor4f(0.5, 0.5, 0.5, 0.5);
+   else
+      glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
+
    glLineWidth(1);glDisable(GL_LINE_SMOOTH);glDisable(GL_LINE_STIPPLE);
 }
 
@@ -448,9 +475,9 @@ std::string layprop::DrawProperties::getLineName(word layno) const
 const layprop::LineSettings* layprop::DrawProperties::getLine(word layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
-   if (_layset.end() == layer_set) return NULL;
+   if (_layset.end() == layer_set) return &_defaultSeline;
    lineMAP::const_iterator line = _lineset.find(layer_set->second->sline());
-   if (_lineset.end() == line) return NULL;
+   if (_lineset.end() == line) return &_defaultSeline;
    return line->second;
 // All the stuff above is equivalent to 
 //   return _layfill[_layset[layno]->sline()];
@@ -460,7 +487,7 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(word layno) const
 const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_name) const
 {
    lineMAP::const_iterator line = _lineset.find(line_name);
-   if (_lineset.end() == line) return NULL;
+   if (_lineset.end() == line) return &_defaultSeline;
    return line->second;
 // All the stuff above is equivalent to 
 //   return _layfill[_layset[layno]->sline()];
@@ -470,9 +497,9 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_n
 const byte* layprop::DrawProperties::getFill(word layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
-   if (_layset.end() == layer_set) return NULL;
+   if (_layset.end() == layer_set) return &_defaultFill[0];
    fillMAP::const_iterator fill_set = _layfill.find(layer_set->second->fill());
-   if (_layfill.end() == fill_set) return NULL;
+   if (_layfill.end() == fill_set) return &_defaultFill[0];
    return fill_set->second;
 // All the stuff above is equivalent to 
 //   return _layfill[_layset[layno]->fill()];
@@ -482,7 +509,7 @@ const byte* layprop::DrawProperties::getFill(word layno) const
 const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 {
    fillMAP::const_iterator fill_set = _layfill.find(fill_name);
-   if (_layfill.end() == fill_set) return NULL;
+   if (_layfill.end() == fill_set) return &_defaultFill[0];
    return fill_set->second;
 // All the stuff above is equivalent to 
 //   return _layfill[fill_name];
@@ -492,9 +519,9 @@ const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 const layprop::tellRGB* layprop::DrawProperties::getColor(word layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
-   if (_layset.end() == layer_set) return NULL;
+   if (_layset.end() == layer_set) return &_defaultColor;
    colorMAP::const_iterator col_set = _laycolors.find(layer_set->second->color());
-   if (_laycolors.end() == col_set) return NULL;
+   if (_laycolors.end() == col_set) return &_defaultColor;
    return col_set->second;
 // All the stuff above is equivalent to 
 //   return _laycolors[_layset[layno]->color()];
@@ -504,7 +531,7 @@ const layprop::tellRGB* layprop::DrawProperties::getColor(word layno) const
 const layprop::tellRGB* layprop::DrawProperties::getColor(std::string color_name) const
 {
    colorMAP::const_iterator col_set = _laycolors.find(color_name);
-   if (_laycolors.end() == col_set) return NULL;
+   if (_laycolors.end() == col_set) return &_defaultColor;
    return col_set->second;
 // All the stuff above is equivalent to 
 //   return _laycolors[color_name];
