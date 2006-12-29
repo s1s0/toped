@@ -35,6 +35,14 @@
 #include "../tpd_DB/viewprop.h"
 #include "tui.h"
 
+#if wxCHECK_VERSION(2, 8, 0)
+#define tpdfOPEN wxFD_OPEN
+#define tpdfSAVE wxFD_SAVE
+#else
+#define tpdfOPEN wxOPEN
+#define tpdfSAVE wxSAVE
+#endif
+
 extern const wxEventType         wxEVT_MARKERPOSITION;
 extern const wxEventType         wxEVT_CNVSSTATUSLINE;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
@@ -51,8 +59,8 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent) : wxPanel( parent, -1,
    SetFont(fontX);
    _abort = new wxButton(this, TBSTAT_ABORT, wxT("Abort"));
    _abort->Disable();
-   SetBackgroundColour(wxColour("BLACK"));
-   SetForegroundColour(wxColour("CYAN"));
+   SetBackgroundColour(wxColour(wxT("BLACK")));
+   SetForegroundColour(wxColour(wxT("CYAN")));
    X_pos = new wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
    Y_pos = new wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
@@ -685,7 +693,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
    SetStatusText(wxT("Opening file..."));
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
       wxT("Toped files |*.tdt"),
-      wxOPEN);
+      tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
@@ -703,7 +711,7 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
    SetStatusText(wxT("Including command file..."));
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
       wxT("Tell files |*.tll"),
-      wxOPEN);
+      tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
       wxString ost;
@@ -717,7 +725,7 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
 void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
                      wxT("Stream files |*.sf;*.gds"),
-      wxOPEN);
+      tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       SetStatusText(wxT("Parsing GDS file..."));
       wxString filename = dlg2.GetFilename();
@@ -756,7 +764,7 @@ void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
    SetStatusText(wxT("Saving database under new filename..."));
    wxFileDialog dlg2(this, wxT("Save a design in a file"), wxT(""), wxT(""),
       wxT("Toped files |*.tdt"),
-      wxSAVE);
+      tpdfSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();
       if(!checkFileOverwriting(filename))
@@ -848,7 +856,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
 {
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), 
                      wxT("Stream files |*.sf;*.gds"),
-                     wxOPEN);
+                     tpdfOPEN);
    if (wxID_OK != dlg2.ShowModal()) 
    {
       SetStatusText(wxT("Parsing aborted")); return;
@@ -867,7 +875,7 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
    SetStatusText(wxT("Exporting database to GDS file..."));
    wxFileDialog dlg2(this, wxT("Export design to GDS file"), wxT(""), wxT(""),
       wxT("GDS files |*.sf;*.gds"),
-      wxSAVE);
+      tpdfSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();
       if(!checkFileOverwriting(filename))
@@ -906,7 +914,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    fullCellName << cellname << wxT(".gds");
    wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
       wxT("GDS files |*.sf;*.gds"),
-      wxSAVE);
+      tpdfSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();
       if(!checkFileOverwriting(filename))
