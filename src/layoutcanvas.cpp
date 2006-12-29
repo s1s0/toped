@@ -190,14 +190,13 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
    SetCurrent();
    glMatrixMode( GL_MODELVIEW );
    glShadeModel( GL_FLAT ); // Single color
-   glClear(GL_ACCUM_BUFFER_BIT);
    update_viewport();
    // CTM matrix stuff
    glLoadIdentity();
    glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
    if (invalid_window || !(tmp_wnd || rubber_band)) {
-      // invalid_window indicates zooming. If that is false and the rest two 
-      // variables are not set, means that the system request repaint 
+      // invalid_window indicates zooming. If that is false and the rest two
+      // variables are not set, means that the system request repaint
       // In both cases - the entire window is redrawn
       glClear(GL_COLOR_BUFFER_BIT);
       glEnable(GL_BLEND);
