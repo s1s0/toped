@@ -247,24 +247,16 @@ void tui::LayoutCanvas::initializeGL() {
    gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
                                                 &glEnd);
 #endif
-   // The next call needs to be fitted in some kind of GL descructor
+   //@TODO Check somewhere that RGBA mode is available!?
+   //@TODO The next call needs to be fitted in some kind of GL descructor
    // gluDeleteTess(tessellObj);
-   
-   // SG REMARK !! Strange -> in wx port glPixelStorei is kind of ignored
-   // in this place.
-   // it looks like glGetError() fixes the problem. It does not seems to make 
-   // any sence - it obviously has something to do with the openGL initialization
-   // when invoked by wxGLCanvas
-   // The effect is that bitmaps (select/cell/text marks) are not displayed
-   // correctly, because default alignment 4 is used
-//   GLenum error = glGetError();
-   glShadeModel( GL_FLAT ); // Single color
-//   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//   error = glGetError();
-//   int boza;
-//   glGetIntegerv(GL_UNPACK_ALIGNMENT, &boza);
-//   boza++;
-   glClear(GL_ACCUM_BUFFER_BIT);
+
+   //@NOTE: With the Mesa library updates (first noticed in ver. 6.5) - most of the
+   // gl* functions are starting with ASSERT_OUTSIDE_BEGIN_END(...) which in turn
+   // will produce a segmentation. Other openGL implementations are more polite,
+   // but I don't know the result of those calls will be.
+   // So... don't try to put gl stuff here, unless you're sure that it is not
+   // causing troubles and that's the proper place for it.
 }
 
 void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
@@ -282,11 +274,6 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
     }
     lp_BL = TP(0,0)  * _LayCTM;
     lp_TR = TP(w, h) * _LayCTM;
-//   glMatrixMode( GL_PROJECTION );
-//   glLoadIdentity();
-//   glFrustum( -1.0, 1.0, -1.0, 1.0, 5.0, 15.0 );
-   glMatrixMode( GL_MODELVIEW );
-   glClear(GL_ACCUM_BUFFER_BIT);
    invalid_window = true;
 }
 
@@ -297,6 +284,9 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
       if (!GetContext()) return;
    #endif
    SetCurrent();
+   glMatrixMode( GL_MODELVIEW );
+   glShadeModel( GL_FLAT ); // Single color
+   glClear(GL_ACCUM_BUFFER_BIT);
    if (invalid_window || !(tmp_wnd || rubber_band))
    {
       update_viewport();

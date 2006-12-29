@@ -35,6 +35,7 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/treectrl.h>
+#include <wx/imaglist.h>
 #include <string>
 #include "../tpd_DB/tedesign.h"
 #include "../tpd_DB/gds_io.h"
