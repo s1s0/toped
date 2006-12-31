@@ -212,10 +212,10 @@
   <dist>
     <custom>false</custom>
     <bzip>true</bzip>
-    <archname/>
+    <archname>%n_%v_%d</archname>
     <appname>toped.kdevelop</appname>
     <version>0.8</version>
-    <release>1</release>
+    <release>3</release>
     <vendor>Svilen Krastev</vendor>
     <licence>GPL</licence>
     <summary>IC Layout Editor</summary>
@@ -232,6 +232,6 @@
     <useRPM>false</useRPM>
     <ftpkde>false</ftpkde>
     <appskde>false</appskde>
-    <url/>
+    <url></url>
   </dist>
 </kdevelop>

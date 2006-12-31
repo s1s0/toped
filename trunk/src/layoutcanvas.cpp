@@ -286,10 +286,10 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
    SetCurrent();
    glMatrixMode( GL_MODELVIEW );
    glShadeModel( GL_FLAT ); // Single color
-   glClear(GL_ACCUM_BUFFER_BIT);
    if (invalid_window || !(tmp_wnd || rubber_band))
    {
       update_viewport();
+      glClear(GL_ACCUM_BUFFER_BIT);
       //@TODO !! Check somewhere that RGBA mode is available!?
       // CTM matrix stuff
       glLoadIdentity();
