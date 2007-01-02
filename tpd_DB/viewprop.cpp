@@ -592,6 +592,7 @@ void layprop::DrawProperties::saveLayers(FILE* prop_file) const
    fprintf(prop_file, "   colorSetup(); fillSetup();\n");
    for( CI = _layset.begin(); CI != _layset.end(); CI++)
    {
+      if (0 == CI->first) continue;
       LayerSettings* the_layer = CI->second;
       fprintf(prop_file, "   layprop(\"%s\", %d , \"%s\", \"%s\", \"%s\");\n",
             the_layer->name().c_str()  ,
