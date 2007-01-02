@@ -67,6 +67,7 @@ namespace tui {
       TMGDS_CLOSE         ,
       TMFILE_SAVE         ,
       TMFILE_SAVEAS       ,
+      TMPROP_SAVE         ,
       TMFILE_EXIT         ,
 
       TMEDIT_UNDO         ,

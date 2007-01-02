@@ -187,6 +187,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
+   EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
    EVT_MENU( TMFILE_EXIT         , tui::TopedFrame::OnQuit        )
    
    EVT_MENU( TMEDIT_UNDO         , tui::TopedFrame::OnUndo        )
@@ -373,6 +374,7 @@ void tui::TopedFrame::initMenuBar() {
       
    _resourceCenter->appendMenu("&File/Save",       "CTRL-S",  &tui::TopedFrame::OnTDTSave,  "Save the database");
    _resourceCenter->appendMenu("&File/Save as ...","",  &tui::TopedFrame::OnTDTSaveAs, "Save the database under a new name" );
+   _resourceCenter->appendMenu("&File/Save properties...","",  &tui::TopedFrame::OnPropSave, "Save the layout properties" );
    _resourceCenter->appendMenuSeparator("&File");
   // _resourceCenter->appendMenu("&File/Snapshot ...","",  &tui::TopedFrame::OnTDTSnapshot, "Export screen to picture" );
   // _resourceCenter->appendMenuSeparator("&File");
@@ -850,6 +852,28 @@ void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
       _cmdline->parseCommand(ost);
 //      SetStatusText(wxT("Design saved in file: ")+dlg2.GetFilename());
    }   
+   else SetStatusText(wxT("Saving aborted"));
+}
+
+void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event)) 
+{
+   SetStatusText(wxT("Saving layout properties ..."));
+   wxFileDialog dlg2(this, wxT("Save properties"), wxT(""), wxT(""),
+      wxT("TELL files |*.tll"),
+      tpdfSAVE);
+   if (wxID_OK == dlg2.ShowModal()) {
+      wxString filename = dlg2.GetPath();
+      if(!checkFileOverwriting(filename))
+      {
+         SetStatusText(wxT("Saving aborted"));
+         return;
+      }
+
+      wxString ost;
+      ost << wxT("propsave(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
+      _cmdline->parseCommand(ost);
+//      SetStatusText(wxT("Design saved in file: ")+dlg2.GetFilename());
+   }
    else SetStatusText(wxT("Saving aborted"));
 }
 
