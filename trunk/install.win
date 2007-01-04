@@ -11,6 +11,6 @@ To compile Toped for Windows you need next tools and external libraries:
 
 Open src\toped.dsw into Toped directory and use Batch Build to compile all debug libraries projects.
 Then use Built toped.exe in Buit Menu`
-Run and enjoy it.
+Run and enjoy it!
 
 
