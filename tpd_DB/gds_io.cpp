@@ -112,7 +112,7 @@ bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
          for (int i = 0; i < 3; i++)
             mant[i] = record[curnum+3-i];
          double *rld = (double*)var; // assign pointer
-         *rld = sign*(mantissa/pow(2,24)) * pow(16, exponent-64);
+         *rld = sign*(mantissa/pow(2.0,24)) * pow(16.0, exponent-64);
          break;
       }
       case gdsDT_REAL8B:{// 8-byte real
@@ -1177,14 +1177,14 @@ GDSin::GDSaref::GDSaref(GDSFile* cf, GDSdata *lst):GDSref(lst) {
 }
 
 int GDSin::GDSaref::Get_Xstep() {
-   int ret = (int) sqrt(pow((X_step.x() - magn_point.x()),2) +
-      pow((X_step.y() - magn_point.y()),2)) / colnum;
+   int ret = (int) sqrt(pow(float((X_step.x() - magn_point.x())),2) +
+      pow(float((X_step.y() - magn_point.y())),2)) / colnum;
    return ret;
 }
 
 int GDSin::GDSaref::Get_Ystep() {
-   int ret = (int) sqrt(pow((Y_step.x() - magn_point.x()),2) +
-      pow((Y_step.y() - magn_point.y()),2)) / rownum;
+   int ret = (int) sqrt(pow(float((Y_step.x() - magn_point.x())),2) +
+      pow(float((Y_step.y() - magn_point.y())),2)) / rownum;
    return ret;
 }
 
