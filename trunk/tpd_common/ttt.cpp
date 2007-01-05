@@ -27,6 +27,7 @@
 
 #include <math.h>
 #include <sstream>
+#include <algorithm>
 #include "ttt.h"
 //-----------------------------------------------------------------------------
 // class TP

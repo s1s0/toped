@@ -28,9 +28,10 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include "../tpd_common/ttt.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "../tpd_common/ttt.h"
+
 #include "viewprop.h"
 #include "../tpd_common/outbox.h"
 #include "../tpd_common/glf.h"

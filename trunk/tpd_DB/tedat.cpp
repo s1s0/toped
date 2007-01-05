@@ -2308,7 +2308,7 @@ int laydata::xangle(TP& p1, TP& p2) {
       else                 return 180;
    }   
    else
-      return (int)rint(180*atan2(p2.y() - p1.y(), p2.x() - p1.x())/Pi);
+      return (int)rint(180*atan2(double(p2.y() - p1.y()), p2.x() - p1.x())/Pi);
 }
 
 //-----------------------------------------------------------------------------

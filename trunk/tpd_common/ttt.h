@@ -44,6 +44,9 @@ double round(double x);
    #define remainder fmod
    #define M_PI   3.1415926535897932384626433832795
    #pragma warning( disable : 4786 ) 
+	
+	#include <wx/msw/winundef.h>
+
 #else
 #include "config.h"
 #endif
