@@ -103,6 +103,7 @@ browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
 }
 
 browsers::topedlay_list::~topedlay_list() {
+   _imageList->RemoveAll();
    delete _imageList;
    DeleteAllItems();
 }
@@ -780,8 +781,13 @@ void browsers::TDTbrowser::OnReportUsedLayers(wxCommandEvent& WXUNUSED(event)) {
 
 browsers::TDTbrowser::~TDTbrowser()
 {
+   _imageList->RemoveAll();
    delete _imageList;
    hCellBrowser->DeleteAllItems();
+   fCellBrowser->DeleteAllItems();
+   delete hCellBrowser;
+   delete fCellBrowser;
+   
 }
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::browserTAB, wxNotebook)
@@ -974,6 +980,8 @@ browsers::layerbrowser::layerbrowser(wxWindow* parent, wxWindowID id) :
 browsers::layerbrowser::~layerbrowser()
 {
    delete _layerlist;
+   delete action_select;
+   delete action_wild;
 }
 
 void browsers::layerbrowser::OnActiveLayerL(wxListEvent& event)

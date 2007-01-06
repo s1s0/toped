@@ -9,8 +9,8 @@
     <ignoreparts/>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
-    <versioncontrol/>
+    <description></description>
+    <versioncontrol></versioncontrol>
     <secondaryLanguages/>
   </general>
   <kdevautoproject>
@@ -51,16 +51,16 @@
         <ccompiler>kdevgccoptions</ccompiler>
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevpgf77options</f77compiler>
-        <cxxflags>-O0 -g3 -pg</cxxflags>
+        <cxxflags>-O0 -Wall -pg -g3</cxxflags>
         <envvars/>
-        <topsourcedir/>
-        <cppflags/>
-        <ldflags/>
-        <ccompilerbinary/>
-        <cxxcompilerbinary/>
-        <f77compilerbinary/>
+        <topsourcedir></topsourcedir>
+        <cppflags></cppflags>
+        <ldflags></ldflags>
+        <ccompilerbinary></ccompilerbinary>
+        <cxxcompilerbinary></cxxcompilerbinary>
+        <f77compilerbinary></f77compilerbinary>
         <cflags>-O0 -g3 -pg</cflags>
-        <f77flags/>
+        <f77flags></f77flags>
       </debug>
     </configurations>
     <make>
@@ -79,10 +79,10 @@
     <general>
       <dbgshell>libtool</dbgshell>
       <programargs>$TPD_LOCAL/tll/tcase.tll</programargs>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -164,7 +164,7 @@
       <headerCompletionDelay>250</headerCompletionDelay>
     </codecompletion>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
@@ -179,7 +179,7 @@
   </kdevcppsupport>
   <kdevfileview>
     <groups>
-      <group pattern="*.cpp" name="Sources" />
+      <group pattern="*.cpp; *.c" name="Sources" />
       <group pattern="*.h" name="Headers" />
       <group pattern="*.yy" name="Parsers" />
       <group pattern="*.ll" name="Lexers" />
