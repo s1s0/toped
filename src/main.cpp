@@ -181,6 +181,7 @@ class TopedApp : public wxApp
    public:
       virtual bool   OnInit();
       virtual int    OnExit();
+      virtual       ~TopedApp(){};
 //      bool           ignoreOnRecovery() { return _ignoreOnRecovery;}
 //      void           set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
    protected:
@@ -326,8 +327,8 @@ bool TopedApp::OnInit() {
    CMDBlock = new parsercmd::cmdMAIN();
    InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
 
-   Toped->Show(TRUE);
    SetTopWindow(Toped);
+   Toped->Show(TRUE);
 
    wxString fontFile = wxT("$TPD_LOCAL/fonts/arial1.glf");
    wxFileName fontFN(fontFile);
@@ -340,7 +341,7 @@ bool TopedApp::OnInit() {
             wxYES_NO | wxICON_WARNING);
       if (wxID_NO == dlg1->ShowModal())
          return false;
-      delete dlg1;
+      dlg1->Destroy();
       std::string info("Font library \"$TPD_LOCAL/fonts/arial1.glf\" is not loaded. All text objects will not be properly processed");
       tell_log(console::MT_ERROR,info);
    }
@@ -359,7 +360,7 @@ bool TopedApp::OnInit() {
          recovery_mode = true;
       else
          tell_log(console::MT_WARNING,"Recovery rejected.");
-      delete dlg1;
+      dlg1->Destroy();
       if (!recovery_mode) SaveIgnoredCrashLog();
    }
    if (recovery_mode)
@@ -394,7 +395,8 @@ int TopedApp::OnExit() {
    delete CMDBlock; 
    delete DATC;
    FinishSessionLog();
-   return 0;
+   glfClose();
+   return wxApp::OnExit();
 }
 
 // Starting macro
