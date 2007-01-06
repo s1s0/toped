@@ -443,12 +443,9 @@ tui::layset_sample::layset_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
    _selected = false;
 }
 
-void tui::layset_sample::setColor(const layprop::tellRGB *col)
+void tui::layset_sample::setColor(const layprop::tellRGB& col)
 {
-   if (NULL != col)
-      _color.Set(col->red(), col->green(), col->blue());
-   else
-      _color.Set(0,0,0);
+   _color.Set(col.red(), col.green(), col.blue());
 }
 
 void tui::layset_sample::setColor(word layno)
@@ -708,7 +705,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
 {
    wxString color_name = cmdevent.GetString();
-   const layprop::tellRGB* color = DATC->getColor(std::string(color_name.fn_str()));
+   const layprop::tellRGB color = DATC->getColor(std::string(color_name.fn_str()));
    _sample->setColor(color);
    _sample->Refresh();
 }
@@ -739,12 +736,10 @@ void tui::defineLayer::OnDefaultColor(wxCommandEvent& cmdevent)
 {
    bool selected = cmdevent.GetInt();
    _colors->Enable(!selected);
-   const layprop::tellRGB* color;
    if (selected)
-      color = DATC->getColor(std::string(""));
+      _sample->setColor(DATC->getColor(std::string("")));
    else
-      color = DATC->getColor(std::string(_colors->GetStringSelection().fn_str()));
-   _sample->setColor(color);
+      _sample->setColor(DATC->getColor(std::string(_colors->GetStringSelection().fn_str())));
    _sample->Refresh();
 }
 
@@ -800,11 +795,11 @@ wxString tui::defineLayer::line()
 
 tui::defineLayer::~defineLayer()
 {
-   delete _colors;
-   delete _fills;
-   delete _lines;
-   delete _sample;
-   delete _selected;
+//   delete _colors;
+//   delete _fills;
+//   delete _lines;
+//   delete _sample;
+//   delete _selected;
 }
 
 //==============================================================================
@@ -818,12 +813,9 @@ tui::color_sample::color_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
    setColor(DATC->getColor(init));
 }
 
-void tui::color_sample::setColor(const layprop::tellRGB *col)
+void tui::color_sample::setColor(const layprop::tellRGB& col)
 {
-   if (NULL != col)
-      _color.Set(col->red(), col->green(), col->blue());
-   else
-      _color.Set(0,0,0);
+   _color.Set(col.red(), col.green(), col.blue());
 }
 
 void tui::color_sample::OnPaint(wxPaintEvent&)
@@ -847,6 +839,7 @@ BEGIN_EVENT_TABLE(tui::defineColor, wxDialog)
    EVT_TEXT(ID_REDVAL      , tui::defineColor::OnColorPropChanged )
    EVT_TEXT(ID_GREENVAL    , tui::defineColor::OnColorPropChanged )
    EVT_TEXT(ID_BLUEVAL     , tui::defineColor::OnColorPropChanged )
+   EVT_TEXT(ID_ALPHAVAL    , tui::defineColor::OnColorPropChanged )
 END_EVENT_TABLE()
 
 tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) :
@@ -854,12 +847,12 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 {
    nameList all_names;
    DATC->all_colors(all_names);
-   _colorList = new wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(-1,200), 0, NULL, wxLB_SORT);
+   _colorList = new wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    std::string init_color = *(all_names.begin());
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
-      _allColors[*CI] = new layprop::tellRGB(*(DATC->getColor(*CI)));
+      _allColors[*CI] = new layprop::tellRGB(DATC->getColor(*CI));
    }
    _dwcolname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_colname));
@@ -871,11 +864,12 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
                                            wxTextValidator(wxFILTER_NUMERIC, &_green));
    _c_blue   = new wxTextCtrl( this, ID_BLUEVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_blue));
-   _c_alpha  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _c_alpha  = new wxTextCtrl( this, ID_ALPHAVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_alpha));
    
    wxBoxSizer *hsizer0 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Color") );
    hsizer0->Add( _dwcolname   , 0, wxALL | wxEXPAND, 5);
+   hsizer0->Add(0,0,1); //
    hsizer0->Add( new wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
    
    wxBoxSizer *hsizer1 = new wxBoxSizer( wxHORIZONTAL );
@@ -901,6 +895,8 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 
    wxBoxSizer *hsizer5 = new wxBoxSizer( wxHORIZONTAL );
    hsizer5->Add(new wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+   FindWindow(ID_BTNAPPLY)->Enable(false);
+   
    hsizer5->Add(new wxButton( this, ID_BTNEDIT  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
    
    wxBoxSizer *vsizer2 = new wxBoxSizer( wxVERTICAL );
@@ -919,6 +915,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 
    wxBoxSizer *vsizer3 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Color") );
    vsizer3->Add( _colorList   , 0, wxALL | wxEXPAND, 5);
+   vsizer3->Add(0,0,1); //
    vsizer3->Add( vsizer2      , 0, wxEXPAND );
    
    wxBoxSizer *top_sizer = new wxBoxSizer( wxVERTICAL );
@@ -970,8 +967,9 @@ void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
       _c_green->SetValue(channel);channel.Clear();
       channel << col.Blue();
       _c_blue->SetValue(channel);channel.Clear();
-      layprop::tellRGB* scol = new layprop::tellRGB(col.Red(), col.Green(), col.Blue(),178);
-      _colorsample->setColor(scol);
+      _colorsample->setColor(layprop::tellRGB(col.Red(), col.Green(), col.Blue(),178));
+      wxCommandEvent dummy;
+      OnApply(dummy);
    }
 }
 
@@ -990,6 +988,7 @@ void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
    channel << scol->alpha();
    _c_alpha->SetValue(channel);channel.Clear();
    
+   FindWindow(ID_BTNAPPLY)->Enable(false);
 }
 
 void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(cmdevent))
@@ -1003,10 +1002,9 @@ void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(cmdevent))
    unsigned long d_blue;  s_blue.ToULong(&d_blue);
    unsigned long d_alpha;s_alpha.ToULong(&d_alpha);
    
-   layprop::tellRGB* scol = new layprop::tellRGB(d_red, d_green, d_blue, d_alpha);
-   _colorsample->setColor(scol);
-   
+   _colorsample->setColor(layprop::tellRGB(d_red, d_green, d_blue, d_alpha));
    _colorsample->Refresh();
+   FindWindow(ID_BTNAPPLY)->Enable(true);
 }
 
 void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
@@ -1064,7 +1062,7 @@ const layprop::tellRGB* tui::defineColor::getColor(std::string color_name) const
    return col_set->second;
 }
 
-void tui::defineColor::OnApply(wxCommandEvent& cmdevent)
+void tui::defineColor::OnApply(wxCommandEvent& WXUNUSED(event))
 {
    wxString s_name  = _colorList->GetStringSelection();
    wxString s_red   =   _c_red->GetValue();
@@ -1083,17 +1081,20 @@ void tui::defineColor::OnApply(wxCommandEvent& cmdevent)
       delete _allColors[ss_name];
       _allColors[ss_name] = scol;
    }
+   FindWindow(ID_BTNAPPLY)->Enable(false);
 }
 
 tui::defineColor::~defineColor()
 {
-   delete _colorList;
-   delete _dwcolname;
-   delete _colorsample;
-   delete _c_red;
-   delete _c_green;
-   delete _c_blue;
-   delete _c_alpha;
+//   delete _dwcolname;
+//   delete _colorsample;
+//   delete _c_red;
+//   delete _c_green;
+//   delete _c_blue;
+//   delete _c_alpha;
+//   delete _colorList;
+   for(colorMAP::const_iterator CI = _allColors.begin(); CI != _allColors.end(); CI++)
+      delete CI->second;
 }
 
 //==============================================================================
@@ -1325,7 +1326,6 @@ BEGIN_EVENT_TABLE(tui::defineFill, wxDialog)
    EVT_LISTBOX(ID_ITEMLIST     , tui::defineFill::OnFillSelected   )
     EVT_BUTTON(ID_BTNEDIT      , tui::defineFill::OnDefineFill     )
     EVT_BUTTON(ID_NEWITEM      , tui::defineFill::OnFillNameAdded  )
-    EVT_BUTTON(ID_BTNAPPLY     , tui::defineFill::OnApply          )
 END_EVENT_TABLE()
 
 tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) :
@@ -1333,7 +1333,7 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
 {
    nameList all_names;
    DATC->all_fills(all_names);
-   _fillList = new wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(-1,200), 0, NULL, wxLB_SORT);
+   _fillList = new wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    std::string init_color = *(all_names.begin());
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
@@ -1348,15 +1348,17 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
    
    wxBoxSizer *hsizer0 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Fill") );
    hsizer0->Add( _dwfilname   , 0, wxALL | wxEXPAND, 5);
+   hsizer0->Add(0,0,1); //
    hsizer0->Add( new wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
    
-   wxBoxSizer *hsizer5 = new wxBoxSizer( wxHORIZONTAL );
-   hsizer5->Add(new wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
-   hsizer5->Add(new wxButton( this, ID_BTNEDIT  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+//   wxBoxSizer *hsizer5 = new wxBoxSizer( wxHORIZONTAL );
+//   hsizer5->Add(new wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
    
    wxBoxSizer *vsizer2 = new wxBoxSizer( wxVERTICAL );
    vsizer2->Add( _fillsample , 0, wxALL | wxEXPAND, 5);
-   vsizer2->Add( hsizer5   , 0, wxEXPAND);
+//   vsizer2->Add( hsizer5   , 0, wxEXPAND);
+   vsizer2->Add(0,0,1); //
+   vsizer2->Add(new wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
    
    // Buttons
    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
@@ -1366,6 +1368,7 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
 
    wxBoxSizer *vsizer3 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Pattern") );
    vsizer3->Add( _fillList   , 0, wxALL | wxEXPAND, 5);
+   vsizer3->Add(0,0,1); //
    vsizer3->Add( vsizer2      , 0, wxEXPAND );
    
    wxBoxSizer *top_sizer = new wxBoxSizer( wxVERTICAL );
@@ -1403,16 +1406,6 @@ void tui::defineFill::OnFillSelected(wxCommandEvent& cmdevent)
     fillcopy(getFill(std::string(fill_name.fn_str())),_current_pattern);
    _fillsample->setFill(_current_pattern);
    _fillsample->Refresh();
-}
-
-void tui::defineFill::OnApply(wxCommandEvent& WXUNUSED(cmdevent))
-{
-   wxString s_name  = _fillList->GetStringSelection();
-   std::string ss_name(s_name.fn_str());
-   if (_allFills.end() != _allFills.find(ss_name))
-   {
-      fillcopy(_current_pattern, _allFills[ss_name]);
-   }
 }
 
 void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
@@ -1456,6 +1449,13 @@ void tui::defineFill::OnDefineFill(wxCommandEvent& cmdevent)
       fillcopy(dialog.pattern(),_current_pattern);
       _fillsample->setFill(_current_pattern);
       _fillsample->Refresh();
+      wxString s_name  = _fillList->GetStringSelection();
+      std::string ss_name(s_name.fn_str());
+      if (_allFills.end() != _allFills.find(ss_name))
+      {
+         fillcopy(_current_pattern, _allFills[ss_name]);
+      }
+      
    }
 }
 
@@ -1474,9 +1474,9 @@ void tui::defineFill::fillcopy(const byte* pattern, byte* nfill)
 
 tui::defineFill::~defineFill()
 {
-   delete _fillList;
-   delete _dwfilname;
-   delete _fillsample;
+//   delete _dwfilname;
+//   delete _fillsample;
+//   delete _fillList;
    for(fillMAP::const_iterator CI = _allFills.begin(); CI != _allFills.end(); CI++)
       delete[] CI->second;
 }

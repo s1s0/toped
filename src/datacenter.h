@@ -129,8 +129,8 @@ public:
    void                       all_lines(nameList& linelist) const {_properties.all_lines(linelist);}
    const byte*                getFill(word layno) {return _properties.drawprop().getFill(layno);}
    const byte*                getFill(std::string fill_name) {return _properties.drawprop().getFill(fill_name);}
-   const layprop::tellRGB*    getColor(word layno) {return _properties.drawprop().getColor(layno);}
-   const layprop::tellRGB*    getColor(std::string color_name) {return _properties.drawprop().getColor(color_name);}
+   const layprop::tellRGB&    getColor(word layno) {return _properties.drawprop().getColor(layno);}
+   const layprop::tellRGB&    getColor(std::string color_name) {return _properties.drawprop().getColor(color_name);}
    const layprop::LineSettings* getLine(word layno) {return _properties.drawprop().getLine(layno);}
    const layprop::LineSettings* getLine(std::string line_name) {return _properties.drawprop().getLine(line_name);}
    const std::string          getColorName(word layno) {return _properties.drawprop().getColorName(layno);}
