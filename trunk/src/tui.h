@@ -48,6 +48,7 @@ namespace tui {
       ID_REDVAL         ,
       ID_GREENVAL       ,
       ID_BLUEVAL        ,
+      ID_ALPHAVAL       ,
       ID_BTNEDIT        ,
       ID_BTNAPPLY       ,
       ID_BTNCLEAR       ,
@@ -180,7 +181,7 @@ namespace tui {
    public:
                      layset_sample(wxWindow*, wxWindowID, wxPoint, wxSize, word);
       void           setColor(word);
-      void           setColor(const layprop::tellRGB*);
+      void           setColor(const layprop::tellRGB&);
       void           setFill(word);
       void           setFill(const byte*);
       void           setLine(word);
@@ -201,7 +202,7 @@ namespace tui {
    class defineLayer : public wxDialog {
    public:
                      defineLayer(wxFrame*, wxWindowID, const wxString&, wxPoint, word);
-                    ~defineLayer();
+      virtual       ~defineLayer();
       void           OnColorChanged(wxCommandEvent&);
       void           OnFillChanged(wxCommandEvent&);
       void           OnLineChanged(wxCommandEvent&);
@@ -228,7 +229,7 @@ namespace tui {
    class color_sample : public wxWindow {
    public:
                      color_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string);
-      void           setColor(const layprop::tellRGB*);
+      void           setColor(const layprop::tellRGB&);
       void           OnPaint(wxPaintEvent&);
    protected:
       wxColour             _color;
@@ -241,13 +242,13 @@ namespace tui {
       typedef  std::map<std::string, layprop::tellRGB*>  colorMAP;
                      defineColor(wxFrame *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos);
-                    ~defineColor();
-      void           OnDefineColor(wxCommandEvent&);
-      void           OnColorSelected(wxCommandEvent&);
-      void           OnApply(wxCommandEvent&);
-      void           OnColorPropChanged(wxCommandEvent&);
-      void           OnColorNameAdded(wxCommandEvent&);
-      colorMAP&      allColors() {return _allColors;}
+      virtual          ~defineColor();
+      void              OnDefineColor(wxCommandEvent&);
+      void              OnColorSelected(wxCommandEvent&);
+      void              OnApply(wxCommandEvent&);
+      void              OnColorPropChanged(wxCommandEvent&);
+      void              OnColorNameAdded(wxCommandEvent&);
+      const colorMAP&   allColors() const {return _allColors;}
    private:
       void                    nameNormalize(wxString&);
       const layprop::tellRGB* getColor(std::string color_name) const;
@@ -290,7 +291,7 @@ namespace tui {
                      drawFillDef(wxWindow *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos, const byte*);
       byte*          pattern() {return _sampleDraw->pattern();}
-                    ~drawFillDef();
+      virtual       ~drawFillDef();
    protected:
       void              OnClear(wxCommandEvent&);
       void              OnFill(wxCommandEvent&);
@@ -316,10 +317,9 @@ namespace tui {
       typedef  std::map<std::string, byte*         >  fillMAP;
                      defineFill(wxFrame *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos);
-                    ~defineFill();
+      virtual       ~defineFill();
       void           OnDefineFill(wxCommandEvent&);
       void           OnFillSelected(wxCommandEvent&);
-      void           OnApply(wxCommandEvent&);
       void           OnFillNameAdded(wxCommandEvent&);
       fillMAP&       allPatterns() {return _allFills;}
    private:

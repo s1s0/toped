@@ -194,8 +194,8 @@ namespace layprop {
       word                       drawinglayer() const {return _drawinglayer;}
       const byte*                getFill(word layno) const;
       const byte*                getFill(std::string) const;
-      const tellRGB*             getColor(word layno) const;
-      const tellRGB*             getColor(std::string) const;
+      const tellRGB&             getColor(word layno) const;
+      const tellRGB&             getColor(std::string) const;
       const LineSettings*        getLine(word layno) const;
       const LineSettings*        getLine(std::string) const;
       friend class ViewProperties;

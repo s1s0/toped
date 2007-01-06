@@ -517,23 +517,23 @@ const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 // but is safer and preserves constness
 }
 
-const layprop::tellRGB* layprop::DrawProperties::getColor(word layno) const
+const layprop::tellRGB& layprop::DrawProperties::getColor(word layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
-   if (_layset.end() == layer_set) return &_defaultColor;
+   if (_layset.end() == layer_set) return _defaultColor;
    colorMAP::const_iterator col_set = _laycolors.find(layer_set->second->color());
-   if (_laycolors.end() == col_set) return &_defaultColor;
-   return col_set->second;
+   if (_laycolors.end() == col_set) return _defaultColor;
+   return *(col_set->second);
 // All the stuff above is equivalent to 
 //   return _laycolors[_layset[layno]->color()];
 // but is safer and preserves constness
 }
 
-const layprop::tellRGB* layprop::DrawProperties::getColor(std::string color_name) const
+const layprop::tellRGB& layprop::DrawProperties::getColor(std::string color_name) const
 {
    colorMAP::const_iterator col_set = _laycolors.find(color_name);
-   if (_laycolors.end() == col_set) return &_defaultColor;
-   return col_set->second;
+   if (_laycolors.end() == col_set) return _defaultColor;
+   return *(col_set->second);
 // All the stuff above is equivalent to 
 //   return _laycolors[color_name];
 // but is safer and preserves constness

@@ -1250,7 +1250,7 @@ void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
    tui::defineColor dlg(this, -1, wxT("Color Definitions"), pos);
    if ( dlg.ShowModal() == wxID_OK )
    {
-      layprop::colorMAP colors = dlg.allColors();
+      const layprop::colorMAP colors = dlg.allColors();
       for(layprop::colorMAP::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
       {
          wxString ost;
