@@ -147,6 +147,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(GDSconvert       )
    TELL_STDCMD_CLASSA(GDSexportLIB     )
    TELL_STDCMD_CLASSA(GDSexportTOP     )
+   TELL_STDCMD_CLASSA(PSexportTOP      )
    TELL_STDCMD_CLASSA(GDSreportlay     )
    TELL_STDCMD_CLASSA(GDSclose         )
    TELL_STDCMD_CLASSA(getPOINT         )

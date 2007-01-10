@@ -38,6 +38,7 @@ namespace laydata {
       void           read(TEDfile* const tedfile);
       void           write(TEDfile* const tedfile);
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
+      void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
       tdtcell*       addcell(std::string name);
       bool           removecell(std::string&, laydata::atticList*);
       tdtdata*       addbox(word la, TP* p1, TP* p2);

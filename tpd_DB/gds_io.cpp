@@ -353,6 +353,8 @@ GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
       std::ostringstream info;
       info << "File "<< fn <<" can NOT be opened";
       tell_log(console::MT_ERROR,info.str());
+      //@TODO: Exception Here
+      return;
    }//
    time_t acctim_N = acctime;
    tm* broken_time = localtime(&acctim_N);

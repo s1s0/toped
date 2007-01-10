@@ -335,7 +335,8 @@ void laydata::tdtdesign::write(TEDfile* const tedfile) {
    modified = false;
 }
 
-void laydata::tdtdesign::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recur) {
+void laydata::tdtdesign::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recur)
+{
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_LIBNAME, _name.size());
    wr->add_ascii(_name.c_str()); gdsf.flush(wr);
 
@@ -357,6 +358,13 @@ void laydata::tdtdesign::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recur
       top->GDSwrite(gdsf, _cells, root_cell, _UU, recur);
    }
    wr = gdsf.SetNextRecord(gds_ENDLIB);gdsf.flush(wr);
+}
+
+void laydata::tdtdesign::PSwrite(PSFile& psf, const tdtcell* top, const layprop::DrawProperties& drawprop)
+{
+   //
+   laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
+   top->PSwrite(psf, _cells, root_cell, drawprop);
 }
 
 void laydata::tdtdesign::recreate_hierarchy() {

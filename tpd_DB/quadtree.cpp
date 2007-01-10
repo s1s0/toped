@@ -491,14 +491,29 @@ void laydata::quadTree::write(TEDfile* const tedfile) const {
 }
 
 /*! Write the contents of the quadTree in a GDS file.\n
-Nothing special here - effectively the same as wrie method*/
-void laydata::quadTree::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const {
+Nothing special here - effectively the same as write method*/
+void laydata::quadTree::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
+{
    tdtdata* wdt = _first;
-   while(wdt) {
+   while(wdt)
+   {
       wdt->GDSwrite(gdsf,lay, UU); wdt = wdt->next();
    }   
    for(byte i = 0; i < 4; i++) 
       if (_quads[i]) _quads[i]->GDSwrite(gdsf,lay, UU);
+}
+
+/*! Write the contents of the quadTree in a PS file.\n
+Nothing special here - effectively the same as GDSwrite and write method*/
+void laydata::quadTree::PSwrite(PSFile& gdsf) const
+{
+   tdtdata* wdt = _first;
+   while(wdt)
+   {
+      wdt->PSwrite(gdsf); wdt = wdt->next();
+   }
+   for(byte i = 0; i < 4; i++) 
+      if (_quads[i]) _quads[i]->PSwrite(gdsf);
 }
 
 /*! Draw the contents of the container on the screen using the virtual 

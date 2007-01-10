@@ -28,9 +28,10 @@
 #include <sstream>
 #include "datacenter.h"
 #include "browsers.h"
-#include "../tpd_DB/tedat.h"
 #include "../tpd_common/outbox.h"
+#include "../tpd_DB/tedat.h"
 #include "../tpd_DB/viewprop.h"
+#include "../tpd_DB/ps_out.h"
 
 //-----------------------------------------------------------------------------
 // class gds2ted
@@ -378,6 +379,15 @@ void DataCenter::GDSclose() {
       delete _GDSDB;
       _GDSDB = NULL;
    unlockGDS();
+}
+
+void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
+{
+   //Get actual time
+   PSFile psex(filename);
+   _properties.drawprop().PSwrite(psex);
+   _TEDDB->PSwrite(psex, cell, _properties.drawprop());
+//   gdsex.closeFile();
 }
 
 void DataCenter::newDesign(std::string name, time_t created) 

@@ -80,6 +80,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("gdsexport"        ,(new                tellstdfunc::GDSexportLIB(telldata::tn_void,false)));
    mblock->addFUNC("gdsexport"        ,(new                tellstdfunc::GDSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("gdsclose"         ,(new                    tellstdfunc::GDSclose(telldata::tn_void, true)));
+   mblock->addFUNC("psexport"         ,(new                 tellstdfunc::PSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("tdtread"          ,(new                     tellstdfunc::TDTread(telldata::tn_void, true)));
    mblock->addFUNC("tdtread"          ,(new                  tellstdfunc::TDTreadIFF(telldata::tn_void, true)));
    mblock->addFUNC("tdtsave"          ,(new                     tellstdfunc::TDTsave(telldata::tn_void, true)));

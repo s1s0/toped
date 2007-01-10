@@ -30,6 +30,7 @@
 
 #include "tedstd.h"
 #include "gds_io.h"
+#include "ps_out.h"
 
 namespace laydata {
 
@@ -69,6 +70,7 @@ namespace laydata {
       void                 put(tdtdata* shape);
       void                 write(TEDfile* const) const;
       void                 GDSwrite(GDSin::GDSFile&, word const, real UU) const;
+      void                 PSwrite(PSFile&) const;
       void                 select_inBox(DBbox&, dataList*, bool);
       void                 select_fromList(dataList*, dataList*);
       void                 select_all(dataList*, bool mark = true);

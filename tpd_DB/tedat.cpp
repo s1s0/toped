@@ -540,6 +540,12 @@ void laydata::tdtbox::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
+void laydata::tdtbox::PSwrite(PSFile& gdsf) const
+{
+   const pointlist box4 = shape2poly();
+   gdsf.poly(box4, overlap());
+}
+
 DBbox laydata::tdtbox::overlap() const {
    DBbox ovl = DBbox(*_p1);
    ovl.overlap(*_p2);
@@ -559,7 +565,7 @@ void  laydata::tdtbox::rmpoint(TP& lp) {
    if (NULL != _p1) {delete _p1; _p1 = NULL;}
 };
 
-const pointlist laydata::tdtbox::shape2poly() {
+const pointlist laydata::tdtbox::shape2poly() const {
   // convert box to polygon
    pointlist _plist;
    _plist.push_back(TP(*_p1));_plist.push_back(TP(_p2->x(), _p1->y()));
@@ -925,6 +931,11 @@ void laydata::tdtpoly::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_ENDEL);
    gdsf.flush(wr);
+}
+
+void laydata::tdtpoly::PSwrite(PSFile& gdsf) const
+{
+   gdsf.poly(_plist, overlap());
 }
 
 DBbox laydata::tdtpoly::overlap() const {
@@ -1317,6 +1328,11 @@ void laydata::tdtwire::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
+void laydata::tdtwire::PSwrite(PSFile& gdsf) const
+{
+   gdsf.wire(_plist, _width, overlap());
+}
+
 DBbox laydata::tdtwire::overlap() const 
 {
    word nump = _plist.size();
@@ -1517,6 +1533,11 @@ void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_ENDEL);
    gdsf.flush(wr);
+}
+
+void laydata::tdtcellref::PSwrite(PSFile& gdsf) const
+{
+   gdsf.cellref(_structure->first, _translation);
 }
 
 void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticList* nshp) {
@@ -1803,6 +1824,21 @@ void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
+void laydata::tdtcellaref::PSwrite(PSFile& gdsf) const
+{
+   for (int i = 0; i < _rows; i++)
+   {// start/stop rows
+      for(int j = 0; j < _cols; j++)
+      { // start/stop columns
+         // for each of the visual array figures...
+         // ... get the translation matrix ...
+         CTM refCTM(TP(_stepX * i , _stepY * j ), 1, 0, false);
+         refCTM *= _translation;
+         gdsf.cellref(_structure->first, refCTM);
+      }
+   }
+}
+
 void  laydata::tdtcellaref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, laydata::atticList* nshp) {
    for (word i = 0; i < _cols; i++)
       for(word j = 0; j < _rows; j++) {
@@ -2039,6 +2075,11 @@ void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
    wr->add_ascii(_text.c_str());gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_ENDEL);
    gdsf.flush(wr);
+}
+
+void laydata::tdttext::PSwrite(PSFile& gdsf) const
+{
+   gdsf.text(_text, _translation);
 }
 
 DBbox laydata::tdttext::overlap() const {

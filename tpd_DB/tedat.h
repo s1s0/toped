@@ -35,6 +35,7 @@
 #include "tedstd.h"
 #include "viewprop.h"
 #include "gds_io.h"
+#include "ps_out.h"
 
 namespace laydata {
 
@@ -80,12 +81,14 @@ namespace laydata {
       virtual   void       write(TEDfile* const tedfile) const = 0;
    //! Write the tdtdata object in GDS file.
       virtual   void       GDSwrite(GDSin::GDSFile&, word, real) const = 0;
+   //! Write the tdtdata object in PS file.
+      virtual   void       PSwrite(PSFile&) const = 0;
    //!
       virtual   bool       point_inside(const TP);
    //! shape cut with the input polygon
       virtual   void       polycut(pointlist&, shapeList**) = 0;
    //! 
-      virtual  const pointlist  shape2poly() = 0;
+      virtual  const pointlist  shape2poly() const = 0;
    //! Add a point to the tdtdata object. Used to handle the objects under construction on the screen.
       virtual   void       addpoint(TP ) {};
    //! Removes a point from the tdtdata object. Used to handle the objects under construction on the screen.
@@ -141,12 +144,13 @@ namespace laydata {
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
+      void                 PSwrite(PSFile&) const;
       void                 addpoint(TP);
       void                 rmpoint(TP&);
       word                 numpoints() const {return 4;};
       void                 polycut(pointlist&, shapeList**);
 //      tdtdata*             polymerge(tdtdata*);
-      const pointlist      shape2poly();
+      const pointlist      shape2poly() const;
       
    protected:   
       void                 select_points(DBbox&, SGBitSet*);
@@ -181,13 +185,14 @@ namespace laydata {
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
+      void                 PSwrite(PSFile&) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
       void                 rmpoint(TP&);
       word                 numpoints() const {return _plist.size();};
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**);
 //      tdtdata*             polymerge(tdtdata*);
-      const pointlist      shape2poly() {return _plist;};
+      const pointlist      shape2poly() const {return _plist;};
 //   protected:   
    private:
       void                 select_points(DBbox&, SGBitSet*);
@@ -220,13 +225,14 @@ namespace laydata {
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
+      void                 PSwrite(PSFile&) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
       void                 rmpoint(TP&);
       word                 numpoints() const {return _plist.size();};
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**){};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
-      const pointlist      shape2poly(){return pointlist();};
+      const pointlist      shape2poly() const {return pointlist();};
 //   protected:   
    private:
       void                 precalc(pointlist&, _dbl_word) const;
@@ -269,6 +275,7 @@ namespace laydata {
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
+      void                 PSwrite(PSFile&) const;
       virtual void         ungroup(tdtdesign*, tdtcell*, atticList*);
       std::string          cellname() const {return _structure->first;};
       tdtcell*             structure() const{return _structure->second;};
@@ -276,7 +283,7 @@ namespace laydata {
       CTM                  translation() const {return _translation;};
       void                 polycut(pointlist&, shapeList**) {};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
-      const pointlist      shape2poly() {return pointlist();};
+      const pointlist      shape2poly() const {return pointlist();};
    protected:
       void                 select_points(DBbox&, SGBitSet*) {};
       void                 unselect_points(DBbox&, SGBitSet*) {return;};
@@ -310,6 +317,7 @@ namespace laydata {
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
+      void                 PSwrite(PSFile&) const;
       void                 ungroup(tdtdesign*, tdtcell*, atticList*);
    private:   
 //      bool                 aref_visible(layprop::DrawProperties&, int*) const;
@@ -344,10 +352,11 @@ namespace laydata {
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
+      void                 PSwrite(PSFile&) const;
       word                 numpoints() const {return 1;};
       void                 polycut(pointlist&, shapeList**){};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
-      const pointlist      shape2poly() {return pointlist();};
+      const pointlist      shape2poly() const {return pointlist();};
    protected:  
       void                 select_points(DBbox&, SGBitSet*) {return;};
       void                 unselect_points(DBbox&, SGBitSet*) {return;};

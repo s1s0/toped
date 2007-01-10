@@ -31,6 +31,7 @@
 #include <string>
 #include <math.h>
 #include "tedstd.h"
+#include "ps_out.h"
 namespace layprop {
 
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
@@ -198,6 +199,7 @@ namespace layprop {
       const tellRGB&             getColor(std::string) const;
       const LineSettings*        getLine(word layno) const;
       const LineSettings*        getLine(std::string) const;
+      void                       PSwrite(PSFile&) const;
       friend class ViewProperties;
    protected:
       laySetList                 _layset;

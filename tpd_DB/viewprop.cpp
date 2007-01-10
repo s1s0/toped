@@ -605,6 +605,19 @@ void layprop::DrawProperties::saveLayers(FILE* prop_file) const
    fprintf(prop_file, "}\n\n");
 }
 
+void layprop::DrawProperties::PSwrite(PSFile& psf) const
+{
+   for(colorMAP::const_iterator CI = _laycolors.begin(); CI != _laycolors.end(); CI++)
+   {
+      tellRGB* the_color = CI->second;
+      psf.defineColor( CI->first.c_str() , the_color->red(),
+                       the_color->green(), the_color->blue() );
+   }
+
+   for(fillMAP::const_iterator CI = _layfill.begin(); CI != _layfill.end(); CI++)
+      psf.defineFill( CI->first.c_str() , CI->second);
+}
+
 layprop::DrawProperties::~DrawProperties() {
    for (laySetList::iterator LSI = _layset.begin(); LSI != _layset.end(); LSI++)
       delete LSI->second;
