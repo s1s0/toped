@@ -58,6 +58,7 @@ public:
    void                       GDSexport(laydata::tdtcell*, bool, std::string&);
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
+   void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string, std::list<std::string>& topcells);
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&); 

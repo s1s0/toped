@@ -3419,6 +3419,46 @@ int tellstdfunc::GDSexportTOP::execute()
 }
 
 //=============================================================================
+tellstdfunc::PSexportTOP::PSexportTOP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::PSexportTOP::execute()
+{
+   std::string filename = getStringValue();
+   std::string cellname = getStringValue();
+   if (expandFileName(filename))
+   {
+      laydata::tdtcell *excell = NULL;
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         excell = ATDB->checkcell(cellname);
+         if (NULL != excell)
+            DATC->PSexport(excell, filename);
+      DATC->unlockDB();
+      if (NULL != excell)
+      {
+         LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
+                                    << ",\"" << filename << "\");";
+         LogFile.flush();
+      }
+      else
+      {
+         std::string message = "Cell " + cellname + " not found in the database";
+         tell_log(console::MT_ERROR,message);
+      }
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
+   }
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {

@@ -108,6 +108,7 @@ namespace laydata {
       void                 write(TEDfile* const, const cellList&, TDTHierTree* const) const;
       void                 GDSwrite(GDSin::GDSFile&, const cellList&,
                                                 TDTHierTree* const, real, bool) const;
+      void                 PSwrite(PSFile&, const cellList&, TDTHierTree* const, const layprop::DrawProperties&) const;
       TDTHierTree*         hierout(TDTHierTree*& Htree, tdtcell* parent, 
                                                            cellList* celldefs);
       DBbox                overlap() const;
