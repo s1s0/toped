@@ -2079,7 +2079,10 @@ void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
 
 void laydata::tdttext::PSwrite(PSFile& gdsf) const
 {
-   gdsf.text(_text, _translation);
+   CTM fmtrx(_translation);
+   fmtrx.Scale(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT);
+   CTM ffmtrx(fmtrx.a(), fmtrx.b(), fmtrx.c(), fmtrx.d(), _translation.tx(), _translation.ty());
+   gdsf.text(_text, ffmtrx);
 }
 
 DBbox laydata::tdttext::overlap() const {
