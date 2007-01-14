@@ -365,6 +365,7 @@ void laydata::tdtdesign::PSwrite(PSFile& psf, const tdtcell* top, const layprop:
    //
    laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
    top->PSwrite(psf, _cells, root_cell, drawprop);
+   psf.pspage(top->name(),top->overlap());
 }
 
 void laydata::tdtdesign::recreate_hierarchy() {

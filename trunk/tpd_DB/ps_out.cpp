@@ -61,11 +61,13 @@ void PSFile::writeStdDefs()
 {
    fprintf(_psfh,"%%%%BeginProlog\n");
    fprintf(_psfh,"/bd{bind def}def\n");
-   fprintf(_psfh,"/tr{gsave concat exec grestore}bd\n");
+   fprintf(_psfh,"/tr{gsave concat execform grestore}bd\n");
    fprintf(_psfh,"/cn{gsave concat}bd\n");
    fprintf(_psfh,"/gr{grestore}bd\n");
    fprintf(_psfh,"/dt{gsave selectfont moveto show grestore}bd\n");
    fprintf(_psfh,"/dp{gsave setlinecap setlinewidth ustrokepath false upath grestore dpl}bd\n");
+   fprintf(_psfh,"/dc_ {ustroke}bd\n");
+
 }
 
 bool PSFile::checkCellWritten(std::string cellname)
@@ -90,8 +92,57 @@ void PSFile::defineColor(std::string name, byte colR, byte colG, byte colB)
                                                       (real)(colB)/255.0 );
 }
 
-void PSFile::defineFill(std::string, byte*)
+void PSFile::defineFill(std::string pname, const byte* pat)
 {
+   fprintf(_psfh,"<< /PatternType 1\n");
+   fprintf(_psfh,"   /PaintType 2\n");
+   fprintf(_psfh,"   /TilingType 1\n");
+   fprintf(_psfh,"   /BBox [0 0 31 31]\n");
+   fprintf(_psfh,"   /XStep 2\n");
+   fprintf(_psfh,"   /YStep 2\n");
+   fprintf(_psfh,"   /PaintProc\n");
+   fprintf(_psfh,"    { pop\n");
+   fprintf(_psfh,"      32 32\n");
+   fprintf(_psfh,"      true\n");
+   fprintf(_psfh,"      [32 0 0 -31 0 32]\n");
+   fprintf(_psfh,"      {<");
+   for(word i = 0; i < 32; i++)
+   {
+      if ((0 == i%4) && (i != 31))
+         fprintf(_psfh,"\n          ");
+      fprintf(_psfh,"%02x%02x %02x%02x ", pat[4*i+0], pat[4*i+1], pat[4*i+2], pat[4*i+3] );
+   }
+   fprintf(_psfh,"\n      >}\n");
+   fprintf(_psfh,"      imagemask\n");
+   fprintf(_psfh,"      fill\n");
+   fprintf(_psfh,"    } bind\n");
+   fprintf(_psfh,">>\n");
+   fprintf(_psfh,"matrix\n");
+   fprintf(_psfh,"makepattern\n");
+   fprintf(_psfh,"/tp_%s exch def\n",pname.c_str());
+   fprintf(_psfh,"/dc_%s {gsave dup ustroke currentrgbcolor tp_%s setpattern ufill grestore}bd\n",
+           pname.c_str(),
+           pname.c_str()
+          );
+
+/*   fprintf(_psfh,"%% %s pattern definition\n", pname.c_str());
+   fprintf(_psfh,"<<\n");
+   fprintf(_psfh,"   /ImageType 1\n");
+   fprintf(_psfh,"   /Width 32\n");
+   fprintf(_psfh,"   /Height 32\n");
+   fprintf(_psfh,"   /Decode [1 0]\n");
+   fprintf(_psfh,"   /ImageMatrix [32 0 0 -32 0 32]\n");
+   fprintf(_psfh,"   /DataSource  {<");
+   for(word i = 0; i < 32; i++)
+   {
+      if ((0 == i%4) && (i != 31))
+         fprintf(_psfh,"\n                  ");
+      fprintf(_psfh,"%02x%02x%02x%02x ", pat[4*i+0], pat[4*i+1], pat[4*i+2], pat[4*i+3] );
+   }
+   fprintf(_psfh,"\n                 >}\n");
+   fprintf(_psfh,">>\n");
+   fprintf(_psfh,"imagemask\n");
+   fprintf(_psfh,"/tp_%s exch def\n", pname.c_str());*/
 }
 
 void PSFile::formHeader(std::string cellname, DBbox overlap)
@@ -116,33 +167,29 @@ void PSFile::formFooter()
 void PSFile::propSet(std::string color_name, std::string pattern_name)
 {
    fprintf(_psfh, "      tc_%s\n", color_name.c_str());
-   fprintf(_psfh, "      /dpl {%s} bind\n", pattern_name.c_str());
+   fprintf(_psfh, "      /dpl {dc_%s} bd\n", pattern_name.c_str());
 }
 
 void PSFile::poly(const pointlist points, const DBbox bbox)
 {
-   fprintf(_psfh,"         {{%i %i %i %i ", bbox.p1().x(), bbox.p1().y(),
+   fprintf(_psfh,"      {{%i %i %i %i ", bbox.p1().x(), bbox.p1().y(),
                                             bbox.p2().x(), bbox.p2().y() );
    for(word i = 0; i < points.size(); i++)
-   {
-//      PSP cp = mtrx * wp;//translate wp
       fprintf(_psfh,"%i %i ",points[i].x(), points[i].y());
-   }
    fprintf(_psfh,"}<00 01 %X 03 0A>}dpl\n",31+points.size());
 }
 
 void PSFile::wire(const pointlist points, word width, DBbox bbox)
 {
-   fprintf(_psfh,"         {{%i %i %i %i ", bbox.p1().x(), bbox.p1().y(),
+   fprintf(_psfh,"      {{%i %i %i %i ", bbox.p1().x(), bbox.p1().y(),
                                             bbox.p2().x(), bbox.p2().y() );
    for(word i = 0; i < points.size(); i++)
-   {
-//      PSP cp = mtrx * wp;//translate fp
       fprintf(_psfh,"%i %i ",points[i].x(), points[i].y());
-   }
    //It's possible here to specify the pathtype of GDSII style
    //int pt = (4== pathtype) ? 2 : pathtype;
-   fprintf(_psfh,"}<00 01 %X 03>} %i %i dp\n",31+points.size(), width, 1/*pt*/);
+   // in Toped however we have only one pathtype - which is equivalent to type 2
+   // in both - PS and GDSII
+   fprintf(_psfh,"}<00 01 %X 03>} %i %i dp\n",31+points.size(), width, 2/*pt*/);
 }
 
 void PSFile::text(std::string text, const CTM tmtrx)
@@ -153,9 +200,34 @@ void PSFile::text(std::string text, const CTM tmtrx)
                      tmtrx.a(), tmtrx.b(), tmtrx.c(), tmtrx.d(), 0.0, 0.0);
 }
 
-void PSFile::cellref(std::string text, const CTM)
+void PSFile::cellref(std::string cellname, const CTM mx)
 {
-   //@TODO cell reference !!!
+   fprintf(_psfh,"      %s [%G %G %G %G %G %G] tr\n", cellname.c_str(),
+                         mx.a(), mx.b(), mx.c(), mx.d(), mx.tx(), mx.ty());
+
+}
+
+void PSFile::pspage(std::string topcell, const DBbox box)
+{
+   double W=(220/25.4)*72;
+   double H=(297/25.4)*72;
+   double w = abs(box.p1().x() - box.p2().x());
+   double h = abs(box.p1().y() - box.p2().y());
+   double sc = (W/H < w/h) ? w/W : h/H;
+   double tx = ((box.p1().x() + box.p2().x()) - W*sc) / 2;
+   double ty = ((box.p1().y() + box.p2().y()) - H*sc) / 2;
+   CTM laymx( sc, 0.0, 0.0, sc, tx, ty);
+//   _LayCTM.FlipX((box->p1().y() + box->p2().y())/2);  // flip Y coord towards the center
+   CTM psmx(laymx.Reversed());
+
+   
+   fprintf(_psfh,"%%%%EndProlog\n");
+   fprintf(_psfh,"[%G %G %G %G %G %G] concat\n",
+                         psmx.a(), psmx.b(), psmx.c(), psmx.d(), psmx.tx(), psmx.ty());
+   fprintf(_psfh,"[/Pattern /DeviceRGB] setcolorspace\n");
+   fprintf(_psfh,"%s execform\n",topcell.c_str());
+   fprintf(_psfh,"showpage\n");
+   fprintf(_psfh,"%%%%EOF\n");
 }
 
 PSFile::~PSFile()

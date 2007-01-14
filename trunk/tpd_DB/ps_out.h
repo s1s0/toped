@@ -41,11 +41,12 @@ public:
    void           formFooter();
    void           propSet(std::string, std::string);
    void           defineColor(std::string, byte, byte, byte);
-   void           defineFill(std::string, byte*);
+   void           defineFill(std::string, const byte*);
    void           poly(const pointlist, const DBbox);
    void           wire(const pointlist, word, const DBbox);
    void           text(std::string, const CTM);
    void           cellref(std::string, const CTM);
+   void           pspage(std::string, const DBbox);
                  ~PSFile();
 protected:
    void           writeStdDefs();
