@@ -407,6 +407,7 @@ void laydata::tdtbox::openGL_drawfill(layprop::DrawProperties&, const pointlist&
 
 void laydata::tdtbox::openGL_drawsel(const pointlist& ptlist, const SGBitSet* pslist) const
 {
+   assert(0 != ptlist.size());
    if (sh_selected == status())
    {
       glBegin(GL_LINE_LOOP);
@@ -695,6 +696,7 @@ void laydata::tdtpoly::openGL_drawfill(layprop::DrawProperties&, const pointlist
 
 void laydata::tdtpoly::openGL_drawsel(const pointlist& ptlist, const SGBitSet* pslist) const
 {
+   assert(0 != ptlist.size());
    if (sh_selected == status())
    {
       glBegin(GL_LINE_LOOP);
@@ -1093,6 +1095,7 @@ void laydata::tdtwire::openGL_drawfill(layprop::DrawProperties&, const pointlist
 
 void laydata::tdtwire::openGL_drawsel(const pointlist& ptlist, const SGBitSet* pslist) const
 {
+   assert(0 != ptlist.size());
    if (sh_selected == status())
    {
       glBegin(GL_LINE_STRIP);
@@ -1473,6 +1476,7 @@ void laydata::tdtcellref::openGL_drawfill(layprop::DrawProperties& drawprop, con
 
 void laydata::tdtcellref::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
 {
+   assert(0 != ptlist.size());
    if (sh_selected == status())
    {
       glBegin(GL_LINE_LOOP);
@@ -1768,6 +1772,7 @@ void laydata::tdtcellaref::openGL_drawfill(layprop::DrawProperties& drawprop, co
 
 void laydata::tdtcellaref::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
 {
+   assert(0 != ptlist.size());
    if (sh_selected == status())
    {
       glBegin(GL_LINE_LOOP);
@@ -1998,6 +2003,7 @@ void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const 
 
 void laydata::tdttext::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
 {
+   assert(0 != ptlist.size());
    if (sh_selected == status())
    {
       glBegin(GL_LINE_LOOP);
