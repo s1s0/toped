@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Sat Jan 10 2004
@@ -19,7 +19,7 @@
 //    Description: TDT I/O and database access control
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$

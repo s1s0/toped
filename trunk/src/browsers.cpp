@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
 //          $URL$
 //        Created: Mon Aug 11 2003
@@ -20,7 +20,7 @@
 //                 definition browser
 //===========================================================================
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$

@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Sat, 14 Jan 17:32:27 2006
@@ -19,7 +19,7 @@
 //    Description: Toped user configurable resources
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$

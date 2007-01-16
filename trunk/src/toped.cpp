@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Thu May  6 22:04:50 BST 2004
@@ -19,7 +19,7 @@
 //    Description: Main Toped framework
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$
