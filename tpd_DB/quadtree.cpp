@@ -546,26 +546,29 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
          pointlist points;
          // precalculate drawing data
          wdt->openGL_precalc(drawprop, points);
-         // draw the shape fill (contents of refs, arefs and texts)
-         if (fill) wdt->openGL_drawfill(drawprop, points);
-         // draw the outline of the shapes and overlapping boxes 
-         wdt->openGL_drawline(drawprop, points);
-         if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
+         if (0 != points.size())
          {
-            drawprop.setLineProps(true);
-            if       (sh_selected == wdt->status())
-               wdt->openGL_drawsel(points, NULL);
-            else if  (sh_partsel  == wdt->status())
+            // draw the shape fill (contents of refs, arefs and texts)
+            if (fill) wdt->openGL_drawfill(drawprop, points);
+            // draw the outline of the shapes and overlapping boxes 
+            wdt->openGL_drawline(drawprop, points);
+            if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
             {
-               dataList::const_iterator SI;
-               for (SI = slst->begin(); SI != slst->end(); SI++)
-                  if (SI->first == wdt) break;
-               assert(SI != slst->end());
-               wdt->openGL_drawsel(points, SI->second);
+               drawprop.setLineProps(true);
+               if       (sh_selected == wdt->status())
+                  wdt->openGL_drawsel(points, NULL);
+               else if  (sh_partsel  == wdt->status())
+               {
+                  dataList::const_iterator SI;
+                  for (SI = slst->begin(); SI != slst->end(); SI++)
+                     if (SI->first == wdt) break;
+                  assert(SI != slst->end());
+                  wdt->openGL_drawsel(points, SI->second);
+               }
+               drawprop.setLineProps(false);
             }
-            drawprop.setLineProps(false);
+            wdt->openGL_postclean(drawprop, points);
          }
-         wdt->openGL_postclean(drawprop, points);
          wdt = wdt->next();
       }
    }

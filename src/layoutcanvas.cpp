@@ -680,11 +680,15 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    case ZOOM_EMPTY  : box = new DBbox(-10,-10,90,90); break;
    default: assert(false);
    }
-   int W, H;
-   GetClientSize(&W,&H);
+   int Wcl, Hcl;
+   GetClientSize(&Wcl,&Hcl);
+   // To prevent a loss of precision in the following lines - don't use
+   // integer variables (Wcl & Hcl) directly
+   double W = Wcl;
+   double H = Hcl;
    double w = abs(box->p1().x() - box->p2().x());
    double h = abs(box->p1().y() - box->p2().y());
-   double sc = (W/H < w/h) ? w/W : h/H;
+   double sc = 1.1 * ((W/H < w/h) ? w/W : h/H);
    double tx = ((box->p1().x() + box->p2().x()) - W*sc) / 2;
    double ty = ((box->p1().y() + box->p2().y()) - H*sc) / 2;
    _LayCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);
