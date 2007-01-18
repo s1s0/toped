@@ -37,8 +37,8 @@ public:
                   PSFile(std::string);
    bool           checkCellWritten(std::string);
    void           registerCellWritten(std::string);
-   void           formHeader(std::string, DBbox);
-   void           formFooter();
+   void           cellHeader(std::string, DBbox);
+   void           cellFooter();
    void           propSet(std::string, std::string);
    void           defineColor(std::string, byte, byte, byte);
    void           defineFill(std::string, const byte*);
@@ -46,13 +46,16 @@ public:
    void           wire(const pointlist, word, const DBbox);
    void           text(std::string, const CTM);
    void           cellref(std::string, const CTM);
-   void           pspage(std::string, const DBbox);
+   void           pspage_header(const DBbox);
+   void           pspage_footer(std::string);
+   bool           hier()   {return _hierarchical;}
                  ~PSFile();
 protected:
    void           writeStdDefs();
    FILE*          _psfh;
    std::string    _fname;
    nameList       _childnames;
+   bool           _hierarchical;
 };
 
 #endif // PS_OUT_H_DEFINED

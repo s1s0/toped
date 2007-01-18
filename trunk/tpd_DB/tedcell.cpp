@@ -464,26 +464,27 @@ void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
    gdsf.registerCellWritten(_name);
 }
 
-void laydata::tdtcell::PSwrite(PSFile& psf, const cellList& allcells,
-                                                TDTHierTree* const root, const layprop::DrawProperties& drawprop) const
+void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop,
+                               const cellList* allcells, TDTHierTree* const root) const
 {
-   // We going to write the cells in hierarchical order. Children - first!
-   laydata::TDTHierTree* Child= root->GetChild();
-   while (Child)
+   if (psf.hier())
    {
-      allcells.find(Child->GetItem()->name())->second->PSwrite(psf, allcells, Child, drawprop);
-      Child = Child->GetBrother();
+      assert( root );
+      assert( allcells );
+      // We going to write the cells in hierarchical order. Children - first!
+      laydata::TDTHierTree* Child= root->GetChild();
+      while (Child)
+      {
+         allcells->find(Child->GetItem()->name())->second->PSwrite(psf, drawprop, allcells, Child);
+         Child = Child->GetBrother();
+      }
+      // If no more children and the cell has not been written yet
+      if (psf.checkCellWritten(_name)) return;
+      //
+      std::string message = "...converting " + _name;
+      tell_log(console::MT_INFO, message);
    }
-   // If no more children and the cell has not been written yet
-   if (psf.checkCellWritten(_name)) return;
-   //
-   std::string message = "...converting " + _name;
-   tell_log(console::MT_INFO, message);
-   psf.formHeader(_name,overlap());
-/*   GDSin::GDSrecord* wr = psf.SetNextRecord(gds_BGNSTR);
-   psf.SetTimes(wr);psf.flush(wr);
-   wr = psf.SetNextRecord(gds_STRNAME, _name.size());
-   wr->add_ascii(_name.c_str()); psf.flush(wr);*/
+   psf.cellHeader(_name,overlap());
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
@@ -493,12 +494,12 @@ void laydata::tdtcell::PSwrite(PSFile& psf, const cellList& allcells,
       {
          if (0 != curlayno)
             psf.propSet(drawprop.getColorName(curlayno), drawprop.getFillName(curlayno));
-         wl->second->PSwrite(psf);
+         wl->second->PSwrite(psf, drawprop);
       }
    }
-   
-   psf.formFooter();
-   psf.registerCellWritten(_name);
+   psf.cellFooter();
+   if (psf.hier())
+      psf.registerCellWritten(_name);
 }
 
 laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree, 

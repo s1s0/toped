@@ -33,6 +33,7 @@
 PSFile::PSFile(std::string fname)
 {
    _fname = fname;
+   _hierarchical = false;
    std::ostringstream info;
    info << "Writing PostScript output file: "<< _fname;
    tell_log(console::MT_INFO,info.str());
@@ -67,7 +68,7 @@ void PSFile::writeStdDefs()
    fprintf(_psfh,"/dt{gsave selectfont moveto show grestore}bd\n");
    fprintf(_psfh,"/dp{gsave setlinecap setlinewidth ustrokepath false upath grestore dpl}bd\n");
    fprintf(_psfh,"/dc_ {ustroke}bd\n");
-
+   fprintf(_psfh,"/tc_ {0.5 0.5 0.5 setrgbcolor}bd\n");
 }
 
 bool PSFile::checkCellWritten(std::string cellname)
@@ -126,25 +127,21 @@ void PSFile::defineFill(std::string pname, const byte* pat)
           );
 }
 
-void PSFile::formHeader(std::string cellname, DBbox overlap)
+void PSFile::cellHeader(std::string cellname, DBbox overlap)
 {
-   fprintf(_psfh, "%%Cell %s\n", cellname.c_str());
-   fprintf(_psfh, "/%s{\n", cellname.c_str());
-//   fprintf(_psfh, "<< /FormType 1\n");
-//   fprintf(_psfh, "   /BBox [%i %i %i %i]\n", overlap.p1().x(),
-//                                            overlap.p1().y(),
-//                                            overlap.p2().x(),
-//                                            overlap.p2().y() );
-//   fprintf(_psfh, "   /Matrix [1 0 0 1 0 0]\n");
-//   fprintf(_psfh, "   /PaintProc {\n");
-//   fprintf(_psfh, "   /PaintProc {\n");
+   if (_hierarchical)
+   {
+      fprintf(_psfh, "%%Cell %s\n", cellname.c_str());
+      fprintf(_psfh, "/%s{\n", cellname.c_str());
+   }
 }
 
-void PSFile::formFooter()
+void PSFile::cellFooter()
 {
-/*   fprintf(_psfh, "   } bind\n");
-   fprintf(_psfh, ">> def\n");*/
-   fprintf(_psfh,"} bd\n");
+   if (_hierarchical)
+      fprintf(_psfh,"} bd\n");
+   else
+      fprintf(_psfh,"gr\n");
 }
 
 void PSFile::propSet(std::string color_name, std::string pattern_name)
@@ -184,18 +181,24 @@ void PSFile::text(std::string text, const CTM tmtrx)
 
 void PSFile::cellref(std::string cellname, const CTM mx)
 {
-   fprintf(_psfh,"      /%s [%G %G %G %G %G %G] tr\n", cellname.c_str(),
-                         mx.a(), mx.b(), mx.c(), mx.d(), mx.tx(), mx.ty());
+   if (_hierarchical)
+      fprintf(_psfh,"      /%s [%G %G %G %G %G %G] tr\n", cellname.c_str(),
+                           mx.a(), mx.b(), mx.c(), mx.d(), mx.tx(), mx.ty());
+   else
+   {
+      fprintf(_psfh,"      [%G %G %G %G %G %G] cn\n",
+                           mx.a(), mx.b(), mx.c(), mx.d(), mx.tx(), mx.ty());
+   }
 
 }
 
-void PSFile::pspage(std::string topcell, const DBbox box)
+void PSFile::pspage_header(const DBbox box)
 {
    double W=(220/25.4)*72;
    double H=(297/25.4)*72;
    double w = abs(box.p1().x() - box.p2().x());
    double h = abs(box.p1().y() - box.p2().y());
-   double sc = (W/H < w/h) ? w/W : h/H;
+   double sc = (W/H < w/h) ? w/(W-30) : h/(H-30);
    double tx = ((box.p1().x() + box.p2().x()) - W*sc) / 2;
    double ty = ((box.p1().y() + box.p2().y()) - H*sc) / 2;
    CTM laymx( sc, 0.0, 0.0, sc, tx, ty);
@@ -205,7 +208,12 @@ void PSFile::pspage(std::string topcell, const DBbox box)
    fprintf(_psfh,"[%G %G %G %G %G %G] concat\n",
                          psmx.a(), psmx.b(), psmx.c(), psmx.d(), psmx.tx(), psmx.ty());
    fprintf(_psfh,"[/Pattern /DeviceRGB] setcolorspace\n");
-   fprintf(_psfh,"%s\n",topcell.c_str());
+}
+
+void PSFile::pspage_footer(std::string topcell)
+{
+   if (_hierarchical)
+      fprintf(_psfh,"%s\n",topcell.c_str());
    fprintf(_psfh,"showpage\n");
    fprintf(_psfh,"%%%%EOF\n");
 }

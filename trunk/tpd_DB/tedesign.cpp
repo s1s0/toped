@@ -364,8 +364,18 @@ void laydata::tdtdesign::PSwrite(PSFile& psf, const tdtcell* top, const layprop:
 {
    //
    laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
-   top->PSwrite(psf, _cells, root_cell, drawprop);
-   psf.pspage(top->name(),top->overlap());
+   if (psf.hier())
+   {
+      top->PSwrite(psf, drawprop, &_cells, root_cell);
+      psf.pspage_header(top->overlap());
+      psf.pspage_footer(top->name());
+   }
+   else
+   {
+      psf.pspage_header(top->overlap());
+      top->PSwrite(psf, drawprop, &_cells, root_cell);
+      psf.pspage_footer(top->name());
+   }
 }
 
 void laydata::tdtdesign::recreate_hierarchy() {
