@@ -1,9 +1,10 @@
 General
 =========
   * MEMORY LEAKAGE DEBUG!
-  * Theread status and status line in general.
   * layer fill control - command and menu
   * No visualization for addtext() (_tmpdata MouseStart requires additional parameters?)
+  * No visualization for addcell() (_tmpdata MouseStart requires additional parameters?)
+  * No visualization for move/copy cellaref
   * Online hierarhy tree maintanence still has troubles - especially when
     deleting the stuff from the top level. Check and debug!
   * Parser needs well defined error recovery policy
@@ -16,6 +17,7 @@ General
   * There is no log possible for select/unselect from list operations. The
     reason is that we don't have a representation of layout list in TELL.
     Think about it. Pointetrs are unapropriate of course.
+  * Theread status and status line in general.
   * Think about improving the TEDAT text readability manipulating the orientation
   * Optional validation - warning/error menu - acute angle case.
   * Autopan doesn't seems to work fine, because it depends probably

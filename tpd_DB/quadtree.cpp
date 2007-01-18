@@ -505,15 +505,15 @@ void laydata::quadTree::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
 
 /*! Write the contents of the quadTree in a PS file.\n
 Nothing special here - effectively the same as GDSwrite and write method*/
-void laydata::quadTree::PSwrite(PSFile& gdsf) const
+void laydata::quadTree::PSwrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
 {
    tdtdata* wdt = _first;
    while(wdt)
    {
-      wdt->PSwrite(gdsf); wdt = wdt->next();
+      wdt->PSwrite(gdsf, drawprop); wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->PSwrite(gdsf);
+      if (_quads[i]) _quads[i]->PSwrite(gdsf, drawprop);
 }
 
 /*! Draw the contents of the container on the screen using the virtual 

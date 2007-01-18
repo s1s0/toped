@@ -541,7 +541,7 @@ void laydata::tdtbox::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
-void laydata::tdtbox::PSwrite(PSFile& gdsf) const
+void laydata::tdtbox::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
    const pointlist box4 = shape2poly();
    gdsf.poly(box4, overlap());
@@ -935,7 +935,7 @@ void laydata::tdtpoly::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
-void laydata::tdtpoly::PSwrite(PSFile& gdsf) const
+void laydata::tdtpoly::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
    gdsf.poly(_plist, overlap());
 }
@@ -1331,7 +1331,7 @@ void laydata::tdtwire::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
-void laydata::tdtwire::PSwrite(PSFile& gdsf) const
+void laydata::tdtwire::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
    gdsf.wire(_plist, _width, overlap());
 }
@@ -1539,9 +1539,13 @@ void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
-void laydata::tdtcellref::PSwrite(PSFile& gdsf) const
+void laydata::tdtcellref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
 {
-   gdsf.cellref(_structure->first, _translation);
+   psf.cellref(_structure->first, _translation);
+   if (!psf.hier())
+   {
+     _structure->second->PSwrite(psf, drawprop);
+   }
 }
 
 void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticList* nshp) {
@@ -1829,17 +1833,21 @@ void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
-void laydata::tdtcellaref::PSwrite(PSFile& gdsf) const
+void laydata::tdtcellaref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
 {
-   for (int i = 0; i < _rows; i++)
+   for (int i = 0; i < _cols; i++)
    {// start/stop rows
-      for(int j = 0; j < _cols; j++)
+      for(int j = 0; j < _rows; j++)
       { // start/stop columns
          // for each of the visual array figures...
          // ... get the translation matrix ...
          CTM refCTM(TP(_stepX * i , _stepY * j ), 1, 0, false);
          refCTM *= _translation;
-         gdsf.cellref(_structure->first, refCTM);
+         psf.cellref(_structure->first, refCTM);
+         if (!psf.hier())
+         {
+            _structure->second->PSwrite(psf, drawprop);
+         }
       }
    }
 }
@@ -2083,7 +2091,7 @@ void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
    gdsf.flush(wr);
 }
 
-void laydata::tdttext::PSwrite(PSFile& gdsf) const
+void laydata::tdttext::PSwrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
 {
    CTM fmtrx(_translation);
    fmtrx.Scale(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT);
@@ -2092,7 +2100,9 @@ void laydata::tdttext::PSwrite(PSFile& gdsf) const
 }
 
 DBbox laydata::tdttext::overlap() const {
-   return (_overlap * _translation);
+   CTM correction;
+   correction.Translate(-_overlap.p1().x(), -_overlap.p1().y());
+   return (_overlap * correction * _translation);
 }
 
 void laydata::tdttext::info(std::ostringstream& ost) const {

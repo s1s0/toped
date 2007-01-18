@@ -385,7 +385,7 @@ bool TopedApp::OnInit() {
          {
             inputfile.Clear();
             inputfile << wxT("#include \"") << argv[i] << wxT("\"");
-            Console->parseCommand(inputfile, false);
+            Console->parseCommand(inputfile);
          }
       }
    }
