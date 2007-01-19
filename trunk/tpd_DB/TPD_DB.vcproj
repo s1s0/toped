@@ -210,6 +210,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ps_out.cpp"
+				>
+			</File>
+			<File
 				RelativePath="quadtree.cpp"
 				>
 				<FileConfiguration
@@ -340,6 +344,10 @@
 			</File>
 			<File
 				RelativePath="logicop.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ps_out.h"
 				>
 			</File>
 			<File
