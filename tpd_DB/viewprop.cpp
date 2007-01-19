@@ -102,7 +102,7 @@ void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, co
    glColor4f(1, 1, 1, 0.7); // gray
    glDisable(GL_POLYGON_STIPPLE);
 //   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
-   glBegin(GL_LINE);glLineWidth(2);
+   glBegin(GL_LINES);glLineWidth(2);
    // draw the nonius ...
    for (LineList::const_iterator CL = noni_list.begin(); CL != noni_list.end(); CL++)
    {
