@@ -122,12 +122,17 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel)
    }
 }
 
-laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2) {
+laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2)
+{
+   DBbox old_overlap = _target.edit()->overlap();
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    (*p1) *= _target.rARTM();
    (*p2) *= _target.rARTM();
-   return actlay->addbox(p1,p2);
+   laydata::tdtdata* newshape = actlay->addbox(p1,p2);
+   if (_target.edit()->overlapChanged(old_overlap, this))
+      do {} while(validate_cells());
+   return newshape;
 }
 
 laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
@@ -138,17 +143,22 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
       tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }
+   laydata::tdtdata* newshape;
+   DBbox old_overlap = _target.edit()->overlap();
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    pointlist vpl = check.get_validated();
    if (check.box()) {
       TP* p1= new TP(vpl[0] *_target.rARTM());
       TP* p2= new TP(vpl[2] *_target.rARTM());
-      return actlay->addbox(p1,p2);
+      newshape = actlay->addbox(p1,p2);
    }
    for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
-   return actlay->addpoly(vpl);
+   newshape = actlay->addpoly(vpl);
+   if (_target.edit()->overlapChanged(old_overlap, this))
+      do {} while(validate_cells());
+   return newshape;
 }
 
 laydata::tdtdata* laydata::tdtdesign::addwire(word la, const pointlist* pl, word w) {
@@ -159,19 +169,27 @@ laydata::tdtdata* laydata::tdtdesign::addwire(word la, const pointlist* pl, word
       tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }   
+   DBbox old_overlap = _target.edit()->overlap();
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    pointlist vpl = check.get_validated();
    for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
-   return actlay->addwire(vpl,w);
+   laydata::tdtdata* newshape = actlay->addwire(vpl,w);
+   if (_target.edit()->overlapChanged(old_overlap, this))
+      do {} while(validate_cells());
+   return newshape;
 }
 
 laydata::tdtdata* laydata::tdtdesign::addtext(word la, std::string& text, CTM& ori) {
+   DBbox old_overlap = _target.edit()->overlap();
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    ori *= _target.rARTM();
-   return actlay->addtext(text,ori);
+   laydata::tdtdata* newshape = actlay->addtext(text,ori);
+   if (_target.edit()->overlapChanged(old_overlap, this))
+      do {} while(validate_cells());
+   return newshape;
 }
  
 laydata::tdtdata* laydata::tdtdesign::addcellref(std::string& name, CTM& ori) {
@@ -179,9 +197,15 @@ laydata::tdtdata* laydata::tdtdesign::addcellref(std::string& name, CTM& ori) {
       laydata::refnamepair striter = getcellnamepair(name);
       modified = true;
       ori *= _target.rARTM();
+      DBbox old_overlap = _target.edit()->overlap();
       tdtdata* ncrf = _target.edit()->addcellref(this, striter, ori);
       if (NULL == ncrf) {
         tell_log(console::MT_ERROR, "Circular reference is forbidden");
+      }
+      else
+      {
+         if (_target.edit()->overlapChanged(old_overlap, this))
+            do {} while(validate_cells());
       }
       return ncrf;
    }   
@@ -199,10 +223,16 @@ laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori,
       laydata::refnamepair striter = getcellnamepair(name);
       modified = true;
       ori *= _target.rARTM();
+      DBbox old_overlap = _target.edit()->overlap();
       tdtdata* ncrf = _target.edit()->addcellaref(this, striter, ori, 
                                                    stepX, stepY, columns, rows);
       if (NULL == ncrf) {
         tell_log(console::MT_ERROR, "Circular reference is forbidden");
+      }
+      else
+      {
+         if (_target.edit()->overlapChanged(old_overlap, this))
+            do {} while(validate_cells());
       }
       return ncrf;
    }   
@@ -214,11 +244,13 @@ laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori,
    }
 }
 
-void laydata::tdtdesign::addlist(atticList* nlst) {
-   if (_target.edit()->addlist(this, nlst)) {
+void laydata::tdtdesign::addlist(atticList* nlst)
+{
+   if (_target.edit()->addlist(this, nlst))
+   {
       // needs validation
       do {} while(validate_cells());
-   }   
+   }
 }
 
 laydata::tdtcell* laydata::tdtdesign::opencell(std::string name) {

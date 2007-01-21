@@ -229,7 +229,7 @@ laydata::quadTree* laydata::tdtcell::securelayer(word layno)
 }
 
 laydata::tdtcellref* laydata::tdtcell::addcellref(laydata::tdtdesign* ATDB,
-                                 refnamepair str, CTM trans, bool sortnow) 
+                                 refnamepair str, CTM trans, bool sortnow)
 {
    if (!addchild(ATDB, str->second)) return NULL;
    quadTree *cellreflayer = securelayer(0);
@@ -665,14 +665,7 @@ bool laydata::tdtcell::copy_selected(laydata::tdtdesign* ATDB, const CTM& trans)
       if (1 != numshapes)  _layers[CL->first]->resort();
       CL++;
    }
-   // Invalidate parents if the overlapping box has changed
-   DBbox new_overlap = overlap();
-   float areaold = old_overlap.area();
-   float areanew = new_overlap.area();
-   if (areaold != areanew) {
-      invalidateParents(ATDB);return true;
-   }
-   else return false;
+   return overlapChanged(old_overlap, ATDB);
 };
 
 bool laydata::tdtcell::addlist(laydata::tdtdesign* ATDB, atticList* nlst) {
@@ -694,14 +687,7 @@ bool laydata::tdtcell::addlist(laydata::tdtdesign* ATDB, atticList* nlst) {
    }
    delete nlst;
    validate_layers(); // because put is used
-   // Invalidate parents if the overlapping box has changed
-   DBbox new_overlap = overlap();
-   float areaold = old_overlap.area();
-   float areanew = new_overlap.area();
-   if (areaold != areanew) {
-      invalidateParents(ATDB);return true;
-   }
-   else return false;
+   return overlapChanged(old_overlap, ATDB);
 }
 
 laydata::dataList* laydata::tdtcell::secure_dataList(selectList& slst, word layno) {
@@ -803,14 +789,7 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
       }
 
    }
-   // Invalidate parents if the overlapping box has changed
-   DBbox new_overlap = overlap();
-   float areaold = old_overlap.area();
-   float areanew = new_overlap.area();
-   if (areaold != areanew) {
-      invalidateParents(ATDB);return true;
-   }
-   else return false;
+   return overlapChanged(old_overlap, ATDB);
 }
 
 bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& trans, selectList** fadead)
@@ -872,15 +851,7 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
       }
 
    }
-   // Invalidate parents if the overlapping box has changed
-   DBbox new_overlap = overlap();
-   float areaold = old_overlap.area();
-   float areanew = new_overlap.area();
-   if (areaold != areanew)
-   {
-      invalidateParents(ATDB);return true;
-   }
-   else return false;
+   return overlapChanged(old_overlap, ATDB);
 }
 
 bool laydata::tdtcell::transfer_selected(laydata::tdtdesign* ATDB, const CTM& trans) {
@@ -908,14 +879,7 @@ bool laydata::tdtcell::transfer_selected(laydata::tdtdesign* ATDB, const CTM& tr
       }
       _layers[CL->first]->resort();
    }
-   // Invalidate parents if the overlapping box has changed
-   DBbox new_overlap = overlap();
-   float areaold = old_overlap.area();
-   float areanew = new_overlap.area();
-   if (areaold != areanew) {
-      invalidateParents(ATDB);return true;
-   }
-   else return false;
+   return overlapChanged(old_overlap, ATDB);
 }
 
 bool laydata::tdtcell::delete_selected(laydata::tdtdesign* ATDB, laydata::atticList* fsel) {
@@ -938,14 +902,7 @@ bool laydata::tdtcell::delete_selected(laydata::tdtdesign* ATDB, laydata::atticL
    else      unselect_all(true);   
    updateHierarchy(ATDB);
    DBbox new_overlap = overlap();
-   float areaold = old_overlap.area();
-   float areanew = new_overlap.area();
-   // Invalidate all parent cells
-   if (areaold != areanew) {
-      invalidateParents(ATDB);
-      return true;
-   }
-   else return false;   
+   return overlapChanged(old_overlap, ATDB);
 }
 
 bool laydata::tdtcell::cutpoly_selected(pointlist& plst, atticList** dasao) {
@@ -1076,15 +1033,7 @@ bool laydata::tdtcell::destroy_this(laydata::tdtdesign* ATDB, tdtdata* ds, word 
    }
    delete(ds);
    if (0 == la) updateHierarchy(ATDB);
-   DBbox new_overlap = overlap();
-   float areaold = old_overlap.area();
-   float areanew = new_overlap.area();
-   // Invalidate all parent cells
-   if (areaold != areanew) {
-      invalidateParents(ATDB);
-      return true;
-   }
-   else return false;   
+   return overlapChanged(old_overlap, ATDB);
 }
 
 void laydata::tdtcell::select_all(layprop::ViewProperties& viewprop)
@@ -1293,11 +1242,25 @@ void laydata::tdtcell::store_inAttic(laydata::atticList& _Attic) {
       else CL++;   
    }
 }
+bool laydata::tdtcell::overlapChanged(DBbox& old_overlap, laydata::tdtdesign* ATDB)
+{
+   DBbox new_overlap = overlap();
+//   float areaold = old_overlap.area();
+//   float areanew = new_overlap.area();
+   // Invalidate all parent cells
+   if (old_overlap != new_overlap) {
+      invalidateParents(ATDB);return true;
+   }
+   else return false;
+}
 
-void laydata::tdtcell::invalidateParents(laydata::tdtdesign* ATDB) {
+void laydata::tdtcell::invalidateParents(laydata::tdtdesign* ATDB)
+{
    TDTHierTree* hc = ATDB->hiertree()->GetMember(this);
-   while(hc) {
-      if (hc->Getparent()) {
+   while(hc)
+   {
+      if (hc->Getparent())
+      {
          layerList llist = hc->Getparent()->GetItem()->_layers;
          if (llist.end() != llist.find(0)) llist[0]->invalidate();
       }      
@@ -1309,8 +1272,7 @@ bool laydata::tdtcell::validate_cells(laydata::tdtdesign* ATDB) {
    quadTree* wq = (_layers.end() != _layers.find(0)) ? _layers[0] : NULL;
    if (!(wq && wq->invalid())) return false;
    if (wq->full_validate()) {
-      invalidateParents(ATDB);
-      return true;
+      invalidateParents(ATDB); return true;
    }   
    else return false;
 }
