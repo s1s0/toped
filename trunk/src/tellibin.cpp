@@ -440,26 +440,51 @@ tellstdfunc::stdHIDELAYER::stdHIDELAYER(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdHIDELAYER::undo_cleanup() {
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   delete pl;
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
 }
 
 void tellstdfunc::stdHIDELAYER::undo() {
    TEUNDO_DEBUG("hidelayer( word , bool ) UNDO");
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        hide  = getBoolValue(UNDOPstack,true);
    word        layno = getWordValue(UNDOPstack,true);
+   laydata::tdtdesign* ATDB = DATC->lockDB();
    DATC->hideLayer(layno, hide);
+   ATDB->select_fromList(get_ttlaylist(pl));
+   DATC->unlockDB();
+   delete pl;
    browsers::layer_status(browsers::BT_LAYER_HIDE, layno, hide);
+   UpdateLV();
 }
 
 int tellstdfunc::stdHIDELAYER::execute() {
    bool        hide  = getBoolValue();
    word        layno = getWordValue();
    if (layno != DATC->curlay()) {
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(layno));
       UNDOPstack.push_front(new telldata::ttbool(!hide));
+      laydata::selectList *listselected = ATDB->shapesel();
+      laydata::selectList *todslct = new laydata::selectList();
+      if (hide && (listselected->end() != listselected->find(layno)))
+      {
+         (*todslct)[layno] = new laydata::dataList(*((*listselected)[layno]));
+         UNDOPstack.push_front(make_ttlaylist(todslct));
+         ATDB->unselect_fromList(todslct);
+      }
+      else
+      {
+         UNDOPstack.push_front(make_ttlaylist(todslct));
+         delete todslct;
+      }
       DATC->hideLayer(layno, hide);
+      DATC->unlockDB();
+
       browsers::layer_status(browsers::BT_LAYER_HIDE, layno, hide);
       LogFile << LogFile.getFN() << "("<< layno << "," << 
                  LogFile._2bool(hide) << ");"; LogFile.flush();
@@ -550,22 +575,28 @@ tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdHIDELAYERS::undo_cleanup() {
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    getBoolValue(UNDOPstack, false);
-   delete sl;
+   delete pl; delete sl;
 }
 
 void tellstdfunc::stdHIDELAYERS::undo() {
    TEUNDO_DEBUG("hidelayer( int list , bool ) UNDO");
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        hide  = getBoolValue(UNDOPstack,true);
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttint *laynumber;
+   laydata::tdtdesign* ATDB = DATC->lockDB();
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       DATC->hideLayer(laynumber->value(), hide);
       browsers::layer_status(browsers::BT_LAYER_HIDE, laynumber->value(), hide);
    }
-   delete sl;
+   ATDB->select_fromList(get_ttlaylist(pl));
+   DATC->unlockDB();
+   delete pl; delete sl;
+   UpdateLV();
 }
 
 int tellstdfunc::stdHIDELAYERS::execute() {
@@ -574,6 +605,11 @@ int tellstdfunc::stdHIDELAYERS::execute() {
    UNDOcmdQ.push_front(this);
    telldata::ttlist* undolaylist = new telldata::ttlist(telldata::tn_int);
    telldata::ttint *laynumber;
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::selectList *listselected = ATDB->shapesel();
+   laydata::selectList *todslct = new laydata::selectList();
+   // "preliminary" pass - to collect the selected shapes in the layers, targeted
+   // for locking and to issue some warning messages if appropriate
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1)) {
@@ -585,13 +621,25 @@ int tellstdfunc::stdHIDELAYERS::execute() {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
       }
       else {
-         DATC->hideLayer(laynumber->value(), hide);
+         if (hide && (listselected->end() != listselected->find(laynumber->value())))
+            (*todslct)[laynumber->value()] = new laydata::dataList(*((*listselected)[laynumber->value()]));
          browsers::layer_status(browsers::BT_LAYER_HIDE, laynumber->value(), hide);
          undolaylist->add(new telldata::ttint(*laynumber));
       }
    }
    UNDOPstack.push_front(undolaylist);
    UNDOPstack.push_front(new telldata::ttbool(!hide));
+   UNDOPstack.push_front(make_ttlaylist(todslct));
+   // Now unselect the shapes in the taret layers
+   ATDB->unselect_fromList(todslct);
+   // ... and at last - lock the layers. Here we're using the list collected for undo
+   // otherwise we have to either maintain another list or to do agai all the checks above
+   for (unsigned i = 0; i < undolaylist->size(); i++)
+   {
+      telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
+      DATC->hideLayer(laynumber->value(), hide);
+   }
+   DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *sl << "," <<
                                       LogFile._2bool(hide) << ");"; LogFile.flush();
    delete sl;
@@ -607,29 +655,53 @@ tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdLOCKLAYER::undo_cleanup() {
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   delete pl;
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
 }
 
 void tellstdfunc::stdLOCKLAYER::undo() {
    TEUNDO_DEBUG("locklayer( word , bool ) UNDO");
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        lock  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
+   laydata::tdtdesign* ATDB = DATC->lockDB();
    DATC->lockLayer(layno, lock);
+   ATDB->select_fromList(get_ttlaylist(pl));
+   DATC->unlockDB();
+   delete pl;
    browsers::layer_status(browsers::BT_LAYER_LOCK, layno, lock);
+   UpdateLV();
 }
 
 int tellstdfunc::stdLOCKLAYER::execute() {
    bool        lock  = getBoolValue();
    word        layno = getWordValue();
    if (layno != DATC->curlay()) {
+      laydata::tdtdesign* ATDB = DATC->lockDB();
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(layno));
       UNDOPstack.push_front(new telldata::ttbool(!lock));
+      laydata::selectList *listselected = ATDB->shapesel();
+      laydata::selectList *todslct = new laydata::selectList();
+      if (lock && (listselected->end() != listselected->find(layno)))
+      {
+         (*todslct)[layno] = new laydata::dataList(*((*listselected)[layno]));
+         UNDOPstack.push_front(make_ttlaylist(todslct));
+         ATDB->unselect_fromList(todslct);
+      }
+      else
+      {
+         UNDOPstack.push_front(make_ttlaylist(todslct));
+         delete todslct;
+      }
       DATC->lockLayer(layno, lock);
+      DATC->unlockDB();
       browsers::layer_status(browsers::BT_LAYER_LOCK, layno, lock);
       LogFile << LogFile.getFN() << "("<< layno << "," << 
                  LogFile._2bool(lock) << ");"; LogFile.flush();
+      UpdateLV();
    }
    else {
       tell_log(console::MT_ERROR,"Layer above is the current. Can't be locked.");
@@ -647,22 +719,28 @@ tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdLOCKLAYERS::undo_cleanup() {
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    getBoolValue(UNDOPstack, false);
-   delete sl;
+   delete pl; delete sl;
 }
 
 void tellstdfunc::stdLOCKLAYERS::undo() {
    TEUNDO_DEBUG("locklayer( int list , bool ) UNDO");
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        lock  = getBoolValue(UNDOPstack,true);
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttint *laynumber;
+   laydata::tdtdesign* ATDB = DATC->lockDB();
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       DATC->lockLayer(laynumber->value(), lock);
       browsers::layer_status(browsers::BT_LAYER_LOCK, laynumber->value(), lock);
    }
-   delete sl;
+   ATDB->select_fromList(get_ttlaylist(pl));
+   DATC->unlockDB();
+   delete pl; delete sl;
+   UpdateLV();
 }
 
 int tellstdfunc::stdLOCKLAYERS::execute() {
@@ -671,6 +749,11 @@ int tellstdfunc::stdLOCKLAYERS::execute() {
    UNDOcmdQ.push_front(this);
    telldata::ttlist* undolaylist = new telldata::ttlist(telldata::tn_int);
    telldata::ttint *laynumber;
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::selectList *listselected = ATDB->shapesel();
+   laydata::selectList *todslct = new laydata::selectList();
+   // "preliminary" pass - to collect the selected shapes in the layers, targeted
+   // for locking and to issue some warning messages if appropriate
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1)) {
@@ -682,16 +765,29 @@ int tellstdfunc::stdLOCKLAYERS::execute() {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
       }
       else {
-         DATC->lockLayer(laynumber->value(), lock);
+         if (lock && (listselected->end() != listselected->find(laynumber->value())))
+            (*todslct)[laynumber->value()] = new laydata::dataList(*((*listselected)[laynumber->value()]));
          browsers::layer_status(browsers::BT_LAYER_LOCK, laynumber->value(), lock);
          undolaylist->add(new telldata::ttint(*laynumber));
       }
    }
    UNDOPstack.push_front(undolaylist);
    UNDOPstack.push_front(new telldata::ttbool(!lock));
+   UNDOPstack.push_front(make_ttlaylist(todslct));
+   // Now unselect the shapes in the taret layers
+   ATDB->unselect_fromList(todslct);
+   // ... and at last - lock the layers. Here we're using the list collected for undo
+   // otherwise we have to either maintain another list or to do agai all the checks above
+   for (unsigned i = 0; i < undolaylist->size(); i++)
+   {
+      telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
+      DATC->lockLayer(laynumber->value(), lock);
+   }
+   DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *sl << "," <<
                                       LogFile._2bool(lock) << ");"; LogFile.flush();
    delete sl;
+   UpdateLV();
    return EXEC_NEXT;
 }
 
