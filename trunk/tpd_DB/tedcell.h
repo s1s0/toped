@@ -149,6 +149,7 @@ namespace laydata {
       void                 removePrep(laydata::tdtdesign* ATDB) const;
       void                 report_selected() const;
       void                 collect_usedlays(const tdtdesign*, bool, usedlayList&) const;
+      bool                 overlapChanged(DBbox&, tdtdesign*);
    private:
       bool                 getshapeover(TP, layprop::ViewProperties&);
       void                 store_inAttic(atticList&);
