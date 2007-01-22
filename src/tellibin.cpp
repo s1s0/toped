@@ -599,7 +599,8 @@ void tellstdfunc::stdHIDELAYERS::undo() {
    UpdateLV();
 }
 
-int tellstdfunc::stdHIDELAYERS::execute() {
+int tellstdfunc::stdHIDELAYERS::execute()
+{
    bool        hide  = getBoolValue();
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    UNDOcmdQ.push_front(this);
@@ -610,17 +611,21 @@ int tellstdfunc::stdHIDELAYERS::execute() {
    laydata::selectList *todslct = new laydata::selectList();
    // "preliminary" pass - to collect the selected shapes in the layers, targeted
    // for locking and to issue some warning messages if appropriate
-   for (unsigned i = 0; i < sl->size() ; i++) {
+   for (unsigned i = 0; i < sl->size() ; i++)
+   {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1)) {
+      if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1))
+      {
          std::ostringstream info;
          info << "Layer number "<< i <<" out of range ... ignored";
          tell_log(console::MT_WARNING,info.str());
       }
-      else if (laynumber->value() == DATC->curlay()) {
+      else if (laynumber->value() == DATC->curlay())
+      {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
       }
-      else {
+      else if (hide ^ DATC->layerHidden(laynumber->value()))
+      {
          if (hide && (listselected->end() != listselected->find(laynumber->value())))
             (*todslct)[laynumber->value()] = new laydata::dataList(*((*listselected)[laynumber->value()]));
          browsers::layer_status(browsers::BT_LAYER_HIDE, laynumber->value(), hide);
@@ -646,6 +651,7 @@ int tellstdfunc::stdHIDELAYERS::execute() {
    UpdateLV();
    return EXEC_NEXT;
 }
+
 //=============================================================================
 tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
@@ -675,10 +681,12 @@ void tellstdfunc::stdLOCKLAYER::undo() {
    UpdateLV();
 }
 
-int tellstdfunc::stdLOCKLAYER::execute() {
+int tellstdfunc::stdLOCKLAYER::execute()
+{
    bool        lock  = getBoolValue();
    word        layno = getWordValue();
-   if (layno != DATC->curlay()) {
+   if (layno != DATC->curlay())
+   {
       laydata::tdtdesign* ATDB = DATC->lockDB();
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(new telldata::ttint(layno));
@@ -703,7 +711,8 @@ int tellstdfunc::stdLOCKLAYER::execute() {
                  LogFile._2bool(lock) << ");"; LogFile.flush();
       UpdateLV();
    }
-   else {
+   else
+   {
       tell_log(console::MT_ERROR,"Layer above is the current. Can't be locked.");
    }   
    return EXEC_NEXT;
@@ -743,7 +752,8 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
    UpdateLV();
 }
 
-int tellstdfunc::stdLOCKLAYERS::execute() {
+int tellstdfunc::stdLOCKLAYERS::execute()
+{
    bool        lock  = getBoolValue();
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    UNDOcmdQ.push_front(this);
@@ -754,17 +764,21 @@ int tellstdfunc::stdLOCKLAYERS::execute() {
    laydata::selectList *todslct = new laydata::selectList();
    // "preliminary" pass - to collect the selected shapes in the layers, targeted
    // for locking and to issue some warning messages if appropriate
-   for (unsigned i = 0; i < sl->size() ; i++) {
+   for (unsigned i = 0; i < sl->size() ; i++)
+   {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1)) {
+      if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1))
+      {
          std::ostringstream info;
          info << "Layer number "<< i <<" out of range ... ignored";
          tell_log(console::MT_WARNING,info.str());
       }
-      else if (laynumber->value() == DATC->curlay()) {
+      else if (laynumber->value() == DATC->curlay())
+      {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
       }
-      else {
+      else if (lock ^ DATC->layerLocked(laynumber->value()))
+      {
          if (lock && (listselected->end() != listselected->find(laynumber->value())))
             (*todslct)[laynumber->value()] = new laydata::dataList(*((*listselected)[laynumber->value()]));
          browsers::layer_status(browsers::BT_LAYER_LOCK, laynumber->value(), lock);
