@@ -440,10 +440,10 @@ tellstdfunc::stdHIDELAYER::stdHIDELAYER(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdHIDELAYER::undo_cleanup() {
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   delete pl;
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete pl;
 }
 
 void tellstdfunc::stdHIDELAYER::undo() {
@@ -575,9 +575,9 @@ tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdHIDELAYERS::undo_cleanup() {
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    getBoolValue(UNDOPstack, false);
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl; delete sl;
 }
 
@@ -661,10 +661,10 @@ tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdLOCKLAYER::undo_cleanup() {
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   delete pl;
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete pl;
 }
 
 void tellstdfunc::stdLOCKLAYER::undo() {
@@ -728,9 +728,9 @@ tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdLOCKLAYERS::undo_cleanup() {
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    getBoolValue(UNDOPstack, false);
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl; delete sl;
 }
 
@@ -893,8 +893,8 @@ tellstdfunc::stdREMOVECELL::stdREMOVECELL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdREMOVECELL::undo_cleanup()
 {
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    getStringValue(UNDOPstack, false);
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
 }
 
@@ -2906,8 +2906,8 @@ tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdGROUP::undo_cleanup() {
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    getStringValue(UNDOPstack, false);
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
 }
 
