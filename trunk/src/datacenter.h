@@ -69,10 +69,12 @@ public:
    void                       unlockDB();
    void                       unlockGDS();
    unsigned int               numselected() const;
-   void                       mouseStart(int input_type);
+   void                       mouseStart(int input_type, std::string);
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
    void                       mouseStop();
+   void                       mouseFlip();
+   void                       mouseRotate();
    void                       openGL_draw(const CTM&);
    void                       tmp_draw(const CTM&, TP, TP);
    const laydata::cellList&   cells();

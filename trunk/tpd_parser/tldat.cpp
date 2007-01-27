@@ -43,6 +43,7 @@ telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
          case tn_string: nvar = new telldata::ttstring() ;break;
          case tn_pnt   : nvar = new telldata::ttpnt()    ;break;
          case tn_box   : nvar = new telldata::ttwnd()    ;break;
+         case tn_bnd   : nvar = new telldata::ttbnd()    ;break;
          case tn_layout: nvar = new telldata::ttlayout() ;break;
                 default: {
                      assert(_tIDMAP.end() != _tIDMAP.find(ID));
@@ -71,15 +72,26 @@ const telldata::tell_type* telldata::tell_type::findtype(const typeID basetype) 
 }
 
 //=============================================================================
-telldata::point_type::point_type() : tell_type(telldata::tn_pnt) {
+telldata::point_type::point_type() : tell_type(telldata::tn_pnt)
+{
    addfield("x", telldata::tn_real, NULL);
    addfield("y", telldata::tn_real, NULL);
 };
 
 //=============================================================================
-telldata::box_type::box_type(point_type* pfld) : tell_type(telldata::tn_box) {
+telldata::box_type::box_type(point_type* pfld) : tell_type(telldata::tn_box)
+{
    addfield("p1", telldata::tn_pnt, pfld);
    addfield("p2", telldata::tn_pnt, pfld);
+};
+
+//=============================================================================
+telldata::bnd_type::bnd_type(point_type* pfld) : tell_type(telldata::tn_bnd)
+{
+   addfield("p"   , telldata::tn_pnt , pfld);
+   addfield("rot" , telldata::tn_real, NULL);
+   addfield("flx" , telldata::tn_bool, NULL);
+   addfield("sc"  , telldata::tn_real, NULL);
 };
 
 //=============================================================================
@@ -88,7 +100,7 @@ void telldata::ttreal::assign(tell_var* rt) {
       _value = static_cast<ttreal*>(rt)->value();
    else if (rt->get_type() == tn_int)
       _value = static_cast<ttint*>(rt)->value();
-//   else ERROR Run time error (or Warning) -> unexpected type in ..bla bla
+//   @TODO else ERROR Run time error (or Warning) -> unexpected type in ..bla bla
 }
 
 void telldata::ttreal::echo(std::string& wstr) {
@@ -392,6 +404,86 @@ const telldata::ttwnd& telldata::ttwnd::operator = (const ttwnd& a) {
    (*_p1) = a.p1(); (*_p2) = a.p2();
    return *this;
 }
+
+//=============================================================================
+telldata::ttbnd::ttbnd( real p_x, real p_y, real rot, bool flip, real scale) :
+      user_struct(tn_bnd),
+      _p(new telldata::ttpnt(p_x, p_y)),
+      _rot(new telldata::ttreal(rot)),
+      _flx(new telldata::ttbool(flip)),
+      _sc(new telldata::ttreal(scale))
+{
+   _fieldList.push_back(structRECNAME("p"  , _p  ));
+   _fieldList.push_back(structRECNAME("rot", _rot));
+   _fieldList.push_back(structRECNAME("flx", _flx));
+   _fieldList.push_back(structRECNAME("sc" , _sc ));
+}
+
+telldata::ttbnd::ttbnd( ttpnt p, ttreal rot, ttbool flip, ttreal scale) :
+      user_struct(tn_bnd),
+      _p(new telldata::ttpnt(p)),
+      _rot(new telldata::ttreal(rot)),
+      _flx(new telldata::ttbool(flip)),
+      _sc(new telldata::ttreal(scale))
+{
+   _fieldList.push_back(structRECNAME("p"  , _p  ));
+   _fieldList.push_back(structRECNAME("rot", _rot));
+   _fieldList.push_back(structRECNAME("flx", _flx));
+   _fieldList.push_back(structRECNAME("sc" , _sc ));
+}
+
+telldata::ttbnd::ttbnd(const ttbnd& cobj) : user_struct(tn_bnd),
+      _p(new telldata::ttpnt(cobj.p())),
+      _rot(new telldata::ttreal(cobj.rot())),
+      _flx(new telldata::ttbool(cobj.flx())),
+      _sc(new telldata::ttreal(cobj.sc()))
+{
+   _fieldList.push_back(structRECNAME("p"  , _p  ));
+   _fieldList.push_back(structRECNAME("rot", _rot));
+   _fieldList.push_back(structRECNAME("flx", _flx));
+   _fieldList.push_back(structRECNAME("sc" , _sc ));
+}
+
+
+telldata::ttbnd::ttbnd(operandSTACK& OPstack) : user_struct(telldata::tn_bnd)
+{
+   // Here - get the data from the stack and reuse it ... don't delete it.
+   // The alternative - to make a selfcopy and then delete the original from the OPstack
+    _sc = static_cast<telldata::ttreal*>(OPstack.top()); OPstack.pop();
+    _flx = static_cast<telldata::ttbool*>(OPstack.top()); OPstack.pop();
+    _rot = static_cast<telldata::ttreal*>(OPstack.top()); OPstack.pop();
+    _p = static_cast<telldata::ttpnt*>(OPstack.top()); OPstack.pop();
+
+   _fieldList.push_back(structRECNAME("p"  , _p  ));
+   _fieldList.push_back(structRECNAME("rot", _rot));
+   _fieldList.push_back(structRECNAME("flx", _flx));
+   _fieldList.push_back(structRECNAME("sc" , _sc ));
+}
+
+void telldata::ttbnd::assign(tell_var* rt)
+{
+   (*_p  ) = static_cast<ttbnd*>(rt)->p();
+   (*_rot) = static_cast<ttbnd*>(rt)->rot();
+   (*_flx) = static_cast<ttbnd*>(rt)->flx();
+   (*_sc ) = static_cast<ttbnd*>(rt)->sc();
+}
+
+void telldata::ttbnd::echo(std::string& wstr) {
+   std::ostringstream ost;
+   ost << "P: X = " << p().x() << ": Y = " << p().y() << " ; " <<
+          "rot = "  << rot().value() << ": flipX " << (flx().value() ? "true" : "false") << " ; "  <<
+          "scale = " << sc().value();
+   wstr += ost.str();
+}
+
+const telldata::ttbnd& telldata::ttbnd::operator = (const ttbnd& a) {
+   (*_p) = a.p();
+   (*_rot) = a.rot();
+   (*_flx) = a.flx();
+   (*_sc) = a.sc();
+   return *this;
+}
+
 
 //=============================================================================
 telldata::argumentID::argumentID(const argumentID& obj2copy) {

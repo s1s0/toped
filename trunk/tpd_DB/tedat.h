@@ -90,9 +90,13 @@ namespace laydata {
    //! 
       virtual  const pointlist  shape2poly() const = 0;
    //! Add a point to the tdtdata object. Used to handle the objects under construction on the screen.
-      virtual   void       addpoint(TP ) {};
+      virtual   void       addpoint(TP ) {assert(false);}
    //! Removes a point from the tdtdata object. Used to handle the objects under construction on the screen.
-      virtual   void       rmpoint(TP&) {};
+      virtual   void       rmpoint(TP&) {assert(false);}
+   //! Flips the object. Used to handle the objects under construction on the screen.
+      virtual   void       objFlip() {assert(false);}
+   //! Rotates the object. Used to handle the objects under construction on the screen.
+      virtual   void       objRotate() {assert(false);}
    //! A pointer to the OpenGL object tesselator
       static GLUtriangulatorObj *tessellObj; 
    //! The pointer to the user callback function for openGL polygon tessellation
@@ -284,6 +288,8 @@ namespace laydata {
       void                 polycut(pointlist&, shapeList**) {};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
+      void                 objFlip() {_translation.FlipY(0.0);}
+      void                 objRotate() {_translation.Rotate( 90.0);}
    protected:
       void                 select_points(DBbox&, SGBitSet*) {};
       void                 unselect_points(DBbox&, SGBitSet*) {return;};

@@ -167,6 +167,8 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_MENU(CM_CANCEL_LAST, LayoutCanvas::OnCMcancel        )
    EVT_MENU(      CM_CLOSE, LayoutCanvas::OnCMclose         )
    EVT_MENU(      CM_AGAIN, LayoutCanvas::OnRepeatLastCmd   )
+   EVT_MENU(       CM_FLIP, LayoutCanvas::OnCMFlip          )
+   EVT_MENU(     CM_ROTATE, LayoutCanvas::OnCMRotate        )
 END_EVENT_TABLE()
 
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(parent,
@@ -535,7 +537,12 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
-//            case console::op_move:
+            case console::op_bind:
+               menu.Append(CM_ROTATE, wxT("Rotate"));
+               menu.Append(CM_FLIP, wxT("Flip"));
+               menu.Append(CM_CONTINUE, wxT("Continue"));
+               menu.Append(   CM_ABORT, wxT("Abort"));
+               break;
 //            case console::op_copy:
             default:
                menu.Append(CM_CONTINUE, wxT("Continue"));
@@ -725,8 +732,12 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       eventABORTEN.SetInt(CNVS_ABORTENABLE);
       reperX = (console::op_flipX == actop);
       reperY = (console::op_flipY == actop);
-      if (reperX || reperY || (console::op_rotate == actop))
+      if (   reperX
+          || reperY
+          ||(console::op_rotate == actop)
+          ||(console::op_bind  == actop) )
          rubber_band = true;
+      releasepoint = TP(0,0);
    }
    else
    { // stop mouse input
@@ -747,12 +758,14 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
    wxPostEvent(this, eventABORTEN);
 }
 
-void tui::LayoutCanvas::OnCMcontinue(wxCommandEvent& WXUNUSED(event)) {
+void tui::LayoutCanvas::OnCMcontinue(wxCommandEvent& WXUNUSED(event))
+{
 // keep going ... This function is not doing anything really
    return;
 }
 
-void tui::LayoutCanvas::OnCMabort(wxCommandEvent& WXUNUSED(event)) {
+void tui::LayoutCanvas::OnCMabort(wxCommandEvent& WXUNUSED(event))
+{
    wxCommandEvent eventButtonUP(wxEVT_COMMAND_ENTER);
    eventButtonUP.SetClientData((void*)NULL);
    eventButtonUP.SetInt(-1);
@@ -760,7 +773,8 @@ void tui::LayoutCanvas::OnCMabort(wxCommandEvent& WXUNUSED(event)) {
    Refresh();
 }
 
-void tui::LayoutCanvas::OnCMcancel(wxCommandEvent& WXUNUSED(event)) {
+void tui::LayoutCanvas::OnCMcancel(wxCommandEvent& WXUNUSED(event))
+{
    //Post an event to notify the console
    if (Console->numpoints() > 0) {
       wxCommandEvent eventCancelLast(wxEVT_COMMAND_ENTER);
@@ -772,14 +786,35 @@ void tui::LayoutCanvas::OnCMcancel(wxCommandEvent& WXUNUSED(event)) {
    }
 }
 
-void tui::LayoutCanvas::OnCMclose(wxCommandEvent& WXUNUSED(event)) {
+void tui::LayoutCanvas::OnCMclose(wxCommandEvent& WXUNUSED(event))
+{
    releasepoint = ScrMARK;
    EventMouseClick(2);
 }
 
-void tui::LayoutCanvas::OnRepeatLastCmd(wxCommandEvent& WXUNUSED(event)){
+void tui::LayoutCanvas::OnRepeatLastCmd(wxCommandEvent& WXUNUSED(event))
+{
    Console->parseCommand(wxString(Console->lastCommand(), wxConvUTF8));
 }
+
+void tui::LayoutCanvas::OnCMFlip(wxCommandEvent&)
+{
+   //Post an event to notify the console
+   wxCommandEvent eventCancelLast(wxEVT_COMMAND_ENTER);
+   eventCancelLast.SetInt(-4);
+   wxPostEvent(Console, eventCancelLast);
+   DATC->mouseFlip();
+}
+
+void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
+{
+   //Post an event to notify the console
+   wxCommandEvent eventCancelLast(wxEVT_COMMAND_ENTER);
+   eventCancelLast.SetInt(-3);
+   wxPostEvent(Console, eventCancelLast);
+   DATC->mouseRotate();
+}
+
 tui::LayoutCanvas::~LayoutCanvas(){
    delete crossCur;
 //   delete (laydata::tdtdata::tessellObj);

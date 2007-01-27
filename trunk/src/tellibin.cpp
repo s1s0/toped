@@ -1214,6 +1214,30 @@ int tellstdfunc::stdCELLREF::execute() {
 }
 
 //=============================================================================
+tellstdfunc::stdCELLREF_D::stdCELLREF_D(telldata::typeID retype, bool eor) :
+      stdCELLREF(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::stdCELLREF_D::execute() {
+   std::string name = getStringValue();
+   // stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(console::op_bind, &OPstack, name)) return EXEC_ABORT;
+   // get the data from the stack
+   telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
+   
+   OPstack.push(new telldata::ttstring(name));
+   OPstack.push(new telldata::ttpnt(bnd->p()));
+   OPstack.push(new telldata::ttreal(bnd->rot()));
+   OPstack.push(new telldata::ttbool(bnd->flx()));
+   OPstack.push(new telldata::ttreal(bnd->sc()));
+   delete bnd;
+   return stdCELLREF::execute();
+}
+
+
+//=============================================================================
 tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
@@ -3649,23 +3673,9 @@ telldata::ttint* tellstdfunc::CurrentLayer() {
 }
 
 
-/* Maybe the only place to describe the input_type parameter:
-   input_type > 0 - wire where input type is the width. List of points expected.
-                    Rubber band wire will be shown.
-   input_type = 0 - box. Two points expected, A rubberband box will be shown
-   input_type = -1 - polygon. List of points expected. Rubber band polygon will 
-                     be shown
-   input_type = -2 - move. Two points expected. Selected and partially selected 
-                     objects will be moved on the screen with the marker
-   input_type = -3 - copy. Two points expected. Fully selected shapes will be
-                     moved on the screen with the marker.
-   input_type = -4 - flipX. One point expected only
-   input_type = -5 - flipY. One point expected only
-   input_type = -6 - rotate. One point expected
-*/
-bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack) {
+bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack, std::string name) {
    // Create a temporary object in the tdtdesign (only if a new object is created, i.e. box,wire,polygon)
-   try {DATC->mouseStart(input_type);}
+   try {DATC->mouseStart(input_type, name);}
    catch (EXPTN) {return false;}
    // flag the prompt what type of data is expected & handle a pointer to
    // the operand stack

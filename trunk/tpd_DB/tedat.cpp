@@ -1495,12 +1495,13 @@ void laydata::tdtcellref::openGL_postclean(layprop::DrawProperties& drawprop, po
 }
 
 void laydata::tdtcellref::tmp_draw(const layprop::DrawProperties& drawprop,
-                 ctmqueue& transtack, SGBitSet*, bool under_construct) const {
-   if (under_construct) return;
-   if (structure()) {
+                 ctmqueue& transtack, SGBitSet*, bool under_construct) const
+{
+   if (structure())
+   {
       transtack.push_front(_translation * transtack.front());
       structure()->tmp_draw(drawprop, transtack);
-   }   
+   }
 }
 
 void laydata::tdtcellref::info(std::ostringstream& ost) const {

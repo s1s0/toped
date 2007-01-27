@@ -477,6 +477,7 @@ namespace console{
          toped_logfile&    operator<< (const std::string& _s);
          toped_logfile&    operator<< (const telldata::ttpnt& _p);
          toped_logfile&    operator<< (const telldata::ttwnd& _w);
+         toped_logfile&    operator<< (const telldata::ttbnd& _b);
          toped_logfile&    operator<< (const telldata::ttlist& _tl);
          toped_logfile&    flush();
       private:

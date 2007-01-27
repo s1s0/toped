@@ -57,18 +57,41 @@ namespace console {
       FT_FUNCTION_SORT
    } FUNCTION_BROWSER_TYPE;
    
+/* Maybe the only place to describe the parameter dictating the behaviour during user input:
+   op_dwire  >  0 -> wire where input type is the width. List of points expected.
+                     Rubber band wire will be shown.
+   op_dbox   =  0 -> box. Two points expected, A rubberband box will be shown
+   op_dpoly  = -1 -> polygon. List of points expected. Rubber band polygon will
+                     be shown
+   op_move   = -2 -> move. Two points expected. Selected and partially selected
+                     objects will be moved on the screen with the marker
+   op_copy   = -3 -> copy. Two points expected. Fully selected shapes will be
+                     moved on the screen with the marker.
+   op_flipX  = -4 -> flipX. One point expected only. The eventual new location of the
+                     fully selected shapes will be shown
+   op_flipY  = -5 -> flipY. One point expected only. The eventual new location of the
+                     fully selected shapes will be shown
+   op_rotate = -6 -> rotate. One point expected. The eventual new location of the
+                     fully selected shapes will be shown
+   op_line   = -7 -> line. Two points expected. Used for rulers. It is dynamically
+                     rolled
+   op_point  = -8 -> point. One point expected. No graphical effects
+   op_bind   = -9 -> cell. One point expected. The possible reference location is following
+                     the cursor position
+*/
    typedef enum
    {
-      op_none = -9,
-      op_point    ,
-      op_line     ,
-      op_rotate   ,
-      op_flipY    ,
-      op_flipX    ,
-      op_copy     ,
-      op_move     ,
-      op_dpoly    ,
-      op_dbox     ,
+      op_none     = -10 ,
+      op_bind           ,
+      op_point          ,
+      op_line           ,
+      op_rotate         ,
+      op_flipY          ,
+      op_flipX          ,
+      op_copy           ,
+      op_move           ,
+      op_dpoly          ,
+      op_dbox           ,
       op_dwire
    } ACTIVE_OP;
    
