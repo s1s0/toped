@@ -52,10 +52,12 @@ extern console::TELLFuncList*    CmdList;
 
 void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    // First the internal types
-   telldata::point_type* pntype = new telldata::point_type();
-   telldata::box_type*   bxtype = new telldata::box_type(pntype);
-   mblock->addGlobalType("point"     , pntype);
-   mblock->addGlobalType("box"       , bxtype);
+   telldata::point_type* pntype  = new telldata::point_type();
+   telldata::box_type*   bxtype  = new telldata::box_type(pntype);
+   telldata::bnd_type*   bndtype = new telldata::bnd_type(pntype);
+   mblock->addGlobalType("point"     ,  pntype);
+   mblock->addGlobalType("box"       ,  bxtype);
+   mblock->addGlobalType("bind"      , bndtype);
    // Internal variables next - Can't think of any for the moment
 //   mblock->addID("$_CW", new ttwnd(Toped->_view->lp_BL, Toped->_view->lp_TR));
    //--------------------------------------------------------------------------
@@ -105,6 +107,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("addwire"          ,(new              tellstdfunc::stdADDWIRE_D(telldata::tn_layout,false)));
    mblock->addFUNC("addtext"          ,(new                tellstdfunc::stdADDTEXT(telldata::tn_layout,false)));
    mblock->addFUNC("cellref"          ,(new                tellstdfunc::stdCELLREF(telldata::tn_layout,false)));
+   mblock->addFUNC("cellref"          ,(new              tellstdfunc::stdCELLREF_D(telldata::tn_layout,false)));
    mblock->addFUNC("cellaref"         ,(new               tellstdfunc::stdCELLAREF(telldata::tn_layout,false)));
    mblock->addFUNC("select"           ,(new        tellstdfunc::stdSELECT(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("select"           ,(new      tellstdfunc::stdSELECTIN(TLISTOF(telldata::tn_layout),false)));

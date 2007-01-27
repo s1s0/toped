@@ -58,10 +58,12 @@ namespace laydata {
       void           openGL_draw(layprop::DrawProperties&);
       void           tmp_draw(const layprop::DrawProperties&, TP, TP);
       void           recreate_hierarchy();
-      void           mouseStart(int input_type);
+      void           mouseStart(int input_type, std::string);
       void           mousePoint(TP p);
       void           mousePointCancel(TP&);
       void           mouseStop();
+      void           mouseFlip();
+      void           mouseRotate();
       void           select_inBox(TP*, TP*, bool pntsel = false);
       atticList*     change_select(TP*, bool select = true);
       void           unselect_inBox(TP*, TP*, bool pntsel = false);

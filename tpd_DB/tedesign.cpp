@@ -424,29 +424,49 @@ void laydata::tdtdesign::recreate_hierarchy() {
    }   
 }      
 
-void laydata::tdtdesign::mouseStart(int input_type) {
+void laydata::tdtdesign::mouseStart(int input_type, std::string name) {
    if      ( 0  < input_type)  _tmpdata = new tdtwire(input_type);
    else if ( console::op_dbox  == input_type)  _tmpdata = new tdtbox();
    else if ( console::op_dpoly == input_type)  _tmpdata = new tdtpoly();
-//   else if (-2 == input_type)  _tellop = op_move;
-//   else if (-3 == input_type)  _tellop = op_copy;
+   else if ( console::op_bind  == input_type)
+   {
+      assert ("" != name);
+      laydata::refnamepair striter = getcellnamepair(name);
+      CTM eqm;
+      _tmpdata = new tdtcellref(striter, eqm);
+   }
 }
 
-void laydata::tdtdesign::mousePoint(TP p) {
+void laydata::tdtdesign::mousePoint(TP p)
+{
    if (_tmpdata) _tmpdata->addpoint(p);
 }
 
-void laydata::tdtdesign::mousePointCancel(TP& lp) {
+void laydata::tdtdesign::mousePointCancel(TP& lp)
+{
    if (_tmpdata) _tmpdata->rmpoint(lp);
 }
 
-void laydata::tdtdesign::mouseStop() {
+void laydata::tdtdesign::mouseStop()
+{
    if (_tmpdata) delete _tmpdata;
    _tmpdata = NULL;
 }
 
-void laydata::tdtdesign::select_inBox(TP* p1, TP* p2, bool pntsel) {
-   if (_target.checkedit()) {
+void laydata::tdtdesign::mouseFlip()
+{
+   if (_tmpdata) _tmpdata->objFlip();
+}
+
+void laydata::tdtdesign::mouseRotate()
+{
+   if (_tmpdata) _tmpdata->objRotate();
+}
+
+void laydata::tdtdesign::select_inBox(TP* p1, TP* p2, bool pntsel)
+{
+   if (_target.checkedit())
+   {
       DBbox select_in((*p1)*_target.rARTM(), (*p2)*_target.rARTM());
       select_in.normalize();
       _target.edit()->select_inBox(select_in, _target.viewprop(), pntsel);

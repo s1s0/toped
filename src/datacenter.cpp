@@ -459,33 +459,48 @@ unsigned int DataCenter::numselected() const {
    else return 0;
 }
 
-void DataCenter::mouseStart(int input_type) {
+void DataCenter::mouseStart(int input_type, std::string name)
+{
    if (console::op_line == input_type) return;
-   if (_TEDDB) {
+   if (_TEDDB)
+   {
       _TEDDB->check_active();
-      _TEDDB->mouseStart(input_type);
+      _TEDDB->mouseStart(input_type, name);
    }
    else throw EXPTNactive_DB();
 }
 
-void DataCenter::mousePoint(TP p) {
+void DataCenter::mousePoint(TP p)
+{
    if (console::op_line == currentop())
       _properties.mousePoint(p);
-   else if (_TEDDB)
+   else if ((_TEDDB) && (console::op_bind != currentop()))
       _TEDDB->mousePoint(p);
 }
 
-void DataCenter::mousePointCancel(TP& lp) {
+void DataCenter::mousePointCancel(TP& lp)
+{
    if (console::op_line == currentop()) return;
    if (_TEDDB)
       _TEDDB->mousePointCancel(lp);
 }
 
-void DataCenter::mouseStop() {
+void DataCenter::mouseStop()
+{
    if (console::op_line == currentop())
       _properties.mouseStop();
    if (_TEDDB) _TEDDB->mouseStop();
    else throw EXPTNactive_DB();
+}
+
+void DataCenter::mouseFlip()
+{
+   if (_TEDDB) _TEDDB->mouseFlip();
+}
+
+void DataCenter::mouseRotate()
+{
+   if (_TEDDB) _TEDDB->mouseRotate();
 }
 
 void DataCenter::openGL_draw(const CTM& layCTM) {

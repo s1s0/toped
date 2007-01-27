@@ -106,6 +106,7 @@ bool console::miniParser::getGUInput(wxString expression) {
    switch (_wait4type) {
       case         telldata::tn_pnt : return getPoint();
       case         telldata::tn_box : return getBox();
+      case         telldata::tn_bnd : return getBind();
       case TLISTOF(telldata::tn_pnt): return getList();
                default: return false;// unexpected type
    }
@@ -136,7 +137,8 @@ bool console::miniParser::getPoint() {
    return true;
 }
 
-bool console::miniParser::getBox() {
+bool console::miniParser::getBox()
+{
    wxRegEx src_tmpl(box_tmpl);
    assert(src_tmpl.IsValid());
    // search the entire pattern
@@ -153,7 +155,7 @@ bool console::miniParser::getBox() {
       if (!src_tmpl.Matches(exp)) return false;
       wxString ps = src_tmpl.GetMatch(exp);
       src_tmpl.ReplaceFirst(&exp,wxT(""));
-      
+
       wxRegEx crd_tmpl(real_tmpl);
       assert(crd_tmpl.IsValid());
       crd_tmpl.Matches(ps);
@@ -167,6 +169,68 @@ bool console::miniParser::getBox() {
       pp[i] = telldata::ttpnt(p1,p2);
    }
    client_stack->push(new telldata::ttwnd(pp[0],pp[1]));
+   return true;
+}
+
+bool console::miniParser::getBind()
+{
+   wxRegEx src_tmpl(bind_tmpl);
+   assert(src_tmpl.IsValid());
+   // search the entire pattern
+   if (!src_tmpl.Matches(exp)) return false;
+   // remove the outside brackets
+   assert(src_tmpl.Compile(wxT("^\\{{2}")));
+   src_tmpl.ReplaceAll(&exp,wxT("{"));
+   assert(src_tmpl.Compile(wxT("\\}$")));
+   src_tmpl.ReplaceAll(&exp,wxT(""));
+   // let's extract the point first ...
+   assert(src_tmpl.Compile(point_tmpl));
+   telldata::ttpnt pp;
+   if (!src_tmpl.Matches(exp)) return false;
+   wxString ps = src_tmpl.GetMatch(exp);
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
+
+   wxRegEx crd_tmpl(real_tmpl);
+   assert(crd_tmpl.IsValid());
+   crd_tmpl.Matches(ps);
+   wxString p1s = crd_tmpl.GetMatch(ps);
+   crd_tmpl.ReplaceFirst(&ps,wxT(""));
+   crd_tmpl.Matches(ps);
+   wxString p2s = crd_tmpl.GetMatch(ps);
+   double p1,p2;
+   p1s.ToDouble(&p1);p2s.ToDouble(&p2);
+   // convert the coordinates to ttpoint ...
+   pp = telldata::ttpnt(p1,p2);
+   // ... now the rotation ...
+   assert(src_tmpl.Compile(real_tmpl));
+   telldata::ttreal rot;
+   if (!src_tmpl.Matches(exp)) return false;
+   ps = src_tmpl.GetMatch(exp);
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
+   ps.ToDouble(&p1);
+   rot = telldata::ttreal(p1);
+
+   // ... the flip ...
+   assert(src_tmpl.Compile(bool_tmpl));
+   telldata::ttbool flip;
+   if (!src_tmpl.Matches(exp)) return false;
+   ps = src_tmpl.GetMatch(exp);
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
+   if (wxT("true") == ps)
+      flip = telldata::ttbool(true);
+   else
+      flip = telldata::ttbool(false);
+
+   // ... and finally - the scale ...
+   assert(src_tmpl.Compile(real_tmpl));
+   telldata::ttreal scl;
+   if (!src_tmpl.Matches(exp)) return false;
+   ps = src_tmpl.GetMatch(exp);
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
+   ps.ToDouble(&p1);
+   scl = telldata::ttreal(p1);
+
+   client_stack->push(new telldata::ttbnd(pp,rot,flip,scl));
    return true;
 }
 
@@ -352,24 +416,24 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
       case console::op_flipY  :
       case console::op_flipX  :
       case console::op_point  : ttype = telldata::tn_pnt; break;
+      case console::op_bind   : ttype = telldata::tn_bnd; break;
       default:ttype = TLISTOF(telldata::tn_pnt); break;
-//      case console::op_dpoly  :
-//      case console::op_dwire  : ttype = TLISTOF(telldata::tn_pnt); break;
-//      console::op_line     ,
-//      default: assert(false);
    }
-   puc = new miniParser(clst, ttype);_numpoints = 0;
+   puc = new miniParser(clst, ttype);
+   _numpoints = 0;
+   _flipX = false;
+   _scale = 1;
+   _angle = 0;
    _mouseIN_OK = true;
    _guinput.Clear();
    tell_log(MT_GUIPROMPT);
    Connect(-1, wxEVT_COMMAND_ENTER,
            (wxObjectEventFunction) (wxEventFunction)
            (wxCommandEventFunction)&ted_cmd::OnGUInput);
-   
+
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(TSTS_THREADWAIT);
    wxPostEvent(_parent, eventSTATUSUPD);
-   
 }
 
 void console::ted_cmd::getGUInput(bool from_keyboard) {
@@ -396,10 +460,18 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
    }
    _guinput.Clear();
    _numpoints = 0;
+   _flipX = false;
+   _scale = 1;
+   _angle = 0;
 }
 
 void console::ted_cmd::OnGUInput(wxCommandEvent& evt) {
    switch (evt.GetInt()) {
+      case -4: _flipX = !_flipX;break;
+      case -3: _angle += 90.0;
+               if (360 < _angle)
+                  _angle -= 360.0;
+               break;
       case -2: cancelLastPoint();break;
       case -1:   // abort current  mouse input
          Disconnect(-1, wxEVT_COMMAND_ENTER);
@@ -429,6 +501,11 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
       switch (puc->wait4type()) {
          case TLISTOF(telldata::tn_pnt):
          case         telldata::tn_box : ost2 << wxT("{ ") << ost1; break;
+         case         telldata::tn_bnd : ost2 << wxT("{ ") << ost1 << wxT(", ")
+                                                           << _angle << wxT(", ")
+                                                           << (_flipX ? wxT("true") : wxT("false")) << wxT(", ")
+                                                           << _scale << wxT("}");
+                      break;
          default                       : ost2 << ost1;
       }
    // ... and separators between the points
@@ -440,14 +517,18 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    // actualize the number of points entered
    _numpoints++;
    // If there is nothing else to wait ... call end of mouse input
-   if ( (_numpoints == 1) && (telldata::tn_pnt == puc->wait4type())
-     || (_numpoints == 2) && (telldata::tn_box == puc->wait4type())) mouseRB();
+   if ( (_numpoints == 1) && ((telldata::tn_pnt == puc->wait4type()) ||
+                              (telldata::tn_bnd == puc->wait4type())   )
+     || (_numpoints == 2) &&  (telldata::tn_box == puc->wait4type())    )
+      mouseRB();
 }
 
 void console::ted_cmd::mouseRB() {
    // End of input is not accepted if ... 
-   if ( (_numpoints == 0) 
-      ||((_numpoints == 1) && (telldata::tn_pnt != puc->wait4type()))) return;
+   if ( (_numpoints == 0) || ((_numpoints == 1)                      &&
+                              (telldata::tn_pnt != puc->wait4type()) &&
+                              (telldata::tn_bnd != puc->wait4type())    )
+      ) return;
    // put the proper closing bracket
    wxString close;
    switch (puc->wait4type()) {

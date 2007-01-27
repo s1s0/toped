@@ -43,8 +43,10 @@ namespace console {
 
    typedef std::list<std::string>   stringList;
    const wxString real_tmpl      = wxT("[-+]?([[:digit:]]+(\\.[[:digit:]]*)?|(\\.[[:digit:]]+))");
+   const wxString bool_tmpl      = wxT("true|false");
    const wxString point_tmpl     = wxT("\\{")+ real_tmpl+wxT(",")+ real_tmpl+wxT("\\}");
    const wxString box_tmpl       = wxT("\\{")+point_tmpl+wxT(",")+point_tmpl+wxT("\\}");
+   const wxString bind_tmpl      = wxT("\\{")+point_tmpl+wxT(",")+real_tmpl+wxT(",")+bool_tmpl+wxT(",")+real_tmpl+wxT("\\}");
    const wxString pointlist_tmpl = wxT("\\{")+point_tmpl+wxT("(,")+point_tmpl+wxT("){1,}\\}");
 
    bool patternFound(const wxString templ,  wxString str);
@@ -59,11 +61,12 @@ namespace console {
       bool                    getPoint();
       bool                    getBox();
       bool                    getList();
+      bool                    getBind();
       telldata::operandSTACK *client_stack;
       telldata::typeID         _wait4type;
       wxString                  exp;
    };
-
+   
    class parse_thread : public wxThread {
    public:
       parse_thread(wxString& cmd, wxWindow* status_wnd, wxThreadKind kind=wxTHREAD_DETACHED):
@@ -99,6 +102,9 @@ namespace console {
       void                    mouseLB(const telldata::ttpnt& p);
       void                    mouseRB();
       word                    _numpoints;
+      real                    _angle;
+      bool                    _flipX;
+      real                    _scale;
       bool                    _mouseIN_OK;
       wxString                _guinput;
       stringList              _cmd_history;

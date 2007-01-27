@@ -55,6 +55,7 @@ namespace telldata {
    const typeID tn_composite  = 10;
    const typeID tn_pnt        = 11;
    const typeID tn_box        = 12;
+   const typeID tn_bnd        = 13;
    const typeID tn_usertypes  = 16;
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
@@ -108,6 +109,12 @@ namespace telldata {
    class box_type : public tell_type {
    public:
                            box_type(point_type*);
+   };
+
+   //==============================================================================
+   class bnd_type : public tell_type {
+   public:
+                           bnd_type(point_type*);
    };
 
    //==============================================================================
@@ -294,6 +301,31 @@ namespace telldata {
    private:
       ttpnt*               _p1;
       ttpnt*               _p2;
+   };
+
+   //==============================================================================
+   // Don't destruct _p, _rot etc. here. They are just pointing to the structures in
+   // the parent _fieldList and obviously should be destroyed there
+   class ttbnd : public user_struct {
+   public:
+                           ttbnd( real p_x=0.0, real p_y=0.0,
+                                  real rot=0.0, bool flx=false, real scale = 1.0);
+                           ttbnd( ttpnt p, ttreal rot, ttbool flx, ttreal sc);
+                           ttbnd(operandSTACK& OPStack);
+                           ttbnd(const ttbnd& cobj);
+      tell_var*            selfcopy() const    {return new ttbnd(*this);};
+      void                 echo(std::string&);
+      void                 assign(tell_var*);
+      const ttpnt&         p() const           {return *_p;}
+      const ttreal&        rot() const         {return *_rot;}
+      const ttbool&        flx() const         {return *_flx;}
+      const ttreal&        sc() const          {return *_sc;}
+      const ttbnd&         operator = (const ttbnd&);
+   private:
+      ttpnt*               _p;
+      ttreal*              _rot;
+      ttbool*              _flx;
+      ttreal*              _sc;
    };
 
    //==============================================================================

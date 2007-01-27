@@ -161,7 +161,9 @@ namespace tui {
       CM_ABORT            ,
       CM_CANCEL_LAST      ,
       CM_CLOSE            ,
-      CM_AGAIN
+      CM_AGAIN            ,
+      CM_ROTATE           ,
+      CM_FLIP
    } CONTEXT_MENU_TYPE;
 
    typedef enum {
@@ -239,6 +241,8 @@ namespace tui {
       void           OnCMcancel(wxCommandEvent&);
       void           OnCMclose(wxCommandEvent&);
       void           OnRepeatLastCmd(wxCommandEvent&);
+      void           OnCMFlip(wxCommandEvent&);
+      void           OnCMRotate(wxCommandEvent&);
       void           initializeGL();
    private:
       void           CursorControl(bool, bool);
