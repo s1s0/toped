@@ -1787,6 +1787,26 @@ void laydata::tdtcellaref::openGL_drawsel(const pointlist& ptlist, const SGBitSe
    }
 }
 
+void laydata::tdtcellaref::tmp_draw(const layprop::DrawProperties& drawprop,
+                 ctmqueue& transtack, SGBitSet*, bool under_construct) const
+{
+   if (structure())
+   {
+      for (int i = 0; i < _cols; i++)
+      {// start/stop rows
+         for(int j = 0; j < _rows; j++)
+         { // start/stop columns
+            // for each of the visual array figures...
+            // ... get the translation matrix ...
+            CTM refCTM(TP(_stepX * i , _stepY * j ), 1, 0, false);
+            refCTM *= _translation;
+            transtack.push_front(refCTM * transtack.front());
+            structure()->tmp_draw(drawprop, transtack);
+         }
+      }
+   }
+}
+
 void laydata::tdtcellaref::info(std::ostringstream& ost) const {
    ost << "cell \"" << _structure->first << "\" - array reference @ (";
    ost << _translation.tx() << " , " << _translation.ty() << ") ->";

@@ -60,8 +60,6 @@ namespace laydata {
       virtual   void       transfer(const CTM&) = 0;
    //! Copy the object and move it using the input CTM  
       virtual   tdtdata*   copy(const CTM&) = 0;
-//   //! Draw the object using OpenGL and the translation matrix stack.
-//                void       openGL_draw(layprop::DrawProperties&) const;
    //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
       virtual   void       openGL_precalc(layprop::DrawProperties&, pointlist&) const = 0;
    //! Draw the outline of the objects
@@ -136,13 +134,12 @@ namespace laydata {
       validator*           move(const CTM&, const SGBitSet* plst = NULL);
       void                 transfer(const CTM&);
       tdtdata*             copy(const CTM&);
-//      void                 openGL_draw(layprop::DrawProperties&) const;
-      
+
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      
+
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                              SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 info(std::ostringstream&) const;
@@ -177,13 +174,12 @@ namespace laydata {
       validator*           move(const CTM&, const SGBitSet* plst = NULL);
       void                 transfer(const CTM&);
       tdtdata*             copy(const CTM&);
-//      void                 openGL_draw(layprop::DrawProperties&) const;
-      
+
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      
+
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 info(std::ostringstream&) const;
@@ -217,13 +213,12 @@ namespace laydata {
       validator*           move(const CTM&, const SGBitSet* plst = NULL);
       void                 transfer(const CTM&);
       tdtdata*             copy(const CTM&);
-//      void                 openGL_draw(layprop::DrawProperties&) const;
-      
+
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      
+
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 info(std::ostringstream&) const;
@@ -266,14 +261,13 @@ namespace laydata {
       tdtdata*             copy(const CTM& trans) {return new tdtcellref(
                                                _structure,_translation*trans);};
 //       tdtcellref*          getshapeover(TP);
-//      void                 openGL_draw(layprop::DrawProperties&) const;
-      
+
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
       virtual void         openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
-      
+
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 info(std::ostringstream&) const;
@@ -313,13 +307,14 @@ namespace laydata {
       tdtdata*             copy(const CTM& trans) {return new tdtcellaref(
                               _structure,_translation * trans,_stepX, _stepY, 
                                                                 _cols, _rows);};
-//      void                 openGL_draw(layprop::DrawProperties&) const;
-      
+
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      
+
+      void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
+                              SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 info(std::ostringstream&) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;

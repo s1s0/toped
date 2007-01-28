@@ -1299,6 +1299,46 @@ int tellstdfunc::stdCELLAREF::execute() {
 }
 
 //=============================================================================
+tellstdfunc::stdCELLAREF_D::stdCELLAREF_D(telldata::typeID retype, bool eor) :
+      stdCELLAREF(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+}
+
+int tellstdfunc::stdCELLAREF_D::execute() {
+   real        stepY = getOpValue();
+   real        stepX = getOpValue();
+   word        row   = getWordValue();
+   word        col   = getWordValue();
+   std::string name  = getStringValue();
+   real DBscale = DATC->DBscale();
+   int4b istepX = rint(stepX * DBscale);
+   int4b istepY = rint(stepY * DBscale);
+   
+   // stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(console::op_abind, &OPstack, name, CTM(), istepX, istepY,col,row))
+      return EXEC_ABORT;
+   // get the data from the stack
+   telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
+
+   OPstack.push(new telldata::ttstring(name));
+   OPstack.push(new telldata::ttpnt(bnd->p()));
+   OPstack.push(new telldata::ttreal(bnd->rot()));
+   OPstack.push(new telldata::ttbool(bnd->flx()));
+   OPstack.push(new telldata::ttreal(bnd->sc()));
+   OPstack.push(new telldata::ttint(col));
+   OPstack.push(new telldata::ttint(row));
+   OPstack.push(new telldata::ttreal(stepX));
+   OPstack.push(new telldata::ttreal(stepY));
+   delete bnd;
+   return stdCELLAREF::execute();
+}
+
+//=============================================================================
 tellstdfunc::stdUSINGLAYER::stdUSINGLAYER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
@@ -3700,9 +3740,11 @@ telldata::ttint* tellstdfunc::CurrentLayer() {
 }
 
 
-bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack, std::string name, const CTM trans) {
-   // Create a temporary object in the tdtdesign (only if a new object is created, i.e. box,wire,polygon)
-   try {DATC->mouseStart(input_type, name, trans);}
+bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
+   std::string name, const CTM trans, int4b stepX, int4b stepY, word cols, word rows)
+{
+   // Create a temporary object in the tdtdesign (only if a new object is created, i.e. box,wire,polygon,cell etc.)
+   try {DATC->mouseStart(input_type, name, trans, stepX, stepY, cols, rows);}
    catch (EXPTN) {return false;}
    // flag the prompt what type of data is expected & handle a pointer to
    // the operand stack

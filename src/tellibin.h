@@ -226,6 +226,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdADDWIRE_D    , stdADDWIRE    )
    TELL_STDCMD_CLASSB(stdDRAWWIRE_D   , stdDRAWWIRE   )
    TELL_STDCMD_CLASSB(stdCELLREF_D    , stdCELLREF    )
+   TELL_STDCMD_CLASSB(stdCELLAREF_D   , stdCELLAREF   )
    TELL_STDCMD_CLASSB(stdADDTEXT_D    , stdADDTEXT    )
    TELL_STDCMD_CLASSB(stdCOPYSEL_D    , stdCOPYSEL    )
    TELL_STDCMD_CLASSB(stdMOVESEL_D    , stdMOVESEL    )
@@ -245,7 +246,14 @@ namespace tellstdfunc {
 
          //   laydata::tdtdesign*  currentDesign();
    telldata::ttint*     CurrentLayer();
-   bool                 waitGUInput(int, telldata::operandSTACK *, std::string name = "", const CTM trans = CTM());
+   bool                 waitGUInput(int, telldata::operandSTACK *,
+                                    std::string name = "",
+                                    const CTM trans = CTM(),
+                                    int4b stepX = 0,
+                                    int4b stepY = 0,
+                                    word cols = 0,
+                                    word rows = 0
+                                   );
    pointlist*           t2tpoints(telldata::ttlist *, real);
    telldata::ttlist*    make_ttlaylist(laydata::selectList*);
    telldata::ttlist*    make_ttlaylist(laydata::atticList*);
