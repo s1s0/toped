@@ -182,8 +182,8 @@ tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &ti
 tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
-   _rotation = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-   _flip = new wxCheckBox(this, -1, wxT("Flip X"));
+//   _rotation = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+//   _flip = new wxCheckBox(this, -1, wxT("Flip X"));
    _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::cellList const cll = ATDB->cells();
@@ -196,15 +196,15 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
    // The window layout
    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
    // First line up the important things
-   wxBoxSizer *spin_sizer = new wxBoxSizer( wxHORIZONTAL );
-   spin_sizer->Add( new wxStaticText(this, -1, wxT("Rotation:"), 
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_CENTER, 10);
-   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(new sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
-                                                  0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(0,0,1); // 
-   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
+//   wxBoxSizer *spin_sizer = new wxBoxSizer( wxHORIZONTAL );
+//   spin_sizer->Add( new wxStaticText(this, -1, wxT("Rotation:"), 
+//                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+//                                                0, wxALL | wxALIGN_CENTER, 10);
+//   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
+//   spin_sizer->Add(new sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
+//                                                  0, wxALL | wxALIGN_CENTER, 0);
+//   spin_sizer->Add(0,0,1); // 
+//   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Buttons
    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
@@ -212,7 +212,7 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
    button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
       topsizer->Add(_nameList, 1, wxEXPAND );
-   topsizer->Add(spin_sizer, 0, wxEXPAND );
+//   topsizer->Add(spin_sizer, 0, wxEXPAND );
    topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
 
    SetSizer( topsizer );      // use the sizer for layout
@@ -223,8 +223,8 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
 tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
-   _rotation = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-   _flip = new wxCheckBox(this, -1, wxT("Flip X"));
+//   _rotation = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+//   _flip = new wxCheckBox(this, -1, wxT("Flip X"));
    _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::cellList const cll = ATDB->cells();
@@ -237,15 +237,15 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
    // The window layout
    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
    // First line up the important things
-   wxBoxSizer *spin_sizer = new wxBoxSizer( wxHORIZONTAL );
-   spin_sizer->Add( new wxStaticText(this, -1, wxT("Rotation:"), 
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_CENTER, 10);
-   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(new sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
-                                                  0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(0,0,1); // 
-   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
+//   wxBoxSizer *spin_sizer = new wxBoxSizer( wxHORIZONTAL );
+//   spin_sizer->Add( new wxStaticText(this, -1, wxT("Rotation:"), 
+//                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+//                                                0, wxALL | wxALIGN_CENTER, 10);
+//   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
+//   spin_sizer->Add(new sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
+//                                                  0, wxALL | wxALIGN_CENTER, 0);
+//   spin_sizer->Add(0,0,1); // 
+//   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Now Array specific controls
    _numX = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    _numY = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
@@ -290,7 +290,7 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
    button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
       topsizer->Add(_nameList, 1, wxEXPAND );
-   topsizer->Add(spin_sizer, 0, wxEXPAND );
+//   topsizer->Add(spin_sizer, 0, wxEXPAND );
    topsizer->Add(num_sizer, 0, wxEXPAND );
    topsizer->Add(step_sizer, 0, wxEXPAND );
    topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
@@ -304,8 +304,8 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
            : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
    
    _size     = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-   _rotation = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-   _flip = new wxCheckBox(this, -1, wxT("Flip X"));
+//   _rotation = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+//   _flip = new wxCheckBox(this, -1, wxT("Flip X"));
    _text = new wxTextCtrl(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    // The window layout
    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
@@ -320,14 +320,14 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
                                                   0, wxALL | wxALIGN_CENTER, 0);
    spin_sizer->Add(0,0,1); // 
    
-   spin_sizer->Add( new wxStaticText(this, -1, wxT("Rotation:"), 
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                0, wxALL | wxALIGN_CENTER, 10);
-   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(new sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
-                                                  0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(0,0,1); // 
-   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
+//   spin_sizer->Add( new wxStaticText(this, -1, wxT("Rotation:"), 
+//                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+//                                                0, wxALL | wxALIGN_CENTER, 10);
+//   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
+//   spin_sizer->Add(new sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
+//                                                  0, wxALL | wxALIGN_CENTER, 0);
+//   spin_sizer->Add(0,0,1); // 
+//   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Buttons
    wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );

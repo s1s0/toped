@@ -1054,10 +1054,11 @@ void tui::TopedFrame::CellRef(wxString clname) {
    catch (EXPTN) {delete dlg;return;}   
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
-      ost << wxT("cellref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),") 
+/*      ost << wxT("cellref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),") 
           <<                     dlg->get_angle() << wxT(",") 
           << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
-          <<                                wxT("1")  << wxT(");");
+          <<                                wxT("1")  << wxT(");");*/
+      ost << wxT("cellref(\"") << dlg->get_selectedcell() << wxT("\");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
@@ -1073,11 +1074,16 @@ void tui::TopedFrame::CellARef(wxString clname) {
    catch (EXPTN) {delete dlg; return;}   
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
-      ost << wxT("cellaref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),") 
+/*      ost << wxT("cellaref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),") 
           <<                     dlg->get_angle() << wxT(",") 
           << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
           <<                                 wxT("1")  << wxT(",")
           <<                       dlg->get_col() << wxT(",") 
+          <<                       dlg->get_row() << wxT(",") 
+          <<                     dlg->get_stepX() << wxT(",") 
+          <<                     dlg->get_stepY() << wxT(");");*/
+      ost << wxT("cellaref(\"") << dlg->get_selectedcell() << wxT("\",")
+          <<                       dlg->get_col() << wxT(",")
           <<                       dlg->get_row() << wxT(",") 
           <<                     dlg->get_stepX() << wxT(",") 
           <<                     dlg->get_stepY() << wxT(");");
@@ -1128,12 +1134,15 @@ void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
-      wxString ost; ost << wxT("addtext(\"")
+/*      wxString ost; ost << wxT("addtext(\"")
                         << dlg->get_text()                      << wxT("\",")
                         << DATC->curlay()                       << wxT(",")
                         << wxT("getpoint(),")
                         << dlg->get_angle()                     << wxT(",")
                         << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
+                        << dlg->get_size()                      << wxT(");");*/
+      wxString ost; ost << wxT("addtext(\"")
+                        << dlg->get_text()                      << wxT("\",")
                         << dlg->get_size()                      << wxT(");");
       _cmdline->parseCommand(ost);
    }
