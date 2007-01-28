@@ -78,13 +78,16 @@ namespace console {
    op_point  = -8 -> point. One point expected. No graphical effects
    op_cbind  = -9 -> cell bind. One point expected. The possible reference location is following
                      the cursor position
-   op_tbind  =-10 -> text bind. One point expected. The possible text location is following
+   op_cbind  =-10 -> cell array bind. One point expected. The possible reference location is following
+                     the cursor position
+   op_tbind  =-11 -> text bind. One point expected. The possible text location is following
                      the cursor position
 */
    typedef enum
    {
-      op_none     = -11 ,
+      op_none     = -12 ,
       op_tbind          ,
+      op_abind          ,
       op_cbind          ,
       op_point          ,
       op_line           ,

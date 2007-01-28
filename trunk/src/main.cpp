@@ -110,6 +110,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("cellref"          ,(new                tellstdfunc::stdCELLREF(telldata::tn_layout,false)));
    mblock->addFUNC("cellref"          ,(new              tellstdfunc::stdCELLREF_D(telldata::tn_layout,false)));
    mblock->addFUNC("cellaref"         ,(new               tellstdfunc::stdCELLAREF(telldata::tn_layout,false)));
+   mblock->addFUNC("cellaref"         ,(new             tellstdfunc::stdCELLAREF_D(telldata::tn_layout,false)));
    mblock->addFUNC("select"           ,(new        tellstdfunc::stdSELECT(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("select"           ,(new      tellstdfunc::stdSELECTIN(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("select"           ,(new      tellstdfunc::stdSELECT_I(TLISTOF(telldata::tn_layout),false)));

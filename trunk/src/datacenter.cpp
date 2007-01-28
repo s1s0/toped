@@ -459,13 +459,14 @@ unsigned int DataCenter::numselected() const {
    else return 0;
 }
 
-void DataCenter::mouseStart(int input_type, std::string name, const CTM trans)
+void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
+                            int4b stepX, int4b stepY, word cols, word rows)
 {
    if (console::op_line == input_type) return;
    if (_TEDDB)
    {
       _TEDDB->check_active();
-      _TEDDB->mouseStart(input_type, name, trans);
+      _TEDDB->mouseStart(input_type, name, trans, stepX, stepY, cols, rows);
    }
    else throw EXPTNactive_DB();
 }
@@ -475,6 +476,7 @@ void DataCenter::mousePoint(TP p)
    if (console::op_line == currentop())
       _properties.mousePoint(p);
    else if ((_TEDDB) && (console::op_cbind != currentop())
+                     && (console::op_abind != currentop())
                      && (console::op_tbind != currentop()) )
       _TEDDB->mousePoint(p);
 }

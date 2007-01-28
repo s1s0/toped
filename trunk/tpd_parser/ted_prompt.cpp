@@ -417,6 +417,7 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
       case console::op_flipX  :
       case console::op_point  : ttype = telldata::tn_pnt; break;
       case console::op_cbind  :
+      case console::op_abind  :
       case console::op_tbind  : ttype = telldata::tn_bnd; break;
       default:ttype = TLISTOF(telldata::tn_pnt); break;
    }
