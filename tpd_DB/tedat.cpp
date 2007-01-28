@@ -1524,7 +1524,7 @@ void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    TP trans;
    real rotation, scale;
    bool flipX;
-   _translation.toGDS(trans,rotation,scale,flipX);
+   _translation.Decompose(trans,rotation,scale,flipX);
    wr = gdsf.SetNextRecord(gds_STRANS);
    if (flipX) wr->add_int2b(0x8000);
    else       wr->add_int2b(0x0000);
@@ -1813,7 +1813,7 @@ void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    TP trans;
    real rotation, scale;
    bool flipX;
-   _translation.toGDS(trans,rotation,scale,flipX);
+   _translation.Decompose(trans,rotation,scale,flipX);
    wr = gdsf.SetNextRecord(gds_STRANS);
    if (flipX) wr->add_int2b(0x8000);
    else       wr->add_int2b(0x0000);
@@ -2033,7 +2033,6 @@ void laydata::tdttext::openGL_postclean(layprop::DrawProperties& drawprop, point
 void laydata::tdttext::tmp_draw(const layprop::DrawProperties& drawprop,
                ctmqueue& transtack, SGBitSet*, bool under_construct) const
 {
-   if (under_construct) return;
    //====================================================================
    // font translation matrix
    CTM ftmtrx =  _translation * transtack.front();
@@ -2074,7 +2073,7 @@ void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
    TP trans;
    real rotation, scale;
    bool flipX;
-   _translation.toGDS(trans,rotation,scale,flipX);
+   _translation.Decompose(trans,rotation,scale,flipX);
    wr = gdsf.SetNextRecord(gds_STRANS);
    if (flipX) wr->add_int2b(0x8000);
    else       wr->add_int2b(0x0000);

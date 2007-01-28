@@ -1223,10 +1223,10 @@ tellstdfunc::stdCELLREF_D::stdCELLREF_D(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdCELLREF_D::execute() {
    std::string name = getStringValue();
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_bind, &OPstack, name)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_cbind, &OPstack, name)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
-   
+
    OPstack.push(new telldata::ttstring(name));
    OPstack.push(new telldata::ttpnt(bnd->p()));
    OPstack.push(new telldata::ttreal(bnd->rot()));
@@ -1235,7 +1235,6 @@ int tellstdfunc::stdCELLREF_D::execute() {
    delete bnd;
    return stdCELLREF::execute();
 }
-
 
 //=============================================================================
 tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype, bool eor) :
@@ -1885,7 +1884,7 @@ int tellstdfunc::stdADDTEXT::execute() {
    UNDOPstack.push_front(new telldata::ttint(la));
    std::string text = getStringValue();
    real DBscale = DATC->DBscale();
-   CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), 
+   CTM ori(TP(rpnt->x(), rpnt->y(), DBscale),
                                      magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlayout* tx = new telldata::ttlayout(ATDB->addtext(la, text, ori), la);
@@ -1897,6 +1896,34 @@ int tellstdfunc::stdADDTEXT::execute() {
    delete rpnt;
    UpdateLV();   
    return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdADDTEXT_D::stdADDTEXT_D(telldata::typeID retype, bool eor) :
+      stdADDTEXT(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+}
+
+int tellstdfunc::stdADDTEXT_D::execute() {
+   real   magn   = getOpValue();
+   std::string name = getStringValue();
+   CTM ftrans;
+   ftrans.Scale(magn,magn);
+   // stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(console::op_tbind, &OPstack, name, ftrans)) return EXEC_ABORT;
+   // get the data from the stack
+   telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
+
+   OPstack.push(new telldata::ttstring(name));
+   OPstack.push(CurrentLayer());
+   OPstack.push(new telldata::ttpnt(bnd->p()));
+   OPstack.push(new telldata::ttreal(bnd->rot()));
+   OPstack.push(new telldata::ttbool(bnd->flx()));
+   OPstack.push(new telldata::ttreal(bnd->sc()));
+   delete bnd;
+   return stdADDTEXT::execute();
 }
 
 //=============================================================================
@@ -2077,7 +2104,7 @@ int tellstdfunc::getPOINT::execute() {
    DATC->unlockDB();
    // flag the prompt that we expect a single point & handle a pointer to
    // the operand stack
-   Toped->cmdline()->waitGUInput(&OPstack, console::op_point);
+   Toped->cmdline()->waitGUInput(&OPstack, console::op_point, CTM());
    // force the thread in wait condition until the ted_prompt has our data
    Toped->cmdline()->threadWaits4->Wait();
    // ... and continue when the thread is woken up
@@ -2097,7 +2124,7 @@ int tellstdfunc::getPOINTLIST::execute() {
    DATC->unlockDB();
    // flag the prompt that we expect a list of points & handle a pointer to
    // the operand stack
-   Toped->cmdline()->waitGUInput(&OPstack, console::op_dpoly);
+   Toped->cmdline()->waitGUInput(&OPstack, console::op_dpoly, CTM());
    // 
    wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(-1);
@@ -3673,13 +3700,13 @@ telldata::ttint* tellstdfunc::CurrentLayer() {
 }
 
 
-bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack, std::string name) {
+bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack, std::string name, const CTM trans) {
    // Create a temporary object in the tdtdesign (only if a new object is created, i.e. box,wire,polygon)
-   try {DATC->mouseStart(input_type, name);}
+   try {DATC->mouseStart(input_type, name, trans);}
    catch (EXPTN) {return false;}
    // flag the prompt what type of data is expected & handle a pointer to
    // the operand stack
-   Toped->cmdline()->waitGUInput(OPstack, (console::ACTIVE_OP)input_type);
+   Toped->cmdline()->waitGUInput(OPstack, (console::ACTIVE_OP)input_type, trans);
    // flag the canvas that a mouse input will be required
    wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(input_type);

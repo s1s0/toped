@@ -359,6 +359,11 @@ CTM::CTM(TP dp, real scale, real rotation,bool reflX) {
    Translate((real) dp.x(),(real) dp.y());
 }
 
+inline CTM CTM::Translate( const TP pnt)
+{
+   return (*this *= CTM(1,0,0,1,pnt.x(),pnt.y()));
+}
+
 CTM CTM::Rotate(const real alfa) {// alfa - in degrees
    double temp = (double) alfa; 
    double alfaG = (temp * M_PI / 180.0);// translate in radians
@@ -397,7 +402,7 @@ CTM CTM::operator = (const CTM op2) {
    return *this; 
 }
 
-void CTM::toGDS(TP& trans, real& rot, real& scale, bool& flipX) const 
+void CTM::Decompose(TP& trans, real& rot, real& scale, bool& flipX) const
 {
    // Assuming that every CTM can be represented as a result
    // of 4 consequitive operations - flipX, rotate, scale and translate,

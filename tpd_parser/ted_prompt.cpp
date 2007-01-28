@@ -403,7 +403,7 @@ void console::ted_cmd::parseCommand(wxString cmd, bool thread) {
 }
    
 
-void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE_OP input_type)
+void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE_OP input_type, const CTM& trans)
 {
    telldata::typeID ttype;
    switch (input_type)
@@ -416,14 +416,13 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
       case console::op_flipY  :
       case console::op_flipX  :
       case console::op_point  : ttype = telldata::tn_pnt; break;
-      case console::op_bind   : ttype = telldata::tn_bnd; break;
+      case console::op_cbind  :
+      case console::op_tbind  : ttype = telldata::tn_bnd; break;
       default:ttype = TLISTOF(telldata::tn_pnt); break;
    }
    puc = new miniParser(clst, ttype);
    _numpoints = 0;
-   _flipX = false;
-   _scale = 1;
-   _angle = 0;
+   _initrans = _translation = trans;
    _mouseIN_OK = true;
    _guinput.Clear();
    tell_log(MT_GUIPROMPT);
@@ -460,18 +459,13 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
    }
    _guinput.Clear();
    _numpoints = 0;
-   _flipX = false;
-   _scale = 1;
-   _angle = 0;
+   _translation = _initrans;
 }
 
 void console::ted_cmd::OnGUInput(wxCommandEvent& evt) {
    switch (evt.GetInt()) {
-      case -4: _flipX = !_flipX;break;
-      case -3: _angle += 90.0;
-               if (360 < _angle)
-                  _angle -= 360.0;
-               break;
+      case -4: _translation.FlipY();break;
+      case -3: _translation.Rotate(90.0);break;
       case -2: cancelLastPoint();break;
       case -1:   // abort current  mouse input
          Disconnect(-1, wxEVT_COMMAND_ENTER);
@@ -501,11 +495,19 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
       switch (puc->wait4type()) {
          case TLISTOF(telldata::tn_pnt):
          case         telldata::tn_box : ost2 << wxT("{ ") << ost1; break;
-         case         telldata::tn_bnd : ost2 << wxT("{ ") << ost1 << wxT(", ")
-                                                           << _angle << wxT(", ")
-                                                           << (_flipX ? wxT("true") : wxT("false")) << wxT(", ")
-                                                           << _scale << wxT("}");
+         case         telldata::tn_bnd :
+         {
+            TP bp;
+            real ang;
+            real sc;
+            bool flipX;
+            _translation.Decompose(bp, ang, sc, flipX);
+            ost2 << wxT("{ ") << ost1 << wxT(", ")
+                              << ang  << wxT(", ")
+                              << (flipX ? wxT("true") : wxT("false")) << wxT(", ")
+                              << sc   << wxT("}");
                       break;
+         }
          default                       : ost2 << ost1;
       }
    // ... and separators between the points

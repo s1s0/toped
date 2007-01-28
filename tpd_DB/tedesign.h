@@ -58,7 +58,7 @@ namespace laydata {
       void           openGL_draw(layprop::DrawProperties&);
       void           tmp_draw(const layprop::DrawProperties&, TP, TP);
       void           recreate_hierarchy();
-      void           mouseStart(int input_type, std::string);
+      void           mouseStart(int input_type, std::string, const CTM trans);
       void           mousePoint(TP p);
       void           mousePointCancel(TP&);
       void           mouseStop();

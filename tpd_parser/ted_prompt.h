@@ -85,7 +85,7 @@ namespace console {
                               ted_cmd(wxWindow*);
       virtual                ~ted_cmd();
       void                    parseCommand(wxString, bool thread=true);
-      void                    waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP);
+      void                    waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
       void                    getGUInput(bool from_keyboard = true);
       wxCondition*            threadWaits4;
       miniParser*             puc; // parse user coordinates
@@ -102,9 +102,8 @@ namespace console {
       void                    mouseLB(const telldata::ttpnt& p);
       void                    mouseRB();
       word                    _numpoints;
-      real                    _angle;
-      bool                    _flipX;
-      real                    _scale;
+      CTM                     _translation;
+      CTM                     _initrans;
       bool                    _mouseIN_OK;
       wxString                _guinput;
       stringList              _cmd_history;

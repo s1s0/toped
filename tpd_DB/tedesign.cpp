@@ -424,16 +424,23 @@ void laydata::tdtdesign::recreate_hierarchy() {
    }   
 }      
 
-void laydata::tdtdesign::mouseStart(int input_type, std::string name) {
+void laydata::tdtdesign::mouseStart(int input_type, std::string name, const CTM trans) {
    if      ( 0  < input_type)  _tmpdata = new tdtwire(input_type);
    else if ( console::op_dbox  == input_type)  _tmpdata = new tdtbox();
    else if ( console::op_dpoly == input_type)  _tmpdata = new tdtpoly();
-   else if ( console::op_bind  == input_type)
+   else if ( console::op_cbind  == input_type)
    {
       assert ("" != name);
       laydata::refnamepair striter = getcellnamepair(name);
       CTM eqm;
       _tmpdata = new tdtcellref(striter, eqm);
+   }
+   else if ( console::op_tbind == input_type)
+   {
+      assert ("" != name);
+      CTM eqm(trans);
+      eqm.Scale(1/(_UU*OPENGL_FONT_UNIT), 1/(_UU*OPENGL_FONT_UNIT));
+      _tmpdata = new tdttext(name, eqm);
    }
 }
 

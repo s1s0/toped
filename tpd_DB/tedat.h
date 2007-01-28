@@ -363,7 +363,9 @@ namespace laydata {
       void                 polycut(pointlist&, shapeList**){};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
-   protected:  
+      void                 objFlip() {_translation.FlipY(0.0);}
+      void                 objRotate() {_translation.Rotate( 90.0);}
+   protected:
       void                 select_points(DBbox&, SGBitSet*) {return;};
       void                 unselect_points(DBbox&, SGBitSet*) {return;};
    private:   

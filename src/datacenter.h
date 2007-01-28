@@ -69,7 +69,7 @@ public:
    void                       unlockDB();
    void                       unlockGDS();
    unsigned int               numselected() const;
-   void                       mouseStart(int input_type, std::string);
+   void                       mouseStart(int input_type, std::string, const CTM);
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
    void                       mouseStop();
