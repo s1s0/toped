@@ -106,6 +106,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("addwire"          ,(new                tellstdfunc::stdADDWIRE(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(new              tellstdfunc::stdADDWIRE_D(telldata::tn_layout,false)));
    mblock->addFUNC("addtext"          ,(new                tellstdfunc::stdADDTEXT(telldata::tn_layout,false)));
+   mblock->addFUNC("addtext"          ,(new              tellstdfunc::stdADDTEXT_D(telldata::tn_layout,false)));
    mblock->addFUNC("cellref"          ,(new                tellstdfunc::stdCELLREF(telldata::tn_layout,false)));
    mblock->addFUNC("cellref"          ,(new              tellstdfunc::stdCELLREF_D(telldata::tn_layout,false)));
    mblock->addFUNC("cellaref"         ,(new               tellstdfunc::stdCELLAREF(telldata::tn_layout,false)));

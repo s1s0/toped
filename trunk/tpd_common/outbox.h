@@ -76,13 +76,16 @@ namespace console {
    op_line   = -7 -> line. Two points expected. Used for rulers. It is dynamically
                      rolled
    op_point  = -8 -> point. One point expected. No graphical effects
-   op_bind   = -9 -> cell. One point expected. The possible reference location is following
+   op_cbind  = -9 -> cell bind. One point expected. The possible reference location is following
+                     the cursor position
+   op_tbind  =-10 -> text bind. One point expected. The possible text location is following
                      the cursor position
 */
    typedef enum
    {
-      op_none     = -10 ,
-      op_bind           ,
+      op_none     = -11 ,
+      op_tbind          ,
+      op_cbind          ,
       op_point          ,
       op_line           ,
       op_rotate         ,

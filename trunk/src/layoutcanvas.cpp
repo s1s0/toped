@@ -537,7 +537,8 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
-            case console::op_bind:
+            case console::op_cbind:
+            case console::op_tbind:
                menu.Append(CM_ROTATE, wxT("Rotate"));
                menu.Append(CM_FLIP, wxT("Flip"));
                menu.Append(CM_CONTINUE, wxT("Continue"));
@@ -735,7 +736,8 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       if (   reperX
           || reperY
           ||(console::op_rotate == actop)
-          ||(console::op_bind  == actop) )
+          ||(console::op_cbind  == actop)
+          ||(console::op_tbind  == actop) )
          rubber_band = true;
       releasepoint = TP(0,0);
    }
