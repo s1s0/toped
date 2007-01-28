@@ -100,10 +100,10 @@ namespace tui {
    public:
       getCellRef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, wxString init);
       wxString get_selectedcell() const {return _nameList->GetStringSelection();};
-      wxString get_angle() const {return _rotation->GetValue();};
-      bool  get_flip() const {return _flip->GetValue();};
-      wxTextCtrl* _rotation;
-      wxCheckBox* _flip;
+//      wxString get_angle() const {return _rotation->GetValue();};
+//      bool  get_flip() const {return _flip->GetValue();};
+//      wxTextCtrl* _rotation;
+//      wxCheckBox* _flip;
       wxListBox*  _nameList;
    };
 
@@ -111,19 +111,19 @@ namespace tui {
    public:
       getCellARef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, wxString init);
       wxString get_selectedcell() const {return _nameList->GetStringSelection();};
-      wxString get_angle() const {return _rotation->GetValue();};
+//      wxString get_angle() const {return _rotation->GetValue();};
       wxString get_col() const {return _numY->GetValue();};
       wxString get_row() const {return _numX->GetValue();};
       wxString get_stepX() const {return _stepX->GetValue();};
       wxString get_stepY() const {return _stepY->GetValue();};
 
-      bool  get_flip() const {return _flip->GetValue();};
-      wxTextCtrl* _rotation;
+//      bool  get_flip() const {return _flip->GetValue();};
+//      wxTextCtrl* _rotation;
       wxTextCtrl* _numX;
       wxTextCtrl* _numY;
       wxTextCtrl* _stepX;
       wxTextCtrl* _stepY;
-      wxCheckBox* _flip;
+//      wxCheckBox* _flip;
       wxListBox*  _nameList;
    };
 

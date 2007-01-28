@@ -1222,6 +1222,20 @@ tellstdfunc::stdCELLREF_D::stdCELLREF_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCELLREF_D::execute() {
    std::string name = getStringValue();
+
+   // check that target cell exists - otherwise tmp_draw can't onviously work.
+   // there is another more extensive check when the cell is added, there the circular
+   // references are checked as well 
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   laydata::tdtcell *excell = ATDB->checkcell(name);
+   DATC->unlockDB();
+   if (NULL == excell)
+   {
+      std::string news = "Can't find cell \"";
+      news += name; news += "\" ";
+      tell_log(console::MT_ERROR,news);
+      return EXEC_ABORT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_cbind, &OPstack, name)) return EXEC_ABORT;
    // get the data from the stack
@@ -1281,12 +1295,12 @@ int tellstdfunc::stdCELLAREF::execute() {
                      static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    real DBscale = DATC->DBscale();
-   stepX = rint(stepX * DBscale);
-   stepY = rint(stepY * DBscale);
+   int4b istepX = (int4b)rint(stepX * DBscale);
+   int4b istepY = (int4b)rint(stepY * DBscale);
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlayout* cl = new telldata::ttlayout(
-            ATDB->addcellaref(name,ori,(int4b)stepX,(int4b)stepY,col,row),0);
+            ATDB->addcellaref(name,ori,istepX,istepY,col,row),0);
    DATC->unlockDB();
    OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
@@ -1315,9 +1329,24 @@ int tellstdfunc::stdCELLAREF_D::execute() {
    word        row   = getWordValue();
    word        col   = getWordValue();
    std::string name  = getStringValue();
+   
+   // check that target cell exists - otherwise tmp_draw can't onviously work.
+   // there is another more extensive check when the cell is added, there the circular
+   // references are checked as well 
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   laydata::tdtcell *excell = ATDB->checkcell(name);
+   DATC->unlockDB();
+   if (NULL == excell)
+   {
+      std::string news = "Can't find cell \"";
+      news += name; news += "\" ";
+      tell_log(console::MT_ERROR,news);
+      return EXEC_ABORT;
+   }
+   
    real DBscale = DATC->DBscale();
-   int4b istepX = rint(stepX * DBscale);
-   int4b istepY = rint(stepY * DBscale);
+   int4b istepX = (int4b)rint(stepX * DBscale);
+   int4b istepY = (int4b)rint(stepY * DBscale);
    
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_abind, &OPstack, name, CTM(), istepX, istepY,col,row))

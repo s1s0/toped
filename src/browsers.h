@@ -137,6 +137,8 @@ namespace browsers {
       void              copyItem(const wxTreeItemId, const wxTreeItemId);
       void              highlightChildren(wxTreeItemId, wxColour);
       wxTreeItemId      activeStructure(void) {return _activeStructure;};
+      wxString          selectedCellname() const {if (RBcellID.IsOk())
+         return GetItemText(RBcellID); else return wxT("");}
    protected:
       wxTreeItemId      RBcellID;
    private:
@@ -206,13 +208,14 @@ namespace browsers {
       virtual           ~TDTbrowser();
       void              collectInfo(const wxString, laydata::TDTHierTree*);
       void              initialize();
-      wxString          selectedCellname() const {if (RBcellID.IsOk()) 
-         return hCellBrowser->GetItemText(RBcellID); else return wxT("");}
+      wxString          selectedCellname() const;
+//      wxString          selectedCellname() const {if (RBcellID.IsOk()) 
+//         return hCellBrowser->GetItemText(RBcellID); else return wxT("");}
    protected:
       void              collectChildren(laydata::TDTHierTree *root, 
                                                  wxTreeItemId& lroot);
    private:
-      wxTreeItemId      RBcellID;//+
+//      wxTreeItemId      RBcellID;//+
       wxTreeItemId      top_structure;//+
       wxTreeItemId      active_structure;//+
       wxImageList*      _imageList;

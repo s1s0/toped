@@ -535,7 +535,7 @@ void browsers::TDTbrowser::initialize()
 {
    fCellBrowser->DeleteAllItems();
    hCellBrowser->DeleteAllItems();
-   RBcellID.Unset(); top_structure.Unset(); active_structure.Unset();
+/*   RBcellID.Unset(); */top_structure.Unset(); active_structure.Unset();
 }
 
 void browsers::TDTbrowser::collectInfo(const wxString libname, laydata::TDTHierTree* tdtH) 
@@ -779,6 +779,11 @@ void browsers::TDTbrowser::OnReportUsedLayers(wxCommandEvent& WXUNUSED(event)) {
    Console->parseCommand(cmd);
 }
 
+wxString browsers::TDTbrowser::selectedCellname() const
+{
+   return hCellBrowser->selectedCellname();
+}
+
 browsers::TDTbrowser::~TDTbrowser()
 {
    _imageList->RemoveAll();
@@ -789,6 +794,7 @@ browsers::TDTbrowser::~TDTbrowser()
    delete fCellBrowser;
    
 }
+
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::browserTAB, wxNotebook)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::browserTAB::OnCommand)
