@@ -252,9 +252,9 @@ tellstdfunc::stdREDRAW::stdREDRAW(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {}
 
-int tellstdfunc::stdREDRAW::execute() {
-   wxPaintEvent upde(wxEVT_PAINT);
-   wxPostEvent(Toped->view(), upde);
+int tellstdfunc::stdREDRAW::execute()
+{
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -514,7 +514,7 @@ void tellstdfunc::stdHIDECELLMARK::undo() {
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
-   UpdateLV();
+   RefreshGL();
 }
 
 int tellstdfunc::stdHIDECELLMARK::execute() {
@@ -526,7 +526,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   UpdateLV();
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -549,7 +549,7 @@ void tellstdfunc::stdHIDETEXTMARK::undo() {
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   UpdateLV();
+   RefreshGL();
 }
 
 int tellstdfunc::stdHIDETEXTMARK::execute() {
@@ -561,7 +561,7 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
    wxPostEvent(Toped->view(), eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   UpdateLV();
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1188,7 +1188,7 @@ void tellstdfunc::stdCELLREF::undo() {
       ATDB->destroy_this(cl->data(),0);
    DATC->unlockDB();   
    delete (cl);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdCELLREF::execute() {
@@ -1209,7 +1209,7 @@ int tellstdfunc::stdCELLREF::execute() {
                      angle << "," << LogFile._2bool(flip) << "," << magn <<");";
    LogFile.flush();
    delete rpnt;
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1277,7 +1277,7 @@ void tellstdfunc::stdCELLAREF::undo() {
       ATDB->destroy_this(cl->data(),0);
    DATC->unlockDB();
    delete (cl);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdCELLAREF::execute() {
@@ -1308,7 +1308,7 @@ int tellstdfunc::stdCELLAREF::execute() {
                       col << "," << row << "," << stepX << "," << stepY << ");";
    LogFile.flush();
    delete rpnt;
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1447,7 +1447,7 @@ void tellstdfunc::stdADDBOX::undo() {
       ATDB->destroy_this(bx->data(),la);
    DATC->unlockDB();
    delete (bx);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdADDBOX::execute() {
@@ -1464,7 +1464,7 @@ int tellstdfunc::stdADDBOX::execute() {
    OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
    LogFile << LogFile.getFN() << "("<< *w << "," << la << ");";LogFile.flush();
    delete w;
-   UpdateLV();
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1501,7 +1501,7 @@ void tellstdfunc::stdDRAWBOX::undo() {
       ATDB->destroy_this(bx->data(),la);
    DATC->unlockDB();
    delete (bx);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdDRAWBOX::execute() {
@@ -1521,7 +1521,7 @@ int tellstdfunc::stdDRAWBOX::execute() {
    OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
    LogFile << "addbox("<< *w << "," << la << ");";LogFile.flush();
    delete w;
-   UpdateLV();
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1559,7 +1559,7 @@ void tellstdfunc::stdADDBOXr::undo() {
       ATDB->destroy_this(bx->data(),la);
    DATC->unlockDB();
    delete (bx);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdADDBOXr::execute() {
@@ -1580,7 +1580,7 @@ int tellstdfunc::stdADDBOXr::execute() {
    LogFile << LogFile.getFN() << "("<< *p1 << "," << width << "," << heigth <<
                                               "," << la << ");"; LogFile.flush();
    delete p1;
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1621,7 +1621,7 @@ void tellstdfunc::stdADDBOXp::undo() {
       ATDB->destroy_this(bx->data(),la);
    DATC->unlockDB();
    delete (bx);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdADDBOXp::execute() {
@@ -1640,7 +1640,7 @@ int tellstdfunc::stdADDBOXp::execute() {
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << "," << la << ");"; 
    LogFile.flush();
    delete p1; delete p2;
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1679,7 +1679,7 @@ void tellstdfunc::stdADDPOLY::undo() {
       ATDB->destroy_this(ply->data(),la);
    DATC->unlockDB();
    delete (ply);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdADDPOLY::execute() {
@@ -1703,7 +1703,7 @@ int tellstdfunc::stdADDPOLY::execute() {
       OPstack.push(new telldata::ttlayout());
    }
    delete pl;
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1740,7 +1740,7 @@ void tellstdfunc::stdDRAWPOLY::undo() {
       ATDB->destroy_this(ply->data(),la);
    DATC->unlockDB();
    delete (ply);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdDRAWPOLY::execute() {
@@ -1766,7 +1766,7 @@ int tellstdfunc::stdDRAWPOLY::execute() {
       OPstack.push(new telldata::ttlayout());
    }
    delete pl;
-   UpdateLV();
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1803,7 +1803,7 @@ void tellstdfunc::stdADDWIRE::undo() {
       ATDB->destroy_this(wr->data(),la);
    DATC->unlockDB();
    delete (wr);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdADDWIRE::execute() {
@@ -1829,7 +1829,7 @@ int tellstdfunc::stdADDWIRE::execute() {
       OPstack.push(new telldata::ttlayout());
    }
    delete pl;
-   UpdateLV();
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1868,7 +1868,7 @@ void tellstdfunc::stdDRAWWIRE::undo() {
       ATDB->destroy_this(wr->data(),la);
    DATC->unlockDB();
    delete (wr);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdDRAWWIRE::execute() {
@@ -1897,7 +1897,7 @@ int tellstdfunc::stdDRAWWIRE::execute() {
       OPstack.push(new telldata::ttlayout());
    }
    delete pl;
-   UpdateLV();
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1939,7 +1939,7 @@ void tellstdfunc::stdADDTEXT::undo() {
       ATDB->destroy_this(tx->data(),la);
    DATC->unlockDB();
    delete (tx);
-   UpdateLV();
+   RefreshGL();
 }
 
 int tellstdfunc::stdADDTEXT::execute() {
@@ -1963,7 +1963,7 @@ int tellstdfunc::stdADDTEXT::execute() {
          "," << angle << "," << LogFile._2bool(flip) << "," << magn << ");";
    LogFile.flush();
    delete rpnt;
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -2015,9 +2015,9 @@ int tellstdfunc::stdGRIDDEF::execute() {
    real    step    = getOpValue();
    byte    no      = getByteValue();
    DATC->setGrid(no,step,colname);
-   UpdateLV();   
-   LogFile << LogFile.getFN() << "(" << no << "," << step << ",\"" << 
+   LogFile << LogFile.getFN() << "(" << no << "," << step << ",\"" <<
                                               colname << "\");";LogFile.flush();
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -2039,7 +2039,7 @@ void tellstdfunc::stdGRID::undo() {
    bool  visu     = getBoolValue(UNDOPstack, true);
    byte    no     = getByteValue(UNDOPstack, true);
    gridON(no,visu);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdGRID::execute() {
@@ -2051,9 +2051,9 @@ int tellstdfunc::stdGRID::execute() {
       UNDOPstack.push_front(new telldata::ttint(no));
       UNDOPstack.push_front(new telldata::ttbool(DATC->grid_visual(no)));
       gridON(no,visu);
-      UpdateLV();
       LogFile << LogFile.getFN() << "(" << no << "," << LogFile._2bool(visu) << ");";
       LogFile.flush();
+      RefreshGL();
    }
    else
       tell_log(console::MT_ERROR,"Grid is not defined. Use definegrid(...) first");
@@ -2684,7 +2684,7 @@ void tellstdfunc::stdCOPYSEL::undo() {
       ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();   
    delete (pl);
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdCOPYSEL::execute() {
@@ -2699,7 +2699,7 @@ int tellstdfunc::stdCOPYSEL::execute() {
    DATC->unlockDB();   
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    delete p1; delete p2;
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -2775,7 +2775,7 @@ void tellstdfunc::stdMOVESEL::undo() {
    delete deleted;
    delete added;
    delete p1; delete p2;
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdMOVESEL::execute() {
@@ -2800,7 +2800,7 @@ int tellstdfunc::stdMOVESEL::execute() {
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    //delete p1; delete p2; undo will delete them
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -2876,7 +2876,7 @@ void tellstdfunc::stdROTATESEL::undo()
    delete deleted;
    delete added;
    delete p1;
-   UpdateLV();
+   RefreshGL();
 }
 
 int tellstdfunc::stdROTATESEL::execute() {
@@ -2904,7 +2904,7 @@ int tellstdfunc::stdROTATESEL::execute() {
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << "," << angle << ");"; LogFile.flush();
    //delete p1; undo will delete them
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -2942,7 +2942,7 @@ void tellstdfunc::stdFLIPXSEL::undo() {
       ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), true);
    DATC->unlockDB();
    delete p1; 
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdFLIPXSEL::execute() {
@@ -2955,7 +2955,7 @@ int tellstdfunc::stdFLIPXSEL::execute() {
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
    //delete p1; undo will delete them
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -2990,7 +2990,7 @@ void tellstdfunc::stdFLIPYSEL::undo() {
       ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), false);
    DATC->unlockDB();
    delete p1; 
-   UpdateLV();   
+   RefreshGL();
 }
 
 int tellstdfunc::stdFLIPYSEL::execute() {
@@ -3003,7 +3003,7 @@ int tellstdfunc::stdFLIPYSEL::execute() {
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
    //delete p1; undo will delete them
-   UpdateLV();   
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -3896,8 +3896,7 @@ void tellstdfunc::UpdateLV() {
 }
 
 void tellstdfunc::RefreshGL() {
-   wxPaintEvent upde(wxEVT_PAINT);
-   wxPostEvent(Toped->view(), upde);
+   Toped->cmdline()->set_canvas_invalid(true);
 }
 
 void tellstdfunc::gridON(byte No, bool status) {
