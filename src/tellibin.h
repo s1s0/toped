@@ -261,7 +261,7 @@ namespace tellstdfunc {
    laydata::atticList*  get_shlaylist(telldata::ttlist* llist);
    void                 clean_ttlaylist(telldata::ttlist* llist);
    void                 UpdateLV();
-   void                 RefreshGL();
+   inline void          RefreshGL();
    void                 gridON(byte No, bool status);
    void                 updateLayerDefinitions(laydata::tdtdesign*, nameList&);
 }

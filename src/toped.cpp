@@ -617,7 +617,8 @@ void tui::TopedFrame::initView() {
    mS_command->SetOrientation(wxLAYOUT_HORIZONTAL);
    mS_command->SetAlignment(wxLAYOUT_BOTTOM);
    mS_command->SetSashVisible(wxSASH_TOP, TRUE);
-   _cmdline = new console::ted_cmd(mS_command);
+   // postponed initialization until the canvas window is initialized
+//   _cmdline = new console::ted_cmd(mS_command);
    //----------------------------------------------------------------------------
    //the log window
    //----------------------------------------------------------------------------
@@ -641,9 +642,6 @@ void tui::TopedFrame::initView() {
    mS_canvas = new wxSashLayoutWindow(this, ID_WIN_CANVAS,
                                wxDefaultPosition, wxDefaultSize,
                                wxSW_3D | wxCLIP_CHILDREN);
-//   mS_canvas->SetDefaultSize(wxSize(1000, 600));
-//   mS_log->SetSashVisible(wxSASH_BOTTOM, true);
-//   mS_log->SetSashVisible(wxSASH_LEFT, true);
    //the canvas
 #ifdef __WXMSW__
    int *gl_attrib = NULL;
@@ -666,6 +664,7 @@ void tui::TopedFrame::initView() {
 #  endif
 #endif
    _laycanvas = new LayoutCanvas(mS_canvas, gl_attrib);
+   _cmdline = new console::ted_cmd(mS_command, _laycanvas);
 }
 
 

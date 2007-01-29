@@ -67,22 +67,9 @@ namespace console {
       wxString                  exp;
    };
    
-   class parse_thread : public wxThread {
-   public:
-      parse_thread(wxString& cmd, wxWindow* status_wnd, wxThreadKind kind=wxTHREAD_DETACHED):
-                                    wxThread(kind),command(cmd), _status_wnd(status_wnd){};
-   protected:
-      void*                   Entry();
-      void                    StatusBusy(wxString&);
-      void                    StatusReady();
-      wxString                command;
-      wxWindow*               _status_wnd;
-   };
-
-
    class ted_cmd : public wxTextCtrl {
    public:
-                              ted_cmd(wxWindow*);
+                              ted_cmd(wxWindow*, wxWindow*);
       virtual                ~ted_cmd();
       void                    parseCommand(wxString, bool thread=true);
       void                    waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
@@ -96,6 +83,9 @@ namespace console {
       bool                    mouseIN_OK() const {return _mouseIN_OK;};
       word                    numpoints() const {return _numpoints;}
       const char*             lastCommand() const {return _cmd_history.rbegin()->c_str();}
+      void                    invalidateCanvas() {_canvas_invalid = true;}
+      void                    set_canvas_invalid(bool val) { _canvas_invalid = val;}
+      bool                    canvas_invalid() {return _canvas_invalid;}
    private:
       void                    OnKeyUP(wxKeyEvent&);
       void                    cancelLastPoint();
@@ -110,9 +100,25 @@ namespace console {
       stringList::const_iterator _history_position;
       bool                    _thread; //flag fo detached thread
       wxWindow*               _parent;
+      wxWindow*               _canvas;
+      bool                    _canvas_invalid;
       DECLARE_EVENT_TABLE();
    };
 
-   const int Evt_Mouse = 100;
+   class parse_thread : public wxThread
+   {
+   public:
+      parse_thread(wxString& cmd, wxWindow* status_wnd, wxWindow* canvas_wnd, wxThreadKind kind=wxTHREAD_DETACHED):
+                  wxThread(kind),command(cmd), _status_wnd(status_wnd), _canvas_wnd(canvas_wnd){};
+      friend ted_cmd::ted_cmd( wxWindow*, wxWindow*);
+   protected:
+      void*                   Entry();
+      void                    StatusBusy(wxString&);
+      void                    StatusReady();
+      wxString                command;
+      wxWindow*               _status_wnd;
+      wxWindow*               _canvas_wnd;
+      static wxMutex          _mutex; 
+   };
 }
 #endif

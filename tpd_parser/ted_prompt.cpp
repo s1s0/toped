@@ -30,6 +30,10 @@
 #include "tell_yacc.h"
 
 //-----------------------------------------------------------------------------
+// Some static members
+//-----------------------------------------------------------------------------
+wxMutex          console::parse_thread::_mutex;
+//-----------------------------------------------------------------------------
 // Some external definitions
 //-----------------------------------------------------------------------------
 //??? I need help in this place
@@ -57,8 +61,6 @@ extern void* tell_scan_string(const char *str);
 extern void my_delete_yy_buffer( void* b );
 extern int tellparse(); // Calls the bison generated parser
 extern YYLTYPE telllloc; // parser current location - global variable, defined in bison
-wxMutex              Mutex;
-
 
 //extern const wxEventType    wxEVT_LOG_ERRMESSAGE;
 console::ted_cmd*           Console = NULL;
@@ -273,8 +275,7 @@ bool console::miniParser::getList() {
 void* console::parse_thread::Entry() {
 //   wxLogMessage(_T("Mouse is %s (%ld, %ld)"), where.c_str(), x, y);
 //   wxLogMessage(_T("Mutex try to lock..."));
-   while (wxMUTEX_NO_ERROR != Mutex.TryLock());
-//   wxLogMessage(_T("Mutex locked!"));
+   while (wxMUTEX_NO_ERROR != _mutex.TryLock());
    
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
@@ -284,7 +285,13 @@ void* console::parse_thread::Entry() {
    tellparse();
    my_delete_yy_buffer( b );
    
-   Mutex.Unlock();
+   _mutex.Unlock();
+   if (Console->canvas_invalid())
+   {
+      wxPaintEvent upde(wxEVT_PAINT);
+      wxPostEvent(_canvas_wnd, upde);
+      Console->set_canvas_invalid(false);
+   }
    StatusReady();
 //   wxLogMessage(_T("Mutex unlocked"));
    return NULL;
@@ -312,16 +319,18 @@ BEGIN_EVENT_TABLE( console::ted_cmd, wxTextCtrl )
 END_EVENT_TABLE()
 
 //==============================================================================
-console::ted_cmd::ted_cmd(wxWindow *parent) :
+console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
       wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
                   wxTE_PROCESS_ENTER | wxNO_BORDER), puc(NULL), _numpoints(0)
 {
    _parent = parent;
-   threadWaits4 = new wxCondition(Mutex);
+   _canvas = canvas;
+   threadWaits4 = new wxCondition(parse_thread::_mutex);
    assert(threadWaits4->IsOk());
    _mouseIN_OK = true;
    Console = this;
    _history_position = _cmd_history.begin();
+   _canvas_invalid = false;
 };
 
 void console::ted_cmd::getCommand(wxCommandEvent& WXUNUSED(event)) {
@@ -332,7 +341,7 @@ void console::ted_cmd::getCommand(wxCommandEvent& WXUNUSED(event)) {
       _cmd_history.push_back(std::string(command.mb_str()));
       _history_position = _cmd_history.end();
       Clear();
-      parse_thread *pthrd = new parse_thread(command,_parent);
+      parse_thread *pthrd = new parse_thread(command,_parent,_canvas);
       pthrd->Create();
       pthrd->Run();
    }   
@@ -361,7 +370,7 @@ void console::ted_cmd::getCommandA() {
       {
          // executing the parser in a separate thread
          //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
-         parse_thread *pthrd = new parse_thread(command,_parent);
+         parse_thread *pthrd = new parse_thread(command,_parent,_canvas);
          wxThreadError result = pthrd->Create();
          if (wxTHREAD_NO_ERROR == result)
             pthrd->Run();
