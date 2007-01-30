@@ -2915,9 +2915,14 @@ tellstdfunc::stdROTATESEL_D::stdROTATESEL_D(telldata::typeID retype, bool eor) :
    arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
 }
 
-int tellstdfunc::stdROTATESEL_D::execute() {
-// stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_rotate, &OPstack)) return EXEC_ABORT;
+int tellstdfunc::stdROTATESEL_D::execute()
+{
+   real   angle  = getOpValue();
+   CTM rct;
+   rct.Rotate(angle);
+   OPstack.push(new telldata::ttreal(angle));
+   // stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(console::op_rotate, &OPstack, "", rct)) return EXEC_ABORT;
    return stdROTATESEL::execute();
 }
 

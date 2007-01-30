@@ -122,6 +122,7 @@ namespace laydata {
       editobject     _target;       // edit/view target <- introduced with pedit operations
       time_t         _created;
       time_t         _lastUpdated;
+      CTM            _tmpctm;
 
    };
 }
