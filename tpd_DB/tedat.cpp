@@ -432,26 +432,39 @@ void laydata::tdtbox::openGL_drawsel(const pointlist& ptlist, const SGBitSet* ps
 }
 
 void laydata::tdtbox::tmp_draw(const layprop::DrawProperties&, ctmqueue& transtack,
-                              SGBitSet* plst, bool under_construct) const {
+                              SGBitSet* plst, bool under_construct) const
+{
    CTM trans = transtack.front();
    if (!(_p1)) return;
-   else if (under_construct) {
+   else if (under_construct)
+   {
       TP pt2 = (*_p1) * trans;
       glRecti(_p1->x(),_p1->y(),pt2.x(),pt2.y());
    }
    else if (_p2){
-      TP pt1, pt2;
-      if (sh_partsel == status()) {      
+      if (sh_partsel == status())
+      {
+         TP pt1, pt2;
          CTM strans = transtack.back();
          assert(plst);
          pointlist nshape = movePointsSelected(plst, trans, strans);
          pt1 = nshape[0]; pt2 = nshape[2];
+         glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
       }
-      else {
-         pt1 = (*_p1) * trans;
-         pt2 = (*_p2) * trans;
-      }   
-      glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
+      else
+      {
+         pointlist ptlist;
+         ptlist.reserve(4);
+         ptlist.push_back(                (*_p1) * trans);
+         ptlist.push_back(TP(_p2->x(), _p1->y()) * trans);
+         ptlist.push_back(                (*_p2) * trans);
+         ptlist.push_back(TP(_p1->x(), _p2->y()) * trans);
+         glBegin(GL_LINE_LOOP);
+         for (unsigned i = 0; i < 4; i++)
+            glVertex2i(ptlist[i].x(), ptlist[i].y());
+         glEnd();
+         ptlist.clear();
+      }
    }
 }
 

@@ -342,7 +342,7 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
          CTM newpos = _target.ARTM();
          tmp_stack.push_front(_target.ARTM());
          newpos.Translate(-newp.x(),-newp.y());
-         newpos.Rotate(90);
+         newpos *= _tmpctm;
          newpos.Translate(newp.x(),newp.y());
          tmp_stack.push_front(newpos);
       }
@@ -451,6 +451,10 @@ void laydata::tdtdesign::mouseStart(int input_type, std::string name, const CTM 
       CTM eqm(trans);
       eqm.Scale(1/(_UU*OPENGL_FONT_UNIT), 1/(_UU*OPENGL_FONT_UNIT));
       _tmpdata = new tdttext(name, eqm);
+   }
+   else if ( console::op_rotate == input_type)
+   {
+      _tmpctm = trans;
    }
 }
 
