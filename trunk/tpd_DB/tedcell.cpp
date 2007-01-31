@@ -798,7 +798,7 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
    validator* checkS = NULL;
    // for every single layer selected
    for (selectList::const_iterator CL = _shapesel.begin(); 
-                                                  CL != _shapesel.end(); CL++)
+                                                  CL != _shapesel.end(); )
    {
       assert((_layers.end() != _layers.find(CL->first)));
       // before all remove the selected and partially shapes 
@@ -847,8 +847,12 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
       // at the end, if the container of the selected shapes is empty -
       if (lslct->empty())
       {
-         delete lslct; _shapesel.erase(_shapesel.find(CL->first));
+         delete lslct;_shapesel.erase(_shapesel.find((CL++)->first)); 
       }
+		else
+		{
+			CL++;
+		}
 
    }
    return overlapChanged(old_overlap, ATDB);
