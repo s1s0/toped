@@ -2072,14 +2072,11 @@ void laydata::tdttext::tmp_draw(const layprop::DrawProperties& drawprop,
    valid_box wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT), ftmtrx * drawprop.ScrCTM());
    if (wsquare.area() > MIN_VISUAL_AREA)
    {
-      // ... and text bounding point (see the comment above)
-      TP boundPoint = TP(static_cast<int4b>(_translation.tx()),
-                         static_cast<int4b>(_translation.ty()))  * transtack.front();
       glPushMatrix();
-      double ori_mtrx[] = { _translation.a(), _translation.b(),0,0,
-                            _translation.c(), _translation.d(),0,0,
-                                           0,                0,0,0,
-                              boundPoint.x(),   boundPoint.y(),0,1};
+      double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
+                            ftmtrx.c(), ftmtrx.d(),0,0,
+                                     0,          0,0,0,
+                           ftmtrx.tx(),ftmtrx.ty(),0,1};
       glMultMatrixd(ori_mtrx);
       // correction of the glf shift - as explained in the openGL_precalc above
       glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
