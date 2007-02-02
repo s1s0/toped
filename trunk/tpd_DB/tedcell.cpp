@@ -539,24 +539,30 @@ void laydata::tdtcell::select_inBox(DBbox select_in, layprop::ViewProperties& vi
    }
 }
 
-void laydata::tdtcell::unselect_inBox(DBbox select_in, bool pntsel, layprop::ViewProperties& viewprop) {
+void laydata::tdtcell::unselect_inBox(DBbox select_in, bool pntsel, layprop::ViewProperties& viewprop)
+{
    // check that current cell is within 
-   if (select_in.cliparea(overlap()) != 0) {
+   if (select_in.cliparea(overlap()) != 0)
+   {
       // Unselect figures within the active layers
       typedef layerList::const_iterator LCI;
       for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-         if (viewprop.selectable(lay->first)) {
+      {
+         if (viewprop.selectable(lay->first))
+         {
             dataList* ssl;
             if (_shapesel.end() != _shapesel.find(lay->first))  {
                ssl = _shapesel[lay->first];
 /***/          lay->second->unselect_inBox(select_in, ssl, pntsel);
-               if (ssl->empty())   {
+               if (ssl->empty())
+               {
                   delete ssl; 
                   _shapesel.erase(_shapesel.find(lay->first));
                }   
                else _shapesel[lay->first] = ssl; 
             }   
          }
+      }
    }
 }
 
@@ -742,12 +748,14 @@ laydata::tdtdata* laydata::tdtcell::checkNreplaceBox(selectDataPair& sel, valida
    }
 }
 
-bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans, selectList** fadead) {
+bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans, selectList** fadead)
+{
    DBbox old_overlap = overlap();
    validator* checkS = NULL;
    // for every single layer selected
-   for (selectList::const_iterator CL = _shapesel.begin(); 
-                                                  CL != _shapesel.end(); CL++) {
+   selectList::iterator CL = _shapesel.begin();
+   while (_shapesel.end() != CL)
+   {
       assert((_layers.end() != _layers.find(CL->first)));
       // before all remove the selected and partially shapes 
       // from the data holders ...
@@ -756,38 +764,51 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
          if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
       // now for every single shape...
 
-      dataList* lslct = _shapesel[CL->first];
+      dataList* lslct = CL->second;
       dataList::iterator DI = lslct->begin();
-      while (DI != lslct->end()) {
+      while (DI != lslct->end())
+      {
          // .. restore the status byte, of the fully selected shapes, because
          // it was modified to sh_deleted from the quadtree::delete_selected method
          if (sh_partsel != DI->first->status()) DI->first->set_status(sh_selected);
          // ... move it ...
-         if (NULL != (checkS = DI->first->move(trans, DI->second))) {
+         if (NULL != (checkS = DI->first->move(trans, DI->second)))
+         {
             // modify has been performed and a shape needs validation
             laydata::tdtdata *newshape = NULL;
-            if (NULL != (newshape = checkNreplacePoly(*DI, checkS, CL->first, fadead))) {
+            if (NULL != (newshape = checkNreplacePoly(*DI, checkS, CL->first, fadead)))
+            {
                // remove the shape from list of selected shapes and mark it as selected
                DI = lslct->erase(DI);
                _layers[CL->first]->add(newshape);
             }
-            else {
+            else
+            {
                _layers[CL->first]->add(DI->first);
                DI++;
-            }   
-         }   
-         else {
+            }
+         }
+         else
+         {
             // move has been performed, so just add the shape back to the data holder   
             _layers[CL->first]->add(DI->first);
-            DI++;   
-         }   
+            DI++;
+         }
       }
       _layers[CL->first]->resort();
-      // at the end, if the container of the selected shapes is empty -
-      if (lslct->empty()) {
-         delete lslct; _shapesel.erase(_shapesel.find(CL->first));
+      if (lslct->empty())
+      {
+         // at the end, if the container of the selected shapes is empty -
+         // Note! _shapesel.erase(CL) will invalidate the iterator which means that
+         // it can't be incremened afterwards
+         // This on some platforms/compilers/STL implementations or some combinations
+         // of the above might work fine sometimes which makes the bug hunt a real fun!
+         // (thanks to Sergey)
+         delete lslct; 
+         selectList::iterator deliter = CL++;
+         _shapesel.erase(deliter);
       }
-
+      else CL++;
    }
    return overlapChanged(old_overlap, ATDB);
 }
@@ -797,8 +818,8 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
    DBbox old_overlap = overlap();
    validator* checkS = NULL;
    // for every single layer selected
-   for (selectList::const_iterator CL = _shapesel.begin(); 
-                                                  CL != _shapesel.end(); )
+   selectList::iterator CL = _shapesel.begin();
+   while (_shapesel.end() != CL)
    {
       assert((_layers.end() != _layers.find(CL->first)));
       // before all remove the selected and partially shapes 
@@ -806,9 +827,8 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
       if (_layers[CL->first]->delete_marked()) 
          // ... and validate quadTrees if needed
          if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
-
       // now for every single shape...
-      dataList* lslct = _shapesel[CL->first];
+      dataList* lslct = CL->second;
       dataList::iterator DI = lslct->begin();
       while (DI != lslct->end())
       {
@@ -844,16 +864,14 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
          else DI++;
       }
       _layers[CL->first]->resort();
-      // at the end, if the container of the selected shapes is empty -
       if (lslct->empty())
       {
-         delete lslct;_shapesel.erase(_shapesel.find((CL++)->first)); 
+         // at the end, if the container of the selected shapes is empty -
+         delete lslct; 
+         selectList::iterator deliter = CL++;
+         _shapesel.erase(deliter);
       }
-		else
-		{
-			CL++;
-		}
-
+      else CL++;
    }
    return overlapChanged(old_overlap, ATDB);
 }
