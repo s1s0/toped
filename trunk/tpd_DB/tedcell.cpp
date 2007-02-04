@@ -123,7 +123,7 @@ bool laydata::editobject::pop() {
       // to be a good name. So the matrix has to be calculated in reverse order, because the
       // bottom of the _peditchain contains the active reference (the top contains the top view)
       // so we must go bottom-up, instead of the usual (and wrong in this case) top-down
-      // That is the way _ARTM is calculated by _getcellover method initially, but it is not
+      // That is the why _ARTM is calculated by getcellover method initially, but it is not
       // that obvious there because of the recurse
       _ARTM = CTM();
       for( cellrefstack::reverse_iterator CCR = _peditchain->rbegin(); CCR != _peditchain->rend(); CCR++) 
@@ -1228,6 +1228,63 @@ laydata::shapeList* laydata::tdtcell::ungroupPrep(laydata::tdtdesign* ATDB) {
    return csel;
 }
 
+bool laydata::tdtcell::transferLayer(word src, word dst, atticList* clst)
+{
+   assert(src != 0);
+   assert(dst != 0);
+   if (_layers.end() != _layers.find(src))
+   {
+      quadTree *dstlay = securelayer(dst);
+      quadTree *srclay = _layers[src];
+      dataList* ssl = new dataList();
+      srclay->select_all(ssl);
+      assert(!ssl->empty());
+      srclay->delete_marked();
+      // delete the source layer
+      delete _layers[src];
+      _layers.erase(_layers.find(src));
+      shapeList* shl = new shapeList();
+      for (dataList::const_iterator DI = ssl->begin(); DI != ssl->end(); DI++)
+      {// for each object in the ssl ...
+         // add it "as is" to the destination layer, don't copy it!
+         DI->first->set_status(sh_active);
+         dstlay->put(DI->first);
+         shl->push_back(DI->first);
+      }
+      // validate the destination layer.
+      dstlay->validate();
+      // The overall cell overlap shouldn't have been changed,
+      // so no need to refresh the overlapping box etc.
+      (*clst)[dst] = shl;
+      ssl->clear();
+      delete ssl;
+      return true;
+   }
+   else return false;
+}
+
+void laydata::tdtcell::transferLayer(selectList* slst, word dst)
+{
+   assert(slst->size() == 1);
+   quadTree *dstlay = securelayer(dst);
+   selectList::const_iterator CL = slst->begin();
+   assert(_layers.end() != _layers.find(CL->first));
+   quadTree *srclay = _layers[CL->first];
+   // delete the shapes from the src layer
+   for (dataList::const_iterator CD = CL->second->begin(); CD != CL->second->end(); CD++)
+      srclay->delete_this(CD->first);
+   if (srclay->empty())
+   {
+      delete srclay; _layers.erase(_layers.find(CL->first));
+   }
+   else srclay->validate();
+   // add the to the destination layer
+   for (dataList::const_iterator CD = CL->second->begin(); CD != CL->second->end(); CD++)
+      dstlay->put(CD->first);
+   dstlay->validate();
+   delete(CL->second);
+   delete(slst);
+}
 
 void laydata::tdtcell::resort() {
    typedef layerList::const_iterator LCI;

@@ -665,8 +665,8 @@ to sort the data imediately, but only to maintain the valid overlapping
 box of the structure*/
 void laydata::quadTree::update_overlap(DBbox hovl) {
    if (empty())  _overlap = hovl;
-   else         _overlap.overlap(hovl);                     
-}   
+   else         _overlap.overlap(hovl);
+}
 
 /*! Puts the shape into current quadTree object without sorting. Updates 
 the overlapping box though. */

@@ -80,6 +80,8 @@ namespace laydata {
       bool           merge(atticList** dasao) {return _target.edit()->merge_selected(dasao);};
       unsigned int   numselected();
       DBbox          activeoverlap();
+      bool           transferLayer(word,word,laydata::atticList*);
+      void           transferLayer(laydata::selectList*, word);
       //
       void           check_active();
       void           select_fromList(selectList* ss) {_target.edit()->select_fromList(ss, _target.viewprop());};
