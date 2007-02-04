@@ -1299,8 +1299,16 @@ void tui::fill_sample::setFill(const byte* fill)
 {
    if (NULL != fill)
    {
+#ifdef WIN32
+		wxBitmap stipplebrush((char  *)fill, 32, 32, 1);
+		wxImage image;
+		image = stipplebrush.ConvertToImage();
+		stipplebrush = wxBitmap(image, 1);
+      _brush = wxBrush(stipplebrush);
+#else
       wxBitmap stipplebrush((char  *)fill, 32, 32, 1);
       _brush = wxBrush(stipplebrush);
+#endif
    }
    else
    {
