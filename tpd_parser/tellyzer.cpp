@@ -98,7 +98,10 @@ word parsercmd::cmdVIRTUAL::getWordValue(telldata::operandSTACK& OPs) {
    telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
    word value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_WORD_VALUE))
-      {/*Error -> value out of expected range*/}
+      {
+         //@TODO
+         /*Error -> value out of expected range*/
+      }
    else value = word(op->value());
    delete op;
    return value;
@@ -110,7 +113,10 @@ word parsercmd::cmdVIRTUAL::getWordValue(telldata::UNDOPerandQUEUE& OPs, bool fr
    else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();} 
    word value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_WORD_VALUE))
-      {/*Error -> value out of expected range*/}
+      {
+         //@TODO
+         /*Error -> value out of expected range*/
+      }
    else value = word(op->value());
    delete op;
    return value;
@@ -120,7 +126,10 @@ byte parsercmd::cmdVIRTUAL::getByteValue(telldata::operandSTACK& OPs) {
    telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
    byte value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_BYTE_VALUE))
-      {/*Error -> value out of expected range*/}
+   {
+      //@TODO
+      /*Error -> value out of expected range*/
+   }
    else value = byte(op->value());
    delete op;
    return value;
@@ -132,7 +141,10 @@ byte parsercmd::cmdVIRTUAL::getByteValue(telldata::UNDOPerandQUEUE& OPs, bool fr
    else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();}
    byte value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_BYTE_VALUE))
-      {/*Error -> value out of expected range*/}
+   {
+      //@TODO
+      /*Error -> value out of expected range*/
+   }
    else value = byte(op->value());
    delete op;
    return value;

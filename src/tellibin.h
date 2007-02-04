@@ -135,12 +135,9 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdUNDO          )
    TELL_STDCMD_CLASSA(stdREDRAW        )
    TELL_STDCMD_CLASSA(stdZOOMWIN       )
-   TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN   )
    TELL_STDCMD_CLASSA(stdZOOMALL       )
    TELL_STDCMD_CLASSA(TDTread          )       // reset undo buffers
-   TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread   )
    TELL_STDCMD_CLASSA(TDTsave          )
-   TELL_STDCMD_CLASSB(TDTsaveIFF      , TDTsave   )
    TELL_STDCMD_CLASSA(TDTsaveas        )
    TELL_STDCMD_CLASSA(GDSread          )
    TELL_STDCMD_CLASSA(GDSconvertAll    )
@@ -153,19 +150,23 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(getPOINT         )
    TELL_STDCMD_CLASSA(getPOINTLIST     )
    TELL_STDCMD_CLASSA(stdNEWDESIGNd    )              // reset undo buffers
-   TELL_STDCMD_CLASSB(stdNEWDESIGN   , stdNEWDESIGNd) // reset undo buffers
    TELL_STDCMD_CLASSA(stdREPORTSLCTD   )
    TELL_STDCMD_CLASSA(stdREPORTLAY     )
-   TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
    TELL_STDCMD_CLASSA(stdDISTANCE      )
    TELL_STDCMD_CLASSA(stdCLEARRULERS   )
    TELL_STDCMD_CLASSA(stdPROPSAVE      )
+   TELL_STDCMD_CLASSA(stdLAYPROP       )  //
+   TELL_STDCMD_CLASSA(stdLINEDEF       )  //
+
+   TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN    )
+   TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread       )
+   TELL_STDCMD_CLASSB(TDTsaveIFF      , TDTsave       )
+   TELL_STDCMD_CLASSB(stdNEWDESIGN   , stdNEWDESIGNd  ) // reset undo buffers
+   TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
 
    //
-   TELL_STDCMD_CLASSA(stdLAYPROP       )  //
    TELL_STDCMD_CLASSA_UNDO(stdCOLORDEF    )  //
    TELL_STDCMD_CLASSA_UNDO(stdFILLDEF     )  //
-   TELL_STDCMD_CLASSA(stdLINEDEF     )  //
    TELL_STDCMD_CLASSA_UNDO(stdHIDELAYER   )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdHIDELAYERS  )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdHIDECELLMARK)  // undo - implemented
@@ -216,6 +217,8 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdUNGROUP     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcCUTPOLY     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcMERGE       )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdADDMENU     )  //
+   TELL_STDCMD_CLASSA_UNDO(stdTRANSFERLAY )  //
    //
    TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     )
    TELL_STDCMD_CLASSB(stdDRAWBOX_D    , stdDRAWBOX    )
@@ -240,8 +243,6 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdFLIPYSEL_D   , stdFLIPYSEL   )
    TELL_STDCMD_CLASSB(stdROTATESEL_D  , stdROTATESEL  )
    TELL_STDCMD_CLASSB(stdDISTANCE_D   , stdDISTANCE   )
-
-   TELL_STDCMD_CLASSA_UNDO(stdADDMENU       )
 
 
          //   laydata::tdtdesign*  currentDesign();
@@ -283,7 +284,7 @@ namespace tellstdfunc {
 ----------+------+------+------+------+------|------||-------+------||----||
  move     |  OK  |  OK  |  OK  |  OK  |  OK  |  OK  ||  OK   |  -   ||    ||
 ----------+------+------+------+------+------|------||-------+------||----||
- delete   |  OK  |  OK  |  OK  |  OK  |  OK  |  OK  ||   -   |  x   || 2  ||
+ delete   |  OK  |  OK  |  OK  |  OK  |  OK  |  OK  ||   -   |  OK  || 2  ||
 ----------+------+------+------+------+------|------||-------+------||----||
  merge    |  v   |   v  |   x  |   -  |   -  |  -   ||   -   |  -   || 1  ||
 ----------+------+------+------+------+------|------||-------+------||----||

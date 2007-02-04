@@ -60,9 +60,9 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addGlobalType("bind"      , bndtype);
    // Internal variables next - Can't think of any for the moment
 //   mblock->addID("$_CW", new ttwnd(Toped->_view->lp_BL, Toped->_view->lp_TR));
-   //--------------------------------------------------------------------------
+   //-----------------------------------------------------------------------------------------------------------
    // tell functions
-   //--------------------------------------------------------------------------
+   //-----------------------------------------------------------------------------------------------------------
    mblock->addFUNC("echo"             ,(new                     tellstdfunc::stdECHO(telldata::tn_void, true)));
    mblock->addFUNC("status"           ,(new               tellstdfunc::stdTELLSTATUS(telldata::tn_void, true)));
    mblock->addFUNC("undo"             ,(new                     tellstdfunc::stdUNDO(telldata::tn_void,false)));
@@ -139,13 +139,15 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("delete"           ,(new                tellstdfunc::stdDELETESEL(telldata::tn_void,false)));
    mblock->addFUNC("group"            ,(new                    tellstdfunc::stdGROUP(telldata::tn_void,false)));
    mblock->addFUNC("ungroup"          ,(new                  tellstdfunc::stdUNGROUP(telldata::tn_void,false)));
-   //
+   // logical operations
    mblock->addFUNC("polycut"          ,(new                  tellstdfunc::lgcCUTPOLY(telldata::tn_void,false)));
    mblock->addFUNC("polycut"          ,(new                tellstdfunc::lgcCUTPOLY_I(telldata::tn_void,false)));
    mblock->addFUNC("merge"            ,(new                    tellstdfunc::lgcMERGE(telldata::tn_void,false)));
-   //--------------------------------------------------------------------------
+   // layer/reference operations
+   mblock->addFUNC("transferlayer"    ,(new              tellstdfunc::stdTRANSFERLAY(telldata::tn_void,false)));
+   //-----------------------------------------------------------------------------------------------------------
    // toped specific functons
-   //--------------------------------------------------------------------------
+   //-----------------------------------------------------------------------------------------------------------
    mblock->addFUNC("redraw"           ,(new                   tellstdfunc::stdREDRAW(telldata::tn_void, true)));
    mblock->addFUNC("addruler"         ,(new                 tellstdfunc::stdDISTANCE(telldata::tn_void, true)));
    mblock->addFUNC("addruler"         ,(new               tellstdfunc::stdDISTANCE_D(telldata::tn_void, true)));

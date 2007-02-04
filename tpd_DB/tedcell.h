@@ -132,6 +132,8 @@ namespace laydata {
       bool                 destroy_this(tdtdesign*, tdtdata* ds, word la);
       atticList*           groupPrep(tdtdesign*);
       shapeList*           ungroupPrep(tdtdesign*);
+      bool                 transferLayer(word, word, atticList*);
+      void                 transferLayer(selectList*, word);
       void                 resort();
       bool                 validate_cells(tdtdesign*);
       void                 validate_layers();
