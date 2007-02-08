@@ -530,7 +530,7 @@ void laydata::tdtcell::select_inBox(DBbox select_in, layprop::ViewProperties& vi
             dataList* ssl;
             if (_shapesel.end() != _shapesel.find(lay->first))  
                ssl = _shapesel[lay->first];
-            else                                        
+            else
                ssl = new dataList();
 /***/       lay->second->select_inBox(select_in, ssl, pntsel);
             if (ssl->empty())  delete ssl; 
