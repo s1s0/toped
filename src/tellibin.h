@@ -218,7 +218,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(lgcCUTPOLY     )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcMERGE       )  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdADDMENU     )  //
-   TELL_STDCMD_CLASSA_UNDO(stdTRANSFERLAY )  //
+   TELL_STDCMD_CLASSA_UNDO(stdCHANGELAY   )  //
    //
    TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     )
    TELL_STDCMD_CLASSB(stdDRAWBOX_D    , stdDRAWBOX    )

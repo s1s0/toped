@@ -653,22 +653,6 @@ unsigned int laydata::tdtdesign::numselected() {
    else return 0;
 }
 
-bool laydata::tdtdesign::transferLayer(word src, word dst, laydata::atticList* slst)
-{
-/*   laydata::atticCList* sclst = new atticCList();
-   if (recur)
-   {
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(_target.edit());
-      _target.edit()->transferLayer(src, dst, root_cell, _cells, *sclst);
-   }*/
-   return _target.edit()->transferLayer(src, dst, slst);
-}
-
-void laydata::tdtdesign::transferLayer(laydata::selectList* slst, word dst)
-{
-   _target.edit()->transferLayer(slst, dst);
-}
-
 DBbox laydata::tdtdesign::activeoverlap() {
    return _target.overlap();
 //   if (_target.checkedit())
