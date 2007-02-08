@@ -77,11 +77,11 @@ namespace laydata {
       shapeList*     ungroup_prep();
       atticList*     ungroup_this(shapeList*);
       bool           cutpoly(pointlist& pl, atticList** dasao);
-      bool           merge(atticList** dasao) {return _target.edit()->merge_selected(dasao);};
+      bool           merge(atticList** dasao) {return _target.edit()->merge_selected(dasao);}
       unsigned int   numselected();
       DBbox          activeoverlap();
-      bool           transferLayer(word,word,laydata::atticList*);
-      void           transferLayer(laydata::selectList*, word);
+      void           transferLayer(word dst) { _target.edit()->transferLayer(dst);}
+      void           transferLayer(laydata::selectList*slst, word dst) {_target.edit()->transferLayer(slst, dst);}
       //
       void           check_active();
       void           select_fromList(selectList* ss) {_target.edit()->select_fromList(ss, _target.viewprop());};

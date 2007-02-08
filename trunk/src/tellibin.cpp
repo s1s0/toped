@@ -3768,54 +3768,54 @@ int tellstdfunc::stdADDMENU::execute()
    return EXEC_NEXT;
 }
    
-//TELL_STDCMD_CLASSA_UNDO(stdTRANSFERLAY )  //
 //=============================================================================
-tellstdfunc::stdTRANSFERLAY::stdTRANSFERLAY(telldata::typeID retype, bool eor) :
+tellstdfunc::stdCHANGELAY::stdCHANGELAY(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+//   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
-void tellstdfunc::stdTRANSFERLAY::undo_cleanup()
+void tellstdfunc::stdCHANGELAY::undo_cleanup()
 {
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    getWordValue(UNDOPstack, false);
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
 }
 
-void tellstdfunc::stdTRANSFERLAY::undo()
+void tellstdfunc::stdCHANGELAY::undo()
 {
-   word dst = getWordValue(UNDOPstack, true);
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   word src = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->transferLayer(get_ttlaylist(pl), dst);
+      ATDB->transferLayer(get_ttlaylist(pl), src);
    DATC->unlockDB();
    delete pl;
    RefreshGL();
 }
 
-int tellstdfunc::stdTRANSFERLAY::execute()
+int tellstdfunc::stdCHANGELAY::execute()
 {
-   word target = getWordValue();
-   word source = getWordValue();
-   laydata::atticList* sclst = new laydata::atticList();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      bool layok = ATDB->transferLayer(source, target, sclst);
+      laydata::selectList *listselected = ATDB->shapesel();
    DATC->unlockDB();
-   if (layok)
+   if (listselected->empty())
    {
-      // prepare undo stacks
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(make_ttlaylist(sclst));
-      UNDOPstack.push_front(new telldata::ttint(source));
-      RefreshGL();
+      std::ostringstream ost;
+      ost << "No objects selected";
+      tell_log(console::MT_ERROR,ost.str());
    }
    else
    {
-      std::ostringstream ost;
-      ost << "Source layer " << source << " is empty. Nothing to transfer";
-      tell_log(console::MT_ERROR,ost.str());
+      // prepare undo stacks
+      UNDOcmdQ.push_front(this);
+      word target = getWordValue();
+      UNDOPstack.push_front(new telldata::ttint(target));
+      UNDOPstack.push_front(make_ttlaylist(listselected));
+      ATDB = DATC->lockDB();
+         ATDB->transferLayer(target);
+      DATC->unlockDB();
+      RefreshGL();
    }
    return EXEC_NEXT;
 }

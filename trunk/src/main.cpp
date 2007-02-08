@@ -144,7 +144,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("polycut"          ,(new                tellstdfunc::lgcCUTPOLY_I(telldata::tn_void,false)));
    mblock->addFUNC("merge"            ,(new                    tellstdfunc::lgcMERGE(telldata::tn_void,false)));
    // layer/reference operations
-   mblock->addFUNC("transferlayer"    ,(new              tellstdfunc::stdTRANSFERLAY(telldata::tn_void,false)));
+   mblock->addFUNC("changelayer"      ,(new                tellstdfunc::stdCHANGELAY(telldata::tn_void,false)));
    //-----------------------------------------------------------------------------------------------------------
    // toped specific functons
    //-----------------------------------------------------------------------------------------------------------

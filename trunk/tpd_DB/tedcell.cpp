@@ -1228,62 +1228,170 @@ laydata::shapeList* laydata::tdtcell::ungroupPrep(laydata::tdtdesign* ATDB) {
    return csel;
 }
 
-bool laydata::tdtcell::transferLayer(word src, word dst, atticList* clst)
+void laydata::tdtcell::transferLayer(word dst)
 {
-   assert(src != 0);
-   assert(dst != 0);
-   if (_layers.end() != _layers.find(src))
+   assert(dst);
+   quadTree *dstlay = securelayer(dst);
+   dataList* transfered;
+   if (_shapesel.end() == _shapesel.find(dst))
+      _shapesel[dst] = transfered = new dataList();
+   else
+      transfered = _shapesel[dst];
+   assert(!_shapesel.empty());
+   selectList::iterator CL = _shapesel.begin();
+   while (_shapesel.end() != CL)
    {
-      quadTree *dstlay = securelayer(dst);
-      quadTree *srclay = _layers[src];
-      dataList* ssl = new dataList();
-      srclay->select_all(ssl);
-      assert(!ssl->empty());
-      srclay->delete_marked();
-      // delete the source layer
-      delete _layers[src];
-      _layers.erase(_layers.find(src));
-      shapeList* shl = new shapeList();
-      for (dataList::const_iterator DI = ssl->begin(); DI != ssl->end(); DI++)
-      {// for each object in the ssl ...
-         // add it "as is" to the destination layer, don't copy it!
-         DI->first->set_status(sh_active);
-         dstlay->put(DI->first);
-         shl->push_back(DI->first);
+      assert((_layers.end() != _layers.find(CL->first)));
+      // we're not doing anything if the current layer appers to be dst,
+      // i.e. don't mess around if the source and destination layers are the same!
+      // The same for the reference layer
+      if ((dst != CL->first) && (0 != CL->first))
+      {
+         // now remove the selected shapes from the data holders ...
+         if (_layers[CL->first]->delete_marked())
+            // ... and validate quadTrees if needed
+            if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
+            else
+            {//..or remove the source layer if it remained empty
+               delete _layers[CL->first];
+               _layers.erase(_layers.find(CL->first));
+            }
+         // traverse the shapes on this layer and add them to the destination layer
+         dataList* lslct = CL->second;
+         dataList::iterator DI = lslct->begin();
+         while (DI != lslct->end())
+         {
+            // partially selected are not a subject of this operation, omit them
+            if (sh_partsel != DI->first->status())
+            {
+               // restore the status byte, of the fully selected shapes, because
+               // it was modified to sh_deleted from the quadtree::delete_selected method
+               DI->first->set_status(sh_selected);
+               // add it to the destination layer ...
+               dstlay->put(DI->first);
+               // because the shape is changing it's layer and the _shapesel structure
+               // is based on layer, so we have to remove the structure from the current layer
+               // which is lslct and to add it to a new one which will be added to the _shapesel
+               // at the end - when we exit the layer loop
+               transfered->push_back(*DI);
+               DI = lslct->erase(DI);
+            }
+            else DI++;
+         }
+         if (lslct->empty())
+         {
+            // if the container of the selected shapes is empty -
+            delete lslct;
+            selectList::iterator deliter = CL++;
+            _shapesel.erase(deliter);
+         }
+         else CL++;
       }
-      // validate the destination layer.
-      dstlay->validate();
-      // The overall cell overlap shouldn't have been changed,
-      // so no need to refresh the overlapping box etc.
-      (*clst)[dst] = shl;
-      ssl->clear();
-      delete ssl;
-      return true;
+      else CL++;
    }
-   else return false;
+   // finally - validate the destination layer.
+   dstlay->validate();
+   // For the records:
+   // The overall cell overlap shouldn't have been changed,
+   // so no need to refresh the overlapping box etc.
 }
 
 void laydata::tdtcell::transferLayer(selectList* slst, word dst)
 {
-   assert(slst->size() == 1);
-   quadTree *dstlay = securelayer(dst);
-   selectList::const_iterator CL = slst->begin();
-   assert(_layers.end() != _layers.find(CL->first));
-   quadTree *srclay = _layers[CL->first];
-   // delete the shapes from the src layer
-   for (dataList::const_iterator CD = CL->second->begin(); CD != CL->second->end(); CD++)
-      srclay->delete_this(CD->first);
-   if (srclay->empty())
+   assert(dst);
+   assert(_shapesel.end() != _shapesel.find(dst));
+   // get the list of the selected shapes, on the source layer
+   dataList* fortransfer = _shapesel[dst];
+   assert(!fortransfer->empty());
+   // now remove the selected shapes from the data holders ...
+   if (_layers[dst]->delete_marked())
+      // ... and validate quadTrees if needed
+      if (!_layers[dst]->empty()) _layers[dst]->validate();
+      else
+      {//..or remove the source layer if it remained empty
+         delete _layers[dst];
+         _layers.erase(_layers.find(dst));
+      }
+   // traversing the input list - it contains the destination layers
+   selectList::iterator CL = slst->begin();
+   while (slst->end() != CL)
    {
-      delete srclay; _layers.erase(_layers.find(CL->first));
+      // we're not doing anything if the current layer appers to be dst,
+      // i.e. don't mess around if the source and destination layers are the same!
+      if ((dst != CL->first) && (0 != CL->first))
+      {
+         quadTree *dstlay = securelayer(CL->first);
+         // traverse the shapes on this layer and add them to the destination layer
+         dataList* lslct = CL->second;
+         dataList::iterator DI = lslct->begin();
+         while (DI != lslct->end())
+         {
+            // partially selected are not a subject of this operation, omit them
+            if (sh_partsel != DI->first->status())
+            {
+               // find the current shape in the list of selected shapes
+               dataList::iterator DDI;
+               for(DDI = fortransfer->begin(); DDI != fortransfer->end(); DDI++)
+                  if (*DDI == *DI) break;
+               assert(DDI != fortransfer->end());
+               // and delete it
+               fortransfer->erase(DDI);
+               // make sure that the destination layer exists in the _shapesel
+               dataList* transfered = NULL;
+               if (_shapesel.end() == _shapesel.find(CL->first))
+                  _shapesel[CL->first] = transfered = new dataList();
+               else
+                  transfered = _shapesel[CL->first];
+               // restore the status byte, of the fully selected shapes, because
+               // it was modified to sh_deleted from the quadtree::delete_selected method
+               DI->first->set_status(sh_selected);
+               // add it to the destination layer ...
+               dstlay->put(DI->first);
+               // because the shape is changing it's layer and the _shapesel structure
+               // is based on layer, so we have to remove the structure from the current layer
+               // which is lslct and to add it to a new one which will be added to the _shapesel
+               // at the end - when we exit the layer loop
+               transfered->push_back(*DI);
+            }
+            DI++;
+         }
+         dstlay->validate();
+      }
+      CL++;
    }
-   else srclay->validate();
-   // add the to the destination layer
-   for (dataList::const_iterator CD = CL->second->begin(); CD != CL->second->end(); CD++)
-      dstlay->put(CD->first);
-   dstlay->validate();
-   delete(CL->second);
-   delete(slst);
+   if (fortransfer->empty())
+   {
+      // if the container of the selected shapes is empty -
+      delete fortransfer;
+      selectList::iterator deliter = _shapesel.find(dst);
+      _shapesel.erase(deliter);
+   }
+   else
+   {
+      // what has remained here in the fortransfer list should be only partially
+      // selected shapes that are not interesting for us AND the shapes that
+      // were already on dst layer and were deleted in the beginnig of the
+      // function. The latter must be returned to the data holders
+      // so...check & find whether there are still remaining fully selected shapes
+      dataList::iterator DDI;
+      for(DDI = fortransfer->begin(); DDI != fortransfer->end(); DDI++)
+         if (sh_partsel != DDI->first->status()) break;
+      if (fortransfer->end() != DDI)
+      {
+         //if so put them back in the data holders
+         quadTree *dstlay = securelayer(dst);
+         for(DDI = fortransfer->begin(); DDI != fortransfer->end(); DDI++)
+            if (sh_partsel != DDI->first->status())
+            {
+               DDI->first->set_status(sh_selected);
+               dstlay->put(DDI->first);
+            }
+         dstlay->validate();
+      }
+   }
+   // For the records:
+   // The overall cell overlap shouldn't have been changed,
+   // so no need to refresh the overlapping box etc.
 }
 
 void laydata::tdtcell::resort() {
