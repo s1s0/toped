@@ -339,8 +339,8 @@ bool SGBitSet::isallset() const {
    assert(_size);
    for(word i = 0; i < _size / 8; i++)
       if (0xFF != _packet[i]) return false;
-   if (_packet[(_size / 8)] != (0xFF << (8 - (_size % 8)))) return false;
-   return true;   
+   if (_packet[(_size / 8)] != (byte)(0xFF >> (8 - (_size % 8)))) return false;
+   return true;
 }     
 
 SGBitSet::~SGBitSet() {
