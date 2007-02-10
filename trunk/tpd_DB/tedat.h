@@ -55,7 +55,7 @@ namespace laydata {
       //! Return the overlapping box of the object.
       virtual   DBbox      overlap()  const = 0; // why not DBbox& ????
    //! Move the object relatively using the input CTM
-      virtual   validator* move(const CTM&, const SGBitSet* plst = NULL) = 0;
+      virtual   validator* move(const CTM&, SGBitSet* plst = NULL) = 0;
    //! Rotate or flip (transfer the object using input CTM
       virtual   void       transfer(const CTM&) = 0;
    //! Copy the object and move it using the input CTM  
@@ -131,7 +131,7 @@ namespace laydata {
                            tdtbox(TEDfile* const tedfile);
                           ~tdtbox();
       DBbox                overlap() const;
-      validator*           move(const CTM&, const SGBitSet* plst = NULL);
+      validator*           move(const CTM&, SGBitSet* plst = NULL);
       void                 transfer(const CTM&);
       tdtdata*             copy(const CTM&);
 
@@ -157,7 +157,7 @@ namespace laydata {
       void                 select_points(DBbox&, SGBitSet*);
       void                 unselect_points(DBbox&, SGBitSet*);
    private:
-      void                 normalize();
+      void                 normalize(SGBitSet* psel = NULL);
       pointlist&           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
       TP*                 _p1;
       TP*                 _p2;
@@ -171,7 +171,7 @@ namespace laydata {
                            tdtpoly(TEDfile* const tedfile);
 //                          ~tdtpoly() {};
       DBbox                overlap() const;
-      validator*           move(const CTM&, const SGBitSet* plst = NULL);
+      validator*           move(const CTM&, SGBitSet* plst = NULL);
       void                 transfer(const CTM&);
       tdtdata*             copy(const CTM&);
 
@@ -210,7 +210,7 @@ namespace laydata {
                            tdtwire(TEDfile* const tedfile);
 //                          ~tdtwire() {};
       DBbox                overlap() const;
-      validator*           move(const CTM&, const SGBitSet* plst = NULL);
+      validator*           move(const CTM&, SGBitSet* plst = NULL);
       void                 transfer(const CTM&);
       tdtdata*             copy(const CTM&);
 
@@ -255,7 +255,7 @@ namespace laydata {
                            tdtcellref(TEDfile* const tedfile);
 //                          ~tdtcellref() {};
       DBbox                overlap() const;
-      validator*           move(const CTM& trans, const SGBitSet*) {
+      validator*           move(const CTM& trans, SGBitSet*) {
                                             _translation *= trans; return NULL;};
       void                 transfer(const CTM& trans) {_translation *= trans;};
       tdtdata*             copy(const CTM& trans) {return new tdtcellref(
@@ -335,7 +335,7 @@ namespace laydata {
                            tdttext(TEDfile* const tedfile);
 //                          ~tdttext() {};
       DBbox                overlap() const;
-      validator*           move(const CTM& trans, const SGBitSet*) {
+      validator*           move(const CTM& trans, SGBitSet*) {
                                             _translation *= trans; return NULL;};
       void                 transfer(const CTM& trans)  {_translation *= trans;};
       tdtdata*             copy(const CTM& trans) {return new tdttext(
