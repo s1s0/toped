@@ -253,6 +253,24 @@ void addbox()
    
 }
 
+void modify_undo_bug()
+{
+   newcell("modify_undo_bug");
+   opencell("modify_undo_bug");
+   usinglayer(7);
+   addbox({{2.5,11.5},{4.5,9.5}},7);
+   select_all();
+   copy({4,10.5},{14,10.5});
+   select_all();
+   copy({14,10.5},{14,5.5});
+   copy({14,5.5},{14,0.5});
+   copy({14,0},{14,-5});
+   select_all();
+   punselect({{3.5,10.5},{13,-4.5}});
+   move({11.5,8},{18,10.5});
+//   undo();
+}
+
 
 newcell("Fcell");
 opencell("Fcell");

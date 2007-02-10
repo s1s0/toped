@@ -90,6 +90,7 @@ public:
    bool     isallclear() const;
    bool     isallset() const;
    word     size() const {return _size;};
+   void     swap(word, word);
            ~SGBitSet();
 private:
             SGBitSet(const SGBitSet&);

@@ -279,38 +279,44 @@ DBline DBline::operator  =  (const DBline& ln)
 //-----------------------------------------------------------------------------
 // class SGBitSet
 //-----------------------------------------------------------------------------
-SGBitSet::SGBitSet(word  bit_length) {
+SGBitSet::SGBitSet(word  bit_length)
+{
    _size = bit_length;
    word nb = _size / 8;
    _packet = new byte[nb+1];
    for (word i = 0; i <= nb; i++) _packet[i] = 0;
-}     
+}
 
-SGBitSet::SGBitSet(SGBitSet*  bs) {
+SGBitSet::SGBitSet(SGBitSet*  bs)
+{
    _size = bs->size();
    word nb = _size / 8;
    _packet = new byte[nb+1];
    for (word i = 0; i <= nb; i++) _packet[i] = bs->_packet[i];
-}     
+} 
 
-void SGBitSet::set(word  bit) {
+void SGBitSet::set(word  bit)
+{
    assert(bit <= _size);
    _packet[bit / 8] |= (0x01 << (bit % 8));
-}     
+}
 
-void SGBitSet::setall() {
+void SGBitSet::setall()
+{
    assert(_size);
    for(word i = 0; i < _size / 8; i++)
       _packet[i] = 0xFF;
    _packet[(_size / 8)] = (0xFF >> (8 - (_size % 8)));
-}     
+}
 
-void SGBitSet::reset(word  bit) {
+void SGBitSet::reset(word  bit)
+{
    assert(bit <= _size);
    _packet[bit / 8] &= ~(0x01 << (bit % 8));
-}     
+}
 
-void SGBitSet::check_neighbours_set(bool wire) {
+void SGBitSet::check_neighbours_set(bool wire)
+{
    word size;
    if (wire) 
       if (_size > 2) size = _size - 2;
@@ -323,29 +329,45 @@ void SGBitSet::check_neighbours_set(bool wire) {
           _packet[(((indx+1) % _size) / 8)] &= ~(0x01 << ((indx+1) % _size)% 8); //reset
 }
 
-bool SGBitSet::check(word  bit) const {
+bool SGBitSet::check(word  bit) const
+{
    assert(bit <= _size);
    return (_packet[bit / 8] & (0x01 << (bit % 8)));
-}     
+}
 
-bool SGBitSet::isallclear() const {
+bool SGBitSet::isallclear() const
+{
    assert(_size);
    for(word i = 0; i <= _size / 8; i++)
       if (0x00 != _packet[i]) return false;
    return true;   
-}     
+}
 
-bool SGBitSet::isallset() const {
+bool SGBitSet::isallset() const
+{
    assert(_size);
    for(word i = 0; i < _size / 8; i++)
       if (0xFF != _packet[i]) return false;
    if (_packet[(_size / 8)] != (byte)(0xFF >> (8 - (_size % 8)))) return false;
    return true;
-}     
+}
 
-SGBitSet::~SGBitSet() {
+void SGBitSet::swap(word bitA, word bitB)
+{
+   assert(bitA < _size);
+   assert(bitB < _size);
+   bool oldbA = check(bitA);
+   bool oldbB = check(bitB);
+   if (oldbA)   set(bitB);
+   else       reset(bitB);
+   if (oldbB)   set(bitA);
+   else       reset(bitA);
+}
+
+SGBitSet::~SGBitSet()
+{
    delete [] _packet;
-}         
+}
 
 
 //-----------------------------------------------------------------------------
