@@ -3105,7 +3105,7 @@ void tellstdfunc::stdUNGROUP::undo() {
    // finally - clean-up behind
    delete pl;
    delete pl1;
-   UpdateLV();   
+   UpdateLV();
 }
    
 int tellstdfunc::stdUNGROUP::execute() {
@@ -3123,7 +3123,7 @@ int tellstdfunc::stdUNGROUP::execute() {
       undol[0] = cells4u;
       UNDOPstack.push_front(make_ttlaylist(&undol));
       ATDB = DATC->lockDB();
-         // and then ungroup and push the list of the shapes produced in 
+         // and then ungroup and push the list of the shapes produced in
          //result of the ungroup
          laydata::atticList* undol2 = ATDB->ungroup_this(cells4u);
       DATC->unlockDB();
@@ -3134,7 +3134,7 @@ int tellstdfunc::stdUNGROUP::execute() {
       delete undol2;
       LogFile << LogFile.getFN() << "();"; LogFile.flush();
       UpdateLV();
-   }   
+   }
    return EXEC_NEXT;
 }
 
@@ -3773,7 +3773,6 @@ tellstdfunc::stdCHANGELAY::stdCHANGELAY(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-//   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
 }
 
 void tellstdfunc::stdCHANGELAY::undo_cleanup()
@@ -3820,6 +3819,86 @@ int tellstdfunc::stdCHANGELAY::execute()
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::stdCHANGEREF::stdCHANGEREF(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+void tellstdfunc::stdCHANGEREF::undo_cleanup()
+{
+   telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete pl;
+   delete pl1;
+}
+
+void tellstdfunc::stdCHANGEREF::undo()
+{
+   TEUNDO_DEBUG("ungroup() CHANGEREF");
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      // first save the list of all currently selected components
+      laydata::selectList *savelist = ATDB->copy_selist();
+      // now unselect all
+      ATDB->unselect_all();
+      // get the list of new references from the UNDO stack
+      telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      // select them ...
+      ATDB->select_fromList(get_ttlaylist(pl));
+      //... and delete them cleaning up the memory (don't store in the Attic)
+      ATDB->delete_selected(NULL);
+      // now get the list of the old cell ref's from the UNDO stack
+      telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      // and add them to the target cell
+      ATDB->addlist(get_shlaylist(pl1)); 
+      // select the restored cell refs
+      ATDB->select_fromList(get_ttlaylist(pl1)); 
+      // now restore selection
+      ATDB->select_fromList(savelist);
+   DATC->unlockDB();
+   // finally - clean-up behind
+   delete pl;
+   delete pl1;
+   UpdateLV();
+}
+
+int tellstdfunc::stdCHANGEREF::execute()
+{
+   std::string newref = getStringValue();
+   laydata::shapeList* cells4u = NULL;
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      bool refok = ATDB->checkValidRef(newref);
+      if (refok)
+         cells4u = ATDB->ungroup_prep();
+   DATC->unlockDB();
+   if (refok)
+   {
+      if (cells4u->empty())
+      {
+         tell_log(console::MT_ERROR,"No cell references selected");
+         delete cells4u;
+      }
+      else
+      {
+         ATDB = DATC->lockDB();
+            laydata::atticList* undol2 = ATDB->changeref(cells4u, newref);
+         DATC->unlockDB();
+         assert(NULL != undol2);
+         UNDOcmdQ.push_front(this);
+         // Push the list of the cells to be ungroupped first
+         laydata::atticList undol;
+         undol[0] = cells4u;
+         UNDOPstack.push_front(make_ttlaylist(&undol));
+         UNDOPstack.push_front(make_ttlaylist(undol2));
+         delete cells4u;
+         delete undol2;
+         LogFile << LogFile.getFN() << "();"; LogFile.flush();
+         RefreshGL();
+      }
+   }
+   return EXEC_NEXT;
+}
 //=============================================================================
 telldata::ttint* tellstdfunc::CurrentLayer() {
    word cl = 0;

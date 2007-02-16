@@ -81,9 +81,11 @@ namespace laydata {
       unsigned int   numselected();
       DBbox          activeoverlap();
       void           transferLayer(word dst) { _target.edit()->transferLayer(dst);}
-      void           transferLayer(laydata::selectList*slst, word dst) {_target.edit()->transferLayer(slst, dst);}
+      void           transferLayer(laydata::selectList* slst, word dst) {_target.edit()->transferLayer(slst, dst);}
+      atticList*     changeref(shapeList*, std::string);
       //
       void           check_active();
+      bool           checkValidRef(std::string);
       void           select_fromList(selectList* ss) {_target.edit()->select_fromList(ss, _target.viewprop());};
       void           unselect_fromList(selectList* ss) {_target.edit()->unselect_fromList(ss, _target.viewprop());};
       void           unselect_all()    const {_target.edit()->unselect_all(false);};

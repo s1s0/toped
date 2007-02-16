@@ -208,7 +208,7 @@ laydata::tdtdata* laydata::tdtdesign::addcellref(std::string& name, CTM& ori) {
             do {} while(validate_cells());
       }
       return ncrf;
-   }   
+   }
    else {
       std::string news = "Cell \"";
       news += name; news += "\" is not defined";
@@ -645,6 +645,48 @@ laydata::atticList* laydata::tdtdesign::ungroup_this(laydata::shapeList* cells4u
                                                      CC != cells4u->end(); CC++)
       static_cast<tdtcellref*>(*CC)->ungroup(this, _target.edit(), shapeUngr);      
    _target.edit()->validate_layers();
+   return shapeUngr;
+}
+
+bool laydata::tdtdesign::checkValidRef(std::string newref)
+{
+   if ( _cells.end() == _cells.find(newref) )
+   {
+      std::string news = "Cell \"";
+      news += newref; news += "\" is not defined";
+      tell_log(console::MT_ERROR,news);
+      return false;
+   }
+   laydata::tdtcell* child = _cells[newref];
+   if (_hiertree->checkAncestors(_target.edit(), child, _hiertree))
+   {
+      tell_log(console::MT_ERROR, "Circular reference is forbidden.");
+      return false;
+   }
+   return true;
+}
+
+laydata::atticList* laydata::tdtdesign::changeref(shapeList* cells4u, std::string newref)
+{
+   assert(checkcell(newref));
+   assert((!cells4u->empty()));
+   laydata::shapeList* cellsUngr = new laydata::shapeList();
+   laydata::refnamepair striter = getcellnamepair(newref);
+   DBbox old_overlap = _target.edit()->overlap();
+
+   for (shapeList::const_iterator CC = cells4u->begin(); CC != cells4u->end(); CC++)
+   {
+      CTM ori = static_cast<tdtcellref*>(*CC)->translation();
+      tdtdata* ncrf = _target.edit()->addcellref(this, striter, ori);
+      assert(NULL != ncrf);
+      ncrf->set_status(sh_selected);
+      _target.edit()->select_this(ncrf,0);
+      cellsUngr->push_back(ncrf);
+   }
+   laydata::atticList* shapeUngr = new laydata::atticList();
+   (*shapeUngr)[0] = cellsUngr;
+   if (_target.edit()->overlapChanged(old_overlap, this))
+      do {} while(validate_cells());
    return shapeUngr;
 }
 

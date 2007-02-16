@@ -145,6 +145,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("merge"            ,(new                    tellstdfunc::lgcMERGE(telldata::tn_void,false)));
    // layer/reference operations
    mblock->addFUNC("changelayer"      ,(new                tellstdfunc::stdCHANGELAY(telldata::tn_void,false)));
+   mblock->addFUNC("changeref"        ,(new                tellstdfunc::stdCHANGEREF(telldata::tn_void,false)));
    //-----------------------------------------------------------------------------------------------------------
    // toped specific functons
    //-----------------------------------------------------------------------------------------------------------
