@@ -218,14 +218,13 @@ laydata::tdtdata* laydata::tdtdesign::addcellref(std::string& name, CTM& ori) {
 }
 
 laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori, 
-                             int4b stepX, int4b stepY, word columns, word rows) {
+                             ArrayProperties& arrprops) {
    if (checkcell(name)) {
       laydata::refnamepair striter = getcellnamepair(name);
       modified = true;
       ori *= _target.rARTM();
       DBbox old_overlap = _target.edit()->overlap();
-      tdtdata* ncrf = _target.edit()->addcellaref(this, striter, ori, 
-                                                   stepX, stepY, columns, rows);
+      tdtdata* ncrf = _target.edit()->addcellaref(this, striter, ori, arrprops);
       if (NULL == ncrf) {
         tell_log(console::MT_ERROR, "Circular reference is forbidden");
       }
@@ -443,7 +442,8 @@ void laydata::tdtdesign::mouseStart(int input_type, std::string name, const CTM 
       assert(0 != cols);assert(0 != rows);assert(0 != stepX);assert(0 != stepY);
       laydata::refnamepair striter = getcellnamepair(name);
       CTM eqm;
-      _tmpdata = new tdtcellaref(striter, eqm, stepX, stepY, cols, rows);
+      ArrayProperties arrprops(stepX, stepY, cols, rows);
+      _tmpdata = new tdtcellaref(striter, eqm, arrprops);
    }
    else if ( console::op_tbind == input_type)
    {
@@ -677,7 +677,12 @@ laydata::atticList* laydata::tdtdesign::changeref(shapeList* cells4u, std::strin
    for (shapeList::const_iterator CC = cells4u->begin(); CC != cells4u->end(); CC++)
    {
       CTM ori = static_cast<tdtcellref*>(*CC)->translation();
-      tdtdata* ncrf = _target.edit()->addcellref(this, striter, ori);
+      ArrayProperties arrayprops = static_cast<tdtcellref*>(*CC)->arrayprops();
+      tdtdata* ncrf;
+      if (arrayprops.valid())
+         ncrf = _target.edit()->addcellaref(this, striter, ori, arrayprops);
+      else
+         ncrf = _target.edit()->addcellref(this, striter, ori);
       assert(NULL != ncrf);
       ncrf->set_status(sh_selected);
       _target.edit()->select_this(ncrf,0);

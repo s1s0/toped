@@ -284,6 +284,7 @@ namespace laydata {
       const pointlist      shape2poly() const {return pointlist();};
       void                 objFlip() {_translation.FlipY(0.0);}
       void                 objRotate() {_translation.Rotate( 90.0);}
+      virtual ArrayProperties arrayprops() const {return ArrayProperties();}
    protected:
       void                 select_points(DBbox&, SGBitSet*) {};
       void                 unselect_points(DBbox&, SGBitSet*) {return;};
@@ -296,17 +297,17 @@ namespace laydata {
 //==============================================================================
    class tdtcellaref : public tdtcellref  {
    public:
-                           tdtcellaref(refnamepair str, CTM trans, int4b stepX, 
-                              int4b stepY, word cols, word rows) : 
-                              tdtcellref(str, trans), _stepX(stepX), _stepY(stepY), 
-                                                       _cols(cols), _rows(rows) {};
+                           tdtcellaref(refnamepair str, CTM trans, ArrayProperties& arrprops) :
+                              tdtcellref(str, trans), _arrprops(arrprops) {};
                            tdtcellaref(TEDfile* const tedfile);
 //                          ~tdtcellaref() {};
       DBbox                overlap() const;
       DBbox                clear_overlap() const;
       tdtdata*             copy(const CTM& trans) {return new tdtcellaref(
-                              _structure,_translation * trans,_stepX, _stepY, 
-                                                                _cols, _rows);};
+                              _structure,_translation * trans, _arrprops);};
+//       tdtdata*             copy(const CTM& trans) {return new tdtcellaref(
+//                               _structure,_translation * trans,_stepX, _stepY, 
+//                                                                 _cols, _rows);};
 
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
@@ -320,14 +321,11 @@ namespace laydata {
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       void                 ungroup(tdtdesign*, tdtcell*, atticList*);
-   private:   
-//      bool                 aref_visible(layprop::DrawProperties&, int*) const;
-      int4b               _stepX;
-      int4b               _stepY;
-      word                _cols;
-      word                _rows;
+      ArrayProperties      arrayprops() const {return _arrprops;}
+   private:
+      ArrayProperties      _arrprops;
    };
-   
+
 //==============================================================================
    class tdttext : public tdtdata  {
    public:

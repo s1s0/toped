@@ -164,13 +164,15 @@ void GDSin::gds2ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst) {
    if (NULL != _dst_lib->checkcell(wd->GetStrname())) {
       laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->GetStrname());
       // Absolute magnification, absolute angle should be reflected somehow!!!
+
+      laydata::ArrayProperties arrprops(wd->Get_Xstep(),wd->Get_Ystep(),
+                                 static_cast<word>(wd->Get_colnum()),
+                                 static_cast<word>(wd->Get_rownum()));
       dst->addcellaref(_dst_lib,
          striter, 
          CTM(wd->GetMagn_point(), wd->GetMagnification(), 
                                           wd->GetAngle(),wd->GetReflection()),
-         wd->Get_Xstep(), wd->Get_Ystep(),
-         static_cast<word>(wd->Get_colnum()), 
-         static_cast<word>(wd->Get_rownum()),
+         arrprops,
          false
       );
    }
