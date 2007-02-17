@@ -239,13 +239,13 @@ laydata::tdtcellref* laydata::tdtcell::addcellref(laydata::tdtdesign* ATDB,
    return cellref;
 }
 
-laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB, 
-          refnamepair str, CTM trans, int4b stepX, int4b stepY, word columns, 
-                                                      word rows, bool sortnow) {
+laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB,
+          refnamepair str, CTM trans, ArrayProperties& arrprops, bool sortnow)
+{
    if (!addchild(ATDB, str->second)) return NULL;
    quadTree *cellreflayer = securelayer(0);
-   laydata::tdtcellaref* cellaref = 
-                       new tdtcellaref(str, trans, stepX, stepY, columns, rows);
+   laydata::tdtcellaref* cellaref =
+                       new tdtcellaref(str, trans, arrprops);
    if (sortnow) cellreflayer->add(cellaref);
    else         cellreflayer->put(cellaref);
    return cellaref;

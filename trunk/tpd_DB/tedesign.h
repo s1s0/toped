@@ -46,8 +46,7 @@ namespace laydata {
       tdtdata*       addwire(word, const pointlist*, word);
       tdtdata*       addtext(word la, std::string& text, CTM& ori);
       tdtdata*       addcellref(std::string& name, CTM& ori);
-      tdtdata*       addcellaref(std::string& name, CTM& ori, int4b stepX, 
-                                          int4b stepY, word columns, word rows);
+      tdtdata*       addcellaref(std::string&, CTM&, ArrayProperties&);
       void           addlist(atticList*);
       tdtcell*       opencell(std::string name);
       bool           editpush(const TP&);

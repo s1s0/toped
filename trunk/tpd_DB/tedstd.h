@@ -168,6 +168,25 @@ namespace laydata {
       tdtdesign*           _design;
       nameList             _childnames;
    };
+
+   class ArrayProperties
+   {
+      public:
+         ArrayProperties() : _stepX(0), _stepY(0), _cols(0), _rows(0) {}
+         ArrayProperties(int4b stepX, int4b stepY, word cols, word rows) :
+            _stepX(stepX), _stepY(stepY), _cols(cols), _rows(rows) {}
+         bool                valid() {return ((_cols != 0) && (_rows != 0));}
+         int4b               stepX() const {return _stepX;}
+         int4b               stepY() const {return _stepY;}
+         word                cols()  const {return _cols;}
+         word                rows()  const {return _rows;}
+      private:
+         int4b               _stepX;
+         int4b               _stepY;
+         word                _cols;
+         word                _rows;
+   };
+
 }
 
 #endif

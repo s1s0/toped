@@ -1298,9 +1298,10 @@ int tellstdfunc::stdCELLAREF::execute() {
    int4b istepX = (int4b)rint(stepX * DBscale);
    int4b istepY = (int4b)rint(stepY * DBscale);
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
+   laydata::ArrayProperties arrprops(istepX,istepY,col,row);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlayout* cl = new telldata::ttlayout(
-            ATDB->addcellaref(name,ori,istepX,istepY,col,row),0);
+            ATDB->addcellaref(name,ori,arrprops),0);
    DATC->unlockDB();
    OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 

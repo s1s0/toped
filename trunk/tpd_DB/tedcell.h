@@ -101,9 +101,8 @@ namespace laydata {
       quadTree*            securelayer(word layno);
       tdtcellref*          addcellref(tdtdesign*, refnamepair str, CTM trans,
                                                           bool sortnow = true);
-      tdtcellaref*         addcellaref(tdtdesign*,refnamepair str, CTM trans,  
-                              int4b stepX, int4b stepY, word columns, word rows, 
-                                                              bool sortnow = true);
+      tdtcellaref*         addcellaref(tdtdesign*, refnamepair, CTM,
+                                          ArrayProperties&, bool sortnow = true);
       bool                 addchild(tdtdesign*, tdtcell*);
       void                 write(TEDfile* const, const cellList&, TDTHierTree* const) const;
       void                 GDSwrite(GDSin::GDSFile&, const cellList&,

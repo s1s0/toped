@@ -1631,13 +1631,13 @@ DBbox laydata::tdtcellref::overlap() const {
 //-----------------------------------------------------------------------------
 // class tdtcellaref
 //-----------------------------------------------------------------------------
-laydata::tdtcellaref::tdtcellaref(TEDfile* const tedfile) : tdtcellref(tedfile) 
+laydata::tdtcellaref::tdtcellaref(TEDfile* const tedfile) : tdtcellref(tedfile)
 {
-   // get the matrix properties
-   _stepX = tedfile->get4b();
-   _stepY = tedfile->get4b();
-   _rows  = tedfile->getWord();
-   _cols  = tedfile->getWord();
+   int4b _stepX = tedfile->get4b();
+   int4b _stepY = tedfile->get4b();
+   word _rows = tedfile->getWord();
+   word _cols = tedfile->getWord();
+   _arrprops = ArrayProperties(_stepX, _stepY, _cols, _rows);
 }
 
 // bool laydata::tdtcellaref::aref_visible(layprop::DrawProperties& drawprop, int* stst) const {
@@ -1750,13 +1750,13 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
       // now calculate the start/stop values of the visible references in the matrix
       if (-1 == mutual_position) {
          // entire matrix is visible
-         ptlist.push_back(TP(0,_cols));
-         ptlist.push_back(TP(0,_rows));
+         ptlist.push_back(TP(0,_arrprops.cols()));
+         ptlist.push_back(TP(0,_arrprops.rows()));
       }
       else {
          int stst[4];
-         real cstepX = (array_overlap.p2().x() - array_overlap.p1().x()) / _cols;
-         real cstepY = (array_overlap.p2().y() - array_overlap.p1().y()) / _rows;
+         real cstepX = (array_overlap.p2().x() - array_overlap.p1().x()) / _arrprops.cols();
+         real cstepY = (array_overlap.p2().y() - array_overlap.p1().y()) / _arrprops.rows();
          // matrix is partially visible
          stst[0] = array_overlap.p1().x() < clip.p1().x() ?
                (int) rint((clip.p1().x() - array_overlap.p1().x()) / cstepX) : 0;
@@ -1768,8 +1768,8 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
          // border areas
          stst[0] -= (0 == stst[0]) ? 0 : 1;
          stst[2] -= (0 == stst[2]) ? 0 : 1;
-         stst[1] += (_cols == stst[1]) ? 0 : 1;
-         stst[3] += (_rows == stst[3]) ? 0 : 1;
+         stst[1] += (_arrprops.cols() == stst[1]) ? 0 : 1;
+         stst[3] += (_arrprops.rows() == stst[3]) ? 0 : 1;
          ptlist.push_back(TP(stst[0],stst[1]));
          ptlist.push_back(TP(stst[2],stst[3]));
       }
@@ -1799,7 +1799,7 @@ void laydata::tdtcellaref::openGL_drawfill(layprop::DrawProperties& drawprop, co
       { // start/stop columns
          // for each of the visual array figures...
          // ... get the translation matrix ...
-         CTM refCTM(TP(_stepX * i , _stepY * j ), 1, 0, false);
+         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          refCTM *= drawprop.topCTM();
          // ...draw the structure itself, not forgeting to push/pop the refCTM
          drawprop.pushCTM(refCTM);
@@ -1828,13 +1828,13 @@ void laydata::tdtcellaref::tmp_draw(const layprop::DrawProperties& drawprop,
 {
    if (structure())
    {
-      for (int i = 0; i < _cols; i++)
+      for (int i = 0; i < _arrprops.cols(); i++)
       {// start/stop rows
-         for(int j = 0; j < _rows; j++)
+         for(int j = 0; j < _arrprops.rows(); j++)
          { // start/stop columns
             // for each of the visual array figures...
             // ... get the translation matrix ...
-            CTM refCTM(TP(_stepX * i , _stepY * j ), 1, 0, false);
+            CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
             refCTM *= _translation;
             transtack.push_front(refCTM * transtack.front());
             structure()->tmp_draw(drawprop, transtack);
@@ -1846,18 +1846,18 @@ void laydata::tdtcellaref::tmp_draw(const layprop::DrawProperties& drawprop,
 void laydata::tdtcellaref::info(std::ostringstream& ost) const {
    ost << "cell \"" << _structure->first << "\" - array reference @ (";
    ost << _translation.tx() << " , " << _translation.ty() << ") ->";
-   ost << " [" << _cols << " x " << _stepX << " , " ;
-   ost <<         _rows << " x " << _stepY << "]";
+   ost << " [" << _arrprops.cols() << " x " << _arrprops.stepX() << " , " ;
+   ost <<         _arrprops.rows() << " x " << _arrprops.stepY() << "]";
 }
 
 void laydata::tdtcellaref::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_CELLAREF);
    tedfile->putString(_structure->first);
    tedfile->putCTM(_translation);
-   tedfile->put4b(_stepX);
-   tedfile->put4b(_stepY);
-   tedfile->putWord(_rows);
-   tedfile->putWord(_cols);
+   tedfile->put4b(_arrprops.stepX());
+   tedfile->put4b(_arrprops.stepY());
+   tedfile->putWord(_arrprops.rows());
+   tedfile->putWord(_arrprops.cols());
 }
 
 void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
@@ -1879,12 +1879,12 @@ void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
    wr = gdsf.SetNextRecord(gds_ANGLE);
    wr->add_real8b(rotation);gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_COLROW);
-   wr->add_int2b(_cols);wr->add_int2b(_rows);
+   wr->add_int2b(_arrprops.cols());wr->add_int2b(_arrprops.rows());
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_XY,3);
    wr->add_int4b(trans.x());wr->add_int4b(trans.y());
-   wr->add_int4b(trans.x() + _cols * _stepX);wr->add_int4b(trans.y());
-   wr->add_int4b(trans.x());wr->add_int4b(trans.y() + _rows * _stepY);
+   wr->add_int4b(trans.x() + _arrprops.cols() * _arrprops.stepX());wr->add_int4b(trans.y());
+   wr->add_int4b(trans.x());wr->add_int4b(trans.y() + _arrprops.rows() * _arrprops.stepY());
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_ENDEL);
    gdsf.flush(wr);
@@ -1892,13 +1892,13 @@ void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
 
 void laydata::tdtcellaref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
 {
-   for (int i = 0; i < _cols; i++)
+   for (int i = 0; i < _arrprops.cols(); i++)
    {// start/stop rows
-      for(int j = 0; j < _rows; j++)
+      for(int j = 0; j < _arrprops.rows(); j++)
       { // start/stop columns
          // for each of the visual array figures...
          // ... get the translation matrix ...
-         CTM refCTM(TP(_stepX * i , _stepY * j ), 1, 0, false);
+         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          refCTM *= _translation;
          psf.cellref(_structure->first, refCTM);
          if (!psf.hier())
@@ -1910,11 +1910,11 @@ void laydata::tdtcellaref::PSwrite(PSFile& psf, const layprop::DrawProperties& d
 }
 
 void  laydata::tdtcellaref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, laydata::atticList* nshp) {
-   for (word i = 0; i < _cols; i++)
-      for(word j = 0; j < _rows; j++) {
+   for (word i = 0; i < _arrprops.cols(); i++)
+      for(word j = 0; j < _arrprops.rows(); j++) {
          // for each of the array figures
          CTM refCTM;
-         refCTM.Translate(_stepX * i , _stepY * j );
+         refCTM.Translate(_arrprops.stepX() * i , _arrprops.stepY() * j );
          refCTM *= _translation;
          laydata::tdtcellref* cellref = new tdtcellref(_structure, refCTM);
          cellref->ungroup(ATDB, dst, nshp);
@@ -1935,7 +1935,7 @@ DBbox laydata::tdtcellaref::overlap() const {
 DBbox laydata::tdtcellaref::clear_overlap() const {
    DBbox bx = structure()->overlap();
    DBbox ovl = bx;
-   CTM refCTM(1.0,0.0,0.0,1.0,_stepX * (_cols-1), _stepY * (_rows - 1));
+   CTM refCTM(1.0,0.0,0.0,1.0,_arrprops.stepX() * (_arrprops.cols()-1), _arrprops.stepY() * (_arrprops.rows() - 1));
    ovl.overlap(bx * refCTM);
    return ovl;
 }
