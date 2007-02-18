@@ -167,7 +167,7 @@ public:
    TP(real, real, real);
    void     roundTO(int4b step);
    void     move(int4b dX, int4b dY) {_x += dX; _y += dY;};
-   void     info(std::ostringstream&) const;
+   void     info(std::ostringstream&,real) const;
    const int4b    x()  const {return _x;};
    const int4b    y()  const {return _y;};
    TP operator * ( const CTM& ) const;

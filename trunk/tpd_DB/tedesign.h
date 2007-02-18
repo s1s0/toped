@@ -92,7 +92,7 @@ namespace laydata {
       selectList*    copy_selist()     const {return _target.edit()->copy_selist();};
       unsigned int   numselected()     const {return _target.edit()->numselected();};
       void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
-      void           report_selected() const {       _target.edit()->report_selected();};
+      void           report_selected(real DBscale) const { _target.edit()->report_selected(DBscale);};
       quadTree*      targetlayer(word layno) {return _target.edit()->securelayer(layno);};
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       std::string    activecellname()  const {return _target.name();};
