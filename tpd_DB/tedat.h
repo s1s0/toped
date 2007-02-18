@@ -74,7 +74,7 @@ namespace laydata {
       virtual   void       tmp_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet* plst = NULL,
                                          bool under_construct=false) const = 0;
    //! Print an object description on the toped console.
-      virtual   void       info(std::ostringstream&) const = 0;
+      virtual   void       info(std::ostringstream&, real) const = 0;
    //! Write the tdtdata object in TDT file.
       virtual   void       write(TEDfile* const tedfile) const = 0;
    //! Write the tdtdata object in GDS file.
@@ -142,7 +142,7 @@ namespace laydata {
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                              SGBitSet* plst = NULL, bool under_construct=false) const;
-      void                 info(std::ostringstream&) const;
+      void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
@@ -182,7 +182,7 @@ namespace laydata {
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
-      void                 info(std::ostringstream&) const;
+      void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
@@ -221,7 +221,7 @@ namespace laydata {
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
-      void                 info(std::ostringstream&) const;
+      void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
@@ -270,7 +270,7 @@ namespace laydata {
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
-      void                 info(std::ostringstream&) const;
+      void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
@@ -316,7 +316,7 @@ namespace laydata {
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
-      void                 info(std::ostringstream&) const;
+      void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
@@ -348,7 +348,7 @@ namespace laydata {
       
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
-      void                 info(std::ostringstream&) const;
+      void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;

@@ -1614,12 +1614,15 @@ bool laydata::tdtcell::unselect_pointlist(selectDataPair& sel, selectDataPair& u
    }   
 }   
 
-void laydata::tdtcell::report_selected() const {
-   for (selectList::const_iterator CL = _shapesel.begin(); CL != _shapesel.end(); CL++) {
-      for (dataList::const_iterator DP = CL->second->begin(); DP != CL->second->end(); DP++) {
+void laydata::tdtcell::report_selected(real DBscale) const
+{
+   for (selectList::const_iterator CL = _shapesel.begin(); CL != _shapesel.end(); CL++)
+   {
+      for (dataList::const_iterator DP = CL->second->begin(); DP != CL->second->end(); DP++)
+      {
          std::ostringstream ost;
          ost << "layer " << CL->first << " : ";
-         DP->first->info(ost);
+         DP->first->info(ost, DBscale);
          tell_log(console::MT_INFO, ost.str());
       }
    }

@@ -544,12 +544,12 @@ laydata::tdtdata* laydata::tdtbox::copy(const CTM& trans) {
    return new tdtbox(cp1, cp2);
 }
 
-void laydata::tdtbox::info(std::ostringstream& ost) const {
-   ost << "box at (";
-   _p1->info(ost);
+void laydata::tdtbox::info(std::ostringstream& ost, real DBU) const {
+   ost << "box - {";
+   _p1->info(ost, DBU);
    ost << " , ";
-   _p2->info(ost);
-   ost << ");";
+   _p2->info(ost, DBU);
+   ost << "};";
 }
 
 void laydata::tdtbox::write(TEDfile* const tedfile) const {
@@ -934,15 +934,15 @@ void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
    }
 }
 
-void laydata::tdtpoly::info(std::ostringstream& ost) const {
-   ost << "polygon at (";
+void laydata::tdtpoly::info(std::ostringstream& ost, real DBU) const {
+   ost << "polygon - {";
    unsigned lstsize = _plist.size();
    unsigned lastpnt = lstsize-1;
    for (unsigned i = 0; i < lstsize; i++) {
-      _plist[i].info(ost);
+      _plist[i].info(ost, DBU);
       if (i != lastpnt) ost << " , ";
    }
-   ost << ");";
+   ost << "};";
 }
 
 void laydata::tdtpoly::write(TEDfile* const tedfile) const {
@@ -1328,15 +1328,15 @@ laydata::tdtdata* laydata::tdtwire::copy(const CTM& trans) {
    return new tdtwire(ptlist,_width);
 }
 
-void laydata::tdtwire::info(std::ostringstream& ost) const {
-   ost << "wire #" << _width << " wide at (";
+void laydata::tdtwire::info(std::ostringstream& ost, real DBU) const {
+   ost << "wire " << _width/DBU << " - {";
    unsigned lstsize = _plist.size();
    unsigned lastpnt = lstsize-1;
    for (unsigned i = 0; i < lstsize; i++) {
-      _plist[i].info(ost);
+      _plist[i].info(ost, DBU);
       if (i != lastpnt) ost << " , ";
    }
-   ost << ");";
+   ost << "};";
 }
 
 void laydata::tdtwire::write(TEDfile* const tedfile) const {
@@ -1540,9 +1540,9 @@ void laydata::tdtcellref::tmp_draw(const layprop::DrawProperties& drawprop,
    }
 }
 
-void laydata::tdtcellref::info(std::ostringstream& ost) const {
-   ost << "cell \"" << _structure->first << "\" - reference @ (";
-   ost << _translation.tx() << " , " << _translation.ty() << ")";
+void laydata::tdtcellref::info(std::ostringstream& ost, real DBU) const {
+   ost << "cell \"" << _structure->first << "\" - reference @ {";
+   ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "}";
 }
 
 void laydata::tdtcellref::write(TEDfile* const tedfile) const {
@@ -1843,9 +1843,9 @@ void laydata::tdtcellaref::tmp_draw(const layprop::DrawProperties& drawprop,
    }
 }
 
-void laydata::tdtcellaref::info(std::ostringstream& ost) const {
-   ost << "cell \"" << _structure->first << "\" - array reference @ (";
-   ost << _translation.tx() << " , " << _translation.ty() << ") ->";
+void laydata::tdtcellaref::info(std::ostringstream& ost, real DBU) const {
+   ost << "cell \"" << _structure->first << "\" - array reference @ {";
+   ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "} ->";
    ost << " [" << _arrprops.cols() << " x " << _arrprops.stepX() << " , " ;
    ost <<         _arrprops.rows() << " x " << _arrprops.stepY() << "]";
 }
@@ -2158,7 +2158,9 @@ DBbox laydata::tdttext::overlap() const {
    return (_overlap * correction * _translation);
 }
 
-void laydata::tdttext::info(std::ostringstream& ost) const {
+void laydata::tdttext::info(std::ostringstream& ost, real DBU) const {
+   ost << "text \"" << _text << "\" @ {";
+   ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "}";
 }
 
 //-----------------------------------------------------------------------------

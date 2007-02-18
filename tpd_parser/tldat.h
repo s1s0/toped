@@ -122,7 +122,7 @@ namespace telldata {
    public:
                            tell_var(typeID ID) : _ID(ID) {}
       virtual tell_var*    selfcopy() const = 0;
-      virtual void         echo(std::string&) = 0;
+      virtual void         echo(std::string&, real) = 0;
       virtual const typeID get_type() const {return _ID;}
       virtual void         assign(tell_var*) = 0;
       virtual tell_var*    field_var(char*& fname) {return NULL;}
@@ -139,7 +139,7 @@ namespace telldata {
                                           tell_var(tn_real), _value(cobj.value()) {}
       const ttreal&        operator =(const ttreal&);
       const ttreal&        operator =(const ttint&);
-      void                 echo(std::string&);
+      void                 echo(std::string&, real);
       void                 assign(tell_var*);
       real                 value() const        {return _value;};
       void                 uminus()             {_value  = -_value;   };
@@ -157,7 +157,7 @@ namespace telldata {
                                           tell_var(tn_int), _value(cobj.value()) {}
       const ttint&         operator =(const ttint&);
       const ttint&         operator =(const ttreal&);
-      void                 echo(std::string&);
+      void                 echo(std::string&, real);
       void                 assign(tell_var*);
       int4b                value() const        {return _value;};
       void                 uminus()             {_value  = -_value;   };
@@ -174,7 +174,7 @@ namespace telldata {
                            ttbool(const ttbool& cobj) :
                                          tell_var(tn_bool), _value(cobj.value()) {};
       const ttbool&        operator = (const ttbool&);
-      void                 echo(std::string&);
+      void                 echo(std::string&, real);
       void                 assign(tell_var*);
       bool                 value() const        {return _value;};
       tell_var*            selfcopy() const     {return new ttbool(_value);};
@@ -195,7 +195,7 @@ namespace telldata {
                            ttstring(const ttstring& cobj) :
                                         tell_var(tn_string), _value(cobj.value()){};
       const ttstring&      operator = (const ttstring&);
-      void                 echo(std::string& wstr);// {wstr += _value;};
+      void                 echo(std::string&, real);// {wstr += _value;};
       void                 assign(tell_var*);
       tell_var*            selfcopy() const    {return new ttstring(_value);}
       const std::string    value() const       {return _value;};
@@ -212,7 +212,7 @@ namespace telldata {
                              tell_var(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
                            ttlayout(const ttlayout& cobj);
       const ttlayout&      operator = (const ttlayout&);
-      void                 echo(std::string& wstr);
+      void                 echo(std::string&, real);
       void                 assign(tell_var*);
       tell_var*            selfcopy() const {return new ttlayout(*this);};
       laydata::tdtdata*    data() const     {return _data;};
@@ -231,7 +231,7 @@ namespace telldata {
                            ttlist(typeID ltype): tell_var(ltype) {};
                            ttlist(const ttlist& cobj);
       const ttlist&        operator = (const ttlist&);
-      void                 echo(std::string&);
+      void                 echo(std::string&, real);
       void                 assign(tell_var*);
       tell_var*            selfcopy() const  {return new ttlist(*this);};
       const typeID         get_type() const  {return _ID | tn_listmask;};
@@ -254,7 +254,7 @@ namespace telldata {
                            user_struct(const user_struct&);
                           ~user_struct();
       tell_var*            selfcopy() const  {return new user_struct(*this);}
-      void                 echo(std::string&);
+      void                 echo(std::string&, real);
       void                 assign(tell_var*);
       tell_var*            field_var(char*& fname);
    protected:
@@ -270,7 +270,7 @@ namespace telldata {
                            ttpnt(const ttpnt&);
                            ttpnt(operandSTACK& OPStack);
                            tell_var*            selfcopy() const    {return new ttpnt(*this);}
-      void                 echo(std::string&);
+      void                 echo(std::string&, real);
       void                 assign(tell_var*);
       real                 x() const           {return _x->value();}
       real                 y() const           {return _y->value();}
@@ -292,7 +292,7 @@ namespace telldata {
                            ttwnd(operandSTACK& OPStack);
                            ttwnd(const ttwnd& cobj);
       tell_var*            selfcopy() const    {return new ttwnd(*this);};
-      void                 echo(std::string&);
+      void                 echo(std::string&, real);
       void                 assign(tell_var*);
       const ttpnt&         p1() const          {return *_p1;};
       const ttpnt&         p2() const          {return *_p2;};
@@ -314,7 +314,7 @@ namespace telldata {
                            ttbnd(operandSTACK& OPStack);
                            ttbnd(const ttbnd& cobj);
       tell_var*            selfcopy() const    {return new ttbnd(*this);};
-      void                 echo(std::string&);
+      void                 echo(std::string&, real);
       void                 assign(tell_var*);
       const ttpnt&         p() const           {return *_p;}
       const ttreal&        rot() const         {return *_rot;}

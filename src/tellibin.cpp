@@ -69,9 +69,10 @@ nameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*) {
 }
 
 int tellstdfunc::stdECHO::execute() {
+   real DBscale = DATC->DBscale();
    telldata::tell_var *p = OPstack.top();OPstack.pop();
    std::string news;
-   p->echo(news);
+   p->echo(news, DBscale);
    tell_log(console::MT_INFO,news);
    delete p;
    return EXEC_NEXT;
@@ -83,11 +84,12 @@ tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdTELLSTATUS::execute() {
+   real DBscale = DATC->DBscale();
    telldata::tell_var *y;
    std::string news;
    while (OPstack.size()) {
       y = OPstack.top(); OPstack.pop();
-      y->echo(news);
+      y->echo(news, DBscale);
       tell_log(console::MT_ERROR,news);
    }
    news = "Bottom of the operand stack reached";
@@ -101,8 +103,9 @@ tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdREPORTSLCTD::execute() {
+   real DBscale = DATC->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->report_selected();
+      ATDB->report_selected(DBscale);
    DATC->unlockDB();
    return EXEC_NEXT;
 }
@@ -3108,7 +3111,7 @@ void tellstdfunc::stdUNGROUP::undo() {
    delete pl1;
    UpdateLV();
 }
-   
+
 int tellstdfunc::stdUNGROUP::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::shapeList* cells4u = ATDB->ungroup_prep();

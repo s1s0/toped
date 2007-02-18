@@ -103,7 +103,7 @@ void telldata::ttreal::assign(tell_var* rt) {
 //   @TODO else ERROR Run time error (or Warning) -> unexpected type in ..bla bla
 }
 
-void telldata::ttreal::echo(std::string& wstr) {
+void telldata::ttreal::echo(std::string& wstr, real) {
    std::ostringstream ost;
    ost << value();
    wstr += ost.str();
@@ -126,7 +126,7 @@ void telldata::ttint::assign(tell_var* rt) {
       _value = static_cast<ttint*>(rt)->value();
 }
 
-void telldata::ttint::echo(std::string& wstr) {
+void telldata::ttint::echo(std::string& wstr, real) {
    std::ostringstream ost;
    ost << value();
    wstr += ost.str();
@@ -155,7 +155,7 @@ void telldata::ttbool::assign(tell_var* rt) {
    _value = static_cast<ttbool*>(rt)->value();
 }
 
-void telldata::ttbool::echo(std::string& wstr) {
+void telldata::ttbool::echo(std::string& wstr, real) {
    if (_value) wstr += "true";
    else        wstr += "false";
 }
@@ -170,7 +170,7 @@ void telldata::ttstring::assign(tell_var* value) {
    _value = static_cast<ttstring*>(value)->_value;
 }
 
-void telldata::ttstring::echo(std::string& wstr) {
+void telldata::ttstring::echo(std::string& wstr, real) {
    std::ostringstream ost;
    ost << "\"" << _value << "\"";
    wstr += ost.str();
@@ -191,10 +191,11 @@ const telldata::ttlayout& telldata::ttlayout::operator = (const ttlayout& cobj) 
    return *this;
 }
 
-void telldata::ttlayout::echo(std::string& wstr) {
+void telldata::ttlayout::echo(std::string& wstr, real DBU)
+{
    std::ostringstream ost;
    ost << "layer " << _layer << " :";
-   _data->info(ost);
+   _data->info(ost, DBU);
    if (_selp) ost << " - partially selected";
    wstr += ost.str();
 }
@@ -226,14 +227,17 @@ const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cob
    return *this;
 }
 
-void telldata::ttlist::echo(std::string& wstr) {
+void telldata::ttlist::echo(std::string& wstr, real DBU)
+{
    std::ostringstream ost;
    if (_mlist.empty()) {wstr += "empty list";}
-   else {
+   else
+   {
       wstr += " list members: { ";
-      for (unsigned i = 0; i < _mlist.size(); i++) {
+      for (unsigned i = 0; i < _mlist.size(); i++)
+      {
          if (i > 0)  wstr += " , ";
-         (_mlist[i])->echo(wstr);
+         (_mlist[i])->echo(wstr, DBU);
       }
       wstr += " } ";
    }
@@ -279,10 +283,10 @@ telldata::user_struct::~user_struct() {
       delete CI->second;
 }
 
-void telldata::user_struct::echo(std::string& wstr) {
+void telldata::user_struct::echo(std::string& wstr, real DBU) {
    wstr += "struct members:\n";
    for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++) {
-      wstr += CI->first; wstr += ": "; CI->second->echo(wstr);
+      wstr += CI->first; wstr += ": "; CI->second->echo(wstr, DBU);
       wstr += "\n";
    }
 }
@@ -342,7 +346,7 @@ void telldata::ttpnt::assign(tell_var* rt) {
    _y->_value = static_cast<ttpnt*>(rt)->y();
 }
 
-void telldata::ttpnt::echo(std::string& wstr) {
+void telldata::ttpnt::echo(std::string& wstr, real) {
    std::ostringstream ost;
    ost << "{X = " << x() << ", Y = " << y() << "}";
    wstr += ost.str();
@@ -393,7 +397,7 @@ void telldata::ttwnd::assign(tell_var* rt) {
    (*_p2) = static_cast<ttwnd*>(rt)->p2();
 }
 
-void telldata::ttwnd::echo(std::string& wstr) {
+void telldata::ttwnd::echo(std::string& wstr, real) {
    std::ostringstream ost;
    ost << "P1: X = " << p1().x() << ": Y = " << p1().y() << " ; " <<
           "P2: X = " << p2().x() << ": Y = " << p2().y() ;
@@ -468,7 +472,7 @@ void telldata::ttbnd::assign(tell_var* rt)
    (*_sc ) = static_cast<ttbnd*>(rt)->sc();
 }
 
-void telldata::ttbnd::echo(std::string& wstr) {
+void telldata::ttbnd::echo(std::string& wstr, real) {
    std::ostringstream ost;
    ost << "P: X = " << p().x() << ": Y = " << p().y() << " ; " <<
           "rot = "  << rot().value() << ": flipX " << (flx().value() ? "true" : "false") << " ; "  <<

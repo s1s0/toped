@@ -148,7 +148,7 @@ namespace laydata {
       selectList*          copy_selist() const;
       void                 updateHierarchy(tdtdesign*);
       void                 removePrep(laydata::tdtdesign* ATDB) const;
-      void                 report_selected() const;
+      void                 report_selected(real) const;
       void                 collect_usedlays(const tdtdesign*, bool, usedlayList&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
    private:

@@ -62,8 +62,8 @@ TP TP::operator *= (const CTM& op2) {
 //   return *this;
 //}
 
-void TP::info(std::ostringstream& ost) const {
-   ost << "( " << _x << " , " << _y << " )";
+void TP::info(std::ostringstream& ost, real DBU) const {
+   ost << "{ " << _x/DBU << " , " << _y/DBU << " }";
 }
 
 //-----------------------------------------------------------------------------
