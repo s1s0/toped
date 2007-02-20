@@ -59,8 +59,10 @@ telldata::tell_type *tellstruct = NULL;
 telldata::argumentQ   *argmap  = NULL;
 /*taking care when a function is called from the argument list of another call*/
 std::stack<telldata::argumentQ*>  argmapstack;
-/* current function type (during function definition)*/
+/* current function type (during function declaration/definition)*/
 telldata::typeID funcretype;
+/* current function name (during function declaration/definition)*/
+char* funcname;
 /*number of return statements encountered*/
 int returns = 0;
 /*number of errors in a function defintion*/
@@ -204,39 +206,55 @@ input:
 
 entrance:
      statement ';'                         {
-    if (!yynerrs)  CMDBlock->execute();
-    else           CMDBlock = CMDBlock->cleaner();
+      if (!yynerrs)  CMDBlock->execute();
+      else           CMDBlock = CMDBlock->cleaner();
    }
    | funcdefinition                        {}
+   | funcdeclaration ';'                   {
+//         CMDBlock->addUSERFUNCDECL(std::string($2),$1,arglist);
+      arglist = NULL;
+      delete [] funcname;
+   }
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
    | error                                 {CMDBlock = CMDBlock->cleaner();/*yynerrs = 0;*/}
 ;
 
+funcdeclaration:
+     telltypeID tknIDENTIFIER '('          {
+      /*Create a new variableMAP structure containing the arguments*/
+      arglist = new parsercmd::argumentLIST;
+      funcretype = $1;returns = 0;funcdeferrors = 0;
+      funcname = $2;
+   }
+     funcarguments ')'                     {}
+;
+
 funcdefinition:
-     telltypeID tknIDENTIFIER '('        {
-         /*Create a new variableMAP structure containing the arguments*/
-         arglist = new parsercmd::argumentLIST;
-         funcretype = $1;returns = 0;funcdeferrors = 0;
-      }
-     funcarguments ')'  funcblock        {
-         if ((telldata::tn_void != $1) && (0 == returns)) {
+//     telltypeID tknIDENTIFIER '('        {
+//         /*Create a new variableMAP structure containing the arguments*/
+//         arglist = new parsercmd::argumentLIST;
+//         funcretype = $1;returns = 0;funcdeferrors = 0;
+//      }
+//     funcarguments ')'  funcblock        {
+     funcdeclaration funcblock {
+         if ((telldata::tn_void != funcretype) && (0 == returns)) {
             tellerror("function must return a value", @$);
-            delete($7);// arglist is cleared by the cmdSTDFUNC destructor
+            delete($2);// arglist is cleared by the cmdSTDFUNC destructor
          }
          else  if (funcdeferrors > 0) {
             tellerror("function definition is ignored because of the errors above", @$);
-            delete($7);// arglist is cleared by the cmdSTDFUNC destructor
+            delete($2);// arglist is cleared by the cmdSTDFUNC destructor
          }
          else {
-            if (!CMDBlock->addUSERFUNC(std::string($2),$7,arglist)) {
-               delete ($7);
+            if (!CMDBlock->addUSERFUNC(std::string(funcname),$2,arglist)) {
+               delete ($2);
             }
          }
          arglist = NULL;
-         delete [] $2;
+         delete [] funcname;
    }
 ;
-
+ 
 block:
      '{'                                   {
          CMDBlock = new parsercmd::cmdBLOCK();
