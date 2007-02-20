@@ -79,21 +79,22 @@ namespace laydata {
       bool           merge(atticList** dasao) {return _target.edit()->merge_selected(dasao);}
       unsigned int   numselected();
       DBbox          activeoverlap();
-      void           transferLayer(word dst) { _target.edit()->transferLayer(dst);}
-      void           transferLayer(laydata::selectList* slst, word dst) {_target.edit()->transferLayer(slst, dst);}
+      void           transferLayer(word dst);
+      void           transferLayer(laydata::selectList* slst, word dst);
       atticList*     changeref(shapeList*, std::string);
       //
       void           check_active();
       bool           checkValidRef(std::string);
       void           select_fromList(selectList* ss) {_target.edit()->select_fromList(ss, _target.viewprop());};
       void           unselect_fromList(selectList* ss) {_target.edit()->unselect_fromList(ss, _target.viewprop());};
+      quadTree*      targetlayer(word layno);
+      bool           securelaydef(word layno) {return _target.securelaydef( layno);}
       void           unselect_all()    const {_target.edit()->unselect_all(false);};
       selectList*    shapesel()        const {return _target.edit()->shapesel();};
       selectList*    copy_selist()     const {return _target.edit()->copy_selist();};
       unsigned int   numselected()     const {return _target.edit()->numselected();};
       void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
       void           report_selected(real DBscale) const { _target.edit()->report_selected(DBscale);};
-      quadTree*      targetlayer(word layno) {return _target.edit()->securelayer(layno);};
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       std::string    activecellname()  const {return _target.name();};
       void           assign_properties(layprop::ViewProperties& viewprop) {_target.init_viewprop(&viewprop);}
