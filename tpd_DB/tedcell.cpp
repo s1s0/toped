@@ -182,16 +182,27 @@ bool laydata::editobject::previous(const bool undo) {
    return true;
 }
 
-std::string laydata::editobject::name() const {
+bool laydata::editobject::securelaydef(word layno)
+{
+   if (layno > 0)
+      return _viewprop->addlayer( "_unknown_xx", layno);
+   else
+      return false;
+}
+
+std::string laydata::editobject::name() const
+{
    if (_activecell) return _activecell->name();
    else return std::string("");
 }
 
-laydata::editobject::~editobject() {
+laydata::editobject::~editobject()
+{
    if (_peditchain) delete _peditchain;
 }
+
 //-----------------------------------------------------------------------------
-// class tdtcell                       
+// class tdtcell
 //-----------------------------------------------------------------------------
 laydata::tdtcell::tdtcell(std::string name) {
    _name = name; _orphan = true;
@@ -680,6 +691,7 @@ bool laydata::tdtcell::addlist(laydata::tdtdesign* ATDB, atticList* nlst) {
                                    CL != nlst->end(); CL++) {
       // secure the target layer
       quadTree* wl = securelayer(CL->first);
+      ATDB->securelaydef(CL->first);
       for (shapeList::const_iterator DI = CL->second->begin();
                                     DI != CL->second->end(); DI++) {
          // add it to the corresponding layer

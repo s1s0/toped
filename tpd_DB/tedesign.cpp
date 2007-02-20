@@ -613,6 +613,10 @@ bool laydata::tdtdesign::group_selected(std::string name) {
                                                    CL != TBgroup->end(); CL++) {
       shapeList* lslct = CL->second;
       quadTree* wl = newcell->securelayer(CL->first);
+      // There is no point here to ensure that the layer definition exists.
+      // We are just transfering shapes from one structure to another.
+      // ATDB->securelaydef( CL->first );
+      securelaydef( CL->first );
       for(shapeList::const_iterator CI = lslct->begin(); 
                                                      CI != lslct->end(); CI++) {
          wl->put(*CI);
@@ -736,6 +740,24 @@ bool laydata::tdtdesign::collect_usedlays(std::string cellname, bool recursive, 
       return true;
    }
    else return false;
+}
+
+laydata::quadTree* laydata::tdtdesign::targetlayer(word layno)
+{
+   securelaydef( layno );
+   return _target.edit()->securelayer(layno);
+}
+
+void laydata::tdtdesign::transferLayer(word dst)
+{
+   _target.securelaydef( dst );
+   _target.edit()->transferLayer(dst);
+}
+
+void laydata::tdtdesign::transferLayer(laydata::selectList* slst, word dst)
+{
+   _target.securelaydef( dst );
+   _target.edit()->transferLayer(slst, dst);
 }
 
 laydata::tdtdesign::~tdtdesign() {

@@ -57,34 +57,35 @@ namespace laydata {
    */
    class editobject {
    public:
-                           editobject();
-                           editobject(tdtcellref*, tdtcell*, cellrefstack*, const CTM&);
-                          ~editobject();
-      void                 setcell(tdtcell*);
-      bool                 previous(const bool undo);
-      void                 push(tdtcellref*, tdtcell*, cellrefstack*, CTM);
-      bool                 pop();
-      bool                 top();
-      DBbox                overlap() const;
-      std::string          name() const;
-      tdtcell*             edit() const      {return _activecell;};
-      tdtcell*             view() const      {return _viewcell;};
-      bool                 checkedit() const {return _activecell != NULL;};
-      const CTM            rARTM() const     {return _ARTM.Reversed();};
-      const CTM            ARTM() const      {return _ARTM;};
-      bool                 iscell() const    {return _activeref == NULL;};
-      layprop::ViewProperties& viewprop() const {return *_viewprop;}
-      void                 init_viewprop(layprop::ViewProperties* viewprop) {_viewprop = viewprop;}
-      static editcellstack _editstack;    //! the stack of all previously edited (opened) cells
+                                 editobject();
+                                 editobject(tdtcellref*, tdtcell*, cellrefstack*, const CTM&);
+                                ~editobject();
+      void                       setcell(tdtcell*);
+      bool                       previous(const bool undo);
+      void                       push(tdtcellref*, tdtcell*, cellrefstack*, CTM);
+      bool                       pop();
+      bool                       top();
+      DBbox                      overlap() const;
+      std::string                name() const;
+      bool                       securelaydef(word layno);
+      tdtcell*                   edit() const      {return _activecell;};
+      tdtcell*                   view() const      {return _viewcell;};
+      bool                       checkedit() const {return _activecell != NULL;};
+      const CTM                  rARTM() const     {return _ARTM.Reversed();};
+      const CTM                  ARTM() const      {return _ARTM;};
+      bool                       iscell() const    {return _activeref == NULL;};
+      layprop::ViewProperties&   viewprop() const  {return *_viewprop;}
+      void                       init_viewprop(layprop::ViewProperties* viewprop) {_viewprop = viewprop;}
+      static editcellstack       _editstack;    //! the stack of all previously edited (opened) cells
    private:
-      void                 reset();
-      void                 unblockfill();
-      void                 blockfill();
-      tdtcell*             _activecell;   //! the curently active cell
-      tdtcell*             _viewcell;     //! current topview cell - if edit in place is active
-      tdtcellref*          _activeref;    //! current topview reference - if edit in place is active
-      cellrefstack*        _peditchain;   //! the path from _viewcell to the _activeref (_activecell)
-      CTM                  _ARTM;         //! active reference (cell) translation matrix
+      void                       reset();
+      void                       unblockfill();
+      void                       blockfill();
+      tdtcell*                   _activecell;   //! the curently active cell
+      tdtcell*                   _viewcell;     //! current topview cell - if edit in place is active
+      tdtcellref*                _activeref;    //! current topview reference - if edit in place is active
+      cellrefstack*              _peditchain;   //! the path from _viewcell to the _activeref (_activecell)
+      CTM                        _ARTM;         //! active reference (cell) translation matrix
       static layprop::ViewProperties* _viewprop;
    };
 
