@@ -1,10 +1,6 @@
 General
 =========
   * MEMORY LEAKAGE DEBUG!
-  * layer fill control - command and menu
-  * No visualization for addtext() (_tmpdata MouseStart requires additional parameters?)
-  * No visualization for addcell() (_tmpdata MouseStart requires additional parameters?)
-  * No visualization for move/copy cellaref
   * Online hierarhy tree maintanence still has troubles - especially when
     deleting the stuff from the top level. Check and debug!
   * Parser needs well defined error recovery policy
@@ -13,7 +9,6 @@ General
   * getpointlist(PARAMETERS) - general management of temporary images from TELL
     The end of the line here is to include online DRC checks as TELL callback
     functions
-  * lock/hide layer must deselect all shapes of that layer
   * There is no log possible for select/unselect from list operations. The
     reason is that we don't have a representation of layout list in TELL.
     Think about it. Pointetrs are unapropriate of course.
@@ -68,6 +63,11 @@ Seems OK
 
   done after rel.0.8
   --------------------
+  * lock/hide layer must deselect all shapes of that layer
+  * layer fill control - command and menu
+  * No visualization for addtext() (_tmpdata MouseStart requires additional parameters?)
+  * No visualization for addcell() (_tmpdata MouseStart requires additional parameters?)
+  * No visualization for move/copy cellaref
   * rotate and flip - visualizing the marker
   * Draw selected figures using separate property definition.
   * Initial (default) values of grids, step etc. When a new design is created and

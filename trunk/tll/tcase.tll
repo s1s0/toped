@@ -271,6 +271,17 @@ void modify_undo_bug()
 //   undo();
 }
 
+//int factoriel(int stop)
+//{
+//   if (stop > 1)
+//   {
+//      int next = stop - 1;
+//      int boza = factoriel(next);
+//      return (stop * boza);
+//   }
+//   return 1;
+//}
+
 
 newcell("Fcell");
 opencell("Fcell");
