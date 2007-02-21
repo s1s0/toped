@@ -329,12 +329,12 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
       else if ((console::op_flipX == drawprop.currentop()) || (console::op_flipY == drawprop.currentop()))
       {
          CTM newpos = _target.ARTM();
-//         tmp_stack.push_front(newpos);
+         tmp_stack.push_front(newpos);
          if (console::op_flipX == drawprop.currentop())
             newpos.FlipX(newp.y());
          else
             newpos.FlipY(newp.x());
-         tmp_stack.push_front(newpos * _target.rARTM());
+         tmp_stack.push_front(newpos);
       }
       else if (console::op_rotate == drawprop.currentop())
       {
