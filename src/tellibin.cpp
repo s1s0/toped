@@ -121,13 +121,13 @@ tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdREPORTLAY::execute() {
    bool recursive = getBoolValue();
    std::string cellname = getStringValue();
-   laydata::usedlayList ull;
+   laydata::ListOfWords ull;
    laydata::tdtdesign* ATDB = DATC->lockDB();
       bool success = ATDB->collect_usedlays(cellname, recursive, ull);
    DATC->unlockDB();
    telldata::ttlist* tllull = new telldata::ttlist(telldata::tn_int);
    if (success) {
-      for(laydata::usedlayList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+      for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
          tllull->add(new telldata::ttint(*CL));
       ull.clear();
    }
@@ -4027,7 +4027,8 @@ laydata::atticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
    return shapesel;
 }
 
-void tellstdfunc::UpdateLV() {
+void tellstdfunc::UpdateLV()
+{
    wxString ws;
    ws.sprintf(wxT("%d"),DATC->numselected());
    wxCommandEvent eventUPDATESEL(wxEVT_CNVSSTATUS);
@@ -4037,7 +4038,15 @@ void tellstdfunc::UpdateLV() {
    RefreshGL();
 }
 
-void tellstdfunc::RefreshGL() {
+void tellstdfunc::RefreshGL()
+{
+   if (!DATC->upLayers().empty())
+   {
+      const laydata::ListOfWords freshlays = DATC->upLayers();
+      for(laydata::ListOfWords::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+         browsers::layer_add(UNDEFLAYNAME, *CUL);
+      DATC->clearUnpublishedLayers();
+   }
    Toped->cmdline()->set_canvas_invalid(true);
 }
 
@@ -4056,15 +4065,15 @@ void tellstdfunc::gridON(byte No, bool status) {
 void tellstdfunc::updateLayerDefinitions(laydata::tdtdesign* ATDB, nameList& top_cells)
 {
    // get all the layers used in the design and define them using the default definition
-   laydata::usedlayList ull;
+   laydata::ListOfWords ull;
    for(nameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
       ATDB->collect_usedlays(*CTC, true, ull);
    std::unique(ull.begin(),ull.end());
-   for(laydata::usedlayList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
+   for(laydata::ListOfWords::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
    {
       if (0 == *CUL) continue;
-      if (DATC->addlayer("__undefined",*CUL))
-         browsers::layer_add("__undefined",*CUL);
+      if (DATC->addlayer(UNDEFLAYNAME, *CUL))
+         browsers::layer_add(UNDEFLAYNAME, *CUL);
    }
 }
 

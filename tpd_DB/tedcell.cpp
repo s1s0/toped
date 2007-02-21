@@ -185,7 +185,12 @@ bool laydata::editobject::previous(const bool undo) {
 bool laydata::editobject::securelaydef(word layno)
 {
    if (layno > 0)
-      return _viewprop->addlayer( "_unknown_xx", layno);
+   {
+      bool newlay = _viewprop->addlayer( UNDEFLAYNAME, layno);
+      if (newlay)
+         _viewprop->addUnpublishedLay(layno);
+      return newlay;
+   }
    else
       return false;
 }
@@ -1640,7 +1645,7 @@ void laydata::tdtcell::report_selected(real DBscale) const
    }
 }
 
-void laydata::tdtcell::collect_usedlays(const tdtdesign* ATDB, bool recursive, usedlayList& laylist) const{
+void laydata::tdtcell::collect_usedlays(const tdtdesign* ATDB, bool recursive, ListOfWords& laylist) const{
    // first call recursively the method on all children cells
    if (recursive)
       for (nameList::const_iterator CC = _children.begin(); CC != _children.end(); CC++)

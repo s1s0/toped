@@ -70,7 +70,6 @@ const byte                    layprop::DrawProperties::_defaultFill [128] = {
 };
 
 #define _GRID_LIMIT  5    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
-extern const wxEventType         wxEVT_SETTINGSMENU;
 
 layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
 {
@@ -684,6 +683,12 @@ bool layprop::ViewProperties::addlayer(std::string name, word layno)
    }
    return false;
 }
+
+void layprop::ViewProperties::addUnpublishedLay(word layno)
+{
+   _uplaylist.push_back(layno);
+}
+
 
 void layprop::ViewProperties::addline(std::string name, std::string col, word pattern,
                                        byte patscale, byte width) {

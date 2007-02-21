@@ -97,7 +97,7 @@ namespace laydata {
    typedef  std::map<std::string, tdtcell*>         cellList;
    typedef  cellList::const_iterator                refnamepair;
    typedef  std::deque<const tdtcellref*>           cellrefstack;
-   typedef  std::list<word>                         usedlayList;
+   typedef  std::list<word>                         ListOfWords;
    typedef  std::deque<editobject*>                 editcellstack;
 
    //==============================================================================

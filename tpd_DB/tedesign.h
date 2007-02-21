@@ -105,7 +105,7 @@ namespace laydata {
       const cellList& cells()          const {return _cells;};
       time_t         created()         const {return _created;}
       time_t         lastUpdated()     const {return _lastUpdated;}
-      bool           collect_usedlays(std::string, bool, usedlayList&) const;
+      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
       //
 //      const ACTIVE_OP tellop()         const {return _tellop;};
       bool           modified;

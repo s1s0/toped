@@ -723,7 +723,7 @@ void laydata::tdtdesign::check_active() {
    if (NULL == _target.edit()) throw EXPTNactive_cell();
 };
 
-bool laydata::tdtdesign::collect_usedlays(std::string cellname, bool recursive, usedlayList& laylist) const {
+bool laydata::tdtdesign::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const {
    tdtcell* targetcell;
    if ("" == cellname) targetcell = _target.edit();
    else                targetcell = getcellnamepair(cellname)->second;
@@ -733,7 +733,7 @@ bool laydata::tdtdesign::collect_usedlays(std::string cellname, bool recursive, 
       laylist.unique();
       std::ostringstream ost;
       ost << "used layers: {";
-      for(usedlayList::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
+      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
          ost << " " << *CL << " ";
       ost << "}";
       tell_log(console::MT_INFO, ost.str());
