@@ -1949,7 +1949,10 @@ DBbox laydata::tdtcellaref::clear_overlap() const {
 // class tdttext
 //-----------------------------------------------------------------------------
 laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata(), _overlap(TP()) {
-   _text = text; _translation = trans;
+   for (int charnum = 0; charnum < text.length(); charnum++)
+      if (!isprint(text[charnum])) text[charnum] = '?';
+   _text = text;
+   _translation = trans;
    float minx, miny, maxx, maxy;
    glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
    _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
