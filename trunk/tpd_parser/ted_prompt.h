@@ -83,7 +83,6 @@ namespace console {
       bool                    mouseIN_OK() const {return _mouseIN_OK;};
       word                    numpoints() const {return _numpoints;}
       const char*             lastCommand() const {return _cmd_history.rbegin()->c_str();}
-      void                    invalidateCanvas() {_canvas_invalid = true;}
       void                    set_canvas_invalid(bool val) { _canvas_invalid = val;}
       bool                    canvas_invalid() {return _canvas_invalid;}
    private:

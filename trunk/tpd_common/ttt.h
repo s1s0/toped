@@ -60,6 +60,7 @@ double round(double x);
 #define MAX_OVL_BOX  DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y) // maximum overlapping box
 #define DEFAULT_OVL_BOX DBbox(TP(0,0))
 #define DEFAULT_ZOOM_BOX DBbox(TP(-2000,-2000), TP(20000,20000))
+#define UNDEFLAYNAME "__undefined"
 
 //=============================================================================
 // General type declations (compatability)

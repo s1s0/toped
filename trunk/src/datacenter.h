@@ -139,9 +139,10 @@ public:
    const std::string          getColorName(word layno) {return _properties.drawprop().getColorName(layno);}
    const std::string          getFillName(word layno) {return _properties.drawprop().getFillName(layno);}
    const std::string          getLineName(word layno) {return _properties.drawprop().getLineName(layno);}
+   const laydata::ListOfWords upLayers() {return _properties.upLayers();}
+   void                       clearUnpublishedLayers() {_properties.clearUnpublishedLayers();}
 
-
-protected:
+   protected:
    laydata::tdtdesign*        _TEDDB;      // toped data base
    GDSin::GDSFile*            _GDSDB;      // GDS parsed data
    layprop::ViewProperties    _properties; //
