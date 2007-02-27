@@ -195,12 +195,15 @@ class TopedApp : public wxApp
 //      void           set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
    protected:
       bool           GetLogFileName();
+      bool           LoadFontFile(std::string);
       bool           CheckCrashLog();
       void           GetLogDir();
+      void           GetFontDir();
       void           FinishSessionLog();
       void           SaveIgnoredCrashLog();
       wxString       logFileName;
       wxString       tpdLogDir;
+      wxString       tpdFontDir;
 //      bool           _ignoreOnRecovery;
 };
 
@@ -246,6 +249,47 @@ void TopedApp::GetLogDir()
    delete logDIR;
 }
 
+void TopedApp::GetFontDir()
+{
+   wxFileName* fontsDIR = new wxFileName(wxT("$TPD_GLOBAL/"));
+   fontsDIR->Normalize();
+   wxString dirName = fontsDIR->GetPath();
+   wxString info;
+   bool undefined = dirName.Matches(wxT("*$TPD_GLOBAL*"));
+   if (!undefined)
+   {
+      fontsDIR->AppendDir(wxT("fonts"));
+      fontsDIR->Normalize();
+   }
+   if (fontsDIR->IsOk())
+   {
+      bool exist = fontsDIR->DirExists();
+      if (!exist)
+      {
+         if (undefined)
+            info = wxT("Environment variable $TPD_GLOBAL is not defined");
+         else
+         {
+            info << wxT("Directory ") << fontsDIR->GetFullPath() << wxT(" doesn't exists");
+         }
+         info << wxT(". Looking for fonts in the current directory \"");
+         info << wxGetCwd() << wxT("\"");
+         tell_log(console::MT_WARNING,info);
+         tpdFontDir = wxT("./fonts/");
+      }
+      else
+         tpdFontDir = fontsDIR->GetFullPath();
+   }
+   else
+   {
+      info = wxT("Can't evaluate properly \"$TPD_GLOBAL\" env. variable");
+      info << wxT(". Looking for fonts in the current directory \"");
+      tell_log(console::MT_WARNING,info);
+      tpdLogDir = wxT("./fonts/");
+   }
+   delete fontsDIR;
+}
+
 bool TopedApp::GetLogFileName()
 {
    bool status = false;
@@ -261,6 +305,36 @@ bool TopedApp::GetLogFileName()
    else status = false;
    delete logFN;
    return status;
+}
+
+bool TopedApp::LoadFontFile(std::string fontname)
+{
+   wxString fontFile;
+   fontFile << tpdFontDir << wxString(fontname.c_str(), wxConvUTF8) << wxT(".glf");
+   wxFileName fontFN(fontFile);
+   fontFN.Normalize();
+   if (!(fontFN.IsOk() && (-1 != glfLoadFont(fontFN.GetFullPath().mb_str()))))
+   {
+      wxString errmsg;
+      bool wbox_status = true;
+      errmsg << wxT("Font library \"") << fontFN.GetFullPath() << wxT("\" not found or corrupted. \n)") <<
+                wxT("Toped will be unstable.\n Continue?");
+      wxMessageDialog* dlg1 = new  wxMessageDialog(Toped,
+            errmsg,
+            wxT("Toped"),
+            wxYES_NO | wxICON_WARNING);
+      if (wxID_NO == dlg1->ShowModal())
+         wbox_status = false;
+      dlg1->Destroy();
+      if (wbox_status)
+      {
+         std::string info("Font library is not loaded. All text objects will not be properly processed");
+         tell_log(console::MT_ERROR,info);
+      }
+      return wbox_status;
+   }
+   else
+      return true;
 }
 
 bool TopedApp::CheckCrashLog()
@@ -339,22 +413,8 @@ bool TopedApp::OnInit() {
    SetTopWindow(Toped);
    Toped->Show(TRUE);
 
-   wxString fontFile = wxT("$TPD_LOCAL/fonts/arial1.glf");
-   wxFileName fontFN(fontFile);
-   fontFN.Normalize();
-   if (!(fontFN.IsOk() && (-1 != glfLoadFont(fontFN.GetFullPath().mb_str()))))
-   {
-      wxMessageDialog* dlg1 = new  wxMessageDialog(Toped,
-            wxT("Font library \"$TPD_LOCAL/fonts/arial1.glf\" not found or corrupted. \n Toped will be unstable.\n Continue?"),
-            wxT("Toped"),
-            wxYES_NO | wxICON_WARNING);
-      if (wxID_NO == dlg1->ShowModal())
-         return false;
-      dlg1->Destroy();
-      std::string info("Font library \"$TPD_LOCAL/fonts/arial1.glf\" is not loaded. All text objects will not be properly processed");
-      tell_log(console::MT_ERROR,info);
-   }
-   //
+   GetFontDir();
+   if (!LoadFontFile("arial1")) return FALSE;
 
    GetLogDir();
    if (!GetLogFileName()) return FALSE;
