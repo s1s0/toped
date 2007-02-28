@@ -2275,12 +2275,12 @@ void laydata::valid_poly::angles()
       {
          cp1 = cp2; cp2++;
       }
-      if (_plist.end() == cp1||_plist.end() == cp2)
+      if (_plist.end() == cp2)
       {
          cp2 = _plist.begin();
          loopCompleted = true;
       }
-      else if (_plist.end() == cp1)
+      if (_plist.end() == cp1)
          cp1--;
       if (loopCompleted) exitcnt++;
    } while((exitcnt < 2) && (_plist.size() > 2));
