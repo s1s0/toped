@@ -2,15 +2,14 @@ Installing Toped for Microsoft Windows
 
 Current version of Toped develops only on Windows XP. On other versions of Windows Toped also should be run but it's not tested yet.
 To compile Toped for Windows you need next tools and external libraries:
-1. Visual C++ 6.0
-2. STLPort 4.6
-3 wxWidgets 2.6.2 (compile it with support OpenGL and regexp)
-4 Glut libraries and dll 3.6
-5 Bison 1.8.7.5
-6 Flex 2.5
+1 Visual Studio 2005
+2 wxWidgets 2.8 (compile it with support OpenGL and regexp)
+3 Glut libraries and dll 3.6
+4 Bison 1.8.7.5
+5 Flex 2.5
 
-Open src\toped.dsw into Toped directory and use Batch Build to compile all debug libraries projects.
-Then use Built toped.exe in Buit Menu`
+Open src\toped.sln into Toped\src directory and use 
+Build Solution in Build to compile all debug libraries projects.
 Run and enjoy it!
 
 
