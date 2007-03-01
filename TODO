@@ -1,3 +1,32 @@
+Release 0.85
+==============
+
+* left/right/up/down is changing the scale of the canvas.
+
+Documentation
+-> new type
+   *bind          (bnd_type)
+-> new functions
+   *psexport      (PSexportTOP)
+   *changelayer   (stdCHANGELAY)
+   *changeref     (stdCHANGEREF)
+   *addruler      (stdDISTANCE)
+   *addruler      (stdDISTANCE_D)
+   *clearrulers   (stdCLEARRULERS)
+-> added overloaded functions (dialog related)
+   *addtext       (stdADDTEXT_D)
+   *cellref       (stdCELLREF_D)
+   *cellaref      (stdCELLAREF_D)
+   *rotate        (stdROTATESEL_D)
+   *flipX         (stdFLIPXSEL_D)
+   *flipY         (stdFLIPYSEL_D)
+-> new property related
+   *defineline    (stdLINEDEF)
+   *propsave      (stdPROPSAVE)
+-> changed (property related)
+   *layprop       (stdLAYPROP)      
+
+
 General
 =========
   * MEMORY LEAKAGE DEBUG!
