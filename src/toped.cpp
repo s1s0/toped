@@ -471,6 +471,8 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenuSeparator("Cell");
    _resourceCenter->appendMenu("&Cell/Group Cell",    "",  &tui::TopedFrame::OnCellGroup, "Group selected shapes in a cell" );
    _resourceCenter->appendMenu("&Cell/Unroup Cell",   "",  &tui::TopedFrame::OnCellUngroup, "Ungroup selected cell references" );
+   _resourceCenter->appendMenuSeparator("Cell");
+   _resourceCenter->appendMenu("&Cell/Change Reference","",&tui::TopedFrame::OnChangeRef, "Replace a cell reference" );
 
    //---------------------------------------------------------------------------
    // menuBar entry Draw
@@ -538,6 +540,8 @@ void tui::TopedFrame::initMenuBar() {
    */
    _resourceCenter->appendMenu("&Other/Add Ruler"   , "", &tui::TopedFrame::OnAddRuler, "Add new ruler" );
    _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
+   _resourceCenter->appendMenuSeparator("Other");
+   _resourceCenter->appendMenu("&Other/Change Layer","",&tui::TopedFrame::OnChangeLayer, "Translate the objects to another layer" );
    
    _resourceCenter->appendMenu("&Help/About", "", &tui::TopedFrame::OnAbout, "About TOPED" );
    
@@ -1114,7 +1118,7 @@ void tui::TopedFrame::OnDrawWire(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getSize* dlg = NULL;
    try {
-      dlg = new tui::getSize(this, -1, wxT("Wire width"), pos);
+      dlg = new tui::getSize(this, -1, wxT("Wire width"), pos, DATC->step() ,3);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -1295,6 +1299,39 @@ void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
          _cmdline->parseCommand(ost);
       }
    }
+}
+
+void tui::TopedFrame::OnChangeRef( wxCommandEvent& WXUNUSED( event ))
+{
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getCellRef* dlg = NULL;
+   try {
+      dlg = new tui::getCellRef(this, -1, wxT("Change Cell Reference"), pos, wxT(""));
+   }
+   catch (EXPTN) {delete dlg;return;}   
+   if ( dlg->ShowModal() == wxID_OK ) {
+      wxString ost;
+      ost << wxT("changeref(\"") << dlg->get_selectedcell() << wxT("\");");
+      _cmdline->parseCommand(ost);
+   }
+   delete dlg;
+}
+
+void tui::TopedFrame::OnChangeLayer( wxCommandEvent& WXUNUSED( event ))
+{
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getSize* dlg = NULL;
+   try {
+      dlg = new tui::getSize(this, -1, wxT("Transfer to layer"), pos, 1, 0);
+   }
+   catch (EXPTN) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK ) {
+      wxString ost; ost << wxT("changelayer(")<<dlg->value()<<wxT(");");
+      _cmdline->parseCommand(ost);
+   }
+   delete dlg;
 }
 
 void tui::TopedFrame::OnMenu(wxCommandEvent& event)
