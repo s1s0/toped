@@ -160,6 +160,7 @@ namespace tui {
       void   OnCellARef_M(wxCommandEvent&);
       void   OnCellGroup(wxCommandEvent&);
       void OnCellUngroup(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("ungroup();"));}
+      void   OnChangeRef(wxCommandEvent& WXUNUSED(event));
 
       void        OnUndo(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("undo();"));}
       void      OnzoomIn(wxCommandEvent& WXUNUSED(event));// {_laycanvas->zoomIn();}
@@ -198,6 +199,8 @@ namespace tui {
       void  OnGridDefine(wxCommandEvent&);
       void  OnAddRuler(wxCommandEvent& WXUNUSED(event))    {_cmdline->parseCommand(wxT("addruler();") );}
       void  OnClearRulers(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("clearrulers();") );}
+      void  OnChangeLayer(wxCommandEvent& WXUNUSED(event));
+
       //
       void               OnAbort(wxCommandEvent&);
       void  OnUpdateSettingsMenu(wxCommandEvent&);
