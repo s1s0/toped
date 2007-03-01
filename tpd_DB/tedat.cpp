@@ -2268,7 +2268,9 @@ void laydata::valid_poly::angles()
       if (eraseP1)
       {
          cp1 = _plist.erase(cp1);
-			cp2 = cp1; cp2++;
+			cp2 = cp1;
+			if (_plist.end() != cp1) cp2++;
+
          _status |= laydata::shp_ident;
       }
       else
