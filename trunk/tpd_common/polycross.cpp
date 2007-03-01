@@ -266,9 +266,9 @@ bool polycross::SortLine::operator() (CPoint* cp1, CPoint* cp2) {
    assert(direction != 0);
    int ord = xyorder(cp1->cp(), cp2->cp());
    if (direction > 0)
-      return (ord >= 0);
+      return (ord > 0);
    else
-      return (ord <= 0);
+      return (ord < 0);
 }
 
 //==============================================================================
