@@ -1,0 +1,2 @@
+toped16x16 ICON "../ui/toped_16x16.ico"
+#include "wx/msw/wx.rc"
