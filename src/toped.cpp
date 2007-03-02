@@ -274,6 +274,9 @@ END_EVENT_TABLE()
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
 {
+#if WIN32
+	SetIcon(wxICON(toped16x16));
+#endif
    initView();
 //   initToolBar();
 //   CreateStatusBar();
