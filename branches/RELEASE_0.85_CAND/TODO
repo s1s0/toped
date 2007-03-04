@@ -1,13 +1,24 @@
 Release 0.85
 ==============
 
+* clear the rulers when a new cell is opened
+* Clean-up tll files
+
+* propsave is not saving line properties.
 * left/right/up/down is changing the scale of the canvas.
+* Import GDS with empty Toped
+
+main branch
+* version.h
 
 Documentation
+   *psexport      (PSexportTOP)
+
+
 -> new type
    *bind          (bnd_type)
 -> new functions
-   *psexport      (PSexportTOP)
+
    *changelayer   (stdCHANGELAY)
    *changeref     (stdCHANGEREF)
    *addruler      (stdDISTANCE)
@@ -20,11 +31,11 @@ Documentation
    *rotate        (stdROTATESEL_D)
    *flipX         (stdFLIPXSEL_D)
    *flipY         (stdFLIPYSEL_D)
+-> changed (property related)
+   *layprop       (stdLAYPROP)      
 -> new property related
    *defineline    (stdLINEDEF)
    *propsave      (stdPROPSAVE)
--> changed (property related)
-   *layprop       (stdLAYPROP)      
 
 
 General

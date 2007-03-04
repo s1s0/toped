@@ -164,15 +164,6 @@ void cut_test3B() {
    move({0,0},{15,0});
 }
    
-void cut_test4B() {
-   // bowtie
-   newcell("cut_test4B");
-   opencell("cut_test4B");
-   addpoly({{4,10},{5,10},{8,7},{11,10},{12,10},{12,4},{11,4},{8,7},{5,4},{4,4}},2);
-   select({5.5,6.5});
-//   polycut({{3,7},{13,7},{13,2.5},{3,2.5}});
-}
-
 void merge_test1() {
    newcell("merge_test1");
    opencell("merge_test1");
@@ -356,7 +347,9 @@ void edge_cut5()
    unselect_all();
 }
 
-void polycrash() {
+void edge_cut6() {
+   newcell("edge_cut6");
+   opencell("edge_cut6");
    addpoly( { { 0 , 36 } , { 9 , 36 } , { 9 , 28 } , { 4 , 28 } , { 0 , 32 } }, 2);
    select({6.50,30.50});
    addpoly({ { 0 , 28.5 } , { 3.5 , 32 } , { 0 , 32 } , { -1.5 , 30.5 } }, 4);
@@ -430,6 +423,7 @@ void all_cut()
    edge_cut3();
    edge_cut4();
    edge_cut5();
+   edge_cut6();   
    zoomall();
 }
 
@@ -489,36 +483,11 @@ void bug3()
 //   polycut( { { 2.5 , 10 } , { 5.5 , 10 } , { 5.5 , 8.5 } , { 2 , 8.5 } , { 2 , 7 } , { 1.5 , 7 } , { 1.5 , 10 } });
 }
 
-//cut_test3A();
-//
-//all_tests();
-
-//opencell("top");
-//addpoly({{-9.5,21.5},{-9.5,33},{15,33},{15,21.5},{10.5,21.5},{10.5,28},{5.5,28},{5.5,21.5},{0,21.5},{0,28},{-6,28},{-6,21.5}},2);
-
-//unselect_all();
-//zoom(({70,-19},{94,-40.5}));
-// End of cut test
-
-//cellref("cell_1",{0,0},  0,false,1);
-//cellref("cell_1",{0,0}, 90,false,1);
-//cellref("cell_1",{0,0},180,false,1);
-//cellref("cell_1",{0,0},270,false,1);
-//OK
-//cellref("cell_1",{  0,),  0,false,1);
-//cellref("cell_1",{ 60,),  0,false,1);
-//cellref("cell_1",{120,0},  0,false,1);
-//cellref("cell_1",{180,0},  0,false,1);
-//fail
-//cellref("cell_1",{  100, 100},  0,false,1);
-//cellref("cell_1",{  0,20},  0, true,1);
-//cellref("cell_1",{ 60, 0},  0,false,1);
-//cellref("cell_1",{ 60,20},  0, true,1);
-
-//select({{-8,-3},{54,104}});
-//copy({0,0},{0,110});
-//unselect_all();
-//select({{-8,-3},{54,104}});
-//delete();
-//zoomall();
-
+void bug4() {
+   // bowtie
+   newcell("bug4");
+   opencell("bug4");
+   addpoly({{4,10},{5,10},{8,7},{11,10},{12,10},{12,4},{11,4},{8,7},{5,4},{4,4}},2);
+   select({5.5,6.5});
+//   polycut({{3,7},{13,7},{13,2.5},{3,2.5}});
+}
