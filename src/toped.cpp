@@ -680,7 +680,7 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
-   wxMessageBox( wxT( "Toped ver. 0.8.x\n\nOpen source IC layout editor \n(c) 2001-2006 Toped developers\nwww.toped.org.uk" ),
+   wxMessageBox( wxT( "Toped ver. 0.8.5\n\nOpen source IC layout editor \n(c) 2001-2006 Toped developers\nwww.toped.org.uk" ),
                   wxT( "About Toped" ), wxOK | wxICON_INFORMATION, this );
 }
 
