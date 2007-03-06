@@ -51,9 +51,6 @@ Section "toped"
   File "msvcp80d.dll"
   File "msvcr80d.dll"
   File "opengl32.dll"
-  File "seed.tll"
-  File "laylogic.tll"
-  File "tcase.tll"
   File "toped_example.bat"
 
   ;Read current user directory
@@ -61,7 +58,13 @@ Section "toped"
   ;ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Personal"
   StrCpy $LocalDir "$R0\toped"
   CreateDirectory "$LocalDir\log"
-  
+
+  ;Change installation directory to $INSTDIR\font
+  SetOutPath $INSTDIR\tll
+  File "seed.tll"
+  File "laylogic.tll"
+  File "tcase.tll"
+
   ;Change installation directory to $INSTDIR\font
   SetOutPath $INSTDIR\fonts
   File "fonts\arial1.glf"
@@ -122,10 +125,10 @@ Section "Uninstall"
   Delete $INSTDIR\msvcp80d.dll
   Delete $INSTDIR\msvcr80d.dll
   Delete $INSTDIR\opengl32.dll
-  Delete $INSTDIR\seed.tll
-  Delete $INSTDIR\laylogic.tll
-  Delete $INSTDIR\tcase.tll
   Delete $INSTDIR\toped_example.bat
+  Delete $INSTDIR\tll\seed.tll
+  Delete $INSTDIR\tll\laylogic.tll
+  Delete $INSTDIR\tll\tcase.tll
   Delete $INSTDIR\fonts\arial1.glf
   Delete $INSTDIR\fonts\courier1.glf
   Delete $INSTDIR\fonts\crystal1.glf
@@ -148,7 +151,7 @@ Section "Uninstall"
   Delete $INSTDIR\*.*
   
   RMDir $INSTDIR\log
-
+  RMDir $INSTDIR\tll
   RMDir $INSTDIR\fonts
   Delete $INSTDIR\uninstall.exe
 
