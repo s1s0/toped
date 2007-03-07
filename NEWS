@@ -1,18 +1,24 @@
 Toped release 0.85 changes and updates
 =======================================
-
+* PS output
 
 Graphics and database handling
 --------------------------------
 * glut library is not used anymore
 * new fonts introduced with much better look (glf library (c)Roman Podobedov)
 * drawing procedures optimized further to minimize color/pattern changes
+* Rulers
+
+Updates in the TELL script
+---------------------------
+* Shift operators
 
 User interface & dialog boxes
 -------------------------------
 * Fill pattern definition
 * Color definition
 * Layer definition
+* Status line with thread status indication
 
 --------------------------------------------------------------------------------
 

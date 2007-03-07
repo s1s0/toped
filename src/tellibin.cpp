@@ -963,14 +963,18 @@ void tellstdfunc::stdOPENCELL::undo() {
    wxPostEvent(Toped->view(), eventZOOM);
 }
 
-int tellstdfunc::stdOPENCELL::execute() {
+int tellstdfunc::stdOPENCELL::execute()
+{
    std::string nm = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       std::string oldnm = ATDB->activecellname();
       telldata::ttlist* selected = NULL;
       if ("" != oldnm)  selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->opencell(nm)) {
-         if (oldnm != "") {
+      if (ATDB->opencell(nm))
+      {
+         DATC->clearRulers();
+         if (oldnm != "")
+         {
             UNDOcmdQ.push_front(this);
             UNDOPstack.push_front(selected);
          }
@@ -984,7 +988,8 @@ int tellstdfunc::stdOPENCELL::execute() {
          wxPostEvent(Toped->view(), eventZOOM);
          LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
       }
-      else {
+      else
+      {
 /*-!-*/  DATC->unlockDB();
          std::string news = "cell \"";
          news += nm; news += "\" doesn't exists";
