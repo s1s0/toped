@@ -287,6 +287,8 @@ int parsercmd::cmdSHIFTBOX4::execute() {
    TELL_DEBUG(cmdSHIFTBOX4);
    telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   bool swapx, swapy;
+   w->normalize(swapx, swapy);
    telldata::ttwnd* r;
    if  (1 == _signX) 
       if (1 == _signY)
@@ -302,7 +304,7 @@ int parsercmd::cmdSHIFTBOX4::execute() {
       else
          r = new telldata::ttwnd(w->p1().x() - p->x() , w->p1().y() - p->y() ,
                                  w->p2().x()          , w->p2().y()           );
-
+   r->denormalize(swapx, swapy);
    OPstack.push(r);
    delete p; delete w;
    return EXEC_NEXT;

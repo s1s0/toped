@@ -1,18 +1,9 @@
 Release 0.85
 ==============
 
-* clear the rulers when a new cell is opened
-* Clean-up tll files
-
-* propsave is not saving line properties.
-* left/right/up/down is changing the scale of the canvas.
-* Import GDS with empty Toped
-
-main branch
-* version.h
-
 Documentation
-   *psexport      (PSexportTOP)
+   *psexport  (PSexportTOP)
+   *shift operators
 
 
 -> new type

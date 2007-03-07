@@ -229,7 +229,7 @@ void shifttest() {
    point bSE = a \| b;
    point bNE = a /| b;
    point bNW = a |\ b;
-   addpoly({bSW,bSE,bNE,bNW},6);
+   addpoly({bSW,bSE,bNE,bNW},5);
    
    box c = {{15,10},{15,10}};
    box cSW = c |/ 1;
