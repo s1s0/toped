@@ -53,6 +53,9 @@ Section "toped"
   File "opengl32.dll"
   File "toped_example.bat"
 
+  SetOutPath $INSTDIR\tll
+  File "seed.tll"
+
   ;Read current user directory
   ReadRegStr $R0 HKCU "Environment" "HOME"
   ;ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Personal"
@@ -60,7 +63,7 @@ Section "toped"
   CreateDirectory "$LocalDir\log"
 
   ;Change installation directory to $INSTDIR\font
-  SetOutPath $INSTDIR\tll
+  SetOutPath $LocalDir\tll
   File "seed.tll"
   File "laylogic.tll"
   File "tcase.tll"
@@ -126,9 +129,9 @@ Section "Uninstall"
   Delete $INSTDIR\msvcr80d.dll
   Delete $INSTDIR\opengl32.dll
   Delete $INSTDIR\toped_example.bat
+
   Delete $INSTDIR\tll\seed.tll
-  Delete $INSTDIR\tll\laylogic.tll
-  Delete $INSTDIR\tll\tcase.tll
+
   Delete $INSTDIR\fonts\arial1.glf
   Delete $INSTDIR\fonts\courier1.glf
   Delete $INSTDIR\fonts\crystal1.glf
@@ -143,6 +146,10 @@ Section "Uninstall"
   StrCpy $LocalDir "$R0\toped"
   Delete "$LocalDir\log\*.*"
   RMDir "$LocalDir\log"
+  Delete $LocalDir\tll\seed.tll
+  Delete $LocalDir\tll\laylogic.tll
+  Delete $LocalDir\tll\tcase.tll
+  RmDir $LocalDir\tll
   RMDir $LocalDir
 
   ;Sometimes log creates in installation directory
