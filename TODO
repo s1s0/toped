@@ -1,34 +1,3 @@
-Release 0.85
-==============
-
-Documentation
-   *psexport  (PSexportTOP)
-   *shift operators
-
-
--> new type
-   *bind          (bnd_type)
--> new functions
-
-   *changelayer   (stdCHANGELAY)
-   *changeref     (stdCHANGEREF)
-   *addruler      (stdDISTANCE)
-   *addruler      (stdDISTANCE_D)
-   *clearrulers   (stdCLEARRULERS)
--> added overloaded functions (dialog related)
-   *addtext       (stdADDTEXT_D)
-   *cellref       (stdCELLREF_D)
-   *cellaref      (stdCELLAREF_D)
-   *rotate        (stdROTATESEL_D)
-   *flipX         (stdFLIPXSEL_D)
-   *flipY         (stdFLIPYSEL_D)
--> changed (property related)
-   *layprop       (stdLAYPROP)      
--> new property related
-   *defineline    (stdLINEDEF)
-   *propsave      (stdPROPSAVE)
-
-
 General
 =========
   * MEMORY LEAKAGE DEBUG!
