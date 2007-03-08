@@ -1,17 +1,24 @@
 Toped release 0.85 changes and updates
 =======================================
 * PS output
+* change layer
+* change cell reference
+* Rulers
+* Property save from the editor
 
 Graphics and database handling
 --------------------------------
 * glut library is not used anymore
 * new fonts introduced with much better look (glf library (c)Roman Podobedov)
 * drawing procedures optimized further to minimize color/pattern changes
-* Rulers
+* All edit operations have now interactive versions and proper visualization
+* Line style definitions. Selected objects and edges now appear in a user 
+  defined line style
 
 Updates in the TELL script
 ---------------------------
 * Shift operators
+* bind type introduced
 
 User interface & dialog boxes
 -------------------------------
@@ -19,7 +26,6 @@ User interface & dialog boxes
 * Color definition
 * Layer definition
 * Status line with thread status indication
-
 --------------------------------------------------------------------------------
 
 Release 0.8.2
