@@ -52,9 +52,13 @@ Section "toped"
   File "msvcr80d.dll"
   File "opengl32.dll"
   File "toped_example.bat"
+  File "news.txt"
+  File "readme.txt"
 
   SetOutPath $INSTDIR\tll
   File "seed.tll"
+  File "laylogic.tll"
+  File "tcase.tll"
 
   ;Read current user directory
   ReadRegStr $R0 HKCU "Environment" "HOME"
@@ -63,10 +67,10 @@ Section "toped"
   CreateDirectory "$LocalDir\log"
 
   ;Change installation directory to $INSTDIR\font
-  SetOutPath $LocalDir\tll
-  File "seed.tll"
-  File "laylogic.tll"
-  File "tcase.tll"
+  ;SetOutPath $LocalDir\tll
+  ;File "seed.tll"
+  ;File "laylogic.tll"
+  ;File "tcase.tll"
 
   ;Change installation directory to $INSTDIR\font
   SetOutPath $INSTDIR\fonts
@@ -129,8 +133,12 @@ Section "Uninstall"
   Delete $INSTDIR\msvcr80d.dll
   Delete $INSTDIR\opengl32.dll
   Delete $INSTDIR\toped_example.bat
+  Delete $INSTDIR\news.txt
+  Delete $INSTDIR\readme.txt
 
   Delete $INSTDIR\tll\seed.tll
+  Delete $INSTDIR\tll\laylogic.tll
+  Delete $INSTDIR\tll\tcase.tll
 
   Delete $INSTDIR\fonts\arial1.glf
   Delete $INSTDIR\fonts\courier1.glf
@@ -146,10 +154,10 @@ Section "Uninstall"
   StrCpy $LocalDir "$R0\toped"
   Delete "$LocalDir\log\*.*"
   RMDir "$LocalDir\log"
-  Delete $LocalDir\tll\seed.tll
-  Delete $LocalDir\tll\laylogic.tll
-  Delete $LocalDir\tll\tcase.tll
-  RmDir $LocalDir\tll
+  ;Delete $LocalDir\tll\seed.tll
+  ;Delete $LocalDir\tll\laylogic.tll
+  ;Delete $LocalDir\tll\tcase.tll
+  ;RmDir $LocalDir\tll
   RMDir $LocalDir
 
   ;Sometimes log creates in installation directory
