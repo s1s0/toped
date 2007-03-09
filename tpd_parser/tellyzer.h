@@ -459,6 +459,7 @@ namespace  parsercmd {
 
    bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);
    void              ClearArgumentList(argumentLIST*);
+   
 }
 
 namespace console{

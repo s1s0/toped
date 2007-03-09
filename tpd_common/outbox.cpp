@@ -63,7 +63,7 @@ BEGIN_EVENT_TABLE( console::ted_log, wxTextCtrl )
 END_EVENT_TABLE()
 
 console::ted_log::ted_log(wxWindow *parent): wxTextCtrl( parent, -1, wxT(""),
-   wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER)
+   wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER|wxTE_RICH)
 {
    cmd_mark = wxT("=> ");
    gui_mark = wxT(">> ");

@@ -213,6 +213,7 @@ namespace layprop {
       void                       savePatterns(FILE*) const;
       void                       saveColors(FILE*) const;
       void                       saveLayers(FILE*) const;
+      void                       saveLines(FILE*) const;
     
    private:                       
       bool                       _blockfill;

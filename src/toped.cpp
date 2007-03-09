@@ -274,6 +274,9 @@ END_EVENT_TABLE()
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
 {
+#if WIN32
+	SetIcon(wxICON(toped16x16));
+#endif
    initView();
 //   initToolBar();
 //   CreateStatusBar();
@@ -677,7 +680,7 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
-   wxMessageBox( wxT( "Toped ver. 0.8.x\n\nOpen source IC layout editor \n(c) 2001-2006 Toped developers\nwww.toped.org.uk" ),
+   wxMessageBox( wxT( "Toped ver. 0.8.5\n\nOpen source IC layout editor \n(c) 2001-2007 Toped developers\nwww.toped.org.uk" ),
                   wxT( "About Toped" ), wxOK | wxICON_INFORMATION, this );
 }
 
@@ -953,7 +956,11 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
 {
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), 
+   // Here - try a hollow lock/unlock the database just to check that it exists
+   try {DATC->lockDB(false);}
+   catch (EXPTN) {return;}
+   DATC->unlockDB();
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
                      wxT("Stream files |*.sf;*.gds"),
                      tpdfOPEN);
    if (wxID_OK != dlg2.ShowModal()) 

@@ -527,6 +527,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\toped.rc"
+				>
+			</File>
+			<File
 				RelativePath="wx\msw\watch1.cur"
 				>
 			</File>
