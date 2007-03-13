@@ -623,7 +623,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 	}
 	else
 	{
-		_colors   = new wxComboBox( this, COLOR_COMBO, "" , wxDefaultPosition, wxDefaultSize,NULL, wxCB_READONLY | wxCB_SORT);
+		_colors   = new wxComboBox( this, COLOR_COMBO, wxT("") , wxDefaultPosition, wxDefaultSize);
 	}
 		
 	all_names.clear();
@@ -640,7 +640,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 	}
 	else
 	{
-		_fills   = new wxComboBox( this, FILL_COMBO, "", wxDefaultPosition, wxDefaultSize, NULL,wxCB_READONLY | wxCB_SORT);
+		_fills   = new wxComboBox( this, FILL_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
 	}
 	
 	all_names.clear();
@@ -659,7 +659,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 	}
 	else
 	{
-		_lines   = new wxComboBox( this, LINE_COMBO, "", wxDefaultPosition, wxDefaultSize, NULL ,wxCB_READONLY | wxCB_SORT);
+		_lines   = new wxComboBox( this, LINE_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
 	}
    // The window layout
    wxBoxSizer *line1_sizer = new wxBoxSizer( wxHORIZONTAL );
