@@ -409,6 +409,35 @@ const telldata::ttwnd& telldata::ttwnd::operator = (const ttwnd& a) {
    return *this;
 }
 
+void telldata::ttwnd::normalize(bool& swapx, bool& swapy)
+{
+   real swap;
+   swapx = swapy = false;
+   if (p1().x() > p2().x())
+   {
+      swap = p1().x(); _p1->set_x(p2().x()); _p2->set_x(swap);
+      swapx = true;
+   }
+   if (p1().y() > p2().y())
+   {
+      swap = p1().y(); _p1->set_y(p2().y()); _p2->set_y(swap);
+      swapy = true;
+   }
+}
+
+void telldata::ttwnd::denormalize(bool swapx, bool swapy)
+{
+   real swap;
+   if (swapx)
+   {
+      swap = p1().x(); _p1->set_x(p2().x()); _p2->set_x(swap);
+   }
+   if (swapy)
+   {
+      swap = p1().y(); _p1->set_y(p2().y()); _p2->set_y(swap);
+   }
+}
+
 //=============================================================================
 telldata::ttbnd::ttbnd( real p_x, real p_y, real rot, bool flip, real scale) :
       user_struct(tn_bnd),

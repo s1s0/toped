@@ -272,9 +272,11 @@ namespace telldata {
                            tell_var*            selfcopy() const    {return new ttpnt(*this);}
       void                 echo(std::string&, real);
       void                 assign(tell_var*);
-      real                 x() const           {return _x->value();}
-      real                 y() const           {return _y->value();}
+      const real           x() const           {return _x->value();}
+      const real           y() const           {return _y->value();}
       void                 scale(real sf)      {_x->_value *= sf;_y->_value *= sf;};
+      void                 set_x(const real x) {_x->_value = x; }
+      void                 set_y(const real y) {_y->_value = y; }
       const ttpnt&         operator = (const ttpnt&);
    private:
       ttreal*              _x;
@@ -298,6 +300,8 @@ namespace telldata {
       const ttpnt&         p2() const          {return *_p2;};
       void                 scale(real sf)      {_p1->scale(sf); _p1->scale(sf);};
       const ttwnd&         operator = (const ttwnd&);
+      void                 normalize(bool&, bool&);
+      void                 denormalize(bool, bool);
    private:
       ttpnt*               _p1;
       ttpnt*               _p2;

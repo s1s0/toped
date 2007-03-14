@@ -1,3 +1,75 @@
+Toped release 0.85 changes and updates
+=======================================
+* PS output
+* change layer
+* change cell reference
+* Rulers
+* Property save from the editor
+
+Graphics and database handling
+--------------------------------
+* glut library is not used anymore
+* new fonts introduced with much better look (glf library (c)Roman Podobedov)
+* drawing procedures optimized further to minimize color/pattern changes
+* All edit operations have now interactive versions and proper visualization
+* Line style definitions. Selected objects and edges now appear in a user 
+  defined line style
+
+Updates in the TELL script
+---------------------------
+* Shift operators
+* bind type introduced
+
+User interface & dialog boxes
+-------------------------------
+* Fill pattern definition
+* Color definition
+* Layer definition
+* Status line with thread status indication
+--------------------------------------------------------------------------------
+
+Release 0.8.2
+---------------
+Structural changes to fix the problems with libraries, reported by ldd tool. This was
+reported during the package checks for fedora extras. Thanks to Chitlesh GOORAH and
+Mamoru Tasaka.
+No functional updates or bugfixes
+--------------------------------------------------------------------------------
+
+Release 0.8.1
+---------------
+This release contains only fixes of some critical (and not so critical) bugs in release 0.8.
+
+- syntax problems in two header files - not reported by previous revision of gcc
+
+- configure.ac rearranged to fix the false error reports of the configure script
+
+- bug #8596 - missing grid definition during the initialization - this was causing
+  windows version to crash. Thanks to Tim Blankenship
+
+- bug #8595 - zero length wire imported from a GDS file was causing toped to crash.
+  Thanks to Stefan Thiede, who submitted also a nice GDS test file
+
+- troubles with ATI graphic cards and fglrx driver. This problem is rather patched.
+  On some machines with fglrx driver, the entire X hangs intermittently, when openGL
+  is active. It is most likely a problem outside toped, nevertheless - it has to be
+  investigated and fixed properly (or reported to ATI)
+
+- glut library requires glutInit in order to handle texts (linux). This wasn't the case
+  until recently. Toped exits immediately (without any error messages) when the first
+  text object has to be processed. This problem is also temporarily patched. glut library
+  will not be used in the next release.
+
+- uninitialized variables causing troubles with saveas if the target file is new.
+
+- bug #8634 - improper behavior when a box is partially unselected.
+
+- grid/text/cell status in the menu is now properly synchronized with the actual status
+  of the layout canvas
+
+- minimum number of the points in a polygon - reduced to 3
+--------------------------------------------------------------------------------
+
 Toped release 0.8 changes and updates
 =======================================
 
