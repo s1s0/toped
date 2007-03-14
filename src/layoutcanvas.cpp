@@ -697,7 +697,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    double H = Hcl;
    double w = abs(box->p1().x() - box->p2().x());
    double h = abs(box->p1().y() - box->p2().y());
-   double sc = 1.1 * ((W/H < w/h) ? w/W : h/H);
+   double sc =  ((W/H < w/h) ? w/W : h/H);
    double tx = ((box->p1().x() + box->p2().x()) - W*sc) / 2;
    double ty = ((box->p1().y() + box->p2().y()) - H*sc) / 2;
    _LayCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);

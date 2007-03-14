@@ -21,7 +21,7 @@
 //        $Author: skr $
 //===========================================================================
 
-#include "$TPD_LOCAL/tll/seed.tll"
+#include "$TPD_GLOBAL/tll/seed.tll"
 // Some DRC rules defined as global variables
 real _actOverCont = 1.5;
 real _mincont = 2;
@@ -43,17 +43,17 @@ box MOStran(point bound, real W, real L) {
    point gateB = {bound.x + (activeW - L)/2, bound.y -_polyOverActive};
    addbox(gateB, L,  W + 2*_polyOverActive,4); // as above
    // add contacts...
-   point contBL = bound -| _actOverCont;
-   point contBR = bound |- _actOverCont;
+   point contBL = bound /| _actOverCont;
+   point contBR = bound |\ _actOverCont;
    contBR = {contBR.x + activeW, contBR.y};
-   point metlBL = contBL |_  _metalovercont;
-   point metlBR = contBR  _|  _metalovercont;
+   point metlBL = contBL |/  _metalovercont;
+   point metlBR = contBR \|  _metalovercont;
    
-//   box test_box = {{0,0},(0,0}} -| _mincont;
+//   box test_box = {{0,0},(0,0}} /| _mincont;
    
    box zerobox = {{0,0},{0,0}};
-   box contactL = zerobox -| _mincont;
-   box contactR = zerobox |- _mincont;
+   box contactL = zerobox /| _mincont;
+   box contactR = zerobox |\ _mincont;
    // calculate the number of contacts
    if (W < 2*_actOverCont + _mincont) {echo("Can't fit even a single contact !")}
    else {
@@ -218,31 +218,31 @@ void shifttest() {
    newcell("shifttest");
    opencell("shifttest");
    point a = {10,10};
-   point aSW = a |_ 1;
-   point aSE = a _| 1;
-   point aNE = a -| 1;
-   point aNW = a |- 1;
+   point aSW = a |/ 1;
+   point aSE = a \| 1;
+   point aNE = a /| 1;
+   point aNW = a |\ 1;
    addpoly({aSW,aSE,aNE,aNW},6);
       
    point b = {2,3};
-   point bSW = a |_ b;
-   point bSE = a _| b;
-   point bNE = a -| b;
-   point bNW = a |- b;
-   addpoly({bSW,bSE,bNE,bNW},6);
+   point bSW = a |/ b;
+   point bSE = a \| b;
+   point bNE = a /| b;
+   point bNW = a |\ b;
+   addpoly({bSW,bSE,bNE,bNW},5);
    
    box c = {{15,10},{15,10}};
-   box cSW = c |_ 1;
-   box cSE = c _| 1;
-   box cNE = c -| 1;
-   box cNW = c |- 1;
+   box cSW = c |/ 1;
+   box cSE = c \| 1;
+   box cNE = c /| 1;
+   box cNW = c |\ 1;
    addbox(cSW,2); addbox(cSE,4); addbox(cNW,7); addbox(cNE,8); 
 
    box d = {{20,10},{20,10}};
-   box dSW = d |_ b;
-   box dSE = d _| b;
-   box dNE = d -| b;
-   box dNW = d |- b;
+   box dSW = d |/ b;
+   box dSE = d \| b;
+   box dNE = d /| b;
+   box dNW = d |\ b;
    addbox(dSW,2); addbox(dSE,4); addbox(dNW,7); addbox(dNE,8); 
 
 }
@@ -268,7 +268,8 @@ void modify_undo_bug()
    select_all();
    punselect({{3.5,10.5},{13,-4.5}});
    move({11.5,8},{18,10.5});
-//   undo();
+   undo();
+   echo("6 sqare boxes should be displayed");
 }
 
 //int factoriel(int stop)

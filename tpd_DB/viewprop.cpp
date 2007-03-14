@@ -589,7 +589,7 @@ void layprop::DrawProperties::saveLayers(FILE* prop_file) const
 {
    laySetList::const_iterator CI;
    fprintf(prop_file, "void  layerSetup() {\n");
-   fprintf(prop_file, "   colorSetup(); fillSetup();\n");
+   fprintf(prop_file, "   colorSetup(); fillSetup(); lineSetup();\n");
    for( CI = _layset.begin(); CI != _layset.end(); CI++)
    {
       if (0 == CI->first) continue;
@@ -600,6 +600,23 @@ void layprop::DrawProperties::saveLayers(FILE* prop_file) const
             the_layer->color().c_str() ,
             the_layer->fill().c_str()  ,
             the_layer->sline().c_str()  );
+   }
+   fprintf(prop_file, "}\n\n");
+}
+
+void layprop::DrawProperties::saveLines(FILE* prop_file) const
+{
+   lineMAP::const_iterator CI;
+   fprintf(prop_file, "void  lineSetup() {\n");
+   for( CI = _lineset.begin(); CI != _lineset.end(); CI++)
+   {
+      LineSettings* the_line = CI->second;
+      fprintf(prop_file, "   defineline(\"%s\", \"%s\", 0x%04x , %d, %d);\n",
+            CI->first.c_str()         ,
+            the_line->color().c_str() ,
+            the_line->pattern()       ,
+            the_line->patscale()      ,
+            the_line->width()            );
    }
    fprintf(prop_file, "}\n\n");
 }
@@ -823,6 +840,7 @@ void layprop::ViewProperties::saveProperties(std::string filename) const
    // file header here
    _drawprop.savePatterns(prop_file);
    _drawprop.saveColors(prop_file);
+   _drawprop.saveLines(prop_file);
    _drawprop.saveLayers(prop_file);
    saveScreenProps(prop_file);
    fprintf(prop_file, "layerSetup();screenSetup();\n\n");
