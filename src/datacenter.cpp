@@ -268,6 +268,7 @@ bool DataCenter::TDTread(std::string filename, std::list<std::string>& topcells)
    _TEDDB = tempin.design();
    _TEDDB->btreeAddMember    = &browsers::treeAddMember;
    _TEDDB->btreeRemoveMember = &browsers::treeRemoveMember;
+   _TEDDB->assign_properties(_properties);
    // get the hierarchy
    browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
    // extract the root cells
