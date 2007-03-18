@@ -522,7 +522,7 @@ the current quadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. Draws also the select marks in case shape is
 selected. \n This is the cherry of the quadTree algorithm cake*/
 void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
-                                                   const dataList* slst, bool fill) const {
+                                                   const dataList* slst, bool fill, bool bound) const {
    if (empty()) return;
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
@@ -549,9 +549,9 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
          if (0 != points.size())
          {
             // draw the shape fill (contents of refs, arefs and texts)
-            if (fill) wdt->openGL_drawfill(drawprop, points);
+            if (fill)  wdt->openGL_drawfill(drawprop, points);
             // draw the outline of the shapes and overlapping boxes 
-            wdt->openGL_drawline(drawprop, points);
+            if (bound) wdt->openGL_drawline(drawprop, points);
             if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
             {
                drawprop.setLineProps(true);
@@ -581,9 +581,9 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
          // precalculate drawing data
          wdt->openGL_precalc(drawprop, points);
          // draw the shape fill (contents of refs, arefs and texts)
-         if (fill) wdt->openGL_drawfill(drawprop, points);
+         if (fill)  wdt->openGL_drawfill(drawprop, points);
          // draw the outline of the shapes and overlapping boxes
-         wdt->openGL_drawline(drawprop, points);
+         if (bound) wdt->openGL_drawline(drawprop, points);
          // clean-up
          wdt->openGL_postclean(drawprop, points);
          wdt = wdt->next();
@@ -614,7 +614,7 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
          wdt = wdt->next();
       }*/
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst, fill);
+      if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst, fill, bound);
 }
 
 /*! Temporary draw of the container contents on the screen using the virtual 

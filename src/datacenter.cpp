@@ -618,6 +618,20 @@ void DataCenter::settextmarks_hidden(bool hide)
    PROPLock.Unlock();
 }
 
+void DataCenter::setcellbox_hidden(bool hide)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.setcellbox_hidden(hide);
+   PROPLock.Unlock();
+}
+
+void DataCenter::settextbox_hidden(bool hide)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.settextbox_hidden(hide);
+   PROPLock.Unlock();
+}
+
 void DataCenter::setGrid(byte No, real step, std::string colname)
 {
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());

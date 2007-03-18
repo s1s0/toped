@@ -293,18 +293,19 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
 //      if (0 < lay->first)
       word curlayno = lay->first;
       if (!drawprop.layerHidden(curlayno))
-         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(curlayno);
+         drawprop.setCurrentColor(curlayno);
       else continue;
       // fancy like this (dlist iterator) , besause a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
       bool fill = drawprop.getCurrentFill();
+      bool bbox = drawprop.getCurrentBoundary();
 //      if (fill) glfEnable(GLF_FILLING);
 //      else      glfDisable(GLF_FILLING);
       if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
-         lay->second->openGL_draw(drawprop,dlst->second, fill);
+         lay->second->openGL_draw(drawprop,dlst->second, fill, bbox);
       else
-         lay->second->openGL_draw(drawprop, NULL, fill);
+         lay->second->openGL_draw(drawprop, NULL, fill, bbox);
    }
 }
 

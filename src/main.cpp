@@ -160,6 +160,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("hidelayer"        ,(new                tellstdfunc::stdHIDELAYER(telldata::tn_void, true)));
    mblock->addFUNC("hidelayer"        ,(new               tellstdfunc::stdHIDELAYERS(telldata::tn_void, true)));
    mblock->addFUNC("hidecellmarks"    ,(new             tellstdfunc::stdHIDECELLMARK(telldata::tn_void, true)));
+   mblock->addFUNC("hidecellbox"      ,(new             tellstdfunc::stdHIDECELLBOND(telldata::tn_void, true)));
    mblock->addFUNC("hidetextmarks"    ,(new             tellstdfunc::stdHIDETEXTMARK(telldata::tn_void, true)));
    mblock->addFUNC("locklayer"        ,(new                tellstdfunc::stdLOCKLAYER(telldata::tn_void, true)));
    mblock->addFUNC("locklayer"        ,(new               tellstdfunc::stdLOCKLAYERS(telldata::tn_void, true)));

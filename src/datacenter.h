@@ -123,6 +123,8 @@ public:
    void                       lockLayer(word, bool);
    void                       setcellmarks_hidden(bool);
    void                       settextmarks_hidden(bool);
+   void                       setcellbox_hidden(bool);
+   void                       settextbox_hidden(bool);
    void                       setGrid(byte, real, std::string);
    bool                       viewGrid(byte, bool);
    void                       addRuler(TP&, TP&);

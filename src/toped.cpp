@@ -243,6 +243,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_GRID2         , tui::TopedFrame::OnGrid2       )
    EVT_MENU( TMSET_CELLMARK      , tui::TopedFrame::OnCellMark    )
    EVT_MENU( TMSET_TEXTMARK      , tui::TopedFrame::OnTextMark    )
+   EVT_MENU( TMSET_CELLBOX       , tui::TopedFrame::OnCellBox    )
    
    EVT_MENU( TMSET_MARKER0       , tui::TopedFrame::OnMarker0     )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
@@ -530,6 +531,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendCheckItem(TMSET_GRID2    , wxT("Grid 2")    , wxT("Draw/Hide Grid 2"));
    settingsMenu->AppendCheckItem(TMSET_CELLMARK , wxT("Cell marks"), wxT("Draw/Hide Cell marks"));
    settingsMenu->AppendCheckItem(TMSET_TEXTMARK , wxT("Text marks"), wxT("Draw/Hide Text marks"));
+   settingsMenu->AppendCheckItem(TMSET_CELLBOX , wxT("Cell box"), wxT("Draw/Hide Cell overlapping box"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
    settingsMenu->AppendSeparator();
@@ -1212,6 +1214,13 @@ void tui::TopedFrame::OnCellMark(wxCommandEvent& WXUNUSED(event)){
   _cmdline->parseCommand(ost);
 }
 
+void tui::TopedFrame::OnCellBox(wxCommandEvent& WXUNUSED(event)){
+  wxString ost;
+  ost << wxT("hidecellbox(") << (settingsMenu->IsChecked(TMSET_CELLBOX) ? wxT("false") : wxT("true")) <<
+  wxT(");");
+  _cmdline->parseCommand(ost);
+}
+
 void tui::TopedFrame::OnTextMark(wxCommandEvent& WXUNUSED(event)){
   wxString ost;
   ost << wxT("hidetextmarks(") << (settingsMenu->IsChecked(TMSET_TEXTMARK) ? wxT("false") : wxT("true")) <<
@@ -1364,6 +1373,10 @@ void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
       case STS_GRID2_OFF   : settingsMenu->Check(TMSET_GRID2,false);break;
       case STS_CELLMARK_OFF: settingsMenu->Check(TMSET_CELLMARK,false);break;
       case STS_CELLMARK_ON : settingsMenu->Check(TMSET_CELLMARK,true);break;
+      
+      case STS_CELLBOX_OFF : settingsMenu->Check(TMSET_CELLBOX,false);break;
+      case STS_CELLBOX_ON  : settingsMenu->Check(TMSET_CELLBOX,true);break;
+      
       case STS_TEXTMARK_OFF: settingsMenu->Check(TMSET_TEXTMARK,false);break;
       case STS_TEXTMARK_ON : settingsMenu->Check(TMSET_TEXTMARK,true);break;
       case STS_AUTOPAN_ON  : settingsMenu->Check(TMSET_AUTOPAN,true );break;

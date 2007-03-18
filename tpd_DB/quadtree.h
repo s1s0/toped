@@ -64,7 +64,7 @@ namespace laydata {
                            quadTree();
                            quadTree(TEDfile* const tedfile);
       virtual             ~quadTree();
-      virtual void         openGL_draw(layprop::DrawProperties&, const dataList*, bool) const;
+      virtual void         openGL_draw(layprop::DrawProperties&, const dataList*, bool, bool) const;
       virtual void         tmp_draw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(tdtdata* shape);
       void                 put(tdtdata* shape);

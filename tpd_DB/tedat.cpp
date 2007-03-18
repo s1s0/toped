@@ -1485,9 +1485,10 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
 }
 
-void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
+//   if drawprop.cell_boundary
    // draw the overlapping box
    glColor4f(1.0, 1.0, 1.0, 0.5);
    glLineStipple(1,0xf18f);
@@ -1503,11 +1504,11 @@ void laydata::tdtcellref::openGL_drawfill(layprop::DrawProperties& drawprop, con
 {
    if (0 == ptlist.size()) return;
    // draw the structure itself. Pop/push ref stuff is when edit in place is active
-   byte crchain = const_cast<layprop::DrawProperties&>(drawprop).popref(this);
+   byte crchain = drawprop.popref(this);
    structure()->openGL_draw(drawprop, crchain == 2);
    // push is done in the precalc()
 //   drawprop.popCTM();
-   if (crchain) const_cast<layprop::DrawProperties&>(drawprop).pushref(this);
+   if (crchain) drawprop.pushref(this);
 }
 
 void laydata::tdtcellref::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
