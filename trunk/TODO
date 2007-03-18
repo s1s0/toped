@@ -1,12 +1,9 @@
 Short Term
 ------------
- - Redraw should invalidate only part of the screen. Not the entire one.
  - Draw wire - this seems to be the most obvious bug in the drawing.
  - Import of the GDSII wire type 2 and/or 4. We have troubles - the example GDSII from Sergey.
  - Browser window needs search facilities. For big designs
- - Switch on/off the drawing of the cell boundaries
  - Depth of UNDO must be a menu parameter (or a TELL function ?)
- - Long marker has to be added
       
 General
 =========
@@ -43,10 +40,11 @@ General
     will be appropriate? Error numbers with error messages etc. -
     It will be much easier to document them eventually in the future!
 
-  To be implemented in the language:
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  * box blow - it's there but not implemented - box + real
 
+  Graphics
+  ---------
+ - Switch on/off the drawing of the text boundaries. See rev. 348
+      
 Dialog stuff
 ============
    * Grid definitioan dialog is ugly - text windows are not resizing properly. Needs color
@@ -60,6 +58,7 @@ Dialog stuff
 Documentation
 ==============
   * TELL status function
+  * hidecellbox
 
 Seems OK
 ========

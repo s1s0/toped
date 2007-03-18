@@ -46,7 +46,7 @@
 #define tpdfSAVE wxSAVE
 #endif
 
-extern const wxEventType         wxEVT_CNVSSTATUS;
+extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
@@ -248,6 +248,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER0       , tui::TopedFrame::OnMarker0     )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
+   EVT_MENU( TMSET_CURLONG       , tui::TopedFrame::OnLongCursor  )
    EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
    EVT_MENU( TMSET_DEFFILL       , tui::TopedFrame::OnDefineFill  )
@@ -262,7 +263,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_SIZE( TopedFrame::OnSize )
    EVT_SASH_DRAGGED_RANGE(ID_WIN_BROWSERS, ID_WIN_CANVAS, tui::TopedFrame::OnSashDrag)
    EVT_TECUSTOM_COMMAND(wxEVT_TPDSTATUS  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
-   EVT_TECUSTOM_COMMAND(wxEVT_CNVSSTATUS , wxID_ANY, tui::TopedFrame::OnCanvasStatus)
+   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_SETINGSMENU, wxID_ANY, tui::TopedFrame::OnUpdateSettingsMenu)
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
 END_EVENT_TABLE()
@@ -529,11 +530,13 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendCheckItem(TMSET_GRID0    , wxT("Grid 0")    , wxT("Draw/Hide Grid 0"));
    settingsMenu->AppendCheckItem(TMSET_GRID1    , wxT("Grid 1")    , wxT("Draw/Hide Grid 1"));
    settingsMenu->AppendCheckItem(TMSET_GRID2    , wxT("Grid 2")    , wxT("Draw/Hide Grid 2"));
+   settingsMenu->AppendSeparator();
    settingsMenu->AppendCheckItem(TMSET_CELLMARK , wxT("Cell marks"), wxT("Draw/Hide Cell marks"));
    settingsMenu->AppendCheckItem(TMSET_TEXTMARK , wxT("Text marks"), wxT("Draw/Hide Text marks"));
-   settingsMenu->AppendCheckItem(TMSET_CELLBOX , wxT("Cell box"), wxT("Draw/Hide Cell overlapping box"));
+   settingsMenu->AppendCheckItem(TMSET_CELLBOX  , wxT("Cell box")  , wxT("Draw/Hide Cell overlapping box"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
+   settingsMenu->AppendCheckItem(TMSET_CURLONG  , wxT("Long cursor")  , wxT("Stretch the cursor cross"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_DEFLAY   , wxT("Define Layer") , wxT("Define a layer"));
    settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color") , wxT("Define a drawing color"));
@@ -1214,6 +1217,13 @@ void tui::TopedFrame::OnCellMark(wxCommandEvent& WXUNUSED(event)){
   _cmdline->parseCommand(ost);
 }
 
+void tui::TopedFrame::OnLongCursor(wxCommandEvent& WXUNUSED(event)){
+  wxString ost;
+  ost << wxT("longcursor(") << (settingsMenu->IsChecked(TMSET_CURLONG) ? wxT("true") : wxT("false")) <<
+  wxT(");");
+  _cmdline->parseCommand(ost);
+}
+
 void tui::TopedFrame::OnCellBox(wxCommandEvent& WXUNUSED(event)){
   wxString ost;
   ost << wxT("hidecellbox(") << (settingsMenu->IsChecked(TMSET_CELLBOX) ? wxT("false") : wxT("true")) <<
@@ -1373,10 +1383,8 @@ void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
       case STS_GRID2_OFF   : settingsMenu->Check(TMSET_GRID2,false);break;
       case STS_CELLMARK_OFF: settingsMenu->Check(TMSET_CELLMARK,false);break;
       case STS_CELLMARK_ON : settingsMenu->Check(TMSET_CELLMARK,true);break;
-      
       case STS_CELLBOX_OFF : settingsMenu->Check(TMSET_CELLBOX,false);break;
       case STS_CELLBOX_ON  : settingsMenu->Check(TMSET_CELLBOX,true);break;
-      
       case STS_TEXTMARK_OFF: settingsMenu->Check(TMSET_TEXTMARK,false);break;
       case STS_TEXTMARK_ON : settingsMenu->Check(TMSET_TEXTMARK,true);break;
       case STS_AUTOPAN_ON  : settingsMenu->Check(TMSET_AUTOPAN,true );break;
@@ -1384,6 +1392,8 @@ void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
       case STS_ANGLE_0     : settingsMenu->Check(TMSET_MARKER0  ,true );break;
       case STS_ANGLE_45    : settingsMenu->Check(TMSET_MARKER45 ,true );break;
       case STS_ANGLE_90    : settingsMenu->Check(TMSET_MARKER90 ,true );break;
+      case STS_LONG_CURSOR : settingsMenu->Check(TMSET_CURLONG ,true );break;
+      case STS_SHORT_CURSOR: settingsMenu->Check(TMSET_CURLONG ,false );break;
                     default: assert(false);
    }
 };

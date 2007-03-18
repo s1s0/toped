@@ -157,6 +157,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdPROPSAVE      )
    TELL_STDCMD_CLASSA(stdLAYPROP       )  //
    TELL_STDCMD_CLASSA(stdLINEDEF       )  //
+   TELL_STDCMD_CLASSA(stdLONGCURSOR    )  //
 
    TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN    )
    TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread       )

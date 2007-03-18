@@ -42,12 +42,11 @@
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
-extern const wxEventType         wxEVT_CNVSSTATUS;
+extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
-extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
-
+extern const wxEventType         wxEVT_CANVAS_CURSOR;
 
 #include "../ui/crosscursor.xpm"
 
@@ -159,8 +158,9 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_LEFT_DCLICK      ( tui::LayoutCanvas::OnMouseLeftDClick )
    EVT_MIDDLE_UP        ( tui::LayoutCanvas::OnMouseMiddleUp   )
    EVT_CHAR             ( tui::LayoutCanvas::OnChar)
-   EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_ZOOM, wxID_ANY, tui::LayoutCanvas::OnZoom)
-   EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT, wxID_ANY, tui::LayoutCanvas::OnMouseIN)
+   EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_ZOOM  , wxID_ANY, tui::LayoutCanvas::OnZoom)
+   EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT  , wxID_ANY, tui::LayoutCanvas::OnMouseIN)
+   EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_CURSOR, wxID_ANY, tui::LayoutCanvas::OnCursorType)
 
    EVT_MENU(   CM_CONTINUE, LayoutCanvas::OnCMcontinue      )
    EVT_MENU(      CM_ABORT, LayoutCanvas::OnCMabort         )
@@ -182,8 +182,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    rubber_band = false;
    restricted_move = false;
    invalid_window = false;
-   reperX = false;
-   reperY = false;
+   reperX = reperY = long_cursor = false;
    initializeGL();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
@@ -280,72 +279,41 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 }
 
 
-void tui::LayoutCanvas::OnpaintGL(wxPaintEvent&) {
+void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
     wxPaintDC dc(this);
    #ifndef __WXMOTIF__
       if (!GetContext()) return;
    #endif
    SetCurrent();
-   glMatrixMode( GL_MODELVIEW );
-   glShadeModel( GL_FLAT ); // Single color
-   if (invalid_window || !(tmp_wnd || rubber_band))
+   // invalid_window indicates zooming.
+   // event.GetEventType() == event.GetId() should means that database is updated
+   // In both cases - the entire window is redrawn
+   if ((invalid_window) || (event.GetEventType() == event.GetId()))
    {
+      glMatrixMode( GL_MODELVIEW );
+      glShadeModel( GL_FLAT ); // Single color
       update_viewport();
       glClear(GL_ACCUM_BUFFER_BIT);
       //@TODO !! Check somewhere that RGBA mode is available!?
       // CTM matrix stuff
       glLoadIdentity();
       glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
-      // invalid_window indicates zooming. If that is false and the rest two 
-      // variables are not set, means that the system request repaint 
-      // In both cases - the entire window is redrawn
       glClear(GL_COLOR_BUFFER_BIT);
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
       DATC->openGL_draw(_LayCTM);    // draw data
-//      _status_line.draw();
       glAccum(GL_LOAD, 1.0);
-      if (rubber_band) rubber_paint();
       invalid_window = false;
+      if (rubber_band) rubber_paint();
    }
-   else if (tmp_wnd)
-      // zooming using the mouse
-      wnd_paint();
-   else if (n_ScrMARKold != n_ScrMARK) 
-      // the only reason to get to this point remains rubber_band == true
-      // so the paint will be invoked only if we have something new to show on 
-      //the screen
-      rubber_paint();
-   
-   SwapBuffers();
-}
-
-// void tui::LayoutCanva+s::drawInterim(const TP& cp)
-// {
-//    wxPaintDC dc(this);
-//    #ifndef __WXMOTIF__
-//       if (!GetContext()) return;
-//    #endif
-//    SetCurrent();
-//    _status_line.update_coords(cp);
-//    SwapBuffers();
-// }
-
-void tui::LayoutCanvas::wnd_paint() {
-   glAccum(GL_RETURN, 1.0);
-   glColor4f(0.7, 0.7, 0.7, 0.4); // gray
-   glDisable(GL_POLYGON_STIPPLE);
-   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
-   glRecti(presspoint.x(),presspoint.y(), n_ScrMARK.x(), n_ScrMARK.y());
-   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
-   glEnable(GL_POLYGON_STIPPLE);
-}
-
-void tui::LayoutCanvas::rubber_paint()
-{
-   glAccum(GL_RETURN, 1.0);
-   DATC->tmp_draw(_LayCTM, releasepoint, n_ScrMARK);
+   else
+   {
+      glAccum(GL_RETURN, 1.0);
+      if       (tmp_wnd)         wnd_paint();
+      else if  (rubber_band)     rubber_paint();
+   }
+   // deal with the long cursor
    if (reperX || reperY)
    {
       glColor4f(1, 1, 1, .5);
@@ -362,6 +330,33 @@ void tui::LayoutCanvas::rubber_paint()
       }
       glEnd();
    }
+
+   SwapBuffers();
+}
+
+// void tui::LayoutCanva+s::drawInterim(const TP& cp)
+// {
+//    wxPaintDC dc(this);
+//    #ifndef __WXMOTIF__
+//       if (!GetContext()) return;
+//    #endif
+//    SetCurrent();
+//    _status_line.update_coords(cp);
+//    SwapBuffers();
+// }
+
+void tui::LayoutCanvas::wnd_paint() {
+   glColor4f(0.7, 0.7, 0.7, 0.4); // gray
+   glDisable(GL_POLYGON_STIPPLE);
+   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
+   glRecti(presspoint.x(),presspoint.y(), n_ScrMARK.x(), n_ScrMARK.y());
+   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
+   glEnable(GL_POLYGON_STIPPLE);
+}
+
+void tui::LayoutCanvas::rubber_paint()
+{
+   DATC->tmp_draw(_LayCTM, releasepoint, n_ScrMARK);
 }
 
 void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
@@ -394,7 +389,7 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
 
 void tui::LayoutCanvas::UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype) {
    wxString ws;
-   wxCommandEvent eventPOSITION(wxEVT_CNVSSTATUS);
+   wxCommandEvent eventPOSITION(wxEVT_CANVAS_STATUS);
    ws.sprintf(wxT("%3.2f"),coord*DATC->UU());
    eventPOSITION.SetString(ws);
    eventPOSITION.SetInt(postype);
@@ -481,7 +476,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event) {
       UpdateCoordWin(ScrMARK.y(), CNVS_POS_Y, (n_ScrMARK.y() - releasepoint.y()), CNVS_DEL_Y);
 
 //   drawInterim(ScrMARK);
-   if ((tmp_wnd || mouse_input)) Refresh();//updateGL();
+   if (tmp_wnd || mouse_input || reperX || reperY) Refresh();//updateGL();
 }
       
 void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
@@ -720,7 +715,7 @@ void tui::LayoutCanvas::update_viewport() {
 
 void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
 {
-   wxCommandEvent eventABORTEN(wxEVT_CNVSSTATUS);
+   wxCommandEvent eventABORTEN(wxEVT_CANVAS_STATUS);
    if (1 == evt.GetExtraLong())
    { // start mouse input
       mouse_input = true;
@@ -732,10 +727,10 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       restricted_move = (DATC->marker_angle() != 0) &&
             ((actop > 0) || (actop == console::op_dpoly));
       eventABORTEN.SetInt(CNVS_ABORTENABLE);
-      reperX = (console::op_flipX == actop);
-      reperY = (console::op_flipY == actop);
-      if (   reperX
-          || reperY
+      reperX = (console::op_flipX == actop) || (long_cursor && (console::op_flipY != actop));
+      reperY = (console::op_flipY == actop) || (long_cursor && (console::op_flipX != actop));
+      if (  (console::op_flipX  == actop)
+          ||(console::op_flipY  == actop)
           ||(console::op_rotate == actop)
           ||(console::op_cbind  == actop)
           ||(console::op_abind  == actop)
@@ -748,10 +743,10 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       mouse_input = false;
       rubber_band = false;
       restricted_move = false;
-      reperX = false;
-      reperY = false;
+      reperX = long_cursor;
+      reperY = long_cursor;
       DATC->setCurrentOp(console::op_none);
-      wxCommandEvent eventPOSITION(wxEVT_CNVSSTATUS);
+      wxCommandEvent eventPOSITION(wxEVT_CANVAS_STATUS);
       eventPOSITION.SetString(wxT(""));
       eventPOSITION.SetInt(CNVS_DEL_Y);
       wxPostEvent(this, eventPOSITION);
@@ -760,6 +755,12 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       eventABORTEN.SetInt(CNVS_ABORTDISABLE);
    }
    wxPostEvent(this, eventABORTEN);
+}
+
+void tui::LayoutCanvas::OnCursorType(wxCommandEvent& event)
+{
+   long_cursor = (1 == event.GetInt());
+   reperX = reperY = long_cursor;
 }
 
 void tui::LayoutCanvas::OnCMcontinue(wxCommandEvent& WXUNUSED(event))

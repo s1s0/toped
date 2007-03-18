@@ -153,6 +153,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("addruler"         ,(new                 tellstdfunc::stdDISTANCE(telldata::tn_void, true)));
    mblock->addFUNC("addruler"         ,(new               tellstdfunc::stdDISTANCE_D(telldata::tn_void, true)));
    mblock->addFUNC("clearrulers"      ,(new              tellstdfunc::stdCLEARRULERS(telldata::tn_void, true)));
+   mblock->addFUNC("longcursor"       ,(new               tellstdfunc::stdLONGCURSOR(telldata::tn_void, true)));
    mblock->addFUNC("zoom"             ,(new                  tellstdfunc::stdZOOMWIN(telldata::tn_void, true)));
    mblock->addFUNC("zoom"             ,(new                 tellstdfunc::stdZOOMWINb(telldata::tn_void, true)));
    mblock->addFUNC("zoomall"          ,(new                  tellstdfunc::stdZOOMALL(telldata::tn_void, true)));
