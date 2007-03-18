@@ -569,6 +569,41 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
 }
 
 //=============================================================================
+tellstdfunc::stdHIDECELLBOND::stdHIDECELLBOND(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+}
+
+void tellstdfunc::stdHIDECELLBOND::undo_cleanup() {
+   getBoolValue(UNDOPstack, false);
+}
+
+void tellstdfunc::stdHIDECELLBOND::undo() {
+   TEUNDO_DEBUG("hide_cellbox( bool ) UNDO");
+   bool        hide  = getBoolValue(UNDOPstack,true);
+   DATC->setcellbox_hidden(hide);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
+   wxPostEvent(Toped->view(), eventGRIDUPD);
+   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+   RefreshGL();
+}
+
+int tellstdfunc::stdHIDECELLBOND::execute() {
+   bool        hide  = getBoolValue();
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(new telldata::ttbool(!hide));
+   DATC->setcellbox_hidden(hide);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
+   wxPostEvent(Toped->view(), eventGRIDUPD);
+   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+   RefreshGL();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
 {

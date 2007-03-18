@@ -1,3 +1,13 @@
+Short Term
+------------
+ - Redraw should invalidate only part of the screen. Not the entire one.
+ - Draw wire - this seems to be the most obvious bug in the drawing.
+ - Import of the GDSII wire type 2 and/or 4. We have troubles - the example GDSII from Sergey.
+ - Browser window needs search facilities. For big designs
+ - Switch on/off the drawing of the cell boundaries
+ - Depth of UNDO must be a menu parameter (or a TELL function ?)
+ - Long marker has to be added
+      
 General
 =========
   * MEMORY LEAKAGE DEBUG!

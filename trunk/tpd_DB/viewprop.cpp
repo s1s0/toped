@@ -260,6 +260,8 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0) {
    _drawinglayer = 0;
    _cellmarks_hidden = true;
    _textmarks_hidden = true;
+   _cellbox_hidden = true;
+   _textbox_hidden = false;
    _refstack = NULL;
 }
 
@@ -331,6 +333,14 @@ bool layprop::DrawProperties::getCurrentFill() const
       return true;
    }
    else return false;
+}
+
+bool layprop::DrawProperties::getCurrentBoundary() const
+{
+   if (0 == _drawinglayer)
+      return !_cellbox_hidden;
+   else
+      return !_textbox_hidden;
 }
 
 void layprop::DrawProperties::setLineProps(bool selected) const

@@ -171,6 +171,7 @@ namespace layprop {
       void                       setCurrentColor(word layno);
       void                       setGridColor(std::string colname) const;
       bool                       getCurrentFill() const;
+      bool                       getCurrentBoundary() const;
       void                       setLineProps(bool selected = false) const;
       bool                       layerHidden(word layno) const;
       bool                       layerLocked(word layno) const;
@@ -209,13 +210,15 @@ namespace layprop {
       DBbox                      _clipRegion;
       CTM                        _ScrCTM;
       bool                       _cellmarks_hidden;
+      bool                       _cellbox_hidden;
       bool                       _textmarks_hidden;
+      bool                       _textbox_hidden;
       void                       savePatterns(FILE*) const;
       void                       saveColors(FILE*) const;
       void                       saveLayers(FILE*) const;
       void                       saveLines(FILE*) const;
-    
-   private:                       
+
+   private:
       bool                       _blockfill;
       laydata::cellrefstack*     _refstack;
       ctmstack                   _transtack;
@@ -280,6 +283,8 @@ namespace layprop {
       DrawProperties&   drawprop()                       {return _drawprop;}
       void              setcellmarks_hidden(bool hide)   {_drawprop._cellmarks_hidden = hide;}
       void              settextmarks_hidden(bool hide)   {_drawprop._textmarks_hidden = hide;}
+      void              setcellbox_hidden(bool hide)     {_drawprop._cellbox_hidden = hide;}
+      void              settextbox_hidden(bool hide)     {_drawprop._textbox_hidden = hide;}
       void              setScrCTM(CTM ScrCTM)            {_drawprop._ScrCTM = ScrCTM;}
       void              setClipRegion(DBbox clipR)       {_drawprop._clipRegion = clipR;}
       void              setCurrentOp(console::ACTIVE_OP actop)
