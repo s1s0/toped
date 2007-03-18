@@ -53,7 +53,8 @@ extern tui::TopedFrame*          Toped;
 extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
-extern const wxEventType         wxEVT_CNVSSTATUS;
+extern const wxEventType         wxEVT_CANVAS_STATUS;
+extern const wxEventType         wxEVT_CANVAS_CURSOR;
 
 
 //=============================================================================
@@ -202,6 +203,30 @@ tellstdfunc::stdCLEARRULERS::stdCLEARRULERS(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdCLEARRULERS::execute()
 {
    DATC->clearRulers();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdLONGCURSOR::stdLONGCURSOR(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+}
+
+int tellstdfunc::stdLONGCURSOR::execute()
+{
+   bool        longcur  = getBoolValue();
+   
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   eventGRIDUPD.SetInt((longcur ? tui::STS_LONG_CURSOR : tui::STS_SHORT_CURSOR));
+   wxPostEvent(Toped, eventGRIDUPD);
+
+   wxCommandEvent eventCNVS(wxEVT_CANVAS_CURSOR);
+   eventCNVS.SetInt((longcur ? 1 : 0));
+   wxPostEvent(Toped->view(), eventCNVS);
+
+   LogFile << LogFile.getFN() << "(" << LogFile._2bool(longcur) << ");"; LogFile.flush();
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -4071,7 +4096,7 @@ void tellstdfunc::UpdateLV()
 {
    wxString ws;
    ws.sprintf(wxT("%d"),DATC->numselected());
-   wxCommandEvent eventUPDATESEL(wxEVT_CNVSSTATUS);
+   wxCommandEvent eventUPDATESEL(wxEVT_CANVAS_STATUS);
    eventUPDATESEL.SetInt(tui::CNVS_SELECTED);
    eventUPDATESEL.SetString(ws);
    wxPostEvent(Toped->view(), eventUPDATESEL);

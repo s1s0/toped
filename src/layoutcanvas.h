@@ -124,11 +124,12 @@ namespace tui {
       TMSET_GRID1         ,
       TMSET_GRID2         ,
       TMSET_CELLMARK      ,
-      TMSET_CELLBOX      ,
+      TMSET_CELLBOX       ,
       TMSET_TEXTMARK      ,
       TMSET_MARKER0       ,
       TMSET_MARKER45      ,
       TMSET_MARKER90      ,
+      TMSET_CURLONG       ,
       TMSET_MARKER        ,
       TMSET_DEFLAY        ,
       TMSET_DEFCOLOR      ,
@@ -194,7 +195,9 @@ namespace tui {
       STS_AUTOPAN_OFF     ,
       STS_ANGLE_0         ,
       STS_ANGLE_45        ,
-      STS_ANGLE_90
+      STS_ANGLE_90        ,
+      STS_LONG_CURSOR     ,
+      STS_SHORT_CURSOR    ,
    } SETTINGSMENU_TYPE;
 
    //=============================================================================
@@ -246,6 +249,7 @@ namespace tui {
       void           OnRepeatLastCmd(wxCommandEvent&);
       void           OnCMFlip(wxCommandEvent&);
       void           OnCMRotate(wxCommandEvent&);
+      void           OnCursorType(wxCommandEvent&);
       void           initializeGL();
    private:
       void           CursorControl(bool, bool);
@@ -275,6 +279,7 @@ namespace tui {
       void           EventMouseClick(int button);
       bool           reperX;         // Draw a cursor line across the window parallel to the X axis
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
+      bool           long_cursor;    //
 //      StatusLine     _status_line;
       DECLARE_EVENT_TABLE();
    };
