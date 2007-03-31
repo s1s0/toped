@@ -48,8 +48,6 @@
 extern parsercmd::cmdBLOCK*       CMDBlock;
 /*Global console object*/
 extern console::ted_cmd*           Console;
-/*Argument list structure used in function definitions*/
-parsercmd::argumentLIST  *arglist = NULL;
 /*Current tell variable name*/
 telldata::tell_var *tellvar = NULL;
 telldata::tell_var *tell_lvalue = NULL;
@@ -59,12 +57,9 @@ telldata::tell_type *tellstruct = NULL;
 telldata::argumentQ   *argmap  = NULL;
 /*taking care when a function is called from the argument list of another call*/
 std::stack<telldata::argumentQ*>  argmapstack;
-/* current function type (during function declaration/definition)*/
-telldata::typeID funcretype;
-/* current function name (during function declaration/definition)*/
-char* funcname;
-/*number of return statements encountered*/
-int returns = 0;
+
+/* Current function declaration structure */
+parsercmd::FuncDeclaration *cfd;
 /*number of errors in a function defintion*/
 int funcdeferrors = 0;
 /*number of poits of the current polygon*/
@@ -163,16 +158,17 @@ Ooops! Second thought!
 
 =============================================================================*/
 %union {
-   float                    real;
-   bool                     ptypedef;
-   int                      integer;
-   char                    *parsestr;
-    telldata::typeID        pttname;
-   parsercmd::argumentLIST *pfarguments;
-    telldata::argumentQ    *plarguments;
-    telldata::argumentID   *parguments;
-   parsercmd::cmdBLOCK     *pblock;
-   parsercmd::cmdFUNC      *pfblock;
+   float                       real;
+   bool                        ptypedef;
+   int                         integer;
+   char                       *parsestr;
+    telldata::typeID           pttname;
+   parsercmd::argumentLIST    *pfarguments;
+    telldata::argumentQ       *plarguments;
+    telldata::argumentID      *parguments;
+   parsercmd::cmdBLOCK        *pblock;
+   parsercmd::cmdFUNC         *pfblock;
+   parsercmd::FuncDeclaration *pfdeclaration;
 }
 %start input
 /*---------------------------------------------------------------------------*/
@@ -197,6 +193,7 @@ Ooops! Second thought!
 %type <pblock>         block
 %type <pfblock>        funcblock
 %type <ptypedef>       fielddeclaration typedefstruct
+%type <pfdeclaration>  funcdeclaration
 /*=============================================================================*/
 %%
 input:
@@ -212,8 +209,7 @@ entrance:
    | funcdefinition                        {}
    | funcdeclaration ';'                   {
 //         CMDBlock->addUSERFUNCDECL(std::string($2),$1,arglist);
-      arglist = NULL;
-      delete [] funcname;
+      delete($1); cfd = NULL;
    }
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
    | error                                 {CMDBlock = CMDBlock->cleaner();/*yynerrs = 0;*/}
@@ -221,37 +217,19 @@ entrance:
 
 funcdeclaration:
      telltypeID tknIDENTIFIER '('          {
-      /*Create a new variableMAP structure containing the arguments*/
-      arglist = new parsercmd::argumentLIST;
-      funcretype = $1;returns = 0;funcdeferrors = 0;
-      funcname = $2;
+      cfd = new parsercmd::FuncDeclaration($2, $1) ;
    }
-     funcarguments ')'                     {}
+     funcarguments ')'                     {
+      $$ = cfd;
+      delete [] $2;
+   }
 ;
 
 funcdefinition:
-//     telltypeID tknIDENTIFIER '('        {
-//         /*Create a new variableMAP structure containing the arguments*/
-//         arglist = new parsercmd::argumentLIST;
-//         funcretype = $1;returns = 0;funcdeferrors = 0;
-//      }
-//     funcarguments ')'  funcblock        {
-     funcdeclaration funcblock {
-         if ((telldata::tn_void != funcretype) && (0 == returns)) {
-            tellerror("function must return a value", @$);
-            delete($2);// arglist is cleared by the cmdSTDFUNC destructor
-         }
-         else  if (funcdeferrors > 0) {
-            tellerror("function definition is ignored because of the errors above", @$);
-            delete($2);// arglist is cleared by the cmdSTDFUNC destructor
-         }
-         else {
-            if (!CMDBlock->addUSERFUNC(std::string(funcname),$2,arglist)) {
-               delete ($2);
-            }
-         }
-         arglist = NULL;
-         delete [] funcname;
+     funcdeclaration funcblock             {
+      if (!CMDBlock->addUSERFUNC($1, $2, @$))
+         delete ($2);
+      delete($1); cfd = NULL;
    }
 ;
  
@@ -268,7 +246,7 @@ block:
 
 funcblock :
      '{'                                   {
-         CMDBlock = new parsercmd::cmdFUNC(arglist,funcretype);
+         CMDBlock = new parsercmd::cmdFUNC(cfd->argListCopy(),cfd->type());
          CMDBlock->pushblk();
       }
      statements '}'                        {
@@ -279,21 +257,21 @@ funcblock :
 
 returnstatement :
      tknRETURN                             {
-      if      (!arglist) tellerror("return statement outside function body", @1);
+      if (!cfd) tellerror("return statement outside function body", @1);
       else {
-         parsercmd::cmdRETURN* rcmd = new parsercmd::cmdRETURN(funcretype);
+         parsercmd::cmdRETURN* rcmd = new parsercmd::cmdRETURN(cfd->type());
          if (rcmd->checkRetype(NULL)) CMDBlock->pushcmd(rcmd);
          else {
             tellerror("return value expected", @1);
             delete rcmd;
          }
       }
-      returns++;
+      cfd->incReturns();
    }
    | tknRETURN  argument                   {
-      if (!arglist) tellerror("return statement outside function body", @1);
+      if (!cfd) tellerror("return statement outside function body", @1);
       else {
-         parsercmd::cmdRETURN* rcmd = new parsercmd::cmdRETURN(funcretype);
+         parsercmd::cmdRETURN* rcmd = new parsercmd::cmdRETURN(cfd->type());
          if (rcmd->checkRetype($2)) CMDBlock->pushcmd(rcmd);
          else {
             tellerror("return type different from function type", @2);
@@ -301,7 +279,7 @@ returnstatement :
          }
          delete $2;
       }
-      returns++;
+      cfd->incReturns();
    }
 ;
 
@@ -426,7 +404,7 @@ funcneargument:
 funcargument:
      telltypeID tknIDENTIFIER              {
       tellvar = CMDBlock->newTellvar($1, @1);
-      arglist->push_back(new parsercmd::argumentTYPE($2,tellvar));
+      cfd->pushArg(new parsercmd::argumentTYPE($2,tellvar));
       delete [] $2;
    }
 ;
@@ -641,8 +619,8 @@ int yyerror (char *s) {  /* Called by yyparse on error */
 }
 
 void tellerror (std::string s, YYLTYPE loc) {
-   if (NULL != arglist) funcdeferrors++;
-   else                 yynerrs++;
+   if (cfd) cfd->incErrors();
+   else     yynerrs++;
    std::ostringstream ost;
    ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
    if (loc.filename) {
@@ -654,8 +632,8 @@ void tellerror (std::string s, YYLTYPE loc) {
 }
 
 void tellerror (std::string s) {
-   if (NULL != arglist) funcdeferrors++;
-   else                 yynerrs++;
+   if (cfd) cfd->incErrors();
+   else     yynerrs++;
    std::ostringstream ost;
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column << ": " << s;
    tell_log(console::MT_ERROR,ost.str());
