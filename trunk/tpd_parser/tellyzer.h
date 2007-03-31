@@ -97,6 +97,7 @@ namespace  parsercmd {
    typedef  std::pair<std::string,telldata::tell_var*>   argumentTYPE;
    typedef  std::deque<argumentTYPE*>                    argumentLIST;
 
+   class FuncDeclaration;
 
    /*** cmdVIRTUAL **************************************************************
    > virtual class inherited by all tell classes
@@ -349,7 +350,7 @@ namespace  parsercmd {
       int                        execute();
       cmdBLOCK*                  cleaner();
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
-      virtual bool               addUSERFUNC(std::string, cmdSTDFUNC*, argumentLIST*);
+      virtual bool               addUSERFUNC(FuncDeclaration*, cmdSTDFUNC*, parsercmd::yyltype);
       void                       addID(char*&, telldata::tell_var*);
       void                       addlocaltype(char*&, telldata::tell_type*);
       telldata::tell_type*       requesttypeID(char*&);
@@ -357,7 +358,7 @@ namespace  parsercmd {
       const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(char*&, bool local=false);
       telldata::tell_var*        newTellvar(telldata::typeID, yyltype);
-      bool                       funcValidate(const std::string& ,argumentLIST*);
+      bool                       funcValidate(const std::string& ,const argumentLIST*);
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
@@ -378,7 +379,7 @@ namespace  parsercmd {
                      cmdMAIN();
       int            execute();
       void           addFUNC(std::string, cmdSTDFUNC*);
-      bool           addUSERFUNC(std::string, cmdSTDFUNC*, argumentLIST*);
+      bool           addUSERFUNC(FuncDeclaration*, cmdSTDFUNC*, parsercmd::yyltype);
       void           addGlobalType(char*, telldata::tell_type*);
       void           recoveryDone();
       ~cmdMAIN();
@@ -459,7 +460,34 @@ namespace  parsercmd {
 
    bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);
    void              ClearArgumentList(argumentLIST*);
-   
+
+
+   /**
+      structure used during the parsing
+   */
+   class FuncDeclaration {
+   public:
+                                       FuncDeclaration(std::string name, telldata::typeID type):
+                                          _name(name), _type(type), _numReturns(0), _numErrors(0)
+                                          {_argList = new parsercmd::argumentLIST;}
+                                      ~FuncDeclaration();
+      const std::string                name() const     {return _name;}
+      const telldata::typeID           type() const     {return _type;}
+      const parsercmd::argumentLIST*   argList() const  {return _argList;}
+      void                             pushArg(parsercmd::argumentTYPE* arg) {_argList->push_back(arg);}
+      void                             incReturns() {_numReturns++;}
+      void                             incErrors() {_numErrors++;}
+      word                             numReturns() const {return _numReturns;}
+      word                             numErrors() const {return _numErrors;}
+      parsercmd::argumentLIST*         argListCopy() const;
+   private:
+      std::string                      _name;
+      telldata::typeID                 _type;
+      parsercmd::argumentLIST*         _argList;
+      word                             _numReturns;
+      word                             _numErrors;
+   };
+
 }
 
 namespace console{

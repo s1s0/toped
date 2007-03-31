@@ -622,7 +622,7 @@ void parsercmd::cmdBLOCK::addFUNC(std::string, cmdSTDFUNC* cQ) {
    if (cQ)    delete cQ;
 }
 
-bool parsercmd::cmdBLOCK::addUSERFUNC(std::string, cmdSTDFUNC* cQ, argumentLIST*) {
+bool parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdSTDFUNC*, parsercmd::yyltype) {
    TELL_DEBUG(addFUNC);
    tellerror("Nested function definitions are not allowed");
    return false;
@@ -681,7 +681,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    return fbody;
 }
 
-bool  parsercmd::cmdBLOCK::funcValidate(const std::string& fn, argumentLIST* alst)
+bool  parsercmd::cmdBLOCK::funcValidate(const std::string& fn, const argumentLIST* alst)
 {
    // convert argumentLIST to argumentMAP
    telldata::argumentQ arguMap;
@@ -932,22 +932,32 @@ void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
    console::TellFnAdd(fname, cQ->callingConv(NULL));
 }
 
-bool parsercmd::cmdMAIN::addUSERFUNC(std::string fname , cmdSTDFUNC* cQ,
-                                                          argumentLIST* arglst)
+/*bool parsercmd::cmdMAIN::addUSERFUNC(std::string fname , cmdSTDFUNC* cQ,
+                                                          argumentLIST* arglst)*/
+bool parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdSTDFUNC* cQ, parsercmd::yyltype loc)
 {
    /*Check whether such a function is already defined */
-   if (CMDBlock->funcValidate(fname.c_str(),arglst))
+   
+   if ((telldata::tn_void != decl->type()) && (0 == decl->numReturns())) {
+      tellerror("function must return a value", loc);
+      return false;
+   }
+   else  if (decl->numErrors() > 0) {
+      tellerror("function definition is ignored because of the errors above", loc);
+      return false;
+   }
+   else if (!(CMDBlock->funcValidate(decl->name().c_str(),decl->argList())))
    {
-      _funcMAP.insert(std::make_pair(fname,cQ));
-      console::TellFnAdd(fname, cQ->callingConv(&TYPElocal));
-      console::TellFnSort();
-      return true;
+      std::string msg = "can't redefine internal function \"" + decl->name() + "\"";
+      tellerror(msg, loc);
+      return false;
    }
    else
    {
-      std::string msg = "can't redefine internal function \"" + fname + "\"";
-      tellerror(msg);
-      return false;
+      _funcMAP.insert(std::make_pair(decl->name(), cQ));
+      console::TellFnAdd(decl->name(), cQ->callingConv(&TYPElocal));
+      console::TellFnSort();
+      return true;
    }
 }
 
@@ -1297,6 +1307,24 @@ void parsercmd::ClearArgumentList(argumentLIST* alst) {
       delete (*ALI);
    }
    alst->clear();
+}
+
+//-----------------------------------------------------------------------------
+// class FuncDeclaration
+//-----------------------------------------------------------------------------
+parsercmd::argumentLIST* parsercmd::FuncDeclaration::argListCopy() const
+{
+   parsercmd::argumentLIST* arglist = new parsercmd::argumentLIST;
+   typedef argumentLIST::const_iterator AT;
+   for (AT arg = _argList->begin(); arg != _argList->end(); arg++)
+      arglist->push_back(new parsercmd::argumentTYPE((*arg)->first,(*arg)->second->selfcopy()));
+   return arglist;
+}
+
+parsercmd::FuncDeclaration::~FuncDeclaration()
+{
+   ClearArgumentList(_argList);
+   delete _argList;
 }
 
 //-----------------------------------------------------------------------------
