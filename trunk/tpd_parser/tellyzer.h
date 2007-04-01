@@ -51,7 +51,10 @@ int yyerror (char *s);
 namespace  parsercmd {
    class cmdVIRTUAL;
    class cmdSTDFUNC;
+   class cmdFUNC;
    class cmdBLOCK;
+   class FuncDeclaration;
+
 
    struct yyltype {
       int          first_line;
@@ -96,8 +99,6 @@ namespace  parsercmd {
    typedef  std::deque<cmdSTDFUNC*>                      undoQUEUE;
    typedef  std::pair<std::string,telldata::tell_var*>   argumentTYPE;
    typedef  std::deque<argumentTYPE*>                    argumentLIST;
-
-   class FuncDeclaration;
 
    /*** cmdVIRTUAL **************************************************************
    > virtual class inherited by all tell classes
@@ -350,19 +351,22 @@ namespace  parsercmd {
       int                        execute();
       cmdBLOCK*                  cleaner();
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
-      virtual bool               addUSERFUNC(FuncDeclaration*, cmdSTDFUNC*, parsercmd::yyltype);
-      void                       addID(char*&, telldata::tell_var*);
-      void                       addlocaltype(char*&, telldata::tell_type*);
+      virtual bool               addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype);
+      virtual bool               addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype);
+      void                       addID(const char*, telldata::tell_var*);
+      void                       addlocaltype(const char*, telldata::tell_type*);
       telldata::tell_type*       requesttypeID(char*&);
       const telldata::tell_type* getTypeByName(char*&) const;
       const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(char*&, bool local=false);
       telldata::tell_var*        newTellvar(telldata::typeID, yyltype);
-      bool                       funcValidate(const std::string& ,const argumentLIST*);
+      bool                       defValidate(const std::string& ,const argumentLIST*, cmdFUNC*&);
+      bool                       declValidate(const std::string&, const argumentLIST*, parsercmd::yyltype);
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
+      void                       copyContents(cmdFUNC*);
       functionMAP const          funcMAP() const {return _funcMAP;};
       virtual                   ~cmdBLOCK();
    protected:
@@ -379,7 +383,8 @@ namespace  parsercmd {
                      cmdMAIN();
       int            execute();
       void           addFUNC(std::string, cmdSTDFUNC*);
-      bool           addUSERFUNC(FuncDeclaration*, cmdSTDFUNC*, parsercmd::yyltype);
+      bool           addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype);
+      bool           addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype);
       void           addGlobalType(char*, telldata::tell_type*);
       void           recoveryDone();
       ~cmdMAIN();
@@ -388,7 +393,7 @@ namespace  parsercmd {
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
                                  cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
-   arguments(vm), returntype(tt), _execOnRecovery(eor) {};
+                                    arguments(vm), returntype(tt), _execOnRecovery(eor) {};
       virtual int                execute() = 0;
       virtual void               undo() = 0;
       virtual void               undo_cleanup() = 0;
@@ -397,6 +402,7 @@ namespace  parsercmd {
       virtual int                argsOK(telldata::argumentQ* amap);
       telldata::typeID           gettype() const {return returntype;};
       virtual bool               internal() {return true;}
+      virtual bool               declaration() {return false;}
       bool                       execOnRecovery() {return _execOnRecovery;}
       bool                       ignoreOnRecovery() { return _ignoreOnRecovery;}
       void                       set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
@@ -412,11 +418,16 @@ namespace  parsercmd {
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
    public:
-      cmdFUNC(argumentLIST* vm, telldata::typeID tt);
+                              cmdFUNC(argumentLIST*, telldata::typeID, bool);
       int                     execute();
       bool                    internal() {return false;}
+      bool                    declaration() {return _declaration;}
       void                    undo() {};
       void                    undo_cleanup() {};
+      void                    set_defined() {_declaration = false;}
+   private:
+      bool                    _declaration;
+      word                    _recursyLevel;
    };
 
    class cmdIFELSE: public cmdVIRTUAL {

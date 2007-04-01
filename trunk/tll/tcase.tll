@@ -269,19 +269,21 @@ void modify_undo_bug()
    punselect({{3.5,10.5},{13,-4.5}});
    move({11.5,8},{18,10.5});
    undo();
-   echo("6 sqare boxes should be displayed");
+   echo("8 sqare boxes should be displayed");
 }
 
-//int factoriel(int stop)
-//{
-//   if (stop > 1)
-//   {
-//      int next = stop - 1;
-//      int boza = factoriel(next);
-//      return (stop * boza);
-//   }
-//   return 1;
-//}
+int factoriel(int stop)
+{
+   if (stop > 1)
+   {
+      echo(stop);
+      int next = stop - 1;
+      int boza = factoriel(next);
+      echo(stop);
+      return (stop * boza);
+   };
+   return 1;
+}
 
 
 newcell("Fcell");
