@@ -199,7 +199,7 @@ Ooops! Second thought!
 input:
      entrance                              {}
    | input  entrance                       {}
-;   
+;
 
 entrance:
      statement ';'                         {
@@ -208,7 +208,6 @@ entrance:
    }
    | funcdefinition                        {}
    | funcdeclaration ';'                   {
-//         CMDBlock->addUSERFUNCDECL(std::string($2),$1,arglist);
       delete($1); cfd = NULL;
    }
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
@@ -220,6 +219,7 @@ funcdeclaration:
       cfd = new parsercmd::FuncDeclaration($2, $1) ;
    }
      funcarguments ')'                     {
+      CMDBlock->addUSERFUNCDECL(cfd,@$);
       $$ = cfd;
       delete [] $2;
    }
@@ -246,7 +246,7 @@ block:
 
 funcblock :
      '{'                                   {
-         CMDBlock = new parsercmd::cmdFUNC(cfd->argListCopy(),cfd->type());
+         CMDBlock = new parsercmd::cmdFUNC(cfd->argListCopy(),cfd->type(),false);
          CMDBlock->pushblk();
       }
      statements '}'                        {

@@ -500,6 +500,12 @@ int parsercmd::cmdFUNCCALL::execute()
       tell_log(console::MT_INFO, info);
       return EXEC_NEXT;
    }
+   if (funcbody->declaration())
+   {
+      std::string info = "Link error. Function " + funcname + "() not defined";
+      tell_log(console::MT_ERROR, info);
+      return EXEC_ABORT;
+   }
    LogFile.setFN(funcname);
    try {fresult = funcbody->execute();}
    catch (EXPTN) {return EXEC_ABORT;}
@@ -544,12 +550,12 @@ telldata::tell_var* parsercmd::cmdBLOCK::getID(char*& name, bool local){
    return NULL;
 }
 
-void parsercmd::cmdBLOCK::addID(char*& name, telldata::tell_var* var) {
+void parsercmd::cmdBLOCK::addID(const char* name, telldata::tell_var* var) {
    TELL_DEBUG(addID);
    VARlocal[name] = var;
 }
 
-void parsercmd::cmdBLOCK::addlocaltype(char*& ttypename, telldata::tell_type* ntype) {
+void parsercmd::cmdBLOCK::addlocaltype(const char* ttypename, telldata::tell_type* ntype) {
    assert(TYPElocal.end() == TYPElocal.find(ttypename));
    _next_lcl_typeID = ntype->ID() + 1;
    TYPElocal[ttypename] = ntype;
@@ -622,9 +628,15 @@ void parsercmd::cmdBLOCK::addFUNC(std::string, cmdSTDFUNC* cQ) {
    if (cQ)    delete cQ;
 }
 
-bool parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdSTDFUNC*, parsercmd::yyltype) {
+bool parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype) {
    TELL_DEBUG(addFUNC);
    tellerror("Nested function definitions are not allowed");
+   return false;
+}
+
+bool parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype) {
+   TELL_DEBUG(addFUNCDECL);
+   tellerror("Function definitions can be only global");
    return false;
 }
 
@@ -665,6 +677,24 @@ parsercmd::cmdBLOCK::~cmdBLOCK() {
 
 }
 
+void parsercmd::cmdBLOCK::copyContents( cmdFUNC* cQ )
+{
+   for (cmdQUEUE::const_iterator cmd = cmdQ.begin(); cmd != cmdQ.end(); cmd++)
+      cQ->pushcmd(*cmd);
+
+   cmdQ.clear();
+
+   for (telldata::variableMAP::iterator VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
+      cQ->addID(VMI->first.c_str(), VMI->second);
+
+   VARlocal.clear();
+
+   for (telldata::typeMAP::iterator TMI = TYPElocal.begin(); TMI != TYPElocal.end(); TMI++)
+      cQ->addlocaltype(TMI->first.c_str(), TMI->second);
+
+   TYPElocal.clear();
+}
+
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                                         (char*& fn, telldata::argumentQ* amap) const {
@@ -681,7 +711,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    return fbody;
 }
 
-bool  parsercmd::cmdBLOCK::funcValidate(const std::string& fn, const argumentLIST* alst)
+bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const argumentLIST* alst, cmdFUNC*& funcdef)
 {
    // convert argumentLIST to argumentMAP
    telldata::argumentQ arguMap;
@@ -704,11 +734,60 @@ bool  parsercmd::cmdBLOCK::funcValidate(const std::string& fn, const argumentLIS
          }
          else
          {
-            delete (fb->second);
-            _funcMAP.erase(fb);
-            std::ostringstream ost;
-            ost << "Warning! User function \""<< fn <<"\" is redefined";
+            if (!fb->second->declaration())
+            {
+               std::ostringstream ost;
+               ost << "Warning! User function \""<< fn <<"\" is redefined";
+               tell_log(console::MT_WARNING, ost.str());
+               delete (fb->second);
+               _funcMAP.erase(fb);
+            }
+            else
+               funcdef = static_cast<cmdFUNC*>(fb->second);
+            break;
+         }
+      }
+   }
+   telldata::argQClear(&arguMap);
+   return allow_definition;
+}
+
+bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const argumentLIST* alst, parsercmd::yyltype loc)
+{
+   // convert argumentLIST to argumentMAP
+   telldata::argumentQ arguMap;
+   typedef argumentLIST::const_iterator AT;
+   for (AT arg = alst->begin(); arg != alst->end(); arg++)
+      arguMap.push_back(new telldata::argumentID((*arg)->second->get_type()));
+   // get the function definitions with this name
+   typedef functionMAP::iterator MM;
+   std::pair<MM,MM> range = _funcMAP.equal_range(fn);
+   bool allow_definition = true;
+   for (MM fb = range.first; fb != range.second; fb++)
+   {
+      if (0 == fb->second->argsOK(&arguMap))
+      {// if function with this name and parameter list is already defined
+         std::ostringstream ost;
+         ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
+         if (fb->second->internal())
+         {
+            ost << "Can't redeclare internal function \"" << fn << "\"";
+            tell_log(console::MT_ERROR, ost.str());
+            allow_definition = false;
+            break;
+         }
+         else if (!fb->second->declaration())
+         {
+            ost << "Function \"" << fn << "\" already defined. Declaration ignored";
             tell_log(console::MT_WARNING, ost.str());
+            allow_definition = false;
+            break;
+         }
+         else
+         {
+            ost << "Function \"" << fn << "\" already declared. Declaration ignored";
+            tell_log(console::MT_WARNING, ost.str());
+            allow_definition = false;
             break;
          }
       }
@@ -838,8 +917,10 @@ parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
 }   
 
 //=============================================================================
-parsercmd::cmdFUNC::cmdFUNC(argumentLIST* vm, telldata::typeID tt):
-                                                cmdSTDFUNC(vm,tt,true), cmdBLOCK() {
+parsercmd::cmdFUNC::cmdFUNC(argumentLIST* vm, telldata::typeID tt, bool declaration):
+                        cmdSTDFUNC(vm,tt,true), cmdBLOCK(), _declaration(declaration)
+{
+   _recursyLevel = 0;
    // copy the arguments in the structure of the local variables
    typedef argumentLIST::const_iterator AT;
    for (AT arg = arguments->begin(); arg != arguments->end(); arg++) {
@@ -863,8 +944,14 @@ int parsercmd::cmdFUNC::execute() {
       argvar->assign(argval);
       delete argval;OPstack.pop();
    }
-   LogFile << "// Executing UDF " << LogFile.getFN();LogFile.flush();   
+   _recursyLevel++;
+   std::string funcname = LogFile.getFN();
+   LogFile << "// >> Entering UDF \"" << funcname << "\" .Recursy level:" << _recursyLevel;
+   LogFile.flush();
    int retexec = cmdBLOCK::execute();
+   LogFile << "// << Exiting  UDF \"" << funcname << "\" .Recursy level:" << _recursyLevel;
+   LogFile.flush();
+   _recursyLevel--;
    if (EXEC_ABORT == retexec) return retexec;
    else return EXEC_NEXT;
 }
@@ -932,12 +1019,9 @@ void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
    console::TellFnAdd(fname, cQ->callingConv(NULL));
 }
 
-/*bool parsercmd::cmdMAIN::addUSERFUNC(std::string fname , cmdSTDFUNC* cQ,
-                                                          argumentLIST* arglst)*/
-bool parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdSTDFUNC* cQ, parsercmd::yyltype loc)
+bool parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, parsercmd::yyltype loc)
 {
-   /*Check whether such a function is already defined */
-   
+   cmdFUNC* declfunc = NULL;
    if ((telldata::tn_void != decl->type()) && (0 == decl->numReturns())) {
       tellerror("function must return a value", loc);
       return false;
@@ -946,19 +1030,35 @@ bool parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdSTDFUNC* cQ, pars
       tellerror("function definition is ignored because of the errors above", loc);
       return false;
    }
-   else if (!(CMDBlock->funcValidate(decl->name().c_str(),decl->argList())))
+   /*Check whether such a function is already defined */
+   else if ( CMDBlock->defValidate(decl->name().c_str(), decl->argList(), declfunc) )
    {
-      std::string msg = "can't redefine internal function \"" + decl->name() + "\"";
-      tellerror(msg, loc);
-      return false;
+      if (declfunc)
+      {// pour over the definition contents in the body created by the declaration
+         cQ->copyContents(declfunc);
+         declfunc->set_defined();
+         console::TellFnAdd(decl->name(), cQ->callingConv(&TYPElocal));
+         console::TellFnSort();
+         return true;
+      }
+      else
+      {// the only reason to be here must be that the function is redefined
+         _funcMAP.insert(std::make_pair(decl->name(), cQ));
+         return true;
+      }
    }
-   else
+   else return false;
+}
+
+bool parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, parsercmd::yyltype loc)
+{
+   if (CMDBlock->declValidate(decl->name().c_str(),decl->argList(),loc))
    {
+      cmdSTDFUNC* cQ = new parsercmd::cmdFUNC(decl->argListCopy(),decl->type(), true);
       _funcMAP.insert(std::make_pair(decl->name(), cQ));
-      console::TellFnAdd(decl->name(), cQ->callingConv(&TYPElocal));
-      console::TellFnSort();
       return true;
    }
+   else return false;
 }
 
 parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {
