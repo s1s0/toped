@@ -367,6 +367,8 @@ namespace  parsercmd {
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
       void                       copyContents(cmdFUNC*);
+      telldata::variableMAP*     copyVarLocal();
+      void                       restoreVarLocal(telldata::variableMAP&);
       functionMAP const          funcMAP() const {return _funcMAP;};
       virtual                   ~cmdBLOCK();
    protected:
@@ -426,8 +428,10 @@ namespace  parsercmd {
       void                    undo_cleanup() {};
       void                    set_defined() {_declaration = false;}
    private:
+      typedef std::stack<telldata::variableMAP*> LocalVarStack;
       bool                    _declaration;
       word                    _recursyLevel;
+      LocalVarStack           _VARLocalStack;
    };
 
    class cmdIFELSE: public cmdVIRTUAL {

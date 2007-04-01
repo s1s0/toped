@@ -695,6 +695,27 @@ void parsercmd::cmdBLOCK::copyContents( cmdFUNC* cQ )
    TYPElocal.clear();
 }
 
+telldata::variableMAP* parsercmd::cmdBLOCK::copyVarLocal()
+{
+   telldata::variableMAP* varmap = new telldata::variableMAP();
+   for (telldata::variableMAP::iterator VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
+      (*varmap)[VMI->first.c_str()] = VMI->second->selfcopy();
+   return varmap;
+}
+
+void parsercmd::cmdBLOCK::restoreVarLocal(telldata::variableMAP& nvars)
+{
+   typedef telldata::variableMAP::iterator VMIT;
+   for (VMIT VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
+   {
+      VMIT coresp = nvars.find(VMI->first.c_str());
+      assert(coresp != nvars.end());
+      VMI->second->assign(coresp->second);
+      delete coresp->second;
+   }
+   nvars.clear();
+}
+
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                                         (char*& fn, telldata::argumentQ* amap) const {
@@ -929,11 +950,15 @@ parsercmd::cmdFUNC::cmdFUNC(argumentLIST* vm, telldata::typeID tt, bool declarat
    }
 }
 
-int parsercmd::cmdFUNC::execute() {
+int parsercmd::cmdFUNC::execute()
+{
+   if (_recursyLevel > 0)  _VARLocalStack.push(copyVarLocal());
+   _recursyLevel++;
    // get the arguments from the operands stack and replace the values
    // of the function arguments
    int i = arguments->size();
-   while (i-- > 0) {
+   while (i-- > 0)
+   {
       //get the argument name
       std::string   argname = (*arguments)[i]->first;
       // get the tell variable (by name)
@@ -944,7 +969,6 @@ int parsercmd::cmdFUNC::execute() {
       argvar->assign(argval);
       delete argval;OPstack.pop();
    }
-   _recursyLevel++;
    std::string funcname = LogFile.getFN();
    LogFile << "// >> Entering UDF \"" << funcname << "\" .Recursy level:" << _recursyLevel;
    LogFile.flush();
@@ -952,6 +976,12 @@ int parsercmd::cmdFUNC::execute() {
    LogFile << "// << Exiting  UDF \"" << funcname << "\" .Recursy level:" << _recursyLevel;
    LogFile.flush();
    _recursyLevel--;
+   if (_recursyLevel > 0)
+   {
+      telldata::variableMAP* top_stack = _VARLocalStack.top();_VARLocalStack.pop();
+      restoreVarLocal(*top_stack);
+      delete top_stack;
+   }
    if (EXEC_ABORT == retexec) return retexec;
    else return EXEC_NEXT;
 }
