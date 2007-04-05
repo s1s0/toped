@@ -82,8 +82,6 @@ void                       return tknVOIDdef;
 real                       return tknREALdef;
 int                        return tknINTdef;
 bool                       return tknBOOLdef;
-point                      return tknPOINTdef;
-box                        return tknBOXdef;
 string                     return tknSTRINGdef;
 layout                     return tknLAYOUTdef;
 list                       return tknLISTdef;

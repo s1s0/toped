@@ -28,12 +28,13 @@ General
   
   TELL related
   ------------
+  * Function calls must be declared as expressions (in the parser). Currently the expressions
+    can contain only variables
   * TELL lists and their manupulation
     - think about indexing operatons on the lists - adding, removing components
   * break, continue, jump/goto statements and label (for the f.... jump)
   * return statements when there are multiply paths
   * logical operations between figures in TELL! (maybe Toped engine should be used here)
-  * Think about the recursive functions!
   * Introduce default parameter values. Think about callback functions
   * Error messages and YYERROR and error recovery - esspecialy from
     tellyzer block. May be something like a error report structure

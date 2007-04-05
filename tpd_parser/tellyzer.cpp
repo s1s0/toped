@@ -535,6 +535,8 @@ bool parsercmd::cmdRETURN::checkRetype(telldata::argumentID* arg) {
 parsercmd::cmdBLOCK::cmdBLOCK() {
    assert(!_blocks.empty());
    _next_lcl_typeID = _blocks.front()->_next_lcl_typeID;
+   TYPElocal.clear();
+   VARlocal.clear();
 }
 
 telldata::tell_var* parsercmd::cmdBLOCK::getID(char*& name, bool local){
@@ -576,7 +578,7 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByName(char*& ttypename) 
    BS blkstart = _blocks.begin();
    BS blkend   = _blocks.end();
    for (BS cmd = blkstart; cmd != blkend; cmd++) {
-        if ((*cmd)->TYPElocal.end() != TYPElocal.find(ttypename))
+        if ((*cmd)->TYPElocal.end() != (*cmd)->TYPElocal.find(ttypename))
             return (*cmd)->TYPElocal[ttypename];
    }
    return NULL;
