@@ -49,13 +49,13 @@ box MOStran(point bound, real W, real L) {
    point metlBL = contBL |/  _metalovercont;
    point metlBR = contBR \|  _metalovercont;
    
-//   box test_box = {{0,0},(0,0}} /| _mincont;
-   
    box zerobox = {{0,0},{0,0}};
    box contactL = zerobox /| _mincont;
    box contactR = zerobox |\ _mincont;
    // calculate the number of contacts
-   if (W < 2*_actOverCont + _mincont) {echo("Can't fit even a single contact !")}
+   if (W < 2*_actOverCont + _mincont) {
+      echo("Can't fit even a single contact !")
+   }
    else {
       usinglayer(7);
       real numconts = (W - 2*_actOverCont) / (_mincont + _contspace);
@@ -109,6 +109,27 @@ void CheckLists() {
    addwire({{-5,0},{-5,40}, {40,40}, {40,0}},2);
    addwire({{-5,0},{40,0}},2);
    addwire({{35,5},{35,30}},2);
+
+   point current;
+   point list copy_list;
+//   foreach current p2
+//   {
+//      echo(current);
+//   }
+      
+//   list     ++| (scalar || list)    // add one to the front of the list   push_front
+//   list     |++ (scalar || list)    // add one to the back of the list	 push_back
+//   scalar   --| list;       	   // take the first out of the list     pop_front
+//   scalar   |-- list;       	   // take the last out of the list      pop_back
+
+//   list     += (scalar || list)    // add one to the front of the list   push_front, unshift
+//   list     =+ (scalar || list)    // add one to the back of the list    push_back , push
+//   list     -= (int);       	   // take the first out of the list     pop_front , shift
+//   list     =- (int);       	   // take the last out of the list      pop_back  , pop
+   
+//   lenght(list);
+//   first(list);
+//   last(list);
 }
 
 void whiletest() {
@@ -289,6 +310,11 @@ void factotest()
       echo(factoriel(i));
       i = i+1;
    } until (i < 10)      
+}
+
+void listtest()
+{
+   
 }
 
 newcell("Fcell");

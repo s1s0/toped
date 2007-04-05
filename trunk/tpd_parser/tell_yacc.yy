@@ -173,9 +173,9 @@ Ooops! Second thought!
 %start input
 /*---------------------------------------------------------------------------*/
 %token                 tknERROR
-%token	               tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknSTRUCTdef
-%token                 tknVOIDdef tknREALdef tknBOOLdef tknINTdef tknPOINTdef 
-%token                 tknBOXdef tknSTRINGdef tknLAYOUTdef tknLISTdef tknRETURN
+%token	              tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknSTRUCTdef
+%token                 tknVOIDdef tknREALdef tknBOOLdef tknINTdef
+%token                 tknSTRINGdef tknLAYOUTdef tknLISTdef tknRETURN
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ tknAND tknOR
 %token                 tknSW tknSE tknNE tknNW
 %token <parsestr>      tknIDENTIFIER tknFIELD tknSTRING
@@ -460,14 +460,13 @@ telltype:
    | tknREALdef                            {$$ = telldata::tn_real;}
    | tknINTdef                             {$$ = telldata::tn_int;}
    | tknBOOLdef                            {$$ = telldata::tn_bool;}
-   | tknPOINTdef                           {$$ = telldata::tn_pnt;}
-   | tknBOXdef                             {$$ = telldata::tn_box;}
    | tknSTRINGdef                          {$$ = telldata::tn_string;}
    | tknLAYOUTdef                          {$$ = telldata::tn_layout;}
    | tknIDENTIFIER                         {
         const telldata::tell_type* ttype = CMDBlock->getTypeByName($1);
         if (NULL == ttype)  {
-           tellerror("Bad type specifier", @1);YYABORT;
+           tellerror("Bad type specifier", @1);
+           YYABORT;
         }
         else $$ = ttype->ID();
         delete [] $1;
