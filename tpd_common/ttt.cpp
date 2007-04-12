@@ -232,6 +232,7 @@ DBbox DBbox::getcorner(byte corner) {
    return DBbox(_p1.x(),_p1.y(),
                  static_cast<int4b>(rint((_p2.x() + _p1.x()) / 2)), 
                  static_cast<int4b>(rint((_p2.y() + _p1.y()) / 2)));
+     default: assert(false);
    }
 }
 

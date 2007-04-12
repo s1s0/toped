@@ -1445,7 +1445,7 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
       else {tellerror("unexepected operand type",loc1);return telldata::tn_void;}
       return telldata::tn_bool;
    }
-   else if (op1 == op2 == telldata::tn_bool) {
+   else if ((telldata::tn_bool == op1) && (telldata::tn_bool == op2)) {
       if      (ope == "&&") CMDBlock->pushcmd(new parsercmd::cmdAND());
       else if (ope == "||") CMDBlock->pushcmd(new parsercmd::cmdOR());
       else {tellerror("unexepected operand type",loc1);return telldata::tn_void;}
