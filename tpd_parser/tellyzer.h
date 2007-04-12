@@ -464,6 +464,20 @@ namespace  parsercmd {
       cmdBLOCK *body;
    };
 
+   class cmdFOREACH: public cmdVIRTUAL {
+   public:
+      cmdFOREACH(telldata::tell_var* var, telldata::tell_var* list) :
+                                       _var(var),_header(NULL), _body(NULL) {};
+      void                 addBlocks(cmdBLOCK* hd, cmdBLOCK* bd)
+                                                    {_header = hd; _body = bd;}
+      int                  execute();
+      ~cmdFOREACH();
+   private:
+      telldata::tell_var*  _var;
+      cmdBLOCK*            _header;
+      cmdBLOCK*            _body;
+   };
+
    telldata::typeID UMinus(telldata::typeID, yyltype);
    telldata::typeID   Plus(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Minus(telldata::typeID, telldata::typeID, yyltype, yyltype);

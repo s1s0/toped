@@ -1032,6 +1032,35 @@ int parsercmd::cmdREPEAT::execute() {
 }
 
 //=============================================================================
+int parsercmd::cmdFOREACH::execute() {
+   TELL_DEBUG(cmdFOREACH);
+   int retexec;
+   
+   _header->execute();
+   telldata::ttlist* bozalist = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::memlist valist = bozalist->mlist();
+      
+//   telldata::memlist valist = (static_cast<telldata::ttlist*>(_list))->mlist();
+   for (telldata::memlist::const_iterator CI = valist.begin(); CI != valist.end(); CI++)
+   {
+      _var->assign(*CI);
+      retexec = _body->execute();
+      if (EXEC_NEXT != retexec) return retexec;
+      //@TODO 
+   }
+   return retexec;
+}
+
+parsercmd::cmdFOREACH::~cmdFOREACH()
+{
+//   delete _var;
+   if (NULL != _header)
+      delete _header;
+   if (NULL != _body)
+      delete _body;
+}
+
+//=============================================================================
 int parsercmd::cmdMAIN::execute()
 {
    TELL_DEBUG(cmdMAIN_execute);

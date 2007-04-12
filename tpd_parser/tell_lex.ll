@@ -92,6 +92,7 @@ if                         return tknIF;
 else                       return tknELSE;
 while                      return tknWHILE;
 repeat                     return tknREPEAT;
+foreach                    return tknFOREACH;
 struct                     return tknSTRUCTdef;
 until                      return tknUNTIL;
 {lex_string}             { telllval.parsestr = parsercmd::charcopy(yytext, true);

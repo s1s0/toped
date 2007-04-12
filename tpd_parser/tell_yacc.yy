@@ -51,6 +51,8 @@ extern console::ted_cmd*           Console;
 /*Current tell variable name*/
 telldata::tell_var *tellvar = NULL;
 telldata::tell_var *tell_lvalue = NULL;
+/*Current command - used in foreach statement*/
+parsercmd::cmdFOREACH *foreach_command;
 /*Current tell struct */
 telldata::tell_type *tellstruct = NULL;
 /* used for argument type checking during function call parse */
@@ -173,8 +175,8 @@ Ooops! Second thought!
 %start input
 /*---------------------------------------------------------------------------*/
 %token                 tknERROR
-%token	              tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknSTRUCTdef
-%token                 tknVOIDdef tknREALdef tknBOOLdef tknINTdef
+%token	              tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
+%token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
 %token                 tknSTRINGdef tknLAYOUTdef tknLISTdef tknRETURN
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ tknAND tknOR
 %token                 tknSW tknSE tknNE tknNW
@@ -184,7 +186,7 @@ Ooops! Second thought!
 /* parser types*/
 %type <pttname>        primaryexpression unaryexpression
 %type <pttname>        multiexpression addexpression expression
-%type <pttname>        assignment fieldname funccall
+%type <pttname>        assignment fieldname funccall telllist
 %type <pttname>        lvalue telltype telltypeID variable anonymousvar
 %type <pttname>        variabledeclaration andexpression eqexpression relexpression 
 %type <pfarguments>    funcarguments
@@ -307,7 +309,37 @@ whilestatement:
          parsercmd::cmdBLOCK* condBlock = CMDBlock;
          CMDBlock = CMDBlock->popblk();
          CMDBlock->pushcmd(new parsercmd::cmdWHILE(condBlock,$7));
-   }
+      }
+;
+
+telllist:
+     expression                     {
+         if       (!($1 & telldata::tn_listmask))
+            tellerror("list expected",@1);
+         else
+            $$ = $1;
+      }
+;
+
+foreachstatement:
+     tknFOREACH '('                 {
+         CMDBlock = new parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+      }
+     lvalue ';'                     {
+         tell_lvalue = tellvar;
+      }
+     telllist ')'                   {
+         if  (($4 | telldata::tn_listmask) != $7)
+            tellerror("unappropriate variable type",@4);
+         foreach_command = new parsercmd::cmdFOREACH(tell_lvalue,tellvar);
+      }
+     block                          {
+         parsercmd::cmdBLOCK* foreach_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         foreach_command->addBlocks(foreach_block,$10);
+         CMDBlock->pushcmd(foreach_command);
+      }
 ;
 
 repeatstatement:
@@ -337,6 +369,7 @@ statement:
    | assignment                            {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | ifstatement                           {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | whilestatement                        {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
+   | foreachstatement                      {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | repeatstatement                       {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | returnstatement                       {/*keep the return value in the stack*/}
    | funccall                              {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
@@ -531,9 +564,12 @@ structure:
 
 anonymousvar:
      telltypeID   structure               {
+      telldata::argumentID* op2 = $2;
       // the structure is without a type at this moment, so here we do the type checking
-      if (parsercmd::StructTypeCheck($1, $2, @2)) {
+      if (parsercmd::StructTypeCheck($1, op2, @2)) {
          tellvar = CMDBlock->newTellvar($1, @1);
+         parsercmd::Assign(tellvar, $2, @2);
+         delete $2;
          $$ = $1;
       }
       else tellerror("Type mismatch", @2);
