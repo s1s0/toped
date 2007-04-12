@@ -599,30 +599,33 @@ void glfDrawTopedString(const char *s, unsigned char fill)
    int i;
    float sda, sdb;
 
-   if ((!s) || (!*s) || (curfont == -1)) return;
-   void(* symbfunc) (char) = (fill) ? &glfDrawSolidSymbol : &glfDrawWiredSymbol;
-   glPushMatrix();
+	if ((!s) || (!*s) || (curfont == -1)) 
+		return; 
+	else 
+	{
+		void(* symbfunc) (char)	  = (fill) ? &glfDrawSolidSymbol : &glfDrawWiredSymbol;
+		glPushMatrix();
    
-   /* Start to draw the string */
-   for (i=0; i<(int)strlen(s); i++)
-   {
-      if (s[i] != ' ') (* symbfunc)(s[i]);
-      if ((fonts[curfont]->symbols[s[i]] == NULL) || (s[i] == ' '))
-         glTranslatef(SpaceSize, 0, 0);
-      else if (i < ((int)strlen(s)-1))
-      {
-         if (s[i+1] == ' ')
-            glTranslatef(SymbolDist, 0, 0);
-         else
-         {
-            if (fonts[curfont]->symbols[s[i+1]] == NULL) continue;
-            sda = (float)fabs(fonts[curfont]->symbols[s[i]]->rightx);
-            sdb = (float)fabs(fonts[curfont]->symbols[s[i+1]]->leftx);
-            glTranslatef(sda+sdb+SymbolDist, 0, 0);
-         }
-      }
-   }
-   glPopMatrix();
+		/* Start to draw the string */
+		for (i=0; i<(int)strlen(s); i++)
+		{
+			if (s[i] != ' ') (* symbfunc)(s[i]);
+			if ((fonts[curfont]->symbols[s[i]] == NULL) || (s[i] == ' '))
+				glTranslatef(SpaceSize, 0, 0);
+			else if (i < ((int)strlen(s)-1))
+			{
+				if (s[i+1] == ' ')
+					glTranslatef(SymbolDist, 0, 0);
+				else
+				{
+					if (fonts[curfont]->symbols[s[i+1]] == NULL) continue;
+					sda = (float)fabs(fonts[curfont]->symbols[s[i]]->rightx);
+					sdb = (float)fabs(fonts[curfont]->symbols[s[i+1]]->leftx);
+					glTranslatef(sda+sdb+SymbolDist, 0, 0);
+				}
+			}
+		}
+		glPopMatrix();}
 }
 
 /* Draw wired string by font_descriptor */
