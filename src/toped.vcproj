@@ -73,12 +73,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib winmm.lib wxmsw26_xrc.lib wxregex.lib wxzlib.lib wxpng.lib wxjpeg.lib wxtiff.lib wxexpat.lib wxbase26.lib wxbase26_net.lib wxmsw26_core.lib wxmsw26_adv.lib wxmsw26_html.lib wxbase26_xml.lib wxmsw26_gl.lib glut32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib winmm.lib wxmsw28_xrc.lib wxregex.lib wxzlib.lib wxpng.lib wxjpeg.lib wxtiff.lib wxexpat.lib wxbase28.lib wxbase28_net.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_html.lib wxbase28_xml.lib wxmsw28_gl.lib glut32.lib"
 				OutputFile=".\Release/toped.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="c:\wxWindows\lib,c:\wxWindows\contrib\lib"
-				IgnoreDefaultLibraryNames="libc.lib,libci.lib,msvcrt.lib"
+				IgnoreDefaultLibraryNames="libc.lib,libci.lib "
 				ProgramDatabaseFile=".\Release/toped.pdb"
 				SubSystem="2"
 				TargetMachine="1"
@@ -543,18 +543,6 @@
 			Name="FlexBison Files"
 			>
 		</Filter>
-		<File
-			RelativePath="..\Debug\tpd_commond.lib"
-			>
-		</File>
-		<File
-			RelativePath="..\Debug\TPD_DBd.lib"
-			>
-		</File>
-		<File
-			RelativePath="..\Debug\tpd_parserd.lib"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
