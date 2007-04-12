@@ -372,7 +372,8 @@ bool  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierT
          citem = child->brother;
          child->brother = citem->brother;
       }
-      assert(check = lst->GetMember(comp));
+      check = lst->GetMember(comp);
+      assert(check);
       if (check->GetNextMember(comp)) {
          // Means that is not the last component of this type
          // So it has to be deleted, though unlinked first

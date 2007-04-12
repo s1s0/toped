@@ -292,7 +292,8 @@ bool TpdTime::getStdCTime(wxString& exp) {
    // get the date
    assert(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
-   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   src_tmpl.GetMatch(exp).ToLong(&conversion);
+   assert(conversion);
    broken_time.tm_mday = conversion;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // get month
