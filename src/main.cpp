@@ -319,7 +319,7 @@ bool TopedApp::LoadFontFile(std::string fontname)
    {
       wxString errmsg;
       bool wbox_status = true;
-      errmsg << wxT("Font library \"") << fontFN.GetFullPath() << wxT("\" not found or corrupted. \n)") <<
+      errmsg << wxT("Font library \"") << fontFN.GetFullPath() << wxT("\" not found or corrupted. \n") <<
                 wxT("Toped will be unstable.\n Continue?");
       wxMessageDialog* dlg1 = new  wxMessageDialog(Toped,
             errmsg,
