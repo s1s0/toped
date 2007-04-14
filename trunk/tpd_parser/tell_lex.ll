@@ -110,8 +110,6 @@ until                      return tknUNTIL;
 "|\\"                      return tknNW;
 "("                        return '(';
 ")"                        return ')';
-"["                        return '[';
-"]"                        return ']';
 "{"                        return '{';
 "}"                        return '}';
 "<"                        return '<';
