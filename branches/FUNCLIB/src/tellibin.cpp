@@ -895,7 +895,12 @@ int tellstdfunc::stdNEWDESIGNd::execute()
    TpdTime timeCreated(getStringValue());
    std::string nm = getStringValue();
    DATC->newDesign(nm, timeCreated.stdCTime());
-// reset UNDO buffers;
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      ATDB ->btreeAddMember    = &browsers::treeAddMember;
+      ATDB ->btreeRemoveMember = &browsers::treeRemoveMember;
+      browsers::addTDTtab(nm, ATDB->hiertree());
+   DATC->unlockDB();
+   // reset UNDO buffers;
    UNDOcmdQ.clear();
    while (!UNDOPstack.empty()) {
       delete UNDOPstack.front(); UNDOPstack.pop_front();
@@ -3414,7 +3419,18 @@ int tellstdfunc::GDSread::execute() {
    if (expandFileName(filename))
    {
       std::list<std::string> top_cell_list;
-      DATC->GDSparse(filename, top_cell_list);
+      DATC->GDSparse(filename);
+      // add GDS tab in the browser
+      browsers::addGDStab();
+      //
+      GDSin::GDSFile* AGDSDB = DATC->lockGDS();
+
+         GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot();
+         do 
+         {
+            top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));
+         } while (NULL != (root = root->GetNextRoot()));
+      DATC->unlockGDS();
       telldata::ttlist* topcells = new telldata::ttlist(telldata::tn_string);
       for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                 CN != top_cell_list.end(); CN ++)
@@ -3443,9 +3459,17 @@ int tellstdfunc::TDTread::execute()
    if (expandFileName(filename))
    {
       nameList top_cell_list;
-      if (DATC->TDTread(filename, top_cell_list))
+      if (DATC->TDTread(filename))
       {
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+            browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
+            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot();
+            do
+            {
+               top_cell_list.push_back(std::string(root->GetItem()->name()));
+            } while (NULL != (root = root->GetNextRoot()));
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
             updateLayerDefinitions(ATDB, top_cell_list);
@@ -3491,8 +3515,16 @@ int tellstdfunc::TDTreadIFF::execute()
       if (DATC->TDTcheckread(filename, timeCreated, timeSaved, start_ignoring))
       {
          std::list<std::string> top_cell_list;
-         DATC->TDTread(filename, top_cell_list);
+         DATC->TDTread(filename);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         ATDB->btreeAddMember    = &browsers::treeAddMember;
+         ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+         browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
+         laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot();
+         do
+         {
+            top_cell_list.push_back(std::string(root->GetItem()->name()));
+         } while (NULL != (root = root->GetNextRoot()));
          TpdTime timec(ATDB->created());
          TpdTime timeu(ATDB->lastUpdated());
          updateLayerDefinitions(ATDB, top_cell_list);
@@ -3620,9 +3652,11 @@ int tellstdfunc::GDSconvertAll::execute()
    }
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       DATC->importGDScell(top_cells, recur, over);
+      browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
       updateLayerDefinitions(ATDB, top_cells);
    DATC->unlockDB();
-   LogFile << LogFile.getFN() << "(\""<< *pl << "\"," << LogFile._2bool(recur) 
+   
+   LogFile << LogFile.getFN() << "(\""<< *pl << "\"," << LogFile._2bool(recur)
          << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    delete pl;
    return EXEC_NEXT;
@@ -3797,6 +3831,7 @@ tellstdfunc::GDSclose::GDSclose(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::GDSclose::execute() {
+   browsers::clearGDStab();
    DATC->GDSclose();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
    return EXEC_NEXT;
