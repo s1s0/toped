@@ -30,6 +30,7 @@
 
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_common/ttt.h"
+#include "../tpd_common/tuidefs.h"
 
 extern console::ted_cmd*         Console;
 extern tui::TopedFrame*          Toped;
