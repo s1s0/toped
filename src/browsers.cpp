@@ -34,7 +34,7 @@
 #include "../tpd_common/outbox.h"
 #include "../tpd_parser/ted_prompt.h"
 #include "tui.h"
-#include "datacenter.h"
+#include "../tpd_DB/datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
 #include "../ui/cell_normal.xpm"

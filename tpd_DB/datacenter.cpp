@@ -27,11 +27,10 @@
 
 #include <sstream>
 #include "datacenter.h"
-#include "browsers.h"
 #include "../tpd_common/outbox.h"
-#include "../tpd_DB/tedat.h"
-#include "../tpd_DB/viewprop.h"
-#include "../tpd_DB/ps_out.h"
+#include "tedat.h"
+#include "viewprop.h"
+#include "ps_out.h"
 
 //-----------------------------------------------------------------------------
 // class gds2ted
@@ -246,7 +245,7 @@ bool DataCenter::TDTcheckread(const std::string filename,
    return retval;
 } 
 
-bool DataCenter::TDTread(std::string filename, std::list<std::string>& topcells)
+bool DataCenter::TDTread(std::string filename)
 {
    laydata::TEDfile tempin(filename.c_str());
    if (!tempin.status()) return false;
@@ -266,18 +265,7 @@ bool DataCenter::TDTread(std::string filename, std::list<std::string>& topcells)
    _tedfilename = filename;
    _neversaved = false;
    _TEDDB = tempin.design();
-   _TEDDB->btreeAddMember    = &browsers::treeAddMember;
-   _TEDDB->btreeRemoveMember = &browsers::treeRemoveMember;
    _TEDDB->assign_properties(_properties);
-   // get the hierarchy
-   browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
-   // extract the root cells
-   laydata::TDTHierTree* root = _TEDDB->hiertree()->GetFirstRoot();
-   do 
-   {
-      topcells.push_back(std::string(root->GetItem()->name()));
-   } while (NULL != (root = root->GetNextRoot()));
-   
    // Update Canvas scale
    _properties.setUU(_TEDDB->UU());
    return true;
@@ -342,27 +330,20 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
    gdsex.updateLastRecord();gdsex.closeFile();
 }
 
-void DataCenter::GDSparse(std::string filename, std::list<std::string>& topcells) 
+void DataCenter::GDSparse(std::string filename) 
 {
+   lockGDS();
    if (_GDSDB) 
    {
       std::string news = "Removing existing GDS data from memory...";
       tell_log(console::MT_WARNING,news);
       GDSclose();
    }
-   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    // parse the GDS file
    _GDSDB = new GDSin::GDSFile(filename.c_str());
    if (!_GDSDB->status()) return;
    // generate the hierarchy tree of cells
    _GDSDB->HierOut();
-   // add GDS tab in the browser
-   browsers::addGDStab();
-   GDSin::GDSHierTree* root = _GDSDB->hiertree()->GetFirstRoot();
-   do 
-   {
-      topcells.push_back(std::string(root->GetItem()->Get_StrName()));
-   } while (NULL != (root = root->GetNextRoot()));
    unlockGDS();
 }
 
@@ -372,12 +353,10 @@ void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over)
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.structure(CN->c_str(), recur, over);
       _TEDDB->modified = true;
-      browsers::addTDTtab(_TEDDB->name(), _TEDDB->hiertree());
    unlockGDS();
 }
 
 void DataCenter::GDSclose() {
-   browsers::clearGDStab();
    lockGDS();
       delete _GDSDB;
       _GDSDB = NULL;
@@ -408,14 +387,9 @@ void DataCenter::newDesign(std::string name, time_t created)
    }   
    _TEDDB = new laydata::tdtdesign(name, created, 0);
    _TEDDB->assign_properties(_properties);
-   _TEDDB->btreeAddMember    = &browsers::treeAddMember;
-   _TEDDB->btreeRemoveMember = &browsers::treeRemoveMember;
-
-   browsers::addTDTtab(name, _TEDDB->hiertree());
    _tedfilename = name + ".tdt";
    _neversaved = true;
    _properties.setUU(_TEDDB->UU());
-
 }
 
 laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell) 
