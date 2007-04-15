@@ -65,6 +65,7 @@ extern YYLTYPE telllloc; // parser current location - global variable, defined i
 //extern const wxEventType    wxEVT_LOG_ERRMESSAGE;
 console::ted_cmd*           Console = NULL;
 extern const wxEventType    wxEVT_TPDSTATUS;
+extern const wxEventType    wxEVT_CONSOLE_PARSE;
 
 //==============================================================================
 bool console::patternFound(const wxString templ,  wxString str) {
@@ -314,6 +315,7 @@ void console::parse_thread::StatusReady()
 //==============================================================================
 // The ted_cmd event table
 BEGIN_EVENT_TABLE( console::ted_cmd, wxTextCtrl )
+   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, ted_cmd::getCommandB)
    EVT_TEXT_ENTER(wxID_ANY, ted_cmd::getCommand)
    EVT_KEY_UP(ted_cmd::OnKeyUP)
 END_EVENT_TABLE()
@@ -382,6 +384,15 @@ void console::ted_cmd::getCommandA() {
 //         if (_wait) pthrd->Wait();
       }
    }
+}
+
+void console::ted_cmd::getCommandB(wxCommandEvent& event) {
+   
+   if (NULL != puc) return; // don't accept commands during shape input sessions
+   _thread = true;
+   wxString cmd = event.GetString();
+   SetValue(cmd);
+   getCommandA();
 }
 
 void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {

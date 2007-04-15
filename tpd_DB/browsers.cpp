@@ -29,21 +29,23 @@
 //===========================================================================
 
 #include "browsers.h"
-#include "../tpd_DB/viewprop.h"
+#include "viewprop.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
-#include "../tpd_parser/ted_prompt.h"
-#include "../tpd_DB/datacenter.h"
+//#include "../tpd_parser/ted_prompt.h"
+#include "datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
 #include "../ui/cell_normal.xpm"
 #include "../ui/cell_expanded.xpm"
 
 
-extern console::ted_cmd*         Console;
+//extern console::ted_cmd*         Console;
 extern DataCenter*               DATC;
-extern browsers::browserTAB*     Browsers;
 extern const wxEventType         wxEVT_CMD_BROWSER;
+extern const wxEventType         wxEVT_CONSOLE_PARSE;
+
+browsers::browserTAB*     Browsers = NULL;
 
 int wxCALLBACK wxListCompareFunction(long item1, long item2, long column)
 {
@@ -220,9 +222,9 @@ void browsers::GDSCellBrowser::OnLMouseDblClk(wxMouseEvent& event)
 }
 
 void browsers::GDSCellBrowser::OnGDSreportlay(wxCommandEvent& WXUNUSED(event)) {
-   wxString ost;
-   ost << wxT("report_gdslayers(\"") << GetItemText(RBcellID) <<wxT("\");");
-   Console->parseCommand(ost);
+   wxString cmd;
+   cmd << wxT("report_gdslayers(\"") << GetItemText(RBcellID) <<wxT("\");");
+   parseCommand(cmd);
 }
 
 void browsers::GDSCellBrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt)
@@ -401,9 +403,9 @@ void browsers::CellBrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt) {
 void browsers::CellBrowser::OnWXOpenCell(wxCommandEvent& event)
 {
    _activeStructure = top_structure = RBcellID;
-   wxString ost; 
-   ost << wxT("opencell(\"") << GetItemText(RBcellID) <<wxT("\");");
-   Console->parseCommand(ost);
+   wxString cmd; 
+   cmd << wxT("opencell(\"") << GetItemText(RBcellID) <<wxT("\");");
+   parseCommand(cmd);
 }
 
 void browsers::CellBrowser::OnItemRightClick(wxTreeEvent& event) 
@@ -423,9 +425,9 @@ void  browsers::CellBrowser::OnLMouseDblClk(wxMouseEvent& event)
    wxTreeItemId id = HitTest(pt, flags);
    if (id.IsOk() && (id != GetRootItem()) && (flags & wxTREE_HITTEST_ONITEMLABEL))
    {
-      wxString ost; 
-      ost << wxT("opencell(\"") << GetItemText(id) <<wxT("\");");
-      Console->parseCommand(ost);
+      wxString cmd; 
+      cmd << wxT("opencell(\"") << GetItemText(id) <<wxT("\");");
+      parseCommand(cmd);
    }
    else 
       event.Skip();
@@ -774,7 +776,7 @@ void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentna
 void browsers::TDTbrowser::OnReportUsedLayers(wxCommandEvent& WXUNUSED(event)) {
    wxString cmd;
    cmd << wxT("report_layers(\"") << selectedCellname() << wxT("\" , true);");
-   Console->parseCommand(cmd);
+   parseCommand(cmd);
 }
 
 wxString browsers::TDTbrowser::selectedCellname() const
@@ -806,6 +808,8 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    _TDTlayers = new layerbrowser(this, tui::ID_TPD_LAYERS);
    AddPage(_TDTlayers, wxT("Layers"));
    _GDSstruct = NULL;
+   _tellParser = NULL;
+   Browsers = this;
 }
 
 browsers::browserTAB::~browserTAB() {
@@ -937,6 +941,14 @@ void browsers::treeRemoveMember(const char* cell, const char* parent, bool orpha
    wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);
 }
 
+void browsers::parseCommand(const wxString cmd)
+{
+   assert(Browsers->tellParser());
+   wxCommandEvent eventPARSE(wxEVT_CONSOLE_PARSE);
+   eventPARSE.SetString(cmd);
+   wxPostEvent(Browsers->tellParser(), eventPARSE);
+}
+
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::layerbrowser, wxPanel)
    EVT_BUTTON(BT_LAYER_DO, browsers::layerbrowser::OnXXXSelected)
@@ -996,7 +1008,7 @@ void browsers::layerbrowser::OnActiveLayerL(wxListEvent& event)
 //      word layno = (word)info.GetData();
       wxString cmd;
       cmd << wxT("usinglayer(") << info.GetText() << wxT(");");
-      Console->parseCommand(cmd);
+      parseCommand(cmd);
    }
 }
 
@@ -1091,28 +1103,28 @@ void browsers::layerbrowser::OnHideSelected(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("hidelayer(") << getAllSelected() << wxT(", true);");
-   Console->parseCommand(cmd);
+   parseCommand(cmd);
 }
 
 void browsers::layerbrowser::OnShowSelected(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("hidelayer(") << getAllSelected() << wxT(", false);");
-   Console->parseCommand(cmd);
+   parseCommand(cmd);
 }
 
 void browsers::layerbrowser::OnLockSelected(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("locklayer(") << getAllSelected() << wxT(", true);");
-   Console->parseCommand(cmd);
+   parseCommand(cmd);
 }
 
 void browsers::layerbrowser::OnUnlockSelected(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("locklayer(") << getAllSelected() << wxT(", false);");
-   Console->parseCommand(cmd);
+   parseCommand(cmd);
 }
 
 //! Returns the GDS number of the first selected layer
@@ -1159,5 +1171,5 @@ void browsers::layerbrowser::OnActiveLayerM(wxCommandEvent&)
    word layno = getFirstSelected();
    wxString cmd;
    cmd << wxT("usinglayer(") << layno << wxT(");");
-   Console->parseCommand(cmd);
+   parseCommand(cmd);
 }

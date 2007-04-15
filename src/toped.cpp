@@ -677,6 +677,7 @@ void tui::TopedFrame::initView() {
 #endif
    _laycanvas = new LayoutCanvas(mS_canvas, gl_attrib);
    _cmdline = new console::ted_cmd(mS_command, _laycanvas);
+   _browsers->set_tellParser( _cmdline ) ;
 }
 
 
