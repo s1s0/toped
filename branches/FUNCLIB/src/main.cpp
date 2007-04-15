@@ -39,9 +39,9 @@
 #include "../tpd_common/glf.h"
 
 tui::TopedFrame*                 Toped = NULL;
-browsers::browserTAB*            Browsers = NULL;
 DataCenter*                      DATC = NULL;
 // from ted_prompt (console)
+extern browsers::browserTAB*     Browsers;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
@@ -406,7 +406,7 @@ bool TopedApp::OnInit() {
    console::ted_log_ctrl *logWindow = new console::ted_log_ctrl(Toped->logwin());
    delete wxLog::SetActiveTarget(logWindow);
 
-   Browsers = Toped->browsers();
+//   Browsers = Toped->browsers();
    CmdList = Toped->cmdlist();
    // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
    CMDBlock = new parsercmd::cmdMAIN();

@@ -31,7 +31,7 @@
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_DB/tedat.h"
 #include "../tpd_DB/datacenter.h"
-#include "browsers.h"
+#include "../tpd_DB/browsers.h"
 #include "../tpd_DB/viewprop.h"
 #include "../tpd_common/tedop.h"
 #include "toped.h"
@@ -896,8 +896,8 @@ int tellstdfunc::stdNEWDESIGNd::execute()
    std::string nm = getStringValue();
    DATC->newDesign(nm, timeCreated.stdCTime());
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      ATDB ->btreeAddMember    = &browsers::treeAddMember;
-      ATDB ->btreeRemoveMember = &browsers::treeRemoveMember;
+      ATDB->btreeAddMember    = &browsers::treeAddMember;
+      ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
       browsers::addTDTtab(nm, ATDB->hiertree());
    DATC->unlockDB();
    // reset UNDO buffers;
