@@ -30,10 +30,9 @@
 
 #include "browsers.h"
 #include "../tpd_DB/viewprop.h"
-#include "layoutcanvas.h"
+#include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
 #include "../tpd_parser/ted_prompt.h"
-#include "tui.h"
 #include "../tpd_DB/datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
@@ -45,7 +44,6 @@ extern console::ted_cmd*         Console;
 extern DataCenter*               DATC;
 extern browsers::browserTAB*     Browsers;
 extern const wxEventType         wxEVT_CMD_BROWSER;
-extern tui::TopedFrame*          Toped;
 
 int wxCALLBACK wxListCompareFunction(long item1, long item2, long column)
 {

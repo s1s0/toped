@@ -31,9 +31,6 @@
 #include <vector>
 #include <wx/wx.h>
 
-#include "layoutcanvas.h"
-
-
 /*WARNING!!!
    Current version ResourceCenter can use callback functions only
    for TopedFrame class. Using all other classes include TopedFrame children

@@ -30,12 +30,12 @@
 #include "tellibin.h"
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_DB/tedat.h"
-#include "layoutcanvas.h"
-#include "datacenter.h"
+#include "../tpd_DB/datacenter.h"
 #include "browsers.h"
 #include "../tpd_DB/viewprop.h"
 #include "../tpd_common/tedop.h"
 #include "toped.h"
+#include "../tpd_common/tuidefs.h"
 #include "resourcecenter.h"
 
 //#define TEUNDO_DEBUG_ON
