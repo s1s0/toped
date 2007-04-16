@@ -34,7 +34,6 @@
 #include "../tpd_DB/browsers.h"
 #include "../tpd_DB/viewprop.h"
 #include "../tpd_common/tedop.h"
-#include "toped.h"
 #include "../tpd_common/tuidefs.h"
 #include "resourcecenter.h"
 
@@ -47,8 +46,10 @@
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
-extern tui::TopedFrame*          Toped;
+extern console::ted_cmd*         Console;
 
+wxFrame*                         TopedMainW;
+wxWindow*                        TopedCanvasW;
 
 extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
@@ -219,11 +220,11 @@ int tellstdfunc::stdLONGCURSOR::execute()
    
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((longcur ? tui::STS_LONG_CURSOR : tui::STS_SHORT_CURSOR));
-   wxPostEvent(Toped, eventGRIDUPD);
+   wxPostEvent(TopedMainW, eventGRIDUPD);
 
    wxCommandEvent eventCNVS(wxEVT_CANVAS_CURSOR);
    eventCNVS.SetInt((longcur ? 1 : 0));
-   wxPostEvent(Toped->view(), eventCNVS);
+   wxPostEvent(TopedCanvasW, eventCNVS);
 
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(longcur) << ");"; LogFile.flush();
    RefreshGL();
@@ -303,7 +304,7 @@ int tellstdfunc::stdZOOMWIN::execute() {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
-   wxPostEvent(Toped->view(), eventZOOM);
+   wxPostEvent(TopedCanvasW, eventZOOM);
    return EXEC_NEXT;
 }
 
@@ -322,7 +323,7 @@ int tellstdfunc::stdZOOMWINb::execute() {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
-   wxPostEvent(Toped->view(), eventZOOM);
+   wxPostEvent(TopedCanvasW, eventZOOM);
    return EXEC_NEXT;
 }
 
@@ -338,7 +339,7 @@ int tellstdfunc::stdZOOMALL::execute() {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(ovl));
-   wxPostEvent(Toped->view(), eventZOOM);
+   wxPostEvent(TopedCanvasW, eventZOOM);
    return EXEC_NEXT;
 }
 //=============================================================================
@@ -541,7 +542,7 @@ void tellstdfunc::stdHIDECELLMARK::undo() {
    DATC->setcellmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
-   wxPostEvent(Toped->view(), eventGRIDUPD);
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
    RefreshGL();
 }
 
@@ -552,7 +553,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
    DATC->setcellmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
-   wxPostEvent(Toped->view(), eventGRIDUPD);
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
    RefreshGL();
    return EXEC_NEXT;
@@ -575,7 +576,7 @@ void tellstdfunc::stdHIDETEXTMARK::undo() {
    DATC->settextmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
-   wxPostEvent(Toped->view(), eventGRIDUPD);
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
    RefreshGL();
 }
@@ -587,7 +588,7 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
    DATC->settextmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
-   wxPostEvent(Toped->view(), eventGRIDUPD);
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
    RefreshGL();
    return EXEC_NEXT;
@@ -610,7 +611,7 @@ void tellstdfunc::stdHIDECELLBOND::undo() {
    DATC->setcellbox_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
-   wxPostEvent(Toped->view(), eventGRIDUPD);
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
    RefreshGL();
 }
@@ -622,7 +623,7 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
    DATC->setcellbox_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
-   wxPostEvent(Toped->view(), eventGRIDUPD);
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
    RefreshGL();
    return EXEC_NEXT;
@@ -1025,7 +1026,7 @@ void tellstdfunc::stdOPENCELL::undo() {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(ovl));
-   wxPostEvent(Toped->view(), eventZOOM);
+   wxPostEvent(TopedCanvasW, eventZOOM);
 }
 
 int tellstdfunc::stdOPENCELL::execute()
@@ -1050,7 +1051,7 @@ int tellstdfunc::stdOPENCELL::execute()
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(tui::ZOOM_WINDOW);
          eventZOOM.SetClientData(static_cast<void*>(ovl));
-         wxPostEvent(Toped->view(), eventZOOM);
+         wxPostEvent(TopedCanvasW, eventZOOM);
          LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
       }
       else
@@ -2178,7 +2179,7 @@ void tellstdfunc::stdAUTOPAN::undo() {
    DATC->setautopan(autop);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
-   wxPostEvent(Toped, eventGRIDUPD);
+   wxPostEvent(TopedMainW, eventGRIDUPD);
 
 }
 
@@ -2191,7 +2192,7 @@ int tellstdfunc::stdAUTOPAN::execute() {
    DATC->setautopan(autop);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
-   wxPostEvent(Toped, eventGRIDUPD);
+   wxPostEvent(TopedMainW, eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(autop) << ");"; LogFile.flush();
    return EXEC_NEXT;
 }
@@ -2226,7 +2227,7 @@ int tellstdfunc::stdSHAPEANGLE::execute() {
       else if  (angle == 45) eventGRIDUPD.SetInt(tui::STS_ANGLE_45);
       else if  (angle == 90) eventGRIDUPD.SetInt(tui::STS_ANGLE_90);
       else assert(false);
-      wxPostEvent(Toped, eventGRIDUPD);
+      wxPostEvent(TopedMainW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << angle << ");"; LogFile.flush();
    }
    else {
@@ -2247,11 +2248,11 @@ int tellstdfunc::getPOINT::execute() {
    DATC->unlockDB();
    // flag the prompt that we expect a single point & handle a pointer to
    // the operand stack
-   Toped->cmdline()->waitGUInput(&OPstack, console::op_point, CTM());
+   Console->waitGUInput(&OPstack, console::op_point, CTM());
    // force the thread in wait condition until the ted_prompt has our data
-   Toped->cmdline()->threadWaits4->Wait();
+   Console->threadWaits4->Wait();
    // ... and continue when the thread is woken up
-   if (Toped->cmdline()->mouseIN_OK())  return EXEC_NEXT;
+   if (Console->mouseIN_OK())  return EXEC_NEXT;
    else return EXEC_RETURN;
 }
 
@@ -2267,18 +2268,18 @@ int tellstdfunc::getPOINTLIST::execute() {
    DATC->unlockDB();
    // flag the prompt that we expect a list of points & handle a pointer to
    // the operand stack
-   Toped->cmdline()->waitGUInput(&OPstack, console::op_dpoly, CTM());
+   Console->waitGUInput(&OPstack, console::op_dpoly, CTM());
    // 
    wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(-1);
    eventMOUSEIN.SetExtraLong(1);
-   wxPostEvent(Toped->view(), eventMOUSEIN);
+   wxPostEvent(TopedCanvasW, eventMOUSEIN);
    // force the thread in wait condition until the ted_prompt has our data
-   Toped->cmdline()->threadWaits4->Wait();
+   Console->threadWaits4->Wait();
    // ... and continue when the thread is woken up
    eventMOUSEIN.SetExtraLong(0);
-   wxPostEvent(Toped->view(), eventMOUSEIN);
-   if (Toped->cmdline()->mouseIN_OK())  return EXEC_NEXT;
+   wxPostEvent(TopedCanvasW, eventMOUSEIN);
+   if (Console->mouseIN_OK())  return EXEC_NEXT;
    else return EXEC_RETURN;
 }
 
@@ -3864,10 +3865,10 @@ int tellstdfunc::stdADDMENU::execute()
    std::string hotKey   = getStringValue();
    std::string menu     = getStringValue();
 
-   wxMenuBar *menuBar      = Toped->getMenuBar();
-   tui::ResourceCenter *resourceCenter = Toped->getResourceCenter();
-   resourceCenter->appendMenu(menu, hotKey, function);
-   resourceCenter->buildMenu(menuBar);
+   wxMenuBar *menuBar      = TopedMainW->GetMenuBar();
+//   tui::ResourceCenter *resourceCenter = Toped->getResourceCenter();
+//   resourceCenter->appendMenu(menu, hotKey, function);
+//   resourceCenter->buildMenu(menuBar);
 
    return EXEC_NEXT;
 }
@@ -4019,21 +4020,21 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
    catch (EXPTN) {return false;}
    // flag the prompt what type of data is expected & handle a pointer to
    // the operand stack
-   Toped->cmdline()->waitGUInput(OPstack, (console::ACTIVE_OP)input_type, trans);
+   Console->waitGUInput(OPstack, (console::ACTIVE_OP)input_type, trans);
    // flag the canvas that a mouse input will be required
    wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(input_type);
    eventMOUSEIN.SetExtraLong(1);
-   wxPostEvent(Toped->view(), eventMOUSEIN);
+   wxPostEvent(TopedCanvasW, eventMOUSEIN);
    // force the thread in wait condition until the ted_prompt has our data
-   Toped->cmdline()->threadWaits4->Wait();
+   Console->threadWaits4->Wait();
    // ... and continue when the thread is woken up
    // Delete the temporary object in the tdtdesign
    DATC->mouseStop();
    // Stop the mouse stream from the canvas
    eventMOUSEIN.SetExtraLong(0);
-   wxPostEvent(Toped->view(), eventMOUSEIN);
-   return Toped->cmdline()->mouseIN_OK();
+   wxPostEvent(TopedCanvasW, eventMOUSEIN);
+   return Console->mouseIN_OK();
 }
 
 pointlist* tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
@@ -4134,7 +4135,7 @@ void tellstdfunc::UpdateLV()
    wxCommandEvent eventUPDATESEL(wxEVT_CANVAS_STATUS);
    eventUPDATESEL.SetInt(tui::CNVS_SELECTED);
    eventUPDATESEL.SetString(ws);
-   wxPostEvent(Toped->view(), eventUPDATESEL);
+   wxPostEvent(TopedCanvasW, eventUPDATESEL);
    RefreshGL();
 }
 
@@ -4147,7 +4148,7 @@ void tellstdfunc::RefreshGL()
          browsers::layer_add(UNDEFLAYNAME, *CUL);
       DATC->clearUnpublishedLayers();
    }
-   Toped->cmdline()->set_canvas_invalid(true);
+   Console->set_canvas_invalid(true);
 }
 
 void tellstdfunc::gridON(byte No, bool status) {
@@ -4159,7 +4160,7 @@ void tellstdfunc::gridON(byte No, bool status) {
       case 2: eventGRIDUPD.SetInt((status ? tui::STS_GRID2_ON : tui::STS_GRID2_OFF)); break;
       default: assert(false);
    }
-   wxPostEvent(Toped->view(), eventGRIDUPD);
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
 }
 
 void tellstdfunc::updateLayerDefinitions(laydata::tdtdesign* ATDB, nameList& top_cells)
@@ -4175,6 +4176,12 @@ void tellstdfunc::updateLayerDefinitions(laydata::tdtdesign* ATDB, nameList& top
       if (DATC->addlayer(UNDEFLAYNAME, *CUL))
          browsers::layer_add(UNDEFLAYNAME, *CUL);
    }
+}
+
+void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
+{
+   TopedMainW = tpd;
+   TopedCanvasW = cnvs;
 }
 
 /*

@@ -406,10 +406,10 @@ bool TopedApp::OnInit() {
    console::ted_log_ctrl *logWindow = new console::ted_log_ctrl(Toped->logwin());
    delete wxLog::SetActiveTarget(logWindow);
 
-//   Browsers = Toped->browsers();
    CmdList = Toped->cmdlist();
    // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
    CMDBlock = new parsercmd::cmdMAIN();
+   tellstdfunc::initFuncLib(Toped, Toped->view());
    InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
 
    SetTopWindow(Toped);
