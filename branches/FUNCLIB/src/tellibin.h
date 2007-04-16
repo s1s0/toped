@@ -268,6 +268,7 @@ namespace tellstdfunc {
    inline void          RefreshGL();
    void                 gridON(byte No, bool status);
    void                 updateLayerDefinitions(laydata::tdtdesign*, nameList&);
+   void                 initFuncLib(wxFrame*, wxWindow*);
 }
 
 #endif

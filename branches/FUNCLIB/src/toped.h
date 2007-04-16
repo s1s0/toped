@@ -85,8 +85,8 @@ namespace tui {
       void                    OnSashDrag(wxSashEvent& event);
       void                    OnQuit (wxCommandEvent&);
       void                    OnAbout(wxCommandEvent&);
-      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
-      ResourceCenter*         getResourceCenter(void) {return _resourceCenter;}
+//      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
+      ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
       console::ted_log*       logwin()   const {return _cmdlog;}
       LayoutCanvas*           view()     const {return _laycanvas;}
       console::ted_cmd*       cmdline()  const {return _cmdline;}
