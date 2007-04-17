@@ -32,6 +32,9 @@
 #include "viewprop.h"
 #include "ps_out.h"
 
+// Global variables
+DataCenter*               DATC = NULL;
+
 //-----------------------------------------------------------------------------
 // class gds2ted
 //-----------------------------------------------------------------------------
@@ -634,3 +637,9 @@ void DataCenter::clearRulers()
    _properties.clearRulers();
    PROPLock.Unlock();
 }
+
+void initDBLib()
+{
+   DATC = new DataCenter();
+}
+

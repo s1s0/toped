@@ -1093,6 +1093,7 @@ void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist
    _dbl_word i;
    _dbl_word num_cpoints = (num_points == _plist.size()) ? num_points : num_points / 3;
    // draw the central line in all cases
+   if (0 == num_cpoints) return;
    glBegin(GL_LINE_STRIP);
    for (i = 0; i < num_cpoints; i++)
       glVertex2i(ptlist[i].x(), ptlist[i].y());
