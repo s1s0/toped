@@ -39,8 +39,7 @@
 #include "../tpd_common/glf.h"
 
 tui::TopedFrame*                 Toped = NULL;
-DataCenter*                      DATC = NULL;
-// from ted_prompt (console)
+extern DataCenter*               DATC;
 extern browsers::browserTAB*     Browsers;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
@@ -400,7 +399,8 @@ bool TopedApp::OnInit() {
   _CrtSetDbgFlag(tmpDbgFlag);
   //_CrtSetBreakAlloc(5919);
 #endif*/
-   DATC = new DataCenter();
+//   DATC = new DataCenter();
+   initDBLib();
    Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
    console::ted_log_ctrl *logWindow = new console::ted_log_ctrl(Toped->logwin());

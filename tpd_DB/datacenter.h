@@ -159,4 +159,6 @@ private:
 
 };
 
+void initDBLib();
+
 #endif
