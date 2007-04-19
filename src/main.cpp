@@ -34,9 +34,13 @@
 
 #include "toped.h"
 #include "../tpd_DB/viewprop.h"
-#include "tellibin.h"
 #include "datacenter.h"
 #include "../tpd_common/glf.h"
+
+#include "../tpd_bidfunc/tellibin.h"
+#include "../tpd_bidfunc/tpdf_db.h"
+#include "../tpd_bidfunc/tpdf_props.h"
+#include "../tpd_bidfunc/tpdf_cells.h"
 
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
