@@ -44,73 +44,18 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdZOOMALL       )
    TELL_STDCMD_CLASSA(getPOINT         )
    TELL_STDCMD_CLASSA(getPOINTLIST     )
-   TELL_STDCMD_CLASSA(stdREPORTSLCTD   )
-   TELL_STDCMD_CLASSA(stdREPORTLAY     )
    TELL_STDCMD_CLASSA(stdDISTANCE      )
+   TELL_STDCMD_CLASSB(stdDISTANCE_D   , stdDISTANCE   )
    TELL_STDCMD_CLASSA(stdCLEARRULERS   )
    TELL_STDCMD_CLASSA(stdLONGCURSOR    )  //
-   TELL_STDCMD_CLASSA(GDSreportlay     )
-
+   
    TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN    )
-   TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
 
    TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  )  // undo - implemented**
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOX      )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWBOX     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXp     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDPOLY     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWPOLY    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDWIRE     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWWIRE    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDTEXT     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdCELLREF     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdCELLAREF    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdSELECT      )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdSELECTIN    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdSELECT_TL   )  //
-   TELL_STDCMD_CLASSA_UNDO(stdPNTSELECT   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdSELECTALL   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECT    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECTIN  )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECT_TL )  //
-   TELL_STDCMD_CLASSA_UNDO(stdPNTUNSELECT )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECTALL )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdCOPYSEL     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdMOVESEL     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdROTATESEL   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdFLIPXSEL    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdFLIPYSEL    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdDELETESEL   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(lgcCUTPOLY     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(lgcMERGE       )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdADDMENU     )  //
-   TELL_STDCMD_CLASSA_UNDO(stdCHANGELAY   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdCHANGEREF   )  // undo - implemented
-   //
-   TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     )
-   TELL_STDCMD_CLASSB(stdDRAWBOX_D    , stdDRAWBOX    )
-   TELL_STDCMD_CLASSB(stdADDBOXr_D    , stdADDBOXr    )
-   TELL_STDCMD_CLASSB(stdADDBOXp_D    , stdADDBOXp    )
-   TELL_STDCMD_CLASSB(stdADDPOLY_D    , stdADDPOLY    )
-   TELL_STDCMD_CLASSB(stdDRAWPOLY_D   , stdDRAWPOLY   )
-   TELL_STDCMD_CLASSB(stdADDWIRE_D    , stdADDWIRE    )
-   TELL_STDCMD_CLASSB(stdDRAWWIRE_D   , stdDRAWWIRE   )
-   TELL_STDCMD_CLASSB(stdCELLREF_D    , stdCELLREF    )
-   TELL_STDCMD_CLASSB(stdCELLAREF_D   , stdCELLAREF   )
-   TELL_STDCMD_CLASSB(stdADDTEXT_D    , stdADDTEXT    )
-   TELL_STDCMD_CLASSB(stdCOPYSEL_D    , stdCOPYSEL    )
-   TELL_STDCMD_CLASSB(stdMOVESEL_D    , stdMOVESEL    )
-   TELL_STDCMD_CLASSB(stdSELECT_I     , stdSELECT     )
-   TELL_STDCMD_CLASSB(stdPNTSELECT_I  , stdPNTSELECT  )
-   TELL_STDCMD_CLASSB(stdUNSELECT_I   , stdUNSELECT   )
-   TELL_STDCMD_CLASSB(stdPNTUNSELECT_I, stdPNTUNSELECT)
-   TELL_STDCMD_CLASSB(lgcCUTPOLY_I    , lgcCUTPOLY    )
    TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER )  //
-   TELL_STDCMD_CLASSB(stdFLIPXSEL_D   , stdFLIPXSEL   )
-   TELL_STDCMD_CLASSB(stdFLIPYSEL_D   , stdFLIPYSEL   )
-   TELL_STDCMD_CLASSB(stdROTATESEL_D  , stdROTATESEL  )
-   TELL_STDCMD_CLASSB(stdDISTANCE_D   , stdDISTANCE   )
+   
+   TELL_STDCMD_CLASSA_UNDO(stdADDMENU     )  //
+   //
 }
 
 #endif

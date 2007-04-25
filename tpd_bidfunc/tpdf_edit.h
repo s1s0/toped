@@ -14,9 +14,9 @@
 //   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//        Created: Thu Apr 19 BST 2007 (from tellibin.h Fri Jan 24 2003)
+//        Created: Wed Apr 25 BST 2007 (from tellibin.h Fri Jan 24 2003)
 //     Originator: Svilen Krustev - skr@toped.org.uk
-//    Description: Definition of all TOPED database functions
+//    Description: Definition of all TOPED edit functions
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
@@ -24,9 +24,8 @@
 //          $Date$
 //        $Author$
 //===========================================================================
-
-#ifndef  TPDF_DB_H
-#define  TPDF_DB_H
+#ifndef  TPDF_EDIT_H
+#define  TPDF_EDIT_H
 
 #include "tpdf_commom.h"
 namespace tellstdfunc {
@@ -35,24 +34,22 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 
-   TELL_STDCMD_CLASSA(stdNEWDESIGNd    )              // reset undo buffers
-   TELL_STDCMD_CLASSB(stdNEWDESIGN   , stdNEWDESIGNd  ) // reset undo buffers
-   TELL_STDCMD_CLASSA(TDTread          )       // reset undo buffers
-   TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread       )
-   TELL_STDCMD_CLASSA(TDTsave          )
-   TELL_STDCMD_CLASSB(TDTsaveIFF      , TDTsave       )
-   TELL_STDCMD_CLASSA(TDTsaveas        )
-   TELL_STDCMD_CLASSA(GDSread          )
-   TELL_STDCMD_CLASSA(GDSconvert       )
-   TELL_STDCMD_CLASSA(GDSconvertAll    )
-   TELL_STDCMD_CLASSA(GDSexportLIB     )
-   TELL_STDCMD_CLASSA(GDSexportTOP     )
-   TELL_STDCMD_CLASSA(PSexportTOP      )
-   TELL_STDCMD_CLASSA(GDSclose         )
-   TELL_STDCMD_CLASSA(stdREPORTLAY     )
-   TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
-   TELL_STDCMD_CLASSA(GDSreportlay     )
+   TELL_STDCMD_CLASSA_UNDO(stdCOPYSEL     )  // undo - implemented
+   TELL_STDCMD_CLASSB(stdCOPYSEL_D    , stdCOPYSEL    )
+   TELL_STDCMD_CLASSA_UNDO(stdMOVESEL     )  // undo - implemented
+   TELL_STDCMD_CLASSB(stdMOVESEL_D    , stdMOVESEL    )
+   TELL_STDCMD_CLASSA_UNDO(stdROTATESEL   )  // undo - implemented
+   TELL_STDCMD_CLASSB(stdROTATESEL_D  , stdROTATESEL  )
+   TELL_STDCMD_CLASSA_UNDO(stdFLIPXSEL    )  // undo - implemented
+   TELL_STDCMD_CLASSB(stdFLIPXSEL_D   , stdFLIPXSEL   )
+   TELL_STDCMD_CLASSA_UNDO(stdFLIPYSEL    )  // undo - implemented
+   TELL_STDCMD_CLASSB(stdFLIPYSEL_D   , stdFLIPYSEL   )
+   TELL_STDCMD_CLASSA_UNDO(stdDELETESEL   )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(lgcCUTPOLY     )  // undo - implemented
+   TELL_STDCMD_CLASSB(lgcCUTPOLY_I    , lgcCUTPOLY    )
+   TELL_STDCMD_CLASSA_UNDO(lgcMERGE       )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdCHANGELAY   )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdCHANGEREF   )  // undo - implemented
 
-         
 }
 #endif

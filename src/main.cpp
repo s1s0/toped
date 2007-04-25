@@ -41,6 +41,9 @@
 #include "../tpd_bidfunc/tpdf_db.h"
 #include "../tpd_bidfunc/tpdf_props.h"
 #include "../tpd_bidfunc/tpdf_cells.h"
+#include "../tpd_bidfunc/tpdf_edit.h"
+#include "../tpd_bidfunc/tpdf_add.h"
+#include "../tpd_bidfunc/tpdf_select.h"
 
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
