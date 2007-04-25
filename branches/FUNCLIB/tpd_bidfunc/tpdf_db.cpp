@@ -26,7 +26,7 @@
 //===========================================================================
 
 #include "tpdf_db.h"
-
+#include <sstream>
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_DB/browsers.h"
@@ -475,6 +475,79 @@ int tellstdfunc::GDSclose::execute() {
    browsers::clearGDStab();
    DATC->GDSclose();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+}
+
+int tellstdfunc::stdREPORTLAY::execute() {
+   bool recursive = getBoolValue();
+   std::string cellname = getStringValue();
+   laydata::ListOfWords ull;
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      bool success = ATDB->collect_usedlays(cellname, recursive, ull);
+   DATC->unlockDB();
+   telldata::ttlist* tllull = new telldata::ttlist(telldata::tn_int);
+   if (success) {
+      for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+         tllull->add(new telldata::ttint(*CL));
+      ull.clear();
+   }
+   else {
+      std::string news = "cell \"";
+      news += cellname; news += "\" doesn't exists";
+      tell_log(console::MT_ERROR,news);
+   }
+   OPstack.push(tllull);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype, bool eor) :
+      stdREPORTLAY(new parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+}
+
+int tellstdfunc::stdREPORTLAYc::execute() {
+   bool recursive = getBoolValue();
+   OPstack.push(new telldata::ttstring(""));
+   OPstack.push(new telldata::ttbool(recursive));
+   return stdREPORTLAY::execute();
+}
+
+//=============================================================================
+tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::GDSreportlay::execute() {
+   std::string name = getStringValue();
+   GDSin::GDSFile* AGDSDB = DATC->lockGDS();
+      GDSin::GDSstructure *src_structure = AGDSDB->GetStructure(name.c_str());
+      std::ostringstream ost; 
+      if (!src_structure) {
+         ost << "GDS structure named \"" << name << "\" does not exists";
+         tell_log(console::MT_ERROR,ost.str());
+      }
+      else 
+      {
+         ost << "GDS layers found in \"" << name <<"\": ";
+         for(int i = 0 ; i < GDS_MAX_LAYER ; i++)
+            if (src_structure->Get_Allay(i)) ost << i << " ";
+         tell_log(console::MT_INFO,ost.str());
+         LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+      }
+   DATC->unlockGDS();
+   //   DATC->reportGDSlay(name.c_str());
    return EXEC_NEXT;
 }
 
