@@ -31,10 +31,10 @@
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/tuidefs.h"
+#include "../src/toped.h"
 
 extern console::ted_cmd*         Console;
 extern tui::TopedFrame*          Toped;
-
 
 tui::MenuItemHandler::MenuItemHandler(void)
    :_ID(0), _menuItem(""), _hotKey(""), _function(""), _method(NULL)
@@ -437,3 +437,28 @@ void tui::ResourceCenter::executeMenu(int ID1)
       }
    }
 }
+
+
+//=============================================================================
+tellstdfunc::stdADDMENU::stdADDMENU(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::stdADDMENU::execute()
+{
+   std::string function = getStringValue();
+   std::string hotKey   = getStringValue();
+   std::string menu     = getStringValue();
+
+   wxMenuBar *menuBar   = Toped->GetMenuBar();
+   tui::ResourceCenter *resourceCenter = Toped->resourceCenter();
+   resourceCenter->appendMenu(menu, hotKey, function);
+   resourceCenter->buildMenu(menuBar);
+
+   return EXEC_NEXT;
+}
+

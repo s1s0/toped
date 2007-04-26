@@ -43,6 +43,8 @@ extern console::ted_cmd*         Console;
 
 extern wxFrame*                  TopedMainW;
 extern wxWindow*                 TopedCanvasW;
+extern tui::ResourceCenter*      Resources;
+
 
 extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
@@ -368,41 +370,6 @@ int tellstdfunc::getPOINTLIST::execute() {
    else return EXEC_RETURN;
 }
 
-//=============================================================================
-tellstdfunc::stdADDMENU::stdADDMENU(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
-{
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-}
-
-void tellstdfunc::stdADDMENU::undo_cleanup() 
-{
-   //@TODO
-/*???Not implemented yet*/
-}
-
-void tellstdfunc::stdADDMENU::undo() 
-{
-   //@TODO
-/*???Not implemented yet*/
-}
-
-int tellstdfunc::stdADDMENU::execute() 
-{
-   std::string function = getStringValue();
-   std::string hotKey   = getStringValue();
-   std::string menu     = getStringValue();
-
-   wxMenuBar *menuBar      = TopedMainW->GetMenuBar();
-//   tui::ResourceCenter *resourceCenter = Toped->getResourceCenter();
-//   resourceCenter->appendMenu(menu, hotKey, function);
-//   resourceCenter->buildMenu(menuBar);
-
-   return EXEC_NEXT;
-}
-   
 /*
 UNDO/REDO operation - some preliminary thoughts
    Where to fit it. Two major possibilities here:
