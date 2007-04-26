@@ -1,5 +1,5 @@
 # these are the headers for the project
-noinst_HEADERS = layoutcanvas.h toped.h tui.h
+noinst_HEADERS = layoutcanvas.h toped.h tui.h resourcecenter.h 
 
 #BUILT_SOURCES = tell_yacc.h
 #AM_YFLAGS = -p tell -d -y -v
@@ -13,7 +13,7 @@ noinst_HEADERS = layoutcanvas.h toped.h tui.h
 bin_PROGRAMS = toped
 
 # the application source, library search path, and link libraries
-toped_SOURCES = layoutcanvas.cpp main.cpp toped.cpp tui.cpp
+toped_SOURCES = layoutcanvas.cpp  resourcecenter.cpp tui.cpp toped.cpp main.cpp
 
 #########################################################################
 # EXTRAS
@@ -23,4 +23,5 @@ INCLUDES = -I$(top_srcdir)/tpd_parser -I$(top_srcdir)/tpd_DB \
 	-I$(top_srcdir)/tpd_common -I$(top_srcdir)/tpd_bidfunc
 toped_LDADD = ../tpd_parser/libtpd_parser.la ../tpd_common/libtpd_common.la \
               ../tpd_DB/libtpd_DB.la ../tpd_bidfunc/libtpd_bidfunc.la
-#toped_LDFLAGS = -static              
+#toped_LDFLAGS = -static
+

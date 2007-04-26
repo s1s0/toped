@@ -41,6 +41,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdUNDO          )
    TELL_STDCMD_CLASSA(stdREDRAW        )
    TELL_STDCMD_CLASSA(stdZOOMWIN       )
+   TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN    )
    TELL_STDCMD_CLASSA(stdZOOMALL       )
    TELL_STDCMD_CLASSA(getPOINT         )
    TELL_STDCMD_CLASSA(getPOINTLIST     )
@@ -48,13 +49,9 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdDISTANCE_D   , stdDISTANCE   )
    TELL_STDCMD_CLASSA(stdCLEARRULERS   )
    TELL_STDCMD_CLASSA(stdLONGCURSOR    )  //
-   
-   TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN    )
 
    TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  )  // undo - implemented**
    TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER )  //
-   
-   TELL_STDCMD_CLASSA_UNDO(stdADDMENU     )  //
    //
 }
 
