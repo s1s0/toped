@@ -34,7 +34,7 @@
 
 #include "toped.h"
 #include "../tpd_DB/viewprop.h"
-#include "datacenter.h"
+#include "../tpd_DB/datacenter.h"
 #include "../tpd_common/glf.h"
 
 #include "../tpd_bidfunc/tellibin.h"
