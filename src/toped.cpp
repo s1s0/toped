@@ -31,7 +31,7 @@
 #include <math.h>
 //#include "config.h"
 #include "toped.h"
-#include "datacenter.h"
+#include "../tpd_DB/datacenter.h"
 #include "../tpd_DB/viewprop.h"
 #include "tui.h"
 #include "../ui/red_lamp.xpm"

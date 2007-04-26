@@ -31,7 +31,7 @@
 #include <wx/colordlg.h>
 #include <wx/regex.h>
 #include "tui.h"
-#include "datacenter.h"
+#include "../tpd_DB/datacenter.h"
 
 extern DataCenter*                DATC;
 
