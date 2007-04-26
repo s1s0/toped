@@ -28,7 +28,7 @@
 #ifndef  TPDF_PROPS_H
 #define  TPDF_PROPS_H
 
-#include "tpdf_commom.h"
+#include "tpdf_common.h"
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;

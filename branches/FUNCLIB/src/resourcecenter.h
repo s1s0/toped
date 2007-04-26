@@ -30,7 +30,7 @@
 #include <string>
 #include <vector>
 #include <wx/wx.h>
-#include "../tpd_bidfunc/tpdf_commom.h"
+#include "../tpd_bidfunc/tpdf_common.h"
 
 /*WARNING!!!
    Current version ResourceCenter can use callback functions only

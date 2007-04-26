@@ -27,7 +27,7 @@
 #ifndef  TPDF_ADD_H
 #define  TPDF_ADD_H
 
-#include "tpdf_commom.h"
+#include "tpdf_common.h"
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
@@ -38,7 +38,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     )
    TELL_STDCMD_CLASSA_UNDO(stdDRAWBOX     )  // undo - implemented
    TELL_STDCMD_CLASSB(stdDRAWBOX_D    , stdDRAWBOX    )
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     )  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     )  // undo - implemented8
    TELL_STDCMD_CLASSB(stdADDBOXr_D    , stdADDBOXr    )
    TELL_STDCMD_CLASSA_UNDO(stdADDBOXp     )  // undo - implemented
    TELL_STDCMD_CLASSB(stdADDBOXp_D    , stdADDBOXp    )
@@ -56,5 +56,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdCELLREF_D    , stdCELLREF    )
    TELL_STDCMD_CLASSA_UNDO(stdCELLAREF    )  // undo - implemented
    TELL_STDCMD_CLASSB(stdCELLAREF_D   , stdCELLAREF   )
+   TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  )  // undo - implemented
+   TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER )  //
 }
 #endif

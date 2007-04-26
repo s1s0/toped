@@ -27,7 +27,7 @@
 
 #ifndef  TELLIBIN_H
 #define  TELLIBIN_H
-#include "tpdf_commom.h"
+#include "tpdf_common.h"
 
 
 namespace tellstdfunc {
@@ -49,9 +49,6 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdDISTANCE_D   , stdDISTANCE   )
    TELL_STDCMD_CLASSA(stdCLEARRULERS   )
    TELL_STDCMD_CLASSA(stdLONGCURSOR    )  //
-
-   TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  )  // undo - implemented**
-   TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER )  //
    //
 }
 

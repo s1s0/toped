@@ -28,6 +28,8 @@
 #include "tpdf_add.h"
 
 #include "../tpd_DB/datacenter.h"
+#include "../tpd_DB/browsers.h"
+
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
@@ -805,4 +807,61 @@ int tellstdfunc::stdCELLAREF_D::execute() {
    return stdCELLAREF::execute();
 }
 
+//=============================================================================
+tellstdfunc::stdUSINGLAYER::stdUSINGLAYER(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+}
 
+void tellstdfunc::stdUSINGLAYER::undo_cleanup() {
+   getWordValue(UNDOPstack, false);
+}
+
+void tellstdfunc::stdUSINGLAYER::undo() {
+   TEUNDO_DEBUG("usinglayer( int ) UNDO");
+   word layno = getWordValue(UNDOPstack, true);
+   browsers::layer_default(layno, DATC->curlay());
+   DATC->defaultlayer(layno);
+}
+
+int tellstdfunc::stdUSINGLAYER::execute() {
+   word layno = getWordValue();
+   // Unlock and Unhide the layer(if needed)
+   if (DATC->layerHidden(layno)) {
+      DATC->hideLayer(layno, false);
+      browsers::layer_status(browsers::BT_LAYER_HIDE, layno, false);
+   }   
+   if (DATC->layerLocked(layno)) {
+      DATC->lockLayer(layno, false);
+      browsers::layer_status(browsers::BT_LAYER_LOCK, layno, false);
+   }   
+   browsers::layer_default(layno, DATC->curlay());
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(new telldata::ttint(DATC->curlay()));
+   DATC->defaultlayer(layno);
+   LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor) :
+      stdUSINGLAYER(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+int tellstdfunc::stdUSINGLAYER_S::execute() {
+  std::string layname = getStringValue();
+  word layno = DATC->getLayerNo(layname);
+  if (layno > 0) {
+    OPstack.push(new telldata::ttint(layno));
+    return stdUSINGLAYER::execute();
+  }
+  else {// no layer with this name
+    std::string news = "layer \"";
+    news += layname; news += "\" is not defined";
+    tell_log(console::MT_ERROR,news);
+    return EXEC_NEXT;
+  }
+}
