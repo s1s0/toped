@@ -47,12 +47,10 @@
 
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
-extern browsers::browserTAB*     Browsers;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 extern console::TELLFuncList*    CmdList;
-//console::TELLFuncList*           CmdLst = NULL;
 
 //-----------------------------------------------------------------------------
 

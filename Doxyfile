@@ -73,7 +73,8 @@ WARN_LOGFILE           =
 INPUT                  = $(top_srcdir)src \
                          $(top_srcdir)tpd_parser \
                          $(top_srcdir)tpd_common \
-                         $(top_srcdir)tpd_DB
+                         $(top_srcdir)tpd_DB \
+                         $(top_srcdir)tpd_bidfunc
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
