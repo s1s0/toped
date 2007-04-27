@@ -37,8 +37,8 @@
 #include <wx/treectrl.h>
 #include <wx/imaglist.h>
 #include <string>
-#include "../tpd_DB/tedesign.h"
-#include "../tpd_DB/gds_io.h"
+#include "tedesign.h"
+#include "gds_io.h"
 
 namespace browsers {
    typedef enum {
@@ -249,14 +249,17 @@ namespace browsers {
       word              TDTSelectedLayNo()   {return _TDTlayers->getFirstSelected();}
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
+      void              set_tellParser(wxWindow* tp) {_tellParser = tp;}
+      wxWindow*         tellParser() const {return _tellParser;}
    private:
       void              OnCommand(wxCommandEvent&);
       void              OnTELLaddTDTtab(const wxString, laydata::TDTHierTree*);
       void              OnTELLaddGDStab();
       void              OnTELLclearGDStab();
-      GDSbrowser      *_GDSstruct;
-      TDTbrowser      *_TDTstruct;
-      layerbrowser    *_TDTlayers;
+      GDSbrowser*       _GDSstruct;
+      TDTbrowser*       _TDTstruct;
+      layerbrowser*     _TDTlayers;
+      wxWindow*         _tellParser;
       //      CanvasPalette   *_TDTlayers;
       DECLARE_EVENT_TABLE();
    };
@@ -271,6 +274,7 @@ namespace browsers {
    void celltree_highlight(const std::string);
    void treeAddMember(const char*, const char*, int action = 0);
    void treeRemoveMember(const char*, const char*, bool orphan);
+   void parseCommand(const wxString);
 }
 
 #endif //BROWSERS_H_INCLUDED

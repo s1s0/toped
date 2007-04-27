@@ -35,7 +35,7 @@
 
 #include "layoutcanvas.h"
 #include "../tpd_DB/viewprop.h"
-#include "datacenter.h"
+#include "../tpd_DB/datacenter.h"
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_DB/tedat.h"
 #include "../tpd_common/glf.h"

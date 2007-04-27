@@ -78,6 +78,6 @@ AX_CHECK_GLU
 #...
 
 
-AC_CONFIG_FILES([Makefile tpd_common/Makefile tpd_parser/Makefile 
+AC_CONFIG_FILES([Makefile tpd_common/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile 
    tpd_DB/Makefile src/Makefile tll/Makefile fonts/Makefile ui/Makefile])
 AC_OUTPUT

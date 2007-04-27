@@ -31,7 +31,7 @@
 #include <math.h>
 //#include "config.h"
 #include "toped.h"
-#include "datacenter.h"
+#include "../tpd_DB/datacenter.h"
 #include "../tpd_DB/viewprop.h"
 #include "tui.h"
 #include "../ui/red_lamp.xpm"
@@ -677,6 +677,7 @@ void tui::TopedFrame::initView() {
 #endif
    _laycanvas = new LayoutCanvas(mS_canvas, gl_attrib);
    _cmdline = new console::ted_cmd(mS_command, _laycanvas);
+   _browsers->set_tellParser( _cmdline ) ;
 }
 
 

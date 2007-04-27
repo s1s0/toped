@@ -30,9 +30,7 @@
 #include <string>
 #include <vector>
 #include <wx/wx.h>
-
-#include "layoutcanvas.h"
-
+#include "../tpd_bidfunc/tpdf_common.h"
 
 /*WARNING!!!
    Current version ResourceCenter can use callback functions only
@@ -143,5 +141,16 @@ namespace tui
       
 
    };
+
 }
+
+namespace tellstdfunc {
+   using parsercmd::cmdSTDFUNC;
+   using telldata::argumentQ;
+   using parsercmd::argumentLIST;
+   using parsercmd::argumentTYPE;
+   
+   TELL_STDCMD_CLASSA(stdADDMENU       )  //
+}
+
 #endif //RESOURCE_CENTER_INCLUDED
