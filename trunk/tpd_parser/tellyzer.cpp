@@ -1332,7 +1332,7 @@ telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
 bool parsercmd::StructTypeCheck(telldata::typeID targett, 
                                       telldata::argumentID* op2, yyltype loc)
 {
-   assert(TLUNKNOWN_TYPE((*op2)()));
+   VERIFY(TLUNKNOWN_TYPE((*op2)()));
    const telldata::tell_type* vartype;
    if (TLISALIST(targett))
    { // we have a list lval

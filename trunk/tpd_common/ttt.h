@@ -431,4 +431,11 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
 
 std::vector<std::string> split (const std::string& str, char delim);
 
+// macros for tracking down errors
+#ifdef _DEBUG
+#define VERIFY( exp )           assert( exp )
+#else
+#define VERIFY( exp )           ((void)(exp))
+#endif  // _DEBUG
+
 #endif

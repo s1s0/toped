@@ -77,22 +77,22 @@ bool console::patternFound(const wxString templ,  wxString str) {
 void console::patternNormalize(wxString& str) {
    wxRegEx regex;
    // replace tabs with spaces
-   assert(regex.Compile(wxT("\t")));
+   VERIFY(regex.Compile(wxT("\t")));
    regex.ReplaceAll(&str,wxT(" "));
    // remove continious spaces
-   assert(regex.Compile(wxT("[[:space:]]{2,}")));
+   VERIFY(regex.Compile(wxT("[[:space:]]{2,}")));
    regex.ReplaceAll(&str,wxT(""));
    //remove leading spaces
-   assert(regex.Compile(wxT("^[[:space:]]")));
+   VERIFY(regex.Compile(wxT("^[[:space:]]")));
    regex.ReplaceAll(&str,wxT(""));
    // remove trailing spaces
-   assert(regex.Compile(wxT("[[:space:]]$")));
+   VERIFY(regex.Compile(wxT("[[:space:]]$")));
    regex.ReplaceAll(&str,wxT(""));
    //remove spaces before brackets and separators
-   assert(regex.Compile(wxT("([[:space:]])([\\{\\}\\,\\-\\+])")));
+   VERIFY(regex.Compile(wxT("([[:space:]])([\\{\\}\\,\\-\\+])")));
    regex.ReplaceAll(&str,wxT("\\2"));
    // remove spaces after brackets and separators
-   assert(regex.Compile(wxT("([\\{\\}\\,\\-\\+])([[:space:]])")));
+   VERIFY(regex.Compile(wxT("([\\{\\}\\,\\-\\+])([[:space:]])")));
    regex.ReplaceAll(&str,wxT("\\1"));
 
 }
@@ -120,7 +120,7 @@ bool console::miniParser::getPoint() {
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // get the coordinates
-   assert(src_tmpl.Compile(real_tmpl));
+   VERIFY(src_tmpl.Compile(real_tmpl));
    src_tmpl.Matches(exp);
    // first one...
    wxString p1s = src_tmpl.GetMatch(exp);
@@ -146,12 +146,12 @@ bool console::miniParser::getBox()
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
-   assert(src_tmpl.Compile(wxT("^\\{{2}")));
+   VERIFY(src_tmpl.Compile(wxT("^\\{{2}")));
    src_tmpl.ReplaceAll(&exp,wxT("{"));
-   assert(src_tmpl.Compile(wxT("\\}{2}$")));
+   VERIFY(src_tmpl.Compile(wxT("\\}{2}$")));
    src_tmpl.ReplaceAll(&exp,wxT("}"));
    // now we are going to extract the points
-   assert(src_tmpl.Compile(point_tmpl));
+   VERIFY(src_tmpl.Compile(point_tmpl));
    telldata::ttpnt pp[2];
    for (int i = 0; i < 2; i++) {
       if (!src_tmpl.Matches(exp)) return false;
@@ -181,12 +181,12 @@ bool console::miniParser::getBind()
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
-   assert(src_tmpl.Compile(wxT("^\\{{2}")));
+   VERIFY(src_tmpl.Compile(wxT("^\\{{2}")));
    src_tmpl.ReplaceAll(&exp,wxT("{"));
-   assert(src_tmpl.Compile(wxT("\\}$")));
+   VERIFY(src_tmpl.Compile(wxT("\\}$")));
    src_tmpl.ReplaceAll(&exp,wxT(""));
    // let's extract the point first ...
-   assert(src_tmpl.Compile(point_tmpl));
+   VERIFY(src_tmpl.Compile(point_tmpl));
    telldata::ttpnt pp;
    if (!src_tmpl.Matches(exp)) return false;
    wxString ps = src_tmpl.GetMatch(exp);
@@ -204,7 +204,7 @@ bool console::miniParser::getBind()
    // convert the coordinates to ttpoint ...
    pp = telldata::ttpnt(p1,p2);
    // ... now the rotation ...
-   assert(src_tmpl.Compile(real_tmpl));
+   VERIFY(src_tmpl.Compile(real_tmpl));
    telldata::ttreal rot;
    if (!src_tmpl.Matches(exp)) return false;
    ps = src_tmpl.GetMatch(exp);
@@ -213,7 +213,7 @@ bool console::miniParser::getBind()
    rot = telldata::ttreal(p1);
 
    // ... the flip ...
-   assert(src_tmpl.Compile(bool_tmpl));
+   VERIFY(src_tmpl.Compile(bool_tmpl));
    telldata::ttbool flip;
    if (!src_tmpl.Matches(exp)) return false;
    ps = src_tmpl.GetMatch(exp);
@@ -224,7 +224,7 @@ bool console::miniParser::getBind()
       flip = telldata::ttbool(false);
 
    // ... and finally - the scale ...
-   assert(src_tmpl.Compile(real_tmpl));
+   VERIFY(src_tmpl.Compile(real_tmpl));
    telldata::ttreal scl;
    if (!src_tmpl.Matches(exp)) return false;
    ps = src_tmpl.GetMatch(exp);
@@ -242,12 +242,12 @@ bool console::miniParser::getList() {
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
-   assert(src_tmpl.Compile(wxT("^\\{")));
+   VERIFY(src_tmpl.Compile(wxT("^\\{")));
    src_tmpl.ReplaceAll(&exp,wxT(""));    
-   assert(src_tmpl.Compile(wxT("\\}$")));
+   VERIFY(src_tmpl.Compile(wxT("\\}$")));
    src_tmpl.ReplaceAll(&exp,wxT(""));    
    // now we are going to extract the points
-   assert(src_tmpl.Compile(point_tmpl));
+   VERIFY(src_tmpl.Compile(point_tmpl));
    telldata::ttlist *pl = new telldata::ttlist(telldata::tn_pnt);
    telldata::ttpnt* pp = NULL;
    while (src_tmpl.Matches(exp)) {
