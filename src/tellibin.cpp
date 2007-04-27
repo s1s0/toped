@@ -1011,7 +1011,7 @@ void tellstdfunc::stdOPENCELL::undo_cleanup() {
 void tellstdfunc::stdOPENCELL::undo() {
    TEUNDO_DEBUG("opencell( string ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      assert(ATDB->editprev(true));
+      VERIFY(ATDB->editprev(true));
       browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
@@ -1074,7 +1074,7 @@ void tellstdfunc::stdEDITPUSH::undo_cleanup() {
 void tellstdfunc::stdEDITPUSH::undo() {
    TEUNDO_DEBUG("editpush( point ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      assert(ATDB->editprev(true));
+      VERIFY(ATDB->editprev(true));
       browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
@@ -1120,7 +1120,7 @@ void tellstdfunc::stdEDITPOP::undo_cleanup() {
 void tellstdfunc::stdEDITPOP::undo() {
    TEUNDO_DEBUG("editpop( ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      assert(ATDB->editprev(true));
+      VERIFY(ATDB->editprev(true));
       browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
@@ -1162,7 +1162,7 @@ void tellstdfunc::stdEDITPREV::undo_cleanup() {
 void tellstdfunc::stdEDITPREV::undo() {
    TEUNDO_DEBUG("editpop( ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      assert(ATDB->editprev(true));
+      VERIFY(ATDB->editprev(true));
       browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
@@ -1204,7 +1204,7 @@ void tellstdfunc::stdEDITTOP::undo_cleanup() {
 void tellstdfunc::stdEDITTOP::undo() {
    TEUNDO_DEBUG("editpop( ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      assert(ATDB->editprev(true));
+      VERIFY(ATDB->editprev(true));
       browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
@@ -3113,7 +3113,7 @@ void tellstdfunc::stdGROUP::undo() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->select_fromList(get_ttlaylist(pl));
       ATDB->ungroup_this(ATDB->ungroup_prep());
-      assert(ATDB->removecell(name,NULL));
+      VERIFY(ATDB->removecell(name,NULL));
    DATC->unlockDB();
    delete pl;
    UpdateLV();
