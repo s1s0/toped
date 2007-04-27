@@ -34,19 +34,23 @@
 
 #include "toped.h"
 #include "../tpd_DB/viewprop.h"
-#include "tellibin.h"
-#include "datacenter.h"
+#include "../tpd_DB/datacenter.h"
 #include "../tpd_common/glf.h"
 
+#include "../tpd_bidfunc/tellibin.h"
+#include "../tpd_bidfunc/tpdf_db.h"
+#include "../tpd_bidfunc/tpdf_props.h"
+#include "../tpd_bidfunc/tpdf_cells.h"
+#include "../tpd_bidfunc/tpdf_edit.h"
+#include "../tpd_bidfunc/tpdf_add.h"
+#include "../tpd_bidfunc/tpdf_select.h"
+
 tui::TopedFrame*                 Toped = NULL;
-browsers::browserTAB*            Browsers = NULL;
-DataCenter*                      DATC = NULL;
-// from ted_prompt (console)
+extern DataCenter*               DATC;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 extern console::TELLFuncList*    CmdList;
-//console::TELLFuncList*           CmdLst = NULL;
 
 //-----------------------------------------------------------------------------
 
@@ -400,16 +404,17 @@ bool TopedApp::OnInit() {
   _CrtSetDbgFlag(tmpDbgFlag);
   //_CrtSetBreakAlloc(5919);
 #endif*/
-   DATC = new DataCenter();
+//   DATC = new DataCenter();
+   initDBLib();
    Toped = new tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
    console::ted_log_ctrl *logWindow = new console::ted_log_ctrl(Toped->logwin());
    delete wxLog::SetActiveTarget(logWindow);
 
-   Browsers = Toped->browsers();
    CmdList = Toped->cmdlist();
    // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
    CMDBlock = new parsercmd::cmdMAIN();
+   tellstdfunc::initFuncLib(Toped, Toped->view());
    InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
 
    SetTopWindow(Toped);

@@ -27,9 +27,9 @@
 
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
-#include "../tpd_DB/tedesign.h"
-#include "../tpd_DB/gds_io.h"
-#include "../tpd_DB/viewprop.h"
+#include "tedesign.h"
+#include "gds_io.h"
+#include "viewprop.h"
 
 namespace GDSin {
    class gds2ted {
@@ -53,13 +53,13 @@ class DataCenter {
 public:
                               DataCenter();
                              ~DataCenter(); 
-   void                       GDSparse(std::string filename, std::list<std::string>&);
+   void                       GDSparse(std::string filename);
    void                       GDSexport(std::string&);
    void                       GDSexport(laydata::tdtcell*, bool, std::string&);
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
    void                       PSexport(laydata::tdtcell*, std::string&);
-   bool                       TDTread(std::string, std::list<std::string>& topcells);
+   bool                       TDTread(std::string);
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&); 
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
@@ -158,5 +158,7 @@ private:
    wxMutex                    PROPLock;
 
 };
+
+void initDBLib();
 
 #endif

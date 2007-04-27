@@ -79,6 +79,7 @@ namespace console {
       // event table handlers
       void                    getCommand(wxCommandEvent&);
       void                    getCommandA();
+      void                    getCommandB(wxCommandEvent&);
       void                    OnGUInput(wxCommandEvent&);
       bool                    mouseIN_OK() const {return _mouseIN_OK;};
       word                    numpoints() const {return _numpoints;}

@@ -25145,7 +25145,7 @@ echo "$as_me: error:
 #...
 
 
-                                                                                ac_config_files="$ac_config_files Makefile tpd_common/Makefile tpd_parser/Makefile tpd_DB/Makefile src/Makefile tll/Makefile fonts/Makefile ui/Makefile"
+                                                                                          ac_config_files="$ac_config_files Makefile tpd_common/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile tpd_DB/Makefile src/Makefile tll/Makefile fonts/Makefile ui/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -25720,6 +25720,7 @@ do
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "tpd_common/Makefile" ) CONFIG_FILES="$CONFIG_FILES tpd_common/Makefile" ;;
   "tpd_parser/Makefile" ) CONFIG_FILES="$CONFIG_FILES tpd_parser/Makefile" ;;
+  "tpd_bidfunc/Makefile" ) CONFIG_FILES="$CONFIG_FILES tpd_bidfunc/Makefile" ;;
   "tpd_DB/Makefile" ) CONFIG_FILES="$CONFIG_FILES tpd_DB/Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "tll/Makefile" ) CONFIG_FILES="$CONFIG_FILES tll/Makefile" ;;
