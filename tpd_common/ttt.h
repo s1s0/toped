@@ -28,6 +28,7 @@
 #ifndef TTT_H_INCLUDED
 #define TTT_H_INCLUDED
 
+#include <string>
 #include <vector>
 #include <map>
 #include <stack>
@@ -35,32 +36,26 @@
 #include <assert.h>
 
 #if WIN32
-   #include <windows.h>
+#include <windows.h>
 //#define rint(x) floor( (x) + ( ( (x) < 0 ) ? -0.5 : 0.5))
 //#define round(x) floor( (x) + ( ( (x) < 0 ) ? -0.5 : 0.5))
 double round(double x);
-   #define rint round
-   //#define round floor
-   #define remainder fmod
-   #define M_PI   3.1415926535897932384626433832795
-   #pragma warning( disable : 4786 ) 
-	
-	#include <wx/msw/winundef.h>
-
+#define rint round
+//#define round floor
+#define remainder fmod
+#define M_PI   3.1415926535897932384626433832795
+#pragma warning( disable : 4786 )
+#include <wx/msw/winundef.h>
 #else
 #include "config.h"
-#endif
+#endif // WIN32
 
-//#define MIN_X        (int4b)0x80000001      //  -2 147 483 647
-//#define MAX_X        (int4b)0x7FFFFFFF      //   2 147 483 643
-//#define MIN_Y        (int4b)0x80000001      //  -2 147 483 647
-//#define MAX_Y        (int4b)0x7FFFFFFF      //   2 147 483 647
-#define OPENGL_FONT_UNIT   128
-#define MIN_VISUAL_AREA    10   // that would be 10 pixels
-#define MAX_OVL_BOX  DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y) // maximum overlapping box
-#define DEFAULT_OVL_BOX DBbox(TP(0,0))
-#define DEFAULT_ZOOM_BOX DBbox(TP(-2000,-2000), TP(20000,20000))
-#define UNDEFLAYNAME "__undefined"
+// macros for tracking down errors
+#ifdef NDEBUG
+#define VERIFY( exp )           ((void)(exp))
+#else
+#define VERIFY( exp )           assert( exp )
+#endif  // NDEBUG
 
 //=============================================================================
 // General type declations (compatability)
@@ -70,9 +65,7 @@ typedef         short   _sg_int16;	// 2 bytes
 typedef           int   _sg_int32;	// 4 bytes
 
 typedef unsigned char   byte;
-#define MAX_BYTE_VALUE  255
 typedef unsigned short  word;
-#define MAX_WORD_VALUE  65535
 typedef unsigned long   _dbl_word;
 typedef     _sg_int16   int2b;
 typedef     _sg_int32   int4b;
@@ -431,11 +424,18 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
 
 std::vector<std::string> split (const std::string& str, char delim);
 
-// macros for tracking down errors
-#ifdef _DEBUG
-#define VERIFY( exp )           assert( exp )
-#else
-#define VERIFY( exp )           ((void)(exp))
-#endif  // _DEBUG
+const byte MAX_BYTE_VALUE = 255;
+const word MAX_WORD_VALUE = 65535;
+//#define MIN_X        (int4b)0x80000001      //  -2 147 483 647
+//#define MAX_X        (int4b)0x7FFFFFFF      //   2 147 483 643
+//#define MIN_Y        (int4b)0x80000001      //  -2 147 483 647
+//#define MAX_Y        (int4b)0x7FFFFFFF      //   2 147 483 647
+//const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
+const byte        OPENGL_FONT_UNIT   = 128;
+const byte        MIN_VISUAL_AREA    = 10;   // that would be 10 pixels
+const DBbox       DEFAULT_OVL_BOX    = DBbox(TP(0,0));
+const DBbox       DEFAULT_ZOOM_BOX   = DBbox(TP(-2000,-2000), TP(20000,20000));
+const std::string UNDEFLAYNAME       = std::string("__undefined");
+
 
 #endif
