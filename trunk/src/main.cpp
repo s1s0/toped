@@ -44,6 +44,7 @@
 #include "../tpd_bidfunc/tpdf_edit.h"
 #include "../tpd_bidfunc/tpdf_add.h"
 #include "../tpd_bidfunc/tpdf_select.h"
+#include "../tpd_bidfunc/tllf_list.h"
 
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
@@ -65,7 +66,11 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    // Internal variables next - Can't think of any for the moment
 //   mblock->addID("$_CW", new ttwnd(Toped->_view->lp_BL, Toped->_view->lp_TR));
    //-----------------------------------------------------------------------------------------------------------
-   // tell functions
+   // tell build-in functions
+   //-----------------------------------------------------------------------------------------------------------
+   mblock->addFUNC("length"           ,(new                   tellstdfunc::lstLENGTH(telldata::tn_int, false)));
+   //-----------------------------------------------------------------------------------------------------------
+   // toped build-in functions
    //-----------------------------------------------------------------------------------------------------------
    mblock->addFUNC("echo"             ,(new                     tellstdfunc::stdECHO(telldata::tn_void, true)));
    mblock->addFUNC("status"           ,(new               tellstdfunc::stdTELLSTATUS(telldata::tn_void, true)));

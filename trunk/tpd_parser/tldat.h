@@ -126,6 +126,7 @@ namespace telldata {
       virtual const typeID get_type() const {return _ID;}
       virtual void         assign(tell_var*) = 0;
       virtual tell_var*    field_var(char*& fname) {return NULL;}
+      virtual tell_var*    index_var(unsigned index) {return NULL;}
       virtual             ~tell_var() {};
    protected:
       typeID              _ID;
@@ -240,6 +241,8 @@ namespace telldata {
       void                 reserve(unsigned num) {_mlist.reserve(num);};
       void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());};
       unsigned             size() const      {return _mlist.size();};
+      tell_var*            index_var(unsigned index);
+      
                           ~ttlist();
    private:
       memlist             _mlist;    // the list itself

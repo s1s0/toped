@@ -15,7 +15,7 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>src/toped</activetarget>
+      <activetarget>tpd_bidfunc/libtpd_bidfunc.la</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
@@ -205,7 +205,7 @@
   <kdevdocumentation>
     <projectdoc>
       <docsystem>Doxygen Documentation Collection</docsystem>
-      <docurl>doc/API/html/hier.tag</docurl>
+      <docurl>toped.tag</docurl>
       <usermanualurl/>
     </projectdoc>
   </kdevdocumentation>

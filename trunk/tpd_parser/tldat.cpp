@@ -247,6 +247,12 @@ void telldata::ttlist::assign(tell_var* rt) {
    this->operator = (*(static_cast<ttlist*>(rt)));
 }
 
+telldata::tell_var* telldata::ttlist::index_var(unsigned index)
+{
+   if (index > (_mlist.size() - 1)) return NULL;
+   else return _mlist[index];
+}
+
 telldata::ttlist::~ttlist() {
    for (unsigned long i = 0 ; i < _mlist.size(); i++)
       delete _mlist[i];

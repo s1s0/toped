@@ -114,6 +114,8 @@ until                      return tknUNTIL;
 "}"                        return '}';
 "<"                        return '<';
 ">"                        return '>';
+"["                        return '[';
+"]"                        return ']';
 ","                        return ',';
 "+"                        return '+';
 "-"                        return '-';
