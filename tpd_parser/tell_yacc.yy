@@ -186,7 +186,7 @@ Ooops! Second thought!
 /* parser types*/
 %type <pttname>        primaryexpression unaryexpression
 %type <pttname>        multiexpression addexpression expression
-%type <pttname>        assignment fieldname funccall telllist
+%type <pttname>        assignment fieldname listindex funccall telllist
 %type <pttname>        lvalue telltype telltypeID variable anonymousvar
 %type <pttname>        variabledeclaration andexpression eqexpression relexpression 
 %type <pfarguments>    funcarguments
@@ -538,6 +538,30 @@ fieldname:
     }
 ;
 
+listindex:
+     variable '[' expression ']'    {
+      assert(NULL != tellvar);
+      if       (!($1 & telldata::tn_listmask))
+         tellerror("list expected",@1);
+      else if  (($3 != telldata::tn_int) && ($3 != telldata::tn_real))
+         tellerror("index is expected to be a number",@3);
+      else
+      {
+         CMDBlock->pushcmd(new parsercmd::cmdLISTINDEX(tellvar));
+         $$ = ($1 & (~telldata::tn_listmask));
+      }
+/*     variable tknINDEX              {
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttint($2),true));
+      CMDBlock->pushcmd(new parsercmd::cmdLISTINDEX());
+      assert(NULL != tellvar);
+      tellvar = tellvar->index_var($2);
+      if (tellvar) $$ = tellvar->get_type();
+      else tellerror("Index out of bounds", @2);
+      delete [] $2;*/
+    }
+;
+
 structure:
      '{'                                  {
         argmap = new telldata::argumentQ;
@@ -637,6 +661,7 @@ primaryexpression :
                                                                 delete [] $1;}
    | variable                              {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
+   | listindex                             {$$ = $1;}
    | anonymousvar                          {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
    | '(' expression ')'                    {$$ = $2;}

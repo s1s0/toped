@@ -295,6 +295,14 @@ namespace  parsercmd {
       telldata::argumentID*  _arg;
    };
 
+   class cmdLISTINDEX : public cmdVIRTUAL {
+   public:
+      cmdLISTINDEX(telldata::tell_var* listarg) : _listarg(listarg) {};
+      int execute();
+   private:
+      telldata::tell_var*   _listarg;
+   };
+
    class cmdRETURN:public cmdVIRTUAL {
    public:
       cmdRETURN(telldata::typeID tID) : _retype(tID) {};

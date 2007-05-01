@@ -440,6 +440,29 @@ int parsercmd::cmdASSIGN::execute() {
 }
 
 //=============================================================================
+int parsercmd::cmdLISTINDEX::execute()
+{
+   TELL_DEBUG(cmdAND);
+   real idx = getOpValue();
+   if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
+   {
+      tellerror("Rintime error.Invalid index");
+      return EXEC_ABORT;
+   }
+   telldata::tell_var *listcomp = static_cast<telldata::ttlist*>(_listarg)->index_var(idx);
+   if (NULL != listcomp)
+   {
+      OPstack.push(listcomp->selfcopy());
+      return EXEC_NEXT;
+   }
+   else
+   {
+      tellerror("Rintime error.Index out of bounds");
+      return EXEC_ABORT;
+   }
+}
+
+//=============================================================================
 int parsercmd::cmdPUSH::execute() {
    // The temptation here is to put the constants in the operand stack directly,
    // i.e. without self-copy. It is wrong though - for many reasons - for example
@@ -1035,11 +1058,11 @@ int parsercmd::cmdREPEAT::execute() {
 int parsercmd::cmdFOREACH::execute() {
    TELL_DEBUG(cmdFOREACH);
    int retexec;
-   
+
    _header->execute();
    telldata::ttlist* bozalist = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    telldata::memlist valist = bozalist->mlist();
-      
+
 //   telldata::memlist valist = (static_cast<telldata::ttlist*>(_list))->mlist();
    for (telldata::memlist::const_iterator CI = valist.begin(); CI != valist.end(); CI++)
    {
