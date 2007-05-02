@@ -150,6 +150,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\tllf_list.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\tpdf_add.cpp"
 				>
 			</File>
@@ -188,6 +192,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\tllf_list.h"
+				>
+			</File>
+			<File
 				RelativePath=".\tpdf_add.h"
 				>
 			</File>
@@ -196,7 +204,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\tpdf_commom.h"
+				RelativePath=".\tpdf_common.h"
 				>
 			</File>
 			<File

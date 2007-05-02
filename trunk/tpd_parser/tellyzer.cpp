@@ -446,7 +446,7 @@ int parsercmd::cmdLISTINDEX::execute()
    real idx = getOpValue();
    if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
    {
-      tellerror("Rintime error.Invalid index");
+      tellerror("Runtime error.Invalid index");
       return EXEC_ABORT;
    }
    telldata::tell_var *listcomp = static_cast<telldata::ttlist*>(_listarg)->index_var(idx);
