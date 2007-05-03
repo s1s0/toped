@@ -57,6 +57,7 @@ namespace telldata {
    const typeID tn_box        = 12;
    const typeID tn_bnd        = 13;
    const typeID tn_usertypes  = 16;
+   // the most significant bit is a mask flag
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
    class tell_var;

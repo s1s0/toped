@@ -422,56 +422,108 @@ int parsercmd::cmdSTACKRST::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdASSIGN::execute() {
+int parsercmd::cmdASSIGN::execute()
+{
    TELL_DEBUG(cmdREALASSIGN);
    telldata::tell_var *op = OPstack.top();OPstack.pop();
    telldata::typeID typeis = _var->get_type();
-   if (TLISALIST(typeis)) {
+   if (TLISALIST(typeis))
+   {
       typeis = typeis & ~telldata::tn_listmask;
    }
    if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
       tellerror("Bad or unsupported type in assign statement");
-   else {
-      _var->assign(op); OPstack.push(_var->selfcopy());
+   else
+   {
+      if (_indexed)
+      {
+         real idx = getOpValue();
+         if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
+         {
+            tellerror("Runtime error.Invalid index");
+            return EXEC_ABORT;
+         }
+         _var = static_cast<telldata::ttlist*>(_var)->index_var(idx);
+         if (NULL != _var)
+         {
+            _var->assign(op); OPstack.push(_var->selfcopy());
+         }
+         else
+         {
+            tellerror("Runtime error.Index out of bounds");
+            return EXEC_ABORT;
+         }
+      }
+      else
+      {
+         _var->assign(op); OPstack.push(_var->selfcopy());
+      }
    }
    delete op;
    return EXEC_NEXT;
 
 }
 
-//=============================================================================
-int parsercmd::cmdLISTINDEX::execute()
-{
-   TELL_DEBUG(cmdAND);
-   real idx = getOpValue();
-   if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
-   {
-      tellerror("Runtime error.Invalid index");
-      return EXEC_ABORT;
-   }
-   telldata::tell_var *listcomp = static_cast<telldata::ttlist*>(_listarg)->index_var(idx);
-   if (NULL != listcomp)
-   {
-      OPstack.push(listcomp->selfcopy());
-      return EXEC_NEXT;
-   }
-   else
-   {
-      tellerror("Rintime error.Index out of bounds");
-      return EXEC_ABORT;
-   }
-}
+// //=============================================================================
+// int parsercmd::cmdLISTINDEX::execute()
+// {
+//    TELL_DEBUG(cmdLISTINDEX);
+//    real idx = getOpValue();
+//    if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
+//    {
+//       tellerror("Runtime error.Invalid index");
+//       return EXEC_ABORT;
+//    }
+//    telldata::tell_var *listcomp = static_cast<telldata::ttlist*>(_listarg)->index_var(idx);
+//    if (NULL != listcomp)
+//    {
+//       OPstack.push(listcomp->selfcopy());
+//       return EXEC_NEXT;
+//    }
+//    else
+//    {
+//       tellerror("Runtime error.Index out of bounds");
+//       return EXEC_ABORT;
+//    }
+// }
 
 //=============================================================================
-int parsercmd::cmdPUSH::execute() {
+int parsercmd::cmdPUSH::execute()
+{
    // The temptation here is to put the constants in the operand stack directly,
    // i.e. without self-copy. It is wrong though - for many reasons - for example
    // for conditional block "while (count > 0)". It should be executed many 
    // times but the variable will exists only the first time, because it will 
    // be cleaned-up from the operand stack after the first execution
    TELL_DEBUG(cmdPUSH);
-   OPstack.push(_var->selfcopy());
-   return EXEC_NEXT;
+   if (!_indexed)
+   {
+     OPstack.push(_var->selfcopy());
+     return EXEC_NEXT;
+   }
+   else
+   {
+      // another class cmdLISTINDEX could be appropriate instead of the logical
+      // branch below. It looks to me that it is quite the same as above, apart
+      // from the index checks
+      real idx = getOpValue();
+      if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
+      {
+         tellerror("Runtime error.Invalid index");
+         return EXEC_ABORT;
+      }
+      telldata::tell_var *listcomp = static_cast<telldata::ttlist*>(_var)->index_var(idx);
+      if (NULL != listcomp)
+      {
+         OPstack.push(listcomp->selfcopy());
+         return EXEC_NEXT;
+      }
+      else
+      {
+         tellerror("Runtime error.Index out of bounds");
+         return EXEC_ABORT;
+      }
+   }
 }
 
 telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
@@ -1371,7 +1423,7 @@ bool parsercmd::StructTypeCheck(telldata::typeID targett,
    return (targett == (*op2)());
 }
 
-telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentID* op2,
+telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telldata::argumentID* op2,
                                                                  yyltype loc)
 {
    if (!lval)
@@ -1379,7 +1431,19 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentI
       tellerror("Lvalue undefined in assign statement", loc);
       return telldata::tn_void;
    }
-   telldata::typeID lvalID = lval->get_type();
+   telldata::typeID lvalID; 
+   if (indexed)
+   {
+      // A slight complication here - when a list component is an lvalue - then we're going
+      // to cheat a little and remove the list flag from the type ID. That's because the entire
+      // list is handled over as lval, instead of the component itself. That's because the
+      // lists are dynamic and the target component will be retrieved during runtime
+      lvalID = lval->get_type() & (~telldata::tn_listmask);
+   }
+   else
+   {
+      lvalID = lval->get_type();
+   }
    // Here if user structure is used - clarify that it is compatible
    // The thing is that op2 could be a struct of a struct list or a list of
    // tell basic types. This should be checked in the following order:
@@ -1410,7 +1474,7 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, telldata::argumentI
    }
    if ((lvalID == (*op2)()) || (NUMBER_TYPE(lvalID) && NUMBER_TYPE((*op2)())))
    {
-      CMDBlock->pushcmd(new parsercmd::cmdASSIGN(lval));
+      CMDBlock->pushcmd(new parsercmd::cmdASSIGN(lval, indexed));
       // don't forget to update cmdSTRUCT (if this is the rval) with the
       // validated argumentID
 //      if (NULL != op2->command())

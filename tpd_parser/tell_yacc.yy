@@ -51,6 +51,8 @@ extern console::ted_cmd*           Console;
 /*Current tell variable name*/
 telldata::tell_var *tellvar = NULL;
 telldata::tell_var *tell_lvalue = NULL;
+/*Current variable is a list*/
+bool indexed = false;
 /*Current command - used in foreach statement*/
 parsercmd::cmdFOREACH *foreach_command;
 /*Current tell struct */
@@ -80,23 +82,53 @@ Well some remarks may save some time in the future...
  way to calculate any result during parsing - so nothing to assign to
  $$ variable. In the same time it's a good idea to control data types during
  the parsing. Assignment statement, function parameters - these are all
- good exapmples. That's why $$ variable is used (where appropriate) to hold 
+ good examples. That's why $$ variable is used (where appropriate) to hold
  the language types (enum telldata::type). Of course not all predicates have
  telldata::type. That might be a source of confusion - so some further comments
  concerning the %union statement below:
     real        - this holds the real numbers during parsing. tknREAL is the
                   only token of this type
     parsestr    - to hold variable/function names during parsing
-    pttname     - that's the tell_type we spoke about above.
+    pttname     - that's the tell_type we spoke about above. Once again - this is
+                  NOT a tell variable. Just the ID of the type.
     pblock      - that is actually the list structure type where all commands
                   are stored for future execution. block is the only predicate
                   of this type
     pfblock     - same as previous, however to avoid generally some casting
                   the {} blocks and function blocks have been separated.
-                  funcblock is obviously the predicate of this type
+                  funcblock is obviously the only predicate of this type
     pfarguments - Holds the function definition arguments. funcarguments is
                   the only predicate of this type
     pargumants  - Structure with function call arguments
+ 
+ There are two telldata::tell_var* variables defined in the parser.
+   - tellvar - stores a pointer to the last referenced (or defined) tell
+               variable. In all cases cmdPUSH is added to the commands with
+               a tellvar argument wich means that during the execution phase,
+               a copy of tellvar will be pushed in the operand stack. Normally,
+               that COPY is used by the subsequent commands and then destroyed.
+               Not all the commands use the copy in the operand stack thought.
+               An important exception is cmdASSIGN. The reason is obvious - it
+               needs the original variable - not a copy of it. In other words
+               lvalues are not handled trough the operand stack.
+   - tell_lvalue - is storing always the tellvar and is used as an argument of
+               Assign as explained above.
+
+   Some more questions:
+   - Why variables are cloned in the operand stack? If they weren't - we don't
+     need tell_lvalue and most likely tellvar as well.
+     The main reason are the memory leakeges. It is getting very messy with the
+     loops, constants, intermediate results etc. Some of them should be deleted,
+     some of them should be kept.
+   - What happens with the items in the operand stack which are not used?
+     ( for example function returns a value, but it is not assigned to anything)
+     The parser pushes cmdSTACKRST in the instructions stack at the end of every
+     tell statement. During execution this class clears the operand stack.
+   - Does all variables exists during parsing? What about dynamic variables?
+     By definition we don't want pointers in the script ( don't we ?) - means
+     that dynamic variables don't exists. This is not quite correct though.
+     Lists are an important exception here. See below.
+    
 Now something about the arrays. Actually there will be lists. Why? The main
  reason is that select functions may (and certainly will) return various
  objects - point, box, polygons, path, text etc together. Arrays by nature
@@ -112,6 +144,7 @@ Now something about the arrays. Actually there will be lists. Why? The main
  word length(<variable>) -> standard function will return the number of members
  assignment will have the normal form and a normal type checks will apply.
  Besides polygons and paths will be represented as a list of points
+
 Ooops! Second thought!
  The thing is that we have two different thigns here:
    One (array or list) is a langage construct
@@ -158,6 +191,15 @@ Ooops! Second thought!
   layout list select(box<variable>)
  Simple!
 
+ Now about indexing operations. The lists in tell are nothing else but a
+ dynamic arrays. Which means that the index can't be checked during the parsing
+ but only during runtime. The second trouble is when an indexed component is
+ an lvalue. It means that tellvar and tell_lvalue can't get a pointer to that
+ list component.
+ The problem is resolved with the introduction of the "indexed" variable in the
+ parser. tellvar is getting a pointer to the entire list and "indexed" is set to
+ true which allows the indexing to be postponed to the execution phase.
+
 =============================================================================*/
 %union {
    float                       real;
@@ -172,6 +214,7 @@ Ooops! Second thought!
    parsercmd::cmdFUNC         *pfblock;
    parsercmd::FuncDeclaration *pfdeclaration;
 }
+
 %start input
 /*---------------------------------------------------------------------------*/
 %token                 tknERROR
@@ -320,7 +363,7 @@ telllist:
             $$ = $1;
       }
 ;
-
+/*@TODO redefine foreach without using tellvar and tell_lvalue*/
 foreachstatement:
      tknFOREACH '('                 {
          CMDBlock = new parsercmd::cmdBLOCK();
@@ -402,7 +445,7 @@ assignment:
    argument                                {
       /*because of the (possible) structure that has an unknown yet tn_usertypes type,
       here we are doing the type checking, using the type of the lvalue*/
-      $$ = parsercmd::Assign(tell_lvalue, $4, @2);
+      $$ = parsercmd::Assign(tell_lvalue, indexed, $4, @2);
       delete $4;
    }
 ;
@@ -453,8 +496,10 @@ variable:
       if (tellvar) $$ = tellvar->get_type();
       else tellerror("variable not defined in this scope", @1);
       delete [] $1;
+      indexed = false;
    }
-   | fieldname                             {$$ = $1;}
+   | fieldname                             {$$ = $1; indexed = false;}
+   | listindex                             {$$ = $1; indexed = true;}
 ;
 
 variabledeclaration:
@@ -467,6 +512,7 @@ variabledeclaration:
       }
       else tellerror("variable already defined in this scope", @1);
       delete [] $2;
+      indexed = false;
    }
 ;
 
@@ -545,11 +591,11 @@ listindex:
          tellerror("list expected",@1);
       else if  (($3 != telldata::tn_int) && ($3 != telldata::tn_real))
          tellerror("index is expected to be a number",@3);
-      else
-      {
-         CMDBlock->pushcmd(new parsercmd::cmdLISTINDEX(tellvar));
+//      else
+//      {
+//         CMDBlock->pushcmd(new parsercmd::cmdLISTINDEX(tellvar));
          $$ = ($1 & (~telldata::tn_listmask));
-      }
+//      }
 /*     variable tknINDEX              {
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttint($2),true));
@@ -592,7 +638,7 @@ anonymousvar:
       // the structure is without a type at this moment, so here we do the type checking
       if (parsercmd::StructTypeCheck($1, op2, @2)) {
          tellvar = CMDBlock->newTellvar($1, @1);
-         parsercmd::Assign(tellvar, $2, @2);
+         parsercmd::Assign(tellvar, false, $2, @2);
          delete $2;
          $$ = $1;
       }
@@ -649,21 +695,21 @@ unaryexpression :
 
 primaryexpression : 
      tknREAL                               {$$ = telldata::tn_real;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttreal($1),true));}
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttreal($1), false, true));}
    | tknINT                                {$$ = telldata::tn_int;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttint($1),true));}
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttint($1), false, true));}
    | tknTRUE                               {$$ = telldata::tn_bool;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(true),true));}
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(true), false, true));}
    | tknFALSE                              {$$ = telldata::tn_bool;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(false),true));}
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(false), false, true));}
    | tknSTRING                             {$$ = telldata::tn_string;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttstring($1),true));
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttstring($1), false, true));
                                                                 delete [] $1;}
    | variable                              {$$ = $1;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
-   | listindex                             {$$ = $1;}
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, indexed));}
+//   | listindex                             {$$ = $1;}
    | anonymousvar                          {$$ = $1;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));}
+      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, false));}
    | '(' expression ')'                    {$$ = $2;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
 ;

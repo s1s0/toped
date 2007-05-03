@@ -24,7 +24,11 @@ void CheckLists() {
 //   addwire({{35,5},{35,30}},2);
 //
 
-   echo("===================================");
+
+   Indexing({5,4,3,2,1});
+//   Indexing({1,2});
+   
+   echo("===foreach external list, external iterator==");
    point current;
    foreach (current;p2)
    {
@@ -32,15 +36,20 @@ void CheckLists() {
       echo("------------");
    };
 
-   echo("===================================");
-   int list boza_list = {1,2,3,4,5};
-   foreach (int boza; boza_list)
+   echo("===list components as lvalues==");
+   p2[0] = p1[5];
+   p2[1] = p1[4];
+   p2[2] = p1[3];
+   p2[3] = {100,90};
+   
+   echo("===foreach external list, local iterator==");
+   foreach (point boza; p2)
    {
       echo(boza);
       echo("------------");
    };
       
-   echo("===================================");
+   echo("===foreach local list, local iterator==");
    foreach (int boza; int list {5,4,3,2,1})
    {
       echo(boza);
@@ -93,5 +102,6 @@ void CheckLists() {
 //{
 //   echo(counter)
 //}
+point list p1 = {{0,0},{2,0},{2,1},{1,1},{1,2},{0,2}};
 
 
