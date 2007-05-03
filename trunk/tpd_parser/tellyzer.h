@@ -266,21 +266,23 @@ namespace  parsercmd {
 
    class cmdASSIGN:public cmdVIRTUAL {
    public:
-      cmdASSIGN(telldata::tell_var* var): _var(var) {};
+      cmdASSIGN(telldata::tell_var* var, bool indexed): _var(var), _indexed(indexed) {};
       int execute();
 //      ~cmdASSIGN() {delete _var;}
    protected:
-      telldata::tell_var* _var;
+      telldata::tell_var*  _var;
+      bool                 _indexed;
    };
 
    class cmdPUSH:public cmdVIRTUAL {
    public:
-      cmdPUSH(telldata::tell_var *v, bool constant=false):
-                        _var(v),  _constant(constant) {};
+      cmdPUSH(telldata::tell_var *v, bool indexed, bool constant=false):
+                        _var(v),  _indexed(indexed), _constant(constant) {};
       int execute();
       ~cmdPUSH() {if (_constant) delete _var;};
    private:
-      telldata::tell_var* _var;
+      telldata::tell_var*  _var;
+      bool                 _indexed;
       bool                 _constant;
    };
 
@@ -295,14 +297,14 @@ namespace  parsercmd {
       telldata::argumentID*  _arg;
    };
 
-   class cmdLISTINDEX : public cmdVIRTUAL {
+/*   class cmdLISTINDEX : public cmdVIRTUAL {
    public:
       cmdLISTINDEX(telldata::tell_var* listarg) : _listarg(listarg) {};
       int execute();
    private:
       telldata::tell_var*   _listarg;
    };
-
+*/
    class cmdRETURN:public cmdVIRTUAL {
    public:
       cmdRETURN(telldata::typeID tID) : _retype(tID) {};
@@ -492,7 +494,7 @@ namespace  parsercmd {
    telldata::typeID  PointMv(telldata::typeID, telldata::typeID, yyltype, yyltype, int, int);
    telldata::typeID  Multiply(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, yyltype, yyltype);
-   telldata::typeID  Assign(telldata::tell_var*, telldata::argumentID*, yyltype);
+   telldata::typeID  Assign(telldata::tell_var*, bool, telldata::argumentID*, yyltype);
    telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
 
    bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);
