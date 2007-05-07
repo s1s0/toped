@@ -108,11 +108,15 @@ Well some remarks may save some time in the future...
                a copy of tellvar will be pushed in the operand stack. Normally,
                that COPY is used by the subsequent commands and then destroyed.
                Not all the commands use the copy in the operand stack thought.
-               An important exception is cmdASSIGN. The reason is obvious - it
-               needs the original variable - not a copy of it. In other words
-               lvalues are not handled trough the operand stack.
+               An important exception is cmdASSIGN (see tell_lvalue below).
+               Another example is the loop variable (foreach). Generally this
+               variable is hardly used directly.
    - tell_lvalue - is storing always the tellvar and is used as an argument of
-               Assign as explained above.
+               Assign. Assign obviously needs the original variable - not a copy
+               of it which is normally used for most ofthe operaions. In other
+               words lvalues are not handled trough the operand stack, instead
+               this variable is used.
+   
 
    Some more questions:
    - Why variables are cloned in the operand stack? If they weren't - we don't
@@ -363,24 +367,21 @@ telllist:
             $$ = $1;
       }
 ;
-/*@TODO redefine foreach without using tellvar and tell_lvalue*/
+
 foreachstatement:
      tknFOREACH '('                 {
          CMDBlock = new parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
-     lvalue ';'                     {
-         tell_lvalue = tellvar;
-      }
-     telllist ')'                   {
-         if  (($4 | telldata::tn_listmask) != $7)
+     lvalue ';' telllist ')'        {
+         if  (($4 | telldata::tn_listmask) != $6)
             tellerror("unappropriate variable type",@4);
          foreach_command = new parsercmd::cmdFOREACH(tell_lvalue,tellvar);
       }
      block                          {
          parsercmd::cmdBLOCK* foreach_block = CMDBlock;
          CMDBlock = CMDBlock->popblk();
-         foreach_command->addBlocks(foreach_block,$10);
+         foreach_command->addBlocks(foreach_block,$9);
          CMDBlock->pushcmd(foreach_command);
       }
 ;
@@ -441,12 +442,11 @@ funccall:
 ;
 
 assignment:
-     lvalue '='                            {tell_lvalue = tellvar;}
-   argument                                {
+     lvalue '=' argument                   {
       /*because of the (possible) structure that has an unknown yet tn_usertypes type,
       here we are doing the type checking, using the type of the lvalue*/
-      $$ = parsercmd::Assign(tell_lvalue, indexed, $4, @2);
-      delete $4;
+      $$ = parsercmd::Assign(tell_lvalue, indexed, $3, @2);
+      delete $3;
    }
 ;
 
@@ -486,8 +486,8 @@ funcargument:
 ;
 
 lvalue:
-     variable                               {$$ = $1;}
-   | variabledeclaration                    {$$ = $1;}
+     variable                               {$$ = $1;tell_lvalue = tellvar;}
+   | variabledeclaration                    {$$ = $1;tell_lvalue = tellvar;}
 ;
 
 variable:
@@ -591,20 +591,7 @@ listindex:
          tellerror("list expected",@1);
       else if  (($3 != telldata::tn_int) && ($3 != telldata::tn_real))
          tellerror("index is expected to be a number",@3);
-//      else
-//      {
-//         CMDBlock->pushcmd(new parsercmd::cmdLISTINDEX(tellvar));
          $$ = ($1 & (~telldata::tn_listmask));
-//      }
-/*     variable tknINDEX              {
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar));
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttint($2),true));
-      CMDBlock->pushcmd(new parsercmd::cmdLISTINDEX());
-      assert(NULL != tellvar);
-      tellvar = tellvar->index_var($2);
-      if (tellvar) $$ = tellvar->get_type();
-      else tellerror("Index out of bounds", @2);
-      delete [] $2;*/
     }
 ;
 
