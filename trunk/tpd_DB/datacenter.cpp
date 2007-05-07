@@ -344,9 +344,11 @@ void DataCenter::GDSparse(std::string filename)
    }
    // parse the GDS file
    _GDSDB = new GDSin::GDSFile(filename.c_str());
-   if (!_GDSDB->status()) return;
-   // generate the hierarchy tree of cells
-   _GDSDB->HierOut();
+   if (_GDSDB->status())
+   {
+      // generate the hierarchy tree of cells
+      _GDSDB->HierOut();
+   }
    unlockGDS();
 }
 
