@@ -335,7 +335,7 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
 
 void DataCenter::GDSparse(std::string filename) 
 {
-   lockGDS();
+   lockGDS(false);
    if (_GDSDB) 
    {
       std::string news = "Removing existing GDS data from memory...";
