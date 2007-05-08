@@ -253,6 +253,28 @@ telldata::tell_var* telldata::ttlist::index_var(unsigned index)
    else return _mlist[index];
 }
 
+void telldata::ttlist::insert(unsigned index)
+{
+   assert(index >=0); assert(index <= _mlist.size());
+   if (index == _mlist.size())
+   {
+      // add a position in the list and copy the last component into it
+      _mlist.push_back(_mlist[_mlist.size()-1]->selfcopy());
+   }
+   else
+   {
+      // insert a position before index and copy the contents of index position there
+      memlist::iterator CI;
+      unsigned idx = 0;
+      for(CI = _mlist.begin(); CI != _mlist.end(); CI++, idx++)
+      {
+         if (idx == index) break;
+      }
+      assert(NULL != (*CI));
+      _mlist.insert(CI,(*CI)->selfcopy());
+   }
+}
+
 telldata::ttlist::~ttlist() {
    for (unsigned long i = 0 ; i < _mlist.size(); i++)
       delete _mlist[i];
