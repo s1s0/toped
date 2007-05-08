@@ -226,16 +226,18 @@ Ooops! Second thought!
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
 %token                 tknSTRINGdef tknLAYOUTdef tknLISTdef tknRETURN
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ tknAND tknOR
-%token                 tknSW tknSE tknNE tknNW
+%token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
+%token                 tknPOSTADD tknPOSTSUB
 %token <parsestr>      tknIDENTIFIER tknFIELD tknSTRING
 %token <real>          tknREAL
 %token <integer>       tknINT
 /* parser types*/
 %type <pttname>        primaryexpression unaryexpression
 %type <pttname>        multiexpression addexpression expression
-%type <pttname>        assignment fieldname listindex funccall telllist
+%type <pttname>        assignment fieldname funccall telllist
 %type <pttname>        lvalue telltype telltypeID variable anonymousvar
-%type <pttname>        variabledeclaration andexpression eqexpression relexpression 
+%type <pttname>        variabledeclaration andexpression eqexpression relexpression
+%type <pttname>        listindex listprefixadd listpostfixadd listadd
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument
 %type <plarguments>    nearguments arguments
@@ -500,6 +502,7 @@ variable:
    }
    | fieldname                             {$$ = $1; indexed = false;}
    | listindex                             {$$ = $1; indexed = true;}
+   | listadd                               {$$ = $1; indexed = true;}
 ;
 
 variabledeclaration:
@@ -586,12 +589,50 @@ fieldname:
 
 listindex:
      variable '[' expression ']'    {
-      assert(NULL != tellvar);
       if       (!($1 & telldata::tn_listmask))
          tellerror("list expected",@1);
       else if  (($3 != telldata::tn_int) && ($3 != telldata::tn_real))
          tellerror("index is expected to be a number",@3);
-         $$ = ($1 & (~telldata::tn_listmask));
+      $$ = ($1 & (~telldata::tn_listmask));
+    }
+;
+
+listadd:
+     listprefixadd                        { $$ = $1;      }
+   | listpostfixadd                       { $$ = $1;      }
+;
+
+listprefixadd:
+     variable '[' tknPREADD expression ']'    {
+      if       (!($1 & telldata::tn_listmask))
+         tellerror("list expected",@1);
+      else if  (($4 != telldata::tn_int) && ($4 != telldata::tn_real))
+         tellerror("index is expected to be a number",@4);
+      $$ = ($1 & (~telldata::tn_listmask));
+      CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, true));
+    }
+   | variable '[' tknPREADD ']'               {
+      if       (!($1 & telldata::tn_listmask))
+         tellerror("list expected",@1);
+      $$ = ($1 & (~telldata::tn_listmask));
+      CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, false));
+    }
+;
+
+listpostfixadd:
+     variable '[' expression tknPOSTADD ']'   {
+      if       (!($1 & telldata::tn_listmask))
+         tellerror("list expected",@1);
+      else if  (($3 != telldata::tn_int) && ($3 != telldata::tn_real))
+         tellerror("index is expected to be a number",@3);
+      $$ = ($1 & (~telldata::tn_listmask));
+      CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, true));
+    }
+   | variable '[' tknPOSTADD ']'              {
+      if       (!($1 & telldata::tn_listmask))
+         tellerror("list expected",@1);
+      $$ = ($1 & (~telldata::tn_listmask));
+      CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, false));
     }
 ;
 
@@ -694,7 +735,6 @@ primaryexpression :
                                                                 delete [] $1;}
    | variable                              {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, indexed));}
-//   | listindex                             {$$ = $1;}
    | anonymousvar                          {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, false));}
    | '(' expression ')'                    {$$ = $2;}
@@ -731,7 +771,7 @@ void tellerror (std::string s) {
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column << ": " << s;
    tell_log(console::MT_ERROR,ost.str());
 }
-// 
+//
 // {
 //          /*Check whether such a function is already defined */
 //          if (NULL != CMDBlock->funcDefined($2,arglist)) {
@@ -740,4 +780,4 @@ void tellerror (std::string s) {
 //             parsercmd::ClearArgumentList(arglist); delete(arglist); arglist = NULL;
 //             YYABORT;
 // }
-// }
+//

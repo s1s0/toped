@@ -243,7 +243,7 @@ namespace telldata {
       void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());};
       unsigned             size() const      {return _mlist.size();};
       tell_var*            index_var(unsigned index);
-      
+      void                 insert(unsigned index);
                           ~ttlist();
    private:
       memlist             _mlist;    // the list itself

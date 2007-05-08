@@ -464,28 +464,40 @@ int parsercmd::cmdASSIGN::execute()
 
 }
 
-// //=============================================================================
-// int parsercmd::cmdLISTINDEX::execute()
-// {
-//    TELL_DEBUG(cmdLISTINDEX);
-//    real idx = getOpValue();
-//    if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
-//    {
-//       tellerror("Runtime error.Invalid index");
-//       return EXEC_ABORT;
-//    }
-//    telldata::tell_var *listcomp = static_cast<telldata::ttlist*>(_listarg)->index_var(idx);
-//    if (NULL != listcomp)
-//    {
-//       OPstack.push(listcomp->selfcopy());
-//       return EXEC_NEXT;
-//    }
-//    else
-//    {
-//       tellerror("Runtime error.Index out of bounds");
-//       return EXEC_ABORT;
-//    }
-// }
+//=============================================================================
+int parsercmd::cmdLISTADD::execute()
+{
+   TELL_DEBUG(cmdLISTADD);
+   real idx;
+   if (_index)
+   {
+      idx = getOpValue();
+      if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
+      {
+         tellerror("Runtime error.Invalid index");
+         return EXEC_ABORT;
+      }
+   }
+   else
+   {
+      if (_prefix) idx = 0.0;
+      else         idx = static_cast<telldata::ttlist*>(_listarg)->size() - 1.0;
+   }
+   telldata::ttlist *clist = static_cast<telldata::ttlist*>(_listarg);
+   telldata::tell_var *listcomp = clist->index_var(idx);
+   if (NULL != listcomp)
+   {
+      if (!_prefix) idx++;
+      clist->insert(idx);
+      OPstack.push(new telldata::ttreal(idx));
+      return EXEC_NEXT;
+   }
+   else
+   {
+      tellerror("Runtime error.Index out of bounds");
+      return EXEC_ABORT;
+   }
+}
 
 //=============================================================================
 int parsercmd::cmdPUSH::execute()
