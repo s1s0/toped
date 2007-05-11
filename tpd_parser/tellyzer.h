@@ -308,6 +308,17 @@ namespace  parsercmd {
       bool                  _index;
    };
 
+   class cmdLISTSUB : public cmdVIRTUAL {
+   public:
+      cmdLISTSUB(telldata::tell_var* listarg, bool prefix, bool index) :
+         _listarg(listarg), _prefix(prefix), _index(index) {};
+      int execute();
+   private:
+      telldata::tell_var*   _listarg;
+      bool                  _prefix;
+      bool                  _index;
+   };
+
    class cmdRETURN:public cmdVIRTUAL {
    public:
       cmdRETURN(telldata::typeID tID) : _retype(tID) {};

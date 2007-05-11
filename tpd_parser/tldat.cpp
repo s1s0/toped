@@ -124,6 +124,8 @@ void telldata::ttint::assign(tell_var* rt) {
       _value = static_cast<ttreal*>(rt)->value();
    else if (rt->get_type() == tn_int)
       _value = static_cast<ttint*>(rt)->value();
+   else
+      assert(false);
 }
 
 void telldata::ttint::echo(std::string& wstr, real) {
@@ -273,6 +275,29 @@ void telldata::ttlist::insert(unsigned index)
       assert(NULL != (*CI));
       _mlist.insert(CI,(*CI)->selfcopy());
    }
+}
+
+telldata::tell_var* telldata::ttlist::erase(unsigned index)
+{
+   assert(index >=0); assert(index < _mlist.size());
+   telldata::tell_var* erased = _mlist[index];
+   if (index == (_mlist.size() - 1))
+   {
+      // remove the last component
+      _mlist.pop_back();
+   }
+   else
+   {
+      // erase the position at the index
+      memlist::iterator CI;
+      unsigned idx = 0;
+      for(CI = _mlist.begin(); CI != _mlist.end(); CI++, idx++)
+      {
+         if (idx == index) break;
+      }
+      _mlist.erase(CI);
+   }
+   return erased;
 }
 
 telldata::ttlist::~ttlist() {

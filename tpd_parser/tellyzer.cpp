@@ -500,6 +500,39 @@ int parsercmd::cmdLISTADD::execute()
 }
 
 //=============================================================================
+int parsercmd::cmdLISTSUB::execute()
+{
+   TELL_DEBUG(cmdLISTSUB);
+   real idx;
+   unsigned lstsize = static_cast<telldata::ttlist*>(_listarg)->size();
+   if (_index)
+   {
+      idx = getOpValue();
+      if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
+      {
+         tellerror("Runtime error.Invalid index");
+         return EXEC_ABORT;
+      }
+   }
+   else
+   {
+      if (_prefix) idx = 0.0;
+      else         idx = lstsize - 1.0;
+   }
+   telldata::ttlist *clist = static_cast<telldata::ttlist*>(_listarg);
+   telldata::tell_var *listcomp = clist->index_var(idx);
+   if ((0 < lstsize) && (NULL != listcomp))
+   {
+      OPstack.push(clist->erase(idx));
+      return EXEC_NEXT;
+   }
+   else
+   {
+      tellerror("Runtime error.Index out of bounds");
+      return EXEC_ABORT;
+   }
+}
+//=============================================================================
 int parsercmd::cmdPUSH::execute()
 {
    // The temptation here is to put the constants in the operand stack directly,

@@ -244,6 +244,7 @@ namespace telldata {
       unsigned             size() const      {return _mlist.size();};
       tell_var*            index_var(unsigned index);
       void                 insert(unsigned index);
+      tell_var*            erase(unsigned index);
                           ~ttlist();
    private:
       memlist             _mlist;    // the list itself

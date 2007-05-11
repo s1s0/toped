@@ -238,6 +238,7 @@ Ooops! Second thought!
 %type <pttname>        lvalue telltype telltypeID variable anonymousvar
 %type <pttname>        variabledeclaration andexpression eqexpression relexpression
 %type <pttname>        listindex listprefixadd listpostfixadd listadd
+%type <pttname>        listprefixsub listpostfixsub listsub
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument
 %type <plarguments>    nearguments arguments
@@ -636,6 +637,45 @@ listpostfixadd:
     }
 ;
 
+listsub:
+     listprefixsub                        { $$ = $1;      }
+   | listpostfixsub                       { $$ = $1;      }
+;
+
+listprefixsub:
+     variable '[' tknPRESUB expression ']'    {
+      if       (!($1 & telldata::tn_listmask))
+         tellerror("list expected",@1);
+      else if  (($4 != telldata::tn_int) && ($4 != telldata::tn_real))
+         tellerror("index is expected to be a number",@4);
+      $$ = ($1 & (~telldata::tn_listmask));
+      CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,true, true));
+    }
+   | variable '[' tknPRESUB ']'               {
+      if       (!($1 & telldata::tn_listmask))
+         tellerror("list expected",@1);
+      $$ = ($1 & (~telldata::tn_listmask));
+      CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,true, false));
+    }
+;
+
+listpostfixsub:
+     variable '[' expression tknPOSTSUB ']'   {
+      if       (!($1 & telldata::tn_listmask))
+         tellerror("list expected",@1);
+      else if  (($3 != telldata::tn_int) && ($3 != telldata::tn_real))
+         tellerror("index is expected to be a number",@3);
+      $$ = ($1 & (~telldata::tn_listmask));
+      CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,false, true));
+    }
+   | variable '[' tknPOSTSUB ']'              {
+      if       (!($1 & telldata::tn_listmask))
+         tellerror("list expected",@1);
+      $$ = ($1 & (~telldata::tn_listmask));
+      CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,false, false));
+    }
+;
+
 structure:
      '{'                                  {
         argmap = new telldata::argumentQ;
@@ -737,6 +777,7 @@ primaryexpression :
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, indexed));}
    | anonymousvar                          {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, false));}
+   | listsub                               {$$ = $1; indexed = false;}
    | '(' expression ')'                    {$$ = $2;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
 ;
