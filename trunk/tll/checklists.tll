@@ -73,6 +73,19 @@ void CheckLists() {
    echo("=== -33 before the component with index 3:==");
    alst[+:3] = -33; // push before the index
    echo(alst);
+
+   echo("=== remove component with index 3");
+   echo(alst[-:3]); // remove the index
+   echo(alst);
+   echo("=== remove component with index 4");
+   echo(alst[4:-]); // remove the index
+   echo(alst);
+   echo("=== remove first");
+   echo(alst[-:]); // remove first
+   echo(alst);
+   echo("=== remove last");
+   echo(alst[:-]); // remove last
+   echo(alst);
 }
 
 
