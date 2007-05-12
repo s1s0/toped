@@ -112,13 +112,14 @@ namespace  parsercmd {
    ******************************************************************************/
    class cmdVIRTUAL {
    public:
-//      cmdVIRTUAL(yyltype loc): _loc(loc) {}
+      cmdVIRTUAL(): _opstackerr(false) {};
       virtual int  execute() = 0;
               real getOpValue(telldata::operandSTACK& OPs = OPstack);
               word getWordValue(telldata::operandSTACK& OPs = OPstack);
               byte getByteValue(telldata::operandSTACK& OPs = OPstack);
        std::string getStringValue(telldata::operandSTACK& OPs = OPstack);
               bool getBoolValue(telldata::operandSTACK& OPs = OPstack);
+         _dbl_word getIndexValue(telldata::operandSTACK& OPs = OPstack);
               real getOpValue(telldata::UNDOPerandQUEUE&, bool);
               word getWordValue(telldata::UNDOPerandQUEUE&, bool);
               byte getByteValue(telldata::UNDOPerandQUEUE&, bool);
@@ -129,7 +130,7 @@ namespace  parsercmd {
       static telldata::operandSTACK       OPstack;      // Operand stack
       static telldata::UNDOPerandQUEUE    UNDOPstack;   // undo operand stack
       static undoQUEUE                    UNDOcmdQ;     // undo command stack
-//      yyltype                  _loc;
+      bool                                _opstackerr;  // error while extracting operands
    };
 
    /*****************************************************************************
@@ -300,10 +301,10 @@ namespace  parsercmd {
    class cmdLISTADD : public cmdVIRTUAL {
    public:
       cmdLISTADD(telldata::tell_var* listarg, bool prefix, bool index) :
-         _listarg(listarg), _prefix(prefix), _index(index) {};
+         _listarg(static_cast<telldata::ttlist*>(listarg)), _prefix(prefix), _index(index) {};
       int execute();
    private:
-      telldata::tell_var*   _listarg;
+      telldata::ttlist*     _listarg;
       bool                  _prefix;
       bool                  _index;
    };
@@ -311,10 +312,10 @@ namespace  parsercmd {
    class cmdLISTSUB : public cmdVIRTUAL {
    public:
       cmdLISTSUB(telldata::tell_var* listarg, bool prefix, bool index) :
-         _listarg(listarg), _prefix(prefix), _index(index) {};
+         _listarg(static_cast<telldata::ttlist*>(listarg)), _prefix(prefix), _index(index) {};
       int execute();
    private:
-      telldata::tell_var*   _listarg;
+      telldata::ttlist*     _listarg;
       bool                  _prefix;
       bool                  _index;
    };
@@ -512,6 +513,7 @@ namespace  parsercmd {
    telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
 
    bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);
+   bool              ListIndexCheck(telldata::typeID, yyltype, telldata::typeID, yyltype);
    void              ClearArgumentList(argumentLIST*);
 
 
