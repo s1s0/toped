@@ -420,6 +420,8 @@ statement:
    | repeatstatement                       {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | returnstatement                       {/*keep the return value in the stack*/}
    | funccall                              {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
+   | listadd                               {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
+   | listsub                               {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | recorddefinition                      { }
 ;
 
@@ -459,8 +461,7 @@ arguments:
 ;
 
 argument :
-     funccall                              {$$ = new telldata::argumentID($1);}
-   | expression                            {$$ = new telldata::argumentID($1);}
+     expression                            {$$ = new telldata::argumentID($1);}
    | assignment                            {$$ = new telldata::argumentID($1);}
    | structure                             {$$ = $1;}
 ;
@@ -590,10 +591,7 @@ fieldname:
 
 listindex:
      variable '[' expression ']'    {
-      if       (!($1 & telldata::tn_listmask))
-         tellerror("list expected",@1);
-      else if  (($3 != telldata::tn_int) && ($3 != telldata::tn_real))
-         tellerror("index is expected to be a number",@3);
+      ListIndexCheck($1, @1, $3, @3);
       $$ = ($1 & (~telldata::tn_listmask));
     }
 ;
@@ -771,6 +769,7 @@ primaryexpression :
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, false));}
    | listsub                               {$$ = $1; indexed = false;}
    | '(' expression ')'                    {$$ = $2;}
+   | funccall                              {$$ = $1;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
 ;
 
