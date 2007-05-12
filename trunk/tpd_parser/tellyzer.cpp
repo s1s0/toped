@@ -70,7 +70,8 @@ bool parsercmd::cmdSTDFUNC::_ignoreOnRecovery = false;
 
 
 
-real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs) {
+real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs)
+{
    real value = 0;
    telldata::tell_var *op = OPs.top();OPs.pop();
    if (op->get_type() == telldata::tn_real) 
@@ -81,7 +82,8 @@ real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs) {
    return value;
 }
 
-real parsercmd::cmdVIRTUAL::getOpValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
+real parsercmd::cmdVIRTUAL::getOpValue(telldata::UNDOPerandQUEUE& OPs, bool front)
+{
    real value = 0;
    telldata::tell_var *op;
    if (front) {op = OPs.front();OPs.pop_front();}
@@ -94,7 +96,8 @@ real parsercmd::cmdVIRTUAL::getOpValue(telldata::UNDOPerandQUEUE& OPs, bool fron
    return value;
 }
 
-word parsercmd::cmdVIRTUAL::getWordValue(telldata::operandSTACK& OPs) {
+word parsercmd::cmdVIRTUAL::getWordValue(telldata::operandSTACK& OPs)
+{
    telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
    word value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_WORD_VALUE))
@@ -107,7 +110,8 @@ word parsercmd::cmdVIRTUAL::getWordValue(telldata::operandSTACK& OPs) {
    return value;
 }
 
-word parsercmd::cmdVIRTUAL::getWordValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
+word parsercmd::cmdVIRTUAL::getWordValue(telldata::UNDOPerandQUEUE& OPs, bool front)
+{
    telldata::ttint  *op;
    if (front) {op = static_cast<telldata::ttint*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();} 
@@ -122,7 +126,36 @@ word parsercmd::cmdVIRTUAL::getWordValue(telldata::UNDOPerandQUEUE& OPs, bool fr
    return value;
 }
 
-byte parsercmd::cmdVIRTUAL::getByteValue(telldata::operandSTACK& OPs) {
+_dbl_word parsercmd::cmdVIRTUAL::getIndexValue(telldata::operandSTACK& OPs)
+{
+   _dbl_word value = 0;
+   telldata::tell_var *op = OPs.top();OPs.pop();
+   if (op->get_type() == telldata::tn_real)
+   {
+      real realvalue = static_cast<telldata::ttreal*>(op)->value();
+      if ((realvalue < 0) || ((realvalue - int(realvalue)) != 0.0 ) )
+      {
+         _opstackerr = true;
+      }
+      else
+         value = (_dbl_word) rint(realvalue);
+   }
+   else if (op->get_type() == telldata::tn_int)
+   {
+      int4b intvalue = (int4b) rint(static_cast<telldata::ttint*>(op)->value());
+      if (intvalue < 0)
+      {
+         _opstackerr = true;
+      }
+      else
+         value = intvalue;
+   }
+   delete op;
+   return value;
+}
+
+byte parsercmd::cmdVIRTUAL::getByteValue(telldata::operandSTACK& OPs)
+{
    telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
    byte value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_BYTE_VALUE))
@@ -135,7 +168,8 @@ byte parsercmd::cmdVIRTUAL::getByteValue(telldata::operandSTACK& OPs) {
    return value;
 }
 
-byte parsercmd::cmdVIRTUAL::getByteValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
+byte parsercmd::cmdVIRTUAL::getByteValue(telldata::UNDOPerandQUEUE& OPs, bool front)
+{
    telldata::ttint  *op;
    if (front) {op = static_cast<telldata::ttint*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();}
@@ -150,14 +184,16 @@ byte parsercmd::cmdVIRTUAL::getByteValue(telldata::UNDOPerandQUEUE& OPs, bool fr
    return value;
 }
 
-std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::operandSTACK& OPs) {
+std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::operandSTACK& OPs)
+{
    telldata::ttstring  *op = static_cast<telldata::ttstring*>(OPs.top());OPs.pop();
    std::string value = op->value();
    delete op;
    return value;
 }
 
-std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
+std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::UNDOPerandQUEUE& OPs, bool front)
+{
    telldata::ttstring  *op;
    if (front) {op = static_cast<telldata::ttstring*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttstring*>(OPs.back());OPs.pop_back();}
@@ -166,14 +202,16 @@ std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::UNDOPerandQUEUE& OPs
    return value;
 }
 
-bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::operandSTACK& OPs) {
+bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::operandSTACK& OPs)
+{
    telldata::ttbool  *op = static_cast<telldata::ttbool*>(OPs.top());OPs.pop();
    bool value = op->value();
    delete op;
    return value;
 }
 
-bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::UNDOPerandQUEUE& OPs, bool front) {
+bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::UNDOPerandQUEUE& OPs, bool front)
+{
    telldata::ttbool  *op;
    if (front) {op = static_cast<telldata::ttbool*>(OPs.front());OPs.pop_front();}
    else       {op = static_cast<telldata::ttbool*>(OPs.back());OPs.pop_back();}
@@ -437,20 +475,16 @@ int parsercmd::cmdASSIGN::execute()
    {
       if (_indexed)
       {
-         real idx = getOpValue();
-         if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
-         {
-            tellerror("Runtime error.Invalid index");
-            return EXEC_ABORT;
-         }
+         _dbl_word idx = getIndexValue();
          _var = static_cast<telldata::ttlist*>(_var)->index_var(idx);
-         if (NULL != _var)
+         if ((NULL != _var) && (!_opstackerr))
          {
             _var->assign(op); OPstack.push(_var->selfcopy());
          }
          else
          {
-            tellerror("Runtime error.Index out of bounds");
+            tellerror("Runtime error.Invalid Index");
+            delete op;
             return EXEC_ABORT;
          }
       }
@@ -468,33 +502,25 @@ int parsercmd::cmdASSIGN::execute()
 int parsercmd::cmdLISTADD::execute()
 {
    TELL_DEBUG(cmdLISTADD);
-   real idx;
-   if (_index)
-   {
-      idx = getOpValue();
-      if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
-      {
-         tellerror("Runtime error.Invalid index");
-         return EXEC_ABORT;
-      }
-   }
-   else
-   {
-      if (_prefix) idx = 0.0;
-      else         idx = static_cast<telldata::ttlist*>(_listarg)->size() - 1.0;
-   }
-   telldata::ttlist *clist = static_cast<telldata::ttlist*>(_listarg);
-   telldata::tell_var *listcomp = clist->index_var(idx);
-   if (NULL != listcomp)
+   _dbl_word idx;
+   // find the index
+   if      ((!_index) && ( _prefix)) // first in the list
+      idx = 0;
+   else if ((!_index) && (!_prefix)) // last in the list
+      idx = _listarg->size() - 1;
+   else                              // get the index from the operand stack
+      idx = getIndexValue();
+   //
+   if ((!_opstackerr) && (_listarg->validIndex(idx)))
    {
       if (!_prefix) idx++;
-      clist->insert(idx);
-      OPstack.push(new telldata::ttreal(idx));
+      _listarg->insert(idx);
+      OPstack.push(new telldata::ttint(idx));
       return EXEC_NEXT;
    }
    else
    {
-      tellerror("Runtime error.Index out of bounds");
+      tellerror("Runtime error.Invalid index");
       return EXEC_ABORT;
    }
 }
@@ -503,32 +529,23 @@ int parsercmd::cmdLISTADD::execute()
 int parsercmd::cmdLISTSUB::execute()
 {
    TELL_DEBUG(cmdLISTSUB);
-   real idx;
-   unsigned lstsize = static_cast<telldata::ttlist*>(_listarg)->size();
-   if (_index)
+   _dbl_word idx;
+   // find the index
+   if      ((!_index) && ( _prefix)) // first in the list
+      idx = 0;
+   else if ((!_index) && (!_prefix)) // last in the list
+      idx = _listarg->size() - 1;
+   else                              // get the index from the operand stack
+      idx = getIndexValue();
+   //
+   if ((!_opstackerr) && (_listarg->validIndex(idx)))
    {
-      idx = getOpValue();
-      if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
-      {
-         tellerror("Runtime error.Invalid index");
-         return EXEC_ABORT;
-      }
-   }
-   else
-   {
-      if (_prefix) idx = 0.0;
-      else         idx = lstsize - 1.0;
-   }
-   telldata::ttlist *clist = static_cast<telldata::ttlist*>(_listarg);
-   telldata::tell_var *listcomp = clist->index_var(idx);
-   if ((0 < lstsize) && (NULL != listcomp))
-   {
-      OPstack.push(clist->erase(idx));
+      OPstack.push(_listarg->erase(idx));
       return EXEC_NEXT;
    }
    else
    {
-      tellerror("Runtime error.Index out of bounds");
+      tellerror("Runtime error.Invalid index");
       return EXEC_ABORT;
    }
 }
@@ -551,21 +568,16 @@ int parsercmd::cmdPUSH::execute()
       // another class cmdLISTINDEX could be appropriate instead of the logical
       // branch below. It looks to me that it is quite the same as above, apart
       // from the index checks
-      real idx = getOpValue();
-      if ((idx < 0) || ((idx - int(idx)) != 0.0 ) )
-      {
-         tellerror("Runtime error.Invalid index");
-         return EXEC_ABORT;
-      }
+      _dbl_word idx = getIndexValue();
       telldata::tell_var *listcomp = static_cast<telldata::ttlist*>(_var)->index_var(idx);
-      if (NULL != listcomp)
+      if ((NULL != listcomp) && (!_opstackerr))
       {
          OPstack.push(listcomp->selfcopy());
          return EXEC_NEXT;
       }
       else
       {
-         tellerror("Runtime error.Index out of bounds");
+         tellerror("Runtime error.Invalid index");
          return EXEC_ABORT;
       }
    }
@@ -1466,6 +1478,19 @@ bool parsercmd::StructTypeCheck(telldata::typeID targett,
       if (NULL != vartype) op2->userStructCheck(*vartype, true);
    }
    return (targett == (*op2)());
+}
+
+bool parsercmd::ListIndexCheck(telldata::typeID list, yyltype lloc,
+                               telldata::typeID idx, yyltype iloc)
+{
+   bool checkval = false;
+   if       (!(list & telldata::tn_listmask))
+      tellerror("list expected",lloc);
+   else if  ((idx != telldata::tn_int) && (idx != telldata::tn_real))
+      tellerror("index is expected to be a number",iloc);
+   else
+      checkval = true;
+   return checkval;
 }
 
 telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telldata::argumentID* op2,

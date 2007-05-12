@@ -121,7 +121,7 @@ const telldata::ttreal& telldata::ttreal::operator = (const ttint& a) {
 //=============================================================================
 void telldata::ttint::assign(tell_var* rt) {
    if (rt->get_type() == tn_real)
-      _value = static_cast<ttreal*>(rt)->value();
+      _value = (int4b) rint(static_cast<ttreal*>(rt)->value());
    else if (rt->get_type() == tn_int)
       _value = static_cast<ttint*>(rt)->value();
    else
@@ -249,13 +249,20 @@ void telldata::ttlist::assign(tell_var* rt) {
    this->operator = (*(static_cast<ttlist*>(rt)));
 }
 
-telldata::tell_var* telldata::ttlist::index_var(unsigned index)
+telldata::tell_var* telldata::ttlist::index_var(_dbl_word index)
 {
    if (index > (_mlist.size() - 1)) return NULL;
    else return _mlist[index];
 }
 
-void telldata::ttlist::insert(unsigned index)
+bool telldata::ttlist::validIndex(_dbl_word index)
+{
+   _dbl_word cursize = _mlist.size();
+   if ((0 == cursize) || (index > (cursize - 1))) return false;
+   else return true;
+}
+
+void telldata::ttlist::insert(_dbl_word index)
 {
    assert(index >=0); assert(index <= _mlist.size());
    if (index == _mlist.size())
@@ -277,7 +284,7 @@ void telldata::ttlist::insert(unsigned index)
    }
 }
 
-telldata::tell_var* telldata::ttlist::erase(unsigned index)
+telldata::tell_var* telldata::ttlist::erase(_dbl_word index)
 {
    assert(index >=0); assert(index < _mlist.size());
    telldata::tell_var* erased = _mlist[index];

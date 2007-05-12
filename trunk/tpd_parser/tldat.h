@@ -242,9 +242,10 @@ namespace telldata {
       void                 reserve(unsigned num) {_mlist.reserve(num);};
       void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());};
       unsigned             size() const      {return _mlist.size();};
-      tell_var*            index_var(unsigned index);
-      void                 insert(unsigned index);
-      tell_var*            erase(unsigned index);
+      tell_var*            index_var(_dbl_word index);
+      bool                 validIndex(_dbl_word index);
+      void                 insert(_dbl_word index);
+      tell_var*            erase(_dbl_word index);
                           ~ttlist();
    private:
       memlist             _mlist;    // the list itself

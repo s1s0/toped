@@ -605,35 +605,31 @@ listadd:
 
 listprefixadd:
      variable '[' tknPREADD expression ']'    {
-      if       (!($1 & telldata::tn_listmask))
-         tellerror("list expected",@1);
-      else if  (($4 != telldata::tn_int) && ($4 != telldata::tn_real))
-         tellerror("index is expected to be a number",@4);
+      if (ListIndexCheck($1, @1, $4, @4))
+         CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, true));
       $$ = ($1 & (~telldata::tn_listmask));
-      CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, true));
     }
    | variable '[' tknPREADD ']'               {
-      if       (!($1 & telldata::tn_listmask))
+      if ($1 & telldata::tn_listmask)
+         CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, false));
+      else
          tellerror("list expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
-      CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, false));
     }
 ;
 
 listpostfixadd:
      variable '[' expression tknPOSTADD ']'   {
-      if       (!($1 & telldata::tn_listmask))
-         tellerror("list expected",@1);
-      else if  (($3 != telldata::tn_int) && ($3 != telldata::tn_real))
-         tellerror("index is expected to be a number",@3);
+      if (ListIndexCheck($1, @1, $3, @3))
+         CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, true));
       $$ = ($1 & (~telldata::tn_listmask));
-      CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, true));
     }
    | variable '[' tknPOSTADD ']'              {
-      if       (!($1 & telldata::tn_listmask))
+      if ($1 & telldata::tn_listmask)
+         CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, false));
+      else
          tellerror("list expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
-      CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, false));
     }
 ;
 
@@ -644,35 +640,31 @@ listsub:
 
 listprefixsub:
      variable '[' tknPRESUB expression ']'    {
-      if       (!($1 & telldata::tn_listmask))
-         tellerror("list expected",@1);
-      else if  (($4 != telldata::tn_int) && ($4 != telldata::tn_real))
-         tellerror("index is expected to be a number",@4);
+      if (ListIndexCheck($1, @1, $4, @4))
+         CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,true, true));
       $$ = ($1 & (~telldata::tn_listmask));
-      CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,true, true));
     }
    | variable '[' tknPRESUB ']'               {
-      if       (!($1 & telldata::tn_listmask))
+      if ($1 & telldata::tn_listmask)
+         CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,true, false));
+      else
          tellerror("list expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
-      CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,true, false));
     }
 ;
 
 listpostfixsub:
      variable '[' expression tknPOSTSUB ']'   {
-      if       (!($1 & telldata::tn_listmask))
-         tellerror("list expected",@1);
-      else if  (($3 != telldata::tn_int) && ($3 != telldata::tn_real))
-         tellerror("index is expected to be a number",@3);
+      if (ListIndexCheck($1, @1, $3, @3))
+         CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,false, true));
       $$ = ($1 & (~telldata::tn_listmask));
-      CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,false, true));
     }
    | variable '[' tknPOSTSUB ']'              {
-      if       (!($1 & telldata::tn_listmask))
+      if ($1 & telldata::tn_listmask)
+         CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,false, false));
+      else
          tellerror("list expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
-      CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,false, false));
     }
 ;
 
