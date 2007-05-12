@@ -218,6 +218,7 @@ namespace tui {
    private:
       wxString       _layno;
       wxString       _layname;
+		wxString			_fillname;
       wxComboBox*    _colors;
       wxComboBox*    _fills;
       wxComboBox*    _lines;
