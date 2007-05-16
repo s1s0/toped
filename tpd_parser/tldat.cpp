@@ -284,6 +284,33 @@ void telldata::ttlist::insert(_dbl_word index)
    }
 }
 
+void telldata::ttlist::lunion(telldata::ttlist* inlist, _dbl_word index)
+{
+   assert(index >=0); assert(index <= _mlist.size());
+   memlist::iterator CI;
+   if (index == _mlist.size())
+   {
+      assert(false);
+      _mlist.pop_back();
+      // add a position in the list and copy the last component into it
+      _mlist.insert(_mlist.end(), inlist->_mlist.begin(), inlist->_mlist.begin());
+   }
+   else
+   {
+      // insert a position before index and copy the contents of index position there
+      unsigned idx = 0;
+      for(CI = _mlist.begin(); CI != _mlist.end(); CI++, idx++)
+      {
+         if (idx == index) break;
+      }
+      assert(NULL != (*CI));
+      // first - get rid of the member inserted by the previous stdLISTADD
+      // it is redundant here. See the comment in the parser.
+      _mlist.erase(CI);
+      _mlist.insert(CI, inlist->_mlist.begin(), inlist->_mlist.end());
+   }
+}
+
 telldata::tell_var* telldata::ttlist::erase(_dbl_word index)
 {
    assert(index >=0); assert(index < _mlist.size());

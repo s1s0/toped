@@ -549,7 +549,36 @@ int parsercmd::cmdLISTSUB::execute()
       return EXEC_ABORT;
    }
 }
+
+
 //=============================================================================
+int parsercmd::cmdLISTUNION::execute()
+{
+   TELL_DEBUG(cmdLISTUNION);
+   telldata::ttlist *op = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::typeID typeis = _listarg->get_type() & ~telldata::tn_listmask;
+   
+   if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
+      tellerror("Bad or unsupported type in list union statement");
+   else
+   {
+      _dbl_word idx = getIndexValue();
+      if ((NULL != _listarg->index_var(idx)) && (!_opstackerr))
+      {
+         _listarg->lunion(op,idx); OPstack.push(_listarg->selfcopy());
+      }
+      else
+      {
+         tellerror("Runtime error.Invalid Index");
+         delete op;
+         return EXEC_ABORT;
+      }
+   }
+//   delete op;
+   return EXEC_NEXT;
+}
+
+      //=============================================================================
 int parsercmd::cmdPUSH::execute()
 {
    // The temptation here is to put the constants in the operand stack directly,
@@ -1501,18 +1530,14 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
       tellerror("Lvalue undefined in assign statement", loc);
       return telldata::tn_void;
    }
-   telldata::typeID lvalID; 
+   telldata::typeID lvalID = lval->get_type();
    if (indexed)
    {
       // A slight complication here - when a list component is an lvalue - then we're going
       // to cheat a little and remove the list flag from the type ID. That's because the entire
       // list is handled over as lval, instead of the component itself. That's because the
       // lists are dynamic and the target component will be retrieved during runtime
-      lvalID = lval->get_type() & (~telldata::tn_listmask);
-   }
-   else
-   {
-      lvalID = lval->get_type();
+      lvalID &= ~telldata::tn_listmask;
    }
    // Here if user structure is used - clarify that it is compatible
    // The thing is that op2 could be a struct of a struct list or a list of
@@ -1553,7 +1578,7 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
    }
    else
    {
-      tellerror("Operands must be the same type", loc);
+      tellerror("Incompatable operand types in assignment", loc);
       return telldata::tn_void;
    }
 }
