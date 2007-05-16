@@ -87,11 +87,11 @@ void CheckLists() {
    echo(alst[:-]); // remove last
    echo(alst);
    echo("=== first/last alone");
-   alst[-:]; alst[+:];
-   alst[:-]; alst[:+];
+   alst[-:]; alst[+:] = -100;
+   alst[:-]; alst[:+] =  100;
    echo(alst);
    echo("=== index expressions");
-   alst[length(alst) - 1] = 5.0;//length(alst) - 1;
+   alst[length(alst) - 1] = 5.0;// length(alst) - 1;
    alst[(length(alst) - alst[length(alst) - 1])] = 100; 
    echo(alst);
 }

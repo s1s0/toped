@@ -320,6 +320,15 @@ namespace  parsercmd {
       bool                  _index;
    };
 
+   class cmdLISTUNION : public cmdVIRTUAL {
+   public:
+      cmdLISTUNION(telldata::tell_var* listarg) :
+         _listarg(static_cast<telldata::ttlist*>(listarg)) {};
+      int execute();
+   private:
+      telldata::ttlist*     _listarg;
+   };
+
    class cmdRETURN:public cmdVIRTUAL {
    public:
       cmdRETURN(telldata::typeID tID) : _retype(tID) {};

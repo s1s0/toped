@@ -79,17 +79,8 @@ void Invertor(point bound, real NW, real NL, real PW, real PL) {
    MOStran(bound,NW,NL);
    bound.y = bound.y + NW + _nwelltonactive + _welloverpwell;
    box ptrActive = MOStran(bound,PW,PL);
-   //
-   //   ptrActive.p1 = ptrActive.p1 - _welloverpwell;
-   //   ptrActive.p2 = ptrActive.p2 + _welloverpwell;
-   point wBL = {ptrActive.p1.x - _welloverpwell , ptrActive.p1.y - _welloverpwell  };
-   point wBR = {ptrActive.p2.x + _welloverpwell , ptrActive.p2.y + _welloverpwell  };
-   point iBL = {ptrActive.p1.x - _implantoveract, ptrActive.p1.y - _implantoveract };
-   point iBR = {ptrActive.p2.x + _implantoveract, ptrActive.p2.y + _implantoveract };
-   usinglayer(1);
-   addbox(wBL,wBR);
-   usinglayer(6);
-   addbox(iBL,iBR);
+   addbox((ptrActive /| _welloverpwell ) |/ _welloverpwell , 1);
+   addbox((ptrActive /| _implantoveract) |/ _implantoveract, 6);
 }   
    
 
