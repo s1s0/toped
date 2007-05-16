@@ -290,10 +290,10 @@ void telldata::ttlist::lunion(telldata::ttlist* inlist, _dbl_word index)
    memlist::iterator CI;
    if (index == _mlist.size())
    {
+      // an index (that we don't need) should've been already added
+      // by insert method called by cmdLISTADD:execute, so even if we want
+      // to add at the end - that should not be the end yet
       assert(false);
-      _mlist.pop_back();
-      // add a position in the list and copy the last component into it
-      _mlist.insert(_mlist.end(), inlist->_mlist.begin(), inlist->_mlist.begin());
    }
    else
    {

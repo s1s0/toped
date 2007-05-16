@@ -574,7 +574,9 @@ int parsercmd::cmdLISTUNION::execute()
          return EXEC_ABORT;
       }
    }
-//   delete op;
+   // in the lunion method, the op list is inserted in this whithout a copy
+   // means - DON'T delete op here 
+   //   delete op;
    return EXEC_NEXT;
 }
 
