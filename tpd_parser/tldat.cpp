@@ -49,7 +49,7 @@ telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
                      assert(_tIDMAP.end() != _tIDMAP.find(ID));
                      nvar = new telldata::user_struct(_tIDMAP.find(ID)->second);
                      // the default is effectively nvar = new telldata::user_struct(_tIDMAP[ID]),
-                     // but it is not not keeping constness
+                     // but it is not keeping constness
                 }
       }
    return nvar;
@@ -251,7 +251,7 @@ void telldata::ttlist::assign(tell_var* rt) {
 
 telldata::tell_var* telldata::ttlist::index_var(_dbl_word index)
 {
-   if (index > (_mlist.size() - 1)) return NULL;
+   if (_mlist.empty() || (index > (_mlist.size() - 1))) return NULL;
    else return _mlist[index];
 }
 
@@ -260,6 +260,11 @@ bool telldata::ttlist::validIndex(_dbl_word index)
    _dbl_word cursize = _mlist.size();
    if ((0 == cursize) || (index > (cursize - 1))) return false;
    else return true;
+}
+
+void telldata::ttlist::insert_first(const tell_type* tltypedef)
+{
+   _mlist.push_back(tltypedef->initfield(_ID & (~tn_listmask)));
 }
 
 void telldata::ttlist::insert(_dbl_word index)

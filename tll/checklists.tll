@@ -91,7 +91,7 @@ void CheckLists() {
    alst[:-]; alst[:+] =  100;
    echo(alst);
    echo("=== index expressions");
-   alst[length(alst) - 1] = 5.0;// length(alst) - 1;
+   alst[length(alst) - 1] = length(alst);
    alst[(length(alst) - alst[length(alst) - 1])] = 100; 
    echo(alst);
 }
