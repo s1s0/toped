@@ -245,6 +245,7 @@ namespace telldata {
       tell_var*            index_var(_dbl_word);
       bool                 validIndex(_dbl_word);
       void                 insert(_dbl_word);
+      void                 insert_first(const tell_type*);
       tell_var*            erase(_dbl_word);
       void                 lunion(ttlist*, _dbl_word);
                           ~ttlist();

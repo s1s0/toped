@@ -53,6 +53,7 @@ telldata::tell_var *tellvar = NULL;
 telldata::tell_var *tell_lvalue = NULL;
 /*Current variable is a list*/
 bool indexed = false;
+bool lindexed = false;
 /*Current command - used in foreach statement*/
 parsercmd::cmdFOREACH *foreach_command;
 /*Current tell struct */
@@ -450,7 +451,7 @@ assignment:
      lvalue '=' argument                   {
       /*because of the (possible) structure that has an unknown yet tn_usertypes type,
       here we are doing the type checking, using the type of the lvalue*/
-      $$ = parsercmd::Assign(tell_lvalue, indexed, $3, @2);
+      $$ = parsercmd::Assign(tell_lvalue, lindexed, $3, @2);
       delete $3;
    }
    | listinsertindex '=' argument          {
@@ -513,7 +514,7 @@ assignment:
       {// insert component in the list -
        //as far as assignment is concerned - same as first case
          $$ = ($1 & (~telldata::tn_listmask));
-         parsercmd::Assign(tell_lvalue, indexed, $3, @2);
+         parsercmd::Assign(tell_lvalue, lindexed, $3, @2);
          delete $3;
       }
    }
@@ -554,8 +555,8 @@ funcargument:
 ;
 
 lvalue:
-     variable                               {$$ = $1;tell_lvalue = tellvar;}
-   | variabledeclaration                    {$$ = $1;tell_lvalue = tellvar;}
+     variable                               {$$ = $1;tell_lvalue = tellvar; lindexed = indexed;}
+   | variabledeclaration                    {$$ = $1;tell_lvalue = tellvar; lindexed = indexed;}
 ;
 
 variable:
@@ -571,16 +572,27 @@ variable:
 ;
 
 variabledeclaration:
-     telltypeID   tknIDENTIFIER            {$$ = $1;
+     telltypeID   tknIDENTIFIER            {
       telldata::tell_var* v = CMDBlock->getID($2, true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
          tellvar = CMDBlock->newTellvar($1, @1);
          CMDBlock->addID($2,tellvar); 
+         $$ = $1;
       }
-      else tellerror("variable already defined in this scope", @1);
-      delete [] $2;
-      indexed = false;
+      else tellerror("variable already defined in this scope", @2);
+      delete [] $2;indexed = false;
+   }
+   | variabledeclaration ',' tknIDENTIFIER  {
+      telldata::tell_var* v = CMDBlock->getID($3, true);
+      if (!v) {/* if this variableID doesn't exist already in the local scope*/
+         /* add it to the local variable map */
+         tellvar = CMDBlock->newTellvar($1, @1);
+         CMDBlock->addID($3,tellvar);
+         $$ = $1;
+      }
+      else tellerror("variable already defined in this scope", @3);
+      delete [] $3;indexed = false;
    }
 ;
 
@@ -600,6 +612,7 @@ fielddeclaration:
 telltypeID:
      telltype                              {$$ = $1;}
    | telltype tknLISTdef                   {$$ = $1 | telldata::tn_listmask;}
+/*   | telltype '[' ']'                      {$$ = $1 | telldata::tn_listmask;}*/
 ;
 
 telltype:
@@ -662,27 +675,33 @@ listindex:
 listinsertindex:
      variable '[' tknPREADD expression ']'    {
       if (ListIndexCheck($1, @1, $4, @4))
+      {
          CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, true));
-      $$ = $1; tell_lvalue = tellvar; indexed = true;
+         $$ = $1; tell_lvalue = tellvar; lindexed = true;
+      }
     }
    | variable '[' tknPREADD ']'               {
-      if ($1 & telldata::tn_listmask)
+      if ($1 & telldata::tn_listmask) {
          CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, false));
+         $$ = $1; tell_lvalue = tellvar; lindexed = true;
+      }
       else
          tellerror("list expected",@1);
-      $$ = $1; tell_lvalue = tellvar; indexed = true;
     }
    | variable '[' expression tknPOSTADD ']'   {
       if (ListIndexCheck($1, @1, $3, @3))
+      {
          CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, true));
-      $$ = $1; tell_lvalue = tellvar; indexed = true;
+         $$ = $1; tell_lvalue = tellvar; lindexed = true;
+      }
     }
    | variable '[' tknPOSTADD ']'              {
-      if ($1 & telldata::tn_listmask)
+      if ($1 & telldata::tn_listmask) {
          CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, false));
+         $$ = $1; tell_lvalue = tellvar; lindexed = true;
+      }
       else
          tellerror("list expected",@1);
-      $$ = $1; tell_lvalue = tellvar; indexed = true;
     }
 ;
 

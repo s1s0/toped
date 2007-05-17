@@ -503,15 +503,25 @@ int parsercmd::cmdLISTADD::execute()
 {
    TELL_DEBUG(cmdLISTADD);
    _dbl_word idx;
+   bool empty_list = (0 == _listarg->size());
    // find the index
-   if      ((!_index) && ( _prefix)) // first in the list
+   if      (((!_index) && ( _prefix)) || empty_list) // first in the list
       idx = 0;
    else if ((!_index) && (!_prefix)) // last in the list
-      idx = _listarg->size() - 1;
+   {
+      idx = _listarg->size();
+      if (!empty_list) idx--;
+   }
    else                              // get the index from the operand stack
       idx = getIndexValue();
    //
-   if ((!_opstackerr) && (_listarg->validIndex(idx)))
+   if ((!_opstackerr) && (empty_list) && (0 == idx))
+   {
+      _listarg->insert_first(CMDBlock->getTypeByID(_listarg->get_type()));
+      OPstack.push(new telldata::ttint(idx));
+      return EXEC_NEXT;
+   }
+   else if ((!_opstackerr) && (_listarg->validIndex(idx)))
    {
       if (!_prefix) idx++;
       _listarg->insert(idx);
