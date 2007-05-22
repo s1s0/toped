@@ -365,8 +365,10 @@ whilestatement:
 
 telllist:
      expression                     {
-         if       (!($1 & telldata::tn_listmask))
+         if       (!($1 & telldata::tn_listmask)) {
             tellerror("list expected",@1);
+            $$ = telldata::tn_NULL;
+         }
          else
             $$ = $1;
       }
@@ -437,7 +439,10 @@ funccall:
          CMDBlock->pushcmd(new parsercmd::cmdFUNCCALL(fc,$1));
          $$ = fc->gettype();
       }
-      else tellerror("unknown function name or wrong parameter list",@1);
+      else {
+         tellerror("unknown function name or wrong parameter list",@1);
+         $$ = telldata::tn_NULL;
+      }
       telldata::argQClear(argmap);
       argmapstack.pop();
       delete argmap;
@@ -508,7 +513,7 @@ assignment:
             CMDBlock->pushcmd(new parsercmd::cmdLISTUNION(tell_lvalue));
          else
             tellerror("Uncompatible operands in list union", @2);
-         delete $3;
+         $$ = (*$3)(); delete $3;
       }
       else
       {// insert component in the list -
@@ -563,7 +568,11 @@ variable:
      tknIDENTIFIER                         {
       tellvar = CMDBlock->getID($1);
       if (tellvar) $$ = tellvar->get_type();
-      else tellerror("variable not defined in this scope", @1);
+      else
+      {
+         tellerror("variable not defined in this scope", @1);
+         $$ = telldata::tn_NULL;
+      }
       delete [] $1;
       indexed = false;
    }
@@ -578,10 +587,10 @@ variabledeclaration:
          /* add it to the local variable map */
          tellvar = CMDBlock->newTellvar($1, @1);
          CMDBlock->addID($2,tellvar); 
-         $$ = $1;
       }
-      else tellerror("variable already defined in this scope", @2);
-      delete [] $2;indexed = false;
+      else
+         tellerror("variable already defined in this scope", @2);
+      $$ = $1; delete [] $2;indexed = false;
    }
    | variabledeclaration ',' tknIDENTIFIER  {
       telldata::tell_var* v = CMDBlock->getID($3, true);
@@ -589,10 +598,9 @@ variabledeclaration:
          /* add it to the local variable map */
          tellvar = CMDBlock->newTellvar($1, @1);
          CMDBlock->addID($3,tellvar);
-         $$ = $1;
       }
       else tellerror("variable already defined in this scope", @3);
-      delete [] $3;indexed = false;
+      $$ = $1; delete [] $3;indexed = false;
    }
 ;
 
@@ -660,7 +668,11 @@ fieldname:
       assert(NULL != tellvar);
       tellvar = tellvar->field_var($2);
       if (tellvar) $$ = tellvar->get_type();
-      else tellerror("Bad field identifier", @2);
+      else
+      {
+         tellerror("Bad field identifier", @2);
+         $$ = telldata::tn_NULL;
+      }
       delete [] $2;
     }
 ;
@@ -679,14 +691,19 @@ listinsertindex:
          CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, true));
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
+      else
+         $$ = telldata::tn_NULL;
     }
    | variable '[' tknPREADD ']'               {
       if ($1 & telldata::tn_listmask) {
          CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, false));
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
-      else
+      else {
          tellerror("list expected",@1);
+         $$ = telldata::tn_NULL;
+      }
+
     }
    | variable '[' expression tknPOSTADD ']'   {
       if (ListIndexCheck($1, @1, $3, @3))
@@ -694,14 +711,18 @@ listinsertindex:
          CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, true));
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
+      else
+         $$ = telldata::tn_NULL;
     }
    | variable '[' tknPOSTADD ']'              {
       if ($1 & telldata::tn_listmask) {
          CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, false));
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
-      else
+      else {
          tellerror("list expected",@1);
+         $$ = telldata::tn_NULL;
+      }
     }
 ;
 
@@ -774,7 +795,10 @@ anonymousvar:
          delete $2;
          $$ = $1;
       }
-      else tellerror("Type mismatch", @2);
+      else {
+         tellerror("Type mismatch", @2);
+         $$ = telldata::tn_NULL;
+      }
    }
 ;
 
