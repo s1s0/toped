@@ -565,6 +565,13 @@ int parsercmd::cmdLISTSUB::execute()
 int parsercmd::cmdLISTUNION::execute()
 {
    TELL_DEBUG(cmdLISTUNION);
+   // Too many tricks for the union. See the parser
+   // Here - op is not used at all, because can be
+   // "contaminated" by the preceding indexing. This "contamination" happens for example
+   // in recursive union
+   // a[:+] = a;
+   // Instead of the normal stack operand we're using rvalue which is effectively
+   // a snapshot of the parser tellvar variable in the time of parsing the union operation
    telldata::ttlist *op = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    telldata::typeID typeis = _listarg->get_type() & ~telldata::tn_listmask;
    
@@ -575,18 +582,15 @@ int parsercmd::cmdLISTUNION::execute()
       _dbl_word idx = getIndexValue();
       if ((NULL != _listarg->index_var(idx)) && (!_opstackerr))
       {
-         _listarg->lunion(op,idx); OPstack.push(_listarg->selfcopy());
+         _listarg->lunion(_rvalue,idx); OPstack.push(_listarg->selfcopy());
       }
       else
       {
          tellerror("Runtime error.Invalid Index");
-         delete op;
          return EXEC_ABORT;
       }
    }
-   // in the lunion method, the op list is inserted in this whithout a copy
-   // means - DON'T delete op here 
-   //   delete op;
+   delete op;
    return EXEC_NEXT;
 }
 

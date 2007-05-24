@@ -312,7 +312,9 @@ void telldata::ttlist::lunion(telldata::ttlist* inlist, _dbl_word index)
       // first - get rid of the member inserted by the previous stdLISTADD
       // it is redundant here. See the comment in the parser.
       _mlist.erase(CI);
-      _mlist.insert(CI, inlist->_mlist.begin(), inlist->_mlist.end());
+
+      telldata::ttlist* opc = static_cast<telldata::ttlist*>(inlist->selfcopy());
+      _mlist.insert(CI, opc->_mlist.begin(), opc->_mlist.end());
    }
 }
 

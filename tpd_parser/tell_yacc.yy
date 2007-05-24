@@ -125,6 +125,10 @@ Well some remarks may save some time in the future...
      The main reason are the memory leakeges. It is getting very messy with the
      loops, constants, intermediate results etc. Some of them should be deleted,
      some of them should be kept.
+     Operations like recursive list union:
+         int list a = {1,2,3};
+         a[:+] = a;
+     can't be executed properly if rvalue is not cloned
    - What happens with the items in the operand stack which are not used?
      ( for example function returns a value, but it is not assigned to anything)
      The parser pushes cmdSTACKRST in the instructions stack at the end of every
@@ -423,7 +427,6 @@ statement:
    | repeatstatement                       {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | returnstatement                       {/*keep the return value in the stack*/}
    | funccall                              {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
-/*   | listinsert                            {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}*/
    | listsub                               {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | recorddefinition                      { }
 ;
@@ -510,7 +513,7 @@ assignment:
       if ( TLISALIST((*$3)()) )
       { // list union
          if ((tell_lvalue->get_type() & (~telldata::tn_listmask)) == ((*$3)() & (~telldata::tn_listmask)))
-            CMDBlock->pushcmd(new parsercmd::cmdLISTUNION(tell_lvalue));
+            CMDBlock->pushcmd(new parsercmd::cmdLISTUNION(tell_lvalue, tellvar));
          else
             tellerror("Uncompatible operands in list union", @2);
          $$ = (*$3)(); delete $3;
