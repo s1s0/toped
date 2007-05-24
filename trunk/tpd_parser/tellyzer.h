@@ -342,11 +342,12 @@ namespace  parsercmd {
 
    class cmdLISTUNION : public cmdVIRTUAL {
    public:
-      cmdLISTUNION(telldata::tell_var* listarg) :
-         _listarg(static_cast<telldata::ttlist*>(listarg)) {};
+      cmdLISTUNION(telldata::tell_var* listarg, telldata::tell_var* rvalue) :
+         _listarg(static_cast<telldata::ttlist*>(listarg)), _rvalue(static_cast<telldata::ttlist*>(rvalue)) {};
       int execute();
    private:
       telldata::ttlist*     _listarg;
+      telldata::ttlist*     _rvalue;
    };
 
    class cmdRETURN:public cmdVIRTUAL {
