@@ -464,25 +464,25 @@ void tui::layset_sample::setFill(const byte* fill)
       wxBitmap stipplebrush((char  *)fill, 32, 32, 1);
 
 #ifdef WIN32
-		wxImage image(32, 32, (unsigned char  *)fill, true);
-		image = stipplebrush.ConvertToImage();;
-		stipplebrush = wxBitmap(image, 1);
-		image = stipplebrush.ConvertToImage();
-		int w = image.GetWidth();
-		int h = image.GetHeight();
+      wxImage image(32, 32, (unsigned char  *)fill, true);
+      image = stipplebrush.ConvertToImage();;
+      stipplebrush = wxBitmap(image, 1);
+      image = stipplebrush.ConvertToImage();
+      int w = image.GetWidth();
+      int h = image.GetHeight();
 
-		for (int i=0; i<w; i++)
+      for (int i=0; i<w; i++)
          for (int j=0; j<h; j++)
          {
             if((image.GetRed(i,j)==0)&& (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
             {
-					
+
                image.SetRGB(i, j, _color.Red(), _color.Green(), _color.Blue());
             }
-				else
-				{
-					image.SetRGB(i, j, 0, 0, 0);
-				}
+            else
+            {
+               image.SetRGB(i, j, 0, 0, 0);
+            }
          }
 
       //Recreate bitmap with new color
@@ -758,7 +758,7 @@ void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
    _sample->setColor(color);
 
 	//Next 2 strings need for Windows version
-	const byte* fill = DATC->getFill(std::string(_fillname.fn_str()));
+   const byte* fill = DATC->getFill(std::string(_fillname.fn_str()));
    _sample->setFill(fill);
 
 	_sample->Refresh();

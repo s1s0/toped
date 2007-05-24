@@ -94,6 +94,18 @@ void CheckLists() {
    alst[length(alst) - 1] = length(alst);
    alst[(length(alst) - alst[length(alst) - 1])] = 100; 
    echo(alst);
+
+//=> point list a = {{1,2},{2,3},{3,4}};
+//=> echo(a);
+//<=  list members: { {X = 1, Y = 2} , {X = 2, Y = 3} , {X = 3, Y = 4} } 
+//=> a[:+] = {{1,2},{2,3},{3,4}};
+//<= line 1: col 7: Incompatable operand types in assignment
+//=> a[:+] = {1,2};
+//=> echo(a);
+//<=  list members: { {X = 1, Y = 2} , {X = 2, Y = 3} , {X = 3, Y = 4} , {X = 1, Y = 2} } 
+//=> a[:+] = {{1,2},{2,3},{3,4}};
+//<= line 1: col 7: Incompatable operand types in assignment
+
 }
 
 
