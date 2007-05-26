@@ -244,10 +244,11 @@ namespace telldata {
       unsigned             size() const      {return _mlist.size();};
       tell_var*            index_var(_dbl_word);
       bool                 validIndex(_dbl_word);
-      void                 insert(_dbl_word);
-      void                 insert_first(const tell_type*);
+      void                 insert(telldata::tell_var*, _dbl_word);
+      void                 insert(telldata::tell_var*);
+      void                 lunion(telldata::ttlist*, _dbl_word);
+      void                 lunion(telldata::ttlist*);
       tell_var*            erase(_dbl_word);
-      void                 lunion(ttlist*, _dbl_word);
                           ~ttlist();
    private:
       memlist             _mlist;    // the list itself

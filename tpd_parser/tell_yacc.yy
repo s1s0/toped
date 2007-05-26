@@ -54,8 +54,9 @@ telldata::tell_var *tell_lvalue = NULL;
 /*Current variable is a list*/
 bool indexed = false;
 bool lindexed = false;
-/*Current command - used in foreach statement*/
+/*Current commands - parsed, but not yet in the command stack*/
 parsercmd::cmdFOREACH *foreach_command;
+parsercmd::cmdLISTADD *listadd_command;
 /*Current tell struct */
 telldata::tell_type *tellstruct = NULL;
 /* used for argument type checking during function call parse */
@@ -463,68 +464,8 @@ assignment:
       delete $3;
    }
    | listinsertindex '=' argument          {
-      // List add/insert operators are actually "composite" operators - i.e.
-      // they are constituted by two operators:
-      // -> insert index (<idx>:+ +:<idx> ) will add/insert a component in
-      //    the list before/after the idx and will copy the value of the
-      //    idx-th component into the new one - i.e. will assign a temporary
-      //    value to it.
-      // -> assignment -> a proper value will be assigned to the new component.
-      // It's perfectly possible to leave insert index operator as completely
-      // independent one, then operators like
-      //    listvar[:+]; listvar[+:];
-      // will be allowed. The point is though that they don't make much sense
-      // alone. Then why keeping them? What we need is
-      //    listvar[:+] = newValue;
-      // and the parser should take care of it.
-      //
-      // To make the things simpler (?!?) for the user we are adding the list
-      // union operation whith the same syntax. It should benefit from the
-      // same index syntax - i.e the operator should be quite flexible because
-      // list can be added/inserted anywhere in the target list. The beauty is
-      // not coming for free though.
-      // As an operation list union is not composite - i.e. we don't need to
-      // insert an index - just to calculate it, and to make the things even
-      // worse - no assignment operation required as well. Instead we need to
-      // overload the assignment operator with list union operator which
-      // appears to share the same '=' symbol. Then obviously the parser
-      // won't know whether it will be assignment or union operator until
-      // the clause of the right side of the '=' is not parsed (the rvalue).
-      // By that time however a cmdLISTADD command will be already inserted in
-      // the operand stack. And that is the problem
-      //
-      // The orthodox approach would be to define all four insert index operators
-      // separately altogether with the assignment/union operators. Each of them
-      // with two possibilities - assign and union statement as in the present
-      // clause.
-      // A dirty "tango" trick will be applied instead, but I can't see better
-      // compromise at the moment. Here it is.
-      // We keep shorter description in the parser, listinsertindex clauses are
-      // described separately - in result cmdLISTADD command will be pushed
-      // in the operand stack always. If the operation is assign - fine! That's
-      // what we need. If the operation is list union - we've got an extra
-      // cmdLISTADD command somewhere in the command stack. The temptation is
-      // to remove it from there before the execution starts, but it's not
-      // straightforward at all. There is no easy way to find out how many
-      // commands have been inserted in the stack by the rvalue ($3) clause.
-      // So cmdLISTADD stays in the command stack and will be executed. Then
-      // cmdLISTUNION will delete the new value in the list introduced there by
-      // cmdLISTADD. That seems to be the simplest and shortest workaround
-      if ( TLISALIST((*$3)()) )
-      { // list union
-         if ((tell_lvalue->get_type() & (~telldata::tn_listmask)) == ((*$3)() & (~telldata::tn_listmask)))
-            CMDBlock->pushcmd(new parsercmd::cmdLISTUNION(tell_lvalue, tellvar));
-         else
-            tellerror("Uncompatible operands in list union", @2);
-         $$ = (*$3)(); delete $3;
-      }
-      else
-      {// insert component in the list -
-       //as far as assignment is concerned - same as first case
-         $$ = ($1 & (~telldata::tn_listmask));
-         parsercmd::Assign(tell_lvalue, lindexed, $3, @2);
-         delete $3;
-      }
+      $$ = parsercmd::Uninsert(tell_lvalue, $3, listadd_command, @2);
+      delete $3;
    }
 ;
 
@@ -691,40 +632,42 @@ listinsertindex:
      variable '[' tknPREADD expression ']'    {
       if (ListIndexCheck($1, @1, $4, @4))
       {
-         CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, true));
+         listadd_command = new parsercmd::cmdLISTADD(tellvar,true, true);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
-      else
-         $$ = telldata::tn_NULL;
+      else {
+         $$ = telldata::tn_NULL; listadd_command = NULL;
+      }
     }
    | variable '[' tknPREADD ']'               {
       if ($1 & telldata::tn_listmask) {
-         CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,true, false));
+         listadd_command = new parsercmd::cmdLISTADD(tellvar,true, false);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
       else {
          tellerror("list expected",@1);
-         $$ = telldata::tn_NULL;
+         $$ = telldata::tn_NULL; listadd_command = NULL;
       }
 
     }
    | variable '[' expression tknPOSTADD ']'   {
       if (ListIndexCheck($1, @1, $3, @3))
       {
-         CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, true));
+         listadd_command = new parsercmd::cmdLISTADD(tellvar,false, true);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
-      else
-         $$ = telldata::tn_NULL;
+      else {
+         $$ = telldata::tn_NULL; listadd_command = NULL;
+      }
     }
    | variable '[' tknPOSTADD ']'              {
       if ($1 & telldata::tn_listmask) {
-         CMDBlock->pushcmd(new parsercmd::cmdLISTADD(tellvar,false, false));
+         listadd_command = new parsercmd::cmdLISTADD(tellvar,false, false);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
       else {
          tellerror("list expected",@1);
-         $$ = telldata::tn_NULL;
+         $$ = telldata::tn_NULL; listadd_command = NULL;
       }
     }
 ;
