@@ -323,10 +323,20 @@ namespace  parsercmd {
       cmdLISTADD(telldata::tell_var* listarg, bool prefix, bool index) :
          _listarg(static_cast<telldata::ttlist*>(listarg)), _prefix(prefix), _index(index) {};
       int execute();
-   private:
+   protected:
+      cmdLISTADD(cmdLISTADD* indxcmd) :
+         _listarg(indxcmd->_listarg), _prefix(indxcmd->_prefix), _index(indxcmd->_index) {};
+      _dbl_word              getIndex();
       telldata::ttlist*     _listarg;
       bool                  _prefix;
       bool                  _index;
+      bool                  _empty_list;
+   };
+
+   class cmdLISTUNION : public cmdLISTADD {
+   public:
+      cmdLISTUNION(cmdLISTADD* indxcmd) : cmdLISTADD(indxcmd) {}
+      int execute();
    };
 
    class cmdLISTSUB : public cmdVIRTUAL {
@@ -338,16 +348,6 @@ namespace  parsercmd {
       telldata::ttlist*     _listarg;
       bool                  _prefix;
       bool                  _index;
-   };
-
-   class cmdLISTUNION : public cmdVIRTUAL {
-   public:
-      cmdLISTUNION(telldata::tell_var* listarg, telldata::tell_var* rvalue) :
-         _listarg(static_cast<telldata::ttlist*>(listarg)), _rvalue(static_cast<telldata::ttlist*>(rvalue)) {};
-      int execute();
-   private:
-      telldata::ttlist*     _listarg;
-      telldata::ttlist*     _rvalue;
    };
 
    class cmdRETURN:public cmdVIRTUAL {
@@ -540,6 +540,7 @@ namespace  parsercmd {
    telldata::typeID  Multiply(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, yyltype, yyltype);
    telldata::typeID  Assign(telldata::tell_var*, bool, telldata::argumentID*, yyltype);
+   telldata::typeID  Uninsert(telldata::tell_var*, telldata::argumentID*, parsercmd::cmdLISTADD*, yyltype);
    telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
 
    bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);

@@ -262,18 +262,19 @@ bool telldata::ttlist::validIndex(_dbl_word index)
    else return true;
 }
 
-void telldata::ttlist::insert_first(const tell_type* tltypedef)
+void telldata::ttlist::insert(telldata::tell_var* newval)
 {
-   _mlist.push_back(tltypedef->initfield(_ID & (~tn_listmask)));
+   _mlist.push_back(newval);
 }
 
-void telldata::ttlist::insert(_dbl_word index)
+void telldata::ttlist::insert(telldata::tell_var* newval, _dbl_word index)
 {
    assert(index >=0); assert(index <= _mlist.size());
    if (index == _mlist.size())
    {
       // add a position in the list and copy the last component into it
-      _mlist.push_back(_mlist[_mlist.size()-1]->selfcopy());
+//      _mlist.push_back(_mlist[_mlist.size()-1]->selfcopy());
+      _mlist.push_back(newval->selfcopy());
    }
    else
    {
@@ -285,35 +286,34 @@ void telldata::ttlist::insert(_dbl_word index)
          if (idx == index) break;
       }
       assert(NULL != (*CI));
-      _mlist.insert(CI,(*CI)->selfcopy());
+//      _mlist.insert(CI,(*CI)->selfcopy());
+      _mlist.insert(CI,newval->selfcopy());
    }
+}
+
+void telldata::ttlist::lunion(telldata::ttlist* inlist)
+{
+   for (memlist::const_iterator CI = inlist->_mlist.begin(); CI != inlist->_mlist.end(); CI++)
+      _mlist.push_back((*CI)->selfcopy());
 }
 
 void telldata::ttlist::lunion(telldata::ttlist* inlist, _dbl_word index)
 {
    assert(index >=0); assert(index <= _mlist.size());
-   memlist::iterator CI;
+   telldata::ttlist* opc = static_cast<telldata::ttlist*>(inlist->selfcopy());
    if (index == _mlist.size())
    {
-      // an index (that we don't need) should've been already added
-      // by insert method called by cmdLISTADD:execute, so even if we want
-      // to add at the end - that should not be the end yet
-      assert(false);
+      _mlist.insert(_mlist.end(), opc->_mlist.begin(), opc->_mlist.end());
    }
    else
    {
-      // insert a position before index and copy the contents of index position there
+      memlist::iterator CI;
       unsigned idx = 0;
       for(CI = _mlist.begin(); CI != _mlist.end(); CI++, idx++)
       {
          if (idx == index) break;
       }
       assert(NULL != (*CI));
-      // first - get rid of the member inserted by the previous stdLISTADD
-      // it is redundant here. See the comment in the parser.
-      _mlist.erase(CI);
-
-      telldata::ttlist* opc = static_cast<telldata::ttlist*>(inlist->selfcopy());
       _mlist.insert(CI, opc->_mlist.begin(), opc->_mlist.end());
    }
 }

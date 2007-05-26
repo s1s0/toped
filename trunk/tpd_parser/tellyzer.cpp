@@ -502,37 +502,87 @@ int parsercmd::cmdASSIGN::execute()
 int parsercmd::cmdLISTADD::execute()
 {
    TELL_DEBUG(cmdLISTADD);
+
+   telldata::tell_var *op = OPstack.top();OPstack.pop();
+   telldata::typeID typeis = _listarg->get_type();
+   if (TLISALIST(typeis))
+   {
+      typeis = typeis & ~telldata::tn_listmask;
+   }
+   if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
+      tellerror("Bad or unsupported type in assign statement");
+   else
+   {
+      _dbl_word idx = getIndex();
+      if ((!_opstackerr) && (_empty_list) && (0 == idx))
+      {
+         _listarg->insert(op);
+      }
+      else if ((!_opstackerr) && (_listarg->validIndex(idx)))
+      {
+         if (!_prefix) idx++;
+         _listarg->insert(op, idx);
+      }
+      else
+      {
+         tellerror("Runtime error.Invalid index");
+         return EXEC_ABORT;
+      }
+   }
+   delete op;
+   OPstack.push(_listarg->selfcopy());
+   return EXEC_NEXT;
+}
+
+
+_dbl_word parsercmd::cmdLISTADD::getIndex()
+{
    _dbl_word idx;
-   bool empty_list = (0 == _listarg->size());
+   _empty_list = (0 == _listarg->size());
    // find the index
-   if      (((!_index) && ( _prefix)) || empty_list) // first in the list
+   if      (((!_index) && ( _prefix)) || _empty_list) // first in the list
       idx = 0;
    else if ((!_index) && (!_prefix)) // last in the list
    {
       idx = _listarg->size();
-      if (!empty_list) idx--;
+      if (!_empty_list) idx--;
    }
    else                              // get the index from the operand stack
       idx = getIndexValue();
    //
-   if ((!_opstackerr) && (empty_list) && (0 == idx))
-   {
-      _listarg->insert_first(CMDBlock->getTypeByID(_listarg->get_type()));
-      OPstack.push(new telldata::ttint(idx));
-      return EXEC_NEXT;
-   }
-   else if ((!_opstackerr) && (_listarg->validIndex(idx)))
-   {
-      if (!_prefix) idx++;
-      _listarg->insert(idx);
-      OPstack.push(new telldata::ttint(idx));
-      return EXEC_NEXT;
-   }
+   return idx;
+}
+
+//=============================================================================
+int parsercmd::cmdLISTUNION::execute()
+{
+   TELL_DEBUG(cmdLISTUNION);
+   telldata::ttlist *op = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::typeID typeis = _listarg->get_type() & ~telldata::tn_listmask;
+
+   if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
+      tellerror("Bad or unsupported type in list union statement");
    else
    {
-      tellerror("Runtime error.Invalid index");
-      return EXEC_ABORT;
+      _dbl_word idx = getIndex();
+      if ((!_opstackerr) && (_empty_list) && (0 == idx))
+      {
+         _listarg->lunion(op);
+      }
+      else if ((!_opstackerr) && (_listarg->validIndex(idx)))
+      {
+         if (!_prefix) idx++;
+         _listarg->lunion(op,idx);
+      }
+      else
+      {
+         tellerror("Runtime error.Invalid Index");
+         return EXEC_ABORT;
+      }
    }
+   delete op;
+   OPstack.push(_listarg->selfcopy());
+   return EXEC_NEXT;
 }
 
 //=============================================================================
@@ -560,41 +610,7 @@ int parsercmd::cmdLISTSUB::execute()
    }
 }
 
-
 //=============================================================================
-int parsercmd::cmdLISTUNION::execute()
-{
-   TELL_DEBUG(cmdLISTUNION);
-   // Too many tricks for the union. See the parser
-   // Here - op is not used at all, because can be
-   // "contaminated" by the preceding indexing. This "contamination" happens for example
-   // in recursive union
-   // a[:+] = a;
-   // Instead of the normal stack operand we're using rvalue which is effectively
-   // a snapshot of the parser tellvar variable in the time of parsing the union operation
-   telldata::ttlist *op = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   telldata::typeID typeis = _listarg->get_type() & ~telldata::tn_listmask;
-   
-   if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
-      tellerror("Bad or unsupported type in list union statement");
-   else
-   {
-      _dbl_word idx = getIndexValue();
-      if ((NULL != _listarg->index_var(idx)) && (!_opstackerr))
-      {
-         _listarg->lunion(_rvalue,idx); OPstack.push(_listarg->selfcopy());
-      }
-      else
-      {
-         tellerror("Runtime error.Invalid Index");
-         return EXEC_ABORT;
-      }
-   }
-   delete op;
-   return EXEC_NEXT;
-}
-
-      //=============================================================================
 int parsercmd::cmdPUSH::execute()
 {
    // The temptation here is to put the constants in the operand stack directly,
@@ -1549,10 +1565,10 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
    telldata::typeID lvalID = lval->get_type();
    if (indexed)
    {
-      // A slight complication here - when a list component is an lvalue - then we're going
-      // to cheat a little and remove the list flag from the type ID. That's because the entire
-      // list is handled over as lval, instead of the component itself. That's because the
-      // lists are dynamic and the target component will be retrieved during runtime
+      //A slight complication here - when a list component is an lvalue - then we're going
+      //to cheat a little and remove the list flag from the type ID. That's because the entire
+      //list is handled over as lval, instead of the component itself. That's because the
+      //lists are dynamic and the target component will be retrieved during runtime
       lvalID &= ~telldata::tn_listmask;
    }
    // Here if user structure is used - clarify that it is compatible
@@ -1599,6 +1615,103 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
    }
 }
 
+telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumentID* op2,
+                                                    parsercmd::cmdLISTADD* unins_cmd, yyltype loc)
+{
+   // List add/insert operators can be described as "composite" operators - i.e.
+   // they are constituted by two operators:
+   // -> insert index (<idx>:+ +:<idx> ) will add/insert a component in
+   //    the list before/after the idx and will copy the value of the
+   //    idx-th component into the new one - i.e. will assign a temporary
+   //    value to it.
+   // -> assignment -> a proper value will be assigned to the new component.
+   // It's perfectly possible to leave insert index operator as completely
+   // independent one, then operators like
+   //    listvar[:+]; listvar[+:];
+   // will be allowed. The point is though that they don't make much sense
+   // alone. Then why keeping them? What we need is
+   //    listvar[:+] = newValue;
+   // and the parser must treat it as a single operator despite the
+   // distributed syntax of the operator
+   //
+   // To make the things simpler (?!?) for the user we are adding the list
+   // union operation whith the same syntax. It should benefit from the
+   // same index syntax - i.e the operator should be quite flexible because
+   // list can be added/inserted anywhere in the target list. The beauty is
+   // not coming for free though.
+   // As an operation list union is not composite - i.e. we don't need to
+   // insert an index - just to calculate it, and to make the things even
+   // worse - no assignment operation required as well. Instead we need to
+   // overload the assignment operator with list union operator which
+   // appears to share the same '=' symbol. Then obviously the parser
+   // won't know whether it will be assignment or union operator until
+   // the clause of the right side of the '=' is not parsed (the rvalue).
+   // By that time however a cmdLISTADD command should be normally inserted in
+   // the operand stack and this must be avoided, otherwise we'll hide a
+   // can of warms.
+   // On top of this rvalue can be anonymous const, which type is initially
+   // unknown and has to be determined using the type of the lvalue
+   //
+   // During the parsing of the listinsertindex clauses cmdLISTADD command
+   // is created, but not pushed in the operand stack (it lacks its rvalue!).
+   // When the entire '=' statement is parsed, this function has to clarify
+   // whether the operands are compartible and what is the operator -
+   // add/insert or union. If it is add/insert cmdLISTADD is pushed in the
+   // stack (it's rvalue is already in the operand stack). Otherwise it is
+   // scrapped. Instead new cmdLISTUNION is created and pushed in the stack
+   if (!lval)
+   {
+      tellerror("Lvalue undefined in list union/insert statement", loc);
+      return telldata::tn_void;
+   }
+   telldata::typeID lvalID = lval->get_type();
+   if (NULL == unins_cmd) return lvalID;
+   // Here if user structure is used - clarify that it is compatible
+   // The thing is that op2 could be a struct of a struct list or a list of
+   // tell basic types. This should be checked in the following order:
+   // 1. Get the type of the recipient (lval)
+   //    It must be a list
+   //    a) strip the list atribute and get the type of the list component
+   //    b) if the type of the lval list component is compound (struct list), check the
+   //       input structure for struct list
+   //    c) if the type of the list component is basic, check directly that
+   //       op2 is a list
+   if (TLUNKNOWN_TYPE((*op2)()))
+   {
+      if (TLISALIST(lvalID))
+      { // we have a list lval
+         const telldata::tell_type* vartype;
+          vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
+          if (NULL != vartype) op2->userStructListCheck(*vartype, true);
+          else op2->toList(true);
+      }
+      else
+         // lvalue in this function must be a list
+         assert(TLISALIST(lvalID));
+   }
+   if (TLISALIST((*op2)()))
+   {  // operation is union
+      CMDBlock->pushcmd(new parsercmd::cmdLISTUNION(unins_cmd));
+      delete(unins_cmd);
+      return lvalID;
+   }
+   else
+   {  // operation is list add/insert
+      lvalID &= ~telldata::tn_listmask;
+      if ((lvalID == (*op2)()) || (NUMBER_TYPE(lvalID) && NUMBER_TYPE((*op2)())))
+      {
+         // the lval is already in unins_cmd - that's why it's not used here
+         CMDBlock->pushcmd(unins_cmd);
+         return lvalID |= telldata::tn_listmask;
+      }
+      else
+      {
+         delete unins_cmd;
+         tellerror("Incompatable operand types in list add/insert", loc);
+         return telldata::tn_void;
+      }
+   }
+}
 
 //=============================================================================
 // in case real/bool -> real is casted to bool automatically during the
