@@ -19,7 +19,7 @@
 //    Description: TELL parser
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -243,8 +243,7 @@ Ooops! Second thought!
 %type <pttname>        assignment fieldname funccall telllist
 %type <pttname>        lvalue telltype telltypeID variable anonymousvar
 %type <pttname>        variabledeclaration andexpression eqexpression relexpression
-%type <pttname>        listindex listinsertindex
-%type <pttname>        listprefixsub listpostfixsub listsub
+%type <pttname>        listindex listinsert listremove listslice
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument
 %type <plarguments>    nearguments arguments
@@ -428,7 +427,8 @@ statement:
    | repeatstatement                       {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | returnstatement                       {/*keep the return value in the stack*/}
    | funccall                              {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
-   | listsub                               {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
+   | listremove                            {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
+   | listslice                             {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
    | recorddefinition                      { }
 ;
 
@@ -463,7 +463,7 @@ assignment:
       $$ = parsercmd::Assign(tell_lvalue, lindexed, $3, @2);
       delete $3;
    }
-   | listinsertindex '=' argument          {
+   | listinsert '=' argument               {
       $$ = parsercmd::Uninsert(tell_lvalue, $3, listadd_command, @2);
       delete $3;
    }
@@ -628,7 +628,7 @@ listindex:
     }
 ;
 
-listinsertindex:
+listinsert:
      variable '[' tknPREADD expression ']'    {
       if (ListIndexCheck($1, @1, $4, @4))
       {
@@ -648,7 +648,6 @@ listinsertindex:
          tellerror("list expected",@1);
          $$ = telldata::tn_NULL; listadd_command = NULL;
       }
-
     }
    | variable '[' expression tknPOSTADD ']'   {
       if (ListIndexCheck($1, @1, $3, @3))
@@ -672,12 +671,7 @@ listinsertindex:
     }
 ;
 
-listsub:
-     listprefixsub                        { $$ = $1;      }
-   | listpostfixsub                       { $$ = $1;      }
-;
-
-listprefixsub:
+listremove:
      variable '[' tknPRESUB expression ']'    {
       if (ListIndexCheck($1, @1, $4, @4))
          CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,true, true));
@@ -690,10 +684,7 @@ listprefixsub:
          tellerror("list expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
     }
-;
-
-listpostfixsub:
-     variable '[' expression tknPOSTSUB ']'   {
+   | variable '[' expression tknPOSTSUB ']'   {
       if (ListIndexCheck($1, @1, $3, @3))
          CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,false, true));
       $$ = ($1 & (~telldata::tn_listmask));
@@ -704,6 +695,45 @@ listpostfixsub:
       else
          tellerror("list expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
+    }
+;
+
+listslice:
+     variable '[' expression tknPRESUB expression ']'    {
+      if (ListSliceCheck($1, @1, $5, @5, $3, @3))
+      {
+         CMDBlock->pushcmd(new parsercmd::cmdLISTSLICE(tellvar, true, true));
+         $$ = $1;
+      }
+      else
+         $$ = telldata::tn_NULL;
+    }
+   | variable '[' expression tknPRESUB ']'    {
+      if (ListSliceCheck($1, @1, $3, @3))
+      {
+         CMDBlock->pushcmd(new parsercmd::cmdLISTSLICE(tellvar, true, false));
+         $$ = $1;
+      }
+      else
+         $$ = telldata::tn_NULL;
+    }
+   | variable '[' expression tknPOSTSUB expression ']'   {
+      if (ListSliceCheck($1, @1, $3, @3, $5, @5))
+      {
+         CMDBlock->pushcmd(new parsercmd::cmdLISTSLICE(tellvar, false, true));
+         $$ = $1;
+      }
+      else
+         $$ = telldata::tn_NULL;
+    }
+   | variable '[' tknPOSTSUB  expression ']'   {
+      if (ListSliceCheck($1, @1, $4, @4))
+      {
+         CMDBlock->pushcmd(new parsercmd::cmdLISTSLICE(tellvar, false, false));
+         $$ = $1;
+      }
+      else
+         $$ = telldata::tn_NULL;
     }
 ;
 
@@ -811,7 +841,8 @@ primaryexpression :
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, indexed));}
    | anonymousvar                          {$$ = $1;
       CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, false));}
-   | listsub                               {$$ = $1; indexed = false;}
+   | listremove                            {$$ = $1; indexed = false;}
+   | listslice                             {$$ = $1; indexed = false;}
    | '(' expression ')'                    {$$ = $2;}
    | funccall                              {$$ = $1;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}

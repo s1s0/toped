@@ -249,6 +249,7 @@ namespace telldata {
       void                 lunion(telldata::ttlist*, _dbl_word);
       void                 lunion(telldata::ttlist*);
       tell_var*            erase(_dbl_word);
+      tell_var*            erase(_dbl_word, _dbl_word);
                           ~ttlist();
    private:
       memlist             _mlist;    // the list itself
