@@ -611,6 +611,60 @@ int parsercmd::cmdLISTSUB::execute()
 }
 
 //=============================================================================
+int parsercmd::cmdLISTSLICE::execute()
+{
+   TELL_DEBUG(cmdLISTSLICE);
+   _dbl_word idxB, idxE, size;
+   bool idxerrors = false;
+   // find the index
+   if ( _prefix )
+   {
+      if (_index)
+      {
+         idxE = getIndexValue(); idxerrors |= _opstackerr;
+      }
+      else idxE = _listarg->size() - 1;
+      size = getIndexValue(); idxerrors |= _opstackerr;
+
+      if ((0 > (idxE - size + 1)) || (0 == size))
+      {
+         idxerrors = true;idxB = idxE;
+      }
+      else
+      {
+         idxB = idxE - size + 1;
+      }
+   }
+   else
+   {
+      size = getIndexValue(); idxerrors |= _opstackerr;
+      if (_index)
+      {
+         idxB  = getIndexValue(); idxerrors |= _opstackerr;
+      }
+      else idxB = 0;
+      if (0 == size)
+      {
+         idxerrors = true;idxE = idxB;
+      }
+      else
+      {
+         idxE = idxB + size - 1;
+      }
+   }
+   if ((!idxerrors) && _listarg->validIndex(idxB) && _listarg->validIndex(idxE))
+   {
+      OPstack.push(_listarg->erase(idxB, idxE));
+      return EXEC_NEXT;
+   }
+   else
+   {
+      tellerror("Runtime error.Invalid index");
+      return EXEC_ABORT;
+   }
+}
+
+//=============================================================================
 int parsercmd::cmdPUSH::execute()
 {
    // The temptation here is to put the constants in the operand stack directly,
@@ -1552,6 +1606,34 @@ bool parsercmd::ListIndexCheck(telldata::typeID list, yyltype lloc,
    else
       checkval = true;
    return checkval;
+}
+
+bool parsercmd::ListSliceCheck(telldata::typeID list, yyltype lloc,
+   telldata::typeID idx, yyltype iloc, telldata::typeID sidx, yyltype sloc)
+{
+   if  ((sidx != telldata::tn_int) && (sidx != telldata::tn_real))
+   {
+      tellerror("slice size is expected to be a number",iloc);
+      return false;
+   }
+   else
+      return ListIndexCheck(list, lloc, idx, iloc);
+}
+
+bool parsercmd::ListSliceCheck(telldata::typeID list, yyltype lloc,
+                                    telldata::typeID sidx, yyltype sloc)
+{
+   if  ((sidx != telldata::tn_int) && (sidx != telldata::tn_real))
+   {
+      tellerror("slice size is expected to be a number",sloc);
+      return false;
+   }
+   else if (!(list & telldata::tn_listmask))
+   {
+      tellerror("list expected",lloc);
+      return false;
+   }
+   return true;
 }
 
 telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telldata::argumentID* op2,

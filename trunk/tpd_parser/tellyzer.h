@@ -350,6 +350,17 @@ namespace  parsercmd {
       bool                  _index;
    };
 
+   class cmdLISTSLICE : public cmdVIRTUAL {
+   public:
+      cmdLISTSLICE(telldata::tell_var* listarg, bool prefix, bool index) :
+         _listarg(static_cast<telldata::ttlist*>(listarg)), _prefix(prefix), _index(index) {};
+      int execute();
+   private:
+      telldata::ttlist*     _listarg;
+      bool                  _prefix;
+      bool                  _index;
+   };
+
    class cmdRETURN:public cmdVIRTUAL {
    public:
       cmdRETURN(telldata::typeID tID) : _retype(tID) {};
@@ -545,6 +556,8 @@ namespace  parsercmd {
 
    bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);
    bool              ListIndexCheck(telldata::typeID, yyltype, telldata::typeID, yyltype);
+   bool              ListSliceCheck(telldata::typeID, yyltype, telldata::typeID, yyltype, telldata::typeID, yyltype);
+   bool              ListSliceCheck(telldata::typeID, yyltype, telldata::typeID, yyltype);
    void              ClearArgumentList(argumentLIST*);
 
 

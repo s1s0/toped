@@ -341,6 +341,31 @@ telldata::tell_var* telldata::ttlist::erase(_dbl_word index)
    return erased;
 }
 
+telldata::tell_var* telldata::ttlist::erase(_dbl_word idxB, _dbl_word idxE)
+{
+   assert(idxB >=0); assert(idxB < _mlist.size());
+   assert(idxE >=0); assert(idxE < _mlist.size());
+   telldata::ttlist* erased = new telldata::ttlist(get_type());
+   // erase the position at the index
+   memlist::iterator CI, CIB, CIE;
+   unsigned idx = 0;
+   for(CIB = _mlist.begin(); CIB != _mlist.end(); CIB++, idx++)
+   {
+      if (idx == idxB) break;
+   }
+   for(CIE = _mlist.begin(), idx = 0; CIE != _mlist.end(); CIE++, idx++)
+   {
+      if (idx == idxE+1) break;
+   }
+   for(CI = CIB; CI != CIE; CI++)
+      erased->add((*CI)/*->selfcopy()*/);
+   // If I remember correctly erase method from the STDLIB should not delete
+   // the components. Means that we can reuse them - i.e. - don't need a selfcopy
+   _mlist.erase(CIB, CIE);
+
+   return erased;
+}
+
 telldata::ttlist::~ttlist() {
    for (unsigned long i = 0 ; i < _mlist.size(); i++)
       delete _mlist[i];
