@@ -1,4 +1,4 @@
-//===========================================================================
+ //===========================================================================
 //                                                                          =
 //   This program is free software; you can redistribute it and/or modify   =
 //   it under the terms of the GNU General Public License as published by   =
@@ -32,7 +32,8 @@
 #include "viewprop.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
-//#include "../tpd_parser/ted_prompt.h"
+#include "../tpd_DB/viewprop.h"
+#include "../tpd_parser/ted_prompt.h"
 #include "datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
@@ -40,8 +41,9 @@
 #include "../ui/cell_expanded.xpm"
 
 
-//extern console::ted_cmd*         Console;
+extern console::ted_cmd*         Console;
 extern DataCenter*               DATC;
+//extern layprop::ViewProperties*  Properties;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
 
@@ -807,6 +809,9 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    AddPage(_TDTstruct, wxT("Cells"));
    _TDTlayers = new layerbrowser(this, tui::ID_TPD_LAYERS);
    AddPage(_TDTlayers, wxT("Layers"));
+   _layers = new LayerBrowser2(this,  tui::ID_TPD_LAYERS);
+   AddPage(_layers, "L");
+
    _GDSstruct = NULL;
    _tellParser = NULL;
    Browsers = this;
@@ -876,6 +881,15 @@ void browsers::layer_add(const std::string name, const word layno) {
    eventLAYER_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
    eventLAYER_ADD.SetClientData((void*) bt);
    wxPostEvent(Browsers->TDTlayers(), eventLAYER_ADD);
+
+	wxCommandEvent eventLAYER_ADD2(wxEVT_CMD_BROWSER);
+   LayerInfo *layer = new LayerInfo(name, layno);//, col, fill);
+   bt = new int(BT_LAYER_ADD);
+   eventLAYER_ADD2.SetClientData((void*) layer);
+   eventLAYER_ADD2.SetInt(*bt);
+   
+   wxPostEvent(Browsers->layers(), eventLAYER_ADD2);
+
 }
 
 void browsers::layer_default(const word newlay, const word oldlay) {
@@ -948,6 +962,325 @@ void browsers::parseCommand(const wxString cmd)
    eventPARSE.SetString(cmd);
    wxPostEvent(Browsers->tellParser(), eventPARSE);
 }
+
+browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)//, const std::string &col, const std::string &fill)
+{
+   _name    = name;
+   _layno   = layno;
+	_col		= DATC->getColorName(layno);
+	_fill		= DATC->getFillName(layno);
+   //_col     = col;
+   //_fill    = fill;
+};
+
+BEGIN_EVENT_TABLE(browsers::LayerButton, wxBitmapButton)
+   //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
+   EVT_LEFT_DOWN(LayerButton::OnLeftClick)
+   EVT_MIDDLE_DOWN(LayerButton::OnMiddleClick)
+END_EVENT_TABLE()
+
+browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos , const wxSize& size, long style , const wxValidator& validator , const wxString& name, LayerInfo *layer)
+{
+   
+   _layer   = layer;
+   _selected= false;
+   _hidden  = false;
+   _locked  = false;  
+
+   
+   std::string caption;
+   
+   _picture = new wxBitmap(size.GetWidth(), size.GetHeight(), -1);
+
+	const byte *ifill= DATC->getFill(layer->layno());
+   const layprop::tellRGB col = DATC->getColor(layer->layno());
+   wxColour color(col.red(), col.green(), col.blue());
+
+   if(ifill!=NULL)
+   {
+     
+      wxBitmap *stipplebrush = new wxBitmap((char  *)ifill, 32, 32, 1);
+
+      wxImage image;
+      image = stipplebrush->ConvertToImage();
+      int w = image.GetWidth();
+      int h = image.GetHeight();
+#ifdef WIN32
+ //Change white color for current one
+      for (int i=0; i<w; i++)
+         for (int j=0; j<h; j++)
+         {
+            if((image.GetRed(i,j)==255)&& (image.GetGreen(i,j)==255) && (image.GetBlue(i,j)==255))
+            {
+               image.SetRGB(i, j, col.red(), col.green(), col.blue());
+            }
+         }
+    
+      delete stipplebrush;
+
+      //Recreate bitmap with new color
+      stipplebrush = new wxBitmap(image, 1);
+#endif
+
+      _brush = new wxBrush(	*stipplebrush);
+      
+   }
+   else
+   {
+     //???Warning!!!
+		//if (NULL != col)
+     //    _brush = new wxBrush(color, wxTRANSPARENT);
+     // else
+         _brush = new wxBrush(*wxLIGHT_GREY, wxTRANSPARENT);
+   }
+
+   _pen = new wxPen();    
+            
+   //if (col!=NULL)
+   //{
+      _pen->SetColour(color);
+      _brush->SetColour(color);
+   //}
+            
+   //***Draw main picture***   
+   preparePicture(*_picture);
+   
+   Create(parent, id, *_picture, pos, size, style, validator, name);
+}
+
+void browsers::LayerButton::preparePicture(wxBitmap &pict)
+{
+   wxMemoryDC DC;
+   wxFont font;
+   DC.SelectObject(pict);
+   
+
+   font = DC.GetFont();
+   font.SetPointSize(6);
+   const int fontWidth = font.GetPointSize();
+  
+
+   DC.SetBrush(*_brush);
+   DC.SetPen(*_pen);
+
+   if (_selected)
+   {
+      DC.SetBackground(*wxWHITE);
+      DC.SetTextForeground(*wxBLACK);
+   }
+   else
+   {
+      DC.SetBackground(*wxBLACK);
+      DC.SetTextForeground(*wxWHITE);
+
+   }
+
+   std::string infoString = "s";
+   if (_hidden)
+   {
+      infoString += " ";
+   }
+   else
+   {
+      infoString += "v";
+   }
+
+   infoString += " ";
+
+   if (_locked)
+   {
+      infoString += "l";
+   }
+   else
+   {
+      infoString += " ";
+   }
+   
+   DC.Clear(); 
+
+   DC.DrawText(infoString.c_str(), 5, 0);
+   int h,w;
+   DC.GetTextExtent(infoString.c_str(), &w, &h);
+
+   DC.DrawRectangle(5*fontWidth, 1, 40, 49);
+   std::string caption = _layer->name();
+   DC.DrawText(caption.c_str(), 5*fontWidth+40, 0);
+   
+   DC.SelectObject(wxNullBitmap);
+}
+
+
+browsers::LayerButton::~LayerButton()
+{
+   delete _picture;
+
+   delete _brush;
+   delete _pen;
+   delete _layer;
+}
+
+void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
+{
+
+   if (event.ShiftDown())
+   //Lock layer
+   {
+      _locked = !_locked;
+      wxString cmd;
+      cmd << "locklayer("<<_layer->layno()<<", ";
+      if (_locked) cmd<<"true"<<");";
+      else cmd <<"false"<<");";
+      Console->parseCommand(cmd);
+
+      preparePicture(*_picture);
+      SetBitmapLabel(*_picture);
+   }
+   else
+   //Select layer
+   {
+      wxString cmd;
+      cmd << "usinglayer("<<_layer->layno()<<");";
+      Console->parseCommand(cmd);
+
+      if (!_selected)
+      {
+         select();
+   
+         //Next block uses for unselect previous button
+         int bt = BT_LAYER_SELECT;
+         wxCommandEvent eventLAYER_SELECT(wxEVT_CMD_BROWSER);
+   
+         eventLAYER_SELECT.SetExtraLong(_layer->layno());
+   
+         eventLAYER_SELECT.SetInt(bt);
+         wxPostEvent(Browsers->layers(), eventLAYER_SELECT);
+      }
+   }
+}
+
+void browsers::LayerButton::OnMiddleClick(wxMouseEvent &event)
+{
+   _hidden = !_hidden;
+
+   wxString cmd;
+   cmd << "hidelayer("<<_layer->layno()<<", ";
+   if (_hidden) cmd<<"true"<<");";
+   else cmd <<"false"<<");";
+   Console->parseCommand(cmd);
+
+   preparePicture(*_picture);
+   SetBitmapLabel(*_picture);
+
+}
+
+void browsers::LayerButton::select(void)
+{
+   _selected = true;
+   preparePicture(*_picture);
+   SetBitmapLabel(*_picture);
+}
+
+void browsers::LayerButton::unselect(void)
+{
+   _selected = false;
+   preparePicture(*_picture);
+   SetBitmapLabel(*_picture);
+}
+
+
+
+//====================================================================
+BEGIN_EVENT_TABLE(browsers::LayerBrowser2, wxPanel)
+   //EVT_BUTTON(BT_LAYER_NEW, browsers::layerBrowser2::OnNewLayer)
+   //EVT_BUTTON(BT_LAYER_EDIT, browsers::layerbrowser2::OnEditLayer)
+   //EVT_BUTTON(BT_LAYER_DO, browsers::layerbrowser2::OnXXXSelected)
+   //EVT_BUTTON(BT_LAYER_SELECTWILD,browsers::layerbrowser2::OnSelectWild)
+   //EVT_LIST_ITEM_ACTIVATED(ID_TPD_LAYERS, browsers::layerbrowser2::OnActiveLayer)
+   //EVT_LIST_ITEM_RIGHT_CLICK(ID_TPD_LAYERS,browsers::layerbrowser2::OnShowHideLayer)
+   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::LayerBrowser2::OnCommand)
+END_EVENT_TABLE()
+//====================================================================
+
+
+browsers::LayerBrowser2::LayerBrowser2(wxWindow* parent, wxWindowID id) 
+   :wxScrolledWindow(parent, id, wxDefaultPosition, wxDefaultSize,wxVSCROLL) 
+{
+   _buttonCount = 0;
+   SetScrollbars(0, 50, 0, 50);
+}
+
+browsers::LayerBrowser2::~LayerBrowser2() 
+{
+}
+
+void browsers::LayerBrowser2::OnCommand(wxCommandEvent& event)
+{
+   int command = event.GetInt();
+   
+   switch (command) 
+   {
+
+     // case BT_LAYER_DEFAULT:_layerlist->defaultLayer((word)event.GetExtraLong(), (word)event.GetInt());break;
+     // case    BT_LAYER_HIDE:_layerlist->hideLayer((word)event.GetExtraLong(),event.IsChecked());break;
+     // case    BT_LAYER_LOCK:_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());break;
+      case     BT_LAYER_SELECT:
+         {
+            word layno = event.GetExtraLong();
+            _selectedButton->unselect();
+            _selectedButton = _buttonMap[layno];
+         
+            break;
+         }
+
+      case     BT_LAYER_ADD:
+         {
+            LayerInfo* layer = (LayerInfo*)event.GetClientData();
+
+            LayerButton *layerButton;
+
+            layerButtonMap::iterator it;
+            it = _buttonMap.find(layer->layno());
+            if (it!= _buttonMap.end())
+            {
+               LayerButton *tempButton = it->second;
+               
+               //layerButton = new LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
+               //wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
+               int x, y;
+               int szx, szy;
+               int ID;
+               tempButton->GetPosition(&x, &y);
+               tempButton->GetSize(&szx, &szy);
+               ID = tempButton->GetId();
+               layerButton = new LayerButton(this, ID, wxPoint (x, y), wxSize(szx, szy),
+               wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
+               _buttonMap[layer->layno()] = layerButton;
+               delete tempButton;
+
+            }
+            else
+            {
+               int szx, szy;
+               GetSize(&szx, &szy);
+               layerButton = new LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(szx, 30),
+               wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
+               _buttonMap[layer->layno()] = layerButton;
+               _buttonCount++;              
+            }
+            
+            _selectedButton = (_buttonMap.begin())->second;
+            _selectedButton->select();
+            break;
+         }
+   }
+   //delete layer;
+}
+
+void browsers::LayerBrowser2::OnNewLayer(wxCommandEvent& WXUNUSED(event)) 
+{
+
+}
+
 
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::layerbrowser, wxPanel)

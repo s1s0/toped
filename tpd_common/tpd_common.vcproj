@@ -325,6 +325,10 @@
 				RelativePath="ttt.h"
 				>
 			</File>
+			<File
+				RelativePath=".\tuidefs.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
