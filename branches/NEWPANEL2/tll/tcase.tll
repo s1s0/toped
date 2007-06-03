@@ -1,0 +1,293 @@
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+// ------------------------------------------------------------------------ =
+//           $URL: http://perun/tpd_svn/trunk/toped_wx/tll/test.tll $
+//        Created: Fri Nov 08 2002
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Some basic tests of the script and the editor
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------                
+//      $Revision: 218 $
+//          $Date: 2005-09-30 23:04:05 +0100 (Fri, 30 Sep 2005) $
+//        $Author: skr $
+//===========================================================================
+
+#include "$TPD_GLOBAL/tll/seed.tll"
+// Some DRC rules defined as global variables
+real _actOverCont = 1.5;
+real _mincont = 2;
+real _contspace = 2.5;
+real _gate2cont = 2.5;
+real _polyOverActive = 2;
+real _nwelltonactive = 9;
+real _welloverpwell = 3;
+real _wellovernwell = 1;
+real _metalovercont = 1;
+real _polyovercont = 1.5;
+real _implantoveract = 2;
+
+box MOStran(point bound, real W, real L) {
+   // active
+   real activeW = L + 2*_gate2cont + 2*_mincont + 2*_actOverCont;
+   addbox(bound,activeW,W,2);
+   // gate
+   point gateB = {bound.x + (activeW - L)/2, bound.y -_polyOverActive};
+   addbox(gateB, L,  W + 2*_polyOverActive,4); // as above
+   // add contacts...
+   point contBL = bound /| _actOverCont;
+   point contBR = bound |\ _actOverCont;
+   contBR = {contBR.x + activeW, contBR.y};
+   point metlBL = contBL |/  _metalovercont;
+   point metlBR = contBR \|  _metalovercont;
+   
+   box zerobox = {{0,0},{0,0}};
+   box contactL = zerobox /| _mincont;
+   box contactR = zerobox |\ _mincont;
+   // calculate the number of contacts
+   if (W < 2*_actOverCont + _mincont) {
+      echo("Can't fit even a single contact !")
+   }
+   else {
+      usinglayer(7);
+      real numconts = (W - 2*_actOverCont) / (_mincont + _contspace);
+      while (numconts > 0) {
+         addbox(contactL+contBL); 
+         addbox(contactR+contBR);
+         contBL.y = contBL.y + _contspace + _mincont;
+         contBR.y = contBR.y + _contspace + _mincont;
+         numconts = numconts - 1;
+      };
+      usinglayer(8);
+      point metlTL = {contBL.x + _metalovercont + _mincont , contBL.y - _contspace + _metalovercont};
+      point metlTR = {contBR.x - _metalovercont - _mincont , contBR.y - _contspace + _metalovercont};
+      addbox(metlBL, metlTL);
+      addbox(metlBR, metlTR);
+   };
+   return {{bound.x, bound.y}, {bound.x + activeW, bound.y + W}};
+}
+
+void Invertor(point bound, real NW, real NL, real PW, real PL) {
+   MOStran(bound,NW,NL);
+   bound.y = bound.y + NW + _nwelltonactive + _welloverpwell;
+   box ptrActive = MOStran(bound,PW,PL);
+   addbox((ptrActive /| _welloverpwell ) |/ _welloverpwell , 1);
+   addbox((ptrActive /| _implantoveract) |/ _implantoveract, 6);
+}   
+   
+
+void whiletest() {
+   real a = 10;
+   bool b = true;
+   while (a > 0) {
+      echo(a); a = a - 1;
+   };
+
+   while (b) {
+      echo(a); 
+      a = a + 1; 
+      b = a < 5;
+   };
+   int i = 10;
+   while (i > 0) {
+      echo("outer cycle reports -> ");echo(i); i = i - 1;
+      int j = 10;
+      while (j > 0) {
+         echo("inner -> ");echo(j); j = j - 1;
+      }
+   }
+}
+
+void repeattest() {
+   real a = 10;
+   bool b = true;
+   repeat {
+      echo(a); a = a - 1;
+   } until (a > 0);
+
+   repeat {
+      echo(a); 
+      a = a + 1; 
+      b = a < 5;
+   } until (b);
+   int i = 10;
+   repeat {
+      echo("outer cycle reports -> ");echo(i); i = i - 1;
+      int j = 10;
+      repeat {
+         echo("inner -> ");echo(j); j = j - 1;
+      } until (j > 0);
+   } until (i > 0)      
+//   repeat {} until(a);
+}
+
+void testcellrefs() {
+   newcell("cellrefs");
+   opencell("cellrefs");
+   cellref("Fcell", {10,10},   0, false, 1.0);
+   cellref("Fcell", {10,10},  90, false, 1.0);
+   cellref("Fcell", {10,10}, 180, false, 1.0);
+   cellref("Fcell", {10,10}, 270, false, 1.0);
+   cellref("Fcell", {40,10},   0,  true, 1.0);
+   cellref("Fcell", {40,10},  90,  true, 1.0);
+   cellref("Fcell", {40,10}, 180,  true, 1.0);
+   cellref("Fcell", {40,10}, 270,  true, 1.0);
+
+   cellref("Fcell", {10,40},  45, false, 1.0);
+   cellref("Fcell", {10,40}, 135, false, 1.0);
+   cellref("Fcell", {10,40}, 225, false, 1.0);
+   cellref("Fcell", {10,40}, 315, false, 1.0);
+   cellref("Fcell", {40,40},  45,  true, 1.0);
+   cellref("Fcell", {40,40}, 135,  true, 1.0);
+   cellref("Fcell", {40,40}, 225,  true, 1.0);
+   cellref("Fcell", {40,40}, 315,  true, 1.0);
+   redraw();
+}
+
+void testtexts() {
+   newcell("textrefs");
+   opencell("textrefs");
+   addtext("Toped text test", 4, {10,10},   0, false, 2);
+   addtext("Toped text test", 4, {10,10},  90, false, 2);
+   addtext("Toped text test", 4, {10,10}, 180, false, 2);
+   addtext("Toped text test", 4, {10,10}, 270, false, 2);
+   addtext("Toped text test", 4, {40,15},   0,  true, 2);
+   addtext("Toped text test", 4, {40,15},  90,  true, 2);
+   addtext("Toped text test", 4, {40,15}, 180,  true, 2);
+   addtext("Toped text test", 4, {40,15}, 270,  true, 2);
+
+   addtext("Toped text test", 4, {10,40},  45, false, 2);
+   addtext("Toped text test", 4, {10,40}, 135, false, 2);
+   addtext("Toped text test", 4, {10,40}, 225, false, 2);
+   addtext("Toped text test", 4, {10,40}, 315, false, 2);
+   addtext("Toped text test", 4, {40,40},  45,  true, 2);
+   addtext("Toped text test", 4, {40,40}, 135,  true, 2);
+   addtext("Toped text test", 4, {40,40}, 225,  true, 2);
+   addtext("Toped text test", 4, {40,40}, 315,  true, 2);
+
+   addtext("Toped", 4, { 0, 90},   0, false, 20);
+}
+
+void allLayTypes() {
+// For rubber band draw checks during interactive move/rotate/flip etc. operations
+   newcell("allLayTypes");
+   opencell("allLayTypes");
+   addbox({{0,0},{11.5,5.5}},6);
+   addpoly({{0,6},{12,6},{12,0},{14,0},{14,8},{0,8}},2);
+   addwire({{-2,8},{-2,-2},{14,-2}},3,8);
+   addtext("a-z", 14, {1,1}, 0,  false, 4);
+}
+
+void shifttest() {
+
+   newcell("shifttest");
+   opencell("shifttest");
+   point a = {10,10};
+   point aSW = a |/ 1;
+   point aSE = a \| 1;
+   point aNE = a /| 1;
+   point aNW = a |\ 1;
+   addpoly({aSW,aSE,aNE,aNW},6);
+      
+   point b = {2,3};
+   point bSW = a |/ b;
+   point bSE = a \| b;
+   point bNE = a /| b;
+   point bNW = a |\ b;
+   addpoly({bSW,bSE,bNE,bNW},5);
+   
+   box c = {{15,10},{15,10}};
+   box cSW = c |/ 1;
+   box cSE = c \| 1;
+   box cNE = c /| 1;
+   box cNW = c |\ 1;
+   addbox(cSW,2); addbox(cSE,4); addbox(cNW,7); addbox(cNE,8); 
+
+   box d = {{20,10},{20,10}};
+   box dSW = d |/ b;
+   box dSE = d \| b;
+   box dNE = d /| b;
+   box dNW = d |\ b;
+   addbox(dSW,2); addbox(dSE,4); addbox(dNW,7); addbox(dNE,8); 
+
+}
+
+void addbox()
+{
+   echo("Internal function addbox() redefined. This line should never be seen on tell log");
+   
+}
+
+void modify_undo_bug()
+{
+   newcell("modify_undo_bug");
+   opencell("modify_undo_bug");
+   usinglayer(7);
+   addbox({{2.5,11.5},{4.5,9.5}},7);
+   select_all();
+   copy({4,10.5},{14,10.5});
+   select_all();
+   copy({14,10.5},{14,5.5});
+   copy({14,5.5},{14,0.5});
+   copy({14,0},{14,-5});
+   select_all();
+   punselect({{3.5,10.5},{13,-4.5}});
+   move({11.5,8},{18,10.5});
+   undo();
+   echo("8 sqare boxes should be displayed");
+}
+
+int factoriel(real stop)
+{
+   if (stop > 0)
+   {
+      int boza = factoriel(stop - 1);
+      return (stop * boza);
+   };
+   return 1;
+}
+
+void factotest()
+{
+   int i = 0;
+   repeat {
+      echo(factoriel(i));
+      i = i+1;
+   } until (i < 10)      
+}
+
+void listtest()
+{
+   
+}
+
+newcell("Fcell");
+opencell("Fcell");
+point list pl1 =
+{{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}};
+addpoly(pl1,2);
+testcellrefs();
+testtexts();
+newcell("cell_1");
+opencell("cell_1");
+Invertor({0,0},10,3,30,3);
+Invertor({30,0},20,2,60,2);
+cellref("Fcell", {60,30}, 270,  true, 1.0);
+opencell("crop");
+cellref("cellrefs",{10,100},0,false,1);
+
+//cellref("textrefs",{70,10},0,false,1);
+//cellref("cell_1",{120,  0},180,true ,1);
+//cellref("cell_1",{  0,  0},  0,false,1);
+//cellref("cell_1",{120,-20},  0,true ,1);
+//cellref("cell_1",{  0,-20},  0,true ,1);
+
+
