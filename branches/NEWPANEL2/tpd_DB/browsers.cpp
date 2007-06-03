@@ -875,15 +875,17 @@ void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool
 }
 
 void browsers::layer_add(const std::string name, const word layno) {
-   int* bt = new int(BT_LAYER_ADD);
+   //??? Remove it when old panel will be deleted
+	int* bt = new int(BT_LAYER_ADD);
    wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
    eventLAYER_ADD.SetExtraLong(layno);
    eventLAYER_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
    eventLAYER_ADD.SetClientData((void*) bt);
    wxPostEvent(Browsers->TDTlayers(), eventLAYER_ADD);
+   //???-----------------------------------
 
 	wxCommandEvent eventLAYER_ADD2(wxEVT_CMD_BROWSER);
-   LayerInfo *layer = new LayerInfo(name, layno);//, col, fill);
+   LayerInfo *layer = new LayerInfo(name, layno);
    bt = new int(BT_LAYER_ADD);
    eventLAYER_ADD2.SetClientData((void*) layer);
    eventLAYER_ADD2.SetInt(*bt);
@@ -963,7 +965,7 @@ void browsers::parseCommand(const wxString cmd)
    wxPostEvent(Browsers->tellParser(), eventPARSE);
 }
 
-browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)//, const std::string &col, const std::string &fill)
+browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
 {
    _name    = name;
    _layno   = layno;
@@ -1206,7 +1208,6 @@ browsers::LayerBrowser2::LayerBrowser2(wxWindow* parent, wxWindowID id)
    :wxScrolledWindow(parent, id, wxDefaultPosition, wxDefaultSize,wxVSCROLL) 
 {
    _buttonCount = 0;
-   SetScrollbars(0, 50, 0, 50);
 }
 
 browsers::LayerBrowser2::~LayerBrowser2() 
@@ -1265,7 +1266,8 @@ void browsers::LayerBrowser2::OnCommand(wxCommandEvent& event)
                layerButton = new LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(szx, 30),
                wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
                _buttonMap[layer->layno()] = layerButton;
-               _buttonCount++;              
+               _buttonCount++;  
+					SetScrollbars(0, 30, 0, _buttonCount);
             }
             
             _selectedButton = (_buttonMap.begin())->second;

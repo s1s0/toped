@@ -241,7 +241,7 @@ namespace browsers {
 	class LayerInfo
 	{
 	public:
-		LayerInfo(const std::string &name, const word layno);//, const std::string &col, const std::string &fill);
+		LayerInfo(const std::string &name, const word layno);
 		~LayerInfo()         { };
 		std::string name()   {return _name;};
 		word        layno()  {return _layno;};
