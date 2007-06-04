@@ -1012,10 +1012,14 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
       for (int i=0; i<w; i++)
          for (int j=0; j<h; j++)
          {
-            if((image.GetRed(i,j)==255)&& (image.GetGreen(i,j)==255) && (image.GetBlue(i,j)==255))
+            if((image.GetRed(i,j)==0)&& (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
             {
                image.SetRGB(i, j, col.red(), col.green(), col.blue());
             }
+				else
+				{
+					image.SetRGB(i, j, 0, 0, 0);
+				}
          }
     
       delete stipplebrush;
