@@ -264,7 +264,7 @@ bool telldata::ttlist::validIndex(_dbl_word index)
 
 void telldata::ttlist::insert(telldata::tell_var* newval)
 {
-   _mlist.push_back(newval);
+   _mlist.push_back(newval->selfcopy());
 }
 
 void telldata::ttlist::insert(telldata::tell_var* newval, _dbl_word index)

@@ -231,7 +231,8 @@ Ooops! Second thought!
 %token	              tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
 %token                 tknSTRINGdef tknLAYOUTdef tknLISTdef tknRETURN
-%token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ tknAND tknOR
+%token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
+%token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
 %token                 tknPOSTADD tknPOSTSUB
 %token <parsestr>      tknIDENTIFIER tknFIELD tknSTRING
@@ -782,12 +783,14 @@ anonymousvar:
 /*orexpression*/
 expression : 
      andexpression                         {$$ = $1;}
-   | expression tknOR andexpression        {$$ = parsercmd::BoolEx($1,$3,"||",@1,@2);}
+   | expression tknOR   andexpression      {$$ = parsercmd::BoolEx($1,$3,"||",@1,@2);}
+   | expression tknBWOR andexpression      {$$ = parsercmd::BoolEx($1,$3,"|",@1,@2);}
 ;
 
 andexpression :
      eqexpression                          {$$ = $1;}
-   | andexpression tknAND eqexpression     {$$ = parsercmd::BoolEx($1,$3,"&&",@1,@2);}
+   | andexpression tknAND   eqexpression   {$$ = parsercmd::BoolEx($1,$3,"&&",@1,@2);}
+   | andexpression tknBWAND eqexpression   {$$ = parsercmd::BoolEx($1,$3, "&",@1,@2);}
 ;
 
 eqexpression :
@@ -823,6 +826,8 @@ multiexpression :
 unaryexpression : 
      primaryexpression	                   {$$ = $1;}
    | '-' primaryexpression                 {$$ = parsercmd::UMinus($2,@2);}
+   | tknNOT   primaryexpression            {$$ = parsercmd::BoolEx($2, "!",@2);}
+   | tknBWNOT primaryexpression            {$$ = parsercmd::BoolEx($2, "~",@2);}
 ;
 
 primaryexpression : 

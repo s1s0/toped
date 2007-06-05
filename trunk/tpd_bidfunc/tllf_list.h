@@ -36,11 +36,7 @@ namespace tellstdfunc {
    using parsercmd::argumentTYPE;
 
    TELL_STDCMD_CLASSC(lstLENGTH     )
-//   TELL_STDCMD_CLASSA(lstFIRST      )
-//   TELL_STDCMD_CLASSB(lstFIRST_S     , lstFIRST)
-//   TELL_STDCMD_CLASSA(lstLAST      )
-//   TELL_STDCMD_CLASSB(lstLAST_S      , lstLAST )
-
+   TELL_STDCMD_CLASSC(stdABS        )
 }
 
 #endif  //TLLF_LIST_H

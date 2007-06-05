@@ -56,19 +56,32 @@ extern console::TELLFuncList*    CmdList;
 //-----------------------------------------------------------------------------
 
 void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
+   //-----------------------------------------------------------------------------------------------------------
    // First the internal types
+   //-----------------------------------------------------------------------------------------------------------
    telldata::point_type* pntype  = new telldata::point_type();
    telldata::box_type*   bxtype  = new telldata::box_type(pntype);
    telldata::bnd_type*   bndtype = new telldata::bnd_type(pntype);
    mblock->addGlobalType("point"     ,  pntype);
    mblock->addGlobalType("box"       ,  bxtype);
    mblock->addGlobalType("bind"      , bndtype);
-   // Internal variables next - Can't think of any for the moment
-//   mblock->addID("$_CW", new ttwnd(Toped->_view->lp_BL, Toped->_view->lp_TR));
+   //-----------------------------------------------------------------------------------------------------------
+   // Internal variables
+   //-----------------------------------------------------------------------------------------------------------
+   // layout type masks
+   mblock->addID("_lmbox"   , new telldata::ttint(laydata::_lmbox    ));
+   mblock->addID("_lmpoly"  , new telldata::ttint(laydata::_lmpoly   ));
+   mblock->addID("_lmwire"  , new telldata::ttint(laydata::_lmwire   ));
+   mblock->addID("_lmtext"  , new telldata::ttint(laydata::_lmtext   ));
+   mblock->addID("_lmref"   , new telldata::ttint(laydata::_lmref    ));
+   mblock->addID("_lmaref"  , new telldata::ttint(laydata::_lmaref   ));
+   mblock->addID("_lmpref"  , new telldata::ttint(laydata::_lmpref   ));
+   mblock->addID("_lmapref" , new telldata::ttint(laydata::_lmapref  ));
    //-----------------------------------------------------------------------------------------------------------
    // tell build-in functions
    //-----------------------------------------------------------------------------------------------------------
    mblock->addFUNC("length"           ,(new                   tellstdfunc::lstLENGTH(telldata::tn_int, false)));
+   mblock->addFUNC("abs"              ,(new                     tellstdfunc::stdABS(telldata::tn_real, false)));
    //-----------------------------------------------------------------------------------------------------------
    // toped build-in functions
    //-----------------------------------------------------------------------------------------------------------

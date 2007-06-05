@@ -1,0 +1,100 @@
+//===========================================================================
+//                                                                          =
+//  License terms and conditions - not clear yet                            =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+// ------------------------------------------------------------------------ =
+//           $URL$
+//  Creation date: Mon Jan 23 23:48:52 GMT 2006
+//     Created by: Svilen Krustev - s_krustev@yahoo.com
+//      Copyright: (C) 2001-2006 by Svilen Krustev
+//    Description: Checks for tell structures handling
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------                
+//      $Revision: 163 $
+//          $Date: 2005-06-13 18:24:02 +0100 (Mon, 13 Jun 2005) $
+//        $Author: skr $
+//===========================================================================
+
+// Some DRC rules defined as global variables
+real _actOverCont = 1.5;
+real _mincont = 2;
+real _contspace = 2.5;
+real _gate2cont = 2.5;
+real _polyOverActive = 2;
+real _nwelltonactive = 9;
+real _welloverpwell = 3;
+real _wellovernwell = 1;
+real _metalovercont = 1;
+real _polyovercont = 1.5;
+real _implantoveract = 2;
+
+struct record1 {
+   int layer;
+   point list plist
+};
+
+struct record2 {
+   int rotation;
+   bool flip;
+   int list intlist
+};
+
+record1 a = {2, {{1,1},{1,2},{2,3},{3,4},{5,5},{8,6}}};
+echo(a);
+record2 b = {3, false, {1,2,3,4,5,6}};
+echo(b);
+
+void test_poly (record1 boza) {
+   addpoly(boza.plist,boza.layer);
+}
+
+test_poly({2,{{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}}});
+
+// Preliminary idea about parametrized cells
+// It looks exactly as any other function in TELL
+// - parameters are the input function parameters (do we need something like const ?)
+// - all TELL operators & functions are allowed
+// - not all TOPED functions allowed (how to make the difference)
+// - calls to other pcell's only?
+// - can use local variables only (what about the design rules? using clause? packages?)
+// - can be called normally? pcell === overlap(box)
+// - to get then into the DB use - export. After export the pcell gets compiled and stored 
+//   into the graphical DB - respectively in the tdt file
+// - to instanciate it - pcell reference anywhere
+// - once in the DB pcell can't be edited (how!?). There should be an easy but secure way 
+//   to overwrite (redefine) it. Carefull here with reloading tell files!
+
+pcell builkcont(point p1, point p2)
+{
+   point distance = p2 - p1;
+   real actW = (2 * _actOverCont + _mincont);
+   if (abs(distance.x) > abs(distance.y))
+   {
+      real numconts = (distance.x - 2*_actOverCont) / (_mincont + _contspace);
+      addbox({p1.x, p1.y -actW/2}, distance.x, actW, 2);
+      while (numconts > 0) 
+      {
+         addbox({p1.x + numconts*(_contspace + _mincont),p1.y-_mincont/2},_mincont, _mincont,7);
+         numconts = numconts - 1;
+      }
+   }
+   else
+   {
+      real numconts = (distance.y - 2*_actOverCont) / (_mincont + _contspace);
+      addbox({p1.x - actW/2,p1.y}, actW, distance.y,2);
+      while (numconts > 0) 
+      {
+         addbox({p1.x -_mincont/2, p1.y + numconts*(_contspace + _mincont)},_mincont, _mincont,7);
+         numconts = numconts - 1;
+      }
+   }
+}
+
+export builkcont;
+pcellref(builkcont);

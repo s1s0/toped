@@ -82,7 +82,37 @@ void Invertor(point bound, real NW, real NL, real PW, real PL) {
    addbox((ptrActive /| _welloverpwell ) |/ _welloverpwell , 1);
    addbox((ptrActive /| _implantoveract) |/ _implantoveract, 6);
 }   
-   
+
+void builkcont(point p1, point p2)
+{
+   point distance = p2 - p1;
+   layout list generated;
+   real actW = (2 * _actOverCont + _mincont);
+   if (abs(distance.x) > abs(distance.y))
+   {
+      real numconts = (distance.x - 2*_actOverCont) / (_mincont + _contspace);
+      generated[:+] = addbox({p1.x, p1.y -actW/2}, distance.x, actW, 2);
+      real curcont = 0;
+      while (curcont < numconts) 
+      {
+         generated[:+] = addbox({p1.x + curcont*(_contspace + _mincont) + _actOverCont, p1.y-_mincont/2},_mincont, _mincont,7);
+         curcont = curcont + 1;
+      }
+   }
+   else
+   {
+      real numconts = (distance.y - 2*_actOverCont) / (_mincont + _contspace);
+      generated[:+] = addbox({p1.x - actW/2,p1.y}, actW, distance.y,2);
+      real curcont = 0;
+      while (curcont < numconts) 
+      {
+         generated[:+] = addbox({p1.x -_mincont/2, p1.y + curcont*(_contspace + _mincont) + _actOverCont},_mincont, _mincont,7);
+         curcont = curcont + 1;
+      }
+   };
+   select(generated);
+}
+
 
 void whiletest() {
    real a = 10;

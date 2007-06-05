@@ -434,11 +434,43 @@ int parsercmd::cmdAND::execute() {
 }
 
 //=============================================================================
+int parsercmd::cmdBWAND::execute() {
+   TELL_DEBUG(cmdBWAND);
+   word op1 = getWordValue();
+   word op2 = getWordValue();
+   OPstack.push(new telldata::ttint(op1 & op2));
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 int parsercmd::cmdOR::execute() {
    TELL_DEBUG(cmdOR);
    telldata::ttbool *op = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
    static_cast<telldata::ttbool*>(OPstack.top())->OR(op->value());
    delete op;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+int parsercmd::cmdBWOR::execute() {
+   TELL_DEBUG(cmdBWAND);
+   word op1 = getWordValue();
+   word op2 = getWordValue();
+   OPstack.push(new telldata::ttint(op1 | op2));
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+int parsercmd::cmdNOT::execute() {
+   TELL_DEBUG(cmdNOT);
+   static_cast<telldata::ttbool*>(OPstack.top())->NOT();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+int parsercmd::cmdBWNOT::execute() {
+   TELL_DEBUG(cmdNOT);
+   static_cast<telldata::ttint*>(OPstack.top())->NOT();
    return EXEC_NEXT;
 }
 
@@ -1822,36 +1854,81 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
 //   poly     |  -  |  -  |  -  | ??? |  how about +-*/
 //---------------------------------------
 telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
-                                 std::string ope, yyltype loc1, yyltype loc2) {
+                                 std::string ope, yyltype loc1, yyltype loc2)
+{
 //   std::ostringstream ost;
 //   ost << "bad or unsuported pair of operands in " << ope << "operator";
 //   if ((op1 != op2) and (((op1 != telldata::tn_real) and (op1 != telldata::tn_bool)) or
 //                         ((op2 != telldata::tn_real) and (op2 != telldata::tn_bool))))  {
    
-   if (NUMBER_TYPE(op1) && NUMBER_TYPE(op2)) {
+   if (NUMBER_TYPE(op1) && NUMBER_TYPE(op2))
+   {
       if      (ope == "<" ) CMDBlock->pushcmd(new parsercmd::cmdLT());
       else if (ope == "<=") CMDBlock->pushcmd(new parsercmd::cmdLET());
       else if (ope ==  ">") CMDBlock->pushcmd(new parsercmd::cmdGT());
       else if (ope == ">=") CMDBlock->pushcmd(new parsercmd::cmdGET());
       else if (ope == "==") CMDBlock->pushcmd(new parsercmd::cmdEQ());
       else if (ope == "!=") CMDBlock->pushcmd(new parsercmd::cmdNE());
-      else {tellerror("unexepected operand type",loc1);return telldata::tn_void;}
+      else if ((telldata::tn_int == op1) && (telldata::tn_int == op2))
+      {
+         if      (ope == "&") CMDBlock->pushcmd(new parsercmd::cmdBWAND());
+         else if (ope == "|") CMDBlock->pushcmd(new parsercmd::cmdBWOR());
+         else
+         {
+            tellerror("unexepected operand type",loc1);
+            return telldata::tn_void;
+         }
+         return telldata::tn_int;
+      }
+      else
+      {
+         tellerror("unexepected operand type",loc1);
+         return telldata::tn_void;
+      }
       return telldata::tn_bool;
    }
-   else if ((telldata::tn_bool == op1) && (telldata::tn_bool == op2)) {
+   else if ((telldata::tn_bool == op1) && (telldata::tn_bool == op2))
+   {
       if      (ope == "&&") CMDBlock->pushcmd(new parsercmd::cmdAND());
       else if (ope == "||") CMDBlock->pushcmd(new parsercmd::cmdOR());
-      else {tellerror("unexepected operand type",loc1);return telldata::tn_void;}
+      else
+      {
+         tellerror("unexepected operand type",loc1);return telldata::tn_void;
+      }
       return telldata::tn_bool;
    }
-   else tellerror("unexepected operand type",loc2);return telldata::tn_void;
-//      case    telldata::tn_pnt:
-//      case    telldata::tn_box:
-//      case   tn_poly:
-//         if      (ope == "==") CMDBlock->pushcmd(new parsercmd::cmdEQ());
-//         else if (ope == "!=") CMDBlock->pushcmd(new parsercmd::cmdNE());
-//         else {tellerror("unexepected operand type",loc1);return telldata::tn_void;}
-//         break;
+   else
+   {
+      tellerror("unexepected operand type",loc2);
+      return telldata::tn_void;
+   }
+}
+
+telldata::typeID parsercmd::BoolEx(telldata::typeID op1, std::string ope, yyltype loc1)
+{
+   if      (telldata::tn_int == op1)
+   {
+      if      (ope == "~" ) CMDBlock->pushcmd(new parsercmd::cmdBWNOT());
+      else
+      {
+         tellerror("unexepected operand type",loc1);return telldata::tn_void;
+      }
+      return telldata::tn_int;
+   }
+   else if (telldata::tn_bool == op1)
+   {
+      if      (ope == "!") CMDBlock->pushcmd(new parsercmd::cmdNOT());
+      else
+      {
+         tellerror("unexepected operand type",loc1);return telldata::tn_void;
+      }
+      return telldata::tn_bool;
+   }
+   else
+   {
+      tellerror("unexepected operand type",loc1);
+      return telldata::tn_void;
+   }
 }
 
 void parsercmd::ClearArgumentList(argumentLIST* alst) {

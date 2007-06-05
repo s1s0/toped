@@ -270,12 +270,32 @@ namespace  parsercmd {
       int execute();
    };
 
+   class cmdNOT:public cmdVIRTUAL {
+   public:
+      int execute();
+   };
+
+   class cmdBWNOT:public cmdVIRTUAL {
+   public:
+      int execute();
+   };
+
    class cmdAND:public cmdVIRTUAL {
    public:
       int execute();
    };
 
+   class cmdBWAND:public cmdVIRTUAL {
+   public:
+      int execute();
+   };
+
    class cmdOR:public cmdVIRTUAL {
+   public:
+      int execute();
+   };
+
+   class cmdBWOR:public cmdVIRTUAL {
    public:
       int execute();
    };
@@ -553,6 +573,7 @@ namespace  parsercmd {
    telldata::typeID  Assign(telldata::tell_var*, bool, telldata::argumentID*, yyltype);
    telldata::typeID  Uninsert(telldata::tell_var*, telldata::argumentID*, parsercmd::cmdLISTADD*, yyltype);
    telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
+   telldata::typeID  BoolEx(telldata::typeID, std::string, yyltype);
 
    bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);
    bool              ListIndexCheck(telldata::typeID, yyltype, telldata::typeID, yyltype);
