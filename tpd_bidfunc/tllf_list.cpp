@@ -25,9 +25,10 @@
 //        $Author$
 //===========================================================================
 #include <sstream>
+#include <math.h>
 #include "tllf_list.h"
 
-//=============================================================================
+//============================================================================
 int tellstdfunc::lstLENGTH::argsOK(argumentQ* amap)
 {
    return (!((amap->size() == 1) && ( (*((*amap)[0]))() &  telldata::tn_listmask  )));
@@ -46,5 +47,27 @@ int tellstdfunc::lstLENGTH::execute()
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    OPstack.push(new telldata::ttint(pl->size()));
    delete pl;
+   return EXEC_NEXT;
+}
+
+//============================================================================
+int tellstdfunc::stdABS::argsOK(argumentQ* amap)
+{
+   return (!((amap->size() == 1) && ( (*((*amap)[0]))() == telldata::tn_real  ) ||
+                                    ( (*((*amap)[0]))() == telldata::tn_int   )   ));
+}
+
+nameList* tellstdfunc::stdABS::callingConv(const telldata::typeMAP*)
+{
+   nameList* argtypes = new nameList();
+   argtypes->push_back("real");
+   argtypes->push_back("real");
+   return argtypes;
+}
+
+int tellstdfunc::stdABS::execute()
+{
+   real value = getOpValue(OPstack);
+   OPstack.push(new telldata::ttreal(fabs(value)));
    return EXEC_NEXT;
 }

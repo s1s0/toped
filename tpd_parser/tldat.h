@@ -164,6 +164,7 @@ namespace telldata {
       int4b                value() const        {return _value;};
       void                 uminus()             {_value  = -_value;   };
       tell_var*            selfcopy() const     {return new ttint(_value);};
+      void                 NOT()                {_value = ~_value;}
    protected:
       int4b               _value;
    };
@@ -182,6 +183,7 @@ namespace telldata {
       tell_var*            selfcopy() const     {return new ttbool(_value);};
       void                 AND(bool op)         {_value = _value && op;};
       void                 OR(bool op)          {_value = _value || op; };
+      void                 NOT()                {_value = !_value;}
    private:
       bool  _value;
    };
