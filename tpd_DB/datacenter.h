@@ -143,6 +143,8 @@ public:
    const std::string          getLineName(word layno) {return _properties.drawprop().getLineName(layno);}
    const laydata::ListOfWords upLayers() {return _properties.upLayers();}
    void                       clearUnpublishedLayers() {_properties.clearUnpublishedLayers();}
+   const word                 layselmask() {return _properties.layselmask();}
+   void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
 
    protected:
    laydata::tdtdesign*        _TEDDB;      // toped data base

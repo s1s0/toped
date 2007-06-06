@@ -1198,7 +1198,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 }
 
 void parsercmd::cmdSTDFUNC::reduce_undo_stack() {
-   if (UNDOcmdQ.size() > 100) {
+   if (UNDOcmdQ.size() > 10) {
       UNDOcmdQ.back()->undo_cleanup(); UNDOcmdQ.pop_back();
    }
 }

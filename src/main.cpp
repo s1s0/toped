@@ -147,6 +147,8 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("punselect"        ,(new tellstdfunc::stdPNTUNSELECT_I(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("select_all"       ,(new     tellstdfunc::stdSELECTALL(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("unselect_all"     ,(new              tellstdfunc::stdUNSELECTALL(telldata::tn_void,false)));
+   mblock->addFUNC("selectmask"       ,(new             tellstdfunc::stdSETSELECTMASK(telldata::tn_int,false)));
+   
    // operation on the toped data
    mblock->addFUNC("move"             ,(new                  tellstdfunc::stdMOVESEL(telldata::tn_void,false)));
    mblock->addFUNC("move"             ,(new                tellstdfunc::stdMOVESEL_D(telldata::tn_void,false)));

@@ -38,16 +38,6 @@
 #include "ps_out.h"
 
 namespace laydata {
-
-   const word _lmbox    = 0x0001;
-   const word _lmpoly   = 0x0002;
-   const word _lmwire   = 0x0004;
-   const word _lmtext   = 0x0008;
-   const word _lmref    = 0x0010;
-   const word _lmaref   = 0x0020;
-   const word _lmpref   = 0x0040;
-   const word _lmapref  = 0x0080;
-
 //==============================================================================
    /*! Abstract class - the base of all layout objects.\n To optimize the RAM 
        usage having in mind the huge potential number of objects, we must have 

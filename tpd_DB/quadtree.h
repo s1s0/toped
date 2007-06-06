@@ -71,9 +71,9 @@ namespace laydata {
       void                 write(TEDfile* const) const;
       void                 GDSwrite(GDSin::GDSFile&, word const, real UU) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
-      void                 select_inBox(DBbox&, dataList*, bool);
+      void                 select_inBox(DBbox&, dataList*, bool, word /*selmask = laydata::_lmall*/);
       void                 select_fromList(dataList*, dataList*);
-      void                 select_all(dataList*, bool mark = true);
+      void                 select_all(dataList*, word selmask = laydata::_lmall, bool mark = true);
       void                 unselect_inBox(DBbox&, dataList*, bool);
       bool                 delete_marked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 delete_this(laydata::tdtdata*);

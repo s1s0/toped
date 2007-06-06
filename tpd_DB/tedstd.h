@@ -71,6 +71,18 @@ namespace layprop {
 }
 
 namespace laydata {
+
+   const word _lmnone   = 0x0000;
+   const word _lmbox    = 0x0001;
+   const word _lmpoly   = 0x0002;
+   const word _lmwire   = 0x0004;
+   const word _lmtext   = 0x0008;
+   const word _lmref    = 0x0010;
+   const word _lmaref   = 0x0020;
+   const word _lmpref   = 0x0040;
+   const word _lmapref  = 0x0080;
+   const word _lmall    = 0xffff;
+
    typedef enum { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } SH_STATUS;
    typedef enum {
       shp_OK         = 0x00,

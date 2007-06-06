@@ -680,17 +680,22 @@ void laydata::quadTree::put(tdtdata* shape) {
 select methods of the parent structures in the data base - tdtlayer and tdtcell
 */
 void laydata::quadTree::select_inBox(DBbox& select_in, dataList* selist, 
-                                                          bool pselect) {
+                                                  bool pselect, word selmask)
+{
    // check the entire holder for clipping...
-   if (select_in.cliparea(_overlap) == 0) return;
+   if ((laydata::_lmnone == selmask) || (select_in.cliparea(_overlap) == 0)) return;
    // now start selecting one by one
    tdtdata* wdt = _first;
-   while(wdt) {
-      wdt->select_inBox(select_in, selist, pselect);
+   while(wdt)
+   {
+      if (selmask & wdt->ltype())
+      {
+         wdt->select_inBox(select_in, selist, pselect);
+      }
       wdt = wdt->next();
    }   
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->select_inBox(select_in, selist, pselect);
+      if (_quads[i]) _quads[i]->select_inBox(select_in, selist, pselect, selmask);
 }
 
 /*! Unselects already selected data using unselect_in box. Called by the corresponding
@@ -755,15 +760,20 @@ void laydata::quadTree::select_fromList(dataList* src, dataList* dst) {
 
 /*! Mark all shapes in the current quadTree and its children as sh_selected and
 add a reference in the selist*/
-void laydata::quadTree::select_all(dataList* selist, bool mark) {
+void laydata::quadTree::select_all(dataList* selist, word selmask, bool mark) {
    tdtdata* wdt = _first;
-   while(wdt) {
-      selist->push_back(selectDataPair(wdt,NULL));
-      if (mark) wdt->set_status(sh_selected);
+   if (laydata::_lmnone == selmask) return;
+   while(wdt)
+   {
+      if (selmask & wdt->ltype())
+      {
+         selist->push_back(selectDataPair(wdt,NULL));
+         if (mark) wdt->set_status(sh_selected);
+      }
       wdt = wdt->next();
-   }   
+   }
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->select_all(selist, mark);
+      if (_quads[i]) _quads[i]->select_all(selist, selmask, mark);
 }
 
 
@@ -782,7 +792,7 @@ void laydata::quadTree::freememory() {
       dwdt = wdt;
       wdt = dwdt->next();
       delete dwdt;
-   }      
+   }
 }
 
 bool laydata::quadTree::getobjectover(const TP pnt, laydata::tdtdata*& prev) {

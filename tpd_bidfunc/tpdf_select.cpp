@@ -465,3 +465,36 @@ int tellstdfunc::stdREPORTSLCTD::execute() {
    return EXEC_NEXT;
 }
 
+
+//=============================================================================
+tellstdfunc::stdSETSELECTMASK::stdSETSELECTMASK(telldata::typeID retype, bool eor) :
+                               cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+}
+
+void tellstdfunc::stdSETSELECTMASK::undo_cleanup()
+{
+   getWordValue(UNDOPstack,false);
+}
+
+void tellstdfunc::stdSETSELECTMASK::undo()
+{
+   TEUNDO_DEBUG("setselectmask() UNDO");
+   word mask = getWordValue(UNDOPstack,true);
+   DATC->setlayselmask(mask);
+//   UpdateLV();
+}
+
+int tellstdfunc::stdSETSELECTMASK::execute()
+{
+   UNDOcmdQ.push_front(this);
+   word mask = getWordValue();
+   word oldmask = DATC->layselmask();
+   UNDOPstack.push_front(new telldata::ttint(oldmask));
+   DATC->setlayselmask(mask);
+   OPstack.push(new telldata::ttint(oldmask));
+   LogFile << LogFile.getFN() << "("<< mask <<");"; LogFile.flush();
+   return EXEC_NEXT;
+}
+

@@ -549,7 +549,7 @@ void laydata::tdtcell::select_inBox(DBbox select_in, layprop::ViewProperties& vi
                ssl = _shapesel[lay->first];
             else
                ssl = new dataList();
-/***/       lay->second->select_inBox(select_in, ssl, pntsel);
+/***/       lay->second->select_inBox(select_in, ssl, pntsel, viewprop.layselmask());
             if (ssl->empty())  delete ssl; 
             else               _shapesel[lay->first] = ssl; 
          }
@@ -1095,9 +1095,14 @@ void laydata::tdtcell::select_all(layprop::ViewProperties& viewprop)
       if (viewprop.selectable(lay->first))
       {
          dataList* ssl = new dataList();
-/***/    lay->second->select_all(ssl);
-         assert(!ssl->empty());
-         _shapesel[lay->first] = ssl; 
+/***/    lay->second->select_all(ssl, viewprop.layselmask());
+         if (ssl->empty())
+         {
+            delete ssl;
+            assert(viewprop.layselmask() != laydata::_lmall);
+         }
+         else
+            _shapesel[lay->first] = ssl;
       }
 }
 
