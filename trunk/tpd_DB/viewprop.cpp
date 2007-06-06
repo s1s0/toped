@@ -661,6 +661,7 @@ layprop::ViewProperties::ViewProperties() {
    setUU(1);
    _marker_angle = 0;
    _autopan = false;
+   _layselmask = laydata::_lmall;
 }
 
 bool layprop::ViewProperties::selectable(word layno) const {

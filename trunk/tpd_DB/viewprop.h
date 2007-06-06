@@ -281,6 +281,8 @@ namespace layprop {
       bool              autopan() const                  {return _autopan;}
       byte              marker_angle() const             {return _marker_angle;}
       DrawProperties&   drawprop()                       {return _drawprop;}
+      word              layselmask() const               {return _layselmask;}
+      void              setlayselmask(word lsm)          {_layselmask = lsm;}
       void              setcellmarks_hidden(bool hide)   {_drawprop._cellmarks_hidden = hide;}
       void              settextmarks_hidden(bool hide)   {_drawprop._textmarks_hidden = hide;}
       void              setcellbox_hidden(bool hide)     {_drawprop._cellbox_hidden = hide;}
@@ -316,6 +318,7 @@ namespace layprop {
       byte              _marker_angle; // angle of restriction during shape drawing (0,45,90)
       SupplementaryData _supp_data;    // supplementary data
       laydata::ListOfWords _uplaylist;    // unpublished layer list
+      word              _layselmask;   // layout shape type selection mask
    };
 }
 #endif
