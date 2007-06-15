@@ -2274,7 +2274,15 @@ void laydata::valid_poly::angles()
       if (eraseP1)
       {
          cp2 = _plist.erase(cp1);
-         cp1 = cp2; cp1--;
+         cp1 = cp2; 
+			if (cp2 == _plist.begin()) 
+			{
+				cp1 = _plist.end(); cp1--;
+			}
+			else
+			{
+				cp1--;
+			}
          angle_stack.pop();
          _status |= laydata::shp_ident;
          prev_cleared = true;
@@ -2363,6 +2371,7 @@ void laydata::valid_wire::angles()
    pointlist::iterator cp1 = cp2; cp2++;
    real pAngle, cAngle; //
    bool pAngleValid = false;
+	if (_plist.size()>2)
    do
    {
       bool eraseP1 = false;
@@ -2384,7 +2393,8 @@ void laydata::valid_wire::angles()
       }
       if (eraseP1)
       {
-         _plist.erase(cp1);
+         cp2 = _plist.erase(cp1);
+			cp1 = cp2; cp2++;
          _status |= laydata::shp_ident;
       }
       else
