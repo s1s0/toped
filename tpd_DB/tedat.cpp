@@ -2244,40 +2244,45 @@ void laydata::valid_poly::angles()
 {
    pointlist::iterator cp1 = _plist.end(); cp1--;
    pointlist::iterator cp2 = _plist.begin();
-   real pAngle, cAngle; //
-   bool pAngleValid = false;
+   real cAngle;
+   std::stack<real> angle_stack;
    bool loopCompleted = false;
+   bool prev_cleared = false;
    int exitcnt = 0;
    do
    {
       bool eraseP1 = false;
       if (*cp1 == *cp2)
+      {
          eraseP1 = true;
-      else
+         if (!prev_cleared)
+            angle_stack.push(0);
+      }
+      else if (!prev_cleared)
       {
          cAngle = xangle(*cp1, *cp2);
-         if (pAngleValid)
+         if (!angle_stack.empty())
          {
-            real ang = fabs(cAngle - pAngle);
+            real ang = fabs(cAngle - angle_stack.top());
             if ((0 == ang) || (180 == ang))
                eraseP1 = true;
             else if (ang < 90 || ang > 270)
                _status |= laydata::shp_acute;
          }
-         pAngleValid = true;
-         pAngle = cAngle;
+         angle_stack.push(cAngle);
       }
       if (eraseP1)
       {
-         cp1 = _plist.erase(cp1);
-			cp2 = cp1;
-			if (_plist.end() != cp1) cp2++;
-
+         cp2 = _plist.erase(cp1);
+         cp1 = cp2; cp1--;
+         angle_stack.pop();
          _status |= laydata::shp_ident;
+         prev_cleared = true;
       }
       else
       {
          cp1 = cp2; cp2++;
+         prev_cleared = false;
       }
       if (_plist.end() == cp2)
       {
