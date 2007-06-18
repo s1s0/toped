@@ -427,7 +427,11 @@ GDSin::GDSFile* DataCenter::lockGDS(bool throwexception)
    }
    else {
       if (throwexception) throw EXPTNactive_GDS();
-      else return NULL;
+      else 
+		{
+			while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
+			return NULL;
+		}
    }
 }
 
