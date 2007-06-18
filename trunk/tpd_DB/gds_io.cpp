@@ -940,14 +940,14 @@ GDSin::GDSpath::GDSpath(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
                for(i = 0; i < numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
                delete cr;break;
             case gds_ENDEL://end of element, exit point
-               if (3 == pathtype) {
-                  AddLog('W',"GDS Pathtype 3 digitized. Will be converted to Pathtype 2");
+               if (2 == pathtype) {
+                  AddLog('W',"GDS Pathtype 2 digitized. Will be converted to Pathtype 0");
                   convert22(width/2, width/2);
                }   
                else if (4 == pathtype) {
-                  AddLog('W',"GDS Pathtype 4 digitized. Will be converted to Pathtype 2");
+                  AddLog('W',"GDS Pathtype 4 digitized. Will be converted to Pathtype 0");
                   convert22(bgnextn, endextn);
-               }   
+               }
                delete cr;return;
             default://parse error - not expected record type
                AddLog('E',"GDS path - wrong record type in the current context");
