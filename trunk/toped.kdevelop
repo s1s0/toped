@@ -15,7 +15,7 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>src/toped</activetarget>
+      <activetarget>tpd_bidfunc/libtpd_bidfunc.la</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
@@ -78,7 +78,7 @@
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs>../../tll/tcase.tll</programargs>
+      <programargs>../../tll/philips_test.tll</programargs>
       <gdbpath/>
       <configGdbScript/>
       <runShellScript/>

@@ -234,7 +234,7 @@ Ooops! Second thought!
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
 %token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
-%token                 tknPOSTADD tknPOSTSUB
+%token                 tknPOSTADD tknPOSTSUB tknCONST
 %token <parsestr>      tknIDENTIFIER tknFIELD tknSTRING
 %token <real>          tknREAL
 %token <integer>       tknINT
@@ -536,6 +536,17 @@ variabledeclaration:
       else
          tellerror("variable already defined in this scope", @2);
       $$ = $1; delete [] $2;indexed = false;
+   }
+   | tknCONST telltypeID tknIDENTIFIER      {
+      telldata::tell_var* v = CMDBlock->getID($3, true);
+      if (!v) {/* if this variableID doesn't exist already in the local scope*/
+         /* add it to the local variable map */
+         tellvar = CMDBlock->newTellvar($2, @2);
+         CMDBlock->addconstID($3,tellvar,false);
+      }
+      else
+         tellerror("variable already defined in this scope", @2);
+      $$ = $2; delete [] $3;indexed = false;
    }
    | variabledeclaration ',' tknIDENTIFIER  {
       telldata::tell_var* v = CMDBlock->getID($3, true);
