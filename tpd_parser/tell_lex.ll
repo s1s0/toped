@@ -95,6 +95,7 @@ repeat                     return tknREPEAT;
 foreach                    return tknFOREACH;
 struct                     return tknSTRUCTdef;
 until                      return tknUNTIL;
+const                      return tknCONST;
 {lex_string}             { telllval.parsestr = parsercmd::charcopy(yytext, true);
                            return tknSTRING;                               }
 "."{lex_identifier}      { telllval.parsestr = parsercmd::charcopy(yytext);return tknFIELD;}

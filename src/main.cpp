@@ -69,14 +69,14 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    // Internal variables
    //-----------------------------------------------------------------------------------------------------------
    // layout type masks
-   mblock->addID("_lmbox"   , new telldata::ttint(laydata::_lmbox    ));
-   mblock->addID("_lmpoly"  , new telldata::ttint(laydata::_lmpoly   ));
-   mblock->addID("_lmwire"  , new telldata::ttint(laydata::_lmwire   ));
-   mblock->addID("_lmtext"  , new telldata::ttint(laydata::_lmtext   ));
-   mblock->addID("_lmref"   , new telldata::ttint(laydata::_lmref    ));
-   mblock->addID("_lmaref"  , new telldata::ttint(laydata::_lmaref   ));
-   mblock->addID("_lmpref"  , new telldata::ttint(laydata::_lmpref   ));
-   mblock->addID("_lmapref" , new telldata::ttint(laydata::_lmapref  ));
+   mblock->addconstID("_lmbox"   , new telldata::ttint( laydata::_lmbox  ), true);
+   mblock->addconstID("_lmpoly"  , new telldata::ttint( laydata::_lmpoly ), true);
+   mblock->addconstID("_lmwire"  , new telldata::ttint( laydata::_lmwire ), true);
+   mblock->addconstID("_lmtext"  , new telldata::ttint( laydata::_lmtext ), true);
+   mblock->addconstID("_lmref"   , new telldata::ttint( laydata::_lmref  ), true);
+   mblock->addconstID("_lmaref"  , new telldata::ttint( laydata::_lmaref ), true);
+   mblock->addconstID("_lmpref"  , new telldata::ttint( laydata::_lmpref ), true);
+   mblock->addconstID("_lmapref" , new telldata::ttint( laydata::_lmapref), true);
    //-----------------------------------------------------------------------------------------------------------
    // tell build-in functions
    //-----------------------------------------------------------------------------------------------------------

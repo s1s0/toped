@@ -121,16 +121,20 @@ namespace telldata {
    //==============================================================================
    class tell_var {
    public:
-                           tell_var(typeID ID) : _ID(ID) {}
+                           tell_var(typeID ID) : _ID(ID), _changeable(2) {}
       virtual tell_var*    selfcopy() const = 0;
       virtual void         echo(std::string&, real) = 0;
       virtual const typeID get_type() const {return _ID;}
       virtual void         assign(tell_var*) = 0;
       virtual tell_var*    field_var(char*& fname) {return NULL;}
       virtual tell_var*    index_var(unsigned index) {return NULL;}
+      void                 update_cstat() {if (1 == _changeable) _changeable = 0;}
+      bool                 constant() const {return 0 == _changeable;}
+      void                 const_declaration() {_changeable = 1;}
       virtual             ~tell_var() {};
    protected:
       typeID              _ID;
+      byte                _changeable;
    };
 
    //==============================================================================

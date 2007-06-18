@@ -98,3 +98,11 @@ pcell builkcont(point p1, point p2)
 
 export builkcont;
 pcellref(builkcont);
+
+
+void bug_011384() {
+   newcell("bug_011384");
+   opencell("bug_011384");
+   point list testp = {{0,0), {0,5}, {3,5}, {3,3} , {3,5} , {5,5}, {0,5}};
+   addpoly(testp,8);
+}

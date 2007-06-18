@@ -294,11 +294,6 @@ void factotest()
    } until (i < 10)      
 }
 
-void listtest()
-{
-   
-}
-
 newcell("Fcell");
 opencell("Fcell");
 point list pl1 =

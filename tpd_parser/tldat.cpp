@@ -95,11 +95,18 @@ telldata::bnd_type::bnd_type(point_type* pfld) : tell_type(telldata::tn_bnd)
 };
 
 //=============================================================================
-void telldata::ttreal::assign(tell_var* rt) {
+void telldata::ttreal::assign(tell_var* rt)
+{
    if (rt->get_type() == tn_real)
+   {
       _value = static_cast<ttreal*>(rt)->value();
+      update_cstat();
+   }
    else if (rt->get_type() == tn_int)
+   {
       _value = static_cast<ttint*>(rt)->value();
+      update_cstat();
+   }
 //   @TODO else ERROR Run time error (or Warning) -> unexpected type in ..bla bla
 }
 
@@ -121,9 +128,15 @@ const telldata::ttreal& telldata::ttreal::operator = (const ttint& a) {
 //=============================================================================
 void telldata::ttint::assign(tell_var* rt) {
    if (rt->get_type() == tn_real)
+   {
       _value = (int4b) rint(static_cast<ttreal*>(rt)->value());
+      update_cstat();
+   }
    else if (rt->get_type() == tn_int)
+   {
       _value = static_cast<ttint*>(rt)->value();
+      update_cstat();
+   }
    else
       assert(false);
 }
@@ -155,6 +168,7 @@ const telldata::ttbool& telldata::ttbool::operator = (const ttbool& a) {
 
 void telldata::ttbool::assign(tell_var* rt) {
    _value = static_cast<ttbool*>(rt)->value();
+   update_cstat();
 }
 
 void telldata::ttbool::echo(std::string& wstr, real) {
@@ -170,6 +184,7 @@ const telldata::ttstring& telldata::ttstring::operator = (const ttstring& a) {
 
 void telldata::ttstring::assign(tell_var* value) {
    _value = static_cast<ttstring*>(value)->_value;
+   update_cstat();
 }
 
 void telldata::ttstring::echo(std::string& wstr, real) {
@@ -205,6 +220,7 @@ void telldata::ttlayout::echo(std::string& wstr, real DBU)
 void telldata::ttlayout::assign(tell_var* data) {
    _data = static_cast<ttlayout*>(data)->_data;
    _selp = static_cast<ttlayout*>(data)->_selp;
+   update_cstat();
 }
 
 //=============================================================================

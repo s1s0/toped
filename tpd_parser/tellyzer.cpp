@@ -1,4 +1,4 @@
-//===========================================================================
+// //===========================================================================
 //                                                                          =
 //   This program is free software; you can redistribute it and/or modify   =
 //   it under the terms of the GNU General Public License as published by   =
@@ -836,6 +836,13 @@ void parsercmd::cmdBLOCK::addID(const char* name, telldata::tell_var* var) {
    VARlocal[name] = var;
 }
 
+void parsercmd::cmdBLOCK::addconstID(const char* name, telldata::tell_var* var, bool initialized) {
+   TELL_DEBUG(addID);
+   VARlocal[name] = var;
+   var->const_declaration();
+   if (initialized) var->update_cstat();
+}
+
 void parsercmd::cmdBLOCK::addlocaltype(const char* ttypename, telldata::tell_type* ntype) {
    assert(TYPElocal.end() == TYPElocal.find(ttypename));
    _next_lcl_typeID = ntype->ID() + 1;
@@ -876,10 +883,12 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::type
    return NULL;
 }
 
-telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype loc) {
+telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype loc)
+{
    if (ID & telldata::tn_listmask) return(new telldata::ttlist(ID));
    else
-   switch (ID) {
+   switch (ID)
+   {
       case   telldata::tn_real: return(new telldata::ttreal());
       case    telldata::tn_int: return(new telldata::ttint());
       case   telldata::tn_bool: return(new telldata::ttbool());
@@ -888,7 +897,8 @@ telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype
       case    telldata::tn_bnd: return(new telldata::ttbnd());
       case telldata::tn_string: return(new telldata::ttstring());
       case telldata::tn_layout: return(new telldata::ttlayout());
-      default: {
+      default:
+      {
          const telldata::tell_type* utype = getTypeByID(ID);
          if (NULL == utype) tellerror("Bad type specifier", loc);
          else return (new telldata::user_struct(utype));
@@ -1674,6 +1684,11 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
    if (!lval)
    {
       tellerror("Lvalue undefined in assign statement", loc);
+      return telldata::tn_void;
+   }
+   else if (lval->constant())
+   {
+      tellerror("Constant lvalue can't be changed", loc);
       return telldata::tn_void;
    }
    telldata::typeID lvalID = lval->get_type();

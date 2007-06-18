@@ -440,6 +440,7 @@ namespace  parsercmd {
       virtual bool               addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype);
       virtual bool               addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype);
       void                       addID(const char*, telldata::tell_var*);
+      void                       addconstID(const char*, telldata::tell_var*, bool initialized);
       void                       addlocaltype(const char*, telldata::tell_type*);
       telldata::tell_type*       requesttypeID(char*&);
       const telldata::tell_type* getTypeByName(char*&) const;
