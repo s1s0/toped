@@ -45,6 +45,7 @@
 #include "../tpd_bidfunc/tpdf_add.h"
 #include "../tpd_bidfunc/tpdf_select.h"
 #include "../tpd_bidfunc/tllf_list.h"
+#include "../tpd_bidfunc/tpdf_get.h"
 
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
@@ -82,6 +83,9 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    //-----------------------------------------------------------------------------------------------------------
    mblock->addFUNC("length"           ,(new                   tellstdfunc::lstLENGTH(telldata::tn_int, false)));
    mblock->addFUNC("abs"              ,(new                     tellstdfunc::stdABS(telldata::tn_real, false)));
+   mblock->addFUNC("getlaytype"       ,(new               tellstdfunc::stdGETLAYTYPE(telldata::tn_int, false)));
+   mblock->addFUNC("getlaytext"       ,(new         tellstdfunc::stdGETLAYTEXTSTR(telldata::tn_string, false)));
+   mblock->addFUNC("getlayref"        ,(new          tellstdfunc::stdGETLAYREFSTR(telldata::tn_string, false)));
    //-----------------------------------------------------------------------------------------------------------
    // toped build-in functions
    //-----------------------------------------------------------------------------------------------------------

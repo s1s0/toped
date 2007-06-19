@@ -113,7 +113,7 @@ namespace laydata {
       SH_STATUS            status() const {return _status;};
       virtual word         numpoints() const = 0;
       virtual             ~tdtdata(){}; 
-      virtual word         ltype() = 0;
+      virtual word         ltype() const = 0;
    protected:
       virtual void        select_points(DBbox&, SGBitSet*) = 0;
       virtual void        unselect_points(DBbox&, SGBitSet*) = 0;
@@ -152,7 +152,7 @@ namespace laydata {
       void                 polycut(pointlist&, shapeList**);
 //      tdtdata*             polymerge(tdtdata*);
       const pointlist      shape2poly() const;
-      word                 ltype() {return _lmbox;}
+      word                 ltype() const {return _lmbox;}
    protected:
       void                 select_points(DBbox&, SGBitSet*);
       void                 unselect_points(DBbox&, SGBitSet*);
@@ -193,7 +193,7 @@ namespace laydata {
       void                 polycut(pointlist&, shapeList**);
 //      tdtdata*             polymerge(tdtdata*);
       const pointlist      shape2poly() const {return _plist;};
-      word                 ltype() {return _lmpoly;}
+      word                 ltype() const {return _lmpoly;}
 //   protected:
    private:
       void                 select_points(DBbox&, SGBitSet*);
@@ -233,7 +233,7 @@ namespace laydata {
       void                 polycut(pointlist&, shapeList**){};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
-      word                 ltype() {return _lmwire;}
+      word                 ltype() const {return _lmwire;}
 //   protected:   
    private:
       void                 precalc(pointlist&, _dbl_word) const;
@@ -287,7 +287,7 @@ namespace laydata {
       void                 objFlip() {_translation.FlipY(0.0);}
       void                 objRotate() {_translation.Rotate( 90.0);}
       virtual ArrayProperties arrayprops() const {return ArrayProperties();}
-      virtual word         ltype() {return _lmref;}
+      virtual word         ltype() const {return _lmref;}
    protected:
       void                 select_points(DBbox&, SGBitSet*) {};
       void                 unselect_points(DBbox&, SGBitSet*) {return;};
@@ -325,7 +325,7 @@ namespace laydata {
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       void                 ungroup(tdtdesign*, tdtcell*, atticList*);
       ArrayProperties      arrayprops() const {return _arrprops;}
-      word                 ltype() {return _lmaref;}
+      word                 ltype() const {return _lmaref;}
    private:
       ArrayProperties      _arrprops;
    };
@@ -362,7 +362,8 @@ namespace laydata {
       const pointlist      shape2poly() const {return pointlist();};
       void                 objFlip() {_translation.FlipY(0.0);}
       void                 objRotate() {_translation.Rotate( 90.0);}
-      word                 ltype() {return _lmtext;}
+      word                 ltype() const {return _lmtext;}
+      const std::string    text() const {return _text;}
    protected:
       void                 select_points(DBbox&, SGBitSet*) {return;};
       void                 unselect_points(DBbox&, SGBitSet*) {return;};

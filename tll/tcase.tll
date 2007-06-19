@@ -294,6 +294,32 @@ void factotest()
    } until (i < 10)      
 }
 
+void all_texts()
+{
+   selectmask(_lmtext);
+   layout list all_t = select_all();
+   echo("Number of selected text objects");
+   echo(length(all_t));   
+   foreach(layout curt; all_t)
+   {
+      echo(getlaytext(curt));
+   };
+   unselect_all();
+}
+
+void all_refs()
+{
+   selectmask(_lmref);
+   layout list all_t = select_all();
+   echo("Number of selected reference objects");
+   echo(length(all_t));   
+   foreach(layout curt; all_t)
+   {
+      echo(getlayref(curt));
+   };
+   unselect_all();
+}
+
 newcell("Fcell");
 opencell("Fcell");
 point list pl1 =
