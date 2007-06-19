@@ -335,14 +335,16 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
 
 void DataCenter::GDSparse(std::string filename) 
 {
-   lockGDS(false);
-   if (_GDSDB) 
+   if (lockGDS(false))
    {
+      
       std::string news = "Removing existing GDS data from memory...";
       tell_log(console::MT_WARNING,news);
       GDSclose();
+      unlockGDS();
    }
-   // parse the GDS file
+   // parse the GDS file - don't forget to lock the GDS mutex here!
+   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    _GDSDB = new GDSin::GDSFile(filename.c_str());
    if (_GDSDB->status())
    {
@@ -353,12 +355,19 @@ void DataCenter::GDSparse(std::string filename)
 }
 
 void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over) {
-   lockGDS();
+   if (NULL == lockGDS())
+   {
+      std::string news = "No GDS data in memory. Parse GDS file first";
+      tell_log(console::MT_ERROR,news);
+   }
+   {
+      // Lock the DB here manually. Otherwise the cell browser is going mad
       GDSin::gds2ted converter(_GDSDB, _TEDDB);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.structure(CN->c_str(), recur, over);
       _TEDDB->modified = true;
-   unlockGDS();
+      unlockGDS();
+   }
 }
 
 void DataCenter::GDSclose() {
@@ -427,11 +436,7 @@ GDSin::GDSFile* DataCenter::lockGDS(bool throwexception)
    }
    else {
       if (throwexception) throw EXPTNactive_GDS();
-      else 
-		{
-			while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
-			return NULL;
-		}
+      else return NULL;
    }
 }
 
