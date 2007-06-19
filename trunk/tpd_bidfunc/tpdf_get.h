@@ -35,8 +35,9 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 
-   TELL_STDCMD_CLASSA(stdGETTYPE           )
-   TELL_STDCMD_CLASSA(stdGETSTRING         )
+   TELL_STDCMD_CLASSA(stdGETLAYTYPE     )
+   TELL_STDCMD_CLASSA(stdGETLAYTEXTSTR  )
+   TELL_STDCMD_CLASSA(stdGETLAYREFSTR   )
    TELL_STDCMD_CLASSA_UNDO(stdCHANGESTRING )
 
 }

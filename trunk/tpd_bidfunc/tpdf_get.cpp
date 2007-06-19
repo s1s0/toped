@@ -27,10 +27,73 @@
 
 #include "tpdf_get.h"
 #include <sstream>
-#include "../tpd_DB/datacenter.h"
-#include "../tpd_common/tuidefs.h"
-#include "../tpd_DB/browsers.h"
+//#include "../tpd_DB/datacenter.h"
+//#include "../tpd_common/tuidefs.h"
+//#include "../tpd_DB/browsers.h"
 
-extern DataCenter*               DATC;
-extern console::toped_logfile    LogFile;
+//extern DataCenter*               DATC;
+//extern console::toped_logfile    LogFile;
+extern void tellerror(std::string s);
 
+//=============================================================================
+tellstdfunc::stdGETLAYTYPE::stdGETLAYTYPE(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttlayout()));
+}
+
+int tellstdfunc::stdGETLAYTYPE::execute()
+{
+   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
+   OPstack.push(new telldata::ttint(tx->data()->ltype()));
+   delete tx;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdGETLAYTEXTSTR::stdGETLAYTEXTSTR(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttlayout()));
+}
+
+int tellstdfunc::stdGETLAYTEXTSTR::execute()
+{
+   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
+   if (laydata::_lmtext != tx->data()->ltype())
+   {
+      tellerror("Runtime error.Invalid layout type");
+      delete tx;
+      return EXEC_ABORT;
+   }
+   else
+   {
+      OPstack.push(new telldata::ttstring(static_cast<laydata::tdttext*>(tx->data())->text()));
+      delete tx;
+      return EXEC_NEXT;
+   }
+}
+
+//=============================================================================
+tellstdfunc::stdGETLAYREFSTR::stdGETLAYREFSTR(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttlayout()));
+}
+
+int tellstdfunc::stdGETLAYREFSTR::execute()
+{
+   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
+   if ((laydata::_lmref != tx->data()->ltype()) && (laydata::_lmaref != tx->data()->ltype()))
+   {
+      tellerror("Runtime error.Invalid layout type");
+      delete tx;
+      return EXEC_ABORT;
+   }
+   else
+   {
+      OPstack.push(new telldata::ttstring(static_cast<laydata::tdtcellref*>(tx->data())->cellname()));
+      delete tx;
+      return EXEC_NEXT;
+   }
+}
