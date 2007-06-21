@@ -756,3 +756,89 @@ int tellstdfunc::stdCHANGEREF::execute()
 }
 
 
+//=============================================================================
+tellstdfunc::stdCHANGESTRING::stdCHANGESTRING(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+}
+
+void tellstdfunc::stdCHANGESTRING::undo_cleanup()
+{
+/*   telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete pl;
+   delete pl1;*/
+}
+
+void tellstdfunc::stdCHANGESTRING::undo()
+{
+/*   TEUNDO_DEBUG("ungroup() CHANGEREF");
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      // first save the list of all currently selected components
+      laydata::selectList *savelist = ATDB->copy_selist();
+      // now unselect all
+      ATDB->unselect_all();
+      // get the list of new references from the UNDO stack
+      telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      // select them ...
+      ATDB->select_fromList(get_ttlaylist(pl));
+      //... and delete them cleaning up the memory (don't store in the Attic)
+      ATDB->delete_selected(NULL);
+      // now get the list of the old cell ref's from the UNDO stack
+      telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      // and add them to the target cell
+      ATDB->addlist(get_shlaylist(pl1)); 
+      // select the restored cell refs
+      ATDB->select_fromList(get_ttlaylist(pl1)); 
+      // now restore selection
+      ATDB->select_fromList(savelist);
+   DATC->unlockDB();
+   // finally - clean-up behind
+   delete pl;
+   delete pl1;
+   UpdateLV();*/
+}
+
+int tellstdfunc::stdCHANGESTRING::execute()
+{
+//         UNDOcmdQ.push_front(this);
+   std::string newstring = getStringValue();
+   laydata::atticList* fha = new laydata::atticList();
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      // first save the list of all currently selected components ...
+      laydata::selectList* savelist = ATDB->copy_selist();
+      // ... and push it in the UNDO stack
+      UNDOPstack.push_front(make_ttlaylist(savelist));
+      // get a list of selected texts only
+      laydata::selectList* texts4u = filter_selist(savelist, laydata::_lmtext);
+      // now unselect all ...
+      ATDB->unselect_all();
+      // ... and select back only text shapes
+      ATDB->select_fromList(texts4u);
+      // delete them from the DB - get back the list of deleted shapes.
+      ATDB->delete_selected(fha);
+      // save the deleted shapes in the UNDO data stack
+      UNDOPstack.push_front(make_ttlaylist(fha));
+      //
+      replace_str(fha, newstring);
+      //
+      ATDB->addlist(fha);
+   DATC->unlockDB();
+
+   return EXEC_NEXT;
+}
+/*   laydata::selectList* texts4u = filter_selected(laydata::_lmtext);
+   if (texts4u->empty())
+   {
+      tell_log(console::MT_ERROR,"No text objetcs selected");
+   }
+   else
+   {
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+         laydata::atticList* undol2 = ATDB->changestring(texts4u, newstring);
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "();"; LogFile.flush();
+      RefreshGL();
+   }
+  delete texts4u;*/

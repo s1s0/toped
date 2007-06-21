@@ -1969,6 +1969,13 @@ laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata(), _overlap(TP())
    _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
 }
 
+void laydata::tdttext::replace_str(std::string newstr)
+{
+   _text = newstr;
+   float minx, miny, maxx, maxy;
+   glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
+   _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
+}
 
 void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
