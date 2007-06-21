@@ -173,6 +173,51 @@ laydata::atticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
    return shapesel;
 }
 
+
+/** Filters shapesel using the mask. Returns new list, containing copy of
+unfiltered components
+*/
+laydata::selectList* tellstdfunc::filter_selist(const laydata::selectList* shapesel, word mask)
+{
+   laydata::selectList* filtered = new laydata::selectList();
+
+   for (laydata::selectList::const_iterator CL = shapesel->begin();
+                                            CL != shapesel->end(); CL++)
+   {
+      laydata::dataList* ssl = new laydata::dataList();
+      laydata::dataList* lslct = CL->second;
+      for (laydata::dataList::const_iterator CI = lslct->begin();
+                                             CI != lslct->end(); CI++)
+      {
+         if (mask & CI->first->ltype())
+         {
+            SGBitSet* pntl = NULL;
+            if (CI->second) pntl = new SGBitSet(CI->second);
+            ssl->push_back(laydata::selectDataPair(CI->first,pntl));
+         }
+      }
+      if    (ssl->empty()) delete ssl;
+      else                 (*filtered)[CL->first] = ssl;
+   }
+   return filtered;
+}
+
+//=============================================================================
+void tellstdfunc::replace_str(laydata::atticList* shapesel, std::string newstr)
+{
+   for (laydata::atticList::iterator CL = shapesel->begin();
+                                            CL != shapesel->end(); CL++)
+   {
+      laydata::shapeList* lslct = CL->second;
+      for (laydata::shapeList::iterator CI = lslct->begin();
+                                             CI != lslct->end(); CI++)
+      {
+         assert(laydata::_lmtext == (*CI)->ltype());
+         static_cast<laydata::tdttext*>(*CI)->replace_str(newstr);
+      }
+   }
+}
+
 //=============================================================================
 void tellstdfunc::UpdateLV()
 {

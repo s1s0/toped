@@ -153,6 +153,8 @@ namespace tellstdfunc {
    void                 gridON(byte No, bool status);
    void                 updateLayerDefinitions(laydata::tdtdesign*, nameList&);
    void                 initFuncLib(wxFrame*, wxWindow*);
+   laydata::selectList* filter_selist(const laydata::selectList*, word mask);
+   void                 replace_str(laydata::atticList*, std::string);
 }
 
 

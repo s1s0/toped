@@ -364,6 +364,7 @@ namespace laydata {
       void                 objRotate() {_translation.Rotate( 90.0);}
       word                 ltype() const {return _lmtext;}
       const std::string    text() const {return _text;}
+      void                 replace_str(std::string newstr);
    protected:
       void                 select_points(DBbox&, SGBitSet*) {return;};
       void                 unselect_points(DBbox&, SGBitSet*) {return;};
