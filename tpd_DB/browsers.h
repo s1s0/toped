@@ -262,6 +262,7 @@ namespace browsers {
       //Call when other button is selected
       void unselect(void);
       void select(void);
+		void hideLayer(bool hide);
 
       
    private:
@@ -316,6 +317,7 @@ namespace browsers {
                                                                   long style = 0);
       virtual          ~browserTAB();// {};
       topedlay_list*    TDTlayers() const    {return _TDTlayers->layerlist();};
+		LayerBrowser2*    TDTlayers2() const   {return _layers;};
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
       word              TDTSelectedLayNo()   {return _TDTlayers->getFirstSelected();}
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};

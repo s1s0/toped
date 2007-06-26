@@ -866,12 +866,24 @@ void browsers::browserTAB::OnTELLclearGDStab() {
 
 //==============================================================================
 void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool status) {
-   int* bt = new int(btype);
+   //???Remove it 
+	int* bt = new int(btype);
    wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
    eventLAYER_STATUS.SetExtraLong(layno);
    eventLAYER_STATUS.SetInt(status);
    eventLAYER_STATUS.SetClientData((void*) bt);
    wxPostEvent(Browsers->TDTlayers(), eventLAYER_STATUS);
+
+
+	int* bt1 = new int(btype);
+   wxCommandEvent eventLAYER_STATUS2(wxEVT_CMD_BROWSER);
+   eventLAYER_STATUS2.SetExtraLong(status);
+   eventLAYER_STATUS2.SetInt(*bt1);
+	word *laynotemp = new word(layno);
+   eventLAYER_STATUS2.SetClientData((void*) laynotemp);
+	wxPostEvent(Browsers->TDTlayers2(), eventLAYER_STATUS2);
+
+
 }
 
 void browsers::layer_add(const std::string name, const word layno) {
@@ -1108,7 +1120,7 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    int h,w;
    DC.GetTextExtent(infoString.c_str(), &w, &h);
 
-   DC.DrawRectangle(5*fontWidth, 1, 40, 49);
+   DC.DrawRectangle(5*fontWidth, 1, 40, 29);
    std::string caption = _layer->name();
    DC.DrawText(caption.c_str(), 5*fontWidth+40, 0);
    
@@ -1166,15 +1178,23 @@ void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
 
 void browsers::LayerButton::OnMiddleClick(wxMouseEvent &event)
 {
-   _hidden = !_hidden;
-
+   //_hidden = !_hidden;
+   hideLayer(!_hidden);
    wxString cmd;
    cmd << "hidelayer("<<_layer->layno()<<", ";
    if (_hidden) cmd<<"true"<<");";
    else cmd <<"false"<<");";
    Console->parseCommand(cmd);
 
-   preparePicture(*_picture);
+   //preparePicture(*_picture);
+   //SetBitmapLabel(*_picture);
+
+}
+
+void browsers::LayerButton::hideLayer(bool hide)
+{
+	_hidden = hide;
+	preparePicture(*_picture);
    SetBitmapLabel(*_picture);
 
 }
@@ -1226,7 +1246,15 @@ void browsers::LayerBrowser2::OnCommand(wxCommandEvent& event)
    {
 
      // case BT_LAYER_DEFAULT:_layerlist->defaultLayer((word)event.GetExtraLong(), (word)event.GetInt());break;
-     // case    BT_LAYER_HIDE:_layerlist->hideLayer((word)event.GetExtraLong(),event.IsChecked());break;
+		case    BT_LAYER_HIDE:
+			{
+				word *layno = (word*)event.GetClientData();
+				bool status = event.GetExtraLong();
+				//_buttonMap[layno]->hideLayer(event.IsChecked());
+				_buttonMap[*layno]->hideLayer(status);
+				break;
+			}
+			//_layerlist->hideLayer((word)event.GetExtraLong(),event.IsChecked());break;
      // case    BT_LAYER_LOCK:_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());break;
       case     BT_LAYER_SELECT:
          {
