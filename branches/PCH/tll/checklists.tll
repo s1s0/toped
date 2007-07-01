@@ -1,0 +1,108 @@
+void Indexing (int list boza)
+{
+   echo(boza[0]);
+   echo(boza[1]);
+   echo(boza[2]);
+}
+
+void CheckLists() {
+   point list p1 = {{0,0},{2,0},{2,1},{1,1},{1,2},{0,2}};
+   real  a0 = 11;
+   real  a1 = 12;
+   real  a2 = 13;
+   real  a3 = 14;
+   point list p2;
+   p2 = {{a0,a0},{a3,a0},{a3,a3},{a1,a3},{a1,a1},{a2,a1},{a2,a2},{a1,a2},{a1,a3},{a0,a3}};
+//   usinglayer(1);
+//   addpoly(p1);
+//   addpoly(p2);
+//   point list p3 = {{20,10}, {22,10}, {22,12}, {24,12}, {26,14}, {28,14}, {30,12}, {30,10}};
+//   usinglayer(8);
+//   addwire(p3,1);
+//   addwire({{-5,0},{-5,40}, {40,40}, {40,0}},2);
+//   addwire({{-5,0},{40,0}},2);
+//   addwire({{35,5},{35,30}},2);
+//
+
+
+   Indexing({5,4,3,2,1});
+//   Indexing({1,2});
+   
+   echo("===foreach external list, external iterator==");
+   point current;
+   foreach (current;p2)
+   {
+      echo(current);
+      echo("------------");
+   };
+
+   echo("===list components as lvalues==");
+   p2[0] = p1[5];
+   p2[1] = p1[4];
+   p2[2] = p1[3];
+   p2[3] = {100,90};
+   
+   echo("===foreach external list, local iterator==");
+   foreach (point boza; p2)
+   {
+      echo(boza);
+      echo("------------");
+   };
+      
+   echo("===foreach local list, local iterator==");
+   foreach (int boza; int list {5,4,3,2,1})
+   {
+      echo(boza);
+      echo("------------");
+   };
+
+   int list alst = {1,2,3,4,5};
+   echo("===original list:==");
+   echo(alst);
+   echo("=== 0 at the beginning:==");
+   alst[+:] = 0;  // push front
+   // alst[+:0] = 0; // should produce the same result as above
+   echo(alst);
+   echo("=== 6 at the end:==");
+   alst[:+] = 6;  // push back
+   // alst[5:+] = 6; // should produce the same result as above
+   echo(alst);
+   echo("=== 33 after the component with index 3:==");
+   alst[3:+] = 33; // push after the index
+   echo(alst);
+   echo("=== -33 before the component with index 3:==");
+   alst[+:3] = -33; // push before the index
+   echo(alst);
+
+   echo("=== remove component with index 3");
+   echo(alst[-:3]); // remove the index
+   echo(alst);
+   echo("=== remove component with index 4");
+   echo(alst[4:-]); // remove the index
+   echo(alst);
+   echo("=== remove first");
+   echo(alst[-:]); // remove first
+   echo(alst);
+   echo("=== remove last");
+   echo(alst[:-]); // remove last
+   echo(alst);
+   echo("=== first/last alone");
+   alst[-:]; alst[+:] = -100;
+   alst[:-]; alst[:+] =  100;
+   echo(alst);
+   echo("=== index expressions");
+   alst[length(alst) - 1] = length(alst);
+   alst[(length(alst) - alst[length(alst) - 1])] = 100; 
+   echo(alst);
+   echo("=== slices ...");
+   int list blst;
+   echo("=== get first 3 ");
+   echo(blst = alst[:-3]);
+   echo("=== put last 2 of them at the back");
+   alst[:+] = blst[2-:];
+   echo(alst);
+   echo("=== put second pair in front (recursive slicing)");
+   alst[:+] = alst[:-2];
+   echo(alst);
+}
+
