@@ -98,7 +98,7 @@ void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, co
    LineList noni_list;
    nonius(short_mark, long_mark, _step, noni_list);
 
-   glColor4f(1, 1, 1, 0.7); // gray
+   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
    glDisable(GL_POLYGON_STIPPLE);
 //   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
    glBegin(GL_LINES);glLineWidth(2);
@@ -415,14 +415,14 @@ void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_m
       case  cell_mark:if (_cellmarks_hidden) return;
                       else
                       {
-                         glColor4f(1.0, 1.0, 1.0, 0.8);
+                         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
                          the_mark = cell_mark_bmp;
                          break;
                       }
       case array_mark:if (_cellmarks_hidden) return;
                       else
                       {
-                         glColor4f(1.0, 1.0, 1.0, 0.8);
+                         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
                          the_mark = array_mark_bmp;
                          break;
                       }

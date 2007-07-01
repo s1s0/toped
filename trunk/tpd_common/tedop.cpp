@@ -277,8 +277,8 @@ bool tedop::SweepLine::coincideOK( plysegment* line, plysegment* cross, float lp
 }
 
 float tedop::SweepLine::getLambda( const TP* p1, const TP* p2, const TP* p) {
-   float denomX = p2->x() - p->x();
-   float denomY = p2->y() - p->y();
+   float denomX = (float) (p2->x() - p->x());
+   float denomY = (float) (p2->y() - p->y());
    float lambda;
    if      (0 != denomX) lambda = (p->x() - p1->x()) / denomX;
    else if (0 != denomY) lambda = (p->y() - p1->y()) / denomY;

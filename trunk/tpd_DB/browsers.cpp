@@ -596,7 +596,7 @@ void browsers::TDTbrowser::OnCommand(wxCommandEvent& event) {
           *((wxString*)event.GetClientData()), (int)event.GetExtraLong());
           delete ((wxString*)event.GetClientData()); break;
       case BT_CELL_REMOVE:OnTELLremovecell(event.GetString(), 
-          *((wxString*)event.GetClientData()), (bool)event.GetExtraLong());
+          *((wxString*)event.GetClientData()), (0 != event.GetExtraLong()));
           delete ((wxString*)event.GetClientData()); break;
 
    }   

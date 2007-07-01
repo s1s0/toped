@@ -1951,7 +1951,7 @@ DBbox laydata::tdtcellaref::clear_overlap() const {
 // class tdttext
 //-----------------------------------------------------------------------------
 laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata(), _overlap(TP()) {
-   for (int charnum = 0; charnum < text.length(); charnum++)
+   for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
    _text = text;
    _translation = trans;

@@ -150,7 +150,7 @@ void GDSin::gds2ted::ref(GDSin::GDSref* wd, laydata::tdtcell* dst) {
                    CTM(wd->GetMagn_point(), 
                    wd->GetMagnification(),
                    wd->GetAngle(),
-                   wd->GetReflection()),
+                   (0 != wd->GetReflection())),
                    false
       );
    }
@@ -172,8 +172,10 @@ void GDSin::gds2ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst) {
                                  static_cast<word>(wd->Get_rownum()));
       dst->addcellaref(_dst_lib,
          striter, 
-         CTM(wd->GetMagn_point(), wd->GetMagnification(), 
-                                          wd->GetAngle(),wd->GetReflection()),
+         CTM( wd->GetMagn_point(), 
+              wd->GetMagnification(), 
+              wd->GetAngle(),
+              (0 != wd->GetReflection()) ),
          arrprops,
          false
       );
@@ -193,7 +195,8 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
    wl->addtext(wd->GetText(), 
                CTM(wd->GetMagn_point(), 
                    wd->GetMagnification() / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
-                   wd->GetAngle(),wd->GetReflection()));
+                   wd->GetAngle(),
+                   (0 != wd->GetReflection())));
 }
 
 //-----------------------------------------------------------------------------

@@ -70,7 +70,7 @@ void tui::StatusLine::update(const int4b width, const CTM& _LayCTM)
 
 void tui::StatusLine::draw()
 {
-   glColor4f(1,1,1,.7);
+   glColor4f((GLfloat)1,(GLfloat)1,(GLfloat)1,(GLfloat)0.7);
    glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
    glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
    glRecti(_sb_TR.x(), _sb_TR.y(), _sb_BL.x(), _sb_BL.y());
@@ -346,7 +346,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
 // }
 
 void tui::LayoutCanvas::wnd_paint() {
-   glColor4f(0.7, 0.7, 0.7, 0.4); // gray
+   glColor4f((GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.4); // gray
    glDisable(GL_POLYGON_STIPPLE);
    glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
    glRecti(presspoint.x(),presspoint.y(), n_ScrMARK.x(), n_ScrMARK.y());

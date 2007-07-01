@@ -645,7 +645,7 @@ void glfDrawSolidSymbol(char s)
 	float *vp;        /* Vertex pointer */
 	int i, j;
 	float x, y;
-	float temp_color[4];
+//	float temp_color[4];
 
 	if ((curfont<0) || (fonts[curfont] == NULL)) return;
   
