@@ -655,9 +655,6 @@ void tui::TopedFrame::initView() {
                                wxDefaultPosition, wxDefaultSize,
                                wxSW_3D | wxCLIP_CHILDREN);
    //the canvas
-#ifdef __WXMSW__
-   int *gl_attrib = NULL;
-#else
    int gl_attrib[20] = { WX_GL_RGBA             ,
                          WX_GL_MIN_RED          , 2,
                          WX_GL_MIN_GREEN        , 2,
@@ -669,12 +666,7 @@ void tui::TopedFrame::initView() {
                          WX_GL_MIN_ACCUM_ALPHA  , 2,
 //                         WX_GL_DEPTH_SIZE    , 1,
                          WX_GL_DOUBLEBUFFER     ,
-#  ifdef __WXMAC__
-            GL_NONE };
-#  else
-            None };
-#  endif
-#endif
+                         GL_NONE };
    _laycanvas = new LayoutCanvas(mS_canvas, gl_attrib);
    _cmdline = new console::ted_cmd(mS_command, _laycanvas);
    _browsers->set_tellParser( _cmdline ) ;
