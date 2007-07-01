@@ -540,7 +540,7 @@ void tui::layset_sample::setLine(const layprop::LineSettings* line)
          if (((pattern & mask) > 0) ^ current_pen)
          {
             _dashes.push_back(pixels * line->patscale());
-            current_pen = (pattern & mask);
+            current_pen = (0 != (pattern & mask));
             pixels = 1;
          }
          else
@@ -782,13 +782,13 @@ void tui::defineLayer::OnLineChanged(wxCommandEvent& cmdevent)
 
 void tui::defineLayer::OnSelectedChanged(wxCommandEvent& cmdevent)
 {
-   bool selected = cmdevent.GetInt();
+   bool selected = (0 != cmdevent.GetInt());
    _sample->setSelected(selected);
    _sample->Refresh();
 }
 void tui::defineLayer::OnDefaultColor(wxCommandEvent& cmdevent)
 {
-   bool selected = cmdevent.GetInt();
+   bool selected = (0 != cmdevent.GetInt());
    _colors->Enable(!selected);
    if (selected)
       _sample->setColor(DATC->getColor(std::string("")));
@@ -799,7 +799,7 @@ void tui::defineLayer::OnDefaultColor(wxCommandEvent& cmdevent)
 
 void tui::defineLayer::OnDefaultPattern(wxCommandEvent& cmdevent)
 {
-   bool selected = cmdevent.GetInt();
+   bool selected = (0 != cmdevent.GetInt());
    _fills->Enable(!selected);
    const byte* fill;
    if (selected)
@@ -812,7 +812,7 @@ void tui::defineLayer::OnDefaultPattern(wxCommandEvent& cmdevent)
 
 void tui::defineLayer::OnDefaultLine(wxCommandEvent& cmdevent)
 {
-   bool selected = cmdevent.GetInt();
+   bool selected = (0 != cmdevent.GetInt());
    _lines->Enable(!selected);
    const layprop::LineSettings* line;
    if (selected)

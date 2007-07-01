@@ -333,7 +333,7 @@ void SGBitSet::check_neighbours_set(bool wire)
 bool SGBitSet::check(word  bit) const
 {
    assert(bit <= _size);
-   return (_packet[bit / 8] & (0x01 << (bit % 8)));
+   return (0 != (_packet[bit / 8] & (0x01 << (bit % 8))));
 }
 
 bool SGBitSet::isallclear() const

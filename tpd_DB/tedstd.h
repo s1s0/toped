@@ -120,7 +120,7 @@ namespace laydata {
                            validator() : _status(shp_OK) {};
       bool                 valid()           {return _status < shp_null;};
       byte                 status()          {return _status;};
-      bool                 box()             {return _status & shp_box;};
+      bool                 box()             {return (0 != (_status & shp_box));}
       pointlist&           get_validated()   {return _plist;};
       virtual char*        failtype() = 0;
       virtual tdtdata*     replacement() = 0;

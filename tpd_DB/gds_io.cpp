@@ -253,7 +253,7 @@ void GDSin::GDSrecord::add_int4b(const int4b data)
 void GDSin::GDSrecord::add_ascii(const char* data)
 {  
    word slen = strlen(data);
-   bool compensate = (slen % 2);
+   bool compensate = (0 != (slen % 2));
    word strindex = 0;
    while (strindex < slen)
       record[index++] = data[strindex++];

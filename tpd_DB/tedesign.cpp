@@ -313,7 +313,7 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
    if (_tmpdata)
    {
-      glColor4f(1.0, 1.0, 1.0, 0.7);
+      glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.7);
       tmp_stack.push_front(CTM(newp - base,1,0,false));
       _tmpdata->tmp_draw(drawprop, tmp_stack,NULL,true);
    }
