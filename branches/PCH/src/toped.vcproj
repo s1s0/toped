@@ -440,14 +440,6 @@
 				>
 			</File>
 		</Filter>
-		<Filter
-			Name="libs"
-			>
-		</Filter>
-		<Filter
-			Name="FlexBison Files"
-			>
-		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
