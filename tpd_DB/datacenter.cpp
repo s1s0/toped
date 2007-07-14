@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <sstream>
 #include "datacenter.h"
 #include "../tpd_common/outbox.h"

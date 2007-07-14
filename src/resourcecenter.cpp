@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <sstream>
 #include "resourcecenter.h"
 

@@ -24,6 +24,8 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+
+#include "tpdph.h"
 #include <sstream>
 #include <math.h>
 #include "tllf_list.h"

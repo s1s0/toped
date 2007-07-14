@@ -24,6 +24,8 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+
+#include "tpdph.h"
 #ifdef WIN32
 //For GUI application with glf we need "windows.h"
 #include <windows.h>

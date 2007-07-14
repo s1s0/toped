@@ -25,10 +25,12 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <math.h>
 #include <algorithm>
 #include "polycross.h"
 #include "outbox.h"
+#include "avl.h"
 
 //#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
@@ -38,13 +40,13 @@ SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
 //-----------------------------------------------------------------------------
 // The declaratoin of the avl related functions. They are declared originally
 // in avl.h and redeclared here in C++ manner with extern "C" clause
-extern "C" {
-   avl_table* avl_create (avl_comparison_func *, const void *, libavl_allocator *);
-   void avl_destroy (struct avl_table *, avl_item_func *);
-   void **avl_probe (struct avl_table *, void *);
-   void*      avl_delete (avl_table *, const void *);
-   void*      avl_t_first (avl_traverser *, avl_table *);
-}
+//extern "C" {
+//   avl_table* avl_create (avl_comparison_func *, const void *, libavl_allocator *);
+//   void avl_destroy (struct avl_table *, avl_item_func *);
+//   void **avl_probe (struct avl_table *, void *);
+//   void*      avl_delete (avl_table *, const void *);
+//   void*      avl_t_first (avl_traverser *, avl_table *);
+//}
 
 //==============================================================================
 /**

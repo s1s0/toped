@@ -25,6 +25,8 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+
+#include "tpdph.h"
 #include <time.h>
 #include <string>
 #include <wx/log.h>

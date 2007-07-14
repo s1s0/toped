@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include "tpdf_common.h"
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_parser/ted_prompt.h"

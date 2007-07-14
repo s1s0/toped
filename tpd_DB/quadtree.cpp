@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include "quadtree.h"
 #include "tedat.h"
 #include "viewprop.h"

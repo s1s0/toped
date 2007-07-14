@@ -24,6 +24,7 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+
 #include <string>
 #include "ted_prompt.h"
 #include <wx/regex.h>

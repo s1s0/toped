@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <wx/sizer.h>
 #include <wx/filename.h>
 #include <wx/image.h>

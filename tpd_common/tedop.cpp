@@ -25,22 +25,24 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <math.h>
 #include <algorithm>
 #include "tedop.h"
+#include "avl.h"
 
 //-----------------------------------------------------------------------------
 // The declaratoin of the avl related functions. They are declared originally
 // in avl.h and redeclared here in C++ manner with extern "C" clause
-extern "C" {
-   avl_table *avl_create (avl_comparison_func *, void *, libavl_allocator *);
-   void       avl_destroy (struct avl_table *, avl_item_func *);
-   void      *avl_t_next (avl_traverser *);
-   void      *avl_t_prev (avl_traverser *);
-   void      *avl_delete (avl_table *, const void *);
-   void      *avl_t_find (avl_traverser *, avl_table *, void *);
-   void      *avl_t_insert (avl_traverser *, avl_table *, void *);
-}   
+//extern "C" {
+//   avl_table *avl_create (avl_comparison_func *, void *, libavl_allocator *);
+//   void       avl_destroy (struct avl_table *, avl_item_func *);
+//   void      *avl_t_next (avl_traverser *);
+//   void      *avl_t_prev (avl_traverser *);
+//   void      *avl_delete (avl_table *, const void *);
+//   void      *avl_t_find (avl_traverser *, avl_table *, void *);
+//   void      *avl_t_insert (avl_traverser *, avl_table *, void *);
+//}   
 
 //==============================================================================
 /*! Determines the lexicographical order of two points comparing X first. 

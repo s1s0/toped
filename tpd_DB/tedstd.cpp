@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <math.h>
 #include <sstream>
 #include "tedstd.h"

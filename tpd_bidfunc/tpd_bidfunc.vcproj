@@ -44,7 +44,8 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				PrecompiledHeaderFile=".\Debug/TPD_bidfunc.pch"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
@@ -106,6 +107,8 @@
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				WarningLevel="3"
 			/>
 			<Tool
@@ -186,6 +189,26 @@
 				RelativePath=".\tpdf_select.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\tpdph.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -230,6 +253,10 @@
 			</File>
 			<File
 				RelativePath=".\tpdf_select.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tpdph.h"
 				>
 			</File>
 		</Filter>

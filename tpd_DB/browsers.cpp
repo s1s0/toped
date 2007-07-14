@@ -28,6 +28,7 @@
 //      Comments :
 //===========================================================================
 
+#include "tpdph.h"
 #include "browsers.h"
 #include "viewprop.h"
 #include "../tpd_common/tuidefs.h"

@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include "tpdf_get.h"
 #include <sstream>
 //#include "../tpd_DB/datacenter.h"
