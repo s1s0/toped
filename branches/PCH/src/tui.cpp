@@ -27,6 +27,7 @@
 //      Comments :
 //===========================================================================
 
+#include "tpdph.h"
 #include <math.h>
 #include <wx/colordlg.h>
 #include <wx/regex.h>

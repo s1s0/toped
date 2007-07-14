@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <sstream>
 #include "../tpd_common/ttt.h"
 #include "tedesign.h"

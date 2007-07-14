@@ -47,6 +47,8 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Release/tpd_common.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
@@ -115,11 +117,14 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/Tp&quot;../tpd_common/glf.c&quot;"
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Debug/tpd_common.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
@@ -188,6 +193,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						PreprocessorDefinitions=""
+						CompileAs="2"
 					/>
 				</FileConfiguration>
 			</File>
@@ -273,6 +279,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tpdph.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="ttt.cpp"
 				>
 				<FileConfiguration
@@ -319,6 +337,10 @@
 			</File>
 			<File
 				RelativePath="tedop.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tpdph.h"
 				>
 			</File>
 			<File

@@ -24,6 +24,8 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+
+#include "tpdph.h"
 #include <wx/wx.h>
 #include <wx/filefn.h>
 #include <wx/filename.h>

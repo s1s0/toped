@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <assert.h>
 #include <sstream>
 #include "logicop.h"

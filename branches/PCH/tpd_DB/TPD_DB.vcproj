@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="windows-1251"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="TPD_DB"
 	ProjectGUID="{7CC90726-FAE0-415A-B2E4-552D1070B4F0}"
+	RootNamespace="TPD_DB"
 	>
 	<Platforms>
 		<Platform
@@ -46,6 +47,8 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Release/TPD_DB.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
@@ -119,6 +122,8 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Debug/TPD_DB.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
@@ -322,6 +327,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tpdph.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="viewprop.cpp"
 				>
 				<FileConfiguration
@@ -384,6 +401,10 @@
 			</File>
 			<File
 				RelativePath="tedstd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tpdph.h"
 				>
 			</File>
 			<File

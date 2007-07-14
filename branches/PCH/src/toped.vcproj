@@ -53,6 +53,8 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Release/toped.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
@@ -148,6 +150,8 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WINDOWS__;__WXMSW__;__WXDEBUG__;WXDEBUG=1;__WIN95__;__WIN32__;WINVER=0x0400;STRICT"
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Debug/toped.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
@@ -288,6 +292,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tpdph.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="tui.cpp"
 				>
 				<FileConfiguration
@@ -324,6 +340,10 @@
 			</File>
 			<File
 				RelativePath="toped.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tpdph.h"
 				>
 			</File>
 			<File

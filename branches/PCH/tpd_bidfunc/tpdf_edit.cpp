@@ -24,6 +24,8 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+
+#include "tpdph.h"
 #include <sstream>
 #include "tpdf_edit.h"
 
