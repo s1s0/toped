@@ -37,7 +37,9 @@
 #include "../ui/red_lamp.xpm"
 #include "../ui/green_lamp.xpm"
 #include "../ui/blue_lamp.xpm"
-
+#ifndef WIN32
+   #include "../ui/toped16x16.xpm"
+#endif
 #if wxCHECK_VERSION(2, 8, 0)
 #define tpdfOPEN wxFD_OPEN
 #define tpdfSAVE wxFD_SAVE
@@ -276,9 +278,7 @@ END_EVENT_TABLE()
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
 {
-#if WIN32
-	SetIcon(wxICON(toped16x16));
-#endif
+   SetIcon(wxICON(toped16x16));
    initView();
 //   initToolBar();
 //   CreateStatusBar();
