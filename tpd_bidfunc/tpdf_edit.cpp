@@ -36,10 +36,10 @@ extern console::toped_logfile    LogFile;
 
 //=============================================================================
 tellstdfunc::stdCOPYSEL::stdCOPYSEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdCOPYSEL::undo_cleanup() {
@@ -77,7 +77,7 @@ int tellstdfunc::stdCOPYSEL::execute() {
 
 //=============================================================================
 tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype, bool eor) :
-      stdCOPYSEL(new parsercmd::argumentLIST,retype,eor)
+      stdCOPYSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdCOPYSEL_D::execute() {
@@ -85,18 +85,18 @@ int tellstdfunc::stdCOPYSEL_D::execute() {
    if (!tellstdfunc::waitGUInput(console::op_copy, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   OPstack.push(new telldata::ttpnt(w->p1().x(), w->p1().y()));
-   OPstack.push(new telldata::ttpnt(w->p2().x(), w->p2().y()));
+   OPstack.push(DEBUG_NEW telldata::ttpnt(w->p1().x(), w->p1().y()));
+   OPstack.push(DEBUG_NEW telldata::ttpnt(w->p2().x(), w->p2().y()));
    delete w;
    return stdCOPYSEL::execute();
 }
 
 //=============================================================================
 tellstdfunc::stdMOVESEL::stdMOVESEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdMOVESEL::undo_cleanup() {
@@ -127,7 +127,7 @@ void tellstdfunc::stdMOVESEL::undo() {
       ATDB->unselect_fromList(get_ttlaylist(added));
       laydata::selectList* fadead[3];
      byte i;
-      for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
+      for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::selectList());
       ATDB->move_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale),fadead);
       //@TODO Here - an internal check can be done - all 3 of the fadead lists
       // MUST be empty, otherwise - god knows what's wrong!
@@ -161,7 +161,7 @@ int tellstdfunc::stdMOVESEL::execute() {
    // This is because of the modify operations
    laydata::selectList* fadead[3];
    byte i;
-   for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
+   for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::selectList());
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->move_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
       // save for undo operations ... 
@@ -178,7 +178,7 @@ int tellstdfunc::stdMOVESEL::execute() {
 
 //=============================================================================
 tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype, bool eor) :
-      stdMOVESEL(new parsercmd::argumentLIST,retype,eor)
+      stdMOVESEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdMOVESEL_D::execute() {
@@ -186,18 +186,18 @@ int tellstdfunc::stdMOVESEL_D::execute() {
    if (!tellstdfunc::waitGUInput(console::op_move, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   OPstack.push(new telldata::ttpnt(w->p1().x(), w->p1().y()));
-   OPstack.push(new telldata::ttpnt(w->p2().x(), w->p2().y()));
+   OPstack.push(DEBUG_NEW telldata::ttpnt(w->p1().x(), w->p1().y()));
+   OPstack.push(DEBUG_NEW telldata::ttpnt(w->p2().x(), w->p2().y()));
    delete w;
    return stdMOVESEL::execute();
 }
 
 //=============================================================================
 tellstdfunc::stdROTATESEL::stdROTATESEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdROTATESEL::undo_cleanup() {
@@ -227,7 +227,7 @@ void tellstdfunc::stdROTATESEL::undo()
       ATDB->unselect_fromList(get_ttlaylist(added));
       laydata::selectList* fadead[3];
       byte i;
-      for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
+      for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::selectList());
       ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
       //@TODO Here - an internal check can be done - all 3 of the fadead lists
       // MUST be empty, otherwise - god knows what's wrong!
@@ -256,14 +256,14 @@ int tellstdfunc::stdROTATESEL::execute() {
    UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real   angle  = getOpValue();
-   UNDOPstack.push_front(new telldata::ttreal(angle));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(angle));
    real DBscale = DATC->DBscale();
    // rotate_selected returns 3 select lists : Failed/Deleted/Added
    // This is because of the box rotation in which case box has to be converted to polygon
    // Failed shapes here should not exist but no explicit check for this
    laydata::selectList* fadead[3];
    byte i;
-   for (i = 0; i < 3; fadead[i++] = new laydata::selectList());
+   for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::selectList());
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
       telldata::ttlist* added = make_ttlaylist(fadead[2]);
@@ -282,9 +282,9 @@ int tellstdfunc::stdROTATESEL::execute() {
 
 //=============================================================================
 tellstdfunc::stdROTATESEL_D::stdROTATESEL_D(telldata::typeID retype, bool eor) :
-      stdROTATESEL(new parsercmd::argumentLIST,retype,eor)
+      stdROTATESEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::stdROTATESEL_D::execute()
@@ -292,7 +292,7 @@ int tellstdfunc::stdROTATESEL_D::execute()
    real   angle  = getOpValue();
    CTM rct;
    rct.Rotate(angle);
-   OPstack.push(new telldata::ttreal(angle));
+   OPstack.push(DEBUG_NEW telldata::ttreal(angle));
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_rotate, &OPstack, "", rct)) return EXEC_ABORT;
    return stdROTATESEL::execute();
@@ -301,9 +301,9 @@ int tellstdfunc::stdROTATESEL_D::execute()
 
 //=============================================================================
 tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdFLIPXSEL::undo_cleanup() {
@@ -338,7 +338,7 @@ int tellstdfunc::stdFLIPXSEL::execute() {
 
 //=============================================================================
 tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
-      stdFLIPXSEL(new parsercmd::argumentLIST,retype,eor)
+      stdFLIPXSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdFLIPXSEL_D::execute() {
@@ -349,9 +349,9 @@ int tellstdfunc::stdFLIPXSEL_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdFLIPYSEL::undo_cleanup() {
@@ -386,7 +386,7 @@ int tellstdfunc::stdFLIPYSEL::execute() {
 
 //=============================================================================
 tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
-      stdFLIPYSEL(new parsercmd::argumentLIST,retype,eor)
+      stdFLIPYSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdFLIPYSEL_D::execute() {
@@ -397,7 +397,7 @@ int tellstdfunc::stdFLIPYSEL_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdDELETESEL::stdDELETESEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdDELETESEL::undo_cleanup() {
@@ -419,7 +419,7 @@ void tellstdfunc::stdDELETESEL::undo() {
 
 int tellstdfunc::stdDELETESEL::execute() {
    UNDOcmdQ.push_front(this);
-   laydata::atticList* sh_delist = new laydata::atticList();
+   laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->delete_selected(sh_delist);
    DATC->unlockDB();   
@@ -431,9 +431,9 @@ int tellstdfunc::stdDELETESEL::execute() {
 
 //=============================================================================
 tellstdfunc::lgcCUTPOLY::lgcCUTPOLY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
 }
 
 void tellstdfunc::lgcCUTPOLY::undo_cleanup() {
@@ -495,7 +495,7 @@ int tellstdfunc::lgcCUTPOLY::execute() {
          //cutpoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,  
          // create and initialize them here
          laydata::atticList* dasao[3];
-         for (byte i = 0; i < 3; dasao[i++] = new laydata::atticList());
+         for (byte i = 0; i < 3; dasao[i++] = DEBUG_NEW laydata::atticList());
          laydata::tdtdesign* ATDB = DATC->lockDB();
             if (ATDB->cutpoly(check.get_validated() ,dasao)) {
                // push the command for undo
@@ -507,7 +507,7 @@ int tellstdfunc::lgcCUTPOLY::execute() {
                telldata::ttlist* shdeleted = make_ttlaylist(dasao[0]);
                // select the shapes to delete & delete them ...
                ATDB->select_fromList(get_ttlaylist(shdeleted));
-               laydata::atticList* sh_delist = new laydata::atticList();
+               laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
                ATDB->delete_selected(sh_delist);
                // ... not forgetting to save them in the undo data stack for undo
                UNDOPstack.push_front(make_ttlaylist(sh_delist));
@@ -537,7 +537,7 @@ int tellstdfunc::lgcCUTPOLY::execute() {
 
 //=============================================================================
 tellstdfunc::lgcCUTPOLY_I::lgcCUTPOLY_I(telldata::typeID retype, bool eor) :
-      lgcCUTPOLY(new parsercmd::argumentLIST,retype,eor)
+      lgcCUTPOLY(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::lgcCUTPOLY_I::execute() {
@@ -552,7 +552,7 @@ int tellstdfunc::lgcCUTPOLY_I::execute() {
 
 //=============================================================================
 tellstdfunc::lgcMERGE::lgcMERGE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 void tellstdfunc::lgcMERGE::undo_cleanup() {
@@ -598,7 +598,7 @@ int tellstdfunc::lgcMERGE::execute() {
       // create and initialize them here
       laydata::atticList* dasao[2];
      byte i;
-      for (i = 0; i < 2; dasao[i++] = new laydata::atticList());
+      for (i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::atticList());
       // create a list of currently selected shapes
       laydata::tdtdesign* ATDB = DATC->lockDB();
          telldata::ttlist* listselected = make_ttlaylist(ATDB->shapesel());
@@ -627,9 +627,9 @@ int tellstdfunc::lgcMERGE::execute() {
 
 //=============================================================================
 tellstdfunc::stdCHANGELAY::stdCHANGELAY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdCHANGELAY::undo_cleanup()
@@ -666,7 +666,7 @@ int tellstdfunc::stdCHANGELAY::execute()
       // prepare undo stacks
       UNDOcmdQ.push_front(this);
       word target = getWordValue();
-      UNDOPstack.push_front(new telldata::ttint(target));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(target));
       UNDOPstack.push_front(make_ttlaylist(listselected));
       ATDB = DATC->lockDB();
          ATDB->transferLayer(target);
@@ -678,9 +678,9 @@ int tellstdfunc::stdCHANGELAY::execute()
 
 //=============================================================================
 tellstdfunc::stdCHANGEREF::stdCHANGEREF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdCHANGEREF::undo_cleanup()
@@ -699,7 +699,7 @@ void tellstdfunc::stdCHANGEREF::undo()
       laydata::selectList *savelist = ATDB->copy_selist();
       // now unselect all
       ATDB->unselect_all();
-      // get the list of new references from the UNDO stack
+      // get the list of DEBUG_NEW references from the UNDO stack
       telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // select them ...
       ATDB->select_fromList(get_ttlaylist(pl));
@@ -760,9 +760,9 @@ int tellstdfunc::stdCHANGEREF::execute()
 
 //=============================================================================
 tellstdfunc::stdCHANGESTRING::stdCHANGESTRING(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdCHANGESTRING::undo_cleanup()
@@ -806,7 +806,7 @@ int tellstdfunc::stdCHANGESTRING::execute()
 {
 //         UNDOcmdQ.push_front(this);
    std::string newstring = getStringValue();
-   laydata::atticList* fha = new laydata::atticList();
+   laydata::atticList* fha = DEBUG_NEW laydata::atticList();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       // first save the list of all currently selected components ...
       laydata::selectList* savelist = ATDB->copy_selist();

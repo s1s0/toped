@@ -70,18 +70,18 @@ tui::getSize::getSize(wxFrame *parent, wxWindowID id, const wxString &title,
    else precision = fmod
    if (fmod(1/DATC->UU(), (float)View.getstep()) != 0)
       precision = */
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
-   wxBoxSizer *spin_sizer = new wxBoxSizer( wxHORIZONTAL );
-   _wxText = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   _wxText = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    spin_sizer->Add(10,10,0);
    spin_sizer->Add(_wxText, 1, wxEXPAND, 0);
-   spin_sizer->Add(new sgSpinButton(this, _wxText, step, 1, 10, 2, precision), 0, 0, 0);
+   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _wxText, step, 1, 10, 2, precision), 0, 0, 0);
    spin_sizer->Add(10,10,0);
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add(new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add(new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add(DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add(DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(10,10,0);
    topsizer->Add(spin_sizer, 0, wxEXPAND ); // no border and centre horizontally
@@ -95,13 +95,13 @@ tui::getStep::getStep(wxFrame *parent, wxWindowID id, const wxString &title, wxP
    real init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                       wxDEFAULT_DIALOG_STYLE)  {
    wxString ws;
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    ws.sprintf(wxT("%.*f"), 3, init);
-   _wxText = new wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
+   _wxText = DEBUG_NEW wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add(new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add(new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add(DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add(DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(_wxText, 0, wxEXPAND | wxALL ,10 );
    topsizer->Add(button_sizer, 0, wxEXPAND);
@@ -114,35 +114,35 @@ tui::getGrid::getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxP
    real ig0, real ig1, real ig2 ) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                       wxDEFAULT_DIALOG_STYLE)  {
    wxString ws;
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    //grid 0
-   wxBoxSizer *g0sizer = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *g0sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    ws.sprintf(wxT("%.*f"), 3, ig0);
-   _wxGrid0 = new wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
-   g0sizer->Add( new wxStaticText(this, -1, wxT("Grid 0:"), 
+   _wxGrid0 = DEBUG_NEW wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
+   g0sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Grid 0:"), 
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL, 5);
    g0sizer->Add(_wxGrid0, 0, wxEXPAND | wxALL ,5 );
    //grid 1
-   wxBoxSizer *g1sizer = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *g1sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    ws.sprintf(wxT("%.*f"), 3, ig1);
-   _wxGrid1 = new wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
-   g1sizer->Add( new wxStaticText(this, -1, wxT("Grid 1:"), 
+   _wxGrid1 = DEBUG_NEW wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
+   g1sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Grid 1:"), 
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL, 5);
    g1sizer->Add(_wxGrid1, 0, wxEXPAND | wxALL ,5 );
    //grid 2
-   wxBoxSizer *g2sizer = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *g2sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    ws.sprintf(wxT("%.*f"), 3, ig2);
-   _wxGrid2 = new wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
-   g2sizer->Add( new wxStaticText(this, -1, wxT("Grid 2:"),
+   _wxGrid2 = DEBUG_NEW wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
+   g2sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Grid 2:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL, 5);
    g2sizer->Add(_wxGrid2, 0, wxEXPAND | wxALL ,5 );
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add(new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add(new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add(DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add(DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(g0sizer, 0, wxEXPAND);
    topsizer->Add(g1sizer, 0, wxEXPAND);
@@ -156,7 +156,7 @@ tui::getGrid::getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxP
 tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
-   _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       laydata::cellList const cll = ATDB->cells();
       laydata::cellList::const_iterator CL;
@@ -166,12 +166,12 @@ tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &ti
    DATC->unlockDB();   
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add(0,0,1); // 
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(_nameList, 1, wxEXPAND );
    topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
@@ -184,9 +184,9 @@ tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &ti
 tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
-//   _rotation = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-//   _flip = new wxCheckBox(this, -1, wxT("Flip X"));
-   _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+//   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+//   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::cellList const cll = ATDB->cells();
       laydata::cellList::const_iterator CL;
@@ -196,22 +196,22 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
    DATC->unlockDB();   
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
-//   wxBoxSizer *spin_sizer = new wxBoxSizer( wxHORIZONTAL );
-//   spin_sizer->Add( new wxStaticText(this, -1, wxT("Rotation:"), 
+//   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"), 
 //                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
 //                                                0, wxALL | wxALIGN_CENTER, 10);
 //   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
-//   spin_sizer->Add(new sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
+//   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
 //                                                  0, wxALL | wxALIGN_CENTER, 0);
 //   spin_sizer->Add(0,0,1); // 
 //   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add(0,0,1); // 
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
       topsizer->Add(_nameList, 1, wxEXPAND );
 //   topsizer->Add(spin_sizer, 0, wxEXPAND );
@@ -225,9 +225,9 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
 tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
-//   _rotation = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-//   _flip = new wxCheckBox(this, -1, wxT("Flip X"));
-   _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+//   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+//   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::cellList const cll = ATDB->cells();
       laydata::cellList::const_iterator CL;
@@ -237,59 +237,59 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
    DATC->unlockDB();   
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
-//   wxBoxSizer *spin_sizer = new wxBoxSizer( wxHORIZONTAL );
-//   spin_sizer->Add( new wxStaticText(this, -1, wxT("Rotation:"), 
+//   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"), 
 //                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
 //                                                0, wxALL | wxALIGN_CENTER, 10);
 //   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
-//   spin_sizer->Add(new sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
+//   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
 //                                                  0, wxALL | wxALIGN_CENTER, 0);
 //   spin_sizer->Add(0,0,1); // 
 //   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Now Array specific controls
-   _numX = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-   _numY = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-   wxBoxSizer* num_sizer =  new wxBoxSizer( wxHORIZONTAL );
-   num_sizer->Add( new wxStaticText(this, -1, wxT("Rows:"), 
+   _numX = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+   _numY = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+   wxBoxSizer* num_sizer =  DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   num_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rows:"), 
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    num_sizer->Add(_numX, 0, wxALL | wxALIGN_CENTER, 0);
-   num_sizer->Add(new sgSpinButton(this, _numX, 1, 2, 200, 2, 0),
+   num_sizer->Add(DEBUG_NEW sgSpinButton(this, _numX, 1, 2, 200, 2, 0),
                                                   0, wxALL | wxALIGN_CENTER, 0);
    num_sizer->Add(0,0,1); // 
-   num_sizer->Add( new wxStaticText(this, -1, wxT("Columns:"), 
+   num_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Columns:"), 
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    num_sizer->Add(_numY, 0, wxALL | wxALIGN_CENTER, 0);
-   num_sizer->Add(new sgSpinButton(this, _numY, 1, 2, 200, 2, 0),
+   num_sizer->Add(DEBUG_NEW sgSpinButton(this, _numY, 1, 2, 200, 2, 0),
                                                   0, wxALL | wxALIGN_CENTER, 0);
    num_sizer->Add(0,0,1); // 
    //
-   _stepX = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-   _stepY = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-   wxBoxSizer* step_sizer =  new wxBoxSizer( wxHORIZONTAL );
-   step_sizer->Add( new wxStaticText(this, -1, wxT("step X:"), 
+   _stepX = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+   _stepY = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+   wxBoxSizer* step_sizer =  DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   step_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("step X:"), 
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    step_sizer->Add(_stepX, 0, wxALL | wxALIGN_CENTER, 0);
-   step_sizer->Add(new sgSpinButton(this, _stepX, DATC->step(), 2, 200, 2, 3),
+   step_sizer->Add(DEBUG_NEW sgSpinButton(this, _stepX, DATC->step(), 2, 200, 2, 3),
                                                   0, wxALL | wxALIGN_CENTER, 0);
    step_sizer->Add(0,0,1); // 
-   step_sizer->Add( new wxStaticText(this, -1, wxT("step Y:"), 
+   step_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("step Y:"), 
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    step_sizer->Add(_stepY, 0, wxALL | wxALIGN_CENTER, 0);
-   step_sizer->Add(new sgSpinButton(this, _stepY, DATC->step(), 2, 200, 2, 3),
+   step_sizer->Add(DEBUG_NEW sgSpinButton(this, _stepY, DATC->step(), 2, 200, 2, 3),
                                                   0, wxALL | wxALIGN_CENTER, 0);
    
    step_sizer->Add(0,0,1); // 
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add(0,0,1); // 
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
       topsizer->Add(_nameList, 1, wxEXPAND );
 //   topsizer->Add(spin_sizer, 0, wxEXPAND );
@@ -305,36 +305,36 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
 tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) 
            : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
    
-   _size     = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-//   _rotation = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-//   _flip = new wxCheckBox(this, -1, wxT("Flip X"));
-   _text = new wxTextCtrl(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+   _size     = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+//   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
+//   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
+   _text = DEBUG_NEW wxTextCtrl(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    // The window layout
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
-   wxBoxSizer *spin_sizer = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    
-   spin_sizer->Add( new wxStaticText(this, -1, wxT("Size:"), 
+   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Size:"), 
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    spin_sizer->Add(_size, 0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(new sgSpinButton(this, _size, DATC->step(), 1, 20, 2, 3),
+   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _size, DATC->step(), 1, 20, 2, 3),
                                                   0, wxALL | wxALIGN_CENTER, 0);
    spin_sizer->Add(0,0,1); // 
    
-//   spin_sizer->Add( new wxStaticText(this, -1, wxT("Rotation:"), 
+//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"), 
 //                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
 //                                                0, wxALL | wxALIGN_CENTER, 10);
 //   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
-//   spin_sizer->Add(new sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
+//   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
 //                                                  0, wxALL | wxALIGN_CENTER, 0);
 //   spin_sizer->Add(0,0,1); // 
 //   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add(0,0,1); // 
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(_text, 1, wxEXPAND | wxALIGN_CENTER, 10 );
    topsizer->Add(spin_sizer, 0, wxEXPAND );
@@ -348,10 +348,10 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
 tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
-   _overwrite = new wxCheckBox(this, -1, wxT("Overwrite existing cells"));
-   _recursive = new wxCheckBox(this, -1, wxT("Import recursively"));
+   _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
+   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
    _recursive->SetValue(true);
-   _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    GDSin::GDSFile* AGDSDB = DATC->lockGDS();
       GDSin::GDSstructure* gdss = AGDSDB->Get_structures();
       while (gdss) {
@@ -361,17 +361,17 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    DATC->unlockGDS();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
-   wxBoxSizer *spin_sizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    //   spin_sizer->Add(0,0,1); //
    spin_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
    spin_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add(0,0,1); // 
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(_nameList, 1, wxEXPAND );
    topsizer->Add(spin_sizer, 0, wxEXPAND );
@@ -385,8 +385,8 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
 tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
-   _recursive = new wxCheckBox(this, -1, wxT("Export recursively"));
-   _nameList = new wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Export recursively"));
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::cellList const cll = ATDB->cells();
       laydata::cellList::const_iterator CL;
@@ -396,16 +396,16 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
-   wxBoxSizer *spin_sizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    //   spin_sizer->Add(0,0,1); //
    spin_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add(0,0,1); // 
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(_nameList, 1, wxEXPAND );
    topsizer->Add(spin_sizer, 0, wxEXPAND );
@@ -628,15 +628,15 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    bool no_color = (wxT("") == init_color);
    bool no_fill = (wxT("") == init_fill);
    bool no_line = (wxT("") == init_line);
-   wxTextCtrl* dwlayno    = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   wxTextCtrl* dwlayno    = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_layno));
-   wxTextCtrl* dwlayname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 0,
+   wxTextCtrl* dwlayname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 0,
                                           wxTextValidator(wxFILTER_ASCII, &_layname));
    if (init > 0)
    {
       dwlayno->SetEditable(false);
    }
-   _sample   = new layset_sample( this, -1, wxDefaultPosition, wxDefaultSize, init);
+   _sample   = DEBUG_NEW layset_sample( this, -1, wxDefaultPosition, wxDefaultSize, init);
    nameList all_names;
    wxArrayString all_strings;
    DATC->all_colors(all_names);
@@ -646,12 +646,12 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 			all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 		if (no_color)
 			init_color = wxString(all_names.begin()->c_str(), wxConvUTF8);
-		_colors   = new wxComboBox( this, COLOR_COMBO, init_color, wxDefaultPosition, wxDefaultSize,all_strings, wxCB_READONLY | wxCB_SORT);
+		_colors   = DEBUG_NEW wxComboBox( this, COLOR_COMBO, init_color, wxDefaultPosition, wxDefaultSize,all_strings, wxCB_READONLY | wxCB_SORT);
 		_colors->SetStringSelection(init_color);
 	}
 	else
 	{
-		_colors   = new wxComboBox( this, COLOR_COMBO, wxT("") , wxDefaultPosition, wxDefaultSize);
+		_colors   = DEBUG_NEW wxComboBox( this, COLOR_COMBO, wxT("") , wxDefaultPosition, wxDefaultSize);
 	}
 		
 	all_names.clear();
@@ -663,12 +663,12 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 			all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 		if (no_fill)
 			init_fill = wxString(all_names.begin()->c_str(), wxConvUTF8);
-		_fills   = new wxComboBox( this, FILL_COMBO, init_fill, wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
+		_fills   = DEBUG_NEW wxComboBox( this, FILL_COMBO, init_fill, wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
 		_fills->SetStringSelection(init_fill);
 	}
 	else
 	{
-		_fills   = new wxComboBox( this, FILL_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
+		_fills   = DEBUG_NEW wxComboBox( this, FILL_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
 	}
 	
 	all_names.clear();
@@ -682,67 +682,67 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 		}
 		if (no_line)
 			init_line = wxString(all_names.begin()->c_str(), wxConvUTF8);
-		_lines   = new wxComboBox( this, LINE_COMBO, init_line, wxDefaultPosition, wxDefaultSize, all_strings,wxCB_READONLY | wxCB_SORT);
+		_lines   = DEBUG_NEW wxComboBox( this, LINE_COMBO, init_line, wxDefaultPosition, wxDefaultSize, all_strings,wxCB_READONLY | wxCB_SORT);
 		_lines->SetStringSelection(init_line);
 	}
 	else
 	{
-		_lines   = new wxComboBox( this, LINE_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
+		_lines   = DEBUG_NEW wxComboBox( this, LINE_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
 	}
    // The window layout
-   wxBoxSizer *line1_sizer = new wxBoxSizer( wxHORIZONTAL );
-   line1_sizer->Add( new wxStaticText(this, -1, wxT("Number:"), wxDefaultPosition, wxDefaultSize),
+   wxBoxSizer *line1_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   line1_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Number:"), wxDefaultPosition, wxDefaultSize),
                                                 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
    line1_sizer->Add(dwlayno, 1, wxRIGHT | wxALIGN_CENTER, 5);
-   line1_sizer->Add( new wxStaticText(this, -1, wxT("Name:"),  wxDefaultPosition, wxDefaultSize),
+   line1_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Name:"),  wxDefaultPosition, wxDefaultSize),
                                                 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
    line1_sizer->Add(dwlayname, 2, wxRIGHT | wxALIGN_CENTER, 5);
    //
-   wxBoxSizer *color_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Color"));
+   wxBoxSizer *color_sizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Color"));
    color_sizer->Add(_colors, 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
-   color_sizer->Add(new wxCheckBox(this, ID_CBDEFCOLOR, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
+   color_sizer->Add(DEBUG_NEW wxCheckBox(this, ID_CBDEFCOLOR, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
    if (no_color)
    {
       static_cast<wxCheckBox*>(FindWindow(ID_CBDEFCOLOR))->SetValue(true);
       _colors->Enable(false);
    }
-   wxBoxSizer *fill_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Pattern"));
+   wxBoxSizer *fill_sizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Pattern"));
    fill_sizer->Add(_fills , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
-   fill_sizer->Add(new wxCheckBox(this, ID_CBDEFPATTERN, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
+   fill_sizer->Add(DEBUG_NEW wxCheckBox(this, ID_CBDEFPATTERN, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
    if (no_fill)
    {
       static_cast<wxCheckBox*>(FindWindow(ID_CBDEFPATTERN))->SetValue(true);
       _fills->Enable(false);
    }
-   wxBoxSizer *line_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Selected Line"));
+   wxBoxSizer *line_sizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Selected Line"));
    line_sizer->Add(_lines , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
-   line_sizer->Add(new wxCheckBox(this, ID_CBDEFLINE, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
+   line_sizer->Add(DEBUG_NEW wxCheckBox(this, ID_CBDEFLINE, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
    if (no_line)
    {
       static_cast<wxCheckBox*>(FindWindow(ID_CBDEFLINE))->SetValue(true);
       _lines->Enable(false);
    }
 
-   wxBoxSizer *col2_sizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *col2_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    col2_sizer->Add(color_sizer, 0, wxEXPAND);
    col2_sizer->Add(fill_sizer , 0, wxEXPAND);
    col2_sizer->Add(line_sizer , 0, wxEXPAND);
    
-   _selected = new wxCheckBox(this, DRAW_SELECTED, wxT("selected"));
-   wxBoxSizer *col3_sizer = new wxStaticBoxSizer( wxVERTICAL, this, wxT("Sample") );
+   _selected = DEBUG_NEW wxCheckBox(this, DRAW_SELECTED, wxT("selected"));
+   wxBoxSizer *col3_sizer = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Sample") );
    col3_sizer->Add( _sample  , 1, wxEXPAND);
    col3_sizer->Add(_selected , 0, wxALL | wxALIGN_LEFT | wxEXPAND, 5);
    
-   wxBoxSizer *line2_sizer = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *line2_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    line2_sizer->Add(col2_sizer, 3, wxEXPAND | wxALL, 5);
    line2_sizer->Add(col3_sizer, 1, wxEXPAND | wxALL, 5);
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(0,0,1); //
-   button_sizer->Add( new wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    topsizer->Add(line1_sizer , 0, wxEXPAND | wxTOP, 5 );
    topsizer->Add(line2_sizer , 0, wxEXPAND );
    topsizer->Add(button_sizer, 0, wxEXPAND );
@@ -903,7 +903,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 	std::string init_color;
    nameList all_names;
    DATC->all_colors(all_names);
-   _colorList = new wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
+   _colorList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
 	if (!all_names.empty())
 	{
 		init_color = *(all_names.begin());
@@ -912,54 +912,54 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 	for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
-      _allColors[*CI] = new layprop::tellRGB(DATC->getColor(*CI));
+      _allColors[*CI] = DEBUG_NEW layprop::tellRGB(DATC->getColor(*CI));
    }
-   _dwcolname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
+   _dwcolname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_colname));
-   _colorsample = new color_sample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color);
+   _colorsample = DEBUG_NEW color_sample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color);
    
-   _c_red    = new wxTextCtrl( this, ID_REDVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _c_red    = DEBUG_NEW wxTextCtrl( this, ID_REDVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_red));
-   _c_green  = new wxTextCtrl( this, ID_GREENVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _c_green  = DEBUG_NEW wxTextCtrl( this, ID_GREENVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_green));
-   _c_blue   = new wxTextCtrl( this, ID_BLUEVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _c_blue   = DEBUG_NEW wxTextCtrl( this, ID_BLUEVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_blue));
-   _c_alpha  = new wxTextCtrl( this, ID_ALPHAVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _c_alpha  = DEBUG_NEW wxTextCtrl( this, ID_ALPHAVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_alpha));
    
-   wxBoxSizer *hsizer0 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Color") );
+   wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Color") );
    hsizer0->Add( _dwcolname   , 0, wxALL | wxEXPAND, 5);
    hsizer0->Add(0,0,1); //
-   hsizer0->Add( new wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
+   hsizer0->Add( DEBUG_NEW wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
    
-   wxBoxSizer *hsizer1 = new wxBoxSizer( wxHORIZONTAL );
-   hsizer1->Add( new wxStaticText(this, -1, wxT("R:"),
+   wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   hsizer1->Add( DEBUG_NEW wxStaticText(this, -1, wxT("R:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 1, wxALL | wxALIGN_RIGHT, 5);
    hsizer1->Add( _c_red   , 0, wxALL | wxEXPAND, 5);
-   wxBoxSizer *hsizer2 = new wxBoxSizer( wxHORIZONTAL );
-   hsizer2->Add( new wxStaticText(this, -1, wxT("G:"),
+   wxBoxSizer *hsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   hsizer2->Add( DEBUG_NEW wxStaticText(this, -1, wxT("G:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 1, wxALL | wxALIGN_RIGHT, 5);
    hsizer2->Add( _c_green   , 0, wxALL | wxEXPAND, 5);
-   wxBoxSizer *hsizer3 = new wxBoxSizer( wxHORIZONTAL );
-   hsizer3->Add( new wxStaticText(this, -1, wxT("B:"),
+   wxBoxSizer *hsizer3 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   hsizer3->Add( DEBUG_NEW wxStaticText(this, -1, wxT("B:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 1, wxALL | wxALIGN_RIGHT, 5);
    hsizer3->Add( _c_blue   , 0, wxALL | wxEXPAND, 5);
-   wxBoxSizer *hsizer4 = new wxBoxSizer( wxHORIZONTAL );
-   hsizer4->Add( new wxStaticText(this, -1, wxT("A:"),
+   wxBoxSizer *hsizer4 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   hsizer4->Add( DEBUG_NEW wxStaticText(this, -1, wxT("A:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 1, wxALL | wxALIGN_RIGHT, 5);
    hsizer4->Add( _c_alpha   , 0, wxALL | wxEXPAND, 5);
 
-   wxBoxSizer *hsizer5 = new wxBoxSizer( wxHORIZONTAL );
-   hsizer5->Add(new wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+   wxBoxSizer *hsizer5 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
    FindWindow(ID_BTNAPPLY)->Enable(false);
    
-   hsizer5->Add(new wxButton( this, ID_BTNEDIT  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+   hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
    
-   wxBoxSizer *vsizer2 = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    vsizer2->Add( _colorsample , 0, wxALL | wxEXPAND, 5);
    vsizer2->Add( hsizer1   , 0, wxEXPAND);
    vsizer2->Add( hsizer2   , 0, wxEXPAND);
@@ -968,17 +968,17 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
    vsizer2->Add( hsizer5   , 0, wxEXPAND);
    
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(0,0,1); // 
-   button_sizer->Add( new wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
 
-   wxBoxSizer *vsizer3 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Color") );
+   wxBoxSizer *vsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Color") );
    vsizer3->Add( _colorList   , 0, wxALL | wxEXPAND, 5);
    vsizer3->Add(0,0,1); //
    vsizer3->Add( vsizer2      , 0, wxEXPAND );
    
-   wxBoxSizer *top_sizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *top_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    top_sizer->Add( hsizer0      , 0, wxEXPAND );
    top_sizer->Add( vsizer3      , 0, wxEXPAND );
    top_sizer->Add( button_sizer , 0, wxEXPAND );
@@ -1085,7 +1085,7 @@ void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
    }
    else
    {
-      layprop::tellRGB* newcol = new layprop::tellRGB(0,0,0,178);
+      layprop::tellRGB* newcol = DEBUG_NEW layprop::tellRGB(0,0,0,178);
       std::string s_newcol = std::string(color_name.fn_str());
       _allColors[s_newcol] = newcol;
       int index = _colorList->Append(color_name);
@@ -1134,7 +1134,7 @@ void tui::defineColor::OnApply(wxCommandEvent& WXUNUSED(event))
    unsigned long d_blue;  s_blue.ToULong(&d_blue);
    unsigned long d_alpha;s_alpha.ToULong(&d_alpha);
    
-   layprop::tellRGB* scol = new layprop::tellRGB(d_red, d_green, d_blue, d_alpha);
+   layprop::tellRGB* scol = DEBUG_NEW layprop::tellRGB(d_red, d_green, d_blue, d_alpha);
    std::string ss_name(s_name.fn_str());
    if (_allColors.end() != _allColors.find(ss_name))
    {
@@ -1280,30 +1280,30 @@ tui::drawFillDef::drawFillDef(wxWindow *parent, wxWindowID id, const wxString &t
         wxT("5x5"),
     };
 
-    _radioBrushSize = new wxRadioBox(this, ID_RADIOBSIZE, wxT("Brush size"),
+    _radioBrushSize = DEBUG_NEW wxRadioBox(this, ID_RADIOBSIZE, wxT("Brush size"),
                                    wxDefaultPosition, wxDefaultSize,
                                    WXSIZEOF(brushsize), brushsize);
 
    
-   wxBoxSizer *vsizer1 = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *vsizer1 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    vsizer1->Add( _radioBrushSize , 0, wxALL, 5);
-   vsizer1->Add(new wxButton( this, ID_BTNCLEAR , wxT(" Clear ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ),
+   vsizer1->Add(DEBUG_NEW wxButton( this, ID_BTNCLEAR , wxT(" Clear ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ),
                 0, wxALL | wxALIGN_RIGHT, 5);
-   vsizer1->Add(new wxButton( this, ID_BTNFILL  , wxT(" Fill  "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ),
+   vsizer1->Add(DEBUG_NEW wxButton( this, ID_BTNFILL  , wxT(" Fill  "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ),
                 0, wxALL | wxALIGN_RIGHT, 5);
    
-   _sampleDraw = new pattern_canvas(this, -1, wxDefaultPosition, wxSize(256,256), init);
+   _sampleDraw = DEBUG_NEW pattern_canvas(this, -1, wxDefaultPosition, wxSize(256,256), init);
    
-   wxBoxSizer *hsizer1 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer1->Add( _sampleDraw , 0, wxALL, 5);
    hsizer1->Add( vsizer1   , 0, wxEXPAND);
    
-   wxBoxSizer *hsizer2 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *hsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer2->Add(0,0,1);
-   hsizer2->Add(new wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5);
-   hsizer2->Add(new wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 5);
+   hsizer2->Add(DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5);
+   hsizer2->Add(DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 5);
    
-   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    topsizer->Add( hsizer1 , 0, wxEXPAND);
    topsizer->Add( hsizer2 , 0, wxEXPAND);
    
@@ -1396,7 +1396,7 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
 {
    nameList all_names;
    DATC->all_fills(all_names);
-   _fillList = new wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
+   _fillList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    std::string init_color; 
 	if (!all_names.empty())
 	{
@@ -1405,40 +1405,40 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
 	for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _fillList->Append(wxString(CI->c_str(), wxConvUTF8));
-      byte* pat = new byte[128];
+      byte* pat = DEBUG_NEW byte[128];
       fillcopy(DATC->getFill(*CI), pat);
       _allFills[*CI] = pat;
    }
-   _dwfilname  = new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
+   _dwfilname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_filname));
-   _fillsample = new fill_sample( this, -1, wxDefaultPosition, wxSize(-1,150), init_color);
+   _fillsample = DEBUG_NEW fill_sample( this, -1, wxDefaultPosition, wxSize(-1,150), init_color);
    
-   wxBoxSizer *hsizer0 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Fill") );
+   wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Fill") );
    hsizer0->Add( _dwfilname   , 0, wxALL | wxEXPAND, 5);
    hsizer0->Add(0,0,1); //
-   hsizer0->Add( new wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
+   hsizer0->Add( DEBUG_NEW wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
    
-//   wxBoxSizer *hsizer5 = new wxBoxSizer( wxHORIZONTAL );
-//   hsizer5->Add(new wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
+//   wxBoxSizer *hsizer5 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+//   hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
    
-   wxBoxSizer *vsizer2 = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    vsizer2->Add( _fillsample , 0, wxALL | wxEXPAND, 5);
 //   vsizer2->Add( hsizer5   , 0, wxEXPAND);
    vsizer2->Add(0,0,1); //
-   vsizer2->Add(new wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
+   vsizer2->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
    
    // Buttons
-   wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(0,0,1); // 
-   button_sizer->Add( new wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
-   button_sizer->Add( new wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
 
-   wxBoxSizer *vsizer3 = new wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Pattern") );
+   wxBoxSizer *vsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Pattern") );
    vsizer3->Add( _fillList   , 0, wxALL | wxEXPAND, 5);
    vsizer3->Add(0,0,1); //
    vsizer3->Add( vsizer2      , 0, wxEXPAND );
    
-   wxBoxSizer *top_sizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *top_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    top_sizer->Add( hsizer0      , 0, wxEXPAND );
    top_sizer->Add( vsizer3      , 0, wxEXPAND );
    top_sizer->Add( button_sizer , 0, wxEXPAND );
@@ -1494,7 +1494,7 @@ void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
    else
    {
       std::string s_newcol = std::string(fill_name.fn_str());
-      byte* newpat = new byte[128];
+      byte* newpat = DEBUG_NEW byte[128];
       for(byte i = 0; i< 128; i++)
          newpat[i] = 0x55 << ((byte)(i/4)%2);
       _allFills[s_newcol] = newpat;

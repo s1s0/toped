@@ -175,7 +175,7 @@ namespace polycross
    {
       public:
          EventVertex(const TP* evertex) :
-            _evertex(new TP(evertex->x(), evertex->y())) {};
+            _evertex(DEBUG_NEW TP(evertex->x(), evertex->y())) {};
          ~EventVertex();
          const TP*         operator () () const {return _evertex;};
          void              addEvent(TEvent*, EventTypes);

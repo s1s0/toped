@@ -39,7 +39,7 @@ static GDSin::GDSFile*        InFile    = NULL;
 GDSin::GDSrecord::GDSrecord(FILE* Gf, word rl, byte rt, byte dt) {
    reclen = rl;rectype = rt;datatype = dt;
    if (rl) {
-      record = new byte[reclen];
+      record = DEBUG_NEW byte[reclen];
       numread = fread(record,1,reclen,Gf);
       isvalid = (numread == reclen) ? true : false;
    }
@@ -51,7 +51,7 @@ GDSin::GDSrecord::GDSrecord(byte rt, byte dt, word rl) {
    reclen = rl+4; index = 0;
    // compensation for odd length ASCII string
    if ((gdsDT_ASCII == datatype) && (rl % 2)) reclen++;
-   record = new byte[reclen];
+   record = DEBUG_NEW byte[reclen];
    add_int2b(reclen);
    record[index++] = rectype;
    record[index++] = datatype;
@@ -189,7 +189,7 @@ double GDSin::GDSrecord::gds2ieee(byte* gds) {
 
 byte* GDSin::GDSrecord::ieee2gds(double inval) {
    byte* ieee = ((byte*)&inval);
-   byte* gds = new byte[8];
+   byte* gds = DEBUG_NEW byte[8];
    // zero is an exception (as always!) so check it first
    if (0 == inval) {
       for (byte i = 0; i < 8; gds[i++] = 0x00);
@@ -320,7 +320,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
                delete wr;break;
             case gds_LIBNAME:   // down in the hierarchy. 
                //Start reading the library structure
-               library = new GDSlibrary(this, wr);
+               library = DEBUG_NEW GDSlibrary(this, wr);
                //build the hierarchy tree
                library->SetHierarchy();
                closeFile();// close the input stream
@@ -434,7 +434,7 @@ GDSin::GDSrecord* GDSin::GDSFile::GetNextRecord() {
    rl[0] = recheader[1];
    rl[1] = recheader[0];
    word reclen = *(word*)rl - 4; // record lenght
-   GDSrecord* retrec = new GDSrecord(GDSfh, reclen, recheader[2],recheader[3]);
+   GDSrecord* retrec = DEBUG_NEW GDSrecord(GDSfh, reclen, recheader[2],recheader[3]);
    file_pos += reclen+4;    // update file position
 //   if (2048 < (file_pos - prgrs_pos))
 //   {
@@ -448,31 +448,31 @@ GDSin::GDSrecord* GDSin::GDSFile::GetNextRecord() {
 GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
    byte datatype;
    switch (rectype) {
-      case gds_HEADER         :return new GDSrecord(rectype, gdsDT_INT2B , 2);
-      case gds_BGNLIB         :return new GDSrecord(rectype, gdsDT_INT2B , 24);
-      case gds_ENDLIB         :return new GDSrecord(rectype, gdsDT_NODATA, 0);
-      case gds_LIBNAME        :return new GDSrecord(rectype, gdsDT_ASCII , reclen);
-      case gds_UNITS          :return new GDSrecord(rectype, gdsDT_REAL8B, 16);
-      case gds_BGNSTR         :return new GDSrecord(rectype, gdsDT_INT2B , 24);
-      case gds_STRNAME        :return new GDSrecord(rectype, gdsDT_ASCII , reclen);
-      case gds_ENDSTR         :return new GDSrecord(rectype, gdsDT_NODATA, 0);
-      case gds_BOUNDARY       :return new GDSrecord(rectype, gdsDT_NODATA, 0);
-      case gds_PATH           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
-      case gds_SREF           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
-      case gds_AREF           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
-      case gds_TEXT           :return new GDSrecord(rectype, gdsDT_NODATA, 0);
-      case gds_LAYER          :return new GDSrecord(rectype, gdsDT_INT2B, 2);
-      case gds_DATATYPE       :return new GDSrecord(rectype, gdsDT_INT2B, 2);
-      case gds_XY             :return new GDSrecord(rectype, gdsDT_INT4B, 8*reclen);
-      case gds_WIDTH          :return new GDSrecord(rectype, gdsDT_INT4B, 4);
-      case gds_ENDEL          :return new GDSrecord(rectype, gdsDT_NODATA, 0);
-      case gds_SNAME          :return new GDSrecord(rectype, gdsDT_ASCII, reclen);
-      case gds_COLROW         :return new GDSrecord(rectype, gdsDT_INT2B , 4);
-      case gds_TEXTTYPE       :return new GDSrecord(rectype, gdsDT_INT2B, 2);
-      case gds_STRING         :return new GDSrecord(rectype, gdsDT_ASCII, reclen);
-      case gds_STRANS         :return new GDSrecord(rectype, gdsDT_BIT, 2);
-      case gds_MAG            :return new GDSrecord(rectype, gdsDT_REAL8B, 8);
-      case gds_ANGLE          :return new GDSrecord(rectype, gdsDT_REAL8B, 8);
+      case gds_HEADER         :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B , 2);
+      case gds_BGNLIB         :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B , 24);
+      case gds_ENDLIB         :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_LIBNAME        :return DEBUG_NEW GDSrecord(rectype, gdsDT_ASCII , reclen);
+      case gds_UNITS          :return DEBUG_NEW GDSrecord(rectype, gdsDT_REAL8B, 16);
+      case gds_BGNSTR         :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B , 24);
+      case gds_STRNAME        :return DEBUG_NEW GDSrecord(rectype, gdsDT_ASCII , reclen);
+      case gds_ENDSTR         :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_BOUNDARY       :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_PATH           :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_SREF           :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_AREF           :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_TEXT           :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_LAYER          :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B, 2);
+      case gds_DATATYPE       :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B, 2);
+      case gds_XY             :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT4B, 8*reclen);
+      case gds_WIDTH          :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT4B, 4);
+      case gds_ENDEL          :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA, 0);
+      case gds_SNAME          :return DEBUG_NEW GDSrecord(rectype, gdsDT_ASCII, reclen);
+      case gds_COLROW         :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B , 4);
+      case gds_TEXTTYPE       :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B, 2);
+      case gds_STRING         :return DEBUG_NEW GDSrecord(rectype, gdsDT_ASCII, reclen);
+      case gds_STRANS         :return DEBUG_NEW GDSrecord(rectype, gdsDT_BIT, 2);
+      case gds_MAG            :return DEBUG_NEW GDSrecord(rectype, gdsDT_REAL8B, 8);
+      case gds_ANGLE          :return DEBUG_NEW GDSrecord(rectype, gdsDT_REAL8B, 8);
       case gds_PROPATTR       :datatype = gdsDT_INT2B;break;
       case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;
                        default: assert(false); //the rest should not be used
@@ -528,7 +528,7 @@ GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
       case gds_LINKKEYS:
       */
    }
-   return new GDSrecord(rectype, datatype,0);
+   return DEBUG_NEW GDSrecord(rectype, datatype,0);
 }
 
 bool GDSin::GDSFile::checkCellWritten(std::string cellname)
@@ -619,7 +619,7 @@ GDSin::GDSlibrary::GDSlibrary(GDSFile* cf, GDSrecord* cr) {
                delete cr;break;
             case gds_FONTS:// Read fonts
                for(i = 0; i < 4; i++)  {
-                  fonts[i] = new char[45];
+                  fonts[i] = DEBUG_NEW char[45];
                   cr->Ret_Data(fonts[i],i,44);
                }
                delete cr;break;
@@ -630,7 +630,7 @@ GDSin::GDSlibrary::GDSlibrary(GDSFile* cf, GDSrecord* cr) {
                cr->Ret_Data(&DBU,8,8); // database unit in meters
                delete cr;break;
             case gds_BGNSTR:   
-               Fstruct = new GDSstructure(cf, Fstruct);
+               Fstruct = DEBUG_NEW GDSstructure(cf, Fstruct);
                AddLog('S',Fstruct->Get_StrName());
                delete cr;break;
             case gds_ENDLIB://end of library, exit form the procedure
@@ -731,30 +731,30 @@ GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst) {
                else cr->Ret_Data(&strname);
                delete cr;break;
             case gds_BOX: 
-               Fdata = new GDSbox(cf, Fdata);
+               Fdata = DEBUG_NEW GDSbox(cf, Fdata);
                Compbylay[Fdata->GetLayer()] = //put in layer sequence
                   Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
                delete cr;break;
             case gds_BOUNDARY: 
-               Fdata = new GDSpolygon(cf, Fdata);
+               Fdata = DEBUG_NEW GDSpolygon(cf, Fdata);
                Compbylay[Fdata->GetLayer()] = //put in layer sequence
                   Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
                delete cr;break;
             case gds_PATH: 
-               Fdata = new GDSpath(cf, Fdata);
+               Fdata = DEBUG_NEW GDSpath(cf, Fdata);
                Compbylay[Fdata->GetLayer()] = //put in layer sequence
                   Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
                delete cr;break;
             case gds_TEXT:   
-               Fdata = new GDStext(cf,Fdata);
+               Fdata = DEBUG_NEW GDStext(cf,Fdata);
                Compbylay[Fdata->GetLayer()] = //put in layer sequence
                   Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
                delete cr;break;
             case gds_SREF:   
-               Fdata = new GDSref(cf, Fdata);
+               Fdata = DEBUG_NEW GDSref(cf, Fdata);
                delete cr;break;
             case gds_AREF: 
-               Fdata = new GDSaref(cf, Fdata);
+               Fdata = DEBUG_NEW GDSaref(cf, Fdata);
                delete cr;break;
             case gds_ENDSTR:// end of structure, exit point
                for(i = 0;i < GDS_MAX_LAYER;i++)//collect all used layers 
@@ -782,7 +782,7 @@ bool GDSin::GDSstructure::RegisterStructure(GDSstructure* ws) {
    
 GDSin::GDSHierTree* GDSin::GDSstructure::HierOut(GDSHierTree* Htree, GDSstructure* parent) {
    // collecting hierarchical information
-   Htree = new GDSHierTree(this, parent, Htree);
+   Htree = DEBUG_NEW GDSHierTree(this, parent, Htree);
    for (unsigned i = 0; i < children.size(); i++)
       if (NULL == children[i]) continue;
       else {
@@ -1093,7 +1093,7 @@ GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
                delete cr;break;
             case gds_ENDEL://end of element, exit point
                // before exiting, init Current Translation Matrix
-//               tmtrx = new PSCTM(magn_point,magnification,angle,reflection);
+//               tmtrx = DEBUG_NEW PSCTM(magn_point,magnification,angle,reflection);
                delete cr;return;
             //TODO Not implemented yet+++++
             case gds_PROPATTR:
@@ -1159,7 +1159,7 @@ GDSin::GDSaref::GDSaref(GDSFile* cf, GDSdata *lst):GDSref(lst) {
                delete cr;break;
             case gds_ENDEL://end of element, exit point
                // before exiting, init Current Translation Matrix
-//               tmtrx = new PSCTM(magn_point,magnification,angle,reflection);
+//               tmtrx = DEBUG_NEW PSCTM(magn_point,magnification,angle,reflection);
                delete cr;return;
             //TODO not implemented yet+++++
             case gds_PROPATTR:

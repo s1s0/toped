@@ -59,7 +59,7 @@ void laydata::tdtdesign::read(TEDfile* const tedfile)
    {
       cellname = tedfile->getString();
       tell_log(console::MT_CELLNAME, cellname);
-      tedfile->registercellread(cellname, new tdtcell(tedfile, cellname));
+      tedfile->registercellread(cellname, DEBUG_NEW tdtcell(tedfile, cellname));
    }
    recreate_hierarchy();
    _tmpdata = NULL;
@@ -73,8 +73,8 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name) {
    if (_cells.end() != _cells.find(name)) return NULL; // cell already exists
    else {
       modified = true;
-      tdtcell* ncl = _cells[name] = new tdtcell(name);
-      _hiertree = new TDTHierTree(ncl, NULL, _hiertree);
+      tdtcell* ncl = _cells[name] = DEBUG_NEW tdtcell(name);
+      _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
        btreeAddMember(_hiertree->GetItem()->name().c_str(), NULL, 0);
       return ncl;
    }
@@ -150,8 +150,8 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
    modified = true;
    pointlist vpl = check.get_validated();
    if (check.box()) {
-      TP* p1= new TP(vpl[0] *_target.rARTM());
-      TP* p2= new TP(vpl[2] *_target.rARTM());
+      TP* p1= DEBUG_NEW TP(vpl[0] *_target.rARTM());
+      TP* p2= DEBUG_NEW TP(vpl[2] *_target.rARTM());
       newshape = actlay->addbox(p1,p2);
    }
    for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
@@ -265,7 +265,7 @@ bool laydata::tdtdesign::editpush(const TP& pnt) {
    if (_target.checkedit()) {// 
       ctmstack transtack;
       transtack.push(CTM());
-      laydata::cellrefstack* crstack = new laydata::cellrefstack();
+      laydata::cellrefstack* crstack = DEBUG_NEW laydata::cellrefstack();
       tdtcell* oldtvcell = _target.view();
       // Find the new active reference
       laydata::tdtcellref *new_activeref =
@@ -427,15 +427,15 @@ void laydata::tdtdesign::recreate_hierarchy() {
 void laydata::tdtdesign::mouseStart(int input_type, std::string name, const CTM trans,
                                    int4b stepX, int4b stepY, word cols, word rows)
 {
-   if      ( 0  < input_type)  _tmpdata = new tdtwire(input_type);
-   else if ( console::op_dbox  == input_type)  _tmpdata = new tdtbox();
-   else if ( console::op_dpoly == input_type)  _tmpdata = new tdtpoly();
+   if      ( 0  < input_type)  _tmpdata = DEBUG_NEW tdtwire(input_type);
+   else if ( console::op_dbox  == input_type)  _tmpdata = DEBUG_NEW tdtbox();
+   else if ( console::op_dpoly == input_type)  _tmpdata = DEBUG_NEW tdtpoly();
    else if ( console::op_cbind  == input_type)
    {
       assert ("" != name);
       laydata::refnamepair striter = getcellnamepair(name);
       CTM eqm;
-      _tmpdata = new tdtcellref(striter, eqm);
+      _tmpdata = DEBUG_NEW tdtcellref(striter, eqm);
    }
    else if ( console::op_abind  == input_type)
    {
@@ -444,14 +444,14 @@ void laydata::tdtdesign::mouseStart(int input_type, std::string name, const CTM 
       laydata::refnamepair striter = getcellnamepair(name);
       CTM eqm;
       ArrayProperties arrprops(stepX, stepY, cols, rows);
-      _tmpdata = new tdtcellaref(striter, eqm, arrprops);
+      _tmpdata = DEBUG_NEW tdtcellaref(striter, eqm, arrprops);
    }
    else if ( console::op_tbind == input_type)
    {
       assert ("" != name);
       CTM eqm(trans);
       eqm.Scale(1/(_UU*OPENGL_FONT_UNIT), 1/(_UU*OPENGL_FONT_UNIT));
-      _tmpdata = new tdttext(name, eqm);
+      _tmpdata = DEBUG_NEW tdttext(name, eqm);
    }
    else if ( console::op_rotate == input_type)
    {
@@ -645,7 +645,7 @@ laydata::shapeList* laydata::tdtdesign::ungroup_prep() {
 }
 
 laydata::atticList* laydata::tdtdesign::ungroup_this(laydata::shapeList* cells4u) {
-   laydata::atticList* shapeUngr = new laydata::atticList();
+   laydata::atticList* shapeUngr = DEBUG_NEW laydata::atticList();
    for (shapeList::const_iterator CC = cells4u->begin(); 
                                                      CC != cells4u->end(); CC++)
       static_cast<tdtcellref*>(*CC)->ungroup(this, _target.edit(), shapeUngr);      
@@ -675,7 +675,7 @@ laydata::atticList* laydata::tdtdesign::changeref(shapeList* cells4u, std::strin
 {
    assert(checkcell(newref));
    assert((!cells4u->empty()));
-   laydata::shapeList* cellsUngr = new laydata::shapeList();
+   laydata::shapeList* cellsUngr = DEBUG_NEW laydata::shapeList();
    laydata::refnamepair striter = getcellnamepair(newref);
    DBbox old_overlap = _target.edit()->overlap();
 
@@ -693,7 +693,7 @@ laydata::atticList* laydata::tdtdesign::changeref(shapeList* cells4u, std::strin
       _target.edit()->select_this(ncrf,0);
       cellsUngr->push_back(ncrf);
    }
-   laydata::atticList* shapeUngr = new laydata::atticList();
+   laydata::atticList* shapeUngr = DEBUG_NEW laydata::atticList();
    (*shapeUngr)[0] = cellsUngr;
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validate_cells());

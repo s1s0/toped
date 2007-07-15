@@ -62,7 +62,7 @@ byte PSegment::crossP(PSegment seg, TP& crossp) {
 }
    
 PSegment& PSegment::ortho(TP p) {
-   PSegment* seg = new PSegment(-_B, _A, _B*p.x() - _A*p.y());
+   PSegment* seg = DEBUG_NEW PSegment(-_B, _A, _B*p.x() - _A*p.y());
    return *seg;
 }
 //-----------------------------------------------------------------------------
@@ -107,7 +107,7 @@ void laydata::TEDfile::read() {
    real         DBU = getReal();
    real          UU = getReal();
    tell_log(console::MT_DESIGNNAME, name);
-   _design = new tdtdesign(name,_created, _lastUpdated, DBU,UU);
+   _design = DEBUG_NEW tdtdesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in tdtdesign so don't search it here
    //byte designend = getByte(); 
@@ -176,7 +176,7 @@ std::string laydata::TEDfile::getString()
 {
    std::string str;
    byte length = getByte();
-   char* strc = new char[length+1];
+   char* strc = DEBUG_NEW char[length+1];
    _numread = fread(strc, length, 1, _file);
    strc[length] = 0x00;
    if (_numread != 1) 

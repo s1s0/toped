@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <string>
 #include "ted_prompt.h"
 #include <wx/regex.h>
@@ -135,7 +136,7 @@ bool console::miniParser::getPoint() {
    double p1,p2;
    p1s.ToDouble(&p1);p2s.ToDouble(&p2);
    // convert the coordinates to ttpoint ...
-   telldata::ttpnt* pp = new telldata::ttpnt(p1,p2);
+   telldata::ttpnt* pp = DEBUG_NEW telldata::ttpnt(p1,p2);
    // and push it into the operand stack
    client_stack->push(pp);
    return true;
@@ -172,7 +173,7 @@ bool console::miniParser::getBox()
       // convert the coordinates to ttpoint ...
       pp[i] = telldata::ttpnt(p1,p2);
    }
-   client_stack->push(new telldata::ttwnd(pp[0],pp[1]));
+   client_stack->push(DEBUG_NEW telldata::ttwnd(pp[0],pp[1]));
    return true;
 }
 
@@ -234,7 +235,7 @@ bool console::miniParser::getBind()
    ps.ToDouble(&p1);
    scl = telldata::ttreal(p1);
 
-   client_stack->push(new telldata::ttbnd(pp,rot,flip,scl));
+   client_stack->push(DEBUG_NEW telldata::ttbnd(pp,rot,flip,scl));
    return true;
 }
 
@@ -250,7 +251,7 @@ bool console::miniParser::getList() {
    src_tmpl.ReplaceAll(&exp,wxT(""));    
    // now we are going to extract the points
    VERIFY(src_tmpl.Compile(point_tmpl));
-   telldata::ttlist *pl = new telldata::ttlist(telldata::tn_pnt);
+   telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
    telldata::ttpnt* pp = NULL;
    while (src_tmpl.Matches(exp)) {
       wxString ps = src_tmpl.GetMatch(exp);
@@ -264,7 +265,7 @@ bool console::miniParser::getList() {
       wxString p2s = crd_tmpl.GetMatch(ps);
       double p1,p2;
       p1s.ToDouble(&p1);p2s.ToDouble(&p2);
-      pp = new telldata::ttpnt(p1,p2);
+      pp = DEBUG_NEW telldata::ttpnt(p1,p2);
       // add it to the point list
       pl->add(pp);
    }
@@ -328,7 +329,7 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
 {
    _parent = parent;
    _canvas = canvas;
-   threadWaits4 = new wxCondition(parse_thread::_mutex);
+   threadWaits4 = DEBUG_NEW wxCondition(parse_thread::_mutex);
    assert(threadWaits4->IsOk());
    _mouseIN_OK = true;
    Console = this;
@@ -344,7 +345,7 @@ void console::ted_cmd::getCommand(wxCommandEvent& WXUNUSED(event)) {
       _cmd_history.push_back(std::string(command.mb_str()));
       _history_position = _cmd_history.end();
       Clear();
-      parse_thread *pthrd = new parse_thread(command,_parent,_canvas);
+      parse_thread *pthrd = DEBUG_NEW parse_thread(command,_parent,_canvas);
       pthrd->Create();
       pthrd->Run();
    }   
@@ -373,7 +374,7 @@ void console::ted_cmd::getCommandA() {
       {
          // executing the parser in a separate thread
          //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
-         parse_thread *pthrd = new parse_thread(command,_parent,_canvas);
+         parse_thread *pthrd = DEBUG_NEW parse_thread(command,_parent,_canvas);
          wxThreadError result = pthrd->Create();
          if (wxTHREAD_NO_ERROR == result)
             pthrd->Run();
@@ -442,7 +443,7 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
       case console::op_tbind  : ttype = telldata::tn_bnd; break;
       default:ttype = TLISTOF(telldata::tn_pnt); break;
    }
-   puc = new miniParser(clst, ttype);
+   puc = DEBUG_NEW miniParser(clst, ttype);
    _numpoints = 0;
    _initrans = _translation = trans;
    _mouseIN_OK = true;

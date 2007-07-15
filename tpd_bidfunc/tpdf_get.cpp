@@ -38,24 +38,24 @@ extern void tellerror(std::string s);
 
 //=============================================================================
 tellstdfunc::stdGETLAYTYPE::stdGETLAYTYPE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlayout()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlayout()));
 }
 
 int tellstdfunc::stdGETLAYTYPE::execute()
 {
    telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
-   OPstack.push(new telldata::ttint(tx->data()->ltype()));
+   OPstack.push(DEBUG_NEW telldata::ttint(tx->data()->ltype()));
    delete tx;
    return EXEC_NEXT;
 }
 
 //=============================================================================
 tellstdfunc::stdGETLAYTEXTSTR::stdGETLAYTEXTSTR(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlayout()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlayout()));
 }
 
 int tellstdfunc::stdGETLAYTEXTSTR::execute()
@@ -69,7 +69,7 @@ int tellstdfunc::stdGETLAYTEXTSTR::execute()
    }
    else
    {
-      OPstack.push(new telldata::ttstring(static_cast<laydata::tdttext*>(tx->data())->text()));
+      OPstack.push(DEBUG_NEW telldata::ttstring(static_cast<laydata::tdttext*>(tx->data())->text()));
       delete tx;
       return EXEC_NEXT;
    }
@@ -77,9 +77,9 @@ int tellstdfunc::stdGETLAYTEXTSTR::execute()
 
 //=============================================================================
 tellstdfunc::stdGETLAYREFSTR::stdGETLAYREFSTR(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlayout()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlayout()));
 }
 
 int tellstdfunc::stdGETLAYREFSTR::execute()
@@ -93,7 +93,7 @@ int tellstdfunc::stdGETLAYREFSTR::execute()
    }
    else
    {
-      OPstack.push(new telldata::ttstring(static_cast<laydata::tdtcellref*>(tx->data())->cellname()));
+      OPstack.push(DEBUG_NEW telldata::ttstring(static_cast<laydata::tdtcellref*>(tx->data())->cellname()));
       delete tx;
       return EXEC_NEXT;
    }

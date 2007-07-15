@@ -276,7 +276,7 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
       else
       {
          // otherwise create a new pointlist
-         pntlst = new SGBitSet(numpoints());
+         pntlst = DEBUG_NEW SGBitSet(numpoints());
          // select some more points using shape specific procedures
          select_points(select_in, pntlst);
          // and check 
@@ -311,7 +311,7 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
       if (sh_partsel == _status) // if the shape is already partially selected
          pntlst = SI.second;
       else // otherwise (sh_selected) create a new pointlist
-         SI.second = pntlst = new SGBitSet(numpoints());
+         SI.second = pntlst = DEBUG_NEW SGBitSet(numpoints());
       // finally - go and unselect some points   
       unselect_points(select_in, pntlst);
       if (pntlst->isallclear()) {//none selected
@@ -372,8 +372,8 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
 //-----------------------------------------------------------------------------
 laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata() 
 {
-   _p1 = new TP(tedfile->getTP());
-   _p2 = new TP(tedfile->getTP());
+   _p1 = DEBUG_NEW TP(tedfile->getTP());
+   _p2 = DEBUG_NEW TP(tedfile->getTP());
    normalize();
 }
 
@@ -519,7 +519,7 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet* plst)
    }
    else
    {// used for rotate
-      laydata::valid_box* check = new valid_box(*_p1, *_p2 ,trans);
+      laydata::valid_box* check = DEBUG_NEW valid_box(*_p1, *_p2 ,trans);
       if (laydata::shp_box & check->status())
       {
          // modify the box ONLY if we're going to get a box
@@ -541,9 +541,9 @@ void laydata::tdtbox::transfer(const CTM& trans) {
 }
 
 laydata::tdtdata* laydata::tdtbox::copy(const CTM& trans) {
-   TP *cp1 = new TP(*_p1 * trans);
-   TP *cp2 = new TP(*_p2 * trans);
-   return new tdtbox(cp1, cp2);
+   TP *cp1 = DEBUG_NEW TP(*_p1 * trans);
+   TP *cp2 = DEBUG_NEW TP(*_p2 * trans);
+   return DEBUG_NEW tdtbox(cp1, cp2);
 }
 
 void laydata::tdtbox::info(std::ostringstream& ost, real DBU) const {
@@ -592,10 +592,10 @@ DBbox laydata::tdtbox::overlap() const {
 }
 
 void  laydata::tdtbox::addpoint(TP p) {
-   if (!_p1) _p1 = new TP(p);
+   if (!_p1) _p1 = DEBUG_NEW TP(p);
    else {
       if (_p2) delete _p2; // This line seems to be redundant
-      _p2 = new TP(p);
+      _p2 = DEBUG_NEW TP(p);
    }
 }
 
@@ -649,7 +649,7 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
 pointlist& laydata::tdtbox::movePointsSelected(const SGBitSet* pset, 
                                     const CTM&  movedM, const CTM& stableM) const {
   // convert box to polygon
-   pointlist* mlist = new pointlist();
+   pointlist* mlist = DEBUG_NEW pointlist();
    mlist->push_back(TP(*_p1));mlist->push_back(TP(_p2->x(), _p1->y()));
    mlist->push_back(TP(*_p2));mlist->push_back(TP(_p1->x(), _p2->y()));
 
@@ -822,7 +822,7 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet* plst)
    {// modify i.e. move when only part of the polygon is selected
     // should get here only
       pointlist& nshape = movePointsSelected(plst, trans);
-      laydata::valid_poly* check = new laydata::valid_poly(nshape);
+      laydata::valid_poly* check = DEBUG_NEW laydata::valid_poly(nshape);
       if (laydata::shp_OK == check->status()) {
          // assign the modified pointlist ONLY if the resulting shape is perfect
          _plist.clear(); _plist = nshape;
@@ -842,12 +842,12 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet* plst)
       {  // The whole gymnastics is because of the Rotate operation (on angles <> 90)
          // Rotated box is converted to polygon. Means that polygon after rotatoin could
          // produce a box
-         pointlist* mlist = new pointlist(_plist);
+         pointlist* mlist = DEBUG_NEW pointlist(_plist);
          for (unsigned i = 0; i < _plist.size(); i++)
             (*mlist)[i] *= trans;
          //@TODO: It's a waste of resources to recheck every polygon again. What we need here is
          // only check for box. Validation classes has to be optimized
-         laydata::valid_poly* check = new laydata::valid_poly(*mlist);
+         laydata::valid_poly* check = DEBUG_NEW laydata::valid_poly(*mlist);
          if (!(laydata::shp_box & check->status()))
          {
             // leave the modified pointlist ONLY if the resulting shape is not a box
@@ -885,7 +885,7 @@ laydata::tdtdata* laydata::tdtpoly::copy(const CTM& trans) {
    ptlist.reserve(_plist.size());
    for (unsigned i = 0; i < _plist.size(); i++) 
       ptlist.push_back(_plist[i] * trans);
-   return new tdtpoly(ptlist);
+   return DEBUG_NEW tdtpoly(ptlist);
 }
 
 bool laydata::tdtpoly::point_inside(TP pnt) {
@@ -987,7 +987,7 @@ DBbox laydata::tdtpoly::overlap() const {
 
 pointlist& laydata::tdtpoly::movePointsSelected(const SGBitSet* pset, 
                                     const CTM&  movedM, const CTM& stableM) const {
-   pointlist* mlist = new pointlist(_plist);
+   pointlist* mlist = DEBUG_NEW pointlist(_plist);
    word size = mlist->size();
    PSegment seg1,seg0;
    // See the note about this algo in tdtbox::movePointsSelected above
@@ -1044,7 +1044,7 @@ DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const {
       xcorr = rint(w * (sl / sqsl)); 
       ycorr = rint(w * ( 1 / sqsl));
    }
-   return new DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
+   return DEBUG_NEW DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
                      (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
 }
 
@@ -1063,7 +1063,7 @@ DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
    if (0 == L2) return NULL;
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
-   return new DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
+   return DEBUG_NEW DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
                      (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
 }
 
@@ -1275,7 +1275,7 @@ float laydata::tdtwire::get_distance(TP p1, TP p2, TP p0)
       float Cn = A*p0.x() + B*p0.y() + C;
       float X = p0.x() - (A / dist) * Cn;
       float Y = p0.y() - (B / dist) * Cn;
-      // now check that the new coordinate is on the p1-p2 line
+      // now check that the DEBUG_NEW coordinate is on the p1-p2 line
       if ((((Y >= p1.y()) && (Y <= p2.y()))||((Y <= p1.y()) && (Y >= p2.y()))) &&
           (((X >= p1.x()) && (X <= p2.x()))||((X <= p1.x()) && (X >= p2.x())))   )
          return fabsf(Cn / sqrt(dist));
@@ -1303,7 +1303,7 @@ laydata::validator* laydata::tdtwire::move(const CTM& trans, SGBitSet* plst)
 {
    if (plst) {
       pointlist nshape = movePointsSelected(plst, trans);
-      laydata::valid_wire* check = new laydata::valid_wire(nshape, _width);
+      laydata::valid_wire* check = DEBUG_NEW laydata::valid_wire(nshape, _width);
       if (laydata::shp_OK == check->status()) {
          // assign the modified pointlist ONLY if the resulting shape is perfect
          _plist.clear(); _plist = nshape;
@@ -1328,7 +1328,7 @@ laydata::tdtdata* laydata::tdtwire::copy(const CTM& trans) {
    ptlist.reserve(_plist.size());
    for (unsigned i = 0; i < _plist.size(); i++) 
       ptlist.push_back(_plist[i] * trans);
-   return new tdtwire(ptlist,_width);
+   return DEBUG_NEW tdtwire(ptlist,_width);
 }
 
 void laydata::tdtwire::info(std::ostringstream& ost, real DBU) const {
@@ -1398,7 +1398,7 @@ DBbox laydata::tdtwire::overlap() const
 
 pointlist& laydata::tdtwire::movePointsSelected(const SGBitSet* pset, 
                                     const CTM& movedM, const CTM& stableM) const {
-   pointlist* mlist = new pointlist(_plist);
+   pointlist* mlist = DEBUG_NEW pointlist(_plist);
    word size = mlist->size();
    PSegment seg1,seg0;
    for (int i = 0; i < size; i++) {
@@ -1607,7 +1607,7 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
       if (nshp->end() != nshp->find(CL->first))  
          ssl = (*nshp)[CL->first];
       else {
-         ssl = new shapeList();
+         ssl = DEBUG_NEW shapeList();
          (*nshp)[CL->first] = ssl;
       }   
       // for every single shape on the layer
@@ -1925,7 +1925,7 @@ void  laydata::tdtcellaref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, layd
          CTM refCTM;
          refCTM.Translate(_arrprops.stepX() * i , _arrprops.stepY() * j );
          refCTM *= _translation;
-         laydata::tdtcellref* cellref = new tdtcellref(_structure, refCTM);
+         laydata::tdtcellref* cellref = DEBUG_NEW tdtcellref(_structure, refCTM);
          cellref->ungroup(ATDB, dst, nshp);
          delete cellref;
       }
@@ -2210,10 +2210,10 @@ laydata::valid_box::valid_box(const TP& p1, const TP& p2, const CTM& trans) : va
 laydata::tdtdata* laydata::valid_box::replacement()
 {
    if (box()) {
-      TP* p1= new TP(_plist[0]); TP* p2= new TP(_plist[2]);
-      return new laydata::tdtbox(p1, p2);
+      TP* p1= DEBUG_NEW TP(_plist[0]); TP* p2= DEBUG_NEW TP(_plist[2]);
+      return DEBUG_NEW laydata::tdtbox(p1, p2);
    }
-   else return new laydata::tdtpoly(_plist);
+   else return DEBUG_NEW laydata::tdtpoly(_plist);
 }
 
 char* laydata::valid_box::failtype()
@@ -2237,10 +2237,10 @@ laydata::valid_poly::valid_poly(const pointlist& plist) : validator(plist) {
 laydata::tdtdata* laydata::valid_poly::replacement() {
    laydata::tdtdata* newshape;
    if (box()) {
-      TP* p1= new TP(_plist[0]); TP* p2= new TP(_plist[2]);
-      newshape = new laydata::tdtbox(p1, p2);
+      TP* p1= DEBUG_NEW TP(_plist[0]); TP* p2= DEBUG_NEW TP(_plist[2]);
+      newshape = DEBUG_NEW laydata::tdtbox(p1, p2);
    }
-   else newshape = new laydata::tdtpoly(_plist);
+   else newshape = DEBUG_NEW laydata::tdtpoly(_plist);
    return newshape;
 }
 
@@ -2433,7 +2433,7 @@ void laydata::valid_wire::selfcrossing() {
 }
 
 laydata::tdtdata* laydata::valid_wire::replacement() {
-   return new laydata::tdtwire(_plist, _width);
+   return DEBUG_NEW laydata::tdtwire(_plist, _width);
 }   
 
 char* laydata::valid_wire::failtype() {
@@ -2478,9 +2478,9 @@ laydata::tdtdata* laydata::createValidShape(pointlist* pl) {
    laydata::tdtdata* newshape;
    pointlist npl = check.get_validated();
    if (check.box())
-      newshape = new laydata::tdtbox(new TP(npl[2]),new TP(npl[0]));
+      newshape = DEBUG_NEW laydata::tdtbox(DEBUG_NEW TP(npl[2]),DEBUG_NEW TP(npl[0]));
    else
-      newshape = new laydata::tdtpoly(npl);
+      newshape = DEBUG_NEW laydata::tdtpoly(npl);
    npl.clear();
    return newshape;
 }
