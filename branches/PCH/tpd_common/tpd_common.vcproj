@@ -117,7 +117,6 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Tp&quot;../tpd_common/glf.c&quot;"
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
@@ -198,23 +197,22 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="glf.c"
+				RelativePath=".\glf.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
+						CompileAs="2"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
 					>
 					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="cl /c /Tpglf.c /D&quot;WIN32&quot; /Fo&quot;./Debug/glf.obj&quot;&#x0D;&#x0A;"
-						Outputs="./Debug/glf.obj"
+						Name="VCCLCompilerTool"
+						CompileAs="2"
 					/>
 				</FileConfiguration>
 			</File>

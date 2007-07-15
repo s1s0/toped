@@ -46,7 +46,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Debug/tpd_parser.pch"
 				AssemblerListingLocation=".\Debug/"
@@ -204,6 +204,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -224,6 +225,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -275,6 +277,18 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\tpdph.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -296,6 +310,10 @@
 				RelativePath="tldat.h"
 				>
 			</File>
+			<File
+				RelativePath=".\tpdph.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="FlexBison Files"
@@ -308,7 +326,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="flex2CPP.bat&#x0D;&#x0A;"
+						CommandLine="Flex2CPP.BAT&#x0D;&#x0A;"
 						Outputs="$(InputName).cpp"
 					/>
 				</FileConfiguration>

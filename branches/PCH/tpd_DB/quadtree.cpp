@@ -54,12 +54,12 @@ laydata::quadTree::quadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX)
    while (tedf_LAYEREND != (recordtype = tedfile->getByte())) 
       switch (recordtype) 
       {
-         case      tedf_BOX: put(new tdtbox(tedfile));break;
-         case     tedf_POLY: put(new tdtpoly(tedfile));break;
-         case     tedf_WIRE: put(new tdtwire(tedfile));break;
-         case     tedf_TEXT: put(new tdttext(tedfile));break;
-         case  tedf_CELLREF: put(new tdtcellref(tedfile));break;
-         case tedf_CELLAREF: put(new tdtcellaref(tedfile));break;
+         case      tedf_BOX: put(DEBUG_NEW tdtbox(tedfile));break;
+         case     tedf_POLY: put(DEBUG_NEW tdtpoly(tedfile));break;
+         case     tedf_WIRE: put(DEBUG_NEW tdtwire(tedfile));break;
+         case     tedf_TEXT: put(DEBUG_NEW tdttext(tedfile));break;
+         case  tedf_CELLREF: put(DEBUG_NEW tdtcellref(tedfile));break;
+         case tedf_CELLAREF: put(DEBUG_NEW tdtcellaref(tedfile));break;
          //--------------------------------------------------
          default: throw EXPTNreadTDT("Unexpected record type");
       }
@@ -124,7 +124,7 @@ bool laydata::quadTree::fitintree(tdtdata* shape) {
       DBbox subbox = _overlap.getcorner(i);
       clipedarea[i] = subbox.cliparea(shovl,true);
       if (-1 == clipedarea[i]) {//entirely inside the area
-         if (!_quads[i]) _quads[i] = new quadTree();
+         if (!_quads[i]) _quads[i] = DEBUG_NEW quadTree();
          _quads[i]->add(shape);
          return true;
       }
@@ -139,7 +139,7 @@ bool laydata::quadTree::fitintree(tdtdata* shape) {
    // if the max area of the candidate does not blow more than 10% - 
    // then seems to be OK to get it
    if (newovl.area() < 1.1 * (_overlap.area() / 4)) {
-      if (!_quads[candidate]) _quads[candidate] = new quadTree();
+      if (!_quads[candidate]) _quads[candidate] = DEBUG_NEW quadTree();
       _quads[candidate]->add(shape);
       return true;
    }
@@ -220,7 +220,7 @@ void laydata::quadTree::sort(dataList inlist) {
             _quads[fitinsubbox]->_overlap.overlap(shovl);
          else {   
             // create the child, initialize the overlapping box
-            _quads[fitinsubbox] = new quadTree();
+            _quads[fitinsubbox] = DEBUG_NEW quadTree();
             _quads[fitinsubbox]->_overlap = shovl;
          }
       }
@@ -869,7 +869,7 @@ laydata::quadTree::~quadTree() {
 just added to the quadTree (using quadTree::put()) without sorting or fit on 
 the proper place (using add() */
 laydata::tdtdata* laydata::tdtlayer::addbox(TP* p1, TP* p2, bool sortnow) {
-   laydata::tdtbox *shape = new tdtbox(p1,p2);
+   laydata::tdtbox *shape = DEBUG_NEW tdtbox(p1,p2);
    if (sortnow) add(shape);
    else         put(shape);
    return shape;
@@ -878,7 +878,7 @@ laydata::tdtdata* laydata::tdtlayer::addbox(TP* p1, TP* p2, bool sortnow) {
 just added to the quadTree (using quadTree::put()) without sorting or fit on 
 the proper place (using add() */
 laydata::tdtdata* laydata::tdtlayer::addpoly(pointlist& pl, bool sortnow) {
-   laydata::tdtpoly *shape = new tdtpoly(pl);
+   laydata::tdtpoly *shape = DEBUG_NEW tdtpoly(pl);
    if (sortnow) add(shape);
    else         put(shape);
    return shape;
@@ -888,7 +888,7 @@ just added to the quadTree (using quadTree::put()) without sorting or fit on
 the proper place (using add() */
 laydata::tdtdata* laydata::tdtlayer::addwire(pointlist& pl,word w, 
                                                                  bool sortnow) {
-   laydata::tdtwire *shape = new tdtwire(pl,w);
+   laydata::tdtwire *shape = DEBUG_NEW tdtwire(pl,w);
    if (sortnow) add(shape);
    else         put(shape);
    return shape;
@@ -898,7 +898,7 @@ just added to the quadTree (using quadTree::put()) without sorting or fit on
 the proper place (using add() */
 laydata::tdtdata* laydata::tdtlayer::addtext(std::string text, 
                                                       CTM trans, bool sortnow) {
-   laydata::tdttext *shape = new tdttext(text,trans);
+   laydata::tdttext *shape = DEBUG_NEW tdttext(text,trans);
    if (sortnow) add(shape);
    else         put(shape);
    return shape;

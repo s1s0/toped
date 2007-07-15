@@ -38,10 +38,10 @@ extern console::toped_logfile    LogFile;
 
 //=============================================================================
 tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdADDBOX::undo_cleanup() {
@@ -64,13 +64,13 @@ void tellstdfunc::stdADDBOX::undo() {
 int tellstdfunc::stdADDBOX::execute() {
    UNDOcmdQ.push_front(this);
    word la = getWordValue();
-   UNDOPstack.push_front(new telldata::ttint(la));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = new telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB),la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB),la);
    DATC->unlockDB();
    OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
    LogFile << LogFile.getFN() << "("<< *w << "," << la << ");";LogFile.flush();
@@ -81,9 +81,9 @@ int tellstdfunc::stdADDBOX::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype, bool eor) :
-      stdADDBOX(new parsercmd::argumentLIST,retype,eor)
+      stdADDBOX(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 int tellstdfunc::stdADDBOX_D::execute() {
@@ -93,9 +93,9 @@ int tellstdfunc::stdADDBOX_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdDRAWBOX::stdDRAWBOX(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdDRAWBOX::undo_cleanup() {
@@ -120,14 +120,14 @@ int tellstdfunc::stdDRAWBOX::execute() {
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttint(la));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = new telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
    DATC->unlockDB();
    OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
    LogFile << "addbox("<< *w << "," << la << ");";LogFile.flush();
@@ -138,7 +138,7 @@ int tellstdfunc::stdDRAWBOX::execute() {
 
 //=============================================================================
 tellstdfunc::stdDRAWBOX_D::stdDRAWBOX_D(telldata::typeID retype, bool eor) :
-      stdDRAWBOX(new parsercmd::argumentLIST,retype,eor)
+      stdDRAWBOX(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdDRAWBOX_D::execute() {
@@ -148,12 +148,12 @@ int tellstdfunc::stdDRAWBOX_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdADDBOXr::undo_cleanup() {
@@ -176,16 +176,16 @@ void tellstdfunc::stdADDBOXr::undo() {
 int tellstdfunc::stdADDBOXr::execute() {
    UNDOcmdQ.push_front(this);
    word     la = getWordValue();
-   UNDOPstack.push_front(new telldata::ttint(la));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    real heigth = getOpValue();
    real width  = getOpValue();
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt  p2 = telldata::ttpnt(p1->x()+width,p1->y()+heigth);
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
-   TP* p2DB = new TP(p2.x() , p2.y() , DBscale);
+   TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(p2.x() , p2.y() , DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = new telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
    DATC->unlockDB();
    OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
    LogFile << LogFile.getFN() << "("<< *p1 << "," << width << "," << heigth <<
@@ -197,11 +197,11 @@ int tellstdfunc::stdADDBOXr::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype, bool eor) :
-      stdADDBOXr(new parsercmd::argumentLIST,retype,eor)
+      stdADDBOXr(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::stdADDBOXr_D::execute() {
@@ -211,11 +211,11 @@ int tellstdfunc::stdADDBOXr_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdADDBOXp::undo_cleanup() {
@@ -238,14 +238,14 @@ void tellstdfunc::stdADDBOXp::undo() {
 int tellstdfunc::stdADDBOXp::execute() {
    UNDOcmdQ.push_front(this);
    word     la = getWordValue();
-   UNDOPstack.push_front(new telldata::ttint(la));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
-   TP* p2DB = new TP(p2->x(), p2->y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(p2->x(), p2->y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = new telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
    DATC->unlockDB();   
    OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << "," << la << ");"; 
@@ -257,10 +257,10 @@ int tellstdfunc::stdADDBOXp::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype, bool eor) :
-      stdADDBOXp(new parsercmd::argumentLIST,retype,eor)
+      stdADDBOXp(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 int tellstdfunc::stdADDBOXp_D::execute() {
@@ -270,10 +270,10 @@ int tellstdfunc::stdADDBOXp_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdADDPOLY::undo_cleanup() {
@@ -298,11 +298,11 @@ int tellstdfunc::stdADDPOLY::execute() {
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() >= 3) {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       real DBscale = DATC->DBscale();
       laydata::tdtdesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* ply = new telldata::ttlayout(ATDB->addpoly(la,plst), la);
+         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addpoly(la,plst), la);
          delete plst;
       DATC->unlockDB();
       OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
@@ -311,7 +311,7 @@ int tellstdfunc::stdADDPOLY::execute() {
    }
    else {
       tell_log(console::MT_ERROR,"At least 3 points expected to create a polygon");
-      OPstack.push(new telldata::ttlayout());
+      OPstack.push(DEBUG_NEW telldata::ttlayout());
    }
    delete pl;
    RefreshGL();
@@ -320,9 +320,9 @@ int tellstdfunc::stdADDPOLY::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDPOLY_D::stdADDPOLY_D(telldata::typeID retype, bool eor) :
-      stdADDPOLY(new parsercmd::argumentLIST,retype,eor)
+      stdADDPOLY(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
 }
 
 int tellstdfunc::stdADDPOLY_D::execute() {
@@ -332,9 +332,9 @@ int tellstdfunc::stdADDPOLY_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdDRAWPOLY::stdDRAWPOLY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdDRAWPOLY::undo_cleanup() {
@@ -362,11 +362,11 @@ int tellstdfunc::stdDRAWPOLY::execute() {
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() >= 3) {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       real DBscale = DATC->DBscale();
       laydata::tdtdesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* ply = new telldata::ttlayout(ATDB->addpoly(la,plst), la);
+         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addpoly(la,plst), la);
          delete plst;
       DATC->unlockDB();
       OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
@@ -374,7 +374,7 @@ int tellstdfunc::stdDRAWPOLY::execute() {
    }
    else {
       tell_log(console::MT_ERROR,"At least 3 points expected to create a polygon");
-      OPstack.push(new telldata::ttlayout());
+      OPstack.push(DEBUG_NEW telldata::ttlayout());
    }
    delete pl;
    RefreshGL();
@@ -383,7 +383,7 @@ int tellstdfunc::stdDRAWPOLY::execute() {
 
 //=============================================================================
 tellstdfunc::stdDRAWPOLY_D::stdDRAWPOLY_D(telldata::typeID retype, bool eor) :
-      stdDRAWPOLY(new parsercmd::argumentLIST,retype,eor)
+      stdDRAWPOLY(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdDRAWPOLY_D::execute() {
@@ -393,11 +393,11 @@ int tellstdfunc::stdDRAWPOLY_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdADDWIRE::undo_cleanup() {
@@ -423,11 +423,11 @@ int tellstdfunc::stdADDWIRE::execute() {
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() > 1) {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       real DBscale = DATC->DBscale();
       laydata::tdtdesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* wr = new telldata::ttlayout(ATDB->addwire(la,plst,
+         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(la,plst,
                                     static_cast<word>(rint(w * DBscale))), la);
          delete plst;
       DATC->unlockDB();
@@ -437,7 +437,7 @@ int tellstdfunc::stdADDWIRE::execute() {
    }
    else {
       tell_log(console::MT_ERROR,"At least 2 points expected to create a wire");
-      OPstack.push(new telldata::ttlayout());
+      OPstack.push(DEBUG_NEW telldata::ttlayout());
    }
    delete pl;
    RefreshGL();
@@ -446,10 +446,10 @@ int tellstdfunc::stdADDWIRE::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDWIRE_D::stdADDWIRE_D(telldata::typeID retype, bool eor) :
-      stdADDWIRE(new parsercmd::argumentLIST,retype,eor)
+      stdADDWIRE(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::stdADDWIRE_D::execute() {
@@ -459,10 +459,10 @@ int tellstdfunc::stdADDWIRE_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdDRAWWIRE::stdDRAWWIRE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdDRAWWIRE::undo_cleanup() {
@@ -492,10 +492,10 @@ int tellstdfunc::stdDRAWWIRE::execute() {
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() > 1) {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       laydata::tdtdesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* wr = new telldata::ttlayout(ATDB->addwire(la,plst,
+         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(la,plst,
                                     static_cast<word>(rint(w * DBscale))), la);
          delete plst;
       DATC->unlockDB();
@@ -505,7 +505,7 @@ int tellstdfunc::stdDRAWWIRE::execute() {
    }
    else {
       tell_log(console::MT_ERROR,"At least 2 points expected to create a wire");
-      OPstack.push(new telldata::ttlayout());
+      OPstack.push(DEBUG_NEW telldata::ttlayout());
    }
    delete pl;
    RefreshGL();
@@ -514,9 +514,9 @@ int tellstdfunc::stdDRAWWIRE::execute() {
 
 //=============================================================================
 tellstdfunc::stdDRAWWIRE_D::stdDRAWWIRE_D(telldata::typeID retype, bool eor) :
-      stdDRAWWIRE(new parsercmd::argumentLIST,retype,eor)
+      stdDRAWWIRE(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::stdDRAWWIRE_D::execute() {
@@ -526,14 +526,14 @@ int tellstdfunc::stdDRAWWIRE_D::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 void tellstdfunc::stdADDTEXT::undo_cleanup() {
@@ -561,13 +561,13 @@ int tellstdfunc::stdADDTEXT::execute() {
    real   angle  = getOpValue();
    telldata::ttpnt  *rpnt  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    word      la  = getWordValue();
-   UNDOPstack.push_front(new telldata::ttint(la));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    std::string text = getStringValue();
    real DBscale = DATC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale),
                                      magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* tx = new telldata::ttlayout(ATDB->addtext(la, text, ori), la);
+      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(ATDB->addtext(la, text, ori), la);
    DATC->unlockDB();
    OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
    LogFile << LogFile.getFN() << "(\"" << text << "\"," << la << "," << *rpnt <<
@@ -580,10 +580,10 @@ int tellstdfunc::stdADDTEXT::execute() {
 
 //=============================================================================
 tellstdfunc::stdADDTEXT_D::stdADDTEXT_D(telldata::typeID retype, bool eor) :
-      stdADDTEXT(new parsercmd::argumentLIST,retype,eor)
+      stdADDTEXT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::stdADDTEXT_D::execute() {
@@ -596,25 +596,25 @@ int tellstdfunc::stdADDTEXT_D::execute() {
    // get the data from the stack
    telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
 
-   OPstack.push(new telldata::ttstring(name));
+   OPstack.push(DEBUG_NEW telldata::ttstring(name));
    OPstack.push(CurrentLayer());
-   OPstack.push(new telldata::ttpnt(bnd->p()));
-   OPstack.push(new telldata::ttreal(bnd->rot()));
-   OPstack.push(new telldata::ttbool(bnd->flx()));
-   OPstack.push(new telldata::ttreal(bnd->sc()));
+   OPstack.push(DEBUG_NEW telldata::ttpnt(bnd->p()));
+   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->rot()));
+   OPstack.push(DEBUG_NEW telldata::ttbool(bnd->flx()));
+   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->sc()));
    delete bnd;
    return stdADDTEXT::execute();
 }
 
 //=============================================================================
 tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 void tellstdfunc::stdCELLREF::undo_cleanup() {
@@ -643,7 +643,7 @@ int tellstdfunc::stdCELLREF::execute() {
    real DBscale = DATC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* cl = new telldata::ttlayout(ATDB->addcellref(name,ori), 0);
+      telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(name,ori), 0);
    DATC->unlockDB();
    OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
@@ -656,9 +656,9 @@ int tellstdfunc::stdCELLREF::execute() {
 
 //=============================================================================
 tellstdfunc::stdCELLREF_D::stdCELLREF_D(telldata::typeID retype, bool eor) :
-      stdCELLREF(new parsercmd::argumentLIST,retype,eor)
+      stdCELLREF(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdCELLREF_D::execute() {
@@ -682,28 +682,28 @@ int tellstdfunc::stdCELLREF_D::execute() {
    // get the data from the stack
    telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
 
-   OPstack.push(new telldata::ttstring(name));
-   OPstack.push(new telldata::ttpnt(bnd->p()));
-   OPstack.push(new telldata::ttreal(bnd->rot()));
-   OPstack.push(new telldata::ttbool(bnd->flx()));
-   OPstack.push(new telldata::ttreal(bnd->sc()));
+   OPstack.push(DEBUG_NEW telldata::ttstring(name));
+   OPstack.push(DEBUG_NEW telldata::ttpnt(bnd->p()));
+   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->rot()));
+   OPstack.push(DEBUG_NEW telldata::ttbool(bnd->flx()));
+   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->sc()));
    delete bnd;
    return stdCELLREF::execute();
 }
 
 //=============================================================================
 tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 void tellstdfunc::stdCELLAREF::undo_cleanup() {
@@ -741,7 +741,7 @@ int tellstdfunc::stdCELLAREF::execute() {
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
    laydata::ArrayProperties arrprops(istepX,istepY,col,row);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* cl = new telldata::ttlayout(
+      telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(
             ATDB->addcellaref(name,ori,arrprops),0);
    DATC->unlockDB();
    OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
@@ -756,13 +756,13 @@ int tellstdfunc::stdCELLAREF::execute() {
 
 //=============================================================================
 tellstdfunc::stdCELLAREF_D::stdCELLAREF_D(telldata::typeID retype, bool eor) :
-      stdCELLAREF(new parsercmd::argumentLIST,retype,eor)
+      stdCELLAREF(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::stdCELLAREF_D::execute() {
@@ -796,24 +796,24 @@ int tellstdfunc::stdCELLAREF_D::execute() {
    // get the data from the stack
    telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
 
-   OPstack.push(new telldata::ttstring(name));
-   OPstack.push(new telldata::ttpnt(bnd->p()));
-   OPstack.push(new telldata::ttreal(bnd->rot()));
-   OPstack.push(new telldata::ttbool(bnd->flx()));
-   OPstack.push(new telldata::ttreal(bnd->sc()));
-   OPstack.push(new telldata::ttint(col));
-   OPstack.push(new telldata::ttint(row));
-   OPstack.push(new telldata::ttreal(stepX));
-   OPstack.push(new telldata::ttreal(stepY));
+   OPstack.push(DEBUG_NEW telldata::ttstring(name));
+   OPstack.push(DEBUG_NEW telldata::ttpnt(bnd->p()));
+   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->rot()));
+   OPstack.push(DEBUG_NEW telldata::ttbool(bnd->flx()));
+   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->sc()));
+   OPstack.push(DEBUG_NEW telldata::ttint(col));
+   OPstack.push(DEBUG_NEW telldata::ttint(row));
+   OPstack.push(DEBUG_NEW telldata::ttreal(stepX));
+   OPstack.push(DEBUG_NEW telldata::ttreal(stepY));
    delete bnd;
    return stdCELLAREF::execute();
 }
 
 //=============================================================================
 tellstdfunc::stdUSINGLAYER::stdUSINGLAYER(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdUSINGLAYER::undo_cleanup() {
@@ -840,7 +840,7 @@ int tellstdfunc::stdUSINGLAYER::execute() {
    }   
    browsers::layer_default(layno, DATC->curlay());
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttint(DATC->curlay()));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(DATC->curlay()));
    DATC->defaultlayer(layno);
    LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
    return EXEC_NEXT;
@@ -848,16 +848,16 @@ int tellstdfunc::stdUSINGLAYER::execute() {
 
 //=============================================================================
 tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor) :
-      stdUSINGLAYER(new parsercmd::argumentLIST,retype,eor)
+      stdUSINGLAYER(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdUSINGLAYER_S::execute() {
   std::string layname = getStringValue();
   word layno = DATC->getLayerNo(layname);
   if (layno > 0) {
-    OPstack.push(new telldata::ttint(layno));
+    OPstack.push(DEBUG_NEW telldata::ttint(layno));
     return stdUSINGLAYER::execute();
   }
   else {// no layer with this name

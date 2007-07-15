@@ -81,7 +81,7 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
       }
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
-      // first create a new cell
+      // first create a DEBUG_NEW cell
       dst_structure = _dst_lib->addcell(gname);
       // now call the cell converter
       convert(src_structure, dst_structure);
@@ -120,7 +120,7 @@ void GDSin::gds2ted::polygon(GDSin::GDSpolygon* wd, laydata::tdtcell* dst) {
    }   
    else pl = check.get_validated() ;
    if (check.box()) {
-      wl->addbox(new TP(pl[0]), new TP(pl[2]),false);
+      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
    }
    else wl->addpoly(pl,false);
 }
@@ -349,7 +349,7 @@ void DataCenter::GDSparse(std::string filename)
    }
    // parse the GDS file - don't forget to lock the GDS mutex here!
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
-   _GDSDB = new GDSin::GDSFile(filename.c_str());
+   _GDSDB = DEBUG_NEW GDSin::GDSFile(filename.c_str());
    if (_GDSDB->status())
    {
       // generate the hierarchy tree of cells
@@ -403,7 +403,7 @@ void DataCenter::newDesign(std::string name, time_t created)
       // but there is still a chance to restore everything - using the log file.
       delete _TEDDB;
    }   
-   _TEDDB = new laydata::tdtdesign(name, created, 0);
+   _TEDDB = DEBUG_NEW laydata::tdtdesign(name, created, 0);
    _TEDDB->assign_properties(_properties);
    _tedfilename = name + ".tdt";
    _neversaved = true;
@@ -655,6 +655,6 @@ void DataCenter::clearRulers()
 
 void initDBLib()
 {
-   DATC = new DataCenter();
+   DATC = DEBUG_NEW DataCenter();
 }
 

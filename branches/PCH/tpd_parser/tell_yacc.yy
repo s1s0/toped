@@ -38,6 +38,7 @@
 /*Switch on code processing locations for more acurate error messages*/
 %locations
 %{
+#include "tpdph.h"
 #include <sstream>
 #include "tellyzer.h"
 #include "ted_prompt.h"
@@ -274,7 +275,7 @@ entrance:
 
 funcdeclaration:
      telltypeID tknIDENTIFIER '('          {
-      cfd = new parsercmd::FuncDeclaration($2, $1) ;
+      cfd = DEBUG_NEW parsercmd::FuncDeclaration($2, $1) ;
    }
      funcarguments ')'                     {
       CMDBlock->addUSERFUNCDECL(cfd,@$);
@@ -293,7 +294,7 @@ funcdefinition:
  
 block:
      '{'                                   {
-         CMDBlock = new parsercmd::cmdBLOCK();
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
      statements '}'                        {
@@ -304,7 +305,7 @@ block:
 
 funcblock :
      '{'                                   {
-         CMDBlock = new parsercmd::cmdFUNC(cfd->argListCopy(),cfd->type(),false);
+         CMDBlock = DEBUG_NEW parsercmd::cmdFUNC(cfd->argListCopy(),cfd->type(),false);
          CMDBlock->pushblk();
       }
      statements '}'                        {
@@ -317,7 +318,7 @@ returnstatement :
      tknRETURN                             {
       if (!cfd) tellerror("return statement outside function body", @1);
       else {
-         parsercmd::cmdRETURN* rcmd = new parsercmd::cmdRETURN(cfd->type());
+         parsercmd::cmdRETURN* rcmd = DEBUG_NEW parsercmd::cmdRETURN(cfd->type());
          if (rcmd->checkRetype(NULL)) CMDBlock->pushcmd(rcmd);
          else {
             tellerror("return value expected", @1);
@@ -329,7 +330,7 @@ returnstatement :
    | tknRETURN  argument                   {
       if (!cfd) tellerror("return statement outside function body", @1);
       else {
-         parsercmd::cmdRETURN* rcmd = new parsercmd::cmdRETURN(cfd->type());
+         parsercmd::cmdRETURN* rcmd = DEBUG_NEW parsercmd::cmdRETURN(cfd->type());
          if (rcmd->checkRetype($2)) CMDBlock->pushcmd(rcmd);
          else {
             tellerror("return type different from function type", @2);
@@ -344,18 +345,18 @@ returnstatement :
 ifstatement:
      tknIF '(' expression ')' block {
          if (telldata::tn_bool != $3) tellerror("bool type expected",@3);
-         else CMDBlock->pushcmd(new parsercmd::cmdIFELSE($5, NULL));
+         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE($5, NULL));
       }
 
    | tknIF '(' expression ')' block tknELSE block  {
          if (telldata::tn_bool != $3) tellerror("bool type expected",@3);
-         else CMDBlock->pushcmd(new parsercmd::cmdIFELSE($5,$7));
+         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE($5,$7));
       }
 ;
 
 whilestatement:
      tknWHILE '('                   {
-         CMDBlock = new parsercmd::cmdBLOCK();
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
      expression ')'                 {
@@ -364,7 +365,7 @@ whilestatement:
      block {
          parsercmd::cmdBLOCK* condBlock = CMDBlock;
          CMDBlock = CMDBlock->popblk();
-         CMDBlock->pushcmd(new parsercmd::cmdWHILE(condBlock,$7));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdWHILE(condBlock,$7));
       }
 ;
 
@@ -381,13 +382,13 @@ telllist:
 
 foreachstatement:
      tknFOREACH '('                 {
-         CMDBlock = new parsercmd::cmdBLOCK();
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
      lvalue ';' telllist ')'        {
          if  (($4 | telldata::tn_listmask) != $6)
             tellerror("unappropriate variable type",@4);
-         foreach_command = new parsercmd::cmdFOREACH(tell_lvalue,tellvar);
+         foreach_command = DEBUG_NEW parsercmd::cmdFOREACH(tell_lvalue,tellvar);
       }
      block                          {
          parsercmd::cmdBLOCK* foreach_block = CMDBlock;
@@ -399,7 +400,7 @@ foreachstatement:
 
 repeatstatement:
      tknREPEAT block tknUNTIL '('   {
-         CMDBlock = new parsercmd::cmdBLOCK();
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
      expression ')'                 {
@@ -409,7 +410,7 @@ repeatstatement:
             tellerror("bool type expected", @6);
             delete condBlock;
          }
-         else CMDBlock->pushcmd(new parsercmd::cmdREPEAT(condBlock,$2));
+         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdREPEAT(condBlock,$2));
    }
 ;
 
@@ -421,27 +422,27 @@ statements:
 statement:
                                            { }
    | variabledeclaration                   { }
-   | assignment                            {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
-   | ifstatement                           {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
-   | whilestatement                        {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
-   | foreachstatement                      {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
-   | repeatstatement                       {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
+   | assignment                            {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | ifstatement                           {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | whilestatement                        {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | foreachstatement                      {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | repeatstatement                       {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | returnstatement                       {/*keep the return value in the stack*/}
-   | funccall                              {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
-   | listremove                            {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
-   | listslice                             {CMDBlock->pushcmd(new parsercmd::cmdSTACKRST());}
+   | funccall                              {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | listremove                            {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | listslice                             {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | recorddefinition                      { }
 ;
 
 funccall:
      tknIDENTIFIER '('                     {
-        argmap = new telldata::argumentQ;
+        argmap = DEBUG_NEW telldata::argumentQ;
         argmapstack.push(argmap);
    }
       arguments ')'                        {
       parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4);
       if (fc) {
-         CMDBlock->pushcmd(new parsercmd::cmdFUNCCALL(fc,$1));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdFUNCCALL(fc,$1));
          $$ = fc->gettype();
       }
       else {
@@ -476,8 +477,8 @@ arguments:
 ;
 
 argument :
-     expression                            {$$ = new telldata::argumentID($1);}
-   | assignment                            {$$ = new telldata::argumentID($1);}
+     expression                            {$$ = DEBUG_NEW telldata::argumentID($1);}
+   | assignment                            {$$ = DEBUG_NEW telldata::argumentID($1);}
    | structure                             {$$ = $1;}
 ;
 
@@ -499,7 +500,7 @@ funcneargument:
 funcargument:
      telltypeID tknIDENTIFIER              {
       tellvar = CMDBlock->newTellvar($1, @1);
-      cfd->pushArg(new parsercmd::argumentTYPE($2,tellvar));
+      cfd->pushArg(DEBUG_NEW parsercmd::argumentTYPE($2,tellvar));
       delete [] $2;
    }
 ;
@@ -644,7 +645,7 @@ listinsert:
      variable '[' tknPREADD expression ']'    {
       if (ListIndexCheck($1, @1, $4, @4))
       {
-         listadd_command = new parsercmd::cmdLISTADD(tellvar,true, true);
+         listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,true, true);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
       else {
@@ -653,7 +654,7 @@ listinsert:
     }
    | variable '[' tknPREADD ']'               {
       if ($1 & telldata::tn_listmask) {
-         listadd_command = new parsercmd::cmdLISTADD(tellvar,true, false);
+         listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,true, false);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
       else {
@@ -664,7 +665,7 @@ listinsert:
    | variable '[' expression tknPOSTADD ']'   {
       if (ListIndexCheck($1, @1, $3, @3))
       {
-         listadd_command = new parsercmd::cmdLISTADD(tellvar,false, true);
+         listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,false, true);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
       else {
@@ -673,7 +674,7 @@ listinsert:
     }
    | variable '[' tknPOSTADD ']'              {
       if ($1 & telldata::tn_listmask) {
-         listadd_command = new parsercmd::cmdLISTADD(tellvar,false, false);
+         listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,false, false);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
       }
       else {
@@ -686,24 +687,24 @@ listinsert:
 listremove:
      variable '[' tknPRESUB expression ']'    {
       if (ListIndexCheck($1, @1, $4, @4))
-         CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,true, true));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,true, true));
       $$ = ($1 & (~telldata::tn_listmask));
     }
    | variable '[' tknPRESUB ']'               {
       if ($1 & telldata::tn_listmask)
-         CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,true, false));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,true, false));
       else
          tellerror("list expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
     }
    | variable '[' expression tknPOSTSUB ']'   {
       if (ListIndexCheck($1, @1, $3, @3))
-         CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,false, true));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,false, true));
       $$ = ($1 & (~telldata::tn_listmask));
     }
    | variable '[' tknPOSTSUB ']'              {
       if ($1 & telldata::tn_listmask)
-         CMDBlock->pushcmd(new parsercmd::cmdLISTSUB(tellvar,false, false));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,false, false));
       else
          tellerror("list expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
@@ -714,7 +715,7 @@ listslice:
      variable '[' expression tknPRESUB expression ']'    {
       if (ListSliceCheck($1, @1, $5, @5, $3, @3))
       {
-         CMDBlock->pushcmd(new parsercmd::cmdLISTSLICE(tellvar, true, true));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, true, true));
          $$ = $1;
       }
       else
@@ -723,7 +724,7 @@ listslice:
    | variable '[' expression tknPRESUB ']'    {
       if (ListSliceCheck($1, @1, $3, @3))
       {
-         CMDBlock->pushcmd(new parsercmd::cmdLISTSLICE(tellvar, true, false));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, true, false));
          $$ = $1;
       }
       else
@@ -732,7 +733,7 @@ listslice:
    | variable '[' expression tknPOSTSUB expression ']'   {
       if (ListSliceCheck($1, @1, $3, @3, $5, @5))
       {
-         CMDBlock->pushcmd(new parsercmd::cmdLISTSLICE(tellvar, false, true));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, false, true));
          $$ = $1;
       }
       else
@@ -741,7 +742,7 @@ listslice:
    | variable '[' tknPOSTSUB  expression ']'   {
       if (ListSliceCheck($1, @1, $4, @4))
       {
-         CMDBlock->pushcmd(new parsercmd::cmdLISTSLICE(tellvar, false, false));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, false, false));
          $$ = $1;
       }
       else
@@ -751,7 +752,7 @@ listslice:
 
 structure:
      '{'                                  {
-        argmap = new telldata::argumentQ;
+        argmap = DEBUG_NEW telldata::argumentQ;
         argmapstack.push(argmap);
    }
       nearguments '}'                     {
@@ -762,9 +763,9 @@ structure:
           are postponed untill we get the recepient - i.e. the lvalue or the
           function call. $$ is assigned to argumentID, that caries the whole argument
           queue listed in structure*/
-        parsercmd::cmdSTRUCT* struct_command = new parsercmd::cmdSTRUCT();
+        parsercmd::cmdSTRUCT* struct_command = DEBUG_NEW parsercmd::cmdSTRUCT();
         CMDBlock->pushcmd(struct_command);
-        $$ = new telldata::argumentID(argmap, struct_command);
+        $$ = DEBUG_NEW telldata::argumentID(argmap, struct_command);
         //argQClear(argmap);
         argmapstack.pop();
         delete argmap;
@@ -843,20 +844,20 @@ unaryexpression :
 
 primaryexpression : 
      tknREAL                               {$$ = telldata::tn_real;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttreal($1), false, true));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttreal($1), false, true));}
    | tknINT                                {$$ = telldata::tn_int;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttint($1), false, true));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttint($1), false, true));}
    | tknTRUE                               {$$ = telldata::tn_bool;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(true), false, true));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttbool(true), false, true));}
    | tknFALSE                              {$$ = telldata::tn_bool;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttbool(false), false, true));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttbool(false), false, true));}
    | tknSTRING                             {$$ = telldata::tn_string;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(new telldata::ttstring($1), false, true));
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttstring($1), false, true));
                                                                 delete [] $1;}
    | variable                              {$$ = $1;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, indexed));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(tellvar, indexed));}
    | anonymousvar                          {$$ = $1;
-      CMDBlock->pushcmd(new parsercmd::cmdPUSH(tellvar, false));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(tellvar, false));}
    | listremove                            {$$ = $1; indexed = false;}
    | listslice                             {$$ = $1; indexed = false;}
    | '(' expression ')'                    {$$ = $2;}

@@ -100,7 +100,7 @@ tedop::segmentlist::segmentlist(const pointlist& plst, bool wire) {
    unsigned plysize = plst.size();
    segs.reserve(plysize - adjustment);
    for (unsigned i = 0; i < plysize - adjustment; i++)
-      segs.push_back(new plysegment(&(plst[i]),&(plst[(i+1)%plysize]),i));
+      segs.push_back(DEBUG_NEW plysegment(&(plst[i]),&(plst[(i+1)%plysize]),i));
 }
 
 tedop::segmentlist::~segmentlist() {
@@ -116,8 +116,8 @@ tedop::EventQueue::EventQueue( const segmentlist& segments ) {
    equeue.reserve(2*segments.size());
    // Initialize event queue with edge segment endpoints
    for (unsigned i=0; i < segments.size(); i++) {
-      equeue.push_back(new LEvent(segments[i]));
-      equeue.push_back(new REvent(segments[i]));
+      equeue.push_back(DEBUG_NEW LEvent(segments[i]));
+      equeue.push_back(DEBUG_NEW REvent(segments[i]));
    }
    std::sort(equeue.begin(), equeue.end(), E_compare);
 }

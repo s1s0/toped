@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <cmath>
 #include <sstream>
 #include "tldat.h"
@@ -33,22 +34,22 @@
 //=============================================================================
 telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
    telldata::tell_var* nvar;
-   if (ID & telldata::tn_listmask) nvar = new telldata::ttlist(ID & ~telldata::tn_listmask);
+   if (ID & telldata::tn_listmask) nvar = DEBUG_NEW telldata::ttlist(ID & ~telldata::tn_listmask);
    else 
       switch(ID & ~telldata::tn_listmask) {
          case tn_void  : assert(false);
-         case tn_int   : nvar = new telldata::ttint()    ;break;
-         case tn_real  : nvar = new telldata::ttreal()   ;break;
-         case tn_bool  : nvar = new telldata::ttbool()   ;break;
-         case tn_string: nvar = new telldata::ttstring() ;break;
-         case tn_pnt   : nvar = new telldata::ttpnt()    ;break;
-         case tn_box   : nvar = new telldata::ttwnd()    ;break;
-         case tn_bnd   : nvar = new telldata::ttbnd()    ;break;
-         case tn_layout: nvar = new telldata::ttlayout() ;break;
+         case tn_int   : nvar = DEBUG_NEW telldata::ttint()    ;break;
+         case tn_real  : nvar = DEBUG_NEW telldata::ttreal()   ;break;
+         case tn_bool  : nvar = DEBUG_NEW telldata::ttbool()   ;break;
+         case tn_string: nvar = DEBUG_NEW telldata::ttstring() ;break;
+         case tn_pnt   : nvar = DEBUG_NEW telldata::ttpnt()    ;break;
+         case tn_box   : nvar = DEBUG_NEW telldata::ttwnd()    ;break;
+         case tn_bnd   : nvar = DEBUG_NEW telldata::ttbnd()    ;break;
+         case tn_layout: nvar = DEBUG_NEW telldata::ttlayout() ;break;
                 default: {
                      assert(_tIDMAP.end() != _tIDMAP.find(ID));
-                     nvar = new telldata::user_struct(_tIDMAP.find(ID)->second);
-                     // the default is effectively nvar = new telldata::user_struct(_tIDMAP[ID]),
+                     nvar = DEBUG_NEW telldata::user_struct(_tIDMAP.find(ID)->second);
+                     // the default is effectively nvar = DEBUG_NEW telldata::user_struct(_tIDMAP[ID]),
                      // but it is not keeping constness
                 }
       }
@@ -194,7 +195,7 @@ void telldata::ttstring::echo(std::string& wstr, real) {
 }
 //=============================================================================
 telldata::ttlayout::ttlayout(const ttlayout& cobj) : tell_var(cobj.get_type()) {
-   if (NULL != cobj._selp) _selp = new SGBitSet(cobj._selp);
+   if (NULL != cobj._selp) _selp = DEBUG_NEW SGBitSet(cobj._selp);
    else _selp = NULL;
    _layer = cobj._layer;
    _data = cobj._data; // don't copy the layout data!
@@ -202,7 +203,7 @@ telldata::ttlayout::ttlayout(const ttlayout& cobj) : tell_var(cobj.get_type()) {
 
 const telldata::ttlayout& telldata::ttlayout::operator = (const ttlayout& cobj) {
    if (_selp) {delete _selp; _selp = NULL;}
-   if (NULL != cobj._selp) _selp = new SGBitSet(cobj._selp);
+   if (NULL != cobj._selp) _selp = DEBUG_NEW SGBitSet(cobj._selp);
    _layer = cobj._layer;
    _data = cobj._data; // don't copy the layout data!
    return *this;
@@ -361,7 +362,7 @@ telldata::tell_var* telldata::ttlist::erase(_dbl_word idxB, _dbl_word idxE)
 {
    assert(idxB >=0); assert(idxB < _mlist.size());
    assert(idxE >=0); assert(idxE < _mlist.size());
-   telldata::ttlist* erased = new telldata::ttlist(get_type());
+   telldata::ttlist* erased = DEBUG_NEW telldata::ttlist(get_type());
    // erase the position at the index
    memlist::iterator CI, CIB, CIE;
    unsigned idx = 0;
@@ -455,23 +456,23 @@ telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
 
 //=============================================================================
 telldata::ttpnt::ttpnt (real x, real y) : user_struct(telldata::tn_pnt),
-                                         _x(new ttreal(x)), _y(new ttreal(y)) {
+                                         _x(DEBUG_NEW ttreal(x)), _y(DEBUG_NEW ttreal(y)) {
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
 
 telldata::ttpnt::ttpnt(operandSTACK& OPstack) : user_struct(telldata::tn_pnt) 
 {
-   _y = new telldata::ttreal(); _y->assign(OPstack.top());
+   _y = DEBUG_NEW telldata::ttreal(); _y->assign(OPstack.top());
    delete OPstack.top(); OPstack.pop();
-   _x = new telldata::ttreal(); _x->assign(OPstack.top());
+   _x = DEBUG_NEW telldata::ttreal(); _x->assign(OPstack.top());
    delete OPstack.top(); OPstack.pop();
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
 
 telldata::ttpnt::ttpnt(const ttpnt& invar) : user_struct(telldata::tn_pnt) ,
-                         _x(new ttreal(invar.x())), _y(new ttreal(invar.y())) {
+                         _x(DEBUG_NEW ttreal(invar.x())), _y(DEBUG_NEW ttreal(invar.y())) {
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
@@ -495,20 +496,20 @@ const telldata::ttpnt& telldata::ttpnt::operator = (const ttpnt& a) {
 //=============================================================================
 telldata::ttwnd::ttwnd( real bl_x, real bl_y, real tr_x, real tr_y ) :
                                                        user_struct(tn_box),
-                                       _p1(new telldata::ttpnt(bl_x,bl_y)),
-                                       _p2(new telldata::ttpnt(tr_x,tr_y)) {
+                                       _p1(DEBUG_NEW telldata::ttpnt(bl_x,bl_y)),
+                                       _p2(DEBUG_NEW telldata::ttpnt(tr_x,tr_y)) {
    _fieldList.push_back(structRECNAME("p1", _p1));
    _fieldList.push_back(structRECNAME("p2", _p2));
 }
 
 telldata::ttwnd::ttwnd( ttpnt bl, ttpnt tr ) : user_struct(tn_box),
-                 _p1(new telldata::ttpnt(bl)), _p2(new telldata::ttpnt(tr)) {
+                 _p1(DEBUG_NEW telldata::ttpnt(bl)), _p2(DEBUG_NEW telldata::ttpnt(tr)) {
    _fieldList.push_back(structRECNAME("p1", _p1));
    _fieldList.push_back(structRECNAME("p2", _p2));
 }
 
 telldata::ttwnd::ttwnd(const ttwnd& cobj) : user_struct(tn_box),
-    _p1(new telldata::ttpnt(cobj.p1())), _p2(new telldata::ttpnt(cobj.p2())) {
+    _p1(DEBUG_NEW telldata::ttpnt(cobj.p1())), _p2(DEBUG_NEW telldata::ttpnt(cobj.p2())) {
    _fieldList.push_back(structRECNAME("p1", _p1));
    _fieldList.push_back(structRECNAME("p2", _p2));
 }
@@ -576,10 +577,10 @@ void telldata::ttwnd::denormalize(bool swapx, bool swapy)
 //=============================================================================
 telldata::ttbnd::ttbnd( real p_x, real p_y, real rot, bool flip, real scale) :
       user_struct(tn_bnd),
-      _p(new telldata::ttpnt(p_x, p_y)),
-      _rot(new telldata::ttreal(rot)),
-      _flx(new telldata::ttbool(flip)),
-      _sc(new telldata::ttreal(scale))
+      _p(DEBUG_NEW telldata::ttpnt(p_x, p_y)),
+      _rot(DEBUG_NEW telldata::ttreal(rot)),
+      _flx(DEBUG_NEW telldata::ttbool(flip)),
+      _sc(DEBUG_NEW telldata::ttreal(scale))
 {
    _fieldList.push_back(structRECNAME("p"  , _p  ));
    _fieldList.push_back(structRECNAME("rot", _rot));
@@ -589,10 +590,10 @@ telldata::ttbnd::ttbnd( real p_x, real p_y, real rot, bool flip, real scale) :
 
 telldata::ttbnd::ttbnd( ttpnt p, ttreal rot, ttbool flip, ttreal scale) :
       user_struct(tn_bnd),
-      _p(new telldata::ttpnt(p)),
-      _rot(new telldata::ttreal(rot)),
-      _flx(new telldata::ttbool(flip)),
-      _sc(new telldata::ttreal(scale))
+      _p(DEBUG_NEW telldata::ttpnt(p)),
+      _rot(DEBUG_NEW telldata::ttreal(rot)),
+      _flx(DEBUG_NEW telldata::ttbool(flip)),
+      _sc(DEBUG_NEW telldata::ttreal(scale))
 {
    _fieldList.push_back(structRECNAME("p"  , _p  ));
    _fieldList.push_back(structRECNAME("rot", _rot));
@@ -601,10 +602,10 @@ telldata::ttbnd::ttbnd( ttpnt p, ttreal rot, ttbool flip, ttreal scale) :
 }
 
 telldata::ttbnd::ttbnd(const ttbnd& cobj) : user_struct(tn_bnd),
-      _p(new telldata::ttpnt(cobj.p())),
-      _rot(new telldata::ttreal(cobj.rot())),
-      _flx(new telldata::ttbool(cobj.flx())),
-      _sc(new telldata::ttreal(cobj.sc()))
+      _p(DEBUG_NEW telldata::ttpnt(cobj.p())),
+      _rot(DEBUG_NEW telldata::ttreal(cobj.rot())),
+      _flx(DEBUG_NEW telldata::ttbool(cobj.flx())),
+      _sc(DEBUG_NEW telldata::ttreal(cobj.sc()))
 {
    _fieldList.push_back(structRECNAME("p"  , _p  ));
    _fieldList.push_back(structRECNAME("rot", _rot));
@@ -660,7 +661,7 @@ telldata::argumentID::argumentID(const argumentID& obj2copy) {
    if (0 < obj2copy.child().size())
    {
       for(argumentQ::const_iterator CA = obj2copy.child().begin(); CA != obj2copy.child().end(); CA ++)
-         _child.push_back(new argumentID(**CA));
+         _child.push_back(DEBUG_NEW argumentID(**CA));
    }
 }
 

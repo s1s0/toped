@@ -260,7 +260,7 @@ namespace laydata {
       validator*           move(const CTM& trans, SGBitSet*) {
                                             _translation *= trans; return NULL;};
       void                 transfer(const CTM& trans) {_translation *= trans;};
-      tdtdata*             copy(const CTM& trans) {return new tdtcellref(
+      tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdtcellref(
                                                _structure,_translation*trans);};
 //       tdtcellref*          getshapeover(TP);
 
@@ -306,9 +306,9 @@ namespace laydata {
 //                          ~tdtcellaref() {};
       DBbox                overlap() const;
       DBbox                clear_overlap() const;
-      tdtdata*             copy(const CTM& trans) {return new tdtcellaref(
+      tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdtcellaref(
                               _structure,_translation * trans, _arrprops);};
-//       tdtdata*             copy(const CTM& trans) {return new tdtcellaref(
+//       tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdtcellaref(
 //                               _structure,_translation * trans,_stepX, _stepY, 
 //                                                                 _cols, _rows);};
 
@@ -340,7 +340,7 @@ namespace laydata {
       validator*           move(const CTM& trans, SGBitSet*) {
                                             _translation *= trans; return NULL;};
       void                 transfer(const CTM& trans)  {_translation *= trans;};
-      tdtdata*             copy(const CTM& trans) {return new tdttext(
+      tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdttext(
                                                   _text,_translation * trans);};
 //      void                 openGL_draw(layprop::DrawProperties&) const;
       
