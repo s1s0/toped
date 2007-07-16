@@ -430,9 +430,10 @@ void tui::ResourceCenter::executeMenu(int ID1)
             if ((*mItem)->method()!=NULL)
             {
                callbackMethod cbMethod;
-               wxCommandEvent event(0);
+               wxCommandEvent cmd_event(0);
                cbMethod = (*mItem)->method();
-               (Toped->* cbMethod)(event);
+               (Toped->* cbMethod)(cmd_event);
+               return;
             }
          }
       }
