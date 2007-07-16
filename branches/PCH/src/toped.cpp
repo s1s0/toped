@@ -329,7 +329,7 @@ tui::TopedFrame::~TopedFrame() {
    delete mS_command;
    delete mS_log;
    delete mS_canvas;
-//   delete _resourceCenter;
+   delete _resourceCenter;
 //   delete _toped_status;
 }
 
