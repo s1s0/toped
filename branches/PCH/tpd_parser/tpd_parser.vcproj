@@ -337,6 +337,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="Flex2CPP.BAT&#x0D;&#x0A;"
+						AdditionalDependencies=""
 						Outputs="$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -350,6 +351,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="bison2CPP.bat&#x0D;&#x0A;"
+						AdditionalDependencies="$(InputName).h"
 						Outputs="$(InputName).cpp"
 					/>
 				</FileConfiguration>
