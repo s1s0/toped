@@ -1,3 +1,3 @@
-flex.exe -Ptell -+ tell_lex.ll
-copy lex.tell.c tell_lex.cpp
+flex.exe -Ptell tell_lex.ll
+move lex.tell.c tell_lex.cpp
 

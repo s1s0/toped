@@ -286,7 +286,8 @@ funcdeclaration:
 
 funcdefinition:
      funcdeclaration funcblock             {
-      if (!CMDBlock->addUSERFUNC($1, $2, @$))
+//      if (!CMDBlock->addUSERFUNC($1, $2, @$))
+      CMDBlock->addUSERFUNC($1, $2, @$);
          delete ($2);
       delete($1); cfd = NULL;
    }
