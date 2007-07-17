@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <assert.h>
 #include <sstream>
 #include "logicop.h"
@@ -43,8 +44,8 @@ between them. These data structures will be used in all subsequently called
 methods, implementing the actual logic operations*/
 logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
                                                 _poly1(poly1), _poly2(poly2) {
-   _segl1 = new polycross::segmentlist(poly1,1);
-   _segl2 = new polycross::segmentlist(poly2,2);
+   _segl1 = DEBUG_NEW polycross::segmentlist(poly1,1);
+   _segl2 = DEBUG_NEW polycross::segmentlist(poly2,2);
    _shape1 = NULL;
    _shape2 = NULL;
 }
@@ -52,7 +53,7 @@ logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
 void logicop::logic::findCrossingPoints()
 {
 // create the event queue
-   polycross::XQ* _eq = new polycross::XQ(*_segl1, *_segl2);
+   polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl1, *_segl2);
    // BO modified algorithm
    _eq->sweep();
    unsigned crossp1 = _segl1->normalize(_poly1);
@@ -167,7 +168,7 @@ bool logicop::logic::AND(pcollection& plycol) {
    polycross::VPoint* collector = centinel;
    do {
       if (0 == collector->visited()) {
-         pointlist *shgen = new pointlist();
+         pointlist *shgen = DEBUG_NEW pointlist();
          polycross::VPoint* pickup = collector;
          do {
             pickup = pickup->follower(direction);
@@ -218,7 +219,7 @@ bool logicop::logic::ANDNOT(pcollection& plycol) {
    polycross::VPoint* collector = centinel;
    do {
       if (0 == collector->visited()) {
-         pointlist *shgen = new pointlist();
+         pointlist *shgen = DEBUG_NEW pointlist();
          polycross::VPoint* pickup = collector;
          do {
             pickup = pickup->follower(direction, true);
@@ -269,7 +270,7 @@ bool logicop::logic::OR(pcollection& plycol) {
    polycross::VPoint* collector = centinel;
    do {
       if (0 == collector->visited()) {
-         pointlist *shgen = new pointlist();
+         pointlist *shgen = DEBUG_NEW pointlist();
          polycross::VPoint* pickup = collector;
          direction = (0 == lclcol.size());
          do {
@@ -291,7 +292,7 @@ bool logicop::logic::OR(pcollection& plycol) {
       laydata::valid_poly check(*csh);
       delete csh; lclcol.pop_front();
       if (check.valid())
-         lclvalidated.push_back(new pointlist(check.get_validated()));
+         lclvalidated.push_back(DEBUG_NEW pointlist(check.get_validated()));
    }
    if (lclvalidated.empty()) return false;
    // Convert all collected shapes to a single normalized polygon
@@ -309,7 +310,7 @@ bool logicop::logic::OR(pcollection& plycol) {
 
 void logicop::logic::getShape(pcollection& plycol, polycross::VPoint* centinel)
 {
-   pointlist *shgen = new pointlist();
+   pointlist *shgen = DEBUG_NEW pointlist();
    polycross::VPoint* vpnt = centinel;
    do {
       shgen->push_back(TP(vpnt->cp()->x(), vpnt->cp()->y()));
@@ -370,7 +371,7 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
    polycross::VPoint*  inshape = _seg2.dump_points();
    // traverse and form the resulting shape
    polycross::VPoint* centinel = outshape;
-   pointlist *shgen = new pointlist();
+   pointlist *shgen = DEBUG_NEW pointlist();
    bool direction = true; /*next*/
    polycross::VPoint* pickup = centinel;
    polycross::VPoint* prev = centinel->prev();

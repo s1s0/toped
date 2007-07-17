@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include "tpdf_select.h"
 
 #include "../tpd_DB/datacenter.h"
@@ -34,9 +35,9 @@ extern console::toped_logfile    LogFile;
 
 //=============================================================================
 tellstdfunc::stdSELECT::stdSELECT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 void tellstdfunc::stdSELECT::undo_cleanup() {
@@ -48,8 +49,8 @@ void tellstdfunc::stdSELECT::undo() {
    TEUNDO_DEBUG("select(box) UNDO");
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.front());UNDOPstack.pop_front();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->unselect_inBox(p1DB, p2DB);
    DATC->unlockDB();
@@ -63,8 +64,8 @@ int tellstdfunc::stdSELECT::execute() {
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->select_inBox(p1DB, p2DB);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
@@ -78,7 +79,7 @@ int tellstdfunc::stdSELECT::execute() {
 
 //=============================================================================
 tellstdfunc::stdSELECT_I::stdSELECT_I(telldata::typeID retype, bool eor) :
-      stdSELECT(new parsercmd::argumentLIST,retype,eor)
+      stdSELECT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdSELECT_I::execute() {
@@ -89,9 +90,9 @@ int tellstdfunc::stdSELECT_I::execute() {
 
 //=============================================================================
 tellstdfunc::stdSELECT_TL::stdSELECT_TL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_layout)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_layout)));
 }
 
 void tellstdfunc::stdSELECT_TL::undo_cleanup() {
@@ -114,9 +115,9 @@ int tellstdfunc::stdSELECT_TL::execute() {
 
 //=============================================================================
 tellstdfunc::stdSELECTIN::stdSELECTIN(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdSELECTIN::undo_cleanup() {
@@ -139,7 +140,7 @@ int tellstdfunc::stdSELECTIN::execute() {
    assert(telldata::tn_pnt == OPstack.top()->get_type());
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::atticList* selectedl = ATDB->change_select(p1DB,true);
    DATC->unlockDB();
@@ -157,9 +158,9 @@ int tellstdfunc::stdSELECTIN::execute() {
 
 //=============================================================================
 tellstdfunc::stdPNTSELECT::stdPNTSELECT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 void tellstdfunc::stdPNTSELECT::undo_cleanup() {
@@ -171,8 +172,8 @@ void tellstdfunc::stdPNTSELECT::undo() {
    TEUNDO_DEBUG("pselect(box) UNDO");
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.front());UNDOPstack.pop_front();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->unselect_inBox(p1DB, p2DB,true);
    DATC->unlockDB();   
@@ -186,8 +187,8 @@ int tellstdfunc::stdPNTSELECT::execute() {
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->select_inBox(p1DB, p2DB,true);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
@@ -201,7 +202,7 @@ int tellstdfunc::stdPNTSELECT::execute() {
 
 //=============================================================================
 tellstdfunc::stdPNTSELECT_I::stdPNTSELECT_I(telldata::typeID retype, bool eor) :
-      stdPNTSELECT(new parsercmd::argumentLIST,retype,eor)
+      stdPNTSELECT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdPNTSELECT_I::execute() {
@@ -212,9 +213,9 @@ int tellstdfunc::stdPNTSELECT_I::execute() {
 
 //=============================================================================
 tellstdfunc::stdUNSELECT::stdUNSELECT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 void tellstdfunc::stdUNSELECT::undo_cleanup() {
@@ -226,8 +227,8 @@ void tellstdfunc::stdUNSELECT::undo() {
    TEUNDO_DEBUG("unselect(box) UNDO");
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.front());UNDOPstack.pop_front();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->select_inBox(p1DB, p2DB);
    DATC->unlockDB();
@@ -241,8 +242,8 @@ int tellstdfunc::stdUNSELECT::execute() {
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->unselect_inBox(p1DB, p2DB);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
@@ -256,7 +257,7 @@ int tellstdfunc::stdUNSELECT::execute() {
 
 //=============================================================================
 tellstdfunc::stdUNSELECT_I::stdUNSELECT_I(telldata::typeID retype, bool eor) :
-      stdUNSELECT(new parsercmd::argumentLIST,retype,eor)
+      stdUNSELECT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdUNSELECT_I::execute() {
@@ -267,9 +268,9 @@ int tellstdfunc::stdUNSELECT_I::execute() {
 
 //=============================================================================
 tellstdfunc::stdUNSELECT_TL::stdUNSELECT_TL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_layout)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_layout)));
 }
 
 void tellstdfunc::stdUNSELECT_TL::undo() {
@@ -292,9 +293,9 @@ int tellstdfunc::stdUNSELECT_TL::execute() {
 
 //=============================================================================
 tellstdfunc::stdUNSELECTIN::stdUNSELECTIN(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdUNSELECTIN::undo_cleanup() {
@@ -317,7 +318,7 @@ int tellstdfunc::stdUNSELECTIN::execute() {
    assert(telldata::tn_pnt == OPstack.top()->get_type());
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(p1->x(), p1->y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::atticList* selectedl = ATDB->change_select(p1DB,false);
    DATC->unlockDB();   
@@ -335,9 +336,9 @@ int tellstdfunc::stdUNSELECTIN::execute() {
 
 //=============================================================================
 tellstdfunc::stdPNTUNSELECT::stdPNTUNSELECT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 void tellstdfunc::stdPNTUNSELECT::undo_cleanup() {
@@ -349,8 +350,8 @@ void tellstdfunc::stdPNTUNSELECT::undo() {
    TEUNDO_DEBUG("punselect(box) UNDO");
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(UNDOPstack.front());UNDOPstack.pop_front();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->select_inBox(p1DB, p2DB,true);
    DATC->unlockDB();
@@ -364,8 +365,8 @@ int tellstdfunc::stdPNTUNSELECT::execute() {
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   TP* p1DB = new TP(w->p1().x(), w->p1().y(), DBscale);
-   TP* p2DB = new TP(w->p2().x(), w->p2().y(), DBscale);
+   TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
+   TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->unselect_inBox(p1DB, p2DB,true);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
@@ -379,7 +380,7 @@ int tellstdfunc::stdPNTUNSELECT::execute() {
 
 //=============================================================================
 tellstdfunc::stdPNTUNSELECT_I::stdPNTUNSELECT_I(telldata::typeID retype, bool eor) :
-      stdPNTUNSELECT(new parsercmd::argumentLIST,retype,eor)
+      stdPNTUNSELECT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdPNTUNSELECT_I::execute() {
@@ -390,7 +391,7 @@ int tellstdfunc::stdPNTUNSELECT_I::execute() {
 
 //=============================================================================
 tellstdfunc::stdSELECTALL::stdSELECTALL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdSELECTALL::undo_cleanup() {
@@ -423,7 +424,7 @@ int tellstdfunc::stdSELECTALL::execute() {
 
 //=============================================================================
 tellstdfunc::stdUNSELECTALL::stdUNSELECTALL(telldata::typeID retype, bool eor) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+                               cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdUNSELECTALL::undo_cleanup() {
@@ -454,7 +455,7 @@ int tellstdfunc::stdUNSELECTALL::execute() {
 
 //=============================================================================
 tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdREPORTSLCTD::execute() {
@@ -468,9 +469,9 @@ int tellstdfunc::stdREPORTSLCTD::execute() {
 
 //=============================================================================
 tellstdfunc::stdSETSELECTMASK::stdSETSELECTMASK(telldata::typeID retype, bool eor) :
-                               cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+                               cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdSETSELECTMASK::undo_cleanup()
@@ -491,9 +492,9 @@ int tellstdfunc::stdSETSELECTMASK::execute()
    UNDOcmdQ.push_front(this);
    word mask = getWordValue();
    word oldmask = DATC->layselmask();
-   UNDOPstack.push_front(new telldata::ttint(oldmask));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(oldmask));
    DATC->setlayselmask(mask);
-   OPstack.push(new telldata::ttint(oldmask));
+   OPstack.push(DEBUG_NEW telldata::ttint(oldmask));
    LogFile << LogFile.getFN() << "("<< mask <<");"; LogFile.flush();
    return EXEC_NEXT;
 }

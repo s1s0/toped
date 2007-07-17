@@ -330,7 +330,7 @@ namespace  parsercmd {
    class cmdSTRUCT: public cmdVIRTUAL {
    public:
                cmdSTRUCT() : _arg(NULL) {}
-      void     setargID(telldata::argumentID* arg) {_arg = new telldata::argumentID(*arg);}
+      void     setargID(telldata::argumentID* arg) {_arg = DEBUG_NEW telldata::argumentID(*arg);}
       virtual ~cmdSTRUCT()                         {if (NULL != _arg) delete _arg;}
       int      execute();
    private:
@@ -590,7 +590,7 @@ namespace  parsercmd {
    public:
                                        FuncDeclaration(std::string name, telldata::typeID type):
                                           _name(name), _type(type), _numReturns(0), _numErrors(0)
-                                          {_argList = new parsercmd::argumentLIST;}
+                                          {_argList = DEBUG_NEW parsercmd::argumentLIST;}
                                       ~FuncDeclaration();
       const std::string                name() const     {return _name;}
       const telldata::typeID           type() const     {return _type;}

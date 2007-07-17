@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <math.h>
 #include <sstream>
 #include "tellibin.h"
@@ -56,7 +57,7 @@ int tellstdfunc::stdECHO::argsOK(argumentQ* amap) {
 }
 
 nameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*) {
-   nameList* argtypes = new nameList();
+   nameList* argtypes = DEBUG_NEW nameList();
    argtypes->push_back("void");
    argtypes->push_back("<...anything...>");
    return argtypes;
@@ -74,7 +75,7 @@ int tellstdfunc::stdECHO::execute() {
 
 //=============================================================================
 tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdTELLSTATUS::execute() {
@@ -93,9 +94,9 @@ int tellstdfunc::stdTELLSTATUS::execute() {
 
 //=============================================================================
 tellstdfunc::stdDISTANCE::stdDISTANCE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_pnt)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
 }
 
 int tellstdfunc::stdDISTANCE::execute()
@@ -126,7 +127,7 @@ int tellstdfunc::stdDISTANCE::execute()
 
 //=============================================================================
 tellstdfunc::stdDISTANCE_D::stdDISTANCE_D(telldata::typeID retype, bool eor) :
-      stdDISTANCE(new parsercmd::argumentLIST,retype,eor)
+      stdDISTANCE(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
 }
 
@@ -136,9 +137,9 @@ int tellstdfunc::stdDISTANCE_D::execute()
    if (!tellstdfunc::waitGUInput(console::op_line, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   telldata::ttlist* plst = new telldata::ttlist(telldata::tn_pnt);
-   plst->add(new telldata::ttpnt(w->p1().x(), w->p1().y()));
-   plst->add(new telldata::ttpnt(w->p2().x(), w->p2().y()));
+   telldata::ttlist* plst = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
+   plst->add(DEBUG_NEW telldata::ttpnt(w->p1().x(), w->p1().y()));
+   plst->add(DEBUG_NEW telldata::ttpnt(w->p2().x(), w->p2().y()));
    OPstack.push(plst);
    delete w;
    return stdDISTANCE::execute();
@@ -147,7 +148,7 @@ int tellstdfunc::stdDISTANCE_D::execute()
 
 //=============================================================================
 tellstdfunc::stdCLEARRULERS::stdCLEARRULERS(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdCLEARRULERS::execute()
@@ -158,9 +159,9 @@ int tellstdfunc::stdCLEARRULERS::execute()
 
 //=============================================================================
 tellstdfunc::stdLONGCURSOR::stdLONGCURSOR(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::stdLONGCURSOR::execute()
@@ -182,7 +183,7 @@ int tellstdfunc::stdLONGCURSOR::execute()
 
 //=============================================================================
 tellstdfunc::stdUNDO::stdUNDO(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdUNDO::execute() {
@@ -199,7 +200,7 @@ int tellstdfunc::stdUNDO::execute() {
 
 //=============================================================================
 tellstdfunc::stdREDRAW::stdREDRAW(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdREDRAW::execute()
@@ -210,17 +211,17 @@ int tellstdfunc::stdREDRAW::execute()
 
 //=============================================================================
 tellstdfunc::stdZOOMWIN::stdZOOMWIN(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 int tellstdfunc::stdZOOMWIN::execute() {
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   DBbox* box = new DBbox(TP(p1->x(), p1->y(), DBscale), 
+   DBbox* box = DEBUG_NEW DBbox(TP(p1->x(), p1->y(), DBscale), 
                           TP(p2->x(), p2->y(), DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -231,15 +232,15 @@ int tellstdfunc::stdZOOMWIN::execute() {
 
 //=============================================================================
 tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype, bool eor) :
-      stdZOOMWIN(new parsercmd::argumentLIST,retype, eor)
+      stdZOOMWIN(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttwnd()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 int tellstdfunc::stdZOOMWINb::execute() {
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   DBbox* box = new DBbox(TP(w->p1().x(), w->p1().y(), DBscale), 
+   DBbox* box = DEBUG_NEW DBbox(TP(w->p1().x(), w->p1().y(), DBscale), 
                           TP(w->p2().x(), w->p2().y(), DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -250,12 +251,12 @@ int tellstdfunc::stdZOOMWINb::execute() {
 
 //=============================================================================
 tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {}
 
 int tellstdfunc::stdZOOMALL::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      DBbox* ovl  = new DBbox(ATDB->activeoverlap());
+      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
    DATC->unlockDB();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -266,7 +267,7 @@ int tellstdfunc::stdZOOMALL::execute() {
 
 //=============================================================================
 tellstdfunc::getPOINT::getPOINT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::getPOINT::execute() {
@@ -286,7 +287,7 @@ int tellstdfunc::getPOINT::execute() {
 
 //=============================================================================
 tellstdfunc::getPOINTLIST::getPOINTLIST(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::getPOINTLIST::execute() {

@@ -53,6 +53,8 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Release/toped.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
@@ -74,7 +76,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib winmm.lib wxmsw28_xrc.lib wxregex.lib wxzlib.lib wxpng.lib wxjpeg.lib wxtiff.lib wxexpat.lib wxbase28.lib wxbase28_net.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_html.lib wxbase28_xml.lib wxmsw28_gl.lib glut32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib winmm.lib wxmsw28_xrc.lib wxregex.lib wxzlib.lib wxpng.lib wxjpeg.lib wxtiff.lib wxexpat.lib wxbase28.lib wxbase28_net.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_html.lib wxbase28_xml.lib wxmsw28_gl.lib"
 				OutputFile=".\Release/toped.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -148,6 +150,8 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WINDOWS__;__WXMSW__;__WXDEBUG__;WXDEBUG=1;__WIN95__;__WIN32__;WINVER=0x0400;STRICT"
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Debug/toped.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
@@ -288,6 +292,26 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tpdph.cpp"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="tui.cpp"
 				>
 				<FileConfiguration
@@ -324,6 +348,10 @@
 			</File>
 			<File
 				RelativePath="toped.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tpdph.h"
 				>
 			</File>
 			<File
@@ -439,14 +467,6 @@
 				RelativePath="wx\msw\watch1.cur"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="libs"
-			>
-		</Filter>
-		<Filter
-			Name="FlexBison Files"
-			>
 		</Filter>
 	</Files>
 	<Globals>

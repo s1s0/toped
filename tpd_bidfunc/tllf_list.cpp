@@ -24,6 +24,8 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+
+#include "tpdph.h"
 #include <sstream>
 #include <math.h>
 #include "tllf_list.h"
@@ -36,7 +38,7 @@ int tellstdfunc::lstLENGTH::argsOK(argumentQ* amap)
 
 nameList* tellstdfunc::lstLENGTH::callingConv(const telldata::typeMAP*)
 {
-   nameList* argtypes = new nameList();
+   nameList* argtypes = DEBUG_NEW nameList();
    argtypes->push_back("int");
    argtypes->push_back("<...anything...> list");
    return argtypes;
@@ -45,7 +47,7 @@ nameList* tellstdfunc::lstLENGTH::callingConv(const telldata::typeMAP*)
 int tellstdfunc::lstLENGTH::execute()
 {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   OPstack.push(new telldata::ttint(pl->size()));
+   OPstack.push(DEBUG_NEW telldata::ttint(pl->size()));
    delete pl;
    return EXEC_NEXT;
 }
@@ -59,7 +61,7 @@ int tellstdfunc::stdABS::argsOK(argumentQ* amap)
 
 nameList* tellstdfunc::stdABS::callingConv(const telldata::typeMAP*)
 {
-   nameList* argtypes = new nameList();
+   nameList* argtypes = DEBUG_NEW nameList();
    argtypes->push_back("real");
    argtypes->push_back("real");
    return argtypes;
@@ -68,6 +70,6 @@ nameList* tellstdfunc::stdABS::callingConv(const telldata::typeMAP*)
 int tellstdfunc::stdABS::execute()
 {
    real value = getOpValue(OPstack);
-   OPstack.push(new telldata::ttreal(fabs(value)));
+   OPstack.push(DEBUG_NEW telldata::ttreal(fabs(value)));
    return EXEC_NEXT;
 }

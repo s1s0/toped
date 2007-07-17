@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include "tpdf_cells.h"
 
 #include "../tpd_DB/datacenter.h"
@@ -38,9 +39,9 @@ extern wxWindow*                 TopedCanvasW;
 
 //=============================================================================
 tellstdfunc::stdNEWCELL::stdNEWCELL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdNEWCELL::undo_cleanup()
@@ -50,7 +51,7 @@ void tellstdfunc::stdNEWCELL::undo_cleanup()
 
 void tellstdfunc::stdNEWCELL::undo()
 {
-   // get the name of the new cell
+   // get the name of the DEBUG_NEW cell
    std::string  nm = getStringValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
    ATDB->removecell(nm,NULL);
@@ -66,7 +67,7 @@ int tellstdfunc::stdNEWCELL::execute()
    if (NULL != new_cell)
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttstring(nm));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
       LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
    }
    else
@@ -80,9 +81,9 @@ int tellstdfunc::stdNEWCELL::execute()
 
 //=============================================================================
 tellstdfunc::stdREMOVECELL::stdREMOVECELL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdREMOVECELL::undo_cleanup()
@@ -115,13 +116,13 @@ int tellstdfunc::stdREMOVECELL::execute()
 {
    std::string nm = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-   laydata::atticList* cell_contents = new laydata::atticList();
+   laydata::atticList* cell_contents = DEBUG_NEW laydata::atticList();
    bool removed = ATDB->removecell(nm,cell_contents);
    DATC->unlockDB();
    if (removed)
    {  // removal has been successfull
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttstring(nm));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
       UNDOPstack.push_front(make_ttlaylist(cell_contents));
       LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
    }
@@ -129,9 +130,9 @@ int tellstdfunc::stdREMOVECELL::execute()
 }
 //=============================================================================
 tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdOPENCELL::undo_cleanup() {
@@ -146,7 +147,7 @@ void tellstdfunc::stdOPENCELL::undo() {
       browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
-      DBbox* ovl  = new DBbox(ATDB->activeoverlap());
+      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
    DATC->unlockDB();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -169,7 +170,7 @@ int tellstdfunc::stdOPENCELL::execute()
             UNDOcmdQ.push_front(this);
             UNDOPstack.push_front(selected);
          }
-         DBbox* ovl  = new DBbox(ATDB->activeoverlap());
+         DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
 /*-!-*/  DATC->unlockDB();
          if (*ovl == DEFAULT_OVL_BOX) *ovl = DEFAULT_ZOOM_BOX;
          browsers::celltree_open(nm);
@@ -192,9 +193,9 @@ int tellstdfunc::stdOPENCELL::execute()
 
 //=============================================================================
 tellstdfunc::stdEDITPUSH::stdEDITPUSH(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdEDITPUSH::undo_cleanup() {
@@ -240,7 +241,7 @@ int tellstdfunc::stdEDITPUSH::execute() {
 
 //=============================================================================
 tellstdfunc::stdEDITPOP::stdEDITPOP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdEDITPOP::undo_cleanup() {
@@ -282,7 +283,7 @@ int tellstdfunc::stdEDITPOP::execute() {
 
 //=============================================================================
 tellstdfunc::stdEDITPREV::stdEDITPREV(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdEDITPREV::undo_cleanup() {
@@ -324,7 +325,7 @@ int tellstdfunc::stdEDITPREV::execute() {
 
 //=============================================================================
 tellstdfunc::stdEDITTOP::stdEDITTOP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {}
 
 void tellstdfunc::stdEDITTOP::undo_cleanup() {
@@ -366,9 +367,9 @@ int tellstdfunc::stdEDITTOP::execute() {
 
 //=============================================================================
 tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdGROUP::undo_cleanup() {
@@ -399,7 +400,7 @@ int tellstdfunc::stdGROUP::execute() {
    if (group_sucessful)
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttstring(name));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(name));
       UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
       LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
       UpdateLV();
@@ -409,7 +410,7 @@ int tellstdfunc::stdGROUP::execute() {
 
 //=============================================================================
 tellstdfunc::stdUNGROUP::stdUNGROUP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdUNGROUP::undo_cleanup() {

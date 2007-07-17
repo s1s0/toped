@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <sstream>
 #include "tpdf_props.h"
 
@@ -40,9 +41,9 @@ extern const wxEventType         wxEVT_SETINGSMENU;
 
 //=============================================================================
 tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdPROPSAVE::execute()
@@ -54,13 +55,13 @@ int tellstdfunc::stdPROPSAVE::execute()
 
 //=============================================================================
 tellstdfunc::stdLAYPROP::stdLAYPROP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdLAYPROP::execute() {
@@ -79,13 +80,13 @@ int tellstdfunc::stdLAYPROP::execute() {
 
 //=============================================================================
 tellstdfunc::stdLINEDEF::stdLINEDEF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 int tellstdfunc::stdLINEDEF::execute() {
@@ -102,13 +103,13 @@ int tellstdfunc::stdLINEDEF::execute() {
 
 //=============================================================================
 tellstdfunc::stdCOLORDEF::stdCOLORDEF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 int tellstdfunc::stdCOLORDEF::execute() {
@@ -126,10 +127,10 @@ int tellstdfunc::stdCOLORDEF::execute() {
 
 //=============================================================================
 tellstdfunc::stdFILLDEF::stdFILLDEF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_int)));
 }
 
 int tellstdfunc::stdFILLDEF::execute() {
@@ -140,7 +141,7 @@ int tellstdfunc::stdFILLDEF::execute() {
    }
    else {
       // declare the array like this because otherwise it'll be wiped
-      byte* ptrn = new byte[128];
+      byte* ptrn = DEBUG_NEW byte[128];
       telldata::ttint *cmpnt;
       for (unsigned i = 0; i < 128; i++) {
          cmpnt = static_cast<telldata::ttint*>((sl->mlist())[i]);
@@ -161,11 +162,11 @@ int tellstdfunc::stdFILLDEF::execute() {
 
 //=============================================================================
 tellstdfunc::stdGRIDDEF::stdGRIDDEF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdGRIDDEF::execute() {
@@ -181,10 +182,10 @@ int tellstdfunc::stdGRIDDEF::execute() {
 
 //=============================================================================
 tellstdfunc::stdHIDELAYER::stdHIDELAYER(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST, retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST, retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 void tellstdfunc::stdHIDELAYER::undo_cleanup() {
@@ -215,13 +216,13 @@ int tellstdfunc::stdHIDELAYER::execute() {
       laydata::tdtdesign* ATDB = DATC->lockDB();
 
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttint(layno));
-      UNDOPstack.push_front(new telldata::ttbool(!hide));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       laydata::selectList *listselected = ATDB->shapesel();
-      laydata::selectList *todslct = new laydata::selectList();
+      laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
       if (hide && (listselected->end() != listselected->find(layno)))
       {
-         (*todslct)[layno] = new laydata::dataList(*((*listselected)[layno]));
+         (*todslct)[layno] = DEBUG_NEW laydata::dataList(*((*listselected)[layno]));
          UNDOPstack.push_front(make_ttlaylist(todslct));
          ATDB->unselect_fromList(todslct);
       }
@@ -246,11 +247,11 @@ int tellstdfunc::stdHIDELAYER::execute() {
 
 //=============================================================================
 tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
 
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_int)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 void tellstdfunc::stdHIDELAYERS::undo_cleanup() {
@@ -283,11 +284,11 @@ int tellstdfunc::stdHIDELAYERS::execute()
    bool        hide  = getBoolValue();
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    UNDOcmdQ.push_front(this);
-   telldata::ttlist* undolaylist = new telldata::ttlist(telldata::tn_int);
+   telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    telldata::ttint *laynumber;
    laydata::tdtdesign* ATDB = DATC->lockDB();
    laydata::selectList *listselected = ATDB->shapesel();
-   laydata::selectList *todslct = new laydata::selectList();
+   laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
    // "preliminary" pass - to collect the selected shapes in the layers, targeted
    // for locking and to issue some warning messages if appropriate
    for (unsigned i = 0; i < sl->size() ; i++)
@@ -306,13 +307,13 @@ int tellstdfunc::stdHIDELAYERS::execute()
       else if (hide ^ DATC->layerHidden(laynumber->value()))
       {
          if (hide && (listselected->end() != listselected->find(laynumber->value())))
-            (*todslct)[laynumber->value()] = new laydata::dataList(*((*listselected)[laynumber->value()]));
+            (*todslct)[laynumber->value()] = DEBUG_NEW laydata::dataList(*((*listselected)[laynumber->value()]));
          browsers::layer_status(browsers::BT_LAYER_HIDE, laynumber->value(), hide);
-         undolaylist->add(new telldata::ttint(*laynumber));
+         undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
       }
    }
    UNDOPstack.push_front(undolaylist);
-   UNDOPstack.push_front(new telldata::ttbool(!hide));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
    UNDOPstack.push_front(make_ttlaylist(todslct));
    // Now unselect the shapes in the taret layers
    ATDB->unselect_fromList(todslct);
@@ -333,9 +334,9 @@ int tellstdfunc::stdHIDELAYERS::execute()
 
 //=============================================================================
 tellstdfunc::stdHIDECELLMARK::stdHIDECELLMARK(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,true)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,true)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 void tellstdfunc::stdHIDECELLMARK::undo_cleanup() {
@@ -355,7 +356,7 @@ void tellstdfunc::stdHIDECELLMARK::undo() {
 int tellstdfunc::stdHIDECELLMARK::execute() {
    bool        hide  = getBoolValue();
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttbool(!hide));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
    DATC->setcellmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
@@ -367,9 +368,9 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
 
 //=============================================================================
 tellstdfunc::stdHIDETEXTMARK::stdHIDETEXTMARK(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 void tellstdfunc::stdHIDETEXTMARK::undo_cleanup() {
@@ -390,7 +391,7 @@ void tellstdfunc::stdHIDETEXTMARK::undo() {
 int tellstdfunc::stdHIDETEXTMARK::execute() {
    bool        hide  = getBoolValue();
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttbool(!hide));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
    DATC->settextmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
@@ -402,9 +403,9 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
 
 //=============================================================================
 tellstdfunc::stdHIDECELLBOND::stdHIDECELLBOND(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 void tellstdfunc::stdHIDECELLBOND::undo_cleanup() {
@@ -425,7 +426,7 @@ void tellstdfunc::stdHIDECELLBOND::undo() {
 int tellstdfunc::stdHIDECELLBOND::execute() {
    bool        hide  = getBoolValue();
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttbool(!hide));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
    DATC->setcellbox_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
@@ -437,10 +438,10 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
 
 //=============================================================================
 tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 void tellstdfunc::stdLOCKLAYER::undo_cleanup() {
@@ -472,13 +473,13 @@ int tellstdfunc::stdLOCKLAYER::execute()
    {
       laydata::tdtdesign* ATDB = DATC->lockDB();
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttint(layno));
-      UNDOPstack.push_front(new telldata::ttbool(!lock));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
       laydata::selectList *listselected = ATDB->shapesel();
-      laydata::selectList *todslct = new laydata::selectList();
+      laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
       if (lock && (listselected->end() != listselected->find(layno)))
       {
-         (*todslct)[layno] = new laydata::dataList(*((*listselected)[layno]));
+         (*todslct)[layno] = DEBUG_NEW laydata::dataList(*((*listselected)[layno]));
          UNDOPstack.push_front(make_ttlaylist(todslct));
          ATDB->unselect_fromList(todslct);
       }
@@ -503,11 +504,11 @@ int tellstdfunc::stdLOCKLAYER::execute()
 
 //=============================================================================
 tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
 
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_int)));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_int)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 void tellstdfunc::stdLOCKLAYERS::undo_cleanup() {
@@ -540,11 +541,11 @@ int tellstdfunc::stdLOCKLAYERS::execute()
    bool        lock  = getBoolValue();
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    UNDOcmdQ.push_front(this);
-   telldata::ttlist* undolaylist = new telldata::ttlist(telldata::tn_int);
+   telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    telldata::ttint *laynumber;
    laydata::tdtdesign* ATDB = DATC->lockDB();
    laydata::selectList *listselected = ATDB->shapesel();
-   laydata::selectList *todslct = new laydata::selectList();
+   laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
    // "preliminary" pass - to collect the selected shapes in the layers, targeted
    // for locking and to issue some warning messages if appropriate
    for (unsigned i = 0; i < sl->size() ; i++)
@@ -563,13 +564,13 @@ int tellstdfunc::stdLOCKLAYERS::execute()
       else if (lock ^ DATC->layerLocked(laynumber->value()))
       {
          if (lock && (listselected->end() != listselected->find(laynumber->value())))
-            (*todslct)[laynumber->value()] = new laydata::dataList(*((*listselected)[laynumber->value()]));
+            (*todslct)[laynumber->value()] = DEBUG_NEW laydata::dataList(*((*listselected)[laynumber->value()]));
          browsers::layer_status(browsers::BT_LAYER_LOCK, laynumber->value(), lock);
-         undolaylist->add(new telldata::ttint(*laynumber));
+         undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
       }
    }
    UNDOPstack.push_front(undolaylist);
-   UNDOPstack.push_front(new telldata::ttbool(!lock));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
    UNDOPstack.push_front(make_ttlaylist(todslct));
    // Now unselect the shapes in the taret layers
    ATDB->unselect_fromList(todslct);
@@ -590,10 +591,10 @@ int tellstdfunc::stdLOCKLAYERS::execute()
 
 //=============================================================================
 tellstdfunc::stdGRID::stdGRID(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 void tellstdfunc::stdGRID::undo_cleanup() {
@@ -615,8 +616,8 @@ int tellstdfunc::stdGRID::execute() {
    if (NULL != DATC->grid(no))
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttint(no));
-      UNDOPstack.push_front(new telldata::ttbool(DATC->grid_visual(no)));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(no));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(DATC->grid_visual(no)));
       gridON(no,visu);
       LogFile << LogFile.getFN() << "(" << no << "," << LogFile._2bool(visu) << ");";
       LogFile.flush();
@@ -629,9 +630,9 @@ int tellstdfunc::stdGRID::execute() {
 
 //=============================================================================
 tellstdfunc::stdSTEP::stdSTEP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 void tellstdfunc::stdSTEP::undo_cleanup() {
@@ -646,7 +647,7 @@ void tellstdfunc::stdSTEP::undo() {
 int tellstdfunc::stdSTEP::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttreal(DATC->step()));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(DATC->step()));
    //
    real    step    = getOpValue();
    DATC->setstep(step);
@@ -656,9 +657,9 @@ int tellstdfunc::stdSTEP::execute() {
 
 //=============================================================================
 tellstdfunc::stdAUTOPAN::stdAUTOPAN(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 void tellstdfunc::stdAUTOPAN::undo_cleanup() {
@@ -678,7 +679,7 @@ void tellstdfunc::stdAUTOPAN::undo() {
 int tellstdfunc::stdAUTOPAN::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(new telldata::ttbool(DATC->autopan()));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(DATC->autopan()));
    //
    bool autop    = getBoolValue();
    DATC->setautopan(autop);
@@ -691,9 +692,9 @@ int tellstdfunc::stdAUTOPAN::execute() {
 
 //=============================================================================
 tellstdfunc::stdSHAPEANGLE::stdSHAPEANGLE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdSHAPEANGLE::undo_cleanup() {
@@ -711,7 +712,7 @@ int tellstdfunc::stdSHAPEANGLE::execute() {
    if ((angle == 0) || (angle == 45) || (angle == 90)) {
       // prepare undo first
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(new telldata::ttint(DATC->marker_angle()));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(DATC->marker_angle()));
       //
       DATC->setmarker_angle(angle);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);

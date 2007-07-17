@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <math.h>
 #include <sstream>
 #include <wx/wx.h>
@@ -175,7 +176,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    ID_TPD_CANVAS, wxDefaultPosition, wxDefaultSize, 0,wxT("LayoutCanvas"), attribList){
 
    crossCur = MakeCursor(crosscursor,16, 16);
-   //crossCur = new wxCursor((const char*)crosscursor,16, 16);
+   //crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
    SetCursor(*crossCur);
    tmp_wnd = false;
    mouse_input = false;
@@ -405,7 +406,7 @@ void tui::LayoutCanvas::UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dc
 void tui::LayoutCanvas::EventMouseClick(int button) {
    wxCommandEvent eventButtonUP(wxEVT_COMMAND_ENTER);
 
-   telldata::ttpnt* ttp = new telldata::ttpnt(releasepoint.x()*DATC->UU(),
+   telldata::ttpnt* ttp = DEBUG_NEW telldata::ttpnt(releasepoint.x()*DATC->UU(),
                                               releasepoint.y()*DATC->UU());
    //Post an event to notify the console
    eventButtonUP.SetClientData((void*)ttp);
@@ -655,33 +656,33 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    DBbox* box = NULL;
    switch (evt.GetInt()) {
    case ZOOM_WINDOW : box = static_cast<DBbox*>(evt.GetClientData());break;
-   case ZOOM_WINDOWM: box = new DBbox(presspoint.x(),presspoint.y(),
+   case ZOOM_WINDOWM: box = DEBUG_NEW DBbox(presspoint.x(),presspoint.y(),
                                             ScrMARK.x(),ScrMARK.y());break;
-   case ZOOM_IN     : box = new DBbox((3*lp_BL.x() + lp_TR.x())/4, //in
+   case ZOOM_IN     : box = DEBUG_NEW DBbox((3*lp_BL.x() + lp_TR.x())/4, //in
                             (3*lp_BL.y() + lp_TR.y())/4,
                             (3*lp_TR.x() + lp_BL.x())/4, 
                             (3*lp_TR.y() + lp_BL.y())/4); break;
-   case ZOOM_OUT    : box = new DBbox((5*lp_BL.x() - lp_TR.x())/4, //out
+   case ZOOM_OUT    : box = DEBUG_NEW DBbox((5*lp_BL.x() - lp_TR.x())/4, //out
                             (5*lp_BL.y() - lp_TR.y())/4,
                             (5*lp_TR.x() - lp_BL.x())/4, 
                             (5*lp_TR.y() - lp_BL.y())/4); break;
-   case ZOOM_LEFT   : box = new DBbox((  lp_TR.x() + lp_BL.x())/2, //left
+   case ZOOM_LEFT   : box = DEBUG_NEW DBbox((  lp_TR.x() + lp_BL.x())/2, //left
                                lp_BL.y()               ,
                             (3*lp_BL.x() - lp_TR.x())/2, 
                                lp_TR.y()               ); break;
-   case ZOOM_RIGHT  : box = new DBbox((3*lp_TR.x() - lp_BL.x())/2, // right
+   case ZOOM_RIGHT  : box = DEBUG_NEW DBbox((3*lp_TR.x() - lp_BL.x())/2, // right
                                lp_BL.y()               ,
                             (  lp_TR.x() + lp_BL.x())/2, 
                                lp_TR.y()               ); break;
-   case ZOOM_UP     : box = new DBbox(   lp_BL.x()               , // up
+   case ZOOM_UP     : box = DEBUG_NEW DBbox(   lp_BL.x()               , // up
                             (3*lp_BL.y() - lp_TR.y())/2,
                                lp_TR.x()               ,
                             (  lp_TR.y() + lp_BL.y())/2); break;
-   case ZOOM_DOWN   : box = new DBbox(   lp_BL.x()               , // down
+   case ZOOM_DOWN   : box = DEBUG_NEW DBbox(   lp_BL.x()               , // down
                             (  lp_TR.y() + lp_BL.y())/2,
                                lp_TR.x()               ,
                             (3*lp_TR.y() - lp_BL.y())/2); break;
-   case ZOOM_EMPTY  : box = new DBbox(-10,-10,90,90); break;
+   case ZOOM_EMPTY  : box = DEBUG_NEW DBbox(-10,-10,90,90); break;
    default: assert(false);
    }
    int Wcl, Hcl;
@@ -852,8 +853,8 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
    int h = Image.GetHeight();
    int imagebitcount = (w*h)/8;
    
-   unsigned char *bits = new unsigned char [imagebitcount];
-   unsigned char *maskBits = new unsigned char [imagebitcount];
+   unsigned char *bits = DEBUG_NEW unsigned char [imagebitcount];
+   unsigned char *maskBits = DEBUG_NEW unsigned char [imagebitcount];
 
    int i, j, i8;
    unsigned char cMask;
@@ -881,10 +882,10 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
       }
    }
 
-   wxColour* col_black = new wxColour(  0,   0,   0);
-   wxColour* col_white = new wxColour(255, 255, 255);
+   wxColour* col_black = DEBUG_NEW wxColour(  0,   0,   0);
+   wxColour* col_white = DEBUG_NEW wxColour(255, 255, 255);
 
-   pCursor = new wxCursor((const char *)bits, w, h,
+   pCursor = DEBUG_NEW wxCursor((const char *)bits, w, h,
                           HotX-HotAdjust, HotY-HotAdjust,
                           (const char *)maskBits,
                           col_black,
@@ -897,7 +898,7 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
 #else 
    Image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_X, HotX-HotAdjust );
    Image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_Y, HotY-HotAdjust );
-   pCursor = new wxCursor( Image );
+   pCursor = DEBUG_NEW wxCursor( Image );
 #endif
 
    return pCursor;
