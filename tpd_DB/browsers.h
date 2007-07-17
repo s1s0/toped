@@ -164,7 +164,6 @@ namespace browsers {
    private:
       void              OnItemRightClick(wxTreeEvent&);
       void              OnBlankRMouseUp(wxMouseEvent&);
-      void              OnLMouseDblClk(wxMouseEvent&);
       void              OnGDSreportlay(wxCommandEvent& WXUNUSED(event));
       DECLARE_EVENT_TABLE();
    };

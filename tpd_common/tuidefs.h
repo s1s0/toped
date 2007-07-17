@@ -43,8 +43,8 @@ namespace tui
       ID_TPD_CELLTREE_H   ,
       ID_TPD_CELLTREE_F   ,
       ID_GDS_CELLTREE     ,
-      ID_TPD_CELLTREE_H2  ,
-      ID_TPD_CELLTREE_F2
+      ID_GDS_CELLTREE_H   ,
+      ID_GDS_CELLTREE_F
    } WX_WINDOW_IDS_TYPE;
 
    typedef enum  {
