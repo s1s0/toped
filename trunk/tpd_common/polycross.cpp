@@ -25,10 +25,12 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <math.h>
 #include <algorithm>
 #include "polycross.h"
 #include "outbox.h"
+#include "avl.h"
 
 //#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
@@ -38,13 +40,13 @@ SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
 //-----------------------------------------------------------------------------
 // The declaratoin of the avl related functions. They are declared originally
 // in avl.h and redeclared here in C++ manner with extern "C" clause
-extern "C" {
-   avl_table* avl_create (avl_comparison_func *, const void *, libavl_allocator *);
-   void avl_destroy (struct avl_table *, avl_item_func *);
-   void **avl_probe (struct avl_table *, void *);
-   void*      avl_delete (avl_table *, const void *);
-   void*      avl_t_first (avl_traverser *, avl_table *);
-}
+//extern "C" {
+//   avl_table* avl_create (avl_comparison_func *, const void *, libavl_allocator *);
+//   void avl_destroy (struct avl_table *, avl_item_func *);
+//   void **avl_probe (struct avl_table *, void *);
+//   void*      avl_delete (avl_table *, const void *);
+//   void*      avl_t_first (avl_traverser *, avl_table *);
+//}
 
 //==============================================================================
 /**
@@ -288,7 +290,7 @@ Event::insertCrossPoint() only.
  * @return the #CPoint that will be linked to its counterpart by the caller
  */
 polycross::CPoint* polycross::polysegment::insertCrossPoint(const TP* pnt) {
-   CPoint* cp = new CPoint(pnt);
+   CPoint* cp = DEBUG_NEW CPoint(pnt);
    crosspoints.push_back(cp);
    return cp;
 }
@@ -304,7 +306,7 @@ unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2) {
 }
 
 void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
-   vlist = new VPoint(_lP, vlist);
+   vlist = DEBUG_NEW VPoint(_lP, vlist);
    for (unsigned i = 0; i < crosspoints.size(); i++)
    {
       crosspoints[i]->linkage(vlist);
@@ -316,7 +318,7 @@ void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
 
 polycross::BPoint* polycross::polysegment::insertBindPoint(const TP* pnt)
 {
-   BPoint* cp = new BPoint(pnt);
+   BPoint* cp = DEBUG_NEW BPoint(pnt);
    crosspoints.push_back(cp);
    return cp;
 }
@@ -336,7 +338,7 @@ polycross::segmentlist::segmentlist(const pointlist& plst, byte plyn) {
    unsigned plysize = plst.size();
    _segs.reserve(plysize);
    for (unsigned i = 0; i < plysize; i++)
-      _segs.push_back(new polysegment(&(plst[i]),&(plst[(i+1)%plysize]),i, plyn));
+      _segs.push_back(DEBUG_NEW polysegment(&(plst[i]),&(plst[(i+1)%plysize]),i, plyn));
 }
 
 polycross::BPoint* polycross::segmentlist::insertBindPoint(unsigned segno, const TP* point) {
@@ -485,12 +487,12 @@ TP* polycross::TEvent::joiningSegments(polysegment* above, polysegment* below, f
    if (0 == lps)
    {
       if (0 >= getLambda(above->lP(), above->rP(), below->lP())) return NULL;
-      else return new TP(*(below->lP()));
+      else return DEBUG_NEW TP(*(below->lP()));
    }
    else if(0 == rps)
    {
       if (0 >= getLambda(above->lP(), above->rP(), below->rP())) return NULL;
-      else return new TP(*(below->rP()));
+      else return DEBUG_NEW TP(*(below->rP()));
    }
    assert(false);
 }
@@ -604,7 +606,7 @@ TP* polycross::TEvent::getCross(polysegment* above, polysegment* below)
    }
    else
       throw EXPTNpolyCross("Input segments don't have a crossing point");
-   return new TP((int)rint(X),(int)rint(Y));
+   return DEBUG_NEW TP((int)rint(X),(int)rint(Y));
 }
 
 
@@ -612,7 +614,7 @@ TP* polycross::TEvent::getMiddle(const TP* p1, const TP* p2)
 {
    int4b x = (p2->x() + p1->x()) / 2;
    int4b y = (p2->y() + p1->y()) / 2;
-   return new TP(x,y);
+   return DEBUG_NEW TP(x,y);
 }
 
 /**
@@ -1058,13 +1060,13 @@ polycross:: YQ::YQ(DBbox& overlap, const segmentlist* seg1, const segmentlist* s
 {
    _osl1 = seg1;
    _osl2 = seg2;
-   _blSent = new TP(overlap.p1().x()-1, overlap.p1().y()-1);
-   _brSent = new TP(overlap.p2().x()+1, overlap.p1().y()-1);
-   _tlSent = new TP(overlap.p1().x()-1, overlap.p2().y()+1);
-   _trSent = new TP(overlap.p2().x()+1, overlap.p2().y()+1);
-   _bottomSentinel = new BottomSentinel(new polysegment(_blSent, _brSent, -1, 0));
+   _blSent = DEBUG_NEW TP(overlap.p1().x()-1, overlap.p1().y()-1);
+   _brSent = DEBUG_NEW TP(overlap.p2().x()+1, overlap.p1().y()-1);
+   _tlSent = DEBUG_NEW TP(overlap.p1().x()-1, overlap.p2().y()+1);
+   _trSent = DEBUG_NEW TP(overlap.p2().x()+1, overlap.p2().y()+1);
+   _bottomSentinel = DEBUG_NEW BottomSentinel(DEBUG_NEW polysegment(_blSent, _brSent, -1, 0));
    _cthreads[-2] = _bottomSentinel;
-   _topSentinel = new TopSentinel(new polysegment(_tlSent, _trSent, -1, 0));
+   _topSentinel = DEBUG_NEW TopSentinel(DEBUG_NEW polysegment(_tlSent, _trSent, -1, 0));
    _cthreads[-1] = _topSentinel;
    _bottomSentinel->set_threadAbove(_topSentinel);
    _topSentinel->set_threadBelow(_bottomSentinel);
@@ -1085,7 +1087,7 @@ polycross::SegmentThread* polycross::YQ::beginThread(polycross::polysegment* sta
       above = above->threadAbove();
    
    SegmentThread* below = above->threadBelow();
-   SegmentThread* newthread = new SegmentThread(startseg, below, above);
+   SegmentThread* newthread = DEBUG_NEW SegmentThread(startseg, below, above);
    above->set_threadBelow(newthread);
    below->set_threadAbove(newthread);
    _cthreads[++_lastThreadID] = newthread;
@@ -1262,7 +1264,7 @@ polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
    _xqueue = avl_create(E_compare, NULL, NULL);
    createEvents(seg1,1);
    createEvents(seg2,2);
-   _sweepline = new YQ(_overlap, &seg1, &seg2);
+   _sweepline = DEBUG_NEW YQ(_overlap, &seg1, &seg2);
 }
 
 void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
@@ -1276,24 +1278,24 @@ void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
       // and create the thread event
       if (seg[s1]->lP() == seg[s2]->lP())
       {
-         evt = new TbEvent(seg[s1], seg[s2], shapeID);
+         evt = DEBUG_NEW TbEvent(seg[s1], seg[s2], shapeID);
          etype = _beginE;
       }
       else if (seg[s1]->rP() == seg[s2]->rP())
       {
-         evt = new TeEvent(seg[s1], seg[s2], shapeID);
+         evt = DEBUG_NEW TeEvent(seg[s1], seg[s2], shapeID);
          etype = _endE;
       }
       else
       {
-         evt = new TmEvent(seg[s1], seg[s2], shapeID);
+         evt = DEBUG_NEW TmEvent(seg[s1], seg[s2], shapeID);
          etype = _modifyE;
       }
       // update overlapping box
       _overlap.overlap(*(seg[s1]->lP()));
       _overlap.overlap(*(seg[s1]->rP()));
       // now create the vertex with the event inside
-      EventVertex* vrtx = new EventVertex(evt->evertex());
+      EventVertex* vrtx = DEBUG_NEW EventVertex(evt->evertex());
       // and try to stick it in the AVL tree
       void** retitem =  avl_probe(_xqueue,vrtx);
       if ((*retitem) != vrtx)
@@ -1306,9 +1308,9 @@ void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
 
 void polycross::XQ::addCrossEvent(const TP* CP, polysegment* aseg, polysegment* bseg)
 {
-   TcEvent* evt = new TcEvent(CP, aseg, bseg);
+   TcEvent* evt = DEBUG_NEW TcEvent(CP, aseg, bseg);
    // now create the vertex with the event inside
-   EventVertex* vrtx = new EventVertex(evt->evertex());
+   EventVertex* vrtx = DEBUG_NEW EventVertex(evt->evertex());
    // and try to stick it in the AVL tree
    void** retitem =  avl_probe(_xqueue,vrtx);
    if ((*retitem) != vrtx)
@@ -1385,7 +1387,7 @@ void polycross::BindCollection::update_BL(polysegment* outseg, unsigned poly1seg
    real denom = A*A + B*B;
    real X = poly1pnt->x() - (A / denom) * line1;
    real Y = poly1pnt->y() - (B / denom) * line1;
-   TP* poly0pnt = new TP((int)rint(X),(int)rint(Y));
+   TP* poly0pnt = DEBUG_NEW TP((int)rint(X),(int)rint(Y));
    // if the point lies inside the segment
    if (getLambda(outseg->lP(), outseg->rP(), poly0pnt) >= 0)
    {
@@ -1395,7 +1397,7 @@ void polycross::BindCollection::update_BL(polysegment* outseg, unsigned poly1seg
       // or of no distance calculated fro this segment
       if (is_shorter(poly0seg, distance))
          // store the data
-         _blist.push_back(new BindSegment(poly0seg, poly1seg, poly0pnt, poly1pnt, distance));
+         _blist.push_back(DEBUG_NEW BindSegment(poly0seg, poly1seg, poly0pnt, poly1pnt, distance));
       else delete poly0pnt;
    }
    else delete poly0pnt;

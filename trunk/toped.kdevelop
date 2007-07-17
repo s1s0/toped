@@ -16,7 +16,7 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>tpd_bidfunc/libtpd_bidfunc.la</activetarget>
+      <activetarget>src/toped</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>

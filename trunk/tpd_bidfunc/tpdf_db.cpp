@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include "tpdf_db.h"
 #include <sstream>
 #include "../tpd_DB/datacenter.h"
@@ -36,24 +37,24 @@ extern console::toped_logfile    LogFile;
 
 //=============================================================================
 tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype, bool eor) :
-      stdNEWDESIGNd(new parsercmd::argumentLIST,retype, eor)
+      stdNEWDESIGNd(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdNEWDESIGN::execute()
 {
    TpdTime timeCreated(time(NULL));
-   OPstack.push(new telldata::ttstring(timeCreated()));
+   OPstack.push(DEBUG_NEW telldata::ttstring(timeCreated()));
    return stdNEWDESIGNd::execute();
 }
 
 //=============================================================================
 tellstdfunc::stdNEWDESIGNd::stdNEWDESIGNd(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdNEWDESIGNd::execute()
@@ -78,9 +79,9 @@ int tellstdfunc::stdNEWDESIGNd::execute()
 
 //=============================================================================
 tellstdfunc::TDTread::TDTread(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::TDTread::execute()
@@ -123,11 +124,11 @@ int tellstdfunc::TDTread::execute()
 
 //=============================================================================
 tellstdfunc::TDTreadIFF::TDTreadIFF(telldata::typeID retype, bool eor) :
-      TDTread(new parsercmd::argumentLIST,retype,eor)
+      TDTread(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::TDTreadIFF::execute()
@@ -179,7 +180,7 @@ int tellstdfunc::TDTreadIFF::execute()
 
 //=============================================================================
 tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::TDTsave::execute() {
@@ -198,10 +199,10 @@ int tellstdfunc::TDTsave::execute() {
 
 //=============================================================================
 tellstdfunc::TDTsaveIFF::TDTsaveIFF(telldata::typeID retype, bool eor) :
-      TDTsave(new parsercmd::argumentLIST,retype,eor)
+      TDTsave(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::TDTsaveIFF::execute() {
@@ -234,9 +235,9 @@ int tellstdfunc::TDTsaveIFF::execute() {
 
 //=============================================================================
 tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::TDTsaveas::execute() {
@@ -264,9 +265,9 @@ int tellstdfunc::TDTsaveas::execute() {
 
 //=============================================================================
 tellstdfunc::GDSread::GDSread(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::GDSread::execute() {
@@ -286,10 +287,10 @@ int tellstdfunc::GDSread::execute() {
             top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));
          } while (NULL != (root = root->GetNextRoot()));
       DATC->unlockGDS();
-      telldata::ttlist* topcells = new telldata::ttlist(telldata::tn_string);
+      telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
       for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                 CN != top_cell_list.end(); CN ++)
-         topcells->add(new telldata::ttstring(*CN));
+         topcells->add(DEBUG_NEW telldata::ttstring(*CN));
       OPstack.push(topcells);
       LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
    }
@@ -303,11 +304,11 @@ int tellstdfunc::GDSread::execute() {
 
 //=============================================================================
 tellstdfunc::GDSconvert::GDSconvert(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor) 
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 
 }
 
@@ -329,11 +330,11 @@ int tellstdfunc::GDSconvert::execute()
 
 //=============================================================================
 tellstdfunc::GDSconvertAll::GDSconvertAll(telldata::typeID retype, bool eor) :
-                              cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor) 
+                              cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttlist(telldata::tn_string)));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::GDSconvertAll::execute() 
@@ -360,9 +361,9 @@ int tellstdfunc::GDSconvertAll::execute()
 
 //=============================================================================
 tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::GDSexportLIB::execute()
@@ -385,11 +386,11 @@ int tellstdfunc::GDSexportLIB::execute()
 
 //=============================================================================
 tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::GDSexportTOP::execute()
@@ -428,10 +429,10 @@ int tellstdfunc::GDSexportTOP::execute()
 
 //=============================================================================
 tellstdfunc::PSexportTOP::PSexportTOP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::PSexportTOP::execute()
@@ -468,7 +469,7 @@ int tellstdfunc::PSexportTOP::execute()
 
 //=============================================================================
 tellstdfunc::GDSclose::GDSclose(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
 int tellstdfunc::GDSclose::execute() {
@@ -480,10 +481,10 @@ int tellstdfunc::GDSclose::execute() {
 
 //=============================================================================
 tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::stdREPORTLAY::execute() {
@@ -493,10 +494,10 @@ int tellstdfunc::stdREPORTLAY::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
       bool success = ATDB->collect_usedlays(cellname, recursive, ull);
    DATC->unlockDB();
-   telldata::ttlist* tllull = new telldata::ttlist(telldata::tn_int);
+   telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    if (success) {
       for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
-         tllull->add(new telldata::ttint(*CL));
+         tllull->add(DEBUG_NEW telldata::ttint(*CL));
       ull.clear();
    }
    else {
@@ -510,23 +511,23 @@ int tellstdfunc::stdREPORTLAY::execute() {
 
 //=============================================================================
 tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype, bool eor) :
-      stdREPORTLAY(new parsercmd::argumentLIST,retype, eor)
+      stdREPORTLAY(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::stdREPORTLAYc::execute() {
    bool recursive = getBoolValue();
-   OPstack.push(new telldata::ttstring(""));
-   OPstack.push(new telldata::ttbool(recursive));
+   OPstack.push(DEBUG_NEW telldata::ttstring(""));
+   OPstack.push(DEBUG_NEW telldata::ttbool(recursive));
    return stdREPORTLAY::execute();
 }
 
 //=============================================================================
 tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::GDSreportlay::execute() {

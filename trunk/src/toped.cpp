@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <wx/sizer.h>
 #include <wx/filename.h>
 #include <wx/image.h>
@@ -63,35 +64,35 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent) : wxPanel( parent, -1,
    wxFont fontX = GetFont();
    fontX.SetWeight(wxBOLD);
    SetFont(fontX);
-   _abort = new wxButton(this, TBSTAT_ABORT, wxT("Abort"));
+   _abort = DEBUG_NEW wxButton(this, TBSTAT_ABORT, wxT("Abort"));
    _abort->Disable();
    SetBackgroundColour(wxColour(wxT("BLACK")));
    SetForegroundColour(wxColour(wxT("CYAN")));
-   X_pos = new wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
+   X_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   Y_pos = new wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
+   Y_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dX = new wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(80,20),
+   _dX = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(80,20),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dY = new wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(100,20),
+   _dY = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(100,20),
                                                    wxST_NO_AUTORESIZE/* | wxALIGN_RIGHT*/);
    
-   _selected = new wxStaticText(this, -1, wxT("0"), wxDefaultPosition, wxSize(40,20),
+   _selected = DEBUG_NEW wxStaticText(this, -1, wxT("0"), wxDefaultPosition, wxSize(40,20),
                                                    wxST_NO_AUTORESIZE | wxALIGN_LEFT);
-   wxBoxSizer *thesizer = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    thesizer->Add(_abort, 0, wxALL | wxALIGN_CENTER, 3);
    thesizer->Add(10,0,1);  
-   thesizer->Add(new wxStaticText(this, -1, wxT("Selected: ")), 0, wxALIGN_CENTER, 3 );
+   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("Selected: ")), 0, wxALIGN_CENTER, 3 );
    thesizer->Add(_selected, 0, wxALIGN_CENTER, 3 );
 //   thesizer->Add(10,0,1);  
-   thesizer->Add(new wxStaticText(this, -1, wxT("dX: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("dX: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
    thesizer->Add(_dX, 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(new wxStaticText(this, -1, wxT("dY: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("dY: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
    thesizer->Add(_dY, 0, wxALIGN_CENTER, 3 );
 //   thesizer->Add(20,0,1);  
-   thesizer->Add(new wxStaticText(this, -1, wxT("X: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("X: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
    thesizer->Add(X_pos, 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(new wxStaticText(this, -1, wxT("Y: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("Y: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
    thesizer->Add(Y_pos, 0, wxALIGN_CENTER, 3 );
    SetSizerAndFit(thesizer);
 }
@@ -140,7 +141,7 @@ tui::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, wxID_ANY)
 
     SetFieldsCount(Field_Max);
     SetStatusWidths(Field_Max, widths);
-    _lamp = new wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
+    _lamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
 }
 
 void tui::TopedStatus::OnThreadON(wxString cmd)
@@ -282,9 +283,9 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initView();
 //   initToolBar();
 //   CreateStatusBar();
-   _toped_status = new TopedStatus(this);
+   _toped_status = DEBUG_NEW TopedStatus(this);
    SetStatusBar(_toped_status);
-   _resourceCenter = new ResourceCenter;
+   _resourceCenter = DEBUG_NEW ResourceCenter;
    SetStatusText( wxT( "Toped loaded..." ) );
    //Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
@@ -328,14 +329,14 @@ tui::TopedFrame::~TopedFrame() {
    delete mS_command;
    delete mS_log;
    delete mS_canvas;
-//   delete _resourceCenter;
+   delete _resourceCenter;
 //   delete _toped_status;
 }
 
 void tui::TopedFrame::initMenuBar() {
    //---------------------------------------------------------------------------
    // menuBar entry fileMenu
-   /*gdsMenu=new wxMenu();
+   /*gdsMenu=DEBUG_NEW wxMenu();
    gdsMenu->Append(TMGDS_OPEN   , wxT("parse")  , wxT("Parse GDS file"));
    gdsMenu->Append(TMGDS_TRANSLATE , wxT("translate to library") , wxT("Import GDS structure"));
    gdsMenu->Append(TMGDS_EXPORTC, wxT("export cell") , wxT("Export cell to GDS"));
@@ -343,8 +344,8 @@ void tui::TopedFrame::initMenuBar() {
    */
    
 
-   /*fileMenu=new wxMenu();
-   fileMenu->Append(TMFILE_NEW   , wxT("New ...\tCTRL-N")    , wxT("Create new design"));
+   /*fileMenu=DEBUG_NEW wxMenu();
+   fileMenu->Append(TMFILE_NEW   , wxT("New ...\tCTRL-N")    , wxT("Create DEBUG_NEW design"));
    fileMenu->Append(TMFILE_OPEN  , wxT("Open ...\tCTRL-O")   , wxT("Open a TDT file"));
    fileMenu->Append(TMFILE_INCLUDE, wxT("Include ...")       , wxT("Include a TELL file"));
    fileMenu->AppendSeparator();
@@ -353,11 +354,11 @@ void tui::TopedFrame::initMenuBar() {
    //fileMenu->Append(TMGDS_MENU   , wxT("Advanced GDS operations") , gdsMenu , wxT("More granulated GDS related functions"));
    fileMenu->AppendSeparator();
    fileMenu->Append(TMFILE_SAVE  , wxT("Save\tCTRL-S")       , wxT("Save the database"));
-   fileMenu->Append(TMFILE_SAVEAS, wxT("Save as ..."), wxT("Save the database under a new name"));
+   fileMenu->Append(TMFILE_SAVEAS, wxT("Save as ..."), wxT("Save the database under a DEBUG_NEW name"));
    fileMenu->AppendSeparator();
    fileMenu->Append(TMFILE_EXIT  , wxT("Exit")       , wxT("Exit Toped"));*/
 
-   menuBar = new wxMenuBar();
+   menuBar = DEBUG_NEW wxMenuBar();
    SetMenuBar( menuBar );
 
    _resourceCenter->appendMenu("&File/New ...",    "CTRL-N", &tui::TopedFrame::OnNewDesign,  "Create new design");
@@ -389,7 +390,7 @@ void tui::TopedFrame::initMenuBar() {
 
    //---------------------------------------------------------------------------
    // menuBar entry editMenu
-   /*editMenu=new wxMenu();
+   /*editMenu=DEBUG_NEW wxMenu();
    editMenu->Append(TMEDIT_UNDO  , wxT("Undo\tCTRL-Z")  , wxT("Undo last operation"));
    editMenu->AppendSeparator();
    editMenu->Append(TMEDIT_COPY  , wxT("Copy\tCTRL-C")  , wxT("Copy selected shapes"));
@@ -417,7 +418,7 @@ void tui::TopedFrame::initMenuBar() {
 
    //---------------------------------------------------------------------------
    // menuBar entry viewMenu
-   /*viewMenu=new wxMenu();
+   /*viewMenu=DEBUG_NEW wxMenu();
    viewMenu->AppendCheckItem(TMVIEW_VIEWTOOLBAR  , wxT("Toolbar")  , wxT("Show/Hide the tool bar"));
    viewMenu->AppendCheckItem(TMVIEW_VIEWSTATUSBAR, wxT("Statusbar"), wxT("Show/Hide the status bar"));
    viewMenu->AppendSeparator();
@@ -447,7 +448,7 @@ void tui::TopedFrame::initMenuBar() {
 
    //---------------------------------------------------------------------------
    // menuBar entry Cell
-   /*cellMenu=new wxMenu();
+   /*cellMenu=DEBUG_NEW wxMenu();
    cellMenu->Append(TMCELL_NEW      , wxT("New Cell") , wxT("Create a new cell"));
    cellMenu->Append(TMCELL_OPEN     , wxT("Open Cell") , wxT("Open existing cell for editing"));
    cellMenu->AppendSeparator();
@@ -462,7 +463,7 @@ void tui::TopedFrame::initMenuBar() {
    cellMenu->Append(TMCELL_GROUP    , wxT("Group Cell") , wxT("Group selected shapes in a cell"));
    cellMenu->Append(TMCELL_UNGROUP  , wxT("Unroup Cell") , wxT("Ungroup selected cell references"));
    */
-   _resourceCenter->appendMenu("&Cell/New Cell",      "",   &tui::TopedFrame::OnCellNew, "Create a new cell" );
+   _resourceCenter->appendMenu("&Cell/New Cell",      "",   &tui::TopedFrame::OnCellNew, "Create a DEBUG_NEW cell" );
    _resourceCenter->appendMenu("&Cell/Open Cell",     "",   &tui::TopedFrame::OnCellOpen,    "Open existing cell for editing" );
    _resourceCenter->appendMenu("&Cell/Remove Cell",   "",   &tui::TopedFrame::OnCellRemove,  "Remove existing cell" );
    _resourceCenter->appendMenuSeparator("Cell");
@@ -481,7 +482,7 @@ void tui::TopedFrame::initMenuBar() {
 
    //---------------------------------------------------------------------------
    // menuBar entry Draw
-   /*drawMenu=new wxMenu();
+   /*drawMenu=DEBUG_NEW wxMenu();
    drawMenu->Append(TMDRAW_BOX , wxT("Box\tCTRL-B")     , wxT("Create new box on the current layer"));
    drawMenu->Append(TMDRAW_POLY, wxT("Polygon\tCTRL-L") , wxT("Create new polygon on the current layer"));
    drawMenu->Append(TMDRAW_WIRE, wxT("Wire ...\tCTRL-W"), wxT("Create new wire on the current layer"));
@@ -495,7 +496,7 @@ void tui::TopedFrame::initMenuBar() {
 
    //---------------------------------------------------------------------------
    // menuBar entry Modify
-   /*selectMenu=new wxMenu();
+   /*selectMenu=DEBUG_NEW wxMenu();
    selectMenu->Append(TMSEL_SELECT_IN   , wxT("Select\tCTRL-I")        , wxT("Select objects"));
    selectMenu->Append(TMSEL_PSELECT_IN  , wxT("Part select\tCTRL-P")  , wxT("Select object edges"));
    selectMenu->Append(TMSEL_SELECT_ALL  , wxT("Select all\tCTRL-A")    , wxT("Select all objects in the current cell"));
@@ -517,12 +518,12 @@ void tui::TopedFrame::initMenuBar() {
    //---------------------------------------------------------------------------
    // menuBar entry Settings
    // first the sub menu
-   markerMenu=new wxMenu();
+   markerMenu=DEBUG_NEW wxMenu();
    markerMenu->AppendRadioItem(TMSET_MARKER0    , wxT("Free")      , wxT("Marker is not restricted"));
    markerMenu->AppendRadioItem(TMSET_MARKER45   , wxT("45 degrees"), wxT("Restrict shape angles to 45 deg"));
    markerMenu->AppendRadioItem(TMSET_MARKER90   , wxT("Orthogonal"), wxT("Restrict shape angles to 90 deg"));
    // now the setting menu itself
-   settingsMenu=new wxMenu();
+   settingsMenu=DEBUG_NEW wxMenu();
    settingsMenu->Append         (TMSET_STEP     , wxT("Step")      , wxT("Select objects"));
    settingsMenu->AppendCheckItem(TMSET_AUTOPAN  , wxT("Auto Pan")  , wxT("Automatic window move"));
    settingsMenu->AppendSeparator();
@@ -543,7 +544,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->Append         (TMSET_DEFFILL  , wxT("Define Fill")  , wxT("Define a drawing pattern"));
    //---------------------------------------------------------------------------
    // menuBar entry helpMenu
-   /*helpMenu=new wxMenu();
+   /*helpMenu=DEBUG_NEW wxMenu();
    helpMenu->Append(TMHELP_ABOUTAPP       , wxT("About")          , wxT("About TOPED"));
    */
    _resourceCenter->appendMenu("&Other/Add Ruler"   , "", &tui::TopedFrame::OnAddRuler, "Add new ruler" );
@@ -555,7 +556,7 @@ void tui::TopedFrame::initMenuBar() {
    
    //---------------------------------------------------------------------------
    // MENUBAR CONFIGURATION
-   //menuBar = new wxMenuBar();
+   //menuBar = DEBUG_NEW wxMenuBar();
    //menuBar->Append(fileMenu      , wxT("&File"  ));
    //menuBar->Append(editMenu      , wxT("&Edit"  ));
    //menuBar->Append(viewMenu      , wxT("&View"  ));
@@ -575,9 +576,9 @@ void tui::TopedFrame::initMenuBar() {
 /*
 void TopedFrame::initToolBar() {
    wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
-   X_pos = new wxStaticText(positionBar, -1, "", wxDefaultPosition, 
+   X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
                               wxSize(100,32), wxST_NO_AUTORESIZE);
-   Y_pos = new wxStaticText(positionBar, -1, "", wxDefaultPosition, 
+   Y_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
                               wxSize(100,32), wxST_NO_AUTORESIZE);
 //wxSIMPLE_BORDER | wxALIGN_RIGHT  |
    wxFont fontX = X_pos->GetFont();
@@ -600,29 +601,29 @@ void TopedFrame::initToolBar() {
 */
 void tui::TopedFrame::initView() {
    // The browsers window
-   mS_browsers = new wxSashLayoutWindow(this, ID_WIN_BROWSERS,
+   mS_browsers = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_BROWSERS,
                                         wxDefaultPosition, wxDefaultSize,
                                wxSW_3D | wxCLIP_CHILDREN);
    mS_browsers->SetDefaultSize(wxSize(180, 1000));
    mS_browsers->SetOrientation(wxLAYOUT_VERTICAL);
    mS_browsers->SetAlignment(wxLAYOUT_LEFT);
    mS_browsers->SetSashVisible(wxSASH_RIGHT, TRUE);
-   _browsers = new browsers::browserTAB(mS_browsers);
+   _browsers = DEBUG_NEW browsers::browserTAB(mS_browsers);
    //---------------------------------------------------------------------------- 
    // The Layoutcanvas toolbar window
    //---------------------------------------------------------------------------- 
-   mS_GLstatus = new wxSashLayoutWindow(this, ID_WIN_GLSTATUS,
+   mS_GLstatus = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_GLSTATUS,
                                         wxDefaultPosition, wxDefaultSize,
                              wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
    mS_GLstatus->SetDefaultSize(wxSize(1000, 30));
    mS_GLstatus->SetOrientation(wxLAYOUT_HORIZONTAL);
    mS_GLstatus->SetAlignment(wxLAYOUT_TOP);
    mS_GLstatus->SetBackgroundColour(wxColour(255, 0, 0));
-   _GLstatus = new CanvasStatus(mS_GLstatus);
+   _GLstatus = DEBUG_NEW CanvasStatus(mS_GLstatus);
    //----------------------------------------------------------------------------
    // The command window
    //----------------------------------------------------------------------------
-   mS_command = new wxSashLayoutWindow(this, ID_WIN_COMMAND,
+   mS_command = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_COMMAND,
                                wxDefaultPosition, wxDefaultSize,
                                wxSW_3D | wxCLIP_CHILDREN);
    mS_command->SetDefaultSize(wxSize(1000, 30));
@@ -630,11 +631,11 @@ void tui::TopedFrame::initView() {
    mS_command->SetAlignment(wxLAYOUT_BOTTOM);
    mS_command->SetSashVisible(wxSASH_TOP, TRUE);
    // postponed initialization until the canvas window is initialized
-//   _cmdline = new console::ted_cmd(mS_command);
+//   _cmdline = DEBUG_NEW console::ted_cmd(mS_command);
    //----------------------------------------------------------------------------
    //the log window
    //----------------------------------------------------------------------------
-   mS_log = new wxSashLayoutWindow(this, ID_WIN_LOG,
+   mS_log = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_LOG,
                                wxDefaultPosition, wxDefaultSize,
                                wxSW_3D | wxCLIP_CHILDREN);
    mS_log->SetDefaultSize(wxSize(1000, 150));
@@ -642,16 +643,16 @@ void tui::TopedFrame::initView() {
    mS_log->SetAlignment(wxLAYOUT_BOTTOM);
    mS_log->SetSashVisible(wxSASH_TOP, TRUE);
    //
-   wxNotebook* logpane = new wxNotebook(mS_log, -1, wxDefaultPosition, wxDefaultSize, wxNB_RIGHT);
-   _cmdlog = new console::ted_log(logpane);
+   wxNotebook* logpane = DEBUG_NEW wxNotebook(mS_log, -1, wxDefaultPosition, wxDefaultSize, wxNB_RIGHT);
+   _cmdlog = DEBUG_NEW console::ted_log(logpane);
    logpane->AddPage(_cmdlog, wxT("Log"));
-   _cmdbrowser = new console::TELLFuncList(logpane);
+   _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane);
    logpane->AddPage(_cmdbrowser, wxT("Lib"));
 
    //----------------------------------------------------------------------------
    // the openGL window
    //---------------------------------------------------------------------------- 
-   mS_canvas = new wxSashLayoutWindow(this, ID_WIN_CANVAS,
+   mS_canvas = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_CANVAS,
                                wxDefaultPosition, wxDefaultSize,
                                wxSW_3D | wxCLIP_CHILDREN);
    //the canvas
@@ -667,8 +668,8 @@ void tui::TopedFrame::initView() {
 //                         WX_GL_DEPTH_SIZE    , 1,
                          WX_GL_DOUBLEBUFFER     ,
                          GL_NONE };
-   _laycanvas = new LayoutCanvas(mS_canvas, gl_attrib);
-   _cmdline = new console::ted_cmd(mS_command, _laycanvas);
+   _laycanvas = DEBUG_NEW LayoutCanvas(mS_canvas, gl_attrib);
+   _cmdline = DEBUG_NEW console::ted_cmd(mS_command, _laycanvas);
    _browsers->set_tellParser( _cmdline ) ;
 }
 
@@ -905,7 +906,7 @@ void tui::TopedFrame::OnCellOpen(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getCellOpen* dlg = NULL;
    try {
-      dlg = new tui::getCellOpen(this, -1, wxT("Cell Open"), pos, wxT(""));
+      dlg = DEBUG_NEW tui::getCellOpen(this, -1, wxT("Cell Open"), pos, wxT(""));
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -922,7 +923,7 @@ void tui::TopedFrame::OnCellRemove(wxCommandEvent&)
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getCellOpen* dlg = NULL;
    try {
-      dlg = new tui::getCellOpen(this, -1, wxT("Cell Remove"), pos, wxT(""));
+      dlg = DEBUG_NEW tui::getCellOpen(this, -1, wxT("Cell Remove"), pos, wxT(""));
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -938,7 +939,7 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getGDSimport* dlg = NULL;
    try {
-      dlg = new tui::getGDSimport(this, -1, wxT("Import GDS structure"), pos,
+      dlg = DEBUG_NEW tui::getGDSimport(this, -1, wxT("Import GDS structure"), pos,
                                           _browsers->TDTSelectedGDSName());
    }
    catch (EXPTN) {delete dlg;return;}
@@ -1001,7 +1002,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getGDSexport* dlg = NULL;
    try {
-      dlg = new tui::getGDSexport(this, -1, wxT("GDS export cell"), pos, _browsers->TDTSelectedCellName());
+      dlg = DEBUG_NEW tui::getGDSexport(this, -1, wxT("GDS export cell"), pos, _browsers->TDTSelectedCellName());
    }
    catch (EXPTN) {delete dlg;return;}
    wxString cellname;
@@ -1057,7 +1058,7 @@ void tui::TopedFrame::CellRef(wxString clname) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getCellRef* dlg = NULL;
    try {
-      dlg = new tui::getCellRef(this, -1, wxT("Cell Reference"), pos, clname);
+      dlg = DEBUG_NEW tui::getCellRef(this, -1, wxT("Cell Reference"), pos, clname);
    }
    catch (EXPTN) {delete dlg;return;}   
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -1077,7 +1078,7 @@ void tui::TopedFrame::CellARef(wxString clname) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getCellARef* dlg = NULL;
    try {
-      dlg = new tui::getCellARef(this, -1, wxT("Array of References"), pos, clname);
+      dlg = DEBUG_NEW tui::getCellARef(this, -1, wxT("Array of References"), pos, clname);
    }
    catch (EXPTN) {delete dlg; return;}   
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -1123,7 +1124,7 @@ void tui::TopedFrame::OnDrawWire(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getSize* dlg = NULL;
    try {
-      dlg = new tui::getSize(this, -1, wxT("Wire width"), pos, DATC->step() ,3);
+      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Wire width"), pos, DATC->step() ,3);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -1138,7 +1139,7 @@ void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);   
    tui::getTextdlg* dlg = NULL;
    try {
-      dlg = new tui::getTextdlg(this, -1, wxT("Add text"), pos);
+      dlg = DEBUG_NEW tui::getTextdlg(this, -1, wxT("Add text"), pos);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -1326,7 +1327,7 @@ void tui::TopedFrame::OnChangeRef( wxCommandEvent& WXUNUSED( event ))
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getCellRef* dlg = NULL;
    try {
-      dlg = new tui::getCellRef(this, -1, wxT("Change Cell Reference"), pos, wxT(""));
+      dlg = DEBUG_NEW tui::getCellRef(this, -1, wxT("Change Cell Reference"), pos, wxT(""));
    }
    catch (EXPTN) {delete dlg;return;}   
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -1343,7 +1344,7 @@ void tui::TopedFrame::OnChangeLayer( wxCommandEvent& WXUNUSED( event ))
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getSize* dlg = NULL;
    try {
-      dlg = new tui::getSize(this, -1, wxT("Transfer to layer"), pos, 1, 0);
+      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Transfer to layer"), pos, 1, 0);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {

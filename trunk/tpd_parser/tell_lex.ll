@@ -32,6 +32,7 @@
 lex_string        \"[^"]*\"
 lex_identifier    [a-zA-Z_][a-zA-Z0-9_]*
 %{ /**************************************************************************/
+#include "tpdph.h"
 #include <stdio.h>
 #include <string.h>
 #include <wx/filename.h>
@@ -172,7 +173,7 @@ void parsercmd::location_lines(YYLTYPE *loc, int num) {
 
 char* parsercmd::charcopy(std::string source, bool quotes) {
    int length = source.length() - (quotes ? 2 : 0);
-   char* newstr = new char[length+2];
+   char* newstr = DEBUG_NEW char[length+2];
    memcpy(newstr,&(source.c_str()[quotes ? 1 : 0]),length);
    newstr[length] = 0x00;
    return newstr;
@@ -195,7 +196,7 @@ int parsercmd::includefile(char* name, FILE* &handler)
    else
    {
       FILE* newfilehandle;
-      wxFileName* inclFN = new wxFileName(wxString(name,wxConvUTF8));
+      wxFileName* inclFN = DEBUG_NEW wxFileName(wxString(name,wxConvUTF8));
       inclFN->Normalize();
       std::string nfname = inclFN->IsOk() ? std::string(inclFN->GetFullPath().mb_str()) : name;
       std::string infomsg;
@@ -215,8 +216,8 @@ int parsercmd::includefile(char* name, FILE* &handler)
          tell_log(console::MT_INFO,infomsg);
          handler = newfilehandle;
          /* create a new record with file handler and location objects*/
-         include_stack[include_stack_ptr++] = new parsercmd::lexer_files(
-                    static_cast<void*>(YY_CURRENT_BUFFER), new YYLTYPE(telllloc));
+         include_stack[include_stack_ptr++] = DEBUG_NEW parsercmd::lexer_files(
+                    static_cast<void*>(YY_CURRENT_BUFFER), DEBUG_NEW YYLTYPE(telllloc));
          /* switch the buffer to the new file */
          yy_switch_to_buffer(yy_create_buffer( newfilehandle, YY_BUF_SIZE ) );
          /* initialize the current error location object */

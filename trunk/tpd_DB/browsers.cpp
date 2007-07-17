@@ -28,6 +28,7 @@
 //      Comments :
 //===========================================================================
 
+#include "tpdph.h"
 #include "browsers.h"
 #include "viewprop.h"
 #include "../tpd_common/tuidefs.h"
@@ -81,7 +82,7 @@ browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
    SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
-   _imageList = new wxImageList(16, 16, TRUE);
+   _imageList = DEBUG_NEW wxImageList(16, 16, TRUE);
 #ifdef __WXMSW__
 /*@TODO : Under windows - resource loading*/
 //    m_imageListNormal->Add( wxIcon(_T("icon1"), wxBITMAP_TYPE_ICO_RESOURCE) );
@@ -191,10 +192,11 @@ void browsers::topedlay_list::OnSort(wxListEvent& event)
 }
 
 
-BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, CellBrowser)
+BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, wxTreeCtrl)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_GDS_CELLTREE_H, browsers::GDSCellBrowser::OnItemRightClick)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_GDS_CELLTREE_F, browsers::GDSCellBrowser::OnItemRightClick)
    EVT_RIGHT_UP(browsers::GDSCellBrowser::OnBlankRMouseUp)
    EVT_MENU(GDSTREEREPORTLAY, browsers::GDSCellBrowser::OnGDSreportlay)
-   EVT_LEFT_DCLICK(browsers::GDSCellBrowser::OnLMouseDblClk)
 END_EVENT_TABLE()
 
 browsers::GDSCellBrowser::GDSCellBrowser(wxWindow *parent, wxWindowID id, 
@@ -213,12 +215,6 @@ void browsers::GDSCellBrowser::OnBlankRMouseUp(wxMouseEvent& event)
 {
    wxPoint pt = event.GetPosition();
    ShowMenu(HitTest(pt), pt);
-}
-
-void browsers::GDSCellBrowser::OnLMouseDblClk(wxMouseEvent& event)
-{
-   //Empty
-   //Use for overwriting CellBrowser::OnLMouseDblClk
 }
 
 void browsers::GDSCellBrowser::OnGDSreportlay(wxCommandEvent& WXUNUSED(event)) {
@@ -254,23 +250,23 @@ browsers::GDSbrowser::GDSbrowser(wxWindow *parent, wxWindowID id,
                         const wxSize& size ,
                         long style ):wxPanel(parent, id, pos, size, style)
 {
-   wxBoxSizer *thesizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
       
-   wxBoxSizer *sizer1 = new wxBoxSizer( wxHORIZONTAL );
-   _hierButton = new wxButton( this, BT_CELLS_HIER2, wxT("Hier") );
+   wxBoxSizer *sizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   _hierButton = DEBUG_NEW wxButton( this, BT_CELLS_HIER2, wxT("Hier") );
    //Set bold font for _hierButton
    wxFont font = _hierButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
    _hierButton->SetFont(font);
 
-   _flatButton = new wxButton( this, BT_CELLS_FLAT2, wxT("Flat") );
+   _flatButton = DEBUG_NEW wxButton( this, BT_CELLS_FLAT2, wxT("Flat") );
 
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
    
-   fCellBrowser = new GDSCellBrowser(this, tui::ID_TPD_CELLTREE_F2,pos, size, style);
+   fCellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_GDS_CELLTREE_F, pos, size, style);
    
-   hCellBrowser = new GDSCellBrowser(this, tui::ID_TPD_CELLTREE_H2, pos, size, style);
+   hCellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_GDS_CELLTREE_H, pos, size, style);
    
    thesizer->Add(hCellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(fCellBrowser, 1, wxEXPAND | wxBOTTOM);
@@ -492,29 +488,29 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
                                           //,
                                        //style | wxTR_FULL_ROW_HIGHLIGHT) 
 {
-   wxBoxSizer *thesizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
       
-   wxBoxSizer *sizer1 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *sizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    
-   _hierButton = new wxButton( this, BT_CELLS_HIER, wxT("Hier") );
+   _hierButton = DEBUG_NEW wxButton( this, BT_CELLS_HIER, wxT("Hier") );
    //Set bold font for _hierButton
    wxFont font = _hierButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
    _hierButton->SetFont(font);
 
-   _flatButton = new wxButton( this, BT_CELLS_FLAT, wxT("Flat") );
+   _flatButton = DEBUG_NEW wxButton( this, BT_CELLS_FLAT, wxT("Flat") );
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
-   fCellBrowser = new CellBrowser(this, tui::ID_TPD_CELLTREE_F,pos, size, style);
+   fCellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_TPD_CELLTREE_F,pos, size, style);
    
-   hCellBrowser = new CellBrowser(this, tui::ID_TPD_CELLTREE_H, pos, size, style);
+   hCellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_TPD_CELLTREE_H, pos, size, style);
    
    thesizer->Add(hCellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(fCellBrowser, 1, wxEXPAND | wxBOTTOM);
    fCellBrowser->Hide();
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
 
-   _imageList = new wxImageList(16, 16, TRUE);
+   _imageList = DEBUG_NEW wxImageList(16, 16, TRUE);
 #ifdef __WXMSW__
 /*TODO : Under windows - resource loading*/
 //    m_imageListNormal->Add( wxIcon(_T("icon1"), wxBITMAP_TYPE_ICO_RESOURCE) );
@@ -542,7 +538,7 @@ void browsers::TDTbrowser::collectInfo(const wxString libname, laydata::TDTHierT
 {
    hCellBrowser->AddRoot(libname);
    fCellBrowser->AddRoot(libname);
-   if (!tdtH) return; // new, empty design 
+   if (!tdtH) return; // DEBUG_NEW, empty design 
    laydata::TDTHierTree* root = tdtH->GetFirstRoot();
    wxTreeItemId nroot;
    while (root){
@@ -803,9 +799,9 @@ END_EVENT_TABLE()
 browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const 
    wxPoint& pos, const wxSize& size, long style) : 
                                  wxNotebook(parent, id, pos, size, style) {
-   _TDTstruct = new TDTbrowser(this, tui::ID_TPD_CELLTREE);
+   _TDTstruct = DEBUG_NEW TDTbrowser(this, tui::ID_TPD_CELLTREE);
    AddPage(_TDTstruct, wxT("Cells"));
-   _TDTlayers = new layerbrowser(this, tui::ID_TPD_LAYERS);
+   _TDTlayers = DEBUG_NEW layerbrowser(this, tui::ID_TPD_LAYERS);
    AddPage(_TDTlayers, wxT("Layers"));
    _GDSstruct = NULL;
    _tellParser = NULL;
@@ -844,7 +840,7 @@ void browsers::browserTAB::OnTELLaddTDTtab(const wxString libname, laydata::TDTH
 
 void browsers::browserTAB::OnTELLaddGDStab() {
    if (!_GDSstruct) {
-      _GDSstruct = new GDSbrowser(this, tui::ID_GDS_CELLTREE);
+      _GDSstruct = DEBUG_NEW GDSbrowser(this, tui::ID_GDS_CELLTREE);
       AddPage(_GDSstruct, wxT("GDS"));
    }
    else _GDSstruct->DeleteAllItems();
@@ -861,7 +857,7 @@ void browsers::browserTAB::OnTELLclearGDStab() {
 
 //==============================================================================
 void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool status) {
-   int* bt = new int(btype);
+   int* bt = DEBUG_NEW int(btype);
    wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
    eventLAYER_STATUS.SetExtraLong(layno);
    eventLAYER_STATUS.SetInt(status);
@@ -870,7 +866,7 @@ void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool
 }
 
 void browsers::layer_add(const std::string name, const word layno) {
-   int* bt = new int(BT_LAYER_ADD);
+   int* bt = DEBUG_NEW int(BT_LAYER_ADD);
    wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
    eventLAYER_ADD.SetExtraLong(layno);
    eventLAYER_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
@@ -879,7 +875,7 @@ void browsers::layer_add(const std::string name, const word layno) {
 }
 
 void browsers::layer_default(const word newlay, const word oldlay) {
-   int* bt = new int(BT_LAYER_DEFAULT);
+   int* bt = DEBUG_NEW int(BT_LAYER_DEFAULT);
    wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
    eventLAYER_DEF.SetExtraLong(newlay);
    eventLAYER_DEF.SetInt(oldlay);
@@ -926,7 +922,7 @@ void browsers::treeAddMember(const char* cell, const char* parent, int action) {
    eventCELLTREE.SetInt(BT_CELL_ADD);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
    eventCELLTREE.SetExtraLong(action);
-   wxString* prnt = new wxString(parent, wxConvUTF8);
+   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
    eventCELLTREE.SetClientData((void*) prnt);
    wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);
 }
@@ -936,7 +932,7 @@ void browsers::treeRemoveMember(const char* cell, const char* parent, bool orpha
    eventCELLTREE.SetInt(BT_CELL_REMOVE);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
    eventCELLTREE.SetExtraLong(orphan);
-   wxString* prnt = new wxString(parent, wxConvUTF8);
+   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
    eventCELLTREE.SetClientData((void*) prnt);
    wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);
 }
@@ -965,26 +961,26 @@ END_EVENT_TABLE()
 //====================================================================
 browsers::layerbrowser::layerbrowser(wxWindow* parent, wxWindowID id) :
                                                                wxPanel(parent, id) {
-   wxBoxSizer *thesizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    //   
    wxString action[] = { _T("Hide"), _T("View"),  _T("Lock"),  _T("Unlock") };
-   wxBoxSizer *sizer1 = new wxBoxSizer( wxHORIZONTAL );
-   action_select = new wxChoice(this, BT_LAYER_ACTION, wxDefaultPosition,
+   wxBoxSizer *sizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   action_select = DEBUG_NEW wxChoice(this, BT_LAYER_ACTION, wxDefaultPosition,
                                                        wxDefaultSize, 4, action);
    action_select->SetSelection(0);
    sizer1->Add(action_select, 1, wxEXPAND, 3);
-   sizer1->Add(new wxButton( this, BT_LAYER_DO, wxT("Selected") ), 1, wxEXPAND, 3);
+   sizer1->Add(DEBUG_NEW wxButton( this, BT_LAYER_DO, wxT("Selected") ), 1, wxEXPAND, 3);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
    //
-   _layerlist = new topedlay_list(this, tui::ID_TPD_LAYERS);
+   _layerlist = DEBUG_NEW topedlay_list(this, tui::ID_TPD_LAYERS);
    thesizer->Add(_layerlist,1, wxEXPAND | wxALL | wxALIGN_TOP ,3);
    //
    wxString actionwild[] = { _T("All"), _T("None")};
-   wxBoxSizer *sizer3 = new wxBoxSizer( wxHORIZONTAL );
-   action_wild = new wxChoice(this, BT_LAYER_ACTIONWILD, wxDefaultPosition,
+   wxBoxSizer *sizer3 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   action_wild = DEBUG_NEW wxChoice(this, BT_LAYER_ACTIONWILD, wxDefaultPosition,
                                                          wxDefaultSize, 2, actionwild);
    action_wild->SetSelection(0);
-   sizer3->Add(new wxButton( this, BT_LAYER_SELECTWILD, wxT("Select") ), 1, wxEXPAND, 3);
+   sizer3->Add(DEBUG_NEW wxButton( this, BT_LAYER_SELECTWILD, wxT("Select") ), 1, wxEXPAND, 3);
    sizer3->Add(action_wild, 1, wxEXPAND, 3);
    thesizer->Add(sizer3, 0, wxEXPAND | wxALL);
    //

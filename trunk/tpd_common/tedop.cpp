@@ -25,22 +25,24 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <math.h>
 #include <algorithm>
 #include "tedop.h"
+#include "avl.h"
 
 //-----------------------------------------------------------------------------
 // The declaratoin of the avl related functions. They are declared originally
 // in avl.h and redeclared here in C++ manner with extern "C" clause
-extern "C" {
-   avl_table *avl_create (avl_comparison_func *, void *, libavl_allocator *);
-   void       avl_destroy (struct avl_table *, avl_item_func *);
-   void      *avl_t_next (avl_traverser *);
-   void      *avl_t_prev (avl_traverser *);
-   void      *avl_delete (avl_table *, const void *);
-   void      *avl_t_find (avl_traverser *, avl_table *, void *);
-   void      *avl_t_insert (avl_traverser *, avl_table *, void *);
-}   
+//extern "C" {
+//   avl_table *avl_create (avl_comparison_func *, void *, libavl_allocator *);
+//   void       avl_destroy (struct avl_table *, avl_item_func *);
+//   void      *avl_t_next (avl_traverser *);
+//   void      *avl_t_prev (avl_traverser *);
+//   void      *avl_delete (avl_table *, const void *);
+//   void      *avl_t_find (avl_traverser *, avl_table *, void *);
+//   void      *avl_t_insert (avl_traverser *, avl_table *, void *);
+//}   
 
 //==============================================================================
 /*! Determines the lexicographical order of two points comparing X first. 
@@ -98,7 +100,7 @@ tedop::segmentlist::segmentlist(const pointlist& plst, bool wire) {
    unsigned plysize = plst.size();
    segs.reserve(plysize - adjustment);
    for (unsigned i = 0; i < plysize - adjustment; i++)
-      segs.push_back(new plysegment(&(plst[i]),&(plst[(i+1)%plysize]),i));
+      segs.push_back(DEBUG_NEW plysegment(&(plst[i]),&(plst[(i+1)%plysize]),i));
 }
 
 tedop::segmentlist::~segmentlist() {
@@ -114,8 +116,8 @@ tedop::EventQueue::EventQueue( const segmentlist& segments ) {
    equeue.reserve(2*segments.size());
    // Initialize event queue with edge segment endpoints
    for (unsigned i=0; i < segments.size(); i++) {
-      equeue.push_back(new LEvent(segments[i]));
-      equeue.push_back(new REvent(segments[i]));
+      equeue.push_back(DEBUG_NEW LEvent(segments[i]));
+      equeue.push_back(DEBUG_NEW REvent(segments[i]));
    }
    std::sort(equeue.begin(), equeue.end(), E_compare);
 }

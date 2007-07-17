@@ -320,20 +320,20 @@ void all_refs()
    unselect_all();
 }
 
-newcell("Fcell");
-opencell("Fcell");
-point list pl1 =
-{{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}};
-addpoly(pl1,2);
-testcellrefs();
-testtexts();
-newcell("cell_1");
-opencell("cell_1");
-Invertor({0,0},10,3,30,3);
-Invertor({30,0},20,2,60,2);
-cellref("Fcell", {60,30}, 270,  true, 1.0);
-opencell("crop");
-cellref("cellrefs",{10,100},0,false,1);
+//newcell("Fcell");
+//opencell("Fcell");
+//point list pl1 =
+//{{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}};
+//addpoly(pl1,2);
+//testcellrefs();
+//testtexts();
+//newcell("cell_1");
+//opencell("cell_1");
+//Invertor({0,0},10,3,30,3);
+//Invertor({30,0},20,2,60,2);
+//cellref("Fcell", {60,30}, 270,  true, 1.0);
+//opencell("crop");
+//cellref("cellrefs",{10,100},0,false,1);
 
 //cellref("textrefs",{70,10},0,false,1);
 //cellref("cell_1",{120,  0},180,true ,1);

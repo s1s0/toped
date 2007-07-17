@@ -334,7 +334,7 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
       while (NULL != (wv2 = wv2->GetNextMember(comp)));
       // if not, for every appearance of the parent, we need to add a child comp
       do {
-         lst = new SGHierTree(comp, lst);
+         lst = DEBUG_NEW SGHierTree(comp, lst);
          lst->parent = wvP;
          lst->brother = wvP->Fchild;
          wvP->Fchild = lst;

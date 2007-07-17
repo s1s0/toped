@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="windows-1251"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="tpd_parser"
 	ProjectGUID="{1A934334-9615-4C20-871C-660795FCF7C0}"
+	RootNamespace="tpd_parser"
 	>
 	<Platforms>
 		<Platform
@@ -45,6 +46,8 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Debug/tpd_parser.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
@@ -121,6 +124,8 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Release/tpd_parser.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
@@ -199,6 +204,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -207,6 +213,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 			</File>
@@ -219,6 +226,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -227,6 +235,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 			</File>
@@ -270,6 +279,26 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\tpdph.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -291,33 +320,43 @@
 				RelativePath="tldat.h"
 				>
 			</File>
+			<File
+				RelativePath=".\tpdph.h"
+				>
+			</File>
 		</Filter>
-		<File
-			RelativePath="tell_lex.ll"
+		<Filter
+			Name="FlexBison Files"
 			>
-			<FileConfiguration
-				Name="Debug|Win32"
+			<File
+				RelativePath="tell_lex.ll"
 				>
-				<Tool
-					Name="VCCustomBuildTool"
-					CommandLine="flex2CPP.bat&#x0D;&#x0A;"
-					Outputs="$(InputName).cpp"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath="tell_yacc.yy"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="Flex2CPP.BAT&#x0D;&#x0A;"
+						AdditionalDependencies=""
+						Outputs="$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="tell_yacc.yy"
 				>
-				<Tool
-					Name="VCCustomBuildTool"
-					CommandLine="bison2CPP.bat&#x0D;&#x0A;"
-					Outputs="$(InputName).cpp"
-				/>
-			</FileConfiguration>
-		</File>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="bison2CPP.bat&#x0D;&#x0A;"
+						AdditionalDependencies="$(InputName).h"
+						Outputs="$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

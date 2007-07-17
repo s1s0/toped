@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <math.h>
 #include <sstream>
 #include <algorithm>
@@ -136,17 +137,17 @@ float DBbox::cliparea(const DBbox& bx, bool calculate) {
    if (!calculate) return 1.0;
    TP *Aprim, *Bprim;
    switch (A_place) {
-      case 0x00: Aprim = new TP(bx.p1()); break;
-      case 0x01: Aprim = new TP(_p1.x(), bx.p1().y());break;
-      case 0x04: Aprim = new TP(bx.p1().x(), _p1.y());break;
-      case 0x05: Aprim = new TP(_p1);break;
+      case 0x00: Aprim = DEBUG_NEW TP(bx.p1()); break;
+      case 0x01: Aprim = DEBUG_NEW TP(_p1.x(), bx.p1().y());break;
+      case 0x04: Aprim = DEBUG_NEW TP(bx.p1().x(), _p1.y());break;
+      case 0x05: Aprim = DEBUG_NEW TP(_p1);break;
       default: assert(false);
    }
    switch (B_place) {
-      case 0x00: Bprim = new TP(bx.p2());break;
-      case 0x02: Bprim = new TP(_p2.x(),bx.p2().y());break;
-      case 0x08: Bprim = new TP(bx.p2().x(),_p2.y());break;
-      case 0x0A: Bprim = new TP(_p2);break;
+      case 0x00: Bprim = DEBUG_NEW TP(bx.p2());break;
+      case 0x02: Bprim = DEBUG_NEW TP(_p2.x(),bx.p2().y());break;
+      case 0x08: Bprim = DEBUG_NEW TP(bx.p2().x(),_p2.y());break;
+      case 0x0A: Bprim = DEBUG_NEW TP(_p2);break;
       default: assert(false);
    }
    float area =  fabsf((Aprim->x() - Bprim->x()) * (Aprim->y() - Bprim->y()));
@@ -180,17 +181,17 @@ int DBbox::clipbox(DBbox& bx) {
    // the boxes intersect each other, so let's find the intersection area
    TP *Aprim, *Bprim;
    switch (A_place) {
-      case 0x00: Aprim = new TP(bx.p1()); break;
-      case 0x01: Aprim = new TP(_p1.x(), bx.p1().y());break;
-      case 0x04: Aprim = new TP(bx.p1().x(), _p1.y());break;
-      case 0x05: Aprim = new TP(_p1);break;
+      case 0x00: Aprim = DEBUG_NEW TP(bx.p1()); break;
+      case 0x01: Aprim = DEBUG_NEW TP(_p1.x(), bx.p1().y());break;
+      case 0x04: Aprim = DEBUG_NEW TP(bx.p1().x(), _p1.y());break;
+      case 0x05: Aprim = DEBUG_NEW TP(_p1);break;
       default: assert(false);
    }
    switch (B_place) {
-      case 0x00: Bprim = new TP(bx.p2());break;
-      case 0x02: Bprim = new TP(_p2.x(),bx.p2().y());break;
-      case 0x08: Bprim = new TP(bx.p2().x(),_p2.y());break;
-      case 0x0A: Bprim = new TP(_p2);break;
+      case 0x00: Bprim = DEBUG_NEW TP(bx.p2());break;
+      case 0x02: Bprim = DEBUG_NEW TP(_p2.x(),bx.p2().y());break;
+      case 0x08: Bprim = DEBUG_NEW TP(bx.p2().x(),_p2.y());break;
+      case 0x0A: Bprim = DEBUG_NEW TP(_p2);break;
       default: assert(false);
    }
    bx = DBbox(*Aprim, *Bprim);
@@ -284,7 +285,7 @@ SGBitSet::SGBitSet(word  bit_length)
 {
    _size = bit_length;
    word nb = _size / 8;
-   _packet = new byte[nb+1];
+   _packet = DEBUG_NEW byte[nb+1];
    for (word i = 0; i <= nb; i++) _packet[i] = 0;
 }
 
@@ -292,7 +293,7 @@ SGBitSet::SGBitSet(SGBitSet*  bs)
 {
    _size = bs->size();
    word nb = _size / 8;
-   _packet = new byte[nb+1];
+   _packet = DEBUG_NEW byte[nb+1];
    for (word i = 0; i <= nb; i++) _packet[i] = bs->_packet[i];
 } 
 

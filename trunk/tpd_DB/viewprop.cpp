@@ -24,6 +24,8 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+
+#include "tpdph.h"
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -186,7 +188,7 @@ void layprop::SupplementaryData::tmp_draw(const TP& base, const TP& newp, real U
       DBline long_mark, short_mark, text_bp;
       double scaledpix;
       getConsts(LayCTM, long_mark, short_mark, text_bp, scaledpix);
-      SDLine* tmp_ruler = new SDLine(base, newp, UU);
+      SDLine* tmp_ruler = DEBUG_NEW SDLine(base, newp, UU);
       tmp_ruler->draw(long_mark, short_mark, text_bp, scaledpix, _step);
    }
 }
@@ -218,7 +220,7 @@ void layprop::SupplementaryData::getConsts(const CTM& LayCTM, DBline& long_mark,
 void layprop::SupplementaryData::mousePoint(const TP& bp)
 {
    if (!_tmp_base)
-      _tmp_base = new TP(bp);
+      _tmp_base = DEBUG_NEW TP(bp);
 }
 
 void layprop::SupplementaryData::mouseStop()
@@ -651,6 +653,8 @@ layprop::DrawProperties::~DrawProperties() {
       delete CMI->second;
    for (fillMAP::iterator FMI = _layfill.begin(); FMI != _layfill.end(); FMI++)
       delete [] FMI->second;
+   for (lineMAP::iterator LMI = _lineset.begin(); LMI != _lineset.end(); LMI++)
+      delete LMI->second;
 //   if (NULL != _refstack) delete _refstack; -> deleted in editobject
 }
 
@@ -698,7 +702,7 @@ bool layprop::ViewProperties::addlayer(std::string name, word layno, std::string
       ost << "Warning! Layer "<<layno<<" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }   
-   _drawprop._layset[layno] = new LayerSettings(name,col,fill,sline);
+   _drawprop._layset[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
    return new_layer;
 }
 
@@ -706,7 +710,7 @@ bool layprop::ViewProperties::addlayer(std::string name, word layno)
 {
    if (_drawprop._layset.end() == _drawprop._layset.find(layno))
    {
-      _drawprop._layset[layno] = new LayerSettings(name,"","","");
+      _drawprop._layset[layno] = DEBUG_NEW LayerSettings(name,"","","");
       return true;
    }
    return false;
@@ -731,7 +735,7 @@ void layprop::ViewProperties::addline(std::string name, std::string col, word pa
       ost << "Warning! Line "<< name <<" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   _drawprop._lineset[name] = new LineSettings(col,pattern,patscale,width);
+   _drawprop._lineset[name] = DEBUG_NEW LineSettings(col,pattern,patscale,width);
 }
 
 void layprop::ViewProperties::addcolor(std::string name, byte R, byte G, byte B, byte A) {
@@ -741,7 +745,7 @@ void layprop::ViewProperties::addcolor(std::string name, byte R, byte G, byte B,
       ost << "Warning! Color \""<<name<<"\" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   tellRGB* col = new tellRGB(R,G,B,A);
+   tellRGB* col = DEBUG_NEW tellRGB(R,G,B,A);
    _drawprop._laycolors[name] = col;
 }
 
@@ -779,7 +783,7 @@ void layprop::ViewProperties::setGrid(byte No, real step, std::string colname) {
    if (_grid.end() != _grid.find(No)) // if this grid No is already defined
       _grid[No]->Init(step,colname);
    else // define a new grid
-      _grid[No] = new layprop::LayoutGrid(step, colname);
+      _grid[No] = DEBUG_NEW layprop::LayoutGrid(step, colname);
 }
 
 bool layprop::ViewProperties::viewGrid(byte No, bool status) {

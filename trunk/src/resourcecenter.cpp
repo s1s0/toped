@@ -25,6 +25,7 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <sstream>
 #include "resourcecenter.h"
 
@@ -77,7 +78,7 @@ wxMenu* tui::MenuItemHandler::buildPath(wxMenuBar *menuBar, const std::vector<st
    if (wxNOT_FOUND == menuID)
       {
          // create at the left of Help menu
-         menu = new wxMenu();
+         menu = DEBUG_NEW wxMenu();
          menuBar->Insert(menuBar->GetMenuCount()-1, menu, wxString(menuString.c_str(), wxConvUTF8));
          menuID = menuBar->FindMenu(wxString(menuString.c_str(), wxConvUTF8));
       }
@@ -91,7 +92,7 @@ wxMenu* tui::MenuItemHandler::buildPath(wxMenuBar *menuBar, const std::vector<st
             
          if ((wxNOT_FOUND == menuID) || (menu2 == NULL))
          {
-            menu2 = new wxMenu();
+            menu2 = DEBUG_NEW wxMenu();
             menu->Append(_ID+10000 , wxString(menuNames[j].c_str(), wxConvUTF8), menu2);
             menu = menu2;
          }
@@ -120,8 +121,8 @@ void tui::MenuItemHandler::create(wxMenuBar *menuBar)
 
    if (menuNames.size()==1)
    {
-      //Create new item in main menu
-      menu = new wxMenu();
+      //Create DEBUG_NEW item in main menu
+      menu = DEBUG_NEW wxMenu();
       menuBar->Insert(menuBar->GetMenuCount()-1, menu, wxString(menuNames[0].c_str(), wxConvUTF8));
       _inserted = true;
       return;
@@ -133,7 +134,7 @@ void tui::MenuItemHandler::create(wxMenuBar *menuBar)
    std::string insertedString = *(menuNames.end()-1);
    if (_hotKey !="") insertedString=insertedString+"\t"+_hotKey;
    
-   menuItem = new wxMenuItem(menu, _ID, wxString(insertedString.c_str(), wxConvUTF8), wxString(_helpString.c_str(), wxConvUTF8));
+   menuItem = DEBUG_NEW wxMenuItem(menu, _ID, wxString(insertedString.c_str(), wxConvUTF8), wxString(_helpString.c_str(), wxConvUTF8));
         
    menu->Append(menuItem);
             
@@ -156,7 +157,7 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
    if (menuNames.size()==1)
    {
       //Create new item in main menu
-      menu = new wxMenu();
+      menu = DEBUG_NEW wxMenu();
       menuBar->Insert(menuBar->GetMenuCount()-1, menu, wxString(menuNames[0].c_str(), wxConvUTF8));
       _inserted = true;
       return;
@@ -180,7 +181,7 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
    }
    menuItem->SetText(wxString(insertedString.c_str(), wxConvUTF8));
    menuItem->SetHelp(wxString(_helpString.c_str(), wxConvUTF8));
-   //menuItem = new wxMenuItem(menu, _ID, insertedString.c_str(), _helpString.c_str());
+   //menuItem = DEBUG_NEW wxMenuItem(menu, _ID, insertedString.c_str(), _helpString.c_str());
     
    //menu->Append(menuItem);
             
@@ -265,7 +266,7 @@ void tui::ResourceCenter::buildMenu(wxMenuBar *menuBar)
    if (wxNOT_FOUND == menuID)
    {
       // create Help menu on most right
-      menu = new wxMenu();
+      menu = DEBUG_NEW wxMenu();
       menuBar->Insert(menuBar->GetMenuCount(), menu, wxT("&Help"));
    }
 
@@ -360,7 +361,7 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
    std::string str = menuItem;
    str[0] = toupper(str[0]);
 
-   MenuItemHandler* mItem = new MenuItem(ID, str, hotKey, function);
+   MenuItemHandler* mItem = DEBUG_NEW MenuItem(ID, str, hotKey, function);
    if (!checkExistence(*mItem))
    {
       _menus.push_back(mItem);
@@ -379,7 +380,7 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
    str[0] = toupper(str[0]);
   
 
-   MenuItemHandler* mItem= new MenuItem(ID, str, hotKey, cbMethod);
+   MenuItemHandler* mItem= DEBUG_NEW MenuItem(ID, str, hotKey, cbMethod);
    if (!checkExistence(*mItem))
    {
       _menus.push_back(mItem);
@@ -396,7 +397,7 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
    std::string str = menuItem;
    str[0] = toupper(str[0]);
   
-   MenuItemHandler* mItem= new MenuItem(ID, str, hotKey, cbMethod, helpString);
+   MenuItemHandler* mItem= DEBUG_NEW MenuItem(ID, str, hotKey, cbMethod, helpString);
    if (!checkExistence(*mItem))
    {
       _menus.push_back(mItem);
@@ -407,7 +408,7 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
 
 void tui::ResourceCenter::appendMenuSeparator(const std::string &menuItem)
 {
-   MenuItemHandler* mItem= new MenuItemSeparator(menuItem);
+   MenuItemHandler* mItem= DEBUG_NEW MenuItemSeparator(menuItem);
    _menus.push_back(mItem);
 }
 
@@ -429,9 +430,10 @@ void tui::ResourceCenter::executeMenu(int ID1)
             if ((*mItem)->method()!=NULL)
             {
                callbackMethod cbMethod;
-               wxCommandEvent event(0);
+               wxCommandEvent cmd_event(0);
                cbMethod = (*mItem)->method();
-               (Toped->* cbMethod)(event);
+               (Toped->* cbMethod)(cmd_event);
+               return;
             }
          }
       }
@@ -441,11 +443,11 @@ void tui::ResourceCenter::executeMenu(int ID1)
 
 //=============================================================================
 tellstdfunc::stdADDMENU::stdADDMENU(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(new parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
-   arguments->push_back(new argumentTYPE("", new telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdADDMENU::execute()
