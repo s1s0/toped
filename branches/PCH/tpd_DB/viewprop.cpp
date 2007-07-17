@@ -653,6 +653,8 @@ layprop::DrawProperties::~DrawProperties() {
       delete CMI->second;
    for (fillMAP::iterator FMI = _layfill.begin(); FMI != _layfill.end(); FMI++)
       delete [] FMI->second;
+   for (lineMAP::iterator LMI = _lineset.begin(); LMI != _lineset.end(); LMI++)
+      delete LMI->second;
 //   if (NULL != _refstack) delete _refstack; -> deleted in editobject
 }
 

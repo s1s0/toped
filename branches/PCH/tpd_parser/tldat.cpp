@@ -456,7 +456,8 @@ telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
 
 //=============================================================================
 telldata::ttpnt::ttpnt (real x, real y) : user_struct(telldata::tn_pnt),
-                                         _x(DEBUG_NEW ttreal(x)), _y(DEBUG_NEW ttreal(y)) {
+                                         _x(DEBUG_NEW ttreal(x)), _y(DEBUG_NEW ttreal(y)) 
+{
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
@@ -472,23 +473,27 @@ telldata::ttpnt::ttpnt(operandSTACK& OPstack) : user_struct(telldata::tn_pnt)
 }
 
 telldata::ttpnt::ttpnt(const ttpnt& invar) : user_struct(telldata::tn_pnt) ,
-                         _x(DEBUG_NEW ttreal(invar.x())), _y(DEBUG_NEW ttreal(invar.y())) {
+                         _x(DEBUG_NEW ttreal(invar.x())), _y(DEBUG_NEW ttreal(invar.y())) 
+{
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
 
-void telldata::ttpnt::assign(tell_var* rt) {
+void telldata::ttpnt::assign(tell_var* rt) 
+{
    _x->_value = static_cast<ttpnt*>(rt)->x();
    _y->_value = static_cast<ttpnt*>(rt)->y();
 }
 
-void telldata::ttpnt::echo(std::string& wstr, real) {
+void telldata::ttpnt::echo(std::string& wstr, real) 
+{
    std::ostringstream ost;
    ost << "{X = " << x() << ", Y = " << y() << "}";
    wstr += ost.str();
 }
 
-const telldata::ttpnt& telldata::ttpnt::operator = (const ttpnt& a) {
+const telldata::ttpnt& telldata::ttpnt::operator = (const ttpnt& a) 
+{
    _x->_value = a.x(); _y->_value = a.y();
    return *this;
 }
