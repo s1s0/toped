@@ -192,10 +192,11 @@ void browsers::topedlay_list::OnSort(wxListEvent& event)
 }
 
 
-BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, CellBrowser)
+BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, wxTreeCtrl)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_GDS_CELLTREE_H, browsers::GDSCellBrowser::OnItemRightClick)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_GDS_CELLTREE_F, browsers::GDSCellBrowser::OnItemRightClick)
    EVT_RIGHT_UP(browsers::GDSCellBrowser::OnBlankRMouseUp)
    EVT_MENU(GDSTREEREPORTLAY, browsers::GDSCellBrowser::OnGDSreportlay)
-   EVT_LEFT_DCLICK(browsers::GDSCellBrowser::OnLMouseDblClk)
 END_EVENT_TABLE()
 
 browsers::GDSCellBrowser::GDSCellBrowser(wxWindow *parent, wxWindowID id, 
@@ -214,12 +215,6 @@ void browsers::GDSCellBrowser::OnBlankRMouseUp(wxMouseEvent& event)
 {
    wxPoint pt = event.GetPosition();
    ShowMenu(HitTest(pt), pt);
-}
-
-void browsers::GDSCellBrowser::OnLMouseDblClk(wxMouseEvent& event)
-{
-   //Empty
-   //Use for overwriting CellBrowser::OnLMouseDblClk
 }
 
 void browsers::GDSCellBrowser::OnGDSreportlay(wxCommandEvent& WXUNUSED(event)) {
@@ -269,9 +264,9 @@ browsers::GDSbrowser::GDSbrowser(wxWindow *parent, wxWindowID id,
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
    
-   fCellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_TPD_CELLTREE_F2,pos, size, style);
+   fCellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_GDS_CELLTREE_F, pos, size, style);
    
-   hCellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_TPD_CELLTREE_H2, pos, size, style);
+   hCellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_GDS_CELLTREE_H, pos, size, style);
    
    thesizer->Add(hCellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(fCellBrowser, 1, wxEXPAND | wxBOTTOM);
