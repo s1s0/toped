@@ -213,6 +213,7 @@ namespace tui {
       void    CellRef(wxString);
       void   CellARef(wxString);
       // The declaration of the associated event table
+      void OnUncapturedMouseClick(wxCommandEvent&);
       DECLARE_EVENT_TABLE();
    };
 
