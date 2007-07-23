@@ -1395,7 +1395,7 @@ bool parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, parserc
       else
       {// the only reason to be here must be that the function is redefined
          _funcMAP.insert(std::make_pair(decl->name(), cQ));
-         return true;
+         return false;
       }
    }
    else return false;
