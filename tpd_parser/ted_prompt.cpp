@@ -505,7 +505,12 @@ void console::ted_cmd::OnGUInput(wxCommandEvent& evt) {
          delete p;
          break;
          }
-      case  2: mouseRB(); break;
+      case  2: {
+         telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
+         mouseRB(); 
+         delete p;
+         break;
+         }
       default: assert(false);
    }
 }

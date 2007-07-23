@@ -269,6 +269,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_SETINGSMENU, wxID_ANY, tui::TopedFrame::OnUpdateSettingsMenu)
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
+   EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of brawsers.cpp
@@ -1454,3 +1455,10 @@ bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
    }
    return ret;
 }
+
+void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
+{
+   telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
+   delete p;
+}
+
