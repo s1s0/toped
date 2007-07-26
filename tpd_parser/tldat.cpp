@@ -695,7 +695,7 @@ void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, b
       if ( TLUNKNOWN_TYPE( (**CA)() ) )
          if (TLISALIST(CF->second))
          {// check the list fields
-            if (TLCOMPOSIT_TYPE((CF->second) & ~telldata::tn_listmask))
+            if (TLCOMPOSIT_TYPE((CF->second) & (~telldata::tn_listmask)))
                (*CA)->userStructListCheck(*(vartype.findtype(CF->second)), cmdUpdate);
             else
                (*CA)->toList(cmdUpdate);

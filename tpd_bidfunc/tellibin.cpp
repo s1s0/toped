@@ -121,7 +121,7 @@ int tellstdfunc::stdDISTANCE::execute()
          tell_log(console::MT_WARNING,info.str());*/
       }
    }
-
+   delete pl;
    return EXEC_NEXT;
 }
 

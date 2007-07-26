@@ -60,6 +60,7 @@ namespace layprop {
    class SupplementaryData {
    public:
                         SupplementaryData() {_tmp_base = NULL;}
+                        ~SupplementaryData() {delete _tmp_base;}
       void              addRuler(TP&, TP&, const real);
       void              clearRulers();
       void              drawRulers(const CTM&, real);
