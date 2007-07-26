@@ -190,6 +190,7 @@ void layprop::SupplementaryData::tmp_draw(const TP& base, const TP& newp, real U
       getConsts(LayCTM, long_mark, short_mark, text_bp, scaledpix);
       SDLine* tmp_ruler = DEBUG_NEW SDLine(base, newp, UU);
       tmp_ruler->draw(long_mark, short_mark, text_bp, scaledpix, _step);
+      delete tmp_ruler;
    }
 }
 
