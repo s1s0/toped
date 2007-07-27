@@ -624,7 +624,8 @@ bool laydata::tdtdesign::group_selected(std::string name) {
          if (0 == CL->first) newcell->addchild(this,
                                     static_cast<tdtcellref*>(*CI)->structure());
       }                  
-      lslct->clear();   
+      lslct->clear();
+      delete (lslct);
    }
    TBgroup->clear();delete TBgroup;
    newcell->resort();
