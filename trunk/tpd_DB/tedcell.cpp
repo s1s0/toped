@@ -1514,7 +1514,7 @@ nameList* laydata::tdtcell::rehash_children() {
    if (refsTree) { // if it is not empty...
       // get all cell refs/arefs in a list - 
       dataList *refsList = DEBUG_NEW dataList();
-      refsTree->select_all(refsList, false);
+      refsTree->select_all(refsList, laydata::_lmref, false);
       // for every cell ref in the list
       for (dataList::const_iterator CC = refsList->begin(); 
                                      CC != refsList->end(); CC++) {
@@ -1523,6 +1523,7 @@ nameList* laydata::tdtcell::rehash_children() {
       }   
       cellnames->sort();
       cellnames->unique();
+      refsList->clear(); delete refsList;
    }
    return cellnames;
 }
@@ -1549,8 +1550,9 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB) {
       // Recollect the children.
       nameList *children_upd = rehash_children();
       std::pair<nameList::iterator,nameList::iterator> diff;
-      do {
-		  diff = std::mismatch(children_upd->begin(), children_upd->end(), _children.begin());
+      while (true) 
+      {
+		   diff = std::mismatch(children_upd->begin(), children_upd->end(), _children.begin());
          if (diff.second != _children.end()) {
             childref = ATDB->checkcell(*(diff.second));
             // remove it from the hierarchy
@@ -1559,9 +1561,10 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB) {
             ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), 
                                                             childref->orphan());
             _children.erase(diff.second);
-         }   
+         }
+         else break;
       }      
-      while (diff.second != _children.end());
+      children_upd->clear(); delete children_upd;
    }
 }   
 
@@ -1664,6 +1667,7 @@ void laydata::tdtcell::collect_usedlays(const tdtdesign* ATDB, bool recursive, L
 
 laydata::tdtcell::~tdtcell() 
 {
+   unselect_all();
    for (layerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++) 
    {
       if (0 == lay->first) 
