@@ -1234,11 +1234,14 @@ parsercmd::cmdFUNC::cmdFUNC(argumentLIST* vm, telldata::typeID tt, bool declarat
                         cmdSTDFUNC(vm,tt,true), cmdBLOCK(), _declaration(declaration)
 {
    _recursyLevel = 0;
-   // copy the arguments in the structure of the local variables
-   typedef argumentLIST::const_iterator AT;
-   for (AT arg = arguments->begin(); arg != arguments->end(); arg++) {
-//      VARlocal.insert(**arg);
-      VARlocal[(*arg)->first] = (*arg)->second->selfcopy();
+   if (!_declaration)
+   {
+      // copy the arguments in the structure of the local variables
+      typedef argumentLIST::const_iterator AT;
+      for (AT arg = arguments->begin(); arg != arguments->end(); arg++) 
+      {
+         VARlocal[(*arg)->first] = (*arg)->second->selfcopy();
+      }
    }
 }
 
