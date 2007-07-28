@@ -920,16 +920,14 @@ void parsercmd::cmdBLOCK::addFUNC(std::string, cmdSTDFUNC* cQ) {
    if (cQ)    delete cQ;
 }
 
-bool parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype) {
+void parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype) {
    TELL_DEBUG(addFUNC);
    tellerror("Nested function definitions are not allowed");
-   return false;
 }
 
-bool parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype) {
+void parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype) {
    TELL_DEBUG(addFUNCDECL);
    tellerror("Function definitions can be only global");
-   return false;
 }
 
 int parsercmd::cmdBLOCK::execute() {
@@ -1075,7 +1073,7 @@ bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const argumentLIS
    // get the function definitions with this name
    typedef functionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
-   bool allow_definition = true;
+   bool allow_declaration = true;
    for (MM fb = range.first; fb != range.second; fb++)
    {
       if (0 == fb->second->argsOK(&arguMap))
@@ -1086,27 +1084,27 @@ bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const argumentLIS
          {
             ost << "Can't redeclare internal function \"" << fn << "\"";
             tell_log(console::MT_ERROR, ost.str());
-            allow_definition = false;
+            allow_declaration = false;
             break;
          }
          else if (!fb->second->declaration())
          {
             ost << "Function \"" << fn << "\" already defined. Declaration ignored";
             tell_log(console::MT_WARNING, ost.str());
-            allow_definition = false;
+            allow_declaration = false;
             break;
          }
          else
          {
             ost << "Function \"" << fn << "\" already declared. Declaration ignored";
             tell_log(console::MT_WARNING, ost.str());
-            allow_definition = false;
+            allow_declaration = false;
             break;
          }
       }
    }
    telldata::argQClear(&arguMap);
-   return allow_definition;
+   return allow_declaration;
 }
 
 //=============================================================================
@@ -1373,16 +1371,16 @@ void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
    console::TellFnAdd(fname, cQ->callingConv(NULL));
 }
 
-bool parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, parsercmd::yyltype loc)
+/*! 
+*/
+void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, parsercmd::yyltype loc)
 {
    cmdFUNC* declfunc = NULL;
    if ((telldata::tn_void != decl->type()) && (0 == decl->numReturns())) {
       tellerror("function must return a value", loc);
-      return false;
    }
    else  if (decl->numErrors() > 0) {
       tellerror("function definition is ignored because of the errors above", loc);
-      return false;
    }
    /*Check whether such a function is already defined */
    else if ( CMDBlock->defValidate(decl->name().c_str(), decl->argList(), declfunc) )
@@ -1393,26 +1391,30 @@ bool parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, parserc
          declfunc->set_defined();
          console::TellFnAdd(decl->name(), cQ->callingConv(&TYPElocal));
          console::TellFnSort();
-         return true;
       }
       else
       {// the only reason to be here must be that the function is redefined
          _funcMAP.insert(std::make_pair(decl->name(), cQ));
-         return false;
+         delete decl;
+         return; // i.e. don't delete cQ - we need it!
       }
    }
-   else return false;
+   delete cQ;
+   delete decl;
 }
 
-bool parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, parsercmd::yyltype loc)
+/*! The method calls CMDBlock::declValidate(...) to check whether a function 
+with such name and calling convention already exists. If it doesn't - a new cmdFUNC will
+be created and will be inserted in the _funcMAP. The contents of the new cmdFUNC will be 
+empty and cmdFUNC._declarationit will be true. 
+*/
+void parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, parsercmd::yyltype loc)
 {
    if (CMDBlock->declValidate(decl->name().c_str(),decl->argList(),loc))
    {
       cmdSTDFUNC* cQ = DEBUG_NEW parsercmd::cmdFUNC(decl->argListCopy(),decl->type(), true);
       _funcMAP.insert(std::make_pair(decl->name(), cQ));
-      return true;
    }
-   else return false;
 }
 
 parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {

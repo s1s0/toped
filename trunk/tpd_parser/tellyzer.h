@@ -437,8 +437,8 @@ namespace  parsercmd {
       int                        execute();
       cmdBLOCK*                  cleaner();
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
-      virtual bool               addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype);
-      virtual bool               addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype);
+      virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype);
+      virtual void               addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype);
       void                       addID(const char*, telldata::tell_var*);
       void                       addconstID(const char*, telldata::tell_var*, bool initialized);
       void                       addlocaltype(const char*, telldata::tell_type*);
@@ -472,8 +472,8 @@ namespace  parsercmd {
                      cmdMAIN();
       int            execute();
       void           addFUNC(std::string, cmdSTDFUNC*);
-      bool           addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype);
-      bool           addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype);
+      void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype);
+      void           addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype);
       void           addGlobalType(char*, telldata::tell_type*);
       void           recoveryDone();
       ~cmdMAIN();
