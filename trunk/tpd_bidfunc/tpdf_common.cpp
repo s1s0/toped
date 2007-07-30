@@ -117,10 +117,28 @@ void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
    //  - Second - the best place to clean-up the lists is of course inside
    // telldata::ttlayout class, however they don't know shit about laydata::tdtdata
    // though with a strange error message compiler claims that destructors will 
-   // not be called - and I have no other choice except to belive it.
+   // not be called - and I have no other choice but to belive it.
    // This of course is because of the separation of the project on modules
+   // The other possibility is to convert the list to (say) atticList and then
+   // to use the corresponding destroyer, but that seem to be much more convoluted
+   // This looks weird - true, but is doing the job.
    for (word i = 0 ; i < llist->mlist().size(); i++) {
       delete (static_cast<telldata::ttlayout*>(llist->mlist()[i])->data());
+   }
+}
+
+//==============================================================================
+void tellstdfunc::clean_atticlist(laydata::atticList* nlst, bool destroy)
+{
+   for (laydata::atticList::const_iterator CL = nlst->begin(); CL != nlst->end(); CL++) 
+   {
+      if (destroy)
+      {
+         for (laydata::shapeList::const_iterator DI = CL->second->begin(); DI != CL->second->end(); DI++) 
+            delete (*DI);
+      }
+      CL->second->clear();
+      delete (CL->second);
    }
 }
 
@@ -279,4 +297,3 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
    TopedMainW = tpd;
    TopedCanvasW = cnvs;
 }
-
