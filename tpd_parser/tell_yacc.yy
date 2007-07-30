@@ -111,12 +111,13 @@ Well some remarks may save some time in the future...
                a copy of tellvar will be pushed in the operand stack. Normally,
                that COPY is used by the subsequent commands and then destroyed.
                Not all the commands use the copy in the operand stack thought.
-               An important exception is cmdASSIGN (see tell_lvalue below).
+               An important exception is cmdASSIGN (see tell_lvalue below) and 
+               list operations - cmdLISTADD.
                Another example is the loop variable (foreach). Generally this
                variable is hardly used directly.
    - tell_lvalue - is storing always the tellvar and is used as an argument of
                Assign. Assign obviously needs the original variable - not a copy
-               of it which is normally used for most ofthe operaions. In other
+               of it which is normally used for most of the operaions. In other
                words lvalues are not handled trough the operand stack, instead
                this variable is used.
    
@@ -857,7 +858,7 @@ primaryexpression :
    | variable                              {$$ = $1;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(tellvar, indexed));}
    | anonymousvar                          {$$ = $1;
-      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(tellvar, false));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(tellvar, false, true));}
    | listremove                            {$$ = $1; indexed = false;}
    | listslice                             {$$ = $1; indexed = false;}
    | '(' expression ')'                    {$$ = $2;}

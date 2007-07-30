@@ -340,13 +340,16 @@ namespace  parsercmd {
 
    class cmdLISTADD : public cmdVIRTUAL {
    public:
-      cmdLISTADD(telldata::tell_var* listarg, bool prefix, bool index) :
+               cmdLISTADD(telldata::tell_var* listarg, bool prefix, bool index) :
          _listarg(static_cast<telldata::ttlist*>(listarg)), _prefix(prefix), _index(index) {};
       int execute();
    protected:
       cmdLISTADD(cmdLISTADD* indxcmd) :
-         _listarg(indxcmd->_listarg), _prefix(indxcmd->_prefix), _index(indxcmd->_index) {};
+         _listarg(indxcmd->_listarg),_prefix(indxcmd->_prefix), _index(indxcmd->_index) {};
       _dbl_word              getIndex();
+      // don't delete this and don't get confused. It's only a pointer to a variable, 
+      // that normally should be in the operand stack. List operations are an exception - 
+      // see the comments in the parser (tell_yacc.yy)
       telldata::ttlist*     _listarg;
       bool                  _prefix;
       bool                  _index;

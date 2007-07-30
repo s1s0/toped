@@ -105,4 +105,4 @@ void CheckLists() {
    alst[:+] = alst[:-2];
    echo(alst);
 }
-
+CheckLists();
