@@ -303,7 +303,6 @@ void telldata::ttlist::insert(telldata::tell_var* newval, _dbl_word index)
          if (idx == index) break;
       }
       assert(NULL != (*CI));
-//      _mlist.insert(CI,(*CI)->selfcopy());
       _mlist.insert(CI,newval->selfcopy());
    }
 }
@@ -317,10 +316,10 @@ void telldata::ttlist::lunion(telldata::ttlist* inlist)
 void telldata::ttlist::lunion(telldata::ttlist* inlist, _dbl_word index)
 {
    assert(index >=0); assert(index <= _mlist.size());
-   telldata::ttlist* opc = static_cast<telldata::ttlist*>(inlist->selfcopy());
    if (index == _mlist.size())
    {
-      _mlist.insert(_mlist.end(), opc->_mlist.begin(), opc->_mlist.end());
+      for (telldata::memlist::const_iterator CCI = inlist->_mlist.begin(); CCI != inlist->_mlist.end(); CCI++)
+         _mlist.push_back((*CCI)->selfcopy());
    }
    else
    {
@@ -331,7 +330,8 @@ void telldata::ttlist::lunion(telldata::ttlist* inlist, _dbl_word index)
          if (idx == index) break;
       }
       assert(NULL != (*CI));
-      _mlist.insert(CI, opc->_mlist.begin(), opc->_mlist.end());
+      for (telldata::memlist::const_iterator CCI = inlist->_mlist.begin(); CCI != inlist->_mlist.end(); CCI++)
+         _mlist.insert(CI, (*CCI)->selfcopy());
    }
 }
 

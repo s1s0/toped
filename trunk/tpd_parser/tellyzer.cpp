@@ -886,7 +886,8 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::type
 
 telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype loc)
 {
-   if (ID & telldata::tn_listmask) return(DEBUG_NEW telldata::ttlist(ID));
+   if (ID & telldata::tn_listmask) 
+      return(DEBUG_NEW telldata::ttlist(ID));
    else
    switch (ID)
    {
@@ -1328,17 +1329,16 @@ int parsercmd::cmdFOREACH::execute() {
    int retexec;
 
    _header->execute();
-   telldata::ttlist* bozalist = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   telldata::memlist valist = bozalist->mlist();
+   telldata::ttlist* clist = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::memlist valist = clist->mlist();
 
-//   telldata::memlist valist = (static_cast<telldata::ttlist*>(_list))->mlist();
    for (telldata::memlist::const_iterator CI = valist.begin(); CI != valist.end(); CI++)
    {
       _var->assign(*CI);
       retexec = _body->execute();
-      if (EXEC_NEXT != retexec) return retexec;
-      //@TODO 
+      if (EXEC_NEXT != retexec) break;
    }
+   delete clist;
    return retexec;
 }
 
@@ -1755,7 +1755,7 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
 {
    // List add/insert operators can be described as "composite" operators - i.e.
    // they are constituted by two operators:
-   // -> insert index (<idx>:+ +:<idx> ) will add/insert a component in
+   // -> insert index (<idx>:+ / +:<idx> ) will add/insert a component in
    //    the list before/after the idx and will copy the value of the
    //    idx-th component into the new one - i.e. will assign a temporary
    //    value to it.
@@ -1826,6 +1826,7 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
    }
    if (TLISALIST((*op2)()))
    {  // operation is union
+
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTUNION(unins_cmd));
       delete(unins_cmd);
       return lvalID;
