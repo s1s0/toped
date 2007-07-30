@@ -148,6 +148,7 @@ namespace tellstdfunc {
    laydata::selectList* get_ttlaylist(telldata::ttlist* llist);
    laydata::atticList*  get_shlaylist(telldata::ttlist* llist);
    void                 clean_ttlaylist(telldata::ttlist* llist);
+   void                 clean_atticlist(laydata::atticList*, bool destroy = false);
    void                 UpdateLV();
    void                 RefreshGL();
    void                 gridON(byte No, bool status);

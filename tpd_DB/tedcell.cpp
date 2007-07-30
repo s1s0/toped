@@ -709,7 +709,10 @@ bool laydata::tdtcell::addlist(laydata::tdtdesign* ATDB, atticList* nlst) {
                             static_cast<tdtcellref*>(*DI)->structure());
       }
       wl->invalidate();
+      CL->second->clear();
+      delete (CL->second);
    }
+   nlst->clear();
    delete nlst;
    validate_layers(); // because put is used
    return overlapChanged(old_overlap, ATDB);

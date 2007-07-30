@@ -424,6 +424,7 @@ int tellstdfunc::stdDELETESEL::execute() {
       ATDB->delete_selected(sh_delist);
    DATC->unlockDB();   
    UNDOPstack.push_front(make_ttlaylist(sh_delist));
+   clean_atticlist(sh_delist); delete sh_delist;
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
    UpdateLV();   
    return EXEC_NEXT;
@@ -441,6 +442,7 @@ void tellstdfunc::lgcCUTPOLY::undo_cleanup() {
    telldata::ttlist* pl3 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    telldata::ttlist* pl2 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   clean_ttlaylist(pl3); // deleted shapes
    delete pl1; delete pl2;
    delete pl3; delete pl4;
 }
@@ -512,7 +514,9 @@ int tellstdfunc::lgcCUTPOLY::execute() {
                // ... not forgetting to save them in the undo data stack for undo
                UNDOPstack.push_front(make_ttlaylist(sh_delist));
                // clean-up the delete attic list
-               delete sh_delist; delete shdeleted;
+               clean_atticlist(sh_delist); delete sh_delist;
+               delete shdeleted;
+
                // add the result of the cut...
                telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
                telldata::ttlist* shaddonly = make_ttlaylist(dasao[2]);
@@ -524,7 +528,7 @@ int tellstdfunc::lgcCUTPOLY::execute() {
                // and finally select the_cut
                ATDB->select_fromList(get_ttlaylist(shaddselect));
                LogFile << "polycut("<< *pl << ");"; LogFile.flush();
-               delete dasao[0];
+               clean_atticlist(dasao[0]); delete (dasao[0]);
                // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addlist
             }
          DATC->unlockDB();
@@ -559,6 +563,7 @@ void tellstdfunc::lgcMERGE::undo_cleanup() {
    telldata::ttlist* pl3 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    telldata::ttlist* pl2 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   clean_ttlaylist(pl2);
    delete pl1; delete pl2;
    delete pl3;
 }
@@ -619,7 +624,11 @@ int tellstdfunc::lgcMERGE::execute() {
             delete listselected;
          }   
       // clean-up the lists
-      for (i = 0; i < 2; delete dasao[i++]);
+      for (i = 0; i < 2; i++)
+      {
+         clean_atticlist(dasao[i]);
+         delete(dasao[i]);
+      }
    }
    UpdateLV();
    return EXEC_NEXT;
@@ -671,6 +680,7 @@ int tellstdfunc::stdCHANGELAY::execute()
       ATDB = DATC->lockDB();
          ATDB->transferLayer(target);
       DATC->unlockDB();
+      LogFile << "changelayer("<< target << ");";LogFile.flush();
       RefreshGL();
    }
    return EXEC_NEXT;
