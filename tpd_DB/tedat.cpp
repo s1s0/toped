@@ -2255,10 +2255,8 @@ void laydata::valid_poly::angles()
    pointlist::iterator cp2 = _plist.begin();
    real cAngle;
    std::stack<real> angle_stack;
-   bool loopCompleted = false;
    bool prev_cleared = false;
-   int exitcnt = 0;
-   do
+   while (angle_stack.size() <= _plist.size())
    {
       bool eraseP1 = false;
       if (*cp1 == *cp2)
@@ -2284,14 +2282,8 @@ void laydata::valid_poly::angles()
       {
          cp2 = _plist.erase(cp1);
          cp1 = cp2; 
-			if (cp2 == _plist.begin()) 
-			{
-				cp1 = _plist.end(); cp1--;
-			}
-			else
-			{
-				cp1--;
-			}
+			if (cp2 == _plist.begin()) cp1 = _plist.end();
+		   cp1--;
          angle_stack.pop();
          _status |= laydata::shp_ident;
          prev_cleared = true;
@@ -2301,15 +2293,9 @@ void laydata::valid_poly::angles()
          cp1 = cp2; cp2++;
          prev_cleared = false;
       }
-      if (_plist.end() == cp2)
-      {
-         cp2 = _plist.begin();
-         loopCompleted = true;
-      }
-      if (_plist.end() == cp1)
-         cp1--;
-      if (loopCompleted) exitcnt++;
-   } while((exitcnt < 2) && (_plist.size() > 2));
+      if (_plist.end() == cp2) cp2 = _plist.begin();
+      if (_plist.end() == cp1) cp1--;
+   }
    // check for a single segment
    if (_plist.size() < 3)
       _status |= shp_null;
