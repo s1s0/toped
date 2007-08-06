@@ -229,6 +229,25 @@ bool laydata::tdtdata::point_inside(const TP pnt) {
    else return false;
 }
 
+void laydata::tdtdata::select_this(dataList* selist)
+{
+   if (sh_partsel == _status)
+   {
+      // if the shape has already been partially selected
+      for (dataList::iterator SI = selist->begin(); SI != selist->end(); SI++)
+      // find it in the select list and remove the list of selected points
+         if (SI->first == this)
+         {
+            delete (SI->second); SI->second = NULL;
+            break;
+         }
+   }
+   else
+      // otherwise - simply add it to the list
+      selist->push_back(selectDataPair(this,NULL));
+   _status = sh_selected; 
+}
+
 void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pselect)
 {
    // if shape is already fully selected, nothing to do here
@@ -236,24 +255,7 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
    float clip;
    // get the clip area and if it is 0 - run away
    if (0 == (clip = select_in.cliparea(overlap()))) return;
-   if (-1 == clip)
-   {// entire shape is in
-      if (sh_partsel == _status)
-      {
-         // if the shape has already been partially selected
-         for (dataList::iterator SI = selist->begin(); SI != selist->end(); SI++)
-         // find it in the select list and remove the list of selected points
-            if (SI->first == this)
-            {
-               delete (SI->second); SI->second = NULL;
-               break;
-            }
-      }
-      else
-         // otherwise - simply add it to the list
-         selist->push_back(selectDataPair(this,NULL));
-      _status = sh_selected; 
-   }
+   if (-1 == clip) select_this(selist); // entire shape is in
    else if ((clip > 0) && pselect)
    { // shape partially is in the select box
       SGBitSet* pntlst = NULL;
@@ -2256,7 +2258,7 @@ void laydata::valid_poly::angles()
    real cAngle;
    std::stack<real> angle_stack;
    bool prev_cleared = false;
-   while (angle_stack.size() <= _plist.size())
+   while ((angle_stack.size() <= _plist.size()) && (2 < _plist.size()))
    {
       bool eraseP1 = false;
       if (*cp1 == *cp2)

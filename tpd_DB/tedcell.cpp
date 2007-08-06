@@ -374,19 +374,17 @@ laydata::atticList* laydata::tdtcell::changeselect(TP pnt, SH_STATUS status, lay
       if (sh_selected == status) {
          if (_shapesel.end() == _shapesel.find(prevlay))
             _shapesel[prevlay] = DEBUG_NEW dataList();
-         _shapesel[prevlay]->push_back(selectDataPair(prev,NULL));
-         prev->set_status(status);
-         
-      }
+         prev->select_this(_shapesel[prevlay]);
+     }
       else {
-            dataList::iterator CI = _shapesel[prevlay]->begin();
-            while (_shapesel[prevlay]->end() != CI)
-               if (CI->first == prev) {
-                  _shapesel[prevlay]->erase(CI);
-                  break;
-               }
-               else CI++;      
-            prev->set_status(status);
+         dataList::iterator CI = _shapesel[prevlay]->begin();
+         while (_shapesel[prevlay]->end() != CI)
+            if (CI->first == prev) {
+               _shapesel[prevlay]->erase(CI);
+               break;
+            }
+            else CI++;      
+         prev->set_status(status);
       }   
       return retlist;
    }
@@ -1126,8 +1124,9 @@ void laydata::tdtcell::full_select()
 
 void laydata::tdtcell::select_this(tdtdata* dat, word lay) {
    if (_shapesel.end() == _shapesel.find(lay)) _shapesel[lay] = DEBUG_NEW dataList();
-   _shapesel[lay]->push_back(selectDataPair(dat, NULL));
-   dat->set_status(sh_selected);
+   dat->select_this(_shapesel[lay]);
+   //   _shapesel[lay]->push_back(selectDataPair(dat, NULL));
+   //dat->set_status(sh_selected);
 }   
 
 void laydata::tdtcell::unselect_all(bool destroy) {
