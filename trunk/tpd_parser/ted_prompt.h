@@ -86,6 +86,7 @@ namespace console {
       const char*             lastCommand() const {return _cmd_history.rbegin()->c_str();}
       void                    set_canvas_invalid(bool val) { _canvas_invalid = val;}
       bool                    canvas_invalid() {return _canvas_invalid;}
+      bool                    cmdHistoryExists() const {return !_cmd_history.empty();}
    private:
       void                    OnKeyUP(wxKeyEvent&);
       void                    cancelLastPoint();
@@ -98,7 +99,7 @@ namespace console {
       wxString                _guinput;
       stringList              _cmd_history;
       stringList::const_iterator _history_position;
-      bool                    _thread; //flag fo detached thread
+      bool                    _thread; //flag for detached thread
       wxWindow*               _parent;
       wxWindow*               _canvas;
       bool                    _canvas_invalid;

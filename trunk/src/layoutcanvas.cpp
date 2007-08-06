@@ -548,9 +548,12 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
          }
       }
       else { // no user input expected
-         menu.Append(   CM_AGAIN, wxString(Console->lastCommand(), wxConvUTF8));
-         menu.Append(TMEDIT_UNDO, wxT("undo"));
-         menu.AppendSeparator();
+         if (Console->cmdHistoryExists())
+         {
+            menu.Append(   CM_AGAIN, wxString(Console->lastCommand(), wxConvUTF8));
+            menu.Append(TMEDIT_UNDO, wxT("undo"));
+            menu.AppendSeparator();
+         }
          if (DATC->numselected() > 0) {
             menu.Append(    TMEDIT_MOVE, wxT("move"  ));
             menu.Append(    TMEDIT_COPY, wxT("copy"  ));
