@@ -168,7 +168,12 @@ int tellstdfunc::stdMOVESEL::execute() {
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
       UNDOPstack.push_front(make_ttlaylist(fadead[2])); // and added
-      for (i = 0; i < 3; delete fadead[i++]);
+      for (i = 0; i < 3; i++)
+      {
+         for (laydata::selectList::iterator CI = fadead[i]->begin(); CI != fadead[i]->end(); CI++)
+            delete CI->second;
+         delete fadead[i];
+      }
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    //delete p1; delete p2; undo will delete them

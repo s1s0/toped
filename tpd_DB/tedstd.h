@@ -60,7 +60,7 @@ public:
    PSegment(TP,TP);
    byte     crossP(PSegment, TP&);
    bool     empty() {return ((0 == _A) && (0 == _B));};
-   PSegment& ortho(TP);
+   PSegment* ortho(TP);
    PSegment operator = (const PSegment s) {_A = s._A; _B = s._B; _C = s._C; return *this;};
 private:
    real     _A, _B, _C;   

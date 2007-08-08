@@ -159,7 +159,7 @@ namespace laydata {
       void                 unselect_points(DBbox&, SGBitSet*);
    private:
       void                 normalize(SGBitSet* psel = NULL);
-      pointlist&           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
+      pointlist*           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
       TP*                 _p1;
       TP*                 _p2;
    };
@@ -199,7 +199,7 @@ namespace laydata {
    private:
       void                 select_points(DBbox&, SGBitSet*);
       void                 unselect_points(DBbox&, SGBitSet*);
-      pointlist&           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
+      pointlist*           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
       pointlist            _plist;
    };
 
@@ -240,7 +240,7 @@ namespace laydata {
       void                 precalc(pointlist&, _dbl_word) const;
       void                 select_points(DBbox&, SGBitSet*);
       void                 unselect_points(DBbox&, SGBitSet*);
-      pointlist&           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
+      pointlist*           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
 //      void                 drawSegment(const layprop::DrawProperties&, const TP&,
 //                              const TP&, const TP&, const TP&, bool, bool) const;
       DBbox*               endPnts(const TP&, const TP&, bool first) const;

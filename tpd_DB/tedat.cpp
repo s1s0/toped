@@ -473,9 +473,10 @@ void laydata::tdtbox::tmp_draw(const layprop::DrawProperties&, ctmqueue& transta
          TP pt1, pt2;
          CTM strans = transtack.back();
          assert(plst);
-         pointlist nshape = movePointsSelected(plst, trans, strans);
-         pt1 = nshape[0]; pt2 = nshape[2];
+         pointlist* nshape = movePointsSelected(plst, trans, strans);
+         pt1 = (*nshape)[0]; pt2 = (*nshape)[2];
          glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
+         nshape->clear(); delete nshape;
       }
       else
       {
@@ -514,9 +515,10 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet* plst)
 {
    if (plst)
    {// used for modify
-      pointlist nshape = movePointsSelected(plst, trans);
-      *_p1 = nshape[0]; *_p2 = nshape[2];
+      pointlist* nshape = movePointsSelected(plst, trans);
+      *_p1 = (*nshape)[0]; *_p2 = (*nshape)[2];
       normalize(plst);
+      nshape->clear(); delete nshape;
       return NULL;
    }
    else
@@ -648,7 +650,7 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
    }
 }
 
-pointlist& laydata::tdtbox::movePointsSelected(const SGBitSet* pset, 
+pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet* pset, 
                                     const CTM&  movedM, const CTM& stableM) const {
   // convert box to polygon
    pointlist* mlist = DEBUG_NEW pointlist();
@@ -686,7 +688,7 @@ pointlist& laydata::tdtbox::movePointsSelected(const SGBitSet* pset,
       }
       seg0 = seg1;
    }
-   return (*mlist);
+   return mlist;
 }
 
 laydata::tdtbox::~tdtbox() {
@@ -779,22 +781,24 @@ void laydata::tdtpoly::tmp_draw(const layprop::DrawProperties&, ctmqueue& transt
       glEnd();
    }
    else {
-      pointlist ptlist;
+      pointlist* ptlist;
       if (sh_partsel == status()) {
          CTM strans = transtack.back();
          assert(plst);
          ptlist = movePointsSelected(plst, trans, strans);
       }
       else {
-         ptlist.reserve(numpnts);
+         ptlist = DEBUG_NEW pointlist;
+         ptlist->reserve(numpnts);
          for (i = 0; i < numpnts; i++) 
-            ptlist.push_back(_plist[i] * trans);
+            ptlist->push_back(_plist[i] * trans);
       }
       glBegin(GL_LINE_LOOP);
       for (i = 0; i < numpnts; i++) 
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
+         glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
       glEnd();
-      ptlist.clear();
+      ptlist->clear();
+      delete ptlist;
    }
 }
 
@@ -823,14 +827,18 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet* plst)
    if (plst)
    {// modify i.e. move when only part of the polygon is selected
     // should get here only
-      pointlist& nshape = movePointsSelected(plst, trans);
-      laydata::valid_poly* check = DEBUG_NEW laydata::valid_poly(nshape);
+      pointlist* nshape = movePointsSelected(plst, trans);
+      laydata::valid_poly* check = DEBUG_NEW laydata::valid_poly(*nshape);
       if (laydata::shp_OK == check->status()) {
          // assign the modified pointlist ONLY if the resulting shape is perfect
-         _plist.clear(); _plist = nshape;
+         _plist.clear(); _plist = (*nshape);
+         nshape->clear(); delete nshape;
+         delete check;
+         return NULL;
       }
       // in all other cases keep the original pointlist, depending on the check->status()
       // the shape will be replaced, or marked as failed to modify
+      nshape->clear(); delete nshape;
       return check;
    }
    else
@@ -987,7 +995,7 @@ DBbox laydata::tdtpoly::overlap() const {
    return ovl;
 }
 
-pointlist& laydata::tdtpoly::movePointsSelected(const SGBitSet* pset, 
+pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet* pset, 
                                     const CTM&  movedM, const CTM& stableM) const {
    pointlist* mlist = DEBUG_NEW pointlist(_plist);
    word size = mlist->size();
@@ -1013,7 +1021,7 @@ pointlist& laydata::tdtpoly::movePointsSelected(const SGBitSet* pset,
       }
       seg0 = seg1;
    }
-   return (*mlist);
+   return mlist;
 }
 
 //-----------------------------------------------------------------------------
@@ -1175,21 +1183,22 @@ void laydata::tdtwire::tmp_draw(const layprop::DrawProperties& drawprop,
                ctmqueue& transtack, SGBitSet* plst, bool under_construct) const
 {
    CTM trans = transtack.front();
-   pointlist ptlist;
+   pointlist* ptlist;
    _dbl_word num_points = _plist.size();
    if (under_construct)
    {
       if (num_points == 0) return;
-      ptlist.reserve(3*(num_points + 1));
+      ptlist = DEBUG_NEW pointlist;
+      ptlist->reserve(3*(num_points + 1));
       for (unsigned i = 0; i < num_points; i++)
-         ptlist.push_back(_plist[i]);
-      ptlist.push_back(_plist[num_points-1] * trans);
+         ptlist->push_back(_plist[i]);
+      ptlist->push_back(_plist[num_points-1] * trans);
       num_points++;
    }
    else
    {
       if (num_points < 2) return;
-      ptlist.reserve(3*num_points);
+//      ptlist->reserve(3*num_points);
       if (sh_partsel == status())
       {
          CTM strans = transtack.back();
@@ -1197,15 +1206,17 @@ void laydata::tdtwire::tmp_draw(const layprop::DrawProperties& drawprop,
          ptlist = movePointsSelected(plst, trans, strans);
       }
       else
+      {
+         ptlist = DEBUG_NEW pointlist;
          for (unsigned i = 0; i < num_points; i++)
-            ptlist.push_back(_plist[i] * trans);
-
+            ptlist->push_back(_plist[i] * trans);
+      }
    }
-   precalc(ptlist, num_points);
-   openGL_drawline(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
+   precalc((*ptlist), num_points);
+   openGL_drawline(const_cast<layprop::DrawProperties&>(drawprop), *ptlist);
 //      if (drawprop.getCurrentFill())
 //         openGL_drawfill(ptlist);
-   ptlist.clear();
+   ptlist->clear(); delete ptlist;
 }
 
 void laydata::tdtwire::precalc(pointlist& ptlist, _dbl_word num_points) const
@@ -1304,11 +1315,14 @@ void laydata::tdtwire::unselect_points(DBbox& select_in, SGBitSet* pntlst)
 laydata::validator* laydata::tdtwire::move(const CTM& trans, SGBitSet* plst)
 {
    if (plst) {
-      pointlist nshape = movePointsSelected(plst, trans);
-      laydata::valid_wire* check = DEBUG_NEW laydata::valid_wire(nshape, _width);
+      pointlist* nshape = movePointsSelected(plst, trans);
+      laydata::valid_wire* check = DEBUG_NEW laydata::valid_wire(*nshape, _width);
       if (laydata::shp_OK == check->status()) {
          // assign the modified pointlist ONLY if the resulting shape is perfect
-         _plist.clear(); _plist = nshape;
+         _plist.clear(); _plist = *nshape;
+         nshape->clear(); delete nshape;
+         delete check;
+         return NULL;
       }
       // in all other cases keep the origical pointlist, depending on the check->status()
       // the shape will be replaced, or marked as failed to modify
@@ -1398,32 +1412,35 @@ DBbox laydata::tdtwire::overlap() const
    return ovl;
 }
 
-pointlist& laydata::tdtwire::movePointsSelected(const SGBitSet* pset, 
+pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet* pset, 
                                     const CTM& movedM, const CTM& stableM) const {
    pointlist* mlist = DEBUG_NEW pointlist(_plist);
    word size = mlist->size();
-   PSegment seg1,seg0;
+   PSegment* seg1 = NULL;
+   PSegment* seg0 = NULL;
    for (int i = 0; i < size; i++) {
       if ((size-1) == i) {
          if (pset->check(size-1))
-            seg1 = seg1.ortho((*mlist)[size-1] * movedM);
+            seg1 = seg1->ortho((*mlist)[size-1] * movedM);
          else
-            seg1 = seg1.ortho((*mlist)[size-1] * stableM);
+            seg1 = seg1->ortho((*mlist)[size-1] * stableM);
       }
       else {
          const CTM& transM = ((pset->check(i) && pset->check(i+1))) ? 
                                                                movedM : stableM;
-         seg1 = PSegment((*mlist)[(i  )] * transM, (*mlist)[(i+1)] * transM);
+         seg1 = DEBUG_NEW PSegment((*mlist)[(i  )] * transM, (*mlist)[(i+1)] * transM);
          if (0 == i)
             if (pset->check(0))
-               seg0 = seg1.ortho((*mlist)[i] * movedM);
+               seg0 = seg1->ortho((*mlist)[i] * movedM);
             else
-               seg0 = seg1.ortho((*mlist)[i] * stableM);
+               seg0 = seg1->ortho((*mlist)[i] * stableM);
       }
-      if (!seg0.empty()) seg1.crossP(seg0,(*mlist)[i]);
+      if (!seg0->empty()) seg1->crossP(*seg0,(*mlist)[i]);
+      if (NULL != seg0) delete seg0;
       seg0 = seg1;
    }
-   return (*mlist);
+   if (NULL != seg0) delete seg0;
+   return mlist;
 }
 //-----------------------------------------------------------------------------
 // class tdtcellref

@@ -61,9 +61,9 @@ byte PSegment::crossP(PSegment seg, TP& crossp) {
    return 0;
 }
    
-PSegment& PSegment::ortho(TP p) {
+PSegment* PSegment::ortho(TP p) {
    PSegment* seg = DEBUG_NEW PSegment(-_B, _A, _B*p.x() - _A*p.y());
-   return *seg;
+   return seg;
 }
 //-----------------------------------------------------------------------------
 // class TEDfile
