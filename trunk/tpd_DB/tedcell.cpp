@@ -807,6 +807,7 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
                _layers[CL->first]->add(DI->first);
                DI++;
             }
+            delete checkS;
          }
          else
          {
