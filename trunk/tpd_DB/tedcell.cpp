@@ -1130,22 +1130,26 @@ void laydata::tdtcell::select_this(tdtdata* dat, word lay) {
    //dat->set_status(sh_selected);
 }   
 
-void laydata::tdtcell::unselect_all(bool destroy) {
+void laydata::tdtcell::unselect_all(bool destroy) 
+{
    dataList* lslct;
    // for every layer with selected shapes
    for (selectList::const_iterator CL = _shapesel.begin(); 
-                                                 CL != _shapesel.end(); CL++) {
+                                                 CL != _shapesel.end(); CL++) 
+   {
       lslct = CL->second;
       // for every single selectDataPair
       for (dataList::const_iterator CI = lslct->begin(); 
-                                                      CI != lslct->end(); CI++) {
+                                                      CI != lslct->end(); CI++) 
+      {
          // unmark the shape
          CI->first->set_status(sh_active);
          // clear the list of selected points if it exists
-         if (CI->second) 
-            delete (CI->second);
-         else
-            if (destroy) delete (CI->first);
+         if (destroy)
+         {
+            if (NULL != CI->second) delete (CI->second);
+            delete (CI->first);
+         }
       }
       // clear the selectDataPair structures
       lslct->clear();

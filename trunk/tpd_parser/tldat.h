@@ -226,7 +226,7 @@ namespace telldata {
       laydata::tdtdata*    data() const     {return _data;};
       word                 layer() const    {return _layer;};
       SGBitSet*            selp() const     {return _selp;};
-                          ~ttlayout()       {if (_selp) delete _selp;};
+      virtual             ~ttlayout()       {if (_selp) delete _selp;};
    private:
       laydata::tdtdata*   _data;
       word                _layer;
@@ -256,7 +256,7 @@ namespace telldata {
       void                 lunion(telldata::ttlist*);
       tell_var*            erase(_dbl_word);
       tell_var*            erase(_dbl_word, _dbl_word);
-                          ~ttlist();
+      virtual             ~ttlist();
    private:
       memlist             _mlist;    // the list itself
    };
@@ -268,7 +268,7 @@ namespace telldata {
                            user_struct(const tell_type*);
                            user_struct(const tell_type*, operandSTACK&);
                            user_struct(const user_struct&);
-                          ~user_struct();
+      virtual             ~user_struct();
       tell_var*            selfcopy() const  {return DEBUG_NEW user_struct(*this);}
       void                 echo(std::string&, real);
       void                 assign(tell_var*);

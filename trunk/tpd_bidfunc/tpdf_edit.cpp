@@ -171,7 +171,17 @@ int tellstdfunc::stdMOVESEL::execute() {
       for (i = 0; i < 3; i++)
       {
          for (laydata::selectList::iterator CI = fadead[i]->begin(); CI != fadead[i]->end(); CI++)
-            delete CI->second;
+         {
+            laydata::dataList* sshape = CI->second;
+            if (1 == i) // deleted list only
+            {
+               for (laydata::dataList::iterator CCI = sshape->begin(); CCI  != sshape->end(); CCI++)
+               {
+                  if (NULL != CCI->second) delete CCI->second;
+               }
+            }
+            delete sshape;
+         }
          delete fadead[i];
       }
    DATC->unlockDB();
