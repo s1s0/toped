@@ -36,18 +36,16 @@
 #include <assert.h>
 
 #if WIN32
-#include <windows.h>
-//#define rint(x) floor( (x) + ( ( (x) < 0 ) ? -0.5 : 0.5))
-//#define round(x) floor( (x) + ( ( (x) < 0 ) ? -0.5 : 0.5))
-double round(double x);
-#define rint round
-//#define round floor
-#define remainder fmod
-#define M_PI   3.1415926535897932384626433832795
-#pragma warning( disable : 4786 )
-#include <wx/msw/winundef.h>
+   #include <windows.h>
+   double round(double x);
+   #define rint round
+   //#define round floor
+   #define remainder fmod
+   #define M_PI   3.1415926535897932384626433832795
+   #pragma warning( disable : 4786 )
+   #include <wx/msw/winundef.h>
 #else
-#include "config.h"
+   #include "config.h"
 #endif // WIN32
 
 // macros for tracking down errors

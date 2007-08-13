@@ -1038,24 +1038,23 @@ laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata()
 
 DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const {
    double     w = _width/2;
-   double denom = p2.x() - p1.x();
-   double   nom = p2.y() - p1.y();
-   double signX = (nom   > 0) ? 1.0 : -1.0;
-   double signY = (denom > 0) ? 1.0 : -1.0;
-   TP pt = first ? p1 : p2;
+   double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
+   double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
    double xcorr, ycorr; // the corrections
    if ((0 == nom) && (0 == denom)) return NULL;
-//   assert((0 != nom) || (0 != denom));
-        if (0 == denom)   {xcorr = signX*w; ycorr = 0;} // vertical
-   else if (0 == nom  )   {xcorr = 0; ycorr = signY*w;} // horizontal
+   double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
+   else if (0 == nom  )   {xcorr = 0 ; ycorr = signY * w;} // horizontal |----|
    else {
       double sl   = nom / denom;
-      double sqsl = sqrt( sl*sl + 1);
+      double sqsl = signY*sqrt( sl*sl + 1);
       xcorr = rint(w * (sl / sqsl)); 
       ycorr = rint(w * ( 1 / sqsl));
    }
+   TP pt = first ? p1 : p2;
    return DEBUG_NEW DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
-                     (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
+                          (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
 }
 
 DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const {
@@ -1066,15 +1065,15 @@ DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
    double  y21 = p2.y() - p1.y();
    double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
-   // the corrections
    double denom = x32 * y21 - x21 * y32;
-// @fixme THINK about next two lines!!!    They are wrong !!!
+// @FIXME THINK about next two lines!!!    They are wrong !!!
    if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
    if (0 == L2) return NULL;
+   // the corrections
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
    return DEBUG_NEW DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
-                     (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
+                          (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
 }
 
 void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
@@ -1288,7 +1287,7 @@ float laydata::tdtwire::get_distance(TP p1, TP p2, TP p0)
       float Cn = A*p0.x() + B*p0.y() + C;
       float X = p0.x() - (A / dist) * Cn;
       float Y = p0.y() - (B / dist) * Cn;
-      // now check that the DEBUG_NEW coordinate is on the p1-p2 line
+      // now check that the new coordinate is on the p1-p2 line
       if ((((Y >= p1.y()) && (Y <= p2.y()))||((Y <= p1.y()) && (Y >= p2.y()))) &&
           (((X >= p1.x()) && (X <= p2.x()))||((X <= p1.x()) && (X >= p2.x())))   )
          return fabsf(Cn / sqrt(dist));

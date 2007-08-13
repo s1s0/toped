@@ -146,6 +146,7 @@ namespace tui {
       void       OnFlipY(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("flipY();"));}
       void     OnPolyCut(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("polycut();"));}
       void       OnMerge(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("merge();"));}
+      void  OnChangeText(wxCommandEvent& WXUNUSED(event));
 
       void     OnCellNew(wxCommandEvent&);
       void    OnCellOpen(wxCommandEvent&);
