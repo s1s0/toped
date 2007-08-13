@@ -415,7 +415,8 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Edit/Flip Y",     "CTRL-Y",  &tui::TopedFrame::OnFlipY, "Flip selected shapes towards Y axis " );
    _resourceCenter->appendMenu("&Edit/Cut with poly","CTRL-U",  &tui::TopedFrame::OnPolyCut, "Cut selected shapes with a polygon " );
    _resourceCenter->appendMenu("&Edit/Merge",      "CTRL-G",  &tui::TopedFrame::OnMerge, "Merge selected shpes" );
-
+   _resourceCenter->appendMenuSeparator("Edit");
+   _resourceCenter->appendMenu("&Edit/Change Text","",&tui::TopedFrame::OnChangeText, "Replace a text contents" );
 
    //---------------------------------------------------------------------------
    // menuBar entry viewMenu
@@ -1331,12 +1332,26 @@ void tui::TopedFrame::OnChangeRef( wxCommandEvent& WXUNUSED( event ))
       dlg = DEBUG_NEW tui::getCellRef(this, -1, wxT("Change Cell Reference"), pos, wxT(""));
    }
    catch (EXPTN) {delete dlg;return;}   
-   if ( dlg->ShowModal() == wxID_OK ) {
+   if ( dlg->ShowModal() == wxID_OK ) 
+   {
       wxString ost;
       ost << wxT("changeref(\"") << dlg->get_selectedcell() << wxT("\");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
+}
+
+void tui::TopedFrame::OnChangeText( wxCommandEvent& WXUNUSED( event ))
+{
+   wxTextEntryDialog dlg(this, wxT("New string:"), wxT("Change text string"));
+   wxString cname, ost;
+   if ((wxID_OK == dlg.ShowModal()) && ((cname = dlg.GetValue()) != wxT(""))) 
+   {
+      SetStatusText(wxT("Change text string ..."));
+      wxString ost;
+      ost << wxT("changestr(\"") << dlg.GetValue() << wxT("\");");
+      _cmdline->parseCommand(ost);
+   }
 }
 
 void tui::TopedFrame::OnChangeLayer( wxCommandEvent& WXUNUSED( event ))

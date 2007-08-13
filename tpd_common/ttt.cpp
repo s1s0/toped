@@ -469,7 +469,7 @@ double round(double x)
 //space requires for split function
 bool space(char c)
 {
-	return isspace(c);
+	return (0 != isspace(c));
 }
 
 //Return false, if argument - space or equivalent; 
@@ -477,7 +477,7 @@ bool space(char c)
 //space requires for split function
 bool not_space(char c)
 {
-   return !isspace(c);
+   return (0 == isspace(c));
 }
 
 bool isDelimit(char c, char d)

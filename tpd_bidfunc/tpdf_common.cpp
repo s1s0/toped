@@ -225,19 +225,26 @@ laydata::selectList* tellstdfunc::filter_selist(const laydata::selectList* shape
 }
 
 //=============================================================================
-void tellstdfunc::replace_str(laydata::atticList* shapesel, std::string newstr)
+laydata::atticList* tellstdfunc::replace_str(laydata::atticList* shapesel, std::string newstr)
 {
+   laydata::atticList* newtextlist = DEBUG_NEW laydata::atticList();
    for (laydata::atticList::iterator CL = shapesel->begin();
                                             CL != shapesel->end(); CL++)
    {
-      laydata::shapeList* lslct = CL->second;
+      laydata::shapeList* lslct  = CL->second;
+      laydata::shapeList* newlst = DEBUG_NEW laydata::shapeList();
       for (laydata::shapeList::iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       {
          assert(laydata::_lmtext == (*CI)->ltype());
-         static_cast<laydata::tdttext*>(*CI)->replace_str(newstr);
+         // using build-in copy constructor
+         laydata::tdttext* newtxt = DEBUG_NEW laydata::tdttext(*(static_cast<laydata::tdttext*>(*CI)));
+         newtxt->replace_str(newstr);
+         newlst->push_back(newtxt);
       }
+      (*newtextlist)[CL->first] = newlst;
    }
+   return newtextlist;
 }
 
 //=============================================================================

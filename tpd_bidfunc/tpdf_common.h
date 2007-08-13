@@ -155,7 +155,7 @@ namespace tellstdfunc {
    void                 updateLayerDefinitions(laydata::tdtdesign*, nameList&);
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::selectList* filter_selist(const laydata::selectList*, word mask);
-   void                 replace_str(laydata::atticList*, std::string);
+   laydata::atticList*  replace_str(laydata::atticList*, std::string);
 }
 
 
