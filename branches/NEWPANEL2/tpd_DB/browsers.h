@@ -63,7 +63,11 @@ namespace browsers {
       BT_CELLS_FLAT,
       BT_CELLS_HIER2,
       BT_CELLS_FLAT2,
-		BT_LAYER_SELECT
+		BT_LAYER_SELECT,
+		BT_LAYER_SHOW_ALL,
+		BT_LAYER_HIDE_ALL,
+		BT_LAYER_LOCK_ALL,
+		BT_LAYER_UNLOCK_ALL
 
    } BROWSER_EVT_TYPE;
    
@@ -263,7 +267,8 @@ namespace browsers {
       void unselect(void);
       void select(void);
 		void hideLayer(bool hide);
-
+		void lockLayer(bool lock);
+		word getLayNo(void) {return _layer->layno();}
       
    private:
       void preparePicture(wxBitmap &pict);
@@ -287,24 +292,37 @@ namespace browsers {
    public:
                            LayerBrowser2(wxWindow* parent, wxWindowID id);
       virtual             ~LayerBrowser2();
-      //topedlay_list*       layerlist() const {return _layerlist;};
+      //topedlay_list*       layerlist() const {return _layerlist;};//+no need for LayerBrowser2
    private:
-      void                 OnNewLayer(wxCommandEvent&);
-      //void                 OnEditLayer(wxCommandEvent&);
+      //void                 OnNewLayer(wxCommandEvent&);//+not used 
+      //void                 OnEditLayer(wxCommandEvent&);//+not used 
       //void                 OnXXXSelected(wxCommandEvent&);
       void                 OnCommand(wxCommandEvent&);
-      //void                 OnActiveLayer(wxListEvent&);
+		void                 OnShowAll(wxCommandEvent&);
+		void                 OnHideAll(wxCommandEvent&);
+		void                 OnLockAll(wxCommandEvent&);
+		void                 OnUnlockAll(wxCommandEvent&);
+		//void                 OnActiveLayerL(wxListEvent&);
+      //void                 OnActiveLayerM(wxCommandEvent&);
       //void                 OnSelectWild(wxCommandEvent&);
-      //void                 OnShowHideLayer(wxListEvent&);
+      //void                 OnItemRightClick(wxListEvent&);
+      //void                 OnHideSelected(wxCommandEvent&);
+      //void                 OnShowSelected(wxCommandEvent&);
+      //void                 OnLockSelected(wxCommandEvent&);
+      //void                 OnUnlockSelected(wxCommandEvent&);
+      wxString             getAllSelected();
+      
       //wxChoice*            action_select;
       //wxChoice*            action_wild;
       //topedlay_list*       _layerlist;
-      //std::vector <layerInfo*> _layerList;
+
       wxBitmap& prepareBitmap(void);
 
       layerButtonMap          _buttonMap;
       int                     _buttonCount;
       LayerButton*            _selectedButton;
+		wxScrolledWindow*			_layerPanel;
+		wxBoxSizer*					_thesizer;
       
       DECLARE_EVENT_TABLE();
    };
