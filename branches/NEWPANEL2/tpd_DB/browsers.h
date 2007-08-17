@@ -40,8 +40,10 @@
 #include "tedesign.h"
 #include "gds_io.h"
 
-namespace browsers {
-   typedef enum {
+namespace browsers 
+{
+   typedef enum 
+	{
       BT_LAYER_DEFAULT,
       BT_LAYER_HIDE,
       BT_LAYER_LOCK,
@@ -71,7 +73,8 @@ namespace browsers {
 
    } BROWSER_EVT_TYPE;
    
-   enum {
+   enum 
+	{
       CELLTREEOPENCELL  = 1000,
       GDSTREEREPORTLAY        ,
       LAYERHIDESELECTED       ,
@@ -82,7 +85,8 @@ namespace browsers {
    };
 
    //===========================================================================
-   class topedlay_list : public wxListCtrl {
+   class topedlay_list : public wxListCtrl 
+	{
    public:
                      topedlay_list(wxWindow* parent, wxWindowID id = -1,
                         const wxPoint& pos = wxDefaultPosition,
@@ -102,33 +106,6 @@ namespace browsers {
    };
 
    //===========================================================================
-   class layerbrowser : public wxPanel {
-   public:
-                           layerbrowser(wxWindow* parent, wxWindowID id);
-      virtual             ~layerbrowser();
-      topedlay_list*       layerlist() const {return _layerlist;};
-      word                 getFirstSelected();
-   private:
-      void                 OnNewLayer(wxCommandEvent&);
-      void                 OnEditLayer(wxCommandEvent&);
-      void                 OnXXXSelected(wxCommandEvent&);
-      void                 OnCommand(wxCommandEvent&);
-      void                 OnActiveLayerL(wxListEvent&);
-      void                 OnActiveLayerM(wxCommandEvent&);
-      void                 OnSelectWild(wxCommandEvent&);
-      void                 OnItemRightClick(wxListEvent&);
-      void                 OnHideSelected(wxCommandEvent&);
-      void                 OnShowSelected(wxCommandEvent&);
-      void                 OnLockSelected(wxCommandEvent&);
-      void                 OnUnlockSelected(wxCommandEvent&);
-      wxString             getAllSelected();
-      
-      wxChoice*            action_select;
-      wxChoice*            action_wild;
-      topedlay_list*       _layerlist;
-      DECLARE_EVENT_TABLE();
-   };
-
    class CellBrowser: public wxTreeCtrl
    {
    public:
@@ -176,7 +153,8 @@ namespace browsers {
 
 
    //===========================================================================
-   class GDSbrowser : public wxPanel {
+   class GDSbrowser : public wxPanel 
+	{
    public:
                         GDSbrowser(wxWindow *parent, wxWindowID id = -1, 
                         const wxPoint& pos = wxDefaultPosition, 
@@ -204,7 +182,8 @@ namespace browsers {
 
 
    //===========================================================================
-   class TDTbrowser : public wxPanel {
+   class TDTbrowser : public wxPanel 
+	{
    public:
                         TDTbrowser(wxWindow* parent, wxWindowID id = -1, 
                         const wxPoint& pos = wxDefaultPosition, 
@@ -214,19 +193,15 @@ namespace browsers {
       void              collectInfo(const wxString, laydata::TDTHierTree*);
       void              initialize();
       wxString          selectedCellname() const;
-//      wxString          selectedCellname() const {if (RBcellID.IsOk()) 
-//         return hCellBrowser->GetItemText(RBcellID); else return wxT("");}
    protected:
       void              collectChildren(laydata::TDTHierTree *root, 
                                                  wxTreeItemId& lroot);
    private:
-//      wxTreeItemId      RBcellID;//+
-      wxTreeItemId      top_structure;//+
-      wxTreeItemId      active_structure;//+
+      wxTreeItemId      top_structure;
+      wxTreeItemId      active_structure;
       wxImageList*      _imageList;
       CellBrowser*      hCellBrowser;//Hierarchy cell browser
       CellBrowser*      fCellBrowser;//Flat cell browser
-      //laydata::TDTHierTree*   tree;
       wxString          libName;
       wxButton*         _hierButton;
       wxButton*         _flatButton;
@@ -274,10 +249,7 @@ namespace browsers {
       void preparePicture(wxBitmap &pict);
 
       LayerInfo   *_layer;
-
       wxBitmap    *_picture;
-
-
       wxBrush     *_brush;
       wxPen       *_pen;
       bool        _selected;
@@ -288,34 +260,19 @@ namespace browsers {
    };
 
    typedef std::map <word, LayerButton*> layerButtonMap;
-   class LayerBrowser2 : public wxScrolledWindow {
+   class LayerBrowser : public wxScrolledWindow 
+	{
    public:
-                           LayerBrowser2(wxWindow* parent, wxWindowID id);
-      virtual             ~LayerBrowser2();
-      //topedlay_list*       layerlist() const {return _layerlist;};//+no need for LayerBrowser2
+                           LayerBrowser(wxWindow* parent, wxWindowID id);
+      virtual             ~LayerBrowser();
    private:
-      //void                 OnNewLayer(wxCommandEvent&);//+not used 
-      //void                 OnEditLayer(wxCommandEvent&);//+not used 
-      //void                 OnXXXSelected(wxCommandEvent&);
       void                 OnCommand(wxCommandEvent&);
 		void                 OnShowAll(wxCommandEvent&);
 		void                 OnHideAll(wxCommandEvent&);
 		void                 OnLockAll(wxCommandEvent&);
 		void                 OnUnlockAll(wxCommandEvent&);
-		//void                 OnActiveLayerL(wxListEvent&);
-      //void                 OnActiveLayerM(wxCommandEvent&);
-      //void                 OnSelectWild(wxCommandEvent&);
-      //void                 OnItemRightClick(wxListEvent&);
-      //void                 OnHideSelected(wxCommandEvent&);
-      //void                 OnShowSelected(wxCommandEvent&);
-      //void                 OnLockSelected(wxCommandEvent&);
-      //void                 OnUnlockSelected(wxCommandEvent&);
       wxString             getAllSelected();
       
-      //wxChoice*            action_select;
-      //wxChoice*            action_wild;
-      //topedlay_list*       _layerlist;
-
       wxBitmap& prepareBitmap(void);
 
       layerButtonMap          _buttonMap;
@@ -328,19 +285,18 @@ namespace browsers {
    };
 
    //===========================================================================
-   class browserTAB : public wxNotebook {
+   class browserTAB : public wxNotebook 
+	{
    public:
                         browserTAB(wxWindow *parent, wxWindowID id = -1,
         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, 
                                                                   long style = 0);
       virtual          ~browserTAB();// {};
-      topedlay_list*    TDTlayers() const    {return _TDTlayers->layerlist();};
-		LayerBrowser2*    TDTlayers2() const   {return _layers;};
+		LayerBrowser*    TDTlayers() const   {return _layers;};
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
-      word              TDTSelectedLayNo()   {return _TDTlayers->getFirstSelected();}
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
-		LayerBrowser2*    layers() const       {return _layers;};
+		LayerBrowser*    layers() const       {return _layers;};
       void              set_tellParser(wxWindow* tp) {_tellParser = tp;}
       wxWindow*         tellParser() const {return _tellParser;}
    private:
@@ -350,10 +306,8 @@ namespace browsers {
       void              OnTELLclearGDStab();
       GDSbrowser*       _GDSstruct;
       TDTbrowser*       _TDTstruct;
-      layerbrowser*     _TDTlayers;
-		LayerBrowser2*		_layers;
+		LayerBrowser*		_layers;
       wxWindow*         _tellParser;
-      //      CanvasPalette   *_TDTlayers;
       DECLARE_EVENT_TABLE();
    };
  
