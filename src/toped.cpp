@@ -1265,7 +1265,8 @@ void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
 {
-   word layno = _browsers->TDTSelectedLayNo();
+   //word layno = _browsers->TDTSelectedLayNo();
+	word layno = DATC->curlay();
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno);
