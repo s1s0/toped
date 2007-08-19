@@ -616,11 +616,11 @@ void browsers::TDTbrowser::OnCommand(wxCommandEvent& event)
       case BT_CELL_OPEN:OnTELLopencell(event.GetString());break;
       case BT_CELL_HIGHLIGHT:OnTELLhighlightcell(event.GetString());break;
       case BT_CELL_ADD :OnTELLaddcell(event.GetString(), 
-          *((wxString*)event.GetClientData()), (int)event.GetExtraLong());
-          delete ((wxString*)event.GetClientData()); break;
+          *(static_cast<wxString*>(event.GetClientData())), static_cast<int>(event.GetExtraLong()));
+          delete (static_cast<wxString*>(event.GetClientData())); break;
       case BT_CELL_REMOVE:OnTELLremovecell(event.GetString(), 
-          *((wxString*)event.GetClientData()), (bool)event.GetExtraLong());
-          delete ((wxString*)event.GetClientData()); break;
+          *(static_cast<wxString*>(event.GetClientData())), static_cast<bool>(event.GetExtraLong()));
+          delete (static_cast<wxString*>(event.GetClientData())); break;
 
    }   
 }
@@ -864,7 +864,7 @@ void browsers::browserTAB::OnCommand(wxCommandEvent& event)
    switch (command) 
    {
       case BT_ADDTDT_TAB:OnTELLaddTDTtab(event.GetString(), 
-                            (laydata::TDTHierTree*)event.GetClientData());break;
+                            static_cast<laydata::TDTHierTree*>(event.GetClientData()));break;
       case BT_ADDGDS_TAB:OnTELLaddGDStab();break;
       case BT_CLEARGDS_TAB:OnTELLclearGDStab(); break;
    }
@@ -903,7 +903,7 @@ void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool
    eventLAYER_STATUS.SetExtraLong(status);
    eventLAYER_STATUS.SetInt(*bt1);
 	word *laynotemp = new word(layno);
-   eventLAYER_STATUS.SetClientData((void*) laynotemp);
+   eventLAYER_STATUS.SetClientData(static_cast<void*> (laynotemp));
 	wxPostEvent(Browsers->TDTlayers(), eventLAYER_STATUS);
 
 
@@ -914,7 +914,7 @@ void browsers::layer_add(const std::string name, const word layno)
 	wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
    LayerInfo *layer = new LayerInfo(name, layno);
    int* bt = new int(BT_LAYER_ADD);
-   eventLAYER_ADD.SetClientData((void*) layer);
+   eventLAYER_ADD.SetClientData(static_cast<void*> (layer));
    eventLAYER_ADD.SetInt(*bt);
    
    wxPostEvent(Browsers->layers(), eventLAYER_ADD);
@@ -927,7 +927,7 @@ void browsers::layer_default(const word newlay, const word oldlay)
    int*bt = new int(BT_LAYER_DEFAULT);
 	eventLAYER_DEF.SetExtraLong(newlay);
 	word *laynotemp = new word(oldlay);
-	eventLAYER_DEF.SetClientData((void*) laynotemp);
+	eventLAYER_DEF.SetClientData(static_cast<void*> (laynotemp));
    eventLAYER_DEF.SetInt(*bt);
    
    wxPostEvent(Browsers->layers(), eventLAYER_DEF);
@@ -937,7 +937,7 @@ void browsers::addTDTtab(std::string libname, laydata::TDTHierTree* tdtH)
 {
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(BT_ADDTDT_TAB);
-   eventADDTAB.SetClientData((void*) tdtH);
+   eventADDTAB.SetClientData(static_cast<void*> ( tdtH));
    eventADDTAB.SetString(wxString(libname.c_str(), wxConvUTF8));
    wxPostEvent(Browsers, eventADDTAB);
 }
@@ -979,7 +979,7 @@ void browsers::treeAddMember(const char* cell, const char* parent, int action)
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
    eventCELLTREE.SetExtraLong(action);
    wxString* prnt = new wxString(parent, wxConvUTF8);
-   eventCELLTREE.SetClientData((void*) prnt);
+   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
    wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);
 }
 
@@ -990,7 +990,7 @@ void browsers::treeRemoveMember(const char* cell, const char* parent, bool orpha
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
    eventCELLTREE.SetExtraLong(orphan);
    wxString* prnt = new wxString(parent, wxConvUTF8);
-   eventCELLTREE.SetClientData((void*) prnt);
+   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
    wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);
 }
 
@@ -1281,7 +1281,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
 
       case BT_LAYER_DEFAULT:
 			{
-				word *oldlay = (word*)event.GetClientData();
+				word *oldlay = static_cast<word*>(event.GetClientData());
 				word layno = event.GetExtraLong();
 				_buttonMap[*oldlay]->unselect();
 				_buttonMap[layno]->select(); 
@@ -1290,7 +1290,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
 			}
 		case    BT_LAYER_HIDE:
 			{
-				word *layno = (word*)event.GetClientData();
+				word *layno = static_cast<word*>(event.GetClientData());
 				bool status = event.GetExtraLong();
 				//_buttonMap[layno]->hideLayer(event.IsChecked());
 				_buttonMap[*layno]->hideLayer(status);
@@ -1300,7 +1300,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
       case    BT_LAYER_LOCK:
 			{
 				//_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());
-				word *layno = (word*)event.GetClientData();
+				word *layno = static_cast<word*>(event.GetClientData());
 				bool status = event.GetExtraLong();
 				_buttonMap[*layno]->lockLayer(status);
 				break;
@@ -1316,7 +1316,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
 
       case     BT_LAYER_ADD:
          {
-            LayerInfo* layer = (LayerInfo*)event.GetClientData();
+            LayerInfo* layer = static_cast<LayerInfo*>(event.GetClientData());
 
             LayerButton *layerButton;
 
