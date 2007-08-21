@@ -84,26 +84,6 @@ namespace browsers
       LAYERCURRENTSELECTED
    };
 
-   //===========================================================================
-   class topedlay_list : public wxListCtrl 
-	{
-   public:
-                     topedlay_list(wxWindow* parent, wxWindowID id = -1,
-                        const wxPoint& pos = wxDefaultPosition,
-                        const wxSize& size = wxDefaultSize,
-                        long style = wxLC_REPORT | wxLC_HRULES);
-      virtual      ~topedlay_list();
-      void                 addlayer(wxString, word);
-      void                 defaultLayer(word, word);
-      void                 hideLayer(word, bool);
-      void                 lockLayer(word, bool);
-      void                 OnSort(wxListEvent&);
-   private:
-      wxImageList*         _imageList;
-      wxFont               _llfont_normal;
-      wxFont               _llfont_bold;
-      DECLARE_EVENT_TABLE();
-   };
 
    //===========================================================================
    class CellBrowser: public wxTreeCtrl
@@ -234,7 +214,10 @@ namespace browsers
    class LayerButton:public wxBitmapButton
    {
    public:
-      LayerButton(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxBU_AUTODRAW, const wxValidator& validator = wxDefaultValidator, const wxString& name = "button", LayerInfo *layer = NULL);
+      LayerButton(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, 
+						const wxSize& size = wxDefaultSize, long style = wxBU_AUTODRAW, 
+						const wxValidator& validator = wxDefaultValidator, const wxString& name = "button", 
+						LayerInfo *layer = NULL);
       ~LayerButton();
       void OnLeftClick(wxMouseEvent &event);
       void OnMiddleClick(wxMouseEvent &event);
