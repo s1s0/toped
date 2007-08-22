@@ -73,7 +73,8 @@ typedef        double   real;
 class SGBitSet {
 public:
             SGBitSet(word);
-            SGBitSet(SGBitSet*);
+            SGBitSet(const SGBitSet&);
+            SGBitSet(): _size(0), _packet(NULL) {};  
    void     set(word);
    void     reset(word);
    void     setall();
@@ -83,9 +84,11 @@ public:
    bool     isallset() const;
    word     size() const {return _size;};
    void     swap(word, word);
+   void     clear();
+   bool     operator == (const SGBitSet&) const;
+   SGBitSet operator =  (const SGBitSet&);
            ~SGBitSet();
 private:
-            SGBitSet(const SGBitSet&);
    word     _size;
    byte*    _packet;
 };

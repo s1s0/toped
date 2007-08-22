@@ -238,13 +238,14 @@ void laydata::tdtdata::select_this(dataList* selist)
       // find it in the select list and remove the list of selected points
          if (SI->first == this)
          {
-            delete (SI->second); SI->second = NULL;
+            SI->second.clear();
+//            delete (SI->second); SI->second = NULL;
             break;
          }
    }
    else
       // otherwise - simply add it to the list
-      selist->push_back(selectDataPair(this,NULL));
+      selist->push_back(selectDataPair(this,SGBitSet()));
    _status = sh_selected; 
 }
 
@@ -258,7 +259,7 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
    if (-1 == clip) select_this(selist); // entire shape is in
    else if ((clip > 0) && pselect)
    { // shape partially is in the select box
-      SGBitSet* pntlst = NULL;
+      SGBitSet pntlst;
       if (sh_partsel == _status)
       {
       // if the shape has already been partially selected
@@ -266,27 +267,28 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
          for (SI = selist->begin(); SI != selist->end(); SI++)
             // get the pointlist
             if (SI->first == this) { pntlst = SI->second; break; }
-         assert(pntlst);
+         assert(0 != pntlst.size());
          // select some more points using shape specific procedures
          select_points(select_in, pntlst);
          // check that after the selection shape doesn't end up fully selected
-         if (pntlst->isallset()) {
+         if (pntlst.isallset()) {
             _status = sh_selected;
-            delete pntlst; SI->second = NULL;
+            pntlst.clear();
+//            delete pntlst; SI->second = NULL;
          }
       }
       else
       {
          // otherwise create a new pointlist
-         pntlst = DEBUG_NEW SGBitSet(numpoints());
+         pntlst = SGBitSet(numpoints());
          // select some more points using shape specific procedures
          select_points(select_in, pntlst);
          // and check 
-         if (!pntlst->isallclear()) {
+         if (!pntlst.isallclear()) {
             _status = sh_partsel;
-            selist->push_back(selectDataPair(this, pntlst));
+            selist->push_back(selectDataPair(this, SGBitSet(pntlst)));
          }
-         else delete pntlst;
+//         else delete pntlst;
       }
    }
 }
@@ -299,28 +301,33 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
    if (0 == (clip = select_in.cliparea(overlap()))) return false;
    // if select_in overlaps the entire shape
    if (-1 == clip) {
-      if (SI.second) {
+      if (0 != SI.second.size()) {
          //remove the list of selected points if it exists ...
-         delete (SI.second); SI.second = NULL;
+         //delete (SI.second); SI.second = NULL;
+         SI.second.clear();
       }
       _status = sh_active;
       return true;// i.e. remove this from the list of selected shapes
    }   
    // if select_in intersects with the overlapping box
    else if ((clip > 0) && pselect) {
-      SGBitSet* pntlst;
-      // get the pointlist
-      if (sh_partsel == _status) // if the shape is already partially selected
-         pntlst = SI.second;
-      else // otherwise (sh_selected) create a new pointlist
-         SI.second = pntlst = DEBUG_NEW SGBitSet(numpoints());
+      if (sh_partsel != _status) // if the shape is already partially selected
+         SI.second = SGBitSet(numpoints());
+      // get an alias of the SI.second
+      SGBitSet &pntlst = SI.second;
       // finally - go and unselect some points   
       unselect_points(select_in, pntlst);
-      if (pntlst->isallclear()) {//none selected
-         _status = sh_active; delete pntlst;SI.second = NULL; return true;
+      if (pntlst.isallclear()) {//none selected
+         _status = sh_active; 
+         pntlst.clear();
+         //delete pntlst;SI.second = NULL; 
+         return true;
       }
-      else if (pntlst->isallset()) { //all points selected; 
-         _status = sh_selected; delete pntlst; SI.second = NULL; return false;
+      else if (pntlst.isallset()) { //all points selected; 
+         _status = sh_selected; 
+         pntlst.clear();
+         //delete pntlst; SI.second = NULL; 
+         return false;
       }   
       else { // some selected
          _status = sh_partsel; return false;
@@ -376,27 +383,27 @@ laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata()
 {
    _p1 = DEBUG_NEW TP(tedfile->getTP());
    _p2 = DEBUG_NEW TP(tedfile->getTP());
-   normalize();
+   normalize(SGBitSet());
 }
 
-void laydata::tdtbox::normalize(SGBitSet* psel)
+void laydata::tdtbox::normalize(SGBitSet& psel)
 {
    int4b swap;
    if (_p1->x() > _p2->x())
    {
       swap = _p1->x(); _p1->setX(_p2->x()); _p2->setX(swap);
-      if (NULL != psel)
+      if (0 != psel.size())
       {
-         psel->swap(0,1);
-         psel->swap(2,3);
+         psel.swap(0,1);
+         psel.swap(2,3);
       }
    }
    if (_p1->y() > _p2->y()) {
       swap = _p1->y(); _p1->setY(_p2->y()); _p2->setY(swap);
-      if (NULL != psel)
+      if (0 != psel.size())
       {
-         psel->swap(0,3);
-         psel->swap(1,2);
+         psel.swap(0,3);
+         psel.swap(1,2);
       }
    }
 }   
@@ -473,7 +480,7 @@ void laydata::tdtbox::tmp_draw(const layprop::DrawProperties&, ctmqueue& transta
          TP pt1, pt2;
          CTM strans = transtack.back();
          assert(plst);
-         pointlist* nshape = movePointsSelected(plst, trans, strans);
+         pointlist* nshape = movePointsSelected(*plst, trans, strans);
          pt1 = (*nshape)[0]; pt2 = (*nshape)[2];
          glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
          nshape->clear(); delete nshape;
@@ -495,25 +502,25 @@ void laydata::tdtbox::tmp_draw(const layprop::DrawProperties&, ctmqueue& transta
    }
 }
 
-void  laydata::tdtbox::select_points(DBbox& select_in, SGBitSet* pntlst) {
-   if (select_in.inside(*_p1))  pntlst->set(0);
-   if (select_in.inside(TP(_p2->x(), _p1->y())))  pntlst->set(1);
-   if (select_in.inside(*_p2))  pntlst->set(2);
-   if (select_in.inside(TP(_p1->x(), _p2->y())))  pntlst->set(3);
-   pntlst->check_neighbours_set(false);   
+void  laydata::tdtbox::select_points(DBbox& select_in, SGBitSet& pntlst) {
+   if (select_in.inside(*_p1))  pntlst.set(0);
+   if (select_in.inside(TP(_p2->x(), _p1->y())))  pntlst.set(1);
+   if (select_in.inside(*_p2))  pntlst.set(2);
+   if (select_in.inside(TP(_p1->x(), _p2->y())))  pntlst.set(3);
+   pntlst.check_neighbours_set(false);   
 }
 
-void  laydata::tdtbox::unselect_points(DBbox& select_in, SGBitSet* pntlst) {
-   if (sh_selected == _status) pntlst->setall();
-   if (select_in.inside(*_p1))  pntlst->reset(0);
-   if (select_in.inside(TP(_p2->x(), _p1->y())))  pntlst->reset(1);
-   if (select_in.inside(*_p2))  pntlst->reset(2);
-   if (select_in.inside(TP(_p1->x(), _p2->y())))  pntlst->reset(3);
+void  laydata::tdtbox::unselect_points(DBbox& select_in, SGBitSet& pntlst) {
+   if (sh_selected == _status) pntlst.setall();
+   if (select_in.inside(*_p1))  pntlst.reset(0);
+   if (select_in.inside(TP(_p2->x(), _p1->y())))  pntlst.reset(1);
+   if (select_in.inside(*_p2))  pntlst.reset(2);
+   if (select_in.inside(TP(_p1->x(), _p2->y())))  pntlst.reset(3);
 }
 
-laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet* plst)
+laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet& plst)
 {
-   if (plst)
+   if (0 != plst.size())
    {// used for modify
       pointlist* nshape = movePointsSelected(plst, trans);
       *_p1 = (*nshape)[0]; *_p2 = (*nshape)[2];
@@ -541,7 +548,7 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet* plst)
 void laydata::tdtbox::transfer(const CTM& trans) {
    *_p1 *= trans;
    *_p2 *= trans;
-   normalize();
+   normalize(SGBitSet());
 }
 
 laydata::tdtdata* laydata::tdtbox::copy(const CTM& trans) {
@@ -650,7 +657,7 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
    }
 }
 
-pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet* pset, 
+pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet& pset, 
                                     const CTM&  movedM, const CTM& stableM) const {
   // convert box to polygon
    pointlist* mlist = DEBUG_NEW pointlist();
@@ -670,14 +677,14 @@ pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet* pset,
    // That's why another condition is introduced -> if (i == size)
    for (unsigned i = 0; i <= size; i++) {
       if (i == size) 
-         if (pset->check(i%size) && pset->check((i+1) % size))
+         if (pset.check(i%size) && pset.check((i+1) % size))
             seg1 = PSegment((*mlist)[(i  ) % size] * movedM,
                             (*mlist)[(i+1) % size]         );
          else
             seg1 = PSegment((*mlist)[(i  ) % size] * stableM,
                             (*mlist)[(i+1) % size]          );
       else
-         if (pset->check(i%size) && pset->check((i+1) % size))
+         if (pset.check(i%size) && pset.check((i+1) % size))
             seg1 = PSegment((*mlist)[(i  ) % size] * movedM, 
                             (*mlist)[(i+1) % size] * movedM);
          else
@@ -785,7 +792,7 @@ void laydata::tdtpoly::tmp_draw(const layprop::DrawProperties&, ctmqueue& transt
       if (sh_partsel == status()) {
          CTM strans = transtack.back();
          assert(plst);
-         ptlist = movePointsSelected(plst, trans, strans);
+         ptlist = movePointsSelected(*plst, trans, strans);
       }
       else {
          ptlist = DEBUG_NEW pointlist;
@@ -808,23 +815,23 @@ void laydata::tdtpoly::rmpoint(TP& lp) {
    if (_plist.size() > 0) lp = _plist.back();
 };
 
-void  laydata::tdtpoly::select_points(DBbox& select_in, SGBitSet* pntlst) {
+void  laydata::tdtpoly::select_points(DBbox& select_in, SGBitSet& pntlst) {
    for (word i = 0; i < _plist.size(); i++) 
-      if (select_in.inside(_plist[i])) pntlst->set(i);
-   pntlst->check_neighbours_set(false);   
+      if (select_in.inside(_plist[i])) pntlst.set(i);
+   pntlst.check_neighbours_set(false);   
 }
 
-void laydata::tdtpoly::unselect_points(DBbox& select_in, SGBitSet* pntlst) {
+void laydata::tdtpoly::unselect_points(DBbox& select_in, SGBitSet& pntlst) {
    if (sh_selected == _status)  // the whole shape use to be selected
-      pntlst->setall();
+      pntlst.setall();
    for (word i = 0; i < _plist.size(); i++) 
-      if (select_in.inside(_plist[i])) pntlst->reset(i);
-   pntlst->check_neighbours_set(false);   
+      if (select_in.inside(_plist[i])) pntlst.reset(i);
+   pntlst.check_neighbours_set(false);   
 }
 
-laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet* plst)
+laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet& plst)
 {
-   if (plst)
+   if (0 != plst.size())
    {// modify i.e. move when only part of the polygon is selected
     // should get here only
       pointlist* nshape = movePointsSelected(plst, trans);
@@ -995,7 +1002,7 @@ DBbox laydata::tdtpoly::overlap() const {
    return ovl;
 }
 
-pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet* pset, 
+pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet& pset, 
                                     const CTM&  movedM, const CTM& stableM) const {
    pointlist* mlist = DEBUG_NEW pointlist(_plist);
    word size = mlist->size();
@@ -1003,14 +1010,14 @@ pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet* pset,
    // See the note about this algo in tdtbox::movePointsSelected above
    for (unsigned i = 0; i <= size; i++) {
       if (i == size)
-         if (pset->check(i%size) && pset->check((i+1) % size))
+         if (pset.check(i%size) && pset.check((i+1) % size))
             seg1 = PSegment((*mlist)[(i  ) % size] * movedM,
                             (*mlist)[(i+1) % size]         );
          else
             seg1 = PSegment((*mlist)[(i  ) % size] * stableM,
                             (*mlist)[(i+1) % size]          );
       else   
-         if (pset->check(i%size) && pset->check((i+1) % size))
+         if (pset.check(i%size) && pset.check((i+1) % size))
             seg1 = PSegment((*mlist)[(i  ) % size] * movedM, 
                             (*mlist)[(i+1) % size] * movedM);
          else
@@ -1202,7 +1209,7 @@ void laydata::tdtwire::tmp_draw(const layprop::DrawProperties& drawprop,
       {
          CTM strans = transtack.back();
          assert(plst);
-         ptlist = movePointsSelected(plst, trans, strans);
+         ptlist = movePointsSelected(*plst, trans, strans);
       }
       else
       {
@@ -1295,25 +1302,26 @@ float laydata::tdtwire::get_distance(TP p1, TP p2, TP p0)
    }
 }
 
-void  laydata::tdtwire::select_points(DBbox& select_in, SGBitSet* pntlst)
+void  laydata::tdtwire::select_points(DBbox& select_in, SGBitSet& pntlst)
 {
    for (word i = 0; i < _plist.size(); i++) 
-      if (select_in.inside(_plist[i])) pntlst->set(i);
-   pntlst->check_neighbours_set(true);   
+      if (select_in.inside(_plist[i])) pntlst.set(i);
+   pntlst.check_neighbours_set(true);   
 }
 
-void laydata::tdtwire::unselect_points(DBbox& select_in, SGBitSet* pntlst)
+void laydata::tdtwire::unselect_points(DBbox& select_in, SGBitSet& pntlst)
 {
    if (sh_selected == _status) // the whole shape use to be selected
-      pntlst->setall();      
+      pntlst.setall();      
    for (word i = 0; i < _plist.size(); i++) 
-      if (select_in.inside(_plist[i])) pntlst->reset(i);
-   pntlst->check_neighbours_set(true);   
+      if (select_in.inside(_plist[i])) pntlst.reset(i);
+   pntlst.check_neighbours_set(true);   
 }
 
-laydata::validator* laydata::tdtwire::move(const CTM& trans, SGBitSet* plst)
+laydata::validator* laydata::tdtwire::move(const CTM& trans, SGBitSet& plst)
 {
-   if (plst) {
+   if (0 != plst.size()) 
+   {
       pointlist* nshape = movePointsSelected(plst, trans);
       laydata::valid_wire* check = DEBUG_NEW laydata::valid_wire(*nshape, _width);
       if (laydata::shp_OK == check->status()) {
@@ -1411,7 +1419,7 @@ DBbox laydata::tdtwire::overlap() const
    return ovl;
 }
 
-pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet* pset, 
+pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet& pset, 
                                     const CTM& movedM, const CTM& stableM) const {
    pointlist* mlist = DEBUG_NEW pointlist(_plist);
    word size = mlist->size();
@@ -1419,17 +1427,17 @@ pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet* pset,
    PSegment* seg0 = NULL;
    for (int i = 0; i < size; i++) {
       if ((size-1) == i) {
-         if (pset->check(size-1))
+         if (pset.check(size-1))
             seg1 = seg1->ortho((*mlist)[size-1] * movedM);
          else
             seg1 = seg1->ortho((*mlist)[size-1] * stableM);
       }
       else {
-         const CTM& transM = ((pset->check(i) && pset->check(i+1))) ? 
+         const CTM& transM = ((pset.check(i) && pset.check(i+1))) ? 
                                                                movedM : stableM;
          seg1 = DEBUG_NEW PSegment((*mlist)[(i  )] * transM, (*mlist)[(i+1)] * transM);
          if (0 == i)
-            if (pset->check(0))
+            if (pset.check(0))
                seg0 = seg1->ortho((*mlist)[i] * movedM);
             else
                seg0 = seg1->ortho((*mlist)[i] * stableM);

@@ -54,7 +54,7 @@ namespace laydata {
       //! Return the overlapping box of the object.
       virtual   DBbox      overlap()  const = 0; // why not DBbox& ????
    //! Move the object relatively using the input CTM
-      virtual   validator* move(const CTM&, SGBitSet* plst = NULL) = 0;
+      virtual   validator* move(const CTM&, SGBitSet& plst) = 0;
    //! Rotate or flip (transfer the object using input CTM
       virtual   void       transfer(const CTM&) = 0;
    //! Copy the object and move it using the input CTM  
@@ -116,8 +116,8 @@ namespace laydata {
       virtual             ~tdtdata(){}; 
       virtual word         ltype() const = 0;
    protected:
-      virtual void        select_points(DBbox&, SGBitSet*) = 0;
-      virtual void        unselect_points(DBbox&, SGBitSet*) = 0;
+      virtual void        select_points(DBbox&, SGBitSet&) = 0;
+      virtual void        unselect_points(DBbox&, SGBitSet&) = 0;
       SH_STATUS            _status;
    //! A pointer to the next tdtdata object
       tdtdata*             _next;
@@ -128,11 +128,11 @@ namespace laydata {
    public:
                            tdtbox() : tdtdata(), _p1(NULL), _p2(NULL) {};
                            tdtbox(TP* p1, TP* p2) : tdtdata(), _p1(p1),
-                                                         _p2(p2) {normalize();};
+                                                         _p2(p2) {normalize(SGBitSet());};
                            tdtbox(TEDfile* const tedfile);
                           ~tdtbox();
       DBbox                overlap() const;
-      validator*           move(const CTM&, SGBitSet* plst = NULL);
+      validator*           move(const CTM&, SGBitSet& plst);
       void                 transfer(const CTM&);
       tdtdata*             copy(const CTM&);
 
@@ -155,11 +155,11 @@ namespace laydata {
       const pointlist      shape2poly() const;
       word                 ltype() const {return _lmbox;}
    protected:
-      void                 select_points(DBbox&, SGBitSet*);
-      void                 unselect_points(DBbox&, SGBitSet*);
+      void                 select_points(DBbox&, SGBitSet&);
+      void                 unselect_points(DBbox&, SGBitSet&);
    private:
-      void                 normalize(SGBitSet* psel = NULL);
-      pointlist*           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
+      void                 normalize(SGBitSet& psel);
+      pointlist*           movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
       TP*                 _p1;
       TP*                 _p2;
    };
@@ -172,7 +172,7 @@ namespace laydata {
                            tdtpoly(TEDfile* const tedfile);
 //                          ~tdtpoly() {};
       DBbox                overlap() const;
-      validator*           move(const CTM&, SGBitSet* plst = NULL);
+      validator*           move(const CTM&, SGBitSet& plst);
       void                 transfer(const CTM&);
       tdtdata*             copy(const CTM&);
 
@@ -197,9 +197,9 @@ namespace laydata {
       word                 ltype() const {return _lmpoly;}
 //   protected:
    private:
-      void                 select_points(DBbox&, SGBitSet*);
-      void                 unselect_points(DBbox&, SGBitSet*);
-      pointlist*           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
+      void                 select_points(DBbox&, SGBitSet&);
+      void                 unselect_points(DBbox&, SGBitSet&);
+      pointlist*           movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
       pointlist            _plist;
    };
 
@@ -212,7 +212,7 @@ namespace laydata {
                            tdtwire(TEDfile* const tedfile);
 //                          ~tdtwire() {};
       DBbox                overlap() const;
-      validator*           move(const CTM&, SGBitSet* plst = NULL);
+      validator*           move(const CTM&, SGBitSet& plst);
       void                 transfer(const CTM&);
       tdtdata*             copy(const CTM&);
 
@@ -238,9 +238,9 @@ namespace laydata {
 //   protected:   
    private:
       void                 precalc(pointlist&, _dbl_word) const;
-      void                 select_points(DBbox&, SGBitSet*);
-      void                 unselect_points(DBbox&, SGBitSet*);
-      pointlist*           movePointsSelected(const SGBitSet*, const CTM&, const CTM& = CTM()) const;
+      void                 select_points(DBbox&, SGBitSet&);
+      void                 unselect_points(DBbox&, SGBitSet&);
+      pointlist*           movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
 //      void                 drawSegment(const layprop::DrawProperties&, const TP&,
 //                              const TP&, const TP&, const TP&, bool, bool) const;
       DBbox*               endPnts(const TP&, const TP&, bool first) const;
@@ -258,7 +258,7 @@ namespace laydata {
                            tdtcellref(TEDfile* const tedfile);
 //                          ~tdtcellref() {};
       DBbox                overlap() const;
-      validator*           move(const CTM& trans, SGBitSet*) {
+      validator*           move(const CTM& trans, SGBitSet&) {
                                             _translation *= trans; return NULL;};
       void                 transfer(const CTM& trans) {_translation *= trans;};
       tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdtcellref(
@@ -290,8 +290,8 @@ namespace laydata {
       virtual ArrayProperties arrayprops() const {return ArrayProperties();}
       virtual word         ltype() const {return _lmref;}
    protected:
-      void                 select_points(DBbox&, SGBitSet*) {};
-      void                 unselect_points(DBbox&, SGBitSet*) {return;};
+      void                 select_points(DBbox&, SGBitSet&) {return;}
+      void                 unselect_points(DBbox&, SGBitSet&) {return;}
       refnamepair          _structure; // pair (name - cell) pointer
       CTM                  _translation;
 //   private:
@@ -338,7 +338,7 @@ namespace laydata {
                            tdttext(TEDfile* const tedfile);
 //                          ~tdttext() {};
       DBbox                overlap() const;
-      validator*           move(const CTM& trans, SGBitSet*) {
+      validator*           move(const CTM& trans, SGBitSet&) {
                                             _translation *= trans; return NULL;};
       void                 transfer(const CTM& trans)  {_translation *= trans;};
       tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdttext(
@@ -367,8 +367,8 @@ namespace laydata {
       const std::string    text() const {return _text;}
       void                 replace_str(std::string newstr);
    protected:
-      void                 select_points(DBbox&, SGBitSet*) {return;};
-      void                 unselect_points(DBbox&, SGBitSet*) {return;};
+      void                 select_points(DBbox&, SGBitSet&) {return;};
+      void                 unselect_points(DBbox&, SGBitSet&) {return;};
    private:   
       std::string         _text;
       CTM                 _translation;

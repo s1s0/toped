@@ -177,7 +177,7 @@ int tellstdfunc::stdMOVESEL::execute() {
             {
                for (laydata::dataList::iterator CCI = sshape->begin(); CCI  != sshape->end(); CCI++)
                {
-                  if (NULL != CCI->second) delete CCI->second;
+                  if (0 != CCI->second.size()) CCI->second.clear();
                }
             }
             delete sshape;

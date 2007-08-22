@@ -319,12 +319,12 @@ void laydata::tdtcell::tmp_draw(const layprop::DrawProperties& drawprop,
       console::ACTIVE_OP actop = drawprop.currentop();
       //temporary draw of the active cell - moving selected shapes
       selectList::const_iterator llst;
-      dataList::const_iterator dlst;
+      dataList::iterator dlst;
       for (llst = _shapesel.begin(); llst != _shapesel.end(); llst++) {
          const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst->first);
          for (dlst = llst->second->begin(); dlst != llst->second->end(); dlst++)
             if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
-               dlst->first->tmp_draw(drawprop, transtack, dlst->second);
+               dlst->first->tmp_draw(drawprop, transtack, &(dlst->second));
       }
    }
    else {
@@ -628,7 +628,8 @@ void laydata::tdtcell::select_fromList(selectList* slist, layprop::ViewPropertie
                         if (unselect_pointlist(*CI,*CUI)) lslct->erase(CI);
                      }   
                      else { // part - full   
-                        delete CI->second;
+                        //delete CI->second;
+                        CI->second.clear();
                         CI->first->set_status(sh_active);
                         lslct->erase(CI);
                      }   
@@ -682,7 +683,7 @@ bool laydata::tdtcell::copy_selected(laydata::tdtdesign* ATDB, const CTM& trans)
          else                 _layers[CL->first]->add(data_copy);
          // replace the data into the selected list
          DI = CL->second->erase(DI);
-         CL->second->push_front(selectDataPair(data_copy,NULL));
+         CL->second->push_front(selectDataPair(data_copy,SGBitSet()));
       }
       if (1 != numshapes)  _layers[CL->first]->resort();
       CL++;
@@ -737,7 +738,7 @@ laydata::tdtdata* laydata::tdtcell::checkNreplacePoly(selectDataPair& sel, valid
          // assert(!(shp_clock & check->status()));
          laydata::tdtdata* newshape = check->replacement();
          // add the new shape to the list of new shapes ...
-         secure_dataList(*(fadead[2]),layno)->push_back(selectDataPair(newshape, NULL));
+         secure_dataList(*(fadead[2]),layno)->push_back(selectDataPair(newshape, SGBitSet()));
          // ... and put the initial shape(that is to be modified) in the
          // list of deleted shapes
          secure_dataList(*(fadead[1]),layno)->push_back(selectDataPair(sel.first, sel.second));
@@ -756,7 +757,7 @@ laydata::tdtdata* laydata::tdtcell::checkNreplaceBox(selectDataPair& sel, valida
    { // shape is valid, but obviously not a box (if it gets here)
       laydata::tdtdata* newshape = check->replacement();
       // add the new shape to the list of new shapes ...
-      secure_dataList(*(fadead[2]),layno)->push_back(selectDataPair(newshape, NULL));
+      secure_dataList(*(fadead[2]),layno)->push_back(selectDataPair(newshape, SGBitSet()));
       // ... and put the initial shape(that has been modified) in the
       // list of deleted shapes
       secure_dataList(*(fadead[1]),layno)->push_back(selectDataPair(sel.first, sel.second));
@@ -1033,7 +1034,7 @@ bool laydata::tdtcell::merge_selected(atticList** dasao) {
       CS = mrgcand->begin();
       while (CS != mrgcand->end()) {
          // put back everything left to _shapesel ...
-         CL->second->push_back(selectDataPair(*CS,NULL));
+         CL->second->push_back(selectDataPair(*CS,SGBitSet()));
          if (sh_selected == (*CS)->status()) 
             //... and remove it from the mrgcand list if it is unchanged ...
             CS = mrgcand->erase(CS);
@@ -1139,15 +1140,16 @@ void laydata::tdtcell::unselect_all(bool destroy)
    {
       lslct = CL->second;
       // for every single selectDataPair
-      for (dataList::const_iterator CI = lslct->begin(); 
-                                                      CI != lslct->end(); CI++) 
+      for (dataList::iterator CI = lslct->begin(); CI != lslct->end(); CI++) 
       {
          // unmark the shape
          CI->first->set_status(sh_active);
          // clear the list of selected points if it exists
          if (destroy)
          {
-            if (NULL != CI->second) delete (CI->second);
+            if (0 != CI->second.size()) 
+               CI->second.clear();
+               //delete (CI->second);
             delete (CI->first);
          }
       }
@@ -1170,7 +1172,7 @@ laydata::shapeList* laydata::tdtcell::mergeprep(word layno) {
       // ... but only if it is marked as sh_deleted
       if (sh_selected == CI->first->status()) {
          atl->push_back(CI->first);
-         assert((!CI->second));
+         assert(0 == CI->second.size());
          CI = lslct->erase(CI);
       }
       else CI++;
@@ -1205,7 +1207,7 @@ laydata::atticList* laydata::tdtcell::groupPrep(laydata::tdtdesign* ATDB) {
          if (sh_deleted == CI->first->status()) {
             CI->first->set_status(sh_active);
             atl->push_back(CI->first);
-            assert((!CI->second));
+            assert(CI->second.size() != 0);
             CI = lslct->erase(CI);
          }
          else CI++;
@@ -1242,7 +1244,7 @@ laydata::shapeList* laydata::tdtcell::ungroupPrep(laydata::tdtdesign* ATDB) {
          if (sh_deleted == CI->first->status()) {
             CI->first->set_status(sh_active);
             csel->push_back(CI->first);
-            assert((!CI->second));
+            assert( CI->second.size() == 0 );
             CI = _shapesel[0]->erase(CI);
          }
          else CI++;
@@ -1445,7 +1447,7 @@ void laydata::tdtcell::store_inAttic(laydata::atticList& _Attic) {
          // ... but only if it is marked as sh_deleted ...
          if (sh_deleted == CI->first->status()) {
             atl->push_back(CI->first);
-            assert((!CI->second));
+            assert(CI->second.size() == 0);
             // ... and free up the _shapesel list from it
             CI = lslct->erase(CI);
          }
@@ -1620,25 +1622,25 @@ laydata::selectList* laydata::tdtcell::copy_selist() const {
 
 
 bool laydata::tdtcell::unselect_pointlist(selectDataPair& sel, selectDataPair& unsel) {
-   SGBitSet* unspntlst = unsel.second;
-   assert(NULL != unspntlst);
+   SGBitSet unspntlst = unsel.second;
+   assert(0 != unspntlst.size());
 
-   SGBitSet* pntlst = NULL;
+   SGBitSet pntlst;
    if (sh_partsel == sel.first->status()) // if the shape is already partially selected
       pntlst = sel.second;
    else {// otherwise (sh_selected) create a new pointlist
-      pntlst = DEBUG_NEW SGBitSet(sel.first->numpoints());
-      pntlst->setall();
+      pntlst = SGBitSet(sel.first->numpoints());
+      pntlst.setall();
    }   
-   assert(NULL != pntlst);
+   assert(0 != pntlst.size());
    // Check that the shape hasn't changed since
-   if (pntlst->size() != unspntlst->size()) return false;
+   if (pntlst.size() != unspntlst.size()) return false;
    // process select list
-   for (word i = 0; i < pntlst->size(); i++) 
-      if (unspntlst->check(i)) pntlst->reset(i);
+   for (word i = 0; i < pntlst.size(); i++) 
+      if (unspntlst.check(i)) pntlst.reset(i);
    // finally check what left selected   
-   if (pntlst->isallclear()) {
-      delete pntlst;
+   if (pntlst.isallclear()) {
+      pntlst.clear();
       sel.first->set_status(sh_active);
       return true;
    }

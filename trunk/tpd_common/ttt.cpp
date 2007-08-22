@@ -284,18 +284,28 @@ DBline DBline::operator  =  (const DBline& ln)
 SGBitSet::SGBitSet(word  bit_length)
 {
    _size = bit_length;
-   word nb = _size / 8;
-   _packet = DEBUG_NEW byte[nb+1];
-   for (word i = 0; i <= nb; i++) _packet[i] = 0;
+   if (0 == _size)
+      _packet = NULL;
+   else
+   {
+      word nb = _size / 8;
+      _packet = DEBUG_NEW byte[nb+1];
+      for (word i = 0; i <= nb; i++) _packet[i] = 0;
+   }
 }
 
-SGBitSet::SGBitSet(SGBitSet*  bs)
+SGBitSet::SGBitSet(const SGBitSet& bs)
 {
-   _size = bs->size();
-   word nb = _size / 8;
-   _packet = DEBUG_NEW byte[nb+1];
-   for (word i = 0; i <= nb; i++) _packet[i] = bs->_packet[i];
-} 
+   _size = bs.size();
+   if (0 == _size)
+      _packet = NULL;
+   else
+   {
+      word nb = _size / 8;
+      _packet = DEBUG_NEW byte[nb+1];
+      for (word i = 0; i <= nb; i++) _packet[i] = bs._packet[i];
+   }
+}
 
 void SGBitSet::set(word  bit)
 {
@@ -334,6 +344,7 @@ void SGBitSet::check_neighbours_set(bool wire)
 bool SGBitSet::check(word  bit) const
 {
    assert(bit <= _size);
+   if (0 == _size) return false;
    return (0 != (_packet[bit / 8] & (0x01 << (bit % 8))));
 }
 
@@ -366,9 +377,48 @@ void SGBitSet::swap(word bitA, word bitB)
    else       reset(bitA);
 }
 
+void SGBitSet::clear()
+{
+   _size = 0; 
+   if (NULL != _packet) 
+   {
+      delete [] _packet; 
+      _packet = NULL;
+   }
+}
+
+bool SGBitSet::operator == (const SGBitSet& sop) const
+{
+   if (_size != sop.size()) return false;
+   else
+   {
+      word nb = _size / 8;
+      for (word i = 0; i <= nb; i++) 
+         if (_packet[i] != sop._packet[i]) return false;
+   }
+   return true;
+}
+
+SGBitSet SGBitSet::operator = (const SGBitSet& sop)
+{
+   if (NULL != _packet)
+      delete [] _packet;
+   _size = sop.size();
+   if (0 == _size)
+      _packet = NULL;
+   else
+   {
+      word nb = _size / 8;
+      _packet = DEBUG_NEW byte[nb+1];
+      for (word i = 0; i <= nb; i++) _packet[i] = sop._packet[i];
+   }
+   return *this;
+}
+
 SGBitSet::~SGBitSet()
 {
-   delete [] _packet;
+   if (NULL != _packet)
+      delete [] _packet;
 }
 
 
