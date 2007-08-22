@@ -216,7 +216,7 @@ namespace browsers
    public:
       LayerButton(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, 
 						const wxSize& size = wxDefaultSize, long style = wxBU_AUTODRAW, 
-						const wxValidator& validator = wxDefaultValidator, const wxString& name = "button", 
+						const wxValidator& validator = wxDefaultValidator, const wxString& name = wxT("button"), 
 						LayerInfo *layer = NULL);
       ~LayerButton();
       void OnLeftClick(wxMouseEvent &event);

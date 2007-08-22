@@ -688,7 +688,7 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    _TDTstruct = new TDTbrowser(this, tui::ID_TPD_CELLTREE);
    AddPage(_TDTstruct, wxT("Cells"));
    _layers = new LayerBrowser(this,  tui::ID_TPD_LAYERS);
-   AddPage(_layers, "Layers");
+   AddPage(_layers, wxT("Layers"));
 
    _GDSstruct = NULL;
    _tellParser = NULL;
@@ -984,14 +984,13 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    }
    
    DC.Clear(); 
-
-   DC.DrawText(infoString.c_str(), 5, 0);
+   DC.DrawText(wxString(infoString.c_str(), wxConvUTF8), 5, 0);
    int h,w;
-   DC.GetTextExtent(infoString.c_str(), &w, &h);
+   DC.GetTextExtent(wxString(infoString.c_str(), wxConvUTF8), &w, &h);
 
    DC.DrawRectangle(5*fontWidth, 1, 40, 29);
    std::string caption = _layer->name();
-   DC.DrawText(caption.c_str(), 5*fontWidth+40, 0);
+   DC.DrawText(wxString(caption.c_str(), wxConvUTF8), 5*fontWidth+40, 0);
    
    DC.SelectObject(wxNullBitmap);
 }
@@ -1014,9 +1013,9 @@ void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
    {
       _locked = !_locked;
       wxString cmd;
-      cmd << "locklayer("<<_layer->layno()<<", ";
-      if (_locked) cmd<<"true"<<");";
-      else cmd <<"false"<<");";
+      cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
+      if (_locked) cmd << wxT("true") << wxT(");");
+      else cmd << wxT("false") << wxT(");");
       Console->parseCommand(cmd);
 
    }
@@ -1024,7 +1023,7 @@ void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
    //Select layer
    {
       wxString cmd;
-      cmd << "usinglayer("<<_layer->layno()<<");";
+      cmd << wxT("usinglayer(") << _layer->layno()<< wxT(");");
       Console->parseCommand(cmd);
 
       if (!_selected)
@@ -1048,9 +1047,9 @@ void browsers::LayerButton::OnMiddleClick(wxMouseEvent &event)
    //_hidden = !_hidden;
    hideLayer(!_hidden);
    wxString cmd;
-   cmd << "hidelayer("<<_layer->layno()<<", ";
-   if (_hidden) cmd<<"true"<<");";
-   else cmd <<"false"<<");";
+   cmd << wxT("hidelayer(") <<_layer->layno() << wxT(", ");
+   if (_hidden) cmd << wxT("true") << wxT(");");
+   else cmd << wxT("false") << wxT(");");
    Console->parseCommand(cmd);
 }
 
