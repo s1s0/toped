@@ -93,7 +93,7 @@ pointlist* tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
 telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::selectList* shapesel) {
    telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_layout);
    laydata::dataList* lslct;
-   SGBitSet* pntl;
+   SGBitSet pntl;
    for (laydata::selectList::const_iterator CL = shapesel->begin(); 
                                             CL != shapesel->end(); CL++) {
       lslct = CL->second;
@@ -101,9 +101,9 @@ telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::selectList* shapesel) {
       for (laydata::dataList::const_iterator CI = lslct->begin(); 
                                              CI != lslct->end(); CI++) {
          // copy the pointlist, because it will be deleted with the shapesel
-         if (CI->second) pntl = DEBUG_NEW SGBitSet(CI->second);
-         else           pntl = NULL;
-         llist->add(DEBUG_NEW telldata::ttlayout(CI->first, CL->first, pntl));
+         if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
+         else                        pntl = SGBitSet();
+         llist->add(DEBUG_NEW telldata::ttlayout(CI->first, CL->first, DEBUG_NEW SGBitSet(pntl)));
       }   
    }
    return llist;
@@ -165,18 +165,17 @@ telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::atticList* shapesel) {
 laydata::selectList* tellstdfunc::get_ttlaylist(telldata::ttlist* llist) {
    laydata::selectList* shapesel = DEBUG_NEW laydata::selectList();
    word clayer;
-   SGBitSet *pntl, *pntl_o;
+   SGBitSet* pntl_o;
    for (word i = 0 ; i < llist->mlist().size(); i++) {
       clayer = static_cast<telldata::ttlayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
          (*shapesel)[clayer] = DEBUG_NEW laydata::dataList();
       pntl_o = static_cast<telldata::ttlayout*>(llist->mlist()[i])->selp();
-      // copy the pointlist, to preserve the TELL variable contents when
-      // Toped select list is deleted
-      if (pntl_o) pntl = DEBUG_NEW SGBitSet(pntl_o);
-      else        pntl = NULL;
+
+      SGBitSet pntl_n;
+      if (NULL != pntl_o)  pntl_n = SGBitSet(*pntl_o);
       (*shapesel)[clayer]->push_back(laydata::selectDataPair(
-        static_cast<telldata::ttlayout*>(llist->mlist()[i])->data(), pntl));
+        static_cast<telldata::ttlayout*>(llist->mlist()[i])->data(), pntl_n));
    }
    return shapesel;
 }
@@ -213,8 +212,8 @@ laydata::selectList* tellstdfunc::filter_selist(const laydata::selectList* shape
       {
          if (mask & CI->first->ltype())
          {
-            SGBitSet* pntl = NULL;
-            if (CI->second) pntl = DEBUG_NEW SGBitSet(CI->second);
+            SGBitSet pntl;
+            if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
             ssl->push_back(laydata::selectDataPair(CI->first,pntl));
          }
       }

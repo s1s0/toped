@@ -564,7 +564,7 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
                   for (SI = slst->begin(); SI != slst->end(); SI++)
                      if (SI->first == wdt) break;
                   assert(SI != slst->end());
-                  wdt->openGL_drawsel(points, SI->second);
+                  wdt->openGL_drawsel(points, &(SI->second));
                }
                drawprop.setLineProps(false);
             }
@@ -649,7 +649,7 @@ by resort() or full_validate() when current quadTree needs to be rebuild
 */
 void laydata::quadTree::tmpstore(dataList &store) {
    while (_first) {
-      store.push_back(selectDataPair(_first,NULL));
+      store.push_back(selectDataPair(_first,SGBitSet()));
       _first = _first->next();
    }
    for (byte i = 0; i < 4; i++)
@@ -738,13 +738,13 @@ void laydata::quadTree::select_fromList(dataList* src, dataList* dst) {
          // if the objects (pointer) coinsides - that's out object
          if (wdt == DI->first) {
             // select the object
-            if ((DI->second) && (DI->second->size() == wdt->numpoints())) {
+            if (DI->second.size() == wdt->numpoints()) {
                wdt->set_status(sh_partsel);
                dst->push_back(selectDataPair(wdt,DI->second));
             }
             else {   
                wdt->set_status(sh_selected);
-               dst->push_back(selectDataPair(wdt,NULL));
+               dst->push_back(selectDataPair(wdt,SGBitSet()));
             }   
             // remove it from the select list - it will speed up the following
             // operations
@@ -768,7 +768,7 @@ void laydata::quadTree::select_all(dataList* selist, word selmask, bool mark) {
    {
       if (selmask & wdt->ltype())
       {
-         selist->push_back(selectDataPair(wdt,NULL));
+         selist->push_back(selectDataPair(wdt,SGBitSet()));
          if (mark) wdt->set_status(sh_selected);
       }
       wdt = wdt->next();

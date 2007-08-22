@@ -195,7 +195,7 @@ void telldata::ttstring::echo(std::string& wstr, real) {
 }
 //=============================================================================
 telldata::ttlayout::ttlayout(const ttlayout& cobj) : tell_var(cobj.get_type()) {
-   if (NULL != cobj._selp) _selp = DEBUG_NEW SGBitSet(cobj._selp);
+   if (NULL != cobj._selp) _selp = DEBUG_NEW SGBitSet(*(cobj._selp));
    else _selp = NULL;
    _layer = cobj._layer;
    _data = cobj._data; // don't copy the layout data!
@@ -203,7 +203,7 @@ telldata::ttlayout::ttlayout(const ttlayout& cobj) : tell_var(cobj.get_type()) {
 
 const telldata::ttlayout& telldata::ttlayout::operator = (const ttlayout& cobj) {
    if (_selp) {delete _selp; _selp = NULL;}
-   if (NULL != cobj._selp) _selp = DEBUG_NEW SGBitSet(cobj._selp);
+   if (NULL != cobj._selp) _selp = DEBUG_NEW SGBitSet((*cobj._selp));
    _layer = cobj._layer;
    _data = cobj._data; // don't copy the layout data!
    return *this;
