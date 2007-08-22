@@ -128,7 +128,7 @@ namespace laydata {
    public:
                            tdtbox() : tdtdata(), _p1(NULL), _p2(NULL) {};
                            tdtbox(TP* p1, TP* p2) : tdtdata(), _p1(p1),
-                                                         _p2(p2) {normalize(SGBitSet());};
+                                       _p2(p2) {SGBitSet dummy; normalize(dummy);};
                            tdtbox(TEDfile* const tedfile);
                           ~tdtbox();
       DBbox                overlap() const;
