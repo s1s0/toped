@@ -383,7 +383,8 @@ laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata()
 {
    _p1 = DEBUG_NEW TP(tedfile->getTP());
    _p2 = DEBUG_NEW TP(tedfile->getTP());
-   normalize(SGBitSet());
+   SGBitSet dummy;
+   normalize(dummy);
 }
 
 void laydata::tdtbox::normalize(SGBitSet& psel)
@@ -548,7 +549,8 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet& plst)
 void laydata::tdtbox::transfer(const CTM& trans) {
    *_p1 *= trans;
    *_p2 *= trans;
-   normalize(SGBitSet());
+   SGBitSet dummy;
+   normalize(dummy);
 }
 
 laydata::tdtdata* laydata::tdtbox::copy(const CTM& trans) {

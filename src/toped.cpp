@@ -81,7 +81,7 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent) : wxPanel( parent, -1,
                                                    wxST_NO_AUTORESIZE | wxALIGN_LEFT);
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    thesizer->Add(_abort, 0, wxALL | wxALIGN_CENTER, 3);
-   thesizer->Add(10,0,1);  
+   thesizer->Add(10,0,1);
    thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("Selected: ")), 0, wxALIGN_CENTER, 3 );
    thesizer->Add(_selected, 0, wxALIGN_CENTER, 3 );
 //   thesizer->Add(10,0,1);  
