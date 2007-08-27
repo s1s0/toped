@@ -282,6 +282,8 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
 {
    SetIcon(wxICON(toped16x16));
    initView();
+   wxCommandEvent dummy;
+   OnzoomEmpty(dummy);
 //   initToolBar();
 //   CreateStatusBar();
    _toped_status = DEBUG_NEW TopedStatus(this);
@@ -1429,6 +1431,12 @@ void tui::TopedFrame::OnzoomIn(wxCommandEvent& WXUNUSED(event)) {
 void tui::TopedFrame::OnzoomOut(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_OUT);
+   wxPostEvent(_laycanvas, eventZOOM);
+}
+
+void tui::TopedFrame::OnzoomEmpty(wxCommandEvent& WXUNUSED(event)) {
+   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   eventZOOM.SetInt(ZOOM_EMPTY);
    wxPostEvent(_laycanvas, eventZOOM);
 }
 
