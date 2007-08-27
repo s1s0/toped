@@ -185,9 +185,6 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    invalid_window = false;
    reperX = reperY = long_cursor = false;
    initializeGL();
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-   eventZOOM.SetInt(ZOOM_EMPTY);
-   OnZoom(eventZOOM);
    ap_trigger = 10;
    glfInit();
 }
@@ -228,11 +225,6 @@ wxImage   tui::LayoutCanvas::snapshot(void)
 }
 
 void tui::LayoutCanvas::initializeGL() {
-   // OpenGL clear to black
-//   if (format().rgba()) glClearColor(0.0,0.0,0.0,0.0);
-//   else                 glClearIndex(0);
-//   glClearColor(0.5,0.5,0.5,0.5);
-//    object = makeObject();		// Generate display lists
    // Create a couple of common callback functions
 #ifndef WIN32
    gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_BEGIN,
