@@ -570,6 +570,30 @@ int tellstdfunc::lgcCUTPOLY_I::execute() {
 }
 
 //=============================================================================
+tellstdfunc::lgcCUTBOX_I::lgcCUTBOX_I(telldata::typeID retype, bool eor) :
+      lgcCUTPOLY(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::lgcCUTBOX_I::execute() {
+   if (DATC->numselected() == 0) {
+      tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
+      return EXEC_NEXT;
+   }
+   // stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
+   telldata::ttwnd *bx = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+
+   telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
+   pl->add(DEBUG_NEW telldata::ttpnt(bx->p1().x(), bx->p1().y()));
+   pl->add(DEBUG_NEW telldata::ttpnt(bx->p1().x(), bx->p2().y()));
+   pl->add(DEBUG_NEW telldata::ttpnt(bx->p2().x(), bx->p2().y()));
+   pl->add(DEBUG_NEW telldata::ttpnt(bx->p2().x(), bx->p1().y()));
+   OPstack.push(pl);
+   delete bx;
+   return lgcCUTPOLY::execute();
+}
+
+//=============================================================================
 tellstdfunc::lgcMERGE::lgcMERGE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
