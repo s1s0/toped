@@ -103,7 +103,6 @@ int tellstdfunc::stdDISTANCE::execute()
 {
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-//   real DBscale = DATC->DBscale();
 
    telldata::ttpnt* p1 = NULL;
    telldata::ttpnt* p2 = NULL;
@@ -122,6 +121,7 @@ int tellstdfunc::stdDISTANCE::execute()
       }
    }
    delete pl;
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -133,6 +133,14 @@ tellstdfunc::stdDISTANCE_D::stdDISTANCE_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdDISTANCE_D::execute()
 {
+   // generally there is no point having rulers without having
+   // active database and cell, besides rulers appears funny on the 
+   // screen because of the default settings of the layout canvas
+   // That's the reason to have the lock/unlock here, i.e. to get an exception
+   // if there is no active database & cell. This is done for the interacive
+   // version only
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+   DATC->unlockDB();
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_line, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
@@ -154,6 +162,7 @@ tellstdfunc::stdCLEARRULERS::stdCLEARRULERS(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdCLEARRULERS::execute()
 {
    DATC->clearRulers();
+   RefreshGL();
    return EXEC_NEXT;
 }
 

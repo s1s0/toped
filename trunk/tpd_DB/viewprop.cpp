@@ -201,17 +201,19 @@ void layprop::SupplementaryData::getConsts(const CTM& LayCTM, DBline& long_mark,
    // the {0,0} point of the canvas (logical coords)
    // the coeffitients 1e3/1e-3 are picked ramdomly attempting to reduce the
    // error
-   DBline tick_sample = DBline(TP(0,0),TP(0,7,1e3)) * LayCTM;
+   const double ico = 1e3;
+   const double dco = 1/ico;
+   DBline tick_sample = DBline(TP(0,0),TP(0,7,ico)) * LayCTM;
    double tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
-   long_mark = DBline(TP(0,-tick_size, 1e-3),TP(0,tick_size, 1e-3));
+   long_mark = DBline(TP(0,-tick_size, dco),TP(0,tick_size, dco));
    
-   tick_sample = DBline(TP(0,0),TP(0,3,1e3)) * LayCTM;
+   tick_sample = DBline(TP(0,0),TP(0,3,ico)) * LayCTM;
    tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
-   short_mark = DBline(TP(0,-tick_size, 1e-3),TP(0,tick_size, 1e-3));
+   short_mark = DBline(TP(0,-tick_size, dco),TP(0,tick_size, dco));
    
-   tick_sample = DBline(TP(0,0),TP(0,20,1e3)) * LayCTM;
+   tick_sample = DBline(TP(0,0),TP(0,20,ico)) * LayCTM;
    tick_size = ((double)(tick_sample.p1().y()-tick_sample.p2().y()));
-   text_bp = DBline(TP(0,0),TP(0,tick_size, 1e-3));
+   text_bp = DBline(TP(0,0),TP(0,tick_size, dco));
    
    // now prepare to draw the size
    DBbox pixelbox = DBbox(TP(),TP(15,15)) * LayCTM;

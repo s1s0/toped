@@ -487,7 +487,7 @@ void DataCenter::mouseStop()
 {
    if (console::op_line == currentop())
       _properties.mouseStop();
-   if (_TEDDB) _TEDDB->mouseStop();
+   else if (_TEDDB) _TEDDB->mouseStop();
    else throw EXPTNactive_DB();
 }
 
