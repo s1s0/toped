@@ -297,7 +297,7 @@ void layprop::DrawProperties::setCurrentColor(word layno)
          }
       } 
    }
-      glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
+   glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
 }
 
 bool  layprop::DrawProperties::layerHidden(word layno) const

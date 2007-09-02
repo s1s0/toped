@@ -79,6 +79,7 @@ namespace tui {
       void           OnZoom(wxCommandEvent&);
       void           OnMouseIN(wxCommandEvent&);
       void           OnCMcontinue(wxCommandEvent&);
+      void           OnCMchangeLayer(wxCommandEvent&);
       void           OnCMabort(wxCommandEvent&);
       void           OnCMcancel(wxCommandEvent&);
       void           OnCMclose(wxCommandEvent&);
