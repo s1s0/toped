@@ -82,7 +82,10 @@ public:
                                                       {_properties.saveProperties(fname);}
    void                       defaultlayer(word layno)
                                                       {_curlay = layno;}
+   void                       initcmdlayer()          {_curcmdlay = _curlay;}
+   void                       setcmdlayer(word layno) {_curcmdlay = layno;}
    word                       curlay() const          {return _curlay;}
+   word                       curcmdlay() const       {return _curcmdlay;}
    std::string                tedfilename() const     {return _tedfilename;};
    bool                       neversaved()  const     {return _neversaved;}; 
    bool                       modified() const        {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
@@ -154,7 +157,8 @@ public:
    std::string                _tedfilename;
    bool                       _neversaved;
 private:
-   word                       _curlay;       // current drawing layer
+   word                       _curlay;     // current drawing layer
+   word                       _curcmdlay;  // layer used during current drawing operation
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
    wxMutex                    PROPLock;

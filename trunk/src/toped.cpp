@@ -50,11 +50,11 @@
 #endif
 
 extern const wxEventType         wxEVT_CANVAS_STATUS;
+extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
-extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_TPDSTATUS;
-
+extern const wxEventType         wxEVT_CURRENT_LAYER;
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -269,10 +269,11 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_SETINGSMENU, wxID_ANY, tui::TopedFrame::OnUpdateSettingsMenu)
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
+   EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)
    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
 END_EVENT_TABLE()
 
-// See the FIXME note in the bootom of brawsers.cpp
+// See the FIXME note in the bootom of browsers.cpp
 //   EVT_COMMAND(wxID_ANY, wxEVT_INIT_DIALOG , tui::TopedFrame::OnDefineLayer )
    
    
@@ -1366,9 +1367,28 @@ void tui::TopedFrame::OnChangeLayer( wxCommandEvent& WXUNUSED( event ))
       dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Transfer to layer"), pos, 1, 0);
    }
    catch (EXPTN) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK ) {
+   if ( dlg->ShowModal() == wxID_OK )
+   {
       wxString ost; ost << wxT("changelayer(")<<dlg->value()<<wxT(");");
       _cmdline->parseCommand(ost);
+   }
+   delete dlg;
+}
+
+void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
+{
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getSize* dlg = NULL;
+   try {
+      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Change current layer"), pos, 1, 0);
+   }
+   catch (EXPTN) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK )
+   {
+      unsigned long vlu;
+      dlg->value().ToULong(&vlu);
+      DATC->setcmdlayer((word)vlu);
    }
    delete dlg;
 }

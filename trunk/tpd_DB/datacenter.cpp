@@ -462,6 +462,7 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
    {
       _TEDDB->check_active();
       _TEDDB->mouseStart(input_type, name, trans, stepX, stepY, cols, rows);
+      initcmdlayer();
    }
    else throw EXPTNactive_DB();
 }

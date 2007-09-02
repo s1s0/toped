@@ -35,6 +35,7 @@
 #endif
 
 #include "layoutcanvas.h"
+#include "toped.h"
 #include "../tpd_DB/viewprop.h"
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_parser/ted_prompt.h"
@@ -44,10 +45,11 @@
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
+extern const wxEventType         wxEVT_CANVAS_CURSOR;
+extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
-extern const wxEventType         wxEVT_CANVAS_ZOOM;
-extern const wxEventType         wxEVT_CANVAS_CURSOR;
+extern const wxEventType         wxEVT_CURRENT_LAYER;
 
 #include "../ui/crosscursor.xpm"
 
@@ -163,6 +165,7 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT  , wxID_ANY, tui::LayoutCanvas::OnMouseIN)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_CURSOR, wxID_ANY, tui::LayoutCanvas::OnCursorType)
 
+   EVT_MENU(      CM_CHLAY, LayoutCanvas::OnCMchangeLayer   )
    EVT_MENU(   CM_CONTINUE, LayoutCanvas::OnCMcontinue      )
    EVT_MENU(      CM_ABORT, LayoutCanvas::OnCMabort         )
    EVT_MENU(CM_CANCEL_LAST, LayoutCanvas::OnCMcancel        )
@@ -171,6 +174,8 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_MENU(       CM_FLIP, LayoutCanvas::OnCMFlip          )
    EVT_MENU(     CM_ROTATE, LayoutCanvas::OnCMRotate        )
 END_EVENT_TABLE()
+
+//   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
 
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(parent,
    ID_TPD_CANVAS, wxDefaultPosition, wxDefaultSize, 0,wxT("LayoutCanvas"), attribList){
@@ -496,6 +501,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                if (Console->numpoints() > 0) {
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
                }
+               menu.Append(   CM_CHLAY, wxT("Change Layer"));
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
@@ -509,6 +515,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                else if (Console->numpoints() > 0) {
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
                }
+               menu.Append(   CM_CHLAY, wxT("Change Layer"));
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
@@ -522,6 +529,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                else if (Console->numpoints() > 0) {
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
                }
+               menu.Append(   CM_CHLAY, wxT("Change Layer"));
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
@@ -763,6 +771,13 @@ void tui::LayoutCanvas::OnCMcontinue(wxCommandEvent& WXUNUSED(event))
 {
 // keep going ... This function is not doing anything really
    return;
+}
+
+void tui::LayoutCanvas::OnCMchangeLayer(wxCommandEvent& WXUNUSED(event))
+{
+   // post an event to the toped.cpp
+   wxCommandEvent eventCurLay(wxEVT_CURRENT_LAYER);
+   wxPostEvent(this, eventCurLay);
 }
 
 void tui::LayoutCanvas::OnCMabort(wxCommandEvent& WXUNUSED(event))
