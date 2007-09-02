@@ -207,6 +207,7 @@ DataCenter::DataCenter() {
    _GDSDB = NULL; _TEDDB = NULL;
    _tedfilename = "unnamed";
    _curlay = 1;
+   _drawruler = false;
 }
    
 DataCenter::~DataCenter() {
@@ -469,11 +470,12 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
 
 void DataCenter::mousePoint(TP p)
 {
-   if (console::op_line == currentop())
+   if ((console::op_line == currentop()) || _drawruler)
       _properties.mousePoint(p);
-   else if ((_TEDDB) && (console::op_cbind != currentop())
-                     && (console::op_abind != currentop())
-                     && (console::op_tbind != currentop()) )
+   if ((NULL != _TEDDB) && (console::op_cbind != currentop())
+                        && (console::op_abind != currentop())
+                        && (console::op_tbind != currentop()) 
+                        && (console::op_line  != currentop()) )
       _TEDDB->mousePoint(p);
 }
 
@@ -518,14 +520,17 @@ void DataCenter::openGL_draw(const CTM& layCTM) {
 //   else throw EXPTNactive_DB();      
 }
 
-void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp) {
-   if (console::op_line == currentop()) {
+void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp) 
+{
+   if ((console::op_line == currentop()) || _drawruler)
+   {
       // ruller
       while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
       _properties.tmp_draw(layCTM, base, newp);
       PROPLock.Unlock();
    }
-   else if (_TEDDB) {
+   if ((console::op_line != currentop())  && (NULL !=_TEDDB))
+   {
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
       _TEDDB->tmp_draw(_properties.drawprop(), base, newp);

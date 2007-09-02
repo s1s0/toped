@@ -74,6 +74,8 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
    // Stop the mouse stream from the canvas
    eventMOUSEIN.SetExtraLong(0);
    wxPostEvent(TopedCanvasW, eventMOUSEIN);
+   // and clean-up the state of the temporary ruler
+   DATC->switch_drawruler(false);
    return Console->mouseIN_OK();
 }
 

@@ -154,6 +154,7 @@ namespace tui
    typedef enum  {
       CM_CONTINUE  = 0    ,
       CM_ABORT            ,
+      CM_RULER            , 
       CM_CHLAY            ,
       CM_CANCEL_LAST      ,
       CM_CLOSE            ,

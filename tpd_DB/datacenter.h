@@ -132,6 +132,8 @@ public:
    bool                       viewGrid(byte, bool);
    void                       addRuler(TP&, TP&);
    void                       clearRulers();
+   void                       switch_drawruler(bool st) {_drawruler = st;}
+   bool                       drawruler() {return _drawruler;}
    void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
    void                       all_fills(nameList& filist)   const {_properties.all_fills(filist);  }
    void                       all_lines(nameList& linelist) const {_properties.all_lines(linelist);}
@@ -149,16 +151,17 @@ public:
    const word                 layselmask() {return _properties.layselmask();}
    void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
 
-   protected:
+protected:
    laydata::tdtdesign*        _TEDDB;      // toped data base
    GDSin::GDSFile*            _GDSDB;      // GDS parsed data
-   layprop::ViewProperties    _properties; //
+   layprop::ViewProperties    _properties; // properties data base
    
    std::string                _tedfilename;
    bool                       _neversaved;
 private:
    word                       _curlay;     // current drawing layer
    word                       _curcmdlay;  // layer used during current drawing operation
+   bool                       _drawruler;  // draw a ruler while coposing a shape interactively
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
    wxMutex                    PROPLock;
