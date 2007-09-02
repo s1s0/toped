@@ -165,6 +165,7 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT  , wxID_ANY, tui::LayoutCanvas::OnMouseIN)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_CURSOR, wxID_ANY, tui::LayoutCanvas::OnCursorType)
 
+   EVT_MENU(      CM_RULER, LayoutCanvas::OnCMrulerState    )
    EVT_MENU(      CM_CHLAY, LayoutCanvas::OnCMchangeLayer   )
    EVT_MENU(   CM_CONTINUE, LayoutCanvas::OnCMcontinue      )
    EVT_MENU(      CM_ABORT, LayoutCanvas::OnCMabort         )
@@ -515,6 +516,10 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                else if (Console->numpoints() > 0) {
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
                }
+               if (DATC->drawruler())
+                  menu.Append(   CM_RULER, wxT("Ruler Off"));
+               else
+                  menu.Append(   CM_RULER, wxT("Ruler On"));
                menu.Append(   CM_CHLAY, wxT("Change Layer"));
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
@@ -529,6 +534,10 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                else if (Console->numpoints() > 0) {
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
                }
+               if (DATC->drawruler())
+                  menu.Append(   CM_RULER, wxT("Ruler Off"));
+               else
+                  menu.Append(   CM_RULER, wxT("Ruler On"));
                menu.Append(   CM_CHLAY, wxT("Change Layer"));
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
@@ -778,6 +787,11 @@ void tui::LayoutCanvas::OnCMchangeLayer(wxCommandEvent& WXUNUSED(event))
    // post an event to the toped.cpp
    wxCommandEvent eventCurLay(wxEVT_CURRENT_LAYER);
    wxPostEvent(this, eventCurLay);
+}
+
+void tui::LayoutCanvas::OnCMrulerState(wxCommandEvent& WXUNUSED(event))
+{
+   DATC->switch_drawruler(!DATC->drawruler());
 }
 
 void tui::LayoutCanvas::OnCMabort(wxCommandEvent& WXUNUSED(event))

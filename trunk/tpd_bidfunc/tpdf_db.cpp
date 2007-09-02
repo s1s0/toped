@@ -92,19 +92,25 @@ int tellstdfunc::TDTread::execute()
       nameList top_cell_list;
       if (DATC->TDTread(filename))
       {
+         std::string info = "Generating cell hierarchy ...";
+         tell_log(console::MT_INFO,info);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
-            ATDB->btreeAddMember    = &browsers::treeAddMember;
-            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-            browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
             laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot();
             do
             {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
             } while (NULL != (root = root->GetNextRoot()));
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+            browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
+            info = "... done";
+            tell_log(console::MT_INFO,info);
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
             updateLayerDefinitions(ATDB, top_cell_list);
          DATC->unlockDB();
+   info = "... DB unlocked";
+   tell_log(console::MT_INFO,info);
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
