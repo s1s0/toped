@@ -984,13 +984,18 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    }
    
    DC.Clear(); 
-   DC.DrawText(wxString(infoString.c_str(), wxConvUTF8), 5, 0);
+    
    int h,w;
    DC.GetTextExtent(wxString(infoString.c_str(), wxConvUTF8), &w, &h);
+	int yCoord = int(buttonHeight/2 - h/2);
+	DC.DrawText(wxString(infoString.c_str(), wxConvUTF8), 8, yCoord);
+   DC.DrawRectangle(5*fontWidth, 1, 40, buttonHeight-1);
 
-   DC.DrawRectangle(5*fontWidth, 1, 40, 29);
    std::string caption = _layer->name();
-   DC.DrawText(wxString(caption.c_str(), wxConvUTF8), 5*fontWidth+40, 0);
+
+	DC.GetTextExtent(wxString(infoString.c_str(), wxConvUTF8), &w, &h);
+	yCoord = int(buttonHeight/2 - h/2);
+   DC.DrawText(wxString(caption.c_str(), wxConvUTF8), 5*fontWidth+45, yCoord);
    
    DC.SelectObject(wxNullBitmap);
 }
@@ -1190,7 +1195,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
                tempButton->GetSize(&szx, &szy);
                ID = tempButton->GetId();
                layerButton = new LayerButton(_layerPanel, ID, wxPoint (x, y), wxSize(szx, szy),
-               wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
+               wxBU_AUTODRAW|wxNO_BORDER, wxDefaultValidator, _T("button"), layer);
                _buttonMap[layer->layno()] = layerButton;
                delete tempButton;
 
@@ -1200,12 +1205,13 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
 					//Button doesn't exist, create new button
                int szx, szy;
                _layerPanel->GetSize(&szx, &szy);
-               layerButton = new LayerButton(_layerPanel, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(szx, 30),
+               layerButton = new LayerButton(_layerPanel, tui::TMDUMMY_LAYER+_buttonCount, 
+															wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
                wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
                _buttonMap[layer->layno()] = layerButton;
 
                _buttonCount++; 
-					_layerPanel->SetScrollbars(0, 30, 0, _buttonCount);
+					_layerPanel->SetScrollbars(0, buttonHeight, 0, _buttonCount);
 
             }
             
