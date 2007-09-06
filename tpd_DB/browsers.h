@@ -42,6 +42,8 @@
 
 namespace browsers 
 {
+   const int buttonHeight = 30;
+    
    typedef enum 
 	{
       BT_LAYER_DEFAULT,
