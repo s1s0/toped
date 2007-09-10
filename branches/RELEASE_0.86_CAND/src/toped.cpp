@@ -29,8 +29,8 @@
 #include <wx/sizer.h>
 #include <wx/filename.h>
 #include <wx/image.h>
+#include <wx/aboutdlg.h>
 #include <math.h>
-//#include "config.h"
 #include "toped.h"
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_DB/viewprop.h"
@@ -38,6 +38,7 @@
 #include "../ui/red_lamp.xpm"
 #include "../ui/green_lamp.xpm"
 #include "../ui/blue_lamp.xpm"
+#include "../ui/toped32x32.xpm"
 #ifndef WIN32
    #include "../ui/toped16x16.xpm"
 #endif
@@ -685,8 +686,15 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
-   wxMessageBox( wxT( "Toped ver. 0.8.6\n\nOpen source IC layout editor \n(c) 2001-2007 Toped developers\nwww.toped.org.uk" ),
-                  wxT( "About Toped" ), wxOK | wxICON_INFORMATION, this );
+    wxAboutDialogInfo info;
+    info.SetName(wxT("Toped"));
+    info.SetVersion(wxT("0.8.6"));
+    info.SetIcon(wxIcon( toped32x32_xpm ));
+    info.SetWebSite(wxT("www.toped.org.uk"));
+    info.SetDescription(wxT("Open source IC layout editor"));
+    info.SetCopyright(wxT("(C) 2001-2007 Toped developers"));
+
+    wxAboutBox(info);
 }
 
 
@@ -1505,4 +1513,3 @@ void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
    telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
    delete p;
 }
-
