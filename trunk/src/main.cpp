@@ -435,7 +435,7 @@ bool TopedApp::OnInit() {
    if (CheckCrashLog())
    {
       wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
-            wxT("Last session didn't exit normally. Start recovery?\n\n WARNING! Recovery mode is experimental.\nMake sure that you've backed-up your database before proceeding"),
+            wxT("Last session didn't exit normally. Start recovery?"),
             wxT("Toped"),
             wxYES_NO | wxICON_WARNING);
       if (wxID_YES == dlg1->ShowModal())
@@ -451,7 +451,7 @@ bool TopedApp::OnInit() {
       wxString inputfile;
       inputfile << wxT("#include \"") << logFileName.c_str() << wxT("\"");
       Console->parseCommand(inputfile, false);
-      tell_log(console::MT_WARNING,"Previous session recovered.");
+      tell_log(console::MT_WARNING,"Exit recovery mode.");
       static_cast<parsercmd::cmdMAIN*>(CMDBlock)->recoveryDone();
       LogFile.init(std::string(logFileName.mb_str()), true);
    }
@@ -470,6 +470,7 @@ bool TopedApp::OnInit() {
          }
       }
    }
+   tell_log(console::MT_WARNING,"Please report a bugs to toped-development@lists.berlios.de or bugs@toped.org.uk");
    return TRUE;
 }
 

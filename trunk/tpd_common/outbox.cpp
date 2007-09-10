@@ -84,7 +84,7 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
    switch (evt.GetInt()) {
       case    MT_INFO:
          *this << rply_mark << evt.GetString() << wxT("\n");
-         logColour = *wxBLUE;
+         logColour = *wxBLACK;
 //         logColour = *wxGREEN;
          break;
       case   MT_ERROR:
@@ -102,7 +102,7 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
          *this << wxT("\n"); break;
       case MT_WARNING:
          *this << rply_mark << evt.GetString() << wxT("\n");
-         logColour = *wxCYAN;
+         logColour = *wxBLUE;
          break;
       case MT_CELLNAME:
          *this << rply_mark << wxT(" Cell ") << evt.GetString() << wxT("\n");
