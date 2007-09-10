@@ -83,19 +83,8 @@ browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
    SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
    _imageList = DEBUG_NEW wxImageList(16, 16, TRUE);
-#ifdef __WXMSW__
-/*@TODO : Under windows - resource loading*/
-//    m_imageListNormal->Add( wxIcon(_T("icon1"), wxBITMAP_TYPE_ICO_RESOURCE) );
-//
-#else
-   //SGREM!!! Troubles with the gdb on Linux with threads!
-   // I spent a night debugging a stupid mistake with traversing the tree
-   // to realize finally that the gdb is doing some funny things when 
-   // stepping over next two lines. The troble comes from wxIcon constructor, 
-   // that internally is calling gdk_pixmap_create_from_xpm_d
-    _imageList->Add( wxIcon( activelay ) );
-    _imageList->Add( wxIcon( lock      ) );
-#endif
+   _imageList->Add( wxIcon( activelay ) );
+   _imageList->Add( wxIcon( lock      ) );
 //   SetBackgroundColour(wxColour("LIGHTGREY"));
    SetImageList(_imageList,wxIMAGE_LIST_SMALL);
    _llfont_normal.SetPointSize(9);
@@ -120,9 +109,10 @@ void browsers::topedlay_list::addlayer(wxString name, word layno) {
    }
    wxString num; num.Printf(_T("%3d"), layno);
    wxListItem row;
+   row.Clear();
    row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
    row.SetData(layno); row.SetText(num); row.SetId(GetItemCount());
-   row.SetFont(_llfont_normal);
+   row.SetFont(_llfont_normal); row.SetImage(-1);
    long inum = InsertItem(row);
    SetItem(inum, 1, name);
    SetItemData(inum, layno);
