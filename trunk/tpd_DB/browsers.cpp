@@ -82,10 +82,9 @@ browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
    SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
-   _imageList = DEBUG_NEW wxImageList(16, 16, TRUE);
+   _imageList = DEBUG_NEW wxImageList(32, 16, TRUE);
    _imageList->Add( wxIcon( activelay ) );
    _imageList->Add( wxIcon( lock      ) );
-//   SetBackgroundColour(wxColour("LIGHTGREY"));
    SetImageList(_imageList,wxIMAGE_LIST_SMALL);
    _llfont_normal.SetPointSize(9);
    _llfont_bold.SetPointSize(9);
@@ -107,12 +106,50 @@ void browsers::topedlay_list::addlayer(wxString name, word layno) {
       long oldno = GetItemData(item);
       if (oldno == layno) DeleteItem(item);
    }
+
+   const byte *ifill= DATC->getFill(layno);
+   //wxBitmap fill_sample((char  *)ifill, 32, 32, 1);
+   //_imageList->Add( fill_sample );
+   //const layprop::tellRGB col = DATC->getColor(layno);
+   //wxColour color(col.red(), col.green(), col.blue());
+
+//   wxBitmap fill_sample((char  *)ifill, 32, 32, 1);
+////   _imageList->Add( fill_sample );
+   const layprop::tellRGB col = DATC->getColor(layno);
+//   wxColour color(col.red(), col.green(), col.blue());
+
+//   if(ifill!=NULL)
+//   {     
+      wxBitmap *afill = new wxBitmap((char  *)ifill, 32, 32, 1);
+      wxImage image;
+      image = afill->ConvertToImage();
+      int w = image.GetWidth();
+      int h = image.GetHeight();
+      //Change white color for current one
+      for (int i=0; i<w; i++)
+         for (int j=0; j<h; j++)
+            if((image.GetRed(i,j)==0)&& (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
+            {
+               image.SetRGB(i, j, col.red(), col.green(), col.blue());
+            }
+            else
+            {
+               image.SetRGB(i, j, 0, 0, 0);
+            }
+      delete afill;
+
+      //Recreate bitmap with new color
+      afill = new wxBitmap(image, 1);
+//   }
+   _imageList->Add( *afill       );
+
    wxString num; num.Printf(_T("%3d"), layno);
    wxListItem row;
    row.Clear();
    row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
    row.SetData(layno); row.SetText(num); row.SetId(GetItemCount());
-   row.SetFont(_llfont_normal); row.SetImage(-1);
+   row.SetFont(_llfont_normal); 
+   row.SetImage(GetItemCount()+2);
    long inum = InsertItem(row);
    SetItem(inum, 1, name);
    SetItemData(inum, layno);
@@ -120,6 +157,9 @@ void browsers::topedlay_list::addlayer(wxString name, word layno) {
    row.SetColumn(2); row.SetId(inum); row.SetMask(wxLIST_MASK_IMAGE);
    row.SetImage(-1); // No icon assigned initially
    SetItem(row);
+
+
+
 }   
 
 void browsers::topedlay_list::defaultLayer(word newl, word oldl) {
@@ -1159,3 +1199,77 @@ void browsers::layerbrowser::OnActiveLayerM(wxCommandEvent&)
    cmd << wxT("usinglayer(") << layno << wxT(");");
    parseCommand(cmd);
 }
+
+
+
+
+/*
+browsers::LayerButton::LayerButton( wxWindow* parent, wxWindowID id, const wxPoint& pos, 
+                                   const wxSize& size, long style, const wxValidator& validator, 
+                                   const wxString& name, LayerInfo *layer )
+{
+   
+   _layer   = layer;
+   _selected= false;
+   _hidden  = false;
+   _locked  = false;  
+
+   std::string caption;
+   
+   _picture = new wxBitmap(size.GetWidth(), size.GetHeight(), -1);
+
+   const byte *ifill= DATC->getFill(layer->layno());
+   const layprop::tellRGB col = DATC->getColor(layer->layno());
+   wxColour color(col.red(), col.green(), col.blue());
+
+   if(ifill!=NULL)
+   {     
+      wxBitmap *stipplebrush = new wxBitmap((char  *)ifill, 32, 32, 1);
+      wxImage image;
+      image = stipplebrush->ConvertToImage();
+      int w = image.GetWidth();
+      int h = image.GetHeight();
+#ifdef WIN32
+ //Change white color for current one
+      for (int i=0; i<w; i++)
+         for (int j=0; j<h; j++)
+         {
+            if((image.GetRed(i,j)==0)&& (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
+            {
+               image.SetRGB(i, j, col.red(), col.green(), col.blue());
+            }
+                                else
+                                {
+                                        image.SetRGB(i, j, 0, 0, 0);
+                                }
+         }
+      delete stipplebrush;
+
+      //Recreate bitmap with new color
+      stipplebrush = new wxBitmap(image, 1);
+#endif
+      _brush = new wxBrush(	*stipplebrush);
+   }
+   else
+   {
+     //???Warning!!!
+		//if (NULL != col)
+     //    _brush = new wxBrush(color, wxTRANSPARENT);
+     // else
+         _brush = new wxBrush(*wxLIGHT_GREY, wxTRANSPARENT);
+   }
+
+   _pen = new wxPen();    
+            
+   //if (col!=NULL)
+   //{
+      _pen->SetColour(color);
+      _brush->SetColour(color);
+   //}
+            
+   //***Draw main picture***   
+   preparePicture(*_picture);
+   
+   Create(parent, id, *_picture, pos, size, style, validator, name);
+}
+*/
