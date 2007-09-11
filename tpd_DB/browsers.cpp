@@ -862,13 +862,16 @@ browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
 	_fill		= DATC->getFillName(layno);
 };
 
-BEGIN_EVENT_TABLE(browsers::LayerButton, wxBitmapButton)
+BEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
    //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
    EVT_LEFT_DOWN(LayerButton::OnLeftClick)
    EVT_MIDDLE_DOWN(LayerButton::OnMiddleClick)
+	EVT_PAINT(LayerButton::OnPaint)
 END_EVENT_TABLE()
 
-browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos , const wxSize& size, long style , const wxValidator& validator , const wxString& name, LayerInfo *layer)
+browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos , 
+											  const wxSize& size, long style , const wxValidator& validator , 
+											  const wxString& name, LayerInfo *layer)
 {
    
    _layer   = layer;
@@ -932,7 +935,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    //***Draw main picture***   
    preparePicture(*_picture);
    
-   Create(parent, id, *_picture, pos, size, style, validator, name);
+   Create(parent, id,  pos, size, style, name);
 }
 
 void browsers::LayerButton::preparePicture(wxBitmap &pict)
@@ -998,6 +1001,8 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    DC.DrawText(wxString(caption.c_str(), wxConvUTF8), 5*fontWidth+45, yCoord);
    
    DC.SelectObject(wxNullBitmap);
+
+	Refresh();
 }
 
 
@@ -1008,6 +1013,13 @@ browsers::LayerButton::~LayerButton()
    delete _brush;
    delete _pen;
    delete _layer;
+}
+
+
+void browsers::LayerButton::OnPaint(wxPaintEvent&event)
+{
+	wxPaintDC dc(this);
+	dc.DrawBitmap(*_picture, 0, 0, false);
 }
 
 void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
@@ -1062,29 +1074,30 @@ void browsers::LayerButton::hideLayer(bool hide)
 {
 	_hidden = hide;
 	preparePicture(*_picture);
-   SetBitmapLabel(*_picture);
+//   SetBitmapLabel(*_picture);
 }
 
 void browsers::LayerButton::lockLayer(bool lock)
 {
 	_locked = lock;
 	preparePicture(*_picture);
-   SetBitmapLabel(*_picture);
+ //  SetBitmapLabel(*_picture);
 }
 
 void browsers::LayerButton::select(void)
 {
    _selected = true;
    preparePicture(*_picture);
-   SetBitmapLabel(*_picture);
+ //  SetBitmapLabel(*_picture);
 }
 
 void browsers::LayerButton::unselect(void)
 {
    _selected = false;
    preparePicture(*_picture);
-   SetBitmapLabel(*_picture);
+  // SetBitmapLabel(*_picture);
 }
+
 
 
 

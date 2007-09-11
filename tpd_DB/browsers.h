@@ -213,7 +213,7 @@ namespace browsers
 		std::string _fill;
 	};
 
-   class LayerButton:public wxBitmapButton
+   class LayerButton:public wxPanel
    {
    public:
       LayerButton(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, 
@@ -223,6 +223,7 @@ namespace browsers
       ~LayerButton();
       void OnLeftClick(wxMouseEvent &event);
       void OnMiddleClick(wxMouseEvent &event);
+		void OnPaint(wxPaintEvent&event);
       //Call when other button is selected
       void unselect(void);
       void select(void);
