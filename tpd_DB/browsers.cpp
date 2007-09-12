@@ -996,12 +996,18 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
 //	DC.DrawText(wxString(infoString.c_str(), wxConvUTF8), 8, yCoord);
 //   DC.DrawIcon(boza,8,0);
 //   DC.DrawIcon(boza2,8,buttonHeight/2);
-   DC.DrawRectangle(1, 1, 140, buttonHeight-1);
+	char temp[100];
+	std::string layno = _itoa(_layer->layno(), temp, 10);
+	DC.GetTextExtent(wxString(layno.c_str(), wxConvUTF8), &w, &h);
+	int yCoord = int(buttonHeight/2 - h/2);
+	DC.DrawText(wxString(layno.c_str(), wxConvUTF8), 0, yCoord);
+
+   DC.DrawRectangle(20, 1, 32, buttonHeight-1);
 
    std::string caption = _layer->name();
 
 	DC.GetTextExtent(wxString(caption.c_str(), wxConvUTF8), &w, &h);
-	int yCoord = int(buttonHeight/2 - h/2);
+	yCoord = int(buttonHeight/2 - h/2);
    
    if (_selected)
    {
@@ -1015,9 +1021,25 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    }
 
 //   DC.SetBrush(*wxBLACK_BRUSH);
-   DC.DrawRectangle(43, yCoord-2, w+15, h+4);
-   DC.DrawText(wxString(caption.c_str(), wxConvUTF8), 45, yCoord);
+   DC.DrawRectangle(55, yCoord-2, w+15, h+4);
+   DC.DrawText(wxString(caption.c_str(), wxConvUTF8), 57, yCoord);
    
+	wxIcon top_icon, t2;
+	wxCoord ww, hh;
+	DC.GetSize(&ww, &hh);
+	if (_selected)
+   {
+      top_icon = wxIcon(activelay);
+		DC.DrawIcon(top_icon,ww-top_icon.GetWidth(),0);
+   }
+
+
+   if (_locked)
+   {
+      top_icon = wxIcon(lock);
+		DC.DrawIcon(top_icon,ww-top_icon.GetWidth(),18);
+   }
+
    DC.SelectObject(wxNullBitmap);
 
 	Refresh();
@@ -1037,23 +1059,11 @@ browsers::LayerButton::~LayerButton()
 void browsers::LayerButton::OnPaint(wxPaintEvent&event)
 {
 	wxPaintDC dc(this);
-   wxIcon top_icon;
-   if (_selected)
-   {
-      top_icon = wxIcon(activelay);
-   }
-   else if (_locked)
-   {
-      top_icon = wxIcon(lock);
-   }
+	dc.DrawBitmap(*_picture, 0, 0, false);
 
-   if(top_icon.IsOk()) 
-	{
-			dc.DrawIcon(top_icon,0,0);
-	}
-//   wxIcon bottom_icon(activelay);
+	//   wxIcon bottom_icon(activelay);
 //   dc.DrawIcon(bottom_icon,0,16);
-	dc.DrawBitmap(*_picture, 18, 0, false);
+
 }
 
 void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
