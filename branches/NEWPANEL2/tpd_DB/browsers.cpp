@@ -1047,7 +1047,10 @@ void browsers::LayerButton::OnPaint(wxPaintEvent&event)
       top_icon = wxIcon(lock);
    }
 
-   dc.DrawIcon(top_icon,0,0);
+   if(top_icon.IsOk()) 
+	{
+			dc.DrawIcon(top_icon,0,0);
+	}
 //   wxIcon bottom_icon(activelay);
 //   dc.DrawIcon(bottom_icon,0,16);
 	dc.DrawBitmap(*_picture, 18, 0, false);
