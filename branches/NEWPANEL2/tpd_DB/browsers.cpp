@@ -953,19 +953,19 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    DC.SetBrush(*_brush);
    DC.SetPen(*_pen);
 
-   if (_selected)
-   {
-      DC.SetBackground(*wxWHITE);
-      DC.SetTextForeground(*wxBLACK);
-   }
-   else
-   {
-      DC.SetBackground(*wxBLACK);
-      DC.SetTextForeground(*wxWHITE);
+//   if (_selected)
+//   {
+//      DC.SetBackground(*wxWHITE);
+//      DC.SetTextForeground(*wxBLACK);
+//   }
+//   else
+//   {
+   DC.SetBackground(*wxBLACK);
+   DC.SetTextForeground(*wxWHITE);
 
-   }
+//   }
 
-   std::string infoString = "s";
+/*   std::string infoString = "s";
    if (_hidden)
    {
       infoString += " ";
@@ -984,21 +984,39 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    else
    {
       infoString += " ";
-   }
+   }*/
    
    DC.Clear(); 
     
    int h,w;
-   DC.GetTextExtent(wxString(infoString.c_str(), wxConvUTF8), &w, &h);
-	int yCoord = int(buttonHeight/2 - h/2);
-	DC.DrawText(wxString(infoString.c_str(), wxConvUTF8), 8, yCoord);
-   DC.DrawRectangle(5*fontWidth, 1, 40, buttonHeight-1);
+//   wxIcon boza(lock);
+//   wxIcon boza2(activelay);
+/*   DC.GetTextExtent(wxString(infoString.c_str(), wxConvUTF8), &w, &h);
+	int yCoord = int(buttonHeight/2 - h/2);*/
+//	DC.DrawText(wxString(infoString.c_str(), wxConvUTF8), 8, yCoord);
+//   DC.DrawIcon(boza,8,0);
+//   DC.DrawIcon(boza2,8,buttonHeight/2);
+   DC.DrawRectangle(1, 1, 140, buttonHeight-1);
 
    std::string caption = _layer->name();
 
-	DC.GetTextExtent(wxString(infoString.c_str(), wxConvUTF8), &w, &h);
-	yCoord = int(buttonHeight/2 - h/2);
-   DC.DrawText(wxString(caption.c_str(), wxConvUTF8), 5*fontWidth+45, yCoord);
+	DC.GetTextExtent(wxString(caption.c_str(), wxConvUTF8), &w, &h);
+	int yCoord = int(buttonHeight/2 - h/2);
+   
+   if (_selected)
+   {
+      DC.SetBrush(*wxWHITE_BRUSH);
+      DC.SetTextForeground(*wxBLACK);
+   }
+   else
+   {
+      DC.SetBrush(*wxBLACK_BRUSH);
+      DC.SetTextForeground(*wxWHITE);
+   }
+
+//   DC.SetBrush(*wxBLACK_BRUSH);
+   DC.DrawRectangle(43, yCoord-2, w+15, h+4);
+   DC.DrawText(wxString(caption.c_str(), wxConvUTF8), 45, yCoord);
    
    DC.SelectObject(wxNullBitmap);
 
@@ -1019,7 +1037,20 @@ browsers::LayerButton::~LayerButton()
 void browsers::LayerButton::OnPaint(wxPaintEvent&event)
 {
 	wxPaintDC dc(this);
-	dc.DrawBitmap(*_picture, 0, 0, false);
+   wxIcon top_icon;
+   if (_selected)
+   {
+      top_icon = wxIcon(activelay);
+   }
+   else if (_locked)
+   {
+      top_icon = wxIcon(lock);
+   }
+
+   dc.DrawIcon(top_icon,0,0);
+//   wxIcon bottom_icon(activelay);
+//   dc.DrawIcon(bottom_icon,0,16);
+	dc.DrawBitmap(*_picture, 18, 0, false);
 }
 
 void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
