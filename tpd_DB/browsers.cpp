@@ -877,7 +877,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    _layer   = layer;
    _selected= false;
    _hidden  = false;
-   _locked  = false;  
+   //_locked  = false;  
 
    std::string caption;
    
@@ -1029,12 +1029,12 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
 	DC.GetSize(&ww, &hh);
 	if (_selected)
    {
-      top_icon = wxIcon(activelay);
+		top_icon = wxIcon(activelay);
 		DC.DrawIcon(top_icon,ww-top_icon.GetWidth(),0);
    }
 
 
-   if (_locked)
+   if (DATC->layerLocked(_layer->layno()))
    {
       top_icon = wxIcon(lock);
 		DC.DrawIcon(top_icon,ww-top_icon.GetWidth(),18);
@@ -1072,11 +1072,11 @@ void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
    if (event.ShiftDown())
    //Lock layer
    {
-      _locked = !_locked;
+      //_locked = !_locked;
       wxString cmd;
       cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
-      if (_locked) cmd << wxT("true") << wxT(");");
-      else cmd << wxT("false") << wxT(");");
+		if (DATC->layerLocked(_layer->layno())) cmd << wxT("false") << wxT(");");
+      else cmd << wxT("true") << wxT(");");
       Console->parseCommand(cmd);
 
    }
@@ -1123,7 +1123,7 @@ void browsers::LayerButton::hideLayer(bool hide)
 
 void browsers::LayerButton::lockLayer(bool lock)
 {
-	_locked = lock;
+	//_locked = lock;
 	preparePicture(*_picture);
  //  SetBitmapLabel(*_picture);
 }
