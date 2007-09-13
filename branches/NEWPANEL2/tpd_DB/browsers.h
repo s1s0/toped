@@ -43,9 +43,9 @@
 namespace browsers 
 {
    const int buttonHeight = 30;
-    
-   typedef enum 
-	{
+   const int buttonWidth  = 170;
+   typedef enum
+   {
       BT_LAYER_DEFAULT,
       BT_LAYER_HIDE,
       BT_LAYER_LOCK,
@@ -67,16 +67,16 @@ namespace browsers
       BT_CELLS_FLAT,
       BT_CELLS_HIER2,
       BT_CELLS_FLAT2,
-		BT_LAYER_SELECT,
-		BT_LAYER_SHOW_ALL,
-		BT_LAYER_HIDE_ALL,
-		BT_LAYER_LOCK_ALL,
-		BT_LAYER_UNLOCK_ALL
+      BT_LAYER_SELECT,
+      BT_LAYER_SHOW_ALL,
+      BT_LAYER_HIDE_ALL,
+      BT_LAYER_LOCK_ALL,
+      BT_LAYER_UNLOCK_ALL
 
    } BROWSER_EVT_TYPE;
    
    enum 
-	{
+   {
       CELLTREEOPENCELL  = 1000,
       GDSTREEREPORTLAY        ,
       LAYERHIDESELECTED       ,
@@ -136,7 +136,7 @@ namespace browsers
 
    //===========================================================================
    class GDSbrowser : public wxPanel 
-	{
+   {
    public:
                         GDSbrowser(wxWindow *parent, wxWindowID id = -1, 
                         const wxPoint& pos = wxDefaultPosition, 
@@ -165,7 +165,7 @@ namespace browsers
 
    //===========================================================================
    class TDTbrowser : public wxPanel 
-	{
+   {
    public:
                         TDTbrowser(wxWindow* parent, wxWindowID id = -1, 
                         const wxPoint& pos = wxDefaultPosition, 
@@ -199,37 +199,37 @@ namespace browsers
       DECLARE_EVENT_TABLE();
    };
 
-	class LayerInfo
-	{
-	public:
-		LayerInfo(const std::string &name, const word layno);
-		~LayerInfo()         { };
-		std::string name()   {return _name;};
-		word        layno()  {return _layno;};
-	private:
-		std::string _name;
-		word        _layno;
-		std::string _col;
-		std::string _fill;
-	};
+   class LayerInfo
+   {
+   public:
+      LayerInfo(const std::string &name, const word layno);
+      ~LayerInfo()         { };
+      std::string name()   {return _name;};
+      word        layno()  {return _layno;};
+   private:
+      std::string _name;
+      word        _layno;
+      std::string _col;
+      std::string _fill;
+   };
 
    class LayerButton:public wxPanel
    {
    public:
       LayerButton(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, 
-						const wxSize& size = wxDefaultSize, long style = wxBU_AUTODRAW, 
-						const wxValidator& validator = wxDefaultValidator, const wxString& name = wxT("button"), 
-						LayerInfo *layer = NULL);
+                  const wxSize& size = wxDefaultSize, long style = wxBU_AUTODRAW,
+                  const wxValidator& validator = wxDefaultValidator, const wxString& name = wxT("button"),
+                  LayerInfo *layer = NULL);
       ~LayerButton();
       void OnLeftClick(wxMouseEvent &event);
       void OnMiddleClick(wxMouseEvent &event);
-		void OnPaint(wxPaintEvent&event);
+      void OnPaint(wxPaintEvent&event);
       //Call when other button is selected
       void unselect(void);
       void select(void);
-		void hideLayer(bool hide);
-		void lockLayer(bool lock);
-		word getLayNo(void) {return _layer->layno();}
+      void hideLayer(bool hide);
+      void lockLayer(bool lock);
+      word getLayNo(void) {return _layer->layno();}
       
    private:
       void preparePicture(wxBitmap &pict);
@@ -247,16 +247,16 @@ namespace browsers
 
    typedef std::map <word, LayerButton*> layerButtonMap;
    class LayerBrowser : public wxScrolledWindow 
-	{
+   {
    public:
                            LayerBrowser(wxWindow* parent, wxWindowID id);
       virtual             ~LayerBrowser();
    private:
       void                 OnCommand(wxCommandEvent&);
-		void                 OnShowAll(wxCommandEvent&);
-		void                 OnHideAll(wxCommandEvent&);
-		void                 OnLockAll(wxCommandEvent&);
-		void                 OnUnlockAll(wxCommandEvent&);
+      void                 OnShowAll(wxCommandEvent&);
+      void                 OnHideAll(wxCommandEvent&);
+      void                 OnLockAll(wxCommandEvent&);
+      void                 OnUnlockAll(wxCommandEvent&);
       wxString             getAllSelected();
       
       wxBitmap& prepareBitmap(void);
@@ -264,25 +264,25 @@ namespace browsers
       layerButtonMap          _buttonMap;
       int                     _buttonCount;
       LayerButton*            _selectedButton;
-		wxScrolledWindow*			_layerPanel;
-		wxBoxSizer*					_thesizer;
+      wxScrolledWindow*         _layerPanel;
+      wxBoxSizer*               _thesizer;
       
       DECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
    class browserTAB : public wxNotebook 
-	{
+   {
    public:
                         browserTAB(wxWindow *parent, wxWindowID id = -1,
         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, 
                                                                   long style = 0);
       virtual          ~browserTAB();// {};
-		LayerBrowser*    TDTlayers() const   {return _layers;};
+      LayerBrowser*    TDTlayers() const   {return _layers;};
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
-		LayerBrowser*    layers() const       {return _layers;};
+      LayerBrowser*    layers() const       {return _layers;};
       void              set_tellParser(wxWindow* tp) {_tellParser = tp;}
       wxWindow*         tellParser() const {return _tellParser;}
    private:
@@ -292,7 +292,7 @@ namespace browsers
       void              OnTELLclearGDStab();
       GDSbrowser*       _GDSstruct;
       TDTbrowser*       _TDTstruct;
-		LayerBrowser*		_layers;
+      LayerBrowser*      _layers;
       wxWindow*         _tellParser;
       DECLARE_EVENT_TABLE();
    };
