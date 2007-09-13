@@ -1002,25 +1002,19 @@ void browsers::LayerButton::OnPaint(wxPaintEvent&event)
 {
    wxPaintDC dc(this);
    dc.DrawBitmap(*_picture, 0, 0, false);
-   wxIcon top_icon;
    if (_selected)
    {
-      top_icon = wxIcon(activelay);
+      dc.DrawIcon(wxIcon(activelay),buttonWidth-16,15);
    }
    else if (DATC->layerLocked(_layer->layno()))
    {
-      top_icon = wxIcon(lock);
+      dc.DrawIcon(wxIcon(lock),buttonWidth-16,15);
    }
-   dc.DrawIcon(top_icon,buttonWidth-16,15);
 
    if (DATC->layerHidden(_layer->layno()))
    {
-      wxIcon bottom_icon(nolay_xpm);
-      dc.DrawIcon(bottom_icon,buttonWidth-16,0);
+      dc.DrawIcon(wxIcon(nolay_xpm),buttonWidth-16,0);
    }
-   //   wxIcon bottom_icon(activelay);
-//   dc.DrawIcon(bottom_icon,0,16);
-
 }
 
 void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
