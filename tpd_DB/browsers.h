@@ -43,7 +43,7 @@
 namespace browsers 
 {
    const int buttonHeight = 30;
-   const int buttonWidth  = 170;
+   const int buttonWidth  = 150;
    typedef enum
    {
       BT_LAYER_DEFAULT,
@@ -240,7 +240,7 @@ namespace browsers
       wxPen       *_pen;
       bool        _selected;
       bool        _hidden;
-      bool        _locked;
+      //bool        _locked;
       
    DECLARE_EVENT_TABLE();
    };
@@ -258,6 +258,8 @@ namespace browsers
       void                 OnLockAll(wxCommandEvent&);
       void                 OnUnlockAll(wxCommandEvent&);
       wxString             getAllSelected();
+		void Resort(void);
+
       
       wxBitmap& prepareBitmap(void);
 
