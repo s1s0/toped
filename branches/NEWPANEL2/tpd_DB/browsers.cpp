@@ -882,7 +882,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
 
    std::string caption;
    
-   _picture = new wxBitmap(size.GetWidth()-16, size.GetHeight(), -1);
+   _picture = new wxBitmap(size.GetWidth(), size.GetHeight(), -1);
 
    const byte *ifill= DATC->getFill(layer->layno());
    const layprop::tellRGB col = DATC->getColor(layer->layno());
@@ -1220,8 +1220,8 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
 
                _buttonCount++; 
                _layerPanel->SetScrollbars(0, buttonHeight, 0, _buttonCount);
-
             }
+				Resort();
             
             //Restore selection
             if ((it = _buttonMap.find(DATC->curlay()))!= _buttonMap.end())
@@ -1234,6 +1234,19 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
             break;
          }
    }
+}
+
+void browsers::LayerBrowser::Resort(void)
+{
+	layerButtonMap::const_iterator it;
+	int index = 0;
+	for(it=_buttonMap.begin();it !=_buttonMap.end(); ++it, ++index)
+	{
+			LayerButton *tempButton = it->second;
+         int szx, szy;
+			GetSize(&szx, &szy);
+			tempButton->SetSize(0, index*buttonHeight, szx, buttonHeight);
+	}
 }
 
 void browsers::LayerBrowser::OnShowAll(wxCommandEvent& WXUNUSED(event))
