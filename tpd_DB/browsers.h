@@ -266,8 +266,9 @@ namespace browsers
       layerButtonMap          _buttonMap;
       int                     _buttonCount;
       LayerButton*            _selectedButton;
-      wxScrolledWindow*         _layerPanel;
-      wxBoxSizer*               _thesizer;
+      wxScrolledWindow*       _layerPanel;
+      wxBoxSizer*             _thesizer;
+		wxTextCtrl*             _helpPanel;
       
       DECLARE_EVENT_TABLE();
    };

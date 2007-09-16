@@ -1128,8 +1128,15 @@ browsers::LayerBrowser::LayerBrowser(wxWindow* parent, wxWindowID id)
 
    _layerPanel = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
    _thesizer->Add(_layerPanel, 3, wxEXPAND);//|wxALL);
+
+	wxString help;
+	help<<_T("LBM		-select\n");
+	help<<_T("shift+LBM	-hide\n");
+	help<<_T("MBM		- lock\n");
+	int w, h;
+	_helpPanel = new wxTextCtrl(this,  wxID_ANY, help, wxDefaultPosition, wxSize(100, 60),wxTE_MULTILINE|wxTE_READONLY		);
+	_thesizer->Add(_helpPanel, 0, wxALIGN_BOTTOM|wxEXPAND	);
    SetSizerAndFit(_thesizer);
-   _thesizer->SetSizeHints( this );
 }
 
 browsers::LayerBrowser::~LayerBrowser() 
