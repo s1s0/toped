@@ -34,6 +34,7 @@
 #include <wx/filefn.h>
 #include <wx/filename.h>
 #include "outbox.h"
+#include "ttt.h"
 
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_STATUS , 10000)
@@ -246,7 +247,7 @@ void console::TellFnSort()
 std::string TpdTime::operator () ()
 {
    tm* broken_time = localtime(&_stdCTime);
-   assert(broken_time != NULL);
+   VERIFY(broken_time != NULL);
    char* btm = DEBUG_NEW char[256];
    strftime(btm, 256, "%d-%m-%Y %X", broken_time);
    std::string info = btm;
@@ -264,22 +265,22 @@ TpdTime::TpdTime(std::string str_time)
 void TpdTime::patternNormalize(wxString& str) {
    wxRegEx regex;
    // replace tabs with spaces
-   assert(regex.Compile(wxT("\t")));
+   VERIFY(regex.Compile(wxT("\t")));
    regex.ReplaceAll(&str,wxT(" "));
    // remove continious spaces
-   assert(regex.Compile(wxT("[[:space:]]{2,}")));
+   VERIFY(regex.Compile(wxT("[[:space:]]{2,}")));
    regex.ReplaceAll(&str,wxT(""));
    //remove leading spaces
-   assert(regex.Compile(wxT("^[[:space:]]")));
+   VERIFY(regex.Compile(wxT("^[[:space:]]")));
    regex.ReplaceAll(&str,wxT(""));
    // remove trailing spaces
-   assert(regex.Compile(wxT("[[:space:]]$")));
+   VERIFY(regex.Compile(wxT("[[:space:]]$")));
    regex.ReplaceAll(&str,wxT(""));
    //remove spaces before separators
-   assert(regex.Compile(wxT("([[:space:]])([\\-\\:])")));
+   VERIFY(regex.Compile(wxT("([[:space:]])([\\-\\:])")));
    regex.ReplaceAll(&str,wxT("\\2"));
    // remove spaces after separators
-   assert(regex.Compile(wxT("([\\-\\:])([[:space:]])")));
+   VERIFY(regex.Compile(wxT("([\\-\\:])([[:space:]])")));
    regex.ReplaceAll(&str,wxT("\\1"));
 
 }
@@ -289,45 +290,57 @@ bool TpdTime::getStdCTime(wxString& exp) {
    const wxString tmpl4digits      = wxT("[[:digit:]]{4,4}");
    const wxString tmplDate         = tmpl2digits+wxT("\\-")+tmpl2digits+wxT("\\-")+tmpl4digits;
    const wxString tmplTime         = tmpl2digits+wxT("\\:")+tmpl2digits+wxT("\\:")+tmpl2digits;
-   wxRegEx src_tmpl(tmplDate+wxT("[[:space:]]")+tmplTime);
-   assert(src_tmpl.IsValid());
+   const wxString tmplAmPm         = wxT("[AP]M");
+   wxRegEx src_tmpl(tmplDate+wxT("[[:space:]]")+tmplTime + wxT("[[:space:]]") + tmplAmPm);
+   VERIFY(src_tmpl.IsValid());
    long conversion;
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    tm broken_time;
    // get the date
-   assert(src_tmpl.Compile(tmpl2digits));
+   VERIFY(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
    src_tmpl.GetMatch(exp).ToLong(&conversion);
-   assert(conversion);
+   VERIFY(conversion);
    broken_time.tm_mday = conversion;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // get month
    src_tmpl.Matches(exp);
-   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
    broken_time.tm_mon = conversion - 1;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // get year
-   assert(src_tmpl.Compile(tmpl4digits));
+   VERIFY(src_tmpl.Compile(tmpl4digits));
    src_tmpl.Matches(exp);
-   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
    broken_time.tm_year = conversion - 1900;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // now the time - first hour
-   assert(src_tmpl.Compile(tmpl2digits));
+   VERIFY(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
-   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
    broken_time.tm_hour = conversion; 
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // minutes
    src_tmpl.Matches(exp);
-   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
    broken_time.tm_min = conversion;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // and seconds
    src_tmpl.Matches(exp);
-   assert(src_tmpl.GetMatch(exp).ToLong(&conversion));
+   VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
    broken_time.tm_sec = conversion;
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
+   //AM-PM
+   VERIFY(src_tmpl.Compile(tmplAmPm));
+   if (src_tmpl.Matches(exp))
+   {
+      wxString ampm = src_tmpl.GetMatch(exp);
+      assert(0 != ampm.Len()); 
+      if ( wxT("PM") == ampm )
+         broken_time.tm_hour += 12;
+      src_tmpl.ReplaceFirst(&exp,wxT(""));
+   }
    //
    broken_time.tm_isdst = -1;
    _stdCTime = mktime(&broken_time);
