@@ -49,6 +49,11 @@
 extern parsercmd::cmdBLOCK*       CMDBlock;
 /*Global console object*/
 extern console::ted_cmd*           Console;
+namespace parsercmd
+{
+   extern int EOfile();
+}
+
 /*Current tell variable name*/
 telldata::tell_var *tellvar = NULL;
 telldata::tell_var *tell_lvalue = NULL;
@@ -264,14 +269,25 @@ input:
 entrance:
      statement ';'                         {
       if (!yynerrs)  CMDBlock->execute();
-      else           CMDBlock = CMDBlock->cleaner();
+      else 
+      {           
+         CMDBlock = CMDBlock->cleaner();
+         parsercmd::EOfile();
+      }
    }
    | funcdefinition                        {}
    | funcdeclaration ';'                   {
       delete($1); cfd = NULL;
    }
-   | tknERROR                              {tellerror("Unexpected symbol", @1);}
-   | error                                 {CMDBlock = CMDBlock->cleaner();/*yynerrs = 0;*/}
+   | tknERROR                              {
+      tellerror("Unexpected symbol", @1);
+      parsercmd::EOfile();
+   }
+   | error                                 {
+      CMDBlock = CMDBlock->cleaner();
+      parsercmd::EOfile();
+      /*yynerrs = 0;*/
+   }
 ;
 
 funcdeclaration:
@@ -592,7 +608,9 @@ telltype:
         const telldata::tell_type* ttype = CMDBlock->getTypeByName($1);
         if (NULL == ttype)  {
            tellerror("Bad type specifier", @1);
+           parsercmd::EOfile();
            YYABORT;
+
         }
         else $$ = ttype->ID();
         delete [] $1;
@@ -605,6 +623,7 @@ recorddefinition:
         if (NULL == tellstruct) {
            tellerror("type with this name already defined", @1);
            delete [] $2;
+           parsercmd::EOfile();
            YYABORT;
         }
      }
@@ -896,13 +915,3 @@ void tellerror (std::string s) {
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column << ": " << s;
    tell_log(console::MT_ERROR,ost.str());
 }
-//
-// {
-//          /*Check whether such a function is already defined */
-//          if (NULL != CMDBlock->funcDefined($2,arglist)) {
-//             tellerror("function already defined",@$);
-//             delete [] $2;
-//             parsercmd::ClearArgumentList(arglist); delete(arglist); arglist = NULL;
-//             YYABORT;
-// }
-//
