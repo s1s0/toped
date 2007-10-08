@@ -295,7 +295,13 @@ bool TpdTime::getStdCTime(wxString& exp) {
    VERIFY(src_tmpl.IsValid());
    long conversion;
    // search the entire pattern
-   if (!src_tmpl.Matches(exp)) return false;
+   if (!src_tmpl.Matches(exp)) 
+   {
+      std::string news = "Can't recognise the time format. Recovery will be unreliable ";
+      tell_log(console::MT_ERROR,news);
+      _stdCTime = 0;
+      return false;
+   }
    tm broken_time;
    // get the date
    VERIFY(src_tmpl.Compile(tmpl2digits));
