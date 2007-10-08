@@ -73,7 +73,7 @@ extern const wxEventType    wxEVT_CONSOLE_PARSE;
 bool console::patternFound(const wxString templ,  wxString str) {
    patternNormalize(str);
    wxRegEx src_tmpl(templ);
-   assert(src_tmpl.IsValid());
+   VERIFY(src_tmpl.IsValid());
    return src_tmpl.Matches(str);
 }
 
@@ -119,7 +119,7 @@ bool console::miniParser::getGUInput(wxString expression) {
 
 bool console::miniParser::getPoint() {
    wxRegEx src_tmpl(point_tmpl);
-   assert(src_tmpl.IsValid());
+   VERIFY(src_tmpl.IsValid());
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // get the coordinates
@@ -145,7 +145,7 @@ bool console::miniParser::getPoint() {
 bool console::miniParser::getBox()
 {
    wxRegEx src_tmpl(box_tmpl);
-   assert(src_tmpl.IsValid());
+   VERIFY(src_tmpl.IsValid());
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
@@ -162,7 +162,7 @@ bool console::miniParser::getBox()
       src_tmpl.ReplaceFirst(&exp,wxT(""));
 
       wxRegEx crd_tmpl(real_tmpl);
-      assert(crd_tmpl.IsValid());
+      VERIFY(crd_tmpl.IsValid());
       crd_tmpl.Matches(ps);
       wxString p1s = crd_tmpl.GetMatch(ps);
       crd_tmpl.ReplaceFirst(&ps,wxT(""));
@@ -180,7 +180,7 @@ bool console::miniParser::getBox()
 bool console::miniParser::getBind()
 {
    wxRegEx src_tmpl(bind_tmpl);
-   assert(src_tmpl.IsValid());
+   VERIFY(src_tmpl.IsValid());
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
@@ -196,7 +196,7 @@ bool console::miniParser::getBind()
    src_tmpl.ReplaceFirst(&exp,wxT(""));
 
    wxRegEx crd_tmpl(real_tmpl);
-   assert(crd_tmpl.IsValid());
+   VERIFY(crd_tmpl.IsValid());
    crd_tmpl.Matches(ps);
    wxString p1s = crd_tmpl.GetMatch(ps);
    crd_tmpl.ReplaceFirst(&ps,wxT(""));
@@ -241,7 +241,7 @@ bool console::miniParser::getBind()
 
 bool console::miniParser::getList() {
    wxRegEx src_tmpl(pointlist_tmpl);
-   assert(src_tmpl.IsValid());
+   VERIFY(src_tmpl.IsValid());
    // search the entire pattern
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
@@ -257,7 +257,7 @@ bool console::miniParser::getList() {
       wxString ps = src_tmpl.GetMatch(exp);
       src_tmpl.ReplaceFirst(&exp,wxT(""));
       wxRegEx crd_tmpl(real_tmpl);
-      assert(crd_tmpl.IsValid());
+      VERIFY(crd_tmpl.IsValid());
       crd_tmpl.Matches(ps);
       wxString p1s = crd_tmpl.GetMatch(ps);
       crd_tmpl.ReplaceFirst(&ps,wxT(""));
@@ -330,7 +330,7 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
    _parent = parent;
    _canvas = canvas;
    threadWaits4 = DEBUG_NEW wxCondition(parse_thread::_mutex);
-   assert(threadWaits4->IsOk());
+   VERIFY(threadWaits4->IsOk());
    _mouseIN_OK = true;
    Console = this;
    _history_position = _cmd_history.begin();
