@@ -286,7 +286,7 @@ void TpdTime::patternNormalize(wxString& str) {
 }
 
 bool TpdTime::getStdCTime(wxString& exp) {
-   const wxString tmpl2digits      = wxT("[[:digit:]]{2,2}");
+   const wxString tmpl2digits      = wxT("[[:digit:]]{1,2}");
    const wxString tmpl4digits      = wxT("[[:digit:]]{4,4}");
    const wxString tmplDate         = tmpl2digits+wxT("\\-")+tmpl2digits+wxT("\\-")+tmpl4digits;
    const wxString tmplTime         = tmpl2digits+wxT("\\:")+tmpl2digits+wxT("\\:")+tmpl2digits;
