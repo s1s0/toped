@@ -1,5 +1,5 @@
 # these are the headers for the project
-noinst_HEADERS = layoutcanvas.h toped.h tui.h resourcecenter.h 
+noinst_HEADERS = layoutcanvas.h toped.h tui.h resourcecenter.h tpdph.h
 
 #BUILT_SOURCES = tell_yacc.h
 #AM_YFLAGS = -p tell -d -y -v
