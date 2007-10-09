@@ -338,7 +338,7 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
    gdsex.updateLastRecord();gdsex.closeFile();
 }
 
-void DataCenter::GDSparse(std::string filename) 
+bool DataCenter::GDSparse(std::string filename) 
 {
    if (lockGDS(false))
    {
@@ -357,6 +357,7 @@ void DataCenter::GDSparse(std::string filename)
       _GDSDB->HierOut();
    }
    unlockGDS();
+   return _GDSDB->status();
 }
 
 void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over) {

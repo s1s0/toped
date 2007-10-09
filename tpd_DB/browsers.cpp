@@ -82,9 +82,21 @@ browsers::topedlay_list::topedlay_list(wxWindow *parent, wxWindowID id,
    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
    SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
-   _imageList = DEBUG_NEW wxImageList(32, 16, TRUE);
-   _imageList->Add( wxIcon( activelay ) );
-   _imageList->Add( wxIcon( lock      ) );
+   _imageList = DEBUG_NEW wxImageList(16, 16, TRUE);
+#ifdef __WXMSW__
+/*@TODO : Under windows - resource loading*/
+//    m_imageListNormal->Add( wxIcon(_T("icon1"), wxBITMAP_TYPE_ICO_RESOURCE) );
+//
+#else
+   //SGREM!!! Troubles with the gdb on Linux with threads!
+   // I spent a night debugging a stupid mistake with traversing the tree
+   // to realize finally that the gdb is doing some funny things when 
+   // stepping over next two lines. The troble comes from wxIcon constructor, 
+   // that internally is calling gdk_pixmap_create_from_xpm_d
+    _imageList->Add( wxIcon( activelay ) );
+    _imageList->Add( wxIcon( lock      ) );
+#endif
+//   SetBackgroundColour(wxColour("LIGHTGREY"));
    SetImageList(_imageList,wxIMAGE_LIST_SMALL);
    _llfont_normal.SetPointSize(9);
    _llfont_bold.SetPointSize(9);
@@ -106,50 +118,11 @@ void browsers::topedlay_list::addlayer(wxString name, word layno) {
       long oldno = GetItemData(item);
       if (oldno == layno) DeleteItem(item);
    }
-
-   const byte *ifill= DATC->getFill(layno);
-   //wxBitmap fill_sample((char  *)ifill, 32, 32, 1);
-   //_imageList->Add( fill_sample );
-   //const layprop::tellRGB col = DATC->getColor(layno);
-   //wxColour color(col.red(), col.green(), col.blue());
-
-//   wxBitmap fill_sample((char  *)ifill, 32, 32, 1);
-////   _imageList->Add( fill_sample );
-   const layprop::tellRGB col = DATC->getColor(layno);
-//   wxColour color(col.red(), col.green(), col.blue());
-
-//   if(ifill!=NULL)
-//   {     
-      wxBitmap *afill = new wxBitmap((char  *)ifill, 32, 32, 1);
-      wxImage image;
-      image = afill->ConvertToImage();
-      int w = image.GetWidth();
-      int h = image.GetHeight();
-      //Change white color for current one
-      for (int i=0; i<w; i++)
-         for (int j=0; j<h; j++)
-            if((image.GetRed(i,j)==0)&& (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
-            {
-               image.SetRGB(i, j, col.red(), col.green(), col.blue());
-            }
-            else
-            {
-               image.SetRGB(i, j, 0, 0, 0);
-            }
-      delete afill;
-
-      //Recreate bitmap with new color
-      afill = new wxBitmap(image, 1);
-//   }
-   _imageList->Add( *afill       );
-
    wxString num; num.Printf(_T("%3d"), layno);
    wxListItem row;
-   row.Clear();
    row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
    row.SetData(layno); row.SetText(num); row.SetId(GetItemCount());
-   row.SetFont(_llfont_normal); 
-   row.SetImage(GetItemCount()+2);
+   row.SetFont(_llfont_normal);
    long inum = InsertItem(row);
    SetItem(inum, 1, name);
    SetItemData(inum, layno);
@@ -157,9 +130,6 @@ void browsers::topedlay_list::addlayer(wxString name, word layno) {
    row.SetColumn(2); row.SetId(inum); row.SetMask(wxLIST_MASK_IMAGE);
    row.SetImage(-1); // No icon assigned initially
    SetItem(row);
-
-
-
 }   
 
 void browsers::topedlay_list::defaultLayer(word newl, word oldl) {
@@ -677,14 +647,14 @@ void browsers::TDTbrowser::OnTELLopencell(wxString open_cell)
 {
    wxTreeItemId item1, item2;
    //Flat
-   assert(fCellBrowser->findItem(open_cell, item1, fCellBrowser->GetRootItem()));
+   VERIFY(fCellBrowser->findItem(open_cell, item1, fCellBrowser->GetRootItem()));
    fCellBrowser->highlightChildren(fCellBrowser->GetRootItem(), *wxLIGHT_GREY);
    top_structure = active_structure = item1;
    //fCellBrowser->highlightChildren(top_structure, *wxBLACK);
    fCellBrowser->SetItemTextColour(item1,*wxBLUE);
    
    //Hier
-   assert(hCellBrowser->findItem(open_cell, item2, hCellBrowser->GetRootItem()));
+   VERIFY(hCellBrowser->findItem(open_cell, item2, hCellBrowser->GetRootItem()));
    hCellBrowser->highlightChildren(hCellBrowser->GetRootItem(), *wxLIGHT_GREY);
 //   if (top_structure.IsOk())
 //      SetItemFont(active_structure,_llfont_normal);
@@ -698,7 +668,7 @@ void browsers::TDTbrowser::OnTELLhighlightcell(wxString open_cell)
 {
    //Only for hierarchy mode
    wxTreeItemId item;
-   assert(hCellBrowser->findItem(open_cell, item, hCellBrowser->GetRootItem()));
+   VERIFY(hCellBrowser->findItem(open_cell, item, hCellBrowser->GetRootItem()));
    hCellBrowser->SetItemTextColour(active_structure,*wxBLACK);
 //   SetItemFont(active_structure,_llfont_normal);
    active_structure = item;
@@ -727,7 +697,7 @@ void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname,
          break;
       }   
       case 1: {//first reference of existing cell
-         assert(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
+         VERIFY(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
          while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem())) 
          {
             hCellBrowser->copyItem(item,newparent);
@@ -738,7 +708,7 @@ void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname,
          break;
       }   
       case 2: {//
-         assert(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
+         VERIFY(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
          while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()))
          {
             hCellBrowser->copyItem(item,newparent);
@@ -759,8 +729,8 @@ void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentna
       hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem());
       hCellBrowser->copyItem(item, hCellBrowser->GetRootItem());
       item = wxTreeItemId();
-      assert(hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()));
-      assert(hCellBrowser->findItem(cellname, item, newparent));
+      VERIFY(hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()));
+      VERIFY(hCellBrowser->findItem(cellname, item, newparent));
       hCellBrowser->DeleteChildren(item);
       hCellBrowser->Delete(item);
    }
@@ -769,12 +739,12 @@ void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentna
       wxTreeItemId item;
       
       //Flat
-      assert(fCellBrowser->findItem(cellname, item, fCellBrowser->GetRootItem()));
+      VERIFY(fCellBrowser->findItem(cellname, item, fCellBrowser->GetRootItem()));
       fCellBrowser->Delete(item);
 
       //Hier
       wxTreeItemId item2;
-      assert(hCellBrowser->findItem(cellname, item2, hCellBrowser->GetRootItem()));
+      VERIFY(hCellBrowser->findItem(cellname, item2, hCellBrowser->GetRootItem()));
       // copy all children
       // This part is "in case". The thing is that children should have been
       // removed already, by tdtcell::removePrep
@@ -793,7 +763,7 @@ void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentna
       while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()))
       {
          wxTreeItemId item;
-         assert(hCellBrowser->findItem(cellname, item, newparent));
+         VERIFY(hCellBrowser->findItem(cellname, item, newparent));
          hCellBrowser->DeleteChildren(item);
          hCellBrowser->Delete(item);
       }
@@ -1199,77 +1169,3 @@ void browsers::layerbrowser::OnActiveLayerM(wxCommandEvent&)
    cmd << wxT("usinglayer(") << layno << wxT(");");
    parseCommand(cmd);
 }
-
-
-
-
-/*
-browsers::LayerButton::LayerButton( wxWindow* parent, wxWindowID id, const wxPoint& pos, 
-                                   const wxSize& size, long style, const wxValidator& validator, 
-                                   const wxString& name, LayerInfo *layer )
-{
-   
-   _layer   = layer;
-   _selected= false;
-   _hidden  = false;
-   _locked  = false;  
-
-   std::string caption;
-   
-   _picture = new wxBitmap(size.GetWidth(), size.GetHeight(), -1);
-
-   const byte *ifill= DATC->getFill(layer->layno());
-   const layprop::tellRGB col = DATC->getColor(layer->layno());
-   wxColour color(col.red(), col.green(), col.blue());
-
-   if(ifill!=NULL)
-   {     
-      wxBitmap *stipplebrush = new wxBitmap((char  *)ifill, 32, 32, 1);
-      wxImage image;
-      image = stipplebrush->ConvertToImage();
-      int w = image.GetWidth();
-      int h = image.GetHeight();
-#ifdef WIN32
- //Change white color for current one
-      for (int i=0; i<w; i++)
-         for (int j=0; j<h; j++)
-         {
-            if((image.GetRed(i,j)==0)&& (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
-            {
-               image.SetRGB(i, j, col.red(), col.green(), col.blue());
-            }
-                                else
-                                {
-                                        image.SetRGB(i, j, 0, 0, 0);
-                                }
-         }
-      delete stipplebrush;
-
-      //Recreate bitmap with new color
-      stipplebrush = new wxBitmap(image, 1);
-#endif
-      _brush = new wxBrush(	*stipplebrush);
-   }
-   else
-   {
-     //???Warning!!!
-		//if (NULL != col)
-     //    _brush = new wxBrush(color, wxTRANSPARENT);
-     // else
-         _brush = new wxBrush(*wxLIGHT_GREY, wxTRANSPARENT);
-   }
-
-   _pen = new wxPen();    
-            
-   //if (col!=NULL)
-   //{
-      _pen->SetColour(color);
-      _brush->SetColour(color);
-   //}
-            
-   //***Draw main picture***   
-   preparePicture(*_picture);
-   
-   Create(parent, id, *_picture, pos, size, style, validator, name);
-}
-*/

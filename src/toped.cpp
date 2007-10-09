@@ -688,7 +688,7 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutDialogInfo info;
     info.SetName(wxT("Toped"));
-    info.SetVersion(wxT("0.8.x"));
+    info.SetVersion(wxT("0.8.6"));
     info.SetIcon(wxIcon( toped32x32_xpm ));
     info.SetWebSite(wxT("www.toped.org.uk"));
     info.SetDescription(wxT("Open source IC layout editor"));
@@ -785,7 +785,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
    }
    SetStatusText(wxT("Opening file..."));
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-      wxT("Toped files |*.tdt"),
+      wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
@@ -803,7 +803,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
 void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
    SetStatusText(wxT("Including command file..."));
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-      wxT("Tell files |*.tll"),
+      wxT("Tell files(*.tll)|*.tll|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetFilename();
@@ -817,7 +817,7 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
 
 void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Stream files |*.sf;*.gds"),
+                     wxT("Stream files(*.sf;*.gds)|*.sf;*.gds;*.SF;*.GDS|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       SetStatusText(wxT("Parsing GDS file..."));
