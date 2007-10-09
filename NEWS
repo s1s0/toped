@@ -1,3 +1,25 @@
+Toped release 0.86 changes and updates
+=======================================
+* Improving stability especially of the windows version
+* Cleaning memory leakages & bug fixes
+* full support of list operations in TELL
+* text contents change
+* Changes in the project structure
+
+Graphics and database handling
+--------------------------------
+* Bug fixes in the validation algorithms
+
+Updates in the TELL script
+---------------------------
+* foreach and a full set of list operators introduced
+* function declarations
+* constants
+* recursive function calls
+* filter masks on select
+
+--------------------------------------------------------------------------------
+
 Toped release 0.85 changes and updates
 =======================================
 * PS output
