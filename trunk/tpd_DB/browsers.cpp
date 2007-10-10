@@ -677,14 +677,14 @@ void browsers::TDTbrowser::OnTELLopencell(wxString open_cell)
 {
    wxTreeItemId item1, item2;
    //Flat
-   assert(fCellBrowser->findItem(open_cell, item1, fCellBrowser->GetRootItem()));
+   VERIFY(fCellBrowser->findItem(open_cell, item1, fCellBrowser->GetRootItem()));
    fCellBrowser->highlightChildren(fCellBrowser->GetRootItem(), *wxLIGHT_GREY);
    top_structure = active_structure = item1;
    //fCellBrowser->highlightChildren(top_structure, *wxBLACK);
    fCellBrowser->SetItemTextColour(item1,*wxBLUE);
    
    //Hier
-   assert(hCellBrowser->findItem(open_cell, item2, hCellBrowser->GetRootItem()));
+   VERIFY(hCellBrowser->findItem(open_cell, item2, hCellBrowser->GetRootItem()));
    hCellBrowser->highlightChildren(hCellBrowser->GetRootItem(), *wxLIGHT_GREY);
 //   if (top_structure.IsOk())
 //      SetItemFont(active_structure,_llfont_normal);
@@ -698,7 +698,7 @@ void browsers::TDTbrowser::OnTELLhighlightcell(wxString open_cell)
 {
    //Only for hierarchy mode
    wxTreeItemId item;
-   assert(hCellBrowser->findItem(open_cell, item, hCellBrowser->GetRootItem()));
+   VERIFY(hCellBrowser->findItem(open_cell, item, hCellBrowser->GetRootItem()));
    hCellBrowser->SetItemTextColour(active_structure,*wxBLACK);
 //   SetItemFont(active_structure,_llfont_normal);
    active_structure = item;
@@ -727,7 +727,7 @@ void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname,
          break;
       }   
       case 1: {//first reference of existing cell
-         assert(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
+         VERIFY(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
          while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem())) 
          {
             hCellBrowser->copyItem(item,newparent);
@@ -738,7 +738,7 @@ void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname,
          break;
       }   
       case 2: {//
-         assert(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
+         VERIFY(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
          while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()))
          {
             hCellBrowser->copyItem(item,newparent);
@@ -759,8 +759,8 @@ void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentna
       hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem());
       hCellBrowser->copyItem(item, hCellBrowser->GetRootItem());
       item = wxTreeItemId();
-      assert(hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()));
-      assert(hCellBrowser->findItem(cellname, item, newparent));
+      VERIFY(hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()));
+      VERIFY(hCellBrowser->findItem(cellname, item, newparent));
       hCellBrowser->DeleteChildren(item);
       hCellBrowser->Delete(item);
    }
@@ -769,12 +769,12 @@ void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentna
       wxTreeItemId item;
       
       //Flat
-      assert(fCellBrowser->findItem(cellname, item, fCellBrowser->GetRootItem()));
+      VERIFY(fCellBrowser->findItem(cellname, item, fCellBrowser->GetRootItem()));
       fCellBrowser->Delete(item);
 
       //Hier
       wxTreeItemId item2;
-      assert(hCellBrowser->findItem(cellname, item2, hCellBrowser->GetRootItem()));
+      VERIFY(hCellBrowser->findItem(cellname, item2, hCellBrowser->GetRootItem()));
       // copy all children
       // This part is "in case". The thing is that children should have been
       // removed already, by tdtcell::removePrep
@@ -793,7 +793,7 @@ void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentna
       while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()))
       {
          wxTreeItemId item;
-         assert(hCellBrowser->findItem(cellname, item, newparent));
+         VERIFY(hCellBrowser->findItem(cellname, item, newparent));
          hCellBrowser->DeleteChildren(item);
          hCellBrowser->Delete(item);
       }

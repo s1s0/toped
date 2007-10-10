@@ -1,7 +1,5 @@
 Short Term
 ------------
- - Draw wire - this seems to be the most obvious bug in the drawing.
- - Import of the GDSII wire type 2 and/or 4. We have troubles - the example GDSII from Sergey.
  - Browser window needs search facilities. For big designs
  - Depth of UNDO must be a menu parameter (or a TELL function ?)
       
@@ -30,8 +28,6 @@ General
   ------------
   * Function calls must be declared as expressions (in the parser). Currently the expressions
     can contain only variables
-  * TELL lists and their manupulation
-    - think about indexing operatons on the lists - adding, removing components
   * break, continue, jump/goto statements and label (for the f.... jump)
   * return statements when there are multiply paths
   * logical operations between figures in TELL! (maybe Toped engine should be used here)
@@ -70,6 +66,8 @@ Seems OK
     structures will remain in the heap. Of course TOPED objects should not be
     desctructed!
   * TELL Run time error handling - exceptions
+  * Draw wire - this seems to be the most obvious bug in the drawing.
+  * Import of the GDSII wire type 2 and/or 4. We have troubles - the example GDSII from Sergey.
 
   done after rel.0.8
   --------------------

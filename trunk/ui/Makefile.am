@@ -3,7 +3,7 @@ EXTRA_DIST = activelay.xpm cell_expanded.xpm \
              lock.xpm red_lamp.xpm green_lamp.xpm \
              blue_lamp.xpm toped.desktop \
              toped_16x16.png toped_32x32.png toped_64x64.png \
-             toped16x16.xpm
+             toped16x16.xpm toped32x32.xpm
 tpd_appsdir = $(datadir)/applications
 tpd_apps_DATA = toped.desktop
 tpd_icondir = $(pkgdatadir)/icons

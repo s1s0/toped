@@ -53,7 +53,7 @@ class DataCenter {
 public:
                               DataCenter();
                              ~DataCenter(); 
-   void                       GDSparse(std::string filename);
+   bool                       GDSparse(std::string filename);
    void                       GDSexport(std::string&);
    void                       GDSexport(laydata::tdtcell*, bool, std::string&);
    void                       importGDScell(const nameList&, bool recur, bool over);

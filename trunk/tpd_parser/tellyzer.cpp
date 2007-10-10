@@ -1993,6 +1993,7 @@ parsercmd::FuncDeclaration::~FuncDeclaration()
 
 void console::toped_logfile::init(const std::string logFileName, bool append)
 {
+	char *locale=setlocale(LC_ALL, "");
    if (append)
    {
       _file.open(logFileName.c_str(), std::ios::out | std::ios::app);
@@ -2008,11 +2009,12 @@ void console::toped_logfile::init(const std::string logFileName, bool append)
       _file << LFH_SEPARATOR << std::endl;
       _file << LFH_HEADER    << std::endl;
       _file << LFH_SEPARATOR << std::endl;
-      _file << LFH_REVISION  << "0.7" << std::endl;
+      _file << LFH_REVISION  << "0.8x" << std::endl;
       _file << LFH_ENVIRONM  << wxGetCwd() << std::endl;
       _file << LFH_TIMESTAMP << timec() << std::endl;
       _file << LFH_SEPARATOR << std::endl;
    }
+	setlocale(LC_ALL, "English");
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const byte _i) {

@@ -10,14 +10,14 @@
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
     <description/>
-    <versioncontrol>kdevsubversion</versioncontrol>
+    <versioncontrol/>
     <secondaryLanguages/>
     <projectname>toped</projectname>
   </general>
   <kdevautoproject>
     <general>
       <activetarget>src/toped</activetarget>
-      <useconfiguration>debug</useconfiguration>
+      <useconfiguration>optimized</useconfiguration>
     </general>
     <run>
       <mainprogram>src/toped</mainprogram>
@@ -79,7 +79,7 @@
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs>../../tll/tcase.tll</programargs>
+      <programargs/>
       <gdbpath/>
       <configGdbScript/>
       <runShellScript/>

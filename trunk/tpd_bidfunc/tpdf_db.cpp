@@ -281,24 +281,31 @@ int tellstdfunc::GDSread::execute() {
    if (expandFileName(filename))
    {
       std::list<std::string> top_cell_list;
-      DATC->GDSparse(filename);
-      // add GDS tab in the browser
-      browsers::addGDStab();
-      //
-      GDSin::GDSFile* AGDSDB = DATC->lockGDS();
+      if (DATC->GDSparse(filename))
+      {
+         // add GDS tab in the browser
+         browsers::addGDStab();
+         //
+         GDSin::GDSFile* AGDSDB = DATC->lockGDS();
 
-         GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot();
-         do 
-         {
-            top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));
-         } while (NULL != (root = root->GetNextRoot()));
-      DATC->unlockGDS();
-      telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
-      for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
-                                                CN != top_cell_list.end(); CN ++)
-         topcells->add(DEBUG_NEW telldata::ttstring(*CN));
-      OPstack.push(topcells);
-      LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+            GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot();
+            do 
+            {
+               top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));
+            } while (NULL != (root = root->GetNextRoot()));
+         DATC->unlockGDS();
+         telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
+         for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
+                                                   CN != top_cell_list.end(); CN ++)
+            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
+         OPstack.push(topcells);
+         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+      }
+      else
+      {
+         std::string info = "File \"" + filename + "\" doesn't seem to appear a valid GDSII file";
+         tell_log(console::MT_ERROR,info);
+      }
    }
    else
    {

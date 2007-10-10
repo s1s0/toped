@@ -1,5 +1,5 @@
 noinst_HEADERS = tellibin.h tpdf_common.h tpdf_db.h 		tpdf_props.h tpdf_cells.h \
-		tpdf_edit.h tpdf_add.h tpdf_select.h tllf_list.h tpdf_get.h
+		tpdf_edit.h tpdf_add.h tpdf_select.h tllf_list.h tpdf_get.h tpdph.h
 lib_LTLIBRARIES = libtpd_bidfunc.la
 libtpd_bidfunc_la_LDFLAGS = -no-undefined
 libtpd_bidfunc_la_SOURCES = tellibin.cpp tpdf_common.cpp 		tpdf_db.cpp \
