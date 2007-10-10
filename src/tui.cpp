@@ -632,10 +632,11 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
                                            wxTextValidator(wxFILTER_NUMERIC, &_layno));
    wxTextCtrl* dwlayname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 0,
                                           wxTextValidator(wxFILTER_ASCII, &_layname));
-   if (init > 0)
+
+   /*if (init > 0)
    {
       dwlayno->SetEditable(false);
-   }
+   }*/
    _sample   = DEBUG_NEW layset_sample( this, -1, wxDefaultPosition, wxDefaultSize, init);
    nameList all_names;
    wxArrayString all_strings;

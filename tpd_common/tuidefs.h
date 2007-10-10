@@ -135,6 +135,7 @@ namespace tui
       TBSTAT_ABORT        ,
       //Warning!!! Do not use IDs between TMDUMMY and TMDUMMY_END
       TMDUMMY = 500       ,
+      TMDUMMY_LAYER = 10000,
       TMDUMMY_END = 11000
    } TOPED_MENUID;
 
