@@ -12,7 +12,7 @@
 Name "toped"
 
 ; The file to write
-OutFile "toped_install.exe"
+OutFile "toped_install-086RC.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\toped
@@ -46,11 +46,12 @@ Section "toped"
   ; Put file there
   File "toped.exe"
   File "glu32.dll"
-  File "Microsoft.VC80.DebugCRT.manifest"
-  File "msvcm80d.dll"
-  File "msvcp80d.dll"
-  File "msvcr80d.dll"
-  File "opengl32.dll"
+  ;File "Microsoft.VC80.CRT.manifest"
+  ;File "toped.exe.manifest"
+  ;File "toped.exe.intermediate.manifest"
+  ;File "msvcm80.dll"
+  ;File "msvcp80.dll"
+  ;File "msvcr80.dll"
   File "toped_example.bat"
   File "news.txt"
   File "readme.txt"
@@ -59,18 +60,14 @@ Section "toped"
   File "seed.tll"
   File "laylogic.tll"
   File "tcase.tll"
+  File "structures.tll"
+  File "checklists.tll"
 
   ;Read current user directory
-  ReadRegStr $R0 HKCU "Environment" "HOME"
-  ;ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Personal"
+  ;ReadRegStr $R0 HKCU "Environment" "HOME"
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Personal"
   StrCpy $LocalDir "$R0\toped"
   CreateDirectory "$LocalDir\log"
-
-  ;Change installation directory to $INSTDIR\font
-  ;SetOutPath $LocalDir\tll
-  ;File "seed.tll"
-  ;File "laylogic.tll"
-  ;File "tcase.tll"
 
   ;Change installation directory to $INSTDIR\font
   SetOutPath $INSTDIR\fonts
@@ -98,6 +95,7 @@ Section "toped"
   ;Write environment variables
   WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" TPD_GLOBAL "$INSTDIR"
   WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" TPD_LOCAL "$LocalDir"
+  SetRebootFlag true
 SectionEnd
 
 ; Optional section (can be disabled by the user)
@@ -110,6 +108,15 @@ Section "Start Menu Shortcuts"
 
   
 SectionEnd
+
+
+;MessageBox MB_YESNO|MB_ICONQUESTION "Do you wish to reboot the system right now?" IDNO +2
+;  Reboot
+
+Function .onInstSuccess
+  MessageBox MB_YESNO|MB_ICONQUESTION "Do you wish to reboot the system right now?" IDNO +2
+  Reboot
+FunctionEnd
 
 ;--------------------------------
 
@@ -127,11 +134,12 @@ Section "Uninstall"
   ; Remove files and uninstaller
   Delete $INSTDIR\toped.exe
   Delete $INSTDIR\glu32.dll
-  Delete $INSTDIR\Microsoft.VC80.DebugCRT.manifest
-  Delete $INSTDIR\msvcm80d.dll
-  Delete $INSTDIR\msvcp80d.dll
-  Delete $INSTDIR\msvcr80d.dll
-  Delete $INSTDIR\opengl32.dll
+  ;Delete $INSTDIR\Microsoft.VC80.CRT.manifest
+  ;Delete "$INSTDIR\toped.exe.manifest"
+  ;Delete "$INSTDIR\toped.exe.intermediate.manifest"
+  ;Delete $INSTDIR\msvcm80d.dll
+  ;Delete $INSTDIR\msvcp80d.dll
+  ;Delete $INSTDIR\msvcr80d.dll
   Delete $INSTDIR\toped_example.bat
   Delete $INSTDIR\news.txt
   Delete $INSTDIR\readme.txt
@@ -139,6 +147,8 @@ Section "Uninstall"
   Delete $INSTDIR\tll\seed.tll
   Delete $INSTDIR\tll\laylogic.tll
   Delete $INSTDIR\tll\tcase.tll
+  Delete $INSTDIR\tll\structures.tll
+  Delete $INSTDIR\tll\checklists.tll
 
   Delete $INSTDIR\fonts\arial1.glf
   Delete $INSTDIR\fonts\courier1.glf
@@ -154,10 +164,6 @@ Section "Uninstall"
   StrCpy $LocalDir "$R0\toped"
   Delete "$LocalDir\log\*.*"
   RMDir "$LocalDir\log"
-  ;Delete $LocalDir\tll\seed.tll
-  ;Delete $LocalDir\tll\laylogic.tll
-  ;Delete $LocalDir\tll\tcase.tll
-  ;RmDir $LocalDir\tll
   RMDir $LocalDir
 
   ;Sometimes log creates in installation directory

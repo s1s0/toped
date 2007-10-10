@@ -1453,16 +1453,16 @@ void tui::defineFill::nameNormalize(wxString& str)
 {
    wxRegEx regex;
    // replace tabs with spaces
-   assert(regex.Compile(wxT("\t")));
+   VERIFY(regex.Compile(wxT("\t")));
    regex.ReplaceAll(&str,wxT(" "));
    // remove continious spaces
-   assert(regex.Compile(wxT("[[:space:]]{2,}")));
+   VERIFY(regex.Compile(wxT("[[:space:]]{2,}")));
    regex.ReplaceAll(&str,wxT(""));
    //remove leading spaces
-   assert(regex.Compile(wxT("^[[:space:]]")));
+   VERIFY(regex.Compile(wxT("^[[:space:]]")));
    regex.ReplaceAll(&str,wxT(""));
    // remove trailing spaces
-   assert(regex.Compile(wxT("[[:space:]]$")));
+   VERIFY(regex.Compile(wxT("[[:space:]]$")));
    regex.ReplaceAll(&str,wxT(""));
    //remove spaces before brackets and separators
 }
