@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="Windows-1252"?>
+<?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="tpd_common"
 	ProjectGUID="{1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB}"
 	RootNamespace="tpd_common"
@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Release\tpd_common.lib"
+				OutputFile="..\Release\tpd_common.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
