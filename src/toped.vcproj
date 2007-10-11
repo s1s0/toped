@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="Windows-1252"?>
+<?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="toped"
 	ProjectGUID="{07EF8990-20F5-4E03-803A-7BC622A4B5E1}"
 	RootNamespace="toped"
@@ -77,7 +77,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib winmm.lib wxmsw28_xrc.lib wxregex.lib wxzlib.lib wxpng.lib wxjpeg.lib wxtiff.lib wxexpat.lib wxbase28.lib wxbase28_net.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_html.lib wxbase28_xml.lib wxmsw28_gl.lib"
-				OutputFile=".\Release/toped.exe"
+				OutputFile="../Release/toped.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="c:\wxWindows\lib,c:\wxWindows\contrib\lib"
