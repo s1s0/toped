@@ -160,7 +160,8 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_LEFT_UP          ( tui::LayoutCanvas::OnMouseLeftUp     )
    EVT_LEFT_DCLICK      ( tui::LayoutCanvas::OnMouseLeftDClick )
    EVT_MIDDLE_UP        ( tui::LayoutCanvas::OnMouseMiddleUp   )
-   EVT_CHAR             ( tui::LayoutCanvas::OnChar)
+   EVT_MOUSEWHEEL       ( tui::LayoutCanvas::OnMouseWheel      )
+   EVT_CHAR             ( tui::LayoutCanvas::OnChar            )
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_ZOOM  , wxID_ANY, tui::LayoutCanvas::OnZoom)
    EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT  , wxID_ANY, tui::LayoutCanvas::OnMouseIN)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_CURSOR, wxID_ANY, tui::LayoutCanvas::OnCursorType)
@@ -416,57 +417,76 @@ void tui::LayoutCanvas::EventMouseClick(int button) {
    }
 }
 
-void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event) {
+void tui::LayoutCanvas::PointUpdate(int nX, int nY)
+{
+   ScrMARKold = ScrMARK;
+   ScrMARK = TP(nX,nY) * _LayCTM;
+   int4b stepDB = DATC->stepDB();
+   ScrMARK.roundTO(stepDB);
+   
+   // update movement indicators
+   int deltaX = abs(ScrMARKold.x() - ScrMARK.x());
+   int deltaY = abs(ScrMARKold.y() - ScrMARK.y());
+   if (!(deltaX || deltaY)) return;
+   //
+   CursorControl(false, false);
+   if (deltaX > 0) 
+      UpdateCoordWin(ScrMARK.x(), CNVS_POS_X, (n_ScrMARK.x() - releasepoint.x()), CNVS_DEL_X);
+   if (deltaY > 0) 
+      UpdateCoordWin(ScrMARK.y(), CNVS_POS_Y, (n_ScrMARK.y() - releasepoint.y()), CNVS_DEL_Y);
+}
+
+void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
+{
    ScrMARKold = ScrMARK;
    // get a current position
    ScrMARK = TP(event.GetX(),event.GetY()) * _LayCTM ;
    int4b stepDB = DATC->stepDB();
    ScrMARK.roundTO(stepDB);
-   if (DATC->autopan() && mouse_input && !invalid_window) {
+   if (DATC->autopan() && mouse_input && !invalid_window)
+   {
       CTM LayCTMR(_LayCTM.Reversed());
       TP sp_BL     =     lp_BL * LayCTMR;
       TP sp_TR     =     lp_TR * LayCTMR;
       TP s_ScrMARK = n_ScrMARK * LayCTMR;
       TP nsp;
-      if      (abs(s_ScrMARK.x() - sp_BL.x()) < ap_trigger)  {
-               wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-               eventZOOM.SetInt(ZOOM_LEFT);
-               OnZoom(eventZOOM);
-               nsp = ScrMARK * _LayCTM.Reversed();
-               WarpPointer(nsp.x(),nsp.y());return;
-            }
-      else  if(abs(sp_TR.x() - s_ScrMARK.x()) < ap_trigger) {
-               wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-               eventZOOM.SetInt(ZOOM_RIGHT);
-               OnZoom(eventZOOM);
-               nsp = ScrMARK * _LayCTM.Reversed();
-               WarpPointer(nsp.x(),nsp.y());return;
-            }   
-      else  if(abs(sp_BL.y() - s_ScrMARK.y()) < ap_trigger) {
-               wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-               eventZOOM.SetInt(ZOOM_UP);
-               OnZoom(eventZOOM);
-               nsp = ScrMARK * _LayCTM.Reversed();
-               WarpPointer(nsp.x(),nsp.y());return;
-            }   
-      else  if(abs(s_ScrMARK.y() - sp_TR.y()) < ap_trigger) {
-               wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-               eventZOOM.SetInt(ZOOM_DOWN);
-               OnZoom(eventZOOM);
-               nsp = ScrMARK * _LayCTM.Reversed();
-               WarpPointer(nsp.x(),nsp.y());return;
-            }   
-   }   
+      if      (abs(s_ScrMARK.x() - sp_BL.x()) < ap_trigger)
+      {
+         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+         eventZOOM.SetInt(ZOOM_LEFT);
+         OnZoom(eventZOOM);
+         nsp = ScrMARK * _LayCTM.Reversed();
+         WarpPointer(nsp.x(),nsp.y());return;
+      }
+      else  if(abs(sp_TR.x() - s_ScrMARK.x()) < ap_trigger)
+      {
+         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+         eventZOOM.SetInt(ZOOM_RIGHT);
+         OnZoom(eventZOOM);
+         nsp = ScrMARK * _LayCTM.Reversed();
+         WarpPointer(nsp.x(),nsp.y());return;
+      }
+      else  if(abs(sp_BL.y() - s_ScrMARK.y()) < ap_trigger)
+      {
+         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+         eventZOOM.SetInt(ZOOM_UP);
+         OnZoom(eventZOOM);
+         nsp = ScrMARK * _LayCTM.Reversed();
+         WarpPointer(nsp.x(),nsp.y());return;
+      }
+      else  if(abs(s_ScrMARK.y() - sp_TR.y()) < ap_trigger)
+      {
+         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+         eventZOOM.SetInt(ZOOM_DOWN);
+         OnZoom(eventZOOM);
+         nsp = ScrMARK * _LayCTM.Reversed();
+         WarpPointer(nsp.x(),nsp.y());return;
+      }
+   }
    // update movement indicators
    static int deltaX = abs(ScrMARKold.x() - ScrMARK.x());
    static int deltaY = abs(ScrMARKold.y() - ScrMARK.y());
    if (!(deltaX || deltaY)) return;
-   //
-//   if (event.LeftIsDown() && !mouse_input) {
-//      presspoint = ScrMARKold;
-//      mouseIN(true);rubber_band = true;
-//   }   
-//   if (mouse_input && event.LeftIsDown() && !rubber_band)  rubber_band = true;
    //
    CursorControl(event.ShiftDown(), event.ControlDown());
    if (deltaX > 0) 
@@ -608,7 +628,8 @@ void tui::LayoutCanvas::OnMouseLeftUp(wxMouseEvent& WXUNUSED(event)) {
 //   }   
 }
 
-void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event) {
+void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event)
+{
    wxString ws;
    wxCommandEvent eventMOUSEACCEL(wxEVT_MOUSE_ACCEL);
    ws.sprintf(wxT("{%3.2f,%3.2f}"),ScrMARK.x()*DATC->UU(), ScrMARK.y()*DATC->UU());
@@ -617,12 +638,38 @@ void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event) {
    wxPostEvent(this, eventMOUSEACCEL);
 }
 
-void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& event) {
+void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& event)
+{
    TP s_ScrMARK = ScrMARK * _LayCTM.Reversed();
    wxMenu menu;
-   menu.Append(1000, wxT("Menu Item 1"));
+   menu.Append(TMVIEW_ZOOMALL, wxT("Zoom All"));
    menu.Append(1001, wxT("Menu Item 2"));
    PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
+}
+
+void tui::LayoutCanvas::OnMouseWheel(wxMouseEvent& event)
+{
+   int delta    = event.GetWheelDelta();
+   int fulldist = event.GetWheelRotation();
+   double scroll = fulldist / delta;
+   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   if (event.AltDown())
+   {
+      if      ( 1 <= scroll) eventZOOM.SetInt(ZOOM_IN);
+      else if (-1 >= scroll) eventZOOM.SetInt(ZOOM_OUT);
+   }
+   else if (event.ShiftDown())
+   {
+      if      ( 1 <= scroll) eventZOOM.SetInt(ZOOM_RIGHT);
+      else if (-1 >= scroll) eventZOOM.SetInt(ZOOM_LEFT);
+   }
+   else
+   {
+      if      ( 1 <= scroll) eventZOOM.SetInt(ZOOM_UP);
+      else if (-1 >= scroll) eventZOOM.SetInt(ZOOM_DOWN);
+   }
+   OnZoom(eventZOOM);
+   PointUpdate(event.GetX(), event.GetY());
 }
 
 void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
@@ -630,38 +677,16 @@ void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    switch(event.GetKeyCode())
    {
-   case WXK_LEFT:
-   case '4':
-      eventZOOM.SetInt(ZOOM_LEFT);
-      OnZoom(eventZOOM);
-      break;
-   case WXK_RIGHT:
-   case '6':
-      eventZOOM.SetInt(ZOOM_RIGHT);
-      OnZoom(eventZOOM);
-      break;
-   case WXK_UP:
-   case '8':
-      eventZOOM.SetInt(ZOOM_UP);
-      OnZoom(eventZOOM);
-      break;
-   case WXK_DOWN:
-   case '2':
-      eventZOOM.SetInt(ZOOM_DOWN);
-      OnZoom(eventZOOM);
-      break;
-   case '+':
-      eventZOOM.SetInt(ZOOM_IN);
-      OnZoom(eventZOOM);
-      break;
-   case '-':
-      eventZOOM.SetInt(ZOOM_OUT);
-      OnZoom(eventZOOM);
-      break;
-   default:
-      event.Skip();
-      return;
+      case WXK_LEFT : eventZOOM.SetInt(ZOOM_LEFT ); break;
+      case WXK_RIGHT: eventZOOM.SetInt(ZOOM_RIGHT); break;
+      case WXK_UP   : eventZOOM.SetInt(ZOOM_UP   ); break;
+      case WXK_DOWN : eventZOOM.SetInt(ZOOM_DOWN ); break;
+      case '+'      : eventZOOM.SetInt(ZOOM_IN   ); break;
+      case '-'      : eventZOOM.SetInt(ZOOM_OUT  ); break;
+            default : event.Skip(); return;
    }
+   OnZoom(eventZOOM);
+   PointUpdate(event.GetX(), event.GetY());
 }
 
 void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
