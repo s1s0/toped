@@ -2,6 +2,10 @@ Short Term
 ------------
  - Browser window needs search facilities. For big designs
  - Depth of UNDO must be a menu parameter (or a TELL function ?)
+ - move change layer item to edit menu
+ - implement hidetextbox TELL function (already documented)
+ - bitwise logical operations. Require unsigned.
+
       
 General
 =========
@@ -41,21 +45,29 @@ General
   Graphics
   ---------
  - Switch on/off the drawing of the text boundaries. See rev. 348
-      
+
 Dialog stuff
 ============
-   * Grid definitioan dialog is ugly - text windows are not resizing properly. Needs color
-     dialog as well
+   * Grid definitioan dialog is ugly - text windows are not resizing properly. 
    * The number of the digits after the decimal point must be intact with the 
      current step. There is some piece of code left in tui.cpp (getSize::getSize)
      to be used as a starting point for this
    * Icons and toolbars
    * Resources should go to XML and resource compiler should be used
-   
+
 Documentation
 ==============
-  * TELL status function
   * hidecellbox
+  * boxcut
+  * selectmask
+  * changestr
+  -- TELL  
+  * status
+  * length
+  * abs
+  * getlaytype
+  * getlaytext
+  * getlayref
 
 Seems OK
 ========

@@ -75,6 +75,7 @@ namespace tui {
       void           OnMouseMiddleUp(wxMouseEvent&);
       void           OnMouseLeftDown(wxMouseEvent&);
       void           OnMouseLeftDClick(wxMouseEvent&);
+      void           OnMouseWheel(wxMouseEvent&);
       void           OnChar(wxKeyEvent&);
       void           OnZoom(wxCommandEvent&);
       void           OnMouseIN(wxCommandEvent&);
@@ -91,6 +92,7 @@ namespace tui {
       void           initializeGL();
    private:
       void           CursorControl(bool, bool);
+      void           PointUpdate(int nX, int nY);
 //      void           drawInterim(const TP&);
       CTM            _LayCTM;      // Layout translation matrix
       TP             ScrMARK;      // Current marker position in DB units
