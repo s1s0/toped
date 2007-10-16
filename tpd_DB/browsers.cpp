@@ -750,8 +750,7 @@ void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool
    word *laynotemp = DEBUG_NEW word(layno);
    eventLAYER_STATUS.SetClientData(static_cast<void*> (laynotemp));
    wxPostEvent(Browsers->TDTlayers(), eventLAYER_STATUS);
-
-
+	delete bt1;
 }
 
 void browsers::layer_add(const std::string name, const word layno) 
@@ -763,7 +762,7 @@ void browsers::layer_add(const std::string name, const word layno)
    eventLAYER_ADD.SetInt(*bt);
 
    wxPostEvent(Browsers->layers(), eventLAYER_ADD);
-
+	delete bt;
 }
 
 void browsers::layer_default(const word newlay, const word oldlay) 
@@ -776,6 +775,7 @@ void browsers::layer_default(const word newlay, const word oldlay)
    eventLAYER_DEF.SetInt(*bt);
    
    wxPostEvent(Browsers->layers(), eventLAYER_DEF);
+	delete bt;
 }
 
 void browsers::addTDTtab(std::string libname, laydata::TDTHierTree* tdtH)
@@ -847,6 +847,14 @@ void browsers::parseCommand(const wxString cmd)
    wxPostEvent(Browsers->tellParser(), eventPARSE);
 }
 
+browsers::LayerInfo::LayerInfo(const LayerInfo& lay)
+{
+	_name = lay._name;
+	_layno = lay._layno;
+	_col = lay._col;
+	_fill = lay._fill;
+}
+
 browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
 {
    _name    = name;
@@ -867,7 +875,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
                                    const wxString& name, LayerInfo *layer)
 {
    
-   _layer   = layer;
+   _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
    _hidden  = false;
    //_locked  = false;  
@@ -907,6 +915,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
       stipplebrush = DEBUG_NEW wxBitmap(image, 1);
 #endif
       _brush = DEBUG_NEW wxBrush(   *stipplebrush);
+		delete stipplebrush;
    }
    else
    {
@@ -1142,6 +1151,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
             _buttonMap[*oldlay]->unselect();
             _buttonMap[layno]->select();
             //_layerlist->defaultLayer((word)event.GetExtraLong(), (word)event.GetInt());
+				delete (static_cast<word*>(oldlay));
             break;
          }
       case    BT_LAYER_HIDE:
@@ -1150,6 +1160,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
             bool status = event.GetExtraLong();
             //_buttonMap[layno]->hideLayer(event.IsChecked());
             _buttonMap[*layno]->hideLayer(status);
+				delete (static_cast<word*>(layno));
             break;
          }
          //_layerlist->hideLayer((word)event.GetExtraLong(),event.IsChecked());break;
@@ -1159,6 +1170,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
             word *layno = static_cast<word*>(event.GetClientData());
             bool status = event.GetExtraLong();
             _buttonMap[*layno]->lockLayer(status);
+				delete (static_cast<word*>(layno));
             break;
          }
       case     BT_LAYER_SELECT:
@@ -1223,6 +1235,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
             }
             //_selectedButton = (_buttonMap.begin())->second;
             //_selectedButton->select();
+				delete (static_cast<LayerInfo*>(layer));
             break;
          }
    }

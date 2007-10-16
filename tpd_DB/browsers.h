@@ -200,6 +200,7 @@ namespace browsers
    class LayerInfo
    {
    public:
+		LayerInfo(const LayerInfo& lay);
       LayerInfo(const std::string &name, const word layno);
       ~LayerInfo()         { };
       std::string name()   {return _name;};
