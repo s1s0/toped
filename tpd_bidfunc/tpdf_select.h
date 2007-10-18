@@ -34,22 +34,22 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 
-   TELL_STDCMD_CLASSA_UNDO(stdSELECT      )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdSELECT_I     , stdSELECT     )
-   TELL_STDCMD_CLASSA_UNDO(stdSELECTIN    )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdSELECT_TL   )  //
-   TELL_STDCMD_CLASSA_UNDO(stdPNTSELECT   )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdPNTSELECT_I  , stdPNTSELECT  )
-   TELL_STDCMD_CLASSA_UNDO(stdSELECTALL   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECT    )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdUNSELECT_I   , stdUNSELECT   )
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECTIN  )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECT_TL )  //
-   TELL_STDCMD_CLASSA_UNDO(stdPNTUNSELECT )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdPNTUNSELECT_I, stdPNTUNSELECT)
-   TELL_STDCMD_CLASSA_UNDO(stdUNSELECTALL )  // undo - implemented
-   TELL_STDCMD_CLASSA(stdREPORTSLCTD      )
-   TELL_STDCMD_CLASSA_UNDO(stdSETSELECTMASK)
+   TELL_STDCMD_CLASSA_UNDO(stdSELECT      );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdSELECT_I     , stdSELECT     );
+   TELL_STDCMD_CLASSA_UNDO(stdSELECTIN    );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdSELECT_TL   );  //
+   TELL_STDCMD_CLASSA_UNDO(stdPNTSELECT   );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdPNTSELECT_I  , stdPNTSELECT  );
+   TELL_STDCMD_CLASSA_UNDO(stdSELECTALL   );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdUNSELECT    );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdUNSELECT_I   , stdUNSELECT   );
+   TELL_STDCMD_CLASSA_UNDO(stdUNSELECTIN  );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdUNSELECT_TL );  //
+   TELL_STDCMD_CLASSA_UNDO(stdPNTUNSELECT );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdPNTUNSELECT_I, stdPNTUNSELECT);
+   TELL_STDCMD_CLASSA_UNDO(stdUNSELECTALL );  // undo - implemented
+   TELL_STDCMD_CLASSA(stdREPORTSLCTD      );
+   TELL_STDCMD_CLASSA_UNDO(stdSETSELECTMASK);
 
 }
 #endif
