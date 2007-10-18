@@ -189,10 +189,11 @@ namespace tui {
       void       OnGrid0(wxCommandEvent&);
       void       OnGrid1(wxCommandEvent&);
       void       OnGrid2(wxCommandEvent&);
-      void    OnCellMark(wxCommandEvent&);
       void  OnLongCursor(wxCommandEvent&);
+      void    OnCellMark(wxCommandEvent&);
       void    OnCellBox(wxCommandEvent&);
       void    OnTextMark(wxCommandEvent&);
+      void    OnTextBox(wxCommandEvent&);
       void     OnMarker0(wxCommandEvent&);
       void    OnMarker45(wxCommandEvent&);
       void    OnMarker90(wxCommandEvent&);

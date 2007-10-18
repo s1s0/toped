@@ -437,6 +437,41 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
 }
 
 //=============================================================================
+tellstdfunc::stdHIDETEXTBOND::stdHIDETEXTBOND(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+void tellstdfunc::stdHIDETEXTBOND::undo_cleanup() {
+   getBoolValue(UNDOPstack, false);
+}
+
+void tellstdfunc::stdHIDETEXTBOND::undo() {
+   TEUNDO_DEBUG("hide_textbox( bool ) UNDO");
+   bool        hide  = getBoolValue(UNDOPstack,true);
+   DATC->settextbox_hidden(hide);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
+   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+   RefreshGL();
+}
+
+int tellstdfunc::stdHIDETEXTBOND::execute() {
+   bool        hide  = getBoolValue();
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+   DATC->settextbox_hidden(hide);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
+   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+   RefreshGL();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {

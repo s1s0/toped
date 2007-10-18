@@ -266,7 +266,7 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0) {
    _cellmarks_hidden = true;
    _textmarks_hidden = true;
    _cellbox_hidden = true;
-   _textbox_hidden = false;
+   _textbox_hidden = true;
    _refstack = NULL;
 }
 
@@ -345,12 +345,36 @@ bool layprop::DrawProperties::getCurrentFill() const
    else return false;
 }
 
-bool layprop::DrawProperties::getCurrentBoundary() const
+void layprop::DrawProperties::draw_text_boundary(const pointlist& ptlist)
 {
-   if (0 == _drawinglayer)
-      return !_cellbox_hidden;
+   if (_textbox_hidden) return;
    else
-      return !_textbox_hidden;
+   {
+//      glColor4f(1.0, 1.0, 1.0, 0.5);
+      glLineStipple(1,0x3030);
+      glEnable(GL_LINE_STIPPLE);
+      glBegin(GL_LINE_LOOP);
+      for (unsigned i = 0; i < 4; i++)
+         glVertex2i(ptlist[i].x(), ptlist[i].y());
+      glEnd();
+      glDisable(GL_LINE_STIPPLE);
+   }
+}
+
+void layprop::DrawProperties::draw_cell_boundary(const pointlist& ptlist)
+{
+   if (_cellbox_hidden) return;
+   else
+   {
+      glColor4f(1.0, 1.0, 1.0, 0.5);
+      glLineStipple(1,0xf18f);
+      glEnable(GL_LINE_STIPPLE);
+      glBegin(GL_LINE_LOOP);
+      for (unsigned i = 0; i < 4; i++)
+         glVertex2i(ptlist[i].x(), ptlist[i].y());
+      glEnd();
+      glDisable(GL_LINE_STIPPLE);
+   }
 }
 
 void layprop::DrawProperties::setLineProps(bool selected) const

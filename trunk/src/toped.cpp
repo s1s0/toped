@@ -247,7 +247,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_GRID2         , tui::TopedFrame::OnGrid2       )
    EVT_MENU( TMSET_CELLMARK      , tui::TopedFrame::OnCellMark    )
    EVT_MENU( TMSET_TEXTMARK      , tui::TopedFrame::OnTextMark    )
-   EVT_MENU( TMSET_CELLBOX       , tui::TopedFrame::OnCellBox    )
+   EVT_MENU( TMSET_CELLBOX       , tui::TopedFrame::OnCellBox     )
+   EVT_MENU( TMSET_TEXTBOX       , tui::TopedFrame::OnTextBox     )
    
    EVT_MENU( TMSET_MARKER0       , tui::TopedFrame::OnMarker0     )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
@@ -421,6 +422,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Edit/Cut with box","CTRL-ALT-U", &tui::TopedFrame::OnBoxCut, "Cut selected shapes with a box " );
    _resourceCenter->appendMenu("&Edit/Merge",      "CTRL-G",  &tui::TopedFrame::OnMerge, "Merge selected shpes" );
    _resourceCenter->appendMenuSeparator("Edit");
+   _resourceCenter->appendMenu("&Edit/Change Layer","",&tui::TopedFrame::OnChangeLayer, "Translate the objects to another layer" );
    _resourceCenter->appendMenu("&Edit/Change Text","",&tui::TopedFrame::OnChangeText, "Replace a text contents" );
 
    //---------------------------------------------------------------------------
@@ -542,6 +544,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendCheckItem(TMSET_CELLMARK , wxT("Cell marks"), wxT("Draw/Hide Cell marks"));
    settingsMenu->AppendCheckItem(TMSET_TEXTMARK , wxT("Text marks"), wxT("Draw/Hide Text marks"));
    settingsMenu->AppendCheckItem(TMSET_CELLBOX  , wxT("Cell box")  , wxT("Draw/Hide Cell overlapping box"));
+   settingsMenu->AppendCheckItem(TMSET_TEXTBOX  , wxT("Text box")  , wxT("Draw/Hide Text overlapping box"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
    settingsMenu->AppendCheckItem(TMSET_CURLONG  , wxT("Long cursor")  , wxT("Stretch the cursor cross"));
@@ -556,8 +559,7 @@ void tui::TopedFrame::initMenuBar() {
    */
    _resourceCenter->appendMenu("&Other/Add Ruler"   , "", &tui::TopedFrame::OnAddRuler, "Add new ruler" );
    _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
-   _resourceCenter->appendMenuSeparator("Other");
-   _resourceCenter->appendMenu("&Other/Change Layer","",&tui::TopedFrame::OnChangeLayer, "Translate the objects to another layer" );
+//   _resourceCenter->appendMenuSeparator("Other");
    
    _resourceCenter->appendMenu("&Help/About", "", &tui::TopedFrame::OnAbout, "About TOPED" );
    
@@ -1246,6 +1248,13 @@ void tui::TopedFrame::OnTextMark(wxCommandEvent& WXUNUSED(event)){
   _cmdline->parseCommand(ost);
 }
 
+void tui::TopedFrame::OnTextBox(wxCommandEvent& WXUNUSED(event)){
+  wxString ost;
+  ost << wxT("hidetextbox(") << (settingsMenu->IsChecked(TMSET_TEXTBOX) ? wxT("false") : wxT("true")) <<
+  wxT(");");
+  _cmdline->parseCommand(ost);
+}
+
 void tui::TopedFrame::OnAutopan(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
    ost << wxT("autopan(")<< (settingsMenu->IsChecked(TMSET_AUTOPAN) ? wxT("true") : wxT("false")) << wxT(");");
@@ -1429,6 +1438,8 @@ void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
       case STS_CELLBOX_ON  : settingsMenu->Check(TMSET_CELLBOX,true);break;
       case STS_TEXTMARK_OFF: settingsMenu->Check(TMSET_TEXTMARK,false);break;
       case STS_TEXTMARK_ON : settingsMenu->Check(TMSET_TEXTMARK,true);break;
+      case STS_TEXTBOX_OFF : settingsMenu->Check(TMSET_TEXTBOX,false);break;
+      case STS_TEXTBOX_ON  : settingsMenu->Check(TMSET_TEXTBOX,true);break;
       case STS_AUTOPAN_ON  : settingsMenu->Check(TMSET_AUTOPAN,true );break;
       case STS_AUTOPAN_OFF : settingsMenu->Check(TMSET_AUTOPAN,false);break;
       case STS_ANGLE_0     : settingsMenu->Check(TMSET_MARKER0  ,true );break;

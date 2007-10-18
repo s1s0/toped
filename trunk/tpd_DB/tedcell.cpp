@@ -300,13 +300,10 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
       bool fill = drawprop.getCurrentFill();
-      bool bbox = drawprop.getCurrentBoundary();
-//      if (fill) glfEnable(GLF_FILLING);
-//      else      glfDisable(GLF_FILLING);
       if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
-         lay->second->openGL_draw(drawprop,dlst->second, fill, bbox);
+         lay->second->openGL_draw(drawprop,dlst->second, fill);
       else
-         lay->second->openGL_draw(drawprop, NULL, fill, bbox);
+         lay->second->openGL_draw(drawprop, NULL, fill);
    }
 }
 

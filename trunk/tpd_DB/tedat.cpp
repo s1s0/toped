@@ -1519,16 +1519,7 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
 void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
-//   if drawprop.cell_boundary
-   // draw the overlapping box
-   glColor4f(1.0, 1.0, 1.0, 0.5);
-   glLineStipple(1,0xf18f);
-   glEnable(GL_LINE_STIPPLE);
-   glBegin(GL_LINE_LOOP);
-   for (unsigned i = 0; i < 4; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
+   drawprop.draw_cell_boundary(ptlist);
 }
 
 void laydata::tdtcellref::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -2063,15 +2054,7 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
 void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
-   // draw the overlapping box
-   glLineStipple(1,0x3030);
-   glEnable(GL_LINE_STIPPLE);
-   glBegin(GL_LINE_LOOP);
-   for (unsigned i = 0; i < 4; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
-   
+   drawprop.draw_text_boundary(ptlist);
    drawprop.draw_reference_marks(ptlist[4], layprop::text_mark);
    // draw the text itself
    glPushMatrix();
