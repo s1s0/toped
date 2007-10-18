@@ -35,24 +35,22 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 
-   TELL_STDCMD_CLASSA(stdNEWDESIGNd    )              // reset undo buffers
-   TELL_STDCMD_CLASSB(stdNEWDESIGN   , stdNEWDESIGNd  ) // reset undo buffers
-   TELL_STDCMD_CLASSA(TDTread          )       // reset undo buffers
-   TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread       )
-   TELL_STDCMD_CLASSA(TDTsave          )
-   TELL_STDCMD_CLASSB(TDTsaveIFF      , TDTsave       )
-   TELL_STDCMD_CLASSA(TDTsaveas        )
-   TELL_STDCMD_CLASSA(GDSread          )
-   TELL_STDCMD_CLASSA(GDSconvert       )
-   TELL_STDCMD_CLASSA(GDSconvertAll    )
-   TELL_STDCMD_CLASSA(GDSexportLIB     )
-   TELL_STDCMD_CLASSA(GDSexportTOP     )
-   TELL_STDCMD_CLASSA(PSexportTOP      )
-   TELL_STDCMD_CLASSA(GDSclose         )
-   TELL_STDCMD_CLASSA(stdREPORTLAY     )
-   TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  )
-   TELL_STDCMD_CLASSA(GDSreportlay     )
-
-         
+   TELL_STDCMD_CLASSA(stdNEWDESIGNd    );              // reset undo buffers
+   TELL_STDCMD_CLASSB(stdNEWDESIGN   , stdNEWDESIGNd  ); // reset undo buffers
+   TELL_STDCMD_CLASSA(TDTread          );       // reset undo buffers
+   TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread       );
+   TELL_STDCMD_CLASSA(TDTsave          );
+   TELL_STDCMD_CLASSB(TDTsaveIFF      , TDTsave       );
+   TELL_STDCMD_CLASSA(TDTsaveas        );
+   TELL_STDCMD_CLASSA(GDSread          );
+   TELL_STDCMD_CLASSA(GDSconvert       );
+   TELL_STDCMD_CLASSA(GDSconvertAll    );
+   TELL_STDCMD_CLASSA(GDSexportLIB     );
+   TELL_STDCMD_CLASSA(GDSexportTOP     );
+   TELL_STDCMD_CLASSA(PSexportTOP      );
+   TELL_STDCMD_CLASSA(GDSclose         );
+   TELL_STDCMD_CLASSA(stdREPORTLAY     );
+   TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  );
+   TELL_STDCMD_CLASSA(GDSreportlay     );
 }
 #endif

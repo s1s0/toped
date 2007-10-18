@@ -76,7 +76,7 @@
    protected:                                                     \
       name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor) : \
                                          cmdSTDFUNC(al,retype,eor) {};\
-   };
+   }
 #endif
 
 // TELL_STDCMD_CLASSA_UNDO - inherits directly cmdSTDFUNC - with UNDO
@@ -93,7 +93,7 @@
    protected:                                                     \
       name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor) : \
                                          cmdSTDFUNC(al,retype, eor) {};\
-   };
+   }
 #endif
 
 // TELL_STDCMD_CLASSB - inherits one of the above class types,
@@ -107,7 +107,7 @@
    public:                                                        \
       name(telldata::typeID retype, bool eor);                    \
       int         execute();                                      \
-   };
+   }
 #endif
 
 // Using different type of argument checking. Only echo is defined
@@ -122,7 +122,7 @@
       void        undo_cleanup() {};                              \
       int         argsOK(argumentQ* amap);                        \
       nameList*   callingConv(const telldata::typeMAP*);          \
-   };
+   }
 #endif
 
 //#define TEUNDO_DEBUG_ON

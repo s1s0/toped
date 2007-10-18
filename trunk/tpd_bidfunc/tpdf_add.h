@@ -34,29 +34,29 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOX      )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     )
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWBOX     )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdDRAWBOX_D    , stdDRAWBOX    )
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     )  // undo - implemented8
-   TELL_STDCMD_CLASSB(stdADDBOXr_D    , stdADDBOXr    )
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXp     )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdADDBOXp_D    , stdADDBOXp    )
-   TELL_STDCMD_CLASSA_UNDO(stdADDPOLY     )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdADDPOLY_D    , stdADDPOLY    )
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWPOLY    )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdDRAWPOLY_D   , stdDRAWPOLY   )
-   TELL_STDCMD_CLASSA_UNDO(stdADDWIRE     )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdADDWIRE_D    , stdADDWIRE    )
-   TELL_STDCMD_CLASSA_UNDO(stdDRAWWIRE    )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdDRAWWIRE_D   , stdDRAWWIRE   )
-   TELL_STDCMD_CLASSA_UNDO(stdADDTEXT     )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdADDTEXT_D    , stdADDTEXT    )
-   TELL_STDCMD_CLASSA_UNDO(stdCELLREF     )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdCELLREF_D    , stdCELLREF    )
-   TELL_STDCMD_CLASSA_UNDO(stdCELLAREF    )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdCELLAREF_D   , stdCELLAREF   )
-   TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  )  // undo - implemented
-   TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER )  //
+   TELL_STDCMD_CLASSA_UNDO(stdADDBOX      );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     );
+   TELL_STDCMD_CLASSA_UNDO(stdDRAWBOX     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdDRAWBOX_D    , stdDRAWBOX    );
+   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     );  // undo - implemented8
+   TELL_STDCMD_CLASSB(stdADDBOXr_D    , stdADDBOXr    );
+   TELL_STDCMD_CLASSA_UNDO(stdADDBOXp     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDBOXp_D    , stdADDBOXp    );
+   TELL_STDCMD_CLASSA_UNDO(stdADDPOLY     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDPOLY_D    , stdADDPOLY    );
+   TELL_STDCMD_CLASSA_UNDO(stdDRAWPOLY    );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdDRAWPOLY_D   , stdDRAWPOLY   );
+   TELL_STDCMD_CLASSA_UNDO(stdADDWIRE     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDWIRE_D    , stdADDWIRE    );
+   TELL_STDCMD_CLASSA_UNDO(stdDRAWWIRE    );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdDRAWWIRE_D   , stdDRAWWIRE   );
+   TELL_STDCMD_CLASSA_UNDO(stdADDTEXT     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDTEXT_D    , stdADDTEXT    );
+   TELL_STDCMD_CLASSA_UNDO(stdCELLREF     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdCELLREF_D    , stdCELLREF    );
+   TELL_STDCMD_CLASSA_UNDO(stdCELLAREF    );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdCELLAREF_D   , stdCELLAREF   );
+   TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER );  //
 }
 #endif

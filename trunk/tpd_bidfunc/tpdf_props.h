@@ -35,23 +35,23 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 
-   TELL_STDCMD_CLASSA(stdPROPSAVE      )
-   TELL_STDCMD_CLASSA(stdLAYPROP       )  //
-   TELL_STDCMD_CLASSA(stdLINEDEF       )  //
-   TELL_STDCMD_CLASSA(stdCOLORDEF      )  //
-   TELL_STDCMD_CLASSA(stdFILLDEF       )  //
-   TELL_STDCMD_CLASSA(stdGRIDDEF       )  //
-   TELL_STDCMD_CLASSA_UNDO(stdHIDELAYER   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdHIDELAYERS  )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdHIDECELLMARK)  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdHIDETEXTMARK)  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdHIDECELLBOND)  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdHIDETEXTBOND)  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdLOCKLAYER   )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdLOCKLAYERS  )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdGRID        )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdSTEP        )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdAUTOPAN     )  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdSHAPEANGLE  )  // undo - implemented
+   TELL_STDCMD_CLASSA(stdPROPSAVE      );
+   TELL_STDCMD_CLASSA(stdLAYPROP       );  //
+   TELL_STDCMD_CLASSA(stdLINEDEF       );  //
+   TELL_STDCMD_CLASSA(stdCOLORDEF      );  //
+   TELL_STDCMD_CLASSA(stdFILLDEF       );  //
+   TELL_STDCMD_CLASSA(stdGRIDDEF       );  //
+   TELL_STDCMD_CLASSA_UNDO(stdHIDELAYER   );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdHIDELAYERS  );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdHIDECELLMARK);  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdHIDETEXTMARK);  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdHIDECELLBOND);  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdHIDETEXTBOND);  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdLOCKLAYER   );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdLOCKLAYERS  );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdGRID        );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdSTEP        );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdAUTOPAN     );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdSHAPEANGLE  );  // undo - implemented
 }
 #endif

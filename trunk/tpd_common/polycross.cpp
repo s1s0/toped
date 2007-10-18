@@ -564,7 +564,7 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
    } while (0 == (lps * rps));
    // When segments are crossing (because of the direction of their neightbours),
    // then a crossing point is introduced in the midle of the internal segment
-   if   (lps*rps > 0) return NULL;
+   if   ((lps*rps) > 0) return NULL;
    else return getMiddle(inside->lP(), inside->rP());
 }
 

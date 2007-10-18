@@ -150,7 +150,7 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
    
-   TELL_STDCMD_CLASSA(stdADDMENU       )  //
+   TELL_STDCMD_CLASSA(stdADDMENU       );  //
 }
 
 #endif //RESOURCE_CENTER_INCLUDED
