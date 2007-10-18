@@ -2,7 +2,6 @@ Short Term
 ------------
  - Browser window needs search facilities. For big designs
  - Depth of UNDO must be a menu parameter (or a TELL function ?)
- - move change layer item to edit menu
  - implement hidetextbox TELL function (already documented)
  - bitwise logical operations. Require unsigned.
 

@@ -172,7 +172,6 @@ namespace layprop {
       void                       setCurrentColor(word layno);
       void                       setGridColor(std::string colname) const;
       bool                       getCurrentFill() const;
-      bool                       getCurrentBoundary() const;
       void                       setLineProps(bool selected = false) const;
       bool                       layerHidden(word layno) const;
       bool                       layerLocked(word layno) const;
@@ -189,6 +188,8 @@ namespace layprop {
       void                       popCTM()             {_transtack.pop();}
       const CTM&                 topCTM() const       {assert(_transtack.size());return _transtack.top();}
       void                       draw_reference_marks(const TP&, const binding_marks) const;
+      void                       draw_text_boundary(const pointlist& ptlist);
+      void                       draw_cell_boundary(const pointlist& ptlist);
       word                       getLayerNo(std::string name) const;
       std::string                getLayerName(word layno) const;
       std::string                getColorName(word layno) const;
