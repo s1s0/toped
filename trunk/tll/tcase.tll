@@ -9,16 +9,16 @@
 //                                                                          =
 //   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tll/test.tll $
+//           $URL$
 //        Created: Fri Nov 08 2002
 //     Originator: Svilen Krustev - skr@toped.org.uk
 //    Description: Some basic tests of the script and the editor
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 218 $
-//          $Date: 2005-09-30 23:04:05 +0100 (Fri, 30 Sep 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 
 #include "$TPD_GLOBAL/tll/seed.tll"

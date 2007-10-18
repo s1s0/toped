@@ -7,16 +7,16 @@
 //                        T      E        L       L                         =
 //                        T      EEEEE    LLLLL   LLLLL                     =
 // ------------------------------------------------------------------------ =
-//           $URL: http://perun/tpd_svn/trunk/toped_wx/tll/topedmain.tll $
+//           $URL$
 //        Created: Wed, 16 Nov 2005
 //     Originator: Svilen Krustev - skr@toped.org.uk
 //    Description: Tests for logical operations with polygons
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------                
-//      $Revision: 226 $
-//          $Date: 2005-10-09 23:11:18 +0100 (Sun, 09 Oct 2005) $
-//        $Author: skr $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 
 #include "$TPD_GLOBAL/tll/seed.tll"
