@@ -476,11 +476,14 @@ void browsers::TDTbrowser::OnFlatView(wxCommandEvent& event)
    hCellBrowser->Hide();
    fCellBrowser->Show();
    (this->GetSizer())->Layout();
-   if (hCellBrowser->IsExpanded(hCellBrowser->GetRootItem()))
-   {
-      fCellBrowser->Expand(fCellBrowser->GetRootItem());
-   }
-   
+	wxTreeItemId itemID = hCellBrowser->GetRootItem();
+	if (itemID)
+	{
+		if (hCellBrowser->IsExpanded(itemID))
+		{
+			fCellBrowser->Expand(fCellBrowser->GetRootItem());
+		}
+	}
    //Set normal font for  _hierButton 
    //Set bold font for _flatButton;
    wxFont font = _flatButton->GetFont();
