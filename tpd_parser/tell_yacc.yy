@@ -744,7 +744,7 @@ listslice:
    | variable '[' expression tknPRESUB ']'    {
       if (ListSliceCheck($1, @1, $3, @3))
       {
-         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, true, false));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, false, false));
          $$ = $1;
       }
       else
@@ -762,7 +762,7 @@ listslice:
    | variable '[' tknPOSTSUB  expression ']'   {
       if (ListSliceCheck($1, @1, $4, @4))
       {
-         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, false, false));
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, true, false));
          $$ = $1;
       }
       else
