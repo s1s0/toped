@@ -902,8 +902,10 @@ telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype
       default:
       {
          const telldata::tell_type* utype = getTypeByID(ID);
-         if (NULL == utype) tellerror("Bad type specifier", loc);
-         else return (DEBUG_NEW telldata::user_struct(utype));
+         if (NULL == utype) 
+            tellerror("Bad type specifier", loc);
+         else 
+            return (DEBUG_NEW telldata::user_struct(utype));
       }
    }
    return NULL;
@@ -1346,9 +1348,13 @@ parsercmd::cmdFOREACH::~cmdFOREACH()
 {
 //   delete _var;
    if (NULL != _header)
-      delete _header;
+   {
+      delete _header; _header = NULL;
+   }
    if (NULL != _body)
-      delete _body;
+   {
+      delete _body; _body = NULL;
+   }
 }
 
 //=============================================================================

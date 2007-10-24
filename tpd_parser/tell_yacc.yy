@@ -61,8 +61,8 @@ telldata::tell_var *tell_lvalue = NULL;
 bool indexed = false;
 bool lindexed = false;
 /*Current commands - parsed, but not yet in the command stack*/
-parsercmd::cmdFOREACH *foreach_command;
-parsercmd::cmdLISTADD *listadd_command;
+parsercmd::cmdFOREACH *foreach_command = NULL;
+parsercmd::cmdLISTADD *listadd_command = NULL;
 /*Current tell struct */
 telldata::tell_type *tellstruct = NULL;
 /* used for argument type checking during function call parse */
@@ -78,6 +78,7 @@ int funcdeferrors = 0;
 unsigned listlength = 0;
 void tellerror(std::string s, parsercmd::yyltype loc);
 void tellerror (std::string s);
+void cleanonabort();
 
 %}
 /*=============================================================================
@@ -608,9 +609,10 @@ telltype:
         const telldata::tell_type* ttype = CMDBlock->getTypeByName($1);
         if (NULL == ttype)  {
            tellerror("Bad type specifier", @1);
-           parsercmd::EOfile();
+           $$ = telldata::tn_NULL;
+           delete [] $1;
+           cleanonabort();
            YYABORT;
-
         }
         else $$ = ttype->ID();
         delete [] $1;
@@ -623,7 +625,7 @@ recorddefinition:
         if (NULL == tellstruct) {
            tellerror("type with this name already defined", @1);
            delete [] $2;
-           parsercmd::EOfile();
+           cleanonabort();
            YYABORT;
         }
      }
@@ -807,6 +809,9 @@ anonymousvar:
       else {
          tellerror("Type mismatch", @2);
          $$ = telldata::tn_NULL;
+         delete $2;
+         cleanonabort();
+         YYABORT;
       }
    }
 ;
@@ -887,7 +892,8 @@ primaryexpression :
 
 %%
 /*-------------------------------------------------------------------------*/
-int yyerror (char *s) {  /* Called by yyparse on error */
+int yyerror (char *s) 
+{  /* Called by yyparse on error */
    std::ostringstream ost;
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column
        << ": " << s;
@@ -895,7 +901,8 @@ int yyerror (char *s) {  /* Called by yyparse on error */
    return 0;
 }
 
-void tellerror (std::string s, YYLTYPE loc) {
+void tellerror (std::string s, YYLTYPE loc) 
+{
    if (cfd) cfd->incErrors();
    else     yynerrs++;
    std::ostringstream ost;
@@ -908,10 +915,24 @@ void tellerror (std::string s, YYLTYPE loc) {
    tell_log(console::MT_ERROR,ost.str());
 }
 
-void tellerror (std::string s) {
+void tellerror (std::string s)
+{
    if (cfd) cfd->incErrors();
    else     yynerrs++;
    std::ostringstream ost;
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column << ": " << s;
    tell_log(console::MT_ERROR,ost.str());
+}
+
+void cleanonabort()
+{
+   CMDBlock = CMDBlock->cleaner();
+   parsercmd::EOfile();
+//   if (tellvar)         {delete tellvar;        tellvar           = NULL;}
+//   if (tell_lvalue)     {delete tell_lvalue;    tell_lvalue       = NULL;}
+//   if (foreach_command) {delete foreach_command;foreach_command   = NULL;}
+//   if (listadd_command) {delete listadd_command;listadd_command   = NULL;}
+//   if (tellstruct)      {delete tellstruct;     tellstruct        = NULL;}
+//   if (argmap)          {delete argmap;         argmap            = NULL;}
+//   if (cfd)             {delete cfd;            cfd               = NULL;}
 }

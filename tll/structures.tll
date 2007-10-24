@@ -54,7 +54,7 @@ void test_poly (record1 boza) {
    addpoly(boza.plist,boza.layer);
 }
 
-test_poly({2,{{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}}});
+//test_poly({2,{{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}}});
 
 // Preliminary idea about parametrized cells
 // It looks exactly as any other function in TELL
