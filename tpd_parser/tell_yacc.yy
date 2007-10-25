@@ -100,9 +100,6 @@ Well some remarks may save some time in the future...
     parsestr    - to hold variable/function names during parsing
     pttname     - that's the tell_type we spoke about above. Once again - this is
                   NOT a tell variable. Just the ID of the type.
-    pblock      - that is actually the list structure type where all commands
-                  are stored for future execution. block is the only predicate
-                  of this type
     pfblock     - same as previous, however to avoid generally some casting
                   the {} blocks and function blocks have been separated.
                   funcblock is obviously the only predicate of this type
@@ -256,8 +253,8 @@ Ooops! Second thought!
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument
 %type <plarguments>    nearguments arguments
-%type <pblock>         block
 %type <pfblock>        funcblock
+%type <pblock>         ifcommon
 %type <ptypedef>       fielddeclaration typedefstruct
 %type <pfdeclaration>  funcdeclaration
 /*=============================================================================*/
@@ -268,7 +265,7 @@ input:
 ;
 
 entrance:
-     statement ';'                         {
+      blockstatement                       {
       if (!yynerrs)  CMDBlock->execute();
       else 
       {           
@@ -310,15 +307,9 @@ funcdefinition:
    }
 ;
  
-block:
-     '{'                                   {
-         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
-         CMDBlock->pushblk();
-      }
-     statements '}'                        {
-         $$ = CMDBlock;
-         CMDBlock = CMDBlock->popblk();
-      }
+blockstatement:
+     statement ';'                         {} 
+   | '{' statements '}'                    {}
 ;
 
 funcblock :
@@ -360,15 +351,38 @@ returnstatement :
    }
 ;
 
-ifstatement:
-     tknIF '(' expression ')' block {
-         if (telldata::tn_bool != $3) tellerror("bool type expected",@3);
-         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE($5, NULL));
+ifcommon:
+     tknIF '(' expression ')'       {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+     }
+     blockstatement {
+         parsercmd::cmdBLOCK* if_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         if (telldata::tn_bool != $3) {
+            tellerror("bool type expected",@3);
+            delete if_block;
+            $$ = NULL;
+         }
+         else {
+            $$ = if_block;
+         }
       }
 
-   | tknIF '(' expression ')' block tknELSE block  {
-         if (telldata::tn_bool != $3) tellerror("bool type expected",@3);
-         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE($5,$7));
+ifstatement:
+     ifcommon                       {
+        if (NULL != $1)
+           CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE($1, NULL));
+   }
+   | ifcommon tknELSE               {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+   }  
+     blockstatement                   {
+         parsercmd::cmdBLOCK* else_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         if (NULL != $1)
+            CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE($1,else_block));
       }
 ;
 
@@ -379,11 +393,15 @@ whilestatement:
       }
      expression ')'                 {
          if (telldata::tn_bool != $4) tellerror("bool type expected", @4);
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
       }
-     block {
-         parsercmd::cmdBLOCK* condBlock = CMDBlock;
+     blockstatement {
+         parsercmd::cmdBLOCK* body_block = CMDBlock;
          CMDBlock = CMDBlock->popblk();
-         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdWHILE(condBlock,$7));
+         parsercmd::cmdBLOCK* cond_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdWHILE(cond_block,body_block));
       }
 ;
 
@@ -407,28 +425,38 @@ foreachstatement:
          if  (($4 | telldata::tn_listmask) != $6)
             tellerror("unappropriate variable type",@4);
          foreach_command = DEBUG_NEW parsercmd::cmdFOREACH(tell_lvalue,tellvar);
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
       }
-     block                          {
-         parsercmd::cmdBLOCK* foreach_block = CMDBlock;
+     blockstatement                 {
+         parsercmd::cmdBLOCK* body_block = CMDBlock;
          CMDBlock = CMDBlock->popblk();
-         foreach_command->addBlocks(foreach_block,$9);
+         parsercmd::cmdBLOCK* header_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();         
+         foreach_command->addBlocks(header_block, body_block);
          CMDBlock->pushcmd(foreach_command);
       }
 ;
 
 repeatstatement:
-     tknREPEAT block tknUNTIL '('   {
+     tknREPEAT                      {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+      }
+     blockstatement tknUNTIL '('   {
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
      expression ')'                 {
-         parsercmd::cmdBLOCK* condBlock = CMDBlock;
+         parsercmd::cmdBLOCK* cond_block = CMDBlock;
          CMDBlock = CMDBlock->popblk();
-         if (telldata::tn_bool != $6) {
-            tellerror("bool type expected", @6);
-            delete condBlock;
+         parsercmd::cmdBLOCK* body_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         if (telldata::tn_bool != $7) {
+            tellerror("bool type expected", @7);
+            delete cond_block;
          }
-         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdREPEAT(condBlock,$2));
+         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdREPEAT(cond_block,body_block));
    }
 ;
 
@@ -936,3 +964,50 @@ void cleanonabort()
 //   if (argmap)          {delete argmap;         argmap            = NULL;}
 //   if (cfd)             {delete cfd;            cfd               = NULL;}
 }
+
+/*
+%type <pblock>         block
+    pblock      - that is actually the list structure type where all commands
+                  are stored for future execution. block is the only predicate
+                  of this type
+block:
+     '{'                                   {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+      }
+     statements '}'                        {
+         $$ = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+      }
+;
+*/
+/*
+     tknIF '(' expression ')'       {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+     }
+     blockstatement {
+         parsercmd::cmdBLOCK* if_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         if (telldata::tn_bool != $3) tellerror("bool type expected",@3);
+         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE(if_block, NULL));
+      }
+
+   | tknIF '(' expression ')'       {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+   }
+   blockstatement tknELSE           {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+   }
+   blockstatement                   {
+         parsercmd::cmdBLOCK* else_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         parsercmd::cmdBLOCK* if_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         if (telldata::tn_bool != $3) tellerror("bool type expected",@3);
+         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE(if_block,else_block));
+      }
+;
+*/
