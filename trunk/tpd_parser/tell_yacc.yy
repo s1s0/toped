@@ -265,7 +265,7 @@ input:
 ;
 
 entrance:
-      blockstatement                       {
+      statement                            {
       if (!yynerrs)  CMDBlock->execute();
       else 
       {           
@@ -305,11 +305,6 @@ funcdefinition:
       // addUSERFUNC will take care about cleaning the funcdeclaration ($1) and funcblock ($2) 
       cfd = NULL;
    }
-;
- 
-blockstatement:
-     statement ';'                         {} 
-   | '{' statements '}'                    {}
 ;
 
 funcblock :
@@ -368,6 +363,7 @@ ifcommon:
             $$ = if_block;
          }
       }
+;
 
 ifstatement:
      ifcommon                       {
@@ -460,24 +456,30 @@ repeatstatement:
    }
 ;
 
+blockstatement:
+     statement                             { }
+   | '{' '}'                               { }
+   | '{' statements '}'                    { }
+;
+
 statements:
-     statement                             {}
-   | statements ';' statement              {}
+     statement                             { }
+   | statements     statement              { }
 ;
 
 statement:
-                                           { }
-   | variabledeclaration                   { }
-   | assignment                            {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+     ';'                                   { }
+   | variabledeclaration ';'               { }
+   | assignment          ';'               {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | ifstatement                           {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | whilestatement                        {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | foreachstatement                      {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | repeatstatement                       {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
-   | returnstatement                       {/*keep the return value in the stack*/}
-   | funccall                              {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
-   | listremove                            {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
-   | listslice                             {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
-   | recorddefinition                      { }
+   | returnstatement     ';'               {/*keep the return value in the stack*/}
+   | funccall            ';'               {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | listremove          ';'               {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | listslice           ';'               {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | recorddefinition    ';'               { }
 ;
 
 funccall:
