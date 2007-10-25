@@ -53,9 +53,8 @@ box MOStran(point bound, real W, real L) {
    box contactL = zerobox /| _mincont;
    box contactR = zerobox |\ _mincont;
    // calculate the number of contacts
-   if (W < 2*_actOverCont + _mincont) {
-      echo("Can't fit even a single contact !")
-   }
+   if (W < 2*_actOverCont + _mincont) 
+      echo("Can't fit even a single contact !");
    else {
       usinglayer(7);
       real numconts = (W - 2*_actOverCont) / (_mincont + _contspace);
@@ -65,13 +64,13 @@ box MOStran(point bound, real W, real L) {
          contBL.y = contBL.y + _contspace + _mincont;
          contBR.y = contBR.y + _contspace + _mincont;
          numconts = numconts - 1;
-      };
+      }
       usinglayer(8);
       point metlTL = {contBL.x + _metalovercont + _mincont , contBL.y - _contspace + _metalovercont};
       point metlTR = {contBR.x - _metalovercont - _mincont , contBR.y - _contspace + _metalovercont};
       addbox(metlBL, metlTL);
       addbox(metlBR, metlTR);
-   };
+   }
    return {{bound.x, bound.y}, {bound.x + activeW, bound.y + W}};
 }
 
@@ -81,7 +80,7 @@ void Invertor(point bound, real NW, real NL, real PW, real PL) {
    box ptrActive = MOStran(bound,PW,PL);
    addbox((ptrActive /| _welloverpwell ) |/ _welloverpwell , 1);
    addbox((ptrActive /| _implantoveract) |/ _implantoveract, 6);
-}   
+}
 
 void builkcont(point p1, point p2)
 {
@@ -109,7 +108,7 @@ void builkcont(point p1, point p2)
          generated[:+] = addbox({p1.x -_mincont/2, p1.y + curcont*(_contspace + _mincont) + _actOverCont},_mincont, _mincont,7);
          curcont = curcont + 1;
       }
-   };
+   }
    select(generated);
 }
 
@@ -119,13 +118,13 @@ void whiletest() {
    bool b = true;
    while (a > 0) {
       echo(a); a = a - 1;
-   };
+   }
 
    while (b) {
       echo(a); 
       a = a + 1; 
       b = a < 5;
-   };
+   }
    int i = 10;
    while (i > 0) {
       echo("outer cycle reports -> ");echo(i); i = i - 1;
@@ -155,7 +154,7 @@ void repeattest() {
       repeat {
          echo("inner -> ");echo(j); j = j - 1;
       } until (j > 0);
-   } until (i > 0)      
+   } until (i > 0)
 //   repeat {} until(a);
 }
 
@@ -281,7 +280,7 @@ int factoriel(real stop)
    {
       int boza = factoriel(stop - 1);
       return (stop * boza);
-   };
+   }
    return 1;
 }
 
@@ -291,7 +290,7 @@ void factotest()
    repeat {
       echo(factoriel(i));
       i = i+1;
-   } until (i < 10)      
+   } until (i < 10)
 }
 
 void all_texts()
@@ -301,9 +300,7 @@ void all_texts()
    echo("Number of selected text objects");
    echo(length(all_t));   
    foreach(layout curt; all_t)
-   {
       echo(getlaytext(curt));
-   };
    unselect_all();
 }
 
@@ -314,11 +311,41 @@ void all_refs()
    echo("Number of selected reference objects");
    echo(length(all_t));   
    foreach(layout curt; all_t)
-   {
       echo(getlayref(curt));
-   };
    unselect_all();
 }
+
+
+void embedif(int a)
+{
+   if      (a < 1) echo(0);
+   else if (a < 2) echo(1);
+   else if (a < 3) echo(2);
+   else if (a < 4) echo(3);
+   else if (a < 5) echo(4);
+   else if (a < 6) echo(5);
+   else if (a < 7) echo(6);
+   else if (a < 8) echo(7);
+   else            echo("input parameter too big");
+
+   if (a>0)
+      if (a>1)
+         if (a>2)
+            if (a>3)
+               if (a>4)
+                  if (a>5)
+                     if (a>6)
+                        if (a>7) echo ("input parameter too big");
+                        else echo(7);
+                     else echo(6);
+                  else echo(5);
+               else echo(4);
+            else echo(3);
+         else echo(2);
+      else echo(1);
+   else echo(0);
+}
+
 
 newcell("Fcell");
 opencell("Fcell");
