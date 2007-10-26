@@ -9,11 +9,11 @@
     <ignoreparts/>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
+    <description></description>
     <versioncontrol>kdevsubversion</versioncontrol>
     <secondaryLanguages/>
     <projectname>toped</projectname>
-    <defaultencoding/>
+    <defaultencoding></defaultencoding>
   </general>
   <kdevautoproject>
     <general>
@@ -21,14 +21,14 @@
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
-      <mainprogram/>
+      <mainprogram>/home/siso/toped/toped_public/debug</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs/>
+      <programargs>$TPD_LOCAL/tll/tbase.tll</programargs>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars/>
-      <globaldebugarguments/>
+      <globaldebugarguments>$TPD_LOCAL/tll/tbase.tll</globaldebugarguments>
       <globalcwd>/home/siso/toped/toped_public/debug</globalcwd>
       <useglobalprogram>false</useglobalprogram>
       <autoinstall>false</autoinstall>
@@ -86,10 +86,10 @@
     <general>
       <dbgshell>libtool</dbgshell>
       <programargs/>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -186,7 +186,7 @@
       <includePaths>.;</includePaths>
     </codecompletion>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
@@ -215,8 +215,6 @@
       <group pattern="*.h" name="Headers" />
       <group pattern="*.yy" name="Parsers" />
       <group pattern="*.ll" name="Lexers" />
-      <hidenonprojectfiles>false</hidenonprojectfiles>
-      <hidenonlocation>false</hidenonlocation>
     </groups>
     <tree>
       <hidepatterns>*.o,*.lo,CVS</hidepatterns>
@@ -231,8 +229,9 @@
     </filetemplates>
   </cppsupportpart>
   <ctagspart>
-    <customArguments/>
-    <customTagfilePath/>
+    <customArguments></customArguments>
+    <customTagfilePath>/home/siso/toped/toped_public/tags</customTagfilePath>
+    <activeTagsFiles/>
   </ctagspart>
   <kdevdocumentation>
     <projectdoc>
@@ -245,17 +244,19 @@
     <custom>false</custom>
     <bzip>true</bzip>
     <archname>%n_%v_%d</archname>
-    <appname>toped.kdevelop</appname>
-    <version>0.8</version>
-    <release>3</release>
-    <vendor>Svilen Krastev</vendor>
-    <licence>GPL</licence>
+    <appname>toped</appname>
+    <version>0.8.7</version>
+    <release>1%{?dist}</release>
+    <vendor/>
+    <licence/>
     <summary>IC Layout Editor</summary>
     <group>Applications/Engineering</group>
-    <packager>Svilen Krastev</packager>
-    <description>VLSI layout editor</description>
-    <changelog>*
-- first RPM</changelog>
+    <packager/>
+    <description>Toped is an open source cross-platform IC layout editor,
+based on openGL and wxWidgets.
+
+</description>
+    <changelog/>
     <devpackage>false</devpackage>
     <docspackage>false</docspackage>
     <appicon>false</appicon>

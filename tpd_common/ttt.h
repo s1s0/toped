@@ -130,7 +130,7 @@ public:
    CTM(real va,real vb,real vc,real vd,real vtx,real vty) :
     _a(va), _b(vb), _c(vc), _d(vd), _tx(vtx), _ty(vty) {};
 //   CTM(const CTM& mtrx) { *this = *mtrx;};
-   inline CTM  Translate(real X, real Y) {return (*this *= CTM(1,0,0,1,X,Y));}
+   CTM  Translate(real X, real Y) {return (*this *= CTM(1,0,0,1,X,Y));}
    CTM  Translate(const TP);
    CTM  Scale(real X, real Y)     {return (*this *= CTM(X,0,0,Y,0,0));}
    CTM  FlipX(real Y=0)           {return (*this *= CTM(1,0,0,-1,0,2*Y));}

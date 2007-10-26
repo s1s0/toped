@@ -433,7 +433,7 @@ CTM::CTM(TP dp, real scale, real rotation,bool reflX) {
    Translate((real) dp.x(),(real) dp.y());
 }
 
-inline CTM CTM::Translate( const TP pnt)
+CTM CTM::Translate( const TP pnt)
 {
    return (*this *= CTM(1,0,0,1,pnt.x(),pnt.y()));
 }
