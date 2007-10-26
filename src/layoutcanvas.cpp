@@ -166,15 +166,16 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT  , wxID_ANY, tui::LayoutCanvas::OnMouseIN)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_CURSOR, wxID_ANY, tui::LayoutCanvas::OnCursorType)
 
-   EVT_MENU(      CM_RULER, LayoutCanvas::OnCMrulerState    )
-   EVT_MENU(      CM_CHLAY, LayoutCanvas::OnCMchangeLayer   )
-   EVT_MENU(   CM_CONTINUE, LayoutCanvas::OnCMcontinue      )
-   EVT_MENU(      CM_ABORT, LayoutCanvas::OnCMabort         )
-   EVT_MENU(CM_CANCEL_LAST, LayoutCanvas::OnCMcancel        )
-   EVT_MENU(      CM_CLOSE, LayoutCanvas::OnCMclose         )
-   EVT_MENU(      CM_AGAIN, LayoutCanvas::OnRepeatLastCmd   )
-   EVT_MENU(       CM_FLIP, LayoutCanvas::OnCMFlip          )
-   EVT_MENU(     CM_ROTATE, LayoutCanvas::OnCMRotate        )
+   EVT_MENU(         CM_RULER, LayoutCanvas::OnCMrulerState    )
+   EVT_MENU(         CM_CHLAY, LayoutCanvas::OnCMchangeLayer   )
+   EVT_MENU(      CM_CONTINUE, LayoutCanvas::OnCMcontinue      )
+   EVT_MENU(         CM_ABORT, LayoutCanvas::OnCMabort         )
+   EVT_MENU(   CM_CANCEL_LAST, LayoutCanvas::OnCMcancel        )
+   EVT_MENU(         CM_CLOSE, LayoutCanvas::OnCMclose         )
+   EVT_MENU(         CM_AGAIN, LayoutCanvas::OnRepeatLastCmd   )
+   EVT_MENU(          CM_FLIP, LayoutCanvas::OnCMFlip          )
+   EVT_MENU(        CM_ROTATE, LayoutCanvas::OnCMRotate        )
+   EVT_MENU( TMVIEW_PANCENTER, LayoutCanvas::OnPanCenter       )
 END_EVENT_TABLE()
 
 //   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
@@ -191,6 +192,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    restricted_move = false;
    invalid_window = false;
    reperX = reperY = long_cursor = false;
+   slide = false;
    initializeGL();
    ap_trigger = 10;
    glfInit();
@@ -229,6 +231,19 @@ wxImage   tui::LayoutCanvas::snapshot(void)
    
    wxImage image2;
    return image2;
+}
+
+
+void tui::LayoutCanvas::viewshift()
+{
+   int Wcl, Hcl;
+   const int slide_step = 100;
+   GetClientSize(&Wcl,&Hcl);
+   glReadBuffer(GL_FRONT);
+   glRasterPos2i (0, 0);
+   glCopyPixels (slide_step, 0, Wcl-slide_step, Hcl, GL_COLOR);
+   glAccum(GL_LOAD, 1.0);
+   slide = false;
 }
 
 void tui::LayoutCanvas::initializeGL() {
@@ -293,7 +308,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glMatrixMode( GL_MODELVIEW );
       glShadeModel( GL_FLAT ); // Single color
       update_viewport();
-      glClear(GL_ACCUM_BUFFER_BIT);
       //@TODO !! Check somewhere that RGBA mode is available!?
       // CTM matrix stuff
       glLoadIdentity();
@@ -312,6 +326,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glAccum(GL_RETURN, 1.0);
       if       (tmp_wnd)         wnd_paint();
       else if  (rubber_band)     rubber_paint();
+//      else if  (slide)           viewshift();
    }
    // deal with the long cursor
    if (reperX || reperY)
@@ -642,8 +657,8 @@ void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& event)
 {
    TP s_ScrMARK = ScrMARK * _LayCTM.Reversed();
    wxMenu menu;
-   menu.Append(TMVIEW_ZOOMALL, wxT("Zoom All"));
-   menu.Append(1001, wxT("Menu Item 2"));
+   menu.Append(TMVIEW_ZOOMALL  , wxT("Zoom All"));
+   menu.Append(TMVIEW_PANCENTER, wxT("Pan Center"));
    PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
 }
 
@@ -709,7 +724,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
       case ZOOM_IN     : box = DEBUG_NEW DBbox( (3*lp_BL.x() + lp_TR.x())/4, //in
                                                 (3*lp_BL.y() + lp_TR.y())/4,
                                                 (3*lp_TR.x() + lp_BL.x())/4,
-                                                (3*lp_TR.y() + lp_BL.y())/4 );
+                                                (3*lp_TR.y() + lp_BL.y())/4);
                         break;
       case ZOOM_OUT    : box = DEBUG_NEW DBbox( (5*lp_BL.x() - lp_TR.x())/4, //out
                                                 (5*lp_BL.y() - lp_TR.y())/4,
@@ -811,6 +826,22 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       eventABORTEN.SetInt(CNVS_ABORTDISABLE);
    }
    wxPostEvent(this, eventABORTEN);
+}
+
+
+void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
+{
+   CTM tmpmtrx;
+   TP center((lp_TR.x() + lp_BL.x())/2, (lp_TR.y() + lp_BL.y())/2);
+   tmpmtrx.Translate(ScrMARK - center);
+   DBbox* box = DEBUG_NEW DBbox( lp_BL, lp_TR );
+   (*box) = (*box) * tmpmtrx;
+   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   eventZOOM.SetInt(tui::ZOOM_WINDOW);
+   eventZOOM.SetClientData(static_cast<void*>(box));
+   OnZoom(eventZOOM);
+/*   slide = true;
+   Refresh();*/
 }
 
 void tui::LayoutCanvas::OnCursorType(wxCommandEvent& event)

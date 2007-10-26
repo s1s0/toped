@@ -89,7 +89,9 @@ namespace tui {
       void           OnCMFlip(wxCommandEvent&);
       void           OnCMRotate(wxCommandEvent&);
       void           OnCursorType(wxCommandEvent&);
+      void           OnPanCenter(wxCommandEvent&);
       void           initializeGL();
+      void           viewshift();
    private:
       void           CursorControl(bool, bool);
       void           PointUpdate(int nX, int nY);
@@ -111,6 +113,7 @@ namespace tui {
       bool           mouse_input;    // Indicates that a mouse input is expected
       bool           rubber_band;    // Indicates that moving or changing objects must be drawn
       bool           restricted_move;// when mouse controlled input
+      bool           slide;
       wxCursor*      crossCur;
       //
       void           wnd_paint();
