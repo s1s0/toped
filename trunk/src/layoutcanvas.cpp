@@ -653,20 +653,30 @@ void tui::LayoutCanvas::OnMouseWheel(wxMouseEvent& event)
    int fulldist = event.GetWheelRotation();
    double scroll = fulldist / delta;
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-   if (event.AltDown())
+   if (event.ShiftDown())
    {
-      if      ( 1 <= scroll) eventZOOM.SetInt(ZOOM_IN);
-      else if (-1 >= scroll) eventZOOM.SetInt(ZOOM_OUT);
+      if      ( 1 <= scroll) eventZOOM.SetInt(ZOOM_UP);
+      else if (-1 >= scroll) eventZOOM.SetInt(ZOOM_DOWN);
    }
-   else if (event.ShiftDown())
+   else if (event.ControlDown())
    {
       if      ( 1 <= scroll) eventZOOM.SetInt(ZOOM_RIGHT);
       else if (-1 >= scroll) eventZOOM.SetInt(ZOOM_LEFT);
    }
    else
    {
-      if      ( 1 <= scroll) eventZOOM.SetInt(ZOOM_UP);
-      else if (-1 >= scroll) eventZOOM.SetInt(ZOOM_DOWN);
+      const double scalefactor = event.AltDown() ? 0.8 : 0.5;
+      CTM tmpmtrx;
+      TP markerpos(event.GetX(), event.GetY());
+      if      ( 1 <= scroll)
+         tmpmtrx.Scale(scalefactor,scalefactor);
+      else if (-1 >= scroll)
+         tmpmtrx.Scale(1/scalefactor,1/scalefactor);
+      tmpmtrx.Translate(markerpos * _LayCTM - markerpos * _LayCTM * tmpmtrx);
+      DBbox* box = DEBUG_NEW DBbox( lp_BL, lp_TR );
+      (*box) = (*box) * tmpmtrx;
+      eventZOOM.SetInt(tui::ZOOM_WINDOW);
+      eventZOOM.SetClientData(static_cast<void*>(box));
    }
    OnZoom(eventZOOM);
    PointUpdate(event.GetX(), event.GetY());
@@ -691,36 +701,44 @@ void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
 
 void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    DBbox* box = NULL;
-   switch (evt.GetInt()) {
-   case ZOOM_WINDOW : box = static_cast<DBbox*>(evt.GetClientData());break;
-   case ZOOM_WINDOWM: box = DEBUG_NEW DBbox(presspoint.x(),presspoint.y(),
-                                            ScrMARK.x(),ScrMARK.y());break;
-   case ZOOM_IN     : box = DEBUG_NEW DBbox((3*lp_BL.x() + lp_TR.x())/4, //in
-                            (3*lp_BL.y() + lp_TR.y())/4,
-                            (3*lp_TR.x() + lp_BL.x())/4, 
-                            (3*lp_TR.y() + lp_BL.y())/4); break;
-   case ZOOM_OUT    : box = DEBUG_NEW DBbox((5*lp_BL.x() - lp_TR.x())/4, //out
-                            (5*lp_BL.y() - lp_TR.y())/4,
-                            (5*lp_TR.x() - lp_BL.x())/4, 
-                            (5*lp_TR.y() - lp_BL.y())/4); break;
-   case ZOOM_LEFT   : box = DEBUG_NEW DBbox((  lp_TR.x() + lp_BL.x())/2, //left
-                               lp_BL.y()               ,
-                            (3*lp_BL.x() - lp_TR.x())/2, 
-                               lp_TR.y()               ); break;
-   case ZOOM_RIGHT  : box = DEBUG_NEW DBbox((3*lp_TR.x() - lp_BL.x())/2, // right
-                               lp_BL.y()               ,
-                            (  lp_TR.x() + lp_BL.x())/2, 
-                               lp_TR.y()               ); break;
-   case ZOOM_UP     : box = DEBUG_NEW DBbox(   lp_BL.x()               , // up
-                            (3*lp_BL.y() - lp_TR.y())/2,
-                               lp_TR.x()               ,
-                            (  lp_TR.y() + lp_BL.y())/2); break;
-   case ZOOM_DOWN   : box = DEBUG_NEW DBbox(   lp_BL.x()               , // down
-                            (  lp_TR.y() + lp_BL.y())/2,
-                               lp_TR.x()               ,
-                            (3*lp_TR.y() - lp_BL.y())/2); break;
-   case ZOOM_EMPTY  : box = DEBUG_NEW DBbox(-10,-10,90,90); break;
-   default: assert(false);
+   switch (evt.GetInt())
+   {
+      case ZOOM_WINDOW : box = static_cast<DBbox*>(evt.GetClientData());break;
+      case ZOOM_WINDOWM: box = DEBUG_NEW DBbox(presspoint.x(),presspoint.y(),
+                                             ScrMARK.x(),ScrMARK.y());break;
+      case ZOOM_IN     : box = DEBUG_NEW DBbox( (3*lp_BL.x() + lp_TR.x())/4, //in
+                                                (3*lp_BL.y() + lp_TR.y())/4,
+                                                (3*lp_TR.x() + lp_BL.x())/4,
+                                                (3*lp_TR.y() + lp_BL.y())/4 );
+                        break;
+      case ZOOM_OUT    : box = DEBUG_NEW DBbox( (5*lp_BL.x() - lp_TR.x())/4, //out
+                                                (5*lp_BL.y() - lp_TR.y())/4,
+                                                (5*lp_TR.x() - lp_BL.x())/4,
+                                                (5*lp_TR.y() - lp_BL.y())/4);
+                        break;
+      case ZOOM_LEFT   : box = DEBUG_NEW DBbox( (  lp_TR.x() + lp_BL.x())/2, //left
+                                                   lp_BL.y()               ,
+                                                (3*lp_BL.x() - lp_TR.x())/2,
+                                                   lp_TR.y()               );
+                        break;
+      case ZOOM_RIGHT  : box = DEBUG_NEW DBbox( (3*lp_TR.x() - lp_BL.x())/2, // right
+                                                   lp_BL.y()               ,
+                                                (  lp_TR.x() + lp_BL.x())/2,
+                                                   lp_TR.y()               );
+                        break;
+      case ZOOM_UP     : box = DEBUG_NEW DBbox(    lp_BL.x()               , // up
+                                                (3*lp_BL.y() - lp_TR.y())/2,
+                                                   lp_TR.x()               ,
+                                                (  lp_TR.y() + lp_BL.y())/2);
+                        break;
+      case ZOOM_DOWN   : box = DEBUG_NEW DBbox(    lp_BL.x()               , // down
+                                                (  lp_TR.y() + lp_BL.y())/2,
+                                                   lp_TR.x()               ,
+                                                (3*lp_TR.y() - lp_BL.y())/2);
+                        break;
+      case ZOOM_EMPTY  : box = DEBUG_NEW DBbox(-10,-10,90,90);
+                        break;
+      default: assert(false);
    }
    int Wcl, Hcl;
    GetClientSize(&Wcl,&Hcl);

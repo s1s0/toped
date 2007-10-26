@@ -2,10 +2,9 @@ Short Term
 ------------
  - Browser window needs search facilities. For big designs
  - Depth of UNDO must be a menu parameter (or a TELL function ?)
- - implement hidetextbox TELL function (already documented)
  - bitwise logical operations. Require unsigned.
 
-      
+
 General
 =========
   * MEMORY LEAKAGE DEBUG!
@@ -20,7 +19,6 @@ General
   * There is no log possible for select/unselect from list operations. The
     reason is that we don't have a representation of layout list in TELL.
     Think about it. Pointetrs are unapropriate of course.
-  * Theread status and status line in general.
   * Think about improving the TEDAT text readability manipulating the orientation
   * Optional validation - warning/error menu - acute angle case.
   * Autopan doesn't seems to work fine, because it depends probably
@@ -29,8 +27,6 @@ General
   
   TELL related
   ------------
-  * Function calls must be declared as expressions (in the parser). Currently the expressions
-    can contain only variables
   * break, continue, jump/goto statements and label (for the f.... jump)
   * return statements when there are multiply paths
   * logical operations between figures in TELL! (maybe Toped engine should be used here)
@@ -43,7 +39,6 @@ General
 
   Graphics
   ---------
- - Switch on/off the drawing of the text boundaries. See rev. 348
 
 Dialog stuff
 ============
