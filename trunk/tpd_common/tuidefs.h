@@ -82,6 +82,7 @@ namespace tui
       TMVIEW_PANRIGHT     ,
       TMVIEW_PANUP        ,
       TMVIEW_PANDOWN      ,
+      TMVIEW_PANCENTER    ,
 
       TMCELL_NEW          ,
       TMCELL_OPEN         ,
