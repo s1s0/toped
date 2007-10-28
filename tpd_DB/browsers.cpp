@@ -966,9 +966,9 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    DC.GetTextExtent(layno, &wno, &hno);
    DC.DrawText(layno, 0, int((buttonHeight - hno)/2));
    curw += wno + clearence;
-   DC.DrawRectangle(curw, 1, 32, buttonHeight-1);
-   curw += 32 + clearence;
-   if (_selected)
+	
+	wxBrush tempBrush = DC.GetBrush();
+	if (_selected)
    {
       DC.SetBrush(*wxWHITE_BRUSH);
       DC.SetTextForeground(*wxBLACK);
@@ -978,16 +978,19 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
       DC.SetBrush(*wxBLACK_BRUSH);
       DC.SetTextForeground(*wxWHITE);
    }
-   
+   const wxString dummy= "WWWWWWWWWW";
    wxString caption(_layer->name().c_str(),wxConvUTF8);
    int hna,wna;
-   DC.GetTextExtent(caption, &wna, &hna);
-   DC.DrawRectangle(curw, clearence, buttonWidth - curw - clearence - 16, buttonHeight - 2*clearence);
+   DC.GetTextExtent(dummy, &wna, &hna);
+   DC.DrawRectangle(curw, clearence, wna, buttonHeight - 2*clearence);//buttonWidth - curw - clearence - 16
    curw += clearence;
    DC.DrawText(caption, curw, int(buttonHeight/2 - hna/2));
+	curw += wna;
+	
+	DC.SetBrush(tempBrush);
+	DC.DrawRectangle(curw, 1, buttonWidth-curw, buttonHeight-1);
 
    DC.SelectObject(wxNullBitmap);
-
    Refresh();
 }
 
@@ -1107,6 +1110,7 @@ BEGIN_EVENT_TABLE(browsers::LayerBrowser, wxPanel)
    EVT_BUTTON(BT_LAYER_LOCK_ALL, browsers::LayerBrowser::OnLockAll)
    EVT_BUTTON(BT_LAYER_UNLOCK_ALL, browsers::LayerBrowser::OnUnlockAll)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::LayerBrowser::OnCommand)
+	EVT_SIZE(browsers::LayerBrowser::OnSize)
 END_EVENT_TABLE()
 //====================================================================
 
@@ -1242,6 +1246,19 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
             break;
          }
    }
+}
+
+void	browsers::LayerBrowser::OnSize(wxSizeEvent& evt)
+{
+	wxSize size = evt.GetSize();
+	for(layerButtonMap::const_iterator it = _buttonMap.begin(); it!=_buttonMap.end();++it)
+	{
+		LayerButton *button = it->second;
+		wxSize buttonSize = button->GetSize();
+		buttonSize.SetWidth(size.GetWidth());
+		button->SetSize(buttonSize);
+	}
+	Refresh();
 }
 
 void browsers::LayerBrowser::OnShowAll(wxCommandEvent& WXUNUSED(event))

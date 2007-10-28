@@ -252,6 +252,7 @@ namespace browsers
       virtual             ~LayerBrowser();
    private:
       void                 OnCommand(wxCommandEvent&);
+		void						OnSize(wxSizeEvent&);
       void                 OnShowAll(wxCommandEvent&);
       void                 OnHideAll(wxCommandEvent&);
       void                 OnLockAll(wxCommandEvent&);
