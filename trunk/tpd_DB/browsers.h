@@ -43,7 +43,7 @@
 namespace browsers 
 {
    const int buttonHeight = 30;
-   const int buttonWidth  = 170;
+   
    typedef enum
    {
       BT_LAYER_DEFAULT,
@@ -229,10 +229,11 @@ namespace browsers
       void hideLayer(bool hide);
       void lockLayer(bool lock);
       word getLayNo(void) {return _layer->layno();}
+		void preparePicture();
       
    private:
-      void preparePicture(wxBitmap &pict);
-
+		int			_buttonWidth;
+		int			_buttonHeight;
       LayerInfo   *_layer;
       wxBitmap    *_picture;
       wxBrush     *_brush;
