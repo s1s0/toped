@@ -881,6 +881,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
    _hidden  = false;
+	
    //_locked  = false;  
 
    std::string caption;
@@ -936,20 +937,30 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
       _pen->SetColour(color);
       _brush->SetColour(color);
    //}
-            
+         
+	Create(parent, id,  pos, size, style, name);
+	GetClientSize(&_buttonWidth, &_buttonHeight);
    //***Draw main picture***   
-   preparePicture(*_picture);
+   preparePicture();
    
-   Create(parent, id,  pos, size, style, name);
+   
+	
 }
 
-void browsers::LayerButton::preparePicture(wxBitmap &pict)
+void browsers::LayerButton::preparePicture()
 {
    const int clearence = 2;
-   wxMemoryDC DC;
+	GetSize(&_buttonWidth, &_buttonHeight); 
+	wxMemoryDC DC;
    wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
    DC.SetFont(font);
-   DC.SelectObject(pict);
+	//pict.SetWidth(_buttonWidth);
+	if (_picture)
+	{
+		delete _picture;
+		_picture = DEBUG_NEW wxBitmap(_buttonWidth-16, _buttonHeight, -1);
+	}
+   DC.SelectObject(*_picture);
 
    DC.SetBrush(*_brush);
    DC.SetPen(*_pen);
@@ -964,7 +975,7 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    wxString layno(temp, wxConvUTF8);
    int hno,wno;
    DC.GetTextExtent(layno, &wno, &hno);
-   DC.DrawText(layno, 0, int((buttonHeight - hno)/2));
+   DC.DrawText(layno, 0, int((_buttonHeight - hno)/2));
    curw += wno + clearence;
 	
 	wxBrush tempBrush = DC.GetBrush();
@@ -982,13 +993,13 @@ void browsers::LayerButton::preparePicture(wxBitmap &pict)
    wxString caption(_layer->name().c_str(),wxConvUTF8);
    int hna,wna;
    DC.GetTextExtent(dummy, &wna, &hna);
-   DC.DrawRectangle(curw, clearence, wna, buttonHeight - 2*clearence);//buttonWidth - curw - clearence - 16
+   DC.DrawRectangle(curw, clearence, wna, _buttonHeight - 2*clearence);
    curw += clearence;
-   DC.DrawText(caption, curw, int(buttonHeight/2 - hna/2));
+   DC.DrawText(caption, curw, int(_buttonHeight/2 - hna/2));
 	curw += wna;
 	
 	DC.SetBrush(tempBrush);
-	DC.DrawRectangle(curw, 1, buttonWidth-curw, buttonHeight-1);
+	DC.DrawRectangle(curw, clearence, _buttonWidth-curw-16, _buttonHeight-2*clearence);
 
    DC.SelectObject(wxNullBitmap);
    Refresh();
@@ -1007,20 +1018,20 @@ browsers::LayerButton::~LayerButton()
 
 void browsers::LayerButton::OnPaint(wxPaintEvent&event)
 {
-   wxPaintDC dc(this);
+	wxPaintDC dc(this);
    dc.DrawBitmap(*_picture, 0, 0, false);
    if (_selected)
    {
-      dc.DrawIcon(wxIcon(activelay),buttonWidth-16,15);
+      dc.DrawIcon(wxIcon(activelay),_buttonWidth-16,15);
    }
    else if (DATC->layerLocked(_layer->layno()))
    {
-      dc.DrawIcon(wxIcon(lock),buttonWidth-16,15);
+      dc.DrawIcon(wxIcon(lock),_buttonWidth-16,15);
    }
 
    if (DATC->layerHidden(_layer->layno()))
    {
-      dc.DrawIcon(wxIcon(nolay_xpm),buttonWidth-16,0);
+      dc.DrawIcon(wxIcon(nolay_xpm),_buttonWidth-16,0);
    }
 }
 
@@ -1072,32 +1083,29 @@ void browsers::LayerButton::OnMiddleClick(wxMouseEvent &event)
 
 }
 
+
 void browsers::LayerButton::hideLayer(bool hide)
 {
    _hidden = hide;
-   preparePicture(*_picture);
-//   SetBitmapLabel(*_picture);
+   preparePicture();
 }
 
 void browsers::LayerButton::lockLayer(bool lock)
 {
    //_locked = lock;
-   preparePicture(*_picture);
- //  SetBitmapLabel(*_picture);
+   preparePicture();
 }
 
 void browsers::LayerButton::select(void)
 {
    _selected = true;
-   preparePicture(*_picture);
- //  SetBitmapLabel(*_picture);
+   preparePicture();
 }
 
 void browsers::LayerButton::unselect(void)
 {
    _selected = false;
-   preparePicture(*_picture);
-  // SetBitmapLabel(*_picture);
+   preparePicture();
 }
 
 
@@ -1194,8 +1202,10 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
             LayerInfo* layer = static_cast<LayerInfo*>(event.GetClientData());
 
             LayerButton *layerButton;
-
+				
             layerButtonMap::iterator it;
+				int szx, szy;
+
             //Remove selection from current button
             if (_selectedButton!=NULL) _selectedButton->unselect();
 
@@ -1208,7 +1218,7 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
                //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
                //wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
                int x, y;
-               int szx, szy;
+               
                int ID;
                tempButton->GetPosition(&x, &y);
                tempButton->GetSize(&szx, &szy);
@@ -1223,9 +1233,9 @@ void browsers::LayerBrowser::OnCommand(wxCommandEvent& event)
             {
                //Button doesn't exist, create new button
 //               int szx, szy;
-//               _layerPanel->GetSize(&szx, &szy);
+					GetClientSize(&szx, &szy);
                layerButton = DEBUG_NEW LayerButton(_layerPanel, tui::TMDUMMY_LAYER+_buttonCount,
-                                             wxPoint (0, _buttonCount*buttonHeight), wxSize(buttonWidth, buttonHeight),
+                                             wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
                wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
                _buttonMap[layer->layno()] = layerButton;
 
@@ -1257,6 +1267,7 @@ void	browsers::LayerBrowser::OnSize(wxSizeEvent& evt)
 		wxSize buttonSize = button->GetSize();
 		buttonSize.SetWidth(size.GetWidth());
 		button->SetSize(buttonSize);
+		button->preparePicture();
 	}
 	Refresh();
 }
