@@ -28,6 +28,7 @@
 //      Comments :
 //===========================================================================
 
+#include <tooltip.h>
 #include "tpdph.h"
 #include "browsers.h"
 #include "viewprop.h"
@@ -883,8 +884,6 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    _hidden  = false;
 	
    //_locked  = false;  
-
-   std::string caption;
    
    _picture = DEBUG_NEW wxBitmap(size.GetWidth()-16, size.GetHeight(), -1);
 
@@ -943,7 +942,8 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    //***Draw main picture***   
    preparePicture();
    
-   
+	wxString caption(_layer->name().c_str(),wxConvUTF8);
+   SetToolTip(caption);
 	
 }
 
@@ -989,8 +989,14 @@ void browsers::LayerButton::preparePicture()
       DC.SetBrush(*wxBLACK_BRUSH);
       DC.SetTextForeground(*wxWHITE);
    }
-   const wxString dummy= "WWWWWWWWWW";
+   const wxString dummy= _T("WWWWWWWWWW");
    wxString caption(_layer->name().c_str(),wxConvUTF8);
+	if (caption.Len()>10)
+	{
+		caption[7]=wxT('.');
+		caption[8]=wxT('.');
+		caption[9]=wxT('.');
+	}
    int hna,wna;
    DC.GetTextExtent(dummy, &wna, &hna);
    DC.DrawRectangle(curw, clearence, wna, _buttonHeight - 2*clearence);

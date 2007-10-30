@@ -30,6 +30,7 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <wx/aboutdlg.h>
+#include <wx/tooltip.h>
 #include <math.h>
 #include "toped.h"
 #include "../tpd_DB/datacenter.h"
@@ -295,6 +296,8 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    SetStatusText( wxT( "Toped loaded..." ) );
    //Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
+	wxToolTip::Enable(true);
+	wxToolTip::SetDelay(3000);
 }
 
 void tui::TopedFrame::OnClose(wxCloseEvent& event)
