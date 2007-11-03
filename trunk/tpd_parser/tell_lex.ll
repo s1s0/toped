@@ -53,6 +53,7 @@ Function declarations
 namespace parsercmd {
    void     location_step(YYLTYPE *loc);
    void     location_lines(YYLTYPE *loc, int num);
+   void     location_comment(YYLTYPE *loc, char* source);
    char*    charcopy(std::string source, bool quotes = false);
    unsigned getllint(char* source);
    int      includefile(char* name, FILE* &handler);
@@ -70,6 +71,7 @@ location_step(&telllloc);
 %} /*******************************************************************************/
 [ \t]+                     location_step(&telllloc);
 \n+                        location_lines(&telllloc,yyleng);location_step(&telllloc);
+"/*"([^\*]|\*[^/])*"*/"    location_comment(&telllloc,yytext);
 "//".*\n                   location_lines(&telllloc,1);/* comment line */
 #include                   BEGIN(incl);
 <incl>{lex_string}       { /*first change the scanner state, otherwise there
@@ -157,14 +159,28 @@ void my_delete_yy_buffer( void* b ) {
 // from http://www.lrde.epita.fr/~akim/compil/gnuprog2/Advanced-Use-of-Flex.html
 //=============================================================================
 
-void parsercmd::location_step(YYLTYPE *loc) {
+void parsercmd::location_step(YYLTYPE *loc)
+{
    loc->first_column = loc->last_column;
    loc->first_line = loc->last_line;
 }
 
-void parsercmd::location_lines(YYLTYPE *loc, int num) {
+void parsercmd::location_lines(YYLTYPE *loc, int num)
+{
    loc->last_column = 0;
    loc->last_line += num;
+}
+
+void parsercmd::location_comment(YYLTYPE *loc, char* source)
+{
+   unsigned endlnum = 0;
+   while (0x00 == *source)
+   {
+      if (0x10 == *source) endlnum++;
+      source++;
+   }
+   location_step(loc);
+   loc->last_line +=endlnum;
 }
 
 //=============================================================================
