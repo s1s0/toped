@@ -28,7 +28,7 @@
 //      Comments :
 //===========================================================================
 
-#include <tooltip.h>
+#include <wx/tooltip.h>
 #include "tpdph.h"
 #include "browsers.h"
 #include "viewprop.h"

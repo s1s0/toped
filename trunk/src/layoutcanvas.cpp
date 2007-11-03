@@ -192,7 +192,6 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(p
    restricted_move = false;
    invalid_window = false;
    reperX = reperY = long_cursor = false;
-   slide = false;
    initializeGL();
    ap_trigger = 10;
    glfInit();
@@ -236,6 +235,7 @@ wxImage   tui::LayoutCanvas::snapshot(void)
 
 void tui::LayoutCanvas::viewshift()
 {
+   //@TODO screen sliding. Some rough tires.
    int Wcl, Hcl;
    const int slide_step = 100;
    GetClientSize(&Wcl,&Hcl);
@@ -243,7 +243,7 @@ void tui::LayoutCanvas::viewshift()
    glRasterPos2i (0, 0);
    glCopyPixels (slide_step, 0, Wcl-slide_step, Hcl, GL_COLOR);
    glAccum(GL_LOAD, 1.0);
-   slide = false;
+/*   slide = false;*/
 }
 
 void tui::LayoutCanvas::initializeGL() {
@@ -326,7 +326,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glAccum(GL_RETURN, 1.0);
       if       (tmp_wnd)         wnd_paint();
       else if  (rubber_band)     rubber_paint();
-//      else if  (slide)           viewshift();
    }
    // deal with the long cursor
    if (reperX || reperY)
@@ -840,8 +839,6 @@ void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
    OnZoom(eventZOOM);
-/*   slide = true;
-   Refresh();*/
 }
 
 void tui::LayoutCanvas::OnCursorType(wxCommandEvent& event)
