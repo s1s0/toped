@@ -174,13 +174,23 @@ void parsercmd::location_lines(YYLTYPE *loc, int num)
 void parsercmd::location_comment(YYLTYPE *loc, char* source)
 {
    unsigned endlnum = 0;
-   while (0x00 == *source)
+   unsigned posnum = 0;
+   while (0x00 != *source)
    {
-      if (0x10 == *source) endlnum++;
+      if (0x0A == *source) 
+      {
+         endlnum++;
+         posnum = 1;
+      }
+      else posnum++;
       source++;
    }
-   location_step(loc);
-   loc->last_line +=endlnum;
+   if (0 != endlnum)
+   {
+      loc->last_line += endlnum;
+      loc->last_column = posnum;
+      location_step(loc);
+   }
 }
 
 //=============================================================================
