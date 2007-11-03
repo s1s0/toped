@@ -365,7 +365,9 @@ cellref("cellrefs",{10,100},0,false,1);
 cellref("textrefs",{70,10},0,false,1);
 cellref("cell_1",{120,  0},180,true ,1);
 cellref("cell_1",{  0,  0},  0,false,1);
-cellref("cell_1",{120,-20},  0,true ,1);
+cellref("cell_1",{120,-20},/*inserted comment*/  0,true ,1);
 cellref("cell_1",{  0,-20},  0,true ,1);
-
-
+/*test         of a         multiline                   comment
+     */
+newcell("dummy", 1);
+echo("Error above must be reported at line 372");
