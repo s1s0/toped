@@ -214,7 +214,7 @@ void allLayTypes() {
    addwire({{-2,8},{-2,-2},{14,-2}},3,8);
    addtext("a-z", 14, {1,1}, 0,  false, 4);
 }
-
+/*
 void shifttest() {
 
    newcell("shifttest");
@@ -248,7 +248,7 @@ void shifttest() {
    addbox(dSW,2); addbox(dSE,4); addbox(dNW,7); addbox(dNE,8); 
 
 }
-
+*/
 void addbox()
 {
    echo("Internal function addbox() redefined. This line should never be seen on tell log");
@@ -367,7 +367,9 @@ cellref("cell_1",{120,  0},180,true ,1);
 cellref("cell_1",{  0,  0},  0,false,1);
 cellref("cell_1",{120,-20},/*inserted comment*/  0,true ,1);
 cellref("cell_1",{  0,-20},  0,true ,1);
-/*test         of a         multiline                   comment
-     */
-newcell("dummy", 1);
-echo("Error above must be reported at line 372");
+echo("Error below must be reported @ line 375 col 8");
+/*test   
+      of a    
+           multiline    
+                          comment
+     */newcell("dummy", 1);
