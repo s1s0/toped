@@ -244,29 +244,47 @@ namespace browsers
       
    DECLARE_EVENT_TABLE();
    };
+   
+	typedef std::map <word, LayerButton*> layerButtonMap;
+	class LayerPanel:public wxScrolledWindow
+	{
+	public:
+									LayerPanel(wxWindow* parent, wxWindowID id = -1, 
+										const wxPoint& pos = wxDefaultPosition, 
+										const wxSize& size = wxDefaultSize, 
+										long style = wxHSCROLL |  wxVSCROLL, const wxString& name = "LayerPanel");
 
-   typedef std::map <word, LayerButton*> layerButtonMap;
+		virtual					~LayerPanel();
+		wxString             getAllSelected();
+	private:
+		void						OnSize(wxSizeEvent&);
+		void                 OnCommand(wxCommandEvent&);
+
+		//wxBitmap&				prepareBitmap(void);//-
+
+      layerButtonMap          _buttonMap;
+      int                     _buttonCount;
+      LayerButton*            _selectedButton;
+		DECLARE_EVENT_TABLE();
+
+	};
+
    class LayerBrowser : public wxScrolledWindow 
    {
    public:
                            LayerBrowser(wxWindow* parent, wxWindowID id);
       virtual             ~LayerBrowser();
+		//const layerButtonMap& getButtonMap(void) {return _buttonMap;};
+		LayerPanel*		getLayerPanel() {return _layerPanel;};
+      
    private:
-      void                 OnCommand(wxCommandEvent&);
-		void						OnSize(wxSizeEvent&);
       void                 OnShowAll(wxCommandEvent&);
       void                 OnHideAll(wxCommandEvent&);
       void                 OnLockAll(wxCommandEvent&);
       void                 OnUnlockAll(wxCommandEvent&);
       wxString             getAllSelected();
-      
-      wxBitmap& prepareBitmap(void);
-
-      layerButtonMap          _buttonMap;
-      int                     _buttonCount;
-      LayerButton*            _selectedButton;
-      wxScrolledWindow*         _layerPanel;
-      wxBoxSizer*               _thesizer;
+	   LayerPanel*					_layerPanel;
+      wxBoxSizer*             _thesizer;
       
       DECLARE_EVENT_TABLE();
    };
@@ -283,7 +301,6 @@ namespace browsers
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
-      LayerBrowser*     layers() const  {return _layers;};
       void              set_tellParser(wxWindow* tp) {_tellParser = tp;}
       wxWindow*         tellParser() const {return _tellParser;}
    private:
