@@ -77,6 +77,7 @@ namespace laydata {
       atticList*     ungroup_this(shapeList*);
       bool           cutpoly(pointlist& pl, atticList** dasao);
       bool           merge(atticList** dasao) {return _target.edit()->merge_selected(dasao);}
+      bool           stretch(int bfactor, atticList** dasao) {return _target.edit()->stretch_selected(bfactor, dasao);}
       unsigned int   numselected();
       DBbox          activeoverlap();
       void           transferLayer(word dst);

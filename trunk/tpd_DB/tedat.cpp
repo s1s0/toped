@@ -628,7 +628,7 @@ const pointlist laydata::tdtbox::shape2poly() const {
 void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
 {
    pointlist _plist = shape2poly();
-   // and proceed in the same was as for the polygon
+   // and proceed in the same way as for the polygon
    logicop::logic operation(_plist, cutter);
    try
    {
@@ -657,6 +657,19 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
       // and finally add this to the_delete shapelist
       decure[0]->push_back(this);
    }
+}
+
+void laydata::tdtbox::stretch(int bfactor, shapeList** decure)
+{
+   // cut list is not used in when shrinking/expanding a box
+   tdtbox* modified = DEBUG_NEW tdtbox(
+                                        DEBUG_NEW TP(_p1->x() - bfactor,
+                                                     _p1->y() - bfactor ),
+                                        DEBUG_NEW TP(_p2->x() + bfactor,
+                                                     _p2->y() + bfactor )
+                                      );
+   decure[0]->push_back(this);
+   decure[1]->push_back(modified);
 }
 
 pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet& pset, 
