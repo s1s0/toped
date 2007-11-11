@@ -84,6 +84,8 @@ namespace laydata {
       virtual   bool       point_inside(const TP);
    //! shape cut with the input polygon
       virtual   void       polycut(pointlist&, shapeList**) = 0;
+   //! shrink/stretch
+      virtual   void       stretch(int bfactor, shapeList**) = 0;
    //! 
       virtual  const pointlist  shape2poly() const = 0;
    //! Add a point to the tdtdata object. Used to handle the objects under construction on the screen.
@@ -151,6 +153,7 @@ namespace laydata {
       void                 rmpoint(TP&);
       word                 numpoints() const {return 4;};
       void                 polycut(pointlist&, shapeList**);
+      void                 stretch(int bfactor, shapeList**);
 //      tdtdata*             polymerge(tdtdata*);
       const pointlist      shape2poly() const;
       word                 ltype() const {return _lmbox;}
@@ -192,6 +195,7 @@ namespace laydata {
       word                 numpoints() const {return _plist.size();};
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**);
+      void                 stretch(int bfactor, shapeList**) {};
 //      tdtdata*             polymerge(tdtdata*);
       const pointlist      shape2poly() const {return _plist;};
       word                 ltype() const {return _lmpoly;}
@@ -232,6 +236,7 @@ namespace laydata {
       word                 numpoints() const {return _plist.size();};
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**){};
+      void                 stretch(int bfactor, shapeList**) {};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
       word                 ltype() const {return _lmwire;}
@@ -283,6 +288,7 @@ namespace laydata {
       word                 numpoints() const {return 1;};
       CTM                  translation() const {return _translation;};
       void                 polycut(pointlist&, shapeList**) {};
+      void                 stretch(int bfactor, shapeList**) {};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
       void                 objFlip() {_translation.FlipY(0.0);}
@@ -358,7 +364,8 @@ namespace laydata {
       void                 GDSwrite(GDSin::GDSFile&, word, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       word                 numpoints() const {return 1;};
-      void                 polycut(pointlist&, shapeList**){};
+      void                 polycut(pointlist&, shapeList**) {};
+      void                 stretch(int bfactor, shapeList**) {};
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
       void                 objFlip() {_translation.FlipY(0.0);}

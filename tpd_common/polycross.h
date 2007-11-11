@@ -46,7 +46,7 @@ namespace polycross
    float getLambda( const TP* p1, const TP* p2, const TP* p);
    bool coinsidingSegm(const TP*, const TP*, const TP*);
    //===========================================================================
-   // VPoint
+   // Vertex Point
    //===========================================================================
    class VPoint
    {
@@ -71,7 +71,7 @@ namespace polycross
    };
 
    //===========================================================================
-   // CPoint
+   // Cross Point
    //===========================================================================
    class CPoint : public VPoint
    {
@@ -95,7 +95,7 @@ namespace polycross
    };
 
    //===========================================================================
-   // CPoint
+   // Binding Point
    //===========================================================================
    class BPoint : public CPoint
    {

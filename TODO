@@ -51,17 +51,7 @@ Dialog stuff
 
 Documentation
 ==============
-  * hidecellbox
-  * boxcut
-  * selectmask
-  * changestr
-  -- TELL  
-  * status
-  * length
-  * abs
-  * getlaytype
-  * getlaytext
-  * getlayref
+   multi line comments /* */ in TELL
 
 Seems OK
 ========

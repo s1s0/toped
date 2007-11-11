@@ -138,8 +138,9 @@ namespace laydata {
       bool                 validate_cells(tdtdesign*);
       void                 validate_layers();
       unsigned int         numselected();
-      bool                 cutpoly_selected(pointlist&,atticList**);
+      bool                 cutpoly_selected(pointlist&, atticList**);
       bool                 merge_selected(atticList**);
+      bool                 stretch_selected(int bfactor, atticList**);
       atticList*           changeselect(TP, SH_STATUS status, layprop::ViewProperties&);
       tdtcellref*          getcellover(TP, ctmstack&, cellrefstack*, layprop::ViewProperties&);
       void                 parentfound()     {_orphan = false;};

@@ -327,6 +327,7 @@ void laydata::quadTree::cutpoly_selected(pointlist& plst, DBbox& cut_overlap,
       if (_quads[i]) _quads[i]->cutpoly_selected(plst, cut_overlap, decure);
 
 }
+
 /*!*/
 laydata::tdtdata* laydata::quadTree::merge_selected(tdtdata*& shapeRef) {
    laydata::tdtdata* mergeres = NULL;

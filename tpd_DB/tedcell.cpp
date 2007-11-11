@@ -961,8 +961,6 @@ bool laydata::tdtcell::cutpoly_selected(pointlist& plst, atticList** dasao) {
       shapeList* decure[3];
       byte i;
       for (i = 0; i < 3; decure[i++] = DEBUG_NEW shapeList());
-      // omit the layer if there are no fully selected shapes 
-      if (0 == getFullySelected(CL->second)) continue;
       // do the clipping
       _layers[CL->first]->cutpoly_selected(plst, cut_ovl, decure);
       // add the shapelists to the collection, but only if they are not empty
@@ -970,6 +968,33 @@ bool laydata::tdtcell::cutpoly_selected(pointlist& plst, atticList** dasao) {
          if (decure[i]->empty()) delete decure[i];
          else (*(dasao[i]))[CL->first] = decure[i];
       }   
+   }
+   return !dasao[0]->empty();
+}
+
+bool laydata::tdtcell::stretch_selected(int bfactor, atticList** dasao)
+{
+   // for every single layer in the select list
+   for (selectList::const_iterator CL = _shapesel.begin(); 
+                                                  CL != _shapesel.end(); CL++)
+   {
+      assert((_layers.end() != _layers.find(CL->first)));
+      // omit the layer if there are no fully selected shapes 
+      if ((0 == CL->first) || (0 == getFullySelected(CL->second)))  continue;
+      // initialize the corresponding 3 shape lists -> one per attic list
+      // DElete/CUt/REst/
+      shapeList* decure[2];
+      byte i;
+      for (i = 0; i < 2; decure[i++] = DEBUG_NEW shapeList());
+      // do the logic operation
+      for (dataList::const_iterator CD = CL->second->begin(); CD != CL->second->end(); CD++)
+         CD->first->stretch(bfactor, decure);
+      // add the shapelists to the collection, but only if they are not empty
+      for (i = 0; i < 2; i++)
+      {
+         if (decure[i]->empty()) delete decure[i];
+         else (*(dasao[i]))[CL->first] = decure[i];
+      }
    }
    return !dasao[0]->empty();
 }
