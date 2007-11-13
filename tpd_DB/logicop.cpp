@@ -419,3 +419,46 @@ logicop::logic::~logic()
    delete _segl1;
    delete _segl2;
 }
+
+
+//-----------------------------------------------------------------------------
+// class SSegment (Stretch Segment)
+//-----------------------------------------------------------------------------
+logicop::SSegment::SSegment(const TP& p1, const TP& p2, int distance) : PSegment(p1,p2)
+{
+   assert(0 != distance);
+   DBline sample(TP(0,0), TP(distance, 0));
+   CTM mtrx;
+   real rotation = laydata::xangle(p1,p2) + 270.0;
+   mtrx.Rotate(rotation);
+   mtrx.Translate(p1);
+   sample = sample * mtrx;
+   _moved = parallel(sample.p2());
+}
+
+
+//-----------------------------------------------------------------------------
+// class stretcher
+//-----------------------------------------------------------------------------
+/*!*/
+logicop::stretcher::stretcher(const pointlist& poly, int bfactor) : _poly(poly)
+{
+   unsigned plysize = _poly.size();
+   _segl.reserve(plysize);
+   for (unsigned i = 0; i < plysize; i++)
+      _segl.push_back(SSegment(_poly[i],_poly[(i+1)%plysize], bfactor ));
+//   _shape1 = NULL;
+}
+
+pointlist* logicop::stretcher::execute()
+{
+   unsigned plysize = _poly.size();
+   pointlist* streched = DEBUG_NEW pointlist();
+   for (unsigned i = 0; i < plysize; i++)
+   {
+      TP npnt;
+      VERIFY(0 == _segl[i].moved()->crossP(*(_segl[(i+1)%plysize].moved()), npnt));
+      streched->push_back(npnt);
+   }
+   return streched;
+}
