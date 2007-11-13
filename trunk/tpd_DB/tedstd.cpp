@@ -36,13 +36,15 @@
 //-----------------------------------------------------------------------------
 // class PSegment
 //-----------------------------------------------------------------------------
-PSegment::PSegment(TP p1,TP p2) {
+PSegment::PSegment(TP p1,TP p2) 
+{
    _A = p2.y() - p1.y();
    _B = p1.x() - p2.x();
    _C = -(_A*p1.x() + _B*p1.y());
 }
 
-byte PSegment::crossP(PSegment seg, TP& crossp) {
+byte PSegment::crossP(PSegment seg, TP& crossp) 
+{
    // segments will coinside if    A1/A2 == B1/B2 == C1/C2
    // segments will be parallel if A1/A2 == B1/B2 != C1/C2
    if (0 == (_A*seg._B - seg._A*_B)) return 1;
@@ -61,10 +63,19 @@ byte PSegment::crossP(PSegment seg, TP& crossp) {
    return 0;
 }
    
-PSegment* PSegment::ortho(TP p) {
+PSegment* PSegment::ortho(TP p) 
+{
    PSegment* seg = DEBUG_NEW PSegment(-_B, _A, _B*p.x() - _A*p.y());
    return seg;
 }
+
+PSegment* PSegment::parallel(TP p) 
+{
+   PSegment* seg = DEBUG_NEW PSegment( _A, _B, -_A*p.x() - _B*p.y());
+   return seg;
+}
+
+
 //-----------------------------------------------------------------------------
 // class TEDfile
 //-----------------------------------------------------------------------------

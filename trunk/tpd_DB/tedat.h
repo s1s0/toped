@@ -195,7 +195,7 @@ namespace laydata {
       word                 numpoints() const {return _plist.size();};
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**);
-      void                 stretch(int bfactor, shapeList**) {};
+      void                 stretch(int bfactor, shapeList**);
 //      tdtdata*             polymerge(tdtdata*);
       const pointlist      shape2poly() const {return _plist;};
       word                 ltype() const {return _lmpoly;}
@@ -418,7 +418,7 @@ namespace laydata {
       word              _width;
    };
    //===========================================================================
-   int            xangle(TP&, TP&);
+   int            xangle(const TP&, const TP&);
    
 //   void draw_select_marks(const DBbox&, const CTM&);
 //   void draw_select_mark(const TP&);

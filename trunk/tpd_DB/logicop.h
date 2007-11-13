@@ -29,6 +29,7 @@
 
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/polycross.h"
+#include "tedstd.h"
 
 namespace logicop {
    
@@ -47,7 +48,7 @@ namespace logicop {
    logic operations can produce a collection of polygons, that's why a new 
    container type pcollection is introduced. If more than one operation is 
    desired, the user has to call reset_visited(), to prepare the #_shape1/#_shape2
-   structures for another traversing.\n It has to be noted that in the general 
+   structures for another traversing.\n It has to be noted that in general 
    the input polygons and repectively _poly1 and _poly2 fields are not 
    interchangable. For example polyA ANDNOT polyB produces different result from
    polyB ANDNOT polyA. Of course for some operations (AND, OR) that restriction 
@@ -81,18 +82,37 @@ namespace logicop {
       //
       void              cleanupDumped(polycross::VPoint*);
       //! The first input polygon
-      const pointlist&  _poly1;
+      const pointlist&        _poly1;
       //! The second input polygon
-      const pointlist&  _poly2;
+      const pointlist&        _poly2;
       //! The raw data, corresponding to _poly1, used by all logic methods
-      polycross::VPoint* _shape1;
+      polycross::VPoint*      _shape1;
       //! The raw data, corresponding to _poly2, used by all logic methods
-      polycross::VPoint* _shape2;
+      polycross::VPoint*      _shape2;
       //! Number of crossing points found from the constructor
-      unsigned          _crossp;
+      unsigned                _crossp;
       polycross::segmentlist* _segl1;
       polycross::segmentlist* _segl2;
       
+   };
+
+   class SSegment : public PSegment
+   {
+   public:
+                        SSegment(const TP&, const TP&, int);
+      PSegment*         moved() {return _moved;}
+   private:
+      PSegment*         _moved;
+   };
+
+   class stretcher {
+   public:
+      typedef std::vector<SSegment> SSegments;
+                        stretcher(const pointlist&, int);
+      pointlist*        execute();
+   private:
+      const pointlist&        _poly; //! The input polygon
+      SSegments               _segl;
    };
    
 }

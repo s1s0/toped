@@ -55,15 +55,17 @@
 //==============================================================================   
 class PSegment {
 public:
-   PSegment() : _A(0), _B(0), _C(0) {};
-   PSegment(real A, real B, real C) : _A(A), _B(B), _C(C) {};
-   PSegment(TP,TP);
-   byte     crossP(PSegment, TP&);
-   bool     empty() {return ((0 == _A) && (0 == _B));};
-   PSegment* ortho(TP);
-   PSegment operator = (const PSegment s) {_A = s._A; _B = s._B; _C = s._C; return *this;};
+               PSegment() : _A(0), _B(0), _C(0) {};
+               PSegment(real A, real B, real C) : _A(A), _B(B), _C(C) {};
+               PSegment(TP,TP);
+   byte        crossP(PSegment, TP&);
+   bool        empty() {return ((0 == _A) && (0 == _B));};
+   PSegment*   ortho(TP);
+   PSegment*   parallel(TP);
+   PSegment    operator = (const PSegment s) {_A = s._A; _B = s._B; _C = s._C; return *this;};
 private:
-   real     _A, _B, _C;   
+   real        _A, _B, _C;
+   int         _angle;
 };
 
 namespace layprop {

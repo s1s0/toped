@@ -661,6 +661,7 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
 
 void laydata::tdtbox::stretch(int bfactor, shapeList** decure)
 {
+   //@TODO Limits!
    // cut list is not used in when shrinking/expanding a box
    tdtbox* modified = DEBUG_NEW tdtbox(
                                         DEBUG_NEW TP(_p1->x() - bfactor,
@@ -966,6 +967,17 @@ void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
       // and finally add this to the_delete shapelist
       decure[0]->push_back(this);
    }
+}
+
+void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
+{
+   //@TODO Limits!
+   logicop::stretcher boza(_plist, bfactor);
+   pointlist* res = boza.execute();
+   laydata::tdtpoly* modified = DEBUG_NEW laydata::tdtpoly(*res);
+   decure[0]->push_back(this);
+   decure[1]->push_back(modified);
+   delete res;
 }
 
 void laydata::tdtpoly::info(std::ostringstream& ost, real DBU) const {
@@ -2456,7 +2468,7 @@ char* laydata::valid_wire::failtype() {
 //-----------------------------------------------------------------------------
 /*! Returns the angle between the line and the X axis
 */
-int laydata::xangle(TP& p1, TP& p2) {
+int laydata::xangle(const TP& p1, const TP& p2) {
 //   printf("-- Calculating angle between X axis and (%i, %i) - (%i, %i) line\n",
 //          p1.x(), p1.y(), p2.x(), p2.y());
    const long double Pi = 3.1415926535897932384626433832795;
