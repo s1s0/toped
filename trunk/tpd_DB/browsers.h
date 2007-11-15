@@ -200,7 +200,7 @@ namespace browsers
    class LayerInfo
    {
    public:
-		LayerInfo(const LayerInfo& lay);
+      LayerInfo(const LayerInfo& lay);
       LayerInfo(const std::string &name, const word layno);
       ~LayerInfo()         { };
       std::string name()   {return _name;};
@@ -229,11 +229,11 @@ namespace browsers
       void hideLayer(bool hide);
       void lockLayer(bool lock);
       word getLayNo(void) {return _layer->layno();}
-		void preparePicture();
+      void preparePicture();
       
    private:
-		int			_buttonWidth;
-		int			_buttonHeight;
+      int         _buttonWidth;
+      int         _buttonHeight;
       LayerInfo   *_layer;
       wxBitmap    *_picture;
       wxBrush     *_brush;
@@ -245,37 +245,37 @@ namespace browsers
    DECLARE_EVENT_TABLE();
    };
    
-	typedef std::map <word, LayerButton*> layerButtonMap;
-	class LayerPanel:public wxScrolledWindow
-	{
-	public:
-									LayerPanel(wxWindow* parent, wxWindowID id = -1, 
-										const wxPoint& pos = wxDefaultPosition, 
-										const wxSize& size = wxDefaultSize, 
-										long style = wxHSCROLL |  wxVSCROLL, const wxString& name = "LayerPanel");
+   typedef std::map <word, LayerButton*> layerButtonMap;
+   class LayerPanel:public wxScrolledWindow
+   {
+   public:
+                           LayerPanel(wxWindow* parent, wxWindowID id = -1,
+                              const wxPoint& pos = wxDefaultPosition,
+                              const wxSize& size = wxDefaultSize,
+                              long style = wxHSCROLL |  wxVSCROLL, const wxString& name = wxT("LayerPanel"));
 
-		virtual					~LayerPanel();
-		wxString             getAllSelected();
-	private:
-		void						OnSize(wxSizeEvent&);
-		void                 OnCommand(wxCommandEvent&);
+      virtual               ~LayerPanel();
+      wxString             getAllSelected();
+   private:
+      void                  OnSize(wxSizeEvent&);
+      void                 OnCommand(wxCommandEvent&);
 
-		//wxBitmap&				prepareBitmap(void);//-
+      //wxBitmap&            prepareBitmap(void);//-
 
       layerButtonMap          _buttonMap;
       int                     _buttonCount;
       LayerButton*            _selectedButton;
-		DECLARE_EVENT_TABLE();
+      DECLARE_EVENT_TABLE();
 
-	};
+   };
 
    class LayerBrowser : public wxScrolledWindow 
    {
    public:
                            LayerBrowser(wxWindow* parent, wxWindowID id);
       virtual             ~LayerBrowser();
-		//const layerButtonMap& getButtonMap(void) {return _buttonMap;};
-		LayerPanel*		getLayerPanel() {return _layerPanel;};
+      //const layerButtonMap& getButtonMap(void) {return _buttonMap;};
+      LayerPanel*      getLayerPanel() {return _layerPanel;};
       
    private:
       void                 OnShowAll(wxCommandEvent&);
@@ -283,7 +283,7 @@ namespace browsers
       void                 OnLockAll(wxCommandEvent&);
       void                 OnUnlockAll(wxCommandEvent&);
       wxString             getAllSelected();
-	   LayerPanel*					_layerPanel;
+      LayerPanel*               _layerPanel;
       wxBoxSizer*             _thesizer;
       
       DECLARE_EVENT_TABLE();

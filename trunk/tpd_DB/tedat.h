@@ -236,7 +236,7 @@ namespace laydata {
       word                 numpoints() const {return _plist.size();};
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**){};
-      void                 stretch(int bfactor, shapeList**) {};
+      void                 stretch(int bfactor, shapeList**);
 //      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
       word                 ltype() const {return _lmwire;}
