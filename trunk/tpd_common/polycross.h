@@ -197,20 +197,20 @@ namespace polycross
    {
       public:
          friend void EventVertex::CheckBEM(XQ&, TEvent&, TEvent&);
-         TEvent(byte shapeID) : _shapeID(shapeID) {};
+//         TEvent(byte shapeID) : _shapeID(shapeID) {};
          virtual void      sweep(XQ&, YQ&, ThreadList&) = 0;
          virtual void      sweep2bind(YQ&, BindCollection&) = 0;
          virtual const TP* avertex() = 0;
          virtual const TP* bvertex() = 0;
          const TP*         evertex() {return _evertex;}
-         byte              shapeID() {return _shapeID;}
+//         byte              shapeID() {return _shapeID;}
          polysegment*      aseg() {return _aseg;}
          polysegment*      bseg() {return _bseg;}
          virtual          ~TEvent() {};
       protected:
          TP*               getIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
          void              checkIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
-         byte              _shapeID;
+//         byte              _shapeID;
          const TP*         _evertex;
          void              insertCrossPoint(const TP*, polysegment*, polysegment*,
                                             XQ&, bool dontswap = false);
@@ -229,7 +229,7 @@ namespace polycross
    class TbEvent : public TEvent
    {
       public:
-         TbEvent(polysegment*, polysegment*, byte);
+         TbEvent(polysegment*, polysegment*);
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&);
          const TP*         avertex() {return _aseg->rP();}
@@ -242,7 +242,7 @@ namespace polycross
    class TeEvent : public TEvent
    {
       public:
-         TeEvent(polysegment*, polysegment*, byte);
+         TeEvent(polysegment*, polysegment*);
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&);
          const TP*         avertex() {return _aseg->lP();}
@@ -255,7 +255,7 @@ namespace polycross
    class TmEvent : public TEvent
    {
       public:
-         TmEvent(polysegment*, polysegment*, byte);
+         TmEvent(polysegment*, polysegment*);
          void              sweep(XQ&, YQ&, ThreadList&);
          void              sweep2bind(YQ&, BindCollection&);
          const TP*         avertex() {return _aseg->lP();}
@@ -268,7 +268,7 @@ namespace polycross
    class TcEvent : public TEvent
    {
       public:
-         TcEvent(const TP* ev, polysegment* aseg, polysegment* bseg): TEvent(0),
+         TcEvent(const TP* ev, polysegment* aseg, polysegment* bseg): TEvent(),
          _threadAbove(aseg->threadID()),_threadBelow(bseg->threadID()),
          _eventvertex(ev->x(), ev->y())
             {_aseg = aseg; _bseg = bseg;  _evertex = &_eventvertex;}
@@ -365,7 +365,7 @@ namespace polycross
          void              addCrossEvent(const TP*, polysegment*, polysegment*);
          YQ*               sweepline() {return _sweepline;}
       protected:
-         void              createEvents(const segmentlist&, byte);
+         void              createEvents(const segmentlist&);
          static int        E_compare( const void*, const void*, void* );
          avl_table*        _xqueue;
          YQ*               _sweepline;
