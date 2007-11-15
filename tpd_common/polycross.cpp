@@ -649,8 +649,7 @@ void polycross::TEvent::insertCrossPoint(const TP* CP, polysegment* above,
 //==============================================================================
 // TbEvent
 
-polycross::TbEvent::TbEvent (polysegment* seg1, polysegment* seg2, byte shapeID):
-      TEvent( shapeID )
+polycross::TbEvent::TbEvent (polysegment* seg1, polysegment* seg2):TEvent()
 {
    if (seg1->lP() != seg2->lP())
       throw EXPTNpolyCross("Invalid input segments in thread begin");
@@ -726,8 +725,7 @@ void polycross::TbEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 //==============================================================================
 // TeEvent
 
-polycross::TeEvent::TeEvent (polysegment* seg1, polysegment* seg2, byte shapeID):
-      TEvent( shapeID )
+polycross::TeEvent::TeEvent (polysegment* seg1, polysegment* seg2): TEvent()
 {
    if (seg1->rP() != seg2->rP())
       throw EXPTNpolyCross("Invalid input segments in thread end");
@@ -809,8 +807,7 @@ void polycross::TeEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 //==============================================================================
 // TmEvent
 
-polycross::TmEvent::TmEvent (polysegment* seg1, polysegment* seg2, byte shapeID):
-      TEvent( shapeID )
+polycross::TmEvent::TmEvent (polysegment* seg1, polysegment* seg2):TEvent( )
 {
    if       (seg1->rP() == seg2->lP())
    {
@@ -1262,12 +1259,12 @@ polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
 //   _osl1 = ;
 //   _osl2 = ;
    _xqueue = avl_create(E_compare, NULL, NULL);
-   createEvents(seg1,1);
-   createEvents(seg2,2);
+   createEvents(seg1);
+   createEvents(seg2);
    _sweepline = DEBUG_NEW YQ(_overlap, &seg1, &seg2);
 }
 
-void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
+void polycross::XQ::createEvents(const segmentlist& seg)
 {
    unsigned s1, s2;
    TEvent*      evt;
@@ -1278,17 +1275,17 @@ void polycross::XQ::createEvents(const segmentlist& seg, byte shapeID)
       // and create the thread event
       if (seg[s1]->lP() == seg[s2]->lP())
       {
-         evt = DEBUG_NEW TbEvent(seg[s1], seg[s2], shapeID);
+         evt = DEBUG_NEW TbEvent(seg[s1], seg[s2]);
          etype = _beginE;
       }
       else if (seg[s1]->rP() == seg[s2]->rP())
       {
-         evt = DEBUG_NEW TeEvent(seg[s1], seg[s2], shapeID);
+         evt = DEBUG_NEW TeEvent(seg[s1], seg[s2]);
          etype = _endE;
       }
       else
       {
-         evt = DEBUG_NEW TmEvent(seg[s1], seg[s2], shapeID);
+         evt = DEBUG_NEW TmEvent(seg[s1], seg[s2]);
          etype = _modifyE;
       }
       // update overlapping box
