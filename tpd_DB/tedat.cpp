@@ -971,12 +971,16 @@ void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
 
 void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
 {
-   //@TODO Limits!
+   //@TODO Limits! The length of every single segment plus twice the
+   // bfactor should be bigger than 0. Otherwise the shape should disappear
    logicop::stretcher boza(_plist, bfactor);
    pointlist* res = boza.execute();
-   laydata::tdtpoly* modified = DEBUG_NEW laydata::tdtpoly(*res);
-   decure[0]->push_back(this);
-   decure[1]->push_back(modified);
+   valid_poly vsh(*res);
+   if (vsh.valid())
+   {
+      decure[0]->push_back(this);
+      decure[1]->push_back(vsh.replacement());
+   }
    delete res;
 }
 
@@ -1358,7 +1362,7 @@ laydata::validator* laydata::tdtwire::move(const CTM& trans, SGBitSet& plst)
          delete check;
          return NULL;
       }
-      // in all other cases keep the origical pointlist, depending on the check->status()
+      // in all other cases keep the original pointlist, depending on the check->status()
       // the shape will be replaced, or marked as failed to modify
       return check;
    }
@@ -1379,6 +1383,16 @@ laydata::tdtdata* laydata::tdtwire::copy(const CTM& trans) {
    for (unsigned i = 0; i < _plist.size(); i++) 
       ptlist.push_back(_plist[i] * trans);
    return DEBUG_NEW tdtwire(ptlist,_width);
+}
+
+void laydata::tdtwire::stretch(int bfactor, shapeList** decure)
+{
+   if ((2*bfactor + _width) > 0)
+   {
+      tdtwire* modified = DEBUG_NEW tdtwire(_plist, 2*bfactor + _width);
+      decure[0]->push_back(this);
+      decure[1]->push_back(modified);
+   }
 }
 
 void laydata::tdtwire::info(std::ostringstream& ost, real DBU) const {

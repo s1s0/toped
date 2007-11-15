@@ -708,7 +708,7 @@ int tellstdfunc::lgcMERGE::execute()
 tellstdfunc::lgcSTRETCH::lgcSTRETCH(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 void tellstdfunc::lgcSTRETCH::undo_cleanup()
@@ -756,8 +756,8 @@ int tellstdfunc::lgcSTRETCH::execute()
    }
    else
    {
-      telldata::ttint  *op = static_cast<telldata::ttint*>(OPstack.top());OPstack.pop();
-      int bfactor = op->value();
+      telldata::ttreal  *op = static_cast<telldata::ttreal*>(OPstack.top());OPstack.pop();
+      real bfactor = op->value();
       delete op;
       //expand/shrink returns 2 Attic lists -> Delete/AddSelect,
       // create and initialize them here
@@ -765,7 +765,7 @@ int tellstdfunc::lgcSTRETCH::execute()
       for (byte i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::atticList());
       laydata::tdtdesign* ATDB = DATC->lockDB();
          real DBscale = DATC->DBscale();
-         if (ATDB->stretch(bfactor * DBscale, dasao))
+         if (ATDB->stretch((int) rint(bfactor * DBscale), dasao))
          {
             // push the command for undo
             UNDOcmdQ.push_front(this);
