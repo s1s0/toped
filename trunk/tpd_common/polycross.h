@@ -179,7 +179,7 @@ namespace polycross
          ~EventVertex();
          const TP*         operator () () const {return _evertex;};
          void              addEvent(TEvent*, EventTypes);
-         void              sweep(YQ&, XQ&);
+         void              sweep(YQ&, XQ&, bool single);
          void              sweep2bind(YQ&, BindCollection&);
          void              CheckBEM(XQ&, TEvent&, TEvent&);
       private:
@@ -198,7 +198,7 @@ namespace polycross
       public:
          friend void EventVertex::CheckBEM(XQ&, TEvent&, TEvent&);
 //         TEvent(byte shapeID) : _shapeID(shapeID) {};
-         virtual void      sweep(XQ&, YQ&, ThreadList&) = 0;
+         virtual void      sweep(XQ&, YQ&, ThreadList&, bool) = 0;
          virtual void      sweep2bind(YQ&, BindCollection&) = 0;
          virtual const TP* avertex() = 0;
          virtual const TP* bvertex() = 0;
@@ -208,9 +208,8 @@ namespace polycross
          polysegment*      bseg() {return _bseg;}
          virtual          ~TEvent() {};
       protected:
-         TP*               getIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
-         void              checkIntersect(polysegment*, polysegment*, XQ&, const TP* iff=NULL);
-//         byte              _shapeID;
+         TP*               getIntersect(polysegment*, polysegment*, XQ&, bool, const TP* iff=NULL);
+         void              checkIntersect(polysegment*, polysegment*, XQ&, bool, const TP* iff=NULL);
          const TP*         _evertex;
          void              insertCrossPoint(const TP*, polysegment*, polysegment*,
                                             XQ&, bool dontswap = false);
@@ -230,7 +229,7 @@ namespace polycross
    {
       public:
          TbEvent(polysegment*, polysegment*);
-         void              sweep(XQ&, YQ&, ThreadList&);
+         void              sweep(XQ&, YQ&, ThreadList&, bool);
          void              sweep2bind(YQ&, BindCollection&);
          const TP*         avertex() {return _aseg->rP();}
          const TP*         bvertex() {return _bseg->rP();};
@@ -243,7 +242,7 @@ namespace polycross
    {
       public:
          TeEvent(polysegment*, polysegment*);
-         void              sweep(XQ&, YQ&, ThreadList&);
+         void              sweep(XQ&, YQ&, ThreadList&, bool);
          void              sweep2bind(YQ&, BindCollection&);
          const TP*         avertex() {return _aseg->lP();}
          const TP*         bvertex() {return _bseg->lP();}
@@ -256,7 +255,7 @@ namespace polycross
    {
       public:
          TmEvent(polysegment*, polysegment*);
-         void              sweep(XQ&, YQ&, ThreadList&);
+         void              sweep(XQ&, YQ&, ThreadList&, bool);
          void              sweep2bind(YQ&, BindCollection&);
          const TP*         avertex() {return _aseg->lP();}
          const TP*         bvertex() {return _bseg->rP();}
@@ -273,7 +272,7 @@ namespace polycross
          _eventvertex(ev->x(), ev->y())
             {_aseg = aseg; _bseg = bseg;  _evertex = &_eventvertex;}
 //               ~TcEvent() { delete _evertex; }
-         void              sweep(XQ&, YQ&, ThreadList&);
+         void              sweep(XQ&, YQ&, ThreadList&, bool);
          void              sweep2bind(YQ&, BindCollection&) {assert(false);}
          const TP*         avertex() {assert(false); return NULL;}
          const TP*         bvertex() {assert(false); return NULL;}
@@ -313,8 +312,9 @@ namespace polycross
    {
       public:
          typedef std::map<int,SegmentThread*> Threads;
-         YQ(DBbox&, const segmentlist*, const segmentlist*);
-         ~YQ();
+                           YQ(DBbox&, const segmentlist*, const segmentlist*);
+                           YQ(DBbox&, const segmentlist*);
+                          ~YQ();
          SegmentThread*    beginThread(polysegment*);
          SegmentThread*    endThread(unsigned);
          SegmentThread*    modifyThread(unsigned, polysegment*);
@@ -338,9 +338,9 @@ namespace polycross
                SegmentThread*    threadBelow()  {assert(false); return NULL;}
                ~BottomSentinel() {delete _cseg;}
          };
-
          BottomSentinel*   _bottomSentinel;
          TopSentinel*      _topSentinel;
+         void              initialize(DBbox&);
          int               sCompare(const polysegment*, const polysegment*);
          Threads           _cthreads;
          int               _lastThreadID;
@@ -358,9 +358,10 @@ namespace polycross
    //===========================================================================
    class XQ {
       public:
-         XQ(const segmentlist &, const segmentlist&);
+                           XQ(const segmentlist &, const segmentlist&);
+                           XQ(const segmentlist&);
          ~XQ();
-         void              sweep();
+         void              sweep(bool single);
          void              sweep2bind(BindCollection&);
          void              addCrossEvent(const TP*, polysegment*, polysegment*);
          YQ*               sweepline() {return _sweepline;}
