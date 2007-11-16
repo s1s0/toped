@@ -52,10 +52,10 @@ logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
    
 void logicop::logic::findCrossingPoints()
 {
-// create the event queue
+   // create the event queue
    polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl1, *_segl2);
    // BO modified algorithm
-   _eq->sweep();
+   _eq->sweep(false);
    unsigned crossp1 = _segl1->normalize(_poly1);
    unsigned crossp2 = _segl2->normalize(_poly2);
    assert(crossp1 == crossp2);
@@ -461,4 +461,23 @@ pointlist* logicop::stretcher::execute()
       streched->push_back(npnt);
    }
    return streched;
+}
+
+//-----------------------------------------------------------------------------
+// class CrossFix
+//-----------------------------------------------------------------------------
+/*!*/
+logicop::CrossFix::CrossFix(const pointlist& poly) : _poly(poly)
+{
+   _segl = DEBUG_NEW polycross::segmentlist(poly,1);
+   _shape = NULL;
+
+}
+
+void logicop::CrossFix::findCrossingPoints()
+{
+   // create the event queue
+   polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl);
+   // BO modified algorithm
+   _eq->sweep(true);
 }

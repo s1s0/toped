@@ -96,6 +96,7 @@ namespace logicop {
       
    };
 
+   //===========================================================================
    class SSegment : public PSegment
    {
    public:
@@ -105,6 +106,7 @@ namespace logicop {
       PSegment*         _moved;
    };
 
+   //===========================================================================
    class stretcher {
    public:
       typedef std::vector<SSegment> SSegments;
@@ -114,6 +116,20 @@ namespace logicop {
       const pointlist&        _poly; //! The input polygon
       SSegments               _segl;
    };
-   
+
+   //===========================================================================
+   class CrossFix   {
+   public:
+      //! The class constructor preparing all data fields
+                              CrossFix(const pointlist&);
+      //! Do Benttley-Ottman modified
+      void                    findCrossingPoints();
+   protected:
+      //! The raw data, corresponding to _poly, used by all logic methods
+      polycross::VPoint*      _shape;
+      //! The input polygon
+      const pointlist&        _poly;
+      polycross::segmentlist* _segl;
+   };
 }
 #endif
