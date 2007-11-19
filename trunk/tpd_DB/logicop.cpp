@@ -480,4 +480,36 @@ void logicop::CrossFix::findCrossingPoints()
    polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl);
    // BO modified algorithm
    _eq->sweep(true);
+   unsigned crossp = _segl->normalize(_poly);
+   if (1 == crossp)
+      throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
+   delete _eq;
+   _shape = _segl->dump_points();
+   reorderCross();
+}
+
+void logicop::CrossFix::reorderCross()
+{
+   polycross::VPoint* centinel = _shape;
+   polycross::VPoint* looper = centinel;
+   unsigned shapeNum = 0;
+   do
+   {
+      shapeNum++;
+      looper = looper->next();
+   } while (centinel != looper);
+   unsigned loopcount;
+   for(loopcount = 0; loopcount < shapeNum; loopcount++)
+   {
+      // for every non-crossing point which has cross point neightbors and
+      // all 3 points coincide
+      if (looper->visited() &&
+          (!looper->prev()->visited() && !looper->next()->visited()) &&
+           (*looper->prev()->cp() == *looper->next()->cp()) )
+      {
+         looper = looper->checkNreorder(_shape);
+      }
+      else looper = looper->next();
+   }
+   _shape = looper;
 }

@@ -125,6 +125,7 @@ namespace logicop {
       //! Do Benttley-Ottman modified
       void                    findCrossingPoints();
    protected:
+      void              reorderCross();
       //! The raw data, corresponding to _poly, used by all logic methods
       polycross::VPoint*      _shape;
       //! The input polygon
