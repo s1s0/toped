@@ -981,6 +981,11 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
       decure[0]->push_back(this);
       decure[1]->push_back(vsh.replacement());
    }
+   else
+   {
+      logicop::CrossFix fixingpoly(*res);
+      fixingpoly.findCrossingPoints();
+   }
    delete res;
 }
 
