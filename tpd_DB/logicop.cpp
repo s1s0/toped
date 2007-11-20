@@ -259,7 +259,7 @@ bool logicop::logic::OR(pcollection& plycol) {
       if  (_shape1->inside(_poly2)) centinel = _shape2;
       // ... if not, check that an arbitrary point from poly2 is inside poly1 ...
       else if (_shape2->inside(_poly1)) centinel = _shape1;
-      // ... if not - still insysting - check that the polygons coincides
+      // ... if not - still insisting - check that the polygons coincides
       else if (NULL == (centinel = checkCoinciding(_poly1, _shape2))) return false;
       // If we've got here means that one of the polygons is completely 
       // overlapped by the other one. So we need to return the outer one
@@ -480,8 +480,8 @@ void logicop::CrossFix::findCrossingPoints()
    polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl);
    // BO modified algorithm
    _eq->sweep(true);
-   unsigned crossp = _segl->normalize(_poly);
-   if (1 == crossp)
+   _crossp = _segl->normalize(_poly);
+   if (1 == _crossp)
       throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
    delete _eq;
    _shape = _segl->dump_points();
@@ -512,4 +512,41 @@ void logicop::CrossFix::reorderCross()
       else looper = looper->next();
    }
    _shape = looper;
+}
+
+
+bool logicop::CrossFix::getFixed(pcollection& plycol)
+{
+   bool result = false;
+   polycross::VPoint* centinel = NULL;
+   bool direction = true; /*next*/
+   if (0 == _crossp) return false;
+   else
+   {
+      //@ TODO here find the first point properly!
+      // - In case of oversize - it should be easy, because every odd shape
+      //   shold be overlapped entirely by a valid shape - i.e. we can generate two
+      //   sets of shapes and determine which one to scrap
+      // - With undersize - it seems  more complecated here. It seems that the only
+      //   universal way is to apply something similar to the bind algo. (remember I case)
+      //   to fond-out 
+      centinel = _shape;
+   }
+   //
+   assert(centinel);
+   polycross::VPoint* collector = centinel;
+   do {
+      if (0 == collector->visited()) {
+         pointlist *shgen = DEBUG_NEW pointlist();
+         polycross::VPoint* pickup = collector;
+         do {
+            pickup = pickup->follower(direction, true);
+            shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
+         } while (pickup != collector);
+         plycol.push_back(shgen);
+         result = true;
+      }
+      collector = collector->prev();
+   } while (collector != centinel);
+   return result;
 }

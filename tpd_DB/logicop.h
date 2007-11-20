@@ -124,6 +124,8 @@ namespace logicop {
                               CrossFix(const pointlist&);
       //! Do Benttley-Ottman modified
       void                    findCrossingPoints();
+      //! Get the fixed polygon
+      bool                    getFixed(pcollection&);
    protected:
       void              reorderCross();
       //! The raw data, corresponding to _poly, used by all logic methods
@@ -131,6 +133,7 @@ namespace logicop {
       //! The input polygon
       const pointlist&        _poly;
       polycross::segmentlist* _segl;
+      word                    _crossp;
    };
 }
 #endif
