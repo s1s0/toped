@@ -21,7 +21,7 @@
 
 #include "$TPD_GLOBAL/tll/seed.tll"
 
-void spreadNstretch(point sel)
+void spreadNstretch(point sel, real stretch, int layer)
 {
    select(sel);
    copy({0,0},{0,0});
@@ -32,8 +32,8 @@ void spreadNstretch(point sel)
    rotate(90, {0,0});
    select_all();
    copy({0,0},{0,0});
-   resize(-1.0);
-   changelayer(4);
+   resize(stretch);
+   changelayer(layer);
 }
 
 void example1()
@@ -41,7 +41,7 @@ void example1()
    newcell("example1");
    opencell("example1");
    addpoly({{1,1},{1,9},{2,9},{2,6},{9,6},{9,1}},2);
-   spreadNstretch({2,2});
+   spreadNstretch({2,2}, -1.0, 4);
 }
 
 void example1a()
@@ -49,7 +49,7 @@ void example1a()
    newcell("example1a");
    opencell("example1a");
    addpoly({{1,2},{1,1},{9,1},{9,9},{6,9},{6,2}},2);
-   spreadNstretch({8,8});
+   spreadNstretch({8,8}, -1.0, 4);
 }
 
 void example2()
@@ -57,7 +57,7 @@ void example2()
    newcell("example2");
    opencell("example2");
    addpoly({{1,1},{9,1},{9,9},{6,9},{6,15},{5,15},{5,7},{1,7}},2);
-   spreadNstretch({2,2});
+   spreadNstretch({2,2}, -1.0, 4);
 }
 
 void example3()
@@ -65,7 +65,7 @@ void example3()
    newcell("example3");
    opencell("example3");
    addpoly({{1,1},{9,1},{9,5},{6,5},{6,12},{9,12},{9,16},{1,16},{1,11},{4.5,11},{4.5,6},{1,6}},2);
-   spreadNstretch({2,2});
+   spreadNstretch({2,2}, -1.0, 4);
 }
 
 void example3a()
@@ -73,8 +73,19 @@ void example3a()
    newcell("example3a");
    opencell("example3a");
    addpoly({{4.5,11},{4.5,6},{1,6},{1,1},{9,1},{9,5},{6,5},{6,12},{9,12},{9,16},{1,16},{1,11}},2);
-   spreadNstretch({2,2});
+   spreadNstretch({2,2}, -1.0, 4);
 }
+
+
+void example4()
+{
+   newcell("example4");
+   opencell("example4");
+   addpoly({{9,9},{1,9},{1,1},{5,1},{5,6},{6,6},{6,3},{9,3}},7);
+   spreadNstretch({2,2}, 1.0, 8);
+}
+
+
 
 longcursor(true);
 example1();
@@ -82,5 +93,6 @@ example1a();
 example2();
 example3();
 example3a();
+example4();
 unselect_all();
 

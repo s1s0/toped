@@ -525,42 +525,78 @@ void logicop::CrossFix::reset_visited()
    }  while (centinel != looper);
 }
 
-bool logicop::CrossFix::getFixed(pcollection& plycol)
+polycross::VPoint* logicop::CrossFix::findFirstValid()
 {
-   bool result = false;
-   polycross::VPoint* centinel = NULL;
-   bool direction = true; /*next*/
-   if (0 == _crossp) return false;
-   else
-   {
-      //@ TODO here find the first point properly!
-      // - In case of oversize - it should be easy, because every odd shape
-      //   shold be overlapped entirely by a valid shape - i.e. we can generate two
-      //   sets of shapes and determine which one to scrap
-      // - With undersize - it seems  more complecated here. It seems that the only
-      //   universal way is to apply something similar to the bind algo. (remember I case)
-      //   to fond-out 
-      centinel = _shape;
-   }
-   //
-   assert(centinel);
+   assert(_crossp);
+   assert(_shape);
+   polycross::VPoint* centinel = _shape;
    polycross::VPoint* collector = centinel;
-   bool chdirection = true;
+   bool direction = true; /*next*/
+
    // the general idea behind the code below:
    // The list of points resulted from the BO algo shall be traversed to
    // generate the new polygon(s). It is not obvious however which part of the
    // point list shall be discarded and which one shall be used in the new polygon.
    // If we can determine a single point that is (for sure) in or out - then it's
    // easy - we can use the "usual" alternative traversing using the crossing
-   // points as a switch markers. It appears though that it's not easy to determine
-   // such point - so here is the "bright" alternative.
+   // points as a switch markers. It appears though that it's not obvious how to
+   // to find such point - there are a number of blow/shrink cases. Here is the idea:
    // Take an arbitraty starting point.
    // Generate the first polygon and check whether it is winding clockwise (negative area).
-   // If it is - skip it and start again from the point following the crossing point.
-   // If it isn't - great - we've got a proper starting point - finish the traversing.
-   // The "theory" behind all that is that closed polygons will be picked-up
-   // alternatively - one to keep, one to skip. Of course in most of the cases there
-   // will be only one of each kind.
+   // If it is - skip it and start the traversing from the point following the crossing point.
+   // If it isn't - great - we've got a proper starting point - so the traversing should
+   // start from there.
+   // It is essential, that the traversing here and in getFixed procedure is absolutely
+   // the same.
+   // This certainly is not the most optimal algo, but seems to be easier to understand
+   // and maintain. Once the function is fully working - it could be optimized.
+   do {
+      if (0 == collector->visited())
+      { // crossing point found
+         pointlist *shgen = DEBUG_NEW pointlist();
+         polycross::VPoint* pickup = collector;
+         do {
+            pickup = pickup->follower(direction, true);
+            shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
+         } while (pickup != collector);
+
+            // get the polygon area ...
+            real area = 0;
+            word size = shgen->size();
+            word i,j;
+            for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
+               area += real((*shgen)[i].x()) * real((*shgen)[j].y()) -
+                     real((*shgen)[j].x()) * real((*shgen)[i].y());
+            // ... and from there - the polygon orientation
+            if (area >= 0)
+            {
+              // pick-up the first point after the crossing one
+               centinel = collector->prev();
+            }
+            reset_visited();
+            return centinel;
+      }
+      collector = collector->prev();
+   } while (collector != centinel);
+
+   return NULL;
+}
+
+
+bool logicop::CrossFix::getFixed(pcollection& plycol)
+{
+   bool result = false;
+   polycross::VPoint* centinel = NULL;
+   bool direction = true; /*next*/
+   if (0 == _crossp) return false;
+   else  centinel = findFirstValid();
+   //
+   assert(centinel);
+   polycross::VPoint* collector = centinel;
+   bool chdirection = true;
+   // The "standard" traversing of the BO output points.
+   // Closed polygons will be picked-up alternatively - one to keep, one to skip.
+   // The trick is to get the starting point right - see the notes in findFirstValid
    do {
       if (0 == collector->visited())
       { // crossing point found
@@ -570,33 +606,8 @@ bool logicop::CrossFix::getFixed(pcollection& plycol)
             pickup = pickup->follower(direction, chdirection);
             shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
          } while (pickup != collector);
-         if (0 == plycol.size())
-         {
-            // get the polygon area ...
-            real area = 0;
-            word size = shgen->size();
-            word i,j;
-            for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
-               area += real((*shgen)[i].x()) * real((*shgen)[j].y()) -
-                     real((*shgen)[j].x()) * real((*shgen)[i].y());
-            // ... and from there - the polygon orientation
-//            if ((chdirection && (area < 0)) || (!chdirection && (area > 0)))
-            if (area < 0)
-            {
-               plycol.push_back(shgen);
-               result = true;
-            }
-            else
-            {
-               reset_visited();
-               chdirection = !chdirection;
-            }
-         }
-         else
-         {
-            plycol.push_back(shgen);
-            result = true;
-         }
+         plycol.push_back(shgen);
+         result = true;
       }
       collector = collector->prev();
    } while (collector != centinel);
