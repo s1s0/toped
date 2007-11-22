@@ -791,7 +791,7 @@ int tellstdfunc::lgcSTRETCH::execute()
             UNDOPstack.push_front(shaddselect);
             // and finally select the_cut
             ATDB->select_fromList(get_ttlaylist(shaddselect));
-            LogFile << "expand("<< bfactor << ");"; LogFile.flush();
+            LogFile << "resize("<< bfactor << ");"; LogFile.flush();
             clean_atticlist(dasao[0]); delete (dasao[0]);
             // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addlist
          }
