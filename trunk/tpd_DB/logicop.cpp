@@ -515,6 +515,16 @@ void logicop::CrossFix::reorderCross()
 }
 
 
+void logicop::CrossFix::reset_visited()
+{
+   polycross::VPoint* centinel = _shape;
+   polycross::VPoint* looper = centinel;
+   do {
+      looper->reset_visited();
+      looper = looper->next();
+   }  while (centinel != looper);
+}
+
 bool logicop::CrossFix::getFixed(pcollection& plycol)
 {
    bool result = false;
@@ -535,16 +545,58 @@ bool logicop::CrossFix::getFixed(pcollection& plycol)
    //
    assert(centinel);
    polycross::VPoint* collector = centinel;
+   bool chdirection = true;
+   // the general idea behind the code below:
+   // The list of points resulted from the BO algo shall be traversed to
+   // generate the new polygon(s). It is not obvious however which part of the
+   // point list shall be discarded and which one shall be used in the new polygon.
+   // If we can determine a single point that is (for sure) in or out - then it's
+   // easy - we can use the "usual" alternative traversing using the crossing
+   // points as a switch markers. It appears though that it's not easy to determine
+   // such point - so here is the "bright" alternative.
+   // Take an arbitraty starting point.
+   // Generate the first polygon and check whether it is winding clockwise (negative area).
+   // If it is - skip it and start again from the point following the crossing point.
+   // If it isn't - great - we've got a proper starting point - finish the traversing.
+   // The "theory" behind all that is that closed polygons will be picked-up
+   // alternatively - one to keep, one to skip. Of course in most of the cases there
+   // will be only one of each kind.
    do {
-      if (0 == collector->visited()) {
+      if (0 == collector->visited())
+      { // crossing point found
          pointlist *shgen = DEBUG_NEW pointlist();
          polycross::VPoint* pickup = collector;
          do {
-            pickup = pickup->follower(direction, true);
+            pickup = pickup->follower(direction, chdirection);
             shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
          } while (pickup != collector);
-         plycol.push_back(shgen);
-         result = true;
+         if (0 == plycol.size())
+         {
+            // get the polygon area ...
+            real area = 0;
+            word size = shgen->size();
+            word i,j;
+            for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
+               area += real((*shgen)[i].x()) * real((*shgen)[j].y()) -
+                     real((*shgen)[j].x()) * real((*shgen)[i].y());
+            // ... and from there - the polygon orientation
+//            if ((chdirection && (area < 0)) || (!chdirection && (area > 0)))
+            if (area < 0)
+            {
+               plycol.push_back(shgen);
+               result = true;
+            }
+            else
+            {
+               reset_visited();
+               chdirection = !chdirection;
+            }
+         }
+         else
+         {
+            plycol.push_back(shgen);
+            result = true;
+         }
       }
       collector = collector->prev();
    } while (collector != centinel);

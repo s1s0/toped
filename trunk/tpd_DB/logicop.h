@@ -127,6 +127,7 @@ namespace logicop {
       //! Get the fixed polygon
       bool                    getFixed(pcollection&);
    protected:
+      void              reset_visited();
       void              reorderCross();
       //! The raw data, corresponding to _poly, used by all logic methods
       polycross::VPoint*      _shape;
