@@ -85,7 +85,13 @@ void example4()
    spreadNstretch({2,2}, 1.0, 8);
 }
 
-
+void example5()
+{
+   newcell("example5");
+   opencell("example5");
+   addpoly({{1,1},{1,4},{4,4},{4,9},{1,9},{1,12},{8,12},{8,9},{5,9},{5,4},{8,4},{8,1}},7);
+   spreadNstretch({2,2}, -1.0, 8);
+}
 
 longcursor(true);
 example1();
@@ -94,5 +100,6 @@ example2();
 example3();
 example3a();
 example4();
+example5();
 unselect_all();
 
