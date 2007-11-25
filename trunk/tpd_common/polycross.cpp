@@ -213,11 +213,14 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape)
    assert(*(prevCross->cp()) == *(nextCross->cp()));
    CPoint* nextCrossCouple = nextCross->link();
    CPoint* prevCrossCouple = prevCross->link();
+   // Check that crossing points are not cross coupled. If they are - swap
+   // their links to fix them
    if (!(*(prevCrossCouple->next()->cp()) == *(nextCrossCouple->cp())))
    {
       // swap the links
       prevCross->linkto(nextCrossCouple); nextCrossCouple->linkto(prevCross);
       nextCross->linkto(prevCrossCouple); prevCrossCouple->linkto(nextCross);
+      // ... and don't forget to update the points themselfs
       nextCrossCouple = nextCross->link();
       prevCrossCouple = prevCross->link();
    }
@@ -290,17 +293,36 @@ Event::insertCrossPoint() only.
  * @return the #CPoint that will be linked to its counterpart by the caller
  */
 polycross::CPoint* polycross::polysegment::insertCrossPoint(const TP* pnt) {
-   CPoint* cp = DEBUG_NEW CPoint(pnt);
+   CPoint* cp = DEBUG_NEW CPoint(pnt, _edge);
    crosspoints.push_back(cp);
    return cp;
 }
 
-unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2) {
+unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2) 
+{
    _lP = p1; _rP = p2;
    unsigned numcross = crosspoints.size();
-   if (crosspoints.size() > 1) {
+   if (crosspoints.size() > 1) 
+   {
       SortLine functor(p1,p2);
       std::sort(crosspoints.begin(), crosspoints.end(), functor);
+   }
+   if (0 < numcross)
+   {
+      printf("( On EDGE %i ...)\n", _edge );
+      for (crossCList::const_iterator CCP = crosspoints.begin(); CCP != crosspoints.end(); CCP++)
+      {
+         printf("(....... cross point with edge %i)\n", (*CCP)->link()->edge() );
+//         for (crossCList::const_iterator RCP = crosspoints.begin(); RCP != CCP; RCP++ )
+//         {
+//            if ((*CCP)->link()->edge() == (*RCP)->link()->edge())
+//            {
+//               #ifdef BO2_DEBUG
+//               printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, (*RCP)->link()->edge() );
+//               #endif
+//            }
+//         }
+      }
    }
    return numcross;
 }
@@ -318,7 +340,7 @@ void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
 
 polycross::BPoint* polycross::polysegment::insertBindPoint(const TP* pnt)
 {
-   BPoint* cp = DEBUG_NEW BPoint(pnt);
+   BPoint* cp = DEBUG_NEW BPoint(pnt, _edge);
    crosspoints.push_back(cp);
    return cp;
 }

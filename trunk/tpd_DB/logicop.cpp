@@ -485,7 +485,9 @@ void logicop::CrossFix::findCrossingPoints()
       throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
    delete _eq;
    _shape = _segl->dump_points();
+   report_poly();
    reorderCross();
+   report_poly();
 }
 
 void logicop::CrossFix::reorderCross()
@@ -512,6 +514,19 @@ void logicop::CrossFix::reorderCross()
       else looper = looper->next();
    }
    _shape = looper;
+}
+
+void logicop::CrossFix::report_poly()
+{
+   printf("=======================================================\n");
+   polycross::VPoint* centinel = _shape;
+   polycross::VPoint* looper = centinel;
+   int pno = 1;
+   do
+   {
+      printf("%.2i -%s-> ( %i , %i )\n", pno++, looper->visited() ? "-" : "C", looper->cp()->x(), looper->cp()->y());
+      looper = looper->next();
+   } while (centinel != looper);
 }
 
 
