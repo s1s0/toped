@@ -76,8 +76,8 @@ namespace polycross
    class CPoint : public VPoint
    {
       public:
-         CPoint(const TP* cp) : VPoint(&_crossingP), _link(NULL), _visited(0),
-         _crossingP(cp->x(), cp->y()) {};
+         CPoint(const TP* cp, int edge) : VPoint(&_crossingP), _link(NULL), _visited(0),
+         _edge(edge), _crossingP(cp->x(), cp->y()) {};
 //         virtual ~CPoint() {delete _cp;}
          virtual VPoint*  follower(bool& direction, bool modify = false);
          bool              inside(const pointlist&, bool touching = false) {return true;}
@@ -87,9 +87,11 @@ namespace polycross
          void              reset_visited() {_visited = 0;};
          void              linkage(VPoint*& prev);
          VPoint*           checkNreorder()       {assert(false); return NULL;}
+         int               edge() const  {return _edge;}
       protected:
          CPoint*           _link;
          char              _visited;
+         int               _edge;
       private:
          TP                _crossingP;
    };
@@ -101,7 +103,7 @@ namespace polycross
    {
       public:
       //! Creates a new BPoint simply by calling the CPoint constructor
-         BPoint(const TP* cp) : CPoint(cp) {};
+         BPoint(const TP* cp, int edge) : CPoint(cp, edge) {};
       //! Returns always 1 - VPoint is considered always visited
          char              visited() const      {return -1;}
       //! Returns the following point for the currently generated polygon
