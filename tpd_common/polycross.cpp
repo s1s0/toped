@@ -206,7 +206,21 @@ polycross::VPoint* polycross::CPoint::follower(bool& direction, bool modify) {
    return flw;
 }
 
-polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape)
+/*! One of the Bentley-Ottman post process functions. This one is dealing 
+with the cases when a vertex is lying on a segment it doesn't belongs to,
+i.e. two neightboring segments are touching the third segment. The algorithm
+is generating a crossing point exactly at the vertex of each segment. This
+results in a sequence of CPoint-VPoint-CPoint which refer to the same place.
+First of all we need to make sure that the corresponding cross couples are
+sorted properly, because they will coincide and there is no way for the
+sorting function to find out which is the proper order. Then we have to deal
+with two general cases. Both segments are approaching from the
+same side - the K case. Then the crossing points should be removed. The
+second case is when the segments are piercing the third segment Then one
+of the crossing points and the vertex point are redundant and should be
+removed.
+*/
+polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool single)
 {
    CPoint* nextCross = static_cast<CPoint*>(_next);
    CPoint* prevCross = static_cast<CPoint*>(_prev);
@@ -250,8 +264,32 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape)
       delete prevCrossCouple;
       delete prevCross;
       delete this;
+      return nextCross;
    }
-   return nextCross;
+   else
+   {
+      if (single)
+      {
+         //we have a touching edges (K case) and we're post-processing
+         //a single polygin - so, let's remove both crossing points
+         prevCross->prev()->set_next(this); set_prev(prevCross->prev());
+         nextCross->next()->set_prev(this); set_next(nextCross->next());
+         prevCrossCouple->prev()->set_next(nextCrossCouple->next());
+         nextCrossCouple->next()->set_prev(prevCrossCouple->prev());
+         delete prevCross; delete prevCrossCouple;
+         delete nextCross; delete nextCrossCouple;
+         return this;
+      }
+      else
+      {
+         //in the case of two polygons the only posible filtering is to remove
+         //the vertex point (laylogic.tll:cut_test3a()) which is not having any
+         //impact of the algorithm
+         //@TODO
+         return nextCross;
+      }
+
+   }
 }
 
 //==============================================================================
@@ -309,19 +347,32 @@ unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2)
    }
    if (0 < numcross)
    {
+#ifdef BO2_DEBUG
       printf("( On EDGE %i ...)\n", _edge );
-      for (crossCList::const_iterator CCP = crosspoints.begin(); CCP != crosspoints.end(); CCP++)
+#endif
+      crossCList::iterator CCP = crosspoints.begin();
+      while (CCP != crosspoints.end())
       {
+#ifdef BO2_DEBUG
          printf("(....... cross point with edge %i)\n", (*CCP)->link()->edge() );
-//         for (crossCList::const_iterator RCP = crosspoints.begin(); RCP != CCP; RCP++ )
-//         {
-//            if ((*CCP)->link()->edge() == (*RCP)->link()->edge())
-//            {
-//               #ifdef BO2_DEBUG
-//               printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, (*RCP)->link()->edge() );
-//               #endif
-//            }
-//         }
+#endif
+         bool doublecross = false;
+         for (crossCList::const_iterator RCP = crosspoints.begin(); RCP != CCP; RCP++ )
+         {
+            if ((*CCP)->link()->edge() == (*RCP)->link()->edge())
+            {
+               doublecross = true;
+#ifdef BO2_DEBUG
+               printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, (*RCP)->link()->edge() );
+#endif
+            }
+         }
+         if (doublecross)
+         {
+            delete (*CCP);
+            CCP = crosspoints.erase(CCP);
+         }
+         else CCP++;
       }
    }
    return numcross;
