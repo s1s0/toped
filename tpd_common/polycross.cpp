@@ -239,14 +239,17 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
       prevCrossCouple = prevCross->link();
    }
    // now check for piercing edge cross points
-   VPoint* pV = prevCross->prev();
-   VPoint *nV = nextCross->next();
    VPoint* spV = prevCrossCouple->prev();
    VPoint *snV = nextCrossCouple->next();
-   int oriP = orientation(spV->cp(), snV->cp(), pV->cp());
-   int oriN = orientation(spV->cp(), snV->cp(), nV->cp());
-   assert(0 != oriP);
-   assert(0 != oriN);
+   
+   VPoint* pV = prevCross;
+   int oriP, oriN;
+   do pV = pV->prev();
+   while  (0 == (oriP = orientation(spV->cp(), snV->cp(), pV->cp())));
+
+   VPoint *nV = nextCross;
+   do nV = nV->next();
+   while  (0 == (oriN = orientation(spV->cp(), snV->cp(), nV->cp())));
    if (oriP != oriN)
    {
       // we have a piercing edge cross - so let's remove the redundant points
