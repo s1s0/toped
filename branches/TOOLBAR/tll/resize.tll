@@ -1,0 +1,107 @@
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+// ------------------------------------------------------------------------ =
+//           $URL$
+//        Created: Wed Nov 21 2007
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Tests for resize operations
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision$
+//          $Date$
+//        $Author$
+//===========================================================================
+
+#include "$TPD_GLOBAL/tll/seed.tll"
+
+void spreadNstretch(point sel, real stretch, int layer)
+{
+   select(sel);
+   copy({0,0},{0,0});
+   rotate(90, {0,0});
+   copy({0,0},{0,0});
+   rotate(90, {0,0});
+   copy({0,0},{0,0});
+   rotate(90, {0,0});
+   select_all();
+   copy({0,0},{0,0});
+   resize(stretch);
+   changelayer(layer);
+}
+
+void example1()
+{
+   newcell("example1");
+   opencell("example1");
+   addpoly({{1,1},{1,9},{2,9},{2,6},{9,6},{9,1}},2);
+   spreadNstretch({2,2}, -1.0, 4);
+}
+
+void example1a()
+{
+   newcell("example1a");
+   opencell("example1a");
+   addpoly({{1,2},{1,1},{9,1},{9,9},{6,9},{6,2}},2);
+   spreadNstretch({8,8}, -1.0, 4);
+}
+
+void example2()
+{
+   newcell("example2");
+   opencell("example2");
+   addpoly({{1,1},{9,1},{9,9},{6,9},{6,15},{5,15},{5,7},{1,7}},2);
+   spreadNstretch({2,2}, -1.0, 4);
+}
+
+void example3()
+{
+   newcell("example3");
+   opencell("example3");
+   addpoly({{1,1},{9,1},{9,5},{6,5},{6,12},{9,12},{9,16},{1,16},{1,11},{4.5,11},{4.5,6},{1,6}},2);
+   spreadNstretch({2,2}, -1.0, 4);
+}
+
+void example3a()
+{
+   newcell("example3a");
+   opencell("example3a");
+   addpoly({{4.5,11},{4.5,6},{1,6},{1,1},{9,1},{9,5},{6,5},{6,12},{9,12},{9,16},{1,16},{1,11}},2);
+   spreadNstretch({2,2}, -1.0, 4);
+}
+
+
+void example4()
+{
+   newcell("example4");
+   opencell("example4");
+   addpoly({{9,9},{1,9},{1,1},{5,1},{5,6},{6,6},{6,3},{9,3}},7);
+   spreadNstretch({2,2}, 1.0, 8);
+}
+
+void example5()
+{
+   newcell("example5");
+   opencell("example5");
+   addpoly({{1,1},{1,4},{4,4},{4,9},{1,9},{1,12},{8,12},{8,9},{5,9},{5,4},{8,4},{8,1}},8);
+   spreadNstretch({2,2}, -1.0, 7);
+//   select({2,2});
+//   copy({0,0},{0,0});
+//   resize(-1.0);
+}
+
+longcursor(true);
+example1();
+example1a();
+example2();
+example3();
+example3a();
+example4();
+example5();
+//unselect_all();
