@@ -241,6 +241,31 @@ void tui::MenuItemSeparator::create(wxMenuBar *menuBar)
    _inserted = true;
 }
 
+tui::ToolItem::ToolItem(int toolBarID, int toolID)
+{
+}
+
+tui::ToolItem::~ToolItem()
+{
+}
+
+tui::ToolBarHandler::ToolBarHandler(int ID, std::string name)
+		:_ID(ID), _name(name)
+{
+	//_window = DEBUG_NEW wxSashLayoutWindow(Toped->getFrame(),_ID);
+_window = DEBUG_NEW wxSashLayoutWindow(Toped->getFrame(), wxID_ANY,
+                                        wxDefaultPosition, wxDefaultSize,
+                               wxSW_3D | wxCLIP_CHILDREN);
+	_window->SetDefaultSize(wxSize(1000, 30));
+	_window->SetOrientation(wxLAYOUT_HORIZONTAL);
+	_window->SetAlignment(wxLAYOUT_TOP);
+	_window->SetSashVisible(wxSASH_RIGHT, TRUE);
+}
+
+tui::ToolBarHandler::~ToolBarHandler()
+{
+}
+
 tui::ResourceCenter::ResourceCenter(void):_menuCount(0) 
 {
 }
@@ -252,6 +277,12 @@ tui::ResourceCenter::~ResourceCenter(void)
       delete (*mItem);
    }
    _menus.clear();
+
+	for(toolBarList::iterator tItem=_toolBars.begin(); tItem!=_toolBars.end(); tItem++)
+   {
+      delete (*tItem);
+   }
+   _toolBars.clear();
 }
 
 void tui::ResourceCenter::buildMenu(wxMenuBar *menuBar)
@@ -440,6 +471,30 @@ void tui::ResourceCenter::executeMenu(int ID1)
    }
 }
 
+void tui::ResourceCenter::appendTool(wxWindow* win, const std::string toolBarName, const std::string &toolBarItem, 
+												 const std::string &hotKey, callbackMethod cbMethod)
+{
+	
+	std::string str = toolBarName;
+
+	std::transform(str.begin(), str.end(), str.begin(), tolower);
+	toolBarList::const_iterator it;
+	_toolBars.clear();
+	for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+	{
+		if ((*it)->name()==str)
+		{
+			break;
+		}
+	}
+	
+	if (it==_toolBars.end())
+	{
+		//Create new toolbar
+		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(1, str);
+	}
+ 
+}
 
 //=============================================================================
 tellstdfunc::stdADDMENU::stdADDMENU(telldata::typeID retype, bool eor) :

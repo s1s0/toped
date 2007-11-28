@@ -415,6 +415,7 @@ bool TopedApp::OnInit() {
 //   DATC = DEBUG_NEW DataCenter();
    initDBLib();
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
+	Toped->initToolBars();
 
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
    delete wxLog::SetActiveTarget(logWindow);
