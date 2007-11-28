@@ -345,8 +345,43 @@ unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2)
       SortLine functor(p1,p2);
       std::sort(crosspoints.begin(), crosspoints.end(), functor);
    }
-   if (0 < numcross)
+   return numcross;
+}
+
+/*! Dump the valid segment points and link them. A valid segment points are the 
+segment left point and all crossing points except the coinciding ones. Two 
+segments cross each other in a single point. This is axiohmatic of course, but 
+here it includes the coinciding or partially coinciding segments. It is rather 
+a sanity check here for double crossing points, but BO algo implementation is 
+producing such cases exactly when segments partially coincides.
+*/
+void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
+   vlist = DEBUG_NEW VPoint(_lP, vlist);
+   for (unsigned i = 0; i < crosspoints.size(); i++)
    {
+      unsigned j = 0;
+      for (j = 0; j < i; j++)
+      {
+         if (crosspoints[i]->link()->edge() == crosspoints[j]->link()->edge())
+            break;
+      }
+      if (j == i)
+      {
+         crosspoints[i]->linkage(vlist);
+#ifdef BO2_DEBUG
+         printf("( %i , %i )\n", crosspoints[i]->cp()->x(), crosspoints[i]->cp()->y());
+#endif
+      }
+      else 
+      {
+#ifdef BO2_DEBUG
+         printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, crosspoints[i]->link()->edge() );
+#endif
+      }
+   }
+}
+
+/*
 #ifdef BO2_DEBUG
       printf("( On EDGE %i ...)\n", _edge );
 #endif
@@ -374,20 +409,7 @@ unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2)
          }
          else CCP++;
       }
-   }
-   return numcross;
-}
-
-void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
-   vlist = DEBUG_NEW VPoint(_lP, vlist);
-   for (unsigned i = 0; i < crosspoints.size(); i++)
-   {
-      crosspoints[i]->linkage(vlist);
-#ifdef BO2_DEBUG
-      printf("( %i , %i )\n", crosspoints[i]->cp()->x(), crosspoints[i]->cp()->y());
-#endif
-   }
-}
+*/
 
 polycross::BPoint* polycross::polysegment::insertBindPoint(const TP* pnt)
 {
