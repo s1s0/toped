@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 #include <wx/wx.h>
+#include <wx/laywin.h>
+
 #include "../tpd_bidfunc/tpdf_common.h"
 
 /*WARNING!!!
@@ -44,11 +46,15 @@ namespace tui
    //forward declarations
    class TopedFrame;
    class MenuItemHandler;
+	class ToolBarHandler;
 
    typedef void (TopedFrame::*callbackMethod)(wxCommandEvent&);
    typedef std::vector <MenuItemHandler*> itemList;
+	typedef std::vector <ToolBarHandler*> toolBarList;
 
-
+//=================================
+//		Everything about menu
+//=================================
    class MenuItemHandler
    {
    public:
@@ -115,7 +121,37 @@ namespace tui
    };
 
 
+//=================================
+//		Everything about toolbar
+//=================================
+	class ToolItem
+	{
+	public:
+		ToolItem(int toolBarID, int toolID);
+		virtual ~ToolItem();
 
+	};
+
+	class ToolBarHandler
+	{
+	public:
+		ToolBarHandler(int ID, std::string name);
+		virtual ~ToolBarHandler();
+
+		std::string		name() const {return _name;};
+	private:
+		std::string					_name;
+		wxSashLayoutWindow*		_window;
+		int							_ID;
+
+	};
+
+
+//=================================
+//		Resourcecenter is resposible 
+//		for handle of all ui action
+//		currently only menu and toolbar
+//=================================
    class ResourceCenter
    {
    public:
@@ -131,12 +167,16 @@ namespace tui
       void appendMenuSeparator(const std::string &menuItem);
       void executeMenu(int ID);
       bool checkExistence(const tui::MenuItemHandler & item);
+
+		void appendTool(wxWindow* win, const std::string toolBarName, const std::string &toolBarItem,
+							const std::string &hotKey, callbackMethod cbMethod);
    private:
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
 
 
-      itemList _menus;
+      itemList				_menus;
+		toolBarList			_toolBars;
       int _menuCount; //quantity of menu items;
       
 

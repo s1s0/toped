@@ -92,9 +92,10 @@ namespace tui {
       console::ted_cmd*       cmdline()  const {return _cmdline;}
       browsers::browserTAB*   browsers() const {return _browsers;}
       console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
+		wxWindow*					getFrame()			{return this;}
+		void                    initToolBars();
    private:
       void                    initMenuBar();
-      void                    initToolBar();
       void                    initView();
       bool                    checkFileOverwriting(const wxString& fileName);
       console::ted_log*       _cmdlog;       // log window

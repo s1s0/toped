@@ -288,13 +288,13 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initView();
    wxCommandEvent dummy;
    OnzoomEmpty(dummy);
-//   initToolBar();
+  
 //   CreateStatusBar();
    _toped_status = DEBUG_NEW TopedStatus(this);
    SetStatusBar(_toped_status);
    _resourceCenter = DEBUG_NEW ResourceCenter;
    SetStatusText( wxT( "Toped loaded..." ) );
-   //Put initMenuBar() at the end because in Windows it crashes
+	//Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
 	wxToolTip::Enable(true);
 	wxToolTip::SetDelay(3000);
@@ -585,9 +585,11 @@ void tui::TopedFrame::initMenuBar() {
    menuBar->Insert(menuBar->GetMenuCount()-1,settingsMenu  , wxT("Se&ttings"));
   
 }
-/*
-void TopedFrame::initToolBar() {
-   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
+
+void tui::TopedFrame::initToolBars() 
+{
+	_resourceCenter->appendTool(this, "main", "new.xpm", "", &tui::TopedFrame::OnCellNew);
+/*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
    X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
                               wxSize(100,32), wxST_NO_AUTORESIZE);
    Y_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
@@ -608,11 +610,11 @@ void TopedFrame::initToolBar() {
    positionBar->AddSeparator();
    positionBar->AddControl(Y_pos);
    positionBar->AddSeparator();
-   positionBar->Realize();
+   positionBar->Realize();*/
 }
-*/
+
 void tui::TopedFrame::initView() {
-   // The browsers window
+	// The browsers window
    mS_browsers = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_BROWSERS,
                                         wxDefaultPosition, wxDefaultSize,
                                wxSW_3D | wxCLIP_CHILDREN);
