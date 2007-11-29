@@ -97,11 +97,11 @@ void example5()
 }
 
 longcursor(true);
-example1();
-example1a();
-example2();
-example3();
-example3a();
-example4();
+//example1();
+//example1a();
+//example2();
+//example3();
+//example3a();
+//example4();
 example5();
 //unselect_all();

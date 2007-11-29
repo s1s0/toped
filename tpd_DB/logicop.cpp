@@ -487,6 +487,7 @@ void logicop::CrossFix::findCrossingPoints()
    _shape = _segl->dump_points();
    report_poly();
    reorderCross();
+   cleanRedundant();
    report_poly();
 }
 
@@ -510,6 +511,34 @@ void logicop::CrossFix::reorderCross()
            (*looper->prev()->cp() == *looper->next()->cp()) )
       {
          looper = looper->checkNreorder(_shape, true);
+      }
+      else looper = looper->next();
+   }
+   _shape = looper;
+}
+
+void logicop::CrossFix::cleanRedundant()
+{
+   polycross::VPoint* centinel = _shape;
+   polycross::VPoint* looper = centinel;
+   unsigned shapeNum = 0;
+   do
+   {
+      shapeNum++;
+      looper = looper->next();
+   } while (centinel != looper);
+   unsigned loopcount;
+   for(loopcount = 0; loopcount < shapeNum; loopcount++)
+   {
+      // for every non-crossing point which coincides with a neightboring cross point
+      if (
+           (looper->visited() &&  (!looper->prev()->visited()) &&
+           (*looper->prev()->cp() == *looper->cp()))                 ||
+           (looper->visited() &&  (!looper->next()->visited()) &&
+           (*looper->next()->cp() == *looper->cp()))
+         )
+      {
+         looper = looper->Redundant(_shape);
       }
       else looper = looper->next();
    }
@@ -574,22 +603,23 @@ polycross::VPoint* logicop::CrossFix::findFirstValid()
             pickup = pickup->follower(direction, true);
             shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
          } while (pickup != collector);
-
-            // get the polygon area ...
-            real area = 0;
-            word size = shgen->size();
-            word i,j;
-            for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
-               area += real((*shgen)[i].x()) * real((*shgen)[j].y()) -
-                     real((*shgen)[j].x()) * real((*shgen)[i].y());
-            // ... and from there - the polygon orientation
-            if (area >= 0)
-            {
-              // pick-up the first point after the crossing one
-               centinel = collector->prev();
-            }
-            reset_visited();
-            return centinel;
+         reset_visited();
+         // get the polygon area ...
+         real area = 0;
+         word size = shgen->size();
+         word i,j;
+         for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
+            area += real((*shgen)[i].x()) * real((*shgen)[j].y()) -
+                  real((*shgen)[j].x()) * real((*shgen)[i].y());
+         // ... and from there - the polygon orientation
+         if (area >= 0)
+         {
+            // pick-up the first non-crossing point after the crossing one
+            centinel = collector;
+            do centinel = centinel->prev();
+            while (0 == centinel->visited());
+         }
+         return centinel;
       }
       collector = collector->prev();
    } while (collector != centinel);
