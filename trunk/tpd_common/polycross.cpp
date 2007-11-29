@@ -295,6 +295,14 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
    }
 }
 
+polycross::VPoint* polycross::VPoint::Redundant(VPoint*& pairedShape)
+{
+   prev()->set_next(next());
+   next()->set_prev(prev());
+   polycross::VPoint* retval = next();
+   delete this;
+   return retval;
+}
 //==============================================================================
 // class BPoint
 polycross::VPoint* polycross::BPoint::follower(bool& direction, bool modify) {

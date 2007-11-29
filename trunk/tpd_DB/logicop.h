@@ -129,6 +129,7 @@ namespace logicop {
    protected:
       void                    reset_visited();
       void                    reorderCross();
+      void                    cleanRedundant();
       polycross::VPoint*      findFirstValid();
       void                    report_poly();
       //! The raw data, corresponding to _poly, used by all logic methods

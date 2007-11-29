@@ -58,6 +58,7 @@ namespace polycross
          virtual char     visited() const      {return 1;}
          virtual void     reset_visited()      {};
          virtual VPoint*  checkNreorder(VPoint*&, bool);
+         virtual VPoint*  Redundant(VPoint*&);
          const TP*         cp() const           {return _cp;};
          VPoint*           next() const         {return _next;};
          VPoint*           prev() const         {return _prev;};
@@ -86,7 +87,8 @@ namespace polycross
          CPoint*           link() const {return _link;}
          void              reset_visited() {_visited = 0;};
          void              linkage(VPoint*& prev);
-         VPoint*           checkNreorder()       {assert(false); return NULL;}
+         VPoint*           checkNreorder(VPoint*&, bool) {assert(false); return NULL;}
+         VPoint*           Redundant(VPoint*&)           {assert(false); return NULL;}
          int               edge() const  {return _edge;}
       protected:
          CPoint*           _link;
