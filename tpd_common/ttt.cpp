@@ -47,13 +47,13 @@ void TP::roundTO(int4b step) {
 }
 
 TP TP::operator * (const CTM& op2) const {
-   return TP(int4b(op2.a() * x() + op2.c() * y() + op2.tx()),
-              int4b(op2.b() * x() + op2.d() * y() + op2.ty()));  
+   return TP((int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx()),
+              (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty()));
 }
 
 TP TP::operator *= (const CTM& op2) {
-   int4b x_new = int4b(op2.a() * x() + op2.c() * y() + op2.tx());
-   int4b y_new = int4b(op2.b() * x() + op2.d() * y() + op2.ty());
+   int4b x_new = (int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
+   int4b y_new = (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
    _x = x_new; _y = y_new;
   return *this;
 }
