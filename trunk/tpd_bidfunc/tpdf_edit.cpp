@@ -756,48 +756,53 @@ int tellstdfunc::lgcSTRETCH::execute()
    }
    else
    {
-      telldata::ttreal  *op = static_cast<telldata::ttreal*>(OPstack.top());OPstack.pop();
-      real bfactor = op->value();
-      delete op;
-      //expand/shrink returns 2 Attic lists -> Delete/AddSelect,
-      // create and initialize them here
-      laydata::atticList* dasao[2];
-      for (byte i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::atticList());
-      laydata::tdtdesign* ATDB = DATC->lockDB();
-         real DBscale = DATC->DBscale();
-         if (ATDB->stretch((int) rint(bfactor * DBscale), dasao))
-         {
-            // push the command for undo
-            UNDOcmdQ.push_front(this);
-            // put the list of selected shapes in undo stack
-            UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
-            // unselect everything
-            ATDB->unselect_all();
+      real bfactor = getOpValue();
+      if (0.0 == bfactor)
+      {
+         tell_log(console::MT_WARNING,"Resize argument is 0. Nothing was changed");
+      }
+      else
+      {
+         //expand/shrink returns 2 Attic lists -> Delete/AddSelect,
+         // create and initialize them here
+         laydata::atticList* dasao[2];
+         for (byte i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::atticList());
+         laydata::tdtdesign* ATDB = DATC->lockDB();
+            real DBscale = DATC->DBscale();
+            if (ATDB->stretch((int) rint(bfactor * DBscale), dasao))
+            {
+               // push the command for undo
+               UNDOcmdQ.push_front(this);
+               // put the list of selected shapes in undo stack
+               UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
+               // unselect everything
+               ATDB->unselect_all();
 
-            telldata::ttlist* shdeleted = make_ttlaylist(dasao[0]);
-            // select the shapes to delete & delete them ...
-            ATDB->select_fromList(get_ttlaylist(shdeleted));
-            laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
-            ATDB->delete_selected(sh_delist);
-            // ... not forgetting to save them in the undo data stack for undo
-            UNDOPstack.push_front(make_ttlaylist(sh_delist));
-            // clean-up the delete attic list
-            clean_atticlist(sh_delist); delete sh_delist;
-            delete shdeleted;
+               telldata::ttlist* shdeleted = make_ttlaylist(dasao[0]);
+               // select the shapes to delete & delete them ...
+               ATDB->select_fromList(get_ttlaylist(shdeleted));
+               laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
+               ATDB->delete_selected(sh_delist);
+               // ... not forgetting to save them in the undo data stack for undo
+               UNDOPstack.push_front(make_ttlaylist(sh_delist));
+               // clean-up the delete attic list
+               clean_atticlist(sh_delist); delete sh_delist;
+               delete shdeleted;
 
-            // add the result of the expand/shrink...
-            telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
-            ATDB->addlist(dasao[1]);
-            UNDOPstack.push_front(shaddselect);
-            // and finally select the_cut
-            ATDB->select_fromList(get_ttlaylist(shaddselect));
-            LogFile << "resize("<< bfactor << ");"; LogFile.flush();
-            clean_atticlist(dasao[0]); delete (dasao[0]);
-            // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addlist
-         }
-      DATC->unlockDB();
+               // add the result of the expand/shrink...
+               telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
+               ATDB->addlist(dasao[1]);
+               UNDOPstack.push_front(shaddselect);
+               // and finally select the_cut
+               ATDB->select_fromList(get_ttlaylist(shaddselect));
+               LogFile << "resize("<< bfactor << ");"; LogFile.flush();
+               clean_atticlist(dasao[0]); delete (dasao[0]);
+               // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addlist
+            }
+         DATC->unlockDB();
+         UpdateLV();
+      }
    }
-   UpdateLV();
    return EXEC_NEXT;
 }
 

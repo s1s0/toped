@@ -550,7 +550,7 @@ void laydata::tdtdesign::rotate_selected( TP p, real angle, selectList** fadead)
    // To deal with edit in place, you have to :
    // - get the current translation matrix of the active cell
    // - apply the transformation - in this case rotation around a point
-   //   than is done in 3 steps - translate to 0, rotate, translate back
+   //   is done in 3 steps - translate to 0, rotate, translate back
    // - multiply with the reversed CTM to get back in the current 
    //   coordinates
    // If just rotation is applied (second step) operation can not deal 
