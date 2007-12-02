@@ -995,12 +995,11 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
       if (fixingpoly.getFixed(cut_shapes))
       {
          logicop::pcollection::const_iterator CI;
-         // add the resulting cut_shapes to the_cut shapeList
+         // add the resulting fixed_shapes to the_cut shapeList
          for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
             if (NULL != (newshape = createValidShape(*CI)))
                decure[1]->push_back(newshape);
          cut_shapes.clear();
-         
          // and finally add this to the_delete shapelist
          decure[0]->push_back(this);
       }

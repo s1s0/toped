@@ -96,12 +96,39 @@ void example5()
 //   resize(-1.0);
 }
 
+void example6()
+{
+   newcell("example6");
+   opencell("example6");
+   addpoly({{1,1},{9,1},{9,9},{5.5,9},{5.5,4},{4.5,4},{4.5,9},{1,9}},7);
+   spreadNstretch({2,2}, 1.0, 8);
+//   select({2,2});
+//   copy({0,0},{0,0});
+//   resize(-1.0);
+}
+
+
+
+void precisionR()
+{
+   // test the precision 
+   newcell("precisionR");
+   opencell("precisionR");
+   addpoly({{1,1},{1,4},{4,4},{4,9},{1,9},{1,12},{8,12},{8,9},{5,9},{5,4},{8,4},{8,1}},8);
+   select({2,2});
+   copy({0,0},{0,0});
+   rotate(90, {0,0});
+   report_selected();
+}
+
 longcursor(true);
-//example1();
-//example1a();
-//example2();
-//example3();
-//example3a();
-//example4();
+example1();
+example1a();
+example2();
+example3();
+example3a();
+example4();
 example5();
-//unselect_all();
+example6();
+unselect_all();
+//precisionR();

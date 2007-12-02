@@ -131,7 +131,6 @@ namespace logicop {
       void                    reorderCross();
       void                    cleanRedundant();
       polycross::VPoint*      findFirstValid();
-      void                    report_poly();
       //! The raw data, corresponding to _poly, used by all logic methods
       polycross::VPoint*      _shape;
       //! The input polygon
