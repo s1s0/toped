@@ -32,7 +32,7 @@
 #include "outbox.h"
 #include "avl.h"
 
-#define BO2_DEBUG
+//#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -295,14 +295,41 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
    }
 }
 
-polycross::VPoint* polycross::VPoint::Redundant(VPoint*& pairedShape)
+polycross::VPoint* polycross::VPoint::checkRedundantCross()
 {
-   prev()->set_next(next());
-   next()->set_prev(prev());
-   polycross::VPoint* retval = next();
-   delete this;
+   // Basically we are expecting the case with coiciding or partially
+   // coinciding segmets here. This case should result in a sequence CV-C
+   // or C-VC i.e. CrossPoint/VertexPoint whith the same coordinates
+   // followed/preceded by another CorssPoint with different coordinates.
+   // The idea is that the first crossing point is redundant and must be
+   // removed
+   polycross::CPoint* target;
+   polycross::VPoint* retval;
+
+   if (*prev()->cp() == *cp())
+   {
+      // remove previous point
+      assert( 0 == prev()->visited() );
+      target = static_cast<CPoint*>(prev());
+      retval = next();
+   }
+   else
+   {
+      // remove next point
+      assert(*next()->cp() == *cp());
+      assert(0 == next()->visited());
+      target = static_cast<CPoint*>(next());
+      retval = next()->next();
+   }
+   target->prev()->set_next(target->next());
+   target->next()->set_prev(target->prev());
+   target->link()->prev()->set_next(target->link()->next());
+   target->link()->next()->set_prev(target->link()->prev());
+   delete target->link();
+   delete target;
    return retval;
 }
+
 //==============================================================================
 // class BPoint
 polycross::VPoint* polycross::BPoint::follower(bool& direction, bool modify) {
