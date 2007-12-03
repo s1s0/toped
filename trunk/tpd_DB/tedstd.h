@@ -124,9 +124,9 @@ namespace laydata {
       byte                 status()          {return _status;};
       bool                 box()             {return (0 != (_status & shp_box));}
       pointlist&           get_validated()   {return _plist;};
-      virtual char*        failtype() = 0;
-      virtual tdtdata*     replacement() = 0;
-      virtual             ~validator() {};
+      virtual char*       failtype() = 0;
+      virtual tdtdata*    replacement() = 0;
+      virtual            ~validator() {};
    protected:
       byte                 _status;
       pointlist            _plist;

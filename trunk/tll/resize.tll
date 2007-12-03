@@ -121,14 +121,26 @@ void precisionR()
    report_selected();
 }
 
+
+void selfcrosscheck()
+{
+   newcell("selfcrosscheck");
+   opencell("selfcrosscheck");
+   addbox({{0,0},{10,10}},8);
+   select({5.5,4.5});
+   polycut({{3,3},{3,7},{7,7},{7,3}});
+}
+
+
 longcursor(true);
-example1();
-example1a();
-example2();
-example3();
-example3a();
-example4();
-example5();
+//example1();
+//example1a();
+//example2();
+//example3();
+//example3a();
+//example4();
+//example5();
 example6();
-unselect_all();
+//unselect_all();
+//selfcrosscheck();
 //precisionR();

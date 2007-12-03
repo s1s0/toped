@@ -495,15 +495,27 @@ void logicop::CrossFix::findCrossingPoints()
    polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl);
    // BO modified algorithm
    _eq->sweep(true);
-   _crossp = _segl->normalize(_poly);
-   if (1 == _crossp)
-      throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
    delete _eq;
+   _crossp = _segl->normalize(_poly);
+   if (0 == _crossp) return;
    _shape = _segl->dump_points();
    REPORT_POLY_DEBUG
    reorderCross();
    cleanRedundant();
    REPORT_POLY_DEBUG
+   countCross();
+}
+
+void logicop::CrossFix::countCross()
+{
+   polycross::VPoint* centinel = _shape;
+   polycross::VPoint* looper = centinel;
+   _crossp = 0;
+   do
+   {
+      if (0 == looper->visited()) _crossp++;
+      looper = looper->next();
+   } while (centinel != looper);
 }
 
 void logicop::CrossFix::reorderCross()
