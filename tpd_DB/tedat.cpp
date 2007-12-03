@@ -989,7 +989,9 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
          fixingpoly.findCrossingPoints();
       }
       catch (EXPTNpolyCross) {return;}
-   
+      if (1 == fixingpoly.crossp())
+      throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
+
       logicop::pcollection cut_shapes;
       laydata::tdtdata* newshape;
       if (fixingpoly.getFixed(cut_shapes))
@@ -2400,14 +2402,23 @@ void laydata::valid_poly::normalize() {
 self crossing. Alters the laydata::shp_cross bit of _status if the polygon
 is selfcrossing
 */ 
-void laydata::valid_poly::selfcrossing() {
-   // after all checks above, polygon has to have at least 6 points
-   // to be self-crossing
-   if (_plist.size() < 6) return;
+void laydata::valid_poly::selfcrossing()
+{
+   
+//    //using BO modified
+//    logicop::CrossFix fixingpoly(_plist);
+//    try
+//    {
+//       fixingpoly.findCrossingPoints();
+//    }
+//    catch (EXPTNpolyCross) {_status |= laydata::shp_cross; return;}
+//    if (0 != fixingpoly.crossp() )
+//       _status |= laydata::shp_cross;
+
    tedop::segmentlist segs(_plist, false);
    tedop::EventQueue Eq(segs); // initialize the event queue
    tedop::SweepLine  SL(_plist); // initialize the sweep line
-   if (!Eq.check_valid(SL)) 
+   if (!Eq.check_valid(SL))
       _status |= laydata::shp_cross;
 }
 
@@ -2481,9 +2492,17 @@ void laydata::valid_wire::angles()
 Alters the laydata::shp_cross bit of _status if the wire is selfcrossing
 */ 
 void laydata::valid_wire::selfcrossing() {
-   // after all previous checks , wre has to have at least 5 points
-   // to be self-crossing
-   if (_plist.size() < 5) return;
+   /*
+   // using BO modified
+   logicop::CrossFix fixingpoly(_plist);
+   try
+   {
+   fixingpoly.findCrossingPoints();
+}
+   catch (EXPTNpolyCross) {_status |= laydata::shp_cross; return;}
+   if (0 != fixingpoly.crossp() )
+   _status |= laydata::shp_cross;
+   */
    tedop::segmentlist segs(_plist, true);
    tedop::EventQueue Eq(segs); // initialize the event queue
    tedop::SweepLine  SL(_plist); // initialize the sweep line
