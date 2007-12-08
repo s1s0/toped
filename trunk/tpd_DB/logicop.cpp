@@ -672,3 +672,32 @@ bool logicop::CrossFix::getFixed(pcollection& plycol)
    } while (collector != centinel);
    return result;
 }
+
+bool logicop::CrossFix::generate(pcollection& plycol)
+{
+   if (0 == _crossp) return false;
+   polycross::VPoint* centinel = _shape;
+   while (0 == centinel->visited()) centinel = centinel->next();
+   traverseOne(centinel, plycol);
+   return true;
+}
+
+pointlist* logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollection& plycol)
+{
+   bool direction = true; /*next*/
+   pointlist *shgen = DEBUG_NEW pointlist();
+   // always push the entry point
+   shgen->push_back(TP(centinel->cp()->x(), centinel->cp()->y()));
+   polycross::VPoint* collector = centinel->next();
+   while (collector != centinel);
+   {
+      shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
+      if (0 == collector->visited())
+      {
+         traverseOne(collector, plycol);
+         collector = centinel->follower(direction, false);
+      }
+      else collector = collector->next();
+   }
+   plycol.push_back(shgen);
+}
