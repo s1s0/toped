@@ -33,7 +33,7 @@
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/outbox.h"
 
-//#define POLYFIX_DEBUG
+#define POLYFIX_DEBUG
 #ifdef POLYFIX_DEBUG
 #define REPORT_POLY_DEBUG {  printf("=======================================================\n"); \
    polycross::VPoint* centinel = _shape;  \
@@ -583,14 +583,8 @@ void logicop::CrossFix::reset_visited()
    }  while (centinel != looper);
 }
 
-polycross::VPoint* logicop::CrossFix::findFirstValid()
+bool logicop::CrossFix::generate(pcollection& plycol)
 {
-   assert(_crossp);
-   assert(_shape);
-   polycross::VPoint* centinel = _shape;
-   polycross::VPoint* collector = centinel;
-   bool direction = true; /*next*/
-
    // the general idea behind the code below:
    // The list of points resulted from the BO algo shall be traversed to
    // generate the new polygon(s). It is not obvious however which part of the
@@ -608,73 +602,7 @@ polycross::VPoint* logicop::CrossFix::findFirstValid()
    // the same.
    // This certainly is not the most optimal algo, but seems to be easier to understand
    // and maintain. Once the function is fully working - it could be optimized.
-   do {
-      if (0 == collector->visited())
-      { // crossing point found
-         pointlist *shgen = DEBUG_NEW pointlist();
-         polycross::VPoint* pickup = collector;
-         do {
-            pickup = pickup->follower(direction, true);
-            shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
-         } while (pickup != collector);
-         reset_visited();
-         // get the polygon area ...
-         real area = 0;
-         word size = shgen->size();
-         word i,j;
-         for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
-            area += real((*shgen)[i].x()) * real((*shgen)[j].y()) -
-                  real((*shgen)[j].x()) * real((*shgen)[i].y());
-         // ... and from there - the polygon orientation
-         if (area >= 0)
-         {
-            // pick-up the first non-crossing point after the crossing one
-            centinel = collector;
-            do centinel = centinel->prev();
-            while (0 == centinel->visited());
-         }
-         return centinel;
-      }
-      collector = collector->prev();
-   } while (collector != centinel);
 
-   return NULL;
-}
-
-
-bool logicop::CrossFix::getFixed(pcollection& plycol)
-{
-   bool result = false;
-   polycross::VPoint* centinel = NULL;
-   bool direction = true; /*next*/
-   if (0 == _crossp) return false;
-   else  centinel = findFirstValid();
-   //
-   assert(centinel);
-   polycross::VPoint* collector = centinel;
-   bool chdirection = true;
-   // The "standard" traversing of the BO output points.
-   // Closed polygons will be picked-up alternatively - one to keep, one to skip.
-   // The trick is to get the starting point right - see the notes in findFirstValid
-   do {
-      if (0 == collector->visited())
-      { // crossing point found
-         pointlist *shgen = DEBUG_NEW pointlist();
-         polycross::VPoint* pickup = collector;
-         do {
-            pickup = pickup->follower(direction, chdirection);
-            shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
-         } while (pickup != collector);
-         plycol.push_back(shgen);
-         result = true;
-      }
-      collector = collector->prev();
-   } while (collector != centinel);
-   return result;
-}
-
-bool logicop::CrossFix::generate(pcollection& plycol)
-{
    if (0 == _crossp) return false;
    polycross::VPoint* centinel = _shape;
    // Get a non-crossing starting point
@@ -682,11 +610,10 @@ bool logicop::CrossFix::generate(pcollection& plycol)
    // traverse the resulting points recursively to get all the polygons
    traverseOne(centinel, plycol);
    // remove the invalid polygons (negative orientation)
-
    logicop::pcollection::iterator CI = plycol.begin();
    while (CI != plycol.end())
    {
-      if (0 >= polyarea(**CI))
+      if (0 >= laydata::polyarea(**CI))
          CI = plycol.erase(CI);
       else CI++;
    }
@@ -711,15 +638,4 @@ void logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollecti
       collector = collector->follower(direction, false);
    }
    plycol.push_back(shgen);
-}
-
-real polyarea(pointlist const shape)
-{
-   real area = 0;
-   word size = shape.size();
-   word i,j;
-   for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
-      area += real(shape[i].x()) * real(shape[j].y()) -
-              real(shape[j].x()) * real(shape[i].y());
-   return area;
 }

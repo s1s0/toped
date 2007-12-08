@@ -91,9 +91,6 @@ void example5()
    opencell("example5");
    addpoly({{1,1},{1,4},{4,4},{4,9},{1,9},{1,12},{8,12},{8,9},{5,9},{5,4},{8,4},{8,1}},8);
    spreadNstretch({2,2}, -1.0, 7);
-//   select({2,2});
-//   copy({0,0},{0,0});
-//   resize(-1.0);
 }
 
 void example6()
@@ -102,11 +99,16 @@ void example6()
    opencell("example6");
    addpoly({{1,1},{9,1},{9,9},{5.5,9},{5.5,4},{4.5,4},{4.5,9},{1,9}},7);
    spreadNstretch({2,2}, 1.0, 8);
-//   select({2,2});
-//   copy({0,0},{0,0});
-//   resize(-1.0);
 }
 
+void example7()
+{
+   // zero area result
+   newcell("example7");
+   opencell("example7");
+   addpoly({{1,1},{5,1},{5,3},{3,3},{3,5},{1,5}},7);
+   spreadNstretch({2,2}, -1.0, 8);
+}
 
 
 void precisionR()
@@ -141,6 +143,7 @@ example3a();
 example4();
 example5();
 example6();
+example7();
 unselect_all();
 //selfcrosscheck();
 //precisionR();

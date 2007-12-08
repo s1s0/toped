@@ -93,8 +93,8 @@ namespace laydata {
       shp_box        = 0x04, // shape is a box
       shp_acute      = 0x08, // acute angle
       // critical
-      shp_null       = 0x40, // 0 area - points are not forming a polygon
-      shp_cross      = 0x80, // self crossing sequence
+      shp_cross      = 0x40, // self crossing sequence
+      shp_null       = 0x80, // 0 area - points are not forming a polygon
    } shape_status;
    
    class TEDfile;
@@ -120,7 +120,8 @@ namespace laydata {
                            validator(const pointlist& plist) : _status(shp_OK), 
                                                             _plist(plist) {};
                            validator() : _status(shp_OK) {};
-      bool                 valid()           {return _status < shp_null;};
+      bool                 valid()           {return _status < shp_cross;}
+      bool                 recoverable()     {return _status < shp_null;}
       byte                 status()          {return _status;};
       bool                 box()             {return (0 != (_status & shp_box));}
       pointlist&           get_validated()   {return _plist;};
@@ -201,6 +202,7 @@ namespace laydata {
          word                _rows;
    };
 
+   real polyarea(pointlist const shape);
 }
 
 #endif

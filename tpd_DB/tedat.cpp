@@ -900,16 +900,9 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet& plst)
 void laydata::tdtpoly::transfer(const CTM& trans) {
    for (unsigned ii = 0; ii < _plist.size(); ii++) 
       _plist[ii] *= trans;
-   // normalize - taken 1:1 form valid_poly class
-   // @TODO: Again - validation classes has to be optimized
-   real area = 0;
-   word size = _plist.size();
-   word i,j;
-   for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
-      area += _plist[i].x()*_plist[j].y() - _plist[j].x()*_plist[i].y();
-   if (area < 0)  {
+   real area = laydata::polyarea(_plist);
+   if (area < 0)
       std::reverse(_plist.begin(),_plist.end());
-   }
 }
 
 laydata::tdtdata* laydata::tdtpoly::copy(const CTM& trans) {
@@ -976,12 +969,12 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
    logicop::stretcher boza(_plist, bfactor);
    pointlist* res = boza.execute();
    valid_poly vsh(*res);
-   if (vsh.valid())
+   if (vsh.valid() && !(laydata::shp_clock & vsh.status()))
    {
       decure[0]->push_back(this);
       decure[1]->push_back(vsh.replacement());
    }
-   else
+   else if ( vsh.recoverable() && (!(laydata::shp_clock & vsh.status())) )
    {
       logicop::CrossFix fixingpoly(*res);
       try
@@ -995,7 +988,6 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
       logicop::pcollection cut_shapes;
       laydata::tdtdata* newshape;
       if ( fixingpoly.generate(cut_shapes) )
-//      if (fixingpoly.getFixed(cut_shapes))
       {
          logicop::pcollection::const_iterator CI;
          // add the resulting fixed_shapes to the_cut shapeList
@@ -1003,9 +995,17 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
             if (NULL != (newshape = createValidShape(*CI)))
                decure[1]->push_back(newshape);
          cut_shapes.clear();
-         // and finally add this to the_delete shapelist
          decure[0]->push_back(this);
       }
+      // Normally generate shall return always some valid shapes
+//      assert(false);
+   }
+   else
+   {
+      // resulting polygon is exactly with 0 area (non-recoverable) OR
+      // resulting polygon is turned completely inside out shp_clock & vsh.status()
+      // in both cases - it shall dissapear
+      decure[0]->push_back(this);
    }
    delete res;
 }
@@ -2304,10 +2304,11 @@ char* laydata::valid_box::failtype()
 laydata::valid_poly::valid_poly(const pointlist& plist) : validator(plist) { 
    angles();
    if (_status > 0x10) return;
-   selfcrossing();
-   if (_status > 0x10) return;
    //reorder the chain (if needed) to get the points in anticlockwise order
    normalize();
+   if (_status > 0x10) return;
+   //check self crossing
+   selfcrossing();
 }
 
 laydata::tdtdata* laydata::valid_poly::replacement() {
@@ -2384,12 +2385,7 @@ void laydata::valid_poly::angles()
 }
 
 void laydata::valid_poly::normalize() {
-   real area = 0;
-   word size = _plist.size();
-   word i,j;
-   for (i = 0, j = 1; i < size; i++, j = (j+1) % size) 
-      area += real(_plist[i].x()) * real(_plist[j].y()) -
-            real(_plist[j].x()) * real(_plist[i].y());
+   real area = laydata::polyarea(_plist);
    if (area == 0) {
       _status |= shp_null; return;
    }
@@ -2405,22 +2401,24 @@ is selfcrossing
 */ 
 void laydata::valid_poly::selfcrossing()
 {
-   
-//    //using BO modified
-//    logicop::CrossFix fixingpoly(_plist);
-//    try
-//    {
-//       fixingpoly.findCrossingPoints();
-//    }
-//    catch (EXPTNpolyCross) {_status |= laydata::shp_cross; return;}
-//    if (0 != fixingpoly.crossp() )
-//       _status |= laydata::shp_cross;
+   //using BO modified
+   logicop::CrossFix fixingpoly(_plist);
+   try
+   {
+      fixingpoly.findCrossingPoints();
+   }
+   catch (EXPTNpolyCross) {_status |= laydata::shp_cross; return;}
+   if (0 != fixingpoly.crossp() )
+      _status |= laydata::shp_cross;
 
+/* @TODO Clean-up the old self-cross check algo as soon as the resize
+   works properly
+   Old algo
    tedop::segmentlist segs(_plist, false);
    tedop::EventQueue Eq(segs); // initialize the event queue
    tedop::SweepLine  SL(_plist); // initialize the sweep line
    if (!Eq.check_valid(SL))
-      _status |= laydata::shp_cross;
+      _status |= laydata::shp_cross;*/
 }
 
 char* laydata::valid_poly::failtype() {
