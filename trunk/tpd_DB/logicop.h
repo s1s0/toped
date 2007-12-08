@@ -133,7 +133,7 @@ namespace logicop {
       void                    reorderCross();
       void                    cleanRedundant();
       polycross::VPoint*      findFirstValid();
-      pointlist*              traverseOne(polycross::VPoint* const, pcollection&);
+      void                    traverseOne(polycross::VPoint* const, pcollection&);
       void                    countCross();
       //! The raw data, corresponding to _poly, used by all logic methods
       polycross::VPoint*      _shape;
@@ -143,4 +143,6 @@ namespace logicop {
       word                    _crossp;
    };
 }
+
+real polyarea(pointlist const shape);
 #endif

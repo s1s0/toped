@@ -134,13 +134,13 @@ void selfcrosscheck()
 
 longcursor(true);
 example1();
-//example1a();
-//example2();
-//example3();
-//example3a();
-//example4();
-//example5();
-//example6();
-//unselect_all();
+example1a();
+example2();
+example3();
+example3a();
+example4();
+example5();
+example6();
+unselect_all();
 //selfcrosscheck();
 //precisionR();

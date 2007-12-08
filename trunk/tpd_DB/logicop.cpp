@@ -677,27 +677,49 @@ bool logicop::CrossFix::generate(pcollection& plycol)
 {
    if (0 == _crossp) return false;
    polycross::VPoint* centinel = _shape;
+   // Get a non-crossing starting point
    while (0 == centinel->visited()) centinel = centinel->next();
+   // traverse the resulting points recursively to get all the polygons
    traverseOne(centinel, plycol);
-   return true;
+   // remove the invalid polygons (negative orientation)
+
+   logicop::pcollection::iterator CI = plycol.begin();
+   while (CI != plycol.end())
+   {
+      if (0 >= polyarea(**CI))
+         CI = plycol.erase(CI);
+      else CI++;
+   }
+   if (0 == plycol.size()) return false;
+   else return true;
 }
 
-pointlist* logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollection& plycol)
+void logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollection& plycol)
 {
    bool direction = true; /*next*/
    pointlist *shgen = DEBUG_NEW pointlist();
    // always push the entry point
    shgen->push_back(TP(centinel->cp()->x(), centinel->cp()->y()));
    polycross::VPoint* collector = centinel->next();
-   while (collector != centinel);
+   while ( *(collector->cp()) != *(centinel->cp()) )
    {
       shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
       if (0 == collector->visited())
       {
          traverseOne(collector, plycol);
-         collector = centinel->follower(direction, false);
       }
-      else collector = collector->next();
+      collector = collector->follower(direction, false);
    }
    plycol.push_back(shgen);
+}
+
+real polyarea(pointlist const shape)
+{
+   real area = 0;
+   word size = shape.size();
+   word i,j;
+   for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
+      area += real(shape[i].x()) * real(shape[j].y()) -
+              real(shape[j].x()) * real(shape[i].y());
+   return area;
 }
