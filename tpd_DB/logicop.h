@@ -126,12 +126,14 @@ namespace logicop {
       void                    findCrossingPoints();
       //! Get the fixed polygon
       bool                    getFixed(pcollection&);
+      bool                    generate(pcollection&);
       word                    crossp() {return _crossp;}
    protected:
       void                    reset_visited();
       void                    reorderCross();
       void                    cleanRedundant();
       polycross::VPoint*      findFirstValid();
+      pointlist*              traverseOne(polycross::VPoint* const, pcollection&);
       void                    countCross();
       //! The raw data, corresponding to _poly, used by all logic methods
       polycross::VPoint*      _shape;
