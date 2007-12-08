@@ -994,8 +994,8 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
 
       logicop::pcollection cut_shapes;
       laydata::tdtdata* newshape;
-//      if ( fixingpoly.generate(cut_shapes) )
-      if (fixingpoly.getFixed(cut_shapes))
+      if ( fixingpoly.generate(cut_shapes) )
+//      if (fixingpoly.getFixed(cut_shapes))
       {
          logicop::pcollection::const_iterator CI;
          // add the resulting fixed_shapes to the_cut shapeList
