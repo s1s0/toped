@@ -38,7 +38,6 @@
 #include "tedat.h"
 #include "tedcell.h"
 #include "logicop.h"
-#include "../tpd_common/tedop.h"
 #include "../tpd_common/outbox.h"
 #include "../tpd_common/glf.h"
 

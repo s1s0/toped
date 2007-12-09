@@ -30,7 +30,6 @@
 #include "../tpd_common/ttt.h"
 #include "tedesign.h"
 #include "tedat.h"
-#include "../tpd_common/tedop.h"
 #include "viewprop.h"
 #include "../tpd_common/outbox.h"
 
