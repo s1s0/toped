@@ -33,7 +33,7 @@
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/outbox.h"
 
-#define POLYFIX_DEBUG
+//#define POLYFIX_DEBUG
 #ifdef POLYFIX_DEBUG
 #define REPORT_POLY_DEBUG {  printf("=======================================================\n"); \
    polycross::VPoint* centinel = _shape;  \
@@ -583,39 +583,84 @@ void logicop::CrossFix::reset_visited()
    }  while (centinel != looper);
 }
 
-bool logicop::CrossFix::generate(pcollection& plycol)
+bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
 {
    // the general idea behind the code below:
    // The list of points resulted from the BO algo shall be traversed to
-   // generate the new polygon(s). It is not obvious however which part of the
-   // point list shall be discarded and which one shall be used in the new polygon.
-   // If we can determine a single point that is (for sure) in or out - then it's
-   // easy - we can use the "usual" alternative traversing using the crossing
-   // points as a switch markers. It appears though that it's not obvious how to
-   // to find such point - there are a number of blow/shrink cases. Here is the idea:
-   // Take an arbitraty starting point.
-   // Generate the first polygon and check whether it is winding clockwise (negative area).
-   // If it is - skip it and start the traversing from the point following the crossing point.
-   // If it isn't - great - we've got a proper starting point - so the traversing should
-   // start from there.
-   // It is essential, that the traversing here and in getFixed procedure is absolutely
-   // the same.
-   // This certainly is not the most optimal algo, but seems to be easier to understand
-   // and maintain. Once the function is fully working - it could be optimized.
-
+   // generate the new polygon(s). The trick is to firler-out properly
+   // redundant points (shapes). The "usual" alternative traversing although
+   // almost working, isn't quite appropriate here - the problem is to find a
+   // proper starting point (see the comment in the previsous versions of
+   // this file).
+   // Another approach has been used here that seem to cover all the
+   // shrink/bloat cases and on top of this is quicker and much simpler.
+   // The algorithm traverses the points produced by BO-modified and creates
+   // ALL shapes. It doesn't filters out anything. ALL possible polygons.
+   // Next step is checking every new polygons
+   // - undersizing (shrink) Check the polygoms for orientation. If it's normally
+   // oriented (anticlockwise) - fine. If it isn't - the polygon should be
+   // deleted. Having in mind that all input polygons were normaly oriented
+   //  it means that those parts are inside out and must be removed. When the
+   // input polygon is completely inside out it should dissapear alltogether, but
+   // this case should be catched befor this algo is invoked.
+   // - oversized (bloat) All resulting polygons will be normally oriented BUT
+   // some of the polygons could be overlapped entirely by other polygons. The
+   // overlapped fellas should be removed.
    if (0 == _crossp) return false;
    polycross::VPoint* centinel = _shape;
    // Get a non-crossing starting point
    while (0 == centinel->visited()) centinel = centinel->next();
    // traverse the resulting points recursively to get all the polygons
    traverseOne(centinel, plycol);
-   // remove the invalid polygons (negative orientation)
-   logicop::pcollection::iterator CI = plycol.begin();
-   while (CI != plycol.end())
-   {
-      if (0 >= laydata::polyarea(**CI))
-         CI = plycol.erase(CI);
-      else CI++;
+//   if (1 == plycol.size()) return true;
+   assert( plycol.size() > 1 );
+   if (0 > bfactor)
+   {  // undersize case
+      // remove the invalid polygons (negative orientation)
+      logicop::pcollection::iterator CI = plycol.begin();
+      while (CI != plycol.end())
+      {
+         if (0 >= laydata::polyarea(**CI))
+         {
+            delete (*CI);
+            CI = plycol.erase(CI);
+         }
+         else CI++;
+      }
+   }
+   else
+   {  // oversize case
+      // Oversizing single polygon shall result in a single polygon.
+      // Find the polygon with the biggest area. The rest should be removed
+      // As a samity check (not implemented!)- the biggest polygon should
+      // overlap entirely all the rest
+      word the_one = -1;
+      word current = 0;
+      real biggest_area = 0;
+      for (logicop::pcollection::const_iterator CI = plycol.begin(); CI != plycol.end(); CI++)
+      {
+         real cur_area = laydata::polyarea(**CI);
+         if (biggest_area < cur_area)
+         {
+            biggest_area = cur_area;
+            the_one = current;
+         }
+         current++;
+      }
+      assert(the_one != -1);
+      // remove all except the_one
+      current = 0;
+      logicop::pcollection::iterator CI = plycol.begin();
+      while (CI != plycol.end())
+      {
+         if (current != the_one)
+         {
+            delete (*CI);
+            CI = plycol.erase(CI);
+         }
+         else CI++;
+         current++;
+      }
    }
    if (0 == plycol.size()) return false;
    else return true;
