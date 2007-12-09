@@ -451,6 +451,10 @@ logicop::SSegment::SSegment(const TP& p1, const TP& p2, int distance) : PSegment
    _moved = parallel(sample.p2());
 }
 
+logicop::SSegment::~SSegment()
+{
+   delete _moved;
+}
 
 //-----------------------------------------------------------------------------
 // class stretcher
@@ -461,7 +465,7 @@ logicop::stretcher::stretcher(const pointlist& poly, int bfactor) : _poly(poly)
    unsigned plysize = _poly.size();
    _segl.reserve(plysize);
    for (unsigned i = 0; i < plysize; i++)
-      _segl.push_back(SSegment(_poly[i],_poly[(i+1)%plysize], bfactor ));
+      _segl.push_back(DEBUG_NEW SSegment(_poly[i],_poly[(i+1)%plysize], bfactor ));
 //   _shape1 = NULL;
 }
 
@@ -472,10 +476,17 @@ pointlist* logicop::stretcher::execute()
    for (unsigned i = 0; i < plysize; i++)
    {
       TP npnt;
-      VERIFY(0 == _segl[i].moved()->crossP(*(_segl[(i+1)%plysize].moved()), npnt));
+      VERIFY(0 == _segl[i]->moved()->crossP(*(_segl[(i+1)%plysize]->moved()), npnt));
       streched->push_back(npnt);
    }
    return streched;
+}
+
+logicop::stretcher::~stretcher()
+{
+   unsigned segsize = _segl.size();
+   for (unsigned i = 0; i < segsize; i++)
+      delete _segl[i];
 }
 
 //-----------------------------------------------------------------------------
@@ -683,4 +694,17 @@ void logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollecti
       collector = collector->follower(direction, false);
    }
    plycol.push_back(shgen);
+}
+
+logicop::CrossFix::~CrossFix()
+{
+   delete _segl;
+   if (NULL == _shape) return;
+   polycross::VPoint* shape = _shape;
+   do
+   {
+      polycross::VPoint* cpnt = shape->next();
+      delete shape; shape = cpnt;
+   }
+   while (shape != _shape);
 }
