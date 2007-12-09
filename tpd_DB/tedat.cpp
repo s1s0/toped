@@ -195,7 +195,7 @@ are several important points to consider here.
    - The TELL component list variables will be used mainly as a parameter of a
      dedicated select function, so that the stored lists can be reselected later.
    The bottom line is: There is always ONE active TOPED list of selected shapes.
-   TELL has an oportunity to reselect a sertain list of shapes using a dedicated
+   TELL has an oportunity to reselect a certain list of shapes using a dedicated
    select function. All modifications are executed over the current TOPED list.
    TOPED list of selected components is invalidated after each cell change.
    Thus the mess with the multiply selected lists seems to be sorted. 
@@ -2492,22 +2492,22 @@ void laydata::valid_wire::angles()
 Alters the laydata::shp_cross bit of _status if the wire is selfcrossing
 */ 
 void laydata::valid_wire::selfcrossing() {
-   /*
-   // using BO modified
+   
+   //using BO modified
    logicop::CrossFix fixingpoly(_plist);
    try
    {
-   fixingpoly.findCrossingPoints();
-}
+      fixingpoly.findCrossingPoints();
+   }
    catch (EXPTNpolyCross) {_status |= laydata::shp_cross; return;}
    if (0 != fixingpoly.crossp() )
-   _status |= laydata::shp_cross;
-   */
-   tedop::segmentlist segs(_plist, true);
+      _status |= laydata::shp_cross;
+
+/*   tedop::segmentlist segs(_plist, true);
    tedop::EventQueue Eq(segs); // initialize the event queue
    tedop::SweepLine  SL(_plist); // initialize the sweep line
    if (!Eq.check_valid(SL)) 
-      _status |= laydata::shp_cross;
+      _status |= laydata::shp_cross;*/
 }
 
 laydata::tdtdata* laydata::valid_wire::replacement() {
