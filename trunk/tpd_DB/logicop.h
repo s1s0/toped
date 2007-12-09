@@ -101,6 +101,7 @@ namespace logicop {
    {
    public:
                         SSegment(const TP&, const TP&, int);
+                       ~SSegment();
       PSegment*         moved() {return _moved;}
    private:
       PSegment*         _moved;
@@ -109,8 +110,9 @@ namespace logicop {
    //===========================================================================
    class stretcher {
    public:
-      typedef std::vector<SSegment> SSegments;
+      typedef std::vector<SSegment*> SSegments;
                               stretcher(const pointlist&, int);
+                             ~stretcher();
       pointlist*              execute();
    private:
       const pointlist&        _poly; //! The input polygon
@@ -122,6 +124,7 @@ namespace logicop {
    public:
       //! The class constructor preparing all data fields
                               CrossFix(const pointlist&);
+                             ~CrossFix();
       //! Do Benttley-Ottman modified
       void                    findCrossingPoints();
       //! Get the fixed polygon(s)
