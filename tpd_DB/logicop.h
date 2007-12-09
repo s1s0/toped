@@ -110,8 +110,8 @@ namespace logicop {
    class stretcher {
    public:
       typedef std::vector<SSegment> SSegments;
-                        stretcher(const pointlist&, int);
-      pointlist*        execute();
+                              stretcher(const pointlist&, int);
+      pointlist*              execute();
    private:
       const pointlist&        _poly; //! The input polygon
       SSegments               _segl;
@@ -124,8 +124,8 @@ namespace logicop {
                               CrossFix(const pointlist&);
       //! Do Benttley-Ottman modified
       void                    findCrossingPoints();
-      //! Get the fixed polygon
-      bool                    generate(pcollection&);
+      //! Get the fixed polygon(s)
+      bool                    generate(pcollection&, real);
       word                    crossp() {return _crossp;}
    protected:
       void                    reset_visited();

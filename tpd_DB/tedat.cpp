@@ -661,16 +661,18 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
 
 void laydata::tdtbox::stretch(int bfactor, shapeList** decure)
 {
-   //@TODO Limits!
-   // cut list is not used in when shrinking/expanding a box
-   tdtbox* modified = DEBUG_NEW tdtbox(
-                                        DEBUG_NEW TP(_p1->x() - bfactor,
-                                                     _p1->y() - bfactor ),
-                                        DEBUG_NEW TP(_p2->x() + bfactor,
-                                                     _p2->y() + bfactor )
-                                      );
+   if ( ((_p1->x() - _p2->x()) < 2*bfactor) &&
+        ((_p1->y() - _p2->y()) < 2*bfactor)    )
+   {
+      tdtbox* modified = DEBUG_NEW tdtbox(
+                                          DEBUG_NEW TP(_p1->x() - bfactor,
+                                                      _p1->y() - bfactor ),
+                                          DEBUG_NEW TP(_p2->x() + bfactor,
+                                                      _p2->y() + bfactor )
+                                       );
+      decure[1]->push_back(modified);
+   }
    decure[0]->push_back(this);
-   decure[1]->push_back(modified);
 }
 
 pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet& pset, 
@@ -964,10 +966,8 @@ void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
 
 void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
 {
-   //@TODO Limits! The length of every single segment plus twice the
-   // bfactor should be bigger than 0. Otherwise the shape should disappear
-   logicop::stretcher boza(_plist, bfactor);
-   pointlist* res = boza.execute();
+   logicop::stretcher sh_resize(_plist, bfactor);
+   pointlist* res = sh_resize.execute();
    valid_poly vsh(*res);
    if (vsh.valid() && !(laydata::shp_clock & vsh.status()))
    {
@@ -987,7 +987,7 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
 
       logicop::pcollection cut_shapes;
       laydata::tdtdata* newshape;
-      if ( fixingpoly.generate(cut_shapes) )
+      if ( fixingpoly.generate(cut_shapes, bfactor) )
       {
          logicop::pcollection::const_iterator CI;
          // add the resulting fixed_shapes to the_cut shapeList
@@ -1413,12 +1413,13 @@ laydata::tdtdata* laydata::tdtwire::copy(const CTM& trans) {
 
 void laydata::tdtwire::stretch(int bfactor, shapeList** decure)
 {
+   //@TODO cut bfactor from both sides
    if ((2*bfactor + _width) > 0)
    {
       tdtwire* modified = DEBUG_NEW tdtwire(_plist, 2*bfactor + _width);
-      decure[0]->push_back(this);
       decure[1]->push_back(modified);
    }
+   decure[0]->push_back(this);
 }
 
 void laydata::tdtwire::info(std::ostringstream& ost, real DBU) const {
