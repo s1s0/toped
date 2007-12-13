@@ -224,26 +224,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tedop.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\tpdph.cpp"
 				>
 				<FileConfiguration
@@ -306,10 +286,6 @@
 			</File>
 			<File
 				RelativePath="polycross.h"
-				>
-			</File>
-			<File
-				RelativePath="tedop.h"
 				>
 			</File>
 			<File
