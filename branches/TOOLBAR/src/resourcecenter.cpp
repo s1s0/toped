@@ -252,14 +252,20 @@ tui::ToolItem::~ToolItem()
 tui::ToolBarHandler::ToolBarHandler(int ID, std::string name)
 		:_ID(ID), _name(name)
 {
+	/*_toolBar = DEBUG_NEW wxToolBar(Toped->getFrame(), wxID_ANY, wxDefaultPosition,
+		wxSize(1000, 30), wxBORDER_NONE|wxTB_HORIZONTAL|wxTB_NODIVIDER|wxTB_FLAT);
+	_toolBar->SetToolBitmapSize(wxSize(16, 15));
+	_toolBar->Realize();*/
+	//_toolBar->AddTool(wxID_NEW, _("New"), wxBitmap(new_xpm));
 	//_window = DEBUG_NEW wxSashLayoutWindow(Toped->getFrame(),_ID);
-_window = DEBUG_NEW wxSashLayoutWindow(Toped->getFrame(), wxID_ANY,
+	_window = DEBUG_NEW wxSashLayoutWindow(Toped->getFrame(), wxID_ANY,
                                         wxDefaultPosition, wxDefaultSize,
                                wxSW_3D | wxCLIP_CHILDREN);
 	_window->SetDefaultSize(wxSize(1000, 30));
 	_window->SetOrientation(wxLAYOUT_HORIZONTAL);
 	_window->SetAlignment(wxLAYOUT_TOP);
 	_window->SetSashVisible(wxSASH_RIGHT, TRUE);
+
 }
 
 tui::ToolBarHandler::~ToolBarHandler()

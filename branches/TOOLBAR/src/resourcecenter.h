@@ -143,6 +143,7 @@ namespace tui
 		std::string					_name;
 		wxSashLayoutWindow*		_window;
 		int							_ID;
+		wxToolBar*					_toolBar;
 
 	};
 
