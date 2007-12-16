@@ -1009,6 +1009,14 @@ void parsercmd::cmdBLOCK::restoreVarLocal(telldata::variableMAP& nvars)
    nvars.clear();
 }
 
+void parsercmd::cmdBLOCK::initializeVarLocal()
+{
+   typedef telldata::variableMAP::iterator VMIT;
+   for (VMIT VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
+   {
+      VMI->second->initialize();
+   }
+}
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                                         (char*& fn, telldata::argumentQ* amap) const {
@@ -1277,6 +1285,12 @@ int parsercmd::cmdFUNC::execute()
       telldata::variableMAP* top_stack = _VARLocalStack.top();_VARLocalStack.pop();
       restoreVarLocal(*top_stack);
       delete top_stack;
+   }
+   else
+   {
+      // we must reinitialize local variables - otherwise we'll get unexpected
+      // results - for example local lists are not empty!
+      initializeVarLocal();
    }
    if (EXEC_ABORT == retexec) return retexec;
    else return EXEC_NEXT;

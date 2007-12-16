@@ -142,7 +142,7 @@ unsigned layprop::SDLine::nonius(const DBline& short_mark, const DBline& long_ma
    tmtrx.Rotate(_angle);
    tmtrx.Translate(_ln.p1().x(), _ln.p1().y());
    unsigned numtics;
-   for( numtics = 0 ; numtics * step < _length ; numtics++ )
+   for( numtics = 0 ; (numtics * step) < _length ; numtics++ )
    {
       // for each tick - get the deltas ...
       int4b deltaX = (int4b) rint(numtics * step * _cosinus);

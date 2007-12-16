@@ -459,6 +459,7 @@ namespace  parsercmd {
       void                       copyContents(cmdFUNC*);
       telldata::variableMAP*     copyVarLocal();
       void                       restoreVarLocal(telldata::variableMAP&);
+      void                       initializeVarLocal();
       functionMAP const          funcMAP() const {return _funcMAP;};
       virtual                   ~cmdBLOCK();
    protected:
