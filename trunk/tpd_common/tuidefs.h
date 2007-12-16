@@ -72,6 +72,7 @@ namespace tui
       TMEDIT_FLIPY        ,
       TMEDIT_POLYCUT      ,
       TMEDIT_MERGE        ,
+      TMEDIT_RESIZE       ,
 
       TMVIEW_VIEWTOOLBAR  ,
       TMVIEW_VIEWSTATUSBAR,
@@ -110,6 +111,7 @@ namespace tui
       TMSEL_UNSELECT_IN   ,
       TMSEL_PUNSELECT_IN  ,
       TMSEL_UNSELECT_ALL  ,
+      TMSEL_REPORT_SLCTD  ,
 
       TMSET_STEP          ,
       TMSET_AUTOPAN       ,

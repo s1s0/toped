@@ -598,11 +598,12 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
             menu.AppendSeparator();
          }
          if (DATC->numselected() > 0) {
-            menu.Append(    TMEDIT_MOVE, wxT("move"  ));
-            menu.Append(    TMEDIT_COPY, wxT("copy"  ));
-            menu.Append(TMEDIT_ROTATE90, wxT("rotate"));
-            menu.Append(   TMEDIT_FLIPX, wxT("flipX" ));
-            menu.Append(   TMEDIT_FLIPY, wxT("flipY" ));
+            menu.Append(       TMEDIT_MOVE, wxT("move"  ));
+            menu.Append(       TMEDIT_COPY, wxT("copy"  ));
+            menu.Append(   TMEDIT_ROTATE90, wxT("rotate"));
+            menu.Append(      TMEDIT_FLIPX, wxT("flipX" ));
+            menu.Append(      TMEDIT_FLIPY, wxT("flipY" ));
+            menu.Append(TMSEL_REPORT_SLCTD, wxT("report selected"));
          }
          else {
             menu.Append(     TMDRAW_BOX, wxT("box"   ));
