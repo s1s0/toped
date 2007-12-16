@@ -147,6 +147,7 @@ namespace tui {
       void     OnPolyCut(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("polycut();"));}
       void      OnBoxCut(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("boxcut();"));}
       void       OnMerge(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("merge();"));}
+      void      OnResize(wxCommandEvent& WXUNUSED(event));
       void  OnChangeText(wxCommandEvent& WXUNUSED(event));
 
       void     OnCellNew(wxCommandEvent&);
@@ -182,6 +183,7 @@ namespace tui {
       void   OnPselectIn(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("pselect();"));}
       void OnPunselectIn(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("punselect();"));}
       void OnUnselectAll(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("unselect_all();"));}
+      void OnReportSelected(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("report_selected();"));}
       void   OnSelectAll(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("select_all();"));}
       //
       void        OnStep(wxCommandEvent&);

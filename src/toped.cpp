@@ -204,6 +204,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMEDIT_FLIPY        , tui::TopedFrame::OnFlipY       )
    EVT_MENU( TMEDIT_POLYCUT      , tui::TopedFrame::OnPolyCut     )
    EVT_MENU( TMEDIT_MERGE        , tui::TopedFrame::OnMerge       )
+   EVT_MENU( TMEDIT_RESIZE       , tui::TopedFrame::OnResize      )
    
    EVT_MENU( TMVIEW_ZOOMIN       , tui::TopedFrame::OnzoomIn      )
    EVT_MENU( TMVIEW_ZOOMOUT      , tui::TopedFrame::OnzoomOut     )
@@ -238,7 +239,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSEL_UNSELECT_IN   , tui::TopedFrame::OnUnselectIn  )
    EVT_MENU( TMSEL_PUNSELECT_IN  , tui::TopedFrame::OnPunselectIn )
    EVT_MENU( TMSEL_UNSELECT_ALL  , tui::TopedFrame::OnUnselectAll )
-   
+   EVT_MENU( TMSEL_REPORT_SLCTD  , tui::TopedFrame::OnReportSelected )
+      
 
    EVT_MENU( TMSET_STEP          , tui::TopedFrame::OnStep        )
    EVT_MENU( TMSET_AUTOPAN       , tui::TopedFrame::OnAutopan     )
@@ -423,7 +425,8 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Edit/Flip Y",     "CTRL-Y",  &tui::TopedFrame::OnFlipY, "Flip selected shapes towards Y axis " );
    _resourceCenter->appendMenu("&Edit/Cut with poly","CTRL-U",  &tui::TopedFrame::OnPolyCut, "Cut selected shapes with a polygon " );
    _resourceCenter->appendMenu("&Edit/Cut with box","CTRL-ALT-U", &tui::TopedFrame::OnBoxCut, "Cut selected shapes with a box " );
-   _resourceCenter->appendMenu("&Edit/Merge",      "CTRL-G",  &tui::TopedFrame::OnMerge, "Merge selected shpes" );
+   _resourceCenter->appendMenu("&Edit/Merge",      "CTRL-G",  &tui::TopedFrame::OnMerge, "Merge selected shapes" );
+   _resourceCenter->appendMenu("&Edit/Resize",           "",  &tui::TopedFrame::OnResize, "Blow/shrink selected shpes" );
    _resourceCenter->appendMenuSeparator("Edit");
    _resourceCenter->appendMenu("&Edit/Change Layer","",&tui::TopedFrame::OnChangeLayer, "Translate the objects to another layer" );
    _resourceCenter->appendMenu("&Edit/Change Text","",&tui::TopedFrame::OnChangeText, "Replace a text contents" );
@@ -525,7 +528,8 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Select/Unselect",    "ALT-I", &tui::TopedFrame::OnUnselectIn, "Unselect objects" );
    _resourceCenter->appendMenu("&Select/Part unselect","ALT-P", &tui::TopedFrame::OnPunselectIn, "Unselect object edges" );
    _resourceCenter->appendMenu("&Select/Unselect all", "ALT-A", &tui::TopedFrame::OnUnselectAll, "Unselect all" );
-   
+   _resourceCenter->appendMenuSeparator("Select");
+   _resourceCenter->appendMenu("&Select/Report selected",   "", &tui::TopedFrame::OnReportSelected, "Report selected objects" );
 
    //---------------------------------------------------------------------------
    // menuBar entry Settings
@@ -1172,6 +1176,21 @@ void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
       wxString ost; ost << wxT("addtext(\"")
                         << dlg->get_text()                      << wxT("\",")
                         << dlg->get_size()                      << wxT(");");
+      _cmdline->parseCommand(ost);
+   }
+   delete dlg;
+}
+
+void tui::TopedFrame::OnResize(wxCommandEvent& WXUNUSED(event)) {
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getSize* dlg = NULL;
+   try {
+      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Resize by"), pos, DATC->step() ,3);
+   }
+   catch (EXPTN) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK ) {
+      wxString ost; ost << wxT("resize(")<<dlg->value()<<wxT(");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
