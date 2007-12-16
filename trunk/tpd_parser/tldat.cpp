@@ -246,6 +246,16 @@ const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cob
    return *this;
 }
 
+void telldata::ttlist::initialize()
+{
+   for (unsigned long i = 0 ; i < _mlist.size(); i++)
+   {
+      delete _mlist[i];
+   }
+   _mlist.clear();
+}
+
+
 void telldata::ttlist::echo(std::string& wstr, real DBU)
 {
    std::ostringstream ost;
@@ -383,7 +393,8 @@ telldata::tell_var* telldata::ttlist::erase(_dbl_word idxB, _dbl_word idxE)
    return erased;
 }
 
-telldata::ttlist::~ttlist() {
+telldata::ttlist::~ttlist()
+{
    for (unsigned long i = 0 ; i < _mlist.size(); i++)
       delete _mlist[i];
 }
@@ -417,6 +428,12 @@ telldata::user_struct::user_struct(const user_struct& cobj) : tell_var(cobj.get_
 telldata::user_struct::~user_struct() {
    for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++)
       delete CI->second;
+}
+
+void telldata::user_struct::initialize()
+{
+   for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++)
+      CI->second->initialize();
 }
 
 void telldata::user_struct::echo(std::string& wstr, real DBU) {

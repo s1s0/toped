@@ -73,3 +73,49 @@ int tellstdfunc::stdABS::execute()
    OPstack.push(DEBUG_NEW telldata::ttreal(fabs(value)));
    return EXEC_NEXT;
 }
+
+//============================================================================
+int tellstdfunc::stdSIN::argsOK(argumentQ* amap)
+{
+   return (!((amap->size() == 1) && ( (*((*amap)[0]))() == telldata::tn_real  ) ||
+         ( (*((*amap)[0]))() == telldata::tn_int   )   ));
+}
+
+nameList* tellstdfunc::stdSIN::callingConv(const telldata::typeMAP*)
+{
+   nameList* argtypes = DEBUG_NEW nameList();
+   argtypes->push_back("real");
+   argtypes->push_back("real");
+   return argtypes;
+}
+
+int tellstdfunc::stdSIN::execute()
+{
+   real value = getOpValue(OPstack);
+   double angle = (value / 180.0 * M_PI);// translate in radians
+   OPstack.push(DEBUG_NEW telldata::ttreal(sin(angle)));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+int tellstdfunc::stdCOS::argsOK(argumentQ* amap)
+{
+   return (!((amap->size() == 1) && ( (*((*amap)[0]))() == telldata::tn_real  ) ||
+         ( (*((*amap)[0]))() == telldata::tn_int   )   ));
+}
+
+nameList* tellstdfunc::stdCOS::callingConv(const telldata::typeMAP*)
+{
+   nameList* argtypes = DEBUG_NEW nameList();
+   argtypes->push_back("real");
+   argtypes->push_back("real");
+   return argtypes;
+}
+
+int tellstdfunc::stdCOS::execute()
+{
+   real value = getOpValue(OPstack);
+   double angle = (value / 180.0 * M_PI);// translate in radians
+   OPstack.push(DEBUG_NEW telldata::ttreal(cos(angle)));
+   return EXEC_NEXT;
+}

@@ -128,6 +128,7 @@ namespace telldata {
       virtual void         assign(tell_var*) = 0;
       virtual tell_var*    field_var(char*& fname) {return NULL;}
       virtual tell_var*    index_var(unsigned index) {return NULL;}
+      virtual void         initialize() = 0;
       void                 update_cstat() {if (1 == _changeable) _changeable = 0;}
       bool                 constant() const {return 0 == _changeable;}
       void                 const_declaration() {_changeable = 1;}
@@ -145,6 +146,7 @@ namespace telldata {
                                           tell_var(tn_real), _value(cobj.value()) {}
       const ttreal&        operator =(const ttreal&);
       const ttreal&        operator =(const ttint&);
+      void                 initialize() {_value = 0.0;}
       void                 echo(std::string&, real);
       void                 assign(tell_var*);
       real                 value() const        {return _value;};
@@ -163,6 +165,7 @@ namespace telldata {
                                           tell_var(tn_int), _value(cobj.value()) {}
       const ttint&         operator =(const ttint&);
       const ttint&         operator =(const ttreal&);
+      void                 initialize() {_value = 0;}
       void                 echo(std::string&, real);
       void                 assign(tell_var*);
       int4b                value() const        {return _value;};
@@ -181,6 +184,7 @@ namespace telldata {
                            ttbool(const ttbool& cobj) :
                                          tell_var(tn_bool), _value(cobj.value()) {};
       const ttbool&        operator = (const ttbool&);
+      void                 initialize() {_value = false;}
       void                 echo(std::string&, real);
       void                 assign(tell_var*);
       bool                 value() const        {return _value;};
@@ -203,6 +207,7 @@ namespace telldata {
                            ttstring(const ttstring& cobj) :
                                         tell_var(tn_string), _value(cobj.value()){};
       const ttstring&      operator = (const ttstring&);
+      void                 initialize() {_value = "";}
       void                 echo(std::string&, real);// {wstr += _value;};
       void                 assign(tell_var*);
       tell_var*            selfcopy() const    {return DEBUG_NEW ttstring(_value);}
@@ -220,13 +225,14 @@ namespace telldata {
                              tell_var(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
                            ttlayout(const ttlayout& cobj);
       const ttlayout&      operator = (const ttlayout&);
+      void                 initialize() {if (_selp) delete _selp;_data = NULL;}
       void                 echo(std::string&, real);
       void                 assign(tell_var*);
       tell_var*            selfcopy() const {return DEBUG_NEW ttlayout(*this);};
       laydata::tdtdata*    data() const     {return _data;};
       word                 layer() const    {return _layer;};
       SGBitSet*            selp() const     {return _selp;};
-      virtual             ~ttlayout()       {if (_selp) delete _selp;};
+      virtual             ~ttlayout()       {if (_selp) delete _selp;}
    private:
       laydata::tdtdata*   _data;
       word                _layer;
@@ -239,6 +245,7 @@ namespace telldata {
                            ttlist(typeID ltype): tell_var(ltype) {};
                            ttlist(const ttlist& cobj);
       const ttlist&        operator = (const ttlist&);
+      void                 initialize();
       void                 echo(std::string&, real);
       void                 assign(tell_var*);
       tell_var*            selfcopy() const  {return DEBUG_NEW ttlist(*this);};
@@ -269,6 +276,7 @@ namespace telldata {
                            user_struct(const tell_type*, operandSTACK&);
                            user_struct(const user_struct&);
       virtual             ~user_struct();
+      void                 initialize();
       tell_var*            selfcopy() const  {return DEBUG_NEW user_struct(*this);}
       void                 echo(std::string&, real);
       void                 assign(tell_var*);

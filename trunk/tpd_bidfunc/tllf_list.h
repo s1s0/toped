@@ -37,6 +37,8 @@ namespace tellstdfunc {
 
    TELL_STDCMD_CLASSC(lstLENGTH     );
    TELL_STDCMD_CLASSC(stdABS        );
+   TELL_STDCMD_CLASSC(stdSIN        );
+   TELL_STDCMD_CLASSC(stdCOS        );
 }
 
 #endif  //TLLF_LIST_H
