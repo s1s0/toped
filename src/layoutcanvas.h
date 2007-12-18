@@ -138,6 +138,8 @@ namespace tui {
 		LayoutCanvas*	canvas()     const {return _canvas;}
 	private:
 		LayoutCanvas	*_canvas;
+		wxWindow			*_status;
+		wxBoxSizer		*_sizer;
 		DECLARE_EVENT_TABLE();
 	};
 
