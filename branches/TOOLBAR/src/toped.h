@@ -41,7 +41,10 @@ namespace tui {
    //-----------------------------------------------------------------------------
    class CanvasStatus : public wxPanel {
    public:
-                           CanvasStatus(wxWindow*);
+                           CanvasStatus(wxWindow*,wxWindowID id = wxID_ANY, 
+										  const wxPoint& pos = wxDefaultPosition,
+										  const wxSize& size = wxDefaultSize, 
+										  long style = wxTAB_TRAVERSAL);
       virtual             ~CanvasStatus();
       void                 setXpos(wxString);
       void                 setYpos(wxString);
@@ -123,7 +126,7 @@ namespace tui {
       wxMenu*                 helpMenu;
 
       // Sash layout stuff
-      wxWindow*     mS_browsers;
+      //wxControl*    mS_browsers;
       wxWindow*     mS_GLstatus;
       wxWindow*     mS_command;
       wxWindow*     mS_log;
