@@ -692,23 +692,21 @@ void tui::TopedFrame::initView() {
 
    _browsers->set_tellParser( _cmdline ) ;
 
-	_winManager.AddPane(mS_canvas, wxAuiPaneInfo().CenterPane().MaximizeButton(true));
-	_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Layer(2).Position(2).BestSize(wxSize(1000, 30)));
-	_winManager.AddPane(logpane, wxAuiPaneInfo().Bottom().Layer(2).Position(2).BestSize(wxSize(1000, 150)));
-	_winManager.AddPane(_cmdline, wxAuiPaneInfo().Bottom().Layer(3).Position(2));
-	/*_winManager.AddPane(mS_browsers, 
-						wxAuiPaneInfo().
-						Left().
-						GripperTop().
-						Layer(1).
-						Floatable(false).
-						TopDockable(false).
-						BottomDockable(false));*/
-	_winManager.AddPane(_browsers, 
-						wxAuiPaneInfo().
-                  Left().BestSize(wxSize(160,1000)).Position(1));
+	_winManager.AddPane(mS_canvas, wxAuiPaneInfo().CenterPane().MaximizeButton(true).
+												Floatable(false).CloseButton(false).Layer(2));
+	_winManager.AddPane(_browsers, wxAuiPaneInfo().Left().BestSize(wxSize(160,1000)).Position(1).
+												Floatable(false).CloseButton(false).CaptionVisible(false).Row(1).Layer(1));
+	_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().CenterPane().Layer(2).Position(0).Row(0).
+												Floatable(false).BestSize(wxSize(1000, 30)).LeftDockable(false).
+												CloseButton(false).Fixed().CaptionVisible(false));
+	_winManager.AddPane(logpane, wxAuiPaneInfo().Bottom().CenterPane().Layer(2).Position(2).
+												Floatable(false).BestSize(wxSize(1000, 150)).
+												CloseButton(false).CaptionVisible(false));
+	_winManager.AddPane(_cmdline, wxAuiPaneInfo().Bottom().CenterPane().Layer(2).Position(2).
+												Floatable(false).CloseButton(false).Fixed().CaptionVisible(false));
 
-	//mS_log
+
+
 	_winManager.Update();
 }
 
