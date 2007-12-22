@@ -682,8 +682,9 @@ void tui::TopedFrame::initView() {
    // the openGL window
    //---------------------------------------------------------------------------- 
    mS_canvas = DEBUG_NEW WinCanvas(this, ID_WIN_CANVAS,
-                               wxDefaultPosition, wxSize(1000,1000),wxAUI_NB_DEFAULT_STYLE|wxDOUBLE_BORDER);
-                               //wxSW_3D | wxCLIP_CHILDREN);
+                               wxDefaultPosition, wxSize(1000,1000),
+										 wxAUI_NB_DEFAULT_STYLE|wxDOUBLE_BORDER|wxSW_3D | wxCLIP_CHILDREN);
+
 
 
 	_cmdline = DEBUG_NEW console::ted_cmd(this, mS_canvas->canvas());
@@ -696,7 +697,7 @@ void tui::TopedFrame::initView() {
 												Floatable(false).CloseButton(false).CaptionVisible(false));
 	_winManager.AddPane(mS_canvas, wxAuiPaneInfo().CentrePane().MaximizeButton(false).
 												Floatable(true).CloseButton(false));
-	_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).
+	_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).Fixed().
 												CloseButton(false).CaptionVisible(false));
 	_winManager.AddPane(logpane, wxAuiPaneInfo().Bottom().Row(1).
 												Floatable(false).BestSize(wxSize(1000, 150)).

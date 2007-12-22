@@ -922,17 +922,13 @@ tui::LayoutCanvas::~LayoutCanvas(){
 }
 
 BEGIN_EVENT_TABLE(tui::WinCanvas, wxWindow)
- //  EVT_SIZE             ( tui::WinCanvas::OnSize        )
-
+   EVT_SIZE             ( tui::WinCanvas::OnSize        )
 END_EVENT_TABLE()
 
 tui::WinCanvas::WinCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos, 
 										 const wxSize& size, long style, const wxString& name):
 										wxWindow(parent, id, pos, size, style, name)
 {
-	_sizer = DEBUG_NEW wxBoxSizer(wxVERTICAL );
-
-
 	int gl_attrib[20] = { WX_GL_RGBA             ,
                          WX_GL_MIN_RED          , 2,
                          WX_GL_MIN_GREEN        , 2,
@@ -946,28 +942,12 @@ tui::WinCanvas::WinCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
                          WX_GL_DOUBLEBUFFER     ,
                          GL_NONE };
    _canvas = DEBUG_NEW LayoutCanvas(this, gl_attrib);
-	_canvas->SetSize(3000,3000);
-	
-	//_status = DEBUG_NEW wxWindow(this, ID_WIN_GLSTATUS	,
-	_status = DEBUG_NEW wxWindow(this, wxID_ANY	,
-                                       wxDefaultPosition, wxDefaultSize);//,
-                             //wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-   _status->SetSize(wxSize(1000, 30));
-	
-	
-	
-	_sizer->Add(_canvas, 0, wxEXPAND|wxALL);
-	_sizer->Add(_status, 1);
-	SetSizer(_sizer);
-	this->SetSizerAndFit(_sizer, false);
+	_canvas->SetSize(GetClientSize());
 }
 void tui::WinCanvas::OnSize(wxSizeEvent& event)
 {
 	event.Skip();
-	
-	//_canvas->SetSize(this->GetSize());
-	this->SetSizerAndFit(_sizer, false);
-
+	_canvas->SetSize(this->GetClientSize());
 }
 
 // Code below taken from the internet after nasty troubles with the cursor
