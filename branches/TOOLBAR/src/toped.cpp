@@ -592,7 +592,7 @@ void tui::TopedFrame::initMenuBar() {
 
 void tui::TopedFrame::initToolBars() 
 {
-	//_resourceCenter->appendTool(this, "main", "new.xpm", "", &tui::TopedFrame::OnCellNew);
+	_resourceCenter->appendTool(this, "main", "new.xpm", "", &tui::TopedFrame::OnCellNew);
 /*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
    X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
                               wxSize(100,32), wxST_NO_AUTORESIZE);
@@ -631,6 +631,7 @@ void tui::TopedFrame::initView() {
                                         wxDefaultPosition, wxDefaultSize,
                                wxCLIP_CHILDREN);
 	_browsers->SetSize(wxSize(180, 1000));
+	_browsers->SetArtProvider(new wxAuiSimpleTabArt);
    //---------------------------------------------------------------------------- 
    // The Layoutcanvas toolbar window
    //---------------------------------------------------------------------------- 
@@ -670,9 +671,12 @@ void tui::TopedFrame::initView() {
    mS_log->SetAlignment(wxLAYOUT_BOTTOM);
    mS_log->SetSashVisible(wxSASH_TOP, TRUE);*/
    //
-   wxNotebook* logpane = DEBUG_NEW wxNotebook(this, ID_WIN_LOG, wxDefaultPosition, wxDefaultSize, 
-															wxNB_RIGHT);
+   wxAuiNotebook* logpane = DEBUG_NEW wxAuiNotebook(this, ID_WIN_LOG, wxDefaultPosition, wxDefaultSize, //wxAUI_NB_DEFAULT_STYLE |wxNB_RIGHT| wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
+															wxNB_RIGHT|wxNO_BORDER);
 	logpane->SetSize(wxSize(1000, 150));
+	wxAuiSimpleTabArt *docArt = new wxAuiSimpleTabArt;
+	logpane->SetArtProvider(docArt);
+
    _cmdlog = DEBUG_NEW console::ted_log(logpane);
    logpane->AddPage(_cmdlog, wxT("Log"));
    _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane);
@@ -697,12 +701,12 @@ void tui::TopedFrame::initView() {
 												Floatable(false).CloseButton(false).CaptionVisible(false));
 	_winManager.AddPane(mS_canvas, wxAuiPaneInfo().CentrePane().MaximizeButton(false).
 												Floatable(true).CloseButton(false));
-	_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).Fixed().
-												CloseButton(false).CaptionVisible(false));
+	_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).//Fixed().
+												CloseButton(false).CaptionVisible(false).BestSize(wxSize(1000,30)));
 	_winManager.AddPane(logpane, wxAuiPaneInfo().Bottom().Row(1).
 												Floatable(false).BestSize(wxSize(1000, 150)).
 												CloseButton(false).CaptionVisible(false));
-	_winManager.AddPane(_cmdline, wxAuiPaneInfo().Bottom().Row(0).Fixed().
+	_winManager.AddPane(_cmdline, wxAuiPaneInfo().Bottom().Row(0).BestSize(wxSize(1000,30)).
 												Floatable(false).CloseButton(false).CaptionVisible(false));
 
 	_winManager.Update();

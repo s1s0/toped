@@ -141,7 +141,6 @@ namespace tui
 		std::string		name() const {return _name;};
 	private:
 		std::string					_name;
-		wxSashLayoutWindow*		_window;
 		int							_ID;
 		wxToolBar*					_toolBar;
 

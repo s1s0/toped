@@ -30,12 +30,12 @@
 
 #if !defined(BROWSERS_H_INCLUDED)
 #define BROWSERS_H_INCLUDED
-
 #include <wx/notebook.h>
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/treectrl.h>
 #include <wx/imaglist.h>
+#include <wx/aui/aui.h>
 #include <string>
 #include "tedesign.h"
 #include "gds_io.h"
@@ -290,7 +290,7 @@ namespace browsers
    };
 
    //===========================================================================
-   class browserTAB : public wxNotebook 
+   class browserTAB : public wxAuiNotebook 
    {
    public:
                         browserTAB(wxWindow *parent, wxWindowID id = -1,
