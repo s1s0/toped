@@ -33,6 +33,8 @@
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/tuidefs.h"
 #include "../src/toped.h"
+//??? Next line is temporary - need to be removed
+#include "../ui/red_lamp.xpm"
 
 extern console::ted_cmd*         Console;
 extern tui::TopedFrame*          Toped;
@@ -258,14 +260,24 @@ tui::ToolBarHandler::ToolBarHandler(int ID, std::string name)
 	_toolBar->Realize();*/
 	//_toolBar->AddTool(wxID_NEW, _("New"), wxBitmap(new_xpm));
 	//_window = DEBUG_NEW wxSashLayoutWindow(Toped->getFrame(),_ID);
-	_window = DEBUG_NEW wxSashLayoutWindow(Toped->getFrame(), wxID_ANY,
+	/*_window = DEBUG_NEW wxSashLayoutWindow(Toped->getFrame(), wxID_ANY,
                                         wxDefaultPosition, wxDefaultSize,
                                wxSW_3D | wxCLIP_CHILDREN);
 	_window->SetDefaultSize(wxSize(1000, 30));
 	_window->SetOrientation(wxLAYOUT_HORIZONTAL);
 	_window->SetAlignment(wxLAYOUT_TOP);
-	_window->SetSashVisible(wxSASH_RIGHT, TRUE);
+	_window->SetSashVisible(wxSASH_RIGHT, TRUE);*/
 
+	_toolBar = DEBUG_NEW wxToolBar(Toped->getFrame(), wxID_ANY, wxDefaultPosition,
+		wxSize(1000, 30), wxBORDER_NONE|wxTB_HORIZONTAL|wxTB_NODIVIDER|wxTB_FLAT);
+	_toolBar->SetToolBitmapSize(wxSize(16, 15));
+	wxBitmap bitmap(red_lamp);
+	//_lamp->SetBitmap(wxIcon(red_lamp));
+	_toolBar->AddTool(wxID_ANY, _("new"), bitmap);
+	_toolBar->Realize();
+	Toped->getAuiManager()->AddPane(_toolBar, wxAuiPaneInfo().ToolbarPane().
+		Name(wxT("Standard Toolbar")).Top().Floatable(false));
+	Toped->getAuiManager()->Update();
 }
 
 tui::ToolBarHandler::~ToolBarHandler()
