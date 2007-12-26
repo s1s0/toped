@@ -103,6 +103,7 @@ namespace laydata {
    class tdtcell;
    class tdtcellref;
    class tdtdesign;
+   class tdtlibrary;
    typedef  std::pair<tdtdata*, SGBitSet>           selectDataPair;
    typedef  std::list<selectDataPair>               dataList;
    typedef  std::map<word, dataList*>               selectList;

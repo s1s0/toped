@@ -139,43 +139,57 @@ void laydata::tdtlibrary::recreate_hierarchy()
    }   
 }
 
-//bool laydata::tdtlibrary::checkValidRef(std::string newref)
-//{
-//   if ( _cells.end() == _cells.find(newref) )
-//   {
-//      std::string news = "Cell \"";
-//      news += newref; news += "\" is not defined";
-//      tell_log(console::MT_ERROR,news);
-//      return false;
-//   }
-//   laydata::tdtcell* child = _cells[newref];
-//   if (_hiertree->checkAncestors(_target.edit(), child, _hiertree))
-//   {
-//      tell_log(console::MT_ERROR, "Circular reference is forbidden.");
-//      return false;
-//   }
-//   return true;
-//}
-
-//bool laydata::tdtlibrary::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const
-//{
-//   tdtcell* targetcell;
+bool laydata::tdtlibrary::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const 
+{
 //   if ("" == cellname) targetcell = _target.edit();
-//   else                targetcell = getcellnamepair(cellname)->second;
-//   if (NULL != targetcell) {
-//      targetcell->collect_usedlays(this, recursive, laylist);
-//      laylist.sort();
-//      laylist.unique();
-//      std::ostringstream ost;
-//      ost << "used layers: {";
-//      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
-//         ost << " " << *CL << " ";
-//      ost << "}";
-//      tell_log(console::MT_INFO, ost.str());
-//      return true;
-//   }
-//   else return false;
-//}
+   assert("" != cellname);
+   tdtcell* targetcell = getcellnamepair(cellname)->second;
+   if (NULL != targetcell) {
+      targetcell->collect_usedlays(this, recursive, laylist);
+      laylist.sort();
+      laylist.unique();
+      std::ostringstream ost;
+      ost << "used layers: {";
+      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
+        ost << " " << *CL << " ";
+      ost << "}";
+      tell_log(console::MT_INFO, ost.str());
+      return true;
+   }
+   else return false;
+}
+
+//-----------------------------------------------------------------------------
+// class tdtlibdir
+//-----------------------------------------------------------------------------
+laydata::tdtlibdir::tdtlibdir()
+{
+}
+      
+laydata::tdtlibdir::~tdtlibdir()
+{
+}
+      
+int laydata::tdtlibdir::addlibrary(std::string name, tdtlibrary* const lib)
+{
+   _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem(name, lib) );
+   return (_libdirectory.size() - 1);
+}
+
+void laydata::tdtlibdir::closelibrary(std::string)
+{
+}
+
+laydata::tdtlibrary* laydata::tdtlibdir::getLib(int libID)
+{
+   assert(libID < _libdirectory.size());
+   return _libdirectory[libID]->second;
+}
+
+laydata::refnamepair laydata::tdtlibdir::getcellnamepair(std::string) const
+{
+   return NULL;
+}
 
 //-----------------------------------------------------------------------------
 // class tdtdesign
@@ -792,24 +806,24 @@ void laydata::tdtdesign::check_active() {
    if (NULL == _target.edit()) throw EXPTNactive_cell();
 };
 
-bool laydata::tdtdesign::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const {
-   tdtcell* targetcell;
-   if ("" == cellname) targetcell = _target.edit();
-   else                targetcell = getcellnamepair(cellname)->second;
-   if (NULL != targetcell) {
-      targetcell->collect_usedlays(this, recursive, laylist);
-      laylist.sort();
-      laylist.unique();
-      std::ostringstream ost;
-      ost << "used layers: {";
-      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
-         ost << " " << *CL << " ";
-      ost << "}";
-      tell_log(console::MT_INFO, ost.str());
-      return true;
-   }
-   else return false;
-}
+//bool laydata::tdtdesign::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const {
+//   tdtcell* targetcell;
+//   if ("" == cellname) targetcell = _target.edit();
+//   else                targetcell = getcellnamepair(cellname)->second;
+//   if (NULL != targetcell) {
+//      targetcell->collect_usedlays(this, recursive, laylist);
+//      laylist.sort();
+//      laylist.unique();
+//      std::ostringstream ost;
+//      ost << "used layers: {";
+//      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
+//        ost << " " << *CL << " ";
+//      ost << "}";
+//      tell_log(console::MT_INFO, ost.str());
+//      return true;
+//   }
+//   else return false;
+//}
 
 laydata::quadTree* laydata::tdtdesign::targetlayer(word layno)
 {

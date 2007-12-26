@@ -60,12 +60,14 @@ public:
    void                       GDSclose();
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
+   int                        TDTloadlib(std::string, std::string);
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&); 
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    GDSin::GDSFile*            lockGDS(bool throwexception = true);
+   laydata::tdtlibrary*       getLib(int libID) {return _tdtlibraries.getLib(libID);}
    void                       unlockDB();
    void                       unlockGDS();
    unsigned int               numselected() const;
@@ -153,7 +155,7 @@ protected:
    laydata::tdtdesign*        _TEDDB;      // toped data base
    GDSin::GDSFile*            _GDSDB;      // GDS parsed data
    layprop::ViewProperties    _properties; // properties data base
-   
+   laydata::tdtlibdir         _tdtlibraries; // catalog of available tdt libraries
    std::string                _tedfilename;
    bool                       _neversaved;
 private:

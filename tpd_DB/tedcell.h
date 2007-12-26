@@ -151,7 +151,7 @@ namespace laydata {
       void                 updateHierarchy(tdtdesign*);
       void                 removePrep(laydata::tdtdesign* ATDB) const;
       void                 report_selected(real) const;
-      void                 collect_usedlays(const tdtdesign*, bool, ListOfWords&) const;
+      void                 collect_usedlays(const tdtlibrary*, bool, ListOfWords&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
    private:
       bool                 getshapeover(TP, layprop::ViewProperties&);

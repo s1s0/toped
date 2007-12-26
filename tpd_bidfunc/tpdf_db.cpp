@@ -109,8 +109,6 @@ int tellstdfunc::TDTread::execute()
             TpdTime timeu(ATDB->lastUpdated());
             updateLayerDefinitions(ATDB, top_cell_list);
          DATC->unlockDB();
-   info = "... DB unlocked";
-   tell_log(console::MT_INFO,info);
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -175,6 +173,52 @@ int tellstdfunc::TDTreadIFF::execute()
          }
       }
       if (start_ignoring) set_ignoreOnRecovery(true);
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
+   }
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::TDTloadlib::TDTloadlib(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::TDTloadlib::execute()
+{
+   std::string filename = getStringValue();
+   if (expandFileName(filename))
+   {
+      nameList top_cell_list;
+      int libID = DATC->TDTloadlib("fixeme",filename);
+      if (0 <= libID)
+      {
+         std::string info = "Generating cell hierarchy ...";
+         tell_log(console::MT_INFO,info);
+         laydata::tdtlibrary* LTDB = DATC->getLib(libID);
+         laydata::TDTHierTree* root = LTDB->hiertree()->GetFirstRoot();
+         do
+         {
+            top_cell_list.push_back(std::string(root->GetItem()->name()));
+         } while (NULL != (root = root->GetNextRoot()));
+         browsers::addTDTtab(LTDB->name(), LTDB->hiertree());
+         info = "... done";
+         tell_log(console::MT_INFO,info);
+
+         updateLayerDefinitions(LTDB, top_cell_list);
+
+         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+      }
+      else
+      {
+         std::string info = "Can't load \"" + filename + "\" as a library";
+         tell_log(console::MT_ERROR,info);
+      }
    }
    else
    {
