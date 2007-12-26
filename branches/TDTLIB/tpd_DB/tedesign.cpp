@@ -38,20 +38,31 @@ laydata::editcellstack      laydata::editobject::_editstack;
 layprop::ViewProperties*    laydata::editobject::_viewprop = NULL;
 
 //-----------------------------------------------------------------------------
-// class tdtdesign
+// class tdtlibrary
 //-----------------------------------------------------------------------------
-laydata::tdtdesign::tdtdesign(std::string name, time_t created,
-                              time_t lastUpdated, real DBU, real UU) {
+laydata::tdtlibrary::tdtlibrary(std::string name, real DBU, real UU)
+{
    _name = name;
    _DBU  = DBU; _UU   = UU;
-   _tmpdata = NULL;
-   modified = false;
    _hiertree = NULL;
-   _created = created;
-   _lastUpdated = lastUpdated;
 }
 
-void laydata::tdtdesign::read(TEDfile* const tedfile) 
+laydata::tdtlibrary::~tdtlibrary()
+{
+   // get rid of the hierarchy tree
+   TDTHierTree* droot;
+   while (_hiertree) {
+      droot = _hiertree; _hiertree = droot->GetLast();
+      delete droot;
+   }
+   // now delete the cells
+   laydata::cellList::const_iterator wc;
+   for (wc = _cells.begin(); wc != _cells.end(); wc++)
+      delete wc->second;
+   _cells.clear();
+}
+
+void laydata::tdtlibrary::read(TEDfile* const tedfile)
 {
    std::string cellname;
    while (tedf_CELL == tedfile->getByte()) 
@@ -61,9 +72,128 @@ void laydata::tdtdesign::read(TEDfile* const tedfile)
       tedfile->registercellread(cellname, DEBUG_NEW tdtcell(tedfile, cellname));
    }
    recreate_hierarchy();
+   tell_log(console::MT_INFO, "Done");
+}
+      
+void laydata::tdtlibrary::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recur)
+{
+   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_LIBNAME, _name.size());
+   wr->add_ascii(_name.c_str()); gdsf.flush(wr);
+
+   wr = gdsf.SetNextRecord(gds_UNITS);
+   wr->add_real8b(_UU); wr->add_real8b(_DBU);
+   gdsf.flush(wr);
+   //
+   if (NULL == top)
+   {
+      laydata::TDTHierTree* root = _hiertree->GetFirstRoot();
+      while (root) {
+         _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root, _UU, recur);
+         root = root->GetNextRoot();
+      }
+   }
+   else
+   {
+      laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
+      top->GDSwrite(gdsf, _cells, root_cell, _UU, recur);
+   }
+   wr = gdsf.SetNextRecord(gds_ENDLIB);gdsf.flush(wr);
+}
+
+      
+void laydata::tdtlibrary::PSwrite(PSFile& psf, const tdtcell* top, const layprop::DrawProperties& drawprop)
+{
+   laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
+   if (psf.hier())
+   {
+      top->PSwrite(psf, drawprop, &_cells, root_cell);
+      psf.pspage_header(top->overlap());
+      psf.pspage_footer(top->name());
+   }
+   else
+   {
+      psf.pspage_header(top->overlap());
+      top->PSwrite(psf, drawprop, &_cells, root_cell);
+      psf.pspage_footer(top->name());
+   }
+}
+      
+laydata::tdtcell* laydata::tdtlibrary::checkcell(std::string name)
+{
+   if (_cells.end() != _cells.find(name)) return _cells[name];
+   else return NULL;
+}
+      
+void laydata::tdtlibrary::recreate_hierarchy()
+{
+    // get rid of the hierarchy tree
+   TDTHierTree* droot;
+   while (_hiertree) {
+      droot = _hiertree; _hiertree = droot->GetLast();
+      delete droot;
+   }
+   laydata::cellList::const_iterator wc;
+   for (wc = _cells.begin(); wc != _cells.end(); wc++) {
+   // here - run the hierarchy extractoin on orphans only   
+      if (wc->second->orphan()) _hiertree = wc->second->hierout(_hiertree, NULL, &_cells);
+   }   
+}
+
+//bool laydata::tdtlibrary::checkValidRef(std::string newref)
+//{
+//   if ( _cells.end() == _cells.find(newref) )
+//   {
+//      std::string news = "Cell \"";
+//      news += newref; news += "\" is not defined";
+//      tell_log(console::MT_ERROR,news);
+//      return false;
+//   }
+//   laydata::tdtcell* child = _cells[newref];
+//   if (_hiertree->checkAncestors(_target.edit(), child, _hiertree))
+//   {
+//      tell_log(console::MT_ERROR, "Circular reference is forbidden.");
+//      return false;
+//   }
+//   return true;
+//}
+
+//bool laydata::tdtlibrary::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const
+//{
+//   tdtcell* targetcell;
+//   if ("" == cellname) targetcell = _target.edit();
+//   else                targetcell = getcellnamepair(cellname)->second;
+//   if (NULL != targetcell) {
+//      targetcell->collect_usedlays(this, recursive, laylist);
+//      laylist.sort();
+//      laylist.unique();
+//      std::ostringstream ost;
+//      ost << "used layers: {";
+//      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
+//         ost << " " << *CL << " ";
+//      ost << "}";
+//      tell_log(console::MT_INFO, ost.str());
+//      return true;
+//   }
+//   else return false;
+//}
+
+//-----------------------------------------------------------------------------
+// class tdtdesign
+//-----------------------------------------------------------------------------
+laydata::tdtdesign::tdtdesign(std::string name, time_t created, time_t lastUpdated,
+                              real DBU, real UU)  :    laydata::tdtdesign::tdtlibrary(name, DBU, UU)
+{
+   _tmpdata       = NULL;
+   modified       = false;
+   _created       = created;
+   _lastUpdated   = lastUpdated;
+}
+
+void laydata::tdtdesign::read(TEDfile* const tedfile) 
+{
+   tdtlibrary::read(tedfile);
    _tmpdata = NULL;
    modified = false;
-   tell_log(console::MT_INFO, "Done");
 }
 
 // !!! Do not forget that the indexing[] operations over std::map can alter the structure !!!
@@ -292,11 +422,6 @@ bool laydata::tdtdesign::edittop() {
    return _target.top();
 }
 
-laydata::tdtcell* laydata::tdtdesign::checkcell(std::string name) {
-   if (_cells.end() != _cells.find(name)) return _cells[name];
-   else return NULL;
-}   
-
 void laydata::tdtdesign::openGL_draw(layprop::DrawProperties& drawprop) {
    if (_target.checkedit())
    {
@@ -365,63 +490,6 @@ void laydata::tdtdesign::write(TEDfile* const tedfile) {
    tedfile->putByte(tedf_DESIGNEND);
    modified = false;
 }
-
-void laydata::tdtdesign::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recur)
-{
-   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_LIBNAME, _name.size());
-   wr->add_ascii(_name.c_str()); gdsf.flush(wr);
-
-   wr = gdsf.SetNextRecord(gds_UNITS);
-   wr->add_real8b(_UU); wr->add_real8b(_DBU);
-   gdsf.flush(wr);
-   //
-   if (NULL == top)
-   {
-      laydata::TDTHierTree* root = _hiertree->GetFirstRoot();
-      while (root) {
-         _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root, _UU, recur);
-         root = root->GetNextRoot();
-      }
-   }
-   else
-   {
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
-      top->GDSwrite(gdsf, _cells, root_cell, _UU, recur);
-   }
-   wr = gdsf.SetNextRecord(gds_ENDLIB);gdsf.flush(wr);
-}
-
-void laydata::tdtdesign::PSwrite(PSFile& psf, const tdtcell* top, const layprop::DrawProperties& drawprop)
-{
-   //
-   laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
-   if (psf.hier())
-   {
-      top->PSwrite(psf, drawprop, &_cells, root_cell);
-      psf.pspage_header(top->overlap());
-      psf.pspage_footer(top->name());
-   }
-   else
-   {
-      psf.pspage_header(top->overlap());
-      top->PSwrite(psf, drawprop, &_cells, root_cell);
-      psf.pspage_footer(top->name());
-   }
-}
-
-void laydata::tdtdesign::recreate_hierarchy() {
-    // get rid of the hierarchy tree
-   TDTHierTree* droot;
-   while (_hiertree) {
-      droot = _hiertree; _hiertree = droot->GetLast();
-      delete droot;
-   }
-   laydata::cellList::const_iterator wc;
-   for (wc = _cells.begin(); wc != _cells.end(); wc++) {
-   // here - run the hierarchy extractoin on orphans only   
-      if (wc->second->orphan()) _hiertree = wc->second->hierout(_hiertree, NULL, &_cells);
-   }   
-}      
 
 void laydata::tdtdesign::mouseStart(int input_type, std::string name, const CTM trans,
                                    int4b stepX, int4b stepY, word cols, word rows)
@@ -767,15 +835,4 @@ laydata::tdtdesign::~tdtdesign() {
                                 CECS != _target._editstack.end(); CECS++)
       delete (*CECS);
    _target._editstack.clear();
-   // get rid of the hierarchy tree
-   TDTHierTree* droot;
-   while (_hiertree) {
-      droot = _hiertree; _hiertree = droot->GetLast();
-      delete droot;
-   }
-   // now delete the cells
-   laydata::cellList::const_iterator wc;
-   for (wc = _cells.begin(); wc != _cells.end(); wc++)
-      delete wc->second;
-   _cells.clear();
 }

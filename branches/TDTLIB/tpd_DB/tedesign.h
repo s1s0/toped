@@ -31,14 +31,43 @@
 #include "tedcell.h"
 namespace laydata {
 
-   class tdtdesign {
+   class tdtlibrary {
    public:
-      tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);
-      ~tdtdesign();
+                     tdtlibrary(std::string, real, real);
+                    ~tdtlibrary();
       void           read(TEDfile* const tedfile);
-      void           write(TEDfile* const tedfile);
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
+      tdtcell*       checkcell(std::string name);
+      void           recreate_hierarchy();
+//      bool           checkValidRef(std::string);
+      refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
+//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
+      //
+      std::string    name()            const {return _name;};
+      real           UU()              const {return _UU;};
+      const cellList& cells()          const {return _cells;};
+      TDTHierTree*   hiertree()        const {return _hiertree;};
+      // callbacks
+      void          (*btreeAddMember)(const char*, const char*, int action);
+      void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
+      friend         void tdtcell::updateHierarchy(tdtdesign*);
+      friend         void tdtcell::removePrep(tdtdesign*) const;
+      friend         bool tdtcell::addchild(tdtdesign*, tdtcell*);
+   protected:
+      std::string    _name;         // design/library name
+      real           _DBU;          // Size of database units in meters
+      real           _UU;           // size of user unit in DBU
+      cellList       _cells;        // list of cells in the design
+      TDTHierTree*   _hiertree;     // 
+   };
+
+   class tdtdesign : public tdtlibrary {
+   public:
+                     tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);                     
+      virtual       ~tdtdesign();
+      virtual void   read(TEDfile* const tedfile);
+      void           write(TEDfile* const tedfile);
       tdtcell*       addcell(std::string name);
       bool           removecell(std::string&, laydata::atticList*);
       tdtdata*       addbox(word la, TP* p1, TP* p2);
@@ -53,10 +82,8 @@ namespace laydata {
       bool           editprev(const bool undo = false);
       bool           editpop();
       bool           edittop();
-      tdtcell*       checkcell(std::string name);
       void           openGL_draw(layprop::DrawProperties&);
       void           tmp_draw(const layprop::DrawProperties&, TP, TP);
-      void           recreate_hierarchy();
       void           mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
       void           mousePoint(TP p);
       void           mousePointCancel(TP&);
@@ -100,36 +127,31 @@ namespace laydata {
       std::string    activecellname()  const {return _target.name();};
       void           assign_properties(layprop::ViewProperties& viewprop) {_target.init_viewprop(&viewprop);}
       //
-      std::string    name()            const {return _name;};
-      real           UU()              const {return _UU;};
-      TDTHierTree*   hiertree()        const {return _hiertree;};
-      const cellList& cells()          const {return _cells;};
       time_t         created()         const {return _created;}
       time_t         lastUpdated()     const {return _lastUpdated;}
       bool           collect_usedlays(std::string, bool, ListOfWords&) const;
       //
 //      const ACTIVE_OP tellop()         const {return _tellop;};
       bool           modified;
-      void          (*btreeAddMember)(const char*, const char*, int action);
-      void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
       friend         class TEDfile;
-      friend         void tdtcell::updateHierarchy(tdtdesign*);
-      friend         void tdtcell::removePrep(tdtdesign*) const;
-      friend         bool tdtcell::addchild(tdtdesign*, tdtcell*);
    private:
       bool           validate_cells();
-      std::string    _name;         // design name
-      real           _DBU;          // Size of database units in meters
-      real           _UU;           // size of user unit in DBU
-      cellList       _cells;        // list of cells in the design
-      TDTHierTree*   _hiertree;     // 
       tdtdata*       _tmpdata;      // pointer to a data under construction - for view purposes
       editobject     _target;       // edit/view target <- introduced with pedit operations
       time_t         _created;
       time_t         _lastUpdated;
       CTM            _tmpctm;
-
    };
 }
 
 #endif //TEDESIGN_H_INCLUDED
+
+//      void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
+//      void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
+//      tdtcell*       checkcell(std::string name);
+//      void           recreate_hierarchy();
+//      std::string    _name;         // design name
+//      real           _DBU;          // Size of database units in meters
+//      real           _UU;           // size of user unit in DBU
+//      cellList       _cells;        // list of cells in the design
+//      TDTHierTree*   _hiertree;     // 

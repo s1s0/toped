@@ -80,16 +80,14 @@ public:
    const laydata::cellList&   cells();
    void                       saveProperties(std::string fname)
                                                       {_properties.saveProperties(fname);}
-   void                       defaultlayer(word layno)
-                                                      {_curlay = layno;}
+   void                       defaultlayer(word layno){_curlay = layno;}
    void                       initcmdlayer()          {_curcmdlay = _curlay;}
    void                       setcmdlayer(word layno) {_curcmdlay = layno;}
    word                       curlay() const          {return _curlay;}
    word                       curcmdlay() const       {return _curcmdlay;}
    std::string                tedfilename() const     {return _tedfilename;};
    bool                       neversaved()  const     {return _neversaved;}; 
-   bool                       modified() const        {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
-   
+   bool                       modified() const        {return (NULL == _TEDDB) ? false : _TEDDB->modified;};   
    bool                       autopan() const         {return _properties.autopan();}
    const real                 step() const            {return _properties.step();}
    const layprop::LayoutGrid* grid(byte gn) const     {return _properties.grid(gn);}
