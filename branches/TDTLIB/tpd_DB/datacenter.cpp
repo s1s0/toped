@@ -279,6 +279,32 @@ bool DataCenter::TDTread(std::string filename)
    return true;
 }
 
+int DataCenter::TDTloadlib(std::string libname, std::string filename)
+{
+   laydata::TEDfile tempin(filename.c_str());
+   if (!tempin.status()) return -1;
+
+   try
+   {
+      tempin.read();
+   }
+   catch (EXPTNreadTDT)
+   {
+      tempin.closeF();
+      tempin.cleanup();
+      return -1;
+   }
+   tempin.closeF();
+   return _tdtlibraries.addlibrary(libname, tempin.design());
+//   delete _TEDDB;//Erase existing data
+//   _tedfilename = filename;
+//   _neversaved = false;
+//   _TEDDB = tempin.design();
+//   _TEDDB->assign_properties(_properties);
+//   // Update Canvas scale
+//   _properties.setUU(_TEDDB->UU());
+}
+
 bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
 {
    std::string news;

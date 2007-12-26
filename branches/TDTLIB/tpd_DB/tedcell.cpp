@@ -1685,7 +1685,7 @@ void laydata::tdtcell::report_selected(real DBscale) const
    }
 }
 
-void laydata::tdtcell::collect_usedlays(const tdtdesign* ATDB, bool recursive, ListOfWords& laylist) const{
+void laydata::tdtcell::collect_usedlays(const tdtlibrary* ATDB, bool recursive, ListOfWords& laylist) const{
    // first call recursively the method on all children cells
    if (recursive)
       for (nameList::const_iterator CC = _children.begin(); CC != _children.end(); CC++)

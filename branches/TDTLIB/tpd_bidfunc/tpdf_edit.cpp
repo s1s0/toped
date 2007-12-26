@@ -799,6 +799,10 @@ int tellstdfunc::lgcSTRETCH::execute()
                clean_atticlist(dasao[0]); delete (dasao[0]);
                // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addlist
             }
+            else
+            {
+               for (byte i = 0; i < 2; delete dasao[i++]);
+            }
          DATC->unlockDB();
          UpdateLV();
       }

@@ -287,12 +287,12 @@ void tellstdfunc::gridON(byte No, bool status) {
 }
 
 //=============================================================================
-void tellstdfunc::updateLayerDefinitions(laydata::tdtdesign* ATDB, nameList& top_cells)
+void tellstdfunc::updateLayerDefinitions(laydata::tdtlibrary* LTDB, nameList& top_cells)
 {
    // get all the layers used in the design and define them using the default definition
    laydata::ListOfWords ull;
    for(nameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
-      ATDB->collect_usedlays(*CTC, true, ull);
+      LTDB->collect_usedlays(*CTC, true, ull);
    std::unique(ull.begin(),ull.end());
    for(laydata::ListOfWords::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
    {

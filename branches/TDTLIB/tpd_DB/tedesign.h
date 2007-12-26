@@ -42,7 +42,7 @@ namespace laydata {
       void           recreate_hierarchy();
 //      bool           checkValidRef(std::string);
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
-//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
+      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
       //
       std::string    name()            const {return _name;};
       real           UU()              const {return _UU;};
@@ -62,12 +62,27 @@ namespace laydata {
       TDTHierTree*   _hiertree;     // 
    };
 
+   class tdtlibdir {
+   public:
+      typedef std::pair<std::string, tdtlibrary*> LibItem;
+      typedef std::vector<LibItem*> Catalog;
+                     tdtlibdir();
+                    ~tdtlibdir();
+      int            addlibrary( std::string, tdtlibrary* const);
+      void           closelibrary(std::string);
+      tdtlibrary*    getLib(int libID);
+      refnamepair    getcellnamepair(std::string) const;
+   private:
+      Catalog        _libdirectory;
+   };
+
    class tdtdesign : public tdtlibrary {
    public:
                      tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);                     
       virtual       ~tdtdesign();
       virtual void   read(TEDfile* const tedfile);
       void           write(TEDfile* const tedfile);
+      int            readLibrary(TEDfile* const);
       tdtcell*       addcell(std::string name);
       bool           removecell(std::string&, laydata::atticList*);
       tdtdata*       addbox(word la, TP* p1, TP* p2);
@@ -129,7 +144,7 @@ namespace laydata {
       //
       time_t         created()         const {return _created;}
       time_t         lastUpdated()     const {return _lastUpdated;}
-      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
+//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
       //
 //      const ACTIVE_OP tellop()         const {return _tellop;};
       bool           modified;
@@ -145,13 +160,3 @@ namespace laydata {
 }
 
 #endif //TEDESIGN_H_INCLUDED
-
-//      void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
-//      void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
-//      tdtcell*       checkcell(std::string name);
-//      void           recreate_hierarchy();
-//      std::string    _name;         // design name
-//      real           _DBU;          // Size of database units in meters
-//      real           _UU;           // size of user unit in DBU
-//      cellList       _cells;        // list of cells in the design
-//      TDTHierTree*   _hiertree;     // 
