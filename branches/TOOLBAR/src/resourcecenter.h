@@ -47,10 +47,12 @@ namespace tui
    class TopedFrame;
    class MenuItemHandler;
 	class ToolBarHandler;
+	class ToolItem;
 
    typedef void (TopedFrame::*callbackMethod)(wxCommandEvent&);
    typedef std::vector <MenuItemHandler*> itemList;
 	typedef std::vector <ToolBarHandler*> toolBarList;
+	typedef std::vector <ToolItem*> toolList;
 
 //=================================
 //		Everything about menu
@@ -127,8 +129,15 @@ namespace tui
 	class ToolItem
 	{
 	public:
-		ToolItem(int toolBarID, int toolID);
+		ToolItem(int toolBarID, int toolID, const std::string &name,
+							const std::string &bitmapFileName,
+							const std::string &hotKey, callbackMethod cbMethod);
 		virtual ~ToolItem();
+		wxBitmap	bitmap(void)	const {return _bitmap;};
+		int		ID(void)			const {return _ID;};
+	private:
+		int		_ID;
+		wxBitmap	_bitmap;
 
 	};
 
@@ -138,11 +147,14 @@ namespace tui
 		ToolBarHandler(int ID, std::string name);
 		virtual ~ToolBarHandler();
 
+		void				addTool(ToolItem *tool);
+
 		std::string		name() const {return _name;};
 	private:
 		std::string					_name;
 		int							_ID;
 		wxToolBar*					_toolBar;
+		toolList						_tools;
 
 	};
 
@@ -168,7 +180,8 @@ namespace tui
       void executeMenu(int ID);
       bool checkExistence(const tui::MenuItemHandler & item);
 
-		void appendTool(wxWindow* win, const std::string toolBarName, const std::string &toolBarItem,
+		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
+							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod);
    private:
       //produce lowercase string and exclude unwanted character
@@ -177,7 +190,8 @@ namespace tui
 
       itemList				_menus;
 		toolBarList			_toolBars;
-      int _menuCount; //quantity of menu items;
+      int _menuCount; //number of menu items
+		int _toolCount; //number of tool items
       
 
    };
