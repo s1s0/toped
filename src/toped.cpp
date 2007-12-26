@@ -266,7 +266,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
   
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
-   EVT_MENU_RANGE(TMDUMMY, TMDUMMY+500 , tui::TopedFrame::OnMenu  )
+   EVT_MENU_RANGE(TMDUMMY, TMDUMMY+2000 , tui::TopedFrame::OnMenu  )
    EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
    EVT_CLOSE(tui::TopedFrame::OnClose)
    EVT_SIZE( TopedFrame::OnSize )
@@ -592,7 +592,7 @@ void tui::TopedFrame::initMenuBar() {
 
 void tui::TopedFrame::initToolBars() 
 {
-	_resourceCenter->appendTool(this, "main", "new.xpm", "", &tui::TopedFrame::OnCellNew);
+	_resourceCenter->appendTool("main", "new.xpm", "ui/new.xpm","", &tui::TopedFrame::OnCellNew);
 /*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
    X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
                               wxSize(100,32), wxST_NO_AUTORESIZE);

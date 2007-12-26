@@ -243,7 +243,9 @@ void tui::MenuItemSeparator::create(wxMenuBar *menuBar)
    _inserted = true;
 }
 
-tui::ToolItem::ToolItem(int toolBarID, int toolID)
+tui::ToolItem::ToolItem(int toolBarID, int toolID, const std::string &name,
+							const std::string &bitmapFileName,
+							const std::string &hotKey, callbackMethod cbMethod)
 {
 }
 
@@ -284,7 +286,14 @@ tui::ToolBarHandler::~ToolBarHandler()
 {
 }
 
-tui::ResourceCenter::ResourceCenter(void):_menuCount(0) 
+void	tui::ToolBarHandler::addTool(ToolItem *tool)
+{
+	_tools.push_back(tool);
+	_toolBar->AddTool(tool->ID(),tool->bitmap());
+	_toolBar->Update();
+}
+
+tui::ResourceCenter::ResourceCenter(void):_menuCount(0), _toolCount(0) 
 {
 }
 
@@ -473,6 +482,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
          if (!((*mItem)->function()).empty())
          {
             Console->parseCommand(wxString(((*mItem)->function()).c_str(), wxConvUTF8));
+				return;
          }
          else
          {
@@ -486,13 +496,15 @@ void tui::ResourceCenter::executeMenu(int ID1)
             }
          }
       }
+		//???Proceed here toolbars
    }
 }
 
-void tui::ResourceCenter::appendTool(wxWindow* win, const std::string toolBarName, const std::string &toolBarItem, 
+void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem, 
+												 const std::string &bitmapFileName,
 												 const std::string &hotKey, callbackMethod cbMethod)
 {
-	
+	int ID = TMDUMMY + _menuCount;
 	std::string str = toolBarName;
 
 	std::transform(str.begin(), str.end(), str.begin(), tolower);
@@ -509,7 +521,8 @@ void tui::ResourceCenter::appendTool(wxWindow* win, const std::string toolBarNam
 	if (it==_toolBars.end())
 	{
 		//Create new toolbar
-		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(1, str);
+		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str);
+		_menuCount++;
 	}
  
 }
