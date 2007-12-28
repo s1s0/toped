@@ -112,13 +112,17 @@ void laydata::TEDfile::getFHeader()
 //   checkIntegrity();
 }
 
-void laydata::TEDfile::read() {
+void laydata::TEDfile::read(bool lib) 
+{
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
    real         DBU = getReal();
    real          UU = getReal();
    tell_log(console::MT_DESIGNNAME, name);
-   _design = DEBUG_NEW tdtdesign(name,_created, _lastUpdated, DBU,UU);
+   if (lib)
+      _design = DEBUG_NEW tdtlibrary(name, DBU, UU);
+   else
+      _design = DEBUG_NEW tdtdesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in tdtdesign so don't search it here
    //byte designend = getByte(); 
@@ -135,7 +139,7 @@ laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) { //writing
    putString(TED_LEADSTRING);
    putRevision();
    putTime();
-   _design->write(this);
+   static_cast<laydata::tdtdesign*>(_design)->write(this);
    fclose(_file);
 }
 
@@ -266,7 +270,7 @@ void laydata::TEDfile::putReal(const real data) {
 
 void laydata::TEDfile::putTime() 
 {
-   time_t ctime = _design->created();
+   time_t ctime = static_cast<laydata::tdtdesign*>(_design)->created();
    tm* broken_time = localtime(&ctime);
    putByte(tedf_TIMECREATED);
    put4b(broken_time->tm_mday);
@@ -277,7 +281,7 @@ void laydata::TEDfile::putTime()
    put4b(broken_time->tm_sec);
    //
    _lastUpdated = time(NULL);
-   _design->_lastUpdated = _lastUpdated;
+   static_cast<laydata::tdtdesign*>(_design)->_lastUpdated = _lastUpdated;
    broken_time = localtime(&_lastUpdated);
    putByte(tedf_TIMEUPDATED);
    put4b(broken_time->tm_mday);

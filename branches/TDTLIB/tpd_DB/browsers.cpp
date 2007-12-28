@@ -371,10 +371,8 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    _flatButton = DEBUG_NEW wxButton( this, BT_CELLS_FLAT, wxT("Flat") );
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
-   fCellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_TPD_CELLTREE_F,pos, size, style);
-   
-   hCellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_TPD_CELLTREE_H, pos, size, style);
-   
+   fCellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_TPD_CELLTREE_F,pos, size, style | wxTR_HIDE_ROOT);
+   hCellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_TPD_CELLTREE_H, pos, size, style | wxTR_HIDE_ROOT);
    thesizer->Add(hCellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(fCellBrowser, 1, wxEXPAND | wxBOTTOM);
    fCellBrowser->Hide();
@@ -400,24 +398,26 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
 void browsers::TDTbrowser::initialize() 
 {
    fCellBrowser->DeleteAllItems();
+   fCellBrowser->AddRoot("hidden_wxroot");
    hCellBrowser->DeleteAllItems();
+   hCellBrowser->AddRoot("hidden_wxroot");
 /*   RBcellID.Unset(); */top_structure.Unset(); active_structure.Unset();
 }
 
 void browsers::TDTbrowser::collectInfo(const wxString libname, laydata::TDTHierTree* tdtH) 
 {
-   hCellBrowser->AddRoot(libname);
-   fCellBrowser->AddRoot(libname);
+   wxTreeItemId hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),libname);
+   wxTreeItemId froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
    if (!tdtH) return; // DEBUG_NEW, empty design 
    laydata::TDTHierTree* root = tdtH->GetFirstRoot();
    wxTreeItemId nroot;
    while (root){
       //Flat
-      nroot = fCellBrowser->AppendItem(fCellBrowser-> GetRootItem(), 
+      nroot = fCellBrowser->AppendItem(froot, 
          wxString(root->GetItem()->name().c_str(), wxConvUTF8));
       fCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
       //Hier
-      nroot = hCellBrowser->AppendItem(hCellBrowser-> GetRootItem(), 
+      nroot = hCellBrowser->AppendItem(hroot, 
          wxString(root->GetItem()->name().c_str(), wxConvUTF8));
       hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
 
@@ -555,28 +555,27 @@ void browsers::TDTbrowser::OnTELLhighlightcell(wxString open_cell)
 
 void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname, int action) 
 {
-   wxTreeItemId item, newparent;
-
    switch (action) 
    {
       case 0: 
       {//new cell
          //Flat
-         wxTreeItemId item = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), 
-            cellname);
-         fCellBrowser->SetItemTextColour(item,
-            fCellBrowser->GetItemTextColour(fCellBrowser->GetRootItem()));
+         wxTreeItemId fnewparent;
+         VERIFY(fCellBrowser->findItem(parentname, fnewparent, fCellBrowser->GetRootItem())); 
+         wxTreeItemId item = fCellBrowser->AppendItem(fnewparent, cellname);
+         fCellBrowser->SetItemTextColour(item,fCellBrowser->GetItemTextColour(fCellBrowser->GetRootItem()));
          fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
          //Hier
-         item = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), 
-            cellname);
-         hCellBrowser->SetItemTextColour(item,
-            hCellBrowser->GetItemTextColour(hCellBrowser->GetRootItem()));
+         wxTreeItemId hnewparent;
+         VERIFY(hCellBrowser->findItem(parentname, hnewparent, hCellBrowser->GetRootItem())); 
+         item = hCellBrowser->AppendItem(hnewparent, cellname);
+         hCellBrowser->SetItemTextColour(item,hCellBrowser->GetItemTextColour(hCellBrowser->GetRootItem()));
          hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
          break;
       }   
       case 1:
       {//first reference of existing cell
+         wxTreeItemId item, newparent;
          VERIFY(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
          while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem())) 
          {
@@ -589,6 +588,7 @@ void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname,
       }   
       case 2: 
       {//
+         wxTreeItemId item, newparent;
          VERIFY(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
          while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()))
          {
@@ -712,16 +712,23 @@ void browsers::browserTAB::OnCommand(wxCommandEvent& event)
    int command = event.GetInt();
    switch (command) 
    {
-      case BT_ADDTDT_TAB:OnTELLaddTDTtab(event.GetString(), 
+      case BT_ADDTDT_DB:OnTELLaddTDTdb(event.GetString(), 
+                            static_cast<laydata::TDTHierTree*>(event.GetClientData()));break;
+      case BT_ADDTDT_LIB:OnTELLaddTDTlib(event.GetString(), 
                             static_cast<laydata::TDTHierTree*>(event.GetClientData()));break;
       case BT_ADDGDS_TAB:OnTELLaddGDStab();break;
       case BT_CLEARGDS_TAB:OnTELLclearGDStab(); break;
    }
 }
 
-void browsers::browserTAB::OnTELLaddTDTtab(const wxString libname, laydata::TDTHierTree* tdtH) 
+void browsers::browserTAB::OnTELLaddTDTdb(const wxString libname, laydata::TDTHierTree* tdtH) 
 {
    _TDTstruct->initialize();
+   _TDTstruct->collectInfo(libname, tdtH);
+}
+
+void browsers::browserTAB::OnTELLaddTDTlib(const wxString libname, laydata::TDTHierTree* tdtH) 
+{
    _TDTstruct->collectInfo(libname, tdtH);
 }
 
@@ -782,10 +789,10 @@ void browsers::layer_default(const word newlay, const word oldlay)
 	delete bt;
 }
 
-void browsers::addTDTtab(std::string libname, laydata::TDTHierTree* tdtH)
+void browsers::addTDTtab(std::string libname, laydata::TDTHierTree* tdtH, bool lib)
 {
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(BT_ADDTDT_TAB);
+   eventADDTAB.SetInt(lib ? BT_ADDTDT_LIB : BT_ADDTDT_DB);
    eventADDTAB.SetClientData(static_cast<void*> ( tdtH));
    eventADDTAB.SetString(wxString(libname.c_str(), wxConvUTF8));
    wxPostEvent(Browsers, eventADDTAB);

@@ -182,6 +182,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_NEW          , tui::TopedFrame::OnNewDesign   )
    EVT_MENU( TMFILE_OPEN         , tui::TopedFrame::OnTDTRead     )
    EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
+   EVT_MENU( TMLIB_LOAD          , tui::TopedFrame::OnTDTLoadLib  )
    EVT_MENU( TMGDS_OPEN          , tui::TopedFrame::OnGDSRead     )
    EVT_MENU( TMGDS_IMPORT        , tui::TopedFrame::OnGDSimport   )
    
@@ -375,6 +376,8 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&File/New ...",    "CTRL-N", &tui::TopedFrame::OnNewDesign,  "Create new design");
    _resourceCenter->appendMenu("&File/Open ...",   "CTRL-O", &tui::TopedFrame::OnTDTRead, "Open a TDT file" );
    _resourceCenter->appendMenu("&File/Include ...","",      &tui::TopedFrame::OnTELLRead, "Include a TELL file" );
+   _resourceCenter->appendMenuSeparator("&File");
+   _resourceCenter->appendMenu("&File/Load Library ...",  "", &tui::TopedFrame::OnTDTLoadLib, "Load a TDT library" );
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Export library to GDS","",  &tui::TopedFrame::OnGDSexportLIB, "Export library to GDS");
    _resourceCenter->appendMenu("&File/Import GDS to library","",  &tui::TopedFrame::OnGDSimport, "Import GDS structure" );
@@ -780,13 +783,16 @@ void tui::TopedFrame::OnNewDesign(wxCommandEvent& evt) {
    else SetStatusText(wxT("New file not created"));
 }
 
-void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
-   if (DATC->modified()) {
+void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) 
+{
+   if (DATC->modified()) 
+   {
       wxMessageDialog dlg1(this,
          wxT("Current design contains unsaved data"),
          wxT("Save the current design before creating a new one?"),
          wxYES_NO | wxCANCEL | wxICON_QUESTION);
-      switch (dlg1.ShowModal()) {
+      switch (dlg1.ShowModal()) 
+      {
          case wxID_YES:OnTDTSave(evt);
          case wxID_NO: break;
          case wxID_CANCEL: return;
@@ -796,7 +802,8 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
       wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
       tpdfOPEN);
-   if (wxID_OK == dlg2.ShowModal()) {
+   if (wxID_OK == dlg2.ShowModal()) 
+   {
       wxString filename = dlg2.GetFilename();
       wxString ost;
       ost << wxT("tdtread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
@@ -807,6 +814,24 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) {
       SetTitle(dlg2.GetFilename());
    }
    else SetStatusText(wxT("Opening aborted"));
+}
+
+void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt) 
+{
+   SetStatusText(wxT("Loading library..."));
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+      wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
+      tpdfOPEN);
+   if (wxID_OK == dlg2.ShowModal()) 
+   {
+      wxString filename = dlg2.GetFilename();
+      wxString ost;
+      ost << wxT("loadlib(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
+      _cmdline->parseCommand(ost);
+      wxString ost1;
+      SetTitle(dlg2.GetFilename());
+   }
+   else SetStatusText(wxT("Loading aborted"));
 }
 
 void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {

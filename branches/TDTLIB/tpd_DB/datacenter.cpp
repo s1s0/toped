@@ -272,21 +272,21 @@ bool DataCenter::TDTread(std::string filename)
    delete _TEDDB;//Erase existing data
    _tedfilename = filename;
    _neversaved = false;
-   _TEDDB = tempin.design();
+   _TEDDB = static_cast<laydata::tdtdesign*>(tempin.design());
    _TEDDB->assign_properties(_properties);
    // Update Canvas scale
    _properties.setUU(_TEDDB->UU());
    return true;
 }
 
-int DataCenter::TDTloadlib(std::string libname, std::string filename)
+int DataCenter::TDTloadlib(std::string filename)
 {
    laydata::TEDfile tempin(filename.c_str());
    if (!tempin.status()) return -1;
 
    try
    {
-      tempin.read();
+      tempin.read(true);
    }
    catch (EXPTNreadTDT)
    {
@@ -295,7 +295,7 @@ int DataCenter::TDTloadlib(std::string libname, std::string filename)
       return -1;
    }
    tempin.closeF();
-   return _tdtlibraries.addlibrary(libname, tempin.design());
+   return _tdtlibraries.addlibrary(tempin.design());
 //   delete _TEDDB;//Erase existing data
 //   _tedfilename = filename;
 //   _neversaved = false;

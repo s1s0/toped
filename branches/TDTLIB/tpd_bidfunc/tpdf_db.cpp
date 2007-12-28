@@ -195,7 +195,7 @@ int tellstdfunc::TDTloadlib::execute()
    if (expandFileName(filename))
    {
       nameList top_cell_list;
-      int libID = DATC->TDTloadlib("fixeme",filename);
+      int libID = DATC->TDTloadlib(filename);
       if (0 <= libID)
       {
          std::string info = "Generating cell hierarchy ...";
@@ -206,7 +206,7 @@ int tellstdfunc::TDTloadlib::execute()
          {
             top_cell_list.push_back(std::string(root->GetItem()->name()));
          } while (NULL != (root = root->GetNextRoot()));
-         browsers::addTDTtab(LTDB->name(), LTDB->hiertree());
+         browsers::addTDTtab(LTDB->name(), LTDB->hiertree(),true);
          info = "... done";
          tell_log(console::MT_INFO,info);
 

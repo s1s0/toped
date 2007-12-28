@@ -60,7 +60,7 @@ public:
    void                       GDSclose();
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
-   int                        TDTloadlib(std::string, std::string);
+   int                        TDTloadlib(std::string);
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&); 
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 

@@ -168,11 +168,16 @@ laydata::tdtlibdir::tdtlibdir()
       
 laydata::tdtlibdir::~tdtlibdir()
 {
+   for (word i = 0; i < _libdirectory.size(); i++)
+   {
+      delete _libdirectory[i]->second;
+      delete _libdirectory[i];
+   }
 }
       
-int laydata::tdtlibdir::addlibrary(std::string name, tdtlibrary* const lib)
+int laydata::tdtlibdir::addlibrary(tdtlibrary* const lib)
 {
-   _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem(name, lib) );
+   _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem(lib->name(), lib) );
    return (_libdirectory.size() - 1);
 }
 
@@ -218,7 +223,7 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name) {
       modified = true;
       tdtcell* ncl = _cells[name] = DEBUG_NEW tdtcell(name);
       _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
-       btreeAddMember(_hiertree->GetItem()->name().c_str(), NULL, 0);
+       btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
       return ncl;
    }
 }
