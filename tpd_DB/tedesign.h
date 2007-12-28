@@ -54,6 +54,7 @@ namespace laydata {
       friend         void tdtcell::updateHierarchy(tdtdesign*);
       friend         void tdtcell::removePrep(tdtdesign*) const;
       friend         bool tdtcell::addchild(tdtdesign*, tdtcell*);
+      friend         class TEDfile;
    protected:
       std::string    _name;         // design/library name
       real           _DBU;          // Size of database units in meters
@@ -68,7 +69,7 @@ namespace laydata {
       typedef std::vector<LibItem*> Catalog;
                      tdtlibdir();
                     ~tdtlibdir();
-      int            addlibrary( std::string, tdtlibrary* const);
+      int            addlibrary( tdtlibrary* const );
       void           closelibrary(std::string);
       tdtlibrary*    getLib(int libID);
       refnamepair    getcellnamepair(std::string) const;

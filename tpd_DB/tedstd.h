@@ -140,7 +140,7 @@ namespace laydata {
                            TEDfile(const char*); // for reading
                            TEDfile(tdtdesign*, std::string&); // for writing
       void                 closeF() {fclose(_file);};
-      void                 read();
+      void                 read(bool lib = false);
       void                 cleanup();
       std::string          getString();
       void                 putString(std::string str);
@@ -163,7 +163,7 @@ namespace laydata {
       void                 get_cellchildnames(nameList*);
       bool                 status() const  {return _status;};
       word                 numread() const {return _numread;};
-      tdtdesign*           design() const  {return _design;};
+      tdtlibrary*          design() const  {return _design;};
       time_t               created() const {return _created;};
       time_t               lastUpdated() const {return _lastUpdated;};
       protected:
@@ -181,7 +181,7 @@ namespace laydata {
       word                 _subrevision;
       time_t               _created;
       time_t               _lastUpdated;
-      tdtdesign*           _design;
+      tdtlibrary*          _design;
       nameList             _childnames;
    };
 

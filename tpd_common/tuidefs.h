@@ -51,6 +51,7 @@ namespace tui
       TMFILE_NEW = 100    ,
       TMFILE_OPEN         ,
       TMFILE_INCLUDE      ,
+      TMLIB_LOAD          ,
       TMGDS_OPEN          ,
       TMGDS_MENU          ,
       TMGDS_IMPORT        ,

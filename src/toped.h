@@ -127,6 +127,7 @@ namespace tui {
       // Menu 
       void   OnNewDesign(wxCommandEvent&);
       void     OnTDTRead(wxCommandEvent&);
+      void  OnTDTLoadLib(wxCommandEvent&);
       void    OnTELLRead(wxCommandEvent&);
       void     OnGDSRead(wxCommandEvent&);
       void   OnGDSimport(wxCommandEvent&);
