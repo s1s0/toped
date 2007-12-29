@@ -129,15 +129,28 @@ namespace tui
 	class ToolItem
 	{
 	public:
-		ToolItem(int toolBarID, int toolID, const std::string &name,
+		ToolItem(int toolID, const std::string &name,
 							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod);
+		ToolItem(int toolID, const std::string &name,
+							const wxBitmap &bitmap,
+							const std::string &hotKey, callbackMethod cbMethod);
+		//std::string    hotKey(void)   const    { return _hotKey;};
+      std::string    function(void) const    { return _function;};
+      //std::string    helpString(void) const  { return _helpString;};
+      callbackMethod method(void)   const    { return _method;};
+
 		virtual ~ToolItem();
 		wxBitmap	bitmap(void)	const {return _bitmap;};
 		int		ID(void)			const {return _ID;};
 	private:
 		int		_ID;
 		wxBitmap	_bitmap;
+		//std::string _hotKey;
+      std::string _function;
+      //std::string _helpString;
+      callbackMethod _method;
+
 
 	};
 
@@ -148,6 +161,7 @@ namespace tui
 		virtual ~ToolBarHandler();
 
 		void				addTool(ToolItem *tool);
+		void				execute(int ID1);
 
 		std::string		name() const {return _name;};
 	private:
@@ -183,6 +197,9 @@ namespace tui
 		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
 							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod);
+		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
+							const wxBitmap &bitmap,
+							const std::string &hotKey, callbackMethod cbMethod);
    private:
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
@@ -190,8 +207,8 @@ namespace tui
 
       itemList				_menus;
 		toolBarList			_toolBars;
-      int _menuCount; //number of menu items
-		int _toolCount; //number of tool items
+      int					_menuCount; //number of menu items
+		int					_toolCount; //number of tool items
       
 
    };

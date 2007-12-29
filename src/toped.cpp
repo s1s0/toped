@@ -40,6 +40,11 @@
 #include "../ui/green_lamp.xpm"
 #include "../ui/blue_lamp.xpm"
 #include "../ui/toped32x32.xpm"
+
+//icons for toolbars
+#include "../ui/new.xpm"
+#include "../ui/open.xpm"
+
 #ifndef WIN32
    #include "../ui/toped16x16.xpm"
 #endif
@@ -266,7 +271,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
   
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
-   EVT_MENU_RANGE(TMDUMMY, TMDUMMY+2000 , tui::TopedFrame::OnMenu  )
+   EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
+	EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
    EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
    EVT_CLOSE(tui::TopedFrame::OnClose)
    EVT_SIZE( TopedFrame::OnSize )
@@ -592,7 +598,12 @@ void tui::TopedFrame::initMenuBar() {
 
 void tui::TopedFrame::initToolBars() 
 {
-	_resourceCenter->appendTool("main", "new.xpm", "ui/new.xpm","", &tui::TopedFrame::OnCellNew);
+	//_resourceCenter->appendTool("main", "new", "D:\\new.bmp","", &tui::TopedFrame::OnCellNew);
+	_resourceCenter->appendTool("main", "new", wxBitmap(new_xpm),"", &tui::TopedFrame::OnCellNew);
+	_resourceCenter->appendTool("main", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen);
+
+	_resourceCenter->appendTool("secondary", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen);
+
 /*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
    X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
                               wxSize(100,32), wxST_NO_AUTORESIZE);
