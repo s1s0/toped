@@ -193,7 +193,9 @@ laydata::tdtlibrary* laydata::tdtlibdir::getLib(int libID)
 
 laydata::refnamepair laydata::tdtlibdir::getcellnamepair(std::string) const
 {
-   return NULL;
+   cellList boza;
+//   typedef  cellList::const_iterator                refnamepair;
+   return boza.begin();
 }
 
 //-----------------------------------------------------------------------------
@@ -855,3 +857,6 @@ laydata::tdtdesign::~tdtdesign() {
       delete (*CECS);
    _target._editstack.clear();
 }
+//
+//
+//
