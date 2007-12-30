@@ -398,9 +398,9 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
 void browsers::TDTbrowser::initialize() 
 {
    fCellBrowser->DeleteAllItems();
-   fCellBrowser->AddRoot("hidden_wxroot");
+   fCellBrowser->AddRoot(wxT("hidden_wxroot"));
    hCellBrowser->DeleteAllItems();
-   hCellBrowser->AddRoot("hidden_wxroot");
+   hCellBrowser->AddRoot(wxT("hidden_wxroot"));
 /*   RBcellID.Unset(); */top_structure.Unset(); active_structure.Unset();
 }
 
