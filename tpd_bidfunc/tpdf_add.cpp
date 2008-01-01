@@ -635,7 +635,6 @@ void tellstdfunc::stdCELLREF::undo() {
 }
 
 int tellstdfunc::stdCELLREF::execute() {
-   UNDOcmdQ.push_front(this);
    // get the parameters from the operand stack
    real   magn   = getOpValue();
    bool   flip   = getBoolValue();
@@ -644,16 +643,31 @@ int tellstdfunc::stdCELLREF::execute() {
    std::string name = getStringValue();
    real DBscale = DATC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(name,ori), 0);
-   DATC->unlockDB();
-   OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
-                     angle << "," << LogFile._2bool(flip) << "," << magn <<");";
-   LogFile.flush();
-   delete rpnt;
-   RefreshGL();
-   return EXEC_NEXT;
+
+   laydata::refnamepair striter;
+   if (DATC->getCellNamePair(name, striter))
+   {
+      UNDOcmdQ.push_front(this);
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+//         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(name,ori), 0);
+         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(striter,ori), 0);
+      DATC->unlockDB();
+      OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
+                        angle << "," << LogFile._2bool(flip) << "," << magn <<");";
+      LogFile.flush();
+      delete rpnt;
+      RefreshGL();
+      return EXEC_NEXT;
+   }
+   else
+   {
+      std::string news = "Cell \"";
+      news += name; news += "\" is not defined";
+      tell_log(console::MT_ERROR,news);
+      delete rpnt;
+      return EXEC_ABORT;
+   }
 }
 
 //=============================================================================

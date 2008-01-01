@@ -296,13 +296,6 @@ int DataCenter::TDTloadlib(std::string filename)
    }
    tempin.closeF();
    return _tdtlibraries.addlibrary(tempin.design());
-//   delete _TEDDB;//Erase existing data
-//   _tedfilename = filename;
-//   _neversaved = false;
-//   _TEDDB = tempin.design();
-//   _TEDDB->assign_properties(_properties);
-//   // Update Canvas scale
-//   _properties.setUU(_TEDDB->UU());
 }
 
 bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
@@ -685,6 +678,21 @@ void DataCenter::clearRulers()
    _properties.clearRulers();
    PROPLock.Unlock();
 }
+
+bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter) 
+{
+   laydata::tdtdesign* ATDB = lockDB();
+   if (ATDB->checkcell(name))
+   {
+      striter = ATDB->getcellnamepair(name);
+      unlockDB();
+      return true;
+   }
+   unlockDB();
+   // search the cell in the libraries because it's not in the DB
+   return _tdtlibraries.getCellNamePair(name, striter);
+}
+
 
 void initDBLib()
 {
