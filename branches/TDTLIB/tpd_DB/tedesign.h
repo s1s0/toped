@@ -71,8 +71,8 @@ namespace laydata {
                     ~tdtlibdir();
       int            addlibrary( tdtlibrary* const );
       void           closelibrary(std::string);
-      tdtlibrary*    getLib(int libID);
-      refnamepair    getcellnamepair(std::string) const;
+      tdtlibrary*    getLib(word libID);
+      bool           getCellNamePair(std::string, refnamepair&) const;
    private:
       Catalog        _libdirectory;
    };
@@ -90,7 +90,7 @@ namespace laydata {
       tdtdata*       addpoly(word, const pointlist*);
       tdtdata*       addwire(word, const pointlist*, word);
       tdtdata*       addtext(word la, std::string& text, CTM& ori);
-      tdtdata*       addcellref(std::string& name, CTM& ori);
+      tdtdata*       addcellref(laydata::refnamepair striter, CTM& ori);
       tdtdata*       addcellaref(std::string&, CTM&, ArrayProperties&);
       void           addlist(atticList*);
       tdtcell*       opencell(std::string name);
@@ -139,7 +139,7 @@ namespace laydata {
       unsigned int   numselected()     const {return _target.edit()->numselected();};
       void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
       void           report_selected(real DBscale) const { _target.edit()->report_selected(DBscale);};
-      refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
+//      refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       std::string    activecellname()  const {return _target.name();};
       void           assign_properties(layprop::ViewProperties& viewprop) {_target.init_viewprop(&viewprop);}
       //

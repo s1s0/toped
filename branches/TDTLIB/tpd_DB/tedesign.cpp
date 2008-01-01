@@ -185,17 +185,23 @@ void laydata::tdtlibdir::closelibrary(std::string)
 {
 }
 
-laydata::tdtlibrary* laydata::tdtlibdir::getLib(int libID)
+laydata::tdtlibrary* laydata::tdtlibdir::getLib(word libID)
 {
    assert(libID < _libdirectory.size());
    return _libdirectory[libID]->second;
 }
 
-laydata::refnamepair laydata::tdtlibdir::getcellnamepair(std::string) const
+bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair& striter) const
 {
-   cellList boza;
-//   typedef  cellList::const_iterator                refnamepair;
-   return boza.begin();
+   for (word i = 0; i < _libdirectory.size(); i++)
+   {
+      if (NULL != _libdirectory[i]->second->checkcell(name))
+      {
+         striter = _libdirectory[i]->second->getcellnamepair(name);
+         return true;
+      }
+   }
+   return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -343,14 +349,17 @@ laydata::tdtdata* laydata::tdtdesign::addtext(word la, std::string& text, CTM& o
    return newshape;
 }
  
-laydata::tdtdata* laydata::tdtdesign::addcellref(std::string& name, CTM& ori) {
-   if (checkcell(name)) {
-      laydata::refnamepair striter = getcellnamepair(name);
+laydata::tdtdata* laydata::tdtdesign::addcellref(laydata::refnamepair striter, CTM& ori) 
+{
+//   if (checkcell(name)) 
+//   {
+//      laydata::refnamepair striter = getcellnamepair(name);
       modified = true;
       ori *= _target.rARTM();
       DBbox old_overlap = _target.edit()->overlap();
       tdtdata* ncrf = _target.edit()->addcellref(this, striter, ori);
-      if (NULL == ncrf) {
+      if (NULL == ncrf) 
+      {
         tell_log(console::MT_ERROR, "Circular reference is forbidden");
       }
       else
@@ -359,13 +368,14 @@ laydata::tdtdata* laydata::tdtdesign::addcellref(std::string& name, CTM& ori) {
             do {} while(validate_cells());
       }
       return ncrf;
-   }
-   else {
-      std::string news = "Cell \"";
-      news += name; news += "\" is not defined";
-      tell_log(console::MT_ERROR,news);
-      return NULL;
-   }
+//   }
+//   else 
+//   {
+//      std::string news = "Cell \"";
+//      news += name; news += "\" is not defined";
+//      tell_log(console::MT_ERROR,news);
+//      return NULL;
+//   }
 }
 
 laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori, 
@@ -813,24 +823,6 @@ void laydata::tdtdesign::check_active() {
    if (NULL == _target.edit()) throw EXPTNactive_cell();
 };
 
-//bool laydata::tdtdesign::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const {
-//   tdtcell* targetcell;
-//   if ("" == cellname) targetcell = _target.edit();
-//   else                targetcell = getcellnamepair(cellname)->second;
-//   if (NULL != targetcell) {
-//      targetcell->collect_usedlays(this, recursive, laylist);
-//      laylist.sort();
-//      laylist.unique();
-//      std::ostringstream ost;
-//      ost << "used layers: {";
-//      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
-//        ost << " " << *CL << " ";
-//      ost << "}";
-//      tell_log(console::MT_INFO, ost.str());
-//      return true;
-//   }
-//   else return false;
-//}
 
 laydata::quadTree* laydata::tdtdesign::targetlayer(word layno)
 {
