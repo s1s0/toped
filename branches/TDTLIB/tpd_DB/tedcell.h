@@ -105,11 +105,11 @@ namespace laydata {
       tdtcellaref*         addcellaref(tdtdesign*, refnamepair, CTM,
                                           ArrayProperties&, bool sortnow = true);
       bool                 addchild(tdtdesign*, tdtcell*);
-      void                 write(TEDfile* const, const cellList&, TDTHierTree* const) const;
+      void                 write(TEDfile* const, const cellList&, const TDTHierTree*) const;
       void                 GDSwrite(GDSin::GDSFile&, const cellList&,
-                                                TDTHierTree* const, real, bool) const;
+                                                 const TDTHierTree*, real, bool) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&,
-                                   const cellList* = NULL, TDTHierTree* const = NULL) const;
+                                   const cellList* = NULL, const TDTHierTree* = NULL) const;
       TDTHierTree*         hierout(TDTHierTree*& Htree, tdtcell* parent, 
                                                            cellList* celldefs);
       DBbox                overlap() const;

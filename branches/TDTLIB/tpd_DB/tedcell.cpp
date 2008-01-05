@@ -419,9 +419,9 @@ laydata::tdtcellref* laydata::tdtcell::getcellover(TP pnt, ctmstack& transtack, 
    return NULL;
 }
 
-void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, TDTHierTree* const root) const {
+void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, const TDTHierTree* root) const {
    // We going to write the cells in hierarchical order. Children - first!
-   laydata::TDTHierTree* Child= root->GetChild();
+   const laydata::TDTHierTree* Child= root->GetChild();
    while (Child) {
 //      tedfile->design()->getcellnamepair(Child->GetItem()->name())->second->write(tedfile, Child);
       allcells.find(Child->GetItem()->name())->second->write(tedfile, allcells, Child);
@@ -447,12 +447,12 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, T
 }
 
 void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
-                                         TDTHierTree* const root, real UU, bool recur) const
+                                 const TDTHierTree* root, real UU, bool recur) const
 {
    // We going to write the cells in hierarchical order. Children - first!
    if (recur)
    {
-      laydata::TDTHierTree* Child= root->GetChild();
+      const laydata::TDTHierTree* Child= root->GetChild();
       while (Child)
       {
          allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child, UU, recur);
@@ -477,14 +477,14 @@ void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
 }
 
 void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop,
-                               const cellList* allcells, TDTHierTree* const root) const
+                               const cellList* allcells, const TDTHierTree* root) const
 {
    if (psf.hier())
    {
       assert( root );
       assert( allcells );
       // We going to write the cells in hierarchical order. Children - first!
-      laydata::TDTHierTree* Child= root->GetChild();
+      const laydata::TDTHierTree* Child= root->GetChild();
       while (Child)
       {
          allcells->find(Child->GetItem()->name())->second->PSwrite(psf, drawprop, allcells, Child);

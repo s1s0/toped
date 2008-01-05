@@ -50,10 +50,11 @@ laydata::tdtlibrary::tdtlibrary(std::string name, real DBU, real UU)
 laydata::tdtlibrary::~tdtlibrary()
 {
    // get rid of the hierarchy tree
-   TDTHierTree* droot;
-   while (_hiertree) {
-      droot = _hiertree; _hiertree = droot->GetLast();
-      delete droot;
+   const TDTHierTree* var1 = _hiertree;
+   while (var1)
+   {
+      const TDTHierTree* var2 = var1->GetLast();
+      delete var1; var1 = var2;
    }
    // now delete the cells
    laydata::cellList::const_iterator wc;
@@ -126,11 +127,12 @@ laydata::tdtcell* laydata::tdtlibrary::checkcell(std::string name)
       
 void laydata::tdtlibrary::recreate_hierarchy()
 {
-    // get rid of the hierarchy tree
-   TDTHierTree* droot;
-   while (_hiertree) {
-      droot = _hiertree; _hiertree = droot->GetLast();
-      delete droot;
+   // get rid of the hierarchy tree
+   const TDTHierTree* var1 = _hiertree;
+   while (var1)
+   {
+      const TDTHierTree* var2 = var1->GetLast();
+      delete var1; var1 = var2;
    }
    laydata::cellList::const_iterator wc;
    for (wc = _cells.begin(); wc != _cells.end(); wc++) {
