@@ -3,7 +3,7 @@ Short Term
  - Browser window needs search facilities. For big designs
  - Depth of UNDO must be a menu parameter (or a TELL function ?)
  - bitwise logical operations. Require unsigned.
-
+ - avoid using #defines where possible. Use const instead
 
 General
 =========

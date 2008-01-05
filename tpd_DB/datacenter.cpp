@@ -295,7 +295,7 @@ int DataCenter::TDTloadlib(std::string filename)
       return -1;
    }
    tempin.closeF();
-   return _tdtlibraries.addlibrary(tempin.design());
+   return _TEDLIB.addlibrary(tempin.design());
 }
 
 bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
@@ -690,7 +690,7 @@ bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter
    }
    unlockDB();
    // search the cell in the libraries because it's not in the DB
-   return _tdtlibraries.getCellNamePair(name, striter);
+   return _TEDLIB.getCellNamePair(name, striter);
 }
 
 

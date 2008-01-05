@@ -146,8 +146,8 @@ namespace browsers
          return hCellBrowser->GetItemText(RBcellID); else return wxT("");}
       void DeleteAllItems(void);
    protected:
-      void              collectChildren(GDSin::GDSHierTree *root, 
-                                                   wxTreeItemId& lroot);
+      void              collectChildren(const GDSin::GDSHierTree *root, 
+                                                   const wxTreeItemId& lroot);
    private:
       wxButton*         _hierButton;
       wxButton*         _flatButton;
@@ -175,8 +175,8 @@ namespace browsers
       void              initialize();
       wxString          selectedCellname() const;
    protected:
-      void              collectChildren(laydata::TDTHierTree *root, 
-                                                 wxTreeItemId& lroot);
+      void              collectChildren(const laydata::TDTHierTree *root, 
+                                                 const wxTreeItemId& lroot);
    private:
       wxTreeItemId      top_structure;
       wxTreeItemId      active_structure;

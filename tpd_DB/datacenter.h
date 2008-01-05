@@ -67,7 +67,7 @@ public:
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    GDSin::GDSFile*            lockGDS(bool throwexception = true);
-   laydata::tdtlibrary*       getLib(int libID) {return _tdtlibraries.getLib(libID);}
+   laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    bool                       getCellNamePair(std::string name, laydata::refnamepair& striter);
    void                       unlockDB();
    void                       unlockGDS();
@@ -153,16 +153,16 @@ public:
    void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
 
 protected:
-   laydata::tdtdesign*        _TEDDB;      // toped data base
-   GDSin::GDSFile*            _GDSDB;      // GDS parsed data
-   layprop::ViewProperties    _properties; // properties data base
-   laydata::tdtlibdir         _tdtlibraries; // catalog of available tdt libraries
+   laydata::tdtdesign*        _TEDDB;        // toped data base
+   laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
+   GDSin::GDSFile*            _GDSDB;        // GDS parsed data
+   layprop::ViewProperties    _properties;   // properties data base
    std::string                _tedfilename;
    bool                       _neversaved;
 private:
-   word                       _curlay;     // current drawing layer
-   word                       _curcmdlay;  // layer used during current drawing operation
-   bool                       _drawruler;  // draw a ruler while coposing a shape interactively
+   word                       _curlay;       // current drawing layer
+   word                       _curcmdlay;    // layer used during current drawing operation
+   bool                       _drawruler;    // draw a ruler while coposing a shape interactively
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
    wxMutex                    PROPLock;

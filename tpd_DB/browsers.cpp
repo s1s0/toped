@@ -167,9 +167,9 @@ void browsers::GDSbrowser::DeleteAllItems(void)
    fCellBrowser->DeleteAllItems();
 }
 
-void browsers::GDSbrowser::collectChildren(GDSin::GDSHierTree *root, wxTreeItemId& lroot) 
+void browsers::GDSbrowser::collectChildren(const GDSin::GDSHierTree *root, const wxTreeItemId& lroot) 
 {
-   GDSin::GDSHierTree* Child= root->GetChild();
+   const GDSin::GDSHierTree* Child= root->GetChild();
    wxTreeItemId nroot;
    wxTreeItemId temp;
 
@@ -428,9 +428,9 @@ void browsers::TDTbrowser::collectInfo(const wxString libname, laydata::TDTHierT
    fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
 }
       
-void browsers::TDTbrowser::collectChildren(laydata::TDTHierTree *root, wxTreeItemId& lroot) 
+void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, const wxTreeItemId& lroot) 
 {
-   laydata::TDTHierTree* Child= root->GetChild();
+   const laydata::TDTHierTree* Child= root->GetChild();
    wxTreeItemId nroot;
    wxTreeItemId temp;
    while (Child) 
