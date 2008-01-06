@@ -205,14 +205,18 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
 //-----------------------------------------------------------------------------
 DataCenter::DataCenter() {
    _GDSDB = NULL; _TEDDB = NULL;
+   // initializing the static cell hierarchy tree
+//   laydata::tdtlibrary::_hiertree = NULL;
    _tedfilename = "unnamed";
    _curlay = 1;
    _drawruler = false;
 }
    
 DataCenter::~DataCenter() {
+   laydata::tdtlibrary::clearHierTree();
    if (NULL != _GDSDB) delete _GDSDB;
    if (NULL != _TEDDB) delete _TEDDB;
+   // _TEDLIB will be cleared automatically (not a pointer)
 }
 bool DataCenter::TDTcheckread(const std::string filename,
     const TpdTime& timeCreated, const TpdTime& timeSaved, bool& start_ignoring)
@@ -260,7 +264,7 @@ bool DataCenter::TDTread(std::string filename)
 
    try
    {
-      tempin.read();
+      tempin.read(0);
    }
    catch (EXPTNreadTDT)
    {
@@ -283,10 +287,10 @@ int DataCenter::TDTloadlib(std::string filename)
 {
    laydata::TEDfile tempin(filename.c_str());
    if (!tempin.status()) return -1;
-
+   word libRef = _TEDLIB.getNextLibRefNo();
    try
    {
-      tempin.read(true);
+      tempin.read(libRef);
    }
    catch (EXPTNreadTDT)
    {
@@ -295,7 +299,8 @@ int DataCenter::TDTloadlib(std::string filename)
       return -1;
    }
    tempin.closeF();
-   return _TEDLIB.addlibrary(tempin.design());
+   _TEDLIB.addlibrary(tempin.design(), libRef);
+   return libRef;
 }
 
 bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)

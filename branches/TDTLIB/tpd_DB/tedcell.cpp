@@ -209,12 +209,11 @@ laydata::editobject::~editobject()
 //-----------------------------------------------------------------------------
 // class tdtcell
 //-----------------------------------------------------------------------------
-laydata::tdtcell::tdtcell(std::string name) {
-   _name = name; _orphan = true;
-};
+laydata::tdtcell::tdtcell(std::string name) : 
+   _name(name), _library(0), _orphan(true) {}
 
-laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name) : _name(name) ,
-                                                               _orphan(true) 
+laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, word lib) : 
+   _name(name), _library(lib), _orphan(true) 
 {
    byte recordtype;
    word  layno;
