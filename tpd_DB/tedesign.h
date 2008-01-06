@@ -33,9 +33,9 @@ namespace laydata {
 
    class tdtlibrary {
    public:
-                     tdtlibrary(std::string, real, real);
+                     tdtlibrary(std::string, real, real, word);
                     ~tdtlibrary();
-      void           read(TEDfile* const tedfile);
+      void           read(TEDfile* const);
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
       tdtcell*       checkcell(std::string name);
@@ -55,12 +55,14 @@ namespace laydata {
       friend         void tdtcell::removePrep(tdtdesign*) const;
       friend         bool tdtcell::addchild(tdtdesign*, tdtcell*);
       friend         class TEDfile;
+      static void           clearHierTree();
    protected:
-      std::string    _name;         // design/library name
-      real           _DBU;          // Size of database units in meters
-      real           _UU;           // size of user unit in DBU
-      cellList       _cells;        // list of cells in the design
-      TDTHierTree*   _hiertree;     // 
+      std::string          _name;         // design/library name
+      word                 _libID;        // library ID
+      real                 _DBU;          // Size of database units in meters
+      real                 _UU;           // size of user unit in DBU
+      cellList             _cells;        // list of cells in the design
+      static TDTHierTree*  _hiertree;     // 
    };
 
    class tdtlibdir {
@@ -69,9 +71,10 @@ namespace laydata {
       typedef std::vector<LibItem*> Catalog;
                      tdtlibdir();
                     ~tdtlibdir();
-      int            addlibrary( tdtlibrary* const );
+      void           addlibrary( tdtlibrary* const, word libRef );
       void           closelibrary(std::string);
       tdtlibrary*    getLib(word libID);
+      word           getNextLibRefNo();
       bool           getCellNamePair(std::string, refnamepair&) const;
    private:
       Catalog        _libdirectory;
@@ -81,7 +84,7 @@ namespace laydata {
    public:
                      tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);                     
       virtual       ~tdtdesign();
-      virtual void   read(TEDfile* const tedfile);
+      virtual void   read(TEDfile* const);
       void           write(TEDfile* const tedfile);
       int            readLibrary(TEDfile* const);
       tdtcell*       addcell(std::string name);

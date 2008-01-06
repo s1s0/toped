@@ -126,6 +126,7 @@ int tellstdfunc::stdREMOVECELL::execute()
       UNDOPstack.push_front(make_ttlaylist(cell_contents));
       LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
    }
+   delete cell_contents;
    return EXEC_NEXT;
 }
 //=============================================================================

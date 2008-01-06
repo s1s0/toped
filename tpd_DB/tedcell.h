@@ -92,8 +92,8 @@ namespace laydata {
 //==============================================================================
    class tdtcell  {
    public:
-                           tdtcell(std::string name);
-                           tdtcell(TEDfile* const tedfile, std::string name);
+                           tdtcell(std::string);
+                           tdtcell(TEDfile* const, std::string, word);
                           ~tdtcell(); 
       void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
@@ -164,11 +164,12 @@ namespace laydata {
       tdtdata*             checkNreplacePoly(selectDataPair&, validator*, word, selectList**);
       tdtdata*             checkNreplaceBox(selectDataPair&, validator*, word, selectList**);
       dataList*            secure_dataList(selectList&, word);
-      std::string          _name;
-      bool                 _orphan;
-      layerList            _layers;
-      nameList             _children;     // for hierarchy list purposes
-      selectList           _shapesel;     // selected shapes
+      std::string          _name;         //! cell name
+      word                 _library;      //! cell belongs to ... library
+      layerList            _layers;       //! all layers the cell
+      bool                 _orphan;       //! cell doesn't have a parent
+      nameList             _children;     //! for hierarchy list purposes
+      selectList           _shapesel;     //! selected shapes
    };
 
 }

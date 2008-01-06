@@ -112,15 +112,15 @@ void laydata::TEDfile::getFHeader()
 //   checkIntegrity();
 }
 
-void laydata::TEDfile::read(bool lib) 
+void laydata::TEDfile::read(word libRef) 
 {
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
    real         DBU = getReal();
    real          UU = getReal();
    tell_log(console::MT_DESIGNNAME, name);
-   if (lib)
-      _design = DEBUG_NEW tdtlibrary(name, DBU, UU);
+   if (libRef > 0)
+      _design = DEBUG_NEW tdtlibrary(name, DBU, UU, libRef);
    else
       _design = DEBUG_NEW tdtdesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);

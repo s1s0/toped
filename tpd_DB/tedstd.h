@@ -140,7 +140,7 @@ namespace laydata {
                            TEDfile(const char*); // for reading
                            TEDfile(tdtdesign*, std::string&); // for writing
       void                 closeF() {fclose(_file);};
-      void                 read(bool lib = false);
+      void                 read(word libRef);
       void                 cleanup();
       std::string          getString();
       void                 putString(std::string str);
