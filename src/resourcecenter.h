@@ -154,10 +154,10 @@ namespace tui
 
 	};
 
-	class ToolBarHandler
+	class ToolBarHandler:public wxToolBar
 	{
 	public:
-		ToolBarHandler(int ID, std::string name);
+		ToolBarHandler(int ID, std::string name, int direction);
 		virtual ~ToolBarHandler();
 
 		void				addTool(ToolItem *tool);
@@ -165,11 +165,14 @@ namespace tui
 
 		std::string		name() const {return _name;};
 	private:
+		void				OnSize(wxSizeEvent& event);
+		void				OnPaint(wxPaintEvent&event);
 		std::string					_name;
 		int							_ID;
-		wxToolBar*					_toolBar;
+		//wxToolBar*					_toolBar;
 		toolList						_tools;
-
+		int							_dockDirection;
+		DECLARE_EVENT_TABLE();
 	};
 
 

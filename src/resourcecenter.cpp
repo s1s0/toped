@@ -264,18 +264,30 @@ tui::ToolItem::~ToolItem()
 {
 }
 
-tui::ToolBarHandler::ToolBarHandler(int ID, std::string name)
-		:_ID(ID), _name(name)
+BEGIN_EVENT_TABLE( tui::ToolBarHandler, wxToolBar )
+   EVT_SIZE( tui::ToolBarHandler::OnSize   )
+	EVT_PAINT(tui::ToolBarHandler::OnPaint)
+END_EVENT_TABLE()
+
+tui::ToolBarHandler::ToolBarHandler(int ID, std::string name, int direction)
+		:wxToolBar(Toped->getFrame(), ID, wxDefaultPosition,
+		wxSize(1000, 30), wxTB_NODIVIDER|wxTB_FLAT ),
+		_ID(ID), _name(name), _dockDirection(direction)
 {
-	_toolBar = DEBUG_NEW wxToolBar(Toped->getFrame(), ID, wxDefaultPosition,
-		wxSize(1000, 30), wxBORDER_NONE|wxTB_HORIZONTAL|wxTB_NODIVIDER|wxTB_FLAT);
-	_toolBar->SetToolBitmapSize(wxSize(16, 15));
-	//wxBitmap bitmap(red_lamp);
-	//_lamp->SetBitmap(wxIcon(red_lamp));
-	//_toolBar->AddTool(wxID_ANY, _("new1"), bitmap);
-	_toolBar->Realize();
-	Toped->getAuiManager()->AddPane(_toolBar, wxAuiPaneInfo().ToolbarPane().
-		Name(wxT(_name)).Top().Floatable(false));
+	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
+	{
+		SetWindowStyle(wxTB_VERTICAL|GetWindowStyle());
+	}
+	else
+	{
+		SetWindowStyle(wxTB_HORIZONTAL|GetWindowStyle());
+	}
+	
+	SetToolBitmapSize(wxSize(16, 15));
+
+	Realize();
+	Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
+		Name(wxT(_name)).Direction(_dockDirection).Floatable(false));
 	Toped->getAuiManager()->Update();
 }
 
@@ -283,15 +295,67 @@ tui::ToolBarHandler::~ToolBarHandler()
 {
 }
 
+void tui::ToolBarHandler::OnSize(wxSizeEvent& event)
+{
+	event.Skip();
+	Refresh();
+}
+
+void tui::ToolBarHandler::OnPaint(wxPaintEvent&event)
+{
+	wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(this);
+	if (paneInfo.dock_direction != _dockDirection)
+	{
+		Toped->getAuiManager()->DetachPane(this);
+
+		for(toolList::iterator it=_tools.begin();it!=_tools.end(); ++it)
+		{
+			RemoveTool((*it)->ID());
+		}
+	
+		_dockDirection = paneInfo.dock_direction;
+
+		if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
+		{
+			long style = (GetWindowStyle() ^ wxTB_HORIZONTAL);
+			style = style|wxTB_VERTICAL;
+			SetWindowStyle(style);
+			wxSize size = GetSize();
+			SetSize(size.GetHeight(),size.GetWidth());
+			paneInfo.GripperTop(true);
+		}
+		else
+		{
+			long style = (GetWindowStyle() ^ wxTB_VERTICAL);
+			style = style|wxTB_HORIZONTAL;
+			SetWindowStyle(style);
+			wxSize size = GetSize();
+			SetSize(size.GetHeight(),size.GetWidth());
+			paneInfo.GripperTop(false);
+		}
+
+		for(toolList::iterator it=_tools.begin();it!=_tools.end(); ++it)
+		{
+			AddTool((*it)->ID(), wxT(""), (*it)->bitmap());
+		}
+		
+		Realize();
+		Toped->getAuiManager()->AddPane(this, paneInfo.ToolbarPane().
+			Name(wxT(_name)).Floatable(false).Direction(_dockDirection));
+		Toped->getAuiManager()->Update();
+	}
+	event.Skip();
+
+}
 void	tui::ToolBarHandler::addTool(ToolItem *tool)
 {
 	_tools.push_back(tool);
-	_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap());
-	Toped->getAuiManager()->DetachPane(_toolBar);
-	Toped->getAuiManager()->Update();
-	_toolBar->Realize();
-	Toped->getAuiManager()->AddPane(_toolBar, wxAuiPaneInfo().ToolbarPane().
-		Name(wxT(_name)).Top().Floatable(false));
+	AddTool(tool->ID(),wxT(""),tool->bitmap());
+	//SetWindowStyle(wxTB_HORIZONTAL|GetWindowStyle());
+	Toped->getAuiManager()->DetachPane(this);
+	Realize();
+	Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
+		Name(wxT(_name)).Top().Gripper().Floatable(false));
 	Toped->getAuiManager()->Update();
 }
 
@@ -554,7 +618,7 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 	{
 		ID = TDUMMY_TOOL + _toolCount;
 		//Create new toolbar
-		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str);
+		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, wxAUI_DOCK_TOP);
 		_toolCount++;
 
 		ID = TDUMMY_TOOL + _toolCount;
@@ -593,7 +657,7 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 	{
 		ID = TDUMMY_TOOL + _toolCount;
 		//Create new toolbar
-		toolBar = DEBUG_NEW ToolBarHandler(ID, str);
+		toolBar = DEBUG_NEW ToolBarHandler(ID, str, wxAUI_DOCK_TOP);
 		_toolCount++;
 		_toolBars.push_back(toolBar);
 	}
