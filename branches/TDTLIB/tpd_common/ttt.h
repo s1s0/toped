@@ -230,8 +230,8 @@ public:
    SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst);
    SGHierTree(const TYPE* comp, SGHierTree* lst) : component(comp), last(lst), 
                                     parent(NULL), brother(NULL), Fchild(NULL) {};
-   SGHierTree*       GetFirstRoot();
-   SGHierTree*       GetNextRoot();
+   SGHierTree*       GetFirstRoot(word libID = 0);
+   SGHierTree*       GetNextRoot(word libID = 0);
    SGHierTree*       GetMember(const TYPE* comp);
    SGHierTree*       GetNextMember(const TYPE* comp);
    bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
@@ -276,16 +276,16 @@ SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst
 };
 
 template <class TYPE> 
-   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetFirstRoot() {
+   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetFirstRoot(word libID) {
       SGHierTree* wv = this;
-      while (wv && (wv->parent)) wv = wv->last;
+      while (wv && (wv->parent || (libID != wv->component->libID()))) wv = wv->last;
       return wv;
    }
 
 template <class TYPE> 
-   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetNextRoot()  {
+   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetNextRoot(word libID)  {
       SGHierTree* wv = this->last;
-      while (wv && (wv->parent)) wv = wv->last;
+      while (wv && (wv->parent || (libID != wv->component->libID()))) wv = wv->last;
       return wv;
    }
 

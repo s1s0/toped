@@ -67,6 +67,12 @@ void laydata::tdtlibrary::clearHierTree()
    _hiertree = NULL;
 }
 
+void laydata::tdtlibrary::clearHierTreeLib()
+{
+   assert(false);
+   //@FIXME!!!
+}
+
 void laydata::tdtlibrary::read(TEDfile* const tedfile)
 {
    std::string cellname;
@@ -131,20 +137,18 @@ laydata::tdtcell* laydata::tdtlibrary::checkcell(std::string name)
       
 void laydata::tdtlibrary::recreate_hierarchy()
 {
-   // get rid of the hierarchy tree
-   const TDTHierTree* var1 = _hiertree;
-   while (var1)
+   if (0 == _libID)
    {
-      const TDTHierTree* var2 = var1->GetLast();
-      delete var1; var1 = var2;
+      clearHierTreeLib();
    }
-   _hiertree = NULL;
-   laydata::cellList::const_iterator wc;
    // here - run the hierarchy extraction on orphans only   
-   for (wc = _cells.begin(); wc != _cells.end(); wc++) {
-      if (wc->second->orphan()) _hiertree = wc->second->hierout(_hiertree, NULL, &_cells);
-   }   
+   for (laydata::cellList::const_iterator wc = _cells.begin(); 
+                                          wc != _cells.end(); wc++) {
+      if (wc->second->orphan()) 
+         _hiertree = wc->second->hierout(_hiertree, NULL, &_cells);
+   }
 }
+
 
 bool laydata::tdtlibrary::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const 
 {
@@ -199,8 +203,8 @@ void laydata::tdtlibdir::closelibrary(std::string)
 
 laydata::tdtlibrary* laydata::tdtlibdir::getLib(word libID)
 {
-   assert(libID < _libdirectory.size());
-   return _libdirectory[libID]->second;
+   assert(libID <= _libdirectory.size());
+   return _libdirectory[libID-1]->second;
 }
 
 bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair& striter) const

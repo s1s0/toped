@@ -201,11 +201,11 @@ int tellstdfunc::TDTloadlib::execute()
          std::string info = "Generating cell hierarchy ...";
          tell_log(console::MT_INFO,info);
          laydata::tdtlibrary* LTDB = DATC->getLib(libID);
-         laydata::TDTHierTree* root = LTDB->hiertree()->GetFirstRoot();
+         laydata::TDTHierTree* root = LTDB->hiertree()->GetFirstRoot(libID);
          do
          {
             top_cell_list.push_back(std::string(root->GetItem()->name()));
-         } while (NULL != (root = root->GetNextRoot()));
+         } while (NULL != (root = root->GetNextRoot(libID)));
          browsers::addTDTtab(LTDB->name(), LTDB->hiertree(),true);
          info = "... done";
          tell_log(console::MT_INFO,info);
