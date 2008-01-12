@@ -145,7 +145,7 @@ void browsers::GDSbrowser::collectInfo()
    fCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
   
    if (NULL == AGDSDB->hiertree()) return; // new, empty design
-   GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot();
+   GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(0);
    wxTreeItemId nroot;
    while (root){
       nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
@@ -153,7 +153,7 @@ void browsers::GDSbrowser::collectInfo()
       nroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
 //      SetItemTextColour(nroot,*wxLIGHT_GREY);
       collectChildren(root, nroot);
-      root = root->GetNextRoot();
+      root = root->GetNextRoot(0);
    }
    DATC->unlockGDS();
    hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
@@ -404,11 +404,12 @@ void browsers::TDTbrowser::initialize()
 /*   RBcellID.Unset(); */top_structure.Unset(); active_structure.Unset();
 }
 
-void browsers::TDTbrowser::collectInfo(const wxString libname, const word libID, laydata::TDTHierTree* tdtH) 
+void browsers::TDTbrowser::collectInfo(const wxString libname, const word libID, laydata::TDTHierTree* tdtH, bool traverse_all) 
 {
    wxTreeItemId hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),libname);
    wxTreeItemId froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
-   if (!tdtH) return; // DEBUG_NEW, empty design 
+   assert(traverse_all ? NULL != tdtH : true);
+   if (!traverse_all) return; 
    laydata::TDTHierTree* root = tdtH->GetFirstRoot(libID);
    wxTreeItemId nroot;
    while (root){
@@ -465,7 +466,7 @@ void browsers::TDTbrowser::OnCommand(wxCommandEvent& event)
           *(static_cast<wxString*>(event.GetClientData())), static_cast<int>(event.GetExtraLong()));
           delete (static_cast<wxString*>(event.GetClientData())); break;
       case BT_CELL_REMOVE:OnTELLremovecell(event.GetString(), 
-          *(static_cast<wxString*>(event.GetClientData())), static_cast<bool>(event.GetExtraLong()));
+          *(static_cast<wxString*>(event.GetClientData())), (1 == event.GetExtraLong()) ? true : false);
           delete (static_cast<wxString*>(event.GetClientData())); break;
 
    }
@@ -712,26 +713,19 @@ void browsers::browserTAB::OnCommand(wxCommandEvent& event)
    int command = event.GetInt();
    switch (command) 
    {
-/*      case BT_ADDTDT_DB:OnTELLaddTDTdb(event.GetString(), 
-                            static_cast<laydata::TDTHierTree*>(event.GetClientData()));break; */
-      case BT_ADDTDT_LIB:OnTELLaddTDTlib(static_cast<laydata::tdtlibrary*>(event.GetClientData()));break;
+   case BT_ADDTDT_LIB:OnTELLaddTDTlib(static_cast<laydata::tdtlibrary*>(event.GetClientData()),
+                         (1 == event.GetExtraLong()) ? true : false);break;
       case BT_ADDGDS_TAB:OnTELLaddGDStab();break;
       case BT_CLEARGDS_TAB:OnTELLclearGDStab(); break;
    }
 }
-/*
-void browsers::browserTAB::OnTELLaddTDTdb(const wxString libname, laydata::TDTHierTree* tdtH) 
-{
-   _TDTstruct->initialize();
-   _TDTstruct->collectInfo(libname, tdtH);
-}
-*/
-void browsers::browserTAB::OnTELLaddTDTlib(laydata::tdtlibrary* tdtLib) 
+
+void browsers::browserTAB::OnTELLaddTDTlib(laydata::tdtlibrary* tdtLib, bool traverse_all) 
 {
    word libID = tdtLib->libID();
    if (0 == libID) _TDTstruct->initialize();
    wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
-      _TDTstruct->collectInfo(libname, tdtLib->libID(), tdtLib->hiertree());
+      _TDTstruct->collectInfo(libname, tdtLib->libID(), tdtLib->hiertree(), traverse_all);
 }
 
 void browsers::browserTAB::OnTELLaddGDStab() 
@@ -791,12 +785,12 @@ void browsers::layer_default(const word newlay, const word oldlay)
 	delete bt;
 }
 
-void browsers::addTDTtab(laydata::tdtlibrary* tdtLib)
+void browsers::addTDTtab(laydata::tdtlibrary* tdtLib, bool traverse_all)
 {
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(BT_ADDTDT_LIB/* : BT_ADDTDT_DB*/);
+   eventADDTAB.SetInt(BT_ADDTDT_LIB);
    eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
-/*   eventADDTAB.SetString(wxString(libname.c_str(), wxConvUTF8));*/
+   eventADDTAB.SetExtraLong(traverse_all ? 1 : 0);
    wxPostEvent(Browsers, eventADDTAB);
 }
 
@@ -1168,7 +1162,7 @@ void browsers::LayerPanel::OnCommand(wxCommandEvent& event)
       case    BT_LAYER_HIDE:
          {
             word *layno = static_cast<word*>(event.GetClientData());
-            bool status = event.GetExtraLong();
+            bool status = (1 == event.GetExtraLong());
             //_buttonMap[layno]->hideLayer(event.IsChecked());
             _buttonMap[*layno]->hideLayer(status);
 				delete (static_cast<word*>(layno));
@@ -1179,7 +1173,7 @@ void browsers::LayerPanel::OnCommand(wxCommandEvent& event)
          {
             //_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());
             word *layno = static_cast<word*>(event.GetClientData());
-            bool status = event.GetExtraLong();
+            bool status = (1 == event.GetExtraLong());
             _buttonMap[*layno]->lockLayer(status);
 				delete (static_cast<word*>(layno));
             break;

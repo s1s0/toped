@@ -97,10 +97,10 @@ void laydata::tdtlibrary::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recu
    //
    if (NULL == top)
    {
-      laydata::TDTHierTree* root = _hiertree->GetFirstRoot();
+      laydata::TDTHierTree* root = _hiertree->GetFirstRoot(0);
       while (root) {
          _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root, _UU, recur);
-         root = root->GetNextRoot();
+         root = root->GetNextRoot(0);
       }
    }
    else
@@ -529,10 +529,10 @@ void laydata::tdtdesign::write(TEDfile* const tedfile) {
    tedfile->putReal(_DBU);
    tedfile->putReal(_UU);
    //
-   laydata::TDTHierTree* root = _hiertree->GetFirstRoot();
+   laydata::TDTHierTree* root = _hiertree->GetFirstRoot(0);
    while (root) {
       _cells[root->GetItem()->name()]->write(tedfile, _cells, root);
-      root = root->GetNextRoot();
+      root = root->GetNextRoot(0);
    }
    tedfile->putByte(tedf_DESIGNEND);
    modified = false;
