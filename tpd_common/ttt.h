@@ -230,8 +230,8 @@ public:
    SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst);
    SGHierTree(const TYPE* comp, SGHierTree* lst) : component(comp), last(lst), 
                                     parent(NULL), brother(NULL), Fchild(NULL) {};
-   SGHierTree*       GetFirstRoot(word libID = 0);
-   SGHierTree*       GetNextRoot(word libID = 0);
+   SGHierTree*       GetFirstRoot(word libID);
+   SGHierTree*       GetNextRoot(word libID);
    SGHierTree*       GetMember(const TYPE* comp);
    SGHierTree*       GetNextMember(const TYPE* comp);
    bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);

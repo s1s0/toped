@@ -58,6 +58,7 @@ namespace laydata {
       friend         class TEDfile;
       static void    clearHierTree();
       static void    clearHierTreeLib();
+      static void    initHierTreePtr() {_hiertree = NULL;}
    protected:
       std::string          _name;         // design/library name
       word                 _libID;        // library ID

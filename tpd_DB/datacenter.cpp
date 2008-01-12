@@ -206,7 +206,7 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
 DataCenter::DataCenter() {
    _GDSDB = NULL; _TEDDB = NULL;
    // initializing the static cell hierarchy tree
-//   laydata::tdtlibrary::_hiertree = NULL;
+   laydata::tdtlibrary::initHierTreePtr();
    _tedfilename = "unnamed";
    _curlay = 1;
    _drawruler = false;
@@ -427,9 +427,11 @@ void DataCenter::newDesign(std::string name, time_t created)
       // without much talking.
       // UNDO buffers will be reset as well in tellstdfunc::stdNEWDESIGN::execute()
       // but there is still a chance to restore everything - using the log file.
+      laydata::tdtlibrary::clearHierTree();
       delete _TEDDB;
-   }   
+   }
    _TEDDB = DEBUG_NEW laydata::tdtdesign(name, created, 0);
+   laydata::tdtlibrary::initHierTreePtr();
    _TEDDB->assign_properties(_properties);
    _tedfilename = name + ".tdt";
    _neversaved = true;
