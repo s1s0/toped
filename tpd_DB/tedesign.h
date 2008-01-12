@@ -44,10 +44,11 @@ namespace laydata {
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       bool           collect_usedlays(std::string, bool, ListOfWords&) const;
       //
-      std::string    name()            const {return _name;};
-      real           UU()              const {return _UU;};
-      const cellList& cells()          const {return _cells;};
-      TDTHierTree*   hiertree()        const {return _hiertree;};
+      std::string    name()            const {return _name;}
+      real           UU()              const {return _UU;}
+      const cellList& cells()          const {return _cells;}
+      TDTHierTree*   hiertree()        const {return _hiertree;}
+      word           libID()           const {return _libID;}
       // callbacks
       void          (*btreeAddMember)(const char*, const char*, int action);
       void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
