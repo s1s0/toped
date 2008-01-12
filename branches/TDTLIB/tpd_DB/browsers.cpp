@@ -404,12 +404,12 @@ void browsers::TDTbrowser::initialize()
 /*   RBcellID.Unset(); */top_structure.Unset(); active_structure.Unset();
 }
 
-void browsers::TDTbrowser::collectInfo(const wxString libname, laydata::TDTHierTree* tdtH) 
+void browsers::TDTbrowser::collectInfo(const wxString libname, const word libID, laydata::TDTHierTree* tdtH) 
 {
    wxTreeItemId hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),libname);
    wxTreeItemId froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
    if (!tdtH) return; // DEBUG_NEW, empty design 
-   laydata::TDTHierTree* root = tdtH->GetFirstRoot(/*@FIXME!!! requires library ID*/);
+   laydata::TDTHierTree* root = tdtH->GetFirstRoot(libID);
    wxTreeItemId nroot;
    while (root){
       //Flat
@@ -422,7 +422,7 @@ void browsers::TDTbrowser::collectInfo(const wxString libname, laydata::TDTHierT
       hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
 
       collectChildren(root, nroot);
-      root = root->GetNextRoot();
+      root = root->GetNextRoot(libID);
    }
    hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
    fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
@@ -712,24 +712,26 @@ void browsers::browserTAB::OnCommand(wxCommandEvent& event)
    int command = event.GetInt();
    switch (command) 
    {
-      case BT_ADDTDT_DB:OnTELLaddTDTdb(event.GetString(), 
-                            static_cast<laydata::TDTHierTree*>(event.GetClientData()));break;
-      case BT_ADDTDT_LIB:OnTELLaddTDTlib(event.GetString(), 
-                            static_cast<laydata::TDTHierTree*>(event.GetClientData()));break;
+/*      case BT_ADDTDT_DB:OnTELLaddTDTdb(event.GetString(), 
+                            static_cast<laydata::TDTHierTree*>(event.GetClientData()));break; */
+      case BT_ADDTDT_LIB:OnTELLaddTDTlib(static_cast<laydata::tdtlibrary*>(event.GetClientData()));break;
       case BT_ADDGDS_TAB:OnTELLaddGDStab();break;
       case BT_CLEARGDS_TAB:OnTELLclearGDStab(); break;
    }
 }
-
+/*
 void browsers::browserTAB::OnTELLaddTDTdb(const wxString libname, laydata::TDTHierTree* tdtH) 
 {
    _TDTstruct->initialize();
    _TDTstruct->collectInfo(libname, tdtH);
 }
-
-void browsers::browserTAB::OnTELLaddTDTlib(const wxString libname, laydata::TDTHierTree* tdtH) 
+*/
+void browsers::browserTAB::OnTELLaddTDTlib(laydata::tdtlibrary* tdtLib) 
 {
-   _TDTstruct->collectInfo(libname, tdtH);
+   word libID = tdtLib->libID();
+   if (0 == libID) _TDTstruct->initialize();
+   wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
+      _TDTstruct->collectInfo(libname, tdtLib->libID(), tdtLib->hiertree());
 }
 
 void browsers::browserTAB::OnTELLaddGDStab() 
@@ -789,12 +791,12 @@ void browsers::layer_default(const word newlay, const word oldlay)
 	delete bt;
 }
 
-void browsers::addTDTtab(std::string libname, laydata::TDTHierTree* tdtH, bool lib)
+void browsers::addTDTtab(laydata::tdtlibrary* tdtLib)
 {
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(lib ? BT_ADDTDT_LIB : BT_ADDTDT_DB);
-   eventADDTAB.SetClientData(static_cast<void*> ( tdtH));
-   eventADDTAB.SetString(wxString(libname.c_str(), wxConvUTF8));
+   eventADDTAB.SetInt(BT_ADDTDT_LIB/* : BT_ADDTDT_DB*/);
+   eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
+/*   eventADDTAB.SetString(wxString(libname.c_str(), wxConvUTF8));*/
    wxPostEvent(Browsers, eventADDTAB);
 }
 

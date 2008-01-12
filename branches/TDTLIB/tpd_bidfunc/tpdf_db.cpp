@@ -65,7 +65,7 @@ int tellstdfunc::stdNEWDESIGNd::execute()
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       ATDB->btreeAddMember    = &browsers::treeAddMember;
       ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-      browsers::addTDTtab(nm, ATDB->hiertree());
+      browsers::addTDTtab(ATDB);
    DATC->unlockDB();
    // reset UNDO buffers;
    UNDOcmdQ.clear();
@@ -102,7 +102,7 @@ int tellstdfunc::TDTread::execute()
             } while (NULL != (root = root->GetNextRoot()));
             ATDB->btreeAddMember    = &browsers::treeAddMember;
             ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-            browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
+            browsers::addTDTtab(ATDB);
             info = "... done";
             tell_log(console::MT_INFO,info);
             TpdTime timec(ATDB->created());
@@ -154,7 +154,7 @@ int tellstdfunc::TDTreadIFF::execute()
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
          ATDB->btreeAddMember    = &browsers::treeAddMember;
          ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-         browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
+         browsers::addTDTtab(ATDB);
          laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot();
          do
          {
@@ -206,7 +206,7 @@ int tellstdfunc::TDTloadlib::execute()
          {
             top_cell_list.push_back(std::string(root->GetItem()->name()));
          } while (NULL != (root = root->GetNextRoot(libID)));
-         browsers::addTDTtab(LTDB->name(), LTDB->hiertree(),true);
+         browsers::addTDTtab(LTDB);
          info = "... done";
          tell_log(console::MT_INFO,info);
 
@@ -406,7 +406,7 @@ int tellstdfunc::GDSconvertAll::execute()
    }
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       DATC->importGDScell(top_cells, recur, over);
-      browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
+      browsers::addTDTtab(ATDB);
       updateLayerDefinitions(ATDB, top_cells);
    DATC->unlockDB();
    
