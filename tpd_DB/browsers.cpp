@@ -409,7 +409,7 @@ void browsers::TDTbrowser::collectInfo(const wxString libname, laydata::TDTHierT
    wxTreeItemId hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),libname);
    wxTreeItemId froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
    if (!tdtH) return; // DEBUG_NEW, empty design 
-   laydata::TDTHierTree* root = tdtH->GetFirstRoot();
+   laydata::TDTHierTree* root = tdtH->GetFirstRoot(/*@FIXME!!! requires library ID*/);
    wxTreeItemId nroot;
    while (root){
       //Flat

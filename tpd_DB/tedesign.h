@@ -55,7 +55,8 @@ namespace laydata {
       friend         void tdtcell::removePrep(tdtdesign*) const;
       friend         bool tdtcell::addchild(tdtdesign*, tdtcell*);
       friend         class TEDfile;
-      static void           clearHierTree();
+      static void    clearHierTree();
+      static void    clearHierTreeLib();
    protected:
       std::string          _name;         // design/library name
       word                 _libID;        // library ID
