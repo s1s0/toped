@@ -106,7 +106,8 @@ namespace laydata {
       bool           edittop();
       void           openGL_draw(layprop::DrawProperties&);
       void           tmp_draw(const layprop::DrawProperties&, TP, TP);
-      void           mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
+      void           set_tmpdata(tdtdata* tmpdata) {_tmpdata = tmpdata;}
+      void           set_tmpctm(CTM tmpctm)        {_tmpctm  = tmpctm; }
       void           mousePoint(TP p);
       void           mousePointCancel(TP&);
       void           mouseStop();

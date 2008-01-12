@@ -1,3 +1,11 @@
+Library properties
+-------------------
+- A reference to undefined cells is allowed in the DB as well as in the library
+- Library can't refernce a cell from a DB. Library can reference a cell from another library,
+  but only if it has bigger ID. DB has an ID 0 - i.e. it can reference cells from any library
+- the above means that circular reference across the libraries is not possible
+
+
 Short Term
 ------------
  - Browser window needs search facilities. For big designs

@@ -489,7 +489,45 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
    if (_TEDDB)
    {
       _TEDDB->check_active();
-      _TEDDB->mouseStart(input_type, name, trans, stepX, stepY, cols, rows);
+      switch (input_type)
+      {
+         case console::op_dbox:   _TEDDB->set_tmpdata( DEBUG_NEW laydata::tdtbox()  ); break;
+         case console::op_dpoly:  _TEDDB->set_tmpdata( DEBUG_NEW laydata::tdtpoly()) ; break;
+         case console::op_cbind:
+         {
+            assert ("" != name);
+            laydata::refnamepair striter;
+            CTM eqm;
+            VERIFY(DATC->getCellNamePair(name, striter));
+            _TEDDB->set_tmpdata( DEBUG_NEW laydata::tdtcellref(striter, eqm) );
+            break;
+         }
+         case console::op_abind:
+         {
+            assert ("" != name);
+            assert(0 != cols);assert(0 != rows);assert(0 != stepX);assert(0 != stepY);
+            laydata::refnamepair striter;
+            CTM eqm;
+            VERIFY(DATC->getCellNamePair(name, striter));
+            laydata::ArrayProperties arrprops(stepX, stepY, cols, rows);
+            _TEDDB->set_tmpdata( DEBUG_NEW laydata::tdtcellaref(striter, eqm, arrprops) );
+            break;
+         }
+         case console::op_tbind:
+         {
+            assert ("" != name);
+            CTM eqm(trans);
+            eqm.Scale(1/(UU()*OPENGL_FONT_UNIT), 1/(UU()*OPENGL_FONT_UNIT));
+            _TEDDB->set_tmpdata( DEBUG_NEW laydata::tdttext(name, eqm) );
+            break;
+         }
+         case console::op_rotate: _TEDDB->set_tmpctm( trans );
+         default:
+         {
+            if (0  < input_type)
+               _TEDDB->set_tmpdata( DEBUG_NEW laydata::tdtwire(input_type) );
+         }
+      }
       initcmdlayer();
    }
    else throw EXPTNactive_DB();
