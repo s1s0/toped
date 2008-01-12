@@ -479,6 +479,22 @@ void laydata::tdtdesign::openGL_draw(layprop::DrawProperties& drawprop) {
    }
 }
 
+
+void laydata::tdtdesign::write(TEDfile* const tedfile) {
+   tedfile->putByte(tedf_DESIGN);
+   tedfile->putString(_name);
+   tedfile->putReal(_DBU);
+   tedfile->putReal(_UU);
+   //
+   laydata::TDTHierTree* root = _hiertree->GetFirstRoot(0);
+   while (root) {
+      _cells[root->GetItem()->name()]->write(tedfile, _cells, root);
+      root = root->GetNextRoot(0);
+   }
+   tedfile->putByte(tedf_DESIGNEND);
+   modified = false;
+}
+
 void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
                                           TP base, TP newp) {
    ctmqueue tmp_stack;
@@ -521,56 +537,6 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
       tmp_stack.clear();
    }
    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-}
-
-void laydata::tdtdesign::write(TEDfile* const tedfile) {
-   tedfile->putByte(tedf_DESIGN);
-   tedfile->putString(_name);
-   tedfile->putReal(_DBU);
-   tedfile->putReal(_UU);
-   //
-   laydata::TDTHierTree* root = _hiertree->GetFirstRoot(0);
-   while (root) {
-      _cells[root->GetItem()->name()]->write(tedfile, _cells, root);
-      root = root->GetNextRoot(0);
-   }
-   tedfile->putByte(tedf_DESIGNEND);
-   modified = false;
-}
-
-void laydata::tdtdesign::mouseStart(int input_type, std::string name, const CTM trans,
-                                   int4b stepX, int4b stepY, word cols, word rows)
-{
-   if      ( 0  < input_type)  _tmpdata = DEBUG_NEW tdtwire(input_type);
-   else if ( console::op_dbox  == input_type)  _tmpdata = DEBUG_NEW tdtbox();
-   else if ( console::op_dpoly == input_type)  _tmpdata = DEBUG_NEW tdtpoly();
-   else if ( console::op_cbind  == input_type)
-   {
-      assert ("" != name);
-      laydata::refnamepair striter = getcellnamepair(name);
-      CTM eqm;
-      _tmpdata = DEBUG_NEW tdtcellref(striter, eqm);
-   }
-   else if ( console::op_abind  == input_type)
-   {
-      assert ("" != name);
-      assert(0 != cols);assert(0 != rows);assert(0 != stepX);assert(0 != stepY);
-      laydata::refnamepair striter = getcellnamepair(name);
-      CTM eqm;
-      ArrayProperties arrprops(stepX, stepY, cols, rows);
-      _tmpdata = DEBUG_NEW tdtcellaref(striter, eqm, arrprops);
-   }
-   else if ( console::op_tbind == input_type)
-   {
-      assert ("" != name);
-      CTM eqm(trans);
-      eqm.Scale(1/(_UU*OPENGL_FONT_UNIT), 1/(_UU*OPENGL_FONT_UNIT));
-      _tmpdata = DEBUG_NEW tdttext(name, eqm);
-   }
-   else if ( console::op_rotate == input_type)
-   {
-      _tmpctm = trans;
-   }
 }
 
 void laydata::tdtdesign::mousePoint(TP p)
