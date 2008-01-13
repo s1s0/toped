@@ -139,12 +139,12 @@ void laydata::tdtlibrary::recreate_hierarchy()
 {
    if (0 == _libID)
    {
-      clearHierTreeLib();
+      clearHierTree();
    }
    // here - run the hierarchy extraction on orphans only   
    for (laydata::cellList::const_iterator wc = _cells.begin(); 
                                           wc != _cells.end(); wc++) {
-      if (wc->second->orphan()) 
+      if (wc->second && wc->second->orphan()) 
          _hiertree = wc->second->hierout(_hiertree, NULL, &_cells);
    }
 }

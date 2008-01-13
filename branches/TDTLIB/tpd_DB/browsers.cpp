@@ -169,7 +169,7 @@ void browsers::GDSbrowser::DeleteAllItems(void)
 
 void browsers::GDSbrowser::collectChildren(const GDSin::GDSHierTree *root, const wxTreeItemId& lroot) 
 {
-   const GDSin::GDSHierTree* Child= root->GetChild();
+   const GDSin::GDSHierTree* Child= root->GetChild(0);
    wxTreeItemId nroot;
    wxTreeItemId temp;
 
@@ -182,7 +182,7 @@ void browsers::GDSbrowser::collectChildren(const GDSin::GDSHierTree *root, const
 //      SetItemTextColour(nroot,*wxLIGHT_GREY);
       hCellBrowser->SortChildren(lroot);
       collectChildren(Child, nroot);
-      Child = Child->GetBrother();
+      Child = Child->GetBrother(0);
    }
 }
 
@@ -422,16 +422,16 @@ void browsers::TDTbrowser::collectInfo(const wxString libname, const word libID,
          wxString(root->GetItem()->name().c_str(), wxConvUTF8));
       hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
 
-      collectChildren(root, nroot);
+      collectChildren(root, libID, nroot);
       root = root->GetNextRoot(libID);
    }
    hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
    fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
 }
       
-void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, const wxTreeItemId& lroot) 
+void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, word libID, const wxTreeItemId& lroot) 
 {
-   const laydata::TDTHierTree* Child= root->GetChild();
+   const laydata::TDTHierTree* Child= root->GetChild(libID);
    wxTreeItemId nroot;
    wxTreeItemId temp;
    while (Child) 
@@ -451,8 +451,8 @@ void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, con
       nroot = hCellBrowser->AppendItem(lroot, wxString(Child->GetItem()->name().c_str(), wxConvUTF8));
       hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
       hCellBrowser->SortChildren(lroot);
-      collectChildren(Child, nroot);
-      Child = Child->GetBrother();
+      collectChildren(Child, libID, nroot);
+      Child = Child->GetBrother(libID);
    }
 }
 
