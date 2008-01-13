@@ -685,7 +685,7 @@ void tui::TopedFrame::initView() {
    wxAuiNotebook* logpane = DEBUG_NEW wxAuiNotebook(this, ID_WIN_LOG, wxDefaultPosition, wxDefaultSize, //wxAUI_NB_DEFAULT_STYLE |wxNB_RIGHT| wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
 															wxNB_RIGHT|wxNO_BORDER);
 	logpane->SetSize(wxSize(1000, 150));
-	wxAuiSimpleTabArt *docArt = new wxAuiSimpleTabArt;
+	wxAuiSimpleTabArt *docArt = DEBUG_NEW wxAuiSimpleTabArt;
 	logpane->SetArtProvider(docArt);
 
    _cmdlog = DEBUG_NEW console::ted_log(logpane);

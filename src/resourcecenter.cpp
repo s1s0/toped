@@ -297,6 +297,11 @@ tui::ToolBarHandler::ToolBarHandler(int ID, std::string name, int direction)
 
 tui::ToolBarHandler::~ToolBarHandler()
 {
+	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
+	{
+		delete (*it);
+	}
+	_tools.clear();
 }
 
 void tui::ToolBarHandler::OnSize(wxSizeEvent& event)
