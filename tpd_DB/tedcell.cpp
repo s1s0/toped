@@ -420,12 +420,12 @@ laydata::tdtcellref* laydata::tdtcell::getcellover(TP pnt, ctmstack& transtack, 
 
 void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, const TDTHierTree* root) const {
    // We going to write the cells in hierarchical order. Children - first!
-   const laydata::TDTHierTree* Child= root->GetChild();
+   const laydata::TDTHierTree* Child= root->GetChild(0);
    while (Child) {
 //      tedfile->design()->getcellnamepair(Child->GetItem()->name())->second->write(tedfile, Child);
       allcells.find(Child->GetItem()->name())->second->write(tedfile, allcells, Child);
 //      allcells[Child->GetItem()->name()]->write(tedfile, Child);
-      Child = Child->GetBrother();
+      Child = Child->GetBrother(0);
 	}
    // If no more children and the cell has not been written yet
    if (tedfile->checkcellwritten(_name)) return;
@@ -451,11 +451,11 @@ void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
    // We going to write the cells in hierarchical order. Children - first!
    if (recur)
    {
-      const laydata::TDTHierTree* Child= root->GetChild();
+      const laydata::TDTHierTree* Child= root->GetChild(0);
       while (Child)
       {
          allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child, UU, recur);
-         Child = Child->GetBrother();
+         Child = Child->GetBrother(0);
       }
    }
    // If no more children and the cell has not been written yet
@@ -483,11 +483,11 @@ void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawp
       assert( root );
       assert( allcells );
       // We going to write the cells in hierarchical order. Children - first!
-      const laydata::TDTHierTree* Child= root->GetChild();
+      const laydata::TDTHierTree* Child= root->GetChild(0);
       while (Child)
       {
          allcells->find(Child->GetItem()->name())->second->PSwrite(psf, drawprop, allcells, Child);
-         Child = Child->GetBrother();
+         Child = Child->GetBrother(0);
       }
       // If no more children and the cell has not been written yet
       if (psf.checkCellWritten(_name)) return;
@@ -518,8 +518,11 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
    // collecting hierarchical information
    Htree = DEBUG_NEW TDTHierTree(this, parent, Htree);
    nameList::const_iterator wn;
-   for (wn = _children.begin(); wn != _children.end(); wn++) 
-      (*celldefs)[*wn]->hierout(Htree, this, celldefs); // yahoooo!
+   for (wn = _children.begin(); wn != _children.end(); wn++)
+   {
+      if (NULL != (*celldefs)[*wn])
+         (*celldefs)[*wn]->hierout(Htree, this, celldefs); // yahoooo!
+   }
    return  Htree;
 }   
 
@@ -1688,7 +1691,11 @@ void laydata::tdtcell::collect_usedlays(const tdtlibrary* ATDB, bool recursive, 
    // first call recursively the method on all children cells
    if (recursive)
       for (nameList::const_iterator CC = _children.begin(); CC != _children.end(); CC++)
-         ATDB->getcellnamepair(*CC)->second->collect_usedlays(ATDB, recursive, laylist);
+      {
+         laydata::tdtcell* curcel = ATDB->getcellnamepair(*CC)->second;
+         if (NULL != curcel)
+            ATDB->getcellnamepair(*CC)->second->collect_usedlays(ATDB, recursive, laylist);
+      }
    // then update with the layers used in this cell
    for(layerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       laylist.push_back(CL->first);

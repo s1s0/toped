@@ -174,8 +174,8 @@ namespace browsers
       void              initialize();
       wxString          selectedCellname() const;
    protected:
-      void              collectChildren(const laydata::TDTHierTree *root, 
-                                                 const wxTreeItemId& lroot);
+      void              collectChildren(const laydata::TDTHierTree *, word , 
+                                                 const wxTreeItemId& );
    private:
       wxTreeItemId      top_structure;
       wxTreeItemId      active_structure;
