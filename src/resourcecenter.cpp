@@ -248,14 +248,14 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 							const std::string &hotKey, callbackMethod cbMethod)
 							:_ID(toolID), /*_hotKey(hotKey),*/_method(cbMethod)
 {
-	_bitmap.LoadFile(bitmapFileName, wxBITMAP_TYPE_BMP);//,wxBITMAP_TYPE_XPM);
+	_bitmap.LoadFile(wxString(bitmapFileName.c_str(), wxConvUTF8), wxBITMAP_TYPE_BMP);//,wxBITMAP_TYPE_XPM);
 
 }
 
 tui::ToolItem::ToolItem(int toolID, const std::string &name,
 							const wxBitmap &bitmap,
 							const std::string &hotKey, callbackMethod cbMethod)
-							:_ID(toolID), /*_hotKey(hotKey),*/_method(cbMethod),_bitmap(bitmap)
+							:_ID(toolID), /*_hotKey(hotKey),*/_bitmap(bitmap), _method(cbMethod)
 {
 	_bitmap = bitmap;
 }
@@ -272,7 +272,7 @@ END_EVENT_TABLE()
 tui::ToolBarHandler::ToolBarHandler(int ID, std::string name, int direction)
 		:wxToolBar(Toped->getFrame(), ID, wxDefaultPosition,
 		wxSize(1000, 30), wxTB_NODIVIDER|wxTB_FLAT ),
-		_ID(ID), _name(name), _dockDirection(direction)
+		_name(name),_ID(ID), _dockDirection(direction)
 {
 	wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(this);
 
@@ -291,7 +291,7 @@ tui::ToolBarHandler::ToolBarHandler(int ID, std::string name, int direction)
 
 	Realize();
 	Toped->getAuiManager()->AddPane(this, paneInfo.ToolbarPane().
-		Name(wxT(_name)).Direction(_dockDirection).Floatable(false));
+		Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Floatable(false));
 	Toped->getAuiManager()->Update();
 }
 
@@ -366,13 +366,13 @@ void	tui::ToolBarHandler::addTool(ToolItem *tool)
 	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
 	{
 		Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
-		Name(wxT(_name)).Top().Gripper().Floatable(false).
+		Name(wxString(_name.c_str(), wxConvUTF8)).Top().Gripper().Floatable(false).
 		TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true));
 	}
 	else
 	{
 		Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
-		Name(wxT(_name)).Top().Gripper().Floatable(false).
+		Name(wxString(_name.c_str(), wxConvUTF8)).Top().Gripper().Floatable(false).
 		TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false));
 	}
 
