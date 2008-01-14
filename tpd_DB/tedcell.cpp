@@ -521,7 +521,11 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
    for (wn = _children.begin(); wn != _children.end(); wn++)
    {
       if (NULL != (*celldefs)[*wn])
-         (*celldefs)[*wn]->hierout(Htree, this, celldefs); // yahoooo!
+         (*celldefs)[*wn]->hierout(Htree, this, celldefs);
+      else 
+      {
+         //@TODO Default cell definition!
+      }
    }
    return  Htree;
 }   
