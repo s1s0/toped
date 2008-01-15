@@ -603,10 +603,10 @@ void tui::TopedFrame::initMenuBar() {
 void tui::TopedFrame::initToolBars() 
 {
 	//_resourceCenter->appendTool("main", "new", "D:\\new.bmp","", &tui::TopedFrame::OnCellNew);
-	_resourceCenter->appendTool("main", "new", wxBitmap(new_xpm),"", &tui::TopedFrame::OnCellNew);
-	_resourceCenter->appendTool("main", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen);
+	_resourceCenter->appendTool("main", "new", wxBitmap(new_xpm),"", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
 
-	_resourceCenter->appendTool("secondary", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen);
+	_resourceCenter->appendTool("secondary", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_LEFT);
 
 /*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
    X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 

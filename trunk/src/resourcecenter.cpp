@@ -366,13 +366,13 @@ void	tui::ToolBarHandler::addTool(ToolItem *tool)
 	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
 	{
 		Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
-		Name(wxString(_name.c_str(), wxConvUTF8)).Top().Gripper().Floatable(false).
+		Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(true).Floatable(false).
 		TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true));
 	}
 	else
 	{
 		Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
-		Name(wxString(_name.c_str(), wxConvUTF8)).Top().Gripper().Floatable(false).
+		Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(false).Floatable(false).
 		TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false));
 	}
 
@@ -619,7 +619,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
 
 void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem, 
 												 const std::string &bitmapFileName,
-												 const std::string &hotKey, callbackMethod cbMethod)
+												 const std::string &hotKey, callbackMethod cbMethod, int direction)
 {
 	int ID; 
 	std::string str = toolBarName;
@@ -638,7 +638,7 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 	{
 		ID = TDUMMY_TOOL + _toolCount;
 		//Create new toolbar
-		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, wxAUI_DOCK_TOP);
+		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, direction);
 		_toolCount++;
 
 		ID = TDUMMY_TOOL + _toolCount;
@@ -650,7 +650,7 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 }
 void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem,
 							const wxBitmap &bitmap,
-							const std::string &hotKey, callbackMethod cbMethod)
+							const std::string &hotKey, callbackMethod cbMethod, int direction)
 {
 	int ID; 
 	ToolBarHandler* toolBar;
@@ -677,7 +677,7 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 	{
 		ID = TDUMMY_TOOL + _toolCount;
 		//Create new toolbar
-		toolBar = DEBUG_NEW ToolBarHandler(ID, str, wxAUI_DOCK_TOP);
+		toolBar = DEBUG_NEW ToolBarHandler(ID, str, direction);
 		_toolCount++;
 		_toolBars.push_back(toolBar);
 	}
