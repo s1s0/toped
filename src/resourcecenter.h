@@ -199,10 +199,10 @@ namespace tui
 
 		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
 							const std::string &bitmapFileName,
-							const std::string &hotKey, callbackMethod cbMethod);
+							const std::string &hotKey, callbackMethod cbMethod, int direction);
 		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
 							const wxBitmap &bitmap,
-							const std::string &hotKey, callbackMethod cbMethod);
+							const std::string &hotKey, callbackMethod cbMethod, int direction);
    private:
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
