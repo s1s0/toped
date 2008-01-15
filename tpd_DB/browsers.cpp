@@ -674,13 +674,13 @@ browsers::TDTbrowser::~TDTbrowser()
 }
 
 //==============================================================================
-BEGIN_EVENT_TABLE(browsers::browserTAB, wxNotebook)
+BEGIN_EVENT_TABLE(browsers::browserTAB, wxAuiNotebook)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::browserTAB::OnCommand)
 END_EVENT_TABLE()
 //==============================================================================
 browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const 
    wxPoint& pos, const wxSize& size, long style) : 
-                                 wxNotebook(parent, id, pos, size, style) 
+                                 wxAuiNotebook(parent, id, pos, size, style) 
 {
    _TDTstruct = DEBUG_NEW TDTbrowser(this, tui::ID_TPD_CELLTREE);
    AddPage(_TDTstruct, wxT("Cells"));

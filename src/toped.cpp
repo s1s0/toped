@@ -40,6 +40,11 @@
 #include "../ui/green_lamp.xpm"
 #include "../ui/blue_lamp.xpm"
 #include "../ui/toped32x32.xpm"
+
+//icons for toolbars
+#include "../ui/new.xpm"
+#include "../ui/open.xpm"
+
 #ifndef WIN32
    #include "../ui/toped16x16.xpm"
 #endif
@@ -61,8 +66,11 @@ extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
 
-tui::CanvasStatus::CanvasStatus(wxWindow* parent) : wxPanel( parent, -1,
-                                          wxDefaultPosition, wxDefaultSize) {
+tui::CanvasStatus::CanvasStatus(wxWindow* parent,
+										  wxWindowID id , const wxPoint& pos ,
+										  const wxSize& size , long style)
+											: wxPanel( parent, -1, pos, size, style) 
+{
    wxFont fontX = GetFont();
    fontX.SetWeight(wxBOLD);
    SetFont(fontX);
@@ -265,11 +273,12 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
   
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
-   EVT_MENU_RANGE(TMDUMMY, TMDUMMY+500 , tui::TopedFrame::OnMenu  )
+   EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
+	EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
    EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
    EVT_CLOSE(tui::TopedFrame::OnClose)
    EVT_SIZE( TopedFrame::OnSize )
-   EVT_SASH_DRAGGED_RANGE(ID_WIN_BROWSERS, ID_WIN_CANVAS, tui::TopedFrame::OnSashDrag)
+   //EVT_SASH_DRAGGED_RANGE(ID_WIN_BROWSERS, ID_WIN_CANVAS, tui::TopedFrame::OnSashDrag)
    EVT_TECUSTOM_COMMAND(wxEVT_TPDSTATUS  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_SETINGSMENU, wxID_ANY, tui::TopedFrame::OnUpdateSettingsMenu)
@@ -290,13 +299,13 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initView();
    wxCommandEvent dummy;
    OnzoomEmpty(dummy);
-//   initToolBar();
+  
 //   CreateStatusBar();
    _toped_status = DEBUG_NEW TopedStatus(this);
    SetStatusBar(_toped_status);
    _resourceCenter = DEBUG_NEW ResourceCenter;
    SetStatusText( wxT( "Toped loaded..." ) );
-   //Put initMenuBar() at the end because in Windows it crashes
+	//Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
 	wxToolTip::Enable(true);
 	wxToolTip::SetDelay(3000);
@@ -335,11 +344,12 @@ tui::TopedFrame::~TopedFrame() {
 //   delete _cmdline;
 //   delete _GLstatus;
 //   delete _browsers;
-   delete mS_browsers;
-   delete mS_GLstatus;
-   delete mS_command;
-   delete mS_log;
-   delete mS_canvas;
+	_winManager.UnInit();
+   //delete mS_browsers;
+   //delete mS_GLstatus;
+   //delete mS_command;
+   //delete mS_log;
+   //delete mS_canvas;
    delete _resourceCenter;
 //   delete _toped_status;
 }
@@ -589,9 +599,16 @@ void tui::TopedFrame::initMenuBar() {
    menuBar->Insert(menuBar->GetMenuCount()-1,settingsMenu  , wxT("Se&ttings"));
   
 }
-/*
-void TopedFrame::initToolBar() {
-   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
+
+void tui::TopedFrame::initToolBars() 
+{
+	//_resourceCenter->appendTool("main", "new", "D:\\new.bmp","", &tui::TopedFrame::OnCellNew);
+	_resourceCenter->appendTool("main", "new", wxBitmap(new_xpm),"", &tui::TopedFrame::OnCellNew);
+	_resourceCenter->appendTool("main", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen);
+
+	_resourceCenter->appendTool("secondary", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen);
+
+/*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
    X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
                               wxSize(100,32), wxST_NO_AUTORESIZE);
    Y_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
@@ -612,54 +629,69 @@ void TopedFrame::initToolBar() {
    positionBar->AddSeparator();
    positionBar->AddControl(Y_pos);
    positionBar->AddSeparator();
-   positionBar->Realize();
+   positionBar->Realize();*/
 }
-*/
+
 void tui::TopedFrame::initView() {
-   // The browsers window
-   mS_browsers = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_BROWSERS,
+	_winManager.SetManagedWindow(this);
+	
+	/*mS_browsers = DEBUG_NEW wxControl(this, ID_WIN_BROWSERS,
                                         wxDefaultPosition, wxDefaultSize,
-                               wxSW_3D | wxCLIP_CHILDREN);
-   mS_browsers->SetDefaultSize(wxSize(180, 1000));
-   mS_browsers->SetOrientation(wxLAYOUT_VERTICAL);
-   mS_browsers->SetAlignment(wxLAYOUT_LEFT);
-   mS_browsers->SetSashVisible(wxSASH_RIGHT, TRUE);
-   _browsers = DEBUG_NEW browsers::browserTAB(mS_browsers);
+                               wxSW_3D | wxCLIP_CHILDREN);*/
+   //mS_browsers->SetSize(wxSize(180, 1000));
+   //mS_browsers->SetOrientation(wxLAYOUT_VERTICAL);
+   //mS_browsers->SetAlignment(wxLAYOUT_LEFT);
+   //mS_browsers->SetSashVisible(wxSASH_RIGHT, TRUE);
+   _browsers = DEBUG_NEW browsers::browserTAB(this,ID_WIN_BROWSERS,
+                                        wxDefaultPosition, wxDefaultSize,
+                               wxCLIP_CHILDREN);
+	_browsers->SetSize(wxSize(180, 1000));
+	_browsers->SetArtProvider(new wxAuiSimpleTabArt);
    //---------------------------------------------------------------------------- 
    // The Layoutcanvas toolbar window
    //---------------------------------------------------------------------------- 
-   mS_GLstatus = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_GLSTATUS,
+   /*mS_GLstatus = DEBUG_NEW wxWindow(this, ID_WIN_GLSTATUS	,
+                                        wxDefaultPosition, wxDefaultSize,
+                             wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);*/
+   //mS_GLstatus->SetSize(wxSize(1000, 30));
+   /*mS_GLstatus->SetOrientation(wxLAYOUT_HORIZONTAL);
+   mS_GLstatus->SetAlignment(wxLAYOUT_TOP);
+   mS_GLstatus->SetBackgroundColour(wxColour(255, 0, 0));*/
+   _GLstatus = DEBUG_NEW CanvasStatus(this, ID_WIN_GLSTATUS	,
                                         wxDefaultPosition, wxDefaultSize,
                              wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-   mS_GLstatus->SetDefaultSize(wxSize(1000, 30));
-   mS_GLstatus->SetOrientation(wxLAYOUT_HORIZONTAL);
-   mS_GLstatus->SetAlignment(wxLAYOUT_TOP);
-   mS_GLstatus->SetBackgroundColour(wxColour(255, 0, 0));
-   _GLstatus = DEBUG_NEW CanvasStatus(mS_GLstatus);
+	_GLstatus->SetSize(wxSize(1000, 30));
+
    //----------------------------------------------------------------------------
    // The command window
    //----------------------------------------------------------------------------
-   mS_command = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_COMMAND,
-                               wxDefaultPosition, wxDefaultSize,
-                               wxSW_3D | wxCLIP_CHILDREN);
-   mS_command->SetDefaultSize(wxSize(1000, 30));
+   //mS_command = DEBUG_NEW wxWindow(this, ID_WIN_COMMAND,
+   //                            wxDefaultPosition, wxDefaultSize,
+   //                            wxSW_3D | wxCLIP_CHILDREN);
+   /*mS_command->SetDefaultSize(wxSize(1000, 30));
    mS_command->SetOrientation(wxLAYOUT_HORIZONTAL);
    mS_command->SetAlignment(wxLAYOUT_BOTTOM);
-   mS_command->SetSashVisible(wxSASH_TOP, TRUE);
+   mS_command->SetSashVisible(wxSASH_TOP, TRUE);*/
    // postponed initialization until the canvas window is initialized
 //   _cmdline = DEBUG_NEW console::ted_cmd(mS_command);
+
    //----------------------------------------------------------------------------
    //the log window
    //----------------------------------------------------------------------------
-   mS_log = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_LOG,
+   /*mS_log = DEBUG_NEW wxWindow(this, ID_WIN_LOG,
                                wxDefaultPosition, wxDefaultSize,
-                               wxSW_3D | wxCLIP_CHILDREN);
-   mS_log->SetDefaultSize(wxSize(1000, 150));
+                               wxSW_3D | wxCLIP_CHILDREN);*/
+   /*mS_log->SetDefaultSize(wxSize(1000, 150));
    mS_log->SetOrientation(wxLAYOUT_HORIZONTAL);
    mS_log->SetAlignment(wxLAYOUT_BOTTOM);
-   mS_log->SetSashVisible(wxSASH_TOP, TRUE);
+   mS_log->SetSashVisible(wxSASH_TOP, TRUE);*/
    //
-   wxNotebook* logpane = DEBUG_NEW wxNotebook(mS_log, -1, wxDefaultPosition, wxDefaultSize, wxNB_RIGHT);
+   wxAuiNotebook* logpane = DEBUG_NEW wxAuiNotebook(this, ID_WIN_LOG, wxDefaultPosition, wxDefaultSize, //wxAUI_NB_DEFAULT_STYLE |wxNB_RIGHT| wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
+															wxNB_RIGHT|wxNO_BORDER);
+	logpane->SetSize(wxSize(1000, 150));
+	wxAuiSimpleTabArt *docArt = DEBUG_NEW wxAuiSimpleTabArt;
+	logpane->SetArtProvider(docArt);
+
    _cmdlog = DEBUG_NEW console::ted_log(logpane);
    logpane->AddPage(_cmdlog, wxT("Log"));
    _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane);
@@ -668,25 +700,31 @@ void tui::TopedFrame::initView() {
    //----------------------------------------------------------------------------
    // the openGL window
    //---------------------------------------------------------------------------- 
-   mS_canvas = DEBUG_NEW wxSashLayoutWindow(this, ID_WIN_CANVAS,
-                               wxDefaultPosition, wxDefaultSize,
-                               wxSW_3D | wxCLIP_CHILDREN);
-   //the canvas
-   int gl_attrib[20] = { WX_GL_RGBA             ,
-                         WX_GL_MIN_RED          , 2,
-                         WX_GL_MIN_GREEN        , 2,
-                         WX_GL_MIN_BLUE         , 2,
-                         WX_GL_MIN_ALPHA        , 2,
-                         WX_GL_MIN_ACCUM_RED    , 2,
-                         WX_GL_MIN_ACCUM_GREEN  , 2,
-                         WX_GL_MIN_ACCUM_BLUE   , 2,
-                         WX_GL_MIN_ACCUM_ALPHA  , 2,
-//                         WX_GL_DEPTH_SIZE    , 1,
-                         WX_GL_DOUBLEBUFFER     ,
-                         GL_NONE };
-   _laycanvas = DEBUG_NEW LayoutCanvas(mS_canvas, gl_attrib);
-   _cmdline = DEBUG_NEW console::ted_cmd(mS_command, _laycanvas);
+   mS_canvas = DEBUG_NEW WinCanvas(this, ID_WIN_CANVAS,
+                               wxDefaultPosition, wxSize(1000,1000),
+										 wxAUI_NB_DEFAULT_STYLE|wxDOUBLE_BORDER|wxSW_3D | wxCLIP_CHILDREN);
+
+
+
+	_cmdline = DEBUG_NEW console::ted_cmd(this, mS_canvas->canvas());
+	_cmdline->SetSize(wxSize(wxSize(1000, 30)));
+	_cmdline->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
+
    _browsers->set_tellParser( _cmdline ) ;
+
+	_winManager.AddPane(_browsers, wxAuiPaneInfo().Left().BestSize(wxSize(180,1000)).Layer(1).
+												Floatable(false).CloseButton(false).CaptionVisible(false));
+	_winManager.AddPane(mS_canvas, wxAuiPaneInfo().CentrePane().MaximizeButton(false).
+												Floatable(true).CloseButton(false));
+	_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).//Fixed().
+												CloseButton(false).CaptionVisible(false).BestSize(wxSize(1000,30)));
+	_winManager.AddPane(logpane, wxAuiPaneInfo().Bottom().Row(1).
+												Floatable(false).BestSize(wxSize(1000, 150)).
+												CloseButton(false).CaptionVisible(false));
+	_winManager.AddPane(_cmdline, wxAuiPaneInfo().Bottom().Row(0).BestSize(wxSize(1000,30)).
+												Floatable(false).CloseButton(false).CaptionVisible(false));
+
+	_winManager.Update();
 }
 
 
@@ -707,7 +745,7 @@ void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
 }
 
 
-void tui::TopedFrame::OnSashDrag(wxSashEvent& event) {
+/*void tui::TopedFrame::OnSashDrag(wxSashEvent& event) {
    if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
       return;
    switch (event.GetId()) {
@@ -723,12 +761,13 @@ void tui::TopedFrame::OnSashDrag(wxSashEvent& event) {
    }
    wxLayoutAlgorithm layout;
    layout.LayoutFrame(this, mS_canvas);
-}
+}*/
 
-void tui::TopedFrame::OnSize(wxSizeEvent& WXUNUSED(event))
+void tui::TopedFrame::OnSize(wxSizeEvent& event)
 {
-   wxLayoutAlgorithm layout;
-   layout.LayoutFrame(this, mS_canvas);
+	event.Skip();
+   //wxLayoutAlgorithm layout;
+   //layout.LayoutFrame(this, mS_canvas);
 }
 
 void tui::TopedFrame::OnCanvasStatus(wxCommandEvent& evt)
@@ -907,7 +946,7 @@ void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent&)
 {
-   wxImage image = _laycanvas->snapshot();
+	wxImage image = mS_canvas->canvas()->snapshot();
 
 }
 
@@ -1487,43 +1526,43 @@ void  tui::TopedFrame::OnMouseAccel(wxCommandEvent& evt) {
 void tui::TopedFrame::OnzoomIn(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_IN);
-   wxPostEvent(_laycanvas, eventZOOM);
+	wxPostEvent(mS_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnzoomOut(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_OUT);
-   wxPostEvent(_laycanvas, eventZOOM);
+   wxPostEvent(mS_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnzoomEmpty(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
-   wxPostEvent(_laycanvas, eventZOOM);
+   wxPostEvent(mS_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnpanLeft(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_LEFT);
-   wxPostEvent(_laycanvas, eventZOOM);
+   wxPostEvent(mS_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnpanRight(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_RIGHT);
-   wxPostEvent(_laycanvas, eventZOOM);
+   wxPostEvent(mS_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnpanUp(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_UP);
-   wxPostEvent(_laycanvas, eventZOOM);
+   wxPostEvent(mS_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnpanDown(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_DOWN);
-   wxPostEvent(_laycanvas, eventZOOM);
+   wxPostEvent(mS_canvas->canvas(), eventZOOM);
 }
 
 bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)

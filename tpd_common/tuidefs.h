@@ -44,7 +44,10 @@ namespace tui
       ID_TPD_CELLTREE_F   ,
       ID_GDS_CELLTREE     ,
       ID_GDS_CELLTREE_H   ,
-      ID_GDS_CELLTREE_F
+      ID_GDS_CELLTREE_F   ,
+		//Warning!!! Do not use IDs between ID_DUMMY_WIN and ID_DUMMY_WIN_END
+		ID_DUMMY_WIN = 500  ,
+		ID_DUMMY_WIN_END = 600
    } WX_WINDOW_IDS_TYPE;
 
    typedef enum  {
@@ -139,6 +142,7 @@ namespace tui
       TBSTAT_ABORT        ,
       //Warning!!! Do not use IDs between TMDUMMY and TMDUMMY_END
       TMDUMMY = 500       ,
+		TDUMMY_TOOL = 2000  ,
       TMDUMMY_LAYER = 10000,
       TMDUMMY_END = 11000
    } TOPED_MENUID;
