@@ -31,6 +31,7 @@
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 #include <wx/laywin.h>
+#include <wx/aui/aui.h>
 #include "../tpd_parser/ted_prompt.h"
 #include "layoutcanvas.h"
 #include "tui.h"
@@ -40,7 +41,10 @@ namespace tui {
    //-----------------------------------------------------------------------------
    class CanvasStatus : public wxPanel {
    public:
-                           CanvasStatus(wxWindow*);
+                           CanvasStatus(wxWindow*,wxWindowID id = wxID_ANY, 
+										  const wxPoint& pos = wxDefaultPosition,
+										  const wxSize& size = wxDefaultSize, 
+										  long style = wxTAB_TRAVERSAL);
       virtual             ~CanvasStatus();
       void                 setXpos(wxString);
       void                 setYpos(wxString);
@@ -88,23 +92,26 @@ namespace tui {
 //      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
       console::ted_log*       logwin()   const {return _cmdlog;}
-      LayoutCanvas*           view()     const {return _laycanvas;}
+		LayoutCanvas*           view()     const {return mS_canvas->canvas();}
       console::ted_cmd*       cmdline()  const {return _cmdline;}
       browsers::browserTAB*   browsers() const {return _browsers;}
       console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
+		wxWindow*					getFrame()			{return this;}
+		wxAuiManager*				getAuiManager() {return &_winManager;}
+		void                    initToolBars();
    private:
       void                    initMenuBar();
-      void                    initToolBar();
       void                    initView();
       bool                    checkFileOverwriting(const wxString& fileName);
       console::ted_log*       _cmdlog;       // log window
       console::TELLFuncList*  _cmdbrowser;
       console::ted_cmd*       _cmdline;      // tell command input window
-      LayoutCanvas*           _laycanvas;
+      //LayoutCanvas*           _laycanvas;
       CanvasStatus*           _GLstatus;
       TopedStatus*            _toped_status;
       browsers::browserTAB*   _browsers;  // TDT/GDS/layer browsers
       ResourceCenter*         _resourceCenter;
+		wxAuiManager				_winManager;
       //Menu stuff
       wxMenuBar*              menuBar;
       wxMenu*                 fileMenu;
@@ -119,11 +126,11 @@ namespace tui {
       wxMenu*                 helpMenu;
 
       // Sash layout stuff
-      wxSashLayoutWindow*     mS_browsers;
-      wxSashLayoutWindow*     mS_GLstatus;
-      wxSashLayoutWindow*     mS_command;
-      wxSashLayoutWindow*     mS_log;
-      wxSashLayoutWindow*     mS_canvas;
+      //wxControl*    mS_browsers;
+      wxWindow*     mS_GLstatus;
+      wxWindow*     mS_command;
+      wxWindow*     mS_log;
+      WinCanvas*    mS_canvas;
       // Menu 
       void   OnNewDesign(wxCommandEvent&);
       void     OnTDTRead(wxCommandEvent&);

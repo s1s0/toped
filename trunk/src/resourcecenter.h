@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 #include <wx/wx.h>
+#include <wx/laywin.h>
+
 #include "../tpd_bidfunc/tpdf_common.h"
 
 /*WARNING!!!
@@ -44,11 +46,17 @@ namespace tui
    //forward declarations
    class TopedFrame;
    class MenuItemHandler;
+	class ToolBarHandler;
+	class ToolItem;
 
    typedef void (TopedFrame::*callbackMethod)(wxCommandEvent&);
    typedef std::vector <MenuItemHandler*> itemList;
+	typedef std::vector <ToolBarHandler*> toolBarList;
+	typedef std::vector <ToolItem*> toolList;
 
-
+//=================================
+//		Everything about menu
+//=================================
    class MenuItemHandler
    {
    public:
@@ -115,7 +123,64 @@ namespace tui
    };
 
 
+//=================================
+//		Everything about toolbar
+//=================================
+	class ToolItem
+	{
+	public:
+		ToolItem(int toolID, const std::string &name,
+							const std::string &bitmapFileName,
+							const std::string &hotKey, callbackMethod cbMethod);
+		ToolItem(int toolID, const std::string &name,
+							const wxBitmap &bitmap,
+							const std::string &hotKey, callbackMethod cbMethod);
+		//std::string    hotKey(void)   const    { return _hotKey;};
+      std::string    function(void) const    { return _function;};
+      //std::string    helpString(void) const  { return _helpString;};
+      callbackMethod method(void)   const    { return _method;};
 
+		virtual ~ToolItem();
+		wxBitmap	bitmap(void)	const {return _bitmap;};
+		int		ID(void)			const {return _ID;};
+	private:
+		int		_ID;
+		wxBitmap	_bitmap;
+		//std::string _hotKey;
+      std::string _function;
+      //std::string _helpString;
+      callbackMethod _method;
+
+
+	};
+
+	class ToolBarHandler:public wxToolBar
+	{
+	public:
+		ToolBarHandler(int ID, std::string name, int direction);
+		virtual ~ToolBarHandler();
+
+		void				addTool(ToolItem *tool);
+		void				execute(int ID1);
+
+		std::string		name() const {return _name;};
+	private:
+		void				OnSize(wxSizeEvent& event);
+		void				OnPaint(wxPaintEvent&event);
+		std::string					_name;
+		int							_ID;
+		//wxToolBar*					_toolBar;
+		toolList						_tools;
+		int							_dockDirection;
+		DECLARE_EVENT_TABLE();
+	};
+
+
+//=================================
+//		Resourcecenter is resposible 
+//		for handle of all ui action
+//		currently only menu and toolbar
+//=================================
    class ResourceCenter
    {
    public:
@@ -131,13 +196,22 @@ namespace tui
       void appendMenuSeparator(const std::string &menuItem);
       void executeMenu(int ID);
       bool checkExistence(const tui::MenuItemHandler & item);
+
+		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
+							const std::string &bitmapFileName,
+							const std::string &hotKey, callbackMethod cbMethod);
+		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
+							const wxBitmap &bitmap,
+							const std::string &hotKey, callbackMethod cbMethod);
    private:
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
 
 
-      itemList _menus;
-      int _menuCount; //quantity of menu items;
+      itemList				_menus;
+		toolBarList			_toolBars;
+      int					_menuCount; //number of menu items
+		int					_toolCount; //number of tool items
       
 
    };
