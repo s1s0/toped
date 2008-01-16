@@ -76,22 +76,22 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent,
    SetFont(fontX);
    _abort = DEBUG_NEW wxButton(this, TBSTAT_ABORT, wxT("Abort"));
    _abort->Disable();
-   SetBackgroundColour(wxColour(wxT("BLACK")));
-   SetForegroundColour(wxColour(wxT("CYAN")));
-   X_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
+   SetBackgroundColour(wxColour(wxT("LIGHT_GRAY")));
+   SetForegroundColour(wxColour(wxT("BLACK")));
+   X_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition,wxSize(80,13),// wxDefaultSize,
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   Y_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,20),
+	Y_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,13),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dX = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(80,20),
+   _dX = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(80,13),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dY = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(100,20),
+   _dY = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(100,13),
                                                    wxST_NO_AUTORESIZE/* | wxALIGN_RIGHT*/);
    
-   _selected = DEBUG_NEW wxStaticText(this, -1, wxT("0"), wxDefaultPosition, wxSize(40,20),
+   _selected = DEBUG_NEW wxStaticText(this, -1, wxT("0"), wxDefaultPosition, wxSize(40,13),
                                                    wxST_NO_AUTORESIZE | wxALIGN_LEFT);
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    thesizer->Add(_abort, 0, wxALL | wxALIGN_CENTER, 3);
-   thesizer->Add(10,0,1);
+   thesizer->Add(30,0,0);
    thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("Selected: ")), 0, wxALIGN_CENTER, 3 );
    thesizer->Add(_selected, 0, wxALIGN_CENTER, 3 );
 //   thesizer->Add(10,0,1);  
@@ -602,12 +602,26 @@ void tui::TopedFrame::initMenuBar() {
 
 void tui::TopedFrame::initToolBars() 
 {
-	//_resourceCenter->appendTool("main", "new", "D:\\new.bmp","", &tui::TopedFrame::OnCellNew);
 	_resourceCenter->appendTool("main", "new", wxBitmap(new_xpm),"", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
 	_resourceCenter->appendTool("main", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
 
 	_resourceCenter->appendTool("secondary", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_LEFT);
 
+	_status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
+
+	_GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS	,
+														wxDefaultPosition, wxDefaultSize,
+														wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+	_GLstatus->SetSize(wxSize(650, 30));
+
+	_status->AddControl((wxControl*)_GLstatus);
+	_status->Realize();
+		
+	getAuiManager()->AddPane(_status, wxAuiPaneInfo().ToolbarPane().
+									Name(wxString("Status", wxConvUTF8)).Top().Gripper().GripperTop(false).Floatable(false).
+									TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false));
+
+	getAuiManager()->Update();
 /*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
    X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
                               wxSize(100,32), wxST_NO_AUTORESIZE);
@@ -657,10 +671,10 @@ void tui::TopedFrame::initView() {
    /*mS_GLstatus->SetOrientation(wxLAYOUT_HORIZONTAL);
    mS_GLstatus->SetAlignment(wxLAYOUT_TOP);
    mS_GLstatus->SetBackgroundColour(wxColour(255, 0, 0));*/
-   _GLstatus = DEBUG_NEW CanvasStatus(this, ID_WIN_GLSTATUS	,
+ /*  _GLstatus = DEBUG_NEW CanvasStatus(this, ID_WIN_GLSTATUS	,
                                         wxDefaultPosition, wxDefaultSize,
                              wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-	_GLstatus->SetSize(wxSize(1000, 30));
+	_GLstatus->SetSize(wxSize(1000, 30));*/
 
    //----------------------------------------------------------------------------
    // The command window
@@ -716,8 +730,8 @@ void tui::TopedFrame::initView() {
 												Floatable(false).CloseButton(false).CaptionVisible(false));
 	_winManager.AddPane(mS_canvas, wxAuiPaneInfo().CentrePane().MaximizeButton(false).
 												Floatable(true).CloseButton(false));
-	_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).//Fixed().
-												CloseButton(false).CaptionVisible(false).BestSize(wxSize(1000,30)));
+	//_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).//Fixed().
+	//											CloseButton(false).CaptionVisible(false).BestSize(wxSize(1000,30)));
 	_winManager.AddPane(logpane, wxAuiPaneInfo().Bottom().Row(1).
 												Floatable(false).BestSize(wxSize(1000, 150)).
 												CloseButton(false).CaptionVisible(false));

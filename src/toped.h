@@ -130,7 +130,8 @@ namespace tui {
       wxWindow*     mS_GLstatus;
       wxWindow*     mS_command;
       wxWindow*     mS_log;
-      WinCanvas*    mS_canvas;
+		WinCanvas*    mS_canvas;
+		wxToolBar*	  _status;
       // Menu 
       void   OnNewDesign(wxCommandEvent&);
       void     OnTDTRead(wxCommandEvent&);
