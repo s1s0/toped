@@ -207,13 +207,35 @@ laydata::editobject::~editobject()
 }
 
 //-----------------------------------------------------------------------------
+// class tdtdefcell
+//-----------------------------------------------------------------------------
+void laydata::tdtdefcell::openGL_draw(layprop::DrawProperties&,
+                                                          bool active) const
+{
+}
+
+void laydata::tdtdefcell::tmp_draw(const layprop::DrawProperties&, ctmqueue&,
+                                                          bool active) const
+{
+}
+
+void laydata::tdtdefcell::write(TEDfile* const, const cellList&, const TDTHierTree*) const
+{
+}
+
+void laydata::tdtdefcell::PSwrite(PSFile&, const layprop::DrawProperties&,
+                                   const cellList*, const TDTHierTree*) const
+{
+}
+
+//-----------------------------------------------------------------------------
 // class tdtcell
 //-----------------------------------------------------------------------------
-laydata::tdtcell::tdtcell(std::string name) : 
-   _name(name), _libID(0), _orphan(true) {}
+laydata::tdtcell::tdtcell(std::string name) : tdtdefcell(name),
+   _libID(0), _orphan(true) {}
 
 laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, word lib) : 
-   _name(name), _libID(lib), _orphan(true) 
+   tdtdefcell(name), _libID(lib), _orphan(true)
 {
    byte recordtype;
    word  layno;
@@ -524,7 +546,7 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
          (*celldefs)[*wn]->hierout(Htree, this, celldefs);
       else 
       {
-         //@TODO Default cell definition!
+         //@TODO Hang a default cell definition here!
       }
    }
    return  Htree;
