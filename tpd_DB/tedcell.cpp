@@ -207,35 +207,13 @@ laydata::editobject::~editobject()
 }
 
 //-----------------------------------------------------------------------------
-// class tdtdefcell
-//-----------------------------------------------------------------------------
-void laydata::tdtdefcell::openGL_draw(layprop::DrawProperties&,
-                                                          bool active) const
-{
-}
-
-void laydata::tdtdefcell::tmp_draw(const layprop::DrawProperties&, ctmqueue&,
-                                                          bool active) const
-{
-}
-
-void laydata::tdtdefcell::write(TEDfile* const, const cellList&, const TDTHierTree*) const
-{
-}
-
-void laydata::tdtdefcell::PSwrite(PSFile&, const layprop::DrawProperties&,
-                                   const cellList*, const TDTHierTree*) const
-{
-}
-
-//-----------------------------------------------------------------------------
 // class tdtcell
 //-----------------------------------------------------------------------------
-laydata::tdtcell::tdtcell(std::string name) : tdtdefcell(name),
-   _libID(0), _orphan(true) {}
+laydata::tdtcell::tdtcell(std::string name) : 
+   _name(name), _libID(0), _orphan(true) {}
 
 laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, word lib) : 
-   tdtdefcell(name), _libID(lib), _orphan(true)
+   _name(name), _libID(lib), _orphan(true) 
 {
    byte recordtype;
    word  layno;
@@ -546,7 +524,9 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
          (*celldefs)[*wn]->hierout(Htree, this, celldefs);
       else 
       {
-         //@TODO Hang a default cell definition here!
+         //@TODO Default cell definition!
+         int boza = 1;
+         boza++;
       }
    }
    return  Htree;
@@ -1613,11 +1593,14 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB) {
 		   diff = std::mismatch(children_upd->begin(), children_upd->end(), _children.begin());
          if (diff.second != _children.end()) {
             childref = ATDB->checkcell(*(diff.second));
-            // remove it from the hierarchy
-            childref->_orphan = ATDB->_hiertree->removeParent(
+            if (NULL != childref)
+            {
+               // remove it from the hierarchy
+               childref->_orphan = ATDB->_hiertree->removeParent(
                                              childref, this, ATDB->_hiertree);
-            ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), 
+               ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(),
                                                             childref->orphan());
+            }
             _children.erase(diff.second);
          }
          else break;

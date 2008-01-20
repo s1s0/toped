@@ -1554,11 +1554,12 @@ laydata::tdtcellref::tdtcellref(TEDfile* const tedfile)
 
 void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
-   if (!structure()) return;
    // calculate the current translation matrix
    CTM newtrans = _translation * drawprop.topCTM();
    // get overlapping box of the structure ...
-   DBbox obox = structure()->overlap();
+   DBbox obox(DEFAULT_ZOOM_BOX);
+   if (structure()) 
+      obox = structure()->overlap();
    // ... translate it to the current coordinates ...
    DBbox areal = obox * newtrans;
    // ... and normalize it
@@ -1589,7 +1590,7 @@ void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties& drawprop, con
 
 void laydata::tdtcellref::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
-   if (0 == ptlist.size()) return;
+   if ((NULL == structure()) || (0 == ptlist.size())) return;
    // draw the structure itself. Pop/push ref stuff is when edit in place is active
    byte crchain = drawprop.popref(this);
    structure()->openGL_draw(drawprop, crchain == 2);
@@ -1717,8 +1718,10 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
 DBbox laydata::tdtcellref::overlap() const {
    if (structure())
       return structure()->overlap() * _translation;
-   else return DBbox(TP(static_cast<int4b>(rint(_translation.tx())),
-                         static_cast<int4b>(rint(_translation.ty()))));
+   else 
+      return DEFAULT_ZOOM_BOX * _translation;
+//      return DBbox(TP(static_cast<int4b>(rint(_translation.tx())),
+//                         static_cast<int4b>(rint(_translation.ty()))));
 }      
    
 //-----------------------------------------------------------------------------

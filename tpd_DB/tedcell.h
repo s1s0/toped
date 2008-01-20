@@ -90,28 +90,7 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdtdefcell  {
-   public:
-                           tdtdefcell(std::string name) : _name(name) {};
-      virtual             ~tdtdefcell() {};
-      virtual void         openGL_draw(layprop::DrawProperties&,
-                                                          bool active=false) const;
-      virtual void         tmp_draw(const layprop::DrawProperties&, ctmqueue&,
-                                                          bool active=false) const;
-      virtual void         write(TEDfile* const, const cellList&, const TDTHierTree*) const;
-      virtual void         PSwrite(PSFile&, const layprop::DrawProperties&,
-                                   const cellList* = NULL, const TDTHierTree* = NULL) const;
-//      virtual TDTHierTree* hierout(TDTHierTree*&, tdtcell*, cellList*);
-      virtual DBbox        overlap() const   {return DBbox(TP(0,0),TP(20,20));}
-      virtual bool         orphan() const    {return true;}
-      virtual word         libID() const     {return 0;}
-      std::string          name() const      {return _name;}
-   protected:
-      std::string          _name;         //! cell name
-   };
-
-//==============================================================================
-   class tdtcell : public tdtdefcell {
+   class tdtcell  {
    public:
                            tdtcell(std::string);
                            tdtcell(TEDfile* const, std::string, word);
@@ -164,10 +143,10 @@ namespace laydata {
       bool                 stretch_selected(int bfactor, atticList**);
       atticList*           changeselect(TP, SH_STATUS status, layprop::ViewProperties&);
       tdtcellref*          getcellover(TP, ctmstack&, cellrefstack*, layprop::ViewProperties&);
-      void                 parentfound()     {_orphan = false;}
-      bool                 orphan() const    {return _orphan;}
-//      std::string          name() const      {return _name;}
-      selectList*          shapesel()        {return &_shapesel;}
+      void                 parentfound()     {_orphan = false;};
+      bool                 orphan() const    {return _orphan;};
+      std::string          name() const      {return _name;};
+      selectList*          shapesel()        {return &_shapesel;};
       selectList*          copy_selist() const;
       void                 updateHierarchy(tdtdesign*);
       void                 removePrep(laydata::tdtdesign* ATDB) const;
@@ -186,13 +165,14 @@ namespace laydata {
       tdtdata*             checkNreplacePoly(selectDataPair&, validator*, word, selectList**);
       tdtdata*             checkNreplaceBox(selectDataPair&, validator*, word, selectList**);
       dataList*            secure_dataList(selectList&, word);
-//      std::string          _name;         //! cell name
+      std::string          _name;         //! cell name
       word                 _libID;        //! cell belongs to ... library
       layerList            _layers;       //! all layers the cell
       bool                 _orphan;       //! cell doesn't have a parent
       nameList             _children;     //! for hierarchy list purposes
       selectList           _shapesel;     //! selected shapes
    };
+
 }
 
 #endif
