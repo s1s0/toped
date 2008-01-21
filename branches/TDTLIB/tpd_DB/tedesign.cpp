@@ -797,7 +797,10 @@ bool laydata::tdtdesign::validate_cells() {
    bool invalidParents = false;
    laydata::cellList::const_iterator wc;
    for (wc = _cells.begin(); wc != _cells.end(); wc++)
-      invalidParents |= wc->second->validate_cells(this);
+   {
+      if (NULL != wc->second)
+         invalidParents |= wc->second->validate_cells(this);
+   }
    return invalidParents;
 }
 
