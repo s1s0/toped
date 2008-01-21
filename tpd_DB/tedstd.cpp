@@ -386,7 +386,8 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
       // Mark that the cell definition is referenced, i.e. it is not the top 
       // of the tree (orphan flag in the tdtcell), BUT just in case it is
       // not empty yet
-      _design->_cells[cellname]->parentfound();
+      if (NULL != _design->_cells[cellname])
+         _design->_cells[cellname]->parentfound();
    }
    return _design->_cells.find(cellname);
 }

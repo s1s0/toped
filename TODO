@@ -5,6 +5,7 @@ Library properties
   but only if it has bigger ID. DB has an ID 0 - i.e. it can reference cells from any library
 - the above means that circular reference across the libraries is not possible
 
+- cellemptyref::cellref
 
 Short Term
 ------------
