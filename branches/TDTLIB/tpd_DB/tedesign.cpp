@@ -55,7 +55,33 @@ laydata::tdtlibrary::~tdtlibrary()
    _cells.clear();
 }
 
-void laydata::tdtlibrary::clearHierTree()
+void laydata::tdtlibrary::clearHierTree(word libID)
+{
+   // get rid of the hierarchy tree
+   const TDTHierTree* var1 = _hiertree;
+   _hiertree = NULL;
+   TDTHierTree* lastValid = NULL;
+   while (var1)
+   {
+      const TDTHierTree* var2 = var1->GetLast();
+      if (libID == var1->GetItem()->libID())
+      {
+         if (NULL != lastValid)  
+            lastValid->relink(var1);
+         delete var1;
+      }
+      else
+      {
+         if (NULL != lastValid)
+            lastValid = const_cast<TDTHierTree*>(var1);
+         else
+            _hiertree = lastValid = const_cast<TDTHierTree*>(var1);
+      }
+      var1 = var2;
+   }
+}
+
+void laydata::tdtlibrary::clearEntireHierTree()
 {
    // get rid of the hierarchy tree
    const TDTHierTree* var1 = _hiertree;
@@ -65,12 +91,6 @@ void laydata::tdtlibrary::clearHierTree()
       delete var1; var1 = var2;
    }
    _hiertree = NULL;
-}
-
-void laydata::tdtlibrary::clearHierTreeLib()
-{
-   assert(false);
-   //@FIXME!!!
 }
 
 void laydata::tdtlibrary::read(TEDfile* const tedfile)
@@ -139,7 +159,7 @@ void laydata::tdtlibrary::recreate_hierarchy()
 {
    if (0 == _libID)
    {
-      clearHierTree();
+      clearHierTree(0);
    }
    // here - run the hierarchy extraction on orphans only   
    for (laydata::cellList::const_iterator wc = _cells.begin(); 
@@ -367,31 +387,20 @@ laydata::tdtdata* laydata::tdtdesign::addtext(word la, std::string& text, CTM& o
  
 laydata::tdtdata* laydata::tdtdesign::addcellref(laydata::refnamepair striter, CTM& ori) 
 {
-//   if (checkcell(name)) 
-//   {
-//      laydata::refnamepair striter = getcellnamepair(name);
-      modified = true;
-      ori *= _target.rARTM();
-      DBbox old_overlap = _target.edit()->overlap();
-      tdtdata* ncrf = _target.edit()->addcellref(this, striter, ori);
-      if (NULL == ncrf) 
-      {
-        tell_log(console::MT_ERROR, "Circular reference is forbidden");
-      }
-      else
-      {
-         if (_target.edit()->overlapChanged(old_overlap, this))
-            do {} while(validate_cells());
-      }
-      return ncrf;
-//   }
-//   else 
-//   {
-//      std::string news = "Cell \"";
-//      news += name; news += "\" is not defined";
-//      tell_log(console::MT_ERROR,news);
-//      return NULL;
-//   }
+   modified = true;
+   ori *= _target.rARTM();
+   DBbox old_overlap = _target.edit()->overlap();
+   tdtdata* ncrf = _target.edit()->addcellref(this, striter, ori);
+   if (NULL == ncrf) 
+   {
+     tell_log(console::MT_ERROR, "Circular reference is forbidden");
+   }
+   else
+   {
+      if (_target.edit()->overlapChanged(old_overlap, this))
+         do {} while(validate_cells());
+   }
+   return ncrf;
 }
 
 laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori, 

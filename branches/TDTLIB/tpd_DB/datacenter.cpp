@@ -213,7 +213,7 @@ DataCenter::DataCenter() {
 }
    
 DataCenter::~DataCenter() {
-   laydata::tdtlibrary::clearHierTree();
+   laydata::tdtlibrary::clearEntireHierTree();
    if (NULL != _GDSDB) delete _GDSDB;
    if (NULL != _TEDDB) delete _TEDDB;
    // _TEDLIB will be cleared automatically (not a pointer)
@@ -223,7 +223,7 @@ bool DataCenter::TDTcheckread(const std::string filename,
 {
    bool retval = false;
    start_ignoring = false;
-   laydata::TEDfile tempin(filename.c_str());
+   laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
    if (!tempin.status()) return retval;
 
    std::string news = "Project created: ";
@@ -259,7 +259,7 @@ bool DataCenter::TDTcheckread(const std::string filename,
 
 bool DataCenter::TDTread(std::string filename)
 {
-   laydata::TEDfile tempin(filename.c_str());
+   laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
    if (!tempin.status()) return false;
 
    try
@@ -285,7 +285,7 @@ bool DataCenter::TDTread(std::string filename)
 
 int DataCenter::TDTloadlib(std::string filename)
 {
-   laydata::TEDfile tempin(filename.c_str());
+   laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
    if (!tempin.status()) return -1;
    word libRef = _TEDLIB.getNextLibRefNo();
    try
@@ -339,7 +339,7 @@ bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSa
 bool DataCenter::TDTwrite(const char* filename)
 {
    if (filename)  _tedfilename = filename;
-   laydata::TEDfile tempin(_TEDDB, _tedfilename);
+   laydata::TEDfile tempin(_TEDDB, _tedfilename, &_TEDLIB);
    _neversaved = false;
    return true;
 }
@@ -427,7 +427,7 @@ void DataCenter::newDesign(std::string name, time_t created)
       // without much talking.
       // UNDO buffers will be reset as well in tellstdfunc::stdNEWDESIGN::execute()
       // but there is still a chance to restore everything - using the log file.
-      laydata::tdtlibrary::clearHierTree();
+      laydata::tdtlibrary::clearHierTree(0);
       delete _TEDDB;
    }
    _TEDDB = DEBUG_NEW laydata::tdtdesign(name, created, 0);
