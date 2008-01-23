@@ -79,8 +79,10 @@ PSegment* PSegment::parallel(TP p)
 //-----------------------------------------------------------------------------
 // class TEDfile
 //-----------------------------------------------------------------------------
-laydata::TEDfile::TEDfile(const char* filename) { // reading
+laydata::TEDfile::TEDfile(const char* filename, const laydata::tdtlibdir* tedlib)  // reading
+{
    _numread = 0;_position = 0;_design = NULL;
+   _TEDLIB = tedlib;
    if (NULL == (_file = fopen(filename, "rb"))) {
       std::string news = "File \"";
       news += filename; news += "\" not found or unaccessable";
@@ -128,8 +130,10 @@ void laydata::TEDfile::read(word libRef)
    //byte designend = getByte(); 
 }
 
-laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) { //writing
+laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename,  const laydata::tdtlibdir* tedlib) 
+{ //writing
    _design = design;_revision=0;_subrevision=6;
+   _TEDLIB = tedlib;
    if (NULL == (_file = fopen(filename.c_str(), "wb"))) {
       std::string news = "File \"";
       news += filename.c_str(); news += "\" can not be created";
@@ -363,23 +367,30 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.push_back(cellname);
+   laydata::refnamepair striter = _design->_cells.find(cellname);
    // link the cells instances with their definitions
-   if (_design->_cells.end() == _design->_cells.find(cellname)) 
+   if (_design->_cells.end() == striter) 
    {
-   // Attention! In this case we've parsed a cell reference, before
-   // the cell is defined. This might means:
-   //   1. Cell is referenced, but simply not defined. 
-   //   2. Circular reference ! Cell1 contains a reference of Cell2,
-   //      that in turn contains a reference of Cell1. This is not allowed
-   // We can not make a decision yet, because the entire file has not been
-   // parsed yet. That is why we are assigning a NULL pointer to the 
-   // referenced structure here in order to continue the parsing, and when 
-   // the entire file is parced the cell references without a proper pointer
-   // to the structure need to be flagged as warning in case 1 and as error 
-   // in case 2.
-   // Empty cell ctructure should be handled without a problem by the 
-   // tdttcellref class and its ancestors
-      _design->_cells[cellname] = NULL;
+   //   if (_design->checkcell(name))
+   //   {
+      // search the cell in the libraries because it's not in the DB
+      if (!_TEDLIB->getCellNamePair(cellname, striter))
+      {
+         // Attention! In this case we've parsed a cell reference, before
+         // the cell is defined. This might means:
+         //   1. Cell is referenced, but simply not defined. 
+         //   2. Circular reference ! Cell1 contains a reference of Cell2,
+         //      that in turn contains a reference of Cell1. This is not allowed
+         // We can not make a decision yet, because the entire file has not been
+         // parsed yet. That is why we are assigning a NULL pointer to the 
+         // referenced structure here in order to continue the parsing, and when 
+         // the entire file is parced the cell references without a proper pointer
+         // to the structure need to be flagged as warning in case 1 and as error 
+         // in case 2.
+         // Empty cell ctructure should be handled without a problem by the 
+         // tdttcellref class and its ancestors
+         _design->_cells[cellname] = NULL;
+      }
    }   
    else 
    {
@@ -389,7 +400,7 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
       if (NULL != _design->_cells[cellname])
          _design->_cells[cellname]->parentfound();
    }
-   return _design->_cells.find(cellname);
+   return striter;
 }
 
 void laydata::TEDfile::get_cellchildnames(nameList* cnames) {

@@ -244,6 +244,7 @@ public:
    const TYPE*       GetItem() const           {return component;}
    const SGHierTree* GetLast() const           {return last;}
    const SGHierTree* Getparent() const         {return parent;}
+   void              relink(const SGHierTree* comp)  {last = comp->last;}
 private:
    const TYPE             *component; // points to the component
    SGHierTree*             last;      // last in the linear list of components

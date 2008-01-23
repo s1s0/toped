@@ -524,9 +524,9 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
          (*celldefs)[*wn]->hierout(Htree, this, celldefs);
       else 
       {
-         //@TODO Default cell definition!
-         int boza = 1;
-         boza++;
+         std::ostringstream ost;
+         ost << "cell " << *wn << " referenced but not defined";
+         tell_log(console::MT_WARNING, ost.str());
       }
    }
    return  Htree;
