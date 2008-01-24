@@ -1,3 +1,8 @@
+new	   ICON "../ui/new.ico"
+open	   ICON "../ui/open.ico"
+save       ICON "../ui/save.ico"
+
+
 toped16x16 ICON "../ui/toped_16x16.ico"
 toped32x32 ICON "../ui/toped_32x32.ico"
 toped48x48 ICON "../ui/toped_48x48.ico"
