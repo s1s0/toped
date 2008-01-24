@@ -602,11 +602,13 @@ void tui::TopedFrame::initMenuBar() {
 
 void tui::TopedFrame::initToolBars() 
 {
-	_resourceCenter->appendTool("main", "new", wxBitmap(new_xpm),"", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("main", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
+	//_resourceCenter->appendTool("main", "new", wxBitmap(new_xpm),"", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
+	//_resourceCenter->appendTool("main", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "new", wxIcon("new", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16),"", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "open", wxIcon("open", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "save", wxIcon("save", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16), "", &tui::TopedFrame::OnTDTSave, wxAUI_DOCK_TOP);
 
 	_resourceCenter->appendTool("secondary", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_LEFT);
-
 	_status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
 	_GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS	,
