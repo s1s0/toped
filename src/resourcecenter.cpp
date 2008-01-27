@@ -287,7 +287,7 @@ tui::ToolBarHandler::ToolBarHandler(int ID, std::string name, int direction)
 		paneInfo.TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
 	}
 	
-	SetToolBitmapSize(wxSize(16, 15));
+	SetToolBitmapSize(wxSize(24, 24));
 
 	Realize();
 	Toped->getAuiManager()->AddPane(this, paneInfo.ToolbarPane().
