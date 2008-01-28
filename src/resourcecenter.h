@@ -197,11 +197,11 @@ namespace tui
       void executeMenu(int ID);
       bool checkExistence(const tui::MenuItemHandler & item);
 
-		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
+		/*void appendTool(const std::string toolBarName, const std::string &toolBarItem,
 							const std::string &bitmapFileName,
-							const std::string &hotKey, callbackMethod cbMethod, int direction);
+							const std::string &hotKey, callbackMethod cbMethod, int direction);*/
 		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
-							const wxBitmap &bitmap,
+							const std::string &iconName,
 							const std::string &hotKey, callbackMethod cbMethod, int direction);
    private:
       //produce lowercase string and exclude unwanted character

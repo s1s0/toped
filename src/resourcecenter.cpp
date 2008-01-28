@@ -617,7 +617,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
 	}
 }
 
-void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem, 
+/*void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem, 
 												 const std::string &bitmapFileName,
 												 const std::string &hotKey, callbackMethod cbMethod, int direction)
 {
@@ -647,14 +647,14 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 		toolBar->addTool(tool);
 	}
  
-}
+}*/
 void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem,
-							const wxBitmap &bitmap,
+							const  std::string &iconName,
 							const std::string &hotKey, callbackMethod cbMethod, int direction)
 {
 	int ID; 
 	ToolBarHandler* toolBar;
-
+	wxBitmap bitmap = wxIcon(iconName, wxBITMAP_TYPE_ICO_RESOURCE, 24, 24);
 
 	//Create neew tool item
 	ID = TDUMMY_TOOL + _toolCount;

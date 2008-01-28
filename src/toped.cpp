@@ -602,32 +602,31 @@ void tui::TopedFrame::initMenuBar() {
 
 void tui::TopedFrame::initToolBars() 
 {
-	_resourceCenter->appendTool("main", "new", wxIcon("new", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24),"", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("main", "open", wxIcon("open", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("main", "save", wxIcon("save", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnTDTSave, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "new", "new","", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "open", "open","", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "save", "save", "", &tui::TopedFrame::OnTDTSave, wxAUI_DOCK_TOP);
 
-	_resourceCenter->appendTool("edit", "undo", wxIcon("undo", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);
-	//_resourceCenter->appendTool("edit", "redo", wxIcon("redo", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "box", wxIcon("box", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnDrawBox, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "poly", wxIcon("poly", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnDrawPoly, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "wire", wxIcon("wire", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnDrawWire, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "text", wxIcon("text", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnDrawText, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "delete", wxIcon("delete", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnDelete, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "cut_with_poly", wxIcon("cut_with_poly", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnPolyCut, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "zoom_all", wxIcon("zoom_all", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnZoomAll, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "zoom_in", wxIcon("zoom_in", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnzoomIn, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "zoom_out", wxIcon("zoom_out", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnzoomOut, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "ruler", wxIcon("ruler", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnAddRuler, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "copy", wxIcon("copy", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnCopy, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "move", wxIcon("move", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnMove, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "rotate", wxIcon("rotate_left", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
-	//_resourceCenter->appendTool("edit", "rotate_right", wxIcon("rotate_left", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "flipx", wxIcon("flipx", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnFlipX, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "flipy", wxIcon("flipy", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnFlipY, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "edit_push", wxIcon("edit_push", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnCellPush, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "edit_pop", wxIcon("edit_pop", wxBITMAP_TYPE_ICO_RESOURCE, 24, 24), "", &tui::TopedFrame::OnCellPop, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "undo", "undo", "", &tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);
+	//_resourceCenter->appendTool("edit", "redo", "redo", "", &tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "box", "box", "", &tui::TopedFrame::OnDrawBox, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "poly", "poly", "", &tui::TopedFrame::OnDrawPoly, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "wire", "wire", "", &tui::TopedFrame::OnDrawWire, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "text", "text", "", &tui::TopedFrame::OnDrawText, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "delete", "delete", "", &tui::TopedFrame::OnDelete, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly", "", &tui::TopedFrame::OnPolyCut, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "zoom_all", "zoom_all", "", &tui::TopedFrame::OnZoomAll, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "zoom_in", "zoom_in", "", &tui::TopedFrame::OnzoomIn, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "zoom_out", "zoom_out", "", &tui::TopedFrame::OnzoomOut, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "ruler", "ruler", "", &tui::TopedFrame::OnAddRuler, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "copy", "copy", "", &tui::TopedFrame::OnCopy, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "move", "move", "", &tui::TopedFrame::OnMove, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "rotate", "rotate_left", "", &tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
+	//_resourceCenter->appendTool("edit", "rotate_right", "rotate_left", "", &tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "flipx", "flipx", "", &tui::TopedFrame::OnFlipX, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "flipy", "flipy", "", &tui::TopedFrame::OnFlipY, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "edit_push", "edit_push", "", &tui::TopedFrame::OnCellPush, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "edit_pop", "edit_pop", "", &tui::TopedFrame::OnCellPop, wxAUI_DOCK_TOP);
 
-//	_resourceCenter->appendTool("secondary", "open", wxBitmap(open_xpm),"", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_LEFT);
 	_status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
 	_GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS	,
