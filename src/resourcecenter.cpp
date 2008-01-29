@@ -243,26 +243,32 @@ void tui::MenuItemSeparator::create(wxMenuBar *menuBar)
    _inserted = true;
 }
 
-tui::ToolItem::ToolItem(int toolID, const std::string &name,
+/*tui::ToolItem::ToolItem(int toolID, const std::string &name,
 							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod)
-							:_ID(toolID), /*_hotKey(hotKey),*/_method(cbMethod)
-{
+							:_ID(toolID), /*_hotKey(hotKey),_method(cbMethod)*/
+/*{
 	_bitmap.LoadFile(wxString(bitmapFileName.c_str(), wxConvUTF8), wxBITMAP_TYPE_BMP);//,wxBITMAP_TYPE_XPM);
 
-}
+}*/
 
 tui::ToolItem::ToolItem(int toolID, const std::string &name,
-							const wxBitmap &bitmap,
-							const std::string &hotKey, callbackMethod cbMethod)
-							:_ID(toolID), /*_hotKey(hotKey),*/_bitmap(bitmap), _method(cbMethod)
+								const std::string &bitmapName,
+								const std::string &hotKey, callbackMethod cbMethod)
+								:_ID(toolID), /*_hotKey(hotKey),*/ _bitmapName(bitmapName), _method(cbMethod)
 {
-	_bitmap = bitmap;
+	_bitmap = wxIcon(_bitmapName, wxBITMAP_TYPE_ICO_RESOURCE, 16, 16);
 }
 
 tui::ToolItem::~ToolItem()
 {
 }
+
+void tui::ToolItem::changeToolSize(const wxSize& size)
+{
+	_bitmap = wxIcon(_bitmapName, wxBITMAP_TYPE_ICO_RESOURCE, size.GetX(), size.GetY());
+}
+
 
 BEGIN_EVENT_TABLE( tui::ToolBarHandler, wxToolBar )
    EVT_SIZE( tui::ToolBarHandler::OnSize   )
@@ -287,7 +293,7 @@ tui::ToolBarHandler::ToolBarHandler(int ID, std::string name, int direction)
 		paneInfo.TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
 	}
 	
-	SetToolBitmapSize(wxSize(24, 24));
+	//SetToolBitmapSize(wxSize(24, 24));
 
 	Realize();
 	Toped->getAuiManager()->AddPane(this, paneInfo.ToolbarPane().
@@ -302,6 +308,23 @@ tui::ToolBarHandler::~ToolBarHandler()
 		delete (*it);
 	}
 	_tools.clear();
+}
+
+void	tui::ToolBarHandler::changeToolSize(const wxSize& size)
+{
+	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
+	{
+		RemoveTool((*it)->ID());
+		
+	}
+	Realize();
+	SetToolBitmapSize(size);
+
+	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
+	{
+		AddTool((*it)->ID(),wxT(""),(*it)->bitmap());
+	}
+	Toped->getAuiManager()->Update();
 }
 
 void tui::ToolBarHandler::OnSize(wxSizeEvent& event)
@@ -356,8 +379,34 @@ void tui::ToolBarHandler::OnPaint(wxPaintEvent&event)
 	event.Skip();
 
 }
-void	tui::ToolBarHandler::addTool(ToolItem *tool)
+/*void	tui::ToolBarHandler::addTool(ToolItem *tool)
 {
+	_tools.push_back(tool);
+	AddTool(tool->ID(),wxT(""),tool->bitmap());
+	Toped->getAuiManager()->DetachPane(this);
+	Realize();
+
+	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
+	{
+		Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
+		Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(true).Floatable(false).
+		TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true));
+	}
+	else
+	{
+		Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
+		Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(false).Floatable(false).
+		TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false));
+	}
+
+	Toped->getAuiManager()->Update();
+}*/
+
+void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const std::string iconName, 
+										const std::string hotKey, callbackMethod cbMethod)
+{
+	ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconName, hotKey, cbMethod);
+
 	_tools.push_back(tool);
 	AddTool(tool->ID(),wxT(""),tool->bitmap());
 	Toped->getAuiManager()->DetachPane(this);
@@ -654,12 +703,8 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 {
 	int ID; 
 	ToolBarHandler* toolBar;
-	wxBitmap bitmap = wxIcon(iconName, wxBITMAP_TYPE_ICO_RESOURCE, 24, 24);
 
-	//Create neew tool item
-	ID = TDUMMY_TOOL + _toolCount;
-	ToolItem *tool = DEBUG_NEW ToolItem(ID, toolBarItem, bitmap, hotKey, cbMethod);
-	_toolCount++;
+
 
 	//find toolbar
 	std::string str = toolBarName;
@@ -685,7 +730,13 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 	{
 		toolBar = *it;
 	}
-	toolBar->addTool(tool);
+	//increase counter of toolItems
+	ID = TDUMMY_TOOL + _toolCount;
+	_toolCount++;
+
+	toolBar->addTool(ID, toolBarItem, iconName, hotKey, cbMethod); 
+	//toolBar->addTool(tool);
+
 }
 
 //=============================================================================
