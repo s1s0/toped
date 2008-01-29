@@ -129,12 +129,12 @@ namespace tui
 	class ToolItem
 	{
 	public:
-		ToolItem(int toolID, const std::string &name,
+		/*ToolItem(int toolID, const std::string &name,
 							const std::string &bitmapFileName,
-							const std::string &hotKey, callbackMethod cbMethod);
+							const std::string &hotKey, callbackMethod cbMethod);*/
 		ToolItem(int toolID, const std::string &name,
-							const wxBitmap &bitmap,
-							const std::string &hotKey, callbackMethod cbMethod);
+					const std::string &bitmapName,
+					const std::string &hotKey, callbackMethod cbMethod);
 		//std::string    hotKey(void)   const    { return _hotKey;};
       std::string    function(void) const    { return _function;};
       //std::string    helpString(void) const  { return _helpString;};
@@ -143,13 +143,15 @@ namespace tui
 		virtual ~ToolItem();
 		wxBitmap	bitmap(void)	const {return _bitmap;};
 		int		ID(void)			const {return _ID;};
+		void		changeToolSize(const wxSize& size);
 	private:
-		int		_ID;
-		wxBitmap	_bitmap;
-		//std::string _hotKey;
-      std::string _function;
-      //std::string _helpString;
-      callbackMethod _method;
+		int				_ID;
+		wxBitmap			_bitmap;
+		std::string		_bitmapName;
+		//std::string	_hotKey;
+      std::string		_function;
+      //std::string	_helpString;
+      callbackMethod	_method;
 
 
 	};
@@ -160,10 +162,13 @@ namespace tui
 		ToolBarHandler(int ID, std::string name, int direction);
 		virtual ~ToolBarHandler();
 
-		void				addTool(ToolItem *tool);
+//		void				addTool(ToolItem *tool);
+		void				addTool(int ID1, const std::string &toolBarItem, const std::string iconName, 
+										const std::string hotKey, callbackMethod cbMethod);
 		void				execute(int ID1);
 
 		std::string		name() const {return _name;};
+		void				changeToolSize(const wxSize& size);
 	private:
 		void				OnSize(wxSizeEvent& event);
 		void				OnPaint(wxPaintEvent&event);
