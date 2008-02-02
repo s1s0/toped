@@ -1221,7 +1221,7 @@ void browsers::LayerPanel::OnCommand(wxCommandEvent& event)
       case     BT_LAYER_SELECT:
          {
             word layno = event.GetExtraLong();
-            _selectedButton->unselect();
+            if (NULL != _selectedButton) _selectedButton->unselect();
             _selectedButton = _buttonMap[layno];
          
             break;

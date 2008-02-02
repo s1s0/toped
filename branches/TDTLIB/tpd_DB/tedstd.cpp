@@ -390,6 +390,7 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
          // Empty cell ctructure should be handled without a problem by the 
          // tdttcellref class and its ancestors
          _design->_cells[cellname] = NULL;
+         striter = _design->_cells.find(cellname);
       }
    }   
    else 
