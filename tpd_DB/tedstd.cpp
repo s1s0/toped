@@ -114,7 +114,7 @@ void laydata::TEDfile::getFHeader()
 //   checkIntegrity();
 }
 
-void laydata::TEDfile::read(word libRef) 
+void laydata::TEDfile::read(int libRef) 
 {
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();

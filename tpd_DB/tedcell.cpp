@@ -210,9 +210,9 @@ laydata::editobject::~editobject()
 // class tdtcell
 //-----------------------------------------------------------------------------
 laydata::tdtcell::tdtcell(std::string name) : 
-   _name(name), _libID(0), _orphan(true) {}
+   _name(name), _libID(TARGETDB_LIB), _orphan(true) {}
 
-laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, word lib) : 
+laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) : 
    _name(name), _libID(lib), _orphan(true) 
 {
    byte recordtype;
@@ -420,12 +420,12 @@ laydata::tdtcellref* laydata::tdtcell::getcellover(TP pnt, ctmstack& transtack, 
 
 void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, const TDTHierTree* root) const {
    // We going to write the cells in hierarchical order. Children - first!
-   const laydata::TDTHierTree* Child= root->GetChild(0);
+   const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
    while (Child) {
 //      tedfile->design()->getcellnamepair(Child->GetItem()->name())->second->write(tedfile, Child);
       allcells.find(Child->GetItem()->name())->second->write(tedfile, allcells, Child);
 //      allcells[Child->GetItem()->name()]->write(tedfile, Child);
-      Child = Child->GetBrother(0);
+      Child = Child->GetBrother(TARGETDB_LIB);
 	}
    // If no more children and the cell has not been written yet
    if (tedfile->checkcellwritten(_name)) return;
@@ -451,11 +451,11 @@ void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
    // We going to write the cells in hierarchical order. Children - first!
    if (recur)
    {
-      const laydata::TDTHierTree* Child= root->GetChild(0);
+      const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
          allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child, UU, recur);
-         Child = Child->GetBrother(0);
+         Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
@@ -483,11 +483,11 @@ void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawp
       assert( root );
       assert( allcells );
       // We going to write the cells in hierarchical order. Children - first!
-      const laydata::TDTHierTree* Child= root->GetChild(0);
+      const laydata::TDTHierTree* Child= root->GetChild(ALL_LIB);
       while (Child)
       {
          allcells->find(Child->GetItem()->name())->second->PSwrite(psf, drawprop, allcells, Child);
-         Child = Child->GetBrother(0);
+         Child = Child->GetBrother(ALL_LIB);
       }
       // If no more children and the cell has not been written yet
       if (psf.checkCellWritten(_name)) return;

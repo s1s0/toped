@@ -171,11 +171,11 @@ namespace browsers
                         const wxSize& size = wxDefaultSize,
                         long style = wxTR_DEFAULT_STYLE);
       virtual           ~TDTbrowser();
-      void              collectInfo(const wxString, const word, laydata::TDTHierTree*);
+      void              collectInfo(const wxString, const int, laydata::TDTHierTree*);
       void              initialize();
       wxString          selectedCellname() const;
    protected:
-      void              collectChildren(const laydata::TDTHierTree *, word , 
+      void              collectChildren(const laydata::TDTHierTree *, int , 
                                                  const wxTreeItemId& );
    private:
       wxTreeItemId      top_structure;
@@ -319,7 +319,7 @@ namespace browsers
    void layer_status(BROWSER_EVT_TYPE, const word, const bool);
    void layer_add(const std::string, const word);
    void layer_default(const word, const word);
-   void addTDTtab(/*laydata::tdtlibrary**/);
+   void addTDTtab();
    void addGDStab();
    void clearGDStab();
    void celltree_open(const std::string);

@@ -93,7 +93,7 @@ namespace laydata {
    class tdtcell  {
    public:
                            tdtcell(std::string);
-                           tdtcell(TEDfile* const, std::string, word);
+                           tdtcell(TEDfile* const, std::string, int);
                           ~tdtcell(); 
       void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
@@ -153,7 +153,7 @@ namespace laydata {
       void                 report_selected(real) const;
       void                 collect_usedlays(const tdtlibrary*, bool, ListOfWords&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
-      word                 libID() const {return _libID;}
+      int                  libID() const {return _libID;}
    private:
       bool                 getshapeover(TP, layprop::ViewProperties&);
       void                 store_inAttic(atticList&);
@@ -166,7 +166,7 @@ namespace laydata {
       tdtdata*             checkNreplaceBox(selectDataPair&, validator*, word, selectList**);
       dataList*            secure_dataList(selectList&, word);
       std::string          _name;         //! cell name
-      word                 _libID;        //! cell belongs to ... library
+      int                  _libID;        //! cell belongs to ... library
       layerList            _layers;       //! all layers the cell
       bool                 _orphan;       //! cell doesn't have a parent
       nameList             _children;     //! for hierarchy list purposes
