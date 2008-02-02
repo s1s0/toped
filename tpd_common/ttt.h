@@ -230,10 +230,10 @@ public:
    SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst);
    SGHierTree(const TYPE* comp, SGHierTree* lst) : component(comp), last(lst), 
                                     parent(NULL), brother(NULL), Fchild(NULL) {};
-   SGHierTree*       GetFirstRoot(word libID);
-   SGHierTree*       GetNextRoot(word libID);
-   const SGHierTree* GetBrother(word libID) const;
-   const SGHierTree* GetChild(word libID) const;
+   SGHierTree*       GetFirstRoot(int libID);
+   SGHierTree*       GetNextRoot(int libID);
+   const SGHierTree* GetBrother(int libID) const;
+   const SGHierTree* GetChild(int libID) const;
    SGHierTree*       GetMember(const TYPE* comp);
    SGHierTree*       GetNextMember(const TYPE* comp);
    bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
@@ -246,11 +246,12 @@ public:
    const SGHierTree* Getparent() const         {return parent;}
    void              relink(const SGHierTree* comp)  {last = comp->last;}
 private:
-   const TYPE             *component; // points to the component
-   SGHierTree*             last;      // last in the linear list of components
-   SGHierTree*             parent;    // points up
-   SGHierTree*             brother;   // points right (siblings)
-   SGHierTree*             Fchild;    // points down to the first child
+   bool              thisLib(int libID);
+   const TYPE       *component; // points to the component
+   SGHierTree*       last;      // last in the linear list of components
+   SGHierTree*       parent;    // points up
+   SGHierTree*       brother;   // points right (siblings)
+   SGHierTree*       Fchild;    // points down to the first child
 //   std::list<SGHierTree*>  reflibs;   // reference library hierarhies
 };
 
@@ -277,31 +278,36 @@ SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst
 };
 
 template <class TYPE> 
-   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetFirstRoot(word libID) {
+      bool   SGHierTree<TYPE>::thisLib(int libID) {
+         return (0 > libID) ? true : (libID == component->libID());
+      }
+
+template <class TYPE>
+   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetFirstRoot(int libID) {
       SGHierTree* wv = this;
-      while (wv && (wv->parent || (libID != wv->component->libID()))) wv = wv->last;
+      while (wv && (wv->parent || !wv->thisLib(libID) ) ) wv = wv->last;
       return wv;
    }
 
 template <class TYPE> 
-   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetNextRoot(word libID)  {
+   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetNextRoot(int libID)  {
       SGHierTree* wv = this->last;
-      while (wv && (wv->parent || (libID != wv->component->libID()))) wv = wv->last;
+      while (wv && (wv->parent || !wv->thisLib(libID) ) ) wv = wv->last;
       return wv;
    }
 
 template <class TYPE> 
-   const SGHierTree<TYPE>* SGHierTree<TYPE>::GetChild(word libID) const {
-      if ((NULL == Fchild) || (libID == Fchild->component->libID())) return Fchild;
+   const SGHierTree<TYPE>* SGHierTree<TYPE>::GetChild(int libID) const {
+   if ( (NULL == Fchild) || Fchild->thisLib(libID) ) return Fchild;
       SGHierTree* wv = Fchild;
-      while (wv && (libID != wv->component->libID())) wv = wv->brother;
+      while ( wv && !wv->thisLib(libID) ) wv = wv->brother;
       return wv;
    }
 
 template <class TYPE> 
-   const SGHierTree<TYPE>* SGHierTree<TYPE>::GetBrother(word libID) const {
+   const SGHierTree<TYPE>* SGHierTree<TYPE>::GetBrother(int libID) const {
       SGHierTree* wv = brother;
-      while (wv && (libID != wv->component->libID())) wv = wv->brother;
+      while (wv && !wv->thisLib(libID) ) wv = wv->brother;
       return wv;
    }
 

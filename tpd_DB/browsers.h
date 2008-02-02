@@ -61,6 +61,7 @@ namespace browsers
       BT_CELL_ADD,
       BT_CELL_REMOVE,
       BT_ADDTDT_LIB,
+      BT_NEWTDTDB,
       BT_ADDGDS_TAB,
       BT_CLEARGDS_TAB,
       BT_CELLS_HIER,
@@ -170,7 +171,7 @@ namespace browsers
                         const wxSize& size = wxDefaultSize,
                         long style = wxTR_DEFAULT_STYLE);
       virtual           ~TDTbrowser();
-      void              collectInfo(const wxString, const word, laydata::TDTHierTree*, bool);
+      void              collectInfo(const wxString, const word, laydata::TDTHierTree*);
       void              initialize();
       wxString          selectedCellname() const;
    protected:
@@ -305,8 +306,7 @@ namespace browsers
       wxWindow*         tellParser() const {return _tellParser;}
    private:
       void              OnCommand(wxCommandEvent&);
-/*      void              OnTELLaddTDTdb(const wxString, laydata::TDTHierTree*);*/
-      void              OnTELLaddTDTlib(laydata::tdtlibrary*, bool);
+      void              OnTELLaddTDTlib();
       void              OnTELLaddGDStab();
       void              OnTELLclearGDStab();
       GDSbrowser*       _GDSstruct;
@@ -319,7 +319,7 @@ namespace browsers
    void layer_status(BROWSER_EVT_TYPE, const word, const bool);
    void layer_add(const std::string, const word);
    void layer_default(const word, const word);
-   void addTDTtab(laydata::tdtlibrary*,bool);
+   void addTDTtab(/*laydata::tdtlibrary**/);
    void addGDStab();
    void clearGDStab();
    void celltree_open(const std::string);

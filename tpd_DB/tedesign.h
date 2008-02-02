@@ -77,7 +77,7 @@ namespace laydata {
       void           addlibrary( tdtlibrary* const, word libRef );
       void           closelibrary(std::string);
       tdtlibrary*    getLib(word libID);
-      word           getNextLibRefNo();
+      word           getLastLibRefNo();
       bool           getCellNamePair(std::string, refnamepair&) const;
    private:
       Catalog        _libdirectory;

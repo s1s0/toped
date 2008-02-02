@@ -206,9 +206,9 @@ laydata::tdtlibdir::~tdtlibdir()
    }
 }
 
-word laydata::tdtlibdir::getNextLibRefNo()
+word laydata::tdtlibdir::getLastLibRefNo()
 {
-   return _libdirectory.size() + 1;
+   return _libdirectory.size();
 }
 
 void laydata::tdtlibdir::addlibrary(tdtlibrary* const lib, word libRef)
@@ -223,6 +223,7 @@ void laydata::tdtlibdir::closelibrary(std::string)
 
 laydata::tdtlibrary* laydata::tdtlibdir::getLib(word libID)
 {
+   assert(libID);
    assert(libID <= _libdirectory.size());
    return _libdirectory[libID-1]->second;
 }
