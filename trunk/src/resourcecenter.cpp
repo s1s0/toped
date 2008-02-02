@@ -257,7 +257,7 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								const std::string &hotKey, callbackMethod cbMethod)
 								:_ID(toolID), /*_hotKey(hotKey),*/ _bitmapName(bitmapName), _method(cbMethod)
 {
-	_bitmap = wxIcon(_bitmapName, wxBITMAP_TYPE_ICO_RESOURCE, 16, 16);
+   _bitmap = wxIcon(wxString(_bitmapName.c_str(), wxConvUTF8), wxBITMAP_TYPE_ICO_RESOURCE, 16, 16);
 }
 
 tui::ToolItem::~ToolItem()
@@ -266,7 +266,7 @@ tui::ToolItem::~ToolItem()
 
 void tui::ToolItem::changeToolSize(const wxSize& size)
 {
-	_bitmap = wxIcon(_bitmapName, wxBITMAP_TYPE_ICO_RESOURCE, size.GetX(), size.GetY());
+   _bitmap = wxIcon(wxString(_bitmapName.c_str(), wxConvUTF8), wxBITMAP_TYPE_ICO_RESOURCE, size.GetX(), size.GetY());
 }
 
 
@@ -703,6 +703,7 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 {
 	int ID; 
 	ToolBarHandler* toolBar;
+//   wxBitmap bitmap = wxIcon(wxString(iconName.c_str(), wxConvUTF8), wxBITMAP_TYPE_ICO_RESOURCE, 24, 24);
 
 
 
