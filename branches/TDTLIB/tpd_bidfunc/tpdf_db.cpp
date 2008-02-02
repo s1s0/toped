@@ -65,8 +65,8 @@ int tellstdfunc::stdNEWDESIGNd::execute()
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       ATDB->btreeAddMember    = &browsers::treeAddMember;
       ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-      browsers::addTDTtab(ATDB, false);
    DATC->unlockDB();
+   browsers::addTDTtab();
    // reset UNDO buffers;
    UNDOcmdQ.clear();
    while (!UNDOPstack.empty()) {
@@ -102,13 +102,13 @@ int tellstdfunc::TDTread::execute()
             } while (NULL != (root = root->GetNextRoot(0)));
             ATDB->btreeAddMember    = &browsers::treeAddMember;
             ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-            browsers::addTDTtab(ATDB,true);
-            info = "... done";
             tell_log(console::MT_INFO,info);
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
             updateLayerDefinitions(ATDB, top_cell_list);
          DATC->unlockDB();
+         browsers::addTDTtab();
+         info = "... done";
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -152,18 +152,18 @@ int tellstdfunc::TDTreadIFF::execute()
          std::list<std::string> top_cell_list;
          DATC->TDTread(filename);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         ATDB->btreeAddMember    = &browsers::treeAddMember;
-         ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-         laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(0);
-         do
-         {
-            top_cell_list.push_back(std::string(root->GetItem()->name()));
-         } while (NULL != (root = root->GetNextRoot(0)));
-         TpdTime timec(ATDB->created());
-         TpdTime timeu(ATDB->lastUpdated());
-         browsers::addTDTtab(ATDB,true);
-         updateLayerDefinitions(ATDB, top_cell_list);
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(0);
+            do
+            {
+               top_cell_list.push_back(std::string(root->GetItem()->name()));
+            } while (NULL != (root = root->GetNextRoot(0)));
+            TpdTime timec(ATDB->created());
+            TpdTime timeu(ATDB->lastUpdated());
+            updateLayerDefinitions(ATDB, top_cell_list);
          DATC->unlockDB();
+         browsers::addTDTtab();
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -206,7 +206,7 @@ int tellstdfunc::TDTloadlib::execute()
          {
             top_cell_list.push_back(std::string(root->GetItem()->name()));
          } while (NULL != (root = root->GetNextRoot(libID)));
-         browsers::addTDTtab(LTDB,true);
+         browsers::addTDTtab();
          info = "... done";
          tell_log(console::MT_INFO,info);
 
@@ -406,10 +406,9 @@ int tellstdfunc::GDSconvertAll::execute()
    }
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       DATC->importGDScell(top_cells, recur, over);
-      browsers::addTDTtab(ATDB,true);
       updateLayerDefinitions(ATDB, top_cells);
    DATC->unlockDB();
-   
+   browsers::addTDTtab();
    LogFile << LogFile.getFN() << "(\""<< *pl << "\"," << LogFile._2bool(recur)
          << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    delete pl;

@@ -287,7 +287,7 @@ int DataCenter::TDTloadlib(std::string filename)
 {
    laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
    if (!tempin.status()) return -1;
-   word libRef = _TEDLIB.getNextLibRefNo();
+   word libRef = _TEDLIB.getLastLibRefNo() + 1;
    try
    {
       tempin.read(libRef);

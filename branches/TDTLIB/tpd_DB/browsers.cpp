@@ -404,12 +404,11 @@ void browsers::TDTbrowser::initialize()
 /*   RBcellID.Unset(); */top_structure.Unset(); active_structure.Unset();
 }
 
-void browsers::TDTbrowser::collectInfo(const wxString libname, const word libID, laydata::TDTHierTree* tdtH, bool traverse_all) 
+void browsers::TDTbrowser::collectInfo(const wxString libname, const word libID, laydata::TDTHierTree* tdtH) 
 {
    wxTreeItemId hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),libname);
    wxTreeItemId froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
-   assert(traverse_all ? NULL != tdtH : true);
-   if (!traverse_all) return; 
+   if (NULL == tdtH) return;
    laydata::TDTHierTree* root = tdtH->GetFirstRoot(libID);
    wxTreeItemId nroot;
    while (root){
@@ -428,7 +427,7 @@ void browsers::TDTbrowser::collectInfo(const wxString libname, const word libID,
    hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
    fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
 }
-      
+
 void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, word libID, const wxTreeItemId& lroot) 
 {
    const laydata::TDTHierTree* Child= root->GetChild(libID);
@@ -713,19 +712,38 @@ void browsers::browserTAB::OnCommand(wxCommandEvent& event)
    int command = event.GetInt();
    switch (command) 
    {
-   case BT_ADDTDT_LIB:OnTELLaddTDTlib(static_cast<laydata::tdtlibrary*>(event.GetClientData()),
-                         (1 == event.GetExtraLong()) ? true : false);break;
+      case BT_ADDTDT_LIB:OnTELLaddTDTlib();break;
       case BT_ADDGDS_TAB:OnTELLaddGDStab();break;
       case BT_CLEARGDS_TAB:OnTELLclearGDStab(); break;
    }
 }
 
-void browsers::browserTAB::OnTELLaddTDTlib(laydata::tdtlibrary* tdtLib, bool traverse_all) 
+void browsers::browserTAB::OnTELLaddTDTlib() 
 {
-   word libID = tdtLib->libID();
-   if (0 == libID) _TDTstruct->initialize();
-   wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
-      _TDTstruct->collectInfo(libname, tdtLib->libID(), tdtLib->hiertree(), traverse_all);
+   _TDTstruct->initialize();
+   laydata::tdtlibrary* tdtLib = NULL;
+   bool traverseDB = true;
+   // first the database
+   try
+   {
+      tdtLib = DATC->lockDB(false);
+   }
+   catch (EXPTNactive_DB) {traverseDB = false;}
+
+   if (traverseDB)
+   {
+      wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
+      _TDTstruct->collectInfo(libname, 0, tdtLib->hiertree());
+      DATC->unlockDB();
+   }
+   // and now libraries
+   int lastlib = DATC->getLastLibRefNo();
+   for (int curlib = 1; curlib <= lastlib; curlib++)
+   {
+      tdtLib = DATC->getLib(curlib);
+      wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
+         _TDTstruct->collectInfo(libname, curlib, tdtLib->hiertree());
+   }
 }
 
 void browsers::browserTAB::OnTELLaddGDStab() 
@@ -750,6 +768,7 @@ void browsers::browserTAB::OnTELLclearGDStab()
 //==============================================================================
 void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool status) 
 {
+   assert(Browsers);
    int* bt1 = DEBUG_NEW int(btype);
    wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
    eventLAYER_STATUS.SetExtraLong(status);
@@ -762,6 +781,7 @@ void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool
 
 void browsers::layer_add(const std::string name, const word layno) 
 {
+   assert(Browsers);
    wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
    LayerInfo *layer = DEBUG_NEW LayerInfo(name, layno);
    int* bt = DEBUG_NEW int(BT_LAYER_ADD);
@@ -774,6 +794,7 @@ void browsers::layer_add(const std::string name, const word layno)
 
 void browsers::layer_default(const word newlay, const word oldlay) 
 {
+   assert(Browsers);
    wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
    int*bt = DEBUG_NEW int(BT_LAYER_DEFAULT);
    eventLAYER_DEF.SetExtraLong(newlay);
@@ -785,17 +806,30 @@ void browsers::layer_default(const word newlay, const word oldlay)
 	delete bt;
 }
 
-void browsers::addTDTtab(laydata::tdtlibrary* tdtLib, bool traverse_all)
+void browsers::addTDTtab(/*laydata::tdtlibrary* tdtLib*/)
 {
+   assert(Browsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(BT_ADDTDT_LIB);
-   eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
-   eventADDTAB.SetExtraLong(traverse_all ? 1 : 0);
-   wxPostEvent(Browsers, eventADDTAB);
+//   eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
+//   eventADDTAB.SetExtraLong(traverse_all ? 1 : 0);
+   // Note about threads here!
+   // Traversing the entire hierarchy tree can not be done in a
+   // separate thread. The main reason - when executing a script
+   // that contains for example:
+   //    new("a")); addcell("b");
+   // it's quite possible that cell hierarchy will be traversed
+   // after the execution of the second function. The latter will
+   // send treeAddMember itself - in result the browser window
+   // will get cell b twice. Bottom line: don't use PostEvent here!
+   Browsers->GetEventHandler()->ProcessEvent( eventADDTAB );
+   // the alternative is to call the function directly
+//   Browsers->OnTELLaddTDTlib(tdtLib, traverse_all);
 }
 
 void browsers::addGDStab() 
 {
+   assert(Browsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(BT_ADDGDS_TAB);
    wxPostEvent(Browsers, eventADDTAB);
@@ -803,6 +837,7 @@ void browsers::addGDStab()
 
 void browsers::clearGDStab() 
 {
+   assert(Browsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(BT_CLEARGDS_TAB);
    wxPostEvent(Browsers, eventADDTAB);
@@ -810,6 +845,7 @@ void browsers::clearGDStab()
 
 void browsers::celltree_open(const std::string cname) 
 {
+   assert(Browsers);
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(BT_CELL_OPEN);
    eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
@@ -818,6 +854,7 @@ void browsers::celltree_open(const std::string cname)
 
 void browsers::celltree_highlight(const std::string cname) 
 {
+   assert(Browsers);
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(BT_CELL_HIGHLIGHT);
    eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
@@ -826,6 +863,7 @@ void browsers::celltree_highlight(const std::string cname)
 
 void browsers::treeAddMember(const char* cell, const char* parent, int action) 
 {
+   assert(Browsers);
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(BT_CELL_ADD);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
@@ -837,6 +875,7 @@ void browsers::treeAddMember(const char* cell, const char* parent, int action)
 
 void browsers::treeRemoveMember(const char* cell, const char* parent, bool orphan) 
 {
+   assert(Browsers);
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(BT_CELL_REMOVE);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
@@ -848,7 +887,7 @@ void browsers::treeRemoveMember(const char* cell, const char* parent, bool orpha
 
 void browsers::parseCommand(const wxString cmd)
 {
-   assert(Browsers->tellParser());
+   assert(Browsers && Browsers->tellParser());
    wxCommandEvent eventPARSE(wxEVT_CONSOLE_PARSE);
    eventPARSE.SetString(cmd);
    wxPostEvent(Browsers->tellParser(), eventPARSE);
@@ -1080,6 +1119,7 @@ void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
          eventLAYER_SELECT.SetExtraLong(_layer->layno());
    
          eventLAYER_SELECT.SetInt(bt);
+         assert(Browsers && Browsers->TDTlayers());
 			wxPostEvent(Browsers->TDTlayers()->getLayerPanel(), eventLAYER_SELECT);
       }
    }
