@@ -95,11 +95,11 @@ int tellstdfunc::TDTread::execute()
          std::string info = "Generating cell hierarchy ...";
          tell_log(console::MT_INFO,info);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
-            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(0);
+            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
             do
             {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
-            } while (NULL != (root = root->GetNextRoot(0)));
+            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
             ATDB->btreeAddMember    = &browsers::treeAddMember;
             ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
             tell_log(console::MT_INFO,info);
@@ -154,11 +154,11 @@ int tellstdfunc::TDTreadIFF::execute()
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
             ATDB->btreeAddMember    = &browsers::treeAddMember;
             ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(0);
+            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
             do
             {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
-            } while (NULL != (root = root->GetNextRoot(0)));
+            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
             updateLayerDefinitions(ATDB, top_cell_list);
@@ -332,11 +332,11 @@ int tellstdfunc::GDSread::execute() {
          //
          GDSin::GDSFile* AGDSDB = DATC->lockGDS();
 
-            GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(0);
+            GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
             do 
             {
                top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));
-            } while (NULL != (root = root->GetNextRoot(0)));
+            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
          DATC->unlockGDS();
          telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();

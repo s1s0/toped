@@ -145,7 +145,7 @@ void browsers::GDSbrowser::collectInfo()
    fCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
   
    if (NULL == AGDSDB->hiertree()) return; // new, empty design
-   GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(0);
+   GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
    wxTreeItemId nroot;
    while (root){
       nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
@@ -153,7 +153,7 @@ void browsers::GDSbrowser::collectInfo()
       nroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
 //      SetItemTextColour(nroot,*wxLIGHT_GREY);
       collectChildren(root, nroot);
-      root = root->GetNextRoot(0);
+      root = root->GetNextRoot(TARGETDB_LIB);
    }
    DATC->unlockGDS();
    hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
@@ -169,7 +169,7 @@ void browsers::GDSbrowser::DeleteAllItems(void)
 
 void browsers::GDSbrowser::collectChildren(const GDSin::GDSHierTree *root, const wxTreeItemId& lroot) 
 {
-   const GDSin::GDSHierTree* Child= root->GetChild(0);
+   const GDSin::GDSHierTree* Child= root->GetChild(TARGETDB_LIB);
    wxTreeItemId nroot;
    wxTreeItemId temp;
 
@@ -182,7 +182,7 @@ void browsers::GDSbrowser::collectChildren(const GDSin::GDSHierTree *root, const
 //      SetItemTextColour(nroot,*wxLIGHT_GREY);
       hCellBrowser->SortChildren(lroot);
       collectChildren(Child, nroot);
-      Child = Child->GetBrother(0);
+      Child = Child->GetBrother(TARGETDB_LIB);
    }
 }
 
@@ -404,7 +404,7 @@ void browsers::TDTbrowser::initialize()
 /*   RBcellID.Unset(); */top_structure.Unset(); active_structure.Unset();
 }
 
-void browsers::TDTbrowser::collectInfo(const wxString libname, const word libID, laydata::TDTHierTree* tdtH) 
+void browsers::TDTbrowser::collectInfo(const wxString libname, const int libID, laydata::TDTHierTree* tdtH) 
 {
    wxTreeItemId hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),libname);
    wxTreeItemId froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
@@ -428,7 +428,7 @@ void browsers::TDTbrowser::collectInfo(const wxString libname, const word libID,
    fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
 }
 
-void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, word libID, const wxTreeItemId& lroot) 
+void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, int libID, const wxTreeItemId& lroot) 
 {
    const laydata::TDTHierTree* Child= root->GetChild(libID);
    wxTreeItemId nroot;
@@ -733,12 +733,12 @@ void browsers::browserTAB::OnTELLaddTDTlib()
    if (traverseDB)
    {
       wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
-      _TDTstruct->collectInfo(libname, 0, tdtLib->hiertree());
+      _TDTstruct->collectInfo(libname, TARGETDB_LIB, tdtLib->hiertree());
       DATC->unlockDB();
    }
    // and now libraries
-   int lastlib = DATC->getLastLibRefNo();
-   for (int curlib = 1; curlib <= lastlib; curlib++)
+   int numlibs = DATC->getLastLibRefNo();
+   for (int curlib = 1; curlib < numlibs; curlib++)
    {
       tdtLib = DATC->getLib(curlib);
       wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
@@ -806,7 +806,7 @@ void browsers::layer_default(const word newlay, const word oldlay)
 	delete bt;
 }
 
-void browsers::addTDTtab(/*laydata::tdtlibrary* tdtLib*/)
+void browsers::addTDTtab()
 {
    assert(Browsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);

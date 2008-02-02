@@ -43,7 +43,7 @@ laydata::TDTHierTree* laydata::tdtlibrary::_hiertree = NULL;
 //-----------------------------------------------------------------------------
 // class tdtlibrary
 //-----------------------------------------------------------------------------
-laydata::tdtlibrary::tdtlibrary(std::string name, real DBU, real UU, word libID) :
+laydata::tdtlibrary::tdtlibrary(std::string name, real DBU, real UU, int libID) :
    _name(name), _libID(libID), _DBU(DBU), _UU(UU) {}
 
 laydata::tdtlibrary::~tdtlibrary()
@@ -117,10 +117,10 @@ void laydata::tdtlibrary::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recu
    //
    if (NULL == top)
    {
-      laydata::TDTHierTree* root = _hiertree->GetFirstRoot(0);
+      laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
       while (root) {
          _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root, _UU, recur);
-         root = root->GetNextRoot(0);
+         root = root->GetNextRoot(TARGETDB_LIB);
       }
    }
    else
@@ -157,9 +157,9 @@ laydata::tdtcell* laydata::tdtlibrary::checkcell(std::string name)
       
 void laydata::tdtlibrary::recreate_hierarchy()
 {
-   if (0 == _libID)
+   if (-1 == _libID)
    {
-      clearHierTree(0);
+      clearHierTree(TARGETDB_LIB);
    }
    // here - run the hierarchy extraction on orphans only   
    for (laydata::cellList::const_iterator wc = _cells.begin(); 
@@ -195,6 +195,9 @@ bool laydata::tdtlibrary::collect_usedlays(std::string cellname, bool recursive,
 //-----------------------------------------------------------------------------
 laydata::tdtlibdir::tdtlibdir()
 {
+   // create the default library of unknown cells
+   tdtlibrary* undeflib = DEBUG_NEW tdtlibrary("__UNDEFINED__", 1e-9, 1e-3, 0);
+   _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem("__UNDEFINED__", undeflib) );
 }
       
 laydata::tdtlibdir::~tdtlibdir()
@@ -213,8 +216,8 @@ word laydata::tdtlibdir::getLastLibRefNo()
 
 void laydata::tdtlibdir::addlibrary(tdtlibrary* const lib, word libRef)
 {
-   _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem(lib->name(), lib) );
    assert(libRef == _libdirectory.size());
+   _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem(lib->name(), lib) );
 }
 
 void laydata::tdtlibdir::closelibrary(std::string)
@@ -223,14 +226,14 @@ void laydata::tdtlibdir::closelibrary(std::string)
 
 laydata::tdtlibrary* laydata::tdtlibdir::getLib(word libID)
 {
-   assert(libID);
+   assert(libID); // make sure that nobody asks for the default library
    assert(libID <= _libdirectory.size());
-   return _libdirectory[libID-1]->second;
+   return _libdirectory[libID]->second;
 }
 
 bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair& striter) const
 {
-   for (word i = 0; i < _libdirectory.size(); i++)
+   for (word i = 1; i < _libdirectory.size(); i++)
    {
       if (NULL != _libdirectory[i]->second->checkcell(name))
       {
@@ -245,7 +248,7 @@ bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair&
 // class tdtdesign
 //-----------------------------------------------------------------------------
 laydata::tdtdesign::tdtdesign(std::string name, time_t created, time_t lastUpdated,
-           real DBU, real UU)  :    laydata::tdtdesign::tdtlibrary(name, DBU, UU, 0)
+           real DBU, real UU)  :    laydata::tdtdesign::tdtlibrary(name, DBU, UU, TARGETDB_LIB)
 {
    _tmpdata       = NULL;
    modified       = false;
@@ -496,10 +499,10 @@ void laydata::tdtdesign::write(TEDfile* const tedfile) {
    tedfile->putReal(_DBU);
    tedfile->putReal(_UU);
    //
-   laydata::TDTHierTree* root = _hiertree->GetFirstRoot(0);
+   laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
    while (root) {
       _cells[root->GetItem()->name()]->write(tedfile, _cells, root);
-      root = root->GetNextRoot(0);
+      root = root->GetNextRoot(TARGETDB_LIB);
    }
    tedfile->putByte(tedf_DESIGNEND);
    modified = false;

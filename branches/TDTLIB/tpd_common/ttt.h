@@ -69,6 +69,13 @@ typedef     _sg_int16   int2b;
 typedef     _sg_int32   int4b;
 typedef        double   real;
 
+//=============================================================================
+// Some common constants (instead of #defines)
+//=============================================================================
+const int         ALL_LIB           = -2;
+const int         TARGETDB_LIB      = -1;
+const int         UNDEFCELL_LIB     =  0;
+
 //==============================================================================
 class SGBitSet {
 public:
@@ -279,7 +286,10 @@ SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst
 
 template <class TYPE> 
       bool   SGHierTree<TYPE>::thisLib(int libID) {
-         return (0 > libID) ? true : (libID == component->libID());
+         /*! Any libID < TARGETDB_LIB will make the functions to ignore it.
+             Idea is to have a possibility to traverse the entire
+             tree no matter where the cell belongs */
+         return (libID < TARGETDB_LIB) ? true : (libID == component->libID());
       }
 
 template <class TYPE>
@@ -461,6 +471,9 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
 
 std::vector<std::string> split (const std::string& str, char delim);
 
+//=============================================================================
+// More common constants (instead of #defines)
+//=============================================================================
 const byte MAX_BYTE_VALUE = 255;
 const word MAX_WORD_VALUE = 65535;
 //#define MIN_X        (int4b)0x80000001      //  -2 147 483 647
@@ -468,11 +481,9 @@ const word MAX_WORD_VALUE = 65535;
 //#define MIN_Y        (int4b)0x80000001      //  -2 147 483 647
 //#define MAX_Y        (int4b)0x7FFFFFFF      //   2 147 483 647
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
-const byte        OPENGL_FONT_UNIT   = 128;
-const byte        MIN_VISUAL_AREA    = 10;   // that would be 10 pixels
-const DBbox       DEFAULT_OVL_BOX    = DBbox(TP(0,0));
-const DBbox       DEFAULT_ZOOM_BOX   = DBbox(TP(-2000,-2000), TP(20000,20000));
-const std::string UNDEFLAYNAME       = std::string("__undefined");
-
-
+const byte        OPENGL_FONT_UNIT  = 128;
+const byte        MIN_VISUAL_AREA   = 10;   // that would be 10 pixels
+const DBbox       DEFAULT_OVL_BOX   = DBbox(TP(0,0));
+const DBbox       DEFAULT_ZOOM_BOX  = DBbox(TP(-2000,-2000), TP(20000,20000));
+const std::string UNDEFLAYNAME      = std::string("__undefined");
 #endif

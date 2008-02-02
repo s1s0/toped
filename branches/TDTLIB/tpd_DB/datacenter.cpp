@@ -264,7 +264,7 @@ bool DataCenter::TDTread(std::string filename)
 
    try
    {
-      tempin.read(0);
+      tempin.read(TARGETDB_LIB);
    }
    catch (EXPTNreadTDT)
    {
@@ -287,7 +287,7 @@ int DataCenter::TDTloadlib(std::string filename)
 {
    laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
    if (!tempin.status()) return -1;
-   word libRef = _TEDLIB.getLastLibRefNo() + 1;
+   word libRef = _TEDLIB.getLastLibRefNo();
    try
    {
       tempin.read(libRef);
@@ -427,7 +427,7 @@ void DataCenter::newDesign(std::string name, time_t created)
       // without much talking.
       // UNDO buffers will be reset as well in tellstdfunc::stdNEWDESIGN::execute()
       // but there is still a chance to restore everything - using the log file.
-      laydata::tdtlibrary::clearHierTree(0);
+      laydata::tdtlibrary::clearHierTree(TARGETDB_LIB);
       delete _TEDDB;
    }
    _TEDDB = DEBUG_NEW laydata::tdtdesign(name, created, 0);
