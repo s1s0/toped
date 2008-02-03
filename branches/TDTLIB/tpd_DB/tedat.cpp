@@ -1640,6 +1640,16 @@ void laydata::tdtcellref::write(TEDfile* const tedfile) const {
    tedfile->putCTM(_translation);
 }
 
+laydata::tdtcell* laydata::tdtcellref::cstructure() const
+{
+   laydata::tdtcell* celldef;
+   if (_structure->second->libID())
+      celldef =  static_cast<laydata::tdtcell*>(_structure->second);
+   else
+      celldef = NULL;
+   return celldef;
+}
+
 void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
 {
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_SREF);
@@ -1674,13 +1684,22 @@ void laydata::tdtcellref::PSwrite(PSFile& psf, const layprop::DrawProperties& dr
    }
 }
 
-void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticList* nshp) {
+void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticList* nshp)
+{
    tdtdata *data_copy;
    shapeList* ssl;
    // select all the shapes of the referenced tdtcell
-   structure()->full_select();
-   for (selectList::const_iterator CL = structure()->shapesel()->begin();
-                                   CL != structure()->shapesel()->end(); CL++) {
+   if (NULL == cstructure())
+   {
+      std::ostringstream ost;
+      ost << "Cell \"" << structure()->name() << "\" is undefined. Ignored during ungoup.";
+      tell_log(console::MT_WARNING, ost.str());
+      return;
+   }
+   cstructure()->full_select();
+   for (selectList::const_iterator CL = cstructure()->shapesel()->begin();
+                                   CL != cstructure()->shapesel()->end(); CL++)
+   {
       // secure the target layer
       quadTree* wl = dst->securelayer(CL->first);
       // There is no point here to ensure that the layer definition exists.
@@ -1697,7 +1716,8 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
       }   
       // for every single shape on the layer
       for (dataList::const_iterator DI = CL->second->begin();
-                                    DI != CL->second->end(); DI++) {
+                                    DI != CL->second->end(); DI++)
+      {
          // create a new copy of the data
          data_copy = DI->first->copy(_translation);
          // add it to the corresponding layer of the dst cell
@@ -1706,20 +1726,21 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
          ssl->push_back(data_copy);
          //update the hierarchy tree if this is a cell
          if (0 == CL->first) dst->addchild(ATDB, 
-                            static_cast<tdtcellref*>(data_copy)->structure());
+                            static_cast<tdtcellref*>(data_copy)->cstructure());
          // add it to the selection list of the dst cell
          dst->select_this(data_copy,CL->first);
       }
       wl->invalidate();
    }
-   structure()->unselect_all();
+   cstructure()->unselect_all();
 }
 
-DBbox laydata::tdtcellref::overlap() const {
-   if (structure())
-      return structure()->overlap() * _translation;
-   else 
-      return DEFAULT_ZOOM_BOX * _translation;
+DBbox laydata::tdtcellref::overlap() const
+{
+//   if (structure())
+   return structure()->overlap() * _translation;
+//   else 
+//      return DEFAULT_ZOOM_BOX * _translation;
 //      return DBbox(TP(static_cast<int4b>(rint(_translation.tx())),
 //                         static_cast<int4b>(rint(_translation.ty()))));
 }      
@@ -1796,7 +1817,8 @@ laydata::tdtcellaref::tdtcellaref(TEDfile* const tedfile) : tdtcellref(tedfile)
 void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // make sure that the referenced structure exists
-   if (NULL == structure()) return;
+   //if (NULL == structure()) return;
+   assert(structure());
    if (0 != drawprop.drawinglayer())
    {
       int boza = drawprop.drawinglayer();
@@ -1922,19 +1944,17 @@ void laydata::tdtcellaref::openGL_drawsel(const pointlist& ptlist, const SGBitSe
 void laydata::tdtcellaref::tmp_draw(const layprop::DrawProperties& drawprop,
                  ctmqueue& transtack, SGBitSet*, bool under_construct) const
 {
-   if (structure())
-   {
-      for (int i = 0; i < _arrprops.cols(); i++)
-      {// start/stop rows
-         for(int j = 0; j < _arrprops.rows(); j++)
-         { // start/stop columns
-            // for each of the visual array figures...
-            // ... get the translation matrix ...
-            CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
-            refCTM *= _translation;
-            transtack.push_front(refCTM * transtack.front());
-            structure()->tmp_draw(drawprop, transtack);
-         }
+   assert(structure());
+   for (int i = 0; i < _arrprops.cols(); i++)
+   {// start/stop rows
+      for(int j = 0; j < _arrprops.rows(); j++)
+      { // start/stop columns
+         // for each of the visual array figures...
+         // ... get the translation matrix ...
+         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+         refCTM *= _translation;
+         transtack.push_front(refCTM * transtack.front());
+         structure()->tmp_draw(drawprop, transtack);
       }
    }
 }
@@ -2019,16 +2039,19 @@ void  laydata::tdtcellaref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, layd
 }
 
 DBbox laydata::tdtcellaref::overlap() const {
-   if (structure()) {
+   assert(structure());
+   {
      DBbox ovl(clear_overlap() * _translation);
      ovl.normalize();
      return ovl;
    }
-   else return DBbox(TP(static_cast<int4b>(rint(_translation.tx())),
-                         static_cast<int4b>(rint(_translation.ty()))));
+//   else return DBbox(TP(static_cast<int4b>(rint(_translation.tx())),
+//                         static_cast<int4b>(rint(_translation.ty()))));
 }
 
-DBbox laydata::tdtcellaref::clear_overlap() const {
+DBbox laydata::tdtcellaref::clear_overlap() const
+{
+   assert(structure());
    DBbox bx = structure()->overlap();
    DBbox ovl = bx;
    CTM refCTM(1.0,0.0,0.0,1.0,_arrprops.stepX() * (_arrprops.cols()-1), _arrprops.stepY() * (_arrprops.rows() - 1));

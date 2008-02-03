@@ -111,7 +111,7 @@ namespace laydata {
    typedef  std::map<word, dataList*>               selectList;
    typedef  std::list<tdtdata*>                     shapeList;
    typedef  std::map<word,shapeList*>               atticList;
-   typedef  std::map<std::string, tdtcell*>         cellList;
+   typedef  std::map<std::string, tdtdefaultcell*>  cellList;
    typedef  cellList::const_iterator                refnamepair;
    typedef  std::deque<const tdtcellref*>           cellrefstack;
    typedef  std::list<word>                         ListOfWords;

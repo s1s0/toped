@@ -58,7 +58,7 @@ laydata::editobject::editobject(tdtcellref* cref, tdtcell* vcell, cellrefstack* 
 {
    _activeref = cref;
    _viewcell = vcell;
-   if (_activeref) _activecell = _activeref->structure();
+   if (_activeref) _activecell = _activeref->cstructure();
    else            _activecell = vcell;
    _peditchain = crs;
    _ARTM = trans;
@@ -92,7 +92,7 @@ void laydata::editobject::push(tdtcellref* cref, tdtcell* vref, cellrefstack* cr
    assert(cref);
    reset(); // Unset previous active reference if it exists
    _activeref = cref;
-   _activecell = _activeref->structure();
+   _activecell = _activeref->cstructure();
    _viewcell = vref;
    _peditchain = crs;
    _ARTM = trans;
@@ -131,7 +131,7 @@ bool laydata::editobject::pop() {
       // get a pointer to the active reference...
       _activeref = const_cast<tdtcellref*>(_peditchain->back());
       // ... and active cell
-      _activecell = _activeref->structure();
+      _activecell = _activeref->cstructure();
       // 
       blockfill();
    }
@@ -210,9 +210,8 @@ laydata::editobject::~editobject()
 // class tdtdefaultcell
 //-----------------------------------------------------------------------------
 laydata::tdtdefaultcell::tdtdefaultcell(std::string name, int libID, bool orphan) :
-      _name(name), _libID(libID), _orphan(orphan) {}
+      _orphan(orphan), _name(name), _libID(libID)  {}
 
-//laydata::tdtdefaultcell::~tdtdefaultcell();
 void laydata::tdtdefaultcell::openGL_draw(layprop::DrawProperties&, bool active) const
 {
 }
@@ -238,6 +237,20 @@ void laydata::tdtdefaultcell::updateHierarchy(tdtdesign*)
 DBbox laydata::tdtdefaultcell::overlap() const
 {
    return DEFAULT_ZOOM_BOX;
+}
+
+void laydata::tdtdefaultcell::write(TEDfile* const, const cellList&, const TDTHierTree*) const
+{
+   assert(false);
+}
+
+void laydata::tdtdefaultcell::GDSwrite(GDSin::GDSFile&, const cellList&, const TDTHierTree*, real, bool) const
+{
+   assert(false);
+}
+
+void laydata::tdtdefaultcell::collect_usedlays(const tdtlibrary*, bool, ListOfWords&) const
+{
 }
 
 void laydata::tdtdefaultcell::invalidateParents(laydata::tdtdesign* ATDB)
@@ -314,7 +327,7 @@ laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB,
    return cellaref;
 }
 
-bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtcell* child) {
+bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child) {
   // check for circular reference, i.e. the child is a father of some of its ancestors
   if (ATDB->_hiertree->checkAncestors(this, child, ATDB->_hiertree)) {
     //Circular reference found. child is already an ancestor of this
@@ -443,23 +456,28 @@ laydata::tdtcellref* laydata::tdtcell::getcellover(TP pnt, ctmstack& transtack, 
     while (_layers[0]->getobjectover(pnt,cellobj)) {
       //... and get the one that overlaps pnt.
       cref = static_cast<laydata::tdtcellref*>(cellobj);
-      TP pntadj = pnt * cref->translation().Reversed();
-      // if in the selected reference there are shapes that overlap pnt...
-      if (cref->structure()->getshapeover(pntadj, viewprop)) {
-         // ... that is what we need ...
-         refstack->push_front(cref);
-         // save the strack of reference translations
-         transtack.push(transtack.top()*cref->translation());
-         return cref;
-      }   
-      // ... otherwise, dive into the hierarchy
-      else {
-         laydata::tdtcellref *rref = cref->structure()->getcellover(pntadj,transtack,refstack, viewprop);
-         if (rref) {
+      if (cref->cstructure()) // avoid undefined cells
+      {
+         TP pntadj = pnt * cref->translation().Reversed();
+         // if in the selected reference there are shapes that overlap pnt...
+         if (cref->cstructure()->getshapeover(pntadj, viewprop))
+         {
+            // ... that is what we need ...
             refstack->push_front(cref);
             // save the strack of reference translations
             transtack.push(transtack.top()*cref->translation());
-            return rref;
+            return cref;
+         }   
+         // ... otherwise, dive into the hierarchy
+         else
+         {
+            laydata::tdtcellref *rref = cref->cstructure()->getcellover(pntadj,transtack,refstack, viewprop);
+            if (rref) {
+               refstack->push_front(cref);
+               // save the stack of reference translations
+               transtack.push(transtack.top()*cref->translation());
+               return rref;
+            }
          }
       }
    }
@@ -1734,11 +1752,7 @@ void laydata::tdtcell::collect_usedlays(const tdtlibrary* ATDB, bool recursive, 
    // first call recursively the method on all children cells
    if (recursive)
       for (nameList::const_iterator CC = _children.begin(); CC != _children.end(); CC++)
-      {
-         laydata::tdtcell* curcel = ATDB->getcellnamepair(*CC)->second;
-         if (NULL != curcel)
-            ATDB->getcellnamepair(*CC)->second->collect_usedlays(ATDB, recursive, laylist);
-      }
+         ATDB->getcellnamepair(*CC)->second->collect_usedlays(ATDB, recursive, laylist);
    // then update with the layers used in this cell
    for(layerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       laylist.push_back(CL->first);
