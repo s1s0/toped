@@ -342,11 +342,11 @@ void laydata::TEDfile::registercellread(std::string cellname, tdtcell* cell) {
       if (NULL == _design->_cells[cellname]) {
          // case 1 or case 2 -> can't be distiguised in this moment
          //_design->_cells[cellname] = cell;
-         // call has been referenced already, so it's not an orphan
+         // cell has been referenced already, so it's not an orphan
          cell->parentfound();
       }
       else {
-         // case 3 -> parsing should be stopped !
+         //@FIXME case 3 -> parsing should be stopped !
       }
    _design->_cells[cellname] = cell;
 }

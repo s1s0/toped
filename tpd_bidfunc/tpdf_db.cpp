@@ -89,26 +89,27 @@ int tellstdfunc::TDTread::execute()
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      nameList top_cell_list;
       if (DATC->TDTread(filename))
       {
-         std::string info = "Generating cell hierarchy ...";
-         tell_log(console::MT_INFO,info);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
+            // Initialize call back functions
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+               // time stamps
+            TpdTime timec(ATDB->created());
+            TpdTime timeu(ATDB->lastUpdated());
+               // Gatering the used layers & update the layer definitions
+            std::list<std::string> top_cell_list;
             laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
             do
             {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            ATDB->btreeAddMember    = &browsers::treeAddMember;
-            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-            tell_log(console::MT_INFO,info);
-            TpdTime timec(ATDB->created());
-            TpdTime timeu(ATDB->lastUpdated());
             updateLayerDefinitions(ATDB, top_cell_list);
          DATC->unlockDB();
+         // populate the hierarchy browser
          browsers::addTDTtab();
-         info = "... done";
+         //
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -149,20 +150,24 @@ int tellstdfunc::TDTreadIFF::execute()
       bool start_ignoring = false;
       if (DATC->TDTcheckread(filename, timeCreated, timeSaved, start_ignoring))
       {
-         std::list<std::string> top_cell_list;
          DATC->TDTread(filename);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
+            // Initialize call back functions
             ATDB->btreeAddMember    = &browsers::treeAddMember;
             ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+            // time stamps
+            TpdTime timec(ATDB->created());
+            TpdTime timeu(ATDB->lastUpdated());
+            // Gatering the used layers & update the layer definitions
+            std::list<std::string> top_cell_list;
             laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
             do
             {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            TpdTime timec(ATDB->created());
-            TpdTime timeu(ATDB->lastUpdated());
             updateLayerDefinitions(ATDB, top_cell_list);
          DATC->unlockDB();
+         // populate the cell hierarchy browser
          browsers::addTDTtab();
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
@@ -198,20 +203,16 @@ int tellstdfunc::TDTloadlib::execute()
       int libID = DATC->TDTloadlib(filename);
       if (0 <= libID)
       {
-         std::string info = "Generating cell hierarchy ...";
-         tell_log(console::MT_INFO,info);
          laydata::tdtlibrary* LTDB = DATC->getLib(libID);
+         // Gatering the used layers & update the layer definitions
          laydata::TDTHierTree* root = LTDB->hiertree()->GetFirstRoot(libID);
          do
          {
             top_cell_list.push_back(std::string(root->GetItem()->name()));
          } while (NULL != (root = root->GetNextRoot(libID)));
-         browsers::addTDTtab();
-         info = "... done";
-         tell_log(console::MT_INFO,info);
-
          updateLayerDefinitions(LTDB, top_cell_list);
-
+         // populating cell hierarchy browser
+         browsers::addTDTtab();
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
       else

@@ -157,7 +157,7 @@ laydata::tdtcell* laydata::tdtlibrary::checkcell(std::string name)
       
 void laydata::tdtlibrary::recreate_hierarchy()
 {
-   if (-1 == _libID)
+   if (TARGETDB_LIB == _libID)
    {
       clearHierTree(TARGETDB_LIB);
    }

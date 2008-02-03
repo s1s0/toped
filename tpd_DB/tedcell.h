@@ -41,7 +41,7 @@ namespace laydata {
    class tdtcellref;
    class tdtcellaref;
    typedef  std::map<word, quadTree*>               layerList;
-   typedef  SGHierTree<tdtcell>                     TDTHierTree;
+   typedef  SGHierTree<tdtdefaultcell>              TDTHierTree;
 
 
 //==============================================================================
@@ -90,7 +90,34 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdtcell  {
+   class tdtdefaultcell  {
+      public:
+                              tdtdefaultcell(std::string, int , bool );
+         virtual            ~tdtdefaultcell() {};
+         virtual void        openGL_draw(layprop::DrawProperties&, bool active=false) const;
+         virtual void        tmp_draw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
+         virtual void        PSwrite(PSFile&, const layprop::DrawProperties&,
+                                      const cellList* = NULL, const TDTHierTree* = NULL) const;
+         virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell* parent, cellList* celldefs);
+         virtual void        updateHierarchy(tdtdesign*);
+         virtual DBbox       overlap() const;
+
+         void                 parentfound()     {_orphan = false;};
+         bool                 orphan() const    {return _orphan;};
+         std::string          name() const      {return _name;};
+         int                  libID() const     {return _libID;}
+         layerList&           layers();       //! all layers the cell
+      private:
+         std::string          _name;         //! cell name
+         int                  _libID;        //! cell belongs to ... library
+      protected:
+         void                 invalidateParents(tdtdesign*);
+         bool                 _orphan;       //! cell doesn't have a parent
+         layerList            _layers;       //! all layers the cell
+   };
+
+//==============================================================================
+   class tdtcell : public tdtdefaultcell  {
    public:
                            tdtcell(std::string);
                            tdtcell(TEDfile* const, std::string, int);
@@ -143,9 +170,9 @@ namespace laydata {
       bool                 stretch_selected(int bfactor, atticList**);
       atticList*           changeselect(TP, SH_STATUS status, layprop::ViewProperties&);
       tdtcellref*          getcellover(TP, ctmstack&, cellrefstack*, layprop::ViewProperties&);
-      void                 parentfound()     {_orphan = false;};
-      bool                 orphan() const    {return _orphan;};
-      std::string          name() const      {return _name;};
+//      void                 parentfound()     {_orphan = false;};
+//      bool                 orphan() const    {return _orphan;};
+//      std::string          name() const      {return _name;};
       selectList*          shapesel()        {return &_shapesel;};
       selectList*          copy_selist() const;
       void                 updateHierarchy(tdtdesign*);
@@ -153,11 +180,10 @@ namespace laydata {
       void                 report_selected(real) const;
       void                 collect_usedlays(const tdtlibrary*, bool, ListOfWords&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
-      int                  libID() const {return _libID;}
+//      int                  libID() const {return _libID;}
    private:
       bool                 getshapeover(TP, layprop::ViewProperties&);
       void                 store_inAttic(atticList&);
-      void                 invalidateParents(tdtdesign*);
       _dbl_word            getFullySelected(dataList*) const;
       nameList*            rehash_children();
       shapeList*           mergeprep(word);
@@ -165,14 +191,12 @@ namespace laydata {
       tdtdata*             checkNreplacePoly(selectDataPair&, validator*, word, selectList**);
       tdtdata*             checkNreplaceBox(selectDataPair&, validator*, word, selectList**);
       dataList*            secure_dataList(selectList&, word);
-      std::string          _name;         //! cell name
-      int                  _libID;        //! cell belongs to ... library
-      layerList            _layers;       //! all layers the cell
-      bool                 _orphan;       //! cell doesn't have a parent
+//      std::string          _name;         //! cell name
+//      int                  _libID;        //! cell belongs to ... library
+//      layerList            _layers;       //! all layers the cell
+//      bool                 _orphan;       //! cell doesn't have a parent
       nameList             _children;     //! for hierarchy list purposes
       selectList           _shapesel;     //! selected shapes
    };
-
 }
-
 #endif

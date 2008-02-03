@@ -207,13 +207,61 @@ laydata::editobject::~editobject()
 }
 
 //-----------------------------------------------------------------------------
+// class tdtdefaultcell
+//-----------------------------------------------------------------------------
+laydata::tdtdefaultcell::tdtdefaultcell(std::string name, int libID, bool orphan) :
+      _name(name), _libID(libID), _orphan(orphan) {}
+
+//laydata::tdtdefaultcell::~tdtdefaultcell();
+void laydata::tdtdefaultcell::openGL_draw(layprop::DrawProperties&, bool active) const
+{
+}
+
+void laydata::tdtdefaultcell::tmp_draw(const layprop::DrawProperties&, ctmqueue&, bool active) const
+{
+}
+
+void laydata::tdtdefaultcell::PSwrite(PSFile&, const layprop::DrawProperties&,
+      const cellList*, const TDTHierTree*) const
+{
+}
+
+laydata::TDTHierTree* laydata::tdtdefaultcell::hierout(laydata::TDTHierTree*& Htree, tdtcell* parent, cellList* celldefs)
+{
+   return Htree;
+}
+
+void laydata::tdtdefaultcell::updateHierarchy(tdtdesign*)
+{
+}
+
+DBbox laydata::tdtdefaultcell::overlap() const
+{
+   return DEFAULT_ZOOM_BOX;
+}
+
+void laydata::tdtdefaultcell::invalidateParents(laydata::tdtdesign* ATDB)
+{
+   TDTHierTree* hc = ATDB->hiertree()->GetMember(this);
+   while(hc)
+   {
+      if (hc->Getparent())
+      {
+         layerList llist = hc->Getparent()->GetItem()->_layers;
+         if (llist.end() != llist.find(0)) llist[0]->invalidate();
+      }
+      hc = hc->GetNextMember(this);
+   }
+}
+
+//-----------------------------------------------------------------------------
 // class tdtcell
 //-----------------------------------------------------------------------------
-laydata::tdtcell::tdtcell(std::string name) : 
-   _name(name), _libID(TARGETDB_LIB), _orphan(true) {}
+laydata::tdtcell::tdtcell(std::string name) :
+      tdtdefaultcell::tdtdefaultcell(name, TARGETDB_LIB, true) {}
 
-laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) : 
-   _name(name), _libID(lib), _orphan(true) 
+laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
+      tdtdefaultcell::tdtdefaultcell(name, lib, true)
 {
    byte recordtype;
    word  layno;
@@ -428,11 +476,11 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, c
       Child = Child->GetBrother(TARGETDB_LIB);
 	}
    // If no more children and the cell has not been written yet
-   if (tedfile->checkcellwritten(_name)) return;
-   std::string message = "...writing " + _name;
+   if (tedfile->checkcellwritten(name())) return;
+   std::string message = "...writing " + name();
    tell_log(console::MT_INFO, message);
    tedfile->putByte(tedf_CELL);
-   tedfile->putString(_name);
+   tedfile->putString(name());
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++) {
@@ -442,7 +490,7 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, c
       tedfile->putByte(tedf_LAYEREND);
    }   
    tedfile->putByte(tedf_CELLEND);
-   tedfile->registercellwritten(_name);
+   tedfile->registercellwritten(name());
 }
 
 void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
@@ -459,20 +507,20 @@ void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
       }
    }
    // If no more children and the cell has not been written yet
-   if (gdsf.checkCellWritten(_name)) return;
+   if (gdsf.checkCellWritten(name())) return;
    //
-   std::string message = "...converting " + _name;
+   std::string message = "...converting " + name();
    tell_log(console::MT_INFO, message);
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BGNSTR);
    gdsf.SetTimes(wr);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_STRNAME, _name.size());
-   wr->add_ascii(_name.c_str()); gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_STRNAME, name().size());
+   wr->add_ascii(name().c_str()); gdsf.flush(wr);
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
       wl->second->GDSwrite(gdsf, wl->first, UU);
    wr = gdsf.SetNextRecord(gds_ENDSTR);gdsf.flush(wr);
-   gdsf.registerCellWritten(_name);
+   gdsf.registerCellWritten(name());
 }
 
 void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop,
@@ -490,12 +538,12 @@ void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawp
          Child = Child->GetBrother(ALL_LIB);
       }
       // If no more children and the cell has not been written yet
-      if (psf.checkCellWritten(_name)) return;
+      if (psf.checkCellWritten(name())) return;
       //
-      std::string message = "...converting " + _name;
+      std::string message = "...converting " + name();
       tell_log(console::MT_INFO, message);
    }
-   psf.cellHeader(_name,overlap());
+   psf.cellHeader(name(),overlap());
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
@@ -510,10 +558,10 @@ void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawp
    }
    psf.cellFooter();
    if (psf.hier())
-      psf.registerCellWritten(_name);
+      psf.registerCellWritten(name());
 }
 
-laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree, 
+laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
                                            tdtcell* parent, cellList* celldefs) {
    // collecting hierarchical information
    Htree = DEBUG_NEW TDTHierTree(this, parent, Htree);
@@ -525,7 +573,7 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
       else 
       {
          std::ostringstream ost;
-         ost << "cell " << *wn << " referenced but not defined";
+         ost << "cell \"" << *wn << "\" referenced but not defined";
          tell_log(console::MT_WARNING, ost.str());
       }
    }
@@ -1501,20 +1549,6 @@ bool laydata::tdtcell::overlapChanged(DBbox& old_overlap, laydata::tdtdesign* AT
       invalidateParents(ATDB);return true;
    }
    else return false;
-}
-
-void laydata::tdtcell::invalidateParents(laydata::tdtdesign* ATDB)
-{
-   TDTHierTree* hc = ATDB->hiertree()->GetMember(this);
-   while(hc)
-   {
-      if (hc->Getparent())
-      {
-         layerList llist = hc->Getparent()->GetItem()->_layers;
-         if (llist.end() != llist.find(0)) llist[0]->invalidate();
-      }      
-      hc = hc->GetNextMember(this);
-   }
 }
 
 bool laydata::tdtcell::validate_cells(laydata::tdtdesign* ATDB) {
