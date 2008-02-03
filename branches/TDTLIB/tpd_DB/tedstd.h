@@ -101,6 +101,7 @@ namespace laydata {
    class tdtdata;
    class editobject;
    class tdtcell;
+   class tdtdefaultcell;
    class tdtcellref;
    class tdtdesign;
    class tdtlibrary;
