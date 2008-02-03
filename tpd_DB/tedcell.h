@@ -101,19 +101,22 @@ namespace laydata {
          virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell* parent, cellList* celldefs);
          virtual void        updateHierarchy(tdtdesign*);
          virtual DBbox       overlap() const;
+         virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
+         virtual void        GDSwrite(GDSin::GDSFile&, const cellList&, const TDTHierTree*, real, bool) const;
+         virtual void        collect_usedlays(const tdtlibrary*, bool, ListOfWords&) const;
 
          void                 parentfound()     {_orphan = false;};
          bool                 orphan() const    {return _orphan;};
          std::string          name() const      {return _name;};
          int                  libID() const     {return _libID;}
-         layerList&           layers();       //! all layers the cell
-      private:
-         std::string          _name;         //! cell name
-         int                  _libID;        //! cell belongs to ... library
+         layerList&           layers();      //! all layers the cell
       protected:
          void                 invalidateParents(tdtdesign*);
          bool                 _orphan;       //! cell doesn't have a parent
          layerList            _layers;       //! all layers the cell
+      private:
+         std::string          _name;         //! cell name
+         int                  _libID;        //! cell belongs to ... library
    };
 
 //==============================================================================
@@ -131,7 +134,7 @@ namespace laydata {
                                                           bool sortnow = true);
       tdtcellaref*         addcellaref(tdtdesign*, refnamepair, CTM,
                                           ArrayProperties&, bool sortnow = true);
-      bool                 addchild(tdtdesign*, tdtcell*);
+      bool                 addchild(tdtdesign*, tdtdefaultcell*);
       void                 write(TEDfile* const, const cellList&, const TDTHierTree*) const;
       void                 GDSwrite(GDSin::GDSFile&, const cellList&,
                                                  const TDTHierTree*, real, bool) const;

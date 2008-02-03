@@ -43,6 +43,7 @@ namespace laydata {
 //      bool           checkValidRef(std::string);
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       bool           collect_usedlays(std::string, bool, ListOfWords&) const;
+      tdtdefaultcell* secure_defaultcell(std::string name);
       //
       std::string    name()            const {return _name;}
       real           UU()              const {return _UU;}
@@ -54,7 +55,7 @@ namespace laydata {
       void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
       friend         void tdtcell::updateHierarchy(tdtdesign*);
       friend         void tdtcell::removePrep(tdtdesign*) const;
-      friend         bool tdtcell::addchild(tdtdesign*, tdtcell*);
+      friend         bool tdtcell::addchild(tdtdesign*, tdtdefaultcell*);
       friend         class TEDfile;
       static void    clearHierTree(word libID);
       static void    clearEntireHierTree();
@@ -90,6 +91,7 @@ namespace laydata {
       tdtlibrary*    getLib(word libID);
       word           getLastLibRefNo();
       bool           getCellNamePair(std::string, refnamepair&) const;
+      void           adddefaultcell( std::string name );
    private:
       Catalog        _libdirectory;
    };
