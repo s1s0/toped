@@ -225,7 +225,8 @@ void laydata::tdtdefaultcell::PSwrite(PSFile&, const layprop::DrawProperties&,
 {
 }
 
-laydata::TDTHierTree* laydata::tdtdefaultcell::hierout(laydata::TDTHierTree*& Htree, tdtcell* parent, cellList* celldefs)
+laydata::TDTHierTree* laydata::tdtdefaultcell::hierout(laydata::TDTHierTree*& Htree, 
+                                    tdtcell* parent, cellList* celldefs, const laydata::tdtlibdir* libdir)
 {
    return Htree;
 }
@@ -249,7 +250,7 @@ void laydata::tdtdefaultcell::GDSwrite(GDSin::GDSFile&, const cellList&, const T
    assert(false);
 }
 
-void laydata::tdtdefaultcell::collect_usedlays(const tdtlibrary*, bool, ListOfWords&) const
+void laydata::tdtdefaultcell::collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const
 {
 }
 
@@ -271,10 +272,11 @@ void laydata::tdtdefaultcell::invalidateParents(laydata::tdtdesign* ATDB)
 // class tdtcell
 //-----------------------------------------------------------------------------
 laydata::tdtcell::tdtcell(std::string name) :
-      tdtdefaultcell::tdtdefaultcell(name, TARGETDB_LIB, true) {}
+                               tdtdefaultcell(name, TARGETDB_LIB, true) {}
+
 
 laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
-      tdtdefaultcell::tdtdefaultcell(name, lib, true)
+                               tdtdefaultcell(name, lib, true)
 {
    byte recordtype;
    word  layno;
@@ -580,19 +582,23 @@ void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawp
 }
 
 laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
-                                           tdtcell* parent, cellList* celldefs) {
+                   tdtcell* parent, cellList* celldefs, const laydata::tdtlibdir* libdir) {
    // collecting hierarchical information
    Htree = DEBUG_NEW TDTHierTree(this, parent, Htree);
    nameList::const_iterator wn;
    for (wn = _children.begin(); wn != _children.end(); wn++)
    {
       if (NULL != (*celldefs)[*wn])
-         (*celldefs)[*wn]->hierout(Htree, this, celldefs);
+         (*celldefs)[*wn]->hierout(Htree, this, celldefs, libdir);
       else 
       {
-         std::ostringstream ost;
-         ost << "cell \"" << *wn << "\" referenced but not defined";
-         tell_log(console::MT_WARNING, ost.str());
+         laydata::refnamepair striter;
+         libdir->getCellNamePair(*wn, striter);
+         striter->second->hierout(Htree, this, celldefs, libdir);
+//         Htree = DEBUG_NEW TDTHierTree(libdir->getCell(*wn), this, Htree);
+//         std::ostringstream ost;
+//         ost << "cell \"" << *wn << "\" referenced but not defined";
+//         tell_log(console::MT_WARNING, ost.str());
       }
    }
    return  Htree;
@@ -1748,11 +1754,11 @@ void laydata::tdtcell::report_selected(real DBscale) const
    }
 }
 
-void laydata::tdtcell::collect_usedlays(const tdtlibrary* ATDB, bool recursive, ListOfWords& laylist) const{
+void laydata::tdtcell::collect_usedlays(const tdtlibdir* LTDB, bool recursive, ListOfWords& laylist) const{
    // first call recursively the method on all children cells
    if (recursive)
       for (nameList::const_iterator CC = _children.begin(); CC != _children.end(); CC++)
-         ATDB->getcellnamepair(*CC)->second->collect_usedlays(ATDB, recursive, laylist);
+         LTDB->collect_usedlays(*CC, recursive, laylist);
    // then update with the layers used in this cell
    for(layerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       laylist.push_back(CL->first);

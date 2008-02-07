@@ -140,7 +140,7 @@ namespace laydata {
    class   TEDfile {
    public:
                            TEDfile(const char*, const laydata::tdtlibdir*); // for reading
-                           TEDfile(tdtdesign*, std::string&, const laydata::tdtlibdir*); // for writing
+                           TEDfile(std::string&, laydata::tdtlibdir*); // for writing
       void                 closeF() {fclose(_file);};
       void                 read(int libRef);
       void                 cleanup();
@@ -168,7 +168,8 @@ namespace laydata {
       tdtlibrary*          design() const  {return _design;};
       time_t               created() const {return _created;};
       time_t               lastUpdated() const {return _lastUpdated;};
-      protected:
+      const laydata::tdtlibdir* TEDLIB() {return _TEDLIB;}
+   protected:
       bool                 _status;
       word                 _numread;
    private:

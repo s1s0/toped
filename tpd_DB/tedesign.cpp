@@ -102,7 +102,7 @@ void laydata::tdtlibrary::read(TEDfile* const tedfile)
       tell_log(console::MT_CELLNAME, cellname);
       tedfile->registercellread(cellname, DEBUG_NEW tdtcell(tedfile, cellname, _libID));
    }
-   recreate_hierarchy();
+   recreate_hierarchy(tedfile->TEDLIB());
    tell_log(console::MT_INFO, "Done");
 }
       
@@ -156,7 +156,7 @@ laydata::tdtcell* laydata::tdtlibrary::checkcell(std::string name)
    else return static_cast<laydata::tdtcell*>(_cells[name]);
 }
       
-void laydata::tdtlibrary::recreate_hierarchy()
+void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
 {
    if (TARGETDB_LIB == _libID)
    {
@@ -166,30 +166,31 @@ void laydata::tdtlibrary::recreate_hierarchy()
    for (laydata::cellList::const_iterator wc = _cells.begin(); 
                                           wc != _cells.end(); wc++) {
       if (wc->second && wc->second->orphan()) 
-         _hiertree = wc->second->hierout(_hiertree, NULL, &_cells);
+         _hiertree = wc->second->hierout(_hiertree, NULL, &_cells, libdir);
    }
 }
 
-
-bool laydata::tdtlibrary::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const 
-{
-//   if ("" == cellname) targetcell = _target.edit();
-   assert("" != cellname);
-   tdtdefaultcell* targetcell = getcellnamepair(cellname)->second;
-   if (NULL != targetcell) {
-      targetcell->collect_usedlays(this, recursive, laylist);
-      laylist.sort();
-      laylist.unique();
-      std::ostringstream ost;
-      ost << "used layers: {";
-      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
-        ost << " " << *CL << " ";
-      ost << "}";
-      tell_log(console::MT_INFO, ost.str());
-      return true;
-   }
-   else return false;
-}
+//
+//bool laydata::tdtlibrary::`lays(std::string cellname, bool recursive, ListOfWords& laylist) const 
+//{
+////   if ("" == cellname) targetcell = _target.edit();
+//   assert("" != cellname);
+//   tdtdefaultcell* targetcell = getcellnamepair(cellname)->second;
+//   if (NULL != targetcell) {
+//      targetcell->collect_usedlays(this, recursive, laylist);
+//      laylist.sort();
+//      laylist.unique();
+//      std::ostringstream ost;
+//      ost << "used layers: {";
+//      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
+//        ost << " " << *CL << " ";
+//      ost << "}";
+//      tell_log(console::MT_INFO, ost.str());
+//      return true;
+//   }
+//   else return false;
+//}
+//
 
 laydata::tdtdefaultcell* laydata::tdtlibrary::secure_defaultcell(std::string name)
 {
@@ -212,6 +213,8 @@ laydata::tdtlibdir::tdtlibdir()
    // create the default library of unknown cells
    tdtlibrary* undeflib = DEBUG_NEW tdtlibrary("__UNDEFINED__", 1e-9, 1e-3, UNDEFCELL_LIB);
    _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem("__UNDEFINED__", undeflib) );
+   // toped data base
+   _TEDDB = NULL;
 }
 
 laydata::tdtlibdir::~tdtlibdir()
@@ -221,6 +224,7 @@ laydata::tdtlibdir::~tdtlibdir()
       delete _libdirectory[i]->second;
       delete _libdirectory[i];
    }
+   if (NULL != _TEDDB) delete _TEDDB;
 }
 
 word laydata::tdtlibdir::getLastLibRefNo()
@@ -264,6 +268,26 @@ void laydata::tdtlibdir::adddefaultcell( std::string name )
    undeflib->secure_defaultcell(name);
 }
 
+bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const
+{
+   tdtcell* topcell = NULL;
+   if (NULL != _TEDDB) topcell = _TEDDB->checkcell(cellname);
+   if (NULL != topcell)
+   {
+      topcell->collect_usedlays(this, recursive, laylist);
+      return true;
+   }
+   else
+   {
+      laydata::refnamepair striter;
+      if (getCellNamePair(cellname, striter))
+      {
+         static_cast<laydata::tdtcell*>(striter->second)->collect_usedlays(this, recursive, laylist);
+         return true;
+      }
+      else return false;
+   }
+}
 
 //-----------------------------------------------------------------------------
 // class tdtdesign

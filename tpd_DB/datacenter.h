@@ -91,7 +91,7 @@ public:
    word                       curcmdlay() const       {return _curcmdlay;}
    std::string                tedfilename() const     {return _tedfilename;};
    bool                       neversaved()  const     {return _neversaved;}; 
-   bool                       modified() const        {return (NULL == _TEDDB) ? false : _TEDDB->modified;};   
+   bool                       modified() const        {return _TEDLIB.modified();};
    bool                       autopan() const         {return _properties.autopan();}
    const real                 step() const            {return _properties.step();}
    const layprop::LayoutGrid* grid(byte gn) const     {return _properties.grid(gn);}
@@ -152,9 +152,9 @@ public:
    void                       clearUnpublishedLayers() {_properties.clearUnpublishedLayers();}
    const word                 layselmask() {return _properties.layselmask();}
    void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
-
+   laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
 protected:
-   laydata::tdtdesign*        _TEDDB;        // toped data base
+//   laydata::tdtdesign*        _TEDDB;        // toped data base
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
    GDSin::GDSFile*            _GDSDB;        // GDS parsed data
    layprop::ViewProperties    _properties;   // properties data base
