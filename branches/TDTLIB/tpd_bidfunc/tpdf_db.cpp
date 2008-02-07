@@ -105,7 +105,7 @@ int tellstdfunc::TDTread::execute()
             {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            updateLayerDefinitions(ATDB, top_cell_list);
+            updateLayerDefinitions( DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
          browsers::addTDTtab();
@@ -165,7 +165,7 @@ int tellstdfunc::TDTreadIFF::execute()
             {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            updateLayerDefinitions(ATDB, top_cell_list);
+            updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the cell hierarchy browser
          browsers::addTDTtab();
@@ -210,7 +210,7 @@ int tellstdfunc::TDTloadlib::execute()
          {
             top_cell_list.push_back(std::string(root->GetItem()->name()));
          } while (NULL != (root = root->GetNextRoot(libID)));
-         updateLayerDefinitions(LTDB, top_cell_list);
+         updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, libID);
          // populating cell hierarchy browser
          browsers::addTDTtab();
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
@@ -379,7 +379,7 @@ int tellstdfunc::GDSconvert::execute()
    top_cells.push_back(name.c_str());
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       DATC->importGDScell(top_cells, recur, over);
-      updateLayerDefinitions(ATDB, top_cells);
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur) 
          << "," << LogFile._2bool(over) << ");"; LogFile.flush();
@@ -407,7 +407,7 @@ int tellstdfunc::GDSconvertAll::execute()
    }
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       DATC->importGDScell(top_cells, recur, over);
-      updateLayerDefinitions(ATDB, top_cells);
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    browsers::addTDTtab();
    LogFile << LogFile.getFN() << "(\""<< *pl << "\"," << LogFile._2bool(recur)
@@ -549,10 +549,18 @@ int tellstdfunc::stdREPORTLAY::execute() {
    std::string cellname = getStringValue();
    laydata::ListOfWords ull;
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      bool success = ATDB->collect_usedlays(cellname, recursive, ull);
+      bool success = DATC->TEDLIB()->collect_usedlays(cellname, recursive, ull);
    DATC->unlockDB();
    telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    if (success) {
+      ull.sort();ull.unique();
+      std::ostringstream ost;
+      ost << "used layers: {";
+      for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+         ost << " " << *CL << " ";
+      ost << "}";
+      tell_log(console::MT_INFO, ost.str());
+
       for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
          tllull->add(DEBUG_NEW telldata::ttint(*CL));
       ull.clear();

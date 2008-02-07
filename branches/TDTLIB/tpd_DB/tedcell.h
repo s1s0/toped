@@ -92,18 +92,18 @@ namespace laydata {
 //==============================================================================
    class tdtdefaultcell  {
       public:
-                              tdtdefaultcell(std::string, int , bool );
+                             tdtdefaultcell(std::string, int , bool );
          virtual            ~tdtdefaultcell() {};
          virtual void        openGL_draw(layprop::DrawProperties&, bool active=false) const;
          virtual void        tmp_draw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
          virtual void        PSwrite(PSFile&, const layprop::DrawProperties&,
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
-         virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell* parent, cellList* celldefs);
+         virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell*, cellList*, const tdtlibdir*);
          virtual void        updateHierarchy(tdtdesign*);
          virtual DBbox       overlap() const;
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
          virtual void        GDSwrite(GDSin::GDSFile&, const cellList&, const TDTHierTree*, real, bool) const;
-         virtual void        collect_usedlays(const tdtlibrary*, bool, ListOfWords&) const;
+         virtual void        collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const;
 
          void                 parentfound()     {_orphan = false;};
          bool                 orphan() const    {return _orphan;};
@@ -124,7 +124,7 @@ namespace laydata {
    public:
                            tdtcell(std::string);
                            tdtcell(TEDfile* const, std::string, int);
-                          ~tdtcell(); 
+      virtual             ~tdtcell(); 
       void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
@@ -140,8 +140,7 @@ namespace laydata {
                                                  const TDTHierTree*, real, bool) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&,
                                    const cellList* = NULL, const TDTHierTree* = NULL) const;
-      TDTHierTree*         hierout(TDTHierTree*& Htree, tdtcell* parent, 
-                                                           cellList* celldefs);
+      TDTHierTree*         hierout(TDTHierTree*&, tdtcell*, cellList*, const tdtlibdir*);
       DBbox                overlap() const;
       void                 select_inBox(DBbox, layprop::ViewProperties&, bool pntsel = false);
 //      void                 select_inside(const TP);
@@ -181,7 +180,7 @@ namespace laydata {
       void                 updateHierarchy(tdtdesign*);
       void                 removePrep(laydata::tdtdesign* ATDB) const;
       void                 report_selected(real) const;
-      void                 collect_usedlays(const tdtlibrary*, bool, ListOfWords&) const;
+      void                 collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
 //      int                  libID() const {return _libID;}
    private:

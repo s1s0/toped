@@ -130,9 +130,9 @@ void laydata::TEDfile::read(int libRef)
    //byte designend = getByte(); 
 }
 
-laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename,  const laydata::tdtlibdir* tedlib) 
+laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib) 
 { //writing
-   _design = design;_revision=0;_subrevision=6;
+   _design = (*tedlib)();_revision=0;_subrevision=6;
    _TEDLIB = tedlib;
    if (NULL == (_file = fopen(filename.c_str(), "wb"))) {
       std::string news = "File \"";
@@ -387,11 +387,13 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
          // the entire file is parced the cell references without a proper pointer
          // to the structure need to be flagged as warning in case 1 and as error 
          // in case 2.
-         // Empty cell ctructure should be handled without a problem by the 
+         // Empty cell structure should be handled without a problem by the 
          // tdttcellref class and its ancestors
          _design->_cells[cellname] = NULL;
          striter = _design->_cells.find(cellname);
       }
+      else
+         striter->second->parentfound();
    }   
    else 
    {

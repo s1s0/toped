@@ -39,10 +39,10 @@ namespace laydata {
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
       tdtcell*       checkcell(std::string name);
-      void           recreate_hierarchy();
+      void           recreate_hierarchy(const tdtlibdir*);
 //      bool           checkValidRef(std::string);
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
-      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
+//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
       tdtdefaultcell* secure_defaultcell(std::string name);
       //
       std::string    name()            const {return _name;}
@@ -67,33 +67,6 @@ namespace laydata {
       real                 _UU;           // size of user unit in DBU
       cellList             _cells;        // list of cells in the design
       static TDTHierTree*  _hiertree;     // 
-   };
-
-   /*! Library directory or Directory of libraries.
-   This object contains pointers to all loaded libraries. Current database is the 
-   only exception. Instead there is one "hidden" library and this is the library
-   of undefined cells. It is always defined and always located in the 0 slot of
-   the Catalog.
-   Here is the library ID code:
-   -1 -> current database
-    0 -> library of undefened cells
-    1 -> first loaded library
-    etc. 
-   */
-   class tdtlibdir {
-   public:
-      typedef std::pair<std::string, tdtlibrary*> LibItem;
-      typedef std::vector<LibItem*> Catalog;
-                     tdtlibdir();
-                    ~tdtlibdir();
-      void           addlibrary( tdtlibrary* const, word libRef );
-      void           closelibrary(std::string);
-      tdtlibrary*    getLib(word libID);
-      word           getLastLibRefNo();
-      bool           getCellNamePair(std::string, refnamepair&) const;
-      void           adddefaultcell( std::string name );
-   private:
-      Catalog        _libdirectory;
    };
 
    class tdtdesign : public tdtlibrary {
@@ -178,6 +151,41 @@ namespace laydata {
       time_t         _lastUpdated;
       CTM            _tmpctm;
    };
+
+   /*! Library directory or Directory of libraries.
+   This object contains pointers to all loaded libraries. Current database is the 
+   only exception. Instead there is one "hidden" library and this is the library
+   of undefined cells. It is always defined and always located in the 0 slot of
+   the Catalog.
+   Here is the library ID code:
+   -1 -> current database
+    0 -> library of undefened cells
+    1 -> first loaded library
+    etc. 
+   */
+   class tdtlibdir {
+   public:
+      typedef std::pair<std::string, tdtlibrary*> LibItem;
+      typedef std::vector<LibItem*>               Catalog;
+                     tdtlibdir();
+                    ~tdtlibdir();
+      tdtdesign*     operator ()() {return _TEDDB;}
+      void           addlibrary( tdtlibrary* const, word libRef );
+      void           closelibrary(std::string);
+      tdtlibrary*    getLib(word libID);
+      word           getLastLibRefNo();
+      bool           getCellNamePair(std::string, refnamepair&) const;
+      void           adddefaultcell( std::string name );
+      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
+      bool           modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
+      void           deleteDB() {delete _TEDDB;}
+      void           setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
+      unsigned int   numselected()     const {return _TEDDB->numselected();}
+   private:
+      Catalog        _libdirectory;
+      tdtdesign*     _TEDDB;        // toped data base
+   };
+
 }
 
 #endif //TEDESIGN_H_INCLUDED
