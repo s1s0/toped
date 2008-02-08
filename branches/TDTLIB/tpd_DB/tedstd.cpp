@@ -79,7 +79,7 @@ PSegment* PSegment::parallel(TP p)
 //-----------------------------------------------------------------------------
 // class TEDfile
 //-----------------------------------------------------------------------------
-laydata::TEDfile::TEDfile(const char* filename, const laydata::tdtlibdir* tedlib)  // reading
+laydata::TEDfile::TEDfile(const char* filename, laydata::tdtlibdir* tedlib)  // reading
 {
    _numread = 0;_position = 0;_design = NULL;
    _TEDLIB = tedlib;
@@ -389,7 +389,7 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
          // in case 2.
          // Empty cell structure should be handled without a problem by the 
          // tdttcellref class and its ancestors
-         _design->_cells[cellname] = NULL;
+         _design->_cells[cellname] = _TEDLIB->adddefaultcell(cellname);
          striter = _design->_cells.find(cellname);
       }
       else

@@ -222,7 +222,7 @@ bool DataCenter::TDTcheckread(const std::string filename,
 {
    bool retval = false;
    start_ignoring = false;
-   laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
+   laydata::TEDfile tempin(filename.c_str(), TEDLIB());
    if (!tempin.status()) return retval;
 
    std::string news = "Project created: ";

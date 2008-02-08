@@ -262,10 +262,10 @@ bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair&
    return false;
 }
 
-void laydata::tdtlibdir::adddefaultcell( std::string name )
+laydata::tdtdefaultcell* laydata::tdtlibdir::adddefaultcell( std::string name )
 {
    laydata::tdtlibrary* undeflib = _libdirectory[UNDEFCELL_LIB]->second;
-   undeflib->secure_defaultcell(name);
+   return undeflib->secure_defaultcell(name);
 }
 
 bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const
@@ -488,12 +488,18 @@ void laydata::tdtdesign::addlist(atticList* nlst)
    }
 }
 
-laydata::tdtcell* laydata::tdtdesign::opencell(std::string name) {
-   if (_cells.end() != _cells.find(name)) {
-      _target.setcell(static_cast<tdtcell*>(_cells[name]));
-      return _target.edit();
+laydata::tdtcell* laydata::tdtdesign::opencell(std::string name) 
+{
+   if (_cells.end() != _cells.find(name)) 
+   {
+      laydata::tdtdefaultcell* tcell = _cells[name];
+      if (UNDEFCELL_LIB != tcell->libID())
+      {
+         _target.setcell(static_cast<tdtcell*>(_cells[name]));
+         return _target.edit();
+      }
    }   
-   else return NULL; // Active cell has not changed if name is not found
+   return NULL; // Active cell has not changed if name is not found
 }
 
 bool laydata::tdtdesign::editpush(const TP& pnt) {
