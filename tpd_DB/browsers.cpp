@@ -421,7 +421,7 @@ void browsers::TDTbrowser::collectInfo(const wxString libname, const int libID, 
          wxString(root->GetItem()->name().c_str(), wxConvUTF8));
       hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
 
-      collectChildren(root, libID, nroot);
+      collectChildren(root, ALL_LIB, nroot);
       root = root->GetNextRoot(libID);
    }
    hCellBrowser->SortChildren(hCellBrowser->GetRootItem());

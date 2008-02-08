@@ -228,7 +228,7 @@ void laydata::tdtdefaultcell::PSwrite(PSFile&, const layprop::DrawProperties&,
 laydata::TDTHierTree* laydata::tdtdefaultcell::hierout(laydata::TDTHierTree*& Htree, 
                                     tdtcell* parent, cellList* celldefs, const laydata::tdtlibdir* libdir)
 {
-   return Htree;
+   return DEBUG_NEW TDTHierTree(this, parent, Htree);
 }
 
 void laydata::tdtdefaultcell::updateHierarchy(tdtdesign*)

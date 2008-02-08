@@ -185,7 +185,7 @@ int tellstdfunc::stdOPENCELL::execute()
       {
 /*-!-*/  DATC->unlockDB();
          std::string news = "cell \"";
-         news += nm; news += "\" doesn't exists";
+         news += nm; news += "\" is not defined";
          tell_log(console::MT_ERROR,news);
          if (selected) delete selected;
       }

@@ -167,23 +167,23 @@ namespace laydata {
    public:
       typedef std::pair<std::string, tdtlibrary*> LibItem;
       typedef std::vector<LibItem*>               Catalog;
-                     tdtlibdir();
-                    ~tdtlibdir();
-      tdtdesign*     operator ()() {return _TEDDB;}
-      void           addlibrary( tdtlibrary* const, word libRef );
-      void           closelibrary(std::string);
-      tdtlibrary*    getLib(word libID);
-      word           getLastLibRefNo();
-      bool           getCellNamePair(std::string, refnamepair&) const;
-      void           adddefaultcell( std::string name );
-      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
-      bool           modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
-      void           deleteDB() {delete _TEDDB;}
-      void           setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
-      unsigned int   numselected()     const {return _TEDDB->numselected();}
+                        tdtlibdir();
+                       ~tdtlibdir();
+      tdtdesign*        operator ()() {return _TEDDB;}
+      void              addlibrary( tdtlibrary* const, word libRef );
+      void              closelibrary(std::string);
+      tdtlibrary*       getLib(word libID);
+      word              getLastLibRefNo();
+      bool              getCellNamePair(std::string, refnamepair&) const;
+      tdtdefaultcell*   adddefaultcell( std::string name );
+      bool              collect_usedlays(std::string, bool, ListOfWords&) const;
+      bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
+      void              deleteDB() {delete _TEDDB;}
+      void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
+      unsigned int      numselected()     const {return _TEDDB->numselected();}
    private:
-      Catalog        _libdirectory;
-      tdtdesign*     _TEDDB;        // toped data base
+      Catalog           _libdirectory;
+      tdtdesign*        _TEDDB;        // toped data base
    };
 
 }

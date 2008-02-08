@@ -139,7 +139,7 @@ namespace laydata {
 //==============================================================================
    class   TEDfile {
    public:
-                           TEDfile(const char*, const laydata::tdtlibdir*); // for reading
+                           TEDfile(const char*, laydata::tdtlibdir*); // for reading
                            TEDfile(std::string&, laydata::tdtlibdir*); // for writing
       void                 closeF() {fclose(_file);};
       void                 read(int libRef);
@@ -186,7 +186,7 @@ namespace laydata {
       time_t               _lastUpdated;
       tdtlibrary*          _design;
       nameList             _childnames;
-      const laydata::tdtlibdir* _TEDLIB;       // catalog of available TDT libraries
+      laydata::tdtlibdir*  _TEDLIB;       // catalog of available TDT libraries
 
    };
 
