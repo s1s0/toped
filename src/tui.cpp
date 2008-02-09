@@ -187,12 +187,17 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
 //   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
 //   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      laydata::cellList const cll = ATDB->cells();
-      laydata::cellList::const_iterator CL;
-      for (CL = cll.begin(); CL != cll.end(); CL++) {
-         _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
+   DATC->lockDB();
+      std::list<const laydata::cellList> *cll = DATC->getCells(ALL_LIB);
+      for (std::list<const laydata::cellList>::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
+      {
+         laydata::cellList::const_iterator CL;
+         for (CL = curlib->begin(); CL != curlib->end(); CL++) 
+         {
+            _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
+         }
       }
+      delete cll;
    DATC->unlockDB();   
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
@@ -228,12 +233,17 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
 //   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
 //   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      laydata::cellList const cll = ATDB->cells();
-      laydata::cellList::const_iterator CL;
-      for (CL = cll.begin(); CL != cll.end(); CL++) {
-         _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
+   DATC->lockDB();
+      std::list<const laydata::cellList> *cll = DATC->getCells(ALL_LIB);
+      for (std::list<const laydata::cellList>::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
+      {
+         laydata::cellList::const_iterator CL;
+         for (CL = curlib->begin(); CL != curlib->end(); CL++) 
+         {
+            _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
+         }
       }
+      delete cll;
    DATC->unlockDB();   
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout

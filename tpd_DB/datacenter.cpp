@@ -286,7 +286,7 @@ int DataCenter::TDTloadlib(std::string filename)
 {
    laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
    if (!tempin.status()) return -1;
-   word libRef = _TEDLIB.getLastLibRefNo();
+   int libRef = _TEDLIB.getLastLibRefNo();
    try
    {
       tempin.read(libRef);
@@ -736,6 +736,19 @@ bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter
    return _TEDLIB.getCellNamePair(name, striter);
 }
 
+std::list<const laydata::cellList>* DataCenter::getCells(int libID)
+{
+   std::list<const laydata::cellList>* all_cells = DEBUG_NEW std::list<const laydata::cellList>;
+   if (libID != ALL_LIB)
+      all_cells->push_back(_TEDLIB.getLib(libID)->cells());
+   else
+   {
+      all_cells->push_back(_TEDLIB()->cells());
+      for (int i = 1; i < _TEDLIB.getLastLibRefNo(); i++)
+         all_cells->push_back(_TEDLIB.getLib(i)->cells());
+   }
+   return all_cells;
+}
 
 void initDBLib()
 {

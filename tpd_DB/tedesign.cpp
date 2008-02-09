@@ -227,7 +227,7 @@ laydata::tdtlibdir::~tdtlibdir()
    if (NULL != _TEDDB) delete _TEDDB;
 }
 
-word laydata::tdtlibdir::getLastLibRefNo()
+int laydata::tdtlibdir::getLastLibRefNo()
 {
    return _libdirectory.size();
 }
@@ -242,10 +242,10 @@ void laydata::tdtlibdir::closelibrary(std::string)
 {
 }
 
-laydata::tdtlibrary* laydata::tdtlibdir::getLib(word libID)
+laydata::tdtlibrary* laydata::tdtlibdir::getLib(int libID)
 {
    assert(libID); // make sure that nobody asks for the default library
-   assert(libID <= _libdirectory.size());
+   assert(libID <= (int)_libdirectory.size());
    return _libdirectory[libID]->second;
 }
 
@@ -493,7 +493,7 @@ laydata::tdtcell* laydata::tdtdesign::opencell(std::string name)
    if (_cells.end() != _cells.find(name)) 
    {
       laydata::tdtdefaultcell* tcell = _cells[name];
-      if (UNDEFCELL_LIB != tcell->libID())
+      if (tcell && (UNDEFCELL_LIB != tcell->libID()))
       {
          _target.setcell(static_cast<tdtcell*>(_cells[name]));
          return _target.edit();

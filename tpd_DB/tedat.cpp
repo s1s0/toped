@@ -2461,7 +2461,8 @@ laydata::valid_wire::valid_wire(const pointlist& plist, word width) :
                                      validator(plist), _width(width) { 
    angles();
    if (_status > 0x10) return;
-   selfcrossing();
+   if (numpoints() > 3)
+      selfcrossing();
 }
 
 /*! Checks the wire angles. Filters out intermediate and coinciding points.

@@ -488,7 +488,7 @@ namespace GDSin {
       bool              HaveParent;
       ChildStructure    children;
       // to cover the requirements of the hierarchy template
-      word              libID() const {return 0;}
+      int               libID() const {return TARGETDB_LIB;}
    protected:
       bool              Allay[GDS_MAX_LAYER];
       GDSdata*          Compbylay[GDS_MAX_LAYER];
