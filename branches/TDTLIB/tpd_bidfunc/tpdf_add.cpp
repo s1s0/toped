@@ -786,7 +786,7 @@ int tellstdfunc::stdCELLAREF_D::execute() {
    word        col   = getWordValue();
    std::string name  = getStringValue();
    
-   // check that target cell exists - otherwise tmp_draw can't onviously work.
+   // check that target cell exists - otherwise tmp_draw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well 
    laydata::tdtdesign* ATDB = DATC->lockDB(false);

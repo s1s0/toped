@@ -334,6 +334,7 @@ int tellstdfunc::GDSread::execute() {
          GDSin::GDSFile* AGDSDB = DATC->lockGDS();
 
             GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+            assert(root);
             do 
             {
                top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));

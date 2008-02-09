@@ -68,7 +68,7 @@ public:
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    GDSin::GDSFile*            lockGDS(bool throwexception = true);
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
-   word                       getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
+   int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::refnamepair& striter);
    void                       unlockDB();
    void                       unlockGDS();
@@ -153,6 +153,7 @@ public:
    const word                 layselmask() {return _properties.layselmask();}
    void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
    laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
+   std::list<const laydata::cellList>* getCells(int libID);
 protected:
 //   laydata::tdtdesign*        _TEDDB;        // toped data base
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries

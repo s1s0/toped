@@ -172,8 +172,8 @@ namespace laydata {
       tdtdesign*        operator ()() {return _TEDDB;}
       void              addlibrary( tdtlibrary* const, word libRef );
       void              closelibrary(std::string);
-      tdtlibrary*       getLib(word libID);
-      word              getLastLibRefNo();
+      tdtlibrary*       getLib(int);
+      int               getLastLibRefNo();
       bool              getCellNamePair(std::string, refnamepair&) const;
       tdtdefaultcell*   adddefaultcell( std::string name );
       bool              collect_usedlays(std::string, bool, ListOfWords&) const;
