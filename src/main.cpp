@@ -303,7 +303,7 @@ void TopedApp::GetGlobalDirs()
    {
       fontsDIR->AppendDir(wxT("fonts"));
       fontsDIR->Normalize();
-		UIDir->AppendDir("ui");
+		UIDir->AppendDir(wxT("ui"));
 		UIDir->Normalize();
    }
    if (fontsDIR->IsOk())
@@ -446,7 +446,7 @@ bool TopedApp::OnInit() {
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
 	GetGlobalDirs();
    if (!LoadFontFile("arial1")) return FALSE;
-	Toped->setUIDir(tpdUIDir.c_str());
+   Toped->setUIDir(std::string(tpdUIDir.mb_str()));
 	Toped->initToolBars();
 
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
