@@ -189,8 +189,9 @@ namespace tui
    class ResourceCenter
    {
    public:
-      ResourceCenter(void);
+		ResourceCenter(void);
       ~ResourceCenter(void);
+		void setUIDir(const std::string& UIDir) {_UIDir = UIDir;};
       //Using for build of complete menu
       void buildMenu(wxMenuBar *menuBar);
       //Insert new menu item
@@ -217,7 +218,7 @@ namespace tui
 		toolBarList			_toolBars;
       int					_menuCount; //number of menu items
 		int					_toolCount; //number of tool items
-      
+		std::string			_UIDir;	//directory that contains
 
    };
 
