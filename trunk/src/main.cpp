@@ -236,12 +236,13 @@ class TopedApp : public wxApp
       bool           LoadFontFile(std::string);
       bool           CheckCrashLog();
       void           GetLogDir();
-      void           GetFontDir();
+      void           GetGlobalDirs(); //get directories in TPD_GLOBAL
       void           FinishSessionLog();
       void           SaveIgnoredCrashLog();
       wxString       logFileName;
       wxString       tpdLogDir;
       wxString       tpdFontDir;
+		wxString			tpdUIDir;
 //      bool           _ignoreOnRecovery;
 };
 
@@ -287,17 +288,23 @@ void TopedApp::GetLogDir()
    delete logDIR;
 }
 
-void TopedApp::GetFontDir()
+void TopedApp::GetGlobalDirs()
 {
    wxFileName* fontsDIR = DEBUG_NEW wxFileName(wxT("$TPD_GLOBAL/"));
    fontsDIR->Normalize();
    wxString dirName = fontsDIR->GetPath();
+
+	wxFileName* UIDir = DEBUG_NEW wxFileName(wxT("$TPD_GLOBAL/"));
+	UIDir->Normalize();
+
    wxString info;
    bool undefined = dirName.Matches(wxT("*$TPD_GLOBAL*"));
    if (!undefined)
    {
       fontsDIR->AppendDir(wxT("fonts"));
       fontsDIR->Normalize();
+		UIDir->AppendDir("ui");
+		UIDir->Normalize();
    }
    if (fontsDIR->IsOk())
    {
@@ -318,15 +325,34 @@ void TopedApp::GetFontDir()
       else
          tpdFontDir = fontsDIR->GetFullPath();
    }
-   else
+	else
    {
-      info = wxT("Can't evaluate properly \"$TPD_GLOBAL\" env. variable");
+		info = wxT("Can't evaluate properly \"$TPD_GLOBAL\" env. variable");
       info << wxT(". Looking for fonts in the current directory \"");
       tell_log(console::MT_WARNING,info);
-      tpdLogDir = wxT("./fonts/");
+      tpdFontDir = wxT("./fonts/");
    }
+
+	if(UIDir->IsOk())
+	{
+		bool exist = UIDir->DirExists();
+		if (!exist)
+		{
+			info << wxT("Directory ") << UIDir->GetFullPath() << wxT(" doesn't exists");
+			info << wxT(". Looking for icons in the current directory \"");
+			info << wxGetCwd() << wxT("\"");
+         tell_log(console::MT_WARNING,info);
+         tpdUIDir = wxT("./ui/");
+		}
+		else
+		{
+			tpdUIDir = UIDir->GetFullPath();
+		}
+	}
    delete fontsDIR;
+	delete UIDir;
 }
+
 
 bool TopedApp::GetLogFileName()
 {
@@ -415,8 +441,12 @@ void TopedApp::FinishSessionLog()
 
 bool TopedApp::OnInit() {
 //   DATC = DEBUG_NEW DataCenter();
+	wxImage::AddHandler(new wxPNGHandler);
    initDBLib();
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
+	GetGlobalDirs();
+   if (!LoadFontFile("arial1")) return FALSE;
+	Toped->setUIDir(tpdUIDir.c_str());
 	Toped->initToolBars();
 
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
@@ -431,8 +461,6 @@ bool TopedApp::OnInit() {
    SetTopWindow(Toped);
    Toped->Show(TRUE);
 
-   GetFontDir();
-   if (!LoadFontFile("arial1")) return FALSE;
 
    GetLogDir();
    if (!GetLogFileName()) return FALSE;
