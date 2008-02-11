@@ -607,30 +607,30 @@ void tui::TopedFrame::setUIDir(const std::string& uiDir)
 
 void tui::TopedFrame::initToolBars() 
 {
-	_resourceCenter->appendTool("main", "new", "new16x16.png","", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("main", "open", "open16x16.png","", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("main", "save", "save16x16.png", "", &tui::TopedFrame::OnTDTSave, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "new", "new16x16.png","", "new cell", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "open", "open16x16.png","", "open cell", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("main", "save", "save16x16.png", "", "save design", &tui::TopedFrame::OnTDTSave, wxAUI_DOCK_TOP);
 
-	_resourceCenter->appendTool("edit", "undo", "undo16x16.png", "", &tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);
-	//_resourceCenter->appendTool("edit", "redo", "redo16x16.png", "", &tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);*/
-	_resourceCenter->appendTool("edit", "box", "box16x16.png", "", &tui::TopedFrame::OnDrawBox, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "poly", "poly16x16.png", "", &tui::TopedFrame::OnDrawPoly, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "wire", "wire16x16.png", "", &tui::TopedFrame::OnDrawWire, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "text", "text16x16.png", "", &tui::TopedFrame::OnDrawText, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "delete", "delete16x16.png", "", &tui::TopedFrame::OnDelete, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly16x16.png", "", &tui::TopedFrame::OnPolyCut, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "zoom_all", "zoom_all16x16.png", "", &tui::TopedFrame::OnZoomAll, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "zoom_in", "zoom_in16x16.png", "", &tui::TopedFrame::OnzoomIn, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "zoom_out", "zoom_out16x16.png", "", &tui::TopedFrame::OnzoomOut, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "ruler", "ruler16x16.png", "", &tui::TopedFrame::OnAddRuler, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "copy", "copy16x16.png", "", &tui::TopedFrame::OnCopy, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "move", "move16x16.png", "", &tui::TopedFrame::OnMove, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "rotate", "rotate_left16x16.png", "", &tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
-	//_resourceCenter->appendTool("edit", "rotate_right", "rotate_left16x16.png", "", &tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "flipx", "flipx16x16.png", "", &tui::TopedFrame::OnFlipX, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "flipy", "flipy16x16.png", "", &tui::TopedFrame::OnFlipY, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "edit_push", "edit_push16x16.png", "", &tui::TopedFrame::OnCellPush, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "edit_pop", "edit_pop16x16.png", "", &tui::TopedFrame::OnCellPop, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "undo", "undo16x16.png", "", "undo", &tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);
+	//_resourceCenter->appendTool("edit", "redo", "redo16x16.png", "", "redo",&tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);*/
+	_resourceCenter->appendTool("edit", "box", "box16x16.png", "", "add box",&tui::TopedFrame::OnDrawBox, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "poly", "poly16x16.png", "", "add polygon",&tui::TopedFrame::OnDrawPoly, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "wire", "wire16x16.png", "", "add wire",&tui::TopedFrame::OnDrawWire, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "text", "text16x16.png", "", "add text",&tui::TopedFrame::OnDrawText, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "delete", "delete16x16.png", "", "delete",&tui::TopedFrame::OnDelete, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly16x16.png", "", "cut",&tui::TopedFrame::OnPolyCut, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "zoom_all", "zoom_all16x16.png", "", "zoom all",&tui::TopedFrame::OnZoomAll, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "zoom_in", "zoom_in16x16.png", "", "zoom in",&tui::TopedFrame::OnzoomIn, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "zoom_out", "zoom_out16x16.png", "", "zoom out",&tui::TopedFrame::OnzoomOut, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "ruler", "ruler16x16.png", "", "add ruler",&tui::TopedFrame::OnAddRuler, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "copy", "copy16x16.png", "", "copy",&tui::TopedFrame::OnCopy, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "move", "move16x16.png", "", "move",&tui::TopedFrame::OnMove, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "rotate", "rotate_left16x16.png", "", "rotate",&tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
+	//_resourceCenter->appendTool("edit", "rotate_right", "rotate_right16x16.png", "", "rotate",&tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "flipx", "flipx16x16.png", "", "flip X",&tui::TopedFrame::OnFlipX, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "flipy", "flipy16x16.png", "", "flip Y",&tui::TopedFrame::OnFlipY, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "edit_push", "edit_push16x16.png", "", "edit push",&tui::TopedFrame::OnCellPush, wxAUI_DOCK_TOP);
+	_resourceCenter->appendTool("edit", "edit_pop", "edit_pop16x16.png", "", "edit pop",&tui::TopedFrame::OnCellPop, wxAUI_DOCK_TOP);
 
 	_status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 

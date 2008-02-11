@@ -134,10 +134,11 @@ namespace tui
 							const std::string &hotKey, callbackMethod cbMethod);*/
 		ToolItem(int toolID, const std::string &name,
 					const std::string &bitmapName,
-					const std::string &hotKey, callbackMethod cbMethod);
+					const std::string &hotKey, 
+					const std::string &helpString, callbackMethod cbMethod);
 		//std::string    hotKey(void)   const    { return _hotKey;};
       std::string    function(void) const    { return _function;};
-      //std::string    helpString(void) const  { return _helpString;};
+      std::string    helpString(void) const  { return _helpString;};
       callbackMethod method(void)   const    { return _method;};
 
 		virtual ~ToolItem();
@@ -150,7 +151,7 @@ namespace tui
 		std::string		_bitmapName;
 		//std::string	_hotKey;
       std::string		_function;
-      //std::string	_helpString;
+      std::string		_helpString;
       callbackMethod	_method;
 
 
@@ -164,7 +165,7 @@ namespace tui
 
 //		void				addTool(ToolItem *tool);
 		void				addTool(int ID1, const std::string &toolBarItem, const std::string iconName, 
-										const std::string hotKey, callbackMethod cbMethod);
+										const std::string hotKey, const std::string &helpString, callbackMethod cbMethod);
 		void				execute(int ID1);
 
 		std::string		name() const {return _name;};
@@ -208,7 +209,9 @@ namespace tui
 							const std::string &hotKey, callbackMethod cbMethod, int direction);*/
 		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
 							const std::string &iconName,
-							const std::string &hotKey, callbackMethod cbMethod, int direction);
+							const std::string &hotKey, 
+							const std::string &helpString,
+							callbackMethod cbMethod, int direction);
    private:
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
