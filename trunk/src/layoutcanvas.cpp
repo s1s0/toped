@@ -235,7 +235,7 @@ wxImage   tui::LayoutCanvas::snapshot(void)
 
 void tui::LayoutCanvas::viewshift()
 {
-   //@TODO screen sliding. Some rough tires.
+   //@TODO screen sliding. Some rough ideas.
    int Wcl, Hcl;
    const int slide_step = 100;
    GetClientSize(&Wcl,&Hcl);

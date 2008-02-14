@@ -31,21 +31,58 @@
 #include "tedcell.h"
 namespace laydata {
 
-   class tdtdesign {
+   class tdtlibrary {
    public:
-      tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);
-      ~tdtdesign();
-      void           read(TEDfile* const tedfile);
-      void           write(TEDfile* const tedfile);
+                     tdtlibrary(std::string, real, real, int);
+                    ~tdtlibrary();
+      void           read(TEDfile* const);
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
+      tdtcell*       checkcell(std::string name);
+      void           recreate_hierarchy(const tdtlibdir*);
+//      bool           checkValidRef(std::string);
+      refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
+//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
+      tdtdefaultcell* secure_defaultcell(std::string name);
+      //
+      std::string    name()            const {return _name;}
+      real           UU()              const {return _UU;}
+      const cellList& cells()          const {return _cells;}
+      TDTHierTree*   hiertree()        const {return _hiertree;}
+      int            libID()           const {return _libID;}
+      // callbacks
+      void          (*btreeAddMember)(const char*, const char*, int action);
+      void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
+      friend         void tdtcell::updateHierarchy(tdtdesign*);
+      friend         void tdtcell::removePrep(tdtdesign*) const;
+      friend         bool tdtcell::addchild(tdtdesign*, tdtdefaultcell*);
+      friend         class TEDfile;
+      static void    clearHierTree(word libID);
+      static void    clearEntireHierTree();
+      static void    initHierTreePtr() {_hiertree = NULL;}
+   protected:
+      std::string          _name;         // design/library name
+      int                  _libID;        // library ID
+      real                 _DBU;          // Size of database units in meters
+      real                 _UU;           // size of user unit in DBU
+      cellList             _cells;        // list of cells in the design
+      static TDTHierTree*  _hiertree;     // 
+   };
+
+   class tdtdesign : public tdtlibrary {
+   public:
+                     tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);                     
+      virtual       ~tdtdesign();
+      virtual void   read(TEDfile* const);
+      void           write(TEDfile* const tedfile);
+      int            readLibrary(TEDfile* const);
       tdtcell*       addcell(std::string name);
       bool           removecell(std::string&, laydata::atticList*);
       tdtdata*       addbox(word la, TP* p1, TP* p2);
       tdtdata*       addpoly(word, const pointlist*);
       tdtdata*       addwire(word, const pointlist*, word);
       tdtdata*       addtext(word la, std::string& text, CTM& ori);
-      tdtdata*       addcellref(std::string& name, CTM& ori);
+      tdtdata*       addcellref(laydata::refnamepair striter, CTM& ori);
       tdtdata*       addcellaref(std::string&, CTM&, ArrayProperties&);
       void           addlist(atticList*);
       tdtcell*       opencell(std::string name);
@@ -53,11 +90,10 @@ namespace laydata {
       bool           editprev(const bool undo = false);
       bool           editpop();
       bool           edittop();
-      tdtcell*       checkcell(std::string name);
       void           openGL_draw(layprop::DrawProperties&);
       void           tmp_draw(const layprop::DrawProperties&, TP, TP);
-      void           recreate_hierarchy();
-      void           mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
+      void           set_tmpdata(tdtdata* tmpdata) {_tmpdata = tmpdata;}
+      void           set_tmpctm(CTM tmpctm)        {_tmpctm  = tmpctm; }
       void           mousePoint(TP p);
       void           mousePointCancel(TP&);
       void           mouseStop();
@@ -96,40 +132,60 @@ namespace laydata {
       unsigned int   numselected()     const {return _target.edit()->numselected();};
       void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
       void           report_selected(real DBscale) const { _target.edit()->report_selected(DBscale);};
-      refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
+//      refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       std::string    activecellname()  const {return _target.name();};
       void           assign_properties(layprop::ViewProperties& viewprop) {_target.init_viewprop(&viewprop);}
       //
-      std::string    name()            const {return _name;};
-      real           UU()              const {return _UU;};
-      TDTHierTree*   hiertree()        const {return _hiertree;};
-      const cellList& cells()          const {return _cells;};
       time_t         created()         const {return _created;}
       time_t         lastUpdated()     const {return _lastUpdated;}
-      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
+//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
       //
 //      const ACTIVE_OP tellop()         const {return _tellop;};
       bool           modified;
-      void          (*btreeAddMember)(const char*, const char*, int action);
-      void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
       friend         class TEDfile;
-      friend         void tdtcell::updateHierarchy(tdtdesign*);
-      friend         void tdtcell::removePrep(tdtdesign*) const;
-      friend         bool tdtcell::addchild(tdtdesign*, tdtcell*);
    private:
       bool           validate_cells();
-      std::string    _name;         // design name
-      real           _DBU;          // Size of database units in meters
-      real           _UU;           // size of user unit in DBU
-      cellList       _cells;        // list of cells in the design
-      TDTHierTree*   _hiertree;     // 
       tdtdata*       _tmpdata;      // pointer to a data under construction - for view purposes
       editobject     _target;       // edit/view target <- introduced with pedit operations
       time_t         _created;
       time_t         _lastUpdated;
       CTM            _tmpctm;
-
    };
+
+   /*! Library directory or Directory of libraries.
+   This object contains pointers to all loaded libraries. Current database is the 
+   only exception. Instead there is one "hidden" library and this is the library
+   of undefined cells. It is always defined and always located in the 0 slot of
+   the Catalog.
+   Here is the library ID code:
+   -1 -> current database
+    0 -> library of undefened cells
+    1 -> first loaded library
+    etc. 
+   */
+   class tdtlibdir {
+   public:
+      typedef std::pair<std::string, tdtlibrary*> LibItem;
+      typedef std::vector<LibItem*>               Catalog;
+                        tdtlibdir();
+                       ~tdtlibdir();
+      tdtdesign*        operator ()() {return _TEDDB;}
+      void              addlibrary( tdtlibrary* const, word libRef );
+      void              closelibrary(std::string);
+      tdtlibrary*       getLib(int);
+      int               getLastLibRefNo();
+      bool              getCellNamePair(std::string, refnamepair&) const;
+      tdtdefaultcell*   adddefaultcell( std::string name );
+      bool              collect_usedlays(std::string, bool, ListOfWords&) const;
+      bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
+      void              deleteDB() {delete _TEDDB;}
+      void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
+      unsigned int      numselected()     const {return _TEDDB->numselected();}
+   private:
+      Catalog           _libdirectory;
+      tdtdesign*        _TEDDB;        // toped data base
+   };
+
 }
 
 #endif //TEDESIGN_H_INCLUDED

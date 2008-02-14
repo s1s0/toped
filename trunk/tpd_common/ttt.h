@@ -69,6 +69,13 @@ typedef     _sg_int16   int2b;
 typedef     _sg_int32   int4b;
 typedef        double   real;
 
+//=============================================================================
+// Some common constants (instead of #defines)
+//=============================================================================
+const int         ALL_LIB           = -2;
+const int         TARGETDB_LIB      = -1;
+const int         UNDEFCELL_LIB     =  0;
+
 //==============================================================================
 class SGBitSet {
 public:
@@ -228,45 +235,31 @@ typedef  std::list<std::string>  nameList;
 template <class TYPE> class SGHierTree {
 public:
    SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst);
-   SGHierTree(const TYPE* comp, SGHierTree* lst) {
-      component = comp; last = lst;
-   };
-   SGHierTree*   GetFirstRoot() {
-      SGHierTree* wv = this;
-      while (wv && (wv->parent)) wv = wv->last;
-      return wv;
-   };
-   SGHierTree*   GetNextRoot()  {
-      SGHierTree* wv = this->last;
-      while (wv && (wv->parent)) wv = wv->last;
-      return wv;
-   };
-   SGHierTree*  GetMember(const TYPE* comp) {
-      SGHierTree* wv = this;
-      while (wv && (wv->component != comp)) 
-         wv = wv->last;
-      return wv;
-   };
-   SGHierTree*  GetNextMember(const TYPE* comp) {
-      SGHierTree* wv = this->last;
-      while (wv && (wv->component != comp)) wv = wv->last;
-      return wv;
-   };
-   int            addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
-   bool           removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
-   bool           removeRootItem(const TYPE*comp, SGHierTree*& lst);
-   bool           checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
-   SGHierTree*    GetBrother()         {return brother;};
-   SGHierTree*    GetChild()           {return Fchild;};
-   SGHierTree*    Getparent()          {return parent;};
-   SGHierTree*    GetLast()            {return last;};
-   const TYPE*    GetItem()            {return component;};
-protected:
-   const TYPE     *component; // points to the component
-   SGHierTree*    last;      // last in the linear list of components
-   SGHierTree*    parent;    // points up
-   SGHierTree*    brother;   // points right
-   SGHierTree*    Fchild;    // points down to first child
+   SGHierTree(const TYPE* comp, SGHierTree* lst) : component(comp), last(lst), 
+                                    parent(NULL), brother(NULL), Fchild(NULL) {};
+   SGHierTree*       GetFirstRoot(int libID);
+   SGHierTree*       GetNextRoot(int libID);
+   const SGHierTree* GetBrother(int libID) const;
+   const SGHierTree* GetChild(int libID) const;
+   SGHierTree*       GetMember(const TYPE* comp);
+   SGHierTree*       GetNextMember(const TYPE* comp);
+   bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
+   int               addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
+   bool              removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
+   bool              removeRootItem(const TYPE*comp, SGHierTree*& lst);
+//   void              addLibRef(const SGHierTree* lref) { reflibs.add(lref);}
+   const TYPE*       GetItem() const           {return component;}
+   const SGHierTree* GetLast() const           {return last;}
+   const SGHierTree* Getparent() const         {return parent;}
+   void              relink(const SGHierTree* comp)  {last = comp->last;}
+private:
+   bool              thisLib(int libID);
+   const TYPE       *component; // points to the component
+   SGHierTree*       last;      // last in the linear list of components
+   SGHierTree*       parent;    // points up
+   SGHierTree*       brother;   // points right (siblings)
+   SGHierTree*       Fchild;    // points down to the first child
+//   std::list<SGHierTree*>  reflibs;   // reference library hierarhies
 };
 
 // The constructor
@@ -290,6 +283,59 @@ SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst
       brother = NULL;
    Fchild = NULL;
 };
+
+template <class TYPE> 
+      bool   SGHierTree<TYPE>::thisLib(int libID) {
+         /*! Any libID < TARGETDB_LIB will make the functions to ignore it.
+             Idea is to have a possibility to traverse the entire
+             tree no matter where the cell belongs */
+         return (libID < TARGETDB_LIB) ? true : (libID == component->libID());
+      }
+
+template <class TYPE>
+   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetFirstRoot(int libID) {
+      SGHierTree* wv = this;
+      while (wv && (wv->parent || !wv->thisLib(libID) ) ) wv = wv->last;
+      return wv;
+   }
+
+template <class TYPE> 
+   SGHierTree<TYPE>*   SGHierTree<TYPE>::GetNextRoot(int libID)  {
+      SGHierTree* wv = this->last;
+      while (wv && (wv->parent || !wv->thisLib(libID) ) ) wv = wv->last;
+      return wv;
+   }
+
+template <class TYPE> 
+   const SGHierTree<TYPE>* SGHierTree<TYPE>::GetChild(int libID) const {
+   if ( (NULL == Fchild) || Fchild->thisLib(libID) ) return Fchild;
+      SGHierTree* wv = Fchild;
+      while ( wv && !wv->thisLib(libID) ) wv = wv->brother;
+      return wv;
+   }
+
+template <class TYPE> 
+   const SGHierTree<TYPE>* SGHierTree<TYPE>::GetBrother(int libID) const {
+      SGHierTree* wv = brother;
+      while (wv && !wv->thisLib(libID) ) wv = wv->brother;
+      return wv;
+   }
+
+
+template <class TYPE> 
+   SGHierTree<TYPE>*  SGHierTree<TYPE>::GetMember(const TYPE* comp) {
+      SGHierTree* wv = this;
+      while (wv && (wv->component != comp)) 
+         wv = wv->last;
+      return wv;
+   }
+
+template <class TYPE> 
+   SGHierTree<TYPE>*  SGHierTree<TYPE>::GetNextMember(const TYPE* comp) {
+      SGHierTree* wv = this->last;
+      while (wv && (wv->component != comp)) wv = wv->last;
+      return wv;
+   }
 
 template <class TYPE> 
     bool SGHierTree<TYPE>::checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
@@ -425,6 +471,9 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
 
 std::vector<std::string> split (const std::string& str, char delim);
 
+//=============================================================================
+// More common constants (instead of #defines)
+//=============================================================================
 const byte MAX_BYTE_VALUE = 255;
 const word MAX_WORD_VALUE = 65535;
 //#define MIN_X        (int4b)0x80000001      //  -2 147 483 647
@@ -432,11 +481,9 @@ const word MAX_WORD_VALUE = 65535;
 //#define MIN_Y        (int4b)0x80000001      //  -2 147 483 647
 //#define MAX_Y        (int4b)0x7FFFFFFF      //   2 147 483 647
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
-const byte        OPENGL_FONT_UNIT   = 128;
-const byte        MIN_VISUAL_AREA    = 10;   // that would be 10 pixels
-const DBbox       DEFAULT_OVL_BOX    = DBbox(TP(0,0));
-const DBbox       DEFAULT_ZOOM_BOX   = DBbox(TP(-2000,-2000), TP(20000,20000));
-const std::string UNDEFLAYNAME       = std::string("__undefined");
-
-
+const byte        OPENGL_FONT_UNIT  = 128;
+const byte        MIN_VISUAL_AREA   = 10;   // that would be 10 pixels
+const DBbox       DEFAULT_OVL_BOX   = DBbox(TP(0,0));
+const DBbox       DEFAULT_ZOOM_BOX  = DBbox(TP(-2000,-2000), TP(20000,20000));
+const std::string UNDEFLAYNAME      = std::string("__undefined");
 #endif

@@ -152,7 +152,7 @@ namespace tellstdfunc {
    void                 UpdateLV();
    void                 RefreshGL();
    void                 gridON(byte No, bool status);
-   void                 updateLayerDefinitions(laydata::tdtdesign*, nameList&);
+   void                 updateLayerDefinitions(laydata::tdtlibdir*, nameList&, int);
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::selectList* filter_selist(const laydata::selectList*, word mask);
    laydata::atticList*  replace_str(laydata::atticList*, std::string);

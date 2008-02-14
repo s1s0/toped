@@ -101,18 +101,22 @@ namespace laydata {
    class tdtdata;
    class editobject;
    class tdtcell;
+   class tdtdefaultcell;
    class tdtcellref;
    class tdtdesign;
+   class tdtlibrary;
+   class tdtlibdir;
    typedef  std::pair<tdtdata*, SGBitSet>           selectDataPair;
    typedef  std::list<selectDataPair>               dataList;
    typedef  std::map<word, dataList*>               selectList;
    typedef  std::list<tdtdata*>                     shapeList;
    typedef  std::map<word,shapeList*>               atticList;
-   typedef  std::map<std::string, tdtcell*>         cellList;
+   typedef  std::map<std::string, tdtdefaultcell*>  cellList;
    typedef  cellList::const_iterator                refnamepair;
    typedef  std::deque<const tdtcellref*>           cellrefstack;
    typedef  std::list<word>                         ListOfWords;
    typedef  std::deque<editobject*>                 editcellstack;
+   typedef  std::list<const cellList*>              LibCellLists;
 
    //==============================================================================
    class validator {
@@ -122,9 +126,10 @@ namespace laydata {
                            validator() : _status(shp_OK) {};
       bool                 valid()           {return _status < shp_cross;}
       bool                 recoverable()     {return _status < shp_null;}
-      byte                 status()          {return _status;};
+      byte                 status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
-      pointlist&           get_validated()   {return _plist;};
+      pointlist&           get_validated()   {return _plist;}
+      word                 numpoints()       {return _plist.size();}
       virtual char*       failtype() = 0;
       virtual tdtdata*    replacement() = 0;
       virtual            ~validator() {};
@@ -136,10 +141,10 @@ namespace laydata {
 //==============================================================================
    class   TEDfile {
    public:
-                           TEDfile(const char*); // for reading
-                           TEDfile(tdtdesign*, std::string&); // for writing
+                           TEDfile(const char*, laydata::tdtlibdir*); // for reading
+                           TEDfile(std::string&, laydata::tdtlibdir*); // for writing
       void                 closeF() {fclose(_file);};
-      void                 read();
+      void                 read(int libRef);
       void                 cleanup();
       std::string          getString();
       void                 putString(std::string str);
@@ -162,10 +167,11 @@ namespace laydata {
       void                 get_cellchildnames(nameList*);
       bool                 status() const  {return _status;};
       word                 numread() const {return _numread;};
-      tdtdesign*           design() const  {return _design;};
+      tdtlibrary*          design() const  {return _design;};
       time_t               created() const {return _created;};
       time_t               lastUpdated() const {return _lastUpdated;};
-      protected:
+      const laydata::tdtlibdir* TEDLIB() {return _TEDLIB;}
+   protected:
       bool                 _status;
       word                 _numread;
    private:
@@ -180,8 +186,10 @@ namespace laydata {
       word                 _subrevision;
       time_t               _created;
       time_t               _lastUpdated;
-      tdtdesign*           _design;
+      tdtlibrary*          _design;
       nameList             _childnames;
+      laydata::tdtlibdir*  _TEDLIB;       // catalog of available TDT libraries
+
    };
 
    class ArrayProperties

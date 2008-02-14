@@ -79,8 +79,10 @@ PSegment* PSegment::parallel(TP p)
 //-----------------------------------------------------------------------------
 // class TEDfile
 //-----------------------------------------------------------------------------
-laydata::TEDfile::TEDfile(const char* filename) { // reading
+laydata::TEDfile::TEDfile(const char* filename, laydata::tdtlibdir* tedlib)  // reading
+{
    _numread = 0;_position = 0;_design = NULL;
+   _TEDLIB = tedlib;
    if (NULL == (_file = fopen(filename, "rb"))) {
       std::string news = "File \"";
       news += filename; news += "\" not found or unaccessable";
@@ -112,20 +114,26 @@ void laydata::TEDfile::getFHeader()
 //   checkIntegrity();
 }
 
-void laydata::TEDfile::read() {
+void laydata::TEDfile::read(int libRef) 
+{
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
    real         DBU = getReal();
    real          UU = getReal();
    tell_log(console::MT_DESIGNNAME, name);
-   _design = DEBUG_NEW tdtdesign(name,_created, _lastUpdated, DBU,UU);
+   if (libRef > 0)
+      _design = DEBUG_NEW tdtlibrary(name, DBU, UU, libRef);
+   else
+      _design = DEBUG_NEW tdtdesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in tdtdesign so don't search it here
    //byte designend = getByte(); 
 }
 
-laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) { //writing
-   _design = design;_revision=0;_subrevision=6;
+laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib) 
+{ //writing
+   _design = (*tedlib)();_revision=0;_subrevision=6;
+   _TEDLIB = tedlib;
    if (NULL == (_file = fopen(filename.c_str(), "wb"))) {
       std::string news = "File \"";
       news += filename.c_str(); news += "\" can not be created";
@@ -135,7 +143,7 @@ laydata::TEDfile::TEDfile(tdtdesign* design, std::string& filename) { //writing
    putString(TED_LEADSTRING);
    putRevision();
    putTime();
-   _design->write(this);
+   static_cast<laydata::tdtdesign*>(_design)->write(this);
    fclose(_file);
 }
 
@@ -266,7 +274,7 @@ void laydata::TEDfile::putReal(const real data) {
 
 void laydata::TEDfile::putTime() 
 {
-   time_t ctime = _design->created();
+   time_t ctime = static_cast<laydata::tdtdesign*>(_design)->created();
    tm* broken_time = localtime(&ctime);
    putByte(tedf_TIMECREATED);
    put4b(broken_time->tm_mday);
@@ -277,7 +285,7 @@ void laydata::TEDfile::putTime()
    put4b(broken_time->tm_sec);
    //
    _lastUpdated = time(NULL);
-   _design->_lastUpdated = _lastUpdated;
+   static_cast<laydata::tdtdesign*>(_design)->_lastUpdated = _lastUpdated;
    broken_time = localtime(&_lastUpdated);
    putByte(tedf_TIMEUPDATED);
    put4b(broken_time->tm_mday);
@@ -334,11 +342,11 @@ void laydata::TEDfile::registercellread(std::string cellname, tdtcell* cell) {
       if (NULL == _design->_cells[cellname]) {
          // case 1 or case 2 -> can't be distiguised in this moment
          //_design->_cells[cellname] = cell;
-         // call has been referenced already, so it's not an orphan
+         // cell has been referenced already, so it's not an orphan
          cell->parentfound();
       }
       else {
-         // case 3 -> parsing should be stopped !
+         //@FIXME case 3 -> parsing should be stopped !
       }
    _design->_cells[cellname] = cell;
 }
@@ -359,32 +367,43 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.push_back(cellname);
+   laydata::refnamepair striter = _design->_cells.find(cellname);
    // link the cells instances with their definitions
-   if (_design->_cells.end() == _design->_cells.find(cellname)) 
+   if (_design->_cells.end() == striter) 
    {
-   // Attention! In this case we've parsed a cell reference, before
-   // the cell is defined. This might means:
-   //   1. Cell is referenced, but simply not defined. 
-   //   2. Circular reference ! Cell1 contains a reference of Cell2,
-   //      that in turn contains a reference of Cell1. This is not allowed
-   // We can not make a decision yet, because the entire file has not been
-   // parsed yet. That is why we are assigning a NULL pointer to the 
-   // referenced structure here in order to continue the parsing, and when 
-   // the entire file is parced the cell references without a proper pointer
-   // to the structure need to be flagged as warning in case 1 and as error 
-   // in case 2.
-   // Empty cell ctructure should be handled without a problem by the 
-   // tdttcellref class and its ancestors
-      _design->_cells[cellname] = NULL;
+   //   if (_design->checkcell(name))
+   //   {
+      // search the cell in the libraries because it's not in the DB
+      if (!_TEDLIB->getCellNamePair(cellname, striter))
+      {
+         // Attention! In this case we've parsed a cell reference, before
+         // the cell is defined. This might means:
+         //   1. Cell is referenced, but simply not defined. 
+         //   2. Circular reference ! Cell1 contains a reference of Cell2,
+         //      that in turn contains a reference of Cell1. This is not allowed
+         // We can not make a decision yet, because the entire file has not been
+         // parsed yet. That is why we are assigning a NULL pointer to the 
+         // referenced structure here in order to continue the parsing, and when 
+         // the entire file is parced the cell references without a proper pointer
+         // to the structure need to be flagged as warning in case 1 and as error 
+         // in case 2.
+         // Empty cell structure should be handled without a problem by the 
+         // tdttcellref class and its ancestors
+         _design->_cells[cellname] = _TEDLIB->adddefaultcell(cellname);
+         striter = _design->_cells.find(cellname);
+      }
+      else
+         striter->second->parentfound();
    }   
    else 
    {
       // Mark that the cell definition is referenced, i.e. it is not the top 
       // of the tree (orphan flag in the tdtcell), BUT just in case it is
       // not empty yet
-      _design->_cells[cellname]->parentfound();
+      if (NULL != _design->_cells[cellname])
+         _design->_cells[cellname]->parentfound();
    }
-   return _design->_cells.find(cellname);
+   return striter;
 }
 
 void laydata::TEDfile::get_cellchildnames(nameList* cnames) {

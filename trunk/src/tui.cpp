@@ -187,12 +187,17 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
 //   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
 //   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      laydata::cellList const cll = ATDB->cells();
-      laydata::cellList::const_iterator CL;
-      for (CL = cll.begin(); CL != cll.end(); CL++) {
-         _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
+   DATC->lockDB();
+      laydata::LibCellLists *cll = DATC->getCells(ALL_LIB);
+      for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
+      {
+         laydata::cellList::const_iterator CL;
+         for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+         {
+            _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
+         }
       }
+      delete cll;
    DATC->unlockDB();   
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
@@ -228,12 +233,17 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
 //   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
 //   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      laydata::cellList const cll = ATDB->cells();
-      laydata::cellList::const_iterator CL;
-      for (CL = cll.begin(); CL != cll.end(); CL++) {
-         _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
+   DATC->lockDB();
+      laydata::LibCellLists *cll = DATC->getCells(ALL_LIB);
+      for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
+      {
+         laydata::cellList::const_iterator CL;
+         for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+         {
+            _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
+         }
       }
+      delete cll;
    DATC->unlockDB();   
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
@@ -756,11 +766,11 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
 {
    wxString color_name = cmdevent.GetString();
-   const layprop::tellRGB color = DATC->getColor(std::string(color_name.fn_str()));
+   const layprop::tellRGB color = DATC->getColor(std::string(color_name.mb_str()));
    _sample->setColor(color);
 
 	//Next 2 strings need for Windows version
-   const byte* fill = DATC->getFill(std::string(_fillname.fn_str()));
+   const byte* fill = DATC->getFill(std::string(_fillname.mb_str()));
    _sample->setFill(fill);
 
 	_sample->Refresh();
@@ -769,7 +779,7 @@ void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
 void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
 {
    _fillname = cmdevent.GetString();
-   const byte* fill = DATC->getFill(std::string(_fillname.fn_str()));
+   const byte* fill = DATC->getFill(std::string(_fillname.mb_str()));
    _sample->setFill(fill);
    _sample->Refresh();
 }
@@ -777,7 +787,7 @@ void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
 void tui::defineLayer::OnLineChanged(wxCommandEvent& cmdevent)
 {
    wxString line_name = cmdevent.GetString();
-   const layprop::LineSettings* line = DATC->getLine(std::string(line_name.fn_str()));
+   const layprop::LineSettings* line = DATC->getLine(std::string(line_name.mb_str()));
    _sample->setLine(line);
    _sample->Refresh();
 }
@@ -795,7 +805,7 @@ void tui::defineLayer::OnDefaultColor(wxCommandEvent& cmdevent)
    if (selected)
       _sample->setColor(DATC->getColor(std::string("")));
    else
-      _sample->setColor(DATC->getColor(std::string(_colors->GetStringSelection().fn_str())));
+      _sample->setColor(DATC->getColor(std::string(_colors->GetStringSelection().mb_str())));
    _sample->Refresh();
 }
 
@@ -807,7 +817,7 @@ void tui::defineLayer::OnDefaultPattern(wxCommandEvent& cmdevent)
    if (selected)
       fill = DATC->getFill(std::string(""));
    else
-      fill = DATC->getFill(std::string(_fills->GetStringSelection().fn_str()));
+      fill = DATC->getFill(std::string(_fills->GetStringSelection().mb_str()));
    _sample->setFill(fill);
    _sample->Refresh();
 }
@@ -820,7 +830,7 @@ void tui::defineLayer::OnDefaultLine(wxCommandEvent& cmdevent)
    if (selected)
       line = DATC->getLine(std::string(""));
    else
-      line = DATC->getLine(std::string(_lines->GetStringSelection().fn_str()));
+      line = DATC->getLine(std::string(_lines->GetStringSelection().mb_str()));
    _sample->setLine(line);
    _sample->Refresh();
 }
@@ -1037,7 +1047,7 @@ void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
 void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
 {
     wxString color_name = cmdevent.GetString();
-   const layprop::tellRGB* scol = getColor(std::string(color_name.fn_str()));
+   const layprop::tellRGB* scol = getColor(std::string(color_name.mb_str()));
    
    wxString channel;
    channel << scol->red();
@@ -1078,7 +1088,7 @@ void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
       msg << wxT("Empty color name.");
       wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
    }
-   else if (_allColors.end() != _allColors.find(std::string(color_name.fn_str())))
+   else if (_allColors.end() != _allColors.find(std::string(color_name.mb_str())))
    {
       wxString msg;
       msg << wxT("Color \"") << color_name << wxT("\" is already defined.");
@@ -1087,7 +1097,7 @@ void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
    else
    {
       layprop::tellRGB* newcol = DEBUG_NEW layprop::tellRGB(0,0,0,178);
-      std::string s_newcol = std::string(color_name.fn_str());
+      std::string s_newcol = std::string(color_name.mb_str());
       _allColors[s_newcol] = newcol;
       int index = _colorList->Append(color_name);
       _colorList->Select(index);
@@ -1136,7 +1146,7 @@ void tui::defineColor::OnApply(wxCommandEvent& WXUNUSED(event))
    unsigned long d_alpha;s_alpha.ToULong(&d_alpha);
    
    layprop::tellRGB* scol = DEBUG_NEW layprop::tellRGB(d_red, d_green, d_blue, d_alpha);
-   std::string ss_name(s_name.fn_str());
+   std::string ss_name(s_name.mb_str());
    if (_allColors.end() != _allColors.find(ss_name))
    {
       delete _allColors[ss_name];
@@ -1471,7 +1481,7 @@ void tui::defineFill::nameNormalize(wxString& str)
 void tui::defineFill::OnFillSelected(wxCommandEvent& cmdevent)
 {
     wxString fill_name = cmdevent.GetString();
-    fillcopy(getFill(std::string(fill_name.fn_str())),_current_pattern);
+    fillcopy(getFill(std::string(fill_name.mb_str())),_current_pattern);
    _fillsample->setFill(_current_pattern);
    _fillsample->Refresh();
 }
@@ -1486,7 +1496,7 @@ void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
       msg << wxT("Empty fill name.");
       wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
    }
-   else if (_allFills.end() != _allFills.find(std::string(fill_name.fn_str())))
+   else if (_allFills.end() != _allFills.find(std::string(fill_name.mb_str())))
    {
       wxString msg;
       msg << wxT("Pattern \"") << fill_name << wxT("\" is already defined.");
@@ -1494,7 +1504,7 @@ void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
    }
    else
    {
-      std::string s_newcol = std::string(fill_name.fn_str());
+      std::string s_newcol = std::string(fill_name.mb_str());
       byte* newpat = DEBUG_NEW byte[128];
       for(byte i = 0; i< 128; i++)
          newpat[i] = 0x55 << ((byte)(i/4)%2);
@@ -1518,7 +1528,7 @@ void tui::defineFill::OnDefineFill(wxCommandEvent& cmdevent)
       _fillsample->setFill(_current_pattern);
       _fillsample->Refresh();
       wxString s_name  = _fillList->GetStringSelection();
-      std::string ss_name(s_name.fn_str());
+      std::string ss_name(s_name.mb_str());
       if (_allFills.end() != _allFills.find(ss_name))
       {
          fillcopy(_current_pattern, _allFills[ss_name]);
