@@ -100,10 +100,6 @@ namespace tui {
    public:
       getCellRef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, wxString init);
       wxString get_selectedcell() const {return _nameList->GetStringSelection();};
-//      wxString get_angle() const {return _rotation->GetValue();};
-//      bool  get_flip() const {return _flip->GetValue();};
-//      wxTextCtrl* _rotation;
-//      wxCheckBox* _flip;
       wxListBox*  _nameList;
    };
 

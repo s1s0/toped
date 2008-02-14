@@ -327,7 +327,7 @@ void	tui::ToolBarHandler::changeToolSize(const wxSize& size)
 
 	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
 	{
-		AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), (*it)->helpString());
+		AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
 	}
 	Toped->getAuiManager()->Update();
 }
@@ -415,7 +415,7 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 	ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconName, hotKey, helpString, cbMethod);
 
 	_tools.push_back(tool);
-	AddTool(tool->ID(),wxT(""),tool->bitmap(), helpString);
+	AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
 	Toped->getAuiManager()->DetachPane(this);
 	Realize();
 

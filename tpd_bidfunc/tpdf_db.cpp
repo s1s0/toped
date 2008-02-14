@@ -65,8 +65,8 @@ int tellstdfunc::stdNEWDESIGNd::execute()
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       ATDB->btreeAddMember    = &browsers::treeAddMember;
       ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-      browsers::addTDTtab(nm, ATDB->hiertree());
    DATC->unlockDB();
+   browsers::addTDTtab();
    // reset UNDO buffers;
    UNDOcmdQ.clear();
    while (!UNDOPstack.empty()) {
@@ -89,28 +89,27 @@ int tellstdfunc::TDTread::execute()
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      nameList top_cell_list;
       if (DATC->TDTread(filename))
       {
-         std::string info = "Generating cell hierarchy ...";
-         tell_log(console::MT_INFO,info);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
-            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot();
+            // Initialize call back functions
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+               // time stamps
+            TpdTime timec(ATDB->created());
+            TpdTime timeu(ATDB->lastUpdated());
+               // Gatering the used layers & update the layer definitions
+            std::list<std::string> top_cell_list;
+            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
             do
             {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
-            } while (NULL != (root = root->GetNextRoot()));
-            ATDB->btreeAddMember    = &browsers::treeAddMember;
-            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-            browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
-            info = "... done";
-            tell_log(console::MT_INFO,info);
-            TpdTime timec(ATDB->created());
-            TpdTime timeu(ATDB->lastUpdated());
-            updateLayerDefinitions(ATDB, top_cell_list);
+            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+            updateLayerDefinitions( DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
-   info = "... DB unlocked";
-   tell_log(console::MT_INFO,info);
+         // populate the hierarchy browser
+         browsers::addTDTtab();
+         //
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -151,21 +150,25 @@ int tellstdfunc::TDTreadIFF::execute()
       bool start_ignoring = false;
       if (DATC->TDTcheckread(filename, timeCreated, timeSaved, start_ignoring))
       {
-         std::list<std::string> top_cell_list;
          DATC->TDTread(filename);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         ATDB->btreeAddMember    = &browsers::treeAddMember;
-         ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-         browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
-         laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot();
-         do
-         {
-            top_cell_list.push_back(std::string(root->GetItem()->name()));
-         } while (NULL != (root = root->GetNextRoot()));
-         TpdTime timec(ATDB->created());
-         TpdTime timeu(ATDB->lastUpdated());
-         updateLayerDefinitions(ATDB, top_cell_list);
+            // Initialize call back functions
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+            // time stamps
+            TpdTime timec(ATDB->created());
+            TpdTime timeu(ATDB->lastUpdated());
+            // Gatering the used layers & update the layer definitions
+            std::list<std::string> top_cell_list;
+            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+            do
+            {
+               top_cell_list.push_back(std::string(root->GetItem()->name()));
+            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+            updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
+         // populate the cell hierarchy browser
+         browsers::addTDTtab();
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -175,6 +178,48 @@ int tellstdfunc::TDTreadIFF::execute()
          }
       }
       if (start_ignoring) set_ignoreOnRecovery(true);
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
+   }
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::TDTloadlib::TDTloadlib(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::TDTloadlib::execute()
+{
+   std::string filename = getStringValue();
+   if (expandFileName(filename))
+   {
+      nameList top_cell_list;
+      int libID = DATC->TDTloadlib(filename);
+      if (0 <= libID)
+      {
+         laydata::tdtlibrary* LTDB = DATC->getLib(libID);
+         // Gatering the used layers & update the layer definitions
+         laydata::TDTHierTree* root = LTDB->hiertree()->GetFirstRoot(libID);
+         do
+         {
+            top_cell_list.push_back(std::string(root->GetItem()->name()));
+         } while (NULL != (root = root->GetNextRoot(libID)));
+         updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, libID);
+         // populating cell hierarchy browser
+         browsers::addTDTtab();
+         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+      }
+      else
+      {
+         std::string info = "Can't load \"" + filename + "\" as a library";
+         tell_log(console::MT_ERROR,info);
+      }
    }
    else
    {
@@ -288,11 +333,12 @@ int tellstdfunc::GDSread::execute() {
          //
          GDSin::GDSFile* AGDSDB = DATC->lockGDS();
 
-            GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot();
+            GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+            assert(root);
             do 
             {
                top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));
-            } while (NULL != (root = root->GetNextRoot()));
+            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
          DATC->unlockGDS();
          telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
@@ -332,9 +378,9 @@ int tellstdfunc::GDSconvert::execute()
    std::string name = getStringValue();
    nameList top_cells;
    top_cells.push_back(name.c_str());
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   DATC->lockDB(false);
       DATC->importGDScell(top_cells, recur, over);
-      updateLayerDefinitions(ATDB, top_cells);
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur) 
          << "," << LogFile._2bool(over) << ");"; LogFile.flush();
@@ -360,12 +406,11 @@ int tellstdfunc::GDSconvertAll::execute()
    {
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
    }
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   DATC->lockDB(false);
       DATC->importGDScell(top_cells, recur, over);
-      browsers::addTDTtab(ATDB->name(), ATDB->hiertree());
-      updateLayerDefinitions(ATDB, top_cells);
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
-   
+   browsers::addTDTtab();
    LogFile << LogFile.getFN() << "(\""<< *pl << "\"," << LogFile._2bool(recur)
          << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    delete pl;
@@ -504,11 +549,19 @@ int tellstdfunc::stdREPORTLAY::execute() {
    bool recursive = getBoolValue();
    std::string cellname = getStringValue();
    laydata::ListOfWords ull;
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      bool success = ATDB->collect_usedlays(cellname, recursive, ull);
+   DATC->lockDB();
+      bool success = DATC->TEDLIB()->collect_usedlays(cellname, recursive, ull);
    DATC->unlockDB();
    telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    if (success) {
+      ull.sort();ull.unique();
+      std::ostringstream ost;
+      ost << "used layers: {";
+      for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+         ost << " " << *CL << " ";
+      ost << "}";
+      tell_log(console::MT_INFO, ost.str());
+
       for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
          tllull->add(DEBUG_NEW telldata::ttint(*CL));
       ull.clear();

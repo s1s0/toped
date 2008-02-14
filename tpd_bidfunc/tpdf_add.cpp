@@ -635,7 +635,6 @@ void tellstdfunc::stdCELLREF::undo() {
 }
 
 int tellstdfunc::stdCELLREF::execute() {
-   UNDOcmdQ.push_front(this);
    // get the parameters from the operand stack
    real   magn   = getOpValue();
    bool   flip   = getBoolValue();
@@ -644,16 +643,32 @@ int tellstdfunc::stdCELLREF::execute() {
    std::string name = getStringValue();
    real DBscale = DATC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(name,ori), 0);
-   DATC->unlockDB();
-   OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
-                     angle << "," << LogFile._2bool(flip) << "," << magn <<");";
-   LogFile.flush();
-   delete rpnt;
-   RefreshGL();
-   return EXEC_NEXT;
+   // check that target cell exists - otherwise tmp_draw can't obviously work.
+   // there is another more extensive check when the cell is added, there the circular
+   // references are checked as well 
+   laydata::refnamepair striter;
+   if (DATC->getCellNamePair(name, striter))
+   {
+      UNDOcmdQ.push_front(this);
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(striter,ori), 0);
+      DATC->unlockDB();
+      OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
+                        angle << "," << LogFile._2bool(flip) << "," << magn <<");";
+      LogFile.flush();
+      delete rpnt;
+      RefreshGL();
+      return EXEC_NEXT;
+   }
+   else
+   {
+      std::string news = "Cell \"";
+      news += name; news += "\" is not defined";
+      tell_log(console::MT_ERROR,news);
+      delete rpnt;
+      return EXEC_ABORT;
+   }
 }
 
 //=============================================================================
@@ -665,14 +680,11 @@ tellstdfunc::stdCELLREF_D::stdCELLREF_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCELLREF_D::execute() {
    std::string name = getStringValue();
-
-   // check that target cell exists - otherwise tmp_draw can't onviously work.
+   // check that target cell exists - otherwise tmp_draw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well 
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
-   laydata::tdtcell *excell = ATDB->checkcell(name);
-   DATC->unlockDB();
-   if (NULL == excell)
+   laydata::refnamepair striter;
+   if (!DATC->getCellNamePair(name, striter))
    {
       std::string news = "Can't find cell \"";
       news += name; news += "\" ";
@@ -774,7 +786,7 @@ int tellstdfunc::stdCELLAREF_D::execute() {
    word        col   = getWordValue();
    std::string name  = getStringValue();
    
-   // check that target cell exists - otherwise tmp_draw can't onviously work.
+   // check that target cell exists - otherwise tmp_draw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well 
    laydata::tdtdesign* ATDB = DATC->lockDB(false);

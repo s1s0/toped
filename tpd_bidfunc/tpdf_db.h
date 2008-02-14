@@ -34,11 +34,11 @@ namespace tellstdfunc {
    using telldata::argumentQ;
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
-
-   TELL_STDCMD_CLASSA(stdNEWDESIGNd    );              // reset undo buffers
+   TELL_STDCMD_CLASSA(stdNEWDESIGNd    );                // reset undo buffers
    TELL_STDCMD_CLASSB(stdNEWDESIGN   , stdNEWDESIGNd  ); // reset undo buffers
-   TELL_STDCMD_CLASSA(TDTread          );       // reset undo buffers
+   TELL_STDCMD_CLASSA(TDTread          );                // reset undo buffers
    TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread       );
+   TELL_STDCMD_CLASSA(TDTloadlib       );                            
    TELL_STDCMD_CLASSA(TDTsave          );
    TELL_STDCMD_CLASSB(TDTsaveIFF      , TDTsave       );
    TELL_STDCMD_CLASSA(TDTsaveas        );

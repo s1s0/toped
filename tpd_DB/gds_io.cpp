@@ -581,11 +581,11 @@ GDSin::GDSFile::~GDSFile()
 {
    delete library;
    // get rid of the hierarchy tree
-   GDSHierTree* droot;
-   while (_hiertree)
+   const GDSHierTree* var1 = _hiertree;
+   while (var1)
    {
-      droot = _hiertree; _hiertree = droot->GetLast();
-      delete droot;
+      const GDSHierTree* var2 = var1->GetLast();
+      delete var1; var1 = var2;
    }
 }
 

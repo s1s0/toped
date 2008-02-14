@@ -204,22 +204,25 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
 // class DataCenter
 //-----------------------------------------------------------------------------
 DataCenter::DataCenter() {
-   _GDSDB = NULL; _TEDDB = NULL;
+   _GDSDB = NULL; //_TEDDB = NULL;
+   // initializing the static cell hierarchy tree
+   laydata::tdtlibrary::initHierTreePtr();
    _tedfilename = "unnamed";
    _curlay = 1;
    _drawruler = false;
 }
    
 DataCenter::~DataCenter() {
+   laydata::tdtlibrary::clearEntireHierTree();
    if (NULL != _GDSDB) delete _GDSDB;
-   if (NULL != _TEDDB) delete _TEDDB;
+   // _TEDLIB will be cleared automatically (not a pointer)
 }
 bool DataCenter::TDTcheckread(const std::string filename,
     const TpdTime& timeCreated, const TpdTime& timeSaved, bool& start_ignoring)
 {
    bool retval = false;
    start_ignoring = false;
-   laydata::TEDfile tempin(filename.c_str());
+   laydata::TEDfile tempin(filename.c_str(), TEDLIB());
    if (!tempin.status()) return retval;
 
    std::string news = "Project created: ";
@@ -255,12 +258,12 @@ bool DataCenter::TDTcheckread(const std::string filename,
 
 bool DataCenter::TDTread(std::string filename)
 {
-   laydata::TEDfile tempin(filename.c_str());
+   laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
    if (!tempin.status()) return false;
 
    try
    {
-      tempin.read();
+      tempin.read(TARGETDB_LIB);
    }
    catch (EXPTNreadTDT)
    {
@@ -269,14 +272,34 @@ bool DataCenter::TDTread(std::string filename)
       return false;
    }
    tempin.closeF();
-   delete _TEDDB;//Erase existing data
+   _TEDLIB.deleteDB();//Erase existing data
    _tedfilename = filename;
    _neversaved = false;
-   _TEDDB = tempin.design();
-   _TEDDB->assign_properties(_properties);
+   _TEDLIB.setDB(static_cast<laydata::tdtdesign*>(tempin.design()));
+   _TEDLIB()->assign_properties(_properties);
    // Update Canvas scale
-   _properties.setUU(_TEDDB->UU());
+   _properties.setUU(_TEDLIB()->UU());
    return true;
+}
+
+int DataCenter::TDTloadlib(std::string filename)
+{
+   laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
+   if (!tempin.status()) return -1;
+   int libRef = _TEDLIB.getLastLibRefNo();
+   try
+   {
+      tempin.read(libRef);
+   }
+   catch (EXPTNreadTDT)
+   {
+      tempin.closeF();
+      tempin.cleanup();
+      return -1;
+   }
+   tempin.closeF();
+   _TEDLIB.addlibrary(tempin.design(), libRef);
+   return libRef;
 }
 
 bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
@@ -285,20 +308,20 @@ bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSa
    stop_ignoring = false;
    // File created time stamp must match exactly, otherwise it means
    // that we're saving not exactly the same file that is requested
-   if (timeCreated.stdCTime() != _TEDDB->created())
+   if (timeCreated.stdCTime() != _TEDLIB()->created())
    {
       news = "time stamp \"Project created \" doesn't match. File save aborted";
       tell_log(console::MT_ERROR,news);
       return false;
    }
-   if (_TEDDB->lastUpdated() < timeSaved.stdCTime())
+   if (_TEDLIB()->lastUpdated() < timeSaved.stdCTime())
    {
       news = "Database in memory is older than the file. File save operation ignored.";
       tell_log(console::MT_WARNING,news);
       _neversaved = false;
       return false;
    }
-   else if (_TEDDB->lastUpdated() > timeSaved.stdCTime())
+   else if (_TEDLIB()->lastUpdated() > timeSaved.stdCTime())
       // database in memory is newer than the file - save has to go ahead
       // ignore on recovery has to stop
       stop_ignoring = true;
@@ -315,7 +338,7 @@ bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSa
 bool DataCenter::TDTwrite(const char* filename)
 {
    if (filename)  _tedfilename = filename;
-   laydata::TEDfile tempin(_TEDDB, _tedfilename);
+   laydata::TEDfile tempin(_tedfilename, &_TEDLIB);
    _neversaved = false;
    return true;
 }
@@ -325,7 +348,7 @@ void DataCenter::GDSexport(std::string& filename)
    std::string nfn;
    //Get actual time
    GDSin::GDSFile gdsex(filename, time(NULL));
-   _TEDDB->GDSwrite(gdsex, NULL, true);
+   _TEDLIB()->GDSwrite(gdsex, NULL, true);
    gdsex.updateLastRecord();gdsex.closeFile();
 }
 
@@ -334,7 +357,7 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
    std::string nfn;
    //Get actual time
    GDSin::GDSFile gdsex(filename, time(NULL));
-   _TEDDB->GDSwrite(gdsex, cell, recur);
+   _TEDLIB()->GDSwrite(gdsex, cell, recur);
    gdsex.updateLastRecord();gdsex.closeFile();
 }
 
@@ -368,10 +391,10 @@ void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over)
    }
    {
       // Lock the DB here manually. Otherwise the cell browser is going mad
-      GDSin::gds2ted converter(_GDSDB, _TEDDB);
+      GDSin::gds2ted converter(_GDSDB, _TEDLIB());
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.structure(CN->c_str(), recur, over);
-      _TEDDB->modified = true;
+      _TEDLIB()->modified = true;
       unlockGDS();
    }
 }
@@ -388,13 +411,13 @@ void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
    //Get actual time
    PSFile psex(filename);
    _properties.drawprop().PSwrite(psex);
-   _TEDDB->PSwrite(psex, cell, _properties.drawprop());
+   _TEDLIB()->PSwrite(psex, cell, _properties.drawprop());
 //   gdsex.closeFile();
 }
 
 void DataCenter::newDesign(std::string name, time_t created) 
 {
-   if (_TEDDB) 
+   if (_TEDLIB()) 
    {
       // Checks before closing(save?) available only when the command is launched 
       // via GUI(void TopedFrame::OnNewDesign(). If the command is typed directly 
@@ -403,22 +426,24 @@ void DataCenter::newDesign(std::string name, time_t created)
       // without much talking.
       // UNDO buffers will be reset as well in tellstdfunc::stdNEWDESIGN::execute()
       // but there is still a chance to restore everything - using the log file.
-      delete _TEDDB;
-   }   
-   _TEDDB = DEBUG_NEW laydata::tdtdesign(name, created, 0);
-   _TEDDB->assign_properties(_properties);
+      laydata::tdtlibrary::clearHierTree(TARGETDB_LIB);
+      _TEDLIB.deleteDB();
+   }
+   _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, 0));
+   laydata::tdtlibrary::initHierTreePtr();
+   _TEDLIB()->assign_properties(_properties);
    _tedfilename = name + ".tdt";
    _neversaved = true;
-   _properties.setUU(_TEDDB->UU());
+   _properties.setUU(_TEDLIB()->UU());
 }
 
 laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell) 
 {
-   if (_TEDDB) 
+   if (_TEDLIB()) 
    {
-      if (checkACTcell) _TEDDB->check_active();
+      if (checkACTcell) _TEDLIB()->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-      return _TEDDB;
+      return _TEDLIB();
    }
    else throw EXPTNactive_DB();
 }
@@ -452,18 +477,55 @@ void DataCenter::unlockGDS()
 }
 
 unsigned int DataCenter::numselected() const {
-   if (_TEDDB) return _TEDDB->numselected();
-   else return 0;
+   return _TEDLIB.numselected();
 }
 
 void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
                             int4b stepX, int4b stepY, word cols, word rows)
 {
    if (console::op_line == input_type) return;
-   if (_TEDDB)
+   if (_TEDLIB())
    {
-      _TEDDB->check_active();
-      _TEDDB->mouseStart(input_type, name, trans, stepX, stepY, cols, rows);
+      _TEDLIB()->check_active();
+      switch (input_type)
+      {
+         case console::op_dbox:   _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtbox()  ); break;
+         case console::op_dpoly:  _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtpoly()) ; break;
+         case console::op_cbind:
+         {
+            assert ("" != name);
+            laydata::refnamepair striter;
+            CTM eqm;
+            VERIFY(DATC->getCellNamePair(name, striter));
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtcellref(striter, eqm) );
+            break;
+         }
+         case console::op_abind:
+         {
+            assert ("" != name);
+            assert(0 != cols);assert(0 != rows);assert(0 != stepX);assert(0 != stepY);
+            laydata::refnamepair striter;
+            CTM eqm;
+            VERIFY(DATC->getCellNamePair(name, striter));
+            laydata::ArrayProperties arrprops(stepX, stepY, cols, rows);
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtcellaref(striter, eqm, arrprops) );
+            break;
+         }
+         case console::op_tbind:
+         {
+            assert ("" != name);
+            CTM eqm(trans);
+            eqm.Scale(1/(UU()*OPENGL_FONT_UNIT), 1/(UU()*OPENGL_FONT_UNIT));
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttext(name, eqm) );
+            break;
+         }
+         case console::op_rotate: _TEDLIB()->set_tmpctm( trans );
+         default:
+         {
+            if (0  < input_type)
+               _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtwire(input_type) );
+         }
+      }
       initcmdlayer();
    }
    else throw EXPTNactive_DB();
@@ -473,46 +535,46 @@ void DataCenter::mousePoint(TP p)
 {
    if ((console::op_line == currentop()) || _drawruler)
       _properties.mousePoint(p);
-   if ((NULL != _TEDDB) && (console::op_cbind != currentop())
-                        && (console::op_abind != currentop())
-                        && (console::op_tbind != currentop()) 
-                        && (console::op_line  != currentop()) )
-      _TEDDB->mousePoint(p);
+   if ((NULL != _TEDLIB()) && (console::op_cbind != currentop())
+                           && (console::op_abind != currentop())
+                           && (console::op_tbind != currentop()) 
+                           && (console::op_line  != currentop()) )
+      _TEDLIB()->mousePoint(p);
 }
 
 void DataCenter::mousePointCancel(TP& lp)
 {
    if (console::op_line == currentop()) return;
-   if (_TEDDB)
-      _TEDDB->mousePointCancel(lp);
+   if (_TEDLIB())
+      _TEDLIB()->mousePointCancel(lp);
 }
 
 void DataCenter::mouseStop()
 {
    if (console::op_line == currentop())
       _properties.mouseStop();
-   else if (_TEDDB) _TEDDB->mouseStop();
+   else if (_TEDLIB()) _TEDLIB()->mouseStop();
    else throw EXPTNactive_DB();
 }
 
 void DataCenter::mouseFlip()
 {
-   if (_TEDDB) _TEDDB->mouseFlip();
+   if (_TEDLIB()) _TEDLIB()->mouseFlip();
 }
 
 void DataCenter::mouseRotate()
 {
-   if (_TEDDB) _TEDDB->mouseRotate();
+   if (_TEDLIB()) _TEDLIB()->mouseRotate();
 }
 
 void DataCenter::openGL_draw(const CTM& layCTM) {
 // Maybe we need another try/catch in the layoutcanvas ?   
-   if (_TEDDB) {
+   if (_TEDLIB()) {
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
       while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
       _properties.drawGrid();
-      _TEDDB->openGL_draw(_properties.drawprop());
+      _TEDLIB()->openGL_draw(_properties.drawprop());
       _properties.drawRulers(layCTM);
       DBLock.Unlock();
       PROPLock.Unlock();
@@ -530,11 +592,11 @@ void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
       _properties.tmp_draw(layCTM, base, newp);
       PROPLock.Unlock();
    }
-   if ((console::op_line != currentop())  && (NULL !=_TEDDB))
+   if ((console::op_line != currentop())  && (NULL !=_TEDLIB()))
    {
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-      _TEDDB->tmp_draw(_properties.drawprop(), base, newp);
+      _TEDLIB()->tmp_draw(_properties.drawprop(), base, newp);
       DBLock.Unlock();
    }
 // 
@@ -542,7 +604,7 @@ void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
 }
 
 const laydata::cellList& DataCenter::cells() {
-   if (_TEDDB) return _TEDDB->cells();
+   if (_TEDLIB()) return _TEDLIB()->cells();
    else throw EXPTNactive_DB();
 };
 
@@ -658,6 +720,34 @@ void DataCenter::clearRulers()
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
    _properties.clearRulers();
    PROPLock.Unlock();
+}
+
+bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter) 
+{
+   laydata::tdtdesign* ATDB = lockDB();
+   if (ATDB->checkcell(name))
+   {
+      striter = ATDB->getcellnamepair(name);
+      unlockDB();
+      return true;
+   }
+   unlockDB();
+   // search the cell in the libraries because it's not in the DB
+   return _TEDLIB.getCellNamePair(name, striter);
+}
+
+laydata::LibCellLists* DataCenter::getCells(int libID)
+{
+   laydata::LibCellLists* all_cells = DEBUG_NEW laydata::LibCellLists();
+   if (libID != ALL_LIB)
+      all_cells->push_back(&(_TEDLIB.getLib(libID)->cells()));
+   else
+   {
+      all_cells->push_back(&(_TEDLIB()->cells()));
+      for (int i = 1; i < _TEDLIB.getLastLibRefNo(); i++)
+         all_cells->push_back(&(_TEDLIB.getLib(i)->cells()));
+   }
+   return all_cells;
 }
 
 void initDBLib()

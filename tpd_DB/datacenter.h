@@ -60,12 +60,16 @@ public:
    void                       GDSclose();
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
+   int                        TDTloadlib(std::string);
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&); 
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    GDSin::GDSFile*            lockGDS(bool throwexception = true);
+   laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
+   int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
+   bool                       getCellNamePair(std::string name, laydata::refnamepair& striter);
    void                       unlockDB();
    void                       unlockGDS();
    unsigned int               numselected() const;
@@ -80,16 +84,14 @@ public:
    const laydata::cellList&   cells();
    void                       saveProperties(std::string fname)
                                                       {_properties.saveProperties(fname);}
-   void                       defaultlayer(word layno)
-                                                      {_curlay = layno;}
+   void                       defaultlayer(word layno){_curlay = layno;}
    void                       initcmdlayer()          {_curcmdlay = _curlay;}
    void                       setcmdlayer(word layno) {_curcmdlay = layno;}
    word                       curlay() const          {return _curlay;}
    word                       curcmdlay() const       {return _curcmdlay;}
    std::string                tedfilename() const     {return _tedfilename;};
    bool                       neversaved()  const     {return _neversaved;}; 
-   bool                       modified() const        {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
-   
+   bool                       modified() const        {return _TEDLIB.modified();};
    bool                       autopan() const         {return _properties.autopan();}
    const real                 step() const            {return _properties.step();}
    const layprop::LayoutGrid* grid(byte gn) const     {return _properties.grid(gn);}
@@ -150,18 +152,19 @@ public:
    void                       clearUnpublishedLayers() {_properties.clearUnpublishedLayers();}
    const word                 layselmask() {return _properties.layselmask();}
    void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
-
+   laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
+   laydata::LibCellLists*     getCells(int libID);
 protected:
-   laydata::tdtdesign*        _TEDDB;      // toped data base
-   GDSin::GDSFile*            _GDSDB;      // GDS parsed data
-   layprop::ViewProperties    _properties; // properties data base
-   
+//   laydata::tdtdesign*        _TEDDB;        // toped data base
+   laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
+   GDSin::GDSFile*            _GDSDB;        // GDS parsed data
+   layprop::ViewProperties    _properties;   // properties data base
    std::string                _tedfilename;
    bool                       _neversaved;
 private:
-   word                       _curlay;     // current drawing layer
-   word                       _curcmdlay;  // layer used during current drawing operation
-   bool                       _drawruler;  // draw a ruler while coposing a shape interactively
+   word                       _curlay;       // current drawing layer
+   word                       _curcmdlay;    // layer used during current drawing operation
+   bool                       _drawruler;    // draw a ruler while coposing a shape interactively
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
    wxMutex                    PROPLock;

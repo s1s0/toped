@@ -58,7 +58,7 @@ laydata::editobject::editobject(tdtcellref* cref, tdtcell* vcell, cellrefstack* 
 {
    _activeref = cref;
    _viewcell = vcell;
-   if (_activeref) _activecell = _activeref->structure();
+   if (_activeref) _activecell = _activeref->cstructure();
    else            _activecell = vcell;
    _peditchain = crs;
    _ARTM = trans;
@@ -92,7 +92,7 @@ void laydata::editobject::push(tdtcellref* cref, tdtcell* vref, cellrefstack* cr
    assert(cref);
    reset(); // Unset previous active reference if it exists
    _activeref = cref;
-   _activecell = _activeref->structure();
+   _activecell = _activeref->cstructure();
    _viewcell = vref;
    _peditchain = crs;
    _ARTM = trans;
@@ -131,7 +131,7 @@ bool laydata::editobject::pop() {
       // get a pointer to the active reference...
       _activeref = const_cast<tdtcellref*>(_peditchain->back());
       // ... and active cell
-      _activecell = _activeref->structure();
+      _activecell = _activeref->cstructure();
       // 
       blockfill();
    }
@@ -207,14 +207,76 @@ laydata::editobject::~editobject()
 }
 
 //-----------------------------------------------------------------------------
+// class tdtdefaultcell
+//-----------------------------------------------------------------------------
+laydata::tdtdefaultcell::tdtdefaultcell(std::string name, int libID, bool orphan) :
+      _orphan(orphan), _name(name), _libID(libID)  {}
+
+void laydata::tdtdefaultcell::openGL_draw(layprop::DrawProperties&, bool active) const
+{
+}
+
+void laydata::tdtdefaultcell::tmp_draw(const layprop::DrawProperties&, ctmqueue&, bool active) const
+{
+}
+
+void laydata::tdtdefaultcell::PSwrite(PSFile&, const layprop::DrawProperties&,
+      const cellList*, const TDTHierTree*) const
+{
+}
+
+laydata::TDTHierTree* laydata::tdtdefaultcell::hierout(laydata::TDTHierTree*& Htree, 
+                                    tdtcell* parent, cellList* celldefs, const laydata::tdtlibdir* libdir)
+{
+   return DEBUG_NEW TDTHierTree(this, parent, Htree);
+}
+
+void laydata::tdtdefaultcell::updateHierarchy(tdtdesign*)
+{
+}
+
+DBbox laydata::tdtdefaultcell::overlap() const
+{
+   return DEFAULT_ZOOM_BOX;
+}
+
+void laydata::tdtdefaultcell::write(TEDfile* const, const cellList&, const TDTHierTree*) const
+{
+   assert(false);
+}
+
+void laydata::tdtdefaultcell::GDSwrite(GDSin::GDSFile&, const cellList&, const TDTHierTree*, real, bool) const
+{
+   assert(false);
+}
+
+void laydata::tdtdefaultcell::collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const
+{
+}
+
+void laydata::tdtdefaultcell::invalidateParents(laydata::tdtdesign* ATDB)
+{
+   TDTHierTree* hc = ATDB->hiertree()->GetMember(this);
+   while(hc)
+   {
+      if (hc->Getparent())
+      {
+         layerList llist = hc->Getparent()->GetItem()->_layers;
+         if (llist.end() != llist.find(0)) llist[0]->invalidate();
+      }
+      hc = hc->GetNextMember(this);
+   }
+}
+
+//-----------------------------------------------------------------------------
 // class tdtcell
 //-----------------------------------------------------------------------------
-laydata::tdtcell::tdtcell(std::string name) {
-   _name = name; _orphan = true;
-};
+laydata::tdtcell::tdtcell(std::string name) :
+                               tdtdefaultcell(name, TARGETDB_LIB, true) {}
 
-laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name) : _name(name) ,
-                                                               _orphan(true) 
+
+laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
+                               tdtdefaultcell(name, lib, true)
 {
    byte recordtype;
    word  layno;
@@ -267,7 +329,7 @@ laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB,
    return cellaref;
 }
 
-bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtcell* child) {
+bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child) {
   // check for circular reference, i.e. the child is a father of some of its ancestors
   if (ATDB->_hiertree->checkAncestors(this, child, ATDB->_hiertree)) {
     //Circular reference found. child is already an ancestor of this
@@ -396,44 +458,49 @@ laydata::tdtcellref* laydata::tdtcell::getcellover(TP pnt, ctmstack& transtack, 
     while (_layers[0]->getobjectover(pnt,cellobj)) {
       //... and get the one that overlaps pnt.
       cref = static_cast<laydata::tdtcellref*>(cellobj);
-      TP pntadj = pnt * cref->translation().Reversed();
-      // if in the selected reference there are shapes that overlap pnt...
-      if (cref->structure()->getshapeover(pntadj, viewprop)) {
-         // ... that is what we need ...
-         refstack->push_front(cref);
-         // save the strack of reference translations
-         transtack.push(transtack.top()*cref->translation());
-         return cref;
-      }   
-      // ... otherwise, dive into the hierarchy
-      else {
-         laydata::tdtcellref *rref = cref->structure()->getcellover(pntadj,transtack,refstack, viewprop);
-         if (rref) {
+      if (cref->cstructure()) // avoid undefined cells
+      {
+         TP pntadj = pnt * cref->translation().Reversed();
+         // if in the selected reference there are shapes that overlap pnt...
+         if (cref->cstructure()->getshapeover(pntadj, viewprop))
+         {
+            // ... that is what we need ...
             refstack->push_front(cref);
             // save the strack of reference translations
             transtack.push(transtack.top()*cref->translation());
-            return rref;
+            return cref;
+         }   
+         // ... otherwise, dive into the hierarchy
+         else
+         {
+            laydata::tdtcellref *rref = cref->cstructure()->getcellover(pntadj,transtack,refstack, viewprop);
+            if (rref) {
+               refstack->push_front(cref);
+               // save the stack of reference translations
+               transtack.push(transtack.top()*cref->translation());
+               return rref;
+            }
          }
       }
    }
    return NULL;
 }
 
-void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, TDTHierTree* const root) const {
+void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, const TDTHierTree* root) const {
    // We going to write the cells in hierarchical order. Children - first!
-   laydata::TDTHierTree* Child= root->GetChild();
+   const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
    while (Child) {
 //      tedfile->design()->getcellnamepair(Child->GetItem()->name())->second->write(tedfile, Child);
       allcells.find(Child->GetItem()->name())->second->write(tedfile, allcells, Child);
 //      allcells[Child->GetItem()->name()]->write(tedfile, Child);
-      Child = Child->GetBrother();
+      Child = Child->GetBrother(TARGETDB_LIB);
 	}
    // If no more children and the cell has not been written yet
-   if (tedfile->checkcellwritten(_name)) return;
-   std::string message = "...writing " + _name;
+   if (tedfile->checkcellwritten(name())) return;
+   std::string message = "...writing " + name();
    tell_log(console::MT_INFO, message);
    tedfile->putByte(tedf_CELL);
-   tedfile->putString(_name);
+   tedfile->putString(name());
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++) {
@@ -443,60 +510,60 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, T
       tedfile->putByte(tedf_LAYEREND);
    }   
    tedfile->putByte(tedf_CELLEND);
-   tedfile->registercellwritten(_name);
+   tedfile->registercellwritten(name());
 }
 
 void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
-                                         TDTHierTree* const root, real UU, bool recur) const
+                                 const TDTHierTree* root, real UU, bool recur) const
 {
    // We going to write the cells in hierarchical order. Children - first!
    if (recur)
    {
-      laydata::TDTHierTree* Child= root->GetChild();
+      const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
          allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child, UU, recur);
-         Child = Child->GetBrother();
+         Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
-   if (gdsf.checkCellWritten(_name)) return;
+   if (gdsf.checkCellWritten(name())) return;
    //
-   std::string message = "...converting " + _name;
+   std::string message = "...converting " + name();
    tell_log(console::MT_INFO, message);
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BGNSTR);
    gdsf.SetTimes(wr);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_STRNAME, _name.size());
-   wr->add_ascii(_name.c_str()); gdsf.flush(wr);
+   wr = gdsf.SetNextRecord(gds_STRNAME, name().size());
+   wr->add_ascii(name().c_str()); gdsf.flush(wr);
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
       wl->second->GDSwrite(gdsf, wl->first, UU);
    wr = gdsf.SetNextRecord(gds_ENDSTR);gdsf.flush(wr);
-   gdsf.registerCellWritten(_name);
+   gdsf.registerCellWritten(name());
 }
 
 void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop,
-                               const cellList* allcells, TDTHierTree* const root) const
+                               const cellList* allcells, const TDTHierTree* root) const
 {
    if (psf.hier())
    {
       assert( root );
       assert( allcells );
       // We going to write the cells in hierarchical order. Children - first!
-      laydata::TDTHierTree* Child= root->GetChild();
+      const laydata::TDTHierTree* Child= root->GetChild(ALL_LIB);
       while (Child)
       {
          allcells->find(Child->GetItem()->name())->second->PSwrite(psf, drawprop, allcells, Child);
-         Child = Child->GetBrother();
+         Child = Child->GetBrother(ALL_LIB);
       }
       // If no more children and the cell has not been written yet
-      if (psf.checkCellWritten(_name)) return;
+      if (psf.checkCellWritten(name())) return;
       //
-      std::string message = "...converting " + _name;
+      std::string message = "...converting " + name();
       tell_log(console::MT_INFO, message);
    }
-   psf.cellHeader(_name,overlap());
+   psf.cellHeader(name(),overlap());
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
@@ -511,16 +578,29 @@ void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawp
    }
    psf.cellFooter();
    if (psf.hier())
-      psf.registerCellWritten(_name);
+      psf.registerCellWritten(name());
 }
 
-laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree, 
-                                           tdtcell* parent, cellList* celldefs) {
+laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
+                   tdtcell* parent, cellList* celldefs, const laydata::tdtlibdir* libdir) {
    // collecting hierarchical information
    Htree = DEBUG_NEW TDTHierTree(this, parent, Htree);
    nameList::const_iterator wn;
-   for (wn = _children.begin(); wn != _children.end(); wn++) 
-      (*celldefs)[*wn]->hierout(Htree, this, celldefs); // yahoooo!
+   for (wn = _children.begin(); wn != _children.end(); wn++)
+   {
+      if (NULL != (*celldefs)[*wn])
+         (*celldefs)[*wn]->hierout(Htree, this, celldefs, libdir);
+      else 
+      {
+         laydata::refnamepair striter;
+         libdir->getCellNamePair(*wn, striter);
+         striter->second->hierout(Htree, this, celldefs, libdir);
+//         Htree = DEBUG_NEW TDTHierTree(libdir->getCell(*wn), this, Htree);
+//         std::ostringstream ost;
+//         ost << "cell \"" << *wn << "\" referenced but not defined";
+//         tell_log(console::MT_WARNING, ost.str());
+      }
+   }
    return  Htree;
 }   
 
@@ -1495,20 +1575,6 @@ bool laydata::tdtcell::overlapChanged(DBbox& old_overlap, laydata::tdtdesign* AT
    else return false;
 }
 
-void laydata::tdtcell::invalidateParents(laydata::tdtdesign* ATDB)
-{
-   TDTHierTree* hc = ATDB->hiertree()->GetMember(this);
-   while(hc)
-   {
-      if (hc->Getparent())
-      {
-         layerList llist = hc->Getparent()->GetItem()->_layers;
-         if (llist.end() != llist.find(0)) llist[0]->invalidate();
-      }      
-      hc = hc->GetNextMember(this);
-   }
-}
-
 bool laydata::tdtcell::validate_cells(laydata::tdtdesign* ATDB) {
    quadTree* wq = (_layers.end() != _layers.find(0)) ? _layers[0] : NULL;
    if (!(wq && wq->invalid())) return false;
@@ -1585,11 +1651,14 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB) {
 		   diff = std::mismatch(children_upd->begin(), children_upd->end(), _children.begin());
          if (diff.second != _children.end()) {
             childref = ATDB->checkcell(*(diff.second));
-            // remove it from the hierarchy
-            childref->_orphan = ATDB->_hiertree->removeParent(
+            if (NULL != childref)
+            {
+               // remove it from the hierarchy
+               childref->_orphan = ATDB->_hiertree->removeParent(
                                              childref, this, ATDB->_hiertree);
-            ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), 
+               ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(),
                                                             childref->orphan());
+            }
             _children.erase(diff.second);
          }
          else break;
@@ -1685,11 +1754,11 @@ void laydata::tdtcell::report_selected(real DBscale) const
    }
 }
 
-void laydata::tdtcell::collect_usedlays(const tdtdesign* ATDB, bool recursive, ListOfWords& laylist) const{
+void laydata::tdtcell::collect_usedlays(const tdtlibdir* LTDB, bool recursive, ListOfWords& laylist) const{
    // first call recursively the method on all children cells
    if (recursive)
       for (nameList::const_iterator CC = _children.begin(); CC != _children.end(); CC++)
-         ATDB->getcellnamepair(*CC)->second->collect_usedlays(ATDB, recursive, laylist);
+         LTDB->collect_usedlays(*CC, recursive, laylist);
    // then update with the layers used in this cell
    for(layerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       laylist.push_back(CL->first);
