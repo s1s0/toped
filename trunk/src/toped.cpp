@@ -41,10 +41,6 @@
 #include "../ui/blue_lamp.xpm"
 #include "../ui/toped32x32.xpm"
 
-//icons for toolbars
-#include "../ui/new.xpm"
-#include "../ui/open.xpm"
-
 #ifndef WIN32
    #include "../ui/toped16x16.xpm"
 #endif
@@ -66,10 +62,9 @@ extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
 
-tui::CanvasStatus::CanvasStatus(wxWindow* parent,
-										  wxWindowID id , const wxPoint& pos ,
-										  const wxSize& size , long style)
-											: wxPanel( parent, -1, pos, size, style) 
+tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
+   const wxPoint& pos , const wxSize& size , long style)
+   : wxPanel( parent, id, pos, size, style)
 {
    wxFont fontX = GetFont();
    fontX.SetWeight(wxBOLD);
@@ -80,7 +75,7 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent,
    SetForegroundColour(wxColour(wxT("BLACK")));
    X_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition,wxSize(80,13),// wxDefaultSize,
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-	Y_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,13),
+   Y_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,13),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
    _dX = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(80,13),
                                                    wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
@@ -191,19 +186,20 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_OPEN         , tui::TopedFrame::OnTDTRead     )
    EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
    EVT_MENU( TMLIB_LOAD          , tui::TopedFrame::OnTDTLoadLib  )
+   EVT_MENU( TMLIB_UNLOAD        , tui::TopedFrame::OnTDTUnloadLib)
    EVT_MENU( TMGDS_OPEN          , tui::TopedFrame::OnGDSRead     )
    EVT_MENU( TMGDS_IMPORT        , tui::TopedFrame::OnGDSimport   )
-   
+
    EVT_MENU( TMGDS_TRANSLATE     , tui::TopedFrame::OnGDStranslate)
    EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnGDSexportLIB)
    EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
-   
+
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
    EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
    EVT_MENU( TMFILE_EXIT         , tui::TopedFrame::OnQuit        )
-   
+
    EVT_MENU( TMEDIT_UNDO         , tui::TopedFrame::OnUndo        )
    EVT_MENU( TMEDIT_COPY         , tui::TopedFrame::OnCopy        )
    EVT_MENU( TMEDIT_MOVE         , tui::TopedFrame::OnMove        )
@@ -214,7 +210,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMEDIT_POLYCUT      , tui::TopedFrame::OnPolyCut     )
    EVT_MENU( TMEDIT_MERGE        , tui::TopedFrame::OnMerge       )
    EVT_MENU( TMEDIT_RESIZE       , tui::TopedFrame::OnResize      )
-   
+
    EVT_MENU( TMVIEW_ZOOMIN       , tui::TopedFrame::OnzoomIn      )
    EVT_MENU( TMVIEW_ZOOMOUT      , tui::TopedFrame::OnzoomOut     )
    EVT_MENU( TMVIEW_PANLEFT      , tui::TopedFrame::OnpanLeft     )
@@ -222,7 +218,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMVIEW_PANUP        , tui::TopedFrame::OnpanUp       )
    EVT_MENU( TMVIEW_PANDOWN      , tui::TopedFrame::OnpanDown     )
    EVT_MENU( TMVIEW_ZOOMALL      , tui::TopedFrame::OnZoomAll     )
-   
+
    EVT_MENU( TMCELL_NEW          , tui::TopedFrame::OnCellNew     )
    EVT_MENU( TMCELL_OPEN         , tui::TopedFrame::OnCellOpen    )
    EVT_MENU( TMCELL_REMOVE       , tui::TopedFrame::OnCellRemove  )
@@ -236,12 +232,12 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMCELL_AREF_M       , tui::TopedFrame::OnCellARef_M  )
    EVT_MENU( TMCELL_GROUP        , tui::TopedFrame::OnCellGroup   )
    EVT_MENU( TMCELL_UNGROUP      , tui::TopedFrame::OnCellUngroup )
-   
+
    EVT_MENU( TMDRAW_BOX          , tui::TopedFrame::OnDrawBox     )
    EVT_MENU( TMDRAW_POLY         , tui::TopedFrame::OnDrawPoly    )
    EVT_MENU( TMDRAW_WIRE         , tui::TopedFrame::OnDrawWire    )
    EVT_MENU( TMDRAW_TEXT         , tui::TopedFrame::OnDrawText    )
-   
+
    EVT_MENU( TMSEL_SELECT_IN     , tui::TopedFrame::OnSelectIn    )
    EVT_MENU( TMSEL_PSELECT_IN    , tui::TopedFrame::OnPselectIn   )
    EVT_MENU( TMSEL_SELECT_ALL    , tui::TopedFrame::OnSelectAll   )
@@ -249,7 +245,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSEL_PUNSELECT_IN  , tui::TopedFrame::OnPunselectIn )
    EVT_MENU( TMSEL_UNSELECT_ALL  , tui::TopedFrame::OnUnselectAll )
    EVT_MENU( TMSEL_REPORT_SLCTD  , tui::TopedFrame::OnReportSelected )
-      
 
    EVT_MENU( TMSET_STEP          , tui::TopedFrame::OnStep        )
    EVT_MENU( TMSET_AUTOPAN       , tui::TopedFrame::OnAutopan     )
@@ -261,7 +256,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_TEXTMARK      , tui::TopedFrame::OnTextMark    )
    EVT_MENU( TMSET_CELLBOX       , tui::TopedFrame::OnCellBox     )
    EVT_MENU( TMSET_TEXTBOX       , tui::TopedFrame::OnTextBox     )
-   
+
    EVT_MENU( TMSET_MARKER0       , tui::TopedFrame::OnMarker0     )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
@@ -269,17 +264,16 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
    EVT_MENU( TMSET_DEFFILL       , tui::TopedFrame::OnDefineFill  )
-         
+
    EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
-  
+
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
-	EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
+   EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
    EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
    EVT_CLOSE(tui::TopedFrame::OnClose)
-   EVT_SIZE( TopedFrame::OnSize )
-   //EVT_SASH_DRAGGED_RANGE(ID_WIN_BROWSERS, ID_WIN_CANVAS, tui::TopedFrame::OnSashDrag)
+//   EVT_SIZE( TopedFrame::OnSize )
    EVT_TECUSTOM_COMMAND(wxEVT_TPDSTATUS  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_SETINGSMENU, wxID_ANY, tui::TopedFrame::OnUpdateSettingsMenu)
@@ -290,8 +284,6 @@ END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
 //   EVT_COMMAND(wxID_ANY, wxEVT_INIT_DIALOG , tui::TopedFrame::OnDefineLayer )
-   
-   
 
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
@@ -300,16 +292,14 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initView();
    wxCommandEvent dummy;
    OnzoomEmpty(dummy);
-  
-//   CreateStatusBar();
    _toped_status = DEBUG_NEW TopedStatus(this);
    SetStatusBar(_toped_status);
    _resourceCenter = DEBUG_NEW ResourceCenter;
    SetStatusText( wxT( "Toped loaded..." ) );
-	//Put initMenuBar() at the end because in Windows it crashes
+   //Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
-	wxToolTip::Enable(true);
-	wxToolTip::SetDelay(3000);
+   wxToolTip::Enable(true);
+   wxToolTip::SetDelay(3000);
 }
 
 void tui::TopedFrame::OnClose(wxCloseEvent& event)
@@ -345,12 +335,8 @@ tui::TopedFrame::~TopedFrame() {
 //   delete _cmdline;
 //   delete _GLstatus;
 //   delete _browsers;
-	_winManager.UnInit();
-   //delete mS_browsers;
-   //delete mS_GLstatus;
-   //delete mS_command;
-   //delete mS_log;
-   //delete mS_canvas;
+    _winManager.UnInit();
+   delete _canvas;
    delete _resourceCenter;
 //   delete _toped_status;
 }
@@ -388,6 +374,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&File/Include ...","",      &tui::TopedFrame::OnTELLRead, "Include a TELL file" );
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Load Library ...",  "", &tui::TopedFrame::OnTDTLoadLib, "Load a TDT library" );
+   _resourceCenter->appendMenu("&File/Unload Library ...",  "", &tui::TopedFrame::OnTDTUnloadLib, "Unload a TDT library" );
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Export library to GDS","",  &tui::TopedFrame::OnGDSexportLIB, "Export library to GDS");
    _resourceCenter->appendMenu("&File/Import GDS to library","",  &tui::TopedFrame::OnGDSimport, "Import GDS structure" );
@@ -605,54 +592,54 @@ void tui::TopedFrame::initMenuBar() {
 
 void tui::TopedFrame::setUIDir(const std::string& uiDir)
 {
-	if (_resourceCenter) _resourceCenter->setUIDir(uiDir);
+   if (_resourceCenter) _resourceCenter->setUIDir(uiDir);
 }
 
 void tui::TopedFrame::initToolBars() 
 {
-	_resourceCenter->appendTool("main", "new", "new16x16.png","", "new cell", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("main", "open", "open16x16.png","", "open cell", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("main", "save", "save16x16.png", "", "save design", &tui::TopedFrame::OnTDTSave, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("main", "new", "new16x16.png","", "new cell", &tui::TopedFrame::OnCellNew, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("main", "open", "open16x16.png","", "open cell", &tui::TopedFrame::OnCellOpen, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("main", "save", "save16x16.png", "", "save design", &tui::TopedFrame::OnTDTSave, wxAUI_DOCK_TOP);
 
-	_resourceCenter->appendTool("edit", "undo", "undo16x16.png", "", "undo", &tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);
-	//_resourceCenter->appendTool("edit", "redo", "redo16x16.png", "", "redo",&tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);*/
-	_resourceCenter->appendTool("edit", "box", "box16x16.png", "", "add box",&tui::TopedFrame::OnDrawBox, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "poly", "poly16x16.png", "", "add polygon",&tui::TopedFrame::OnDrawPoly, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "wire", "wire16x16.png", "", "add wire",&tui::TopedFrame::OnDrawWire, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "text", "text16x16.png", "", "add text",&tui::TopedFrame::OnDrawText, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "delete", "delete16x16.png", "", "delete",&tui::TopedFrame::OnDelete, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly16x16.png", "", "cut",&tui::TopedFrame::OnPolyCut, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "zoom_all", "zoom_all16x16.png", "", "zoom all",&tui::TopedFrame::OnZoomAll, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "zoom_in", "zoom_in16x16.png", "", "zoom in",&tui::TopedFrame::OnzoomIn, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "zoom_out", "zoom_out16x16.png", "", "zoom out",&tui::TopedFrame::OnzoomOut, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "ruler", "ruler16x16.png", "", "add ruler",&tui::TopedFrame::OnAddRuler, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "copy", "copy16x16.png", "", "copy",&tui::TopedFrame::OnCopy, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "move", "move16x16.png", "", "move",&tui::TopedFrame::OnMove, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "rotate", "rotate_left16x16.png", "", "rotate",&tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
-	//_resourceCenter->appendTool("edit", "rotate_right", "rotate_right16x16.png", "", "rotate",&tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "flipx", "flipx16x16.png", "", "flip X",&tui::TopedFrame::OnFlipX, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "flipy", "flipy16x16.png", "", "flip Y",&tui::TopedFrame::OnFlipY, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "edit_push", "edit_push16x16.png", "", "edit push",&tui::TopedFrame::OnCellPush, wxAUI_DOCK_TOP);
-	_resourceCenter->appendTool("edit", "edit_pop", "edit_pop16x16.png", "", "edit pop",&tui::TopedFrame::OnCellPop, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "undo", "undo16x16.png", "", "undo", &tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);
+   //_resourceCenter->appendTool("edit", "redo", "redo16x16.png", "", "redo",&tui::TopedFrame::OnUndo, wxAUI_DOCK_TOP);*/
+   _resourceCenter->appendTool("edit", "box", "box16x16.png", "", "add box",&tui::TopedFrame::OnDrawBox, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "poly", "poly16x16.png", "", "add polygon",&tui::TopedFrame::OnDrawPoly, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "wire", "wire16x16.png", "", "add wire",&tui::TopedFrame::OnDrawWire, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "text", "text16x16.png", "", "add text",&tui::TopedFrame::OnDrawText, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "delete", "delete16x16.png", "", "delete",&tui::TopedFrame::OnDelete, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly16x16.png", "", "cut",&tui::TopedFrame::OnPolyCut, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "zoom_all", "zoom_all16x16.png", "", "zoom all",&tui::TopedFrame::OnZoomAll, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "zoom_in", "zoom_in16x16.png", "", "zoom in",&tui::TopedFrame::OnzoomIn, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "zoom_out", "zoom_out16x16.png", "", "zoom out",&tui::TopedFrame::OnzoomOut, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "ruler", "ruler16x16.png", "", "add ruler",&tui::TopedFrame::OnAddRuler, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "copy", "copy16x16.png", "", "copy",&tui::TopedFrame::OnCopy, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "move", "move16x16.png", "", "move",&tui::TopedFrame::OnMove, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "rotate", "rotate_left16x16.png", "", "rotate",&tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
+   //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right16x16.png", "", "rotate",&tui::TopedFrame::OnRotate, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "flipx", "flipx16x16.png", "", "flip X",&tui::TopedFrame::OnFlipX, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "flipy", "flipy16x16.png", "", "flip Y",&tui::TopedFrame::OnFlipY, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "edit_push", "edit_push16x16.png", "", "edit push",&tui::TopedFrame::OnCellPush, wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool("edit", "edit_pop", "edit_pop16x16.png", "", "edit pop",&tui::TopedFrame::OnCellPop, wxAUI_DOCK_TOP);
 
-	_status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
+   _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
-	_GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS	,
-														wxDefaultPosition, wxDefaultSize,
-														wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-	_GLstatus->SetSize(wxSize(650, 30));
+   _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
+                                          wxDefaultPosition, wxDefaultSize,
+                                          wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+   _GLstatus->SetSize(wxSize(650, 30));
 
-	_status->AddControl((wxControl*)_GLstatus);
-	_status->Realize();
-		
-	getAuiManager()->AddPane(_status, wxAuiPaneInfo().ToolbarPane().
-									Name(wxString("Status", wxConvUTF8)).Top().Gripper().GripperTop(false).Floatable(false).
-									TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false).Row(2));
+   _status->AddControl((wxControl*)_GLstatus);
+   _status->Realize();
 
-	getAuiManager()->Update();
+   getAuiManager()->AddPane(_status, wxAuiPaneInfo().ToolbarPane().
+                           Name(wxString("Status", wxConvUTF8)).Top().Gripper().GripperTop(false).Floatable(false).
+                           TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false).Row(2));
+
+   getAuiManager()->Update();
 /*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
    X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
-                              wxSize(100,32), wxST_NO_AUTORESIZE);
+   id   wxSize(100,32), wxST_NO_AUTORESIZE);
    Y_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
                               wxSize(100,32), wxST_NO_AUTORESIZE);
 //wxSIMPLE_BORDER | wxALIGN_RIGHT  |
@@ -661,7 +648,7 @@ void tui::TopedFrame::initToolBars()
    X_pos->SetFont(fontX);
    Y_pos->SetFont(fontX);
 
-   X_pos->SetBackgroundColour(wxColour("WHITE"));
+   X_pos->SetBackgroundColoidur(wxColour("WHITE"));
    Y_pos->SetBackgroundColour(wxColour("WHITE"));
    X_pos->SetLabel("0.00");
    Y_pos->SetLabel("0.00");
@@ -674,65 +661,24 @@ void tui::TopedFrame::initToolBars()
    positionBar->Realize();*/
 }
 
-void tui::TopedFrame::initView() {
-	_winManager.SetManagedWindow(this);
-	
-	/*mS_browsers = DEBUG_NEW wxControl(this, ID_WIN_BROWSERS,
-                                        wxDefaultPosition, wxDefaultSize,
-                               wxSW_3D | wxCLIP_CHILDREN);*/
-   //mS_browsers->SetSize(wxSize(180, 1000));
-   //mS_browsers->SetOrientation(wxLAYOUT_VERTICAL);
-   //mS_browsers->SetAlignment(wxLAYOUT_LEFT);
-   //mS_browsers->SetSashVisible(wxSASH_RIGHT, TRUE);
+void tui::TopedFrame::initView()
+{
+   _winManager.SetManagedWindow(this);
+   //----------------------------------------------------------------------------
+   //the cell & layer browsers
+   //----------------------------------------------------------------------------
    _browsers = DEBUG_NEW browsers::browserTAB(this,ID_WIN_BROWSERS,
-                                        wxDefaultPosition, wxDefaultSize,
-                               wxCLIP_CHILDREN);
-	_browsers->SetSize(wxSize(180, 1000));
-	_browsers->SetArtProvider(new wxAuiSimpleTabArt);
-   //---------------------------------------------------------------------------- 
-   // The Layoutcanvas toolbar window
-   //---------------------------------------------------------------------------- 
-   /*mS_GLstatus = DEBUG_NEW wxWindow(this, ID_WIN_GLSTATUS	,
-                                        wxDefaultPosition, wxDefaultSize,
-                             wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);*/
-   //mS_GLstatus->SetSize(wxSize(1000, 30));
-   /*mS_GLstatus->SetOrientation(wxLAYOUT_HORIZONTAL);
-   mS_GLstatus->SetAlignment(wxLAYOUT_TOP);
-   mS_GLstatus->SetBackgroundColour(wxColour(255, 0, 0));*/
- /*  _GLstatus = DEBUG_NEW CanvasStatus(this, ID_WIN_GLSTATUS	,
-                                        wxDefaultPosition, wxDefaultSize,
-                             wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-	_GLstatus->SetSize(wxSize(1000, 30));*/
-
+                                        wxDefaultPosition, wxDefaultSize, wxCLIP_CHILDREN);
+   _browsers->SetSize(wxSize(180, 1000));
+   _browsers->SetArtProvider(new wxAuiSimpleTabArt);
    //----------------------------------------------------------------------------
-   // The command window
+   //the log & lib windows
    //----------------------------------------------------------------------------
-   //mS_command = DEBUG_NEW wxWindow(this, ID_WIN_COMMAND,
-   //                            wxDefaultPosition, wxDefaultSize,
-   //                            wxSW_3D | wxCLIP_CHILDREN);
-   /*mS_command->SetDefaultSize(wxSize(1000, 30));
-   mS_command->SetOrientation(wxLAYOUT_HORIZONTAL);
-   mS_command->SetAlignment(wxLAYOUT_BOTTOM);
-   mS_command->SetSashVisible(wxSASH_TOP, TRUE);*/
-   // postponed initialization until the canvas window is initialized
-//   _cmdline = DEBUG_NEW console::ted_cmd(mS_command);
-
-   //----------------------------------------------------------------------------
-   //the log window
-   //----------------------------------------------------------------------------
-   /*mS_log = DEBUG_NEW wxWindow(this, ID_WIN_LOG,
-                               wxDefaultPosition, wxDefaultSize,
-                               wxSW_3D | wxCLIP_CHILDREN);*/
-   /*mS_log->SetDefaultSize(wxSize(1000, 150));
-   mS_log->SetOrientation(wxLAYOUT_HORIZONTAL);
-   mS_log->SetAlignment(wxLAYOUT_BOTTOM);
-   mS_log->SetSashVisible(wxSASH_TOP, TRUE);*/
-   //
-   wxAuiNotebook* logpane = DEBUG_NEW wxAuiNotebook(this, ID_WIN_LOG, wxDefaultPosition, wxDefaultSize, //wxAUI_NB_DEFAULT_STYLE |wxNB_RIGHT| wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
-															wxNB_RIGHT|wxNO_BORDER);
-	logpane->SetSize(wxSize(1000, 150));
-	wxAuiSimpleTabArt *docArt = DEBUG_NEW wxAuiSimpleTabArt;
-	logpane->SetArtProvider(docArt);
+   wxAuiNotebook* logpane = DEBUG_NEW wxAuiNotebook(this, ID_WIN_LOG,
+         wxDefaultPosition, wxDefaultSize, wxNB_RIGHT|wxNO_BORDER);
+         //wxAUI_NB_DEFAULT_STYLE |wxNB_RIGHT| wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
+   logpane->SetSize(wxSize(1000, 150));
+   logpane->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
 
    _cmdlog = DEBUG_NEW console::ted_log(logpane);
    logpane->AddPage(_cmdlog, wxT("Log"));
@@ -740,33 +686,56 @@ void tui::TopedFrame::initView() {
    logpane->AddPage(_cmdbrowser, wxT("Lib"));
 
    //----------------------------------------------------------------------------
-   // the openGL window
+   // the openGL window - the canvas
    //---------------------------------------------------------------------------- 
-   mS_canvas = DEBUG_NEW WinCanvas(this, ID_WIN_CANVAS,
+   _canvas = DEBUG_NEW WinCanvas(this, ID_WIN_CANVAS,
                                wxDefaultPosition, wxSize(1000,1000),
-										 wxAUI_NB_DEFAULT_STYLE|wxDOUBLE_BORDER|wxSW_3D | wxCLIP_CHILDREN);
+                               wxAUI_NB_DEFAULT_STYLE|wxDOUBLE_BORDER|wxSW_3D | wxCLIP_CHILDREN);
 
-
-
-	_cmdline = DEBUG_NEW console::ted_cmd(this, mS_canvas->canvas());
-	_cmdline->SetSize(wxSize(wxSize(1000, 30)));
-	_cmdline->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
+   //----------------------------------------------------------------------------
+   // The command line
+   //----------------------------------------------------------------------------
+   _cmdline = DEBUG_NEW console::ted_cmd(this, _canvas->canvas());
+   _cmdline->SetSize(wxSize(wxSize(1000, 30)));
+// _cmdline->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
 
    _browsers->set_tellParser( _cmdline ) ;
 
-	_winManager.AddPane(_browsers, wxAuiPaneInfo().Left().BestSize(wxSize(180,1000)).Layer(1).
-												Floatable(false).CloseButton(false).CaptionVisible(false));
-	_winManager.AddPane(mS_canvas, wxAuiPaneInfo().CentrePane().MaximizeButton(false).
-												Floatable(true).CloseButton(false));
-	//_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).//Fixed().
-	//											CloseButton(false).CaptionVisible(false).BestSize(wxSize(1000,30)));
-	_winManager.AddPane(logpane, wxAuiPaneInfo().Bottom().Row(1).
-												Floatable(false).BestSize(wxSize(1000, 150)).
-												CloseButton(false).CaptionVisible(false));
-	_winManager.AddPane(_cmdline, wxAuiPaneInfo().Bottom().Row(0).BestSize(wxSize(1000,30)).
-												Floatable(false).CloseButton(false).CaptionVisible(false));
+   _winManager.AddPane(_browsers,   wxAuiPaneInfo().
+                                    Left().
+                                    BestSize(wxSize(180,1000)).
+                                    Layer(1).
+                                    Floatable(false).
+                                    CloseButton(false).
+                                    CaptionVisible(false)
+                      );
+   _winManager.AddPane( _canvas,    wxAuiPaneInfo().
+                                    CentrePane().
+                                    MaximizeButton(false).
+                                    Floatable(true).
+                                    CloseButton(false)
+                      );
+   //_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).//Fixed().
+   //                               CloseButton(false).CaptionVisible(false).BestSize(wxSize(1000,30)));
+   _winManager.AddPane(logpane,     wxAuiPaneInfo().
+                                    Bottom().
+                                    Row(1).
+                                    Floatable(false).
+                                    BestSize(wxSize(1000, 150)).
+                                    CloseButton(false).
+                                    CaptionVisible(false)
+                      );
 
-	_winManager.Update();
+   _winManager.AddPane(_cmdline,    wxAuiPaneInfo().
+                                    Bottom().
+                                    Row(0).
+                                    BestSize(wxSize(1000,30)).
+                                    Floatable(false).
+                                    CloseButton(false).
+                                    CaptionVisible(false)
+                      );
+
+   _winManager.Update();
 }
 
 
@@ -787,30 +756,12 @@ void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
 }
 
 
-/*void tui::TopedFrame::OnSashDrag(wxSashEvent& event) {
-   if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
-      return;
-   switch (event.GetId()) {
-//      case ID_WIN_GLSTATUS:
-//         mS_GLstatus->SetDefaultSize(wxSize(1000, event.GetDragRect().height));
-//         break;
-      case ID_WIN_BROWSERS:
-         mS_browsers->SetDefaultSize(wxSize(event.GetDragRect().width, 1000));
-         break;
-      case ID_WIN_LOG:
-         mS_log->SetDefaultSize(wxSize(1000, event.GetDragRect().height));
-         break;
-   }
-   wxLayoutAlgorithm layout;
-   layout.LayoutFrame(this, mS_canvas);
-}*/
-
-void tui::TopedFrame::OnSize(wxSizeEvent& event)
-{
-	event.Skip();
+//void tui::TopedFrame::OnSize(wxSizeEvent& event)
+//{
+// event.Skip();
    //wxLayoutAlgorithm layout;
    //layout.LayoutFrame(this, mS_canvas);
-}
+//}
 
 void tui::TopedFrame::OnCanvasStatus(wxCommandEvent& evt)
 {
@@ -912,6 +863,28 @@ void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt)
    else SetStatusText(wxT("Loading aborted"));
 }
 
+void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
+{
+/*   SetStatusText(wxT("Loading library..."));
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+                     wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
+                         tpdfOPEN);
+   if (wxID_OK == dlg2.ShowModal())
+   {
+      wxString filename = dlg2.GetFilename();
+      wxString ost;
+      ost << wxT("loadlib(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
+      _cmdline->parseCommand(ost);
+      wxString ost1;
+      SetTitle(dlg2.GetFilename());
+   }
+   else SetStatusText(wxT("Loading aborted"));*/
+   wxString filename = wxT("isclib3U");
+   wxString ost;
+   ost << wxT("unloadlib(\"") << filename << wxT("\");");
+   _cmdline->parseCommand(ost);
+}
+
 void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
    SetStatusText(wxT("Including command file..."));
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
@@ -1010,7 +983,7 @@ void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent&)
 {
-	wxImage image = mS_canvas->canvas()->snapshot();
+   wxImage image = _canvas->canvas()->snapshot();
 
 }
 
@@ -1407,7 +1380,7 @@ void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
 void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
 {
    //word layno = _browsers->TDTSelectedLayNo();
-	word layno = DATC->curlay();
+   word layno = DATC->curlay();
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno);
@@ -1590,43 +1563,43 @@ void  tui::TopedFrame::OnMouseAccel(wxCommandEvent& evt) {
 void tui::TopedFrame::OnzoomIn(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_IN);
-	wxPostEvent(mS_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnzoomOut(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_OUT);
-   wxPostEvent(mS_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnzoomEmpty(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
-   wxPostEvent(mS_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnpanLeft(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_LEFT);
-   wxPostEvent(mS_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnpanRight(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_RIGHT);
-   wxPostEvent(mS_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnpanUp(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_UP);
-   wxPostEvent(mS_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas->canvas(), eventZOOM);
 }
 
 void tui::TopedFrame::OnpanDown(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_DOWN);
-   wxPostEvent(mS_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas->canvas(), eventZOOM);
 }
 
 bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
