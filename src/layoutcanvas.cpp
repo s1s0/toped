@@ -922,15 +922,15 @@ tui::LayoutCanvas::~LayoutCanvas(){
 //   delete (laydata::tdtdata::tessellObj);
 }
 
-BEGIN_EVENT_TABLE(tui::WinCanvas, wxWindow)
-   EVT_SIZE             ( tui::WinCanvas::OnSize        )
-END_EVENT_TABLE()
+//BEGIN_EVENT_TABLE(tui::WinCanvas, wxWindow)
+//   EVT_SIZE             ( tui::WinCanvas::OnSize        )
+//END_EVENT_TABLE()
 
 tui::WinCanvas::WinCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos, 
-										 const wxSize& size, long style, const wxString& name):
-										wxWindow(parent, id, pos, size, style, name)
+                               const wxSize& size, long style, const wxString& name):
+                              wxWindow(parent, id, pos, size, style, name)
 {
-	int gl_attrib[20] = { WX_GL_RGBA             ,
+   int gl_attrib[20] = { WX_GL_RGBA             ,
                          WX_GL_MIN_RED          , 2,
                          WX_GL_MIN_GREEN        , 2,
                          WX_GL_MIN_BLUE         , 2,
@@ -943,13 +943,14 @@ tui::WinCanvas::WinCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
                          WX_GL_DOUBLEBUFFER     ,
                          GL_NONE };
    _canvas = DEBUG_NEW LayoutCanvas(this, gl_attrib);
-	_canvas->SetSize(GetClientSize());
+   _canvas->SetSize(GetClientSize());
 }
-void tui::WinCanvas::OnSize(wxSizeEvent& event)
-{
-	event.Skip();
-	_canvas->SetSize(this->GetClientSize());
-}
+
+//void tui::WinCanvas::OnSize(wxSizeEvent& event)
+//{
+//   event.Skip();
+//   _canvas->SetSize(this->GetClientSize());
+//}
 
 // Code below taken from the internet after nasty troubles with the cursor
 // initialization in GTK

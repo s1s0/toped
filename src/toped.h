@@ -41,10 +41,10 @@ namespace tui {
    //-----------------------------------------------------------------------------
    class CanvasStatus : public wxPanel {
    public:
-                           CanvasStatus(wxWindow*,wxWindowID id = wxID_ANY, 
-										  const wxPoint& pos = wxDefaultPosition,
-										  const wxSize& size = wxDefaultSize, 
-										  long style = wxTAB_TRAVERSAL);
+                           CanvasStatus(wxWindow*,wxWindowID id = wxID_ANY,
+                                const wxPoint& pos = wxDefaultPosition,
+                                const wxSize& size = wxDefaultSize,
+                                long style = wxTAB_TRAVERSAL);
       virtual             ~CanvasStatus();
       void                 setXpos(wxString);
       void                 setYpos(wxString);
@@ -85,21 +85,21 @@ namespace tui {
                                                                const wxSize&);
       void                    OnClose(wxCloseEvent&);
       virtual                ~TopedFrame();
-      void                    OnSize(wxSizeEvent& event);
+//      void                    OnSize(wxSizeEvent& event);
       void                    OnSashDrag(wxSashEvent& event);
       void                    OnQuit (wxCommandEvent&);
       void                    OnAbout(wxCommandEvent&);
 //      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
       console::ted_log*       logwin()   const {return _cmdlog;}
-		LayoutCanvas*           view()     const {return mS_canvas->canvas();}
+      LayoutCanvas*           view()     const {return _canvas->canvas();}
       console::ted_cmd*       cmdline()  const {return _cmdline;}
       browsers::browserTAB*   browsers() const {return _browsers;}
       console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
-		wxWindow*					getFrame()			{return this;}
-		wxAuiManager*				getAuiManager() {return &_winManager;}
-		void                    initToolBars();
-		void							setUIDir(const std::string& uiDir);
+      wxWindow*               getFrame()       {return this;}
+      wxAuiManager*           getAuiManager()  {return &_winManager;}
+      void                    initToolBars();
+      void                    setUIDir(const std::string& uiDir);
    private:
       void                    initMenuBar();
       void                    initView();
@@ -112,7 +112,9 @@ namespace tui {
       TopedStatus*            _toped_status;
       browsers::browserTAB*   _browsers;  // TDT/GDS/layer browsers
       ResourceCenter*         _resourceCenter;
-		wxAuiManager				_winManager;
+      WinCanvas*              _canvas;
+      wxToolBar*              _status;
+      wxAuiManager            _winManager;
       //Menu stuff
       wxMenuBar*              menuBar;
       wxMenu*                 fileMenu;
@@ -128,15 +130,14 @@ namespace tui {
 
       // Sash layout stuff
       //wxControl*    mS_browsers;
-      wxWindow*     mS_GLstatus;
-      wxWindow*     mS_command;
-      wxWindow*     mS_log;
-		WinCanvas*    mS_canvas;
-		wxToolBar*	  _status;
-      // Menu 
+//      wxWindow*     mS_GLstatus;
+//      wxWindow*     mS_command;
+//      wxWindow*     mS_log;
+      // Menu
       void   OnNewDesign(wxCommandEvent&);
       void     OnTDTRead(wxCommandEvent&);
       void  OnTDTLoadLib(wxCommandEvent&);
+      void OnTDTUnloadLib(wxCommandEvent&);
       void    OnTELLRead(wxCommandEvent&);
       void     OnGDSRead(wxCommandEvent&);
       void   OnGDSimport(wxCommandEvent&);
