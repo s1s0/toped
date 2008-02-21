@@ -922,9 +922,9 @@ tui::LayoutCanvas::~LayoutCanvas(){
 //   delete (laydata::tdtdata::tessellObj);
 }
 
-//BEGIN_EVENT_TABLE(tui::WinCanvas, wxWindow)
-//   EVT_SIZE             ( tui::WinCanvas::OnSize        )
-//END_EVENT_TABLE()
+BEGIN_EVENT_TABLE(tui::WinCanvas, wxWindow)
+   EVT_SIZE             ( tui::WinCanvas::OnSize        )
+END_EVENT_TABLE()
 
 tui::WinCanvas::WinCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos, 
                                const wxSize& size, long style, const wxString& name):
@@ -946,11 +946,11 @@ tui::WinCanvas::WinCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    _canvas->SetSize(GetClientSize());
 }
 
-//void tui::WinCanvas::OnSize(wxSizeEvent& event)
-//{
-//   event.Skip();
-//   _canvas->SetSize(this->GetClientSize());
-//}
+void tui::WinCanvas::OnSize(wxSizeEvent& event)
+{
+   event.Skip();
+   _canvas->SetSize(this->GetClientSize());
+}
 
 // Code below taken from the internet after nasty troubles with the cursor
 // initialization in GTK
