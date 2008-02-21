@@ -229,6 +229,30 @@ int tellstdfunc::TDTloadlib::execute()
    return EXEC_NEXT;
 }
 
+//===================================================return==========================
+tellstdfunc::TDTunloadlib::TDTunloadlib(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::TDTunloadlib::execute()
+{
+   std::string libname = getStringValue();
+   
+   if (DATC->TDTunloadlib(libname))
+   {
+      browsers::addTDTtab();
+      LogFile << LogFile.getFN() << "(\""<< libname << "\");"; LogFile.flush();
+   }
+   else
+   {
+      std::string info = "Library \"" + libname + "\" is not loaded";
+      tell_log(console::MT_ERROR,info);
+   }
+   return EXEC_NEXT;
+}
+
 //=============================================================================
 tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)

@@ -171,8 +171,9 @@ namespace laydata {
                        ~tdtlibdir();
       tdtdesign*        operator ()() {return _TEDDB;}
       void              addlibrary( tdtlibrary* const, word libRef );
-      void              closelibrary(std::string);
+      bool              closelibrary(std::string);
       tdtlibrary*       getLib(int);
+//      tdtlibrary*       getLib(std::string);
       int               getLastLibRefNo();
       bool              getCellNamePair(std::string, refnamepair&) const;
       tdtdefaultcell*   adddefaultcell( std::string name );
@@ -180,7 +181,7 @@ namespace laydata {
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       void              deleteDB() {delete _TEDDB;}
       void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
-      unsigned int      numselected()     const {return _TEDDB->numselected();}
+      unsigned int      numselected()     const {if (NULL == _TEDDB) return 0; else return _TEDDB->numselected();}
    private:
       Catalog           _libdirectory;
       tdtdesign*        _TEDDB;        // toped data base
