@@ -879,10 +879,12 @@ void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
       SetTitle(dlg2.GetFilename());
    }
    else SetStatusText(wxT("Loading aborted"));*/
-   wxString filename = wxT("isclib3U");
+   tell_log(console::MT_ERROR,"unloadlib() function under development!");
+
+/*   wxString filename = wxT("isclib3U");
    wxString ost;
    ost << wxT("unloadlib(\"") << filename << wxT("\");");
-   _cmdline->parseCommand(ost);
+   _cmdline->parseCommand(ost);*/
 }
 
 void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {

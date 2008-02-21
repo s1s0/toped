@@ -66,7 +66,7 @@ void laydata::tdtlibrary::clearHierTree(word libID)
       const TDTHierTree* var2 = var1->GetLast();
       if (libID == var1->GetItem()->libID())
       {
-         if (NULL != lastValid)  
+         if (NULL != lastValid)
             lastValid->relink(var1);
          delete var1;
       }
@@ -238,8 +238,24 @@ void laydata::tdtlibdir::addlibrary(tdtlibrary* const lib, word libRef)
    _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem(lib->name(), lib) );
 }
 
-void laydata::tdtlibdir::closelibrary(std::string)
+bool laydata::tdtlibdir::closelibrary(std::string libname)
 {
+   word libID;
+/*   for (libID = 1; libID < _libdirectory.size(); libID++)
+   {
+      if (libname == _libdirectory[libID]->first) break;
+   }
+   if (libID > _libdirectory.size()) return false;*/
+   for (Catalog::iterator LDI = _libdirectory.begin(); LDI != _libdirectory.end(); LDI++)
+   {
+      if (libname == (*LDI)->first)
+      {
+         delete ((*LDI)->second);
+         _libdirectory.erase(LDI);
+         return true;
+      }
+   }
+   return false;
 }
 
 laydata::tdtlibrary* laydata::tdtlibdir::getLib(int libID)
@@ -248,6 +264,16 @@ laydata::tdtlibrary* laydata::tdtlibdir::getLib(int libID)
    assert(libID <= (int)_libdirectory.size());
    return _libdirectory[libID]->second;
 }
+
+// laydata::tdtlibrary* laydata::tdtlibdir::getLib(std::string libname)
+// {
+//    for (word i = 1; i < _libdirectory.size(); i++)
+//    {
+//       if (libname == _libdirectory[i]->first) return _libdirectory[i]->second;
+//    }
+//    return NULL;
+// 
+// }
 
 bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair& striter) const
 {

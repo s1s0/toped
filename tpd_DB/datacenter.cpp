@@ -302,6 +302,17 @@ int DataCenter::TDTloadlib(std::string filename)
    return libRef;
 }
 
+bool DataCenter::TDTunloadlib(std::string libname)
+{
+   if ( _TEDLIB.closelibrary(libname))
+   {
+      _TEDLIB()->recreate_hierarchy(&_TEDLIB);
+      return true;
+   }
+   else return false;
+}
+
+
 bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
 {
    std::string news;
@@ -430,7 +441,6 @@ void DataCenter::newDesign(std::string name, time_t created)
       _TEDLIB.deleteDB();
    }
    _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, 0));
-   laydata::tdtlibrary::initHierTreePtr();
    _TEDLIB()->assign_properties(_properties);
    _tedfilename = name + ".tdt";
    _neversaved = true;
