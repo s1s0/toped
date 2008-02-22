@@ -46,6 +46,17 @@ laydata::TDTHierTree* laydata::tdtlibrary::_hiertree = NULL;
 laydata::tdtlibrary::tdtlibrary(std::string name, real DBU, real UU, int libID) :
    _name(name), _libID(libID), _DBU(DBU), _UU(UU) {}
 
+void laydata::tdtlibrary::unloadprep(laydata::tdtlibdir* libdir)
+{
+   laydata::cellList::const_iterator wc;
+   for (wc = _cells.begin(); wc != _cells.end(); wc++)
+      if (!wc->second->orphan())
+      {
+//         laydata::tdtdefaultcell* boza = new laydata::tdtdefaultcell(wc->first, 0, false);
+         _hiertree->replaceChild(wc->second, libdir->adddefaultcell(wc->first), _hiertree);
+      }
+}
+
 laydata::tdtlibrary::~tdtlibrary()
 {
    // now delete the cells
@@ -240,16 +251,11 @@ void laydata::tdtlibdir::addlibrary(tdtlibrary* const lib, word libRef)
 
 bool laydata::tdtlibdir::closelibrary(std::string libname)
 {
-   word libID;
-/*   for (libID = 1; libID < _libdirectory.size(); libID++)
-   {
-      if (libname == _libdirectory[libID]->first) break;
-   }
-   if (libID > _libdirectory.size()) return false;*/
    for (Catalog::iterator LDI = _libdirectory.begin(); LDI != _libdirectory.end(); LDI++)
    {
       if (libname == (*LDI)->first)
       {
+         (*LDI)->second->unloadprep(this);
          delete ((*LDI)->second);
          _libdirectory.erase(LDI);
          return true;

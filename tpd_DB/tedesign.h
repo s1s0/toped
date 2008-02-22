@@ -39,11 +39,10 @@ namespace laydata {
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
       tdtcell*       checkcell(std::string name);
-      void           recreate_hierarchy(const tdtlibdir*);
-//      bool           checkValidRef(std::string);
+      void           recreate_hierarchy(const laydata::tdtlibdir* );
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
-//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
       tdtdefaultcell* secure_defaultcell(std::string name);
+      void            unloadprep(laydata::tdtlibdir* );
       //
       std::string    name()            const {return _name;}
       real           UU()              const {return _UU;}
@@ -67,11 +66,13 @@ namespace laydata {
       real                 _UU;           // size of user unit in DBU
       cellList             _cells;        // list of cells in the design
       static TDTHierTree*  _hiertree;     // 
+//      bool           checkValidRef(std::string);
+//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
    };
 
    class tdtdesign : public tdtlibrary {
    public:
-                     tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);                     
+                     tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);
       virtual       ~tdtdesign();
       virtual void   read(TEDfile* const);
       void           write(TEDfile* const tedfile);

@@ -246,6 +246,7 @@ public:
    bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    int               addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    bool              removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
+   void              replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst);
    bool              removeRootItem(const TYPE*comp, SGHierTree*& lst);
 //   void              addLibRef(const SGHierTree* lref) { reflibs.add(lref);}
    const TYPE*       GetItem() const           {return component;}
@@ -438,6 +439,17 @@ bool  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierT
       cparent = cparent->GetNextMember(prnt);   
    }
    return false;
+}
+
+template <class TYPE>
+void  SGHierTree<TYPE>::replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst)
+{
+   SGHierTree* thechild = lst->GetMember(oldchild);
+   while (thechild)
+   {
+      thechild->component = newchild;
+      thechild = thechild->GetNextMember(oldchild);
+   }
 }
 
 /*! Requires root childless item */

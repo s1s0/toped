@@ -593,16 +593,19 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
       else 
       {
          laydata::refnamepair striter;
-         libdir->getCellNamePair(*wn, striter);
-         striter->second->hierout(Htree, this, celldefs, libdir);
-//         Htree = DEBUG_NEW TDTHierTree(libdir->getCell(*wn), this, Htree);
-//         std::ostringstream ost;
-//         ost << "cell \"" << *wn << "\" referenced but not defined";
-//         tell_log(console::MT_WARNING, ost.str());
+         if (libdir->getCellNamePair(*wn, striter))
+            // found in a library
+            striter->second->hierout(Htree, this, celldefs, libdir);
+         else
+         {
+            // not found - getting the default definition
+            laydata::tdtdefaultcell *dflt = const_cast<laydata::tdtlibdir*>(libdir)->adddefaultcell(*wn);
+            dflt->hierout(Htree, this, celldefs, libdir);
+         }
       }
    }
    return  Htree;
-}   
+}
 
 DBbox laydata::tdtcell::overlap() const {
    DBbox ovlap = DEFAULT_OVL_BOX;
