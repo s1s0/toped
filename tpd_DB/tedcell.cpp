@@ -235,6 +235,10 @@ void laydata::tdtdefaultcell::updateHierarchy(tdtdesign*)
 {
 }
 
+void laydata::tdtdefaultcell::relink(tdtlibdir*)
+{
+}
+
 DBbox laydata::tdtdefaultcell::overlap() const
 {
    return DEFAULT_ZOOM_BOX;
@@ -582,8 +586,12 @@ void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawp
 }
 
 laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
-                   tdtcell* parent, cellList* celldefs, const laydata::tdtlibdir* libdir) {
+                   tdtcell* parent, cellList* celldefs, const laydata::tdtlibdir* libdir)
+{
    // collecting hierarchical information
+   // NOTE! This function is supposed just to collect information.
+   // Not to to alter it or update it! It's important to keep that rule, in order
+   // to make cell instance tracking and cell hierarchy manageable.
    Htree = DEBUG_NEW TDTHierTree(this, parent, Htree);
    nameList::const_iterator wn;
    for (wn = _children.begin(); wn != _children.end(); wn++)
@@ -598,9 +606,12 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
             striter->second->hierout(Htree, this, celldefs, libdir);
          else
          {
+            assert(false);
+            // See the note above. At this stage all cell instances must have
+            // definitions
             // not found - getting the default definition
-            laydata::tdtdefaultcell *dflt = const_cast<laydata::tdtlibdir*>(libdir)->adddefaultcell(*wn);
-            dflt->hierout(Htree, this, celldefs, libdir);
+//            laydata::tdtdefaultcell *dflt = const_cast<laydata::tdtlibdir*>(libdir)->adddefaultcell(*wn);
+//            dflt->hierout(Htree, this, celldefs, libdir);
          }
       }
    }
@@ -1604,22 +1615,25 @@ _dbl_word laydata::tdtcell::getFullySelected(dataList* lslct) const {
    return numselected;      
 }
 
-nameList* laydata::tdtcell::rehash_children() {
+nameList* laydata::tdtcell::rehash_children()
+{
    // the actual list of names of the referenced cells
-   nameList *cellnames = DEBUG_NEW nameList(); 
+   nameList *cellnames = DEBUG_NEW nameList();
    // get the cells layer
    quadTree* refsTree = _layers[0];
    tdtcellref* wcl;
-   if (refsTree) { // if it is not empty...
+   if (refsTree)
+   {  // if it is not empty...
       // get all cell refs/arefs in a list - 
       dataList *refsList = DEBUG_NEW dataList();
       refsTree->select_all(refsList, laydata::_lmref, false);
       // for every cell ref in the list
       for (dataList::const_iterator CC = refsList->begin(); 
-                                     CC != refsList->end(); CC++) {
+                                     CC != refsList->end(); CC++)
+      {
          wcl = static_cast<tdtcellref*>(CC->first);
          cellnames->push_back(wcl->cellname());
-      }   
+      }
       cellnames->sort();
       cellnames->unique();
       refsList->clear(); delete refsList;
@@ -1627,32 +1641,37 @@ nameList* laydata::tdtcell::rehash_children() {
    return cellnames;
 }
 
-void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB) {
+void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB)
+{
    tdtcell* childref;
    // Check that there are referenced cells
    if (_layers.end() == _layers.find(0))
-      if (!_children.empty()) {
-      // Means that all child references has been wiped out by the last 
-      // operation, so remove all children from the hierarchy tree
+      if (!_children.empty())
+      {
+         // Means that all child references has been wiped out by the last 
+         // operation, so remove all children from the hierarchy tree
          for (nameList::const_iterator CN = _children.begin(); 
-                                       CN != _children.end(); CN++) {
+                                       CN != _children.end(); CN++)
+         {
             childref = ATDB->checkcell(*CN);
             childref->_orphan = ATDB->_hiertree->removeParent(
                                              childref, this, ATDB->_hiertree);
             ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), 
                                                             childref->orphan());
-         }   
+         }
          _children.clear();
       }
       else return; // there were no children before the last operation
-   else {
+   else
+   {
       // Recollect the children.
       nameList *children_upd = rehash_children();
       std::pair<nameList::iterator,nameList::iterator> diff;
       while (true) 
       {
-		   diff = std::mismatch(children_upd->begin(), children_upd->end(), _children.begin());
-         if (diff.second != _children.end()) {
+         diff = std::mismatch(children_upd->begin(), children_upd->end(), _children.begin());
+         if (diff.second != _children.end())
+         {
             childref = ATDB->checkcell(*(diff.second));
             if (NULL != childref)
             {
@@ -1665,10 +1684,29 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB) {
             _children.erase(diff.second);
          }
          else break;
-      }      
+      }
       children_upd->clear(); delete children_upd;
    }
-}   
+}
+
+void laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
+{
+   // get the cells layer
+   quadTree* refsTree = _layers[0];
+   if (refsTree)
+   {  // if it is not empty get all cell refs/arefs in a list -
+      dataList *refsList = DEBUG_NEW dataList();
+      refsTree->select_all(refsList, laydata::_lmref, false);
+      // relink every single cell ref in the list
+      for (dataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
+      {
+         tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
+         refnamepair boza = libdir->getcellinstance(wcl->cellname(), libID());
+         wcl->set_structure(boza);
+      }
+      refsList->clear(); delete refsList;
+   }
+}
 
 void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const {
    // Check that there are referenced cells

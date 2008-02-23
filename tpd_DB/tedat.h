@@ -154,7 +154,6 @@ namespace laydata {
       word                 numpoints() const {return 4;};
       void                 polycut(pointlist&, shapeList**);
       void                 stretch(int bfactor, shapeList**);
-//      tdtdata*             polymerge(tdtdata*);
       const pointlist      shape2poly() const;
       word                 ltype() const {return _lmbox;}
    protected:
@@ -196,7 +195,6 @@ namespace laydata {
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**);
       void                 stretch(int bfactor, shapeList**);
-//      tdtdata*             polymerge(tdtdata*);
       const pointlist      shape2poly() const {return _plist;};
       word                 ltype() const {return _lmpoly;}
 //   protected:
@@ -237,10 +235,9 @@ namespace laydata {
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**){};
       void                 stretch(int bfactor, shapeList**);
-//      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
       word                 ltype() const {return _lmwire;}
-//   protected:   
+//   protected:
    private:
       void                 precalc(pointlist&, _dbl_word) const;
       void                 select_points(DBbox&, SGBitSet&);
@@ -268,6 +265,7 @@ namespace laydata {
       void                 transfer(const CTM& trans) {_translation *= trans;};
       tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdtcellref(
                                                _structure,_translation*trans);};
+      void                 set_structure(refnamepair&);
 //       tdtcellref*          getshapeover(TP);
 
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
@@ -284,14 +282,12 @@ namespace laydata {
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       virtual void        ungroup(tdtdesign*, tdtcell*, atticList*);
       std::string          cellname() const {return _structure->first;};
-//      tdtcell*             structure() const{return _structure->second;};
       tdtcell*             cstructure() const;
       tdtdefaultcell*      structure() const {return _structure->second;}
       word                 numpoints() const {return 1;};
       CTM                  translation() const {return _translation;};
       void                 polycut(pointlist&, shapeList**) {};
       void                 stretch(int bfactor, shapeList**) {};
-//      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
       void                 objFlip() {_translation.FlipY(0.0);}
       void                 objRotate() {_translation.Rotate( 90.0);}
@@ -368,7 +364,6 @@ namespace laydata {
       word                 numpoints() const {return 1;};
       void                 polycut(pointlist&, shapeList**) {};
       void                 stretch(int bfactor, shapeList**) {};
-//      tdtdata*             polymerge(tdtdata*){return NULL;};
       const pointlist      shape2poly() const {return pointlist();};
       void                 objFlip() {_translation.FlipY(0.0);}
       void                 objRotate() {_translation.Rotate( 90.0);}

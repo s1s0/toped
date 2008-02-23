@@ -57,6 +57,16 @@ void laydata::tdtlibrary::unloadprep(laydata::tdtlibdir* libdir)
       }
 }
 
+void laydata::tdtlibrary::relink(tdtlibdir* libdir)
+{
+   laydata::cellList::iterator wc;
+   for (wc = _cells.begin(); wc != _cells.end(); wc++)
+   {
+      printf("%s \n",wc->first);
+      wc->second->relink(libdir);
+   }
+}
+
 laydata::tdtlibrary::~tdtlibrary()
 {
    // now delete the cells
@@ -107,7 +117,7 @@ void laydata::tdtlibrary::clearEntireHierTree()
 void laydata::tdtlibrary::read(TEDfile* const tedfile)
 {
    std::string cellname;
-   while (tedf_CELL == tedfile->getByte()) 
+   while (tedf_CELL == tedfile->getByte())
    {
       cellname = tedfile->getString();
       tell_log(console::MT_CELLNAME, cellname);
@@ -116,7 +126,7 @@ void laydata::tdtlibrary::read(TEDfile* const tedfile)
    recreate_hierarchy(tedfile->TEDLIB());
    tell_log(console::MT_INFO, "Done");
 }
-      
+
 void laydata::tdtlibrary::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recur)
 {
    GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_LIBNAME, _name.size());
@@ -142,7 +152,7 @@ void laydata::tdtlibrary::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recu
    wr = gdsf.SetNextRecord(gds_ENDLIB);gdsf.flush(wr);
 }
 
-      
+
 void laydata::tdtlibrary::PSwrite(PSFile& psf, const tdtcell* top, const layprop::DrawProperties& drawprop)
 {
    laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
@@ -166,23 +176,23 @@ laydata::tdtcell* laydata::tdtlibrary::checkcell(std::string name)
       return NULL;
    else return static_cast<laydata::tdtcell*>(_cells[name]);
 }
-      
+
 void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
 {
    if (TARGETDB_LIB == _libID)
    {
       clearHierTree(TARGETDB_LIB);
    }
-   // here - run the hierarchy extraction on orphans only   
-   for (laydata::cellList::const_iterator wc = _cells.begin(); 
+   // here - run the hierarchy extraction on orphans only
+   for (laydata::cellList::const_iterator wc = _cells.begin();
                                           wc != _cells.end(); wc++) {
-      if (wc->second && wc->second->orphan()) 
+      if (wc->second && wc->second->orphan())
          _hiertree = wc->second->hierout(_hiertree, NULL, &_cells, libdir);
    }
 }
 
 //
-//bool laydata::tdtlibrary::`lays(std::string cellname, bool recursive, ListOfWords& laylist) const 
+//bool laydata::tdtlibrary::`lays(std::string cellname, bool recursive, ListOfWords& laylist) const
 //{
 ////   if ("" == cellname) targetcell = _target.edit();
 //   assert("" != cellname);
@@ -271,15 +281,14 @@ laydata::tdtlibrary* laydata::tdtlibdir::getLib(int libID)
    return _libdirectory[libID]->second;
 }
 
-// laydata::tdtlibrary* laydata::tdtlibdir::getLib(std::string libname)
-// {
-//    for (word i = 1; i < _libdirectory.size(); i++)
-//    {
-//       if (libname == _libdirectory[i]->first) return _libdirectory[i]->second;
-//    }
-//    return NULL;
-// 
-// }
+void laydata::tdtlibdir::relink()
+{
+   for (int i = _libdirectory.size() - 2; i > 0 ; i--)
+   {
+      _libdirectory[i]->second->relink(this);
+   }
+   _TEDDB->relink(this);
+}
 
 bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair& striter) const
 {
@@ -321,6 +330,48 @@ bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, 
    }
 }
 
+
+laydata::refnamepair laydata::tdtlibdir::getcellinstance(std::string cellname, int libID)
+{
+/*   laydata::refnamepair striter = _design->_cells.find(cellname);
+   // link the cells instances with their definitions
+   if (_design->_cells.end() == striter)
+   {
+   //   if (_design->checkcell(name))
+   //   {
+      // search the cell in the libraries because it's not in the DB
+      if (!_TEDLIB->getCellNamePair(cellname, striter))
+      {
+         // Attention! In this case we've parsed a cell reference, before
+         // the cell is defined. This might means:
+         //   1. Cell is referenced, but simply not defined. 
+         //   2. Circular reference ! Cell1 contains a reference of Cell2,
+         //      that in turn contains a reference of Cell1. This is not allowed
+         // We can not make a decision yet, because the entire file has not been
+         // parsed yet. That is why we are assigning a NULL pointer to the 
+         // referenced structure here in order to continue the parsing, and when 
+         // the entire file is parced the cell references without a proper pointer
+         // to the structure need to be flagged as warning in case 1 and as error 
+         // in case 2.
+         // Empty cell structure should be handled without a problem by the 
+         // tdttcellref class and its ancestors
+         _design->_cells[cellname] = _TEDLIB->adddefaultcell(cellname);
+         striter = _design->_cells.find(cellname);
+      }
+      else
+         striter->second->parentfound();
+   }
+   else
+   {
+      // Mark that the cell definition is referenced, i.e. it is not the top 
+      // of the tree (orphan flag in the tdtcell), BUT just in case it is
+      // not empty yet
+      if (NULL != _design->_cells[cellname])
+         _design->_cells[cellname]->parentfound();
+   }
+   return striter;*/
+}
+
 //-----------------------------------------------------------------------------
 // class tdtdesign
 //-----------------------------------------------------------------------------
@@ -333,7 +384,7 @@ laydata::tdtdesign::tdtdesign(std::string name, time_t created, time_t lastUpdat
    _lastUpdated   = lastUpdated;
 }
 
-void laydata::tdtdesign::read(TEDfile* const tedfile) 
+void laydata::tdtdesign::read(TEDfile* const tedfile)
 {
    tdtlibrary::read(tedfile);
    _tmpdata = NULL;
@@ -413,7 +464,7 @@ laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2)
 laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
    laydata::valid_poly check(*pl);
    if (!check.valid()) {
-      std::ostringstream ost; 
+      std::ostringstream ost;
       ost << "Polygon check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
       return NULL;
@@ -439,11 +490,11 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
 laydata::tdtdata* laydata::tdtdesign::addwire(word la, const pointlist* pl, word w) {
    laydata::valid_wire check(*pl,w);
    if (!check.valid()) {
-      std::ostringstream ost; 
+      std::ostringstream ost;
       ost << "Wire check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
       return NULL;
-   }   
+   }
    DBbox old_overlap = _target.edit()->overlap();
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
@@ -466,14 +517,14 @@ laydata::tdtdata* laydata::tdtdesign::addtext(word la, std::string& text, CTM& o
       do {} while(validate_cells());
    return newshape;
 }
- 
-laydata::tdtdata* laydata::tdtdesign::addcellref(laydata::refnamepair striter, CTM& ori) 
+
+laydata::tdtdata* laydata::tdtdesign::addcellref(laydata::refnamepair striter, CTM& ori)
 {
    modified = true;
    ori *= _target.rARTM();
    DBbox old_overlap = _target.edit()->overlap();
    tdtdata* ncrf = _target.edit()->addcellref(this, striter, ori);
-   if (NULL == ncrf) 
+   if (NULL == ncrf)
    {
      tell_log(console::MT_ERROR, "Circular reference is forbidden");
    }
@@ -485,7 +536,7 @@ laydata::tdtdata* laydata::tdtdesign::addcellref(laydata::refnamepair striter, C
    return ncrf;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori, 
+laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori,
                              ArrayProperties& arrprops) {
    if (checkcell(name)) {
       laydata::refnamepair striter = getcellnamepair(name);
@@ -502,7 +553,7 @@ laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori,
             do {} while(validate_cells());
       }
       return ncrf;
-   }   
+   }
    else {
       std::string news = "Cell \"";
       news += name; news += "\" is not defined";
@@ -520,9 +571,9 @@ void laydata::tdtdesign::addlist(atticList* nlst)
    }
 }
 
-laydata::tdtcell* laydata::tdtdesign::opencell(std::string name) 
+laydata::tdtcell* laydata::tdtdesign::opencell(std::string name)
 {
-   if (_cells.end() != _cells.find(name)) 
+   if (_cells.end() != _cells.find(name))
    {
       laydata::tdtdefaultcell* tcell = _cells[name];
       if (tcell && (UNDEFCELL_LIB != tcell->libID()))
@@ -530,12 +581,12 @@ laydata::tdtcell* laydata::tdtdesign::opencell(std::string name)
          _target.setcell(static_cast<tdtcell*>(_cells[name]));
          return _target.edit();
       }
-   }   
+   }
    return NULL; // Active cell has not changed if name is not found
 }
 
 bool laydata::tdtdesign::editpush(const TP& pnt) {
-   if (_target.checkedit()) {// 
+   if (_target.checkedit()) {//
       ctmstack transtack;
       transtack.push(CTM());
       laydata::cellrefstack* crstack = DEBUG_NEW laydata::cellrefstack();
@@ -698,8 +749,8 @@ void laydata::tdtdesign::copy_selected( TP p1, TP p2) {
    if (_target.edit()->copy_selected(this, trans)) {
       // needs validation
       do {} while(validate_cells());
-   }   
-}   
+   }
+}
 
 void laydata::tdtdesign::move_selected( TP p1, TP p2, selectList** fadead)
 {
@@ -712,13 +763,13 @@ void laydata::tdtdesign::move_selected( TP p1, TP p2, selectList** fadead)
    if (_target.edit()->move_selected(this, trans, fadead))
       // needs validation
       do {} while(validate_cells());
-}   
+}
 
 bool laydata::tdtdesign::cutpoly(pointlist& pl, atticList** dasao)
 {
    for (pointlist::iterator CP = pl.begin(); CP != pl.end(); CP ++)
       (*CP) *= _target.rARTM();
-   return _target.edit()->cutpoly_selected(pl,dasao); 
+   return _target.edit()->cutpoly_selected(pl,dasao);
 }
 
 void laydata::tdtdesign::rotate_selected( TP p, real angle, selectList** fadead)
@@ -728,9 +779,9 @@ void laydata::tdtdesign::rotate_selected( TP p, real angle, selectList** fadead)
    // - get the current translation matrix of the active cell
    // - apply the transformation - in this case rotation around a point
    //   is done in 3 steps - translate to 0, rotate, translate back
-   // - multiply with the reversed CTM to get back in the current 
+   // - multiply with the reversed CTM to get back in the current
    //   coordinates
-   // If just rotation is applied (second step) operation can not deal 
+   // If just rotation is applied (second step) operation can not deal
    // with the cases when the referenced cell is flipped
    CTM trans = _target.ARTM();
    trans.Translate(-p.x(),-p.y());
@@ -741,10 +792,10 @@ void laydata::tdtdesign::rotate_selected( TP p, real angle, selectList** fadead)
 //   if (_target.edit()->transfer_selected(this, trans))
       // needs validation
       do {} while(validate_cells());
-}   
+}
 
 void laydata::tdtdesign::flip_selected( TP p, bool Xaxis) {
-   // Here - same principle as for rotate_selected 
+   // Here - same principle as for rotate_selected
    // othrwise flip toggles between X and Y depending on the angle
    // of rotation of the active cell reference
    CTM trans = _target.ARTM();
@@ -754,22 +805,22 @@ void laydata::tdtdesign::flip_selected( TP p, bool Xaxis) {
    if (_target.edit()->transfer_selected(this, trans)) {
       // needs validation
       do {} while(validate_cells());
-   }   
-}   
+   }
+}
 
 void laydata::tdtdesign::delete_selected(laydata::atticList* fsel) {
    if (_target.edit()->delete_selected(this, fsel)) {
       // needs validation
       do {} while(validate_cells());
    }
-}   
+}
 
 void laydata::tdtdesign::destroy_this(tdtdata* ds, word la) {
    if (_target.edit()->destroy_this(this, ds,la)) {
       // needs validation
       do {} while(validate_cells());
-   }   
-}   
+   }
+}
 
 bool laydata::tdtdesign::group_selected(std::string name) {
    // first check that the cell with this name does not exist already
@@ -787,7 +838,7 @@ bool laydata::tdtdesign::group_selected(std::string name) {
    tdtcell* newcell = addcell(name);
    assert(newcell);
    //Get the selected shapes from the current cell and add them to the new cell
-   for(atticList::const_iterator CL = TBgroup->begin(); 
+   for(atticList::const_iterator CL = TBgroup->begin();
                                                    CL != TBgroup->end(); CL++) {
       shapeList* lslct = CL->second;
       quadTree* wl = newcell->securelayer(CL->first);
@@ -795,7 +846,7 @@ bool laydata::tdtdesign::group_selected(std::string name) {
       // We are just transfering shapes from one structure to another.
       // ATDB->securelaydef( CL->first );
       securelaydef( CL->first );
-      for(shapeList::const_iterator CI = lslct->begin(); 
+      for(shapeList::const_iterator CI = lslct->begin();
                                                      CI != lslct->end(); CI++) {
          wl->put(*CI);
          if (0 == CL->first) newcell->addchild(this,
@@ -807,7 +858,7 @@ bool laydata::tdtdesign::group_selected(std::string name) {
    TBgroup->clear();delete TBgroup;
    newcell->resort();
    //reference the new cell into the current one.
-   tdtdata* ref = _target.edit()->addcellref(this, 
+   tdtdata* ref = _target.edit()->addcellref(this,
                                     getcellnamepair(name),CTM(TP(0,0),1,0,false));
    //select the new cell
    ref->set_status(sh_selected);
@@ -824,9 +875,9 @@ laydata::shapeList* laydata::tdtdesign::ungroup_prep() {
 
 laydata::atticList* laydata::tdtdesign::ungroup_this(laydata::shapeList* cells4u) {
    laydata::atticList* shapeUngr = DEBUG_NEW laydata::atticList();
-   for (shapeList::const_iterator CC = cells4u->begin(); 
+   for (shapeList::const_iterator CC = cells4u->begin();
                                                      CC != cells4u->end(); CC++)
-      static_cast<tdtcellref*>(*CC)->ungroup(this, _target.edit(), shapeUngr);      
+      static_cast<tdtcellref*>(*CC)->ungroup(this, _target.edit(), shapeUngr);
    _target.edit()->validate_layers();
    return shapeUngr;
 }
