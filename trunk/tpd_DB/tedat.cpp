@@ -1519,7 +1519,7 @@ pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet& pset,
 //-----------------------------------------------------------------------------
 // class tdtcellref
 //-----------------------------------------------------------------------------
-laydata::tdtcellref::tdtcellref(TEDfile* const tedfile) 
+laydata::tdtcellref::tdtcellref(TEDfile* const tedfile)
 {
    // read the name of the referenced cell
    std::string cellrefname = tedfile->getString();
@@ -1530,6 +1530,12 @@ laydata::tdtcellref::tdtcellref(TEDfile* const tedfile)
    _translation = tedfile->getCTM();
 }
 
+void laydata::tdtcellref::set_structure(refnamepair& newstructure)
+{
+   _structure = newstructure;
+}
+
+//      void laydata::tdtcellref::relink(const laydata::tdtlibdir* libdir)
 // bool laydata::tdtcellref::ref_visible(ctmstack& transtack, const layprop::DrawProperties& drawprop) const {
 //    if (!structure()) return false;
 //    DBbox obox = structure()->overlap();

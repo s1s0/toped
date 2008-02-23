@@ -306,6 +306,7 @@ bool DataCenter::TDTunloadlib(std::string libname)
 {
    if ( _TEDLIB.closelibrary(libname))
    {
+      _TEDLIB.relink();
       _TEDLIB()->recreate_hierarchy(&_TEDLIB);
       return true;
    }

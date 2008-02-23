@@ -43,6 +43,7 @@ namespace laydata {
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       tdtdefaultcell* secure_defaultcell(std::string name);
       void            unloadprep(laydata::tdtlibdir* );
+      void           relink(tdtlibdir*);
       //
       std::string    name()            const {return _name;}
       real           UU()              const {return _UU;}
@@ -64,10 +65,8 @@ namespace laydata {
       int                  _libID;        // library ID
       real                 _DBU;          // Size of database units in meters
       real                 _UU;           // size of user unit in DBU
-      cellList             _cells;        // list of cells in the design
+      cellList             _cells;        // licheckValidRefcheckValidRefst of cells in the design
       static TDTHierTree*  _hiertree;     // 
-//      bool           checkValidRef(std::string);
-//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
    };
 
    class tdtdesign : public tdtlibrary {
@@ -173,12 +172,14 @@ namespace laydata {
       tdtdesign*        operator ()() {return _TEDDB;}
       void              addlibrary( tdtlibrary* const, word libRef );
       bool              closelibrary(std::string);
+      void              relink();
       tdtlibrary*       getLib(int);
 //      tdtlibrary*       getLib(std::string);
       int               getLastLibRefNo();
       bool              getCellNamePair(std::string, refnamepair&) const;
       tdtdefaultcell*   adddefaultcell( std::string name );
       bool              collect_usedlays(std::string, bool, ListOfWords&) const;
+      refnamepair       getcellinstance(std::string, int);
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       void              deleteDB() {delete _TEDDB;}
       void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}

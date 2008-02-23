@@ -394,7 +394,7 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
       }
       else
          striter->second->parentfound();
-   }   
+   }
    else 
    {
       // Mark that the cell definition is referenced, i.e. it is not the top 
