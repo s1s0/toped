@@ -350,19 +350,17 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
       {
          // Attention! In this case we've parsed a cell reference, before
          // the cell is defined. This might means:
-         //   1. Cell is referenced, but simply not defined. 
+         //   1. Cell is referenced, but not defined - i.e. library cell, but 
+         //      library is not loaded
          //   2. Circular reference ! Cell1 contains a reference of Cell2,
          //      that in turn contains a reference of Cell1. This is not allowed
          // We can not make a decision yet, because the entire file has not been
-         // parsed yet. That is why we are assigning a NULL pointer to the 
+         // parsed yet. That is why we are assigning a default cell to the 
          // referenced structure here in order to continue the parsing, and when 
          // the entire file is parced the cell references without a proper pointer
          // to the structure need to be flagged as warning in case 1 and as error 
          // in case 2.
-         // Empty cell structure should be handled without a problem by the 
-         // tdttcellref class and its ancestors
-         _design->_cells[cellname] = _TEDLIB->adddefaultcell(cellname);
-         striter = _design->_cells.find(cellname);
+         striter = _TEDLIB->adddefaultcell(cellname);
       }
       else
          striter->second->parentfound();
