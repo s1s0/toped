@@ -304,10 +304,16 @@ int DataCenter::TDTloadlib(std::string filename)
 
 bool DataCenter::TDTunloadlib(std::string libname)
 {
-   if ( _TEDLIB.closelibrary(libname))
+   // Unhook the library from the list of known DB's, get a pointer to it
+   laydata::tdtlibrary* tberased = _TEDLIB.removelibrary(libname);
+   if ( NULL != tberased )
    {
+      // Relink everything
       _TEDLIB.relink();
+      // get the new hierarchy
       _TEDLIB()->recreate_hierarchy(&_TEDLIB);
+      // after all above - remove the library (TODO! undo)
+      delete tberased;
       return true;
    }
    else return false;

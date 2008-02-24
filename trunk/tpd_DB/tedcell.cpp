@@ -596,7 +596,7 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
    nameList::const_iterator wn;
    for (wn = _children.begin(); wn != _children.end(); wn++)
    {
-      if (NULL != (*celldefs)[*wn])
+      if (celldefs->end() != celldefs->find(*wn) )
          (*celldefs)[*wn]->hierout(Htree, this, celldefs, libdir);
       else 
       {
@@ -1692,6 +1692,7 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB)
 void laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
 {
    // get the cells layer
+   if (_layers.end() == _layers.find(0)) return; // nothing to relink
    quadTree* refsTree = _layers[0];
    if (refsTree)
    {  // if it is not empty get all cell refs/arefs in a list -
@@ -1701,8 +1702,8 @@ void laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
       for (dataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
       {
          tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
-         refnamepair boza = libdir->getcellinstance(wcl->cellname(), libID());
-         wcl->set_structure(boza);
+         refnamepair newcelldef = libdir->getcellinstance(wcl->cellname(), libID());
+         wcl->set_structure(newcelldef);
       }
       refsList->clear(); delete refsList;
    }

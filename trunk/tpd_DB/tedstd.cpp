@@ -323,34 +323,6 @@ void laydata::TEDfile::putString(std::string str) {
    fputs(str.c_str(), _file);
 }
 
-void laydata::TEDfile::registercellread(std::string cellname, tdtcell* cell) {
-   if (_design->_cells.end() != _design->_cells.find(cellname)) 
-   // There are several possiblirities here:
-   // 1. Cell has been referenced before the definition takes place
-   // 2. The same case 1, but the reason is circular reference. 
-   // 3. Cell is defined more than once
-   // Case 3 seems to be just theoretical and we should abort the reading 
-   // and retun with error in this case.
-   // Case 2 is really dangerous and once again theoretically we need to 
-   // break the circularity. This might happen however once the whole file
-   // is parced
-   // Case 1 is quite OK, although, the write sequence should use the 
-   // cell structure tree and start the writing from the leaf cells. At the 
-   // moment writing is in kind of alphabetical order and case 1 is more
-   // than possible. In the future it might me appropriate to issue a warning
-   // for possible circular reference.
-      if (NULL == _design->_cells[cellname]) {
-         // case 1 or case 2 -> can't be distiguised in this moment
-         //_design->_cells[cellname] = cell;
-         // cell has been referenced already, so it's not an orphan
-         cell->parentfound();
-      }
-      else {
-         //@FIXME case 3 -> parsing should be stopped !
-      }
-   _design->_cells[cellname] = cell;
-}
-
 void laydata::TEDfile::registercellwritten(std::string cellname) {
    _childnames.push_back(cellname);
 }   

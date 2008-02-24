@@ -62,7 +62,7 @@ void laydata::tdtlibrary::relink(tdtlibdir* libdir)
    laydata::cellList::iterator wc;
    for (wc = _cells.begin(); wc != _cells.end(); wc++)
    {
-      printf("%s \n",wc->first);
+      assert(wc->second);
       wc->second->relink(libdir);
    }
 }
@@ -76,7 +76,7 @@ laydata::tdtlibrary::~tdtlibrary()
    _cells.clear();
 }
 
-void laydata::tdtlibrary::clearHierTree(word libID)
+void laydata::tdtlibrary::clearHierTree(int libID)
 {
    // get rid of the hierarchy tree
    const TDTHierTree* var1 = _hiertree;
@@ -121,10 +121,38 @@ void laydata::tdtlibrary::read(TEDfile* const tedfile)
    {
       cellname = tedfile->getString();
       tell_log(console::MT_CELLNAME, cellname);
-      tedfile->registercellread(cellname, DEBUG_NEW tdtcell(tedfile, cellname, _libID));
+      registercellread(cellname, DEBUG_NEW tdtcell(tedfile, cellname, _libID));
    }
    recreate_hierarchy(tedfile->TEDLIB());
    tell_log(console::MT_INFO, "Done");
+}
+
+void laydata::tdtlibrary::registercellread(std::string cellname, tdtcell* cell) {
+   if (_cells.end() != _cells.find(cellname)) 
+   // There are several possiblirities here:
+   // 1. Cell has been referenced before the definition takes place
+   // 2. The same case 1, but the reason is circular reference. 
+   // 3. Cell is defined more than once
+   // Case 3 seems to be just theoretical and we should abort the reading 
+   // and retun with error in this case.
+   // Case 2 is really dangerous and once again theoretically we need to 
+   // break the circularity. This might happen however once the whole file
+   // is parced
+   // Case 1 is quite OK, although, the write sequence should use the 
+   // cell structure tree and start the writing from the leaf cells. At the 
+   // moment writing is in kind of alphabetical order and case 1 is more
+   // than possible. In the future it might me appropriate to issue a warning
+   // for possible circular reference.
+      if (NULL == _cells[cellname]) {
+         // case 1 or case 2 -> can't be distiguised in this moment
+         //_cells[cellname] = cell;
+         // cell has been referenced already, so it's not an orphan
+         cell->parentfound();
+      }
+      else {
+         //@FIXME case 3 -> parsing should be stopped !
+      }
+   _cells[cellname] = cell;
 }
 
 void laydata::tdtlibrary::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recur)
@@ -259,19 +287,19 @@ void laydata::tdtlibdir::addlibrary(tdtlibrary* const lib, word libRef)
    _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem(lib->name(), lib) );
 }
 
-bool laydata::tdtlibdir::closelibrary(std::string libname)
+laydata::tdtlibrary* laydata::tdtlibdir::removelibrary(std::string libname)
 {
+   tdtlibrary* tberased = NULL;
    for (Catalog::iterator LDI = _libdirectory.begin(); LDI != _libdirectory.end(); LDI++)
    {
       if (libname == (*LDI)->first)
       {
-         (*LDI)->second->unloadprep(this);
-         delete ((*LDI)->second);
+         tberased = (*LDI)->second;
          _libdirectory.erase(LDI);
-         return true;
+         break;
       }
    }
-   return false;
+   return tberased;
 }
 
 laydata::tdtlibrary* laydata::tdtlibdir::getLib(int libID)
@@ -290,9 +318,11 @@ void laydata::tdtlibdir::relink()
    _TEDDB->relink(this);
 }
 
-bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair& striter) const
+bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair& striter, const int libID) const
 {
-   for (word i = 1; i < _libdirectory.size(); i++)
+   // start searching form the first library after the current 
+   word first2search = (TARGETDB_LIB == libID) ? 1 : libID + 1;
+   for (word i = first2search; i < _libdirectory.size(); i++)
    {
       if (NULL != _libdirectory[i]->second->checkcell(name))
       {
@@ -333,43 +363,25 @@ bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, 
 
 laydata::refnamepair laydata::tdtlibdir::getcellinstance(std::string cellname, int libID)
 {
-/*   laydata::refnamepair striter = _design->_cells.find(cellname);
+   assert(UNDEFCELL_LIB != libID);
+   laydata::tdtlibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;
+   laydata::refnamepair striter = curlib->_cells.find(cellname);
    // link the cells instances with their definitions
-   if (_design->_cells.end() == striter)
+   if (curlib->_cells.end() == striter)
    {
-   //   if (_design->checkcell(name))
-   //   {
-      // search the cell in the libraries because it's not in the DB
-      if (!_TEDLIB->getCellNamePair(cellname, striter))
+      // search the cell in the restt of the libraries because it's not in the current
+      if (!getCellNamePair(cellname, striter, libID))
       {
-         // Attention! In this case we've parsed a cell reference, before
-         // the cell is defined. This might means:
-         //   1. Cell is referenced, but simply not defined. 
-         //   2. Circular reference ! Cell1 contains a reference of Cell2,
-         //      that in turn contains a reference of Cell1. This is not allowed
-         // We can not make a decision yet, because the entire file has not been
-         // parsed yet. That is why we are assigning a NULL pointer to the 
-         // referenced structure here in order to continue the parsing, and when 
-         // the entire file is parced the cell references without a proper pointer
-         // to the structure need to be flagged as warning in case 1 and as error 
-         // in case 2.
-         // Empty cell structure should be handled without a problem by the 
-         // tdttcellref class and its ancestors
-         _design->_cells[cellname] = _TEDLIB->adddefaultcell(cellname);
-         striter = _design->_cells.find(cellname);
+         // not found! make a default cell
+         curlib->_cells[cellname] = adddefaultcell(cellname);
+         striter = curlib->_cells.find(cellname);
       }
-      else
-         striter->second->parentfound();
    }
-   else
-   {
-      // Mark that the cell definition is referenced, i.e. it is not the top 
-      // of the tree (orphan flag in the tdtcell), BUT just in case it is
-      // not empty yet
-      if (NULL != _design->_cells[cellname])
-         _design->_cells[cellname]->parentfound();
-   }
-   return striter;*/
+   // Mark that the cell definition is referenced, i.e. it is not the top 
+   // of the tree (orphan flag in the tdtcell)
+   assert(striter->second);
+   striter->second->parentfound();
+   return striter;
 }
 
 //-----------------------------------------------------------------------------
