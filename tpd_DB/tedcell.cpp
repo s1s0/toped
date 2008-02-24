@@ -600,19 +600,13 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
          (*celldefs)[*wn]->hierout(Htree, this, celldefs, libdir);
       else 
       {
-         laydata::refnamepair striter;
-         if (libdir->getCellNamePair(*wn, striter))
-            // found in a library
-            striter->second->hierout(Htree, this, celldefs, libdir);
+         laydata::tdtdefaultcell* celldef = libdir->getCellDef(*wn, libID());
+         if (NULL != celldef)
+            celldef->hierout(Htree, this, celldefs, libdir);
          else
-         {
+            // This assert is here on purpose! If you hit it - go fix your
+            // problrm somewhere else. It's not here! See the note above.
             assert(false);
-            // See the note above. At this stage all cell instances must have
-            // definitions
-            // not found - getting the default definition
-//            laydata::tdtdefaultcell *dflt = const_cast<laydata::tdtlibdir*>(libdir)->adddefaultcell(*wn);
-//            dflt->hierout(Htree, this, celldefs, libdir);
-         }
       }
    }
    return  Htree;

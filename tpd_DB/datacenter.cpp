@@ -299,6 +299,8 @@ int DataCenter::TDTloadlib(std::string filename)
    }
    tempin.closeF();
    _TEDLIB.addlibrary(tempin.design(), libRef);
+   // Relink everything
+   _TEDLIB.relink();
    return libRef;
 }
 

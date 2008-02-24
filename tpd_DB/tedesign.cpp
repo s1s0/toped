@@ -46,16 +46,16 @@ laydata::TDTHierTree* laydata::tdtlibrary::_hiertree = NULL;
 laydata::tdtlibrary::tdtlibrary(std::string name, real DBU, real UU, int libID) :
    _name(name), _libID(libID), _DBU(DBU), _UU(UU) {}
 
-void laydata::tdtlibrary::unloadprep(laydata::tdtlibdir* libdir)
-{
-   laydata::cellList::const_iterator wc;
-   for (wc = _cells.begin(); wc != _cells.end(); wc++)
-      if (!wc->second->orphan())
-      {
-//         laydata::tdtdefaultcell* boza = new laydata::tdtdefaultcell(wc->first, 0, false);
-         _hiertree->replaceChild(wc->second, libdir->adddefaultcell(wc->first), _hiertree);
-      }
-}
+//void laydata::tdtlibrary::unloadprep(laydata::tdtlibdir* libdir)
+//{
+//   laydata::cellList::const_iterator wc;
+//   for (wc = _cells.begin(); wc != _cells.end(); wc++)
+//     if (!wc->second->orphan())
+//      {
+////         laydata::tdtdefaultcell* boza = new laydata::tdtdefaultcell(wc->first, 0, false);
+//         _hiertree->replaceChild(wc->second, libdir->adddefaultcell(wc->first), _hiertree);
+//      }
+//}
 
 void laydata::tdtlibrary::relink(tdtlibdir* libdir)
 {
@@ -198,9 +198,9 @@ void laydata::tdtlibrary::PSwrite(PSFile& psf, const tdtcell* top, const layprop
    }
 }
 
-laydata::tdtcell* laydata::tdtlibrary::checkcell(std::string name)
+laydata::tdtcell* laydata::tdtlibrary::checkcell(std::string name, bool undeflib)
 {
-   if ((UNDEFCELL_LIB == _libID) || (_cells.end() == _cells.find(name)))
+   if ((!undeflib && (UNDEFCELL_LIB == _libID)) || (_cells.end() == _cells.find(name)))
       return NULL;
    else return static_cast<laydata::tdtcell*>(_cells[name]);
 }
@@ -241,17 +241,15 @@ void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
 //}
 //
 
-laydata::tdtdefaultcell* laydata::tdtlibrary::secure_defaultcell(std::string name)
+laydata::refnamepair laydata::tdtlibrary::secure_defaultcell(std::string name)
 {
    assert(UNDEFCELL_LIB == _libID);
-   if (_cells.end() != _cells.find(name)) return _cells[name]; // cell already exists
-   else
+   if (_cells.end() == _cells.find(name))
    {
-      tdtdefaultcell* ncl = _cells[name] = DEBUG_NEW tdtdefaultcell(name, UNDEFCELL_LIB, true);
-      _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
-//      btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
-      return ncl;
+      _cells[name] = DEBUG_NEW tdtdefaultcell(name, UNDEFCELL_LIB, true);
+/*???*/      _hiertree = DEBUG_NEW TDTHierTree(_cells[name], NULL, _hiertree);
    }
+   return _cells.find(name);
 }
 
 //-----------------------------------------------------------------------------
@@ -333,7 +331,26 @@ bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair&
    return false;
 }
 
-laydata::tdtdefaultcell* laydata::tdtlibdir::adddefaultcell( std::string name )
+laydata::tdtdefaultcell* laydata::tdtlibdir::getCellDef(std::string name, const int libID) const
+{
+   // start searching form the first library after the current 
+   word first2search = (TARGETDB_LIB == libID) ? 1 : libID + 1;
+   for (word i = first2search; i < _libdirectory.size(); i++)
+   {
+      if (NULL != _libdirectory[i]->second->checkcell(name))
+      {
+         return _libdirectory[i]->second->getcellnamepair(name)->second;
+      }
+   }
+   // not in the libraries - must be in the defaultlib
+   if (NULL != _libdirectory[UNDEFCELL_LIB]->second->checkcell(name, true))
+   {
+      return _libdirectory[UNDEFCELL_LIB]->second->getcellnamepair(name)->second;
+   }
+   return NULL;
+}
+
+laydata::refnamepair laydata::tdtlibdir::adddefaultcell( std::string name )
 {
    laydata::tdtlibrary* undeflib = _libdirectory[UNDEFCELL_LIB]->second;
    return undeflib->secure_defaultcell(name);
@@ -369,12 +386,11 @@ laydata::refnamepair laydata::tdtlibdir::getcellinstance(std::string cellname, i
    // link the cells instances with their definitions
    if (curlib->_cells.end() == striter)
    {
-      // search the cell in the restt of the libraries because it's not in the current
+      // search the cell in the rest of the libraries because it's not in the current
       if (!getCellNamePair(cellname, striter, libID))
       {
          // not found! make a default cell
-         curlib->_cells[cellname] = adddefaultcell(cellname);
-         striter = curlib->_cells.find(cellname);
+         striter = adddefaultcell(cellname);
       }
    }
    // Mark that the cell definition is referenced, i.e. it is not the top 

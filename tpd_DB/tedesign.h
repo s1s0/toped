@@ -38,12 +38,12 @@ namespace laydata {
       virtual void   read(TEDfile* const);
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
-      tdtcell*       checkcell(std::string name);
+      tdtcell*       checkcell(std::string name, bool undeflib = false);
       void           recreate_hierarchy(const laydata::tdtlibdir* );
       void           registercellread(std::string, tdtcell*);
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
-      tdtdefaultcell* secure_defaultcell(std::string name);
-      void            unloadprep(laydata::tdtlibdir* );
+      refnamepair    secure_defaultcell(std::string name);
+//      void            unloadprep(laydata::tdtlibdir* );
       void           relink(tdtlibdir*);
       //
       std::string    name()            const {return _name;}
@@ -176,14 +176,15 @@ namespace laydata {
       tdtdesign*        operator ()() {return _TEDDB;}
       void              addlibrary( tdtlibrary* const, word libRef );
       tdtlibrary*       removelibrary( std::string );
-      void              relink();
       tdtlibrary*       getLib(int);
+      void              relink();
 //      tdtlibrary*       getLib(std::string);
       int               getLastLibRefNo();
       bool              getCellNamePair(std::string, refnamepair&, const int libID = TARGETDB_LIB) const;
-      tdtdefaultcell*   adddefaultcell( std::string name );
-      bool              collect_usedlays(std::string, bool, ListOfWords&) const;
       refnamepair       getcellinstance(std::string, int);
+      refnamepair       adddefaultcell( std::string name );
+      tdtdefaultcell*   getCellDef(std::string, const int) const;
+      bool              collect_usedlays(std::string, bool, ListOfWords&) const;
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       void              deleteDB() {delete _TEDDB;}
       void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
