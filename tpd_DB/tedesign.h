@@ -35,11 +35,12 @@ namespace laydata {
    public:
                      tdtlibrary(std::string, real, real, int);
                     ~tdtlibrary();
-      void           read(TEDfile* const);
+      virtual void   read(TEDfile* const);
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
       tdtcell*       checkcell(std::string name);
       void           recreate_hierarchy(const laydata::tdtlibdir* );
+      void           registercellread(std::string, tdtcell*);
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       tdtdefaultcell* secure_defaultcell(std::string name);
       void            unloadprep(laydata::tdtlibdir* );
@@ -56,8 +57,10 @@ namespace laydata {
       friend         void tdtcell::updateHierarchy(tdtdesign*);
       friend         void tdtcell::removePrep(tdtdesign*) const;
       friend         bool tdtcell::addchild(tdtdesign*, tdtdefaultcell*);
+//      friend         refnamepair tdtlibdir::getcellinstance(std::string cellname, int)
+      friend         class tdtlibdir;
       friend         class TEDfile;
-      static void    clearHierTree(word libID);
+      static void    clearHierTree(int);
       static void    clearEntireHierTree();
       static void    initHierTreePtr() {_hiertree = NULL;}
    protected:
@@ -65,7 +68,8 @@ namespace laydata {
       int                  _libID;        // library ID
       real                 _DBU;          // Size of database units in meters
       real                 _UU;           // size of user unit in DBU
-      cellList             _cells;        // licheckValidRefcheckValidRefst of cells in the design
+      cellList             _cells;        // list of cells in the design
+                                          //
       static TDTHierTree*  _hiertree;     // 
    };
 
@@ -73,7 +77,7 @@ namespace laydata {
    public:
                      tdtdesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);
       virtual       ~tdtdesign();
-      virtual void   read(TEDfile* const);
+      void           read(TEDfile* const);
       void           write(TEDfile* const tedfile);
       int            readLibrary(TEDfile* const);
       tdtcell*       addcell(std::string name);
@@ -171,12 +175,12 @@ namespace laydata {
                        ~tdtlibdir();
       tdtdesign*        operator ()() {return _TEDDB;}
       void              addlibrary( tdtlibrary* const, word libRef );
-      bool              closelibrary(std::string);
+      tdtlibrary*       removelibrary( std::string );
       void              relink();
       tdtlibrary*       getLib(int);
 //      tdtlibrary*       getLib(std::string);
       int               getLastLibRefNo();
-      bool              getCellNamePair(std::string, refnamepair&) const;
+      bool              getCellNamePair(std::string, refnamepair&, const int libID = TARGETDB_LIB) const;
       tdtdefaultcell*   adddefaultcell( std::string name );
       bool              collect_usedlays(std::string, bool, ListOfWords&) const;
       refnamepair       getcellinstance(std::string, int);

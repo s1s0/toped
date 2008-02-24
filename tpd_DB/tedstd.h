@@ -160,7 +160,6 @@ namespace laydata {
       void                 putTP(const TP*);
       CTM                  getCTM();
       void                 putCTM(const CTM);
-      void                 registercellread(std::string, tdtcell*);
       void                 registercellwritten(std::string);
       bool                 checkcellwritten(std::string);
       refnamepair          getcellinstance(std::string cellname);
