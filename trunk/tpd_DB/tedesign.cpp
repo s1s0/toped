@@ -247,7 +247,6 @@ laydata::refnamepair laydata::tdtlibrary::secure_defaultcell(std::string name)
    if (_cells.end() == _cells.find(name))
    {
       _cells[name] = DEBUG_NEW tdtdefaultcell(name, UNDEFCELL_LIB, true);
-/*???*/      _hiertree = DEBUG_NEW TDTHierTree(_cells[name], NULL, _hiertree);
    }
    return _cells.find(name);
 }
@@ -313,7 +312,8 @@ void laydata::tdtlibdir::relink()
    {
       _libdirectory[i]->second->relink(this);
    }
-   _TEDDB->relink(this);
+   if (NULL !=_TEDDB) 
+      _TEDDB->relink(this);
 }
 
 bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair& striter, const int libID) const
