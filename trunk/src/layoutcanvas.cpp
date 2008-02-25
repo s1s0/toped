@@ -948,8 +948,10 @@ tui::WinCanvas::WinCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 
 void tui::WinCanvas::OnSize(wxSizeEvent& event)
 {
-   event.Skip();
+   //event.Skip();
    _canvas->SetSize(this->GetClientSize());
+   wxPostEvent(_canvas,event);
+   _canvas->Refresh();
 }
 
 // Code below taken from the internet after nasty troubles with the cursor
