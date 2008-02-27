@@ -62,7 +62,8 @@ namespace tui {
    //=============================================================================
    class LayoutCanvas : public wxGLCanvas  {
    public: 
-                     LayoutCanvas(wxWindow *parent, int* attribList);
+                     LayoutCanvas(wxWindow *parent, const wxPoint&, 
+                                                const wxSize& , int* attribList);
       virtual       ~LayoutCanvas();
       wxImage        snapshot(void);
    protected:
