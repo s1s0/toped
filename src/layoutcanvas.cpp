@@ -180,9 +180,11 @@ END_EVENT_TABLE()
 
 //   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
 
-tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, int* attribList): wxGLCanvas(parent,
-   ID_TPD_CANVAS, wxDefaultPosition, wxDefaultSize, 0,wxT("LayoutCanvas"), attribList){
-
+tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, 
+     const wxSize& size, int* attribList): wxGLCanvas(parent, ID_TPD_CANVAS, pos, 
+     size, 0,wxT("LayoutCanvas"), attribList)
+{
+      
    crossCur = MakeCursor(crosscursor,16, 16);
    //crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
    SetCursor(*crossCur);
@@ -942,8 +944,8 @@ tui::WinCanvas::WinCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 //                         WX_GL_DEPTH_SIZE    , 1,
                          WX_GL_DOUBLEBUFFER     ,
                          GL_NONE };
-   _canvas = DEBUG_NEW LayoutCanvas(this, gl_attrib);
-   _canvas->SetSize(GetClientSize());
+   _canvas = DEBUG_NEW LayoutCanvas(this, pos, size, gl_attrib);
+//   _canvas->SetSize(GetClientSize());
 }
 
 void tui::WinCanvas::OnSize(wxSizeEvent& event)
