@@ -99,7 +99,7 @@ namespace laydata {
          virtual void        PSwrite(PSFile&, const layprop::DrawProperties&,
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
          virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell*, cellList*, const tdtlibdir*);
-         virtual void        relink(tdtlibdir*);
+         virtual bool        relink(tdtlibdir*);
          virtual void        updateHierarchy(tdtdesign*);
          virtual DBbox       overlap() const;
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
@@ -112,7 +112,7 @@ namespace laydata {
          int                  libID() const     {return _libID;}
          layerList&           layers();      //! all layers the cell
       protected:
-         void                 invalidateParents(tdtdesign*);
+         void                 invalidateParents(tdtlibrary*);
          bool                 _orphan;       //! cell doesn't have a parent
          layerList            _layers;       //! all layers the cell
       private:
@@ -165,7 +165,7 @@ namespace laydata {
       void                 transferLayer(word);
       void                 transferLayer(selectList*, word);
       void                 resort();
-      bool                 validate_cells(tdtdesign*);
+      bool                 validate_cells(tdtlibrary*);
       void                 validate_layers();
       unsigned int         numselected();
       bool                 cutpoly_selected(pointlist&, atticList**);
@@ -176,7 +176,7 @@ namespace laydata {
       selectList*          shapesel()        {return &_shapesel;};
       selectList*          copy_selist() const;
       void                 updateHierarchy(tdtdesign*);
-      void                 relink(tdtlibdir*);
+      bool                 relink(tdtlibdir*);
       void                 removePrep(laydata::tdtdesign* ATDB) const;
       void                 report_selected(real) const;
       void                 collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const;

@@ -60,11 +60,14 @@ laydata::tdtlibrary::tdtlibrary(std::string name, real DBU, real UU, int libID) 
 void laydata::tdtlibrary::relink(tdtlibdir* libdir)
 {
    laydata::cellList::iterator wc;
+   bool need_validation = false;
    for (wc = _cells.begin(); wc != _cells.end(); wc++)
    {
       assert(wc->second);
-      wc->second->relink(libdir);
+      need_validation |= wc->second->relink(libdir);
    }
+   if (need_validation)
+      do {} while(validate_cells());
 }
 
 laydata::tdtlibrary::~tdtlibrary()
@@ -249,6 +252,18 @@ laydata::refnamepair laydata::tdtlibrary::secure_defaultcell(std::string name)
       _cells[name] = DEBUG_NEW tdtdefaultcell(name, UNDEFCELL_LIB, true);
    }
    return _cells.find(name);
+}
+
+bool laydata::tdtlibrary::validate_cells()
+{
+   bool invalidParents = false;
+   laydata::cellList::const_iterator wc;
+   for (wc = _cells.begin(); wc != _cells.end(); wc++)
+   {
+      if (NULL != wc->second)
+         invalidParents |= static_cast<tdtcell*>(wc->second)->validate_cells(this);
+   }
+   return invalidParents;
 }
 
 //-----------------------------------------------------------------------------
@@ -967,17 +982,6 @@ DBbox laydata::tdtdesign::activeoverlap() {
 //   if (_target.checkedit())
 //      return _target.edit()->overlap() * _ARTM;
 //   else return DEFAULT_OVL_BOX;
-}
-
-bool laydata::tdtdesign::validate_cells() {
-   bool invalidParents = false;
-   laydata::cellList::const_iterator wc;
-   for (wc = _cells.begin(); wc != _cells.end(); wc++)
-   {
-      if (NULL != wc->second)
-         invalidParents |= static_cast<tdtcell*>(wc->second)->validate_cells(this);
-   }
-   return invalidParents;
 }
 
 void laydata::tdtdesign::check_active() {

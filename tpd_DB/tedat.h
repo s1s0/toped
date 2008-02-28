@@ -272,7 +272,7 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      virtual void         openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
+      virtual void        openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;

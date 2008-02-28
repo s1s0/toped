@@ -64,6 +64,7 @@ namespace laydata {
       static void    clearEntireHierTree();
       static void    initHierTreePtr() {_hiertree = NULL;}
    protected:
+      bool                 validate_cells();
       std::string          _name;         // design/library name
       int                  _libID;        // library ID
       real                 _DBU;          // Size of database units in meters
@@ -148,7 +149,6 @@ namespace laydata {
       bool           modified;
       friend         class TEDfile;
    private:
-      bool           validate_cells();
       tdtdata*       _tmpdata;      // pointer to a data under construction - for view purposes
       editobject     _target;       // edit/view target <- introduced with pedit operations
       time_t         _created;

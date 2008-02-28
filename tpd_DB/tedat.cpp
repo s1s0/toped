@@ -1743,14 +1743,9 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
 
 DBbox laydata::tdtcellref::overlap() const
 {
-//   if (structure())
    return structure()->overlap() * _translation;
-//   else 
-//      return DEFAULT_ZOOM_BOX * _translation;
-//      return DBbox(TP(static_cast<int4b>(rint(_translation.tx())),
-//                         static_cast<int4b>(rint(_translation.ty()))));
-}      
-   
+}
+
 //-----------------------------------------------------------------------------
 // class tdtcellaref
 //-----------------------------------------------------------------------------
