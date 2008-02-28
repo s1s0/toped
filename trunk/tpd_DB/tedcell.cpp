@@ -235,8 +235,9 @@ void laydata::tdtdefaultcell::updateHierarchy(tdtdesign*)
 {
 }
 
-void laydata::tdtdefaultcell::relink(tdtlibdir*)
+bool laydata::tdtdefaultcell::relink(tdtlibdir*)
 {
+   return false;
 }
 
 DBbox laydata::tdtdefaultcell::overlap() const
@@ -258,7 +259,7 @@ void laydata::tdtdefaultcell::collect_usedlays(const tdtlibdir*, bool, ListOfWor
 {
 }
 
-void laydata::tdtdefaultcell::invalidateParents(laydata::tdtdesign* ATDB)
+void laydata::tdtdefaultcell::invalidateParents(laydata::tdtlibrary* ATDB)
 {
    TDTHierTree* hc = ATDB->hiertree()->GetMember(this);
    while(hc)
@@ -1583,7 +1584,7 @@ bool laydata::tdtcell::overlapChanged(DBbox& old_overlap, laydata::tdtdesign* AT
    else return false;
 }
 
-bool laydata::tdtcell::validate_cells(laydata::tdtdesign* ATDB) {
+bool laydata::tdtcell::validate_cells(laydata::tdtlibrary* ATDB) {
    quadTree* wq = (_layers.end() != _layers.find(0)) ? _layers[0] : NULL;
    if (!(wq && wq->invalid())) return false;
    if (wq->full_validate()) {
@@ -1683,24 +1684,24 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB)
    }
 }
 
-void laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
+bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
 {
    // get the cells layer
-   if (_layers.end() == _layers.find(0)) return; // nothing to relink
+   if (_layers.end() == _layers.find(0)) return false; // nothing to relink
+   // if it is not empty get all cell refs/arefs in a list -
    quadTree* refsTree = _layers[0];
-   if (refsTree)
-   {  // if it is not empty get all cell refs/arefs in a list -
-      dataList *refsList = DEBUG_NEW dataList();
-      refsTree->select_all(refsList, laydata::_lmref, false);
-      // relink every single cell ref in the list
-      for (dataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
-      {
-         tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
-         refnamepair newcelldef = libdir->getcellinstance(wcl->cellname(), libID());
-         wcl->set_structure(newcelldef);
-      }
-      refsList->clear(); delete refsList;
+   DBbox old_overlap = overlap();
+   dataList *refsList = DEBUG_NEW dataList();
+   refsTree->select_all(refsList, laydata::_lmref, false);
+   // relink every single cell ref in the list
+   for (dataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
+   {
+      tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
+      refnamepair newcelldef = libdir->getcellinstance(wcl->cellname(), libID());
+      wcl->set_structure(newcelldef);
    }
+   refsList->clear(); delete refsList;
+   return overlapChanged(old_overlap, (*libdir)());
 }
 
 void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const {
