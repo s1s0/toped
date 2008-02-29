@@ -186,6 +186,8 @@ namespace browsers
       wxString          libName;
       wxButton*         _hierButton;
       wxButton*         _flatButton;
+      wxTreeItemId      hroot;
+      wxTreeItemId      froot;
       void              OnCommand(wxCommandEvent&);
       void              OnWXCellARef(wxCommandEvent&);
       void              OnReportUsedLayers(wxCommandEvent&);

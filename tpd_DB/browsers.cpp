@@ -392,7 +392,6 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
 //   _llfont_normal.SetWeight(wxNORMAL);
    SetSizerAndFit(thesizer);
    thesizer->SetSizeHints( this );
-
 }
 
 void browsers::TDTbrowser::initialize() 
@@ -406,8 +405,8 @@ void browsers::TDTbrowser::initialize()
 
 void browsers::TDTbrowser::collectInfo(const wxString libname, const int libID, laydata::TDTHierTree* tdtH) 
 {
-   wxTreeItemId hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),libname);
-   wxTreeItemId froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
+   hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),libname);
+   froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
    if (NULL == tdtH) return;
    laydata::TDTHierTree* root = tdtH->GetFirstRoot(libID);
    wxTreeItemId nroot;
@@ -425,7 +424,7 @@ void browsers::TDTbrowser::collectInfo(const wxString libname, const int libID, 
       root = root->GetNextRoot(libID);
    }
    hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
-   fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
+   fCellBrowser->SortChildren(froot);
 }
 
 void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, int libID, const wxTreeItemId& lroot) 
@@ -440,7 +439,7 @@ void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, int
       {
          fCellBrowser->SetItemImage(lroot,0,wxTreeItemIcon_Normal);
          fCellBrowser->SetItemImage(lroot,1,wxTreeItemIcon_Expanded);
-         nroot = fCellBrowser->AppendItem(fCellBrowser-> GetRootItem(), 
+         nroot = fCellBrowser->AppendItem(froot, 
             wxString(Child->GetItem()->name().c_str(), wxConvUTF8));
          fCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
       }
@@ -474,42 +473,42 @@ void browsers::TDTbrowser::OnCommand(wxCommandEvent& event)
 
 void browsers::TDTbrowser::OnFlatView(wxCommandEvent& event)
 {
+   /*if (hCellBrowser->IsExpanded(hroot))
+	   {
+			   fCellBrowser->Expand(froot);
+	   }*/
    hCellBrowser->Hide();
    fCellBrowser->Show();
    (this->GetSizer())->Layout();
-	wxTreeItemId itemID = hCellBrowser->GetRootItem();
-	if (itemID)
-	{
-		if (hCellBrowser->IsExpanded(itemID))
-		{
-			fCellBrowser->Expand(fCellBrowser->GetRootItem());
-		}
-	}
    //Set normal font for  _hierButton 
    //Set bold font for _flatButton;
-   wxFont font = _flatButton->GetFont();
+   wxFont font = _hierButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_NORMAL);
    _hierButton->SetFont(font);
+   font = _flatButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
    _flatButton->SetFont(font);
 }
 
 void browsers::TDTbrowser::OnHierView(wxCommandEvent& event)
 {
-   fCellBrowser->Hide();
-
-   hCellBrowser->Show();
-   (this->GetSizer())->Layout();
-   /*if (fCellBrowser->IsExpanded(fCellBrowser->GetRootItem()))
+   /*if (fCellBrowser->IsExpanded(froot))
    {
       hCellBrowser->Expand(hCellBrowser->activeStructure());
    }*/
 
+   fCellBrowser->Hide();
+   hCellBrowser->Show();
+   (this->GetSizer())->Layout();
+
    //Set bold  font for  _hierButton 
    //Set normal  font for _flatButton;
    wxFont font = _hierButton->GetFont();
-   _flatButton->SetFont(font);
    font.SetWeight(wxFONTWEIGHT_BOLD);
    _hierButton->SetFont(font);
+   font = _flatButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_NORMAL);
+   _flatButton->SetFont(font);
 }
 
 /*void browsers::TDTbrowser::OnWXOpenCell(wxCommandEvent& WXUNUSED(event)) {
