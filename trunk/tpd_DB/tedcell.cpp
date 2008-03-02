@@ -1694,11 +1694,19 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
    dataList *refsList = DEBUG_NEW dataList();
    refsTree->select_all(refsList, laydata::_lmref, false);
    // relink every single cell ref in the list
-   for (dataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
+   dataList::iterator CC = refsList->begin();
+   while (CC != refsList->end())
    {
       tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
       refnamepair newcelldef = libdir->getcellinstance(wcl->cellname(), libID());
-      wcl->set_structure(newcelldef);
+      if (newcelldef->second != wcl->structure())
+      {
+         CTM ori = wcl->translation();
+         refsTree->delete_this(wcl);
+         addcellref((*libdir)(), newcelldef, ori);
+         CC = refsList->erase(CC);
+      }
+      else CC++;
    }
    refsList->clear(); delete refsList;
    return overlapChanged(old_overlap, (*libdir)());

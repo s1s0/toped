@@ -265,9 +265,7 @@ namespace laydata {
       void                 transfer(const CTM& trans) {_translation *= trans;};
       tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdtcellref(
                                                _structure,_translation*trans);};
-      void                 set_structure(refnamepair&);
 //       tdtcellref*          getshapeover(TP);
-
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;

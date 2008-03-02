@@ -1530,34 +1530,6 @@ laydata::tdtcellref::tdtcellref(TEDfile* const tedfile)
    _translation = tedfile->getCTM();
 }
 
-void laydata::tdtcellref::set_structure(refnamepair& newstructure)
-{
-   _structure = newstructure;
-}
-
-//      void laydata::tdtcellref::relink(const laydata::tdtlibdir* libdir)
-// bool laydata::tdtcellref::ref_visible(ctmstack& transtack, const layprop::DrawProperties& drawprop) const {
-//    if (!structure()) return false;
-//    DBbox obox = structure()->overlap();
-//    DBbox areal = obox * _translation * transtack.top();
-//    areal.normalize();
-//    // check that the cell (or part of it) is in the visual window
-//    DBbox clip = drawprop.clipRegion();
-//    if (clip.cliparea(areal) == 0) return false;
-//    // check that the cell area is bigger that the MIN_VISUAL_AREA
-//    DBbox minareal = areal * drawprop.ScrCTM();
-//    if (minareal.area() < MIN_VISUAL_AREA) return false;
-//    // If we get here - means that the cell (or part of it) is visible
-//    CTM newtrans = _translation * transtack.top();
-//    // draw the cell mark ...
-//    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
-//    // ... and the overlapping box
-//    draw_overlapping_box(obox, newtrans , 0xf18f);
-//    // push the new translation in the stack
-//    transtack.push(newtrans);
-//    return true;
-// }
-
 void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // calculate the current translation matrix
