@@ -688,14 +688,24 @@ void tui::TopedFrame::initView()
    //----------------------------------------------------------------------------
    // the openGL window - the canvas
    //---------------------------------------------------------------------------- 
-   _canvas = DEBUG_NEW WinCanvas(this, ID_WIN_CANVAS,
-                               wxDefaultPosition, wxSize(1000,1000),
-                               wxAUI_NB_DEFAULT_STYLE|wxDOUBLE_BORDER|wxSW_3D | wxCLIP_CHILDREN);
+   int gl_attrib[20] = { WX_GL_RGBA             ,
+                         WX_GL_MIN_RED          , 2,
+                         WX_GL_MIN_GREEN        , 2,
+                         WX_GL_MIN_BLUE         , 2,
+                         WX_GL_MIN_ALPHA        , 2,
+                         WX_GL_MIN_ACCUM_RED    , 2,
+                         WX_GL_MIN_ACCUM_GREEN  , 2,
+                         WX_GL_MIN_ACCUM_BLUE   , 2,
+                         WX_GL_MIN_ACCUM_ALPHA  , 2,
+//                         WX_GL_DEPTH_SIZE    , 1,
+                         WX_GL_DOUBLEBUFFER     ,
+                         GL_NONE };
+   _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, gl_attrib);
 
    //----------------------------------------------------------------------------
    // The command line
    //----------------------------------------------------------------------------
-   _cmdline = DEBUG_NEW console::ted_cmd(this, _canvas->canvas());
+   _cmdline = DEBUG_NEW console::ted_cmd(this, _canvas);
    _cmdline->SetSize(wxSize(wxSize(1000, 30)));
 // _cmdline->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
 
@@ -734,7 +744,7 @@ void tui::TopedFrame::initView()
                                     CloseButton(false).
                                     CaptionVisible(false)
                       );
-
+   Show();
    _winManager.Update();
 }
 
@@ -985,7 +995,7 @@ void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent&)
 {
-   wxImage image = _canvas->canvas()->snapshot();
+   wxImage image = _canvas->snapshot();
 
 }
 
@@ -1565,43 +1575,43 @@ void  tui::TopedFrame::OnMouseAccel(wxCommandEvent& evt) {
 void tui::TopedFrame::OnzoomIn(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_IN);
-   wxPostEvent(_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnzoomOut(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_OUT);
-   wxPostEvent(_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnzoomEmpty(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
-   wxPostEvent(_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanLeft(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_LEFT);
-   wxPostEvent(_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanRight(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_RIGHT);
-   wxPostEvent(_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanUp(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_UP);
-   wxPostEvent(_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanDown(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_DOWN);
-   wxPostEvent(_canvas->canvas(), eventZOOM);
+   wxPostEvent(_canvas, eventZOOM);
 }
 
 bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
