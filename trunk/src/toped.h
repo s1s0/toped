@@ -92,7 +92,7 @@ namespace tui {
 //      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
       console::ted_log*       logwin()   const {return _cmdlog;}
-      LayoutCanvas*           view()     const {return _canvas->canvas();}
+      LayoutCanvas*           view()     const {return _canvas;}
       console::ted_cmd*       cmdline()  const {return _cmdline;}
       browsers::browserTAB*   browsers() const {return _browsers;}
       console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
@@ -112,7 +112,7 @@ namespace tui {
       TopedStatus*            _toped_status;
       browsers::browserTAB*   _browsers;  // TDT/GDS/layer browsers
       ResourceCenter*         _resourceCenter;
-      WinCanvas*              _canvas;
+      LayoutCanvas*           _canvas;
       wxToolBar*              _status;
       wxAuiManager            _winManager;
       //Menu stuff

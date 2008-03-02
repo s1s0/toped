@@ -128,22 +128,6 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
-   //=============================================================================
-   class WinCanvas:public wxWindow
-   {
-   public:
-      WinCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition,
-         const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxPanelNameStr);
-
-      void              OnSize(wxSizeEvent& event);
-      LayoutCanvas*     canvas()   const {return _canvas;}
-   private:
-      LayoutCanvas*     _canvas;
-      wxWindow*         _status;
-      wxBoxSizer*       _sizer;
-      DECLARE_EVENT_TABLE();
-   };
-
    wxCursor* MakeCursor(const char * pXpm[36],  int HotX, int HotY );
 }
 #endif
