@@ -189,6 +189,7 @@ namespace laydata {
       void              deleteDB() {delete _TEDDB;}
       void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
       unsigned int      numselected()     const {if (NULL == _TEDDB) return 0; else return _TEDDB->numselected();}
+      const cellList&   getUndefinedCells() {return _libdirectory[UNDEFCELL_LIB]->second->cells();}
    private:
       Catalog           _libdirectory;
       tdtdesign*        _TEDDB;        // toped data base
