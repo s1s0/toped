@@ -758,14 +758,18 @@ bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter
 laydata::LibCellLists* DataCenter::getCells(int libID)
 {
    laydata::LibCellLists* all_cells = DEBUG_NEW laydata::LibCellLists();
-   if (libID != ALL_LIB)
-      all_cells->push_back(&(_TEDLIB.getLib(libID)->cells()));
-   else
+   if (libID == ALL_LIB)
    {
       all_cells->push_back(&(_TEDLIB()->cells()));
       for (int i = 1; i < _TEDLIB.getLastLibRefNo(); i++)
          all_cells->push_back(&(_TEDLIB.getLib(i)->cells()));
    }
+   else if (libID == TARGETDB_LIB)
+      all_cells->push_back(&(_TEDLIB()->cells()));
+   else if (libID == UNDEFCELL_LIB)
+      all_cells->push_back(&(_TEDLIB.getUndefinedCells()));
+   else
+      all_cells->push_back(&(_TEDLIB.getLib(libID)->cells()));
    return all_cells;
 }
 
