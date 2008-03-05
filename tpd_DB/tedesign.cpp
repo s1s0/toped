@@ -331,7 +331,11 @@ void laydata::tdtlibdir::relink()
       _TEDDB->relink(this);
 }
 
-bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair& striter, const int libID) const
+/*! Searches the library directory for a cell \a name. Returns true and updates \a striter if
+the cell is found. Returns false otherwise. The method never searches in the UNDEFCELL_LIB and
+TARGETDB_LIB. It starts searching from the library after \a libID .
+*/
+bool laydata::tdtlibdir::getLibCellRNP(std::string name, laydata::refnamepair& striter, const int libID) const
 {
    // start searching form the first library after the current 
    word first2search = (TARGETDB_LIB == libID) ? 1 : libID + 1;
@@ -346,7 +350,12 @@ bool laydata::tdtlibdir::getCellNamePair(std::string name, laydata::refnamepair&
    return false;
 }
 
-laydata::tdtdefaultcell* laydata::tdtlibdir::getCellDef(std::string name, const int libID) const
+/*! Searches the library directory for a cell \a name. Returns the cell definition if
+the cell is found. Returns NULL otherwise. The method never searches in the TARGETDB_LIB.
+It starts searching from the library after \a libID . If the cell is not found in the
+libraries it also checks the UNDEFCELL_LIB
+ */
+laydata::tdtdefaultcell* laydata::tdtlibdir::getLibCellDef(std::string name, const int libID) const
 {
    // start searching form the first library after the current 
    word first2search = (TARGETDB_LIB == libID) ? 1 : libID + 1;
@@ -383,7 +392,7 @@ bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, 
    else
    {
       laydata::refnamepair striter;
-      if (getCellNamePair(cellname, striter))
+      if (getLibCellRNP(cellname, striter))
       {
          static_cast<laydata::tdtcell*>(striter->second)->collect_usedlays(this, recursive, laylist);
          return true;
@@ -392,8 +401,12 @@ bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, 
    }
 }
 
-
-laydata::refnamepair laydata::tdtlibdir::getcellinstance(std::string cellname, int libID)
+/*! Used to link the cell references with their definitions. This function is called to relink
+databases (libraries) already loaded in memory. A function with completely the same functionality
+and name is defined in the TEDfile. That one is used to link cell references during tdt parsing
+phase
+*/
+laydata::refnamepair laydata::tdtlibdir::linkcellref(std::string cellname, int libID)
 {
    assert(UNDEFCELL_LIB != libID);
    laydata::tdtlibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;
@@ -402,7 +415,7 @@ laydata::refnamepair laydata::tdtlibdir::getcellinstance(std::string cellname, i
    if (curlib->_cells.end() == striter)
    {
       // search the cell in the rest of the libraries because it's not in the current
-      if (!getCellNamePair(cellname, striter, libID))
+      if (!getLibCellRNP(cellname, striter, libID))
       {
          // not found! make a default cell
          striter = adddefaultcell(cellname);
@@ -972,7 +985,8 @@ laydata::atticList* laydata::tdtdesign::changeref(shapeList* cells4u, std::strin
    return shapeUngr;
 }
 
-unsigned int laydata::tdtdesign::numselected() {
+unsigned int laydata::tdtdesign::numselected() const
+{
    if (_target.checkedit()) return _target.edit()->numselected();
    else return 0;
 }

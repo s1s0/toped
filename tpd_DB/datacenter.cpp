@@ -495,10 +495,6 @@ void DataCenter::unlockGDS()
    GDSLock.Unlock();
 }
 
-unsigned int DataCenter::numselected() const {
-   return _TEDLIB.numselected();
-}
-
 void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
                             int4b stepX, int4b stepY, word cols, word rows)
 {
@@ -752,7 +748,7 @@ bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter
    }
    unlockDB();
    // search the cell in the libraries because it's not in the DB
-   return _TEDLIB.getCellNamePair(name, striter);
+   return _TEDLIB.getLibCellRNP(name, striter);
 }
 
 laydata::LibCellLists* DataCenter::getCells(int libID)

@@ -184,8 +184,12 @@ int tellstdfunc::stdOPENCELL::execute()
       else
       {
 /*-!-*/  DATC->unlockDB();
-         std::string news = "cell \"";
-         news += nm; news += "\" is not defined";
+         std::string news = "cell \"";news += nm;
+         laydata::refnamepair striter;
+         if (DATC->TEDLIB()->getLibCellRNP(nm, striter))
+            news += "\" is a library cell and can't be edited";
+         else
+            news += "\" is not defined";
          tell_log(console::MT_ERROR,news);
          if (selected) delete selected;
       }

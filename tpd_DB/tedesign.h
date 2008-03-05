@@ -34,7 +34,7 @@ namespace laydata {
    class tdtlibrary {
    public:
                      tdtlibrary(std::string, real, real, int);
-                    ~tdtlibrary();
+      virtual      ~tdtlibrary();
       virtual void   read(TEDfile* const);
       void           GDSwrite(GDSin::GDSFile&, tdtcell*, bool);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
@@ -57,7 +57,6 @@ namespace laydata {
       friend         void tdtcell::updateHierarchy(tdtdesign*);
       friend         void tdtcell::removePrep(tdtdesign*) const;
       friend         bool tdtcell::addchild(tdtdesign*, tdtdefaultcell*);
-//      friend         refnamepair tdtlibdir::getcellinstance(std::string cellname, int)
       friend         class tdtlibdir;
       friend         class TEDfile;
       static void    clearHierTree(int);
@@ -119,7 +118,7 @@ namespace laydata {
       bool           cutpoly(pointlist& pl, atticList** dasao);
       bool           merge(atticList** dasao) {return _target.edit()->merge_selected(dasao);}
       bool           stretch(int bfactor, atticList** dasao) {return _target.edit()->stretch_selected(bfactor, dasao);}
-      unsigned int   numselected();
+      unsigned int   numselected() const;
       DBbox          activeoverlap();
       void           transferLayer(word dst);
       void           transferLayer(laydata::selectList* slst, word dst);
@@ -134,7 +133,6 @@ namespace laydata {
       void           unselect_all()    const {_target.edit()->unselect_all(false);};
       selectList*    shapesel()        const {return _target.edit()->shapesel();};
       selectList*    copy_selist()     const {return _target.edit()->copy_selist();};
-      unsigned int   numselected()     const {return _target.edit()->numselected();};
       void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
       void           report_selected(real DBscale) const { _target.edit()->report_selected(DBscale);};
 //      refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
@@ -157,15 +155,15 @@ namespace laydata {
    };
 
    /*! Library directory or Directory of libraries.
-   This object contains pointers to all loaded libraries. Current database is the 
-   only exception. Instead there is one "hidden" library and this is the library
-   of undefined cells. It is always defined and always located in the 0 slot of
-   the Catalog.
-   Here is the library ID code:
-   -1 -> current database
-    0 -> library of undefened cells
-    1 -> first loaded library
-    etc. 
+   This object contains pointers to all loaded libraries. Current database is a 
+   special case. The other special case is the library of undefined cells. It is
+   always defined and always located in the 0 slot of the Catalog. Undefined cell
+   library is not accessible outside of the scope of this class \n
+   Current database is accessible using the class functor.
+   The class is using folowing library ID definitions
+      ALL_LIB
+      TARGETDB_LIB
+      UNDEFCELL_LIB
    */
    class tdtlibdir {
    public:
@@ -180,15 +178,14 @@ namespace laydata {
       void              relink();
 //      tdtlibrary*       getLib(std::string);
       int               getLastLibRefNo();
-      bool              getCellNamePair(std::string, refnamepair&, const int libID = TARGETDB_LIB) const;
-      refnamepair       getcellinstance(std::string, int);
+      bool              getLibCellRNP(std::string, refnamepair&, const int libID = TARGETDB_LIB) const;
+      tdtdefaultcell*   getLibCellDef(std::string, const int libID = TARGETDB_LIB) const;
+      refnamepair       linkcellref(std::string, int);
       refnamepair       adddefaultcell( std::string name );
-      tdtdefaultcell*   getCellDef(std::string, const int) const;
       bool              collect_usedlays(std::string, bool, ListOfWords&) const;
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       void              deleteDB() {delete _TEDDB;}
       void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
-      unsigned int      numselected()     const {if (NULL == _TEDDB) return 0; else return _TEDDB->numselected();}
       const cellList&   getUndefinedCells() {return _libdirectory[UNDEFCELL_LIB]->second->cells();}
    private:
       Catalog           _libdirectory;

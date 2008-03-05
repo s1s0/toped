@@ -601,7 +601,7 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
          (*celldefs)[*wn]->hierout(Htree, this, celldefs, libdir);
       else 
       {
-         laydata::tdtdefaultcell* celldef = libdir->getCellDef(*wn, libID());
+         laydata::tdtdefaultcell* celldef = libdir->getLibCellDef(*wn, libID());
          if (NULL != celldef)
             celldef->hierout(Htree, this, celldefs, libdir);
          else
@@ -1698,7 +1698,7 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
    while (CC != refsList->end())
    {
       tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
-      refnamepair newcelldef = libdir->getcellinstance(wcl->cellname(), libID());
+      refnamepair newcelldef = libdir->linkcellref(wcl->cellname(), libID());
       if (newcelldef->second != wcl->structure())
       {
          CTM ori = wcl->translation();

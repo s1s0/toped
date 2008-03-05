@@ -1525,7 +1525,7 @@ laydata::tdtcellref::tdtcellref(TEDfile* const tedfile)
    std::string cellrefname = tedfile->getString();
    // get the cell definition pointer and register the cellrefname as a child 
    // to the currently parsed cell
-   _structure = tedfile->getcellinstance(cellrefname);
+   _structure = tedfile->linkcellref(cellrefname);
    // get the translation   
    _translation = tedfile->getCTM();
 }
