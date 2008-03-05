@@ -162,7 +162,7 @@ namespace laydata {
       void                 putCTM(const CTM);
       void                 registercellwritten(std::string);
       bool                 checkcellwritten(std::string);
-      refnamepair          getcellinstance(std::string cellname);
+      refnamepair          linkcellref(std::string cellname);
       void                 get_cellchildnames(nameList*);
       bool                 status() const  {return _status;};
       word                 numread() const {return _numread;};

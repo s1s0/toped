@@ -73,7 +73,6 @@ public:
    bool                       getCellNamePair(std::string name, laydata::refnamepair& striter);
    void                       unlockDB();
    void                       unlockGDS();
-   unsigned int               numselected() const;
    void                       mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
@@ -83,6 +82,7 @@ public:
    void                       openGL_draw(const CTM&);
    void                       tmp_draw(const CTM&, TP, TP);
    const laydata::cellList&   cells();
+   unsigned int               numselected()           {return _TEDLIB()->numselected();}
    void                       saveProperties(std::string fname)
                                                       {_properties.saveProperties(fname);}
    void                       defaultlayer(word layno){_curlay = layno;}

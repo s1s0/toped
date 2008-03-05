@@ -335,7 +335,7 @@ bool laydata::TEDfile::checkcellwritten(std::string cellname) {
 //   return (_childnames.end() != _childnames.find(cellname));
 }   
 
-laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname) 
+laydata::refnamepair laydata::TEDfile::linkcellref(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.push_back(cellname);
@@ -346,7 +346,7 @@ laydata::refnamepair laydata::TEDfile::getcellinstance(std::string cellname)
    //   if (_design->checkcell(name))
    //   {
       // search the cell in the libraries because it's not in the DB
-      if (!_TEDLIB->getCellNamePair(cellname, striter))
+      if (!_TEDLIB->getLibCellRNP(cellname, striter))
       {
          // Attention! In this case we've parsed a cell reference, before
          // the cell is defined. This might means:
