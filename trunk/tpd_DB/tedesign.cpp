@@ -64,7 +64,7 @@ void laydata::tdtlibrary::relink(tdtlibdir* libdir)
    for (wc = _cells.begin(); wc != _cells.end(); wc++)
    {
       assert(wc->second);
-      need_validation |= wc->second->relink(libdir);
+      need_validation |= wc->second->relink(libdir, _hiertree);
    }
    if (need_validation)
       do {} while(validate_cells());
@@ -413,7 +413,7 @@ databases (libraries) already loaded in memory. A function with completely the s
 and name is defined in the TEDfile. That one is used to link cell references during tdt parsing
 phase
 */
-laydata::refnamepair laydata::tdtlibdir::linkcellref(std::string cellname, int libID)
+laydata::refnamepair laydata::tdtlibdir::linkcellref(std::string cellname, int libID, TDTHierTree*& Htree)
 {
    assert(UNDEFCELL_LIB != libID);
    laydata::tdtlibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;
@@ -426,6 +426,7 @@ laydata::refnamepair laydata::tdtlibdir::linkcellref(std::string cellname, int l
       {
          // not found! make a default cell
          striter = adddefaultcell(cellname);
+         Htree = DEBUG_NEW TDTHierTree(striter->second, NULL, Htree);
       }
    }
    // Mark that the cell definition is referenced, i.e. it is not the top 
