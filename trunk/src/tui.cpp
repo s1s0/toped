@@ -180,7 +180,8 @@ tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &ti
 
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
- 
+
+//==============================================================================
 tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
@@ -226,7 +227,7 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
 
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
- 
+
 tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
@@ -355,6 +356,39 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 
+
+//==============================================================================
+tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+                              wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
+                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+{
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   laydata::tdtlibdir* LDR = DATC->TEDLIB();
+
+   for (int curlib = 1; curlib < LDR->getLastLibRefNo(); curlib++)
+   {
+      _nameList->Append(wxString(LDR->getLibName(curlib).c_str(), wxConvUTF8));
+   }
+
+   DATC->unlockDB();
+   if (init != wxT("")) _nameList->SetStringSelection(init,true);
+   // The window layout
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   // Buttons
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add(0,0,1); //
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   // TOP sizer
+   topsizer->Add(_nameList, 1, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+
+   SetSizer( topsizer );      // use the sizer for layout
+
+   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+}
+
+//==============================================================================
 tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {

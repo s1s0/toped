@@ -321,6 +321,13 @@ laydata::tdtlibrary* laydata::tdtlibdir::getLib(int libID)
    return _libdirectory[libID]->second;
 }
 
+std::string laydata::tdtlibdir::getLibName(int libID)
+{
+   assert(libID); // make sure that nobody asks for the default library
+   assert(libID <= (int)_libdirectory.size());
+   return _libdirectory[libID]->first;
+}
+
 void laydata::tdtlibdir::relink()
 {
    for (int i = _libdirectory.size() - 2; i > 0 ; i--)

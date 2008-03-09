@@ -149,6 +149,13 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
+   class getLibList : public wxDialog {
+      public:
+         getLibList(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, wxString init);
+         wxString get_selected() const {return _nameList->GetStringSelection();};
+         wxListBox*  _nameList;
+   };
+
    class getGDSimport : public wxDialog {
    public:
                      getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title,

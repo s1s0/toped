@@ -875,26 +875,19 @@ void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
 {
-/*   SetStatusText(wxT("Loading library..."));
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
-                         tpdfOPEN);
-   if (wxID_OK == dlg2.ShowModal())
-   {
-      wxString filename = dlg2.GetFilename();
-      wxString ost;
-      ost << wxT("loadlib(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
-      _cmdline->parseCommand(ost);
-      wxString ost1;
-      SetTitle(dlg2.GetFilename());
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getLibList* dlg = NULL;
+   try {
+      dlg = DEBUG_NEW tui::getLibList(this, -1, wxT("Close Library"), pos, wxT(""));
    }
-   else SetStatusText(wxT("Loading aborted"));*/
-   tell_log(console::MT_ERROR,"unloadlib() function under development!");
-
-/*   wxString filename = wxT("isclib3U");
-   wxString ost;
-   ost << wxT("unloadlib(\"") << filename << wxT("\");");
-   _cmdline->parseCommand(ost);*/
+   catch (EXPTN) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK ) {
+      wxString ost;
+      ost << wxT("unloadlib(\"") << dlg->get_selected() << wxT("\");");
+      _cmdline->parseCommand(ost);
+   }
+   delete dlg;
 }
 
 void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
