@@ -175,6 +175,7 @@ namespace laydata {
       void              addlibrary( tdtlibrary* const, word libRef );
       tdtlibrary*       removelibrary( std::string );
       tdtlibrary*       getLib(int);
+      std::string       getLibName(int);
       void              relink();
 //      tdtlibrary*       getLib(std::string);
       int               getLastLibRefNo();

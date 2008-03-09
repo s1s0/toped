@@ -313,7 +313,8 @@ bool DataCenter::TDTunloadlib(std::string libname)
       // Relink everything
       _TEDLIB.relink();
       // get the new hierarchy
-      _TEDLIB()->recreate_hierarchy(&_TEDLIB);
+      if (NULL != _TEDLIB())
+         _TEDLIB()->recreate_hierarchy(&_TEDLIB);
       // after all above - remove the library (TODO! undo)
       delete tberased;
       return true;
