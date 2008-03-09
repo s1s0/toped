@@ -181,7 +181,7 @@ namespace laydata {
       int               getLastLibRefNo();
       bool              getLibCellRNP(std::string, refnamepair&, const int libID = TARGETDB_LIB) const;
       tdtdefaultcell*   getLibCellDef(std::string, const int libID = TARGETDB_LIB) const;
-      refnamepair       linkcellref(std::string, int);
+      refnamepair       linkcellref(std::string, int, TDTHierTree*&);
       refnamepair       adddefaultcell( std::string name );
       bool              collect_usedlays(std::string, bool, ListOfWords&) const;
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};

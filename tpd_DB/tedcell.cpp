@@ -235,7 +235,7 @@ void laydata::tdtdefaultcell::updateHierarchy(tdtdesign*)
 {
 }
 
-bool laydata::tdtdefaultcell::relink(tdtlibdir*)
+bool laydata::tdtdefaultcell::relink(tdtlibdir*, TDTHierTree*&)
 {
    return false;
 }
@@ -1684,7 +1684,7 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB)
    }
 }
 
-bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
+bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertree)
 {
    // get the cells layer
    if (_layers.end() == _layers.find(0)) return false; // nothing to relink
@@ -1698,7 +1698,7 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
    while (CC != refsList->end())
    {
       tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
-      refnamepair newcelldef = libdir->linkcellref(wcl->cellname(), libID());
+      refnamepair newcelldef = libdir->linkcellref(wcl->cellname(), libID(), _hiertree);
       if (newcelldef->second != wcl->structure())
       {
          CTM ori = wcl->translation();
