@@ -435,14 +435,14 @@ void browsers::TDTbrowser::collectChildren(const laydata::TDTHierTree *root, int
    while (Child) 
    {
       //Flat
-      if (!fCellBrowser->findItem(wxString(Child->GetItem()->name().c_str(), wxConvUTF8), temp, fCellBrowser-> GetRootItem()))
+      /*if (!fCellBrowser->findItem(wxString(Child->GetItem()->name().c_str(), wxConvUTF8), temp, fCellBrowser-> GetRootItem()))
       {
          fCellBrowser->SetItemImage(lroot,0,wxTreeItemIcon_Normal);
          fCellBrowser->SetItemImage(lroot,1,wxTreeItemIcon_Expanded);
          nroot = fCellBrowser->AppendItem(froot, 
             wxString(Child->GetItem()->name().c_str(), wxConvUTF8));
          fCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
-      }
+      }*/
       //Hier
       hCellBrowser->SetItemImage(lroot,0,wxTreeItemIcon_Normal);
       hCellBrowser->SetItemImage(lroot,1,wxTreeItemIcon_Expanded);
@@ -477,6 +477,62 @@ void browsers::TDTbrowser::OnFlatView(wxCommandEvent& event)
 	   {
 			   fCellBrowser->Expand(froot);
 	   }*/
+   wxTreeItemId temp, nroot;
+   fCellBrowser->DeleteAllItems();
+   fCellBrowser->AddRoot(wxT("hidden_wxroot"));
+//   froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
+   laydata::cellList::const_iterator it;
+ 
+   try
+   {
+      DATC->lockDB(false);
+   }
+   catch (EXPTNactive_DB) {return;}
+
+      for(it=DATC->cells().begin(); it!= DATC->cells().end(); it++)
+      {
+         wxString cellName = wxString( (*it).first.c_str(),  wxConvUTF8);
+
+         if (!fCellBrowser->findItem(cellName, temp, fCellBrowser-> GetRootItem()))
+         {
+            nroot = fCellBrowser->AppendItem(fCellBrowser-> GetRootItem(), cellName);
+            fCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+         }
+      }
+    
+  
+      const laydata::cellList& cellList= DATC->TEDLIB()->getUndefinedCells();
+      for(it=cellList.begin(); it!= cellList.end(); it++)
+      {
+         wxString cellName = wxString( (*it).first.c_str(),  wxConvUTF8);
+
+         if (!fCellBrowser->findItem(cellName, temp, fCellBrowser-> GetRootItem()))
+         {
+            nroot = fCellBrowser->AppendItem(fCellBrowser-> GetRootItem(), cellName);
+            fCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+         }
+      }
+
+      int no = DATC->TEDLIB()->getLastLibRefNo();
+      for(int libID=1; libID< no; libID++)
+      {
+         const laydata::LibCellLists* libCellList= DATC->getCells(libID);
+         for(it=cellList.begin(); it!= cellList.end(); it++)
+         {
+            wxString cellName = wxString( (*it).first.c_str(),  wxConvUTF8);
+
+            if (!fCellBrowser->findItem(cellName, temp, fCellBrowser-> GetRootItem()))
+            {
+               nroot = fCellBrowser->AppendItem(fCellBrowser-> GetRootItem(), cellName);
+               fCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+            }
+      }
+
+      }
+   DATC->unlockDB();
+
+   fCellBrowser->SortChildren(froot);
+
    hCellBrowser->Hide();
    fCellBrowser->Show();
    (this->GetSizer())->Layout();
@@ -492,15 +548,68 @@ void browsers::TDTbrowser::OnFlatView(wxCommandEvent& event)
 
 void browsers::TDTbrowser::OnHierView(wxCommandEvent& event)
 {
-   /*if (fCellBrowser->IsExpanded(froot))
+   hCellBrowser->DeleteAllItems();
+   hCellBrowser->AddRoot(wxT("hidden_wxroot"));
+   laydata::tdtdesign* design;
+   try
    {
-      hCellBrowser->Expand(hCellBrowser->activeStructure());
-   }*/
+      design = DATC->lockDB(false);
+   }
+   catch (EXPTNactive_DB) {return;}
+   hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
+   laydata::TDTHierTree *tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
+
+   if (NULL == tdtH) return;
+
+   wxTreeItemId nroot, nrootUndef;
+   while (tdtH){
+      std::string str = tdtH->GetItem()->name();
+      nroot = hCellBrowser->AppendItem(hroot, 
+         wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
+      hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+
+      collectChildren(tdtH, ALL_LIB, nroot);
+      tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
+   }
+
+   int no = DATC->TEDLIB()->getLastLibRefNo();
+   for(int libID=1; libID< no; libID++)
+   {
+      tdtH = design->hiertree()->GetFirstRoot(libID);
+      while (tdtH)
+      {
+         std::string str = tdtH->GetItem()->name();
+         nroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), 
+              wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
+         hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+
+         collectChildren(tdtH, libID, nroot);
+         tdtH = tdtH->GetNextRoot(libID);
+      }
+   }
+   
+   const laydata::cellList& cellList= DATC->TEDLIB()->getUndefinedCells();
+   if(cellList.size()!=0)
+   {
+      nrootUndef = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), 
+         wxString("Undefined Cells", wxConvUTF8));
+      hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+
+      for(laydata::cellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
+      {
+         wxString cellName = wxString( (*it).first.c_str(),  wxConvUTF8);
+         nroot = hCellBrowser->AppendItem(nrootUndef, cellName);
+         hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+
+      }
+   }
+   hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
+
 
    fCellBrowser->Hide();
    hCellBrowser->Show();
    (this->GetSizer())->Layout();
-
+   
    //Set bold  font for  _hierButton 
    //Set normal  font for _flatButton;
    wxFont font = _hierButton->GetFont();
