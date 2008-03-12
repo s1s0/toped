@@ -559,10 +559,15 @@ void browsers::TDTbrowser::OnHierView(wxCommandEvent& event)
    hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
    laydata::TDTHierTree *tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
 
-   if (NULL == tdtH) return;
+   if (NULL == tdtH) 
+   {
+      DATC->unlockDB();
+      return;
+   }
 
    wxTreeItemId nroot, nrootUndef;
-   while (tdtH){
+   while (tdtH)
+   {
       std::string str = tdtH->GetItem()->name();
       nroot = hCellBrowser->AppendItem(hroot, 
          wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
@@ -587,7 +592,7 @@ void browsers::TDTbrowser::OnHierView(wxCommandEvent& event)
          tdtH = tdtH->GetNextRoot(libID);
       }
    }
-   
+   DATC->unlockDB();
    const laydata::cellList& cellList= DATC->TEDLIB()->getUndefinedCells();
    if(cellList.size()!=0)
    {
