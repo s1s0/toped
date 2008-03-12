@@ -173,6 +173,7 @@ namespace browsers
       virtual           ~TDTbrowser();
       void              collectInfo(const wxString, const int, laydata::TDTHierTree*);
       void              initialize();
+      void              update();
       wxString          selectedCellname() const;
    protected:
       void              collectChildren(const laydata::TDTHierTree *, int , 
@@ -186,8 +187,11 @@ namespace browsers
       wxString          libName;
       wxButton*         _hierButton;
       wxButton*         _flatButton;
+      enum {hier, flat} _status;
       wxTreeItemId      hroot;
       wxTreeItemId      froot;
+      void              updateFlat();
+      void              updateHier();
       void              OnCommand(wxCommandEvent&);
       void              OnWXCellARef(wxCommandEvent&);
       void              OnReportUsedLayers(wxCommandEvent&);
