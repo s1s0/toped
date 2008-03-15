@@ -197,7 +197,6 @@ namespace browsers
       void              OnReportUsedLayers(wxCommandEvent&);
       void              OnTELLopencell(wxString);
       void              OnTELLhighlightcell(wxString);
-      void              OnTELLaddcell(wxString, wxString, int);
       void              OnTELLremovecell(wxString, wxString, bool);
       void              OnHierView(wxCommandEvent&);
       void              OnFlatView(wxCommandEvent&);
@@ -330,8 +329,7 @@ namespace browsers
    void clearGDStab();
    void celltree_open(const std::string);
    void celltree_highlight(const std::string);
-   void treeAddMember(const char*, const char*, int action = 0);
-   void treeRemoveMember(const char*, const char*, bool orphan);
+   void update();
    void parseCommand(const wxString);
 }
 

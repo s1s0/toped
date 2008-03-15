@@ -491,7 +491,7 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name) {
       tdtcell* ncl = DEBUG_NEW tdtcell(name);
       _cells[name] = ncl;
       _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
-       btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
+       bupdate();
       return ncl;
    }
 }
