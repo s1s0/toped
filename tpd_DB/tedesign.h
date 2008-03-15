@@ -43,8 +43,9 @@ namespace laydata {
       void           registercellread(std::string, tdtcell*);
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       refnamepair    secure_defaultcell(std::string name);
-//      void            unloadprep(laydata::tdtlibdir* );
       void           relink(tdtlibdir*);
+      void           clearLib();
+      void           cleanUnreferenced();
       //
       std::string    name()            const {return _name;}
       real           UU()              const {return _UU;}
@@ -184,6 +185,7 @@ namespace laydata {
       refnamepair       linkcellref(std::string, int, TDTHierTree*&);
       refnamepair       adddefaultcell( std::string name );
       bool              collect_usedlays(std::string, bool, ListOfWords&) const;
+      void              cleanUndefLib();
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       void              deleteDB() {delete _TEDDB;}
       void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}

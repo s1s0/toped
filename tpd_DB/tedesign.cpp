@@ -72,11 +72,7 @@ void laydata::tdtlibrary::relink(tdtlibdir* libdir)
 
 laydata::tdtlibrary::~tdtlibrary()
 {
-   // now delete the cells
-   laydata::cellList::const_iterator wc;
-   for (wc = _cells.begin(); wc != _cells.end(); wc++)
-      delete wc->second;
-   _cells.clear();
+   clearLib();
 }
 
 void laydata::tdtlibrary::clearHierTree(int libID)
@@ -266,6 +262,28 @@ bool laydata::tdtlibrary::validate_cells()
    return invalidParents;
 }
 
+void laydata::tdtlibrary::clearLib()
+{
+   laydata::cellList::const_iterator wc;
+   for (wc = _cells.begin(); wc != _cells.end(); wc++)
+      delete wc->second;
+   _cells.clear();
+}
+
+void laydata::tdtlibrary::cleanUnreferenced()
+{
+//   laydata::cellList::const_iterator wc;
+//   for (wc = _cells.begin(); wc != _cells.end(); wc++)
+//   {
+//      const TDTHierTree* hcell = _hiertree->GetMember(wc->second);
+//      if ((NULL != hcell) && (NULL == hcell->Getparent()))
+//      {
+//         _hiertree->removeRootItem(wc->second, _hiertree);
+//         delete wc->second;
+//      }
+//   }
+}
+
 //-----------------------------------------------------------------------------
 // class tdtlibdir
 //-----------------------------------------------------------------------------
@@ -330,10 +348,12 @@ std::string laydata::tdtlibdir::getLibName(int libID)
 
 void laydata::tdtlibdir::relink()
 {
+   // relink starting from the back of the library queue
    for (int i = _libdirectory.size() - 2; i > 0 ; i--)
    {
       _libdirectory[i]->second->relink(this);
    }
+   // finally - relink the active database
    if (NULL !=_TEDDB) 
       _TEDDB->relink(this);
 }
@@ -434,6 +454,11 @@ laydata::refnamepair laydata::tdtlibdir::linkcellref(std::string cellname, int l
    assert(striter->second);
    striter->second->parentfound();
    return striter;
+}
+
+void  laydata::tdtlibdir::cleanUndefLib()
+{
+   _libdirectory[UNDEFCELL_LIB]->second->cleanUnreferenced();
 }
 
 //-----------------------------------------------------------------------------

@@ -211,6 +211,7 @@ int tellstdfunc::TDTloadlib::execute()
             top_cell_list.push_back(std::string(root->GetItem()->name()));
          } while (NULL != (root = root->GetNextRoot(libID)));
          updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, libID);
+         DATC->TEDLIB()->cleanUndefLib();
          // populating cell hierarchy browser
          browsers::addTDTtab();
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
