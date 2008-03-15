@@ -272,16 +272,18 @@ void laydata::tdtlibrary::clearLib()
 
 void laydata::tdtlibrary::cleanUnreferenced()
 {
-//   laydata::cellList::const_iterator wc;
-//   for (wc = _cells.begin(); wc != _cells.end(); wc++)
-//   {
-//      const TDTHierTree* hcell = _hiertree->GetMember(wc->second);
-//      if ((NULL != hcell) && (NULL == hcell->Getparent()))
-//      {
-//         _hiertree->removeRootItem(wc->second, _hiertree);
-//         delete wc->second;
-//      }
-//   }
+   laydata::cellList::iterator wc = _cells.begin();
+   while (wc != _cells.end())
+   {
+      const TDTHierTree* hcell = _hiertree->GetMember(wc->second);
+      if ((NULL != hcell) && (NULL == hcell->Getparent()))
+      {
+         _hiertree->removeRootItem(wc->second, _hiertree);
+         delete wc->second;
+         wc = _cells.erase(wc);
+      }
+      else wc++;
+   }
 }
 
 //-----------------------------------------------------------------------------

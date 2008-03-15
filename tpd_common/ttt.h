@@ -411,7 +411,8 @@ bool  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierT
             child = child->brother;
          assert(child);
          citem = child->brother;
-         child->brother = citem->brother;
+         if (NULL != citem)
+            child->brother = citem->brother;
       }
       check = lst->GetMember(comp);
       assert(check);
@@ -428,7 +429,7 @@ bool  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierT
          }
          delete citem;
       }   
-      else {
+      else if (citem) {
          // This is the last component of this type, so it has to 
          // be flagged as an orphan and preserved at the top of the
          // hierarchy
