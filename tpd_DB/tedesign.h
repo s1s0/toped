@@ -53,8 +53,7 @@ namespace laydata {
       TDTHierTree*   hiertree()        const {return _hiertree;}
       int            libID()           const {return _libID;}
       // callbacks
-      void          (*btreeAddMember)(const char*, const char*, int action);
-      void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
+      void          (*bupdate)(void);
       friend         void tdtcell::updateHierarchy(tdtdesign*);
       friend         void tdtcell::removePrep(tdtdesign*) const;
       friend         bool tdtcell::addchild(tdtdesign*, tdtdefaultcell*);

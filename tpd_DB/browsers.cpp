@@ -41,12 +41,14 @@
 #include "../ui/cell_normal.xpm"
 #include "../ui/cell_expanded.xpm"
 #include "../ui/nolay.xpm"
+#include "../src/toped.h"
 
 
 extern console::ted_cmd*         Console;
 extern DataCenter*               DATC;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
+extern tui::TopedFrame*          Toped;
 
 browsers::browserTAB*     Browsers = NULL;
 
@@ -612,9 +614,7 @@ void browsers::TDTbrowser::OnCommand(wxCommandEvent& event)
    {
       case BT_CELL_OPEN:OnTELLopencell(event.GetString());break;
       case BT_CELL_HIGHLIGHT:OnTELLhighlightcell(event.GetString());break;
-      case BT_CELL_ADD :OnTELLaddcell(event.GetString(), 
-          *(static_cast<wxString*>(event.GetClientData())), static_cast<int>(event.GetExtraLong()));
-          delete (static_cast<wxString*>(event.GetClientData())); break;
+      case BT_CELL_ADD :update();
       case BT_CELL_REMOVE:OnTELLremovecell(event.GetString(), 
           *(static_cast<wxString*>(event.GetClientData())), (1 == event.GetExtraLong()) ? true : false);
           delete (static_cast<wxString*>(event.GetClientData())); break;
@@ -693,103 +693,9 @@ void browsers::TDTbrowser::OnTELLhighlightcell(wxString open_cell)
    hCellBrowser->EnsureVisible(active_structure);
 }
 
-void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname, int action) 
-{
-   update();
-   /*switch (action) 
-   {
-      case 0: 
-      {//new cell
-         //Flat
-         wxTreeItemId fnewparent;
-         VERIFY(fCellBrowser->findItem(parentname, fnewparent, fCellBrowser->GetRootItem())); 
-         wxTreeItemId item = fCellBrowser->AppendItem(fnewparent, cellname);
-         fCellBrowser->SetItemTextColour(item,fCellBrowser->GetItemTextColour(fCellBrowser->GetRootItem()));
-         fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
-         //Hier
-         wxTreeItemId hnewparent;
-         VERIFY(hCellBrowser->findItem(parentname, hnewparent, hCellBrowser->GetRootItem())); 
-         item = hCellBrowser->AppendItem(hnewparent, cellname);
-         hCellBrowser->SetItemTextColour(item,hCellBrowser->GetItemTextColour(hCellBrowser->GetRootItem()));
-         hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
-         break;
-      }   
-      case 1:
-      {//first reference of existing cell
-         wxTreeItemId item, newparent;
-         VERIFY(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
-         while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem())) 
-         {
-            hCellBrowser->copyItem(item,newparent);
-            hCellBrowser->SortChildren(newparent);
-         }
-         hCellBrowser->DeleteChildren(item);
-         hCellBrowser->Delete(item);
-         break;
-      }   
-      case 2: 
-      {//
-         wxTreeItemId item, newparent;
-         VERIFY(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));
-         while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()))
-         {
-            hCellBrowser->copyItem(item,newparent);
-            hCellBrowser->SortChildren(newparent);
-         }
-         break;
-      }
-      default: assert(false);
-   }*/
-}
-
 void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentname, bool orphan)
 {
    update();
-   /*wxTreeItemId newparent;
-   if (orphan)
-   {
-      wxTreeItemId item;
-      hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem());
-      hCellBrowser->copyItem(item, hCellBrowser->GetRootItem());
-      item = wxTreeItemId();
-      VERIFY(hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()));
-      VERIFY(hCellBrowser->findItem(cellname, item, newparent));
-      hCellBrowser->DeleteChildren(item);
-      hCellBrowser->Delete(item);
-   }
-   else if (wxT("") == parentname)
-   {// no parent => we are removing the cell, not it's reference
-      wxTreeItemId item;
-      
-      //Flat
-      VERIFY(fCellBrowser->findItem(cellname, item, fCellBrowser->GetRootItem()));
-      fCellBrowser->Delete(item);
-
-      //Hier
-      wxTreeItemId item2;
-      VERIFY(hCellBrowser->findItem(cellname, item2, hCellBrowser->GetRootItem()));
-      // copy all children
-      // This part is "in case". The thing is that children should have been
-      // removed already, by tdtcell::removePrep
-      wxTreeItemIdValue cookie;
-      wxTreeItemId child = hCellBrowser->GetFirstChild(item2,cookie);
-      while (child.IsOk())
-      {
-         hCellBrowser->copyItem(child, hCellBrowser->GetRootItem());
-         child = hCellBrowser->GetNextChild(item2,cookie);
-      }
-      // finally delete the item and it's children
-      hCellBrowser->DeleteChildren(item2);
-      hCellBrowser->Delete(item2);
-   }
-   else 
-      while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()))
-      {
-         wxTreeItemId item;
-         VERIFY(hCellBrowser->findItem(cellname, item, newparent));
-         hCellBrowser->DeleteChildren(item);
-         hCellBrowser->Delete(item);
-      }*/
 }
 
 void browsers::TDTbrowser::OnReportUsedLayers(wxCommandEvent& WXUNUSED(event))
@@ -862,7 +768,8 @@ void browsers::browserTAB::OnCommand(wxCommandEvent& event)
 
 void browsers::browserTAB::OnTELLaddTDTlib() 
 {
-   _TDTstruct->initialize();
+   _TDTstruct->update();
+   /*_TDTstruct->initialize();
    laydata::tdtlibrary* tdtLib = NULL;
    bool traverseDB = true;
    // first the database
@@ -874,7 +781,8 @@ void browsers::browserTAB::OnTELLaddTDTlib()
 
    if (traverseDB)
    {
-      wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
+      _TDTstruct->update();
+      /*wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
       _TDTstruct->collectInfo(libname, TARGETDB_LIB, tdtLib->hiertree());
       DATC->unlockDB();
    }
@@ -885,7 +793,7 @@ void browsers::browserTAB::OnTELLaddTDTlib()
       tdtLib = DATC->getLib(curlib);
       wxString libname = wxString(tdtLib->name().c_str(), wxConvUTF8);
          _TDTstruct->collectInfo(libname, curlib, tdtLib->hiertree());
-   }
+   }*/
 }
 
 void browsers::browserTAB::OnTELLaddGDStab() 
@@ -1003,28 +911,9 @@ void browsers::celltree_highlight(const std::string cname)
    wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);
 }
 
-void browsers::treeAddMember(const char* cell, const char* parent, int action) 
+void browsers::update(void)
 {
-   assert(Browsers);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(BT_CELL_ADD);
-   eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
-   eventCELLTREE.SetExtraLong(action);
-   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
-   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
-   wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);
-}
-
-void browsers::treeRemoveMember(const char* cell, const char* parent, bool orphan) 
-{
-   assert(Browsers);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(BT_CELL_REMOVE);
-   eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
-   eventCELLTREE.SetExtraLong(orphan);
-   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
-   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
-   wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);
+   Toped->browsers()->TDTstruct()->update();
 }
 
 void browsers::parseCommand(const wxString cmd)
