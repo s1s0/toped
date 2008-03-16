@@ -349,7 +349,7 @@ bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child)
    // update the hierarchical tree
    int res = ATDB->_hiertree->addParent(child, this, ATDB->_hiertree);
    if (res > 0)
-      ATDB->bupdate();
+      ATDB->btreeAddMember(child->name().c_str(), name().c_str(), res);
    return true;
 }
 
@@ -1651,7 +1651,8 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB)
             childref = ATDB->checkcell(*CN);
             childref->_orphan = ATDB->_hiertree->removeParent(
                                              childref, this, ATDB->_hiertree);
-            ATDB->bupdate();
+            ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), 
+                                                            childref->orphan());
          }
          _children.clear();
       }
@@ -1672,7 +1673,8 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB)
                // remove it from the hierarchy
                childref->_orphan = ATDB->_hiertree->removeParent(
                                              childref, this, ATDB->_hiertree);
-               ATDB->bupdate();
+               ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(),
+                                                            childref->orphan());
             }
             _children.erase(diff.second);
          }
@@ -1723,13 +1725,14 @@ void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const {
          childref = ATDB->checkcell(*CN);
          childref->_orphan = ATDB->_hiertree->removeParent(
                childref, this, ATDB->_hiertree);
-         ATDB->bupdate();
+         ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(),
+                                 childref->orphan());
       }
    }
    // remove this form _hiertree
    ATDB->_hiertree->removeRootItem(this, ATDB->_hiertree);
    // and browser tab
-   ATDB->bupdate();
+   ATDB->btreeRemoveMember(name().c_str(), NULL, false);
    // don't clear children, the cell will be moved to Attic
    //_children.clear();
 }

@@ -171,7 +171,7 @@ namespace browsers
                         const wxSize& size = wxDefaultSize,
                         long style = wxTR_DEFAULT_STYLE);
       virtual           ~TDTbrowser();
-      void              collectInfo(const wxString, const int, laydata::TDTHierTree*);
+//      void              collectInfo(const wxString, const int, laydata::TDTHierTree*);
       void              initialize();
       void              update();
       wxString          selectedCellname() const;
@@ -183,7 +183,6 @@ namespace browsers
       wxTreeItemId      active_structure;
       wxImageList*      _imageList;
       CellBrowser*      hCellBrowser;//Hierarchy cell browser
-      CellBrowser*      fCellBrowser;//Flat cell browser
       wxString          libName;
       wxButton*         _hierButton;
       wxButton*         _flatButton;
@@ -197,6 +196,7 @@ namespace browsers
       void              OnReportUsedLayers(wxCommandEvent&);
       void              OnTELLopencell(wxString);
       void              OnTELLhighlightcell(wxString);
+      void              OnTELLaddcell(wxString, wxString, int);
       void              OnTELLremovecell(wxString, wxString, bool);
       void              OnHierView(wxCommandEvent&);
       void              OnFlatView(wxCommandEvent&);
@@ -329,7 +329,8 @@ namespace browsers
    void clearGDStab();
    void celltree_open(const std::string);
    void celltree_highlight(const std::string);
-   void update();
+   void treeAddMember(const char*, const char*, int action = 0);
+   void treeRemoveMember(const char*, const char*, bool orphan);
    void parseCommand(const wxString);
 }
 

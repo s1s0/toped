@@ -63,7 +63,8 @@ int tellstdfunc::stdNEWDESIGNd::execute()
    std::string nm = getStringValue();
    DATC->newDesign(nm, timeCreated.stdCTime());
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-   ATDB->bupdate    = &browsers::update;
+      ATDB->btreeAddMember    = &browsers::treeAddMember;
+      ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
    DATC->unlockDB();
    browsers::addTDTtab();
    // reset UNDO buffers;
@@ -92,7 +93,8 @@ int tellstdfunc::TDTread::execute()
       {
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
             // Initialize call back functions
-            ATDB->bupdate    = &browsers::update;
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
                // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
@@ -151,7 +153,8 @@ int tellstdfunc::TDTreadIFF::execute()
          DATC->TDTread(filename);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
             // Initialize call back functions
-            ATDB->bupdate    = &browsers::update;
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
             // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
