@@ -59,8 +59,8 @@ between them. These data structures will be used in all subsequently called
 methods, implementing the actual logic operations*/
 logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
                                                 _poly1(poly1), _poly2(poly2) {
-   _segl1 = DEBUG_NEW polycross::segmentlist(poly1,1);
-   _segl2 = DEBUG_NEW polycross::segmentlist(poly2,2);
+   _segl1 = DEBUG_NEW polycross::segmentlist(poly1,1,true);
+   _segl2 = DEBUG_NEW polycross::segmentlist(poly2,2,true);
    _shape1 = NULL;
    _shape2 = NULL;
 }
@@ -71,8 +71,8 @@ void logicop::logic::findCrossingPoints()
    polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl1, *_segl2);
    // BO modified algorithm
    _eq->sweep(false);
-   unsigned crossp1 = _segl1->normalize(_poly1);
-   unsigned crossp2 = _segl2->normalize(_poly2);
+   unsigned crossp1 = _segl1->normalize(_poly1, true);
+   unsigned crossp2 = _segl2->normalize(_poly2, true);
    assert(crossp1 == crossp2);
    _crossp = crossp1;
    if (1 == _crossp)
@@ -365,8 +365,8 @@ polycross::VPoint* logicop::logic::checkCoinciding(const pointlist& plist, polyc
 }
 
 pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside) {
-   polycross::segmentlist _seg1(outside,1);
-   polycross::segmentlist _seg2(inside  ,2);
+   polycross::segmentlist _seg1(outside,1,true);
+   polycross::segmentlist _seg2(inside ,2,true);
    polycross::XQ _eq(_seg1, _seg2); // create the event queue
    polycross::BindCollection BC;
    
@@ -378,8 +378,8 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
    cpsegA->linkto(cpsegB);
    cpsegB->linkto(cpsegA);
    // normalize the segment lists
-   _seg1.normalize(outside);
-   _seg2.normalize(inside);
+   _seg1.normalize(outside, true);
+   _seg2.normalize(inside, true);
    //
    // dump the new polygons in VList terms
    polycross::VPoint* outshape = _seg1.dump_points();
@@ -493,9 +493,10 @@ logicop::stretcher::~stretcher()
 // class CrossFix
 //-----------------------------------------------------------------------------
 /*!*/
-logicop::CrossFix::CrossFix(const pointlist& poly) : _poly(poly)
+logicop::CrossFix::CrossFix(const pointlist& poly, bool looped) : 
+                                                   _poly(poly), _looped(looped)
 {
-   _segl = DEBUG_NEW polycross::segmentlist(poly,1);
+   _segl = DEBUG_NEW polycross::segmentlist(poly,1, looped);
    _shape = NULL;
 
 }
@@ -507,7 +508,7 @@ void logicop::CrossFix::findCrossingPoints()
    // BO modified algorithm
    _eq->sweep(true);
    delete _eq;
-   _crossp = _segl->normalize(_poly);
+   _crossp = _segl->normalize(_poly, _looped);
    if (0 == _crossp) return;
    _shape = _segl->dump_points();
    REPORT_POLY_DEBUG

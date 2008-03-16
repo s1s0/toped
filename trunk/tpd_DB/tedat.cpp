@@ -975,7 +975,7 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
    }
    else if ( vsh.recoverable() && (!(laydata::shp_clock & vsh.status())) )
    {
-      logicop::CrossFix fixingpoly(*res);
+      logicop::CrossFix fixingpoly(*res, true);
       try
       {
          fixingpoly.findCrossingPoints();
@@ -2401,7 +2401,7 @@ is selfcrossing
 void laydata::valid_poly::selfcrossing()
 {
    //using BO modified
-   logicop::CrossFix fixingpoly(_plist);
+   logicop::CrossFix fixingpoly(_plist,true);
    try
    {
       fixingpoly.findCrossingPoints();
@@ -2493,7 +2493,7 @@ Alters the laydata::shp_cross bit of _status if the wire is selfcrossing
 void laydata::valid_wire::selfcrossing() {
    
    //using BO modified
-   logicop::CrossFix fixingpoly(_plist);
+   logicop::CrossFix fixingpoly(_plist, false);
    try
    {
       fixingpoly.findCrossingPoints();

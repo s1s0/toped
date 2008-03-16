@@ -123,7 +123,7 @@ namespace logicop {
    class CrossFix   {
    public:
       //! The class constructor preparing all data fields
-                              CrossFix(const pointlist&);
+                              CrossFix(const pointlist&, bool looped);
                              ~CrossFix();
       //! Do Benttley-Ottman modified
       void                    findCrossingPoints();
@@ -142,6 +142,7 @@ namespace logicop {
       const pointlist&        _poly;
       polycross::segmentlist* _segl;
       word                    _crossp;
+      bool                    _looped; // true - polygon; false wire
    };
 }
 
