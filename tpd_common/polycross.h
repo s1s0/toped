@@ -159,11 +159,11 @@ namespace polycross
    {
       public:
          typedef std::vector<polysegment*> Segments;
-         segmentlist(const pointlist&, byte);
+         segmentlist(const pointlist&, byte, bool);
          ~segmentlist();
          polysegment*      operator [](unsigned i) const {return _segs[i];};
          unsigned          size() const {return _segs.size();};
-         unsigned          normalize(const pointlist&);
+         unsigned          normalize(const pointlist&, bool);
          VPoint*           dump_points();
          BPoint*           insertBindPoint(unsigned segno, const TP* point);
          const pointlist*  originalPL() const {return _originalPL;}

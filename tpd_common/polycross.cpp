@@ -466,9 +466,10 @@ polycross::polysegment::~polysegment()
 //==============================================================================
 // class segmentlist
 
-polycross::segmentlist::segmentlist(const pointlist& plst, byte plyn) {
+polycross::segmentlist::segmentlist(const pointlist& plst, byte plyn, bool looped) {
    _originalPL = &plst;
    unsigned plysize = plst.size();
+   if (!looped) plysize--;
    _segs.reserve(plysize);
    for (unsigned i = 0; i < plysize; i++)
       _segs.push_back(DEBUG_NEW polysegment(&(plst[i]),&(plst[(i+1)%plysize]),i, plyn));
@@ -484,9 +485,10 @@ polycross::segmentlist::~segmentlist() {
    _segs.clear();
 }
 
-unsigned polycross::segmentlist::normalize(const pointlist& plst) {
+unsigned polycross::segmentlist::normalize(const pointlist& plst, bool looped) {
    unsigned numcross = 0;
    unsigned plysize = plst.size();
+   if (!looped) plysize--;
    for (unsigned i = 0; i < plysize; i++)
       numcross += _segs[i]->normalize(&(plst[i]),&(plst[(i+1)%plysize]));
    return numcross;
