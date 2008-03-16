@@ -82,7 +82,7 @@ public:
    void                       openGL_draw(const CTM&);
    void                       tmp_draw(const CTM&, TP, TP);
    const laydata::cellList&   cells();
-   unsigned int               numselected()           {return _TEDLIB()->numselected();}
+   unsigned int               numselected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numselected() : 0 ;}
    void                       saveProperties(std::string fname)
                                                       {_properties.saveProperties(fname);}
    void                       defaultlayer(word layno){_curlay = layno;}
