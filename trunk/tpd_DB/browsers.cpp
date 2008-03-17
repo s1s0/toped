@@ -379,14 +379,9 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
 
    _imageList = DEBUG_NEW wxImageList(16, 16, TRUE);
-#ifdef __WXMSW__
-/*TODO : Under windows - resource loading*/
-//    m_imageListNormal->Add( wxIcon(_T("icon1"), wxBITMAP_TYPE_ICO_RESOURCE) );
-//
-#else
-    _imageList->Add( wxIcon( cell_normal   ) );
-    _imageList->Add( wxIcon( cell_expanded ) );
-#endif
+   _imageList->Add( wxIcon( cell_normal   ) );
+   _imageList->Add( wxIcon( cell_expanded ) );
+
    hCellBrowser->SetImageList(_imageList);
 //   _llfont_bold.SetWeight(wxBOLD);
 //   _llfont_normal.SetWeight(wxNORMAL);
@@ -510,6 +505,9 @@ void browsers::TDTbrowser::updateHier()
    }
    catch (EXPTNactive_DB) {return;}
    hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
+   hCellBrowser->SetItemImage(hroot,0,wxTreeItemIcon_Normal);
+   hCellBrowser->SetItemImage(hroot,1,wxTreeItemIcon_Expanded);
+
    laydata::TDTHierTree *tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
 
    if (NULL == tdtH) 
@@ -525,6 +523,8 @@ void browsers::TDTbrowser::updateHier()
       nroot = hCellBrowser->AppendItem(hroot, 
          wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
       hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+      hCellBrowser->SetItemImage(nroot,0,wxTreeItemIcon_Normal);
+      hCellBrowser->SetItemImage(nroot,1,wxTreeItemIcon_Expanded);
 
       collectChildren(tdtH, ALL_LIB, nroot);
       tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
@@ -541,6 +541,8 @@ void browsers::TDTbrowser::updateHier()
               wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
          hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
 
+         hCellBrowser->SetItemImage(nroot,0,wxTreeItemIcon_Normal);
+         hCellBrowser->SetItemImage(nroot,1,wxTreeItemIcon_Expanded);
          collectChildren(tdtH, libID, nroot);
          tdtH = tdtH->GetNextRoot(libID);
       }
@@ -552,6 +554,8 @@ void browsers::TDTbrowser::updateHier()
       nrootUndef = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), 
          wxString("Undefined Cells", wxConvUTF8));
       hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+      hCellBrowser->SetItemImage(nrootUndef,0,wxTreeItemIcon_Normal);
+      hCellBrowser->SetItemImage(nrootUndef,1,wxTreeItemIcon_Expanded);
 
       for(laydata::cellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
       {
