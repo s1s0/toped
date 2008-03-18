@@ -715,9 +715,14 @@ void tui::TopedFrame::initView()
                                     Left().
                                     BestSize(wxSize(180,1000)).
                                     Layer(1).
-                                    Floatable(false).
+                                    Caption(wxString("Project Info",wxConvUTF8)).
+                                    Floatable(true).
                                     CloseButton(false).
-                                    CaptionVisible(false)
+                                    CaptionVisible(true).
+                                    TopDockable(false).
+                                    BottomDockable(false).
+                                    LeftDockable(true).
+                                    RightDockable(true)
                       );
    _winManager.AddPane( _canvas,    wxAuiPaneInfo().
                                     CentrePane().
