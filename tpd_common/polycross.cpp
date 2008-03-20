@@ -469,10 +469,19 @@ polycross::polysegment::~polysegment()
 polycross::segmentlist::segmentlist(const pointlist& plst, byte plyn, bool looped) {
    _originalPL = &plst;
    unsigned plysize = plst.size();
-   if (!looped) plysize--;
-   _segs.reserve(plysize);
-   for (unsigned i = 0; i < plysize; i++)
-      _segs.push_back(DEBUG_NEW polysegment(&(plst[i]),&(plst[(i+1)%plysize]),i, plyn));
+   if (!looped) 
+   {
+      plysize--;
+      _segs.reserve(plysize);
+      for (unsigned i = 0; i < plysize; i++)
+         _segs.push_back(DEBUG_NEW polysegment(&(plst[i]),&(plst[i+1]),i, plyn));
+   }
+   else
+   {
+      _segs.reserve(plysize);
+      for (unsigned i = 0; i < plysize; i++)
+         _segs.push_back(DEBUG_NEW polysegment(&(plst[i]),&(plst[(i+1)%plysize]),i, plyn));
+   }
 }
 
 polycross::BPoint* polycross::segmentlist::insertBindPoint(unsigned segno, const TP* point) {
@@ -1035,6 +1044,60 @@ void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 }
 
 //==============================================================================
+// TbsEvent
+
+polycross::TbsEvent::TbsEvent (polysegment* seg1) : TEvent()
+{
+   _aseg = seg1; _bseg = NULL;
+   _evertex = seg1->lP();
+}
+
+void polycross::TbsEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl, bool single)
+{
+   // create the threads
+   SegmentThread* athr = sweepline.beginThread(_aseg);
+   threadl.push_back(_aseg->threadID());
+#ifdef BO2_DEBUG
+   printf("Begin 1 threads :\n");
+   BO_printseg(_aseg)
+   sweepline.report();
+#endif
+   checkIntersect(athr->threadAbove()->cseg(), _aseg, eventQ, single);
+   checkIntersect(_aseg, athr->threadBelow()->cseg(), eventQ, single);
+   // check the case when left points are also crossing points
+   // this is also the case when one of the input segments coincides with
+   // an existing segment
+   checkIntersect(athr->threadAbove()->cseg(), _aseg, eventQ, single, _aseg->lP());
+   checkIntersect(_aseg, athr->threadBelow()->cseg(), eventQ, single, _aseg->lP());
+}
+
+//==============================================================================
+// TesEvent
+
+polycross::TesEvent::TesEvent (polysegment* seg1) : TEvent()
+{
+   _aseg = seg1; _bseg = NULL;
+   _evertex = seg1->rP();
+}
+
+void polycross::TesEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, bool single)
+{
+   threadl.push_back(_aseg->threadID());
+   SegmentThread* athr = sweepline.getThread(_aseg->threadID());
+   checkIntersect(athr->threadAbove()->cseg(), athr->threadBelow()->cseg(), eventQ, single);
+   // in all cases - check the case when right points are also crossing points
+   checkIntersect(athr->threadAbove()->cseg(), _aseg, eventQ, single, _aseg->rP());
+   checkIntersect(_aseg, athr->threadBelow()->cseg(), eventQ, single, _aseg->rP());
+   // remove segment threads from the sweep line
+   sweepline.endThread(_aseg->threadID());
+#ifdef BO2_DEBUG
+   printf("End 1 threads\n");
+   BO_printseg(_aseg)
+   sweepline.report();
+#endif
+}
+
+//==============================================================================
 // TcEvent
 
 void polycross::TcEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl, bool single)
@@ -1413,10 +1476,14 @@ polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
    _sweepline = DEBUG_NEW YQ(_overlap, &seg1, &seg2);
 }
 
-polycross::XQ::XQ( const segmentlist& seg ) : _overlap(*(seg[0]->lP()))
+polycross::XQ::XQ( const segmentlist& seg, bool loopsegs ) : 
+                     _overlap(*(seg[0]->lP())), _loopsegs(loopsegs)
 {
    _xqueue = avl_create(E_compare, NULL, NULL);
-   createEvents(seg);
+   if (_loopsegs)
+      createEvents(seg);
+   else
+      createSEvents(seg);
    _sweepline = DEBUG_NEW YQ(_overlap, &seg);
 }
 
@@ -1440,7 +1507,7 @@ void polycross::XQ::createEvents(const segmentlist& seg)
          etype = _endE;
       }
       else
-      {
+      {// normal middle poin for polygons
          evt = DEBUG_NEW TmEvent(seg[s1], seg[s2]);
          etype = _modifyE;
       }
@@ -1451,6 +1518,97 @@ void polycross::XQ::createEvents(const segmentlist& seg)
       EventVertex* vrtx = DEBUG_NEW EventVertex(evt->evertex());
       // and try to stick it in the AVL tree
       void** retitem =  avl_probe(_xqueue,vrtx);
+      if ((*retitem) != vrtx)
+         // coinsiding vertexes from different polygons
+         delete(vrtx);
+      // finally add the event itself
+      static_cast<EventVertex*>(*retitem)->addEvent(evt,etype);
+   }
+}
+
+void polycross::XQ::createSEvents(const segmentlist& seg)
+{
+   unsigned s1, s2;
+   TEvent*      evt;
+   EventTypes   etype;
+
+   // first point
+   s1 = 0;
+   if       ( (seg[s1]->rP() == seg[s1+1]->lP()) || (seg[s1]->rP() == seg[s1+1]->rP()) )
+   {
+      evt = DEBUG_NEW TbsEvent(seg[s1]); //lP is a begin
+      etype = _beginE;
+   }
+   else
+   {
+      evt = DEBUG_NEW TesEvent(seg[s1]);// rp is an end
+      etype = _endE;
+   }
+   // update overlapping box
+   _overlap.overlap(*(seg[s1]->lP()));
+   _overlap.overlap(*(seg[s1]->rP()));
+   // now create the vertex with the event inside
+   EventVertex* vrtx = DEBUG_NEW EventVertex(evt->evertex());
+   // and try to stick it in the AVL tree
+   void** retitem =  avl_probe(_xqueue,vrtx);
+   if ((*retitem) != vrtx)
+      // coinsiding vertexes from different polygons
+      delete(vrtx);
+   // finally add the event itself
+   static_cast<EventVertex*>(*retitem)->addEvent(evt,etype);
+
+   // last point
+   s1 = seg.size() - 1;
+   if       ( (seg[s1]->rP() == seg[s1-1]->lP()) || (seg[s1]->rP() == seg[s1-1]->rP()) )
+   {
+      evt = DEBUG_NEW TbsEvent(seg[s1]); //lP is a begin
+      etype = _beginE;
+   }
+   else
+   {
+      evt = DEBUG_NEW TesEvent(seg[s1]);// rp is an end
+      etype = _endE;
+   }
+
+   // update overlapping box
+   _overlap.overlap(*(seg[s1]->lP()));
+   _overlap.overlap(*(seg[s1]->rP()));
+   // now create the vertex with the event inside
+                vrtx = DEBUG_NEW EventVertex(evt->evertex());
+   // and try to stick it in the AVL tree
+          retitem =  avl_probe(_xqueue,vrtx);
+   if ((*retitem) != vrtx)
+      // coinsiding vertexes from different polygons
+      delete(vrtx);
+   // finally add the event itself
+   static_cast<EventVertex*>(*retitem)->addEvent(evt,etype);
+
+   for(s1 = 0, s2 = 1 ; s2 < seg.size(); s1++, s2++ )
+   {
+      // determine the type of event from the neighboring segments
+      // and create the thread event
+      if (seg[s1]->lP() == seg[s2]->lP())
+      {
+         evt = DEBUG_NEW TbEvent(seg[s1], seg[s2]);
+         etype = _beginE;
+      }
+      else if (seg[s1]->rP() == seg[s2]->rP())
+      {
+         evt = DEBUG_NEW TeEvent(seg[s1], seg[s2]);
+         etype = _endE;
+      }
+      else
+      {// normal middle poin for polygons
+         evt = DEBUG_NEW TmEvent(seg[s1], seg[s2]);
+         etype = _modifyE;
+      }
+      // update overlapping box
+      _overlap.overlap(*(seg[s1]->lP()));
+      _overlap.overlap(*(seg[s1]->rP()));
+      // now create the vertex with the event inside
+                   vrtx = DEBUG_NEW EventVertex(evt->evertex());
+      // and try to stick it in the AVL tree
+             retitem =  avl_probe(_xqueue,vrtx);
       if ((*retitem) != vrtx)
          // coinsiding vertexes from different polygons
          delete(vrtx);

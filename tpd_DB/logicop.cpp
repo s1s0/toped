@@ -504,7 +504,7 @@ logicop::CrossFix::CrossFix(const pointlist& poly, bool looped) :
 void logicop::CrossFix::findCrossingPoints()
 {
    // create the event queue
-   polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl);
+   polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl, _looped);
    // BO modified algorithm
    _eq->sweep(true);
    delete _eq;
