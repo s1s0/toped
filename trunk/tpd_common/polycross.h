@@ -266,6 +266,32 @@ namespace polycross
    };
 
    //===========================================================================
+   // Thread begin event single segment
+   //===========================================================================
+   class TbsEvent : public TEvent
+   {
+      public:
+                           TbsEvent(polysegment*);
+         void              sweep(XQ&, YQ&, ThreadList&, bool);
+         void              sweep2bind(YQ&, BindCollection&) {assert(false);}
+         const TP*         avertex() {return _aseg->rP();}
+         const TP*         bvertex() {assert(false);return NULL;}
+   };
+
+   //===========================================================================
+   // Thread end event singe segment
+   //===========================================================================
+   class TesEvent : public TEvent
+   {
+      public:
+                           TesEvent(polysegment*);
+         void              sweep(XQ&, YQ&, ThreadList&, bool);
+         void              sweep2bind(YQ&, BindCollection&) {assert(false);}
+         const TP*         avertex() {return _aseg->lP();}
+         const TP*         bvertex() {assert(false); return NULL;}
+   };
+
+   //===========================================================================
    // Thread cross event
    //===========================================================================
    class TcEvent : public TEvent
@@ -362,8 +388,8 @@ namespace polycross
    //===========================================================================
    class XQ {
       public:
-                           XQ(const segmentlist &, const segmentlist&);
-                           XQ(const segmentlist&);
+                           XQ(const segmentlist&, const segmentlist&);
+                           XQ(const segmentlist&, bool loopsegs);
          ~XQ();
          void              sweep(bool single);
          void              sweep2bind(BindCollection&);
@@ -371,12 +397,14 @@ namespace polycross
          YQ*               sweepline() {return _sweepline;}
       protected:
          void              createEvents(const segmentlist&);
+         void              createSEvents(const segmentlist&);
          static int        E_compare( const void*, const void*, void* );
          avl_table*        _xqueue;
          YQ*               _sweepline;
          DBbox             _overlap;
          TP                _bottom_left;
          TP                _top_right;
+         bool              _loopsegs;
    };
 
    //===========================================================================
