@@ -497,13 +497,16 @@ polycross::segmentlist::~segmentlist() {
 unsigned polycross::segmentlist::normalize(const pointlist& plst, bool looped) {
    unsigned numcross = 0;
    unsigned plysize = plst.size();
-   if (!looped) plysize--;
-   for (unsigned i = 0; i < plysize; i++)
-      numcross += _segs[i]->normalize(&(plst[i]),&(plst[(i+1)%plysize]));
+   if (looped)
+      for (unsigned i = 0; i < plysize; i++)
+         numcross += _segs[i]->normalize(&(plst[i]),&(plst[(i+1)%plysize]));
+   else
+      for (unsigned i = 0; i < plysize - 1; i++)
+         numcross += _segs[i]->normalize(&(plst[i]),&(plst[i+1]));
    return numcross;
 }
 
-polycross::VPoint* polycross::segmentlist::dump_points()
+polycross::VPoint* polycross::segmentlist::dump_points(bool looped)
 {
    VPoint* vlist = NULL;
 #ifdef BO2_DEBUG
@@ -511,6 +514,8 @@ polycross::VPoint* polycross::segmentlist::dump_points()
 #endif
    for (unsigned i = 0; i < _segs.size(); i++)
       _segs[i]->dump_points(vlist);
+   if (!looped)
+      vlist = DEBUG_NEW VPoint(_segs[_segs.size()-1]->rP(), vlist);
    polycross::VPoint* lastV = vlist;
    while (vlist->prev())
       vlist = vlist->prev();

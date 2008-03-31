@@ -509,8 +509,9 @@ void logicop::CrossFix::findCrossingPoints()
    _eq->sweep(true);
    delete _eq;
    _crossp = _segl->normalize(_poly, _looped);
+//   if ((0 == _crossp) || (!_looped)) return;
    if (0 == _crossp) return;
-   _shape = _segl->dump_points();
+   _shape = _segl->dump_points(_looped);
    REPORT_POLY_DEBUG
    reorderCross();
    cleanRedundant();

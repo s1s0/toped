@@ -164,7 +164,7 @@ namespace polycross
          polysegment*      operator [](unsigned i) const {return _segs[i];};
          unsigned          size() const {return _segs.size();};
          unsigned          normalize(const pointlist&, bool);
-         VPoint*           dump_points();
+         VPoint*           dump_points(bool looped = true);
          BPoint*           insertBindPoint(unsigned segno, const TP* point);
          const pointlist*  originalPL() const {return _originalPL;}
       private:
