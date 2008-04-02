@@ -1495,63 +1495,57 @@ polycross::XQ::XQ( const segmentlist& seg, bool loopsegs ) :
 void polycross::XQ::createEvents(const segmentlist& seg)
 {
    unsigned s1, s2;
-   TEvent*      evt;
-   EventTypes   etype;
    for(s1 = 0, s2 = 1 ; s1 < seg.size(); s1++, ++s2 %= seg.size())
    {
       // determine the type of event from the neighboring segments
       // and create the thread event
       if (seg[s1]->lP() == seg[s2]->lP())
-      {
-         evt = DEBUG_NEW TbEvent(seg[s1], seg[s2]);
-         etype = _beginE;
-      }
+         addEvent(seg[s1],DEBUG_NEW TbEvent(seg[s1], seg[s2]),_beginE);
       else if (seg[s1]->rP() == seg[s2]->rP())
-      {
-         evt = DEBUG_NEW TeEvent(seg[s1], seg[s2]);
-         etype = _endE;
-      }
-      else
-      {// normal middle poin for polygons
-         evt = DEBUG_NEW TmEvent(seg[s1], seg[s2]);
-         etype = _modifyE;
-      }
-      // update overlapping box
-      _overlap.overlap(*(seg[s1]->lP()));
-      _overlap.overlap(*(seg[s1]->rP()));
-      // now create the vertex with the event inside
-      EventVertex* vrtx = DEBUG_NEW EventVertex(evt->evertex());
-      // and try to stick it in the AVL tree
-      void** retitem =  avl_probe(_xqueue,vrtx);
-      if ((*retitem) != vrtx)
-         // coinsiding vertexes from different polygons
-         delete(vrtx);
-      // finally add the event itself
-      static_cast<EventVertex*>(*retitem)->addEvent(evt,etype);
+         addEvent(seg[s1],DEBUG_NEW TeEvent(seg[s1], seg[s2]),_endE);
+      else // normal middle point for polygons
+         addEvent(seg[s1],DEBUG_NEW TmEvent(seg[s1], seg[s2]),_modifyE);
    }
 }
 
+/*! create single events - used for open shapes - wires
+First and last points are treated differently. They infer a special single threaded events
+TbsEvent and TesEvent
+*/
 void polycross::XQ::createSEvents(const segmentlist& seg)
 {
    unsigned s1, s2;
-   TEvent*      evt;
-   EventTypes   etype;
-
    // first point
    s1 = 0;
    if       ( (seg[s1]->rP() == seg[s1+1]->lP()) || (seg[s1]->rP() == seg[s1+1]->rP()) )
-   {
-      evt = DEBUG_NEW TbsEvent(seg[s1]); //lP is a begin
-      etype = _beginE;
-   }
+      addEvent(seg[s1],DEBUG_NEW TbsEvent(seg[s1]),_beginE);//lP is a begin
    else
+      addEvent(seg[s1],DEBUG_NEW TesEvent(seg[s1]),_endE  );// rp is an end
+   // last point
+   s1 = seg.size() - 1;
+   if       ( (seg[s1]->rP() == seg[s1-1]->lP()) || (seg[s1]->rP() == seg[s1-1]->rP()) )
+      addEvent(seg[s1],DEBUG_NEW TbsEvent(seg[s1]),_beginE);//lP is a begin
+   else
+      addEvent(seg[s1],DEBUG_NEW TesEvent(seg[s1]),_endE  );// rp is an end
+
+   for(s1 = 0, s2 = 1 ; s2 < seg.size(); s1++, s2++ )
    {
-      evt = DEBUG_NEW TesEvent(seg[s1]);// rp is an end
-      etype = _endE;
+      // determine the type of event from the neighboring segments
+      // and create the thread event
+      if (seg[s1]->lP() == seg[s2]->lP())
+         addEvent(seg[s1],DEBUG_NEW TbEvent(seg[s1], seg[s2]),_beginE);
+      else if (seg[s1]->rP() == seg[s2]->rP())
+         addEvent(seg[s1],DEBUG_NEW TeEvent(seg[s1], seg[s2]),_endE);
+      else
+         addEvent(seg[s1],DEBUG_NEW TmEvent(seg[s1], seg[s2]),_modifyE);
    }
+}
+
+void polycross::XQ::addEvent(polysegment* cseg, TEvent* evt, EventTypes etype)
+{
    // update overlapping box
-   _overlap.overlap(*(seg[s1]->lP()));
-   _overlap.overlap(*(seg[s1]->rP()));
+   _overlap.overlap(*(cseg->lP()));
+   _overlap.overlap(*(cseg->rP()));
    // now create the vertex with the event inside
    EventVertex* vrtx = DEBUG_NEW EventVertex(evt->evertex());
    // and try to stick it in the AVL tree
@@ -1561,65 +1555,6 @@ void polycross::XQ::createSEvents(const segmentlist& seg)
       delete(vrtx);
    // finally add the event itself
    static_cast<EventVertex*>(*retitem)->addEvent(evt,etype);
-
-   // last point
-   s1 = seg.size() - 1;
-   if       ( (seg[s1]->rP() == seg[s1-1]->lP()) || (seg[s1]->rP() == seg[s1-1]->rP()) )
-   {
-      evt = DEBUG_NEW TbsEvent(seg[s1]); //lP is a begin
-      etype = _beginE;
-   }
-   else
-   {
-      evt = DEBUG_NEW TesEvent(seg[s1]);// rp is an end
-      etype = _endE;
-   }
-
-   // update overlapping box
-   _overlap.overlap(*(seg[s1]->lP()));
-   _overlap.overlap(*(seg[s1]->rP()));
-   // now create the vertex with the event inside
-                vrtx = DEBUG_NEW EventVertex(evt->evertex());
-   // and try to stick it in the AVL tree
-          retitem =  avl_probe(_xqueue,vrtx);
-   if ((*retitem) != vrtx)
-      // coinsiding vertexes from different polygons
-      delete(vrtx);
-   // finally add the event itself
-   static_cast<EventVertex*>(*retitem)->addEvent(evt,etype);
-
-   for(s1 = 0, s2 = 1 ; s2 < seg.size(); s1++, s2++ )
-   {
-      // determine the type of event from the neighboring segments
-      // and create the thread event
-      if (seg[s1]->lP() == seg[s2]->lP())
-      {
-         evt = DEBUG_NEW TbEvent(seg[s1], seg[s2]);
-         etype = _beginE;
-      }
-      else if (seg[s1]->rP() == seg[s2]->rP())
-      {
-         evt = DEBUG_NEW TeEvent(seg[s1], seg[s2]);
-         etype = _endE;
-      }
-      else
-      {// normal middle poin for polygons
-         evt = DEBUG_NEW TmEvent(seg[s1], seg[s2]);
-         etype = _modifyE;
-      }
-      // update overlapping box
-      _overlap.overlap(*(seg[s1]->lP()));
-      _overlap.overlap(*(seg[s1]->rP()));
-      // now create the vertex with the event inside
-                   vrtx = DEBUG_NEW EventVertex(evt->evertex());
-      // and try to stick it in the AVL tree
-             retitem =  avl_probe(_xqueue,vrtx);
-      if ((*retitem) != vrtx)
-         // coinsiding vertexes from different polygons
-         delete(vrtx);
-      // finally add the event itself
-      static_cast<EventVertex*>(*retitem)->addEvent(evt,etype);
-   }
 }
 
 void polycross::XQ::addCrossEvent(const TP* CP, polysegment* aseg, polysegment* bseg)

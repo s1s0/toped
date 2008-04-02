@@ -398,6 +398,7 @@ namespace polycross
       protected:
          void              createEvents(const segmentlist&);
          void              createSEvents(const segmentlist&);
+         void              addEvent(polysegment*, TEvent*, EventTypes);
          static int        E_compare( const void*, const void*, void* );
          avl_table*        _xqueue;
          YQ*               _sweepline;
