@@ -280,9 +280,9 @@ void laydata::tdtlibrary::cleanUnreferenced()
       {
          _hiertree->removeRootItem(wc->second, _hiertree);
          delete wc->second;
-         wc = _cells.erase(wc);
+         _cells.erase(wc);
       }
-      else wc++;
+      wc++;
    }
 }
 

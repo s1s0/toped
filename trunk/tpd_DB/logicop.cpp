@@ -615,7 +615,7 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
    // deleted. Having in mind that all input polygons were normaly oriented
    //  it means that those parts are inside out and must be removed. When the
    // input polygon is completely inside out it should dissapear alltogether, but
-   // this case should be catched befor this algo is invoked.
+   // this case should be catched before this algo is invoked.
    // - oversized (bloat) All resulting polygons will be normally oriented BUT
    // some of the polygons could be overlapped entirely by other polygons. The
    // overlapped fellas should be removed.
