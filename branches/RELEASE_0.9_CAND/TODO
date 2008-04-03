@@ -1,0 +1,113 @@
+Library properties
+-------------------
+- A reference to undefined cells is allowed in the DB as well as in the library
+- Library can't refernce a cell from a DB. Library can reference a cell from another library,
+  but only if it has bigger ID. DB has an ID 0 - i.e. it can reference cells from any library
+- the above means that circular reference across the libraries is not possible
+
+- cellemptyref::cellref
+
+Short Term
+------------
+ - Browser window needs search facilities. For big designs
+ - Depth of UNDO must be a menu parameter (or a TELL function ?)
+ - bitwise logical operations. Require unsigned.
+ - avoid using #defines where possible. Use const instead
+
+General
+=========
+  * MEMORY LEAKAGE DEBUG!
+  * Online hierarhy tree maintanence still has troubles - especially when
+    deleting the stuff from the top level. Check and debug!
+  * Parser needs well defined error recovery policy
+  * select edge with double click - needs algo for edge proximity. The same algo
+    can be used for editpush selecting (optional?)
+  * getpointlist(PARAMETERS) - general management of temporary images from TELL
+    The end of the line here is to include online DRC checks as TELL callback
+    functions
+  * There is no log possible for select/unselect from list operations. The
+    reason is that we don't have a representation of layout list in TELL.
+    Think about it. Pointetrs are unapropriate of course.
+  * Think about improving the TEDAT text readability manipulating the orientation
+  * Optional validation - warning/error menu - acute angle case.
+  * Autopan doesn't seems to work fine, because it depends probably
+    on the _step in View properties. Must depend on the absolute proxomity in screen
+    pixesld to the edge of the canvas
+  
+  TELL related
+  ------------
+  * break, continue, jump/goto statements and label (for the f.... jump)
+  * return statements when there are multiply paths
+  * logical operations between figures in TELL! (maybe Toped engine should be used here)
+  * Introduce default parameter values. Think about callback functions
+  * Error messages and YYERROR and error recovery - esspecialy from
+    tellyzer block. May be something like a error report structure
+    will be appropriate? Error numbers with error messages etc. -
+    It will be much easier to document them eventually in the future!
+
+
+  Graphics
+  ---------
+
+Dialog stuff
+============
+   * Grid definitioan dialog is ugly - text windows are not resizing properly. 
+   * The number of the digits after the decimal point must be intact with the 
+     current step. There is some piece of code left in tui.cpp (getSize::getSize)
+     to be used as a starting point for this
+   * Icons and toolbars
+   * Resources should go to XML and resource compiler should be used
+
+Documentation
+==============
+   multi line comments /* */ in TELL
+
+Seems OK
+========
+  * Review the new quadTree sorting procedures and optimize them in terms of
+    speed and memory. They MUST BE PERFECT !!!
+  * Check and take care about clearing of the TELL memory from the layout list 
+    types of variables resulting from select operations. Seems the dataList
+    structures will remain in the heap. Of course TOPED objects should not be
+    desctructed!
+  * TELL Run time error handling - exceptions
+  * Draw wire - this seems to be the most obvious bug in the drawing.
+  * Import of the GDSII wire type 2 and/or 4. We have troubles - the example GDSII from Sergey.
+
+  done after rel.0.8
+  --------------------
+  * lock/hide layer must deselect all shapes of that layer
+  * layer fill control - command and menu
+  * No visualization for addtext() (_tmpdata MouseStart requires additional parameters?)
+  * No visualization for addcell() (_tmpdata MouseStart requires additional parameters?)
+  * No visualization for move/copy cellaref
+  * rotate and flip - visualizing the marker
+  * Draw selected figures using separate property definition.
+  * Initial (default) values of grids, step etc. When a new design is created and
+    grids and steps (and what else) are not explicitly defined, the editor is
+    doing weird things. 
+
+Global options of the editor
+============================
+  * lock/hide layer unselects the shapes on the layer. If not all modify 
+    operations must check for the layer status
+  * Ungroup over tdtaref results in a list of tdtref's
+  * Reference point when groupping -> current (0,0), or bottom left point 
+    of the selected shapes
+  * ref/aref select - overlapping the reference point only or the entire area  
+
+
+Things to remember
+==================
+All sort related operations work with normalized overlapping boxes.
+If this is not the case, the sorting algorithm is screwed up which results 
+in an infinite loop of the finction calls that overflow the stack. The 
+debugger is not very good in handling this problem, that in turn makes
+the debugging to look like a suicide.
+As a rule - every overlap call in the sorting algorithm must be followed 
+by a normalize one. The alternative is to make all overlap functions to 
+return a normalized result. That is NOT the case at the moment and the reason
+is to save some operations and CPU time (to gain speed) during the drawing, 
+because ussually overlap call is followed by a CTM multiplication and the 
+normalization is needed after this.
+

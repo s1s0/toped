@@ -1,0 +1,33 @@
+new	   ICON "../ui/new.ico"
+open	   ICON "../ui/open.ico"
+save       ICON "../ui/save.ico"
+
+
+box	   ICON "../ui/box.ico"
+poly	   ICON "../ui/poly.ico"
+wire	   ICON "../ui/wire.ico"
+text	   ICON "../ui/text.ico"
+
+undo	   ICON "../ui/undo.ico"
+redo	   ICON "../ui/redo.ico"
+delete	   ICON "../ui/delete.ico"
+cut_with_poly	ICON "../ui/cut_with_poly.ico"
+zoom_all   ICON "../ui/zoom_all.ico"
+zoom_in	   ICON "../ui/zoom_in.ico"
+zoom_out   ICON "../ui/zoom_out.ico"
+ruler	   ICON "../ui/ruler.ico"
+
+copy 	   ICON "../ui/copy.ico"
+move	   ICON "../ui/move.ico"
+rotate_left   	ICON "../ui/rotate_left.ico"
+rotate_right	ICON "../ui/rotate_right.ico"
+flipx	   ICON "../ui/flipx.ico"
+flipy	   ICON "../ui/flipy.ico"
+edit_push  ICON "../ui/edit_push.ico"
+edit_pop   ICON "../ui/edit_pop.ico"
+
+
+toped16x16 ICON "../ui/toped_16x16.ico"
+toped32x32 ICON "../ui/toped_32x32.ico"
+toped48x48 ICON "../ui/toped_48x48.ico"
+#include "wx/msw/wx.rc"
