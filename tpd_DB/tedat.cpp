@@ -1321,7 +1321,7 @@ bool laydata::tdtwire::point_inside(TP pnt)
    for (unsigned i = 0; i < _plist.size() - 1 ; i++) {
       p0 = _plist[i]; p1 = _plist[i+1];
       float distance = get_distance(p0,p1,pnt);
-      if ((distance > 0) && (distance < _width/2))
+      if ((distance >= 0) && (distance <= _width/2))
          return true;
    }
    return false;
