@@ -44,24 +44,46 @@ Section "toped"
   SetOutPath $INSTDIR
   
   ; Put file there
-  File "toped.exe"
+  File "release\toped.exe"
   File "glu32.dll"
-  ;File "Microsoft.VC80.CRT.manifest"
-  ;File "toped.exe.manifest"
-  ;File "toped.exe.intermediate.manifest"
-  ;File "msvcm80.dll"
-  ;File "msvcp80.dll"
-  ;File "msvcr80.dll"
   File "toped_example.bat"
   File "news.txt"
   File "readme.txt"
 
   SetOutPath $INSTDIR\tll
-  File "seed.tll"
-  File "laylogic.tll"
-  File "tcase.tll"
-  File "structures.tll"
-  File "checklists.tll"
+  File "tll\seed.tll"
+  File "tll\laylogic.tll"
+  File "tll\tcase.tll"
+  File "tll\structures.tll"
+  File "tll\checklists.tll"
+
+  ;icons
+  SetOutPath $INSTDIR\ui
+  File "ui\box16x16.png"
+  File "ui\copy16x16.png"
+  File "ui\cut_with_poly16x16.png"
+  File "ui\delete16x16.png"
+  File "ui\edit_pop16x16.png"
+  File "ui\edit_push16x16.png"
+  File "ui\flipx16x16.png"
+  File "ui\flipy16x16.png"
+  File "ui\move16x16.png"
+  File "ui\box16x16.png"
+  File "ui\new16x16.png"
+  File "ui\open16x16.png"
+  File "ui\poly16x16.png"  
+  File "ui\redo16x16.png"
+  File "ui\rotate_left16x16.png"
+  File "ui\rotate_right16x16.png"
+  File "ui\ruler16x16.png"
+  File "ui\save16x16.png"
+  File "ui\text16x16.png"
+  File "ui\undo16x16.png"
+  File "ui\wire16x16.png"
+  File "ui\zoom_all16x16.png"
+  File "ui\zoom_in16x16.png"
+  File "ui\zoom_out16x16.png"
+
 
   ;Read current user directory
   ;ReadRegStr $R0 HKCU "Environment" "HOME"
@@ -134,12 +156,6 @@ Section "Uninstall"
   ; Remove files and uninstaller
   Delete $INSTDIR\toped.exe
   Delete $INSTDIR\glu32.dll
-  ;Delete $INSTDIR\Microsoft.VC80.CRT.manifest
-  ;Delete "$INSTDIR\toped.exe.manifest"
-  ;Delete "$INSTDIR\toped.exe.intermediate.manifest"
-  ;Delete $INSTDIR\msvcm80d.dll
-  ;Delete $INSTDIR\msvcp80d.dll
-  ;Delete $INSTDIR\msvcr80d.dll
   Delete $INSTDIR\toped_example.bat
   Delete $INSTDIR\news.txt
   Delete $INSTDIR\readme.txt
@@ -157,6 +173,31 @@ Section "Uninstall"
   Delete $INSTDIR\fonts\techno1.glf
   Delete $INSTDIR\fonts\times_new1.glf
 
+  Delete $INSTDIR\ui\box16x16.png
+  Delete $INSTDIR\ui\copy16x16.png
+  Delete $INSTDIR\ui\cut_with_poly16x16.png
+  Delete $INSTDIR\ui\delete16x16.png
+  Delete $INSTDIR\ui\edit_pop16x16.png
+  Delete $INSTDIR\ui\edit_push16x16.png
+  Delete $INSTDIR\ui\flipx16x16.png
+  Delete $INSTDIR\ui\flipy16x16.png
+  Delete $INSTDIR\ui\move16x16.png
+  Delete $INSTDIR\ui\box16x16.png
+  Delete $INSTDIR\ui\new16x16.png
+  Delete $INSTDIR\ui\open16x16.png
+  Delete $INSTDIR\ui\poly16x16.png  
+  Delete $INSTDIR\ui\redo16x16.png
+  Delete $INSTDIR\ui\rotate_left16x16.png
+  Delete $INSTDIR\ui\rotate_right16x16.png
+  Delete $INSTDIR\ui\ruler16x16.png
+  Delete $INSTDIR\ui\save16x16.png
+  Delete $INSTDIR\ui\text16x16.png
+  Delete $INSTDIR\ui\undo16x16.png
+  Delete $INSTDIR\ui\wire16x16.png
+  Delete $INSTDIR\ui\zoom_all16x16.png
+  Delete $INSTDIR\ui\zoom_in16x16.png
+  Delete $INSTDIR\ui\zoom_out16x16.png
+
   ReadRegStr $R0 HKCU "Environment" "HOME"
   ;ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Personal"
   ;ifFileExists $R0\log\tpd_previous.log 0 +2
@@ -172,6 +213,7 @@ Section "Uninstall"
   Delete $INSTDIR\*.*
   
   RMDir $INSTDIR\log
+  RMDir $INSTDIR\ui
   RMDir $INSTDIR\tll
   RMDir $INSTDIR\fonts
   Delete $INSTDIR\uninstall.exe
