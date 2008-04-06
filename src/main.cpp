@@ -244,7 +244,7 @@ class TopedApp : public wxApp
       wxString       logFileName;
       wxString       tpdLogDir;
       wxString       tpdFontDir;
-		wxString			tpdUIDir;
+      wxString       tpdUIDir;
 //      bool           _ignoreOnRecovery;
 };
 
@@ -305,8 +305,8 @@ void TopedApp::GetGlobalDirs()
    {
       fontsDIR->AppendDir(wxT("fonts"));
       fontsDIR->Normalize();
-		UIDir->AppendDir(wxT("ui"));
-		UIDir->Normalize();
+      UIDir->AppendDir(wxT("icons"));
+      UIDir->Normalize();
    }
    if (fontsDIR->IsOk())
    {
@@ -327,32 +327,32 @@ void TopedApp::GetGlobalDirs()
       else
          tpdFontDir = fontsDIR->GetFullPath();
    }
-	else
+   else
    {
-		info = wxT("Can't evaluate properly \"$TPD_GLOBAL\" env. variable");
+      info = wxT("Can't evaluate properly \"$TPD_GLOBAL\" env. variable");
       info << wxT(". Looking for fonts in the current directory \"");
       tell_log(console::MT_WARNING,info);
       tpdFontDir = wxT("./fonts/");
    }
 
-	if(UIDir->IsOk())
-	{
-		bool exist = UIDir->DirExists();
-		if (!exist)
-		{
-			info << wxT("Directory ") << UIDir->GetFullPath() << wxT(" doesn't exists");
-			info << wxT(". Looking for icons in the current directory \"");
-			info << wxGetCwd() << wxT("\"");
+   if(UIDir->IsOk())
+   {
+      bool exist = UIDir->DirExists();
+      if (!exist)
+      {
+         info << wxT("Directory ") << UIDir->GetFullPath() << wxT(" doesn't exists");
+         info << wxT(". Looking for icons in the current directory \"");
+         info << wxGetCwd() << wxT("\"");
          tell_log(console::MT_WARNING,info);
-         tpdUIDir = wxT("./ui/");
-		}
-		else
-		{
-			tpdUIDir = UIDir->GetFullPath();
-		}
-	}
+         tpdUIDir = wxT("./icons/");
+      }
+      else
+      {
+         tpdUIDir = UIDir->GetFullPath();
+      }
+   }
    delete fontsDIR;
-	delete UIDir;
+   delete UIDir;
 }
 
 
@@ -448,7 +448,7 @@ bool TopedApp::OnInit() {
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
 	GetGlobalDirs();
    if (!LoadFontFile("arial1")) return FALSE;
-   Toped->setUIDir(std::string(tpdUIDir.mb_str()));
+   Toped->setIconDir(std::string(tpdUIDir.mb_str()));
 	Toped->initToolBars();
 
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());

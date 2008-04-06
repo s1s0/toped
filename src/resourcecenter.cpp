@@ -715,7 +715,7 @@ void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::s
 //   wxBitmap bitmap = wxIcon(wxString(iconName.c_str(), wxConvUTF8), wxBITMAP_TYPE_ICO_RESOURCE, 24, 24);
 
 	//set correct filename for toolBarItem
-	std::string fullIconName = _UIDir+iconName;
+	std::string fullIconName = _IconDir+iconName;
 
 
 	//find toolbar
