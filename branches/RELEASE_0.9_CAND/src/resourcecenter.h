@@ -192,7 +192,7 @@ namespace tui
    public:
 		ResourceCenter(void);
       ~ResourceCenter(void);
-		void setUIDir(const std::string& UIDir) {_UIDir = UIDir;};
+		void setIconDir(const std::string& dir) {_IconDir = dir;};
       //Using for build of complete menu
       void buildMenu(wxMenuBar *menuBar);
       //Insert new menu item
@@ -221,7 +221,7 @@ namespace tui
 		toolBarList			_toolBars;
       int					_menuCount; //number of menu items
 		int					_toolCount; //number of tool items
-		std::string			_UIDir;	//directory that contains
+		std::string			_IconDir;	//directory that contains
 
    };
 

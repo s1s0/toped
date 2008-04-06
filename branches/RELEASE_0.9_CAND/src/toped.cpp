@@ -590,9 +590,9 @@ void tui::TopedFrame::initMenuBar() {
   
 }
 
-void tui::TopedFrame::setUIDir(const std::string& uiDir)
+void tui::TopedFrame::setIconDir(const std::string& uiDir)
 {
-   if (_resourceCenter) _resourceCenter->setUIDir(uiDir);
+   if (_resourceCenter) _resourceCenter->setIconDir(uiDir);
 }
 
 void tui::TopedFrame::initToolBars() 
@@ -761,11 +761,11 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutDialogInfo info;
     info.SetName(wxT("Toped"));
-    info.SetVersion(wxT("0.8.x"));
+    info.SetVersion(wxT("0.9.0"));
     info.SetIcon(wxIcon( toped32x32_xpm ));
     info.SetWebSite(wxT("www.toped.org.uk"));
     info.SetDescription(wxT("Open source IC layout editor"));
-    info.SetCopyright(wxT("(C) 2001-2007 Toped developers"));
+    info.SetCopyright(wxT("(C) 2001-2008 Toped developers"));
 
     wxAboutBox(info);
 }
