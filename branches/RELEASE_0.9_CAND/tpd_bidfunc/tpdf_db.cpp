@@ -455,15 +455,17 @@ tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::GDSexportLIB::execute()
 {
+   bool x2048           = getBoolValue();
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
       DATC->lockDB(false);
-         DATC->GDSexport(filename);
+         DATC->GDSexport(filename, x2048);
       DATC->unlockDB();
       LogFile << LogFile.getFN() << "(\""<< filename << ");"; LogFile.flush();
    }
@@ -482,10 +484,12 @@ tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::GDSexportTOP::execute()
 {
+   bool  x2048 = getBoolValue();
    std::string filename = getStringValue();
    bool  recur = getBoolValue();
    std::string cellname = getStringValue();
@@ -495,7 +499,7 @@ int tellstdfunc::GDSexportTOP::execute()
       laydata::tdtdesign* ATDB = DATC->lockDB(false);
          excell = ATDB->checkcell(cellname);
          if (NULL != excell)
-            DATC->GDSexport(excell, recur, filename);
+            DATC->GDSexport(excell, recur, filename, x2048);
       DATC->unlockDB();
       if (NULL != excell)
       {

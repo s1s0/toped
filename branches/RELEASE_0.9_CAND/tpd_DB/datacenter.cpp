@@ -364,22 +364,24 @@ bool DataCenter::TDTwrite(const char* filename)
    return true;
 }
 
-void DataCenter::GDSexport(std::string& filename)
+void DataCenter::GDSexport(std::string& filename, bool x2048)
 {
    std::string nfn;
    //Get actual time
    GDSin::GDSFile gdsex(filename, time(NULL));
    _TEDLIB()->GDSwrite(gdsex, NULL, true);
-   gdsex.updateLastRecord();gdsex.closeFile();
+   if (x2048) gdsex.updateLastRecord();
+   gdsex.closeFile();
 }
 
-void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& filename)
+void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& filename, bool x2048)
 {
    std::string nfn;
    //Get actual time
    GDSin::GDSFile gdsex(filename, time(NULL));
    _TEDLIB()->GDSwrite(gdsex, cell, recur);
-   gdsex.updateLastRecord();gdsex.closeFile();
+   if (x2048) gdsex.updateLastRecord();
+   gdsex.closeFile();
 }
 
 bool DataCenter::GDSparse(std::string filename) 
