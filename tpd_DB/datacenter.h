@@ -54,8 +54,8 @@ public:
                               DataCenter();
                              ~DataCenter(); 
    bool                       GDSparse(std::string filename);
-   void                       GDSexport(std::string&);
-   void                       GDSexport(laydata::tdtcell*, bool, std::string&);
+   void                       GDSexport(std::string&, bool);
+   void                       GDSexport(laydata::tdtcell*, bool, std::string&, bool);
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
    void                       PSexport(laydata::tdtcell*, std::string&);
