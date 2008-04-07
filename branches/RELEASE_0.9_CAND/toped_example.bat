@@ -1,1 +1,1 @@
-toped tll\seed.tll
+toped tll\prop.tll
