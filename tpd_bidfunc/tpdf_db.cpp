@@ -108,7 +108,7 @@ int tellstdfunc::TDTread::execute()
             updateLayerDefinitions( DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
-         browsers::addTDTtab();
+         browsers::addTDTtab(true);
          //
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
@@ -168,7 +168,7 @@ int tellstdfunc::TDTreadIFF::execute()
             updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the cell hierarchy browser
-         browsers::addTDTtab();
+         browsers::addTDTtab(true);
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;

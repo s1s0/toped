@@ -879,7 +879,7 @@ void browsers::layer_default(const word newlay, const word oldlay)
 	delete bt;
 }
 
-void browsers::addTDTtab()
+void browsers::addTDTtab(bool newthread)
 {
    assert(Browsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
@@ -895,7 +895,10 @@ void browsers::addTDTtab()
    // after the execution of the second function. The latter will
    // send treeAddMember itself - in result the browser window
    // will get cell b twice. Bottom line: don't use PostEvent here!
-   Browsers->GetEventHandler()->ProcessEvent( eventADDTAB );
+   if (newthread)
+      wxPostEvent( Browsers, eventADDTAB );
+   else
+      Browsers->GetEventHandler()->ProcessEvent( eventADDTAB );
    // the alternative is to call the function directly
 //   Browsers->OnTELLaddTDTlib(tdtLib, traverse_all);
 }
