@@ -463,7 +463,6 @@ bool TopedApp::OnInit() {
    SetTopWindow(Toped);
    Toped->Show(TRUE);
 
-
    GetLogDir();
    if (!GetLogFileName()) return FALSE;
    bool recovery_mode = false;
@@ -493,7 +492,7 @@ bool TopedApp::OnInit() {
    else
    {
       LogFile.init(std::string(logFileName.mb_str()));
-      //   wxLog::AddTraceMask("thread");
+      wxLog::AddTraceMask(wxT("thread"));
       if (1 < argc) 
       {
          wxString inputfile;

@@ -324,7 +324,7 @@ namespace browsers
    void layer_status(BROWSER_EVT_TYPE, const word, const bool);
    void layer_add(const std::string, const word);
    void layer_default(const word, const word);
-   void addTDTtab();
+   void addTDTtab(bool newthread = false);
    void addGDStab();
    void clearGDStab();
    void celltree_open(const std::string);
