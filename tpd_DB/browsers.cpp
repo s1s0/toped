@@ -537,11 +537,14 @@ void browsers::TDTbrowser::updateHier()
    int no = DATC->TEDLIB()->getLastLibRefNo();
    for(int libID=1; libID< no; libID++)
    {
+      hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(DATC->getLib(libID)->name().c_str(),  wxConvUTF8));
+      hCellBrowser->SetItemImage(hroot,0,wxTreeItemIcon_Normal);
+      hCellBrowser->SetItemImage(hroot,1,wxTreeItemIcon_Expanded);
       tdtH = DATC->getLib(libID)->hiertree()->GetFirstRoot(libID);
       while (tdtH)
       {
          std::string str = tdtH->GetItem()->name();
-         nroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), 
+         nroot = hCellBrowser->AppendItem(hroot, 
               wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
          hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
 
