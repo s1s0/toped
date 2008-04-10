@@ -213,7 +213,7 @@ int tellstdfunc::TDTloadlib::execute()
          updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, libID);
          DATC->TEDLIB()->cleanUndefLib();
          // populating cell hierarchy browser
-         browsers::addTDTtab();
+         browsers::addTDTtab(true);
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
       else
@@ -243,7 +243,7 @@ int tellstdfunc::TDTunloadlib::execute()
    
    if (DATC->TDTunloadlib(libname))
    {
-      browsers::addTDTtab();
+      browsers::addTDTtab(true);
       LogFile << LogFile.getFN() << "(\""<< libname << "\");"; LogFile.flush();
    }
    else
