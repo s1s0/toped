@@ -255,6 +255,7 @@ public:
    void              relink(const SGHierTree* comp)  {last = comp->last;}
 private:
    bool              thisLib(int libID);
+   bool              thisParent(int libID);
    const TYPE       *component; // points to the component
    SGHierTree*       last;      // last in the linear list of components
    SGHierTree*       parent;    // points up
@@ -293,17 +294,26 @@ template <class TYPE>
          return (libID < TARGETDB_LIB) ? true : (libID == component->libID());
       }
 
+template <class TYPE> 
+      bool   SGHierTree<TYPE>::thisParent(int libID) {
+         /*! Any libID < TARGETDB_LIB will make the functions to ignore it.
+             Idea is to have a possibility to traverse the entire
+             tree no matter where the cell belongs */
+         if (NULL == parent) return false;
+         return (libID < TARGETDB_LIB) ? true : (libID == parent->component->libID());
+      }
+
 template <class TYPE>
    SGHierTree<TYPE>*   SGHierTree<TYPE>::GetFirstRoot(int libID) {
       SGHierTree* wv = this;
-      while (wv && (wv->parent || !wv->thisLib(libID) ) ) wv = wv->last;
+      while (wv && (wv->thisParent(libID) || !wv->thisLib(libID) ) ) wv = wv->last;
       return wv;
    }
 
 template <class TYPE> 
    SGHierTree<TYPE>*   SGHierTree<TYPE>::GetNextRoot(int libID)  {
       SGHierTree* wv = this->last;
-      while (wv && (wv->parent || !wv->thisLib(libID) ) ) wv = wv->last;
+      while (wv && (wv->thisParent(libID) || !wv->thisLib(libID) ) ) wv = wv->last;
       return wv;
    }
 
