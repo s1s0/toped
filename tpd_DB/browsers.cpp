@@ -499,41 +499,45 @@ void browsers::TDTbrowser::updateHier()
    hCellBrowser->DeleteAllItems();
    hCellBrowser->AddRoot(wxT("hidden_wxroot"));
    laydata::tdtdesign* design;
+   bool rootexists = true;
    try
    {
       design = DATC->lockDB(false);
    }
-   catch (EXPTNactive_DB) {return;}
-   hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
-   hCellBrowser->SetItemImage(hroot,0,wxTreeItemIcon_Normal);
-   hCellBrowser->SetItemImage(hroot,1,wxTreeItemIcon_Expanded);
-
-   laydata::TDTHierTree *tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
-
-   if (NULL == tdtH) 
-   {
-      DATC->unlockDB();
-      return;
-   }
-
+   catch (EXPTNactive_DB) {rootexists = false;}
+   laydata::TDTHierTree *tdtH = NULL;
    wxTreeItemId nroot, nrootUndef;
-   while (tdtH)
+   if (rootexists)
    {
-      std::string str = tdtH->GetItem()->name();
-      nroot = hCellBrowser->AppendItem(hroot, 
-         wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
-      hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
-      hCellBrowser->SetItemImage(nroot,0,wxTreeItemIcon_Normal);
-      hCellBrowser->SetItemImage(nroot,1,wxTreeItemIcon_Expanded);
+      hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
+      hCellBrowser->SetItemImage(hroot,0,wxTreeItemIcon_Normal);
+      hCellBrowser->SetItemImage(hroot,1,wxTreeItemIcon_Expanded);
+      tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
 
-      collectChildren(tdtH, ALL_LIB, nroot);
-      tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
+      if (NULL == tdtH) 
+      {
+         DATC->unlockDB();
+         return;
+      }
+
+      while (tdtH)
+      {
+         std::string str = tdtH->GetItem()->name();
+         nroot = hCellBrowser->AppendItem(hroot, 
+            wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
+         hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+         hCellBrowser->SetItemImage(nroot,0,wxTreeItemIcon_Normal);
+         hCellBrowser->SetItemImage(nroot,1,wxTreeItemIcon_Expanded);
+
+         collectChildren(tdtH, ALL_LIB, nroot);
+         tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
+      }
    }
 
    int no = DATC->TEDLIB()->getLastLibRefNo();
    for(int libID=1; libID< no; libID++)
    {
-      tdtH = design->hiertree()->GetFirstRoot(libID);
+      tdtH = DATC->getLib(libID)->hiertree()->GetFirstRoot(libID);
       while (tdtH)
       {
          std::string str = tdtH->GetItem()->name();
