@@ -666,6 +666,7 @@ void browsers::TDTbrowser::OnTELLhighlightcell(wxString open_cell)
    hCellBrowser->EnsureVisible(active_structure);
 }
 
+
 void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname, int action) 
 {
    switch (action) 
@@ -694,6 +695,7 @@ void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname,
          break;
       }   
       case 2: 
+      case 3: 
       {//
          wxTreeItemId item, newparent;
          VERIFY(hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem()));

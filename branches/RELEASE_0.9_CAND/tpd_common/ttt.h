@@ -370,6 +370,7 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
    // returns 0 -> nothin's changed (this parent is already in the list)
    //         1 -> first parrent added (component use to be orphan)
    //         2 -> new parent added
+   //         3 -> first parrent added for library component
    SGHierTree* wv = lst->GetMember(comp);
    SGHierTree* wvP = lst->GetMember(prnt);
    // protect yourself - if parent or the component are not in the list 
@@ -380,8 +381,9 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
       wv->parent = wvP;
       wv->brother = wvP->Fchild;
       wvP->Fchild = wv;
-      return 1;
-   }   
+      if (TARGETDB_LIB == wv->component->libID()) return 1;
+      else                             return 3;
+   }
    else {
       // compondent is not an orphan, so first check that this comp 
       //already has this prnt. 
