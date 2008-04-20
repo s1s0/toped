@@ -55,7 +55,7 @@ namespace laydata {
       // callbacks
       void          (*btreeAddMember)(const char*, const char*, int action);
       void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
-      friend         void tdtcell::updateHierarchy(tdtdesign*);
+      friend         void tdtcell::updateHierarchy(tdtlibdir*);
       friend         void tdtcell::removePrep(tdtdesign*) const;
       friend         bool tdtcell::addchild(tdtdesign*, tdtdefaultcell*);
       friend         class tdtlibdir;
@@ -82,7 +82,7 @@ namespace laydata {
       void           write(TEDfile* const tedfile);
       int            readLibrary(TEDfile* const);
       tdtcell*       addcell(std::string name);
-      bool           removecell(std::string&, laydata::atticList*);
+      bool           removecell(std::string&, laydata::atticList*, laydata::tdtlibdir*);
       tdtdata*       addbox(word la, TP* p1, TP* p2);
       tdtdata*       addpoly(word, const pointlist*);
       tdtdata*       addwire(word, const pointlist*, word);
@@ -111,10 +111,10 @@ namespace laydata {
       void           move_selected( TP p1, TP p2, selectList**);
       void           rotate_selected( TP p, real angle, selectList**);
       void           flip_selected( TP p, bool Xaxis);
-      void           delete_selected(laydata::atticList*);
-      void           destroy_this(tdtdata* ds, word la);
-      bool           group_selected(std::string name);
-      shapeList*     ungroup_prep();
+      void           delete_selected(laydata::atticList*, laydata::tdtlibdir*);
+      void           destroy_this(tdtdata* ds, word la, laydata::tdtlibdir* );
+      bool           group_selected(std::string name, laydata::tdtlibdir*);
+      shapeList*     ungroup_prep(laydata::tdtlibdir*);
       atticList*     ungroup_this(shapeList*);
       bool           cutpoly(pointlist& pl, atticList** dasao);
       bool           merge(atticList** dasao) {return _target.edit()->merge_selected(dasao);}

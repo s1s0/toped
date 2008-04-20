@@ -497,7 +497,7 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name) {
    }
 }
 
-bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel)
+bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel, laydata::tdtlibdir* libdir)
 {
    if (_cells.end() == _cells.find(name))
    {
@@ -532,7 +532,7 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel)
          _cells.erase(_cells.find(name));
          //empty the contents of the removed cell and return it in atticList
          remcl->full_select();
-         remcl->delete_selected(this, fsel); // validation is not required here
+         remcl->delete_selected(fsel, libdir); // validation is not required here
          // finally - delete the cell. Cell is already empty
          delete remcl;
          return true;
@@ -900,28 +900,34 @@ void laydata::tdtdesign::flip_selected( TP p, bool Xaxis) {
    }
 }
 
-void laydata::tdtdesign::delete_selected(laydata::atticList* fsel) {
-   if (_target.edit()->delete_selected(this, fsel)) {
+void laydata::tdtdesign::delete_selected(laydata::atticList* fsel, 
+                                         laydata::tdtlibdir* libdir) 
+{
+   //laydata::tdtdesign* ATDB 
+   if (_target.edit()->delete_selected(fsel, libdir)) 
+   {
       // needs validation
       do {} while(validate_cells());
    }
 }
 
-void laydata::tdtdesign::destroy_this(tdtdata* ds, word la) {
-   if (_target.edit()->destroy_this(this, ds,la)) {
+void laydata::tdtdesign::destroy_this(tdtdata* ds, word la, laydata::tdtlibdir* libdir) 
+{
+   if (_target.edit()->destroy_this(libdir, ds,la))
+   {
       // needs validation
       do {} while(validate_cells());
    }
 }
 
-bool laydata::tdtdesign::group_selected(std::string name) {
+bool laydata::tdtdesign::group_selected(std::string name, laydata::tdtlibdir* libdir) {
    // first check that the cell with this name does not exist already
    if (_cells.end() != _cells.find(name)) {
       tell_log(console::MT_ERROR, "Cell with this name already exists. Group impossible");
       return false;
    }
    //unlink the fully selected shapes from the quadTree of the current cell
-   atticList* TBgroup = _target.edit()->groupPrep(this);
+   atticList* TBgroup = _target.edit()->groupPrep(libdir);
    if (TBgroup->empty()) {
       tell_log(console::MT_WARNING, "Nothing to group");
       delete TBgroup; return false;
@@ -960,9 +966,10 @@ bool laydata::tdtdesign::group_selected(std::string name) {
    return true;
 }
 
-laydata::shapeList* laydata::tdtdesign::ungroup_prep() {
+laydata::shapeList* laydata::tdtdesign::ungroup_prep(laydata::tdtlibdir* libdir) 
+{
    //unlink the selected ref/aref's from the quadTree of the current cell
-   return _target.edit()->ungroupPrep(this);
+   return _target.edit()->ungroupPrep(libdir);
 }
 
 laydata::atticList* laydata::tdtdesign::ungroup_this(laydata::shapeList* cells4u) {
