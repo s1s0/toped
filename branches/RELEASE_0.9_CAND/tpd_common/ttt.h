@@ -296,11 +296,36 @@ template <class TYPE>
 
 template <class TYPE> 
       bool   SGHierTree<TYPE>::thisParent(int libID) {
-         /*! Any libID < TARGETDB_LIB will make the functions to ignore it.
-             Idea is to have a possibility to traverse the entire
-             tree no matter where the cell belongs */
-         if (NULL == parent) return false;
-         return (libID < TARGETDB_LIB) ? true : (libID == parent->component->libID());
+         if      ( NULL == parent       ) 
+            return false;
+         else if ( libID <  TARGETDB_LIB ) 
+            // Any libID < TARGETDB_LIB will make the functions to ignore it.
+            // Idea is to have a possibility to traverse the entire
+            // tree no matter where the cell belongs
+            return true;
+         else if ( TARGETDB_LIB == component->libID())
+            // if current cell belongs to the target DB
+            return (TARGETDB_LIB == parent->component->libID());
+         else
+         {
+            // It's more complicated with the libraries here. Here is the problem:
+            // 1. We want to show database hierarchy including referenced library
+            //    cells.
+            // 2. Library hierarchy should not be influenced by the changes in the
+            //    database and particularly by the changes in the hierarchy of the
+            //    database.
+            // To acieve this for library cells we have to check whether all instances 
+            // of this type have parent from libID library
+            SGHierTree* wv = GetMember(component);
+            while (NULL != wv)
+            {
+               if (NULL != wv->parent)
+                  if (libID == wv->parent->component->libID())
+                     return true;
+               wv = wv->GetNextMember(component);
+            }
+            return false;
+         }
       }
 
 template <class TYPE>

@@ -514,24 +514,19 @@ void browsers::TDTbrowser::updateHier()
       hCellBrowser->SetItemImage(hroot,1,wxTreeItemIcon_Expanded);
       tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
 
-      if (NULL == tdtH) 
-      {
-         DATC->unlockDB();
-         return;
-      }
+      if (NULL != tdtH) 
+         while (tdtH)
+         {
+            std::string str = tdtH->GetItem()->name();
+            nroot = hCellBrowser->AppendItem(hroot, 
+               wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
+            hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+            hCellBrowser->SetItemImage(nroot,0,wxTreeItemIcon_Normal);
+            hCellBrowser->SetItemImage(nroot,1,wxTreeItemIcon_Expanded);
 
-      while (tdtH)
-      {
-         std::string str = tdtH->GetItem()->name();
-         nroot = hCellBrowser->AppendItem(hroot, 
-            wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
-         hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
-         hCellBrowser->SetItemImage(nroot,0,wxTreeItemIcon_Normal);
-         hCellBrowser->SetItemImage(nroot,1,wxTreeItemIcon_Expanded);
-
-         collectChildren(tdtH, ALL_LIB, nroot);
-         tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
-      }
+            collectChildren(tdtH, ALL_LIB, nroot);
+            tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
+         }
    }
 
    int no = DATC->TEDLIB()->getLastLibRefNo();
