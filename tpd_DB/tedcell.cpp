@@ -231,7 +231,7 @@ laydata::TDTHierTree* laydata::tdtdefaultcell::hierout(laydata::TDTHierTree*& Ht
    return Htree = DEBUG_NEW TDTHierTree(this, parent, Htree);
 }
 
-void laydata::tdtdefaultcell::updateHierarchy(tdtdesign*)
+void laydata::tdtdefaultcell::updateHierarchy(tdtlibdir*)
 {
 }
 
@@ -1011,16 +1011,20 @@ bool laydata::tdtcell::transfer_selected(laydata::tdtdesign* ATDB, const CTM& tr
    return overlapChanged(old_overlap, ATDB);
 }
 
-bool laydata::tdtcell::delete_selected(laydata::tdtdesign* ATDB, laydata::atticList* fsel) {
+bool laydata::tdtcell::delete_selected(laydata::atticList* fsel, 
+                                             laydata::tdtlibdir* libdir )
+{
    DBbox old_overlap = overlap();
    // for every single layer in the select list
-   for (selectList::const_iterator CL = _shapesel.begin(); 
-                                                  CL != _shapesel.end(); CL++) {
+   for (selectList::const_iterator CL = _shapesel.begin(); CL != _shapesel.end(); CL++) 
+   {
       assert((_layers.end() != _layers.find(CL->first)));
       // omit the layer if there are no fully selected shapes 
       if (0 == getFullySelected(CL->second)) continue;
-      if (_layers[CL->first]->delete_marked()) {
-         if (_layers[CL->first]->empty()) {
+      if (_layers[CL->first]->delete_marked()) 
+      {
+         if (_layers[CL->first]->empty()) 
+         {
             delete _layers[CL->first]; _layers.erase(_layers.find(CL->first));
          }   
          else _layers[CL->first]->validate();
@@ -1029,9 +1033,9 @@ bool laydata::tdtcell::delete_selected(laydata::tdtdesign* ATDB, laydata::atticL
    // Now move the selected shapes to the attic. Will be used for undo operations
    if (fsel) store_inAttic(*fsel);
    else      unselect_all(true);   
-   updateHierarchy(ATDB);
+   updateHierarchy(libdir);
    DBbox new_overlap = overlap();
-   return overlapChanged(old_overlap, ATDB);
+   return overlapChanged(old_overlap, (*libdir)());
 }
 
 bool laydata::tdtcell::cutpoly_selected(pointlist& plst, atticList** dasao) {
@@ -1174,7 +1178,7 @@ bool laydata::tdtcell::merge_selected(atticList** dasao) {
    return !dasao[0]->empty();
 }
 
-bool laydata::tdtcell::destroy_this(laydata::tdtdesign* ATDB, tdtdata* ds, word la) {
+bool laydata::tdtcell::destroy_this(laydata::tdtlibdir* libdir, tdtdata* ds, word la) {
    DBbox old_overlap = overlap();
    laydata::quadTree* lay = (_layers.find(la))->second;
    if (!lay) return false;
@@ -1186,8 +1190,8 @@ bool laydata::tdtcell::destroy_this(laydata::tdtdesign* ATDB, tdtdata* ds, word 
       else lay->validate();
    }
    delete(ds);
-   if (0 == la) updateHierarchy(ATDB);
-   return overlapChanged(old_overlap, ATDB);
+   if (0 == la) updateHierarchy(libdir);
+   return overlapChanged(old_overlap, (*libdir)());
 }
 
 void laydata::tdtcell::select_all(layprop::ViewProperties& viewprop)
@@ -1295,7 +1299,7 @@ laydata::shapeList* laydata::tdtcell::mergeprep(word layno) {
    return atl;
 }
 
-laydata::atticList* laydata::tdtcell::groupPrep(laydata::tdtdesign* ATDB) {
+laydata::atticList* laydata::tdtcell::groupPrep(laydata::tdtlibdir* libdir) {
    atticList* fsel = DEBUG_NEW atticList();
    dataList *lslct;
    shapeList *atl;
@@ -1333,11 +1337,11 @@ laydata::atticList* laydata::tdtcell::groupPrep(laydata::tdtdesign* ATDB) {
    // Don't invalidate parent cells. The reason is, that the new cell will
    // be refereced in the same place, so the final overlapping box is supposed
    // to remain the same. The quadTrees of the layers must be (and are) validated
-   updateHierarchy(ATDB);
+   updateHierarchy(libdir);
    return fsel;
 }
 
-laydata::shapeList* laydata::tdtcell::ungroupPrep(laydata::tdtdesign* ATDB) {
+laydata::shapeList* laydata::tdtcell::ungroupPrep(laydata::tdtlibdir* libdir) {
    shapeList* csel = DEBUG_NEW shapeList();
    if (_shapesel.end() != _shapesel.find(0)) {
       // unlink the selected cells
@@ -1367,7 +1371,7 @@ laydata::shapeList* laydata::tdtcell::ungroupPrep(laydata::tdtdesign* ATDB) {
    // ungroup operation, shapes will be just regrouped and the final 
    // overlapping box is supposed to remain the same. 
    // The quadTrees of the 0 layer must be (and is) validated
-   updateHierarchy(ATDB);
+   updateHierarchy(libdir);
    return csel;
 }
 
@@ -1636,9 +1640,10 @@ nameList* laydata::tdtcell::rehash_children()
    return cellnames;
 }
 
-void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB)
+void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
 {
-   tdtcell* childref;
+   laydata::tdtdesign* ATDB = (*libdir)();
+   tdtdefaultcell* childref;
    // Check that there are referenced cells
    if (_layers.end() == _layers.find(0))
       if (!_children.empty())
@@ -1649,6 +1654,8 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB)
                                        CN != _children.end(); CN++)
          {
             childref = ATDB->checkcell(*CN);
+            if (NULL == childref)
+               childref = libdir->getLibCellDef(*CN);
             childref->_orphan = ATDB->_hiertree->removeParent(
                                              childref, this, ATDB->_hiertree);
             ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), 
@@ -1668,6 +1675,8 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtdesign* ATDB)
          if (diff.second != _children.end())
          {
             childref = ATDB->checkcell(*(diff.second));
+            if (NULL == childref)
+               childref = libdir->getLibCellDef(*(diff.second));
             if (NULL != childref)
             {
                // remove it from the hierarchy
