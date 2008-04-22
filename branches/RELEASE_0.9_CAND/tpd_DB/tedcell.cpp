@@ -1656,10 +1656,9 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
             childref = ATDB->checkcell(*CN);
             if (NULL == childref)
                childref = libdir->getLibCellDef(*CN);
-            childref->_orphan = ATDB->_hiertree->removeParent(
-                                             childref, this, ATDB->_hiertree);
-            ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), 
-                                                            childref->orphan());
+            int res = ATDB->_hiertree->removeParent(childref, this, ATDB->_hiertree);
+            childref->_orphan = (res > 0);
+            ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), res);
          }
          _children.clear();
       }
@@ -1680,10 +1679,9 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
             if (NULL != childref)
             {
                // remove it from the hierarchy
-               childref->_orphan = ATDB->_hiertree->removeParent(
-                                             childref, this, ATDB->_hiertree);
-               ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(),
-                                                            childref->orphan());
+               int res = ATDB->_hiertree->removeParent(childref, this, ATDB->_hiertree);
+               childref->_orphan = (res > 0);
+               ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(),res);
             }
             _children.erase(diff.second);
          }
@@ -1732,16 +1730,15 @@ void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const {
       for (nameList::const_iterator CN = _children.begin(); CN != _children.end(); CN++)
       {
          childref = ATDB->checkcell(*CN);
-         childref->_orphan = ATDB->_hiertree->removeParent(
-               childref, this, ATDB->_hiertree);
-         ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(),
-                                 childref->orphan());
+         int res = ATDB->_hiertree->removeParent(childref, this, ATDB->_hiertree);
+         childref->_orphan = (res > 0);
+         ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), res);
       }
    }
    // remove this form _hiertree
    ATDB->_hiertree->removeRootItem(this, ATDB->_hiertree);
    // and browser tab
-   ATDB->btreeRemoveMember(name().c_str(), NULL, false);
+   ATDB->btreeRemoveMember(name().c_str(), NULL, 3);
    // don't clear children, the cell will be moved to Attic
    //_children.clear();
 }

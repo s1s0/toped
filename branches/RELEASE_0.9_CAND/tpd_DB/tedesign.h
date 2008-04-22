@@ -54,7 +54,7 @@ namespace laydata {
       int            libID()           const {return _libID;}
       // callbacks
       void          (*btreeAddMember)(const char*, const char*, int action);
-      void          (*btreeRemoveMember)(const char*, const char*, bool orphan);
+      void          (*btreeRemoveMember)(const char*, const char*, int action);
       friend         void tdtcell::updateHierarchy(tdtlibdir*);
       friend         void tdtcell::removePrep(tdtdesign*) const;
       friend         bool tdtcell::addchild(tdtdesign*, tdtdefaultcell*);

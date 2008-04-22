@@ -509,16 +509,16 @@ void browsers::TDTbrowser::updateHier()
    wxTreeItemId nroot, nrootUndef;
    if (rootexists)
    {
-      hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
-      hCellBrowser->SetItemImage(hroot,0,wxTreeItemIcon_Normal);
-      hCellBrowser->SetItemImage(hroot,1,wxTreeItemIcon_Expanded);
+      dbroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
+      hCellBrowser->SetItemImage(dbroot,0,wxTreeItemIcon_Normal);
+      hCellBrowser->SetItemImage(dbroot,1,wxTreeItemIcon_Expanded);
       tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
 
       if (NULL != tdtH) 
          while (tdtH)
          {
             std::string str = tdtH->GetItem()->name();
-            nroot = hCellBrowser->AppendItem(hroot, 
+            nroot = hCellBrowser->AppendItem(dbroot, 
                wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
             hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
             hCellBrowser->SetItemImage(nroot,0,wxTreeItemIcon_Normal);
@@ -532,14 +532,15 @@ void browsers::TDTbrowser::updateHier()
    int no = DATC->TEDLIB()->getLastLibRefNo();
    for(int libID=1; libID< no; libID++)
    {
-      hroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(DATC->getLib(libID)->name().c_str(),  wxConvUTF8));
-      hCellBrowser->SetItemImage(hroot,0,wxTreeItemIcon_Normal);
-      hCellBrowser->SetItemImage(hroot,1,wxTreeItemIcon_Expanded);
+      wxTreeItemId libroot;
+      libroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(),wxString(DATC->getLib(libID)->name().c_str(),  wxConvUTF8));
+      hCellBrowser->SetItemImage(libroot,0,wxTreeItemIcon_Normal);
+      hCellBrowser->SetItemImage(libroot,1,wxTreeItemIcon_Expanded);
       tdtH = DATC->getLib(libID)->hiertree()->GetFirstRoot(libID);
       while (tdtH)
       {
          std::string str = tdtH->GetItem()->name();
-         nroot = hCellBrowser->AppendItem(hroot, 
+         nroot = hCellBrowser->AppendItem(libroot, 
               wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
          hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
 
@@ -584,7 +585,7 @@ void browsers::TDTbrowser::OnCommand(wxCommandEvent& event)
           *(static_cast<wxString*>(event.GetClientData())), static_cast<int>(event.GetExtraLong()));
           delete (static_cast<wxString*>(event.GetClientData())); break;
       case BT_CELL_REMOVE:OnTELLremovecell(event.GetString(), 
-          *(static_cast<wxString*>(event.GetClientData())), (1 == event.GetExtraLong()) ? true : false);
+          *(static_cast<wxString*>(event.GetClientData())), static_cast<int>(event.GetExtraLong()));
           delete (static_cast<wxString*>(event.GetClientData())); break;
 
    }
@@ -705,49 +706,59 @@ void browsers::TDTbrowser::OnTELLaddcell(wxString cellname, wxString parentname,
    }
 }
 
-void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentname, bool orphan)
+void browsers::TDTbrowser::OnTELLremovecell(wxString cellname, wxString parentname, int action)
 {
    wxTreeItemId newparent;
-   if (orphan)
+   switch (action)
    {
-      wxTreeItemId item;
-      hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem());
-      hCellBrowser->copyItem(item, hCellBrowser->GetRootItem());
-      item = wxTreeItemId();
-      VERIFY(hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()));
-      VERIFY(hCellBrowser->findItem(cellname, item, newparent));
-      hCellBrowser->DeleteChildren(item);
-      hCellBrowser->Delete(item);
-   }
-   else if (wxT("") == parentname)
-   {// no parent => we are removing the cell, not it's reference
-      wxTreeItemId item;
-      
-      //Hier
-      wxTreeItemId item2;
-      VERIFY(hCellBrowser->findItem(cellname, item2, hCellBrowser->GetRootItem()));
-      // copy all children
-      // This part is "in case". The thing is that children should have been
-      // removed already, by tdtcell::removePrep
-      wxTreeItemIdValue cookie;
-      wxTreeItemId child = hCellBrowser->GetFirstChild(item2,cookie);
-      while (child.IsOk())
-      {
-         hCellBrowser->copyItem(child, hCellBrowser->GetRootItem());
-         child = hCellBrowser->GetNextChild(item2,cookie);
-      }
-      // finally delete the item and it's children
-      hCellBrowser->DeleteChildren(item2);
-      hCellBrowser->Delete(item2);
-   }
-   else 
-      while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()))
-      {
-         wxTreeItemId item;
-         VERIFY(hCellBrowser->findItem(cellname, item, newparent));
-         hCellBrowser->DeleteChildren(item);
-         hCellBrowser->Delete(item);
-      }
+      case 0:// no longer child of this parent - remove it from all parent instances
+      case 1:// Lib cells not more referenced in the DB
+         {
+            while (hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()))
+            {
+               wxTreeItemId item;
+               VERIFY(hCellBrowser->findItem(cellname, item, newparent));
+               hCellBrowser->DeleteChildren(item);
+               hCellBrowser->Delete(item);
+            }
+            break;
+         }
+      case 2://DB cell, which has no parents anymore
+         {
+            wxTreeItemId item;
+            hCellBrowser->findItem(cellname, item, hCellBrowser->GetRootItem());
+            hCellBrowser->copyItem(item, dbroot);
+            item = wxTreeItemId();
+            VERIFY(hCellBrowser->findItem(parentname, newparent, hCellBrowser->GetRootItem()));
+            VERIFY(hCellBrowser->findItem(cellname, item, newparent));
+            hCellBrowser->DeleteChildren(item);
+            hCellBrowser->Delete(item);
+            break;
+         }
+      case 3:// we are removing the cell, not it's reference
+         {
+            
+            wxTreeItemId item;
+            
+            wxTreeItemId item2;
+            VERIFY(hCellBrowser->findItem(cellname, item2, hCellBrowser->GetRootItem()));
+            // copy all children
+            // This part is "in case". The thing is that children should have been
+            // removed already, by tdtcell::removePrep
+            wxTreeItemIdValue cookie;
+            wxTreeItemId child = hCellBrowser->GetFirstChild(item2,cookie);
+            while (child.IsOk())
+            {
+               hCellBrowser->copyItem(child, hCellBrowser->GetRootItem());
+               child = hCellBrowser->GetNextChild(item2,cookie);
+            }
+            // finally delete the item and it's children
+            hCellBrowser->DeleteChildren(item2);
+            hCellBrowser->Delete(item2);
+            break;
+         }
+      default: assert(false);
+   }  
 }
 
 void browsers::TDTbrowser::OnReportUsedLayers(wxCommandEvent& WXUNUSED(event))
@@ -953,13 +964,13 @@ void browsers::treeAddMember(const char* cell, const char* parent, int action)
    wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);
 }
 
-void browsers::treeRemoveMember(const char* cell, const char* parent, bool orphan) 
+void browsers::treeRemoveMember(const char* cell, const char* parent, int action) 
 {
    assert(Browsers);
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(BT_CELL_REMOVE);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
-   eventCELLTREE.SetExtraLong(orphan);
+   eventCELLTREE.SetExtraLong(action);
    wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
    eventCELLTREE.SetClientData(static_cast<void*> (prnt));
    wxPostEvent(Browsers->TDTstruct(), eventCELLTREE);

@@ -245,7 +245,7 @@ public:
    SGHierTree*       GetNextMember(const TYPE* comp);
    bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    int               addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
-   bool              removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
+   int               removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    void              replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst);
    bool              removeRootItem(const TYPE*comp, SGHierTree*& lst);
    bool              itemRefdIn(int libID) const;
@@ -449,7 +449,10 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
 };
 
 template <class TYPE>
-bool  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
+int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
+   // returns 0 -> not much changed (the component has another parent)
+   //         1 -> A DB component which is now an orphan
+   //         2 -> A library component which is no more referenced in the DB
    SGHierTree* citem;
    SGHierTree* check;
    SGHierTree* cparent = lst->GetMember(prnt);
@@ -487,14 +490,17 @@ bool  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierT
       else if (citem) {
          // This is the last component of this type, so it has to 
          // be flagged as an orphan and preserved at the top of the
-         // hierarchy
+         // hierarchy, but only if it is NOT a library cell.
+         // library cells can't be removed from libraries and when removed from
+         // the DB, they are preserved in the library hierarchy anyway.
          citem->brother = NULL;
          citem->parent = NULL;
-         return true;
+         if   (TARGETDB_LIB == citem->component->libID()) return 2;
+         else                                             return 1;
       }
       cparent = cparent->GetNextMember(prnt);   
    }
-   return false;
+   return 0;
 }
 
 template <class TYPE>
