@@ -248,6 +248,7 @@ public:
    bool              removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    void              replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst);
    bool              removeRootItem(const TYPE*comp, SGHierTree*& lst);
+   bool              itemRefdIn(int libID) const;
 //   void              addLibRef(const SGHierTree* lref) { reflibs.add(lref);}
    const TYPE*       GetItem() const           {return component;}
    const SGHierTree* GetLast() const           {return last;}
@@ -285,6 +286,23 @@ SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst
       brother = NULL;
    Fchild = NULL;
 };
+
+template <class TYPE> 
+   bool SGHierTree<TYPE>::itemRefdIn(int libID) const {
+      if (libID == component->libID()) return true;
+      else
+      {
+         SGHierTree* wvparent = parent;
+         while (NULL != wvparent)
+         {
+            if (libID == wvparent->component->libID())
+               return true;
+            else
+               wvparent = wvparent->parent;
+         }
+         return false;
+      }
+   }
 
 template <class TYPE> 
       bool   SGHierTree<TYPE>::thisLib(int libID) {
