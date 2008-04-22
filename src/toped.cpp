@@ -843,7 +843,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
       }
    }
    SetStatusText(wxT("Opening file..."));
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+   wxFileDialog dlg2(this, wxT("Select a design to open"), wxT(""), wxT(""),
       wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) 
@@ -863,7 +863,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
 void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt) 
 {
    SetStatusText(wxT("Loading library..."));
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+   wxFileDialog dlg2(this, wxT("Select a library to open"), wxT(""), wxT(""),
       wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) 

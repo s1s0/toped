@@ -183,12 +183,10 @@ namespace browsers
       wxTreeItemId      active_structure;
       wxImageList*      _imageList;
       CellBrowser*      hCellBrowser;//Hierarchy cell browser
-      wxString          libName;
       wxButton*         _hierButton;
       wxButton*         _flatButton;
       enum {hier, flat} _status;
-      wxTreeItemId      hroot;
-      wxTreeItemId      froot;
+      wxTreeItemId      dbroot;
       void              updateFlat();
       void              updateHier();
       void              OnCommand(wxCommandEvent&);
@@ -197,7 +195,7 @@ namespace browsers
       void              OnTELLopencell(wxString);
       void              OnTELLhighlightcell(wxString);
       void              OnTELLaddcell(wxString, wxString, int);
-      void              OnTELLremovecell(wxString, wxString, bool);
+      void              OnTELLremovecell(wxString, wxString, int);
       void              OnHierView(wxCommandEvent&);
       void              OnFlatView(wxCommandEvent&);
       DECLARE_EVENT_TABLE();
@@ -330,7 +328,7 @@ namespace browsers
    void celltree_open(const std::string);
    void celltree_highlight(const std::string);
    void treeAddMember(const char*, const char*, int action = 0);
-   void treeRemoveMember(const char*, const char*, bool orphan);
+   void treeRemoveMember(const char*, const char*, int orphan);
    void parseCommand(const wxString);
 }
 
