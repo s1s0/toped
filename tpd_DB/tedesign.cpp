@@ -84,7 +84,8 @@ void laydata::tdtlibrary::clearHierTree(int libID)
    while (var1)
    {
       const TDTHierTree* var2 = var1->GetLast();
-      if (libID == var1->GetItem()->libID())
+//      if (libID == var1->GetItem()->libID())
+      if (var1->itemRefdIn(libID))
       {
          if (NULL != lastValid)
             lastValid->relink(var1);
