@@ -461,10 +461,17 @@ tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdREPORTSLCTD::execute() {
-   real DBscale = DATC->DBscale();
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->report_selected(DBscale);
-   DATC->unlockDB();
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected.");
+   }
+   else
+   {
+      real DBscale = DATC->DBscale();
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+         ATDB->report_selected(DBscale);
+      DATC->unlockDB();
+   }
    return EXEC_NEXT;
 }
 

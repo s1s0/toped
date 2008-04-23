@@ -459,12 +459,12 @@ laydata::tdtcellref* laydata::tdtcell::getcellover(TP pnt, ctmstack& transtack, 
     laydata::tdtdata *cellobj = NULL;
 //    laydata::tdtdata *shapeobj = NULL;
     laydata::tdtcellref *cref = NULL;
-    // go truough referenced cells ...
+    // go trough referenced cells ...
     while (_layers[0]->getobjectover(pnt,cellobj)) {
       //... and get the one that overlaps pnt.
       cref = static_cast<laydata::tdtcellref*>(cellobj);
-      if (cref->cstructure()) // avoid undefined cells
-      {
+      if (cref->cstructure() && (TARGETDB_LIB == cref->structure()->libID()) )
+      {// avoid undefined & library cells
          TP pntadj = pnt * cref->translation().Reversed();
          // if in the selected reference there are shapes that overlap pnt...
          if (cref->cstructure()->getshapeover(pntadj, viewprop))
