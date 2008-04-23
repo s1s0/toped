@@ -85,6 +85,11 @@ tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCOPYSEL_D::execute()
 {
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to copy");
+      return EXEC_NEXT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_copy, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
@@ -206,6 +211,11 @@ tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdMOVESEL_D::execute()
 {
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to move");
+      return EXEC_NEXT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_move, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
@@ -317,6 +327,11 @@ tellstdfunc::stdROTATESEL_D::stdROTATESEL_D(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdROTATESEL_D::execute()
 {
    real   angle  = getOpValue();
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to rotate");
+      return EXEC_NEXT;
+   }
    CTM rct;
    rct.Rotate(angle);
    OPstack.push(DEBUG_NEW telldata::ttreal(angle));
@@ -373,6 +388,11 @@ tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPXSEL_D::execute()
 {
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
+      return EXEC_NEXT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_flipX, &OPstack)) return EXEC_ABORT;
    return stdFLIPXSEL::execute();
@@ -425,6 +445,11 @@ tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPYSEL_D::execute()
 {
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
+      return EXEC_NEXT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_flipY, &OPstack)) return EXEC_ABORT;
    return stdFLIPYSEL::execute();
@@ -666,7 +691,7 @@ void tellstdfunc::lgcMERGE::undo()
 int tellstdfunc::lgcMERGE::execute()
 {
    if (DATC->numselected() == 0) {
-      tell_log(console::MT_ERROR,"No shapes selected. Nothing to cut");
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to cut");
    }
    else {
       //merge returns 2 Attic lists -> Delete/AddMerged
@@ -754,7 +779,7 @@ int tellstdfunc::lgcSTRETCH::execute()
 {
    if (DATC->numselected() == 0)
    {
-      tell_log(console::MT_ERROR,"No shapes selected. Nothing to modify");
+      tell_log(console::MT_ERROR,"No object selected. Nothing to modify");
    }
    else
    {

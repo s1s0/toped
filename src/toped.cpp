@@ -897,7 +897,7 @@ void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
    SetStatusText(wxT("Including command file..."));
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+   wxFileDialog dlg2(this, wxT("Select a script to run"), wxT(""), wxT(""),
       wxT("Tell files(*.tll)|*.tll|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {

@@ -237,7 +237,7 @@ int tellstdfunc::stdEDITPUSH::execute() {
       }
       else {
 /*-!-*/  DATC->unlockDB();
-         tell_log(console::MT_ERROR,"No cell reference found on this location");
+         tell_log(console::MT_ERROR,"No editable cell reference found on this location");
          delete selected;
       }
    delete p1;
