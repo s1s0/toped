@@ -54,7 +54,7 @@ Section "toped"
   File "tll\seed.tll"
   File "tll\laylogic.tll"
   File "tll\tcase.tll"
-  File "tll\structures.tll"
+  ;File "tll\structures.tll"
   File "tll\checklists.tll"
   File "tll\prop.tll"
 
@@ -169,7 +169,7 @@ Section "Uninstall"
   Delete $INSTDIR\tll\seed.tll
   Delete $INSTDIR\tll\laylogic.tll
   Delete $INSTDIR\tll\tcase.tll
-  Delete $INSTDIR\tll\structures.tll
+  ;Delete $INSTDIR\tll\structures.tll
   Delete $INSTDIR\tll\checklists.tll
   Delete $INSTDIR\tll\prop.tll
 

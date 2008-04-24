@@ -912,7 +912,7 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
 
 void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Stream files(*.sf;*.gds)|*.sf;*.gds;*.SF;*.GDS|All files(*.*)|*.*"),
+                     wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       SetStatusText(wxT("Parsing GDS file..."));
@@ -1069,7 +1069,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
    catch (EXPTN) {return;}
    DATC->unlockDB();
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Stream files |*.sf;*.gds"),
+                     wxT("Stream files |*.gds;*.sf"),
                      tpdfOPEN);
    if (wxID_OK != dlg2.ShowModal()) 
    {
@@ -1088,7 +1088,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
 void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
    SetStatusText(wxT("Exporting database to GDS file..."));
    wxFileDialog dlg2(this, wxT("Export design to GDS file"), wxT(""), wxT(""),
-      wxT("GDS files |*.sf;*.gds"),
+      wxT("GDS files |*.gds;*.sf"),
       tpdfSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();
@@ -1127,7 +1127,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    wxString fullCellName;
    fullCellName << cellname << wxT(".gds");
    wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
-      wxT("GDS files |*.sf;*.gds"),
+      wxT("GDS files |*.gds;*.sf"),
       tpdfSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();

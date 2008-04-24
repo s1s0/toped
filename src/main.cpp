@@ -445,7 +445,7 @@ bool TopedApp::OnInit() {
 //   DATC = DEBUG_NEW DataCenter();
 	wxImage::AddHandler(new wxPNGHandler);
    initDBLib();
-   Toped = DEBUG_NEW tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
+   Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
 	GetGlobalDirs();
    if (!LoadFontFile("arial1")) return FALSE;
    Toped->setIconDir(std::string(tpdUIDir.mb_str()));

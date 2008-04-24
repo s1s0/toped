@@ -354,6 +354,7 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
    SetSizer( topsizer );      // use the sizer for layout
 
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+   _text->SetFocus();
 }
 
 
