@@ -428,61 +428,75 @@ void browsers::TDTbrowser::updateFlat()
    wxTreeItemId temp, nroot;
    hCellBrowser->DeleteAllItems();
    hCellBrowser->AddRoot(wxT("hidden_wxroot"));
+   laydata::LibCellLists *cll;
+   laydata::LibCellLists::iterator curlib;
 //   froot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(),libname);
-   laydata::cellList::const_iterator it;
- 
-   try
+//   bool rootexists = true;
+//   try
+//   {
+//      DATC->lockDB(false);
+//   }
+//   catch (EXPTNactive_DB) {rootexists = false;}
+//   if (rootexists)
+//   {
+//      laydata::cellList::const_iterator it;
+//      for(it=DATC->cells().begin(); it!= DATC->cells().end(); it++)
+//      {
+//         wxString cellName = wxString( (*it).first.c_str(),  wxConvUTF8);
+//         if (!hCellBrowser->findItem(cellName, temp, hCellBrowser-> GetRootItem()))
+//         {
+//            nroot = hCellBrowser->AppendItem(hCellBrowser-> GetRootItem(), cellName);
+//            hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+//         }
+//      }
+//   }
+//  
+//   const laydata::cellList& cellList= DATC->TEDLIB()->getUndefinedCells();
+//   for(it=cellList.begin(); it!= cellList.end(); it++)
+//   {
+//      wxString cellName = wxString( (*it).first.c_str(),  wxConvUTF8);
+//
+//      if (!hCellBrowser->findItem(cellName, temp, hCellBrowser-> GetRootItem()))
+//      {
+//         nroot = hCellBrowser->AppendItem(hCellBrowser-> GetRootItem(), cellName);
+//         hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+//      }
+//   }
+
+   cll = DATC->getCells(UNDEFCELL_LIB);
+   for (curlib = cll->begin(); curlib != cll->end(); curlib++)
    {
-      DATC->lockDB(false);
+      laydata::cellList::const_iterator CL;
+      for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+      {
+         wxString cellName = wxString( CL->first.c_str(),  wxConvUTF8);
+         if (!hCellBrowser->findItem(cellName, temp, hCellBrowser-> GetRootItem()))
+         {
+            nroot = hCellBrowser->AppendItem(hCellBrowser-> GetRootItem(), cellName);
+            hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+         }
+      }
    }
-   catch (EXPTNactive_DB) {return;}
 
-      for(it=DATC->cells().begin(); it!= DATC->cells().end(); it++)
+   cll = DATC->getCells(ALL_LIB);
+   for (curlib = cll->begin(); curlib != cll->end(); curlib++)
+   {
+      laydata::cellList::const_iterator CL;
+      for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
       {
-         wxString cellName = wxString( (*it).first.c_str(),  wxConvUTF8);
-
+         wxString cellName = wxString( CL->first.c_str(),  wxConvUTF8);
          if (!hCellBrowser->findItem(cellName, temp, hCellBrowser-> GetRootItem()))
          {
             nroot = hCellBrowser->AppendItem(hCellBrowser-> GetRootItem(), cellName);
-            hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
+            hCellBrowser->SetItemTextColour(nroot,*wxBLACK);
          }
       }
-    
-  
-      const laydata::cellList& cellList= DATC->TEDLIB()->getUndefinedCells();
-      for(it=cellList.begin(); it!= cellList.end(); it++)
-      {
-         wxString cellName = wxString( (*it).first.c_str(),  wxConvUTF8);
+   }
 
-         if (!hCellBrowser->findItem(cellName, temp, hCellBrowser-> GetRootItem()))
-         {
-            nroot = hCellBrowser->AppendItem(hCellBrowser-> GetRootItem(), cellName);
-            hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
-         }
-      }
-
-      int no = DATC->TEDLIB()->getLastLibRefNo();
-      for(int libID=1; libID< no; libID++)
-      {
-         const laydata::LibCellLists* libCellList= DATC->getCells(libID);
-         for(it=cellList.begin(); it!= cellList.end(); it++)
-         {
-            wxString cellName = wxString( (*it).first.c_str(),  wxConvUTF8);
-
-            if (!hCellBrowser->findItem(cellName, temp, hCellBrowser-> GetRootItem()))
-            {
-               nroot = hCellBrowser->AppendItem(hCellBrowser-> GetRootItem(), cellName);
-               hCellBrowser->SetItemTextColour(nroot,*wxLIGHT_GREY);
-            }
-      }
-
-      }
    DATC->unlockDB();
 
    hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
 
-   //hCellBrowser->Hide();
-   //fCellBrowser->Show();
    (this->GetSizer())->Layout();
    //Set normal font for  _hierButton 
    //Set bold font for _flatButton;

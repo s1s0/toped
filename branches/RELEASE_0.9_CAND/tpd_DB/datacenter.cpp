@@ -759,15 +759,16 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
    laydata::LibCellLists* all_cells = DEBUG_NEW laydata::LibCellLists();
    if (libID == ALL_LIB)
    {
-      all_cells->push_back(&(_TEDLIB()->cells()));
+      if (NULL != _TEDLIB())
+         all_cells->push_back(&(_TEDLIB()->cells()));
       for (int i = 1; i < _TEDLIB.getLastLibRefNo(); i++)
          all_cells->push_back(&(_TEDLIB.getLib(i)->cells()));
    }
-   else if (libID == TARGETDB_LIB)
+   else if ( (libID == TARGETDB_LIB) && (NULL != _TEDLIB()) )
       all_cells->push_back(&(_TEDLIB()->cells()));
    else if (libID == UNDEFCELL_LIB)
       all_cells->push_back(&(_TEDLIB.getUndefinedCells()));
-   else
+   else if (libID < _TEDLIB.getLastLibRefNo()) 
       all_cells->push_back(&(_TEDLIB.getLib(libID)->cells()));
    return all_cells;
 }
