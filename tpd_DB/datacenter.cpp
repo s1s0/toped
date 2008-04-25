@@ -388,6 +388,7 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
 
 bool DataCenter::GDSparse(std::string filename) 
 {
+   bool status;
    if (lockGDS(false))
    {
       
@@ -399,13 +400,22 @@ bool DataCenter::GDSparse(std::string filename)
    // parse the GDS file - don't forget to lock the GDS mutex here!
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    _GDSDB = DEBUG_NEW GDSin::GDSFile(filename.c_str());
-   if (_GDSDB->status())
+   status = _GDSDB->status();
+   if (status)
    {
       // generate the hierarchy tree of cells
       _GDSDB->HierOut();
    }
+   else
+   {
+      if (NULL != _GDSDB) 
+      {
+         delete _GDSDB;
+         _GDSDB = NULL;
+      }
+   }
    unlockGDS();
-   return _GDSDB->status();
+   return status;
 }
 
 void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over) {
