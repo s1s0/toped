@@ -203,7 +203,9 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
 //-----------------------------------------------------------------------------
 // class DataCenter
 //-----------------------------------------------------------------------------
-DataCenter::DataCenter() {
+DataCenter::DataCenter(std::string localDir) 
+{
+   _localDir = localDir;
    _GDSDB = NULL; //_TEDDB = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
@@ -454,7 +456,7 @@ void DataCenter::newDesign(std::string name, time_t created)
    }
    _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, 0));
    _TEDLIB()->assign_properties(_properties);
-   _tedfilename = name + ".tdt";
+   _tedfilename = _localDir + name + ".tdt";
    _neversaved = true;
    _properties.setUU(_TEDLIB()->UU());
 }
@@ -773,8 +775,8 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
    return all_cells;
 }
 
-void initDBLib()
+void initDBLib(std::string localDir)
 {
-   DATC = DEBUG_NEW DataCenter();
+   DATC = DEBUG_NEW DataCenter(localDir);
 }
 

@@ -51,7 +51,7 @@ namespace GDSin {
 
 class DataCenter {
 public:
-                              DataCenter();
+                              DataCenter(std::string);
                              ~DataCenter(); 
    bool                       GDSparse(std::string filename);
    void                       GDSexport(std::string&, bool);
@@ -166,12 +166,13 @@ private:
    word                       _curlay;       // current drawing layer
    word                       _curcmdlay;    // layer used during current drawing operation
    bool                       _drawruler;    // draw a ruler while coposing a shape interactively
+   std::string                _localDir;
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
    wxMutex                    PROPLock;
 
 };
 
-void initDBLib();
+void initDBLib(std::string);
 
 #endif
