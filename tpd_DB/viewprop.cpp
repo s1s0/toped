@@ -588,7 +588,7 @@ void layprop::DrawProperties::savePatterns(FILE* prop_file) const
    fprintf(prop_file, "void  fillSetup() {\n");
    for( CI = _layfill.begin(); CI != _layfill.end(); CI++)
    {
-      fprintf(prop_file, "   int list %s = {\n", CI->first.c_str());
+      fprintf(prop_file, "   int list _%s = {\n", CI->first.c_str());
       byte* patdef = CI->second;
       for (byte i = 0; i < 16; i++)
       {
@@ -606,7 +606,7 @@ void layprop::DrawProperties::savePatterns(FILE* prop_file) const
    }
    for( CI = _layfill.begin(); CI != _layfill.end(); CI++)
    {
-      fprintf(prop_file, "   definefill(\"%s\", %s );\n", CI->first.c_str(), CI->first.c_str());
+      fprintf(prop_file, "   definefill(\"%s\", _%s );\n", CI->first.c_str(), CI->first.c_str());
    }
    fprintf(prop_file, "}\n\n");
 }
