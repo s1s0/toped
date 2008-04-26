@@ -314,9 +314,10 @@ bool DataCenter::TDTunloadlib(std::string libname)
    {
       // Relink everything
       _TEDLIB.relink();
+      // remove tberased cells from hierarchy tree 
+      tberased->clearHierTree();
       // get the new hierarchy
-      if (NULL != _TEDLIB())
-         _TEDLIB()->recreate_hierarchy(&_TEDLIB);
+      _TEDLIB.reextract_hierarchy();
       // after all above - remove the library (TODO! undo)
       delete tberased;
       return true;
@@ -461,7 +462,7 @@ void DataCenter::newDesign(std::string name, time_t created)
       // without much talking.
       // UNDO buffers will be reset as well in tellstdfunc::stdNEWDESIGN::execute()
       // but there is still a chance to restore everything - using the log file.
-      laydata::tdtlibrary::clearHierTree(TARGETDB_LIB);
+      _TEDLIB()->clearHierTree();
       _TEDLIB.deleteDB();
    }
    _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, 0));

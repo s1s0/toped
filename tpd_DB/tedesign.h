@@ -60,7 +60,7 @@ namespace laydata {
       friend         bool tdtcell::addchild(tdtdesign*, tdtdefaultcell*);
       friend         class tdtlibdir;
       friend         class TEDfile;
-      static void    clearHierTree(int);
+      void           clearHierTree();
       static void    clearEntireHierTree();
       static void    initHierTreePtr() {_hiertree = NULL;}
    protected:
@@ -178,6 +178,7 @@ namespace laydata {
       tdtlibrary*       getLib(int);
       std::string       getLibName(int);
       void              relink();
+      void              reextract_hierarchy();
 //      tdtlibrary*       getLib(std::string);
       int               getLastLibRefNo();
       bool              getLibCellRNP(std::string, refnamepair&, const int libID = TARGETDB_LIB) const;

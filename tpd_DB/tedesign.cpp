@@ -75,7 +75,7 @@ laydata::tdtlibrary::~tdtlibrary()
    clearLib();
 }
 
-void laydata::tdtlibrary::clearHierTree(int libID)
+void laydata::tdtlibrary::clearHierTree()
 {
    // get rid of the hierarchy tree
    const TDTHierTree* var1 = _hiertree;
@@ -84,8 +84,7 @@ void laydata::tdtlibrary::clearHierTree(int libID)
    while (var1)
    {
       const TDTHierTree* var2 = var1->GetLast();
-//      if (libID == var1->GetItem()->libID())
-      if (var1->itemRefdIn(libID))
+      if (var1->itemRefdIn(_libID))
       {
          if (NULL != lastValid)
             lastValid->relink(var1);
@@ -209,7 +208,7 @@ void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
 {
    if (TARGETDB_LIB == _libID)
    {
-      clearHierTree(TARGETDB_LIB);
+      clearHierTree();
    }
    // here - run the hierarchy extraction on orphans only
    for (laydata::cellList::const_iterator wc = _cells.begin();
@@ -218,28 +217,6 @@ void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
          _hiertree = wc->second->hierout(_hiertree, NULL, &_cells, libdir);
    }
 }
-
-//
-//bool laydata::tdtlibrary::`lays(std::string cellname, bool recursive, ListOfWords& laylist) const
-//{
-////   if ("" == cellname) targetcell = _target.edit();
-//   assert("" != cellname);
-//   tdtdefaultcell* targetcell = getcellnamepair(cellname)->second;
-//   if (NULL != targetcell) {
-//      targetcell->collect_usedlays(this, recursive, laylist);
-//      laylist.sort();
-//      laylist.unique();
-//      std::ostringstream ost;
-//      ost << "used layers: {";
-//      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
-//        ost << " " << *CL << " ";
-//      ost << "}";
-//      tell_log(console::MT_INFO, ost.str());
-//      return true;
-//   }
-//   else return false;
-//}
-//
 
 laydata::refnamepair laydata::tdtlibrary::secure_defaultcell(std::string name)
 {
@@ -360,6 +337,18 @@ void laydata::tdtlibdir::relink()
    // finally - relink the active database
    if (NULL !=_TEDDB) 
       _TEDDB->relink(this);
+}
+
+void laydata::tdtlibdir::reextract_hierarchy()
+{
+   // parse starting from the back of the library queue
+   for (int i = _libdirectory.size() - 2; i > 0 ; i--)
+   {
+      _libdirectory[i]->second->recreate_hierarchy(this);
+   }
+   // finally - relink the active database
+   if (NULL !=_TEDDB) 
+      _TEDDB->recreate_hierarchy(this);
 }
 
 /*! Searches the library directory for a cell \a name. Returns true and updates \a striter if
