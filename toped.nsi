@@ -47,6 +47,7 @@ Section "toped"
   File "release\toped.exe"
   File "glu32.dll"
   File "toped_example.bat"
+  File "authors"
   File "news.txt"
   File "readme.txt"
 
@@ -165,6 +166,7 @@ Section "Uninstall"
   Delete $INSTDIR\toped_example.bat
   Delete $INSTDIR\news.txt
   Delete $INSTDIR\readme.txt
+  Delete $INSTDIR\authors
 
   Delete $INSTDIR\tll\seed.tll
   Delete $INSTDIR\tll\laylogic.tll
