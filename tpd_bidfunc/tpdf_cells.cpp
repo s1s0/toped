@@ -54,7 +54,7 @@ void tellstdfunc::stdNEWCELL::undo()
    // get the name of the DEBUG_NEW cell
    std::string  nm = getStringValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-   ATDB->removecell(nm,NULL);
+      ATDB->removecell(nm,NULL, DATC->TEDLIB());
    DATC->unlockDB();
 }
 
@@ -116,8 +116,8 @@ int tellstdfunc::stdREMOVECELL::execute()
 {
    std::string nm = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-   laydata::atticList* cell_contents = DEBUG_NEW laydata::atticList();
-   bool removed = ATDB->removecell(nm,cell_contents);
+      laydata::atticList* cell_contents = DEBUG_NEW laydata::atticList();
+      bool removed = ATDB->removecell(nm,cell_contents, DATC->TEDLIB());
    DATC->unlockDB();
    if (removed)
    {  // removal has been successfull
@@ -237,7 +237,7 @@ int tellstdfunc::stdEDITPUSH::execute() {
       }
       else {
 /*-!-*/  DATC->unlockDB();
-         tell_log(console::MT_ERROR,"No cell reference found on this location");
+         tell_log(console::MT_ERROR,"No editable cell reference found on this location");
          delete selected;
       }
    delete p1;
@@ -390,8 +390,8 @@ void tellstdfunc::stdGROUP::undo() {
    std::string  name = getStringValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->select_fromList(get_ttlaylist(pl));
-      ATDB->ungroup_this(ATDB->ungroup_prep());
-      VERIFY(ATDB->removecell(name,NULL));
+      ATDB->ungroup_this(ATDB->ungroup_prep(DATC->TEDLIB()));
+      VERIFY(ATDB->removecell(name,NULL, DATC->TEDLIB()));
    DATC->unlockDB();
    delete pl;
    UpdateLV();
@@ -400,7 +400,7 @@ void tellstdfunc::stdGROUP::undo() {
 int tellstdfunc::stdGROUP::execute() {
    std::string name = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-   bool group_sucessful = ATDB->group_selected(name);
+      bool group_sucessful = ATDB->group_selected(name, DATC->TEDLIB());
    DATC->unlockDB();
    if (group_sucessful)
    {
@@ -437,7 +437,7 @@ void tellstdfunc::stdUNGROUP::undo() {
       // select them ...
       ATDB->select_fromList(get_ttlaylist(pl));
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL);
+      ATDB->delete_selected(NULL, DATC->TEDLIB());
       // now get the list of the ungroupped cell ref's from the UNDO stack
       telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // and add them to the target cell
@@ -457,7 +457,7 @@ void tellstdfunc::stdUNGROUP::undo() {
 
 int tellstdfunc::stdUNGROUP::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      laydata::shapeList* cells4u = ATDB->ungroup_prep();
+      laydata::shapeList* cells4u = ATDB->ungroup_prep(DATC->TEDLIB());
    DATC->unlockDB();
    if (cells4u->empty()) {
       tell_log(console::MT_ERROR,"Nothing to ungroup");

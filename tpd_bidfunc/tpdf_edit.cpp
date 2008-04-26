@@ -54,7 +54,7 @@ void tellstdfunc::stdCOPYSEL::undo()
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       //clean up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL); 
+      ATDB->delete_selected(NULL, DATC->TEDLIB()); 
       ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();   
    delete (pl);
@@ -85,6 +85,11 @@ tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCOPYSEL_D::execute()
 {
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to copy");
+      return EXEC_NEXT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_copy, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
@@ -146,7 +151,8 @@ void tellstdfunc::stdMOVESEL::undo()
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++) {
          ATDB->destroy_this(static_cast<telldata::ttlayout*>(added->mlist()[j])->data(),
-                           static_cast<telldata::ttlayout*>(added->mlist()[j])->layer());
+                           static_cast<telldata::ttlayout*>(added->mlist()[j])->layer(), 
+                           DATC->TEDLIB());
       }
    DATC->unlockDB();   
    delete failed;
@@ -205,6 +211,11 @@ tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdMOVESEL_D::execute()
 {
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to move");
+      return EXEC_NEXT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_move, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
@@ -265,7 +276,8 @@ void tellstdfunc::stdROTATESEL::undo()
       for (word j = 0 ; j < added->mlist().size(); j++)
       {
          ATDB->destroy_this(static_cast<telldata::ttlayout*>(added->mlist()[j])->data(),
-                           static_cast<telldata::ttlayout*>(added->mlist()[j])->layer());
+                           static_cast<telldata::ttlayout*>(added->mlist()[j])->layer(),
+                           DATC->TEDLIB());
       }
    DATC->unlockDB();
    delete failed;
@@ -315,6 +327,11 @@ tellstdfunc::stdROTATESEL_D::stdROTATESEL_D(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdROTATESEL_D::execute()
 {
    real   angle  = getOpValue();
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to rotate");
+      return EXEC_NEXT;
+   }
    CTM rct;
    rct.Rotate(angle);
    OPstack.push(DEBUG_NEW telldata::ttreal(angle));
@@ -371,6 +388,11 @@ tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPXSEL_D::execute()
 {
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
+      return EXEC_NEXT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_flipX, &OPstack)) return EXEC_ABORT;
    return stdFLIPXSEL::execute();
@@ -423,6 +445,11 @@ tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPYSEL_D::execute()
 {
+   if (DATC->numselected() == 0)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
+      return EXEC_NEXT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_flipY, &OPstack)) return EXEC_ABORT;
    return stdFLIPYSEL::execute();
@@ -457,7 +484,7 @@ int tellstdfunc::stdDELETESEL::execute()
    UNDOcmdQ.push_front(this);
    laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->delete_selected(sh_delist);
+      ATDB->delete_selected(sh_delist, DATC->TEDLIB());
    DATC->unlockDB();   
    UNDOPstack.push_front(make_ttlaylist(sh_delist));
    clean_atticlist(sh_delist); delete sh_delist;
@@ -495,14 +522,14 @@ void tellstdfunc::lgcCUTPOLY::undo()
       // select them ...
       ATDB->select_fromList(get_ttlaylist(pl));
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL);
+      ATDB->delete_selected(NULL, DATC->TEDLIB());
       delete pl;
       // now get the list of cuts ...
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // select them ...
       ATDB->select_fromList(get_ttlaylist(pl));
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL);
+      ATDB->delete_selected(NULL, DATC->TEDLIB());
       delete pl;
       // now get the list of deleted shapes
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
@@ -549,7 +576,7 @@ int tellstdfunc::lgcCUTPOLY::execute()
                // select the shapes to delete & delete them ...
                ATDB->select_fromList(get_ttlaylist(shdeleted));
                laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
-               ATDB->delete_selected(sh_delist);
+               ATDB->delete_selected(sh_delist, DATC->TEDLIB());
                // ... not forgetting to save them in the undo data stack for undo
                UNDOPstack.push_front(make_ttlaylist(sh_delist));
                // clean-up the delete attic list
@@ -645,7 +672,7 @@ void tellstdfunc::lgcMERGE::undo()
       // select them ...
       ATDB->select_fromList(get_ttlaylist(pl));
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL);
+      ATDB->delete_selected(NULL, DATC->TEDLIB());
       delete pl;
       // now get the list of deleted shapes
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
@@ -664,7 +691,7 @@ void tellstdfunc::lgcMERGE::undo()
 int tellstdfunc::lgcMERGE::execute()
 {
    if (DATC->numselected() == 0) {
-      tell_log(console::MT_ERROR,"No shapes selected. Nothing to cut");
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to cut");
    }
    else {
       //merge returns 2 Attic lists -> Delete/AddMerged
@@ -732,7 +759,7 @@ void tellstdfunc::lgcSTRETCH::undo()
       // select them ...
       ATDB->select_fromList(get_ttlaylist(pl));
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL);
+      ATDB->delete_selected(NULL, DATC->TEDLIB());
       delete pl;
       // now get the list of deleted shapes
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
@@ -752,7 +779,7 @@ int tellstdfunc::lgcSTRETCH::execute()
 {
    if (DATC->numselected() == 0)
    {
-      tell_log(console::MT_ERROR,"No shapes selected. Nothing to modify");
+      tell_log(console::MT_ERROR,"No object selected. Nothing to modify");
    }
    else
    {
@@ -782,7 +809,7 @@ int tellstdfunc::lgcSTRETCH::execute()
                // select the shapes to delete & delete them ...
                ATDB->select_fromList(get_ttlaylist(shdeleted));
                laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
-               ATDB->delete_selected(sh_delist);
+               ATDB->delete_selected(sh_delist, DATC->TEDLIB());
                // ... not forgetting to save them in the undo data stack for undo
                UNDOPstack.push_front(make_ttlaylist(sh_delist));
                // clean-up the delete attic list
@@ -891,7 +918,7 @@ void tellstdfunc::stdCHANGEREF::undo()
       // select them ...
       ATDB->select_fromList(get_ttlaylist(pl));
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL);
+      ATDB->delete_selected(NULL, DATC->TEDLIB());
       // now get the list of the old cell ref's from the UNDO stack
       telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // and add them to the target cell
@@ -914,7 +941,7 @@ int tellstdfunc::stdCHANGEREF::execute()
    laydata::tdtdesign* ATDB = DATC->lockDB();
       bool refok = ATDB->checkValidRef(newref);
       if (refok)
-         cells4u = ATDB->ungroup_prep();
+         cells4u = ATDB->ungroup_prep(DATC->TEDLIB());
    DATC->unlockDB();
    if (refok)
    {
@@ -973,7 +1000,7 @@ void tellstdfunc::stdCHANGESTRING::undo()
       // select them ...
       ATDB->select_fromList(get_ttlaylist(pl));
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL);
+      ATDB->delete_selected(NULL, DATC->TEDLIB());
       // now get the list of the old text objects from the UNDO stack
       telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // and add them to the target cell
@@ -1016,7 +1043,7 @@ int tellstdfunc::stdCHANGESTRING::execute()
          ATDB->select_fromList(texts4u);
          // delete them from the DB - get back the list of deleted shapes.
          laydata::atticList* fha = DEBUG_NEW laydata::atticList();
-         ATDB->delete_selected(fha);
+         ATDB->delete_selected(fha, DATC->TEDLIB());
          // save the deleted shapes in the UNDO data stack
          UNDOPstack.push_front(make_ttlaylist(fha));
          // replace the strings

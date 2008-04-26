@@ -12,7 +12,7 @@
 Name "toped"
 
 ; The file to write
-OutFile "toped_install-086RC.exe"
+OutFile "toped_install-09RC.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\toped
@@ -44,24 +44,48 @@ Section "toped"
   SetOutPath $INSTDIR
   
   ; Put file there
-  File "toped.exe"
+  File "release\toped.exe"
   File "glu32.dll"
-  ;File "Microsoft.VC80.CRT.manifest"
-  ;File "toped.exe.manifest"
-  ;File "toped.exe.intermediate.manifest"
-  ;File "msvcm80.dll"
-  ;File "msvcp80.dll"
-  ;File "msvcr80.dll"
   File "toped_example.bat"
+  File "authors"
   File "news.txt"
   File "readme.txt"
 
   SetOutPath $INSTDIR\tll
-  File "seed.tll"
-  File "laylogic.tll"
-  File "tcase.tll"
-  File "structures.tll"
-  File "checklists.tll"
+  File "tll\seed.tll"
+  File "tll\laylogic.tll"
+  File "tll\tcase.tll"
+  ;File "tll\structures.tll"
+  File "tll\checklists.tll"
+  File "tll\prop.tll"
+
+  ;icons
+  SetOutPath $INSTDIR\icons
+  File "icons\box16x16.png"
+  File "icons\copy16x16.png"
+  File "icons\cut_with_poly16x16.png"
+  File "icons\delete16x16.png"
+  File "icons\edit_pop16x16.png"
+  File "icons\edit_push16x16.png"
+  File "icons\flipx16x16.png"
+  File "icons\flipy16x16.png"
+  File "icons\move16x16.png"
+  File "icons\box16x16.png"
+  File "icons\new16x16.png"
+  File "icons\open16x16.png"
+  File "icons\poly16x16.png"  
+  File "icons\redo16x16.png"
+  File "icons\rotate_left16x16.png"
+  File "icons\rotate_right16x16.png"
+  File "icons\ruler16x16.png"
+  File "icons\save16x16.png"
+  File "icons\text16x16.png"
+  File "icons\undo16x16.png"
+  File "icons\wire16x16.png"
+  File "icons\zoom_all16x16.png"
+  File "icons\zoom_in16x16.png"
+  File "icons\zoom_out16x16.png"
+
 
   ;Read current user directory
   ;ReadRegStr $R0 HKCU "Environment" "HOME"
@@ -78,6 +102,11 @@ Section "toped"
   File "fonts\techno1.glf"
   File "fonts\times_new1.glf"
   
+  ;Change installation directory to $INSTDIR\examples
+  SetOutPath $INSTDIR\examples
+  File "foll.tdt"
+
+
   ;Return installation directory
   SetOutPath $INSTDIR
     
@@ -134,21 +163,17 @@ Section "Uninstall"
   ; Remove files and uninstaller
   Delete $INSTDIR\toped.exe
   Delete $INSTDIR\glu32.dll
-  ;Delete $INSTDIR\Microsoft.VC80.CRT.manifest
-  ;Delete "$INSTDIR\toped.exe.manifest"
-  ;Delete "$INSTDIR\toped.exe.intermediate.manifest"
-  ;Delete $INSTDIR\msvcm80d.dll
-  ;Delete $INSTDIR\msvcp80d.dll
-  ;Delete $INSTDIR\msvcr80d.dll
   Delete $INSTDIR\toped_example.bat
   Delete $INSTDIR\news.txt
   Delete $INSTDIR\readme.txt
+  Delete $INSTDIR\authors
 
   Delete $INSTDIR\tll\seed.tll
   Delete $INSTDIR\tll\laylogic.tll
   Delete $INSTDIR\tll\tcase.tll
-  Delete $INSTDIR\tll\structures.tll
+  ;Delete $INSTDIR\tll\structures.tll
   Delete $INSTDIR\tll\checklists.tll
+  Delete $INSTDIR\tll\prop.tll
 
   Delete $INSTDIR\fonts\arial1.glf
   Delete $INSTDIR\fonts\courier1.glf
@@ -156,6 +181,33 @@ Section "Uninstall"
   Delete $INSTDIR\fonts\techno0.glf
   Delete $INSTDIR\fonts\techno1.glf
   Delete $INSTDIR\fonts\times_new1.glf
+
+  Delete $INSTDIR\icons\box16x16.png
+  Delete $INSTDIR\icons\copy16x16.png
+  Delete $INSTDIR\icons\cut_with_poly16x16.png
+  Delete $INSTDIR\icons\delete16x16.png
+  Delete $INSTDIR\icons\edit_pop16x16.png
+  Delete $INSTDIR\icons\edit_push16x16.png
+  Delete $INSTDIR\icons\flipx16x16.png
+  Delete $INSTDIR\icons\flipy16x16.png
+  Delete $INSTDIR\icons\move16x16.png
+  Delete $INSTDIR\icons\box16x16.png
+  Delete $INSTDIR\icons\new16x16.png
+  Delete $INSTDIR\icons\open16x16.png
+  Delete $INSTDIR\icons\poly16x16.png  
+  Delete $INSTDIR\icons\redo16x16.png
+  Delete $INSTDIR\icons\rotate_left16x16.png
+  Delete $INSTDIR\icons\rotate_right16x16.png
+  Delete $INSTDIR\icons\ruler16x16.png
+  Delete $INSTDIR\icons\save16x16.png
+  Delete $INSTDIR\icons\text16x16.png
+  Delete $INSTDIR\icons\undo16x16.png
+  Delete $INSTDIR\icons\wire16x16.png
+  Delete $INSTDIR\icons\zoom_all16x16.png
+  Delete $INSTDIR\icons\zoom_in16x16.png
+  Delete $INSTDIR\icons\zoom_out16x16.png
+
+  Delete $INSTDIR\examples\foll.tdt
 
   ReadRegStr $R0 HKCU "Environment" "HOME"
   ;ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Personal"
@@ -172,8 +224,11 @@ Section "Uninstall"
   Delete $INSTDIR\*.*
   
   RMDir $INSTDIR\log
+  RMDir $INSTDIR\icons
   RMDir $INSTDIR\tll
   RMDir $INSTDIR\fonts
+  RMDir $INSTDIR\examples
+
   Delete $INSTDIR\uninstall.exe
 
 

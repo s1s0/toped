@@ -203,7 +203,9 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
 //-----------------------------------------------------------------------------
 // class DataCenter
 //-----------------------------------------------------------------------------
-DataCenter::DataCenter() {
+DataCenter::DataCenter(std::string localDir) 
+{
+   _localDir = localDir;
    _GDSDB = NULL; //_TEDDB = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
@@ -312,9 +314,10 @@ bool DataCenter::TDTunloadlib(std::string libname)
    {
       // Relink everything
       _TEDLIB.relink();
+      // remove tberased cells from hierarchy tree 
+      tberased->clearHierTree();
       // get the new hierarchy
-      if (NULL != _TEDLIB())
-         _TEDLIB()->recreate_hierarchy(&_TEDLIB);
+      _TEDLIB.reextract_hierarchy();
       // after all above - remove the library (TODO! undo)
       delete tberased;
       return true;
@@ -364,26 +367,29 @@ bool DataCenter::TDTwrite(const char* filename)
    return true;
 }
 
-void DataCenter::GDSexport(std::string& filename)
+void DataCenter::GDSexport(std::string& filename, bool x2048)
 {
    std::string nfn;
    //Get actual time
    GDSin::GDSFile gdsex(filename, time(NULL));
    _TEDLIB()->GDSwrite(gdsex, NULL, true);
-   gdsex.updateLastRecord();gdsex.closeFile();
+   if (x2048) gdsex.updateLastRecord();
+   gdsex.closeFile();
 }
 
-void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& filename)
+void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& filename, bool x2048)
 {
    std::string nfn;
    //Get actual time
    GDSin::GDSFile gdsex(filename, time(NULL));
    _TEDLIB()->GDSwrite(gdsex, cell, recur);
-   gdsex.updateLastRecord();gdsex.closeFile();
+   if (x2048) gdsex.updateLastRecord();
+   gdsex.closeFile();
 }
 
 bool DataCenter::GDSparse(std::string filename) 
 {
+   bool status;
    if (lockGDS(false))
    {
       
@@ -395,13 +401,22 @@ bool DataCenter::GDSparse(std::string filename)
    // parse the GDS file - don't forget to lock the GDS mutex here!
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    _GDSDB = DEBUG_NEW GDSin::GDSFile(filename.c_str());
-   if (_GDSDB->status())
+   status = _GDSDB->status();
+   if (status)
    {
       // generate the hierarchy tree of cells
       _GDSDB->HierOut();
    }
+   else
+   {
+      if (NULL != _GDSDB) 
+      {
+         delete _GDSDB;
+         _GDSDB = NULL;
+      }
+   }
    unlockGDS();
-   return _GDSDB->status();
+   return status;
 }
 
 void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over) {
@@ -447,12 +462,12 @@ void DataCenter::newDesign(std::string name, time_t created)
       // without much talking.
       // UNDO buffers will be reset as well in tellstdfunc::stdNEWDESIGN::execute()
       // but there is still a chance to restore everything - using the log file.
-      laydata::tdtlibrary::clearHierTree(TARGETDB_LIB);
+      _TEDLIB()->clearHierTree();
       _TEDLIB.deleteDB();
    }
    _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, 0));
    _TEDLIB()->assign_properties(_properties);
-   _tedfilename = name + ".tdt";
+   _tedfilename = _localDir + name + ".tdt";
    _neversaved = true;
    _properties.setUU(_TEDLIB()->UU());
 }
@@ -757,21 +772,22 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
    laydata::LibCellLists* all_cells = DEBUG_NEW laydata::LibCellLists();
    if (libID == ALL_LIB)
    {
-      all_cells->push_back(&(_TEDLIB()->cells()));
+      if (NULL != _TEDLIB())
+         all_cells->push_back(&(_TEDLIB()->cells()));
       for (int i = 1; i < _TEDLIB.getLastLibRefNo(); i++)
          all_cells->push_back(&(_TEDLIB.getLib(i)->cells()));
    }
-   else if (libID == TARGETDB_LIB)
+   else if ( (libID == TARGETDB_LIB) && (NULL != _TEDLIB()) )
       all_cells->push_back(&(_TEDLIB()->cells()));
    else if (libID == UNDEFCELL_LIB)
       all_cells->push_back(&(_TEDLIB.getUndefinedCells()));
-   else
+   else if (libID < _TEDLIB.getLastLibRefNo()) 
       all_cells->push_back(&(_TEDLIB.getLib(libID)->cells()));
    return all_cells;
 }
 
-void initDBLib()
+void initDBLib(std::string localDir)
 {
-   DATC = DEBUG_NEW DataCenter();
+   DATC = DEBUG_NEW DataCenter(localDir);
 }
 
