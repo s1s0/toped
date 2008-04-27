@@ -1,3 +1,28 @@
+Toped release 0.9 changes and updates
+=======================================
+
+Graphic User interface
+------------------------
+* toolbars
+* new layer definition panel
+* updates in the hierarchy cell browser
+
+Graphics and database handling
+--------------------------------
+* introduction of layout libraries with dynamic linking
+* resize operations - shrink/bloat on all layout objects except texts
+* Bug fixes in wire validation algorithms
+* All validations and logic operations are now using single line cross
+  algorithm implementation 
+
+Updates in the TELL script
+---------------------------
+* sin/cos functions added to allow arc/circle generation
+* multiline comments
+
+
+--------------------------------------------------------------------------------
+
 Toped release 0.86 changes and updates
 =======================================
 * Improving stability especially of the windows version

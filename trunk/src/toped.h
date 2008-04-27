@@ -99,7 +99,7 @@ namespace tui {
       wxWindow*               getFrame()       {return this;}
       wxAuiManager*           getAuiManager()  {return &_winManager;}
       void                    initToolBars();
-      void                    setUIDir(const std::string& uiDir);
+      void                    setIconDir(const std::string& uiDir);
    private:
       void                    initMenuBar();
       void                    initView();

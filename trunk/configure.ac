@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(toped, 0.8.x)
+AC_INIT(toped, 0.9.0)
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.cpp])
@@ -79,5 +79,11 @@ AX_CHECK_GLU
 
 
 AC_CONFIG_FILES([Makefile tpd_common/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile 
-   tpd_DB/Makefile src/Makefile tll/Makefile fonts/Makefile ui/Makefile])
+   tpd_DB/Makefile 
+   src/Makefile 
+   tll/Makefile 
+   fonts/Makefile 
+   ui/Makefile
+   icons/Makefile
+])
 AC_OUTPUT

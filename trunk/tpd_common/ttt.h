@@ -245,9 +245,10 @@ public:
    SGHierTree*       GetNextMember(const TYPE* comp);
    bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    int               addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
-   bool              removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
+   int               removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    void              replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst);
    bool              removeRootItem(const TYPE*comp, SGHierTree*& lst);
+   bool              itemRefdIn(int libID) const;
 //   void              addLibRef(const SGHierTree* lref) { reflibs.add(lref);}
    const TYPE*       GetItem() const           {return component;}
    const SGHierTree* GetLast() const           {return last;}
@@ -255,6 +256,7 @@ public:
    void              relink(const SGHierTree* comp)  {last = comp->last;}
 private:
    bool              thisLib(int libID);
+   bool              thisParent(int libID);
    const TYPE       *component; // points to the component
    SGHierTree*       last;      // last in the linear list of components
    SGHierTree*       parent;    // points up
@@ -286,6 +288,23 @@ SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst
 };
 
 template <class TYPE> 
+   bool SGHierTree<TYPE>::itemRefdIn(int libID) const {
+      if (libID == component->libID()) return true;
+      else
+      {
+         SGHierTree* wvparent = parent;
+         while (NULL != wvparent)
+         {
+            if (libID == wvparent->component->libID())
+               return true;
+            else
+               wvparent = wvparent->parent;
+         }
+         return false;
+      }
+   }
+
+template <class TYPE> 
       bool   SGHierTree<TYPE>::thisLib(int libID) {
          /*! Any libID < TARGETDB_LIB will make the functions to ignore it.
              Idea is to have a possibility to traverse the entire
@@ -293,17 +312,51 @@ template <class TYPE>
          return (libID < TARGETDB_LIB) ? true : (libID == component->libID());
       }
 
+template <class TYPE> 
+      bool   SGHierTree<TYPE>::thisParent(int libID) {
+         if      ( NULL == parent       ) 
+            return false;
+         else if ( libID <  TARGETDB_LIB ) 
+            // Any libID < TARGETDB_LIB will make the functions to ignore it.
+            // Idea is to have a possibility to traverse the entire
+            // tree no matter where the cell belongs
+            return true;
+         else if ( TARGETDB_LIB == component->libID())
+            // if current cell belongs to the target DB
+            return (TARGETDB_LIB == parent->component->libID());
+         else
+         {
+            // It's more complicated with the libraries here. Here is the problem:
+            // 1. We want to show database hierarchy including referenced library
+            //    cells.
+            // 2. Library hierarchy should not be influenced by the changes in the
+            //    database and particularly by the changes in the hierarchy of the
+            //    database.
+            // To acieve this for library cells we have to check whether all instances 
+            // of this type have parent from libID library
+            SGHierTree* wv = GetMember(component);
+            while (NULL != wv)
+            {
+               if (NULL != wv->parent)
+                  if (libID == wv->parent->component->libID())
+                     return true;
+               wv = wv->GetNextMember(component);
+            }
+            return false;
+         }
+      }
+
 template <class TYPE>
    SGHierTree<TYPE>*   SGHierTree<TYPE>::GetFirstRoot(int libID) {
       SGHierTree* wv = this;
-      while (wv && (wv->parent || !wv->thisLib(libID) ) ) wv = wv->last;
+      while (wv && (wv->thisParent(libID) || !wv->thisLib(libID) ) ) wv = wv->last;
       return wv;
    }
 
 template <class TYPE> 
    SGHierTree<TYPE>*   SGHierTree<TYPE>::GetNextRoot(int libID)  {
       SGHierTree* wv = this->last;
-      while (wv && (wv->parent || !wv->thisLib(libID) ) ) wv = wv->last;
+      while (wv && (wv->thisParent(libID) || !wv->thisLib(libID) ) ) wv = wv->last;
       return wv;
    }
 
@@ -360,6 +413,7 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
    // returns 0 -> nothin's changed (this parent is already in the list)
    //         1 -> first parrent added (component use to be orphan)
    //         2 -> new parent added
+   //         3 -> first parrent added for library component
    SGHierTree* wv = lst->GetMember(comp);
    SGHierTree* wvP = lst->GetMember(prnt);
    // protect yourself - if parent or the component are not in the list 
@@ -370,8 +424,9 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
       wv->parent = wvP;
       wv->brother = wvP->Fchild;
       wvP->Fchild = wv;
-      return 1;
-   }   
+      if (TARGETDB_LIB == wv->component->libID()) return 1;
+      else                             return 3;
+   }
    else {
       // compondent is not an orphan, so first check that this comp 
       //already has this prnt. 
@@ -394,7 +449,10 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
 };
 
 template <class TYPE>
-bool  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
+int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
+   // returns 0 -> not much changed (the component has another parent)
+   //         1 -> A DB component which is now an orphan
+   //         2 -> A library component which is no more referenced in the DB
    SGHierTree* citem;
    SGHierTree* check;
    SGHierTree* cparent = lst->GetMember(prnt);
@@ -432,14 +490,17 @@ bool  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierT
       else if (citem) {
          // This is the last component of this type, so it has to 
          // be flagged as an orphan and preserved at the top of the
-         // hierarchy
+         // hierarchy, but only if it is NOT a library cell.
+         // library cells can't be removed from libraries and when removed from
+         // the DB, they are preserved in the library hierarchy anyway.
          citem->brother = NULL;
          citem->parent = NULL;
-         return true;
+         if   (TARGETDB_LIB == citem->component->libID()) return 2;
+         else                                             return 1;
       }
       cparent = cparent->GetNextMember(prnt);   
    }
-   return false;
+   return 0;
 }
 
 template <class TYPE>

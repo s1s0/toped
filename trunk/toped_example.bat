@@ -1,1 +1,1 @@
-toped tll\seed.tll
+toped $TPD_GLOBAL\tll\prop.tll
