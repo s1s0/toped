@@ -590,9 +590,9 @@ void tui::TopedFrame::initMenuBar() {
   
 }
 
-void tui::TopedFrame::setUIDir(const std::string& uiDir)
+void tui::TopedFrame::setIconDir(const std::string& uiDir)
 {
-   if (_resourceCenter) _resourceCenter->setUIDir(uiDir);
+   if (_resourceCenter) _resourceCenter->setIconDir(uiDir);
 }
 
 void tui::TopedFrame::initToolBars() 
@@ -761,11 +761,11 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutDialogInfo info;
     info.SetName(wxT("Toped"));
-    info.SetVersion(wxT("0.8.x"));
+    info.SetVersion(wxT("0.9.0"));
     info.SetIcon(wxIcon( toped32x32_xpm ));
     info.SetWebSite(wxT("www.toped.org.uk"));
     info.SetDescription(wxT("Open source IC layout editor"));
-    info.SetCopyright(wxT("(C) 2001-2007 Toped developers"));
+    info.SetCopyright(wxT("(C) 2001-2008 Toped developers"));
 
     wxAboutBox(info);
 }
@@ -843,7 +843,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
       }
    }
    SetStatusText(wxT("Opening file..."));
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+   wxFileDialog dlg2(this, wxT("Select a design to open"), wxT(""), wxT(""),
       wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) 
@@ -863,7 +863,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
 void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt) 
 {
    SetStatusText(wxT("Loading library..."));
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+   wxFileDialog dlg2(this, wxT("Select a library to open"), wxT(""), wxT(""),
       wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) 
@@ -897,7 +897,7 @@ void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
    SetStatusText(wxT("Including command file..."));
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+   wxFileDialog dlg2(this, wxT("Select a script to run"), wxT(""), wxT(""),
       wxT("Tell files(*.tll)|*.tll|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
@@ -912,7 +912,7 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
 
 void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Stream files(*.sf;*.gds)|*.sf;*.gds;*.SF;*.GDS|All files(*.*)|*.*"),
+                     wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       SetStatusText(wxT("Parsing GDS file..."));
@@ -1069,7 +1069,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
    catch (EXPTN) {return;}
    DATC->unlockDB();
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Stream files |*.sf;*.gds"),
+                     wxT("Stream files |*.gds;*.sf"),
                      tpdfOPEN);
    if (wxID_OK != dlg2.ShowModal()) 
    {
@@ -1088,7 +1088,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
 void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
    SetStatusText(wxT("Exporting database to GDS file..."));
    wxFileDialog dlg2(this, wxT("Export design to GDS file"), wxT(""), wxT(""),
-      wxT("GDS files |*.sf;*.gds"),
+      wxT("GDS files |*.gds;*.sf"),
       tpdfSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();
@@ -1098,7 +1098,7 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
          return;
       }
       wxString ost;
-      ost << wxT("gdsexport(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
+      ost << wxT("gdsexport(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\", false);");
       _cmdline->parseCommand(ost);
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
@@ -1127,7 +1127,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    wxString fullCellName;
    fullCellName << cellname << wxT(".gds");
    wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
-      wxT("GDS files |*.sf;*.gds"),
+      wxT("GDS files |*.gds;*.sf"),
       tpdfSAVE);
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();
@@ -1139,7 +1139,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
       wxString ost;
       ost << wxT("gdsexport(\"") << cellname.c_str() << wxT("\" , ") <<
                         (recur ? wxT("true") : wxT("false")) << wxT(",\"") <<
-                        (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str() << wxT("\");");
+                        (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str() << wxT("\", false);");
       _cmdline->parseCommand(ost);
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }

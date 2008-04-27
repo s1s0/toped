@@ -55,7 +55,7 @@ void tellstdfunc::stdADDBOX::undo() {
    telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack,true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(bx->data(),la);
+      ATDB->destroy_this(bx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (bx);
    RefreshGL();
@@ -109,7 +109,7 @@ void tellstdfunc::stdDRAWBOX::undo() {
    telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(bx->data(),la);
+      ATDB->destroy_this(bx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (bx);
    RefreshGL();
@@ -168,7 +168,7 @@ void tellstdfunc::stdADDBOXr::undo() {
    telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(bx->data(),la);
+      ATDB->destroy_this(bx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (bx);
    RefreshGL();
@@ -230,7 +230,7 @@ void tellstdfunc::stdADDBOXp::undo() {
    telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(bx->data(),la);
+      ATDB->destroy_this(bx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (bx);
    RefreshGL();
@@ -288,7 +288,7 @@ void tellstdfunc::stdADDPOLY::undo() {
    telldata::ttlayout* ply = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(ply->data(),la);
+      ATDB->destroy_this(ply->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (ply);
    RefreshGL();
@@ -349,7 +349,7 @@ void tellstdfunc::stdDRAWPOLY::undo() {
    telldata::ttlayout* ply = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(ply->data(),la);
+      ATDB->destroy_this(ply->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (ply);
    RefreshGL();
@@ -413,7 +413,7 @@ void tellstdfunc::stdADDWIRE::undo() {
    telldata::ttlayout* wr = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(wr->data(),la);
+      ATDB->destroy_this(wr->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (wr);
    RefreshGL();
@@ -478,7 +478,7 @@ void tellstdfunc::stdDRAWWIRE::undo() {
    telldata::ttlayout* wr = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(wr->data(),la);
+      ATDB->destroy_this(wr->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (wr);
    RefreshGL();
@@ -549,7 +549,7 @@ void tellstdfunc::stdADDTEXT::undo() {
    telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(tx->data(),la);
+      ATDB->destroy_this(tx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (tx);
    RefreshGL();
@@ -628,7 +628,7 @@ void tellstdfunc::stdCELLREF::undo() {
    TEUNDO_DEBUG("cellref(string, point, real, bool, real) UNDO");
    telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(cl->data(),0);
+      ATDB->destroy_this(cl->data(),0, DATC->TEDLIB());
    DATC->unlockDB();   
    delete (cl);
    RefreshGL();
@@ -729,7 +729,7 @@ void tellstdfunc::stdCELLAREF::undo() {
    TEUNDO_DEBUG("cellaref(string, point, real, bool, real) UNDO");
    telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(cl->data(),0);
+      ATDB->destroy_this(cl->data(),0, DATC->TEDLIB());
    DATC->unlockDB();
    delete (cl);
    RefreshGL();

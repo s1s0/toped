@@ -75,7 +75,7 @@ laydata::tdtlibrary::~tdtlibrary()
    clearLib();
 }
 
-void laydata::tdtlibrary::clearHierTree(int libID)
+void laydata::tdtlibrary::clearHierTree()
 {
    // get rid of the hierarchy tree
    const TDTHierTree* var1 = _hiertree;
@@ -84,7 +84,7 @@ void laydata::tdtlibrary::clearHierTree(int libID)
    while (var1)
    {
       const TDTHierTree* var2 = var1->GetLast();
-      if (libID == var1->GetItem()->libID())
+      if (var1->itemRefdIn(_libID))
       {
          if (NULL != lastValid)
             lastValid->relink(var1);
@@ -208,7 +208,7 @@ void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
 {
    if (TARGETDB_LIB == _libID)
    {
-      clearHierTree(TARGETDB_LIB);
+      clearHierTree();
    }
    // here - run the hierarchy extraction on orphans only
    for (laydata::cellList::const_iterator wc = _cells.begin();
@@ -217,28 +217,6 @@ void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
          _hiertree = wc->second->hierout(_hiertree, NULL, &_cells, libdir);
    }
 }
-
-//
-//bool laydata::tdtlibrary::`lays(std::string cellname, bool recursive, ListOfWords& laylist) const
-//{
-////   if ("" == cellname) targetcell = _target.edit();
-//   assert("" != cellname);
-//   tdtdefaultcell* targetcell = getcellnamepair(cellname)->second;
-//   if (NULL != targetcell) {
-//      targetcell->collect_usedlays(this, recursive, laylist);
-//      laylist.sort();
-//      laylist.unique();
-//      std::ostringstream ost;
-//      ost << "used layers: {";
-//      for(ListOfWords::const_iterator CL = laylist.begin() ; CL != laylist.end();CL++ )
-//        ost << " " << *CL << " ";
-//      ost << "}";
-//      tell_log(console::MT_INFO, ost.str());
-//      return true;
-//   }
-//   else return false;
-//}
-//
 
 laydata::refnamepair laydata::tdtlibrary::secure_defaultcell(std::string name)
 {
@@ -280,9 +258,10 @@ void laydata::tdtlibrary::cleanUnreferenced()
       {
          _hiertree->removeRootItem(wc->second, _hiertree);
          delete wc->second;
-         _cells.erase(wc);
+         laydata::cellList::iterator wcd = wc++;
+         _cells.erase(wcd);
       }
-      wc++;
+      else wc++;
    }
 }
 
@@ -358,6 +337,18 @@ void laydata::tdtlibdir::relink()
    // finally - relink the active database
    if (NULL !=_TEDDB) 
       _TEDDB->relink(this);
+}
+
+void laydata::tdtlibdir::reextract_hierarchy()
+{
+   // parse starting from the back of the library queue
+   for (int i = _libdirectory.size() - 2; i > 0 ; i--)
+   {
+      _libdirectory[i]->second->recreate_hierarchy(this);
+   }
+   // finally - relink the active database
+   if (NULL !=_TEDDB) 
+      _TEDDB->recreate_hierarchy(this);
 }
 
 /*! Searches the library directory for a cell \a name. Returns true and updates \a striter if
@@ -496,7 +487,7 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name) {
    }
 }
 
-bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel)
+bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel, laydata::tdtlibdir* libdir)
 {
    if (_cells.end() == _cells.find(name))
    {
@@ -531,7 +522,7 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel)
          _cells.erase(_cells.find(name));
          //empty the contents of the removed cell and return it in atticList
          remcl->full_select();
-         remcl->delete_selected(this, fsel); // validation is not required here
+         remcl->delete_selected(fsel, libdir); // validation is not required here
          // finally - delete the cell. Cell is already empty
          delete remcl;
          return true;
@@ -899,28 +890,34 @@ void laydata::tdtdesign::flip_selected( TP p, bool Xaxis) {
    }
 }
 
-void laydata::tdtdesign::delete_selected(laydata::atticList* fsel) {
-   if (_target.edit()->delete_selected(this, fsel)) {
+void laydata::tdtdesign::delete_selected(laydata::atticList* fsel, 
+                                         laydata::tdtlibdir* libdir) 
+{
+   //laydata::tdtdesign* ATDB 
+   if (_target.edit()->delete_selected(fsel, libdir)) 
+   {
       // needs validation
       do {} while(validate_cells());
    }
 }
 
-void laydata::tdtdesign::destroy_this(tdtdata* ds, word la) {
-   if (_target.edit()->destroy_this(this, ds,la)) {
+void laydata::tdtdesign::destroy_this(tdtdata* ds, word la, laydata::tdtlibdir* libdir) 
+{
+   if (_target.edit()->destroy_this(libdir, ds,la))
+   {
       // needs validation
       do {} while(validate_cells());
    }
 }
 
-bool laydata::tdtdesign::group_selected(std::string name) {
+bool laydata::tdtdesign::group_selected(std::string name, laydata::tdtlibdir* libdir) {
    // first check that the cell with this name does not exist already
    if (_cells.end() != _cells.find(name)) {
       tell_log(console::MT_ERROR, "Cell with this name already exists. Group impossible");
       return false;
    }
    //unlink the fully selected shapes from the quadTree of the current cell
-   atticList* TBgroup = _target.edit()->groupPrep(this);
+   atticList* TBgroup = _target.edit()->groupPrep(libdir);
    if (TBgroup->empty()) {
       tell_log(console::MT_WARNING, "Nothing to group");
       delete TBgroup; return false;
@@ -959,9 +956,10 @@ bool laydata::tdtdesign::group_selected(std::string name) {
    return true;
 }
 
-laydata::shapeList* laydata::tdtdesign::ungroup_prep() {
+laydata::shapeList* laydata::tdtdesign::ungroup_prep(laydata::tdtlibdir* libdir) 
+{
    //unlink the selected ref/aref's from the quadTree of the current cell
-   return _target.edit()->ungroupPrep(this);
+   return _target.edit()->ungroupPrep(libdir);
 }
 
 laydata::atticList* laydata::tdtdesign::ungroup_this(laydata::shapeList* cells4u) {

@@ -237,19 +237,20 @@ class TopedApp : public wxApp
       bool           GetLogFileName();
       bool           LoadFontFile(std::string);
       bool           CheckCrashLog();
-      void           GetLogDir();
+      void           GetLocalDirs();
       void           GetGlobalDirs(); //get directories in TPD_GLOBAL
       void           FinishSessionLog();
       void           SaveIgnoredCrashLog();
       wxString       logFileName;
       wxString       tpdLogDir;
       wxString       tpdFontDir;
-		wxString			tpdUIDir;
+      wxString       tpdUIDir;
+      wxString       localDir;
 //      bool           _ignoreOnRecovery;
 };
 
 
-void TopedApp::GetLogDir()
+void TopedApp::GetLocalDirs()
 {
    wxFileName* logDIR = DEBUG_NEW wxFileName(wxT("$TPD_LOCAL/"));
    logDIR->Normalize();
@@ -258,6 +259,7 @@ void TopedApp::GetLogDir()
    bool undefined = dirName.Matches(wxT("*$TPD_LOCAL*"));
    if (!undefined)
    {
+      localDir = logDIR->GetFullPath();
       logDIR->AppendDir(wxT("log"));
       logDIR->Normalize();
    }
@@ -286,6 +288,7 @@ void TopedApp::GetLogDir()
       info << wxT(". Log file will be created in the current directory \"");
       tell_log(console::MT_WARNING,info);
       tpdLogDir = wxT(".");
+      localDir = wxT(".");
    }
    delete logDIR;
 }
@@ -305,8 +308,8 @@ void TopedApp::GetGlobalDirs()
    {
       fontsDIR->AppendDir(wxT("fonts"));
       fontsDIR->Normalize();
-		UIDir->AppendDir(wxT("ui"));
-		UIDir->Normalize();
+      UIDir->AppendDir(wxT("icons"));
+      UIDir->Normalize();
    }
    if (fontsDIR->IsOk())
    {
@@ -327,32 +330,32 @@ void TopedApp::GetGlobalDirs()
       else
          tpdFontDir = fontsDIR->GetFullPath();
    }
-	else
+   else
    {
-		info = wxT("Can't evaluate properly \"$TPD_GLOBAL\" env. variable");
+      info = wxT("Can't evaluate properly \"$TPD_GLOBAL\" env. variable");
       info << wxT(". Looking for fonts in the current directory \"");
       tell_log(console::MT_WARNING,info);
       tpdFontDir = wxT("./fonts/");
    }
 
-	if(UIDir->IsOk())
-	{
-		bool exist = UIDir->DirExists();
-		if (!exist)
-		{
-			info << wxT("Directory ") << UIDir->GetFullPath() << wxT(" doesn't exists");
-			info << wxT(". Looking for icons in the current directory \"");
-			info << wxGetCwd() << wxT("\"");
+   if(UIDir->IsOk())
+   {
+      bool exist = UIDir->DirExists();
+      if (!exist)
+      {
+         info << wxT("Directory ") << UIDir->GetFullPath() << wxT(" doesn't exists");
+         info << wxT(". Looking for icons in the current directory \"");
+         info << wxGetCwd() << wxT("\"");
          tell_log(console::MT_WARNING,info);
-         tpdUIDir = wxT("./ui/");
-		}
-		else
-		{
-			tpdUIDir = UIDir->GetFullPath();
-		}
-	}
+         tpdUIDir = wxT("./icons/");
+      }
+      else
+      {
+         tpdUIDir = UIDir->GetFullPath();
+      }
+   }
    delete fontsDIR;
-	delete UIDir;
+   delete UIDir;
 }
 
 
@@ -444,11 +447,12 @@ void TopedApp::FinishSessionLog()
 bool TopedApp::OnInit() {
 //   DATC = DEBUG_NEW DataCenter();
 	wxImage::AddHandler(new wxPNGHandler);
-   initDBLib();
-   Toped = DEBUG_NEW tui::TopedFrame( wxT( "wx_Toped" ), wxPoint(50,50), wxSize(1200,900) );
+   GetLocalDirs();
 	GetGlobalDirs();
+   initDBLib(std::string(localDir.mb_str()));
+   Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
    if (!LoadFontFile("arial1")) return FALSE;
-   Toped->setUIDir(std::string(tpdUIDir.mb_str()));
+   Toped->setIconDir(std::string(tpdUIDir.mb_str()));
 	Toped->initToolBars();
 
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
@@ -463,8 +467,6 @@ bool TopedApp::OnInit() {
    SetTopWindow(Toped);
    Toped->Show(TRUE);
 
-
-   GetLogDir();
    if (!GetLogFileName()) return FALSE;
    bool recovery_mode = false;
    if (CheckCrashLog())
@@ -493,7 +495,7 @@ bool TopedApp::OnInit() {
    else
    {
       LogFile.init(std::string(logFileName.mb_str()));
-      //   wxLog::AddTraceMask("thread");
+      wxLog::AddTraceMask(wxT("thread"));
       if (1 < argc) 
       {
          wxString inputfile;

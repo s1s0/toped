@@ -1,12 +1,3 @@
-Library properties
--------------------
-- A reference to undefined cells is allowed in the DB as well as in the library
-- Library can't refernce a cell from a DB. Library can reference a cell from another library,
-  but only if it has bigger ID. DB has an ID 0 - i.e. it can reference cells from any library
-- the above means that circular reference across the libraries is not possible
-
-- cellemptyref::cellref
-
 Short Term
 ------------
  - Browser window needs search facilities. For big designs
@@ -16,9 +7,11 @@ Short Term
 
 General
 =========
-  * MEMORY LEAKAGE DEBUG!
-  * Online hierarhy tree maintanence still has troubles - especially when
-    deleting the stuff from the top level. Check and debug!
+  * Text resize
+  * interactive rotate might be confusing - needs to be discussed
+  * cut/merge doesn't work with wire
+  * (0,0) has to be marked somehow on the screen
+  * Cell hierarchy window needs different icons - library cell, DB cell, DB, library
   * Parser needs well defined error recovery policy
   * select edge with double click - needs algo for edge proximity. The same algo
     can be used for editpush selecting (optional?)
@@ -30,10 +23,8 @@ General
     Think about it. Pointetrs are unapropriate of course.
   * Think about improving the TEDAT text readability manipulating the orientation
   * Optional validation - warning/error menu - acute angle case.
-  * Autopan doesn't seems to work fine, because it depends probably
-    on the _step in View properties. Must depend on the absolute proxomity in screen
-    pixesld to the edge of the canvas
-  
+  * MEMORY LEAKAGE DEBUG!
+
   TELL related
   ------------
   * break, continue, jump/goto statements and label (for the f.... jump)
@@ -55,37 +46,14 @@ Dialog stuff
    * The number of the digits after the decimal point must be intact with the 
      current step. There is some piece of code left in tui.cpp (getSize::getSize)
      to be used as a starting point for this
-   * Icons and toolbars
    * Resources should go to XML and resource compiler should be used
 
 Documentation
 ==============
    multi line comments /* */ in TELL
-
-Seems OK
-========
-  * Review the new quadTree sorting procedures and optimize them in terms of
-    speed and memory. They MUST BE PERFECT !!!
-  * Check and take care about clearing of the TELL memory from the layout list 
-    types of variables resulting from select operations. Seems the dataList
-    structures will remain in the heap. Of course TOPED objects should not be
-    desctructed!
-  * TELL Run time error handling - exceptions
-  * Draw wire - this seems to be the most obvious bug in the drawing.
-  * Import of the GDSII wire type 2 and/or 4. We have troubles - the example GDSII from Sergey.
-
-  done after rel.0.8
-  --------------------
-  * lock/hide layer must deselect all shapes of that layer
-  * layer fill control - command and menu
-  * No visualization for addtext() (_tmpdata MouseStart requires additional parameters?)
-  * No visualization for addcell() (_tmpdata MouseStart requires additional parameters?)
-  * No visualization for move/copy cellaref
-  * rotate and flip - visualizing the marker
-  * Draw selected figures using separate property definition.
-  * Initial (default) values of grids, step etc. When a new design is created and
-    grids and steps (and what else) are not explicitly defined, the editor is
-    doing weird things. 
+   sin/cos
+   loadlibrary
+   unloadlibrary
 
 Global options of the editor
 ============================

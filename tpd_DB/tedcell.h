@@ -100,7 +100,7 @@ namespace laydata {
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
          virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell*, cellList*, const tdtlibdir*);
          virtual bool        relink(tdtlibdir*, TDTHierTree*&);
-         virtual void        updateHierarchy(tdtdesign*);
+         virtual void        updateHierarchy(tdtlibdir*);
          virtual DBbox       overlap() const;
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
          virtual void        GDSwrite(GDSin::GDSFile&, const cellList&, const TDTHierTree*, real, bool) const;
@@ -111,9 +111,10 @@ namespace laydata {
          std::string          name() const      {return _name;};
          int                  libID() const     {return _libID;}
          layerList&           layers();      //! all layers the cell
+         //@FIXME! the _orphan must be protected!
+         bool                 _orphan;       //! cell doesn't have a parent
       protected:
          void                 invalidateParents(tdtlibrary*);
-         bool                 _orphan;       //! cell doesn't have a parent
          layerList            _layers;       //! all layers the cell
       private:
          std::string          _name;         //! cell name
@@ -158,10 +159,10 @@ namespace laydata {
       bool                 move_selected(tdtdesign*, const CTM&, selectList**);
       bool                 rotate_selected(laydata::tdtdesign*, const CTM&, selectList**);
       bool                 transfer_selected(tdtdesign*, const CTM&);
-      bool                 delete_selected(tdtdesign*, atticList*);
-      bool                 destroy_this(tdtdesign*, tdtdata* ds, word la);
-      atticList*           groupPrep(tdtdesign*);
-      shapeList*           ungroupPrep(tdtdesign*);
+      bool                 delete_selected(atticList*, laydata::tdtlibdir* );
+      bool                 destroy_this(tdtlibdir*, tdtdata* ds, word la);
+      atticList*           groupPrep(tdtlibdir*);
+      shapeList*           ungroupPrep(tdtlibdir*);
       void                 transferLayer(word);
       void                 transferLayer(selectList*, word);
       void                 resort();
@@ -175,7 +176,7 @@ namespace laydata {
       tdtcellref*          getcellover(TP, ctmstack&, cellrefstack*, layprop::ViewProperties&);
       selectList*          shapesel()        {return &_shapesel;};
       selectList*          copy_selist() const;
-      void                 updateHierarchy(tdtdesign*);
+      void                 updateHierarchy(tdtlibdir*);
       bool                 relink(tdtlibdir*, TDTHierTree*&);
       void                 removePrep(laydata::tdtdesign* ATDB) const;
       void                 report_selected(real) const;

@@ -366,7 +366,7 @@ GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
       tell_log(console::MT_ERROR,info.str());
    }
    t_access.Year  = broken_time->tm_year;
-   t_access.Month = broken_time->tm_mon;
+   t_access.Month = broken_time->tm_mon+1;
    t_access.Day   = broken_time->tm_mday;
    t_access.Hour  = broken_time->tm_hour;
    t_access.Min   = broken_time->tm_min;
@@ -374,7 +374,7 @@ GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
    time_t cur_time = time(NULL);
    broken_time = localtime(&cur_time);
    t_modif.Year  = broken_time->tm_year;
-   t_modif.Month = broken_time->tm_mon;
+   t_modif.Month = broken_time->tm_mon+1;
    t_modif.Day   = broken_time->tm_mday;
    t_modif.Hour  = broken_time->tm_hour;
    t_modif.Min   = broken_time->tm_min;
