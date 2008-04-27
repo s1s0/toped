@@ -2029,7 +2029,7 @@ void console::toped_logfile::init(const std::string logFileName, bool append)
       _file << LFH_SEPARATOR << std::endl;
       _file << LFH_HEADER    << std::endl;
       _file << LFH_SEPARATOR << std::endl;
-      _file << LFH_REVISION  << "0.9" << std::endl;
+      _file << LFH_REVISION  << "0.9.x" << std::endl;
       _file << LFH_ENVIRONM  << std::string(wxGetCwd().mb_str()) << std::endl;
       _file << LFH_TIMESTAMP << timec() << std::endl;
       _file << LFH_SEPARATOR << std::endl;
