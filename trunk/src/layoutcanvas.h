@@ -119,11 +119,13 @@ namespace tui {
       //
       void           wnd_paint();
       void           rubber_paint();
+      void           drawZeroMark();
       void           UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);
       void           EventMouseClick(int button);
       bool           reperX;         // Draw a cursor line across the window parallel to the X axis
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       bool           long_cursor;    //
+      GLubyte*       zeroMark;
 //      StatusLine     _status_line;
       DECLARE_EVENT_TABLE();
    };
