@@ -52,6 +52,7 @@ extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
 
 #include "../ui/crosscursor.xpm"
+#include "../ui/zerocross.xpm"
 
 //tui::CanvasStatus::CanvasStatus(){};
 void tui::StatusLine::update(const int4b width, const CTM& _LayCTM)
@@ -184,7 +185,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
      const wxSize& size, int* attribList): wxGLCanvas(parent, ID_TPD_CANVAS, pos, 
      size, 0,wxT("LayoutCanvas"), attribList)
 {
-      
+
    crossCur = MakeCursor(crosscursor,16, 16);
    //crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
    SetCursor(*crossCur);
@@ -197,12 +198,14 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    initializeGL();
    ap_trigger = 10;
    glfInit();
+   wxImage boza(zerocross);
+   zeroMark = boza.GetData();
 }
 
 wxImage   tui::LayoutCanvas::snapshot(void)
 {
    int width, height;
-   
+
    int nv[4];
    glGetIntegerv(GL_VIEWPORT, nv);
    width = nv[2];
@@ -215,7 +218,7 @@ wxImage   tui::LayoutCanvas::snapshot(void)
    wxImage image=wxImage(width, height, true);
    for (int j=0; j<(height-1); j++)
       for (int i=0; i<(width-1); i++)
-      
+
       {
          unsigned char* cbuf = (unsigned char *)(buffer);
          cbuf = cbuf +3*(i+j*width);
@@ -226,10 +229,10 @@ wxImage   tui::LayoutCanvas::snapshot(void)
          image.SetRGB(i, height-j-1, r, g, b);
       }
    //image.SetData((unsigned char*)buffer, true);
- 
+
    image.SaveFile(wxT("snapshot.bmp"));
-   
-   
+
+
    wxImage image2;
    return image2;
 }
@@ -318,6 +321,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
+      drawZeroMark();
       DATC->openGL_draw(_LayCTM);    // draw data
       glAccum(GL_LOAD, 1.0);
       invalid_window = false;
@@ -348,6 +352,14 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
    }
 
    SwapBuffers();
+}
+
+void tui::LayoutCanvas::drawZeroMark()
+{
+   glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+   glRasterPos2i(0,0);
+   glBitmap(32,32,16,16,0,0, zeroMark);
 }
 
 // void tui::LayoutCanva+s::drawInterim(const TP& cp)
