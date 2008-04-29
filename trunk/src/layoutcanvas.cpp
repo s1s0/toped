@@ -198,8 +198,8 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    initializeGL();
    ap_trigger = 10;
    glfInit();
-   wxImage boza(zerocross);
-   zeroMark = boza.GetData();
+   //wxImage boza(zerocross);
+   //zeroMark = boza.GetData();
 }
 
 wxImage   tui::LayoutCanvas::snapshot(void)
@@ -321,7 +321,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
-      drawZeroMark();
+//      drawZeroMark();
       DATC->openGL_draw(_LayCTM);    // draw data
       glAccum(GL_LOAD, 1.0);
       invalid_window = false;
@@ -356,10 +356,11 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
 
 void tui::LayoutCanvas::drawZeroMark()
 {
-   glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
-   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-   glRasterPos2i(0,0);
-   glBitmap(32,32,16,16,0,0, zeroMark);
+//   glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
+//   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//   glRasterPos2i(0,0);
+////   glBitmap(32,32,16,16,0,0, zeroMark);
+//   glDrawPixels(32,32, GL_RGB, GL_UNSIGNED_BYTE, zeroMark);
 }
 
 // void tui::LayoutCanva+s::drawInterim(const TP& cp)
