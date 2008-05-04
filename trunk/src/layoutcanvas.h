@@ -125,7 +125,7 @@ namespace tui {
       bool           reperX;         // Draw a cursor line across the window parallel to the X axis
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       bool           long_cursor;    //
-      GLubyte*       zeroMark;
+      wxImage*       zeroMark;
 //      StatusLine     _status_line;
       DECLARE_EVENT_TABLE();
    };
