@@ -180,6 +180,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cif_io.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\datacenter.cpp"
 				>
 			</File>
@@ -374,6 +378,10 @@
 			>
 			<File
 				RelativePath=".\browsers.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cif_io.h"
 				>
 			</File>
 			<File

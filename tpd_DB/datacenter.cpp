@@ -442,6 +442,38 @@ void DataCenter::GDSclose() {
    unlockGDS();
 }
 
+bool DataCenter::CIFparse(std::string filename) 
+{
+   bool status;
+//   if (lockGDS(false))
+//   {
+//      
+//      std::string news = "Removing existing GDS data from memory...";
+//      tell_log(console::MT_WARNING,news);
+//      GDSclose();
+//      unlockGDS();
+//   }
+//   // parse the GDS file - don't forget to lock the GDS mutex here!
+//   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
+   _CIFDB = DEBUG_NEW CIFin::CIFFile(filename.c_str());
+   status = _CIFDB->status();
+//   if (status)
+//   {
+//      // generate the hierarchy tree of cells
+//      _GDSDB->HierOut();
+//   }
+//   else
+//   {
+//      if (NULL != _GDSDB) 
+//      {
+//         delete _GDSDB;
+//         _GDSDB = NULL;
+//      }
+//   }
+//   unlockGDS();
+   return status;
+}
+
 void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
 {
    //Get actual time

@@ -655,3 +655,50 @@ int tellstdfunc::GDSreportlay::execute() {
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::CIFread::CIFread(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::CIFread::execute() {
+   std::string filename = getStringValue();
+   if (expandFileName(filename))
+   {
+      std::list<std::string> top_cell_list;
+      if (DATC->CIFparse(filename))
+      {
+//         // add GDS tab in the browser
+//         browsers::addGDStab();
+//         //
+//         GDSin::GDSFile* AGDSDB = DATC->lockGDS();
+//
+//            GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+//            assert(root);
+//            do 
+//            {
+//               top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));
+//            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+//         DATC->unlockGDS();
+//         telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
+//         for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
+//                                                   CN != top_cell_list.end(); CN ++)
+//            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
+//         OPstack.push(topcells);
+//         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+      }
+      else
+      {
+         std::string info = "File \"" + filename + "\" doesn't seem to appear a valid CIF file";
+         tell_log(console::MT_ERROR,info);
+      }
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
+   }
+   return EXEC_NEXT;
+}
+

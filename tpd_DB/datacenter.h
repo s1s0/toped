@@ -29,6 +29,7 @@
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
 #include "gds_io.h"
+#include "cif_io.h"
 #include "viewprop.h"
 
 namespace GDSin {
@@ -58,6 +59,7 @@ public:
    void                       GDSexport(laydata::tdtcell*, bool, std::string&, bool);
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
+   bool                       CIFparse(std::string filename);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);
@@ -159,6 +161,7 @@ protected:
 //   laydata::tdtdesign*        _TEDDB;        // toped data base
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
    GDSin::GDSFile*            _GDSDB;        // GDS parsed data
+   CIFin::CIFFile*            _CIFDB;        // CIF parsed data
    layprop::ViewProperties    _properties;   // properties data base
    std::string                _tedfilename;
    bool                       _neversaved;
