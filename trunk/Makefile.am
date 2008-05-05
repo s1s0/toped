@@ -5,5 +5,6 @@ SUBDIRS = tll          \
           tpd_common   \
           tpd_parser   \
           tpd_DB       \
+          tpd_ifaces   \
           tpd_bidfunc  \
           src

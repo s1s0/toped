@@ -28,8 +28,8 @@
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
-#include "gds_io.h"
-#include "cif_io.h"
+#include "../tpd_ifaces/gds_io.h"
+#include "../tpd_ifaces/cif_io.h"
 #include "viewprop.h"
 
 namespace GDSin {
