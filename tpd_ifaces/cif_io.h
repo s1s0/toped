@@ -27,6 +27,8 @@
 #if !defined(CIFIO_H_INCLUDED)
 #define CIFIO_H_INCLUDED
 
+#include <string>
+
 namespace CIFin {
 
 /*

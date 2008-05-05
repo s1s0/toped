@@ -19,8 +19,11 @@ toped_SOURCES = layoutcanvas.cpp  resourcecenter.cpp tui.cpp toped.cpp main.cpp
 # EXTRAS
 #########################################################################
 #LEX_OUTPUT_ROOT = lex.tell
-INCLUDES = -I$(top_srcdir)/tpd_parser -I$(top_srcdir)/tpd_DB \
-	-I$(top_srcdir)/tpd_common -I$(top_srcdir)/tpd_bidfunc
+INCLUDES = -I$(top_srcdir)/tpd_parser    \
+           -I$(top_srcdir)/tpd_DB        \
+           -I$(top_srcdir)/tpd_common    \
+           -I$(top_srcdir)/tpd_bidfunc   \
+           -I$(top_srcdir)/tpd_ifaces
 toped_LDADD = ../tpd_parser/libtpd_parser.la ../tpd_common/libtpd_common.la \
               ../tpd_DB/libtpd_DB.la ../tpd_bidfunc/libtpd_bidfunc.la
 #toped_LDFLAGS = -static

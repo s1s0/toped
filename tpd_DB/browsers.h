@@ -38,7 +38,7 @@
 #include <wx/aui/aui.h>
 #include <string>
 #include "tedesign.h"
-#include "gds_io.h"
+#include "../tpd_ifaces/gds_io.h"
 
 namespace browsers 
 {

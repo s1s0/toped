@@ -29,7 +29,7 @@
 #define QUADTREE_H
 
 #include "tedstd.h"
-#include "gds_io.h"
+#include "../tpd_ifaces/gds_io.h"
 #include "ps_out.h"
 
 namespace laydata {
