@@ -11,12 +11,12 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2008 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//        Created: Thu Apr 19 BST 2007 (from tellibin.h Fri Jan 24 2003)
+//        Created: Sun May 04 2008
 //     Originator: Svilen Krustev - skr@toped.org.uk
-//    Description: Definition of all TOPED database functions
+//    Description: CIF parser
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
@@ -25,35 +25,10 @@
 //        $Author$
 //===========================================================================
 
-#ifndef  TPDF_DB_H
-#define  TPDF_DB_H
+#include "tpdph.h"
+#include "cif_io.h"
 
-#include "tpdf_common.h"
-namespace tellstdfunc {
-   using parsercmd::cmdSTDFUNC;
-   using telldata::argumentQ;
-   using parsercmd::argumentLIST;
-   using parsercmd::argumentTYPE;
-   TELL_STDCMD_CLASSA(stdNEWDESIGNd    );                // reset undo buffers
-   TELL_STDCMD_CLASSB(stdNEWDESIGN   , stdNEWDESIGNd  ); // reset undo buffers
-   TELL_STDCMD_CLASSA(TDTread          );                // reset undo buffers
-   TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread       );
-   TELL_STDCMD_CLASSA(TDTloadlib       );
-   TELL_STDCMD_CLASSA(TDTunloadlib     );
-   TELL_STDCMD_CLASSA(TDTsave          );
-   TELL_STDCMD_CLASSB(TDTsaveIFF      , TDTsave       );
-   TELL_STDCMD_CLASSA(TDTsaveas        );
-   TELL_STDCMD_CLASSA(GDSread          );
-   TELL_STDCMD_CLASSA(GDSconvert       );
-   TELL_STDCMD_CLASSA(GDSconvertAll    );
-   TELL_STDCMD_CLASSA(GDSexportLIB     );
-   TELL_STDCMD_CLASSA(GDSexportTOP     );
-   TELL_STDCMD_CLASSA(PSexportTOP      );
-   TELL_STDCMD_CLASSA(GDSclose         );
-   TELL_STDCMD_CLASSA(stdREPORTLAY     );
-   TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  );
-   TELL_STDCMD_CLASSA(GDSreportlay     );
-
-   TELL_STDCMD_CLASSA(CIFread          );
+CIFin::CIFFile::CIFFile(std::string filename)
+{
+   _status = true;
 }
-#endif
