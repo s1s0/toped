@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="TPD_DB"
-	ProjectGUID="{7CC90726-FAE0-415A-B2E4-552D1070B4F0}"
-	RootNamespace="TPD_DB"
+	Name="tpd_ifaces"
+	ProjectGUID="{BA923FBF-9C73-4ACF-900B-FEEF9DC0D4E2}"
+	RootNamespace="tpd_ifaces"
 	>
 	<Platforms>
 		<Platform
@@ -50,7 +50,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="tpdph.h"
-				PrecompiledHeaderFile=".\Release/TPD_DB.pch"
+				PrecompiledHeaderFile=".\Release/tpd_ifaces.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
@@ -70,7 +70,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\Release\TPD_DB.lib"
+				OutputFile="..\Release\tpd_ifaces.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -82,7 +82,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/TPD_DB.bsc"
+				OutputFile=".\Release/tpd_ifaces.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -125,10 +125,11 @@
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="tpdph.h"
-				PrecompiledHeaderFile=".\Debug/TPD_DB.pch"
+				PrecompiledHeaderFile=".\Debug/tpd_ifaces.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
+				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -146,7 +147,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\Debug\tpd_dbd.lib"
+				OutputFile="..\Debug\tpd_ifacesd.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -158,7 +159,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/TPD_DB.bsc"
+				OutputFile=".\Debug/tpd_ifaces.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -176,174 +177,22 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\browsers.cpp"
+				RelativePath=".\cif_io.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\datacenter.cpp"
+				RelativePath=".\gds_io.cpp"
 				>
-			</File>
-			<File
-				RelativePath="logicop.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\ps_out.cpp"
-				>
-			</File>
-			<File
-				RelativePath="quadtree.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="tedat.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="tedcell.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="tedesign.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="tedstd.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\tpdph.cpp"
 				>
 				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="viewprop.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
 			</File>
@@ -353,47 +202,15 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath=".\browsers.h"
+				RelativePath=".\cif_io.h"
 				>
 			</File>
 			<File
-				RelativePath=".\datacenter.h"
-				>
-			</File>
-			<File
-				RelativePath="logicop.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ps_out.h"
-				>
-			</File>
-			<File
-				RelativePath="quadtree.h"
-				>
-			</File>
-			<File
-				RelativePath="tedat.h"
-				>
-			</File>
-			<File
-				RelativePath="tedcell.h"
-				>
-			</File>
-			<File
-				RelativePath="tedesign.h"
-				>
-			</File>
-			<File
-				RelativePath="tedstd.h"
+				RelativePath=".\gds_io.h"
 				>
 			</File>
 			<File
 				RelativePath=".\tpdph.h"
-				>
-			</File>
-			<File
-				RelativePath="viewprop.h"
 				>
 			</File>
 		</Filter>
