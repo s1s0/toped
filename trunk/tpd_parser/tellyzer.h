@@ -65,8 +65,8 @@
 //-----------------------------------------------------------------------------
 // Some forward declarations
 //-----------------------------------------------------------------------------
-int yylex(void);
-int yyerror (char *s);
+int telllex(void);
+int tellerror (char *s);
 
 namespace  parsercmd {
    class cmdVIRTUAL;

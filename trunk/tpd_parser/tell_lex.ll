@@ -145,7 +145,7 @@ const                      return tknCONST;
 /**************************************************************************/
 /*Support functions for the flex parser*/
 /**************************************************************************/
-int yywrap() {
+int tellwrap() {
    return 1;/*line by line*/
 }
 
