@@ -233,7 +233,7 @@ Ooops! Second thought!
 %start input
 /*---------------------------------------------------------------------------*/
 %token                 tknERROR
-%token	              tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
+%token	               tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
 %token                 tknSTRINGdef tknLAYOUTdef tknLISTdef tknRETURN
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
@@ -922,7 +922,7 @@ primaryexpression :
 
 %%
 /*-------------------------------------------------------------------------*/
-int yyerror (char *s) 
+int tellerror (char *s)
 {  /* Called by yyparse on error */
    std::ostringstream ost;
    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column

@@ -29,6 +29,9 @@
 
 #include <string>
 
+int ciflex(void);
+int ciferror (char *s);
+
 namespace CIFin {
 
 /*
