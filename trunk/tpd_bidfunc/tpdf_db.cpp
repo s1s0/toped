@@ -667,7 +667,7 @@ int tellstdfunc::CIFread::execute() {
    if (expandFileName(filename))
    {
       std::list<std::string> top_cell_list;
-      if (DATC->CIFparse(filename))
+      if (0 == DATC->CIFparse(filename))
       {
 //         // add GDS tab in the browser
 //         browsers::addGDStab();

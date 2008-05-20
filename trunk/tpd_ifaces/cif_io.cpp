@@ -25,10 +25,33 @@
 //        $Author$
 //===========================================================================
 
+#include <sstream>
 #include "tpdph.h"
 #include "cif_io.h"
+#include "../tpd_common/outbox.h"
+
+extern void*   cif_scan_string(const char *str);
+extern void    my_delete_yy_buffer( void* b );
+extern int     cifparse(); // Calls the bison generated parser
+extern FILE*   cifin;
 
 CIFin::CIFFile::CIFFile(std::string filename)
 {
-   _status = true;
+//   void* buf = cif_scan_string( command.mb_str() );
+
+   if (!(cifin = fopen(filename.c_str(),"r")))
+   {// open the input file
+      std::ostringstream info;
+      info << "File "<< filename <<" can NOT be opened";
+      tell_log(console::MT_ERROR,info.str());
+      _status = 0;
+      return;
+   }
+   // feed the flex with the buffer of the input file
+   //(cifin is a global variable defined in the flex generated scanner)
+   cifin = fopen(filename.c_str(), "r");
+   // run the bison generated parser
+   cifparse();
+//   my_delete_yy_buffer( buf );
+   fclose(cifin);
 }
