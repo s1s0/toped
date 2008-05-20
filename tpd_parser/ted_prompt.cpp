@@ -42,18 +42,19 @@ wxMutex          console::parse_thread::_mutex;
 #ifdef WIN32
 typedef unsigned int yy_size_t;
 struct yy_buffer_state
-	{
-	FILE *yy_input_file;
-	char *yy_ch_buf;		/* input buffer */
-	char *yy_buf_pos;		/* current position in input buffer */
-	yy_size_t yy_buf_size;
-	int yy_n_chars;
-	int yy_is_our_buffer;
-	int yy_is_interactive;
-	int yy_at_bol;
-	int yy_fill_buffer;
-	int yy_buffer_status;
-	};
+{
+   FILE*       yy_input_file;
+   char*       yy_ch_buf;     // input buffer
+   char*       yy_buf_pos;    // current position in input buffer
+   yy_size_t   yy_buf_size;
+   int         yy_n_chars;
+   int         yy_is_our_buffer;
+   int         yy_is_interactive;
+   int         yy_at_bol;
+   int         yy_fill_buffer;
+   int         yy_buffer_status;
+};
+
 extern yy_buffer_state* tell_scan_string(const char *str);
 
 #else

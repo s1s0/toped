@@ -41,6 +41,7 @@
 #include "../tpd_common/outbox.h"
 #include "cif_io.h"
 /*void ciferror (std::string s);*/
+#define YYDEBUG 1
 %}
 
 %debug
@@ -51,6 +52,7 @@
 */
 %start cifFile
 /* token code T - type; C - command; P - primitive*/
+%token                 tknERROR
 %token                 tknPsem tknPdigit tknPremB tknPremE
 %token                 tknCend tknCdefine tknCpolygon tknCbox tknCround
 %token                 tknCwire tknClayer tknCcall tknCstart tknCfinish
@@ -59,9 +61,9 @@
 
 %%
 cifFile:
-     commands tknCend cifBlank             {}
+     primCommands tknCend cifBlank             {}
 ;
-
+/*
 commands:
                                            {}
    | command tknPsem                       {}
@@ -73,7 +75,7 @@ command:
    | defDeleteCommand                      {}
    | defDefineCommand                      {}
 ;
-
+*/
 primCommands:
                                            {}
    |  primCommand tknPsem                  {}

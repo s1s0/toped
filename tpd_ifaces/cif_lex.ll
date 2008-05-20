@@ -16,7 +16,7 @@
 //           $URL$
 //        Created: Sun May 18 2008
 //     Originator: Svilen Krustev - skr@toped.org.uk
-//    Description: CIF parser
+//    Description: CIF scanner
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
@@ -42,6 +42,7 @@
  * (see '%option yyclass' also!)
  *
  */
+%x comment
 lexcif_digit    [0-9]
 lexcif_upchar   [A-Z]
 lexcif_snc      [A-Z0-9]
@@ -56,6 +57,8 @@ lexcif_usertext [^;]*
 %option debug
 
 %%
+\n+                        ;
+<<EOF>>                  { /*if (!parsercmd::EOfile())*/ yyterminate();}
 "E"                        return tknCend;
 "D"                        return tknCdefine;
 "P"                        return tknCpolygon;
@@ -67,18 +70,16 @@ lexcif_usertext [^;]*
 "S"                        return tknCstart;
 "F"                        return tknCfinish;
 ";"                        return tknPsem;
-"("                        return tknPremB;
-")"                        return tknPremE;
+"("                       {BEGIN(comment);return tknPremB;}
+")"                       {return tknPremE;}
 {lexcif_digit}            {return tknPdigit;}
 {lexcif_digit}+           {return tknTword;}
 -?{lexcif_digit}+         {return tknTint;}
-
 {lexcif_upchar}           {return tknTupchar;}
 {lexcif_snc}{1,4}         {return tknTshortname; }
-{lexcif_blank}             return tknTblank;
-{lexcif_comment}           return tknTremtext;
-
-
+<comment>{lexcif_comment} {BEGIN(INITIAL);return tknTremtext;}
+{lexcif_blank}            return tknTblank;
+.                         return tknERROR;
 %%
 
 int cifwrap() {
