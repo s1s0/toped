@@ -43,6 +43,10 @@
  *
  */
 %x comment
+%x layer
+%x usercmd
+%x cifcmd
+%x defcmd
 lexcif_digit    [0-9]
 lexcif_upchar   [A-Z]
 lexcif_snc      [A-Z0-9]
@@ -58,30 +62,32 @@ lexcif_usertext [^;]*
 
 %%
 \n+                        ;
-<<EOF>>                  { /*if (!parsercmd::EOfile())*/ yyterminate();}
-"E"                        return tknCend;
-"D"                        return tknCdefine;
-"P"                        return tknCpolygon;
-"B"                        return tknCbox;
-"R"                        return tknCround;
-"W"                        return tknCwire;
-"L"                        return tknClayer;
-"C"                        return tknCcall;
-"S"                        return tknCstart;
-"F"                        return tknCfinish;
-";"                        return tknPsem;
-"("                       {BEGIN(comment);return tknPremB;}
-")"                       {return tknPremE;}
-{lexcif_digit}            {return tknPdigit;}
-{lexcif_digit}+           {return tknTword;}
--?{lexcif_digit}+         {return tknTint;}
-{lexcif_upchar}           {return tknTupchar;}
-{lexcif_snc}{1,4}         {return tknTshortname; }
-<comment>{lexcif_comment} {BEGIN(INITIAL);return tknTremtext;}
-{lexcif_blank}            return tknTblank;
-.                         return tknERROR;
+<<EOF>>                    { /*if (!parsercmd::EOfile())*/ yyterminate();}
+"E"                        { BEGIN( cifcmd );      return tknCend;         }
+"D"                        { BEGIN( defcmd );      return tknCdefine;      }
+<defcmd>"D"                { BEGIN( cifcmd );      return tknCdefine;      }
+"P"                        { BEGIN( cifcmd );      return tknCpolygon;     }
+"B"                        { BEGIN( cifcmd );      return tknCbox;         }
+"R"                        { BEGIN( cifcmd );      return tknCround;       }
+"W"                        { BEGIN( cifcmd );      return tknCwire;        }
+"L"                        { BEGIN( layer  );      return tknClayer;       }
+"C"                        { BEGIN( cifcmd );      return tknCcall;        }
+<defcmd>"S"                { BEGIN( cifcmd );      return tknCstart;       }
+<defcmd>"F"                { BEGIN( cifcmd );      return tknCfinish;      }
+<*>";"                     { BEGIN( INITIAL);      return tknPsem;         }
+"("                        { BEGIN( comment);      return tknPremB;        }
+")"                        {                       return tknPremE;        }
+{lexcif_digit}{1,1}        { BEGIN( usercmd);      return tknPdigit;       }
+<cifcmd>-?{lexcif_digit}+  {                       return tknTint;         }
+<cifcmd>{lexcif_upchar}    {                       return tknTupchar;      }
+<layer>{lexcif_snc}{1,4}   {                       return tknTshortname;   }
+<comment>{lexcif_comment}  { BEGIN( INITIAL);      return tknTremtext;     }
+<usercmd>{lexcif_usertext} { BEGIN( INITIAL);      return tknTusertext;    }
+<*>{lexcif_blank}                                  return tknTblank;
+.                                                  return tknERROR;
 %%
 
+/*<cdefines>{lexcif_digit}+  {                       return tknTword;        }*/
 int cifwrap() {
    return 1;/*line by line*/
 }
