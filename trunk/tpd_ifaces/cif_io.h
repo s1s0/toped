@@ -49,7 +49,7 @@ primCommand          = polygonCommand       | boxCommand    | roundFlashCommand 
                        userExtensionCommand | commentCommand
 
 polygonCommand       = "P" path.
-boxCommand           = "B" integer sep integer sep point [sep point]
+boxCommand           = "B" <*blank*> integer sep integer sep point [sep point]
 roundFlashCommand    = "R" integer sep point.
 wireCommand          = "W" integer sep path.
 layerCommand         = "L" {blank} shortname.
@@ -79,6 +79,9 @@ upperChar            = "A" | "B" | "C" | ... | "Z"
 blank                = any ASCII character except digit, upperChar, "-" , "(" , ")" , ";".
 userChar             = any ASCII character except ";".
 commentChar          = any ASCII character except "(" or ")".
+
+<* ... *> -> included in the parser (or the scanner) because existing CIF files are using this syntax, but
+             it breaks the formal syntax definition of CIF
 
 */
 

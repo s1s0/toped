@@ -34,6 +34,7 @@ extern void*   cif_scan_string(const char *str);
 extern void    my_delete_yy_buffer( void* b );
 extern int     cifparse(); // Calls the bison generated parser
 extern FILE*   cifin;
+extern int     cifdebug;
 
 CIFin::CIFFile::CIFFile(std::string filename)
 {
@@ -50,6 +51,7 @@ CIFin::CIFFile::CIFFile(std::string filename)
    // feed the flex with the buffer of the input file
    //(cifin is a global variable defined in the flex generated scanner)
    cifin = fopen(filename.c_str(), "r");
+   cifdebug = 1;
    // run the bison generated parser
    cifparse();
 //   my_delete_yy_buffer( buf );

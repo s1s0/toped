@@ -41,7 +41,6 @@
 #include "../tpd_common/outbox.h"
 #include "cif_io.h"
 /*void ciferror (std::string s);*/
-#define YYDEBUG 1
 %}
 
 %debug
@@ -56,30 +55,29 @@
 %token                 tknPsem tknPdigit tknPremB tknPremE
 %token                 tknCend tknCdefine tknCpolygon tknCbox tknCround
 %token                 tknCwire tknClayer tknCcall tknCstart tknCfinish
-%token                 tknTword tknTint tknTusertext tknTremtext tknTshortname
+%token                 tknTint tknTusertext tknTremtext tknTshortname
 %token                 tknTupchar tknTblank
 
 %%
 cifFile:
-     primCommands tknCend cifBlank             {}
+     tknCend cifBlank                      {}
+   | commands tknCend cifBlank             {}
 ;
-/*
+
 commands:
-                                           {}
-   | command tknPsem                       {}
-   | commands command tknPsem              {}
+     cifBlank command tknPsem                       {}
+   | commands cifBlank command tknPsem              {}
+;
+
+primCommands:
+      cifBlank primCommand tknPsem         {}
+   |  primCommands cifBlank primCommand tknPsem     {}
 ;
 
 command:
      primCommand                           {}
    | defDeleteCommand                      {}
    | defDefineCommand                      {}
-;
-*/
-primCommands:
-                                           {}
-   |  primCommand tknPsem                  {}
-   |  primCommands primCommand tknPsem     {}
 ;
 
 primCommand:
@@ -98,12 +96,12 @@ defDefineCommand:
 ;
 
 defStartCommand:
-     tknCdefine cifBlank tknCstart tknTword {}
-   | tknCdefine cifBlank tknCstart tknTword cifSep tknTword cifSep tknTword {}
+     tknCdefine cifBlank tknCstart cifBlank tknTint       {/*check tknTword*/}
+   | tknCdefine cifBlank tknCstart cifBlank tknTint cifSep tknTint cifSep tknTint {/*check 3*tknTword*/}
 ;
 
 defDeleteCommand:
-     tknCdefine cifBlank tknCdefine tknTword {}
+     tknCdefine cifBlank tknCdefine tknTint {/*check tknTword*/}
 ;
 
 defFinishCommand:
@@ -114,17 +112,17 @@ polygonCommand:
      tknCpolygon cifPath                   {}
 ;
 
-boxCommand:
-     tknCbox tknTword cifSep tknTword cifSep cifPoint    {}
-   | tknCbox tknTword cifSep tknTword cifSep cifPoint cifSep cifPoint  {}
+boxCommand: /*discrepancy with the formal syntax*/
+     tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint    {/*check 2*tknTword*/}
+   | tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint cifSep cifPoint  {/*check 2*tknTword*/}
 ;
 
 roundFlashCommand:
-     tknCround tknTword cifSep cifPoint    {}
+     tknCround tknTint cifSep cifPoint    {/*check tknTword*/}
 ;
 
 wireCommand:
-     tknCwire tknTword cifSep cifPath      {}
+     tknCwire tknTint cifSep cifPath      {/*check tknTword*/}
 ;
 
 layerCommand:
@@ -132,7 +130,7 @@ layerCommand:
 ;
 
 callCommand:
-     tknCcall tknTword cifTrans            {}
+     tknCcall tknTint cifTrans            {/*check tknTword*/}
 ;
 
 userExtensionCommand:
