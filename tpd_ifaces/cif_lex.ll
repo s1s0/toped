@@ -55,7 +55,7 @@ lexcif_comment  [^()]*
 lexcif_usertext [^;]*
 %{
 #include "cif_yacc.h"
-
+int remdepth = 0;
 %}
 
 %option debug
@@ -75,13 +75,17 @@ lexcif_usertext [^;]*
 <defcmd>"S"                { BEGIN( cifcmd );      return tknCstart;       }
 <defcmd>"F"                { BEGIN( cifcmd );      return tknCfinish;      }
 <*>";"                     { BEGIN( INITIAL);      return tknPsem;         }
-"("                        { BEGIN( comment);      return tknPremB;        }
+"("                        { if (0 == remdepth) BEGIN( comment);
+                             remdepth = remdepth + 1;
+                                                   return tknPremB;        }
 ")"                        {                       return tknPremE;        }
 {lexcif_digit}{1,1}        { BEGIN( usercmd);      return tknPdigit;       }
 <cifcmd>-?{lexcif_digit}+  {                       return tknTint;         }
 <cifcmd>{lexcif_upchar}    {                       return tknTupchar;      }
 <layer>{lexcif_snc}{1,4}   {                       return tknTshortname;   }
-<comment>{lexcif_comment}  { BEGIN( INITIAL);      return tknTremtext;     }
+<comment>{lexcif_comment}  { remdepth = remdepth - 1;
+                             if (0 == remdepth) BEGIN( INITIAL);
+                                                   return tknTremtext;     }
 <usercmd>{lexcif_usertext} { BEGIN( INITIAL);      return tknTusertext;    }
 <*>{lexcif_blank}                                  return tknTblank;
 .                                                  return tknERROR;
