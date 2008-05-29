@@ -65,8 +65,8 @@ cifFile:
 ;
 
 commands:
-     cifBlank command tknPsem                       {}
-   | commands cifBlank command tknPsem              {}
+     cifBlank command tknPsem              {}
+   | commands cifBlank command tknPsem     {}
 ;
 
 primCommands:
@@ -129,8 +129,8 @@ layerCommand:
      tknClayer cifBlank tknTshortname      {}
 ;
 
-callCommand:
-     tknCcall tknTint cifTrans            {/*check tknTword*/}
+callCommand: /*discrepancy with the formal syntax*/
+     tknCcall cifBlank tknTint cifTrans            {/*check tknTword*/}
 ;
 
 userExtensionCommand:
@@ -139,6 +139,7 @@ userExtensionCommand:
 
 commentCommand:
      tknPremB tknTremtext tknPremE         {}
+   | tknPremB commentCommand tknPremE      {}
 ;
 
 cifPoint:

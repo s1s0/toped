@@ -49,14 +49,14 @@ primCommand          = polygonCommand       | boxCommand    | roundFlashCommand 
                        userExtensionCommand | commentCommand
 
 polygonCommand       = "P" path.
-boxCommand           = "B" <*blank*> integer sep integer sep point [sep point]
+boxCommand           = "B" <*{blank}*> integer sep integer sep point [sep point]
 roundFlashCommand    = "R" integer sep point.
 wireCommand          = "W" integer sep path.
 layerCommand         = "L" {blank} shortname.
 defStartCommand      = "D" {blank} "S" integer [sep integer sep integer].
 defFinishCommand     = "D" {blank} "F".
 defDeleteCommand     = "D" {blank} "D" integer.
-callCommand          = "C" integer transformation.
+callCommand          = "C" <*{blank}*> integer transformation.
 userExtensionCommand = digit userText
 commentCommand       = "(" commentText ")".
 endCommand           = "E".
