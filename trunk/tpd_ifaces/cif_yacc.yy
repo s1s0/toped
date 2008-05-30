@@ -40,6 +40,7 @@
 #include <sstream>
 #include "../tpd_common/outbox.h"
 #include "cif_io.h"
+int boza;
 /*void ciferror (std::string s);*/
 %}
 
@@ -60,90 +61,90 @@
 
 %%
 cifFile:
-     tknCend cifBlank                      {}
-   | commands tknCend cifBlank             {}
+     tknCend cifBlank                      {boza = 10000;}
+   | commands tknCend cifBlank             {boza = 10001;}
 ;
 
 commands:
-     cifBlank command tknPsem              {}
-   | commands cifBlank command tknPsem     {}
+     cifBlank command tknPsem              {boza = 10010;}
+   | commands cifBlank command tknPsem     {boza = 10011;}
 ;
 
 primCommands:
-      cifBlank primCommand tknPsem         {}
-   |  primCommands cifBlank primCommand tknPsem     {}
+      cifBlank primCommand tknPsem         {boza = 10020;}
+   |  primCommands cifBlank primCommand tknPsem     {boza = 10021;}
 ;
 
 command:
-     primCommand                           {}
-   | defDeleteCommand                      {}
-   | defDefineCommand                      {}
+     primCommand                           {boza = 10030;}
+   | defDeleteCommand                      {boza = 10030;}
+   | defDefineCommand                      {boza = 10030;}
 ;
 
 primCommand:
-     polygonCommand                        {}
-   | boxCommand                            {}
-   | roundFlashCommand                     {}
-   | wireCommand                           {}
-   | layerCommand                          {}
-   | callCommand                           {}
-   | userExtensionCommand                  {}
-   | commentCommand                        {}
+     polygonCommand                        {boza = 10040;}
+   | boxCommand                            {boza = 10041;}
+   | roundFlashCommand                     {boza = 10042;}
+   | wireCommand                           {boza = 10043;}
+   | layerCommand                          {boza = 10044;}
+   | callCommand                           {boza = 10045;}
+   | userExtensionCommand                  {boza = 10046;}
+   | commentCommand                        {boza = 10047;}
 ;
 
 defDefineCommand:
-     defStartCommand tknPsem primCommands defFinishCommand {}
+     defStartCommand tknPsem primCommands defFinishCommand {boza = 10050;}
 ;
 
 defStartCommand:
-     tknCdefine cifBlank tknCstart cifBlank tknTint       {/*check tknTword*/}
-   | tknCdefine cifBlank tknCstart cifBlank tknTint cifSep tknTint cifSep tknTint {/*check 3*tknTword*/}
+     tknCdefine cifBlank tknCstart cifBlank tknTint       {/*check tknTword*/boza = 10060;}
+   | tknCdefine cifBlank tknCstart cifBlank tknTint cifSep tknTint cifSep tknTint {/*check 3*tknTword*/boza = 10061;}
 ;
 
 defDeleteCommand:
-     tknCdefine cifBlank tknCdefine tknTint {/*check tknTword*/}
+     tknCdefine cifBlank tknCdefine tknTint {/*check tknTword*/boza = 10070;}
 ;
 
 defFinishCommand:
-     tknCdefine cifBlank tknCfinish        {}
+     tknCdefine cifBlank tknCfinish        {boza = 10080;}
 ;
 
 polygonCommand:
-     tknCpolygon cifPath                   {}
+     tknCpolygon cifPath                   {boza = 10090;}
 ;
 
 boxCommand: /*discrepancy with the formal syntax*/
-     tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint    {/*check 2*tknTword*/}
-   | tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint cifSep cifPoint  {/*check 2*tknTword*/}
+     tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint    {/*check 2*tknTword*/boza = 10100;}
+   | tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint cifSep cifPoint  {/*check 2*tknTword*/boza = 10101;}
 ;
 
 roundFlashCommand:
-     tknCround tknTint cifSep cifPoint    {/*check tknTword*/}
+     tknCround tknTint cifSep cifPoint    {/*check tknTword*/boza = 10110;}
 ;
 
 wireCommand:
-     tknCwire tknTint cifSep cifPath      {/*check tknTword*/}
+     tknCwire tknTint cifSep cifPath      {/*check tknTword*/boza = 10120;}
 ;
 
 layerCommand:
-     tknClayer cifBlank tknTshortname      {}
+     tknClayer cifBlank tknTshortname      {boza = 10130;}
 ;
 
 callCommand: /*discrepancy with the formal syntax*/
-     tknCcall cifBlank tknTint cifTrans            {/*check tknTword*/}
+     tknCcall cifBlank tknTint cifTrans            {/*check tknTword*/boza = 10140;}
 ;
 
 userExtensionCommand:
-     tknPdigit tknTusertext                {}
+     tknPdigit tknTusertext                {boza = 10150;}
 ;
 
 commentCommand:
-     tknPremB tknTremtext tknPremE         {}
-   | tknPremB commentCommand tknPremE      {}
+     tknPremB tknTremtext tknPremE         {boza = 10160;}
+   | tknPremB commentCommand tknPremE      {boza = 10161;}
 ;
 
 cifPoint:
-     tknTint cifSep tknTint                {}
+     tknTint cifSep tknTint                {boza = 10170;}
 ;
 
 cifTrans:
@@ -153,13 +154,13 @@ cifPath:
 ;
 
 cifBlank:
-                                           {}
-   | tknTblank                             {}
+                                           {boza = 10180;}
+   | tknTblank                             {boza = 10181;}
 ;
 
 cifSep:
-     tknTupchar                            {}
-   | tknTblank                             {}
+     tknTupchar                            {boza = 10190;}
+   | tknTblank                             {boza = 10191;}
 ;
 %%
 
