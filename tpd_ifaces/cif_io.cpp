@@ -25,8 +25,8 @@
 //        $Author$
 //===========================================================================
 
-#include <sstream>
 #include "tpdph.h"
+#include <sstream>
 #include "cif_io.h"
 #include "../tpd_common/outbox.h"
 
@@ -42,9 +42,9 @@ CIFin::CIFFile::CIFFile(std::string filename)
 
    if (!(cifin = fopen(filename.c_str(),"r")))
    {// open the input file
-//      std::ostringstream info;
-//      info << "File "<< filename <<" can NOT be opened";
-//      tell_log(console::MT_ERROR,info.str());
+      std::ostringstream info;
+      info << "File "<< filename <<" can NOT be opened";
+      tell_log(console::MT_ERROR,info.str());
       _status = 0;
       return;
    }
