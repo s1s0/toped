@@ -181,6 +181,30 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cif_lex.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\cif_yacc.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\gds_io.cpp"
 				>
 			</File>
@@ -206,12 +230,49 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cif_yacc.h"
+				>
+			</File>
+			<File
 				RelativePath=".\gds_io.h"
 				>
 			</File>
 			<File
 				RelativePath=".\tpdph.h"
 				>
+			</File>
+		</Filter>
+		<Filter
+			Name="FlexBison Files"
+			>
+			<File
+				RelativePath=".\cif_lex.ll"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating CIF scanner ..."
+						CommandLine="flex.exe -Pcif -o$(InputName).cpp $(InputFileName)"
+						AdditionalDependencies="cif_yacc.h"
+						Outputs="cif_lex.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\cif_yacc.yy"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating CIF parser"
+						CommandLine="bison.exe  -p cif -d -t -v -o $(InputName).cpp $(InputFileName)&#x0D;&#x0A;move $(InputName).hpp $(InputName).h"
+						Outputs="$(InputName).cpp;$(InputName).h"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>
