@@ -35,7 +35,8 @@
  * to create multiple parsers in one project.
  *
  */
-
+/*Switch on code processing locations for more acurate error messages*/
+%locations
 %{
 #include <sstream>
 #include "../tpd_common/outbox.h"

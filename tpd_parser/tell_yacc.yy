@@ -268,7 +268,7 @@ entrance:
       statement                            {
       if (!yynerrs)  CMDBlock->execute();
       else 
-      {           
+      {
          CMDBlock = CMDBlock->cleaner();
          parsercmd::EOfile();
       }

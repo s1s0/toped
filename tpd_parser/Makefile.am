@@ -1,4 +1,4 @@
-noinst_HEADERS = ted_prompt.h  tellyzer.h tldat.h tpdph.h
+noinst_HEADERS = ted_prompt.h tellyzer.h tldat.h tpdph.h
 #INCLUDES = 
 #METASOURCES = AUTO
 BUILT_SOURCES = tell_yacc.h
