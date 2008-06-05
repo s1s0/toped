@@ -181,10 +181,12 @@ END_EVENT_TABLE()
 //   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
 
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, 
-     const wxSize& size, int* attribList): wxGLCanvas(parent, ID_TPD_CANVAS, pos, 
-     size, 0,wxT("LayoutCanvas"), attribList)
+     const wxSize& size, int* attribList): 
+//wxGLCanvas(parent, ID_TPD_CANVAS, attribList, pos, size, 0, wxT("LayoutCanvas"), wxNullPalette)
+ wxGLCanvas(parent, ID_TPD_CANVAS, pos, size, 0,wxT("LayoutCanvas"), attribList)
 {
-      
+//   wxGLContext* boza = GetContext();
+//   if (NULL == boza) return;
    crossCur = MakeCursor(crosscursor,16, 16);
    //crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
    SetCursor(*crossCur);
