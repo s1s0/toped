@@ -688,18 +688,21 @@ void tui::TopedFrame::initView()
    //----------------------------------------------------------------------------
    // the openGL window - the canvas
    //---------------------------------------------------------------------------- 
-   int gl_attrib[20] = { WX_GL_RGBA             ,
-                         WX_GL_MIN_RED          , 2,
-                         WX_GL_MIN_GREEN        , 2,
-                         WX_GL_MIN_BLUE         , 2,
-                         WX_GL_MIN_ALPHA        , 2,
-                         WX_GL_MIN_ACCUM_RED    , 2,
-                         WX_GL_MIN_ACCUM_GREEN  , 2,
-                         WX_GL_MIN_ACCUM_BLUE   , 2,
-                         WX_GL_MIN_ACCUM_ALPHA  , 2,
+   int gl_attrib[] = { 
+                        WX_GL_RGBA             ,
+/*                        WX_GL_MIN_RED          , 2,
+                        WX_GL_MIN_GREEN        , 2,
+                        WX_GL_MIN_BLUE         , 2,
+                        WX_GL_MIN_ALPHA        , 2,
+                        WX_GL_MIN_ACCUM_RED    , 2,
+                        WX_GL_MIN_ACCUM_GREEN  , 2,
+                        WX_GL_MIN_ACCUM_BLUE   , 2,
+                        WX_GL_MIN_ACCUM_ALPHA  , 2,*/
+                        WX_GL_DOUBLEBUFFER     ,
+                        GL_NONE };
 //                         WX_GL_DEPTH_SIZE    , 1,
-                         WX_GL_DOUBLEBUFFER     ,
-                         GL_NONE };
+//     int* gl_attrib = NULL; 
+
    _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, gl_attrib);
 
    //----------------------------------------------------------------------------
