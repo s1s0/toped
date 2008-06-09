@@ -38,6 +38,7 @@
 /*Switch on code processing locations for more acurate error messages*/
 %locations
 %{
+#include "tpdph.h"
 #include <sstream>
 #include "../tpd_common/outbox.h"
 #include "cif_io.h"

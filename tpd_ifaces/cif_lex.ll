@@ -54,6 +54,7 @@ lexcif_blank    [^-();A-Z0-9]+
 lexcif_comment  [^()]*
 lexcif_usertext [^;]*
 %{
+#include <io.h>
 #include "cif_io.h"
 #include "cif_yacc.h"
 namespace CIFin {
