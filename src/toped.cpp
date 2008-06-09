@@ -693,11 +693,11 @@ void tui::TopedFrame::initView()
                         WX_GL_MIN_RED          , 8,
                         WX_GL_MIN_GREEN        , 8,
                         WX_GL_MIN_BLUE         , 8,
-/*                        WX_GL_MIN_ALPHA        , 8,
+/*                        WX_GL_MIN_ALPHA        , 8,*/
                         WX_GL_MIN_ACCUM_RED    , 8,
                         WX_GL_MIN_ACCUM_GREEN  , 8,
                         WX_GL_MIN_ACCUM_BLUE   , 8,
-                        WX_GL_MIN_ACCUM_ALPHA  , 8,*/
+/*                        WX_GL_MIN_ACCUM_ALPHA  , 8,*/
                         WX_GL_DOUBLEBUFFER     ,
                         GL_NONE };
 //                         WX_GL_DEPTH_SIZE    , 1,
