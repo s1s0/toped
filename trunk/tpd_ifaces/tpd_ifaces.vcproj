@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="tpd_ifaces"
 	ProjectGUID="{BA923FBF-9C73-4ACF-900B-FEEF9DC0D4E2}"
 	RootNamespace="tpd_ifaces"
@@ -48,7 +48,7 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="1"
 				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Release/tpd_ifaces.pch"
 				AssemblerListingLocation=".\Release/"
@@ -249,7 +249,7 @@
 				RelativePath=".\cif_lex.ll"
 				>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
@@ -259,17 +259,38 @@
 						Outputs="cif_lex.cpp"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating CIF scanner ..."
+						CommandLine="flex.exe -Pcif -o$(InputName).cpp $(InputFileName)&#x0D;&#x0A;"
+						AdditionalDependencies="cif_yacc.h"
+						Outputs="cif_lex.cpp"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\cif_yacc.yy"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating CIF parser"
+						CommandLine="bison.exe  -p cif -d -t -v -o $(InputName).cpp $(InputFileName)&#x0D;&#x0A;move $(InputName).hpp $(InputName).h"
+						Outputs="$(InputName).cpp;$(InputName).h"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Generating CIF parser"
-						CommandLine="bison.exe  -p cif -d -t -v -o $(InputName).cpp $(InputFileName)&#x0D;&#x0A;move $(InputName).hpp $(InputName).h"
+						CommandLine="bison.exe  -p cif -d -t -v -o $(InputName).cpp $(InputFileName)&#x0D;&#x0A;move $(InputName).hpp $(InputName).h&#x0D;&#x0A;"
 						Outputs="$(InputName).cpp;$(InputName).h"
 					/>
 				</FileConfiguration>
