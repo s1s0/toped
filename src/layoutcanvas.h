@@ -67,7 +67,7 @@ namespace tui {
       virtual       ~LayoutCanvas();
       wxImage        snapshot(void);
       bool           initStatus() {
-#ifdef wxGTK
+#ifdef __WXGTK__
          return (NULL != x_visual);
 #else
          return true;
@@ -131,7 +131,7 @@ namespace tui {
       bool           reperX;         // Draw a cursor line across the window parallel to the X axis
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       bool           long_cursor;    //
-#ifdef wxGTK
+#ifdef __WXGTK__
       XVisualInfo*   x_visual;       //
 #endif
 //      StatusLine     _status_line;
