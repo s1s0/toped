@@ -1025,7 +1025,9 @@ unsigned int laydata::tdtdesign::numselected() const
 }
 
 DBbox laydata::tdtdesign::activeoverlap() {
-   return _target.overlap();
+   DBbox ovl = _target.overlap();
+   if (ovl == DEFAULT_OVL_BOX) ovl = DEFAULT_ZOOM_BOX;
+   return ovl;
 //   if (_target.checkedit())
 //      return _target.edit()->overlap() * _ARTM;
 //   else return DEFAULT_OVL_BOX;
