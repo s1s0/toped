@@ -220,14 +220,14 @@ Ooops! Second thought!
    float                       real;
    bool                        ptypedef;
    int                         integer;
-   char                       *parsestr;
+   char*                       parsestr;
     telldata::typeID           pttname;
-   parsercmd::argumentLIST    *pfarguments;
-    telldata::argumentQ       *plarguments;
-    telldata::argumentID      *parguments;
-   parsercmd::cmdBLOCK        *pblock;
-   parsercmd::cmdFUNC         *pfblock;
-   parsercmd::FuncDeclaration *pfdeclaration;
+   parsercmd::argumentLIST*    pfarguments;
+    telldata::argumentQ*       plarguments;
+    telldata::argumentID*      parguments;
+   parsercmd::cmdBLOCK*        pblock;
+   parsercmd::cmdFUNC*         pfblock;
+   parsercmd::FuncDeclaration* pfdeclaration;
 }
 
 %start input

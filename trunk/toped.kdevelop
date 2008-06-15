@@ -18,19 +18,19 @@
   <kdevautoproject>
     <general>
       <activetarget>src/toped</activetarget>
-      <useconfiguration>optimized</useconfiguration>
+      <useconfiguration>debug</useconfiguration>
     </general>
     <run>
-      <mainprogram/>
+      <mainprogram>/home/skr/toped_public/debug/src/toped</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs/>
+      <programargs>/home/skr/toped_public/tll/cif_reader.tll</programargs>
       <terminal>true</terminal>
       <autocompile>true</autocompile>
       <envvars/>
-      <globaldebugarguments/>
+      <globaldebugarguments>/home/skr/toped_public/tll/cif_reader.tll</globaldebugarguments>
       <globalcwd>/home/skr/toped_public/debug</globalcwd>
-      <useglobalprogram>false</useglobalprogram>
+      <useglobalprogram>true</useglobalprogram>
       <autoinstall>false</autoinstall>
       <autokdesu>false</autokdesu>
     </run>

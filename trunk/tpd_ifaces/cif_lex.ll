@@ -54,15 +54,16 @@ lexcif_blank    [^-();A-Z0-9]+
 lexcif_comment  [^()]*
 lexcif_usertext [^;]*
 %{
-#include <io.h>
+#include "tpdph.h"
+#include <stdio.h>
 #include "cif_io.h"
 #include "cif_yacc.h"
 namespace CIFin {
    void     location_step(YYLTYPE *loc);
    void     location_lines(YYLTYPE *loc, int num);
    void     location_comment(YYLTYPE *loc, char* source);
-//   char*    charcopy(std::string source, bool quotes = false);
-//   unsigned getllint(char* source);
+   char*    charcopy(std::string source, bool quotes = false);
+   unsigned getllint(char* source);
 //   int      includefile(char* name, FILE* &handler);
 //   int      EOfile();
    int      cifsRemDepth = 0; // depth of comments
@@ -72,11 +73,14 @@ extern YYLTYPE ciflloc;
 #define YY_USER_ACTION  ciflloc.last_column += yyleng;
 %}
 
-%option debug
+/*%option debug*/
 
 %%
+%{
+location_step(&ciflloc);
+%}
 <*>\n+                     location_lines(&ciflloc,yyleng);location_step(&ciflloc);
-<<EOF>>                    { /*if (!parsercmd::EOfile())*/ yyterminate();}
+<<EOF>>                    { /*if (!parsercmd::EOfile())*/ yyterminate();   }
 "E"                        { BEGIN( cifcmd );      return tknCend;         }
 "D"                        { BEGIN( defcmd );      return tknCdefine;      }
 <defcmd>"D"                { BEGIN( cifcmd );      return tknCdefine;      }
@@ -89,20 +93,26 @@ extern YYLTYPE ciflloc;
 <defcmd>"S"                { BEGIN( cifcmd );      return tknCstart;       }
 <defcmd>"F"                { BEGIN( cifcmd );      return tknCfinish;      }
 <*>";"                     { BEGIN( INITIAL);      return tknPsem;         }
-"("                        { if (0 == cifsRemDepth) BEGIN( comment);
+<*>"("                     { if (0 == cifsRemDepth) BEGIN( comment);
                              cifsRemDepth = cifsRemDepth + 1;
                                                    return tknPremB;        }
-")"                        {                       return tknPremE;        }
-{lexcif_digit}{1,1}        { BEGIN( usercmd);      return tknPdigit;       }
-<cifcmd>-?{lexcif_digit}+  {                       return tknTint;         }
-<cifcmd>{lexcif_upchar}    {                       return tknTupchar;      }
-<layer>{lexcif_snc}{1,4}   {                       return tknTshortname;   }
-<comment>{lexcif_comment}  { location_comment(&ciflloc,yytext);
-                             cifsRemDepth = cifsRemDepth - 1;
+<*>")"                     { cifsRemDepth = cifsRemDepth - 1;
                              if (0 == cifsRemDepth) BEGIN( INITIAL);
+                                                   return tknPremE;        }
+{lexcif_digit}{1,1}        { BEGIN( usercmd);
+                             ciflval.word    = CIFin::getllint(yytext);
+                                                   return tknPdigit;       }
+<cifcmd>-?{lexcif_digit}+  { ciflval.integer = CIFin::getllint(yytext);
+                                                   return tknTint;         }
+<cifcmd>{lexcif_upchar}    {                       return tknTupchar;      }
+<layer>{lexcif_snc}{1,4}   { ciflval.identifier = CIFin::charcopy(yytext);
+                                                   return tknTshortname;   }
+<comment>{lexcif_comment}  { location_comment(&ciflloc,yytext);
+                             ciflval.identifier = CIFin::charcopy(yytext);
                                                    return tknTremtext;     }
 <usercmd>{lexcif_usertext} { BEGIN( INITIAL);      return tknTusertext;    }
-<*>{lexcif_blank}                                  return tknTblank;
+<*>{lexcif_blank}          {location_comment(&ciflloc,yytext);
+                                                   return tknTblank;       }
 .                                                  return tknERROR;
 %%
 
@@ -124,7 +134,7 @@ void CIFin::location_step(YYLTYPE *loc)
 
 void CIFin::location_lines(YYLTYPE *loc, int num)
 {
-   loc->last_column = 0;
+   loc->last_column = 1;
    loc->last_line += num;
 }
 
@@ -150,4 +160,18 @@ void CIFin::location_comment(YYLTYPE *loc, char* source)
    }
 }
 
+unsigned CIFin::getllint(char* source)
+{
+   char* dummy;
+   unsigned result = strtoul(source, &dummy, 0);
+   return result;
+}
 
+char* CIFin::charcopy(std::string source, bool quotes)
+{
+   int length = source.length() - (quotes ? 2 : 0);
+   char* newstr = DEBUG_NEW char[length+2];
+   memcpy(newstr,&(source.c_str()[quotes ? 1 : 0]),length);
+   newstr[length] = 0x00;
+   return newstr;
+}

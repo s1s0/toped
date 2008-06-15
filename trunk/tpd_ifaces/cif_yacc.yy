@@ -41,25 +41,39 @@
 #include "tpdph.h"
 #include <sstream>
 #include "../tpd_common/outbox.h"
+#include "../tpd_common/ttt.h"
 #include "cif_io.h"
 int boza;
+extern CIFin::CIFFile* CIFInFile;
+
 /*void ciferror (std::string s);*/
+void ciferror(std::string s, CIFin::yyltype loc);
+bool checkPositive(int var, CIFin::yyltype loc);
+
 %}
 
-%debug
-/*
-%union {
+/*%debug*/
 
+%union {
+   unsigned       word;
+   int            integer;
+   char*          identifier;
+   TP*            point;
+   pointlist*     path;
 }
-*/
+
 %start cifFile
 /* token code T - type; C - command; P - primitive*/
 %token                 tknERROR
 %token                 tknPsem tknPdigit tknPremB tknPremE
 %token                 tknCend tknCdefine tknCpolygon tknCbox tknCround
 %token                 tknCwire tknClayer tknCcall tknCstart tknCfinish
-%token                 tknTint tknTusertext tknTremtext tknTshortname
-%token                 tknTupchar tknTblank
+%token                 tknTint tknTusertext tknTshortname
+%token                 tknTupchar tknTblank tknTremtext
+%type  <identifier>    commentCommand tknTremtext tknTshortname
+%type  <integer>       tknTint
+%type  <point>         cifPoint
+%type  <path>          cifPath
 
 %%
 cifFile:
@@ -91,7 +105,7 @@ primCommand:
    | layerCommand                          {boza = 10044;}
    | callCommand                           {boza = 10045;}
    | userExtensionCommand                  {boza = 10046;}
-   | commentCommand                        {boza = 10047;}
+   | commentCommand                        {delete $1;}
 ;
 
 defDefineCommand:
@@ -99,65 +113,110 @@ defDefineCommand:
 ;
 
 defStartCommand:
-     tknCdefine cifBlank tknCstart cifBlank tknTint       {/*check tknTword*/boza = 10060;}
-   | tknCdefine cifBlank tknCstart cifBlank tknTint cifSep tknTint cifSep tknTint {/*check 3*tknTword*/boza = 10061;}
+     tknCdefine cifBlank tknCstart cifBlank tknTint {
+      if (checkPositive($5, @5))
+         CIFInFile->addStructure($5);
+   }
+   | tknCdefine cifBlank tknCstart cifBlank tknTint cifSep tknTint cifSep tknTint {
+      bool valid = true;
+      valid &= checkPositive($5,@5);
+      valid &= checkPositive($7,@7);
+      valid &= checkPositive($9,@9);
+      if (valid)
+         CIFInFile->addStructure($5, $7, $9);
+   }
 ;
 
 defDeleteCommand:
-     tknCdefine cifBlank tknCdefine tknTint {/*check tknTword*/boza = 10070;}
+     tknCdefine cifBlank tknCdefine tknTint {/*check tknTword*/ciferror("defDeleteCommand - not implemented yet", @1);}
 ;
 
 defFinishCommand:
-     tknCdefine cifBlank tknCfinish        {boza = 10080;}
-;
-
-polygonCommand:
-     tknCpolygon cifPath                   {boza = 10090;}
-;
-
-boxCommand: /*discrepancy with the formal syntax*/
-     tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint    {/*check 2*tknTword*/boza = 10100;}
-   | tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint cifSep cifPoint  {/*check 2*tknTword*/boza = 10101;}
-;
-
-roundFlashCommand:
-     tknCround tknTint cifSep cifPoint    {/*check tknTword*/boza = 10110;}
-;
-
-wireCommand:
-     tknCwire tknTint cifSep cifPath      {/*check tknTword*/boza = 10120;}
+     tknCdefine cifBlank tknCfinish       {
+      CIFInFile->doneStructure();
+   }
 ;
 
 layerCommand:
-     tknClayer cifBlank tknTshortname      {boza = 10130;}
+     tknClayer cifBlank tknTshortname     {
+      CIFInFile->secureLayer($3);
+      delete $3;
+   }
+;
+
+polygonCommand: /*discrepancy with the formal syntax*/
+     tknCpolygon cifBlank cifPath         {
+      CIFInFile->addPoly($3);
+   }
+;
+
+boxCommand: /*discrepancy with the formal syntax*/
+     tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint    {
+      bool valid = true;
+      valid &= checkPositive($3,@3);
+      valid &= checkPositive($5,@5);
+      if (valid)
+         CIFInFile->addBox($3, $5, $7);
+   }
+   | tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint cifSep cifPoint  {
+      bool valid = true;
+      valid &= checkPositive($3,@3);
+      valid &= checkPositive($5,@5);
+      if (valid)
+         CIFInFile->addBox($3, $5, $7, $9);
+   }
+;
+
+roundFlashCommand:
+     tknCround tknTint cifSep cifPoint    {/*check tknTword*/ciferror("roundFlashCommand - not implemented yet", @1);}
+;
+
+wireCommand:
+     tknCwire tknTint cifSep cifPath      {/*check tknTword*/ciferror("wireCommand - not implemented yet", @1);}
 ;
 
 callCommand: /*discrepancy with the formal syntax*/
-     tknCcall cifBlank tknTint cifTrans            {/*check tknTword*/boza = 10140;}
+     tknCcall cifBlank tknTint cifTrans   {/*check tknTword*/ciferror("callCommand - not implemented yet", @1);}
 ;
 
 userExtensionCommand:
-     tknPdigit tknTusertext                {boza = 10150;}
+     tknPdigit tknTusertext                {ciferror("Unsupported user command", @1);}
 ;
 
 commentCommand:
-     tknPremB tknTremtext tknPremE         {boza = 10160;}
-   | tknPremB commentCommand tknPremE      {boza = 10161;}
+     tknPremB tknTremtext tknPremE         {
+      $$ = $2;
+   }
+   | tknPremB commentCommand tknPremE      {
+      $$ = $2;
+   }
 ;
 
 cifPoint:
-     tknTint cifSep tknTint                {boza = 10170;}
+     tknTint cifSep tknTint                {
+      $$ = DEBUG_NEW TP($1, $3);
+   }
 ;
 
 cifTrans:
 ;
 
 cifPath:
+     cifPoint                             {
+      $$ = DEBUG_NEW pointlist();
+      $$->push_back(*($1));
+      delete ($1);
+   }
+   | cifPath cifSep cifPoint              {
+      $1->push_back(*($3));
+      delete ($3);
+}
 ;
 
 cifBlank:
                                            {boza = 10180;}
    | tknTblank                             {boza = 10181;}
+/*   | cifBlank tknTblank                    {             }*/
 ;
 
 cifSep:
@@ -170,9 +229,9 @@ cifSep:
 int ciferror (char *s)
 {  /* Called by yyparse on error */
       std::ostringstream ost;
-/*      ost << "line " << telllloc.first_line << ": col " << telllloc.first_column
-            << ": " << s;*/
-      ost << s;
+      ost << "line " << ciflloc.first_line << ": col " << ciflloc.first_column
+            << ": " << s;
+//      ost << s;
       tell_log(console::MT_ERROR,ost.str());
       return 0;
 }
@@ -187,3 +246,25 @@ int ciferror (char *s)
 //    tell_log(console::MT_ERROR,ost.str());
 // }
 
+void ciferror (std::string s, CIFin::yyltype loc)
+{
+   yynerrs++;
+   std::ostringstream ost;
+   ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
+   if (loc.filename) {
+      std::string fn = loc.filename;
+      ost << "in file \"" << fn << "\" : ";
+   }
+   ost << s;
+   tell_log(console::MT_ERROR,ost.str());
+}
+
+bool checkPositive(int var, CIFin::yyltype loc)
+{
+   if (var < 0)
+   {
+      ciferror("Positive integer expected", loc);
+      return false;
+   }
+   return true;
+}
