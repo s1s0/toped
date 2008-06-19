@@ -33,7 +33,7 @@
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
 #include "../tpd_common/ttt.h"
-#include "resourcecenter.h"
+
 #include "../tpd_DB/viewprop.h"
 
 namespace tui {
@@ -58,6 +58,14 @@ namespace tui {
       ID_CBDEFPATTERN   ,
       ID_CBDEFLINE
    };
+
+	enum {
+		ICON_SIZE_16x16,
+		ICON_SIZE_24x24,
+		ICON_SIZE_32x32,
+		ICON_SIZE_48x48
+	};
+	const int numberOfIconSizes = 4;//ICON_SIZE_16x16, ICON_SIZE_24x24, ICON_SIZE_32x32,ICON_SIZE_48x48
 
    class getSize : public wxDialog {
    public:

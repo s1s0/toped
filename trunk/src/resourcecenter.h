@@ -33,6 +33,7 @@
 #include <wx/laywin.h>
 
 #include "../tpd_bidfunc/tpdf_common.h"
+#include "tui.h"
 
 /*WARNING!!!
    Current version ResourceCenter can use callback functions only
@@ -142,13 +143,14 @@ namespace tui
       callbackMethod method(void)   const    { return _method;};
 
 		virtual ~ToolItem();
-		wxBitmap	bitmap(void)	const {return _bitmap;};
+		wxBitmap	bitmap(void)	const {return _bitmaps[0];};
 		int		ID(void)			const {return _ID;};
 		void		changeToolSize(const wxSize& size);
 	private:
 		int				_ID;
-		wxBitmap			_bitmap;
-		std::string		_bitmapName;
+		wxBitmap			_bitmaps[numberOfIconSizes];
+		std::string		_bitmapNames[numberOfIconSizes];
+		
 		//std::string	_hotKey;
       std::string		_function;
       std::string		_helpString;
@@ -164,7 +166,7 @@ namespace tui
 		virtual ~ToolBarHandler();
 
 //		void				addTool(ToolItem *tool);
-		void				addTool(int ID1, const std::string &toolBarItem, const std::string iconName, 
+		void				addTool(int ID1, const std::string &toolBarItem, const std::string iconName, int size,
 										const std::string hotKey, const std::string &helpString, callbackMethod cbMethod);
 		void				execute(int ID1);
 
@@ -207,11 +209,13 @@ namespace tui
 		/*void appendTool(const std::string toolBarName, const std::string &toolBarItem,
 							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod, int direction);*/
+		void setDirection(int direction);
 		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
 							const std::string &iconName,
+							int size,
 							const std::string &hotKey, 
 							const std::string &helpString,
-							callbackMethod cbMethod, int direction);
+							callbackMethod cbMethod);
    private:
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
@@ -222,6 +226,7 @@ namespace tui
       int					_menuCount; //number of menu items
 		int					_toolCount; //number of tool items
 		std::string			_IconDir;	//directory that contains
+		int					_direction;
 
    };
 
