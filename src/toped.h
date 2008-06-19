@@ -35,6 +35,7 @@
 #include "../tpd_parser/ted_prompt.h"
 #include "layoutcanvas.h"
 #include "tui.h"
+#include "resourcecenter.h"
 #include "../tpd_DB/browsers.h"
 
 namespace tui {
