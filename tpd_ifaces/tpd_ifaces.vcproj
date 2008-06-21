@@ -48,7 +48,7 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="1"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderThrough="tpdph.h"
 				PrecompiledHeaderFile=".\Release/tpd_ifaces.pch"
 				AssemblerListingLocation=".\Release/"
