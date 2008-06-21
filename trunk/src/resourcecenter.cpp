@@ -260,12 +260,71 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								:_ID(toolID), /*_hotKey(hotKey),*/ 
 								_helpString(helpString), _method(cbMethod)
 {
+	_bitmaps[ICON_SIZE_16x16] = wxNullBitmap;
+	_bitmaps[ICON_SIZE_24x24] = wxNullBitmap;
+	_bitmaps[ICON_SIZE_32x32] = wxNullBitmap;
+	_bitmaps[ICON_SIZE_48x48] = wxNullBitmap;
+
+	_bitmapNames[ICON_SIZE_16x16] = "";
+	_bitmapNames[ICON_SIZE_24x24] = "";
+	_bitmapNames[ICON_SIZE_32x32] = "";
+	_bitmapNames[ICON_SIZE_48x48] = "";
+
 	_bitmapNames[0] = bitmapName;
 
 	wxImage image(wxString(_bitmapNames[0].c_str(), wxConvUTF8),wxBITMAP_TYPE_PNG);
 	
 	_bitmaps[0] = wxBitmap(image);
    //_bitmap = wxIcon(wxString(_bitmapName.c_str(), wxConvUTF8), wxBITMAP_TYPE_ICO_RESOURCE, 16, 16);
+}
+
+void tui::ToolItem::addIcon(const std::string &bitmapName, int size)
+{
+	switch(size)
+	{
+		case ICON_SIZE_16x16:
+			checkEmptyIconAndSet(ICON_SIZE_24x24, bitmapName);
+			checkEmptyIconAndSet(ICON_SIZE_32x32, bitmapName);
+			checkEmptyIconAndSet(ICON_SIZE_48x48, bitmapName);
+
+			break;
+		case ICON_SIZE_24x24:
+			checkEmptyIconAndSet(ICON_SIZE_16x16, bitmapName);
+			checkEmptyIconAndSet(ICON_SIZE_32x32, bitmapName);
+			checkEmptyIconAndSet(ICON_SIZE_48x48, bitmapName);
+
+			break;
+		case ICON_SIZE_32x32:
+			checkEmptyIconAndSet(ICON_SIZE_16x16, bitmapName);
+			checkEmptyIconAndSet(ICON_SIZE_24x24, bitmapName);
+			checkEmptyIconAndSet(ICON_SIZE_48x48, bitmapName);
+
+			break;
+			case ICON_SIZE_48x48:
+			checkEmptyIconAndSet(ICON_SIZE_16x16, bitmapName);
+			checkEmptyIconAndSet(ICON_SIZE_24x24, bitmapName);
+			checkEmptyIconAndSet(ICON_SIZE_32x32, bitmapName);
+
+			break;
+		default:
+			wxString info;
+			info << wxT("Wrong size for icon was chosen.");
+         tell_log(console::MT_ERROR,info);
+
+			;
+	}
+}
+
+void tui::ToolItem::checkEmptyIconAndSet(int size, const std::string &bitmapName)
+{
+	//if this bitmap empty , replace it 
+	//another case do nothing
+	if(_bitmapNames[size] == ""  )
+	{
+		_bitmapNames[size] = bitmapName;
+		wxImage image(wxString(_bitmapNames[size].c_str(), wxConvUTF8),wxBITMAP_TYPE_PNG);
+		_bitmaps[size] = wxBitmap(image);
+	}
 }
 
 tui::ToolItem::~ToolItem()
@@ -415,6 +474,10 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 										const std::string &helpString,
 										callbackMethod cbMethod)
 {
+	for(toolList::const_iterator it = _tools.begin(); it != _tools.end(); it++)
+	{
+		if ((*it)->name() == iconName) ;
+	}
 	ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconName, hotKey, helpString, cbMethod);
 
 	_tools.push_back(tool);

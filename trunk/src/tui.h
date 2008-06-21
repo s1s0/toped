@@ -60,7 +60,7 @@ namespace tui {
    };
 
 	enum {
-		ICON_SIZE_16x16,
+		ICON_SIZE_16x16 = 0,
 		ICON_SIZE_24x24,
 		ICON_SIZE_32x32,
 		ICON_SIZE_48x48

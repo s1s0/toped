@@ -137,10 +137,12 @@ namespace tui
 					const std::string &bitmapName,
 					const std::string &hotKey, 
 					const std::string &helpString, callbackMethod cbMethod);
-		//std::string    hotKey(void)   const    { return _hotKey;};
-      std::string    function(void) const    { return _function;};
-      std::string    helpString(void) const  { return _helpString;};
-      callbackMethod method(void)   const    { return _method;};
+		void addIcon(const std::string &bitmapName, int size); 
+		//std::string  hotKey(void)		const		{ return _hotKey;};
+      std::string    function(void)		const    { return _function;};
+		std::string    name(void)			const    { return _name;};
+      std::string    helpString(void)	const		{ return _helpString;};
+      callbackMethod method(void)		const    { return _method;};
 
 		virtual ~ToolItem();
 		wxBitmap	bitmap(void)	const {return _bitmaps[0];};
@@ -148,6 +150,7 @@ namespace tui
 		void		changeToolSize(const wxSize& size);
 	private:
 		int				_ID;
+		std::string		_name;
 		wxBitmap			_bitmaps[numberOfIconSizes];
 		std::string		_bitmapNames[numberOfIconSizes];
 		
@@ -155,7 +158,8 @@ namespace tui
       std::string		_function;
       std::string		_helpString;
       callbackMethod	_method;
-
+		
+		void checkEmptyIconAndSet(int size, const std::string &bitmapName);
 
 	};
 
