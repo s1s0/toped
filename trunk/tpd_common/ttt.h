@@ -55,6 +55,28 @@
 #define VERIFY( exp )           assert( exp )
 #endif  // NDEBUG
 
+#define YYLTYPE TpdYYLtype
+#define YYLLOC_DEFAULT(Current, Rhs, N)                         \
+   do                                                           \
+      if (N)                                                    \
+      {                                                         \
+      (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;    \
+      (Current).first_column = YYRHSLOC (Rhs, 1).first_column;  \
+      (Current).last_line    = YYRHSLOC (Rhs, N).last_line;     \
+      (Current).last_column  = YYRHSLOC (Rhs, N).last_column;   \
+      (Current).filename     = YYRHSLOC (Rhs, N).filename;      \
+      }                                                         \
+      else                                                      \
+      {                                                         \
+      (Current).first_line   = (Current).last_line   =          \
+                           YYRHSLOC (Rhs, 0).last_line;         \
+      (Current).first_column = (Current).last_column =          \
+                        YYRHSLOC (Rhs, 0).last_column;          \
+         (Current).filename = YYRHSLOC (Rhs, 0).filename;       \
+      }                                                         \
+   while (0)
+
+
 //=============================================================================
 // General type declations (compatability)
 //=============================================================================
@@ -230,6 +252,14 @@ typedef  std::vector<TP>         pointlist;
 typedef  std::stack<CTM>         ctmstack;
 typedef  std::deque<CTM>         ctmqueue;
 typedef  std::list<std::string>  nameList;
+
+struct TpdYYLtype {
+   int          first_line;
+   int          first_column;
+   int          last_line;
+   int          last_column;
+   char*        filename;
+};
 
 //=============================================================================
 template <class TYPE> class SGHierTree {
