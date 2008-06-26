@@ -47,8 +47,8 @@ int boza;
 extern CIFin::CIFFile* CIFInFile;
 
 /*void ciferror (std::string s);*/
-void ciferror(std::string s, CIFin::yyltype loc);
-bool checkPositive(int var, CIFin::yyltype loc);
+void ciferror(std::string s, TpdYYLtype loc);
+bool checkPositive(int var, TpdYYLtype loc);
 
 %}
 
@@ -246,7 +246,7 @@ int ciferror (char *s)
 //    tell_log(console::MT_ERROR,ost.str());
 // }
 
-void ciferror (std::string s, CIFin::yyltype loc)
+void ciferror (std::string s, TpdYYLtype loc)
 {
    yynerrs++;
    std::ostringstream ost;
@@ -259,7 +259,7 @@ void ciferror (std::string s, CIFin::yyltype loc)
    tell_log(console::MT_ERROR,ost.str());
 }
 
-bool checkPositive(int var, CIFin::yyltype loc)
+bool checkPositive(int var, TpdYYLtype loc)
 {
    if (var < 0)
    {

@@ -40,28 +40,6 @@
 #define  EXEC_RETURN    1
 #define  EXEC_ABORT     2
 
-#define YYLTYPE parsercmd::yyltype
-
-#define YYLLOC_DEFAULT(Current, Rhs, N)                         \
-   do                                                           \
-      if (N)                                                    \
-      {                                                         \
-      (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;    \
-      (Current).first_column = YYRHSLOC (Rhs, 1).first_column;  \
-      (Current).last_line    = YYRHSLOC (Rhs, N).last_line;     \
-      (Current).last_column  = YYRHSLOC (Rhs, N).last_column;   \
-      (Current).filename     = YYRHSLOC (Rhs, N).filename;      \
-      }                                                         \
-      else                                                      \
-      {                                                         \
-      (Current).first_line   = (Current).last_line   =          \
-                           YYRHSLOC (Rhs, 0).last_line;         \
-      (Current).first_column = (Current).last_column =          \
-                        YYRHSLOC (Rhs, 0).last_column;          \
-         (Current).filename = YYRHSLOC (Rhs, 0).filename;       \
-      }                                                         \
-   while (0)
-
 //-----------------------------------------------------------------------------
 // Some forward declarations
 //-----------------------------------------------------------------------------
@@ -75,14 +53,6 @@ namespace  parsercmd {
    class cmdBLOCK;
    class FuncDeclaration;
 
-
-   struct yyltype {
-      int          first_line;
-      int          first_column;
-      int          last_line;
-      int          last_column;
-      char*        filename;
-   };
    // Used by lexer to include multiply files and for error tracing
    class lexer_files {
    public:
@@ -440,8 +410,8 @@ namespace  parsercmd {
       int                        execute();
       cmdBLOCK*                  cleaner();
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
-      virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype);
-      virtual void               addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype);
+      virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
+      virtual void               addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
       void                       addID(const char*, telldata::tell_var*);
       void                       addconstID(const char*, telldata::tell_var*, bool initialized);
       void                       addlocaltype(const char*, telldata::tell_type*);
@@ -449,9 +419,9 @@ namespace  parsercmd {
       const telldata::tell_type* getTypeByName(char*&) const;
       const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(char*&, bool local=false);
-      telldata::tell_var*        newTellvar(telldata::typeID, yyltype);
+      telldata::tell_var*        newTellvar(telldata::typeID, TpdYYLtype);
       bool                       defValidate(const std::string& ,const argumentLIST*, cmdFUNC*&);
-      bool                       declValidate(const std::string&, const argumentLIST*, parsercmd::yyltype);
+      bool                       declValidate(const std::string&, const argumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
@@ -476,8 +446,8 @@ namespace  parsercmd {
                      cmdMAIN();
       int            execute();
       void           addFUNC(std::string, cmdSTDFUNC*);
-      void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype);
-      void           addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype);
+      void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
+      void           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
       void           addGlobalType(char*, telldata::tell_type*);
       void           recoveryDone();
       ~cmdMAIN();
@@ -569,21 +539,21 @@ namespace  parsercmd {
       cmdBLOCK*            _body;
    };
 
-   telldata::typeID UMinus(telldata::typeID, yyltype);
-   telldata::typeID   Plus(telldata::typeID, telldata::typeID, yyltype, yyltype);
-   telldata::typeID  Minus(telldata::typeID, telldata::typeID, yyltype, yyltype);
-   telldata::typeID  PointMv(telldata::typeID, telldata::typeID, yyltype, yyltype, int, int);
-   telldata::typeID  Multiply(telldata::typeID, telldata::typeID, yyltype, yyltype);
-   telldata::typeID  Divide(telldata::typeID, telldata::typeID, yyltype, yyltype);
-   telldata::typeID  Assign(telldata::tell_var*, bool, telldata::argumentID*, yyltype);
-   telldata::typeID  Uninsert(telldata::tell_var*, telldata::argumentID*, parsercmd::cmdLISTADD*, yyltype);
-   telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, yyltype, yyltype);
-   telldata::typeID  BoolEx(telldata::typeID, std::string, yyltype);
+   telldata::typeID UMinus(telldata::typeID, TpdYYLtype);
+   telldata::typeID   Plus(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
+   telldata::typeID  Minus(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
+   telldata::typeID  PointMv(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype, int, int);
+   telldata::typeID  Multiply(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
+   telldata::typeID  Divide(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
+   telldata::typeID  Assign(telldata::tell_var*, bool, telldata::argumentID*, TpdYYLtype);
+   telldata::typeID  Uninsert(telldata::tell_var*, telldata::argumentID*, parsercmd::cmdLISTADD*, TpdYYLtype);
+   telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, TpdYYLtype, TpdYYLtype);
+   telldata::typeID  BoolEx(telldata::typeID, std::string, TpdYYLtype);
 
-   bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, yyltype);
-   bool              ListIndexCheck(telldata::typeID, yyltype, telldata::typeID, yyltype);
-   bool              ListSliceCheck(telldata::typeID, yyltype, telldata::typeID, yyltype, telldata::typeID, yyltype);
-   bool              ListSliceCheck(telldata::typeID, yyltype, telldata::typeID, yyltype);
+   bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, TpdYYLtype);
+   bool              ListIndexCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
+   bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
+   bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    void              ClearArgumentList(argumentLIST*);
 
 

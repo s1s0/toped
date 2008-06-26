@@ -42,7 +42,7 @@
 #define TELL_DEBUG(a) 
 #endif
 
-extern void tellerror(std::string s, parsercmd::yyltype loc);
+extern void tellerror(std::string s, TpdYYLtype loc);
 extern void tellerror(std::string s);
 // Declared here to avoid "undefined symbol" errors reported by 
 // ldd -r for tpd_parser.so
@@ -884,7 +884,7 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::type
    return NULL;
 }
 
-telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, yyltype loc)
+telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLtype loc)
 {
    if (ID & telldata::tn_listmask) 
       return(DEBUG_NEW telldata::ttlist(ID));
@@ -923,12 +923,12 @@ void parsercmd::cmdBLOCK::addFUNC(std::string, cmdSTDFUNC* cQ) {
    if (cQ)    delete cQ;
 }
 
-void parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdFUNC*, parsercmd::yyltype) {
+void parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype) {
    TELL_DEBUG(addFUNC);
    tellerror("Nested function definitions are not allowed");
 }
 
-void parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, parsercmd::yyltype) {
+void parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype) {
    TELL_DEBUG(addFUNCDECL);
    tellerror("Function definitions can be only global");
 }
@@ -1074,7 +1074,7 @@ bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const argumentLIST
    return allow_definition;
 }
 
-bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const argumentLIST* alst, parsercmd::yyltype loc)
+bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const argumentLIST* alst, TpdYYLtype loc)
 {
    // convert argumentLIST to argumentMAP
    telldata::argumentQ arguMap;
@@ -1393,7 +1393,7 @@ void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
 
 /*! 
 */
-void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, parsercmd::yyltype loc)
+void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, TpdYYLtype loc)
 {
    cmdFUNC* declfunc = NULL;
    if ((telldata::tn_void != decl->type()) && (0 == decl->numReturns())) {
@@ -1428,7 +1428,7 @@ with such name and calling convention already exists. If it doesn't - a new cmdF
 be created and will be inserted in the _funcMAP. The contents of the new cmdFUNC will be 
 empty and cmdFUNC._declarationit will be true. 
 */
-void parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, parsercmd::yyltype loc)
+void parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, TpdYYLtype loc)
 {
    if (CMDBlock->declValidate(decl->name().c_str(),decl->argList(),loc))
    {
@@ -1462,7 +1462,7 @@ parsercmd::cmdMAIN::~cmdMAIN(){
 };
 
 //=============================================================================
-telldata::typeID parsercmd::UMinus(telldata::typeID op1, yyltype loc1) {
+telldata::typeID parsercmd::UMinus(telldata::typeID op1, TpdYYLtype loc1) {
    if (NUMBER_TYPE(op1)) {
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdUMINUS(op1));
       return op1;}
@@ -1480,7 +1480,7 @@ telldata::typeID parsercmd::UMinus(telldata::typeID op1, yyltype loc1) {
 //   box      |blow |shift| or  |
 //---------------------------------------
 telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
-                                                  yyltype loc1, yyltype loc2) {
+                                                  TpdYYLtype loc1, TpdYYLtype loc2) {
    switch (op1)   {
       case  telldata::tn_int: 
       case telldata::tn_real:
@@ -1513,7 +1513,7 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
 }
 
 telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
-                                                  yyltype loc1, yyltype loc2) {
+                                                  TpdYYLtype loc1, TpdYYLtype loc2) {
    switch (op1)   {
        case telldata::tn_int:
       case telldata::tn_real:
@@ -1546,7 +1546,7 @@ telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
 }
 
 telldata::typeID parsercmd::PointMv(telldata::typeID op1, telldata::typeID op2,
-                                   yyltype loc1, yyltype loc2, int xdir, int ydir) {
+                                   TpdYYLtype loc1, TpdYYLtype loc2, int xdir, int ydir) {
    switch (op1)   {
       case telldata::tn_pnt:
          switch(op2) {
@@ -1579,7 +1579,7 @@ telldata::typeID parsercmd::PointMv(telldata::typeID op1, telldata::typeID op2,
 //   box      |scale| rota| and |
 //-------------------------------
 telldata::typeID parsercmd::Multiply(telldata::typeID op1, telldata::typeID op2,
-                                                  yyltype loc1, yyltype loc2) {
+                                                  TpdYYLtype loc1, TpdYYLtype loc2) {
    switch (op1)   {
        case telldata::tn_int:
       case telldata::tn_real:
@@ -1612,7 +1612,7 @@ telldata::typeID parsercmd::Multiply(telldata::typeID op1, telldata::typeID op2,
 }
 
 telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
-                                                  yyltype loc1, yyltype loc2) {
+                                                  TpdYYLtype loc1, TpdYYLtype loc2) {
    switch (op1)   {
        case telldata::tn_int:
       case telldata::tn_real:
@@ -1645,7 +1645,7 @@ telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
 }
 
 bool parsercmd::StructTypeCheck(telldata::typeID targett, 
-                                      telldata::argumentID* op2, yyltype loc)
+                                      telldata::argumentID* op2, TpdYYLtype loc)
 {
    VERIFY(TLUNKNOWN_TYPE((*op2)()));
    const telldata::tell_type* vartype;
@@ -1663,8 +1663,8 @@ bool parsercmd::StructTypeCheck(telldata::typeID targett,
    return (targett == (*op2)());
 }
 
-bool parsercmd::ListIndexCheck(telldata::typeID list, yyltype lloc,
-                               telldata::typeID idx, yyltype iloc)
+bool parsercmd::ListIndexCheck(telldata::typeID list, TpdYYLtype lloc,
+                               telldata::typeID idx, TpdYYLtype iloc)
 {
    bool checkval = false;
    if       (!(list & telldata::tn_listmask))
@@ -1676,8 +1676,8 @@ bool parsercmd::ListIndexCheck(telldata::typeID list, yyltype lloc,
    return checkval;
 }
 
-bool parsercmd::ListSliceCheck(telldata::typeID list, yyltype lloc,
-   telldata::typeID idx, yyltype iloc, telldata::typeID sidx, yyltype sloc)
+bool parsercmd::ListSliceCheck(telldata::typeID list, TpdYYLtype lloc,
+   telldata::typeID idx, TpdYYLtype iloc, telldata::typeID sidx, TpdYYLtype sloc)
 {
    if  ((sidx != telldata::tn_int) && (sidx != telldata::tn_real))
    {
@@ -1688,8 +1688,8 @@ bool parsercmd::ListSliceCheck(telldata::typeID list, yyltype lloc,
       return ListIndexCheck(list, lloc, idx, iloc);
 }
 
-bool parsercmd::ListSliceCheck(telldata::typeID list, yyltype lloc,
-                                    telldata::typeID sidx, yyltype sloc)
+bool parsercmd::ListSliceCheck(telldata::typeID list, TpdYYLtype lloc,
+                                    telldata::typeID sidx, TpdYYLtype sloc)
 {
    if  ((sidx != telldata::tn_int) && (sidx != telldata::tn_real))
    {
@@ -1705,7 +1705,7 @@ bool parsercmd::ListSliceCheck(telldata::typeID list, yyltype lloc,
 }
 
 telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telldata::argumentID* op2,
-                                                                 yyltype loc)
+                                                                 TpdYYLtype loc)
 {
    if (!lval)
    {
@@ -1771,7 +1771,7 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
 }
 
 telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumentID* op2,
-                                                    parsercmd::cmdLISTADD* unins_cmd, yyltype loc)
+                                                    parsercmd::cmdLISTADD* unins_cmd, TpdYYLtype loc)
 {
    // List add/insert operators can be described as "composite" operators - i.e.
    // they are constituted by two operators:
@@ -1896,7 +1896,7 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
 //   poly     |  -  |  -  |  -  | ??? |  how about +-*/
 //---------------------------------------
 telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
-                                 std::string ope, yyltype loc1, yyltype loc2)
+                                 std::string ope, TpdYYLtype loc1, TpdYYLtype loc2)
 {
 //   std::ostringstream ost;
 //   ost << "bad or unsuported pair of operands in " << ope << "operator";
@@ -1946,7 +1946,7 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
    }
 }
 
-telldata::typeID parsercmd::BoolEx(telldata::typeID op1, std::string ope, yyltype loc1)
+telldata::typeID parsercmd::BoolEx(telldata::typeID op1, std::string ope, TpdYYLtype loc1)
 {
    if      (telldata::tn_int == op1)
    {

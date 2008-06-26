@@ -76,7 +76,7 @@ parsercmd::FuncDeclaration *cfd;
 int funcdeferrors = 0;
 /*number of poits of the current polygon*/
 unsigned listlength = 0;
-void tellerror(std::string s, parsercmd::yyltype loc);
+void tellerror(std::string s, TpdYYLtype loc);
 void tellerror (std::string s);
 void cleanonabort();
 
@@ -688,14 +688,14 @@ fieldname:
 
 listindex:
      variable '[' expression ']'    {
-      ListIndexCheck($1, @1, $3, @3);
+      parsercmd::ListIndexCheck($1, @1, $3, @3);
       $$ = ($1 & (~telldata::tn_listmask));
     }
 ;
 
 listinsert:
      variable '[' tknPREADD expression ']'    {
-      if (ListIndexCheck($1, @1, $4, @4))
+      if (parsercmd::ListIndexCheck($1, @1, $4, @4))
       {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,true, true);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
@@ -715,7 +715,7 @@ listinsert:
       }
     }
    | variable '[' expression tknPOSTADD ']'   {
-      if (ListIndexCheck($1, @1, $3, @3))
+      if (parsercmd::ListIndexCheck($1, @1, $3, @3))
       {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,false, true);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
@@ -738,7 +738,7 @@ listinsert:
 
 listremove:
      variable '[' tknPRESUB expression ']'    {
-      if (ListIndexCheck($1, @1, $4, @4))
+      if (parsercmd::ListIndexCheck($1, @1, $4, @4))
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,true, true));
       $$ = ($1 & (~telldata::tn_listmask));
     }
@@ -750,7 +750,7 @@ listremove:
       $$ = ($1 & (~telldata::tn_listmask));
     }
    | variable '[' expression tknPOSTSUB ']'   {
-      if (ListIndexCheck($1, @1, $3, @3))
+      if (parsercmd::ListIndexCheck($1, @1, $3, @3))
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,false, true));
       $$ = ($1 & (~telldata::tn_listmask));
     }
@@ -765,7 +765,7 @@ listremove:
 
 listslice:
      variable '[' expression tknPRESUB expression ']'    {
-      if (ListSliceCheck($1, @1, $5, @5, $3, @3))
+      if (parsercmd::ListSliceCheck($1, @1, $5, @5, $3, @3))
       {
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, true, true));
          $$ = $1;
@@ -774,7 +774,7 @@ listslice:
          $$ = telldata::tn_NULL;
     }
    | variable '[' expression tknPRESUB ']'    {
-      if (ListSliceCheck($1, @1, $3, @3))
+      if (parsercmd::ListSliceCheck($1, @1, $3, @3))
       {
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, false, false));
          $$ = $1;
@@ -783,7 +783,7 @@ listslice:
          $$ = telldata::tn_NULL;
     }
    | variable '[' expression tknPOSTSUB expression ']'   {
-      if (ListSliceCheck($1, @1, $3, @3, $5, @5))
+      if (parsercmd::ListSliceCheck($1, @1, $3, @3, $5, @5))
       {
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, false, true));
          $$ = $1;
@@ -792,7 +792,7 @@ listslice:
          $$ = telldata::tn_NULL;
     }
    | variable '[' tknPOSTSUB  expression ']'   {
-      if (ListSliceCheck($1, @1, $4, @4))
+      if (parsercmd::ListSliceCheck($1, @1, $4, @4))
       {
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, true, false));
          $$ = $1;
