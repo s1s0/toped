@@ -66,6 +66,13 @@ namespace tui {
                                                 const wxSize& , int* attribList);
       virtual       ~LayoutCanvas();
       wxImage        snapshot(void);
+      bool           initStatus() {
+#ifdef __WXGTK__
+         return (NULL != x_visual);
+#else
+         return true;
+#endif
+      }
    protected:
       void           OnpaintGL(wxPaintEvent& event);
       void           OnresizeGL(wxSizeEvent& event);
@@ -126,6 +133,9 @@ namespace tui {
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       bool           long_cursor;    //
       wxImage*       zeroMark;
+#ifdef __WXGTK__
+      XVisualInfo*   x_visual;       //
+#endif
 //      StatusLine     _status_line;
       DECLARE_EVENT_TABLE();
    };

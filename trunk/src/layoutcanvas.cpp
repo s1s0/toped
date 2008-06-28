@@ -182,10 +182,17 @@ END_EVENT_TABLE()
 //   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
 
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, 
-     const wxSize& size, int* attribList): wxGLCanvas(parent, ID_TPD_CANVAS, pos, 
-     size, 0,wxT("LayoutCanvas"), attribList)
+     const wxSize& size, int* attribList): 
+ wxGLCanvas(parent, ID_TPD_CANVAS, pos, size, 0,wxT("LayoutCanvas"), attribList)
 {
-
+#ifdef __WXGTK__
+   //  Here we'll have to check that we've got what we've asked for. Is is
+   // quite possible that we can't get the requested GL visual. If that is the case
+   // we'll have to aboandon the init sequence right here, otherwise Toped will
+   // crash.
+   x_visual = (XVisualInfo*) m_vi;
+   if (NULL == x_visual) return;
+#endif
    crossCur = MakeCursor(crosscursor,16, 16);
    //crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
    SetCursor(*crossCur);

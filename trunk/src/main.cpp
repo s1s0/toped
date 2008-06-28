@@ -452,6 +452,21 @@ bool TopedApp::OnInit() {
 	GetGlobalDirs();
    initDBLib(std::string(localDir.mb_str()));
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
+
+   if (!Toped->view()->initStatus())
+   {
+      bool wbox_status = true;
+
+      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
+            wxT("Toped can't obtain required GLX Visual. Check your video driver/setup please"),
+            wxT("Toped"),
+            wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
+      dlg1->Destroy();
+      //std::string info("Toped can't obtain required GLX Visual. Check your video driver/setup please");
+      //tell_log(console::MT_ERROR,info);
+      return FALSE;
+   }
    if (!LoadFontFile("arial1")) return FALSE;
    Toped->setIconDir(std::string(tpdUIDir.mb_str()));
 	Toped->initToolBars();
