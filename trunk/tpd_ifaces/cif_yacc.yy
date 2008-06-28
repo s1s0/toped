@@ -52,7 +52,7 @@ bool checkPositive(int var, TpdYYLtype loc);
 
 %}
 
-/*%debug*/
+%debug
 
 %union {
    unsigned       word;
@@ -60,6 +60,7 @@ bool checkPositive(int var, TpdYYLtype loc);
    char*          identifier;
    TP*            point;
    pointlist*     path;
+   CTM*           ctmp;
 }
 
 %start cifFile
@@ -68,12 +69,15 @@ bool checkPositive(int var, TpdYYLtype loc);
 %token                 tknPsem tknPdigit tknPremB tknPremE
 %token                 tknCend tknCdefine tknCpolygon tknCbox tknCround
 %token                 tknCwire tknClayer tknCcall tknCstart tknCfinish
-%token                 tknTint tknTusertext tknTshortname
+%token                 tknTint tknTshortname tknTuserText
 %token                 tknTupchar tknTblank tknTremtext
-%type  <identifier>    commentCommand tknTremtext tknTshortname
+%token                 tknCtranslate tknCmirror tknCmirx tknCmiry tknCrotate
+%token                 tknP9
+%type  <identifier>    commentCommand tknTremtext tknTshortname tknTuserText
 %type  <integer>       tknTint
 %type  <point>         cifPoint
 %type  <path>          cifPath
+%type  <ctmp>          cifTrans cifLtrans
 
 %%
 cifFile:
@@ -105,6 +109,7 @@ primCommand:
    | layerCommand                          {boza = 10044;}
    | callCommand                           {boza = 10045;}
    | userExtensionCommand                  {boza = 10046;}
+   | UEC_cellName                          {             }
    | commentCommand                        {delete $1;}
 ;
 
@@ -172,15 +177,28 @@ roundFlashCommand:
 ;
 
 wireCommand:
-     tknCwire tknTint cifSep cifPath      {/*check tknTword*/ciferror("wireCommand - not implemented yet", @1);}
+     tknCwire cifBlank tknTint cifSep cifPath      {
+      if (checkPositive($3, @3))
+         CIFInFile->addWire($5, $3);
+   }
 ;
 
 callCommand: /*discrepancy with the formal syntax*/
-     tknCcall cifBlank tknTint cifTrans   {/*check tknTword*/ciferror("callCommand - not implemented yet", @1);}
+     tknCcall cifBlank tknTint cifLtrans  {
+      if (checkPositive($3, @3))
+         CIFInFile->addRef($3, $4);
+   }
 ;
 
 userExtensionCommand:
-     tknPdigit tknTusertext                {ciferror("Unsupported user command", @1);}
+     tknPdigit tknTuserText                {ciferror("Unsupported user command", @1);}
+;
+
+UEC_cellName:
+     tknP9 tknTuserText                    {
+      CIFInFile->curCellName($2);
+      delete $2;
+   }
 ;
 
 commentCommand:
@@ -199,6 +217,29 @@ cifPoint:
 ;
 
 cifTrans:
+     tknCtranslate cifBlank cifPoint       {
+      $$ = new CTM(); $$->Translate(*$3);
+   }
+   | tknCmirror cifBlank tknCmirx          {
+      $$ = new CTM(); $$->FlipY(); /*TODO CHECK!*/
+   }
+   | tknCmirror cifBlank tknCmiry          {
+      $$ = new CTM(); $$->FlipX(); /*TODO CHECK!*/
+   }
+   | tknCrotate cifBlank cifPoint          {
+      $$ = new CTM(); $$->Rotate(*($3)); /*TODO CHECK!*/
+   }
+;
+
+cifLtrans:
+                                           {
+      $$ = new CTM();
+   }
+   | cifLtrans cifBlank cifTrans           {
+      $$ = new CTM(*($1) * (*($3)));
+      delete $1;
+      delete $3;
+   }
 ;
 
 cifPath:

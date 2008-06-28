@@ -452,6 +452,13 @@ CTM CTM::Rotate(const real alfa, const TP& center) // alfa - in degrees
    return *this;
 }
 
+CTM CTM::Rotate(const TP& direction) // angle between X axis and the point (CIF)
+{
+   real alfa = round(atan2(direction.y() , direction.x()) * 180.0 / M_PI);
+   Rotate(alfa);
+   return *this;
+}
+
 CTM CTM::Reversed() const {
    real denom = (a() * d()) - (b() * c());
    return CTM(                 d()/denom,                   -b()/denom,// 0.0,

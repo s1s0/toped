@@ -49,6 +49,14 @@ CIFin::CIFPoly::CIFPoly(CIFData* last, pointlist* poly) :
       CIFData(last), _poly(poly) {};
 
 //=============================================================================
+CIFin::CIFWire::CIFWire(CIFData* last, pointlist* poly, word width) :
+      CIFData(last), _poly(poly), _width(width) {};
+
+//=============================================================================
+CIFin::CIFRef::CIFRef(CIFData* last, word cell, CTM* location) :
+      CIFData(last), _cell(cell), _location(location) {};
+
+//=============================================================================
 CIFin::CIFLayer::CIFLayer(std::string name, CIFLayer* last):
       _name(name), _last(last), _first(NULL) {}
 
@@ -61,6 +69,12 @@ void CIFin::CIFLayer::addPoly(pointlist* poly)
 {
    _first = DEBUG_NEW CIFPoly(_first, poly);
 }
+
+void CIFin::CIFLayer::addWire(pointlist* poly, word width)
+{
+   _first = DEBUG_NEW CIFWire(_first, poly, width);
+}
+
 //=============================================================================
 CIFin::CIFStructure::CIFStructure(word ID, CIFStructure* last, word a, word b) :
       _ID(ID), _last(last), _a(a), _b(b), _cellname(""), _first(NULL) { }
@@ -81,7 +95,7 @@ CIFin::CIFLayer* CIFin::CIFStructure::secureLayer(std::string name)
 CIFin::CIFFile::CIFFile(std::string filename)
 {
    _first = _current = _default = NULL;
-   _curlay = NULL;
+   _curlay = NULL; _refirst = NULL;
    // feed the flex with the buffer of the input file
    //(cifin is a global variable defined in the flex generated scanner)
    if (!(cifin = fopen(filename.c_str(),"r")))
@@ -124,6 +138,15 @@ void CIFin::CIFFile::secureLayer(char* layname)
    else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
 }
 
+void CIFin::CIFFile::curCellName(char* cellname)
+{
+   if (NULL !=_current)
+   {
+      _current->cellNameIs(std::string(cellname));
+   }
+   else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
+}
+
 void CIFin::CIFFile::addBox(word length,word width ,TP* center, TP* direction)
 {
    _curlay->addBox(length, width, center, direction);
@@ -133,3 +156,14 @@ void CIFin::CIFFile::addPoly(pointlist* poly)
 {
    _curlay->addPoly(poly);
 }
+
+void CIFin::CIFFile::addWire(pointlist* poly, word width)
+{
+   _curlay->addWire(poly, width);
+}
+
+void CIFin::CIFFile::addRef(word cell, CTM* location)
+{
+   _refirst = new CIFRef(_refirst, cell, location);
+}
+
