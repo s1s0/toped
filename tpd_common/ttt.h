@@ -166,6 +166,7 @@ public:
    CTM  FlipY(real X=0)           {return (*this *= CTM(-1,0,0,1,2*X,0));}
    CTM  Rotate(const real);
    CTM  Rotate(const real, const TP&);
+   CTM  Rotate(const TP&);
    CTM  Reversed() const;
    void Decompose(TP&, real&, real&, bool&) const;
    void setCTM(real a, real b, real c, real d, real tx, real ty)

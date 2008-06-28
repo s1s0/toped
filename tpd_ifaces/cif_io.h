@@ -52,7 +52,7 @@ primCommand          = polygonCommand       | boxCommand    | roundFlashCommand 
 polygonCommand       = "P" <*{blank}*> path.
 boxCommand           = "B" <*{blank}*> integer sep integer sep point [sep point]
 roundFlashCommand    = "R" integer sep point.
-wireCommand          = "W" integer sep path.
+wireCommand          = "W" <*{blank}*> integer sep path.
 layerCommand         = "L" {blank} shortname.
 defStartCommand      = "D" {blank} "S" integer [sep integer sep integer].
 defFinishCommand     = "D" {blank} "F".
@@ -62,7 +62,7 @@ userExtensionCommand = digit userText
 commentCommand       = "(" commentText ")".
 endCommand           = "E".
 
-transformation       = {{blank} ("T" point | "M" {blank} "X" | "M" {blank} "Y" | "R" point)}.
+transformation       = {{blank} ("T" <*{blank}*> point | "M" {blank} "X" | "M" {blank} "Y" | "R" <*{blank}*> point)}.
 path                 = point {sep point}.
 point                = sInteger sep sInteger.
 sInteger             = {sep} ["-"]integerD.
@@ -129,6 +129,22 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          pointlist*  _poly;
    };
 
+   class CIFWire : public CIFData {
+      public:
+                     CIFWire(CIFData* last, pointlist*, word);
+      protected:
+         pointlist*  _poly;
+         word        _width;
+   };
+
+   class CIFRef : public CIFData {
+      public:
+         CIFRef(CIFData* last, word, CTM*);
+      protected:
+         word        _cell;
+         CTM*        _location;
+   };
+
    class CIFLayer {
    public:
                      CIFLayer(std::string name, CIFLayer* last);
@@ -136,7 +152,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       CIFLayer*      last()         {return _last;}
       void           addBox(word, word, TP*, TP* direction = NULL);
       void           addPoly(pointlist* poly);
-   private:
+      void           addWire(pointlist* poly, word width);
+      private:
       std::string    _name;
       CIFLayer*      _last;
       CIFData*       _first;
@@ -147,13 +164,14 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
                      CIFStructure(word, CIFStructure*, word=1,word=1);
       void           cellNameIs(std::string cellname) {_cellname = cellname;}
       CIFLayer*      secureLayer(std::string);
+      void           addRef(word cell, CTM* location);
    private:
       word           _ID;
       CIFStructure*  _last;
       word           _a;
       word           _b;
       std::string    _cellname;
-      CIFLayer*     _first;
+      CIFLayer*      _first;
    };
 
    class   CIFFile {
@@ -165,7 +183,10 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       void           doneStructure();
       void           addBox(word, word, TP*, TP* direction = NULL);
       void           addPoly(pointlist*);
+      void           addWire(pointlist*, word);
+      void           addRef(word, CTM*);
       void           secureLayer(char*);
+      void           curCellName(char*);
    protected:
       bool           _status;
 //      CIFStructure*  currentStructure() {return _first;}
@@ -173,6 +194,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       CIFStructure*  _current;
       CIFStructure*  _default;
       CIFLayer*      _curlay;
+      CIFRef*        _refirst;
    };
 
 }
