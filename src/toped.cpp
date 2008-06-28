@@ -689,20 +689,22 @@ void tui::TopedFrame::initView()
    //----------------------------------------------------------------------------
    // the openGL window - the canvas
    //---------------------------------------------------------------------------- 
-   int gl_attrib[20] = { WX_GL_RGBA             ,
-                         WX_GL_MIN_RED          , 2,
-                         WX_GL_MIN_GREEN        , 2,
-                         WX_GL_MIN_BLUE         , 2,
-                         WX_GL_MIN_ALPHA        , 2,
-                         WX_GL_MIN_ACCUM_RED    , 2,
-                         WX_GL_MIN_ACCUM_GREEN  , 2,
-                         WX_GL_MIN_ACCUM_BLUE   , 2,
-                         WX_GL_MIN_ACCUM_ALPHA  , 2,
+   int gl_attrib[] = { 
+                        WX_GL_RGBA             ,
+                        WX_GL_MIN_RED          , 8,
+                        WX_GL_MIN_GREEN        , 8,
+                        WX_GL_MIN_BLUE         , 8,
+/*                        WX_GL_MIN_ALPHA        , 8,*/
+                        WX_GL_MIN_ACCUM_RED    , 8,
+                        WX_GL_MIN_ACCUM_GREEN  , 8,
+                        WX_GL_MIN_ACCUM_BLUE   , 8,
+/*                        WX_GL_MIN_ACCUM_ALPHA  , 8,*/
+                        WX_GL_DOUBLEBUFFER     ,
+                        GL_NONE };
 //                         WX_GL_DEPTH_SIZE    , 1,
-                         WX_GL_DOUBLEBUFFER     ,
-                         GL_NONE };
-   _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, gl_attrib);
+//     int* gl_attrib = NULL; 
 
+   _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, gl_attrib);
    //----------------------------------------------------------------------------
    // The command line
    //----------------------------------------------------------------------------
@@ -725,12 +727,13 @@ void tui::TopedFrame::initView()
                                     LeftDockable(true).
                                     RightDockable(true)
                       );
-   _winManager.AddPane( _canvas,    wxAuiPaneInfo().
-                                    CentrePane().
-                                    MaximizeButton(false).
-                                    Floatable(true).
-                                    CloseButton(false)
-                      );
+   if (_canvas->initStatus())
+      _winManager.AddPane( _canvas,    wxAuiPaneInfo().
+                                       CentrePane().
+                                       MaximizeButton(false).
+                                       Floatable(true).
+                                       CloseButton(false)
+                        );
    //_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).//Fixed().
    //                               CloseButton(false).CaptionVisible(false).BestSize(wxSize(1000,30)));
    _winManager.AddPane(logpane,     wxAuiPaneInfo().
