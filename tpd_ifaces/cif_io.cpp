@@ -57,6 +57,14 @@ CIFin::CIFRef::CIFRef(CIFData* last, word cell, CTM* location) :
       CIFData(last), _cell(cell), _location(location) {};
 
 //=============================================================================
+CIFin::CIFLabelLoc::CIFLabelLoc(CIFData* last, std::string label, TP* location) :
+      CIFData(last), _label(label), _location(location) {};
+
+//=============================================================================
+CIFin::CIFLabelSig::CIFLabelSig(CIFData* last, std::string label, TP* location) :
+      CIFLabelLoc(last, label, location) {};
+
+//=============================================================================
 CIFin::CIFLayer::CIFLayer(std::string name, CIFLayer* last):
       _name(name), _last(last), _first(NULL) {}
 
@@ -75,9 +83,19 @@ void CIFin::CIFLayer::addWire(pointlist* poly, word width)
    _first = DEBUG_NEW CIFWire(_first, poly, width);
 }
 
+void CIFin::CIFLayer::addLabelLoc(std::string label, TP* loc)
+{
+   _first = DEBUG_NEW CIFLabelLoc(_first, label, loc);
+}
+
+void CIFin::CIFLayer::addLabelSig(std::string label, TP* loc)
+{
+   _first = DEBUG_NEW CIFLabelSig(_first, label, loc);
+}
+
 //=============================================================================
 CIFin::CIFStructure::CIFStructure(word ID, CIFStructure* last, word a, word b) :
-      _ID(ID), _last(last), _a(a), _b(b), _cellname(""), _first(NULL) { }
+      _ID(ID), _last(last), _a(a), _b(b), _cellname(""), _first(NULL), _overlap(TP()) { }
 
 CIFin::CIFLayer* CIFin::CIFStructure::secureLayer(std::string name)
 {
@@ -96,16 +114,18 @@ CIFin::CIFFile::CIFFile(std::string filename)
 {
    _first = _current = _default = NULL;
    _curlay = NULL; _refirst = NULL;
+   std::ostringstream info;
    // feed the flex with the buffer of the input file
    //(cifin is a global variable defined in the flex generated scanner)
    if (!(cifin = fopen(filename.c_str(),"r")))
    {// open the input file
-      std::ostringstream info;
       info << "File "<< filename <<" can NOT be opened";
       tell_log(console::MT_ERROR,info.str());
       _status = 0;
       return;
    }
+   info << "Parsing \"" << filename << "\" using CIF grammar";
+   tell_log(console::MT_INFO,info.str());
    CIFInFile = this;
    _default = DEBUG_NEW CIFStructure(0,NULL);
 
@@ -115,6 +135,7 @@ CIFin::CIFFile::CIFFile(std::string filename)
 //   cifdebug = 1;
    cifparse();
 //   my_delete_yy_buffer( buf );
+   _status = 0;
    fclose(cifin);
 }
 
@@ -147,6 +168,15 @@ void CIFin::CIFFile::curCellName(char* cellname)
    else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
 }
 
+void CIFin::CIFFile::curCellOverlap(TP* bl, TP* tr)
+{
+   if (NULL !=_current)
+   {
+      _current->cellOverlapIs(bl,tr);
+   }
+   else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
+}
+
 void CIFin::CIFFile::addBox(word length,word width ,TP* center, TP* direction)
 {
    _curlay->addBox(length, width, center, direction);
@@ -167,3 +197,17 @@ void CIFin::CIFFile::addRef(word cell, CTM* location)
    _refirst = new CIFRef(_refirst, cell, location);
 }
 
+void CIFin::CIFFile::addLabelLoc(char* label, TP* location, char* layname)
+{
+   CIFLayer* llay = _curlay;
+   if (NULL != layname)
+   {
+      llay = _current->secureLayer(std::string(layname));
+   }
+   llay->addLabelLoc(std::string(label), location);
+}
+
+void CIFin::CIFFile::addLabelSig(char* label, TP* location)
+{
+   _curlay->addLabelSig(std::string(label), location);
+}
