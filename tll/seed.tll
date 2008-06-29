@@ -345,15 +345,15 @@ void layerSetup() {
    layprop("POLY"       ,4  ,"red"         ,"checkerboards"  , "selected2" );
    layprop("N_IMPL"     ,5  ,"white"       ,""               , "selected3" );
    layprop("P_IMPL"     ,6  ,"magenta"     ,""               , "selected3" );
-   layprop("CONTACT"    ,7  ,"white"       ,"diagStripeForw" , "selected3" );   
+   layprop("CONTACT"    ,7  ,"white"       ,"diagStripeForw" , "selected3" );
    layprop("METAL1"     ,8  ,"green"       ,"checkerboard"   , "selected3" );
    layprop("PASS"       ,9  ,"darkGray"    ,""               , "selected3" );
    layprop("UNKWN_2"    ,10 ,"white"       ,""               , "selected3" );
    layprop("UNKWN_3"    ,11 ,"white"       ,""               , "selected3" );
    layprop("UNKWN_3"    ,12 ,"white"       ,""               , "selected3" );
    layprop("P_FIELD"    ,13 ,"white"       ,""               , "selected3" );
-   layprop("POLY1"      ,14 ,"cyan"        ,"Cross1"         , "selected3" );  
-   layprop("FUSE"       ,15 ,"white"       ,""               , "selected3" );  
+   layprop("POLY1"      ,14 ,"cyan"        ,"Cross1"         , "selected3" );
+   layprop("FUSE"       ,15 ,"white"       ,""               , "selected3" );
    layprop("VIA12"      ,17 ,"lightGray"   ,""               , "selected3" );
    layprop("METAL2"     ,18 ,"darkMagenta" ,""               , "selected3" );
    layprop("TEXT"       ,60 ,"darkGray"    ,""               , "selected1" );

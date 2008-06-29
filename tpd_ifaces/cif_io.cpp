@@ -109,6 +109,16 @@ CIFin::CIFLayer* CIFin::CIFStructure::secureLayer(std::string name)
    return _first;
 }
 
+void CIFin::CIFStructure::collectLayers(CifLayerList& layList)
+{
+   CIFLayer* wlay = _first;
+   while (NULL != wlay)
+   {
+      layList.push_back(wlay);
+      wlay = wlay->last();
+   }
+}
+
 //=============================================================================
 CIFin::CIFFile::CIFFile(std::string filename)
 {
@@ -210,4 +220,45 @@ void CIFin::CIFFile::addLabelLoc(char* label, TP* location, char* layname)
 void CIFin::CIFFile::addLabelSig(char* label, TP* location)
 {
    _curlay->addLabelSig(std::string(label), location);
+}
+
+void CIFin::CIFFile::collectLayers()
+{
+   CifLayerList allCiffLayers;
+   CIFStructure* local = _first;
+   std::ostringstream info;
+   info << "\t <<List of layers>> \n";
+   while (NULL != local)
+   {
+      local->collectLayers(allCiffLayers);
+      local = local->last();
+   }
+   typedef std::map<std::string, int> CifLList;
+   CifLList laylist;
+   for (CifLayerList::const_iterator LLI = allCiffLayers.begin(); LLI != allCiffLayers.end(); LLI++)
+   {
+      laylist[(*LLI)->name()] = 0; // keys are unique anyway, so this is effecively uniquifying the data
+   }
+   word laynum = 1;
+   for (CifLList::iterator LLI = laylist.begin(); LLI != laylist.end(); LLI++)
+   {
+      LLI->second = laynum++;
+      info << "\""<< LLI->first << "\"\t\t"<< LLI->second << "\n";
+   }
+   tell_log(console::MT_INFO,info.str());
+}
+
+void CIFin::CIFFile::collectCells()
+{
+   CifCellList allCiffCells;
+   CIFStructure* local = _first;
+   std::ostringstream info;
+   info << "\t <<List of cells>> \n";
+   while (NULL != local)
+   {
+      allCiffCells.push_back(local);
+      info << local->ID() << "\t\t\""<< local->cellname() << "\"\n";
+      local = local->last();
+   }
+   tell_log(console::MT_INFO,info.str());
 }
