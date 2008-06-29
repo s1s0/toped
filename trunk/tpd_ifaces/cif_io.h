@@ -159,64 +159,71 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    };
 
    class CIFLayer {
-   public:
-                     CIFLayer(std::string name, CIFLayer* last);
-      std::string    name()         {return _name;}
-      CIFLayer*      last()         {return _last;}
-      void           addBox(word, word, TP*, TP* direction = NULL);
-      void           addPoly(pointlist* poly);
-      void           addWire(pointlist* poly, word width);
-      void           addLabelLoc(std::string, TP*);
-      void           addLabelSig(std::string, TP*);
+      public:
+                        CIFLayer(std::string name, CIFLayer* last);
+         std::string    name()         {return _name;}
+         CIFLayer*      last()         {return _last;}
+         void           addBox(word, word, TP*, TP* direction = NULL);
+         void           addPoly(pointlist* poly);
+         void           addWire(pointlist* poly, word width);
+         void           addLabelLoc(std::string, TP*);
+         void           addLabelSig(std::string, TP*);
       private:
-      std::string    _name;
-      CIFLayer*      _last;
-      CIFData*       _first;
+         std::string    _name;
+         CIFLayer*      _last;
+         CIFData*       _first;
    };
+   typedef std::list<CIFLayer*>     CifLayerList;
 
    class CIFStructure  {
-   public:
-                     CIFStructure(word, CIFStructure*, word=1,word=1);
-      void           cellNameIs(std::string cellname) {_cellname = cellname;}
-      void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
-      CIFLayer*      secureLayer(std::string);
-      void           addRef(word cell, CTM* location);
-   private:
-      word           _ID;
-      CIFStructure*  _last;
-      word           _a;
-      word           _b;
-      std::string    _cellname;
-      CIFLayer*      _first;
-      DBbox          _overlap;
+      public:
+                        CIFStructure(word, CIFStructure*, word=1,word=1);
+         void           cellNameIs(std::string cellname) {_cellname = cellname;}
+         void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
+         CIFStructure*  last() const                  {return _last;}
+         word           ID() const                    {return _ID;}
+         std::string    cellname() const              {return _cellname;}
+         CIFLayer*      secureLayer(std::string);
+         void           addRef(word cell, CTM* location);
+         void           collectLayers(CifLayerList&);
+      private:
+         word           _ID;
+         CIFStructure*  _last;
+         word           _a;
+         word           _b;
+         std::string    _cellname;
+         CIFLayer*      _first;
+         DBbox          _overlap;
    };
+   typedef std::list<CIFStructure*> CifCellList;
 
    class   CIFFile {
       public:
-                     CIFFile(std::string);
-                    ~CIFFile();
-      bool           status() {return _status;}
-      void           addStructure(word, word = 1, word = 1);
-      void           doneStructure();
-      void           addBox(word, word, TP*, TP* direction = NULL);
-      void           addPoly(pointlist*);
-      void           addWire(pointlist*, word);
-      void           addRef(word, CTM*);
-      void           addLabelLoc(char*, TP*, char* layname = NULL);
-      void           addLabelSig(char*, TP*);
-      void           secureLayer(char*);
-      void           curCellName(char*);
-      void           curCellOverlap(TP*, TP*);
-   protected:
-      bool           _status;
-//      CIFStructure*  currentStructure() {return _first;}
-      CIFStructure*  _first;
-      CIFStructure*  _current;
-      CIFStructure*  _default;
-      CIFLayer*      _curlay;
-      CIFRef*        _refirst;
+                        CIFFile(std::string);
+                     ~CIFFile();
+         bool           status() {return _status;}
+         void           addStructure(word, word = 1, word = 1);
+         void           doneStructure();
+         void           addBox(word, word, TP*, TP* direction = NULL);
+         void           addPoly(pointlist*);
+         void           addWire(pointlist*, word);
+         void           addRef(word, CTM*);
+         void           addLabelLoc(char*, TP*, char* layname = NULL);
+         void           addLabelSig(char*, TP*);
+         void           secureLayer(char*);
+         void           curCellName(char*);
+         void           curCellOverlap(TP*, TP*);
+         void           collectLayers();
+         void           collectCells();
+      protected:
+         bool           _status;
+   //      CIFStructure*  currentStructure() {return _first;}
+         CIFStructure*  _first;
+         CIFStructure*  _current;
+         CIFStructure*  _default;
+         CIFLayer*      _curlay;
+         CIFRef*        _refirst;
    };
-
 }
 
 #endif // !defined(CIFIO_H_INCLUDED)

@@ -138,7 +138,7 @@ int tellstdfunc::stdDISTANCE_D::execute()
    // That's the reason to have the lock/unlock here, i.e. to get an exception
    // if there is no active database & cell. This is done for the interacive
    // version only
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   DATC->lockDB();
    DATC->unlockDB();
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_line, &OPstack)) return EXEC_ABORT;
