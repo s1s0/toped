@@ -52,7 +52,7 @@ bool checkPositive(int var, TpdYYLtype loc);
 
 %}
 
-%debug
+/*%debug*/
 
 %union {
    unsigned       word;
@@ -69,12 +69,12 @@ bool checkPositive(int var, TpdYYLtype loc);
 %token                 tknPsem tknPdigit tknPremB tknPremE
 %token                 tknCend tknCdefine tknCpolygon tknCbox tknCround
 %token                 tknCwire tknClayer tknCcall tknCstart tknCfinish
-%token                 tknTint tknTshortname tknTuserText
+%token                 tknTint tknTshortname tknTuserText tknTuserid
 %token                 tknTupchar tknTblank tknTremtext
 %token                 tknCtranslate tknCmirror tknCmirx tknCmiry tknCrotate
-%token                 tknP9
-%type  <identifier>    commentCommand tknTremtext tknTshortname tknTuserText
-%type  <integer>       tknTint
+%token                 tknP9 tknP4A tknP4N tknP94
+%type  <identifier>    commentCommand tknTremtext tknTshortname tknTuserText tknTuserid
+%type  <integer>       tknTint tknPdigit
 %type  <point>         cifPoint
 %type  <path>          cifPath
 %type  <ctmp>          cifTrans cifLtrans
@@ -110,7 +110,10 @@ primCommand:
    | callCommand                           {boza = 10045;}
    | userExtensionCommand                  {boza = 10046;}
    | UEC_cellName                          {             }
-   | commentCommand                        {delete $1;}
+   | UEC_cellOverlap                       {             }
+   | UEC_labelLoc                          {             }
+   | UEC_labelSig                          {             }
+   | commentCommand                        {delete $1;  }
 ;
 
 defDefineCommand:
@@ -191,13 +194,47 @@ callCommand: /*discrepancy with the formal syntax*/
 ;
 
 userExtensionCommand:
-     tknPdigit tknTuserText                {ciferror("Unsupported user command", @1);}
+     tknPdigit tknTuserText               {
+      std::ostringstream ost;
+      ost << "Unsupported user command: \"" << $1 << $2 << "\"";
+      ciferror(ost.str().c_str(), @1);
+   }
 ;
 
 UEC_cellName:
-     tknP9 tknTuserText                    {
+     tknP9 tknTuserid                    {
       CIFInFile->curCellName($2);
       delete $2;
+   }
+;
+
+UEC_cellOverlap:
+     tknP4A cifPoint tknTblank cifPoint  {
+      CIFInFile->curCellOverlap($2, $4);
+      delete $2;
+      delete $4;
+   }
+;
+
+UEC_labelLoc:
+     tknP94 tknTuserid tknTblank cifPoint {
+      CIFInFile->addLabelLoc($2, $4);
+      delete $2;
+      delete $4;
+   }
+   | tknP94 tknTuserid tknTblank cifPoint tknTblank tknTuserid {
+      CIFInFile->addLabelLoc($2, $4, $6);
+      delete $2;
+      delete $4;
+      delete $6;
+   }
+;
+
+UEC_labelSig:
+     tknP4N tknTuserid tknTblank cifPoint {
+      CIFInFile->addLabelSig($2, $4);
+      delete $2;
+      delete $4;
    }
 ;
 

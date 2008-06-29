@@ -48,14 +48,15 @@
 %x CFS_CCMD
 %x CFS__CMD
 %x CFS_DCMD
-%x CFS_9CMD
+%x CFS_UDEF
 lexcif_digit    [0-9]
 lexcif_upchar   [A-Z]
 lexcif_snc      [A-Z0-9]
 lexcif_blank    [^-();A-Z0-9]+
 lexcif_comment  [^()]*
 lexcif_usertext [^;]*
-lexcif_usrspc   [ \t]+
+lexcif_usrid    [^ \t;]+
+lexcif_usrsep   [ \t]+
 %{
 #include "tpdph.h"
 #include <stdio.h>
@@ -74,7 +75,6 @@ namespace CIFin {
 using namespace CIFin;
 extern YYLTYPE ciflloc;
 #define YY_USER_ACTION  ciflloc.last_column += yyleng;
-#define YYDEBUG 1
 %}
 
 /*%option debug*/
@@ -83,49 +83,60 @@ extern YYLTYPE ciflloc;
 %{
 location_step(&ciflloc);
 %}
-<*>\n+                     location_lines(&ciflloc,yyleng);location_step(&ciflloc);
-<<EOF>>                    { /*if (!parsercmd::EOfile())*/ yyterminate();     }
-"E"                        { BEGIN( CFS__CMD );      return tknCend;         }
-"D"                        { BEGIN( CFS_DCMD );      return tknCdefine;      }
-<CFS_DCMD>"D"              { BEGIN( CFS__CMD );      return tknCdefine;      }
-"P"                        { BEGIN( CFS__CMD );      return tknCpolygon;     }
-"B"                        { BEGIN( CFS__CMD );      return tknCbox;         }
-"R"                        { BEGIN( CFS__CMD );      return tknCround;       }
-"W"                        { BEGIN( CFS__CMD );      return tknCwire;        }
-"L"                        { BEGIN( CFS_LCMD );      return tknClayer;       }
-"C"                        { BEGIN( CFS_CCMD );      return tknCcall;        }
-<CFS_DCMD>"S"              { BEGIN( CFS__CMD );      return tknCstart;       }
-<CFS_DCMD>"F"              { BEGIN( CFS__CMD );      return tknCfinish;      }
-<CFS_CCMD>"T"              {                         return tknCtranslate;   }
-<CFS_CCMD>"M"              {                         return tknCmirror;      }
-<CFS_CCMD>"X"              {                         return tknCmirx;        }
-<CFS_CCMD>"Y"              {                         return tknCmiry;        }
-<CFS_CCMD>"R"              {                         return tknCrotate;      }
-<*>";"                     { BEGIN( INITIAL  );      return tknPsem;         }
-<*>"("                     { if (0 == cifsRemDepth) BEGIN( CFS_REM);
-                             cifsRemDepth = cifsRemDepth + 1;
-                                                     return tknPremB;        }
-<*>")"                     { cifsRemDepth = cifsRemDepth - 1;
-                             if (0 == cifsRemDepth) BEGIN( INITIAL);
-                                                     return tknPremE;        }
-{lexcif_digit}{1,1}        { BEGIN( CFS_UCMD);
-                             ciflval.word    = CIFin::getllint(yytext);
-                                                     return tknPdigit;       }
+<*>\n+                         location_lines(&ciflloc,yyleng);location_step(&ciflloc);
+<<EOF>>                       { /*if (!parsercmd::EOfile())*/ yyterminate();      }
+"E"                           { BEGIN( CFS__CMD );       return tknCend;         }
+"D"                           { BEGIN( CFS_DCMD );       return tknCdefine;      }
+<CFS_DCMD>"D"                 { BEGIN( CFS__CMD );       return tknCdefine;      }
+"P"                           { BEGIN( CFS__CMD );       return tknCpolygon;     }
+"B"                           { BEGIN( CFS__CMD );       return tknCbox;         }
+"R"                           { BEGIN( CFS__CMD );       return tknCround;       }
+"W"                           { BEGIN( CFS__CMD );       return tknCwire;        }
+"L"                           { BEGIN( CFS_LCMD );       return tknClayer;       }
+"C"                           { BEGIN( CFS_CCMD );       return tknCcall;        }
+<CFS_DCMD>"S"                 { BEGIN( CFS__CMD );       return tknCstart;       }
+<CFS_DCMD>"F"                 { BEGIN( CFS__CMD );       return tknCfinish;      }
+<CFS_CCMD>"T"                 {                          return tknCtranslate;   }
+<CFS_CCMD>"M"                 {                          return tknCmirror;      }
+<CFS_CCMD>"X"                 {                          return tknCmirx;        }
+<CFS_CCMD>"Y"                 {                          return tknCmiry;        }
+<CFS_CCMD>"R"                 {                          return tknCrotate;      }
+<*>";"                        { BEGIN( INITIAL  );       return tknPsem;         }
+<*>"("                        { if (0 == cifsRemDepth) BEGIN( CFS_REM);
+                                cifsRemDepth = cifsRemDepth + 1;
+                                                         return tknPremB;        }
+<*>")"                        { cifsRemDepth = cifsRemDepth - 1;
+                                if (0 == cifsRemDepth) BEGIN( INITIAL);
+                                                         return tknPremE;        }
+9{lexcif_usrsep}              { BEGIN( CFS_UCMD);        return tknP9;           }
+4A{lexcif_usrsep}             { BEGIN( CFS__CMD);        return tknP4A;          }
+4N{lexcif_usrsep}             { BEGIN( CFS_UCMD);        return tknP4N;          }
+94{lexcif_usrsep}             { BEGIN( CFS_UCMD);        return tknP94;          }
+{lexcif_digit}{1,1}           { BEGIN( CFS_UDEF);
+                                ciflval.word    = CIFin::getllint(yytext);
+                                                         return tknPdigit;       }
 <CFS__CMD>-?{lexcif_digit}+  |
-<CFS_CCMD>-?{lexcif_digit}+  { ciflval.integer = CIFin::getllint(yytext);
-                                                     return tknTint;         }
-<CFS__CMD>{lexcif_upchar}  {                       return tknTupchar;        }
-<CFS_LCMD>{lexcif_snc}{1,4} { ciflval.identifier = CIFin::charcopy(yytext);
-                                                     return tknTshortname;   }
-<CFS_REM>{lexcif_comment}  { location_comment(&ciflloc,yytext);
-                             ciflval.identifier = CIFin::charcopy(yytext);
-                                                     return tknTremtext;     }
-<CFS_UCMD>{lexcif_usertext} {BEGIN (INITIAL);
-                              ciflval.identifier = CIFin::charcopy(yytext);
-                                                      return tknTuserText;   }
-<*>{lexcif_blank}          {location_comment(&ciflloc,yytext);
-                                                     return tknTblank;       }
-.                                                    return tknERROR;
+<CFS_CCMD>-?{lexcif_digit}+  |
+<CFS_UCMD>-?{lexcif_digit}+   { ciflval.integer = CIFin::getllint(yytext);
+                                                         return tknTint;         }
+<CFS__CMD>{lexcif_upchar}     {                          return tknTupchar;      }
+<CFS_UCMD>{lexcif_usrsep}     {                          return tknTblank;       }
+<CFS_UCMD>{lexcif_usrid}      { ciflval.identifier = CIFin::charcopy(yytext);
+                                                         return tknTuserid;      }
+<CFS_LCMD>{lexcif_snc}{1,4}   { ciflval.identifier = CIFin::charcopy(yytext);
+                                                         return tknTshortname;   }
+<CFS_REM>{lexcif_comment}     { location_comment(&ciflloc,yytext);
+                                ciflval.identifier = CIFin::charcopy(yytext);
+                                                         return tknTremtext;     }
+<CFS_UDEF>{lexcif_usertext}   { BEGIN (INITIAL);
+                                ciflval.identifier = CIFin::charcopy(yytext);
+                                                         return tknTuserText;    }
+<INITIAL>{lexcif_blank}      |
+<CFS__CMD>{lexcif_blank}     |
+<CFS_CCMD>{lexcif_blank}     |
+<CFS_DCMD>{lexcif_blank}      { location_comment(&ciflloc,yytext);
+                                                         return tknTblank;       }
+.                                                        return tknERROR;
 %%
 
 /*<cdefines>{lexcif_digit}+  {                       return tknTword;        }*/
@@ -195,13 +206,12 @@ char* CIFin::charcopy(std::string source, bool quotes)
       2C "msg" T x y;               Place message centered at specified location
       2L "msg" T x y;               Place message left of specified location
       2R "msg" T x y;               Place message right of specified location
-      4A lowx lowy highx highy;     Declare cell boundary
+Done  4A lowx lowy highx highy;     Declare cell boundary
       4B instancename;              Attach instance name to cell
       4N signalname x y;            Labels a signal at a location
-      9  cellname;                  Declare cell name
+Done  9  cellname;                  Declare cell name
       91 instancename;              Attach instance name to cell
-      94 label x y;                 Place label in specified location
+Done  94 label x y;                 Place label in specified location
+Done  94 label x y layername;       Place label in specified location
       95 label length width x y;    Place label in specified area
-"9"                        { BEGIN( CFS_9CMD); location_step(&ciflloc);       }
-<CFS_9CMD>{lexcif_usrspc}  { BEGIN( CFS_UCMD);       return tknP9;           }
  */

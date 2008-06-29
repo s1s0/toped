@@ -139,10 +139,23 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CIFRef : public CIFData {
       public:
-         CIFRef(CIFData* last, word, CTM*);
+                     CIFRef(CIFData* last, word, CTM*);
       protected:
          word        _cell;
          CTM*        _location;
+   };
+
+   class CIFLabelLoc : public CIFData {
+      public:
+                     CIFLabelLoc(CIFData*, std::string, TP*);
+      protected:
+         std::string _label;
+         TP*         _location;
+   };
+
+   class CIFLabelSig : public CIFLabelLoc {
+      public:
+                     CIFLabelSig(CIFData*, std::string, TP*);
    };
 
    class CIFLayer {
@@ -153,6 +166,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       void           addBox(word, word, TP*, TP* direction = NULL);
       void           addPoly(pointlist* poly);
       void           addWire(pointlist* poly, word width);
+      void           addLabelLoc(std::string, TP*);
+      void           addLabelSig(std::string, TP*);
       private:
       std::string    _name;
       CIFLayer*      _last;
@@ -163,6 +178,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    public:
                      CIFStructure(word, CIFStructure*, word=1,word=1);
       void           cellNameIs(std::string cellname) {_cellname = cellname;}
+      void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
       CIFLayer*      secureLayer(std::string);
       void           addRef(word cell, CTM* location);
    private:
@@ -172,6 +188,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       word           _b;
       std::string    _cellname;
       CIFLayer*      _first;
+      DBbox          _overlap;
    };
 
    class   CIFFile {
@@ -185,8 +202,11 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       void           addPoly(pointlist*);
       void           addWire(pointlist*, word);
       void           addRef(word, CTM*);
+      void           addLabelLoc(char*, TP*, char* layname = NULL);
+      void           addLabelSig(char*, TP*);
       void           secureLayer(char*);
       void           curCellName(char*);
+      void           curCellOverlap(TP*, TP*);
    protected:
       bool           _status;
 //      CIFStructure*  currentStructure() {return _first;}
