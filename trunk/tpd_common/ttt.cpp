@@ -454,7 +454,7 @@ CTM CTM::Rotate(const real alfa, const TP& center) // alfa - in degrees
 
 CTM CTM::Rotate(const TP& direction) // angle between X axis and the point (CIF)
 {
-   real alfa = round(atan2(direction.y() , direction.x()) * 180.0 / M_PI);
+   real alfa = round(atan2((real)direction.y() , (real)direction.x()) * 180.0 / M_PI);
    Rotate(alfa);
    return *this;
 }
