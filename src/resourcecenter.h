@@ -145,17 +145,19 @@ namespace tui
       callbackMethod method(void)		const    { return _method;};
 
 		virtual ~ToolItem();
-		wxBitmap	bitmap(void)	const {return _bitmaps[0];};
+		wxBitmap	bitmap(void)	const {return _bitmaps[currentSize];};
 		int		ID(void)			const {return _ID;};
-		void		changeToolSize(const wxSize& size);
+		void		changeToolSize(int size);
 	private:
 		int				_ID;
 		std::string		_name;
 		wxBitmap			_bitmaps[numberOfIconSizes];
 		std::string		_bitmapNames[numberOfIconSizes];
+		int				currentSize;
+
 		
 		//std::string	_hotKey;
-      std::string		_function;
+      std::string		_function;	
       std::string		_helpString;
       callbackMethod	_method;
 		
@@ -175,7 +177,8 @@ namespace tui
 		void				execute(int ID1);
 
 		std::string		name() const {return _name;};
-		void				changeToolSize(const wxSize& size);
+		void				changeToolSize(int size);
+		void				update(void);
 	private:
 		void				OnSize(wxSizeEvent& event);
 		void				OnPaint(wxPaintEvent&event);
@@ -214,7 +217,8 @@ namespace tui
 							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod, int direction);*/
 		void setDirection(int direction);
-		void appendTool(const std::string toolBarName, const std::string &toolBarItem,
+		void setToolBarSize(const std::string &toolBarName, int size);
+		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
 							const std::string &iconName,
 							int size,
 							const std::string &hotKey, 
