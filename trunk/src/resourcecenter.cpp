@@ -334,8 +334,9 @@ tui::ToolItem::~ToolItem()
 void tui::ToolItem::changeToolSize(int size)
 {
    //_bitmaps[0] = wxIcon(wxString(_bitmapNames[0].c_str(), wxConvUTF8), wxBITMAP_TYPE_ICO_RESOURCE, size.GetX(), size.GetY());
-	if ((ICON_SIZE_16x16 == size) || (ICON_SIZE_24x24 == size) ||
-		 (ICON_SIZE_32x32 == size) || (ICON_SIZE_48x48 == size))
+	//if ((ICON_SIZE_16x16 == size) || (ICON_SIZE_24x24 == size) ||
+	//	 (ICON_SIZE_32x32 == size) || (ICON_SIZE_48x48 == size))
+	if(checkToolSize(static_cast<IconSizes> (size)))
 	{
 		currentSize = size;
 	}
@@ -821,8 +822,7 @@ void tui::ResourceCenter::setDirection(int direction)
 
 void tui::ResourceCenter::setToolBarSize(const std::string &toolBarName, int size)
 {
-	if((ICON_SIZE_16x16 == size) || (ICON_SIZE_24x24 == size)||
-		(ICON_SIZE_32x32 == size) || (ICON_SIZE_48x48 == size))
+	if(checkToolSize(static_cast<IconSizes>(size)))
 	{
 		toolBarList::const_iterator it;
 		for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
@@ -893,6 +893,21 @@ void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::
 	toolBar->addTool(ID, toolBarItem, fullIconName, size, hotKey, helpString, cbMethod); 
 	//toolBar->addTool(tool);
 
+}
+
+bool tui::checkToolSize(IconSizes size)
+{
+	IconSizes isz;
+	for(
+		isz = ICON_SIZE_16x16; 
+		isz < ICON_SIZE_END; 
+		isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+	{
+		if(size == isz) break;
+	}
+	if(ICON_SIZE_END == size) 
+		return false;
+	else return true;
 }
 
 //=============================================================================

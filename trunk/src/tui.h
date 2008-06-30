@@ -59,13 +59,15 @@ namespace tui {
       ID_CBDEFLINE
    };
 
-	enum {
-		ICON_SIZE_16x16 = 0,
+	typedef enum {
+		ICON_SIZE_16x16 = 0, //must begin from 0
 		ICON_SIZE_24x24,
 		ICON_SIZE_32x32,
-		ICON_SIZE_48x48
-	};
-	const int numberOfIconSizes = 4;//ICON_SIZE_16x16, ICON_SIZE_24x24, ICON_SIZE_32x32,ICON_SIZE_48x48
+		ICON_SIZE_48x48,
+		ICON_SIZE_END
+	} IconSizes;
+
+	//const int numberOfIconSizes = 4;//ICON_SIZE_16x16, ICON_SIZE_24x24, ICON_SIZE_32x32,ICON_SIZE_48x48
 
    class getSize : public wxDialog {
    public:
