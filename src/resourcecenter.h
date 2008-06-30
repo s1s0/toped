@@ -151,8 +151,8 @@ namespace tui
 	private:
 		int				_ID;
 		std::string		_name;
-		wxBitmap			_bitmaps[numberOfIconSizes];
-		std::string		_bitmapNames[numberOfIconSizes];
+		wxBitmap			_bitmaps[ICON_SIZE_END];
+		std::string		_bitmapNames[ICON_SIZE_END];
 		int				currentSize;
 
 		
@@ -190,6 +190,7 @@ namespace tui
 		DECLARE_EVENT_TABLE();
 	};
 
+	bool checkToolSize(IconSizes size);
 
 //=================================
 //		Resourcecenter is resposible 
