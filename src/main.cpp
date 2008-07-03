@@ -62,12 +62,14 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    //-----------------------------------------------------------------------------------------------------------
    // First the internal types
    //-----------------------------------------------------------------------------------------------------------
-   telldata::point_type* pntype  = DEBUG_NEW telldata::point_type();
-   telldata::box_type*   bxtype  = DEBUG_NEW telldata::box_type(pntype);
-   telldata::bnd_type*   bndtype = DEBUG_NEW telldata::bnd_type(pntype);
-   mblock->addGlobalType("point"     ,  pntype);
-   mblock->addGlobalType("box"       ,  bxtype);
+   telldata::point_type*   pntype  = DEBUG_NEW telldata::point_type();
+   telldata::box_type*     bxtype  = DEBUG_NEW telldata::box_type(pntype);
+   telldata::bnd_type*     bndtype = DEBUG_NEW telldata::bnd_type(pntype);
+   telldata::hsh_type*     hshtype = DEBUG_NEW telldata::hsh_type();
+   mblock->addGlobalType("point"     , pntype);
+   mblock->addGlobalType("box"       , bxtype);
    mblock->addGlobalType("bind"      , bndtype);
+   mblock->addGlobalType("lmap"     , hshtype);
    //-----------------------------------------------------------------------------------------------------------
    // Internal variables
    //-----------------------------------------------------------------------------------------------------------
