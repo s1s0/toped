@@ -147,13 +147,13 @@ namespace tui
 		virtual ~ToolItem();
 		wxBitmap	bitmap(void)	const {return _bitmaps[currentSize];};
 		int		ID(void)			const {return _ID;};
-		void		changeToolSize(int size);
+		void		changeToolSize(IconSizes size);
 	private:
 		int				_ID;
 		std::string		_name;
 		wxBitmap			_bitmaps[ICON_SIZE_END];
 		std::string		_bitmapNames[ICON_SIZE_END];
-		int				currentSize;
+		IconSizes		currentSize;
 
 		
 		//std::string	_hotKey;
@@ -168,16 +168,17 @@ namespace tui
 	class ToolBarHandler:public wxToolBar
 	{
 	public:
-		ToolBarHandler(int ID, std::string name, int direction);
+		ToolBarHandler(int ID, const std::string& name, int direction);
 		virtual ~ToolBarHandler();
 
 //		void				addTool(ToolItem *tool);
-		void				addTool(int ID1, const std::string &toolBarItem, const std::string iconName, int size,
+		void				addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
+										const std::string &iconFileName, IconSizes size,
 										const std::string hotKey, const std::string &helpString, callbackMethod cbMethod);
 		void				execute(int ID1);
 
 		std::string		name() const {return _name;};
-		void				changeToolSize(int size);
+		void				changeToolSize(IconSizes size);
 		void				update(void);
 	private:
 		void				OnSize(wxSizeEvent& event);
@@ -218,10 +219,10 @@ namespace tui
 							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod, int direction);*/
 		void setDirection(int direction);
-		void setToolBarSize(const std::string &toolBarName, int size);
+		void setToolBarSize(const std::string &toolBarName, IconSizes size);
 		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
 							const std::string &iconName,
-							int size,
+							IconSizes size,
 							const std::string &hotKey, 
 							const std::string &helpString,
 							callbackMethod cbMethod);

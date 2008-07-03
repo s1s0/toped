@@ -257,8 +257,8 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								const std::string &hotKey,
 								const std::string &helpString,
 								callbackMethod cbMethod)
-								:_ID(toolID), /*_hotKey(hotKey),*/ 
-								_helpString(helpString), _method(cbMethod),currentSize(0)
+								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
+								_helpString(helpString), _method(cbMethod),currentSize(ICON_SIZE_16x16)
 {
 	_bitmaps[ICON_SIZE_16x16] = wxNullBitmap;
 	_bitmaps[ICON_SIZE_24x24] = wxNullBitmap;
@@ -280,6 +280,8 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 
 void tui::ToolItem::addIcon(const std::string &bitmapName, int size)
 {
+	//_bitmapNames[size]
+	//wxImage image(wxString(_bitmapNames[0].c_str(), wxConvUTF8),wxBITMAP_TYPE_PNG);;
 	switch(size)
 	{
 		case ICON_SIZE_16x16:
@@ -331,12 +333,12 @@ tui::ToolItem::~ToolItem()
 {
 }
 
-void tui::ToolItem::changeToolSize(int size)
+void tui::ToolItem::changeToolSize(IconSizes size)
 {
    //_bitmaps[0] = wxIcon(wxString(_bitmapNames[0].c_str(), wxConvUTF8), wxBITMAP_TYPE_ICO_RESOURCE, size.GetX(), size.GetY());
 	//if ((ICON_SIZE_16x16 == size) || (ICON_SIZE_24x24 == size) ||
 	//	 (ICON_SIZE_32x32 == size) || (ICON_SIZE_48x48 == size))
-	if(checkToolSize(static_cast<IconSizes> (size)))
+	if(checkToolSize(size))
 	{
 		currentSize = size;
 	}
@@ -354,7 +356,7 @@ BEGIN_EVENT_TABLE( tui::ToolBarHandler, wxToolBar )
 	EVT_PAINT(tui::ToolBarHandler::OnPaint)
 END_EVENT_TABLE()
 
-tui::ToolBarHandler::ToolBarHandler(int ID, std::string name, int direction)
+tui::ToolBarHandler::ToolBarHandler(int ID, const std::string & name, int direction)
 		:wxToolBar(Toped->getFrame(), ID, wxDefaultPosition,
 		wxSize(1000, 30), wxTB_NODIVIDER|wxTB_FLAT ),
 		_name(name),_ID(ID), _dockDirection(direction)
@@ -389,7 +391,7 @@ tui::ToolBarHandler::~ToolBarHandler()
 	_tools.clear();
 }
 
-void	tui::ToolBarHandler::changeToolSize(int size)
+void	tui::ToolBarHandler::changeToolSize(IconSizes size)
 {
 	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
 	{
@@ -398,12 +400,15 @@ void	tui::ToolBarHandler::changeToolSize(int size)
 		
 	}
 	Realize();
-	SetToolBitmapSize(wxSize(size, size));
+	//SetToolBitmapSize(wxSize(size, size));
+	int sz = IconSizesValues[size];
+	SetToolBitmapSize(wxSize(sz, sz));
 
 	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
 	{
 		AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
 	}
+	Realize();
 	Toped->getAuiManager()->Update();
 }
 
@@ -482,15 +487,17 @@ void tui::ToolBarHandler::OnPaint(wxPaintEvent&event)
 	Toped->getAuiManager()->Update();
 }*/
 
-void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const std::string iconName, int size,
-										const std::string hotKey,
-										const std::string &helpString,
-										callbackMethod cbMethod)
+void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
+												const std::string &iconFileName,IconSizes size,
+												const std::string hotKey,
+												const std::string &helpString,
+												callbackMethod cbMethod)
 {
 	toolList::const_iterator it;
 	for(it = _tools.begin(); it != _tools.end(); it++)
 	{
-		if ((*it)->name() == iconName) break;
+		if ((*it)->name() == iconName) 
+			(*it)->addIcon(iconName, size);
 	}
 	if (it == _tools.end()) 
 	{
@@ -517,13 +524,6 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 
 		Toped->getAuiManager()->Update();
 	}
-
-	else 
-	{
-		(*it)->addIcon(iconName, size);
-	};
-	
-
 }
 
 void	tui::ToolBarHandler::update(void)
@@ -820,9 +820,9 @@ void tui::ResourceCenter::setDirection(int direction)
 		_direction = direction;
 }
 
-void tui::ResourceCenter::setToolBarSize(const std::string &toolBarName, int size)
+void tui::ResourceCenter::setToolBarSize(const std::string &toolBarName, IconSizes size)
 {
-	if(checkToolSize(static_cast<IconSizes>(size)))
+	if(checkToolSize(size))
 	{
 		toolBarList::const_iterator it;
 		for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
@@ -850,7 +850,7 @@ void tui::ResourceCenter::setToolBarSize(const std::string &toolBarName, int siz
 }
 
 void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::string &toolBarItem,
-							const  std::string &iconName, int size,
+							const  std::string &iconName, IconSizes size,
 							const std::string &hotKey, const std::string &helpString,
 							callbackMethod cbMethod)
 {
@@ -890,7 +890,7 @@ void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::
 	ID = TDUMMY_TOOL + _toolCount;
 	_toolCount++;
 
-	toolBar->addTool(ID, toolBarItem, fullIconName, size, hotKey, helpString, cbMethod); 
+	toolBar->addTool(ID, toolBarItem, iconName, fullIconName, size, hotKey, helpString, cbMethod); 
 	//toolBar->addTool(tool);
 
 }
