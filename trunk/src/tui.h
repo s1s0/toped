@@ -59,7 +59,8 @@ namespace tui {
       ID_CBDEFLINE
    };
 
-	typedef enum {
+	typedef enum 
+	{
 		ICON_SIZE_16x16 = 0, //must begin from 0
 		ICON_SIZE_24x24,
 		ICON_SIZE_32x32,
@@ -67,7 +68,15 @@ namespace tui {
 		ICON_SIZE_END
 	} IconSizes;
 
-	//const int numberOfIconSizes = 4;//ICON_SIZE_16x16, ICON_SIZE_24x24, ICON_SIZE_32x32,ICON_SIZE_48x48
+	const int IconSizesValues[ICON_SIZE_END] = {16, 24, 32, 48};
+	//Order for this enum must corresponds IconSizes order
+	enum 
+	{
+		ICON_SIZE_16x16_V = 16,
+		ICON_SIZE_24x24_V = 24,
+		ICON_SIZE_32x32_V = 32,
+		ICON_SIZE_48x48_V = 48
+	};
 
    class getSize : public wxDialog {
    public:
