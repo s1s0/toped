@@ -45,6 +45,7 @@ telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
          case tn_pnt   : nvar = DEBUG_NEW telldata::ttpnt()    ;break;
          case tn_box   : nvar = DEBUG_NEW telldata::ttwnd()    ;break;
          case tn_bnd   : nvar = DEBUG_NEW telldata::ttbnd()    ;break;
+         case tn_hsh   : nvar = DEBUG_NEW telldata::tthsh()    ;break;
          case tn_layout: nvar = DEBUG_NEW telldata::ttlayout() ;break;
                 default: {
                      assert(_tIDMAP.end() != _tIDMAP.find(ID));
@@ -93,6 +94,13 @@ telldata::bnd_type::bnd_type(point_type* pfld) : tell_type(telldata::tn_bnd)
    addfield("rot" , telldata::tn_real, NULL);
    addfield("flx" , telldata::tn_bool, NULL);
    addfield("sc"  , telldata::tn_real, NULL);
+};
+
+//=============================================================================
+telldata::hsh_type::hsh_type() : tell_type(telldata::tn_hsh)
+{
+   addfield("number", telldata::tn_int, NULL);
+   addfield("name"  , telldata::tn_string, NULL);
 };
 
 //=============================================================================
@@ -675,6 +683,47 @@ const telldata::ttbnd& telldata::ttbnd::operator = (const ttbnd& a) {
    return *this;
 }
 
+//=============================================================================
+/*   class tthsh : public user_struct {*/
+telldata::tthsh::tthsh (int4b number, std::string name) : user_struct(tn_hsh),
+      _number(DEBUG_NEW telldata::ttint(number)),
+      _name(DEBUG_NEW telldata::ttstring(name))
+{
+   _fieldList.push_back(structRECNAME("number"  , _number  ));
+   _fieldList.push_back(structRECNAME("name"  , _name  ));
+}
+
+telldata::tthsh::tthsh(const tthsh& cobj) : user_struct(tn_hsh),
+      _number(DEBUG_NEW telldata::ttint(cobj.number())),
+      _name(DEBUG_NEW telldata::ttstring(cobj.name()))
+{
+   _fieldList.push_back(structRECNAME("number"  , _number  ));
+   _fieldList.push_back(structRECNAME("name"  , _name  ));
+}
+
+telldata::tthsh::tthsh(operandSTACK& OPstack) : user_struct(tn_hsh)
+{
+   // Here - get the data from the stack and reuse it ... don't delete it.
+   // The alternative - to make a selfcopy and then delete the original from the OPstack
+   _name    = static_cast<telldata::ttstring*>(OPstack.top()); OPstack.pop();
+   _number  = static_cast<telldata::ttint*>(OPstack.top()); OPstack.pop();
+
+   _fieldList.push_back(structRECNAME("number"  , _number  ));
+   _fieldList.push_back(structRECNAME("name"  , _name  ));
+}
+
+void telldata::tthsh::echo(std::string& wstr, real)
+{
+   std::ostringstream ost;
+   ost << "number = "  << number().value() << " : name = \"" << name().value() << "\"";
+   wstr += ost.str();
+}
+
+void telldata::tthsh::assign(tell_var* rt)
+{
+   (*_number  ) = static_cast<tthsh*>(rt)->number();
+   (*_name)     = static_cast<tthsh*>(rt)->name();
+}
 
 //=============================================================================
 telldata::argumentID::argumentID(const argumentID& obj2copy) {

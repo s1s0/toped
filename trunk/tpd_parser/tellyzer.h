@@ -594,15 +594,16 @@ namespace console{
          void              setFN(std::string fn) {_funcname = fn;};
          std::string       getFN() const {return _funcname;};
          std::string       _2bool(bool b) {return b ? "true" : "false";};
-         toped_logfile&    operator<< (const byte _i);
-         toped_logfile&    operator<< (const word _i);
-         toped_logfile&    operator<< (const int4b _i);
-         toped_logfile&    operator<< (const real _r);
-         toped_logfile&    operator<< (const std::string& _s);
-         toped_logfile&    operator<< (const telldata::ttpnt& _p);
-         toped_logfile&    operator<< (const telldata::ttwnd& _w);
-         toped_logfile&    operator<< (const telldata::ttbnd& _b);
-         toped_logfile&    operator<< (const telldata::ttlist& _tl);
+         toped_logfile&    operator<< (const byte);
+         toped_logfile&    operator<< (const word);
+         toped_logfile&    operator<< (const int4b);
+         toped_logfile&    operator<< (const real);
+         toped_logfile&    operator<< (const std::string&);
+         toped_logfile&    operator<< (const telldata::ttpnt&);
+         toped_logfile&    operator<< (const telldata::ttwnd&);
+         toped_logfile&    operator<< (const telldata::ttbnd&);
+         toped_logfile&    operator<< (const telldata::tthsh&);
+         toped_logfile&    operator<< (const telldata::ttlist&);
          toped_logfile&    flush();
       private:
          std::fstream     _file;

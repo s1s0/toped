@@ -56,6 +56,7 @@ namespace telldata {
    const typeID tn_pnt        = 11;
    const typeID tn_box        = 12;
    const typeID tn_bnd        = 13;
+   const typeID tn_hsh        = 14;
    const typeID tn_usertypes  = 16;
    // the most significant bit is a mask flag
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
@@ -116,6 +117,12 @@ namespace telldata {
    class bnd_type : public tell_type {
    public:
                            bnd_type(point_type*);
+   };
+
+   //==============================================================================
+   class hsh_type : public tell_type {
+      public:
+                           hsh_type();
    };
 
    //==============================================================================
@@ -354,6 +361,26 @@ namespace telldata {
       ttreal*              _rot;
       ttbool*              _flx;
       ttreal*              _sc;
+   };
+
+   //==============================================================================
+   // Don't destruct _number and _name here. They are just pointing to the structures in
+   // the parent _fieldList and obviously should be destroyed there
+   class tthsh : public user_struct {
+      public:
+                              tthsh (int4b number=1, std::string name = "");
+                              tthsh(const tthsh&);
+                              tthsh(operandSTACK& OPStack);
+         tell_var*            selfcopy() const    {return DEBUG_NEW tthsh(*this);}
+         void                 echo(std::string&, real);
+         void                 assign(tell_var*);
+         const ttint&         number() const      {return *_number;}
+         const ttstring&      name() const        {return *_name;}
+//         void                 set_number(const int4b number)   {_number->_value = number; }
+//         void                 set_name(const std::string name) {_name->_value = name; }
+      private:
+         ttint*               _number;
+         ttstring*            _name;
    };
 
    //==============================================================================

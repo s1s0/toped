@@ -762,6 +762,7 @@ int parsercmd::cmdSTRUCT::execute()
          case telldata::tn_pnt: ustrct = DEBUG_NEW telldata::ttpnt(OPstack);break;
          case telldata::tn_box: ustrct = DEBUG_NEW telldata::ttwnd(OPstack);break;
          case telldata::tn_bnd: ustrct = DEBUG_NEW telldata::ttbnd(OPstack);break;
+         case telldata::tn_hsh: ustrct = DEBUG_NEW telldata::tthsh(OPstack);break;
          default:ustrct = DEBUG_NEW telldata::user_struct(CMDBlock->getTypeByID( (*_arg)() ), OPstack);
       }
    }
@@ -897,6 +898,7 @@ telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLt
       case    telldata::tn_pnt: return(DEBUG_NEW telldata::ttpnt());
       case    telldata::tn_box: return(DEBUG_NEW telldata::ttwnd());
       case    telldata::tn_bnd: return(DEBUG_NEW telldata::ttbnd());
+      case    telldata::tn_hsh: return(DEBUG_NEW telldata::tthsh());
       case telldata::tn_string: return(DEBUG_NEW telldata::ttstring());
       case telldata::tn_layout: return(DEBUG_NEW telldata::ttlayout());
       default:
@@ -2075,6 +2077,11 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttbn
    return *this;
 }
 
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::tthsh& _h) {
+   _file << "{" << _h.number().value() << "," << _h.name().value() << "}";
+   return *this;
+}
+
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttlist& _tl) {
    _file << "{";
    for (unsigned i = 0; i < _tl.size(); i++) {
@@ -2100,6 +2107,9 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttli
             break;
          case telldata::tn_bnd:
             *this << *(static_cast<telldata::ttbnd*>((_tl.mlist())[i]));
+            break;
+         case telldata::tn_hsh:
+            *this << *(static_cast<telldata::tthsh*>((_tl.mlist())[i]));
             break;
 //         case tn_layout:
             default:{assert(false);}
