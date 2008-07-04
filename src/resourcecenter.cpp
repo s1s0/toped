@@ -265,16 +265,19 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 	_bitmaps[ICON_SIZE_32x32] = wxNullBitmap;
 	_bitmaps[ICON_SIZE_48x48] = wxNullBitmap;
 
-	_bitmapNames[ICON_SIZE_16x16] = "";
-	_bitmapNames[ICON_SIZE_24x24] = "";
-	_bitmapNames[ICON_SIZE_32x32] = "";
-	_bitmapNames[ICON_SIZE_48x48] = "";
+	_bitmapNames[ICON_SIZE_16x16] = bitmapName;
+	_bitmapNames[ICON_SIZE_24x24] = bitmapName;
+	_bitmapNames[ICON_SIZE_32x32] = bitmapName;
+	_bitmapNames[ICON_SIZE_48x48] = bitmapName;
 
-	_bitmapNames[0] = bitmapName;
+	//_bitmapNames[0] = bitmapName;
 
 	wxImage image(wxString(_bitmapNames[0].c_str(), wxConvUTF8),wxBITMAP_TYPE_PNG);
 	
-	_bitmaps[0] = wxBitmap(image);
+	_bitmaps[ICON_SIZE_16x16] = wxBitmap(image);
+	_bitmaps[ICON_SIZE_24x24] = wxBitmap(image);
+	_bitmaps[ICON_SIZE_32x32] = wxBitmap(image);
+	_bitmaps[ICON_SIZE_48x48] = wxBitmap(image);
    //_bitmap = wxIcon(wxString(_bitmapName.c_str(), wxConvUTF8), wxBITMAP_TYPE_ICO_RESOURCE, 16, 16);
 }
 
@@ -501,7 +504,7 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 	}
 	if (it == _tools.end()) 
 	{
-		ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconName, hotKey, helpString, cbMethod);
+		ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, cbMethod);
 
 		_tools.push_back(tool);
 		AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
