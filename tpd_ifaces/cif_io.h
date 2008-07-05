@@ -213,7 +213,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void           secureLayer(char*);
          void           curCellName(char*);
          void           curCellOverlap(TP*, TP*);
-         void           collectLayers();
+         void           collectLayers(nameList&);
          void           collectCells();
       protected:
          bool           _status;

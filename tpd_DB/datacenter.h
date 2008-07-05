@@ -60,6 +60,7 @@ public:
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
    bool                       CIFparse(std::string filename);
+   bool                       CIFgetLay(nameList&);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);
