@@ -55,5 +55,6 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(GDSreportlay     );
 
    TELL_STDCMD_CLASSA(CIFread          );
+   TELL_STDCMD_CLASSA(CIFgetLay     );
 }
 #endif

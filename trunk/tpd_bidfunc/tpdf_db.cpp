@@ -702,3 +702,27 @@ int tellstdfunc::CIFread::execute() {
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::CIFgetLay::CIFgetLay(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{ }
+
+int tellstdfunc::CIFgetLay::execute() {
+   nameList cifLayers;
+   telldata::ttlist* cifll = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
+   if (DATC->CIFgetLay(cifLayers))
+   {
+      word laynum = 1;
+      for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
+      {
+         cifll->add(DEBUG_NEW telldata::tthsh(laynum++, *NLI));
+      }
+   }
+   else
+   {
+      std::string info = "No CIF DB in memory. Parse first";
+      tell_log(console::MT_ERROR,info);
+   }
+   OPstack.push(cifll);
+   return EXEC_NEXT;
+}

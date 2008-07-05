@@ -456,7 +456,6 @@ bool DataCenter::CIFparse(std::string filename)
 //   // parse the GDS file - don't forget to lock the GDS mutex here!
 //   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    _CIFDB = DEBUG_NEW CIFin::CIFFile(filename.c_str());
-   _CIFDB->collectLayers();
    _CIFDB->collectCells();
    status = _CIFDB->status();
 //   if (status)
@@ -474,6 +473,12 @@ bool DataCenter::CIFparse(std::string filename)
 //   }
 //   unlockGDS();
    return status;
+}
+
+bool DataCenter::CIFgetLay(nameList& cifLayers)
+{
+   if (NULL == _CIFDB) return false;
+   else _CIFDB->collectLayers(cifLayers);
 }
 
 void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
