@@ -2,9 +2,9 @@ newdesign("cifcells");
 //cifread("/home/skr/toped/library/cif/oan22_x2.cif");
 //echo(ciflayers());
 //
-cifread("/home/skr/toped/toped_NOTUSED/Start_cmiV4_3.cif");
-lmap list cif_layer_definition = ciflayers();
-echo(cif_layer_definition);
+//cifread("/home/skr/toped/toped_NOTUSED/Start_cmiV4_3.cif");
+//lmap list cif_layer_definition = ciflayers();
+//echo(cif_layer_definition);
 
 
 //lmap list cif_layer_definition = {{ 1, "L01"},
@@ -28,42 +28,15 @@ echo(cif_layer_definition);
 //number = 12 : name = "CWP" , 
 //number = 13 : name = "CWN" 
 //----------------------------------------------------
-//number = 1 : name = "L3" ,
-//number = 2 : name = "L2" ,
-//number = 3 : name = "L1" ,
-//number = 4 : name = "L3" ,
-//number = 5 : name = "L2" ,
-//number = 6 : name = "L1" ,
-//number = 7 : name = "L15" ,
-//number = 8 : name = "L30" ,
-//number = 9 : name = "L1" ,
-//number = 10 : name = "L30" ,
-//number = 11 : name = "L1" ,
-//number = 12 : name = "L2" ,
-//number = 13 : name = "L1" ,
-//number = 14 : name = "L3" ,
-//number = 15 : name = "L1" ,
-//number = 16 : name = "L30" ,
-//number = 17 : name = "L3" ,
-//number = 18 : name = "L2" ,
-//number = 19 : name = "L1" ,
-//number = 20 : name = "L3" ,
-//number = 21 : name = "L2" ,
-//number = 22 : name = "L1" ,
-//number = 23 : name = "L2" ,
-//number = 24 : name = "L3" ,
-//number = 25 : name = "L1" ,
-//number = 26 : name = "L3" ,
-//number = 27 : name = "L2" ,
-//number = 28 : name = "L3" ,
-//number = 29 : name = "L23" ,
-//number = 30 : name = "L21" ,
-//number = 31 : name = "L24" ,
-//number = 32 : name = "L22" ,
-//number = 33 : name = "L21" ,
-//number = 34 : name = "L1" ,
-//number = 35 : name = "L21" ,
-//number = 36 : name = "L32" ,
-//number = 37 : name = "L1" ,
-//number = 38 : name = "L21"
+//number = 1 : name = "L1" ,
+//number = 2 : name = "L15" ,
+//number = 3 : name = "L2" ,
+//number = 4 : name = "L21" ,
+//number = 5 : name = "L22" ,
+//number = 6 : name = "L23" ,
+//number = 7 : name = "L24" ,
+//number = 8 : name = "L3" ,
+//number = 9 : name = "L30" ,
+//number = 10 : name = "L32" }
+
 //--------------------------------------------------

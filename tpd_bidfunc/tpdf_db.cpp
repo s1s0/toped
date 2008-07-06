@@ -669,8 +669,8 @@ int tellstdfunc::CIFread::execute() {
       std::list<std::string> top_cell_list;
       if (0 == DATC->CIFparse(filename))
       {
-//         // add GDS tab in the browser
-//         browsers::addGDStab();
+         // add GDS tab in the browser
+//         browsers::addCIFtab();
 //         //
 //         GDSin::GDSFile* AGDSDB = DATC->lockGDS();
 //
@@ -724,5 +724,26 @@ int tellstdfunc::CIFgetLay::execute() {
       tell_log(console::MT_ERROR,info);
    }
    OPstack.push(cifll);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+}
+
+int tellstdfunc::CIFimport::execute()
+{
+   NMap cifLays;
+   telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::tthsh* nameh;
+   for (unsigned i = 0; i < ll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
+      cifLays[nameh->name().value()] = nameh->number().value();
+   }
+   DATC->CIFimport(cifLays);
    return EXEC_NEXT;
 }

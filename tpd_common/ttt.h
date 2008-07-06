@@ -91,6 +91,9 @@ typedef     _sg_int16   int2b;
 typedef     _sg_int32   int4b;
 typedef        double   real;
 
+typedef  std::list<std::string>     nameList;
+typedef  std::map<std::string, int> NMap;
+
 //=============================================================================
 // Some common constants (instead of #defines)
 //=============================================================================
@@ -252,7 +255,7 @@ private:
 typedef  std::vector<TP>         pointlist;
 typedef  std::stack<CTM>         ctmstack;
 typedef  std::deque<CTM>         ctmqueue;
-typedef  std::list<std::string>  nameList;
+
 
 struct TpdYYLtype {
    int          first_line;

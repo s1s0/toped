@@ -217,6 +217,175 @@ void browsers::GDSbrowser::OnHierView(wxCommandEvent& event)
 }
 
 
+//==============================================================================
+BEGIN_EVENT_TABLE(browsers::CIFbrowser, wxPanel)
+   EVT_BUTTON(BT_CELLS_HIER2, browsers::CIFbrowser::OnHierView)
+   EVT_BUTTON(BT_CELLS_FLAT2, browsers::CIFbrowser::OnFlatView)
+END_EVENT_TABLE()
+//==============================================================================
+browsers::CIFbrowser::CIFbrowser(wxWindow *parent, wxWindowID id,
+                                       const wxPoint& pos ,
+                                       const wxSize& size ,
+                                       long style ):wxPanel(parent, id, pos, size, style)
+{
+   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+
+   wxBoxSizer *sizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   _hierButton = DEBUG_NEW wxButton( this, BT_CELLS_HIER2, wxT("Hier") );
+   //Set bold font for _hierButton
+   wxFont font = _hierButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _hierButton->SetFont(font);
+
+   _flatButton = DEBUG_NEW wxButton( this, BT_CELLS_FLAT2, wxT("Flat") );
+
+   sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
+   sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
+
+   fCellBrowser = DEBUG_NEW CIFCellBrowser(this, tui::ID_CIF_CELLTREE_F, pos, size, style);
+
+   hCellBrowser = DEBUG_NEW CIFCellBrowser(this, tui::ID_CIF_CELLTREE_H, pos, size, style);
+
+   thesizer->Add(hCellBrowser, 1, wxEXPAND | wxBOTTOM);
+   thesizer->Add(fCellBrowser, 1, wxEXPAND | wxBOTTOM);
+   fCellBrowser->Hide();
+   thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
+
+   SetSizerAndFit(thesizer);
+   thesizer->SetSizeHints( this );
+}
+
+
+void browsers::CIFbrowser::collectInfo()
+{
+//   CIFin::CIFFile* ACIFDB = DATC->lockCIF(false);
+   CIFin::CIFFile* ACIFDB = NULL;
+   if (NULL == ACIFDB) return;
+   hCellBrowser->AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
+   fCellBrowser->AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
+
+   if (NULL == ACIFDB->hiertree()) return; // new, empty design
+   CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+   wxTreeItemId nroot;
+   while (root){
+      nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(root->GetItem()->cellName().c_str(),wxConvUTF8));
+
+      nroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), wxString(root->GetItem()->cellName().c_str(),wxConvUTF8));
+//      SetItemTextColour(nroot,*wxLIGHT_GREY);
+      collectChildren(root, nroot);
+      root = root->GetNextRoot(TARGETDB_LIB);
+   }
+//   DATC->unlockCIF();
+   hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
+   fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
+//   Toped->Resize();
+}
+
+void browsers::CIFbrowser::DeleteAllItems(void)
+{
+   hCellBrowser->DeleteAllItems();
+   fCellBrowser->DeleteAllItems();
+}
+
+void browsers::CIFbrowser::collectChildren(const CIFin::CIFHierTree *root, const wxTreeItemId& lroot)
+{
+   const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
+   wxTreeItemId nroot;
+   wxTreeItemId temp;
+
+   while (Child) {
+      if (!fCellBrowser->findItem(wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8), temp, fCellBrowser-> GetRootItem()))
+      {
+         nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8));
+      }
+      nroot = hCellBrowser->AppendItem(lroot, wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8));
+//      SetItemTextColour(nroot,*wxLIGHT_GREY);
+      hCellBrowser->SortChildren(lroot);
+      collectChildren(Child, nroot);
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
+void browsers::CIFbrowser::OnFlatView(wxCommandEvent& event)
+{
+   hCellBrowser->Hide();
+   fCellBrowser->Show();
+   (this->GetSizer())->Layout();
+   if (hCellBrowser->IsExpanded(hCellBrowser->GetRootItem()))
+   {
+      fCellBrowser->Expand(fCellBrowser->GetRootItem());
+   }
+   //Set normal font for  _hierButton 
+   //Set bold font for _flatButton;
+   wxFont font = _flatButton->GetFont();
+   _hierButton->SetFont(font);
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _flatButton->SetFont(font);
+}
+
+void browsers::CIFbrowser::OnHierView(wxCommandEvent& event)
+{
+   fCellBrowser->Hide();
+
+   hCellBrowser->Show();
+   (this->GetSizer())->Layout();
+   //Set normal  font for _flatButton;
+   wxFont font = _hierButton->GetFont();
+   _flatButton->SetFont(font);
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _hierButton->SetFont(font);
+}
+
+
+//==============================================================================
+BEGIN_EVENT_TABLE(browsers::CIFCellBrowser, wxTreeCtrl)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_CIF_CELLTREE_H, browsers::CIFCellBrowser::OnItemRightClick)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_CIF_CELLTREE_F, browsers::CIFCellBrowser::OnItemRightClick)
+   EVT_RIGHT_UP(browsers::CIFCellBrowser::OnBlankRMouseUp)
+   EVT_MENU(CIFTREEREPORTLAY, browsers::CIFCellBrowser::OnCIFreportlay)
+END_EVENT_TABLE()
+
+browsers::CIFCellBrowser::CIFCellBrowser(wxWindow *parent, wxWindowID id,
+   const wxPoint& pos, const wxSize& size, long style) : 
+      CellBrowser(parent, id, pos, size, style )
+{
+
+}
+
+void browsers::CIFCellBrowser::OnItemRightClick(wxTreeEvent& event)
+{
+   ShowMenu(event.GetItem(), event.GetPoint());
+}
+
+void browsers::CIFCellBrowser::OnBlankRMouseUp(wxMouseEvent& event)
+{
+   wxPoint pt = event.GetPosition();
+   ShowMenu(HitTest(pt), pt);
+}
+
+void browsers::CIFCellBrowser::OnCIFreportlay(wxCommandEvent& WXUNUSED(event))
+{
+   wxString cmd;
+   cmd << wxT("report_ciflayers(\"") << GetItemText(RBcellID) <<wxT("\");");
+   parseCommand(cmd);
+}
+
+void browsers::CIFCellBrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt)
+{
+   wxMenu menu;
+   RBcellID = id;
+   if ( id.IsOk() && (id != GetRootItem()))   {
+      wxString RBcellname = GetItemText(id);
+//      menu.Append(tui::TMCIF_TRANSLATE, wxT("Translate " + RBcellname));
+      menu.Append(CIFTREEREPORTLAY, wxT("Report layers used in " + RBcellname));
+   }
+   else {
+//      menu.Append(tui::TMCIF_CLOSE, wxT("Close CIF")); // will be catched up in toped.cpp
+   }
+   PopupMenu(&menu, pt);
+}
+
+
 
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::CellBrowser, wxTreeCtrl)
@@ -840,6 +1009,8 @@ void browsers::browserTAB::OnCommand(wxCommandEvent& event)
       case BT_ADDTDT_LIB:OnTELLaddTDTlib();break;
       case BT_ADDGDS_TAB:OnTELLaddGDStab();break;
       case BT_CLEARGDS_TAB:OnTELLclearGDStab(); break;
+      case BT_ADDCIF_TAB:OnTELLaddCIFtab();break;
+      case BT_CLEARCIF_TAB:OnTELLclearCIFtab(); break;
    }
 }
 
@@ -850,7 +1021,8 @@ void browsers::browserTAB::OnTELLaddTDTlib()
 
 void browsers::browserTAB::OnTELLaddGDStab() 
 {
-   if (!_GDSstruct) {
+   if (!_GDSstruct)
+   {
       _GDSstruct = DEBUG_NEW GDSbrowser(this, tui::ID_GDS_CELLTREE);
       AddPage(_GDSstruct, wxT("GDS"));
    }
@@ -860,13 +1032,33 @@ void browsers::browserTAB::OnTELLaddGDStab()
 
 void browsers::browserTAB::OnTELLclearGDStab() 
 {
-   if (_GDSstruct) {
+   if (_GDSstruct)
+   {
       _GDSstruct->DeleteAllItems();
       DeletePage(2);
       _GDSstruct = NULL;
    }
 }
 
+void browsers::browserTAB::OnTELLaddCIFtab()
+{
+   if (!_CIFstruct) {
+      _CIFstruct = DEBUG_NEW CIFbrowser(this, tui::ID_CIF_CELLTREE);
+      AddPage(_CIFstruct, wxT("CIF"));
+   }
+   else _CIFstruct->DeleteAllItems();
+   _CIFstruct->collectInfo();
+}
+
+void browsers::browserTAB::OnTELLclearCIFtab()
+{
+   if (_CIFstruct)
+   {
+      _CIFstruct->DeleteAllItems();
+      DeletePage(2);// @FIXME!!! Get the page number on creation!
+      _CIFstruct = NULL;
+   }
+}
 //==============================================================================
 void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool status) 
 {
@@ -937,6 +1129,14 @@ void browsers::addGDStab()
    assert(Browsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(BT_ADDGDS_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
+}
+
+void browsers::addCIFtab()
+{
+   assert(Browsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(BT_ADDCIF_TAB);
    wxPostEvent(Browsers, eventADDTAB);
 }
 
