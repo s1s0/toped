@@ -478,7 +478,11 @@ bool DataCenter::CIFparse(std::string filename)
 bool DataCenter::CIFgetLay(nameList& cifLayers)
 {
    if (NULL == _CIFDB) return false;
-   else _CIFDB->collectLayers(cifLayers);
+   else 
+   {
+      _CIFDB->collectLayers(cifLayers);
+      return true;
+   }
 }
 
 void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
