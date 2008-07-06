@@ -233,21 +233,21 @@ void CIFin::CIFFile::collectLayers(nameList& cifLayers)
       local->collectLayers(allCiffLayers);
       local = local->last();
    }
-//   typedef std::map<std::string, int> CifLList;
-//   CifLList laylist;
+   typedef std::map<std::string, int> CifLList;
+   CifLList laylist;
+   // cifLayers.unique();
+   // Unique doesn't seem to work properly after collecting all layers from 
+   // all the cells. No quite sure why.
+   // Using the std::map instead
    for (CifLayerList::const_iterator LLI = allCiffLayers.begin(); LLI != allCiffLayers.end(); LLI++)
    {
-      cifLayers.push_back((*LLI)->name());
-//      laylist[(*LLI)->name()] = 0; // keys are unique anyway, so this is effecively uniquifying the data
+      laylist[(*LLI)->name()] = 0; // map key is unique! 
    }
-   cifLayers.unique();
-//   word laynum = 1;
-//   for (CifLList::iterator LLI = laylist.begin(); LLI != laylist.end(); LLI++)
-//   {
-//      LLI->second = laynum++;
-//      info << "\""<< LLI->first << "\"\t\t"<< LLI->second << "\n";
-//   }
-//   tell_log(console::MT_INFO,info.str());
+   // and after uniquifying - gather the unique layer names
+   for (CifLList::const_iterator LLI = laylist.begin(); LLI != laylist.end(); LLI++)
+   {
+      cifLayers.push_back(LLI->first);
+   }
 }
 
 void CIFin::CIFFile::collectCells()
