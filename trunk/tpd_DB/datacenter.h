@@ -50,6 +50,18 @@ namespace GDSin {
    };
 }
 
+namespace CIFin {
+
+   class CIF2TED {
+      public:
+         CIF2TED(CIFin::CIFFile* src_lib, laydata::tdtdesign* dst_lib);
+      protected:
+         CIFin::CIFFile*      _src_lib;
+         laydata::tdtdesign*  _dst_lib;
+   };
+
+}
+
 class DataCenter {
 public:
                               DataCenter(std::string);
@@ -61,6 +73,7 @@ public:
    void                       GDSclose();
    bool                       CIFparse(std::string filename);
    bool                       CIFgetLay(nameList&);
+   void                       CIFimport(NMap&);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);

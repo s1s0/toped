@@ -672,7 +672,7 @@ void GDSin::GDSlibrary::SetHierarchy() {
                //SGREM probably is a good idea to add default
                //GDSstructure here. Then this structure can be
                //visualized in the Hierarchy window as disabled
-            }         
+            }
          }
          wd = wd->GetLast();
       }

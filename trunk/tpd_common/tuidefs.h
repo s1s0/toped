@@ -45,9 +45,12 @@ namespace tui
       ID_GDS_CELLTREE     ,
       ID_GDS_CELLTREE_H   ,
       ID_GDS_CELLTREE_F   ,
-		//Warning!!! Do not use IDs between ID_DUMMY_WIN and ID_DUMMY_WIN_END
-		ID_DUMMY_WIN = 500  ,
-		ID_DUMMY_WIN_END = 600
+      ID_CIF_CELLTREE     ,
+      ID_CIF_CELLTREE_H   ,
+      ID_CIF_CELLTREE_F   ,
+      //Warning!!! Do not use IDs between ID_DUMMY_WIN and ID_DUMMY_WIN_END
+      ID_DUMMY_WIN = 500  ,
+      ID_DUMMY_WIN_END = 600
    } WX_WINDOW_IDS_TYPE;
 
    typedef enum  {

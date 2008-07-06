@@ -95,7 +95,8 @@ void CIFin::CIFLayer::addLabelSig(std::string label, TP* loc)
 
 //=============================================================================
 CIFin::CIFStructure::CIFStructure(word ID, CIFStructure* last, word a, word b) :
-      _ID(ID), _last(last), _a(a), _b(b), _cellname(""), _first(NULL), _overlap(TP()) { }
+      _ID(ID), _last(last), _a(a), _b(b), _cellName(""), _first(NULL),
+          _refirst(NULL), _overlap(TP()), _orphan(true) {}
 
 CIFin::CIFLayer* CIFin::CIFStructure::secureLayer(std::string name)
 {
@@ -119,11 +120,42 @@ void CIFin::CIFStructure::collectLayers(CifLayerList& layList)
    }
 }
 
+void CIFin::CIFStructure::addRef(word cell, CTM* location)
+{
+   _refirst = new CIFRef(_refirst, cell, location);
+}
+
+void CIFin::CIFStructure::hierPrep(CIFFile& cfile)
+{
+   CIFRef* _local = _refirst;
+   while (NULL != _local)
+   {
+      CIFStructure* celldef = cfile.getStructure(_local->cell());
+      if (NULL != celldef)
+      {
+         celldef->parentFound();
+         _children.push_back(celldef);
+      }
+      _local = _local->last();
+   }
+}
+
+CIFin::CIFHierTree* CIFin::CIFStructure::hierOut(CIFHierTree* theTree, CIFStructure* parent)
+{
+   // collecting hierarchical information
+   theTree = DEBUG_NEW CIFHierTree(this, parent, theTree);
+   for (CIFSList::iterator CI = _children.begin(); CI != _children.end(); CI++)
+   {
+      theTree = (*CI)->hierOut(theTree, this);
+   }
+   return theTree;
+}
+
 //=============================================================================
 CIFin::CIFFile::CIFFile(std::string filename)
 {
-   _first = _current = _default = NULL;
-   _curlay = NULL; _refirst = NULL;
+   _first = _current = _default = NULL; _curlay = NULL;
+   _filename = filename;
    std::ostringstream info;
    // feed the flex with the buffer of the input file
    //(cifin is a global variable defined in the flex generated scanner)
@@ -147,6 +179,11 @@ CIFin::CIFFile::CIFFile(std::string filename)
 //   my_delete_yy_buffer( buf );
    _status = 0;
    fclose(cifin);
+}
+
+CIFin::CIFFile::~CIFFile()
+{
+   //@TODO
 }
 
 void CIFin::CIFFile::addStructure(word ID, word a, word b)
@@ -204,7 +241,7 @@ void CIFin::CIFFile::addWire(pointlist* poly, word width)
 
 void CIFin::CIFFile::addRef(word cell, CTM* location)
 {
-   _refirst = new CIFRef(_refirst, cell, location);
+   _current->addRef(cell, location);
 }
 
 void CIFin::CIFFile::addLabelLoc(char* label, TP* location, char* layname)
@@ -233,34 +270,58 @@ void CIFin::CIFFile::collectLayers(nameList& cifLayers)
       local->collectLayers(allCiffLayers);
       local = local->last();
    }
-   typedef std::map<std::string, int> CifLList;
-   CifLList laylist;
+   NMap laylist;
    // cifLayers.unique();
    // Unique doesn't seem to work properly after collecting all layers from 
-   // all the cells. No quite sure why.
+   // all the cells. Not quite sure why.
    // Using the std::map instead
    for (CifLayerList::const_iterator LLI = allCiffLayers.begin(); LLI != allCiffLayers.end(); LLI++)
    {
       laylist[(*LLI)->name()] = 0; // map key is unique! 
    }
    // and after uniquifying - gather the unique layer names
-   for (CifLList::const_iterator LLI = laylist.begin(); LLI != laylist.end(); LLI++)
+   for (NMap::const_iterator LLI = laylist.begin(); LLI != laylist.end(); LLI++)
    {
       cifLayers.push_back(LLI->first);
    }
 }
 
-void CIFin::CIFFile::collectCells()
+CIFin::CIFStructure* CIFin::CIFFile::getStructure(word cellno)
 {
-   CifCellList allCiffCells;
    CIFStructure* local = _first;
-   std::ostringstream info;
-   info << "\t <<List of cells>> \n";
    while (NULL != local)
    {
-      allCiffCells.push_back(local);
-      info << local->ID() << "\t\t\""<< local->cellname() << "\"\n";
+      if (cellno == local->ID())
+         return local;
       local = local->last();
    }
-   tell_log(console::MT_INFO,info.str());
+   assert(false); // Cell with this number not found ?!
+}
+
+void CIFin::CIFFile::hierPrep()
+{
+//   CifCellList allCiffCells;
+   CIFStructure* local = _first;
+/*   std::ostringstream info;
+   info << "\t <<List of cells>> \n";*/
+   while (NULL != local)
+   {
+//       allCiffCells.push_back(local);
+//       info << local->ID() << "\t\t\""<< local->cellname() << "\"\n";
+      local->hierPrep(*this);
+      local = local->last();
+   }
+//   tell_log(console::MT_INFO,info.str());
+}
+
+
+void CIFin::CIFFile::hierOut()
+{
+   CIFStructure* local = _first;
+   while (NULL != local)
+   {
+      if (local->orphan())
+         _hiertree = local->hierOut(_hiertree,NULL);
+      local = local->last();
+   }
 }

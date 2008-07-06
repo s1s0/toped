@@ -39,6 +39,7 @@
 #include <string>
 #include "tedesign.h"
 #include "../tpd_ifaces/gds_io.h"
+#include "../tpd_ifaces/cif_io.h"
 
 namespace browsers 
 {
@@ -64,6 +65,8 @@ namespace browsers
       BT_NEWTDTDB,
       BT_ADDGDS_TAB,
       BT_CLEARGDS_TAB,
+      BT_ADDCIF_TAB,
+      BT_CLEARCIF_TAB,
       BT_CELLS_HIER,
       BT_CELLS_FLAT,
       BT_CELLS_HIER2,
@@ -79,6 +82,7 @@ namespace browsers
    {
       CELLTREEOPENCELL  = 1000,
       GDSTREEREPORTLAY        ,
+      CIFTREEREPORTLAY        ,
       LAYERHIDESELECTED       ,
       LAYERSHOWSELECTED       ,
       LAYERLOCKSELECTED       ,
@@ -91,7 +95,7 @@ namespace browsers
    class CellBrowser: public wxTreeCtrl
    {
    public:
-      CellBrowser(wxWindow* parent, wxWindowID id = -1, 
+                        CellBrowser(wxWindow* parent, wxWindowID id = -1, 
                         const wxPoint& pos = wxDefaultPosition, 
                         const wxSize& size = wxDefaultSize,
                         long style = wxTR_DEFAULT_STYLE);
@@ -117,10 +121,11 @@ namespace browsers
       DECLARE_EVENT_TABLE();
    };
 
+   //===========================================================================
    class GDSCellBrowser:public CellBrowser
    {
    public:
-      GDSCellBrowser(wxWindow* parent, wxWindowID id = -1, 
+                        GDSCellBrowser(wxWindow* parent, wxWindowID id = -1, 
                         const wxPoint& pos = wxDefaultPosition, 
                         const wxSize& size = wxDefaultSize,
                         long style = wxTR_DEFAULT_STYLE);
@@ -132,6 +137,10 @@ namespace browsers
       DECLARE_EVENT_TABLE();
    };
 
+   //===========================================================================
+   //
+   // @TODO ! Hierarchy browsers of imported DB's should be templated!
+   //
 
    //===========================================================================
    class GDSbrowser : public wxPanel 
@@ -144,7 +153,7 @@ namespace browsers
       void              collectInfo();
       wxString          selectedCellname() const {if (RBcellID.IsOk())
          return hCellBrowser->GetItemText(RBcellID); else return wxT("");}
-      void DeleteAllItems(void);
+      void              DeleteAllItems(void);
    protected:
       void              collectChildren(const GDSin::GDSHierTree *root, 
                                                    const wxTreeItemId& lroot);
@@ -161,6 +170,49 @@ namespace browsers
       DECLARE_EVENT_TABLE();
    };
 
+   //===========================================================================
+   class CIFCellBrowser:public CellBrowser
+   {
+      public:
+                        CIFCellBrowser(wxWindow* parent, wxWindowID id = -1,
+                        const wxPoint& pos = wxDefaultPosition,
+                        const wxSize& size = wxDefaultSize,
+                        long style = wxTR_DEFAULT_STYLE);
+         virtual  void     ShowMenu(wxTreeItemId id, const wxPoint& pt);
+      private:
+         void              OnItemRightClick(wxTreeEvent&);
+         void              OnBlankRMouseUp(wxMouseEvent&);
+         void              OnCIFreportlay(wxCommandEvent& WXUNUSED(event));
+         DECLARE_EVENT_TABLE();
+   };
+
+   //===========================================================================
+   class CIFbrowser : public wxPanel
+   {
+      public:
+                           CIFbrowser(wxWindow *parent, wxWindowID id = -1,
+                           const wxPoint& pos = wxDefaultPosition,
+                           const wxSize& size = wxDefaultSize,
+                           long style = wxTR_DEFAULT_STYLE);
+         void              collectInfo();
+         wxString          selectedCellname() const {if (RBcellID.IsOk())
+            return hCellBrowser->GetItemText(RBcellID); else return wxT("");}
+         void              DeleteAllItems(void);
+      protected:
+         void              collectChildren(const CIFin::CIFHierTree *root,
+                                           const wxTreeItemId& lroot);
+      private:
+         wxButton*         _hierButton;
+         wxButton*         _flatButton;
+         wxTreeItemId      RBcellID;
+         CIFCellBrowser*   hCellBrowser;//Hierarchy cell browser
+         CIFCellBrowser*   fCellBrowser;//Flat cell browser
+         void              OnCommand(wxCommandEvent&);
+         void              OnWXImportCell(wxCommandEvent&);
+         void              OnHierView(wxCommandEvent&);
+         void              OnFlatView(wxCommandEvent&);
+         DECLARE_EVENT_TABLE();
+   };
 
    //===========================================================================
    class TDTbrowser : public wxPanel 
@@ -248,7 +300,7 @@ namespace browsers
       
    DECLARE_EVENT_TABLE();
    };
-   
+
    typedef std::map <word, LayerButton*> layerButtonMap;
    class LayerPanel:public wxScrolledWindow
    {
@@ -280,7 +332,7 @@ namespace browsers
       virtual             ~LayerBrowser();
       //const layerButtonMap& getButtonMap(void) {return _buttonMap;};
       LayerPanel*      getLayerPanel() {return _layerPanel;};
-      
+
    private:
       void                 OnShowAll(wxCommandEvent&);
       void                 OnHideAll(wxCommandEvent&);
@@ -289,7 +341,7 @@ namespace browsers
       wxString             getAllSelected();
       LayerPanel*               _layerPanel;
       wxBoxSizer*             _thesizer;
-      
+
       DECLARE_EVENT_TABLE();
    };
 
@@ -301,7 +353,7 @@ namespace browsers
         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, 
                                                                   long style = 0);
       virtual          ~browserTAB();// {};
-      LayerBrowser*    TDTlayers() const   {return _layers;};
+      LayerBrowser*     TDTlayers() const   {return _layers;};
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
@@ -312,7 +364,10 @@ namespace browsers
       void              OnTELLaddTDTlib();
       void              OnTELLaddGDStab();
       void              OnTELLclearGDStab();
+      void              OnTELLaddCIFtab();
+      void              OnTELLclearCIFtab();
       GDSbrowser*       _GDSstruct;
+      CIFbrowser*       _CIFstruct;
       TDTbrowser*       _TDTstruct;
       LayerBrowser*     _layers;
       wxWindow*         _tellParser;
@@ -324,6 +379,7 @@ namespace browsers
    void layer_default(const word, const word);
    void addTDTtab(bool newthread = false);
    void addGDStab();
+   void addCIFtab();
    void clearGDStab();
    void celltree_open(const std::string);
    void celltree_highlight(const std::string);

@@ -39,16 +39,19 @@ DataCenter*               DATC = NULL;
 //-----------------------------------------------------------------------------
 // class gds2ted
 //-----------------------------------------------------------------------------
-GDSin::gds2ted::gds2ted(GDSin::GDSFile* src_lib, laydata::tdtdesign* dst_lib) {
+GDSin::gds2ted::gds2ted(GDSin::GDSFile* src_lib, laydata::tdtdesign* dst_lib)
+{
    _src_lib = src_lib;
    _dst_lib = dst_lib;
    coeff = dst_lib->UU() / src_lib->Get_LibUnits();
-}   
+}
 
-void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite) {
+void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite)
+{
    // source structure
    GDSin::GDSstructure *src_structure = _src_lib->GetStructure(gname);
-   if (!src_structure) {
+   if (!src_structure)
+   {
       std::string news = "GDS structure named \"";
       news += gname; news += "\" does not exists";
       tell_log(console::MT_ERROR,news);
@@ -57,8 +60,10 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
    // check that destination structure with this name exists
    laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
    std::ostringstream ost; ost << "GDS import: ";
-   if (NULL != dst_structure) {
-      if (overwrite) {
+   if (NULL != dst_structure)
+   {
+      if (overwrite)
+      {
          /*@TODO Erase the existing structure and convert*/
          ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
          tell_log(console::MT_WARNING,ost.str());
@@ -71,9 +76,11 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
          tell_log(console::MT_INFO,ost.str());
       }
    }
-   else {
+   else
+   {
       // proceed with children first
-      if (recursive) {
+      if (recursive)
+      {
          GDSin::ChildStructure nextofkin = src_structure->children;
          typedef GDSin::ChildStructure::iterator CI;
          for (CI ci = nextofkin.begin(); ci != nextofkin.end(); ci++)
@@ -88,10 +95,13 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
    }
 }
 
-void GDSin::gds2ted::convert(GDSin::GDSstructure* src, laydata::tdtcell* dst) {
+void GDSin::gds2ted::convert(GDSin::GDSstructure* src, laydata::tdtcell* dst)
+{
    GDSin::GDSdata *wd = src->Get_Fdata();
-   while( wd ){
-      switch( wd->GetGDSDatatype() ){
+   while( wd )
+   {
+      switch( wd->GetGDSDatatype() )
+      {
 //         case      gds_BOX: box(static_cast<GDSin::GDSbox*>(wd), dst);  break;
          case      gds_BOX:
          case gds_BOUNDARY: polygon(static_cast<GDSin::GDSpolygon*>(wd), dst);  break;
@@ -107,43 +117,50 @@ void GDSin::gds2ted::convert(GDSin::GDSstructure* src, laydata::tdtcell* dst) {
 //   dst->secure_layprop();
 }
 
-void GDSin::gds2ted::polygon(GDSin::GDSpolygon* wd, laydata::tdtcell* dst) {
+void GDSin::gds2ted::polygon(GDSin::GDSpolygon* wd, laydata::tdtcell* dst)
+{
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
                                           (dst->securelayer(wd->GetLayer()));
    pointlist &pl = wd->GetPlist();
    laydata::valid_poly check(pl);
 
-   if (!check.valid()) {
+   if (!check.valid())
+   {
       std::ostringstream ost; ost << "Layer " << wd->GetLayer();
       ost << ": Polygon check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
-   }   
+   }
    else pl = check.get_validated() ;
-   if (check.box()) {
+   if (check.box())
+   {
       wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
    }
    else wl->addpoly(pl,false);
 }
 
-void GDSin::gds2ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst) {
+void GDSin::gds2ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst)
+{
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
                                           (dst->securelayer(wd->GetLayer()));
    pointlist &pl = wd->GetPlist();
    laydata::valid_wire check(pl, wd->Get_width());
 
-   if (!check.valid()) {
+   if (!check.valid())
+   {
       std::ostringstream ost; ost << "Layer " << wd->GetLayer();
       ost << ": Wire check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
       return;
-   }   
+   }
    else pl = check.get_validated() ;
    /* @TODO !!! GDS path type here!!!! */
    wl->addwire(pl, wd->Get_width(),false);
 }
 
-void GDSin::gds2ted::ref(GDSin::GDSref* wd, laydata::tdtcell* dst) {
-   if (NULL != _dst_lib->checkcell(wd->GetStrname())) {
+void GDSin::gds2ted::ref(GDSin::GDSref* wd, laydata::tdtcell* dst)
+{
+   if (NULL != _dst_lib->checkcell(wd->GetStrname()))
+   {
       laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->GetStrname());
       // Absolute magnification, absolute angle should be reflected somehow!!!
       dst->addcellref(_dst_lib,
@@ -155,7 +172,8 @@ void GDSin::gds2ted::ref(GDSin::GDSref* wd, laydata::tdtcell* dst) {
                    false
       );
    }
-   else {
+   else
+   {
       std::string news = "Referenced structure \"";
       news += wd->GetStrname(); news += "\" not found. Reference ignored";
       tell_log(console::MT_ERROR,news);
@@ -163,8 +181,10 @@ void GDSin::gds2ted::ref(GDSin::GDSref* wd, laydata::tdtcell* dst) {
    // How about structures defined, but not parsed yet????
 }
 
-void GDSin::gds2ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst) {
-   if (NULL != _dst_lib->checkcell(wd->GetStrname())) {
+void GDSin::gds2ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst)
+{
+   if (NULL != _dst_lib->checkcell(wd->GetStrname()))
+   {
       laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->GetStrname());
       // Absolute magnification, absolute angle should be reflected somehow!!!
 
@@ -181,7 +201,8 @@ void GDSin::gds2ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst) {
          false
       );
    }
-   else {
+   else
+   {
       std::string news = "Referenced structure \"";
       news += wd->GetStrname(); news += "\" not found. Reference ignored";
       tell_log(console::MT_ERROR,news);
@@ -189,7 +210,8 @@ void GDSin::gds2ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst) {
    // How about structures defined, but not parsed yet????
 }
 
-void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
+void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst)
+{
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
                                        (dst->securelayer(wd->GetLayer()));
    // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
@@ -198,6 +220,15 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst) {
                    wd->GetMagnification() / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
                    wd->GetAngle(),
                    (0 != wd->GetReflection())));
+}
+
+//-----------------------------------------------------------------------------
+// class CIF2TED
+//-----------------------------------------------------------------------------
+CIFin::CIF2TED::CIF2TED(CIFin::CIFFile* src_lib, laydata::tdtdesign* dst_lib) :
+      _src_lib (src_lib), _dst_lib(dst_lib)
+{
+//   coeff = dst_lib->UU() / src_lib->Get_LibUnits();
 }
 
 //-----------------------------------------------------------------------------
@@ -387,7 +418,7 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
    gdsex.closeFile();
 }
 
-bool DataCenter::GDSparse(std::string filename) 
+bool DataCenter::GDSparse(std::string filename)
 {
    bool status;
    if (lockGDS(false))
@@ -419,12 +450,14 @@ bool DataCenter::GDSparse(std::string filename)
    return status;
 }
 
-void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over) {
+void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over)
+{
    if (NULL == lockGDS())
    {
       std::string news = "No GDS data in memory. Parse GDS file first";
       tell_log(console::MT_ERROR,news);
    }
+   else
    {
       // Lock the DB here manually. Otherwise the cell browser is going mad
       GDSin::gds2ted converter(_GDSDB, _TEDLIB());
@@ -447,7 +480,6 @@ bool DataCenter::CIFparse(std::string filename)
    bool status;
 //   if (lockGDS(false))
 //   {
-//      
 //      std::string news = "Removing existing GDS data from memory...";
 //      tell_log(console::MT_WARNING,news);
 //      GDSclose();
@@ -456,21 +488,21 @@ bool DataCenter::CIFparse(std::string filename)
 //   // parse the GDS file - don't forget to lock the GDS mutex here!
 //   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    _CIFDB = DEBUG_NEW CIFin::CIFFile(filename.c_str());
-   _CIFDB->collectCells();
+   _CIFDB->hierPrep();
    status = _CIFDB->status();
-//   if (status)
-//   {
-//      // generate the hierarchy tree of cells
-//      _GDSDB->HierOut();
-//   }
-//   else
-//   {
-//      if (NULL != _GDSDB) 
-//      {
-//         delete _GDSDB;
-//         _GDSDB = NULL;
-//      }
-//   }
+   if (status)
+   {
+      // generate the hierarchy tree of cells
+      _CIFDB->hierOut();
+   }
+   else
+   {
+      if (NULL != _CIFDB)
+      {
+         delete _CIFDB;
+         _CIFDB = NULL;
+      }
+   }
 //   unlockGDS();
    return status;
 }
@@ -482,6 +514,24 @@ bool DataCenter::CIFgetLay(nameList& cifLayers)
    {
       _CIFDB->collectLayers(cifLayers);
       return true;
+   }
+}
+
+void DataCenter::CIFimport(NMap& cifLayers)
+{
+/*   if (NULL == lockGDS())
+   {
+      std::string news = "No GDS data in memory. Parse GDS file first";
+      tell_log(console::MT_ERROR,news);
+   }
+   else*/
+   {
+      //Lock the DB here manually. Otherwise the cell browser is going mad
+      CIFin::CIF2TED converter(_CIFDB, _TEDLIB());
+/*      for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
+         converter.structure(CN->c_str(), recur, over);
+      _TEDLIB()->modified = true;
+      unlockGDS();*/
    }
 }
 

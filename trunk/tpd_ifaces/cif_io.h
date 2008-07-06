@@ -105,9 +105,17 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 95 label length width x y;    Place label in specified area
 
 */
+   class CIFStructure;
+   class CIFFile;
+
+   typedef SGHierTree<CIFStructure>       CIFHierTree;
+   typedef std::list<CIFStructure*>       CIFSList;
+
+
    class CIFData {
       public:
                      CIFData(CIFData* last) : _last(last) {};
+         CIFData*    last()         {return _last;}
       protected:
          CIFData*    _last;
    };
@@ -140,6 +148,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFRef : public CIFData {
       public:
                      CIFRef(CIFData* last, word, CTM*);
+         CIFRef*     last()                     {return static_cast<CIFRef*>(last());}
+         word        cell()                     {return _cell;}
       protected:
          word        _cell;
          CTM*        _location;
@@ -178,29 +188,38 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFStructure  {
       public:
                         CIFStructure(word, CIFStructure*, word=1,word=1);
-         void           cellNameIs(std::string cellname) {_cellname = cellname;}
+         void           cellNameIs(std::string cellName) {_cellName = cellName;}
          void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
          CIFStructure*  last() const                  {return _last;}
          word           ID() const                    {return _ID;}
-         std::string    cellname() const              {return _cellname;}
+         std::string    cellName() const              {return _cellName;}
+         void           parentFound()                 {_orphan = false;}
+         bool           orphan()                      {return _orphan;}
          CIFLayer*      secureLayer(std::string);
          void           addRef(word cell, CTM* location);
          void           collectLayers(CifLayerList&);
+         void           hierPrep(CIFFile&);
+         CIFHierTree*   hierOut(CIFHierTree*, CIFStructure*);
+      // to cover the requirements of the hierarchy template
+         int            libID() const                 {return TARGETDB_LIB;}
       private:
          word           _ID;
          CIFStructure*  _last;
          word           _a;
          word           _b;
-         std::string    _cellname;
+         std::string    _cellName;
          CIFLayer*      _first;
+         CIFRef*        _refirst;
          DBbox          _overlap;
+         bool           _orphan;
+         CIFSList       _children;
    };
-   typedef std::list<CIFStructure*> CifCellList;
+//   typedef std::list<CIFStructure*> CifCellList;
 
    class   CIFFile {
       public:
                         CIFFile(std::string);
-                     ~CIFFile();
+                       ~CIFFile();
          bool           status() {return _status;}
          void           addStructure(word, word = 1, word = 1);
          void           doneStructure();
@@ -214,15 +233,19 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void           curCellName(char*);
          void           curCellOverlap(TP*, TP*);
          void           collectLayers(nameList&);
-         void           collectCells();
+         CIFStructure*  getStructure(word);
+         void           hierPrep();
+         void           hierOut();
+         std::string    Get_libname() const  {return _filename;}
+         CIFHierTree*   hiertree()           {return _hiertree;}
       protected:
-         bool           _status;
-   //      CIFStructure*  currentStructure() {return _first;}
-         CIFStructure*  _first;
-         CIFStructure*  _current;
-         CIFStructure*  _default;
-         CIFLayer*      _curlay;
-         CIFRef*        _refirst;
+         bool           _status;          //!
+         CIFStructure*  _first;           //! poiter to the first defined cell
+         CIFStructure*  _current;         //! the working (current) cell
+         CIFStructure*  _default;         //! pointer to the default cell - i.e. the scratch pad
+         CIFLayer*      _curlay;          //!
+         CIFHierTree*   _hiertree;        //! Tree of instance hierarchy
+         std::string    _filename;
    };
 }
 
