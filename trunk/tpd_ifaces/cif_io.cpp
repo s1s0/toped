@@ -138,6 +138,7 @@ void CIFin::CIFStructure::hierPrep(CIFFile& cfile)
       }
       _local = _local->last();
    }
+   _children.unique();
 }
 
 CIFin::CIFHierTree* CIFin::CIFStructure::hierOut(CIFHierTree* theTree, CIFStructure* parent)
@@ -154,7 +155,9 @@ CIFin::CIFHierTree* CIFin::CIFStructure::hierOut(CIFHierTree* theTree, CIFStruct
 //=============================================================================
 CIFin::CIFFile::CIFFile(std::string filename)
 {
-   _first = _current = _default = NULL; _curlay = NULL;
+   _first = _current = _default = NULL;
+   _curlay = NULL;
+   _hiertree = NULL;
    _filename = filename;
    std::ostringstream info;
    // feed the flex with the buffer of the input file
