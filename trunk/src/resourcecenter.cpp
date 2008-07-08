@@ -243,14 +243,14 @@ void tui::MenuItemSeparator::create(wxMenuBar *menuBar)
    _inserted = true;
 }
 
-/*tui::ToolItem::ToolItem(int toolID, const std::string &name,
-							const std::string &bitmapFileName,
-							const std::string &hotKey, callbackMethod cbMethod)
-							:_ID(toolID), /*_hotKey(hotKey),_method(cbMethod)*/
-/*{
-	_bitmap.LoadFile(wxString(bitmapFileName.c_str(), wxConvUTF8), wxBITMAP_TYPE_BMP);//,wxBITMAP_TYPE_XPM);
-
-}*/
+// tui::ToolItem::ToolItem(int toolID, const std::string &name,
+// 							const std::string &bitmapFileName,
+// 							const std::string &hotKey, callbackMethod cbMethod)
+// 							:_ID(toolID), /*_hotKey(hotKey),_method(cbMethod)*/
+// {
+// 	_bitmap.LoadFile(wxString(bitmapFileName.c_str(), wxConvUTF8), wxBITMAP_TYPE_BMP);//,wxBITMAP_TYPE_XPM);
+// 
+// }
 
 tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								const std::string &bitmapName,

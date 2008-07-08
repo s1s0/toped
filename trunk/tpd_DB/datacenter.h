@@ -71,6 +71,7 @@ public:
    void                       GDSexport(laydata::tdtcell*, bool, std::string&, bool);
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
+   void                       CIFclose();
    bool                       CIFparse(std::string filename);
    bool                       CIFgetLay(nameList&);
    void                       CIFimport(NMap&);
@@ -84,11 +85,13 @@ public:
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    GDSin::GDSFile*            lockGDS(bool throwexception = true);
+   CIFin::CIFFile*            lockCIF(bool throwexception = true);
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::refnamepair& striter);
    void                       unlockDB();
    void                       unlockGDS();
+   void                       unlockCIF();
    void                       mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
@@ -186,6 +189,7 @@ private:
    std::string                _localDir;
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
+   wxMutex                    CIFLock;
    wxMutex                    PROPLock;
 
 };

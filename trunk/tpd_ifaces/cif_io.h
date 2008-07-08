@@ -148,7 +148,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFRef : public CIFData {
       public:
                      CIFRef(CIFData* last, word, CTM*);
-         CIFRef*     last()                     {return static_cast<CIFRef*>(last());}
+         CIFRef*     last()                     {return static_cast<CIFRef*>(CIFData::last());}
          word        cell()                     {return _cell;}
       protected:
          word        _cell;

@@ -258,8 +258,7 @@ browsers::CIFbrowser::CIFbrowser(wxWindow *parent, wxWindowID id,
 
 void browsers::CIFbrowser::collectInfo()
 {
-//   CIFin::CIFFile* ACIFDB = DATC->lockCIF(false);
-   CIFin::CIFFile* ACIFDB = NULL;
+  CIFin::CIFFile* ACIFDB = DATC->lockCIF(false);
    if (NULL == ACIFDB) return;
    hCellBrowser->AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
    fCellBrowser->AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
@@ -275,7 +274,7 @@ void browsers::CIFbrowser::collectInfo()
       collectChildren(root, nroot);
       root = root->GetNextRoot(TARGETDB_LIB);
    }
-//   DATC->unlockCIF();
+   DATC->unlockCIF();
    hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
    fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
 //   Toped->Resize();
@@ -982,6 +981,7 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    AddPage(_layers, wxT("Layers"));
 
    _GDSstruct = NULL;
+   _CIFstruct = NULL;
    _tellParser = NULL;
    Browsers = this;
 }
@@ -1042,7 +1042,8 @@ void browsers::browserTAB::OnTELLclearGDStab()
 
 void browsers::browserTAB::OnTELLaddCIFtab()
 {
-   if (!_CIFstruct) {
+   if (NULL == _CIFstruct)
+   {
       _CIFstruct = DEBUG_NEW CIFbrowser(this, tui::ID_CIF_CELLTREE);
       AddPage(_CIFstruct, wxT("CIF"));
    }

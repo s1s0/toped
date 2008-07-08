@@ -237,7 +237,7 @@ CIFin::CIF2TED::CIF2TED(CIFin::CIFFile* src_lib, laydata::tdtdesign* dst_lib) :
 DataCenter::DataCenter(std::string localDir) 
 {
    _localDir = localDir;
-   _GDSDB = NULL; //_TEDDB = NULL;
+   _GDSDB = NULL; _CIFDB = NULL;//_TEDDB = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
    _tedfilename = "unnamed";
@@ -468,25 +468,34 @@ void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over)
    }
 }
 
-void DataCenter::GDSclose() {
+void DataCenter::GDSclose()
+{
    lockGDS();
       delete _GDSDB;
       _GDSDB = NULL;
    unlockGDS();
 }
 
+void DataCenter::CIFclose()
+{
+   lockCIF();
+   delete _CIFDB;
+   _CIFDB = NULL;
+   unlockCIF();
+}
+
 bool DataCenter::CIFparse(std::string filename) 
 {
    bool status;
-//   if (lockGDS(false))
-//   {
-//      std::string news = "Removing existing GDS data from memory...";
-//      tell_log(console::MT_WARNING,news);
-//      GDSclose();
-//      unlockGDS();
-//   }
-//   // parse the GDS file - don't forget to lock the GDS mutex here!
-//   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
+   if (lockCIF(false))
+   {
+      std::string news = "Removing existing CIF data from memory...";
+      tell_log(console::MT_WARNING,news);
+      CIFclose();
+      unlockCIF();
+   }
+   // parse the CIF file - don't forget to lock the CIF mutex here!
+   while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
    _CIFDB = DEBUG_NEW CIFin::CIFFile(filename.c_str());
    _CIFDB->hierPrep();
    status = _CIFDB->status();
@@ -503,7 +512,7 @@ bool DataCenter::CIFparse(std::string filename)
          _CIFDB = NULL;
       }
    }
-//   unlockGDS();
+   unlockCIF();
    return status;
 }
 
@@ -519,19 +528,19 @@ bool DataCenter::CIFgetLay(nameList& cifLayers)
 
 void DataCenter::CIFimport(NMap& cifLayers)
 {
-/*   if (NULL == lockGDS())
+   if (NULL == lockCIF())
    {
-      std::string news = "No GDS data in memory. Parse GDS file first";
+      std::string news = "No CIF data in memory. Parse CIF file first";
       tell_log(console::MT_ERROR,news);
    }
-   else*/
+   else
    {
       //Lock the DB here manually. Otherwise the cell browser is going mad
       CIFin::CIF2TED converter(_CIFDB, _TEDLIB());
 /*      for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.structure(CN->c_str(), recur, over);
-      _TEDLIB()->modified = true;
-      unlockGDS();*/
+      _TEDLIB()->modified = true;*/
+      unlockCIF();
    }
 }
 
@@ -599,9 +608,32 @@ GDSin::GDSFile* DataCenter::lockGDS(bool throwexception)
    }
 }
 
-void DataCenter::unlockGDS() 
+void DataCenter::unlockGDS()
 {
    GDSLock.Unlock();
+}
+
+CIFin::CIFFile* DataCenter::lockCIF(bool throwexception)
+{
+   // Carefull HERE! When CIF is locked form the main thread
+   // (GDS browser), then there is no catch pending -i.e.
+   // throwing an exception will make the things worse
+   // When it is locked from the parser command - then exception
+   // is fine 
+   if (_CIFDB)
+   {
+      while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
+      return _CIFDB;
+   }
+   else {
+      if (throwexception) throw EXPTNactive_CIF();
+      else return NULL;
+   }
+}
+
+void DataCenter::unlockCIF()
+{
+   CIFLock.Unlock();
 }
 
 void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
