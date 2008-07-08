@@ -163,7 +163,7 @@ CIFin::CIFFile::CIFFile(std::string filename)
    {// open the input file
       info << "File "<< filename <<" can NOT be opened";
       tell_log(console::MT_ERROR,info.str());
-      _status = 0;
+      _status = false;
       return;
    }
    info << "Parsing \"" << filename << "\" using CIF grammar";
@@ -177,7 +177,7 @@ CIFin::CIFFile::CIFFile(std::string filename)
 //   cifdebug = 1;
    cifparse();
 //   my_delete_yy_buffer( buf );
-   _status = 0;
+   _status = true;
    fclose(cifin);
 }
 

@@ -384,6 +384,11 @@ EXPTNactive_GDS::EXPTNactive_GDS() {
    tell_log(console::MT_ERROR,news);
 };
 
+EXPTNactive_CIF::EXPTNactive_CIF() {
+   std::string news = "No CIF structure in memory. Parse first";
+   tell_log(console::MT_ERROR,news);
+};
+
 EXPTNreadTDT::EXPTNreadTDT(std::string info) {
    std::string news = "Error parsing TDT file =>";
    news += info;

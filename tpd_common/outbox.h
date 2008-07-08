@@ -183,6 +183,12 @@ class EXPTNactive_GDS : public EXPTN
       EXPTNactive_GDS();
 };
 
+class EXPTNactive_CIF : public EXPTN
+{
+   public:
+      EXPTNactive_CIF();
+};
+
 class EXPTNreadTDT : public EXPTN
 {
    public:
