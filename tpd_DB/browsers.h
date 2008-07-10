@@ -381,6 +381,7 @@ namespace browsers
    void addGDStab();
    void addCIFtab();
    void clearGDStab();
+   void clearCIFtab();
    void celltree_open(const std::string);
    void celltree_highlight(const std::string);
    void treeAddMember(const char*, const char*, int action = 0);

@@ -96,7 +96,7 @@ void CIFin::CIFLayer::addLabelSig(std::string label, TP* loc)
 //=============================================================================
 CIFin::CIFStructure::CIFStructure(word ID, CIFStructure* last, word a, word b) :
       _ID(ID), _last(last), _a(a), _b(b), _cellName(""), _first(NULL),
-          _refirst(NULL), _overlap(TP()), _orphan(true) {}
+          _refirst(NULL), _overlap(TP()), _orphan(true), _traversed(false) {}
 
 CIFin::CIFLayer* CIFin::CIFStructure::secureLayer(std::string name)
 {

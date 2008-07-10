@@ -666,27 +666,10 @@ int tellstdfunc::CIFread::execute() {
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      std::list<std::string> top_cell_list;
       if (DATC->CIFparse(filename))
       {
          // add CIF tab in the browser
          browsers::addCIFtab();
-//         //
-//         GDSin::GDSFile* AGDSDB = DATC->lockGDS();
-//
-//            GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-//            assert(root);
-//            do 
-//            {
-//               top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));
-//            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-//         DATC->unlockGDS();
-//         telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
-//         for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
-//                                                   CN != top_cell_list.end(); CN ++)
-//            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
-//         OPstack.push(topcells);
-//         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
       else
       {
@@ -732,18 +715,33 @@ tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::CIFimport::execute()
 {
-   NMap cifLays;
+   bool  over  = getBoolValue();
+   NMap* cifLays = DEBUG_NEW NMap();
    telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    telldata::tthsh* nameh;
    for (unsigned i = 0; i < ll->size(); i++)
    {
       nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
-      cifLays[nameh->name().value()] = nameh->number().value();
+      (*cifLays)[nameh->name().value()] = nameh->number().value();
    }
-   DATC->CIFimport(cifLays);
+   DATC->CIFimport(cifLays, over);
    return EXEC_NEXT;
 }
+
+//=============================================================================
+tellstdfunc::CIFclose::CIFclose(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::CIFclose::execute() {
+   browsers::clearCIFtab();
+   DATC->CIFclose();
+   LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   return EXEC_NEXT;
+}
+

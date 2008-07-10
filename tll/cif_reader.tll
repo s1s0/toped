@@ -1,11 +1,23 @@
 newdesign("cifcells");
 //cifread("/home/skr/toped/library/cif/oan22_x2.cif");
 //echo(ciflayers());
-//
-//cifread("/home/skr/toped/toped_NOTUSED/Start_cmiV4_3.cif");
+
+cifread("/home/skr/toped/toped_NOTUSED/Start_cmiV4_3.cif");
 //lmap list cif_layer_definition = ciflayers();
 //echo(cif_layer_definition);
-
+//----------------------------------------------------
+lmap list cif_layer_definition = {  { 1 , "L1"  },
+                                    { 3 , "L2"  },
+                                    { 8 , "L3"  },
+                                    { 2 , "L15" },
+                                    { 4 , "L21" },
+                                    { 5 , "L22" },
+                                    { 6 , "L23" },
+                                    { 7 , "L24" },
+                                    { 9 , "L30" },
+                                    {10 , "L32" }
+                                 };
+cifimport(cif_layer_definition, true);
 
 //lmap list cif_layer_definition = {{ 1, "L01"},
 //                                  { 4, "L04"},
@@ -27,16 +39,4 @@ newdesign("cifcells");
 //number = 11 : name = "CPD" , 
 //number = 12 : name = "CWP" , 
 //number = 13 : name = "CWN" 
-//----------------------------------------------------
-//number = 1 : name = "L1" ,
-//number = 2 : name = "L15" ,
-//number = 3 : name = "L2" ,
-//number = 4 : name = "L21" ,
-//number = 5 : name = "L22" ,
-//number = 6 : name = "L23" ,
-//number = 7 : name = "L24" ,
-//number = 8 : name = "L3" ,
-//number = 9 : name = "L30" ,
-//number = 10 : name = "L32" }
-
 //--------------------------------------------------

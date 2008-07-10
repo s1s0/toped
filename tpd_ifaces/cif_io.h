@@ -195,6 +195,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::string    cellName() const              {return _cellName;}
          void           parentFound()                 {_orphan = false;}
          bool           orphan()                      {return _orphan;}
+         bool           traversed() const             {return _traversed;}
+         void           set_traversed(bool trv)       { _traversed = trv;}
          CIFLayer*      secureLayer(std::string);
          void           addRef(word cell, CTM* location);
          void           collectLayers(CifLayerList&);
@@ -212,6 +214,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CIFRef*        _refirst;
          DBbox          _overlap;
          bool           _orphan;
+         bool           _traversed;       //! For hierarchy traversing purposes
          CIFSList       _children;
    };
 //   typedef std::list<CIFStructure*> CifCellList;

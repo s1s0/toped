@@ -88,7 +88,7 @@ void GDSin::gds2ted::structure(const char* gname, bool recursive, bool overwrite
       }
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
-      // first create a DEBUG_NEW cell
+      // first create a new cell
       dst_structure = _dst_lib->addcell(gname);
       // now call the cell converter
       convert(src_structure, dst_structure);
@@ -225,10 +225,74 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst)
 //-----------------------------------------------------------------------------
 // class CIF2TED
 //-----------------------------------------------------------------------------
-CIFin::CIF2TED::CIF2TED(CIFin::CIFFile* src_lib, laydata::tdtdesign* dst_lib) :
-      _src_lib (src_lib), _dst_lib(dst_lib)
+CIFin::CIF2TED::CIF2TED(CIFin::CIFFile* src_lib, laydata::tdtdesign* dst_lib,
+      NMap* cif_layers) : _src_lib (src_lib), _dst_lib(dst_lib),
+                                    _cif_layers(cif_layers)
 {
-//   coeff = dst_lib->UU() / src_lib->Get_LibUnits();
+}
+
+
+void CIFin::CIF2TED::top_structure(bool overwrite)
+{
+   assert(_src_lib->hiertree());
+   CIFin::CIFHierTree* root = _src_lib->hiertree()->GetFirstRoot(TARGETDB_LIB);
+   while (root)
+   {
+      child_structure(root, overwrite);
+      root = root->GetNextRoot(TARGETDB_LIB);
+   }
+   // Convert the top structure
+   //   hCellBrowser->AddRoot(wxString((_src_lib->Get_libname()).c_str(), wxConvUTF8));
+
+}
+
+void CIFin::CIF2TED::child_structure(const CIFin::CIFHierTree* root, bool overwrite)
+{
+   const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
+   while (Child)
+   {
+      if ( !Child->GetItem()->traversed() )
+      {
+         // traverse children first
+         child_structure(Child, overwrite);
+         // get the CIF structure
+         CIFin::CIFStructure* src_structure = const_cast<CIFin::CIFStructure*>(Child->GetItem());
+         std::string gname = src_structure->cellName();
+         // check that destination structure with this name exists
+         laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
+         std::ostringstream ost; ost << "CIF import: ";
+         if (NULL != dst_structure)
+         {
+            if (overwrite)
+            {
+               /*@TODO Erase the existing structure and convert*/
+               ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
+               tell_log(console::MT_WARNING,ost.str());
+            }
+            else
+            {
+               ost << "Structure "<< gname << " already exists. Omitted";
+               tell_log(console::MT_INFO,ost.str());
+            }
+         }
+         else
+         {
+            ost << "Importing structure " << gname << "...";
+            tell_log(console::MT_INFO,ost.str());
+            // first create a new cell
+            dst_structure = _dst_lib->addcell(gname);
+            // finally call the cell converter
+            convert(src_structure, dst_structure);
+         }
+         src_structure->set_traversed(true);
+      }
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
+ void CIFin::CIF2TED::convert(CIFin::CIFStructure* src, laydata::tdtcell* dst)
+{
+
 }
 
 //-----------------------------------------------------------------------------
@@ -423,7 +487,6 @@ bool DataCenter::GDSparse(std::string filename)
    bool status;
    if (lockGDS(false))
    {
-      
       std::string news = "Removing existing GDS data from memory...";
       tell_log(console::MT_WARNING,news);
       GDSclose();
@@ -526,22 +589,18 @@ bool DataCenter::CIFgetLay(nameList& cifLayers)
    }
 }
 
-void DataCenter::CIFimport(NMap& cifLayers)
+void DataCenter::CIFimport(NMap* cifLayers, bool overwrite)
 {
-   if (NULL == lockCIF())
-   {
-      std::string news = "No CIF data in memory. Parse CIF file first";
-      tell_log(console::MT_ERROR,news);
-   }
-   else
-   {
-      //Lock the DB here manually. Otherwise the cell browser is going mad
-      CIFin::CIF2TED converter(_CIFDB, _TEDLIB());
+   lockCIF();
+   lockDB(false);
+   //@TODO - Check the following comment -> Lock the DB here manually. Otherwise the cell browser is going mad
+   CIFin::CIF2TED converter(_CIFDB, _TEDLIB(), cifLayers);
+   converter.top_structure(overwrite);
 /*      for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
-         converter.structure(CN->c_str(), recur, over);
-      _TEDLIB()->modified = true;*/
-      unlockCIF();
-   }
+   converter.structure(CN->c_str(), recur, over); */
+   _TEDLIB()->modified = true;
+   unlockDB();
+   unlockCIF();
 }
 
 void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
@@ -616,7 +675,7 @@ void DataCenter::unlockGDS()
 CIFin::CIFFile* DataCenter::lockCIF(bool throwexception)
 {
    // Carefull HERE! When CIF is locked form the main thread
-   // (GDS browser), then there is no catch pending -i.e.
+   // (CIF browser), then there is no catch pending -i.e.
    // throwing an exception will make the things worse
    // When it is locked from the parser command - then exception
    // is fine 

@@ -1149,6 +1149,14 @@ void browsers::clearGDStab()
    wxPostEvent(Browsers, eventADDTAB);
 }
 
+void browsers::clearCIFtab()
+{
+   assert(Browsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(BT_CLEARCIF_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
+}
+
 void browsers::celltree_open(const std::string cname) 
 {
    assert(Browsers);

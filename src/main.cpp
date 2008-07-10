@@ -111,6 +111,8 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("newcell"          ,(DEBUG_NEW                  tellstdfunc::stdNEWCELL(telldata::tn_void,false)));
    mblock->addFUNC("removecell"       ,(DEBUG_NEW               tellstdfunc::stdREMOVECELL(telldata::tn_void,false)));
    mblock->addFUNC("cifread"          ,(DEBUG_NEW                     tellstdfunc::CIFread(telldata::tn_void, true)));
+   mblock->addFUNC("cifimport"        ,(DEBUG_NEW                   tellstdfunc::CIFimport(telldata::tn_void, true)));
+   mblock->addFUNC("cifclose"         ,(DEBUG_NEW                    tellstdfunc::CIFclose(telldata::tn_void, true)));
    mblock->addFUNC("gdsread"          ,(DEBUG_NEW          tellstdfunc::GDSread(TLISTOF(telldata::tn_string), true)));
    mblock->addFUNC("gdsimport"        ,(DEBUG_NEW               tellstdfunc::GDSconvertAll(telldata::tn_void, true)));
    mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                  tellstdfunc::GDSconvert(telldata::tn_void, true)));
