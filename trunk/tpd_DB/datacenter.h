@@ -35,8 +35,8 @@
 namespace GDSin {
    class gds2ted {
    public:
-      gds2ted(GDSin::GDSFile* src_lib, laydata::tdtdesign* dst_lib);
-      void structure(const char* gname, bool recursive, bool overwrite);
+                           gds2ted(GDSin::GDSFile* src_lib, laydata::tdtdesign* dst_lib);
+      void                 structure(const char* gname, bool recursive, bool overwrite);
    protected:
       void                 convert(GDSin::GDSstructure*, laydata::tdtcell*);
       void                 polygon(GDSin::GDSpolygon*, laydata::tdtcell*);
@@ -54,10 +54,14 @@ namespace CIFin {
 
    class CIF2TED {
       public:
-         CIF2TED(CIFin::CIFFile* src_lib, laydata::tdtdesign* dst_lib);
+                              CIF2TED(CIFin::CIFFile*, laydata::tdtdesign*, NMap*);
+         void                 top_structure(bool);
       protected:
+         void                 child_structure(const CIFin::CIFHierTree*, bool);
+         void                 convert(CIFin::CIFStructure*, laydata::tdtcell*);
          CIFin::CIFFile*      _src_lib;
          laydata::tdtdesign*  _dst_lib;
+         NMap*                _cif_layers;
    };
 
 }
@@ -74,7 +78,7 @@ public:
    void                       CIFclose();
    bool                       CIFparse(std::string filename);
    bool                       CIFgetLay(nameList&);
-   void                       CIFimport(NMap&);
+   void                       CIFimport(NMap*, bool);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);
