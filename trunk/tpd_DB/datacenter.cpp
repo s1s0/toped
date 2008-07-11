@@ -290,9 +290,66 @@ void CIFin::CIF2TED::child_structure(const CIFin::CIFHierTree* root, bool overwr
    }
 }
 
- void CIFin::CIF2TED::convert(CIFin::CIFStructure* src, laydata::tdtcell* dst)
+void CIFin::CIF2TED::convert(CIFin::CIFStructure* src, laydata::tdtcell* dst)
 {
+   CIFin::CIFLayer* swl = src->firstLayer();
+   while( swl )
+   {
+      if (_cif_layers->end() != _cif_layers->find(swl->name()))
+      {
+         laydata::tdtlayer* dwl =
+               static_cast<laydata::tdtlayer*>(dst->securelayer((*_cif_layers)[swl->name()]));
 
+         CIFin::CIFData* wd = swl->firstData();
+         while ( wd )
+         {
+            switch (wd->dataType())
+            {
+               case cif_BOX     : box ( static_cast<CIFin::CIFBox*     >(wd),dwl );break;
+               case cif_POLY    : poly( static_cast<CIFin::CIFPoly*    >(wd),dwl );break;
+               case cif_WIRE    : wire( static_cast<CIFin::CIFWire*    >(wd),dwl );break;
+               case cif_REF     : ref ( static_cast<CIFin::CIFRef*     >(wd),dwl );break;
+               case cif_LBL_LOC : lbll( static_cast<CIFin::CIFLabelLoc*>(wd),dwl );break;
+               case cif_LBL_SIG : lbls( static_cast<CIFin::CIFLabelSig*>(wd),dwl );break;
+               default    : assert(false);
+            }
+            wd = wd->last();
+         }
+      }
+      else
+      {
+         std::ostringstream ost;
+         ost << "CIF Layer name \"" << swl->name() << "\" is not defined in the function input parameter. Will be omitted";
+         tell_log(console::MT_INFO,ost.str());
+      }
+      swl = swl->last();
+   }
+   dst->resort();
+//   dst->secure_layprop();
+}
+
+void CIFin::CIF2TED::box ( CIFin::CIFBox*     ,laydata::tdtlayer* )
+{
+}
+
+void CIFin::CIF2TED::poly( CIFin::CIFPoly*    ,laydata::tdtlayer* )
+{
+}
+
+void CIFin::CIF2TED::wire( CIFin::CIFWire*    ,laydata::tdtlayer* )
+{
+}
+
+void CIFin::CIF2TED::ref ( CIFin::CIFRef*     ,laydata::tdtlayer* )
+{
+}
+
+void CIFin::CIF2TED::lbll( CIFin::CIFLabelLoc*,laydata::tdtlayer* )
+{
+}
+
+void CIFin::CIF2TED::lbls( CIFin::CIFLabelSig*,laydata::tdtlayer* )
+{
 }
 
 //-----------------------------------------------------------------------------
