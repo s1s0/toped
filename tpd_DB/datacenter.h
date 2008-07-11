@@ -59,6 +59,12 @@ namespace CIFin {
       protected:
          void                 child_structure(const CIFin::CIFHierTree*, bool);
          void                 convert(CIFin::CIFStructure*, laydata::tdtcell*);
+         void                 box ( CIFin::CIFBox*     ,laydata::tdtlayer* );
+         void                 poly( CIFin::CIFPoly*    ,laydata::tdtlayer* );
+         void                 wire( CIFin::CIFWire*    ,laydata::tdtlayer* );
+         void                 ref ( CIFin::CIFRef*     ,laydata::tdtlayer* );
+         void                 lbll( CIFin::CIFLabelLoc*,laydata::tdtlayer* );
+         void                 lbls( CIFin::CIFLabelSig*,laydata::tdtlayer* );
          CIFin::CIFFile*      _src_lib;
          laydata::tdtdesign*  _dst_lib;
          NMap*                _cif_layers;

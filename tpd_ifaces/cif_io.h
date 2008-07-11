@@ -105,6 +105,15 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 95 label length width x y;    Place label in specified area
 
 */
+   typedef enum {
+      cif_BOX        ,
+      cif_POLY       ,
+      cif_WIRE       ,
+      cif_REF        ,
+      cif_LBL_LOC    ,
+      cif_LBL_SIG
+   } CifDataType;
+
    class CIFStructure;
    class CIFFile;
 
@@ -114,8 +123,10 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CIFData {
       public:
-                     CIFData(CIFData* last) : _last(last) {};
-         CIFData*    last()         {return _last;}
+                              CIFData(CIFData* last) : _last(last) {};
+                  CIFData*    last()         {return _last;}
+         virtual CifDataType dataType() = 0;
+         virtual            ~CIFData() {}
       protected:
          CIFData*    _last;
    };
@@ -123,6 +134,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFBox : public CIFData {
       public:
                      CIFBox(CIFData*, word, word, TP*, TP*);
+         CifDataType dataType()     {return cif_BOX;}
       protected:
          word        _length;
          word        _width;
@@ -133,6 +145,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFPoly : public CIFData {
       public:
                      CIFPoly(CIFData* last, pointlist*);
+         CifDataType dataType()     {return cif_POLY;}
       protected:
          pointlist*  _poly;
    };
@@ -140,6 +153,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFWire : public CIFData {
       public:
                      CIFWire(CIFData* last, pointlist*, word);
+         CifDataType dataType()     {return cif_WIRE;}
       protected:
          pointlist*  _poly;
          word        _width;
@@ -148,8 +162,9 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFRef : public CIFData {
       public:
                      CIFRef(CIFData* last, word, CTM*);
-         CIFRef*     last()                     {return static_cast<CIFRef*>(CIFData::last());}
-         word        cell()                     {return _cell;}
+         CIFRef*     last()                           {return static_cast<CIFRef*>(CIFData::last());}
+         word        cell()                           {return _cell;}
+         CifDataType dataType()                       {return cif_REF;}
       protected:
          word        _cell;
          CTM*        _location;
@@ -158,6 +173,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFLabelLoc : public CIFData {
       public:
                      CIFLabelLoc(CIFData*, std::string, TP*);
+         CifDataType dataType()                       {return cif_LBL_LOC;}
       protected:
          std::string _label;
          TP*         _location;
@@ -166,13 +182,15 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFLabelSig : public CIFLabelLoc {
       public:
                      CIFLabelSig(CIFData*, std::string, TP*);
+         CifDataType dataType()                       {return cif_LBL_SIG;}
    };
 
    class CIFLayer {
       public:
                         CIFLayer(std::string name, CIFLayer* last);
-         std::string    name()         {return _name;}
-         CIFLayer*      last()         {return _last;}
+         std::string    name()                        {return _name;}
+         CIFLayer*      last()                        {return _last;}
+         CIFData*       firstData()                   {return _first;}
          void           addBox(word, word, TP*, TP* direction = NULL);
          void           addPoly(pointlist* poly);
          void           addWire(pointlist* poly, word width);
@@ -197,6 +215,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          bool           orphan()                      {return _orphan;}
          bool           traversed() const             {return _traversed;}
          void           set_traversed(bool trv)       { _traversed = trv;}
+         CIFLayer*      firstLayer()                  {return _first;}
          CIFLayer*      secureLayer(std::string);
          void           addRef(word cell, CTM* location);
          void           collectLayers(CifLayerList&);
