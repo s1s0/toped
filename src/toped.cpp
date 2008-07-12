@@ -602,7 +602,7 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("main", "open", "open16x16.png",ICON_SIZE_16x16,"", "open cell", &tui::TopedFrame::OnCellOpen);
    _resourceCenter->appendTool("main", "save", "save16x16.png",ICON_SIZE_16x16, "", "save design", &tui::TopedFrame::OnTDTSave);
 
-	_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
+	//_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
    _resourceCenter->appendTool("edit", "undo", "undo16x16.png",ICON_SIZE_16x16, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo16x16.png",ICON_SIZE_16x16, "", "redo",&tui::TopedFrame::OnUndo);*/
    _resourceCenter->appendTool("edit", "box", "box16x16.png", ICON_SIZE_16x16,"", "add box",&tui::TopedFrame::OnDrawBox);
@@ -624,6 +624,7 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "edit_push", "edit_push16x16.png", ICON_SIZE_16x16,"", "edit push",&tui::TopedFrame::OnCellPush);
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop16x16.png", ICON_SIZE_16x16,"", "edit pop",&tui::TopedFrame::OnCellPop);
 
+	_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
    _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
    _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,

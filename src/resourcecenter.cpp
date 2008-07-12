@@ -354,33 +354,37 @@ void tui::ToolItem::changeToolSize(IconSizes size)
 }
 
 
-BEGIN_EVENT_TABLE( tui::ToolBarHandler, wxToolBar )
-   EVT_SIZE( tui::ToolBarHandler::OnSize   )
-	EVT_PAINT(tui::ToolBarHandler::OnPaint)
-END_EVENT_TABLE()
+tui::TpdToolBar::TpdToolBar(int ID, long style, IconSizes iconSize)
+	:wxToolBar(Toped->getFrame(), ID, wxDefaultPosition,
+		wxSize(1000, 30), wxTB_NODIVIDER|wxTB_FLAT )
+{
+	SetWindowStyle(style|GetWindowStyle());
+	int sz = IconSizesValues[iconSize];
+	SetToolBitmapSize(wxSize(sz, sz));
+}
 
 tui::ToolBarHandler::ToolBarHandler(int ID, const std::string & name, int direction)
-		:wxToolBar(Toped->getFrame(), ID, wxDefaultPosition,
-		wxSize(1000, 30), wxTB_NODIVIDER|wxTB_FLAT ),
-		_name(name),_ID(ID), _dockDirection(direction)
+		:_name(name),_ID(ID), _dockDirection(direction)
 {
-	wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(this);
-
+	wxAuiPaneInfo paneInfo;
+	
 	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
 	{
-		SetWindowStyle(wxTB_VERTICAL|GetWindowStyle());
+		_toolBar = DEBUG_NEW TpdToolBar(ID, wxTB_VERTICAL, ICON_SIZE_16x16);
+		paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
+		//SetWindowStyle(wxTB_VERTICAL|GetWindowStyle());
 		paneInfo.TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true);
 	}
 	else
 	{
-		SetWindowStyle(wxTB_HORIZONTAL|GetWindowStyle());
+		_toolBar = DEBUG_NEW TpdToolBar(ID, wxTB_HORIZONTAL, ICON_SIZE_16x16);
+		paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
+		//SetWindowStyle(wxTB_HORIZONTAL|GetWindowStyle());
 		paneInfo.TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
 	}
 	
-	SetToolBitmapSize(wxSize(16, 16));
-
-	Realize();
-	Toped->getAuiManager()->AddPane(this, paneInfo.ToolbarPane().
+	_toolBar->Realize();
+	Toped->getAuiManager()->AddPane(_toolBar, paneInfo.ToolbarPane().
 		Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Floatable(false));
 	Toped->getAuiManager()->Update();
 }
@@ -396,77 +400,58 @@ tui::ToolBarHandler::~ToolBarHandler()
 
 void	tui::ToolBarHandler::changeToolSize(IconSizes size)
 {
+
+
+	//------------------------------------
+	Toped->getAuiManager()->DetachPane(_toolBar);
+	delete _toolBar;
+
+	Toped->getAuiManager()->Update();
+
 	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
 	{
 		(*it)->changeToolSize(size);
-		RemoveTool((*it)->ID());
-		
 	}
-	Realize();
-	//SetToolBitmapSize(wxSize(size, size));
-	int sz = IconSizesValues[size];
-	SetToolBitmapSize(wxSize(sz, sz));
 
+
+
+	wxAuiPaneInfo paneInfo;
+	
+	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
+	{
+		_toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_VERTICAL, size);
+		paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
+		//SetWindowStyle(wxTB_VERTICAL|GetWindowStyle());
+		paneInfo.TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true);
+	}
+	else
+	{
+		_toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_HORIZONTAL, size);
+		paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
+		//SetWindowStyle(wxTB_HORIZONTAL|GetWindowStyle());
+		paneInfo.TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
+	}
+		
 	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
 	{
-		AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
+		_toolBar->AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
 	}
-	Realize();
+	_toolBar->Realize();
+
+
+	Toped->getAuiManager()->AddPane(_toolBar, paneInfo.ToolbarPane().
+		Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Floatable(false));
+	Toped->getAuiManager()->Update();
+
+
+
+
 	Toped->getAuiManager()->Update();
 }
 
-void tui::ToolBarHandler::OnSize(wxSizeEvent& event)
-{
-	event.Skip();
-	Refresh();
-}
 
-void tui::ToolBarHandler::OnPaint(wxPaintEvent&event)
-{
-	/*wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(this);
-	if (paneInfo.dock_direction != _dockDirection)
-	{
-		Toped->getAuiManager()->DetachPane(this);
 
-		for(toolList::iterator it=_tools.begin();it!=_tools.end(); ++it)
-		{
-			RemoveTool((*it)->ID());
-		}
-	
-		_dockDirection = paneInfo.dock_direction;
 
-		if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
-		{
-			long style = (GetWindowStyle() ^ wxTB_HORIZONTAL);
-			style = style|wxTB_VERTICAL;
-			SetWindowStyle(style);
-			wxSize size = GetSize();
-			SetSize(size.GetHeight(),size.GetWidth());
-			paneInfo.GripperTop(true);
-		}
-		else
-		{
-			long style = (GetWindowStyle() ^ wxTB_VERTICAL);
-			style = style|wxTB_HORIZONTAL;
-			SetWindowStyle(style);
-			wxSize size = GetSize();
-			SetSize(size.GetHeight(),size.GetWidth());
-			paneInfo.GripperTop(false);
-		}
-
-		for(toolList::iterator it=_tools.begin();it!=_tools.end(); ++it)
-		{
-			AddTool((*it)->ID(), wxT(""), (*it)->bitmap());
-		}
-		
-		Realize();
-		Toped->getAuiManager()->AddPane(this, paneInfo.ToolbarPane().
-			Name(wxT(_name)).Floatable(false).Direction(_dockDirection));
-		Toped->getAuiManager()->Update();
-	}*/
-	event.Skip();
-
-}
 /*void	tui::ToolBarHandler::addTool(ToolItem *tool)
 {
 	_tools.push_back(tool);
@@ -507,20 +492,20 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 		ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, cbMethod);
 
 		_tools.push_back(tool);
-		AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
+		_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
 
-		Toped->getAuiManager()->DetachPane(this);
-		Realize();
+		Toped->getAuiManager()->DetachPane(_toolBar);
+		_toolBar->Realize();
 
 		if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
 		{
-			Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
+			Toped->getAuiManager()->AddPane(_toolBar, wxAuiPaneInfo().ToolbarPane().
 			Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(true).Floatable(false).
 			TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true));
 		}
 		else
 		{
-			Toped->getAuiManager()->AddPane(this, wxAuiPaneInfo().ToolbarPane().
+			Toped->getAuiManager()->AddPane(_toolBar, wxAuiPaneInfo().ToolbarPane().
 			Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(false).Floatable(false).
 			TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false));
 		}
@@ -533,14 +518,14 @@ void	tui::ToolBarHandler::update(void)
 {
 	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
 	{
-		RemoveTool((*it)->ID());
+		_toolBar->RemoveTool((*it)->ID());
 		
 	}
-	Realize();
+	_toolBar->Realize();
 	
 	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
 	{
-		AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
+		_toolBar->AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
 	}
 	Toped->getAuiManager()->Update();
 }
