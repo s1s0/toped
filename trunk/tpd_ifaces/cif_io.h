@@ -135,6 +135,10 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                      CIFBox(CIFData*, word, word, TP*, TP*);
          CifDataType dataType()     {return cif_BOX;}
+         word        length()       {return _length;}
+         word        width()        {return _width;}
+         TP*         center()       {return _center;}
+         TP*         direction()    {return _direction;}
       protected:
          word        _length;
          word        _width;
@@ -146,6 +150,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                      CIFPoly(CIFData* last, pointlist*);
          CifDataType dataType()     {return cif_POLY;}
+         pointlist*  poly()         {return _poly;}
       protected:
          pointlist*  _poly;
    };
@@ -154,6 +159,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                      CIFWire(CIFData* last, pointlist*, word);
          CifDataType dataType()     {return cif_WIRE;}
+         pointlist*  poly()         {return _poly;}
+         word        width()        {return _width;}
       protected:
          pointlist*  _poly;
          word        _width;
@@ -163,8 +170,9 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                      CIFRef(CIFData* last, word, CTM*);
          CIFRef*     last()                           {return static_cast<CIFRef*>(CIFData::last());}
-         word        cell()                           {return _cell;}
-         CifDataType dataType()                       {return cif_REF;}
+         word        cell()                           {return  _cell;}
+         CTM*        location()                       {return  _location;}
+         CifDataType dataType()                       {return  cif_REF;}
       protected:
          word        _cell;
          CTM*        _location;

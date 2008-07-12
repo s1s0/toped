@@ -305,12 +305,12 @@ void CIFin::CIF2TED::convert(CIFin::CIFStructure* src, laydata::tdtcell* dst)
          {
             switch (wd->dataType())
             {
-               case cif_BOX     : box ( static_cast<CIFin::CIFBox*     >(wd),dwl );break;
-               case cif_POLY    : poly( static_cast<CIFin::CIFPoly*    >(wd),dwl );break;
-               case cif_WIRE    : wire( static_cast<CIFin::CIFWire*    >(wd),dwl );break;
-               case cif_REF     : ref ( static_cast<CIFin::CIFRef*     >(wd),dwl );break;
-               case cif_LBL_LOC : lbll( static_cast<CIFin::CIFLabelLoc*>(wd),dwl );break;
-               case cif_LBL_SIG : lbls( static_cast<CIFin::CIFLabelSig*>(wd),dwl );break;
+               case cif_BOX     : box ( static_cast<CIFin::CIFBox*     >(wd), dwl, swl->name() );break;
+               case cif_POLY    : poly( static_cast<CIFin::CIFPoly*    >(wd), dwl, swl->name() );break;
+               case cif_WIRE    : wire( static_cast<CIFin::CIFWire*    >(wd), dwl, swl->name() );break;
+               case cif_REF     : ref ( static_cast<CIFin::CIFRef*     >(wd), dst              );break;
+               case cif_LBL_LOC : lbll( static_cast<CIFin::CIFLabelLoc*>(wd), dwl, swl->name() );break;
+               case cif_LBL_SIG : lbls( static_cast<CIFin::CIFLabelSig*>(wd), dwl, swl->name() );break;
                default    : assert(false);
             }
             wd = wd->last();
@@ -328,27 +328,95 @@ void CIFin::CIF2TED::convert(CIFin::CIFStructure* src, laydata::tdtcell* dst)
 //   dst->secure_layprop();
 }
 
-void CIFin::CIF2TED::box ( CIFin::CIFBox*     ,laydata::tdtlayer* )
+void CIFin::CIF2TED::box ( CIFin::CIFBox* wd, laydata::tdtlayer* wl, std::string layname)
+{
+   pointlist pl;
+   pl.reserve(4);
+   pl[0] =  TP( wd->center()->x() - wd->length() / 2, wd->center()->y() - wd->width() / 2 );
+   pl[1] =  TP( wd->center()->x() + wd->length() / 2, wd->center()->y() - wd->width() / 2 );
+   pl[2] =  TP( wd->center()->x() + wd->length() / 2, wd->center()->y() + wd->width() / 2 );
+   pl[3] =  TP( wd->center()->x() - wd->length() / 2, wd->center()->y() + wd->width() / 2 );
+   if (NULL != wd->direction())
+   {
+      CTM tmx;
+      tmx.Translate(-wd->center()->x(),-wd->center()->x());
+      tmx.Rotate(*(wd->direction()));
+      tmx.Translate(-wd->center()->x(),-wd->center()->x());
+      pl[0] *=  tmx;
+      pl[1] *=  tmx;
+      pl[2] *=  tmx;
+      pl[3] *=  tmx;
+   }
+
+   laydata::valid_poly check(pl);
+
+   assert(check.valid());
+   pl = check.get_validated() ;
+   if (check.box())
+   {
+      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
+   }
+   else wl->addpoly(pl,false);
+
+}
+
+void CIFin::CIF2TED::poly( CIFin::CIFPoly* wd, laydata::tdtlayer* wl, std::string layname)
+{
+   pointlist pl = *(wd->poly());
+   laydata::valid_poly check(pl);
+
+   if (!check.valid())
+   {
+      std::ostringstream ost; ost << "Layer " << layname;
+      ost << ": Polygon check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   else pl = check.get_validated() ;
+   if (check.box())
+   {
+      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
+   }
+   else wl->addpoly(pl,false);
+}
+
+void CIFin::CIF2TED::wire( CIFin::CIFWire* wd, laydata::tdtlayer* wl, std::string layname)
+{
+   pointlist pl = *(wd->poly());
+   laydata::valid_wire check(pl, wd->width());
+
+   if (!check.valid())
+   {
+      std::ostringstream ost; ost << "Layer " << layname;
+      ost << ": Wire check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   else pl = check.get_validated() ;
+   wl->addwire(pl, wd->width(),false);
+}
+
+void CIFin::CIF2TED::ref ( CIFin::CIFRef* wd, laydata::tdtcell* dst)
+{
+   CIFStructure* refd = _src_lib->getStructure(wd->cell());
+   std::string cell_name = refd->cellName();
+   if (NULL != _dst_lib->checkcell(cell_name))
+   {
+      laydata::refnamepair striter = _dst_lib->getcellnamepair(cell_name);
+      // Absolute magnification, absolute angle should be reflected somehow!!!
+      dst->addcellref(_dst_lib, striter, *(wd->location()), false);
+   }
+   else
+   {
+      std::string news = "Referenced structure \"";
+      news += cell_name; news += "\" not found. Reference ignored";
+      tell_log(console::MT_ERROR,news);
+   }
+}
+
+void CIFin::CIF2TED::lbll( CIFin::CIFLabelLoc*,laydata::tdtlayer*, std::string )
 {
 }
 
-void CIFin::CIF2TED::poly( CIFin::CIFPoly*    ,laydata::tdtlayer* )
-{
-}
-
-void CIFin::CIF2TED::wire( CIFin::CIFWire*    ,laydata::tdtlayer* )
-{
-}
-
-void CIFin::CIF2TED::ref ( CIFin::CIFRef*     ,laydata::tdtlayer* )
-{
-}
-
-void CIFin::CIF2TED::lbll( CIFin::CIFLabelLoc*,laydata::tdtlayer* )
-{
-}
-
-void CIFin::CIF2TED::lbls( CIFin::CIFLabelSig*,laydata::tdtlayer* )
+void CIFin::CIF2TED::lbls( CIFin::CIFLabelSig*,laydata::tdtlayer*, std::string )
 {
 }
 
