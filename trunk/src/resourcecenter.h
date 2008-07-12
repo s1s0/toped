@@ -165,7 +165,15 @@ namespace tui
 
 	};
 
-	class ToolBarHandler:public wxToolBar
+	class TpdToolBar:public wxToolBar
+	{
+	public:
+		TpdToolBar(int ID, long style, IconSizes iconSize);
+	private:
+		//DECLARE_EVENT_TABLE();
+	};
+
+	class ToolBarHandler
 	{
 	public:
 		ToolBarHandler(int ID, const std::string& name, int direction);
@@ -181,14 +189,13 @@ namespace tui
 		void				changeToolSize(IconSizes size);
 		void				update(void);
 	private:
-		void				OnSize(wxSizeEvent& event);
-		void				OnPaint(wxPaintEvent&event);
+		//void				OnSize(wxSizeEvent& event);
+		//void				OnPaint(wxPaintEvent&event);
 		std::string					_name;
 		int							_ID;
-		//wxToolBar*					_toolBar;
+		TpdToolBar*					_toolBar;
 		toolList						_tools;
 		int							_dockDirection;
-		DECLARE_EVENT_TABLE();
 	};
 
 	bool checkToolSize(IconSizes size);
