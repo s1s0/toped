@@ -332,10 +332,10 @@ void CIFin::CIF2TED::box ( CIFin::CIFBox* wd, laydata::tdtlayer* wl, std::string
 {
    pointlist pl;
    pl.reserve(4);
-   pl[0] =  TP( wd->center()->x() - wd->length() / 2, wd->center()->y() - wd->width() / 2 );
-   pl[1] =  TP( wd->center()->x() + wd->length() / 2, wd->center()->y() - wd->width() / 2 );
-   pl[2] =  TP( wd->center()->x() + wd->length() / 2, wd->center()->y() + wd->width() / 2 );
-   pl[3] =  TP( wd->center()->x() - wd->length() / 2, wd->center()->y() + wd->width() / 2 );
+   pl.push_back(TP( wd->center()->x() - wd->length() / 2, wd->center()->y() - wd->width() / 2 ));
+   pl.push_back(TP( wd->center()->x() + wd->length() / 2, wd->center()->y() - wd->width() / 2 ));
+   pl.push_back(TP( wd->center()->x() + wd->length() / 2, wd->center()->y() + wd->width() / 2 ));
+   pl.push_back(TP( wd->center()->x() - wd->length() / 2, wd->center()->y() + wd->width() / 2 ));
    if (NULL != wd->direction())
    {
       CTM tmx;

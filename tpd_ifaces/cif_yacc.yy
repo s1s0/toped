@@ -47,8 +47,8 @@ int boza;
 extern CIFin::CIFFile* CIFInFile;
 
 /*void ciferror (std::string s);*/
-void ciferror(std::string s, TpdYYLtype loc);
-bool checkPositive(int var, TpdYYLtype loc);
+void ciferror(std::string, TpdYYLtype);
+bool checkPositive(long, TpdYYLtype);
 
 %}
 
@@ -56,7 +56,7 @@ bool checkPositive(int var, TpdYYLtype loc);
 
 %union {
    unsigned       word;
-   int            integer;
+   long           integer;
    char*          identifier;
    TP*            point;
    pointlist*     path;
@@ -337,7 +337,7 @@ void ciferror (std::string s, TpdYYLtype loc)
    tell_log(console::MT_ERROR,ost.str());
 }
 
-bool checkPositive(int var, TpdYYLtype loc)
+bool checkPositive(long var, TpdYYLtype loc)
 {
    if (var < 0)
    {

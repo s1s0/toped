@@ -124,7 +124,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CIFData {
       public:
                               CIFData(CIFData* last) : _last(last) {};
-                  CIFData*    last()         {return _last;}
+         CIFData*            last()         {return _last;}
          virtual CifDataType dataType() = 0;
          virtual            ~CIFData() {}
       protected:
@@ -133,15 +133,15 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CIFBox : public CIFData {
       public:
-                     CIFBox(CIFData*, word, word, TP*, TP*);
+                     CIFBox(CIFData*, _dbl_word, _dbl_word, TP*, TP*);
          CifDataType dataType()     {return cif_BOX;}
-         word        length()       {return _length;}
-         word        width()        {return _width;}
+         _dbl_word   length()       {return _length;}
+         _dbl_word   width()        {return _width;}
          TP*         center()       {return _center;}
          TP*         direction()    {return _direction;}
       protected:
-         word        _length;
-         word        _width;
+         _dbl_word   _length;
+         _dbl_word   _width;
          TP*         _center;
          TP*         _direction;
    };
@@ -157,24 +157,24 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CIFWire : public CIFData {
       public:
-                     CIFWire(CIFData* last, pointlist*, word);
+                     CIFWire(CIFData* last, pointlist*, _dbl_word);
          CifDataType dataType()     {return cif_WIRE;}
          pointlist*  poly()         {return _poly;}
-         word        width()        {return _width;}
+         _dbl_word   width()        {return _width;}
       protected:
          pointlist*  _poly;
-         word        _width;
+         _dbl_word   _width;
    };
 
    class CIFRef : public CIFData {
       public:
-                     CIFRef(CIFData* last, word, CTM*);
+                     CIFRef(CIFData* last, _dbl_word, CTM*);
          CIFRef*     last()                           {return static_cast<CIFRef*>(CIFData::last());}
-         word        cell()                           {return  _cell;}
+         _dbl_word   cell()                           {return  _cell;}
          CTM*        location()                       {return  _location;}
          CifDataType dataType()                       {return  cif_REF;}
       protected:
-         word        _cell;
+         _dbl_word   _cell;
          CTM*        _location;
    };
 
@@ -199,9 +199,9 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::string    name()                        {return _name;}
          CIFLayer*      last()                        {return _last;}
          CIFData*       firstData()                   {return _first;}
-         void           addBox(word, word, TP*, TP* direction = NULL);
+         void           addBox(_dbl_word, _dbl_word, TP*, TP* direction = NULL);
          void           addPoly(pointlist* poly);
-         void           addWire(pointlist* poly, word width);
+         void           addWire(pointlist* poly, _dbl_word width);
          void           addLabelLoc(std::string, TP*);
          void           addLabelSig(std::string, TP*);
       private:
@@ -213,11 +213,11 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CIFStructure  {
       public:
-                        CIFStructure(word, CIFStructure*, word=1,word=1);
+                        CIFStructure(_dbl_word, CIFStructure*, _dbl_word=1,_dbl_word=1);
          void           cellNameIs(std::string cellName) {_cellName = cellName;}
          void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
          CIFStructure*  last() const                  {return _last;}
-         word           ID() const                    {return _ID;}
+         _dbl_word      ID() const                    {return _ID;}
          std::string    cellName() const              {return _cellName;}
          void           parentFound()                 {_orphan = false;}
          bool           orphan()                      {return _orphan;}
@@ -225,17 +225,17 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void           set_traversed(bool trv)       { _traversed = trv;}
          CIFLayer*      firstLayer()                  {return _first;}
          CIFLayer*      secureLayer(std::string);
-         void           addRef(word cell, CTM* location);
+         void           addRef(_dbl_word cell, CTM* location);
          void           collectLayers(CifLayerList&);
          void           hierPrep(CIFFile&);
          CIFHierTree*   hierOut(CIFHierTree*, CIFStructure*);
       // to cover the requirements of the hierarchy template
          int            libID() const                 {return TARGETDB_LIB;}
       private:
-         word           _ID;
+         _dbl_word      _ID;
          CIFStructure*  _last;
-         word           _a;
-         word           _b;
+         _dbl_word      _a;
+         _dbl_word      _b;
          std::string    _cellName;
          CIFLayer*      _first;
          CIFRef*        _refirst;
@@ -251,19 +251,19 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
                         CIFFile(std::string);
                        ~CIFFile();
          bool           status() {return _status;}
-         void           addStructure(word, word = 1, word = 1);
+         void           addStructure(_dbl_word, _dbl_word = 1, _dbl_word = 1);
          void           doneStructure();
-         void           addBox(word, word, TP*, TP* direction = NULL);
+         void           addBox(_dbl_word, _dbl_word, TP*, TP* direction = NULL);
          void           addPoly(pointlist*);
-         void           addWire(pointlist*, word);
-         void           addRef(word, CTM*);
+         void           addWire(pointlist*, _dbl_word);
+         void           addRef(_dbl_word, CTM*);
          void           addLabelLoc(char*, TP*, char* layname = NULL);
          void           addLabelSig(char*, TP*);
          void           secureLayer(char*);
          void           curCellName(char*);
          void           curCellOverlap(TP*, TP*);
          void           collectLayers(nameList&);
-         CIFStructure*  getStructure(word);
+         CIFStructure*  getStructure(_dbl_word);
          void           hierPrep();
          void           hierOut();
          std::string    Get_libname() const  {return _filename;}
