@@ -44,7 +44,7 @@
 #include "../tpd_common/ttt.h"
 #include "cif_io.h"
 int boza;
-extern CIFin::CIFFile* CIFInFile;
+extern CIFin::CifFile* CIFInFile;
 
 /*void ciferror (std::string s);*/
 void ciferror(std::string, TpdYYLtype);

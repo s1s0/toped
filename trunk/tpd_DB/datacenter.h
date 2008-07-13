@@ -54,18 +54,18 @@ namespace CIFin {
 
    class CIF2TED {
       public:
-                              CIF2TED(CIFin::CIFFile*, laydata::tdtdesign*, NMap*);
+                              CIF2TED(CIFin::CifFile*, laydata::tdtdesign*, NMap*);
          void                 top_structure(bool);
       protected:
          void                 child_structure(const CIFin::CIFHierTree*, bool);
-         void                 convert(CIFin::CIFStructure*, laydata::tdtcell*);
-         void                 box ( CIFin::CIFBox*     ,laydata::tdtlayer*, std::string );
-         void                 poly( CIFin::CIFPoly*    ,laydata::tdtlayer*, std::string );
-         void                 wire( CIFin::CIFWire*    ,laydata::tdtlayer*, std::string );
-         void                 ref ( CIFin::CIFRef*     ,laydata::tdtcell*);
-         void                 lbll( CIFin::CIFLabelLoc*,laydata::tdtlayer*, std::string );
-         void                 lbls( CIFin::CIFLabelSig*,laydata::tdtlayer*, std::string );
-         CIFin::CIFFile*      _src_lib;
+         void                 convert(CIFin::CifStructure*, laydata::tdtcell*);
+         void                 box ( CIFin::CifBox*     ,laydata::tdtlayer*, std::string );
+         void                 poly( CIFin::CifPoly*    ,laydata::tdtlayer*, std::string );
+         void                 wire( CIFin::CifWire*    ,laydata::tdtlayer*, std::string );
+         void                 ref ( CIFin::CifRef*     ,laydata::tdtcell*);
+         void                 lbll( CIFin::CifLabelLoc*,laydata::tdtlayer*, std::string );
+         void                 lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string );
+         CIFin::CifFile*      _src_lib;
          laydata::tdtdesign*  _dst_lib;
          NMap*                _cif_layers;
    };
@@ -95,7 +95,7 @@ public:
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    GDSin::GDSFile*            lockGDS(bool throwexception = true);
-   CIFin::CIFFile*            lockCIF(bool throwexception = true);
+   CIFin::CifFile*            lockCIF(bool throwexception = true);
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::refnamepair& striter);
@@ -188,7 +188,7 @@ protected:
 //   laydata::tdtdesign*        _TEDDB;        // toped data base
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
    GDSin::GDSFile*            _GDSDB;        // GDS parsed data
-   CIFin::CIFFile*            _CIFDB;        // CIF parsed data
+   CIFin::CifFile*            _CIFDB;        // CIF parsed data
    layprop::ViewProperties    _properties;   // properties data base
    std::string                _tedfilename;
    bool                       _neversaved;

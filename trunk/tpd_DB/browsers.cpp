@@ -258,7 +258,7 @@ browsers::CIFbrowser::CIFbrowser(wxWindow *parent, wxWindowID id,
 
 void browsers::CIFbrowser::collectInfo()
 {
-  CIFin::CIFFile* ACIFDB = DATC->lockCIF(false);
+  CIFin::CifFile* ACIFDB = DATC->lockCIF(false);
    if (NULL == ACIFDB) return;
    hCellBrowser->AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
    fCellBrowser->AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));

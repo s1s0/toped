@@ -225,7 +225,7 @@ void GDSin::gds2ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst)
 //-----------------------------------------------------------------------------
 // class CIF2TED
 //-----------------------------------------------------------------------------
-CIFin::CIF2TED::CIF2TED(CIFin::CIFFile* src_lib, laydata::tdtdesign* dst_lib,
+CIFin::CIF2TED::CIF2TED(CIFin::CifFile* src_lib, laydata::tdtdesign* dst_lib,
       NMap* cif_layers) : _src_lib (src_lib), _dst_lib(dst_lib),
                                     _cif_layers(cif_layers)
 {
@@ -256,7 +256,7 @@ void CIFin::CIF2TED::child_structure(const CIFin::CIFHierTree* root, bool overwr
          // traverse children first
          child_structure(Child, overwrite);
          // get the CIF structure
-         CIFin::CIFStructure* src_structure = const_cast<CIFin::CIFStructure*>(Child->GetItem());
+         CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(Child->GetItem());
          std::string gname = src_structure->cellName();
          // check that destination structure with this name exists
          laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
@@ -290,9 +290,9 @@ void CIFin::CIF2TED::child_structure(const CIFin::CIFHierTree* root, bool overwr
    }
 }
 
-void CIFin::CIF2TED::convert(CIFin::CIFStructure* src, laydata::tdtcell* dst)
+void CIFin::CIF2TED::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
 {
-   CIFin::CIFLayer* swl = src->firstLayer();
+   CIFin::CifLayer* swl = src->firstLayer();
    while( swl )
    {
       if (_cif_layers->end() != _cif_layers->find(swl->name()))
@@ -300,17 +300,17 @@ void CIFin::CIF2TED::convert(CIFin::CIFStructure* src, laydata::tdtcell* dst)
          laydata::tdtlayer* dwl =
                static_cast<laydata::tdtlayer*>(dst->securelayer((*_cif_layers)[swl->name()]));
 
-         CIFin::CIFData* wd = swl->firstData();
+         CIFin::CifData* wd = swl->firstData();
          while ( wd )
          {
             switch (wd->dataType())
             {
-               case cif_BOX     : box ( static_cast<CIFin::CIFBox*     >(wd), dwl, swl->name() );break;
-               case cif_POLY    : poly( static_cast<CIFin::CIFPoly*    >(wd), dwl, swl->name() );break;
-               case cif_WIRE    : wire( static_cast<CIFin::CIFWire*    >(wd), dwl, swl->name() );break;
-               case cif_REF     : ref ( static_cast<CIFin::CIFRef*     >(wd), dst              );break;
-               case cif_LBL_LOC : lbll( static_cast<CIFin::CIFLabelLoc*>(wd), dwl, swl->name() );break;
-               case cif_LBL_SIG : lbls( static_cast<CIFin::CIFLabelSig*>(wd), dwl, swl->name() );break;
+               case cif_BOX     : box ( static_cast<CIFin::CifBox*     >(wd), dwl, swl->name() );break;
+               case cif_POLY    : poly( static_cast<CIFin::CifPoly*    >(wd), dwl, swl->name() );break;
+               case cif_WIRE    : wire( static_cast<CIFin::CifWire*    >(wd), dwl, swl->name() );break;
+               case cif_REF     : ref ( static_cast<CIFin::CifRef*     >(wd), dst              );break;
+               case cif_LBL_LOC : lbll( static_cast<CIFin::CifLabelLoc*>(wd), dwl, swl->name() );break;
+               case cif_LBL_SIG : lbls( static_cast<CIFin::CifLabelSig*>(wd), dwl, swl->name() );break;
                default    : assert(false);
             }
             wd = wd->last();
@@ -328,7 +328,7 @@ void CIFin::CIF2TED::convert(CIFin::CIFStructure* src, laydata::tdtcell* dst)
 //   dst->secure_layprop();
 }
 
-void CIFin::CIF2TED::box ( CIFin::CIFBox* wd, laydata::tdtlayer* wl, std::string layname)
+void CIFin::CIF2TED::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(4);
@@ -360,7 +360,7 @@ void CIFin::CIF2TED::box ( CIFin::CIFBox* wd, laydata::tdtlayer* wl, std::string
 
 }
 
-void CIFin::CIF2TED::poly( CIFin::CIFPoly* wd, laydata::tdtlayer* wl, std::string layname)
+void CIFin::CIF2TED::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::string layname)
 {
    pointlist pl = *(wd->poly());
    laydata::valid_poly check(pl);
@@ -379,7 +379,7 @@ void CIFin::CIF2TED::poly( CIFin::CIFPoly* wd, laydata::tdtlayer* wl, std::strin
    else wl->addpoly(pl,false);
 }
 
-void CIFin::CIF2TED::wire( CIFin::CIFWire* wd, laydata::tdtlayer* wl, std::string layname)
+void CIFin::CIF2TED::wire( CIFin::CifWire* wd, laydata::tdtlayer* wl, std::string layname)
 {
    pointlist pl = *(wd->poly());
    laydata::valid_wire check(pl, wd->width());
@@ -394,9 +394,9 @@ void CIFin::CIF2TED::wire( CIFin::CIFWire* wd, laydata::tdtlayer* wl, std::strin
    wl->addwire(pl, wd->width(),false);
 }
 
-void CIFin::CIF2TED::ref ( CIFin::CIFRef* wd, laydata::tdtcell* dst)
+void CIFin::CIF2TED::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
 {
-   CIFStructure* refd = _src_lib->getStructure(wd->cell());
+   CifStructure* refd = _src_lib->getStructure(wd->cell());
    std::string cell_name = refd->cellName();
    if (NULL != _dst_lib->checkcell(cell_name))
    {
@@ -412,11 +412,11 @@ void CIFin::CIF2TED::ref ( CIFin::CIFRef* wd, laydata::tdtcell* dst)
    }
 }
 
-void CIFin::CIF2TED::lbll( CIFin::CIFLabelLoc*,laydata::tdtlayer*, std::string )
+void CIFin::CIF2TED::lbll( CIFin::CifLabelLoc*,laydata::tdtlayer*, std::string )
 {
 }
 
-void CIFin::CIF2TED::lbls( CIFin::CIFLabelSig*,laydata::tdtlayer*, std::string )
+void CIFin::CIF2TED::lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string )
 {
 }
 
@@ -684,7 +684,7 @@ bool DataCenter::CIFparse(std::string filename)
    }
    // parse the CIF file - don't forget to lock the CIF mutex here!
    while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
-   _CIFDB = DEBUG_NEW CIFin::CIFFile(filename.c_str());
+   _CIFDB = DEBUG_NEW CIFin::CifFile(filename.c_str());
    _CIFDB->hierPrep();
    status = _CIFDB->status();
    if (status)
@@ -797,7 +797,7 @@ void DataCenter::unlockGDS()
    GDSLock.Unlock();
 }
 
-CIFin::CIFFile* DataCenter::lockCIF(bool throwexception)
+CIFin::CifFile* DataCenter::lockCIF(bool throwexception)
 {
    // Carefull HERE! When CIF is locked form the main thread
    // (CIF browser), then there is no catch pending -i.e.
