@@ -40,7 +40,7 @@ extern int     cifdebug;
 
 
 //=============================================================================
-CIFin::CIFBox::CIFBox(CIFData* last, word length, word width, TP* center, TP* direction) :
+CIFin::CIFBox::CIFBox(CIFData* last, _dbl_word length, _dbl_word width, TP* center, TP* direction) :
                            CIFData(last), _length(length), _width(width), _center(center),
                                    _direction(direction) {};
 
@@ -49,11 +49,11 @@ CIFin::CIFPoly::CIFPoly(CIFData* last, pointlist* poly) :
       CIFData(last), _poly(poly) {};
 
 //=============================================================================
-CIFin::CIFWire::CIFWire(CIFData* last, pointlist* poly, word width) :
+CIFin::CIFWire::CIFWire(CIFData* last, pointlist* poly, _dbl_word width) :
       CIFData(last), _poly(poly), _width(width) {};
 
 //=============================================================================
-CIFin::CIFRef::CIFRef(CIFData* last, word cell, CTM* location) :
+CIFin::CIFRef::CIFRef(CIFData* last, _dbl_word cell, CTM* location) :
       CIFData(last), _cell(cell), _location(location) {};
 
 //=============================================================================
@@ -68,7 +68,7 @@ CIFin::CIFLabelSig::CIFLabelSig(CIFData* last, std::string label, TP* location) 
 CIFin::CIFLayer::CIFLayer(std::string name, CIFLayer* last):
       _name(name), _last(last), _first(NULL) {}
 
-void CIFin::CIFLayer::addBox(word length,word width ,TP* center, TP* direction)
+void CIFin::CIFLayer::addBox(_dbl_word length,_dbl_word width ,TP* center, TP* direction)
 {
    _first = DEBUG_NEW CIFBox(_first, length, width, center, direction);
 }
@@ -78,7 +78,7 @@ void CIFin::CIFLayer::addPoly(pointlist* poly)
    _first = DEBUG_NEW CIFPoly(_first, poly);
 }
 
-void CIFin::CIFLayer::addWire(pointlist* poly, word width)
+void CIFin::CIFLayer::addWire(pointlist* poly, _dbl_word width)
 {
    _first = DEBUG_NEW CIFWire(_first, poly, width);
 }
@@ -94,7 +94,7 @@ void CIFin::CIFLayer::addLabelSig(std::string label, TP* loc)
 }
 
 //=============================================================================
-CIFin::CIFStructure::CIFStructure(word ID, CIFStructure* last, word a, word b) :
+CIFin::CIFStructure::CIFStructure(_dbl_word ID, CIFStructure* last, _dbl_word a, _dbl_word b) :
       _ID(ID), _last(last), _a(a), _b(b), _cellName(""), _first(NULL),
           _refirst(NULL), _overlap(TP()), _orphan(true), _traversed(false) {}
 
@@ -120,7 +120,7 @@ void CIFin::CIFStructure::collectLayers(CifLayerList& layList)
    }
 }
 
-void CIFin::CIFStructure::addRef(word cell, CTM* location)
+void CIFin::CIFStructure::addRef(_dbl_word cell, CTM* location)
 {
    _refirst = new CIFRef(_refirst, cell, location);
 }
@@ -189,7 +189,7 @@ CIFin::CIFFile::~CIFFile()
    //@TODO
 }
 
-void CIFin::CIFFile::addStructure(word ID, word a, word b)
+void CIFin::CIFFile::addStructure(_dbl_word ID, _dbl_word a, _dbl_word b)
 {
    _first = DEBUG_NEW CIFStructure(ID,_first, a,b);
    _current = _first;
@@ -227,7 +227,7 @@ void CIFin::CIFFile::curCellOverlap(TP* bl, TP* tr)
    else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
 }
 
-void CIFin::CIFFile::addBox(word length,word width ,TP* center, TP* direction)
+void CIFin::CIFFile::addBox(_dbl_word length, _dbl_word width ,TP* center, TP* direction)
 {
    _curlay->addBox(length, width, center, direction);
 }
@@ -237,12 +237,12 @@ void CIFin::CIFFile::addPoly(pointlist* poly)
    _curlay->addPoly(poly);
 }
 
-void CIFin::CIFFile::addWire(pointlist* poly, word width)
+void CIFin::CIFFile::addWire(pointlist* poly, _dbl_word width)
 {
    _curlay->addWire(poly, width);
 }
 
-void CIFin::CIFFile::addRef(word cell, CTM* location)
+void CIFin::CIFFile::addRef(_dbl_word cell, CTM* location)
 {
    _current->addRef(cell, location);
 }
@@ -289,7 +289,7 @@ void CIFin::CIFFile::collectLayers(nameList& cifLayers)
    }
 }
 
-CIFin::CIFStructure* CIFin::CIFFile::getStructure(word cellno)
+CIFin::CIFStructure* CIFin::CIFFile::getStructure(_dbl_word cellno)
 {
    CIFStructure* local = _first;
    while (NULL != local)

@@ -67,7 +67,7 @@ namespace CIFin {
    void     location_lines(YYLTYPE *loc, int num);
    void     location_comment(YYLTYPE *loc, char* source);
    char*    charcopy(std::string source, bool quotes = false);
-   unsigned getllint(char* source);
+   long     getllint(char* source);
 //   int      includefile(char* name, FILE* &handler);
 //   int      EOfile();
    int      cifsRemDepth = 0; // depth of comments
@@ -183,10 +183,10 @@ void CIFin::location_comment(YYLTYPE *loc, char* source)
    }
 }
 
-unsigned CIFin::getllint(char* source)
+long CIFin::getllint(char* source)
 {
    char* dummy;
-   unsigned result = strtoul(source, &dummy, 0);
+   long result = strtoul(source, &dummy, 0);
    return result;
 }
 
