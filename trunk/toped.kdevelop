@@ -9,11 +9,11 @@
     <ignoreparts/>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
+    <description></description>
     <versioncontrol>kdevsubversion</versioncontrol>
     <secondaryLanguages/>
     <projectname>toped</projectname>
-    <defaultencoding/>
+    <defaultencoding></defaultencoding>
   </general>
   <kdevautoproject>
     <general>
@@ -24,11 +24,11 @@
       <mainprogram>/home/skr/toped_public/debug/src/toped</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs>/home/skr/toped_public/tll/cif_reader.tll</programargs>
+      <programargs></programargs>
       <terminal>true</terminal>
       <autocompile>true</autocompile>
       <envvars/>
-      <globaldebugarguments>/home/skr/toped_public/tll/cif_reader.tll</globaldebugarguments>
+      <globaldebugarguments></globaldebugarguments>
       <globalcwd>/home/skr/toped_public/debug</globalcwd>
       <useglobalprogram>true</useglobalprogram>
       <autoinstall>false</autoinstall>
@@ -86,10 +86,10 @@
     <general>
       <dbgshell>libtool</dbgshell>
       <programargs/>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -187,7 +187,7 @@
       <includePaths>.;</includePaths>
     </codecompletion>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>

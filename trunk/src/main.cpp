@@ -460,8 +460,6 @@ bool TopedApp::OnInit() {
 
    if (!Toped->view()->initStatus())
    {
-      bool wbox_status = true;
-
       wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
             wxT("Toped can't obtain required GLX Visual. Check your video driver/setup please"),
             wxT("Toped"),

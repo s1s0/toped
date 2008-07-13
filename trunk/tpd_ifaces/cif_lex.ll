@@ -55,8 +55,8 @@ lexcif_snc      [A-Z0-9]
 lexcif_blank    [^-();A-Z0-9]+
 lexcif_comment  [^()]*
 lexcif_usertext [^;]*
-lexcif_usrid    [^ \t;]+
-lexcif_usrsep   [ \t]+
+lexcif_usrid    [^ \t;,]+
+lexcif_usrsep   [ \t,]+
 %{
 #include "tpdph.h"
 #include <stdio.h>

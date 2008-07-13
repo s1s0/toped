@@ -239,6 +239,7 @@ void CIFin::CIF2TED::top_structure(bool overwrite)
    while (root)
    {
       child_structure(root, overwrite);
+      convert_prep(root, overwrite);
       root = root->GetNextRoot(TARGETDB_LIB);
    }
    // Convert the top structure
@@ -255,40 +256,45 @@ void CIFin::CIF2TED::child_structure(const CIFin::CIFHierTree* root, bool overwr
       {
          // traverse children first
          child_structure(Child, overwrite);
-         // get the CIF structure
-         CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(Child->GetItem());
-         std::string gname = src_structure->cellName();
-         // check that destination structure with this name exists
-         laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
-         std::ostringstream ost; ost << "CIF import: ";
-         if (NULL != dst_structure)
-         {
-            if (overwrite)
-            {
-               /*@TODO Erase the existing structure and convert*/
-               ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
-               tell_log(console::MT_WARNING,ost.str());
-            }
-            else
-            {
-               ost << "Structure "<< gname << " already exists. Omitted";
-               tell_log(console::MT_INFO,ost.str());
-            }
-         }
-         else
-         {
-            ost << "Importing structure " << gname << "...";
-            tell_log(console::MT_INFO,ost.str());
-            // first create a new cell
-            dst_structure = _dst_lib->addcell(gname);
-            // finally call the cell converter
-            convert(src_structure, dst_structure);
-         }
-         src_structure->set_traversed(true);
+         convert_prep(Child, overwrite);
       }
       Child = Child->GetBrother(TARGETDB_LIB);
    }
 }
+
+void CIFin::CIF2TED::convert_prep(const CIFin::CIFHierTree* item, bool overwrite)
+{
+   CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(item->GetItem());
+   std::string gname = src_structure->cellName();
+         // check that destination structure with this name exists
+   laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
+   std::ostringstream ost; ost << "CIF import: ";
+   if (NULL != dst_structure)
+   {
+      if (overwrite)
+      {
+         /*@TODO Erase the existing structure and convert*/
+         ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
+         tell_log(console::MT_WARNING,ost.str());
+      }
+      else
+      {
+         ost << "Structure "<< gname << " already exists. Omitted";
+         tell_log(console::MT_INFO,ost.str());
+      }
+   }
+   else
+   {
+      ost << "Importing structure " << gname << "...";
+      tell_log(console::MT_INFO,ost.str());
+            // first create a new cell
+      dst_structure = _dst_lib->addcell(gname);
+            // finally call the cell converter
+      convert(src_structure, dst_structure);
+   }
+   src_structure->set_traversed(true);
+}
+
 
 void CIFin::CIF2TED::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
 {

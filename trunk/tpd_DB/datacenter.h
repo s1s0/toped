@@ -59,6 +59,7 @@ namespace CIFin {
       protected:
          void                 child_structure(const CIFin::CIFHierTree*, bool);
          void                 convert(CIFin::CifStructure*, laydata::tdtcell*);
+         void                 convert_prep(const CIFin::CIFHierTree* item, bool);
          void                 box ( CIFin::CifBox*     ,laydata::tdtlayer*, std::string );
          void                 poly( CIFin::CifPoly*    ,laydata::tdtlayer*, std::string );
          void                 wire( CIFin::CifWire*    ,laydata::tdtlayer*, std::string );
