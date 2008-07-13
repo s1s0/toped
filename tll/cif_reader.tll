@@ -1,4 +1,5 @@
-newdesign("cifcells");
+#include "$TPD_GLOBAL/tll/seed.tll"
+//newdesign("cifcells");
 //cifread("/home/skr/toped/library/cif/oan22_x2.cif");
 //echo(ciflayers());
 

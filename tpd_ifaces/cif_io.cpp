@@ -31,7 +31,7 @@
 #include "cif_yacc.h"
 #include "../tpd_common/outbox.h"
 
-CIFin::CIFFile* CIFInFile = NULL;
+CIFin::CifFile* CIFInFile = NULL;
 //extern void*   cif_scan_string(const char *str);
 //extern void    my_delete_yy_buffer( void* b );
 extern int     cifparse(); // Calls the bison generated parser
@@ -40,79 +40,79 @@ extern int     cifdebug;
 
 
 //=============================================================================
-CIFin::CIFBox::CIFBox(CIFData* last, _dbl_word length, _dbl_word width, TP* center, TP* direction) :
-                           CIFData(last), _length(length), _width(width), _center(center),
+CIFin::CifBox::CifBox(CifData* last, _dbl_word length, _dbl_word width, TP* center, TP* direction) :
+                           CifData(last), _length(length), _width(width), _center(center),
                                    _direction(direction) {};
 
 //=============================================================================
-CIFin::CIFPoly::CIFPoly(CIFData* last, pointlist* poly) :
-      CIFData(last), _poly(poly) {};
+CIFin::CifPoly::CifPoly(CifData* last, pointlist* poly) :
+      CifData(last), _poly(poly) {};
 
 //=============================================================================
-CIFin::CIFWire::CIFWire(CIFData* last, pointlist* poly, _dbl_word width) :
-      CIFData(last), _poly(poly), _width(width) {};
+CIFin::CifWire::CifWire(CifData* last, pointlist* poly, _dbl_word width) :
+      CifData(last), _poly(poly), _width(width) {};
 
 //=============================================================================
-CIFin::CIFRef::CIFRef(CIFData* last, _dbl_word cell, CTM* location) :
-      CIFData(last), _cell(cell), _location(location) {};
+CIFin::CifRef::CifRef(CifData* last, _dbl_word cell, CTM* location) :
+      CifData(last), _cell(cell), _location(location) {};
 
 //=============================================================================
-CIFin::CIFLabelLoc::CIFLabelLoc(CIFData* last, std::string label, TP* location) :
-      CIFData(last), _label(label), _location(location) {};
+CIFin::CifLabelLoc::CifLabelLoc(CifData* last, std::string label, TP* location) :
+      CifData(last), _label(label), _location(location) {};
 
 //=============================================================================
-CIFin::CIFLabelSig::CIFLabelSig(CIFData* last, std::string label, TP* location) :
-      CIFLabelLoc(last, label, location) {};
+CIFin::CifLabelSig::CifLabelSig(CifData* last, std::string label, TP* location) :
+      CifLabelLoc(last, label, location) {};
 
 //=============================================================================
-CIFin::CIFLayer::CIFLayer(std::string name, CIFLayer* last):
+CIFin::CifLayer::CifLayer(std::string name, CifLayer* last):
       _name(name), _last(last), _first(NULL) {}
 
-void CIFin::CIFLayer::addBox(_dbl_word length,_dbl_word width ,TP* center, TP* direction)
+void CIFin::CifLayer::addBox(_dbl_word length,_dbl_word width ,TP* center, TP* direction)
 {
-   _first = DEBUG_NEW CIFBox(_first, length, width, center, direction);
+   _first = DEBUG_NEW CifBox(_first, length, width, center, direction);
 }
 
-void CIFin::CIFLayer::addPoly(pointlist* poly)
+void CIFin::CifLayer::addPoly(pointlist* poly)
 {
-   _first = DEBUG_NEW CIFPoly(_first, poly);
+   _first = DEBUG_NEW CifPoly(_first, poly);
 }
 
-void CIFin::CIFLayer::addWire(pointlist* poly, _dbl_word width)
+void CIFin::CifLayer::addWire(pointlist* poly, _dbl_word width)
 {
-   _first = DEBUG_NEW CIFWire(_first, poly, width);
+   _first = DEBUG_NEW CifWire(_first, poly, width);
 }
 
-void CIFin::CIFLayer::addLabelLoc(std::string label, TP* loc)
+void CIFin::CifLayer::addLabelLoc(std::string label, TP* loc)
 {
-   _first = DEBUG_NEW CIFLabelLoc(_first, label, loc);
+   _first = DEBUG_NEW CifLabelLoc(_first, label, loc);
 }
 
-void CIFin::CIFLayer::addLabelSig(std::string label, TP* loc)
+void CIFin::CifLayer::addLabelSig(std::string label, TP* loc)
 {
-   _first = DEBUG_NEW CIFLabelSig(_first, label, loc);
+   _first = DEBUG_NEW CifLabelSig(_first, label, loc);
 }
 
 //=============================================================================
-CIFin::CIFStructure::CIFStructure(_dbl_word ID, CIFStructure* last, _dbl_word a, _dbl_word b) :
+CIFin::CifStructure::CifStructure(_dbl_word ID, CifStructure* last, _dbl_word a, _dbl_word b) :
       _ID(ID), _last(last), _a(a), _b(b), _cellName(""), _first(NULL),
           _refirst(NULL), _overlap(TP()), _orphan(true), _traversed(false) {}
 
-CIFin::CIFLayer* CIFin::CIFStructure::secureLayer(std::string name)
+CIFin::CifLayer* CIFin::CifStructure::secureLayer(std::string name)
 {
-   CIFLayer* wlay = _first;
+   CifLayer* wlay = _first;
    while (NULL != wlay)
    {
       if (name == wlay->name()) return wlay;
       wlay = wlay->last();
    }
-   _first = DEBUG_NEW CIFLayer(name, _first);
+   _first = DEBUG_NEW CifLayer(name, _first);
    return _first;
 }
 
-void CIFin::CIFStructure::collectLayers(CifLayerList& layList)
+void CIFin::CifStructure::collectLayers(CifLayerList& layList)
 {
-   CIFLayer* wlay = _first;
+   CifLayer* wlay = _first;
    while (NULL != wlay)
    {
       layList.push_back(wlay);
@@ -120,17 +120,17 @@ void CIFin::CIFStructure::collectLayers(CifLayerList& layList)
    }
 }
 
-void CIFin::CIFStructure::addRef(_dbl_word cell, CTM* location)
+void CIFin::CifStructure::addRef(_dbl_word cell, CTM* location)
 {
-   _refirst = new CIFRef(_refirst, cell, location);
+   _refirst = new CifRef(_refirst, cell, location);
 }
 
-void CIFin::CIFStructure::hierPrep(CIFFile& cfile)
+void CIFin::CifStructure::hierPrep(CifFile& cfile)
 {
-   CIFRef* _local = _refirst;
+   CifRef* _local = _refirst;
    while (NULL != _local)
    {
-      CIFStructure* celldef = cfile.getStructure(_local->cell());
+      CifStructure* celldef = cfile.getStructure(_local->cell());
       if (NULL != celldef)
       {
          celldef->parentFound();
@@ -141,7 +141,7 @@ void CIFin::CIFStructure::hierPrep(CIFFile& cfile)
    _children.unique();
 }
 
-CIFin::CIFHierTree* CIFin::CIFStructure::hierOut(CIFHierTree* theTree, CIFStructure* parent)
+CIFin::CIFHierTree* CIFin::CifStructure::hierOut(CIFHierTree* theTree, CifStructure* parent)
 {
    // collecting hierarchical information
    theTree = DEBUG_NEW CIFHierTree(this, parent, theTree);
@@ -153,7 +153,7 @@ CIFin::CIFHierTree* CIFin::CIFStructure::hierOut(CIFHierTree* theTree, CIFStruct
 }
 
 //=============================================================================
-CIFin::CIFFile::CIFFile(std::string filename)
+CIFin::CifFile::CifFile(std::string filename)
 {
    _first = _current = _default = NULL;
    _curlay = NULL;
@@ -172,7 +172,7 @@ CIFin::CIFFile::CIFFile(std::string filename)
    info << "Parsing \"" << filename << "\" using CIF grammar";
    tell_log(console::MT_INFO,info.str());
    CIFInFile = this;
-   _default = DEBUG_NEW CIFStructure(0,NULL);
+   _default = DEBUG_NEW CifStructure(0,NULL);
 
    // run the bison generated parser
    ciflloc.first_column = ciflloc.first_line = 1;
@@ -184,23 +184,23 @@ CIFin::CIFFile::CIFFile(std::string filename)
    fclose(cifin);
 }
 
-CIFin::CIFFile::~CIFFile()
+CIFin::CifFile::~CifFile()
 {
    //@TODO
 }
 
-void CIFin::CIFFile::addStructure(_dbl_word ID, _dbl_word a, _dbl_word b)
+void CIFin::CifFile::addStructure(_dbl_word ID, _dbl_word a, _dbl_word b)
 {
-   _first = DEBUG_NEW CIFStructure(ID,_first, a,b);
+   _first = DEBUG_NEW CifStructure(ID,_first, a,b);
    _current = _first;
 }
 
-void CIFin::CIFFile::doneStructure()
+void CIFin::CifFile::doneStructure()
 {
    _current = _default;
 }
 
-void CIFin::CIFFile::secureLayer(char* layname)
+void CIFin::CifFile::secureLayer(char* layname)
 {
    if (NULL !=_current)
    {
@@ -209,7 +209,7 @@ void CIFin::CIFFile::secureLayer(char* layname)
    else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
 }
 
-void CIFin::CIFFile::curCellName(char* cellname)
+void CIFin::CifFile::curCellName(char* cellname)
 {
    if (NULL !=_current)
    {
@@ -218,7 +218,7 @@ void CIFin::CIFFile::curCellName(char* cellname)
    else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
 }
 
-void CIFin::CIFFile::curCellOverlap(TP* bl, TP* tr)
+void CIFin::CifFile::curCellOverlap(TP* bl, TP* tr)
 {
    if (NULL !=_current)
    {
@@ -227,29 +227,29 @@ void CIFin::CIFFile::curCellOverlap(TP* bl, TP* tr)
    else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
 }
 
-void CIFin::CIFFile::addBox(_dbl_word length, _dbl_word width ,TP* center, TP* direction)
+void CIFin::CifFile::addBox(_dbl_word length, _dbl_word width ,TP* center, TP* direction)
 {
    _curlay->addBox(length, width, center, direction);
 }
 
-void CIFin::CIFFile::addPoly(pointlist* poly)
+void CIFin::CifFile::addPoly(pointlist* poly)
 {
    _curlay->addPoly(poly);
 }
 
-void CIFin::CIFFile::addWire(pointlist* poly, _dbl_word width)
+void CIFin::CifFile::addWire(pointlist* poly, _dbl_word width)
 {
    _curlay->addWire(poly, width);
 }
 
-void CIFin::CIFFile::addRef(_dbl_word cell, CTM* location)
+void CIFin::CifFile::addRef(_dbl_word cell, CTM* location)
 {
    _current->addRef(cell, location);
 }
 
-void CIFin::CIFFile::addLabelLoc(char* label, TP* location, char* layname)
+void CIFin::CifFile::addLabelLoc(char* label, TP* location, char* layname)
 {
-   CIFLayer* llay = _curlay;
+   CifLayer* llay = _curlay;
    if (NULL != layname)
    {
       llay = _current->secureLayer(std::string(layname));
@@ -257,15 +257,15 @@ void CIFin::CIFFile::addLabelLoc(char* label, TP* location, char* layname)
    llay->addLabelLoc(std::string(label), location);
 }
 
-void CIFin::CIFFile::addLabelSig(char* label, TP* location)
+void CIFin::CifFile::addLabelSig(char* label, TP* location)
 {
    _curlay->addLabelSig(std::string(label), location);
 }
 
-void CIFin::CIFFile::collectLayers(nameList& cifLayers)
+void CIFin::CifFile::collectLayers(nameList& cifLayers)
 {
    CifLayerList allCiffLayers;
-   CIFStructure* local = _first;
+   CifStructure* local = _first;
    std::ostringstream info;
    info << "\t <<List of layers>> \n";
    while (NULL != local)
@@ -289,9 +289,9 @@ void CIFin::CIFFile::collectLayers(nameList& cifLayers)
    }
 }
 
-CIFin::CIFStructure* CIFin::CIFFile::getStructure(_dbl_word cellno)
+CIFin::CifStructure* CIFin::CifFile::getStructure(_dbl_word cellno)
 {
-   CIFStructure* local = _first;
+   CifStructure* local = _first;
    while (NULL != local)
    {
       if (cellno == local->ID())
@@ -301,10 +301,10 @@ CIFin::CIFStructure* CIFin::CIFFile::getStructure(_dbl_word cellno)
    assert(false); // Cell with this number not found ?!
 }
 
-void CIFin::CIFFile::hierPrep()
+void CIFin::CifFile::hierPrep()
 {
 //   CifCellList allCiffCells;
-   CIFStructure* local = _first;
+   CifStructure* local = _first;
 /*   std::ostringstream info;
    info << "\t <<List of cells>> \n";*/
    while (NULL != local)
@@ -318,9 +318,9 @@ void CIFin::CIFFile::hierPrep()
 }
 
 
-void CIFin::CIFFile::hierOut()
+void CIFin::CifFile::hierOut()
 {
-   CIFStructure* local = _first;
+   CifStructure* local = _first;
    while (NULL != local)
    {
       if (local->orphan())
