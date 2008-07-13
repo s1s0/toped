@@ -177,7 +177,7 @@ CIFin::CifFile::CifFile(std::string filename)
    // run the bison generated parser
    ciflloc.first_column = ciflloc.first_line = 1;
    ciflloc.last_column  = ciflloc.last_line  = 1;
-//   cifdebug = 1;
+/*   cifdebug = 1;*/
    cifparse();
 //   my_delete_yy_buffer( buf );
    _status = true;
