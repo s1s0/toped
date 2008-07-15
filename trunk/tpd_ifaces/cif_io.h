@@ -224,6 +224,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          bool           traversed() const             {return _traversed;}
          void           set_traversed(bool trv)       { _traversed = trv;}
          CifLayer*      firstLayer()                  {return _first;}
+         CifRef*        refirst()                     {return _refirst;}
          CifLayer*      secureLayer(std::string);
          void           addRef(_dbl_word cell, CTM* location);
          void           collectLayers(CifLayerList&);

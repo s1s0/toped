@@ -287,9 +287,9 @@ void CIFin::CIF2TED::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
    {
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
-            // first create a new cell
+      // first create a new cell
       dst_structure = _dst_lib->addcell(gname);
-            // finally call the cell converter
+      // finally call the cell converter
       convert(src_structure, dst_structure);
    }
    src_structure->set_traversed(true);
@@ -299,22 +299,20 @@ void CIFin::CIF2TED::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
 void CIFin::CIF2TED::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
 {
    CIFin::CifLayer* swl = src->firstLayer();
-   while( swl )
+   while( swl ) // loop trough the layers
    {
       if (_cif_layers->end() != _cif_layers->find(swl->name()))
       {
          laydata::tdtlayer* dwl =
                static_cast<laydata::tdtlayer*>(dst->securelayer((*_cif_layers)[swl->name()]));
-
          CIFin::CifData* wd = swl->firstData();
-         while ( wd )
+         while ( wd ) // loop trough data
          {
             switch (wd->dataType())
             {
                case cif_BOX     : box ( static_cast<CIFin::CifBox*     >(wd), dwl, swl->name() );break;
                case cif_POLY    : poly( static_cast<CIFin::CifPoly*    >(wd), dwl, swl->name() );break;
                case cif_WIRE    : wire( static_cast<CIFin::CifWire*    >(wd), dwl, swl->name() );break;
-               case cif_REF     : ref ( static_cast<CIFin::CifRef*     >(wd), dst              );break;
                case cif_LBL_LOC : lbll( static_cast<CIFin::CifLabelLoc*>(wd), dwl, swl->name() );break;
                case cif_LBL_SIG : lbls( static_cast<CIFin::CifLabelSig*>(wd), dwl, swl->name() );break;
                default    : assert(false);
@@ -329,6 +327,12 @@ void CIFin::CIF2TED::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
          tell_log(console::MT_INFO,ost.str());
       }
       swl = swl->last();
+   }
+   CIFin::CifRef* swr = src->refirst();
+   while ( swr )
+   {
+      ref(swr,dst);
+      swr = swr->last();
    }
    dst->resort();
 //   dst->secure_layprop();
