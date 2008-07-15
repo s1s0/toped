@@ -24,7 +24,7 @@
       <mainprogram>/home/skr/toped_public/debug/src/toped</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs></programargs>
+      <programargs>$TPD_LOCAL/tll/cif_reader.tll</programargs>
       <terminal>true</terminal>
       <autocompile>true</autocompile>
       <envvars/>
