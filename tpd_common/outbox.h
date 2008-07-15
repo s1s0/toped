@@ -201,6 +201,7 @@ class EXPTNpolyCross : public EXPTN
       EXPTNpolyCross(std::string);
 };
 
-bool expandFileName(std::string&);
+bool        expandFileName(std::string&);
+std::string getFileNameOnly(std::string);
 
 #endif

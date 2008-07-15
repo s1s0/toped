@@ -694,7 +694,7 @@ bool DataCenter::CIFparse(std::string filename)
    }
    // parse the CIF file - don't forget to lock the CIF mutex here!
    while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
-   _CIFDB = DEBUG_NEW CIFin::CifFile(filename.c_str());
+   _CIFDB = DEBUG_NEW CIFin::CifFile(filename);
    _CIFDB->hierPrep();
    status = _CIFDB->status();
    if (status)

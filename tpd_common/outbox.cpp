@@ -368,6 +368,18 @@ bool expandFileName( std::string& filename)
    }
    return false;
 }
+
+std::string getFileNameOnly( std::string filename )
+{
+   wxFileName fName(wxString(filename.c_str(), wxConvUTF8));
+   fName.Normalize();
+   assert (fName.IsOk());
+   {
+      wxString name = fName.GetName();
+      return std::string(name.mb_str());
+   }
+}
+
 //=============================================================================
 EXPTNactive_cell::EXPTNactive_cell() {
    std::string news = "No active cell. Use opencell(\"<name>\") to select one";
