@@ -276,7 +276,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CifStructure*  _default;         //! pointer to the default cell - i.e. the scratch pad
          CifLayer*      _curlay;          //!
          CIFHierTree*   _hiertree;        //! Tree of instance hierarchy
-         std::string    _filename;
+         std::string    _filename;        //! Input CIF file - including the path
    };
 }
 

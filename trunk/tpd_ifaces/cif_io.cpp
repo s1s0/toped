@@ -162,17 +162,18 @@ CIFin::CifFile::CifFile(std::string filename)
    std::ostringstream info;
    // feed the flex with the buffer of the input file
    //(cifin is a global variable defined in the flex generated scanner)
-   if (!(cifin = fopen(filename.c_str(),"r")))
+   if (!(cifin = fopen(_filename.c_str(),"r")))
    {// open the input file
-      info << "File "<< filename <<" can NOT be opened";
+      info << "File "<< _filename <<" can NOT be opened";
       tell_log(console::MT_ERROR,info.str());
       _status = false;
       return;
    }
-   info << "Parsing \"" << filename << "\" using CIF grammar";
+   info << "Parsing \"" << _filename << "\" using CIF grammar";
    tell_log(console::MT_INFO,info.str());
    CIFInFile = this;
    _default = DEBUG_NEW CifStructure(0,NULL);
+   _default->cellNameIs(getFileNameOnly(filename));
 
    // run the bison generated parser
    ciflloc.first_column = ciflloc.first_line = 1;
@@ -304,6 +305,7 @@ CIFin::CifStructure* CIFin::CifFile::getStructure(_dbl_word cellno)
 void CIFin::CifFile::hierPrep()
 {
 //   CifCellList allCiffCells;
+   _default->hierPrep(*this);
    CifStructure* local = _first;
 /*   std::ostringstream info;
    info << "\t <<List of cells>> \n";*/
@@ -320,6 +322,8 @@ void CIFin::CifFile::hierPrep()
 
 void CIFin::CifFile::hierOut()
 {
+   _hiertree = _default->hierOut(_hiertree,NULL);
+
    CifStructure* local = _first;
    while (NULL != local)
    {

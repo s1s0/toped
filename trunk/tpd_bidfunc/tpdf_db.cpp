@@ -730,6 +730,7 @@ int tellstdfunc::CIFimport::execute()
       (*cifLays)[nameh->name().value()] = nameh->number().value();
    }
    DATC->CIFimport(cifLays, over);
+//   updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    return EXEC_NEXT;
 }
 
