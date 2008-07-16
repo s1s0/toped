@@ -130,9 +130,6 @@ namespace tui
 	class ToolItem
 	{
 	public:
-		/*ToolItem(int toolID, const std::string &name,
-							const std::string &bitmapFileName,
-							const std::string &hotKey, callbackMethod cbMethod);*/
 		ToolItem(int toolID, const std::string &name,
 					const std::string &bitmapName,
 					const std::string &hotKey, 
@@ -160,9 +157,6 @@ namespace tui
       std::string		_function;	
       std::string		_helpString;
       callbackMethod	_method;
-		
-		void checkEmptyIconAndSet(int size, const std::string &bitmapName);
-
 	};
 
 	class TpdToolBar:public wxToolBar
@@ -187,10 +181,8 @@ namespace tui
 
 		std::string		name() const {return _name;};
 		void				changeToolSize(IconSizes size);
-		void				update(void);
 	private:
-		//void				OnSize(wxSizeEvent& event);
-		//void				OnPaint(wxPaintEvent&event);
+		void				attachToAUI(void);
 		std::string					_name;
 		int							_ID;
 		TpdToolBar*					_toolBar;
