@@ -195,6 +195,9 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
 
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
+   
+
+   EVT_MENU( TMCIF_CLOSE         , tui::TopedFrame::OnCIFclose    )
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
    EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
@@ -388,7 +391,9 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&File/Advanced GDS operations/close",   
             "", &tui::TopedFrame::OnGDSclose, "Clear the parsed GDS file from memory" );
    _resourceCenter->appendMenuSeparator("&File");
-      
+   _resourceCenter->appendMenu("&File/CIF operations/close",
+                               "", &tui::TopedFrame::OnCIFclose, "Clear the parsed CIF file from memory" );
+   _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Save",       "CTRL-S",  &tui::TopedFrame::OnTDTSave,  "Save the database");
    _resourceCenter->appendMenu("&File/Save as ...","",  &tui::TopedFrame::OnTDTSaveAs, "Save the database under a new name" );
    _resourceCenter->appendMenu("&File/Save properties...","",  &tui::TopedFrame::OnPropSave, "Save the layout properties" );

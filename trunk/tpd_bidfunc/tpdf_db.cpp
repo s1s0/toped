@@ -729,7 +729,7 @@ int tellstdfunc::CIFgetLay::execute() {
 }
 
 //=============================================================================
-tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
+tellstdfunc::CIFimportList::CIFimportList(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
@@ -737,7 +737,7 @@ tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::CIFimport::execute()
+int tellstdfunc::CIFimportList::execute()
 {
    bool  over  = getBoolValue();
    NMap* cifLays = DEBUG_NEW NMap();
@@ -770,6 +770,43 @@ int tellstdfunc::CIFimport::execute()
 }
 
 //=============================================================================
+tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+int tellstdfunc::CIFimport::execute()
+{
+   bool  over  = getBoolValue();
+   NMap* cifLays = DEBUG_NEW NMap();
+   telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   std::string name = getStringValue();
+   // Convert layer map
+   telldata::tthsh* nameh;
+   for (unsigned i = 0; i < ll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
+      (*cifLays)[nameh->name().value()] = nameh->number().value();
+   }
+   // Convert top structure list
+   nameList top_cells;
+   top_cells.push_back(name.c_str());
+   DATC->lockDB(false);
+      DATC->CIFimport(top_cells, cifLays, over);
+      //updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+   DATC->unlockDB();
+   // Don't refresh the tree browser here. See the comment in GDSconvertAll::execute()
+
+   LogFile << LogFile.getFN() << "(\"" << name<< "\"," << *ll << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   delete ll;
+   delete cifLays;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::CIFclose::CIFclose(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
@@ -780,4 +817,5 @@ int tellstdfunc::CIFclose::execute() {
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
    return EXEC_NEXT;
 }
+
 
