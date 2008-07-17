@@ -379,7 +379,7 @@ void browsers::CIFCellBrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(CIFTREEREPORTLAY, wxT("Report layers used in " + RBcellname));
    }
    else {
-//      menu.Append(tui::TMCIF_CLOSE, wxT("Close CIF")); // will be catched up in toped.cpp
+      menu.Append(tui::TMCIF_CLOSE, wxT("Close CIF")); // will be catched up in toped.cpp
    }
    PopupMenu(&menu, pt);
 }
