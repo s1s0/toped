@@ -33,8 +33,6 @@
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/tuidefs.h"
 #include "../src/toped.h"
-//??? Next line is temporary - need to be removed
-#include "../ui/red_lamp.xpm"
 
 extern console::ted_cmd*         Console;
 extern tui::TopedFrame*          Toped;
@@ -250,7 +248,7 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								const std::string &helpString,
 								callbackMethod cbMethod)
 								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
-								_helpString(helpString), _method(cbMethod),currentSize(ICON_SIZE_16x16)
+                        currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod)
 {
 	wxImage image(wxString(bitmapName.c_str(), wxConvUTF8),wxBITMAP_TYPE_PNG);
 	for( 
