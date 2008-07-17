@@ -302,6 +302,19 @@ CIFin::CifStructure* CIFin::CifFile::getStructure(_dbl_word cellno)
    assert(false); // Cell with this number not found ?!
 }
 
+CIFin::CifStructure* CIFin::CifFile::getStructure(std::string cellname)
+{
+   if (cellname == _default->cellName()) return _default;
+   CifStructure* local = _first;
+   while (NULL != local)
+   {
+      if (cellname == local->cellName())
+         return local;
+      local = local->last();
+   }
+   return NULL; // Cell with this name not found ?!
+}
+
 void CIFin::CifFile::hierPrep()
 {
 //   CifCellList allCiffCells;

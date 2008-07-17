@@ -55,7 +55,7 @@ namespace CIFin {
    class CIF2TED {
       public:
                               CIF2TED(CIFin::CifFile*, laydata::tdtdesign*, NMap*);
-         void                 top_structure(bool);
+         void                 top_structure(std::string, bool);
       protected:
          void                 child_structure(const CIFin::CIFHierTree*, bool);
          void                 convert(CIFin::CifStructure*, laydata::tdtcell*);
@@ -85,7 +85,7 @@ public:
    void                       CIFclose();
    bool                       CIFparse(std::string filename);
    bool                       CIFgetLay(nameList&);
-   void                       CIFimport(NMap*, bool);
+   void                       CIFimport(const nameList&, NMap*, bool);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);

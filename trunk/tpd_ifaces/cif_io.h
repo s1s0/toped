@@ -265,6 +265,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void           curCellOverlap(TP*, TP*);
          void           collectLayers(nameList&);
          CifStructure*  getStructure(_dbl_word);
+         CifStructure*  getStructure(std::string);
          void           hierPrep();
          void           hierOut();
          std::string    Get_libname() const  {return _filename;}

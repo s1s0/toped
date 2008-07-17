@@ -232,15 +232,22 @@ CIFin::CIF2TED::CIF2TED(CIFin::CifFile* src_lib, laydata::tdtdesign* dst_lib,
 }
 
 
-void CIFin::CIF2TED::top_structure(bool overwrite)
+void CIFin::CIF2TED::top_structure(std::string top_str, bool overwrite)
 {
    assert(_src_lib->hiertree());
-   CIFin::CIFHierTree* root = _src_lib->hiertree()->GetFirstRoot(TARGETDB_LIB);
-   while (root)
+   CIFin::CifStructure *src_structure = _src_lib->getStructure(top_str);
+   if (NULL != src_structure)
    {
+      CIFin::CIFHierTree* root = _src_lib->hiertree()->GetMember(src_structure);
       child_structure(root, overwrite);
       convert_prep(root, overwrite);
       root = root->GetNextRoot(TARGETDB_LIB);
+   }
+   else
+   {
+      std::ostringstream ost; ost << "CIF import: ";
+      ost << "Structure \""<< top_str << "\" not found in the CIF DB in memory.";
+      tell_log(console::MT_WARNING,ost.str());
    }
    // Convert the top structure
    //   hCellBrowser->AddRoot(wxString((_src_lib->Get_libname()).c_str(), wxConvUTF8));
@@ -724,18 +731,22 @@ bool DataCenter::CIFgetLay(nameList& cifLayers)
    }
 }
 
-void DataCenter::CIFimport(NMap* cifLayers, bool overwrite)
+void DataCenter::CIFimport( const nameList& top_names, NMap* cifLayers, bool overwrite )
 {
-   lockCIF();
-   lockDB(false);
-   //@TODO - Check the following comment -> Lock the DB here manually. Otherwise the cell browser is going mad
-   CIFin::CIF2TED converter(_CIFDB, _TEDLIB(), cifLayers);
-   converter.top_structure(overwrite);
-/*      for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
-   converter.structure(CN->c_str(), recur, over); */
-   _TEDLIB()->modified = true;
-   unlockDB();
-   unlockCIF();
+   // DB shold have been locked at this point (from the tell functions)
+   if (NULL == lockCIF())
+   {
+      std::string news = "No CIF data in memory. Parse CIF file first";
+      tell_log(console::MT_ERROR,news);
+   }
+   else
+   {
+      CIFin::CIF2TED converter(_CIFDB, _TEDLIB(), cifLayers);
+      for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
+         converter.top_structure(*CN, overwrite);
+      _TEDLIB()->modified = true;
+      unlockCIF();
+   }
 }
 
 void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)

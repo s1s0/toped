@@ -421,7 +421,7 @@ tellstdfunc::GDSconvertAll::GDSconvertAll(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSconvertAll::execute() 
+int tellstdfunc::GDSconvertAll::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
@@ -664,12 +664,28 @@ tellstdfunc::CIFread::CIFread(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::CIFread::execute() {
    std::string filename = getStringValue();
+   telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
    if (expandFileName(filename))
    {
       if (DATC->CIFparse(filename))
       {
          // add CIF tab in the browser
          browsers::addCIFtab();
+         // Collect the top structures
+         std::list<std::string> top_cell_list;
+         CIFin::CifFile* ACIFDB = DATC->lockCIF();
+         CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+         assert(root);
+         do
+            top_cell_list.push_back(std::string(root->GetItem()->cellName()));
+         while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+         DATC->unlockCIF();
+         // Convert the string list to TLISTOF(telldata::tn_string)
+         std::list<std::string>::const_iterator CN;
+         for (CN = top_cell_list.begin(); CN != top_cell_list.end(); CN ++)
+            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
+         // Push the top structures in the data stack
+         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
       else
       {
@@ -682,8 +698,10 @@ int tellstdfunc::CIFread::execute() {
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
       tell_log(console::MT_ERROR,info);
    }
+   OPstack.push(topcells);
    return EXEC_NEXT;
 }
+
 
 //=============================================================================
 tellstdfunc::CIFgetLay::CIFgetLay(telldata::typeID retype, bool eor) :
@@ -714,6 +732,7 @@ int tellstdfunc::CIFgetLay::execute() {
 tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
@@ -723,14 +742,30 @@ int tellstdfunc::CIFimport::execute()
    bool  over  = getBoolValue();
    NMap* cifLays = DEBUG_NEW NMap();
    telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   // Convert layer map
    telldata::tthsh* nameh;
    for (unsigned i = 0; i < ll->size(); i++)
    {
       nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
       (*cifLays)[nameh->name().value()] = nameh->number().value();
    }
-   DATC->CIFimport(cifLays, over);
-//   updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+   // Convert top structure list
+   nameList top_cells;
+   for (unsigned i = 0; i < pl->size(); i++)
+   {
+      top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
+   }
+   DATC->lockDB(false);
+      DATC->CIFimport(top_cells, cifLays, over);
+      //updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+   DATC->unlockDB();
+   // Don't refresh the tree browser here. See the comment in GDSconvertAll::execute()
+
+   LogFile << LogFile.getFN() << "(" << *pl << "," << *ll << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   delete pl;
+   delete ll;
+   delete cifLays;
    return EXEC_NEXT;
 }
 
