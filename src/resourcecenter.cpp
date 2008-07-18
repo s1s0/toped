@@ -374,8 +374,11 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 	toolList::const_iterator it;
 	for(it = _tools.begin(); it != _tools.end(); it++)
 	{
-		if ((*it)->name() == iconName) 
-			(*it)->addIcon(iconName, size);
+		if ((*it)->name() == iconName)
+		{
+			(*it)->addIcon(iconFileName, size);
+			break;
+		}
 	}
 	if (it == _tools.end()) 
 	{
@@ -755,7 +758,7 @@ void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::
 	ID = TDUMMY_TOOL + _toolCount;
 	_toolCount++;
 
-	toolBar->addTool(ID, toolBarItem, iconName, fullIconName, size, hotKey, helpString, cbMethod); 
+	toolBar->addTool(ID, toolBarItem, toolBarItem, fullIconName, size, hotKey, helpString, cbMethod); 
 	//toolBar->addTool(tool);
 
 }
