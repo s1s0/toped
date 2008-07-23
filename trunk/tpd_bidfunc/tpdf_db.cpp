@@ -758,7 +758,7 @@ int tellstdfunc::CIFimportList::execute()
    }
    DATC->lockDB(false);
       DATC->CIFimport(top_cells, cifLays, over);
-      //updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSconvertAll::execute()
 
@@ -796,7 +796,7 @@ int tellstdfunc::CIFimport::execute()
    top_cells.push_back(name.c_str());
    DATC->lockDB(false);
       DATC->CIFimport(top_cells, cifLays, over);
-      //updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSconvertAll::execute()
 

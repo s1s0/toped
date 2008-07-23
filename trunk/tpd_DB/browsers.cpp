@@ -375,7 +375,7 @@ void browsers::CIFCellBrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt)
    RBcellID = id;
    if ( id.IsOk() && (id != GetRootItem()))   {
       wxString RBcellname = GetItemText(id);
-//      menu.Append(tui::TMCIF_TRANSLATE, wxT("Translate " + RBcellname));
+      menu.Append(tui::TMCIF_TRANSLATE, wxT("Translate " + RBcellname));
       menu.Append(CIFTREEREPORTLAY, wxT("Report layers used in " + RBcellname));
    }
    else {
