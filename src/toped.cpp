@@ -193,11 +193,12 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMGDS_TRANSLATE     , tui::TopedFrame::OnGDStranslate)
    EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnGDSexportLIB)
    EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
-
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
    
 
+   EVT_MENU( TMCIF_TRANSLATE     , tui::TopedFrame::OnCIFtranslate)
    EVT_MENU( TMCIF_CLOSE         , tui::TopedFrame::OnCIFclose    )
+   
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
    EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
@@ -381,18 +382,16 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Export library to GDS","",  &tui::TopedFrame::OnGDSexportLIB, "Export library to GDS");
    _resourceCenter->appendMenu("&File/Import GDS to library","",  &tui::TopedFrame::OnGDSimport, "Import GDS structure" );
-   
-   _resourceCenter->appendMenu("&File/Advanced GDS operations/parse",   
-            "", &tui::TopedFrame::OnGDSRead, "Parse GDS file" );
-   _resourceCenter->appendMenu("&File/Advanced GDS operations/translate to library",   
-            "", &tui::TopedFrame::OnGDStranslate, "Import GDS structure" );
-   _resourceCenter->appendMenu("&File/Advanced GDS operations/export cell",   
-            "", &tui::TopedFrame::OnGDSexportCELL, "Export cell to GDS" );
-   _resourceCenter->appendMenu("&File/Advanced GDS operations/close",   
-            "", &tui::TopedFrame::OnGDSclose, "Clear the parsed GDS file from memory" );
+
+   _resourceCenter->appendMenu("&File/Advanced GDS operations/parse","", &tui::TopedFrame::OnGDSRead, "Parse GDS file" );
+   _resourceCenter->appendMenu("&File/Advanced GDS operations/translate to library","", &tui::TopedFrame::OnGDStranslate, "Import GDS structure" );
+   _resourceCenter->appendMenu("&File/Advanced GDS operations/export cell", "", &tui::TopedFrame::OnGDSexportCELL, "Export cell to GDS" );
+   _resourceCenter->appendMenu("&File/Advanced GDS operations/close","", &tui::TopedFrame::OnGDSclose, "Clear the parsed GDS file from memory" );
+
    _resourceCenter->appendMenuSeparator("&File");
-   _resourceCenter->appendMenu("&File/CIF operations/close",
-                               "", &tui::TopedFrame::OnCIFclose, "Clear the parsed CIF file from memory" );
+   _resourceCenter->appendMenu("&File/CIF operations/Translate","", &tui::TopedFrame::OnCIFtranslate, "Import CIF structure" );
+   _resourceCenter->appendMenu("&File/CIF operations/close","", &tui::TopedFrame::OnCIFclose, "Clear the parsed CIF file from memory" );
+
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Save",       "CTRL-S",  &tui::TopedFrame::OnTDTSave,  "Save the database");
    _resourceCenter->appendMenu("&File/Save as ...","",  &tui::TopedFrame::OnTDTSaveAs, "Save the database under a new name" );
@@ -402,7 +401,6 @@ void tui::TopedFrame::initMenuBar() {
   // _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Exit",        "",  &tui::TopedFrame::OnQuit, "Exit Toped" );
 
-   
 
    //---------------------------------------------------------------------------
    // menuBar entry editMenu
@@ -708,7 +706,8 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop48x48.png", ICON_SIZE_48x48,"", "edit pop",&tui::TopedFrame::OnCellPop);
 
 
-	_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
+   _resourceCenter->setToolBarSize("edit", ICON_SIZE_16x16);
+   _resourceCenter->setToolBarSize("main", ICON_SIZE_16x16);
    _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
    _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
@@ -1235,6 +1234,27 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    }
    else SetStatusText(wxT("GDS export aborted"));
 }
+
+
+void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
+{
+/*   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getGDSimport* dlg = NULL;
+   try {
+      dlg = DEBUG_NEW tui::getCIFimport(this, -1, wxT("Import CIF structure"), pos,
+                                        _browsers->TDTSelectedCIFName());
+   }
+   catch (EXPTN) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK ) {
+      wxString ost;
+      ost << wxT("cifimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
+            << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
+      _cmdline->parseCommand(ost);
+   }
+   delete dlg;*/
+}
+
 
 void tui::TopedFrame::OnCellRef_B(wxCommandEvent& WXUNUSED(event)) {
    CellRef(_browsers->TDTSelectedCellName());

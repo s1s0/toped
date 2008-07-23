@@ -67,6 +67,7 @@ namespace tui
       TMGDS_TRANSLATE     ,
       TMGDS_CLOSE         ,
       // <- CIF stuff
+      TMCIF_TRANSLATE     ,
       TMCIF_CLOSE         ,
       TMFILE_SAVE         ,
       TMFILE_SAVEAS       ,
