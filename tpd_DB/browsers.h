@@ -195,8 +195,7 @@ namespace browsers
                            const wxSize& size = wxDefaultSize,
                            long style = wxTR_DEFAULT_STYLE);
          void              collectInfo();
-         wxString          selectedCellname() const {if (RBcellID.IsOk())
-            return hCellBrowser->GetItemText(RBcellID); else return wxT("");}
+         wxString          selectedCellname() const;
          void              DeleteAllItems(void);
       protected:
          void              collectChildren(const CIFin::CIFHierTree *root,
@@ -204,7 +203,6 @@ namespace browsers
       private:
          wxButton*         _hierButton;
          wxButton*         _flatButton;
-         wxTreeItemId      RBcellID;
          CIFCellBrowser*   hCellBrowser;//Hierarchy cell browser
          CIFCellBrowser*   fCellBrowser;//Flat cell browser
          void              OnCommand(wxCommandEvent&);
@@ -356,7 +354,8 @@ namespace browsers
       LayerBrowser*     TDTlayers() const   {return _layers;};
       TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
       wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
-      wxString          TDTSelectedGDSName() const;// {return _GDSstruct->selectedCellname();};
+      wxString          TDTSelectedGDSName() const;
+      wxString          TDTSelectedCIFName() const;
       void              set_tellParser(wxWindow* tp) {_tellParser = tp;}
       wxWindow*         tellParser() const {return _tellParser;}
    private:

@@ -1238,9 +1238,9 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
 {
-/*   wxRect wnd = GetRect();
+   wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getGDSimport* dlg = NULL;
+   tui::getCIFimport* dlg = NULL;
    try {
       dlg = DEBUG_NEW tui::getCIFimport(this, -1, wxT("Import CIF structure"), pos,
                                         _browsers->TDTSelectedCIFName());
@@ -1252,7 +1252,7 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
             << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
       _cmdline->parseCommand(ost);
    }
-   delete dlg;*/
+   delete dlg;
 }
 
 
