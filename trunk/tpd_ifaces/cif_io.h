@@ -270,6 +270,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void           hierOut();
          std::string    Get_libname() const  {return _filename;}
          CIFHierTree*   hiertree()           {return _hiertree;}
+         CifStructure*  getFirstStructure()  {return _first;}
+         CifStructure*  getTopStructure()    {return _default;}
       protected:
          bool           _status;          //!
          CifStructure*  _first;           //! poiter to the first defined cell

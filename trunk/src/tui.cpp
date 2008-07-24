@@ -392,14 +392,16 @@ tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &titl
 //==============================================================================
 tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
-                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+{
    _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    GDSin::GDSFile* AGDSDB = DATC->lockGDS();
       GDSin::GDSstructure* gdss = AGDSDB->Get_structures();
-      while (gdss) {
+      while (gdss) 
+      {
          _nameList->Append(wxString(gdss->Get_StrName(), wxConvUTF8));
          gdss = gdss->GetLast();
       }
@@ -427,6 +429,48 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 
+//==============================================================================
+tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+      wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+{
+   _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
+//   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
+//   _recursive->SetValue(true);
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   CIFin::CifFile* ACIFDB = DATC->lockCIF();
+      CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
+      while (cifs) 
+      {
+         _nameList->Append(wxString(cifs->cellName().c_str(), wxConvUTF8));
+         cifs = cifs->last();
+      }
+      _nameList->Append(wxString(ACIFDB->getTopStructure()->cellName().c_str(), wxConvUTF8));
+   DATC->unlockCIF();
+   if (init != wxT("")) _nameList->SetStringSelection(init,true);
+   // The window layout
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   // First line up the important things
+   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   //   spin_sizer->Add(0,0,1); //
+//   spin_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
+   spin_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
+   // Buttons
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add(0,0,1); // 
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   // TOP sizer
+   topsizer->Add(_nameList, 1, wxEXPAND );
+   topsizer->Add(spin_sizer, 0, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+
+   SetSizer( topsizer );      // use the sizer for layout
+
+   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+}
+
+//==============================================================================
 tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {

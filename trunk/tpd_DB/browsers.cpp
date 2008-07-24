@@ -280,6 +280,12 @@ void browsers::CIFbrowser::collectInfo()
 //   Toped->Resize();
 }
 
+wxString browsers::CIFbrowser::selectedCellname() const
+{
+   return hCellBrowser->selectedCellname();
+}
+
+
 void browsers::CIFbrowser::DeleteAllItems(void)
 {
    hCellBrowser->DeleteAllItems();
@@ -373,12 +379,14 @@ void browsers::CIFCellBrowser::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 {
    wxMenu menu;
    RBcellID = id;
-   if ( id.IsOk() && (id != GetRootItem()))   {
+   if ( id.IsOk() && (id != GetRootItem()))   
+   {
       wxString RBcellname = GetItemText(id);
       menu.Append(tui::TMCIF_TRANSLATE, wxT("Translate " + RBcellname));
       menu.Append(CIFTREEREPORTLAY, wxT("Report layers used in " + RBcellname));
    }
-   else {
+   else 
+   {
       menu.Append(tui::TMCIF_CLOSE, wxT("Close CIF")); // will be catched up in toped.cpp
    }
    PopupMenu(&menu, pt);
@@ -754,7 +762,6 @@ void browsers::TDTbrowser::updateHier()
 
    hCellBrowser->Show();
    (this->GetSizer())->Layout();
-
 }
 
 void browsers::TDTbrowser::OnCommand(wxCommandEvent& event) 
@@ -999,6 +1006,14 @@ wxString browsers::browserTAB::TDTSelectedGDSName() const
    if (NULL != _GDSstruct)
       return _GDSstruct->selectedCellname();
    else return wxT("");
+}
+
+wxString browsers::browserTAB::TDTSelectedCIFName() const 
+{
+   if (NULL != _CIFstruct)
+      return _CIFstruct->selectedCellname();
+   else 
+      return wxT("");
 }
 
 void browsers::browserTAB::OnCommand(wxCommandEvent& event) 
