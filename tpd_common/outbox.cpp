@@ -82,7 +82,8 @@ console::ted_log::ted_log(wxWindow *parent): wxTextCtrl( parent, -1, wxT(""),
 void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
    wxColour logColour;
    long int startPos = GetLastPosition();
-   switch (evt.GetInt()) {
+   switch (evt.GetInt())
+   {
       case    MT_INFO:
          *this << rply_mark << evt.GetString() << wxT("\n");
          logColour = *wxBLACK;
@@ -112,7 +113,7 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
          *this << rply_mark << wxT(" Design ") << evt.GetString() << wxT("\n");
          break;
       default:
-         assert(false);
+         assert(false);/*wxLogTextCtrl::DoLog(evt.GetInt(), evt.GetString(), evt.GetExtraLong());*/
    }   
    long int endPos = GetLastPosition();
    SetStyle(startPos,endPos,wxTextAttr(logColour));
@@ -120,13 +121,17 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
 
 void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp) {
    if (level < wxLOG_User)
-      wxLogTextCtrl::DoLog(level, msg, timestamp);
-   else {
-      wxCommandEvent eventLOG(wxEVT_LOG_ERRMESSAGE);
-      eventLOG.SetString(msg);
-      eventLOG.SetInt(level);
-      wxPostEvent(_tellLOGW, eventLOG);
+   {
+      // calling DoLog here directly (most likely) causes troubles with the threads
+      // To be investigated.
+/*      wxLogTextCtrl::DoLog(level, msg, timestamp);*/
+      return;
    }
+   wxCommandEvent eventLOG(wxEVT_LOG_ERRMESSAGE);
+   eventLOG.SetString(msg);
+   eventLOG.SetInt(level);
+   eventLOG.SetExtraLong(timestamp);
+   wxPostEvent(_tellLOGW, eventLOG);
 }
 
 void tell_log(console::LOG_TYPE lt, const char* msg)
