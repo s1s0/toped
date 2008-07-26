@@ -28,7 +28,7 @@
       <terminal>true</terminal>
       <autocompile>true</autocompile>
       <envvars/>
-      <globaldebugarguments>$TPD_LOCAL/tll/bug_14231.tll</globaldebugarguments>
+      <globaldebugarguments></globaldebugarguments>
       <globalcwd>/home/skr/toped_public/debug</globalcwd>
       <useglobalprogram>true</useglobalprogram>
       <autoinstall>false</autoinstall>

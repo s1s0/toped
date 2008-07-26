@@ -162,12 +162,9 @@ CIFin::CifFile::CifFile(std::string filename)
    std::ostringstream info;
    // feed the flex with the buffer of the input file
    //(cifin is a global variable defined in the flex generated scanner)
-   if (!(cifin = fopen(_filename.c_str(),"r")))
-   {// open the input file
-      info << "File "<< _filename <<" can NOT be opened";
-      tell_log(console::MT_ERROR,info.str());
-      _status = false;
-      return;
+   if (!(cifin = fopen(_filename.c_str(),"r"))) // open the input file
+   {
+      _status = cfs_FNF; return;
    }
    info << "Parsing \"" << _filename << "\" using CIF grammar";
    tell_log(console::MT_INFO,info.str());
@@ -181,7 +178,7 @@ CIFin::CifFile::CifFile(std::string filename)
 /*   cifdebug = 1;*/
    cifparse();
 //   my_delete_yy_buffer( buf );
-   _status = true;
+   _status = cfs_POK;
    fclose(cifin);
 }
 

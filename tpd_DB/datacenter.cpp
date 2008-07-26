@@ -689,24 +689,23 @@ void DataCenter::CIFclose()
    unlockCIF();
 }
 
-bool DataCenter::CIFparse(std::string filename) 
+CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
 {
-   bool status;
-   if (lockCIF(false))
+   if (NULL != _CIFDB)
    {
       std::string news = "Removing existing CIF data from memory...";
       tell_log(console::MT_WARNING,news);
       CIFclose();
-      unlockCIF();
    }
    // parse the CIF file - don't forget to lock the CIF mutex here!
    while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
    _CIFDB = DEBUG_NEW CIFin::CifFile(filename);
-   _CIFDB->hierPrep();
-   status = _CIFDB->status();
-   if (status)
+
+   CIFin::CifStatusType status = _CIFDB->status();
+   if (CIFin::cfs_POK == status)
    {
       // generate the hierarchy tree of cells
+      _CIFDB->hierPrep();
       _CIFDB->hierOut();
    }
    else
