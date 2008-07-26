@@ -147,6 +147,7 @@ namespace tui {
       void   OnGDSexportCELL(wxCommandEvent&);
       void    OnGDSclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("gdsclose();"));}
       
+      void     OnCIFRead(wxCommandEvent&);
       void   OnCIFtranslate(wxCommandEvent&);
       void    OnCIFclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("cifclose();"));}
       void     OnTDTSave(wxCommandEvent&);

@@ -67,6 +67,7 @@ namespace tui
       TMGDS_TRANSLATE     ,
       TMGDS_CLOSE         ,
       // <- CIF stuff
+      TMCIF_OPEN          ,
       TMCIF_TRANSLATE     ,
       TMCIF_CLOSE         ,
       TMFILE_SAVE         ,
@@ -149,10 +150,10 @@ namespace tui
       TMHELP_ABOUTAPP     ,
       TBSTAT_ABORT        ,
       //Warning!!! Do not use IDs between TMDUMMY and TMDUMMY_END
-      TMDUMMY = 500       ,
-		TDUMMY_TOOL = 2000  ,
-      TMDUMMY_LAYER = 10000,
-      TMDUMMY_END = 11000
+      TMDUMMY        = 500   ,
+      TDUMMY_TOOL    = 2000  ,
+      TMDUMMY_LAYER  = 10000 ,
+      TMDUMMY_END    = 11000
    } TOPED_MENUID;
 
 

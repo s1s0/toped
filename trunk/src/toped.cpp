@@ -195,7 +195,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
    
-
+   EVT_MENU( TMCIF_OPEN          , tui::TopedFrame::OnCIFRead     )
    EVT_MENU( TMCIF_TRANSLATE     , tui::TopedFrame::OnCIFtranslate)
    EVT_MENU( TMCIF_CLOSE         , tui::TopedFrame::OnCIFclose    )
    
@@ -389,8 +389,9 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&File/Advanced GDS operations/close","", &tui::TopedFrame::OnGDSclose, "Clear the parsed GDS file from memory" );
 
    _resourceCenter->appendMenuSeparator("&File");
+   _resourceCenter->appendMenu("&File/CIF operations/Parse","", &tui::TopedFrame::OnCIFRead, "Parse CIF file" );
    _resourceCenter->appendMenu("&File/CIF operations/Translate","", &tui::TopedFrame::OnCIFtranslate, "Import CIF structure" );
-   _resourceCenter->appendMenu("&File/CIF operations/close","", &tui::TopedFrame::OnCIFclose, "Clear the parsed CIF file from memory" );
+   _resourceCenter->appendMenu("&File/CIF operations/Close","", &tui::TopedFrame::OnCIFclose, "Clear the parsed CIF file from memory" );
 
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Save",       "CTRL-S",  &tui::TopedFrame::OnTDTSave,  "Save the database");
@@ -1235,6 +1236,24 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    else SetStatusText(wxT("GDS export aborted"));
 }
 
+
+void tui::TopedFrame::OnCIFRead(wxCommandEvent& WXUNUSED(event))
+{
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+                     wxT("Caltech files(*.cif)|*.cif;*.CIF|All files(*.*)|*.*"),
+                         tpdfOPEN);
+   if (wxID_OK == dlg2.ShowModal()) {
+      SetStatusText(wxT("Parsing CIF file..."));
+      wxString filename = dlg2.GetFilename();
+      wxString ost;
+      ost << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
+      _cmdline->parseCommand(ost);
+//      wxString ost1;
+//      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loaded");
+//      SetStatusText(ost1);
+   }
+   else SetStatusText(wxT("Parsing aborted"));
+}
 
 void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
 {
