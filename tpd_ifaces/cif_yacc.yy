@@ -43,6 +43,8 @@
 #include "../tpd_common/outbox.h"
 #include "../tpd_common/ttt.h"
 #include "cif_io.h"
+/* Switch on verbose error reporting messages*/
+#define YYERROR_VERBOSE 1
 int boza;
 extern CIFin::CifFile* CIFInFile;
 
@@ -52,7 +54,7 @@ bool checkPositive(long, TpdYYLtype);
 
 %}
 
-/*%debug*/
+%debug
 
 %union {
    unsigned       word;
@@ -73,7 +75,7 @@ bool checkPositive(long, TpdYYLtype);
 %token                 tknTupchar tknTblank tknTremtext
 %token                 tknCtranslate tknCmirror tknCmirx tknCmiry tknCrotate
 %token                 tknP9 tknP4A tknP4N tknP94
-%type  <identifier>    commentCommand tknTremtext tknTshortname tknTuserText tknTuserid
+%type  <identifier>    commentCommand commentText tknTremtext tknTshortname tknTuserText tknTuserid
 %type  <integer>       tknTint tknPdigit
 %type  <point>         cifPoint
 %type  <path>          cifPath
@@ -238,13 +240,14 @@ UEC_labelSig:
    }
 ;
 
+commentText:
+                                           {}
+   | tknTremtext                           {$$ = $1;}
+;
+
 commentCommand:
-     tknPremB tknTremtext tknPremE         {
-      $$ = $2;
-   }
-   | tknPremB commentCommand tknPremE      {
-      $$ = $2;
-   }
+     tknPremB commentText tknPremE         { $$ = $2; }
+   | tknPremB commentText commentCommand commentText tknPremE      { $$ = $3; }
 ;
 
 cifPoint:
