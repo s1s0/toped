@@ -1584,7 +1584,6 @@ void browsers::LayerPanel::OnCommand(wxCommandEvent& event)
             else
             {
                //Button doesn't exist, create new button
-//               int szx, szy;
                GetClientSize(&szx, &szy);
                layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
                                              wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
@@ -1599,8 +1598,6 @@ void browsers::LayerPanel::OnCommand(wxCommandEvent& event)
                _selectedButton = it->second;
                _selectedButton->select();
             }
-            //_selectedButton = (_buttonMap.begin())->second;
-            //_selectedButton->select();
             delete (static_cast<LayerInfo*>(layer));
             break;
          }
@@ -1644,7 +1641,7 @@ END_EVENT_TABLE()
 
 
 browsers::LayerBrowser::LayerBrowser(wxWindow* parent, wxWindowID id) 
-   :wxScrolledWindow(parent, id, wxDefaultPosition, wxDefaultSize),
+   :wxPanel(parent, id, wxDefaultPosition, wxDefaultSize),
    _layerPanel(NULL),
    _thesizer(NULL)
 {

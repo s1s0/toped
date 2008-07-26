@@ -59,24 +59,24 @@ namespace tui {
       ID_CBDEFLINE
    };
 
-	typedef enum 
-	{
-		ICON_SIZE_16x16 = 0, //must begin from 0
-		ICON_SIZE_24x24,
-		ICON_SIZE_32x32,
-		ICON_SIZE_48x48,
-		ICON_SIZE_END
-	} IconSizes;
+   typedef enum
+   {
+      ICON_SIZE_16x16 = 0, //must begin from 0
+      ICON_SIZE_24x24,
+      ICON_SIZE_32x32,
+      ICON_SIZE_48x48,
+      ICON_SIZE_END
+   } IconSizes;
 
-	const int IconSizesValues[ICON_SIZE_END] = {16, 24, 32, 48};
-	//Order for this enum must corresponds IconSizes order
-	enum 
-	{
-		ICON_SIZE_16x16_V = 16,
-		ICON_SIZE_24x24_V = 24,
-		ICON_SIZE_32x32_V = 32,
-		ICON_SIZE_48x48_V = 48
-	};
+   const int IconSizesValues[ICON_SIZE_END] = {16, 24, 32, 48};
+   //Order for this enum must corresponds IconSizes order
+   enum
+   {
+      ICON_SIZE_16x16_V = 16,
+      ICON_SIZE_24x24_V = 24,
+      ICON_SIZE_32x32_V = 32,
+      ICON_SIZE_48x48_V = 48
+   };
 
    class getSize : public wxDialog {
    public:
@@ -193,11 +193,11 @@ namespace tui {
                      getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos, wxString init);
       wxString       get_selectedcell() const {return _nameList->GetStringSelection();}
-      bool           get_overwrite()    const {return _overwrite->GetValue();}
-//      bool           get_recursive()    const {return _recursive->GetValue();}
+//      bool           get_overwrite()    const {return _overwrite->GetValue();}
+      bool           get_recursive()    const {return _recursive->GetValue();}
    private:
-      wxCheckBox*    _overwrite;
-//      wxCheckBox*    _recursive;
+//      wxCheckBox*    _overwrite;
+      wxCheckBox*    _recursive;
       wxListBox*     _nameList;
    };
 
