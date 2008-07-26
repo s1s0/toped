@@ -83,7 +83,7 @@ public:
    void                       importGDScell(const nameList&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
-   bool                       CIFparse(std::string filename);
+   CIFin::CifStatusType       CIFparse(std::string filename);
    bool                       CIFgetLay(nameList&);
    void                       CIFimport(const nameList&, NMap*, bool);
    void                       PSexport(laydata::tdtcell*, std::string&);

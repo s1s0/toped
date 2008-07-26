@@ -667,30 +667,40 @@ int tellstdfunc::CIFread::execute() {
    telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
    if (expandFileName(filename))
    {
-      if (DATC->CIFparse(filename))
+      switch (DATC->CIFparse(filename))
       {
-         // add CIF tab in the browser
-         browsers::addCIFtab();
-         // Collect the top structures
-         std::list<std::string> top_cell_list;
-         CIFin::CifFile* ACIFDB = DATC->lockCIF();
-         CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-         assert(root);
-         do
-            top_cell_list.push_back(std::string(root->GetItem()->cellName()));
-         while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-         DATC->unlockCIF();
-         // Convert the string list to TLISTOF(telldata::tn_string)
-         std::list<std::string>::const_iterator CN;
-         for (CN = top_cell_list.begin(); CN != top_cell_list.end(); CN ++)
-            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
-         // Push the top structures in the data stack
-         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
-      }
-      else
-      {
-         std::string info = "File \"" + filename + "\" doesn't seem to appear a valid CIF file";
-         tell_log(console::MT_ERROR,info);
+         case CIFin::cfs_POK:
+         {
+            // add CIF tab in the browser
+            browsers::addCIFtab();
+            // Collect the top structures
+            std::list<std::string> top_cell_list;
+            CIFin::CifFile* ACIFDB = DATC->lockCIF();
+            CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+            assert(root);
+            do
+               top_cell_list.push_back(std::string(root->GetItem()->cellName()));
+            while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+            DATC->unlockCIF();
+            // Convert the string list to TLISTOF(telldata::tn_string)
+            std::list<std::string>::const_iterator CN;
+            for (CN = top_cell_list.begin(); CN != top_cell_list.end(); CN ++)
+               topcells->add(DEBUG_NEW telldata::ttstring(*CN));
+            // Push the top structures in the data stack
+            LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+            break;
+         }
+         case CIFin::cfs_FNF:
+         {
+            std::string info = "File \"" + filename + "\" not found or not readable";
+            tell_log(console::MT_ERROR,info);
+            break;
+         }
+         default:
+         {
+            std::string info = "File \"" + filename + "\" doesn't seem to appear a valid CIF file";
+            tell_log(console::MT_ERROR,info);
+         }
       }
    }
    else

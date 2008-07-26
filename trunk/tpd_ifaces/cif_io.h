@@ -114,6 +114,12 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       cif_LBL_SIG
    } CifDataType;
 
+   typedef enum {
+      cfs_POK        , // parsed OK
+      cfs_FNF        , // file not found
+      cfs_ERR          // error during parsing
+   } CifStatusType;
+
    class CifStructure;
    class CifFile;
 
@@ -251,7 +257,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                         CifFile(std::string);
                        ~CifFile();
-         bool           status() {return _status;}
+         CifStatusType  status() {return _status;}
          void           addStructure(_dbl_word, _dbl_word = 1, _dbl_word = 1);
          void           doneStructure();
          void           addBox(_dbl_word, _dbl_word, TP*, TP* direction = NULL);
@@ -273,7 +279,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CifStructure*  getFirstStructure()  {return _first;}
          CifStructure*  getTopStructure()    {return _default;}
       protected:
-         bool           _status;          //!
+         CifStatusType  _status;          //!
          CifStructure*  _first;           //! poiter to the first defined cell
          CifStructure*  _current;         //! the working (current) cell
          CifStructure*  _default;         //! pointer to the default cell - i.e. the scratch pad
