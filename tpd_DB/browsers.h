@@ -284,7 +284,7 @@ namespace browsers
       void lockLayer(bool lock);
       word getLayNo(void) {return _layer->layno();}
       void preparePicture();
-      
+
    private:
       int         _buttonWidth;
       int         _buttonHeight;
@@ -295,7 +295,7 @@ namespace browsers
       bool        _selected;
       bool        _hidden;
       bool        _locked;
-      
+
    DECLARE_EVENT_TABLE();
    };
 
@@ -308,26 +308,23 @@ namespace browsers
                               const wxSize& size = wxDefaultSize,
                               long style = wxHSCROLL |  wxVSCROLL, const wxString& name = wxT("LayerPanel"));
 
-      virtual               ~LayerPanel();
+      virtual            ~LayerPanel();
       wxString             getAllSelected();
    private:
-      void                  OnSize(wxSizeEvent&);
+      void                 OnSize(wxSizeEvent&);
       void                 OnCommand(wxCommandEvent&);
+      layerButtonMap      _buttonMap;
+      int                 _buttonCount;
+      LayerButton*        _selectedButton;
 
-      //wxBitmap&            prepareBitmap(void);//-
-
-      layerButtonMap          _buttonMap;
-      int                     _buttonCount;
-      LayerButton*            _selectedButton;
       DECLARE_EVENT_TABLE();
-
    };
 
-   class LayerBrowser : public wxScrolledWindow 
+   class LayerBrowser : public wxPanel
    {
    public:
                            LayerBrowser(wxWindow* parent, wxWindowID id);
-      virtual             ~LayerBrowser();
+      virtual            ~LayerBrowser();
       //const layerButtonMap& getButtonMap(void) {return _buttonMap;};
       LayerPanel*      getLayerPanel() {return _layerPanel;};
 
@@ -337,8 +334,8 @@ namespace browsers
       void                 OnLockAll(wxCommandEvent&);
       void                 OnUnlockAll(wxCommandEvent&);
       wxString             getAllSelected();
-      LayerPanel*               _layerPanel;
-      wxBoxSizer*             _thesizer;
+      LayerPanel*         _layerPanel;
+      wxBoxSizer*         _thesizer;
 
       DECLARE_EVENT_TABLE();
    };
@@ -347,29 +344,30 @@ namespace browsers
    class browserTAB : public wxAuiNotebook 
    {
    public:
-                        browserTAB(wxWindow *parent, wxWindowID id = -1,
+                           browserTAB(wxWindow *parent, wxWindowID id = -1,
         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, 
                                                                   long style = 0);
-      virtual          ~browserTAB();// {};
-      LayerBrowser*     TDTlayers() const   {return _layers;};
-      TDTbrowser*       TDTstruct() const    {return _TDTstruct;};
-      wxString          TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
-      wxString          TDTSelectedGDSName() const;
-      wxString          TDTSelectedCIFName() const;
-      void              set_tellParser(wxWindow* tp) {_tellParser = tp;}
-      wxWindow*         tellParser() const {return _tellParser;}
+      virtual            ~browserTAB();// {};
+      LayerBrowser*        TDTlayers() const   {return _layers;};
+      TDTbrowser*          TDTstruct() const    {return _TDTstruct;};
+      wxString             TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
+      wxString             TDTSelectedGDSName() const;
+      wxString             TDTSelectedCIFName() const;
+      void                 set_tellParser(wxWindow* tp) {_tellParser = tp;}
+      wxWindow*            tellParser() const {return _tellParser;}
    private:
-      void              OnCommand(wxCommandEvent&);
-      void              OnTELLaddTDTlib();
-      void              OnTELLaddGDStab();
-      void              OnTELLclearGDStab();
-      void              OnTELLaddCIFtab();
-      void              OnTELLclearCIFtab();
-      GDSbrowser*       _GDSstruct;
-      CIFbrowser*       _CIFstruct;
-      TDTbrowser*       _TDTstruct;
-      LayerBrowser*     _layers;
-      wxWindow*         _tellParser;
+      void                 OnCommand(wxCommandEvent&);
+      void                 OnTELLaddTDTlib();
+      void                 OnTELLaddGDStab();
+      void                 OnTELLclearGDStab();
+      void                 OnTELLaddCIFtab();
+      void                 OnTELLclearCIFtab();
+      GDSbrowser*         _GDSstruct;
+      CIFbrowser*         _CIFstruct;
+      TDTbrowser*         _TDTstruct;
+      LayerBrowser*       _layers;
+      wxWindow*           _tellParser;
+
       DECLARE_EVENT_TABLE();
    };
  

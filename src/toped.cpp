@@ -1248,9 +1248,6 @@ void tui::TopedFrame::OnCIFRead(wxCommandEvent& WXUNUSED(event))
       wxString ost;
       ost << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
-//      wxString ost1;
-//      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loaded");
-//      SetStatusText(ost1);
    }
    else SetStatusText(wxT("Parsing aborted"));
 }
@@ -1265,10 +1262,11 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
                                         _browsers->TDTSelectedCIFName());
    }
    catch (EXPTN) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK ) {
+   if ( dlg->ShowModal() == wxID_OK )
+   {
       wxString ost;
       ost << wxT("cifimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
-            << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
+            << (dlg->get_recursive() ? wxT("true") : wxT("false")) << wxT(");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;

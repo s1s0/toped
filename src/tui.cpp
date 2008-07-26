@@ -434,9 +434,9 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
 {
-   _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
-//   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
-//   _recursive->SetValue(true);
+//   _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
+   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
+   _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    CIFin::CifFile* ACIFDB = DATC->lockCIF();
       CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
@@ -453,8 +453,8 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    // First line up the important things
    wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    //   spin_sizer->Add(0,0,1); //
-//   spin_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
-   spin_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
+   spin_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
+//   spin_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
