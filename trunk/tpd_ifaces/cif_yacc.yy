@@ -54,7 +54,7 @@ bool checkPositive(long, TpdYYLtype);
 
 %}
 
-%debug
+/*%debug*/
 
 %union {
    unsigned       word;
