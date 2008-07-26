@@ -77,7 +77,7 @@ extern YYLTYPE ciflloc;
 #define YY_USER_ACTION  ciflloc.last_column += yyleng;
 %}
 
-/*%option debug
+/*%option debug*/
 
 %%
 %{
