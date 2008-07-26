@@ -62,7 +62,7 @@ AX_CHECK_GLU
 
 #Check wxWidgets
  AM_OPTIONS_WXCONFIG
- AM_PATH_WXCONFIG(2.6.2, wxWin=1,,std gl)
+ AM_PATH_WXCONFIG(2.8.7, wxWin=1,,std gl)
  if test "$wxWin" != 1 || test "$wx_ver_ok" != "yes"; then
     AC_MSG_ERROR([
        wxWindows ver.2.6.2 or later must be installed on your system
