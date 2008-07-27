@@ -167,6 +167,8 @@ boxCommand: /*discrepancy with the formal syntax*/
       valid &= checkPositive($5,@5);
       if (valid)
          CIFInFile->addBox($3, $5, $7);
+      else
+      { /*@TODO clean-up the input params and flag an error!*/}
    }
    | tknCbox cifBlank tknTint cifSep tknTint cifSep cifPoint cifSep cifPoint  {
       bool valid = true;
@@ -174,6 +176,8 @@ boxCommand: /*discrepancy with the formal syntax*/
       valid &= checkPositive($5,@5);
       if (valid)
          CIFInFile->addBox($3, $5, $7, $9);
+      else
+      { /*@TODO clean-up the input params and flag an error!*/}
    }
 ;
 
@@ -200,6 +204,7 @@ userExtensionCommand:
       std::ostringstream ost;
       ost << "Unsupported user command: \"" << $1 << $2 << "\"";
       ciferror(ost.str().c_str(), @1);
+      delete $2;
    }
 ;
 
@@ -222,12 +227,10 @@ UEC_labelLoc:
      tknP94 tknTuserid tknTblank cifPoint {
       CIFInFile->addLabelLoc($2, $4);
       delete $2;
-      delete $4;
    }
    | tknP94 tknTuserid tknTblank cifPoint tknTblank tknTuserid {
       CIFInFile->addLabelLoc($2, $4, $6);
       delete $2;
-      delete $4;
       delete $6;
    }
 ;
@@ -258,25 +261,25 @@ cifPoint:
 
 cifTrans:
      tknCtranslate cifBlank cifPoint       {
-      $$ = new CTM(); $$->Translate(*$3);
+      $$ = DEBUG_NEW CTM(); $$->Translate(*$3);delete $3;
    }
    | tknCmirror cifBlank tknCmirx          {
-      $$ = new CTM(); $$->FlipY(); /*TODO CHECK!*/
+      $$ = DEBUG_NEW CTM(); $$->FlipY(); /*TODO CHECK!*/
    }
    | tknCmirror cifBlank tknCmiry          {
-      $$ = new CTM(); $$->FlipX(); /*TODO CHECK!*/
+      $$ = DEBUG_NEW CTM(); $$->FlipX(); /*TODO CHECK!*/
    }
    | tknCrotate cifBlank cifPoint          {
-      $$ = new CTM(); $$->Rotate(*($3)); /*TODO CHECK!*/
+      $$ = DEBUG_NEW CTM(); $$->Rotate(*($3));delete $3 /*TODO CHECK!*/
    }
 ;
 
 cifLtrans:
                                            {
-      $$ = new CTM();
+      $$ = DEBUG_NEW CTM();
    }
    | cifLtrans cifBlank cifTrans           {
-      $$ = new CTM(*($1) * (*($3)));
+      $$ = DEBUG_NEW CTM(*($1) * (*($3)));
       delete $1;
       delete $3;
    }

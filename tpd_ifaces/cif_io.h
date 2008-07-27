@@ -129,10 +129,10 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifData {
       public:
-                              CifData(CifData* last) : _last(last) {};
+                             CifData(CifData* last) : _last(last) {};
+         virtual            ~CifData(){};
          CifData*            last()         {return _last;}
          virtual CifDataType dataType() = 0;
-         virtual            ~CifData() {}
       protected:
          CifData*    _last;
    };
@@ -140,6 +140,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifBox : public CifData {
       public:
                      CifBox(CifData*, _dbl_word, _dbl_word, TP*, TP*);
+                    ~CifBox();
          CifDataType dataType()     {return cif_BOX;}
          _dbl_word   length()       {return _length;}
          _dbl_word   width()        {return _width;}
@@ -155,6 +156,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifPoly : public CifData {
       public:
                      CifPoly(CifData* last, pointlist*);
+                    ~CifPoly();
          CifDataType dataType()     {return cif_POLY;}
          pointlist*  poly()         {return _poly;}
       protected:
@@ -164,6 +166,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifWire : public CifData {
       public:
                      CifWire(CifData* last, pointlist*, _dbl_word);
+                    ~CifWire();
          CifDataType dataType()     {return cif_WIRE;}
          pointlist*  poly()         {return _poly;}
          _dbl_word   width()        {return _width;}
@@ -175,6 +178,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifRef : public CifData {
       public:
                      CifRef(CifData* last, _dbl_word, CTM*);
+                    ~CifRef();
          CifRef*     last()                           {return static_cast<CifRef*>(CifData::last());}
          _dbl_word   cell()                           {return  _cell;}
          CTM*        location()                       {return  _location;}
@@ -187,6 +191,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifLabelLoc : public CifData {
       public:
                      CifLabelLoc(CifData*, std::string, TP*);
+         virtual    ~CifLabelLoc();
          CifDataType dataType()                       {return cif_LBL_LOC;}
       protected:
          std::string _label;
@@ -202,6 +207,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifLayer {
       public:
                         CifLayer(std::string name, CifLayer* last);
+                       ~CifLayer();
          std::string    name()                        {return _name;}
          CifLayer*      last()                        {return _last;}
          CifData*       firstData()                   {return _first;}
@@ -220,6 +226,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifStructure  {
       public:
                         CifStructure(_dbl_word, CifStructure*, _dbl_word=1,_dbl_word=1);
+                       ~CifStructure();
          void           cellNameIs(std::string cellName) {_cellName = cellName;}
          void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
          CifStructure*  last() const                  {return _last;}

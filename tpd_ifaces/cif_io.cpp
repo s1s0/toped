@@ -42,31 +42,65 @@ extern int     cifdebug;
 //=============================================================================
 CIFin::CifBox::CifBox(CifData* last, _dbl_word length, _dbl_word width, TP* center, TP* direction) :
                            CifData(last), _length(length), _width(width), _center(center),
-                                   _direction(direction) {};
+                                   _direction(direction) {}
 
+CIFin::CifBox::~CifBox()
+{
+   delete _center;
+   delete _direction;
+}
 //=============================================================================
 CIFin::CifPoly::CifPoly(CifData* last, pointlist* poly) :
-      CifData(last), _poly(poly) {};
+      CifData(last), _poly(poly) {}
 
+CIFin::CifPoly::~CifPoly()
+{
+   delete _poly;
+}
 //=============================================================================
 CIFin::CifWire::CifWire(CifData* last, pointlist* poly, _dbl_word width) :
-      CifData(last), _poly(poly), _width(width) {};
+      CifData(last), _poly(poly), _width(width) {}
 
+CIFin::CifWire::~CifWire()
+{
+   delete _poly;
+}
 //=============================================================================
 CIFin::CifRef::CifRef(CifData* last, _dbl_word cell, CTM* location) :
-      CifData(last), _cell(cell), _location(location) {};
+      CifData(last), _cell(cell), _location(location) {}
 
+CIFin::CifRef::~CifRef()
+{
+   delete _location;
+}
 //=============================================================================
 CIFin::CifLabelLoc::CifLabelLoc(CifData* last, std::string label, TP* location) :
-      CifData(last), _label(label), _location(location) {};
+      CifData(last), _label(label), _location(location) {}
 
+CIFin::CifLabelLoc::~CifLabelLoc()
+{
+   delete _location;
+}
 //=============================================================================
 CIFin::CifLabelSig::CifLabelSig(CifData* last, std::string label, TP* location) :
-      CifLabelLoc(last, label, location) {};
+      CifLabelLoc(last, label, location) {}
 
 //=============================================================================
 CIFin::CifLayer::CifLayer(std::string name, CifLayer* last):
       _name(name), _last(last), _first(NULL) {}
+
+CIFin::CifLayer::~CifLayer()
+{
+   CifData* wdata = _first;
+   CifData* wdata4d;
+   while (wdata)
+   {
+      wdata4d = wdata;
+      wdata = wdata->last();
+      delete wdata4d;
+   }
+}
+
 
 void CIFin::CifLayer::addBox(_dbl_word length,_dbl_word width ,TP* center, TP* direction)
 {
@@ -98,6 +132,28 @@ CIFin::CifStructure::CifStructure(_dbl_word ID, CifStructure* last, _dbl_word a,
       _ID(ID), _last(last), _a(a), _b(b), _cellName(""), _first(NULL),
           _refirst(NULL), _overlap(TP()), _orphan(true), _traversed(false) {}
 
+CIFin::CifStructure::~CifStructure()
+{
+   // Remove all layers ...
+   CifLayer* wlay = _first;
+   CifLayer* wlay4d;
+   while (NULL != wlay)
+   {
+      wlay4d = wlay;
+      wlay = wlay->last();
+      delete wlay4d;
+   }
+   // ... and all references
+   CifRef* wref = _refirst;
+   CifRef* wref4d;
+   while (NULL != wref)
+   {
+      wref4d = wref;
+      wref = wref->last();
+      delete wref4d;
+   }
+}
+
 CIFin::CifLayer* CIFin::CifStructure::secureLayer(std::string name)
 {
    CifLayer* wlay = _first;
@@ -122,7 +178,7 @@ void CIFin::CifStructure::collectLayers(CifLayerList& layList)
 
 void CIFin::CifStructure::addRef(_dbl_word cell, CTM* location)
 {
-   _refirst = new CifRef(_refirst, cell, location);
+   _refirst = DEBUG_NEW CifRef(_refirst, cell, location);
 }
 
 void CIFin::CifStructure::hierPrep(CifFile& cfile)
@@ -184,7 +240,27 @@ CIFin::CifFile::CifFile(std::string filename)
 
 CIFin::CifFile::~CifFile()
 {
-   //@TODO
+   // delete all CIF structures
+   CifStructure* local = _first;
+   CifStructure* local4d;
+   while (NULL != local)
+   {
+      local4d = local;
+      local = local->last();
+      delete local4d;
+   }
+   // get rid of the hierarchy tree
+   const CIFHierTree* hlocal = _hiertree;
+   const CIFHierTree* hlocal4d;
+   while (hlocal)
+   {
+      hlocal4d = hlocal;
+      hlocal = hlocal->GetLast();
+      delete hlocal4d;
+   }
+
+   delete _default;
+
 }
 
 void CIFin::CifFile::addStructure(_dbl_word ID, _dbl_word a, _dbl_word b)
@@ -297,6 +373,7 @@ CIFin::CifStructure* CIFin::CifFile::getStructure(_dbl_word cellno)
       local = local->last();
    }
    assert(false); // Cell with this number not found ?!
+   return NULL;
 }
 
 CIFin::CifStructure* CIFin::CifFile::getStructure(std::string cellname)

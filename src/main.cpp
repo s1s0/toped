@@ -453,7 +453,7 @@ void TopedApp::FinishSessionLog()
 
 bool TopedApp::OnInit() {
 //   DATC = DEBUG_NEW DataCenter();
-	wxImage::AddHandler(new wxPNGHandler);
+	wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    GetLocalDirs();
 	GetGlobalDirs();
    initDBLib(std::string(localDir.mb_str()));
