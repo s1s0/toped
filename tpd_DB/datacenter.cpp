@@ -454,6 +454,7 @@ DataCenter::DataCenter(std::string localDir)
 DataCenter::~DataCenter() {
    laydata::tdtlibrary::clearEntireHierTree();
    if (NULL != _GDSDB) delete _GDSDB;
+   if (NULL != _CIFDB) delete _CIFDB;
    // _TEDLIB will be cleared automatically (not a pointer)
 }
 bool DataCenter::TDTcheckread(const std::string filename,
