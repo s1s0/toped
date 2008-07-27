@@ -167,6 +167,7 @@ public:
    void                       clearRulers();
    void                       switch_drawruler(bool st) {_drawruler = st;}
    bool                       drawruler() {return _drawruler;}
+   void                       all_layers(nameList& laylist) const {_properties.all_layers(laylist);}
    void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
    void                       all_fills(nameList& filist)   const {_properties.all_fills(filist);  }
    void                       all_lines(nameList& linelist) const {_properties.all_lines(linelist);}
