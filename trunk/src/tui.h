@@ -391,10 +391,9 @@ namespace tui {
    };
 
    //==========================================================================
-   class LayerRecord : public wxDialog {
+   class LayerRecord : public wxPanel {
       public:
-                           LayerRecord(wxWindow*, wxWindowID, const wxString&,
-                                                   wxPoint, std::string, word);
+                           LayerRecord(wxWindow*, std::string, word);
       private:
          wxString       _layno;
          wxString       _layname;

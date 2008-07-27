@@ -757,7 +757,7 @@ void tui::TopedFrame::initView()
    _browsers = DEBUG_NEW browsers::browserTAB(this,ID_WIN_BROWSERS,
                                         wxDefaultPosition, wxDefaultSize, wxCLIP_CHILDREN);
    _browsers->SetSize(wxSize(180, 1000));
-   _browsers->SetArtProvider(new wxAuiSimpleTabArt);
+   _browsers->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
    //----------------------------------------------------------------------------
    //the log & lib windows
    //----------------------------------------------------------------------------
