@@ -78,6 +78,7 @@ namespace tui {
       ICON_SIZE_48x48_V = 48
    };
 
+   //--------------------------------------------------------------------------
    class getSize : public wxDialog {
    public:
       getSize(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, real step, byte precision );
@@ -86,6 +87,7 @@ namespace tui {
       wxTextCtrl* _wxText;
    };
 
+   //--------------------------------------------------------------------------
    class getStep : public wxDialog {
    public:
       getStep(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
@@ -95,6 +97,7 @@ namespace tui {
       wxTextCtrl* _wxText;
    };
 
+   //--------------------------------------------------------------------------
    class getGrid : public wxDialog {
    public:
       getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
@@ -108,6 +111,7 @@ namespace tui {
       wxTextCtrl* _wxGrid2;
    };
 
+   //--------------------------------------------------------------------------
    class getCellOpen : public wxDialog {
    public:
       getCellOpen(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, wxString init);
@@ -115,6 +119,7 @@ namespace tui {
       wxListBox*  _nameList;
    };
 
+   //--------------------------------------------------------------------------
    class getCellRef : public wxDialog {
    public:
       getCellRef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, wxString init);
@@ -122,6 +127,7 @@ namespace tui {
       wxListBox*  _nameList;
    };
 
+   //--------------------------------------------------------------------------
    class getCellARef : public wxDialog {
    public:
       getCellARef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, wxString init);
@@ -142,6 +148,7 @@ namespace tui {
       wxListBox*  _nameList;
    };
 
+   //--------------------------------------------------------------------------
    class getTextdlg : public wxDialog {
    public:
       getTextdlg(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos);
@@ -156,6 +163,7 @@ namespace tui {
       wxCheckBox* _flip;
    };
 
+   //--------------------------------------------------------------------------
    class sgSpinButton : public wxSpinButton {
    public:
       sgSpinButton(wxWindow *parent, wxTextCtrl* textW, const float step, 
@@ -168,6 +176,7 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
+   //--------------------------------------------------------------------------
    class getLibList : public wxDialog {
       public:
          getLibList(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, wxString init);
@@ -175,6 +184,7 @@ namespace tui {
          wxListBox*  _nameList;
    };
 
+   //--------------------------------------------------------------------------
    class getGDSimport : public wxDialog {
    public:
                      getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title,
@@ -188,6 +198,7 @@ namespace tui {
       wxListBox*     _nameList;
    };
 
+   //--------------------------------------------------------------------------
    class getCIFimport : public wxDialog {
    public:
                      getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title,
@@ -212,6 +223,7 @@ namespace tui {
       wxListBox*     _nameList;
    };
 
+   //--------------------------------------------------------------------------
    class layset_sample : public wxWindow {
    public:
                      layset_sample(wxWindow*, wxWindowID, wxPoint, wxSize, word);
@@ -234,6 +246,7 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
+   //--------------------------------------------------------------------------
    class defineLayer : public wxDialog {
    public:
                      defineLayer(wxFrame*, wxWindowID, const wxString&, wxPoint, word);
@@ -261,7 +274,8 @@ namespace tui {
       wxCheckBox*    _selected;
       DECLARE_EVENT_TABLE();
    };
-   
+
+   //--------------------------------------------------------------------------
    class color_sample : public wxWindow {
    public:
                      color_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string);
@@ -271,7 +285,8 @@ namespace tui {
       wxColour             _color;
       DECLARE_EVENT_TABLE();
    };
-   
+
+   //--------------------------------------------------------------------------
    class defineColor : public wxDialog
    {
    public:
@@ -301,10 +316,11 @@ namespace tui {
       wxTextCtrl*             _c_green;
       wxTextCtrl*             _c_blue;
       wxTextCtrl*             _c_alpha;
-      
+
       DECLARE_EVENT_TABLE();
    };
 
+   //--------------------------------------------------------------------------
    class pattern_canvas : public wxWindow {
    public:
                      pattern_canvas(wxWindow*, wxWindowID, wxPoint, wxSize, const byte*);
@@ -322,6 +338,7 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
+   //--------------------------------------------------------------------------
    class drawFillDef : public wxDialog {
    public:
                      drawFillDef(wxWindow *parent, wxWindowID id, const wxString &title,
@@ -346,7 +363,8 @@ namespace tui {
       wxBrush        _brush;
       DECLARE_EVENT_TABLE();
    };
-   
+
+   //--------------------------------------------------------------------------
    class defineFill : public wxDialog
    {
    public:
@@ -371,6 +389,26 @@ namespace tui {
 
       DECLARE_EVENT_TABLE();
    };
+
+   //==========================================================================
+   class LayerRecord : public wxDialog {
+      public:
+                           LayerRecord(wxWindow*, wxWindowID, const wxString&,
+                                                   wxPoint, std::string, word);
+      private:
+         wxString       _layno;
+         wxString       _layname;
+   };
+
+   //--------------------------------------------------------------------------
+   class LayerList : public wxScrolledWindow {
+      typedef std::list<LayerRecord*> AllLayers;
+      public:
+                     LayerList(wxWindow*, const NMap&);
+      private:
+         AllLayers   _allLayers;
+   };
+
 }
 #endif
 
