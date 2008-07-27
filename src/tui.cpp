@@ -1657,20 +1657,25 @@ tui::defineFill::~defineFill()
 
 
 //==========================================================================
-tui::LayerRecord::LayerRecord( wxWindow *parent, std::string name, word layno) : wxPanel(parent)
+tui::LayerRecord::LayerRecord( wxWindow *parent, std::string name, word layno, wxArrayString& all_strings) : wxPanel(parent)
 {
    _layname = wxString(name.c_str(), wxConvUTF8);
    _layno.sprintf(wxT("%.3d"), layno);
 
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
 
-   wxTextCtrl* dwlayname  = DEBUG_NEW wxTextCtrl( this, -1, _layname, wxDefaultPosition, wxDefaultSize, 0,
+   wxTextCtrl* dwciflay  = DEBUG_NEW wxTextCtrl( this, -1, _layname, wxDefaultPosition, wxDefaultSize, 0,
          wxTextValidator(wxFILTER_ASCII, &_layname));
-   wxTextCtrl* dwlayno    = DEBUG_NEW wxTextCtrl( this, -1, _layno, wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
-         wxTextValidator(wxFILTER_NUMERIC, &_layno));
 
-   topsizer->Add(dwlayname, 2, wxRIGHT | wxALIGN_CENTER, 5);
-   topsizer->Add(dwlayno, 2, wxRIGHT | wxALIGN_CENTER, 5);
+   wxComboBox* dwtpdlays = DEBUG_NEW wxComboBox( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, all_strings, wxCB_SORT);
+   std::string ics = DATC->getLayerName(layno);
+   dwtpdlays->SetStringSelection(wxString(ics.c_str(), wxConvUTF8));
+
+//   wxTextCtrl* dwlayno    = DEBUG_NEW wxTextCtrl( this, -1, _layno, wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+//         wxTextValidator(wxFILTER_NUMERIC, &_layno));
+
+   topsizer->Add(dwciflay, 2, wxRIGHT | wxALIGN_CENTER, 5);
+   topsizer->Add(dwtpdlays, 2, wxRIGHT | wxALIGN_CENTER, 5);
 
    SetSizer( topsizer );
    topsizer->SetSizeHints( this );
@@ -1680,10 +1685,17 @@ tui::LayerRecord::LayerRecord( wxWindow *parent, std::string name, word layno) :
 tui::LayerList::LayerList(wxWindow* parent, const NMap& inlays) :
       wxScrolledWindow(parent, -1, wxDefaultPosition, wxDefaultSize)
 {
+   // collect all defined layers
+   nameList all_names;
+   DATC->all_layers(all_names);
+   wxArrayString all_strings;
+	for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+		all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    for (NMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-      tui::LayerRecord* clr = DEBUG_NEW tui::LayerRecord(this, CNM->first, CNM->second);
+      tui::LayerRecord* clr = DEBUG_NEW tui::LayerRecord(this, CNM->first, CNM->second, all_strings);
       _allLayers.push_back(clr);
       topsizer->Add(clr, 2, wxALIGN_CENTER, 5);
    }

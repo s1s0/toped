@@ -195,6 +195,7 @@ namespace layprop {
       std::string                getColorName(word layno) const;
       std::string                getFillName(word layno) const;
       std::string                getLineName(word layno) const;
+      void                       all_layers(nameList&) const;
       word                       drawinglayer() const {return _drawinglayer;}
       const byte*                getFill(word layno) const;
       const byte*                getFill(std::string) const;
@@ -302,6 +303,7 @@ namespace layprop {
       void              mousePoint(const TP& lp)         {_supp_data.mousePoint(lp);}
       void              mouseStop()                      {_supp_data.mouseStop();}
       console::ACTIVE_OP currentop() const               {return _drawprop.currentop();}
+      void              all_layers(nameList& laylist) const {_drawprop.all_layers(laylist);}
       void              all_colors(nameList&) const;
       void              all_fills(nameList&) const;
       void              all_lines(nameList&) const;

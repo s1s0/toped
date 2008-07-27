@@ -516,6 +516,12 @@ std::string layprop::DrawProperties::getLineName(word layno) const
    else return "";
 }
 
+void layprop::DrawProperties::all_layers(nameList& alllays) const
+{
+   for (laySetList::const_iterator CL = _layset.begin(); CL != _layset.end(); CL++)
+      alllays.push_back(CL->second->name());
+}
+
 const layprop::LineSettings* layprop::DrawProperties::getLine(word layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
