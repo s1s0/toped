@@ -403,9 +403,11 @@ namespace tui {
    class LayerList : public wxScrolledWindow {
       typedef std::list<LayerRecord*> AllLayers;
       public:
-                     LayerList(wxWindow*, const NMap&);
+                     LayerList(wxWindow*, wxWindowID, wxPoint, wxSize, const NMap&);
+         void        OnSize( wxSizeEvent& );
       private:
          AllLayers   _allLayers;
+         DECLARE_EVENT_TABLE();
    };
 
 }

@@ -464,14 +464,15 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
 //   tui::LayerRecord* _laylist = DEBUG_NEW tui::LayerRecord(this, std::string("boza"), 100);
 
 
-   tui::LayerList* _laylist = DEBUG_NEW tui::LayerList(this, inlays);
+   tui::LayerList* _laylist = DEBUG_NEW tui::LayerList(this, wxID_ANY, wxDefaultPosition, wxSize(100,100), inlays);
+   _laylist->SetScrollbars( 10, 10, 50, 50 );
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   lists_sizer->Add(_nameList, 0, wxEXPAND );
-   lists_sizer->Add(_laylist, 0, wxEXPAND);
+   lists_sizer->Add(_nameList, 1, wxEXPAND );
+   lists_sizer->Add(_laylist, 1, wxEXPAND);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
@@ -1682,8 +1683,12 @@ tui::LayerRecord::LayerRecord( wxWindow *parent, std::string name, word layno, w
 }
 
 //--------------------------------------------------------------------------
-tui::LayerList::LayerList(wxWindow* parent, const NMap& inlays) :
-      wxScrolledWindow(parent, -1, wxDefaultPosition, wxDefaultSize)
+BEGIN_EVENT_TABLE(tui::LayerList, wxScrolledWindow)
+   EVT_SIZE( tui::LayerList::OnSize )
+END_EVENT_TABLE()
+
+tui::LayerList::LayerList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const NMap& inlays) :
+      wxScrolledWindow(parent, id, pnt, sz)
 {
    // collect all defined layers
    nameList all_names;
@@ -1705,3 +1710,17 @@ tui::LayerList::LayerList(wxWindow* parent, const NMap& inlays) :
 //   topsizer->SetSizeHints( this );
 }
 
+void tui::LayerList::OnSize( wxSizeEvent &WXUNUSED(event) )
+{
+   /*Comment below as well as the whole method is taken from wx samples scrollsub.cpp*/
+   // We need to override OnSize so that our scrolled
+   // window a) does call Layout() to use sizers for
+   // positioning the controls but b) does not query
+   // the sizer for their size and use that for setting
+   // the scrollable area as set that ourselves by
+   // calling SetScrollbar() further down.
+
+   Layout();
+
+   AdjustScrollbars();
+}
