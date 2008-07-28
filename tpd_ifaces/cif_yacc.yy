@@ -270,7 +270,7 @@ cifTrans:
       $$ = DEBUG_NEW CTM(); $$->FlipX(); /*TODO CHECK!*/
    }
    | tknCrotate cifBlank cifPoint          {
-      $$ = DEBUG_NEW CTM(); $$->Rotate(*($3));delete $3 /*TODO CHECK!*/
+      $$ = DEBUG_NEW CTM(); $$->Rotate(*($3));delete $3; /*TODO CHECK!*/
    }
 ;
 
