@@ -461,18 +461,14 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    DATC->unlockCIF();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
-//   tui::LayerRecord* _laylist = DEBUG_NEW tui::LayerRecord(this, std::string("boza"), 100);
-
-
-   tui::LayerList* _laylist = DEBUG_NEW tui::LayerList(this, wxID_ANY, wxDefaultPosition, wxSize(100,100), inlays);
-   _laylist->SetScrollbars( 10, 10, 50, 50 );
+   tui::LayerList* _laylist = DEBUG_NEW tui::LayerList(this, wxID_ANY, wxDefaultPosition, wxSize(265,300), inlays);
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_laylist, 1, wxEXPAND);
+   lists_sizer->Add(_laylist, 0, wxEXPAND);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
@@ -480,7 +476,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   topsizer->Add(lists_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
    topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
 
    SetSizer( topsizer );      // use the sizer for layout
@@ -1658,33 +1654,38 @@ tui::defineFill::~defineFill()
 
 
 //==========================================================================
-tui::LayerRecord::LayerRecord( wxWindow *parent, std::string name, word layno, wxArrayString& all_strings) : wxPanel(parent)
+//tui::LayerRecord::LayerRecord( wxWindow *parent, std::string name, word layno, wxArrayString& all_strings) : wxPanel(parent)
+tui::LayerRecord::LayerRecord( wxWindow *parent, wxPoint pnt, wxSize sz, const NMap& inlays, wxArrayString& all_strings) : wxPanel(parent, wxID_ANY, pnt, sz)
 {
-   _layname = wxString(name.c_str(), wxConvUTF8);
-   _layno.sprintf(wxT("%.3d"), layno);
+//   _layname = wxString(name.c_str(), wxConvUTF8);
+//   _layno.sprintf(wxT("%.3d"), layno);
 
-   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+//   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   word rowno = 0;
+   for (NMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   {
+      wxString boza = wxString(CNM->first.c_str(), wxConvUTF8);
+      wxTextCtrl* dwciflay  = DEBUG_NEW wxTextCtrl( this, -1, boza, wxPoint( 5,30*rowno+5), wxSize(100,25) /*,0,wxTextValidator(wxFILTER_ASCII, &_layname)*/);
+      wxComboBox* dwtpdlays = DEBUG_NEW wxComboBox( this, -1,  wxT(""), wxPoint(110,30*rowno+5), wxSize(150,25), all_strings, wxCB_SORT);
+      std::string ics = DATC->getLayerName(CNM->second);
+      dwtpdlays->SetStringSelection(wxString(ics.c_str(), wxConvUTF8));
+      rowno++;
+   }
 
-   wxTextCtrl* dwciflay  = DEBUG_NEW wxTextCtrl( this, -1, _layname, wxDefaultPosition, wxDefaultSize, 0,
-         wxTextValidator(wxFILTER_ASCII, &_layname));
 
-   wxComboBox* dwtpdlays = DEBUG_NEW wxComboBox( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, all_strings, wxCB_SORT);
-   std::string ics = DATC->getLayerName(layno);
-   dwtpdlays->SetStringSelection(wxString(ics.c_str(), wxConvUTF8));
+//    wxTextCtrl* dwlayno    = DEBUG_NEW wxTextCtrl( this, -1, _layno, wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+//          wxTextValidator(wxFILTER_NUMERIC, &_layno));
 
-//   wxTextCtrl* dwlayno    = DEBUG_NEW wxTextCtrl( this, -1, _layno, wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
-//         wxTextValidator(wxFILTER_NUMERIC, &_layno));
+//   topsizer->Add(dwciflay, 2, wxRIGHT | wxALIGN_CENTER, 5);
+//   topsizer->Add(dwtpdlays, 2, wxRIGHT | wxALIGN_CENTER, 5);
 
-   topsizer->Add(dwciflay, 2, wxRIGHT | wxALIGN_CENTER, 5);
-   topsizer->Add(dwtpdlays, 2, wxRIGHT | wxALIGN_CENTER, 5);
-
-   SetSizer( topsizer );
-   topsizer->SetSizeHints( this );
+//   SetSizer( topsizer );
+//   topsizer->SetSizeHints( this );
 }
 
 //--------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tui::LayerList, wxScrolledWindow)
-   EVT_SIZE( tui::LayerList::OnSize )
+      EVT_SIZE( tui::LayerList::OnSize )
 END_EVENT_TABLE()
 
 tui::LayerList::LayerList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const NMap& inlays) :
@@ -1694,17 +1695,23 @@ tui::LayerList::LayerList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize s
    nameList all_names;
    DATC->all_layers(all_names);
    wxArrayString all_strings;
-	for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
-		all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+      all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
-   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-   for (NMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
-   {
-      tui::LayerRecord* clr = DEBUG_NEW tui::LayerRecord(this, CNM->first, CNM->second, all_strings);
-      _allLayers.push_back(clr);
-      topsizer->Add(clr, 2, wxALIGN_CENTER, 5);
-   }
-   SetSizer( topsizer );
+//    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+//    for (NMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+//    {
+//       tui::LayerRecord* clr = DEBUG_NEW tui::LayerRecord(this, CNM->first, CNM->second, all_strings);
+//       _allLayers.push_back(clr);
+//       topsizer->Add(clr, 2, wxALIGN_CENTER, 5);
+//    }
+//    SetSizer( topsizer );
+   wxSize bozasz = GetClientSize();
+   _laypanel = DEBUG_NEW tui::LayerRecord(this, wxDefaultPosition, bozasz, inlays, all_strings);
+   SetTargetWindow(_laypanel);
+   if (inlays.size() > 10)
+      SetScrollbars(  0, 30,  0, inlays.size() );
+
 //   SetVirtualSizeHints(wxSize(100, 100), wxSize(200, 200));
 //   topsizer->SetVirtualSizeHints(this);
 //   topsizer->SetSizeHints( this );
@@ -1712,15 +1719,14 @@ tui::LayerList::LayerList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize s
 
 void tui::LayerList::OnSize( wxSizeEvent &WXUNUSED(event) )
 {
-   /*Comment below as well as the whole method is taken from wx samples scrollsub.cpp*/
-   // We need to override OnSize so that our scrolled
-   // window a) does call Layout() to use sizers for
-   // positioning the controls but b) does not query
-   // the sizer for their size and use that for setting
-   // the scrollable area as set that ourselves by
-   // calling SetScrollbar() further down.
+   //Comment below as well as the part of the method is taken from wx samples scrollsub.cpp
+   // We need to override OnSize so that our scrolled window
+   // a) does call Layout() to use sizers for positioning the controls but
+   // b) does not query the sizer for their size and use that for setting the scrollable
+   // area as set that ourselves by calling SetScrollbar() in the constructor.
 
    Layout();
-
+   wxSize client_size = GetClientSize();
+   _laypanel->SetClientSize(client_size);
    AdjustScrollbars();
 }

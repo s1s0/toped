@@ -393,7 +393,8 @@ namespace tui {
    //==========================================================================
    class LayerRecord : public wxPanel {
       public:
-                           LayerRecord(wxWindow*, std::string, word, wxArrayString&);
+/*                           LayerRecord(wxWindow*, std::string, word, wxArrayString&);*/
+                        LayerRecord(wxWindow*, wxPoint, wxSize, const NMap&, wxArrayString&);
       private:
          wxString       _layno;
          wxString       _layname;
@@ -403,10 +404,11 @@ namespace tui {
    class LayerList : public wxScrolledWindow {
       typedef std::list<LayerRecord*> AllLayers;
       public:
-                     LayerList(wxWindow*, wxWindowID, wxPoint, wxSize, const NMap&);
-         void        OnSize( wxSizeEvent& );
+                              LayerList(wxWindow*, wxWindowID, wxPoint, wxSize, const NMap&);
+         void                 OnSize( wxSizeEvent& );
       private:
-         AllLayers   _allLayers;
+         AllLayers            _allLayers;
+         tui::LayerRecord*    _laypanel;
          DECLARE_EVENT_TABLE();
    };
 
