@@ -33,6 +33,7 @@
 #include <wx/regex.h>
 #include "tui.h"
 #include "../tpd_DB/datacenter.h"
+#include "../tpd_DB/browsers.h"
 
 extern DataCenter*                DATC;
 
@@ -457,18 +458,18 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
             inlays[*NLI] = laynum++;
          }
       }
-
    DATC->unlockCIF();
+
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
-   tui::LayerList* _laylist = DEBUG_NEW tui::LayerList(this, wxID_ANY, wxDefaultPosition, wxSize(280,300), inlays);
+   _layList = DEBUG_NEW tui::LayerList(this, wxID_ANY, wxDefaultPosition, wxSize(280,300), inlays);
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_laylist, 0, wxEXPAND);
+   lists_sizer->Add(_layList, 0, wxEXPAND);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
@@ -1654,7 +1655,7 @@ tui::defineFill::~defineFill()
 
 
 //==========================================================================
-tui::LayerRecord::LayerRecord( wxWindow *parent, wxPoint pnt, wxSize sz, 
+tui::LayerRecords::LayerRecords( wxWindow *parent, wxPoint pnt, wxSize sz, 
             const NMap& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
@@ -1668,8 +1669,25 @@ tui::LayerRecord::LayerRecord( wxWindow *parent, wxPoint pnt, wxSize sz,
          wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
       wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, wxics,
          wxPoint(110,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
+      _allRecords.push_back(LayerRecord(dwciflay, dwtpdlays));
       rowno++;
    }
+}
+NMap* tui::LayerRecords::getCifLayerMap()
+{
+   NMap* cif_lay_map = DEBUG_NEW NMap();
+   for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
+   {
+      std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str());
+      word layno = DATC->getLayerNo(layname);
+      if (0 == layno)
+      {
+         layno = DATC->addlayer(layname);
+         browsers::layer_add(layname, layno);
+      }
+      (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str())] = layno;
+   }
+   return cif_lay_map;
 }
 
 //--------------------------------------------------------------------------
@@ -1678,26 +1696,26 @@ BEGIN_EVENT_TABLE(tui::LayerList, wxScrolledWindow)
 END_EVENT_TABLE()
 
 tui::LayerList::LayerList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const NMap& inlays) :
-      wxScrolledWindow(parent, id, pnt, sz)
+      wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
    nameList all_names;
    DATC->all_layers(all_names);
    wxArrayString all_strings;
-   int line_height = GetFont().GetPointSize() * 2.5;
+   int line_height = (int)(GetFont().GetPointSize() * 2.5);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
-   DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"), 
+   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"),
       wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
-   DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"), 
+   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
       wxPoint(110, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
-   _laypanel = DEBUG_NEW tui::LayerRecord(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
+   _laypanel = DEBUG_NEW tui::LayerRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
    SetTargetWindow(_laypanel); // trget scrollbar window
-   if (inlays.size() > sz.GetHeight() / (line_height + 5))
+   if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
       SetScrollbars(  0, (line_height+5),  0, inlays.size() );
 }
 

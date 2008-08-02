@@ -990,6 +990,15 @@ bool DataCenter::addlayer(std::string name, word layno)
    return status;
 }
 
+word DataCenter::addlayer(std::string name)
+{
+   word layno;
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   layno = _properties.addlayer(name);
+   PROPLock.Unlock();
+   return layno;
+}
+
 void DataCenter::addline(std::string name, std::string col, word pattern,
                                       byte patscale, byte width)
 {
