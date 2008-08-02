@@ -393,8 +393,7 @@ namespace tui {
    //==========================================================================
    class LayerRecord : public wxPanel {
       public:
-/*                           LayerRecord(wxWindow*, std::string, word, wxArrayString&);*/
-                        LayerRecord(wxWindow*, wxPoint, wxSize, const NMap&, wxArrayString&);
+                        LayerRecord(wxWindow*, wxPoint, wxSize, const NMap&, wxArrayString&, int);
       private:
          wxString       _layno;
          wxString       _layname;
