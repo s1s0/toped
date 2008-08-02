@@ -469,7 +469,8 @@ void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_m
    glBitmap(16,16,7,7,0,0, the_mark);
 }
 
-word layprop::DrawProperties::getLayerNo(std::string name) const {
+word layprop::DrawProperties::getLayerNo(std::string name) const
+{
   for (laySetList::const_iterator CL = _layset.begin(); CL != _layset.end(); CL++) {
     if (name == CL->second->name()) return CL->first;
   }
@@ -519,7 +520,7 @@ std::string layprop::DrawProperties::getLineName(word layno) const
 void layprop::DrawProperties::all_layers(nameList& alllays) const
 {
    for (laySetList::const_iterator CL = _layset.begin(); CL != _layset.end(); CL++)
-      alllays.push_back(CL->second->name());
+      if (0 != CL->first) alllays.push_back(CL->second->name());
 }
 
 const layprop::LineSettings* layprop::DrawProperties::getLine(word layno) const
@@ -752,6 +753,13 @@ bool layprop::ViewProperties::addlayer(std::string name, word layno)
       return true;
    }
    return false;
+}
+
+word layprop::ViewProperties::addlayer(std::string name)
+{
+   word layno = _drawprop._layset.rbegin()->first;
+   while (!addlayer(name, layno)) {layno++;}
+   return layno;
 }
 
 void layprop::ViewProperties::addUnpublishedLay(word layno)

@@ -132,7 +132,7 @@ namespace layprop {
    //=============================================================================
    class LayerSettings  {
    public:
-      LayerSettings(std::string name, std::string color, std::string filltype, std::string sline): 
+                        LayerSettings(std::string name, std::string color, std::string filltype, std::string sline): 
                                  _name(name), _color(color), _fill(filltype), _sline(sline),
                                                 _hidden(false), _locked(false) {};
       std::string       color()    const {return _color;}
@@ -256,6 +256,7 @@ namespace layprop {
                        ~ViewProperties(); 
       bool              addlayer(std::string, word, std::string, std::string, std::string);
       bool              addlayer(std::string, word);
+      word              addlayer(std::string);
       void              addUnpublishedLay(word);
       const laydata::ListOfWords& upLayers() {_uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers() {_uplaylist.clear();}

@@ -26,6 +26,7 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include <sstream>
 #include <wx/sizer.h>
 #include <wx/filename.h>
 #include <wx/image.h>
@@ -1264,9 +1265,23 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
+      // get the layer map first
+      std::ostringstream laymapstr;
+      NMap* laymap = dlg->getCifLayerMap();
+      word recno = 0;
+      laymapstr << "{";
+      for (NMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
+      {
+         if (recno != 0)
+            laymapstr << ",";
+         laymapstr << "{" << CLN->second << ",\"" << CLN->first << "\"}";
+         recno++;
+      }
+      laymapstr << "}";
+      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
       wxString ost;
-      ost << wxT("cifimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
-            << (dlg->get_recursive() ? wxT("true") : wxT("false")) << wxT(");");
+      ost << wxT("cifimport(\"") << dlg->getSelectedCell() << wxT("\" , ") << wxlaymap << wxT(",")
+            << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(");");
       _cmdline->parseCommand(ost);
    }
    delete dlg;
