@@ -149,8 +149,8 @@ int tellwrap() {
    return 1;/*line by line*/
 }
 
-void my_delete_yy_buffer( void* b ) {
-   yy_delete_buffer((YY_BUFFER_STATE) b);
+void delete_tell_lex_buffer( void* b ) {
+   tell_delete_buffer((YY_BUFFER_STATE) b);
 }
 
 //=============================================================================

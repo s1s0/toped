@@ -131,10 +131,25 @@ location_step(&ciflloc);
 %%
 
 /*<cdefines>{lexcif_digit}+  {                       return tknTword;        }*/
+
+/**************************************************************************/
+/*Support functions for the flex parser*/
+/**************************************************************************/
 int cifwrap() {
    return 1;/*line by line*/
 }
 
+void delete_cif_lex_buffer( void* b ) 
+{
+   cif_delete_buffer((YY_BUFFER_STATE) b);
+}
+
+void* new_cif_lex_buffer( FILE* cifin )
+{
+   YY_BUFFER_STATE b = yy_create_buffer( yyin, YY_BUF_SIZE );
+   yy_switch_to_buffer(b);
+   return (void*) b;
+}
 //=============================================================================
 // define scanner location tracking functions -
 // taken form tell_lex.ll
