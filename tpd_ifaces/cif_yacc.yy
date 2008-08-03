@@ -228,7 +228,6 @@ UEC_labelSig:
      tknP4N tknTuserid tknTblank cifPoint {
       CIFInFile->addLabelSig($2, $4);
       delete $2;
-      delete $4;
    }
 ;
 
