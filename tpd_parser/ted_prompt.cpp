@@ -61,7 +61,7 @@ extern yy_buffer_state* tell_scan_string(const char *str);
 extern void* tell_scan_string(const char *str);
 #endif
 
-extern void my_delete_yy_buffer( void* b );
+extern void delete_tell_lex_buffer( void* b );
 extern int tellparse(); // Calls the bison generated parser
 extern YYLTYPE telllloc; // parser current location - global variable, defined in bison
 
@@ -287,7 +287,7 @@ void* console::parse_thread::Entry() {
    void* b = tell_scan_string( command.mb_str() );
    StatusBusy(command);
    tellparse();
-   my_delete_yy_buffer( b );
+   delete_tell_lex_buffer( b );
    
    _mutex.Unlock();
    if (Console->canvas_invalid())
@@ -369,7 +369,7 @@ void console::ted_cmd::getCommandA() {
          telllloc.filename = NULL;
          void* b = tell_scan_string( command.mb_str() );
          tellparse();
-         my_delete_yy_buffer( b );
+         delete_tell_lex_buffer( b );
       }
       else
       {

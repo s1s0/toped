@@ -33,8 +33,8 @@
 
 
 CIFin::CifFile* CIFInFile = NULL;
-//extern void*   cif_scan_string(const char *str);
-//extern void    my_delete_yy_buffer( void* b );
+extern void*   new_cif_lex_buffer( FILE* cifin );
+extern void    delete_cif_lex_buffer( void* b ) ;
 extern int     cifparse(); // Calls the bison generated parser
 extern FILE*   cifin;
 extern int     cifdebug;
@@ -218,12 +218,14 @@ CIFin::CifFile::CifFile(std::string filename)
    _hiertree = NULL;
    _filename = filename;
    std::ostringstream info;
-   // feed the flex with the buffer of the input file
-   //(cifin is a global variable defined in the flex generated scanner)
-   if (!(cifin = fopen(_filename.c_str(),"r"))) // open the input file
+   FILE* cif_in_file;
+   // Open the input file
+   if (!(cif_in_file = fopen(_filename.c_str(),"r"))) // open the input file
    {
       _status = cfs_FNF; return;
    }
+   // feed the flex with the buffer of the input file
+   void* b = new_cif_lex_buffer( cif_in_file );
    info << "Parsing \"" << _filename << "\" using CIF grammar";
    tell_log(console::MT_INFO,info.str());
    CIFInFile = this;
@@ -235,10 +237,10 @@ CIFin::CifFile::CifFile(std::string filename)
    ciflloc.last_column  = ciflloc.last_line  = 1;
 /*   cifdebug = 1;*/
    cifparse();
-//   my_delete_yy_buffer( buf );
+   delete_cif_lex_buffer( b );
    if (cifnerrs > 0) _status = cfs_ERR;
    else              _status = cfs_POK;
-   fclose(cifin);
+   fclose(cif_in_file);
 }
 
 CIFin::CifFile::~CifFile()

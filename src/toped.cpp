@@ -1279,6 +1279,7 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
       }
       laymapstr << "}";
       wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
+      delete laymap;
       wxString ost;
       ost << wxT("cifimport(\"") << dlg->getSelectedCell() << wxT("\" , ") << wxlaymap << wxT(",")
             << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(");");
