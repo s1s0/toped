@@ -201,6 +201,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifLabelSig : public CifLabelLoc {
       public:
                      CifLabelSig(CifData*, std::string, TP*);
+                    ~CifLabelSig() {}
          CifDataType dataType()                       {return cif_LBL_SIG;}
    };
 
