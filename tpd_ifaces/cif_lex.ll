@@ -26,15 +26,6 @@
 //===========================================================================*/
 
 /*
- *
- * Use options
- *
- * 	%option prefix="foo"
- * 	%option outfile="lex.yy.c"
- *
- * to create multiple flex scanner in one project.
- *
- *
  * To create scanner class:
  *
  *	%option c++

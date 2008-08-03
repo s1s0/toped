@@ -1673,12 +1673,16 @@ tui::LayerRecords::LayerRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
       rowno++;
    }
 }
+
 NMap* tui::LayerRecords::getCifLayerMap()
 {
    NMap* cif_lay_map = DEBUG_NEW NMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str());
+      // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
+      if ("" == layname)
+         layname = std::string(CNM->_ciflay->GetLabel().mb_str());
       word layno = DATC->getLayerNo(layname);
       if (0 == layno)
       {

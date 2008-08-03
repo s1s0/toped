@@ -25,16 +25,6 @@
 //        $Author$
 //===========================================================================*/
 
-/*
- *
- * Use options
- *
- *    %name-prefix="cif"
- *    %yacc
- *
- * to create multiple parsers in one project.
- *
- */
 /*Switch on code processing locations for more acurate error messages*/
 %locations
 %{
@@ -45,7 +35,6 @@
 #include "cif_io.h"
 /* Switch on verbose error reporting messages*/
 #define YYERROR_VERBOSE 1
-int boza;
 extern CIFin::CifFile* CIFInFile;
 
 /*void ciferror (std::string s);*/
@@ -83,43 +72,43 @@ bool checkPositive(long, TpdYYLtype);
 
 %%
 cifFile:
-     tknCend cifBlank                      {boza = 10000;}
-   | commands tknCend cifBlank             {boza = 10001;}
+     tknCend cifBlank                      {}
+   | commands tknCend cifBlank             {}
 ;
 
 commands:
-     cifBlank command tknPsem              {boza = 10010;}
-   | commands cifBlank command tknPsem     {boza = 10011;}
+     cifBlank command tknPsem              {}
+   | commands cifBlank command tknPsem     {}
 ;
 
 primCommands:
-      cifBlank primCommand tknPsem         {boza = 10020;}
-   |  primCommands cifBlank primCommand tknPsem     {boza = 10021;}
+      cifBlank primCommand tknPsem         {}
+   |  primCommands cifBlank primCommand tknPsem     {}
 ;
 
 command:
-     primCommand                           {boza = 10030;}
-   | defDeleteCommand                      {boza = 10030;}
-   | defDefineCommand                      {boza = 10030;}
+     primCommand                           {}
+   | defDeleteCommand                      {}
+   | defDefineCommand                      {}
 ;
 
 primCommand:
-     polygonCommand                        {boza = 10040;}
-   | boxCommand                            {boza = 10041;}
-   | roundFlashCommand                     {boza = 10042;}
-   | wireCommand                           {boza = 10043;}
-   | layerCommand                          {boza = 10044;}
-   | callCommand                           {boza = 10045;}
-   | userExtensionCommand                  {boza = 10046;}
-   | UEC_cellName                          {             }
-   | UEC_cellOverlap                       {             }
-   | UEC_labelLoc                          {             }
-   | UEC_labelSig                          {             }
+     polygonCommand                        {}
+   | boxCommand                            {}
+   | roundFlashCommand                     {}
+   | wireCommand                           {}
+   | layerCommand                          {}
+   | callCommand                           {}
+   | userExtensionCommand                  {}
+   | UEC_cellName                          {}
+   | UEC_cellOverlap                       {}
+   | UEC_labelLoc                          {}
+   | UEC_labelSig                          {}
    | commentCommand                        {delete $1;  }
 ;
 
 defDefineCommand:
-     defStartCommand tknPsem primCommands defFinishCommand {boza = 10050;}
+     defStartCommand tknPsem primCommands defFinishCommand {}
 ;
 
 defStartCommand:
@@ -298,14 +287,13 @@ cifPath:
 ;
 
 cifBlank:
-                                           {boza = 10180;}
-   | tknTblank                             {boza = 10181;}
-/*   | cifBlank tknTblank                    {             }*/
+                                           {}
+   | tknTblank                             {}
 ;
 
 cifSep:
-     tknTupchar                            {boza = 10190;}
-   | tknTblank                             {boza = 10191;}
+     tknTupchar                            {}
+   | tknTblank                             {}
 ;
 %%
 
