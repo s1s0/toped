@@ -31,12 +31,14 @@
 #include "cif_yacc.h"
 #include "../tpd_common/outbox.h"
 
+
 CIFin::CifFile* CIFInFile = NULL;
 //extern void*   cif_scan_string(const char *str);
 //extern void    my_delete_yy_buffer( void* b );
 extern int     cifparse(); // Calls the bison generated parser
 extern FILE*   cifin;
 extern int     cifdebug;
+extern int     cifnerrs;
 
 
 //=============================================================================
@@ -234,7 +236,8 @@ CIFin::CifFile::CifFile(std::string filename)
 /*   cifdebug = 1;*/
    cifparse();
 //   my_delete_yy_buffer( buf );
-   _status = cfs_POK;
+   if (cifnerrs > 0) _status = cfs_ERR;
+   else              _status = cfs_POK;
    fclose(cifin);
 }
 
@@ -260,7 +263,7 @@ CIFin::CifFile::~CifFile()
    }
 
    delete _default;
-
+   CIFInFile = NULL;
 }
 
 void CIFin::CifFile::addStructure(_dbl_word ID, _dbl_word a, _dbl_word b)

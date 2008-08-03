@@ -37,8 +37,8 @@
 #define YYERROR_VERBOSE 1
 extern CIFin::CifFile* CIFInFile;
 
-/*void ciferror (std::string s);*/
 void ciferror(std::string, TpdYYLtype);
+void cifwarning(std::string, TpdYYLtype);
 bool checkPositive(long, TpdYYLtype);
 
 %}
@@ -192,7 +192,7 @@ userExtensionCommand:
      tknPdigit tknTuserText               {
       std::ostringstream ost;
       ost << "Unsupported user command: \"" << $1 << $2 << "\"";
-      ciferror(ost.str().c_str(), @1);
+      cifwarning(ost.str().c_str(), @1);
       delete $2;
    }
 ;
@@ -302,24 +302,13 @@ int ciferror (char *s)
       std::ostringstream ost;
       ost << "line " << ciflloc.first_line << ": col " << ciflloc.first_column
             << ": " << s;
-//      ost << s;
       tell_log(console::MT_ERROR,ost.str());
       return 0;
 }
 
-// void ciferror (std::string s)
-// {
-//    if (cfd) cfd->incErrors();
-//    else     yynerrs++;
-//    std::ostringstream ost;
-//    ost << "line " << telllloc.first_line << ": col " << telllloc.first_column << ": " << s;
-//    ost << s;
-//    tell_log(console::MT_ERROR,ost.str());
-// }
-
 void ciferror (std::string s, TpdYYLtype loc)
 {
-   yynerrs++;
+   cifnerrs++;
    std::ostringstream ost;
    ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
    if (loc.filename) {
@@ -328,6 +317,18 @@ void ciferror (std::string s, TpdYYLtype loc)
    }
    ost << s;
    tell_log(console::MT_ERROR,ost.str());
+}
+
+void cifwarning (std::string s, TpdYYLtype loc)
+{
+   std::ostringstream ost;
+   ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
+   if (loc.filename) {
+      std::string fn = loc.filename;
+      ost << "in file \"" << fn << "\" : ";
+   }
+   ost << s;
+   tell_log(console::MT_WARNING,ost.str());
 }
 
 bool checkPositive(long var, TpdYYLtype loc)
