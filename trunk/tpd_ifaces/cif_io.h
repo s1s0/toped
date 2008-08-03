@@ -191,7 +191,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifLabelLoc : public CifData {
       public:
                      CifLabelLoc(CifData*, std::string, TP*);
-         virtual    ~CifLabelLoc();
+         virtual   ~CifLabelLoc();
          CifDataType dataType()                       {return cif_LBL_LOC;}
       protected:
          std::string _label;
