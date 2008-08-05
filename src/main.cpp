@@ -456,7 +456,7 @@ bool TopedApp::OnInit() {
 	wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    GetLocalDirs();
 	GetGlobalDirs();
-   initDBLib(std::string(localDir.mb_str()));
+   initDBLib(std::string(localDir.mb_str(wxConvUTF8)));
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
    if (!Toped->view()->initStatus())

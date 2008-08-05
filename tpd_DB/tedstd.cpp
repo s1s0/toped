@@ -134,8 +134,10 @@ laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib)
 { //writing
    _design = (*tedlib)();_revision=0;_subrevision=6;
    _TEDLIB = tedlib;
-   if (NULL == (_file = fopen(filename.c_str(), "wb"))) {
-      std::string news = "File \"";
+	wxString str(filename.c_str(), wxConvUTF8);
+	std::string str2= str.mb_str();
+   if (NULL == (_file = fopen(str2.c_str(), "wb"))) {
+      std::string news = "File \""; 
       news += filename.c_str(); news += "\" can not be created";
       tell_log(console::MT_ERROR,news);
       return;
