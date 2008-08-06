@@ -398,7 +398,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
    _recursive->SetValue(true);
-   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    GDSin::GDSFile* AGDSDB = DATC->lockGDS();
       GDSin::GDSstructure* gdss = AGDSDB->Get_structures();
       while (gdss) 
@@ -438,7 +438,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
 //   _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
    _recursive->SetValue(true);
-   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    CIFin::CifFile* ACIFDB = DATC->lockCIF();
       CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
       while (cifs) 
@@ -745,55 +745,55 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    nameList all_names;
    wxArrayString all_strings;
    DATC->all_colors(all_names);
-	if (!all_names.empty())
-	{
-		for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
-			all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
-		if (no_color)
-			init_color = wxString(all_names.begin()->c_str(), wxConvUTF8);
-		_colors   = DEBUG_NEW wxComboBox( this, COLOR_COMBO, init_color, wxDefaultPosition, wxDefaultSize,all_strings, wxCB_READONLY | wxCB_SORT);
-		_colors->SetStringSelection(init_color);
-	}
-	else
-	{
-		_colors   = DEBUG_NEW wxComboBox( this, COLOR_COMBO, wxT("") , wxDefaultPosition, wxDefaultSize);
-	}
-		
-	all_names.clear();
-	all_strings.Clear();
-	DATC->all_fills(all_names);
-	if (!all_names.empty())
-	{
-		for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
-			all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
-		if (no_fill)
-			init_fill = wxString(all_names.begin()->c_str(), wxConvUTF8);
-		_fills   = DEBUG_NEW wxComboBox( this, FILL_COMBO, init_fill, wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
-		_fills->SetStringSelection(init_fill);
-	}
-	else
-	{
-		_fills   = DEBUG_NEW wxComboBox( this, FILL_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
-	}
-	
-	all_names.clear();
-	all_strings.Clear();
-	DATC->all_lines(all_names);
-	if (!all_names.empty())
-	{
-		for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
-		{
-			all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
-		}
-		if (no_line)
-			init_line = wxString(all_names.begin()->c_str(), wxConvUTF8);
-		_lines   = DEBUG_NEW wxComboBox( this, LINE_COMBO, init_line, wxDefaultPosition, wxDefaultSize, all_strings,wxCB_READONLY | wxCB_SORT);
-		_lines->SetStringSelection(init_line);
-	}
-	else
-	{
-		_lines   = DEBUG_NEW wxComboBox( this, LINE_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
-	}
+   if (!all_names.empty())
+   {
+      for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+         all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+      if (no_color)
+         init_color = wxString(all_names.begin()->c_str(), wxConvUTF8);
+      _colors   = DEBUG_NEW wxComboBox( this, COLOR_COMBO, init_color, wxDefaultPosition, wxDefaultSize,all_strings, wxCB_READONLY | wxCB_SORT);
+      _colors->SetStringSelection(init_color);
+   }
+   else
+   {
+      _colors   = DEBUG_NEW wxComboBox( this, COLOR_COMBO, wxT("") , wxDefaultPosition, wxDefaultSize);
+   }
+      
+   all_names.clear();
+   all_strings.Clear();
+   DATC->all_fills(all_names);
+   if (!all_names.empty())
+   {
+      for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+         all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+      if (no_fill)
+         init_fill = wxString(all_names.begin()->c_str(), wxConvUTF8);
+      _fills   = DEBUG_NEW wxComboBox( this, FILL_COMBO, init_fill, wxDefaultPosition, wxDefaultSize,all_strings,wxCB_READONLY | wxCB_SORT);
+      _fills->SetStringSelection(init_fill);
+   }
+   else
+   {
+      _fills   = DEBUG_NEW wxComboBox( this, FILL_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
+   }
+   
+   all_names.clear();
+   all_strings.Clear();
+   DATC->all_lines(all_names);
+   if (!all_names.empty())
+   {
+      for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+      {
+         all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+      }
+      if (no_line)
+         init_line = wxString(all_names.begin()->c_str(), wxConvUTF8);
+      _lines   = DEBUG_NEW wxComboBox( this, LINE_COMBO, init_line, wxDefaultPosition, wxDefaultSize, all_strings,wxCB_READONLY | wxCB_SORT);
+      _lines->SetStringSelection(init_line);
+   }
+   else
+   {
+      _lines   = DEBUG_NEW wxComboBox( this, LINE_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
+   }
    // The window layout
    wxBoxSizer *line1_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    line1_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Number:"), wxDefaultPosition, wxDefaultSize),
@@ -863,11 +863,11 @@ void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
    const layprop::tellRGB color = DATC->getColor(std::string(color_name.mb_str()));
    _sample->setColor(color);
 
-	//Next 2 strings need for Windows version
+   //Next 2 strings need for Windows version
    const byte* fill = DATC->getFill(std::string(_fillname.mb_str()));
    _sample->setFill(fill);
 
-	_sample->Refresh();
+   _sample->Refresh();
 }
 
 void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
@@ -1005,16 +1005,16 @@ END_EVENT_TABLE()
 tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) :
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
-	std::string init_color;
+   std::string init_color;
    nameList all_names;
    DATC->all_colors(all_names);
    _colorList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
-	if (!all_names.empty())
-	{
-		init_color = *(all_names.begin());
-	}
-	
-	for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   if (!all_names.empty())
+   {
+      init_color = *(all_names.begin());
+   }
+   
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
       _allColors[*CI] = DEBUG_NEW layprop::tellRGB(DATC->getColor(*CI));
@@ -1503,11 +1503,11 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
    DATC->all_fills(all_names);
    _fillList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    std::string init_color; 
-	if (!all_names.empty())
-	{
-		init_color = *(all_names.begin());
-	}
-	for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   if (!all_names.empty())
+   {
+      init_color = *(all_names.begin());
+   }
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _fillList->Append(wxString(CI->c_str(), wxConvUTF8));
       byte* pat = DEBUG_NEW byte[128];

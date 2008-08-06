@@ -735,10 +735,7 @@ void DataCenter::CIFimport( const nameList& top_names, NMap* cifLayers, bool ove
 {
    // DB shold have been locked at this point (from the tell functions)
    if (NULL == lockCIF())
-   {
-      std::string news = "No CIF data in memory. Parse CIF file first";
-      tell_log(console::MT_ERROR,news);
-   }
+      tell_log(console::MT_ERROR,"No CIF data in memory. Parse CIF file first");
    else
    {
       CIFin::CIF2TED converter(_CIFDB, _TEDLIB(), cifLayers);
@@ -746,6 +743,7 @@ void DataCenter::CIFimport( const nameList& top_names, NMap* cifLayers, bool ove
          converter.top_structure(*CN, overwrite);
       _TEDLIB()->modified = true;
       unlockCIF();
+      tell_log(console::MT_INFO,"Done");
    }
 }
 
