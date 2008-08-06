@@ -2078,7 +2078,7 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttbn
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::tthsh& _h) {
-   _file << "{" << _h.number().value() << "," << _h.name().value() << "}";
+   _file << "{" << _h.number().value() << ",\"" << _h.name().value() << "\"}";
    return *this;
 }
 
