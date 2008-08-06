@@ -74,6 +74,8 @@ bool checkPositive(long, TpdYYLtype);
 cifFile:
      tknCend cifBlank                      {}
    | commands tknCend cifBlank             {}
+   | tknERROR                              {ciferror("Unexpected symbol", @1);YYABORT;}
+   | error                                 {YYABORT;}
 ;
 
 commands:
