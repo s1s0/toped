@@ -197,6 +197,16 @@ void CIFin::CifStructure::hierPrep(CifFile& cfile)
       _local = _local->last();
    }
    _children.unique();
+
+   if ("" == _cellName)
+   {
+      std::ostringstream tmp_name;
+      tmp_name << "_cifCellNo_" << _ID;
+      _cellName = tmp_name.str();
+      std::ostringstream news;
+      news << "Name \"" << _cellName << "\" assigned automatically to CIF cell "<< _ID ;
+      tell_log(console::MT_INFO,news.str());
+   }
 }
 
 CIFin::CIFHierTree* CIFin::CifStructure::hierOut(CIFHierTree* theTree, CifStructure* parent)
@@ -230,7 +240,7 @@ CIFin::CifFile::CifFile(std::string filename)
    tell_log(console::MT_INFO,info.str());
    CIFInFile = this;
    _default = DEBUG_NEW CifStructure(0,NULL);
-   _default->cellNameIs(getFileNameOnly(filename));
+   _default->cellNameIs(std::string(getFileNameOnly(filename) + "_cif"));
 
    // run the bison generated parser
    ciflloc.first_column = ciflloc.first_line = 1;
@@ -396,19 +406,13 @@ CIFin::CifStructure* CIFin::CifFile::getStructure(std::string cellname)
 
 void CIFin::CifFile::hierPrep()
 {
-//   CifCellList allCiffCells;
    _default->hierPrep(*this);
    CifStructure* local = _first;
-/*   std::ostringstream info;
-   info << "\t <<List of cells>> \n";*/
    while (NULL != local)
    {
-//       allCiffCells.push_back(local);
-//       info << local->ID() << "\t\t\""<< local->cellname() << "\"\n";
       local->hierPrep(*this);
       local = local->last();
    }
-//   tell_log(console::MT_INFO,info.str());
 }
 
 
