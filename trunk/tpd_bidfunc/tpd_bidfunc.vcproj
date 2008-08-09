@@ -87,6 +87,7 @@
 			OutputDirectory=".\Release"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="4"
+			CharacterSet="1"
 			WholeProgramOptimization="0"
 			>
 			<Tool
