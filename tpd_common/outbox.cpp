@@ -360,7 +360,8 @@ bool TpdTime::getStdCTime(wxString& exp) {
 
 bool expandFileName( std::string& filename)
 {
-   wxFileName fName(wxString(filename.c_str(), wxConvUTF8));
+	std::string str(string2mbstring(filename));
+   wxFileName fName(wxString(str.c_str(), wxConvUTF8));
    fName.Normalize();
    if (fName.IsOk())
    {
@@ -383,6 +384,14 @@ std::string getFileNameOnly( std::string filename )
       wxString name = fName.GetName();
       return std::string(name.mb_str());
    }
+}
+
+//convert string to multibyte string
+std::string string2mbstring(std::string str)
+{
+	wxString strtemp(str.c_str(), wxConvUTF8);
+	std::string mbstr(strtemp.mb_str());
+	return mbstr;
 }
 
 //=============================================================================
