@@ -250,7 +250,7 @@ void laydata::tdtdefaultcell::write(TEDfile* const, const cellList&, const TDTHi
    assert(false);
 }
 
-void laydata::tdtdefaultcell::GDSwrite(GDSin::GDSFile&, const cellList&, const TDTHierTree*, real, bool) const
+void laydata::tdtdefaultcell::GDSwrite(GDSin::GdsFile&, const cellList&, const TDTHierTree*, real, bool) const
 {
    assert(false);
 }
@@ -499,7 +499,7 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, c
       allcells.find(Child->GetItem()->name())->second->write(tedfile, allcells, Child);
 //      allcells[Child->GetItem()->name()]->write(tedfile, Child);
       Child = Child->GetBrother(TARGETDB_LIB);
-	}
+   }
    // If no more children and the cell has not been written yet
    if (tedfile->checkcellwritten(name())) return;
    std::string message = "...writing " + name();
@@ -518,7 +518,7 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, c
    tedfile->registercellwritten(name());
 }
 
-void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
+void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
                                  const TDTHierTree* root, real UU, bool recur) const
 {
    // We going to write the cells in hierarchical order. Children - first!
@@ -536,7 +536,7 @@ void laydata::tdtcell::GDSwrite(GDSin::GDSFile& gdsf, const cellList& allcells,
    //
    std::string message = "...converting " + name();
    tell_log(console::MT_INFO, message);
-   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BGNSTR);
+   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_BGNSTR);
    gdsf.SetTimes(wr);gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_STRNAME, name().size());
    wr->add_ascii(name().c_str()); gdsf.flush(wr);

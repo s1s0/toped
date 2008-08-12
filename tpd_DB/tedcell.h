@@ -103,7 +103,7 @@ namespace laydata {
          virtual void        updateHierarchy(tdtlibdir*);
          virtual DBbox       overlap() const;
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
-         virtual void        GDSwrite(GDSin::GDSFile&, const cellList&, const TDTHierTree*, real, bool) const;
+         virtual void        GDSwrite(GDSin::GdsFile&, const cellList&, const TDTHierTree*, real, bool) const;
          virtual void        collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const;
 
          void                 parentfound()     {_orphan = false;};
@@ -138,7 +138,7 @@ namespace laydata {
                                           ArrayProperties&, bool sortnow = true);
       bool                 addchild(tdtdesign*, tdtdefaultcell*);
       void                 write(TEDfile* const, const cellList&, const TDTHierTree*) const;
-      void                 GDSwrite(GDSin::GDSFile&, const cellList&,
+      void                 GDSwrite(GDSin::GdsFile&, const cellList&,
                                                  const TDTHierTree*, real, bool) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&,
                                    const cellList* = NULL, const TDTHierTree* = NULL) const;

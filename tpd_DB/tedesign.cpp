@@ -154,9 +154,9 @@ void laydata::tdtlibrary::registercellread(std::string cellname, tdtcell* cell) 
    _cells[cellname] = cell;
 }
 
-void laydata::tdtlibrary::GDSwrite(GDSin::GDSFile& gdsf, tdtcell* top, bool recur)
+void laydata::tdtlibrary::GDSwrite(GDSin::GdsFile& gdsf, tdtcell* top, bool recur)
 {
-   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_LIBNAME, _name.size());
+   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_LIBNAME, _name.size());
    wr->add_ascii(_name.c_str()); gdsf.flush(wr);
 
    wr = gdsf.SetNextRecord(gds_UNITS);

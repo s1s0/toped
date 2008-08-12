@@ -572,9 +572,9 @@ void laydata::tdtbox::write(TEDfile* const tedfile) const {
    tedfile->putTP(_p2);
 }
 
-void laydata::tdtbox::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
+void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
+   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_LAYER);
    wr->add_int2b(lay);gdsf.flush(wr);
@@ -1027,9 +1027,9 @@ void laydata::tdtpoly::write(TEDfile* const tedfile) const {
       tedfile->putTP(&_plist[i]);
 }
 
-void laydata::tdtpoly::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
+void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
+   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_LAYER);
    wr->add_int2b(lay);gdsf.flush(wr);
@@ -1440,9 +1440,9 @@ void laydata::tdtwire::write(TEDfile* const tedfile) const {
       tedfile->putTP(&_plist[i]);
 }
 
-void laydata::tdtwire::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
+void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_PATH);
+   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_PATH);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_LAYER);
    wr->add_int2b(lay);gdsf.flush(wr);
@@ -1628,9 +1628,9 @@ laydata::tdtcell* laydata::tdtcellref::cstructure() const
    return celldef;
 }
 
-void laydata::tdtcellref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
+void laydata::tdtcellref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_SREF);
+   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_SREF);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_SNAME, _structure->first.size());
    wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);
@@ -1949,9 +1949,9 @@ void laydata::tdtcellaref::write(TEDfile* const tedfile) const {
    tedfile->putWord(_arrprops.cols());
 }
 
-void laydata::tdtcellaref::GDSwrite(GDSin::GDSFile& gdsf, word lay, real) const
+void laydata::tdtcellaref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_AREF);
+   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_AREF);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_SNAME, _structure->first.size());
    wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);
@@ -2209,9 +2209,9 @@ void laydata::tdttext::write(TEDfile* const tedfile) const {
    tedfile->putCTM(_translation);
 }
 
-void laydata::tdttext::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
+void laydata::tdttext::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 {
-   GDSin::GDSrecord* wr = gdsf.SetNextRecord(gds_TEXT);
+   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_TEXT);
    gdsf.flush(wr);
    wr = gdsf.SetNextRecord(gds_LAYER);
    wr->add_int2b(lay);gdsf.flush(wr);
