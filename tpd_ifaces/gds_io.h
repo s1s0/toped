@@ -480,10 +480,12 @@ namespace GDSin {
       GDSstructure(GDSFile* cf, GDSstructure* lst);
       bool              RegisterStructure(GDSstructure* ws);
       GDSHierTree*      HierOut(GDSHierTree* Htree, GDSstructure* parent);
-      GDSstructure*     GetLast(){return last;}
-      const char*       Get_StrName()const {return strname;}
-      GDSdata*          Get_Fdata(){return Fdata;};
-      bool              Get_Allay(byte i){return Allay[i];};
+      GDSstructure*     GetLast()               { return last;}
+      const char*       Get_StrName()const      { return strname;}
+      GDSdata*          Get_Fdata()             { return Fdata;};
+      bool              Get_Allay(byte i)       { return Allay[i];};
+      bool              traversed() const       { return _traversed;}
+      void              set_traversed(bool trv) { _traversed = trv;}
       ~GDSstructure();
       bool              HaveParent;
       ChildStructure    children;
@@ -495,6 +497,7 @@ namespace GDSin {
       GDSdata*          Fdata;
       char              strname[65];
       GDSstructure*     last;
+      bool              _traversed;       //! For hierarchy traversing purposes
    };
 
    /*** GDSLibrary **************************************************************

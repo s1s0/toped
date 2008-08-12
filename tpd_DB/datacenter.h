@@ -33,11 +33,14 @@
 #include "viewprop.h"
 
 namespace GDSin {
-   class gds2ted {
+
+   class Gds2Ted {
    public:
-                           gds2ted(GDSin::GDSFile* src_lib, laydata::tdtdesign* dst_lib);
-      void                 structure(const char* gname, bool recursive, bool overwrite);
+                           Gds2Ted(GDSin::GDSFile* src_lib, laydata::tdtdesign* dst_lib);
+      void                 top_structure(std::string, bool, bool);
    protected:
+      void                 child_structure(const GDSin::GDSHierTree*, bool, bool);
+      void                 convert_prep(const GDSin::GDSHierTree* item, bool, bool);
       void                 convert(GDSin::GDSstructure*, laydata::tdtcell*);
       void                 polygon(GDSin::GDSpolygon*, laydata::tdtcell*);
       void                 path(GDSin::GDSpath*, laydata::tdtcell*);
@@ -52,14 +55,14 @@ namespace GDSin {
 
 namespace CIFin {
 
-   class CIF2TED {
+   class Cif2Ted {
       public:
-                              CIF2TED(CIFin::CifFile*, laydata::tdtdesign*, NMap*);
+                              Cif2Ted(CIFin::CifFile*, laydata::tdtdesign*, NMap*);
          void                 top_structure(std::string, bool);
       protected:
          void                 child_structure(const CIFin::CIFHierTree*, bool);
-         void                 convert(CIFin::CifStructure*, laydata::tdtcell*);
          void                 convert_prep(const CIFin::CIFHierTree* item, bool);
+         void                 convert(CIFin::CifStructure*, laydata::tdtcell*);
          void                 box ( CIFin::CifBox*     ,laydata::tdtlayer*, std::string );
          void                 poly( CIFin::CifPoly*    ,laydata::tdtlayer*, std::string );
          void                 wire( CIFin::CifWire*    ,laydata::tdtlayer*, std::string );
