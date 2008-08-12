@@ -705,7 +705,9 @@ GDSin::GDSlibrary::~GDSlibrary() {
 //==============================================================================
 // class GDSstructure
 //==============================================================================
-GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst) {   
+GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst)
+{
+   _traversed = false;
    int i;
    //initializing
    last = lst; Fdata = NULL;
