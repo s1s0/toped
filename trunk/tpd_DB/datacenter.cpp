@@ -39,7 +39,7 @@ DataCenter*               DATC = NULL;
 //-----------------------------------------------------------------------------
 // class Gds2Ted
 //-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GDSFile* src_lib, laydata::tdtdesign* dst_lib)
+GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib)
 {
    _src_lib = src_lib;
    _dst_lib = dst_lib;
@@ -49,7 +49,7 @@ GDSin::Gds2Ted::Gds2Ted(GDSin::GDSFile* src_lib, laydata::tdtdesign* dst_lib)
 void GDSin::Gds2Ted::top_structure(std::string top_str, bool recursive, bool overwrite)
 {
    assert(_src_lib->hiertree());
-   GDSin::GDSstructure *src_structure = _src_lib->GetStructure(top_str.c_str());
+   GDSin::GdsStructure *src_structure = _src_lib->GetStructure(top_str.c_str());
    if (NULL != src_structure)
    {
       GDSin::GDSHierTree* root = _src_lib->hiertree()->GetMember(src_structure);
@@ -82,7 +82,7 @@ void GDSin::Gds2Ted::child_structure(const GDSin::GDSHierTree* root, bool recurs
 
 void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool recursive, bool overwrite)
 {
-   GDSin::GDSstructure* src_structure = const_cast<GDSin::GDSstructure*>(item->GetItem());
+   GDSin::GdsStructure* src_structure = const_cast<GDSin::GdsStructure*>(item->GetItem());
    std::string gname = src_structure->Get_StrName();
    // check that destination structure with this name exists
    laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
@@ -113,20 +113,20 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool recursive
    src_structure->set_traversed(true);
 }
 
-void GDSin::Gds2Ted::convert(GDSin::GDSstructure* src, laydata::tdtcell* dst)
+void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
 {
-   GDSin::GDSdata *wd = src->Get_Fdata();
+   GDSin::GdsData *wd = src->Get_Fdata();
    while( wd )
    {
       switch( wd->GetGDSDatatype() )
       {
-//         case      gds_BOX: box(static_cast<GDSin::GDSbox*>(wd), dst);  break;
+//         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
          case      gds_BOX:
-         case gds_BOUNDARY: polygon(static_cast<GDSin::GDSpolygon*>(wd), dst);  break;
+         case gds_BOUNDARY: polygon(static_cast<GDSin::GdsPolygon*>(wd), dst);  break;
          case     gds_PATH: path(static_cast<GDSin::GDSpath*>(wd), dst);  break;
-         case     gds_SREF: ref(static_cast<GDSin::GDSref*>(wd), dst);  break;
-         case     gds_AREF: aref(static_cast<GDSin::GDSaref*>(wd), dst);  break;
-         case     gds_TEXT: text(static_cast<GDSin::GDStext*>(wd), dst);  break;
+         case     gds_SREF: ref(static_cast<GDSin::GdsRef*>(wd), dst);  break;
+         case     gds_AREF: aref(static_cast<GDSin::GdsARef*>(wd), dst);  break;
+         case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd), dst);  break;
                    default: {/*Error - unexpected type*/}
       }
       wd = wd->GetLast();
@@ -135,7 +135,7 @@ void GDSin::Gds2Ted::convert(GDSin::GDSstructure* src, laydata::tdtcell* dst)
 //   dst->secure_layprop();
 }
 
-void GDSin::Gds2Ted::polygon(GDSin::GDSpolygon* wd, laydata::tdtcell* dst)
+void GDSin::Gds2Ted::polygon(GDSin::GdsPolygon* wd, laydata::tdtcell* dst)
 {
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
                                           (dst->securelayer(wd->GetLayer()));
@@ -175,7 +175,7 @@ void GDSin::Gds2Ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst)
    wl->addwire(pl, wd->Get_width(),false);
 }
 
-void GDSin::Gds2Ted::ref(GDSin::GDSref* wd, laydata::tdtcell* dst)
+void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
 {
    if (NULL != _dst_lib->checkcell(wd->GetStrname()))
    {
@@ -199,7 +199,7 @@ void GDSin::Gds2Ted::ref(GDSin::GDSref* wd, laydata::tdtcell* dst)
    // How about structures defined, but not parsed yet????
 }
 
-void GDSin::Gds2Ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst)
+void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
 {
    if (NULL != _dst_lib->checkcell(wd->GetStrname()))
    {
@@ -228,7 +228,7 @@ void GDSin::Gds2Ted::aref(GDSin::GDSaref* wd, laydata::tdtcell* dst)
    // How about structures defined, but not parsed yet????
 }
 
-void GDSin::Gds2Ted::text(GDSin::GDStext* wd, laydata::tdtcell* dst)
+void GDSin::Gds2Ted::text(GDSin::GdsText* wd, laydata::tdtcell* dst)
 {
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
                                        (dst->securelayer(wd->GetLayer()));
@@ -627,7 +627,7 @@ void DataCenter::GDSexport(std::string& filename, bool x2048)
 {
    std::string nfn;
    //Get actual time
-   GDSin::GDSFile gdsex(filename, time(NULL));
+   GDSin::GdsFile gdsex(filename, time(NULL));
    _TEDLIB()->GDSwrite(gdsex, NULL, true);
    if (x2048) gdsex.updateLastRecord();
    gdsex.closeFile();
@@ -637,7 +637,7 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, bool recur, std::string& file
 {
    std::string nfn;
    //Get actual time
-   GDSin::GDSFile gdsex(filename, time(NULL));
+   GDSin::GdsFile gdsex(filename, time(NULL));
    _TEDLIB()->GDSwrite(gdsex, cell, recur);
    if (x2048) gdsex.updateLastRecord();
    gdsex.closeFile();
@@ -655,7 +655,7 @@ bool DataCenter::GDSparse(std::string filename)
    }
    // parse the GDS file - don't forget to lock the GDS mutex here!
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
-   _GDSDB = DEBUG_NEW GDSin::GDSFile(filename.c_str());
+   _GDSDB = DEBUG_NEW GDSin::GdsFile(filename.c_str());
    status = _GDSDB->status();
    if (status)
    {
@@ -812,7 +812,7 @@ void DataCenter::unlockDB()
    DBLock.Unlock();
 }
 
-GDSin::GDSFile* DataCenter::lockGDS(bool throwexception) 
+GDSin::GdsFile* DataCenter::lockGDS(bool throwexception) 
 {
    // Carefull HERE! When GDS is locked form the main thread
    // (GDS browser), then there is no catch pending -i.e.

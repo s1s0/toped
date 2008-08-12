@@ -34,9 +34,9 @@
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/outbox.h"
 
-static GDSin::GDSFile*        InFile    = NULL;
+static GDSin::GdsFile*        InFile    = NULL;
 //==============================================================================
-GDSin::GDSrecord::GDSrecord(FILE* Gf, word rl, byte rt, byte dt) {
+GDSin::GdsRecord::GdsRecord(FILE* Gf, word rl, byte rt, byte dt) {
    reclen = rl;rectype = rt;datatype = dt;
    if (rl) {
       record = DEBUG_NEW byte[reclen];
@@ -46,7 +46,7 @@ GDSin::GDSrecord::GDSrecord(FILE* Gf, word rl, byte rt, byte dt) {
    else {record = NULL;numread = 0;isvalid = true;}
 }
 
-GDSin::GDSrecord::GDSrecord(byte rt, byte dt, word rl) {
+GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl) {
    rectype = rt;datatype = dt;
    reclen = rl+4; index = 0;
    // compensation for odd length ASCII string
@@ -57,7 +57,7 @@ GDSin::GDSrecord::GDSrecord(byte rt, byte dt, word rl) {
    record[index++] = datatype;
 }
 
-word GDSin::GDSrecord::flush(FILE* Gf) {
+word GDSin::GdsRecord::flush(FILE* Gf) {
    assert(index == reclen);
    word bytes_written = fwrite(record,1,reclen,Gf);
    /*TODO !!! Error correction HERE instead of assertetion */
@@ -65,7 +65,7 @@ word GDSin::GDSrecord::flush(FILE* Gf) {
    return bytes_written;
 }
 
-bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
+bool GDSin::GdsRecord::Ret_Data(void* var, word curnum, byte len) {
    byte      *rlb;   
    char      *rlc;
    switch (datatype) {
@@ -134,7 +134,7 @@ bool GDSin::GDSrecord::Ret_Data(void* var, word curnum, byte len) {
    return true;
 }
 
-double GDSin::GDSrecord::gds2ieee(byte* gds) {
+double GDSin::GdsRecord::gds2ieee(byte* gds) {
    // zero is an exception (as always!) so check it first
    byte zerocheck;
    for (zerocheck = 0; zerocheck < 8; zerocheck++)
@@ -187,7 +187,7 @@ double GDSin::GDSrecord::gds2ieee(byte* gds) {
    return *((double*)&ieee);
 }
 
-byte* GDSin::GDSrecord::ieee2gds(double inval) {
+byte* GDSin::GdsRecord::ieee2gds(double inval) {
    byte* ieee = ((byte*)&inval);
    byte* gds = DEBUG_NEW byte[8];
    // zero is an exception (as always!) so check it first
@@ -235,14 +235,14 @@ byte* GDSin::GDSrecord::ieee2gds(double inval) {
    return gds;
 }
 
-void GDSin::GDSrecord::add_int2b(const word data)
+void GDSin::GdsRecord::add_int2b(const word data)
 {
    byte* recpointer = (byte*)&data;
    record[index++] = recpointer[1];
    record[index++] = recpointer[0];
 }
 
-void GDSin::GDSrecord::add_int4b(const int4b data)
+void GDSin::GdsRecord::add_int4b(const int4b data)
 {
    byte* recpointer = (byte*)&data;
    record[index++] = recpointer[3];
@@ -251,7 +251,7 @@ void GDSin::GDSrecord::add_int4b(const int4b data)
    record[index++] = recpointer[0];
 }
 
-void GDSin::GDSrecord::add_ascii(const char* data)
+void GDSin::GdsRecord::add_ascii(const char* data)
 {  
    word slen = strlen(data);
    bool compensate = (0 != (slen % 2));
@@ -262,22 +262,22 @@ void GDSin::GDSrecord::add_ascii(const char* data)
    assert(compensate ? ((reclen-4) == slen+1) : ((reclen-4) == slen) );
 }
 
-void GDSin::GDSrecord::add_real8b(const real data)
+void GDSin::GdsRecord::add_real8b(const real data)
 {
    byte* gdsreal = ieee2gds(data);
    for (byte i = 0; i < 8; i++) record[index++] = gdsreal[i];
    delete [] gdsreal;
 }
 
-GDSin::GDSrecord::~GDSrecord()
+GDSin::GdsRecord::~GdsRecord()
 {
    delete[] record;
 }
 
 //==============================================================================
-// class GDSFile
+// class GdsFile
 //==============================================================================
-GDSin::GDSFile::GDSFile(const char* fn) {
+GDSin::GdsFile::GdsFile(const char* fn) {
    InFile = this; _hiertree = NULL;_status = false;
    GDSIIwarnings = GDSIIerrors = 0;
    filename = fn;
@@ -301,7 +301,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
 //   if (divi.rem != 0) AddLog('W',"File size is not multiple of 2048");
 //   prgrs->SetRange32(0,file_length);// initializes progress indicator control
 //   prgrs->SetStep(1);
-   GDSrecord* wr = NULL;
+   GdsRecord* wr = NULL;
    AddLog('O',"Reading...");
 
    do {// start reading
@@ -320,7 +320,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
                delete wr;break;
             case gds_LIBNAME:   // down in the hierarchy. 
                //Start reading the library structure
-               library = DEBUG_NEW GDSlibrary(this, wr);
+               library = DEBUG_NEW GdsLibrary(this, wr);
                //build the hierarchy tree
                library->SetHierarchy();
                closeFile();// close the input stream
@@ -340,7 +340,7 @@ GDSin::GDSFile::GDSFile(const char* fn) {
    while (true);
 }
 
-GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
+GDSin::GdsFile::GdsFile(std::string fn, time_t acctime) {
    InFile = this;_hiertree = NULL;
    GDSIIwarnings = GDSIIerrors = 0;
    filename = fn;//initializing
@@ -380,7 +380,7 @@ GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
    t_modif.Min   = broken_time->tm_min;
    t_modif.Sec   = broken_time->tm_sec;
    // start writing   
-   GDSrecord* wr = NULL;
+   GdsRecord* wr = NULL;
    // ... GDS header
    wr = SetNextRecord(gds_HEADER); wr->add_int2b(StreamVersion);
    flush(wr);
@@ -389,7 +389,7 @@ GDSin::GDSFile::GDSFile(std::string fn, time_t acctime) {
    flush(wr);
 }
 
-void GDSin::GDSFile::GetTimes(GDSrecord *wr) {
+void GDSin::GdsFile::GetTimes(GdsRecord *wr) {
    word cw;
    for (int i = 0; i<wr->Get_reclen()/2; i++) {
       wr->Ret_Data(&cw,2*i);
@@ -410,7 +410,7 @@ void GDSin::GDSFile::GetTimes(GDSrecord *wr) {
    }
 }
 
-void GDSin::GDSFile::SetTimes(GDSrecord* wr) {
+void GDSin::GdsFile::SetTimes(GdsRecord* wr) {
    wr->add_int2b(t_modif.Year);
    wr->add_int2b(t_modif.Month);
    wr->add_int2b(t_modif.Day);
@@ -425,7 +425,7 @@ void GDSin::GDSFile::SetTimes(GDSrecord* wr) {
    wr->add_int2b(t_access.Sec);
 }
 
-GDSin::GDSrecord* GDSin::GDSFile::GetNextRecord() {
+GDSin::GdsRecord* GDSin::GdsFile::GetNextRecord() {
    char recheader[4]; // record header
    unsigned numread = fread(&recheader,1,4,GDSfh);// read record header
    if (numread != 4)   
@@ -434,7 +434,7 @@ GDSin::GDSrecord* GDSin::GDSFile::GetNextRecord() {
    rl[0] = recheader[1];
    rl[1] = recheader[0];
    word reclen = *(word*)rl - 4; // record lenght
-   GDSrecord* retrec = DEBUG_NEW GDSrecord(GDSfh, reclen, recheader[2],recheader[3]);
+   GdsRecord* retrec = DEBUG_NEW GdsRecord(GDSfh, reclen, recheader[2],recheader[3]);
    file_pos += reclen+4;    // update file position
 //   if (2048 < (file_pos - prgrs_pos))
 //   {
@@ -445,34 +445,34 @@ GDSin::GDSrecord* GDSin::GDSFile::GetNextRecord() {
    else return NULL;// error during read in
 }
 
-GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
+GDSin::GdsRecord* GDSin::GdsFile::SetNextRecord(byte rectype, word reclen) {
    byte datatype;
    switch (rectype) {
-      case gds_HEADER         :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B   , 2         );
-      case gds_BGNLIB         :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B   , 24        );
-      case gds_ENDLIB         :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_LIBNAME        :return DEBUG_NEW GDSrecord(rectype, gdsDT_ASCII   , reclen    );
-      case gds_UNITS          :return DEBUG_NEW GDSrecord(rectype, gdsDT_REAL8B  , 16        );
-      case gds_BGNSTR         :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B   , 24        );
-      case gds_STRNAME        :return DEBUG_NEW GDSrecord(rectype, gdsDT_ASCII   , reclen    );
-      case gds_ENDSTR         :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_BOUNDARY       :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_PATH           :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_SREF           :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_AREF           :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_TEXT           :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_LAYER          :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B   , 2         );
-      case gds_DATATYPE       :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B   , 2         );
-      case gds_XY             :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT4B   , 8*reclen  );
-      case gds_WIDTH          :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT4B   , 4         );
-      case gds_ENDEL          :return DEBUG_NEW GDSrecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_SNAME          :return DEBUG_NEW GDSrecord(rectype, gdsDT_ASCII   , reclen    );
-      case gds_COLROW         :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B   , 4         );
-      case gds_TEXTTYPE       :return DEBUG_NEW GDSrecord(rectype, gdsDT_INT2B   , 2         );
-      case gds_STRING         :return DEBUG_NEW GDSrecord(rectype, gdsDT_ASCII   , reclen    );
-      case gds_STRANS         :return DEBUG_NEW GDSrecord(rectype, gdsDT_BIT     , 2         );
-      case gds_MAG            :return DEBUG_NEW GDSrecord(rectype, gdsDT_REAL8B  , 8         );
-      case gds_ANGLE          :return DEBUG_NEW GDSrecord(rectype, gdsDT_REAL8B  , 8         );
+      case gds_HEADER         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
+      case gds_BGNLIB         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 24        );
+      case gds_ENDLIB         :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_LIBNAME        :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
+      case gds_UNITS          :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 16        );
+      case gds_BGNSTR         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 24        );
+      case gds_STRNAME        :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
+      case gds_ENDSTR         :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_BOUNDARY       :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_PATH           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_SREF           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_AREF           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_TEXT           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_LAYER          :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
+      case gds_DATATYPE       :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
+      case gds_XY             :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT4B   , 8*reclen  );
+      case gds_WIDTH          :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT4B   , 4         );
+      case gds_ENDEL          :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_SNAME          :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
+      case gds_COLROW         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 4         );
+      case gds_TEXTTYPE       :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
+      case gds_STRING         :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
+      case gds_STRANS         :return DEBUG_NEW GdsRecord(rectype, gdsDT_BIT     , 2         );
+      case gds_MAG            :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 8         );
+      case gds_ANGLE          :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 8         );
       case gds_PROPATTR       :datatype = gdsDT_INT2B;break;
       case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;
                        default: assert(false); //the rest should not be used
@@ -528,10 +528,10 @@ GDSin::GDSrecord* GDSin::GDSFile::SetNextRecord(byte rectype, word reclen) {
       case gds_LINKKEYS:
       */
    }
-   return DEBUG_NEW GDSrecord(rectype, datatype,0);
+   return DEBUG_NEW GdsRecord(rectype, datatype,0);
 }
 
-bool GDSin::GDSFile::checkCellWritten(std::string cellname)
+bool GDSin::GdsFile::checkCellWritten(std::string cellname)
 {
    for (nameList::const_iterator i = _childnames.begin();
                                  i != _childnames.end(); i++)
@@ -540,19 +540,19 @@ bool GDSin::GDSFile::checkCellWritten(std::string cellname)
 //   return (_childnames.end() != _childnames.find(cellname));
 }
 
-void GDSin::GDSFile::registerCellWritten(std::string cellname)
+void GDSin::GdsFile::registerCellWritten(std::string cellname)
 {
    _childnames.push_back(cellname);
 }
 
-void GDSin::GDSFile::flush(GDSrecord* wr)
+void GDSin::GdsFile::flush(GdsRecord* wr)
 {
    file_pos += wr->flush(GDSfh);delete wr;
 }
 
 
-GDSin::GDSstructure* GDSin::GDSFile::GetStructure(const char* selection) {
-   GDSstructure* Wstrct = library->Get_Fstruct();
+GDSin::GdsStructure* GDSin::GdsFile::GetStructure(const char* selection) {
+   GdsStructure* Wstrct = library->Get_Fstruct();
    while (Wstrct)   {
       if (!strcmp(Wstrct->Get_StrName(),selection)) return Wstrct;
       Wstrct = Wstrct->GetLast();
@@ -560,15 +560,15 @@ GDSin::GDSstructure* GDSin::GDSFile::GetStructure(const char* selection) {
    return NULL;
 }
 
-double GDSin::GDSFile::Get_LibUnits() {
+double GDSin::GdsFile::Get_LibUnits() {
    return library->Get_DBU()/library->Get_UU();
 }
 
-double GDSin::GDSFile::Get_UserUnits() {
+double GDSin::GdsFile::Get_UserUnits() {
    return library->Get_UU();
 }
 
-void GDSin::GDSFile::updateLastRecord()
+void GDSin::GdsFile::updateLastRecord()
 {
    word num_zeroes = 2048 - (file_pos % 2048);
    byte record = 0x00;
@@ -577,7 +577,7 @@ void GDSin::GDSFile::updateLastRecord()
    file_pos += bytes_written;
 }
 
-GDSin::GDSFile::~GDSFile() 
+GDSin::GdsFile::~GdsFile() 
 {
    delete library;
    // get rid of the hierarchy tree
@@ -590,9 +590,9 @@ GDSin::GDSFile::~GDSFile()
 }
 
 //==============================================================================
-// class GDSlibrary
+// class GdsLibrary
 //==============================================================================
-GDSin::GDSlibrary::GDSlibrary(GDSFile* cf, GDSrecord* cr) {
+GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr) {
    int i;
    cr->Ret_Data(&libname);//Get library name
    // init section
@@ -630,7 +630,7 @@ GDSin::GDSlibrary::GDSlibrary(GDSFile* cf, GDSrecord* cr) {
                cr->Ret_Data(&DBU,8,8); // database unit in meters
                delete cr;break;
             case gds_BGNSTR:   
-               Fstruct = DEBUG_NEW GDSstructure(cf, Fstruct);
+               Fstruct = DEBUG_NEW GdsStructure(cf, Fstruct);
                AddLog('S',Fstruct->Get_StrName());
                delete cr;break;
             case gds_ENDLIB://end of library, exit form the procedure
@@ -644,20 +644,20 @@ GDSin::GDSlibrary::GDSlibrary(GDSFile* cf, GDSrecord* cr) {
    while (true);
 }
 
-void GDSin::GDSlibrary::SetHierarchy() {
-   GDSstructure* ws = Fstruct;
+void GDSin::GdsLibrary::SetHierarchy() {
+   GdsStructure* ws = Fstruct;
    while (ws) {//for every structure
-      GDSdata* wd = ws->Get_Fdata();
-      while (wd) { //for every GDSdata of type SREF or AREF
-      //put a pointer to GDSstructure
+      GdsData* wd = ws->Get_Fdata();
+      while (wd) { //for every GdsData of type SREF or AREF
+      //put a pointer to GdsStructure
          word dt = wd->GetGDSDatatype();
          if ((gds_SREF == dt) || (gds_AREF == dt))
-         {//means that GDSdata type is AREF or SREF 
-            char* strname = ((GDSref*) wd)->GetStrname();
-            GDSstructure* ws2 = Fstruct;
+         {//means that GdsData type is AREF or SREF 
+            char* strname = ((GdsRef*) wd)->GetStrname();
+            GdsStructure* ws2 = Fstruct;
             while ((ws2) && (strcmp(strname,ws2->Get_StrName())))
                ws2 = ws2->GetLast();
-            ((GDSref*) wd)->SetStructure(ws2);
+            ((GdsRef*) wd)->SetStructure(ws2);
             if (ws2)
             {
                ws->RegisterStructure(ws2);
@@ -667,10 +667,10 @@ void GDSin::GDSlibrary::SetHierarchy() {
             {//structure is referenced but not defined!
                char wstr[256];
                sprintf(wstr," Structure %s is referenced, but not defined!",
-                       ((GDSref*)wd)->GetStrname());
+                       ((GdsRef*)wd)->GetStrname());
                AddLog('W',wstr);
                //SGREM probably is a good idea to add default
-               //GDSstructure here. Then this structure can be
+               //GdsStructure here. Then this structure can be
                //visualized in the Hierarchy window as disabled
             }
          }
@@ -680,8 +680,8 @@ void GDSin::GDSlibrary::SetHierarchy() {
    }
 }
 
-GDSin::GDSHierTree* GDSin::GDSlibrary::HierOut() {
-   GDSstructure* ws = Fstruct;
+GDSin::GDSHierTree* GDSin::GdsLibrary::HierOut() {
+   GdsStructure* ws = Fstruct;
    GDSHierTree* Htree = NULL;
    while (ws){
       if (!ws->HaveParent)  Htree = ws->HierOut(Htree,NULL);
@@ -691,10 +691,10 @@ GDSin::GDSHierTree* GDSin::GDSlibrary::HierOut() {
 }
 
 
-GDSin::GDSlibrary::~GDSlibrary() {
+GDSin::GdsLibrary::~GdsLibrary() {
    for(int i = 0; i < 4; i++)
       if (fonts[i]) delete fonts[i];
-   GDSstructure* Wstruct;
+   GdsStructure* Wstruct;
    while (Fstruct){
       Wstruct = Fstruct->GetLast();
       delete Fstruct;
@@ -703,16 +703,16 @@ GDSin::GDSlibrary::~GDSlibrary() {
 }
 
 //==============================================================================
-// class GDSstructure
+// class GdsStructure
 //==============================================================================
-GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst)
+GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
 {
    _traversed = false;
    int i;
    //initializing
    last = lst; Fdata = NULL;
    HaveParent = false;
-   GDSrecord* cr = NULL;
+   GdsRecord* cr = NULL;
    for (i = 0; i < GDS_MAX_LAYER; Compbylay[i++] = NULL);
    do   { //start reading 
       cr = cf->GetNextRecord();
@@ -733,12 +733,12 @@ GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst)
                else cr->Ret_Data(&strname);
                delete cr;break;
             case gds_BOX: 
-               Fdata = DEBUG_NEW GDSbox(cf, Fdata);
+               Fdata = DEBUG_NEW GdsBox(cf, Fdata);
                Compbylay[Fdata->GetLayer()] = //put in layer sequence
                   Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
                delete cr;break;
             case gds_BOUNDARY: 
-               Fdata = DEBUG_NEW GDSpolygon(cf, Fdata);
+               Fdata = DEBUG_NEW GdsPolygon(cf, Fdata);
                Compbylay[Fdata->GetLayer()] = //put in layer sequence
                   Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
                delete cr;break;
@@ -748,15 +748,15 @@ GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst)
                   Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
                delete cr;break;
             case gds_TEXT:   
-               Fdata = DEBUG_NEW GDStext(cf,Fdata);
+               Fdata = DEBUG_NEW GdsText(cf,Fdata);
                Compbylay[Fdata->GetLayer()] = //put in layer sequence
                   Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
                delete cr;break;
             case gds_SREF:   
-               Fdata = DEBUG_NEW GDSref(cf, Fdata);
+               Fdata = DEBUG_NEW GdsRef(cf, Fdata);
                delete cr;break;
             case gds_AREF: 
-               Fdata = DEBUG_NEW GDSaref(cf, Fdata);
+               Fdata = DEBUG_NEW GdsARef(cf, Fdata);
                delete cr;break;
             case gds_ENDSTR:// end of structure, exit point
                for(i = 0;i < GDS_MAX_LAYER;i++)//collect all used layers 
@@ -772,7 +772,7 @@ GDSin::GDSstructure::GDSstructure(GDSFile *cf, GDSstructure* lst)
    while (true);
 }
 
-bool GDSin::GDSstructure::RegisterStructure(GDSstructure* ws) {
+bool GDSin::GdsStructure::RegisterStructure(GdsStructure* ws) {
    for (unsigned i=0; i < children.size(); i++) {
       if (NULL == children[i]) continue;
       else if (!strcmp(children[i]->Get_StrName(),ws->Get_StrName()))
@@ -782,7 +782,7 @@ bool GDSin::GDSstructure::RegisterStructure(GDSstructure* ws) {
    return true;
 }
    
-GDSin::GDSHierTree* GDSin::GDSstructure::HierOut(GDSHierTree* Htree, GDSstructure* parent) {
+GDSin::GDSHierTree* GDSin::GdsStructure::HierOut(GDSHierTree* Htree, GdsStructure* parent) {
    // collecting hierarchical information
    Htree = DEBUG_NEW GDSHierTree(this, parent, Htree);
    for (unsigned i = 0; i < children.size(); i++)
@@ -797,8 +797,8 @@ GDSin::GDSHierTree* GDSin::GDSstructure::HierOut(GDSHierTree* Htree, GDSstructur
    return Htree;
 }
 
-GDSin::GDSstructure::~GDSstructure() {
-   GDSdata* Wdata = Fdata;
+GDSin::GdsStructure::~GdsStructure() {
+   GdsData* Wdata = Fdata;
    while (Fdata) {
       Wdata = Fdata->GetLast();
       delete Fdata;
@@ -807,27 +807,27 @@ GDSin::GDSstructure::~GDSstructure() {
 }
 
 //==============================================================================
-// class GDSdata
+// class GdsData
 //==============================================================================
-GDSin::GDSdata::GDSdata(GDSdata* lst) {
+GDSin::GdsData::GdsData(GdsData* lst) {
    elflags = 0; plex = 0;
    last = lst;layer = -1; singletype = -1;
    lastlay = NULL;
 }
 
-void GDSin::GDSdata::ReadPLEX(GDSrecord *cr) {
+void GDSin::GdsData::ReadPLEX(GdsRecord *cr) {
    cr->Ret_Data(&elflags,0,16);//get two bytes bit-array
 }
 
-void GDSin::GDSdata::ReadELFLAGS(GDSrecord *cr) {
+void GDSin::GdsData::ReadELFLAGS(GdsRecord *cr) {
    cr->Ret_Data(&plex);//get two bytes bit-array
 }
 
 //==============================================================================
-// class GDSbox
+// class GdsBox
 //==============================================================================
-GDSin::GDSbox::GDSbox(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
-   GDSrecord* cr = NULL;
+GDSin::GdsBox::GdsBox(GdsFile* cf, GdsData *lst):GdsData(lst) {
+   GdsRecord* cr = NULL;
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
@@ -866,11 +866,11 @@ GDSin::GDSbox::GDSbox(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
 }
 
 //==============================================================================
-// class GDSpolygon
+// class GdsPolygon
 //==============================================================================
-GDSin::GDSpolygon::GDSpolygon(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
+GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, GdsData *lst):GdsData(lst) {
    word i;
-   GDSrecord* cr = NULL;
+   GdsRecord* cr = NULL;
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
@@ -903,17 +903,17 @@ GDSin::GDSpolygon::GDSpolygon(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
    while (true);
 }
 
-// laydata::tdtdata* GDSin::GDSpolygon::toTED() {
+// laydata::tdtdata* GDSin::GdsPolygon::toTED() {
 //    return NULL;
 // }
 
 //==============================================================================
 // class GDSpath
 //==============================================================================
-GDSin::GDSpath::GDSpath(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
+GDSin::GDSpath::GDSpath(GdsFile* cf, GdsData *lst):GdsData(lst) {
    word i;
    pathtype = 0;bgnextn = 0; endextn = 0;width = 0;
-   GDSrecord* cr = NULL;
+   GdsRecord* cr = NULL;
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
@@ -986,16 +986,16 @@ void GDSin::GDSpath::convert22(int4b begext, int4b endext) {
    _plist[numpoints-1].setY(yn);
 }
 //==============================================================================
-// class GDStext
+// class GdsText
 //==============================================================================
-GDSin::GDStext::GDStext(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
+GDSin::GdsText::GdsText(GdsFile* cf, GdsData *lst):GdsData(lst) {
    word ba;
    // initializing
    font = 0; vertjust = 0;   horijust = 0;pathtype = 0;
    width = 0;abs_magn = 0;abs_angl = 0;reflection = 0;
    magnification = 1.0; angle = 0.0;
    text[0] = 0x0;
-   GDSrecord* cr = NULL;
+   GdsRecord* cr = NULL;
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
@@ -1047,20 +1047,20 @@ GDSin::GDStext::GDStext(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
    while (true);
 }
    
-// laydata::tdtdata* GDSin::GDStext::toTED() {
+// laydata::tdtdata* GDSin::GdsText::toTED() {
 //    return NULL;
 // }
 
 //==============================================================================
-// class GDSref
+// class GdsRef
 //==============================================================================
-GDSin::GDSref::GDSref(GDSdata *lst):GDSdata(lst) {
+GDSin::GdsRef::GdsRef(GdsData *lst):GdsData(lst) {
    abs_angl=abs_magn=reflection=false;
    refstr = NULL;
    magnification = 1.0; angle = 0.0;
 }
 
-GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
+GDSin::GdsRef::GdsRef(GdsFile* cf, GdsData *lst):GdsData(lst) {
    word ba;
    //initializing
    abs_angl=abs_magn=reflection=false;
@@ -1068,7 +1068,7 @@ GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
    magnification = 1.0; angle = 0.0;
    int tmp; //Dummy variable. Use for gds_PROPATTR
    char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
-   GDSrecord* cr = NULL;
+   GdsRecord* cr = NULL;
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
@@ -1115,19 +1115,19 @@ GDSin::GDSref::GDSref(GDSFile* cf, GDSdata *lst):GDSdata(lst) {
    while (true);
 }
 
-// laydata::tdtdata* GDSin::GDSref::toTED() {
+// laydata::tdtdata* GDSin::GdsRef::toTED() {
 //    return NULL;
 // }
 
 //==============================================================================
-// class GDSaref
+// class GdsARef
 //==============================================================================
-GDSin::GDSaref::GDSaref(GDSFile* cf, GDSdata *lst):GDSref(lst) {
+GDSin::GdsARef::GdsARef(GdsFile* cf, GdsData *lst):GdsRef(lst) {
    word ba;
    int tmp; //Dummy variable. Use for gds_PROPATTR
    char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
    //initializing
-   GDSrecord* cr = NULL;   
+   GdsRecord* cr = NULL;   
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
@@ -1181,13 +1181,13 @@ GDSin::GDSaref::GDSaref(GDSFile* cf, GDSdata *lst):GDSref(lst) {
    while (true);
 }
 
-int GDSin::GDSaref::Get_Xstep() {
+int GDSin::GdsARef::Get_Xstep() {
    int ret = (int) sqrt(pow(float((X_step.x() - magn_point.x())),2) +
       pow(float((X_step.y() - magn_point.y())),2)) / colnum;
    return ret;
 }
 
-int GDSin::GDSaref::Get_Ystep() {
+int GDSin::GdsARef::Get_Ystep() {
    int ret = (int) sqrt(pow(float((Y_step.x() - magn_point.x())),2) +
       pow(float((Y_step.y() - magn_point.y())),2)) / rownum;
    return ret;
@@ -1195,7 +1195,7 @@ int GDSin::GDSaref::Get_Ystep() {
 
 //-----------------------------------------------------------------------------
 /*void GDSin::PrintChildren(GDSin::GDSHierTree* parent, std::string* tabnum){
-   GDSstructure* cs = parent->GetItem();
+   GdsStructure* cs = parent->GetItem();
    std::string mytab(*tabnum);
    std::string outname(mytab);
    outname += cs->Get_StrName();
@@ -1213,7 +1213,7 @@ int GDSin::GDSaref::Get_Ystep() {
 }
 */
 //-----------------------------------------------------------------------------
-TP GDSin::get_TP(GDSin::GDSrecord *cr, word curnum, byte len) {
+TP GDSin::get_TP(GDSin::GdsRecord *cr, word curnum, byte len) {
    int4b GDS_X, GDS_Y;
    cr->Ret_Data(&GDS_X, curnum*len*2, len);
    cr->Ret_Data(&GDS_Y, curnum*len*2+len, len);

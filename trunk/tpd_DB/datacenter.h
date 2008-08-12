@@ -36,18 +36,18 @@ namespace GDSin {
 
    class Gds2Ted {
    public:
-                           Gds2Ted(GDSin::GDSFile* src_lib, laydata::tdtdesign* dst_lib);
+                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib);
       void                 top_structure(std::string, bool, bool);
    protected:
       void                 child_structure(const GDSin::GDSHierTree*, bool, bool);
       void                 convert_prep(const GDSin::GDSHierTree* item, bool, bool);
-      void                 convert(GDSin::GDSstructure*, laydata::tdtcell*);
-      void                 polygon(GDSin::GDSpolygon*, laydata::tdtcell*);
+      void                 convert(GDSin::GdsStructure*, laydata::tdtcell*);
+      void                 polygon(GDSin::GdsPolygon*, laydata::tdtcell*);
       void                 path(GDSin::GDSpath*, laydata::tdtcell*);
-      void                 ref(GDSin::GDSref*, laydata::tdtcell*);
-      void                 aref(GDSin::GDSaref*, laydata::tdtcell*);
-      void                 text(GDSin::GDStext*, laydata::tdtcell*);
-      GDSin::GDSFile*      _src_lib;
+      void                 ref(GDSin::GdsRef*, laydata::tdtcell*);
+      void                 aref(GDSin::GdsARef*, laydata::tdtcell*);
+      void                 text(GDSin::GdsText*, laydata::tdtcell*);
+      GDSin::GdsFile*      _src_lib;
       laydata::tdtdesign*  _dst_lib;
       real                 coeff; // DBU difference
    };
@@ -98,7 +98,7 @@ public:
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
-   GDSin::GDSFile*            lockGDS(bool throwexception = true);
+   GDSin::GdsFile*            lockGDS(bool throwexception = true);
    CIFin::CifFile*            lockCIF(bool throwexception = true);
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
@@ -193,7 +193,7 @@ public:
 protected:
 //   laydata::tdtdesign*        _TEDDB;        // toped data base
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
-   GDSin::GDSFile*            _GDSDB;        // GDS parsed data
+   GDSin::GdsFile*            _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
    layprop::ViewProperties    _properties;   // properties data base
    std::string                _tedfilename;

@@ -356,7 +356,7 @@ int tellstdfunc::GDSread::execute() {
          // add GDS tab in the browser
          browsers::addGDStab();
          //
-         GDSin::GDSFile* AGDSDB = DATC->lockGDS();
+         GDSin::GdsFile* AGDSDB = DATC->lockGDS();
 
             GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
             assert(root);
@@ -635,8 +635,8 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::GDSreportlay::execute() {
    std::string name = getStringValue();
-   GDSin::GDSFile* AGDSDB = DATC->lockGDS();
-      GDSin::GDSstructure *src_structure = AGDSDB->GetStructure(name.c_str());
+   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+      GDSin::GdsStructure *src_structure = AGDSDB->GetStructure(name.c_str());
       std::ostringstream ost; 
       if (!src_structure) {
          ost << "GDS structure named \"" << name << "\" does not exists";

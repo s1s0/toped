@@ -116,27 +116,27 @@
 #define gds_CONTACT        0x45
 
 namespace GDSin {
-   class GDSFile;
-   class GDSstructure;
-   class GDSrecord;
+   class GdsFile;
+   class GdsStructure;
+   class GdsRecord;
 
-   typedef std::vector<GDSstructure*>     ChildStructure;
-   typedef SGHierTree<GDSstructure>       GDSHierTree;
+   typedef std::vector<GdsStructure*>     ChildStructure;
+   typedef SGHierTree<GdsStructure>       GDSHierTree;
 
    typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
 
-   /*** GDSrecord ***************************************************************
+   /*** GdsRecord ***************************************************************
    >>> Constructor --------------------------------------------------------------
    > reads 'rl' bytes from the input file 'Gf'. Initializes all data fields
    > including 'isvalid'. This constructor is called ONLY from 'GetNextRecord'
-   > method of GDSFile class
+   > method of GdsFile class
    >> input parameters ->   Gf   - file handler
    >                        rl   - record length
    >                        rt   - record type
    >                        dt   - data type
    >>> Data fields --------------------------------------------------------------
    > reclen      - length of current GDS record
-   > rectype   - type of current GDSrecord
+   > rectype   - type of current GdsRecord
    > datatype   - type of data that this record contain
    > record      - the information record
    > numread   - number of really read bytes in this record
@@ -150,11 +150,11 @@ namespace GDSin {
    >                   that 'record' field contains to C format. Called by all
    >                   GDS classes taking part in GDS reading.
    ******************************************************************************/
-   class   GDSrecord
+   class   GdsRecord
    {
    public:
-                GDSrecord(FILE* Gf, word rl, byte rt, byte dt);
-                GDSrecord(byte rt, byte dt, word rl);
+                GdsRecord(FILE* Gf, word rl, byte rt, byte dt);
+                GdsRecord(byte rt, byte dt, word rl);
       byte      Get_rectype() {return rectype;}
       byte*     Get_record()  {return record;}
       word      Get_reclen()  {return reclen;}
@@ -165,7 +165,7 @@ namespace GDSin {
       void      add_int4b(const int4b);
       void      add_real8b(const real);
       void      add_ascii(const char*);
-      ~GDSrecord();
+      ~GdsRecord();
    protected:
       byte*     ieee2gds(double);
       double    gds2ieee(byte*);
@@ -186,14 +186,14 @@ namespace GDSin {
 //#define gdsDT_REAL8B       5
 //#define gdsDT_ASCII        6
    
-   /*** GDSdata *****************************************************************
+   /*** GdsData *****************************************************************
    > This class is inherited by all GDSII data classes
    >>> Constructor --------------------------------------------------------------
    > Initialize data fields
-   >> input parameters ->   lst - pointer to last GDSdata
+   >> input parameters ->   lst - pointer to last GdsData
    >>> Data fields --------------------------------------------------------------
-   > last               - last GDSdata
-   > lastlay            - last GDSdata in layer sequence(GDSstructure.Compbylay[])
+   > last               - last GdsData
+   > lastlay            - last GdsData in layer sequence(GdsStructure.Compbylay[])
    > plex               - see gds_PLEX (not used anywhere but read from GDS input)
    > elflags            - see gds_ELFLAGS ( same as above )
    > singletype         - see gds_DATATYPE ( same as above )
@@ -211,57 +211,57 @@ namespace GDSin {
    > GetLastInLay()      - ...
    > GetLayer()         - ...
    ******************************************************************************/
-   class   GDSdata {
+   class   GdsData {
    public:
-      GDSdata(GDSdata* lst);
-      void            ReadPLEX(GDSrecord* cr);
-      void            ReadELFLAGS(GDSrecord* cr);
-      GDSdata*        GetLast(){return last;};
-//      GDSdata*        GetLastInLay(){return lastlay;};
+      GdsData(GdsData* lst);
+      void            ReadPLEX(GdsRecord* cr);
+      void            ReadELFLAGS(GdsRecord* cr);
+      GdsData*        GetLast(){return last;};
+//      GdsData*        GetLastInLay(){return lastlay;};
       int2b           GetLayer(){return layer;};
-      GDSdata*        PutLaymark(GDSdata* lst){lastlay = lst;return this;};
+      GdsData*        PutLaymark(GdsData* lst){lastlay = lst;return this;};
       virtual byte    GetGDSDatatype() = 0;
-      virtual ~GDSdata() {};
+      virtual ~GdsData() {};
    protected:
-      GDSdata*         last;
-      GDSdata*         lastlay;
+      GdsData*         last;
+      GdsData*         lastlay;
       int4b            plex;
       word             elflags;
       int2b            layer;
       int2b            singletype;
    };
 
-   class   GDSbox:public GDSdata {
+   class   GdsBox:public GdsData {
    public:
-                     GDSbox(GDSFile *cf, GDSdata *lst);
+                     GdsBox(GdsFile *cf, GdsData *lst);
       byte           GetGDSDatatype(){return gds_BOX;};
       pointlist&     GetPlist()      {return _plist;}
-      virtual       ~GDSbox() {};
+      virtual       ~GdsBox() {};
    protected:
       int2b          boxtype;
       pointlist      _plist;
    };
 
-   /*** GDSpolygon **************************************************************
+   /*** GdsPolygon **************************************************************
    >>> Constructor --------------------------------------------------------------
    > Reads a GDSII polygon
-   >> input parameters ->   cf - pointer to the top GDSFile structure.
-   >                      lst - pointer to last GDSstructure
+   >> input parameters ->   cf - pointer to the top GdsFile structure.
+   >                      lst - pointer to last GdsStructure
    >>> Data fields --------------------------------------------------------------
    > numpoints            - number of polygon vertices
    > FPoint               - pointer to first polygon vertex
    >>> Methods ------------------------------------------------------------------
-   > WritePS_v2()         - virtual method - see GDSdata
-   > Get_BoundBox()      - virtual method - see GDSdata
-   > GetGDSDatatype()   - virtual method - see GDSdata
+   > WritePS_v2()         - virtual method - see GdsData
+   > Get_BoundBox()      - virtual method - see GdsData
+   > GetGDSDatatype()   - virtual method - see GdsData
    ******************************************************************************/
-   class   GDSpolygon:public GDSdata
+   class   GdsPolygon:public GdsData
    {
    public:
-      GDSpolygon(GDSFile *cf, GDSdata *lst);
+      GdsPolygon(GdsFile *cf, GdsData *lst);
       byte           GetGDSDatatype(){return gds_BOUNDARY;};
       pointlist&     GetPlist()      {return _plist;}
-      virtual       ~GDSpolygon() {};
+      virtual       ~GdsPolygon() {};
    protected:
       word           numpoints;
       pointlist      _plist;
@@ -270,8 +270,8 @@ namespace GDSin {
    /*** GDSpath *****************************************************************
    >>> Constructor --------------------------------------------------------------
    > Reads a GDSII path
-   >> input parameters ->   cf - pointer to the top GDSFile structure.
-   >                      lst - pointer to last GDSstructure
+   >> input parameters ->   cf - pointer to the top GdsFile structure.
+   >                      lst - pointer to last GdsStructure
    >>> Data fields --------------------------------------------------------------
    > numpoints            - number of path vertices
    > FPoint               - pointer to first path vertex
@@ -280,14 +280,14 @@ namespace GDSin {
    > bgnextn            - gds_BGNEXTN - not used for output
    > endextn            - gds_ENDEXTN - not used for output
    >>> Methods ------------------------------------------------------------------
-   > WritePS_v2()         - virtual method - see GDSdata
-   > Get_BoundBox()      - virtual method - see GDSdata
-   > GetGDSDatatype()   - virtual method - see GDSdata
+   > WritePS_v2()         - virtual method - see GdsData
+   > Get_BoundBox()      - virtual method - see GdsData
+   > GetGDSDatatype()   - virtual method - see GdsData
    ******************************************************************************/
-   class   GDSpath:public GDSdata
+   class   GDSpath:public GdsData
    {
    public:
-      GDSpath(GDSFile *cf, GDSdata *lst);
+      GDSpath(GdsFile *cf, GdsData *lst);
       byte           GetGDSDatatype(){return gds_PATH;};
       pointlist&     GetPlist()      {return _plist;};
       int4b          Get_width()     {return width;};
@@ -302,11 +302,11 @@ namespace GDSin {
       pointlist      _plist;
    };
 
-   /*** GDStext *****************************************************************
+   /*** GdsText *****************************************************************
    >>> Constructor --------------------------------------------------------------
    > Reads a GDSII text
-   >> input parameters ->   cf - pointer to the top GDSFile structure.
-   >                      lst - pointer to last GDSstructure
+   >> input parameters ->   cf - pointer to the top GdsFile structure.
+   >                      lst - pointer to last GdsStructure
    >>> Data fields --------------------------------------------------------------
    > reflection         - mirror about X axis before angular rotation
    > magn_point         - displacement point;
@@ -322,21 +322,21 @@ namespace GDSin {
    >|width               - this param is not clear from GDSII description
     |--------------------> All this params - not used for PS output
    >>> Methods ------------------------------------------------------------------
-   > WritePS_v2()         - virtual method - see GDSdata
-   > Get_BoundBox()      - virtual method - see GDSdata
-   > GetGDSDatatype()   - virtual method - see GDSdata
+   > WritePS_v2()         - virtual method - see GdsData
+   > Get_BoundBox()      - virtual method - see GdsData
+   > GetGDSDatatype()   - virtual method - see GdsData
    ******************************************************************************/
-   class   GDStext:public GDSdata
+   class   GdsText:public GdsData
    {
    public:
-      GDStext(GDSFile *cf, GDSdata *lst);
+      GdsText(GdsFile *cf, GdsData *lst);
       byte            GetGDSDatatype(){return gds_TEXT;};
       char*           GetText() {return text;};
       word            GetReflection()     {return reflection;};
       TP              GetMagn_point()     {return magn_point;};
       double          GetMagnification()  {return magnification;};
       double          GetAngle()          {return angle;};
-      virtual        ~GDStext() {};
+      virtual        ~GdsText() {};
    protected:
       word      font;
       word      vertjust;
@@ -352,48 +352,48 @@ namespace GDSin {
       int4b     width;
    };
 
-   /*** GDSref ******************************************************************
+   /*** GdsRef ******************************************************************
    >>> Constructor --------------------------------------------------------------
    > Reads a GDSII reference
-   >> input parameters ->   cf - pointer to the top GDSFile structure.
-   >                      lst - pointer to last GDSstructure
+   >> input parameters ->   cf - pointer to the top GdsFile structure.
+   >                      lst - pointer to last GdsStructure
    >>> Data fields --------------------------------------------------------------
-   > char               - name of referenced GDSstructure
-   > refstr               - pointer to referenced GDSstructure
+   > char               - name of referenced GdsStructure
+   > refstr               - pointer to referenced GdsStructure
    > reflection         - mirror about X axis before angular rotation
    > magn_point         - displacement point;
    > magnification      - scaling
    > angle               - rotation angle
-   > tmtrx               - translation matrix for this reference of GDSstructure
+   > tmtrx               - translation matrix for this reference of GdsStructure
    >|abs_magn            - true absolute magnification, false relative one
    >|abs_angl            - true absolute angle, false relative angle
     |--------------------> All this params - not used for PS output
    >>> Methods ------------------------------------------------------------------
    > WritePS_v2()         - virtual method - not defined in this class!
    > Get_BoundBox()      - virtual method - not defined in this class!
-   > GetGDSDatatype()   - virtual method - see GDSdata
-   > SetStructure()      - Set refstr variable, called by GDSlibrary::SetHierarchy
+   > GetGDSDatatype()   - virtual method - see GdsData
+   > SetStructure()      - Set refstr variable, called by GdsLibrary::SetHierarchy
    > GetStrname()         - ...
    > Get_PSCTM()         - ...
    > Get_refstr()         - ...
    ******************************************************************************/
-   class   GDSref:public GDSdata
+   class   GdsRef:public GdsData
    {
    public:
-      GDSref(GDSdata *lst);//default, called by GDSaref::GDSaref
-      GDSref(GDSFile *cf, GDSdata *lst);
-      void            SetStructure(GDSstructure* strct){refstr = strct;};
+      GdsRef(GdsData *lst);//default, called by GdsARef::GdsARef
+      GdsRef(GdsFile *cf, GdsData *lst);
+      void            SetStructure(GdsStructure* strct){refstr = strct;};
       byte            GetGDSDatatype(){return gds_SREF;};
       char*           GetStrname()        {return strname;};
-      GDSstructure*   Get_refstr()        {return refstr;};
+      GdsStructure*   Get_refstr()        {return refstr;};
       word            GetReflection()     {return reflection;};
       TP              GetMagn_point()     {return magn_point;};
       double          GetMagnification()  {return magnification;};
       double          GetAngle()          {return angle;};
-      virtual        ~GDSref() {};
+      virtual        ~GdsRef() {};
    protected:
       char            strname[33];
-      GDSstructure*   refstr;
+      GdsStructure*   refstr;
       word            reflection;
       TP              magn_point;
       double          magnification;
@@ -402,11 +402,11 @@ namespace GDSin {
       word            abs_angl;
    };
 
-   /*** GDSaref ******************************************************************
+   /*** GdsARef ******************************************************************
    >>> Constructor --------------------------------------------------------------
    > Reads a GDSII array reference
-   >> input parameters ->   cf - pointer to the top GDSFile structure.
-   >                      lst - pointer to last GDSstructure
+   >> input parameters ->   cf - pointer to the top GdsFile structure.
+   >                      lst - pointer to last GdsStructure
    >>> Data fields --------------------------------------------------------------
    > X_step               - position that is displaced from the reference point
                           by the inter-column spacing times the number
@@ -420,18 +420,18 @@ namespace GDSin {
    > Get_Ystep()         - returns inter-row spacing
    > WritePS_v2()         - virtual method - not defined in this class!
    > Get_BoundBox()      - virtual method - not defined in this class!
-   > GetGDSDatatype()   - virtual method - see GDSdata
+   > GetGDSDatatype()   - virtual method - see GdsData
    ******************************************************************************/
-   class   GDSaref:public GDSref
+   class   GdsARef:public GdsRef
    {
    public:
-      GDSaref(GDSFile *cf, GDSdata *lst);
+      GdsARef(GdsFile *cf, GdsData *lst);
       int        Get_Xstep();
       int        Get_Ystep();
       int2b      Get_colnum(){return colnum;};
       int2b      Get_rownum(){return rownum;};
       byte       GetGDSDatatype(){return gds_AREF;};
-      virtual   ~GDSaref() {};
+      virtual   ~GdsARef() {};
    protected:
       TP         X_step;
       TP         Y_step;
@@ -439,33 +439,33 @@ namespace GDSin {
       int2b      rownum;
    };
 
-   /*** GDSstructure ************************************************************
+   /*** GdsStructure ************************************************************
    >>> Constructor --------------------------------------------------------------
    > Reads a GDSII structure
-   >> input parameters ->   cf - pointer to the top GDSFile structure.
-   >                      lst - pointer to last GDSstructure
+   >> input parameters ->   cf - pointer to the top GdsFile structure.
+   >                      lst - pointer to last GdsStructure
    >>> Data fields --------------------------------------------------------------
    > HaveParent         - true if current structure has a parrent structure.
-                          Used when hierarchy is created (GDSlibrary.HierOut)
-   > children            - Array of pointers to all GDSstructures referenced
+                          Used when hierarchy is created (GdsLibrary.HierOut)
+   > children            - Array of pointers to all GdsStructures referenced
                           inside this structure. Used when hierarchy is created
    > tvstruct            - HTREEITEM structure used for hierarhy window;
    > Allay[...]         - An array with info whether a given layer is used in
                           GDS structure (and down in hierarhy) or not.
-   > Compbylay[]        - An array of pointers with all GDSdata grouped by GDS
-                          layer. This structure doesn't contain data of type GDSref
-                          and GDSaref because they doesn't belong to any layer
+   > Compbylay[]        - An array of pointers with all GdsData grouped by GDS
+                          layer. This structure doesn't contain data of type GdsRef
+                          and GdsARef because they doesn't belong to any layer
    > UsedLayers         - list of pointers with all used GDS layers in this
                           structure and down in hierarchy
-   > Fdata               - Pointer to first GDSdata of this structure
-   > last               - Pointer to last (next) GDSstructure
+   > Fdata               - Pointer to first GdsData of this structure
+   > last               - Pointer to last (next) GdsStructure
    > strname[33]         - GDSII name of the structure
    >>> Methods ------------------------------------------------------------------
-   > RegisterStructure()- Creates a tree of referenced GDSstructure. Changes
+   > RegisterStructure()- Creates a tree of referenced GdsStructure. Changes
                           children valiable
    > HierOut()            - Updates HierList window. Here Allay[] and UsedLayers
                           variables are changed
-   > PPreview()         - Calculates the box overlapping GDSstructure
+   > PPreview()         - Calculates the box overlapping GdsStructure
    > PSOut_v2()         - Post Script output
    > GetLast()            - ...
    > Get_StrName()      - ...
@@ -474,37 +474,37 @@ namespace GDSin {
    > Get_Allay(byte i)   - ...
    ******************************************************************************/
 
-   class   GDSstructure
+   class   GdsStructure
    {
    public:
-      GDSstructure(GDSFile* cf, GDSstructure* lst);
-      bool              RegisterStructure(GDSstructure* ws);
-      GDSHierTree*      HierOut(GDSHierTree* Htree, GDSstructure* parent);
-      GDSstructure*     GetLast()               { return last;}
+      GdsStructure(GdsFile* cf, GdsStructure* lst);
+      bool              RegisterStructure(GdsStructure* ws);
+      GDSHierTree*      HierOut(GDSHierTree* Htree, GdsStructure* parent);
+      GdsStructure*     GetLast()               { return last;}
       const char*       Get_StrName()const      { return strname;}
-      GDSdata*          Get_Fdata()             { return Fdata;};
+      GdsData*          Get_Fdata()             { return Fdata;};
       bool              Get_Allay(byte i)       { return Allay[i];};
       bool              traversed() const       { return _traversed;}
       void              set_traversed(bool trv) { _traversed = trv;}
-      ~GDSstructure();
+      ~GdsStructure();
       bool              HaveParent;
       ChildStructure    children;
       // to cover the requirements of the hierarchy template
       int               libID() const {return TARGETDB_LIB;}
    protected:
       bool              Allay[GDS_MAX_LAYER];
-      GDSdata*          Compbylay[GDS_MAX_LAYER];
-      GDSdata*          Fdata;
+      GdsData*          Compbylay[GDS_MAX_LAYER];
+      GdsData*          Fdata;
       char              strname[65];
-      GDSstructure*     last;
+      GdsStructure*     last;
       bool              _traversed;       //! For hierarchy traversing purposes
    };
 
    /*** GDSLibrary **************************************************************
    >>> Constructor --------------------------------------------------------------
    > Reads a GDSII library
-   >> input parameters ->   cf - pointer to the top GDSFile structure.
-   >                       cr - pointer to last GDSrecord structure
+   >> input parameters ->   cf - pointer to the top GdsFile structure.
+   >                       cr - pointer to last GdsRecord structure
    >>> Data fields --------------------------------------------------------------
    > libname            - library name (string)
    > fonts[4]            - GDSII font names used in the library;
@@ -514,36 +514,36 @@ namespace GDSin {
    > Fstruct            - pointer to first structure in the GDSII library
    >>> Methods ------------------------------------------------------------------
    > SetHierarchy()      - This method is called to organize hierarhy of the struc-
-                          tures. Each GDSref or GDSaref receives a pointer to its
-                          corresponding GDSstructure.
-   > HierOut            - Called by corresponding method in GDSFile. Calls HierOut
-                          method of GDSstructure. The goal of all that calls is to
+                          tures. Each GdsRef or GdsARef receives a pointer to its
+                          corresponding GdsStructure.
+   > HierOut            - Called by corresponding method in GdsFile. Calls HierOut
+                          method of GdsStructure. The goal of all that calls is to
                           update hierarchy window
    > Get_Fstruct()      - ...
    > Get_DBU()            - ...
    > Get_UU()            - ...
    ******************************************************************************/
-   class   GDSlibrary
+   class   GdsLibrary
    {
    public:
-      GDSlibrary(GDSFile* cf, GDSrecord* cr);
+      GdsLibrary(GdsFile* cf, GdsRecord* cr);
       void             SetHierarchy();
       GDSHierTree*     HierOut();
-      GDSstructure*    Get_Fstruct(){return Fstruct;};
+      GdsStructure*    Get_Fstruct(){return Fstruct;};
       double           Get_DBU(){return DBU;};
       double           Get_UU(){return UU;};
       std::string      Get_name() const {return std::string(libname);}
-      ~GDSlibrary();
+      ~GdsLibrary();
    protected:
       char             libname[256];
       char*            fonts[4];
       double           DBU;
       double           UU;
       int2b            maxver;
-      GDSstructure*    Fstruct;
+      GdsStructure*    Fstruct;
    };
 
-   /*** GDSFile ***************************************************************
+   /*** GdsFile ***************************************************************
    >>> Constructor --------------------------------------------------------------
    > Opens the input GDS file and start reading it. Initializes all data fields
    >> input parameters ->   fn - GDSII file name for reading
@@ -554,7 +554,7 @@ namespace GDSin {
    > filename      - GDS input file name
    > file_length  - length of the input GDS file
    > file_pos      - current position of the input GDS file during read in
-   > library      - pointer to GDSlibrary structure
+   > library      - pointer to GdsLibrary structure
    > prgrs         - pointer to the progress indicator control
    > prgrs_pos      - current position of the progress indicator control
    > logwin         - pointer to the error log edit control
@@ -568,49 +568,49 @@ namespace GDSin {
    > GetNextRecord()      - Reads next record from the input stream. Retuns NULL if
    >                       error ocures during read in. This is the only function
    >                      used for reading of the input GDS file. Calls
-   >                      'GDSrecord' constructor
+   >                      'GdsRecord' constructor
    > Get_LibUnits()      - |Return library units
    > Get_UserUnits()    - |Return user units
-                          |->Both methods call corresponding methods in GDSlibrary
+                          |->Both methods call corresponding methods in GdsLibrary
    > GetStructure()      - Returns the pointer to GDSII structure with a given name
-   > HierOut()            - Call corresponding method in GDSlibrary
+   > HierOut()            - Call corresponding method in GdsLibrary
    > GetReadErrors()      - Returns the number of errors during GDSII file reading
    > GetTimes()         - Reads values of t_access and t_modiff (see above)
    ******************************************************************************/
-   class   GDSFile
+   class   GdsFile
    {
    public:
-      GDSFile(const char*fn);
-      GDSFile(std::string, time_t);
-      GDSrecord*     GetNextRecord();
-      GDSrecord*     SetNextRecord(byte rectype, word reclen = 0);
+      GdsFile(const char*fn);
+      GdsFile(std::string, time_t);
+      GdsRecord*     GetNextRecord();
+      GdsRecord*     SetNextRecord(byte rectype, word reclen = 0);
       double         Get_LibUnits();
       double         Get_UserUnits();
-      void           SetTimes(GDSrecord* wr);
+      void           SetTimes(GdsRecord* wr);
       bool           checkCellWritten(std::string);
       void           registerCellWritten(std::string);
       std::string    Get_libname() const {return library->Get_name();}
-      GDSstructure*  GetStructure(const char* selection);
+      GdsStructure*  GetStructure(const char* selection);
       void           HierOut() {_hiertree = library->HierOut();};
       GDSHierTree*   hiertree() {return _hiertree;}
       int            GetReadErrors() {return GDSIIerrors;};
       int            GetGDSIIwarnings() {return GDSIIwarnings;};
       int            Inc_GDSIIerrors() {return ++GDSIIerrors;};
       int            Inc_GDSIIwarnings() {return ++GDSIIwarnings;};
-      GDSstructure*  Get_structures() {return library->Get_Fstruct();};
-      void           flush(GDSrecord*);
+      GdsStructure*  Get_structures() {return library->Get_Fstruct();};
+      void           flush(GdsRecord*);
       void           closeFile() {if (NULL != GDSfh) {fclose(GDSfh); GDSfh = NULL;}}
       void           updateLastRecord();
       bool           status() {return _status;};
-      ~GDSFile();
+      ~GdsFile();
    protected:
-      void           GetTimes(GDSrecord* wr);
+      void           GetTimes(GdsRecord* wr);
       FILE*          GDSfh;
       std::string    filename;
       int2b          StreamVersion;
       int2b          libdirsize;
       char           srfname[256];
-      GDSlibrary*    library;
+      GdsLibrary*    library;
       long           file_length;
       long           file_pos;
       GDSHierTree*   _hiertree; // Tree of instance hierarchy
@@ -623,7 +623,7 @@ namespace GDSin {
    };
 
    // Function definition
-     TP   get_TP(GDSrecord* cr, word curnum = 0, byte len=4);
+     TP   get_TP(GdsRecord* cr, word curnum = 0, byte len=4);
      void AddLog(char logtype, const char* message, const int number = 0);
 //     void PrintChildren(GDSin::GDSHierTree*, std::string*);
 }   

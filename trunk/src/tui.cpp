@@ -399,8 +399,8 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   GDSin::GDSFile* AGDSDB = DATC->lockGDS();
-      GDSin::GDSstructure* gdss = AGDSDB->Get_structures();
+   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+      GDSin::GdsStructure* gdss = AGDSDB->Get_structures();
       while (gdss) 
       {
          _nameList->Append(wxString(gdss->Get_StrName(), wxConvUTF8));

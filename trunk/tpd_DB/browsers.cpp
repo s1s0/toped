@@ -139,7 +139,7 @@ browsers::GDSbrowser::GDSbrowser(wxWindow *parent, wxWindowID id,
 
 void browsers::GDSbrowser::collectInfo() 
 {
-   GDSin::GDSFile* AGDSDB = DATC->lockGDS(false);
+   GDSin::GdsFile* AGDSDB = DATC->lockGDS(false);
    if (NULL == AGDSDB) return;
    hCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
    fCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));

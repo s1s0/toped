@@ -494,7 +494,7 @@ void laydata::quadTree::write(TEDfile* const tedfile) const {
 
 /*! Write the contents of the quadTree in a GDS file.\n
 Nothing special here - effectively the same as write method*/
-void laydata::quadTree::GDSwrite(GDSin::GDSFile& gdsf, word lay, real UU) const
+void laydata::quadTree::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 {
    tdtdata* wdt = _first;
    while(wdt)
