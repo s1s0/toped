@@ -150,32 +150,31 @@ namespace GDSin {
    >                   that 'record' field contains to C format. Called by all
    >                   GDS classes taking part in GDS reading.
    ******************************************************************************/
-   class   GdsRecord
-   {
-   public:
-                GdsRecord(FILE* Gf, word rl, byte rt, byte dt);
-                GdsRecord(byte rt, byte dt, word rl);
-      byte      Get_rectype() {return rectype;}
-      byte*     Get_record()  {return record;}
-      word      Get_reclen()  {return reclen;}
-      bool      Ret_Data(void* var, word curnum = 0, byte len = 0);
-      word      flush(FILE* Gf);
-      bool      isvalid;
-      void      add_int2b(const word);
-      void      add_int4b(const int4b);
-      void      add_real8b(const real);
-      void      add_ascii(const char*);
-      ~GdsRecord();
-   protected:
-      byte*     ieee2gds(double);
-      double    gds2ieee(byte*);
-      word      reclen;
-      byte      rectype;
-      byte      datatype;
-      byte*     record;
-   private:
-      word      numread;
-      word      index;
+   class   GdsRecord {
+      public:
+                           GdsRecord(FILE* Gf, word rl, byte rt, byte dt);
+                           GdsRecord(byte rt, byte dt, word rl);
+         bool              retData(void* var, word curnum = 0, byte len = 0);
+         word              flush(FILE* Gf);
+         void              add_int2b(const word);
+         void              add_int4b(const int4b);
+         void              add_real8b(const real);
+         void              add_ascii(const char*);
+         byte              recType() const                     { return _recType;}
+         byte*             record() const                      { return _record;}
+         word              recLen() const                      { return _recLen;}
+         bool              valid() const                       { return _valid;}
+                          ~GdsRecord();
+      private:
+         byte*             ieee2gds(double);
+         double            gds2ieee(byte*);
+         bool              _valid;
+         word              _recLen;
+         byte              _recType;
+         byte              _dataType;
+         byte*             _record;
+         word              _numread;
+         word              _index;
    };
 
 //#define gdsDT_NODATA       0
@@ -206,40 +205,39 @@ namespace GDSin {
    > WritePS_v2()         - virtual method - Writes Post script output
    > Get_BoundBox()      - virtual method - Returns the box that overlaps the
                           figure
-   > GetGDSDatatype()   - virtual method - Returns gds_DATATYPE
+   > gdsDataType()   - virtual method - Returns gds_DATATYPE
    > GetLast()            - ...
    > GetLastInLay()      - ...
    > GetLayer()         - ...
    ******************************************************************************/
    class   GdsData {
-   public:
-      GdsData(GdsData* lst);
-      void            ReadPLEX(GdsRecord* cr);
-      void            ReadELFLAGS(GdsRecord* cr);
-      GdsData*        GetLast(){return last;};
-//      GdsData*        GetLastInLay(){return lastlay;};
-      int2b           GetLayer(){return layer;};
-      GdsData*        PutLaymark(GdsData* lst){lastlay = lst;return this;};
-      virtual byte    GetGDSDatatype() = 0;
-      virtual ~GdsData() {};
-   protected:
-      GdsData*         last;
-      GdsData*         lastlay;
-      int4b            plex;
-      word             elflags;
-      int2b            layer;
-      int2b            singletype;
+      public:
+                           GdsData(GdsData*);
+         void              readPlex(GdsRecord*);
+         void              readElflags(GdsRecord*);
+         GdsData*          last()                              { return _last;   }
+         int2b             layer()                             { return _layer;  }
+         GdsData*          PutLaymark(GdsData* lst)            { _lastLay = lst; return this;}
+         virtual byte     gdsDataType() = 0;
+         virtual         ~GdsData()                           {                  };
+      protected:
+         GdsData*          _last;
+         GdsData*          _lastLay;
+         int4b             _plex;
+         word              _elflags;
+         int2b             _layer;
+         int2b             _singleType;
    };
 
    class   GdsBox:public GdsData {
-   public:
-                     GdsBox(GdsFile *cf, GdsData *lst);
-      byte           GetGDSDatatype(){return gds_BOX;};
-      pointlist&     GetPlist()      {return _plist;}
-      virtual       ~GdsBox() {};
-   protected:
-      int2b          boxtype;
-      pointlist      _plist;
+      public:
+                              GdsBox(GdsFile*, GdsData*);
+         byte                 gdsDataType()                     { return gds_BOX;}
+         pointlist&           plist()                           { return _plist; }
+         virtual            ~GdsBox()                          {                 }
+      protected:
+         int2b                _boxtype;
+         pointlist            _plist;
    };
 
    /*** GdsPolygon **************************************************************
@@ -253,18 +251,17 @@ namespace GDSin {
    >>> Methods ------------------------------------------------------------------
    > WritePS_v2()         - virtual method - see GdsData
    > Get_BoundBox()      - virtual method - see GdsData
-   > GetGDSDatatype()   - virtual method - see GdsData
+   > gdsDataType()   - virtual method - see GdsData
    ******************************************************************************/
-   class   GdsPolygon:public GdsData
-   {
-   public:
-      GdsPolygon(GdsFile *cf, GdsData *lst);
-      byte           GetGDSDatatype(){return gds_BOUNDARY;};
-      pointlist&     GetPlist()      {return _plist;}
-      virtual       ~GdsPolygon() {};
-   protected:
-      word           numpoints;
-      pointlist      _plist;
+   class   GdsPolygon:public GdsData {
+      public:
+                              GdsPolygon(GdsFile*, GdsData*);
+         byte                 gdsDataType()                    { return gds_BOUNDARY;  }
+         pointlist&           plist()                          { return _plist;        }
+         virtual            ~GdsPolygon()                     {                        }
+      protected:
+         word                 _numpoints;
+         pointlist            _plist;
    };
 
    /*** GDSpath *****************************************************************
@@ -282,24 +279,23 @@ namespace GDSin {
    >>> Methods ------------------------------------------------------------------
    > WritePS_v2()         - virtual method - see GdsData
    > Get_BoundBox()      - virtual method - see GdsData
-   > GetGDSDatatype()   - virtual method - see GdsData
+   > gdsDataType()   - virtual method - see GdsData
    ******************************************************************************/
-   class   GDSpath:public GdsData
-   {
-   public:
-      GDSpath(GdsFile *cf, GdsData *lst);
-      byte           GetGDSDatatype(){return gds_PATH;};
-      pointlist&     GetPlist()      {return _plist;};
-      int4b          Get_width()     {return width;};
-      virtual       ~GDSpath() {};
-   protected:
-      void           convert22(int4b, int4b);
-      int2b          pathtype;
-      int4b          width;
-      int4b          bgnextn;
-      int4b          endextn;
-      word           numpoints;
-      pointlist      _plist;
+   class   GDSpath:public GdsData {
+      public:
+                              GDSpath(GdsFile*, GdsData*);
+         byte                 gdsDataType()                    { return gds_PATH;}
+         pointlist&           plist()                          { return _plist;  }
+         int4b                width()                          { return _width;  }
+         virtual            ~GDSpath()                        {                  }
+      protected:
+         void                 convert22(int4b, int4b);
+         int2b                _pathtype;
+         int4b                _width;
+         int4b                _bgnextn;
+         int4b                _endextn;
+         word                 _numpoints;
+         pointlist            _plist;
    };
 
    /*** GdsText *****************************************************************
@@ -324,32 +320,31 @@ namespace GDSin {
    >>> Methods ------------------------------------------------------------------
    > WritePS_v2()         - virtual method - see GdsData
    > Get_BoundBox()      - virtual method - see GdsData
-   > GetGDSDatatype()   - virtual method - see GdsData
+   > gdsDataType()   - virtual method - see GdsData
    ******************************************************************************/
-   class   GdsText:public GdsData
-   {
-   public:
-      GdsText(GdsFile *cf, GdsData *lst);
-      byte            GetGDSDatatype(){return gds_TEXT;};
-      char*           GetText() {return text;};
-      word            GetReflection()     {return reflection;};
-      TP              GetMagn_point()     {return magn_point;};
-      double          GetMagnification()  {return magnification;};
-      double          GetAngle()          {return angle;};
-      virtual        ~GdsText() {};
-   protected:
-      word      font;
-      word      vertjust;
-      word      horijust;
-      word      reflection;
-      word      abs_magn;
-      word      abs_angl;
-      TP        magn_point;
-      char      text[512];
-      double    magnification;
-      double    angle;
-      int2b     pathtype;
-      int4b     width;
+   class   GdsText:public GdsData {
+      public:
+                              GdsText(GdsFile *cf, GdsData *lst);
+         byte                 gdsDataType(){return gds_TEXT;};
+         char*                text()                           { return _text;          }
+         word                 reflection()                     { return _reflection;    }
+         TP                   magnPoint()                      { return _magnPoint;     }
+         double               magnification()                  { return _magnification; }
+         double               angle()                          { return _angle;         }
+         virtual            ~GdsText()                        {                         }
+      protected:
+         word                 _font;
+         word                 _vertJust;
+         word                 _horiJust;
+         word                 _reflection;
+         word                 _absMagn;
+         word                 _absAngl;
+         TP                   _magnPoint;
+         char                 _text[512];
+         double               _magnification;
+         double               _angle;
+         int2b                _pathType;
+         int4b                _width;
    };
 
    /*** GdsRef ******************************************************************
@@ -371,7 +366,7 @@ namespace GDSin {
    >>> Methods ------------------------------------------------------------------
    > WritePS_v2()         - virtual method - not defined in this class!
    > Get_BoundBox()      - virtual method - not defined in this class!
-   > GetGDSDatatype()   - virtual method - see GdsData
+   > gdsDataType()   - virtual method - see GdsData
    > SetStructure()      - Set refstr variable, called by GdsLibrary::SetHierarchy
    > GetStrname()         - ...
    > Get_PSCTM()         - ...
@@ -380,26 +375,26 @@ namespace GDSin {
    class   GdsRef:public GdsData
    {
    public:
-      GdsRef(GdsData *lst);//default, called by GdsARef::GdsARef
-      GdsRef(GdsFile *cf, GdsData *lst);
-      void            SetStructure(GdsStructure* strct){refstr = strct;};
-      byte            GetGDSDatatype(){return gds_SREF;};
-      char*           GetStrname()        {return strname;};
-      GdsStructure*   Get_refstr()        {return refstr;};
-      word            GetReflection()     {return reflection;};
-      TP              GetMagn_point()     {return magn_point;};
-      double          GetMagnification()  {return magnification;};
-      double          GetAngle()          {return angle;};
-      virtual        ~GdsRef() {};
+                              GdsRef(GdsData *lst);//default, called by GdsARef::GdsARef
+                              GdsRef(GdsFile *cf, GdsData *lst);
+      void                    SetStructure(GdsStructure* strct){ _refStr = strct;       }
+      byte                    gdsDataType()                    { return gds_SREF;      }
+      char*                   strName()                        { return _strName;      }
+      GdsStructure*           refStr()                         { return _refStr;       }
+      word                    reflection()                     { return _reflection;   }
+      TP                      magnPoint()                      { return _magnPoint;    }
+      double                  magnification()                  { return _magnification;}
+      double                  angle()                          { return _angle;        }
+      virtual               ~GdsRef()                         {                        }
    protected:
-      char            strname[33];
-      GdsStructure*   refstr;
-      word            reflection;
-      TP              magn_point;
-      double          magnification;
-      double          angle;
-      word            abs_magn;
-      word            abs_angl;
+      GdsStructure*           _refStr;
+      word                    _reflection;
+      TP                      _magnPoint;
+      double                  _magnification;
+      double                  _angle;
+      word                    _absMagn;
+      word                    _absAngl;
+      char                    _strName[33];
    };
 
    /*** GdsARef ******************************************************************
@@ -420,7 +415,7 @@ namespace GDSin {
    > Get_Ystep()         - returns inter-row spacing
    > WritePS_v2()         - virtual method - not defined in this class!
    > Get_BoundBox()      - virtual method - not defined in this class!
-   > GetGDSDatatype()   - virtual method - see GdsData
+   > gdsDataType()   - virtual method - see GdsData
    ******************************************************************************/
    class   GdsARef:public GdsRef
    {
@@ -430,7 +425,7 @@ namespace GDSin {
       int        Get_Ystep();
       int2b      Get_colnum(){return colnum;};
       int2b      Get_rownum(){return rownum;};
-      byte       GetGDSDatatype(){return gds_AREF;};
+      byte       gdsDataType(){return gds_AREF;};
       virtual   ~GdsARef() {};
    protected:
       TP         X_step;

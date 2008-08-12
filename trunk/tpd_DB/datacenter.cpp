@@ -118,7 +118,7 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
    GDSin::GdsData *wd = src->Get_Fdata();
    while( wd )
    {
-      switch( wd->GetGDSDatatype() )
+      switch( wd->gdsDataType() )
       {
 //         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
          case      gds_BOX:
@@ -129,7 +129,7 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
          case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd), dst);  break;
                    default: {/*Error - unexpected type*/}
       }
-      wd = wd->GetLast();
+      wd = wd->last();
    }
    dst->resort();
 //   dst->secure_layprop();
@@ -138,13 +138,13 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
 void GDSin::Gds2Ted::polygon(GDSin::GdsPolygon* wd, laydata::tdtcell* dst)
 {
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
-                                          (dst->securelayer(wd->GetLayer()));
-   pointlist &pl = wd->GetPlist();
+                                          (dst->securelayer(wd->layer()));
+   pointlist &pl = wd->plist();
    laydata::valid_poly check(pl);
 
    if (!check.valid())
    {
-      std::ostringstream ost; ost << "Layer " << wd->GetLayer();
+      std::ostringstream ost; ost << "Layer " << wd->layer();
       ost << ": Polygon check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
    }
@@ -159,41 +159,41 @@ void GDSin::Gds2Ted::polygon(GDSin::GdsPolygon* wd, laydata::tdtcell* dst)
 void GDSin::Gds2Ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst)
 {
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
-                                          (dst->securelayer(wd->GetLayer()));
-   pointlist &pl = wd->GetPlist();
-   laydata::valid_wire check(pl, wd->Get_width());
+                                          (dst->securelayer(wd->layer()));
+   pointlist &pl = wd->plist();
+   laydata::valid_wire check(pl, wd->width());
 
    if (!check.valid())
    {
-      std::ostringstream ost; ost << "Layer " << wd->GetLayer();
+      std::ostringstream ost; ost << "Layer " << wd->layer();
       ost << ": Wire check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
       return;
    }
    else pl = check.get_validated() ;
    /* @TODO !!! GDS path type here!!!! */
-   wl->addwire(pl, wd->Get_width(),false);
+   wl->addwire(pl, wd->width(),false);
 }
 
 void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
 {
-   if (NULL != _dst_lib->checkcell(wd->GetStrname()))
+   if (NULL != _dst_lib->checkcell(wd->strName()))
    {
-      laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->GetStrname());
+      laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->strName());
       // Absolute magnification, absolute angle should be reflected somehow!!!
       dst->addcellref(_dst_lib,
                    striter, 
-                   CTM(wd->GetMagn_point(), 
-                   wd->GetMagnification(),
-                   wd->GetAngle(),
-                   (0 != wd->GetReflection())),
+                   CTM(wd->magnPoint(),
+                   wd->magnification(),
+                   wd->angle(),
+                   (0 != wd->reflection())),
                    false
       );
    }
    else
    {
       std::string news = "Referenced structure \"";
-      news += wd->GetStrname(); news += "\" not found. Reference ignored";
+      news += wd->strName(); news += "\" not found. Reference ignored";
       tell_log(console::MT_ERROR,news);
    }
    // How about structures defined, but not parsed yet????
@@ -201,9 +201,9 @@ void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
 
 void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
 {
-   if (NULL != _dst_lib->checkcell(wd->GetStrname()))
+   if (NULL != _dst_lib->checkcell(wd->strName()))
    {
-      laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->GetStrname());
+      laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->strName());
       // Absolute magnification, absolute angle should be reflected somehow!!!
 
       laydata::ArrayProperties arrprops(wd->Get_Xstep(),wd->Get_Ystep(),
@@ -211,10 +211,10 @@ void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
                                  static_cast<word>(wd->Get_rownum()));
       dst->addcellaref(_dst_lib,
          striter, 
-         CTM( wd->GetMagn_point(), 
-              wd->GetMagnification(), 
-              wd->GetAngle(),
-              (0 != wd->GetReflection()) ),
+         CTM( wd->magnPoint(),
+              wd->magnification(),
+              wd->angle(),
+              (0 != wd->reflection()) ),
          arrprops,
          false
       );
@@ -222,7 +222,7 @@ void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
    else
    {
       std::string news = "Referenced structure \"";
-      news += wd->GetStrname(); news += "\" not found. Reference ignored";
+      news += wd->strName(); news += "\" not found. Reference ignored";
       tell_log(console::MT_ERROR,news);
    }
    // How about structures defined, but not parsed yet????
@@ -231,13 +231,13 @@ void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
 void GDSin::Gds2Ted::text(GDSin::GdsText* wd, laydata::tdtcell* dst)
 {
    laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
-                                       (dst->securelayer(wd->GetLayer()));
+                                       (dst->securelayer(wd->layer()));
    // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-   wl->addtext(wd->GetText(), 
-               CTM(wd->GetMagn_point(), 
-                   wd->GetMagnification() / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
-                   wd->GetAngle(),
-                   (0 != wd->GetReflection())));
+   wl->addtext(wd->text(),
+               CTM(wd->magnPoint(),
+                   wd->magnification() / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
+                   wd->angle(),
+                   (0 != wd->reflection())));
 }
 
 //-----------------------------------------------------------------------------

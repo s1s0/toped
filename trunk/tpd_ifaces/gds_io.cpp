@@ -36,56 +36,68 @@
 
 static GDSin::GdsFile*        InFile    = NULL;
 //==============================================================================
-GDSin::GdsRecord::GdsRecord(FILE* Gf, word rl, byte rt, byte dt) {
-   reclen = rl;rectype = rt;datatype = dt;
-   if (rl) {
-      record = DEBUG_NEW byte[reclen];
-      numread = fread(record,1,reclen,Gf);
-      isvalid = (numread == reclen) ? true : false;
+GDSin::GdsRecord::GdsRecord(FILE* Gf, word rl, byte rt, byte dt)
+{
+   _recLen = rl; _recType = rt; _dataType = dt;
+   if (rl)
+   {
+      _record = DEBUG_NEW byte[_recLen];
+      _numread = fread(_record, 1, _recLen, Gf);
+      _valid = (_numread == _recLen) ? true : false;
    }
-   else {record = NULL;numread = 0;isvalid = true;}
+   else
+   {
+      _record = NULL;
+      _numread = 0;
+      _valid = true;
+   }
 }
 
-GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl) {
-   rectype = rt;datatype = dt;
-   reclen = rl+4; index = 0;
+GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl)
+{
+   _recType = rt; _dataType = dt;
+   _recLen = rl+4; _index = 0;
    // compensation for odd length ASCII string
-   if ((gdsDT_ASCII == datatype) && (rl % 2)) reclen++;
-   record = DEBUG_NEW byte[reclen];
-   add_int2b(reclen);
-   record[index++] = rectype;
-   record[index++] = datatype;
+   if ((gdsDT_ASCII == _dataType) && (rl % 2)) _recLen++;
+   _record = DEBUG_NEW byte[_recLen];
+   add_int2b(_recLen);
+   _record[_index++] = _recType;
+   _record[_index++] = _dataType;
 }
 
-word GDSin::GdsRecord::flush(FILE* Gf) {
-   assert(index == reclen);
-   word bytes_written = fwrite(record,1,reclen,Gf);
+word GDSin::GdsRecord::flush(FILE* Gf)
+{
+   assert(_index == _recLen);
+   word bytes_written = fwrite(_record, 1, _recLen, Gf);
    /*TODO !!! Error correction HERE instead of assertetion */
-   assert(bytes_written == reclen);
+   assert(bytes_written == _recLen);
    return bytes_written;
 }
 
-bool GDSin::GdsRecord::Ret_Data(void* var, word curnum, byte len) {
-   byte      *rlb;   
+bool GDSin::GdsRecord::retData(void* var, word curnum, byte len)
+{
+   byte      *rlb;
    char      *rlc;
-   switch (datatype) {
+   switch (_dataType)
+   {
       case gdsDT_NODATA:// no data present
          var = NULL;return false;
       case gdsDT_BIT:// bit array
          rlb = (byte*)var; //assign pointer
-         switch (len) {
+         switch (len)
+         {
             case 32:
-               rlb[3] = record[0];
-               rlb[2] = record[1];
-               rlb[1] = record[2];
-               rlb[0] = record[3];
+               rlb[3] = _record[0];
+               rlb[2] = _record[1];
+               rlb[1] = _record[2];
+               rlb[0] = _record[3];
                break;
             case 16:
-               rlb[1] = record[0];
-               rlb[0] = record[1];
+               rlb[1] = _record[0];
+               rlb[0] = _record[1];
                break;
             case 8:
-               rlb[0] = record[0];
+               rlb[0] = _record[0];
                break;
             default:
                var = NULL;break;
@@ -93,48 +105,52 @@ bool GDSin::GdsRecord::Ret_Data(void* var, word curnum, byte len) {
          break;
       case gdsDT_INT2B://2-byte signed integer
          rlb = (byte*)var;   //assign pointer
-         rlb[0] = record[curnum+1];
-         rlb[1] = record[curnum+0];
+         rlb[0] = _record[curnum+1];
+         rlb[1] = _record[curnum+0];
          break;
       case gdsDT_INT4B: // 4-byte signed integer
          rlb = (byte*)var;//assign pointer
-         rlb[0] = record[curnum+3];
-         rlb[1] = record[curnum+2];
-         rlb[2] = record[curnum+1];
-         rlb[3] = record[curnum+0];
+         rlb[0] = _record[curnum+3];
+         rlb[1] = _record[curnum+2];
+         rlb[2] = _record[curnum+1];
+         rlb[3] = _record[curnum+0];
          break;
-      case gdsDT_REAL4B:{// 4-bit real 
+      case gdsDT_REAL4B:// 4-bit real
+      {
          // WARNING!!! not used and never checked !!!!
-         _sg_int8 sign = (0x80 & record[curnum])? -1:1; //sign
-         byte exponent = 0x7f & record[curnum]; // exponent
+         _sg_int8 sign = (0x80 & _record[curnum])? -1:1; //sign
+         byte exponent = 0x7f & _record[curnum]; // exponent
          _sg_int32 mantissa = 0; // mantissa
          byte* mant = (byte*)&mantissa;// take the memory possition
          mant[3] = 0x0;
          for (int i = 0; i < 3; i++)
-            mant[i] = record[curnum+3-i];
+            mant[i] = _record[curnum+3-i];
          double *rld = (double*)var; // assign pointer
          *rld = sign*(mantissa/pow(2.0,24)) * pow(16.0, exponent-64);
          break;
       }
-      case gdsDT_REAL8B:{// 8-byte real
-         *(double*)var = gds2ieee(record);break;
-      }
+      case gdsDT_REAL8B:// 8-byte real
+         *(double*)var = gds2ieee(_record);
+         break;
       case gdsDT_ASCII:// String
          rlc = (char*)var;
-         if (len > 0){
-            for (word i = 0; i < len; rlc[i] = record[curnum*len+i], i++);
+         if (len > 0)
+         {
+            for (word i = 0; i < len; rlc[i] = _record[curnum*len+i], i++);
             rlc[len] = 0x0;
          }
-         else {
-            for (word i = 0; i < reclen; rlc[i] = record[i], i++);
-            rlc[reclen] = 0x0;
+         else
+         {
+            for (word i = 0; i < _recLen; rlc[i] = _record[i], i++);
+            rlc[_recLen] = 0x0;
          }
          break;
    }
    return true;
 }
 
-double GDSin::GdsRecord::gds2ieee(byte* gds) {
+double GDSin::GdsRecord::gds2ieee(byte* gds)
+{
    // zero is an exception (as always!) so check it first
    byte zerocheck;
    for (zerocheck = 0; zerocheck < 8; zerocheck++)
@@ -187,7 +203,8 @@ double GDSin::GdsRecord::gds2ieee(byte* gds) {
    return *((double*)&ieee);
 }
 
-byte* GDSin::GdsRecord::ieee2gds(double inval) {
+byte* GDSin::GdsRecord::ieee2gds(double inval)
+{
    byte* ieee = ((byte*)&inval);
    byte* gds = DEBUG_NEW byte[8];
    // zero is an exception (as always!) so check it first
@@ -238,40 +255,40 @@ byte* GDSin::GdsRecord::ieee2gds(double inval) {
 void GDSin::GdsRecord::add_int2b(const word data)
 {
    byte* recpointer = (byte*)&data;
-   record[index++] = recpointer[1];
-   record[index++] = recpointer[0];
+   _record[_index++] = recpointer[1];
+   _record[_index++] = recpointer[0];
 }
 
 void GDSin::GdsRecord::add_int4b(const int4b data)
 {
    byte* recpointer = (byte*)&data;
-   record[index++] = recpointer[3];
-   record[index++] = recpointer[2];
-   record[index++] = recpointer[1];
-   record[index++] = recpointer[0];
+   _record[_index++] = recpointer[3];
+   _record[_index++] = recpointer[2];
+   _record[_index++] = recpointer[1];
+   _record[_index++] = recpointer[0];
 }
 
 void GDSin::GdsRecord::add_ascii(const char* data)
-{  
+{
    word slen = strlen(data);
    bool compensate = (0 != (slen % 2));
    word strindex = 0;
    while (strindex < slen)
-      record[index++] = data[strindex++];
-   if (compensate) record[index++] = 0x00;
-   assert(compensate ? ((reclen-4) == slen+1) : ((reclen-4) == slen) );
+      _record[_index++] = data[strindex++];
+   if (compensate) _record[_index++] = 0x00;
+   assert(compensate ? ((_recLen-4) == slen+1) : ((_recLen-4) == slen) );
 }
 
 void GDSin::GdsRecord::add_real8b(const real data)
 {
    byte* gdsreal = ieee2gds(data);
-   for (byte i = 0; i < 8; i++) record[index++] = gdsreal[i];
+   for (byte i = 0; i < 8; i++) _record[_index++] = gdsreal[i];
    delete [] gdsreal;
 }
 
 GDSin::GdsRecord::~GdsRecord()
 {
-   delete[] record;
+   delete[] _record;
 }
 
 //==============================================================================
@@ -307,14 +324,16 @@ GDSin::GdsFile::GdsFile(const char* fn) {
    do {// start reading
       wr = GetNextRecord();
       if (wr)
-         switch (wr->Get_rectype())   {
-            case gds_HEADER:      wr->Ret_Data(&StreamVersion);
+      {
+         switch (wr->recType())
+         {
+            case gds_HEADER:      wr->retData(&StreamVersion);
                delete wr;break;
             case gds_BGNLIB:      GetTimes(wr);
                delete wr;break;
-            case gds_LIBDIRSIZE:   wr->Ret_Data(&libdirsize);
+            case gds_LIBDIRSIZE:   wr->retData(&libdirsize);
                delete wr;break;
-            case gds_SRFNAME:      wr->Ret_Data(&srfname);   
+            case gds_SRFNAME:      wr->retData(&srfname);
                delete wr;break;
             case gds_LIBSECUR:// I don't need this info. Does anybody need it?
                delete wr;break;
@@ -335,6 +354,7 @@ GDSin::GdsFile::GdsFile(const char* fn) {
                delete wr;
                return;
          }
+      }
       else   {AddLog('E',"Unexpected end of file");return;}
    }   
    while (true);
@@ -391,8 +411,8 @@ GDSin::GdsFile::GdsFile(std::string fn, time_t acctime) {
 
 void GDSin::GdsFile::GetTimes(GdsRecord *wr) {
    word cw;
-   for (int i = 0; i<wr->Get_reclen()/2; i++) {
-      wr->Ret_Data(&cw,2*i);
+   for (int i = 0; i<wr->recLen()/2; i++) {
+      wr->retData(&cw,2*i);
       switch (i) {
          case 0 :t_modif.Year   = cw;break;
          case 1 :t_modif.Month  = cw;break;
@@ -441,7 +461,7 @@ GDSin::GdsRecord* GDSin::GdsFile::GetNextRecord() {
 //      prgrs_pos = file_pos;
 //      prgrs->SetPos(prgrs_pos); // update progress indicator
 //   }
-   if (retrec->isvalid) return retrec;
+   if (retrec->valid()) return retrec;
    else return NULL;// error during read in
 }
 
@@ -594,14 +614,16 @@ GDSin::GdsFile::~GdsFile()
 //==============================================================================
 GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr) {
    int i;
-   cr->Ret_Data(&libname);//Get library name
+   cr->retData(&libname);//Get library name
    // init section
    maxver = 3;   Fstruct = NULL;
    for (i=0; i<4;fonts[i++] = NULL);
    do   {//start reading
       cr = cf->GetNextRecord();
       if (cr)
-         switch (cr->Get_rectype())   {
+      {
+         switch (cr->recType())
+         {
             case gds_FORMAT:// skipped record !!!
                AddLog('U',"FORMAT");
                delete cr;break;
@@ -620,14 +642,14 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr) {
             case gds_FONTS:// Read fonts
                for(i = 0; i < 4; i++)  {
                   fonts[i] = DEBUG_NEW char[45];
-                  cr->Ret_Data(fonts[i],i,44);
+                  cr->retData(fonts[i],i,44);
                }
                delete cr;break;
-            case gds_GENERATION:   cr->Ret_Data(&maxver);
+            case gds_GENERATION:   cr->retData(&maxver);
                delete cr;break;
             case gds_UNITS:   
-               cr->Ret_Data(&UU,0,8); // database units in one user unit
-               cr->Ret_Data(&DBU,8,8); // database unit in meters
+               cr->retData(&UU,0,8); // database units in one user unit
+               cr->retData(&DBU,8,8); // database unit in meters
                delete cr;break;
             case gds_BGNSTR:   
                Fstruct = DEBUG_NEW GdsStructure(cf, Fstruct);
@@ -639,6 +661,7 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr) {
                AddLog('E',"GDS Library - wrong record type in the current context");
                delete cr;return;
          }
+      }
       else {AddLog('E',"Unexpected end of file");return;}
    }   
    while (true);
@@ -650,10 +673,10 @@ void GDSin::GdsLibrary::SetHierarchy() {
       GdsData* wd = ws->Get_Fdata();
       while (wd) { //for every GdsData of type SREF or AREF
       //put a pointer to GdsStructure
-         word dt = wd->GetGDSDatatype();
+         word dt = wd->gdsDataType();
          if ((gds_SREF == dt) || (gds_AREF == dt))
          {//means that GdsData type is AREF or SREF 
-            char* strname = ((GdsRef*) wd)->GetStrname();
+            char* strname = ((GdsRef*) wd)->strName();
             GdsStructure* ws2 = Fstruct;
             while ((ws2) && (strcmp(strname,ws2->Get_StrName())))
                ws2 = ws2->GetLast();
@@ -667,14 +690,14 @@ void GDSin::GdsLibrary::SetHierarchy() {
             {//structure is referenced but not defined!
                char wstr[256];
                sprintf(wstr," Structure %s is referenced, but not defined!",
-                       ((GdsRef*)wd)->GetStrname());
+                       ((GdsRef*)wd)->strName());
                AddLog('W',wstr);
                //SGREM probably is a good idea to add default
                //GdsStructure here. Then this structure can be
                //visualized in the Hierarchy window as disabled
             }
          }
-         wd = wd->GetLast();
+         wd = wd->last();
       }
       ws = ws->GetLast();
    }
@@ -717,7 +740,9 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
    do   { //start reading 
       cr = cf->GetNextRecord();
       if (cr)
-         switch (cr->Get_rectype()) {
+      {
+         switch (cr->recType())
+         {
             case gds_NODE:// skipped record !!!
                AddLog('U',"NODE");
                delete cr;break;
@@ -728,29 +753,29 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
                AddLog('U',"STRCLASS");// CADANCE internal use only
                delete cr;break;
             case gds_STRNAME:
-               if (cr->Get_reclen() > 64)
+               if (cr->recLen() > 64)
                   strname[0] = 0x0;
-               else cr->Ret_Data(&strname);
+               else cr->retData(&strname);
                delete cr;break;
             case gds_BOX: 
                Fdata = DEBUG_NEW GdsBox(cf, Fdata);
-               Compbylay[Fdata->GetLayer()] = //put in layer sequence
-                  Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
+               Compbylay[Fdata->layer()] = //put in layer sequence
+                  Fdata->PutLaymark(Compbylay[Fdata->layer()]);
                delete cr;break;
             case gds_BOUNDARY: 
                Fdata = DEBUG_NEW GdsPolygon(cf, Fdata);
-               Compbylay[Fdata->GetLayer()] = //put in layer sequence
-                  Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
+               Compbylay[Fdata->layer()] = //put in layer sequence
+                  Fdata->PutLaymark(Compbylay[Fdata->layer()]);
                delete cr;break;
             case gds_PATH: 
                Fdata = DEBUG_NEW GDSpath(cf, Fdata);
-               Compbylay[Fdata->GetLayer()] = //put in layer sequence
-                  Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
+               Compbylay[Fdata->layer()] = //put in layer sequence
+                  Fdata->PutLaymark(Compbylay[Fdata->layer()]);
                delete cr;break;
             case gds_TEXT:   
                Fdata = DEBUG_NEW GdsText(cf,Fdata);
-               Compbylay[Fdata->GetLayer()] = //put in layer sequence
-                  Fdata->PutLaymark(Compbylay[Fdata->GetLayer()]);
+               Compbylay[Fdata->layer()] = //put in layer sequence
+                  Fdata->PutLaymark(Compbylay[Fdata->layer()]);
                delete cr;break;
             case gds_SREF:   
                Fdata = DEBUG_NEW GdsRef(cf, Fdata);
@@ -766,13 +791,15 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
                AddLog('E',"GDS structure - wrong record type in the current context");
                delete cr;return;
          }
+      }
       else
       { AddLog('E',"Unexpected end of file");return;}
    }
    while (true);
 }
 
-bool GDSin::GdsStructure::RegisterStructure(GdsStructure* ws) {
+bool GDSin::GdsStructure::RegisterStructure(GdsStructure* ws)
+{
    for (unsigned i=0; i < children.size(); i++) {
       if (NULL == children[i]) continue;
       else if (!strcmp(children[i]->Get_StrName(),ws->Get_StrName()))
@@ -781,8 +808,9 @@ bool GDSin::GdsStructure::RegisterStructure(GdsStructure* ws) {
    children.push_back(ws);
    return true;
 }
-   
-GDSin::GDSHierTree* GDSin::GdsStructure::HierOut(GDSHierTree* Htree, GdsStructure* parent) {
+
+GDSin::GDSHierTree* GDSin::GdsStructure::HierOut(GDSHierTree* Htree, GdsStructure* parent)
+{
    // collecting hierarchical information
    Htree = DEBUG_NEW GDSHierTree(this, parent, Htree);
    for (unsigned i = 0; i < children.size(); i++)
@@ -797,10 +825,11 @@ GDSin::GDSHierTree* GDSin::GdsStructure::HierOut(GDSHierTree* Htree, GdsStructur
    return Htree;
 }
 
-GDSin::GdsStructure::~GdsStructure() {
+GDSin::GdsStructure::~GdsStructure()
+{
    GdsData* Wdata = Fdata;
    while (Fdata) {
-      Wdata = Fdata->GetLast();
+      Wdata = Fdata->last();
       delete Fdata;
       Fdata = Wdata;
    }
@@ -809,18 +838,18 @@ GDSin::GdsStructure::~GdsStructure() {
 //==============================================================================
 // class GdsData
 //==============================================================================
-GDSin::GdsData::GdsData(GdsData* lst) {
-   elflags = 0; plex = 0;
-   last = lst;layer = -1; singletype = -1;
-   lastlay = NULL;
+GDSin::GdsData::GdsData(GdsData* lst) :
+   _last(lst), _lastLay(NULL), _plex(0), _elflags(0), _layer(-1), _singleType(-1)
+{}
+
+void GDSin::GdsData::readPlex(GdsRecord *cr)
+{
+   cr->retData(&_elflags,0,16);//get two bytes bit-array
 }
 
-void GDSin::GdsData::ReadPLEX(GdsRecord *cr) {
-   cr->Ret_Data(&elflags,0,16);//get two bytes bit-array
-}
-
-void GDSin::GdsData::ReadELFLAGS(GdsRecord *cr) {
-   cr->Ret_Data(&plex);//get two bytes bit-array
+void GDSin::GdsData::readElflags(GdsRecord *cr)
+{
+   cr->retData(&_plex);//get two bytes bit-array
 }
 
 //==============================================================================
@@ -831,21 +860,23 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, GdsData *lst):GdsData(lst) {
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
-         switch (cr->Get_rectype()) {
-            case gds_ELFLAGS:ReadELFLAGS(cr);// seems that it's not used
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS:readElflags(cr);// seems that it's not used
                delete cr; break;
-            case gds_PLEX:   ReadPLEX(cr);// seems that it's not used
+            case gds_PLEX:   readPlex(cr);// seems that it's not used
                delete cr; break;
-            case gds_LAYER: cr->Ret_Data(&layer);
+            case gds_LAYER: cr->retData(&_layer);
                delete cr; break;
-            case gds_BOXTYPE:cr->Ret_Data(&boxtype);// Don't know what is this !!!
+            case gds_BOXTYPE:cr->retData(&_boxtype);// Don't know what is this !!!
                delete cr; break;
             case gds_PROPATTR: AddLog('W',"GDS box - PROPATTR record ignored");
                delete cr;break;
             case gds_PROPVALUE: AddLog('W',"GDS box - PROPVALUE record ignored");
                delete cr;break;
             case gds_XY: {
-               word numpoints = (cr->Get_reclen())/8 - 1;
+               word numpoints = (cr->recLen())/8 - 1;
                // one point less because fist and last point coincide
                assert(numpoints == 4);
                _plist.reserve(numpoints);
@@ -860,6 +891,7 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, GdsData *lst):GdsData(lst) {
                delete cr;return;
             }
          }
+      }
       else {AddLog('E',"Unexpected end of file");return;}
    }
    while (true);
@@ -874,23 +906,25 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, GdsData *lst):GdsData(lst) {
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
-         switch (cr->Get_rectype()) {
-            case gds_ELFLAGS: ReadELFLAGS(cr);// seems that it's not used
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS: readElflags(cr);// seems that it's not used
                delete cr;break;
-            case gds_PLEX:   ReadPLEX(cr);// seems that it's not used
+            case gds_PLEX:   readPlex(cr);// seems that it's not used
                delete cr;break;
-            case gds_LAYER: cr->Ret_Data(&layer);
+            case gds_LAYER: cr->retData(&_layer);
                delete cr;break;
-            case gds_DATATYPE: cr->Ret_Data(&singletype);
+            case gds_DATATYPE: cr->retData(&_singleType);
                delete cr;break;
             case gds_PROPATTR: AddLog('W',"GDS boundary - PROPATTR record ignored");
                delete cr;break;
             case gds_PROPVALUE: AddLog('W',"GDS boundary - PROPVALUE record ignored");
                delete cr;break;
-            case gds_XY: numpoints = (cr->Get_reclen())/8 - 1;
+            case gds_XY: _numpoints = (cr->recLen())/8 - 1;
                // one point less because fist and last point coincide
-               _plist.reserve(numpoints);
-               for(i = 0; i < numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
+               _plist.reserve(_numpoints);
+               for(i = 0; i < _numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
                delete cr; break;
             case gds_ENDEL://end of element, exit point
                delete cr;return;
@@ -898,6 +932,7 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, GdsData *lst):GdsData(lst) {
                AddLog('E',"GDS boundary - wrong record type in the current context");
                delete cr;return;
          }
+      }
       else {AddLog('E',"Unexpected end of file");return;}
    }   
    while (true);
@@ -910,55 +945,62 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, GdsData *lst):GdsData(lst) {
 //==============================================================================
 // class GDSpath
 //==============================================================================
-GDSin::GDSpath::GDSpath(GdsFile* cf, GdsData *lst):GdsData(lst) {
+GDSin::GDSpath::GDSpath(GdsFile* cf, GdsData *lst):GdsData(lst)
+{
    word i;
-   pathtype = 0;bgnextn = 0; endextn = 0;width = 0;
+   _pathtype = 0; _bgnextn = 0; _endextn = 0; _width = 0;
    GdsRecord* cr = NULL;
-   do {//start reading
+   do
+   {//start reading
       cr = cf->GetNextRecord();
       if (cr)
-         switch (cr->Get_rectype())   {
-            case gds_ELFLAGS: ReadELFLAGS(cr);// seems that's not used               
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS: readElflags(cr);// seems that's not used
                delete cr;break;
-            case gds_PLEX:   ReadPLEX(cr);// seems that's not used
+            case gds_PLEX:   readPlex(cr);// seems that's not used
                delete cr;break;
-            case gds_LAYER: cr->Ret_Data(&layer);
+            case gds_LAYER: cr->retData(&_layer);
                delete cr;break;
-            case gds_DATATYPE: cr->Ret_Data(&singletype);
+            case gds_DATATYPE: cr->retData(&_singleType);
                delete cr;break;
-            case gds_PATHTYPE: cr->Ret_Data(&pathtype);
+            case gds_PATHTYPE: cr->retData(&_pathtype);
                delete cr;break;
-            case gds_WIDTH: cr->Ret_Data(&width);
+            case gds_WIDTH: cr->retData(&_width);
                delete cr;break;
-            case gds_BGNEXTN:   cr->Ret_Data(&bgnextn);
+            case gds_BGNEXTN:   cr->retData(&_bgnextn);
                delete cr;break;
-            case gds_ENDEXTN:   cr->Ret_Data(&endextn);
+            case gds_ENDEXTN:   cr->retData(&_endextn);
                delete cr;break;
             case gds_PROPATTR: AddLog('W',"GDS path - PROPATTR record ignored");
                delete cr;break;
             case gds_PROPVALUE: AddLog('W',"GDS path - PROPVALUE record ignored");
                delete cr;break;
-            case gds_XY:numpoints = (cr->Get_reclen())/8;
-               _plist.reserve(numpoints);
-               for(i = 0; i < numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
+            case gds_XY:_numpoints = (cr->recLen())/8;
+               _plist.reserve(_numpoints);
+               for(i = 0; i < _numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
                delete cr;break;
             case gds_ENDEL://end of element, exit point
-               if (2 == pathtype) {
+               if (2 == _pathtype)
+               {
                   AddLog('W',"GDS Pathtype 2 digitized. Will be converted to Pathtype 0");
-                  convert22(width/2, width/2);
+                  convert22(_width/2, _width/2);
                }   
-               else if (4 == pathtype) {
+               else if (4 == _pathtype)
+               {
                   AddLog('W',"GDS Pathtype 4 digitized. Will be converted to Pathtype 0");
-                  convert22(bgnextn, endextn);
+                  convert22(_bgnextn, _endextn);
                }
                delete cr;return;
             default://parse error - not expected record type
                AddLog('E',"GDS path - wrong record type in the current context");
                delete cr;return;
          }
+      }
       else {AddLog('E',"Unexpected end of file");return;}
-   }   
-   while (cr->Get_rectype() != gds_ENDEL);
+   }
+   while (cr->recType() != gds_ENDEL);
 }
 
 void GDSin::GDSpath::convert22(int4b begext, int4b endext) {
@@ -972,8 +1014,8 @@ void GDSin::GDSpath::convert22(int4b begext, int4b endext) {
    int4b y0 = (int4b) rint(P1.y() - sign*((begext*sdY)/length));
    int4b x0 = (int4b) rint(P1.x() - sign*((begext*sdX)/length));
 //
-   P1 = _plist[numpoints-2];
-   P2 = _plist[numpoints-1];
+   P1 = _plist[_numpoints-2];
+   P2 = _plist[_numpoints-1];
    sdX = P2.x() - P1.x();
    sdY = P2.y() - P1.y();
    sign = ((sdX * sdY) >= 0) ? 1 : -1;
@@ -982,8 +1024,8 @@ void GDSin::GDSpath::convert22(int4b begext, int4b endext) {
    int4b xn = (int4b) rint(P2.x() + sign*((endext*sdX)/length));
    _plist[0].setX(x0);
    _plist[0].setY(y0);
-   _plist[numpoints-1].setX(xn);
-   _plist[numpoints-1].setY(yn);
+   _plist[_numpoints-1].setX(xn);
+   _plist[_numpoints-1].setY(yn);
 }
 //==============================================================================
 // class GdsText
@@ -991,50 +1033,52 @@ void GDSin::GDSpath::convert22(int4b begext, int4b endext) {
 GDSin::GdsText::GdsText(GdsFile* cf, GdsData *lst):GdsData(lst) {
    word ba;
    // initializing
-   font = 0; vertjust = 0;   horijust = 0;pathtype = 0;
-   width = 0;abs_magn = 0;abs_angl = 0;reflection = 0;
-   magnification = 1.0; angle = 0.0;
-   text[0] = 0x0;
+   _font = 0; _vertJust = 0; _horiJust = 0; _pathType = 0;
+   _width = 0; _absMagn = 0; _absAngl = 0; _reflection = 0;
+   _magnification = 1.0; _angle = 0.0;
+   _text[0] = 0x0;
    GdsRecord* cr = NULL;
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
-         switch (cr->Get_rectype()) {
-            case gds_ELFLAGS: ReadELFLAGS(cr);// seems that it's not used
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS: readElflags(cr);// seems that it's not used
                delete cr;break;
-            case gds_PLEX:   ReadPLEX(cr);// seems that it's not used               
+            case gds_PLEX:   readPlex(cr);// seems that it's not used
                delete cr;break;
-            case gds_LAYER: cr->Ret_Data(&layer);
+            case gds_LAYER: cr->retData(&_layer);
                delete cr;break;
-            case gds_TEXTTYPE: cr->Ret_Data(&singletype);
+            case gds_TEXTTYPE: cr->retData(&_singleType);
                delete cr;break;
-            case gds_PATHTYPE: cr->Ret_Data(&pathtype);// ??? for test ???
+            case gds_PATHTYPE: cr->retData(&_pathType);// ??? for test ???
                delete cr;break;
-            case gds_WIDTH: cr->Ret_Data(&width);// seems not to be used
+            case gds_WIDTH: cr->retData(&_width);// seems not to be used
                delete cr;break;
             case gds_PROPATTR: AddLog('W',"GDS text - PROPATTR record ignored");
                delete cr;break;
             case gds_PROPVALUE: AddLog('W',"GDS text - PROPVALUE record ignored");
                delete cr;break;
             case gds_PRESENTATION:
-               cr->Ret_Data(&ba,0,16);
-               font = ba & 0x0030; font >>= 4;
-               vertjust = ba & 0x000C;vertjust >>= 2;
-               horijust = ba & 0x0003;
+               cr->retData(&ba,0,16);
+               _font = ba & 0x0030; _font >>= 4;
+               _vertJust = ba & 0x000C;_vertJust >>= 2;
+               _horiJust = ba & 0x0003;
                delete cr;break;
             case gds_STRANS:
-               cr->Ret_Data(&ba,0,16);
-               reflection = ba & 0x8000; reflection >>= 15;//bit 0
-               abs_magn = ba & 0x0004; abs_magn >>= 2; //bit 13
-               abs_angl = ba & 0x0002;abs_angl >>= 1; //bit 14
+               cr->retData(&ba,0,16);
+               _reflection = ba & 0x8000; _reflection >>= 15;//bit 0
+               _absMagn = ba & 0x0004; _absMagn >>= 2; //bit 13
+               _absAngl = ba & 0x0002; _absAngl >>= 1; //bit 14
                delete cr; break;
-            case gds_MAG: cr->Ret_Data(&magnification);
+            case gds_MAG: cr->retData(&_magnification);
                delete cr; break;
-            case gds_ANGLE: cr->Ret_Data(&angle);
+            case gds_ANGLE: cr->retData(&_angle);
                delete cr; break;
-            case gds_XY: magn_point = GDSin::get_TP(cr);
+            case gds_XY: _magnPoint = GDSin::get_TP(cr);
                delete cr;break;
-            case gds_STRING: cr->Ret_Data(&text);
+            case gds_STRING: cr->retData(&_text);
                delete cr;break;
             case gds_ENDEL://end of element, exit point
                delete cr;return;
@@ -1042,6 +1086,7 @@ GDSin::GdsText::GdsText(GdsFile* cf, GdsData *lst):GdsData(lst) {
                AddLog('E',"GDS text - wrong record type in the current context");
                delete cr;return;
          }
+      }
       else {AddLog('E',"Unexpected end of file");return;}
    }   
    while (true);
@@ -1054,44 +1099,48 @@ GDSin::GdsText::GdsText(GdsFile* cf, GdsData *lst):GdsData(lst) {
 //==============================================================================
 // class GdsRef
 //==============================================================================
-GDSin::GdsRef::GdsRef(GdsData *lst):GdsData(lst) {
-   abs_angl=abs_magn=reflection=false;
-   refstr = NULL;
-   magnification = 1.0; angle = 0.0;
+GDSin::GdsRef::GdsRef(GdsData *lst) : GdsData(lst), _refStr(NULL),
+   _reflection(false), _magnPoint(TP()), _magnification(1.0), _angle(0.0),
+   _absMagn(false), _absAngl(false)
+{
+   _strName[0] = 0x0;
 }
 
-GDSin::GdsRef::GdsRef(GdsFile* cf, GdsData *lst):GdsData(lst) {
+GDSin::GdsRef::GdsRef(GdsFile* cf, GdsData *lst):GdsData(lst)
+{
    word ba;
    //initializing
-   abs_angl=abs_magn=reflection=false;
-   refstr = NULL;
-   magnification = 1.0; angle = 0.0;
+   _absAngl = _absMagn = _reflection = false;
+   _refStr = NULL;
+   _magnification = 1.0; _angle = 0.0;
    int tmp; //Dummy variable. Use for gds_PROPATTR
    char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
    GdsRecord* cr = NULL;
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
-         switch (cr->Get_rectype()) {
-            case gds_ELFLAGS: ReadELFLAGS(cr);// seems that it's not used
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS: readElflags(cr);// seems that it's not used
                delete cr;break;
-            case gds_PLEX:   ReadPLEX(cr); // seems that it's not used
+            case gds_PLEX:   readPlex(cr); // seems that it's not used
                delete cr;break;
             case gds_SNAME:
-               if (cr->Get_reclen() > 32)   strname[0] = 0x0;
-               else cr->Ret_Data(&strname);
+               if (cr->recLen() > 32)   _strName[0] = 0x0;
+               else cr->retData(&_strName);
                delete cr;break;
             case gds_STRANS:
-               cr->Ret_Data(&ba,0,16);
-               reflection = ba & 0x8000;//mask all bits except 0
-               abs_magn = ba & 0x0004;//mask all bits except 13
-               abs_angl = ba & 0x0002;//mask all bits except 14
+               cr->retData(&ba,0,16);
+               _reflection = ba & 0x8000;//mask all bits except 0
+               _absMagn = ba & 0x0004;//mask all bits except 13
+               _absAngl = ba & 0x0002;//mask all bits except 14
                delete cr; break;
-            case gds_MAG: cr->Ret_Data(&magnification);
+            case gds_MAG: cr->retData(&_magnification);
                delete cr; break;
-            case gds_ANGLE: cr->Ret_Data(&angle);
+            case gds_ANGLE: cr->retData(&_angle);
                delete cr; break;
-            case gds_XY: magn_point = GDSin::get_TP(cr);
+            case gds_XY: _magnPoint = GDSin::get_TP(cr);
                delete cr;break;
             case gds_ENDEL://end of element, exit point
                // before exiting, init Current Translation Matrix
@@ -1099,17 +1148,18 @@ GDSin::GdsRef::GdsRef(GdsFile* cf, GdsData *lst):GdsData(lst) {
                delete cr;return;
             //TODO Not implemented yet+++++
             case gds_PROPATTR:
-               cr->Ret_Data(&tmp);
+               cr->retData(&tmp);
                delete cr; break;
             //TODO Not implemented yet+++++
             case gds_PROPVALUE:
-               cr->Ret_Data(&tmp2);
+               cr->retData(&tmp2);
                AddLog('A',tmp2, tmp);
                delete cr; break;
             default://parse error - not expected record type
                AddLog('E',"GDS sref - wrong record type in the current context");
                delete cr;return;
          }
+      }
       else   {AddLog('E',"Unexpected end of file");return;}
    }   
    while (true);
@@ -1131,33 +1181,35 @@ GDSin::GdsARef::GdsARef(GdsFile* cf, GdsData *lst):GdsRef(lst) {
    do {//start reading
       cr = cf->GetNextRecord();
       if (cr)
-         switch (cr->Get_rectype()) {
-            case gds_ELFLAGS:ReadELFLAGS(cr);// seems that it's not used
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS:readElflags(cr);// seems that it's not used
                delete cr;break;
-            case gds_PLEX:ReadPLEX(cr);// seems that it's not used
+            case gds_PLEX:readPlex(cr);// seems that it's not used
                delete cr;break;
             case gds_SNAME:
-               if (cr->Get_reclen() > 32)   strname[0] = 0x0;
-               else cr->Ret_Data(&strname);
+               if (cr->recLen() > 32)   _strName[0] = 0x0;
+               else cr->retData(&_strName);
                delete cr;break;
             case gds_STRANS:
-               cr->Ret_Data(&ba,0,16);
-               reflection = ba & 0x8000;//mask all bits except 0
-               abs_magn = ba & 0x0004;//mask all bita except 13
-               abs_angl = ba & 0x0002;//mask all bita except 14
+               cr->retData(&ba,0,16);
+               _reflection = ba & 0x8000;//mask all bits except 0
+               _absMagn = ba & 0x0004;//mask all bita except 13
+               _absAngl = ba & 0x0002;//mask all bita except 14
                delete cr; break;
-            case gds_MAG: cr->Ret_Data(&magnification);
+            case gds_MAG: cr->retData(&_magnification);
                delete cr; break;
-            case gds_ANGLE: cr->Ret_Data(&angle);
+            case gds_ANGLE: cr->retData(&_angle);
                delete cr; break;
             case gds_XY:
-               magn_point = GDSin::get_TP(cr,0);
+               _magnPoint = GDSin::get_TP(cr,0);
                X_step = GDSin::get_TP(cr,1);
                Y_step = GDSin::get_TP(cr,2);
                delete cr;break;
             case gds_COLROW://return number of columns & rows in the array 
-               cr->Ret_Data(&colnum);
-               cr->Ret_Data(&rownum,2);
+               cr->retData(&colnum);
+               cr->retData(&rownum,2);
                delete cr;break;
             case gds_ENDEL://end of element, exit point
                // before exiting, init Current Translation Matrix
@@ -1165,31 +1217,32 @@ GDSin::GdsARef::GdsARef(GdsFile* cf, GdsData *lst):GdsRef(lst) {
                delete cr;return;
             //TODO not implemented yet+++++
             case gds_PROPATTR:
-               cr->Ret_Data(&tmp);
+               cr->retData(&tmp);
                delete cr; break;
             //TODO not implemented yet+++++
             case gds_PROPVALUE:
-               cr->Ret_Data(&tmp2);
+               cr->retData(&tmp2);
                AddLog('A',tmp2, tmp);
                delete cr; break;
             default://parse error - not expected record type
                AddLog('E',"GDS aref - wrong record type in the current context");
                delete cr;return;
          }
+      }
       else {AddLog('E',"Unexpected end of file");return;}
    }
    while (true);
 }
 
 int GDSin::GdsARef::Get_Xstep() {
-   int ret = (int) sqrt(pow(float((X_step.x() - magn_point.x())),2) +
-      pow(float((X_step.y() - magn_point.y())),2)) / colnum;
+   int ret = (int) sqrt(pow(float((X_step.x() - _magnPoint.x())),2) +
+      pow(float((X_step.y() - _magnPoint.y())),2)) / colnum;
    return ret;
 }
 
 int GDSin::GdsARef::Get_Ystep() {
-   int ret = (int) sqrt(pow(float((Y_step.x() - magn_point.x())),2) +
-      pow(float((Y_step.y() - magn_point.y())),2)) / rownum;
+   int ret = (int) sqrt(pow(float((Y_step.x() - _magnPoint.x())),2) +
+      pow(float((Y_step.y() - _magnPoint.y())),2)) / rownum;
    return ret;
 }
 
@@ -1215,8 +1268,8 @@ int GDSin::GdsARef::Get_Ystep() {
 //-----------------------------------------------------------------------------
 TP GDSin::get_TP(GDSin::GdsRecord *cr, word curnum, byte len) {
    int4b GDS_X, GDS_Y;
-   cr->Ret_Data(&GDS_X, curnum*len*2, len);
-   cr->Ret_Data(&GDS_Y, curnum*len*2+len, len);
+   cr->retData(&GDS_X, curnum*len*2, len);
+   cr->retData(&GDS_Y, curnum*len*2+len, len);
    return TP(GDS_X,GDS_Y);
 }
 
