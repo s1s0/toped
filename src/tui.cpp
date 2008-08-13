@@ -400,11 +400,11 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-      GDSin::GdsStructure* gdss = AGDSDB->Get_structures();
+      GDSin::GdsStructure* gdss = AGDSDB->getStructures();
       while (gdss) 
       {
-         _nameList->Append(wxString(gdss->Get_StrName(), wxConvUTF8));
-         gdss = gdss->GetLast();
+         _nameList->Append(wxString(gdss->name(), wxConvUTF8));
+         gdss = gdss->last();
       }
    DATC->unlockGDS();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);

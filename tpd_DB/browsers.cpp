@@ -141,16 +141,16 @@ void browsers::GDSbrowser::collectInfo()
 {
    GDSin::GdsFile* AGDSDB = DATC->lockGDS(false);
    if (NULL == AGDSDB) return;
-   hCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
-   fCellBrowser->AddRoot(wxString((AGDSDB->Get_libname()).c_str(), wxConvUTF8));
-  
-   if (NULL == AGDSDB->hiertree()) return; // new, empty design
-   GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+   hCellBrowser->AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
+   fCellBrowser->AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
+
+   if (NULL == AGDSDB->hierTree()) return; // new, empty design
+   GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
    wxTreeItemId nroot;
    while (root){
-      nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
-    
-      nroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), wxString(root->GetItem()->Get_StrName(),wxConvUTF8));
+      nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(root->GetItem()->name(),wxConvUTF8));
+
+      nroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), wxString(root->GetItem()->name(),wxConvUTF8));
 //      SetItemTextColour(nroot,*wxLIGHT_GREY);
       collectChildren(root, nroot);
       root = root->GetNextRoot(TARGETDB_LIB);
@@ -174,11 +174,11 @@ void browsers::GDSbrowser::collectChildren(const GDSin::GDSHierTree *root, const
    wxTreeItemId temp;
 
    while (Child) {
-      if (!fCellBrowser->findItem(wxString(Child->GetItem()->Get_StrName(), wxConvUTF8), temp, fCellBrowser-> GetRootItem()))
+      if (!fCellBrowser->findItem(wxString(Child->GetItem()->name(), wxConvUTF8), temp, fCellBrowser-> GetRootItem()))
       {
-         nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(Child->GetItem()->Get_StrName(), wxConvUTF8));
+         nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(Child->GetItem()->name(), wxConvUTF8));
       }
-      nroot = hCellBrowser->AppendItem(lroot, wxString(Child->GetItem()->Get_StrName(), wxConvUTF8));
+      nroot = hCellBrowser->AppendItem(lroot, wxString(Child->GetItem()->name(), wxConvUTF8));
 //      SetItemTextColour(nroot,*wxLIGHT_GREY);
       hCellBrowser->SortChildren(lroot);
       collectChildren(Child, nroot);
