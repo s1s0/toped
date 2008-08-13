@@ -358,11 +358,11 @@ int tellstdfunc::GDSread::execute() {
          //
          GDSin::GdsFile* AGDSDB = DATC->lockGDS();
 
-            GDSin::GDSHierTree* root = AGDSDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+            GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
             assert(root);
             do 
             {
-               top_cell_list.push_back(std::string(root->GetItem()->Get_StrName()));
+               top_cell_list.push_back(std::string(root->GetItem()->name()));
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
          DATC->unlockGDS();
          telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
@@ -646,7 +646,7 @@ int tellstdfunc::GDSreportlay::execute() {
       {
          ost << "GDS layers found in \"" << name <<"\": ";
          for(int i = 0 ; i < GDS_MAX_LAYER ; i++)
-            if (src_structure->Get_Allay(i)) ost << i << " ";
+            if (src_structure->allLay(i)) ost << i << " ";
          tell_log(console::MT_INFO,ost.str());
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
       }

@@ -48,11 +48,11 @@ GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib)
 
 void GDSin::Gds2Ted::top_structure(std::string top_str, bool recursive, bool overwrite)
 {
-   assert(_src_lib->hiertree());
+   assert(_src_lib->hierTree());
    GDSin::GdsStructure *src_structure = _src_lib->GetStructure(top_str.c_str());
    if (NULL != src_structure)
    {
-      GDSin::GDSHierTree* root = _src_lib->hiertree()->GetMember(src_structure);
+      GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
       child_structure(root, recursive, overwrite);
       convert_prep(root, recursive, overwrite);
       root = root->GetNextRoot(TARGETDB_LIB);
@@ -83,7 +83,7 @@ void GDSin::Gds2Ted::child_structure(const GDSin::GDSHierTree* root, bool recurs
 void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool recursive, bool overwrite)
 {
    GDSin::GdsStructure* src_structure = const_cast<GDSin::GdsStructure*>(item->GetItem());
-   std::string gname = src_structure->Get_StrName();
+   std::string gname = src_structure->name();
    // check that destination structure with this name exists
    laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
    std::ostringstream ost; ost << "GDS import: ";
@@ -115,7 +115,7 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool recursive
 
 void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
 {
-   GDSin::GdsData *wd = src->Get_Fdata();
+   GDSin::GdsData *wd = src->fData();
    while( wd )
    {
       switch( wd->gdsDataType() )
@@ -206,9 +206,9 @@ void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
       laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->strName());
       // Absolute magnification, absolute angle should be reflected somehow!!!
 
-      laydata::ArrayProperties arrprops(wd->Get_Xstep(),wd->Get_Ystep(),
-                                 static_cast<word>(wd->Get_colnum()),
-                                 static_cast<word>(wd->Get_rownum()));
+      laydata::ArrayProperties arrprops(wd->getXStep(),wd->getYStep(),
+                                 static_cast<word>(wd->columns()),
+                                 static_cast<word>(wd->rows()));
       dst->addcellaref(_dst_lib,
          striter, 
          CTM( wd->magnPoint(),
@@ -655,12 +655,12 @@ bool DataCenter::GDSparse(std::string filename)
    }
    // parse the GDS file - don't forget to lock the GDS mutex here!
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
-   _GDSDB = DEBUG_NEW GDSin::GdsFile(filename.c_str());
+   _GDSDB = DEBUG_NEW GDSin::GdsFile(filename);
    status = _GDSDB->status();
    if (status)
    {
       // generate the hierarchy tree of cells
-      _GDSDB->HierOut();
+      _GDSDB->hierOut();
    }
    else
    {

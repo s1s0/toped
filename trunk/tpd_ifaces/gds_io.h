@@ -417,21 +417,20 @@ namespace GDSin {
    > Get_BoundBox()      - virtual method - not defined in this class!
    > gdsDataType()   - virtual method - see GdsData
    ******************************************************************************/
-   class   GdsARef:public GdsRef
-   {
-   public:
-      GdsARef(GdsFile *cf, GdsData *lst);
-      int        Get_Xstep();
-      int        Get_Ystep();
-      int2b      Get_colnum(){return colnum;};
-      int2b      Get_rownum(){return rownum;};
-      byte       gdsDataType(){return gds_AREF;};
-      virtual   ~GdsARef() {};
-   protected:
-      TP         X_step;
-      TP         Y_step;
-      int2b      colnum;
-      int2b      rownum;
+   class   GdsARef:public GdsRef {
+      public:
+                              GdsARef(GdsFile*, GdsData*);
+         int                  getXStep();
+         int                  getYStep();
+         byte                 gdsDataType()                    { return gds_AREF;   }
+         int2b                columns()                        { return _columns;   }
+         int2b                rows()                           { return _rows;      }
+         virtual            ~GdsARef()                        {                     }
+      protected:
+         TP                   _xStep;
+         TP                   _yStep;
+         int2b                _columns;
+         int2b                _rows;
    };
 
    /*** GdsStructure ************************************************************
@@ -469,30 +468,28 @@ namespace GDSin {
    > Get_Allay(byte i)   - ...
    ******************************************************************************/
 
-   class   GdsStructure
-   {
-   public:
-      GdsStructure(GdsFile* cf, GdsStructure* lst);
-      bool              RegisterStructure(GdsStructure* ws);
-      GDSHierTree*      HierOut(GDSHierTree* Htree, GdsStructure* parent);
-      GdsStructure*     GetLast()               { return last;}
-      const char*       Get_StrName()const      { return strname;}
-      GdsData*          Get_Fdata()             { return Fdata;};
-      bool              Get_Allay(byte i)       { return Allay[i];};
-      bool              traversed() const       { return _traversed;}
-      void              set_traversed(bool trv) { _traversed = trv;}
-      ~GdsStructure();
-      bool              HaveParent;
-      ChildStructure    children;
-      // to cover the requirements of the hierarchy template
-      int               libID() const {return TARGETDB_LIB;}
-   protected:
-      bool              Allay[GDS_MAX_LAYER];
-      GdsData*          Compbylay[GDS_MAX_LAYER];
-      GdsData*          Fdata;
-      char              strname[65];
-      GdsStructure*     last;
-      bool              _traversed;       //! For hierarchy traversing purposes
+   class   GdsStructure {
+      public:
+                              GdsStructure(GdsFile*, GdsStructure*);
+         bool                 registerStructure(GdsStructure* ws);
+         GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
+         GdsStructure*        last()                           { return _last;         }
+         const char*          name() const                     { return _name;         }
+         GdsData*             fData()                          { return _fData;        }
+         bool                 allLay(byte i)                   { return _allLay[i];    }
+         bool                 traversed() const                { return _traversed;    }
+         void                 set_traversed(bool trv)          { _traversed = trv;      }
+         int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
+                             ~GdsStructure();
+         bool                 _haveParent;
+         ChildStructure       _children;
+      protected:
+         bool                 _allLay[GDS_MAX_LAYER];
+         GdsData*             _compByLay[GDS_MAX_LAYER];
+         GdsData*             _fData;
+         char                 _name[65];
+         GdsStructure*        _last;
+         bool                 _traversed;       //! For hierarchy traversing purposes
    };
 
    /*** GDSLibrary **************************************************************
@@ -521,21 +518,21 @@ namespace GDSin {
    class   GdsLibrary
    {
    public:
-      GdsLibrary(GdsFile* cf, GdsRecord* cr);
-      void             SetHierarchy();
-      GDSHierTree*     HierOut();
-      GdsStructure*    Get_Fstruct(){return Fstruct;};
-      double           Get_DBU(){return DBU;};
-      double           Get_UU(){return UU;};
-      std::string      Get_name() const {return std::string(libname);}
-      ~GdsLibrary();
+                              GdsLibrary(GdsFile* , GdsRecord* );
+      void                    setHierarchy();
+      GDSHierTree*            hierOut();
+      GdsStructure*           fStruct()                        { return _fStruct;            }
+      double                  dbu()                            { return _dbu;                }
+      double                  uu()                             { return _uu;                 }
+      std::string             name() const                     { return std::string(_name);  }
+                             ~GdsLibrary();
    protected:
-      char             libname[256];
-      char*            fonts[4];
-      double           DBU;
-      double           UU;
-      int2b            maxver;
-      GdsStructure*    Fstruct;
+      char                    _name[256];
+      char*                   _fonts[4];
+      double                  _dbu;
+      double                  _uu;
+      int2b                   _maxver;
+      GdsStructure*           _fStruct;
    };
 
    /*** GdsFile ***************************************************************
@@ -572,54 +569,52 @@ namespace GDSin {
    > GetReadErrors()      - Returns the number of errors during GDSII file reading
    > GetTimes()         - Reads values of t_access and t_modiff (see above)
    ******************************************************************************/
-   class   GdsFile
-   {
-   public:
-      GdsFile(const char*fn);
-      GdsFile(std::string, time_t);
-      GdsRecord*     GetNextRecord();
-      GdsRecord*     SetNextRecord(byte rectype, word reclen = 0);
-      double         Get_LibUnits();
-      double         Get_UserUnits();
-      void           SetTimes(GdsRecord* wr);
-      bool           checkCellWritten(std::string);
-      void           registerCellWritten(std::string);
-      std::string    Get_libname() const {return library->Get_name();}
-      GdsStructure*  GetStructure(const char* selection);
-      void           HierOut() {_hiertree = library->HierOut();};
-      GDSHierTree*   hiertree() {return _hiertree;}
-      int            GetReadErrors() {return GDSIIerrors;};
-      int            GetGDSIIwarnings() {return GDSIIwarnings;};
-      int            Inc_GDSIIerrors() {return ++GDSIIerrors;};
-      int            Inc_GDSIIwarnings() {return ++GDSIIwarnings;};
-      GdsStructure*  Get_structures() {return library->Get_Fstruct();};
-      void           flush(GdsRecord*);
-      void           closeFile() {if (NULL != GDSfh) {fclose(GDSfh); GDSfh = NULL;}}
-      void           updateLastRecord();
-      bool           status() {return _status;};
-      ~GdsFile();
-   protected:
-      void           GetTimes(GdsRecord* wr);
-      FILE*          GDSfh;
-      std::string    filename;
-      int2b          StreamVersion;
-      int2b          libdirsize;
-      char           srfname[256];
-      GdsLibrary*    library;
-      long           file_length;
-      long           file_pos;
-      GDSHierTree*   _hiertree; // Tree of instance hierarchy
-      nameList       _childnames;
-      int            GDSIIerrors;
-      int            GDSIIwarnings;
-      GDStime        t_modif;
-      GDStime        t_access;
-      bool           _status;
+   class   GdsFile   {
+      public:
+                              GdsFile(std::string);
+                              GdsFile(std::string, time_t);
+         GdsRecord*           GetNextRecord();
+         GdsRecord*           SetNextRecord(byte, word reclen = 0);
+         double               Get_LibUnits();
+         double               Get_UserUnits();
+         void                 SetTimes(GdsRecord*);
+         bool                 checkCellWritten(std::string);
+         void                 registerCellWritten(std::string);
+         void                 flush(GdsRecord*);
+         void                 updateLastRecord();
+         GdsStructure*        GetStructure(const char*);
+         std::string          libname() const                  { return _library->name();       }
+         void                 hierOut()                        { _hierTree = _library->hierOut();}
+         GDSHierTree*         hierTree()                       { return _hierTree;              }
+         int                  gdsiiErrors()                    { return _gdsiiErrors;           }
+         int                  gdsiiWarnings()                  { return _gdsiiWarnings;         }
+         int                  incGdsiiErrors()                 { return ++_gdsiiErrors;         }
+         int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;       }
+         GdsStructure*        getStructures()                  { return _library->fStruct();    }
+         void                 closeFile()                      { if (NULL != _gdsFh) {fclose(_gdsFh); _gdsFh = NULL;}}
+         bool                 status()                         { return _status;                }
+                              ~GdsFile();
+      protected:
+         void                 getTimes(GdsRecord* wr);
+         FILE*                _gdsFh;
+         std::string          _fileName;
+         int2b                _streamVersion;
+         int2b                _libDirSize;
+         char                 _srfName[256];
+         GdsLibrary*          _library;
+         long                 _fileLength;
+         long                 _filePos;
+         GDSHierTree*         _hierTree; // Tree of instance hierarchy
+         nameList             _childnames;
+         int                  _gdsiiErrors;
+         int                  _gdsiiWarnings;
+         GDStime              _tModif;
+         GDStime              _tAccess;
+         bool                 _status;
    };
 
    // Function definition
      TP   get_TP(GdsRecord* cr, word curnum = 0, byte len=4);
-     void AddLog(char logtype, const char* message, const int number = 0);
 //     void PrintChildren(GDSin::GDSHierTree*, std::string*);
 }   
 #endif // !defined(GDSIO_H_INCLUDED)
