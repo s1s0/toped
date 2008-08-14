@@ -224,7 +224,7 @@ int parsercmd::includefile(char* name, FILE* &handler)
       FILE* newfilehandle;
       wxFileName* inclFN = DEBUG_NEW wxFileName(wxString(name,wxConvUTF8));
       inclFN->Normalize();
-      std::string nfname = inclFN->IsOk() ? std::string(inclFN->GetFullPath().mb_str()) : name;
+      std::string nfname = inclFN->IsOk() ? std::string(inclFN->GetFullPath().mb_str(wxConvFile )) : name;
       std::string infomsg;
       if (!inclFN->IsOk() || !inclFN->FileExists())
       {

@@ -860,11 +860,11 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
 {
    wxString color_name = cmdevent.GetString();
-   const layprop::tellRGB color = DATC->getColor(std::string(color_name.mb_str()));
+   const layprop::tellRGB color = DATC->getColor(std::string(color_name.mb_str(wxConvUTF8)));
    _sample->setColor(color);
 
    //Next 2 strings need for Windows version
-   const byte* fill = DATC->getFill(std::string(_fillname.mb_str()));
+   const byte* fill = DATC->getFill(std::string(_fillname.mb_str(wxConvUTF8)));
    _sample->setFill(fill);
 
    _sample->Refresh();
@@ -873,7 +873,7 @@ void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
 void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
 {
    _fillname = cmdevent.GetString();
-   const byte* fill = DATC->getFill(std::string(_fillname.mb_str()));
+   const byte* fill = DATC->getFill(std::string(_fillname.mb_str(wxConvUTF8)));
    _sample->setFill(fill);
    _sample->Refresh();
 }
@@ -881,7 +881,7 @@ void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
 void tui::defineLayer::OnLineChanged(wxCommandEvent& cmdevent)
 {
    wxString line_name = cmdevent.GetString();
-   const layprop::LineSettings* line = DATC->getLine(std::string(line_name.mb_str()));
+   const layprop::LineSettings* line = DATC->getLine(std::string(line_name.mb_str(wxConvUTF8)));
    _sample->setLine(line);
    _sample->Refresh();
 }
@@ -899,7 +899,7 @@ void tui::defineLayer::OnDefaultColor(wxCommandEvent& cmdevent)
    if (selected)
       _sample->setColor(DATC->getColor(std::string("")));
    else
-      _sample->setColor(DATC->getColor(std::string(_colors->GetStringSelection().mb_str())));
+      _sample->setColor(DATC->getColor(std::string(_colors->GetStringSelection().mb_str(wxConvUTF8))));
    _sample->Refresh();
 }
 
@@ -911,7 +911,7 @@ void tui::defineLayer::OnDefaultPattern(wxCommandEvent& cmdevent)
    if (selected)
       fill = DATC->getFill(std::string(""));
    else
-      fill = DATC->getFill(std::string(_fills->GetStringSelection().mb_str()));
+      fill = DATC->getFill(std::string(_fills->GetStringSelection().mb_str(wxConvUTF8)));
    _sample->setFill(fill);
    _sample->Refresh();
 }
@@ -924,7 +924,7 @@ void tui::defineLayer::OnDefaultLine(wxCommandEvent& cmdevent)
    if (selected)
       line = DATC->getLine(std::string(""));
    else
-      line = DATC->getLine(std::string(_lines->GetStringSelection().mb_str()));
+      line = DATC->getLine(std::string(_lines->GetStringSelection().mb_str(wxConvUTF8)));
    _sample->setLine(line);
    _sample->Refresh();
 }
@@ -1141,7 +1141,7 @@ void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
 void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
 {
     wxString color_name = cmdevent.GetString();
-   const layprop::tellRGB* scol = getColor(std::string(color_name.mb_str()));
+   const layprop::tellRGB* scol = getColor(std::string(color_name.mb_str(wxConvUTF8)));
    
    wxString channel;
    channel << scol->red();
@@ -1182,7 +1182,7 @@ void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
       msg << wxT("Empty color name.");
       wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
    }
-   else if (_allColors.end() != _allColors.find(std::string(color_name.mb_str())))
+   else if (_allColors.end() != _allColors.find(std::string(color_name.mb_str(wxConvUTF8))))
    {
       wxString msg;
       msg << wxT("Color \"") << color_name << wxT("\" is already defined.");
@@ -1191,7 +1191,7 @@ void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
    else
    {
       layprop::tellRGB* newcol = DEBUG_NEW layprop::tellRGB(0,0,0,178);
-      std::string s_newcol = std::string(color_name.mb_str());
+      std::string s_newcol = std::string(color_name.mb_str(wxConvUTF8));
       _allColors[s_newcol] = newcol;
       int index = _colorList->Append(color_name);
       _colorList->Select(index);
@@ -1240,7 +1240,7 @@ void tui::defineColor::OnApply(wxCommandEvent& WXUNUSED(event))
    unsigned long d_alpha;s_alpha.ToULong(&d_alpha);
    
    layprop::tellRGB* scol = DEBUG_NEW layprop::tellRGB(d_red, d_green, d_blue, d_alpha);
-   std::string ss_name(s_name.mb_str());
+   std::string ss_name(s_name.mb_str(wxConvUTF8));
    if (_allColors.end() != _allColors.find(ss_name))
    {
       delete _allColors[ss_name];
@@ -1575,7 +1575,7 @@ void tui::defineFill::nameNormalize(wxString& str)
 void tui::defineFill::OnFillSelected(wxCommandEvent& cmdevent)
 {
     wxString fill_name = cmdevent.GetString();
-    fillcopy(getFill(std::string(fill_name.mb_str())),_current_pattern);
+    fillcopy(getFill(std::string(fill_name.mb_str(wxConvUTF8))),_current_pattern);
    _fillsample->setFill(_current_pattern);
    _fillsample->Refresh();
 }
@@ -1590,7 +1590,7 @@ void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
       msg << wxT("Empty fill name.");
       wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
    }
-   else if (_allFills.end() != _allFills.find(std::string(fill_name.mb_str())))
+   else if (_allFills.end() != _allFills.find(std::string(fill_name.mb_str(wxConvUTF8))))
    {
       wxString msg;
       msg << wxT("Pattern \"") << fill_name << wxT("\" is already defined.");
@@ -1598,7 +1598,7 @@ void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
    }
    else
    {
-      std::string s_newcol = std::string(fill_name.mb_str());
+      std::string s_newcol = std::string(fill_name.mb_str(wxConvUTF8));
       byte* newpat = DEBUG_NEW byte[128];
       for(byte i = 0; i< 128; i++)
          newpat[i] = 0x55 << ((byte)(i/4)%2);
@@ -1622,7 +1622,7 @@ void tui::defineFill::OnDefineFill(wxCommandEvent& cmdevent)
       _fillsample->setFill(_current_pattern);
       _fillsample->Refresh();
       wxString s_name  = _fillList->GetStringSelection();
-      std::string ss_name(s_name.mb_str());
+      std::string ss_name(s_name.mb_str(wxConvUTF8));
       if (_allFills.end() != _allFills.find(ss_name))
       {
          fillcopy(_current_pattern, _allFills[ss_name]);
@@ -1679,17 +1679,17 @@ NMap* tui::LayerRecords::getCifLayerMap()
    NMap* cif_lay_map = DEBUG_NEW NMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
-      std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str());
+      std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str(wxConvUTF8));
       // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
       if ("" == layname)
-         layname = std::string(CNM->_ciflay->GetLabel().mb_str());
+         layname = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
       word layno = DATC->getLayerNo(layname);
       if (0 == layno)
       {
          layno = DATC->addlayer(layname);
          browsers::layer_add(layname, layno);
       }
-      (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str())] = layno;
+      (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
    }
    return cif_lay_map;
 }

@@ -83,7 +83,8 @@ laydata::TEDfile::TEDfile(const char* filename, laydata::tdtlibdir* tedlib)  // 
 {
    _numread = 0;_position = 0;_design = NULL;
    _TEDLIB = tedlib;
-   if (NULL == (_file = fopen(filename, "rb"))) {
+	std::string fname(convertString(filename));
+	if (NULL == (_file = fopen(fname.c_str(), "rb"))) {
       std::string news = "File \"";
       news += filename; news += "\" not found or unaccessable";
       tell_log(console::MT_ERROR,news);
@@ -134,8 +135,8 @@ laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib)
 { //writing
    _design = (*tedlib)();_revision=0;_subrevision=6;
    _TEDLIB = tedlib;
-	std::string str(string2mbstring(filename));
-   if (NULL == (_file = fopen(str.c_str(), "wb"))) {
+	std::string fname(convertString(filename));
+   if (NULL == (_file = fopen(fname.c_str(), "wb"))) {
       std::string news = "File \""; 
       news += filename.c_str(); news += "\" can not be created";
       tell_log(console::MT_ERROR,news);

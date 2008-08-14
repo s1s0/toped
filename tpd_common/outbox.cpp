@@ -360,15 +360,14 @@ bool TpdTime::getStdCTime(wxString& exp) {
 
 bool expandFileName( std::string& filename)
 {
-	std::string str(string2mbstring(filename));
-   wxFileName fName(wxString(str.c_str(), wxConvUTF8));
+	wxFileName fName(wxString(filename.c_str(), wxConvFile ));
    fName.Normalize();
    if (fName.IsOk())
    {
       wxString dirName = fName.GetFullPath();
       if (!dirName.Matches(wxT("*$*")))
       {
-         filename = fName.GetFullPath().mb_str();
+         filename = fName.GetFullPath().mb_str(wxConvFile );
          return true;
       }
    }
@@ -382,18 +381,17 @@ std::string getFileNameOnly( std::string filename )
    assert (fName.IsOk());
    {
       wxString name = fName.GetName();
-      return std::string(name.mb_str());
+      return std::string(name.mb_str(wxConvFile ));
    }
 }
 
-//convert string to multibyte string
-std::string string2mbstring(std::string str)
+//Convert string from UTF8 to wxConvFile
+std::string convertString(const std::string &str)
 {
-	wxString strtemp(str.c_str(), wxConvUTF8);
-	std::string mbstr(strtemp.mb_str());
-	return mbstr;
+	wxString wxstr(str.c_str(), wxConvUTF8 );
+	std::string retstr = wxstr.mb_str(wxConvFile );
+	return retstr;
 }
-
 //=============================================================================
 EXPTNactive_cell::EXPTNactive_cell() {
    std::string news = "No active cell. Use opencell(\"<name>\") to select one";
