@@ -284,7 +284,7 @@ void* console::parse_thread::Entry() {
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
-   void* b = tell_scan_string( command.mb_str() );
+   void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
    StatusBusy(command);
    tellparse();
    delete_tell_lex_buffer( b );
@@ -343,7 +343,7 @@ void console::ted_cmd::getCommand(wxCommandEvent& WXUNUSED(event)) {
    else {
       wxString command = GetValue();
       tell_log(MT_COMMAND, command);
-      _cmd_history.push_back(std::string(command.mb_str()));
+      _cmd_history.push_back(std::string(command.mb_str(wxConvUTF8)));
       _history_position = _cmd_history.end();
       Clear();
       parse_thread *pthrd = DEBUG_NEW parse_thread(command,_parent,_canvas);
@@ -357,7 +357,7 @@ void console::ted_cmd::getCommandA() {
    else {
       wxString command = GetValue();
       tell_log(MT_COMMAND, command);
-      _cmd_history.push_back(std::string(command.mb_str()));
+      _cmd_history.push_back(std::string(command.mb_str(wxConvUTF8)));
       _history_position = _cmd_history.end();
       Clear();
       if (!_thread)
@@ -367,7 +367,7 @@ void console::ted_cmd::getCommandA() {
          telllloc.first_column = telllloc.first_line = 1;
          telllloc.last_column  = telllloc.last_line  = 1;
          telllloc.filename = NULL;
-         void* b = tell_scan_string( command.mb_str() );
+         void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
          tellparse();
          delete_tell_lex_buffer( b );
       }

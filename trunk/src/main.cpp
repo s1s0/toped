@@ -389,7 +389,7 @@ bool TopedApp::LoadFontFile(std::string fontname)
    fontFile << tpdFontDir << wxString(fontname.c_str(), wxConvUTF8) << wxT(".glf");
    wxFileName fontFN(fontFile);
    fontFN.Normalize();
-   if (!(fontFN.IsOk() && (-1 != glfLoadFont(fontFN.GetFullPath().mb_str()))))
+   if (!(fontFN.IsOk() && (-1 != glfLoadFont(fontFN.GetFullPath().mb_str(wxConvFile)))))
    {
       wxString errmsg;
       bool wbox_status = true;
@@ -456,7 +456,7 @@ bool TopedApp::OnInit() {
 	wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    GetLocalDirs();
 	GetGlobalDirs();
-   initDBLib(std::string(localDir.mb_str(wxConvUTF8)));
+	initDBLib(std::string(localDir.mb_str(wxConvFile)));
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
    if (!Toped->view()->initStatus())
@@ -472,7 +472,7 @@ bool TopedApp::OnInit() {
       return FALSE;
    }
    if (!LoadFontFile("arial1")) return FALSE;
-   Toped->setIconDir(std::string(tpdUIDir.mb_str()));
+   Toped->setIconDir(std::string(tpdUIDir.mb_str(wxConvFile)));
 	Toped->initToolBars();
 
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
@@ -510,11 +510,11 @@ bool TopedApp::OnInit() {
       Console->parseCommand(inputfile, false);
       tell_log(console::MT_WARNING,"Exit recovery mode.");
       static_cast<parsercmd::cmdMAIN*>(CMDBlock)->recoveryDone();
-      LogFile.init(std::string(logFileName.mb_str()), true);
+      LogFile.init(std::string(logFileName.mb_str(wxConvFile)), true);
    }
    else
    {
-      LogFile.init(std::string(logFileName.mb_str()));
+      LogFile.init(std::string(logFileName.mb_str(wxConvFile )));
       wxLog::AddTraceMask(wxT("thread"));
       if (1 < argc) 
       {

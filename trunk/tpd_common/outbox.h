@@ -203,7 +203,7 @@ class EXPTNpolyCross : public EXPTN
 
 bool        expandFileName(std::string&);
 std::string getFileNameOnly(std::string);
-//convert string to multibyte string
-std::string string2mbstring(std::string str);
+//Convert string from UTF8 to wxConvFile
+std::string convertString(const std::string &str);
 
 #endif

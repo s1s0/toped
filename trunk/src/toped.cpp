@@ -1022,7 +1022,7 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
    wxString ost; 
    ost << wxT("tdtsave();");
    SetStatusText(wxT("Saving file..."));
-   wxString wxfilename(DATC->tedfilename().c_str(), wxConvUTF8);
+	wxString wxfilename(DATC->tedfilename().c_str(), wxConvFile);
    wxFileName datafile( wxfilename );
    assert(datafile.IsOk());
    if (datafile.FileExists() && DATC->neversaved()) {
