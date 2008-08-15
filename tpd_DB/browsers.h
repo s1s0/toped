@@ -92,55 +92,99 @@ namespace browsers
 
 
    //===========================================================================
-   class CellBrowser: public wxTreeCtrl
-   {
-   public:
-                        CellBrowser(wxWindow* parent, wxWindowID id = -1, 
-                        const wxPoint& pos = wxDefaultPosition, 
-                        const wxSize& size = wxDefaultSize,
-                        long style = wxTR_DEFAULT_STYLE);
-      virtual           ~CellBrowser();
-      virtual  void     ShowMenu(wxTreeItemId id, const wxPoint& pt);
-      bool              findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent);
-      void              copyItem(const wxTreeItemId, const wxTreeItemId);
-      void              highlightChildren(wxTreeItemId, wxColour);
-      wxTreeItemId      activeStructure(void) {return _activeStructure;};
-      wxString          selectedCellname() const {if (RBcellID.IsOk())
-         return GetItemText(RBcellID); else return wxT("");}
-   protected:
-      wxTreeItemId      RBcellID;
-   private:
-      wxTreeItemId      top_structure;
-      wxTreeItemId      _activeStructure;
+   class CellBrowser: public wxTreeCtrl {
+      public:
+                           CellBrowser(wxWindow* parent, wxWindowID id = -1, 
+                              const wxPoint& pos = wxDefaultPosition, 
+                              const wxSize& size = wxDefaultSize,
+                              long style = wxTR_DEFAULT_STYLE);
+         virtual          ~CellBrowser()  {};
+         virtual  void    showMenu(wxTreeItemId id, const wxPoint& pt);
+         bool              findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent);
+         void              copyItem(const wxTreeItemId, const wxTreeItemId);
+         void              highlightChildren(wxTreeItemId, wxColour);
+         wxString          selectedCellName();
+         void              selectCellName(wxString);
+         wxTreeItemId      activeStructure(void)            {return _activeStructure;}
+      protected:
+         wxTreeItemId      RBcellID;
+      private:
+         wxTreeItemId      _topStructure;
+         wxTreeItemId      _activeStructure;
+         void              onItemRightClick(wxTreeEvent&);
+         void              onLMouseDblClk(wxMouseEvent&);
+         void              onWXOpenCell(wxCommandEvent&);
+         void              onBlankRMouseUp(wxMouseEvent&);
 
-      void              OnItemRightClick(wxTreeEvent&);
-      void              OnLMouseDblClk(wxMouseEvent&);
-      void              OnWXOpenCell(wxCommandEvent&);
-      void              OnBlankRMouseUp(wxMouseEvent&);
-
-      DECLARE_EVENT_TABLE();
+         DECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
-   class GDSCellBrowser:public CellBrowser
-   {
-   public:
-                        GDSCellBrowser(wxWindow* parent, wxWindowID id = -1, 
-                        const wxPoint& pos = wxDefaultPosition, 
-                        const wxSize& size = wxDefaultSize,
-                        long style = wxTR_DEFAULT_STYLE);
-      virtual  void     ShowMenu(wxTreeItemId id, const wxPoint& pt);
-   private:
-      void              OnItemRightClick(wxTreeEvent&);
-      void              OnBlankRMouseUp(wxMouseEvent&);
-      void              OnGDSreportlay(wxCommandEvent& WXUNUSED(event));
-      DECLARE_EVENT_TABLE();
+   class GDSCellBrowser:public CellBrowser {
+      public:
+                           GDSCellBrowser(wxWindow* parent, wxWindowID id = -1, 
+                              const wxPoint& pos = wxDefaultPosition, 
+                              const wxSize& size = wxDefaultSize,
+                              long style = wxTR_DEFAULT_STYLE);
+         virtual  void    showMenu(wxTreeItemId id, const wxPoint& pt);
+      private:
+         void              onItemRightClick(wxTreeEvent&);
+         void              onBlankRMouseUp(wxMouseEvent&);
+         void              onGDSreportlay(wxCommandEvent& WXUNUSED(event));
+         DECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
-   //
-   // @TODO ! Hierarchy browsers of imported DB's should be templated!
-   //
+   class CIFCellBrowser:public CellBrowser {
+      public:
+                           CIFCellBrowser(wxWindow* parent, wxWindowID id = -1,
+                              const wxPoint& pos = wxDefaultPosition,
+                              const wxSize& size = wxDefaultSize,
+                              long style = wxTR_DEFAULT_STYLE);
+         virtual  void    showMenu(wxTreeItemId id, const wxPoint& pt);
+      private:
+         void              onItemRightClick(wxTreeEvent&);
+         void              onBlankRMouseUp(wxMouseEvent&);
+         void              onCIFreportlay(wxCommandEvent& WXUNUSED(event));
+         DECLARE_EVENT_TABLE();
+   };
+
+   //===========================================================================
+   class TDTbrowser : public wxPanel {
+      public:
+                           TDTbrowser(wxWindow* parent, wxWindowID id = -1,
+                              const wxPoint& pos = wxDefaultPosition,
+                              const wxSize& size = wxDefaultSize,
+                              long style = wxTR_DEFAULT_STYLE);
+         virtual          ~TDTbrowser();
+         void              initialize();
+         void              update();
+         wxString          selectedCellName() const;
+      protected:
+         void              collectChildren(const laydata::TDTHierTree *, int ,
+                                           const wxTreeItemId& );
+      private:
+         void              updateFlat();
+         void              updateHier();
+         void              onCommand(wxCommandEvent&);
+         void              onWXCellARef(wxCommandEvent&);
+         void              onReportUsedLayers(wxCommandEvent&);
+         void              onTellOpenCell(wxString);
+         void              onTellHighlightCell(wxString);
+         void              onTellAddCell(wxString, wxString, int);
+         void              onTellRemoveCell(wxString, wxString, int);
+         void              onHierView(wxCommandEvent&);
+         void              onFlatView(wxCommandEvent&);
+         wxTreeItemId      _topStructure;
+         wxTreeItemId      _activeStructure;
+         wxImageList*      _imageList;
+         CellBrowser*      _cellBrowser;
+         wxButton*         _hierButton;
+         wxButton*         _flatButton;
+         enum {hier, flat} _status;
+         wxTreeItemId      _dbroot;
+         DECLARE_EVENT_TABLE();
+   };
 
    //===========================================================================
    class GDSbrowser : public wxPanel 
@@ -171,84 +215,28 @@ namespace browsers
    };
 
    //===========================================================================
-   class CIFCellBrowser:public CellBrowser
-   {
-      public:
-                        CIFCellBrowser(wxWindow* parent, wxWindowID id = -1,
-                        const wxPoint& pos = wxDefaultPosition,
-                        const wxSize& size = wxDefaultSize,
-                        long style = wxTR_DEFAULT_STYLE);
-         virtual  void     ShowMenu(wxTreeItemId id, const wxPoint& pt);
-      private:
-         void              OnItemRightClick(wxTreeEvent&);
-         void              OnBlankRMouseUp(wxMouseEvent&);
-         void              OnCIFreportlay(wxCommandEvent& WXUNUSED(event));
-         DECLARE_EVENT_TABLE();
-   };
-
-   //===========================================================================
-   class CIFbrowser : public wxPanel
-   {
+   class CIFbrowser : public wxPanel {
       public:
                            CIFbrowser(wxWindow *parent, wxWindowID id = -1,
-                           const wxPoint& pos = wxDefaultPosition,
-                           const wxSize& size = wxDefaultSize,
-                           long style = wxTR_DEFAULT_STYLE);
+                              const wxPoint& pos = wxDefaultPosition,
+                              const wxSize& size = wxDefaultSize,
+                              long style = wxTR_DEFAULT_STYLE);
          void              collectInfo();
-         wxString          selectedCellname() const;
-         void              DeleteAllItems(void);
+         wxString          selectedCellName() const;
+         void              deleteAllItems(void);
       protected:
          void              collectChildren(const CIFin::CIFHierTree *root,
                                            const wxTreeItemId& lroot);
       private:
+         void              onCommand(wxCommandEvent&);
+         void              onWxImportCell(wxCommandEvent&);
+         void              onHierView(wxCommandEvent&);
+         void              onFlatView(wxCommandEvent&);
          wxButton*         _hierButton;
          wxButton*         _flatButton;
-         CIFCellBrowser*   hCellBrowser;//Hierarchy cell browser
-         CIFCellBrowser*   fCellBrowser;//Flat cell browser
-         void              OnCommand(wxCommandEvent&);
-         void              OnWXImportCell(wxCommandEvent&);
-         void              OnHierView(wxCommandEvent&);
-         void              OnFlatView(wxCommandEvent&);
+         CIFCellBrowser*   _cellBrowser;
+         bool              _hierarchy_view;
          DECLARE_EVENT_TABLE();
-   };
-
-   //===========================================================================
-   class TDTbrowser : public wxPanel 
-   {
-   public:
-                        TDTbrowser(wxWindow* parent, wxWindowID id = -1, 
-                        const wxPoint& pos = wxDefaultPosition, 
-                        const wxSize& size = wxDefaultSize,
-                        long style = wxTR_DEFAULT_STYLE);
-      virtual           ~TDTbrowser();
-//      void              collectInfo(const wxString, const int, laydata::TDTHierTree*);
-      void              initialize();
-      void              update();
-      wxString          selectedCellname() const;
-   protected:
-      void              collectChildren(const laydata::TDTHierTree *, int , 
-                                                 const wxTreeItemId& );
-   private:
-      wxTreeItemId      top_structure;
-      wxTreeItemId      active_structure;
-      wxImageList*      _imageList;
-      CellBrowser*      hCellBrowser;//Hierarchy cell browser
-      wxButton*         _hierButton;
-      wxButton*         _flatButton;
-      enum {hier, flat} _status;
-      wxTreeItemId      dbroot;
-      void              updateFlat();
-      void              updateHier();
-      void              OnCommand(wxCommandEvent&);
-      void              OnWXCellARef(wxCommandEvent&);
-      void              OnReportUsedLayers(wxCommandEvent&);
-      void              OnTELLopencell(wxString);
-      void              OnTELLhighlightcell(wxString);
-      void              OnTELLaddcell(wxString, wxString, int);
-      void              OnTELLremovecell(wxString, wxString, int);
-      void              OnHierView(wxCommandEvent&);
-      void              OnFlatView(wxCommandEvent&);
-      DECLARE_EVENT_TABLE();
    };
 
    class LayerInfo
@@ -348,14 +336,14 @@ namespace browsers
         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, 
                                                                   long style = 0);
       virtual            ~browserTAB();// {};
-      LayerBrowser*        TDTlayers() const   {return _layers;};
-      TDTbrowser*          TDTstruct() const    {return _TDTstruct;};
-      wxString             TDTSelectedCellName() const {return _TDTstruct->selectedCellname();};
       wxString             TDTSelectedGDSName() const;
       wxString             TDTSelectedCIFName() const;
-      void                 set_tellParser(wxWindow* tp) {_tellParser = tp;}
-      wxWindow*            tellParser() const {return _tellParser;}
-   private:
+      LayerBrowser*        TDTlayers() const             { return _layers;       }
+      TDTbrowser*          TDTstruct() const             { return _TDTstruct;    }
+      wxString             TDTSelectedCellName() const   { return _TDTstruct->selectedCellName();}
+      wxWindow*            tellParser() const            { return _tellParser;   }
+      void                 set_tellParser(wxWindow* tp)  { _tellParser = tp;      }
+      private:
       void                 OnCommand(wxCommandEvent&);
       void                 OnTELLaddTDTlib();
       void                 OnTELLaddGDStab();
