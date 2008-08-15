@@ -388,10 +388,11 @@ std::string getFileNameOnly( std::string filename )
 //Convert string from UTF8 to wxConvFile
 std::string convertString(const std::string &str)
 {
-	wxString wxstr(str.c_str(), wxConvUTF8 );
-	std::string retstr = wxstr.mb_str(wxConvFile );
-	return retstr;
+   wxString wxstr(str.c_str(), wxConvUTF8 );
+   std::string retstr( wxstr.mb_str(wxConvFile ) );
+   return retstr;
 }
+
 //=============================================================================
 EXPTNactive_cell::EXPTNactive_cell() {
    std::string news = "No active cell. Use opencell(\"<name>\") to select one";
