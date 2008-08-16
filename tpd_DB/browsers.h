@@ -44,7 +44,7 @@
 namespace browsers 
 {
    const int buttonHeight = 30;
-   
+
    typedef enum
    {
       BT_LAYER_DEFAULT,
@@ -105,19 +105,27 @@ namespace browsers
          void              highlightChildren(wxTreeItemId, wxColour);
          wxString          selectedCellName();
          void              selectCellName(wxString);
-         wxTreeItemId      activeStructure(void)            {return _activeStructure;}
-         virtual void     collectInfo(bool) {assert(false);} //@TODO collect here instead of TDTBrowser
+         virtual void     collectInfo(bool);
       protected:
          wxTreeItemId      RBcellID;
          virtual void     onItemRightClick(wxTreeEvent&);
          virtual void     onBlankRMouseUp(wxMouseEvent&);
          virtual void     onReportlay(wxCommandEvent& WXUNUSED(event)) {assert(false);}
+         void              initialize();
       private:
-         wxTreeItemId      _topStructure;
-         wxTreeItemId      _activeStructure;
+         void              collectChildren(const laydata::TDTHierTree*, int, const wxTreeItemId&);
+         void              updateFlat();
+         void              updateHier();
+         void              onCommand(wxCommandEvent&);
          void              onLMouseDblClk(wxMouseEvent&);
          void              onWXOpenCell(wxCommandEvent&);
-
+         void              onTellOpenCell(wxString);
+         void              onTellHighlightCell(wxString);
+         void              onTellAddCell(wxString, wxString, int);
+         void              onTellRemoveCell(wxString, wxString, int);
+         wxTreeItemId      _topStructure;
+         wxTreeItemId      _activeStructure;
+         wxTreeItemId      _dbroot;
          DECLARE_EVENT_TABLE();
    };
 
@@ -162,33 +170,21 @@ namespace browsers
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-         virtual          ~TDTbrowser();
+                          ~TDTbrowser();
          void              initialize();
-         void              update();
          wxString          selectedCellName() const;
-      protected:
-         void              collectChildren(const laydata::TDTHierTree *, int ,
-                                           const wxTreeItemId& );
+         void              collectInfo()              {_cellBrowser->collectInfo(_hierarchy_view);}
+         CellBrowser*      cellBrowser() const        {return _cellBrowser;}
       private:
-         void              updateFlat();
-         void              updateHier();
-         void              onCommand(wxCommandEvent&);
          void              onWXCellARef(wxCommandEvent&);
          void              onReportUsedLayers(wxCommandEvent&);
-         void              onTellOpenCell(wxString);
-         void              onTellHighlightCell(wxString);
-         void              onTellAddCell(wxString, wxString, int);
-         void              onTellRemoveCell(wxString, wxString, int);
          void              onHierView(wxCommandEvent&);
          void              onFlatView(wxCommandEvent&);
-         wxTreeItemId      _topStructure;
-         wxTreeItemId      _activeStructure;
          wxImageList*      _imageList;
-         CellBrowser*      _cellBrowser;
          wxButton*         _hierButton;
          wxButton*         _flatButton;
-         enum {hier, flat} _status;
-         wxTreeItemId      _dbroot;
+         CellBrowser*      _cellBrowser;
+         bool              _hierarchy_view;
          DECLARE_EVENT_TABLE();
    };
 
@@ -205,8 +201,6 @@ namespace browsers
          void              deleteAllItems(void);
          void              collectInfo()              {_cellBrowser->collectInfo(_hierarchy_view);}
       private:
-         void              onCommand(wxCommandEvent&);
-         void              onWxImportCell(wxCommandEvent&);
          void              onHierView(wxCommandEvent&);
          void              onFlatView(wxCommandEvent&);
          wxButton*         _hierButton;
@@ -316,7 +310,7 @@ namespace browsers
       wxString             TDTSelectedGDSName() const;
       wxString             TDTSelectedCIFName() const;
       LayerBrowser*        TDTlayers() const             { return _layers;       }
-      TDTbrowser*          TDTstruct() const             { return _TDTstruct;    }
+      CellBrowser*         tdtCellBrowser() const        { return _TDTstruct->cellBrowser(); }
       wxString             TDTSelectedCellName() const   { return _TDTstruct->selectedCellName();}
       wxWindow*            tellParser() const            { return _tellParser;   }
       void                 set_tellParser(wxWindow* tp)  { _tellParser = tp;      }
