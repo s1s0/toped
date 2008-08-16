@@ -176,8 +176,8 @@ void browsers::CellBrowser::highlightChildren(wxTreeItemId parent, wxColour clr)
 
 wxString browsers::CellBrowser::selectedCellName()
 {
-//   if (!RBcellID.IsOk())
-//      RBcellID = GetSelection();
+//@FIXME   if (!RBcellID.IsOk())
+//@FIXME      RBcellID = GetSelection();
    if (RBcellID.IsOk())
       return GetItemText(RBcellID);
    else
@@ -202,7 +202,7 @@ BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_GDS_CELLTREE_H, browsers::GDSCellBrowser::onItemRightClick)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_GDS_CELLTREE_F, browsers::GDSCellBrowser::onItemRightClick)
    EVT_RIGHT_UP(browsers::GDSCellBrowser::onBlankRMouseUp)
-   EVT_MENU(GDSTREEREPORTLAY, browsers::GDSCellBrowser::onGDSreportlay)
+   EVT_MENU(GDSTREEREPORTLAY, browsers::GDSCellBrowser::onReportlay)
 END_EVENT_TABLE()
 
 browsers::GDSCellBrowser::GDSCellBrowser(wxWindow *parent, wxWindowID id, 
@@ -221,7 +221,7 @@ void browsers::GDSCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
    showMenu(HitTest(pt), pt);
 }
 
-void browsers::GDSCellBrowser::onGDSreportlay(wxCommandEvent& WXUNUSED(event))
+void browsers::GDSCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("report_gdslayers(\"") << GetItemText(RBcellID) <<wxT("\");");
@@ -243,6 +243,52 @@ void browsers::GDSCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
    PopupMenu(&menu, pt);
 }
 
+void browsers::GDSCellBrowser::collectInfo(bool hier)
+{
+   GDSin::GdsFile* AGDSDB = DATC->lockGDS(false);
+   if (NULL == AGDSDB) return;
+   AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
+
+   if (NULL == AGDSDB->hierTree()) return; // new, empty design
+   GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+   wxTreeItemId nroot;
+   while (root)
+   {
+      nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name(),wxConvUTF8));
+      collectChildren(root, nroot, hier);
+      root = root->GetNextRoot(TARGETDB_LIB);
+   }
+   DATC->unlockGDS();
+   SortChildren(GetRootItem());
+}
+
+void browsers::GDSCellBrowser::collectChildren(const GDSin::GDSHierTree* root,
+                                               const wxTreeItemId& lroot, bool _hierarchy_view)
+{
+   const GDSin::GDSHierTree* Child= root->GetChild(TARGETDB_LIB);
+   wxTreeItemId nroot;
+   wxTreeItemId temp;
+
+   while (Child)
+   {
+      if (_hierarchy_view)
+      {
+         nroot = AppendItem(lroot, wxString(Child->GetItem()->name(), wxConvUTF8));
+         collectChildren(Child, nroot, _hierarchy_view);
+      }
+      else
+      {
+         if (!findItem(wxString(Child->GetItem()->name(), wxConvUTF8), temp, GetRootItem()))
+         {
+            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->name(), wxConvUTF8));
+            collectChildren(Child, nroot, _hierarchy_view);
+         }
+      }
+      SortChildren(lroot);
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
 //==============================================================================
 //
 // CIFCellBrowser
@@ -252,7 +298,7 @@ BEGIN_EVENT_TABLE(browsers::CIFCellBrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_CIF_CELLTREE_H, browsers::CIFCellBrowser::onItemRightClick)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_CIF_CELLTREE_F, browsers::CIFCellBrowser::onItemRightClick)
    EVT_RIGHT_UP(browsers::CIFCellBrowser::onBlankRMouseUp)
-   EVT_MENU(CIFTREEREPORTLAY, browsers::CIFCellBrowser::onCIFreportlay)
+   EVT_MENU(CIFTREEREPORTLAY, browsers::CIFCellBrowser::onReportlay)
 END_EVENT_TABLE()
 
       browsers::CIFCellBrowser::CIFCellBrowser(wxWindow *parent, wxWindowID id,
@@ -271,7 +317,7 @@ void browsers::CIFCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
    showMenu(HitTest(pt), pt);
 }
 
-void browsers::CIFCellBrowser::onCIFreportlay(wxCommandEvent& WXUNUSED(event))
+void browsers::CIFCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("report_ciflayers(\"") << GetItemText(RBcellID) <<wxT("\");");
@@ -295,6 +341,51 @@ void browsers::CIFCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
    PopupMenu(&menu, pt);
 }
 
+void browsers::CIFCellBrowser::collectInfo(bool hier)
+{
+   CIFin::CifFile* ACIFDB = DATC->lockCIF(false);
+   if (NULL == ACIFDB) return;
+   AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
+
+   if (NULL == ACIFDB->hiertree()) return; // new, empty design
+   CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+   wxTreeItemId nroot;
+   while (root)
+   {
+      nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->cellName().c_str(),wxConvUTF8));
+      collectChildren(root, nroot, hier);
+      root = root->GetNextRoot(TARGETDB_LIB);
+   }
+   DATC->unlockCIF();
+   SortChildren(GetRootItem());
+}
+
+void browsers::CIFCellBrowser::collectChildren(const CIFin::CIFHierTree* root,
+                                               const wxTreeItemId& lroot, bool _hierarchy_view)
+{
+   const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
+   wxTreeItemId nroot;
+   wxTreeItemId temp;
+
+   while (Child)
+   {
+      if (_hierarchy_view)
+      {
+         nroot = AppendItem(lroot, wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8));
+         collectChildren(Child, nroot, _hierarchy_view);
+      }
+      else
+      {
+         if (!findItem(wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8), temp, GetRootItem()))
+         {
+            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8));
+            collectChildren(Child, nroot, _hierarchy_view);
+         }
+      }
+      SortChildren(lroot);
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
 
 
 //==============================================================================
@@ -700,146 +791,35 @@ browsers::TDTbrowser::~TDTbrowser()
 //   delete fCellBrowser;
 }
 
-
 //==============================================================================
 //
-// GDSbrowser
+// XdbBrowser (External Data base browser)
 //
 //==============================================================================
-BEGIN_EVENT_TABLE(browsers::GDSbrowser, wxPanel)
-   EVT_BUTTON(BT_CELLS_HIER2, browsers::GDSbrowser::OnHierView)
-   EVT_BUTTON(BT_CELLS_FLAT2, browsers::GDSbrowser::OnFlatView)
+BEGIN_EVENT_TABLE(browsers::XdbBrowser, wxPanel)
+   EVT_BUTTON(BT_CELLS_HIER2, browsers::XdbBrowser::onHierView)
+   EVT_BUTTON(BT_CELLS_FLAT2, browsers::XdbBrowser::onFlatView)
 END_EVENT_TABLE()
 //==============================================================================
-browsers::GDSbrowser::GDSbrowser(wxWindow *parent, wxWindowID id, 
-                        const wxPoint& pos , 
-                        const wxSize& size ,
-                        long style ):wxPanel(parent, id, pos, size, style)
-{
-   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-      
-   wxBoxSizer *sizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   _hierButton = DEBUG_NEW wxButton( this, BT_CELLS_HIER2, wxT("Hier") );
-   //Set bold font for _hierButton
-   wxFont font = _hierButton->GetFont();
-   font.SetWeight(wxFONTWEIGHT_BOLD);
-   _hierButton->SetFont(font);
-
-   _flatButton = DEBUG_NEW wxButton( this, BT_CELLS_FLAT2, wxT("Flat") );
-
-   sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
-   sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
-   
-   fCellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_GDS_CELLTREE_F, pos, size, style);
-   
-   hCellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_GDS_CELLTREE_H, pos, size, style);
-   
-   thesizer->Add(hCellBrowser, 1, wxEXPAND | wxBOTTOM);
-   thesizer->Add(fCellBrowser, 1, wxEXPAND | wxBOTTOM);
-   fCellBrowser->Hide();
-   thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
-
-   SetSizerAndFit(thesizer);
-   thesizer->SetSizeHints( this );
-}
-
-
-void browsers::GDSbrowser::collectInfo() 
-{
-   GDSin::GdsFile* AGDSDB = DATC->lockGDS(false);
-   if (NULL == AGDSDB) return;
-   hCellBrowser->AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
-   fCellBrowser->AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
-
-   if (NULL == AGDSDB->hierTree()) return; // new, empty design
-   GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-   wxTreeItemId nroot;
-   while (root){
-      nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(root->GetItem()->name(),wxConvUTF8));
-
-      nroot = hCellBrowser->AppendItem(hCellBrowser->GetRootItem(), wxString(root->GetItem()->name(),wxConvUTF8));
-//      SetItemTextColour(nroot,*wxLIGHT_GREY);
-      collectChildren(root, nroot);
-      root = root->GetNextRoot(TARGETDB_LIB);
-   }
-   DATC->unlockGDS();
-   hCellBrowser->SortChildren(hCellBrowser->GetRootItem());
-   fCellBrowser->SortChildren(fCellBrowser->GetRootItem());
-//   Toped->Resize();
-}
-      
-void browsers::GDSbrowser::DeleteAllItems(void)
-{
-   hCellBrowser->DeleteAllItems();
-   fCellBrowser->DeleteAllItems();
-}
-
-void browsers::GDSbrowser::collectChildren(const GDSin::GDSHierTree *root, const wxTreeItemId& lroot) 
-{
-   const GDSin::GDSHierTree* Child= root->GetChild(TARGETDB_LIB);
-   wxTreeItemId nroot;
-   wxTreeItemId temp;
-
-   while (Child) {
-      if (!fCellBrowser->findItem(wxString(Child->GetItem()->name(), wxConvUTF8), temp, fCellBrowser-> GetRootItem()))
-      {
-         nroot = fCellBrowser->AppendItem(fCellBrowser->GetRootItem(), wxString(Child->GetItem()->name(), wxConvUTF8));
-      }
-      nroot = hCellBrowser->AppendItem(lroot, wxString(Child->GetItem()->name(), wxConvUTF8));
-//      SetItemTextColour(nroot,*wxLIGHT_GREY);
-      hCellBrowser->SortChildren(lroot);
-      collectChildren(Child, nroot);
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
-void browsers::GDSbrowser::OnFlatView(wxCommandEvent& event)
-{
-   hCellBrowser->Hide();
-   fCellBrowser->Show();
-   (this->GetSizer())->Layout();
-   if (hCellBrowser->IsExpanded(hCellBrowser->GetRootItem()))
-   {
-      fCellBrowser->Expand(fCellBrowser->GetRootItem());
-   }
-   //Set normal font for  _hierButton 
-   //Set bold font for _flatButton;
-   wxFont font = _flatButton->GetFont();
-   _hierButton->SetFont(font);
-   font.SetWeight(wxFONTWEIGHT_BOLD);
-   _flatButton->SetFont(font);
-}
-
-void browsers::GDSbrowser::OnHierView(wxCommandEvent& event)
-{
-   fCellBrowser->Hide();
-
-   hCellBrowser->Show();
-   (this->GetSizer())->Layout();
-   //Set normal  font for _flatButton;
-   wxFont font = _hierButton->GetFont();
-   _flatButton->SetFont(font);
-   font.SetWeight(wxFONTWEIGHT_BOLD);
-   _hierButton->SetFont(font);
-}
-
-
-//==============================================================================
-//
-// CIFbrowser
-//
-//==============================================================================
-BEGIN_EVENT_TABLE(browsers::CIFbrowser, wxPanel)
-   EVT_BUTTON(BT_CELLS_HIER2, browsers::CIFbrowser::onHierView)
-   EVT_BUTTON(BT_CELLS_FLAT2, browsers::CIFbrowser::onFlatView)
-END_EVENT_TABLE()
-//==============================================================================
-browsers::CIFbrowser::CIFbrowser(wxWindow *parent, wxWindowID id,
-                                       const wxPoint& pos ,
-                                       const wxSize& size ,
-                                       long style ):wxPanel(parent, id, pos, size, style)
+browsers::XdbBrowser::XdbBrowser(   wxWindow *parent,
+                                    wxWindowID id,
+                                    const wxPoint& pos ,
+                                    const wxSize& size ,
+                                    long style ):
+      wxPanel(parent, id, pos, size, style)
 {
    _hierarchy_view = true;
+   switch (id)
+   {
+      case tui::ID_CIF_CELLTREE:
+         _cellBrowser = DEBUG_NEW CIFCellBrowser(this, tui::ID_CIF_CELLTREE_H, pos, size, style);
+         break;
+      case tui::ID_GDS_CELLTREE:
+         _cellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_GDS_CELLTREE_H, pos, size, style);
+         break;
+      default: assert(false);
+   }
+
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
 
    wxBoxSizer *sizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
@@ -853,8 +833,6 @@ browsers::CIFbrowser::CIFbrowser(wxWindow *parent, wxWindowID id,
 
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
-
-   _cellBrowser = DEBUG_NEW CIFCellBrowser(this, tui::ID_CIF_CELLTREE_H, pos, size, style);
 
    thesizer->Add(_cellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
@@ -863,71 +841,26 @@ browsers::CIFbrowser::CIFbrowser(wxWindow *parent, wxWindowID id,
    thesizer->SetSizeHints( this );
 }
 
-void browsers::CIFbrowser::collectInfo()
-{
-   CIFin::CifFile* ACIFDB = DATC->lockCIF(false);
-   if (NULL == ACIFDB) return;
-   _cellBrowser->AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
-
-   if (NULL == ACIFDB->hiertree()) return; // new, empty design
-   CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-   wxTreeItemId nroot;
-   while (root)
-   {
-      nroot = _cellBrowser->AppendItem(_cellBrowser->GetRootItem(), wxString(root->GetItem()->cellName().c_str(),wxConvUTF8));
-      collectChildren(root, nroot);
-      root = root->GetNextRoot(TARGETDB_LIB);
-   }
-   DATC->unlockCIF();
-   _cellBrowser->SortChildren(_cellBrowser->GetRootItem());
-}
-
-void browsers::CIFbrowser::collectChildren(const CIFin::CIFHierTree *root, const wxTreeItemId& lroot)
-{
-   const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
-   wxTreeItemId nroot;
-   wxTreeItemId temp;
-
-   while (Child)
-   {
-      if (_hierarchy_view)
-      {
-         nroot = _cellBrowser->AppendItem(lroot, wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8));
-         collectChildren(Child, nroot);
-      }
-      else
-      {
-         if (!_cellBrowser->findItem(wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8), temp, _cellBrowser->GetRootItem()))
-         {
-            nroot = _cellBrowser->AppendItem(_cellBrowser->GetRootItem(), wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8));
-            collectChildren(Child, nroot);
-         }
-      }
-      _cellBrowser->SortChildren(lroot);
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
-wxString browsers::CIFbrowser::selectedCellName() const
+wxString browsers::XdbBrowser::selectedCellName() const
 {
    return _cellBrowser->selectedCellName();
 }
 
-void browsers::CIFbrowser::deleteAllItems(void)
+void browsers::XdbBrowser::deleteAllItems(void)
 {
    _cellBrowser->DeleteAllItems();
 }
 
-void browsers::CIFbrowser::onFlatView(wxCommandEvent& event)
+void browsers::XdbBrowser::onFlatView(wxCommandEvent& event)
 {
    if (!_hierarchy_view) return;
    _hierarchy_view = false;
-//   wxString current_selection = _cellBrowser->selectedCellName();
+//@FIXME   wxString current_selection = _cellBrowser->selectedCellName();
 
    deleteAllItems();
-   collectInfo();
+   _cellBrowser->collectInfo(_hierarchy_view);
 
-//   _cellBrowser->selectCellName(current_selection);
+//@FIXME   _cellBrowser->selectCellName(current_selection);
 
    //Set normal font for  _hierButton 
    wxFont font = _flatButton->GetFont();
@@ -937,16 +870,16 @@ void browsers::CIFbrowser::onFlatView(wxCommandEvent& event)
    _flatButton->SetFont(font);
 }
 
-void browsers::CIFbrowser::onHierView(wxCommandEvent& event)
+void browsers::XdbBrowser::onHierView(wxCommandEvent& event)
 {
    if (_hierarchy_view) return;
    _hierarchy_view = true;
-//   wxString current_selection = _cellBrowser->selectedCellName();
+//@FIXME   wxString current_selection = _cellBrowser->selectedCellName();
 
    deleteAllItems();
-   collectInfo();
+   _cellBrowser->collectInfo(_hierarchy_view);
 
-//   _cellBrowser->selectCellName(current_selection);
+//@FIXME   _cellBrowser->selectCellName(current_selection);
 
    //Set normal  font for _flatButton;
    wxFont font = _hierButton->GetFont();
@@ -987,7 +920,7 @@ browsers::browserTAB::~browserTAB()
 wxString browsers::browserTAB::TDTSelectedGDSName() const 
 {
    if (NULL != _GDSstruct)
-      return _GDSstruct->selectedCellname();
+      return _GDSstruct->selectedCellName();
    else return wxT("");
 }
 
@@ -1021,10 +954,10 @@ void browsers::browserTAB::OnTELLaddGDStab()
 {
    if (!_GDSstruct)
    {
-      _GDSstruct = DEBUG_NEW GDSbrowser(this, tui::ID_GDS_CELLTREE);
+      _GDSstruct = DEBUG_NEW XdbBrowser(this, tui::ID_GDS_CELLTREE);
       AddPage(_GDSstruct, wxT("GDS"));
    }
-   else _GDSstruct->DeleteAllItems();
+   else _GDSstruct->deleteAllItems();
    _GDSstruct->collectInfo();
 }
 
@@ -1032,7 +965,7 @@ void browsers::browserTAB::OnTELLclearGDStab()
 {
    if (_GDSstruct)
    {
-      _GDSstruct->DeleteAllItems();
+      _GDSstruct->deleteAllItems();
       DeletePage(2);
       _GDSstruct = NULL;
    }
@@ -1042,7 +975,7 @@ void browsers::browserTAB::OnTELLaddCIFtab()
 {
    if (NULL == _CIFstruct)
    {
-      _CIFstruct = DEBUG_NEW CIFbrowser(this, tui::ID_CIF_CELLTREE);
+      _CIFstruct = DEBUG_NEW XdbBrowser(this, tui::ID_CIF_CELLTREE);
       AddPage(_CIFstruct, wxT("CIF"));
    }
    else _CIFstruct->deleteAllItems();
@@ -1649,7 +1582,7 @@ browsers::LayerBrowser::LayerBrowser(wxWindow* parent, wxWindowID id)
 browsers::LayerBrowser::~LayerBrowser() 
 {
 }
- 
+
 
 void browsers::LayerBrowser::OnShowAll(wxCommandEvent& WXUNUSED(event))
 {
