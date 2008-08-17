@@ -250,7 +250,7 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
                         currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod)
 {
-	wxImage image(wxString(bitmapName.c_str(), wxConvUTF8),wxBITMAP_TYPE_PNG);
+	wxImage image(wxString(bitmapName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
 	for( 
 	IconSizes isz = ICON_SIZE_16x16; 
 	isz < ICON_SIZE_END; 
@@ -264,7 +264,7 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 void tui::ToolItem::addIcon(const std::string &bitmapName, int size)
 {
 	_bitmapNames[size] = bitmapName;
-	wxImage image(wxString(_bitmapNames[size].c_str(), wxConvUTF8),wxBITMAP_TYPE_PNG);
+	wxImage image(wxString(_bitmapNames[size].c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
 	_bitmaps[size] = wxBitmap(image);
 }
 
