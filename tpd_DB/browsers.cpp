@@ -914,20 +914,20 @@ void browsers::XdbBrowser::onHierView(wxCommandEvent& event)
 
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::browserTAB, wxAuiNotebook)
-   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::browserTAB::OnCommand)
+   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::browserTAB::onCommand)
 END_EVENT_TABLE()
 //==============================================================================
 browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const 
    wxPoint& pos, const wxSize& size, long style) : 
                                  wxAuiNotebook(parent, id, pos, size, style) 
 {
-   _TDTstruct = DEBUG_NEW TDTbrowser(this, tui::ID_TPD_CELLTREE);
-   AddPage(_TDTstruct, wxT("Cells"));
+   _tdtStruct = DEBUG_NEW TDTbrowser(this, tui::ID_TPD_CELLTREE);
+   AddPage(_tdtStruct, wxT("Cells"));
    _layers = DEBUG_NEW LayerBrowser(this,  tui::ID_TPD_LAYERS);
    AddPage(_layers, wxT("Layers"));
 
-   _GDSstruct = NULL;
-   _CIFstruct = NULL;
+   _gdsStruct = NULL;
+   _cifStruct = NULL;
    _tellParser = NULL;
    Browsers = this;
 }
@@ -936,83 +936,83 @@ browsers::browserTAB::~browserTAB()
 {
 //   It appears that wx is calling automatically the destructors of the
 //   child windows, so no need to call them here
-//   delete _TDTstruct; _TDTstruct = NULL;
+//   delete _tdtStruct; _tdtStruct = NULL;
 //   delete _TDTlayers; _TDTlayers = NULL;
 }
 
-wxString browsers::browserTAB::TDTSelectedGDSName() const 
+wxString browsers::browserTAB::tdtSelectedGdsName() const
 {
-   if (NULL != _GDSstruct)
-      return _GDSstruct->selectedCellName();
+   if (NULL != _gdsStruct)
+      return _gdsStruct->selectedCellName();
    else return wxT("");
 }
 
-wxString browsers::browserTAB::TDTSelectedCIFName() const 
+wxString browsers::browserTAB::tdtSelectedCifName() const
 {
-   if (NULL != _CIFstruct)
-      return _CIFstruct->selectedCellName();
+   if (NULL != _cifStruct)
+      return _cifStruct->selectedCellName();
    else 
       return wxT("");
 }
 
-void browsers::browserTAB::OnCommand(wxCommandEvent& event) 
+void browsers::browserTAB::onCommand(wxCommandEvent& event)
 {
    int command = event.GetInt();
    switch (command) 
    {
-      case BT_ADDTDT_LIB:OnTELLaddTDTlib();break;
-      case BT_ADDGDS_TAB:OnTELLaddGDStab();break;
-      case BT_CLEARGDS_TAB:OnTELLclearGDStab(); break;
-      case BT_ADDCIF_TAB:OnTELLaddCIFtab();break;
-      case BT_CLEARCIF_TAB:OnTELLclearCIFtab(); break;
+      case BT_ADDTDT_LIB:onTellAddTdtLib();break;
+      case BT_ADDGDS_TAB:onTellAddGdsTab();break;
+      case BT_CLEARGDS_TAB:onTellClearGdsTab(); break;
+      case BT_ADDCIF_TAB:onTellAddCifTab();break;
+      case BT_CLEARCIF_TAB:onTellClearCifTab(); break;
       default: event.Skip();
    }
 }
 
-void browsers::browserTAB::OnTELLaddTDTlib() 
+void browsers::browserTAB::onTellAddTdtLib()
 {
-   _TDTstruct->collectInfo();
+   _tdtStruct->collectInfo();
 }
 
-void browsers::browserTAB::OnTELLaddGDStab() 
+void browsers::browserTAB::onTellAddGdsTab()
 {
-   if (!_GDSstruct)
+   if (!_gdsStruct)
    {
-      _GDSstruct = DEBUG_NEW XdbBrowser(this, tui::ID_GDS_CELLTREE);
-      AddPage(_GDSstruct, wxT("GDS"));
+      _gdsStruct = DEBUG_NEW XdbBrowser(this, tui::ID_GDS_CELLTREE);
+      AddPage(_gdsStruct, wxT("GDS"));
    }
    // don't bother to clean-up existing DB. It's done in the function called
-   _GDSstruct->collectInfo(); 
+   _gdsStruct->collectInfo();
 }
 
-void browsers::browserTAB::OnTELLclearGDStab() 
+void browsers::browserTAB::onTellClearGdsTab() 
 {
-   if (_GDSstruct)
+   if (_gdsStruct)
    {
-      _GDSstruct->deleteAllItems();
+      _gdsStruct->deleteAllItems();
       DeletePage(2);
-      _GDSstruct = NULL;
+      _gdsStruct = NULL;
    }
 }
 
-void browsers::browserTAB::OnTELLaddCIFtab()
+void browsers::browserTAB::onTellAddCifTab()
 {
-   if (NULL == _CIFstruct)
+   if (NULL == _cifStruct)
    {
-      _CIFstruct = DEBUG_NEW XdbBrowser(this, tui::ID_CIF_CELLTREE);
-      AddPage(_CIFstruct, wxT("CIF"));
+      _cifStruct = DEBUG_NEW XdbBrowser(this, tui::ID_CIF_CELLTREE);
+      AddPage(_cifStruct, wxT("CIF"));
    }
    // don't bother to clean-up existing DB. It's done in the function called
-   _CIFstruct->collectInfo();
+   _cifStruct->collectInfo();
 }
 
-void browsers::browserTAB::OnTELLclearCIFtab()
+void browsers::browserTAB::onTellClearCifTab()
 {
-   if (_CIFstruct)
+   if (_cifStruct)
    {
-      _CIFstruct->deleteAllItems();
+      _cifStruct->deleteAllItems();
       DeletePage(2);// @FIXME!!! Get the page number on creation!
-      _CIFstruct = NULL;
+      _cifStruct = NULL;
    }
 }
 //==============================================================================
@@ -1025,7 +1025,7 @@ void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool
    eventLAYER_STATUS.SetInt(*bt1);
    word *laynotemp = DEBUG_NEW word(layno);
    eventLAYER_STATUS.SetClientData(static_cast<void*> (laynotemp));
-   wxPostEvent(Browsers->TDTlayers()->getLayerPanel(), eventLAYER_STATUS);
+   wxPostEvent(Browsers->tdtLayers()->getLayerPanel(), eventLAYER_STATUS);
    delete bt1;
 }
 
@@ -1038,7 +1038,7 @@ void browsers::layer_add(const std::string name, const word layno)
    eventLAYER_ADD.SetClientData(static_cast<void*> (layer));
    eventLAYER_ADD.SetInt(*bt);
 
-   wxPostEvent(Browsers->TDTlayers()->getLayerPanel(), eventLAYER_ADD);
+   wxPostEvent(Browsers->tdtLayers()->getLayerPanel(), eventLAYER_ADD);
    delete bt;
 }
 
@@ -1052,7 +1052,7 @@ void browsers::layer_default(const word newlay, const word oldlay)
    eventLAYER_DEF.SetClientData(static_cast<void*> (laynotemp));
    eventLAYER_DEF.SetInt(*bt);
    
-   wxPostEvent(Browsers->TDTlayers()->getLayerPanel(), eventLAYER_DEF);
+   wxPostEvent(Browsers->tdtLayers()->getLayerPanel(), eventLAYER_DEF);
    delete bt;
 }
 
@@ -1180,9 +1180,9 @@ browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
 
 BEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
    //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
-   EVT_LEFT_DOWN(LayerButton::OnLeftClick)
-   EVT_MIDDLE_DOWN(LayerButton::OnMiddleClick)
-   EVT_PAINT(LayerButton::OnPaint)
+   EVT_LEFT_DOWN(LayerButton::onLeftClick)
+   EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
+   EVT_PAINT(LayerButton::onPaint)
 END_EVENT_TABLE()
 
 browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos , 
@@ -1337,7 +1337,7 @@ browsers::LayerButton::~LayerButton()
 }
 
 
-void browsers::LayerButton::OnPaint(wxPaintEvent&event)
+void browsers::LayerButton::onPaint(wxPaintEvent&event)
 {
    wxPaintDC dc(this);
    dc.DrawBitmap(*_picture, 0, 0, false);
@@ -1356,7 +1356,7 @@ void browsers::LayerButton::OnPaint(wxPaintEvent&event)
    }
 }
 
-void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
+void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 {
 
    if (event.ShiftDown())
@@ -1380,21 +1380,21 @@ void browsers::LayerButton::OnLeftClick(wxMouseEvent &event)
       if (!_selected)
       {
          select();
-   
+
          //Next block uses for unselect previous button
          int bt = BT_LAYER_SELECT;
          wxCommandEvent eventLAYER_SELECT(wxEVT_CMD_BROWSER);
-   
+
          eventLAYER_SELECT.SetExtraLong(_layer->layno());
-   
+
          eventLAYER_SELECT.SetInt(bt);
-         assert(Browsers && Browsers->TDTlayers());
-         wxPostEvent(Browsers->TDTlayers()->getLayerPanel(), eventLAYER_SELECT);
+         assert(Browsers && Browsers->tdtLayers());
+         wxPostEvent(Browsers->tdtLayers()->getLayerPanel(), eventLAYER_SELECT);
       }
    }
 }
 
-void browsers::LayerButton::OnMiddleClick(wxMouseEvent &event)
+void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 {
    //_locked = !_locked;
    wxString cmd;
@@ -1432,7 +1432,7 @@ void browsers::LayerButton::unselect(void)
 
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::LayerPanel, wxScrolledWindow)
-   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::LayerPanel::OnCommand)
+   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::LayerPanel::onCommand)
    EVT_SIZE(browsers::LayerPanel::OnSize)
 END_EVENT_TABLE()
 //====================================================================
@@ -1451,7 +1451,7 @@ browsers::LayerPanel::~LayerPanel()
 }
 
 
-void browsers::LayerPanel::OnCommand(wxCommandEvent& event)
+void browsers::LayerPanel::onCommand(wxCommandEvent& event)
 {
    int command = event.GetInt();
 
@@ -1545,7 +1545,7 @@ void browsers::LayerPanel::OnCommand(wxCommandEvent& event)
    }
 }
 
-void browsers::LayerPanel::OnSize(wxSizeEvent& evt)
+void browsers::LayerPanel::onSize(wxSizeEvent& evt)
 {
    for(LayerButtonMap::const_iterator it = _buttonMap.begin(); it!=_buttonMap.end();++it)
    {
@@ -1572,10 +1572,10 @@ wxString browsers::LayerPanel::getAllSelected()
 
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::LayerBrowser, wxPanel)
-   EVT_BUTTON(BT_LAYER_SHOW_ALL, browsers::LayerBrowser::OnShowAll)
-   EVT_BUTTON(BT_LAYER_HIDE_ALL, browsers::LayerBrowser::OnHideAll)
-   EVT_BUTTON(BT_LAYER_LOCK_ALL, browsers::LayerBrowser::OnLockAll)
-   EVT_BUTTON(BT_LAYER_UNLOCK_ALL, browsers::LayerBrowser::OnUnlockAll)
+   EVT_BUTTON(BT_LAYER_SHOW_ALL, browsers::LayerBrowser::onShowAll)
+   EVT_BUTTON(BT_LAYER_HIDE_ALL, browsers::LayerBrowser::onHideAll)
+   EVT_BUTTON(BT_LAYER_LOCK_ALL, browsers::LayerBrowser::onLockAll)
+   EVT_BUTTON(BT_LAYER_UNLOCK_ALL, browsers::LayerBrowser::onUnlockAll)
    EVT_SIZE(browsers::LayerBrowser::OnSize)
 END_EVENT_TABLE()
 //====================================================================
@@ -1609,21 +1609,21 @@ browsers::LayerBrowser::~LayerBrowser()
 }
 
 
-void browsers::LayerBrowser::OnShowAll(wxCommandEvent& WXUNUSED(event))
+void browsers::LayerBrowser::onShowAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("hidelayer(") << getAllSelected() << wxT(", false);");
    parseCommand(cmd);
 }
 
-void browsers::LayerBrowser::OnHideAll(wxCommandEvent& WXUNUSED(event))
+void browsers::LayerBrowser::onHideAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("hidelayer(") << getAllSelected() << wxT(", true);");
    parseCommand(cmd);
 }
 
-void browsers::LayerBrowser::OnLockAll(wxCommandEvent& WXUNUSED(event))
+void browsers::LayerBrowser::onLockAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("locklayer(") << getAllSelected() << wxT(", true);");
@@ -1631,7 +1631,7 @@ void browsers::LayerBrowser::OnLockAll(wxCommandEvent& WXUNUSED(event))
 }
 
 
-void browsers::LayerBrowser::OnUnlockAll(wxCommandEvent& WXUNUSED(event))
+void browsers::LayerBrowser::onUnlockAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("locklayer(") << getAllSelected() << wxT(", false);");
