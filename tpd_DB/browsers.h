@@ -105,14 +105,15 @@ namespace browsers
          void              highlightChildren(wxTreeItemId, wxColour);
          wxString          selectedCellName();
          void              selectCellName(wxString);
+         wxString          rbCellName();
          virtual void     collectInfo(bool);
       protected:
-         wxTreeItemId      RBcellID;
+         wxTreeItemId      _rbCellID;
          virtual void     onItemRightClick(wxTreeEvent&);
          virtual void     onBlankRMouseUp(wxMouseEvent&);
          virtual void     onReportlay(wxCommandEvent& WXUNUSED(event)) {assert(false);}
-         void              initialize();
       private:
+         void              initialize();
          void              collectChildren(const laydata::TDTHierTree*, int, const wxTreeItemId&);
          void              updateFlat();
          void              updateHier();
@@ -126,6 +127,7 @@ namespace browsers
          wxTreeItemId      _topStructure;
          wxTreeItemId      _activeStructure;
          wxTreeItemId      _dbroot;
+         bool              _hierarchy_view;
          DECLARE_EVENT_TABLE();
    };
 
