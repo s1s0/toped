@@ -67,7 +67,9 @@ END_EVENT_TABLE()
 browsers::CellBrowser::CellBrowser(wxWindow *parent, wxWindowID id,
                            const wxPoint& pos, const wxSize& size, long style) :
       wxTreeCtrl(parent, id, pos, size, style | wxTR_FULL_ROW_HIGHLIGHT )
-{ }
+{
+   _hierarchy_view = true;
+}
 
 void browsers::CellBrowser::initialize()
 {
@@ -80,7 +82,7 @@ void browsers::CellBrowser::initialize()
 void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 {
    wxMenu menu;
-   RBcellID = id;
+   _rbCellID = id;
    if ( id.IsOk() && (id != GetRootItem()))
    {
       wxString RBcellname = GetItemText(id);
@@ -102,9 +104,9 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 
 void browsers::CellBrowser::onWXOpenCell(wxCommandEvent& event)
 {
-   _activeStructure = _topStructure = RBcellID;
+   _activeStructure = _topStructure = _rbCellID;
    wxString cmd;
-   cmd << wxT("opencell(\"") << GetItemText(RBcellID) <<wxT("\");");
+   cmd << wxT("opencell(\"") << GetItemText(_rbCellID) <<wxT("\");");
    parseCommand(cmd);
 }
 
@@ -185,35 +187,45 @@ void browsers::CellBrowser::highlightChildren(wxTreeItemId parent, wxColour clr)
 
 wxString browsers::CellBrowser::selectedCellName()
 {
-//@FIXME   if (!RBcellID.IsOk())
-//@FIXME      RBcellID = GetSelection();
-   if (RBcellID.IsOk())
-      return GetItemText(RBcellID);
+   wxTreeItemId selected = GetSelection();
+   if (selected.IsOk())
+      return GetItemText(selected);
+   else
+      return wxT("");
+}
+
+wxString browsers::CellBrowser::rbCellName()
+{
+   if (_rbCellID.IsOk())
+      return GetItemText(_rbCellID);
    else
       return wxT("");
 }
 
 void browsers::CellBrowser::selectCellName(wxString tbselected)
 {
-   if (findItem(tbselected, RBcellID, GetRootItem()))
+   wxTreeItemId      item;
+   if (findItem(tbselected, item, GetRootItem()))
    {
-      SelectItem(RBcellID);
-      EnsureVisible(RBcellID);
+      SelectItem(item);
+      EnsureVisible(item);
    }
 }
 
 void browsers::CellBrowser::collectInfo( bool hier )
 {
-   if(hier) updateHier();
-   else     updateFlat();
+   initialize();
+   _hierarchy_view = hier;
+   if(_hierarchy_view)  updateHier();
+   else                 updateFlat();
 }
 
 void browsers::CellBrowser::updateFlat()
 {
    wxTreeItemId temp, nroot;
-   initialize();
    laydata::LibCellLists *cll;
    laydata::LibCellLists::iterator curlib;
+   _dbroot = GetRootItem();
    // get undefined cells first
    cll = DATC->getCells(UNDEFCELL_LIB);
    for (curlib = cll->begin(); curlib != cll->end(); curlib++)
@@ -252,7 +264,6 @@ void browsers::CellBrowser::updateFlat()
 
 void browsers::CellBrowser::updateHier()
 {
-   initialize();
    laydata::tdtdesign* design;
    bool rootexists = true;
    try
@@ -395,43 +406,51 @@ void browsers::CellBrowser::onTellHighlightCell( wxString open_cell )
 
 void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname, int action)
 {
+   wxTreeItemId item;
    switch (action)
    {
-      case 0:
-      {//new cell
-         //Hier
-         wxTreeItemId hnewparent;
-         VERIFY(findItem(parentname, hnewparent, GetRootItem()));
-         wxTreeItemId item = AppendItem(hnewparent, cellname);
-         SetItemTextColour(item,GetItemTextColour(GetRootItem()));
-         SortChildren(GetRootItem());
-         break;
-      }
-      case 1:
-      {//first reference of existing cell
-         wxTreeItemId item, newparent;
-         VERIFY(findItem(cellname, item, GetRootItem()));
-         while (findItem(parentname, newparent, GetRootItem()))
+      case 0://new cell
+         if (_hierarchy_view)
          {
-            copyItem(item,newparent);
-            SortChildren(newparent);
+            wxTreeItemId hnewparent;
+            VERIFY(findItem(parentname, hnewparent, GetRootItem()));
+            item = AppendItem(hnewparent, cellname);
+            SetItemTextColour(item,GetItemTextColour(GetRootItem()));
+            SortChildren(GetRootItem());
          }
-         DeleteChildren(item);
-         Delete(item);
+         else
+         {
+            VERIFY(!findItem(cellname, item, GetRootItem()));
+            AppendItem(GetRootItem(), cellname);
+         }
          break;
-      }
+      case 1://first reference of existing cell
+         if (_hierarchy_view)
+         {
+            wxTreeItemId newparent;
+            VERIFY(findItem(cellname, item, GetRootItem()));
+            while (findItem(parentname, newparent, GetRootItem()))
+            {
+               copyItem(item,newparent);
+               SortChildren(newparent);
+            }
+            DeleteChildren(item);
+            Delete(item);
+         }
+         break;
       case 2:
       case 3:
-      {//
-         wxTreeItemId item, newparent;
-         VERIFY(findItem(cellname, item, GetRootItem()));
-         while (findItem(parentname, newparent, GetRootItem()))
-         {
-            copyItem(item,newparent);
-            SortChildren(newparent);
+         if (_hierarchy_view)
+         {//
+            wxTreeItemId newparent;
+            VERIFY(findItem(cellname, item, GetRootItem()));
+            while (findItem(parentname, newparent, GetRootItem()))
+            {
+               copyItem(item,newparent);
+               SortChildren(newparent);
+            }
          }
          break;
-      }
       default: assert(false);
    }
 }
@@ -442,7 +461,8 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
    switch (action)
    {
       case 0:// no longer child of this parent - remove it from all parent instances
-         case 1:// Lib cells not more referenced in the DB
+      case 1:// Lib cells not more referenced in the DB
+         if (_hierarchy_view)
          {
             while (findItem(parentname, newparent, GetRootItem()))
             {
@@ -451,9 +471,10 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
                DeleteChildren(item);
                Delete(item);
             }
-            break;
          }
-         case 2://DB cell, which has no parents anymore
+         break;
+      case 2://DB cell, which has no parents anymore
+         if (_hierarchy_view)
          {
             wxTreeItemId item;
             findItem(cellname, item, GetRootItem());
@@ -463,28 +484,28 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
             VERIFY(findItem(cellname, item, newparent));
             DeleteChildren(item);
             Delete(item);
-            break;
          }
-         case 3:// we are removing the cell, not it's reference
+         break;
+      case 3:// we are removing the cell, not it's reference
+      {
+         wxTreeItemId item;
+         VERIFY(findItem(cellname, item, GetRootItem()));
+         // copy all children
+         // This part is "in case". The thing is that children should have been
+         // removed already, by tdtcell::removePrep
+         wxTreeItemIdValue cookie;
+         wxTreeItemId child = GetFirstChild(item,cookie);
+         while (child.IsOk())
          {
-            wxTreeItemId item;
-            VERIFY(findItem(cellname, item, GetRootItem()));
-            // copy all children
-            // This part is "in case". The thing is that children should have been
-            // removed already, by tdtcell::removePrep
-            wxTreeItemIdValue cookie;
-            wxTreeItemId child = GetFirstChild(item,cookie);
-            while (child.IsOk())
-            {
-               copyItem(child, GetRootItem());
-               child = GetNextChild(item,cookie);
-            }
-            // finally delete the item and it's children
-            DeleteChildren(item);
-            Delete(item);
-            break;
+            copyItem(child, GetRootItem());
+            child = GetNextChild(item,cookie);
          }
-         default: assert(false);
+         // finally delete the item and it's children
+         DeleteChildren(item);
+         Delete(item);
+         break;
+      }
+      default: assert(false);
    }
 }
 
@@ -519,14 +540,14 @@ void browsers::GDSCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
 void browsers::GDSCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
-   cmd << wxT("report_gdslayers(\"") << GetItemText(RBcellID) <<wxT("\");");
+   cmd << wxT("report_gdslayers(\"") << GetItemText(_rbCellID) <<wxT("\");");
    parseCommand(cmd);
 }
 
 void browsers::GDSCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 {
    wxMenu menu;
-   RBcellID = id;
+   _rbCellID = id;
    if ( id.IsOk() && (id != GetRootItem()))   {
       wxString RBcellname = GetItemText(id);
       menu.Append(tui::TMGDS_TRANSLATE, wxT("Translate " + RBcellname));
@@ -540,6 +561,8 @@ void browsers::GDSCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 
 void browsers::GDSCellBrowser::collectInfo(bool hier)
 {
+   DeleteAllItems();
+
    GDSin::GdsFile* AGDSDB = DATC->lockGDS(false);
    if (NULL == AGDSDB) return;
    AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
@@ -615,14 +638,14 @@ void browsers::CIFCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
 void browsers::CIFCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
-   cmd << wxT("report_ciflayers(\"") << GetItemText(RBcellID) <<wxT("\");");
+   cmd << wxT("report_ciflayers(\"") << GetItemText(_rbCellID) <<wxT("\");");
    parseCommand(cmd);
 }
 
 void browsers::CIFCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 {
    wxMenu menu;
-   RBcellID = id;
+   _rbCellID = id;
    if ( id.IsOk() && (id != GetRootItem()) )
    {
       wxString RBcellname = GetItemText(id);
@@ -638,6 +661,8 @@ void browsers::CIFCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 
 void browsers::CIFCellBrowser::collectInfo(bool hier)
 {
+   DeleteAllItems();
+
    CIFin::CifFile* ACIFDB = DATC->lockCIF(false);
    if (NULL == ACIFDB) return;
    AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
@@ -727,7 +752,9 @@ void browsers::TDTbrowser::onFlatView( wxCommandEvent& event )
 {
    _hierarchy_view = false;
 
+   wxString cell_sel_str = _cellBrowser->selectedCellName();
    _cellBrowser->collectInfo(_hierarchy_view);
+   _cellBrowser->selectCellName(cell_sel_str);
 
    //Set normal font for  _hierButton
    wxFont font = _hierButton->GetFont();
@@ -747,7 +774,10 @@ void browsers::TDTbrowser::onHierView( wxCommandEvent& event )
 {
    _hierarchy_view = true;
 
+   wxString cell_sel_str = _cellBrowser->selectedCellName();
    _cellBrowser->collectInfo(_hierarchy_view);
+   _cellBrowser->selectCellName(cell_sel_str);
+
    //Set bold  font for  _hierButton
    wxFont font = _hierButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
@@ -845,12 +875,10 @@ void browsers::XdbBrowser::onFlatView(wxCommandEvent& event)
 {
    if (!_hierarchy_view) return;
    _hierarchy_view = false;
-//@FIXME   wxString current_selection = _cellBrowser->selectedCellName();
 
-   deleteAllItems();
+   wxString cell_sel_str = _cellBrowser->selectedCellName();
    _cellBrowser->collectInfo(_hierarchy_view);
-
-//@FIXME   _cellBrowser->selectCellName(current_selection);
+   _cellBrowser->selectCellName(cell_sel_str);
 
    //Set normal font for  _hierButton 
    wxFont font = _flatButton->GetFont();
@@ -864,12 +892,10 @@ void browsers::XdbBrowser::onHierView(wxCommandEvent& event)
 {
    if (_hierarchy_view) return;
    _hierarchy_view = true;
-//@FIXME   wxString current_selection = _cellBrowser->selectedCellName();
 
-   deleteAllItems();
+   wxString cell_sel_str = _cellBrowser->selectedCellName();
    _cellBrowser->collectInfo(_hierarchy_view);
-
-//@FIXME   _cellBrowser->selectCellName(current_selection);
+   _cellBrowser->selectCellName(cell_sel_str);
 
    //Set normal  font for _flatButton;
    wxFont font = _hierButton->GetFont();
@@ -948,8 +974,8 @@ void browsers::browserTAB::OnTELLaddGDStab()
       _GDSstruct = DEBUG_NEW XdbBrowser(this, tui::ID_GDS_CELLTREE);
       AddPage(_GDSstruct, wxT("GDS"));
    }
-   else _GDSstruct->deleteAllItems();
-   _GDSstruct->collectInfo();
+   // don't bother to clean-up existing DB. It's done in the function called
+   _GDSstruct->collectInfo(); 
 }
 
 void browsers::browserTAB::OnTELLclearGDStab() 
@@ -969,7 +995,7 @@ void browsers::browserTAB::OnTELLaddCIFtab()
       _CIFstruct = DEBUG_NEW XdbBrowser(this, tui::ID_CIF_CELLTREE);
       AddPage(_CIFstruct, wxT("CIF"));
    }
-   else _CIFstruct->deleteAllItems();
+   // don't bother to clean-up existing DB. It's done in the function called
    _CIFstruct->collectInfo();
 }
 
