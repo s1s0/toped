@@ -104,7 +104,9 @@ namespace browsers
          void              copyItem(const wxTreeItemId, const wxTreeItemId);
          void              highlightChildren(wxTreeItemId, wxColour);
          wxString          selectedCellName();
-         void              selectCellName(wxString);
+         wxString          topCellName();
+         wxString          activeCellName();
+         void              statusHighlight(wxString, wxString, wxString);
          wxString          rbCellName();
          virtual void     collectInfo(bool);
       protected:
@@ -119,7 +121,7 @@ namespace browsers
          void              updateHier();
          void              onCommand(wxCommandEvent&);
          void              onLMouseDblClk(wxMouseEvent&);
-         void              onWXOpenCell(wxCommandEvent&);
+         void              onWxOpenCell(wxCommandEvent&);
          void              onTellOpenCell(wxString);
          void              onTellHighlightCell(wxString);
          void              onTellAddCell(wxString, wxString, int);
@@ -128,6 +130,8 @@ namespace browsers
          wxTreeItemId      _activeStructure;
          wxTreeItemId      _dbroot;
          bool              _hierarchy_view;
+         wxColor           _listColor;
+         wxColor           _editColor;
          DECLARE_EVENT_TABLE();
    };
 
@@ -178,7 +182,6 @@ namespace browsers
          void              collectInfo()              {_cellBrowser->collectInfo(_hierarchy_view);}
          CellBrowser*      cellBrowser() const        {return _cellBrowser;}
       private:
-         void              onWXCellARef(wxCommandEvent&);
          void              onReportUsedLayers(wxCommandEvent&);
          void              onHierView(wxCommandEvent&);
          void              onFlatView(wxCommandEvent&);
@@ -191,8 +194,6 @@ namespace browsers
    };
 
    //===========================================================================
-   // eXternal Data Base Browser
-   //
    class XdbBrowser : public wxPanel {
       public:
                            XdbBrowser(wxWindow*, wxWindowID id = -1,
@@ -212,6 +213,7 @@ namespace browsers
          DECLARE_EVENT_TABLE();
    };
 
+   //===========================================================================
    class LayerInfo
    {
    public:
@@ -227,6 +229,7 @@ namespace browsers
       std::string _fill;
    };
 
+   //===========================================================================
    class LayerButton:public wxPanel
    {
    public:
@@ -260,7 +263,7 @@ namespace browsers
    DECLARE_EVENT_TABLE();
    };
 
-   typedef std::map <word, LayerButton*> layerButtonMap;
+   //===========================================================================
    class LayerPanel:public wxScrolledWindow
    {
    public:
@@ -272,15 +275,17 @@ namespace browsers
       virtual            ~LayerPanel();
       wxString             getAllSelected();
    private:
+      typedef std::map <word, LayerButton*> LayerButtonMap;
       void                 OnSize(wxSizeEvent&);
       void                 OnCommand(wxCommandEvent&);
-      layerButtonMap      _buttonMap;
+      LayerButtonMap      _buttonMap;
       int                 _buttonCount;
       LayerButton*        _selectedButton;
 
       DECLARE_EVENT_TABLE();
    };
 
+   //===========================================================================
    class LayerBrowser : public wxPanel
    {
    public:
