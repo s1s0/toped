@@ -230,7 +230,8 @@ CIFin::CifFile::CifFile(std::string filename)
    std::ostringstream info;
    FILE* cif_in_file;
    // Open the input file
-   if (!(cif_in_file = fopen(_filename.c_str(),"r"))) // open the input file
+	std::string fname(convertString(_filename));
+   if (!(cif_in_file = fopen(fname.c_str(),"r"))) // open the input file
    {
       _status = cfs_FNF; return;
    }

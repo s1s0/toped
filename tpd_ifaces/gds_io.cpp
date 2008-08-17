@@ -304,7 +304,8 @@ GDSin::GdsFile::GdsFile(std::string fn)
    _library = NULL;
 //   prgrs = progrind;
    tell_log(console::MT_INFO, std::string("GDSII input file: \"") + fn + std::string("\""));
-   if (!(_gdsFh = fopen(_fileName.c_str(),"rb")))
+	std::string fname(convertString(_fileName));
+   if (!(_gdsFh = fopen(fname.c_str(),"rb")))
    {// open the input file
       std::ostringstream info;
       info << "File "<< fn <<" can NOT be opened";
@@ -378,7 +379,8 @@ GDSin::GdsFile::GdsFile(std::string fn, time_t acctime)
    _library = NULL;
 //   prgrs_pos = 0;
 //   prgrs = progrind;
-   if (!(_gdsFh = fopen(_fileName.c_str(),"wb")))
+	std::string fname(convertString(_fileName));
+   if (!(_gdsFh = fopen(fname.c_str(),"wb")))
    {// open the output file
       std::ostringstream info;
       info << "File "<< fn <<" can NOT be opened";
