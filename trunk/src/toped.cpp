@@ -776,20 +776,18 @@ void tui::TopedFrame::initView()
    //----------------------------------------------------------------------------
    // the openGL window - the canvas
    //---------------------------------------------------------------------------- 
-   int gl_attrib[] = { 
+   int gl_attrib[] = {
                         WX_GL_RGBA             ,
                         WX_GL_MIN_RED          , 8,
                         WX_GL_MIN_GREEN        , 8,
                         WX_GL_MIN_BLUE         , 8,
-/*                        WX_GL_MIN_ALPHA        , 8,*/
+                        WX_GL_MIN_ALPHA        , 8,
                         WX_GL_MIN_ACCUM_RED    , 8,
                         WX_GL_MIN_ACCUM_GREEN  , 8,
                         WX_GL_MIN_ACCUM_BLUE   , 8,
-/*                        WX_GL_MIN_ACCUM_ALPHA  , 8,*/
+                        WX_GL_MIN_ACCUM_ALPHA  , 8,
                         WX_GL_DOUBLEBUFFER     ,
                         GL_NONE };
-//                         WX_GL_DEPTH_SIZE    , 1,
-//     int* gl_attrib = NULL; 
 
    _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, gl_attrib);
    //----------------------------------------------------------------------------
@@ -799,7 +797,7 @@ void tui::TopedFrame::initView()
    _cmdline->SetSize(wxSize(wxSize(1000, 30)));
 // _cmdline->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
 
-   _browsers->set_tellParser( _cmdline ) ;
+   _browsers->setTellParser( _cmdline ) ;
 
    _winManager.AddPane(_browsers,   wxAuiPaneInfo().
                                     Left().
@@ -1140,7 +1138,7 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
    tui::getGDSimport* dlg = NULL;
    try {
       dlg = DEBUG_NEW tui::getGDSimport(this, -1, wxT("Import GDS structure"), pos,
-                                          _browsers->TDTSelectedGDSName());
+                                          _browsers->tdtSelectedGdsName());
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -1202,7 +1200,8 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getGDSexport* dlg = NULL;
    try {
-      dlg = DEBUG_NEW tui::getGDSexport(this, -1, wxT("GDS export cell"), pos, _browsers->TDTSelectedCellName());
+      dlg = DEBUG_NEW tui::getGDSexport(this, -1, wxT("GDS export cell"), pos,
+                                        _browsers->tdtSelectedCellName());
    }
    catch (EXPTN) {delete dlg;return;}
    wxString cellname;
@@ -1260,7 +1259,7 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
    tui::getCIFimport* dlg = NULL;
    try {
       dlg = DEBUG_NEW tui::getCIFimport(this, -1, wxT("Import CIF structure"), pos,
-                                        _browsers->TDTSelectedCIFName());
+                                        _browsers->tdtSelectedCifName());
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
@@ -1290,7 +1289,7 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
 
 
 void tui::TopedFrame::OnCellRef_B(wxCommandEvent& WXUNUSED(event)) {
-   CellRef(_browsers->TDTSelectedCellName());
+   CellRef(_browsers->tdtSelectedCellName());
 }
 
 void tui::TopedFrame::OnCellRef_M(wxCommandEvent& WXUNUSED(event)) {
@@ -1298,7 +1297,7 @@ void tui::TopedFrame::OnCellRef_M(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void tui::TopedFrame::OnCellARef_B(wxCommandEvent& WXUNUSED(event)) {
-   CellARef(_browsers->TDTSelectedCellName());
+   CellARef(_browsers->tdtSelectedCellName());
 }
 
 void tui::TopedFrame::OnCellARef_M(wxCommandEvent& WXUNUSED(event)) {
