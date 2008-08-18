@@ -679,7 +679,7 @@ int tellstdfunc::CIFread::execute() {
             CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
             assert(root);
             do
-               top_cell_list.push_back(std::string(root->GetItem()->cellName()));
+               top_cell_list.push_back(std::string(root->GetItem()->name()));
             while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
             DATC->unlockCIF();
             // Convert the string list to TLISTOF(telldata::tn_string)

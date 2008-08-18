@@ -443,10 +443,10 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
       CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
       while (cifs) 
       {
-         _nameList->Append(wxString(cifs->cellName().c_str(), wxConvUTF8));
+         _nameList->Append(wxString(cifs->name().c_str(), wxConvUTF8));
          cifs = cifs->last();
       }
-      _nameList->Append(wxString(ACIFDB->getTopStructure()->cellName().c_str(), wxConvUTF8));
+      _nameList->Append(wxString(ACIFDB->getTopStructure()->name().c_str(), wxConvUTF8));
       //-----------------------------------------------------------------------
       NMap inlays;
       nameList cifLayers;

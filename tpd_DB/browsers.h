@@ -329,6 +329,8 @@ namespace browsers
          XdbBrowser*         _gdsStruct;
          XdbBrowser*         _cifStruct;
          TDTbrowser*         _tdtStruct;
+         int                 _gdsPageIndex;
+         int                 _cifPageIndex;
          LayerBrowser*       _layers;
          wxWindow*           _tellParser;
          DECLARE_EVENT_TABLE();

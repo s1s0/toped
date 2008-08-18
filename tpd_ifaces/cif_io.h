@@ -228,11 +228,11 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                         CifStructure(_dbl_word, CifStructure*, _dbl_word=1,_dbl_word=1);
                        ~CifStructure();
-         void           cellNameIs(std::string cellName) {_cellName = cellName;}
+         void           cellNameIs(std::string name)  {_name = name;}
          void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
          CifStructure*  last() const                  {return _last;}
          _dbl_word      ID() const                    {return _ID;}
-         std::string    cellName() const              {return _cellName;}
+         std::string    name() const                  {return _name;}
          void           parentFound()                 {_orphan = false;}
          bool           orphan()                      {return _orphan;}
          bool           traversed() const             {return _traversed;}
@@ -251,7 +251,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CifStructure*  _last;
          _dbl_word      _a;
          _dbl_word      _b;
-         std::string    _cellName;
+         std::string    _name;
          CifLayer*      _first;
          CifRef*        _refirst;
          DBbox          _overlap;
