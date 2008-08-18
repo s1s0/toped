@@ -131,7 +131,7 @@ void CIFin::CifLayer::addLabelSig(std::string label, TP* loc)
 
 //=============================================================================
 CIFin::CifStructure::CifStructure(_dbl_word ID, CifStructure* last, _dbl_word a, _dbl_word b) :
-      _ID(ID), _last(last), _a(a), _b(b), _cellName(""), _first(NULL),
+      _ID(ID), _last(last), _a(a), _b(b), _name(""), _first(NULL),
           _refirst(NULL), _overlap(TP()), _orphan(true), _traversed(false) {}
 
 CIFin::CifStructure::~CifStructure()
@@ -198,13 +198,13 @@ void CIFin::CifStructure::hierPrep(CifFile& cfile)
    }
    _children.unique();
 
-   if ("" == _cellName)
+   if ("" == _name)
    {
       std::ostringstream tmp_name;
       tmp_name << "_cifCellNo_" << _ID;
-      _cellName = tmp_name.str();
+      _name = tmp_name.str();
       std::ostringstream news;
-      news << "Name \"" << _cellName << "\" assigned automatically to CIF cell "<< _ID ;
+      news << "Name \"" << _name << "\" assigned automatically to CIF cell "<< _ID ;
       tell_log(console::MT_INFO,news.str());
    }
 }
@@ -394,11 +394,11 @@ CIFin::CifStructure* CIFin::CifFile::getStructure(_dbl_word cellno)
 
 CIFin::CifStructure* CIFin::CifFile::getStructure(std::string cellname)
 {
-   if (cellname == _default->cellName()) return _default;
+   if (cellname == _default->name()) return _default;
    CifStructure* local = _first;
    while (NULL != local)
    {
-      if (cellname == local->cellName())
+      if (cellname == local->name())
          return local;
       local = local->last();
    }

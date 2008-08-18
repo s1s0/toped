@@ -290,7 +290,7 @@ void CIFin::Cif2Ted::child_structure(const CIFin::CIFHierTree* root, bool overwr
 void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite)
 {
    CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(item->GetItem());
-   std::string gname = src_structure->cellName();
+   std::string gname = src_structure->name();
          // check that destination structure with this name exists
    laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
    std::ostringstream ost; ost << "CIF import: ";
@@ -432,7 +432,7 @@ void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::tdtlayer* wl, std::strin
 void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
 {
    CifStructure* refd = _src_lib->getStructure(wd->cell());
-   std::string cell_name = refd->cellName();
+   std::string cell_name = refd->name();
    if (NULL != _dst_lib->checkcell(cell_name))
    {
       laydata::refnamepair striter = _dst_lib->getcellnamepair(cell_name);

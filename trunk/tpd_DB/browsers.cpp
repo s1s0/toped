@@ -675,7 +675,7 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
    wxTreeItemId nroot;
    while (root)
    {
-      nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->cellName().c_str(),wxConvUTF8));
+      nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
       collectChildren(root, nroot, hier);
       root = root->GetNextRoot(TARGETDB_LIB);
    }
@@ -694,14 +694,14 @@ void browsers::CIFCellBrowser::collectChildren(const CIFin::CIFHierTree* root,
    {
       if (_hierarchy_view)
       {
-         nroot = AppendItem(lroot, wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8));
+         nroot = AppendItem(lroot, wxString(Child->GetItem()->name().c_str(), wxConvUTF8));
          collectChildren(Child, nroot, _hierarchy_view);
       }
       else
       {
-         if (!findItem(wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8), temp, GetRootItem()))
+         if (!findItem(wxString(Child->GetItem()->name().c_str(), wxConvUTF8), temp, GetRootItem()))
          {
-            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->cellName().c_str(), wxConvUTF8));
+            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->name().c_str(), wxConvUTF8));
             collectChildren(Child, nroot, _hierarchy_view);
          }
       }
@@ -929,6 +929,7 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    _gdsStruct = NULL;
    _cifStruct = NULL;
    _tellParser = NULL;
+
    Browsers = this;
 }
 
@@ -989,8 +990,10 @@ void browsers::browserTAB::onTellClearGdsTab()
 {
    if (_gdsStruct)
    {
+      int _gdsPageIndex = GetPageIndex(_gdsStruct);
+      assert(wxNOT_FOUND != _gdsPageIndex);
       _gdsStruct->deleteAllItems();
-      DeletePage(2);
+      DeletePage(_gdsPageIndex);
       _gdsStruct = NULL;
    }
 }
@@ -1010,8 +1013,10 @@ void browsers::browserTAB::onTellClearCifTab()
 {
    if (_cifStruct)
    {
+      int _cifPageIndex = GetPageIndex(_cifStruct);
+      assert(wxNOT_FOUND != _gdsPageIndex);
       _cifStruct->deleteAllItems();
-      DeletePage(2);// @FIXME!!! Get the page number on creation!
+      DeletePage(_cifPageIndex);
       _cifStruct = NULL;
    }
 }
