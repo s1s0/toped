@@ -42,11 +42,11 @@ namespace GDSin {
       void                 child_structure(const GDSin::GDSHierTree*, bool, bool);
       void                 convert_prep(const GDSin::GDSHierTree* item, bool, bool);
       void                 convert(GDSin::GdsStructure*, laydata::tdtcell*);
-      void                 polygon(GDSin::GdsPolygon*, laydata::tdtcell*);
-      void                 path(GDSin::GDSpath*, laydata::tdtcell*);
-      void                 ref(GDSin::GdsRef*, laydata::tdtcell*);
-      void                 aref(GDSin::GdsARef*, laydata::tdtcell*);
-      void                 text(GDSin::GdsText*, laydata::tdtcell*);
+      void                 poly(GDSin::GdsPolygon* , laydata::tdtlayer*, int2b);
+      void                 wire(GDSin::GDSpath*    , laydata::tdtlayer*, int2b);
+      void                 text(GDSin::GdsText*    , laydata::tdtlayer*);
+      void                 ref (GDSin::GdsRef*     , laydata::tdtcell* );
+      void                 aref(GDSin::GdsARef*    , laydata::tdtcell* );
       GDSin::GdsFile*      _src_lib;
       laydata::tdtdesign*  _dst_lib;
       real                 coeff; // DBU difference

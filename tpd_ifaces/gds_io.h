@@ -212,31 +212,27 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsData {
       public:
-                           GdsData(GdsData*);
+                           GdsData();
          void              readPlex(GdsRecord*);
          void              readElflags(GdsRecord*);
+         GdsData*          linkTo(GdsData* lst)                { _last = lst; return this; }
          GdsData*          last()                              { return _last;   }
-         int2b             layer()                             { return _layer;  }
-         GdsData*          PutLaymark(GdsData* lst)            { _lastLay = lst; return this;}
-         virtual byte     gdsDataType() = 0;
          virtual         ~GdsData()                           {                  };
+         virtual byte     gdsDataType() = 0;
       protected:
          GdsData*          _last;
-         GdsData*          _lastLay;
          int4b             _plex;
          word              _elflags;
-         int2b             _layer;
          int2b             _singleType;
    };
 
    class   GdsBox:public GdsData {
       public:
-                              GdsBox(GdsFile*, GdsData*);
+                              GdsBox(GdsFile*, int2b&);
          byte                 gdsDataType()                     { return gds_BOX;}
          pointlist&           plist()                           { return _plist; }
          virtual            ~GdsBox()                          {                 }
       protected:
-         int2b                _boxtype;
          pointlist            _plist;
    };
 
@@ -255,7 +251,7 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsPolygon:public GdsData {
       public:
-                              GdsPolygon(GdsFile*, GdsData*);
+                              GdsPolygon(GdsFile*, int2b&);
          byte                 gdsDataType()                    { return gds_BOUNDARY;  }
          pointlist&           plist()                          { return _plist;        }
          virtual            ~GdsPolygon()                     {                        }
@@ -283,7 +279,7 @@ namespace GDSin {
    ******************************************************************************/
    class   GDSpath:public GdsData {
       public:
-                              GDSpath(GdsFile*, GdsData*);
+                              GDSpath(GdsFile*, int2b&);
          byte                 gdsDataType()                    { return gds_PATH;}
          pointlist&           plist()                          { return _plist;  }
          int4b                width()                          { return _width;  }
@@ -324,7 +320,7 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsText:public GdsData {
       public:
-                              GdsText(GdsFile *cf, GdsData *lst);
+                              GdsText(GdsFile *cf, int2b&);
          byte                 gdsDataType(){return gds_TEXT;};
          char*                text()                           { return _text;          }
          word                 reflection()                     { return _reflection;    }
@@ -375,8 +371,8 @@ namespace GDSin {
    class   GdsRef:public GdsData
    {
    public:
-                              GdsRef(GdsData *lst);//default, called by GdsARef::GdsARef
-                              GdsRef(GdsFile *cf, GdsData *lst);
+                              GdsRef();//default, called by GdsARef::GdsARef
+                              GdsRef(GdsFile *cf);
       void                    SetStructure(GdsStructure* strct){ _refStr = strct;       }
       byte                    gdsDataType()                    { return gds_SREF;      }
       char*                   strName()                        { return _strName;      }
@@ -419,7 +415,7 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsARef:public GdsRef {
       public:
-                              GdsARef(GdsFile*, GdsData*);
+                              GdsARef(GdsFile*);
          int                  getXStep();
          int                  getYStep();
          byte                 gdsDataType()                    { return gds_AREF;   }
@@ -470,12 +466,13 @@ namespace GDSin {
 
    class   GdsStructure {
       public:
+         typedef std::map<int2b, GdsData*> LayMap;
                               GdsStructure(GdsFile*, GdsStructure*);
          bool                 registerStructure(GdsStructure* ws);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
+         GdsData*             fDataAt(int2b);
          GdsStructure*        last()                           { return _last;         }
          const char*          name() const                     { return _name;         }
-         GdsData*             fData()                          { return _fData;        }
          bool                 allLay(byte i)                   { return _allLay[i];    }
          bool                 traversed() const                { return _traversed;    }
          void                 set_traversed(bool trv)          { _traversed = trv;      }
@@ -484,9 +481,9 @@ namespace GDSin {
          bool                 _haveParent;
          ChildStructure       _children;
       protected:
+         void                 linkDataIn(GdsData*, int2b);
          bool                 _allLay[GDS_MAX_LAYER];
-         GdsData*             _compByLay[GDS_MAX_LAYER];
-         GdsData*             _fData;
+         LayMap               _layers;
          char                 _name[65];
          GdsStructure*        _last;
          bool                 _traversed;       //! For hierarchy traversing purposes
