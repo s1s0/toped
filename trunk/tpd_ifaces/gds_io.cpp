@@ -706,7 +706,7 @@ void GDSin::GdsLibrary::setHierarchy()
    GdsStructure* ws = _fStruct;
    while (ws)
    {//for every structure
-      GdsData* wd = ws->fData();
+      GdsData* wd = ws->fDataAt(0);
       while (wd)
       { //for every GdsData of type SREF or AREF
       //put a pointer to GdsStructure
@@ -774,11 +774,13 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
 {
    _traversed = false;
    int i;
+   int2b layer;
    //initializing
-   _last = lst; _fData = NULL;
+   _last = lst;
+   GdsData* cData = NULL;
    _haveParent = false;
    GdsRecord* cr = NULL;
-   for (i = 0; i < GDS_MAX_LAYER; _compByLay[i++] = NULL);
+   for (i = 0; i < GDS_MAX_LAYER; _allLay[i++] = false);
    do
    { //start reading
       cr = cf->GetNextRecord();
@@ -804,34 +806,30 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
                else cr->retData(&_name);
                delete cr;break;
             case gds_BOX: 
-               _fData = DEBUG_NEW GdsBox(cf, _fData);
-               _compByLay[_fData->layer()] = //put in layer sequence
-                     _fData->PutLaymark(_compByLay[_fData->layer()]);
+               cData = DEBUG_NEW GdsBox(cf, layer);
+               linkDataIn(cData, layer);
                delete cr;break;
             case gds_BOUNDARY: 
-               _fData = DEBUG_NEW GdsPolygon(cf, _fData);
-               _compByLay[_fData->layer()] = //put in layer sequence
-                  _fData->PutLaymark(_compByLay[_fData->layer()]);
+               cData = DEBUG_NEW GdsPolygon(cf, layer);
+               linkDataIn(cData, layer);
                delete cr;break;
             case gds_PATH: 
-               _fData = DEBUG_NEW GDSpath(cf, _fData);
-               _compByLay[_fData->layer()] = //put in layer sequence
-                  _fData->PutLaymark(_compByLay[_fData->layer()]);
+               cData = DEBUG_NEW GDSpath(cf, layer);
+               linkDataIn(cData, layer);
                delete cr;break;
-            case gds_TEXT:   
-               _fData = DEBUG_NEW GdsText(cf,_fData);
-               _compByLay[_fData->layer()] = //put in layer sequence
-                  _fData->PutLaymark(_compByLay[_fData->layer()]);
+            case gds_TEXT:
+               cData = DEBUG_NEW GdsText(cf, layer);
+               linkDataIn(cData, layer);
                delete cr;break;
-            case gds_SREF:   
-               _fData = DEBUG_NEW GdsRef(cf, _fData);
+            case gds_SREF:
+               cData = DEBUG_NEW GdsRef(cf);
+               linkDataIn(cData, 0);
                delete cr;break;
             case gds_AREF: 
-               _fData = DEBUG_NEW GdsARef(cf, _fData);
+               cData = DEBUG_NEW GdsARef(cf);
+               linkDataIn(cData, 0);
                delete cr;break;
             case gds_ENDSTR:// end of structure, exit point
-               for(i = 0;i < GDS_MAX_LAYER;i++)//collect all used layers 
-                  _allLay[i] = (NULL != _compByLay[i]);
                delete cr;return;
             default://parse error - not expected record type
                tell_log(console::MT_ERROR, "GDS structure - wrong record type in the current context");
@@ -847,6 +845,23 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
       }
    }
    while (true);
+}
+
+void GDSin::GdsStructure::linkDataIn(GdsData* data, int2b layer)
+{
+   if (_layers.end() == _layers.find(layer))
+      _layers[layer] = data->linkTo(NULL);
+   else
+      _layers[layer] = data->linkTo(_layers[layer]);
+   _allLay[layer] = true;
+}
+
+GDSin::GdsData* GDSin::GdsStructure::fDataAt(int2b layer)
+{
+   if (_layers.end() == _layers.find(layer))
+      return NULL;
+   else
+      return _layers[layer];
 }
 
 bool GDSin::GdsStructure::registerStructure(GdsStructure* ws)
@@ -871,29 +886,32 @@ GDSin::GDSHierTree* GDSin::GdsStructure::hierOut(GDSHierTree* Htree, GdsStructur
       {
          Htree = _children[i]->hierOut(Htree,this);
          // Collect all used layers here and down in hierarchy
-         for(int j = 0 ; j < GDS_MAX_LAYER ; j++)
+         for(int j = 1 ; j < GDS_MAX_LAYER ; j++)
             _allLay[j] |= _children[i]->allLay(j);
-            //   if (children.GetAt(i)->Get_Allay(j)) Allay[j] = true;//same as above
       }
    return Htree;
 }
 
 GDSin::GdsStructure::~GdsStructure()
 {
-   GdsData* Wdata = _fData;
-   while (_fData)
+   for (LayMap::iterator CL = _layers.begin(); CL != _layers.end(); CL++)
    {
-      Wdata = _fData->last();
-      delete _fData;
-      _fData = Wdata;
+      GdsData* wData  = CL->second;
+      GdsData* wData2;
+      while (wData)
+      {
+         wData2 = wData->last();
+         delete wData;
+         wData = wData2;
+      }
    }
 }
 
 //==============================================================================
 // class GdsData
 //==============================================================================
-GDSin::GdsData::GdsData(GdsData* lst) :
-   _last(lst), _lastLay(NULL), _plex(0), _elflags(0), _layer(-1), _singleType(-1)
+GDSin::GdsData::GdsData() :
+   _last(NULL), _plex(0), _elflags(0), _singleType(-1)
 {}
 
 void GDSin::GdsData::readPlex(GdsRecord *cr)
@@ -909,7 +927,7 @@ void GDSin::GdsData::readElflags(GdsRecord *cr)
 //==============================================================================
 // class GdsBox
 //==============================================================================
-GDSin::GdsBox::GdsBox(GdsFile* cf, GdsData *lst):GdsData(lst)
+GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer) : GdsData()
 {
    GdsRecord* cr = NULL;
    do
@@ -923,9 +941,9 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, GdsData *lst):GdsData(lst)
                delete cr; break;
             case gds_PLEX:   readPlex(cr);// seems that it's not used
                delete cr; break;
-            case gds_LAYER: cr->retData(&_layer);
+            case gds_LAYER: cr->retData(&layer);
                delete cr; break;
-            case gds_BOXTYPE:cr->retData(&_boxtype);// Don't know what is this !!!
+            case gds_BOXTYPE:cr->retData(&_singleType);
                delete cr; break;
             case gds_PROPATTR:
                InFile->incGdsiiWarnings(); delete cr; break;
@@ -962,7 +980,7 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, GdsData *lst):GdsData(lst)
 //==============================================================================
 // class GdsPolygon
 //==============================================================================
-GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, GdsData *lst):GdsData(lst)
+GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer) : GdsData()
 {
    word i;
    GdsRecord* cr = NULL;
@@ -977,7 +995,7 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, GdsData *lst):GdsData(lst)
                delete cr;break;
             case gds_PLEX:   readPlex(cr);// seems that it's not used
                delete cr;break;
-            case gds_LAYER: cr->retData(&_layer);
+            case gds_LAYER: cr->retData(&layer);
                delete cr;break;
             case gds_DATATYPE: cr->retData(&_singleType);
                delete cr;break;
@@ -1015,7 +1033,7 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, GdsData *lst):GdsData(lst)
 //==============================================================================
 // class GDSpath
 //==============================================================================
-GDSin::GDSpath::GDSpath(GdsFile* cf, GdsData *lst):GdsData(lst)
+GDSin::GDSpath::GDSpath(GdsFile* cf, int2b& layer):GdsData()
 {
    word i;
    _pathtype = 0; _bgnextn = 0; _endextn = 0; _width = 0;
@@ -1031,7 +1049,7 @@ GDSin::GDSpath::GDSpath(GdsFile* cf, GdsData *lst):GdsData(lst)
                delete cr;break;
             case gds_PLEX:   readPlex(cr);// seems that's not used
                delete cr;break;
-            case gds_LAYER: cr->retData(&_layer);
+            case gds_LAYER: cr->retData(&layer);
                delete cr;break;
             case gds_DATATYPE: cr->retData(&_singleType);
                delete cr;break;
@@ -1108,7 +1126,7 @@ void GDSin::GDSpath::convert22(int4b begext, int4b endext)
 //==============================================================================
 // class GdsText
 //==============================================================================
-GDSin::GdsText::GdsText(GdsFile* cf, GdsData *lst):GdsData(lst)
+GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
 {
    word ba;
    // initializing
@@ -1128,7 +1146,7 @@ GDSin::GdsText::GdsText(GdsFile* cf, GdsData *lst):GdsData(lst)
                delete cr;break;
             case gds_PLEX:   readPlex(cr);// seems that it's not used
                delete cr;break;
-            case gds_LAYER: cr->retData(&_layer);
+            case gds_LAYER: cr->retData(&layer);
                delete cr;break;
             case gds_TEXTTYPE: cr->retData(&_singleType);
                delete cr;break;
@@ -1178,21 +1196,17 @@ GDSin::GdsText::GdsText(GdsFile* cf, GdsData *lst):GdsData(lst)
    while (true);
 }
 
-// laydata::tdtdata* GDSin::GdsText::toTED() {
-//    return NULL;
-// }
-
 //==============================================================================
 // class GdsRef
 //==============================================================================
-GDSin::GdsRef::GdsRef(GdsData *lst) : GdsData(lst), _refStr(NULL),
+GDSin::GdsRef::GdsRef() : GdsData(), _refStr(NULL),
    _reflection(false), _magnPoint(TP()), _magnification(1.0), _angle(0.0),
    _absMagn(false), _absAngl(false)
 {
    _strName[0] = 0x0;
 }
 
-GDSin::GdsRef::GdsRef(GdsFile* cf, GdsData *lst) : GdsData(lst)
+GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
 {
    word ba;
    //initializing
@@ -1266,14 +1280,14 @@ GDSin::GdsRef::GdsRef(GdsFile* cf, GdsData *lst) : GdsData(lst)
 //==============================================================================
 // class GdsARef
 //==============================================================================
-GDSin::GdsARef::GdsARef(GdsFile* cf, GdsData *lst):GdsRef(lst)
+GDSin::GdsARef::GdsARef(GdsFile* cf):GdsRef()
 {
    word ba;
    int tmp; //Dummy variable. Use for gds_PROPATTR
    char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
    std::ostringstream ost;
    //initializing
-   GdsRecord* cr = NULL;   
+   GdsRecord* cr = NULL;
    do
    {//start reading
       cr = cf->GetNextRecord();

@@ -115,36 +115,52 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool recursive
 
 void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
 {
-   GDSin::GdsData *wd = src->fData();
-   while( wd )
+   for(int2b laynum = 1 ; laynum < GDS_MAX_LAYER ; laynum++)
    {
-      switch( wd->gdsDataType() )
-      {
-//         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
-         case      gds_BOX:
-         case gds_BOUNDARY: polygon(static_cast<GDSin::GdsPolygon*>(wd), dst);  break;
-         case     gds_PATH: path(static_cast<GDSin::GDSpath*>(wd), dst);  break;
-         case     gds_SREF: ref(static_cast<GDSin::GdsRef*>(wd), dst);  break;
-         case     gds_AREF: aref(static_cast<GDSin::GdsARef*>(wd), dst);  break;
-         case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd), dst);  break;
-                   default: {/*Error - unexpected type*/}
+      if (src->allLay(laynum))
+      {// layers
+         laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(laynum));
+         GDSin::GdsData *wd = src->fDataAt(laynum);
+         while( wd )
+         {
+            switch( wd->gdsDataType() )
+            {
+      //         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
+               case      gds_BOX: break;
+               case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
+               case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
+               case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
+                        default: assert(false); /*Error - unexpected type*/
+            }
+            wd = wd->last();
+         }
       }
-      wd = wd->last();
+   }
+   if (src->allLay(0))
+   {// references
+      GDSin::GdsData *wd = src->fDataAt(0);
+      while( wd )
+      {
+         switch( wd->gdsDataType() )
+         {
+            case gds_SREF: ref (static_cast<GDSin::GdsRef*>(wd)   , dst);  break;
+            case gds_AREF: aref(static_cast<GDSin::GdsARef*>(wd)  , dst);  break;
+                  default: assert(false); /*Error - unexpected type*/
+         }
+         wd = wd->last();
+      }
    }
    dst->resort();
-//   dst->secure_layprop();
 }
 
-void GDSin::Gds2Ted::polygon(GDSin::GdsPolygon* wd, laydata::tdtcell* dst)
+void GDSin::Gds2Ted::poly(GDSin::GdsPolygon* wd, laydata::tdtlayer* wl, int2b layno)
 {
-   laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
-                                          (dst->securelayer(wd->layer()));
    pointlist &pl = wd->plist();
    laydata::valid_poly check(pl);
 
    if (!check.valid())
    {
-      std::ostringstream ost; ost << "Layer " << wd->layer();
+      std::ostringstream ost; ost << "Layer " << layno;
       ost << ": Polygon check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
    }
@@ -156,16 +172,14 @@ void GDSin::Gds2Ted::polygon(GDSin::GdsPolygon* wd, laydata::tdtcell* dst)
    else wl->addpoly(pl,false);
 }
 
-void GDSin::Gds2Ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst)
+void GDSin::Gds2Ted::wire(GDSin::GDSpath* wd, laydata::tdtlayer* wl, int2b layno)
 {
-   laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
-                                          (dst->securelayer(wd->layer()));
    pointlist &pl = wd->plist();
    laydata::valid_wire check(pl, wd->width());
 
    if (!check.valid())
    {
-      std::ostringstream ost; ost << "Layer " << wd->layer();
+      std::ostringstream ost; ost << "Layer " << layno;
       ost << ": Wire check fails - " << check.failtype();
       tell_log(console::MT_ERROR, ost.str());
       return;
@@ -173,6 +187,16 @@ void GDSin::Gds2Ted::path(GDSin::GDSpath* wd, laydata::tdtcell* dst)
    else pl = check.get_validated() ;
    /* @TODO !!! GDS path type here!!!! */
    wl->addwire(pl, wd->width(),false);
+}
+
+void GDSin::Gds2Ted::text(GDSin::GdsText* wd, laydata::tdtlayer* wl)
+{
+   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
+   wl->addtext(wd->text(),
+               CTM(wd->magnPoint(),
+                   wd->magnification() / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
+                                     wd->angle(),
+                                               (0 != wd->reflection())));
 }
 
 void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
@@ -192,11 +216,11 @@ void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
    }
    else
    {
+      //@FIXME - library or default structure here!
       std::string news = "Referenced structure \"";
       news += wd->strName(); news += "\" not found. Reference ignored";
       tell_log(console::MT_ERROR,news);
    }
-   // How about structures defined, but not parsed yet????
 }
 
 void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
@@ -221,23 +245,11 @@ void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
    }
    else
    {
+      //@FIXME - library or default structure here!
       std::string news = "Referenced structure \"";
       news += wd->strName(); news += "\" not found. Reference ignored";
       tell_log(console::MT_ERROR,news);
    }
-   // How about structures defined, but not parsed yet????
-}
-
-void GDSin::Gds2Ted::text(GDSin::GdsText* wd, laydata::tdtcell* dst)
-{
-   laydata::tdtlayer* wl = static_cast<laydata::tdtlayer*>
-                                       (dst->securelayer(wd->layer()));
-   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-   wl->addtext(wd->text(),
-               CTM(wd->magnPoint(),
-                   wd->magnification() / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
-                   wd->angle(),
-                   (0 != wd->reflection())));
 }
 
 //-----------------------------------------------------------------------------
@@ -353,6 +365,7 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
       }
       swl = swl->last();
    }
+
    CIFin::CifRef* swr = src->refirst();
    while ( swr )
    {
@@ -360,7 +373,6 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
       swr = swr->last();
    }
    dst->resort();
-//   dst->secure_layprop();
 }
 
 void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string layname)
