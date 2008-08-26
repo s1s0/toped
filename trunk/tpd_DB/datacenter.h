@@ -88,6 +88,7 @@ public:
    void                       CIFclose();
    CIFin::CifStatusType       CIFparse(std::string filename);
    bool                       CIFgetLay(nameList&);
+   bool                       gdsGetLayers(GDSin::GdsLayers&);
    void                       CIFimport(const nameList&, NMap*, bool);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);

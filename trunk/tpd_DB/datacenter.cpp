@@ -43,13 +43,13 @@ GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib)
 {
    _src_lib = src_lib;
    _dst_lib = dst_lib;
-   coeff = dst_lib->UU() / src_lib->Get_LibUnits();
+   coeff = dst_lib->UU() / src_lib->libUnits();
 }
 
 void GDSin::Gds2Ted::top_structure(std::string top_str, bool recursive, bool overwrite)
 {
    assert(_src_lib->hierTree());
-   GDSin::GdsStructure *src_structure = _src_lib->GetStructure(top_str.c_str());
+   GDSin::GdsStructure *src_structure = _src_lib->getStructure(top_str.c_str());
    if (NULL != src_structure)
    {
       GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
@@ -758,6 +758,16 @@ bool DataCenter::CIFgetLay(nameList& cifLayers)
    else 
    {
       _CIFDB->collectLayers(cifLayers);
+      return true;
+   }
+}
+
+bool DataCenter::gdsGetLayers(GDSin::GdsLayers& gdsLayers)
+{
+   if (NULL == _GDSDB) return false;
+   else
+   {
+      _GDSDB->collectLayers(gdsLayers);
       return true;
    }
 }

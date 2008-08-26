@@ -536,15 +536,15 @@ void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
    //
    std::string message = "...converting " + name();
    tell_log(console::MT_INFO, message);
-   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_BGNSTR);
-   gdsf.SetTimes(wr);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_STRNAME, name().size());
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BGNSTR);
+   gdsf.setTimes(wr);gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_STRNAME, name().size());
    wr->add_ascii(name().c_str()); gdsf.flush(wr);
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
       wl->second->GDSwrite(gdsf, wl->first, UU);
-   wr = gdsf.SetNextRecord(gds_ENDSTR);gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_ENDSTR);gdsf.flush(wr);
    gdsf.registerCellWritten(name());
 }
 

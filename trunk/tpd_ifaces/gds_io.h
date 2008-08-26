@@ -122,13 +122,16 @@ namespace GDSin {
 
    typedef std::vector<GdsStructure*>     ChildStructure;
    typedef SGHierTree<GdsStructure>       GDSHierTree;
+   typedef std::list<word>                WordList;
+   typedef std::map<word, WordList>       GdsLayers;
+   typedef std::map<word, std::string>    NumStrMap;
 
    typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
 
    /*** GdsRecord ***************************************************************
    >>> Constructor --------------------------------------------------------------
    > reads 'rl' bytes from the input file 'Gf'. Initializes all data fields
-   > including 'isvalid'. This constructor is called ONLY from 'GetNextRecord'
+   > including 'isvalid'. This constructor is called ONLY from 'getNextRecord'
    > method of GdsFile class
    >> input parameters ->   Gf   - file handler
    >                        rl   - record length
@@ -217,6 +220,7 @@ namespace GDSin {
          void              readElflags(GdsRecord*);
          GdsData*          linkTo(GdsData* lst)                { _last = lst; return this; }
          GdsData*          last()                              { return _last;   }
+         int2b             singleType()                        { return _singleType;}
          virtual         ~GdsData()                           {                  };
          virtual byte     gdsDataType() = 0;
       protected:
@@ -471,6 +475,7 @@ namespace GDSin {
          bool                 registerStructure(GdsStructure* ws);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          GdsData*             fDataAt(int2b);
+         void                 collectLayers(GdsLayers&, bool hier);
          GdsStructure*        last()                           { return _last;         }
          const char*          name() const                     { return _name;         }
          bool                 allLay(byte i)                   { return _allLay[i];    }
@@ -554,12 +559,12 @@ namespace GDSin {
    > t_modif      - Date&time of last modification of the GDSII file
                     Last two parameters not used anywhere
    >>> Methods ------------------------------------------------------------------
-   > GetNextRecord()      - Reads next record from the input stream. Retuns NULL if
+   > getNextRecord()      - Reads next record from the input stream. Retuns NULL if
    >                       error ocures during read in. This is the only function
    >                      used for reading of the input GDS file. Calls
    >                      'GdsRecord' constructor
-   > Get_LibUnits()      - |Return library units
-   > Get_UserUnits()    - |Return user units
+   > libUnits()      - |Return library units
+   > userUnits()    - |Return user units
                           |->Both methods call corresponding methods in GdsLibrary
    > GetStructure()      - Returns the pointer to GDSII structure with a given name
    > HierOut()            - Call corresponding method in GdsLibrary
@@ -570,16 +575,17 @@ namespace GDSin {
       public:
                               GdsFile(std::string);
                               GdsFile(std::string, time_t);
-         GdsRecord*           GetNextRecord();
-         GdsRecord*           SetNextRecord(byte, word reclen = 0);
-         double               Get_LibUnits();
-         double               Get_UserUnits();
-         void                 SetTimes(GdsRecord*);
+         GdsRecord*           getNextRecord();
+         GdsRecord*           setNextRecord(byte, word reclen = 0);
+         double               libUnits();
+         double               userUnits();
+         void                 setTimes(GdsRecord*);
          bool                 checkCellWritten(std::string);
          void                 registerCellWritten(std::string);
          void                 flush(GdsRecord*);
          void                 updateLastRecord();
-         GdsStructure*        GetStructure(const char*);
+         GdsStructure*        getStructure(const char*);
+         void                 collectLayers(GdsLayers&);
          std::string          libname() const                  { return _library->name();       }
          void                 hierOut()                        { _hierTree = _library->hierOut();}
          GDSHierTree*         hierTree()                       { return _hierTree;              }

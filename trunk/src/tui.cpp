@@ -406,6 +406,18 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
          _nameList->Append(wxString(gdss->name(), wxConvUTF8));
          gdss = gdss->last();
       }
+      //-----------------------------------------------------------------------
+//       NMap inlays;
+//       GDSin::GdsLayers gdsLayers;
+//       if (DATC->gdsGetLayers(gdsLayers))
+//       {
+//          word laynum = 1;
+//          for (GDSin::GdsLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
+//          {
+// //            inlays[*NLI] = laynum++;
+//          }
+//       }
+
    DATC->unlockGDS();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
