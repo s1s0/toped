@@ -413,7 +413,45 @@ int tellstdfunc::GDSconvert::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSconvertAll::GDSconvertAll(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSconvertT::GDSconvertT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+
+}
+
+int tellstdfunc::GDSconvertT::execute()
+{
+   bool  over  = getBoolValue();
+   bool  recur = getBoolValue();
+   telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   std::string name = getStringValue();
+
+   // Convert layer map
+   telldata::tthsh* nameh;
+   GDSin::NumStrMap* gdsLays = DEBUG_NEW GDSin::NumStrMap();
+   for (unsigned i = 0; i < ll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
+      (*gdsLays)[nameh->number().value()] = nameh->name().value();
+   }
+
+   nameList top_cells;
+   top_cells.push_back(name.c_str());
+   DATC->lockDB(false);
+   DATC->importGDScell(top_cells, recur, over);
+   updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+   DATC->unlockDB();
+   LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur)
+         << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::GDSconvertList::GDSconvertList(telldata::typeID retype, bool eor) :
                               cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
@@ -421,7 +459,7 @@ tellstdfunc::GDSconvertAll::GDSconvertAll(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSconvertAll::execute()
+int tellstdfunc::GDSconvertList::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
@@ -633,10 +671,11 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-int tellstdfunc::GDSreportlay::execute() {
+int tellstdfunc::GDSreportlay::execute()
+{
    std::string name = getStringValue();
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-      GDSin::GdsStructure *src_structure = AGDSDB->GetStructure(name.c_str());
+      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
       std::ostringstream ost; 
       if (!src_structure) {
          ost << "GDS structure named \"" << name << "\" does not exists";
@@ -644,14 +683,20 @@ int tellstdfunc::GDSreportlay::execute() {
       }
       else 
       {
-         ost << "GDS layers found in \"" << name <<"\": ";
-         for(int i = 0 ; i < GDS_MAX_LAYER ; i++)
-            if (src_structure->allLay(i)) ost << i << " ";
+         GDSin::GdsLayers gdsLayers;
+         src_structure->collectLayers(gdsLayers,true);
+         ost << "GDS layers found in \"" << name <<"\" { <layer_number> ; <data_type> }" << std::endl;
+         for (GDSin::GdsLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
+         {
+            ost << "{" << NLI->first << " ; ";
+            for (GDSin::WordList::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
+               ost << *NTI << " ";
+            ost << "}"<< std::endl;
+         }
          tell_log(console::MT_INFO,ost.str());
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
       }
    DATC->unlockGDS();
-   //   DATC->reportGDSlay(name.c_str());
    return EXEC_NEXT;
 }
 

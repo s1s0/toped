@@ -156,10 +156,10 @@ void laydata::tdtlibrary::registercellread(std::string cellname, tdtcell* cell) 
 
 void laydata::tdtlibrary::GDSwrite(GDSin::GdsFile& gdsf, tdtcell* top, bool recur)
 {
-   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_LIBNAME, _name.size());
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_LIBNAME, _name.size());
    wr->add_ascii(_name.c_str()); gdsf.flush(wr);
 
-   wr = gdsf.SetNextRecord(gds_UNITS);
+   wr = gdsf.setNextRecord(gds_UNITS);
    wr->add_real8b(_UU); wr->add_real8b(_DBU);
    gdsf.flush(wr);
    //
@@ -176,7 +176,7 @@ void laydata::tdtlibrary::GDSwrite(GDSin::GdsFile& gdsf, tdtcell* top, bool recu
       laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
       top->GDSwrite(gdsf, _cells, root_cell, _UU, recur);
    }
-   wr = gdsf.SetNextRecord(gds_ENDLIB);gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_ENDLIB);gdsf.flush(wr);
 }
 
 

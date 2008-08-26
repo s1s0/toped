@@ -304,7 +304,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
    _library = NULL;
 //   prgrs = progrind;
    tell_log(console::MT_INFO, std::string("GDSII input file: \"") + fn + std::string("\""));
-	std::string fname(convertString(_fileName));
+   std::string fname(convertString(_fileName));
    if (!(_gdsFh = fopen(fname.c_str(),"rb")))
    {// open the input file
       std::ostringstream info;
@@ -325,7 +325,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
 
    do
    {// start reading
-      wr = GetNextRecord();
+      wr = getNextRecord();
       if (wr)
       {
          switch (wr->recType())
@@ -379,7 +379,7 @@ GDSin::GdsFile::GdsFile(std::string fn, time_t acctime)
    _library = NULL;
 //   prgrs_pos = 0;
 //   prgrs = progrind;
-	std::string fname(convertString(_fileName));
+   std::string fname(convertString(_fileName));
    if (!(_gdsFh = fopen(fname.c_str(),"wb")))
    {// open the output file
       std::ostringstream info;
@@ -413,10 +413,10 @@ GDSin::GdsFile::GdsFile(std::string fn, time_t acctime)
    // start writing   
    GdsRecord* wr = NULL;
    // ... GDS header
-   wr = SetNextRecord(gds_HEADER); wr->add_int2b(_streamVersion);
+   wr = setNextRecord(gds_HEADER); wr->add_int2b(_streamVersion);
    flush(wr);
    //write BGNLIB record
-   wr = SetNextRecord(gds_BGNLIB); SetTimes(wr);
+   wr = setNextRecord(gds_BGNLIB); setTimes(wr);
    flush(wr);
 }
 
@@ -444,7 +444,7 @@ void GDSin::GdsFile::getTimes(GdsRecord *wr)
    }
 }
 
-void GDSin::GdsFile::SetTimes(GdsRecord* wr) {
+void GDSin::GdsFile::setTimes(GdsRecord* wr) {
    wr->add_int2b(_tModif.Year);
    wr->add_int2b(_tModif.Month);
    wr->add_int2b(_tModif.Day);
@@ -459,7 +459,7 @@ void GDSin::GdsFile::SetTimes(GdsRecord* wr) {
    wr->add_int2b(_tAccess.Sec);
 }
 
-GDSin::GdsRecord* GDSin::GdsFile::GetNextRecord()
+GDSin::GdsRecord* GDSin::GdsFile::getNextRecord()
 {
    char recheader[4]; // record header
    unsigned numread = fread(&recheader,1,4,_gdsFh);// read record header
@@ -480,7 +480,7 @@ GDSin::GdsRecord* GDSin::GdsFile::GetNextRecord()
    else return NULL;// error during read in
 }
 
-GDSin::GdsRecord* GDSin::GdsFile::SetNextRecord(byte rectype, word reclen)
+GDSin::GdsRecord* GDSin::GdsFile::setNextRecord(byte rectype, word reclen)
 {
    byte datatype;
    switch (rectype)
@@ -588,7 +588,7 @@ void GDSin::GdsFile::flush(GdsRecord* wr)
 }
 
 
-GDSin::GdsStructure* GDSin::GdsFile::GetStructure(const char* selection)
+GDSin::GdsStructure* GDSin::GdsFile::getStructure(const char* selection)
 {
    GdsStructure* Wstrct = _library->fStruct();
    while (Wstrct)
@@ -599,12 +599,24 @@ GDSin::GdsStructure* GDSin::GdsFile::GetStructure(const char* selection)
    return NULL;
 }
 
-double GDSin::GdsFile::Get_LibUnits()
+void GDSin::GdsFile::collectLayers(GdsLayers& layers)
+{
+   GdsStructure* wstrct = _library->fStruct();
+   while (wstrct)
+   {
+      // There is no point to traverse the hierarchy here if we already have
+      // all the cells listed
+      wstrct->collectLayers(layers, false);
+      wstrct = wstrct->last();
+   }
+}
+
+double GDSin::GdsFile::libUnits()
 {
    return _library->dbu()/_library->uu();
 }
 
-double GDSin::GdsFile::Get_UserUnits()
+double GDSin::GdsFile::userUnits()
 {
    return _library->uu();
 }
@@ -642,7 +654,7 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
    for (i = 0; i < 4; _fonts[i++] = NULL);
    do
    {//start reading
-      cr = cf->GetNextRecord();
+      cr = cf->getNextRecord();
       if (cr)
       {
          switch (cr->recType())
@@ -783,7 +795,7 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
    for (i = 0; i < GDS_MAX_LAYER; _allLay[i++] = false);
    do
    { //start reading
-      cr = cf->GetNextRecord();
+      cr = cf->getNextRecord();
       if (cr)
       {
          switch (cr->recType())
@@ -864,6 +876,31 @@ GDSin::GdsData* GDSin::GdsStructure::fDataAt(int2b layer)
       return _layers[layer];
 }
 
+void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
+{
+   for (LayMap::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
+   {
+      if (0 == CL->first) continue;
+      WordList data_types;
+      if (layers_map.end() != layers_map.find(CL->first))
+         data_types = layers_map[CL->first];
+      GdsData* wdata = CL->second;
+      while (NULL != wdata)
+      {
+         data_types.push_back(wdata->singleType());
+         wdata = wdata->last();
+      }
+      data_types.sort();
+      data_types.unique();
+      layers_map[CL->first] = data_types;
+   }
+
+   for (unsigned i = 0; i < _children.size(); i++)
+      if (NULL == _children[i]) continue;
+   else
+      _children[i]->collectLayers(layers_map, hier);
+}
+
 bool GDSin::GdsStructure::registerStructure(GdsStructure* ws)
 {
    for (unsigned i=0; i < _children.size(); i++)
@@ -932,7 +969,7 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer) : GdsData()
    GdsRecord* cr = NULL;
    do
    {//start reading
-      cr = cf->GetNextRecord();
+      cr = cf->getNextRecord();
       if (cr)
       {
          switch (cr->recType())
@@ -986,7 +1023,7 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer) : GdsData()
    GdsRecord* cr = NULL;
    do
    {//start reading
-      cr = cf->GetNextRecord();
+      cr = cf->getNextRecord();
       if (cr)
       {
          switch (cr->recType())
@@ -1040,7 +1077,7 @@ GDSin::GDSpath::GDSpath(GdsFile* cf, int2b& layer):GdsData()
    GdsRecord* cr = NULL;
    do
    {//start reading
-      cr = cf->GetNextRecord();
+      cr = cf->getNextRecord();
       if (cr)
       {
          switch (cr->recType())
@@ -1137,7 +1174,7 @@ GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
    GdsRecord* cr = NULL;
    do
    {//start reading
-      cr = cf->GetNextRecord();
+      cr = cf->getNextRecord();
       if (cr)
       {
          switch (cr->recType())
@@ -1219,7 +1256,7 @@ GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
    GdsRecord* cr = NULL;
    do
    {//start reading
-      cr = cf->GetNextRecord();
+      cr = cf->getNextRecord();
       if (cr)
       {
          switch (cr->recType())
@@ -1290,7 +1327,7 @@ GDSin::GdsARef::GdsARef(GdsFile* cf):GdsRef()
    GdsRecord* cr = NULL;
    do
    {//start reading
-      cr = cf->GetNextRecord();
+      cr = cf->getNextRecord();
       if (cr)
       {
          switch (cr->recType())

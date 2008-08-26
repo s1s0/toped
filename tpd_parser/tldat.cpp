@@ -836,6 +836,7 @@ std::string telldata::echoType( const telldata::typeID tID,
       case telldata::tn_layout: atype = "layout"; break;
       case telldata::tn_pnt   : atype = "point" ; break;
       case telldata::tn_box   : atype = "box"   ; break;
+      case telldata::tn_hsh   : atype = "lmap"  ; break;
       default                 :
       {
          atype = "?UNKNOWN TYPE?";

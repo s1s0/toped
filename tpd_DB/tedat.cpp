@@ -574,20 +574,20 @@ void laydata::tdtbox::write(TEDfile* const tedfile) const {
 
 void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_LAYER);
+   wr = gdsf.setNextRecord(gds_LAYER);
    wr->add_int2b(lay);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_DATATYPE);
+   wr = gdsf.setNextRecord(gds_DATATYPE);
    wr->add_int2b(0);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_XY,5);
+   wr = gdsf.setNextRecord(gds_XY,5);
    wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
    wr->add_int4b(_p1->x());wr->add_int4b(_p2->y());
    wr->add_int4b(_p2->x());wr->add_int4b(_p2->y());
    wr->add_int4b(_p2->x());wr->add_int4b(_p1->y());
    wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_ENDEL);
+   wr = gdsf.setNextRecord(gds_ENDEL);
    gdsf.flush(wr);
 }
 
@@ -1029,20 +1029,20 @@ void laydata::tdtpoly::write(TEDfile* const tedfile) const {
 
 void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_BOUNDARY);
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_LAYER);
+   wr = gdsf.setNextRecord(gds_LAYER);
    wr->add_int2b(lay);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_DATATYPE);
+   wr = gdsf.setNextRecord(gds_DATATYPE);
    wr->add_int2b(0);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_XY,_plist.size()+1);
+   wr = gdsf.setNextRecord(gds_XY,_plist.size()+1);
    for (word i = 0; i < _plist.size(); i++)
    {
       wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
    }
    wr->add_int4b(_plist[0].x());wr->add_int4b(_plist[0].y());
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_ENDEL);
+   wr = gdsf.setNextRecord(gds_ENDEL);
    gdsf.flush(wr);
 }
 
@@ -1442,21 +1442,21 @@ void laydata::tdtwire::write(TEDfile* const tedfile) const {
 
 void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_PATH);
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_PATH);
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_LAYER);
+   wr = gdsf.setNextRecord(gds_LAYER);
    wr->add_int2b(lay);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_DATATYPE);
+   wr = gdsf.setNextRecord(gds_DATATYPE);
    wr->add_int2b(0);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_WIDTH);
+   wr = gdsf.setNextRecord(gds_WIDTH);
    wr->add_int4b(_width);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_XY,_plist.size());
+   wr = gdsf.setNextRecord(gds_XY,_plist.size());
    for (word i = 0; i < _plist.size(); i++)
    {
       wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
    }
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_ENDEL);
+   wr = gdsf.setNextRecord(gds_ENDEL);
    gdsf.flush(wr);
 }
 
@@ -1630,26 +1630,26 @@ laydata::tdtcell* laydata::tdtcellref::cstructure() const
 
 void laydata::tdtcellref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_SREF);
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_SREF);
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_SNAME, _structure->first.size());
+   wr = gdsf.setNextRecord(gds_SNAME, _structure->first.size());
    wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);
    TP trans;
    real rotation, scale;
    bool flipX;
    _translation.Decompose(trans,rotation,scale,flipX);
-   wr = gdsf.SetNextRecord(gds_STRANS);
+   wr = gdsf.setNextRecord(gds_STRANS);
    if (flipX) wr->add_int2b(0x8000);
    else       wr->add_int2b(0x0000);
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_MAG);
+   wr = gdsf.setNextRecord(gds_MAG);
    wr->add_real8b(scale);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_ANGLE);
+   wr = gdsf.setNextRecord(gds_ANGLE);
    wr->add_real8b(rotation);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_XY,1);
+   wr = gdsf.setNextRecord(gds_XY,1);
    wr->add_int4b(trans.x());wr->add_int4b(trans.y());
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_ENDEL);
+   wr = gdsf.setNextRecord(gds_ENDEL);
    gdsf.flush(wr);
 }
 
@@ -1951,31 +1951,31 @@ void laydata::tdtcellaref::write(TEDfile* const tedfile) const {
 
 void laydata::tdtcellaref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_AREF);
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_AREF);
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_SNAME, _structure->first.size());
+   wr = gdsf.setNextRecord(gds_SNAME, _structure->first.size());
    wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);
    TP trans;
    real rotation, scale;
    bool flipX;
    _translation.Decompose(trans,rotation,scale,flipX);
-   wr = gdsf.SetNextRecord(gds_STRANS);
+   wr = gdsf.setNextRecord(gds_STRANS);
    if (flipX) wr->add_int2b(0x8000);
    else       wr->add_int2b(0x0000);
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_MAG);
+   wr = gdsf.setNextRecord(gds_MAG);
    wr->add_real8b(scale);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_ANGLE);
+   wr = gdsf.setNextRecord(gds_ANGLE);
    wr->add_real8b(rotation);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_COLROW);
+   wr = gdsf.setNextRecord(gds_COLROW);
    wr->add_int2b(_arrprops.cols());wr->add_int2b(_arrprops.rows());
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_XY,3);
+   wr = gdsf.setNextRecord(gds_XY,3);
    wr->add_int4b(trans.x());wr->add_int4b(trans.y());
    wr->add_int4b(trans.x() + _arrprops.cols() * _arrprops.stepX());wr->add_int4b(trans.y());
    wr->add_int4b(trans.x());wr->add_int4b(trans.y() + _arrprops.rows() * _arrprops.stepY());
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_ENDEL);
+   wr = gdsf.setNextRecord(gds_ENDEL);
    gdsf.flush(wr);
 }
 
@@ -2211,30 +2211,30 @@ void laydata::tdttext::write(TEDfile* const tedfile) const {
 
 void laydata::tdttext::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 {
-   GDSin::GdsRecord* wr = gdsf.SetNextRecord(gds_TEXT);
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_TEXT);
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_LAYER);
+   wr = gdsf.setNextRecord(gds_LAYER);
    wr->add_int2b(lay);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_TEXTTYPE);
+   wr = gdsf.setNextRecord(gds_TEXTTYPE);
    wr->add_int2b(0);gdsf.flush(wr);
    TP trans;
    real rotation, scale;
    bool flipX;
    _translation.Decompose(trans,rotation,scale,flipX);
-   wr = gdsf.SetNextRecord(gds_STRANS);
+   wr = gdsf.setNextRecord(gds_STRANS);
    if (flipX) wr->add_int2b(0x8000);
    else       wr->add_int2b(0x0000);
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_MAG);
+   wr = gdsf.setNextRecord(gds_MAG);
    wr->add_real8b(scale * OPENGL_FONT_UNIT * UU);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_ANGLE);
+   wr = gdsf.setNextRecord(gds_ANGLE);
    wr->add_real8b(rotation);gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_XY,1);
+   wr = gdsf.setNextRecord(gds_XY,1);
    wr->add_int4b(trans.x());wr->add_int4b(trans.y());
    gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_STRING, _text.size());
+   wr = gdsf.setNextRecord(gds_STRING, _text.size());
    wr->add_ascii(_text.c_str());gdsf.flush(wr);
-   wr = gdsf.SetNextRecord(gds_ENDEL);
+   wr = gdsf.setNextRecord(gds_ENDEL);
    gdsf.flush(wr);
 }
 
@@ -2358,8 +2358,8 @@ void laydata::valid_poly::angles()
       {
          cp2 = _plist.erase(cp1);
          cp1 = cp2; 
-			if (cp2 == _plist.begin()) cp1 = _plist.end();
-		   cp1--;
+         if (cp2 == _plist.begin()) cp1 = _plist.end();
+         cp1--;
          angle_stack.pop();
          _status |= laydata::shp_ident;
          prev_cleared = true;
@@ -2389,7 +2389,7 @@ void laydata::valid_poly::normalize() {
       _status |= shp_null; return;
    }
    else if (area < 0)  {
-	   std::reverse(_plist.begin(),_plist.end());
+      std::reverse(_plist.begin(),_plist.end());
       _status |= laydata::shp_clock;
    }
 }
@@ -2449,7 +2449,7 @@ void laydata::valid_wire::angles()
    pointlist::iterator cp1 = cp2; cp2++;
    real pAngle, cAngle; //
    bool pAngleValid = false;
-	if (_plist.size()>2)
+   if (_plist.size()>2)
    do
    {
       bool eraseP1 = false;
@@ -2472,7 +2472,7 @@ void laydata::valid_wire::angles()
       if (eraseP1)
       {
          cp2 = _plist.erase(cp1);
-			cp1 = cp2; cp2++;
+         cp1 = cp2; cp2++;
          _status |= laydata::shp_ident;
       }
       else
