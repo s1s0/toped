@@ -25,6 +25,8 @@
 //        $Author$
 //===========================================================================
 
+#include <wx/wx.h>
+#include <wx/regex.h>
 #include "tpdph.h"
 #include "tpdf_common.h"
 #include "../tpd_DB/datacenter.h"
@@ -42,6 +44,71 @@ extern console::ted_cmd*         Console;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_SETINGSMENU;
+
+
+//=============================================================================
+tellstdfunc::LayerMapGds::LayerMapGds(GDSin::NumStrMap& inlist)
+{
+//   typedef std::map<word, GdsLayers>      TdtGdsMap;
+//   typedef std::map<word, std::string>    NumStrMap;
+//GDSin::TdtGdsMap*    _theMap;
+   for (GDSin::NumStrMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)
+   {
+      WordList layList;
+      WordList dTypeList;
+      parseLayTypeString(CE->second, layList, dTypeList);
+   }
+}
+
+void tellstdfunc::LayerMapGds::parseLayTypeString(std::string str, WordList& llst, WordList& dtlst)
+{
+   wxString wxstr(str.c_str(), wxConvUTF8);
+   patternNormalize(wxstr);
+   _status = getDescription(wxstr);
+}
+
+void tellstdfunc::LayerMapGds::patternNormalize(wxString& str)
+{
+   wxRegEx regex;
+   // replace tabs with spaces
+   VERIFY(regex.Compile(wxT("\t")));
+   regex.ReplaceAll(&str,wxT(" "));
+   // remove continious spaces
+   VERIFY(regex.Compile(wxT("[[:space:]]{2,}")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove leading spaces
+   VERIFY(regex.Compile(wxT("^[[:space:]]")));
+   regex.ReplaceAll(&str,wxT(""));
+   // remove trailing spaces
+   VERIFY(regex.Compile(wxT("[[:space:]]$")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove spaces before separators
+   VERIFY(regex.Compile(wxT("([[:space:]])([\\-\\;\\,])")));
+   regex.ReplaceAll(&str,wxT("\\2"));
+   // remove spaces after separators
+   VERIFY(regex.Compile(wxT("([\\-\\;\\,])([[:space:]])")));
+   regex.ReplaceAll(&str,wxT("\\1"));
+
+}
+
+bool tellstdfunc::LayerMapGds::getDescription(wxString& exp)
+{
+   const wxString tmplLayNumber    = wxT("[[:digit:]\\,\\-]*");
+   const wxString tmplTypeNumber   = wxT("[[:digit:]\\,\\-]*|\\*");
+//   const wxString tmplExpression   = tmplLayNumber+wxT("\\;")+tmplTypeNumber;
+
+   wxRegEx src_tmpl(tmplLayNumber+wxT("\\;")+tmplTypeNumber);
+   VERIFY(src_tmpl.IsValid());
+   long conversion;
+   // search the entire pattern
+   if (!src_tmpl.Matches(exp))
+   {
+      std::string news = "Can't recognise the <layer;data_type> format";
+      tell_log(console::MT_ERROR,news);
+      return false;
+   }
+   return true;
+}
 
 
 //=============================================================================
@@ -309,3 +376,4 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
    TopedMainW = tpd;
    TopedCanvasW = cnvs;
 }
+

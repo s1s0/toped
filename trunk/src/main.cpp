@@ -117,6 +117,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("gdsread"          ,(DEBUG_NEW          tellstdfunc::GDSread(TLISTOF(telldata::tn_string), true)));
    mblock->addFUNC("gdsimport"        ,(DEBUG_NEW              tellstdfunc::GDSconvertList(telldata::tn_void, true)));
    mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                  tellstdfunc::GDSconvert(telldata::tn_void, true)));
+   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                 tellstdfunc::GDSconvertT(telldata::tn_void, true)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportLIB(telldata::tn_void,false)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("gdsclose"         ,(DEBUG_NEW                    tellstdfunc::GDSclose(telldata::tn_void, true)));

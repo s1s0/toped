@@ -432,21 +432,22 @@ int tellstdfunc::GDSconvertT::execute()
 
    // Convert layer map
    telldata::tthsh* nameh;
-   GDSin::NumStrMap* gdsLays = DEBUG_NEW GDSin::NumStrMap();
+   GDSin::NumStrMap gdsLays;
    for (unsigned i = 0; i < ll->size(); i++)
    {
       nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
-      (*gdsLays)[nameh->number().value()] = nameh->name().value();
+      gdsLays[nameh->number().value()] = nameh->name().value();
    }
+   tellstdfunc::LayerMapGds LayerExpression(gdsLays);
 
-   nameList top_cells;
+/*   nameList top_cells;
    top_cells.push_back(name.c_str());
    DATC->lockDB(false);
    DATC->importGDScell(top_cells, recur, over);
    updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur)
-         << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+         << "," << LogFile._2bool(over) << ");"; LogFile.flush();*/
    return EXEC_NEXT;
 }
 
@@ -556,7 +557,7 @@ int tellstdfunc::GDSexportTOP::execute()
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
       tell_log(console::MT_ERROR,info);
    }
-      
+
    return EXEC_NEXT;
 }
 
@@ -689,7 +690,7 @@ int tellstdfunc::GDSreportlay::execute()
          for (GDSin::GdsLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
          {
             ost << "{" << NLI->first << " ; ";
-            for (GDSin::WordList::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
+            for (WordList::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
                ost << *NTI << " ";
             ost << "}"<< std::endl;
          }
