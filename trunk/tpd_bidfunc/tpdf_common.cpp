@@ -25,9 +25,9 @@
 //        $Author$
 //===========================================================================
 
+#include "tpdph.h"
 #include <wx/wx.h>
 #include <wx/regex.h>
-#include "tpdph.h"
 #include "tpdf_common.h"
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_parser/ted_prompt.h"
@@ -103,10 +103,11 @@ bool tellstdfunc::LayerMapGds::getDescription(wxString& exp)
    // search the entire pattern
    if (!src_tmpl.Matches(exp))
    {
-      std::string news = "Can't recognise the <layer;data_type> format";
-      tell_log(console::MT_ERROR,news);
+//      std::string news = "Can't make sence from the string \"" + std::string(exp.c_str()) + "\"";
+//      tell_log(console::MT_ERROR,news);
       return false;
    }
+   //@TODO
    return true;
 }
 
