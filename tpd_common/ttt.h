@@ -92,6 +92,7 @@ typedef     _sg_int32   int4b;
 typedef        double   real;
 
 typedef  std::list<std::string>     nameList;
+typedef  std::list<word>            WordList;
 typedef  std::map<std::string, int> NMap;
 
 //=============================================================================
