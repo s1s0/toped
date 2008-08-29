@@ -1563,7 +1563,6 @@ void browsers::LayerPanel::onSize(wxSizeEvent& evt)
 wxString browsers::LayerPanel::getAllSelected()
 {
       //bool multi_selection = _layerlist->GetSelectedItemCount() > 1;
-   
    wxString layers = wxT("{");
    for(LayerButtonMap::iterator it = _buttonMap.begin(); it != _buttonMap.end(); it++)
    {
