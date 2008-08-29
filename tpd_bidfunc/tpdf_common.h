@@ -139,9 +139,9 @@ namespace tellstdfunc {
       public:
                               LayerMapGds(GDSin::NumStrMap&);
       private:
-         void                 parseLayTypeString(std::string, WordList&, WordList&);
+         bool                 parseLayTypeString(std::string, WordList&, WordList&);
          void                 patternNormalize(wxString&);
-         bool                 getDescription(wxString&);
+         void                 getList(wxString&, WordList&);
          GDSin::TdtGdsMap*    _theMap;
          bool                 _status;
    };
