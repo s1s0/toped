@@ -37,6 +37,10 @@
 extern console::ted_cmd*         Console;
 extern tui::TopedFrame*          Toped;
 
+
+extern const wxEventType         wxEVT_TOOLBARSIZE;
+
+
 tui::MenuItemHandler::MenuItemHandler(void)
    :_ID(0), _menuItem(""), _hotKey(""), _function(""), _method(NULL)
 {
@@ -692,7 +696,7 @@ void tui::ResourceCenter::setToolBarSize(const std::string &toolBarName, IconSiz
 {
 	if(checkToolSize(size))
 	{
-		toolBarList::const_iterator it;
+		/*toolBarList::const_iterator it;
 		for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
 		{
 			if ((*it)->name()==toolBarName)
@@ -704,17 +708,22 @@ void tui::ResourceCenter::setToolBarSize(const std::string &toolBarName, IconSiz
 				wxString info;
 				info << wxT("Unknown name of toolbar");
 				tell_log(console::MT_WARNING,info);
-			}
+			}*/
+		toolBarList::const_iterator it;
+		for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+		{
+			(*it)->changeToolSize(size);
+		}
 
 	}
 
-	}
+	/*}
 	else
 	{
 		wxString info;
 		info << wxT("Wrong size for icon was chosen.");
       tell_log(console::MT_ERROR,info);
-	}
+	}*/
 }
 
 void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::string &toolBarItem,
@@ -800,4 +809,31 @@ int tellstdfunc::stdADDMENU::execute()
 
    return EXEC_NEXT;
 }
+
+//=============================================================================
+tellstdfunc::stdTOOLBARSIZE::stdTOOLBARSIZE(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+}
+
+int tellstdfunc::stdTOOLBARSIZE::execute()
+{
+   int size = getWordValue();
+	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
+	if(checkToolSize) 
+	{
+		wxCommandEvent eventToolBarSize(wxEVT_TOOLBARSIZE);
+		eventToolBarSize.SetInt(size);
+		wxPostEvent(Toped, eventToolBarSize);
+	}
+	else
+	{
+		std::ostringstream ost;
+		ost<<"toolbarsize: wrong size value";
+      tell_log(console::MT_ERROR,ost.str());
+	}
+   return EXEC_NEXT;
+}
+
 
