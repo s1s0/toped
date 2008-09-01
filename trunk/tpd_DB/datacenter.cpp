@@ -26,6 +26,8 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include <wx/wx.h>
+#include <wx/regex.h>
 #include <sstream>
 #include "datacenter.h"
 #include "../tpd_common/outbox.h"
@@ -39,11 +41,9 @@ DataCenter*               DATC = NULL;
 //-----------------------------------------------------------------------------
 // class Gds2Ted
 //-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib)
+GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const LayerMapGds& theLayMap) :
+      _src_lib(src_lib), _dst_lib(dst_lib), _theLayMap(theLayMap), _coeff(dst_lib->UU() / src_lib->libUnits())
 {
-   _src_lib = src_lib;
-   _dst_lib = dst_lib;
-   coeff = dst_lib->UU() / src_lib->libUnits();
 }
 
 void GDSin::Gds2Ted::top_structure(std::string top_str, bool recursive, bool overwrite)
@@ -115,22 +115,27 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool recursive
 
 void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
 {
+   //@FIXME!!! ged rid of this silly loop! GDS database is layer oriented now!
    for(int2b laynum = 1 ; laynum < GDS_MAX_LAYER ; laynum++)
    {
       if (src->allLay(laynum))
       {// layers
-         laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(laynum));
          GDSin::GdsData *wd = src->fDataAt(laynum);
          while( wd )
          {
-            switch( wd->gdsDataType() )
+            word tdtlaynum;
+            if (_theLayMap.getTdtLay(tdtlaynum, laynum, wd->singleType()))
             {
-      //         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
-               case      gds_BOX: break;
-               case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
-               case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
-               case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
-                        default: assert(false); /*Error - unexpected type*/
+               laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(tdtlaynum));
+               switch( wd->gdsDataType() )
+               {
+         //         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
+                  case      gds_BOX: break;
+                  case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
+                  case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
+                  case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
+                           default: assert(false); /*Error - unexpected type*/
+               }
             }
             wd = wd->last();
          }
@@ -686,7 +691,7 @@ bool DataCenter::GDSparse(std::string filename)
    return status;
 }
 
-void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over)
+void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
 {
    if (NULL == lockGDS())
    {
@@ -696,7 +701,7 @@ void DataCenter::importGDScell(const nameList& top_names, bool recur, bool over)
    else
    {
       // Lock the DB here manually. Otherwise the cell browser is going mad
-      GDSin::Gds2Ted converter(_GDSDB, _TEDLIB());
+      GDSin::Gds2Ted converter(_GDSDB, _TEDLIB(), laymap);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.top_structure(CN->c_str(), recur, over);
       _TEDLIB()->modified = true;
@@ -1162,6 +1167,154 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
    else if (libID < _TEDLIB.getLastLibRefNo()) 
       all_cells->push_back(&(_TEDLIB.getLib(libID)->cells()));
    return all_cells;
+}
+
+//=============================================================================
+LayerMapGds::LayerMapGds(GDSin::GdsLayers& alist) : _theMap(), _status(false), _alist(alist)
+{
+   for (GDSin::GdsLayers::const_iterator NLI = alist.begin(); NLI != alist.end(); NLI++)
+   {
+      for (WordList::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
+         _theMap[NLI->first].insert(std::make_pair(*NTI, NLI->first));
+   }
+}
+
+LayerMapGds::LayerMapGds(const GDSin::NumStrMap& inlist, GDSin::GdsLayers& alist)
+   : _theMap(), _status(false), _alist(alist)
+{
+   for (GDSin::NumStrMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)
+   {
+      wxString exp(CE->second.c_str(), wxConvUTF8);
+      patternNormalize(exp);
+      parseLayTypeString(exp, CE->first);
+   }
+}
+
+bool LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
+{
+   const wxString tmplLayNumbers    = wxT("[[:digit:]\\,\\-]*");
+   const wxString tmplTypeNumbers   = wxT("[[:digit:]\\,\\-]*|\\*");
+
+
+   wxRegEx src_tmpl(tmplLayNumbers+wxT("\\;")+tmplTypeNumbers); VERIFY(src_tmpl.IsValid());
+   // search the entire pattern
+   if (!src_tmpl.Matches(exp))
+   {
+//      std::string news = "Can't make sence from the string \"" + std::string(exp.c_str()) + "\"";
+//      tell_log(console::MT_ERROR,news);
+      return false;
+   }
+   //separate the layer expression from data type expression
+   src_tmpl.Compile(tmplLayNumbers+wxT("\\;")); VERIFY(src_tmpl.IsValid());
+   src_tmpl.Matches(exp);
+   wxString lay_exp = src_tmpl.GetMatch(exp);
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
+   wxString type_exp = exp;
+   // we need to remove the ';' separator that left in the lay_exp
+   src_tmpl.Compile(wxT("\\;")); VERIFY(src_tmpl.IsValid());
+   src_tmpl.Matches(exp);
+   src_tmpl.ReplaceFirst(&lay_exp,wxT(""));
+
+   WordList llst;
+   // get the listed layers
+   getList(  lay_exp , llst);
+   // now for every listed layer
+   for ( WordList::const_iterator CL = llst.begin(); CL != llst.end(); CL++ )
+   {
+      // if the layer is listed among the GDS used layers
+      if ( _alist.end() != _alist.find(*CL) )
+      {
+         if (wxT('*') == type_exp)
+         { // for all data types
+            // get all GDS data types for the current layer and copy them
+            // to the map
+            for ( WordList::const_iterator CT = _alist[*CL].begin(); CT != _alist[*CL].begin(); CT++)
+               _theMap[*CL].insert(std::make_pair(*CT, tdtLay));
+         }
+         else
+         {// for particular (listed) data type
+            WordList dtlst;
+            getList( type_exp , dtlst);
+            for ( WordList::const_iterator CT = dtlst.begin(); CT != dtlst.begin(); CT++)
+               _theMap[*CL].insert(std::make_pair(*CT, tdtLay));
+         }
+      }
+      // else ignore the mapped GDS layer
+   }
+   return true;
+}
+
+void LayerMapGds::patternNormalize(wxString& str)
+{
+   wxRegEx regex;
+   // replace tabs with spaces
+   VERIFY(regex.Compile(wxT("\t")));
+   regex.ReplaceAll(&str,wxT(" "));
+   // remove continious spaces
+   VERIFY(regex.Compile(wxT("[[:space:]]{2,}")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove leading spaces
+   VERIFY(regex.Compile(wxT("^[[:space:]]")));
+   regex.ReplaceAll(&str,wxT(""));
+   // remove trailing spaces
+   VERIFY(regex.Compile(wxT("[[:space:]]$")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove spaces before separators
+   VERIFY(regex.Compile(wxT("([[:space:]])([\\-\\;\\,])")));
+   regex.ReplaceAll(&str,wxT("\\2"));
+   // remove spaces after separators
+   VERIFY(regex.Compile(wxT("([\\-\\;\\,])([[:space:]])")));
+   regex.ReplaceAll(&str,wxT("\\1"));
+
+}
+
+void LayerMapGds::getList(wxString& exp, WordList& data)
+{
+   wxRegEx number_tmpl(wxT("[[:digit:]]*"));
+   wxRegEx separ_tmpl(wxT("\\,\\-{1,1}"));
+   unsigned long conversion;
+   bool last_was_separator = true;
+   char separator = ',';
+   VERIFY(number_tmpl.IsValid());
+   VERIFY(separ_tmpl.IsValid());
+
+   do
+   {
+      if (last_was_separator)
+      {
+         number_tmpl.Matches(exp);
+         number_tmpl.GetMatch(exp).ToULong(&conversion);
+         number_tmpl.ReplaceFirst(&exp,wxT(""));
+         if (',' == separator)
+            data.push_back((word)conversion);
+         else
+         {
+            for (word numi = data.back(); numi <= conversion; numi++)
+               data.push_back(numi);
+         }
+      }
+      else
+      {
+         separ_tmpl.Matches(exp);
+         if (wxT("-") == separ_tmpl.GetMatch(exp))
+            separator = '-';
+         else
+            separator = ',';
+         separ_tmpl.ReplaceFirst(&exp,wxT(""));
+      }
+      last_was_separator = !last_was_separator;
+   } while (!exp.IsEmpty());
+
+}
+
+bool LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
+{
+   tdtlay = gdslay; // the default value
+//   if (_theMap.end()              == _theMap.find(gdslay)              ) return false;
+//   GdtTdtMap::const_iterator glmap = _theMap.find(gdslay);
+//   if (boza->end() == boza->find(gdstype)) return false;
+//   tdtlay = _theMap[gdslay][gdstype];
+//   return true;
 }
 
 void initDBLib(std::string localDir)

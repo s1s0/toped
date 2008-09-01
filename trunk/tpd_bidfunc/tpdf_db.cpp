@@ -401,14 +401,31 @@ int tellstdfunc::GDSconvert::execute()
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
    std::string name = getStringValue();
-   nameList top_cells;
-   top_cells.push_back(name.c_str());
-   DATC->lockDB(false);
-      DATC->importGDScell(top_cells, recur, over);
-      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-   DATC->unlockDB();
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur) 
-         << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   
+   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+   GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
+   std::ostringstream ost;
+   if (!src_structure)
+   {
+      ost << "GDS structure named \"" << name << "\" does not exists";
+      tell_log(console::MT_ERROR,ost.str());
+      DATC->unlockGDS();
+   }
+   else
+   {
+      GDSin::GdsLayers gdsLaysAll;
+      src_structure->collectLayers(gdsLaysAll,true);
+      DATC->unlockGDS();
+      LayerMapGds LayerExpression(gdsLaysAll); // get default
+      nameList top_cells;
+      top_cells.push_back(name);
+      DATC->lockDB(false);
+         DATC->importGDScell(top_cells, LayerExpression, recur, over);
+         updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur)
+            << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   }
    return EXEC_NEXT;
 }
 
@@ -432,22 +449,37 @@ int tellstdfunc::GDSconvertT::execute()
 
    // Convert layer map
    telldata::tthsh* nameh;
-   GDSin::NumStrMap gdsLays;
+   GDSin::NumStrMap gdsLaysStrList;
    for (unsigned i = 0; i < ll->size(); i++)
    {
       nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
-      gdsLays[nameh->number().value()] = nameh->name().value();
+      gdsLaysStrList[nameh->number().value()] = nameh->name().value();
    }
-   tellstdfunc::LayerMapGds LayerExpression(gdsLays);
 
-/*   nameList top_cells;
-   top_cells.push_back(name.c_str());
-   DATC->lockDB(false);
-   DATC->importGDScell(top_cells, recur, over);
-   updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-   DATC->unlockDB();
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur)
-         << "," << LogFile._2bool(over) << ");"; LogFile.flush();*/
+   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+   GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
+   std::ostringstream ost;
+   if (!src_structure)
+   {
+      ost << "GDS structure named \"" << name << "\" does not exists";
+      tell_log(console::MT_ERROR,ost.str());
+      DATC->unlockGDS();
+   }
+   else
+   {
+      GDSin::GdsLayers gdsLaysAll;
+      src_structure->collectLayers(gdsLaysAll,true);
+      DATC->unlockGDS();
+      LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+      nameList top_cells;
+      top_cells.push_back(name);
+      DATC->lockDB(false);
+      DATC->importGDScell(top_cells, LayerExpression, recur, over);
+         updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "(\""<< name << "\",<TODO layer/type map!>" << LogFile._2bool(recur)
+            << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   }
    return EXEC_NEXT;
 }
 
@@ -470,8 +502,12 @@ int tellstdfunc::GDSconvertList::execute()
    {
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
    }
+   GDSin::GdsLayers gdsLaysAll;
+   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+      AGDSDB->collectLayers(gdsLaysAll);
+   DATC->unlockGDS();
    DATC->lockDB(false);
-      DATC->importGDScell(top_cells, recur, over);
+      DATC->importGDScell(top_cells, gdsLaysAll, recur, over);
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. 

@@ -26,8 +26,6 @@
 //===========================================================================
 
 #include "tpdph.h"
-#include <wx/wx.h>
-#include <wx/regex.h>
 #include "tpdf_common.h"
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_parser/ted_prompt.h"
@@ -46,114 +44,6 @@ extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_SETINGSMENU;
 
 
-//=============================================================================
-tellstdfunc::LayerMapGds::LayerMapGds(GDSin::NumStrMap& inlist)
-{
-//   typedef std::map<word, GdsLayers>      TdtGdsMap;
-//   typedef std::map<word, std::string>    NumStrMap;
-//GDSin::TdtGdsMap*    _theMap;
-   for (GDSin::NumStrMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)
-   {
-      WordList layList;
-      WordList dTypeList;
-      parseLayTypeString(CE->second, layList, dTypeList);
-   }
-}
-
-bool tellstdfunc::LayerMapGds::parseLayTypeString(std::string str, WordList& llst, WordList& dtlst)
-{
-   const wxString tmplLayNumbers    = wxT("[[:digit:]\\,\\-]*");
-   const wxString tmplTypeNumbers   = wxT("[[:digit:]\\,\\-]*|\\*");
-
-   wxString exp(str.c_str(), wxConvUTF8);
-   patternNormalize(exp);
-
-   wxRegEx src_tmpl(tmplLayNumbers+wxT("\\;")+tmplTypeNumbers); VERIFY(src_tmpl.IsValid());
-   // search the entire pattern
-   if (!src_tmpl.Matches(exp))
-   {
-//      std::string news = "Can't make sence from the string \"" + std::string(exp.c_str()) + "\"";
-//      tell_log(console::MT_ERROR,news);
-      return false;
-   }
-   //separate the layer expression from data type expression
-   src_tmpl.Compile(tmplLayNumbers+wxT("\\;")); VERIFY(src_tmpl.IsValid());
-   src_tmpl.Matches(exp);
-   wxString lay_exp = src_tmpl.GetMatch(exp);
-   src_tmpl.ReplaceFirst(&exp,wxT(""));
-   wxString type_exp = exp;
-   // we need to remove the ';' separator that left in the lay_exp
-   src_tmpl.Compile(wxT("\\;")); VERIFY(src_tmpl.IsValid());
-   src_tmpl.Matches(exp);
-   src_tmpl.ReplaceFirst(&lay_exp,wxT(""));
-
-   getList(  lay_exp , llst);
-   getList( type_exp , dtlst);
-   return true;
-}
-
-void tellstdfunc::LayerMapGds::patternNormalize(wxString& str)
-{
-   wxRegEx regex;
-   // replace tabs with spaces
-   VERIFY(regex.Compile(wxT("\t")));
-   regex.ReplaceAll(&str,wxT(" "));
-   // remove continious spaces
-   VERIFY(regex.Compile(wxT("[[:space:]]{2,}")));
-   regex.ReplaceAll(&str,wxT(""));
-   //remove leading spaces
-   VERIFY(regex.Compile(wxT("^[[:space:]]")));
-   regex.ReplaceAll(&str,wxT(""));
-   // remove trailing spaces
-   VERIFY(regex.Compile(wxT("[[:space:]]$")));
-   regex.ReplaceAll(&str,wxT(""));
-   //remove spaces before separators
-   VERIFY(regex.Compile(wxT("([[:space:]])([\\-\\;\\,])")));
-   regex.ReplaceAll(&str,wxT("\\2"));
-   // remove spaces after separators
-   VERIFY(regex.Compile(wxT("([\\-\\;\\,])([[:space:]])")));
-   regex.ReplaceAll(&str,wxT("\\1"));
-
-}
-
-void tellstdfunc::LayerMapGds::getList(wxString& exp, WordList& data)
-{
-   wxRegEx number_tmpl(wxT("[[:digit:]]*"));
-   wxRegEx separ_tmpl(wxT("\\,\\-{1,1}"));
-   unsigned long conversion;
-   bool last_was_separator = true;
-   char separator = ',';
-   VERIFY(number_tmpl.IsValid());
-   VERIFY(separ_tmpl.IsValid());
-
-   do
-   {
-      if (last_was_separator)
-      {
-         number_tmpl.Matches(exp);
-         number_tmpl.GetMatch(exp).ToULong(&conversion);
-         number_tmpl.ReplaceFirst(&exp,wxT(""));
-         if (',' == separator)
-            data.push_back((word)conversion);
-         else
-         {
-            for (word numi = data.back(); numi <= conversion; numi++)
-               data.push_back(numi);
-         }
-      }
-      else
-      {
-         separ_tmpl.Matches(exp);
-         if (wxT("-") == separ_tmpl.GetMatch(exp))
-            separator = '-';
-         else
-            separator = ',';
-         separ_tmpl.ReplaceFirst(&exp,wxT(""));
-      }
-      last_was_separator = !last_was_separator;
-   } while (!exp.IsEmpty());
-
-}
 //=============================================================================
 telldata::ttint* tellstdfunc::CurrentLayer() {
    word cl = 0;
@@ -322,7 +212,7 @@ laydata::selectList* tellstdfunc::filter_selist(const laydata::selectList* shape
       for (laydata::dataList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       {
-         if (mask & CI->first->ltype())
+         if (mask & (CI->first->ltype()))
          {
             SGBitSet pntl;
             if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
