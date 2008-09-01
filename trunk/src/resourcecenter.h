@@ -248,6 +248,7 @@ namespace tellstdfunc {
    using parsercmd::argumentTYPE;
    
    TELL_STDCMD_CLASSA(stdADDMENU       );  //
+	TELL_STDCMD_CLASSA(stdTOOLBARSIZE       );  //
 }
 
 #endif //RESOURCE_CENTER_INCLUDED

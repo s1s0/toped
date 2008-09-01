@@ -59,6 +59,7 @@ extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_TPDSTATUS;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
+extern const wxEventType         wxEVT_TOOLBARSIZE;
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -285,6 +286,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
    EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)
    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
+	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -709,7 +711,7 @@ void tui::TopedFrame::initToolBars()
 
 
    _resourceCenter->setToolBarSize("edit", ICON_SIZE_16x16);
-   _resourceCenter->setToolBarSize("main", ICON_SIZE_16x16);
+   _resourceCenter->setToolBarSize("main", ICON_SIZE_32x32);
    _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
    _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
@@ -1774,4 +1776,11 @@ void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
 {
    telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
    delete p;
+}
+
+void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
+{
+   //telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
+   //delete p;
+	_resourceCenter->setToolBarSize("main", tui::ICON_SIZE_16x16);
 }
