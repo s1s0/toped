@@ -134,18 +134,6 @@
 
 namespace tellstdfunc {
 
-   class LayerMapGds
-   {
-      public:
-                              LayerMapGds(GDSin::NumStrMap&);
-      private:
-         bool                 parseLayTypeString(std::string, WordList&, WordList&);
-         void                 patternNormalize(wxString&);
-         void                 getList(wxString&, WordList&);
-         GDSin::TdtGdsMap*    _theMap;
-         bool                 _status;
-   };
-
    telldata::ttint*     CurrentLayer();
    bool                 waitGUInput(int, telldata::operandSTACK *,
                                     std::string name = "",

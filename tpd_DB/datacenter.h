@@ -32,11 +32,27 @@
 #include "../tpd_ifaces/cif_io.h"
 #include "viewprop.h"
 
+class LayerMapGds {
+   public:
+                           LayerMapGds(GDSin::GdsLayers&);
+                           LayerMapGds(const GDSin::NumStrMap&, GDSin::GdsLayers&);
+      bool                 getTdtLay(word&, word, word) const;
+   private:
+      typedef std::map< word, word  >     GdtTdtMap;
+      typedef std::map< word, GdtTdtMap>  GlMap;
+      bool                 parseLayTypeString(wxString&, word);
+      void                 patternNormalize(wxString&);
+      void                 getList(wxString&, WordList&);
+      GlMap                _theMap;
+      bool                 _status;
+      GDSin::GdsLayers&    _alist; // all available GDS layers with their data types
+};
+
 namespace GDSin {
 
    class Gds2Ted {
    public:
-                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib);
+                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const LayerMapGds&);
       void                 top_structure(std::string, bool, bool);
    protected:
       void                 child_structure(const GDSin::GDSHierTree*, bool, bool);
@@ -49,7 +65,8 @@ namespace GDSin {
       void                 aref(GDSin::GdsARef*    , laydata::tdtcell* );
       GDSin::GdsFile*      _src_lib;
       laydata::tdtdesign*  _dst_lib;
-      real                 coeff; // DBU difference
+      const LayerMapGds&   _theLayMap;
+      real                 _coeff; // DBU difference
    };
 }
 
@@ -83,7 +100,7 @@ public:
    bool                       GDSparse(std::string filename);
    void                       GDSexport(std::string&, bool);
    void                       GDSexport(laydata::tdtcell*, bool, std::string&, bool);
-   void                       importGDScell(const nameList&, bool recur, bool over);
+   void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
    CIFin::CifStatusType       CIFparse(std::string filename);

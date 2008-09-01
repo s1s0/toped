@@ -123,7 +123,6 @@ namespace GDSin {
    typedef std::vector<GdsStructure*>     ChildStructure;
    typedef SGHierTree<GdsStructure>       GDSHierTree;
    typedef std::map<word, WordList>       GdsLayers;
-   typedef std::map<word, GdsLayers>      TdtGdsMap;
    typedef std::map<word, std::string>    NumStrMap;
 
    typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;

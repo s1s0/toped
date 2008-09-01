@@ -821,7 +821,7 @@ int tellstdfunc::stdTOOLBARSIZE::execute()
 {
    int size = getWordValue();
 	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
-	if(checkToolSize) 
+	if(tui::checkToolSize(sz))
 	{
 		wxCommandEvent eventToolBarSize(wxEVT_TOOLBARSIZE);
 		eventToolBarSize.SetInt(size);
