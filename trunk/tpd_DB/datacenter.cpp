@@ -1236,14 +1236,14 @@ bool LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
          { // for all data types
             // get all GDS data types for the current layer and copy them
             // to the map
-            for ( WordList::const_iterator CT = _alist[*CL].begin(); CT != _alist[*CL].begin(); CT++)
+            for ( WordList::const_iterator CT = _alist[*CL].begin(); CT != _alist[*CL].end(); CT++)
                _theMap[*CL].insert(std::make_pair(*CT, tdtLay));
          }
          else
          {// for particular (listed) data type
             WordList dtlst;
             getList( type_exp , dtlst);
-            for ( WordList::const_iterator CT = dtlst.begin(); CT != dtlst.begin(); CT++)
+            for ( WordList::const_iterator CT = dtlst.begin(); CT != dtlst.end(); CT++)
                _theMap[*CL].insert(std::make_pair(*CT, tdtLay));
          }
       }

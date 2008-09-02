@@ -437,7 +437,6 @@ tellstdfunc::GDSconvertT::GDSconvertT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-
 }
 
 int tellstdfunc::GDSconvertT::execute()
