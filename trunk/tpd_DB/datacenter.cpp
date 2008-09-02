@@ -124,18 +124,26 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
          while( wd )
          {
             word tdtlaynum;
-            if (_theLayMap.getTdtLay(tdtlaynum, laynum, wd->singleType()))
+            if (!_theLayMap.getTdtLay(tdtlaynum, laynum, wd->singleType()) && (0 != wd->singleType()))
             {
-               laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(tdtlaynum));
-               switch( wd->gdsDataType() )
-               {
-         //         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
-                  case      gds_BOX: break;
-                  case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
-                  case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
-                  case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
-                           default: assert(false); /*Error - unexpected type*/
-               }
+               // The message below could be noughty - so put it in place ONLY if the data type
+               // is different from default
+               std::ostringstream ost;
+               ost << "Layer: " << laynum << "; data type: " << wd->singleType() <<
+                     "; found in GDS database, but not in the conversion map.";
+               tell_log(console::MT_INFO,ost.str());
+            }
+            // convert in all cases. _theLayMap.getTdtLay() should return a default corresponding layer
+            // even if it can't find the layer/data_type correspondence.
+            laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(tdtlaynum));
+            switch( wd->gdsDataType() )
+            {
+      //         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
+               case      gds_BOX: break;
+               case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
+               case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
+               case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
+                        default: assert(false); /*Error - unexpected type*/
             }
             wd = wd->last();
          }
@@ -1309,12 +1317,16 @@ void LayerMapGds::getList(wxString& exp, WordList& data)
 
 bool LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
 {
+   // All that this function is doing is:
+   // tdtlay = _theMap[gdslay][gdstype]
+   // A number of protections are in place though as well as const_cast
    tdtlay = gdslay; // the default value
-//   if (_theMap.end()              == _theMap.find(gdslay)              ) return false;
-//   GdtTdtMap::const_iterator glmap = _theMap.find(gdslay);
-//   if (boza->end() == boza->find(gdstype)) return false;
-//   tdtlay = _theMap[gdslay][gdstype];
-//   return true;
+   if (_theMap.end()       == _theMap.find(gdslay)       ) return false;
+   GlMap::const_iterator glmap = _theMap.find(gdslay);
+   if (glmap->second.end() == glmap->second.find(gdstype)) return false;
+   GdtTdtMap::const_iterator tltype = glmap->second.find(gdstype);
+   tdtlay = tltype->second;
+   return true;
 }
 
 void initDBLib(std::string localDir)
