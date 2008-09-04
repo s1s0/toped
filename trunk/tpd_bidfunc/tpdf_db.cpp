@@ -387,7 +387,7 @@ int tellstdfunc::GDSread::execute() {
 }
 
 //=============================================================================
-tellstdfunc::GDSconvert::GDSconvert(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSimport::GDSimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
@@ -396,7 +396,7 @@ tellstdfunc::GDSconvert::GDSconvert(telldata::typeID retype, bool eor) :
 
 }
 
-int tellstdfunc::GDSconvert::execute() 
+int tellstdfunc::GDSimport::execute() 
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
@@ -430,7 +430,7 @@ int tellstdfunc::GDSconvert::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSconvertT::GDSconvertT(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSimportT::GDSimportT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
@@ -439,7 +439,7 @@ tellstdfunc::GDSconvertT::GDSconvertT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSconvertT::execute()
+int tellstdfunc::GDSimportT::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
@@ -484,7 +484,7 @@ int tellstdfunc::GDSconvertT::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSconvertList::GDSconvertList(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSimportList::GDSimportList(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
@@ -492,7 +492,7 @@ tellstdfunc::GDSconvertList::GDSconvertList(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSconvertList::execute()
+int tellstdfunc::GDSimportList::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
@@ -527,7 +527,7 @@ int tellstdfunc::GDSconvertList::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSconvertListT::GDSconvertListT(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSimportListT::GDSimportListT(telldata::typeID retype, bool eor) :
                               cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
@@ -536,7 +536,7 @@ tellstdfunc::GDSconvertListT::GDSconvertListT(telldata::typeID retype, bool eor)
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSconvertListT::execute()
+int tellstdfunc::GDSimportListT::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
@@ -907,7 +907,7 @@ int tellstdfunc::CIFimportList::execute()
       DATC->CIFimport(top_cells, cifLays, over);
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
-   // Don't refresh the tree browser here. See the comment in GDSconvertAll::execute()
+   // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
 
    LogFile << LogFile.getFN() << "(" << *pl << "," << *ll << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    delete pl;
@@ -945,7 +945,7 @@ int tellstdfunc::CIFimport::execute()
       DATC->CIFimport(top_cells, cifLays, over);
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
-   // Don't refresh the tree browser here. See the comment in GDSconvertAll::execute()
+   // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
 
    LogFile << LogFile.getFN() << "(\"" << name<< "\"," << *ll << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    delete ll;
