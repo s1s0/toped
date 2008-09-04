@@ -115,10 +115,10 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("cifimport"        ,(DEBUG_NEW                   tellstdfunc::CIFimport(telldata::tn_void, true)));
    mblock->addFUNC("cifclose"         ,(DEBUG_NEW                    tellstdfunc::CIFclose(telldata::tn_void, true)));
    mblock->addFUNC("gdsread"          ,(DEBUG_NEW          tellstdfunc::GDSread(TLISTOF(telldata::tn_string), true)));
-   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW              tellstdfunc::GDSconvertList(telldata::tn_void, true)));
-   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW             tellstdfunc::GDSconvertListT(telldata::tn_void, true)));
-   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                  tellstdfunc::GDSconvert(telldata::tn_void, true)));
-   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                 tellstdfunc::GDSconvertT(telldata::tn_void, true)));
+   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW              tellstdfunc::GDSimportList(telldata::tn_void, true)));
+   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW             tellstdfunc::GDSimportListT(telldata::tn_void, true)));
+   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                  tellstdfunc::GDSimport(telldata::tn_void, true)));
+   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                 tellstdfunc::GDSimportT(telldata::tn_void, true)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportLIB(telldata::tn_void,false)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("gdsclose"         ,(DEBUG_NEW                    tellstdfunc::GDSclose(telldata::tn_void, true)));
@@ -309,8 +309,8 @@ void TopedApp::GetGlobalDirs()
    fontsDIR->Normalize();
    wxString dirName = fontsDIR->GetPath();
 
-	wxFileName* UIDir = DEBUG_NEW wxFileName(wxT("$TPD_GLOBAL/"));
-	UIDir->Normalize();
+   wxFileName* UIDir = DEBUG_NEW wxFileName(wxT("$TPD_GLOBAL/"));
+   UIDir->Normalize();
 
    wxString info;
    bool undefined = dirName.Matches(wxT("*$TPD_GLOBAL*"));
@@ -456,10 +456,10 @@ void TopedApp::FinishSessionLog()
 
 bool TopedApp::OnInit() {
 //   DATC = DEBUG_NEW DataCenter();
-	wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
+   wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    GetLocalDirs();
-	GetGlobalDirs();
-	initDBLib(std::string(localDir.mb_str(wxConvFile)));
+   GetGlobalDirs();
+   initDBLib(std::string(localDir.mb_str(wxConvFile)));
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
    if (!Toped->view()->initStatus())
@@ -476,7 +476,7 @@ bool TopedApp::OnInit() {
    }
    if (!LoadFontFile("arial1")) return FALSE;
    Toped->setIconDir(std::string(tpdUIDir.mb_str(wxConvFile)));
-	Toped->initToolBars();
+   Toped->initToolBars();
 
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
    delete wxLog::SetActiveTarget(logWindow);

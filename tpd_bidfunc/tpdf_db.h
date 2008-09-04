@@ -43,18 +43,19 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(TDTsave          );
    TELL_STDCMD_CLASSB(TDTsaveIFF      , TDTsave       );
    TELL_STDCMD_CLASSA(TDTsaveas        );
+   TELL_STDCMD_CLASSA(stdREPORTLAY     );
+   TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  );
+
    TELL_STDCMD_CLASSA(GDSread          );
-   TELL_STDCMD_CLASSA(GDSconvert       );
-   TELL_STDCMD_CLASSA(GDSconvertT      );
-   TELL_STDCMD_CLASSA(GDSconvertList   );
-   TELL_STDCMD_CLASSA(GDSconvertListT  );
+   TELL_STDCMD_CLASSA(GDSimport        );
+   TELL_STDCMD_CLASSA(GDSimportT       );
+   TELL_STDCMD_CLASSA(GDSimportList    );
+   TELL_STDCMD_CLASSA(GDSimportListT   );
    TELL_STDCMD_CLASSA(GDSexportLIB     );
    TELL_STDCMD_CLASSA(GDSexportTOP     );
    TELL_STDCMD_CLASSA(GDSclose         );
-   TELL_STDCMD_CLASSA(PSexportTOP      );
-   TELL_STDCMD_CLASSA(stdREPORTLAY     );
-   TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  );
    TELL_STDCMD_CLASSA(GDSreportlay     );
+   TELL_STDCMD_CLASSA(PSexportTOP      );
 
    TELL_STDCMD_CLASSA(CIFread          );
    TELL_STDCMD_CLASSA(CIFgetLay        );

@@ -367,7 +367,7 @@ UNDO/REDO operation - some preliminary thoughts
 |  "newdesign"     |  stdNEWDESIGN     |   OK   |    x   |   x*   | if not initial      |
 |  "newcell"       |  stdNEWCELL       |   OK   |    x   |   x*   | if not initial      |
 |  "gdsread"       |  GDSread          |   OK   |    x   |   -    |                     |
-|  "importcell"    |  GDSconvert       |   OK   |    x   |   -*   | issue a warning     |
+|  "importcell"    |  GDSimport       |   OK   |    x   |   -*   | issue a warning     |
 |  "tdtread"       |  TDTread          |   OK   |    x   |   -*   | issue a warning     |
 |  "tdtsave"       |  TDTsave          |   OK   |    x   |   -    |                     |
 |  "tdtsaveas"     |  TDTsaveas        |   OK   |    x   |   -    |                     |
