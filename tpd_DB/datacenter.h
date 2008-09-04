@@ -37,6 +37,7 @@ class LayerMapGds {
                            LayerMapGds(GDSin::GdsLayers&);
                            LayerMapGds(const GDSin::NumStrMap&, GDSin::GdsLayers&);
       bool                 getTdtLay(word&, word, word) const;
+      bool                 status() {return _status;}
    private:
       typedef std::map< word, word  >     GdtTdtMap;
       typedef std::map< word, GdtTdtMap>  GlMap;
