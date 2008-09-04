@@ -47,6 +47,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(GDSconvert       );
    TELL_STDCMD_CLASSA(GDSconvertT      );
    TELL_STDCMD_CLASSA(GDSconvertList   );
+   TELL_STDCMD_CLASSA(GDSconvertListT  );
    TELL_STDCMD_CLASSA(GDSexportLIB     );
    TELL_STDCMD_CLASSA(GDSexportTOP     );
    TELL_STDCMD_CLASSA(GDSclose         );

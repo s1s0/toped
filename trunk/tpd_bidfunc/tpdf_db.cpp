@@ -443,15 +443,15 @@ int tellstdfunc::GDSconvertT::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
-   telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
 
    // Convert layer map
    telldata::tthsh* nameh;
    GDSin::NumStrMap gdsLaysStrList;
-   for (unsigned i = 0; i < ll->size(); i++)
+   for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       gdsLaysStrList[nameh->number().value()] = nameh->name().value();
    }
 
@@ -476,15 +476,16 @@ int tellstdfunc::GDSconvertT::execute()
       DATC->importGDScell(top_cells, LayerExpression, recur, over);
          updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
       DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< name << "\",<TODO layer/type map!>" << LogFile._2bool(recur)
+      LogFile << LogFile.getFN() << "(\""<< name << "," << (*lll) << "," << LogFile._2bool(recur)
             << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    }
+   delete lll;
    return EXEC_NEXT;
 }
 
 //=============================================================================
 tellstdfunc::GDSconvertList::GDSconvertList(telldata::typeID retype, bool eor) :
-                              cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
@@ -505,8 +506,9 @@ int tellstdfunc::GDSconvertList::execute()
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
       AGDSDB->collectLayers(gdsLaysAll);
    DATC->unlockGDS();
+   LayerMapGds LayerExpression(gdsLaysAll);
    DATC->lockDB(false);
-      DATC->importGDScell(top_cells, gdsLaysAll, recur, over);
+      DATC->importGDScell(top_cells, LayerExpression, recur, over);
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. 
@@ -521,6 +523,60 @@ int tellstdfunc::GDSconvertList::execute()
    LogFile << LogFile.getFN() << "(\""<< *pl << "\"," << LogFile._2bool(recur)
          << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    delete pl;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::GDSconvertListT::GDSconvertListT(telldata::typeID retype, bool eor) :
+                              cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+int tellstdfunc::GDSconvertListT::execute()
+{
+   bool  over  = getBoolValue();
+   bool  recur = getBoolValue();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   nameList top_cells;
+   for (unsigned i = 0; i < pl->size(); i++)
+   {
+      top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
+   }
+   // Convert layer map
+   telldata::tthsh* nameh;
+   GDSin::NumStrMap gdsLaysStrList;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      gdsLaysStrList[nameh->number().value()] = nameh->name().value();
+   }
+   GDSin::GdsLayers gdsLaysAll;
+   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+      AGDSDB->collectLayers(gdsLaysAll);
+   DATC->unlockGDS();
+   LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+   DATC->lockDB(false);
+      DATC->importGDScell(top_cells, LayerExpression, recur, over);
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+   DATC->unlockDB();
+   // Don't refresh the tree browser here. 
+   // - First - it has been updated during the conversion
+   // - Second - addTDTtab is running in the same thread as the caller. It must
+   // make sure that there is nothing left in the PostEvent queue in the main thread
+   // which was filled-up during the conversion.
+   // bottom line - don't do that, or you'll suffer ...
+   // @TODO Check whether is not a good idea to skip the cell browser update
+   // during GDS import. The calling addTDTtab() at the end should be safe
+   //browsers::addTDTtab();
+   LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
+         << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   delete pl;
+   delete lll;
    return EXEC_NEXT;
 }
 
