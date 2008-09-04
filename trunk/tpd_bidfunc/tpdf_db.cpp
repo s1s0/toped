@@ -470,14 +470,22 @@ int tellstdfunc::GDSimportT::execute()
       src_structure->collectLayers(gdsLaysAll,true);
       DATC->unlockGDS();
       LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
-      nameList top_cells;
-      top_cells.push_back(name);
-      DATC->lockDB(false);
-      DATC->importGDScell(top_cells, LayerExpression, recur, over);
-         updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-      DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< name << "," << (*lll) << "," << LogFile._2bool(recur)
-            << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+      if (LayerExpression.status())
+      {
+         nameList top_cells;
+         top_cells.push_back(name);
+         DATC->lockDB(false);
+         DATC->importGDScell(top_cells, LayerExpression, recur, over);
+            updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+         DATC->unlockDB();
+         LogFile << LogFile.getFN() << "(\""<< name << "," << (*lll) << "," << LogFile._2bool(recur)
+               << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+      }
+      else
+      {
+         ost << "Can't execute GDS import - error in the layer map";
+         tell_log(console::MT_ERROR,ost.str());
+      }
    }
    delete lll;
    return EXEC_NEXT;
@@ -560,21 +568,30 @@ int tellstdfunc::GDSimportListT::execute()
       AGDSDB->collectLayers(gdsLaysAll);
    DATC->unlockGDS();
    LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
-   DATC->lockDB(false);
-      DATC->importGDScell(top_cells, LayerExpression, recur, over);
-      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-   DATC->unlockDB();
-   // Don't refresh the tree browser here. 
-   // - First - it has been updated during the conversion
-   // - Second - addTDTtab is running in the same thread as the caller. It must
-   // make sure that there is nothing left in the PostEvent queue in the main thread
-   // which was filled-up during the conversion.
-   // bottom line - don't do that, or you'll suffer ...
-   // @TODO Check whether is not a good idea to skip the cell browser update
-   // during GDS import. The calling addTDTtab() at the end should be safe
-   //browsers::addTDTtab();
-   LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
-         << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   if (LayerExpression.status())
+   {
+      DATC->lockDB(false);
+         DATC->importGDScell(top_cells, LayerExpression, recur, over);
+         updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      DATC->unlockDB();
+      // Don't refresh the tree browser here. 
+      // - First - it has been updated during the conversion
+      // - Second - addTDTtab is running in the same thread as the caller. It must
+      // make sure that there is nothing left in the PostEvent queue in the main thread
+      // which was filled-up during the conversion.
+      // bottom line - don't do that, or you'll suffer ...
+      // @TODO Check whether is not a good idea to skip the cell browser update
+      // during GDS import. The calling addTDTtab() at the end should be safe
+      //browsers::addTDTtab();
+      LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
+            << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   }
+   else
+   {
+      std::ostringstream ost;
+      ost << "Can't execute GDS import - error in the layer map";
+      tell_log(console::MT_ERROR,ost.str());
+   }
    delete pl;
    delete lll;
    return EXEC_NEXT;

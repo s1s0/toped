@@ -1178,7 +1178,7 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
 }
 
 //=============================================================================
-LayerMapGds::LayerMapGds(GDSin::GdsLayers& alist) : _theMap(), _status(false), _alist(alist)
+LayerMapGds::LayerMapGds(GDSin::GdsLayers& alist) : _theMap(), _status(true), _alist(alist)
 {
    for (GDSin::GdsLayers::const_iterator NLI = alist.begin(); NLI != alist.end(); NLI++)
    {
@@ -1188,13 +1188,13 @@ LayerMapGds::LayerMapGds(GDSin::GdsLayers& alist) : _theMap(), _status(false), _
 }
 
 LayerMapGds::LayerMapGds(const GDSin::NumStrMap& inlist, GDSin::GdsLayers& alist)
-   : _theMap(), _status(false), _alist(alist)
+   : _theMap(), _status(true), _alist(alist)
 {
    for (GDSin::NumStrMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)
    {
       wxString exp(CE->second.c_str(), wxConvUTF8);
       patternNormalize(exp);
-      parseLayTypeString(exp, CE->first);
+      _status &= parseLayTypeString(exp, CE->first);
    }
 }
 
@@ -1208,8 +1208,10 @@ bool LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
    // search the entire pattern
    if (!src_tmpl.Matches(exp))
    {
-//      std::string news = "Can't make sence from the string \"" + std::string(exp.c_str()) + "\"";
-//      tell_log(console::MT_ERROR,news);
+      wxString wxmsg;
+      wxmsg << wxT("Can't make sence from the string \"") << exp << wxT("\"");
+      std::string msg(wxmsg.mb_str(wxConvUTF8));  
+      tell_log(console::MT_ERROR,msg);
       return false;
    }
    //separate the layer expression from data type expression
@@ -1279,7 +1281,7 @@ void LayerMapGds::patternNormalize(wxString& str)
 void LayerMapGds::getList(wxString& exp, WordList& data)
 {
    wxRegEx number_tmpl(wxT("[[:digit:]]*"));
-   wxRegEx separ_tmpl(wxT("\\,\\-{1,1}"));
+   wxRegEx separ_tmpl(wxT("[\\,\\-]{1,1}"));
    unsigned long conversion;
    bool last_was_separator = true;
    char separator = ',';
@@ -1297,17 +1299,18 @@ void LayerMapGds::getList(wxString& exp, WordList& data)
             data.push_back((word)conversion);
          else
          {
-            for (word numi = data.back(); numi <= conversion; numi++)
+            for (word numi = data.back() + 1; numi <= conversion; numi++)
                data.push_back(numi);
          }
       }
       else
       {
          separ_tmpl.Matches(exp);
-         if (wxT("-") == separ_tmpl.GetMatch(exp))
+         if      (wxT("-") == separ_tmpl.GetMatch(exp))
             separator = '-';
-         else
+         else if (wxT(",") == separ_tmpl.GetMatch(exp))
             separator = ',';
+         else assert(false);
          separ_tmpl.ReplaceFirst(&exp,wxT(""));
       }
       last_was_separator = !last_was_separator;
