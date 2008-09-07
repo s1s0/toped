@@ -188,6 +188,8 @@ namespace tui
 		TpdToolBar*					_toolBar;
 		toolList						_tools;
 		int							_dockDirection;
+		bool							_floating;
+		wxPoint						_coord;
 	};
 
 	bool checkToolSize(IconSizes size);

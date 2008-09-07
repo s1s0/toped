@@ -1780,7 +1780,8 @@ void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 {
-   //telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
-   //delete p;
-	_resourceCenter->setToolBarSize("main", tui::ICON_SIZE_16x16);
+	int size = evt.GetInt();
+	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
+
+	_resourceCenter->setToolBarSize("main", sz);
 }

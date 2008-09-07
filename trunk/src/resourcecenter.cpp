@@ -302,7 +302,7 @@ tui::TpdToolBar::TpdToolBar(int ID, long style, IconSizes iconSize)
 }
 
 tui::ToolBarHandler::ToolBarHandler(int ID, const std::string & name, int direction)
-		:_name(name),_ID(ID), _dockDirection(direction)
+		:_name(name),_ID(ID), _dockDirection(direction),_floating(false),_coord(-1,-1)
 {
 	wxAuiPaneInfo paneInfo;
 	
@@ -336,19 +336,15 @@ tui::ToolBarHandler::~ToolBarHandler()
 
 void	tui::ToolBarHandler::changeToolSize(IconSizes size)
 {
-	//------------------------------------
+	wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
+	_floating = paneInfo.IsFloating();
+	_coord = paneInfo.floating_pos;
+
 	Toped->getAuiManager()->DetachPane(_toolBar);
-	delete _toolBar;
+	_toolBar->Destroy();
 
 	Toped->getAuiManager()->Update();
 
-	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
-	{
-		(*it)->changeToolSize(size);
-	}
-
-	wxAuiPaneInfo paneInfo;
-	
 	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
 	{
 		_toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_VERTICAL, size);
@@ -358,14 +354,15 @@ void	tui::ToolBarHandler::changeToolSize(IconSizes size)
 		_toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_HORIZONTAL, size);
 	}
 
+	attachToAUI();
 	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
 	{
+		(*it)->changeToolSize(size);
 		_toolBar->AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
+		Toped->getAuiManager()->DetachPane(_toolBar);
+		_toolBar->Realize();
+		attachToAUI();
 	}
-	_toolBar->Realize();
-
-	attachToAUI();
-	Toped->getAuiManager()->Update();
 }
 
 
@@ -399,20 +396,24 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 
 void tui::ToolBarHandler::attachToAUI(void)
 {
-		if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
-		{
-			Toped->getAuiManager()->AddPane(_toolBar, wxAuiPaneInfo().ToolbarPane().
-			Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(true).Floatable(false).
-			TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true));
-		}
-		else
-		{
-			Toped->getAuiManager()->AddPane(_toolBar, wxAuiPaneInfo().ToolbarPane().
-			Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(false).Floatable(false).
-			TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false));
-		}
+	wxAuiPaneInfo pane;
+	pane=wxAuiPaneInfo().ToolbarPane().Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(false).Floatable(false).
+			TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
+	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
+	{
+		pane.GripperTop(true).TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true);
+	}
+	else
+	{
+		pane.GripperTop(false).TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
+	}
 
-		Toped->getAuiManager()->Update();
+	if(_floating)
+	{
+		pane.Float().FloatingPosition(_coord);
+	}
+	Toped->getAuiManager()->AddPane(_toolBar,pane);
+	Toped->getAuiManager()->Update();
 }
 
 
