@@ -897,7 +897,7 @@ void layprop::ViewProperties::saveScreenProps(FILE* prop_file) const
 void layprop::ViewProperties::saveProperties(std::string filename) const
 {
    FILE * prop_file;
-	std::string fname = convertString(filename);
+   std::string fname = convertString(filename);
    prop_file = fopen(fname.c_str(),"wt");
    // file header here
    _drawprop.savePatterns(prop_file);

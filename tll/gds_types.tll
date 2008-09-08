@@ -1,22 +1,47 @@
 newdesign("ddd");
-gdsread("/home/skr/toped/library/gds/an2_x05.gds");
+//gdsread("/home/skr/toped/library/gds/an2_x05.gds");
 //report_gdslayers("an2_x05");
+//lmap list gds_layer_definition = {
+//                                    { 3, " 3 ; 0    " },
+//                                    { 4, " 4 ; *    " },
+//                                    { 5, " 5 ; 20,30" },
+//                                    { 6, " 6 ; 10-20" },
+//                                    {24, "24 ; 0    " },
+//                                    {25, "25 ; 0    " },
+//                                    {41, "41 ; 0    " },
+//                                    {42, "42 ; 0    " },
+//                                    {43, "43 ; 0    " },
+//                                    {44, "44 ; 0    " },
+//                                    {45, "45 ; 0    " },
+//                                    {46, "46 ; 0    " },
+//                                    {49, "49 ; 0    " },
+//                                    {63, "63 ; 0    " }
+//                                 };
+//
+//gdsimport("an2_x05",gds_layer_definition, true,false);
 
+/*
+   The default mapping might be left unspecified. For example - if GDSII layer 21 contains 
+   only default data type (0) and is not explicitly listed in the layer map - toped will 
+   convert silently all data to TDT layer 21.
+   If layer 21 conains also data of a type different form 0 (10 for example), toped will 
+   still convert it to TDT layer 21, however a warning will be issued
+   "Layer: 21; data type: 10; found in GDS database, but not in the conversion map."
+
+   If the data rtype is listed in the conversion map - for example {21, {21;*}} then
+   the warning messages will not be issued.
+*/
 lmap list gds_layer_definition = {
-                                    { 3, " 3 ; 0    " },
-                                    { 4, " 4 ; *    " },
-                                    { 5, " 5 ; 20,30" },
-                                    { 6, " 6 ; 10-20" },
-                                    {24, "24 ; 0    " },
-                                    {25, "25 ; 0    " },
-                                    {41, "41 ; 0    " },
-                                    {42, "42 ; 0    " },
-                                    {43, "43 ; 0    " },
-                                    {44, "44 ; 0    " },
-                                    {45, "45 ; 0    " },
-                                    {46, "46 ; 0    " },
-                                    {49, "49 ; 0    " },
-                                    {63, "63 ; 0    " }
+                                    { 21, "21,22 ; * "},
+//                                    { 22, "22 ; * "},
+                                    { 300, "30 ; 0 "},
+                                    { 304, "30 ; 4 "},
+                                    { 31, "31-33 ; * "},
+//                                    { 32, "32 ; * "},
+//                                    { 33, "33 ; * "},
+//                                    { 34, "34 ; 0 "},
+                                    {344, "34 ; 4 "},
+                                    {350, "34 ; 10"}
                                  };
 
-gdsimport("an2_x05",gds_layer_definition, true,false);
+gdsimport(gdsread("/home/skr/toped/library/gds/example_data_type_lulu.gds"),gds_layer_definition, true,false);

@@ -500,9 +500,22 @@ void laydata::quadTree::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
    while(wdt)
    {
       wdt->GDSwrite(gdsf,lay, UU); wdt = wdt->next();
-   }   
+   }
    for(byte i = 0; i < 4; i++) 
       if (_quads[i]) _quads[i]->GDSwrite(gdsf,lay, UU);
+}
+
+/*! Write the contents of the quadTree in a CIF file.\n
+Nothing special here - effectively the same as other write method*/
+void laydata::quadTree::CIFwrite(CIFin::CifExportFile& ciff, real UU) const
+{
+   tdtdata* wdt = _first;
+   while(wdt)
+   {
+      wdt->CIFwrite(ciff, UU); wdt = wdt->next();
+   }
+   for(byte i = 0; i < 4; i++)
+      if (_quads[i]) _quads[i]->CIFwrite(ciff,UU);
 }
 
 /*! Write the contents of the quadTree in a PS file.\n

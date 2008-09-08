@@ -61,6 +61,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(CIFgetLay        );
    TELL_STDCMD_CLASSA(CIFimport        );
    TELL_STDCMD_CLASSA(CIFimportList    );
+   TELL_STDCMD_CLASSA(CIFexportLIB     );
    TELL_STDCMD_CLASSA(CIFclose         );
 }
 #endif

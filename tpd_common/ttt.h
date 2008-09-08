@@ -91,9 +91,10 @@ typedef     _sg_int16   int2b;
 typedef     _sg_int32   int4b;
 typedef        double   real;
 
-typedef  std::list<std::string>     nameList;
-typedef  std::list<word>            WordList;
-typedef  std::map<std::string, int> NMap;
+typedef  std::list<std::string>           nameList;
+typedef  std::list<word>                  WordList;
+typedef  std::map<std::string, int>       NMap;       // name
+typedef  std::map<unsigned, std::string>  USMap; // Unsigned - String Map
 
 //=============================================================================
 // Some common constants (instead of #defines)

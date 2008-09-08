@@ -573,7 +573,7 @@ bool GDSin::GdsFile::checkCellWritten(std::string cellname)
    for (nameList::const_iterator i = _childnames.begin();
                                  i != _childnames.end(); i++)
       if (cellname == *i) return true;
-   return false;      
+   return false;
 //   return (_childnames.end() != _childnames.find(cellname));
 }
 

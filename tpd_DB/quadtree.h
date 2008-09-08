@@ -30,6 +30,7 @@
 
 #include "tedstd.h"
 #include "../tpd_ifaces/gds_io.h"
+#include "../tpd_ifaces/cif_io.h"
 #include "ps_out.h"
 
 namespace laydata {
@@ -70,6 +71,7 @@ namespace laydata {
       void                 put(tdtdata* shape);
       void                 write(TEDfile* const) const;
       void                 GDSwrite(GDSin::GdsFile&, word const, real UU) const;
+      void                 CIFwrite(CIFin::CifExportFile&, real UU) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       void                 select_inBox(DBbox&, dataList*, bool, word /*selmask = laydata::_lmall*/);
       void                 select_fromList(dataList*, dataList*);
