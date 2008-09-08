@@ -693,38 +693,29 @@ void tui::ResourceCenter::setDirection(int direction)
 		_direction = direction;
 }
 
-void tui::ResourceCenter::setToolBarSize(const std::string &toolBarName, IconSizes size)
+void tui::ResourceCenter::setToolBarSize(bool direction, IconSizes size)
 {
 	if(checkToolSize(size))
 	{
-		/*toolBarList::const_iterator it;
-		for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-		{
-			if ((*it)->name()==toolBarName)
-			{
-				(*it)->changeToolSize(size);
-			}
-			else
-			{
-				wxString info;
-				info << wxT("Unknown name of toolbar");
-				tell_log(console::MT_WARNING,info);
-			}*/
 		toolBarList::const_iterator it;
 		for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
 		{
-			(*it)->changeToolSize(size);
+			int dir = (*it)->direction();
+			if(_tuihorizontal==direction)
+			{
+				if((wxAUI_DOCK_TOP == dir) || (wxAUI_DOCK_BOTTOM == dir)) 
+					(*it)->changeToolSize(size);
+			}
+			else //_tuivertical==direction
+			{
+				if((wxAUI_DOCK_LEFT == dir) || (wxAUI_DOCK_RIGHT == dir)) 
+					(*it)->changeToolSize(size);
+			}
+			
 		}
 
 	}
 
-	/*}
-	else
-	{
-		wxString info;
-		info << wxT("Wrong size for icon was chosen.");
-      tell_log(console::MT_ERROR,info);
-	}*/
 }
 
 void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::string &toolBarItem,
@@ -816,15 +807,18 @@ tellstdfunc::stdTOOLBARSIZE::stdTOOLBARSIZE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 int tellstdfunc::stdTOOLBARSIZE::execute()
 {
-   int size = getWordValue();
+   int			size	= getWordValue();
+	int		direction= getWordValue();
 	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
 	if(tui::checkToolSize(sz))
 	{
 		wxCommandEvent eventToolBarSize(wxEVT_TOOLBARSIZE);
+		eventToolBarSize.SetExtraLong(direction);
 		eventToolBarSize.SetInt(size);
 		wxPostEvent(Toped, eventToolBarSize);
 	}
