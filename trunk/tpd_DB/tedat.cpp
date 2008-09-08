@@ -591,6 +591,14 @@ void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
+void laydata::tdtbox::CIFwrite(CIFin::CifExportFile& ciff, real) const
+{
+   unsigned int length = abs(_p2->x() - _p1->x());
+   unsigned int width  = abs(_p2->y() - _p1->y());
+   TP center((_p2->x() + _p1->x()) / 2, (_p2->y() + _p1->y()) / 2);
+   ciff.box(length, width, center);
+}
+
 void laydata::tdtbox::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
    const pointlist box4 = shape2poly();

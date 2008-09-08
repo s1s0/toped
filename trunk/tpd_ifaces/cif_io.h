@@ -27,8 +27,9 @@
 #if !defined(CIFIO_H_INCLUDED)
 #define CIFIO_H_INCLUDED
 
-#include "../tpd_common/ttt.h"
 #include <string>
+#include <fstream>
+#include "../tpd_common/ttt.h"
 
 int ciflex(void);
 int ciferror (char *s);
@@ -264,7 +265,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class   CifFile {
       public:
                         CifFile(std::string);
-                       ~CifFile();
+                        ~CifFile();
          CifStatusType  status() {return _status;}
          void           addStructure(_dbl_word, _dbl_word = 1, _dbl_word = 1);
          void           doneStructure();
@@ -282,18 +283,40 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CifStructure*  getStructure(std::string);
          void           hierPrep();
          void           hierOut();
-         std::string    Get_libname() const  {return _filename;}
-         CIFHierTree*   hiertree()           {return _hiertree;}
+         std::string    Get_libname() const  {return _fileName;}
+         CIFHierTree*   hiertree()           {return _hierTree;}
          CifStructure*  getFirstStructure()  {return _first;}
          CifStructure*  getTopStructure()    {return _default;}
+         void           closeFile();
       protected:
+         FILE*          _cifFh;
          CifStatusType  _status;          //!
          CifStructure*  _first;           //! poiter to the first defined cell
          CifStructure*  _current;         //! the working (current) cell
          CifStructure*  _default;         //! pointer to the default cell - i.e. the scratch pad
-         CifLayer*      _curlay;          //!
-         CIFHierTree*   _hiertree;        //! Tree of instance hierarchy
-         std::string    _filename;        //! Input CIF file - including the path
+         CifLayer*      _curLay;          //!
+         CIFHierTree*   _hierTree;        //! Tree of instance hierarchy
+         std::string    _fileName;        //! Input CIF file - including the path
+   };
+
+   class CifExportFile {
+      public:
+                        CifExportFile(std::string, USMap*);
+                       ~CifExportFile();
+         void           definitionStart(std::string);
+         void           definitionFinish();
+         bool           layerSpecification(word layno);
+         void           box(unsigned, unsigned, TP&);
+         bool           checkCellWritten(std::string) const;
+         void           registerCellWritten(std::string);
+         std::fstream&  file()               {return _file;}
+      private:
+         USMap*         _laymap;          //! Toped-CIF layer map
+         NMap           _cellmap;         //! tdt-cif map of all exported cells
+         std::string    _fileName;        //! Output CIF file name - including the path
+         std::fstream   _file;            //! Output file handler
+         bool           _verbose;         //! CIF output type
+         unsigned       _lastcellnum;     //! The number of the last written cell
    };
 }
 

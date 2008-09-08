@@ -971,6 +971,43 @@ int tellstdfunc::CIFimport::execute()
 }
 
 //=============================================================================
+tellstdfunc::CIFexportLIB::CIFexportLIB(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+}
+
+int tellstdfunc::CIFexportLIB::execute()
+{
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   std::string filename = getStringValue();
+   // Convert layer map
+   USMap* cifLays = DEBUG_NEW USMap();
+   telldata::tthsh* nameh;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      (*cifLays)[nameh->number().value()] = nameh->name().value();
+   }
+   if (expandFileName(filename))
+   {
+      DATC->lockDB(false);
+      DATC->CIFexport(filename, cifLays);
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "(\""<< filename << "\"," << (*lll) << ");"; LogFile.flush();
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
+   }
+   delete cifLays;
+   delete lll;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::CIFclose::CIFclose(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}

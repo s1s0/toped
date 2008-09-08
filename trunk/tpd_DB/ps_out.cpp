@@ -39,7 +39,7 @@ PSFile::PSFile(std::string fname)
    info << "Writing PostScript output file: "<< _fname;
    tell_log(console::MT_INFO,info.str());
 	std::string filename = convertString(_fname);
-   if (!(_psfh = fopen(filename.c_str(),"w")))
+   if (!(_psfh = fopen(filename.c_str(),"wt")))
    {// file can't be opened for writing errcode = errno;
       std::ostringstream info;
       info << "File "<< _fname <<" can NOT be opened";

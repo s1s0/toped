@@ -24,7 +24,7 @@
 //          $Date$
 //        $Author$
 //===========================================================================
-   
+
 #ifndef TEDESIGN_H_INCLUDED
 #define TEDESIGN_H_INCLUDED
 
@@ -37,6 +37,7 @@ namespace laydata {
       virtual      ~tdtlibrary();
       virtual void   read(TEDfile* const);
       void           GDSwrite(GDSin::GdsFile&, tdtcell*, bool);
+      void           CIFwrite(CIFin::CifExportFile&, tdtcell*, bool);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
       tdtcell*       checkcell(std::string name, bool undeflib = false);
       void           recreate_hierarchy(const laydata::tdtlibdir* );
@@ -71,7 +72,9 @@ namespace laydata {
       real                 _UU;           // size of user unit in DBU
       cellList             _cells;        // list of cells in the design
                                           //
-      static TDTHierTree*  _hiertree;     // 
+      static TDTHierTree*  _hiertree;     //
+      time_t               _created;
+      time_t               _lastUpdated;
    };
 
    class tdtdesign : public tdtlibrary {
@@ -150,8 +153,6 @@ namespace laydata {
    private:
       tdtdata*       _tmpdata;      // pointer to a data under construction - for view purposes
       editobject     _target;       // edit/view target <- introduced with pedit operations
-      time_t         _created;
-      time_t         _lastUpdated;
       CTM            _tmpctm;
    };
 

@@ -255,6 +255,11 @@ void laydata::tdtdefaultcell::GDSwrite(GDSin::GdsFile&, const cellList&, const T
    assert(false);
 }
 
+void laydata::tdtdefaultcell::CIFwrite(CIFin::CifExportFile&, const cellList&, const TDTHierTree*, real, bool) const
+{
+   assert(false);
+}
+
 void laydata::tdtdefaultcell::collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const
 {
 }
@@ -546,6 +551,34 @@ void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
       wl->second->GDSwrite(gdsf, wl->first, UU);
    wr = gdsf.setNextRecord(gds_ENDSTR);gdsf.flush(wr);
    gdsf.registerCellWritten(name());
+}
+
+
+void laydata::tdtcell::CIFwrite(CIFin::CifExportFile& ciff, const cellList& allcells,
+                                const TDTHierTree* root, real UU, bool recur) const
+{
+   // We going to write the cells in hierarchical order. Children - first!
+   if (recur)
+   {
+      const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
+      while (Child)
+      {
+         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child, UU, recur);
+         Child = Child->GetBrother(TARGETDB_LIB);
+      }
+   }
+   // If no more children and the cell has not been written yet
+   if (ciff.checkCellWritten(name())) return;
+   //
+   ciff.definitionStart(name());
+   // loop the layers
+   laydata::layerList::const_iterator wl;
+   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   {
+      if (!ciff.layerSpecification(wl->first)) continue;
+      wl->second->CIFwrite(ciff, UU);
+   }
+   ciff.definitionFinish();
 }
 
 void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop,

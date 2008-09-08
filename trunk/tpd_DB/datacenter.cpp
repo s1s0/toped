@@ -765,6 +765,13 @@ CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
    return status;
 }
 
+void DataCenter::CIFexport(std::string& filename, USMap* laymap)
+{
+   std::string nfn;
+   CIFin::CifExportFile cifex(filename, laymap);
+   _TEDLIB()->CIFwrite(cifex, NULL, true);
+}
+
 bool DataCenter::CIFgetLay(nameList& cifLayers)
 {
    if (NULL == _CIFDB) return false;
