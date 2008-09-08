@@ -82,6 +82,15 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addconstID("_lmaref"  , DEBUG_NEW telldata::ttint( laydata::_lmaref ), true);
    mblock->addconstID("_lmpref"  , DEBUG_NEW telldata::ttint( laydata::_lmpref ), true);
    mblock->addconstID("_lmapref" , DEBUG_NEW telldata::ttint( laydata::_lmapref), true);
+
+	mblock->addconstID("horizontal"	, DEBUG_NEW telldata::ttint( tui::_tuihorizontal), true);
+	mblock->addconstID("vertical"		, DEBUG_NEW telldata::ttint( tui::_tuivertical),	true);
+
+	mblock->addconstID("iconsize16"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_16x16),true);
+	mblock->addconstID("iconsize24"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_24x24),true);
+	mblock->addconstID("iconsize32"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_32x32),true);
+	mblock->addconstID("iconsize48"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_48x48),true);
+
    //-----------------------------------------------------------------------------------------------------------
    // tell build-in functions
    //             TELL function name                      Implementation class               return type  execute on recovery

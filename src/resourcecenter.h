@@ -44,6 +44,9 @@
 */
 namespace tui 
 {
+	const word _tuihorizontal	= 0x0000;
+   const word _tuivertical		= 0x0001;
+
    //forward declarations
    class TopedFrame;
    class MenuItemHandler;
@@ -178,7 +181,7 @@ namespace tui
 										const std::string &iconFileName, IconSizes size,
 										const std::string hotKey, const std::string &helpString, callbackMethod cbMethod);
 		void				execute(int ID1);
-
+		int				direction() const {return _dockDirection;};
 		std::string		name() const {return _name;};
 		void				changeToolSize(IconSizes size);
 	private:
@@ -220,7 +223,7 @@ namespace tui
 							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod, int direction);*/
 		void setDirection(int direction);
-		void setToolBarSize(const std::string &toolBarName, IconSizes size);
+		void setToolBarSize(bool direction, IconSizes size);
 		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
 							const std::string &iconName,
 							IconSizes size,

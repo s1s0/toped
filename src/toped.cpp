@@ -710,8 +710,8 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop48x48.png", ICON_SIZE_48x48,"", "edit pop",&tui::TopedFrame::OnCellPop);
 
 
-   _resourceCenter->setToolBarSize("edit", ICON_SIZE_16x16);
-   _resourceCenter->setToolBarSize("main", ICON_SIZE_32x32);
+   _resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_16x16);
+   _resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_32x32);
    _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
    _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
@@ -1781,7 +1781,8 @@ void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
 void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 {
 	int size = evt.GetInt();
+	bool direction = static_cast<bool>(evt.GetExtraLong());
 	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
-
+	
 	_resourceCenter->setToolBarSize("main", sz);
 }
