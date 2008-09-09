@@ -223,13 +223,16 @@ namespace tui
 							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod, int direction);*/
 		void setDirection(int direction);
-		void setToolBarSize(bool direction, IconSizes size);
 		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
 							const std::string &iconName,
 							IconSizes size,
 							const std::string &hotKey, 
 							const std::string &helpString,
 							callbackMethod cbMethod);
+		/*Don’t call setToolBarSize immediately!!! 
+		It leads to nonsynchronized internal state of object and Setting Menu.
+		Better to use toolbarsize TELL-function.*/
+		void setToolBarSize(bool direction, IconSizes size);
    private:
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
@@ -241,9 +244,7 @@ namespace tui
 		int					_toolCount; //number of tool items
 		std::string			_IconDir;	//directory that contains
 		int					_direction;
-
    };
-
 }
 
 namespace tellstdfunc {

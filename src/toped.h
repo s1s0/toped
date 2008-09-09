@@ -126,6 +126,8 @@ namespace tui {
       wxMenu*                 selectMenu;
       wxMenu*                 settingsMenu;
       wxMenu*                 markerMenu;
+		wxMenu*						toolbarVertSizeMenu;
+		wxMenu*						toolbarHorSizeMenu;
       wxMenu*                 gdsMenu;
       wxMenu*                 helpMenu;
 
@@ -215,6 +217,17 @@ namespace tui {
       void     OnMarker0(wxCommandEvent&);
       void    OnMarker45(wxCommandEvent&);
       void    OnMarker90(wxCommandEvent&);
+		void		OnHToolBarSize16(wxCommandEvent&);
+		void		OnHToolBarSize24(wxCommandEvent&);
+		void		OnHToolBarSize32(wxCommandEvent&);
+		void		OnHToolBarSize48(wxCommandEvent&);
+
+		void		OnVToolBarSize16(wxCommandEvent&);
+		void		OnVToolBarSize24(wxCommandEvent&);
+		void		OnVToolBarSize32(wxCommandEvent&);
+		void		OnVToolBarSize48(wxCommandEvent&);
+
+
       void OnDefineLayer(wxCommandEvent&);
       void OnDefineColor(wxCommandEvent&);
       void  OnDefineFill(wxCommandEvent&);
