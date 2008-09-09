@@ -1,4 +1,4 @@
-//===========================================================================
+
 //                                                                          =
 //   This program is free software; you can redistribute it and/or modify   =
 //   it under the terms of the GNU General Public License as published by   =
@@ -37,9 +37,8 @@
 extern console::ted_cmd*         Console;
 extern tui::TopedFrame*          Toped;
 
-
 extern const wxEventType         wxEVT_TOOLBARSIZE;
-
+extern const wxEventType         wxEVT_SETINGSMENU;
 
 tui::MenuItemHandler::MenuItemHandler(void)
    :_ID(0), _menuItem(""), _hotKey(""), _function(""), _method(NULL)
@@ -711,11 +710,8 @@ void tui::ResourceCenter::setToolBarSize(bool direction, IconSizes size)
 				if((wxAUI_DOCK_LEFT == dir) || (wxAUI_DOCK_RIGHT == dir)) 
 					(*it)->changeToolSize(size);
 			}
-			
 		}
-
 	}
-
 }
 
 void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::string &toolBarItem,
