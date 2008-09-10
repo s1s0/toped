@@ -1516,56 +1516,56 @@ void tui::TopedFrame::OnLongCursor(wxCommandEvent& WXUNUSED(event)){
 void tui::TopedFrame::OnHToolBarSize16(wxCommandEvent& WXUNUSED(event))
 {
 	wxString ost;
-	ost << wxT("toolbarsize(horizontal, iconsize16);");
+	ost << wxT("toolbarsize(horizontal, _iconsize16);");
 	_cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize24(wxCommandEvent& WXUNUSED(event))
 {
 	wxString ost;
-	ost << wxT("toolbarsize(horizontal, iconsize24);");
+	ost << wxT("toolbarsize(horizontal, _iconsize24);");
 	_cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize32(wxCommandEvent& WXUNUSED(event))
 {
 	wxString ost;
-	ost << wxT("toolbarsize(horizontal, iconsize32);");
+	ost << wxT("toolbarsize(horizontal, _iconsize32);");
 	_cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize48(wxCommandEvent& WXUNUSED(event))
 {
 	wxString ost;
-	ost << wxT("toolbarsize(horizontal, iconsize48);");
+	ost << wxT("toolbarsize(horizontal, _iconsize48);");
 	_cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize16(wxCommandEvent& WXUNUSED(event))
 {
 	wxString ost;
-	ost << wxT("toolbarsize(vertical, iconsize16);");
+	ost << wxT("toolbarsize(vertical, _iconsize16);");
 	_cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize24(wxCommandEvent& WXUNUSED(event))
 {
 	wxString ost;
-	ost << wxT("toolbarsize(vertical, iconsize24);");
+	ost << wxT("toolbarsize(vertical, _iconsize24);");
 	_cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize32(wxCommandEvent& WXUNUSED(event))
 {
 	wxString ost;
-	ost << wxT("toolbarsize(vertical, iconsize32);");
+	ost << wxT("toolbarsize(vertical, _iconsize32);");
 	_cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize48(wxCommandEvent& WXUNUSED(event))
 {
 	wxString ost;
-	ost << wxT("toolbarsize(vertical, iconsize48);");
+	ost << wxT("toolbarsize(vertical, _iconsize48);");
 	_cmdline->parseCommand(ost);
 }
 

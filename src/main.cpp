@@ -86,10 +86,10 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
 	mblock->addconstID("horizontal"	, DEBUG_NEW telldata::ttint( tui::_tuihorizontal), true);
 	mblock->addconstID("vertical"		, DEBUG_NEW telldata::ttint( tui::_tuivertical),	true);
 
-	mblock->addconstID("iconsize16"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_16x16),true);
-	mblock->addconstID("iconsize24"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_24x24),true);
-	mblock->addconstID("iconsize32"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_32x32),true);
-	mblock->addconstID("iconsize48"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_48x48),true);
+	mblock->addconstID("_iconsize16"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_16x16),true);
+	mblock->addconstID("_iconsize24"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_24x24),true);
+	mblock->addconstID("_iconsize32"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_32x32),true);
+	mblock->addconstID("_iconsize48"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_48x48),true);
 
    //-----------------------------------------------------------------------------------------------------------
    // tell build-in functions
