@@ -337,6 +337,10 @@ void	tui::ToolBarHandler::changeToolSize(IconSizes size)
 {
 	wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
 	_floating = paneInfo.IsFloating();
+	if(paneInfo.IsDocked())
+	{
+		_dockDirection = paneInfo.dock_direction;
+	}
 	_coord = paneInfo.floating_pos;
 
 	Toped->getAuiManager()->DetachPane(_toolBar);
