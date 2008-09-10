@@ -1054,6 +1054,11 @@ void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
+void laydata::tdtpoly::CIFwrite(CIFin::CifExportFile& ciff, real) const
+{
+   ciff.polygon(_plist);
+}
+
 void laydata::tdtpoly::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
    gdsf.poly(_plist, overlap());
@@ -1468,6 +1473,11 @@ void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
+void laydata::tdtwire::CIFwrite(CIFin::CifExportFile& ciff, real) const
+{
+   ciff.wire(_width, _plist);
+}
+
 void laydata::tdtwire::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
    gdsf.wire(_plist, _width, overlap());
@@ -1659,6 +1669,11 @@ void laydata::tdtcellref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_ENDEL);
    gdsf.flush(wr);
+}
+
+void laydata::tdtcellref::CIFwrite(CIFin::CifExportFile& ciff, real) const
+{
+   ciff.call(_structure->first, _translation);
 }
 
 void laydata::tdtcellref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
@@ -1987,6 +2002,20 @@ void laydata::tdtcellaref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
+void laydata::tdtcellaref::CIFwrite(CIFin::CifExportFile& ciff, real) const
+{
+   for (int i = 0; i < _arrprops.cols(); i++)
+   {// start/stop rows
+      for(int j = 0; j < _arrprops.rows(); j++)
+      { // start/stop columns
+         // ... get the translation matrix ...
+         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+         refCTM *= _translation;
+         ciff.call(_structure->first, refCTM);
+      }
+   }
+}
+
 void laydata::tdtcellaref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
 {
    for (int i = 0; i < _arrprops.cols(); i++)
@@ -2244,6 +2273,11 @@ void laydata::tdttext::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
    wr->add_ascii(_text.c_str());gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_ENDEL);
    gdsf.flush(wr);
+}
+
+void laydata::tdttext::CIFwrite(CIFin::CifExportFile& ciff, real) const
+{
+   ciff.text(_text, TP(_translation.tx(), _translation.ty()));
 }
 
 void laydata::tdttext::PSwrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
