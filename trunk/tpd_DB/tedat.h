@@ -192,7 +192,7 @@ namespace laydata {
       void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GdsFile&, word, real) const;
-      void                 CIFwrite(CIFin::CifExportFile&, real) const {};
+      void                 CIFwrite(CIFin::CifExportFile&, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
       void                 rmpoint(TP&);
@@ -233,7 +233,7 @@ namespace laydata {
       void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GdsFile&, word, real) const;
-      void                 CIFwrite(CIFin::CifExportFile&, real) const {};
+      void                 CIFwrite(CIFin::CifExportFile&, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       void                 addpoint(TP p) {_plist.push_back(p);};
       void                 rmpoint(TP&);
@@ -283,7 +283,7 @@ namespace laydata {
       void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GdsFile&, word, real) const;
-      void                 CIFwrite(CIFin::CifExportFile&, real) const {};
+      void                 CIFwrite(CIFin::CifExportFile&, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       virtual void        ungroup(tdtdesign*, tdtcell*, atticList*);
       std::string          cellname() const {return _structure->first;};
@@ -332,7 +332,7 @@ namespace laydata {
       void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GdsFile&, word, real) const;
-      void                 CIFwrite(CIFin::CifExportFile&, real) const {};
+      void                 CIFwrite(CIFin::CifExportFile&, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       void                 ungroup(tdtdesign*, tdtcell*, atticList*);
       ArrayProperties      arrayprops() const {return _arrprops;}
@@ -366,7 +366,7 @@ namespace laydata {
       void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
       void                 GDSwrite(GDSin::GdsFile&, word, real) const;
-      void                 CIFwrite(CIFin::CifExportFile&, real) const {};
+      void                 CIFwrite(CIFin::CifExportFile&, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       word                 numpoints() const {return 1;};
       void                 polycut(pointlist&, shapeList**) {};

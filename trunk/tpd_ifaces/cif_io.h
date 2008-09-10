@@ -305,8 +305,12 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
                        ~CifExportFile();
          void           definitionStart(std::string);
          void           definitionFinish();
-         bool           layerSpecification(word layno);
-         void           box(unsigned, unsigned, TP&);
+         bool           layerSpecification(word);
+         void           box(const unsigned, const unsigned, const TP&);
+         void           polygon(const pointlist&);
+         void           wire(const unsigned, const pointlist&);
+         void           text(const std::string&, const TP&);
+         void           call(const std::string& name, const CTM&);
          bool           checkCellWritten(std::string) const;
          void           registerCellWritten(std::string);
          std::fstream&  file()               {return _file;}

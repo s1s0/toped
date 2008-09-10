@@ -79,13 +79,13 @@ cifFile:
 ;
 
 commands:
-     cifBlank command tknPsem              {}
-   | commands cifBlank command tknPsem     {}
+     cifBlank command semiColon            {}
+   | commands cifBlank command semiColon   {}
 ;
 
 primCommands:
-      cifBlank primCommand tknPsem         {}
-   |  primCommands cifBlank primCommand tknPsem     {}
+      cifBlank primCommand semiColon       {}
+   |  primCommands cifBlank primCommand semiColon  {}
 ;
 
 command:
@@ -110,7 +110,7 @@ primCommand:
 ;
 
 defDefineCommand:
-     defStartCommand tknPsem primCommands defFinishCommand {}
+     defStartCommand semiColon primCommands defFinishCommand {}
 ;
 
 defStartCommand:
@@ -296,6 +296,11 @@ cifSep:
      tknTupchar                            {}
    | tknTblank                             {}
 ;
+
+semiColon:
+     cifBlank tknPsem cifBlank             {}
+;
+
 %%
 
 /*-------------------------------------------------------------------------*/
