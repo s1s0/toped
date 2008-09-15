@@ -55,6 +55,7 @@ Documentation
    loadlibrary
    unloadlibrary
 
+
 Global options of the editor
 ============================
   * lock/hide layer unselects the shapes on the layer. If not all modify 
