@@ -367,9 +367,11 @@ cellref("cell_1",{120,  0},180,true ,1);
 cellref("cell_1",{  0,  0},  0,false,1);
 cellref("cell_1",{120,-20},/*inserted comment*/  0,true ,1);
 cellref("cell_1",{  0,-20},  0,true ,1);
+/*
 echo("Error below must be reported @ line 375 col 8");
-/*test   
+test   
       of a    
            multiline    
                           comment
-     */newcell("dummy", 1);
+     newcell("dummy", 1);
+*/
