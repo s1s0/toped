@@ -540,7 +540,14 @@ void CIFin::CifExportFile::wire(unsigned width, const pointlist& plst)
 
 void CIFin::CifExportFile::text(const std::string& label, const TP& center)
 {
-   _file << "      94 "<< label << " "<< center.x() << " " << center.y() << std::endl;
+   int loc;
+   std::string labelr(label);
+   while ((loc = labelr.find(' ')) >= 0 )
+      labelr.replace(loc, 1, "_"); //@FIXME - this should be an option or ...?
+
+   _file << "      94 "<< labelr << " "<< center.x() << " " << center.y() << ";" << std::endl;
+
+
 }
 
 void CIFin::CifExportFile::call(const std::string& cellname, const CTM& tmatrix)
@@ -554,7 +561,7 @@ void CIFin::CifExportFile::call(const std::string& cellname, const CTM& tmatrix)
 
    tmatrix.Decompose(trans, rot, scale, flipX);
    if (1.0 != scale) assert(false); //@TODO CIF scaling ???
-
+   rot += 90.0;
    int4b resultX = static_cast<int4b>(sin(rot*M_PI/180) * 1e6);
    int4b resultY = static_cast<int4b>(cos(rot*M_PI/180) * 1e6);
    if       (0 == resultX) resultY = abs(resultY) / resultY;
@@ -573,7 +580,7 @@ void CIFin::CifExportFile::call(const std::string& cellname, const CTM& tmatrix)
    {
       _file <<"      Call symbol #" << _cellmap[cellname];
       if (       flipX) _file << " Mirrored in X";
-      if (0.0 != rot  ) _file << " Rotated to " << resultX << " " << resultY;
+      if (90.0 != rot  ) _file << " Rotated to " << resultX << " " << resultY;
       _file << " Translated to " << trans.x() << " " << trans.y();
    }
    else
