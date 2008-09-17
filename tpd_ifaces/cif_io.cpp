@@ -561,9 +561,8 @@ void CIFin::CifExportFile::call(const std::string& cellname, const CTM& tmatrix)
 
    tmatrix.Decompose(trans, rot, scale, flipX);
    if (1.0 != scale) assert(false); //@TODO CIF scaling ???
-   rot += 90.0;
-   int4b resultX = static_cast<int4b>(sin(rot*M_PI/180) * 1e6);
-   int4b resultY = static_cast<int4b>(cos(rot*M_PI/180) * 1e6);
+   int4b resultX = static_cast<int4b>(cos(rot*M_PI/180) * 1e6);
+   int4b resultY = static_cast<int4b>(sin(rot*M_PI/180) * 1e6);
    if       (0 == resultX) resultY = abs(resultY) / resultY;
    else if (0 == resultY) resultX = abs(resultX) / resultX;
    else if (abs(resultX) == abs(resultY))
@@ -579,14 +578,14 @@ void CIFin::CifExportFile::call(const std::string& cellname, const CTM& tmatrix)
    if (_verbose)
    {
       _file <<"      Call symbol #" << _cellmap[cellname];
-      if (       flipX) _file << " Mirrored in X";
-      if (90.0 != rot  ) _file << " Rotated to " << resultX << " " << resultY;
+      if (       flipX) _file << " Mirrored in Y";
+      if (0.0 != rot  ) _file << " Rotated to " << resultX << " " << resultY;
       _file << " Translated to " << trans.x() << " " << trans.y();
    }
    else
    {
       _file <<"      C" << _cellmap[cellname];
-      if (       flipX) _file << " MX";
+      if (       flipX) _file << " MY";
       if (0.0 != rot  ) _file << " R resultX, resultY";
       _file << " T" << trans.x() << " " << trans.y();
    }
