@@ -391,6 +391,108 @@ tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &titl
 }
 
 //==============================================================================
+tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+      wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+{
+   _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
+   _overwrite->SetValue(true);
+   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
+   _recursive->SetValue(true);
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
+   CIFin::CifFile* ACIFDB = DATC->lockCIF();
+      CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
+      while (cifs) 
+      {
+         _nameList->Append(wxString(cifs->name().c_str(), wxConvUTF8));
+         cifs = cifs->last();
+      }
+      _nameList->Append(wxString(ACIFDB->getTopStructure()->name().c_str(), wxConvUTF8));
+      //-----------------------------------------------------------------------
+      NMap inlays;
+      nameList cifLayers;
+      if (DATC->CIFgetLay(cifLayers))
+      {
+         word laynum = 1;
+         for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
+         {
+            inlays[*NLI] = laynum++;
+         }
+      }
+   DATC->unlockCIF();
+
+   if (init != wxT("")) _nameList->SetStringSelection(init,true);
+
+   _layList = DEBUG_NEW tui::nameCboxList(this, wxID_ANY, wxDefaultPosition, wxSize(280,300), inlays);
+
+   // The window layout
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   // First line up the important things
+   wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   lists_sizer->Add(_nameList, 1, wxEXPAND );
+   lists_sizer->Add(_layList, 0, wxEXPAND);
+   // Buttons
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
+   button_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
+   button_sizer->Add(0,0,1); // 
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   // TOP sizer
+   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+
+   SetSizer( topsizer );      // use the sizer for layout
+
+   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+}
+
+//==============================================================================
+tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+      wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+{
+   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Export recursively"));
+   _slang = DEBUG_NEW wxCheckBox(this, -1, wxT("Verbose CIF slang"));
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      laydata::cellList const cll = ATDB->cells();
+      laydata::cellList::const_iterator CL;
+      for (CL = cll.begin(); CL != cll.end(); CL++) {
+         _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
+      }
+      //-----------------------------------------------------------------------
+      nameList tdtLayers;
+      DATC->all_layers(tdtLayers);
+
+   DATC->unlockDB();
+   if (init != wxT("")) _nameList->SetStringSelection(init,true);
+
+   _layList = DEBUG_NEW tui::nameEboxList(this, wxID_ANY, wxDefaultPosition, wxSize(280,300), tdtLayers);
+
+   // The window layout
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   // First line up the important things
+   wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   lists_sizer->Add(_nameList, 1, wxEXPAND );
+   lists_sizer->Add(_layList, 0, wxEXPAND);
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   // Buttons
+   button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
+   button_sizer->Add(_slang    , 0, wxALL | wxALIGN_LEFT, 5);
+   button_sizer->Add(0,0,1); // 
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   // TOP sizer
+   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+
+   SetSizer( topsizer );      // use the sizer for layout
+
+   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+}
+
+//==============================================================================
 tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
@@ -435,61 +537,6 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    // TOP sizer
    topsizer->Add(_nameList, 1, wxEXPAND );
    topsizer->Add(spin_sizer, 0, wxEXPAND );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
-
-   SetSizer( topsizer );      // use the sizer for layout
-
-   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
-}
-
-//==============================================================================
-tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
-      wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
-                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
-{
-//   _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
-   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
-   _recursive->SetValue(true);
-   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   CIFin::CifFile* ACIFDB = DATC->lockCIF();
-      CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
-      while (cifs) 
-      {
-         _nameList->Append(wxString(cifs->name().c_str(), wxConvUTF8));
-         cifs = cifs->last();
-      }
-      _nameList->Append(wxString(ACIFDB->getTopStructure()->name().c_str(), wxConvUTF8));
-      //-----------------------------------------------------------------------
-      NMap inlays;
-      nameList cifLayers;
-      if (DATC->CIFgetLay(cifLayers))
-      {
-         word laynum = 1;
-         for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
-         {
-            inlays[*NLI] = laynum++;
-         }
-      }
-   DATC->unlockCIF();
-
-   if (init != wxT("")) _nameList->SetStringSelection(init,true);
-
-   _layList = DEBUG_NEW tui::LayerList(this, wxID_ANY, wxDefaultPosition, wxSize(280,300), inlays);
-
-   // The window layout
-   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-   // First line up the important things
-   wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_layList, 0, wxEXPAND);
-   // Buttons
-   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
-   button_sizer->Add(0,0,1); // 
-   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
-   // TOP sizer
-   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
    topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
 
    SetSizer( topsizer );      // use the sizer for layout
@@ -1667,7 +1714,7 @@ tui::defineFill::~defineFill()
 
 
 //==========================================================================
-tui::LayerRecords::LayerRecords( wxWindow *parent, wxPoint pnt, wxSize sz, 
+tui::nameCboxRecord::nameCboxRecord( wxWindow *parent, wxPoint pnt, wxSize sz, 
             const NMap& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
@@ -1686,7 +1733,7 @@ tui::LayerRecords::LayerRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-NMap* tui::LayerRecords::getCifLayerMap()
+NMap* tui::nameCboxRecord::getTheMap()
 {
    NMap* cif_lay_map = DEBUG_NEW NMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
@@ -1707,11 +1754,11 @@ NMap* tui::LayerRecords::getCifLayerMap()
 }
 
 //--------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tui::LayerList, wxScrolledWindow)
-      EVT_SIZE( tui::LayerList::OnSize )
+BEGIN_EVENT_TABLE(tui::nameCboxList, wxScrolledWindow)
+      EVT_SIZE( tui::nameCboxList::OnSize )
 END_EVENT_TABLE()
 
-tui::LayerList::LayerList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const NMap& inlays) :
+tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const NMap& inlays) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
@@ -1729,13 +1776,96 @@ tui::LayerList::LayerList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize s
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
-   _laypanel = DEBUG_NEW tui::LayerRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
+   _laypanel = DEBUG_NEW tui::nameCboxRecord(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
    SetTargetWindow(_laypanel); // trget scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
       SetScrollbars(  0, (line_height+5),  0, inlays.size() );
 }
 
-void tui::LayerList::OnSize( wxSizeEvent &WXUNUSED(event) )
+void tui::nameCboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
+{
+   //Comment below as well as the part of the method is taken from wx samples scrollsub.cpp
+   // We need to override OnSize so that our scrolled window
+   // a) does call Layout() to use sizers for positioning the controls but
+   // b) does not query the sizer for their size and use that for setting the scrollable
+   // area as set that ourselves by calling SetScrollbar() in the constructor.
+
+   Layout();
+   wxSize client_size = GetClientSize();
+   _laypanel->SetClientSize(client_size);
+   AdjustScrollbars();
+}
+
+
+//==========================================================================
+tui::nameEboxRecord::nameEboxRecord( wxWindow *parent, wxPoint pnt, wxSize sz, 
+            const nameList& inlays, wxArrayString& all_strings, int row_height) 
+            : wxPanel(parent, wxID_ANY, pnt, sz)
+{
+   word rowno = 0;
+   for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   {
+      wxString cifln  = wxString(CNM->c_str(), wxConvUTF8);
+//      std::string ics = DATC->getLayerName(CNM->second);
+//      wxString wxics  = wxString(CNM->c_str(), wxConvUTF8);
+      wxStaticText* dwciflay  = DEBUG_NEW wxStaticText( this, wxID_ANY, cifln,
+         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
+      wxTextCtrl*   dwtpdlays = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, wxT(""), wxPoint(110,(row_height+5)*rowno + 5), wxSize(150,row_height));
+      _allRecords.push_back(LayerRecord(dwciflay, dwtpdlays));
+      rowno++;
+   }
+}
+
+NMap* tui::nameEboxRecord::getTheMap()
+{
+   NMap* cif_lay_map = DEBUG_NEW NMap();
+   for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
+   {
+      std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str(wxConvUTF8));
+      // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
+      if ("" == layname)
+         layname = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
+      word layno = DATC->getLayerNo(layname);
+      if (0 == layno)
+      {
+         layno = DATC->addlayer(layname);
+         browsers::layer_add(layname, layno);
+      }
+      (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
+   }
+   return cif_lay_map;
+}
+
+//--------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(tui::nameEboxList, wxScrolledWindow)
+      EVT_SIZE( tui::nameEboxList::OnSize )
+END_EVENT_TABLE()
+
+tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const nameList& inlays) :
+      wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
+{
+   // collect all defined layers
+   nameList all_names;
+   DATC->all_layers(all_names);
+   wxArrayString all_strings;
+   int line_height = (int)(GetFont().GetPointSize() * 2.5);
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+      all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+
+   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"),
+      wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
+      wxPoint(110, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+
+   wxSize panelsz = GetClientSize();
+   panelsz.SetHeight(panelsz.GetHeight() - line_height);
+   _laypanel = DEBUG_NEW tui::nameEboxRecord(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
+   SetTargetWindow(_laypanel); // trget scrollbar window
+   if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
+      SetScrollbars(  0, (line_height+5),  0, inlays.size() );
+}
+
+void tui::nameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 {
    //Comment below as well as the part of the method is taken from wx samples scrollsub.cpp
    // We need to override OnSize so that our scrolled window

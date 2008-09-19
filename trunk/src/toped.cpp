@@ -199,6 +199,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    
    EVT_MENU( TMCIF_OPEN          , tui::TopedFrame::OnCIFRead     )
    EVT_MENU( TMCIF_TRANSLATE     , tui::TopedFrame::OnCIFtranslate)
+   EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFexportCELL)
    EVT_MENU( TMCIF_CLOSE         , tui::TopedFrame::OnCIFclose    )
    
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
@@ -405,6 +406,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/CIF operations/Parse","", &tui::TopedFrame::OnCIFRead, "Parse CIF file" );
    _resourceCenter->appendMenu("&File/CIF operations/Translate","", &tui::TopedFrame::OnCIFtranslate, "Import CIF structure" );
+   _resourceCenter->appendMenu("&File/CIF operations/export cell", "", &tui::TopedFrame::OnCIFexportCELL, "Export cell to CIF" );
    _resourceCenter->appendMenu("&File/CIF operations/Close","", &tui::TopedFrame::OnCIFclose, "Clear the parsed CIF file from memory" );
 
    _resourceCenter->appendMenuSeparator("&File");
@@ -1315,6 +1317,50 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
    }
    delete dlg;
 }
+
+void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event)) 
+{
+   SetStatusText(wxT("Exporting a cell to CIF file..."));
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getCIFexport* dlg = NULL;
+   try {
+      dlg = DEBUG_NEW tui::getCIFexport(this, -1, wxT("CIF export cell"), pos,
+                                        _browsers->tdtSelectedCellName());
+   }
+   catch (EXPTN) {delete dlg;return;}
+   wxString cellname;
+   bool recur;
+   if ( dlg->ShowModal() == wxID_OK ) {
+      cellname = dlg->get_selectedcell();
+      recur = dlg->get_recursive();
+      delete dlg;
+   }
+   else {delete dlg;return;}
+   wxString oststr;
+   oststr <<wxT("Exporting ") << cellname << wxT(" to CIF file");
+   wxString fullCellName;
+   fullCellName << cellname << wxT(".cif");
+   wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
+      wxT("CIF files |*.cif;*.CIF"),
+      tpdfSAVE);
+   if (wxID_OK == dlg2.ShowModal()) {
+      wxString filename = dlg2.GetPath();
+      if(!checkFileOverwriting(filename))
+      {
+         SetStatusText(wxT("CIF export aborted"));
+         return;
+      }
+      wxString ost;
+      ost << wxT("cifexport(\"") << cellname.c_str() << wxT("\" , ") <<
+                        (recur ? wxT("true") : wxT("false")) << wxT(",\"") <<
+                        (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str() << wxT("\", false);");
+      _cmdline->parseCommand(ost);
+//      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
+   }
+   else SetStatusText(wxT("CIF export aborted"));
+}
+
 
 
 void tui::TopedFrame::OnCellRef_B(wxCommandEvent& WXUNUSED(event)) {

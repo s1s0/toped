@@ -151,6 +151,7 @@ namespace tui {
       
       void     OnCIFRead(wxCommandEvent&);
       void   OnCIFtranslate(wxCommandEvent&);
+      void   OnCIFexportCELL(wxCommandEvent&);
       void    OnCIFclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("cifclose();"));}
       void     OnTDTSave(wxCommandEvent&);
       void   OnTDTSaveAs(wxCommandEvent&);

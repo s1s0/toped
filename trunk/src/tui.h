@@ -184,14 +184,14 @@ namespace tui {
    };
 
    //==========================================================================
-   class LayerRecords : public wxPanel {
+   class nameCboxRecord : public wxPanel {
       public:
-         LayerRecords(wxWindow*, wxPoint, wxSize, const NMap&, wxArrayString&, int);
-         NMap*                getCifLayerMap();
+         nameCboxRecord(wxWindow*, wxPoint, wxSize, const NMap&, wxArrayString&, int);
+         NMap*                getTheMap();
       private:
          class LayerRecord {
             public:
-               LayerRecord(wxStaticText* ciflay, wxComboBox* tdtlay) : _ciflay(ciflay), _tdtlay(tdtlay) {};
+                              LayerRecord(wxStaticText* ciflay, wxComboBox* tdtlay) : _ciflay(ciflay), _tdtlay(tdtlay) {};
                wxStaticText*     _ciflay;
                wxComboBox*       _tdtlay;
          };
@@ -199,15 +199,73 @@ namespace tui {
          AllRecords         _allRecords;
    };
 
-   //--------------------------------------------------------------------------
-   class LayerList : public wxScrolledWindow {
+   //==========================================================================
+   class nameEboxRecord : public wxPanel {
       public:
-         LayerList(wxWindow*, wxWindowID, wxPoint, wxSize, const NMap&);
-         NMap*                getCifLayerMap()     {return _laypanel->getCifLayerMap();}
+                              nameEboxRecord(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
+         NMap*                getTheMap();
+      private:
+         class LayerRecord {
+            public:
+                              LayerRecord(wxStaticText* ciflay, wxTextCtrl* tdtlay) : _ciflay(ciflay), _tdtlay(tdtlay) {};
+               wxStaticText*     _ciflay;
+               wxTextCtrl*       _tdtlay;
+         };
+         typedef std::list<LayerRecord> AllRecords;
+         AllRecords         _allRecords;
+   };
+
+   //--------------------------------------------------------------------------
+   class nameCboxList : public wxScrolledWindow {
+      public:
+                              nameCboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const NMap&);
+         NMap*                getTheMap()     {return _laypanel->getTheMap();}
          void                 OnSize( wxSizeEvent& );
       private:
-         tui::LayerRecords*   _laypanel;
+         tui::nameCboxRecord*   _laypanel;
          DECLARE_EVENT_TABLE();
+   };
+
+   //--------------------------------------------------------------------------
+   class nameEboxList : public wxScrolledWindow {
+      public:
+                              nameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const nameList&);
+         NMap*                getTheMap()     {return _laypanel->getTheMap();}
+         void                 OnSize( wxSizeEvent& );
+      private:
+         tui::nameEboxRecord*   _laypanel;
+         DECLARE_EVENT_TABLE();
+   };
+
+   //--------------------------------------------------------------------------
+   class getCIFimport : public wxDialog {
+   public:
+                        getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title,
+                                                                  wxPoint pos, wxString init);
+      wxString          getSelectedCell() const {return _nameList->GetStringSelection();}
+      bool              get_overwrite()   const {return _overwrite->GetValue();}
+      bool              getRecursive()    const {return _recursive->GetValue();}
+      NMap*             getCifLayerMap()        {return _layList->getTheMap();}
+   private:
+      wxCheckBox*       _overwrite;
+      wxCheckBox*       _recursive;
+      wxListBox*        _nameList;
+      nameCboxList*     _layList;
+   };
+
+   //--------------------------------------------------------------------------
+   class getCIFexport : public wxDialog {
+   public:
+                        getCIFexport(wxFrame *parent, wxWindowID id, const wxString &title,
+                                                                  wxPoint pos, wxString init);
+      wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
+      bool              get_recursive()    const {return _recursive->GetValue();};
+      NMap*             getCifLayerMap()         {return _layList->getTheMap();}
+   private:
+      wxCheckBox*       _recursive;
+      wxCheckBox*       _slang;
+      wxListBox*        _nameList;
+      nameEboxList*     _layList;
    };
 
    //--------------------------------------------------------------------------
@@ -225,21 +283,6 @@ namespace tui {
    };
 
    //--------------------------------------------------------------------------
-   class getCIFimport : public wxDialog {
-   public:
-                        getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos, wxString init);
-      wxString          getSelectedCell() const {return _nameList->GetStringSelection();}
-//      bool           get_overwrite()    const {return _overwrite->GetValue();}
-      bool              getRecursive()    const {return _recursive->GetValue();}
-      NMap*             getCifLayerMap()        {return _layList->getCifLayerMap();}
-   private:
-//      wxCheckBox*    _overwrite;
-      wxCheckBox*       _recursive;
-      wxListBox*        _nameList;
-      LayerList*        _layList;
-   };
-
    class getGDSexport : public wxDialog {
    public:
                      getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title,

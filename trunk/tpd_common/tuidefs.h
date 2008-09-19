@@ -63,6 +63,7 @@ namespace tui
       // <- CIF stuff
       TMCIF_OPEN          ,
       TMCIF_TRANSLATE     ,
+      TMCIF_EXPORTC       ,
       TMCIF_CLOSE         ,
       TMFILE_SAVE         ,
       TMFILE_SAVEAS       ,

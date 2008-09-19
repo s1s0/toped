@@ -28,8 +28,8 @@
 //      Comments :
 //===========================================================================
 
-#include <wx/tooltip.h>
 #include "tpdph.h"
+#include <wx/tooltip.h>
 #include "browsers.h"
 #include "viewprop.h"
 #include "../tpd_common/tuidefs.h"
@@ -93,6 +93,9 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
       wxString ost;
       ost << wxT("export ") << RBcellname << wxT(" to GDS");
       menu.Append(tui::TMGDS_EXPORTC, ost);
+      ost.Clear();
+      ost << wxT("export ") << RBcellname << wxT(" to CIF");
+      menu.Append(tui::TMCIF_EXPORTC, ost);
       menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
    }
    else
