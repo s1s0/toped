@@ -94,7 +94,7 @@ typedef        double   real;
 typedef  std::list<std::string>           nameList;
 typedef  std::list<word>                  WordList;
 typedef  std::map<std::string, int>       NMap;       // name
-typedef  std::map<unsigned, std::string>  USMap; // Unsigned - String Map
+typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
 
 //=============================================================================
 // Some common constants (instead of #defines)
