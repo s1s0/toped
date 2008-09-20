@@ -23,4 +23,5 @@ lmap list cif_layer_definition = {  {  1 ,"NWEL" },
                                     { 62 ,"TXT2" },
                                     { 63 ,"SCRB" } };
 
-cifexport("test_export.cif", cif_layer_definition );
+cifexport(cif_layer_definition , true, "test_export_v.cif");
+cifexport(cif_layer_definition , false, "test_export.cif");

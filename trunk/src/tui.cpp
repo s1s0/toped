@@ -453,6 +453,7 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
 {
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Export recursively"));
+   _recursive->SetValue(true);
    _slang = DEBUG_NEW wxCheckBox(this, -1, wxT("Verbose CIF slang"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB();

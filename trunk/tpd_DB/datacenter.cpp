@@ -765,12 +765,20 @@ CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
    return status;
 }
 
-void DataCenter::CIFexport(std::string& filename, USMap* laymap)
+void DataCenter::CIFexport(USMap* laymap, bool verbose, std::string& filename)
 {
    std::string nfn;
-   CIFin::CifExportFile cifex(filename, laymap);
-   _TEDLIB()->CIFwrite(cifex, NULL, true);
+   CIFin::CifExportFile cifex(filename, laymap, verbose);
+   _TEDLIB()->CIFwrite(cifex, NULL);
 }
+
+void DataCenter::CIFexport(laydata::tdtcell* topcell, USMap* laymap, bool recur, bool verbose, std::string& filename)
+{
+   std::string nfn;
+   CIFin::CifExportFile cifex(filename, laymap, verbose);
+   _TEDLIB()->CIFwrite(cifex, topcell, recur);
+}
+
 
 bool DataCenter::CIFgetLay(nameList& cifLayers)
 {

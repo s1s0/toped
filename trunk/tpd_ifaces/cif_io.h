@@ -301,7 +301,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifExportFile {
       public:
-                        CifExportFile(std::string, USMap*);
+                        CifExportFile(std::string, USMap*, bool);
                        ~CifExportFile();
          void           definitionStart(std::string);
          void           definitionFinish();

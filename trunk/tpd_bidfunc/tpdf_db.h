@@ -55,13 +55,15 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(GDSexportTOP     );
    TELL_STDCMD_CLASSA(GDSclose         );
    TELL_STDCMD_CLASSA(GDSreportlay     );
-   TELL_STDCMD_CLASSA(PSexportTOP      );
 
    TELL_STDCMD_CLASSA(CIFread          );
    TELL_STDCMD_CLASSA(CIFgetLay        );
    TELL_STDCMD_CLASSA(CIFimport        );
    TELL_STDCMD_CLASSA(CIFimportList    );
    TELL_STDCMD_CLASSA(CIFexportLIB     );
+   TELL_STDCMD_CLASSA(CIFexportTOP     );
    TELL_STDCMD_CLASSA(CIFclose         );
+
+   TELL_STDCMD_CLASSA(PSexportTOP      );
 }
 #endif

@@ -123,6 +123,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("cifimport"        ,(DEBUG_NEW               tellstdfunc::CIFimportList(telldata::tn_void, true)));
    mblock->addFUNC("cifimport"        ,(DEBUG_NEW                   tellstdfunc::CIFimport(telldata::tn_void, true)));
    mblock->addFUNC("cifexport"        ,(DEBUG_NEW                tellstdfunc::CIFexportLIB(telldata::tn_void,false)));
+   mblock->addFUNC("cifexport"        ,(DEBUG_NEW                tellstdfunc::CIFexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("cifclose"         ,(DEBUG_NEW                    tellstdfunc::CIFclose(telldata::tn_void, true)));
    mblock->addFUNC("gdsread"          ,(DEBUG_NEW          tellstdfunc::GDSread(TLISTOF(telldata::tn_string), true)));
    mblock->addFUNC("gdsimport"        ,(DEBUG_NEW              tellstdfunc::GDSimportList(telldata::tn_void, true)));
