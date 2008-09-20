@@ -203,13 +203,13 @@ namespace tui {
    class nameEboxRecord : public wxPanel {
       public:
                               nameEboxRecord(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
-         NMap*                getTheMap();
+         USMap*               getTheMap();
       private:
          class LayerRecord {
             public:
-                              LayerRecord(wxStaticText* ciflay, wxTextCtrl* tdtlay) : _ciflay(ciflay), _tdtlay(tdtlay) {};
-               wxStaticText*     _ciflay;
-               wxTextCtrl*       _tdtlay;
+                              LayerRecord(wxStaticText* tdtlay, wxTextCtrl* ciflay) : _ciflay(ciflay), _tdtlay(tdtlay) {};
+               wxStaticText*     _tdtlay;
+               wxTextCtrl*       _ciflay;
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords         _allRecords;
@@ -230,7 +230,7 @@ namespace tui {
    class nameEboxList : public wxScrolledWindow {
       public:
                               nameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const nameList&);
-         NMap*                getTheMap()     {return _laypanel->getTheMap();}
+         USMap*               getTheMap()     {return _laypanel->getTheMap();}
          void                 OnSize( wxSizeEvent& );
       private:
          tui::nameEboxRecord*   _laypanel;
@@ -258,9 +258,10 @@ namespace tui {
    public:
                         getCIFexport(wxFrame *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos, wxString init);
-      wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
-      bool              get_recursive()    const {return _recursive->GetValue();};
-      NMap*             getCifLayerMap()         {return _layList->getTheMap();}
+      wxString          get_selectedcell() const {return _nameList->GetStringSelection();}
+      bool              get_recursive()    const {return _recursive->GetValue();}
+      bool              get_slang()        const {return _slang->GetValue();}
+      USMap*            getCifLayerMap()         {return _layList->getTheMap();}
    private:
       wxCheckBox*       _recursive;
       wxCheckBox*       _slang;

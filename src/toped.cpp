@@ -1331,9 +1331,13 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
    catch (EXPTN) {delete dlg;return;}
    wxString cellname;
    bool recur;
+   bool sverbose;
+   USMap* laymap;
    if ( dlg->ShowModal() == wxID_OK ) {
       cellname = dlg->get_selectedcell();
-      recur = dlg->get_recursive();
+      recur    = dlg->get_recursive();
+      sverbose = dlg->get_slang();
+      laymap   = dlg->getCifLayerMap();
       delete dlg;
    }
    else {delete dlg;return;}
@@ -1351,12 +1355,32 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
          SetStatusText(wxT("CIF export aborted"));
          return;
       }
+
+      // get the layer map first
+      std::ostringstream laymapstr;
+      word recno = 0;
+      laymapstr << "{";
+      for (USMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
+      {
+         if (recno != 0)
+            laymapstr << ",";
+         laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
+         recno++;
+      }
+      laymapstr << "}";
+      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
+      delete laymap;
       wxString ost;
-      ost << wxT("cifexport(\"") << cellname.c_str() << wxT("\" , ") <<
-                        (recur ? wxT("true") : wxT("false")) << wxT(",\"") <<
-                        (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str() << wxT("\", false);");
+
+      ost << wxT("cifexport(\"") 
+          << cellname << wxT("\", ")
+          << wxlaymap << wxT(", ")
+          << (recur ? wxT("true") : wxT("false")) << wxT(", ")
+          << (sverbose ? wxT("true") : wxT("false")) << wxT(", \"")
+          <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\");");
+
       _cmdline->parseCommand(ost);
-//      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
+      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("CIF export aborted"));
 }

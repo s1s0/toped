@@ -1805,33 +1805,28 @@ tui::nameEboxRecord::nameEboxRecord( wxWindow *parent, wxPoint pnt, wxSize sz,
    word rowno = 0;
    for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-      wxString cifln  = wxString(CNM->c_str(), wxConvUTF8);
-//      std::string ics = DATC->getLayerName(CNM->second);
-//      wxString wxics  = wxString(CNM->c_str(), wxConvUTF8);
-      wxStaticText* dwciflay  = DEBUG_NEW wxStaticText( this, wxID_ANY, cifln,
+      wxString tpdlay  = wxString(CNM->c_str(), wxConvUTF8);
+      wxString ciflay(wxT("L"));
+      ciflay << DATC->getLayerNo(*CNM);
+      if (4 < ciflay.Length()) ciflay.Clear(); // Should not be longer than 4
+      wxStaticText* dwtpdlays  = DEBUG_NEW wxStaticText( this, wxID_ANY, tpdlay,
          wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
-      wxTextCtrl*   dwtpdlays = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, wxT(""), wxPoint(110,(row_height+5)*rowno + 5), wxSize(150,row_height));
-      _allRecords.push_back(LayerRecord(dwciflay, dwtpdlays));
+      wxTextCtrl*   dwciflay = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, ciflay, wxPoint(110,(row_height+5)*rowno + 5), wxSize(150,row_height));
+      _allRecords.push_back(LayerRecord(dwtpdlays, dwciflay));
       rowno++;
    }
 }
 
-NMap* tui::nameEboxRecord::getTheMap()
+USMap* tui::nameEboxRecord::getTheMap()
 {
-   NMap* cif_lay_map = DEBUG_NEW NMap();
+   USMap* cif_lay_map = DEBUG_NEW USMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
-      std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str(wxConvUTF8));
-      // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
-      if ("" == layname)
-         layname = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
+      std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
+      assert("" != layname);
       word layno = DATC->getLayerNo(layname);
-      if (0 == layno)
-      {
-         layno = DATC->addlayer(layname);
-         browsers::layer_add(layname, layno);
-      }
-      (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
+      assert(layno);
+      (*cif_lay_map)[layno] = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
    }
    return cif_lay_map;
 }
@@ -1852,9 +1847,9 @@ tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"),
-      wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
    (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
+      wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"),
       wxPoint(110, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
 
    wxSize panelsz = GetClientSize();
