@@ -105,7 +105,8 @@ public:
    void                       GDSclose();
    void                       CIFclose();
    CIFin::CifStatusType       CIFparse(std::string filename);
-   void                       CIFexport(std::string&, USMap*);
+   void                       CIFexport(USMap*, bool, std::string&);
+   void                       CIFexport(laydata::tdtcell*, USMap*, bool, bool, std::string&);
    bool                       CIFgetLay(nameList&);
    bool                       gdsGetLayers(GDSin::GdsLayers&);
    void                       CIFimport(const nameList&, NMap*, bool);

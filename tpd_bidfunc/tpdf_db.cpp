@@ -974,14 +974,16 @@ int tellstdfunc::CIFimport::execute()
 tellstdfunc::CIFexportLIB::CIFexportLIB(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::CIFexportLIB::execute()
 {
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string filename = getStringValue();
+   bool  verbose = getBoolValue();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    // Convert layer map
    USMap* cifLays = DEBUG_NEW USMap();
    telldata::tthsh* nameh;
@@ -993,7 +995,7 @@ int tellstdfunc::CIFexportLIB::execute()
    if (expandFileName(filename))
    {
       DATC->lockDB(false);
-      DATC->CIFexport(filename, cifLays);
+      DATC->CIFexport(cifLays, verbose, filename);
       DATC->unlockDB();
       LogFile << LogFile.getFN() << "(\""<< filename << "\"," << (*lll) << ");"; LogFile.flush();
    }
@@ -1004,6 +1006,65 @@ int tellstdfunc::CIFexportLIB::execute()
    }
    delete cifLays;
    delete lll;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::CIFexportTOP::CIFexportTOP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::CIFexportTOP::execute()
+{
+   std::string filename = getStringValue();
+   bool  verbose = getBoolValue();
+   bool  recur = getBoolValue();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   std::string cellname = getStringValue();
+
+   // Convert layer map
+   USMap* cifLays = DEBUG_NEW USMap();
+   telldata::tthsh* nameh;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      (*cifLays)[nameh->number().value()] = nameh->name().value();
+   }
+
+   if (expandFileName(filename))
+   {
+      laydata::tdtcell *excell = NULL;
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         excell = ATDB->checkcell(cellname);
+         if (NULL != excell)
+         {
+            DATC->CIFexport(excell, cifLays, recur, verbose, filename);
+            LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
+                                       << (*lll)            
+                                       << LogFile._2bool(recur) 
+                                       << LogFile._2bool(verbose) 
+                                       << ",\"" << filename << "\");";
+            LogFile.flush();
+         }
+         else
+         {
+            std::string message = "Cell " + cellname + " not found in the database";
+            tell_log(console::MT_ERROR,message);
+         }
+      DATC->unlockDB();
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
+   }
+
    return EXEC_NEXT;
 }
 

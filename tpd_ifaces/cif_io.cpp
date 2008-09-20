@@ -438,11 +438,11 @@ void CIFin::CifFile::closeFile()
 }
 
 //=============================================================================
-CIFin::CifExportFile::CifExportFile(std::string fn, USMap* laymap)
+CIFin::CifExportFile::CifExportFile(std::string fn, USMap* laymap, bool verbose)
 {
    _fileName = fn;
    _laymap = laymap;
-   _verbose = true;
+   _verbose = verbose;
    _lastcellnum = 0;
    std::string fname(convertString(_fileName));
    _file.open(_fileName.c_str(), std::ios::out);
@@ -586,7 +586,7 @@ void CIFin::CifExportFile::call(const std::string& cellname, const CTM& tmatrix)
    {
       _file <<"      C" << _cellmap[cellname];
       if (       flipX) _file << " MY";
-      if (0.0 != rot  ) _file << " R resultX, resultY";
+      if (0.0 != rot  ) _file << " R " << resultX << " " << resultY;
       _file << " T" << trans.x() << " " << trans.y();
    }
    _file << ";"<< std::endl;
