@@ -208,8 +208,9 @@ void GDSin::Gds2Ted::text(GDSin::GdsText* wd, laydata::tdtlayer* wl)
    wl->addtext(wd->text(),
                CTM(wd->magnPoint(),
                    wd->magnification() / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
-                                     wd->angle(),
-                                               (0 != wd->reflection())));
+                   wd->angle(),
+                   (0 != wd->reflection()) )
+              );
 }
 
 void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
@@ -472,8 +473,16 @@ void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
    }
 }
 
-void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc*,laydata::tdtlayer*, std::string )
+void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::tdtlayer* wl, std::string )
 {
+   // CIF doesn't have a concept of texts (as GDS)
+   // text size and placement are just the default
+   wl->addtext(wd->text(),
+               CTM(*(wd->location()),
+                   1 / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
+                   0.0,
+                   false )
+              );
 }
 
 void CIFin::Cif2Ted::lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string )

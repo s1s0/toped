@@ -946,13 +946,13 @@ int tellstdfunc::CIFimport::execute()
 {
    bool  over  = getBoolValue();
    NMap* cifLays = DEBUG_NEW NMap();
-   telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    // Convert layer map
    telldata::tthsh* nameh;
-   for (unsigned i = 0; i < ll->size(); i++)
+   for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       (*cifLays)[nameh->name().value()] = nameh->number().value();
    }
    // Convert top structure list
@@ -964,8 +964,9 @@ int tellstdfunc::CIFimport::execute()
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
 
-   LogFile << LogFile.getFN() << "(\"" << name<< "\"," << *ll << "," << LogFile._2bool(over) << ");"; LogFile.flush();
-   delete ll;
+   LogFile << LogFile.getFN() << "(\"" << name<< "\"," << *lll << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   delete lll;
+   cifLays->clear();
    delete cifLays;
    return EXEC_NEXT;
 }
@@ -1064,7 +1065,9 @@ int tellstdfunc::CIFexportTOP::execute()
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
       tell_log(console::MT_ERROR,info);
    }
-
+   cifLays->clear();
+   delete cifLays;
+   delete lll;
    return EXEC_NEXT;
 }
 
