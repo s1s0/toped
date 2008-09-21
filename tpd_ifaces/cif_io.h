@@ -194,6 +194,9 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
                      CifLabelLoc(CifData*, std::string, TP*);
          virtual   ~CifLabelLoc();
          CifDataType dataType()                       {return cif_LBL_LOC;}
+         std::string text() const                     {return _label;}
+         const TP*   location() const                 {return _location;}
+
       protected:
          std::string _label;
          TP*         _location;
