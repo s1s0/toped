@@ -574,12 +574,14 @@ void laydata::tdtbox::write(TEDfile* const tedfile) const {
 
 void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
+   word gds_layer, gds_type;
+   gdsf.getMappedLayType(gds_layer, gds_type, lay);
    GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
    gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_LAYER);
-   wr->add_int2b(lay);gdsf.flush(wr);
+   wr->add_int2b(gds_layer);gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_DATATYPE);
-   wr->add_int2b(0);gdsf.flush(wr);
+   wr->add_int2b(gds_type);gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_XY,5);
    wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
    wr->add_int4b(_p1->x());wr->add_int4b(_p2->y());
@@ -1037,12 +1039,14 @@ void laydata::tdtpoly::write(TEDfile* const tedfile) const {
 
 void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
+   word gds_layer, gds_type;
+   gdsf.getMappedLayType(gds_layer, gds_type, lay);
    GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
    gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_LAYER);
-   wr->add_int2b(lay);gdsf.flush(wr);
+   wr->add_int2b(gds_layer);gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_DATATYPE);
-   wr->add_int2b(0);gdsf.flush(wr);
+   wr->add_int2b(gds_type);gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_XY,_plist.size()+1);
    for (word i = 0; i < _plist.size(); i++)
    {
@@ -1455,12 +1459,14 @@ void laydata::tdtwire::write(TEDfile* const tedfile) const {
 
 void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
+   word gds_layer, gds_type;
+   gdsf.getMappedLayType(gds_layer, gds_type, lay);
    GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_PATH);
    gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_LAYER);
-   wr->add_int2b(lay);gdsf.flush(wr);
+   wr->add_int2b(gds_layer);gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_DATATYPE);
-   wr->add_int2b(0);gdsf.flush(wr);
+   wr->add_int2b(gds_type);gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_WIDTH);
    wr->add_int4b(_width);gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_XY,_plist.size());
@@ -2248,12 +2254,14 @@ void laydata::tdttext::write(TEDfile* const tedfile) const {
 
 void laydata::tdttext::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 {
+   word gds_layer, gds_type;
+   gdsf.getMappedLayType(gds_layer, gds_type, lay);
    GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_TEXT);
    gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_LAYER);
-   wr->add_int2b(lay);gdsf.flush(wr);
+   wr->add_int2b(gds_layer);gdsf.flush(wr);
    wr = gdsf.setNextRecord(gds_TEXTTYPE);
-   wr->add_int2b(0);gdsf.flush(wr);
+   wr->add_int2b(gds_type);gdsf.flush(wr);
    TP trans;
    real rotation, scale;
    bool flipX;

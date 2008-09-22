@@ -526,7 +526,7 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, c
 void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
                                  const TDTHierTree* root, real UU, bool recur) const
 {
-   // We going to write the cells in hierarchical order. Children - first!
+   // We are going to write the cells in hierarchical order. Children - first!
    if (recur)
    {
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);

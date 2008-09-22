@@ -1237,9 +1237,11 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    catch (EXPTN) {delete dlg;return;}
    wxString cellname;
    bool recur;
+   USMap* laymap;
    if ( dlg->ShowModal() == wxID_OK ) {
       cellname = dlg->get_selectedcell();
       recur = dlg->get_recursive();
+      laymap = dlg->getGdsLayerMap();
       delete dlg;
    }
    else {delete dlg;return;}
@@ -1257,10 +1259,29 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
          SetStatusText(wxT("GDS export aborted"));
          return;
       }
+
+      // get the layer map 
+      std::ostringstream laymapstr;
+      word recno = 0;
+      laymapstr << "{";
+      for (USMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
+      {
+         if (recno != 0)
+            laymapstr << ",";
+         laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
+         recno++;
+      }
+      laymapstr << "}";
+      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
+      delete laymap;
+
       wxString ost;
-      ost << wxT("gdsexport(\"") << cellname.c_str() << wxT("\" , ") <<
-                        (recur ? wxT("true") : wxT("false")) << wxT(",\"") <<
-                        (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str() << wxT("\", false);");
+      ost << wxT("gdsexport(\"") 
+          << cellname.c_str() << wxT("\" , ") 
+          << wxlaymap << wxT(", ")
+          << (recur ? wxT("true") : wxT("false")) << wxT(",\"") 
+          << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str() 
+          << wxT("\", false);");
       _cmdline->parseCommand(ost);
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }

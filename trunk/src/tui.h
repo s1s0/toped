@@ -184,9 +184,9 @@ namespace tui {
    };
 
    //==========================================================================
-   class nameCboxRecord : public wxPanel {
+   class nameCboxRecords : public wxPanel {
       public:
-         nameCboxRecord(wxWindow*, wxPoint, wxSize, const NMap&, wxArrayString&, int);
+                              nameCboxRecords(wxWindow*, wxPoint, wxSize, const NMap&, wxArrayString&, int);
          NMap*                getTheMap();
       private:
          class LayerRecord {
@@ -200,16 +200,35 @@ namespace tui {
    };
 
    //==========================================================================
-   class nameEboxRecord : public wxPanel {
+   class nameEboxRecords : public wxPanel {
       public:
-                              nameEboxRecord(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
+                              nameEboxRecords(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
          USMap*               getTheMap();
       private:
          class LayerRecord {
             public:
-                              LayerRecord(wxStaticText* tdtlay, wxTextCtrl* ciflay) : _ciflay(ciflay), _tdtlay(tdtlay) {};
-               wxStaticText*     _tdtlay;
-               wxTextCtrl*       _ciflay;
+                              LayerRecord(wxStaticText* tdtlay, wxTextCtrl* ciflay) : 
+                                 _tdtlay(tdtlay), _ciflay(ciflay) {};
+               wxStaticText*  _tdtlay;
+               wxTextCtrl*    _ciflay;
+         };
+         typedef std::list<LayerRecord> AllRecords;
+         AllRecords         _allRecords;
+   };
+
+   //==========================================================================
+   class nameEbox3Records : public wxPanel {
+      public:
+                              nameEbox3Records(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
+         USMap*               getTheMap();
+      private:
+         class LayerRecord {
+            public:
+                              LayerRecord(wxStaticText* tdtlay, wxTextCtrl* gdslay, wxTextCtrl* gdstype) : 
+                                 _tdtlay(tdtlay), _gdslay(gdslay), _gdstype(gdstype) {};
+               wxStaticText*  _tdtlay;
+               wxTextCtrl*    _gdslay;
+               wxTextCtrl*    _gdstype;
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords         _allRecords;
@@ -222,7 +241,7 @@ namespace tui {
          NMap*                getTheMap()     {return _laypanel->getTheMap();}
          void                 OnSize( wxSizeEvent& );
       private:
-         tui::nameCboxRecord*   _laypanel;
+         tui::nameCboxRecords*   _laypanel;
          DECLARE_EVENT_TABLE();
    };
 
@@ -233,7 +252,18 @@ namespace tui {
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          void                 OnSize( wxSizeEvent& );
       private:
-         tui::nameEboxRecord*   _laypanel;
+         tui::nameEboxRecords* _laypanel;
+         DECLARE_EVENT_TABLE();
+   };
+
+   //--------------------------------------------------------------------------
+   class nameEbox3List : public wxScrolledWindow {
+      public:
+                              nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const nameList&);
+         USMap*               getTheMap()     {return _laypanel->getTheMap();}
+         void                 OnSize( wxSizeEvent& );
+      private:
+         tui::nameEbox3Records* _laypanel;
          DECLARE_EVENT_TABLE();
    };
 
@@ -272,27 +302,29 @@ namespace tui {
    //--------------------------------------------------------------------------
    class getGDSimport : public wxDialog {
    public:
-                     getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title,
+                        getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos, wxString init);
-      wxString       get_selectedcell() const {return _nameList->GetStringSelection();};
-      bool           get_overwrite()    const {return _overwrite->GetValue();};
-      bool           get_recursive()    const {return _recursive->GetValue();};
+      wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
+      bool              get_overwrite()    const {return _overwrite->GetValue();};
+      bool              get_recursive()    const {return _recursive->GetValue();};
    private:
-      wxCheckBox*    _overwrite;
-      wxCheckBox*    _recursive;
-      wxListBox*     _nameList;
+      wxCheckBox*       _overwrite;
+      wxCheckBox*       _recursive;
+      wxListBox*        _nameList;
    };
 
    //--------------------------------------------------------------------------
    class getGDSexport : public wxDialog {
    public:
-                     getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title,
+                        getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos, wxString init);
-      wxString       get_selectedcell() const {return _nameList->GetStringSelection();};
-      bool           get_recursive()    const {return _recursive->GetValue();};
+      wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
+      bool              get_recursive()    const {return _recursive->GetValue();};
+      USMap*            getGdsLayerMap()         {return _layList->getTheMap();}
    private:
-      wxCheckBox*    _recursive;
-      wxListBox*     _nameList;
+      wxCheckBox*       _recursive;
+      wxListBox*        _nameList;
+      nameEbox3List*    _layList;
    };
 
    //--------------------------------------------------------------------------

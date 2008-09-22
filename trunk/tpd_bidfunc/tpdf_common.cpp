@@ -310,3 +310,15 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
    TopedCanvasW = cnvs;
 }
 
+//=============================================================================
+void tellstdfunc::makeGdsLays(GDSin::GdsLayers& gdsLays)
+{
+   nameList allls;
+   DATC->all_layers(allls);
+   for (nameList::const_iterator CL = allls.begin(); CL != allls.end(); CL++)
+   {
+      WordList data_types;
+      data_types.push_back(0);
+      gdsLays[DATC->getLayerNo(*CL)] = data_types;
+   }
+}

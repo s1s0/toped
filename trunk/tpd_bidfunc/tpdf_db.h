@@ -53,6 +53,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(GDSimportListT   );
    TELL_STDCMD_CLASSA(GDSexportLIB     );
    TELL_STDCMD_CLASSA(GDSexportTOP     );
+   TELL_STDCMD_CLASSA(GDSexportTOPT    );
    TELL_STDCMD_CLASSA(GDSclose         );
    TELL_STDCMD_CLASSA(GDSreportlay     );
 

@@ -29,6 +29,7 @@
 
 #include "tpdph.h"
 #include <math.h>
+#include <sstream>
 #include <wx/colordlg.h>
 #include <wx/regex.h>
 #include "tui.h"
@@ -557,22 +558,29 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
+      //-----------------------------------------------------------------------
+      nameList tdtLayers;
+      DATC->all_layers(tdtLayers);
+
    DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
+
+   _layList = DEBUG_NEW tui::nameEbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(250,300), tdtLayers);
+
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-   // First line up the important things
-   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-   //   spin_sizer->Add(0,0,1); //
-   spin_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
+   //
+   wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   lists_sizer->Add(_nameList, 1, wxEXPAND );
+   lists_sizer->Add(_layList, 0, wxEXPAND);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
    button_sizer->Add(0,0,1); // 
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   topsizer->Add(_nameList, 1, wxEXPAND );
-   topsizer->Add(spin_sizer, 0, wxEXPAND );
+   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
    topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
 
    SetSizer( topsizer );      // use the sizer for layout
@@ -1715,7 +1723,7 @@ tui::defineFill::~defineFill()
 
 
 //==========================================================================
-tui::nameCboxRecord::nameCboxRecord( wxWindow *parent, wxPoint pnt, wxSize sz, 
+tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz, 
             const NMap& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
@@ -1734,7 +1742,7 @@ tui::nameCboxRecord::nameCboxRecord( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-NMap* tui::nameCboxRecord::getTheMap()
+NMap* tui::nameCboxRecords::getTheMap()
 {
    NMap* cif_lay_map = DEBUG_NEW NMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
@@ -1777,7 +1785,7 @@ tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
-   _laypanel = DEBUG_NEW tui::nameCboxRecord(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
+   _laypanel = DEBUG_NEW tui::nameCboxRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
    SetTargetWindow(_laypanel); // trget scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
       SetScrollbars(  0, (line_height+5),  0, inlays.size() );
@@ -1799,7 +1807,7 @@ void tui::nameCboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 
 //==========================================================================
-tui::nameEboxRecord::nameEboxRecord( wxWindow *parent, wxPoint pnt, wxSize sz, 
+tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz, 
             const nameList& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
@@ -1818,7 +1826,7 @@ tui::nameEboxRecord::nameEboxRecord( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-USMap* tui::nameEboxRecord::getTheMap()
+USMap* tui::nameEboxRecords::getTheMap()
 {
    USMap* cif_lay_map = DEBUG_NEW USMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
@@ -1855,13 +1863,98 @@ tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
-   _laypanel = DEBUG_NEW tui::nameEboxRecord(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
+   _laypanel = DEBUG_NEW tui::nameEboxRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
    SetTargetWindow(_laypanel); // trget scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
       SetScrollbars(  0, (line_height+5),  0, inlays.size() );
 }
 
 void tui::nameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
+{
+   //Comment below as well as the part of the method is taken from wx samples scrollsub.cpp
+   // We need to override OnSize so that our scrolled window
+   // a) does call Layout() to use sizers for positioning the controls but
+   // b) does not query the sizer for their size and use that for setting the scrollable
+   // area as set that ourselves by calling SetScrollbar() in the constructor.
+
+   Layout();
+   wxSize client_size = GetClientSize();
+   _laypanel->SetClientSize(client_size);
+   AdjustScrollbars();
+}
+
+//==========================================================================
+tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz, 
+            const nameList& inlays, wxArrayString& all_strings, int row_height) 
+            : wxPanel(parent, wxID_ANY, pnt, sz)
+{
+   word rowno = 0;
+   for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   {
+      wxString tpdlay  = wxString(CNM->c_str(), wxConvUTF8);
+      wxString gdslay;
+      gdslay << DATC->getLayerNo(*CNM);
+
+      wxStaticText* dwtpdlays  = DEBUG_NEW wxStaticText( this, wxID_ANY, tpdlay,
+         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
+      wxTextCtrl*   dwgdslay = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, gdslay, 
+         wxPoint(110,(row_height+5)*rowno + 5), wxSize(70,row_height));
+      wxTextCtrl*   dwgdstyp = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, wxT("0"), 
+         wxPoint(180,(row_height+5)*rowno + 5), wxSize(70,row_height));
+      _allRecords.push_back(LayerRecord(dwtpdlays, dwgdslay, dwgdstyp));
+      rowno++;
+   }
+}
+
+USMap* tui::nameEbox3Records::getTheMap()
+{
+   USMap* gds_lay_map = DEBUG_NEW USMap();
+   for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
+   {
+      std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
+      assert("" != layname);
+      word layno = DATC->getLayerNo(layname);
+      assert(layno);
+      std::ostringstream gdslaytype;
+      gdslaytype <<  std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8)) << ";"
+                 <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8))   ;
+      (*gds_lay_map)[layno] = gdslaytype.str();
+   }
+   return gds_lay_map;
+}
+
+//--------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(tui::nameEbox3List, wxScrolledWindow)
+      EVT_SIZE( tui::nameEbox3List::OnSize )
+END_EVENT_TABLE()
+
+tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const nameList& inlays) :
+      wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
+{
+   // collect all defined layers
+   nameList all_names;
+   DATC->all_layers(all_names);
+   wxArrayString all_strings;
+   int line_height = (int)(GetFont().GetPointSize() * 2.5);
+   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+      all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
+
+   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
+      wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS layer"),
+      wxPoint(110, 5), wxSize(70,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS type"),
+      wxPoint(180, 5), wxSize(70,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+
+   wxSize panelsz = GetClientSize();
+   panelsz.SetHeight(panelsz.GetHeight() - line_height);
+   _laypanel = DEBUG_NEW tui::nameEbox3Records(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
+   SetTargetWindow(_laypanel); // target scrollbar window
+   if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
+      SetScrollbars(  0, (line_height+5),  0, inlays.size() );
+}
+
+void tui::nameEbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 {
    //Comment below as well as the part of the method is taken from wx samples scrollsub.cpp
    // We need to override OnSize so that our scrolled window

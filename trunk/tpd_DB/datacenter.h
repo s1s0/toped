@@ -32,28 +32,12 @@
 #include "../tpd_ifaces/cif_io.h"
 #include "viewprop.h"
 
-class LayerMapGds {
-   public:
-                           LayerMapGds(GDSin::GdsLayers&);
-                           LayerMapGds(const GDSin::NumStrMap&, GDSin::GdsLayers&);
-      bool                 getTdtLay(word&, word, word) const;
-      bool                 status() {return _status;}
-   private:
-      typedef std::map< word, word  >     GdtTdtMap;
-      typedef std::map< word, GdtTdtMap>  GlMap;
-      bool                 parseLayTypeString(wxString&, word);
-      void                 patternNormalize(wxString&);
-      void                 getList(wxString&, WordList&);
-      GlMap                _theMap;
-      bool                 _status;
-      GDSin::GdsLayers&    _alist; // all available GDS layers with their data types
-};
 
 namespace GDSin {
 
    class Gds2Ted {
    public:
-                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const LayerMapGds&);
+                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const GDSin::LayerMapGds&);
       void                 top_structure(std::string, bool, bool);
    protected:
       void                 child_structure(const GDSin::GDSHierTree*, bool, bool);
@@ -66,7 +50,7 @@ namespace GDSin {
       void                 aref(GDSin::GdsARef*    , laydata::tdtcell* );
       GDSin::GdsFile*      _src_lib;
       laydata::tdtdesign*  _dst_lib;
-      const LayerMapGds&   _theLayMap;
+      const GDSin::LayerMapGds&   _theLayMap;
       real                 _coeff; // DBU difference
    };
 }
@@ -99,9 +83,9 @@ public:
                               DataCenter(std::string);
                              ~DataCenter(); 
    bool                       GDSparse(std::string filename);
-   void                       GDSexport(std::string&, bool);
-   void                       GDSexport(laydata::tdtcell*, bool, std::string&, bool);
-   void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
+   void                       GDSexport(const GDSin::LayerMapGds&, std::string&, bool);
+   void                       GDSexport(laydata::tdtcell*, const GDSin::LayerMapGds&, bool, std::string&, bool);
+   void                       importGDScell(const nameList&, const GDSin::LayerMapGds&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
    CIFin::CifStatusType       CIFparse(std::string filename);
