@@ -532,7 +532,7 @@ void CIFin::CifExportFile::wire(unsigned width, const pointlist& plst)
    if (_verbose)
       _file <<"      Wire width = " << width << "and points";
    else
-      _file <<"      W";
+      _file <<"      W" << width;
    for (pointlist::const_iterator CP = plst.begin(); CP != plst.end(); CP++)
       _file << " " << CP->x() << " " << CP->y();
    _file << ";"<< std::endl;
