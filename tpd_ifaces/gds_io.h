@@ -123,7 +123,6 @@ namespace GDSin {
    typedef std::vector<GdsStructure*>     ChildStructure;
    typedef SGHierTree<GdsStructure>       GDSHierTree;
    typedef std::map<word, WordList>       GdsLayers;
-   typedef std::map<word, std::string>    NumStrMap;
 
    typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
 
@@ -536,6 +535,24 @@ namespace GDSin {
       GdsStructure*           _fStruct;
    };
 
+   class LayerMapGds {
+      public:
+                              LayerMapGds(GDSin::GdsLayers*);
+                              LayerMapGds(const USMap&, GDSin::GdsLayers*);
+         bool                 getTdtLay(word&, word, word) const;
+         bool                 getGdsLayType(word&, word&, word) const;
+         bool                 status() {return _status;}
+      private:
+         typedef std::map< word, word  >     GdtTdtMap;
+         typedef std::map< word, GdtTdtMap>  GlMap;
+         bool                 parseLayTypeString(wxString&, word);
+         void                 patternNormalize(wxString&);
+         void                 getList(wxString&, WordList&);
+         GlMap                _theMap;
+         bool                 _status;
+         GDSin::GdsLayers*    _alist; // all available GDS layers with their data types
+   };
+
    /*** GdsFile ***************************************************************
    >>> Constructor --------------------------------------------------------------
    > Opens the input GDS file and start reading it. Initializes all data fields
@@ -573,7 +590,7 @@ namespace GDSin {
    class   GdsFile   {
       public:
                               GdsFile(std::string);
-                              GdsFile(std::string, time_t);
+                              GdsFile(std::string, const LayerMapGds*, time_t);
          GdsRecord*           getNextRecord();
          GdsRecord*           setNextRecord(byte, word reclen = 0);
          double               libUnits();
@@ -585,6 +602,7 @@ namespace GDSin {
          void                 updateLastRecord();
          GdsStructure*        getStructure(const char*);
          void                 collectLayers(GdsLayers&);
+         void                 getMappedLayType(word& gdslay, word& gdstype, word tdtlay);
          std::string          libname() const                  { return _library->name();       }
          void                 hierOut()                        { _hierTree = _library->hierOut();}
          GDSHierTree*         hierTree()                       { return _hierTree;              }
@@ -613,6 +631,7 @@ namespace GDSin {
          GDStime              _tModif;
          GDStime              _tAccess;
          bool                 _status;
+         const LayerMapGds*   _laymap;
    };
 
    // Function definition

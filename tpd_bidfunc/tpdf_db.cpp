@@ -416,7 +416,7 @@ int tellstdfunc::GDSimport::execute()
       GDSin::GdsLayers gdsLaysAll;
       src_structure->collectLayers(gdsLaysAll,true);
       DATC->unlockGDS();
-      LayerMapGds LayerExpression(gdsLaysAll); // get default
+      GDSin::LayerMapGds LayerExpression(&gdsLaysAll); // get default
       nameList top_cells;
       top_cells.push_back(name);
       DATC->lockDB(false);
@@ -448,7 +448,7 @@ int tellstdfunc::GDSimportT::execute()
 
    // Convert layer map
    telldata::tthsh* nameh;
-   GDSin::NumStrMap gdsLaysStrList;
+   USMap gdsLaysStrList;
    for (unsigned i = 0; i < lll->size(); i++)
    {
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
@@ -469,7 +469,7 @@ int tellstdfunc::GDSimportT::execute()
       GDSin::GdsLayers gdsLaysAll;
       src_structure->collectLayers(gdsLaysAll,true);
       DATC->unlockGDS();
-      LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+      GDSin::LayerMapGds LayerExpression(gdsLaysStrList, &gdsLaysAll);
       if (LayerExpression.status())
       {
          nameList top_cells;
@@ -514,7 +514,7 @@ int tellstdfunc::GDSimportList::execute()
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
       AGDSDB->collectLayers(gdsLaysAll);
    DATC->unlockGDS();
-   LayerMapGds LayerExpression(gdsLaysAll);
+   GDSin::LayerMapGds LayerExpression(&gdsLaysAll);
    DATC->lockDB(false);
       DATC->importGDScell(top_cells, LayerExpression, recur, over);
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
@@ -557,7 +557,7 @@ int tellstdfunc::GDSimportListT::execute()
    }
    // Convert layer map
    telldata::tthsh* nameh;
-   GDSin::NumStrMap gdsLaysStrList;
+   USMap gdsLaysStrList;
    for (unsigned i = 0; i < lll->size(); i++)
    {
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
@@ -567,7 +567,7 @@ int tellstdfunc::GDSimportListT::execute()
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
       AGDSDB->collectLayers(gdsLaysAll);
    DATC->unlockGDS();
-   LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+   GDSin::LayerMapGds LayerExpression(gdsLaysStrList, &gdsLaysAll);
    if (LayerExpression.status())
    {
       DATC->lockDB(false);
@@ -612,7 +612,10 @@ int tellstdfunc::GDSexportLIB::execute()
    if (expandFileName(filename))
    {
       DATC->lockDB(false);
-         DATC->GDSexport(filename, x2048);
+         GDSin::GdsLayers default_list;
+         makeGdsLays(default_list);
+         GDSin::LayerMapGds default_map(&default_list);
+         DATC->GDSexport(default_map, filename, x2048);
       DATC->unlockDB();
       LogFile << LogFile.getFN() << "(\""<< filename << ");"; LogFile.flush();
    }
@@ -646,19 +649,85 @@ int tellstdfunc::GDSexportTOP::execute()
       laydata::tdtdesign* ATDB = DATC->lockDB(false);
          excell = ATDB->checkcell(cellname);
          if (NULL != excell)
-            DATC->GDSexport(excell, recur, filename, x2048);
+         {
+            GDSin::GdsLayers default_list;
+            makeGdsLays(default_list);
+            GDSin::LayerMapGds default_map(&default_list);
+            DATC->GDSexport(excell, default_map, recur, filename, x2048);
+            LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
+                  << LogFile._2bool(recur) << ",\"" << filename << "\");";
+            LogFile.flush();
+         }
+         else
+         {
+            std::string message = "Cell " + cellname + " not found in the database";
+            tell_log(console::MT_ERROR,message);
+         }
       DATC->unlockDB();
-      if (NULL != excell)
-      {
-         LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
-               << LogFile._2bool(recur) << ",\"" << filename << "\");";
-         LogFile.flush();
-      }
-      else
-      {
-         std::string message = "Cell " + cellname + " not found in the database";
-         tell_log(console::MT_ERROR,message);
-      }
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
+   }
+
+   return EXEC_NEXT;
+}
+
+
+//=============================================================================
+tellstdfunc::GDSexportTOPT::GDSexportTOPT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+int tellstdfunc::GDSexportTOPT::execute()
+{
+   bool  x2048 = getBoolValue();
+   std::string filename = getStringValue();
+   bool  recur = getBoolValue();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   std::string cellname = getStringValue();
+
+   // Convert layer map
+   USMap gdsLays;
+   telldata::tthsh* nameh;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      gdsLays[nameh->number().value()] = nameh->name().value();
+   }
+
+   if (expandFileName(filename))
+   {
+      laydata::tdtcell *excell = NULL;
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         excell = ATDB->checkcell(cellname);
+
+         if (NULL != excell)
+         {
+//            GDSin::GdsLayers default_list;
+//            makeGdsLays(default_list);
+            GDSin::LayerMapGds default_map(gdsLays, NULL);
+
+            DATC->GDSexport(excell, default_map, recur, filename, x2048);
+            LogFile << LogFile.getFN() 
+                     << "(\""<< cellname << "\"," 
+                     << LogFile._2bool(recur) 
+                     << ",\"" << filename << "\");";
+            LogFile.flush();
+         }
+         else
+         {
+            std::string message = "Cell " + cellname + " not found in the database";
+            tell_log(console::MT_ERROR,message);
+         }
+      DATC->unlockDB();
    }
    else
    {
