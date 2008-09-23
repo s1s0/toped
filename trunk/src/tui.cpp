@@ -551,6 +551,7 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Export recursively"));
+   _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::cellList const cll = ATDB->cells();

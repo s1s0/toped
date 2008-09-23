@@ -126,11 +126,12 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("cifexport"        ,(DEBUG_NEW                tellstdfunc::CIFexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("cifclose"         ,(DEBUG_NEW                    tellstdfunc::CIFclose(telldata::tn_void, true)));
    mblock->addFUNC("gdsread"          ,(DEBUG_NEW          tellstdfunc::GDSread(TLISTOF(telldata::tn_string), true)));
-   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW              tellstdfunc::GDSimportList(telldata::tn_void, true)));
-   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW             tellstdfunc::GDSimportListT(telldata::tn_void, true)));
-   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                  tellstdfunc::GDSimport(telldata::tn_void, true)));
-   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                 tellstdfunc::GDSimportT(telldata::tn_void, true)));
+   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW               tellstdfunc::GDSimportList(telldata::tn_void, true)));
+   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW              tellstdfunc::GDSimportListT(telldata::tn_void, true)));
+   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                   tellstdfunc::GDSimport(telldata::tn_void, true)));
+   mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                  tellstdfunc::GDSimportT(telldata::tn_void, true)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportLIB(telldata::tn_void,false)));
+   mblock->addFUNC("gdsexport"        ,(DEBUG_NEW               tellstdfunc::GDSexportLIBT(telldata::tn_void,false)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW               tellstdfunc::GDSexportTOPT(telldata::tn_void,false)));
    mblock->addFUNC("gdsclose"         ,(DEBUG_NEW                    tellstdfunc::GDSclose(telldata::tn_void, true)));
