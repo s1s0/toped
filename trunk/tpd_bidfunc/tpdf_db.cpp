@@ -589,7 +589,10 @@ int tellstdfunc::GDSexportLIBT::execute()
          GDSin::LayerMapGds default_map(gdsLays, NULL);
          DATC->GDSexport(default_map, filename, x2048);
       DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< filename << ", " << *lll << ");"; LogFile.flush();
+      LogFile << LogFile.getFN() << "(\""<< filename << "\", " 
+              << *lll << ", " 
+              << LogFile._2bool(x2048) <<");"; 
+      LogFile.flush();
    }
    else
    {
@@ -658,10 +661,11 @@ int tellstdfunc::GDSexportTOPT::execute()
             GDSin::LayerMapGds default_map(gdsLays, NULL);
 
             DATC->GDSexport(excell, default_map, recur, filename, x2048);
-            LogFile << LogFile.getFN() 
+            LogFile  << LogFile.getFN() 
                      << "(\""<< cellname << "\"," 
                      << LogFile._2bool(recur) 
-                     << ",\"" << filename << "\");";
+                     << ",\"" << filename << "\"," 
+                     << LogFile._2bool(x2048) <<");"; 
             LogFile.flush();
          }
          else
