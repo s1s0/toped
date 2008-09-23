@@ -387,49 +387,6 @@ int tellstdfunc::GDSread::execute() {
 }
 
 //=============================================================================
-tellstdfunc::GDSimport::GDSimport(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-
-}
-
-int tellstdfunc::GDSimport::execute() 
-{
-   bool  over  = getBoolValue();
-   bool  recur = getBoolValue();
-   std::string name = getStringValue();
-   
-   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-   GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
-   std::ostringstream ost;
-   if (!src_structure)
-   {
-      ost << "GDS structure named \"" << name << "\" does not exists";
-      tell_log(console::MT_ERROR,ost.str());
-      DATC->unlockGDS();
-   }
-   else
-   {
-      GDSin::GdsLayers gdsLaysAll;
-      src_structure->collectLayers(gdsLaysAll,true);
-      DATC->unlockGDS();
-      GDSin::LayerMapGds LayerExpression(&gdsLaysAll); // get default
-      nameList top_cells;
-      top_cells.push_back(name);
-      DATC->lockDB(false);
-         DATC->importGDScell(top_cells, LayerExpression, recur, over);
-         updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-      DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< name << "\"," << LogFile._2bool(recur)
-            << "," << LogFile._2bool(over) << ");"; LogFile.flush();
-   }
-   return EXEC_NEXT;
-}
-
-//=============================================================================
 tellstdfunc::GDSimportT::GDSimportT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
@@ -492,46 +449,26 @@ int tellstdfunc::GDSimportT::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSimportList::GDSimportList(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+tellstdfunc::GDSimport::GDSimport(telldata::typeID retype, bool eor) :
+      GDSimportT(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSimportList::execute()
+int tellstdfunc::GDSimport::execute() 
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
-   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   nameList top_cells;
-   for (unsigned i = 0; i < pl->size(); i++)
-   {
-      top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
-   }
-   GDSin::GdsLayers gdsLaysAll;
-   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-      AGDSDB->collectLayers(gdsLaysAll);
-   DATC->unlockGDS();
-   GDSin::LayerMapGds LayerExpression(&gdsLaysAll);
-   DATC->lockDB(false);
-      DATC->importGDScell(top_cells, LayerExpression, recur, over);
-      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-   DATC->unlockDB();
-   // Don't refresh the tree browser here. 
-   // - First - it has been updated during the conversion
-   // - Second - addTDTtab is running in the same thread as the caller. It must
-   // make sure that there is nothing left in the PostEvent queue in the main thread
-   // which was filled-up during the conversion.
-   // bottom line - don't do that, or you'll suffer ...
-   // @TODO Check whether is not a good idea to skip the cell browser update
-   // during GDS import. The calling addTDTtab() at the end should be safe
-   //browsers::addTDTtab();
-   LogFile << LogFile.getFN() << "(\""<< *pl << "\"," << LogFile._2bool(recur)
-         << "," << LogFile._2bool(over) << ");"; LogFile.flush();
-   delete pl;
-   return EXEC_NEXT;
+//   std::string filename = getStringValue();
+
+//   OPstack.push(DEBUG_NEW telldata::ttstring(filename));
+   OPstack.push(DEBUG_NEW telldata::ttlist(telldata::tn_hsh));
+   OPstack.push(DEBUG_NEW telldata::ttbool(recur));
+   OPstack.push(DEBUG_NEW telldata::ttbool(over));
+
+   return GDSimportT::execute();
 }
 
 //=============================================================================
@@ -598,82 +535,90 @@ int tellstdfunc::GDSimportListT::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+tellstdfunc::GDSimportList::GDSimportList(telldata::typeID retype, bool eor) :
+      GDSimportListT(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSexportLIB::execute()
+int tellstdfunc::GDSimportList::execute() 
+{
+   bool  over  = getBoolValue();
+   bool  recur = getBoolValue();
+   // Don't pop out the last argument - we'll just have to put it back
+   //telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+
+   // Don't push in the first argument - it wasn't poped-up
+   // OPstack.push(DEBUG_NEW telldata::ttlist(*pl));
+   OPstack.push(DEBUG_NEW telldata::ttlist(telldata::tn_hsh));
+   OPstack.push(DEBUG_NEW telldata::ttbool(recur));
+   OPstack.push(DEBUG_NEW telldata::ttbool(over));
+
+   return GDSimportListT::execute();
+}
+
+//=============================================================================
+tellstdfunc::GDSexportLIBT::GDSexportLIBT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+int tellstdfunc::GDSexportLIBT::execute()
 {
    bool x2048           = getBoolValue();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string filename = getStringValue();
+
+   // Convert layer map
+   USMap gdsLays;
+   telldata::tthsh* nameh;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      gdsLays[nameh->number().value()] = nameh->name().value();
+   }
+
    if (expandFileName(filename))
    {
       DATC->lockDB(false);
-         GDSin::GdsLayers default_list;
-         makeGdsLays(default_list);
-         GDSin::LayerMapGds default_map(&default_list);
+         GDSin::LayerMapGds default_map(gdsLays, NULL);
          DATC->GDSexport(default_map, filename, x2048);
       DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< filename << ");"; LogFile.flush();
+      LogFile << LogFile.getFN() << "(\""<< filename << ", " << *lll << ");"; LogFile.flush();
    }
    else
    {
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
       tell_log(console::MT_ERROR,info);
    }
+   delete lll;
    return EXEC_NEXT;
 }
 
 //=============================================================================
-tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
+      GDSexportLIBT(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSexportTOP::execute()
+int tellstdfunc::GDSexportLIB::execute() 
 {
    bool  x2048 = getBoolValue();
-   std::string filename = getStringValue();
-   bool  recur = getBoolValue();
-   std::string cellname = getStringValue();
-   if (expandFileName(filename))
-   {
-      laydata::tdtcell *excell = NULL;
-      laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         excell = ATDB->checkcell(cellname);
-         if (NULL != excell)
-         {
-            GDSin::GdsLayers default_list;
-            makeGdsLays(default_list);
-            GDSin::LayerMapGds default_map(&default_list);
-            DATC->GDSexport(excell, default_map, recur, filename, x2048);
-            LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
-                  << LogFile._2bool(recur) << ",\"" << filename << "\");";
-            LogFile.flush();
-         }
-         else
-         {
-            std::string message = "Cell " + cellname + " not found in the database";
-            tell_log(console::MT_ERROR,message);
-         }
-      DATC->unlockDB();
-   }
-   else
-   {
-      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
-      tell_log(console::MT_ERROR,info);
-   }
+   //std::string filename = getStringValue();
 
-   return EXEC_NEXT;
+   //OPstack.push(DEBUG_NEW telldata::ttstring(filename));
+   OPstack.push(DEBUG_NEW telldata::ttlist(telldata::tn_hsh));
+   OPstack.push(DEBUG_NEW telldata::ttbool(x2048));
+
+   return GDSexportLIBT::execute();
 }
-
 
 //=============================================================================
 tellstdfunc::GDSexportTOPT::GDSexportTOPT(telldata::typeID retype, bool eor) :
@@ -702,7 +647,6 @@ int tellstdfunc::GDSexportTOPT::execute()
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       gdsLays[nameh->number().value()] = nameh->name().value();
    }
-
    if (expandFileName(filename))
    {
       laydata::tdtcell *excell = NULL;
@@ -711,8 +655,6 @@ int tellstdfunc::GDSexportTOPT::execute()
 
          if (NULL != excell)
          {
-//            GDSin::GdsLayers default_list;
-//            makeGdsLays(default_list);
             GDSin::LayerMapGds default_map(gdsLays, NULL);
 
             DATC->GDSexport(excell, default_map, recur, filename, x2048);
@@ -734,8 +676,33 @@ int tellstdfunc::GDSexportTOPT::execute()
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
       tell_log(console::MT_ERROR,info);
    }
-
+   delete lll;
    return EXEC_NEXT;
+}
+//=============================================================================
+tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype, bool eor) :
+      GDSexportTOPT(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+int tellstdfunc::GDSexportTOP::execute() 
+{
+   bool  x2048 = getBoolValue();
+   std::string filename = getStringValue();
+   bool  recur = getBoolValue();
+   //std::string cellname = getStringValue();
+
+   //OPstack.push(DEBUG_NEW telldata::ttstring(cellname));
+   OPstack.push(DEBUG_NEW telldata::ttlist(telldata::tn_hsh));
+   OPstack.push(DEBUG_NEW telldata::ttbool(recur));
+   OPstack.push(DEBUG_NEW telldata::ttstring(filename));
+   OPstack.push(DEBUG_NEW telldata::ttbool(x2048));
+
+   return GDSexportTOPT::execute();
 }
 
 //=============================================================================
