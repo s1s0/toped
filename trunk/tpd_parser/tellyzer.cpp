@@ -803,7 +803,7 @@ bool parsercmd::cmdRETURN::checkRetype(telldata::argumentID* arg) {
       if (TLISALIST(_retype)) { // we have a list lval
           vartype = CMDBlock->getTypeByID(_retype & ~telldata::tn_listmask);
           if (NULL != vartype) arg->userStructListCheck(*vartype, true);
-          else arg->toList(true);
+          else arg->toList(true, _retype & ~telldata::tn_listmask);
       }
       else { // we have a struct only
          vartype = CMDBlock->getTypeByID(_retype);
@@ -1173,7 +1173,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
          { // we have a list lval
             vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
             if (NULL != vartype) carg.userStructListCheck(*vartype, false);
-            else carg.toList(false);
+            else carg.toList(false, lvalID & ~telldata::tn_listmask);
          }
          else 
          { // we have a struct only
@@ -1655,7 +1655,7 @@ bool parsercmd::StructTypeCheck(telldata::typeID targett,
    { // we have a list lval
       vartype = CMDBlock->getTypeByID(targett & ~telldata::tn_listmask);
       if (NULL != vartype) op2->userStructListCheck(*vartype, true);
-      else op2->toList(true);
+      else op2->toList(true, targett & ~telldata::tn_listmask);
    }
    else
    { // we have a struct only
@@ -1748,7 +1748,7 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
       { // we have a list lval
           vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
           if (NULL != vartype) op2->userStructListCheck(*vartype, true);
-          else op2->toList(true);
+          else op2->toList(true, lvalID & ~telldata::tn_listmask);
       }
       else
       { // we have a struct only
@@ -1840,7 +1840,7 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
          const telldata::tell_type* vartype;
           vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
           if (NULL != vartype) op2->userStructListCheck(*vartype, true);
-          else op2->toList(true);
+          else op2->toList(true, lvalID & ~telldata::tn_listmask);
       }
       else
          // lvalue in this function must be a list
