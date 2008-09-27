@@ -807,7 +807,7 @@ structure:
         argmap = DEBUG_NEW telldata::argumentQ;
         argmapstack.push(argmap);
    }
-      nearguments '}'                     {
+      arguments '}'                       {
         /*Important note!. Here we will get a list of components that could be
           a tell list or some kind of tell struct or even tell list of tell struct.
           There is no way at this moment to determine the type of the input structure

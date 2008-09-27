@@ -736,13 +736,18 @@ telldata::argumentID::argumentID(const argumentID& obj2copy) {
    }
 }
 
-void telldata::argumentID::toList(bool cmdUpdate)
+void telldata::argumentID::toList(bool cmdUpdate, telldata::typeID alistID)
 {
-   telldata::typeID alistID = (*(_child[0]))();
-   for(argumentQ::const_iterator CA = _child.begin(); CA != _child.end(); CA ++)
-   {
-      if (alistID != (**CA)()) return;
+   if (0 < _child.size())
+   {// i.e. list is not empty
+      alistID = (*(_child[0]))();
+      for(argumentQ::const_iterator CA = _child.begin(); CA != _child.end(); CA ++)
+      {
+         if (alistID != (**CA)()) return;
+      }
    }
+   else // empty list
+      assert (tn_NULL != alistID);
    _ID = TLISTOF(alistID);
    if (cmdUpdate)
       static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
@@ -761,10 +766,10 @@ void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, b
       if ( TLUNKNOWN_TYPE( (**CA)() ) )
          if (TLISALIST(CF->second))
          {// check the list fields
-            if (TLCOMPOSIT_TYPE((CF->second) & (~telldata::tn_listmask)))
+            if (TLCOMPOSIT_TYPE(CF->second & ~telldata::tn_listmask))
                (*CA)->userStructListCheck(*(vartype.findtype(CF->second)), cmdUpdate);
             else
-               (*CA)->toList(cmdUpdate);
+               (*CA)->toList(cmdUpdate, CF->second & ~telldata::tn_listmask);
          }
          else
             // call in recursion the userStructCheck method of the child
@@ -790,7 +795,7 @@ void telldata::argumentID::userStructListCheck(const telldata::tell_type& vartyp
    for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++) 
       if ( TLUNKNOWN_TYPE( (**CA)() ) ) (*CA)->userStructCheck(vartype, cmdUpdate);
 
-   toList(cmdUpdate);
+   toList(cmdUpdate, vartype.ID());
 }
 
 void telldata::argumentID::adjustID(const argumentID& obj2copy)

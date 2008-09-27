@@ -393,7 +393,7 @@ namespace telldata {
                                                     _child(*child), _command(cmd) {};
                            argumentID(const argumentID&);
                            ~argumentID();//               {_child.clear();}
-      void                 toList(bool);
+      void                 toList(bool, typeID alistID = tn_NULL);
       void                 adjustID(const argumentID&);
       void                 userStructCheck(const telldata::tell_type&, bool);
       void                 userStructListCheck(const telldata::tell_type&, bool);
