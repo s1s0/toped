@@ -799,7 +799,7 @@ bool DataCenter::CIFgetLay(nameList& cifLayers)
    }
 }
 
-bool DataCenter::gdsGetLayers(GDSin::GdsLayers& gdsLayers)
+bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
 {
    if (NULL == _GDSDB) return false;
    else

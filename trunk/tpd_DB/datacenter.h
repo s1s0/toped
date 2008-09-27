@@ -92,7 +92,7 @@ public:
    void                       CIFexport(USMap*, bool, std::string&);
    void                       CIFexport(laydata::tdtcell*, USMap*, bool, bool, std::string&);
    bool                       CIFgetLay(nameList&);
-   bool                       gdsGetLayers(GDSin::GdsLayers&);
+   bool                       gdsGetLayers(GdsLayers&);
    void                       CIFimport(const nameList&, NMap*, bool);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);

@@ -311,7 +311,7 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
 }
 
 //=============================================================================
-void tellstdfunc::makeGdsLays(GDSin::GdsLayers& gdsLays)
+void tellstdfunc::makeGdsLays(GdsLayers& gdsLays)
 {
    nameList allls;
    DATC->all_layers(allls);

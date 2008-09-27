@@ -200,6 +200,24 @@ namespace tui {
    };
 
    //==========================================================================
+   class nameCbox3Records : public wxPanel {
+      public:
+                              nameCbox3Records(wxWindow*, wxPoint, wxSize, const GdsLayers&, wxArrayString&, int);
+         NMap*                getTheMap();
+      private:
+         class LayerRecord {
+            public:
+                              LayerRecord(wxStaticText* gdslay, wxStaticText* gdstype, wxComboBox* tdtlay) : 
+                                 _gdslay(gdslay), _gdstype(gdstype), _tdtlay(tdtlay) {};
+               wxStaticText*     _gdslay;
+               wxStaticText*     _gdstype;
+               wxComboBox*       _tdtlay;
+         };
+         typedef std::list<LayerRecord> AllRecords;
+         AllRecords         _allRecords;
+   };
+
+   //==========================================================================
    class nameEboxRecords : public wxPanel {
       public:
                               nameEboxRecords(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
@@ -242,6 +260,17 @@ namespace tui {
          void                 OnSize( wxSizeEvent& );
       private:
          tui::nameCboxRecords*   _laypanel;
+         DECLARE_EVENT_TABLE();
+   };
+
+   //--------------------------------------------------------------------------
+   class nameCbox3List : public wxScrolledWindow {
+      public:
+                              nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const GdsLayers&);
+         NMap*                getTheMap()     {return _laypanel->getTheMap();}
+         void                 OnSize( wxSizeEvent& );
+      private:
+         tui::nameCbox3Records*   _laypanel;
          DECLARE_EVENT_TABLE();
    };
 
@@ -307,10 +336,12 @@ namespace tui {
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
       bool              get_overwrite()    const {return _overwrite->GetValue();};
       bool              get_recursive()    const {return _recursive->GetValue();};
+      NMap*             getGdsLayerMap()         {return _layList->getTheMap();}
    private:
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;
       wxListBox*        _nameList;
+      nameCbox3List*    _layList;
    };
 
    //--------------------------------------------------------------------------
