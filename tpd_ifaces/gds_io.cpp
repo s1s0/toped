@@ -1441,17 +1441,17 @@ TP GDSin::get_TP(GDSin::GdsRecord *cr, word curnum, byte len)
 }
 
 //=============================================================================
-GDSin::LayerMapGds::LayerMapGds(GDSin::GdsLayers* alist) : _theMap(), _status(true), _alist(alist)
+GDSin::LayerMapGds::LayerMapGds(GdsLayers* alist) : _theMap(), _status(true), _alist(alist)
 {
    assert(NULL != alist);
-   for (GDSin::GdsLayers::const_iterator NLI = alist->begin(); NLI != alist->end(); NLI++)
+   for (GdsLayers::const_iterator NLI = alist->begin(); NLI != alist->end(); NLI++)
    {
       for (WordList::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
          _theMap[NLI->first].insert(std::make_pair(*NTI, NLI->first));
    }
 }
 
-GDSin::LayerMapGds::LayerMapGds(const USMap& inlist, GDSin::GdsLayers* alist)
+GDSin::LayerMapGds::LayerMapGds(const USMap& inlist, GdsLayers* alist)
    : _theMap(), _status(true), _alist(alist)
 {
    for (USMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)

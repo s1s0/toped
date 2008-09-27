@@ -423,7 +423,7 @@ int tellstdfunc::GDSimportT::execute()
    }
    else
    {
-      GDSin::GdsLayers gdsLaysAll;
+      GdsLayers gdsLaysAll;
       src_structure->collectLayers(gdsLaysAll,true);
       DATC->unlockGDS();
       GDSin::LayerMapGds LayerExpression(gdsLaysStrList, &gdsLaysAll);
@@ -500,7 +500,7 @@ int tellstdfunc::GDSimportListT::execute()
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       gdsLaysStrList[nameh->number().value()] = nameh->name().value();
    }
-   GDSin::GdsLayers gdsLaysAll;
+   GdsLayers gdsLaysAll;
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
       AGDSDB->collectLayers(gdsLaysAll);
    DATC->unlockGDS();
@@ -832,10 +832,10 @@ int tellstdfunc::GDSreportlay::execute()
       }
       else 
       {
-         GDSin::GdsLayers gdsLayers;
+         GdsLayers gdsLayers;
          src_structure->collectLayers(gdsLayers,true);
          ost << "GDS layers found in \"" << name <<"\" { <layer_number> ; <data_type> }" << std::endl;
-         for (GDSin::GdsLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
+         for (GdsLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
          {
             ost << "{" << NLI->first << " ; ";
             for (WordList::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)

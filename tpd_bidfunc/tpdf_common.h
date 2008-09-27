@@ -157,7 +157,7 @@ namespace tellstdfunc {
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::selectList* filter_selist(const laydata::selectList*, word mask);
    laydata::atticList*  replace_str(laydata::atticList*, std::string);
-   void                 makeGdsLays(GDSin::GdsLayers&);
+   void                 makeGdsLays(GdsLayers&);
 
 }
 

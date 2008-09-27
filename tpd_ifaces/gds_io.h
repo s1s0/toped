@@ -122,7 +122,6 @@ namespace GDSin {
 
    typedef std::vector<GdsStructure*>     ChildStructure;
    typedef SGHierTree<GdsStructure>       GDSHierTree;
-   typedef std::map<word, WordList>       GdsLayers;
 
    typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
 
@@ -537,8 +536,8 @@ namespace GDSin {
 
    class LayerMapGds {
       public:
-                              LayerMapGds(GDSin::GdsLayers*);
-                              LayerMapGds(const USMap&, GDSin::GdsLayers*);
+                              LayerMapGds(GdsLayers*);
+                              LayerMapGds(const USMap&, GdsLayers*);
          bool                 getTdtLay(word&, word, word) const;
          bool                 getGdsLayType(word&, word&, word) const;
          bool                 status() {return _status;}
@@ -550,7 +549,7 @@ namespace GDSin {
          void                 getList(wxString&, WordList&);
          GlMap                _theMap;
          bool                 _status;
-         GDSin::GdsLayers*    _alist; // all available GDS layers with their data types
+         GdsLayers*           _alist; // all available GDS layers with their data types
    };
 
    /*** GdsFile ***************************************************************
