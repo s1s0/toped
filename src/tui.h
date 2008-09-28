@@ -203,7 +203,7 @@ namespace tui {
    class nameCbox3Records : public wxPanel {
       public:
                               nameCbox3Records(wxWindow*, wxPoint, wxSize, const GdsLayers&, wxArrayString&, int);
-         NMap*                getTheMap();
+         USMap*               getTheMap();
       private:
          class LayerRecord {
             public:
@@ -267,7 +267,7 @@ namespace tui {
    class nameCbox3List : public wxScrolledWindow {
       public:
                               nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const GdsLayers&);
-         NMap*                getTheMap()     {return _laypanel->getTheMap();}
+         USMap*               getTheMap()     {return _laypanel->getTheMap();}
          void                 OnSize( wxSizeEvent& );
       private:
          tui::nameCbox3Records*   _laypanel;
@@ -336,7 +336,7 @@ namespace tui {
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
       bool              get_overwrite()    const {return _overwrite->GetValue();};
       bool              get_recursive()    const {return _recursive->GetValue();};
-      NMap*             getGdsLayerMap()         {return _layList->getTheMap();}
+      USMap*            getGdsLayerMap()         {return _layList->getTheMap();}
    private:
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;
