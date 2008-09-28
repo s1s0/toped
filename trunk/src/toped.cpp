@@ -1167,14 +1167,33 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getGDSimport* dlg = NULL;
+   USMap* laymap;
    try {
       dlg = DEBUG_NEW tui::getGDSimport(this, -1, wxT("Import GDS structure"), pos,
                                           _browsers->tdtSelectedGdsName());
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
+      laymap = dlg->getGdsLayerMap();
+
+      // get the layer map 
+      std::ostringstream laymapstr;
+      word recno = 0;
+      laymapstr << "{";
+      for (USMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
+      {
+         if (recno != 0) laymapstr << ",";
+         laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
+         recno++;
+      }
+      laymapstr << "}";
+      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
+      delete laymap;
+
+
       wxString ost;
       ost << wxT("gdsimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
+          << wxlaymap << wxT(", ")
           << (dlg->get_recursive() ? wxT("true") : wxT("false"))   << wxT(" , ")
           << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
       _cmdline->parseCommand(ost);

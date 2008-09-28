@@ -1789,22 +1789,25 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    }
 }
 
-NMap* tui::nameCbox3Records::getTheMap()
+USMap* tui::nameCbox3Records::getTheMap()
 {
-   NMap* gds_lay_map = DEBUG_NEW NMap();
+   USMap* gds_lay_map = DEBUG_NEW USMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
-      std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str(wxConvUTF8));
-      // the user didn't put a tdt correspondence for this GDS layer - so we'll try to use the CIF name
+      word layno = 0;
+      std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       if ("" == layname)
-         layname = std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8));
-      word layno = DATC->getLayerNo(layname);
-      if (0 == layno)
       {
-         layno = DATC->addlayer(layname);
-         browsers::layer_add(layname, layno);
+         long lint;
+         CNM->_gdslay->GetLabel().ToLong(&lint);
+         layno = lint;
       }
-      (*gds_lay_map)[std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8))] = layno;
+      else layno = DATC->getLayerNo(layname);
+      assert(layno);
+      std::ostringstream gdslaytype;
+      gdslaytype <<  std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8)) << ";"
+            <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8))   ;
+      (*gds_lay_map)[layno] = gdslaytype.str();
    }
    return gds_lay_map;
 }
