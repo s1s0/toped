@@ -1337,10 +1337,10 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
    {
       // get the layer map first
       std::ostringstream laymapstr;
-      NMap* laymap = dlg->getCifLayerMap();
+      SIMap* laymap = dlg->getCifLayerMap();
       word recno = 0;
       laymapstr << "{";
-      for (NMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
+      for (SIMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
       {
          if (recno != 0)
             laymapstr << ",";

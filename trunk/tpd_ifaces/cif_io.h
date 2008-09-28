@@ -319,7 +319,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::fstream&  file()               {return _file;}
       private:
          USMap*         _laymap;          //! Toped-CIF layer map
-         NMap           _cellmap;         //! tdt-cif map of all exported cells
+         SIMap          _cellmap;         //! tdt-cif map of all exported cells
          std::string    _fileName;        //! Output CIF file name - including the path
          std::fstream   _file;            //! Output file handler
          bool           _verbose;         //! CIF output type

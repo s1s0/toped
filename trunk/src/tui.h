@@ -186,8 +186,8 @@ namespace tui {
    //==========================================================================
    class nameCboxRecords : public wxPanel {
       public:
-                              nameCboxRecords(wxWindow*, wxPoint, wxSize, const NMap&, wxArrayString&, int);
-         NMap*                getTheMap();
+                              nameCboxRecords(wxWindow*, wxPoint, wxSize, const SIMap&, wxArrayString&, int);
+         SIMap*                getTheMap();
       private:
          class LayerRecord {
             public:
@@ -255,8 +255,8 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameCboxList : public wxScrolledWindow {
       public:
-                              nameCboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const NMap&);
-         NMap*                getTheMap()     {return _laypanel->getTheMap();}
+                              nameCboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const SIMap&);
+         SIMap*                getTheMap()     {return _laypanel->getTheMap();}
          void                 OnSize( wxSizeEvent& );
       private:
          tui::nameCboxRecords*   _laypanel;
@@ -304,7 +304,7 @@ namespace tui {
       wxString          getSelectedCell() const {return _nameList->GetStringSelection();}
       bool              get_overwrite()   const {return _overwrite->GetValue();}
       bool              getRecursive()    const {return _recursive->GetValue();}
-      NMap*             getCifLayerMap()        {return _layList->getTheMap();}
+      SIMap*             getCifLayerMap()        {return _layList->getTheMap();}
    private:
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;

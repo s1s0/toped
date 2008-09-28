@@ -362,7 +362,7 @@ void CIFin::CifFile::collectLayers(nameList& cifLayers)
       local->collectLayers(allCiffLayers);
       local = local->last();
    }
-   NMap laylist;
+   SIMap laylist;
    // cifLayers.unique();
    // Unique doesn't seem to work properly after collecting all layers from 
    // all the cells. Not quite sure why.
@@ -372,7 +372,7 @@ void CIFin::CifFile::collectLayers(nameList& cifLayers)
       laylist[(*LLI)->name()] = 0; // map key is unique! 
    }
    // and after uniquifying - gather the unique layer names
-   for (NMap::const_iterator LLI = laylist.begin(); LLI != laylist.end(); LLI++)
+   for (SIMap::const_iterator LLI = laylist.begin(); LLI != laylist.end(); LLI++)
    {
       cifLayers.push_back(LLI->first);
    }

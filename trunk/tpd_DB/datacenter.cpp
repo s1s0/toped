@@ -270,7 +270,7 @@ void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
 // class Cif2Ted
 //-----------------------------------------------------------------------------
 CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtdesign* dst_lib,
-      NMap* cif_layers) : _src_lib (src_lib), _dst_lib(dst_lib),
+      SIMap* cif_layers) : _src_lib (src_lib), _dst_lib(dst_lib),
                                     _cif_layers(cif_layers)
 {
 }
@@ -809,7 +809,7 @@ bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
    }
 }
 
-void DataCenter::CIFimport( const nameList& top_names, NMap* cifLayers, bool overwrite )
+void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool overwrite )
 {
    // DB shold have been locked at this point (from the tell functions)
    if (NULL == lockCIF())
