@@ -59,7 +59,7 @@ namespace CIFin {
 
    class Cif2Ted {
       public:
-                              Cif2Ted(CIFin::CifFile*, laydata::tdtdesign*, NMap*);
+                              Cif2Ted(CIFin::CifFile*, laydata::tdtdesign*, SIMap*);
          void                 top_structure(std::string, bool);
       protected:
          void                 child_structure(const CIFin::CIFHierTree*, bool);
@@ -73,7 +73,7 @@ namespace CIFin {
          void                 lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string );
          CIFin::CifFile*      _src_lib;
          laydata::tdtdesign*  _dst_lib;
-         NMap*                _cif_layers;
+         SIMap*                _cif_layers;
    };
 
 }
@@ -93,7 +93,7 @@ public:
    void                       CIFexport(laydata::tdtcell*, USMap*, bool, bool, std::string&);
    bool                       CIFgetLay(nameList&);
    bool                       gdsGetLayers(GdsLayers&);
-   void                       CIFimport(const nameList&, NMap*, bool);
+   void                       CIFimport(const nameList&, SIMap*, bool);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);

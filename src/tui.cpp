@@ -410,7 +410,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
       }
       _nameList->Append(wxString(ACIFDB->getTopStructure()->name().c_str(), wxConvUTF8));
       //-----------------------------------------------------------------------
-      NMap inlays;
+      SIMap inlays;
       nameList cifLayers;
       if (DATC->CIFgetLay(cifLayers))
       {
@@ -511,7 +511,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
          gdss = gdss->last();
       }
       //-----------------------------------------------------------------------
-//       NMap inlays;
+//       SIMap inlays;
        GdsLayers gdsLayers;
        DATC->gdsGetLayers(gdsLayers);
 
@@ -1721,11 +1721,11 @@ tui::defineFill::~defineFill()
 
 //==========================================================================
 tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz, 
-            const NMap& inlays, wxArrayString& all_strings, int row_height) 
+            const SIMap& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
    word rowno = 0;
-   for (NMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   for (SIMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
       std::string ics = DATC->getLayerName(CNM->second);
@@ -1739,9 +1739,9 @@ tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-NMap* tui::nameCboxRecords::getTheMap()
+SIMap* tui::nameCboxRecords::getTheMap()
 {
-   NMap* cif_lay_map = DEBUG_NEW NMap();
+   SIMap* cif_lay_map = DEBUG_NEW SIMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str(wxConvUTF8));
@@ -1817,7 +1817,7 @@ BEGIN_EVENT_TABLE(tui::nameCboxList, wxScrolledWindow)
       EVT_SIZE( tui::nameCboxList::OnSize )
 END_EVENT_TABLE()
 
-tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const NMap& inlays) :
+tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const SIMap& inlays) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers

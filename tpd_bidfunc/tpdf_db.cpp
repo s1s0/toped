@@ -944,7 +944,7 @@ tellstdfunc::CIFimportList::CIFimportList(telldata::typeID retype, bool eor) :
 int tellstdfunc::CIFimportList::execute()
 {
    bool  over  = getBoolValue();
-   NMap* cifLays = DEBUG_NEW NMap();
+   SIMap* cifLays = DEBUG_NEW SIMap();
    telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    // Convert layer map
@@ -985,7 +985,7 @@ tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
 int tellstdfunc::CIFimport::execute()
 {
    bool  over  = getBoolValue();
-   NMap* cifLays = DEBUG_NEW NMap();
+   SIMap* cifLays = DEBUG_NEW SIMap();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    // Convert layer map
