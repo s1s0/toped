@@ -618,7 +618,8 @@ void GDSin::GdsFile::collectLayers(GdsLayers& layers)
 void GDSin::GdsFile::getMappedLayType(word& gdslay, word& gdstype, word tdtlay)
 {
    _laymap->getGdsLayType(gdslay, gdstype, tdtlay);
-   //@TODO Error message if
+   //It should not be a problem if the tdtlay is not listed in the map. Then
+   // we take the default mapping which is gdslay = tdtlay; gdstype = 0
 }
 
 double GDSin::GdsFile::libUnits()
@@ -1474,7 +1475,7 @@ bool GDSin::LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
    {
       wxString wxmsg;
       wxmsg << wxT("Can't make sence from the string \"") << exp << wxT("\"");
-      std::string msg(wxmsg.mb_str(wxConvUTF8));  
+      std::string msg(wxmsg.mb_str(wxConvUTF8));
       tell_log(console::MT_ERROR,msg);
       return false;
    }
@@ -1520,17 +1521,25 @@ bool GDSin::LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
       else
       {// TDT tp GDS conversion
          if (wxT('*') == type_exp)
-         { // for all data types
-            // get all GDS data types for the current layer and copy them
-            // to the map
+         { // for all data types - same as data type = 0
             _theMap[*CL].insert(std::make_pair(0, tdtLay));
          }
          else
          {// for particular (listed) data type
             WordList dtlst;
+            wxString saved_expr(type_exp);
             getList( type_exp , dtlst);
-//            for ( WordList::const_iterator CT = dtlst.begin(); CT != dtlst.end(); CT++)
-            //@TODO Wqarning message
+            if (1 < dtlst.size())
+            {
+               wxString wxmsg;
+               wxmsg << wxT("Can't export to multiple types. Expression \"")
+                     << saved_expr << wxT("\"")
+                     << wxT(" for layer ") << tdtLay
+                     << wxT(" is coerced to a single data type ")
+                     << dtlst.front();
+               std::string msg(wxmsg.mb_str(wxConvUTF8));
+               tell_log(console::MT_ERROR,msg);
+            }
             _theMap[tdtLay].insert(std::make_pair(dtlst.front(), *CL));
          }
       }
@@ -1618,9 +1627,6 @@ bool GDSin::LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) cons
 
 bool GDSin::LayerMapGds::getGdsLayType(word& gdslay, word& gdstype, word tdtlay) const
 {
-   // All that this function is doing is:
-   // tdtlay = _theMap[gdslay][gdstype]
-   // A number of protections are in place though as well as const_cast
    gdslay  = tdtlay; // the default value
    gdstype = 0;
    if (_theMap.end()       == _theMap.find(tdtlay)       ) return false;

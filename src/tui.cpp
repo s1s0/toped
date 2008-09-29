@@ -1806,7 +1806,7 @@ USMap* tui::nameCbox3Records::getTheMap()
       assert(layno);
       std::ostringstream gdslaytype;
       gdslaytype <<  std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8)) << ";"
-            <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8))   ;
+                 <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8))   ;
       (*gds_lay_map)[layno] = gdslaytype.str();
    }
    return gds_lay_map;
@@ -2008,8 +2008,8 @@ USMap* tui::nameEbox3Records::getTheMap()
       word layno = DATC->getLayerNo(layname);
       assert(layno);
       std::ostringstream gdslaytype;
-      gdslaytype <<  std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8)) << ";"
-                 <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8))   ;
+      gdslaytype <<  std::string(CNM->_gdslay->GetValue().mb_str(wxConvUTF8)) << ";"
+                 <<  std::string(CNM->_gdstype->GetValue().mb_str(wxConvUTF8))   ;
       (*gds_lay_map)[layno] = gdslaytype.str();
    }
    return gds_lay_map;
