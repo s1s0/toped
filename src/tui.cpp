@@ -1927,7 +1927,7 @@ USMap* tui::nameEboxRecords::getTheMap()
       assert("" != layname);
       word layno = DATC->getLayerNo(layname);
       assert(layno);
-      (*cif_lay_map)[layno] = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
+      (*cif_lay_map)[layno] = std::string(CNM->_ciflay->GetValue().mb_str(wxConvUTF8));
    }
    return cif_lay_map;
 }

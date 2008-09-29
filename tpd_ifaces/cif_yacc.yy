@@ -80,18 +80,18 @@ cifFile:
 
 commands:
      cifBlank command semiColon            {}
-   | commands cifBlank command semiColon   {}
-;
-
-primCommands:
-      cifBlank primCommand semiColon       {}
-   |  primCommands cifBlank primCommand semiColon  {}
+   | commands command semiColon            {}
 ;
 
 command:
      primCommand                           {}
    | defDeleteCommand                      {}
    | defDefineCommand                      {}
+;
+
+primCommands:
+      primCommand semiColon                {}
+   |  primCommands primCommand semiColon   {}
 ;
 
 primCommand:
@@ -133,7 +133,7 @@ defDeleteCommand:
 ;
 
 defFinishCommand:
-     tknCdefine cifBlank tknCfinish       {
+     tknCdefine cifBlank tknCfinish cifBlank      {
       CIFInFile->doneStructure();
    }
 ;
@@ -298,7 +298,7 @@ cifSep:
 ;
 
 semiColon:
-     cifBlank tknPsem cifBlank             {}
+     tknPsem cifBlank                      {}
 ;
 
 %%
