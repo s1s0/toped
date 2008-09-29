@@ -139,7 +139,7 @@ defFinishCommand:
 ;
 
 layerCommand:
-     tknClayer cifBlank tknTshortname     {
+     tknClayer cifBlank tknTshortname cifBlank    {
       CIFInFile->secureLayer($3);
       delete $3;
    }
@@ -184,7 +184,7 @@ wireCommand:
 ;
 
 callCommand: /*discrepancy with the formal syntax*/
-     tknCcall cifBlank tknTint cifLtrans  {
+     tknCcall cifBlank tknTint cifLtrans cifBlank {
       if (checkPositive($3, @3))
          CIFInFile->addRef($3, $4);
    }
@@ -254,13 +254,13 @@ cifTrans:
       $$ = DEBUG_NEW CTM(); $$->Translate(*$3);delete $3;
    }
    | tknCmirror cifBlank tknCmirx          {
-      $$ = DEBUG_NEW CTM(); $$->FlipY(); /*TODO CHECK!*/
+      $$ = DEBUG_NEW CTM(); $$->FlipY();
    }
    | tknCmirror cifBlank tknCmiry          {
-      $$ = DEBUG_NEW CTM(); $$->FlipX(); /*TODO CHECK!*/
+      $$ = DEBUG_NEW CTM(); $$->FlipX();
    }
    | tknCrotate cifBlank cifPoint          {
-      $$ = DEBUG_NEW CTM(); $$->Rotate(*($3));delete $3; /*TODO CHECK!*/
+      $$ = DEBUG_NEW CTM(); $$->Rotate(*($3));delete $3;
    }
 ;
 
