@@ -59,6 +59,8 @@ Documentation
    sin/cos
    loadlibrary
    unloadlibrary
+   gdsimport/gdsexport to be updated with the layer map
+   gdsexport to be updated with x2048 parameter
 
 
 Global options of the editor

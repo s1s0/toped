@@ -674,16 +674,23 @@ typedefstruct:
 
 fieldname:
      variable tknFIELD              {
-      assert(NULL != tellvar);
-      tellvar = tellvar->field_var($2);
-      if (tellvar) $$ = tellvar->get_type();
-      else
+      if (NULL == tellvar)
       {
-         tellerror("Bad field identifier", @2);
+         tellerror("Unexisting variable", @1);
          $$ = telldata::tn_NULL;
       }
+      else
+      {
+         tellvar = tellvar->field_var($2);
+         if (tellvar) $$ = tellvar->get_type();
+         else
+         {
+            tellerror("Bad field identifier", @2);
+            $$ = telldata::tn_NULL;
+         }
+      }
       delete [] $2;
-    }
+   }
 ;
 
 listindex:
