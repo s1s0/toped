@@ -546,7 +546,7 @@ namespace GDSin {
          typedef std::map< word, GdtTdtMap>  GlMap;
          bool                 parseLayTypeString(wxString&, word);
          void                 patternNormalize(wxString&);
-         void                 getList(wxString&, WordList&);
+         void                 getList(wxString, WordList&);
          GlMap                _theMap;
          bool                 _status;
          GdsLayers*           _alist; // all available GDS layers with their data types
