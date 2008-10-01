@@ -1493,18 +1493,19 @@ bool GDSin::LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
    WordList llst;
    // get the listed layers
    getList(  lay_exp , llst);
-   // now for every listed layer
-   for ( WordList::const_iterator CL = llst.begin(); CL != llst.end(); CL++ )
-   {
-      if (NULL != _alist)
-      {// GDS to TDT conversion
+
+   if (NULL != _alist)
+   {// GDS to TDT conversion
+      // ... for every listed layer
+      for ( WordList::const_iterator CL = llst.begin(); CL != llst.end(); CL++ )
+      {
          // if the layer is listed among the GDS used layers
          if ( _alist->end() != _alist->find(*CL) )
          {
             if (wxT('*') == type_exp)
             { // for all data types
-               // get all GDS data types for the current layer and copy them
-               // to the map
+            // get all GDS data types for the current layer and copy them
+            // to the map
                for ( WordList::const_iterator CT = (*_alist)[*CL].begin(); CT != (*_alist)[*CL].end(); CT++)
                   _theMap[*CL].insert(std::make_pair(*CT, tdtLay));
             }
@@ -1518,32 +1519,42 @@ bool GDSin::LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
          }
          // else ignore the mapped GDS layer
       }
+   }
+   else
+   {// TDT to GDS conversion
+      if (1 < llst.size())
+      {
+         wxString wxmsg;
+         wxmsg << wxT("Can't export to multiple layers. Expression \"")
+               << lay_exp << wxT("\"")
+               << wxT(" is coerced to a single layer ")
+               << llst.front();
+         std::string msg(wxmsg.mb_str(wxConvUTF8));
+         tell_log(console::MT_ERROR,msg);
+      }
+      if (wxT('*') == type_exp)
+      { // for all data types - same as data type = 0
+         _theMap[llst.front()].insert(std::make_pair(0, tdtLay));
+      }
       else
-      {// TDT tp GDS conversion
-         if (wxT('*') == type_exp)
-         { // for all data types - same as data type = 0
-            _theMap[*CL].insert(std::make_pair(0, tdtLay));
+      {// for particular (listed) data type
+         WordList dtlst;
+         getList( type_exp , dtlst);
+         if (1 < dtlst.size())
+         {
+            wxString wxmsg;
+            wxmsg << wxT("Can't export to multiple types. Expression \"")
+                  << type_exp << wxT("\"")
+                  << wxT(" for layer ") << tdtLay
+                  << wxT(" is coerced to a single data type ")
+                  << dtlst.front();
+            std::string msg(wxmsg.mb_str(wxConvUTF8));
+            tell_log(console::MT_ERROR,msg);
          }
-         else
-         {// for particular (listed) data type
-            WordList dtlst;
-            wxString saved_expr(type_exp);
-            getList( type_exp , dtlst);
-            if (1 < dtlst.size())
-            {
-               wxString wxmsg;
-               wxmsg << wxT("Can't export to multiple types. Expression \"")
-                     << saved_expr << wxT("\"")
-                     << wxT(" for layer ") << tdtLay
-                     << wxT(" is coerced to a single data type ")
-                     << dtlst.front();
-               std::string msg(wxmsg.mb_str(wxConvUTF8));
-               tell_log(console::MT_ERROR,msg);
-            }
-            _theMap[tdtLay].insert(std::make_pair(dtlst.front(), *CL));
-         }
+         _theMap[tdtLay].insert(std::make_pair(dtlst.front(), llst.front()));
       }
    }
+
    return true;
 }
 
@@ -1565,13 +1576,14 @@ void GDSin::LayerMapGds::patternNormalize(wxString& str)
    //remove spaces before separators
    VERIFY(regex.Compile(wxT("([[:space:]])([\\-\\;\\,])")));
    regex.ReplaceAll(&str,wxT("\\2"));
+
    // remove spaces after separators
    VERIFY(regex.Compile(wxT("([\\-\\;\\,])([[:space:]])")));
    regex.ReplaceAll(&str,wxT("\\1"));
 
 }
 
-void GDSin::LayerMapGds::getList(wxString& exp, WordList& data)
+void GDSin::LayerMapGds::getList(wxString exp, WordList& data)
 {
    wxRegEx number_tmpl(wxT("[[:digit:]]*"));
    wxRegEx separ_tmpl(wxT("[\\,\\-]{1,1}"));
