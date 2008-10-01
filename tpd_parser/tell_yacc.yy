@@ -123,7 +123,7 @@ Well some remarks may save some time in the future...
                of it which is normally used for most of the operaions. In other
                words lvalues are not handled trough the operand stack, instead
                this variable is used.
-   
+
 
    Some more questions:
    - Why variables are cloned in the operand stack? If they weren't - we don't
@@ -143,7 +143,7 @@ Well some remarks may save some time in the future...
      By definition we don't want pointers in the script ( don't we ?) - means
      that dynamic variables don't exists. This is not quite correct though.
      Lists are an important exception here. See below.
-    
+
 Now something about the arrays. Actually there will be lists. Why? The main
  reason is that select functions may (and certainly will) return various
  objects - point, box, polygons, path, text etc together. Arrays by nature
@@ -677,6 +677,12 @@ fieldname:
       if (NULL == tellvar)
       {
          tellerror("Unexisting variable", @1);
+         cleanonabort();
+         YYABORT;
+      }
+      else if (indexed)
+      {
+         tellerror("Can't dereference a field of a listed structures(Bug #14112). Please use intermediate variables.", @1);
          $$ = telldata::tn_NULL;
       }
       else
@@ -695,8 +701,13 @@ fieldname:
 
 listindex:
      variable '[' expression ']'    {
-      parsercmd::ListIndexCheck($1, @1, $3, @3);
-      $$ = ($1 & (~telldata::tn_listmask));
+      if (parsercmd::ListIndexCheck($1, @1, $3, @3))
+      {
+         $$ = ($1 & (~telldata::tn_listmask));
+      }
+      else {
+         $$ = telldata::tn_NULL;
+      }
     }
 ;
 
@@ -965,13 +976,13 @@ void cleanonabort()
 {
    CMDBlock = CMDBlock->cleaner();
    parsercmd::EOfile();
-//   if (tellvar)         {delete tellvar;        tellvar           = NULL;}
-//   if (tell_lvalue)     {delete tell_lvalue;    tell_lvalue       = NULL;}
-//   if (foreach_command) {delete foreach_command;foreach_command   = NULL;}
-//   if (listadd_command) {delete listadd_command;listadd_command   = NULL;}
-//   if (tellstruct)      {delete tellstruct;     tellstruct        = NULL;}
-//   if (argmap)          {delete argmap;         argmap            = NULL;}
-//   if (cfd)             {delete cfd;            cfd               = NULL;}
+   if (tellvar)         {delete tellvar;        tellvar           = NULL;}
+   if (tell_lvalue)     {delete tell_lvalue;    tell_lvalue       = NULL;}
+   if (foreach_command) {delete foreach_command;foreach_command   = NULL;}
+   if (listadd_command) {delete listadd_command;listadd_command   = NULL;}
+   if (tellstruct)      {delete tellstruct;     tellstruct        = NULL;}
+   if (argmap)          {delete argmap;         argmap            = NULL;}
+   if (cfd)             {delete cfd;            cfd               = NULL;}
 }
 
 /*
