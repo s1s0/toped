@@ -60,7 +60,6 @@
       (fill "")
       (outline "")
       (fill-style ""))
-  (define (add-packet x) nil)
   (define (set-stipple! stip) (set! stipple stip))
   (define (get-stipple) stipple)
   (define (set-line-style! style) (set! line-style style))
@@ -88,18 +87,18 @@
             (else (error "unknown method in define-paket")))))
   dispatch))
 
-(define x (define-packet "a"))
-((x 'get-name))
-((x 'set-stipple!) "dots")
-((x 'get-stipple))
-((x 'set-line-style!) "solid")
-((x 'get-line-style))
-((x 'set-fill!) "yellow")
-((x 'get-fill))
-((x 'set-outline!) "lime")
-((x 'get-outline))
-((x 'set-fill-style!) "outline")
-((x 'get-fill-style))
+;(define x (define-packet "a"))
+;((x 'get-name))
+;((x 'set-stipple!) "dots")
+;((x 'get-stipple))
+;((x 'set-line-style!) "solid")
+;((x 'get-line-style))
+;((x 'set-fill!) "yellow")
+;((x 'get-fill))
+;((x 'set-outline!) "lime")
+;((x 'get-outline))
+;((x 'set-fill-style!) "outline")
+;((x 'get-fill-style))
 ;****************CADENCE API FUNCTIONS********************************
 ;---------------------------------------------
 (define drDefineDisplay 
@@ -158,8 +157,40 @@
               (list "}")
               
 ))))
-          ;    (for-each 
-          ;     (lambda(x) (string-append (bin-str->hex-str x)))
+
+
+(define drDefineLineStyle
+  (lambda(style)
+    (list "/*drLineStyle"
+          "toped doesn't support this command*/"))) 
+   (define (set-fill! fl) (set! fill fl))
+  (define (get-fill) fill)
+  (define (set-outline! outln) (set! outline outln))
+  (define (get-outline) outline)
+  (define (set-fill-style! fl-style) (set! fill-style fl-style))
+  (define (get-fill-style) fill-style)
+
+(define drDefinePacket
+  (lambda(packets)
+    (map (lambda(x)
+           (let*  (
+                   (temp (cddddr x))
+                   (name (cadr x))
+                   (stipple (caddr x))
+                   (line-style (cadddr x))
+                   (fill (car temp))
+                   (outline (cadr temp))
+                   (fill-style (caddr temp))
+                   
+                   (packet (define-packet name)))
+                 (begin
+                   ((packet 'set-stipple!) stipple)
+                   ((packet 'set-line-style!) line-style)
+                   ((packet 'set-fill!) fill)
+                   ((packet 'set-outline!) outline)
+                   ((packet 'set-fill-style!) fill-style)
+                   packet))) packets)))
+
 
 ;****************TRANSLATOR FUNCTIONS********************************
 ;----------------------------------------------
@@ -179,6 +210,8 @@
     (cons (cond ((eq? command 'drDefineColor) (drDefineColor body))
           ((eq? command 'drDefineDisplay) (drDefineDisplay body))
           ((eq? command 'drDefineStipple) (drDefineStipple body))
+          ((eq? command 'drDefineLineStyle) (drDefineLineStyle body))
+          ((eq? command 'drDefinePacket) (drDefinePacket body))
           (else (begin
                   (display "mistake in recognition")
                   (newline)
@@ -213,4 +246,4 @@
 (write-to-file "tell.tll" (parse d))
 
 
-;(parse d)
+(parse d)
