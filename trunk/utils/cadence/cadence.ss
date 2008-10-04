@@ -87,19 +87,9 @@
             (else (error "unknown method in define-paket")))))
   dispatch))
 
-;(define x (define-packet "a"))
-;((x 'get-name))
-;((x 'set-stipple!) "dots")
-;((x 'get-stipple))
-;((x 'set-line-style!) "solid")
-;((x 'get-line-style))
-;((x 'set-fill!) "yellow")
-;((x 'get-fill))
-;((x 'set-outline!) "lime")
-;((x 'get-outline))
-;((x 'set-fill-style!) "outline")
-;((x 'get-fill-style))
+
 ;****************CADENCE API FUNCTIONS********************************
+(define packet-list  '())
 ;---------------------------------------------
 (define drDefineDisplay 
   (lambda(f) (list "/*drDefineDisplay"
@@ -211,7 +201,9 @@
           ((eq? command 'drDefineDisplay) (drDefineDisplay body))
           ((eq? command 'drDefineStipple) (drDefineStipple body))
           ((eq? command 'drDefineLineStyle) (drDefineLineStyle body))
-          ((eq? command 'drDefinePacket) (drDefinePacket body))
+          ((eq? command 'drDefinePacket) (begin
+                                           (set! packet-list (append  (drDefinePacket body) packet-list))
+                                           '()))
           (else (begin
                   (display "mistake in recognition")
                   (newline)
@@ -242,7 +234,8 @@
 
 
 ;---------------------------------------------
-(define d (readlines "default.drf"))
+(define d (foldl (lambda (word result) 
+                                          (append result (readlines word))) '() (list "default.drf" "techfile.tf"))); result (readlines "default.drf"))))
 (write-to-file "tell.tll" (parse d))
 
 
