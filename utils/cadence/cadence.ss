@@ -54,6 +54,8 @@
 ;(map-exclude-last (lambda(x) (+ x 10)) '(1 2 3))
 ;(list-of-lists->list (list (list 1 2 3) (list 3 4 5)))
 
+
+;****************OBJECT DEFINITIONS********************************
 (define (define-packet name)
 (let ((stipple "")
       (line-style "")
@@ -87,9 +89,18 @@
             (else (error "unknown method in define-paket")))))
   dispatch))
 
-
+(define (define-layer name number)
+  (let ()
+    (define (get-name) name)
+    (define (get-number) number)
+    (define (dispatch m)
+    (let ()
+      (cond ((eq? m 'get-name) name)
+            ((eq? m 'get-number) get-number ))))
+    dispatch))
 ;****************CADENCE API FUNCTIONS********************************
 (define packet-list  '())
+(define layer-list '())
 ;---------------------------------------------
 (define drDefineDisplay 
   (lambda(f) (list "/*drDefineDisplay"
@@ -153,12 +164,6 @@
   (lambda(style)
     (list "/*drLineStyle"
           "toped doesn't support this command*/"))) 
-   (define (set-fill! fl) (set! fill fl))
-  (define (get-fill) fill)
-  (define (set-outline! outln) (set! outline outln))
-  (define (get-outline) outline)
-  (define (set-fill-style! fl-style) (set! fill-style fl-style))
-  (define (get-fill-style) fill-style)
 
 (define drDefinePacket
   (lambda(packets)
@@ -179,8 +184,42 @@
                    ((packet 'set-fill!) fill)
                    ((packet 'set-outline!) outline)
                    ((packet 'set-fill-style!) fill-style)
-                   packet))) packets)))
+                   packet))) 
+         packets)))
 
+(define layerDefinitions
+  (lambda (definitions)
+    (parse definitions)))
+
+(define techPurposes
+  (lambda(purposes)
+    (list "/*techPurposes "
+                   "toped doesn't support this command*/")))
+
+(define techLayers
+  (lambda(layers)
+    (map
+     (lambda (layer)
+       (let* ( (name (cadr layer))
+               (number (caddr layer))
+               (new-layer (define-layer name number)))
+         new-layer))
+     layers)))
+
+(define techLayerPurposePriorities
+  (lambda(layers)
+    (list "/*techLayerPurposePriorities "
+                   "toped doesn't support this command*/")))
+
+(define techDisplays
+  (lambda(layers)
+    (list "/*techDisplays "
+                   "toped doesn't support this command*/")))
+
+(define techLayerProperties
+  (lambda(layers)
+    (list "/*techLayerProperties "
+                   "toped doesn't support this command*/")))
 
 ;****************TRANSLATOR FUNCTIONS********************************
 ;----------------------------------------------
@@ -204,6 +243,14 @@
           ((eq? command 'drDefinePacket) (begin
                                            (set! packet-list (append  (drDefinePacket body) packet-list))
                                            '()))
+          ((eq? command 'layerDefinitions) (layerDefinitions body))
+          ((eq? command 'techPurposes) (techPurposes body))
+          ((eq? command 'techLayers) (begin
+                                           (set! layer-list (append  (techLayers body) packet-list))
+                                           '()))
+          ((eq? command 'techLayerPurposePriorities) (techLayerPurposePriorities body))
+          ((eq? command 'techDisplays) (techDisplays body))
+          ((eq? command 'techLayerProperties) (techLayerProperties body))
           (else (begin
                   (display "mistake in recognition")
                   (newline)
