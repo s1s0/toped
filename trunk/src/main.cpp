@@ -29,7 +29,7 @@
 #include <wx/wx.h>
 #include <wx/filefn.h>
 #include <wx/filename.h>
-
+#include <sstream>
 #if WIN32 
 #include <crtdbg.h>
 #endif
@@ -543,6 +543,11 @@ bool TopedApp::OnInit() {
          }
       }
    }
+#ifdef __WXGTK__
+   std::ostringstream msg;
+   msg << "GLX version "<< Toped->view()->GetGLXVersion();
+   tell_log(console::MT_WARNING, msg.str());
+#endif
    tell_log(console::MT_WARNING,"Please report a bugs to toped-development@lists.berlios.de or bugs@toped.org.uk");
    return TRUE;
 }

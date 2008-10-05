@@ -185,8 +185,9 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
      const wxSize& size, int* attribList): 
  wxGLCanvas(parent, ID_TPD_CANVAS, pos, size, 0,wxT("LayoutCanvas"), attribList)
 {
+//   if (!wxGLCanvas::IsDisplaySupported(attribList)) return;
 #ifdef __WXGTK__
-   //  Here we'll have to check that we've got what we've asked for. Is is
+   //  Here we'll have to check that we've got what we've asked for. It is
    // quite possible that we can't get the requested GL visual. If that is the case
    // we'll have to aboandon the init sequence right here, otherwise Toped will
    // crash.
