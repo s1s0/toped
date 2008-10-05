@@ -860,6 +860,15 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
       _lines   = DEBUG_NEW wxComboBox( this, LINE_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
    }
    // The window layout
+   // NOTE! Static boxes MUST be created before all other controls which are about to
+   // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
+   // but not everywhere! (fc9)
+   wxBoxSizer *color_sizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Color"));
+   wxBoxSizer *fill_sizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Pattern"));
+   wxBoxSizer *line_sizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Selected Line"));
+   wxBoxSizer *col3_sizer = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Sample") );
+
+
    wxBoxSizer *line1_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    line1_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Number:"), wxDefaultPosition, wxDefaultSize),
                                                 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
@@ -868,7 +877,6 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
                                                 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
    line1_sizer->Add(dwlayname, 2, wxRIGHT | wxALIGN_CENTER, 5);
    //
-   wxBoxSizer *color_sizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Color"));
    color_sizer->Add(_colors, 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
    color_sizer->Add(DEBUG_NEW wxCheckBox(this, ID_CBDEFCOLOR, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
    if (no_color)
@@ -876,7 +884,6 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
       static_cast<wxCheckBox*>(FindWindow(ID_CBDEFCOLOR))->SetValue(true);
       _colors->Enable(false);
    }
-   wxBoxSizer *fill_sizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Pattern"));
    fill_sizer->Add(_fills , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
    fill_sizer->Add(DEBUG_NEW wxCheckBox(this, ID_CBDEFPATTERN, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
    if (no_fill)
@@ -884,7 +891,6 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
       static_cast<wxCheckBox*>(FindWindow(ID_CBDEFPATTERN))->SetValue(true);
       _fills->Enable(false);
    }
-   wxBoxSizer *line_sizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Selected Line"));
    line_sizer->Add(_lines , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
    line_sizer->Add(DEBUG_NEW wxCheckBox(this, ID_CBDEFLINE, wxT("default")), 0, wxALL | wxALIGN_RIGHT, 5);
    if (no_line)
@@ -897,12 +903,11 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    col2_sizer->Add(color_sizer, 0, wxEXPAND);
    col2_sizer->Add(fill_sizer , 0, wxEXPAND);
    col2_sizer->Add(line_sizer , 0, wxEXPAND);
-   
+
    _selected = DEBUG_NEW wxCheckBox(this, DRAW_SELECTED, wxT("selected"));
-   wxBoxSizer *col3_sizer = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Sample") );
    col3_sizer->Add( _sample  , 1, wxEXPAND);
    col3_sizer->Add(_selected , 0, wxALL | wxALIGN_LEFT | wxEXPAND, 5);
-   
+
    wxBoxSizer *line2_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    line2_sizer->Add(col2_sizer, 3, wxEXPAND | wxALL, 5);
    line2_sizer->Add(col3_sizer, 1, wxEXPAND | wxALL, 5);
@@ -1078,16 +1083,22 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
    {
       init_color = *(all_names.begin());
    }
-   
+
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
       _allColors[*CI] = DEBUG_NEW layprop::tellRGB(DATC->getColor(*CI));
    }
+   // NOTE! Static boxes MUST be created before all other controls which are about to
+   // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
+   // but not everywhere! (fc9)
+   wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Color") );
+   wxBoxSizer *vsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Color") );
+
    _dwcolname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_colname));
    _colorsample = DEBUG_NEW color_sample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color);
-   
+
    _c_red    = DEBUG_NEW wxTextCtrl( this, ID_REDVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_red));
    _c_green  = DEBUG_NEW wxTextCtrl( this, ID_GREENVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
@@ -1096,12 +1107,11 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
                                            wxTextValidator(wxFILTER_NUMERIC, &_blue));
    _c_alpha  = DEBUG_NEW wxTextCtrl( this, ID_ALPHAVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_alpha));
-   
-   wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Color") );
+
    hsizer0->Add( _dwcolname   , 0, wxALL | wxEXPAND, 5);
    hsizer0->Add(0,0,1); //
    hsizer0->Add( DEBUG_NEW wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
-   
+
    wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer1->Add( DEBUG_NEW wxStaticText(this, -1, wxT("R:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
@@ -1126,9 +1136,9 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
    wxBoxSizer *hsizer5 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
    FindWindow(ID_BTNAPPLY)->Enable(false);
-   
+
    hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
-   
+
    wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    vsizer2->Add( _colorsample , 0, wxALL | wxEXPAND, 5);
    vsizer2->Add( hsizer1   , 0, wxEXPAND);
@@ -1136,27 +1146,26 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
    vsizer2->Add( hsizer3   , 0, wxEXPAND);
    vsizer2->Add( hsizer4   , 0, wxEXPAND);
    vsizer2->Add( hsizer5   , 0, wxEXPAND);
-   
+
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(0,0,1); // 
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
 
-   wxBoxSizer *vsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Color") );
    vsizer3->Add( _colorList   , 0, wxALL | wxEXPAND, 5);
    vsizer3->Add(0,0,1); //
    vsizer3->Add( vsizer2      , 0, wxEXPAND );
-   
+
    wxBoxSizer *top_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    top_sizer->Add( hsizer0      , 0, wxEXPAND );
    top_sizer->Add( vsizer3      , 0, wxEXPAND );
    top_sizer->Add( button_sizer , 0, wxEXPAND );
-   
+
    SetSizer( top_sizer );      // use the sizer for layout
 
    top_sizer->SetSizeHints( this );   // set size hints to honour minimum size
-   
+
 }
 
 void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
@@ -1579,44 +1588,45 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
       fillcopy(DATC->getFill(*CI), pat);
       _allFills[*CI] = pat;
    }
+   // NOTE! Static boxes MUST be created before all other controls which are about to
+   // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
+   // but not everywhere! (fc9)
+   wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Fill") );
+   wxBoxSizer *vsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Pattern") );
+
    _dwfilname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_filname));
    _fillsample = DEBUG_NEW fill_sample( this, -1, wxDefaultPosition, wxSize(-1,150), init_color);
-   
-   wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Fill") );
+
    hsizer0->Add( _dwfilname   , 0, wxALL | wxEXPAND, 5);
    hsizer0->Add(0,0,1); //
    hsizer0->Add( DEBUG_NEW wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
-   
-//   wxBoxSizer *hsizer5 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-//   hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
-   
+
    wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    vsizer2->Add( _fillsample , 0, wxALL | wxEXPAND, 5);
 //   vsizer2->Add( hsizer5   , 0, wxEXPAND);
    vsizer2->Add(0,0,1); //
    vsizer2->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
-   
+
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(0,0,1); // 
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
 
-   wxBoxSizer *vsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Pattern") );
    vsizer3->Add( _fillList   , 0, wxALL | wxEXPAND, 5);
    vsizer3->Add(0,0,1); //
    vsizer3->Add( vsizer2      , 0, wxEXPAND );
-   
+
    wxBoxSizer *top_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    top_sizer->Add( hsizer0      , 0, wxEXPAND );
    top_sizer->Add( vsizer3      , 0, wxEXPAND );
    top_sizer->Add( button_sizer , 0, wxEXPAND );
-   
+
    SetSizer( top_sizer );      // use the sizer for layout
 
    top_sizer->SetSizeHints( this );   // set size hints to honour minimum size
-   
+
 }
 
 void tui::defineFill::nameNormalize(wxString& str)
