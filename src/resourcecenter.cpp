@@ -251,24 +251,41 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								const std::string &helpString,
 								callbackMethod cbMethod)
 								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
-                        currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod)
+                        currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod), _ok(false)
 {
-	wxImage image(wxString(bitmapName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+	wxImage image;
+	image.LoadFile(wxString(bitmapName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+
 	for( 
 	IconSizes isz = ICON_SIZE_16x16; 
 	isz < ICON_SIZE_END; 
 	isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
 	{
 		_bitmapNames[isz] = bitmapName;
-		_bitmaps[isz] = wxBitmap(image);
+		if(image.IsOk())
+		{
+			_bitmaps[isz] = wxBitmap(image);
+			_ok = true;
+		}
+		else
+		{
+			std::ostringstream ost;
+			ost<<"Can't load icon"<<bitmapName;
+			tell_log(console::MT_ERROR,ost.str());
+			_bitmaps[isz] = wxBitmap();//wxNullImage());
+		}
 	}
 }
 
 void tui::ToolItem::addIcon(const std::string &bitmapName, int size)
 {
-	_bitmapNames[size] = bitmapName;
+	
 	wxImage image(wxString(_bitmapNames[size].c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
-	_bitmaps[size] = wxBitmap(image);
+	if(image.IsOk())
+	{
+		_bitmapNames[size] = bitmapName;
+		_bitmaps[size] = wxBitmap(image);
+	}
 }
 
 
@@ -387,13 +404,19 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 	if (it == _tools.end()) 
 	{
 		ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, cbMethod);
+		if (tool->isOk())
+		{
+			_tools.push_back(tool);
+			_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
 
-		_tools.push_back(tool);
-		_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
-
-		Toped->getAuiManager()->DetachPane(_toolBar);
-		_toolBar->Realize();
-		attachToAUI();
+			Toped->getAuiManager()->DetachPane(_toolBar);
+			_toolBar->Realize();
+			attachToAUI();
+		}
+		else 
+		{
+			delete tool;
+		}
 	}
 }
 
