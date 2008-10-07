@@ -142,6 +142,7 @@ namespace tui
       std::string    function(void)		const    { return _function;};
 		std::string    name(void)			const    { return _name;};
       std::string    helpString(void)	const		{ return _helpString;};
+		bool				isOk(void)			const		{ return _ok;};
       callbackMethod method(void)		const    { return _method;};
 
 		virtual ~ToolItem();
@@ -160,6 +161,7 @@ namespace tui
       std::string		_function;	
       std::string		_helpString;
       callbackMethod	_method;
+		bool				_ok;
 	};
 
 	class TpdToolBar:public wxToolBar
