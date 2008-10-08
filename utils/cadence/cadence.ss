@@ -1,4 +1,5 @@
 (require scheme/list)
+
 ;****************AUX FUNCTIONS********************************
 
 ;bin-str->hex-str
@@ -57,50 +58,63 @@
 
 ;****************OBJECT DEFINITIONS********************************
 (define (define-packet name)
-(let ((stipple "")
-      (line-style "")
-      (fill "")
-      (outline "")
-      (fill-style ""))
-  (define (set-stipple! stip) (set! stipple stip))
-  (define (get-stipple) stipple)
-  (define (set-line-style! style) (set! line-style style))
-  (define (get-line-style) line-style)
-  (define (set-fill! fl) (set! fill fl))
-  (define (get-fill) fill)
-  (define (set-outline! outln) (set! outline outln))
-  (define (get-outline) outline)
-  (define (set-fill-style! fl-style) (set! fill-style fl-style))
-  (define (get-fill-style) fill-style)
-  (define (get-name) name)
-  (define (dispatch m)
-    (let ()
-      (cond ((eq? m 'set-stipple!) set-stipple!)
-            ((eq? m 'get-stipple) get-stipple )
-            ((eq? m 'set-line-style!) set-line-style!)
-            ((eq? m 'get-line-style) get-line-style)
-            ((eq? m 'set-fill!) set-fill!)
-            ((eq? m 'get-fill) get-fill)
-            ((eq? m 'set-outline!) set-outline!)
-            ((eq? m 'get-outline) get-outline)
-            ((eq? m 'set-fill-style!) set-fill-style!)
-            ((eq? m 'get-fill-style) get-fill-style)
-            ((eq? m 'get-name) get-name )
-            (else (error "unknown method in define-paket")))))
-  dispatch))
+  (let ((stipple "")
+        (line-style "")
+        (fill "")
+        (outline "")
+        (fill-style ""))
+    (define (set-stipple! stip) (set! stipple stip))
+    (define (get-stipple) stipple)
+    (define (set-line-style! style) (set! line-style style))
+    (define (get-line-style) line-style)
+    (define (set-fill! fl) (set! fill fl))
+    (define (get-fill) fill)
+    (define (set-outline! outln) (set! outline outln))
+    (define (get-outline) outline)
+    (define (set-fill-style! fl-style) (set! fill-style fl-style))
+    (define (get-fill-style) fill-style)
+    (define (get-name) name)
+    (define (dispatch m)
+      (let ()
+        (cond ((eq? m 'set-stipple!) set-stipple!)
+              ((eq? m 'get-stipple) get-stipple )
+              ((eq? m 'set-line-style!) set-line-style!)
+              ((eq? m 'get-line-style) get-line-style)
+              ((eq? m 'set-fill!) set-fill!)
+              ((eq? m 'get-fill) get-fill)
+              ((eq? m 'set-outline!) set-outline!)
+              ((eq? m 'get-outline) get-outline)
+              ((eq? m 'set-fill-style!) set-fill-style!)
+              ((eq? m 'get-fill-style) get-fill-style)
+              ((eq? m 'get-name) get-name )
+              (else (error "unknown method in define-paket")))))
+    dispatch))
 
 (define (define-layer name number)
-  (let ()
-    (define (get-name) name)
+  (let ((layer-name (cond ((symbol? name)(symbol->string name))
+                          ((string? name) name)
+                          (else (error "Blya!!!")))))
+    (define (get-name) layer-name)
     (define (get-number) number)
     (define (dispatch m)
-    (let ()
-      (cond ((eq? m 'get-name) name)
-            ((eq? m 'get-number) get-number ))))
+      (let ()
+        (cond ((eq? m 'get-name) get-name)
+              ((eq? m 'get-number) get-number )
+              (else (error "unknown method in define-layer")))))
     dispatch))
-;****************CADENCE API FUNCTIONS********************************
+
+(define (find-layer layer-list name)
+  (cond
+    ((empty? layer-list) null)
+    ((string=? (((car layer-list) 'get-name)) name) (car layer-list))
+    (else (find-layer (cdr layer-list) name))))
+
+;****************GLOBAL VARIABLES AND FUNCTIONS*******************
 (define packet-list  '())
 (define layer-list '())
+
+;****************CADENCE API FUNCTIONS********************************
+
 ;---------------------------------------------
 (define drDefineDisplay 
   (lambda(f) (list "/*drDefineDisplay"
@@ -200,8 +214,8 @@
   (lambda(layers)
     (map
      (lambda (layer)
-       (let* ( (name (cadr layer))
-               (number (caddr layer))
+       (let* ( (name (car layer))
+               (number (cadr layer))
                (new-layer (define-layer name number)))
          new-layer))
      layers)))
@@ -220,6 +234,16 @@
   (lambda(layers)
     (list "/*techLayerProperties "
                    "toped doesn't support this command*/")))
+
+(define layerRules
+  (lambda(rules)
+    (parse rules)))
+
+(define streamLayers
+  (lambda(layers)
+    (for-each 
+     (lambda(layer)
+       null)layers)))
 
 ;****************TRANSLATOR FUNCTIONS********************************
 ;----------------------------------------------
@@ -246,11 +270,13 @@
           ((eq? command 'layerDefinitions) (layerDefinitions body))
           ((eq? command 'techPurposes) (techPurposes body))
           ((eq? command 'techLayers) (begin
-                                           (set! layer-list (append  (techLayers body) packet-list))
+                                           (set! layer-list (append  (techLayers body) layer-list))
                                            '()))
           ((eq? command 'techLayerPurposePriorities) (techLayerPurposePriorities body))
           ((eq? command 'techDisplays) (techDisplays body))
           ((eq? command 'techLayerProperties) (techLayerProperties body))
+          ((eq? command 'layerRules) (layerRules body))
+          ((eq? command 'streamLayers) (streamLayers body))
           (else (begin
                   (display "mistake in recognition")
                   (newline)
@@ -286,4 +312,7 @@
 (write-to-file "tell.tll" (parse d))
 
 
-(parse d)
+;(parse d)
+;(find-layer layer-list "PW")
+;(find-layer layer-list "NBL1")
+;((cadr layer-list) 'get-name)
