@@ -258,28 +258,27 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
    if (-1 == clip) select_this(selist); // entire shape is in
    else if ((clip > 0) && pselect)
    { // shape partially is in the select box
-      SGBitSet pntlst;
       if (sh_partsel == _status)
       {
       // if the shape has already been partially selected
          dataList::iterator SI;
          for (SI = selist->begin(); SI != selist->end(); SI++)
             // get the pointlist
-            if (SI->first == this) { pntlst = SI->second; break; }
-         assert(0 != pntlst.size());
+            if (SI->first == this) break;
+         assert(0 != SI->second.size());
          // select some more points using shape specific procedures
-         select_points(select_in, pntlst);
+         select_points(select_in, SI->second);
          // check that after the selection shape doesn't end up fully selected
-         if (pntlst.isallset()) {
+         if (SI->second.isallset()) 
+         {
             _status = sh_selected;
-            pntlst.clear();
-//            delete pntlst; SI->second = NULL;
+            SI->second.clear();
          }
       }
       else
       {
          // otherwise create a new pointlist
-         pntlst = SGBitSet(numpoints());
+         SGBitSet pntlst(numpoints());
          // select some more points using shape specific procedures
          select_points(select_in, pntlst);
          // and check 

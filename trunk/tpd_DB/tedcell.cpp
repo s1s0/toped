@@ -1354,7 +1354,7 @@ laydata::atticList* laydata::tdtcell::groupPrep(laydata::tdtlibdir* libdir) {
          if (sh_deleted == CI->first->status()) {
             CI->first->set_status(sh_active);
             atl->push_back(CI->first);
-            assert(CI->second.size() != 0);
+            assert(0 == CI->second.size());
             CI = lslct->erase(CI);
          }
          else CI++;
@@ -1391,7 +1391,7 @@ laydata::shapeList* laydata::tdtcell::ungroupPrep(laydata::tdtlibdir* libdir) {
          if (sh_deleted == CI->first->status()) {
             CI->first->set_status(sh_active);
             csel->push_back(CI->first);
-            assert( CI->second.size() == 0 );
+            assert( 0 == CI->second.size() );
             CI = _shapesel[0]->erase(CI);
          }
          else CI++;
@@ -1594,7 +1594,7 @@ void laydata::tdtcell::store_inAttic(laydata::atticList& _Attic) {
          // ... but only if it is marked as sh_deleted ...
          if (sh_deleted == CI->first->status()) {
             atl->push_back(CI->first);
-            assert(CI->second.size() == 0);
+            assert(0 == CI->second.size());
             // ... and free up the _shapesel list from it
             CI = lslct->erase(CI);
          }
