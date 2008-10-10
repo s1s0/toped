@@ -49,6 +49,12 @@
 ;Warning - work only  down to one level
 (define (list-of-lists->list lst)
   (foldl (lambda(x result) (append result x)) '() lst))
+
+(define (layer-name->string name) 
+  (cond ((symbol? name)(symbol->string name))
+        ((string? name) name)
+        (else (error "error in layer-name->string. Strange type for conversion"))))
+
 ;(expand-to-N (list 0 1 1 1) 32)
 ;(expand-string-to-32 "0111")
 ;(split-to-8 "0123456701234567")
@@ -91,18 +97,35 @@
     dispatch))
 
 (define (define-layer name number)
-  (let ((layer-name (cond ((symbol? name)(symbol->string name))
-                          ((string? name) name)
-                          (else (error "Blya!!!")))))
+  (let ((layer-name (layer-name->string name))
+        (streamed #f)
+        (stream-number #f)
+        (data-type #f))
     (define (get-name) layer-name)
     (define (get-number) number)
+    (define (get-streamed) streamed)
+    (define (set-streamed! bool) (set! streamed bool))
+    (define (get-stream-number) stream-number)
+    (define (set-stream-number! num) (set! stream-number num))
+    (define (get-data-type) data-type)
+    (define (set-data-type! type) (set! data-type type))
+    
     (define (dispatch m)
       (let ()
         (cond ((eq? m 'get-name) get-name)
-              ((eq? m 'get-number) get-number )
+              ((eq? m 'get-number) get-number)
+              ((eq? m 'get-streamed) get-streamed)
+              ((eq? m 'set-streamed!) set-streamed!)
+              ((eq? m 'get-stream-number) get-stream-number)
+              ((eq? m 'set-stream-number!) set-stream-number!)
+              ((eq? m 'get-data-type) get-data-type)
+              ((eq? m 'set-data-type!) set-data-type!)
               (else (error "unknown method in define-layer")))))
     dispatch))
 
+;find-layer
+;input name - string - name of layer
+;output - function of corresponding layer or null
 (define (find-layer layer-list name)
   (cond
     ((empty? layer-list) null)
@@ -156,22 +179,15 @@
                                                            (map bin-str->hex-str 
                                                           (split-to-8 (expand-string-to-32
                                                            ;get list of bits from cadence bitmap
-                                                           (foldl 
-                                                            (lambda (bit bitstr)
-                                                              (string-append bitstr (number->string bit))) 
-                                                            ""  word)
-                                            )))
-                                                           ;)
-                                                  ))
-                                          '()
-                                        bitmap))
-                                   (list "};"))
-                            )
-                     )
+                                                                       (foldl 
+                                                                        (lambda (bit bitstr)
+                                                                          (string-append bitstr (number->string bit))) 
+                                                                        ""  word))))))
+                                           '()
+                                           bitmap))
+                                   (list "};"))))
                    stipplelist) 
-              (list "}")
-              
-))))
+              (list "}")))))
 
 
 (define drDefineLineStyle
@@ -242,8 +258,28 @@
 (define streamLayers
   (lambda(layers)
     (for-each 
-     (lambda(layer)
-       null)layers)))
+     (lambda(cur-layer)
+       (let* ((layer-name (car (car cur-layer)))
+              (layer (find-layer layer-list layer-name))
+              (stream-number (cadr cur-layer))
+              (data-type (caddr cur-layer))
+              (streamed (cadddr cur-layer)))
+         (if (not (eq? layer null)) 
+             (if (eq? streamed 't)
+                 (begin 
+                   ((layer 'set-streamed!) #t)
+                   ((layer 'set-stream-number!) stream-number)
+                   ((layer 'set-data-type!) data-type))))))
+     layers)))
+
+(define physicalRules
+  (lambda (body)
+    (parse body)))
+
+(define mfgGridResolution
+  (lambda (resolutions)
+    (list "/*mfgGridResolution"
+          "not realized yet*/")))
 
 ;****************TRANSLATOR FUNCTIONS********************************
 ;----------------------------------------------
@@ -277,6 +313,8 @@
           ((eq? command 'techLayerProperties) (techLayerProperties body))
           ((eq? command 'layerRules) (layerRules body))
           ((eq? command 'streamLayers) (streamLayers body))
+          ((eq? command 'physicalRules) (physicalRules body))
+          ((eq? command 'mfgGridResolution) (mfgGridResolution body))
           (else (begin
                   (display "mistake in recognition")
                   (newline)
@@ -316,3 +354,13 @@
 ;(find-layer layer-list "PW")
 ;(find-layer layer-list "NBL1")
 ;((cadr layer-list) 'get-name)
+(for-each 
+ (lambda(layer)
+   (begin
+     (display "name = ")
+     (display ((layer 'get-name)))
+     (newline)
+     (display "streamed=")
+     (display ((layer 'get-streamed)))
+     (newline)))
+ layer-list)
