@@ -55,12 +55,17 @@ Dialog stuff
 
 Documentation
 ==============
-   multi line comments /* */ in TELL
-   sin/cos
-   loadlibrary
-   unloadlibrary
-   gdsimport/gdsexport to be updated with the layer map
-   gdsexport to be updated with x2048 parameter
+   quick list format description
+   cifimport x2
+   cifexport x2
+   toolbarsize
+   (constants)
+   horizontal
+   vertical
+   _iconsize16
+   _iconsize24
+   _iconsize32
+   _iconsize48
 
 
 Global options of the editor
