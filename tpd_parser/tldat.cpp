@@ -99,8 +99,8 @@ telldata::bnd_type::bnd_type(point_type* pfld) : tell_type(telldata::tn_bnd)
 //=============================================================================
 telldata::hsh_type::hsh_type() : tell_type(telldata::tn_hsh)
 {
-   addfield("number", telldata::tn_int, NULL);
-   addfield("name"  , telldata::tn_string, NULL);
+   addfield("key"   , telldata::tn_int   , NULL);
+   addfield("value" , telldata::tn_string, NULL);
 };
 
 //=============================================================================
