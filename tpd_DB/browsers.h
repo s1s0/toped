@@ -276,11 +276,12 @@ namespace browsers
          virtual            ~LayerPanel();
          wxString             getAllSelected();
 
-         private:
+      private:
          typedef std::map <word, LayerButton*> LayerButtonMap;
 
          void                 onSize(wxSizeEvent&);
          void                 onCommand(wxCommandEvent&);
+         LayerButton*         checkDefined(word);
          LayerButtonMap       _buttonMap;
          int                  _buttonCount;
          LayerButton*         _selectedButton;

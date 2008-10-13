@@ -1458,11 +1458,16 @@ browsers::LayerPanel::~LayerPanel()
 {
 }
 
+browsers::LayerButton* browsers::LayerPanel::checkDefined(word key)
+{
+   if (_buttonMap.end() == _buttonMap.find(key)) return NULL;
+   return _buttonMap[key];
+}
 
 void browsers::LayerPanel::onCommand(wxCommandEvent& event)
 {
    int command = event.GetInt();
-
+   LayerButton* wbutton;
    switch (command) 
    {
 
@@ -1470,8 +1475,8 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
          {
             word *oldlay = static_cast<word*>(event.GetClientData());
             word layno = event.GetExtraLong();
-            if (NULL != _buttonMap[*oldlay]) _buttonMap[*oldlay]->unselect();
-            if (NULL != _buttonMap[layno])   _buttonMap[layno]->select();
+            if (wbutton = checkDefined(*oldlay)) wbutton->unselect();
+            if (wbutton = checkDefined( layno )) wbutton->select();
             //_layerlist->defaultLayer((word)event.GetExtraLong(), (word)event.GetInt());
             delete (oldlay);
             break;
@@ -1480,8 +1485,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
          {
             word *layno = static_cast<word*>(event.GetClientData());
             bool status = (1 == event.GetExtraLong());
-            //_buttonMap[layno]->hideLayer(event.IsChecked());
-            if (NULL != _buttonMap[*layno])  _buttonMap[*layno]->hideLayer(status);
+            if (wbutton = checkDefined(*layno)) wbutton->hideLayer(status);
             delete (layno);
             break;
          }
@@ -1491,7 +1495,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
             //_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());
             word *layno = static_cast<word*>(event.GetClientData());
             bool status = (1 == event.GetExtraLong());
-            if (NULL != _buttonMap[*layno])  _buttonMap[*layno]->lockLayer(status);
+            if (wbutton = checkDefined(*layno)) wbutton->lockLayer(status);
             delete (layno);
             break;
          }
@@ -1499,41 +1503,39 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
          {
             word layno = event.GetExtraLong();
             if (NULL != _selectedButton) _selectedButton->unselect();
-            _selectedButton = _buttonMap[layno];
+            if (wbutton = checkDefined( layno)) _selectedButton = _buttonMap[layno];
             break;
          }
 
       case     BT_LAYER_ADD:
          {
             LayerInfo* layer = static_cast<LayerInfo*>(event.GetClientData());
-            LayerButton *layerButton;
-            LayerButtonMap::iterator it;
+//            LayerButton *layerButton;
+//            LayerButtonMap::iterator it;
             int szx, szy;
 
             //Remove selection from current button
             if (NULL != _selectedButton) _selectedButton->unselect();
-            it = _buttonMap.find(layer->layno());
-            if (it != _buttonMap.end())
+            if (wbutton = checkDefined( layer->layno() ))
             {
                //Button already exists, replace it
-               LayerButton *tempButton = it->second;
                //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
                //wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
                int x, y;
                int ID;
-               tempButton->GetPosition(&x, &y);
-               tempButton->GetSize(&szx, &szy);
-               ID = tempButton->GetId();
-               layerButton = DEBUG_NEW LayerButton(this, ID, wxPoint (x, y), wxSize(szx, szy),
+               wbutton->GetPosition(&x, &y);
+               wbutton->GetSize(&szx, &szy);
+               ID = wbutton->GetId();
+               LayerButton* layerButton = DEBUG_NEW LayerButton(this, ID, wxPoint (x, y), wxSize(szx, szy),
                wxBU_AUTODRAW|wxNO_BORDER, wxDefaultValidator, _T("button"), layer);
                _buttonMap[layer->layno()] = layerButton;
-               delete tempButton;
+               delete wbutton;
             }
             else
             {
                //Button doesn't exist, create new button
                GetClientSize(&szx, &szy);
-               layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
+               LayerButton* layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
                                              wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
                wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
                _buttonMap[layer->layno()] = layerButton;
@@ -1541,9 +1543,9 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
                this->SetScrollbars(0, buttonHeight, 0, _buttonCount);
             }
             //Restore selection
-            if ((it = _buttonMap.find(DATC->curlay()))!= _buttonMap.end())
+            if (wbutton = checkDefined( DATC->curlay()))
             {
-               _selectedButton = it->second;
+               _selectedButton = wbutton;
                _selectedButton->select();
             }
             delete (static_cast<LayerInfo*>(layer));
