@@ -1,4 +1,5 @@
 (require scheme/list)
+;(require rnrs/lists-6)
 
 ;****************AUX FUNCTIONS********************************
 
@@ -50,7 +51,7 @@
 (define (list-of-lists->list lst)
   (foldl (lambda(x result) (append result x)) '() lst))
 
-(define (layer-name->string name) 
+(define (name->string name) ;layer-name->string
   (cond ((symbol? name)(symbol->string name))
         ((string? name) name)
         (else (error "error in layer-name->string. Strange type for conversion"))))
@@ -64,22 +65,23 @@
 
 ;****************OBJECT DEFINITIONS********************************
 (define (define-packet name)
-  (let ((stipple "")
+  (let ((packet-name (name->string name))
+        (stipple "")
         (line-style "")
         (fill "")
         (outline "")
         (fill-style ""))
-    (define (set-stipple! stip) (set! stipple stip))
+    (define (set-stipple! stip) (set! stipple (name->string stip)))
     (define (get-stipple) stipple)
-    (define (set-line-style! style) (set! line-style style))
+    (define (set-line-style! style) (set! line-style (name->string style)))
     (define (get-line-style) line-style)
-    (define (set-fill! fl) (set! fill fl))
+    (define (set-fill! fl) (set! fill (name->string fl)))
     (define (get-fill) fill)
-    (define (set-outline! outln) (set! outline outln))
+    (define (set-outline! outln) (set! outline (name->string outln)))
     (define (get-outline) outline)
-    (define (set-fill-style! fl-style) (set! fill-style fl-style))
+    (define (set-fill-style! fl-style) (set! fill-style (name->string fl-style)))
     (define (get-fill-style) fill-style)
-    (define (get-name) name)
+    (define (get-name) packet-name)
     (define (dispatch m)
       (let ()
         (cond ((eq? m 'set-stipple!) set-stipple!)
@@ -97,10 +99,11 @@
     dispatch))
 
 (define (define-layer name number)
-  (let ((layer-name (layer-name->string name))
+  (let ((layer-name (name->string name))
         (streamed #f)
         (stream-number #f)
-        (data-type #f))
+        (data-type #f)
+        (packet #f))
     (define (get-name) layer-name)
     (define (get-number) number)
     (define (get-streamed) streamed)
@@ -109,6 +112,8 @@
     (define (set-stream-number! num) (set! stream-number num))
     (define (get-data-type) data-type)
     (define (set-data-type! type) (set! data-type type))
+    (define (get-packet) packet)
+    (define (set-packet! pack) (set! packet (name->string pack)))
     
     (define (dispatch m)
       (let ()
@@ -120,17 +125,29 @@
               ((eq? m 'set-stream-number!) set-stream-number!)
               ((eq? m 'get-data-type) get-data-type)
               ((eq? m 'set-data-type!) set-data-type!)
+              ((eq? m 'get-packet) get-packet)
+              ((eq? m 'set-packet!) set-packet!)
               (else (error "unknown method in define-layer")))))
     dispatch))
 
-;find-layer
-;input name - string - name of layer
-;output - function of corresponding layer or null
-(define (find-layer layer-list name)
+;find-in-list
+;I wrote this function because I am too stupid to understand (find) from rnrs lists(6)
+;input pred? - predicate
+;      lst - list
+;output - corresponding element from lst or null
+(define (find-in-list pred? lst )
   (cond
-    ((empty? layer-list) null)
-    ((string=? (((car layer-list) 'get-name)) name) (car layer-list))
-    (else (find-layer (cdr layer-list) name))))
+    ((empty? lst) null)
+    ((pred? (car lst)) (car lst))
+    (else (find-in-list pred? (cdr lst) ))))
+
+;find-in-object-list
+;finds object in list with name==elem-name
+;input lst - list of objects
+;      elem-name - name of element
+; Warning - objects must support 'get-name operation
+(define (find-in-object-list lst elem-name)
+  (find-in-list (lambda (elem) (string=? ((elem 'get-name)) elem-name)) lst))
 
 ;****************GLOBAL VARIABLES AND FUNCTIONS*******************
 (define packet-list  '())
@@ -147,7 +164,7 @@
 ;-----------------------------------------------
 (define drDefineColor
   (lambda(colorlist) 
-    (append (list "void ColorSetup() {")
+    (append (list "void colorSetup() {")
           (map (lambda (x)
                  (let ((color (cadr x))
                        (red (caddr x))
@@ -163,13 +180,30 @@
 ;---------------------------------------------
 (define drDefineStipple
   (lambda(stipplelist)
-    (let ((l '()))
-      (append (list "void fillSetup() {") 
+    (let ((stipple-names '()))
+      (append (list "void fillSetup() {")
+              (list (string-append "int list blank= {" 
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00" "};")) 
               (map (lambda(stipple)
                           (let ((display (car stipple))
                                 (name (cadr stipple))
                                 (bitmap (caddr stipple)))
-                            (set! l (append l (list name)))
+                            (set! stipple-names (append stipple-names (list name)))
                             (append 
                              (list "int list " name "= {" )
                                    (map-exclude-last (lambda (str) (string-append str ","))
@@ -186,7 +220,10 @@
                                            '()
                                            bitmap))
                                    (list "};"))))
-                   stipplelist) 
+                   stipplelist)
+              (map (lambda(stipple)
+                     (string-append "definefill(\"" (symbol->string stipple) "\"," (symbol->string stipple) ");"))
+                   stipple-names)
               (list "}")))))
 
 
@@ -232,6 +269,7 @@
      (lambda (layer)
        (let* ( (name (car layer))
                (number (cadr layer))
+               (packet (caddr layer))
                (new-layer (define-layer name number)))
          new-layer))
      layers)))
@@ -243,8 +281,13 @@
 
 (define techDisplays
   (lambda(layers)
-    (list "/*techDisplays "
-                   "toped doesn't support this command*/")))
+    (begin (for-each (lambda (layer)
+                (let* ((layer-name (name->string(car layer)))
+                       (packet-name (name->string(caddr layer)))
+                       (cur-layer (find-in-object-list layer-list layer-name))) 
+                  ((cur-layer 'set-packet!) packet-name)))
+              layers)
+           '())))
 
 (define techLayerProperties
   (lambda(layers)
@@ -257,10 +300,14 @@
 
 (define streamLayers
   (lambda(layers)
-    (for-each 
+    (begin
+      (for-each 
      (lambda(cur-layer)
        (let* ((layer-name (car (car cur-layer)))
-              (layer (find-layer layer-list layer-name))
+              (layer (find-in-list 
+                      (lambda(x) 
+                        (string=? ((x 'get-name)) layer-name)) 
+                      layer-list ))
               (stream-number (cadr cur-layer))
               (data-type (caddr cur-layer))
               (streamed (cadddr cur-layer)))
@@ -270,7 +317,8 @@
                    ((layer 'set-streamed!) #t)
                    ((layer 'set-stream-number!) stream-number)
                    ((layer 'set-data-type!) data-type))))))
-     layers)))
+     layers)
+      '())))
 
 (define physicalRules
   (lambda (body)
@@ -281,8 +329,35 @@
     (list "/*mfgGridResolution"
           "not realized yet*/")))
 
+
 ;****************TRANSLATOR FUNCTIONS********************************
-;----------------------------------------------
+(define (layer-setup)
+  (append (list (list "void layerSetup() {"))
+          (list (list  "defineline(\"selected1\", \"\", 0x5555,   5  ,	5);"))
+          (list (list  "defineline(\"selected2\", \"\", 0xf18f,   2  ,	5);"))
+          (list (list  "defineline(\"selected3\", \"\", 0xcfcf,   2  ,   5);"))
+   
+          (map (lambda(layer)
+                 ;Only layers from gds used
+                 (if ((layer 'get-streamed))
+                     (let* ((name ((layer 'get-name)))
+                           (packet-name ((layer 'get-packet)))
+                           (packet (find-in-object-list packet-list packet-name)))
+                       (if (not (eq? packet null))
+                           (let* ((gds-number (number->string((layer 'get-stream-number))))
+                                  (colour ((packet 'get-fill)))
+                                  (stipple ((packet 'get-stipple))))
+                             (list (string-append "layprop(\"" name "\",\t" gds-number ",\t\"" colour "\",\t"
+                                                  "\"" stipple "\",\t" "\"selected3\");"))) 
+                           (error "can't find packet")))
+                     '()))
+               layer-list)
+          (list (list "}"))))
+(define (post-proceed)
+  (append (list (list "colorSetup();")
+                (list "fillSetup();")
+                (list "layerSetup();") )))
+
 (define (readlines filename)
   (call-with-input-file filename
     (lambda (p)
@@ -346,8 +421,8 @@
 
 ;---------------------------------------------
 (define d (foldl (lambda (word result) 
-                                          (append result (readlines word))) '() (list "default.drf" "techfile.tf"))); result (readlines "default.drf"))))
-(write-to-file "tell.tll" (parse d))
+                                          (append result (readlines word))) '() (list "default.drf" "techfile.tf")))
+(write-to-file "tell.tll" (append (parse d) (layer-setup) (post-proceed)))
 
 
 ;(parse d)
@@ -360,7 +435,11 @@
      (display "name = ")
      (display ((layer 'get-name)))
      (newline)
-     (display "streamed=")
-     (display ((layer 'get-streamed)))
+     ;(display "streamed=")
+     ;(display ((layer 'get-streamed)))
+     (display "packet=")
+     (display ((layer 'get-packet)))
      (newline)))
  layer-list)
+
+(layer-setup)
