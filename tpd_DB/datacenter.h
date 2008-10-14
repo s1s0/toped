@@ -40,8 +40,8 @@ namespace GDSin {
                            Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const GDSin::LayerMapGds&);
       void                 top_structure(std::string, bool, bool);
    protected:
-      void                 child_structure(const GDSin::GDSHierTree*, bool, bool);
-      void                 convert_prep(const GDSin::GDSHierTree* item, bool, bool);
+      void                 child_structure(const GDSin::GDSHierTree*, bool);
+      void                 convert_prep(const GDSin::GDSHierTree* item, bool);
       void                 convert(GDSin::GdsStructure*, laydata::tdtcell*);
       void                 poly(GDSin::GdsPolygon* , laydata::tdtlayer*, int2b);
       void                 wire(GDSin::GDSpath*    , laydata::tdtlayer*, int2b);
@@ -60,7 +60,7 @@ namespace CIFin {
    class Cif2Ted {
       public:
                               Cif2Ted(CIFin::CifFile*, laydata::tdtdesign*, SIMap*);
-         void                 top_structure(std::string, bool);
+         void                 top_structure(std::string, bool, bool);
       protected:
          void                 child_structure(const CIFin::CIFHierTree*, bool);
          void                 convert_prep(const CIFin::CIFHierTree* item, bool);
@@ -93,7 +93,7 @@ public:
    void                       CIFexport(laydata::tdtcell*, USMap*, bool, bool, std::string&);
    bool                       CIFgetLay(nameList&);
    bool                       gdsGetLayers(GdsLayers&);
-   void                       CIFimport(const nameList&, SIMap*, bool);
+   void                       CIFimport(const nameList&, SIMap*, bool, bool);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);

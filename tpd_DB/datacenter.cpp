@@ -53,8 +53,8 @@ void GDSin::Gds2Ted::top_structure(std::string top_str, bool recursive, bool ove
    if (NULL != src_structure)
    {
       GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
-      child_structure(root, recursive, overwrite);
-      convert_prep(root, recursive, overwrite);
+      if (recursive) child_structure(root, overwrite);
+      convert_prep(root, overwrite);
       root = root->GetNextRoot(TARGETDB_LIB);
    }
    else
@@ -65,7 +65,7 @@ void GDSin::Gds2Ted::top_structure(std::string top_str, bool recursive, bool ove
    }
 }
 
-void GDSin::Gds2Ted::child_structure(const GDSin::GDSHierTree* root, bool recursive, bool overwrite)
+void GDSin::Gds2Ted::child_structure(const GDSin::GDSHierTree* root, bool overwrite)
 {
    const GDSin::GDSHierTree* Child= root->GetChild(TARGETDB_LIB);
    while (Child)
@@ -73,14 +73,14 @@ void GDSin::Gds2Ted::child_structure(const GDSin::GDSHierTree* root, bool recurs
       if ( !Child->GetItem()->traversed() )
       {
          // traverse children first
-         child_structure(Child, recursive, overwrite);
-         convert_prep(Child, recursive, overwrite);
+         child_structure(Child, overwrite);
+         convert_prep(Child, overwrite);
       }
       Child = Child->GetBrother(TARGETDB_LIB);
    }
 }
 
-void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool recursive, bool overwrite)
+void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool overwrite)
 {
    GDSin::GdsStructure* src_structure = const_cast<GDSin::GdsStructure*>(item->GetItem());
    std::string gname = src_structure->name();
@@ -276,14 +276,14 @@ CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtdesign* dst_lib,
 }
 
 
-void CIFin::Cif2Ted::top_structure(std::string top_str, bool overwrite)
+void CIFin::Cif2Ted::top_structure(std::string top_str, bool recursive, bool overwrite)
 {
    assert(_src_lib->hiertree());
    CIFin::CifStructure *src_structure = _src_lib->getStructure(top_str);
    if (NULL != src_structure)
    {
       CIFin::CIFHierTree* root = _src_lib->hiertree()->GetMember(src_structure);
-      child_structure(root, overwrite);
+      if (recursive) child_structure(root, overwrite);
       convert_prep(root, overwrite);
       root = root->GetNextRoot(TARGETDB_LIB);
    }
@@ -809,7 +809,7 @@ bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
    }
 }
 
-void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool overwrite )
+void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite )
 {
    // DB shold have been locked at this point (from the tell functions)
    if (NULL == lockCIF())
@@ -818,7 +818,7 @@ void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool ov
    {
       CIFin::Cif2Ted converter(_CIFDB, _TEDLIB(), cifLayers);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
-         converter.top_structure(*CN, overwrite);
+         converter.top_structure(*CN, recur, overwrite);
       _TEDLIB()->modified = true;
       unlockCIF();
       tell_log(console::MT_INFO,"Done");

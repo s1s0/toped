@@ -939,11 +939,13 @@ tellstdfunc::CIFimportList::CIFimportList(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::CIFimportList::execute()
 {
    bool  over  = getBoolValue();
+   bool  recur = getBoolValue();
    SIMap* cifLays = DEBUG_NEW SIMap();
    telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
@@ -961,12 +963,17 @@ int tellstdfunc::CIFimportList::execute()
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
    }
    DATC->lockDB(false);
-      DATC->CIFimport(top_cells, cifLays, over);
+      DATC->CIFimport(top_cells, cifLays, recur, over);
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
 
-   LogFile << LogFile.getFN() << "(" << *pl << "," << *ll << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   LogFile << LogFile.getFN() << "(" << *pl << ","
+           << *ll << ","
+           << LogFile._2bool(recur) << ","
+           << LogFile._2bool(over ) << ");";
+
+   LogFile.flush();
    delete pl;
    delete ll;
    delete cifLays;
@@ -980,11 +987,13 @@ tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::CIFimport::execute()
 {
    bool  over  = getBoolValue();
+   bool  recur = getBoolValue();
    SIMap* cifLays = DEBUG_NEW SIMap();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
@@ -999,12 +1008,16 @@ int tellstdfunc::CIFimport::execute()
    nameList top_cells;
    top_cells.push_back(name.c_str());
    DATC->lockDB(false);
-      DATC->CIFimport(top_cells, cifLays, over);
+      DATC->CIFimport(top_cells, cifLays, recur, over);
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
 
-   LogFile << LogFile.getFN() << "(\"" << name<< "\"," << *lll << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   LogFile << LogFile.getFN() << "(\"" << name<< "\","
+           << *lll << ","
+           << LogFile._2bool(recur) << ","
+           << LogFile._2bool(over) << ");";
+   LogFile.flush();
    delete lll;
    cifLays->clear();
    delete cifLays;
