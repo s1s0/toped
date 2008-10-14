@@ -302,9 +302,9 @@ namespace tui {
                         getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos, wxString init);
       wxString          getSelectedCell() const {return _nameList->GetStringSelection();}
-      bool              get_overwrite()   const {return _overwrite->GetValue();}
+      bool              getOverwrite()    const {return _overwrite->GetValue();}
       bool              getRecursive()    const {return _recursive->GetValue();}
-      SIMap*             getCifLayerMap()        {return _layList->getTheMap();}
+      SIMap*            getCifLayerMap()        {return _layList->getTheMap();}
    private:
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;
