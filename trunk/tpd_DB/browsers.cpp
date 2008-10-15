@@ -1475,8 +1475,8 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
          {
             word *oldlay = static_cast<word*>(event.GetClientData());
             word layno = event.GetExtraLong();
-            if (wbutton = checkDefined(*oldlay)) wbutton->unselect();
-            if (wbutton = checkDefined( layno )) wbutton->select();
+            if ((wbutton = checkDefined(*oldlay))) wbutton->unselect();
+            if ((wbutton = checkDefined( layno ))) wbutton->select();
             //_layerlist->defaultLayer((word)event.GetExtraLong(), (word)event.GetInt());
             delete (oldlay);
             break;
@@ -1485,7 +1485,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
          {
             word *layno = static_cast<word*>(event.GetClientData());
             bool status = (1 == event.GetExtraLong());
-            if (wbutton = checkDefined(*layno)) wbutton->hideLayer(status);
+            if ((wbutton = checkDefined(*layno))) wbutton->hideLayer(status);
             delete (layno);
             break;
          }
@@ -1495,7 +1495,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
             //_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());
             word *layno = static_cast<word*>(event.GetClientData());
             bool status = (1 == event.GetExtraLong());
-            if (wbutton = checkDefined(*layno)) wbutton->lockLayer(status);
+            if ((wbutton = checkDefined(*layno))) wbutton->lockLayer(status);
             delete (layno);
             break;
          }
@@ -1503,7 +1503,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
          {
             word layno = event.GetExtraLong();
             if (NULL != _selectedButton) _selectedButton->unselect();
-            if (wbutton = checkDefined( layno)) _selectedButton = _buttonMap[layno];
+            if ((wbutton = checkDefined( layno))) _selectedButton = _buttonMap[layno];
             break;
          }
 
@@ -1516,7 +1516,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
 
             //Remove selection from current button
             if (NULL != _selectedButton) _selectedButton->unselect();
-            if (wbutton = checkDefined( layer->layno() ))
+            if ((wbutton = checkDefined( layer->layno() )))
             {
                //Button already exists, replace it
                //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
@@ -1543,7 +1543,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
                this->SetScrollbars(0, buttonHeight, 0, _buttonCount);
             }
             //Restore selection
-            if (wbutton = checkDefined( DATC->curlay()))
+            if ((wbutton = checkDefined( DATC->curlay())))
             {
                _selectedButton = wbutton;
                _selectedButton->select();
