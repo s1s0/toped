@@ -374,13 +374,13 @@ namespace telldata {
          tell_var*            selfcopy() const    {return DEBUG_NEW tthsh(*this);}
          void                 echo(std::string&, real);
          void                 assign(tell_var*);
-         const ttint&         number() const      {return *_number;}
-         const ttstring&      name() const        {return *_name;}
+         const ttint&         key()   const        {return *_key;}
+         const ttstring&      value() const        {return *_value;}
 //         void                 set_number(const int4b number)   {_number->_value = number; }
 //         void                 set_name(const std::string name) {_name->_value = name; }
       private:
-         ttint*               _number;
-         ttstring*            _name;
+         ttint*               _key;
+         ttstring*            _value;
    };
 
    //==============================================================================

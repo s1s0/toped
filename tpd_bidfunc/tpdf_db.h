@@ -57,6 +57,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(GDSexportTOP    , GDSexportTOPT );
    TELL_STDCMD_CLASSA(GDSclose         );
    TELL_STDCMD_CLASSA(GDSreportlay     );
+   TELL_STDCMD_CLASSA(GDSdeflaymap     );
 
    TELL_STDCMD_CLASSA(CIFread          );
    TELL_STDCMD_CLASSA(CIFgetLay        );
@@ -65,6 +66,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(CIFexportLIB     );
    TELL_STDCMD_CLASSA(CIFexportTOP     );
    TELL_STDCMD_CLASSA(CIFclose         );
+   TELL_STDCMD_CLASSA(CIFdeflaymap     );
 
    TELL_STDCMD_CLASSA(PSexportTOP      );
 }

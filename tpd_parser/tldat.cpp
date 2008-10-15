@@ -686,43 +686,43 @@ const telldata::ttbnd& telldata::ttbnd::operator = (const ttbnd& a) {
 //=============================================================================
 /*   class tthsh : public user_struct {*/
 telldata::tthsh::tthsh (int4b number, std::string name) : user_struct(tn_hsh),
-      _number(DEBUG_NEW telldata::ttint(number)),
-      _name(DEBUG_NEW telldata::ttstring(name))
+      _key(DEBUG_NEW telldata::ttint(number)),
+      _value(DEBUG_NEW telldata::ttstring(name))
 {
-   _fieldList.push_back(structRECNAME("number"  , _number  ));
-   _fieldList.push_back(structRECNAME("name"  , _name  ));
+   _fieldList.push_back(structRECNAME("key"  , _key  ));
+   _fieldList.push_back(structRECNAME("value", _value  ));
 }
 
 telldata::tthsh::tthsh(const tthsh& cobj) : user_struct(tn_hsh),
-      _number(DEBUG_NEW telldata::ttint(cobj.number())),
-      _name(DEBUG_NEW telldata::ttstring(cobj.name()))
+      _key(DEBUG_NEW telldata::ttint(cobj.key())),
+      _value(DEBUG_NEW telldata::ttstring(cobj.value()))
 {
-   _fieldList.push_back(structRECNAME("number"  , _number  ));
-   _fieldList.push_back(structRECNAME("name"  , _name  ));
+   _fieldList.push_back(structRECNAME("key"  , _key  ));
+   _fieldList.push_back(structRECNAME("value", _value  ));
 }
 
 telldata::tthsh::tthsh(operandSTACK& OPstack) : user_struct(tn_hsh)
 {
    // Here - get the data from the stack and reuse it ... don't delete it.
    // The alternative - to make a selfcopy and then delete the original from the OPstack
-   _name    = static_cast<telldata::ttstring*>(OPstack.top()); OPstack.pop();
-   _number  = static_cast<telldata::ttint*>(OPstack.top()); OPstack.pop();
+   _value  = static_cast<telldata::ttstring*>(OPstack.top()); OPstack.pop();
+   _key    = static_cast<telldata::ttint*>(OPstack.top()); OPstack.pop();
 
-   _fieldList.push_back(structRECNAME("number"  , _number  ));
-   _fieldList.push_back(structRECNAME("name"  , _name  ));
+   _fieldList.push_back(structRECNAME("key"  , _key   ));
+   _fieldList.push_back(structRECNAME("value", _value ));
 }
 
 void telldata::tthsh::echo(std::string& wstr, real)
 {
    std::ostringstream ost;
-   ost << "number = "  << number().value() << " : name = \"" << name().value() << "\"";
+   ost << "key = "  << key().value() << " : value = \"" << value().value() << "\"";
    wstr += ost.str();
 }
 
 void telldata::tthsh::assign(tell_var* rt)
 {
-   (*_number  ) = static_cast<tthsh*>(rt)->number();
-   (*_name)     = static_cast<tthsh*>(rt)->name();
+   (*_key  ) = static_cast<tthsh*>(rt)->key();
+   (*_value) = static_cast<tthsh*>(rt)->value();
 }
 
 //=============================================================================
