@@ -27,7 +27,10 @@
 ;input str - string of bits
 ;output - string of bits expanded to 32 bits 
 (define (expand-string-to-32 str)
-  (list->string (expand-to-N (string->list str)32)))
+  (list->string (expand-to-N (string->list str) 32)))
+
+(define (expand-to-128 lst)
+  (expand-to-N lst 128))
 
 ;split-to-8
 ;input str - string
@@ -207,23 +210,23 @@
                             (append 
                              (list "int list " name "= {" )
                                    (map-exclude-last (lambda (str) (string-append str ","))
-                                    (foldl (lambda (word result) 
-                                          (append result  ;(map-exclude-last 
-                                                          ; (lambda (str) (string-append str ","))
-                                                           (map bin-str->hex-str 
-                                                          (split-to-8 (expand-string-to-32
-                                                           ;get list of bits from cadence bitmap
-                                                                       (foldl 
-                                                                        (lambda (bit bitstr)
-                                                                          (string-append bitstr (number->string bit))) 
-                                                                        ""  word))))))
+                                    (expand-to-N (foldl (lambda (word result) 
+                                          (append result  
+                                                  (map bin-str->hex-str 
+                                                       (split-to-8 (expand-string-to-32
+                                                                    ;get list of bits from cadence bitmap
+                                                                    (foldl 
+                                                                     (lambda (bit bitstr)
+                                                                       (string-append bitstr (number->string bit))) 
+                                                                     ""  word))))))
                                            '()
-                                           bitmap))
+                                           bitmap) 128) )
                                    (list "};"))))
                    stipplelist)
               (map (lambda(stipple)
                      (string-append "definefill(\"" (symbol->string stipple) "\"," (symbol->string stipple) ");"))
                    stipple-names)
+              (list (list "definefill(\"blank\",blank);"))
               (list "}")))))
 
 
@@ -283,9 +286,11 @@
   (lambda(layers)
     (begin (for-each (lambda (layer)
                 (let* ((layer-name (name->string(car layer)))
+                       (purpose (cadr layer))
                        (packet-name (name->string(caddr layer)))
                        (cur-layer (find-in-object-list layer-list layer-name))) 
-                  ((cur-layer 'set-packet!) packet-name)))
+                  (if (eq? purpose 'drawing)
+                      ((cur-layer 'set-packet!) packet-name))))
               layers)
            '())))
 
@@ -344,10 +349,10 @@
                            (packet-name ((layer 'get-packet)))
                            (packet (find-in-object-list packet-list packet-name)))
                        (if (not (eq? packet null))
-                           (let* ((gds-number (number->string((layer 'get-stream-number))))
+                           (let* ((number (number->string((layer 'get-number))))
                                   (colour ((packet 'get-fill)))
                                   (stipple ((packet 'get-stipple))))
-                             (list (string-append "layprop(\"" name "\",\t" gds-number ",\t\"" colour "\",\t"
+                             (list (string-append "layprop(\"" name "\",\t" number ",\t\"" colour "\",\t"
                                                   "\"" stipple "\",\t" "\"selected3\");"))) 
                            (error "can't find packet")))
                      '()))
