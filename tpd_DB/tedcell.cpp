@@ -550,7 +550,8 @@ void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
       word dummy_lay, dummy_type;
-      if (!gdsf.getMappedLayType(dummy_lay, dummy_type, wl->first) ) continue;
+      if ((0!= wl->first) && !gdsf.getMappedLayType(dummy_lay, dummy_type, wl->first) )
+         continue;
       wl->second->GDSwrite(gdsf, wl->first, UU);
    }
    wr = gdsf.setNextRecord(gds_ENDSTR);gdsf.flush(wr);
@@ -579,7 +580,7 @@ void laydata::tdtcell::CIFwrite(CIFin::CifExportFile& ciff, const cellList& allc
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      if (!ciff.layerSpecification(wl->first)) continue;
+      if ((0!= wl->first) && !ciff.layerSpecification(wl->first)) continue;
       wl->second->CIFwrite(ciff, UU);
    }
    ciff.definitionFinish();
