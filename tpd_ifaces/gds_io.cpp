@@ -615,9 +615,10 @@ void GDSin::GdsFile::collectLayers(GdsLayers& layers)
    }
 }
 
-void GDSin::GdsFile::getMappedLayType(word& gdslay, word& gdstype, word tdtlay)
+bool GDSin::GdsFile::getMappedLayType(word& gdslay, word& gdstype, word tdtlay)
 {
-   _laymap->getGdsLayType(gdslay, gdstype, tdtlay);
+   bool result = _laymap->getGdsLayType(gdslay, gdstype, tdtlay);
+   return result;
    //It should not be a problem if the tdtlay is not listed in the map. Then
    // we take the default mapping which is gdslay = tdtlay; gdstype = 0
 }

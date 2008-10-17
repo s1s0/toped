@@ -574,22 +574,27 @@ void laydata::tdtbox::write(TEDfile* const tedfile) const {
 void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
    word gds_layer, gds_type;
-   gdsf.getMappedLayType(gds_layer, gds_type, lay);
-   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
-   gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_LAYER);
-   wr->add_int2b(gds_layer);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_DATATYPE);
-   wr->add_int2b(gds_type);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_XY,5);
-   wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
-   wr->add_int4b(_p1->x());wr->add_int4b(_p2->y());
-   wr->add_int4b(_p2->x());wr->add_int4b(_p2->y());
-   wr->add_int4b(_p2->x());wr->add_int4b(_p1->y());
-   wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
-   gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_ENDEL);
-   gdsf.flush(wr);
+   if (gdsf.getMappedLayType(gds_layer, gds_type, lay))
+   {
+      GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_LAYER);
+      wr->add_int2b(gds_layer);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_DATATYPE);
+      wr->add_int2b(gds_type);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_XY,5);
+      wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
+      wr->add_int4b(_p1->x());wr->add_int4b(_p2->y());
+      wr->add_int4b(_p2->x());wr->add_int4b(_p2->y());
+      wr->add_int4b(_p2->x());wr->add_int4b(_p1->y());
+      wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ENDEL);
+      gdsf.flush(wr);
+   }
+   //else
+   //{ No warning to the user here!. There can be millions of them!
+   //}
 }
 
 void laydata::tdtbox::CIFwrite(CIFin::CifExportFile& ciff, real) const
@@ -1039,22 +1044,27 @@ void laydata::tdtpoly::write(TEDfile* const tedfile) const {
 void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
    word gds_layer, gds_type;
-   gdsf.getMappedLayType(gds_layer, gds_type, lay);
-   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
-   gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_LAYER);
-   wr->add_int2b(gds_layer);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_DATATYPE);
-   wr->add_int2b(gds_type);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_XY,_plist.size()+1);
-   for (word i = 0; i < _plist.size(); i++)
+   if (gdsf.getMappedLayType(gds_layer, gds_type, lay))
    {
-      wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
+      GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_LAYER);
+      wr->add_int2b(gds_layer);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_DATATYPE);
+      wr->add_int2b(gds_type);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_XY,_plist.size()+1);
+      for (word i = 0; i < _plist.size(); i++)
+      {
+         wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
+      }
+      wr->add_int4b(_plist[0].x());wr->add_int4b(_plist[0].y());
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ENDEL);
+      gdsf.flush(wr);
    }
-   wr->add_int4b(_plist[0].x());wr->add_int4b(_plist[0].y());
-   gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_ENDEL);
-   gdsf.flush(wr);
+   //else
+   //{ No warning to the user here!. There can be millions of them!
+   //}
 }
 
 void laydata::tdtpoly::CIFwrite(CIFin::CifExportFile& ciff, real) const
@@ -1459,23 +1469,28 @@ void laydata::tdtwire::write(TEDfile* const tedfile) const {
 void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
    word gds_layer, gds_type;
-   gdsf.getMappedLayType(gds_layer, gds_type, lay);
-   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_PATH);
-   gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_LAYER);
-   wr->add_int2b(gds_layer);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_DATATYPE);
-   wr->add_int2b(gds_type);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_WIDTH);
-   wr->add_int4b(_width);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_XY,_plist.size());
-   for (word i = 0; i < _plist.size(); i++)
+   if (gdsf.getMappedLayType(gds_layer, gds_type, lay))
    {
-      wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
+      GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_PATH);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_LAYER);
+      wr->add_int2b(gds_layer);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_DATATYPE);
+      wr->add_int2b(gds_type);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_WIDTH);
+      wr->add_int4b(_width);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_XY,_plist.size());
+      for (word i = 0; i < _plist.size(); i++)
+      {
+         wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
+      }
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ENDEL);
+      gdsf.flush(wr);
    }
-   gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_ENDEL);
-   gdsf.flush(wr);
+   //else
+   //{ No warning to the user here!. There can be millions of them!
+   //}
 }
 
 void laydata::tdtwire::CIFwrite(CIFin::CifExportFile& ciff, real) const
@@ -2254,32 +2269,37 @@ void laydata::tdttext::write(TEDfile* const tedfile) const {
 void laydata::tdttext::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 {
    word gds_layer, gds_type;
-   gdsf.getMappedLayType(gds_layer, gds_type, lay);
-   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_TEXT);
-   gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_LAYER);
-   wr->add_int2b(gds_layer);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_TEXTTYPE);
-   wr->add_int2b(gds_type);gdsf.flush(wr);
-   TP trans;
-   real rotation, scale;
-   bool flipX;
-   _translation.Decompose(trans,rotation,scale,flipX);
-   wr = gdsf.setNextRecord(gds_STRANS);
-   if (flipX) wr->add_int2b(0x8000);
-   else       wr->add_int2b(0x0000);
-   gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_MAG);
-   wr->add_real8b(scale * OPENGL_FONT_UNIT * UU);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_ANGLE);
-   wr->add_real8b(rotation);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_XY,1);
-   wr->add_int4b(trans.x());wr->add_int4b(trans.y());
-   gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_STRING, _text.size());
-   wr->add_ascii(_text.c_str());gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_ENDEL);
-   gdsf.flush(wr);
+   if (gdsf.getMappedLayType(gds_layer, gds_type, lay))
+   {
+      GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_TEXT);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_LAYER);
+      wr->add_int2b(gds_layer);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_TEXTTYPE);
+      wr->add_int2b(gds_type);gdsf.flush(wr);
+      TP trans;
+      real rotation, scale;
+      bool flipX;
+      _translation.Decompose(trans,rotation,scale,flipX);
+      wr = gdsf.setNextRecord(gds_STRANS);
+      if (flipX) wr->add_int2b(0x8000);
+      else       wr->add_int2b(0x0000);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_MAG);
+      wr->add_real8b(scale * OPENGL_FONT_UNIT * UU);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ANGLE);
+      wr->add_real8b(rotation);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_XY,1);
+      wr->add_int4b(trans.x());wr->add_int4b(trans.y());
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_STRING, _text.size());
+      wr->add_ascii(_text.c_str());gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ENDEL);
+      gdsf.flush(wr);
+   }
+   //else
+   //{ No warning to the user here!. There can be millions of them!
+   //}
 }
 
 void laydata::tdttext::CIFwrite(CIFin::CifExportFile& ciff, real) const
