@@ -191,8 +191,8 @@ namespace tui {
       private:
          class LayerRecord {
             public:
-                              LayerRecord(wxStaticText* ciflay, wxComboBox* tdtlay) : _ciflay(ciflay), _tdtlay(tdtlay) {};
-               wxStaticText*     _ciflay;
+                                 LayerRecord(wxCheckBox* ciflay, wxComboBox* tdtlay) : _ciflay(ciflay), _tdtlay(tdtlay) {};
+               wxCheckBox*       _ciflay;
                wxComboBox*       _tdtlay;
          };
          typedef std::list<LayerRecord> AllRecords;
@@ -207,9 +207,9 @@ namespace tui {
       private:
          class LayerRecord {
             public:
-                              LayerRecord(wxStaticText* gdslay, wxStaticText* gdstype, wxComboBox* tdtlay) : 
+                              LayerRecord(wxCheckBox* gdslay, wxStaticText* gdstype, wxComboBox* tdtlay) :
                                  _gdslay(gdslay), _gdstype(gdstype), _tdtlay(tdtlay) {};
-               wxStaticText*     _gdslay;
+               wxCheckBox*       _gdslay;
                wxStaticText*     _gdstype;
                wxComboBox*       _tdtlay;
          };
@@ -225,9 +225,9 @@ namespace tui {
       private:
          class LayerRecord {
             public:
-                              LayerRecord(wxStaticText* tdtlay, wxTextCtrl* ciflay) : 
+                              LayerRecord(wxCheckBox* tdtlay, wxTextCtrl* ciflay) :
                                  _tdtlay(tdtlay), _ciflay(ciflay) {};
-               wxStaticText*  _tdtlay;
+               wxCheckBox*    _tdtlay;
                wxTextCtrl*    _ciflay;
          };
          typedef std::list<LayerRecord> AllRecords;
@@ -242,9 +242,9 @@ namespace tui {
       private:
          class LayerRecord {
             public:
-                              LayerRecord(wxStaticText* tdtlay, wxTextCtrl* gdslay, wxTextCtrl* gdstype) : 
+                              LayerRecord(wxCheckBox* tdtlay, wxTextCtrl* gdslay, wxTextCtrl* gdstype) :
                                  _tdtlay(tdtlay), _gdslay(gdslay), _gdstype(gdstype) {};
-               wxStaticText*  _tdtlay;
+               wxCheckBox*    _tdtlay;
                wxTextCtrl*    _gdslay;
                wxTextCtrl*    _gdstype;
          };

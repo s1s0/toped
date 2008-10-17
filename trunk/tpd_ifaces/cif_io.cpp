@@ -497,7 +497,7 @@ bool CIFin::CifExportFile::layerSpecification(word layno)
       //std::stringstream message;
       //message << "   Layer " << layno <<" not found in the layer map and will not be converted";
       //tell_log(console::MT_INFO, message.str());
-      //return false;
+      return false;
    }
    if (_verbose)
       _file << "   Layer "<< (*_laymap)[layno] << " objects follow;" << std::endl;
