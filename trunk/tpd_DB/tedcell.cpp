@@ -548,7 +548,11 @@ void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   {
+      word dummy_lay, dummy_type;
+      if (!gdsf.getMappedLayType(dummy_lay, dummy_type, wl->first) ) continue;
       wl->second->GDSwrite(gdsf, wl->first, UU);
+   }
    wr = gdsf.setNextRecord(gds_ENDSTR);gdsf.flush(wr);
    gdsf.registerCellWritten(name());
 }

@@ -601,7 +601,7 @@ namespace GDSin {
          void                 updateLastRecord();
          GdsStructure*        getStructure(const char*);
          void                 collectLayers(GdsLayers&);
-         void                 getMappedLayType(word& gdslay, word& gdstype, word tdtlay);
+         bool                 getMappedLayType(word& gdslay, word& gdstype, word tdtlay);
          std::string          libname() const                  { return _library->name();       }
          void                 hierOut()                        { _hierTree = _library->hierOut();}
          GDSHierTree*         hierTree()                       { return _hierTree;              }

@@ -494,10 +494,10 @@ bool CIFin::CifExportFile::layerSpecification(word layno)
    if (0 == layno) return true;
    if (_laymap->end() == _laymap->find(layno))
    {
-      std::stringstream message;
-      message << "   Layer " << layno <<" not found in the layer map and will not be converted";
-      tell_log(console::MT_INFO, message.str());
-      return false;
+      //std::stringstream message;
+      //message << "   Layer " << layno <<" not found in the layer map and will not be converted";
+      //tell_log(console::MT_INFO, message.str());
+      //return false;
    }
    if (_verbose)
       _file << "   Layer "<< (*_laymap)[layno] << " objects follow;" << std::endl;
