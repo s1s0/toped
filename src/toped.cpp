@@ -1219,7 +1219,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
    wxString ost_int;
    ost_int << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
    wxString ost;
-   ost << wxT("gdsimport(") << ost_int << wxT(", true, false );gdsclose();");
+   ost << wxT("gdsimport(") << ost_int << wxT(", gdsdefaultlaymap(true), true, false );gdsclose();");
    _cmdline->parseCommand(ost);
 //   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
@@ -1237,7 +1237,8 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
          return;
       }
       wxString ost;
-      ost << wxT("gdsexport(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\", false);");
+      ost << wxT("gdsexport(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
+          << wxT("\", gdsdefaultlaymap(false), false);");
       _cmdline->parseCommand(ost);
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }

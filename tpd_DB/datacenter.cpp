@@ -319,7 +319,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
 {
    CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(item->GetItem());
    std::string gname = src_structure->name();
-         // check that destination structure with this name exists
+   // check that destination structure with this name exists
    laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
    std::ostringstream ost; ost << "CIF import: ";
    if (NULL != dst_structure)
