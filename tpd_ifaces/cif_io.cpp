@@ -196,6 +196,7 @@ void CIFin::CifStructure::hierPrep(CifFile& cfile)
       }
       _local = _local->last();
    }
+   _children.sort();
    _children.unique();
 
    if ("" == _name)
@@ -362,20 +363,10 @@ void CIFin::CifFile::collectLayers(nameList& cifLayers)
       local->collectLayers(allCiffLayers);
       local = local->last();
    }
-   SIMap laylist;
-   // cifLayers.unique();
-   // Unique doesn't seem to work properly after collecting all layers from 
-   // all the cells. Not quite sure why.
-   // Using the std::map instead
    for (CifLayerList::const_iterator LLI = allCiffLayers.begin(); LLI != allCiffLayers.end(); LLI++)
-   {
-      laylist[(*LLI)->name()] = 0; // map key is unique! 
-   }
-   // and after uniquifying - gather the unique layer names
-   for (SIMap::const_iterator LLI = laylist.begin(); LLI != laylist.end(); LLI++)
-   {
-      cifLayers.push_back(LLI->first);
-   }
+      cifLayers.push_back((*LLI)->name());
+   cifLayers.sort();
+   cifLayers.unique();
 }
 
 CIFin::CifStructure* CIFin::CifFile::getStructure(_dbl_word cellno)
