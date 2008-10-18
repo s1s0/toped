@@ -988,14 +988,14 @@ tellstdfunc::CIFexportLIB::CIFexportLIB(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::CIFexportLIB::execute()
 {
-   std::string filename = getStringValue();
    bool  verbose = getBoolValue();
+   std::string filename = getStringValue();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    // Convert layer map
    USMap* cifLays = DEBUG_NEW USMap();
@@ -1010,7 +1010,11 @@ int tellstdfunc::CIFexportLIB::execute()
       DATC->lockDB(false);
       DATC->CIFexport(cifLays, verbose, filename);
       DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< filename << "\"," << (*lll) << ");"; LogFile.flush();
+      LogFile << LogFile.getFN() << "( "
+              << (*lll) << ", \""
+              << filename << "\", "
+              << LogFile._2bool(verbose)
+              << " );"; LogFile.flush();
    }
    else
    {
@@ -1027,18 +1031,18 @@ tellstdfunc::CIFexportTOP::CIFexportTOP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::CIFexportTOP::execute()
 {
-   std::string filename = getStringValue();
    bool  verbose = getBoolValue();
-   bool  recur = getBoolValue();
+   std::string filename = getStringValue();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   bool  recur = getBoolValue();
    std::string cellname = getStringValue();
 
    // Convert layer map
@@ -1058,11 +1062,12 @@ int tellstdfunc::CIFexportTOP::execute()
          if (NULL != excell)
          {
             DATC->CIFexport(excell, cifLays, recur, verbose, filename);
-            LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
-                                       << (*lll)            
-                                       << LogFile._2bool(recur) 
-                                       << LogFile._2bool(verbose) 
-                                       << ",\"" << filename << "\");";
+            LogFile << LogFile.getFN() << "( \""
+                    << cellname << "\", " 
+                    << LogFile._2bool(recur) << ", "
+                    << (*lll) << ", \""
+                    << filename << "\", "
+                    << LogFile._2bool(verbose) << ");";
             LogFile.flush();
          }
          else

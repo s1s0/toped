@@ -1417,10 +1417,10 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
 
       ost << wxT("cifexport(\"") 
           << cellname << wxT("\", ")
-          << wxlaymap << wxT(", ")
           << (recur ? wxT("true") : wxT("false")) << wxT(", ")
-          << (sverbose ? wxT("true") : wxT("false")) << wxT(", \"")
-          <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\");");
+          << wxlaymap << wxT(", \"")
+          <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\", ")
+          << (sverbose ? wxT("true") : wxT("false")) << wxT(" );");
 
       _cmdline->parseCommand(ost);
       SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
