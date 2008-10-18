@@ -387,7 +387,7 @@ int tellstdfunc::GDSread::execute() {
 }
 
 //=============================================================================
-tellstdfunc::GDSimportT::GDSimportT(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSimport::GDSimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
@@ -396,7 +396,7 @@ tellstdfunc::GDSimportT::GDSimportT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSimportT::execute()
+int tellstdfunc::GDSimport::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
@@ -449,30 +449,7 @@ int tellstdfunc::GDSimportT::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSimport::GDSimport(telldata::typeID retype, bool eor) :
-      GDSimportT(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-}
-
-int tellstdfunc::GDSimport::execute() 
-{
-   bool  over  = getBoolValue();
-   bool  recur = getBoolValue();
-//   std::string filename = getStringValue();
-
-//   OPstack.push(DEBUG_NEW telldata::ttstring(filename));
-   OPstack.push(DEBUG_NEW telldata::ttlist(telldata::tn_hsh));
-   OPstack.push(DEBUG_NEW telldata::ttbool(recur));
-   OPstack.push(DEBUG_NEW telldata::ttbool(over));
-
-   return GDSimportT::execute();
-}
-
-//=============================================================================
-tellstdfunc::GDSimportListT::GDSimportListT(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSimportList::GDSimportList(telldata::typeID retype, bool eor) :
                               cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
@@ -481,7 +458,7 @@ tellstdfunc::GDSimportListT::GDSimportListT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSimportListT::execute()
+int tellstdfunc::GDSimportList::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
@@ -535,32 +512,7 @@ int tellstdfunc::GDSimportListT::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSimportList::GDSimportList(telldata::typeID retype, bool eor) :
-      GDSimportListT(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-}
-
-int tellstdfunc::GDSimportList::execute() 
-{
-   bool  over  = getBoolValue();
-   bool  recur = getBoolValue();
-   // Don't pop out the last argument - we'll just have to put it back
-   //telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-
-   // Don't push in the first argument - it wasn't poped-up
-   // OPstack.push(DEBUG_NEW telldata::ttlist(*pl));
-   OPstack.push(DEBUG_NEW telldata::ttlist(telldata::tn_hsh));
-   OPstack.push(DEBUG_NEW telldata::ttbool(recur));
-   OPstack.push(DEBUG_NEW telldata::ttbool(over));
-
-   return GDSimportListT::execute();
-}
-
-//=============================================================================
-tellstdfunc::GDSexportLIBT::GDSexportLIBT(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
@@ -568,7 +520,7 @@ tellstdfunc::GDSexportLIBT::GDSexportLIBT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSexportLIBT::execute()
+int tellstdfunc::GDSexportLIB::execute()
 {
    bool x2048           = getBoolValue();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
@@ -604,27 +556,7 @@ int tellstdfunc::GDSexportLIBT::execute()
 }
 
 //=============================================================================
-tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
-      GDSexportLIBT(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-}
-
-int tellstdfunc::GDSexportLIB::execute() 
-{
-   bool  x2048 = getBoolValue();
-   //std::string filename = getStringValue();
-
-   //OPstack.push(DEBUG_NEW telldata::ttstring(filename));
-   OPstack.push(DEBUG_NEW telldata::ttlist(telldata::tn_hsh));
-   OPstack.push(DEBUG_NEW telldata::ttbool(x2048));
-
-   return GDSexportLIBT::execute();
-}
-
-//=============================================================================
-tellstdfunc::GDSexportTOPT::GDSexportTOPT(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
@@ -634,7 +566,7 @@ tellstdfunc::GDSexportTOPT::GDSexportTOPT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSexportTOPT::execute()
+int tellstdfunc::GDSexportTOP::execute()
 {
    bool  x2048 = getBoolValue();
    std::string filename = getStringValue();
@@ -682,31 +614,6 @@ int tellstdfunc::GDSexportTOPT::execute()
    }
    delete lll;
    return EXEC_NEXT;
-}
-//=============================================================================
-tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype, bool eor) :
-      GDSexportTOPT(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-}
-
-int tellstdfunc::GDSexportTOP::execute() 
-{
-   bool  x2048 = getBoolValue();
-   std::string filename = getStringValue();
-   bool  recur = getBoolValue();
-   //std::string cellname = getStringValue();
-
-   //OPstack.push(DEBUG_NEW telldata::ttstring(cellname));
-   OPstack.push(DEBUG_NEW telldata::ttlist(telldata::tn_hsh));
-   OPstack.push(DEBUG_NEW telldata::ttbool(recur));
-   OPstack.push(DEBUG_NEW telldata::ttstring(filename));
-   OPstack.push(DEBUG_NEW telldata::ttbool(x2048));
-
-   return GDSexportTOPT::execute();
 }
 
 //=============================================================================

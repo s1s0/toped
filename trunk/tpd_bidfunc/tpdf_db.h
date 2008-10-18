@@ -47,14 +47,10 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdREPORTLAYc   , stdREPORTLAY  );
 
    TELL_STDCMD_CLASSA(GDSread          );
-   TELL_STDCMD_CLASSA(GDSimportT       );
-   TELL_STDCMD_CLASSB(GDSimport       , GDSimportT    );
-   TELL_STDCMD_CLASSA(GDSimportListT   );
-   TELL_STDCMD_CLASSB(GDSimportList   , GDSimportListT);
-   TELL_STDCMD_CLASSA(GDSexportLIBT    );
-   TELL_STDCMD_CLASSB(GDSexportLIB    , GDSexportLIBT );
-   TELL_STDCMD_CLASSA(GDSexportTOPT    );
-   TELL_STDCMD_CLASSB(GDSexportTOP    , GDSexportTOPT );
+   TELL_STDCMD_CLASSA(GDSimport        );
+   TELL_STDCMD_CLASSA(GDSimportList    );
+   TELL_STDCMD_CLASSA(GDSexportLIB     );
+   TELL_STDCMD_CLASSA(GDSexportTOP     );
    TELL_STDCMD_CLASSA(GDSclose         );
    TELL_STDCMD_CLASSA(GDSreportlay     );
    TELL_STDCMD_CLASSA(GDSdeflaymap     );
