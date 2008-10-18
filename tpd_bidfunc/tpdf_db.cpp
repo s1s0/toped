@@ -515,16 +515,16 @@ int tellstdfunc::GDSimportList::execute()
 tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::GDSexportLIB::execute()
 {
    bool x2048           = getBoolValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string filename = getStringValue();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
 
    // Convert layer map
    USMap gdsLays;
@@ -541,9 +541,10 @@ int tellstdfunc::GDSexportLIB::execute()
          GDSin::LayerMapGds default_map(gdsLays, NULL);
          DATC->GDSexport(default_map, filename, x2048);
       DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< filename << "\", " 
-              << *lll << ", " 
-              << LogFile._2bool(x2048) <<");"; 
+      LogFile << LogFile.getFN() << "( "
+              << *lll << ", "
+              << "\""<< filename << "\", "
+              << LogFile._2bool(x2048) <<");";
       LogFile.flush();
    }
    else
@@ -560,8 +561,8 @@ tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
@@ -570,8 +571,8 @@ int tellstdfunc::GDSexportTOP::execute()
 {
    bool  x2048 = getBoolValue();
    std::string filename = getStringValue();
-   bool  recur = getBoolValue();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   bool  recur = getBoolValue();
    std::string cellname = getStringValue();
 
    // Convert layer map
@@ -595,8 +596,9 @@ int tellstdfunc::GDSexportTOP::execute()
             DATC->GDSexport(excell, default_map, recur, filename, x2048);
             LogFile  << LogFile.getFN() 
                      << "(\""<< cellname << "\"," 
-                     << LogFile._2bool(recur) 
-                     << ",\"" << filename << "\"," 
+                     << LogFile._2bool(recur) << ", "
+                     << *lll << ", "
+                     << "\"" << filename << "\","
                      << LogFile._2bool(x2048) <<");"; 
             LogFile.flush();
          }

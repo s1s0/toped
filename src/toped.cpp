@@ -1237,8 +1237,9 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
          return;
       }
       wxString ost;
-      ost << wxT("gdsexport(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
-          << wxT("\", gdsdefaultlaymap(false), false);");
+      ost << wxT("gdsexport(gdsdefaultlaymap(false), \"")
+          << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
+          << wxT("\", false);");
       _cmdline->parseCommand(ost);
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
@@ -1298,9 +1299,9 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
       wxString ost;
       ost << wxT("gdsexport(\"") 
           << cellname.c_str() << wxT("\" , ") 
-          << wxlaymap << wxT(", ")
-          << (recur ? wxT("true") : wxT("false")) << wxT(",\"") 
-          << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str() 
+          << (recur ? wxT("true") : wxT("false")) << wxT(",")
+          << wxlaymap << wxT(", \"")
+          << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str()
           << wxT("\", false);");
       _cmdline->parseCommand(ost);
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
