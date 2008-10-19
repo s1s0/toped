@@ -120,7 +120,6 @@ int tellstdfunc::stdDRAWBOX::execute() {
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    UNDOcmdQ.push_front(this);
-   la = DATC->curcmdlay();
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
@@ -359,7 +358,6 @@ int tellstdfunc::stdDRAWPOLY::execute() {
    word     la = getWordValue();
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dpoly, &OPstack)) return EXEC_ABORT;
-   la = DATC->curcmdlay();
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() >= 3) {
@@ -489,7 +487,6 @@ int tellstdfunc::stdDRAWWIRE::execute() {
    real      w = getOpValue();
    real DBscale = DATC->DBscale();
    if (!tellstdfunc::waitGUInput(static_cast<int>(rint(w * DBscale)), &OPstack)) return EXEC_ABORT;
-   la = DATC->curcmdlay();
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() > 1) {
