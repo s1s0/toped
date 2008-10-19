@@ -338,9 +338,9 @@ void colorSetup() {
 void layerSetup() {
     colorSetup();
     fillSetup();
-//    	     name    	 GDS  Colour       Fill              Selected
-   layprop("NWELL"      ,1  ,"yellow"      ,"Dots1"          , "selected3" );
+//    	     name    Number  Colour       Fill              Selected
    layprop("ACTIVE"     ,2  ,"blue"        ,"diagStripeBack" , "selected3" );
+   layprop("NWELL"      ,1  ,"yellow"      ,"Dots1"          , "selected3" );
    layprop("UNKWN_1"    ,3  ,"darkGray"    ,""               , "selected3" );
    layprop("POLY"       ,4  ,"red"         ,"checkerboards"  , "selected2" );
    layprop("N_IMPL"     ,5  ,"white"       ,""               , "selected3" );

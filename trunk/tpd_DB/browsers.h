@@ -281,6 +281,7 @@ namespace browsers
 
          void                 onSize(wxSizeEvent&);
          void                 onCommand(wxCommandEvent&);
+			void						addButton(LayerInfo *layer);
          LayerButton*         checkDefined(word);
          LayerButtonMap       _buttonMap;
          int                  _buttonCount;

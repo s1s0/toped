@@ -1510,49 +1510,61 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
       case     BT_LAYER_ADD:
          {
             LayerInfo* layer = static_cast<LayerInfo*>(event.GetClientData());
-//            LayerButton *layerButton;
-//            LayerButtonMap::iterator it;
-            int szx, szy;
-
-            //Remove selection from current button
-            if (NULL != _selectedButton) _selectedButton->unselect();
-            if ((wbutton = checkDefined( layer->layno() )))
-            {
-               //Button already exists, replace it
-               //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
-               //wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
-               int x, y;
-               int ID;
-               wbutton->GetPosition(&x, &y);
-               wbutton->GetSize(&szx, &szy);
-               ID = wbutton->GetId();
-               LayerButton* layerButton = DEBUG_NEW LayerButton(this, ID, wxPoint (x, y), wxSize(szx, szy),
-               wxBU_AUTODRAW|wxNO_BORDER, wxDefaultValidator, _T("button"), layer);
-               _buttonMap[layer->layno()] = layerButton;
-               delete wbutton;
-            }
-            else
-            {
-               //Button doesn't exist, create new button
-               GetClientSize(&szx, &szy);
-               LayerButton* layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
-                                             wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
-               wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
-               _buttonMap[layer->layno()] = layerButton;
-               _buttonCount++; 
-               this->SetScrollbars(0, buttonHeight, 0, _buttonCount);
-            }
-            //Restore selection
-            if ((wbutton = checkDefined( DATC->curlay())))
-            {
-               _selectedButton = wbutton;
-               _selectedButton->select();
-            }
-            delete (static_cast<LayerInfo*>(layer));
-            break;
+				addButton(layer);
+				delete (static_cast<LayerInfo*>(layer));
+				break;
          }
       default: assert(false);
    }
+}
+
+void	browsers::LayerPanel::addButton(LayerInfo *layer)
+{
+	   LayerButton* wbutton;
+      int szx, szy;
+
+      //Remove selection from current button
+      if (NULL != _selectedButton) _selectedButton->unselect();
+      if ((wbutton = checkDefined( layer->layno() )))
+	   {
+			//Button already exists, replace it
+         //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
+         //wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
+         int x, y;
+         int ID;
+         wbutton->GetPosition(&x, &y);
+         wbutton->GetSize(&szx, &szy);
+         ID = wbutton->GetId();
+         LayerButton* layerButton = DEBUG_NEW LayerButton(this, ID, wxPoint (x, y), wxSize(szx, szy),
+            wxBU_AUTODRAW|wxNO_BORDER, wxDefaultValidator, _T("button"), layer);
+         _buttonMap[layer->layno()] = layerButton;
+         delete wbutton;
+      }
+      else
+      {
+			//Button doesn't exist, create new button
+         GetClientSize(&szx, &szy);
+         LayerButton* layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
+															wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
+															wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
+         _buttonMap[layer->layno()] = layerButton;
+         _buttonCount++;
+         this->SetScrollbars(0, buttonHeight, 0, _buttonCount);
+			//Reorder buttons
+			int number = 0;
+			for(LayerButtonMap::iterator it=_buttonMap.begin() ;it!=_buttonMap.end(); ++it, ++number)
+			{
+				LayerButton* tempButton = (*it).second;
+				wxPoint point = wxPoint(0, number*buttonHeight);
+				tempButton->Move(point);
+			}
+      }
+      //Restore selection
+      if ((wbutton = checkDefined( DATC->curlay())))
+      {
+			_selectedButton = wbutton;
+         _selectedButton->select();
+      }
 }
 
 void browsers::LayerPanel::onSize(wxSizeEvent& evt)
