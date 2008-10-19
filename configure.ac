@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(toped, 0.9.x)
+AC_INIT(toped, 0.9.2)
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.cpp])
