@@ -867,27 +867,33 @@ int tellstdfunc::CIFread::execute() {
 
 
 //=============================================================================
-tellstdfunc::CIFgetLay::CIFgetLay(telldata::typeID retype, bool eor) :
+tellstdfunc::CIFreportlay::CIFreportlay(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
-{ }
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
 
-int tellstdfunc::CIFgetLay::execute() {
-   nameList cifLayers;
-   telldata::ttlist* cifll = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
-   if (DATC->CIFgetLay(cifLayers))
-   {
-      word laynum = 1;
-      for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
-      {
-         cifll->add(DEBUG_NEW telldata::tthsh(laynum++, *NLI));
-      }
+int tellstdfunc::CIFreportlay::execute() {
+
+   std::string name = getStringValue();
+   CIFin::CifFile* ACIFDB = DATC->lockCIF();
+   CIFin::CifStructure *src_structure = ACIFDB->getStructure(name.c_str());
+   std::ostringstream ost;
+   if (!src_structure) {
+      ost << "CIF structure named \"" << name << "\" does not exists";
+      tell_log(console::MT_ERROR,ost.str());
    }
    else
    {
-      std::string info = "No CIF DB in memory. Parse first";
-      tell_log(console::MT_ERROR,info);
+      nameList cifLayers;
+      src_structure->collectLayers(cifLayers,true);
+      ost << "CIF layers found in \"" << name <<"\"" << std::endl;
+      for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
+         ost << *NLI << std::endl;
+      tell_log(console::MT_INFO,ost.str());
+      LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
    }
-   OPstack.push(cifll);
+   DATC->unlockCIF();
    return EXEC_NEXT;
 }
 

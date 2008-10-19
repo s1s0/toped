@@ -472,7 +472,7 @@ namespace GDSin {
          bool                 registerStructure(GdsStructure* ws);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          GdsData*             fDataAt(int2b);
-         void                 collectLayers(GdsLayers&, bool hier);
+         void                 collectLayers(GdsLayers&, bool);
          GdsStructure*        last()                           { return _last;         }
          const char*          name() const                     { return _name;         }
          bool                 allLay(byte i)                   { return _allLay[i];    }

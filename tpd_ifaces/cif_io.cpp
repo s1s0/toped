@@ -168,14 +168,20 @@ CIFin::CifLayer* CIFin::CifStructure::secureLayer(std::string name)
    return _first;
 }
 
-void CIFin::CifStructure::collectLayers(CifLayerList& layList)
+void CIFin::CifStructure::collectLayers(nameList& layList, bool hier)
 {
    CifLayer* wlay = _first;
    while (NULL != wlay)
    {
-      layList.push_back(wlay);
+      layList.push_back(wlay->name());
       wlay = wlay->last();
    }
+   layList.sort();
+   layList.unique();
+
+   if (!hier) return;
+   for (CIFSList::const_iterator CCS = _children.begin(); CCS != _children.end(); CCS++)
+      (*CCS)->collectLayers(layList, hier);
 }
 
 void CIFin::CifStructure::addRef(_dbl_word cell, CTM* location)
@@ -354,17 +360,12 @@ void CIFin::CifFile::addLabelSig(char* label, TP* location)
 
 void CIFin::CifFile::collectLayers(nameList& cifLayers)
 {
-   CifLayerList allCiffLayers;
    CifStructure* local = _first;
-   std::ostringstream info;
-   info << "\t <<List of layers>> \n";
    while (NULL != local)
    {
-      local->collectLayers(allCiffLayers);
+      local->collectLayers(cifLayers, false);
       local = local->last();
    }
-   for (CifLayerList::const_iterator LLI = allCiffLayers.begin(); LLI != allCiffLayers.end(); LLI++)
-      cifLayers.push_back((*LLI)->name());
    cifLayers.sort();
    cifLayers.unique();
 }

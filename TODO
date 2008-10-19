@@ -1,5 +1,7 @@
 Short Term
 ------------
+ - report_ciflayer() - has to be implemented. use CIFreportlay - its
+   current implementation is not used anymore.
  - CIF conversion (in both directions) needs scaling facilities. It 
    ussually works properly, because TDT data bases (by default) are
    created 1e-6/1e-9 (UU/DBU) and that's the CIF measurements
@@ -55,9 +57,9 @@ Dialog stuff
 
 Documentation
 ==============
+   gdsdefaultlaymap
+   cifdefaultlaymap
    quick list format description
-   cifimport x2
-   cifexport x2
    toolbarsize
    (constants)
    horizontal

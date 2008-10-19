@@ -245,7 +245,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CifRef*        refirst()                     {return _refirst;}
          CifLayer*      secureLayer(std::string);
          void           addRef(_dbl_word cell, CTM* location);
-         void           collectLayers(CifLayerList&);
+         void           collectLayers(nameList&, bool);
          void           hierPrep(CifFile&);
          CIFHierTree*   hierOut(CIFHierTree*, CifStructure*);
       // to cover the requirements of the hierarchy template
