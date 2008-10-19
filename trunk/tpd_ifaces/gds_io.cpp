@@ -906,7 +906,7 @@ void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
       data_types.unique();
       layers_map[CL->first] = data_types;
    }
-
+   if (!hier) return;
    for (unsigned i = 0; i < _children.size(); i++)
       if (NULL == _children[i]) continue;
    else
