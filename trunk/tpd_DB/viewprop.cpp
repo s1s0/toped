@@ -755,6 +755,18 @@ bool layprop::ViewProperties::addlayer(std::string name, word layno)
    return false;
 }
 
+bool layprop::ViewProperties::addlayer( word layno )
+{
+   if (_drawprop._layset.end() == _drawprop._layset.find(layno))
+   {
+      std::ostringstream lname;
+      lname << "_UNDEF" << layno;
+      _drawprop._layset[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
+      return true;
+   }
+   return false;
+}
+
 word layprop::ViewProperties::addlayer(std::string name)
 {
    word layno = _drawprop._layset.rbegin()->first;

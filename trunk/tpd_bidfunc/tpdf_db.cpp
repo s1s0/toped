@@ -98,7 +98,7 @@ int tellstdfunc::TDTread::execute()
                // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
-               // Gatering the used layers & update the layer definitions
+            // Gatering the used layers & update the layer definitions
             std::list<std::string> top_cell_list;
             laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
             do
