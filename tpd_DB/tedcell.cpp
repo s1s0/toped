@@ -186,7 +186,7 @@ bool laydata::editobject::securelaydef(word layno)
 {
    if (layno > 0)
    {
-      bool newlay = _viewprop->addlayer( UNDEFLAYNAME, layno);
+      bool newlay = _viewprop->addlayer( layno);
       if (newlay)
          _viewprop->addUnpublishedLay(layno);
       return newlay;

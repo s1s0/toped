@@ -596,5 +596,4 @@ const byte        OPENGL_FONT_UNIT  = 128;
 const byte        MIN_VISUAL_AREA   = 10;   // that would be 10 pixels
 const DBbox       DEFAULT_OVL_BOX   = DBbox(TP(0,0));
 const DBbox       DEFAULT_ZOOM_BOX  = DBbox(TP(-2000,-2000), TP(20000,20000));
-const std::string UNDEFLAYNAME      = std::string("__undefined");
 #endif

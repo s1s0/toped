@@ -267,7 +267,7 @@ void tellstdfunc::RefreshGL()
    {
       const laydata::ListOfWords freshlays = DATC->upLayers();
       for(laydata::ListOfWords::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-         browsers::layer_add(UNDEFLAYNAME, *CUL);
+         browsers::layer_add(DATC->getLayerName(*CUL), *CUL);
       DATC->clearUnpublishedLayers();
    }
    Console->set_canvas_invalid(true);
@@ -298,8 +298,8 @@ void tellstdfunc::updateLayerDefinitions(laydata::tdtlibdir* LIBDIR, nameList& t
    for(laydata::ListOfWords::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
    {
       if (0 == *CUL) continue;
-      if (DATC->addlayer(UNDEFLAYNAME, *CUL))
-         browsers::layer_add(UNDEFLAYNAME, *CUL);
+      if (DATC->addlayer(*CUL))
+         browsers::layer_add(DATC->getLayerName(*CUL), *CUL);
    }
 }
 

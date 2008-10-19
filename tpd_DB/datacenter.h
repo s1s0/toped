@@ -160,6 +160,7 @@ public:
 
    bool                       addlayer(std::string, word, std::string, std::string, std::string);
    bool                       addlayer(std::string, word);
+   bool                       addlayer(word layno);
    word                       addlayer(std::string);
    void                       addline(std::string, std::string, word, byte, byte);
    void                       addcolor(std::string, byte, byte, byte, byte);

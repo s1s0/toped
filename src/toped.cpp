@@ -197,6 +197,9 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
    
+   EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnCIFexportLIB)
+   EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnCIFimport   )
+   
    EVT_MENU( TMCIF_OPEN          , tui::TopedFrame::OnCIFRead     )
    EVT_MENU( TMCIF_TRANSLATE     , tui::TopedFrame::OnCIFtranslate)
    EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFexportCELL)
@@ -395,19 +398,22 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&File/Load Library ...",  "", &tui::TopedFrame::OnTDTLoadLib, "Load a TDT library" );
    _resourceCenter->appendMenu("&File/Unload Library ...",  "", &tui::TopedFrame::OnTDTUnloadLib, "Unload a TDT library" );
    _resourceCenter->appendMenuSeparator("&File");
-   _resourceCenter->appendMenu("&File/Export library to GDS","",  &tui::TopedFrame::OnGDSexportLIB, "Export library to GDS");
-   _resourceCenter->appendMenu("&File/Import GDS to library","",  &tui::TopedFrame::OnGDSimport, "Import GDS structure" );
+   _resourceCenter->appendMenu("&File/Export to GDS","",  &tui::TopedFrame::OnGDSexportLIB, "Export DB to GDS using default layer map");
+   _resourceCenter->appendMenu("&File/Import GDS","",  &tui::TopedFrame::OnGDSimport, "Import GDS file using default layer map" );
 
-   _resourceCenter->appendMenu("&File/Advanced GDS operations/parse","", &tui::TopedFrame::OnGDSRead, "Parse GDS file" );
-   _resourceCenter->appendMenu("&File/Advanced GDS operations/translate to library","", &tui::TopedFrame::OnGDStranslate, "Import GDS structure" );
-   _resourceCenter->appendMenu("&File/Advanced GDS operations/export cell", "", &tui::TopedFrame::OnGDSexportCELL, "Export cell to GDS" );
-   _resourceCenter->appendMenu("&File/Advanced GDS operations/close","", &tui::TopedFrame::OnGDSclose, "Clear the parsed GDS file from memory" );
+   _resourceCenter->appendMenu("&File/More GDS .../Parse","", &tui::TopedFrame::OnGDSRead, "Parse GDS file" );
+   _resourceCenter->appendMenu("&File/More GDS .../Translate","", &tui::TopedFrame::OnGDStranslate, "Import GDS structure" );
+   _resourceCenter->appendMenu("&File/More GDS .../Export Cell", "", &tui::TopedFrame::OnGDSexportCELL, "Export cell to GDS" );
+   _resourceCenter->appendMenu("&File/More GDS .../Close","", &tui::TopedFrame::OnGDSclose, "Clear the parsed GDS file from memory" );
 
    _resourceCenter->appendMenuSeparator("&File");
-   _resourceCenter->appendMenu("&File/CIF operations/Parse","", &tui::TopedFrame::OnCIFRead, "Parse CIF file" );
-   _resourceCenter->appendMenu("&File/CIF operations/Translate","", &tui::TopedFrame::OnCIFtranslate, "Import CIF structure" );
-   _resourceCenter->appendMenu("&File/CIF operations/export cell", "", &tui::TopedFrame::OnCIFexportCELL, "Export cell to CIF" );
-   _resourceCenter->appendMenu("&File/CIF operations/Close","", &tui::TopedFrame::OnCIFclose, "Clear the parsed CIF file from memory" );
+   _resourceCenter->appendMenu("&File/Export to CIF","",  &tui::TopedFrame::OnCIFexportLIB, "Export DB to CIF using the default layer map");
+   _resourceCenter->appendMenu("&File/Import CIF","",  &tui::TopedFrame::OnCIFimport, "Import CIF file using default layer map" );
+
+   _resourceCenter->appendMenu("&File/More CIF .../Parse","", &tui::TopedFrame::OnCIFRead, "Parse CIF file" );
+   _resourceCenter->appendMenu("&File/More CIF .../Translate","", &tui::TopedFrame::OnCIFtranslate, "Import CIF structure" );
+   _resourceCenter->appendMenu("&File/More CIF .../Export Cell", "", &tui::TopedFrame::OnCIFexportCELL, "Export cell to CIF" );
+   _resourceCenter->appendMenu("&File/More CIF .../Close","", &tui::TopedFrame::OnCIFclose, "Clear the parsed CIF file from memory" );
 
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Save",       "CTRL-S",  &tui::TopedFrame::OnTDTSave,  "Save the database");
@@ -1224,6 +1230,29 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
 //   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
 
+void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event) evt)
+{
+   // Here - try a hollow lock/unlock the database just to check that it exists
+   try {DATC->lockDB(false);}
+   catch (EXPTN) {return;}
+   DATC->unlockDB();
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+                     wxT("Caltech files(*.cif)|*.cif;*.CIF|All files(*.*)|*.*"),
+                     tpdfOPEN);
+   if (wxID_OK != dlg2.ShowModal())
+   {
+      SetStatusText(wxT("Parsing aborted")); return;
+   }
+   SetStatusText(wxT("Importing CIF file..."));
+   wxString filename = dlg2.GetFilename();
+   wxString ost_int;
+   ost_int << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
+   wxString ost;
+   ost << wxT("cifimport(") << ost_int << wxT(", cifdefaultlaymap(true), true, false );cifclose();");
+   _cmdline->parseCommand(ost);
+//   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
+}
+
 void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
    SetStatusText(wxT("Exporting database to GDS file..."));
    wxFileDialog dlg2(this, wxT("Export design to GDS file"), wxT(""), wxT(""),
@@ -1244,6 +1273,29 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("GDS export aborted"));
+}
+
+void tui::TopedFrame::OnCIFexportLIB(wxCommandEvent& WXUNUSED(event))
+{
+   SetStatusText(wxT("Exporting database to CIF file..."));
+   wxFileDialog dlg2(this, wxT("Export design to CIF file"), wxT(""), wxT(""),
+                     wxT("Caltech files(*.cif)|*.cif;*.CIF"),
+                         tpdfSAVE);
+   if (wxID_OK == dlg2.ShowModal()) {
+      wxString filename = dlg2.GetPath();
+      if(!checkFileOverwriting(filename))
+      {
+         SetStatusText(wxT("CIF export aborted"));
+         return;
+      }
+      wxString ost;
+      ost << wxT("cifexport(cifdefaultlaymap(false), \"")
+            << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
+            << wxT("\", false);");
+      _cmdline->parseCommand(ost);
+//      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
+   }
+   else SetStatusText(wxT("CIF export aborted"));
 }
 
 void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {

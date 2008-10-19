@@ -256,9 +256,10 @@ namespace layprop {
                        ~ViewProperties(); 
       bool              addlayer(std::string, word, std::string, std::string, std::string);
       bool              addlayer(std::string, word);
+      bool              addlayer(word);
       word              addlayer(std::string);
       void              addUnpublishedLay(word);
-      const laydata::ListOfWords& upLayers() {_uplaylist.unique(); return _uplaylist;}
+      const laydata::ListOfWords& upLayers() {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers() {_uplaylist.clear();}
       void              addcolor(std::string name, byte R, byte G, byte B, byte A);
       void              addfill(std::string name, byte *ptrn);
