@@ -610,6 +610,8 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
 //   _resourceCenter->appendMenuSeparator("Other");
    
+	_resourceCenter->appendMenu("&Help/Check hardware", "", &tui::TopedFrame::OnCheckHW, "Show info about video" );
+	_resourceCenter->appendMenuSeparator("Help");
    _resourceCenter->appendMenu("&Help/About", "", &tui::TopedFrame::OnAbout, "About TOPED" );
    
    //---------------------------------------------------------------------------
@@ -896,6 +898,10 @@ void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutBox(info);
 }
 
+void tui::TopedFrame::OnCheckHW(wxCommandEvent&)
+{
+	_canvas->showInfo();
+}
 
 //void tui::TopedFrame::OnSize(wxSizeEvent& event)
 //{

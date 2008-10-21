@@ -66,6 +66,7 @@ namespace tui {
                                                 const wxSize& , int* attribList);
       virtual       ~LayoutCanvas();
       wxImage        snapshot(void);
+		void				showInfo();
       bool           initStatus() {
 #ifdef __WXGTK__
          return (NULL != x_visual);
