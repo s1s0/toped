@@ -89,6 +89,7 @@ namespace tui {
 //      void                    OnSize(wxSizeEvent& event);
       void                    OnSashDrag(wxSashEvent& event);
       void                    OnQuit (wxCommandEvent&);
+		void                    OnCheckHW(wxCommandEvent&);
       void                    OnAbout(wxCommandEvent&);
 //      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
