@@ -210,55 +210,63 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
 }
 void	tui::LayoutCanvas::showInfo()
 {
+   std::ostringstream ost1, ost2, ost3;
+
+   const GLubyte *vendor = glGetString(GL_VENDOR);
+   const GLubyte *renderer = glGetString(GL_RENDERER);
+   const GLubyte *version = glGetString(GL_VERSION);
+
+   ost1<<"Vendor:" << vendor;
+   ost2<<"Renderer:" << renderer;
+   ost3<<"Version:" << version;
+   tell_log(console::MT_INFO,ost1.str());
+   tell_log(console::MT_INFO,ost2.str());
+   tell_log(console::MT_INFO,ost3.str());
+
 #ifdef WIN32
-	HDC hdc =  ::GetDC((HWND) GetHWND());
-	std::ostringstream ost, ost1, ost2, ost3;
+   HDC hdc =  ::GetDC((HWND) GetHWND());
+   std::ostringstream ost;
 
-	PIXELFORMATDESCRIPTOR  pfd; 
-	//HDC  hdc; 
-	int  iPixelFormat; 
+   PIXELFORMATDESCRIPTOR  pfd; 
+   //HDC  hdc; 
+   int  iPixelFormat; 
  
-	iPixelFormat = 1; 
-	
-	const GLubyte *vendor = glGetString(GL_VENDOR);
-	const GLubyte *renderer = glGetString(GL_RENDERER);
-	const GLubyte *version = glGetString(GL_VERSION);
+   iPixelFormat = 1; 
+   
 
-	ost1<<vendor;
-	ost2<<renderer;
-	ost3<<version;
-	tell_log(console::MT_INFO,ost1.str());
-	tell_log(console::MT_INFO,ost2.str());
-	tell_log(console::MT_INFO,ost3.str());
-
-	// obtain detailed information about 
-	// the device context's first pixel format 
-	DescribePixelFormat(hdc, iPixelFormat,  
+   // obtain detailed information about 
+   // the device context's first pixel format 
+   DescribePixelFormat(hdc, iPixelFormat,  
         sizeof(PIXELFORMATDESCRIPTOR), &pfd); 
 
-	if((pfd.dwFlags & PFD_GENERIC_FORMAT) && !(pfd.dwFlags & PFD_GENERIC_ACCELERATED))
-	{
+   if((pfd.dwFlags & PFD_GENERIC_FORMAT) && !(pfd.dwFlags & PFD_GENERIC_ACCELERATED))
+   {
       ost<<"Program emulation of OpenGL";
-		tell_log(console::MT_INFO,ost.str());
-		ost<<"Operation can be extremely slow";
-		tell_log(console::MT_INFO,ost.str());
+      tell_log(console::MT_INFO,ost.str());
+      ost<<"Operation can be extremely slow";
+      tell_log(console::MT_INFO,ost.str());
    }
 
     // Hardware supports only part of all set of functions ( MCD-driver ).
    if((pfd.dwFlags & PFD_GENERIC_FORMAT) && (pfd.dwFlags & PFD_GENERIC_ACCELERATED))
    {
       ost<<"Program/hardware emulation of OpenGL";
-		tell_log(console::MT_INFO,ost.str());
-		ost<<"Some operations can not be accelerated";
-		tell_log(console::MT_INFO,ost.str());
+      tell_log(console::MT_INFO,ost.str());
+      ost<<"Some operations can not be accelerated";
+      tell_log(console::MT_INFO,ost.str());
    }
 
    // Full hardware support ( ICD-driver ).
    if( !(pfd.dwFlags & PFD_GENERIC_FORMAT) && !(pfd.dwFlags & PFD_GENERIC_ACCELERATED))
    {
       ost<<"Hardware accelerated OpenGL";
-		tell_log(console::MT_INFO,ost.str());
+      tell_log(console::MT_INFO,ost.str());
    }
+#endif
+#ifdef __WXGTK__
+   std::ostringstream msg;
+   msg << "GLX version "<< GetGLXVersion();
+   tell_log(console::MT_INFO, msg.str());
 #endif
 }
 wxImage   tui::LayoutCanvas::snapshot(void)
