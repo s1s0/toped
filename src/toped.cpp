@@ -610,7 +610,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
 //   _resourceCenter->appendMenuSeparator("Other");
    
-	_resourceCenter->appendMenu("&Help/Check hardware", "", &tui::TopedFrame::OnCheckHW, "Show info about video" );
+	_resourceCenter->appendMenu("&Help/Report Video", "", &tui::TopedFrame::OnCheckHW, "Display OpenGL & video driver information" );
 	_resourceCenter->appendMenuSeparator("Help");
    _resourceCenter->appendMenu("&Help/About", "", &tui::TopedFrame::OnAbout, "About TOPED" );
    
