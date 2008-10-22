@@ -279,8 +279,8 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 
 void tui::ToolItem::addIcon(const std::string &bitmapName, int size)
 {
-	
-	wxImage image(wxString(_bitmapNames[size].c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+	wxImage image;
+	image.LoadFile(wxString(bitmapName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
 	if(image.IsOk())
 	{
 		_bitmapNames[size] = bitmapName;
