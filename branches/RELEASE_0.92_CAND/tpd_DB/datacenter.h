@@ -196,8 +196,11 @@ public:
    void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
    laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
    laydata::LibCellLists*     getCells(int libID);
+   void                       setGdsLayMap(USMap* map)   {_properties.setGdsLayMap(map);}
+   void                       setCifLayMap(USMap* map)   {_properties.setCifLayMap(map);}
+   const USMap*               getGdsLayMap() const       {return _properties.getGdsLayMap();}
+   const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
 protected:
-//   laydata::tdtdesign*        _TEDDB;        // toped data base
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
    GDSin::GdsFile*            _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data

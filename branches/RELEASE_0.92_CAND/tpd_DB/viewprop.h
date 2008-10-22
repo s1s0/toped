@@ -268,7 +268,7 @@ namespace layprop {
       void              lockLayer(word layno, bool lock);
       bool              selectable(word layno) const;
       void              saveProperties(std::string) const;
-      //      
+      //
       const LayoutGrid* grid(byte) const;
       void              setGrid(byte, real, std::string);
       bool              viewGrid(byte, bool);
@@ -306,25 +306,31 @@ namespace layprop {
       void              mouseStop()                      {_supp_data.mouseStop();}
       console::ACTIVE_OP currentop() const               {return _drawprop.currentop();}
       void              all_layers(nameList& laylist) const {_drawprop.all_layers(laylist);}
+      void              setGdsLayMap(USMap* map)         {_gdsLayMap = map;}
+      void              setCifLayMap(USMap* map)         {_cifLayMap = map;}
+      const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
+      const USMap*      getCifLayMap() const             {return _cifLayMap;}
       void              all_colors(nameList&) const;
       void              all_fills(nameList&) const;
       void              all_lines(nameList&) const;
 
       //
    protected:
-      DrawProperties    _drawprop;
+      DrawProperties       _drawprop;
    private:
-      void               saveScreenProps(FILE*) const;
-      real              _DBscale; 
-      real              _UU;           // The scale of the data base. It is doubled here, on order 
+      void                 saveScreenProps(FILE*) const;
+      real                 _DBscale; 
+      real                 _UU;           // The scale of the data base. It is doubled here, on order 
                                        // not to read it with every mouse move  
-      gridlist          _grid;         // the list of grids as defined by the tell command
-      real              _step;         // current marker step
-      bool              _autopan;      // view window moves automatically during shape drawing
-      byte              _marker_angle; // angle of restriction during shape drawing (0,45,90)
-      SupplementaryData _supp_data;    // supplementary data
+      gridlist             _grid;         // the list of grids as defined by the tell command
+      real                 _step;         // current marker step
+      bool                 _autopan;      // view window moves automatically during shape drawing
+      byte                 _marker_angle; // angle of restriction during shape drawing (0,45,90)
+      SupplementaryData    _supp_data;    // supplementary data
       laydata::ListOfWords _uplaylist;    // unpublished layer list
-      word              _layselmask;   // layout shape type selection mask
+      word                 _layselmask;   // layout shape type selection mask
+      USMap*               _gdsLayMap;    //
+      USMap*               _cifLayMap;    //
    };
 }
 #endif
