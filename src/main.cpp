@@ -125,14 +125,16 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("cifexport"        ,(DEBUG_NEW                tellstdfunc::CIFexportLIB(telldata::tn_void,false)));
    mblock->addFUNC("cifexport"        ,(DEBUG_NEW                tellstdfunc::CIFexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("cifclose"         ,(DEBUG_NEW                    tellstdfunc::CIFclose(telldata::tn_void, true)));
-   mblock->addFUNC("cifdefaultlaymap" ,(DEBUG_NEW        tellstdfunc::CIFdeflaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("getciflaymap"     ,(DEBUG_NEW        tellstdfunc::CIFgetlaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("setciflaymap"     ,(DEBUG_NEW                tellstdfunc::CIFsetlaymap(telldata::tn_void, true)));
    mblock->addFUNC("gdsread"          ,(DEBUG_NEW          tellstdfunc::GDSread(TLISTOF(telldata::tn_string), true)));
    mblock->addFUNC("gdsimport"        ,(DEBUG_NEW               tellstdfunc::GDSimportList(telldata::tn_void, true)));
    mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                   tellstdfunc::GDSimport(telldata::tn_void, true)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportLIB(telldata::tn_void,false)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("gdsclose"         ,(DEBUG_NEW                    tellstdfunc::GDSclose(telldata::tn_void, true)));
-   mblock->addFUNC("gdsdefaultlaymap" ,(DEBUG_NEW        tellstdfunc::GDSdeflaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW        tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("setgdslaymap"     ,(DEBUG_NEW                tellstdfunc::GDSsetlaymap(telldata::tn_void, true)));
    mblock->addFUNC("psexport"         ,(DEBUG_NEW                 tellstdfunc::PSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                     tellstdfunc::TDTread(telldata::tn_void, true)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                  tellstdfunc::TDTreadIFF(telldata::tn_void, true)));
