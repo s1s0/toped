@@ -1163,7 +1163,7 @@ int tellstdfunc::CIFgetlaymap::execute()
       }
    }
    else if (import)
-   { // generate default import GDS layer map
+   { // generate default import CIF layer map
       DATC->lockCIF();
       nameList cifLayers;
       DATC->CIFgetLay(cifLayers);

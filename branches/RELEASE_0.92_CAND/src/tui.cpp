@@ -1917,11 +1917,16 @@ tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
    word rowno = 0;
+   const USMap* cifMap = DATC->secureCifLayMap(false);
    for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
+      word layno = DATC->getLayerNo(*CNM);
       wxString tpdlay  = wxString(CNM->c_str(), wxConvUTF8);
-      wxString ciflay(wxT("L"));
-      ciflay << DATC->getLayerNo(*CNM);
+      wxString ciflay;
+      if (cifMap->end() != cifMap->find(layno))
+         ciflay = wxString((*(const_cast<USMap*>(cifMap)))[layno].c_str(), wxConvUTF8);
+      else
+         ciflay << wxT("L") << layno;
       if (4 < ciflay.Length()) ciflay.Clear(); // Should not be longer than 4
       wxCheckBox* dwtpdlays  = DEBUG_NEW wxCheckBox( this, wxID_ANY, tpdlay,
             wxPoint(  5,(row_height+5)*rowno + 5), wxSize(110,row_height) );
@@ -1996,18 +2001,26 @@ tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
             const nameList& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
+   const GDSin::LayerMapGds* gdsLayMap= DATC->secureGdsLayMap(false);
    word rowno = 0;
    for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
+      word wGdsLay, wGdsType;
+      if (!gdsLayMap->getGdsLayType(wGdsLay, wGdsType, DATC->getLayerNo(*CNM)))
+      {
+         wGdsLay  = DATC->getLayerNo(*CNM);
+         wGdsType = 0;
+      }
       wxString tpdlay  = wxString(CNM->c_str(), wxConvUTF8);
-      wxString gdslay;
-      gdslay << DATC->getLayerNo(*CNM);
+      wxString gdslay, gdstype;
+      gdslay << wGdsLay;
+      gdstype <<wGdsType;
 
       wxCheckBox* dwtpdlays  = DEBUG_NEW wxCheckBox( this, wxID_ANY, tpdlay,
          wxPoint(  5,(row_height+5)*rowno + 5), wxSize(110,row_height) );
-      wxTextCtrl*   dwgdslay = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, gdslay, 
+      wxTextCtrl*   dwgdslay = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, gdslay,
          wxPoint(120,(row_height+5)*rowno + 5), wxSize(70,row_height));
-      wxTextCtrl*   dwgdstyp = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, wxT("0"), 
+      wxTextCtrl*   dwgdstyp = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, gdstype,
          wxPoint(190,(row_height+5)*rowno + 5), wxSize(70,row_height));
       dwtpdlays->SetValue(true);
       _allRecords.push_back(LayerRecord(dwtpdlays, dwgdslay, dwgdstyp));
