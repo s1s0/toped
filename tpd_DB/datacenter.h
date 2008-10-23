@@ -200,7 +200,10 @@ public:
    void                       setCifLayMap(USMap* map)   {_properties.setCifLayMap(map);}
    const USMap*               getGdsLayMap() const       {return _properties.getGdsLayMap();}
    const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
-protected:
+   const GDSin::LayerMapGds*  secureGdsLayMap(bool);
+   const USMap*               secureCifLayMap(bool);
+
+   protected:
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
    GDSin::GdsFile*            _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data

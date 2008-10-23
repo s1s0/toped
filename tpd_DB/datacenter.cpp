@@ -1193,6 +1193,85 @@ bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter
    return _TEDLIB.getLibCellRNP(name, striter);
 }
 
+const USMap* DataCenter::secureCifLayMap(bool import)
+{
+   const USMap* savedMap = _properties.getCifLayMap();
+   if (NULL != savedMap) return savedMap;
+   USMap* theMap = new USMap();
+   if (import)
+   {// Generate the default CIF layer map for import
+      lockCIF();
+      nameList cifLayers;
+      CIFgetLay(cifLayers);
+      unlockCIF();
+      word laynum = 1;
+      for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
+         (*theMap)[laynum] = *CCL;
+   }
+   else
+   {// Generate the default CIF layer map for export
+      lockDB(false);
+      nameList tdtLayers;
+      all_layers(tdtLayers);
+      for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+      {
+         std::ostringstream ciflayname;
+         word layno = getLayerNo( *CDL );
+         ciflayname << "L" << layno;
+         (*theMap)[layno] = ciflayname.str();
+      }
+      unlockDB();
+   }
+}
+
+const GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
+{
+   const USMap* savedMap = _properties.getGdsLayMap();
+   const GDSin::LayerMapGds* theGdsMap;
+   if (NULL == savedMap)
+   {
+      USMap theMap;
+      if (import)
+      { // generate default import GDS layer map
+         lockGDS();
+         GdsLayers* gdsLayers = new GdsLayers();
+         gdsGetLayers(*gdsLayers);
+         unlockGDS();
+         for ( GdsLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
+         {
+            std::ostringstream dtypestr;
+            dtypestr << CGL->first << ";";
+            for ( WordList::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
+            {
+               if ( CDT != CGL->second.begin() ) dtypestr << ", ";
+               dtypestr << *CDT;
+            }
+            theMap[CGL->first] = dtypestr.str();
+         }
+         theGdsMap = new GDSin::LayerMapGds(theMap, gdsLayers);
+      }
+      else
+      { // generate default export GDS layer map
+         lockDB(false);
+         nameList tdtLayers;
+         all_layers(tdtLayers);
+         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         {
+            std::ostringstream dtypestr;
+            dtypestr << DATC->getLayerNo( *CDL )<< "; 0";
+            theMap[DATC->getLayerNo( *CDL )] = dtypestr.str();
+         }
+         DATC->unlockDB();
+         theGdsMap = new GDSin::LayerMapGds(theMap, NULL);
+      }
+   }
+   else
+   {
+      theGdsMap = new GDSin::LayerMapGds(*savedMap, NULL);
+   }
+   return theGdsMap;
+}
+
 laydata::LibCellLists* DataCenter::getCells(int libID)
 {
    laydata::LibCellLists* all_cells = DEBUG_NEW laydata::LibCellLists();
