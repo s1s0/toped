@@ -923,8 +923,11 @@ void layprop::ViewProperties::saveProperties(std::string filename) const
    fclose(prop_file);
 }
 
-layprop::ViewProperties::~ViewProperties() {
+layprop::ViewProperties::~ViewProperties() 
+{
    for(gridlist::iterator GI = _grid.begin(); GI != _grid.end(); GI++)
       delete GI->second;
    _grid.clear();
+   if (NULL != _gdsLayMap) delete _gdsLayMap;
+   if (NULL != _cifLayMap) delete _cifLayMap;
 }

@@ -34,6 +34,8 @@
 #include <wx/spinbutt.h>
 #include "../tpd_common/ttt.h"
 #include "../tpd_DB/viewprop.h"
+#include "../tpd_ifaces/gds_io.h"
+#include "../tpd_ifaces/cif_io.h"
 
 namespace tui {
 
@@ -186,7 +188,8 @@ namespace tui {
    //==========================================================================
    class nameCboxRecords : public wxPanel {
       public:
-                              nameCboxRecords(wxWindow*, wxPoint, wxSize, const SIMap&, wxArrayString&, int);
+                               nameCboxRecords(wxWindow*, wxPoint, wxSize, const SIMap&, wxArrayString&, int);
+                              ~nameCboxRecords() {delete _cifMap;}
          SIMap*                getTheMap();
       private:
          class LayerRecord {
@@ -196,13 +199,15 @@ namespace tui {
                wxComboBox*       _tdtlay;
          };
          typedef std::list<LayerRecord> AllRecords;
-         AllRecords         _allRecords;
+         AllRecords              _allRecords;
+         CIFin::LayerMapCif*     _cifMap;
    };
 
    //==========================================================================
    class nameCbox3Records : public wxPanel {
       public:
                               nameCbox3Records(wxWindow*, wxPoint, wxSize, const GdsLayers&, wxArrayString&, int);
+                             ~nameCbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
       private:
          class LayerRecord {
@@ -214,13 +219,15 @@ namespace tui {
                wxComboBox*       _tdtlay;
          };
          typedef std::list<LayerRecord> AllRecords;
-         AllRecords         _allRecords;
+         AllRecords              _allRecords;
+         GDSin::LayerMapGds*     _gdsLayMap;
    };
 
    //==========================================================================
    class nameEboxRecords : public wxPanel {
       public:
                               nameEboxRecords(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
+                             ~nameEboxRecords() {delete _cifMap;}
          USMap*               getTheMap();
       private:
          class LayerRecord {
@@ -231,13 +238,15 @@ namespace tui {
                wxTextCtrl*    _ciflay;
          };
          typedef std::list<LayerRecord> AllRecords;
-         AllRecords         _allRecords;
+         AllRecords           _allRecords;
+         CIFin::LayerMapCif*  _cifMap;
    };
 
    //==========================================================================
    class nameEbox3Records : public wxPanel {
       public:
                               nameEbox3Records(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
+                             ~nameEbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
       private:
          class LayerRecord {
@@ -249,7 +258,8 @@ namespace tui {
                wxTextCtrl*    _gdstype;
          };
          typedef std::list<LayerRecord> AllRecords;
-         AllRecords         _allRecords;
+         AllRecords           _allRecords;
+         GDSin::LayerMapGds*  _gdsLayMap;
    };
 
    //--------------------------------------------------------------------------

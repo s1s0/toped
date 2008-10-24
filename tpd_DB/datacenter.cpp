@@ -1197,8 +1197,8 @@ bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter
 CIFin::LayerMapCif* DataCenter::secureCifLayMap(bool import)
 {
    const USMap* savedMap = _properties.getCifLayMap();
-   if (NULL != savedMap) return new CIFin::LayerMapCif(*savedMap);
-   USMap* theMap = new USMap();
+   if (NULL != savedMap) return DEBUG_NEW CIFin::LayerMapCif(*savedMap);
+   USMap* theMap = DEBUG_NEW USMap();
    if (import)
    {// Generate the default CIF layer map for import
       lockCIF();
@@ -1223,20 +1223,20 @@ CIFin::LayerMapCif* DataCenter::secureCifLayMap(bool import)
       }
       unlockDB();
    }
-   return new CIFin::LayerMapCif(*theMap);
+   return DEBUG_NEW CIFin::LayerMapCif(*theMap);
 }
 
-const GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
+GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
 {
    const USMap* savedMap = _properties.getGdsLayMap();
-   const GDSin::LayerMapGds* theGdsMap;
+   GDSin::LayerMapGds* theGdsMap;
    if (NULL == savedMap)
    {
       USMap theMap;
       if (import)
       { // generate default import GDS layer map
          lockGDS();
-         GdsLayers* gdsLayers = new GdsLayers();
+         GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
          gdsGetLayers(*gdsLayers);
          unlockGDS();
          for ( GdsLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
@@ -1250,7 +1250,7 @@ const GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
             }
             theMap[CGL->first] = dtypestr.str();
          }
-         theGdsMap = new GDSin::LayerMapGds(theMap, gdsLayers);
+         theGdsMap = DEBUG_NEW GDSin::LayerMapGds(theMap, gdsLayers);
       }
       else
       { // generate default export GDS layer map
@@ -1264,12 +1264,21 @@ const GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
             theMap[DATC->getLayerNo( *CDL )] = dtypestr.str();
          }
          DATC->unlockDB();
-         theGdsMap = new GDSin::LayerMapGds(theMap, NULL);
+         theGdsMap = DEBUG_NEW GDSin::LayerMapGds(theMap, NULL);
       }
    }
    else
    {
-      theGdsMap = new GDSin::LayerMapGds(*savedMap, NULL);
+      if (import)
+      {
+         lockGDS();
+         GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
+         gdsGetLayers(*gdsLayers);
+         unlockGDS();
+         theGdsMap = DEBUG_NEW GDSin::LayerMapGds(*savedMap, gdsLayers);
+      }
+      else
+         theGdsMap = DEBUG_NEW GDSin::LayerMapGds(*savedMap, NULL);
    }
    return theGdsMap;
 }

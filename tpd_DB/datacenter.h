@@ -200,7 +200,7 @@ public:
    void                       setCifLayMap(USMap* map)   {_properties.setCifLayMap(map);}
    const USMap*               getGdsLayMap() const       {return _properties.getGdsLayMap();}
    const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
-   const GDSin::LayerMapGds*  secureGdsLayMap(bool);
+   GDSin::LayerMapGds*        secureGdsLayMap(bool);
    CIFin::LayerMapCif*        secureCifLayMap(bool);
 
    protected:

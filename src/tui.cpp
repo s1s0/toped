@@ -1734,19 +1734,19 @@ tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
-   CIFin::LayerMapCif* cifMap = DATC->secureCifLayMap(true);
+   _cifMap = DATC->secureCifLayMap(true);
    word rowno = 0;
    for (SIMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
       word tdtLay;
-      if (!cifMap->getTdtLay(tdtLay, CNM->first)) tdtLay = CNM->second;
+      if (!_cifMap->getTdtLay(tdtLay, CNM->first)) tdtLay = CNM->second;
       wxString wxics  = wxString(DATC->getLayerName(tdtLay).c_str(), wxConvUTF8);
 
       wxCheckBox* dwciflay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, cifln,
-         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(110,row_height) );
+         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
       wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, wxics,
-         wxPoint(120,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
+         wxPoint(110,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
       dwciflay->SetValue(true);
       _allRecords.push_back(LayerRecord(dwciflay, dwtpdlays));
       rowno++;
@@ -1779,7 +1779,7 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
             const GdsLayers& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
-   const GDSin::LayerMapGds* gdsLayMap = DATC->secureGdsLayMap(true);
+   _gdsLayMap = DATC->secureGdsLayMap(true);
    word rowno = 0;
    for (GdsLayers::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
@@ -1790,10 +1790,7 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          wxString sGdsDtype;
          sGdsDtype << *CTP;
          word wTdtLay;
-         if (!gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP))
-         {
-            wTdtLay = CNM->first;
-         }
+         if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
          wxString sTdtLay(DATC->getLayerName(CNM->first).c_str(), wxConvUTF8);
 
          wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
@@ -1925,22 +1922,22 @@ tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
    word rowno = 0;
-   CIFin::LayerMapCif* cifMap = DATC->secureCifLayMap(false);
+   _cifMap = DATC->secureCifLayMap(false);
    for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word layno = DATC->getLayerNo(*CNM);
       wxString tpdlay  = wxString(CNM->c_str(), wxConvUTF8);
       wxString ciflay;
       std::string cifName;
-      if ( cifMap->getCifLay(cifName, layno) )
+      if ( _cifMap->getCifLay(cifName, layno) )
          ciflay = wxString(cifName.c_str(), wxConvUTF8);
       else
          ciflay << wxT("L") << layno;
       if (4 < ciflay.Length()) ciflay.Clear(); // Should not be longer than 4
       wxCheckBox* dwtpdlays  = DEBUG_NEW wxCheckBox( this, wxID_ANY, tpdlay,
-            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(110,row_height) );
+            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
       wxTextCtrl*   dwciflay = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, ciflay,
-            wxPoint(120,(row_height+5)*rowno + 5), wxSize(150,row_height));
+            wxPoint(110,(row_height+5)*rowno + 5), wxSize(145,row_height));
       dwtpdlays->SetValue(true);
       _allRecords.push_back(LayerRecord(dwtpdlays, dwciflay));
       rowno++;
@@ -2010,12 +2007,12 @@ tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
             const nameList& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
-   const GDSin::LayerMapGds* gdsLayMap= DATC->secureGdsLayMap(false);
+   _gdsLayMap= DATC->secureGdsLayMap(false);
    word rowno = 0;
    for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word wGdsLay, wGdsType;
-      if (!gdsLayMap->getGdsLayType(wGdsLay, wGdsType, DATC->getLayerNo(*CNM)))
+      if (!_gdsLayMap->getGdsLayType(wGdsLay, wGdsType, DATC->getLayerNo(*CNM)))
       {
          wGdsLay  = DATC->getLayerNo(*CNM);
          wGdsType = 0;

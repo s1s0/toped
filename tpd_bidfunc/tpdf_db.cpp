@@ -423,10 +423,10 @@ int tellstdfunc::GDSimport::execute()
    }
    else
    {
-      GdsLayers gdsLaysAll;
-      src_structure->collectLayers(gdsLaysAll,true);
+      GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
+      src_structure->collectLayers(*gdsLaysAll,true);
       DATC->unlockGDS();
-      GDSin::LayerMapGds LayerExpression(gdsLaysStrList, &gdsLaysAll);
+      GDSin::LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
       if (LayerExpression.status())
       {
          nameList top_cells;
@@ -477,11 +477,11 @@ int tellstdfunc::GDSimportList::execute()
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
-   GdsLayers gdsLaysAll;
+   GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-      AGDSDB->collectLayers(gdsLaysAll);
+      AGDSDB->collectLayers(*gdsLaysAll);
    DATC->unlockGDS();
-   GDSin::LayerMapGds LayerExpression(gdsLaysStrList, &gdsLaysAll);
+   GDSin::LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
    {
       DATC->lockDB(false);
@@ -829,7 +829,7 @@ int tellstdfunc::GDSsetlaymap::execute()
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
 
    // Convert layer map
-   USMap* gdsLays = new USMap();
+   USMap* gdsLays = DEBUG_NEW USMap();
    telldata::tthsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
@@ -1206,7 +1206,7 @@ int tellstdfunc::CIFsetlaymap::execute()
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
 
    // Convert layer map
-   USMap* cifLays = new USMap();
+   USMap* cifLays = DEBUG_NEW USMap();
    telldata::tthsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
