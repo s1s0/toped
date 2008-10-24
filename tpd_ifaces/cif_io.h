@@ -325,6 +325,17 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          bool           _verbose;         //! CIF output type
          unsigned       _lastcellnum;     //! The number of the last written cell
    };
+
+   class LayerMapCif {
+      public:
+                              LayerMapCif(const USMap&);
+         bool                 getTdtLay(word&, std::string);
+         bool                 getCifLay(std::string&, word);
+      private:
+         USMap                _theEmap;
+         SIMap                _theImap;
+   };
+
 }
 
 #endif // !defined(CIFIO_H_INCLUDED)

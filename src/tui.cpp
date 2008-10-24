@@ -1734,12 +1734,14 @@ tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
+   CIFin::LayerMapCif* cifMap = DATC->secureCifLayMap(true);
    word rowno = 0;
    for (SIMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
-      std::string ics = DATC->getLayerName(CNM->second);
-      wxString wxics  = wxString(ics.c_str(), wxConvUTF8);
+      word tdtLay;
+      if (!cifMap->getTdtLay(tdtLay, CNM->first)) tdtLay = CNM->second;
+      wxString wxics  = wxString(DATC->getLayerName(tdtLay).c_str(), wxConvUTF8);
 
       wxCheckBox* dwciflay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, cifln,
          wxPoint(  5,(row_height+5)*rowno + 5), wxSize(110,row_height) );
@@ -1777,22 +1779,28 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
             const GdsLayers& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
+   const GDSin::LayerMapGds* gdsLayMap = DATC->secureGdsLayMap(true);
    word rowno = 0;
    for (GdsLayers::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-      wxString gdsln;
-      gdsln << CNM->first;
-      std::string ics = DATC->getLayerName(CNM->first);
-      wxString wxics  = wxString(ics.c_str(), wxConvUTF8);
+      wxString sGdsLay;
+      sGdsLay << CNM->first;
       for (WordList::const_iterator CTP = CNM->second.begin(); CTP != CNM->second.end(); CTP++)
       {
-         wxString gdstp;
-         gdstp << *CTP;
-         wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, gdsln,
+         wxString sGdsDtype;
+         sGdsDtype << *CTP;
+         word wTdtLay;
+         if (!gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP))
+         {
+            wTdtLay = CNM->first;
+         }
+         wxString sTdtLay(DATC->getLayerName(CNM->first).c_str(), wxConvUTF8);
+
+         wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
             wxPoint(  5,(row_height+5)*rowno + 5), wxSize(50,row_height), wxALIGN_LEFT );
-         wxStaticText* dwgdstype = DEBUG_NEW wxStaticText( this, wxID_ANY, gdstp,
+         wxStaticText* dwgdstype = DEBUG_NEW wxStaticText( this, wxID_ANY, sGdsDtype,
             wxPoint( 60,(row_height+5)*rowno + 5), wxSize(40,row_height), wxALIGN_LEFT );
-         wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, wxics,
+         wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, sTdtLay,
             wxPoint(105,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
          dwgdslay->SetValue(true);
          _allRecords.push_back(LayerRecord(dwgdslay, dwgdstype, dwtpdlays));
@@ -1917,14 +1925,15 @@ tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
    word rowno = 0;
-   const USMap* cifMap = DATC->secureCifLayMap(false);
+   CIFin::LayerMapCif* cifMap = DATC->secureCifLayMap(false);
    for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word layno = DATC->getLayerNo(*CNM);
       wxString tpdlay  = wxString(CNM->c_str(), wxConvUTF8);
       wxString ciflay;
-      if (cifMap->end() != cifMap->find(layno))
-         ciflay = wxString((*(const_cast<USMap*>(cifMap)))[layno].c_str(), wxConvUTF8);
+      std::string cifName;
+      if ( cifMap->getCifLay(cifName, layno) )
+         ciflay = wxString(cifName.c_str(), wxConvUTF8);
       else
          ciflay << wxT("L") << layno;
       if (4 < ciflay.Length()) ciflay.Clear(); // Should not be longer than 4

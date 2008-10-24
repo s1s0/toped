@@ -534,9 +534,16 @@ namespace GDSin {
       GdsStructure*           _fStruct;
    };
 
+   /** The LayerMapGds is used for GDS/TDT layer correspondence in both directions.
+      - If the class is constructed with GdsLayers == NULL, then _import will be
+        set to false and only the getGdsLayType() method should be used.
+      - If the class is constructed with GdsLayers != NULL, then _import will be
+        set to true and only the getTdtLay() method should be used
+
+   To ensure this policy some asserts are in place. Don't remove them!
+   */
    class LayerMapGds {
       public:
-                              LayerMapGds(GdsLayers*);
                               LayerMapGds(const USMap&, GdsLayers*);
          bool                 getTdtLay(word&, word, word) const;
          bool                 getGdsLayType(word&, word&, word) const;
@@ -549,6 +556,7 @@ namespace GDSin {
          void                 getList(wxString, WordList&);
          GlMap                _theMap;
          bool                 _status;
+         bool                 _import;
          GdsLayers*           _alist; // all available GDS layers with their data types
    };
 
