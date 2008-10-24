@@ -1455,6 +1455,11 @@ GDSin::LayerMapGds::LayerMapGds(const USMap& inlist, GdsLayers* alist)
    }
 }
 
+GDSin::LayerMapGds::~LayerMapGds()
+{
+   if (NULL != _alist) delete _alist;
+}
+
 bool GDSin::LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
 {
    const wxString tmplLayNumbers    = wxT("[[:digit:]\\,\\-]*");
@@ -1617,7 +1622,7 @@ void GDSin::LayerMapGds::getList(wxString exp, WordList& data)
 
 bool GDSin::LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
 {
-//   assert(_import); // If you hit this - see the comment in the class declaration
+   assert(_import); // If you hit this - see the comment in the class declaration
    // All that this function is doing is:
    // tdtlay = _theMap[gdslay][gdstype]
    // A number of protections are in place though as well as const_cast
@@ -1632,7 +1637,7 @@ bool GDSin::LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) cons
 
 bool GDSin::LayerMapGds::getGdsLayType(word& gdslay, word& gdstype, word tdtlay) const
 {
-//   assert(!_import); // If you hit this - see the comment in the class declaration
+   assert(!_import); // If you hit this - see the comment in the class declaration
    gdslay  = tdtlay; // the default value
    gdstype = 0;
    if (_theMap.end()       == _theMap.find(tdtlay)       ) return false;

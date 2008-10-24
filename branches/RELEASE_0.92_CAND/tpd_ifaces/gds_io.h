@@ -545,6 +545,7 @@ namespace GDSin {
    class LayerMapGds {
       public:
                               LayerMapGds(const USMap&, GdsLayers*);
+                             ~LayerMapGds();
          bool                 getTdtLay(word&, word, word) const;
          bool                 getGdsLayType(word&, word&, word) const;
          bool                 status() {return _status;}
