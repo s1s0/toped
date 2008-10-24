@@ -1443,19 +1443,10 @@ TP GDSin::get_TP(GDSin::GdsRecord *cr, word curnum, byte len)
 }
 
 //=============================================================================
-GDSin::LayerMapGds::LayerMapGds(GdsLayers* alist) : _theMap(), _status(true), _alist(alist)
-{
-   assert(NULL != alist);
-   for (GdsLayers::const_iterator NLI = alist->begin(); NLI != alist->end(); NLI++)
-   {
-      for (WordList::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
-         _theMap[NLI->first].insert(std::make_pair(*NTI, NLI->first));
-   }
-}
-
 GDSin::LayerMapGds::LayerMapGds(const USMap& inlist, GdsLayers* alist)
    : _theMap(), _status(true), _alist(alist)
 {
+   _import = (NULL != _alist);
    for (USMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)
    {
       wxString exp(CE->second.c_str(), wxConvUTF8);
@@ -1626,6 +1617,7 @@ void GDSin::LayerMapGds::getList(wxString exp, WordList& data)
 
 bool GDSin::LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
 {
+//   assert(_import); // If you hit this - see the comment in the class declaration
    // All that this function is doing is:
    // tdtlay = _theMap[gdslay][gdstype]
    // A number of protections are in place though as well as const_cast
@@ -1640,6 +1632,7 @@ bool GDSin::LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) cons
 
 bool GDSin::LayerMapGds::getGdsLayType(word& gdslay, word& gdstype, word tdtlay) const
 {
+//   assert(!_import); // If you hit this - see the comment in the class declaration
    gdslay  = tdtlay; // the default value
    gdstype = 0;
    if (_theMap.end()       == _theMap.find(tdtlay)       ) return false;

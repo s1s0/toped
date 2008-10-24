@@ -590,3 +590,47 @@ CIFin::CifExportFile::~CifExportFile()
    _file.close();
    // don't delete _laymap - it's should be deleted where it had been created
 }
+
+
+CIFin::LayerMapCif::LayerMapCif(const USMap& inMap)
+{
+   for (USMap::const_iterator CI = inMap.begin(); CI != inMap.end(); CI++ )
+   {
+      _theImap[CI->second] = CI->first;
+      _theEmap[CI->first] = CI->second;
+   }
+}
+
+bool CIFin::LayerMapCif::getTdtLay(word& tdtLay, std::string cifLay)
+{
+   if (_theImap.end() != _theImap.find(cifLay))
+   {
+      tdtLay = _theImap[cifLay];
+      return true;
+   }
+   return false;
+}
+
+bool CIFin::LayerMapCif::getCifLay(std::string& cifLay, word tdtLay)
+{
+   if (_theEmap.end() != _theEmap.find(tdtLay))
+   {
+      cifLay = _theEmap[tdtLay];
+      return true;
+   }
+   return false;
+}
+
+//         bool                 status() {return _status;}
+//      private:
+//         typedef std::map< word, word  >     GdtTdtMap;
+//         typedef std::map< word, GdtTdtMap>  GlMap;
+//         bool                 parseLayTypeString(wxString&, word);
+//         void                 patternNormalize(wxString&);
+//         void                 getList(wxString, WordList&);
+//         GlMap                _theMap;
+//         bool                 _status;
+         USMap                _theEmap;
+         SIMap                _theImap;
+         bool                 _import;
+         nameList*            _alist;  // all available CIF layers

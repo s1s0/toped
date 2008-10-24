@@ -201,7 +201,7 @@ public:
    const USMap*               getGdsLayMap() const       {return _properties.getGdsLayMap();}
    const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
    const GDSin::LayerMapGds*  secureGdsLayMap(bool);
-   const USMap*               secureCifLayMap(bool);
+   CIFin::LayerMapCif*        secureCifLayMap(bool);
 
    protected:
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries

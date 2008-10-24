@@ -1193,10 +1193,11 @@ bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter
    return _TEDLIB.getLibCellRNP(name, striter);
 }
 
-const USMap* DataCenter::secureCifLayMap(bool import)
+
+CIFin::LayerMapCif* DataCenter::secureCifLayMap(bool import)
 {
    const USMap* savedMap = _properties.getCifLayMap();
-   if (NULL != savedMap) return savedMap;
+   if (NULL != savedMap) return new CIFin::LayerMapCif(*savedMap);
    USMap* theMap = new USMap();
    if (import)
    {// Generate the default CIF layer map for import
@@ -1222,6 +1223,7 @@ const USMap* DataCenter::secureCifLayMap(bool import)
       }
       unlockDB();
    }
+   return new CIFin::LayerMapCif(*theMap);
 }
 
 const GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
