@@ -1794,11 +1794,11 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          wxString sTdtLay(DATC->getLayerName(CNM->first).c_str(), wxConvUTF8);
 
          wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
-            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(50,row_height), wxALIGN_LEFT );
+            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(40,row_height), wxALIGN_LEFT );
          wxStaticText* dwgdstype = DEBUG_NEW wxStaticText( this, wxID_ANY, sGdsDtype,
-            wxPoint( 60,(row_height+5)*rowno + 5), wxSize(40,row_height), wxALIGN_LEFT );
+            wxPoint( 50,(row_height+5)*rowno + 5), wxSize(40,row_height), wxALIGN_LEFT );
          wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, sTdtLay,
-            wxPoint(105,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
+            wxPoint( 95,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
          dwgdslay->SetValue(true);
          _allRecords.push_back(LayerRecord(dwgdslay, dwgdstype, dwtpdlays));
          rowno++;
@@ -1890,9 +1890,9 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
    (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS layer/type"),
-      wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+      wxPoint(  5, 5), wxSize(90,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
    (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
-      wxPoint(110, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+      wxPoint(95, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
@@ -2023,11 +2023,11 @@ tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
       gdstype <<wGdsType;
 
       wxCheckBox* dwtpdlays  = DEBUG_NEW wxCheckBox( this, wxID_ANY, tpdlay,
-         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(110,row_height) );
+         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
       wxTextCtrl*   dwgdslay = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, gdslay,
-         wxPoint(120,(row_height+5)*rowno + 5), wxSize(70,row_height));
+         wxPoint(110,(row_height+5)*rowno + 5), wxSize(70,row_height));
       wxTextCtrl*   dwgdstyp = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, gdstype,
-         wxPoint(190,(row_height+5)*rowno + 5), wxSize(70,row_height));
+         wxPoint(180,(row_height+5)*rowno + 5), wxSize(70,row_height));
       dwtpdlays->SetValue(true);
       _allRecords.push_back(LayerRecord(dwtpdlays, dwgdslay, dwgdstyp));
       rowno++;
