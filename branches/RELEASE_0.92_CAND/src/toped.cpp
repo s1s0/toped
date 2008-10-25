@@ -1352,7 +1352,6 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
       }
       laymapstr << "}";
       wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
-      delete laymap;
 
       wxString ost;
       ost << wxT("gdsexport(\"") 
@@ -1365,6 +1364,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("GDS export aborted"));
+   delete laymap;
 }
 
 
@@ -1470,7 +1470,6 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
       }
       laymapstr << "}";
       wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
-      delete laymap;
       wxString ost;
 
       ost << wxT("cifexport(\"") 
@@ -1484,6 +1483,7 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
       SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("CIF export aborted"));
+   delete laymap;
 }
 
 
