@@ -208,42 +208,42 @@ namespace tui {
       void OnReportSelected(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("report_selected();"));}
       void   OnSelectAll(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("select_all();"));}
       //
-      void        OnStep(wxCommandEvent&);
-      void     OnAutopan(wxCommandEvent&);
-      void       OnGrid0(wxCommandEvent&);
-      void       OnGrid1(wxCommandEvent&);
-      void       OnGrid2(wxCommandEvent&);
-      void  OnLongCursor(wxCommandEvent&);
-      void    OnCellMark(wxCommandEvent&);
-      void    OnCellBox(wxCommandEvent&);
-      void    OnTextMark(wxCommandEvent&);
-      void    OnTextBox(wxCommandEvent&);
-      void     OnMarker0(wxCommandEvent&);
-      void    OnMarker45(wxCommandEvent&);
-      void    OnMarker90(wxCommandEvent&);
-		void		OnHToolBarSize16(wxCommandEvent&);
-		void		OnHToolBarSize24(wxCommandEvent&);
-		void		OnHToolBarSize32(wxCommandEvent&);
-		void		OnHToolBarSize48(wxCommandEvent&);
+      void        OnStep(wxCommandEvent& WXUNUSED(event));
+      void     OnAutopan(wxCommandEvent& WXUNUSED(event));
+      void       OnGrid0(wxCommandEvent& WXUNUSED(event));
+      void       OnGrid1(wxCommandEvent& WXUNUSED(event));
+      void       OnGrid2(wxCommandEvent& WXUNUSED(event));
+      void  OnLongCursor(wxCommandEvent& WXUNUSED(event));
+      void    OnCellMark(wxCommandEvent& WXUNUSED(event));
+      void    OnCellBox(wxCommandEvent& WXUNUSED(event));
+      void    OnTextMark(wxCommandEvent& WXUNUSED(event));
+      void    OnTextBox(wxCommandEvent& WXUNUSED(event));
+      void     OnMarker0(wxCommandEvent& WXUNUSED(event));
+      void    OnMarker45(wxCommandEvent& WXUNUSED(event));
+      void    OnMarker90(wxCommandEvent& WXUNUSED(event));
+      void		OnHToolBarSize16(wxCommandEvent& WXUNUSED(event));
+      void		OnHToolBarSize24(wxCommandEvent& WXUNUSED(event));
+      void		OnHToolBarSize32(wxCommandEvent& WXUNUSED(event));
+      void		OnHToolBarSize48(wxCommandEvent& WXUNUSED(event));
 
-		void		OnVToolBarSize16(wxCommandEvent&);
-		void		OnVToolBarSize24(wxCommandEvent&);
-		void		OnVToolBarSize32(wxCommandEvent&);
-		void		OnVToolBarSize48(wxCommandEvent&);
+      void		OnVToolBarSize16(wxCommandEvent& WXUNUSED(event));
+      void		OnVToolBarSize24(wxCommandEvent& WXUNUSED(event));
+      void		OnVToolBarSize32(wxCommandEvent& WXUNUSED(event));
+      void		OnVToolBarSize48(wxCommandEvent& WXUNUSED(event));
 
 
       void OnDefineLayer(wxCommandEvent&);
-      void OnDefineColor(wxCommandEvent&);
-      void  OnDefineFill(wxCommandEvent&);
+      void OnDefineColor(wxCommandEvent& WXUNUSED(event));
+      void  OnDefineFill(wxCommandEvent& WXUNUSED(event));
       void    OnMenu(wxCommandEvent&);
 
-      void  OnGridDefine(wxCommandEvent&);
+      void  OnGridDefine(wxCommandEvent& WXUNUSED(event));
       void  OnAddRuler(wxCommandEvent& WXUNUSED(event))    {_cmdline->parseCommand(wxT("addruler();") );}
       void  OnClearRulers(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("clearrulers();") );}
       void  OnChangeLayer(wxCommandEvent& WXUNUSED(event));
       void  OnCurrentLayer(wxCommandEvent& WXUNUSED(event));
       //
-      void               OnAbort(wxCommandEvent&);
+      void               OnAbort(wxCommandEvent& WXUNUSED(event));
       void  OnUpdateSettingsMenu(wxCommandEvent&);
       void          OnMouseAccel(wxCommandEvent&);
       void        OnCanvasStatus(wxCommandEvent&);

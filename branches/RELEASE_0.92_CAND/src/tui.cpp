@@ -1230,7 +1230,7 @@ void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
    FindWindow(ID_BTNAPPLY)->Enable(false);
 }
 
-void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(cmdevent))
+void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(event))
 {
    wxString s_red   =   _c_red->GetValue();
    wxString s_green = _c_green->GetValue();
@@ -1246,7 +1246,7 @@ void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(cmdevent))
    FindWindow(ID_BTNAPPLY)->Enable(true);
 }
 
-void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
+void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(event))
 {
    wxString color_name = _dwcolname->GetValue();
    nameNormalize(color_name);
@@ -1655,7 +1655,7 @@ void tui::defineFill::OnFillSelected(wxCommandEvent& cmdevent)
    _fillsample->Refresh();
 }
 
-void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
+void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(event))
 {
    wxString fill_name = _dwfilname->GetValue();
    nameNormalize(fill_name);

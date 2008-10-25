@@ -77,7 +77,7 @@ namespace console {
       wxCondition*            threadWaits4;
       miniParser*             puc; // parse user coordinates
       // event table handlers
-      void                    getCommand(wxCommandEvent&);
+      void                    getCommand(wxCommandEvent& WXUNUSED(event));
       void                    getCommandA();
       void                    getCommandB(wxCommandEvent&);
       void                    OnGUInput(wxCommandEvent&);
