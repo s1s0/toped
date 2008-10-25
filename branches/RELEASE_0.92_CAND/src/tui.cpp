@@ -392,6 +392,10 @@ tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &titl
 }
 
 //==============================================================================
+BEGIN_EVENT_TABLE(tui::getCIFimport, wxDialog)
+   EVT_BUTTON( ID_SAVELAYMAP, tui::getCIFimport::OnSaveLayMap      )
+END_EVENT_TABLE()
+
 tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
@@ -428,10 +432,15 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   //
+   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   lsizer->Add(_layList, 1, wxEXPAND);
+   lsizer->Add( DEBUG_NEW wxButton( this, ID_SAVELAYMAP, wxT("Save Layer Map") ), 0, wxALL | wxALIGN_RIGHT, 5 );
+   //
    // First line up the important things
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_layList, 0, wxEXPAND);
+   lists_sizer->Add(lsizer, 0, wxEXPAND);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
@@ -448,7 +457,16 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 
+void tui::getCIFimport::OnSaveLayMap(wxCommandEvent& WXUNUSED(event))
+{
+   //@TODO
+}
+
 //==============================================================================
+BEGIN_EVENT_TABLE(tui::getCIFexport, wxDialog)
+   EVT_BUTTON( ID_SAVELAYMAP, tui::getCIFexport::OnSaveLayMap      )
+END_EVENT_TABLE()
+
 tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
@@ -474,12 +492,17 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   //
+   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   lsizer->Add(_layList, 1, wxEXPAND);
+   lsizer->Add( DEBUG_NEW wxButton( this, ID_SAVELAYMAP, wxT("Save Layer Map") ), 0, wxALL | wxALIGN_RIGHT, 5 );
+   //
    // First line up the important things
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_layList, 0, wxEXPAND);
-   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   lists_sizer->Add(lsizer, 0, wxEXPAND);
    // Buttons
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
    button_sizer->Add(_slang    , 0, wxALL | wxALIGN_LEFT, 5);
    button_sizer->Add(0,0,1); // 
@@ -494,7 +517,16 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 
+void tui::getCIFexport::OnSaveLayMap(wxCommandEvent& WXUNUSED(event))
+{
+   //@TODO
+}
+
 //==============================================================================
+BEGIN_EVENT_TABLE(tui::getGDSimport, wxDialog)
+   EVT_BUTTON( ID_SAVELAYMAP, tui::getGDSimport::OnSaveLayMap      )
+END_EVENT_TABLE()
+
 tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
@@ -522,10 +554,14 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-   //   spin_sizer->Add(0,0,1); //
+   //
+   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   lsizer->Add(_layList, 1, wxEXPAND);
+   lsizer->Add( DEBUG_NEW wxButton( this, ID_SAVELAYMAP, wxT("Save Layer Map") ), 0, wxALL | wxALIGN_RIGHT, 5 );
+   //
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_layList, 0, wxEXPAND);
+   lists_sizer->Add(lsizer, 0, wxEXPAND);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
@@ -542,7 +578,16 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 
+void tui::getGDSimport::OnSaveLayMap(wxCommandEvent& WXUNUSED(event))
+{
+   //@TODO
+}
+
 //==============================================================================
+BEGIN_EVENT_TABLE(tui::getGDSexport, wxDialog)
+   EVT_BUTTON( ID_SAVELAYMAP, tui::getGDSexport::OnSaveLayMap      )
+END_EVENT_TABLE()
+
 tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
@@ -567,9 +612,13 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    //
+   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   lsizer->Add(_layList, 1, wxEXPAND);
+   lsizer->Add( DEBUG_NEW wxButton( this, ID_SAVELAYMAP, wxT("Save Layer Map") ), 0, wxALL | wxALIGN_RIGHT, 5 );
+   //
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_layList, 0, wxEXPAND);
+   lists_sizer->Add( lsizer  , 0, wxEXPAND );
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
@@ -583,6 +632,11 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    SetSizer( topsizer );      // use the sizer for layout
 
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+}
+
+void tui::getGDSexport::OnSaveLayMap(wxCommandEvent& WXUNUSED(event))
+{
+   //@TODO
 }
 
 //==============================================================================

@@ -1231,7 +1231,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
    wxString ost_int;
    ost_int << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
    wxString ost;
-   ost << wxT("gdsimport(") << ost_int << wxT(", gdsdefaultlaymap(true), true, false );gdsclose();");
+   ost << wxT("gdsimport(") << ost_int << wxT(", getgdslaymap(true), true, false );gdsclose();");
    _cmdline->parseCommand(ost);
 //   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
@@ -1254,7 +1254,7 @@ void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
    wxString ost_int;
    ost_int << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
    wxString ost;
-   ost << wxT("cifimport(") << ost_int << wxT(", cifdefaultlaymap(true), true, false );cifclose();");
+   ost << wxT("cifimport(") << ost_int << wxT(", getciflaymap(true), true, false );cifclose();");
    _cmdline->parseCommand(ost);
 //   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
@@ -1272,7 +1272,7 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
          return;
       }
       wxString ost;
-      ost << wxT("gdsexport(gdsdefaultlaymap(false), \"")
+      ost << wxT("gdsexport(getgdslaymap(false), \"")
           << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
           << wxT("\", false);");
       _cmdline->parseCommand(ost);
@@ -1295,7 +1295,7 @@ void tui::TopedFrame::OnCIFexportLIB(wxCommandEvent& WXUNUSED(event))
          return;
       }
       wxString ost;
-      ost << wxT("cifexport(cifdefaultlaymap(false), \"")
+      ost << wxT("cifexport(getciflaymap(false), \"")
             << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
             << wxT("\", false);");
       _cmdline->parseCommand(ost);
