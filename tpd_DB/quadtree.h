@@ -29,8 +29,6 @@
 #define QUADTREE_H
 
 #include "tedstd.h"
-#include "../tpd_ifaces/gds_io.h"
-#include "../tpd_ifaces/cif_io.h"
 #include "ps_out.h"
 
 namespace laydata {

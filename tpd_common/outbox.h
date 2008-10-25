@@ -32,6 +32,7 @@
 #include <wx/listctrl.h>
 #include <iostream>
 #include <list>
+#include "ttt.h"
 
 #define EVT_TECUSTOM_COMMAND(cmd, id, fn) \
     DECLARE_EVENT_TABLE_ENTRY( \
@@ -205,5 +206,43 @@ bool        expandFileName(std::string&);
 std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile
 std::string convertString(const std::string &str);
+
+/** The LayerMapGds is used for GDS/TDT layer correspondence in both directions.
+      - If the class is constructed with GdsLayers == NULL, then _import will be
+        set to false and only the getGdsLayType() method should be used.
+      - If the class is constructed with GdsLayers != NULL, then _import will be
+        set to true and only the getTdtLay() method should be used
+
+   To ensure this policy some asserts are in place. Don't remove them!
+ */
+class LayerMapGds {
+   public:
+      LayerMapGds(const USMap&, GdsLayers*);
+      ~LayerMapGds();
+      bool                 getTdtLay(word&, word, word) const;
+      bool                 getGdsLayType(word&, word&, word) const;
+      bool                 status() {return _status;}
+   private:
+      typedef std::map< word, word  >     GdtTdtMap;
+      typedef std::map< word, GdtTdtMap>  GlMap;
+      bool                 parseLayTypeString(wxString&, word);
+      void                 patternNormalize(wxString&);
+      void                 getList(wxString, WordList&);
+      GlMap                _theMap;
+      bool                 _status;
+      bool                 _import;
+      GdsLayers*           _alist; // all available GDS layers with their data types
+};
+
+class LayerMapCif {
+   public:
+      LayerMapCif(const USMap&);
+      bool                 getTdtLay(word&, std::string);
+      bool                 getCifLay(std::string&, word);
+   private:
+      USMap                _theEmap;
+      SIMap                _theImap;
+};
+
 
 #endif

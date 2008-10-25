@@ -34,7 +34,6 @@
 #include "viewprop.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
-#include "../tpd_parser/ted_prompt.h"
 #include "datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
@@ -43,7 +42,6 @@
 #include "../ui/nolay.xpm"
 
 
-extern console::ted_cmd*         Console;
 extern DataCenter*               DATC;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
@@ -1376,14 +1374,14 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
       cmd << wxT("hidelayer(") <<_layer->layno() << wxT(", ");
       if (_hidden) cmd << wxT("true") << wxT(");");
       else cmd << wxT("false") << wxT(");");
-      Console->parseCommand(cmd);
+      parseCommand(cmd);
    }
    else
    //Select layer
    {
       wxString cmd;
       cmd << wxT("usinglayer(") << _layer->layno()<< wxT(");");
-      Console->parseCommand(cmd);
+      parseCommand(cmd);
 
       if (!_selected)
       {
@@ -1409,7 +1407,7 @@ void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
    cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
    if (DATC->layerLocked(_layer->layno())) cmd << wxT("false") << wxT(");");
    else cmd << wxT("true") << wxT(");");
-   Console->parseCommand(cmd);
+   parseCommand(cmd);
 
 }
 

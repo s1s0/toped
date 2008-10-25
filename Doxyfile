@@ -1,4 +1,4 @@
-# Doxyfile 1.5.5-KDevelop
+# Doxyfile 1.5.6-KDevelop
 
 #---------------------------------------------------------------------------
 # Project related configuration options
@@ -37,6 +37,7 @@ IDL_PROPERTY_SUPPORT   = YES
 DISTRIBUTE_GROUP_DOC   = NO
 SUBGROUPING            = YES
 TYPEDEF_HIDES_STRUCT   = NO
+SYMBOL_CACHE_SIZE      = 0
 #---------------------------------------------------------------------------
 # Build related configuration options
 #---------------------------------------------------------------------------
@@ -79,7 +80,7 @@ WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
 WARN_FORMAT            = "$file:$line: $text"
-WARN_LOGFILE           = 
+WARN_LOGFILE           = doxygen.log
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
@@ -115,7 +116,7 @@ FILE_PATTERNS          = *.c \
                          *.patch \
                          *.moc \
                          *.xpm
-RECURSIVE              = YES
+RECURSIVE              = NO
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
@@ -161,7 +162,11 @@ DOCSET_BUNDLE_ID       = org.doxygen.Project
 HTML_DYNAMIC_SECTIONS  = NO
 CHM_FILE               = 
 HHC_LOCATION           = 
+QTHELP_FILE            = 
+QTHELP_CONFIG          = 
+DOXYGEN2QTHELP_LOC     = 
 GENERATE_CHI           = NO
+CHM_INDEX_ENCODING     = 
 BINARY_TOC             = YES
 TOC_EXPAND             = YES
 DISABLE_INDEX          = NO

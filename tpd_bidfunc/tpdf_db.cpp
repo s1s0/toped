@@ -426,7 +426,7 @@ int tellstdfunc::GDSimport::execute()
       GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
       src_structure->collectLayers(*gdsLaysAll,true);
       DATC->unlockGDS();
-      GDSin::LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+      LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
       if (LayerExpression.status())
       {
          nameList top_cells;
@@ -481,7 +481,7 @@ int tellstdfunc::GDSimportList::execute()
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
       AGDSDB->collectLayers(*gdsLaysAll);
    DATC->unlockGDS();
-   GDSin::LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+   LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
    {
       DATC->lockDB(false);
@@ -538,7 +538,7 @@ int tellstdfunc::GDSexportLIB::execute()
    if (expandFileName(filename))
    {
       DATC->lockDB(false);
-         GDSin::LayerMapGds default_map(gdsLays, NULL);
+         LayerMapGds default_map(gdsLays, NULL);
          DATC->GDSexport(default_map, filename, x2048);
       DATC->unlockDB();
       LogFile << LogFile.getFN() << "( "
@@ -591,7 +591,7 @@ int tellstdfunc::GDSexportTOP::execute()
 
          if (NULL != excell)
          {
-            GDSin::LayerMapGds default_map(gdsLays, NULL);
+            LayerMapGds default_map(gdsLays, NULL);
 
             DATC->GDSexport(excell, default_map, recur, filename, x2048);
             LogFile  << LogFile.getFN() 

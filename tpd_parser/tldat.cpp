@@ -31,6 +31,7 @@
 #include "tldat.h"
 #include "tellyzer.h"
 
+#include "tedat.h" //<< Must find a way to remove this from here. See line 224 - it's all about it!
 //=============================================================================
 telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
    telldata::tell_var* nvar;
