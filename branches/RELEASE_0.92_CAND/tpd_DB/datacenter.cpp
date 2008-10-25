@@ -41,7 +41,7 @@ DataCenter*               DATC = NULL;
 //-----------------------------------------------------------------------------
 // class Gds2Ted
 //-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const GDSin::LayerMapGds& theLayMap) :
+GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const LayerMapGds& theLayMap) :
       _src_lib(src_lib), _dst_lib(dst_lib), _theLayMap(theLayMap), _coeff(dst_lib->UU() / src_lib->libUnits())
 {
 }
@@ -659,7 +659,7 @@ bool DataCenter::TDTwrite(const char* filename)
    return true;
 }
 
-void DataCenter::GDSexport(const GDSin::LayerMapGds& layerMap, std::string& filename, bool x2048)
+void DataCenter::GDSexport(const LayerMapGds& layerMap, std::string& filename, bool x2048)
 {
    std::string nfn;
    //Get actual time
@@ -669,7 +669,7 @@ void DataCenter::GDSexport(const GDSin::LayerMapGds& layerMap, std::string& file
    gdsex.closeFile();
 }
 
-void DataCenter::GDSexport(laydata::tdtcell* cell, const GDSin::LayerMapGds& layerMap, bool recur, std::string& filename, bool x2048)
+void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapGds& layerMap, bool recur, std::string& filename, bool x2048)
 {
    std::string nfn;
    //Get actual time
@@ -710,7 +710,7 @@ bool DataCenter::GDSparse(std::string filename)
    return status;
 }
 
-void DataCenter::importGDScell(const nameList& top_names, const GDSin::LayerMapGds& laymap, bool recur, bool over)
+void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
 {
    if (NULL == lockGDS())
    {
@@ -1194,10 +1194,10 @@ bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter
 }
 
 
-CIFin::LayerMapCif* DataCenter::secureCifLayMap(bool import)
+LayerMapCif* DataCenter::secureCifLayMap(bool import)
 {
    const USMap* savedMap = _properties.getCifLayMap();
-   if (NULL != savedMap) return DEBUG_NEW CIFin::LayerMapCif(*savedMap);
+   if (NULL != savedMap) return DEBUG_NEW LayerMapCif(*savedMap);
    USMap* theMap = DEBUG_NEW USMap();
    if (import)
    {// Generate the default CIF layer map for import
@@ -1223,13 +1223,13 @@ CIFin::LayerMapCif* DataCenter::secureCifLayMap(bool import)
       }
       unlockDB();
    }
-   return DEBUG_NEW CIFin::LayerMapCif(*theMap);
+   return DEBUG_NEW LayerMapCif(*theMap);
 }
 
-GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
+LayerMapGds* DataCenter::secureGdsLayMap(bool import)
 {
    const USMap* savedMap = _properties.getGdsLayMap();
-   GDSin::LayerMapGds* theGdsMap;
+   LayerMapGds* theGdsMap;
    if (NULL == savedMap)
    {
       USMap theMap;
@@ -1250,7 +1250,7 @@ GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
             }
             theMap[CGL->first] = dtypestr.str();
          }
-         theGdsMap = DEBUG_NEW GDSin::LayerMapGds(theMap, gdsLayers);
+         theGdsMap = DEBUG_NEW LayerMapGds(theMap, gdsLayers);
       }
       else
       { // generate default export GDS layer map
@@ -1264,7 +1264,7 @@ GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
             theMap[DATC->getLayerNo( *CDL )] = dtypestr.str();
          }
          DATC->unlockDB();
-         theGdsMap = DEBUG_NEW GDSin::LayerMapGds(theMap, NULL);
+         theGdsMap = DEBUG_NEW LayerMapGds(theMap, NULL);
       }
    }
    else
@@ -1275,10 +1275,10 @@ GDSin::LayerMapGds* DataCenter::secureGdsLayMap(bool import)
          GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
          gdsGetLayers(*gdsLayers);
          unlockGDS();
-         theGdsMap = DEBUG_NEW GDSin::LayerMapGds(*savedMap, gdsLayers);
+         theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, gdsLayers);
       }
       else
-         theGdsMap = DEBUG_NEW GDSin::LayerMapGds(*savedMap, NULL);
+         theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, NULL);
    }
    return theGdsMap;
 }

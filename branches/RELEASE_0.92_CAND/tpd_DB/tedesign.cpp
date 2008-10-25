@@ -28,10 +28,12 @@
 #include "tpdph.h"
 #include <sstream>
 #include "../tpd_common/ttt.h"
+#include "../tpd_common/outbox.h"
+#include "../tpd_ifaces/cif_io.h"
+#include "../tpd_ifaces/gds_io.h"
 #include "tedesign.h"
 #include "tedat.h"
 #include "viewprop.h"
-#include "../tpd_common/outbox.h"
 
 //! the stack of all previously edited (opened) cells
 laydata::editcellstack      laydata::editobject::_editstack;

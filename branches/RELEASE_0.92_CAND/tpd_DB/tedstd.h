@@ -72,6 +72,14 @@ namespace layprop {
    class DrawProperties;
 }
 
+namespace GDSin {
+   class GdsFile;
+}
+
+namespace CIFin {
+   class CifExportFile;
+}
+
 namespace laydata {
 
    const word _lmnone   = 0x0000;

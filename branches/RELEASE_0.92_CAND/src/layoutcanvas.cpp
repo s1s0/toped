@@ -595,11 +595,11 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
 //   drawInterim(ScrMARK);
    if (tmp_wnd || mouse_input || reperX || reperY) Refresh();//updateGL();
 }
-      
+
 void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
    presspoint = ScrMARK;
    tmp_wnd = true;
-}   
+}
 
 void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
    tmp_wnd = false;

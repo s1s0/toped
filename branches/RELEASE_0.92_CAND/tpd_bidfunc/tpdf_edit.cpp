@@ -28,7 +28,7 @@
 #include "tpdph.h"
 #include <sstream>
 #include "tpdf_edit.h"
-
+#include "../tpd_DB/tedat.h"
 #include "../tpd_DB/datacenter.h"
 
 extern DataCenter*               DATC;

@@ -115,6 +115,7 @@
 #define gds_SPACER_ERROR   0x44
 #define gds_CONTACT        0x45
 
+class LayerMapGds;
 namespace GDSin {
    class GdsFile;
    class GdsStructure;
@@ -532,33 +533,6 @@ namespace GDSin {
       double                  _uu;
       int2b                   _maxver;
       GdsStructure*           _fStruct;
-   };
-
-   /** The LayerMapGds is used for GDS/TDT layer correspondence in both directions.
-      - If the class is constructed with GdsLayers == NULL, then _import will be
-        set to false and only the getGdsLayType() method should be used.
-      - If the class is constructed with GdsLayers != NULL, then _import will be
-        set to true and only the getTdtLay() method should be used
-
-   To ensure this policy some asserts are in place. Don't remove them!
-   */
-   class LayerMapGds {
-      public:
-                              LayerMapGds(const USMap&, GdsLayers*);
-                             ~LayerMapGds();
-         bool                 getTdtLay(word&, word, word) const;
-         bool                 getGdsLayType(word&, word&, word) const;
-         bool                 status() {return _status;}
-      private:
-         typedef std::map< word, word  >     GdtTdtMap;
-         typedef std::map< word, GdtTdtMap>  GlMap;
-         bool                 parseLayTypeString(wxString&, word);
-         void                 patternNormalize(wxString&);
-         void                 getList(wxString, WordList&);
-         GlMap                _theMap;
-         bool                 _status;
-         bool                 _import;
-         GdsLayers*           _alist; // all available GDS layers with their data types
    };
 
    /*** GdsFile ***************************************************************

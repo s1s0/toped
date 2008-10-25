@@ -32,7 +32,6 @@
 #include <vector>
 #include <algorithm>
 #include "../tpd_common/ttt.h"
-#include "../tpd_DB/tedat.h"
 
 #define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool) && !(op & telldata::tn_listmask))
 #define TLISTOF(op) (op | telldata::tn_listmask)
@@ -40,6 +39,9 @@
 #define TLCOMPOSIT_TYPE(op) (op > telldata::tn_composite)
 #define TLUNKNOWN_TYPE(op) (op == telldata::tn_composite)
 
+namespace laydata {
+   class tdtdata;
+}
 //=============================================================================
 // TELL types
 //=============================================================================

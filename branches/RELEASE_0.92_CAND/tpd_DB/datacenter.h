@@ -37,7 +37,7 @@ namespace GDSin {
 
    class Gds2Ted {
    public:
-                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const GDSin::LayerMapGds&);
+                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const LayerMapGds&);
       void                 top_structure(std::string, bool, bool);
    protected:
       void                 child_structure(const GDSin::GDSHierTree*, bool);
@@ -50,7 +50,7 @@ namespace GDSin {
       void                 aref(GDSin::GdsARef*    , laydata::tdtcell* );
       GDSin::GdsFile*      _src_lib;
       laydata::tdtdesign*  _dst_lib;
-      const GDSin::LayerMapGds&   _theLayMap;
+      const LayerMapGds&   _theLayMap;
       real                 _coeff; // DBU difference
    };
 }
@@ -83,9 +83,9 @@ public:
                               DataCenter(std::string);
                              ~DataCenter(); 
    bool                       GDSparse(std::string filename);
-   void                       GDSexport(const GDSin::LayerMapGds&, std::string&, bool);
-   void                       GDSexport(laydata::tdtcell*, const GDSin::LayerMapGds&, bool, std::string&, bool);
-   void                       importGDScell(const nameList&, const GDSin::LayerMapGds&, bool recur, bool over);
+   void                       GDSexport(const LayerMapGds&, std::string&, bool);
+   void                       GDSexport(laydata::tdtcell*, const LayerMapGds&, bool, std::string&, bool);
+   void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
    CIFin::CifStatusType       CIFparse(std::string filename);
@@ -200,8 +200,8 @@ public:
    void                       setCifLayMap(USMap* map)   {_properties.setCifLayMap(map);}
    const USMap*               getGdsLayMap() const       {return _properties.getGdsLayMap();}
    const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
-   GDSin::LayerMapGds*        secureGdsLayMap(bool);
-   CIFin::LayerMapCif*        secureCifLayMap(bool);
+   LayerMapGds*               secureGdsLayMap(bool);
+   LayerMapCif*               secureCifLayMap(bool);
 
    protected:
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries

@@ -33,6 +33,8 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "tedesign.h"
+#include "../tpd_ifaces/cif_io.h"
+#include "../tpd_ifaces/gds_io.h"
 #include "../tpd_common/outbox.h"
 #include "../tpd_common/glf.h"
 

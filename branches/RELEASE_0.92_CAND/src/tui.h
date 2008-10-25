@@ -34,8 +34,6 @@
 #include <wx/spinbutt.h>
 #include "../tpd_common/ttt.h"
 #include "../tpd_DB/viewprop.h"
-#include "../tpd_ifaces/gds_io.h"
-#include "../tpd_ifaces/cif_io.h"
 
 namespace tui {
 
@@ -200,7 +198,7 @@ namespace tui {
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords              _allRecords;
-         CIFin::LayerMapCif*     _cifMap;
+         LayerMapCif*           _cifMap;
    };
 
    //==========================================================================
@@ -220,7 +218,7 @@ namespace tui {
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords              _allRecords;
-         GDSin::LayerMapGds*     _gdsLayMap;
+         LayerMapGds*            _gdsLayMap;
    };
 
    //==========================================================================
@@ -239,7 +237,7 @@ namespace tui {
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords           _allRecords;
-         CIFin::LayerMapCif*  _cifMap;
+         LayerMapCif*         _cifMap;
    };
 
    //==========================================================================
@@ -259,7 +257,7 @@ namespace tui {
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords           _allRecords;
-         GDSin::LayerMapGds*  _gdsLayMap;
+         LayerMapGds*         _gdsLayMap;
    };
 
    //--------------------------------------------------------------------------
@@ -267,7 +265,7 @@ namespace tui {
       public:
                               nameCboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const SIMap&);
          SIMap*                getTheMap()     {return _laypanel->getTheMap();}
-         void                 OnSize( wxSizeEvent& );
+         void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::nameCboxRecords*   _laypanel;
          DECLARE_EVENT_TABLE();
@@ -278,7 +276,7 @@ namespace tui {
       public:
                               nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const GdsLayers&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
-         void                 OnSize( wxSizeEvent& );
+         void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::nameCbox3Records*   _laypanel;
          DECLARE_EVENT_TABLE();
@@ -289,7 +287,7 @@ namespace tui {
       public:
                               nameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const nameList&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
-         void                 OnSize( wxSizeEvent& );
+         void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::nameEboxRecords* _laypanel;
          DECLARE_EVENT_TABLE();
@@ -300,7 +298,7 @@ namespace tui {
       public:
                               nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const nameList&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
-         void                 OnSize( wxSizeEvent& );
+         void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::nameEbox3Records* _laypanel;
          DECLARE_EVENT_TABLE();
@@ -441,9 +439,9 @@ namespace tui {
       virtual          ~defineColor();
       void              OnDefineColor(wxCommandEvent&);
       void              OnColorSelected(wxCommandEvent&);
-      void              OnApply(wxCommandEvent&);
-      void              OnColorPropChanged(wxCommandEvent&);
-      void              OnColorNameAdded(wxCommandEvent&);
+      void              OnApply(wxCommandEvent& WXUNUSED(event));
+      void              OnColorPropChanged(wxCommandEvent& WXUNUSED(event));
+      void              OnColorNameAdded(wxCommandEvent& WXUNUSED(event));
       const colorMAP&   allColors() const {return _allColors;}
    private:
       void                    nameNormalize(wxString&);
@@ -491,8 +489,8 @@ namespace tui {
       byte*          pattern() {return _sampleDraw->pattern();}
       virtual       ~drawFillDef();
    protected:
-      void              OnClear(wxCommandEvent&);
-      void              OnFill(wxCommandEvent&);
+      void              OnClear(wxCommandEvent& WXUNUSED(event));
+      void              OnFill(wxCommandEvent& WXUNUSED(event));
       void              OnBrushSize(wxCommandEvent&);
       pattern_canvas*   _sampleDraw;
       wxRadioBox*       _radioBrushSize;
@@ -519,7 +517,7 @@ namespace tui {
       virtual       ~defineFill();
       void           OnDefineFill(wxCommandEvent&);
       void           OnFillSelected(wxCommandEvent&);
-      void           OnFillNameAdded(wxCommandEvent&);
+      void           OnFillNameAdded(wxCommandEvent& WXUNUSED(event));
       fillMAP&       allPatterns() {return _allFills;}
    private:
       void           nameNormalize(wxString&);
