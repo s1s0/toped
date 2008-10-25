@@ -182,7 +182,7 @@ namespace browsers
          void              collectInfo()              {_cellBrowser->collectInfo(_hierarchy_view);}
          CellBrowser*      cellBrowser() const        {return _cellBrowser;}
       private:
-         void              onReportUsedLayers(wxCommandEvent&);
+         void              onReportUsedLayers(wxCommandEvent& WXUNUSED(event));
          void              onHierView(wxCommandEvent&);
          void              onFlatView(wxCommandEvent&);
          wxImageList*      _imageList;
@@ -296,10 +296,10 @@ namespace browsers
          virtual            ~LayerBrowser();
          LayerPanel*          getLayerPanel() {return _layerPanel;};
       private:
-         void                 onShowAll(wxCommandEvent&);
-         void                 onHideAll(wxCommandEvent&);
-         void                 onLockAll(wxCommandEvent&);
-         void                 onUnlockAll(wxCommandEvent&);
+         void                 onShowAll(wxCommandEvent& WXUNUSED(event));
+         void                 onHideAll(wxCommandEvent& WXUNUSED(event));
+         void                 onLockAll(wxCommandEvent& WXUNUSED(event));
+         void                 onUnlockAll(wxCommandEvent& WXUNUSED(event));
          wxString             getAllSelected();
          LayerPanel*          _layerPanel;
          wxBoxSizer*          _thesizer;

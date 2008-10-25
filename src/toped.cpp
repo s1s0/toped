@@ -1213,7 +1213,7 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
    delete dlg;
 }
 
-void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
+void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
 {
    // Here - try a hollow lock/unlock the database just to check that it exists
    try {DATC->lockDB(false);}
@@ -1236,7 +1236,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
 //   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
 
-void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event) evt)
+void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
 {
    // Here - try a hollow lock/unlock the database just to check that it exists
    try {DATC->lockDB(false);}
