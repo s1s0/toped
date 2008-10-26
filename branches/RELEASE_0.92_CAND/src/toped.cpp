@@ -1186,22 +1186,16 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
                                           _browsers->tdtSelectedGdsName());
    }
    catch (EXPTN) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK ) {
+   if ( dlg->ShowModal() == wxID_OK )
+   {
       laymap = dlg->getGdsLayerMap();
+      USMap* laymap2save = NULL;
+      if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
 
-      // get the layer map 
-      std::ostringstream laymapstr;
-      word recno = 0;
-      laymapstr << "{";
-      for (USMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
-      {
-         if (recno != 0) laymapstr << ",";
-         laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
-         recno++;
-      }
-      laymapstr << "}";
-      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
-      delete laymap;
+      wxString wxlaymap, wxlaymap2save;
+      USMap2wxString(laymap      , wxlaymap     );
+      if (NULL != laymap2save)
+         USMap2wxString(laymap2save , wxlaymap2save);
 
 
       wxString ost;
@@ -1209,7 +1203,14 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
           << wxlaymap << wxT(", ")
           << (dlg->get_recursive() ? wxT("true") : wxT("false"))   << wxT(" , ")
           << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
+      if (NULL != laymap2save)
+         ost << wxT("setgdslaymap(")
+             << wxlaymap2save << wxT(");");
+
       _cmdline->parseCommand(ost);
+
+      delete laymap;
+      if (NULL != laymap2save) delete laymap2save;
    }
    delete dlg;
 }
@@ -1318,10 +1319,12 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    wxString cellname;
    bool recur;
    USMap* laymap;
+   USMap* laymap2save = NULL;
    if ( dlg->ShowModal() == wxID_OK ) {
       cellname = dlg->get_selectedcell();
       recur = dlg->get_recursive();
       laymap = dlg->getGdsLayerMap();
+      if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
       delete dlg;
    }
    else {delete dlg;return;}
@@ -1335,37 +1338,32 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();
       if(!checkFileOverwriting(filename))
-      {
          SetStatusText(wxT("GDS export aborted"));
-         return;
-      }
-
-      // get the layer map 
-      std::ostringstream laymapstr;
-      word recno = 0;
-      laymapstr << "{";
-      for (USMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
+      else
       {
-         if (recno != 0)
-            laymapstr << ",";
-         laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
-         recno++;
-      }
-      laymapstr << "}";
-      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
+         wxString wxlaymap, wxlaymap2save;
+         USMap2wxString(laymap      , wxlaymap     );
+         if (NULL != laymap2save)
+            USMap2wxString(laymap2save , wxlaymap2save);
 
-      wxString ost;
-      ost << wxT("gdsexport(\"") 
-          << cellname.c_str() << wxT("\" , ") 
-          << (recur ? wxT("true") : wxT("false")) << wxT(",")
-          << wxlaymap << wxT(", \"")
-          << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str()
-          << wxT("\", false);");
-      _cmdline->parseCommand(ost);
+         wxString ost;
+         ost << wxT("gdsexport(\"") 
+            << cellname.c_str() << wxT("\" , ") 
+            << (recur ? wxT("true") : wxT("false")) << wxT(",")
+            << wxlaymap << wxT(", \"")
+            << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str()
+            << wxT("\", false);");
+         if (NULL != laymap2save)
+            ost << wxT("setgdslaymap(")
+                  << wxlaymap2save << wxT(");");
+
+         _cmdline->parseCommand(ost);
+      }
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("GDS export aborted"));
    delete laymap;
+   if (NULL != laymap2save) delete laymap2save;
 }
 
 
@@ -1397,25 +1395,25 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
    if ( dlg->ShowModal() == wxID_OK )
    {
       // get the layer map first
-      std::ostringstream laymapstr;
       SIMap* laymap = dlg->getCifLayerMap();
-      word recno = 0;
-      laymapstr << "{";
-      for (SIMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
-      {
-         if (recno != 0)
-            laymapstr << ",";
-         laymapstr << "{" << CLN->second << ",\"" << CLN->first << "\"}";
-         recno++;
-      }
-      laymapstr << "}";
-      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
-      delete laymap;
+      USMap* laymap2save = NULL;
+      if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap();
+      wxString wxlaymap, wxlaymap2save;
+      SIMap2wxString(laymap      , wxlaymap     );
+      if (NULL != laymap2save)
+         USMap2wxString(laymap2save , wxlaymap2save);
       wxString ost;
       ost << wxT("cifimport(\"") << dlg->getSelectedCell() << wxT("\" , ") << wxlaymap << wxT(",")
-            << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(",")
-            << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(");");
+          << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(",")
+          << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(");");
+      if (NULL != laymap2save)
+         ost << wxT("setciflaymap(")
+             << wxlaymap2save << wxT(");");
+
       _cmdline->parseCommand(ost);
+
+      delete laymap;
+      if (NULL != laymap2save) delete laymap2save;
    }
    delete dlg;
 }
@@ -1435,11 +1433,13 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
    bool recur;
    bool sverbose;
    USMap* laymap;
+   USMap* laymap2save = NULL;
    if ( dlg->ShowModal() == wxID_OK ) {
       cellname = dlg->get_selectedcell();
       recur    = dlg->get_recursive();
       sverbose = dlg->get_slang();
       laymap   = dlg->getCifLayerMap();
+      if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap();
       delete dlg;
    }
    else {delete dlg;return;}
@@ -1450,41 +1450,37 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
    wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
       wxT("CIF files |*.cif;*.CIF"),
       tpdfSAVE);
-   if (wxID_OK == dlg2.ShowModal()) {
+   if (wxID_OK == dlg2.ShowModal())
+   {
       wxString filename = dlg2.GetPath();
       if(!checkFileOverwriting(filename))
-      {
          SetStatusText(wxT("CIF export aborted"));
-         return;
-      }
-
-      // get the layer map first
-      std::ostringstream laymapstr;
-      word recno = 0;
-      laymapstr << "{";
-      for (USMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
+      else
       {
-         if (recno != 0)
-            laymapstr << ",";
-         laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
-         recno++;
+         wxString wxlaymap, wxlaymap2save;
+         USMap2wxString(laymap      , wxlaymap     );
+         if (NULL != laymap2save)
+            USMap2wxString(laymap2save , wxlaymap2save);
+
+         wxString ost;
+
+         ost << wxT("cifexport(\"") 
+            << cellname << wxT("\", ")
+            << (recur ? wxT("true") : wxT("false")) << wxT(", ")
+            << wxlaymap << wxT(", \"")
+            <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\", ")
+            << (sverbose ? wxT("true") : wxT("false")) << wxT(" );");
+         if (NULL != laymap2save)
+            ost << wxT("setciflaymap(")
+                << wxlaymap2save << wxT(");");
+
+         _cmdline->parseCommand(ost);
+         SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
       }
-      laymapstr << "}";
-      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
-      wxString ost;
-
-      ost << wxT("cifexport(\"") 
-          << cellname << wxT("\", ")
-          << (recur ? wxT("true") : wxT("false")) << wxT(", ")
-          << wxlaymap << wxT(", \"")
-          <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\", ")
-          << (sverbose ? wxT("true") : wxT("false")) << wxT(" );");
-
-      _cmdline->parseCommand(ost);
-      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("CIF export aborted"));
    delete laymap;
+   if (NULL != laymap2save) delete laymap2save;
 }
 
 
@@ -2061,4 +2057,36 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 		eventTB_MENU_UPD.SetInt(tui::TMSET_VTOOLSIZE16+size);
 	}
 	wxPostEvent(_canvas, eventTB_MENU_UPD);
+}
+
+void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)
+{
+   std::ostringstream laymapstr;
+   word recno = 0;
+   laymapstr << "{";
+   for (USMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
+   {
+      if (recno != 0)
+         laymapstr << ",";
+      laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
+      recno++;
+   }
+   laymapstr << "}";
+   outmap = wxString(laymapstr.str().c_str(), wxConvUTF8);
+}
+
+void tui::TopedFrame::SIMap2wxString(SIMap* inmap, wxString& outmap)
+{
+   std::ostringstream laymapstr;
+   word recno = 0;
+   laymapstr << "{";
+   for (SIMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
+   {
+      if (recno != 0)
+         laymapstr << ",";
+      laymapstr << "{" << CLN->second << ",\"" << CLN->first << "\"}";
+      recno++;
+   }
+   laymapstr << "}";
+   outmap = wxString(laymapstr.str().c_str(), wxConvUTF8);
 }

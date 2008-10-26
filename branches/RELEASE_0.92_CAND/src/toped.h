@@ -106,6 +106,8 @@ namespace tui {
       void                    initMenuBar();
       void                    initView();
       bool                    checkFileOverwriting(const wxString& fileName);
+      void                    USMap2wxString(USMap* inmap, wxString& outmap);
+      void                    SIMap2wxString(SIMap* inmap, wxString& outmap);
       console::ted_log*       _cmdlog;       // log window
       console::TELLFuncList*  _cmdbrowser;
       console::ted_cmd*       _cmdline;      // tell command input window
