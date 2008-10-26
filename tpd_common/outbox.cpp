@@ -29,6 +29,7 @@
 #include "tpdph.h"
 #include <time.h>
 #include <string>
+#include <sstream>
 #include <wx/wx.h>
 #include <wx/log.h>
 #include <wx/regex.h>
@@ -448,30 +449,6 @@ LayerMapGds::~LayerMapGds()
 
 bool LayerMapGds::parseLayTypeString(wxString exp, word tdtLay)
 {
-//    const wxString tmplLayNumbers    = wxT("[[:digit:]\\,\\-]*");
-//    const wxString tmplTypeNumbers   = wxT("[[:digit:]\\,\\-]*|\\*");
-// 
-// 
-//    wxRegEx src_tmpl(tmplLayNumbers+wxT("\\;")+tmplTypeNumbers); VERIFY(src_tmpl.IsValid());
-//    // search the entire pattern
-//    if (!src_tmpl.Matches(exp))
-//    {
-//       wxString wxmsg;
-//       wxmsg << wxT("Can't make sence from the string \"") << exp << wxT("\"");
-//       std::string msg(wxmsg.mb_str(wxConvUTF8));
-//       tell_log(console::MT_ERROR,msg);
-//       return false;
-//    }
-//    //separate the layer expression from data type expression
-//    src_tmpl.Compile(tmplLayNumbers+wxT("\\;")); VERIFY(src_tmpl.IsValid());
-//    src_tmpl.Matches(exp);
-//    wxString lay_exp = src_tmpl.GetMatch(exp);
-//    src_tmpl.ReplaceFirst(&exp,wxT(""));
-//    wxString type_exp = exp;
-//    // we need to remove the ';' separator that left in the lay_exp
-//    src_tmpl.Compile(wxT("\\;")); VERIFY(src_tmpl.IsValid());
-//    src_tmpl.Matches(exp);
-//    src_tmpl.ReplaceFirst(&lay_exp,wxT(""));
    wxString lay_exp, type_exp;
    if (!separateQuickLists(exp, lay_exp, type_exp)) return false;
 
@@ -666,40 +643,61 @@ bool LayerMapGds::getGdsLayType(word& gdslay, word& gdstype, word tdtlay) const
    return true;
 }
 
+USMap* LayerMapGds::generateAMap()
+{
+   USMap* wMap = new USMap();
+   if (_import)
+   {
+      for (GlMap::const_iterator CTL = _theMap.begin(); CTL != _theMap.end(); CTL++)
+      {
+         for (GdtTdtMap::const_iterator CGT = CTL->second.begin(); CGT != CTL->second.end(); CGT++)
+         {
+            std::ostringstream lay_type;
+            lay_type << CTL->first << ";" << CGT->first;
+            (*wMap)[CGT->second] = lay_type.str();
+         }
+      }
+   }
+   else
+   {
+      for (GlMap::const_iterator CTL = _theMap.begin(); CTL != _theMap.end(); CTL++)
+      {
+         for (GdtTdtMap::const_iterator CGT = CTL->second.begin(); CGT != CTL->second.end(); CGT++)
+         {
+            std::ostringstream lay_type;
+            lay_type << CGT->second << ";" << CGT->first;
+            (*wMap)[CTL->first] = lay_type.str();
+         }
+      }
+   }
+   return wMap;
+}
+
 USMap* LayerMapGds::updateMap(USMap* update, bool import)
 {
    assert(_import == import);
+   // first generate the output from the current map
+   USMap* wMap = generateAMap();
    for (USMap::const_iterator CE = update->begin(); CE != update->end(); CE++)
    {
+      // the idea behind this parsing is simply to check the syntax and
+      // to protect ourselfs from saving rubbish
       wxString exp(CE->second.c_str(), wxConvUTF8);
       patternNormalize(exp);
       wxString lay_exp;
       wxString type_exp;
       if (separateQuickLists(exp, lay_exp, type_exp))
       {
-         // get the listed layers
-         WordList llst;
-         getList(  lay_exp , llst);
-         assert(1 == llst.size());
-         if (wxT('*') == type_exp)
-         { // for all data types - same as data type = 0
-            if (import)
-               _theMap[CE->first].insert(std::make_pair(0, llst.front()));
-            else
-               _theMap[llst.front()].insert(std::make_pair(0, CE->first));
-         }
-         else
-         {// for particular (listed) data type
-            WordList dtlst;
-            getList( type_exp , dtlst);
-            assert(1 == dtlst.size());
-            if (import)
-               _theMap[CE->first].insert(std::make_pair(dtlst.front(), llst.front()));
-            else
-               _theMap[llst.front()].insert(std::make_pair(dtlst.front(), CE->first));
-         }
+         (*wMap)[CE->first] = CE->second;
+      }
+      {
+         wxString wxmsg;
+         wxmsg << wxT("Can't make sence from the input string for layer ") << CE->first;
+         std::string msg(wxmsg.mb_str(wxConvUTF8));
+         tell_log(console::MT_ERROR,msg);
       }
    }
+   return wMap;
 }
 
 //=============================================================================

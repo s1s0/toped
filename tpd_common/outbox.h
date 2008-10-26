@@ -230,6 +230,7 @@ class LayerMapGds {
       void                 patternNormalize(wxString&);
       void                 getList(wxString, WordList&);
       bool                 separateQuickLists(wxString, wxString&, wxString&);
+      USMap*               generateAMap();
       GlMap                _theMap;
       bool                 _status;
       bool                 _import;
