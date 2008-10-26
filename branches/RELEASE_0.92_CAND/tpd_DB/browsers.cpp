@@ -1364,6 +1364,14 @@ void browsers::LayerButton::onPaint(wxPaintEvent&event)
 
 void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 {
+	//???Warning! Here istemporary solution for right vusulalisation of layer buttons
+	//after resizing
+	LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
+	if(_buttonWidth!=parent->GetClientSize().GetWidth())
+	{
+		parent->refresh();
+	}
+	//???
 
    if (event.ShiftDown())
    //Lock layer
@@ -1402,6 +1410,15 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 
 void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 {
+	//???Warning! Here istemporary solution for right vusulalisation of layer buttons
+	//after resizing
+	LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
+	if(_buttonWidth!=parent->GetClientSize().GetWidth())
+	{
+		parent->refresh();
+	}
+	//???
+
    //_locked = !_locked;
    wxString cmd;
    cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
@@ -1566,6 +1583,16 @@ void	browsers::LayerPanel::addButton(LayerInfo *layer)
 }
 
 void browsers::LayerPanel::onSize(wxSizeEvent& evt)
+{
+   for(LayerButtonMap::const_iterator it = _buttonMap.begin(); it!=_buttonMap.end();++it)
+   {
+      LayerButton *button = it->second;
+      button->preparePicture();
+   }
+   Refresh();
+}
+
+void	browsers::LayerPanel::refresh(void)
 {
    for(LayerButtonMap::const_iterator it = _buttonMap.begin(); it!=_buttonMap.end();++it)
    {

@@ -273,8 +273,9 @@ namespace browsers
                                           long style = wxHSCROLL |  wxVSCROLL,
                                           const wxString& name = wxT("LayerPanel"));
 
-         virtual            ~LayerPanel();
+         virtual					~LayerPanel();
          wxString             getAllSelected();
+			void						refresh(void);
 
       private:
          typedef std::map <word, LayerButton*> LayerButtonMap;
