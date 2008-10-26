@@ -263,7 +263,6 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          bool           _traversed;       //! For hierarchy traversing purposes
          CIFSList       _children;
    };
-//   typedef std::list<CifStructure*> CifCellList;
 
    class   CifFile {
       public:
