@@ -446,32 +446,35 @@ LayerMapGds::~LayerMapGds()
    if (NULL != _alist) delete _alist;
 }
 
-bool LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
+bool LayerMapGds::parseLayTypeString(wxString exp, word tdtLay)
 {
-   const wxString tmplLayNumbers    = wxT("[[:digit:]\\,\\-]*");
-   const wxString tmplTypeNumbers   = wxT("[[:digit:]\\,\\-]*|\\*");
+//    const wxString tmplLayNumbers    = wxT("[[:digit:]\\,\\-]*");
+//    const wxString tmplTypeNumbers   = wxT("[[:digit:]\\,\\-]*|\\*");
+// 
+// 
+//    wxRegEx src_tmpl(tmplLayNumbers+wxT("\\;")+tmplTypeNumbers); VERIFY(src_tmpl.IsValid());
+//    // search the entire pattern
+//    if (!src_tmpl.Matches(exp))
+//    {
+//       wxString wxmsg;
+//       wxmsg << wxT("Can't make sence from the string \"") << exp << wxT("\"");
+//       std::string msg(wxmsg.mb_str(wxConvUTF8));
+//       tell_log(console::MT_ERROR,msg);
+//       return false;
+//    }
+//    //separate the layer expression from data type expression
+//    src_tmpl.Compile(tmplLayNumbers+wxT("\\;")); VERIFY(src_tmpl.IsValid());
+//    src_tmpl.Matches(exp);
+//    wxString lay_exp = src_tmpl.GetMatch(exp);
+//    src_tmpl.ReplaceFirst(&exp,wxT(""));
+//    wxString type_exp = exp;
+//    // we need to remove the ';' separator that left in the lay_exp
+//    src_tmpl.Compile(wxT("\\;")); VERIFY(src_tmpl.IsValid());
+//    src_tmpl.Matches(exp);
+//    src_tmpl.ReplaceFirst(&lay_exp,wxT(""));
+   wxString lay_exp, type_exp;
+   if (!separateQuickLists(exp, lay_exp, type_exp)) return false;
 
-
-   wxRegEx src_tmpl(tmplLayNumbers+wxT("\\;")+tmplTypeNumbers); VERIFY(src_tmpl.IsValid());
-   // search the entire pattern
-   if (!src_tmpl.Matches(exp))
-   {
-      wxString wxmsg;
-      wxmsg << wxT("Can't make sence from the string \"") << exp << wxT("\"");
-      std::string msg(wxmsg.mb_str(wxConvUTF8));
-      tell_log(console::MT_ERROR,msg);
-      return false;
-   }
-   //separate the layer expression from data type expression
-   src_tmpl.Compile(tmplLayNumbers+wxT("\\;")); VERIFY(src_tmpl.IsValid());
-   src_tmpl.Matches(exp);
-   wxString lay_exp = src_tmpl.GetMatch(exp);
-   src_tmpl.ReplaceFirst(&exp,wxT(""));
-   wxString type_exp = exp;
-   // we need to remove the ';' separator that left in the lay_exp
-   src_tmpl.Compile(wxT("\\;")); VERIFY(src_tmpl.IsValid());
-   src_tmpl.Matches(exp);
-   src_tmpl.ReplaceFirst(&lay_exp,wxT(""));
 
    WordList llst;
    // get the listed layers
@@ -517,7 +520,7 @@ bool LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
       }
       if (wxT('*') == type_exp)
       { // for all data types - same as data type = 0
-         _theMap[llst.front()].insert(std::make_pair(0, tdtLay));
+         _theMap[tdtLay].insert(std::make_pair(0, llst.front()));
       }
       else
       {// for particular (listed) data type
@@ -538,6 +541,35 @@ bool LayerMapGds::parseLayTypeString(wxString& exp, word tdtLay)
       }
    }
 
+   return true;
+}
+
+bool LayerMapGds::separateQuickLists(wxString exp, wxString& lay_exp, wxString& type_exp)
+{
+   const wxString tmplLayNumbers    = wxT("[[:digit:]\\,\\-]*");
+   const wxString tmplTypeNumbers   = wxT("[[:digit:]\\,\\-]*|\\*");
+
+
+   wxRegEx src_tmpl(tmplLayNumbers+wxT("\\;")+tmplTypeNumbers); VERIFY(src_tmpl.IsValid());
+   // search the entire pattern
+   if (!src_tmpl.Matches(exp))
+   {
+      wxString wxmsg;
+      wxmsg << wxT("Can't make sence from the string \"") << exp << wxT("\"");
+      std::string msg(wxmsg.mb_str(wxConvUTF8));
+      tell_log(console::MT_ERROR,msg);
+      return false;
+   }
+   //separate the layer expression from data type expression
+   src_tmpl.Compile(tmplLayNumbers+wxT("\\;")); VERIFY(src_tmpl.IsValid());
+   src_tmpl.Matches(exp);
+   lay_exp = src_tmpl.GetMatch(exp);
+   src_tmpl.ReplaceFirst(&exp,wxT(""));
+   type_exp = exp;
+   // we need to remove the ';' separator that left in the lay_exp
+   src_tmpl.Compile(wxT("\\;")); VERIFY(src_tmpl.IsValid());
+   src_tmpl.Matches(exp);
+   src_tmpl.ReplaceFirst(&lay_exp,wxT(""));
    return true;
 }
 
@@ -634,6 +666,42 @@ bool LayerMapGds::getGdsLayType(word& gdslay, word& gdstype, word tdtlay) const
    return true;
 }
 
+USMap* LayerMapGds::updateMap(USMap* update, bool import)
+{
+   assert(_import == import);
+   for (USMap::const_iterator CE = update->begin(); CE != update->end(); CE++)
+   {
+      wxString exp(CE->second.c_str(), wxConvUTF8);
+      patternNormalize(exp);
+      wxString lay_exp;
+      wxString type_exp;
+      if (separateQuickLists(exp, lay_exp, type_exp))
+      {
+         // get the listed layers
+         WordList llst;
+         getList(  lay_exp , llst);
+         assert(1 == llst.size());
+         if (wxT('*') == type_exp)
+         { // for all data types - same as data type = 0
+            if (import)
+               _theMap[CE->first].insert(std::make_pair(0, llst.front()));
+            else
+               _theMap[llst.front()].insert(std::make_pair(0, CE->first));
+         }
+         else
+         {// for particular (listed) data type
+            WordList dtlst;
+            getList( type_exp , dtlst);
+            assert(1 == dtlst.size());
+            if (import)
+               _theMap[CE->first].insert(std::make_pair(dtlst.front(), llst.front()));
+            else
+               _theMap[llst.front()].insert(std::make_pair(dtlst.front(), CE->first));
+         }
+      }
+   }
+}
+
 //=============================================================================
 LayerMapCif::LayerMapCif(const USMap& inMap)
 {
@@ -662,4 +730,32 @@ bool LayerMapCif::getCifLay(std::string& cifLay, word tdtLay)
       return true;
    }
    return false;
+}
+
+USMap* LayerMapCif::updateMap(USMap* update)
+{
+   for (USMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
+   {
+      _theEmap[CMI->first] = CMI->second;
+   }
+
+   for (USMap::const_iterator CME = _theEmap.begin(); CME != _theEmap.end(); CME++)
+   {
+      _theImap[CME->second] = CME->first;
+   }
+   return DEBUG_NEW USMap(_theEmap);
+}
+
+USMap* LayerMapCif::updateMap(SIMap* update)
+{
+   for (SIMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
+   {
+      _theImap[CMI->first] = CMI->second;
+   }
+
+   for (SIMap::const_iterator CME = _theImap.begin(); CME != _theImap.end(); CME++)
+   {
+      _theEmap[CME->second] = CME->first;
+   }
+   return DEBUG_NEW USMap(_theEmap);
 }

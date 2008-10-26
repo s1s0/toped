@@ -1797,6 +1797,11 @@ SIMap* tui::nameCboxRecords::getTheMap()
    return cif_lay_map;
 }
 
+USMap* tui::nameCboxRecords::getTheFullMap()
+{
+   return _cifMap->updateMap(getTheMap());
+}
+
 //==========================================================================
 tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz, 
             const GdsLayers& inlays, wxArrayString& all_strings, int row_height) 
@@ -1851,6 +1856,11 @@ USMap* tui::nameCbox3Records::getTheMap()
       (*gds_lay_map)[layno] = gdslaytype.str();
    }
    return gds_lay_map;
+}
+
+USMap* tui::nameCbox3Records::getTheFullMap()
+{
+   return _gdsLayMap->updateMap(getTheMap(), true);
 }
 
 //==========================================================================
@@ -1982,6 +1992,11 @@ USMap* tui::nameEboxRecords::getTheMap()
    return cif_lay_map;
 }
 
+USMap* tui::nameEboxRecords::getTheFullMap()
+{
+   return _cifMap->updateMap(getTheMap());
+}
+
 //--------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tui::nameEboxList, wxScrolledWindow)
       EVT_SIZE( tui::nameEboxList::OnSize )
@@ -2073,6 +2088,11 @@ USMap* tui::nameEbox3Records::getTheMap()
       (*gds_lay_map)[layno] = gdslaytype.str();
    }
    return gds_lay_map;
+}
+
+USMap* tui::nameEbox3Records::getTheFullMap()
+{
+   return _gdsLayMap->updateMap(getTheMap(), false);
 }
 
 //--------------------------------------------------------------------------

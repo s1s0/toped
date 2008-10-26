@@ -217,17 +217,19 @@ std::string convertString(const std::string &str);
  */
 class LayerMapGds {
    public:
-      LayerMapGds(const USMap&, GdsLayers*);
-      ~LayerMapGds();
+                           LayerMapGds(const USMap&, GdsLayers*);
+                          ~LayerMapGds();
       bool                 getTdtLay(word&, word, word) const;
       bool                 getGdsLayType(word&, word&, word) const;
       bool                 status() {return _status;}
+      USMap*               updateMap(USMap*, bool);
    private:
       typedef std::map< word, word  >     GdtTdtMap;
       typedef std::map< word, GdtTdtMap>  GlMap;
-      bool                 parseLayTypeString(wxString&, word);
+      bool                 parseLayTypeString(wxString, word);
       void                 patternNormalize(wxString&);
       void                 getList(wxString, WordList&);
+      bool                 separateQuickLists(wxString, wxString&, wxString&);
       GlMap                _theMap;
       bool                 _status;
       bool                 _import;
@@ -236,9 +238,11 @@ class LayerMapGds {
 
 class LayerMapCif {
    public:
-      LayerMapCif(const USMap&);
+                           LayerMapCif(const USMap&);
       bool                 getTdtLay(word&, std::string);
       bool                 getCifLay(std::string&, word);
+      USMap*               updateMap(USMap*);
+      USMap*               updateMap(SIMap*);
    private:
       USMap                _theEmap;
       SIMap                _theImap;
