@@ -567,16 +567,16 @@ void tui::TopedFrame::initMenuBar() {
 
 	//Toolbar Size sub menu
 	toolbarHorSizeMenu = DEBUG_NEW wxMenu();
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE16	,	wxT("16x16"), wxT("Horizontal toolbars size is 16x16"));
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE24	,	wxT("24x24"), wxT("Horizontal toolbars size is 24x24"));
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE32	,	wxT("32x32"), wxT("Horizontal toolbars size is 32x32"));
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE48	,	wxT("48x48"), wxT("Horizontal toolbars size is 48x48"));
+	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE16	,	wxT("16x16"), wxT("Toolbar size is 16x16"));
+	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE24	,	wxT("24x24"), wxT("Toolbar size is 24x24"));
+	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE32	,	wxT("32x32"), wxT("Toolbar size is 32x32"));
+	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE48	,	wxT("48x48"), wxT("Toolbar size is 48x48"));
 
-	toolbarVertSizeMenu = DEBUG_NEW wxMenu();
-	toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE16	,	wxT("16x16"), wxT("Vertical toolbars size is 16x16"));
-	toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE24	,	wxT("24x24"), wxT("Vertical toolbars size is 24x24"));
-	toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE32	,	wxT("32x32"), wxT("Vertical toolbars size is 32x32"));
-	toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE48	,	wxT("48x48"), wxT("Vertical toolbars size is 48x48"));
+	//toolbarVertSizeMenu = DEBUG_NEW wxMenu();
+	//toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE16	,	wxT("16x16"), wxT("Vertical toolbars size is 16x16"));
+	//toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE24	,	wxT("24x24"), wxT("Vertical toolbars size is 24x24"));
+	//toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE32	,	wxT("32x32"), wxT("Vertical toolbars size is 32x32"));
+	//toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE48	,	wxT("48x48"), wxT("Vertical toolbars size is 48x48"));
    // now the setting menu itself
    settingsMenu=DEBUG_NEW wxMenu();
    settingsMenu->Append         (TMSET_STEP     , wxT("Step")      , wxT("Select objects"));
@@ -595,8 +595,9 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
    settingsMenu->AppendCheckItem(TMSET_CURLONG  , wxT("Long cursor")  , wxT("Stretch the cursor cross"));
 	settingsMenu->AppendSeparator();
-	settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
-	settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
+	settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("Toolbar size") , toolbarHorSizeMenu , wxT("Define toolbars size"));
+	//settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
+	//settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_DEFLAY   , wxT("Define Layer") , wxT("Define a layer"));
    settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color") , wxT("Define a drawing color"));
@@ -660,7 +661,7 @@ void tui::TopedFrame::initToolBars()
 
 
 	//_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
-	_resourceCenter->setDirection(wxAUI_DOCK_LEFT);
+	_resourceCenter->setDirection(wxAUI_DOCK_TOP);
 	//------------------------------------------16x16-------------------------------------------
    _resourceCenter->appendTool("edit", "undo", "undo16x16.png",ICON_SIZE_16x16, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo16x16.png",ICON_SIZE_16x16, "", "redo",&tui::TopedFrame::OnUndo);*/
