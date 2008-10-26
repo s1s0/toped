@@ -690,6 +690,7 @@ USMap* LayerMapGds::updateMap(USMap* update, bool import)
       {
          (*wMap)[CE->first] = CE->second;
       }
+      else
       {
          wxString wxmsg;
          wxmsg << wxT("Can't make sence from the input string for layer ") << CE->first;
