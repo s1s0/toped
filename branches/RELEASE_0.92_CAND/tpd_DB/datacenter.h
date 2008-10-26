@@ -190,7 +190,7 @@ public:
    const std::string          getColorName(word layno) {return _properties.drawprop().getColorName(layno);}
    const std::string          getFillName(word layno) {return _properties.drawprop().getFillName(layno);}
    const std::string          getLineName(word layno) {return _properties.drawprop().getLineName(layno);}
-   const laydata::ListOfWords upLayers() {return _properties.upLayers();}
+   const WordList             upLayers() {return _properties.upLayers();}
    void                       clearUnpublishedLayers() {_properties.clearUnpublishedLayers();}
    const word                 layselmask() {return _properties.layselmask();}
    void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}

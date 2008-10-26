@@ -259,7 +259,7 @@ namespace layprop {
       bool              addlayer(word);
       word              addlayer(std::string);
       void              addUnpublishedLay(word);
-      const laydata::ListOfWords& upLayers() {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
+      const WordList&   upLayers() {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers() {_uplaylist.clear();}
       void              addcolor(std::string name, byte R, byte G, byte B, byte A);
       void              addfill(std::string name, byte *ptrn);
@@ -327,7 +327,7 @@ namespace layprop {
       bool                 _autopan;      // view window moves automatically during shape drawing
       byte                 _marker_angle; // angle of restriction during shape drawing (0,45,90)
       SupplementaryData    _supp_data;    // supplementary data
-      laydata::ListOfWords _uplaylist;    // unpublished layer list
+      WordList             _uplaylist;    // unpublished layer list
       word                 _layselmask;   // layout shape type selection mask
       USMap*               _gdsLayMap;    //
       USMap*               _cifLayMap;    //

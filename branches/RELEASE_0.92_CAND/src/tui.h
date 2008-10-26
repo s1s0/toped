@@ -225,7 +225,7 @@ namespace tui {
    //==========================================================================
    class nameEboxRecords : public wxPanel {
       public:
-                              nameEboxRecords(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
+                              nameEboxRecords(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int);
                              ~nameEboxRecords() {delete _cifMap;}
          USMap*               getTheMap();
       private:
@@ -244,7 +244,7 @@ namespace tui {
    //==========================================================================
    class nameEbox3Records : public wxPanel {
       public:
-                              nameEbox3Records(wxWindow*, wxPoint, wxSize, const nameList&, wxArrayString&, int);
+                              nameEbox3Records(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int);
                              ~nameEbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
       private:
@@ -286,7 +286,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameEboxList : public wxScrolledWindow {
       public:
-                              nameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const nameList&);
+                              nameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
@@ -297,7 +297,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameEbox3List : public wxScrolledWindow {
       public:
-                              nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const nameList&);
+                              nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
@@ -315,12 +315,11 @@ namespace tui {
       bool              getRecursive()    const {return _recursive->GetValue();}
       SIMap*            getCifLayerMap()        {return _layList->getTheMap();}
    private:
-      void              OnSaveLayMap(wxCommandEvent& WXUNUSED(event));
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;
+      wxCheckBox*       _saveMap;
       wxListBox*        _nameList;
       nameCboxList*     _layList;
-      DECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -333,12 +332,11 @@ namespace tui {
       bool              get_slang()        const {return _slang->GetValue();}
       USMap*            getCifLayerMap()         {return _layList->getTheMap();}
    private:
-      void              OnSaveLayMap(wxCommandEvent& WXUNUSED(event));
       wxCheckBox*       _recursive;
+      wxCheckBox*       _saveMap;
       wxCheckBox*       _slang;
       wxListBox*        _nameList;
       nameEboxList*     _layList;
-      DECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -351,12 +349,11 @@ namespace tui {
       bool              get_recursive()    const {return _recursive->GetValue();};
       USMap*            getGdsLayerMap()         {return _layList->getTheMap();}
    private:
-      void              OnSaveLayMap(wxCommandEvent& WXUNUSED(event));
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;
+      wxCheckBox*       _saveMap;
       wxListBox*        _nameList;
       nameCbox3List*    _layList;
-      DECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -368,11 +365,10 @@ namespace tui {
       bool              get_recursive()    const {return _recursive->GetValue();};
       USMap*            getGdsLayerMap()         {return _layList->getTheMap();}
    private:
-      void              OnSaveLayMap(wxCommandEvent& WXUNUSED(event));
       wxCheckBox*       _recursive;
+      wxCheckBox*       _saveMap;
       wxListBox*        _nameList;
       nameEbox3List*    _layList;
-      DECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
