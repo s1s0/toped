@@ -681,7 +681,7 @@ tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdREPORTLAY::execute() {
    bool recursive = getBoolValue();
    std::string cellname = getStringValue();
-   laydata::ListOfWords ull;
+   WordList ull;
    DATC->lockDB();
       bool success = DATC->TEDLIB()->collect_usedlays(cellname, recursive, ull);
    DATC->unlockDB();
@@ -690,12 +690,12 @@ int tellstdfunc::stdREPORTLAY::execute() {
       ull.sort();ull.unique();
       std::ostringstream ost;
       ost << "used layers: {";
-      for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+      for(WordList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
          ost << " " << *CL << " ";
       ost << "}";
       tell_log(console::MT_INFO, ost.str());
 
-      for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+      for(WordList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
          tllull->add(DEBUG_NEW telldata::ttint(*CL));
       ull.clear();
    }

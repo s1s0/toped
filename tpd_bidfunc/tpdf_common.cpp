@@ -266,8 +266,8 @@ void tellstdfunc::RefreshGL()
 {
    if (!DATC->upLayers().empty())
    {
-      const laydata::ListOfWords freshlays = DATC->upLayers();
-      for(laydata::ListOfWords::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+      const WordList freshlays = DATC->upLayers();
+      for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
          browsers::layer_add(DATC->getLayerName(*CUL), *CUL);
       DATC->clearUnpublishedLayers();
    }
@@ -291,12 +291,12 @@ void tellstdfunc::gridON(byte No, bool status) {
 void tellstdfunc::updateLayerDefinitions(laydata::tdtlibdir* LIBDIR, nameList& top_cells, int libID)
 {
    // get all the layers used in the design and define them using the default definition
-   laydata::ListOfWords ull;
+   WordList ull;
    for(nameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
       LIBDIR->collect_usedlays(*CTC, true, ull);
    ull.sort(); ull.unique();
 //   std::unique(ull.begin(),ull.end());
-   for(laydata::ListOfWords::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
+   for(WordList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
    {
       if (0 == *CUL) continue;
       if (DATC->addlayer(*CUL))

@@ -47,6 +47,7 @@ namespace laydata {
       void           relink(tdtlibdir*);
       void           clearLib();
       void           cleanUnreferenced();
+      void           collect_usedlays(WordList&) const;
       //
       std::string    name()            const {return _name;}
       real           UU()              const {return _UU;}
@@ -139,13 +140,11 @@ namespace laydata {
       selectList*    copy_selist()     const {return _target.edit()->copy_selist();};
       void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
       void           report_selected(real DBscale) const { _target.edit()->report_selected(DBscale);};
-//      refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
       std::string    activecellname()  const {return _target.name();};
       void           assign_properties(layprop::ViewProperties& viewprop) {_target.init_viewprop(&viewprop);}
       //
       time_t         created()         const {return _created;}
       time_t         lastUpdated()     const {return _lastUpdated;}
-//      bool           collect_usedlays(std::string, bool, ListOfWords&) const;
       //
 //      const ACTIVE_OP tellop()         const {return _tellop;};
       bool           modified;
@@ -186,7 +185,8 @@ namespace laydata {
       tdtdefaultcell*   getLibCellDef(std::string, const int libID = TARGETDB_LIB) const;
       refnamepair       linkcellref(std::string, int, TDTHierTree*&);
       refnamepair       adddefaultcell( std::string name );
-      bool              collect_usedlays(std::string, bool, ListOfWords&) const;
+      bool              collect_usedlays(std::string, bool, WordList&) const;
+      void              collect_usedlays(int, WordList&) const;
       void              cleanUndefLib();
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       void              deleteDB() {delete _TEDDB;}
