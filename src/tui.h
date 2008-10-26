@@ -190,6 +190,7 @@ namespace tui {
                                nameCboxRecords(wxWindow*, wxPoint, wxSize, const SIMap&, wxArrayString&, int);
                               ~nameCboxRecords() {delete _cifMap;}
          SIMap*                getTheMap();
+         USMap*                getTheFullMap();
       private:
          class LayerRecord {
             public:
@@ -208,6 +209,7 @@ namespace tui {
                               nameCbox3Records(wxWindow*, wxPoint, wxSize, const GdsLayers&, wxArrayString&, int);
                              ~nameCbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
+         USMap*               getTheFullMap();
       private:
          class LayerRecord {
             public:
@@ -228,6 +230,7 @@ namespace tui {
                               nameEboxRecords(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int);
                              ~nameEboxRecords() {delete _cifMap;}
          USMap*               getTheMap();
+         USMap*               getTheFullMap();
       private:
          class LayerRecord {
             public:
@@ -247,6 +250,7 @@ namespace tui {
                               nameEbox3Records(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int);
                              ~nameEbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
+         USMap*               getTheFullMap();
       private:
          class LayerRecord {
             public:
@@ -265,7 +269,8 @@ namespace tui {
    class nameCboxList : public wxScrolledWindow {
       public:
                               nameCboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const SIMap&);
-         SIMap*                getTheMap()     {return _laypanel->getTheMap();}
+         SIMap*               getTheMap()     {return _laypanel->getTheMap();}
+         USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::nameCboxRecords*   _laypanel;
@@ -277,6 +282,7 @@ namespace tui {
       public:
                               nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const GdsLayers&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
+         USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::nameCbox3Records*   _laypanel;
@@ -288,6 +294,7 @@ namespace tui {
       public:
                               nameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
+         USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::nameEboxRecords* _laypanel;
@@ -299,6 +306,7 @@ namespace tui {
       public:
                               nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
+         USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::nameEbox3Records* _laypanel;
@@ -313,7 +321,9 @@ namespace tui {
       wxString          getSelectedCell() const {return _nameList->GetStringSelection();}
       bool              getOverwrite()    const {return _overwrite->GetValue();}
       bool              getRecursive()    const {return _recursive->GetValue();}
+      bool              getSaveMap()      const {return _saveMap->GetValue();}
       SIMap*            getCifLayerMap()        {return _layList->getTheMap();}
+      USMap*            getFullCifLayerMap()    {return _layList->getTheFullMap();}
    private:
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;
@@ -330,7 +340,9 @@ namespace tui {
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();}
       bool              get_recursive()    const {return _recursive->GetValue();}
       bool              get_slang()        const {return _slang->GetValue();}
+      bool              getSaveMap()      const {return _saveMap->GetValue();}
       USMap*            getCifLayerMap()         {return _layList->getTheMap();}
+      USMap*            getFullCifLayerMap()     {return _layList->getTheFullMap();}
    private:
       wxCheckBox*       _recursive;
       wxCheckBox*       _saveMap;
@@ -347,7 +359,9 @@ namespace tui {
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
       bool              get_overwrite()    const {return _overwrite->GetValue();};
       bool              get_recursive()    const {return _recursive->GetValue();};
+      bool              getSaveMap()       const {return _saveMap->GetValue();}
       USMap*            getGdsLayerMap()         {return _layList->getTheMap();}
+      USMap*            getFullGdsLayerMap()     {return _layList->getTheFullMap();}
    private:
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;
@@ -363,8 +377,10 @@ namespace tui {
                                                                   wxPoint pos, wxString init);
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
       bool              get_recursive()    const {return _recursive->GetValue();};
+      bool              getSaveMap()       const {return _saveMap->GetValue();}
       USMap*            getGdsLayerMap()         {return _layList->getTheMap();}
-   private:
+      USMap*            getFullGdsLayerMap()     {return _layList->getTheFullMap();}
+      private:
       wxCheckBox*       _recursive;
       wxCheckBox*       _saveMap;
       wxListBox*        _nameList;
