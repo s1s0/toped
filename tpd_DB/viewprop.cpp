@@ -882,6 +882,24 @@ void layprop::ViewProperties::setUU(real UU) {
    _DBscale = 1/UU;
 };
 
+void layprop::ViewProperties::saveLayerMaps(FILE* prop_file) const
+{
+   fprintf(prop_file, "void  layerMaps() {\n");
+   if (NULL != _gdsLayMap)
+   {
+      std::string sGdsLayMap;
+      USMap2String(_gdsLayMap, sGdsLayMap);
+      fprintf(prop_file, "  setgdslaymap( %s );\n", sGdsLayMap.c_str());
+   }
+   if (NULL != _cifLayMap)
+   {
+      std::string sCifLayMap;
+      USMap2String(_cifLayMap, sCifLayMap);
+      fprintf(prop_file, "  setciflaymap( %s );\n", sCifLayMap.c_str());
+   }
+   fprintf(prop_file, "}\n\n");
+}
+
 void layprop::ViewProperties::saveScreenProps(FILE* prop_file) const
 {
    fprintf(prop_file, "void  screenSetup() {\n");
@@ -918,8 +936,13 @@ void layprop::ViewProperties::saveProperties(std::string filename) const
    _drawprop.saveColors(prop_file);
    _drawprop.saveLines(prop_file);
    _drawprop.saveLayers(prop_file);
+   if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
+      saveLayerMaps(prop_file);
    saveScreenProps(prop_file);
-   fprintf(prop_file, "layerSetup();screenSetup();\n\n");
+   fprintf(prop_file, "layerSetup();");
+   if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
+      fprintf(prop_file, "layerMaps();");
+   fprintf(prop_file, "screenSetup();\n\n");
    fclose(prop_file);
 }
 
@@ -930,4 +953,21 @@ layprop::ViewProperties::~ViewProperties()
    _grid.clear();
    if (NULL != _gdsLayMap) delete _gdsLayMap;
    if (NULL != _cifLayMap) delete _cifLayMap;
+}
+
+
+void layprop::USMap2String(USMap* inmap, std::string& outmap)
+{
+   std::ostringstream laymapstr;
+   word recno = 0;
+   laymapstr << "{";
+   for (USMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
+   {
+      if (recno != 0)
+         laymapstr << ",";
+      laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
+      recno++;
+   }
+   laymapstr << "}";
+   outmap = laymapstr.str();
 }

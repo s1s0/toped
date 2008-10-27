@@ -319,7 +319,8 @@ namespace layprop {
       DrawProperties       _drawprop;
    private:
       void                 saveScreenProps(FILE*) const;
-      real                 _DBscale; 
+      void                 saveLayerMaps(FILE*) const;
+      real                 _DBscale;
       real                 _UU;           // The scale of the data base. It is doubled here, on order 
                                        // not to read it with every mouse move  
       gridlist             _grid;         // the list of grids as defined by the tell command
@@ -332,5 +333,8 @@ namespace layprop {
       USMap*               _gdsLayMap;    //
       USMap*               _cifLayMap;    //
    };
+
+   void USMap2String(USMap*, std::string&);
+
 }
 #endif

@@ -271,16 +271,16 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
    EVT_MENU( TMSET_CURLONG       , tui::TopedFrame::OnLongCursor  )
-	
-	EVT_MENU( TMSET_HTOOLSIZE16   , tui::TopedFrame::OnHToolBarSize16	)
-	EVT_MENU( TMSET_HTOOLSIZE24   , tui::TopedFrame::OnHToolBarSize24	)
-	EVT_MENU( TMSET_HTOOLSIZE32   , tui::TopedFrame::OnHToolBarSize32	)
-	EVT_MENU( TMSET_HTOOLSIZE48   , tui::TopedFrame::OnHToolBarSize48	)
+   
+   EVT_MENU( TMSET_HTOOLSIZE16   , tui::TopedFrame::OnHToolBarSize16   )
+   EVT_MENU( TMSET_HTOOLSIZE24   , tui::TopedFrame::OnHToolBarSize24   )
+   EVT_MENU( TMSET_HTOOLSIZE32   , tui::TopedFrame::OnHToolBarSize32   )
+   EVT_MENU( TMSET_HTOOLSIZE48   , tui::TopedFrame::OnHToolBarSize48   )
 
-	EVT_MENU( TMSET_VTOOLSIZE16   , tui::TopedFrame::OnVToolBarSize16	)
-	EVT_MENU( TMSET_VTOOLSIZE24   , tui::TopedFrame::OnVToolBarSize24	)
-	EVT_MENU( TMSET_VTOOLSIZE32   , tui::TopedFrame::OnVToolBarSize32	)
-	EVT_MENU( TMSET_VTOOLSIZE48   , tui::TopedFrame::OnVToolBarSize48	)
+   EVT_MENU( TMSET_VTOOLSIZE16   , tui::TopedFrame::OnVToolBarSize16   )
+   EVT_MENU( TMSET_VTOOLSIZE24   , tui::TopedFrame::OnVToolBarSize24   )
+   EVT_MENU( TMSET_VTOOLSIZE32   , tui::TopedFrame::OnVToolBarSize32   )
+   EVT_MENU( TMSET_VTOOLSIZE48   , tui::TopedFrame::OnVToolBarSize48   )
 
    EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
@@ -301,7 +301,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
    EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)
    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
-	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -565,18 +565,18 @@ void tui::TopedFrame::initMenuBar() {
    markerMenu->AppendRadioItem(TMSET_MARKER45   , wxT("45 degrees"), wxT("Restrict shape angles to 45 deg"));
    markerMenu->AppendRadioItem(TMSET_MARKER90   , wxT("Orthogonal"), wxT("Restrict shape angles to 90 deg"));
 
-	//Toolbar Size sub menu
-	toolbarHorSizeMenu = DEBUG_NEW wxMenu();
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE16	,	wxT("16x16"), wxT("Toolbar size is 16x16"));
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE24	,	wxT("24x24"), wxT("Toolbar size is 24x24"));
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE32	,	wxT("32x32"), wxT("Toolbar size is 32x32"));
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE48	,	wxT("48x48"), wxT("Toolbar size is 48x48"));
+   //Toolbar Size sub menu
+   toolbarHorSizeMenu = DEBUG_NEW wxMenu();
+   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE16   ,   wxT("16x16"), wxT("Toolbar size is 16x16"));
+   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE24   ,   wxT("24x24"), wxT("Toolbar size is 24x24"));
+   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE32   ,   wxT("32x32"), wxT("Toolbar size is 32x32"));
+   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE48   ,   wxT("48x48"), wxT("Toolbar size is 48x48"));
 
-	//toolbarVertSizeMenu = DEBUG_NEW wxMenu();
-	//toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE16	,	wxT("16x16"), wxT("Vertical toolbars size is 16x16"));
-	//toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE24	,	wxT("24x24"), wxT("Vertical toolbars size is 24x24"));
-	//toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE32	,	wxT("32x32"), wxT("Vertical toolbars size is 32x32"));
-	//toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE48	,	wxT("48x48"), wxT("Vertical toolbars size is 48x48"));
+   //toolbarVertSizeMenu = DEBUG_NEW wxMenu();
+   //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE16   ,   wxT("16x16"), wxT("Vertical toolbars size is 16x16"));
+   //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE24   ,   wxT("24x24"), wxT("Vertical toolbars size is 24x24"));
+   //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE32   ,   wxT("32x32"), wxT("Vertical toolbars size is 32x32"));
+   //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE48   ,   wxT("48x48"), wxT("Vertical toolbars size is 48x48"));
    // now the setting menu itself
    settingsMenu=DEBUG_NEW wxMenu();
    settingsMenu->Append         (TMSET_STEP     , wxT("Step")      , wxT("Select objects"));
@@ -594,10 +594,10 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
    settingsMenu->AppendCheckItem(TMSET_CURLONG  , wxT("Long cursor")  , wxT("Stretch the cursor cross"));
-	settingsMenu->AppendSeparator();
-	settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("Toolbar size") , toolbarHorSizeMenu , wxT("Define toolbars size"));
-	//settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
-	//settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
+   settingsMenu->AppendSeparator();
+   settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("Toolbar size") , toolbarHorSizeMenu , wxT("Define toolbars size"));
+   //settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
+   //settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_DEFLAY   , wxT("Define Layer") , wxT("Define a layer"));
    settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color") , wxT("Define a drawing color"));
@@ -611,8 +611,8 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
 //   _resourceCenter->appendMenuSeparator("Other");
    
-	_resourceCenter->appendMenu("&Help/Report Video", "", &tui::TopedFrame::OnCheckHW, "Display OpenGL & video driver information" );
-	_resourceCenter->appendMenuSeparator("Help");
+   _resourceCenter->appendMenu("&Help/Report Video", "", &tui::TopedFrame::OnCheckHW, "Display OpenGL & video driver information" );
+   _resourceCenter->appendMenuSeparator("Help");
    _resourceCenter->appendMenu("&Help/About", "", &tui::TopedFrame::OnAbout, "About TOPED" );
    
    //---------------------------------------------------------------------------
@@ -642,27 +642,27 @@ void tui::TopedFrame::setIconDir(const std::string& uiDir)
 
 void tui::TopedFrame::initToolBars() 
 {
-	_resourceCenter->setDirection(wxAUI_DOCK_TOP);
+   _resourceCenter->setDirection(wxAUI_DOCK_TOP);
    _resourceCenter->appendTool("main", "new", "new16x16.png",ICON_SIZE_16x16, "", "new cell", &tui::TopedFrame::OnCellNew);
    _resourceCenter->appendTool("main", "open", "open16x16.png",ICON_SIZE_16x16,"", "open cell", &tui::TopedFrame::OnCellOpen);
    _resourceCenter->appendTool("main", "save", "save16x16.png",ICON_SIZE_16x16, "", "save design", &tui::TopedFrame::OnTDTSave);
 
-	_resourceCenter->appendTool("main", "new", "new24x24.png",ICON_SIZE_24x24, "", "new cell", &tui::TopedFrame::OnCellNew);
+   _resourceCenter->appendTool("main", "new", "new24x24.png",ICON_SIZE_24x24, "", "new cell", &tui::TopedFrame::OnCellNew);
    _resourceCenter->appendTool("main", "open", "open24x24.png",ICON_SIZE_24x24,"", "open cell", &tui::TopedFrame::OnCellOpen);
    _resourceCenter->appendTool("main", "save", "save24x24.png",ICON_SIZE_24x24, "", "save design", &tui::TopedFrame::OnTDTSave);
 
-	_resourceCenter->appendTool("main", "new", "new32x32.png",ICON_SIZE_32x32, "", "new cell", &tui::TopedFrame::OnCellNew);
+   _resourceCenter->appendTool("main", "new", "new32x32.png",ICON_SIZE_32x32, "", "new cell", &tui::TopedFrame::OnCellNew);
    _resourceCenter->appendTool("main", "open", "open32x32.png",ICON_SIZE_32x32,"", "open cell", &tui::TopedFrame::OnCellOpen);
    _resourceCenter->appendTool("main", "save", "save32x32.png",ICON_SIZE_32x32, "", "save design", &tui::TopedFrame::OnTDTSave);
 
-	_resourceCenter->appendTool("main", "new", "new48x48.png",ICON_SIZE_48x48, "", "new cell", &tui::TopedFrame::OnCellNew);
+   _resourceCenter->appendTool("main", "new", "new48x48.png",ICON_SIZE_48x48, "", "new cell", &tui::TopedFrame::OnCellNew);
    _resourceCenter->appendTool("main", "open", "open48x48.png",ICON_SIZE_48x48,"", "open cell", &tui::TopedFrame::OnCellOpen);
    _resourceCenter->appendTool("main", "save", "save48x48.png",ICON_SIZE_48x48, "", "save design", &tui::TopedFrame::OnTDTSave);
 
 
-	//_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
-	_resourceCenter->setDirection(wxAUI_DOCK_TOP);
-	//------------------------------------------16x16-------------------------------------------
+   //_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
+   _resourceCenter->setDirection(wxAUI_DOCK_TOP);
+   //------------------------------------------16x16-------------------------------------------
    _resourceCenter->appendTool("edit", "undo", "undo16x16.png",ICON_SIZE_16x16, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo16x16.png",ICON_SIZE_16x16, "", "redo",&tui::TopedFrame::OnUndo);*/
    _resourceCenter->appendTool("edit", "box", "box16x16.png", ICON_SIZE_16x16,"", "add box",&tui::TopedFrame::OnDrawBox);
@@ -684,7 +684,7 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "edit_push", "edit_push16x16.png", ICON_SIZE_16x16,"", "edit push",&tui::TopedFrame::OnCellPush);
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop16x16.png", ICON_SIZE_16x16,"", "edit pop",&tui::TopedFrame::OnCellPop);
 //------------------------------------------24x24-------------------------------------------
-	 _resourceCenter->appendTool("edit", "undo", "undo24x24.png",ICON_SIZE_24x24, "", "undo", &tui::TopedFrame::OnUndo);
+    _resourceCenter->appendTool("edit", "undo", "undo24x24.png",ICON_SIZE_24x24, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo24x24.png",ICON_SIZE_24x24, "", "redo",&tui::TopedFrame::OnUndo);*/
    _resourceCenter->appendTool("edit", "box", "box24x24.png", ICON_SIZE_24x24,"", "add box",&tui::TopedFrame::OnDrawBox);
    _resourceCenter->appendTool("edit", "poly", "poly24x24.png", ICON_SIZE_24x24,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
@@ -705,7 +705,7 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "edit_push", "edit_push24x24.png", ICON_SIZE_24x24,"", "edit push",&tui::TopedFrame::OnCellPush);
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop24x24.png", ICON_SIZE_24x24,"", "edit pop",&tui::TopedFrame::OnCellPop);
 //------------------------------------------32x32-------------------------------------------
-	 _resourceCenter->appendTool("edit", "undo", "undo32x32.png",ICON_SIZE_32x32, "", "undo", &tui::TopedFrame::OnUndo);
+    _resourceCenter->appendTool("edit", "undo", "undo32x32.png",ICON_SIZE_32x32, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo32x32.png",ICON_SIZE_32x32, "", "redo",&tui::TopedFrame::OnUndo);*/
    _resourceCenter->appendTool("edit", "box", "box32x32.png", ICON_SIZE_32x32,"", "add box",&tui::TopedFrame::OnDrawBox);
    _resourceCenter->appendTool("edit", "poly", "poly32x32.png", ICON_SIZE_32x32,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
@@ -726,7 +726,7 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "edit_push", "edit_push32x32.png", ICON_SIZE_32x32,"", "edit push",&tui::TopedFrame::OnCellPush);
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop32x32.png", ICON_SIZE_32x32,"", "edit pop",&tui::TopedFrame::OnCellPop);
 //------------------------------------------48x48-------------------------------------------
-	 _resourceCenter->appendTool("edit", "undo", "undo48x48.png",ICON_SIZE_48x48, "", "undo", &tui::TopedFrame::OnUndo);
+    _resourceCenter->appendTool("edit", "undo", "undo48x48.png",ICON_SIZE_48x48, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo48x48.png",ICON_SIZE_48x48, "", "redo",&tui::TopedFrame::OnUndo);*/
    _resourceCenter->appendTool("edit", "box", "box48x48.png", ICON_SIZE_48x48,"", "add box",&tui::TopedFrame::OnDrawBox);
    _resourceCenter->appendTool("edit", "poly", "poly48x48.png", ICON_SIZE_48x48,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
@@ -901,7 +901,7 @@ void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
 
 void tui::TopedFrame::OnCheckHW(wxCommandEvent&)
 {
-	_canvas->showInfo();
+   _canvas->showInfo();
 }
 
 //void tui::TopedFrame::OnSize(wxSizeEvent& event)
@@ -1064,7 +1064,7 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
    wxString ost; 
    ost << wxT("tdtsave();");
    SetStatusText(wxT("Saving file..."));
-	wxString wxfilename(DATC->tedfilename().c_str(), wxConvFile);
+   wxString wxfilename(DATC->tedfilename().c_str(), wxConvFile);
    wxFileName datafile( wxfilename );
    assert(datafile.IsOk());
    if (datafile.FileExists() && DATC->neversaved()) {
@@ -1683,58 +1683,58 @@ void tui::TopedFrame::OnLongCursor(wxCommandEvent& WXUNUSED(event)){
 
 void tui::TopedFrame::OnHToolBarSize16(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(horizontal, _iconsize16);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(horizontal, _iconsize16);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize24(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(horizontal, _iconsize24);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(horizontal, _iconsize24);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize32(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(horizontal, _iconsize32);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(horizontal, _iconsize32);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize48(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(horizontal, _iconsize48);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(horizontal, _iconsize48);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize16(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(vertical, _iconsize16);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(vertical, _iconsize16);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize24(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(vertical, _iconsize24);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(vertical, _iconsize24);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize32(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(vertical, _iconsize32);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(vertical, _iconsize32);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize48(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(vertical, _iconsize48);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(vertical, _iconsize48);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnCellBox(wxCommandEvent& WXUNUSED(event)){
@@ -1950,14 +1950,14 @@ void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
       case STS_ANGLE_90    : settingsMenu->Check(TMSET_MARKER90 ,true );break;
       case STS_LONG_CURSOR : settingsMenu->Check(TMSET_CURLONG ,true );break;
       case STS_SHORT_CURSOR: settingsMenu->Check(TMSET_CURLONG ,false );break;
-		case TMSET_HTOOLSIZE16: settingsMenu->Check(TMSET_HTOOLSIZE16 ,true );break;
-		case TMSET_HTOOLSIZE24: settingsMenu->Check(TMSET_HTOOLSIZE24 ,true );break;
-		case TMSET_HTOOLSIZE32: settingsMenu->Check(TMSET_HTOOLSIZE32 ,true );break;
-		case TMSET_HTOOLSIZE48: settingsMenu->Check(TMSET_HTOOLSIZE48 ,true );break;
-		case TMSET_VTOOLSIZE16: settingsMenu->Check(TMSET_VTOOLSIZE16 ,true );break;
-		case TMSET_VTOOLSIZE24: settingsMenu->Check(TMSET_VTOOLSIZE24 ,true );break;
-		case TMSET_VTOOLSIZE32: settingsMenu->Check(TMSET_VTOOLSIZE32 ,true );break;
-		case TMSET_VTOOLSIZE48: settingsMenu->Check(TMSET_VTOOLSIZE48 ,true );break;
+      case TMSET_HTOOLSIZE16: settingsMenu->Check(TMSET_HTOOLSIZE16 ,true );break;
+      case TMSET_HTOOLSIZE24: settingsMenu->Check(TMSET_HTOOLSIZE24 ,true );break;
+      case TMSET_HTOOLSIZE32: settingsMenu->Check(TMSET_HTOOLSIZE32 ,true );break;
+      case TMSET_HTOOLSIZE48: settingsMenu->Check(TMSET_HTOOLSIZE48 ,true );break;
+      case TMSET_VTOOLSIZE16: settingsMenu->Check(TMSET_VTOOLSIZE16 ,true );break;
+      case TMSET_VTOOLSIZE24: settingsMenu->Check(TMSET_VTOOLSIZE24 ,true );break;
+      case TMSET_VTOOLSIZE32: settingsMenu->Check(TMSET_VTOOLSIZE32 ,true );break;
+      case TMSET_VTOOLSIZE48: settingsMenu->Check(TMSET_VTOOLSIZE48 ,true );break;
 
                     default: assert(false);
    }
@@ -2040,39 +2040,30 @@ void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 {
-	int size = evt.GetInt();
-	bool direction = static_cast<bool>(evt.GetExtraLong());
-	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
-	
-	_resourceCenter->setToolBarSize(direction, sz);
-	wxCommandEvent eventTB_MENU_UPD(wxEVT_SETINGSMENU);
-	if (tui::_tuihorizontal == direction)
-	{
-		//simplified version of 
-		//case ICON_SIZE_16x16: eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16)
-		eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16+size);
-	}
-	else
-	{
-		eventTB_MENU_UPD.SetInt(tui::TMSET_VTOOLSIZE16+size);
-	}
-	wxPostEvent(_canvas, eventTB_MENU_UPD);
+   int size = evt.GetInt();
+   bool direction = static_cast<bool>(evt.GetExtraLong());
+   tui::IconSizes sz = static_cast<tui::IconSizes>(size);
+   
+   _resourceCenter->setToolBarSize(direction, sz);
+   wxCommandEvent eventTB_MENU_UPD(wxEVT_SETINGSMENU);
+   if (tui::_tuihorizontal == direction)
+   {
+      //simplified version of
+      //case ICON_SIZE_16x16: eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16)
+      eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16+size);
+   }
+   else
+   {
+      eventTB_MENU_UPD.SetInt(tui::TMSET_VTOOLSIZE16+size);
+   }
+   wxPostEvent(_canvas, eventTB_MENU_UPD);
 }
 
 void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)
 {
-   std::ostringstream laymapstr;
-   word recno = 0;
-   laymapstr << "{";
-   for (USMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
-   {
-      if (recno != 0)
-         laymapstr << ",";
-      laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
-      recno++;
-   }
-   laymapstr << "}";
-   outmap = wxString(laymapstr.str().c_str(), wxConvUTF8);
+   std::string soutmap;
+   layprop::USMap2String(inmap, soutmap);
+   outmap = wxString(soutmap.c_str(), wxConvUTF8);
 }
 
 void tui::TopedFrame::SIMap2wxString(SIMap* inmap, wxString& outmap)
