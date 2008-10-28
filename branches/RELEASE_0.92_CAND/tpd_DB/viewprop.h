@@ -306,8 +306,8 @@ namespace layprop {
       void              mouseStop()                      {_supp_data.mouseStop();}
       console::ACTIVE_OP currentop() const               {return _drawprop.currentop();}
       void              all_layers(nameList& laylist) const {_drawprop.all_layers(laylist);}
-      void              setGdsLayMap(USMap* map)         {_gdsLayMap = map;}
-      void              setCifLayMap(USMap* map)         {_cifLayMap = map;}
+      void              setGdsLayMap(USMap* map);
+      void              setCifLayMap(USMap* map);
       const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
       const USMap*      getCifLayMap() const             {return _cifLayMap;}
       void              all_colors(nameList&) const;
