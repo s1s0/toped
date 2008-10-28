@@ -306,7 +306,8 @@ void laydata::tdtlibrary::collect_usedlays(WordList& laylist) const
    }
    laylist.sort();
    laylist.unique();
-   if (0 == laylist.front()) laylist.pop_front();
+   if ( (0 < laylist.size()) && (0 == laylist.front()) )
+      laylist.pop_front();
 }
 
 //-----------------------------------------------------------------------------

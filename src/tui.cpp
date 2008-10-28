@@ -1799,7 +1799,10 @@ SIMap* tui::nameCboxRecords::getTheMap()
 
 USMap* tui::nameCboxRecords::getTheFullMap()
 {
-   return _cifMap->updateMap(getTheMap());
+   SIMap* umap = getTheMap();
+   USMap* nmap = _cifMap->updateMap(umap);
+   delete umap;
+   return nmap;
 }
 
 //==========================================================================
@@ -1860,7 +1863,10 @@ USMap* tui::nameCbox3Records::getTheMap()
 
 USMap* tui::nameCbox3Records::getTheFullMap()
 {
-   return _gdsLayMap->updateMap(getTheMap(), true);
+   USMap* umap = getTheMap();
+   USMap* nmap = _gdsLayMap->updateMap(umap, true);
+   delete umap;
+   return nmap;
 }
 
 //==========================================================================
@@ -1994,7 +2000,10 @@ USMap* tui::nameEboxRecords::getTheMap()
 
 USMap* tui::nameEboxRecords::getTheFullMap()
 {
-   return _cifMap->updateMap(getTheMap());
+   USMap* umap = getTheMap();
+   USMap* nmap = _cifMap->updateMap(umap);
+   delete umap;
+   return nmap;
 }
 
 //--------------------------------------------------------------------------
@@ -2092,7 +2101,10 @@ USMap* tui::nameEbox3Records::getTheMap()
 
 USMap* tui::nameEbox3Records::getTheFullMap()
 {
-   return _gdsLayMap->updateMap(getTheMap(), false);
+   USMap* umap = getTheMap();
+   USMap* nmap = _gdsLayMap->updateMap(umap, false);
+   delete umap;
+   return nmap;
 }
 
 //--------------------------------------------------------------------------

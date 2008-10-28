@@ -946,6 +946,18 @@ void layprop::ViewProperties::saveProperties(std::string filename) const
    fclose(prop_file);
 }
 
+void layprop::ViewProperties::setGdsLayMap(USMap* map)
+{
+   if (NULL != _gdsLayMap) delete _gdsLayMap;
+   _gdsLayMap = map;
+}
+
+void layprop::ViewProperties::setCifLayMap(USMap* map)
+{
+   if (NULL != _cifLayMap) delete _cifLayMap;
+   _cifLayMap = map;
+}
+
 layprop::ViewProperties::~ViewProperties() 
 {
    for(gridlist::iterator GI = _grid.begin(); GI != _grid.end(); GI++)
