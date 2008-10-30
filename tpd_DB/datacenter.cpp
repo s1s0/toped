@@ -130,8 +130,7 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
                laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(tdtlaynum));
                switch( wd->gdsDataType() )
                {
-      //         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
-                  case      gds_BOX: break;
+                  case      gds_BOX: box (static_cast<GDSin::GdsBox*>(wd)     , dwl, laynum);  break;
                   case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
                   case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
                   case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
@@ -166,6 +165,27 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
       }
    }
    dst->resort();
+}
+
+void GDSin::Gds2Ted::box(GDSin::GdsBox* wd, laydata::tdtlayer* wl, int2b layno)
+{
+
+   pointlist &pl = wd->plist();
+   laydata::valid_poly check(pl);
+
+   if (!check.valid())
+   {
+      std::ostringstream ost; ost << "Layer " << layno;
+      ost << ": Box check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   else pl = check.get_validated() ;
+   if (check.box())
+   {
+      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
+   }
+   else wl->addpoly(pl,false);
+
 }
 
 void GDSin::Gds2Ted::poly(GDSin::GdsPolygon* wd, laydata::tdtlayer* wl, int2b layno)
