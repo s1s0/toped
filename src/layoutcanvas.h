@@ -133,7 +133,6 @@ namespace tui {
       bool           reperX;         // Draw a cursor line across the window parallel to the X axis
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       bool           long_cursor;    //
-      wxImage*       zeroMark;
 #ifdef __WXGTK__
       XVisualInfo*   x_visual;       //
 #endif

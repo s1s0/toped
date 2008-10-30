@@ -212,14 +212,15 @@ namespace tui {
       //
       void        OnStep(wxCommandEvent& WXUNUSED(event));
       void     OnAutopan(wxCommandEvent& WXUNUSED(event));
+      void   OnZeroCross(wxCommandEvent& WXUNUSED(event));
       void       OnGrid0(wxCommandEvent& WXUNUSED(event));
       void       OnGrid1(wxCommandEvent& WXUNUSED(event));
       void       OnGrid2(wxCommandEvent& WXUNUSED(event));
       void  OnLongCursor(wxCommandEvent& WXUNUSED(event));
       void    OnCellMark(wxCommandEvent& WXUNUSED(event));
-      void    OnCellBox(wxCommandEvent& WXUNUSED(event));
+      void     OnCellBox(wxCommandEvent& WXUNUSED(event));
       void    OnTextMark(wxCommandEvent& WXUNUSED(event));
-      void    OnTextBox(wxCommandEvent& WXUNUSED(event));
+      void     OnTextBox(wxCommandEvent& WXUNUSED(event));
       void     OnMarker0(wxCommandEvent& WXUNUSED(event));
       void    OnMarker45(wxCommandEvent& WXUNUSED(event));
       void    OnMarker90(wxCommandEvent& WXUNUSED(event));

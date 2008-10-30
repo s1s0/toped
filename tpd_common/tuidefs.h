@@ -122,6 +122,7 @@ namespace tui
 
       TMSET_STEP          ,
       TMSET_AUTOPAN       ,
+      TMSET_ZEROCROSS     ,
       TMSET_GRIDDEF       ,
       TMSET_GRID0         ,
       TMSET_GRID1         ,
@@ -213,6 +214,8 @@ namespace tui
       STS_TEXTBOX_OFF     ,
       STS_AUTOPAN_ON      ,
       STS_AUTOPAN_OFF     ,
+      STS_ZEROCROSS_ON    ,
+      STS_ZEROCROSS_OFF   ,
       STS_ANGLE_0         ,
       STS_ANGLE_45        ,
       STS_ANGLE_90        ,

@@ -232,6 +232,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("step"             ,(DEBUG_NEW                     tellstdfunc::stdSTEP(telldata::tn_void, true)));
    mblock->addFUNC("grid"             ,(DEBUG_NEW                     tellstdfunc::stdGRID(telldata::tn_void, true)));
    mblock->addFUNC("autopan"          ,(DEBUG_NEW                  tellstdfunc::stdAUTOPAN(telldata::tn_void, true)));
+   mblock->addFUNC("zerocross"        ,(DEBUG_NEW                tellstdfunc::stdZEROCROSS(telldata::tn_void, true)));
    mblock->addFUNC("shapeangle"       ,(DEBUG_NEW               tellstdfunc::stdSHAPEANGLE(telldata::tn_void, true)));
    mblock->addFUNC("getpoint"         ,(DEBUG_NEW                    tellstdfunc::getPOINT(telldata::tn_pnt ,false)));
    mblock->addFUNC("getpointlist"     ,(DEBUG_NEW        tellstdfunc::getPOINTLIST(TLISTOF(telldata::tn_pnt),false)));

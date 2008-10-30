@@ -52,7 +52,6 @@ extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
 
 #include "../ui/crosscursor.xpm"
-#include "../ui/zerocross.xpm"
 
 //tui::CanvasStatus::CanvasStatus(){};
 void tui::StatusLine::update(const int4b width, const CTM& _LayCTM)
@@ -206,7 +205,6 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    initializeGL();
    ap_trigger = 10;
    glfInit();
-   zeroMark = DEBUG_NEW wxImage(zerocross);   
 }
 void	tui::LayoutCanvas::showInfo()
 {
@@ -381,7 +379,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glMatrixMode( GL_MODELVIEW );
       glShadeModel( GL_FLAT ); // Single color
       update_viewport();
-      //@TODO !! Check somewhere that RGBA mode is available!?
       // CTM matrix stuff
       glLoadIdentity();
       glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
@@ -389,7 +386,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
-      drawZeroMark();
       DATC->openGL_draw(_LayCTM);    // draw data
       glAccum(GL_LOAD, 1.0);
       invalid_window = false;
@@ -420,16 +416,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
    }
 
    SwapBuffers();
-}
-
-void tui::LayoutCanvas::drawZeroMark()
-{
-   
-//   glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
-//   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-   glRasterPos2i(0,0);
-//   glBitmap(32,32,16,16,0,0, zeroMark);
-   glDrawPixels(32,32, GL_RGB, GL_UNSIGNED_BYTE, zeroMark->GetData());
 }
 
 // void tui::LayoutCanva+s::drawInterim(const TP& cp)
@@ -582,8 +568,8 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
       }
    }
    // update movement indicators
-   static int deltaX = abs(ScrMARKold.x() - ScrMARK.x());
-   static int deltaY = abs(ScrMARKold.y() - ScrMARK.y());
+   int deltaX = abs(ScrMARKold.x() - ScrMARK.x());
+   int deltaY = abs(ScrMARKold.y() - ScrMARK.y());
    if (!(deltaX || deltaY)) return;
    //
    CursorControl(event.ShiftDown(), event.ControlDown());
@@ -1003,7 +989,6 @@ void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
 
 tui::LayoutCanvas::~LayoutCanvas(){
    delete crossCur;
-   delete zeroMark;
 //   delete (laydata::tdtdata::tessellObj);
 }
 
