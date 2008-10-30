@@ -52,6 +52,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdGRID        );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSTEP        );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdAUTOPAN     );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdZEROCROSS   );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSHAPEANGLE  );  // undo - implemented
 }
 #endif

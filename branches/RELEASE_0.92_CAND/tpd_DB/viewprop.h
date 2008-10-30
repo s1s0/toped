@@ -273,9 +273,11 @@ namespace layprop {
       void              setGrid(byte, real, std::string);
       bool              viewGrid(byte, bool);
       void              drawGrid() const;
+      void              drawZeroCross() const;
       void              setUU(real);
       void              setstep(real st)                 {_step = st;}
       void              setautopan(bool status)          {_autopan = status;}
+      void              setZeroCross(bool status)        {_zeroCross = status;}
       void              setmarker_angle(byte angle)      {_marker_angle = angle;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
@@ -284,6 +286,7 @@ namespace layprop {
       real              UU() const                       {return _UU;}
       real              DBscale() const                  {return _DBscale;}
       bool              autopan() const                  {return _autopan;}
+      bool              zeroCross() const                {return _zeroCross;}
       byte              marker_angle() const             {return _marker_angle;}
       DrawProperties&   drawprop()                       {return _drawprop;}
       word              layselmask() const               {return _layselmask;}
@@ -326,6 +329,7 @@ namespace layprop {
       gridlist             _grid;         // the list of grids as defined by the tell command
       real                 _step;         // current marker step
       bool                 _autopan;      // view window moves automatically during shape drawing
+      bool                 _zeroCross;    //
       byte                 _marker_angle; // angle of restriction during shape drawing (0,45,90)
       SupplementaryData    _supp_data;    // supplementary data
       WordList             _uplaylist;    // unpublished layer list

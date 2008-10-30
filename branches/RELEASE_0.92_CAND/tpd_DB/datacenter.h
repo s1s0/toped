@@ -133,6 +133,7 @@ public:
    bool                       neversaved()  const     {return _neversaved;}; 
    bool                       modified() const        {return _TEDLIB.modified();};
    bool                       autopan() const         {return _properties.autopan();}
+   bool                       zeroCross() const       {return _properties.zeroCross();}
    const real                 step() const            {return _properties.step();}
    const layprop::LayoutGrid* grid(byte gn) const     {return _properties.grid(gn);}
    const int4b                stepDB() const          {return _properties.stepDB();}
@@ -149,6 +150,7 @@ public:
    
 
    void                       setautopan(bool status) {_properties.setautopan(status);}
+   void                       setZeroCross(bool status) {_properties.setZeroCross(status);}
    void                       setmarker_angle(byte angle)
                                                       {_properties.setmarker_angle(angle);}
    void                       setstep(real st)        {_properties.setstep(st);}

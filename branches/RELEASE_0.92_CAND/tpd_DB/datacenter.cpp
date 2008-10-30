@@ -1033,6 +1033,7 @@ void DataCenter::openGL_draw(const CTM& layCTM) {
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
       while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
       _properties.drawGrid();
+      _properties.drawZeroCross();
       _TEDLIB()->openGL_draw(_properties.drawprop());
       _properties.drawRulers(layCTM);
       DBLock.Unlock();

@@ -262,6 +262,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_GRID0         , tui::TopedFrame::OnGrid0       )
    EVT_MENU( TMSET_GRID1         , tui::TopedFrame::OnGrid1       )
    EVT_MENU( TMSET_GRID2         , tui::TopedFrame::OnGrid2       )
+   EVT_MENU( TMSET_ZEROCROSS     , tui::TopedFrame::OnZeroCross   )
    EVT_MENU( TMSET_CELLMARK      , tui::TopedFrame::OnCellMark    )
    EVT_MENU( TMSET_TEXTMARK      , tui::TopedFrame::OnTextMark    )
    EVT_MENU( TMSET_CELLBOX       , tui::TopedFrame::OnCellBox     )
@@ -587,6 +588,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendCheckItem(TMSET_GRID1    , wxT("Grid 1")    , wxT("Draw/Hide Grid 1"));
    settingsMenu->AppendCheckItem(TMSET_GRID2    , wxT("Grid 2")    , wxT("Draw/Hide Grid 2"));
    settingsMenu->AppendSeparator();
+   settingsMenu->AppendCheckItem(TMSET_ZEROCROSS, wxT("Zero Cross"), wxT("Draw/Hide Zero Cross mark"));
    settingsMenu->AppendCheckItem(TMSET_CELLMARK , wxT("Cell marks"), wxT("Draw/Hide Cell marks"));
    settingsMenu->AppendCheckItem(TMSET_TEXTMARK , wxT("Text marks"), wxT("Draw/Hide Text marks"));
    settingsMenu->AppendCheckItem(TMSET_CELLBOX  , wxT("Cell box")  , wxT("Draw/Hide Cell overlapping box"));
@@ -1764,6 +1766,12 @@ void tui::TopedFrame::OnAutopan(wxCommandEvent& WXUNUSED(event)){
    _cmdline->parseCommand(ost);   
 }
 
+void tui::TopedFrame::OnZeroCross(wxCommandEvent& WXUNUSED(event)){
+   wxString ost;
+   ost << wxT("zerocross(")<< (settingsMenu->IsChecked(TMSET_ZEROCROSS) ? wxT("true") : wxT("false")) << wxT(");");
+   _cmdline->parseCommand(ost);   
+}
+
 void tui::TopedFrame::OnMarker0(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
    ost << wxT("shapeangle(0);");
@@ -1929,35 +1937,37 @@ void tui::TopedFrame::OnAbort(wxCommandEvent& WXUNUSED(event)) {
 void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
 {
    switch (evt.GetInt()) {
-      case STS_GRID0_ON    : settingsMenu->Check(TMSET_GRID0,true );break;
-      case STS_GRID0_OFF   : settingsMenu->Check(TMSET_GRID0,false);break;
-      case STS_GRID1_ON    : settingsMenu->Check(TMSET_GRID1,true );break;
-      case STS_GRID1_OFF   : settingsMenu->Check(TMSET_GRID1,false);break;
-      case STS_GRID2_ON    : settingsMenu->Check(TMSET_GRID2,true );break;
-      case STS_GRID2_OFF   : settingsMenu->Check(TMSET_GRID2,false);break;
-      case STS_CELLMARK_OFF: settingsMenu->Check(TMSET_CELLMARK,false);break;
-      case STS_CELLMARK_ON : settingsMenu->Check(TMSET_CELLMARK,true);break;
-      case STS_CELLBOX_OFF : settingsMenu->Check(TMSET_CELLBOX,false);break;
-      case STS_CELLBOX_ON  : settingsMenu->Check(TMSET_CELLBOX,true);break;
-      case STS_TEXTMARK_OFF: settingsMenu->Check(TMSET_TEXTMARK,false);break;
-      case STS_TEXTMARK_ON : settingsMenu->Check(TMSET_TEXTMARK,true);break;
-      case STS_TEXTBOX_OFF : settingsMenu->Check(TMSET_TEXTBOX,false);break;
-      case STS_TEXTBOX_ON  : settingsMenu->Check(TMSET_TEXTBOX,true);break;
-      case STS_AUTOPAN_ON  : settingsMenu->Check(TMSET_AUTOPAN,true );break;
-      case STS_AUTOPAN_OFF : settingsMenu->Check(TMSET_AUTOPAN,false);break;
-      case STS_ANGLE_0     : settingsMenu->Check(TMSET_MARKER0  ,true );break;
-      case STS_ANGLE_45    : settingsMenu->Check(TMSET_MARKER45 ,true );break;
-      case STS_ANGLE_90    : settingsMenu->Check(TMSET_MARKER90 ,true );break;
-      case STS_LONG_CURSOR : settingsMenu->Check(TMSET_CURLONG ,true );break;
-      case STS_SHORT_CURSOR: settingsMenu->Check(TMSET_CURLONG ,false );break;
-      case TMSET_HTOOLSIZE16: settingsMenu->Check(TMSET_HTOOLSIZE16 ,true );break;
-      case TMSET_HTOOLSIZE24: settingsMenu->Check(TMSET_HTOOLSIZE24 ,true );break;
-      case TMSET_HTOOLSIZE32: settingsMenu->Check(TMSET_HTOOLSIZE32 ,true );break;
-      case TMSET_HTOOLSIZE48: settingsMenu->Check(TMSET_HTOOLSIZE48 ,true );break;
-      case TMSET_VTOOLSIZE16: settingsMenu->Check(TMSET_VTOOLSIZE16 ,true );break;
-      case TMSET_VTOOLSIZE24: settingsMenu->Check(TMSET_VTOOLSIZE24 ,true );break;
-      case TMSET_VTOOLSIZE32: settingsMenu->Check(TMSET_VTOOLSIZE32 ,true );break;
-      case TMSET_VTOOLSIZE48: settingsMenu->Check(TMSET_VTOOLSIZE48 ,true );break;
+      case STS_GRID0_ON       : settingsMenu->Check(TMSET_GRID0       , true );break;
+      case STS_GRID0_OFF      : settingsMenu->Check(TMSET_GRID0       , false);break;
+      case STS_GRID1_ON       : settingsMenu->Check(TMSET_GRID1       , true );break;
+      case STS_GRID1_OFF      : settingsMenu->Check(TMSET_GRID1       , false);break;
+      case STS_GRID2_ON       : settingsMenu->Check(TMSET_GRID2       , true );break;
+      case STS_GRID2_OFF      : settingsMenu->Check(TMSET_GRID2       , false);break;
+      case STS_CELLMARK_ON    : settingsMenu->Check(TMSET_CELLMARK    , true );break;
+      case STS_CELLMARK_OFF   : settingsMenu->Check(TMSET_CELLMARK    , false);break;
+      case STS_CELLBOX_ON     : settingsMenu->Check(TMSET_CELLBOX     , true );break;
+      case STS_CELLBOX_OFF    : settingsMenu->Check(TMSET_CELLBOX     , false);break;
+      case STS_TEXTMARK_ON    : settingsMenu->Check(TMSET_TEXTMARK    , true );break;
+      case STS_TEXTMARK_OFF   : settingsMenu->Check(TMSET_TEXTMARK    , false);break;
+      case STS_TEXTBOX_ON     : settingsMenu->Check(TMSET_TEXTBOX     , true );break;
+      case STS_TEXTBOX_OFF    : settingsMenu->Check(TMSET_TEXTBOX     , false);break;
+      case STS_AUTOPAN_ON     : settingsMenu->Check(TMSET_AUTOPAN     , true );break;
+      case STS_AUTOPAN_OFF    : settingsMenu->Check(TMSET_AUTOPAN     , false);break;
+      case STS_ZEROCROSS_ON   : settingsMenu->Check(TMSET_ZEROCROSS   , true );break;
+      case STS_ZEROCROSS_OFF  : settingsMenu->Check(TMSET_ZEROCROSS   , false);break;
+      case STS_LONG_CURSOR    : settingsMenu->Check(TMSET_CURLONG     , true );break;
+      case STS_SHORT_CURSOR   : settingsMenu->Check(TMSET_CURLONG     , false);break;
+      case STS_ANGLE_0        : settingsMenu->Check(TMSET_MARKER0     , true );break;
+      case STS_ANGLE_45       : settingsMenu->Check(TMSET_MARKER45    , true );break;
+      case STS_ANGLE_90       : settingsMenu->Check(TMSET_MARKER90    , true );break;
+      case TMSET_HTOOLSIZE16  : settingsMenu->Check(TMSET_HTOOLSIZE16 , true );break;
+      case TMSET_HTOOLSIZE24  : settingsMenu->Check(TMSET_HTOOLSIZE24 , true );break;
+      case TMSET_HTOOLSIZE32  : settingsMenu->Check(TMSET_HTOOLSIZE32 , true );break;
+      case TMSET_HTOOLSIZE48  : settingsMenu->Check(TMSET_HTOOLSIZE48 , true );break;
+      case TMSET_VTOOLSIZE16  : settingsMenu->Check(TMSET_VTOOLSIZE16 , true );break;
+      case TMSET_VTOOLSIZE24  : settingsMenu->Check(TMSET_VTOOLSIZE24 , true );break;
+      case TMSET_VTOOLSIZE32  : settingsMenu->Check(TMSET_VTOOLSIZE32 , true );break;
+      case TMSET_VTOOLSIZE48  : settingsMenu->Check(TMSET_VTOOLSIZE48 , true );break;
 
                     default: assert(false);
    }
