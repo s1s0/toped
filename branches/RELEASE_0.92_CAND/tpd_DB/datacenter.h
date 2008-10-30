@@ -43,6 +43,7 @@ namespace GDSin {
       void                 child_structure(const GDSin::GDSHierTree*, bool);
       void                 convert_prep(const GDSin::GDSHierTree* item, bool);
       void                 convert(GDSin::GdsStructure*, laydata::tdtcell*);
+      void                 box (GDSin::GdsBox*     , laydata::tdtlayer*, int2b);
       void                 poly(GDSin::GdsPolygon* , laydata::tdtlayer*, int2b);
       void                 wire(GDSin::GDSpath*    , laydata::tdtlayer*, int2b);
       void                 text(GDSin::GdsText*    , laydata::tdtlayer*);

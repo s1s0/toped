@@ -153,7 +153,7 @@ double GDSin::GdsRecord::gds2ieee(byte* gds)
 {
    // zero is an exception (as always!) so check it first
    byte zerocheck;
-   for (zerocheck = 0; zerocheck < 8; zerocheck++)
+   for (zerocheck = 1; zerocheck < 8; zerocheck++)
       if (0x00 != gds[zerocheck]) break;
    if (8 == zerocheck) return 0;
    // adjusting the exponent
