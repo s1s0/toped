@@ -192,9 +192,7 @@ namespace tui
       CNVS_POS_Y          ,
       CNVS_DEL_X          ,
       CNVS_DEL_Y          ,
-      CNVS_SELECTED       ,
-      CNVS_ABORTENABLE    ,
-      CNVS_ABORTDISABLE   ,
+      CNVS_SELECTED
    } CVSSTATUS_TYPE;
 
    typedef enum {
@@ -220,7 +218,7 @@ namespace tui
       STS_ANGLE_45        ,
       STS_ANGLE_90        ,
       STS_LONG_CURSOR     ,
-      STS_SHORT_CURSOR    ,
+      STS_SHORT_CURSOR
    } SETTINGSMENU_TYPE;
 
 }

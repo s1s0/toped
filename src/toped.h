@@ -52,14 +52,12 @@ namespace tui {
       void                 setdXpos(wxString);
       void                 setdYpos(wxString);
       void                 setSelected(wxString);
-      void                 btn_abort_enable(bool state) {_abort->Enable(state);};
    private:
       wxStaticText*        X_pos;
       wxStaticText*        Y_pos;
       wxStaticText*        _dX;
       wxStaticText*        _dY;
       wxStaticText*        _selected;
-      wxButton*            _abort;
    };
    //-----------------------------------------------------------------------------
    class TopedStatus : public wxStatusBar

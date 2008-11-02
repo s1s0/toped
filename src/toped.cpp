@@ -70,38 +70,42 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
 {
    wxFont fontX = GetFont();
    fontX.SetWeight(wxBOLD);
+   fontX.SetPointSize(9);
+   //fontX.SetFamily(wxFONTFAMILY_MODERN); 
+   
    SetFont(fontX);
-   _abort = DEBUG_NEW wxButton(this, TBSTAT_ABORT, wxT("Abort"));
-   _abort->Disable();
+   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    SetBackgroundColour(wxColour(wxT("LIGHT_GRAY")));
    SetForegroundColour(wxColour(wxT("BLACK")));
-   X_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition,wxSize(80,13),// wxDefaultSize,
-                                                   wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   Y_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,13),
-                                                   wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dX = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(80,13),
-                                                   wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dY = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(100,13),
-                                                   wxST_NO_AUTORESIZE/* | wxALIGN_RIGHT*/);
-   
-   _selected = DEBUG_NEW wxStaticText(this, -1, wxT("0"), wxDefaultPosition, wxSize(40,13),
+   X_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition,wxSize(120,-1),
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+   Y_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition, wxSize(120,-1),
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+   _dX = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+   _dY = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+
+   _selected = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0"), wxDefaultPosition, wxSize(40,-1),
                                                    wxST_NO_AUTORESIZE | wxALIGN_LEFT);
-   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   thesizer->Add(_abort, 0, wxALL | wxALIGN_CENTER, 3);
-   thesizer->Add(30,0,0);
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("Selected: ")), 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(_selected, 0, wxALIGN_CENTER, 3 );
-//   thesizer->Add(10,0,1);  
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("dX: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(_dX, 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("dY: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(_dY, 0, wxALIGN_CENTER, 3 );
-//   thesizer->Add(20,0,1);  
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("X: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(X_pos, 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("Y: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(Y_pos, 0, wxALIGN_CENTER, 3 );
-   SetSizerAndFit(thesizer);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Selected: ")), 0, wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(_selected, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(10,0,0);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("dX: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(_dX, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(10,0,0);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("dY: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(_dY, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(20,0,0);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("X: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(X_pos, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(10,0,0);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Y: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(Y_pos, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(20,0,0);
+
+   SetSizer( thesizer );      // use the sizer for layout
+   thesizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 
 tui::CanvasStatus::~CanvasStatus() {
@@ -110,7 +114,6 @@ tui::CanvasStatus::~CanvasStatus() {
    delete _dX;
    delete _dY;
    delete _selected;
-   delete _abort;
 }
 
 void tui::CanvasStatus::setXpos(wxString coordX){
@@ -921,8 +924,6 @@ void tui::TopedFrame::OnCanvasStatus(wxCommandEvent& evt)
       case CNVS_DEL_X       : _GLstatus->setdXpos(evt.GetString()); break;
       case CNVS_DEL_Y       : _GLstatus->setdYpos(evt.GetString()); break;
       case CNVS_SELECTED    : _GLstatus->setSelected(evt.GetString());break;
-      case CNVS_ABORTENABLE : _GLstatus->btn_abort_enable(true);break;
-      case CNVS_ABORTDISABLE: _GLstatus->btn_abort_enable(false);break;
       default: assert(false);
    }   
 }

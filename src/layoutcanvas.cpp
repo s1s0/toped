@@ -856,7 +856,6 @@ void tui::LayoutCanvas::update_viewport() {
 
 void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
 {
-   wxCommandEvent eventABORTEN(wxEVT_CANVAS_STATUS);
    if (1 == evt.GetExtraLong())
    { // start mouse input
       mouse_input = true;
@@ -867,7 +866,6 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       //restricted_move will be true for wire and polygon
       restricted_move = (DATC->marker_angle() != 0) &&
             ((actop > 0) || (actop == console::op_dpoly));
-      eventABORTEN.SetInt(CNVS_ABORTENABLE);
       reperX = (console::op_flipX == actop) || (long_cursor && (console::op_flipY != actop));
       reperY = (console::op_flipY == actop) || (long_cursor && (console::op_flipX != actop));
       if (  (console::op_flipX  == actop)
@@ -893,9 +891,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       wxPostEvent(this, eventPOSITION);
       eventPOSITION.SetInt(CNVS_DEL_X);
       wxPostEvent(this, eventPOSITION);
-      eventABORTEN.SetInt(CNVS_ABORTDISABLE);
    }
-   wxPostEvent(this, eventABORTEN);
 }
 
 
