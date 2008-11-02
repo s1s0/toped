@@ -760,7 +760,7 @@ void tui::TopedFrame::initToolBars()
    _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
                                           wxDefaultPosition, wxDefaultSize,
                                           wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-   _GLstatus->SetSize(wxSize(650, 30));
+   _GLstatus->SetSize(wxSize(-1, 30));
 
    _status->AddControl((wxControl*)_GLstatus);
    _status->Realize();
