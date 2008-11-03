@@ -362,8 +362,8 @@ void layerSetup() {
    layprop("TEXT"       ,62 ,"yellow"      ,"horiHash"       , "selected2" );cifmap[:+] = {{62, "TXT2"}};gdsmap[:+] = {{62, "60;40"}};
    layprop("SCRIBE_LANE",63 ,"white"       ,""       	     , "selected3" );cifmap[:+] = {{63, "SRBL"}};gdsmap[:+] = {{63, "60; 0"}};
 
-   setciflaymap(cifmap);
-   setgdslaymap(gdsmap);
+//   setciflaymap(cifmap);
+//   setgdslaymap(gdsmap);
 }
 
 void screenSetup() {
