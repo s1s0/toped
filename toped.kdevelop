@@ -9,11 +9,11 @@
     <ignoreparts/>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
+    <description></description>
     <versioncontrol>kdevsubversion</versioncontrol>
     <secondaryLanguages/>
     <projectname>toped</projectname>
-    <defaultencoding/>
+    <defaultencoding></defaultencoding>
   </general>
   <kdevautoproject>
     <general>
@@ -54,20 +54,20 @@
       </optimized>
       <debug>
         <configargs>--enable-debug=full --prefix=/opt/toped</configargs>
-        <builddir>debug</builddir>
+        <builddir>/local_home/skr/toped/debug</builddir>
         <ccompiler>kdevgccoptions</ccompiler>
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevpgf77options</f77compiler>
         <cxxflags>-O0 -Wall -pg -g3</cxxflags>
         <envvars/>
-        <topsourcedir/>
-        <cppflags/>
-        <ldflags/>
-        <ccompilerbinary/>
-        <cxxcompilerbinary/>
-        <f77compilerbinary/>
+        <topsourcedir></topsourcedir>
+        <cppflags></cppflags>
+        <ldflags></ldflags>
+        <ccompilerbinary></ccompilerbinary>
+        <cxxcompilerbinary></cxxcompilerbinary>
+        <f77compilerbinary></f77compilerbinary>
         <cflags>-O0 -g3 -pg</cflags>
-        <f77flags/>
+        <f77flags></f77flags>
       </debug>
     </configurations>
     <make>
@@ -78,18 +78,19 @@
       <abortonerror>false</abortonerror>
       <numberofjobs>1</numberofjobs>
       <dontact>false</dontact>
-      <makebin/>
+      <makebin></makebin>
       <prio>0</prio>
+      <runmultiplejobs>false</runmultiplejobs>
     </make>
   </kdevautoproject>
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
       <programargs/>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -187,7 +188,7 @@
       <includePaths>.;</includePaths>
     </codecompletion>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
@@ -201,7 +202,7 @@
       <includestyle>3</includestyle>
       <designerintegration>EmbeddedKDevDesigner</designerintegration>
       <qmake>/usr/lib/qt-3.3/bin/qmake</qmake>
-      <designer>/usr/lib/qt-3.3/bin/designer</designer>
+      <designer>/usr/lib64/qt-3.3/bin/designer</designer>
       <designerpluginpaths/>
     </qt>
     <splitheadersource>
