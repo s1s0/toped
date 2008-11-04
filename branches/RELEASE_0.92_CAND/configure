@@ -22599,11 +22599,11 @@ echo "${ECHO_T}no (version $WX_VERSION is not new enough)" >&6; }
 
  if test "$wxWin" != 1 || test "$wx_ver_ok" != "yes"; then
     { { echo "$as_me:$LINENO: error:
-       wxWindows ver.2.6.2 or later must be installed on your system
+       wxWindows ver.2.8.9 or later must be installed on your system
        Please install or update your wxWindows
     " >&5
 echo "$as_me: error:
-       wxWindows ver.2.6.2 or later must be installed on your system
+       wxWindows ver.2.8.9 or later must be installed on your system
        Please install or update your wxWindows
     " >&2;}
    { (exit 1); exit 1; }; }
