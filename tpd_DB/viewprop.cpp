@@ -393,7 +393,7 @@ void layprop::DrawProperties::setLineProps(bool selected) const
       colorMAP::const_iterator gcol;
       if (("" != colorname) && (_laycolors.end() != (gcol = _laycolors.find(colorname))))
          glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
-      glLineWidth(seline->width());glEnable(GL_LINE_SMOOTH);glEnable(GL_LINE_STIPPLE);
+      glLineWidth(seline->width());/*glEnable(GL_LINE_SMOOTH);*/glEnable(GL_LINE_STIPPLE);
       glLineStipple(seline->patscale(),seline->pattern());
       return;
    }
@@ -705,6 +705,9 @@ layprop::ViewProperties::ViewProperties() {
    _marker_angle = 0;
    _autopan = false;
    _layselmask = laydata::_lmall;
+   _gdsLayMap = NULL;
+   _cifLayMap = NULL;
+   _zeroCross = false;
 }
 
 bool layprop::ViewProperties::selectable(word layno) const {
@@ -857,6 +860,22 @@ void layprop::ViewProperties::drawGrid() const{
       p->second->Draw(_drawprop, _UU);
 }
 
+void layprop::ViewProperties::drawZeroCross() const
+{
+   if (!_zeroCross) return;
+   glLineStipple(1,0xcccc);
+   glEnable(GL_LINE_STIPPLE);
+   glBegin(GL_LINES);
+   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
+   glVertex2i(0, _drawprop.clipRegion().p1().y());
+   glVertex2i(0, _drawprop.clipRegion().p2().y()); 
+   glVertex2i(_drawprop.clipRegion().p1().x(), 0);
+   glVertex2i(_drawprop.clipRegion().p2().x(), 0); 
+   glEnd();
+   glDisable(GL_LINE_STIPPLE);
+}
+
+
 void layprop::ViewProperties::all_colors(nameList& colist) const
 {
    for( colorMAP::const_iterator CI = _drawprop._laycolors.begin(); CI != _drawprop._laycolors.end(); CI++)
@@ -880,6 +899,24 @@ void layprop::ViewProperties::setUU(real UU) {
    _DBscale = 1/UU;
 };
 
+void layprop::ViewProperties::saveLayerMaps(FILE* prop_file) const
+{
+   fprintf(prop_file, "void  layerMaps() {\n");
+   if (NULL != _gdsLayMap)
+   {
+      std::string sGdsLayMap;
+      USMap2String(_gdsLayMap, sGdsLayMap);
+      fprintf(prop_file, "  setgdslaymap( %s );\n", sGdsLayMap.c_str());
+   }
+   if (NULL != _cifLayMap)
+   {
+      std::string sCifLayMap;
+      USMap2String(_cifLayMap, sCifLayMap);
+      fprintf(prop_file, "  setciflaymap( %s );\n", sCifLayMap.c_str());
+   }
+   fprintf(prop_file, "}\n\n");
+}
+
 void layprop::ViewProperties::saveScreenProps(FILE* prop_file) const
 {
    fprintf(prop_file, "void  screenSetup() {\n");
@@ -901,6 +938,7 @@ void layprop::ViewProperties::saveScreenProps(FILE* prop_file) const
    }
    fprintf(prop_file, "  step(%f);\n",_step);
    fprintf(prop_file, "  autopan(%s);\n",_autopan ? "true" : "false");
+   fprintf(prop_file, "  zerocross(%s);\n",_zeroCross ? "true" : "false");
    fprintf(prop_file, "  shapeangle(%d);\n",_marker_angle);
    fprintf(prop_file, "}\n\n");
 }
@@ -916,13 +954,50 @@ void layprop::ViewProperties::saveProperties(std::string filename) const
    _drawprop.saveColors(prop_file);
    _drawprop.saveLines(prop_file);
    _drawprop.saveLayers(prop_file);
+   if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
+      saveLayerMaps(prop_file);
    saveScreenProps(prop_file);
-   fprintf(prop_file, "layerSetup();screenSetup();\n\n");
+   fprintf(prop_file, "layerSetup();");
+   if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
+      fprintf(prop_file, "layerMaps();");
+   fprintf(prop_file, "screenSetup();\n\n");
    fclose(prop_file);
 }
 
-layprop::ViewProperties::~ViewProperties() {
+void layprop::ViewProperties::setGdsLayMap(USMap* map)
+{
+   if (NULL != _gdsLayMap) delete _gdsLayMap;
+   _gdsLayMap = map;
+}
+
+void layprop::ViewProperties::setCifLayMap(USMap* map)
+{
+   if (NULL != _cifLayMap) delete _cifLayMap;
+   _cifLayMap = map;
+}
+
+layprop::ViewProperties::~ViewProperties() 
+{
    for(gridlist::iterator GI = _grid.begin(); GI != _grid.end(); GI++)
       delete GI->second;
    _grid.clear();
+   if (NULL != _gdsLayMap) delete _gdsLayMap;
+   if (NULL != _cifLayMap) delete _cifLayMap;
+}
+
+
+void layprop::USMap2String(USMap* inmap, std::string& outmap)
+{
+   std::ostringstream laymapstr;
+   word recno = 0;
+   laymapstr << "{";
+   for (USMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
+   {
+      if (recno != 0)
+         laymapstr << ",";
+      laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
+      recno++;
+   }
+   laymapstr << "}";
+   outmap = laymapstr.str();
 }

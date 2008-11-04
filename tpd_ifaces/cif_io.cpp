@@ -590,3 +590,4 @@ CIFin::CifExportFile::~CifExportFile()
    _file.close();
    // don't delete _laymap - it's should be deleted where it had been created
 }
+

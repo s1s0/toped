@@ -54,7 +54,7 @@
       </optimized>
       <debug>
         <configargs>--enable-debug=full --prefix=/opt/toped</configargs>
-        <builddir>debug</builddir>
+        <builddir>/local_home/skr/toped/debug</builddir>
         <ccompiler>kdevgccoptions</ccompiler>
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevpgf77options</f77compiler>
@@ -80,6 +80,7 @@
       <dontact>false</dontact>
       <makebin/>
       <prio>0</prio>
+      <runmultiplejobs>false</runmultiplejobs>
     </make>
   </kdevautoproject>
   <kdevdebugger>

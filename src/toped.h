@@ -52,14 +52,12 @@ namespace tui {
       void                 setdXpos(wxString);
       void                 setdYpos(wxString);
       void                 setSelected(wxString);
-      void                 btn_abort_enable(bool state) {_abort->Enable(state);};
    private:
       wxStaticText*        X_pos;
       wxStaticText*        Y_pos;
       wxStaticText*        _dX;
       wxStaticText*        _dY;
       wxStaticText*        _selected;
-      wxButton*            _abort;
    };
    //-----------------------------------------------------------------------------
    class TopedStatus : public wxStatusBar
@@ -88,8 +86,9 @@ namespace tui {
       virtual                ~TopedFrame();
 //      void                    OnSize(wxSizeEvent& event);
       void                    OnSashDrag(wxSashEvent& event);
-      void                    OnQuit (wxCommandEvent&);
-      void                    OnAbout(wxCommandEvent&);
+      void                    OnQuit (wxCommandEvent& WXUNUSED( event ));
+		void                    OnCheckHW(wxCommandEvent&);
+      void                    OnAbout(wxCommandEvent& WXUNUSED( event ));
 //      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
       console::ted_log*       logwin()   const {return _cmdlog;}
@@ -105,6 +104,8 @@ namespace tui {
       void                    initMenuBar();
       void                    initView();
       bool                    checkFileOverwriting(const wxString& fileName);
+      void                    USMap2wxString(USMap* inmap, wxString& outmap);
+      void                    SIMap2wxString(SIMap* inmap, wxString& outmap);
       console::ted_log*       _cmdlog;       // log window
       console::TELLFuncList*  _cmdbrowser;
       console::ted_cmd*       _cmdline;      // tell command input window
@@ -142,22 +143,22 @@ namespace tui {
       void  OnTDTLoadLib(wxCommandEvent&);
       void OnTDTUnloadLib(wxCommandEvent&);
       void    OnTELLRead(wxCommandEvent&);
-      void     OnGDSRead(wxCommandEvent&);
-      void   OnGDSimport(wxCommandEvent&);
-      void   OnGDStranslate(wxCommandEvent&);
-      void   OnGDSexportLIB(wxCommandEvent&);
-      void   OnGDSexportCELL(wxCommandEvent&);
+      void     OnGDSRead(wxCommandEvent& WXUNUSED(event));
+      void   OnGDSimport(wxCommandEvent& WXUNUSED(event));
+      void   OnGDStranslate(wxCommandEvent& WXUNUSED(event));
+      void   OnGDSexportLIB(wxCommandEvent& WXUNUSED(event));
+      void   OnGDSexportCELL(wxCommandEvent& WXUNUSED(event));
       void    OnGDSclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("gdsclose();"));}
 
-      void     OnCIFexportLIB(wxCommandEvent&);
-      void     OnCIFimport(wxCommandEvent&);
-      void     OnCIFRead(wxCommandEvent&);
-      void   OnCIFtranslate(wxCommandEvent&);
-      void   OnCIFexportCELL(wxCommandEvent&);
+      void     OnCIFexportLIB(wxCommandEvent& WXUNUSED(event));
+      void     OnCIFimport(wxCommandEvent& WXUNUSED(event));
+      void     OnCIFRead(wxCommandEvent& WXUNUSED(event));
+      void   OnCIFtranslate(wxCommandEvent& WXUNUSED(event));
+      void   OnCIFexportCELL(wxCommandEvent& WXUNUSED(event));
       void    OnCIFclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("cifclose();"));}
-      void     OnTDTSave(wxCommandEvent&);
-      void   OnTDTSaveAs(wxCommandEvent&);
-      void   OnPropSave(wxCommandEvent&);
+      void     OnTDTSave(wxCommandEvent& WXUNUSED(event));
+      void   OnTDTSaveAs(wxCommandEvent& WXUNUSED(event));
+      void   OnPropSave(wxCommandEvent& WXUNUSED(event));
       void OnTDTSnapshot(wxCommandEvent&);
       void        OnCopy(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("copy();"));}
       void        OnMove(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("move();"));}
@@ -171,18 +172,18 @@ namespace tui {
       void      OnResize(wxCommandEvent& WXUNUSED(event));
       void  OnChangeText(wxCommandEvent& WXUNUSED(event));
 
-      void     OnCellNew(wxCommandEvent&);
-      void    OnCellOpen(wxCommandEvent&);
+      void     OnCellNew(wxCommandEvent& WXUNUSED(event));
+      void    OnCellOpen(wxCommandEvent& WXUNUSED(event));
       void    OnCellRemove(wxCommandEvent&);
       void    OnCellPush(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("editpush(getpoint());"));}
       void     OnCellPop(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("editpop();"));}
       void     OnCellTop(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("edittop();"));}
       void    OnCellPrev(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("editprev();"));}
-      void   OnCellRef_B(wxCommandEvent&);
-      void   OnCellRef_M(wxCommandEvent&);
-      void  OnCellARef_B(wxCommandEvent&);
-      void   OnCellARef_M(wxCommandEvent&);
-      void   OnCellGroup(wxCommandEvent&);
+      void   OnCellRef_B(wxCommandEvent& WXUNUSED(event));
+      void   OnCellRef_M(wxCommandEvent& WXUNUSED(event));
+      void  OnCellARef_B(wxCommandEvent& WXUNUSED(event));
+      void  OnCellARef_M(wxCommandEvent& WXUNUSED(event));
+      void   OnCellGroup(wxCommandEvent& WXUNUSED(event));
       void OnCellUngroup(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("ungroup();"));}
       void   OnChangeRef(wxCommandEvent& WXUNUSED(event));
 
@@ -197,8 +198,8 @@ namespace tui {
       void     OnZoomAll(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("zoomall();"));}
       void     OnDrawBox(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("addbox();"));}
       void    OnDrawPoly(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("addpoly();"));}
-      void    OnDrawWire(wxCommandEvent&);
-      void    OnDrawText(wxCommandEvent&);
+      void    OnDrawWire(wxCommandEvent& WXUNUSED(event));
+      void    OnDrawText(wxCommandEvent& WXUNUSED(event));
       void    OnSelectIn(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("select();"));}
       void  OnUnselectIn(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("unselect();"));}
       void   OnPselectIn(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("pselect();"));}
@@ -207,42 +208,43 @@ namespace tui {
       void OnReportSelected(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("report_selected();"));}
       void   OnSelectAll(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("select_all();"));}
       //
-      void        OnStep(wxCommandEvent&);
-      void     OnAutopan(wxCommandEvent&);
-      void       OnGrid0(wxCommandEvent&);
-      void       OnGrid1(wxCommandEvent&);
-      void       OnGrid2(wxCommandEvent&);
-      void  OnLongCursor(wxCommandEvent&);
-      void    OnCellMark(wxCommandEvent&);
-      void    OnCellBox(wxCommandEvent&);
-      void    OnTextMark(wxCommandEvent&);
-      void    OnTextBox(wxCommandEvent&);
-      void     OnMarker0(wxCommandEvent&);
-      void    OnMarker45(wxCommandEvent&);
-      void    OnMarker90(wxCommandEvent&);
-		void		OnHToolBarSize16(wxCommandEvent&);
-		void		OnHToolBarSize24(wxCommandEvent&);
-		void		OnHToolBarSize32(wxCommandEvent&);
-		void		OnHToolBarSize48(wxCommandEvent&);
+      void        OnStep(wxCommandEvent& WXUNUSED(event));
+      void     OnAutopan(wxCommandEvent& WXUNUSED(event));
+      void   OnZeroCross(wxCommandEvent& WXUNUSED(event));
+      void       OnGrid0(wxCommandEvent& WXUNUSED(event));
+      void       OnGrid1(wxCommandEvent& WXUNUSED(event));
+      void       OnGrid2(wxCommandEvent& WXUNUSED(event));
+      void  OnLongCursor(wxCommandEvent& WXUNUSED(event));
+      void    OnCellMark(wxCommandEvent& WXUNUSED(event));
+      void     OnCellBox(wxCommandEvent& WXUNUSED(event));
+      void    OnTextMark(wxCommandEvent& WXUNUSED(event));
+      void     OnTextBox(wxCommandEvent& WXUNUSED(event));
+      void     OnMarker0(wxCommandEvent& WXUNUSED(event));
+      void    OnMarker45(wxCommandEvent& WXUNUSED(event));
+      void    OnMarker90(wxCommandEvent& WXUNUSED(event));
+      void		OnHToolBarSize16(wxCommandEvent& WXUNUSED(event));
+      void		OnHToolBarSize24(wxCommandEvent& WXUNUSED(event));
+      void		OnHToolBarSize32(wxCommandEvent& WXUNUSED(event));
+      void		OnHToolBarSize48(wxCommandEvent& WXUNUSED(event));
 
-		void		OnVToolBarSize16(wxCommandEvent&);
-		void		OnVToolBarSize24(wxCommandEvent&);
-		void		OnVToolBarSize32(wxCommandEvent&);
-		void		OnVToolBarSize48(wxCommandEvent&);
+      void		OnVToolBarSize16(wxCommandEvent& WXUNUSED(event));
+      void		OnVToolBarSize24(wxCommandEvent& WXUNUSED(event));
+      void		OnVToolBarSize32(wxCommandEvent& WXUNUSED(event));
+      void		OnVToolBarSize48(wxCommandEvent& WXUNUSED(event));
 
 
       void OnDefineLayer(wxCommandEvent&);
-      void OnDefineColor(wxCommandEvent&);
-      void  OnDefineFill(wxCommandEvent&);
+      void OnDefineColor(wxCommandEvent& WXUNUSED(event));
+      void  OnDefineFill(wxCommandEvent& WXUNUSED(event));
       void    OnMenu(wxCommandEvent&);
 
-      void  OnGridDefine(wxCommandEvent&);
+      void  OnGridDefine(wxCommandEvent& WXUNUSED(event));
       void  OnAddRuler(wxCommandEvent& WXUNUSED(event))    {_cmdline->parseCommand(wxT("addruler();") );}
       void  OnClearRulers(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("clearrulers();") );}
       void  OnChangeLayer(wxCommandEvent& WXUNUSED(event));
       void  OnCurrentLayer(wxCommandEvent& WXUNUSED(event));
       //
-      void               OnAbort(wxCommandEvent&);
+      void               OnAbort(wxCommandEvent& WXUNUSED(event));
       void  OnUpdateSettingsMenu(wxCommandEvent&);
       void          OnMouseAccel(wxCommandEvent&);
       void        OnCanvasStatus(wxCommandEvent&);
