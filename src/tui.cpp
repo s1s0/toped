@@ -1829,7 +1829,7 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          wxStaticText* dwgdstype = DEBUG_NEW wxStaticText( this, wxID_ANY, sGdsDtype,
             wxPoint( 65,(row_height+5)*rowno + 5), wxSize(55,row_height), wxALIGN_LEFT );
          wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, sTdtLay,
-            wxPoint( 120,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
+            wxPoint( 125,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
          dwgdslay->SetValue(true);
          _allRecords.push_back(LayerRecord(dwgdslay, dwgdstype, dwtpdlays));
          rowno++;
