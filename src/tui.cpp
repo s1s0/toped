@@ -531,7 +531,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    DATC->unlockGDS();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
-   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(270,300), gdsLayers);
+   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300), gdsLayers);
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -1825,11 +1825,11 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          wxString sTdtLay(DATC->getLayerName(CNM->first).c_str(), wxConvUTF8);
 
          wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
-            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(40,row_height), wxALIGN_LEFT );
+            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(55,row_height), wxALIGN_LEFT );
          wxStaticText* dwgdstype = DEBUG_NEW wxStaticText( this, wxID_ANY, sGdsDtype,
-            wxPoint( 50,(row_height+5)*rowno + 5), wxSize(40,row_height), wxALIGN_LEFT );
+            wxPoint( 65,(row_height+5)*rowno + 5), wxSize(55,row_height), wxALIGN_LEFT );
          wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, sTdtLay,
-            wxPoint( 95,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
+            wxPoint( 120,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
          dwgdslay->SetValue(true);
          _allRecords.push_back(LayerRecord(dwgdslay, dwgdstype, dwtpdlays));
          rowno++;
@@ -1929,9 +1929,9 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
    (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS layer/type"),
-      wxPoint(  5, 5), wxSize(90,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+      wxPoint(  5, 5), wxSize(120,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
    (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
-      wxPoint(95, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+      wxPoint(125, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
