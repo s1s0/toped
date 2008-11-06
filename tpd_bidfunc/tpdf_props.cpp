@@ -726,6 +726,42 @@ int tellstdfunc::stdAUTOPAN::execute() {
 }
 
 //=============================================================================
+tellstdfunc::stdZEROCROSS::stdZEROCROSS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+void tellstdfunc::stdZEROCROSS::undo_cleanup() {
+   getBoolValue(UNDOPstack, false);
+}
+
+void tellstdfunc::stdZEROCROSS::undo() {
+   TEUNDO_DEBUG("zerocross() UNDO");
+   bool autop = getBoolValue(UNDOPstack, true);
+   DATC->setZeroCross(autop);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   eventGRIDUPD.SetInt(autop ? tui::STS_ZEROCROSS_ON : tui::STS_ZEROCROSS_OFF);
+   wxPostEvent(TopedMainW, eventGRIDUPD);
+   RefreshGL();
+}
+
+int tellstdfunc::stdZEROCROSS::execute() {
+   // prepare undo first
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(DATC->autopan()));
+   //
+   bool zeroc    = getBoolValue();
+   DATC->setZeroCross(zeroc);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   eventGRIDUPD.SetInt(zeroc ? tui::STS_ZEROCROSS_ON : tui::STS_ZEROCROSS_OFF);
+   wxPostEvent(TopedMainW, eventGRIDUPD);
+   LogFile << LogFile.getFN() << "(" << LogFile._2bool(zeroc) << ");"; LogFile.flush();
+   RefreshGL();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::stdSHAPEANGLE::stdSHAPEANGLE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {

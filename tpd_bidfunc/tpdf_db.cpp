@@ -423,10 +423,10 @@ int tellstdfunc::GDSimport::execute()
    }
    else
    {
-      GdsLayers gdsLaysAll;
-      src_structure->collectLayers(gdsLaysAll,true);
+      GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
+      src_structure->collectLayers(*gdsLaysAll,true);
       DATC->unlockGDS();
-      GDSin::LayerMapGds LayerExpression(gdsLaysStrList, &gdsLaysAll);
+      LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
       if (LayerExpression.status())
       {
          nameList top_cells;
@@ -477,11 +477,11 @@ int tellstdfunc::GDSimportList::execute()
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
-   GdsLayers gdsLaysAll;
+   GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-      AGDSDB->collectLayers(gdsLaysAll);
+      AGDSDB->collectLayers(*gdsLaysAll);
    DATC->unlockGDS();
-   GDSin::LayerMapGds LayerExpression(gdsLaysStrList, &gdsLaysAll);
+   LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
    {
       DATC->lockDB(false);
@@ -538,7 +538,7 @@ int tellstdfunc::GDSexportLIB::execute()
    if (expandFileName(filename))
    {
       DATC->lockDB(false);
-         GDSin::LayerMapGds default_map(gdsLays, NULL);
+         LayerMapGds default_map(gdsLays, NULL);
          DATC->GDSexport(default_map, filename, x2048);
       DATC->unlockDB();
       LogFile << LogFile.getFN() << "( "
@@ -591,7 +591,7 @@ int tellstdfunc::GDSexportTOP::execute()
 
          if (NULL != excell)
          {
-            GDSin::LayerMapGds default_map(gdsLays, NULL);
+            LayerMapGds default_map(gdsLays, NULL);
 
             DATC->GDSexport(excell, default_map, recur, filename, x2048);
             LogFile  << LogFile.getFN() 
@@ -681,7 +681,7 @@ tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdREPORTLAY::execute() {
    bool recursive = getBoolValue();
    std::string cellname = getStringValue();
-   laydata::ListOfWords ull;
+   WordList ull;
    DATC->lockDB();
       bool success = DATC->TEDLIB()->collect_usedlays(cellname, recursive, ull);
    DATC->unlockDB();
@@ -690,12 +690,12 @@ int tellstdfunc::stdREPORTLAY::execute() {
       ull.sort();ull.unique();
       std::ostringstream ost;
       ost << "used layers: {";
-      for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+      for(WordList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
          ost << " " << *CL << " ";
       ost << "}";
       tell_log(console::MT_INFO, ost.str());
 
-      for(laydata::ListOfWords::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+      for(WordList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
          tllull->add(DEBUG_NEW telldata::ttint(*CL));
       ull.clear();
    }
@@ -760,17 +760,26 @@ int tellstdfunc::GDSreportlay::execute()
 
 
 //=============================================================================
-tellstdfunc::GDSdeflaymap::GDSdeflaymap(telldata::typeID retype, bool eor) :
+tellstdfunc::GDSgetlaymap::GDSgetlaymap(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::GDSdeflaymap::execute()
+int tellstdfunc::GDSgetlaymap::execute()
 {
    bool import = getBoolValue();
    telldata::ttlist* theMap = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
-   if (import)
+   const USMap* laymap = DATC->getGdsLayMap();
+   if (NULL != laymap)
+   {
+      for (USMap::const_iterator CI = laymap->begin(); CI != laymap->end(); CI++)
+      {
+         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(CI->first, CI->second);
+         theMap->add(clay);
+      }
+   }
+   else if (import)
    { // generate default import GDS layer map
       DATC->lockGDS();
       GdsLayers gdsLayers;
@@ -805,6 +814,32 @@ int tellstdfunc::GDSdeflaymap::execute()
    }
    OPstack.push(theMap);
    LogFile << LogFile.getFN() << "("<< LogFile._2bool(import)  << ");"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::GDSsetlaymap::GDSsetlaymap(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+}
+
+int tellstdfunc::GDSsetlaymap::execute()
+{
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+
+   // Convert layer map
+   USMap* gdsLays = DEBUG_NEW USMap();
+   telldata::tthsh* nameh;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      (*gdsLays)[nameh->key().value()] = nameh->value().value();
+   }
+   DATC->setGdsLayMap(gdsLays);
+
+   LogFile << LogFile.getFN() << "("<< *lll  << ");"; LogFile.flush();
+   delete lll;
    return EXEC_NEXT;
 }
 
@@ -1108,18 +1143,27 @@ int tellstdfunc::CIFclose::execute() {
 
 
 //=============================================================================
-tellstdfunc::CIFdeflaymap::CIFdeflaymap(telldata::typeID retype, bool eor) :
+tellstdfunc::CIFgetlaymap::CIFgetlaymap(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
-int tellstdfunc::CIFdeflaymap::execute()
+int tellstdfunc::CIFgetlaymap::execute()
 {
    bool import = getBoolValue();
    telldata::ttlist* theMap = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
-   if (import)
-   { // generate default import GDS layer map
+   const USMap* laymap = DATC->getCifLayMap();
+   if (NULL != laymap)
+   {
+      for (USMap::const_iterator CI = laymap->begin(); CI != laymap->end(); CI++)
+      {
+         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(CI->first, CI->second);
+         theMap->add(clay);
+      }
+   }
+   else if (import)
+   { // generate default import CIF layer map
       DATC->lockCIF();
       nameList cifLayers;
       DATC->CIFgetLay(cifLayers);
@@ -1149,3 +1193,30 @@ int tellstdfunc::CIFdeflaymap::execute()
    LogFile << LogFile.getFN() << "("<< LogFile._2bool(import)  << ");"; LogFile.flush();
    return EXEC_NEXT;
 }
+
+//=============================================================================
+tellstdfunc::CIFsetlaymap::CIFsetlaymap(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+}
+
+int tellstdfunc::CIFsetlaymap::execute()
+{
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+
+   // Convert layer map
+   USMap* cifLays = DEBUG_NEW USMap();
+   telldata::tthsh* nameh;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      (*cifLays)[nameh->key().value()] = nameh->value().value();
+   }
+   DATC->setCifLayMap(cifLays);
+
+   LogFile << LogFile.getFN() << "("<< *lll  << ");"; LogFile.flush();
+   delete lll;
+   return EXEC_NEXT;
+}
+

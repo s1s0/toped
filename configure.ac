@@ -36,11 +36,11 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([pow rint sqrt strtoul])
 
 # Checks for size of the types
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(time_t)
-AC_CHECK_SIZEOF(char)
-AC_CHECK_SIZEOF(short)
-AC_CHECK_SIZEOF(long)
+#AC_CHECK_SIZEOF(int)
+#AC_CHECK_SIZEOF(time_t)
+#AC_CHECK_SIZEOF(char)
+#AC_CHECK_SIZEOF(short)
+#AC_CHECK_SIZEOF(long)
 
 # Checks for libraries.
 
@@ -62,10 +62,10 @@ AX_CHECK_GLU
 
 #Check wxWidgets
  AM_OPTIONS_WXCONFIG
- AM_PATH_WXCONFIG(2.8.7, wxWin=1,,std gl)
+ AM_PATH_WXCONFIG(2.8.9, wxWin=1,,std gl)
  if test "$wxWin" != 1 || test "$wx_ver_ok" != "yes"; then
     AC_MSG_ERROR([
-       wxWindows ver.2.6.2 or later must be installed on your system
+       wxWindows ver.2.8.9 or later must be installed on your system
        Please install or update your wxWindows
     ])
  else

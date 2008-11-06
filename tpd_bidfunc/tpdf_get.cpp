@@ -27,13 +27,9 @@
 
 #include "tpdph.h"
 #include "tpdf_get.h"
+#include "../tpd_DB/tedat.h"
 #include <sstream>
-//#include "../tpd_DB/datacenter.h"
-//#include "../tpd_common/tuidefs.h"
-//#include "../tpd_DB/browsers.h"
 
-//extern DataCenter*               DATC;
-//extern console::toped_logfile    LogFile;
 extern void tellerror(std::string s);
 
 //=============================================================================

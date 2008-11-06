@@ -52,7 +52,6 @@ extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
 
 #include "../ui/crosscursor.xpm"
-#include "../ui/zerocross.xpm"
 
 //tui::CanvasStatus::CanvasStatus(){};
 void tui::StatusLine::update(const int4b width, const CTM& _LayCTM)
@@ -206,7 +205,67 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    initializeGL();
    ap_trigger = 10;
    glfInit();
-   zeroMark = DEBUG_NEW wxImage(zerocross);   
+}
+void	tui::LayoutCanvas::showInfo()
+{
+   std::ostringstream ost1, ost2, ost3;
+
+   const GLubyte *vendor = glGetString(GL_VENDOR);
+   const GLubyte *renderer = glGetString(GL_RENDERER);
+   const GLubyte *version = glGetString(GL_VERSION);
+
+   ost1<<"Vendor:" << vendor;
+   ost2<<"Renderer:" << renderer;
+   ost3<<"Version:" << version;
+   tell_log(console::MT_INFO,ost1.str());
+   tell_log(console::MT_INFO,ost2.str());
+   tell_log(console::MT_INFO,ost3.str());
+
+#ifdef WIN32
+   HDC hdc =  ::GetDC((HWND) GetHWND());
+   std::ostringstream ost;
+
+   PIXELFORMATDESCRIPTOR  pfd; 
+   //HDC  hdc; 
+   int  iPixelFormat; 
+ 
+   iPixelFormat = 1; 
+   
+
+   // obtain detailed information about 
+   // the device context's first pixel format 
+   DescribePixelFormat(hdc, iPixelFormat,  
+        sizeof(PIXELFORMATDESCRIPTOR), &pfd); 
+
+   if((pfd.dwFlags & PFD_GENERIC_FORMAT) && !(pfd.dwFlags & PFD_GENERIC_ACCELERATED))
+   {
+      ost<<"Program emulation of OpenGL";
+      tell_log(console::MT_INFO,ost.str());
+      ost<<"Operation can be extremely slow";
+      tell_log(console::MT_INFO,ost.str());
+   }
+
+    // Hardware supports only part of all set of functions ( MCD-driver ).
+   if((pfd.dwFlags & PFD_GENERIC_FORMAT) && (pfd.dwFlags & PFD_GENERIC_ACCELERATED))
+   {
+      ost<<"Program/hardware emulation of OpenGL";
+      tell_log(console::MT_INFO,ost.str());
+      ost<<"Some operations can not be accelerated";
+      tell_log(console::MT_INFO,ost.str());
+   }
+
+   // Full hardware support ( ICD-driver ).
+   if( !(pfd.dwFlags & PFD_GENERIC_FORMAT) && !(pfd.dwFlags & PFD_GENERIC_ACCELERATED))
+   {
+      ost<<"Hardware accelerated OpenGL";
+      tell_log(console::MT_INFO,ost.str());
+   }
+#endif
+#ifdef __WXGTK__
+   std::ostringstream msg;
+   msg << "GLX version "<< GetGLXVersion();
+   tell_log(console::MT_INFO, msg.str());
+#endif
 }
 
 wxImage   tui::LayoutCanvas::snapshot(void)
@@ -320,7 +379,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glMatrixMode( GL_MODELVIEW );
       glShadeModel( GL_FLAT ); // Single color
       update_viewport();
-      //@TODO !! Check somewhere that RGBA mode is available!?
       // CTM matrix stuff
       glLoadIdentity();
       glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
@@ -328,7 +386,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
-      drawZeroMark();
       DATC->openGL_draw(_LayCTM);    // draw data
       glAccum(GL_LOAD, 1.0);
       invalid_window = false;
@@ -359,16 +416,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
    }
 
    SwapBuffers();
-}
-
-void tui::LayoutCanvas::drawZeroMark()
-{
-   
-//   glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
-//   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-   glRasterPos2i(0,0);
-//   glBitmap(32,32,16,16,0,0, zeroMark);
-   glDrawPixels(32,32, GL_RGB, GL_UNSIGNED_BYTE, zeroMark->GetData());
 }
 
 // void tui::LayoutCanva+s::drawInterim(const TP& cp)
@@ -521,8 +568,8 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
       }
    }
    // update movement indicators
-   static int deltaX = abs(ScrMARKold.x() - ScrMARK.x());
-   static int deltaY = abs(ScrMARKold.y() - ScrMARK.y());
+   int deltaX = abs(ScrMARKold.x() - ScrMARK.x());
+   int deltaY = abs(ScrMARKold.y() - ScrMARK.y());
    if (!(deltaX || deltaY)) return;
    //
    CursorControl(event.ShiftDown(), event.ControlDown());
@@ -534,11 +581,11 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
 //   drawInterim(ScrMARK);
    if (tmp_wnd || mouse_input || reperX || reperY) Refresh();//updateGL();
 }
-      
+
 void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
    presspoint = ScrMARK;
    tmp_wnd = true;
-}   
+}
 
 void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
    tmp_wnd = false;
@@ -809,7 +856,6 @@ void tui::LayoutCanvas::update_viewport() {
 
 void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
 {
-   wxCommandEvent eventABORTEN(wxEVT_CANVAS_STATUS);
    if (1 == evt.GetExtraLong())
    { // start mouse input
       mouse_input = true;
@@ -820,7 +866,6 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       //restricted_move will be true for wire and polygon
       restricted_move = (DATC->marker_angle() != 0) &&
             ((actop > 0) || (actop == console::op_dpoly));
-      eventABORTEN.SetInt(CNVS_ABORTENABLE);
       reperX = (console::op_flipX == actop) || (long_cursor && (console::op_flipY != actop));
       reperY = (console::op_flipY == actop) || (long_cursor && (console::op_flipX != actop));
       if (  (console::op_flipX  == actop)
@@ -846,9 +891,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       wxPostEvent(this, eventPOSITION);
       eventPOSITION.SetInt(CNVS_DEL_X);
       wxPostEvent(this, eventPOSITION);
-      eventABORTEN.SetInt(CNVS_ABORTDISABLE);
    }
-   wxPostEvent(this, eventABORTEN);
 }
 
 
@@ -942,7 +985,6 @@ void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
 
 tui::LayoutCanvas::~LayoutCanvas(){
    delete crossCur;
-   delete zeroMark;
 //   delete (laydata::tdtdata::tessellObj);
 }
 

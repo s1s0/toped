@@ -105,7 +105,7 @@ namespace laydata {
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
          virtual void        GDSwrite(GDSin::GdsFile&, const cellList&, const TDTHierTree*, real, bool) const;
          virtual void        CIFwrite(CIFin::CifExportFile&, const cellList&, const TDTHierTree*, real, bool) const;
-         virtual void        collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const;
+         virtual void        collect_usedlays(const tdtlibdir*, bool, WordList&) const;
 
          void                 parentfound()     {_orphan = false;};
          bool                 orphan() const    {return _orphan;};
@@ -183,7 +183,7 @@ namespace laydata {
       bool                 relink(tdtlibdir*, TDTHierTree*&);
       void                 removePrep(laydata::tdtdesign* ATDB) const;
       void                 report_selected(real) const;
-      void                 collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const;
+      void                 collect_usedlays(const tdtlibdir*, bool, WordList&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
    private:
       bool                 getshapeover(TP, layprop::ViewProperties&);

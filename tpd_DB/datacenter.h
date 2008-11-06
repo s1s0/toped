@@ -37,12 +37,13 @@ namespace GDSin {
 
    class Gds2Ted {
    public:
-                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const GDSin::LayerMapGds&);
+                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const LayerMapGds&);
       void                 top_structure(std::string, bool, bool);
    protected:
       void                 child_structure(const GDSin::GDSHierTree*, bool);
       void                 convert_prep(const GDSin::GDSHierTree* item, bool);
       void                 convert(GDSin::GdsStructure*, laydata::tdtcell*);
+      void                 box (GDSin::GdsBox*     , laydata::tdtlayer*, int2b);
       void                 poly(GDSin::GdsPolygon* , laydata::tdtlayer*, int2b);
       void                 wire(GDSin::GDSpath*    , laydata::tdtlayer*, int2b);
       void                 text(GDSin::GdsText*    , laydata::tdtlayer*);
@@ -50,7 +51,7 @@ namespace GDSin {
       void                 aref(GDSin::GdsARef*    , laydata::tdtcell* );
       GDSin::GdsFile*      _src_lib;
       laydata::tdtdesign*  _dst_lib;
-      const GDSin::LayerMapGds&   _theLayMap;
+      const LayerMapGds&   _theLayMap;
       real                 _coeff; // DBU difference
    };
 }
@@ -83,9 +84,9 @@ public:
                               DataCenter(std::string);
                              ~DataCenter(); 
    bool                       GDSparse(std::string filename);
-   void                       GDSexport(const GDSin::LayerMapGds&, std::string&, bool);
-   void                       GDSexport(laydata::tdtcell*, const GDSin::LayerMapGds&, bool, std::string&, bool);
-   void                       importGDScell(const nameList&, const GDSin::LayerMapGds&, bool recur, bool over);
+   void                       GDSexport(const LayerMapGds&, std::string&, bool);
+   void                       GDSexport(laydata::tdtcell*, const LayerMapGds&, bool, std::string&, bool);
+   void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
    CIFin::CifStatusType       CIFparse(std::string filename);
@@ -132,6 +133,7 @@ public:
    bool                       neversaved()  const     {return _neversaved;}; 
    bool                       modified() const        {return _TEDLIB.modified();};
    bool                       autopan() const         {return _properties.autopan();}
+   bool                       zeroCross() const       {return _properties.zeroCross();}
    const real                 step() const            {return _properties.step();}
    const layprop::LayoutGrid* grid(byte gn) const     {return _properties.grid(gn);}
    const int4b                stepDB() const          {return _properties.stepDB();}
@@ -148,6 +150,7 @@ public:
    
 
    void                       setautopan(bool status) {_properties.setautopan(status);}
+   void                       setZeroCross(bool status) {_properties.setZeroCross(status);}
    void                       setmarker_angle(byte angle)
                                                       {_properties.setmarker_angle(angle);}
    void                       setstep(real st)        {_properties.setstep(st);}
@@ -190,14 +193,20 @@ public:
    const std::string          getColorName(word layno) {return _properties.drawprop().getColorName(layno);}
    const std::string          getFillName(word layno) {return _properties.drawprop().getFillName(layno);}
    const std::string          getLineName(word layno) {return _properties.drawprop().getLineName(layno);}
-   const laydata::ListOfWords upLayers() {return _properties.upLayers();}
+   const WordList             upLayers() {return _properties.upLayers();}
    void                       clearUnpublishedLayers() {_properties.clearUnpublishedLayers();}
    const word                 layselmask() {return _properties.layselmask();}
    void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
    laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
    laydata::LibCellLists*     getCells(int libID);
-protected:
-//   laydata::tdtdesign*        _TEDDB;        // toped data base
+   void                       setGdsLayMap(USMap* map)   {_properties.setGdsLayMap(map);}
+   void                       setCifLayMap(USMap* map)   {_properties.setCifLayMap(map);}
+   const USMap*               getGdsLayMap() const       {return _properties.getGdsLayMap();}
+   const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
+   LayerMapGds*               secureGdsLayMap(bool);
+   LayerMapCif*               secureCifLayMap(bool);
+
+   protected:
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
    GDSin::GdsFile*            _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data

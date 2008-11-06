@@ -33,6 +33,8 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "tedesign.h"
+#include "../tpd_ifaces/cif_io.h"
+#include "../tpd_ifaces/gds_io.h"
 #include "../tpd_common/outbox.h"
 #include "../tpd_common/glf.h"
 
@@ -260,7 +262,7 @@ void laydata::tdtdefaultcell::CIFwrite(CIFin::CifExportFile&, const cellList&, c
    assert(false);
 }
 
-void laydata::tdtdefaultcell::collect_usedlays(const tdtlibdir*, bool, ListOfWords&) const
+void laydata::tdtdefaultcell::collect_usedlays(const tdtlibdir*, bool, WordList&) const
 {
 }
 
@@ -1844,8 +1846,9 @@ void laydata::tdtcell::report_selected(real DBscale) const
    }
 }
 
-void laydata::tdtcell::collect_usedlays(const tdtlibdir* LTDB, bool recursive, ListOfWords& laylist) const{
+void laydata::tdtcell::collect_usedlays(const tdtlibdir* LTDB, bool recursive, WordList& laylist) const{
    // first call recursively the method on all children cells
+   assert(recursive ? NULL != LTDB : true);
    if (recursive)
       for (nameList::const_iterator CC = _children.begin(); CC != _children.end(); CC++)
          LTDB->collect_usedlays(*CC, recursive, laylist);

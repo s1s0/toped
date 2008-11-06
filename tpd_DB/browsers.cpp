@@ -34,7 +34,6 @@
 #include "viewprop.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
-#include "../tpd_parser/ted_prompt.h"
 #include "datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
@@ -43,7 +42,6 @@
 #include "../ui/nolay.xpm"
 
 
-extern console::ted_cmd*         Console;
 extern DataCenter*               DATC;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
@@ -1366,6 +1364,14 @@ void browsers::LayerButton::onPaint(wxPaintEvent&event)
 
 void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 {
+	//???Warning! Here istemporary solution for right vusulalisation of layer buttons
+	//after resizing
+	LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
+	if(_buttonWidth!=parent->GetClientSize().GetWidth())
+	{
+		parent->refresh();
+	}
+	//???
 
    if (event.ShiftDown())
    //Lock layer
@@ -1376,14 +1382,14 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
       cmd << wxT("hidelayer(") <<_layer->layno() << wxT(", ");
       if (_hidden) cmd << wxT("true") << wxT(");");
       else cmd << wxT("false") << wxT(");");
-      Console->parseCommand(cmd);
+      parseCommand(cmd);
    }
    else
    //Select layer
    {
       wxString cmd;
       cmd << wxT("usinglayer(") << _layer->layno()<< wxT(");");
-      Console->parseCommand(cmd);
+      parseCommand(cmd);
 
       if (!_selected)
       {
@@ -1404,12 +1410,21 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 
 void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 {
+	//???Warning! Here istemporary solution for right vusulalisation of layer buttons
+	//after resizing
+	LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
+	if(_buttonWidth!=parent->GetClientSize().GetWidth())
+	{
+		parent->refresh();
+	}
+	//???
+
    //_locked = !_locked;
    wxString cmd;
    cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
    if (DATC->layerLocked(_layer->layno())) cmd << wxT("false") << wxT(");");
    else cmd << wxT("true") << wxT(");");
-   Console->parseCommand(cmd);
+   parseCommand(cmd);
 
 }
 
@@ -1568,6 +1583,16 @@ void	browsers::LayerPanel::addButton(LayerInfo *layer)
 }
 
 void browsers::LayerPanel::onSize(wxSizeEvent& evt)
+{
+   for(LayerButtonMap::const_iterator it = _buttonMap.begin(); it!=_buttonMap.end();++it)
+   {
+      LayerButton *button = it->second;
+      button->preparePicture();
+   }
+   Refresh();
+}
+
+void	browsers::LayerPanel::refresh(void)
 {
    for(LayerButtonMap::const_iterator it = _buttonMap.begin(); it!=_buttonMap.end();++it)
    {
