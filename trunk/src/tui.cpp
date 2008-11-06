@@ -400,6 +400,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    _overwrite->SetValue(true);
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
    _recursive->SetValue(true);
+   _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    CIFin::CifFile* ACIFDB = DATC->lockCIF();
       CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
@@ -428,10 +429,15 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   //
+   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   lsizer->Add(_layList , 1, wxEXPAND);
+   lsizer->Add( _saveMap, 0, wxALL | wxALIGN_RIGHT, 5 );
+   //
    // First line up the important things
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_layList, 0, wxEXPAND);
+   lists_sizer->Add(lsizer, 0, wxEXPAND);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
@@ -455,6 +461,7 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
 {
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Export recursively"));
    _recursive->SetValue(true);
+   _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _slang = DEBUG_NEW wxCheckBox(this, -1, wxT("Verbose CIF slang"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -464,22 +471,27 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
       //-----------------------------------------------------------------------
-      nameList tdtLayers;
-      DATC->all_layers(tdtLayers);
+      WordList ull;
+      DATC->TEDLIB()->collect_usedlays(TARGETDB_LIB, ull);
 
    DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
-   _layList = DEBUG_NEW tui::nameEboxList(this, wxID_ANY, wxDefaultPosition, wxSize(290,300), tdtLayers);
+   _layList = DEBUG_NEW tui::nameEboxList(this, wxID_ANY, wxDefaultPosition, wxSize(290,300), ull);
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   //
+   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   lsizer->Add(_layList , 1, wxEXPAND);
+   lsizer->Add( _saveMap, 0, wxALL | wxALIGN_RIGHT, 5 );
+   //
    // First line up the important things
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_layList, 0, wxEXPAND);
-   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   lists_sizer->Add(lsizer, 0, wxEXPAND);
    // Buttons
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
    button_sizer->Add(_slang    , 0, wxALL | wxALIGN_LEFT, 5);
    button_sizer->Add(0,0,1); // 
@@ -501,6 +513,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
 {
    _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
+   _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
@@ -518,14 +531,18 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    DATC->unlockGDS();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
-   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(270,300), gdsLayers);
+   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300), gdsLayers);
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-   //   spin_sizer->Add(0,0,1); //
+   //
+   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   lsizer->Add(_layList , 1, wxEXPAND);
+   lsizer->Add( _saveMap, 0, wxALL | wxALIGN_RIGHT, 5 );
+   //
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_layList, 0, wxEXPAND);
+   lists_sizer->Add(lsizer, 0, wxEXPAND);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
@@ -548,6 +565,7 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Export recursively"));
    _recursive->SetValue(true);
+   _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::cellList const cll = ATDB->cells();
@@ -556,20 +574,25 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
       //-----------------------------------------------------------------------
-      nameList tdtLayers;
-      DATC->all_layers(tdtLayers);
+
+      WordList ull;
+      DATC->TEDLIB()->collect_usedlays(TARGETDB_LIB, ull);
 
    DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
-   _layList = DEBUG_NEW tui::nameEbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(270,300), tdtLayers);
+   _layList = DEBUG_NEW tui::nameEbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(270,300), ull);
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    //
+   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   lsizer->Add(_layList, 1, wxEXPAND);
+   lsizer->Add( _saveMap, 0, wxALL | wxALIGN_RIGHT, 5 );
+   //
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(_layList, 0, wxEXPAND);
+   lists_sizer->Add( lsizer  , 0, wxEXPAND );
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
@@ -1230,7 +1253,7 @@ void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
    FindWindow(ID_BTNAPPLY)->Enable(false);
 }
 
-void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(cmdevent))
+void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(event))
 {
    wxString s_red   =   _c_red->GetValue();
    wxString s_green = _c_green->GetValue();
@@ -1246,7 +1269,7 @@ void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(cmdevent))
    FindWindow(ID_BTNAPPLY)->Enable(true);
 }
 
-void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
+void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(event))
 {
    wxString color_name = _dwcolname->GetValue();
    nameNormalize(color_name);
@@ -1655,7 +1678,7 @@ void tui::defineFill::OnFillSelected(wxCommandEvent& cmdevent)
    _fillsample->Refresh();
 }
 
-void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(cmdevent))
+void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(event))
 {
    wxString fill_name = _dwfilname->GetValue();
    nameNormalize(fill_name);
@@ -1734,17 +1757,19 @@ tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
+   _cifMap = DATC->secureCifLayMap(true);
    word rowno = 0;
    for (SIMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
-      std::string ics = DATC->getLayerName(CNM->second);
-      wxString wxics  = wxString(ics.c_str(), wxConvUTF8);
+      word tdtLay;
+      if (!_cifMap->getTdtLay(tdtLay, CNM->first)) tdtLay = CNM->second;
+      wxString wxics  = wxString(DATC->getLayerName(tdtLay).c_str(), wxConvUTF8);
 
       wxCheckBox* dwciflay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, cifln,
-         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(110,row_height) );
+         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
       wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, wxics,
-         wxPoint(120,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
+         wxPoint(110,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
       dwciflay->SetValue(true);
       _allRecords.push_back(LayerRecord(dwciflay, dwtpdlays));
       rowno++;
@@ -1772,28 +1797,39 @@ SIMap* tui::nameCboxRecords::getTheMap()
    return cif_lay_map;
 }
 
+USMap* tui::nameCboxRecords::getTheFullMap()
+{
+   SIMap* umap = getTheMap();
+   USMap* nmap = _cifMap->updateMap(umap);
+   delete umap;
+   return nmap;
+}
+
 //==========================================================================
 tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz, 
             const GdsLayers& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
+   _gdsLayMap = DATC->secureGdsLayMap(true);
    word rowno = 0;
    for (GdsLayers::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-      wxString gdsln;
-      gdsln << CNM->first;
-      std::string ics = DATC->getLayerName(CNM->first);
-      wxString wxics  = wxString(ics.c_str(), wxConvUTF8);
+      wxString sGdsLay;
+      sGdsLay << CNM->first;
       for (WordList::const_iterator CTP = CNM->second.begin(); CTP != CNM->second.end(); CTP++)
       {
-         wxString gdstp;
-         gdstp << *CTP;
-         wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, gdsln,
-            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(50,row_height), wxALIGN_LEFT );
-         wxStaticText* dwgdstype = DEBUG_NEW wxStaticText( this, wxID_ANY, gdstp,
-            wxPoint( 60,(row_height+5)*rowno + 5), wxSize(40,row_height), wxALIGN_LEFT );
-         wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, wxics,
-            wxPoint(105,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
+         wxString sGdsDtype;
+         sGdsDtype << *CTP;
+         word wTdtLay;
+         if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
+         wxString sTdtLay(DATC->getLayerName(CNM->first).c_str(), wxConvUTF8);
+
+         wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
+            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(55,row_height), wxALIGN_LEFT );
+         wxStaticText* dwgdstype = DEBUG_NEW wxStaticText( this, wxID_ANY, sGdsDtype,
+            wxPoint( 65,(row_height+5)*rowno + 5), wxSize(55,row_height), wxALIGN_LEFT );
+         wxComboBox*   dwtpdlays = DEBUG_NEW wxComboBox  ( this, wxID_ANY, sTdtLay,
+            wxPoint( 125,(row_height+5)*rowno + 5), wxSize(150,row_height), all_strings, wxCB_SORT);
          dwgdslay->SetValue(true);
          _allRecords.push_back(LayerRecord(dwgdslay, dwgdstype, dwtpdlays));
          rowno++;
@@ -1823,6 +1859,14 @@ USMap* tui::nameCbox3Records::getTheMap()
       (*gds_lay_map)[layno] = gdslaytype.str();
    }
    return gds_lay_map;
+}
+
+USMap* tui::nameCbox3Records::getTheFullMap()
+{
+   USMap* umap = getTheMap();
+   USMap* nmap = _gdsLayMap->updateMap(umap, true);
+   delete umap;
+   return nmap;
 }
 
 //==========================================================================
@@ -1885,9 +1929,9 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
    (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS layer/type"),
-      wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+      wxPoint(  5, 5), wxSize(120,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
    (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
-      wxPoint(110, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
+      wxPoint(125, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
@@ -1913,20 +1957,26 @@ void tui::nameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 //==========================================================================
 tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz, 
-            const nameList& inlays, wxArrayString& all_strings, int row_height) 
+            const WordList& inlays, wxArrayString& all_strings, int row_height)
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
    word rowno = 0;
-   for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   _cifMap = DATC->secureCifLayMap(false);
+   for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-      wxString tpdlay  = wxString(CNM->c_str(), wxConvUTF8);
-      wxString ciflay(wxT("L"));
-      ciflay << DATC->getLayerNo(*CNM);
+      word layno = *CNM;
+      wxString tpdlay  = wxString(DATC->getLayerName(*CNM).c_str(), wxConvUTF8);
+      wxString ciflay;
+      std::string cifName;
+      if ( _cifMap->getCifLay(cifName, layno) )
+         ciflay = wxString(cifName.c_str(), wxConvUTF8);
+      else
+         ciflay << wxT("L") << layno;
       if (4 < ciflay.Length()) ciflay.Clear(); // Should not be longer than 4
       wxCheckBox* dwtpdlays  = DEBUG_NEW wxCheckBox( this, wxID_ANY, tpdlay,
-            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(110,row_height) );
+            wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
       wxTextCtrl*   dwciflay = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, ciflay,
-            wxPoint(120,(row_height+5)*rowno + 5), wxSize(150,row_height));
+            wxPoint(110,(row_height+5)*rowno + 5), wxSize(145,row_height));
       dwtpdlays->SetValue(true);
       _allRecords.push_back(LayerRecord(dwtpdlays, dwciflay));
       rowno++;
@@ -1948,12 +1998,20 @@ USMap* tui::nameEboxRecords::getTheMap()
    return cif_lay_map;
 }
 
+USMap* tui::nameEboxRecords::getTheFullMap()
+{
+   USMap* umap = getTheMap();
+   USMap* nmap = _cifMap->updateMap(umap);
+   delete umap;
+   return nmap;
+}
+
 //--------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tui::nameEboxList, wxScrolledWindow)
       EVT_SIZE( tui::nameEboxList::OnSize )
 END_EVENT_TABLE()
 
-tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const nameList& inlays) :
+tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const WordList& inlays) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
@@ -1993,22 +2051,30 @@ void tui::nameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 //==========================================================================
 tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz, 
-            const nameList& inlays, wxArrayString& all_strings, int row_height) 
+            const WordList& inlays, wxArrayString& all_strings, int row_height)
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
+   _gdsLayMap= DATC->secureGdsLayMap(false);
    word rowno = 0;
-   for (nameList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-      wxString tpdlay  = wxString(CNM->c_str(), wxConvUTF8);
-      wxString gdslay;
-      gdslay << DATC->getLayerNo(*CNM);
+      word wGdsLay, wGdsType;
+      if (!_gdsLayMap->getGdsLayType(wGdsLay, wGdsType, *CNM))
+      {
+         wGdsLay  = *CNM;
+         wGdsType = 0;
+      }
+      wxString tpdlay  = wxString(DATC->getLayerName(*CNM).c_str(), wxConvUTF8);
+      wxString gdslay, gdstype;
+      gdslay << wGdsLay;
+      gdstype <<wGdsType;
 
       wxCheckBox* dwtpdlays  = DEBUG_NEW wxCheckBox( this, wxID_ANY, tpdlay,
-         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(110,row_height) );
-      wxTextCtrl*   dwgdslay = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, gdslay, 
-         wxPoint(120,(row_height+5)*rowno + 5), wxSize(70,row_height));
-      wxTextCtrl*   dwgdstyp = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, wxT("0"), 
-         wxPoint(190,(row_height+5)*rowno + 5), wxSize(70,row_height));
+         wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
+      wxTextCtrl*   dwgdslay = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, gdslay,
+         wxPoint(110,(row_height+5)*rowno + 5), wxSize(70,row_height));
+      wxTextCtrl*   dwgdstyp = DEBUG_NEW wxTextCtrl ( this, wxID_ANY, gdstype,
+         wxPoint(180,(row_height+5)*rowno + 5), wxSize(70,row_height));
       dwtpdlays->SetValue(true);
       _allRecords.push_back(LayerRecord(dwtpdlays, dwgdslay, dwgdstyp));
       rowno++;
@@ -2033,12 +2099,20 @@ USMap* tui::nameEbox3Records::getTheMap()
    return gds_lay_map;
 }
 
+USMap* tui::nameEbox3Records::getTheFullMap()
+{
+   USMap* umap = getTheMap();
+   USMap* nmap = _gdsLayMap->updateMap(umap, false);
+   delete umap;
+   return nmap;
+}
+
 //--------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tui::nameEbox3List, wxScrolledWindow)
       EVT_SIZE( tui::nameEbox3List::OnSize )
 END_EVENT_TABLE()
 
-tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const nameList& inlays) :
+tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const WordList& inlays) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers

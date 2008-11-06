@@ -28,10 +28,12 @@
 #include "tpdph.h"
 #include <sstream>
 #include "../tpd_common/ttt.h"
+#include "../tpd_common/outbox.h"
+#include "../tpd_ifaces/cif_io.h"
+#include "../tpd_ifaces/gds_io.h"
 #include "tedesign.h"
 #include "tedat.h"
 #include "viewprop.h"
-#include "../tpd_common/outbox.h"
 
 //! the stack of all previously edited (opened) cells
 laydata::editcellstack      laydata::editobject::_editstack;
@@ -296,6 +298,18 @@ void laydata::tdtlibrary::cleanUnreferenced()
    }
 }
 
+void laydata::tdtlibrary::collect_usedlays(WordList& laylist) const
+{
+   for (cellList::const_iterator CC = _cells.begin(); CC != _cells.end(); CC++)
+   {
+      CC->second->collect_usedlays(NULL, false,laylist);
+   }
+   laylist.sort();
+   laylist.unique();
+   if ( (0 < laylist.size()) && (0 == laylist.front()) )
+      laylist.pop_front();
+}
+
 //-----------------------------------------------------------------------------
 // class tdtlibdir
 //-----------------------------------------------------------------------------
@@ -431,7 +445,7 @@ laydata::refnamepair laydata::tdtlibdir::adddefaultcell( std::string name )
    return undeflib->secure_defaultcell(name);
 }
 
-bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, ListOfWords& laylist) const
+bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, WordList& laylist) const
 {
    tdtcell* topcell = NULL;
    if (NULL != _TEDDB) topcell = _TEDDB->checkcell(cellname);
@@ -450,6 +464,13 @@ bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, 
       }
       else return false;
    }
+}
+
+void laydata::tdtlibdir::collect_usedlays( int libID, WordList& laylist) const
+{
+   assert(UNDEFCELL_LIB != libID);
+   laydata::tdtlibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;
+   if (NULL != curlib) curlib->collect_usedlays(laylist);
 }
 
 /*! Used to link the cell references with their definitions. This function is called to relink

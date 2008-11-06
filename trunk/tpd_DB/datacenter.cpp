@@ -41,7 +41,7 @@ DataCenter*               DATC = NULL;
 //-----------------------------------------------------------------------------
 // class Gds2Ted
 //-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const GDSin::LayerMapGds& theLayMap) :
+GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const LayerMapGds& theLayMap) :
       _src_lib(src_lib), _dst_lib(dst_lib), _theLayMap(theLayMap), _coeff(dst_lib->UU() / src_lib->libUnits())
 {
 }
@@ -130,8 +130,7 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
                laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(tdtlaynum));
                switch( wd->gdsDataType() )
                {
-      //         case      gds_BOX: box(static_cast<GDSin::GdsBox*>(wd), dst);  break;
-                  case      gds_BOX: break;
+                  case      gds_BOX: box (static_cast<GDSin::GdsBox*>(wd)     , dwl, laynum);  break;
                   case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
                   case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
                   case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
@@ -166,6 +165,27 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
       }
    }
    dst->resort();
+}
+
+void GDSin::Gds2Ted::box(GDSin::GdsBox* wd, laydata::tdtlayer* wl, int2b layno)
+{
+
+   pointlist &pl = wd->plist();
+   laydata::valid_poly check(pl);
+
+   if (!check.valid())
+   {
+      std::ostringstream ost; ost << "Layer " << layno;
+      ost << ": Box check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   else pl = check.get_validated() ;
+   if (check.box())
+   {
+      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
+   }
+   else wl->addpoly(pl,false);
+
 }
 
 void GDSin::Gds2Ted::poly(GDSin::GdsPolygon* wd, laydata::tdtlayer* wl, int2b layno)
@@ -659,7 +679,7 @@ bool DataCenter::TDTwrite(const char* filename)
    return true;
 }
 
-void DataCenter::GDSexport(const GDSin::LayerMapGds& layerMap, std::string& filename, bool x2048)
+void DataCenter::GDSexport(const LayerMapGds& layerMap, std::string& filename, bool x2048)
 {
    std::string nfn;
    //Get actual time
@@ -669,7 +689,7 @@ void DataCenter::GDSexport(const GDSin::LayerMapGds& layerMap, std::string& file
    gdsex.closeFile();
 }
 
-void DataCenter::GDSexport(laydata::tdtcell* cell, const GDSin::LayerMapGds& layerMap, bool recur, std::string& filename, bool x2048)
+void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapGds& layerMap, bool recur, std::string& filename, bool x2048)
 {
    std::string nfn;
    //Get actual time
@@ -710,7 +730,7 @@ bool DataCenter::GDSparse(std::string filename)
    return status;
 }
 
-void DataCenter::importGDScell(const nameList& top_names, const GDSin::LayerMapGds& laymap, bool recur, bool over)
+void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
 {
    if (NULL == lockGDS())
    {
@@ -1013,6 +1033,7 @@ void DataCenter::openGL_draw(const CTM& layCTM) {
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
       while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
       _properties.drawGrid();
+      _properties.drawZeroCross();
       _TEDLIB()->openGL_draw(_properties.drawprop());
       _properties.drawRulers(layCTM);
       DBLock.Unlock();
@@ -1191,6 +1212,96 @@ bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter
    unlockDB();
    // search the cell in the libraries because it's not in the DB
    return _TEDLIB.getLibCellRNP(name, striter);
+}
+
+
+LayerMapCif* DataCenter::secureCifLayMap(bool import)
+{
+   const USMap* savedMap = _properties.getCifLayMap();
+   if (NULL != savedMap) return DEBUG_NEW LayerMapCif(*savedMap);
+   USMap* theMap = DEBUG_NEW USMap();
+   if (import)
+   {// Generate the default CIF layer map for import
+      lockCIF();
+      nameList cifLayers;
+      CIFgetLay(cifLayers);
+      unlockCIF();
+      word laynum = 1;
+      for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
+         (*theMap)[laynum] = *CCL;
+   }
+   else
+   {// Generate the default CIF layer map for export
+      lockDB(false);
+      nameList tdtLayers;
+      all_layers(tdtLayers);
+      for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+      {
+         std::ostringstream ciflayname;
+         word layno = getLayerNo( *CDL );
+         ciflayname << "L" << layno;
+         (*theMap)[layno] = ciflayname.str();
+      }
+      unlockDB();
+   }
+   return DEBUG_NEW LayerMapCif(*theMap);
+}
+
+LayerMapGds* DataCenter::secureGdsLayMap(bool import)
+{
+   const USMap* savedMap = _properties.getGdsLayMap();
+   LayerMapGds* theGdsMap;
+   if (NULL == savedMap)
+   {
+      USMap theMap;
+      if (import)
+      { // generate default import GDS layer map
+         lockGDS();
+         GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
+         gdsGetLayers(*gdsLayers);
+         unlockGDS();
+         for ( GdsLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
+         {
+            std::ostringstream dtypestr;
+            dtypestr << CGL->first << ";";
+            for ( WordList::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
+            {
+               if ( CDT != CGL->second.begin() ) dtypestr << ", ";
+               dtypestr << *CDT;
+            }
+            theMap[CGL->first] = dtypestr.str();
+         }
+         theGdsMap = DEBUG_NEW LayerMapGds(theMap, gdsLayers);
+      }
+      else
+      { // generate default export GDS layer map
+         lockDB(false);
+         nameList tdtLayers;
+         all_layers(tdtLayers);
+         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         {
+            std::ostringstream dtypestr;
+            dtypestr << DATC->getLayerNo( *CDL )<< "; 0";
+            theMap[DATC->getLayerNo( *CDL )] = dtypestr.str();
+         }
+         DATC->unlockDB();
+         theGdsMap = DEBUG_NEW LayerMapGds(theMap, NULL);
+      }
+   }
+   else
+   {
+      if (import)
+      {
+         lockGDS();
+         GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
+         gdsGetLayers(*gdsLayers);
+         unlockGDS();
+         theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, gdsLayers);
+      }
+      else
+         theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, NULL);
+   }
+   return theGdsMap;
 }
 
 laydata::LibCellLists* DataCenter::getCells(int libID)

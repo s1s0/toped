@@ -70,38 +70,42 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
 {
    wxFont fontX = GetFont();
    fontX.SetWeight(wxBOLD);
+   fontX.SetPointSize(9);
+   //fontX.SetFamily(wxFONTFAMILY_MODERN); 
+   
    SetFont(fontX);
-   _abort = DEBUG_NEW wxButton(this, TBSTAT_ABORT, wxT("Abort"));
-   _abort->Disable();
+   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    SetBackgroundColour(wxColour(wxT("LIGHT_GRAY")));
    SetForegroundColour(wxColour(wxT("BLACK")));
-   X_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition,wxSize(80,13),// wxDefaultSize,
-                                                   wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   Y_pos = DEBUG_NEW wxStaticText(this, -1, wxT("0.00"), wxDefaultPosition, wxSize(80,13),
-                                                   wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dX = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(80,13),
-                                                   wxST_NO_AUTORESIZE /*| wxALIGN_RIGHT*/);
-   _dY = DEBUG_NEW wxStaticText(this, -1, wxT(""), wxDefaultPosition, wxSize(100,13),
-                                                   wxST_NO_AUTORESIZE/* | wxALIGN_RIGHT*/);
-   
-   _selected = DEBUG_NEW wxStaticText(this, -1, wxT("0"), wxDefaultPosition, wxSize(40,13),
+   X_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition,wxSize(120,-1),
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+   Y_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition, wxSize(120,-1),
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+   _dX = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+   _dY = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+
+   _selected = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0"), wxDefaultPosition, wxSize(40,-1),
                                                    wxST_NO_AUTORESIZE | wxALIGN_LEFT);
-   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   thesizer->Add(_abort, 0, wxALL | wxALIGN_CENTER, 3);
-   thesizer->Add(30,0,0);
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("Selected: ")), 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(_selected, 0, wxALIGN_CENTER, 3 );
-//   thesizer->Add(10,0,1);  
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("dX: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(_dX, 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("dY: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(_dY, 0, wxALIGN_CENTER, 3 );
-//   thesizer->Add(20,0,1);  
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("X: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(X_pos, 0, wxALIGN_CENTER, 3 );
-   thesizer->Add(DEBUG_NEW wxStaticText(this, -1, wxT("Y: ")), 0, wxLEFT | wxRIGHT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(Y_pos, 0, wxALIGN_CENTER, 3 );
-   SetSizerAndFit(thesizer);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Selected: ")), 0, wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(_selected, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(10,0,0);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("dX: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(_dX, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(10,0,0);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("dY: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(_dY, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(20,0,0);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("X: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(X_pos, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(10,0,0);
+   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Y: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(Y_pos, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
+   thesizer->Add(20,0,0);
+
+   SetSizer( thesizer );      // use the sizer for layout
+   thesizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 
 tui::CanvasStatus::~CanvasStatus() {
@@ -110,7 +114,6 @@ tui::CanvasStatus::~CanvasStatus() {
    delete _dX;
    delete _dY;
    delete _selected;
-   delete _abort;
 }
 
 void tui::CanvasStatus::setXpos(wxString coordX){
@@ -262,6 +265,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_GRID0         , tui::TopedFrame::OnGrid0       )
    EVT_MENU( TMSET_GRID1         , tui::TopedFrame::OnGrid1       )
    EVT_MENU( TMSET_GRID2         , tui::TopedFrame::OnGrid2       )
+   EVT_MENU( TMSET_ZEROCROSS     , tui::TopedFrame::OnZeroCross   )
    EVT_MENU( TMSET_CELLMARK      , tui::TopedFrame::OnCellMark    )
    EVT_MENU( TMSET_TEXTMARK      , tui::TopedFrame::OnTextMark    )
    EVT_MENU( TMSET_CELLBOX       , tui::TopedFrame::OnCellBox     )
@@ -271,16 +275,16 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
    EVT_MENU( TMSET_CURLONG       , tui::TopedFrame::OnLongCursor  )
-	
-	EVT_MENU( TMSET_HTOOLSIZE16   , tui::TopedFrame::OnHToolBarSize16	)
-	EVT_MENU( TMSET_HTOOLSIZE24   , tui::TopedFrame::OnHToolBarSize24	)
-	EVT_MENU( TMSET_HTOOLSIZE32   , tui::TopedFrame::OnHToolBarSize32	)
-	EVT_MENU( TMSET_HTOOLSIZE48   , tui::TopedFrame::OnHToolBarSize48	)
+   
+   EVT_MENU( TMSET_HTOOLSIZE16   , tui::TopedFrame::OnHToolBarSize16   )
+   EVT_MENU( TMSET_HTOOLSIZE24   , tui::TopedFrame::OnHToolBarSize24   )
+   EVT_MENU( TMSET_HTOOLSIZE32   , tui::TopedFrame::OnHToolBarSize32   )
+   EVT_MENU( TMSET_HTOOLSIZE48   , tui::TopedFrame::OnHToolBarSize48   )
 
-	EVT_MENU( TMSET_VTOOLSIZE16   , tui::TopedFrame::OnVToolBarSize16	)
-	EVT_MENU( TMSET_VTOOLSIZE24   , tui::TopedFrame::OnVToolBarSize24	)
-	EVT_MENU( TMSET_VTOOLSIZE32   , tui::TopedFrame::OnVToolBarSize32	)
-	EVT_MENU( TMSET_VTOOLSIZE48   , tui::TopedFrame::OnVToolBarSize48	)
+   EVT_MENU( TMSET_VTOOLSIZE16   , tui::TopedFrame::OnVToolBarSize16   )
+   EVT_MENU( TMSET_VTOOLSIZE24   , tui::TopedFrame::OnVToolBarSize24   )
+   EVT_MENU( TMSET_VTOOLSIZE32   , tui::TopedFrame::OnVToolBarSize32   )
+   EVT_MENU( TMSET_VTOOLSIZE48   , tui::TopedFrame::OnVToolBarSize48   )
 
    EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
@@ -301,7 +305,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
    EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)
    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
-	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -565,18 +569,18 @@ void tui::TopedFrame::initMenuBar() {
    markerMenu->AppendRadioItem(TMSET_MARKER45   , wxT("45 degrees"), wxT("Restrict shape angles to 45 deg"));
    markerMenu->AppendRadioItem(TMSET_MARKER90   , wxT("Orthogonal"), wxT("Restrict shape angles to 90 deg"));
 
-	//Toolbar Size sub menu
-	toolbarHorSizeMenu = DEBUG_NEW wxMenu();
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE16	,	wxT("16x16"), wxT("Horizontal toolbars size is 16x16"));
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE24	,	wxT("24x24"), wxT("Horizontal toolbars size is 24x24"));
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE32	,	wxT("32x32"), wxT("Horizontal toolbars size is 32x32"));
-	toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE48	,	wxT("48x48"), wxT("Horizontal toolbars size is 48x48"));
+   //Toolbar Size sub menu
+   toolbarHorSizeMenu = DEBUG_NEW wxMenu();
+   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE16   ,   wxT("16x16"), wxT("Toolbar size is 16x16"));
+   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE24   ,   wxT("24x24"), wxT("Toolbar size is 24x24"));
+   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE32   ,   wxT("32x32"), wxT("Toolbar size is 32x32"));
+   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE48   ,   wxT("48x48"), wxT("Toolbar size is 48x48"));
 
-	toolbarVertSizeMenu = DEBUG_NEW wxMenu();
-	toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE16	,	wxT("16x16"), wxT("Vertical toolbars size is 16x16"));
-	toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE24	,	wxT("24x24"), wxT("Vertical toolbars size is 24x24"));
-	toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE32	,	wxT("32x32"), wxT("Vertical toolbars size is 32x32"));
-	toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE48	,	wxT("48x48"), wxT("Vertical toolbars size is 48x48"));
+   //toolbarVertSizeMenu = DEBUG_NEW wxMenu();
+   //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE16   ,   wxT("16x16"), wxT("Vertical toolbars size is 16x16"));
+   //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE24   ,   wxT("24x24"), wxT("Vertical toolbars size is 24x24"));
+   //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE32   ,   wxT("32x32"), wxT("Vertical toolbars size is 32x32"));
+   //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE48   ,   wxT("48x48"), wxT("Vertical toolbars size is 48x48"));
    // now the setting menu itself
    settingsMenu=DEBUG_NEW wxMenu();
    settingsMenu->Append         (TMSET_STEP     , wxT("Step")      , wxT("Select objects"));
@@ -587,6 +591,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendCheckItem(TMSET_GRID1    , wxT("Grid 1")    , wxT("Draw/Hide Grid 1"));
    settingsMenu->AppendCheckItem(TMSET_GRID2    , wxT("Grid 2")    , wxT("Draw/Hide Grid 2"));
    settingsMenu->AppendSeparator();
+   settingsMenu->AppendCheckItem(TMSET_ZEROCROSS, wxT("Zero Cross"), wxT("Draw/Hide Zero Cross mark"));
    settingsMenu->AppendCheckItem(TMSET_CELLMARK , wxT("Cell marks"), wxT("Draw/Hide Cell marks"));
    settingsMenu->AppendCheckItem(TMSET_TEXTMARK , wxT("Text marks"), wxT("Draw/Hide Text marks"));
    settingsMenu->AppendCheckItem(TMSET_CELLBOX  , wxT("Cell box")  , wxT("Draw/Hide Cell overlapping box"));
@@ -594,9 +599,10 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
    settingsMenu->AppendCheckItem(TMSET_CURLONG  , wxT("Long cursor")  , wxT("Stretch the cursor cross"));
-	settingsMenu->AppendSeparator();
-	settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
-	settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
+   settingsMenu->AppendSeparator();
+   settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("Toolbar size") , toolbarHorSizeMenu , wxT("Define toolbars size"));
+   //settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
+   //settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_DEFLAY   , wxT("Define Layer") , wxT("Define a layer"));
    settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color") , wxT("Define a drawing color"));
@@ -609,9 +615,10 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Other/Add Ruler"   , "", &tui::TopedFrame::OnAddRuler, "Add new ruler" );
    _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
 //   _resourceCenter->appendMenuSeparator("Other");
-   
+
+   _resourceCenter->appendMenu("&Help/Report Video", "", &tui::TopedFrame::OnCheckHW, "Display OpenGL & video driver information" );
+   _resourceCenter->appendMenuSeparator("Help");
    _resourceCenter->appendMenu("&Help/About", "", &tui::TopedFrame::OnAbout, "About TOPED" );
-   
    //---------------------------------------------------------------------------
    // MENUBAR CONFIGURATION
    //menuBar = DEBUG_NEW wxMenuBar();
@@ -639,27 +646,27 @@ void tui::TopedFrame::setIconDir(const std::string& uiDir)
 
 void tui::TopedFrame::initToolBars() 
 {
-	_resourceCenter->setDirection(wxAUI_DOCK_TOP);
+   _resourceCenter->setDirection(wxAUI_DOCK_TOP);
    _resourceCenter->appendTool("main", "new", "new16x16.png",ICON_SIZE_16x16, "", "new cell", &tui::TopedFrame::OnCellNew);
    _resourceCenter->appendTool("main", "open", "open16x16.png",ICON_SIZE_16x16,"", "open cell", &tui::TopedFrame::OnCellOpen);
    _resourceCenter->appendTool("main", "save", "save16x16.png",ICON_SIZE_16x16, "", "save design", &tui::TopedFrame::OnTDTSave);
 
-	_resourceCenter->appendTool("main", "new", "new24x24.png",ICON_SIZE_24x24, "", "new cell", &tui::TopedFrame::OnCellNew);
+   _resourceCenter->appendTool("main", "new", "new24x24.png",ICON_SIZE_24x24, "", "new cell", &tui::TopedFrame::OnCellNew);
    _resourceCenter->appendTool("main", "open", "open24x24.png",ICON_SIZE_24x24,"", "open cell", &tui::TopedFrame::OnCellOpen);
    _resourceCenter->appendTool("main", "save", "save24x24.png",ICON_SIZE_24x24, "", "save design", &tui::TopedFrame::OnTDTSave);
 
-	_resourceCenter->appendTool("main", "new", "new32x32.png",ICON_SIZE_32x32, "", "new cell", &tui::TopedFrame::OnCellNew);
+   _resourceCenter->appendTool("main", "new", "new32x32.png",ICON_SIZE_32x32, "", "new cell", &tui::TopedFrame::OnCellNew);
    _resourceCenter->appendTool("main", "open", "open32x32.png",ICON_SIZE_32x32,"", "open cell", &tui::TopedFrame::OnCellOpen);
    _resourceCenter->appendTool("main", "save", "save32x32.png",ICON_SIZE_32x32, "", "save design", &tui::TopedFrame::OnTDTSave);
 
-	_resourceCenter->appendTool("main", "new", "new48x48.png",ICON_SIZE_48x48, "", "new cell", &tui::TopedFrame::OnCellNew);
+   _resourceCenter->appendTool("main", "new", "new48x48.png",ICON_SIZE_48x48, "", "new cell", &tui::TopedFrame::OnCellNew);
    _resourceCenter->appendTool("main", "open", "open48x48.png",ICON_SIZE_48x48,"", "open cell", &tui::TopedFrame::OnCellOpen);
    _resourceCenter->appendTool("main", "save", "save48x48.png",ICON_SIZE_48x48, "", "save design", &tui::TopedFrame::OnTDTSave);
 
 
-	//_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
-	_resourceCenter->setDirection(wxAUI_DOCK_LEFT);
-	//------------------------------------------16x16-------------------------------------------
+   //_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
+   _resourceCenter->setDirection(wxAUI_DOCK_TOP);
+   //------------------------------------------16x16-------------------------------------------
    _resourceCenter->appendTool("edit", "undo", "undo16x16.png",ICON_SIZE_16x16, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo16x16.png",ICON_SIZE_16x16, "", "redo",&tui::TopedFrame::OnUndo);*/
    _resourceCenter->appendTool("edit", "box", "box16x16.png", ICON_SIZE_16x16,"", "add box",&tui::TopedFrame::OnDrawBox);
@@ -681,7 +688,7 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "edit_push", "edit_push16x16.png", ICON_SIZE_16x16,"", "edit push",&tui::TopedFrame::OnCellPush);
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop16x16.png", ICON_SIZE_16x16,"", "edit pop",&tui::TopedFrame::OnCellPop);
 //------------------------------------------24x24-------------------------------------------
-	 _resourceCenter->appendTool("edit", "undo", "undo24x24.png",ICON_SIZE_24x24, "", "undo", &tui::TopedFrame::OnUndo);
+    _resourceCenter->appendTool("edit", "undo", "undo24x24.png",ICON_SIZE_24x24, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo24x24.png",ICON_SIZE_24x24, "", "redo",&tui::TopedFrame::OnUndo);*/
    _resourceCenter->appendTool("edit", "box", "box24x24.png", ICON_SIZE_24x24,"", "add box",&tui::TopedFrame::OnDrawBox);
    _resourceCenter->appendTool("edit", "poly", "poly24x24.png", ICON_SIZE_24x24,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
@@ -702,7 +709,7 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "edit_push", "edit_push24x24.png", ICON_SIZE_24x24,"", "edit push",&tui::TopedFrame::OnCellPush);
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop24x24.png", ICON_SIZE_24x24,"", "edit pop",&tui::TopedFrame::OnCellPop);
 //------------------------------------------32x32-------------------------------------------
-	 _resourceCenter->appendTool("edit", "undo", "undo32x32.png",ICON_SIZE_32x32, "", "undo", &tui::TopedFrame::OnUndo);
+    _resourceCenter->appendTool("edit", "undo", "undo32x32.png",ICON_SIZE_32x32, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo32x32.png",ICON_SIZE_32x32, "", "redo",&tui::TopedFrame::OnUndo);*/
    _resourceCenter->appendTool("edit", "box", "box32x32.png", ICON_SIZE_32x32,"", "add box",&tui::TopedFrame::OnDrawBox);
    _resourceCenter->appendTool("edit", "poly", "poly32x32.png", ICON_SIZE_32x32,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
@@ -723,7 +730,7 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "edit_push", "edit_push32x32.png", ICON_SIZE_32x32,"", "edit push",&tui::TopedFrame::OnCellPush);
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop32x32.png", ICON_SIZE_32x32,"", "edit pop",&tui::TopedFrame::OnCellPop);
 //------------------------------------------48x48-------------------------------------------
-	 _resourceCenter->appendTool("edit", "undo", "undo48x48.png",ICON_SIZE_48x48, "", "undo", &tui::TopedFrame::OnUndo);
+    _resourceCenter->appendTool("edit", "undo", "undo48x48.png",ICON_SIZE_48x48, "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo48x48.png",ICON_SIZE_48x48, "", "redo",&tui::TopedFrame::OnUndo);*/
    _resourceCenter->appendTool("edit", "box", "box48x48.png", ICON_SIZE_48x48,"", "add box",&tui::TopedFrame::OnDrawBox);
    _resourceCenter->appendTool("edit", "poly", "poly48x48.png", ICON_SIZE_48x48,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
@@ -752,7 +759,7 @@ void tui::TopedFrame::initToolBars()
    _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
                                           wxDefaultPosition, wxDefaultSize,
                                           wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-   _GLstatus->SetSize(wxSize(650, 30));
+   _GLstatus->SetSize(wxSize(-1, 30));
 
    _status->AddControl((wxControl*)_GLstatus);
    _status->Realize();
@@ -896,6 +903,10 @@ void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutBox(info);
 }
 
+void tui::TopedFrame::OnCheckHW(wxCommandEvent&)
+{
+   _canvas->showInfo();
+}
 
 //void tui::TopedFrame::OnSize(wxSizeEvent& event)
 //{
@@ -912,8 +923,6 @@ void tui::TopedFrame::OnCanvasStatus(wxCommandEvent& evt)
       case CNVS_DEL_X       : _GLstatus->setdXpos(evt.GetString()); break;
       case CNVS_DEL_Y       : _GLstatus->setdYpos(evt.GetString()); break;
       case CNVS_SELECTED    : _GLstatus->setSelected(evt.GetString());break;
-      case CNVS_ABORTENABLE : _GLstatus->btn_abort_enable(true);break;
-      case CNVS_ABORTDISABLE: _GLstatus->btn_abort_enable(false);break;
       default: assert(false);
    }   
 }
@@ -1057,7 +1066,7 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
    wxString ost; 
    ost << wxT("tdtsave();");
    SetStatusText(wxT("Saving file..."));
-	wxString wxfilename(DATC->tedfilename().c_str(), wxConvFile);
+   wxString wxfilename(DATC->tedfilename().c_str(), wxConvFile);
    wxFileName datafile( wxfilename );
    assert(datafile.IsOk());
    if (datafile.FileExists() && DATC->neversaved()) {
@@ -1179,22 +1188,16 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
                                           _browsers->tdtSelectedGdsName());
    }
    catch (EXPTN) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK ) {
+   if ( dlg->ShowModal() == wxID_OK )
+   {
       laymap = dlg->getGdsLayerMap();
+      USMap* laymap2save = NULL;
+      if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
 
-      // get the layer map 
-      std::ostringstream laymapstr;
-      word recno = 0;
-      laymapstr << "{";
-      for (USMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
-      {
-         if (recno != 0) laymapstr << ",";
-         laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
-         recno++;
-      }
-      laymapstr << "}";
-      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
-      delete laymap;
+      wxString wxlaymap, wxlaymap2save;
+      USMap2wxString(laymap      , wxlaymap     );
+      if (NULL != laymap2save)
+         USMap2wxString(laymap2save , wxlaymap2save);
 
 
       wxString ost;
@@ -1202,12 +1205,19 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
           << wxlaymap << wxT(", ")
           << (dlg->get_recursive() ? wxT("true") : wxT("false"))   << wxT(" , ")
           << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
+      if (NULL != laymap2save)
+         ost << wxT("setgdslaymap(")
+             << wxlaymap2save << wxT(");");
+
       _cmdline->parseCommand(ost);
+
+      delete laymap;
+      if (NULL != laymap2save) delete laymap2save;
    }
    delete dlg;
 }
 
-void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
+void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
 {
    // Here - try a hollow lock/unlock the database just to check that it exists
    try {DATC->lockDB(false);}
@@ -1225,12 +1235,12 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event) evt)
    wxString ost_int;
    ost_int << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
    wxString ost;
-   ost << wxT("gdsimport(") << ost_int << wxT(", gdsdefaultlaymap(true), true, false );gdsclose();");
+   ost << wxT("gdsimport(") << ost_int << wxT(", getgdslaymap(true), true, false );gdsclose();");
    _cmdline->parseCommand(ost);
 //   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
 
-void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event) evt)
+void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
 {
    // Here - try a hollow lock/unlock the database just to check that it exists
    try {DATC->lockDB(false);}
@@ -1248,7 +1258,7 @@ void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event) evt)
    wxString ost_int;
    ost_int << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
    wxString ost;
-   ost << wxT("cifimport(") << ost_int << wxT(", cifdefaultlaymap(true), true, false );cifclose();");
+   ost << wxT("cifimport(") << ost_int << wxT(", getciflaymap(true), true, false );cifclose();");
    _cmdline->parseCommand(ost);
 //   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
@@ -1266,7 +1276,7 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
          return;
       }
       wxString ost;
-      ost << wxT("gdsexport(gdsdefaultlaymap(false), \"")
+      ost << wxT("gdsexport(getgdslaymap(false), \"")
           << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
           << wxT("\", false);");
       _cmdline->parseCommand(ost);
@@ -1289,7 +1299,7 @@ void tui::TopedFrame::OnCIFexportLIB(wxCommandEvent& WXUNUSED(event))
          return;
       }
       wxString ost;
-      ost << wxT("cifexport(cifdefaultlaymap(false), \"")
+      ost << wxT("cifexport(getciflaymap(false), \"")
             << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
             << wxT("\", false);");
       _cmdline->parseCommand(ost);
@@ -1311,10 +1321,12 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    wxString cellname;
    bool recur;
    USMap* laymap;
+   USMap* laymap2save = NULL;
    if ( dlg->ShowModal() == wxID_OK ) {
       cellname = dlg->get_selectedcell();
       recur = dlg->get_recursive();
       laymap = dlg->getGdsLayerMap();
+      if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
       delete dlg;
    }
    else {delete dlg;return;}
@@ -1328,37 +1340,32 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
    if (wxID_OK == dlg2.ShowModal()) {
       wxString filename = dlg2.GetPath();
       if(!checkFileOverwriting(filename))
-      {
          SetStatusText(wxT("GDS export aborted"));
-         return;
-      }
-
-      // get the layer map 
-      std::ostringstream laymapstr;
-      word recno = 0;
-      laymapstr << "{";
-      for (USMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
+      else
       {
-         if (recno != 0)
-            laymapstr << ",";
-         laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
-         recno++;
-      }
-      laymapstr << "}";
-      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
-      delete laymap;
+         wxString wxlaymap, wxlaymap2save;
+         USMap2wxString(laymap      , wxlaymap     );
+         if (NULL != laymap2save)
+            USMap2wxString(laymap2save , wxlaymap2save);
 
-      wxString ost;
-      ost << wxT("gdsexport(\"") 
-          << cellname.c_str() << wxT("\" , ") 
-          << (recur ? wxT("true") : wxT("false")) << wxT(",")
-          << wxlaymap << wxT(", \"")
-          << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str()
-          << wxT("\", false);");
-      _cmdline->parseCommand(ost);
+         wxString ost;
+         ost << wxT("gdsexport(\"") 
+            << cellname.c_str() << wxT("\" , ") 
+            << (recur ? wxT("true") : wxT("false")) << wxT(",")
+            << wxlaymap << wxT(", \"")
+            << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str()
+            << wxT("\", false);");
+         if (NULL != laymap2save)
+            ost << wxT("setgdslaymap(")
+                  << wxlaymap2save << wxT(");");
+
+         _cmdline->parseCommand(ost);
+      }
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("GDS export aborted"));
+   delete laymap;
+   if (NULL != laymap2save) delete laymap2save;
 }
 
 
@@ -1390,25 +1397,25 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
    if ( dlg->ShowModal() == wxID_OK )
    {
       // get the layer map first
-      std::ostringstream laymapstr;
       SIMap* laymap = dlg->getCifLayerMap();
-      word recno = 0;
-      laymapstr << "{";
-      for (SIMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
-      {
-         if (recno != 0)
-            laymapstr << ",";
-         laymapstr << "{" << CLN->second << ",\"" << CLN->first << "\"}";
-         recno++;
-      }
-      laymapstr << "}";
-      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
-      delete laymap;
+      USMap* laymap2save = NULL;
+      if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap();
+      wxString wxlaymap, wxlaymap2save;
+      SIMap2wxString(laymap      , wxlaymap     );
+      if (NULL != laymap2save)
+         USMap2wxString(laymap2save , wxlaymap2save);
       wxString ost;
       ost << wxT("cifimport(\"") << dlg->getSelectedCell() << wxT("\" , ") << wxlaymap << wxT(",")
-            << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(",")
-            << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(");");
+          << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(",")
+          << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(");");
+      if (NULL != laymap2save)
+         ost << wxT("setciflaymap(")
+             << wxlaymap2save << wxT(");");
+
       _cmdline->parseCommand(ost);
+
+      delete laymap;
+      if (NULL != laymap2save) delete laymap2save;
    }
    delete dlg;
 }
@@ -1428,11 +1435,13 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
    bool recur;
    bool sverbose;
    USMap* laymap;
+   USMap* laymap2save = NULL;
    if ( dlg->ShowModal() == wxID_OK ) {
       cellname = dlg->get_selectedcell();
       recur    = dlg->get_recursive();
       sverbose = dlg->get_slang();
       laymap   = dlg->getCifLayerMap();
+      if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap();
       delete dlg;
    }
    else {delete dlg;return;}
@@ -1443,41 +1452,37 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
    wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
       wxT("CIF files |*.cif;*.CIF"),
       tpdfSAVE);
-   if (wxID_OK == dlg2.ShowModal()) {
+   if (wxID_OK == dlg2.ShowModal())
+   {
       wxString filename = dlg2.GetPath();
       if(!checkFileOverwriting(filename))
-      {
          SetStatusText(wxT("CIF export aborted"));
-         return;
-      }
-
-      // get the layer map first
-      std::ostringstream laymapstr;
-      word recno = 0;
-      laymapstr << "{";
-      for (USMap::const_iterator CLN = laymap->begin(); CLN != laymap->end(); CLN++)
+      else
       {
-         if (recno != 0)
-            laymapstr << ",";
-         laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
-         recno++;
+         wxString wxlaymap, wxlaymap2save;
+         USMap2wxString(laymap      , wxlaymap     );
+         if (NULL != laymap2save)
+            USMap2wxString(laymap2save , wxlaymap2save);
+
+         wxString ost;
+
+         ost << wxT("cifexport(\"") 
+            << cellname << wxT("\", ")
+            << (recur ? wxT("true") : wxT("false")) << wxT(", ")
+            << wxlaymap << wxT(", \"")
+            <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\", ")
+            << (sverbose ? wxT("true") : wxT("false")) << wxT(" );");
+         if (NULL != laymap2save)
+            ost << wxT("setciflaymap(")
+                << wxlaymap2save << wxT(");");
+
+         _cmdline->parseCommand(ost);
+         SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
       }
-      laymapstr << "}";
-      wxString wxlaymap(laymapstr.str().c_str(), wxConvUTF8);
-      delete laymap;
-      wxString ost;
-
-      ost << wxT("cifexport(\"") 
-          << cellname << wxT("\", ")
-          << (recur ? wxT("true") : wxT("false")) << wxT(", ")
-          << wxlaymap << wxT(", \"")
-          <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\", ")
-          << (sverbose ? wxT("true") : wxT("false")) << wxT(" );");
-
-      _cmdline->parseCommand(ost);
-      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
    else SetStatusText(wxT("CIF export aborted"));
+   delete laymap;
+   if (NULL != laymap2save) delete laymap2save;
 }
 
 
@@ -1680,58 +1685,58 @@ void tui::TopedFrame::OnLongCursor(wxCommandEvent& WXUNUSED(event)){
 
 void tui::TopedFrame::OnHToolBarSize16(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(horizontal, _iconsize16);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(horizontal, _iconsize16);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize24(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(horizontal, _iconsize24);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(horizontal, _iconsize24);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize32(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(horizontal, _iconsize32);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(horizontal, _iconsize32);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize48(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(horizontal, _iconsize48);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(horizontal, _iconsize48);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize16(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(vertical, _iconsize16);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(vertical, _iconsize16);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize24(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(vertical, _iconsize24);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(vertical, _iconsize24);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize32(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(vertical, _iconsize32);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(vertical, _iconsize32);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize48(wxCommandEvent& WXUNUSED(event))
 {
-	wxString ost;
-	ost << wxT("toolbarsize(vertical, _iconsize48);");
-	_cmdline->parseCommand(ost);
+   wxString ost;
+   ost << wxT("toolbarsize(vertical, _iconsize48);");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnCellBox(wxCommandEvent& WXUNUSED(event)){
@@ -1758,6 +1763,12 @@ void tui::TopedFrame::OnTextBox(wxCommandEvent& WXUNUSED(event)){
 void tui::TopedFrame::OnAutopan(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
    ost << wxT("autopan(")<< (settingsMenu->IsChecked(TMSET_AUTOPAN) ? wxT("true") : wxT("false")) << wxT(");");
+   _cmdline->parseCommand(ost);   
+}
+
+void tui::TopedFrame::OnZeroCross(wxCommandEvent& WXUNUSED(event)){
+   wxString ost;
+   ost << wxT("zerocross(")<< (settingsMenu->IsChecked(TMSET_ZEROCROSS) ? wxT("true") : wxT("false")) << wxT(");");
    _cmdline->parseCommand(ost);   
 }
 
@@ -1926,35 +1937,37 @@ void tui::TopedFrame::OnAbort(wxCommandEvent& WXUNUSED(event)) {
 void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
 {
    switch (evt.GetInt()) {
-      case STS_GRID0_ON    : settingsMenu->Check(TMSET_GRID0,true );break;
-      case STS_GRID0_OFF   : settingsMenu->Check(TMSET_GRID0,false);break;
-      case STS_GRID1_ON    : settingsMenu->Check(TMSET_GRID1,true );break;
-      case STS_GRID1_OFF   : settingsMenu->Check(TMSET_GRID1,false);break;
-      case STS_GRID2_ON    : settingsMenu->Check(TMSET_GRID2,true );break;
-      case STS_GRID2_OFF   : settingsMenu->Check(TMSET_GRID2,false);break;
-      case STS_CELLMARK_OFF: settingsMenu->Check(TMSET_CELLMARK,false);break;
-      case STS_CELLMARK_ON : settingsMenu->Check(TMSET_CELLMARK,true);break;
-      case STS_CELLBOX_OFF : settingsMenu->Check(TMSET_CELLBOX,false);break;
-      case STS_CELLBOX_ON  : settingsMenu->Check(TMSET_CELLBOX,true);break;
-      case STS_TEXTMARK_OFF: settingsMenu->Check(TMSET_TEXTMARK,false);break;
-      case STS_TEXTMARK_ON : settingsMenu->Check(TMSET_TEXTMARK,true);break;
-      case STS_TEXTBOX_OFF : settingsMenu->Check(TMSET_TEXTBOX,false);break;
-      case STS_TEXTBOX_ON  : settingsMenu->Check(TMSET_TEXTBOX,true);break;
-      case STS_AUTOPAN_ON  : settingsMenu->Check(TMSET_AUTOPAN,true );break;
-      case STS_AUTOPAN_OFF : settingsMenu->Check(TMSET_AUTOPAN,false);break;
-      case STS_ANGLE_0     : settingsMenu->Check(TMSET_MARKER0  ,true );break;
-      case STS_ANGLE_45    : settingsMenu->Check(TMSET_MARKER45 ,true );break;
-      case STS_ANGLE_90    : settingsMenu->Check(TMSET_MARKER90 ,true );break;
-      case STS_LONG_CURSOR : settingsMenu->Check(TMSET_CURLONG ,true );break;
-      case STS_SHORT_CURSOR: settingsMenu->Check(TMSET_CURLONG ,false );break;
-		case TMSET_HTOOLSIZE16: settingsMenu->Check(TMSET_HTOOLSIZE16 ,true );break;
-		case TMSET_HTOOLSIZE24: settingsMenu->Check(TMSET_HTOOLSIZE24 ,true );break;
-		case TMSET_HTOOLSIZE32: settingsMenu->Check(TMSET_HTOOLSIZE32 ,true );break;
-		case TMSET_HTOOLSIZE48: settingsMenu->Check(TMSET_HTOOLSIZE48 ,true );break;
-		case TMSET_VTOOLSIZE16: settingsMenu->Check(TMSET_VTOOLSIZE16 ,true );break;
-		case TMSET_VTOOLSIZE24: settingsMenu->Check(TMSET_VTOOLSIZE24 ,true );break;
-		case TMSET_VTOOLSIZE32: settingsMenu->Check(TMSET_VTOOLSIZE32 ,true );break;
-		case TMSET_VTOOLSIZE48: settingsMenu->Check(TMSET_VTOOLSIZE48 ,true );break;
+      case STS_GRID0_ON       : settingsMenu->Check(TMSET_GRID0       , true );break;
+      case STS_GRID0_OFF      : settingsMenu->Check(TMSET_GRID0       , false);break;
+      case STS_GRID1_ON       : settingsMenu->Check(TMSET_GRID1       , true );break;
+      case STS_GRID1_OFF      : settingsMenu->Check(TMSET_GRID1       , false);break;
+      case STS_GRID2_ON       : settingsMenu->Check(TMSET_GRID2       , true );break;
+      case STS_GRID2_OFF      : settingsMenu->Check(TMSET_GRID2       , false);break;
+      case STS_CELLMARK_ON    : settingsMenu->Check(TMSET_CELLMARK    , true );break;
+      case STS_CELLMARK_OFF   : settingsMenu->Check(TMSET_CELLMARK    , false);break;
+      case STS_CELLBOX_ON     : settingsMenu->Check(TMSET_CELLBOX     , true );break;
+      case STS_CELLBOX_OFF    : settingsMenu->Check(TMSET_CELLBOX     , false);break;
+      case STS_TEXTMARK_ON    : settingsMenu->Check(TMSET_TEXTMARK    , true );break;
+      case STS_TEXTMARK_OFF   : settingsMenu->Check(TMSET_TEXTMARK    , false);break;
+      case STS_TEXTBOX_ON     : settingsMenu->Check(TMSET_TEXTBOX     , true );break;
+      case STS_TEXTBOX_OFF    : settingsMenu->Check(TMSET_TEXTBOX     , false);break;
+      case STS_AUTOPAN_ON     : settingsMenu->Check(TMSET_AUTOPAN     , true );break;
+      case STS_AUTOPAN_OFF    : settingsMenu->Check(TMSET_AUTOPAN     , false);break;
+      case STS_ZEROCROSS_ON   : settingsMenu->Check(TMSET_ZEROCROSS   , true );break;
+      case STS_ZEROCROSS_OFF  : settingsMenu->Check(TMSET_ZEROCROSS   , false);break;
+      case STS_LONG_CURSOR    : settingsMenu->Check(TMSET_CURLONG     , true );break;
+      case STS_SHORT_CURSOR   : settingsMenu->Check(TMSET_CURLONG     , false);break;
+      case STS_ANGLE_0        : settingsMenu->Check(TMSET_MARKER0     , true );break;
+      case STS_ANGLE_45       : settingsMenu->Check(TMSET_MARKER45    , true );break;
+      case STS_ANGLE_90       : settingsMenu->Check(TMSET_MARKER90    , true );break;
+      case TMSET_HTOOLSIZE16  : settingsMenu->Check(TMSET_HTOOLSIZE16 , true );break;
+      case TMSET_HTOOLSIZE24  : settingsMenu->Check(TMSET_HTOOLSIZE24 , true );break;
+      case TMSET_HTOOLSIZE32  : settingsMenu->Check(TMSET_HTOOLSIZE32 , true );break;
+      case TMSET_HTOOLSIZE48  : settingsMenu->Check(TMSET_HTOOLSIZE48 , true );break;
+      case TMSET_VTOOLSIZE16  : settingsMenu->Check(TMSET_VTOOLSIZE16 , true );break;
+      case TMSET_VTOOLSIZE24  : settingsMenu->Check(TMSET_VTOOLSIZE24 , true );break;
+      case TMSET_VTOOLSIZE32  : settingsMenu->Check(TMSET_VTOOLSIZE32 , true );break;
+      case TMSET_VTOOLSIZE48  : settingsMenu->Check(TMSET_VTOOLSIZE48 , true );break;
 
                     default: assert(false);
    }
@@ -2037,21 +2050,44 @@ void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 {
-	int size = evt.GetInt();
-	bool direction = static_cast<bool>(evt.GetExtraLong());
-	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
-	
-	_resourceCenter->setToolBarSize(direction, sz);
-	wxCommandEvent eventTB_MENU_UPD(wxEVT_SETINGSMENU);
-	if (tui::_tuihorizontal == direction)
-	{
-		//simplified version of 
-		//case ICON_SIZE_16x16: eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16)
-		eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16+size);
-	}
-	else
-	{
-		eventTB_MENU_UPD.SetInt(tui::TMSET_VTOOLSIZE16+size);
-	}
-	wxPostEvent(_canvas, eventTB_MENU_UPD);
+   int size = evt.GetInt();
+   bool direction = static_cast<bool>(evt.GetExtraLong());
+   tui::IconSizes sz = static_cast<tui::IconSizes>(size);
+   
+   _resourceCenter->setToolBarSize(direction, sz);
+   wxCommandEvent eventTB_MENU_UPD(wxEVT_SETINGSMENU);
+   if (tui::_tuihorizontal == direction)
+   {
+      //simplified version of
+      //case ICON_SIZE_16x16: eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16)
+      eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16+size);
+   }
+   else
+   {
+      eventTB_MENU_UPD.SetInt(tui::TMSET_VTOOLSIZE16+size);
+   }
+   wxPostEvent(_canvas, eventTB_MENU_UPD);
+}
+
+void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)
+{
+   std::string soutmap;
+   layprop::USMap2String(inmap, soutmap);
+   outmap = wxString(soutmap.c_str(), wxConvUTF8);
+}
+
+void tui::TopedFrame::SIMap2wxString(SIMap* inmap, wxString& outmap)
+{
+   std::ostringstream laymapstr;
+   word recno = 0;
+   laymapstr << "{";
+   for (SIMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
+   {
+      if (recno != 0)
+         laymapstr << ",";
+      laymapstr << "{" << CLN->second << ",\"" << CLN->first << "\"}";
+      recno++;
+   }
+   laymapstr << "}";
+   outmap = wxString(laymapstr.str().c_str(), wxConvUTF8);
 }

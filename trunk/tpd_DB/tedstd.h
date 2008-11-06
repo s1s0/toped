@@ -72,6 +72,14 @@ namespace layprop {
    class DrawProperties;
 }
 
+namespace GDSin {
+   class GdsFile;
+}
+
+namespace CIFin {
+   class CifExportFile;
+}
+
 namespace laydata {
 
    const word _lmnone   = 0x0000;
@@ -114,7 +122,6 @@ namespace laydata {
    typedef  std::map<std::string, tdtdefaultcell*>  cellList;
    typedef  cellList::const_iterator                refnamepair;
    typedef  std::deque<const tdtcellref*>           cellrefstack;
-   typedef  std::list<word>                         ListOfWords;
    typedef  std::deque<editobject*>                 editcellstack;
    typedef  std::list<const cellList*>              LibCellLists;
 
