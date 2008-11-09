@@ -225,6 +225,7 @@ namespace tui
 							const std::string &bitmapFileName,
 							const std::string &hotKey, callbackMethod cbMethod, int direction);*/
 		void setDirection(int direction);
+		void defineToolBar(const std::string &toolBarName);
 		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
 							const std::string &iconName,
 							IconSizes size,
@@ -257,6 +258,8 @@ namespace tellstdfunc {
    
    TELL_STDCMD_CLASSA(stdADDMENU       );  //
 	TELL_STDCMD_CLASSA(stdTOOLBARSIZE       );  //
+	TELL_STDCMD_CLASSA(stdDEFINETOOLBAR  );  //
+
 }
 
 #endif //RESOURCE_CENTER_INCLUDED

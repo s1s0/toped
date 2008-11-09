@@ -255,6 +255,7 @@ namespace tui {
       // The declaration of the associated event table
 		void OnUncapturedMouseClick(wxCommandEvent&);
 		void          OnToolBarSize(wxCommandEvent&);
+		void		OnToolBarDefine(wxCommandEvent& evt);
       DECLARE_EVENT_TABLE();
    };
 
