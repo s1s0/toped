@@ -60,6 +60,7 @@ extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_TPDSTATUS;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
+extern const wxEventType         wxEVT_TOOLBARDEF;
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -306,6 +307,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)
    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
+	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,	 wxID_ANY, tui::TopedFrame::OnToolBarDefine)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -2067,6 +2069,30 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
       eventTB_MENU_UPD.SetInt(tui::TMSET_VTOOLSIZE16+size);
    }
    wxPostEvent(_canvas, eventTB_MENU_UPD);
+}
+
+void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
+{
+	std::string toolbarname=evt.GetString().mb_str(wxConvUTF8);
+	_resourceCenter->defineToolBar(toolbarname);
+
+  /* int size = evt.GetInt();
+   bool direction = static_cast<bool>(evt.GetExtraLong());
+   tui::IconSizes sz = static_cast<tui::IconSizes>(size);
+   
+   _resourceCenter->setToolBarSize(direction, sz);
+   wxCommandEvent eventTB_MENU_UPD(wxEVT_SETINGSMENU);
+   if (tui::_tuihorizontal == direction)
+   {
+      //simplified version of
+      //case ICON_SIZE_16x16: eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16)
+      eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16+size);
+   }
+   else
+   {
+      eventTB_MENU_UPD.SetInt(tui::TMSET_VTOOLSIZE16+size);
+   }
+   wxPostEvent(_canvas, eventTB_MENU_UPD);*/
 }
 
 void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)

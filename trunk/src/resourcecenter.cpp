@@ -38,6 +38,7 @@ extern console::ted_cmd*         Console;
 extern tui::TopedFrame*          Toped;
 
 extern const wxEventType         wxEVT_TOOLBARSIZE;
+extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType         wxEVT_SETINGSMENU;
 
 tui::MenuItemHandler::MenuItemHandler(void)
@@ -334,11 +335,11 @@ tui::ToolBarHandler::ToolBarHandler(int ID, const std::string & name, int direct
 		paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
 		paneInfo.TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
 	}
-	
-	_toolBar->Realize();
+	_toolBar->Hide();
+	/*_toolBar->Realize();
 	Toped->getAuiManager()->AddPane(_toolBar, paneInfo.ToolbarPane().
 		Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Floatable(false));
-	Toped->getAuiManager()->Update();
+	Toped->getAuiManager()->Update();*/
 }
 
 tui::ToolBarHandler::~ToolBarHandler()
@@ -741,6 +742,36 @@ void tui::ResourceCenter::setToolBarSize(bool direction, IconSizes size)
 	}
 }
 
+void tui::ResourceCenter::defineToolBar(const std::string &toolBarName)
+{
+	int ID;
+	//find toolbar
+	std::string str = toolBarName;
+	std::transform(str.begin(), str.end(), str.begin(), tolower);
+	toolBarList::const_iterator it;
+	for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+	{
+		if ((*it)->name()==str)
+		{
+			std::ostringstream ost;
+			ost<<"definetoolbar: already defined";
+			tell_log(console::MT_WARNING,ost.str());
+			break;
+		}
+	}
+
+	if (it==_toolBars.end())
+	{
+		ID = TDUMMY_TOOL + _toolCount;
+		//Create new toolbar
+		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, _direction);
+		_toolCount++;
+		_toolBars.push_back(toolBar);
+
+	}
+
+}
+
 void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::string &toolBarItem,
 							const  std::string &iconName, IconSizes size,
 							const std::string &hotKey, const std::string &helpString,
@@ -854,4 +885,36 @@ int tellstdfunc::stdTOOLBARSIZE::execute()
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::stdDEFINETOOLBAR::stdDEFINETOOLBAR(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::stdDEFINETOOLBAR::execute()
+{
+	std::string	toolbarname	= getStringValue();
+	wxString str = wxString(toolbarname.c_str(), wxConvUTF8);
+	wxCommandEvent eventToolBarDef(wxEVT_TOOLBARDEF);
+	eventToolBarDef.SetString(str);
+	wxPostEvent(Toped, eventToolBarDef);
+/*	int		direction= getWordValue();
+	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
+	if(tui::checkToolSize(sz))
+	{
+		wxCommandEvent eventToolBarSize(wxEVT_TOOLBARSIZE);
+		eventToolBarSize.SetExtraLong(direction);
+		eventToolBarSize.SetInt(size);
+		wxPostEvent(Toped, eventToolBarSize);
+	}
+	else
+	{
+		std::ostringstream ost;
+		ost<<"toolbarsize: wrong size value";
+      tell_log(console::MT_ERROR,ost.str());
+	}
+	*/
+   return EXEC_NEXT;
+}
 
