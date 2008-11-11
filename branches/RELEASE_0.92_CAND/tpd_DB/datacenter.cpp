@@ -1027,20 +1027,38 @@ void DataCenter::mouseRotate()
 }
 
 void DataCenter::openGL_draw(const CTM& layCTM) {
-// Maybe we need another try/catch in the layoutcanvas ?   
-   if (_TEDLIB()) {
-//      _TEDDB->check_active();
-      while (wxMUTEX_NO_ERROR != DBLock.TryLock());
-      while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   if (_TEDLIB()) 
+   {
+      // Don't block the drawing if the databases are
+      // locked. This will block all redraw activities including UI
+      // which have nothing to do with the DB. Drop a message in the log
+      // and keep going!
+      if (wxMUTEX_NO_ERROR == PROPLock.TryLock())
+      {
+         // If property DB is locked - we can't do much drawing even if the
+         // DB is not locked. In the same time there should not be an operation
+         // which holds the property DB lock for a long time. So it should be
+         // rather an exception
+         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
+         return;
+      }
       _properties.drawGrid();
       _properties.drawZeroCross();
-      _TEDLIB()->openGL_draw(_properties.drawprop());
+      if (wxMUTEX_NO_ERROR == DBLock.TryLock())
+      {
+         // If DB is locked - skip the DB drawing, but draw all the property DB stuff
+         tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
+      }
+      else
+      {
+         // Thereis no need to check for an active cell. If there isn't one
+         // the function will return silently.
+         _TEDLIB()->openGL_draw(_properties.drawprop());
+         DBLock.Unlock();
+      }
       _properties.drawRulers(layCTM);
-      DBLock.Unlock();
       PROPLock.Unlock();
    }
-// 
-//   else throw EXPTNactive_DB();      
 }
 
 void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp) 
