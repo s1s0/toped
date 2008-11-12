@@ -2073,7 +2073,7 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
 {
-	std::string toolbarname=evt.GetString().mb_str(wxConvUTF8);
+	std::string toolbarname(evt.GetString().mb_str(wxConvUTF8));
 	_resourceCenter->defineToolBar(toolbarname);
 
   /* int size = evt.GetInt();

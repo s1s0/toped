@@ -240,7 +240,7 @@
     <projectdoc>
       <docsystem>Doxygen Documentation Collection</docsystem>
       <docurl>toped.tag</docurl>
-      <usermanualurl/>
+      <usermanualurl>/home/skr/toped_public/doc/API/html</usermanualurl>
     </projectdoc>
   </kdevdocumentation>
   <dist>
