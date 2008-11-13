@@ -76,19 +76,20 @@ namespace console {
       void                    getGUInput(bool from_keyboard = true);
       wxCondition*            threadWaits4;
       miniParser*             puc; // parse user coordinates
-      // event table handlers
-      void                    getCommand(wxCommandEvent& WXUNUSED(event));
-      void                    getCommandA();
-      void                    getCommandB(wxCommandEvent&);
-      void                    OnGUInput(wxCommandEvent&);
-      bool                    mouseIN_OK() const {return _mouseIN_OK;};
-      word                    numpoints() const {return _numpoints;}
-      const char*             lastCommand() const {return _cmd_history.rbegin()->c_str();}
-      void                    set_canvas_invalid(bool val) { _canvas_invalid = val;}
-      bool                    canvas_invalid() {return _canvas_invalid;}
-      bool                    cmdHistoryExists() const {return !_cmd_history.empty();}
+      
+      void                    getCommand(bool);
+      bool                    mouseIN_OK() const            {return _mouseIN_OK;};
+      word                    numpoints() const             {return _numpoints;}
+      const char*             lastCommand() const           {return _cmd_history.rbegin()->c_str();}
+      void                    set_canvas_invalid(bool val)  { _canvas_invalid = val;}
+      bool                    canvas_invalid()              {return _canvas_invalid;}
+      bool                    cmdHistoryExists() const      {return !_cmd_history.empty();}
+      void                    spawnParseThread(wxString);
    private:
-      void                    OnKeyUP(wxKeyEvent&);
+      void                    onParseCommand(wxCommandEvent&);
+      void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
+      void                    onKeyUP(wxKeyEvent&);
+      void                    onGUInput(wxCommandEvent&);
       void                    cancelLastPoint();
       void                    mouseLB(const telldata::ttpnt& p);
       void                    mouseRB();
@@ -99,7 +100,6 @@ namespace console {
       wxString                _guinput;
       stringList              _cmd_history;
       stringList::const_iterator _history_position;
-      bool                    _thread; //flag for detached thread
       wxWindow*               _parent;
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
@@ -112,6 +112,7 @@ namespace console {
       parse_thread(wxString& cmd, wxWindow* status_wnd, wxWindow* canvas_wnd, wxThreadKind kind=wxTHREAD_DETACHED):
                   wxThread(kind),command(cmd), _status_wnd(status_wnd), _canvas_wnd(canvas_wnd){};
       friend ted_cmd::ted_cmd( wxWindow*, wxWindow*);
+      friend void ted_cmd::spawnParseThread(wxString);
    protected:
       void*                   Entry();
       void                    StatusBusy(wxString&);
@@ -119,7 +120,7 @@ namespace console {
       wxString                command;
       wxWindow*               _status_wnd;
       wxWindow*               _canvas_wnd;
-      static wxMutex          _mutex; 
+      static wxMutex          _mutex;
    };
 }
 #endif

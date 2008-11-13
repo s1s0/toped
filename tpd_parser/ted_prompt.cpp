@@ -279,8 +279,7 @@ bool console::miniParser::getList() {
 void* console::parse_thread::Entry() {
 //   wxLogMessage(_T("Mouse is %s (%ld, %ld)"), where.c_str(), x, y);
 //   wxLogMessage(_T("Mutex try to lock..."));
-   while (wxMUTEX_NO_ERROR != _mutex.TryLock());
-   
+
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
@@ -288,7 +287,7 @@ void* console::parse_thread::Entry() {
    StatusBusy(command);
    tellparse();
    delete_tell_lex_buffer( b );
-   
+
    _mutex.Unlock();
    if (Console->canvas_invalid())
    {
@@ -318,9 +317,9 @@ void console::parse_thread::StatusReady()
 //==============================================================================
 // The ted_cmd event table
 BEGIN_EVENT_TABLE( console::ted_cmd, wxTextCtrl )
-   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, ted_cmd::getCommandB)
-   EVT_TEXT_ENTER(wxID_ANY, ted_cmd::getCommand)
-   EVT_KEY_UP(ted_cmd::OnKeyUP)
+   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, ted_cmd::onParseCommand)
+   EVT_TEXT_ENTER(wxID_ANY, ted_cmd::onGetCommand)
+   EVT_KEY_UP(ted_cmd::onKeyUP)
 END_EVENT_TABLE()
 
 //==============================================================================
@@ -338,7 +337,16 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
    _canvas_invalid = false;
 };
 
-void console::ted_cmd::getCommand(wxCommandEvent& WXUNUSED(event)) {
+// Note! getCommand and onGetCommand should be overloaded methods, however
+// wxEvent macroses (or maybe the whole system) are not happy if there is
+// an overloaded function of the one listed in the EVT_* macros. This is the
+// only reason for this functions to have different names. They do (almost)
+// the same thing
+
+/*! Called when the command line is entered. Updates the command history,
+   log window and spawns the tell parser in a new thread                   */
+void console::ted_cmd::onGetCommand(wxCommandEvent& WXUNUSED(event))
+{
    if (puc)  getGUInput(); // run the local GUInput parser
    else {
       wxString command = GetValue();
@@ -346,21 +354,22 @@ void console::ted_cmd::getCommand(wxCommandEvent& WXUNUSED(event)) {
       _cmd_history.push_back(std::string(command.mb_str(wxConvUTF8)));
       _history_position = _cmd_history.end();
       Clear();
-      parse_thread *pthrd = DEBUG_NEW parse_thread(command,_parent,_canvas);
-      pthrd->Create();
-      pthrd->Run();
-   }   
+
+      spawnParseThread(command);
+   }
 }
 
-void console::ted_cmd::getCommandA() {
+void console::ted_cmd::getCommand(bool thread)
+{
    if (puc)  getGUInput(); // run the local GUInput parser
-   else {
+   else
+   {
       wxString command = GetValue();
       tell_log(MT_COMMAND, command);
       _cmd_history.push_back(std::string(command.mb_str(wxConvUTF8)));
       _history_position = _cmd_history.end();
       Clear();
-      if (!_thread)
+      if (!thread)
       { // executing the parser without thread
          // essentially the same code as in parse_thread::Entry, but
          // without the mutexes
@@ -372,33 +381,55 @@ void console::ted_cmd::getCommandA() {
          delete_tell_lex_buffer( b );
       }
       else
-      {
-         // executing the parser in a separate thread
-         //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
-         parse_thread *pthrd = DEBUG_NEW parse_thread(command,_parent,_canvas);
-         wxThreadError result = pthrd->Create();
-         if (wxTHREAD_NO_ERROR == result)
-            pthrd->Run();
-         else
-         {
-            tell_log( MT_ERROR, "Can't execute the command in a separate thread");
-            delete(pthrd);
-         }
-//         if (_wait) pthrd->Wait();
-      }
+         spawnParseThread(command);
    }
 }
 
-void console::ted_cmd::getCommandB(wxCommandEvent& event) {
-   
-   if (NULL != puc) return; // don't accept commands during shape input sessions
-   _thread = true;
-   wxString cmd = event.GetString();
-   SetValue(cmd);
-   getCommandA();
+
+void console::ted_cmd::spawnParseThread(wxString command)
+{
+   // executing the parser in a separate thread
+   //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
+
+   if (wxMUTEX_NO_ERROR == parse_thread::_mutex.TryLock())
+   {
+      parse_thread *pthrd = DEBUG_NEW parse_thread(command,_parent,_canvas);
+      wxThreadError result = pthrd->Create();
+      if (wxTHREAD_NO_ERROR == result)
+         pthrd->Run();
+      else
+      {
+         tell_log( MT_ERROR, "Can't execute the command in a separate thread");
+         delete(pthrd);
+      }
+   }
+   else
+      tell_log( MT_WARNING, "Busy. Command above skipped");
+   //if (_wait) pthrd->Wait();
 }
 
-void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
+// Note! parseCommand and onParseCommand should be overloaded methods, however
+// wxEvent macroses (or maybe the whole system) are not happy if there is
+// an overloaded function of the one listed in the EVT_* macros. This is the
+// only reason for this functions to have different names. They do the same
+// thing
+// onParseCommand is called from wxEVT_CONSOLE_PARSE event while getCommand()
+// is called directly
+void console::ted_cmd::onParseCommand(wxCommandEvent& event)
+{
+   if (NULL != puc) return; // don't accept commands during shape input sessions
+   SetValue(event.GetString());
+   getCommand(true);
+}
+
+void console::ted_cmd::parseCommand(wxString cmd, bool thread)
+{
+   if (NULL != puc) return; // don't accept commands during shape input sessions
+   SetValue(cmd);
+   getCommand(thread);
+}
+
+void console::ted_cmd::onKeyUP(wxKeyEvent& event) {
 
    if ((WXK_UP != event.GetKeyCode()) &&  (WXK_DOWN != event.GetKeyCode())) {
       event.Skip();return;
@@ -417,14 +448,6 @@ void console::ted_cmd::OnKeyUP(wxKeyEvent& event) {
       SetValue(wxString(_history_position->c_str(), wxConvUTF8));
    }
 }
-
-void console::ted_cmd::parseCommand(wxString cmd, bool thread) {
-   _thread = thread;
-   if (NULL != puc) return; // don't accept commands during shape input sessions
-   SetValue(cmd);
-   getCommandA();
-}
-   
 
 void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE_OP input_type, const CTM& trans)
 {
@@ -452,7 +475,7 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
    tell_log(MT_GUIPROMPT);
    Connect(-1, wxEVT_COMMAND_ENTER,
            (wxObjectEventFunction) (wxEventFunction)
-           (wxCommandEventFunction)&ted_cmd::OnGUInput);
+           (wxCommandEventFunction)&ted_cmd::onGUInput);
 
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(TSTS_THREADWAIT);
@@ -486,7 +509,7 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
    _translation = _initrans;
 }
 
-void console::ted_cmd::OnGUInput(wxCommandEvent& evt) {
+void console::ted_cmd::onGUInput(wxCommandEvent& evt) {
    switch (evt.GetInt()) {
       case -4: _translation.FlipY();break;
       case -3: _translation.Rotate(90.0);break;

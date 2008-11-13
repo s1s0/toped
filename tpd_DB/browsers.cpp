@@ -1162,6 +1162,11 @@ void browsers::treeRemoveMember(const char* cell, const char* parent, int action
 
 void browsers::parseCommand(const wxString cmd)
 {
+   // Note! The use of wxPostEvent here is not enforced by a thread safety
+   // reasons. This function as well as its callers and the event destination -
+   // all of them are running in the main thread and parser can be called directly.
+   // This simply avoids unnesessary links between the modules using the "magic"
+   // of the wx event system
    assert(Browsers && Browsers->tellParser());
    wxCommandEvent eventPARSE(wxEVT_CONSOLE_PARSE);
    eventPARSE.SetString(cmd);
