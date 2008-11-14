@@ -259,6 +259,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdADDMENU       );  //
 	TELL_STDCMD_CLASSA(stdTOOLBARSIZE       );  //
 	TELL_STDCMD_CLASSA(stdDEFINETOOLBAR  );  //
+	TELL_STDCMD_CLASSA(stdTOOLBARADDITEM  );  //
 
 }
 

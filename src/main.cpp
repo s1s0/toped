@@ -247,6 +247,8 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("addmenu"          ,(DEBUG_NEW                  tellstdfunc::stdADDMENU(telldata::tn_void, true)));
    mblock->addFUNC("toolbarsize"      ,(DEBUG_NEW              tellstdfunc::stdTOOLBARSIZE(telldata::tn_void, true)));
    mblock->addFUNC("definetoolbar"    ,(DEBUG_NEW              tellstdfunc::stdDEFINETOOLBAR(telldata::tn_void, true)));
+	mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW              tellstdfunc::stdTOOLBARADDITEM(telldata::tn_void, true)));
+
    console::TellFnSort();
 }
 

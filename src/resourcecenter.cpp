@@ -899,22 +899,21 @@ int tellstdfunc::stdDEFINETOOLBAR::execute()
 	wxCommandEvent eventToolBarDef(wxEVT_TOOLBARDEF);
 	eventToolBarDef.SetString(str);
 	wxPostEvent(Toped, eventToolBarDef);
-/*	int		direction= getWordValue();
-	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
-	if(tui::checkToolSize(sz))
-	{
-		wxCommandEvent eventToolBarSize(wxEVT_TOOLBARSIZE);
-		eventToolBarSize.SetExtraLong(direction);
-		eventToolBarSize.SetInt(size);
-		wxPostEvent(Toped, eventToolBarSize);
-	}
-	else
-	{
-		std::ostringstream ost;
-		ost<<"toolbarsize: wrong size value";
-      tell_log(console::MT_ERROR,ost.str());
-	}
-	*/
+
    return EXEC_NEXT;
 }
+
+//=============================================================================
+tellstdfunc::stdTOOLBARADDITEM::stdTOOLBARADDITEM(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   //arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::stdTOOLBARADDITEM::execute()
+{
+
+   return EXEC_NEXT;
+}
+
 
