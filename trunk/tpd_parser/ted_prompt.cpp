@@ -276,10 +276,21 @@ bool console::miniParser::getList() {
 }
 
 //==============================================================================
-void* console::parse_thread::Entry() {
+void* console::parse_thread::Entry() 
+{
 //   wxLogMessage(_T("Mouse is %s (%ld, %ld)"), where.c_str(), x, y);
 //   wxLogMessage(_T("Mutex try to lock..."));
 
+   wxMutexError result = _mutex.TryLock();
+   if (wxMUTEX_BUSY == result)
+   {
+      // Don't pile-up commands(threads). If previous command 
+      // didn't finish leave the thread immediately.
+      // This check can't be done in the main thread. See the comment
+      // in ted_cmd::spawnParseThread below
+      tell_log( MT_WARNING, "Busy. Command above skipped");
+      return NULL;
+   }
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
@@ -362,7 +373,7 @@ void console::ted_cmd::onGetCommand(wxCommandEvent& WXUNUSED(event))
 void console::ted_cmd::getCommand(bool thread)
 {
    if (puc)  getGUInput(); // run the local GUInput parser
-   else
+   else 
    {
       wxString command = GetValue();
       tell_log(MT_COMMAND, command);
@@ -390,22 +401,39 @@ void console::ted_cmd::spawnParseThread(wxString command)
 {
    // executing the parser in a separate thread
    //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
+   // A Memo on wxMutexes
+   // A mutex can be owned by one thread at a time. That's the whole point
+   // of them. The thread that owns the mutex is the one which called 
+   // wxMutex.Lock(). When a mutex is unlocked, it is orphan, i.e. it is 
+   // not owned by anybody. Now the exciting part.
+   // - What if wxMutex.Lock() is called twice by the same thread?
+   //   This seems to be called "recursive mutexes" and the bottom line 
+   //   there is - don't try it. (not portable, who knows how it works)
+   //   In other words this means that if you lock the mutex in thread X
+   //   you should better unlock it in the same thread, otherwise the
+   //   hell will break loose.
+   // - About thread synchronisation. wxCondition always have a mutex 
+   //   associated with it. A call to wxCondition::Signal() method will 
+   //   wake-up the thread which currently owns that mutex. Once again - 
+   //   if you are intending to stop the thread X and wait for an event 
+   //   from thread Y then you must lock the mutex from thread X 
+   //   beforehand. Otherwise the thread X is as good as dead.
+   //
+   // And the most exciting part - wxCondition::Broadcast()
+   // It says that it will wake-up all the threads waiting for this
+   // condition. How on earth you can assotiate more than one thread to 
+   // a single mutex? This part I don't understand.
+   //
 
-   if (wxMUTEX_NO_ERROR == parse_thread::_mutex.TryLock())
-   {
-      parse_thread *pthrd = DEBUG_NEW parse_thread(command,_parent,_canvas);
-      wxThreadError result = pthrd->Create();
-      if (wxTHREAD_NO_ERROR == result)
-         pthrd->Run();
-      else
-      {
-         tell_log( MT_ERROR, "Can't execute the command in a separate thread");
-         delete(pthrd);
-      }
-   }
+   parse_thread *pthrd = DEBUG_NEW parse_thread(command,_parent,_canvas);
+   wxThreadError result = pthrd->Create();
+   if (wxTHREAD_NO_ERROR == result)
+      pthrd->Run();
    else
-      tell_log( MT_WARNING, "Busy. Command above skipped");
-   //if (_wait) pthrd->Wait();
+   {
+      tell_log( MT_ERROR, "Can't execute the command in a separate thread");
+      //delete(pthrd);
+   }
 }
 
 // Note! parseCommand and onParseCommand should be overloaded methods, however
