@@ -50,6 +50,10 @@ extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
+//-----------------------------------------------------------------------------
+// Static members
+//-----------------------------------------------------------------------------
+wxMutex          tui::DrawThread::_mutex;
 
 #include "../ui/crosscursor.xpm"
 
@@ -365,17 +369,27 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 }
 
 
-void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
-    wxPaintDC dc(this);
+void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) 
+{
    #ifndef __WXMOTIF__
       if (!GetContext()) return;
    #endif
-   SetCurrent();
    // invalid_window indicates zooming.
    // event.GetEventType() == event.GetId() should means that database is updated
    // In both cases - the entire window is redrawn
    if ((invalid_window) || (event.GetEventType() == event.GetId()))
    {
+/*
+      tui::DrawThread *dthrd = DEBUG_NEW tui::DrawThread(this);
+      wxThreadError result = dthrd->Create();
+      if (wxTHREAD_NO_ERROR == result)
+         dthrd->Run();
+      else
+         tell_log( console::MT_ERROR, "Can't execute the drawing in a separate thread");
+*/      
+
+      wxPaintDC dc(this);
+      SetCurrent();
       glMatrixMode( GL_MODELVIEW );
       glShadeModel( GL_FLAT ); // Single color
       update_viewport();
@@ -390,35 +404,39 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) {
       glAccum(GL_LOAD, 1.0);
       invalid_window = false;
       if (rubber_band) rubber_paint();
+      if (reperX || reperY) longCursor();
+      SwapBuffers();
    }
    else
    {
+      wxPaintDC dc(this);
+      SetCurrent();
       glAccum(GL_RETURN, 1.0);
       if       (tmp_wnd)         wnd_paint();
       else if  (rubber_band)     rubber_paint();
+      if (reperX || reperY)      longCursor();
+      SwapBuffers();
    }
-   // deal with the long cursor
-   if (reperX || reperY)
-   {
-      glColor4f(1, 1, 1, .5);
-      glBegin(GL_LINES);
-      if (reperX)
-      {
-         glVertex2i(lp_BL.x(), ScrMARK.y()) ;
-         glVertex2i(lp_TR.x(), ScrMARK.y());
-      }
-      if (reperY)
-      {
-         glVertex2i(ScrMARK.x() , lp_BL.y()) ;
-         glVertex2i(ScrMARK.x() , lp_TR.y());
-      }
-      glEnd();
-   }
-
-   SwapBuffers();
 }
 
-// void tui::LayoutCanva+s::drawInterim(const TP& cp)
+void tui::LayoutCanvas::longCursor()
+{
+   glColor4f(1, 1, 1, .5);
+   glBegin(GL_LINES);
+   if (reperX)
+   {
+      glVertex2i(lp_BL.x(), ScrMARK.y()) ;
+      glVertex2i(lp_TR.x(), ScrMARK.y());
+   }
+   if (reperY)
+   {
+      glVertex2i(ScrMARK.x() , lp_BL.y()) ;
+      glVertex2i(ScrMARK.x() , lp_TR.y());
+   }
+   glEnd();
+}
+
+// void tui::LayoutCanvas::drawInterim(const TP& cp)
 // {
 //    wxPaintDC dc(this);
 //    #ifndef __WXMOTIF__
@@ -950,7 +968,6 @@ void tui::LayoutCanvas::OnCMcancel(wxCommandEvent& WXUNUSED(event))
       wxPostEvent(Console, eventCancelLast);
       // remove the point from the current temporary object in the data base
       DATC->mousePointCancel(releasepoint);
-      rubber_paint();
    }
 }
 
@@ -987,6 +1004,40 @@ tui::LayoutCanvas::~LayoutCanvas(){
    delete crossCur;
 //   delete (laydata::tdtdata::tessellObj);
 }
+
+void* tui::DrawThread::Entry()
+{
+   if (wxMUTEX_NO_ERROR == _mutex.TryLock())
+   {
+      wxClientDC dc(_canvas);
+      _canvas->SetCurrent();
+      glMatrixMode( GL_MODELVIEW );
+      glShadeModel( GL_FLAT ); // Single color
+      _canvas->update_viewport();
+      // CTM matrix stuff
+      glLoadIdentity();
+      glOrtho(_canvas->lp_BL.x(),_canvas->lp_TR.x(),_canvas->lp_TR.y(),_canvas->lp_BL.y(),-1.0,1.0);
+      glClear(GL_COLOR_BUFFER_BIT);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glClear(GL_ACCUM_BUFFER_BIT);
+      DATC->openGL_draw(_canvas->_LayCTM);    // draw data
+      glAccum(GL_LOAD, 1.0);
+      _canvas->invalid_window = false;
+      if (_canvas->rubber_band) _canvas->rubber_paint();
+      if (_canvas->reperX || _canvas->reperY) _canvas->longCursor();
+      _canvas->SwapBuffers();
+      _mutex.Unlock();
+   }
+   else
+   {
+      tell_log( console::MT_ERROR, "Draw mutex error.");
+      return NULL;
+   }
+   return NULL;
+}
+
+
 
 // Code below taken from the internet after nasty troubles with the cursor
 // initialization in GTK

@@ -64,6 +64,7 @@ namespace tui {
    public: 
                      LayoutCanvas(wxWindow *parent, const wxPoint&, 
                                                 const wxSize& , int* attribList);
+      friend class DrawThread;
       virtual       ~LayoutCanvas();
       wxImage        snapshot(void);
       void           showInfo();
@@ -127,6 +128,7 @@ namespace tui {
       //
       void           wnd_paint();
       void           rubber_paint();
+      void           longCursor();
       void           drawZeroMark();
       void           UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);
       void           EventMouseClick(int button);
@@ -138,6 +140,19 @@ namespace tui {
 #endif
 //      StatusLine     _status_line;
       DECLARE_EVENT_TABLE();
+   };
+
+   class DrawThread : public wxThread
+   {
+   public:
+                               DrawThread( LayoutCanvas* canvas, wxThreadKind kind=wxTHREAD_DETACHED ):
+                                 wxThread(kind), _canvas(canvas) {};
+   protected:
+      void*                    Entry();
+      tui::LayoutCanvas*       _canvas;
+      static wxMutex           _mutex;
+   //      void                    StatusBusy(wxString&);
+   //      void                    StatusReady();
    };
 
    wxCursor* MakeCursor(const char * pXpm[36],  int HotX, int HotY );
