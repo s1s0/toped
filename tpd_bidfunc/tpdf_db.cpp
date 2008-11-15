@@ -348,6 +348,7 @@ tellstdfunc::GDSread::GDSread(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::GDSread::execute() {
    std::string filename = getStringValue();
+   telldata::ttlist* topcells;
    if (expandFileName(filename))
    {
       std::list<std::string> top_cell_list;
@@ -365,11 +366,10 @@ int tellstdfunc::GDSread::execute() {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
          DATC->unlockGDS();
-         telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
+         topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                    CN != top_cell_list.end(); CN ++)
             topcells->add(DEBUG_NEW telldata::ttstring(*CN));
-         OPstack.push(topcells);
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
       else
@@ -383,6 +383,11 @@ int tellstdfunc::GDSread::execute() {
       std::string info = "Filename \"" + filename + "\" can't be expanded properly";
       tell_log(console::MT_ERROR,info);
    }
+   // Make sure you always return what you have to return - a list in this case even if
+   // it's empty. Otherwise the following tell function will crash, because it can't
+   // retrieve from the operand stack the required number of parameters. Empty list
+   // is still a list and everybody should deal with them
+   OPstack.push(topcells);
    return EXEC_NEXT;
 }
 
@@ -463,63 +468,50 @@ int tellstdfunc::GDSimportList::execute()
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-	
-	//Check if nested gdsread failed and doesn't put string list in stack
-	if(OPstack.empty())
-	{
-		std::ostringstream ost;
-      ost << "Can't execute GDS import - problem with first parameter";
+   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   nameList top_cells;
+   for (unsigned i = 0; i < pl->size(); i++)
+   {
+      top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
+   }
+   // Convert layer map
+   telldata::tthsh* nameh;
+   USMap gdsLaysStrList;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      gdsLaysStrList[nameh->key().value()] = nameh->value().value();
+   }
+   GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
+   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+      AGDSDB->collectLayers(*gdsLaysAll);
+   DATC->unlockGDS();
+   LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+   if (LayerExpression.status())
+   {
+      DATC->lockDB(false);
+         DATC->importGDScell(top_cells, LayerExpression, recur, over);
+         updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      DATC->unlockDB();
+      // Don't refresh the tree browser here. 
+      // - First - it has been updated during the conversion
+      // - Second - addTDTtab is running in the same thread as the caller. It must
+      // make sure that there is nothing left in the PostEvent queue in the main thread
+      // which was filled-up during the conversion.
+      // bottom line - don't do that, or you'll suffer ...
+      // @TODO Check whether is not a good idea to skip the cell browser update
+      // during GDS import. The calling addTDTtab() at the end should be safe
+      //browsers::addTDTtab();
+      LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
+            << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+   }
+   else
+   {
+      std::ostringstream ost;
+      ost << "Can't execute GDS import - error in the layer map";
       tell_log(console::MT_ERROR,ost.str());
-	}
-	else
-	{
-		telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());
-		OPstack.pop();
-
-		nameList top_cells;
-		for (unsigned i = 0; i < pl->size(); i++)
-		{
-			top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
-		}
-		// Convert layer map
-		telldata::tthsh* nameh;
-		USMap gdsLaysStrList;
-		for (unsigned i = 0; i < lll->size(); i++)
-		{
-			nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
-			gdsLaysStrList[nameh->key().value()] = nameh->value().value();
-		}
-		GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
-		GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-			AGDSDB->collectLayers(*gdsLaysAll);
-		DATC->unlockGDS();
-		LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
-		if (LayerExpression.status())
-		{
-			DATC->lockDB(false);
-				DATC->importGDScell(top_cells, LayerExpression, recur, over);
-				updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-			DATC->unlockDB();
-			// Don't refresh the tree browser here. 
-			// - First - it has been updated during the conversion
-			// - Second - addTDTtab is running in the same thread as the caller. It must
-			// make sure that there is nothing left in the PostEvent queue in the main thread
-			// which was filled-up during the conversion.
-			// bottom line - don't do that, or you'll suffer ...
-			// @TODO Check whether is not a good idea to skip the cell browser update
-			// during GDS import. The calling addTDTtab() at the end should be safe
-			//browsers::addTDTtab();
-			LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
-					<< "," << LogFile._2bool(over) << ");"; LogFile.flush();
-		}
-		else
-		{
-			std::ostringstream ost;
-			ost << "Can't execute GDS import - error in the layer map";
-			tell_log(console::MT_ERROR,ost.str());
-		}
-		delete pl;
-	}
+   }
+   delete pl;
    delete lll;
    return EXEC_NEXT;
 }
