@@ -121,9 +121,9 @@ public:
    void                       openGL_draw(const CTM&);
    void                       tmp_draw(const CTM&, TP, TP);
    const laydata::cellList&   cells();
+   laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
+   laydata::LibCellLists*     getCells(int libID);
    unsigned int               numselected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numselected() : 0 ;}
-   void                       saveProperties(std::string fname)
-                                                      {_properties.saveProperties(fname);}
    void                       defaultlayer(word layno){_curlay = layno;}
    void                       initcmdlayer()          {_curcmdlay = _curlay;}
    void                       setcmdlayer(word layno) {_curcmdlay = layno;}
@@ -132,35 +132,8 @@ public:
    std::string                tedfilename() const     {return _tedfilename;};
    bool                       neversaved()  const     {return _neversaved;}; 
    bool                       modified() const        {return _TEDLIB.modified();};
-   bool                       autopan() const         {return _properties.autopan();}
-   bool                       zeroCross() const       {return _properties.zeroCross();}
-   const real                 step() const            {return _properties.step();}
-   const layprop::LayoutGrid* grid(byte gn) const     {return _properties.grid(gn);}
-   const int4b                stepDB() const          {return _properties.stepDB();}
-   const real                 UU() const              {return _properties.UU();}
-   const real                 DBscale() const         {return _properties.DBscale();}
-   word                       getLayerNo(std::string name) const
-                                                      {return _properties.getLayerNo(name);}
-   std::string                getLayerName(word layno) const
-                                                      {return _properties.getLayerName(layno);}
-   byte                       marker_angle() const    {return _properties.marker_angle();}
-   bool                       layerHidden(word layno) {return _properties.drawprop().layerHidden(layno);}
-   bool                       layerLocked(word layno) {return _properties.drawprop().layerLocked(layno);}
-   bool                       grid_visual(word no)    {return grid(no)->visual();}
-   
 
-   void                       setautopan(bool status) {_properties.setautopan(status);}
-   void                       setZeroCross(bool status) {_properties.setZeroCross(status);}
-   void                       setmarker_angle(byte angle)
-                                                      {_properties.setmarker_angle(angle);}
-   void                       setstep(real st)        {_properties.setstep(st);}
-   void                       setClipRegion(DBbox clipR)
-                                                      {_properties.setClipRegion(clipR);}
-   void                       setScrCTM(CTM ScrCTM)   {_properties.setScrCTM(ScrCTM);}
-   void                       setCurrentOp(console::ACTIVE_OP op)
-                                                      {_properties.setCurrentOp(op);}
-   const console::ACTIVE_OP   currentop() const       {return _properties.currentop();}
-
+   //------------------------------------------------------------------------------------------------
    bool                       addlayer(std::string, word, std::string, std::string, std::string);
    bool                       addlayer(std::string, word);
    bool                       addlayer(word layno);
@@ -180,6 +153,34 @@ public:
    void                       clearRulers();
    void                       switch_drawruler(bool st) {_drawruler = st;}
    bool                       drawruler() {return _drawruler;}
+   LayerMapGds*               secureGdsLayMap(bool);
+   LayerMapCif*               secureCifLayMap(bool);
+   bool                       autopan() const         {return _properties.autopan();}
+   bool                       zeroCross() const       {return _properties.zeroCross();}
+   const real                 step() const            {return _properties.step();}
+   const layprop::LayoutGrid* grid(byte gn) const     {return _properties.grid(gn);}
+   const int4b                stepDB() const          {return _properties.stepDB();}
+   const real                 UU() const              {return _properties.UU();}
+   const real                 DBscale() const         {return _properties.DBscale();}
+   word                       getLayerNo(std::string name) const
+                                                      {return _properties.getLayerNo(name);}
+   std::string                getLayerName(word layno) const
+                                                      {return _properties.getLayerName(layno);}
+   byte                       marker_angle() const    {return _properties.marker_angle();}
+   bool                       layerHidden(word layno) {return _properties.drawprop().layerHidden(layno);}
+   bool                       layerLocked(word layno) {return _properties.drawprop().layerLocked(layno);}
+   bool                       grid_visual(word no)    {return grid(no)->visual();}
+   void                       setautopan(bool status) {_properties.setautopan(status);}
+   void                       setZeroCross(bool status) {_properties.setZeroCross(status);}
+   void                       setmarker_angle(byte angle)
+                                                      {_properties.setmarker_angle(angle);}
+   void                       setstep(real st)        {_properties.setstep(st);}
+   void                       setClipRegion(DBbox clipR)
+                                                      {_properties.setClipRegion(clipR);}
+   void                       setScrCTM(CTM ScrCTM)   {_properties.setScrCTM(ScrCTM);}
+   void                       setCurrentOp(console::ACTIVE_OP op)
+                                                      {_properties.setCurrentOp(op);}
+   const console::ACTIVE_OP   currentop() const       {return _properties.currentop();}
    void                       all_layers(nameList& laylist) const {_properties.all_layers(laylist);}
    void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
    void                       all_fills(nameList& filist)   const {_properties.all_fills(filist);  }
@@ -197,16 +198,14 @@ public:
    void                       clearUnpublishedLayers() {_properties.clearUnpublishedLayers();}
    const word                 layselmask() {return _properties.layselmask();}
    void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
-   laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
-   laydata::LibCellLists*     getCells(int libID);
    void                       setGdsLayMap(USMap* map)   {_properties.setGdsLayMap(map);}
    void                       setCifLayMap(USMap* map)   {_properties.setCifLayMap(map);}
    const USMap*               getGdsLayMap() const       {return _properties.getGdsLayMap();}
    const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
-   LayerMapGds*               secureGdsLayMap(bool);
-   LayerMapCif*               secureCifLayMap(bool);
+   void                       saveProperties(std::string fname)
+                                                      {_properties.saveProperties(fname);}
 
-   protected:
+protected:
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
    GDSin::GdsFile*            _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
