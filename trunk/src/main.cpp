@@ -538,12 +538,17 @@ bool TopedApp::OnInit() {
       wxLog::AddTraceMask(wxT("thread"));
       if (1 < argc) 
       {
-         wxString inputfile;
          for (int i=1; i<argc; i++)
          {
-            inputfile.Clear();
-            inputfile << wxT("#include \"") << argv[i] << wxT("\"");
-            Console->parseCommand(inputfile);
+            wxString curar(argv[i]);
+            if (wxT("-ogltrd") == curar) Toped->setOglThread(true);
+            else if (!(1 == curar.Find('-')))
+            {
+               wxString inputfile;
+               inputfile.Clear();
+               inputfile << wxT("#include \"") << curar << wxT("\"");
+               Console->parseCommand(inputfile);
+            }
          }
       }
    }

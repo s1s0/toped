@@ -156,16 +156,15 @@ void tui::StatusLine::update_coords(const TP& cp)
 BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_PAINT            ( tui::LayoutCanvas::OnpaintGL         )
    EVT_SIZE             ( tui::LayoutCanvas::OnresizeGL        )
-   EVT_ERASE_BACKGROUND ( tui::LayoutCanvas::OnEraseBackground )
    EVT_MOTION           ( tui::LayoutCanvas::OnMouseMotion     )
    EVT_RIGHT_DOWN       ( tui::LayoutCanvas::OnMouseRightDown  )
    EVT_RIGHT_UP         ( tui::LayoutCanvas::OnMouseRightUp    )
-//   EVT_LEFT_DOWN        ( tui::LayoutCanvas::OnMouseLeftDown   )
    EVT_LEFT_UP          ( tui::LayoutCanvas::OnMouseLeftUp     )
    EVT_LEFT_DCLICK      ( tui::LayoutCanvas::OnMouseLeftDClick )
    EVT_MIDDLE_UP        ( tui::LayoutCanvas::OnMouseMiddleUp   )
    EVT_MOUSEWHEEL       ( tui::LayoutCanvas::OnMouseWheel      )
    EVT_CHAR             ( tui::LayoutCanvas::OnChar            )
+   EVT_ERASE_BACKGROUND ( tui::LayoutCanvas::OnEraseBackground )
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_ZOOM  , wxID_ANY, tui::LayoutCanvas::OnZoom)
    EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT  , wxID_ANY, tui::LayoutCanvas::OnMouseIN)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_CURSOR, wxID_ANY, tui::LayoutCanvas::OnCursorType)
@@ -183,6 +182,7 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
 END_EVENT_TABLE()
 
 //   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
+//   EVT_LEFT_DOWN        ( tui::LayoutCanvas::OnMouseLeftDown   )
 
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, 
      const wxSize& size, int* attribList): 
@@ -206,6 +206,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    restricted_move = false;
    invalid_window = false;
    reperX = reperY = long_cursor = false;
+   _oglThread = false;
    initializeGL();
    ap_trigger = 10;
    glfInit();
@@ -351,20 +352,20 @@ void tui::LayoutCanvas::initializeGL() {
 }
 
 void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
-    // this is also necessary to update the context on some platforms
-    wxGLCanvas::OnSize(event);
-    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
-    int w, h;
-    GetClientSize(&w, &h);
-   #ifndef __WXMOTIF__
-      if (GetContext())
-   #endif
-    {
-      SetCurrent();
-      glViewport( 0, 0, (GLint)w, (GLint)h );
-    }
-    lp_BL = TP(0,0)  * _LayCTM;
-    lp_TR = TP(w, h) * _LayCTM;
+//   // this is also necessary to update the context on some platforms
+//   wxGLCanvas::OnSize(event);
+//    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
+   int w, h;
+   GetClientSize(&w, &h);
+//   #ifndef __WXMOTIF__
+//      if (GetContext())
+//   #endif
+//    {
+//      SetCurrent();
+   glViewport( 0, 0, (GLint)w, (GLint)h );
+//    }
+   lp_BL = TP(0,0)  * _LayCTM;
+   lp_TR = TP(w, h) * _LayCTM;
    invalid_window = true;
 }
 
@@ -379,33 +380,36 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
    // In both cases - the entire window is redrawn
    if ((invalid_window) || (event.GetEventType() == event.GetId()))
    {
-/*
-      tui::DrawThread *dthrd = DEBUG_NEW tui::DrawThread(this);
-      wxThreadError result = dthrd->Create();
-      if (wxTHREAD_NO_ERROR == result)
-         dthrd->Run();
+      if (_oglThread)
+      {
+         tui::DrawThread *dthrd = DEBUG_NEW tui::DrawThread(this);
+         wxThreadError result = dthrd->Create();
+         if (wxTHREAD_NO_ERROR == result)
+            dthrd->Run();
+         else
+            tell_log( console::MT_ERROR, "Can't execute the drawing in a separate thread");
+      }
       else
-         tell_log( console::MT_ERROR, "Can't execute the drawing in a separate thread");
-*/      
-
-      wxPaintDC dc(this);
-      SetCurrent();
-      glMatrixMode( GL_MODELVIEW );
-      glShadeModel( GL_FLAT ); // Single color
-      update_viewport();
-      // CTM matrix stuff
-      glLoadIdentity();
-      glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
-      glClear(GL_COLOR_BUFFER_BIT);
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glClear(GL_ACCUM_BUFFER_BIT);
-      DATC->openGL_draw(_LayCTM);    // draw data
-      glAccum(GL_LOAD, 1.0);
-      invalid_window = false;
-      if (rubber_band) rubber_paint();
-      if (reperX || reperY) longCursor();
-      SwapBuffers();
+      {
+         wxPaintDC dc(this);
+         SetCurrent();
+         glMatrixMode( GL_MODELVIEW );
+         glShadeModel( GL_FLAT ); // Single color
+         update_viewport();
+         // CTM matrix stuff
+         glLoadIdentity();
+         glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
+         glClear(GL_COLOR_BUFFER_BIT);
+         glEnable(GL_BLEND);
+         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+         glClear(GL_ACCUM_BUFFER_BIT);
+         DATC->openGL_draw(_LayCTM);    // draw data
+         glAccum(GL_LOAD, 1.0);
+         invalid_window = false;
+         if (rubber_band) rubber_paint();
+         if (reperX || reperY) longCursor();
+         SwapBuffers();
+      }
    }
    else
    {
@@ -1031,7 +1035,7 @@ void* tui::DrawThread::Entry()
    }
    else
    {
-      tell_log( console::MT_ERROR, "Draw mutex error.");
+      tell_log( console::MT_ERROR, "GL drawing skipped. Mutex busy.");
       return NULL;
    }
    return NULL;
