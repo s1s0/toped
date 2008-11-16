@@ -100,6 +100,7 @@ namespace tui {
       wxAuiManager*           getAuiManager()  {return &_winManager;}
       void                    initToolBars();
       void                    setIconDir(const std::string& uiDir);
+      void                    setOglThread(bool val) {_canvas->setOglThread(val);}
    private:
       void                    initMenuBar();
       void                    initView();

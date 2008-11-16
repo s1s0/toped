@@ -68,6 +68,7 @@ namespace tui {
       virtual       ~LayoutCanvas();
       wxImage        snapshot(void);
       void           showInfo();
+      void           setOglThread(bool val) {_oglThread = true;} 
       bool           initStatus() {
 #ifdef __WXGTK__
          return (NULL != x_visual);
@@ -78,7 +79,7 @@ namespace tui {
    protected:
       void           OnpaintGL(wxPaintEvent& event);
       void           OnresizeGL(wxSizeEvent& event);
-      void           OnEraseBackground(wxEraseEvent&) {};
+      void           OnEraseBackground(wxEraseEvent&) {}; // this prevents flickering !
       void           OnMouseMotion(wxMouseEvent&);
       void           OnMouseRightUp(wxMouseEvent& WXUNUSED(event));
       void           OnMouseRightDown(wxMouseEvent& WXUNUSED(event));
@@ -135,6 +136,7 @@ namespace tui {
       bool           reperX;         // Draw a cursor line across the window parallel to the X axis
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       bool           long_cursor;    //
+      bool           _oglThread;
 #ifdef __WXGTK__
       XVisualInfo*   x_visual;       //
 #endif
