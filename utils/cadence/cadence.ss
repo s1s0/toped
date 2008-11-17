@@ -1,3 +1,30 @@
+;//                                                                          =
+;//   This program is free software; you can redistribute it and/or modify   =
+;//   it under the terms of the GNU General Public License as published by   =
+;//   the Free Software Foundation; either version 2 of the License, or      =
+;//   (at your option) any later version.                                    =
+;// ------------------------------------------------------------------------ =
+;//                  TTTTT    OOO    PPPP    EEEE    DDDD                    =
+;//                  T T T   O   O   P   P   E       D   D                   =
+;//                    T    O     O  PPPP    EEE     D    D                  =
+;//                    T     O   O   P       E       D   D                   =
+;//                    T      OOO    P       EEEEE   DDDD                    =
+;//                                                                          =
+;//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+;// ------------------------------------------------------------------------ =
+;//           $URL: https://gaitukevich@svn.berlios.de/svnroot/repos/toped/trunk/utils/cadence/cadence.ss $
+;//        Created: Wed Dec 26 2001
+;//     Originator: Sergey Gaitukevich 
+;//    Description: Cadence techfile to TELL Converter
+;//---------------------------------------------------------------------------
+;//  Revision info
+;//---------------------------------------------------------------------------
+;//      $Revision: 854 $
+;//          $Date: 2008-11-06 08:45:43 +0800 (Чт, 06 ноя 2008) $
+;//        $Author: s_krustev $
+;//===========================================================================
+
+
 (require scheme/list)
 ;(require rnrs/lists-6)
 
@@ -334,6 +361,35 @@
     (list "/*mfgGridResolution"
           "not realized yet*/")))
 
+(define controls
+  (lambda (cntrls)
+    (list "/*controls"
+          "not realized yet*/")))
+
+(define viaLayers
+  (lambda (layers)
+    (list "/*viaLayers"
+          "not realized yet*/")))
+
+(define orderedSpacingRules
+  (lambda (rules)
+    (list "/*orderedSpacingRules"
+          "not realized yet*/")))
+
+(define spacingRules
+  (lambda (rules)
+    (list "/*spacingRules"
+          "not realized yet*/")))
+
+(define devices
+  (lambda (devs)
+    (list "/*devices"
+          "not realized yet*/")))
+
+(define lxRules
+  (lambda (rules)
+    (list "/*lxRules"
+          "not realized yet*/")))
 
 ;****************TRANSLATOR FUNCTIONS********************************
 (define (layer-setup)
@@ -395,6 +451,12 @@
           ((eq? command 'streamLayers) (streamLayers body))
           ((eq? command 'physicalRules) (physicalRules body))
           ((eq? command 'mfgGridResolution) (mfgGridResolution body))
+          ((eq? command 'controls) (controls body))
+          ((eq? command 'viaLayers) (viaLayers body))
+          ((eq? command 'orderedSpacingRules) (orderedSpacingRules body))
+          ((eq? command 'spacingRules) (spacingRules body))
+          ((eq? command 'devices) (devices body))
+          ((eq? command 'lxRules) (lxRules body))
           (else (begin
                   (display "mistake in recognition")
                   (newline)
@@ -426,14 +488,15 @@
 
 ;---------------------------------------------
 (define d (foldl (lambda (word result) 
-                                          (append result (readlines word))) '() (list "default.drf" "techfile.tf")))
-(write-to-file "tell.tll" (append (parse d) (layer-setup) (post-proceed)))
-
+                                          (append result (readlines word))) '() (list "default.drf" "tf_911.tf")))
+;(write-to-file "tell.tll" (append (parse d) (layer-setup) (post-proceed)))
+(write-to-file "tell.tll" (append (parse d))); (layer-setup) (post-proceed)))
 
 ;(parse d)
 ;(find-layer layer-list "PW")
 ;(find-layer layer-list "NBL1")
 ;((cadr layer-list) 'get-name)
+;#|
 (for-each 
  (lambda(layer)
    (begin
@@ -445,6 +508,10 @@
      (display "packet=")
      (display ((layer 'get-packet)))
      (newline)))
- layer-list)
+ layer-list);|#
 
-(layer-setup)
+;(define xxx (find-in-object-list layer-list "softFence"))
+;(define name ((xxx 'get-name)))
+;((xxx 'get-packet))
+;(define pk (find-in-object-list packet-list name))
+;(layer-setup)
