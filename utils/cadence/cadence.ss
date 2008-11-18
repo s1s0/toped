@@ -12,16 +12,16 @@
 ;//                                                                          =
 ;//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 ;// ------------------------------------------------------------------------ =
-;//           $URL: https://gaitukevich@svn.berlios.de/svnroot/repos/toped/trunk/utils/cadence/cadence.ss $
+;//           $URL$
 ;//        Created: Wed Dec 26 2001
 ;//     Originator: Sergey Gaitukevich 
 ;//    Description: Cadence techfile to TELL Converter
 ;//---------------------------------------------------------------------------
 ;//  Revision info
 ;//---------------------------------------------------------------------------
-;//      $Revision: 854 $
-;//          $Date: 2008-11-06 08:45:43 +0800 (Чт, 06 ноя 2008) $
-;//        $Author: s_krustev $
+;//      $Revision$
+;//          $Date$
+;//        $Author$
 ;//===========================================================================
 
 
@@ -317,7 +317,7 @@
                        (packet-name (name->string(caddr layer)))
                        (cur-layer (find-in-object-list layer-list layer-name))) 
                   (if (eq? purpose 'drawing)
-                      ((cur-layer 'set-packet!) packet-name))))
+                      ((cur-layer 'set-packet!) packet-name) null)))
               layers)
            '())))
 
@@ -335,7 +335,10 @@
     (begin
       (for-each 
      (lambda(cur-layer)
-       (let* ((layer-name (car (car cur-layer)))
+       (let* ((first-item (car cur-layer))
+              (layer-name (if (list? first-item)
+                              (car first-item)
+                              (symbol->string first-item)))
               (layer (find-in-list 
                       (lambda(x) 
                         (string=? ((x 'get-name)) layer-name)) 
@@ -348,7 +351,9 @@
                  (begin 
                    ((layer 'set-streamed!) #t)
                    ((layer 'set-stream-number!) stream-number)
-                   ((layer 'set-data-type!) data-type))))))
+                   ((layer 'set-data-type!) data-type))
+                 null)
+             null)))
      layers)
       '())))
 
@@ -410,7 +415,7 @@
                                   (stipple ((packet 'get-stipple))))
                              (list (string-append "layprop(\"" name "\",\t" number ",\t\"" colour "\",\t"
                                                   "\"" stipple "\",\t" "\"selected3\");"))) 
-                           (error "can't find packet")))
+                           (error "can't find packet" packet-name)))
                      '()))
                layer-list)
           (list (list "}"))))
@@ -470,33 +475,34 @@
 ;---------------------------------------------
 (define (write-to-file filename list-of-string)
   (call-with-output-file filename
-  (lambda (p)
-    (for-each (lambda (s) 
-                (cond ((empty? s) #f)
-                      ((not (list? s)) (display s p) (newline))
-                      (else (for-each (lambda (x) (if (list? x)
-                                                      (begin
-                                                        (for-each (lambda(y) (display y p) ) x)
-                                                        (newline p))
-                                                      (begin 
-                                                        (display x p) 
-                                                        (newline p))))
-                                      s))))
-              list-of-string))
-  'replace))
+    (lambda (p)
+      (for-each (lambda (s) 
+                  (cond ((empty? s) #f)
+                        ((not (list? s)) (display s p) (newline))
+                        (else (for-each (lambda (x) (if (list? x)
+                                                        (begin
+                                                          (for-each (lambda(y) (display y p) ) x)
+                                                          (newline p))
+                                                        (begin 
+                                                          (display x p) 
+                                                          (newline p))))
+                                        s))))
+                list-of-string))
+;    #:exists 'replace))
+    'replace))
 
 
 ;---------------------------------------------
 (define d (foldl (lambda (word result) 
-                                          (append result (readlines word))) '() (list "default.drf" "tf_911.tf")))
-;(write-to-file "tell.tll" (append (parse d) (layer-setup) (post-proceed)))
-(write-to-file "tell.tll" (append (parse d))); (layer-setup) (post-proceed)))
+                   (append result (readlines word))) '() (list "default.drf" "techfile.tf")))
+(write-to-file "tell.tll" (append (parse d) (layer-setup) (post-proceed)))
+;(write-to-file "tell.tll" (append (parse d))); (layer-setup) (post-proceed)))
 
 ;(parse d)
 ;(find-layer layer-list "PW")
 ;(find-layer layer-list "NBL1")
 ;((cadr layer-list) 'get-name)
-;#|
+#|
 (for-each 
  (lambda(layer)
    (begin
@@ -508,10 +514,23 @@
      (display "packet=")
      (display ((layer 'get-packet)))
      (newline)))
- layer-list);|#
+ layer-list)|#
 
 ;(define xxx (find-in-object-list layer-list "softFence"))
 ;(define name ((xxx 'get-name)))
 ;((xxx 'get-packet))
 ;(define pk (find-in-object-list packet-list name))
 ;(layer-setup)
+;(define x1 (vector->immutable-vector (current-command-line-arguments)))
+
+;(define input-list (vector->list (current-command-line-arguments)))
+;(define input-list (list "default.drf" "techfile.tf"))
+;(display "ddd" x1)
+;(newline)
+;(display (vector-ref x1 0))
+(newline)
+;(vector-ref x1 1)
+(newline)
+;(define collected-strings (foldl (lambda (word result) 
+;                   (append result (readlines word))) '() input-list))
+;(write-to-file "tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
