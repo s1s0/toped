@@ -13,20 +13,20 @@
 ;//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 ;// ------------------------------------------------------------------------ =
 ;//           $URL$
-;//        Created: Wed Dec 26 2001
+;//        Created:  Oct 2008
 ;//     Originator: Sergey Gaitukevich 
 ;//    Description: Cadence techfile to TELL Converter
 ;//---------------------------------------------------------------------------
 ;//  Revision info
 ;//---------------------------------------------------------------------------
 ;//      $Revision$
-;//          $Date$
-;//        $Author$
+;//      $Date$
+;//      $Author$
 ;//===========================================================================
 
-
+(module cadence scheme
 (require scheme/list)
-;(require rnrs/lists-6)
+(provide convert)
 
 ;****************AUX FUNCTIONS********************************
 
@@ -200,7 +200,7 @@
                        (red (caddr x))
                        (green (cadddr x))
                        (blue (cadr (cdddr x))))
-                   (string-append "definecolor(\""  (symbol->string color) "\","
+                   (string-append "definecolor(\""  (name->string color) "\","
                                   (number->string red) ","
                                   (number->string green) ","
                                   (number->string blue) ", 178);"))) 
@@ -315,9 +315,11 @@
                 (let* ((layer-name (name->string(car layer)))
                        (purpose (cadr layer))
                        (packet-name (name->string(caddr layer)))
+                       (valid (last layer))
                        (cur-layer (find-in-object-list layer-list layer-name))) 
-                  (if (eq? purpose 'drawing)
-                      ((cur-layer 'set-packet!) packet-name) null)))
+                  (if (eq? valid 't)
+                      ((cur-layer 'set-packet!) packet-name) 
+                      null)))
               layers)
            '())))
 
@@ -488,14 +490,24 @@
                                                           (newline p))))
                                         s))))
                 list-of-string))
-;    #:exists 'replace))
-    'replace))
-
+    #:exists 'replace));for script
+;    'replace))          ;inside drScheme
 
 ;---------------------------------------------
-(define d (foldl (lambda (word result) 
-                   (append result (readlines word))) '() (list "default.drf" "techfile.tf")))
-(write-to-file "tell.tll" (append (parse d) (layer-setup) (post-proceed)))
+(define (collect-strings input-list)
+  (foldl (lambda (word result) 
+           (append result (readlines word))) '() input-list))
+;---------------------------------------------
+;convert - top level exported function
+;input input-list - list of file (first must be drf-files, then techfiles)
+;output - non (output write down to tell.tll file
+
+(define (convert input-list)
+  (write-to-file "tell.tll" (append (parse (collect-strings)) (layer-setup) (post-proceed))))
+;---------------------------------------------
+;(define d (foldl (lambda (word result) 
+;                   (append result (readlines word))) '() (list "default.drf" "techfile.tf")))
+;(write-to-file "tell.tll" (append (parse d) (layer-setup) (post-proceed)))
 ;(write-to-file "tell.tll" (append (parse d))); (layer-setup) (post-proceed)))
 
 ;(parse d)
@@ -516,21 +528,10 @@
      (newline)))
  layer-list)|#
 
-;(define xxx (find-in-object-list layer-list "softFence"))
-;(define name ((xxx 'get-name)))
-;((xxx 'get-packet))
-;(define pk (find-in-object-list packet-list name))
-;(layer-setup)
-;(define x1 (vector->immutable-vector (current-command-line-arguments)))
+(define input-list (vector->list (current-command-line-arguments)))
 
-;(define input-list (vector->list (current-command-line-arguments)))
-;(define input-list (list "default.drf" "techfile.tf"))
-;(display "ddd" x1)
-;(newline)
-;(display (vector-ref x1 0))
-(newline)
-;(vector-ref x1 1)
-(newline)
-;(define collected-strings (foldl (lambda (word result) 
-;                   (append result (readlines word))) '() input-list))
-;(write-to-file "tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
+(define collected-strings (foldl (lambda (word result) 
+                   (append result (readlines word))) '() input-list))
+(write-to-file "tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
+  
+)
