@@ -66,7 +66,7 @@ namespace tui {
                                                 const wxSize& , int* attribList);
       friend class DrawThread;
       virtual       ~LayoutCanvas();
-      wxImage        snapshot(void);
+      void           snapshot(byte*&, word&, word&);
       void           showInfo();
       void           setOglThread(bool val) {_oglThread = true;} 
       bool           initStatus() {

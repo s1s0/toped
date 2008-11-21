@@ -293,6 +293,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 
    EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
+   EVT_MENU( TMGET_SNAPSHOT      , tui::TopedFrame::OnTDTSnapshot )
 
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
@@ -616,7 +617,8 @@ void tui::TopedFrame::initMenuBar() {
    */
    _resourceCenter->appendMenu("&Other/Add Ruler"   , "", &tui::TopedFrame::OnAddRuler, "Add new ruler" );
    _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
-//   _resourceCenter->appendMenuSeparator("Other");
+   _resourceCenter->appendMenu("&Other/Get Snapshot", "", &tui::TopedFrame::OnTDTSnapshot, "Get a snapshot of the canvas on TGA file");
+   //   _resourceCenter->appendMenuSeparator("Other");
 
    _resourceCenter->appendMenu("&Help/Report Video", "", &tui::TopedFrame::OnCheckHW, "Display OpenGL & video driver information" );
    _resourceCenter->appendMenuSeparator("Help");
@@ -1128,10 +1130,44 @@ void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event))
    else SetStatusText(wxT("Saving aborted"));
 }
 
-void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent&)
+void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent& WXUNUSED(event))
 {
-   wxImage image = _canvas->snapshot();
+   // Note the pragmas below. It won't create a proper targa file whithout them!
+   // See the note in LayoutCanvas::snapshot(...)
+#pragma pack(push,1)
+   typedef struct {
+      byte   identsize;              // Size of ID field that follows header (0)
+      byte   colorMapType;           // 0 = None, 1 = paletted
+      byte   imageType;              // 0 = none, 1 = indexed, 2 = rgb, 3 = grey, +8=rle
+      word   colorMapStart;          // First colour map entry
+      word   colorMapLength;         // Number of colors
+      byte   colorMapBits;           // bits per palette entry
+      word   xstart;                 // image x origin
+      word   ystart;                 // image y origin
+      word   width;                  // width in pixels
+      word   height;                 // height in pixels
+      byte   bits;                   // bits per pixel (8 16, 24, 32)
+      byte   descriptor;             // image descriptor
+   } TargaHeader;
+#pragma pack(pop)
 
+   byte* theImage = NULL;
+   word szH, szW;
+   _canvas->snapshot(theImage, szW, szH);
+   unsigned long imgSize = 3 * szH * szW;
+
+   // Initialize the Targa header
+   TargaHeader tHdr = {0, 0, 2, 0, 0, 0, 0, 0, szW, szH, 24, 0 };
+
+   FILE* tFile = fopen("boza.tga", "wb");
+   if(NULL != theImage)
+   {
+      //Save first the targa header and then - the data
+      fwrite(&tHdr, sizeof(TargaHeader), 1, tFile);
+      fwrite(theImage, imgSize, 1, tFile);
+      fclose(tFile);
+   }
+   delete[] theImage;
 }
 
 void tui::TopedFrame::OnCellNew(wxCommandEvent& WXUNUSED(event)) {
