@@ -160,7 +160,7 @@ namespace tui {
       void     OnTDTSave(wxCommandEvent& WXUNUSED(event));
       void   OnTDTSaveAs(wxCommandEvent& WXUNUSED(event));
       void   OnPropSave(wxCommandEvent& WXUNUSED(event));
-      void OnTDTSnapshot(wxCommandEvent&);
+      void OnTDTSnapshot(wxCommandEvent& WXUNUSED(event));
       void        OnCopy(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("copy();"));}
       void        OnMove(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("move();"));}
       void      OnDelete(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("delete();"));}

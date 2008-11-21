@@ -273,39 +273,37 @@ void	tui::LayoutCanvas::showInfo()
 #endif
 }
 
-wxImage   tui::LayoutCanvas::snapshot(void)
+void tui::LayoutCanvas::snapshot(byte*& theImage, word& szW, word& szH)
 {
-   int width, height;
+   // The idea for this piece of code is taken from the examples given here:
+   // http://www.opengl.org/sdk/docs/books/SuperBible/
 
-   int nv[4];
-   glGetIntegerv(GL_VIEWPORT, nv);
-   width = nv[2];
-   height = nv[3];
-   void *buffer = malloc(3*(width+1)*(height+1));
+   // Get the current viewport dimensions
+   GLint viewPort[4];         // Viewport in pixels
+   glGetIntegerv(GL_VIEWPORT, viewPort);
+   szW = viewPort[2];
+   szH = viewPort[3];
+   // Calculate the image size in bytes
+   unsigned long imageSize = szW * 3 * szH;
+   // Get the memory chunk
+   theImage = new byte[imageSize];
+   //@TODO! A fairly big piece of memory will be required. Make sure that we have proper protections @new
 
-   glReadBuffer(GL_BACK);
-   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-   glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);//GL_BGRA_EXT
-   wxImage image=wxImage(width, height, true);
-   for (int j=0; j<(height-1); j++)
-      for (int i=0; i<(width-1); i++)
+   // Now the interesting part
+   glPixelStorei(GL_PACK_ALIGNMENT  , 1);
+   glPixelStorei(GL_PACK_ROW_LENGTH , 0);
+   glPixelStorei(GL_PACK_SKIP_ROWS  , 0);
+   glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
 
-      {
-         unsigned char* cbuf = (unsigned char *)(buffer);
-         cbuf = cbuf +3*(i+j*width);
-         unsigned char r = *(cbuf+0);
-         unsigned char g = *(cbuf+1);
-         unsigned char b = *(cbuf+2);
-
-         image.SetRGB(i, height-j-1, r, g, b);
-      }
-   //image.SetData((unsigned char*)buffer, true);
-
-   image.SaveFile(wxT("snapshot.bmp"));
-
-
-   wxImage image2;
-   return image2;
+   // Store the state of the current read buffer
+   GLenum lastBuffer;
+   glGetIntegerv(GL_READ_BUFFER, (GLint *)&lastBuffer);
+   // Switch the read buffer to the front one
+   glReadBuffer(GL_ACCUM);
+   // Get the data
+   glReadPixels(0, 0, szW, szH, GL_BGR_EXT, GL_UNSIGNED_BYTE, theImage);
+   // Put back the state of the current read buffer
+   glReadBuffer(lastBuffer);
 }
 
 
@@ -315,11 +313,18 @@ void tui::LayoutCanvas::viewshift()
    int Wcl, Hcl;
    const int slide_step = 100;
    GetClientSize(&Wcl,&Hcl);
-   glReadBuffer(GL_FRONT);
-   glRasterPos2i (0, 0);
-   glCopyPixels (slide_step, 0, Wcl-slide_step, Hcl, GL_COLOR);
+   wxPaintDC dc(this);
+   SetCurrent();
+   glAccum(GL_RETURN, 1.0);
+//   glReadBuffer(GL_FRONT);
+//   glDrawBuffer(GL_BACK);
+/*   glRasterPos2i (lp_BL.x(), lp_BL.y());
+   glCopyPixels (lp_BL.x() + slide_step, lp_BL.y(), lp_TR.x() - lp_BL.x() -slide_step, lp_TR.y() - lp_BL.y(), GL_COLOR);*/
+   glRasterPos2i (1, 1);
+   glCopyPixels (slide_step, 0, Wcl - slide_step, Hcl, GL_COLOR);
    glAccum(GL_LOAD, 1.0);
-/*   slide = false;*/
+   SwapBuffers();
+   /*   slide = false;*/
 }
 
 void tui::LayoutCanvas::initializeGL() {
@@ -919,7 +924,8 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
 
 void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
 {
-   CTM tmpmtrx;
+  //viewshift();
+/*   CTM tmpmtrx;
    TP center((lp_TR.x() + lp_BL.x())/2, (lp_TR.y() + lp_BL.y())/2);
    tmpmtrx.Translate(ScrMARK - center);
    DBbox* box = DEBUG_NEW DBbox( lp_BL, lp_TR );
@@ -927,7 +933,7 @@ void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
-   OnZoom(eventZOOM);
+   OnZoom(eventZOOM);*/
 }
 
 void tui::LayoutCanvas::OnCursorType(wxCommandEvent& event)
