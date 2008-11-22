@@ -1132,6 +1132,15 @@ void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent& WXUNUSED(event))
 {
+   wxFileDialog dlg2(this, wxT("Save a canvas snapshot"), wxT(""), wxT(""),
+                     wxT("Targa files |*.tga"),
+                         tpdfSAVE);
+   if (wxID_OK != dlg2.ShowModal()) return;
+   wxString filename;
+   filename << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename();
+//   wxString fname = dlg2.GetPath();
+   if(!checkFileOverwriting(filename)) return;
+
    // Note the pragmas below. It won't create a proper targa file whithout them!
    // See the note in LayoutCanvas::snapshot(...)
 #pragma pack(push,1)
@@ -1159,7 +1168,7 @@ void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent& WXUNUSED(event))
    // Initialize the Targa header
    TargaHeader tHdr = {0, 0, 2, 0, 0, 0, 0, 0, szW, szH, 24, 0 };
 
-   FILE* tFile = fopen("boza.tga", "wb");
+   FILE* tFile = fopen(filename.mb_str(wxConvUTF8) , "wb");
    if(NULL != theImage)
    {
       //Save first the targa header and then - the data
