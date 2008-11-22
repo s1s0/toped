@@ -82,7 +82,7 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 {
    wxMenu menu;
    _rbCellID = id;
-   if ( id.IsOk() && (id != GetRootItem()))
+   if ( id.IsOk() && (id != _dbroot))
    {
       wxString RBcellname = GetItemText(id);
       menu.Append(CELLTREEOPENCELL, wxT("Open " + RBcellname));
@@ -100,6 +100,7 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
    {
       menu.Append(tui::TMCELL_NEW, wxT("New cell")); // will be catched up in toped.cpp
       menu.Append(tui::TMGDS_EXPORTL, wxT("GDS export"));
+      menu.Append(tui::TMCIF_EXPORTL, wxT("CIF export"));
    }
    PopupMenu(&menu, pt);
 }
@@ -127,7 +128,7 @@ void  browsers::CellBrowser::onLMouseDblClk(wxMouseEvent& event)
    int flags;
    wxPoint pt = event.GetPosition();
    wxTreeItemId id = HitTest(pt, flags);
-   if (id.IsOk() && (id != GetRootItem()) && (flags & wxTREE_HITTEST_ONITEMLABEL))
+   if (id.IsOk() && (id != _dbroot) && (flags & wxTREE_HITTEST_ONITEMLABEL))
    {
       wxString cmd;
       cmd << wxT("opencell(\"") << GetItemText(id) <<wxT("\");");

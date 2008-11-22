@@ -128,7 +128,7 @@ namespace browsers
          void              onTellRemoveCell(wxString, wxString, int);
          wxTreeItemId      _topStructure;
          wxTreeItemId      _activeStructure;
-         wxTreeItemId      _dbroot;
+         wxTreeItemId      _dbroot; // The actual Root always invisible (because of the libraries)
          bool              _hierarchy_view;
          wxColor           _listColor;
          wxColor           _editColor;

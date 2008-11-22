@@ -201,8 +201,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
    
-   EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnCIFexportLIB)
-   EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnCIFimport   )
+   EVT_MENU( TMCIF_EXPORTL       , tui::TopedFrame::OnCIFexportLIB)
+   EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFimport   )
    
    EVT_MENU( TMCIF_OPEN          , tui::TopedFrame::OnCIFRead     )
    EVT_MENU( TMCIF_TRANSLATE     , tui::TopedFrame::OnCIFtranslate)
