@@ -122,8 +122,7 @@ namespace browsers
          void              onCommand(wxCommandEvent&);
          void              onLMouseDblClk(wxMouseEvent&);
          void              onWxOpenCell(wxCommandEvent&);
-         void              onTellOpenCell(wxString);
-         void              onTellHighlightCell(wxString);
+         void              tdtCellSpot(const wxTreeItemId&, const wxTreeItemId&);
          void              onTellAddCell(wxString, wxString, int);
          void              onTellRemoveCell(wxString, wxString, int);
          wxTreeItemId      _topStructure;

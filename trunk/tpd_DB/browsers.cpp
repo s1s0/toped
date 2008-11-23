@@ -368,12 +368,18 @@ void browsers::CellBrowser::onCommand( wxCommandEvent& event )
 {
    switch ( event.GetInt() )
    {
-      case BT_CELL_OPEN :
-         onTellOpenCell(event.GetString());
+      case BT_CELL_OPEN :{
+         wxTreeItemId topItem;
+         VERIFY(findItem(event.GetString(), topItem, GetRootItem()));
+         tdtCellSpot(topItem, topItem);
          break;
-      case BT_CELL_HIGHLIGHT:
-         onTellHighlightCell(event.GetString());
+      }
+      case BT_CELL_HIGHLIGHT: {
+         wxTreeItemId actItem;
+         VERIFY(findItem(event.GetString(), actItem, GetRootItem()));
+         tdtCellSpot(_topStructure, actItem);
          break;
+      }
       case BT_CELL_ADD :
          onTellAddCell(event.GetString(),
                        *(static_cast<wxString*>(event.GetClientData())),
@@ -390,25 +396,17 @@ void browsers::CellBrowser::onCommand( wxCommandEvent& event )
    }
 }
 
-void browsers::CellBrowser::onTellOpenCell( wxString open_cell )
+void browsers::CellBrowser::tdtCellSpot( const wxTreeItemId& topItem, const wxTreeItemId& actItem )
 {
-   wxTreeItemId item;
-   VERIFY(findItem(open_cell, item, GetRootItem()));
+   //
    highlightChildren(_topStructure, _listColor);
-   if (_activeStructure.IsOk())  SetItemBold(_activeStructure, false);
-   _topStructure = _activeStructure = item;
+   if (_activeStructure.IsOk()) SetItemBold(_activeStructure, false);
+   if (  _topStructure.IsOk() ) SetItemBold(   _topStructure, false);
+   //
+   _topStructure    = topItem;
+   _activeStructure = actItem;
    highlightChildren(_topStructure, _editColor);
    SetItemBold(_activeStructure, true);
-}
-
-void browsers::CellBrowser::onTellHighlightCell( wxString open_cell )
-{//edit in place
-   wxTreeItemId item;
-   VERIFY(findItem(open_cell, item, GetRootItem()));
-   if ( _activeStructure.IsOk() )  SetItemBold(_topStructure   , false);
-   _activeStructure = item;
-   SetItemBold(_activeStructure, true);
-   EnsureVisible(_activeStructure);
 }
 
 void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname, int action)
