@@ -56,7 +56,10 @@ namespace tui {
       ID_CBDEFCOLOR     ,
       ID_CBDEFPATTERN   ,
       ID_CBDEFLINE      ,
-      ID_SAVELAYMAP
+      ID_SAVELAYMAP		,
+		ID_BTNDISPLAYADD	,
+		ID_BTNTECHADD		,
+		ID_BTNCONVERT
    };
 
    typedef enum
@@ -552,6 +555,23 @@ namespace tui {
       byte           _current_pattern[128];
 
       DECLARE_EVENT_TABLE();
+   };
+
+	   //--------------------------------------------------------------------------
+   class cadenceConvert : public wxDialog 
+	{
+   public:
+      cadenceConvert(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos);
+   protected:   
+      wxTextCtrl* _displayList;
+      wxTextCtrl* _techList;
+     // wxTextCtrl* _rotation;
+     // wxCheckBox* _flip;
+	private:
+		void	onDisplayAdd(wxCommandEvent&);
+		void	onTechAdd(wxCommandEvent&);
+		void	onConvert(wxCommandEvent&);
+		DECLARE_EVENT_TABLE();
    };
 
 }

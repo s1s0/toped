@@ -242,6 +242,7 @@ namespace tui {
       void  OnGridDefine(wxCommandEvent& WXUNUSED(event));
       void  OnAddRuler(wxCommandEvent& WXUNUSED(event))    {_cmdline->parseCommand(wxT("addruler();") );}
       void  OnClearRulers(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("clearrulers();") );}
+		void  OnCadenceConvert(wxCommandEvent& WXUNUSED(event));
       void  OnChangeLayer(wxCommandEvent& WXUNUSED(event));
       void  OnCurrentLayer(wxCommandEvent& WXUNUSED(event));
       //
