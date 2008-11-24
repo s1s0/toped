@@ -271,6 +271,7 @@ void browsers::CellBrowser::updateFlat()
                AppendItem(GetRootItem(), cellName);
          }
       }
+      delete cll;
    }
    // get all libraries
    cll = DATC->getCells(ALL_LIB);
@@ -284,7 +285,7 @@ void browsers::CellBrowser::updateFlat()
             AppendItem(GetRootItem(), cellName);
       }
    }
-
+   delete cll;
    DATC->unlockDB();
 
    SortChildren(GetRootItem());
