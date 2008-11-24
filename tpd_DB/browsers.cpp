@@ -250,17 +250,26 @@ void browsers::CellBrowser::updateFlat()
    wxTreeItemId temp, nroot;
    laydata::LibCellLists *cll;
    laydata::LibCellLists::iterator curlib;
-   _dbroot = GetRootItem();
-   // get undefined cells first
-   cll = DATC->getCells(UNDEFCELL_LIB);
-   for (curlib = cll->begin(); curlib != cll->end(); curlib++)
+   bool rootexists = true;
+   try
    {
-      laydata::cellList::const_iterator CL;
-      for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+      DATC->lockDB(false);
+   }
+   catch (EXPTNactive_DB) {rootexists = false;}
+   if (rootexists)
+   {
+      _dbroot = GetRootItem();
+      // get undefined cells first
+      cll = DATC->getCells(UNDEFCELL_LIB);
+      for (curlib = cll->begin(); curlib != cll->end(); curlib++)
       {
-         wxString cellName = wxString( CL->first.c_str(),  wxConvUTF8);
-         if (!findItem(cellName, temp, GetRootItem()))
-            AppendItem(GetRootItem(), cellName);
+         laydata::cellList::const_iterator CL;
+         for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+         {
+            wxString cellName = wxString( CL->first.c_str(),  wxConvUTF8);
+            if (!findItem(cellName, temp, GetRootItem()))
+               AppendItem(GetRootItem(), cellName);
+         }
       }
    }
    // get all libraries
