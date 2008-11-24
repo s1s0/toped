@@ -38,6 +38,13 @@
 
 extern DataCenter*                DATC;
 
+#if wxCHECK_VERSION(2, 8, 0)
+#define tpdfOPEN wxFD_OPEN
+#define tpdfSAVE wxFD_SAVE
+#else
+#define tpdfOPEN wxOPEN
+#define tpdfSAVE wxSAVE
+#endif
 
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::sgSpinButton, wxSpinButton)
@@ -2150,4 +2157,83 @@ void tui::nameEbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
    wxSize client_size = GetClientSize();
    _laypanel->SetClientSize(client_size);
    AdjustScrollbars();
+}
+
+BEGIN_EVENT_TABLE(tui::cadenceConvert, wxDialog)
+   EVT_BUTTON(ID_BTNDISPLAYADD, tui::cadenceConvert::onDisplayAdd)
+   EVT_BUTTON(ID_BTNTECHADD, tui::cadenceConvert::onTechAdd)
+	EVT_BUTTON(ID_BTNCONVERT, tui::cadenceConvert::onConvert)
+END_EVENT_TABLE()
+
+tui::cadenceConvert::cadenceConvert(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos):
+	wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+{
+	_displayList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(150, -1));
+	_techList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(150, -1));
+
+	wxBoxSizer *topSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+		wxBoxSizer *vertSizer = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("") );
+			wxBoxSizer *displaySizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+				displaySizer->Add(10,10,0);
+				displaySizer->Add(_displayList, 1, wxEXPAND, 10);
+				displaySizer->Add(DEBUG_NEW wxButton(this, ID_BTNDISPLAYADD, _T("Add ...")), 0, 0, 0);
+				displaySizer->Add(10,10,0);
+			wxBoxSizer *techSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+				techSizer->Add(10,10,0);
+				techSizer->Add(_techList, 1, wxEXPAND, 10 );
+				techSizer->Add(DEBUG_NEW wxButton( this, ID_BTNTECHADD, wxT("Add ...") ), 0, 0, 0 );
+				techSizer->Add(10,10,0);
+		vertSizer->Add(displaySizer, 0, wxEXPAND ); // no border and centre horizontally
+		vertSizer->Add(techSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
+	
+	topSizer->Add(vertSizer, 0, wxEXPAND);
+	topSizer->Add(10,10,0);
+	topSizer->Add(DEBUG_NEW wxButton( this, ID_BTNCONVERT, wxT("Convert") ), 0, wxALIGN_CENTER , 0 );
+	topSizer->Add(10,10,0);
+   SetSizer( topSizer );
+   topSizer->SetSizeHints( this );
+}
+
+void	tui::cadenceConvert::onDisplayAdd(wxCommandEvent& evt)
+{
+	wxFileDialog dlg(this, wxT("Select a display file"), wxT(""), wxT(""),
+      wxT("Display files (*.drf)|*.drf|All files(*.*)|*.*"),
+      tpdfOPEN);
+   if (wxID_OK == dlg.ShowModal()) 
+   {
+      wxString filename = dlg.GetPath();
+      wxString ost;
+		_displayList->SetValue(filename);
+   }
+}
+
+void	tui::cadenceConvert::onTechAdd(wxCommandEvent& evt)
+{
+	wxFileDialog dlg(this, wxT("Select a tech file"), wxT(""), wxT(""),
+      wxT("All files(*.*)|*.*"),
+      tpdfOPEN);
+   if (wxID_OK == dlg.ShowModal()) 
+   {
+      wxString filename = dlg.GetPath();
+      wxString ost;
+		_techList->SetValue(filename);
+   }
+}
+
+void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
+{
+	if (_displayList->IsEmpty() || _techList->IsEmpty())
+	{
+		wxMessageDialog dlg(this, wxT("Please add display and tech files"), wxT("Warning!"));
+		dlg.ShowModal();
+	}
+	else
+	{
+		wxString str;
+		str.Append(wxT("$TPD_GLOBAL/cad.exe "));
+		str.Append(_displayList->GetValue());
+		str.Append(wxT(" "));
+		str.Append(_techList->GetValue());
+		wxExecute(str);
+	}
 }

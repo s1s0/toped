@@ -152,6 +152,8 @@ namespace tui
 
       TMADD_RULER         ,
       TMCLEAR_RULERS      ,
+
+		TMCADENCE_CONVERT	  ,
       TMGET_SNAPSHOT      ,
 
       TMHELP_ABOUTAPP     ,

@@ -293,8 +293,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 
    EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
+	EVT_MENU( TMCADENCE_CONVERT   , tui::TopedFrame::OnCadenceConvert )
    EVT_MENU( TMGET_SNAPSHOT      , tui::TopedFrame::OnTDTSnapshot )
-
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
    EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
@@ -617,6 +617,12 @@ void tui::TopedFrame::initMenuBar() {
    */
    _resourceCenter->appendMenu("&Other/Add Ruler"   , "", &tui::TopedFrame::OnAddRuler, "Add new ruler" );
    _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
+
+	_resourceCenter->appendMenuSeparator("&Other");
+	_resourceCenter->appendMenu("&Other/Cadence converter ...", "", &tui::TopedFrame::OnCadenceConvert, "Convert Cadence techfiles" );
+
+//   _resourceCenter->appendMenuSeparator("Other");
+
    _resourceCenter->appendMenu("&Other/Get Snapshot", "", &tui::TopedFrame::OnTDTSnapshot, "Get a snapshot of the canvas on TGA file");
    //   _resourceCenter->appendMenuSeparator("Other");
 
@@ -2120,24 +2126,24 @@ void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
 {
 	std::string toolbarname(evt.GetString().mb_str(wxConvUTF8));
 	_resourceCenter->defineToolBar(toolbarname);
+}
 
-  /* int size = evt.GetInt();
-   bool direction = static_cast<bool>(evt.GetExtraLong());
-   tui::IconSizes sz = static_cast<tui::IconSizes>(size);
-   
-   _resourceCenter->setToolBarSize(direction, sz);
-   wxCommandEvent eventTB_MENU_UPD(wxEVT_SETINGSMENU);
-   if (tui::_tuihorizontal == direction)
+void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))
+{
+	wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+	tui::cadenceConvert dlg(this, -1, wxT("Cadence Converter"), pos);
+   if ( dlg.ShowModal() == wxID_OK )
    {
-      //simplified version of
-      //case ICON_SIZE_16x16: eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16)
-      eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16+size);
+      wxString ost;
+      /*ost      << wxT("layprop(\"") << dlg.layname()
+               << wxT("\" , ")      << dlg.layno()
+               << wxT(" , \"")      << dlg.color()
+               << wxT("\" , \"")    << dlg.fill()
+               << wxT("\" , \"")    << dlg.line()
+               << wxT("\");");
+      _cmdline->parseCommand(ost);*/
    }
-   else
-   {
-      eventTB_MENU_UPD.SetInt(tui::TMSET_VTOOLSIZE16+size);
-   }
-   wxPostEvent(_canvas, eventTB_MENU_UPD);*/
 }
 
 void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)
