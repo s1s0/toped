@@ -514,9 +514,10 @@ void CIFin::Cif2Ted::lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string )
 //-----------------------------------------------------------------------------
 // class DataCenter
 //-----------------------------------------------------------------------------
-DataCenter::DataCenter(std::string localDir) 
+DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir) 
 {
    _localDir = localDir;
+	_globalDir = globalDir;
    _GDSDB = NULL; _CIFDB = NULL;//_TEDDB = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
@@ -1341,8 +1342,8 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
    return all_cells;
 }
 
-void initDBLib(std::string localDir)
+void initDBLib(const std::string &localDir, const std::string &globalDir)
 {
-   DATC = DEBUG_NEW DataCenter(localDir);
+   DATC = DEBUG_NEW DataCenter(localDir, globalDir);
 }
 
