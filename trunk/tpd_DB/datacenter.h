@@ -81,7 +81,7 @@ namespace CIFin {
 
 class DataCenter {
 public:
-                              DataCenter(std::string);
+	DataCenter(const std::string&, const std::string &);
                              ~DataCenter(); 
    bool                       GDSparse(std::string filename);
    void                       GDSexport(const LayerMapGds&, std::string&, bool);
@@ -204,6 +204,8 @@ public:
    const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
    void                       saveProperties(std::string fname)
                                                       {_properties.saveProperties(fname);}
+	std::string                globalDir(void) const
+                                                      {return _globalDir;}
 
 protected:
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
@@ -217,6 +219,7 @@ private:
    word                       _curcmdlay;    // layer used during current drawing operation
    bool                       _drawruler;    // draw a ruler while coposing a shape interactively
    std::string                _localDir;
+	std::string                _globalDir;
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
    wxMutex                    CIFLock;
@@ -224,6 +227,6 @@ private:
 
 };
 
-void initDBLib(std::string);
+void initDBLib(const std::string&, const std::string&);
 
 #endif
