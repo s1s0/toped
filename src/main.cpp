@@ -272,6 +272,7 @@ class TopedApp : public wxApp
       wxString       tpdLogDir;
       wxString       tpdFontDir;
       wxString       tpdUIDir;
+		wxString			globalDir;
       wxString       localDir;
 //      bool           _ignoreOnRecovery;
 };
@@ -333,6 +334,7 @@ void TopedApp::GetGlobalDirs()
    bool undefined = dirName.Matches(wxT("*$TPD_GLOBAL*"));
    if (!undefined)
    {
+		globalDir = UIDir->GetFullPath();
       fontsDIR->AppendDir(wxT("fonts"));
       fontsDIR->Normalize();
       UIDir->AppendDir(wxT("icons"));
@@ -476,7 +478,7 @@ bool TopedApp::OnInit() {
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    GetLocalDirs();
    GetGlobalDirs();
-   initDBLib(std::string(localDir.mb_str(wxConvFile)));
+   initDBLib(std::string(localDir.mb_str(wxConvFile)), std::string(globalDir.mb_str(wxConvFile)));
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
    if (!Toped->view()->initStatus())
