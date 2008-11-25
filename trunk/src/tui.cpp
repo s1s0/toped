@@ -2230,10 +2230,16 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
 	else
 	{
 		wxString str;
-		str.Append(wxT("$TPD_GLOBAL/cad.exe "));
+		//str.Append(wxT("$TPD_GLOBAL/cad.exe"));
+		str.Append(wxString(DATC->globalDir().c_str(),wxConvFile));
+		str.Append(wxT("/cad.exe "));
 		str.Append(_displayList->GetValue());
 		str.Append(wxT(" "));
 		str.Append(_techList->GetValue());
-		wxExecute(str);
+		if (wxExecute(str) != 0)
+		{
+			wxMessageDialog dlg(this, wxT("Can not find cadence converter"), wxT("Error!"));
+			dlg.ShowModal();
+		};
 	}
 }
