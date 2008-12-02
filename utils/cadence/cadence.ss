@@ -503,7 +503,8 @@
 ;output - non (output write down to tell.tll file
 
 (define (convert input-list)
-  (write-to-file "tell.tll" (append (parse (collect-strings)) (layer-setup) (post-proceed))))
+  (write-to-file (car input-list) (append (parse (collect-strings (cdr input-list))) (layer-setup) (post-proceed))))
+  
 ;---------------------------------------------
 ;(define d (foldl (lambda (word result) 
 ;                   (append result (readlines word))) '() (list "default.drf" "techfile.tf")))
@@ -528,10 +529,10 @@
      (newline)))
  layer-list)|#
 
-(define input-list (vector->list (current-command-line-arguments)))
+;(define input-list (vector->list (current-command-line-arguments)))
 
-(define collected-strings (foldl (lambda (word result) 
-                   (append result (readlines word))) '() input-list))
-(write-to-file "tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
+;(define collected-strings (foldl (lambda (word result) 
+;                   (append result (readlines word))) '() input-list))
+;(write-to-file "d:\\1\\tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
   
 )

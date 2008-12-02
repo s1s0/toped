@@ -32,6 +32,7 @@
 #include <sstream>
 #include <wx/colordlg.h>
 #include <wx/regex.h>
+#include <wx/filename.h>
 #include "tui.h"
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_DB/browsers.h"
@@ -2162,14 +2163,16 @@ void tui::nameEbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 BEGIN_EVENT_TABLE(tui::cadenceConvert, wxDialog)
    EVT_BUTTON(ID_BTNDISPLAYADD, tui::cadenceConvert::onDisplayAdd)
    EVT_BUTTON(ID_BTNTECHADD, tui::cadenceConvert::onTechAdd)
+	EVT_BUTTON(ID_BTNOUTFILE, tui::cadenceConvert::onOutputFile)
 	EVT_BUTTON(ID_BTNCONVERT, tui::cadenceConvert::onConvert)
 END_EVENT_TABLE()
 
 tui::cadenceConvert::cadenceConvert(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos):
 	wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
-	_displayList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(150, -1));
-	_techList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(150, -1));
+	_displayList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
+	_techList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
+	_outputFile = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
 
 	wxBoxSizer *topSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
 		wxBoxSizer *vertSizer = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("") );
@@ -2183,8 +2186,14 @@ tui::cadenceConvert::cadenceConvert(wxFrame *parent, wxWindowID id, const wxStri
 				techSizer->Add(_techList, 1, wxEXPAND, 10 );
 				techSizer->Add(DEBUG_NEW wxButton( this, ID_BTNTECHADD, wxT("Add ...") ), 0, 0, 0 );
 				techSizer->Add(10,10,0);
+			wxBoxSizer *outputSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+				outputSizer->Add(10,10,0);
+				outputSizer->Add(_outputFile, 1, wxEXPAND, 10 );
+				outputSizer->Add(DEBUG_NEW wxButton( this, ID_BTNOUTFILE, wxT("Add ...") ), 0, 0, 0 );
+				outputSizer->Add(10,10,0);
 		vertSizer->Add(displaySizer, 0, wxEXPAND ); // no border and centre horizontally
 		vertSizer->Add(techSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
+		vertSizer->Add(outputSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
 	
 	topSizer->Add(vertSizer, 0, wxEXPAND);
 	topSizer->Add(10,10,0);
@@ -2220,6 +2229,19 @@ void	tui::cadenceConvert::onTechAdd(wxCommandEvent& evt)
    }
 }
 
+void	tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
+{
+	wxFileDialog dlg(this, wxT("Select output tell file"), wxT(""), wxT(""),
+      wxT("tell files (*.tll)|*.tll|All files(*.*)|*.*"),
+      tpdfSAVE|wxFD_OVERWRITE_PROMPT);
+   if (wxID_OK == dlg.ShowModal()) 
+   {
+      wxString filename = dlg.GetPath();
+      wxString ost;
+		_outputFile->SetValue(filename);
+   }
+}
+
 void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
 {
 	if (_displayList->IsEmpty() || _techList->IsEmpty())
@@ -2230,16 +2252,26 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
 	else
 	{
 		wxString str;
-		//str.Append(wxT("$TPD_GLOBAL/cad.exe"));
+		//Looking for $TPD_GLOBAL/virtuoso2tll
 		str.Append(wxString(DATC->globalDir().c_str(),wxConvFile));
-		str.Append(wxT("/cad.exe "));
+#ifdef WIN32
+		//For windows full path need to be replace to short one(Program Files->Progra~1)
+		wxFileName filename=wxFileName(str);
+		str=filename.GetShortPath();
+		str.Append(wxT("virtuoso2tll.exe "));
+#else
+		str.Append(wxT("virtuoso2tll.exe "));
+#endif
+
+		//prepare command line arguments 
+		wxString strtemp = _outputFile->GetValue();
+		str.Append(strtemp);
+		str.Append(wxT(" "));
 		str.Append(_displayList->GetValue());
 		str.Append(wxT(" "));
 		str.Append(_techList->GetValue());
-		if (wxExecute(str) != 0)
-		{
-			wxMessageDialog dlg(this, wxT("Can not find cadence converter"), wxT("Error!"));
-			dlg.ShowModal();
-		};
+		//Replace all slashes to double slashes
+		str.Replace(wxT("\\") , wxT("\\\\"), true);
+		wxExecute(str);
 	}
 }

@@ -59,6 +59,7 @@ namespace tui {
       ID_SAVELAYMAP		,
 		ID_BTNDISPLAYADD	,
 		ID_BTNTECHADD		,
+		ID_BTNOUTFILE		,
 		ID_BTNCONVERT
    };
 
@@ -565,11 +566,11 @@ namespace tui {
    protected:   
       wxTextCtrl* _displayList;
       wxTextCtrl* _techList;
-     // wxTextCtrl* _rotation;
-     // wxCheckBox* _flip;
+		wxTextCtrl* _outputFile;
 	private:
 		void	onDisplayAdd(wxCommandEvent&);
 		void	onTechAdd(wxCommandEvent&);
+		void	onOutputFile(wxCommandEvent&);
 		void	onConvert(wxCommandEvent&);
 		DECLARE_EVENT_TABLE();
    };
