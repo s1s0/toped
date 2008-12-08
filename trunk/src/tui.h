@@ -85,7 +85,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class getSize : public wxDialog {
    public:
-      getSize(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, real step, byte precision );
+      getSize(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, real step, byte precision, const float );
       wxString value() const {return _wxText->GetValue();};
    private:   
       wxTextCtrl* _wxText;

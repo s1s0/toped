@@ -227,7 +227,7 @@ namespace tui {
       void		OnHToolBarSize24(wxCommandEvent& WXUNUSED(event));
       void		OnHToolBarSize32(wxCommandEvent& WXUNUSED(event));
       void		OnHToolBarSize48(wxCommandEvent& WXUNUSED(event));
-
+      void   OnUndoDepth(wxCommandEvent& WXUNUSED(event));
       void		OnVToolBarSize16(wxCommandEvent& WXUNUSED(event));
       void		OnVToolBarSize24(wxCommandEvent& WXUNUSED(event));
       void		OnVToolBarSize32(wxCommandEvent& WXUNUSED(event));
