@@ -64,6 +64,7 @@ extern const wxEventType         wxEVT_TOOLBARDEF;
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
+extern parsercmd::cmdBLOCK*      CMDBlock;
 
 tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    const wxPoint& pos , const wxSize& size , long style)
@@ -286,6 +287,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_VTOOLSIZE24   , tui::TopedFrame::OnVToolBarSize24   )
    EVT_MENU( TMSET_VTOOLSIZE32   , tui::TopedFrame::OnVToolBarSize32   )
    EVT_MENU( TMSET_VTOOLSIZE48   , tui::TopedFrame::OnVToolBarSize48   )
+   
+   EVT_MENU( TMSET_UNDODEPTH     , tui::TopedFrame::OnUndoDepth   )
 
    EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
@@ -604,6 +607,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendCheckItem(TMSET_CURLONG  , wxT("Long cursor")  , wxT("Stretch the cursor cross"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("Toolbar size") , toolbarHorSizeMenu , wxT("Define toolbars size"));
+   settingsMenu->Append         (TMSET_UNDODEPTH   , wxT("Undo Depth")   , wxT("Change the depth of undo stack"));
    //settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
    //settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
    settingsMenu->AppendSeparator();
@@ -1627,7 +1631,7 @@ void tui::TopedFrame::OnDrawWire(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getSize* dlg = NULL;
    try {
-      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Wire width"), pos, DATC->step() ,3);
+      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Wire width"), pos, DATC->step() ,3, 2);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -1666,7 +1670,7 @@ void tui::TopedFrame::OnResize(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getSize* dlg = NULL;
    try {
-      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Resize by"), pos, DATC->step() ,3);
+      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Resize by"), pos, DATC->step() ,3, 1);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
@@ -1685,6 +1689,25 @@ void tui::TopedFrame::OnStep(wxCommandEvent& WXUNUSED(event)) {
       _cmdline->parseCommand(ost);
    }
 }
+
+void tui::TopedFrame::OnUndoDepth(wxCommandEvent& WXUNUSED(event))
+{
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getSize* dlg = NULL;
+   try {
+      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Undo depth"), pos, 1, 0, CMDBlock->undoDepth());
+   }
+   catch (EXPTN) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK )
+   {
+      unsigned long newValue;
+      if (dlg->value().ToULong(&newValue))
+         CMDBlock->setUndoDepth(static_cast<word>(newValue));
+   }
+   delete dlg;
+}
+
 
 void tui::TopedFrame::OnGridDefine(wxCommandEvent& WXUNUSED(event)) {
    real grid[3];
@@ -1946,7 +1969,7 @@ void tui::TopedFrame::OnChangeLayer( wxCommandEvent& WXUNUSED( event ))
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getSize* dlg = NULL;
    try {
-      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Transfer to layer"), pos, 1, 0);
+      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Transfer to layer"), pos, 1, 0, 2);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
@@ -1963,7 +1986,7 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getSize* dlg = NULL;
    try {
-      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Change current layer"), pos, 1, 0);
+      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Change current layer"), pos, 1, 0, 2);
    }
    catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )

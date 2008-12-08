@@ -430,7 +430,9 @@ namespace  parsercmd {
       telldata::variableMAP*     copyVarLocal();
       void                       restoreVarLocal(telldata::variableMAP&);
       void                       initializeVarLocal();
-      functionMAP const          funcMAP() const {return _funcMAP;};
+      functionMAP const          funcMAP() const {return _funcMAP;}
+      word                       undoDepth() {return _undoDepth;}
+      void                       setUndoDepth(word ud) {_undoDepth = ud;}
       virtual                   ~cmdBLOCK();
    protected:
       telldata::variableMAP      VARlocal;  // list of local variables
@@ -438,6 +440,7 @@ namespace  parsercmd {
       cmdQUEUE                   cmdQ;      // list of commands
       static blockSTACK         _blocks;
       static functionMAP        _funcMAP;
+      static word               _undoDepth;
       telldata::typeID          _next_lcl_typeID;
    };
 

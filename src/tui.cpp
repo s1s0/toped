@@ -71,7 +71,7 @@ void  tui::sgSpinButton::OnSpin(wxSpinEvent&) {
 
 //==============================================================================
 tui::getSize::getSize(wxFrame *parent, wxWindowID id, const wxString &title,
-      wxPoint pos, real step, byte precision  ) : wxDialog(parent, id, title,
+      wxPoint pos, real step, byte precision, const float init  ) : wxDialog(parent, id, title,
       pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
 /*   int4b Istep = View.getstep();
@@ -86,7 +86,7 @@ tui::getSize::getSize(wxFrame *parent, wxWindowID id, const wxString &title,
    _wxText = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    spin_sizer->Add(10,10,0);
    spin_sizer->Add(_wxText, 1, wxEXPAND, 0);
-   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _wxText, step, 1, 10, 2, precision), 0, 0, 0);
+   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _wxText, step, 1, 10, init, precision), 0, 0, 0);
    spin_sizer->Add(10,10,0);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );

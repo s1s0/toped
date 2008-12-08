@@ -66,8 +66,10 @@ telldata::operandSTACK        parsercmd::cmdVIRTUAL::OPstack;
 telldata::UNDOPerandQUEUE     parsercmd::cmdVIRTUAL::UNDOPstack;
 // UNDO command queue
 parsercmd::undoQUEUE          parsercmd::cmdVIRTUAL::UNDOcmdQ;
-
+// Recovery status
 bool parsercmd::cmdSTDFUNC::_ignoreOnRecovery = false;
+// Depth of the UNDO stack
+word parsercmd::cmdBLOCK::_undoDepth = 100;
 
 
 
@@ -1219,8 +1221,10 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
    return (i);
 }
 
-void parsercmd::cmdSTDFUNC::reduce_undo_stack() {
-   if (UNDOcmdQ.size() > 10) {
+void parsercmd::cmdSTDFUNC::reduce_undo_stack() 
+{
+   if (UNDOcmdQ.size() > CMDBlock->undoDepth()) 
+   {
       UNDOcmdQ.back()->undo_cleanup(); UNDOcmdQ.pop_back();
    }
 }
