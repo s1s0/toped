@@ -907,11 +907,24 @@ int tellstdfunc::stdDEFINETOOLBAR::execute()
 tellstdfunc::stdTOOLBARADDITEM::stdTOOLBARADDITEM(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   //arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hshstr)));
 }
 
 int tellstdfunc::stdTOOLBARADDITEM::execute()
 {
+
+   telldata::ttlist *iconCmdMapList = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+	std::string toolbarName = getStringValue();
+
+	telldata::tthshstr* iconCmdMap;
+   for (unsigned i = 0; i < iconCmdMapList->size(); i++)
+   {
+      iconCmdMap = static_cast<telldata::tthshstr*>((iconCmdMapList->mlist())[i]);
+		std::string toolName = iconCmdMap->key().value();
+		std::string tellCommand = iconCmdMap->value().value();
+		
+   }
 
    return EXEC_NEXT;
 }
