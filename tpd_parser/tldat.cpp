@@ -1,4 +1,4 @@
-//===========================================================================
+
 //                                                                          =
 //   This program is free software; you can redistribute it and/or modify   =
 //   it under the terms of the GNU General Public License as published by   =
@@ -47,6 +47,7 @@ telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
          case tn_box   : nvar = DEBUG_NEW telldata::ttwnd()    ;break;
          case tn_bnd   : nvar = DEBUG_NEW telldata::ttbnd()    ;break;
          case tn_hsh   : nvar = DEBUG_NEW telldata::tthsh()    ;break;
+			case tn_hshstr: nvar = DEBUG_NEW telldata::tthshstr() ;break;
          case tn_layout: nvar = DEBUG_NEW telldata::ttlayout() ;break;
                 default: {
                      assert(_tIDMAP.end() != _tIDMAP.find(ID));
@@ -101,6 +102,13 @@ telldata::bnd_type::bnd_type(point_type* pfld) : tell_type(telldata::tn_bnd)
 telldata::hsh_type::hsh_type() : tell_type(telldata::tn_hsh)
 {
    addfield("key"   , telldata::tn_int   , NULL);
+   addfield("value" , telldata::tn_string, NULL);
+};
+
+//=============================================================================
+telldata::hshstr_type::hshstr_type() : tell_type(telldata::tn_hshstr)
+{
+   addfield("key"   , telldata::tn_string   , NULL);
    addfield("value" , telldata::tn_string, NULL);
 };
 
@@ -725,6 +733,49 @@ void telldata::tthsh::assign(tell_var* rt)
    (*_key  ) = static_cast<tthsh*>(rt)->key();
    (*_value) = static_cast<tthsh*>(rt)->value();
 }
+
+//=============================================================================
+/*   class tthshstr : public user_struct {*/
+telldata::tthshstr::tthshstr (std::string number, std::string name) : user_struct(tn_hshstr),
+      _key(DEBUG_NEW telldata::ttstring(number)),
+      _value(DEBUG_NEW telldata::ttstring(name))
+{
+   _fieldList.push_back(structRECNAME("key"  , _key  ));
+   _fieldList.push_back(structRECNAME("value", _value  ));
+}
+
+telldata::tthshstr::tthshstr(const tthshstr& cobj) : user_struct(tn_hshstr),
+      _key(DEBUG_NEW telldata::ttstring(cobj.key())),
+      _value(DEBUG_NEW telldata::ttstring(cobj.value()))
+{
+   _fieldList.push_back(structRECNAME("key"  , _key  ));
+   _fieldList.push_back(structRECNAME("value", _value  ));
+}
+
+telldata::tthshstr::tthshstr(operandSTACK& OPstack) : user_struct(tn_hshstr)
+{
+   // Here - get the data from the stack and reuse it ... don't delete it.
+   // The alternative - to make a selfcopy and then delete the original from the OPstack
+   _value  = static_cast<telldata::ttstring*>(OPstack.top()); OPstack.pop();
+   _key    = static_cast<telldata::ttstring*>(OPstack.top()); OPstack.pop();
+
+   _fieldList.push_back(structRECNAME("key"  , _key   ));
+   _fieldList.push_back(structRECNAME("value", _value ));
+}
+
+void telldata::tthshstr::echo(std::string& wstr, real)
+{
+   std::ostringstream ost;
+   ost << "key = "  << key().value() << " : value = \"" << value().value() << "\"";
+   wstr += ost.str();
+}
+
+void telldata::tthshstr::assign(tell_var* rt)
+{
+   (*_key  ) = static_cast<tthshstr*>(rt)->key();
+   (*_value) = static_cast<tthshstr*>(rt)->value();
+}
+
 
 //=============================================================================
 telldata::argumentID::argumentID(const argumentID& obj2copy) {

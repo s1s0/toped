@@ -59,6 +59,7 @@ namespace telldata {
    const typeID tn_box        = 12;
    const typeID tn_bnd        = 13;
    const typeID tn_hsh        = 14;
+	const typeID tn_hshstr     = 15;
    const typeID tn_usertypes  = 16;
    // the most significant bit is a mask flag
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
@@ -125,6 +126,12 @@ namespace telldata {
    class hsh_type : public tell_type {
       public:
                            hsh_type();
+   };
+
+	 //==============================================================================
+   class hshstr_type : public tell_type {
+      public:
+                           hshstr_type();
    };
 
    //==============================================================================
@@ -382,6 +389,26 @@ namespace telldata {
 //         void                 set_name(const std::string name) {_name->_value = name; }
       private:
          ttint*               _key;
+         ttstring*            _value;
+   };
+
+	   //==============================================================================
+   // Don't destruct _number and _name here. They are just pointing to the structures in
+   // the parent _fieldList and obviously should be destroyed there
+   class tthshstr : public user_struct {
+      public:
+                              tthshstr (std::string number="", std::string name = "");
+                              tthshstr(const tthshstr&);
+                              tthshstr(operandSTACK& OPStack);
+         tell_var*            selfcopy() const    {return DEBUG_NEW tthshstr(*this);}
+         void                 echo(std::string&, real);
+         void                 assign(tell_var*);
+         const ttstring&      key()   const        {return *_key;}
+         const ttstring&      value() const        {return *_value;}
+//         void                 set_number(const int4b number)   {_number->_value = number; }
+//         void                 set_name(const std::string name) {_name->_value = name; }
+      private:
+         ttstring*            _key;
          ttstring*            _value;
    };
 
