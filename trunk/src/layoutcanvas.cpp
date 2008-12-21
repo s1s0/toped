@@ -380,10 +380,8 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
    #ifndef __WXMOTIF__
       if (!GetContext()) return;
    #endif
-   // invalid_window indicates zooming.
-   // event.GetEventType() == event.GetId() should means that database is updated
-   // In both cases - the entire window is redrawn
-   if ((invalid_window) || (event.GetEventType() == event.GetId()))
+   // invalid_window indicates zooming or refreshing after a tell operation.
+   if (invalid_window)
    {
       if (_oglThread)
       {
@@ -850,6 +848,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
                         break;
       case ZOOM_EMPTY  : box = DEBUG_NEW DBbox(-10,-10,90,90);
                         break;
+      case ZOOM_REFRESH: invalid_window = true; Refresh(); return;
       default: assert(false);
    }
    int Wcl, Hcl;
@@ -866,8 +865,8 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    _LayCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);
    _LayCTM.FlipX((box->p1().y() + box->p2().y())/2);  // flip Y coord towards the center
    DATC->setScrCTM(_LayCTM.Reversed());
-   invalid_window = true;
    delete box;
+   invalid_window = true;
    Refresh();
 }
 
