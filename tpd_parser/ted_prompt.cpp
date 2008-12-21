@@ -26,6 +26,7 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include "../tpd_common/tuidefs.h"
 #include <string>
 #include "ted_prompt.h"
 #include <wx/regex.h>
@@ -69,6 +70,7 @@ extern YYLTYPE telllloc; // parser current location - global variable, defined i
 console::ted_cmd*           Console = NULL;
 extern const wxEventType    wxEVT_TPDSTATUS;
 extern const wxEventType    wxEVT_CONSOLE_PARSE;
+extern const wxEventType    wxEVT_CANVAS_ZOOM;
 
 //==============================================================================
 bool console::patternFound(const wxString templ,  wxString str) {
@@ -302,8 +304,9 @@ void* console::parse_thread::Entry()
    _mutex.Unlock();
    if (Console->canvas_invalid())
    {
-      wxPaintEvent upde(wxEVT_PAINT);
-      wxPostEvent(_canvas_wnd, upde);
+      wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+      eventZOOM.SetInt(tui::ZOOM_REFRESH);
+      wxPostEvent(_canvas_wnd, eventZOOM);
       Console->set_canvas_invalid(false);
    }
    StatusReady();

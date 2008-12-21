@@ -177,6 +177,7 @@ namespace tui
       ZOOM_UP             ,
       ZOOM_DOWN           ,
       ZOOM_EMPTY          ,
+      ZOOM_REFRESH
    } ZOOM_TYPE;
 
    typedef enum  {
