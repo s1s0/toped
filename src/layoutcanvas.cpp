@@ -924,7 +924,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
 void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
 {
   //viewshift();
-/*   CTM tmpmtrx;
+   CTM tmpmtrx;
    TP center((lp_TR.x() + lp_BL.x())/2, (lp_TR.y() + lp_BL.y())/2);
    tmpmtrx.Translate(ScrMARK - center);
    DBbox* box = DEBUG_NEW DBbox( lp_BL, lp_TR );
@@ -932,7 +932,7 @@ void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
-   OnZoom(eventZOOM);*/
+   OnZoom(eventZOOM);
 }
 
 void tui::LayoutCanvas::OnCursorType(wxCommandEvent& event)

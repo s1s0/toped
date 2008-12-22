@@ -296,7 +296,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 
    EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
-	EVT_MENU( TMCADENCE_CONVERT   , tui::TopedFrame::OnCadenceConvert )
+   EVT_MENU( TMCADENCE_CONVERT   , tui::TopedFrame::OnCadenceConvert )
    EVT_MENU( TMGET_SNAPSHOT      , tui::TopedFrame::OnTDTSnapshot )
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
@@ -2153,9 +2153,9 @@ void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
 
 void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))
 {
-	wxRect wnd = GetRect();
+   wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-	tui::cadenceConvert dlg(this, -1, wxT("Cadence Converter"), pos);
+   tui::cadenceConvert dlg(this, -1, wxT("Cadence Converter"), pos);
    if ( dlg.ShowModal() == wxID_OK )
    {
       wxString ost;
