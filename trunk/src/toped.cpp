@@ -61,6 +61,7 @@ extern const wxEventType         wxEVT_TPDSTATUS;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
+extern const wxEventType			wxEVT_TOOLBARADDITEM;
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -312,6 +313,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,	 wxID_ANY, tui::TopedFrame::OnToolBarDefine)
+	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM, wxID_ANY, tui::TopedFrame::OnToolBarAddItem)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -2147,8 +2149,19 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
 {
-	std::string toolbarname(evt.GetString().mb_str(wxConvUTF8));
-	_resourceCenter->defineToolBar(toolbarname);
+	std::string toolBarBame(evt.GetString().mb_str(wxConvUTF8));
+	_resourceCenter->defineToolBar(toolBarBame);
+}
+
+void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
+{
+	std::string toolBarBame(evt.GetString().mb_str(wxConvUTF8));
+	tellstdfunc::StringMapClientData* map = static_cast<tellstdfunc::StringMapClientData*>(evt.GetClientObject());
+	std::string toolName = map->GetKey();
+	std::string toolFunc = map->GetValue();
+
+	_resourceCenter->appendTool(toolBarBame, toolName, toolName, ICON_SIZE_24x24, "", "", toolFunc);
+	delete map;
 }
 
 void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))

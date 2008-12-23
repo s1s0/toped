@@ -39,6 +39,7 @@ extern tui::TopedFrame*          Toped;
 
 extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
+extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_SETINGSMENU;
 
 tui::MenuItemHandler::MenuItemHandler(void)
@@ -818,6 +819,16 @@ void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::
 
 }
 
+void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::string &toolBarItem,
+							const std::string &iconName,
+							IconSizes size,
+							const std::string &hotKey, 
+							const std::string &helpString,
+							std::string func)
+{
+}
+
+
 bool tui::checkToolSize(IconSizes size)
 {
 	IconSizes isz;
@@ -913,7 +924,6 @@ tellstdfunc::stdTOOLBARADDITEM::stdTOOLBARADDITEM(telldata::typeID retype, bool 
 
 int tellstdfunc::stdTOOLBARADDITEM::execute()
 {
-
    telldata::ttlist *iconCmdMapList = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
 	std::string toolbarName = getStringValue();
 
@@ -924,6 +934,15 @@ int tellstdfunc::stdTOOLBARADDITEM::execute()
 		std::string toolName = iconCmdMap->key().value();
 		std::string tellCommand = iconCmdMap->value().value();
 		
+		//WARNING!!! Object data must destroyed in event reciever
+		StringMapClientData *data = DEBUG_NEW StringMapClientData(toolName, tellCommand);
+		
+		wxString str = wxString(toolbarName.c_str(), wxConvUTF8);
+		wxCommandEvent eventToolBarDef(wxEVT_TOOLBARADDITEM);
+		eventToolBarDef.SetClientObject(data);
+		eventToolBarDef.SetString(str);
+		wxPostEvent(Toped, eventToolBarDef);
+
    }
 
    return EXEC_NEXT;
