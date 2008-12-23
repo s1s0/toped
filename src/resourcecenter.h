@@ -232,6 +232,12 @@ namespace tui
 							const std::string &hotKey, 
 							const std::string &helpString,
 							callbackMethod cbMethod);
+		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
+							const std::string &iconName,
+							IconSizes size,
+							const std::string &hotKey, 
+							const std::string &helpString,
+							std::string func);
 		/*Don’t call setToolBarSize immediately!!! 
 		It leads to nonsynchronized internal state of object and Setting Menu.
 		Better to use toolbarsize TELL-function.*/
@@ -248,9 +254,26 @@ namespace tui
 		std::string			_IconDir;	//directory that contains
 		int					_direction;
    };
+
+
+
 }
 
 namespace tellstdfunc {
+	class StringMapClientData: public wxClientData
+	{
+	public:
+		StringMapClientData():_key(),_value() {};
+		StringMapClientData(const std::string &key, const std::string &value):
+			_key(key), _value(value) {};
+		void SetData(const std::string &key, const std::string &value) {_key = key; _value = value;};
+		const std::string GetKey() const {return _key;};
+		const std::string GetValue() const {return _value;};
+	private:
+		std::string _key;
+		std::string _value;
+	};
+
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
    using parsercmd::argumentLIST;
