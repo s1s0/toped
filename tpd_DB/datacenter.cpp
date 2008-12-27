@@ -567,6 +567,10 @@ bool DataCenter::TDTcheckread(const std::string filename,
       start_ignoring = true;
       retval = true;
    }
+   else
+   {
+      retval = true;
+   }
    tempin.closeF();
    return retval;
 } 
