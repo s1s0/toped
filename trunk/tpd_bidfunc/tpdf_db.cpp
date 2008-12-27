@@ -440,7 +440,7 @@ int tellstdfunc::GDSimport::execute()
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
          DATC->unlockDB();
-         LogFile << LogFile.getFN() << "(\""<< name << "," << (*lll) << "," << LogFile._2bool(recur)
+         LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*lll) << "," << LogFile._2bool(recur)
                << "," << LogFile._2bool(over) << ");"; LogFile.flush();
       }
       else
