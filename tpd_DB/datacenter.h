@@ -125,7 +125,6 @@ public:
    laydata::LibCellLists*     getCells(int libID);
    unsigned int               numselected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numselected() : 0 ;}
    void                       defaultlayer(word layno){_curlay = layno;}
-   void                       initcmdlayer()          {_curcmdlay = _curlay;}
    void                       setcmdlayer(word layno) {_curcmdlay = layno;}
    word                       curlay() const          {return _curlay;}
    word                       curcmdlay() const       {return _curcmdlay;}

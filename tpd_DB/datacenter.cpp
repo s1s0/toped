@@ -986,7 +986,6 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
                _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtwire(input_type) );
          }
       }
-      initcmdlayer();
    }
    else throw EXPTNactive_DB();
 }
