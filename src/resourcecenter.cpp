@@ -255,7 +255,32 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
                         currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod), _ok(false)
 {
-	wxImage image;
+	wxImage image[ICON_SIZE_END];
+	IconSizes isz;
+	bool error = true;
+	for(
+		isz = ICON_SIZE_16x16;
+		isz < ICON_SIZE_END;
+		isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+	{
+		char temp[100];
+		sprintf(temp,"%i", IconSizesValues[isz]);
+		std::string name = bitmapName;
+		name.append(temp);
+		name.append("x");
+		name.append(temp);
+		name.append(".png");
+		(image[isz]).LoadFile(wxString(name.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+		if(image[isz].IsOk())
+		{
+			_bitmapNames[isz] = name;
+			_bitmaps[isz] = wxBitmap(image[isz]);
+			error = false;
+			_ok = true;
+		}
+	}
+
+	/*wxImage image;
 	image.LoadFile(wxString(bitmapName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
 
 	for( 
@@ -276,19 +301,31 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 			tell_log(console::MT_ERROR,ost.str());
 			_bitmaps[isz] = wxBitmap();//wxNullImage());
 		}
-	}
+	}*/
 }
 
-void tui::ToolItem::addIcon(const std::string &bitmapName, int size)
-{
-	wxImage image;
-	image.LoadFile(wxString(bitmapName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
-	if(image.IsOk())
+//void tui::ToolItem::addIcon(const std::string &bitmapName, int size)
+//{
+	/*	IconSizes isz;
+	for(
+		isz = ICON_SIZE_16x16; 
+		isz < ICON_SIZE_END; 
+		isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
 	{
-		_bitmapNames[size] = bitmapName;
-		_bitmaps[size] = wxBitmap(image);
+		if(size == isz) break;
 	}
-}
+	if(ICON_SIZE_END == size) 
+		return false;
+	else return true;
+	*/
+
+	//image.LoadFile(wxString(bitmapName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+	//if(image.IsOk())
+	//{
+	//	_bitmapNames[size] = bitmapName;
+	//	_bitmaps[size] = wxBitmap(image);
+	//}
+//}
 
 
 tui::ToolItem::~ToolItem()
@@ -394,32 +431,35 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 												const std::string &helpString,
 												callbackMethod cbMethod)
 {
-	toolList::const_iterator it;
+	toolList::iterator it;
 	for(it = _tools.begin(); it != _tools.end(); it++)
 	{
 		if ((*it)->name() == iconName)
 		{
-			(*it)->addIcon(iconFileName, size);
+			std::ostringstream ost;
+			ost<<"Tool bar"+iconName+" is redefined";
+			tell_log(console::MT_WARNING,ost.str());
+				delete (*it);
+			_tools.erase(it);
 			break;
 		}
-	}
-	if (it == _tools.end()) 
-	{
-		ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, cbMethod);
-		if (tool->isOk())
-		{
-			_tools.push_back(tool);
-			_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
 
-			Toped->getAuiManager()->DetachPane(_toolBar);
-			_toolBar->Realize();
-			attachToAUI();
-		}
-		else 
-		{
-			delete tool;
-		}
 	}
+	ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, cbMethod);
+	if (tool->isOk())
+	{
+		_tools.push_back(tool);
+		_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
+
+		Toped->getAuiManager()->DetachPane(_toolBar);
+		_toolBar->Realize();
+		attachToAUI();
+	}
+	else 
+	{
+		delete tool;
+	}
+
 }
 
 void tui::ToolBarHandler::attachToAUI(void)

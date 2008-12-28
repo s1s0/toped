@@ -663,110 +663,33 @@ void tui::TopedFrame::setIconDir(const std::string& uiDir)
 void tui::TopedFrame::initToolBars() 
 {
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
-   _resourceCenter->appendTool("main", "new", "new16x16.png",ICON_SIZE_16x16, "", "new cell", &tui::TopedFrame::OnCellNew);
-   _resourceCenter->appendTool("main", "open", "open16x16.png",ICON_SIZE_16x16,"", "open cell", &tui::TopedFrame::OnCellOpen);
-   _resourceCenter->appendTool("main", "save", "save16x16.png",ICON_SIZE_16x16, "", "save design", &tui::TopedFrame::OnTDTSave);
-
-   _resourceCenter->appendTool("main", "new", "new24x24.png",ICON_SIZE_24x24, "", "new cell", &tui::TopedFrame::OnCellNew);
-   _resourceCenter->appendTool("main", "open", "open24x24.png",ICON_SIZE_24x24,"", "open cell", &tui::TopedFrame::OnCellOpen);
-   _resourceCenter->appendTool("main", "save", "save24x24.png",ICON_SIZE_24x24, "", "save design", &tui::TopedFrame::OnTDTSave);
-
-   _resourceCenter->appendTool("main", "new", "new32x32.png",ICON_SIZE_32x32, "", "new cell", &tui::TopedFrame::OnCellNew);
-   _resourceCenter->appendTool("main", "open", "open32x32.png",ICON_SIZE_32x32,"", "open cell", &tui::TopedFrame::OnCellOpen);
-   _resourceCenter->appendTool("main", "save", "save32x32.png",ICON_SIZE_32x32, "", "save design", &tui::TopedFrame::OnTDTSave);
-
-   _resourceCenter->appendTool("main", "new", "new48x48.png",ICON_SIZE_48x48, "", "new cell", &tui::TopedFrame::OnCellNew);
-   _resourceCenter->appendTool("main", "open", "open48x48.png",ICON_SIZE_48x48,"", "open cell", &tui::TopedFrame::OnCellOpen);
-   _resourceCenter->appendTool("main", "save", "save48x48.png",ICON_SIZE_48x48, "", "save design", &tui::TopedFrame::OnTDTSave);
-
+   _resourceCenter->appendTool("main", "new", "new",ICON_SIZE_16x16, "", "new cell", &tui::TopedFrame::OnCellNew);
+   _resourceCenter->appendTool("main", "open", "open",ICON_SIZE_16x16,"", "open cell", &tui::TopedFrame::OnCellOpen);
+   _resourceCenter->appendTool("main", "save", "save",ICON_SIZE_16x16, "", "save design", &tui::TopedFrame::OnTDTSave);
 
    //_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
-   //------------------------------------------16x16-------------------------------------------
-   _resourceCenter->appendTool("edit", "undo", "undo16x16.png",ICON_SIZE_16x16, "", "undo", &tui::TopedFrame::OnUndo);
-   //_resourceCenter->appendTool("edit", "redo", "redo16x16.png",ICON_SIZE_16x16, "", "redo",&tui::TopedFrame::OnUndo);*/
-   _resourceCenter->appendTool("edit", "box", "box16x16.png", ICON_SIZE_16x16,"", "add box",&tui::TopedFrame::OnDrawBox);
-   _resourceCenter->appendTool("edit", "poly", "poly16x16.png", ICON_SIZE_16x16,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
-   _resourceCenter->appendTool("edit", "wire", "wire16x16.png", ICON_SIZE_16x16,"", "add wire",&tui::TopedFrame::OnDrawWire);
-   _resourceCenter->appendTool("edit", "text", "text16x16.png", ICON_SIZE_16x16,"", "add text",&tui::TopedFrame::OnDrawText);
-   _resourceCenter->appendTool("edit", "delete", "delete16x16.png", ICON_SIZE_16x16,"", "delete",&tui::TopedFrame::OnDelete);
-   _resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly16x16.png", ICON_SIZE_16x16,"", "cut",&tui::TopedFrame::OnPolyCut);
-   _resourceCenter->appendTool("edit", "zoom_all", "zoom_all16x16.png", ICON_SIZE_16x16,"", "zoom all",&tui::TopedFrame::OnZoomAll);
-   _resourceCenter->appendTool("edit", "zoom_in", "zoom_in16x16.png", ICON_SIZE_16x16,"", "zoom in",&tui::TopedFrame::OnzoomIn);
-   _resourceCenter->appendTool("edit", "zoom_out", "zoom_out16x16.png", ICON_SIZE_16x16,"", "zoom out",&tui::TopedFrame::OnzoomOut);
-   _resourceCenter->appendTool("edit", "ruler", "ruler16x16.png", ICON_SIZE_16x16,"", "add ruler",&tui::TopedFrame::OnAddRuler);
-   _resourceCenter->appendTool("edit", "copy", "copy16x16.png", ICON_SIZE_16x16,"", "copy",&tui::TopedFrame::OnCopy);
-   _resourceCenter->appendTool("edit", "move", "move16x16.png", ICON_SIZE_16x16,"", "move",&tui::TopedFrame::OnMove);
-   _resourceCenter->appendTool("edit", "rotate", "rotate_left16x16.png", ICON_SIZE_16x16,"", "rotate",&tui::TopedFrame::OnRotate);
-   //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right16x16.png", ICON_SIZE_16x16,"", "rotate",&tui::TopedFrame::OnRotate);
-   _resourceCenter->appendTool("edit", "flipx", "flipx16x16.png", ICON_SIZE_16x16,"", "flip X",&tui::TopedFrame::OnFlipX);
-   _resourceCenter->appendTool("edit", "flipy", "flipy16x16.png", ICON_SIZE_16x16,"", "flip Y",&tui::TopedFrame::OnFlipY);
-   _resourceCenter->appendTool("edit", "edit_push", "edit_push16x16.png", ICON_SIZE_16x16,"", "edit push",&tui::TopedFrame::OnCellPush);
-   _resourceCenter->appendTool("edit", "edit_pop", "edit_pop16x16.png", ICON_SIZE_16x16,"", "edit pop",&tui::TopedFrame::OnCellPop);
-//------------------------------------------24x24-------------------------------------------
-    _resourceCenter->appendTool("edit", "undo", "undo24x24.png",ICON_SIZE_24x24, "", "undo", &tui::TopedFrame::OnUndo);
-   //_resourceCenter->appendTool("edit", "redo", "redo24x24.png",ICON_SIZE_24x24, "", "redo",&tui::TopedFrame::OnUndo);*/
-   _resourceCenter->appendTool("edit", "box", "box24x24.png", ICON_SIZE_24x24,"", "add box",&tui::TopedFrame::OnDrawBox);
-   _resourceCenter->appendTool("edit", "poly", "poly24x24.png", ICON_SIZE_24x24,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
-   _resourceCenter->appendTool("edit", "wire", "wire24x24.png", ICON_SIZE_24x24,"", "add wire",&tui::TopedFrame::OnDrawWire);
-   _resourceCenter->appendTool("edit", "text", "text24x24.png", ICON_SIZE_24x24,"", "add text",&tui::TopedFrame::OnDrawText);
-   _resourceCenter->appendTool("edit", "delete", "delete24x24.png", ICON_SIZE_24x24,"", "delete",&tui::TopedFrame::OnDelete);
-   _resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly24x24.png", ICON_SIZE_24x24,"", "cut",&tui::TopedFrame::OnPolyCut);
-   _resourceCenter->appendTool("edit", "zoom_all", "zoom_all24x24.png", ICON_SIZE_24x24,"", "zoom all",&tui::TopedFrame::OnZoomAll);
-   _resourceCenter->appendTool("edit", "zoom_in", "zoom_in24x24.png", ICON_SIZE_24x24,"", "zoom in",&tui::TopedFrame::OnzoomIn);
-   _resourceCenter->appendTool("edit", "zoom_out", "zoom_out24x24.png", ICON_SIZE_24x24,"", "zoom out",&tui::TopedFrame::OnzoomOut);
-   _resourceCenter->appendTool("edit", "ruler", "ruler24x24.png", ICON_SIZE_24x24,"", "add ruler",&tui::TopedFrame::OnAddRuler);
-   _resourceCenter->appendTool("edit", "copy", "copy24x24.png", ICON_SIZE_24x24,"", "copy",&tui::TopedFrame::OnCopy);
-   _resourceCenter->appendTool("edit", "move", "move24x24.png", ICON_SIZE_24x24,"", "move",&tui::TopedFrame::OnMove);
-   _resourceCenter->appendTool("edit", "rotate", "rotate_left24x24.png", ICON_SIZE_24x24,"", "rotate",&tui::TopedFrame::OnRotate);
-   //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right24x24.png", ICON_SIZE_24x24,"", "rotate",&tui::TopedFrame::OnRotate);
-   _resourceCenter->appendTool("edit", "flipx", "flipx24x24.png", ICON_SIZE_24x24,"", "flip X",&tui::TopedFrame::OnFlipX);
-   _resourceCenter->appendTool("edit", "flipy", "flipy24x24.png", ICON_SIZE_24x24,"", "flip Y",&tui::TopedFrame::OnFlipY);
-   _resourceCenter->appendTool("edit", "edit_push", "edit_push24x24.png", ICON_SIZE_24x24,"", "edit push",&tui::TopedFrame::OnCellPush);
-   _resourceCenter->appendTool("edit", "edit_pop", "edit_pop24x24.png", ICON_SIZE_24x24,"", "edit pop",&tui::TopedFrame::OnCellPop);
-//------------------------------------------32x32-------------------------------------------
-    _resourceCenter->appendTool("edit", "undo", "undo32x32.png",ICON_SIZE_32x32, "", "undo", &tui::TopedFrame::OnUndo);
-   //_resourceCenter->appendTool("edit", "redo", "redo32x32.png",ICON_SIZE_32x32, "", "redo",&tui::TopedFrame::OnUndo);*/
-   _resourceCenter->appendTool("edit", "box", "box32x32.png", ICON_SIZE_32x32,"", "add box",&tui::TopedFrame::OnDrawBox);
-   _resourceCenter->appendTool("edit", "poly", "poly32x32.png", ICON_SIZE_32x32,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
-   _resourceCenter->appendTool("edit", "wire", "wire32x32.png", ICON_SIZE_32x32,"", "add wire",&tui::TopedFrame::OnDrawWire);
-   _resourceCenter->appendTool("edit", "text", "text32x32.png", ICON_SIZE_32x32,"", "add text",&tui::TopedFrame::OnDrawText);
-   _resourceCenter->appendTool("edit", "delete", "delete32x32.png", ICON_SIZE_32x32,"", "delete",&tui::TopedFrame::OnDelete);
-   _resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly32x32.png", ICON_SIZE_32x32,"", "cut",&tui::TopedFrame::OnPolyCut);
-   _resourceCenter->appendTool("edit", "zoom_all", "zoom_all32x32.png", ICON_SIZE_32x32,"", "zoom all",&tui::TopedFrame::OnZoomAll);
-   _resourceCenter->appendTool("edit", "zoom_in", "zoom_in32x32.png", ICON_SIZE_32x32,"", "zoom in",&tui::TopedFrame::OnzoomIn);
-   _resourceCenter->appendTool("edit", "zoom_out", "zoom_out32x32.png", ICON_SIZE_32x32,"", "zoom out",&tui::TopedFrame::OnzoomOut);
-   _resourceCenter->appendTool("edit", "ruler", "ruler32x32.png", ICON_SIZE_32x32,"", "add ruler",&tui::TopedFrame::OnAddRuler);
-   _resourceCenter->appendTool("edit", "copy", "copy32x32.png", ICON_SIZE_32x32,"", "copy",&tui::TopedFrame::OnCopy);
-   _resourceCenter->appendTool("edit", "move", "move32x32.png", ICON_SIZE_32x32,"", "move",&tui::TopedFrame::OnMove);
-   _resourceCenter->appendTool("edit", "rotate", "rotate_left32x32.png", ICON_SIZE_32x32,"", "rotate",&tui::TopedFrame::OnRotate);
-   //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right32x32.png", ICON_SIZE_32x32,"", "rotate",&tui::TopedFrame::OnRotate);
-   _resourceCenter->appendTool("edit", "flipx", "flipx32x32.png", ICON_SIZE_32x32,"", "flip X",&tui::TopedFrame::OnFlipX);
-   _resourceCenter->appendTool("edit", "flipy", "flipy32x32.png", ICON_SIZE_32x32,"", "flip Y",&tui::TopedFrame::OnFlipY);
-   _resourceCenter->appendTool("edit", "edit_push", "edit_push32x32.png", ICON_SIZE_32x32,"", "edit push",&tui::TopedFrame::OnCellPush);
-   _resourceCenter->appendTool("edit", "edit_pop", "edit_pop32x32.png", ICON_SIZE_32x32,"", "edit pop",&tui::TopedFrame::OnCellPop);
-//------------------------------------------48x48-------------------------------------------
-    _resourceCenter->appendTool("edit", "undo", "undo48x48.png",ICON_SIZE_48x48, "", "undo", &tui::TopedFrame::OnUndo);
-   //_resourceCenter->appendTool("edit", "redo", "redo48x48.png",ICON_SIZE_48x48, "", "redo",&tui::TopedFrame::OnUndo);*/
-   _resourceCenter->appendTool("edit", "box", "box48x48.png", ICON_SIZE_48x48,"", "add box",&tui::TopedFrame::OnDrawBox);
-   _resourceCenter->appendTool("edit", "poly", "poly48x48.png", ICON_SIZE_48x48,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
-   _resourceCenter->appendTool("edit", "wire", "wire48x48.png", ICON_SIZE_48x48,"", "add wire",&tui::TopedFrame::OnDrawWire);
-   _resourceCenter->appendTool("edit", "text", "text48x48.png", ICON_SIZE_48x48,"", "add text",&tui::TopedFrame::OnDrawText);
-   _resourceCenter->appendTool("edit", "delete", "delete48x48.png", ICON_SIZE_48x48,"", "delete",&tui::TopedFrame::OnDelete);
-   _resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly48x48.png", ICON_SIZE_48x48,"", "cut",&tui::TopedFrame::OnPolyCut);
-   _resourceCenter->appendTool("edit", "zoom_all", "zoom_all48x48.png", ICON_SIZE_48x48,"", "zoom all",&tui::TopedFrame::OnZoomAll);
-   _resourceCenter->appendTool("edit", "zoom_in", "zoom_in48x48.png", ICON_SIZE_48x48,"", "zoom in",&tui::TopedFrame::OnzoomIn);
-   _resourceCenter->appendTool("edit", "zoom_out", "zoom_out48x48.png", ICON_SIZE_48x48,"", "zoom out",&tui::TopedFrame::OnzoomOut);
-   _resourceCenter->appendTool("edit", "ruler", "ruler48x48.png", ICON_SIZE_48x48,"", "add ruler",&tui::TopedFrame::OnAddRuler);
-   _resourceCenter->appendTool("edit", "copy", "copy48x48.png", ICON_SIZE_48x48,"", "copy",&tui::TopedFrame::OnCopy);
-   _resourceCenter->appendTool("edit", "move", "move48x48.png", ICON_SIZE_48x48,"", "move",&tui::TopedFrame::OnMove);
-   _resourceCenter->appendTool("edit", "rotate", "rotate_left48x48.png", ICON_SIZE_48x48,"", "rotate",&tui::TopedFrame::OnRotate);
-   //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right48x48.png", ICON_SIZE_48x48,"", "rotate",&tui::TopedFrame::OnRotate);
-   _resourceCenter->appendTool("edit", "flipx", "flipx48x48.png", ICON_SIZE_48x48,"", "flip X",&tui::TopedFrame::OnFlipX);
-   _resourceCenter->appendTool("edit", "flipy", "flipy48x48.png", ICON_SIZE_48x48,"", "flip Y",&tui::TopedFrame::OnFlipY);
-   _resourceCenter->appendTool("edit", "edit_push", "edit_push48x48.png", ICON_SIZE_48x48,"", "edit push",&tui::TopedFrame::OnCellPush);
-   _resourceCenter->appendTool("edit", "edit_pop", "edit_pop48x48.png", ICON_SIZE_48x48,"", "edit pop",&tui::TopedFrame::OnCellPop);
 
+	_resourceCenter->appendTool("edit", "undo", "undo",ICON_SIZE_16x16, "", "undo", &tui::TopedFrame::OnUndo);
+   //_resourceCenter->appendTool("edit", "redo", "redo",ICON_SIZE_16x16, "", "redo",&tui::TopedFrame::OnUndo);
+   _resourceCenter->appendTool("edit", "box", "box", ICON_SIZE_16x16,"", "add box",&tui::TopedFrame::OnDrawBox);
+   _resourceCenter->appendTool("edit", "poly", "poly", ICON_SIZE_16x16,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
+   _resourceCenter->appendTool("edit", "wire", "wire", ICON_SIZE_16x16,"", "add wire",&tui::TopedFrame::OnDrawWire);
+   _resourceCenter->appendTool("edit", "text", "text", ICON_SIZE_16x16,"", "add text",&tui::TopedFrame::OnDrawText);
+   _resourceCenter->appendTool("edit", "delete", "delete", ICON_SIZE_16x16,"", "delete",&tui::TopedFrame::OnDelete);
+   _resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly", ICON_SIZE_16x16,"", "cut",&tui::TopedFrame::OnPolyCut);
+   _resourceCenter->appendTool("edit", "zoom_all", "zoom_all", ICON_SIZE_16x16,"", "zoom all",&tui::TopedFrame::OnZoomAll);
+   _resourceCenter->appendTool("edit", "zoom_in", "zoom_in", ICON_SIZE_16x16,"", "zoom in",&tui::TopedFrame::OnzoomIn);
+   _resourceCenter->appendTool("edit", "zoom_out", "zoom_out", ICON_SIZE_16x16,"", "zoom out",&tui::TopedFrame::OnzoomOut);
+   _resourceCenter->appendTool("edit", "ruler", "ruler", ICON_SIZE_16x16,"", "add ruler",&tui::TopedFrame::OnAddRuler);
+   _resourceCenter->appendTool("edit", "copy", "copy", ICON_SIZE_16x16,"", "copy",&tui::TopedFrame::OnCopy);
+   _resourceCenter->appendTool("edit", "move", "move", ICON_SIZE_16x16,"", "move",&tui::TopedFrame::OnMove);
+   _resourceCenter->appendTool("edit", "rotate", "rotate_left", ICON_SIZE_16x16,"", "rotate",&tui::TopedFrame::OnRotate);
+   //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right.png", ICON_SIZE_16x16,"", "rotate",&tui::TopedFrame::OnRotate);
+   _resourceCenter->appendTool("edit", "flipx", "flipx", ICON_SIZE_16x16,"", "flip X",&tui::TopedFrame::OnFlipX);
+   _resourceCenter->appendTool("edit", "flipy", "flipy", ICON_SIZE_16x16,"", "flip Y",&tui::TopedFrame::OnFlipY);
+   _resourceCenter->appendTool("edit", "edit_push", "edit_push", ICON_SIZE_16x16,"", "edit push",&tui::TopedFrame::OnCellPush);
+   _resourceCenter->appendTool("edit", "edit_pop", "edit_pop", ICON_SIZE_16x16,"", "edit pop",&tui::TopedFrame::OnCellPop);
 
    //_resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_16x16);
   // _resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_32x32);
