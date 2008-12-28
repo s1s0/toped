@@ -137,7 +137,7 @@ namespace tui
 					const std::string &bitmapName,
 					const std::string &hotKey, 
 					const std::string &helpString, callbackMethod cbMethod);
-		void addIcon(const std::string &bitmapName, int size); 
+//		void addIcon(const std::string &bitmapName, int size); 
 		//std::string  hotKey(void)		const		{ return _hotKey;};
       std::string    function(void)		const    { return _function;};
 		std::string    name(void)			const    { return _name;};
