@@ -341,15 +341,16 @@ laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB,
    return cellaref;
 }
 
-bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child) {
-  // check for circular reference, i.e. the child is a father of some of its ancestors
-  if (ATDB->_hiertree->checkAncestors(this, child, ATDB->_hiertree)) {
-    //Circular reference found. child is already an ancestor of this
-    return false;
-  }
-  //leave a mark that child is not orphan
-  child->parentfound();
-  // update the list of children of the current cell
+bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child) 
+{
+   // check for circular reference, i.e. the child is a father of some of its ancestors
+   if (ATDB->_hiertree->checkAncestors(this, child, ATDB->_hiertree)) {
+      //Circular reference found. child is already an ancestor of this
+      return false;
+   }
+   //leave a mark that child is not orphan
+   child->parentfound();
+   // update the list of children of the current cell
    _children.push_back(child->name());
    _children.sort();
    _children.unique();

@@ -67,7 +67,7 @@ void GDSin::Gds2Ted::top_structure(std::string top_str, bool recursive, bool ove
 
 void GDSin::Gds2Ted::child_structure(const GDSin::GDSHierTree* root, bool overwrite)
 {
-   const GDSin::GDSHierTree* Child= root->GetChild(TARGETDB_LIB);
+   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
    while (Child)
    {
       if ( !Child->GetItem()->traversed() )
@@ -241,13 +241,14 @@ void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
    {
       laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->strName());
       // Absolute magnification, absolute angle should be reflected somehow!!!
-      dst->addcellref(_dst_lib,
-                   striter, 
-                   CTM(wd->magnPoint(),
-                   wd->magnification(),
-                   wd->angle(),
-                   (0 != wd->reflection())),
-                   false
+      dst->addcellref(
+         _dst_lib,
+         striter, 
+         CTM(wd->magnPoint(),
+             wd->magnification(),
+             wd->angle(),
+             (0 != wd->reflection()) ),
+         false
       );
    }
    else
@@ -269,7 +270,8 @@ void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
       laydata::ArrayProperties arrprops(wd->getXStep(),wd->getYStep(),
                                  static_cast<word>(wd->columns()),
                                  static_cast<word>(wd->rows()));
-      dst->addcellaref(_dst_lib,
+      dst->addcellaref(
+         _dst_lib,
          striter, 
          CTM( wd->magnPoint(),
               wd->magnification(),

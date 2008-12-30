@@ -269,11 +269,43 @@ struct TpdYYLtype {
 };
 
 //=============================================================================
+// A template of a cell hierarchy used for all layout databases in Toped (TDT,
+// GDS, CIF). The cell browser panels only miror the hierarchy build in the
+// data bases of this type.
+// Layout hierarchies have their specifics. 
+//  - Cell instances don't have instance names. This means that if a certain
+//    cell is instantiated several times in another cell - this will be shown
+//    in the data base as a single cell instance
+//  - Cells which are not instantiated in other cells shall be shown on the
+//    top of the hierarchy.
+// All the above makes this structure different from a traditional instance
+// hierarchy structure. Each member of the hierarchy has:
+//  - A pointer to the actual cell structure. The cell structure can be pointed
+//    to from more than one hierarchy component.
+//  - None or more brothers. There can not be "twins" among the brothers though.
+//    Means that it doesn't matter how many times a cell is instantiated in 
+//    another cell. It matters only whether or not it is instantiated.
+//  - None or more children. Again - there should not be "twins" among the 
+//    children.
+//  - At most one parent. Means that if a cell is instantiated in several other 
+//    cells there will be exactly one member of hierarchy for each of those 
+//    cases. Cells with no parent (orphans) are the cells on the top of the 
+//    hierarchy tree.
+//  - A linear pointer to the last member of the hierarchy structure. It is used
+//    to search and traverse the entire tree. Only one member can have it's 
+//    "last" field poining to NULL. The code shall always keep a pointer to the 
+//    component added last to the hierarchy.
+// The structure can be used in two ways.
+// - to build a hierarchy of a data base in memory. This is used after an 
+//   external DB or library was loaded and also when GDS or CIF files are parsed.
+// - dynamically - when the layout is updated interactively. This is used also
+//   when a GDS or CIF databases are converted to TDT.
+//
+
 template <class TYPE> class SGHierTree {
 public:
    SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst);
-   SGHierTree(const TYPE* comp, SGHierTree* lst) : component(comp), last(lst), 
-                                    parent(NULL), brother(NULL), Fchild(NULL) {};
+   SGHierTree(const SGHierTree* cousin, SGHierTree* prnt, SGHierTree* lst);
    SGHierTree*       GetFirstRoot(int libID);
    SGHierTree*       GetNextRoot(int libID);
    const SGHierTree* GetBrother(int libID) const;
@@ -286,7 +318,6 @@ public:
    void              replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst);
    bool              removeRootItem(const TYPE*comp, SGHierTree*& lst);
    bool              itemRefdIn(int libID) const;
-//   void              addLibRef(const SGHierTree* lref) { reflibs.add(lref);}
    const TYPE*       GetItem() const           {return component;}
    const SGHierTree* GetLast() const           {return last;}
    const SGHierTree* Getparent() const         {return parent;}
@@ -299,12 +330,12 @@ private:
    SGHierTree*       parent;    // points up
    SGHierTree*       brother;   // points right (siblings)
    SGHierTree*       Fchild;    // points down to the first child
-//   std::list<SGHierTree*>  reflibs;   // reference library hierarhies
 };
 
 // The constructor
 template <class TYPE>
-SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst) {
+SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst) 
+{
    component = comp;last = lst;
    SGHierTree* wv = last;
    // look for parent
@@ -315,13 +346,30 @@ SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst
    else parent = NULL;
    // recognize the brothers
    if (parent) {
-      wv = parent->Fchild;
-      brother = wv;
+      brother = parent->Fchild;
       parent->Fchild = this;
    }
    else 
       brother = NULL;
    Fchild = NULL;
+};
+
+template <class TYPE>
+SGHierTree<TYPE>::SGHierTree(const SGHierTree* cousin, SGHierTree* prnt, SGHierTree* lst) 
+{
+   component = cousin->component;
+   parent = prnt;
+   brother = prnt->Fchild;
+   prnt->Fchild = this;
+   Fchild = NULL;
+   if (cousin->Fchild)
+   {
+      // deep copy
+      SGHierTree* wv = cousin->Fchild;
+      do lst = DEBUG_NEW SGHierTree(wv, this, lst);
+      while (NULL != (wv = wv->brother));
+   }
+   last = lst;
 };
 
 template <class TYPE> 
@@ -412,7 +460,6 @@ template <class TYPE>
       return wv;
    }
 
-
 template <class TYPE> 
    SGHierTree<TYPE>*  SGHierTree<TYPE>::GetMember(const TYPE* comp) {
       SGHierTree* wv = this;
@@ -462,10 +509,10 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
       wv->brother = wvP->Fchild;
       wvP->Fchild = wv;
       if (TARGETDB_LIB == wv->component->libID()) return 1;
-      else                             return 3;
+      else                                        return 3;
    }
    else {
-      // compondent is not an orphan, so first check that this comp 
+      // component is not an orphan, so first check that this comp 
       //already has this prnt. 
       SGHierTree* wv2 = wv;
       do {
@@ -474,11 +521,9 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
       while (NULL != (wv2 = wv2->GetNextMember(comp)));
       // if not, for every appearance of the parent, we need to add a child comp
       do {
-         lst = DEBUG_NEW SGHierTree(comp, lst);
-         lst->parent = wvP;
-         lst->brother = wvP->Fchild;
-         wvP->Fchild = lst;
-         lst->Fchild = wv->Fchild;
+         // here -> we need a "deep" copy. Means - all the children of wv
+         // and their children too
+         lst = DEBUG_NEW SGHierTree(wv, wvP, lst);
       }   
       while (NULL != (wvP = wvP->GetNextMember(prnt))); 
    }
@@ -486,32 +531,39 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
 };
 
 template <class TYPE>
-int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
+int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) 
+{
    // returns 0 -> not much changed (the component has another parent)
    //         1 -> A DB component which is now an orphan
    //         2 -> A library component which is no more referenced in the DB
    SGHierTree* citem;
-   SGHierTree* check;
+   
    SGHierTree* cparent = lst->GetMember(prnt);
    while (cparent) {
       // first unlink comp from its brothers, because comp will be deleted
       assert(cparent->Fchild);
-      if (cparent->Fchild->GetItem() == comp) {
+      if (cparent->Fchild->GetItem() == comp) 
+      {
          citem = cparent->Fchild;
          cparent->Fchild = citem->brother;
       }   
-      else {
+      else 
+      {
          SGHierTree* child = cparent->Fchild;
          while ((child->brother) && (child->brother->GetItem() != comp))
             child = child->brother;
-         assert(child);
          citem = child->brother;
-         if (NULL != citem)
-            child->brother = citem->brother;
+         assert(citem);
+         child->brother = citem->brother;
       }
-      check = lst->GetMember(comp);
+      // Don't get confused here! check has nothing to do with anything. It is
+      // ONLY used to find out whether more components of type comp remain in the
+      // structure. citem can't be used for this purpose, because it simply
+      // can be the last in the structure and the latter is not circular.
+      SGHierTree* check = lst->GetMember(comp);
       assert(check);
-      if (check->GetNextMember(comp)) {
+      if (check->GetNextMember(comp)) 
+      {
          // Means that is not the last component of this type
          // So it has to be deleted, though unlinked first
          if (lst == citem) lst = citem->last;
