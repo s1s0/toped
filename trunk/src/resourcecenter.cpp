@@ -255,9 +255,13 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
                         currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod), _ok(false)
 {
+	wxLogNull logNo; //suppress wxWidget log
+
 	wxImage image[ICON_SIZE_END];
+	wxImage tempImage;
+	std::string tempImageName;
 	IconSizes isz;
-	bool error = true;
+	bool absentFile = false;
 	for(
 		isz = ICON_SIZE_16x16;
 		isz < ICON_SIZE_END;
@@ -271,37 +275,57 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 		name.append(temp);
 		name.append(".png");
 		(image[isz]).LoadFile(wxString(name.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+		_bitmapNames[isz] = name;
 		if(image[isz].IsOk())
 		{
-			_bitmapNames[isz] = name;
 			_bitmaps[isz] = wxBitmap(image[isz]);
-			error = false;
 			_ok = true;
+			if(!tempImage.IsOk())
+			{
+				tempImage = image[isz]; //Save temp image for filling of missing icons
+				tempImageName = name;
+			}
+		}
+		else
+		{
+			absentFile = true;
 		}
 	}
 
-	/*wxImage image;
-	image.LoadFile(wxString(bitmapName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
 
-	for( 
-	IconSizes isz = ICON_SIZE_16x16; 
-	isz < ICON_SIZE_END; 
-	isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+	if(absentFile)
 	{
-		_bitmapNames[isz] = bitmapName;
-		if(image.IsOk())
+		if (tempImage.IsOk())
 		{
-			_bitmaps[isz] = wxBitmap(image);
-			_ok = true;
+			for(
+				isz = ICON_SIZE_16x16;
+				isz < ICON_SIZE_END;
+				isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+				{
+					if(!image[isz].IsOk())
+					{
+						//image[isz] = tempImage.Copy();
+						image[isz].LoadFile(wxString(tempImageName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+						_bitmapNames[isz] = tempImageName;
+						_bitmaps[isz] = wxBitmap(image[isz]);
+
+						std::ostringstream ost;
+						ost<<"No icon file  "<<_bitmapNames[isz];
+						tell_log(console::MT_WARNING,ost.str());
+						ost.clear();
+						ost<<"Replaced";
+						tell_log(console::MT_WARNING,ost.str());
+					}
+				}
+
 		}
 		else
 		{
 			std::ostringstream ost;
-			ost<<"Can't load icon"<<bitmapName;
+			ost<<"No any proper file for "<<bitmapName;
 			tell_log(console::MT_ERROR,ost.str());
-			_bitmaps[isz] = wxBitmap();//wxNullImage());
 		}
-	}*/
+	}
 }
 
 //void tui::ToolItem::addIcon(const std::string &bitmapName, int size)
