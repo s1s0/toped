@@ -633,7 +633,7 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
       logicop::pcollection::iterator CI = plycol.begin();
       while (CI != plycol.end())
       {
-         if (0 >= laydata::polyarea(**CI))
+         if (0 >= polyarea(**CI))
          {
             delete (*CI);
             CI = plycol.erase(CI);
@@ -652,7 +652,7 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
       real biggest_area = 0;
       for (logicop::pcollection::const_iterator CI = plycol.begin(); CI != plycol.end(); CI++)
       {
-         real cur_area = laydata::polyarea(**CI);
+         real cur_area = polyarea(**CI);
          if (biggest_area < cur_area)
          {
             biggest_area = cur_area;

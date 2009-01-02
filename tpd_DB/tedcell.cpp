@@ -68,7 +68,7 @@ laydata::editobject::editobject(tdtcellref* cref, tdtcell* vcell, cellrefstack* 
 
 DBbox laydata::editobject::overlap() const{
    if (_activecell)
-      return _activecell->overlap() * _ARTM;
+      return _activecell->overlap().overlap(_ARTM);
    else return DEFAULT_OVL_BOX;
 }
 

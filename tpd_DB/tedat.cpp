@@ -917,7 +917,7 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet& plst)
 void laydata::tdtpoly::transfer(const CTM& trans) {
    for (unsigned ii = 0; ii < _plist.size(); ii++) 
       _plist[ii] *= trans;
-   real area = laydata::polyarea(_plist);
+   real area = polyarea(_plist);
    if (area < 0)
       std::reverse(_plist.begin(),_plist.end());
 }
@@ -1579,15 +1579,14 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    if (structure()) 
       obox = structure()->overlap();
    // ... translate it to the current coordinates ...
-   DBbox areal = obox * newtrans;
-   // ... and normalize it
-   areal.normalize();
+   DBbox areal = obox.overlap(newtrans);
    // check that the cell (or part of it) is in the visual window
    DBbox clip = drawprop.clipRegion();
    if (clip.cliparea(areal) == 0) return;
    // check that the cell area is bigger that the MIN_VISUAL_AREA
-   DBbox minareal = areal * drawprop.ScrCTM();
-   if (minareal.area() < MIN_VISUAL_AREA) return;
+   if (!areal.visible(drawprop.ScrCTM())) return;
+//   DBbox minareal = areal * drawprop.ScrCTM();
+//   if (minareal.area() < MIN_VISUAL_AREA) return;
    // If we get here - means that the cell (or part of it) is visible
    ptlist.reserve(4);
    ptlist.push_back(obox.p1() * newtrans);
@@ -1760,7 +1759,7 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
 
 DBbox laydata::tdtcellref::overlap() const
 {
-   return structure()->overlap() * _translation;
+   return structure()->overlap().overlap(_translation);
 }
 
 //-----------------------------------------------------------------------------
@@ -1847,8 +1846,7 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    // Calculate the CTM for the array
    CTM newtrans = _translation * drawprop.topCTM();
    // ... get the current visual (clipping) window, and make a REVERSE TRANSLATION
-   DBbox clip = drawprop.clipRegion() * newtrans.Reversed();
-   clip.normalize();
+   DBbox clip = drawprop.clipRegion().overlap(newtrans.Reversed());
    // initialize the visual box from the overlap area of the array ...
    DBbox visual_box(array_overlap);
    // ... and check the visibility of entire array. if mutual_position
@@ -1873,7 +1871,7 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    
    // now check that a single structure is big enough to be visible
    DBbox structure_overlap = structure()->overlap();
-   DBbox minareal = structure_overlap * drawprop.topCTM() * drawprop.ScrCTM();
+   DBbox minareal = structure_overlap.overlap(drawprop.topCTM() * drawprop.ScrCTM());
    // We are going to draw "something", so push the new translation matrix in the stack
    drawprop.pushCTM(newtrans);
    if (minareal.area() < MIN_VISUAL_AREA)
@@ -2072,11 +2070,7 @@ void  laydata::tdtcellaref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, layd
 
 DBbox laydata::tdtcellaref::overlap() const {
    assert(structure());
-   {
-     DBbox ovl(clear_overlap() * _translation);
-     ovl.normalize();
-     return ovl;
-   }
+   return clear_overlap().overlap(_translation);
 //   else return DBbox(TP(static_cast<int4b>(rint(_translation.tx())),
 //                         static_cast<int4b>(rint(_translation.ty()))));
 }
@@ -2084,11 +2078,12 @@ DBbox laydata::tdtcellaref::overlap() const {
 DBbox laydata::tdtcellaref::clear_overlap() const
 {
    assert(structure());
-   DBbox bx = structure()->overlap();
-   DBbox ovl = bx;
+//   DBbox bx = structure()->overlap();
+//   DBbox ovl = bx;
    CTM refCTM(1.0,0.0,0.0,1.0,_arrprops.stepX() * (_arrprops.cols()-1), _arrprops.stepY() * (_arrprops.rows() - 1));
-   ovl.overlap(bx * refCTM);
-   return ovl;
+//   ovl.overlap(bx * refCTM);
+//   return ovl;
+   return structure()->overlap().overlap(refCTM);
 }
 
 //-----------------------------------------------------------------------------
@@ -2153,7 +2148,7 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    // draws the first symbol centerd around the bounding point
    CTM correction;
    correction.Translate(-_overlap.p1().x(), -_overlap.p1().y());
-   DBbox _over = _overlap * correction;
+   DBbox _over = _overlap.overlap(correction);
    // font translation matrix
    CTM ftmtrx =  _translation * drawprop.topCTM();
    valid_box wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT), ftmtrx * drawprop.ScrCTM());
@@ -2320,7 +2315,7 @@ void laydata::tdttext::PSwrite(PSFile& gdsf, const layprop::DrawProperties& draw
 DBbox laydata::tdttext::overlap() const {
    CTM correction;
    correction.Translate(-_overlap.p1().x(), -_overlap.p1().y());
-   return (_overlap * correction * _translation);
+   return (_overlap.overlap(correction * _translation));
 }
 
 void laydata::tdttext::info(std::ostringstream& ost, real DBU) const {
@@ -2455,7 +2450,7 @@ void laydata::valid_poly::angles()
 }
 
 void laydata::valid_poly::normalize() {
-   real area = laydata::polyarea(_plist);
+   real area = polyarea(_plist);
    if (area == 0) {
       _status |= shp_null; return;
    }

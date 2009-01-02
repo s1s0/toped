@@ -541,14 +541,9 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
    if (empty()) return;
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
-   DBbox areal = _overlap * drawprop.topCTM(); 
-   areal.normalize();
-   if (clip.cliparea(areal) == 0) return;
-   else {
-      areal = areal * drawprop.ScrCTM();
-      if (areal.area() < MIN_VISUAL_AREA) return;
-//      std::cout << "  ... with area " << areal.area() << "\n";
-   }
+   DBbox areal = _overlap.overlap(drawprop.topCTM()); 
+   if      ( clip.cliparea(areal) == 0       ) return;
+   else if (!areal.visible(drawprop.ScrCTM())) return;
    tdtdata* wdt = _first;
    // The drawing will be faster like this for the cells without selected shapes
    // that will be the wast majority of the cases. A bit bigger code though.
@@ -618,13 +613,9 @@ void laydata::quadTree::tmp_draw(const layprop::DrawProperties& drawprop,
    if (empty()) return;
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();   
-   DBbox areal = _overlap * transtack.front(); 
-   areal.normalize();
-   if (clip.cliparea(areal) == 0) return;
-   else {
-      areal = areal * drawprop.ScrCTM();
-      if (areal.area() < MIN_VISUAL_AREA) return;
-   }   
+   DBbox areal = _overlap.overlap(transtack.front());
+   if      (clip.cliparea(areal) == 0        ) return;
+   else if (!areal.visible(drawprop.ScrCTM())) return;
    tdtdata* wdt = _first;
    while(wdt) {
       wdt->tmp_draw(drawprop, transtack);
@@ -902,12 +893,8 @@ void laydata::tdtlayer::tmp_draw(const layprop::DrawProperties& drawprop,
    // check the entire layer for clipping...
    DBbox clip = drawprop.clipRegion();
    if (empty()) return;
-   DBbox areal = overlap() * transtack.front();
-   areal.normalize();
-   if (clip.cliparea(areal) == 0) return;
-   else {
-      areal = areal * drawprop.ScrCTM();
-      if (areal.area() < MIN_VISUAL_AREA) return;
-   }   
+   DBbox areal = overlap().overlap(transtack.front());
+   if      ( clip.cliparea(areal) == 0       ) return;
+   else if (!areal.visible(drawprop.ScrCTM())) return;
    quadTree::tmp_draw(drawprop, transtack);
 }
