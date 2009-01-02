@@ -1171,10 +1171,8 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
 {
    if (_plist.size() < 2) return;
    // first check whether to draw only the center line
-//   DBbox wsquare = DBbox(TP(0,0),TP(_width,_width)) * transtack.top();
-//   wsquare *= drawprop.ScrCTM();
-//   bool center_line_only = (wsquare.area() < MIN_VISUAL_AREA);
-   bool center_line_only = false;
+   DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
+   bool center_line_only = !wsquare.visible(drawprop.topCTM() * drawprop.ScrCTM());
    unsigned num_points = _plist.size();
    if (center_line_only)
       ptlist.reserve(num_points);
@@ -1869,18 +1867,11 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    ptlist.push_back(array_overlap.p2() * newtrans);
    ptlist.push_back(TP(array_overlap.p1().x(), array_overlap.p2().y()) * newtrans);
    
-   // now check that a single structure is big enough to be visible
-   DBbox structure_overlap = structure()->overlap();
-   DBbox minareal = structure_overlap.overlap(drawprop.topCTM() * drawprop.ScrCTM());
    // We are going to draw "something", so push the new translation matrix in the stack
    drawprop.pushCTM(newtrans);
-   if (minareal.area() < MIN_VISUAL_AREA)
+   if (structure()->overlap().visible(drawprop.topCTM() * drawprop.ScrCTM()))
    {
-      ptlist.push_back(TP(0,0));
-      ptlist.push_back(TP(0,0));
-   }
-   else
-   {
+      // a single structure is big enough to be visible
       // now calculate the start/stop values of the visible references in the matrix
       if (-1 == mutual_position) {
          // entire matrix is visible
@@ -1907,6 +1898,12 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
          ptlist.push_back(TP(stst[0],stst[1]));
          ptlist.push_back(TP(stst[2],stst[3]));
       }
+   }
+   else
+   {
+      // a single structure is too small
+      ptlist.push_back(TP(0,0));
+      ptlist.push_back(TP(0,0));
    }
 }
 
@@ -2151,8 +2148,8 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    DBbox _over = _overlap.overlap(correction);
    // font translation matrix
    CTM ftmtrx =  _translation * drawprop.topCTM();
-   valid_box wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT), ftmtrx * drawprop.ScrCTM());
-   if (wsquare.area() > MIN_VISUAL_AREA)
+   DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
+   if ( wsquare.visible(ftmtrx * drawprop.ScrCTM()) )
    {
       // If we get here - means that the text is visible
       // get the text overlapping box ...
@@ -2240,8 +2237,8 @@ void laydata::tdttext::tmp_draw(const layprop::DrawProperties& drawprop,
    //====================================================================
    // font translation matrix
    CTM ftmtrx =  _translation * transtack.front();
-   valid_box wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT), ftmtrx * drawprop.ScrCTM());
-   if (wsquare.area() > MIN_VISUAL_AREA)
+   DBbox wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
+   if (wsquare.visible(ftmtrx * drawprop.ScrCTM()))
    {
       glPushMatrix();
       double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
