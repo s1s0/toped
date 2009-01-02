@@ -216,7 +216,6 @@ namespace laydata {
          word                _rows;
    };
 
-   real polyarea(pointlist const shape);
 }
 
 #endif

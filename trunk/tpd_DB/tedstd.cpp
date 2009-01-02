@@ -389,15 +389,3 @@ void laydata::TEDfile::get_cellchildnames(nameList* cnames) {
    //   cnames->push_back(*CN);
    _childnames.clear();
 }
-
-
-real laydata::polyarea(pointlist const shape)
-{
-   real area = 0;
-   word size = shape.size();
-   word i,j;
-   for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
-      area += real(shape[i].x()) * real(shape[j].y()) -
-            real(shape[j].x()) * real(shape[i].y());
-   return area;
-}

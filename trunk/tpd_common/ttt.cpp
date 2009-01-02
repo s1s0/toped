@@ -100,6 +100,18 @@ void DBbox::overlap(const DBbox bx) {
    }   
 }
 
+DBbox DBbox::overlap(const CTM& op2)  const
+{
+   TP np(_p1 * op2);
+   DBbox result(np);
+   np = TP(_p2.x(), _p1.y()) * op2; result.overlap(np);
+   np =                (_p2) * op2; result.overlap(np);
+   np = TP(_p1.x(), _p2.y()) * op2; result.overlap(np);
+//   _p1 = result.p1();
+//   _p2 = result.p2();
+   return result;
+}
+
 void DBbox::normalize() {
    int4b swap;
    if (_p1.x() > _p2.x()) {
@@ -215,6 +227,20 @@ bool DBbox::inside(const TP& pnt) {
 
 float DBbox::area() {
    return fabsf((_p1.x() - _p2.x()) * (_p1.y() - _p2.y()));
+}
+
+bool DBbox::visible(const CTM& tmtrx) const
+{
+   pointlist ptlist;
+   ptlist.reserve(4);
+
+   ptlist.push_back(               (_p1) * tmtrx);
+   ptlist.push_back(TP(_p2.x(), _p1.y()) * tmtrx);
+   ptlist.push_back(               (_p2) * tmtrx);
+   ptlist.push_back(TP(_p1.x(), _p2.y()) * tmtrx);
+
+   if (abs(polyarea(ptlist)) >= (real)MIN_VISUAL_AREA) return true;
+   else                                                return false;
 }
 
 DBbox DBbox::getcorner(byte corner) {
@@ -570,3 +596,13 @@ std::vector<std::string> split (const std::string& str, char delim)
    return ret;
 }
 
+real polyarea(const pointlist& shape)
+{
+   real area = 0;
+   word size = shape.size();
+   word i,j;
+   for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
+      area += real(shape[i].x()) * real(shape[j].y()) -
+            real(shape[j].x()) * real(shape[i].y());
+   return area;
+}

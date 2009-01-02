@@ -215,7 +215,11 @@ private:
    int4b    _y;
 };
 
-//==============================================================================   
+//==============================================================================
+// The DBbox class is used primarily in the quadtree algo, to keep the overlap
+// variables of the DB objects and to implement the corresponding calculations. 
+// Its methods shall comply with the specific requirements of the algorithm.
+//
 class DBbox {
 public:
    DBbox(const TP& p) :        _p1(p)       , _p2(p)    {};
@@ -224,11 +228,13 @@ public:
    DBbox(int4b, int4b, int4b, int4b);
    void  overlap(const TP p);
    void  overlap(const DBbox bx);
+   DBbox overlap(const CTM&) const;
    void  normalize();
    float cliparea(const DBbox& bx, bool calculate = false);
    int   clipbox(DBbox& bx);
    bool  inside(const TP& );
-   float area(); 
+   float area();
+   bool  visible(const CTM&) const;
    DBbox getcorner(byte corner);
    const TP&    p1()  const {return _p1;};
    const TP&    p2()  const {return _p2;};
@@ -267,6 +273,9 @@ struct TpdYYLtype {
    int          last_column;
    char*        filename;
 };
+
+std::vector<std::string> split (const std::string& str, char delim);
+real polyarea(const pointlist& shape);
 
 //=============================================================================
 // A template of a cell hierarchy used for all layout databases in Toped (TDT,
@@ -631,8 +640,6 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
    }
    return false;
 }
-
-std::vector<std::string> split (const std::string& str, char delim);
 
 //=============================================================================
 // More common constants (instead of #defines)
