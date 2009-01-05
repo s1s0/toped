@@ -137,6 +137,12 @@ namespace tui
 					const std::string &bitmapName,
 					const std::string &hotKey, 
 					const std::string &helpString, callbackMethod cbMethod);
+		ToolItem(int toolID, const std::string &name,
+					const std::string &bitmapName,
+					const std::string &hotKey, 
+					const std::string &helpString, 
+					const std::string func);
+
 //		void addIcon(const std::string &bitmapName, int size); 
 		//std::string  hotKey(void)		const		{ return _hotKey;};
       std::string    function(void)		const    { return _function;};
@@ -155,7 +161,6 @@ namespace tui
 		wxBitmap			_bitmaps[ICON_SIZE_END];
 		std::string		_bitmapNames[ICON_SIZE_END];
 		IconSizes		currentSize;
-
 		
 		//std::string	_hotKey;
       std::string		_function;	
@@ -178,16 +183,20 @@ namespace tui
 		ToolBarHandler(int ID, const std::string& name, int direction);
 		virtual ~ToolBarHandler();
 
-//		void				addTool(ToolItem *tool);
 		void				addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
-										const std::string &iconFileName, IconSizes size,
-										const std::string hotKey, const std::string &helpString, callbackMethod cbMethod);
+										const std::string &iconFileName, const std::string hotKey, 
+										const std::string &helpString, callbackMethod cbMethod);
+		void				addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
+										const std::string &iconFileName, const std::string hotKey, 
+										const std::string &helpString, const std::string &func);
 		void				execute(int ID1);
 		int				direction() const {return _dockDirection;};
 		std::string		name() const {return _name;};
 		void				changeToolSize(IconSizes size);
 	private:
 		void				attachToAUI(void);
+		//Check tool and delete if exist
+		void				clearTool(const std::string &iconName);
 		std::string					_name;
 		int							_ID;
 		TpdToolBar*					_toolBar;
@@ -228,13 +237,11 @@ namespace tui
 		void defineToolBar(const std::string &toolBarName);
 		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
 							const std::string &iconName,
-							IconSizes size,
 							const std::string &hotKey, 
 							const std::string &helpString,
 							callbackMethod cbMethod);
 		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
 							const std::string &iconName,
-							IconSizes size,
 							const std::string &hotKey, 
 							const std::string &helpString,
 							std::string func);
@@ -245,7 +252,8 @@ namespace tui
    private:
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
-
+		//Function to avoid copy-paste in appendTool functions
+		ToolBarHandler* proceedTool(const std::string &toolBarName, const std::string &toolBarItem);
 
       itemList				_menus;
 		toolBarList			_toolBars;
