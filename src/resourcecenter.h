@@ -156,6 +156,7 @@ namespace tui
 		int		ID(void)			const {return _ID;};
 		void		changeToolSize(IconSizes size);
 	private:
+		void				init(const std::string& bitmapName);
 		int				_ID;
 		std::string		_name;
 		wxBitmap			_bitmaps[ICON_SIZE_END];
