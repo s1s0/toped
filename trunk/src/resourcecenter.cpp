@@ -256,8 +256,23 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
                         currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod), _ok(false),
 								_function("")
 {
-	wxLogNull logNo; //suppress wxWidget log
+	init(bitmapName);
+}
 
+tui::ToolItem::ToolItem(int toolID, const std::string &name,
+								const std::string &bitmapName,
+								const std::string &hotKey,
+								const std::string &helpString,
+								const std::string func)
+								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
+                        currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(NULL), _ok(false),
+								_function(func)
+{
+	init(bitmapName);
+}
+
+void tui::ToolItem::init(const std::string& bitmapName)
+{
 	wxImage image[ICON_SIZE_END];
 	wxImage tempImage;
 	std::string tempImageName;
@@ -326,41 +341,8 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 			tell_log(console::MT_ERROR,ost.str());
 		}
 	}
+
 }
-
-tui::ToolItem::ToolItem(int toolID, const std::string &name,
-								const std::string &bitmapName,
-								const std::string &hotKey,
-								const std::string &helpString,
-								const std::string func)
-								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
-                        currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(NULL), _ok(false),
-								_function(func)
-{
-}
-//void tui::ToolItem::addIcon(const std::string &bitmapName, int size)
-//{
-	/*	IconSizes isz;
-	for(
-		isz = ICON_SIZE_16x16; 
-		isz < ICON_SIZE_END; 
-		isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
-	{
-		if(size == isz) break;
-	}
-	if(ICON_SIZE_END == size) 
-		return false;
-	else return true;
-	*/
-
-	//image.LoadFile(wxString(bitmapName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
-	//if(image.IsOk())
-	//{
-	//	_bitmapNames[size] = bitmapName;
-	//	_bitmaps[size] = wxBitmap(image);
-	//}
-//}
-
 
 tui::ToolItem::~ToolItem()
 {
@@ -488,7 +470,7 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 												const std::string &helpString,
 												const std::string &func)
 {
-		clearTool(iconName);
+	clearTool(iconName);
 	ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, func);
 	if (tool->isOk())
 	{
@@ -551,13 +533,13 @@ void	tui::ToolBarHandler::execute(int ID1)
 	{
 	   if (((*it)->ID())==ID1) 
       {
-         //Priority - user defined function
-        /* if (!((*it)->function()).empty())
+			//Priority - user defined function
+         if (!((*it)->function()).empty())
          {
-            Console->parseCommand(wxString(((*mItem)->function()).c_str(), wxConvUTF8));
+            Console->parseCommand(wxString(((*it)->function()).c_str(), wxConvUTF8));
 				return;
          }
-         else*/
+         else
             if ((*it)->method()!=NULL)
             {
                callbackMethod cbMethod;
