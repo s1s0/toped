@@ -663,33 +663,33 @@ void tui::TopedFrame::setIconDir(const std::string& uiDir)
 void tui::TopedFrame::initToolBars() 
 {
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
-   _resourceCenter->appendTool("main", "new", "new",ICON_SIZE_16x16, "", "new cell", &tui::TopedFrame::OnCellNew);
-   _resourceCenter->appendTool("main", "open", "open",ICON_SIZE_16x16,"", "open cell", &tui::TopedFrame::OnCellOpen);
-   _resourceCenter->appendTool("main", "save", "save",ICON_SIZE_16x16, "", "save design", &tui::TopedFrame::OnTDTSave);
+   _resourceCenter->appendTool("main", "new", "new", "", "new cell", &tui::TopedFrame::OnCellNew);
+   _resourceCenter->appendTool("main", "open", "open", "", "open cell", &tui::TopedFrame::OnCellOpen);
+   _resourceCenter->appendTool("main", "save", "save", "", "save design", &tui::TopedFrame::OnTDTSave);
 
    //_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
 
-	_resourceCenter->appendTool("edit", "undo", "undo",ICON_SIZE_16x16, "", "undo", &tui::TopedFrame::OnUndo);
-   //_resourceCenter->appendTool("edit", "redo", "redo",ICON_SIZE_16x16, "", "redo",&tui::TopedFrame::OnUndo);
-   _resourceCenter->appendTool("edit", "box", "box", ICON_SIZE_16x16,"", "add box",&tui::TopedFrame::OnDrawBox);
-   _resourceCenter->appendTool("edit", "poly", "poly", ICON_SIZE_16x16,"", "add polygon",&tui::TopedFrame::OnDrawPoly);
-   _resourceCenter->appendTool("edit", "wire", "wire", ICON_SIZE_16x16,"", "add wire",&tui::TopedFrame::OnDrawWire);
-   _resourceCenter->appendTool("edit", "text", "text", ICON_SIZE_16x16,"", "add text",&tui::TopedFrame::OnDrawText);
-   _resourceCenter->appendTool("edit", "delete", "delete", ICON_SIZE_16x16,"", "delete",&tui::TopedFrame::OnDelete);
-   _resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly", ICON_SIZE_16x16,"", "cut",&tui::TopedFrame::OnPolyCut);
-   _resourceCenter->appendTool("edit", "zoom_all", "zoom_all", ICON_SIZE_16x16,"", "zoom all",&tui::TopedFrame::OnZoomAll);
-   _resourceCenter->appendTool("edit", "zoom_in", "zoom_in", ICON_SIZE_16x16,"", "zoom in",&tui::TopedFrame::OnzoomIn);
-   _resourceCenter->appendTool("edit", "zoom_out", "zoom_out", ICON_SIZE_16x16,"", "zoom out",&tui::TopedFrame::OnzoomOut);
-   _resourceCenter->appendTool("edit", "ruler", "ruler", ICON_SIZE_16x16,"", "add ruler",&tui::TopedFrame::OnAddRuler);
-   _resourceCenter->appendTool("edit", "copy", "copy", ICON_SIZE_16x16,"", "copy",&tui::TopedFrame::OnCopy);
-   _resourceCenter->appendTool("edit", "move", "move", ICON_SIZE_16x16,"", "move",&tui::TopedFrame::OnMove);
-   _resourceCenter->appendTool("edit", "rotate", "rotate_left", ICON_SIZE_16x16,"", "rotate",&tui::TopedFrame::OnRotate);
-   //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right.png", ICON_SIZE_16x16,"", "rotate",&tui::TopedFrame::OnRotate);
-   _resourceCenter->appendTool("edit", "flipx", "flipx", ICON_SIZE_16x16,"", "flip X",&tui::TopedFrame::OnFlipX);
-   _resourceCenter->appendTool("edit", "flipy", "flipy", ICON_SIZE_16x16,"", "flip Y",&tui::TopedFrame::OnFlipY);
-   _resourceCenter->appendTool("edit", "edit_push", "edit_push", ICON_SIZE_16x16,"", "edit push",&tui::TopedFrame::OnCellPush);
-   _resourceCenter->appendTool("edit", "edit_pop", "edit_pop", ICON_SIZE_16x16,"", "edit pop",&tui::TopedFrame::OnCellPop);
+	_resourceCenter->appendTool("edit", "undo", "undo", "", "undo", &tui::TopedFrame::OnUndo);
+   //_resourceCenter->appendTool("edit", "redo", "redo", "", "redo",&tui::TopedFrame::OnUndo);
+   _resourceCenter->appendTool("edit", "box", "box", "", "add box",&tui::TopedFrame::OnDrawBox);
+   _resourceCenter->appendTool("edit", "poly", "poly", "", "add polygon",&tui::TopedFrame::OnDrawPoly);
+   _resourceCenter->appendTool("edit", "wire", "wire", "", "add wire",&tui::TopedFrame::OnDrawWire);
+   _resourceCenter->appendTool("edit", "text", "text", "", "add text",&tui::TopedFrame::OnDrawText);
+   _resourceCenter->appendTool("edit", "delete", "delete", "", "delete",&tui::TopedFrame::OnDelete);
+   _resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly", "", "cut",&tui::TopedFrame::OnPolyCut);
+   _resourceCenter->appendTool("edit", "zoom_all", "zoom_all", "", "zoom all",&tui::TopedFrame::OnZoomAll);
+   _resourceCenter->appendTool("edit", "zoom_in", "zoom_in", "", "zoom in",&tui::TopedFrame::OnzoomIn);
+   _resourceCenter->appendTool("edit", "zoom_out", "zoom_out", "", "zoom out",&tui::TopedFrame::OnzoomOut);
+   _resourceCenter->appendTool("edit", "ruler", "ruler", "", "add ruler",&tui::TopedFrame::OnAddRuler);
+   _resourceCenter->appendTool("edit", "copy", "copy", "", "copy",&tui::TopedFrame::OnCopy);
+   _resourceCenter->appendTool("edit", "move", "move", "", "move",&tui::TopedFrame::OnMove);
+   _resourceCenter->appendTool("edit", "rotate", "rotate_left", "", "rotate",&tui::TopedFrame::OnRotate);
+   //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right.png", "", "rotate",&tui::TopedFrame::OnRotate);
+   _resourceCenter->appendTool("edit", "flipx", "flipx", "", "flip X",&tui::TopedFrame::OnFlipX);
+   _resourceCenter->appendTool("edit", "flipy", "flipy", "", "flip Y",&tui::TopedFrame::OnFlipY);
+   _resourceCenter->appendTool("edit", "edit_push", "edit_push", "", "edit push",&tui::TopedFrame::OnCellPush);
+   _resourceCenter->appendTool("edit", "edit_pop", "edit_pop", "", "edit pop",&tui::TopedFrame::OnCellPop);
 
    //_resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_16x16);
   // _resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_32x32);
@@ -2083,7 +2083,7 @@ void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
 	std::string toolName = map->GetKey();
 	std::string toolFunc = map->GetValue();
 
-	_resourceCenter->appendTool(toolBarBame, toolName, toolName, ICON_SIZE_24x24, "", "", toolFunc);
+	_resourceCenter->appendTool(toolBarBame, toolName, toolName,  "", "", toolFunc);
 	delete map;
 }
 
