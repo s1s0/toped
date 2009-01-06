@@ -253,8 +253,8 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								const std::string &helpString,
 								callbackMethod cbMethod)
 								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
-                        currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod), _ok(false),
-								_function("")
+                        _currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod),
+								_ok(false),	_function("")
 {
 	init(bitmapName);
 }
@@ -265,8 +265,8 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								const std::string &helpString,
 								const std::string func)
 								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
-                        currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(NULL), _ok(false),
-								_function(func)
+                        _currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(NULL),
+								_ok(false),	_function(func)
 {
 	init(bitmapName);
 }
@@ -352,13 +352,13 @@ void tui::ToolItem::changeToolSize(IconSizes size)
 {
 	if(checkToolSize(size))
 	{
-		currentSize = size;
+		_currentSize = size;
 	}
 	else
 	{
-			wxString info;
-			info << wxT("Wrong size for icon was chosen.");
-         tell_log(console::MT_ERROR,info);
+		wxString info;
+		info << wxT("Wrong size for icon was chosen.");
+      tell_log(console::MT_ERROR,info);
 	}
 }
 
@@ -373,7 +373,8 @@ tui::TpdToolBar::TpdToolBar(int ID, long style, IconSizes iconSize)
 }
 
 tui::ToolBarHandler::ToolBarHandler(int ID, const std::string & name, int direction)
-		:_name(name),_ID(ID), _dockDirection(direction),_floating(false),_coord(-1,-1)
+		:_name(name),_ID(ID), _dockDirection(direction),_floating(false),_coord(-1,-1),
+		_currentSize(ICON_SIZE_16x16)
 {
 	wxAuiPaneInfo paneInfo;
 	
@@ -407,6 +408,7 @@ tui::ToolBarHandler::~ToolBarHandler()
 
 void	tui::ToolBarHandler::changeToolSize(IconSizes size)
 {
+	_currentSize = size;
 	wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
 	_floating = paneInfo.IsFloating();
 	if(paneInfo.IsDocked())
@@ -432,7 +434,7 @@ void	tui::ToolBarHandler::changeToolSize(IconSizes size)
 	attachToAUI();
 	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
 	{
-		(*it)->changeToolSize(size);
+		(*it)->changeToolSize(_currentSize);
 		_toolBar->AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
 		Toped->getAuiManager()->DetachPane(_toolBar);
 		_toolBar->Realize();
@@ -451,6 +453,7 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 	ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, cbMethod);
 	if (tool->isOk())
 	{
+		tool->changeToolSize(_currentSize);
 		_tools.push_back(tool);
 		_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
 
@@ -474,6 +477,7 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 	ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, func);
 	if (tool->isOk())
 	{
+		tool->changeToolSize(_currentSize);
 		_tools.push_back(tool);
 		_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
 

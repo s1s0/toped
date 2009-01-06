@@ -152,7 +152,7 @@ namespace tui
       callbackMethod method(void)		const    { return _method;};
 
 		virtual ~ToolItem();
-		wxBitmap	bitmap(void)	const {return _bitmaps[currentSize];};
+		wxBitmap	bitmap(void)	const {return _bitmaps[_currentSize];};
 		int		ID(void)			const {return _ID;};
 		void		changeToolSize(IconSizes size);
 	private:
@@ -161,7 +161,7 @@ namespace tui
 		std::string		_name;
 		wxBitmap			_bitmaps[ICON_SIZE_END];
 		std::string		_bitmapNames[ICON_SIZE_END];
-		IconSizes		currentSize;
+		IconSizes		_currentSize;
 		
 		//std::string	_hotKey;
       std::string		_function;	
@@ -205,6 +205,7 @@ namespace tui
 		int							_dockDirection;
 		bool							_floating;
 		wxPoint						_coord;
+		IconSizes					_currentSize;
 	};
 
 	bool checkToolSize(IconSizes size);
