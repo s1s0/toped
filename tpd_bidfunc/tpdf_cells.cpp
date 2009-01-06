@@ -126,7 +126,8 @@ int tellstdfunc::stdREMOVECELL::execute()
       UNDOPstack.push_front(make_ttlaylist(cell_contents));
       LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
    }
-   delete cell_contents;
+   clean_atticlist(cell_contents, true);
+   delete(cell_contents);
    return EXEC_NEXT;
 }
 //=============================================================================
@@ -464,20 +465,23 @@ int tellstdfunc::stdUNGROUP::execute() {
       delete cells4u;
    }
    else {
-      laydata::atticList undol;
+      laydata::atticList* undol = DEBUG_NEW laydata::atticList();
       UNDOcmdQ.push_front(this);
       // Push the list of the cells to be ungroupped first
-      undol[0] = cells4u;
-      UNDOPstack.push_front(make_ttlaylist(&undol));
+      (*undol)[0] = cells4u;
+      UNDOPstack.push_front(make_ttlaylist(undol));
       ATDB = DATC->lockDB();
          // and then ungroup and push the list of the shapes produced in
          //result of the ungroup
          laydata::atticList* undol2 = ATDB->ungroup_this(cells4u);
       DATC->unlockDB();
       UNDOPstack.push_front(make_ttlaylist(undol2));
-      delete cells4u;
-      for(laydata::atticList::iterator CL = undol2->begin(); CL != undol2->end(); CL++)
-         delete CL->second;
+      // a bit funny, but effective way of cleaning-up cells4u
+      // acutually - similar approach was used above to convert cells4u to a
+      // layout list - all this using a atticList structure undol
+      clean_atticlist(undol, false);
+      delete undol;
+      clean_atticlist(undol2, false);
       delete undol2;
       LogFile << LogFile.getFN() << "();"; LogFile.flush();
       UpdateLV();
