@@ -48,6 +48,12 @@ namespace laydata {
       void           clearLib();
       void           cleanUnreferenced();
       void           collect_usedlays(WordList&) const;
+      void           dbHierAdd(const tdtdefaultcell*, const tdtdefaultcell*);
+      void           dbHierAddParent(const tdtdefaultcell*, const tdtdefaultcell*);
+      int            dbHierRemoveParent(const tdtdefaultcell*, const tdtdefaultcell*);
+      void           dbHierRemoveRoot(const tdtdefaultcell*);
+      bool           dbHierCheckAncestors(const tdtdefaultcell*, const tdtdefaultcell*);
+
       //
       std::string    name()            const {return _name;}
       real           UU()              const {return _UU;}
@@ -57,9 +63,6 @@ namespace laydata {
       // callbacks
       void          (*btreeAddMember)(const char*, const char*, int action);
       void          (*btreeRemoveMember)(const char*, const char*, int action);
-      friend         void tdtcell::updateHierarchy(tdtlibdir*);
-      friend         void tdtcell::removePrep(tdtdesign*) const;
-      friend         bool tdtcell::addchild(tdtdesign*, tdtdefaultcell*);
       friend         class tdtlibdir;
       friend         class TEDfile;
       void           clearHierTree();

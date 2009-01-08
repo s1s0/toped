@@ -310,6 +310,43 @@ void laydata::tdtlibrary::collect_usedlays(WordList& laylist) const
       laylist.pop_front();
 }
 
+void laydata::tdtlibrary::dbHierAdd(const laydata::tdtdefaultcell* comp, const laydata::tdtdefaultcell* prnt)
+{
+   assert(comp);
+   _hiertree = DEBUG_NEW TDTHierTree(comp, prnt, _hiertree);
+   //@FIXME! parent name has to be taken from the _hiertree
+   std::string prnt_name = (NULL == prnt) ? _name : prnt->name();
+   btreeAddMember(comp->name().c_str(), prnt_name.c_str(), 0);
+}
+
+void laydata::tdtlibrary::dbHierAddParent(const laydata::tdtdefaultcell* comp, const laydata::tdtdefaultcell* prnt)
+{
+   assert(comp); assert(prnt);
+   int res = _hiertree->addParent(comp, prnt, _hiertree);
+   if (res > 0)
+      btreeAddMember(comp->name().c_str(), prnt->name().c_str(), res);
+}
+
+int laydata::tdtlibrary::dbHierRemoveParent(const tdtdefaultcell* comp, const tdtdefaultcell* prnt)
+{
+   assert(comp); assert(prnt);
+   int res = _hiertree->removeParent(comp, prnt, _hiertree);
+   btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
+}
+
+void laydata::tdtlibrary::dbHierRemoveRoot(const tdtdefaultcell* comp)
+{
+   assert(comp);
+   _hiertree->removeRootItem(comp, _hiertree);
+   btreeRemoveMember(comp->name().c_str(), NULL, 3);
+}
+
+bool laydata::tdtlibrary::dbHierCheckAncestors(const tdtdefaultcell* comp, const tdtdefaultcell* child)
+{
+   assert(comp); assert(child);
+   return _hiertree->checkAncestors(comp, child, _hiertree);
+}
+
 //-----------------------------------------------------------------------------
 // class tdtlibdir
 //-----------------------------------------------------------------------------
