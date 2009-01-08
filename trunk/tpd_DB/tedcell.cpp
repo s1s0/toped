@@ -344,10 +344,9 @@ laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB,
 bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child) 
 {
    // check for circular reference, i.e. the child is a father of some of its ancestors
-   if (ATDB->_hiertree->checkAncestors(this, child, ATDB->_hiertree)) {
+   if (ATDB->dbHierCheckAncestors(this, child))
       //Circular reference found. child is already an ancestor of this
       return false;
-   }
    //leave a mark that child is not orphan
    child->parentfound();
    // update the list of children of the current cell
@@ -355,9 +354,7 @@ bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child)
    _children.sort();
    _children.unique();
    // update the hierarchical tree
-   int res = ATDB->_hiertree->addParent(child, this, ATDB->_hiertree);
-   if (res > 0)
-      ATDB->btreeAddMember(child->name().c_str(), name().c_str(), res);
+   ATDB->dbHierAddParent(child, this);
    return true;
 }
 
@@ -1437,6 +1434,7 @@ void laydata::tdtcell::transferLayer(word dst)
       {
          // now remove the selected shapes from the data holders ...
          if (_layers[CL->first]->delete_marked())
+         {
             // ... and validate quadTrees if needed
             if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
             else
@@ -1444,6 +1442,7 @@ void laydata::tdtcell::transferLayer(word dst)
                delete _layers[CL->first];
                _layers.erase(_layers.find(CL->first));
             }
+         }
          // traverse the shapes on this layer and add them to the destination layer
          dataList* lslct = CL->second;
          dataList::iterator DI = lslct->begin();
@@ -1493,6 +1492,7 @@ void laydata::tdtcell::transferLayer(selectList* slst, word dst)
    assert(!fortransfer->empty());
    // now remove the selected shapes from the data holders ...
    if (_layers[dst]->delete_marked())
+   {
       // ... and validate quadTrees if needed
       if (!_layers[dst]->empty()) _layers[dst]->validate();
       else
@@ -1500,6 +1500,7 @@ void laydata::tdtcell::transferLayer(selectList* slst, word dst)
          delete _layers[dst];
          _layers.erase(_layers.find(dst));
       }
+   }
    // traversing the input list - it contains the destination layers
    selectList::iterator CL = slst->begin();
    while (slst->end() != CL)
@@ -1697,9 +1698,8 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
             childref = ATDB->checkcell(*CN);
             if (NULL == childref)
                childref = libdir->getLibCellDef(*CN);
-            int res = ATDB->_hiertree->removeParent(childref, this, ATDB->_hiertree);
+            int res = ATDB->dbHierRemoveParent(childref, this);
             childref->_orphan = (res > 0);
-            ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), res);
          }
          _children.clear();
       }
@@ -1720,9 +1720,8 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
             if (NULL != childref)
             {
                // remove it from the hierarchy
-               int res = ATDB->_hiertree->removeParent(childref, this, ATDB->_hiertree);
+               int res = ATDB->dbHierRemoveParent(childref, this);
                childref->_orphan = (res > 0);
-               ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(),res);
             }
             _children.erase(diff.second);
          }
@@ -1761,7 +1760,8 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
    return overlapChanged(old_overlap, (*libdir)());
 }
 
-void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const {
+void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const
+{
    // Check that there are referenced cells
    if (_layers.end() != _layers.find(0))
    {
@@ -1771,15 +1771,11 @@ void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const {
       for (nameList::const_iterator CN = _children.begin(); CN != _children.end(); CN++)
       {
          childref = ATDB->checkcell(*CN);
-         int res = ATDB->_hiertree->removeParent(childref, this, ATDB->_hiertree);
+         int res = ATDB->dbHierRemoveParent(childref, this);
          childref->_orphan = (res > 0);
-         ATDB->btreeRemoveMember(childref->name().c_str(), name().c_str(), res);
       }
    }
-   // remove this form _hiertree
-   ATDB->_hiertree->removeRootItem(this, ATDB->_hiertree);
-   // and browser tab
-   ATDB->btreeRemoveMember(name().c_str(), NULL, 3);
+   ATDB->dbHierRemoveRoot(this);
    // don't clear children, the cell will be moved to Attic
    //_children.clear();
 }

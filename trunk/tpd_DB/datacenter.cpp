@@ -41,10 +41,9 @@ DataCenter*               DATC = NULL;
 //-----------------------------------------------------------------------------
 // class Gds2Ted
 //-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const LayerMapGds& theLayMap) :
-      _src_lib(src_lib), _dst_lib(dst_lib), _theLayMap(theLayMap), _coeff(dst_lib->UU() / src_lib->libUnits())
-{
-}
+GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap) :
+      _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap), _coeff((*_tdt_db)()->UU() / src_lib->libUnits())
+{}
 
 void GDSin::Gds2Ted::top_structure(std::string top_str, bool recursive, bool overwrite)
 {
@@ -85,7 +84,7 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool overwrite
    GDSin::GdsStructure* src_structure = const_cast<GDSin::GdsStructure*>(item->GetItem());
    std::string gname = src_structure->name();
    // check that destination structure with this name exists
-   laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
+   laydata::tdtcell* dst_structure = (*_tdt_db)()->checkcell(gname);
    std::ostringstream ost; ost << "GDS import: ";
    if (NULL != dst_structure)
    {
@@ -106,7 +105,7 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool overwrite
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = _dst_lib->addcell(gname);
+      dst_structure = (*_tdt_db)()->addcell(gname);
       // finally call the cell converter
       convert(src_structure, dst_structure);
    }
@@ -229,7 +228,7 @@ void GDSin::Gds2Ted::text(GDSin::GdsText* wd, laydata::tdtlayer* wl)
    // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
    wl->addtext(wd->text(),
                CTM(wd->magnPoint(),
-                   wd->magnification() / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
+                   wd->magnification() / ((*_tdt_db)()->UU() *  OPENGL_FONT_UNIT),
                    wd->angle(),
                    (0 != wd->reflection()) )
               );
@@ -237,57 +236,56 @@ void GDSin::Gds2Ted::text(GDSin::GdsText* wd, laydata::tdtlayer* wl)
 
 void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
 {
-   if (NULL != _dst_lib->checkcell(wd->strName()))
-   {
-      laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->strName());
-      // Absolute magnification, absolute angle should be reflected somehow!!!
-      dst->addcellref(
-         _dst_lib,
-         striter, 
-         CTM(wd->magnPoint(),
-             wd->magnification(),
-             wd->angle(),
-             (0 != wd->reflection()) ),
-         false
-      );
-   }
-   else
-   {
-      //@FIXME - library or default structure here!
-      std::string news = "Referenced structure \"";
-      news += wd->strName(); news += "\" not found. Reference ignored";
-      tell_log(console::MT_ERROR,news);
-   }
+   // Absolute magnification, absolute angle should be reflected somehow!!!
+   laydata::refnamepair striter = linkcellref(wd->strName());
+   dst->addcellref(
+                    (*_tdt_db)(),
+                      striter,
+                      CTM(wd->magnPoint(),
+                         wd->magnification(),
+                         wd->angle(),
+                         (0 != wd->reflection()) ),
+                      false
+   );
 }
 
 void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
 {
-   if (NULL != _dst_lib->checkcell(wd->strName()))
-   {
-      laydata::refnamepair striter = _dst_lib->getcellnamepair(wd->strName());
-      // Absolute magnification, absolute angle should be reflected somehow!!!
+   // Absolute magnification, absolute angle should be reflected somehow!!!
+   laydata::refnamepair striter = linkcellref(wd->strName());
 
-      laydata::ArrayProperties arrprops(wd->getXStep(),wd->getYStep(),
-                                 static_cast<word>(wd->columns()),
-                                 static_cast<word>(wd->rows()));
-      dst->addcellaref(
-         _dst_lib,
-         striter, 
-         CTM( wd->magnPoint(),
-              wd->magnification(),
-              wd->angle(),
-              (0 != wd->reflection()) ),
-         arrprops,
-         false
-      );
+   laydata::ArrayProperties arrprops(wd->getXStep(),wd->getYStep(),
+                                     static_cast<word>(wd->columns()),
+                                     static_cast<word>(wd->rows()));
+   dst->addcellaref(
+                     (*_tdt_db)(),
+                       striter,
+                       CTM( wd->magnPoint(),
+                            wd->magnification(),
+                            wd->angle(),
+                            (0 != wd->reflection()) ),
+                       arrprops,
+                       false
+   );
+}
+
+laydata::refnamepair GDSin::Gds2Ted::linkcellref(std::string cellname)
+{
+   laydata::refnamepair striter;
+   if (NULL != (*_tdt_db)()->checkcell(cellname))
+   {
+      striter = (*_tdt_db)()->getcellnamepair(cellname);
    }
    else
    {
-      //@FIXME - library or default structure here!
-      std::string news = "Referenced structure \"";
-      news += wd->strName(); news += "\" not found. Reference ignored";
-      tell_log(console::MT_ERROR,news);
+      // search the cell in the libraries because it's not in the DB
+      if (!_tdt_db->getLibCellRNP(cellname, striter))
+      {
+         striter = _tdt_db->adddefaultcell(cellname);
+         (*_tdt_db)()->dbHierAdd(striter->second, NULL);
+      }
    }
+   return striter;
 }
 
 //-----------------------------------------------------------------------------
@@ -747,7 +745,7 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& lay
    else
    {
       // Lock the DB here manually. Otherwise the cell browser is going mad
-      GDSin::Gds2Ted converter(_GDSDB, _TEDLIB(), laymap);
+      GDSin::Gds2Ted converter(_GDSDB, &_TEDLIB, laymap);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.top_structure(CN->c_str(), recur, over);
       _TEDLIB()->modified = true;

@@ -37,7 +37,7 @@ namespace GDSin {
 
    class Gds2Ted {
    public:
-                           Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtdesign* dst_lib, const LayerMapGds&);
+                           Gds2Ted(GDSin::GdsFile*, laydata::tdtlibdir*, const LayerMapGds&);
       void                 top_structure(std::string, bool, bool);
    protected:
       void                 child_structure(const GDSin::GDSHierTree*, bool);
@@ -49,8 +49,9 @@ namespace GDSin {
       void                 text(GDSin::GdsText*    , laydata::tdtlayer*);
       void                 ref (GDSin::GdsRef*     , laydata::tdtcell* );
       void                 aref(GDSin::GdsARef*    , laydata::tdtcell* );
+      laydata::refnamepair linkcellref(std::string cellname);
       GDSin::GdsFile*      _src_lib;
-      laydata::tdtdesign*  _dst_lib;
+      laydata::tdtlibdir*  _tdt_db;
       const LayerMapGds&   _theLayMap;
       real                 _coeff; // DBU difference
    };
