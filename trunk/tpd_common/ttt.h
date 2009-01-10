@@ -485,24 +485,26 @@ template <class TYPE>
    }
 
 template <class TYPE> 
-    bool SGHierTree<TYPE>::checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
+   bool SGHierTree<TYPE>::checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst)
+{
    // returns true  -> prnt is already an ancestor of the comp
    //         false -> otherwise
-  SGHierTree* wv = lst->GetMember(comp);
-  SGHierTree* wvP = lst->GetMember(prnt);
-   // protect yourself - if parent or the component are not in the list 
-  assert(wvP); assert(wv);
-  do {
-    SGHierTree* wv2 = wv;
-    do {
-      if (wv2->GetItem() == prnt) return true;
-    } while (NULL != (wv2 = wv2->parent));
-  } while (NULL != (wv = wv->GetNextMember(comp)));
-  return false;
+   SGHierTree* wv = lst->GetMember(comp);
+   SGHierTree* wvP = lst->GetMember(prnt);
+      // protect yourself - if parent or the component are not in the list 
+   assert(wvP); assert(wv);
+   do {
+      SGHierTree* wv2 = wv;
+      do {
+         if (wv2->GetItem() == prnt) return true;
+      } while (NULL != (wv2 = wv2->parent));
+   } while (NULL != (wv = wv->GetNextMember(comp)));
+   return false;
 };
 
 template <class TYPE>
-int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) {
+int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst)
+{
    // returns 0 -> nothin's changed (this parent is already in the list)
    //         1 -> first parrent added (component use to be orphan)
    //         2 -> new parent added
