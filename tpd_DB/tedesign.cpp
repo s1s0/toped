@@ -332,6 +332,7 @@ int laydata::tdtlibrary::dbHierRemoveParent(const tdtdefaultcell* comp, const td
    assert(comp); assert(prnt);
    int res = _hiertree->removeParent(comp, prnt, _hiertree);
    btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
+   return res;
 }
 
 void laydata::tdtlibrary::dbHierRemoveRoot(const tdtdefaultcell* comp)
