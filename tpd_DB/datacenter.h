@@ -120,6 +120,7 @@ public:
    void                       mouseFlip();
    void                       mouseRotate();
    void                       openGL_draw(const CTM&);
+   void                       openGL_render(const CTM&); // alternative to openGL_draw
    void                       tmp_draw(const CTM&, TP, TP);
    const laydata::cellList&   cells();
    laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
