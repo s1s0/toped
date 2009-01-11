@@ -654,7 +654,8 @@ const word MAX_WORD_VALUE = 65535;
 //#define MAX_Y        (int4b)0x7FFFFFFF      //   2 147 483 647
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
 const byte        OPENGL_FONT_UNIT  = 128;
-const byte        MIN_VISUAL_AREA   = 10;   // that would be 10 pixels
+const byte        MIN_VISUAL_AREA   = 40;   // that would be 10 pixels
+const byte        GRID_LIMIT        = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const DBbox       DEFAULT_OVL_BOX   = DBbox(TP(0,0));
 const DBbox       DEFAULT_ZOOM_BOX  = DBbox(TP(-2000,-2000), TP(20000,20000));
 #endif
