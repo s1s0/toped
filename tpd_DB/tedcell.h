@@ -130,6 +130,7 @@ namespace laydata {
       virtual             ~tdtcell(); 
       void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
+      void                 openGL_draw(Tenderer&, bool active=false) const;
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;
       quadTree*            securelayer(word layno);

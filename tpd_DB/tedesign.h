@@ -103,6 +103,7 @@ namespace laydata {
       bool           editpop();
       bool           edittop();
       void           openGL_draw(layprop::DrawProperties&);
+      void           openGL_draw(Tenderer&);
       void           tmp_draw(const layprop::DrawProperties&, TP, TP);
       void           set_tmpdata(tdtdata* tmpdata) {_tmpdata = tmpdata;}
       void           set_tmpctm(CTM tmpctm)        {_tmpctm  = tmpctm; }

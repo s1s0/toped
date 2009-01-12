@@ -788,13 +788,26 @@ bool laydata::tdtdesign::edittop() {
    return _target.top();
 }
 
-void laydata::tdtdesign::openGL_draw(layprop::DrawProperties& drawprop) {
+void laydata::tdtdesign::openGL_draw(layprop::DrawProperties& drawprop)
+{
    if (_target.checkedit())
    {
       ctmstack transtack;
       drawprop.initCTMstack();
       _target.view()->openGL_draw(drawprop, _target.iscell());
       drawprop.clearCTMstack();
+   }
+}
+
+void laydata::tdtdesign::openGL_draw(Tenderer& rend)
+{
+   if (_target.checkedit())
+   {
+      ctmstack transtack;
+//      drawprop.initCTMstack();
+      rend.initCTMstack();
+      _target.view()->openGL_draw(rend, _target.iscell());
+      rend.clearCTMstack();
    }
 }
 

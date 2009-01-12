@@ -122,8 +122,8 @@ namespace layprop {
          void                       setLineProps(bool selected = false) const;
          bool                       layerHidden(word layno) const;
          bool                       layerLocked(word layno) const;
-         const CTM&                 ScrCTM() const       {return  _ScrCTM;};
-         const DBbox&               clipRegion() const   {return _clipRegion;};
+         const CTM&                 ScrCTM() const       {return  _ScrCTM;}
+         const DBbox&               clipRegion() const   {return _clipRegion;}
          console::ACTIVE_OP         currentop() const    {return _currentop;}
          void                       blockfill(laydata::cellrefstack*);
          void                       unblockfill();

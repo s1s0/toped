@@ -537,7 +537,8 @@ the current quadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. Draws also the select marks in case shape is
 selected. \n This is the cherry of the quadTree algorithm cake*/
 void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
-                                                   const dataList* slst, bool fill) const {
+                                                   const dataList* slst, bool fill) const
+{
    if (empty()) return;
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
@@ -602,6 +603,75 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
    for(byte i = 0; i < 4; i++)
       if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst, fill);
 }
+
+void laydata::quadTree::openGL_draw(Tenderer& rend, const dataList* slst) const
+{
+   if (empty()) return;
+   // check the entire holder for clipping...
+   DBbox clip = rend.clipRegion();
+   DBbox areal = _overlap.overlap(rend.topCTM());
+   if      ( clip.cliparea(areal) == 0       ) return;
+   else if (!areal.visible(rend.ScrCTM())) return;
+   tdtdata* wdt = _first;
+   // The drawing will be faster like this for the cells without selected shapes
+   // that will be the wast majority of the cases. A bit bigger code though.
+   // Seems the bargain is worth it.
+/*   if (slst)
+   {
+      while(wdt)
+      {
+         pointlist points;
+         // precalculate drawing data
+         wdt->openGL_precalc(rend, points);
+         if (0 != points.size())
+         {
+            // draw the shape fill (contents of refs, arefs and texts)
+            if (fill)  wdt->openGL_drawfill(drawprop, points);
+            // draw the outline of the shapes and overlapping boxes 
+            wdt->openGL_drawline(drawprop, points);
+            if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
+            {
+               drawprop.setLineProps(true);
+               if       (sh_selected == wdt->status())
+                  wdt->openGL_drawsel(points, NULL);
+               else if  (sh_partsel  == wdt->status())
+               {
+                  dataList::const_iterator SI;
+                  for (SI = slst->begin(); SI != slst->end(); SI++)
+                     if (SI->first == wdt) break;
+                  assert(SI != slst->end());
+                  wdt->openGL_drawsel(points, &(SI->second));
+               }
+               drawprop.setLineProps(false);
+            }
+            wdt->openGL_postclean(drawprop, points);
+         }
+         wdt = wdt->next();
+      }
+   }
+   else*/
+   {
+      // if there are no selected shapes
+      while(wdt)
+      {
+         wdt->draw_request(rend);
+/*         pointlist points;
+         // precalculate drawing data
+         wdt->openGL_precalc(drawprop, points);
+         // draw the shape fill (contents of refs, arefs and texts)
+         if (fill)  wdt->openGL_drawfill(drawprop, points);
+         // draw the outline of the shapes and overlapping boxes
+         wdt->openGL_drawline(drawprop, points);
+         // clean-up
+         wdt->openGL_postclean(drawprop, points);*/
+         wdt = wdt->next();
+      }
+   }
+
+   for(byte i = 0; i < 4; i++)
+      if (_quads[i]) _quads[i]->openGL_draw(rend, slst);
+}
+
 
 /*! Temporary draw of the container contents on the screen using the virtual 
 tmp_draw methods of the tdtddata objects. This happens only if 
