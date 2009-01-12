@@ -358,10 +358,12 @@ bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child)
    return true;
 }
 
-void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool active) const {
+void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool active) const
+{
    // Draw figures
    typedef layerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++) {
+   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   {
 //      if (0 < lay->first)
       word curlayno = lay->first;
       if (!drawprop.layerHidden(curlayno))
@@ -375,6 +377,28 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
          lay->second->openGL_draw(drawprop,dlst->second, fill);
       else
          lay->second->openGL_draw(drawprop, NULL, fill);
+   }
+}
+
+void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
+{
+   // Draw figures
+   typedef layerList::const_iterator LCI;
+   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   {
+      word curlayno = lay->first;
+      if (!rend.layerHidden(curlayno)) rend.setCurrentColor(curlayno);
+      else                             continue;
+      // fancy like this (dlist iterator) , besause a simple
+      // _shapesel[curlayno] complains about loosing qualifiers (const)
+      selectList::const_iterator dlst;
+//      bool fill = drawprop.getCurrentFill();
+      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
+         // there are selected shapes
+         lay->second->openGL_draw(rend, dlst->second);
+      else
+         // no selected cells
+         lay->second->openGL_draw(rend, NULL);
    }
 }
 

@@ -395,7 +395,7 @@ void layprop::ViewProperties::drawGrid(Tenderer& rend) const
    typedef gridlist::const_iterator CI;
    for(CI p = _grid.begin(); p != _grid.end(); p++)
       if (p->second->visual())
-         rend.Grid(p->second->step(), p->second->color(), _UU);
+         rend.Grid(p->second->step(), p->second->color());
 }
 
 void layprop::ViewProperties::drawZeroCross() const

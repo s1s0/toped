@@ -32,11 +32,27 @@
 
 class Tenderer {
    public:
-                        Tenderer( layprop::DrawProperties* drawprop ) : _drawprop(drawprop) {}
+                        Tenderer( layprop::DrawProperties* drawprop, real UU ) : _drawprop(drawprop), _UU(UU) {}
 //                     ~Tenderer();
-      void              Grid( const real, const std::string, const real );
+      void              Grid( const real, const std::string );
+      void              add_quad(pointlist*);
+      void              add_poly(pointlist*);
+      void              add_wire(pointlist*);
+      void              add_lines(pointlist*);
+      void              add_cell_box(pointlist*);
+
+      // temporary!
+      void                       initCTMstack()                {        _drawprop->initCTMstack()        ;}
+      void                       clearCTMstack()               {        _drawprop->clearCTMstack()       ;}
+      void                       setCurrentColor(word layno)   {        _drawprop->setCurrentColor(layno);}
+      bool                       layerHidden(word layno) const {return  _drawprop->layerHidden(layno)    ;}
+      const CTM&                 ScrCTM() const                {return  _drawprop->ScrCTM()              ;}
+      const CTM&                 topCTM() const                {return  _drawprop->topCTM()              ;}
+      const DBbox&               clipRegion() const            {return  _drawprop->clipRegion()          ;}
+      void                       pushCTM(CTM& last)            {        _drawprop->pushCTM(last)         ;}
    private:
       layprop::DrawProperties*   _drawprop;
+      real                       _UU;
 };
 
 

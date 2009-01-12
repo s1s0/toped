@@ -32,9 +32,9 @@
 #include "viewprop.h"
 
 //=============================================================================
-void Tenderer::Grid(const real step, const std::string color, const real DBscale)
+void Tenderer::Grid(const real step, const std::string color)
 {
-   int gridstep = (int)rint(step / DBscale);
+   int gridstep = (int)rint(step / _UU);
    if ( abs((int)(_drawprop->ScrCTM().a() * gridstep)) > GRID_LIMIT)
    {
       _drawprop->setGridColor(color);
@@ -64,4 +64,24 @@ void Tenderer::Grid(const real step, const std::string color, const real DBscale
       delete [] point_array;
       glDisableClientState(GL_VERTEX_ARRAY);
    }
+}
+
+void Tenderer::add_quad(pointlist*)
+{
+}
+
+void Tenderer::add_poly(pointlist*)
+{
+}
+
+void Tenderer::add_wire(pointlist*)
+{
+}
+
+void Tenderer::add_lines(pointlist*)
+{
+}
+
+void Tenderer::add_cell_box(pointlist*)
+{
 }

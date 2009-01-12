@@ -1081,9 +1081,9 @@ void DataCenter::openGL_render(const CTM& layCTM) {
          tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
          return;
       }
-      Tenderer renderer(_properties.drawprop_ptr());
+      Tenderer renderer( _properties.drawprop_ptr(), _properties.UU());
       _properties.drawGrid(renderer);
-/*      _properties.drawZeroCross(renderer);
+//       _properties.drawZeroCross(renderer);
       if (wxMUTEX_NO_ERROR != DBLock.TryLock())
       {
          // If DB is locked - skip the DB drawing, but draw all the property DB stuff
@@ -1093,9 +1093,9 @@ void DataCenter::openGL_render(const CTM& layCTM) {
       {
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
-         _TEDLIB()->openGL_draw(_properties.drawprop());
+         _TEDLIB()->openGL_draw(renderer);
          assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
-      }*/
+      }
       _properties.drawRulers(layCTM);
       PROPLock.Unlock();
    }
