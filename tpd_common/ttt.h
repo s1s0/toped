@@ -96,6 +96,7 @@ typedef  std::list<word>                  WordList;
 typedef  std::map<word, WordList>         GdsLayers;
 typedef  std::map<std::string, int>       SIMap;       // name
 typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
+typedef  std::map<word, unsigned long>    SLMap;
 
 //=============================================================================
 // Some common constants (instead of #defines)
@@ -230,7 +231,7 @@ public:
    void  overlap(const DBbox bx);
    DBbox overlap(const CTM&) const;
    void  normalize();
-   float cliparea(const DBbox& bx, bool calculate = false);
+   float cliparea(const DBbox& bx, bool calculate = false) const;
    int   clipbox(DBbox& bx);
    bool  inside(const TP& );
    float area();

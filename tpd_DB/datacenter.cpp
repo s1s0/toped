@@ -1082,8 +1082,15 @@ void DataCenter::openGL_render(const CTM& layCTM) {
          return;
       }
       Tenderer renderer( _properties.drawprop_ptr(), _properties.UU());
-      _properties.drawGrid(renderer);
-//       _properties.drawZeroCross(renderer);
+      // render the grid
+      for (byte gridNo = 0; gridNo < 3; gridNo++)
+      {
+         const layprop::LayoutGrid* cgrid = _properties.grid(gridNo);
+         if ((NULL !=  cgrid) && cgrid->visual())
+            renderer.Grid(cgrid->step(), cgrid->color());
+      }
+
+      //       _properties.drawZeroCross(renderer);
       if (wxMUTEX_NO_ERROR != DBLock.TryLock())
       {
          // If DB is locked - skip the DB drawing, but draw all the property DB stuff

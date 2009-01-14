@@ -94,10 +94,10 @@ void DBbox::overlap(const DBbox bx) {
          _p1._y = bx.p2().y(); _p2._y = bx.p1().y(); }   
       else {
          _p1._y = bx.p1().y(); _p2._y = bx.p2().y(); }
-   }         
+   }
    else {
       overlap(bx.p1()); overlap(bx.p2());
-   }   
+   }
 }
 
 DBbox DBbox::overlap(const CTM& op2)  const
@@ -122,7 +122,8 @@ void DBbox::normalize() {
    }
 }   
    
-float DBbox::cliparea(const DBbox& bx, bool calculate) {
+float DBbox::cliparea(const DBbox& bx, bool calculate) const
+{
    // returns: -1 - if bx is entirely inside this
    //           0 - if bx is entirely outside this
    //   otherwise - the AND area of the boxes

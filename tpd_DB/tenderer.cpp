@@ -66,22 +66,7 @@ void Tenderer::Grid(const real step, const std::string color)
    }
 }
 
-void Tenderer::add_quad(pointlist*)
+void Tenderer::add_data(const laydata::atticList* cell4Drawing, const SLMap* numPoints)
 {
-}
 
-void Tenderer::add_poly(pointlist*)
-{
-}
-
-void Tenderer::add_wire(pointlist*)
-{
-}
-
-void Tenderer::add_lines(pointlist*)
-{
-}
-
-void Tenderer::add_cell_box(pointlist*)
-{
 }
