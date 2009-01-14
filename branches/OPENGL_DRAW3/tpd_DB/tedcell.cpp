@@ -382,24 +382,31 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
 
 void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
 {
-   // Draw figures
-   typedef layerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   atticList* all4drawing = DEBUG_NEW atticList();
+   SLMap*     numPoints   = DEBUG_NEW SLMap();
+   for (layerList::const_iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       word curlayno = lay->first;
-      if (!rend.layerHidden(curlayno)) rend.setCurrentColor(curlayno);
-      else                             continue;
-      // fancy like this (dlist iterator) , besause a simple
-      // _shapesel[curlayno] complains about loosing qualifiers (const)
-      selectList::const_iterator dlst;
-//      bool fill = drawprop.getCurrentFill();
-      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
-         // there are selected shapes
-         lay->second->openGL_draw(rend, dlst->second);
+      if ((rend.layerHidden(curlayno)) || (0 == curlayno)) continue;
+      shapeList* ssl = DEBUG_NEW shapeList();
+      unsigned long total_points = 0;
+      lay->second->visible_shapes(ssl, rend.clipRegion(), rend.topCTM(), rend.ScrCTM(), total_points );
+      if (ssl->empty()) delete ssl;
       else
-         // no selected cells
-         lay->second->openGL_draw(rend, NULL);
+      {
+         (*all4drawing)[curlayno] = ssl;
+         (*numPoints)[curlayno] = total_points;
+      }
    }
+   if (!all4drawing->empty()) rend.add_data(all4drawing, numPoints);
+   // clean-up
+   for (laydata::atticList::const_iterator CL = all4drawing->begin(); CL != all4drawing->end(); CL++)
+   {
+      CL->second->clear();
+      delete (CL->second);
+   }
+   delete all4drawing;
+   delete numPoints;
 }
 
 void laydata::tdtcell::tmp_draw(const layprop::DrawProperties& drawprop,

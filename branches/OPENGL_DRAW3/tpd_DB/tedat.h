@@ -35,6 +35,7 @@
 #include "tedstd.h"
 #include "viewprop.h"
 #include "ps_out.h"
+//#include "tenderer.h"
 
 namespace laydata {
 //==============================================================================
@@ -69,7 +70,7 @@ namespace laydata {
    //! Clean-up the calculated drawing objects
       virtual   void       openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const {ptlist.clear();}
    //! Put a reference to the data in the toped renderer (alternative to openGL_* methods)
-      virtual   void       draw_request(Tenderer&) const = 0;
+//      virtual   void       draw_request(Tenderer&) const = 0;
    //! Draw the temporary objects during copy/move and similar operations
       virtual   void       tmp_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet* plst = NULL,
                                          bool under_construct=false) const = 0;
@@ -145,7 +146,7 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      void                 draw_request(Tenderer&) const;
+//      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                              SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -187,7 +188,7 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      void                 draw_request(Tenderer&) const;
+//      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -229,7 +230,7 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      void                 draw_request(Tenderer&) const;
+//      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -280,7 +281,7 @@ namespace laydata {
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
       virtual void         openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
-      void                 draw_request(Tenderer&) const;
+      //void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -330,7 +331,7 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      void                 draw_request(Tenderer&) const;
+//      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -365,7 +366,7 @@ namespace laydata {
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
       virtual   void       openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
-      void                 draw_request(Tenderer&) const;
+//      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;

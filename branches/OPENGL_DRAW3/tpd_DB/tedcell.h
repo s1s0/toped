@@ -30,6 +30,7 @@
 
 #include <string>
 #include "quadtree.h"
+#include "tenderer.h"
 
 namespace layprop {
    class ViewProperties;

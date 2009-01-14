@@ -28,7 +28,7 @@
 #ifndef LAYERPROP_H
 #define LAYERPROP_H
 
-#include "tenderer.h"
+#include "drawprop.h"
 namespace layprop {
 
    //=============================================================================
@@ -126,7 +126,7 @@ namespace layprop {
       void              setGrid(byte, real, std::string);
       bool              viewGrid(byte, bool);
       void              drawGrid() const;
-      void              drawGrid(Tenderer&) const;
+//      void              drawGrid(Tenderer&) const;
       void              drawZeroCross() const;
       void              setUU(real);
       void              setstep(real st)                 {_step = st;}
