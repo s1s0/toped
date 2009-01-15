@@ -1041,8 +1041,26 @@ int tellstdfunc::stdTOOLBARADDITEM::execute()
 		wxPostEvent(Toped, eventToolBarDef);
 
    }
-
    return EXEC_NEXT;
+}
+
+
+//=============================================================================
+tellstdfunc::stdTOOLBARADDITEM_S::stdTOOLBARADDITEM_S(telldata::typeID retype, bool eor) :
+      stdTOOLBARADDITEM(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::tthshstr()));
+}
+
+int tellstdfunc::stdTOOLBARADDITEM_S::execute()
+{
+	telldata::tthshstr* iconCmdMap = static_cast<telldata::tthshstr*>(OPstack.top());OPstack.pop();
+	telldata::ttlist *iconCmdMapList = DEBUG_NEW telldata::ttlist(telldata::tn_hshstr);
+	iconCmdMapList->add(iconCmdMap);
+	OPstack.push(iconCmdMapList);
+
+   return stdTOOLBARADDITEM::execute();
 }
 
 
