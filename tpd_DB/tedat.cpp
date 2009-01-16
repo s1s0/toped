@@ -419,17 +419,15 @@ void laydata::tdtbox::openGL_precalc(layprop::DrawProperties& drawprop , pointli
    ptlist.push_back(TP(_p1->x(), _p2->y()) * drawprop.topCTM());
 }
 
-// void laydata::tdtbox::draw_request(Tenderer& rend) const
-// {
-//    pointlist* ptlist = DEBUG_NEW pointlist();
-//    // translate the points using the current CTM
-//    ptlist->reserve(4);
-//    ptlist->push_back(                (*_p1) * rend.topCTM());
-//    ptlist->push_back(TP(_p2->x(), _p1->y()) * rend.topCTM());
-//    ptlist->push_back(                (*_p2) * rend.topCTM());
-//    ptlist->push_back(TP(_p1->x(), _p2->y()) * rend.topCTM());
-//    rend.add_quad(ptlist);
-// }
+void laydata::tdtbox::tender_gen(pointlist& ptlist) const
+{
+   // translate the points using the current CTM
+   ptlist.reserve(4);
+   ptlist.push_back(                (*_p1));
+   ptlist.push_back(TP(_p2->x(), _p1->y()));
+   ptlist.push_back(                (*_p2));
+   ptlist.push_back(TP(_p1->x(), _p2->y()));
+}
 
 void laydata::tdtbox::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
@@ -767,13 +765,12 @@ void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       ptlist.push_back(_plist[i] * drawprop.topCTM());
 }
 
-// void laydata::tdtpoly::draw_request(Tenderer& rend) const
-// {
-//    pointlist* ptlist = DEBUG_NEW pointlist();
-//    for (unsigned i = 0; i < _plist.size(); i++)
-//       ptlist->push_back(_plist[i] * rend.topCTM());
-//    rend.add_poly(ptlist);
-// }
+void laydata::tdtpoly::tender_gen(pointlist& ptlist) const
+{
+   ptlist.reserve(_plist.size());
+   for (unsigned i = 0; i < _plist.size(); i++)
+      ptlist.push_back(_plist[i]);
+}
 
 void laydata::tdtpoly::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
@@ -1205,30 +1202,24 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       precalc(ptlist, num_points);
 }
 
-// void laydata::tdtwire::draw_request(Tenderer& rend) const
-// {
-//    if (_plist.size() < 2) return;
-//    pointlist* ptlist = DEBUG_NEW pointlist();
-//    
-//    // first check whether to draw only the center line
-//    DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
-//    bool center_line_only = !wsquare.visible(rend.topCTM() * rend.ScrCTM());
-//    unsigned num_points = _plist.size();
-//    if (center_line_only)
-//       ptlist->reserve(num_points);
-//    else
-//       ptlist->reserve(3 * num_points);
-//    // translate the points using the current CTM
-//    for (unsigned i = 0; i < num_points; i++)
-//       ptlist->push_back(_plist[i] * rend.topCTM());
-//    if (!center_line_only)
-//    {
-//       precalc(*ptlist, num_points);
-//       rend.add_wire(ptlist);
-//    }
-//    else
-//       rend.add_lines(ptlist);
-// }
+void laydata::tdtwire::tender_gen(pointlist& ptlist) const
+{
+   if (_plist.size() < 2) return;
+   // first check whether to draw only the center line
+//   DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
+//   bool center_line_only = !wsquare.visible(drawprop.topCTM() * drawprop.ScrCTM());
+   unsigned num_points = _plist.size();
+   bool center_line_only = false;
+   if (center_line_only)
+      ptlist.reserve(num_points);
+   else
+      ptlist.reserve(3 * num_points);
+   // translate the points using the current CTM
+   for (unsigned i = 0; i < num_points; i++)
+      ptlist.push_back(_plist[i]);
+   if (!center_line_only)
+      precalc(ptlist, num_points);
+}
 
 
 void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -1640,41 +1631,9 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
 }
 
-// void laydata::tdtcellref::draw_request(Tenderer& rend) const
-// {
-//    // calculate the current translation matrix
-//    CTM newtrans = _translation * rend.topCTM();
-//    // get overlapping box of the structure ...
-//    DBbox obox(DEFAULT_ZOOM_BOX);
-//    if (structure())
-//       obox = structure()->overlap();
-//    // ... translate it to the current coordinates ...
-//    DBbox areal = obox.overlap(newtrans);
-//    // check that the cell (or part of it) is in the visual window
-//    DBbox clip = rend.clipRegion();
-//    if (clip.cliparea(areal) == 0) return;
-//    // check that the cell area is bigger that the MIN_VISUAL_AREA
-//    if (!areal.visible(rend.ScrCTM())) return;
-//    // If we get here - means that the cell (or part of it) is visible
-// 
-//    pointlist* ptlist = DEBUG_NEW pointlist();
-//    ptlist->reserve(4);
-//    ptlist->push_back(obox.p1() * newtrans);
-//    ptlist->push_back(TP(obox.p2().x(), obox.p1().y()) * newtrans);
-//    ptlist->push_back(obox.p2() * newtrans);
-//    ptlist->push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);
-//    rend.pushCTM(newtrans);
-//    rend.add_cell_box(ptlist);
-// /*
-//    if (NULL == structure()) return;
-//    // draw the structure itself. Pop/push ref stuff is when edit in place is active
-//    byte crchain = rend.popref(this);
-//    structure()->openGL_draw(prop, crchain == 2);
-//    if (crchain) drawprop.pushref(this);
-// */
-//    // draw the cell mark ...
-// //   drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
-// }
+void laydata::tdtcellref::tender_gen(pointlist& ptlist) const
+{
+}
 
 void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
@@ -1987,9 +1946,9 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    }
 }
 
-// void laydata::tdtcellaref::draw_request(Tenderer& rend) const
-// {
-// }
+void laydata::tdtcellaref::tender_gen(pointlist& ptlist) const
+{
+}
 
 void laydata::tdtcellaref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
@@ -2250,9 +2209,9 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    }
 }
 
-// void laydata::tdttext::draw_request(Tenderer& rend) const
-// {
-// }
+void laydata::tdttext::tender_gen(pointlist& ptlist) const
+{
+}
 
 void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {

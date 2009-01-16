@@ -36,12 +36,6 @@ class Tenderer {
 //                     ~Tenderer();
       void              Grid( const real, const std::string );
       void              add_data(const laydata::atticList*, const SLMap*);
-//       void              add_quad(pointlist*);
-//       void              add_poly(pointlist*);
-//       void              add_wire(pointlist*);
-//       void              add_lines(pointlist*);
-//       void              add_cell_box(pointlist*);
-
       // temporary!
       void                       initCTMstack()                {        _drawprop->initCTMstack()        ;}
       void                       clearCTMstack()               {        _drawprop->clearCTMstack()       ;}
