@@ -26,6 +26,7 @@
 //===========================================================================
 
 #include "tpdph.h"
+#define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "tenderer.h"
@@ -70,14 +71,10 @@ void Tenderer::Grid(const real step, const std::string color)
 void Tenderer::add_data(const laydata::atticList* cell4Drawing, const SLMap* numPoints)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
-//   glMatrixMode(GL_MODELVIEW);
-//   glPushMatrix();
-//    float openGLmatrix[16] =  { _drawprop->topCTM().a() , _drawprop->topCTM().b() ,  0.0f,  0.0f,
-//                                _drawprop->topCTM().c() , _drawprop->topCTM().d() ,  0.0f,  0.0f,
-//                                 0.0f                   ,  0.0f                   ,  1.0f,  0.0f,
-//                                _drawprop->topCTM().tx(), _drawprop->topCTM().ty(),  0.0f,  1.0f
-//    };
-//    glLoadTransposeMatrixf(openGLmatrix);
+   glPushMatrix();
+   real openGLmatrix[16];
+   _drawprop->topCTM().oglForm(openGLmatrix);
+   glMultMatrixd(openGLmatrix);
 
    for (laydata::atticList::const_iterator CLAY = cell4Drawing->begin(); CLAY != cell4Drawing->end(); CLAY++)
    { // layers in the cell
@@ -85,23 +82,28 @@ void Tenderer::add_data(const laydata::atticList* cell4Drawing, const SLMap* num
       assert(numPoints->end() != numPoints->find(curlayno));
       unsigned long arr_size = 2 * numPoints->find(curlayno)->second;
       int* point_array = new int[arr_size];
-      unsigned long index = 0;
+      GLsizei* size_array = new int[CLAY->second->size()];
+      GLsizei* first_array = new int[CLAY->second->size()];
+      unsigned long pntindx = 0;
+      unsigned      szindx  = 0;
       _drawprop->setCurrentColor(curlayno);
       for (laydata::shapeList::const_iterator CSH = CLAY->second->begin(); CSH != CLAY->second->end(); CSH++)
       { // shapes in a layer
          pointlist shape_points;
          (*CSH)->tender_gen(shape_points);
+         first_array[szindx] = pntindx;
+         size_array[szindx++] = shape_points.size();
          for (pointlist::const_iterator CP = shape_points.begin(); CP != shape_points.end(); CP++)
          { // points in the shape
-            TP bozaa = (*CP) * _drawprop->topCTM();
-            point_array[index++] = bozaa.x();//CP->x();
-            point_array[index++] = bozaa.y();//CP->y();
+            point_array[pntindx++] = CP->x();
+            point_array[pntindx++] = CP->y();
          }
       }
-      assert(index == arr_size);
+      assert(pntindx == arr_size);
       glVertexPointer(2, GL_INT, 0, point_array);
-      glDrawArrays(GL_LINES/*GL_QUAD_STRIP*/, 0, arr_size/2);
+//      glDrawArrays(GL_LINE_LOOP/*GL_QUAD_STRIP*/, 0, arr_size/2);
+      glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
    }
-//   glPopMatrix();
+   glPopMatrix();
    glDisableClientState(GL_VERTEX_ARRAY);
 }

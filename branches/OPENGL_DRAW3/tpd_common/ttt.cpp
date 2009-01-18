@@ -535,6 +535,14 @@ void CTM::Decompose(TP& trans, real& rot, real& scale, bool& flipX) const
    trans.setY(static_cast<int4b>(_ty));
 }
 
+void CTM::oglForm(real* const oglm) const
+{
+   oglm[ 0] =   _a; oglm[ 1] =   _c; oglm[ 2] = 0.0f; oglm[ 3] = _tx;
+   oglm[ 4] =   _b; oglm[ 5] =   _d; oglm[ 6] = 0.0f; oglm[ 7] = _ty;
+   oglm[ 8] = 0.0f; oglm[ 9] = 0.0f; oglm[10] = 1.0f; oglm[11] = 0.0f;
+   oglm[12] = 0.0f; oglm[13] = 0.0f; oglm[14] = 0.0f; oglm[15] = 1.0f;
+}
+
 #if WIN32
 
 double round(double x)
