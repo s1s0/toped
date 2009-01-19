@@ -40,6 +40,7 @@ extern tui::TopedFrame*          Toped;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType         wxEVT_TOOLBARADDITEM;
+extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 extern const wxEventType         wxEVT_SETINGSMENU;
 
 tui::MenuItemHandler::MenuItemHandler(void)
@@ -892,6 +893,19 @@ void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::
 }
 
 
+void tui::ResourceCenter::deleteTool(const std::string &toolBarName, const std::string &toolBarItem)
+{
+	int ID;
+	/*//set correct filename for toolBarItem
+	std::string fullIconName = _IconDir+iconName;
+	//increase counter of toolItems
+	ID = TDUMMY_TOOL + _toolCount;
+	_toolCount++;
+
+	ToolBarHandler* toolBar = proceedTool(toolBarName, toolBarItem);
+	toolBar->addTool(ID, toolBarItem, toolBarItem, fullIconName, hotKey, helpString, func); */
+}
+
 tui::ToolBarHandler* tui::ResourceCenter::proceedTool(const std::string &toolBarName, const std::string &toolBarItem)
 {
 	int ID; 
@@ -1063,4 +1077,26 @@ int tellstdfunc::stdTOOLBARADDITEM_S::execute()
    return stdTOOLBARADDITEM::execute();
 }
 
+//=============================================================================
+tellstdfunc::stdTOOLBARDELETEITEM::stdTOOLBARDELETEITEM(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
 
+int tellstdfunc::stdTOOLBARDELETEITEM::execute()
+{
+	std::string	toolbarname	= getStringValue();
+	wxString utftoolbarname = wxString(toolbarname.c_str(), wxConvUTF8);
+	std::string	itemname	= getStringValue();
+	wxString utfitemname = wxString(itemname.c_str(), wxConvUTF8);
+	
+	wxCommandEvent eventToolBarDelItem(wxEVT_TOOLBARDELETEITEM);
+	eventToolBarDelItem.SetString(utftoolbarname);
+	wxStringClientData *data = DEBUG_NEW wxStringClientData(utfitemname);
+	eventToolBarDelItem.SetClientObject(data);
+	wxPostEvent(Toped, eventToolBarDelItem);
+
+   return EXEC_NEXT;
+}

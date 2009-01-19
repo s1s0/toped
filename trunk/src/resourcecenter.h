@@ -247,6 +247,7 @@ namespace tui
 							const std::string &hotKey, 
 							const std::string &helpString,
 							std::string func);
+		void deleteTool(const std::string &toolBarName, const std::string &toolBarItem);
 		/*Don’t call setToolBarSize immediately!!! 
 		It leads to nonsynchronized internal state of object and Setting Menu.
 		Better to use toolbarsize TELL-function.*/
@@ -294,7 +295,7 @@ namespace tellstdfunc {
 	TELL_STDCMD_CLASSA(stdDEFINETOOLBAR  );  //
 	TELL_STDCMD_CLASSA(stdTOOLBARADDITEM  );  //
 	TELL_STDCMD_CLASSB(stdTOOLBARADDITEM_S     , stdTOOLBARADDITEM     );  //
-
+	TELL_STDCMD_CLASSA(stdTOOLBARDELETEITEM  );  //
 }
 
 #endif //RESOURCE_CENTER_INCLUDED

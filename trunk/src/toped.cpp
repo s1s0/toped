@@ -62,6 +62,7 @@ extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType			wxEVT_TOOLBARADDITEM;
+extern const wxEventType			wxEVT_TOOLBARDELETEITEM;
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -314,6 +315,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,	 wxID_ANY, tui::TopedFrame::OnToolBarDefine)
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM, wxID_ANY, tui::TopedFrame::OnToolBarAddItem)
+	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -2078,13 +2080,23 @@ void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
 {
-	std::string toolBarBame(evt.GetString().mb_str(wxConvUTF8));
+	std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
 	tellstdfunc::StringMapClientData* map = static_cast<tellstdfunc::StringMapClientData*>(evt.GetClientObject());
 	std::string toolName = map->GetKey();
 	std::string toolFunc = map->GetValue();
 
-	_resourceCenter->appendTool(toolBarBame, toolName, toolName,  "", "", toolFunc);
+	_resourceCenter->appendTool(toolBarName, toolName, toolName,  "", "", toolFunc);
 	delete map;
+}
+
+void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
+{
+	std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
+	wxStringClientData *data= static_cast<wxStringClientData*>(evt.GetClientObject());
+	wxString str = data->GetData();
+	std::string toolName = str.mb_str(wxConvUTF8);
+
+	_resourceCenter->deleteTool(toolBarName, toolName);
 }
 
 void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))
