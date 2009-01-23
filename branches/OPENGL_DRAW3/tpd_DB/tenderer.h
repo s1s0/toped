@@ -43,6 +43,7 @@ class Tenderer {
       bool                       layerHidden(word layno) const {return  _drawprop->layerHidden(layno)    ;}
       const CTM&                 ScrCTM() const                {return  _drawprop->ScrCTM()              ;}
       const CTM&                 topCTM() const                {return  _drawprop->topCTM()              ;}
+      void                       popCTM() const                {        _drawprop->popCTM()              ;}
       const DBbox&               clipRegion() const            {return  _drawprop->clipRegion()          ;}
       void                       pushCTM(CTM& last)            {        _drawprop->pushCTM(last)         ;}
    private:

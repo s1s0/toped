@@ -616,12 +616,12 @@ void laydata::quadTree::visible_shapes(laydata::shapeList* all4drawing,
    tdtdata* wdt = _first;
    while(wdt)
    {
-      if (1 < wdt->numpoints())
-      {
+//      if (1 < wdt->numpoints())
+//      {
          all4drawing->push_back(wdt);
          total_points += wdt->numpoints();
-         wdt = wdt->next();
-      }
+//      }
+      wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
       if (_quads[i]) _quads[i]->visible_shapes(all4drawing, clip, topCTM, scrCTM, total_points);

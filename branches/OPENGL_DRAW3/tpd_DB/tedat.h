@@ -289,7 +289,7 @@ namespace laydata {
       void                 GDSwrite(GDSin::GdsFile&, word, real) const;
       void                 CIFwrite(CIFin::CifExportFile&, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
-      virtual void        ungroup(tdtdesign*, tdtcell*, atticList*);
+      virtual void         ungroup(tdtdesign*, tdtcell*, atticList*);
       std::string          cellname() const {return _structure->first;};
       tdtcell*             cstructure() const;
       tdtdefaultcell*      structure() const {return _structure->second;}
@@ -302,6 +302,7 @@ namespace laydata {
       void                 objRotate() {_translation.Rotate( 90.0);}
       virtual ArrayProperties arrayprops() const {return ArrayProperties();}
       virtual word         ltype() const {return _lmref;}
+      tdtdefaultcell*      visible(const DBbox&, const CTM&, const CTM&) const;
    protected:
       void                 select_points(DBbox&, SGBitSet&) {return;}
       void                 unselect_points(DBbox&, SGBitSet&) {return;}
