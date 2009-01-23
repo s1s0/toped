@@ -91,7 +91,7 @@ void Tenderer::add_data(const laydata::atticList* cell4Drawing, const SLMap* num
       { // shapes in a layer
          pointlist shape_points;
          (*CSH)->tender_gen(shape_points);
-         first_array[szindx] = pntindx;
+         first_array[szindx] = pntindx/2;
          size_array[szindx++] = shape_points.size();
          for (pointlist::const_iterator CP = shape_points.begin(); CP != shape_points.end(); CP++)
          { // points in the shape
@@ -100,9 +100,10 @@ void Tenderer::add_data(const laydata::atticList* cell4Drawing, const SLMap* num
          }
       }
       assert(pntindx == arr_size);
+      assert(szindx == CLAY->second->size());
       glVertexPointer(2, GL_INT, 0, point_array);
-//      glDrawArrays(GL_LINE_LOOP/*GL_QUAD_STRIP*/, 0, arr_size/2);
       glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
+
    }
    glPopMatrix();
    glDisableClientState(GL_VERTEX_ARRAY);
