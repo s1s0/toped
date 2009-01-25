@@ -51,5 +51,52 @@ class Tenderer {
       real                       _UU;
 };
 
+//-----------------------------------------------------------------------------
+// holds box representation - The same four points will be used for the
+// contour as well as for the fill
+//
+class TenderObj {
+   public:
+   protected:
+      int*           _cdata;  // contour data
+};
+
+//-----------------------------------------------------------------------------
+// holds polygon representations - the contour will be drawn using the
+// inherited _cdata holder. The _fdata stores the tesselated triangles
+// which will be used for the fill
+class TenderPoly : public TenderObj {
+   public:
+   protected:
+      int*           _fdata;  // fill data
+};
+
+//-----------------------------------------------------------------------------
+// holds wire representation - the contour and the fill - exactly as in the 
+// inherited class. The _ldata stores the central line which is effectively 
+// the original points from tdtwire
+class TenderWire : public TenderPoly {
+   public:
+   protected:
+      int*           _ldata;  // central line data
+};
+
+//-----------------------------------------------------------------------------
+// translation view - effectively a layer slice of the visible cell data
+class TenderTV { 
+   public:
+   private:
+      CTM            _tmatrix;
+      TenderObj*     _data;
+};
+
+//-----------------------------------------------------------------------------
+class TenderData {
+   public:
+   private:
+      typedef std::list<TenderTV*> TenderLay;
+      typedef std::map<word, TenderLay*> DataLay;
+      DataLay        _data;
+};
 
 #endif //TENDERER_H
