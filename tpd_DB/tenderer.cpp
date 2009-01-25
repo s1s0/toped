@@ -74,6 +74,13 @@ void Tenderer::add_data(const laydata::atticList* cell4Drawing, const SLMap* num
    glPushMatrix();
    real openGLmatrix[16];
    _drawprop->topCTM().oglForm(openGLmatrix);
+//    printf("==========================================================\n");
+//    for (int bozai = 0; bozai < 4; bozai++)
+//    {
+//       for (int bozaj = 0; bozaj < 4; bozaj++)
+//          printf(" %1.4f",openGLmatrix[bozai * 4 + bozaj]);
+//       printf("\n");
+//    }
    glMultMatrixd(openGLmatrix);
 
    for (laydata::atticList::const_iterator CLAY = cell4Drawing->begin(); CLAY != cell4Drawing->end(); CLAY++)
@@ -105,6 +112,7 @@ void Tenderer::add_data(const laydata::atticList* cell4Drawing, const SLMap* num
       glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
 
    }
+   
    glPopMatrix();
    glDisableClientState(GL_VERTEX_ARRAY);
 }

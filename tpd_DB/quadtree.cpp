@@ -838,6 +838,17 @@ add a reference in the selist*/
 void laydata::quadTree::select_all(dataList* selist, word selmask, bool mark) {
    tdtdata* wdt = _first;
    if (laydata::_lmnone == selmask) return;
+   while(wdt)
+   {
+      if (selmask & wdt->ltype())
+      {
+         selist->push_back(selectDataPair(wdt,SGBitSet()));
+         if (mark) wdt->set_status(sh_selected);
+      }
+      wdt = wdt->next();
+   }
+   for(byte i = 0; i < 4; i++)
+      if (_quads[i]) _quads[i]->select_all(selist, selmask, mark);
 }
 
 
