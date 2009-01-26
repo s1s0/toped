@@ -419,15 +419,19 @@ void laydata::tdtbox::openGL_precalc(layprop::DrawProperties& drawprop , pointli
    ptlist.push_back(TP(_p1->x(), _p2->y()) * drawprop.topCTM());
 }
 
-void laydata::tdtbox::tender_gen(pointlist& ptlist) const
+void laydata::tdtbox::draw_request(Tenderer& rend) const
 {
-   // translate the points using the current CTM
-   ptlist.reserve(4);
-   ptlist.push_back(                (*_p1));
-   ptlist.push_back(TP(_p2->x(), _p1->y()));
-   ptlist.push_back(                (*_p2));
-   ptlist.push_back(TP(_p1->x(), _p2->y()));
+   rend.box(_p1,_p2);
 }
+// void laydata::tdtbox::tender_gen(pointlist& ptlist) const
+// {
+//    // translate the points using the current CTM
+//    ptlist.reserve(4);
+//    ptlist.push_back(                (*_p1));
+//    ptlist.push_back(TP(_p2->x(), _p1->y()));
+//    ptlist.push_back(                (*_p2));
+//    ptlist.push_back(TP(_p1->x(), _p2->y()));
+// }
 
 void laydata::tdtbox::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
@@ -765,11 +769,16 @@ void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       ptlist.push_back(_plist[i] * drawprop.topCTM());
 }
 
-void laydata::tdtpoly::tender_gen(pointlist& ptlist) const
+// void laydata::tdtpoly::tender_gen(pointlist& ptlist) const
+// {
+//    ptlist.reserve(_plist.size());
+//    for (unsigned i = 0; i < _plist.size(); i++)
+//       ptlist.push_back(_plist[i]);
+// }
+
+void laydata::tdtpoly::draw_request(Tenderer& rend) const
 {
-   ptlist.reserve(_plist.size());
-   for (unsigned i = 0; i < _plist.size(); i++)
-      ptlist.push_back(_plist[i]);
+   rend.poly(_plist);
 }
 
 void laydata::tdtpoly::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -1202,25 +1211,29 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       precalc(ptlist, num_points);
 }
 
-void laydata::tdtwire::tender_gen(pointlist& ptlist) const
-{
-   if (_plist.size() < 2) return;
-   // first check whether to draw only the center line
-//   DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
-//   bool center_line_only = !wsquare.visible(drawprop.topCTM() * drawprop.ScrCTM());
-   unsigned num_points = _plist.size();
-   bool center_line_only = false;
-   if (center_line_only)
-      ptlist.reserve(num_points);
-   else
-      ptlist.reserve(3 * num_points);
-   // translate the points using the current CTM
-   for (unsigned i = 0; i < num_points; i++)
-      ptlist.push_back(_plist[i]);
-   if (!center_line_only)
-      precalc(ptlist, num_points);
-}
+// void laydata::tdtwire::tender_gen(pointlist& ptlist) const
+// {
+//    if (_plist.size() < 2) return;
+//    // first check whether to draw only the center line
+// //   DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
+// //   bool center_line_only = !wsquare.visible(drawprop.topCTM() * drawprop.ScrCTM());
+//    unsigned num_points = _plist.size();
+//    bool center_line_only = false;
+//    if (center_line_only)
+//       ptlist.reserve(num_points);
+//    else
+//       ptlist.reserve(3 * num_points);
+//    // translate the points using the current CTM
+//    for (unsigned i = 0; i < num_points; i++)
+//       ptlist.push_back(_plist[i]);
+//    if (!center_line_only)
+//       precalc(ptlist, num_points);
+// }
 
+void laydata::tdtwire::draw_request(Tenderer& rend) const
+{
+   rend.wire(_plist);
+}
 
 void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
@@ -1579,10 +1592,12 @@ pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet& pset,
                                                                movedM : stableM;
          seg1 = DEBUG_NEW PSegment((*mlist)[(i  )] * transM, (*mlist)[(i+1)] * transM);
          if (0 == i)
+         {
             if (pset.check(0))
                seg0 = seg1->ortho((*mlist)[i] * movedM);
             else
                seg0 = seg1->ortho((*mlist)[i] * stableM);
+         }
       }
       if (!seg0->empty()) seg1->crossP(*seg0,(*mlist)[i]);
       if (NULL != seg0) delete seg0;
@@ -1647,7 +1662,10 @@ laydata::tdtdefaultcell* laydata::tdtcellref::visible(const DBbox& clip, const C
    return _structure->second;
 }
 
-void laydata::tdtcellref::tender_gen(pointlist& ptlist) const
+// void laydata::tdtcellref::tender_gen(pointlist& ptlist) const
+// {
+// }
+void laydata::tdtcellref::draw_request(Tenderer& rend) const
 {
 }
 
@@ -1962,7 +1980,10 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    }
 }
 
-void laydata::tdtcellaref::tender_gen(pointlist& ptlist) const
+// void laydata::tdtcellaref::tender_gen(pointlist& ptlist) const
+// {
+// }
+void laydata::tdtcellaref::draw_request(Tenderer& rend) const
 {
 }
 
@@ -2225,9 +2246,13 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    }
 }
 
-void laydata::tdttext::tender_gen(pointlist& ptlist) const
+// void laydata::tdttext::tender_gen(pointlist& ptlist) const
+// {
+// }
+void laydata::tdttext::draw_request(Tenderer& rend) const
 {
 }
+
 
 void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
@@ -2417,7 +2442,7 @@ laydata::tdtdata* laydata::valid_box::replacement()
    else return DEBUG_NEW laydata::tdtpoly(_plist);
 }
 
-char* laydata::valid_box::failtype()
+std::string laydata::valid_box::failtype()
 {
    if      (!(_status & shp_box))  return "Rotated box";
    else return "OK";
@@ -2546,7 +2571,7 @@ void laydata::valid_poly::selfcrossing()
       _status |= laydata::shp_cross;*/
 }
 
-char* laydata::valid_poly::failtype() {
+std::string laydata::valid_poly::failtype() {
    if      (_status & shp_null) return "NULL area polygon";
    else if (_status & shp_cross) return "Self-crossing";
 //   else if (_status & shp_acute) return "Acute angle";
@@ -2639,7 +2664,7 @@ laydata::tdtdata* laydata::valid_wire::replacement() {
    return DEBUG_NEW laydata::tdtwire(_plist, _width);
 }   
 
-char* laydata::valid_wire::failtype() {
+std::string laydata::valid_wire::failtype() {
 //   if (_status & shp_null)  return "Zero area";
    if      (_status & shp_cross) return "Self-crossing";
    else if (_status & shp_null ) return "Unsuficcient points";
