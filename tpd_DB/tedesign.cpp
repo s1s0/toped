@@ -129,7 +129,8 @@ void laydata::tdtlibrary::read(TEDfile* const tedfile)
 }
 
 void laydata::tdtlibrary::registercellread(std::string cellname, tdtcell* cell) {
-   if (_cells.end() != _cells.find(cellname)) 
+   if (_cells.end() != _cells.find(cellname))
+   {
    // There are several possiblirities here:
    // 1. Cell has been referenced before the definition takes place
    // 2. The same case 1, but the reason is circular reference. 
@@ -153,6 +154,7 @@ void laydata::tdtlibrary::registercellread(std::string cellname, tdtcell* cell) 
       else {
          //@FIXME case 3 -> parsing should be stopped !
       }
+   }
    _cells[cellname] = cell;
 }
 

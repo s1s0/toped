@@ -28,28 +28,22 @@
 #ifndef TENDERER_H
 #define TENDERER_H
 
+#include <GL/glu.h>
 #include "drawprop.h"
 
-class Tenderer {
+typedef std::list<word> TeselVertices;
+
+//-----------------------------------------------------------------------------
+// class used during the tessalation
+class TeselTempData {
    public:
-                        Tenderer( layprop::DrawProperties* drawprop, real UU ) : _drawprop(drawprop), _UU(UU) {}
-//                     ~Tenderer();
-      void              Grid( const real, const std::string );
-      void              add_data(const laydata::atticList*, const SLMap*);
-      // temporary!
-      void                       initCTMstack()                {        _drawprop->initCTMstack()        ;}
-      void                       clearCTMstack()               {        _drawprop->clearCTMstack()       ;}
-      void                       setCurrentColor(word layno)   {        _drawprop->setCurrentColor(layno);}
-      bool                       layerHidden(word layno) const {return  _drawprop->layerHidden(layno)    ;}
-      const CTM&                 ScrCTM() const                {return  _drawprop->ScrCTM()              ;}
-      const CTM&                 topCTM() const                {return  _drawprop->topCTM()              ;}
-      void                       popCTM() const                {        _drawprop->popCTM()              ;}
-      const DBbox&               clipRegion() const            {return  _drawprop->clipRegion()          ;}
-      void                       pushCTM(CTM& last)            {        _drawprop->pushCTM(last)         ;}
-   private:
-      layprop::DrawProperties*   _drawprop;
-      real                       _UU;
+                        TeselTempData(word** pfdata, unsigned int* fsize) :
+                           _fsize(fsize), _pfdata(pfdata), _teseldata(NULL) {}
+   unsigned int*        _fsize;
+   word**               _pfdata;
+   TeselVertices*       _teseldata;
 };
+
 
 //-----------------------------------------------------------------------------
 // holds box representation - The same four points will be used for the
@@ -57,8 +51,11 @@ class Tenderer {
 //
 class TenderObj {
    public:
+                        TenderObj(const TP*, const TP*);
    protected:
-      int*           _cdata;  // contour data
+                        TenderObj(const pointlist);
+      int*              _cdata;  // contour data
+      unsigned int      _csize;
 };
 
 //-----------------------------------------------------------------------------
@@ -67,8 +64,23 @@ class TenderObj {
 // which will be used for the fill
 class TenderPoly : public TenderObj {
    public:
+                        TenderPoly(const pointlist);
+
+
+      static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
+#ifdef WIN32
+      static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
+      static GLvoid CALLBACK teselBegin(GLvoid *);
+      static GLvoid CALLBACK teselEnd(GLvoid *);
+#else
+      static GLvoid     teselVertex(GLvoid *, GLvoid *);
+      static GLvoid     teselBegin(GLvoid *);
+      static GLvoid     teselEnd(GLvoid *);
+#endif
    protected:
-      int*           _fdata;  // fill data
+      word*             _fdata;  // fill data
+      unsigned int      _fsize;
+//      static TeselTempData* _ttmp;
 };
 
 //-----------------------------------------------------------------------------
@@ -77,26 +89,58 @@ class TenderPoly : public TenderObj {
 // the original points from tdtwire
 class TenderWire : public TenderPoly {
    public:
+                        TenderWire(const pointlist);
    protected:
-      int*           _ldata;  // central line data
+      int*              _ldata;  // central line data
 };
 
 //-----------------------------------------------------------------------------
 // translation view - effectively a layer slice of the visible cell data
-class TenderTV { 
+class TenderTV {
    public:
+                        TenderTV(CTM& translation) : _tmatrix(translation) {}
+      void              box  (const TP* p1, const TP* p2);
+      void              poly (const pointlist& plst);
+      void              wire (const pointlist& plst);
+      const CTM*        tmatrix() {return &_tmatrix;}
    private:
-      CTM            _tmatrix;
-      TenderObj*     _data;
+      typedef std::list<TenderObj*> SliceObjects;
+      CTM               _tmatrix;
+      SliceObjects      _data;
 };
 
 //-----------------------------------------------------------------------------
-class TenderData {
+//
+class Tenderer {
    public:
+                        Tenderer( layprop::DrawProperties* drawprop, real UU );
+//                     ~Tenderer();
+      void              Grid( const real, const std::string );
+//       void              add_data(const laydata::atticList*, const SLMap*);
+      void              setLayer(word);
+      void              pushCTM(CTM& trans)                    {_ctrans = trans;_drawprop->pushCTM(trans);}
+      void              box (const TP* p1, const TP* p2)       {_cslice->box(p1,p2);}
+      void              poly (const pointlist& plst)           {_cslice->poly(plst);}
+      void              wire (const pointlist& plst)           {_cslice->wire(plst);}
+      void              draw();
+      // temporary!
+      void              initCTMstack()                {        _drawprop->initCTMstack()        ;}
+      void              clearCTMstack()               {        _drawprop->clearCTMstack()       ;}
+      void              setCurrentColor(word layno)   {        _drawprop->setCurrentColor(layno);}
+      bool              layerHidden(word layno) const {return  _drawprop->layerHidden(layno)    ;}
+      const CTM&        ScrCTM() const                {return  _drawprop->ScrCTM()              ;}
+      const CTM&        topCTM() const                {return  _drawprop->topCTM()              ;}
+      void              popCTM() const                {        _drawprop->popCTM()              ;}
+      const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
    private:
       typedef std::list<TenderTV*> TenderLay;
       typedef std::map<word, TenderLay*> DataLay;
-      DataLay        _data;
+      layprop::DrawProperties*   _drawprop;
+      real              _UU;
+      DataLay           _data;
+      TenderTV*         _cslice;    //!Working variable pointing to the current slice
+      CTM               _ctrans;    //!Working variable storing the current translation
 };
+
 
 #endif //TENDERER_H
