@@ -190,6 +190,7 @@ namespace tui
 		void				addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
 										const std::string &iconFileName, const std::string hotKey, 
 										const std::string &helpString, const std::string &func);
+		void				deleteTool(const std::string &toolBarItem);
 		void				execute(int ID1);
 		int				direction() const {return _dockDirection;};
 		std::string		name() const {return _name;};

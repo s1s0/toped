@@ -492,6 +492,27 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 	}
 }
 
+void	tui::ToolBarHandler::deleteTool(const std::string &toolBarItem)
+{
+	toolList::iterator it;
+	for(it = _tools.begin(); it != _tools.end(); it++)
+	{
+		if ((*it)->name() == toolBarItem)
+		{
+			std::ostringstream ost;
+			ost<<"Tool item "+toolBarItem+" is deleted";
+			tell_log(console::MT_WARNING,ost.str());
+			_toolBar->DeleteTool((*it)->ID());
+			delete (*it);
+			_tools.erase(it);
+			break;
+		}
+	}
+	Toped->getAuiManager()->DetachPane(_toolBar);
+	_toolBar->Realize();
+	attachToAUI();
+}
+
 void	tui::ToolBarHandler::clearTool(const std::string &iconName)
 {
 	toolList::iterator it;
@@ -500,7 +521,7 @@ void	tui::ToolBarHandler::clearTool(const std::string &iconName)
 		if ((*it)->name() == iconName)
 		{
 			std::ostringstream ost;
-			ost<<"Tool bar"+iconName+" is redefined";
+			ost<<"Tool item "+iconName+" is redefined";
 			tell_log(console::MT_WARNING,ost.str());
 				delete (*it);
 			_tools.erase(it);
@@ -895,15 +916,29 @@ void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::
 
 void tui::ResourceCenter::deleteTool(const std::string &toolBarName, const std::string &toolBarItem)
 {
-	int ID;
-	/*//set correct filename for toolBarItem
-	std::string fullIconName = _IconDir+iconName;
-	//increase counter of toolItems
-	ID = TDUMMY_TOOL + _toolCount;
-	_toolCount++;
-
-	ToolBarHandler* toolBar = proceedTool(toolBarName, toolBarItem);
-	toolBar->addTool(ID, toolBarItem, toolBarItem, fullIconName, hotKey, helpString, func); */
+	//find toolbar
+	std::string str = toolBarName;
+	std::transform(str.begin(), str.end(), str.begin(), tolower);
+	toolBarList::const_iterator it;
+	for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+	{
+		if ((*it)->name()==str)
+		{
+			break;
+		}
+	}
+	//if toolbar doesn't exist, create it
+	if (it==_toolBars.end())
+	{
+		std::ostringstream ost;
+		ost<<"toolbardeleteitem: there is no such toolbar";
+		tell_log(console::MT_WARNING,ost.str());
+		return;
+	}
+	else
+	{
+		(*it)->deleteTool(toolBarItem);
+	}
 }
 
 tui::ToolBarHandler* tui::ResourceCenter::proceedTool(const std::string &toolBarName, const std::string &toolBarItem)
@@ -1087,11 +1122,11 @@ tellstdfunc::stdTOOLBARDELETEITEM::stdTOOLBARDELETEITEM(telldata::typeID retype,
 
 int tellstdfunc::stdTOOLBARDELETEITEM::execute()
 {
-	std::string	toolbarname	= getStringValue();
-	wxString utftoolbarname = wxString(toolbarname.c_str(), wxConvUTF8);
 	std::string	itemname	= getStringValue();
 	wxString utfitemname = wxString(itemname.c_str(), wxConvUTF8);
-	
+	std::string	toolbarname	= getStringValue();
+	wxString utftoolbarname = wxString(toolbarname.c_str(), wxConvUTF8);
+
 	wxCommandEvent eventToolBarDelItem(wxEVT_TOOLBARDELETEITEM);
 	eventToolBarDelItem.SetString(utftoolbarname);
 	wxStringClientData *data = DEBUG_NEW wxStringClientData(utfitemname);
