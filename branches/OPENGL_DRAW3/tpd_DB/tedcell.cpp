@@ -446,7 +446,7 @@ void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       word curlayno = lay->first;
-      if (rend.layerHidden(curlayno)) continue;
+      if (rend.layerHidden(curlayno) || (0 == curlayno)) continue;
       else rend.setLayer(curlayno);
       // fancy like this (dlist iterator) , besause a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)

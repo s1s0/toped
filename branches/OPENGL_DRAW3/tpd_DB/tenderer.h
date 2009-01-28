@@ -52,8 +52,10 @@ class TeselTempData {
 class TenderObj {
    public:
                         TenderObj(const TP*, const TP*);
+      int*              cdata()  {return _cdata;};  // contour data
+      unsigned int      csize()  {return _csize;}
    protected:
-                        TenderObj(const pointlist);
+                        TenderObj(const pointlist&);
       int*              _cdata;  // contour data
       unsigned int      _csize;
 };
@@ -64,17 +66,17 @@ class TenderObj {
 // which will be used for the fill
 class TenderPoly : public TenderObj {
    public:
-                        TenderPoly(const pointlist);
+                        TenderPoly(const pointlist&);
 
 
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
-      static GLvoid CALLBACK teselBegin(GLvoid *);
+      static GLvoid CALLBACK teselBegin(GLenum*, GLvoid *);
       static GLvoid CALLBACK teselEnd(GLvoid *);
 #else
       static GLvoid     teselVertex(GLvoid *, GLvoid *);
-      static GLvoid     teselBegin(GLvoid *);
+      static GLvoid     teselBegin(GLenum, GLvoid *);
       static GLvoid     teselEnd(GLvoid *);
 #endif
    protected:
@@ -94,19 +96,25 @@ class TenderWire : public TenderPoly {
       int*              _ldata;  // central line data
 };
 
+typedef std::list<TenderObj*> SliceObjects;
 //-----------------------------------------------------------------------------
 // translation view - effectively a layer slice of the visible cell data
 class TenderTV {
    public:
-                        TenderTV(CTM& translation) : _tmatrix(translation) {}
-      void              box  (const TP* p1, const TP* p2);
-      void              poly (const pointlist& plst);
-      void              wire (const pointlist& plst);
+                        TenderTV(CTM& translation) : _tmatrix(translation),
+                                 _num_contour_points(0l), _num_objects(0) {}
+      void              box  (const TP*, const TP*);
+      void              poly (const pointlist&);
+      void              wire (const pointlist&);
       const CTM*        tmatrix() {return &_tmatrix;}
+      unsigned long     num_contour_points() {return _num_contour_points;  }
+      unsigned          num_objects()        {return _num_objects;         }
+      SliceObjects*     data()               {return &_data;               }
    private:
-      typedef std::list<TenderObj*> SliceObjects;
       CTM               _tmatrix;
       SliceObjects      _data;
+      unsigned long     _num_contour_points;
+      unsigned          _num_objects;
 };
 
 //-----------------------------------------------------------------------------

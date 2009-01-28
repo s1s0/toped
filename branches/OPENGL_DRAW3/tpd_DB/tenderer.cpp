@@ -41,18 +41,24 @@ void TenderTV::box (const TP* p1, const TP* p2)
 {
    TenderObj* cobj = DEBUG_NEW TenderObj(p1,p2);
    _data.push_front(cobj);
+   _num_contour_points += 4;
+   _num_objects += 1;
 }
 
 void TenderTV::poly (const pointlist& plst)
 {
    TenderObj* cobj = DEBUG_NEW TenderPoly(plst);
    _data.push_front(cobj);
+   _num_contour_points += plst.size();
+   _num_objects += 1;
 }
 
 void TenderTV::wire (const pointlist& plst)
 {
    TenderObj* cobj = DEBUG_NEW TenderWire(plst);
    _data.push_front(cobj);
+   _num_contour_points += 2 * plst.size();
+   _num_objects += 1;
 }
 
 //=============================================================================
@@ -68,7 +74,7 @@ TenderObj::TenderObj(const TP* p1, const TP* p2)
    _cdata[index++] = p1->x();_cdata[index++] = p2->y();
 }
 
-TenderObj::TenderObj(const pointlist plst)
+TenderObj::TenderObj(const pointlist& plst)
 {
    _csize = plst.size();
    _cdata = new int[_csize*2];
@@ -81,7 +87,7 @@ TenderObj::TenderObj(const pointlist plst)
 }
 
 //=============================================================================
-TenderPoly::TenderPoly(const pointlist plst) : TenderObj(plst), _fdata(NULL)
+TenderPoly::TenderPoly(const pointlist& plst) : TenderObj(plst), _fdata(NULL)
 {
    TeselTempData pfdata(&_fdata, &_fsize);
    // Start tessellation
@@ -99,7 +105,7 @@ TenderPoly::TenderPoly(const pointlist plst) : TenderObj(plst), _fdata(NULL)
 
 }
 
-GLvoid TenderPoly::teselBegin(GLvoid* ttmp)
+GLvoid TenderPoly::teselBegin(GLenum type, GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->_teseldata = DEBUG_NEW TeselVertices();
@@ -121,7 +127,7 @@ GLvoid TenderPoly::teselEnd(GLvoid* ttmp)
    for (TeselVertices::const_iterator CV = ptmp->_teseldata->begin(); CV != ptmp->_teseldata->end(); CV++)
    {
       (*ptmp->_pfdata)[index++] = *CV;
-      (*ptmp->_pfdata)[index++] = *CV;
+//      (*ptmp->_pfdata)[index++] = *CV;
    }
    delete ptmp->_teseldata;ptmp->_teseldata = NULL;
 }
@@ -164,6 +170,7 @@ void Tenderer::setLayer(word layer)
    else
    {
       laydata = DEBUG_NEW TenderLay();
+      _data[layer] = laydata;
    }
    _cslice = DEBUG_NEW TenderTV(_ctrans);
    laydata->push_front(_cslice);
@@ -220,9 +227,32 @@ void Tenderer::draw()
          ctv->tmatrix()->oglForm(openGLmatrix);
          glMultMatrixd(openGLmatrix);
          //@TODO! Drawing here!
+         unsigned long arr_size = 2 * (*TLAY)->num_contour_points();
+         unsigned objts_size = (*TLAY)->num_objects();
+         int* point_array = DEBUG_NEW int[arr_size];
+         GLsizei* size_array = DEBUG_NEW int[objts_size];
+         GLsizei* first_array = DEBUG_NEW int[objts_size];
+         unsigned long pntindx = 0;
+         unsigned      szindx  = 0;
 
+         for (SliceObjects::const_iterator CSH = (*TLAY)->data()->begin(); CSH != (*TLAY)->data()->end(); CSH++)
+         { // shapes in the current translation (layer within the cell)
+            first_array[szindx] = pntindx/2;
+            size_array[szindx++] = (*CSH)->csize();
+            for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
+            { // points in the shape
+               point_array[pntindx++] = (*CSH)->cdata()[ipnt];
+            }
+         }
+         assert(pntindx == arr_size);
+         assert(szindx == objts_size);
+         glVertexPointer(2, GL_INT, 0, point_array);
+         glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
          //
          glPopMatrix();
+         delete [] point_array;
+         delete [] size_array;
+         delete [] first_array;
       }
    }
    glDisableClientState(GL_VERTEX_ARRAY);
@@ -248,9 +278,9 @@ void Tenderer::draw()
 //       word curlayno = CLAY->first;
 //       assert(numPoints->end() != numPoints->find(curlayno));
 //       unsigned long arr_size = 2 * numPoints->find(curlayno)->second;
-//       int* point_array = new int[arr_size];
-//       GLsizei* size_array = new int[CLAY->second->size()];
-//       GLsizei* first_array = new int[CLAY->second->size()];
+//       int* point_array = DEBUG_NEW int[arr_size];
+//       GLsizei* size_array = DEBUG_NEW int[CLAY->second->size()];
+//       GLsizei* first_array = DEBUG_NEW int[CLAY->second->size()];
 //       unsigned long pntindx = 0;
 //       unsigned      szindx  = 0;
 //       _drawprop->setCurrentColor(curlayno);
