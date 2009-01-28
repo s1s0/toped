@@ -1101,6 +1101,7 @@ void DataCenter::openGL_render(const CTM& layCTM) {
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(renderer);
+         renderer.draw();
          assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
