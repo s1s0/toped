@@ -52,6 +52,7 @@ class TeselTempData {
 class TenderObj {
    public:
                         TenderObj(const TP*, const TP*);
+      virtual void      Tessel() {};
       int*              cdata()  {return _cdata;};  // contour data
       unsigned int      csize()  {return _csize;}
    protected:
@@ -68,7 +69,7 @@ class TenderPoly : public TenderObj {
    public:
                         TenderPoly(const pointlist&);
 
-
+      virtual void      Tessel();
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
@@ -80,9 +81,12 @@ class TenderPoly : public TenderObj {
       static GLvoid     teselEnd(GLvoid *);
 #endif
    protected:
+      //@FIXME -> we need another structure here for the tesselation
+      // results. Tesselation returns a number of point sequences
+      // which can be in one of the 3 formats:
+      // GLU_TRIANGLE_FAN; GLU_TRIANGLE STRIP; GLU_TRIANGLE
       word*             _fdata;  // fill data
       unsigned int      _fsize;
-//      static TeselTempData* _ttmp;
 };
 
 //-----------------------------------------------------------------------------
@@ -92,6 +96,7 @@ class TenderPoly : public TenderObj {
 class TenderWire : public TenderPoly {
    public:
                         TenderWire(const pointlist);
+      virtual void      Tessel() {};
    protected:
       int*              _ldata;  // central line data
 };
@@ -127,6 +132,7 @@ class Tenderer {
 //       void              add_data(const laydata::atticList*, const SLMap*);
       void              setLayer(word);
       void              pushCTM(CTM& trans)                    {_ctrans = trans;_drawprop->pushCTM(trans);}
+      void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box (const TP* p1, const TP* p2)       {_cslice->box(p1,p2);}
       void              poly (const pointlist& plst)           {_cslice->poly(plst);}
       void              wire (const pointlist& plst)           {_cslice->wire(plst);}
@@ -138,8 +144,11 @@ class Tenderer {
       bool              layerHidden(word layno) const {return  _drawprop->layerHidden(layno)    ;}
       const CTM&        ScrCTM() const                {return  _drawprop->ScrCTM()              ;}
       const CTM&        topCTM() const                {return  _drawprop->topCTM()              ;}
-      void              popCTM() const                {        _drawprop->popCTM()              ;}
       const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
+      void              pushref(const laydata::tdtcellref* ref)
+                                                      {        _drawprop->pushref(ref)          ;}
+      byte              popref(const laydata::tdtcellref* ref)
+                                                      {return  _drawprop->popref(ref)           ;}
    private:
       typedef std::list<TenderTV*> TenderLay;
       typedef std::map<word, TenderLay*> DataLay;

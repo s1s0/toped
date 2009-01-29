@@ -1667,6 +1667,34 @@ laydata::tdtdefaultcell* laydata::tdtcellref::visible(const DBbox& clip, const C
 // }
 void laydata::tdtcellref::draw_request(Tenderer& rend) const
 {
+   // calculate the current translation matrix
+   CTM newtrans = _translation * rend.topCTM();
+   // get overlapping box of the structure ...
+   DBbox obox(DEFAULT_ZOOM_BOX);
+   if (structure())
+      obox = structure()->overlap();
+   // ... translate it to the current coordinates ...
+   DBbox areal = obox.overlap(newtrans);
+   // check that the cell (or part of it) is in the visual window
+   DBbox clip = rend.clipRegion();
+   if (clip.cliparea(areal) == 0) return;
+   // check that the cell area is bigger that the MIN_VISUAL_AREA
+   if (!areal.visible(rend.ScrCTM())) return;
+   // If we get here - means that the cell (or part of it) is visible
+/* @FIXME -> problem is that the cell overlap is dynamically calculated
+//          It must be a variable to fit with the renderer data concept!
+   ptlist.reserve(4);
+   ptlist.push_back(obox.p1() * newtrans);
+   ptlist.push_back(TP(obox.p2().x(), obox.p1().y()) * newtrans);
+   ptlist.push_back(obox.p2() * newtrans);
+   ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);*/
+   rend.pushCTM(newtrans);
+   // draw the cell mark ...
+//   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
+   byte crchain = rend.popref(this);
+   structure()->openGL_draw(rend, crchain == 2);
+   rend.popCTM();
+   if (crchain) rend.pushref(this);
 }
 
 void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const

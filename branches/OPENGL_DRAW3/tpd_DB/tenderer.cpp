@@ -87,22 +87,26 @@ TenderObj::TenderObj(const pointlist& plst)
 }
 
 //=============================================================================
-TenderPoly::TenderPoly(const pointlist& plst) : TenderObj(plst), _fdata(NULL)
+TenderPoly::TenderPoly(const pointlist& plst) : TenderObj(plst),
+                       _fdata(NULL), _fsize(0)
+{
+}
+
+void TenderPoly::Tessel()
 {
    TeselTempData pfdata(&_fdata, &_fsize);
    // Start tessellation
    gluTessBeginPolygon(tenderTesel, &pfdata);
    GLdouble pv[3];
    pv[2] = 0;
-   word* index_arr = DEBUG_NEW word[plst.size()];
-   for (unsigned i = 0; i < plst.size(); i++)
+   word* index_arr = DEBUG_NEW word[_csize/2];
+   for (unsigned i = 0; i < _csize/2; i++ )
    {
-      pv[0] = plst[i].x(); pv[1] = plst[i].y();
+      pv[0] = _cdata[2*i]; pv[1] = _cdata[2*i+1];
       index_arr[i] = i;
       gluTessVertex(tenderTesel,pv, &(index_arr[i]));
    }
    gluTessEndPolygon(tenderTesel);
-
 }
 
 GLvoid TenderPoly::teselBegin(GLenum type, GLvoid* ttmp)
@@ -125,10 +129,7 @@ GLvoid TenderPoly::teselEnd(GLvoid* ttmp)
    *(ptmp->_pfdata) = DEBUG_NEW word[*(ptmp->_fsize)];
    word index = 0;
    for (TeselVertices::const_iterator CV = ptmp->_teseldata->begin(); CV != ptmp->_teseldata->end(); CV++)
-   {
       (*ptmp->_pfdata)[index++] = *CV;
-//      (*ptmp->_pfdata)[index++] = *CV;
-   }
    delete ptmp->_teseldata;ptmp->_teseldata = NULL;
 }
 
@@ -162,6 +163,7 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
 
 void Tenderer::setLayer(word layer)
 {
+   if (0==layer) return; // @FIXME!, temporaray, until cell overlap is fixed
    TenderLay* laydata = NULL;
    if (_data.end() != _data.find(layer))
    {
