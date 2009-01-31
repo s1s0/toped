@@ -49,16 +49,19 @@ void TenderTV::poly (const pointlist& plst)
 {
    TenderObj* cobj = DEBUG_NEW TenderPoly(plst);
    _data.push_front(cobj);
-   _num_contour_points += plst.size();
+   _num_contour_points += cobj->csize();
    _num_objects += 1;
 }
 
-void TenderTV::wire (const pointlist& plst)
+void TenderTV::wire (const pointlist& plst, word width, bool center_line_only)
 {
-   TenderObj* cobj = DEBUG_NEW TenderWire(plst);
+   TenderObj* cobj = DEBUG_NEW TenderWire(plst, width, center_line_only);
    _data.push_front(cobj);
-   _num_contour_points += 2 * plst.size();
-   _num_objects += 1;
+   if (cobj->csize() > 0)
+   {
+      _num_contour_points += cobj->csize();
+      _num_objects += 1;
+   }
 }
 
 //=============================================================================
@@ -77,12 +80,17 @@ TenderObj::TenderObj(const TP* p1, const TP* p2)
 TenderObj::TenderObj(const pointlist& plst)
 {
    _csize = plst.size();
-   _cdata = new int[_csize*2];
-   word index = 0;
-   for (unsigned i = 0; i < _csize; i++)
+   if (0 == _csize)
+      _cdata = NULL;
+   else
    {
-      _cdata[index++] = plst[i].x();
-      _cdata[index++] = plst[i].y();
+      _cdata = new int[_csize*2];
+      word index = 0;
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         _cdata[index++] = plst[i].x();
+         _cdata[index++] = plst[i].y();
+      }
    }
 }
 
@@ -134,10 +142,109 @@ GLvoid TenderPoly::teselEnd(GLvoid* ttmp)
 }
 
 //=============================================================================
-TenderWire::TenderWire(const pointlist plst) : TenderPoly(plst)
+TenderWire::TenderWire(const pointlist& plst, const word width, bool center_line_only) : TenderPoly()
 {
+   _lsize = plst.size();
+   assert(0 != _lsize);
+   _ldata = new int[2 * _lsize];
+   word index = 0;
+   for (unsigned i = 0; i < _lsize; i++)
+   {
+      _ldata[index++] = plst[i].x();
+      _ldata[index++] = plst[i].y();
+   }
+   assert(index == 2*_lsize);
+   if (!center_line_only)
+      precalc(width);
+
 }
 
+void TenderWire::TenderWire::precalc(word width)
+{
+   _csize = 2 * _lsize;
+   _cdata = DEBUG_NEW int(2 * _csize);
+   DBbox* ln1 = endPnts(width, 0,1, true);
+   word index = 0;
+   word rindex = 2 * _csize - 1;
+   assert (ln1);
+   _cdata[ index++] = ln1->p1().x();
+   _cdata[ index++] = ln1->p1().y();
+   _cdata[rindex--] = ln1->p2().y();
+   _cdata[rindex--] = ln1->p2().x();
+   delete ln1;
+   for (unsigned i = 1; i < _lsize - 1; i++)
+   {
+      ln1 = mdlPnts(width, i-1,i,i+1);
+      assert(ln1);
+      _cdata[ index++] = ln1->p1().x();
+      _cdata[ index++] = ln1->p1().y();
+      _cdata[rindex--] = ln1->p2().y();
+      _cdata[rindex--] = ln1->p2().x();
+      delete ln1;
+   }
+   ln1 = endPnts(width, _lsize -2, _lsize - 1,false);
+   assert(ln1);
+   _cdata[ index++] = ln1->p1().x();
+   _cdata[ index++] = ln1->p1().y();
+   _cdata[rindex--] = ln1->p2().y();
+   _cdata[rindex--] = ln1->p2().x();
+   delete ln1;
+}
+
+DBbox* TenderWire::TenderWire::endPnts(const word width, word i1, word i2, bool first)
+{
+   double     w = width/2;
+   i1 *= 2; i2 *= 2;
+   double denom = first ? (_ldata[i2  ] - _ldata[i1  ]) : (_ldata[i1  ] - _ldata[i2  ]);
+   double   nom = first ? (_ldata[i2+1] - _ldata[i1+1]) : (_ldata[i1+1] - _ldata[i2+1]);
+   double xcorr, ycorr; // the corrections
+   if ((0 == nom) && (0 == denom)) return NULL;
+   double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   if      (0 == denom) // vertical
+   {
+      xcorr =signX * w ; ycorr = 0        ;
+   }
+   else if (0 == nom  )// horizontal |----|
+   {
+      xcorr = 0        ; ycorr = signY * w;
+   } 
+   else
+   {
+      double sl   = nom / denom;
+      double sqsl = signY*sqrt( sl*sl + 1);
+      xcorr = rint(w * (sl / sqsl));
+      ycorr = rint(w * ( 1 / sqsl));
+   }
+   word it = first ? i1 : i2;
+   return DEBUG_NEW DBbox((int4b) rint(_ldata[it  ] - xcorr),
+                          (int4b) rint(_ldata[it+1] + ycorr),
+                          (int4b) rint(_ldata[it  ] + xcorr),
+                          (int4b) rint(_ldata[it+1] - ycorr) );
+}
+
+DBbox* TenderWire::TenderWire::mdlPnts(const word width, word i1, word i2, word i3)
+{
+   double    w = width/2;
+   i1 *= 2; i2 *= 2; i3 *= 2;
+   double  x32 = _ldata[i3  ] - _ldata[i2  ];
+   double  x21 = _ldata[i2  ] - _ldata[i1  ];
+   double  y32 = _ldata[i3+1] - _ldata[i2+1];
+   double  y21 = _ldata[i2+1] - _ldata[i1+1];
+   double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
+   double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
+   double denom = x32 * y21 - x21 * y32;
+// @FIXME THINK about next two lines!!!    They are wrong !!!
+   if ((0 == denom) || (0 == L1)) return endPnts(width, i2*2, i3*2, false);
+   if (0 == L2) return NULL;
+   // the corrections
+   double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
+   double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
+   return DEBUG_NEW DBbox((int4b) rint(_ldata[i2  ] - xcorr),
+                          (int4b) rint(_ldata[i2+1] + ycorr),
+                          (int4b) rint(_ldata[i2  ] + xcorr),
+                          (int4b) rint(_ldata[i2+1] - ycorr) );
+}
 
 //=============================================================================
 Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
@@ -177,6 +284,14 @@ void Tenderer::setLayer(word layer)
    _cslice = DEBUG_NEW TenderTV(_ctrans);
    laydata->push_front(_cslice);
    // @TODO! current fill on/off should be determined here!
+}
+
+void Tenderer::wire (const pointlist& plst, word width)
+{
+   // first check whether to draw only the center line
+   DBbox wsquare = DBbox(TP(0,0),TP(width,width));
+   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM());
+   _cslice->wire(plst, width, center_line_only);
 }
 
 void Tenderer::Grid(const real step, const std::string color)
