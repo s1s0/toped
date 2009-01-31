@@ -51,6 +51,7 @@ class TeselTempData {
 //
 class TenderObj {
    public:
+                        TenderObj():_cdata(NULL), _csize(0) {}
                         TenderObj(const TP*, const TP*);
       virtual void      Tessel() {};
       int*              cdata()  {return _cdata;};  // contour data
@@ -67,6 +68,7 @@ class TenderObj {
 // which will be used for the fill
 class TenderPoly : public TenderObj {
    public:
+                        TenderPoly() : TenderObj(), _fdata(NULL), _fsize(0) {}
                         TenderPoly(const pointlist&);
 
       virtual void      Tessel();
@@ -95,10 +97,14 @@ class TenderPoly : public TenderObj {
 // the original points from tdtwire
 class TenderWire : public TenderPoly {
    public:
-                        TenderWire(const pointlist);
+                        TenderWire(const pointlist&, const word, bool);
       virtual void      Tessel() {};
    protected:
+      void              precalc(const word);
+      DBbox*            endPnts(const word, word, word, bool);
+      DBbox*            mdlPnts(const word, word, word, const word);
       int*              _ldata;  // central line data
+      unsigned int      _lsize;
 };
 
 typedef std::list<TenderObj*> SliceObjects;
@@ -110,7 +116,7 @@ class TenderTV {
                                  _num_contour_points(0l), _num_objects(0) {}
       void              box  (const TP*, const TP*);
       void              poly (const pointlist&);
-      void              wire (const pointlist&);
+      void              wire (const pointlist&, word, bool);
       const CTM*        tmatrix() {return &_tmatrix;}
       unsigned long     num_contour_points() {return _num_contour_points;  }
       unsigned          num_objects()        {return _num_objects;         }
@@ -135,7 +141,7 @@ class Tenderer {
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box (const TP* p1, const TP* p2)       {_cslice->box(p1,p2);}
       void              poly (const pointlist& plst)           {_cslice->poly(plst);}
-      void              wire (const pointlist& plst)           {_cslice->wire(plst);}
+      void              wire (const pointlist& plst, word w);
       void              draw();
       // temporary!
       void              initCTMstack()                {        _drawprop->initCTMstack()        ;}

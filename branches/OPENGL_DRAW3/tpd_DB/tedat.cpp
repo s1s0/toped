@@ -1153,7 +1153,8 @@ laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata()
       _plist.push_back(tedfile->getTP());
 }
 
-DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const {
+DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const
+{
    double     w = _width/2;
    double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
    double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
@@ -1163,7 +1164,8 @@ DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const {
    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
    else if (0 == nom  )   {xcorr = 0 ; ycorr = signY * w;} // horizontal |----|
-   else {
+   else
+   {
       double sl   = nom / denom;
       double sqsl = signY*sqrt( sl*sl + 1);
       xcorr = rint(w * (sl / sqsl)); 
@@ -1174,7 +1176,8 @@ DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const {
                           (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
 }
 
-DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const {
+DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
+{
    double    w = _width/2;
    double  x32 = p3.x() - p2.x();
    double  x21 = p2.x() - p1.x();
@@ -1232,7 +1235,7 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
 
 void laydata::tdtwire::draw_request(Tenderer& rend) const
 {
-   rend.wire(_plist);
+   rend.wire(_plist, _width);
 }
 
 void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
