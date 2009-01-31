@@ -159,7 +159,7 @@ TenderWire::TenderWire(const pointlist& plst, const word width, bool center_line
 
 }
 
-void TenderWire::TenderWire::precalc(word width)
+void TenderWire::precalc(word width)
 {
    _csize = 2 * _lsize;
    _cdata = DEBUG_NEW int(2 * _csize);
@@ -191,7 +191,7 @@ void TenderWire::TenderWire::precalc(word width)
    delete ln1;
 }
 
-DBbox* TenderWire::TenderWire::endPnts(const word width, word i1, word i2, bool first)
+DBbox* TenderWire::endPnts(const word width, word i1, word i2, bool first)
 {
    double     w = width/2;
    i1 *= 2; i2 *= 2;
@@ -223,7 +223,7 @@ DBbox* TenderWire::TenderWire::endPnts(const word width, word i1, word i2, bool 
                           (int4b) rint(_ldata[it+1] - ycorr) );
 }
 
-DBbox* TenderWire::TenderWire::mdlPnts(const word width, word i1, word i2, word i3)
+DBbox* TenderWire::mdlPnts(const word width, word i1, word i2, word i3)
 {
    double    w = width/2;
    i1 *= 2; i2 *= 2; i3 *= 2;

@@ -75,7 +75,7 @@ class TenderPoly : public TenderObj {
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
-      static GLvoid CALLBACK teselBegin(GLenum*, GLvoid *);
+      static GLvoid CALLBACK teselBegin(GLenum, GLvoid *);
       static GLvoid CALLBACK teselEnd(GLvoid *);
 #else
       static GLvoid     teselVertex(GLvoid *, GLvoid *);
