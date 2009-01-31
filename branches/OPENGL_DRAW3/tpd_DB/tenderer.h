@@ -53,6 +53,7 @@ class TenderObj {
    public:
                         TenderObj():_cdata(NULL), _csize(0) {}
                         TenderObj(const TP*, const TP*);
+      virtual          ~TenderObj();
       virtual void      Tessel() {};
       int*              cdata()  {return _cdata;};  // contour data
       unsigned int      csize()  {return _csize;}
@@ -70,7 +71,7 @@ class TenderPoly : public TenderObj {
    public:
                         TenderPoly() : TenderObj(), _fdata(NULL), _fsize(0) {}
                         TenderPoly(const pointlist&);
-
+      virtual          ~TenderPoly();
       virtual void      Tessel();
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
@@ -98,6 +99,7 @@ class TenderPoly : public TenderObj {
 class TenderWire : public TenderPoly {
    public:
                         TenderWire(const pointlist&, const word, bool);
+      virtual          ~TenderWire();
       virtual void      Tessel() {};
    protected:
       void              precalc(const word);

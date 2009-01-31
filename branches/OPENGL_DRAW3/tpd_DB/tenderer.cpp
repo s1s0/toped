@@ -36,35 +36,6 @@
 GLUtriangulatorObj   *TenderPoly::tenderTesel = NULL;
 
 //=============================================================================
-// class TenderTV 
-void TenderTV::box (const TP* p1, const TP* p2)
-{
-   TenderObj* cobj = DEBUG_NEW TenderObj(p1,p2);
-   _data.push_front(cobj);
-   _num_contour_points += 4;
-   _num_objects += 1;
-}
-
-void TenderTV::poly (const pointlist& plst)
-{
-   TenderObj* cobj = DEBUG_NEW TenderPoly(plst);
-   _data.push_front(cobj);
-   _num_contour_points += cobj->csize();
-   _num_objects += 1;
-}
-
-void TenderTV::wire (const pointlist& plst, word width, bool center_line_only)
-{
-   TenderObj* cobj = DEBUG_NEW TenderWire(plst, width, center_line_only);
-   _data.push_front(cobj);
-   if (cobj->csize() > 0)
-   {
-      _num_contour_points += cobj->csize();
-      _num_objects += 1;
-   }
-}
-
-//=============================================================================
 //
 TenderObj::TenderObj(const TP* p1, const TP* p2)
 {
@@ -94,6 +65,10 @@ TenderObj::TenderObj(const pointlist& plst)
    }
 }
 
+TenderObj::~TenderObj()
+{
+   if (_cdata) delete [] _cdata;
+}
 //=============================================================================
 TenderPoly::TenderPoly(const pointlist& plst) : TenderObj(plst),
                        _fdata(NULL), _fsize(0)
@@ -141,6 +116,11 @@ GLvoid TenderPoly::teselEnd(GLvoid* ttmp)
    delete ptmp->_teseldata;ptmp->_teseldata = NULL;
 }
 
+TenderPoly::~TenderPoly()
+{
+   if (_fdata) delete [] _fdata;
+}
+
 //=============================================================================
 TenderWire::TenderWire(const pointlist& plst, const word width, bool center_line_only) : TenderPoly()
 {
@@ -162,7 +142,7 @@ TenderWire::TenderWire(const pointlist& plst, const word width, bool center_line
 void TenderWire::precalc(word width)
 {
    _csize = 2 * _lsize;
-   _cdata = DEBUG_NEW int(2 * _csize);
+   _cdata = DEBUG_NEW int[2 * _csize];
    DBbox* ln1 = endPnts(width, 0,1, true);
    word index = 0;
    word rindex = 2 * _csize - 1;
@@ -189,6 +169,8 @@ void TenderWire::precalc(word width)
    _cdata[rindex--] = ln1->p2().y();
    _cdata[rindex--] = ln1->p2().x();
    delete ln1;
+   assert(index == _csize);
+   assert((rindex + 1) == _csize);
 }
 
 DBbox* TenderWire::endPnts(const word width, word i1, word i2, bool first)
@@ -198,7 +180,8 @@ DBbox* TenderWire::endPnts(const word width, word i1, word i2, bool first)
    double denom = first ? (_ldata[i2  ] - _ldata[i1  ]) : (_ldata[i1  ] - _ldata[i2  ]);
    double   nom = first ? (_ldata[i2+1] - _ldata[i1+1]) : (_ldata[i1+1] - _ldata[i2+1]);
    double xcorr, ycorr; // the corrections
-   if ((0 == nom) && (0 == denom)) return NULL;
+//   if ((0 == nom) && (0 == denom)) return NULL;
+   assert((0 != nom) || (0 != denom));
    double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    if      (0 == denom) // vertical
@@ -235,8 +218,10 @@ DBbox* TenderWire::mdlPnts(const word width, word i1, word i2, word i3)
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
    double denom = x32 * y21 - x21 * y32;
 // @FIXME THINK about next two lines!!!    They are wrong !!!
-   if ((0 == denom) || (0 == L1)) return endPnts(width, i2*2, i3*2, false);
-   if (0 == L2) return NULL;
+//   if ((0 == denom) || (0 == L1)) return endPnts(width, i2*2, i3*2, false);
+//   if (0 == L2) return NULL;
+   assert (denom);
+   assert (L2);
    // the corrections
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
@@ -244,6 +229,36 @@ DBbox* TenderWire::mdlPnts(const word width, word i1, word i2, word i3)
                           (int4b) rint(_ldata[i2+1] + ycorr),
                           (int4b) rint(_ldata[i2  ] + xcorr),
                           (int4b) rint(_ldata[i2+1] - ycorr) );
+}
+
+TenderWire::~TenderWire()
+{
+   if (_ldata) delete [] _ldata;
+}
+//=============================================================================
+// class TenderTV 
+void TenderTV::box (const TP* p1, const TP* p2)
+{
+   TenderObj* cobj = DEBUG_NEW TenderObj(p1,p2);
+   _data.push_front(cobj);
+   _num_contour_points += 4;
+   _num_objects += 1;
+}
+
+void TenderTV::poly (const pointlist& plst)
+{
+   TenderObj* cobj = DEBUG_NEW TenderPoly(plst);
+   _data.push_front(cobj);
+   _num_contour_points += cobj->csize();
+   _num_objects += 1;
+}
+
+void TenderTV::wire (const pointlist& plst, word width, bool center_line_only)
+{
+   TenderObj* cobj = DEBUG_NEW TenderWire(plst, width, center_line_only);
+   _data.push_front(cobj);
+   _num_contour_points += cobj->csize();
+   _num_objects += 1;
 }
 
 //=============================================================================
@@ -364,7 +379,7 @@ void Tenderer::draw()
          assert(pntindx == arr_size);
          assert(szindx == objts_size);
          glVertexPointer(2, GL_INT, 0, point_array);
-         glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
+//         glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
          //
          glPopMatrix();
          delete [] point_array;
