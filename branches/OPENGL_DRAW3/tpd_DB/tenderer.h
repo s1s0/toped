@@ -54,9 +54,15 @@ class TenderObj {
                         TenderObj():_cdata(NULL), _csize(0) {}
                         TenderObj(const TP*, const TP*);
       virtual          ~TenderObj();
-      virtual void      Tessel() {};
-      int*              cdata()  {return _cdata;};  // contour data
-      unsigned int      csize()  {return _csize;}
+      virtual int*         cdata()     {return _cdata;}  // contour data
+      virtual unsigned int csize()     {return _csize;}
+      virtual int*         ldata()     {assert(0); return NULL;}
+      virtual unsigned int lsize()     {assert(0); return 0   ;}
+      virtual int*         fqudata()   {return _cdata;} // quads
+      virtual unsigned int fqusize()   {return _csize;}
+//      virtual int*         fqudata()   {return _cdata;} // quads
+//      virtual unsigned int fqusize()   {return _csize;}
+//      unsigned int      fsize()  {return _csize;}
    protected:
                         TenderObj(const pointlist&);
       int*              _cdata;  // contour data
@@ -101,6 +107,8 @@ class TenderWire : public TenderPoly {
                         TenderWire(const pointlist&, const word, bool);
       virtual          ~TenderWire();
       virtual void      Tessel() {};
+      virtual int*         ldata()     {return _ldata;}
+      virtual unsigned int lsize()     {return _lsize;}
    protected:
       void              precalc(const word);
       DBbox*            endPnts(const word, word, word, bool);
@@ -115,23 +123,41 @@ typedef std::list<TenderObj*> SliceObjects;
 class TenderTV {
    public:
                         TenderTV(CTM& translation) : _tmatrix(translation),
-                                 _num_contour_points(0l), _num_objects(0) {}
+                           _num_contour_points(0l), _num_line_points(0l),
+                           _num_fill_points(0l)   , _num_contours(0)    ,
+                           _num_lines(0)          , _num_fills(0) {}
       void              box  (const TP*, const TP*);
       void              poly (const pointlist&);
       void              wire (const pointlist&, word, bool);
-      const CTM*        tmatrix() {return &_tmatrix;}
-      unsigned long     num_contour_points() {return _num_contour_points;  }
-      unsigned          num_objects()        {return _num_objects;         }
-      SliceObjects*     data()               {return &_data;               }
+      const CTM*        tmatrix()            {return &_tmatrix;}
+      unsigned long     num_contour_points() {return _num_contour_points; }
+      unsigned long     num_line_points()    {return _num_line_points;    }
+      unsigned long     num_fill_points()    {return _num_fill_points;    }
+      unsigned          num_contours()       {return _num_contours;       }
+      unsigned          num_lines()          {return _num_lines;          }
+      unsigned          num_fills()          {return _num_fills;          }
+
+      SliceObjects*     contour_data()       {return &_contour_data;      }
+      SliceObjects*     line_data()          {return &_line_data;         }
+      SliceObjects*     fill_data()          {return &_fill_data;         }
    private:
       CTM               _tmatrix;
-      SliceObjects      _data;
+      SliceObjects      _contour_data;
+      SliceObjects      _line_data;
+      SliceObjects      _fill_data;
       unsigned long     _num_contour_points;
-      unsigned          _num_objects;
+      unsigned long     _num_line_points;
+      unsigned long     _num_fill_points;
+      unsigned          _num_contours;
+      unsigned          _num_lines;
+      unsigned          _num_fills;
 };
 
 //-----------------------------------------------------------------------------
 //
+typedef std::list<TenderTV*> TenderLay;
+typedef std::map<word, TenderLay*> DataLay;
+
 class Tenderer {
    public:
                         Tenderer( layprop::DrawProperties* drawprop, real UU );
@@ -158,8 +184,9 @@ class Tenderer {
       byte              popref(const laydata::tdtcellref* ref)
                                                       {return  _drawprop->popref(ref)           ;}
    private:
-      typedef std::list<TenderTV*> TenderLay;
-      typedef std::map<word, TenderLay*> DataLay;
+      void              draw_contours(TenderTV*);
+      void              draw_lines(TenderTV*);
+//      void              draw
       layprop::DrawProperties*   _drawprop;
       real              _UU;
       DataLay           _data;
