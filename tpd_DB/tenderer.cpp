@@ -136,7 +136,6 @@ TenderWire::TenderWire(const pointlist& plst, const word width, bool center_line
    assert(index == 2*_lsize);
    if (!center_line_only)
       precalc(width);
-
 }
 
 void TenderWire::precalc(word width)
@@ -240,25 +239,31 @@ TenderWire::~TenderWire()
 void TenderTV::box (const TP* p1, const TP* p2)
 {
    TenderObj* cobj = DEBUG_NEW TenderObj(p1,p2);
-   _data.push_front(cobj);
+   _contour_data.push_front(cobj);
    _num_contour_points += 4;
-   _num_objects += 1;
+   _num_contours += 1;
 }
 
 void TenderTV::poly (const pointlist& plst)
 {
    TenderObj* cobj = DEBUG_NEW TenderPoly(plst);
-   _data.push_front(cobj);
+   _contour_data.push_front(cobj);
    _num_contour_points += cobj->csize();
-   _num_objects += 1;
+   _num_contours += 1;
 }
 
 void TenderTV::wire (const pointlist& plst, word width, bool center_line_only)
 {
    TenderObj* cobj = DEBUG_NEW TenderWire(plst, width, center_line_only);
-   _data.push_front(cobj);
-   _num_contour_points += cobj->csize();
-   _num_objects += 1;
+   _line_data.push_front(cobj);
+   _num_line_points += cobj->lsize();
+   _num_lines += 1;
+   if (!center_line_only)
+   {
+      _contour_data.push_front(cobj);
+      _num_contour_points += cobj->csize();
+      _num_contours += 1;
+   }
 }
 
 //=============================================================================
@@ -344,6 +349,66 @@ void Tenderer::Grid(const real step, const std::string color)
 }
 
 
+void Tenderer::draw_contours(TenderTV* tlay)
+{
+   unsigned long arr_size = 2 * tlay->num_contour_points();
+   unsigned objts_size = tlay->num_contours();
+   int* point_array = DEBUG_NEW int[arr_size];
+   GLsizei* size_array = DEBUG_NEW int[objts_size];
+   GLsizei* first_array = DEBUG_NEW int[objts_size];
+   unsigned long pntindx = 0;
+   unsigned      szindx  = 0;
+
+   for (SliceObjects::const_iterator CSH = tlay->contour_data()->begin(); CSH != tlay->contour_data()->end(); CSH++)
+   { // shapes in the current translation (layer within the cell)
+      if (0 == (*CSH)->csize()) continue;
+      first_array[szindx] = pntindx/2;
+      size_array[szindx++] = (*CSH)->csize();
+      for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
+      { // points in the shape
+         point_array[pntindx++] = (*CSH)->cdata()[ipnt];
+      }
+   }
+   assert(pntindx == arr_size);
+   assert(szindx == objts_size);
+   glVertexPointer(2, GL_INT, 0, point_array);
+   glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
+
+   delete [] point_array;
+   delete [] size_array;
+   delete [] first_array;
+}
+
+void Tenderer::draw_lines(TenderTV* tlay)
+{
+   unsigned long arr_size = 2 * tlay->num_line_points();
+   unsigned objts_size = tlay->num_lines();
+   int* point_array = DEBUG_NEW int[arr_size];
+   GLsizei* size_array = DEBUG_NEW int[objts_size];
+   GLsizei* first_array = DEBUG_NEW int[objts_size];
+   unsigned long pntindx = 0;
+   unsigned      szindx  = 0;
+
+   for (SliceObjects::const_iterator CSH = tlay->line_data()->begin(); CSH != tlay->line_data()->end(); CSH++)
+   { // shapes in the current translation (layer within the cell)
+      assert((*CSH)->lsize());
+      first_array[szindx] = pntindx/2;
+      size_array[szindx++] = (*CSH)->lsize();
+      for (word ipnt = 0; ipnt < 2 * (*CSH)->lsize() ; ipnt++)
+      { // points in the shape
+         point_array[pntindx++] = (*CSH)->ldata()[ipnt];
+      }
+   }
+   assert(pntindx == arr_size);
+   assert(szindx == objts_size);
+   glVertexPointer(2, GL_INT, 0, point_array);
+   glMultiDrawArrays(GL_LINE_STRIP, first_array, size_array, szindx);
+
+   delete [] point_array;
+   delete [] size_array;
+   delete [] first_array;
+}
+
 void Tenderer::draw()
 {
    glEnableClientState(GL_VERTEX_ARRAY);
@@ -358,36 +423,15 @@ void Tenderer::draw()
          real openGLmatrix[16];
          ctv->tmatrix()->oglForm(openGLmatrix);
          glMultMatrixd(openGLmatrix);
-         //@TODO! Drawing here!
-         unsigned long arr_size = 2 * (*TLAY)->num_contour_points();
-         unsigned objts_size = (*TLAY)->num_objects();
-         int* point_array = DEBUG_NEW int[arr_size];
-         GLsizei* size_array = DEBUG_NEW int[objts_size];
-         GLsizei* first_array = DEBUG_NEW int[objts_size];
-         unsigned long pntindx = 0;
-         unsigned      szindx  = 0;
-
-         for (SliceObjects::const_iterator CSH = (*TLAY)->data()->begin(); CSH != (*TLAY)->data()->end(); CSH++)
-         { // shapes in the current translation (layer within the cell)
-            first_array[szindx] = pntindx/2;
-            size_array[szindx++] = (*CSH)->csize();
-            for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
-            { // points in the shape
-               point_array[pntindx++] = (*CSH)->cdata()[ipnt];
-            }
-         }
-         assert(pntindx == arr_size);
-         assert(szindx == objts_size);
-         glVertexPointer(2, GL_INT, 0, point_array);
-//         glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
+         //
+         if (0 < (*TLAY)->num_contour_points()) draw_contours(*TLAY);
+         if (0 < (*TLAY)->num_line_points()   ) draw_lines(*TLAY);
          //
          glPopMatrix();
-         delete [] point_array;
-         delete [] size_array;
-         delete [] first_array;
       }
    }
    glDisableClientState(GL_VERTEX_ARRAY);
+
 }
 
 // void Tenderer::add_data(const laydata::atticList* cell4Drawing, const SLMap* numPoints)
