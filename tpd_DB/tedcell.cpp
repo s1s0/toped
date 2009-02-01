@@ -451,7 +451,6 @@ void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
       // fancy like this (dlist iterator) , besause a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
-//      bool fill = rend.getCurrentFill();
       if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
          lay->second->openGL_draw(rend, dlst->second/*, fill*/);
       else
