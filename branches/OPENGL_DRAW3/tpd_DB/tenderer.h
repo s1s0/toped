@@ -33,15 +33,41 @@
 
 typedef std::list<word> TeselVertices;
 
-//-----------------------------------------------------------------------------
-// class used during the tessalation
+class TeselChunk {
+   public:
+                        TeselChunk(const TeselVertices&, GLenum);
+   private:
+      word*             _index_seq; // index sequence
+      word              _size;      // size of the index sequence
+      GLenum            _type;
+};
+
+typedef std::list<TeselChunk*> TeselChain;
+
 class TeselTempData {
    public:
-                        TeselTempData(word** pfdata, unsigned int* fsize) :
-                           _fsize(fsize), _pfdata(pfdata), _teseldata(NULL) {}
-   unsigned int*        _fsize;
-   word**               _pfdata;
-   TeselVertices*       _teseldata;
+                        TeselTempData();
+      void              setChainP(TeselChain* tc)  {_the_chain = tc;}
+      void              newChunk(GLenum type)      {_ctype = type; _cindexes.clear();}
+      void              newIndex(word vx)          {_cindexes.push_back(vx);}
+      void              storeChunk();
+      word              num_ftr_points()           { return _num_ftr_points;}
+      word              num_ftf_points()           { return _num_ftf_points;}
+      word              num_fts_points()           { return _num_fts_points;}
+      word              num_ftrs()                 { return _num_ftrs;}
+      word              num_ftfs()                 { return _num_ftfs;}
+      word              num_ftss()                 { return _num_ftss;}
+   
+   private:
+      TeselChain*       _the_chain;
+      GLenum            _ctype;
+      TeselVertices     _cindexes;
+      word              _num_ftr_points;
+      word              _num_ftf_points;
+      word              _num_fts_points;
+      word              _num_ftrs;
+      word              _num_ftfs;
+      word              _num_ftss;
 };
 
 
@@ -58,11 +84,6 @@ class TenderObj {
       virtual unsigned int csize()     {return _csize;}
       virtual int*         ldata()     {assert(0); return NULL;}
       virtual unsigned int lsize()     {assert(0); return 0   ;}
-      virtual int*         fqudata()   {return _cdata;} // quads
-      virtual unsigned int fqusize()   {return _csize;}
-//      virtual int*         fqudata()   {return _cdata;} // quads
-//      virtual unsigned int fqusize()   {return _csize;}
-//      unsigned int      fsize()  {return _csize;}
    protected:
                         TenderObj(const pointlist&);
       int*              _cdata;  // contour data
@@ -75,10 +96,10 @@ class TenderObj {
 // which will be used for the fill
 class TenderPoly : public TenderObj {
    public:
-                        TenderPoly() : TenderObj(), _fdata(NULL), _fsize(0) {}
+                        TenderPoly() : TenderObj()/*, _fdata(NULL), _fsize(0)*/ {}
                         TenderPoly(const pointlist&);
       virtual          ~TenderPoly();
-      virtual void      Tessel();
+      virtual void      Tessel(TeselTempData*);
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
@@ -90,12 +111,7 @@ class TenderPoly : public TenderObj {
       static GLvoid     teselEnd(GLvoid *);
 #endif
    protected:
-      //@FIXME -> we need another structure here for the tesselation
-      // results. Tesselation returns a number of point sequences
-      // which can be in one of the 3 formats:
-      // GLU_TRIANGLE_FAN; GLU_TRIANGLE STRIP; GLU_TRIANGLE
-      word*             _fdata;  // fill data
-      unsigned int      _fsize;
+      TeselChain        _tdata;
 };
 
 //-----------------------------------------------------------------------------
@@ -118,39 +134,40 @@ class TenderWire : public TenderPoly {
 };
 
 typedef std::list<TenderObj*> SliceObjects;
+
 //-----------------------------------------------------------------------------
 // translation view - effectively a layer slice of the visible cell data
 class TenderTV {
    public:
-                        TenderTV(CTM& translation) : _tmatrix(translation),
-                           _num_contour_points(0l), _num_line_points(0l),
-                           _num_fill_points(0l)   , _num_contours(0)    ,
-                           _num_lines(0)          , _num_fills(0) {}
+                        TenderTV(CTM& translation);
       void              box  (const TP*, const TP*);
       void              poly (const pointlist&);
       void              wire (const pointlist&, word, bool);
       const CTM*        tmatrix()            {return &_tmatrix;}
-      unsigned long     num_contour_points() {return _num_contour_points; }
-      unsigned long     num_line_points()    {return _num_line_points;    }
-      unsigned long     num_fill_points()    {return _num_fill_points;    }
-      unsigned          num_contours()       {return _num_contours;       }
-      unsigned          num_lines()          {return _num_lines;          }
-      unsigned          num_fills()          {return _num_fills;          }
-
-      SliceObjects*     contour_data()       {return &_contour_data;      }
-      SliceObjects*     line_data()          {return &_line_data;         }
-      SliceObjects*     fill_data()          {return &_fill_data;         }
+      void              draw_contours();
+      void              draw_lines();
+      void              draw_fqus();
+      void              draw_fpolygons();
    private:
       CTM               _tmatrix;
       SliceObjects      _contour_data;
       SliceObjects      _line_data;
-      SliceObjects      _fill_data;
+      SliceObjects      _fqu_data;
+      SliceObjects      _fpolygon_data;
       unsigned long     _num_contour_points;
       unsigned long     _num_line_points;
-      unsigned long     _num_fill_points;
+      unsigned long     _num_fqu_points; // fill quad
+      unsigned long     _num_fqs_points; // fill quad strip
+      unsigned long     _num_ftr_points; // fill triangle
+      unsigned long     _num_ftf_points; // fill triangle fan
+      unsigned long     _num_fts_points; // fill triangle strip
       unsigned          _num_contours;
       unsigned          _num_lines;
-      unsigned          _num_fills;
+      unsigned          _num_fqus;
+      unsigned          _num_fqss;
+      unsigned          _num_ftrs;
+      unsigned          _num_ftfs;
+      unsigned          _num_ftss;
 };
 
 //-----------------------------------------------------------------------------
@@ -184,9 +201,6 @@ class Tenderer {
       byte              popref(const laydata::tdtcellref* ref)
                                                       {return  _drawprop->popref(ref)           ;}
    private:
-      void              draw_contours(TenderTV*);
-      void              draw_lines(TenderTV*);
-//      void              draw
       layprop::DrawProperties*   _drawprop;
       real              _UU;
       DataLay           _data;
