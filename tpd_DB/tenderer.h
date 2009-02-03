@@ -36,6 +36,9 @@ typedef std::list<word> TeselVertices;
 class TeselChunk {
    public:
                         TeselChunk(const TeselVertices&, GLenum);
+      GLenum            type()     {return _type;}
+      word              size()     {return _size;}
+      word*             index_seq(){return _index_seq;}
    private:
       word*             _index_seq; // index sequence
       word              _size;      // size of the index sequence
@@ -51,9 +54,9 @@ class TeselTempData {
       void              newChunk(GLenum type)      {_ctype = type; _cindexes.clear();}
       void              newIndex(word vx)          {_cindexes.push_back(vx);}
       void              storeChunk();
-      word              num_ftr_points()           { return _num_ftr_points;}
-      word              num_ftf_points()           { return _num_ftf_points;}
-      word              num_fts_points()           { return _num_fts_points;}
+      word              num_ftr_indxs()            { return _num_ftr_indxs;}
+      word              num_ftf_indxs()            { return _num_ftf_indxs;}
+      word              num_fts_indxs()            { return _num_fts_indxs;}
       word              num_ftrs()                 { return _num_ftrs;}
       word              num_ftfs()                 { return _num_ftfs;}
       word              num_ftss()                 { return _num_ftss;}
@@ -62,9 +65,9 @@ class TeselTempData {
       TeselChain*       _the_chain;
       GLenum            _ctype;
       TeselVertices     _cindexes;
-      word              _num_ftr_points;
-      word              _num_ftf_points;
-      word              _num_fts_points;
+      word              _num_ftr_indxs;
+      word              _num_ftf_indxs;
+      word              _num_fts_indxs;
       word              _num_ftrs;
       word              _num_ftfs;
       word              _num_ftss;
@@ -100,6 +103,7 @@ class TenderPoly : public TenderObj {
                         TenderPoly(const pointlist&);
       virtual          ~TenderPoly();
       virtual void      Tessel(TeselTempData*);
+      TeselChain*       tdata()     {return &_tdata;}
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
@@ -133,7 +137,8 @@ class TenderWire : public TenderPoly {
       unsigned int      _lsize;
 };
 
-typedef std::list<TenderObj*> SliceObjects;
+typedef std::list<TenderObj*>  SliceObjects;
+typedef std::list<TenderPoly*> SlicePolygons;
 
 //-----------------------------------------------------------------------------
 // translation view - effectively a layer slice of the visible cell data
@@ -153,14 +158,15 @@ class TenderTV {
       SliceObjects      _contour_data;
       SliceObjects      _line_data;
       SliceObjects      _fqu_data;
-      SliceObjects      _fpolygon_data;
+      SlicePolygons     _fpolygon_data;
       unsigned long     _num_contour_points;
       unsigned long     _num_line_points;
-      unsigned long     _num_fqu_points; // fill quad
-      unsigned long     _num_fqs_points; // fill quad strip
-      unsigned long     _num_ftr_points; // fill triangle
-      unsigned long     _num_ftf_points; // fill triangle fan
-      unsigned long     _num_fts_points; // fill triangle strip
+      unsigned long     _num_polygon_points;
+      unsigned long     _num_fqu_indxs; // fill quad
+      unsigned long     _num_fqs_indxs; // fill quad strip
+      unsigned long     _num_ftr_indxs; // fill triangle
+      unsigned long     _num_ftf_indxs; // fill triangle fan
+      unsigned long     _num_fts_indxs; // fill triangle strip
       unsigned          _num_contours;
       unsigned          _num_lines;
       unsigned          _num_fqus;
