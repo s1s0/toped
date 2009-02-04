@@ -35,12 +35,13 @@ typedef std::list<word> TeselVertices;
 
 class TeselChunk {
    public:
-                        TeselChunk(const TeselVertices&, GLenum);
+                        TeselChunk(const TeselVertices&, GLenum, unsigned);
+                       ~TeselChunk();
       GLenum            type()     {return _type;}
       word              size()     {return _size;}
-      word*             index_seq(){return _index_seq;}
+      unsigned*         index_seq(){return _index_seq;}
    private:
-      word*             _index_seq; // index sequence
+      unsigned*         _index_seq; // index sequence
       word              _size;      // size of the index sequence
       GLenum            _type;
 };
@@ -49,7 +50,7 @@ typedef std::list<TeselChunk*> TeselChain;
 
 class TeselTempData {
    public:
-                        TeselTempData();
+                        TeselTempData(unsigned);
       void              setChainP(TeselChain* tc)  {_the_chain = tc;}
       void              newChunk(GLenum type)      {_ctype = type; _cindexes.clear();}
       void              newIndex(word vx)          {_cindexes.push_back(vx);}
@@ -57,7 +58,7 @@ class TeselTempData {
       word              num_ftrs()                 { return _num_ftrs;}
       word              num_ftfs()                 { return _num_ftfs;}
       word              num_ftss()                 { return _num_ftss;}
-   
+
    private:
       TeselChain*       _the_chain;
       GLenum            _ctype;
@@ -65,6 +66,7 @@ class TeselTempData {
       word              _num_ftrs;
       word              _num_ftfs;
       word              _num_ftss;
+      unsigned          _offset;
 };
 
 
@@ -93,7 +95,7 @@ class TenderObj {
 // which will be used for the fill
 class TenderPoly : public TenderObj {
    public:
-                        TenderPoly() : TenderObj()/*, _fdata(NULL), _fsize(0)*/ {}
+                        TenderPoly() : TenderObj() {}
                         TenderPoly(const pointlist&);
       virtual          ~TenderPoly();
       virtual void      Tessel(TeselTempData*);
@@ -120,15 +122,15 @@ class TenderWire : public TenderPoly {
    public:
                         TenderWire(const pointlist&, const word, bool);
       virtual          ~TenderWire();
-      virtual void      Tessel() {};
-      virtual int*         ldata()     {return _ldata;}
-      virtual unsigned int lsize()     {return _lsize;}
+      virtual void      Tessel(TeselTempData*)  {};
+      virtual int*      ldata()                 {return _ldata;}
+      virtual unsigned  lsize()                 {return _lsize;}
    protected:
       void              precalc(const word);
       DBbox*            endPnts(const word, word, word, bool);
       DBbox*            mdlPnts(const word, word, word, const word);
       int*              _ldata;  // central line data
-      unsigned int      _lsize;
+      unsigned          _lsize;
 };
 
 typedef std::list<TenderObj*>  SliceObjects;
@@ -153,9 +155,9 @@ class TenderTV {
       SliceObjects      _line_data;
       SliceObjects      _fqu_data;
       SlicePolygons     _fpolygon_data;
-      unsigned long     _num_contour_points;
-      unsigned long     _num_line_points;
-      unsigned long     _num_polygon_points;
+      unsigned          _num_contour_points; //
+      unsigned          _num_line_points;    // central line of wires
+      unsigned          _num_polygon_points; // non-convex (polygons & wires)
       unsigned          _num_contours;
       unsigned          _num_lines;
       unsigned          _num_fqus; // fill quad
@@ -175,7 +177,6 @@ class Tenderer {
                         Tenderer( layprop::DrawProperties* drawprop, real UU );
 //                     ~Tenderer();
       void              Grid( const real, const std::string );
-//       void              add_data(const laydata::atticList*, const SLMap*);
       void              setLayer(word);
       void              pushCTM(CTM& trans)                    {_ctrans = trans;_drawprop->pushCTM(trans);}
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
