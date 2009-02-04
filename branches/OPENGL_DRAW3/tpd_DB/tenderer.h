@@ -54,9 +54,6 @@ class TeselTempData {
       void              newChunk(GLenum type)      {_ctype = type; _cindexes.clear();}
       void              newIndex(word vx)          {_cindexes.push_back(vx);}
       void              storeChunk();
-      word              num_ftr_indxs()            { return _num_ftr_indxs;}
-      word              num_ftf_indxs()            { return _num_ftf_indxs;}
-      word              num_fts_indxs()            { return _num_fts_indxs;}
       word              num_ftrs()                 { return _num_ftrs;}
       word              num_ftfs()                 { return _num_ftfs;}
       word              num_ftss()                 { return _num_ftss;}
@@ -65,9 +62,6 @@ class TeselTempData {
       TeselChain*       _the_chain;
       GLenum            _ctype;
       TeselVertices     _cindexes;
-      word              _num_ftr_indxs;
-      word              _num_ftf_indxs;
-      word              _num_fts_indxs;
       word              _num_ftrs;
       word              _num_ftfs;
       word              _num_ftss;
@@ -162,18 +156,13 @@ class TenderTV {
       unsigned long     _num_contour_points;
       unsigned long     _num_line_points;
       unsigned long     _num_polygon_points;
-      unsigned long     _num_fqu_indxs; // fill quad
-      unsigned long     _num_fqs_indxs; // fill quad strip
-      unsigned long     _num_ftr_indxs; // fill triangle
-      unsigned long     _num_ftf_indxs; // fill triangle fan
-      unsigned long     _num_fts_indxs; // fill triangle strip
       unsigned          _num_contours;
       unsigned          _num_lines;
-      unsigned          _num_fqus;
-      unsigned          _num_fqss;
-      unsigned          _num_ftrs;
-      unsigned          _num_ftfs;
-      unsigned          _num_ftss;
+      unsigned          _num_fqus; // fill quad
+      unsigned          _num_fqss; // fill quad strip
+      unsigned          _num_ftrs; // fill triangle
+      unsigned          _num_ftfs; // fill triangle fan
+      unsigned          _num_ftss; // fill triangle strip
 };
 
 //-----------------------------------------------------------------------------
