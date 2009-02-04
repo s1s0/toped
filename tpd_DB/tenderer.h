@@ -36,6 +36,7 @@ typedef std::list<word> TeselVertices;
 class TeselChunk {
    public:
                         TeselChunk(const TeselVertices&, GLenum, unsigned);
+                        TeselChunk(const int*, unsigned, unsigned);
                        ~TeselChunk();
       GLenum            type()     {return _type;}
       word              size()     {return _size;}
@@ -79,14 +80,14 @@ class TenderObj {
                         TenderObj():_cdata(NULL), _csize(0) {}
                         TenderObj(const TP*, const TP*);
       virtual          ~TenderObj();
-      virtual int*         cdata()     {return _cdata;}  // contour data
-      virtual unsigned int csize()     {return _csize;}
-      virtual int*         ldata()     {assert(0); return NULL;}
-      virtual unsigned int lsize()     {assert(0); return 0   ;}
+      virtual int*      cdata()     {return _cdata;}  // contour data
+      virtual unsigned  csize()     {return _csize;}
+      virtual int*      ldata()     {assert(0); return NULL;}
+      virtual unsigned  lsize()     {assert(0); return 0   ;}
    protected:
                         TenderObj(const pointlist&);
       int*              _cdata;  // contour data
-      unsigned int      _csize;
+      unsigned          _csize;
 };
 
 //-----------------------------------------------------------------------------
@@ -98,8 +99,8 @@ class TenderPoly : public TenderObj {
                         TenderPoly() : TenderObj() {}
                         TenderPoly(const pointlist&);
       virtual          ~TenderPoly();
-      virtual void      Tessel(TeselTempData*);
-      TeselChain*       tdata()     {return &_tdata;}
+      void              Tessel(TeselTempData*);
+      TeselChain*       tdata()              {return &_tdata;}
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
@@ -122,7 +123,7 @@ class TenderWire : public TenderPoly {
    public:
                         TenderWire(const pointlist&, const word, bool);
       virtual          ~TenderWire();
-      virtual void      Tessel(TeselTempData*)  {};
+      void              Tessel(unsigned);
       virtual int*      ldata()                 {return _ldata;}
       virtual unsigned  lsize()                 {return _lsize;}
    protected:
