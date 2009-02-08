@@ -668,17 +668,21 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
    DeleteAllItems();
 
    CIFin::CifFile* ACIFDB = DATC->lockCIF(false);
-   if (NULL == ACIFDB) return;
-   AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
-
-   if (NULL == ACIFDB->hiertree()) return; // new, empty design
-   CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-   wxTreeItemId nroot;
-   while (root)
+   if (NULL != ACIFDB)
    {
-      nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
-      collectChildren(root, nroot, hier);
-      root = root->GetNextRoot(TARGETDB_LIB);
+      AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
+
+      if (NULL != ACIFDB->hiertree())
+      {
+         CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+         wxTreeItemId nroot;
+         while (root)
+         {
+            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
+            collectChildren(root, nroot, hier);
+            root = root->GetNextRoot(TARGETDB_LIB);
+         }
+      }
    }
    DATC->unlockCIF();
    SortChildren(GetRootItem());
