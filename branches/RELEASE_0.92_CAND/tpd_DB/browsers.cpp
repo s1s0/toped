@@ -569,17 +569,21 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
    DeleteAllItems();
 
    GDSin::GdsFile* AGDSDB = DATC->lockGDS(false);
-   if (NULL == AGDSDB) return;
-   AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
-
-   if (NULL == AGDSDB->hierTree()) return; // new, empty design
-   GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-   wxTreeItemId nroot;
-   while (root)
+   if (NULL != AGDSDB)
    {
-      nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name(),wxConvUTF8));
-      collectChildren(root, nroot, hier);
-      root = root->GetNextRoot(TARGETDB_LIB);
+      AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
+
+      if (NULL != AGDSDB->hierTree())
+      {
+         GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+         wxTreeItemId nroot;
+         while (root)
+         {
+            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name(),wxConvUTF8));
+            collectChildren(root, nroot, hier);
+            root = root->GetNextRoot(TARGETDB_LIB);
+         }
+      }
    }
    DATC->unlockGDS();
    SortChildren(GetRootItem());
