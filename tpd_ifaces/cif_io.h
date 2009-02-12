@@ -211,7 +211,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifLayer {
       public:
-                        CifLayer(std::string name, CifLayer* last);
+                        CifLayer(std::string name, CifLayer* last, _dbl_word, _dbl_word);
                        ~CifLayer();
          std::string    name()                        {return _name;}
          CifLayer*      last()                        {return _last;}
@@ -225,6 +225,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::string    _name;
          CifLayer*      _last;
          CifData*       _first;
+         _dbl_word      _a;
+         _dbl_word      _b;
    };
    typedef std::list<CifLayer*>     CifLayerList;
 
