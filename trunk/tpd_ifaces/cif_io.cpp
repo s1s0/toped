@@ -88,8 +88,9 @@ CIFin::CifLabelSig::CifLabelSig(CifData* last, std::string label, TP* location) 
       CifLabelLoc(last, label, location) {}
 
 //=============================================================================
-CIFin::CifLayer::CifLayer(std::string name, CifLayer* last):
-      _name(name), _last(last), _first(NULL) {}
+CIFin::CifLayer::CifLayer(std::string name, CifLayer* last, _dbl_word a, _dbl_word b):
+      _name(name), _last(last), _first(NULL), _a(a), _b(b)
+{}
 
 CIFin::CifLayer::~CifLayer()
 {
@@ -106,26 +107,36 @@ CIFin::CifLayer::~CifLayer()
 
 void CIFin::CifLayer::addBox(_dbl_word length,_dbl_word width ,TP* center, TP* direction)
 {
+   length = (int)((real)(length * _a) / (real)_b);
+   width  = (int)((real)(width  * _a) / (real)_b);
+   if (NULL != center)     (*center) *= (real)_a/(real)_b;
+   if (NULL != direction)  (*direction) *= (real)_a/(real)_b;
    _first = DEBUG_NEW CifBox(_first, length, width, center, direction);
 }
 
 void CIFin::CifLayer::addPoly(pointlist* poly)
 {
+   for (pointlist::iterator CP = poly->begin(); CP != poly->end(); CP++)
+      (*CP) *= (real)_a/(real)_b;
    _first = DEBUG_NEW CifPoly(_first, poly);
 }
 
 void CIFin::CifLayer::addWire(pointlist* poly, _dbl_word width)
 {
+   for (pointlist::iterator CP = poly->begin(); CP != poly->end(); CP++)
+      (*CP) *= (real)_a/(real)_b;
    _first = DEBUG_NEW CifWire(_first, poly, width);
 }
 
 void CIFin::CifLayer::addLabelLoc(std::string label, TP* loc)
 {
+   (*loc) *= (real)_a/(real)_b;
    _first = DEBUG_NEW CifLabelLoc(_first, label, loc);
 }
 
 void CIFin::CifLayer::addLabelSig(std::string label, TP* loc)
 {
+   (*loc) *= (real)_a/(real)_b;
    _first = DEBUG_NEW CifLabelSig(_first, label, loc);
 }
 
@@ -164,7 +175,7 @@ CIFin::CifLayer* CIFin::CifStructure::secureLayer(std::string name)
       if (name == wlay->name()) return wlay;
       wlay = wlay->last();
    }
-   _first = DEBUG_NEW CifLayer(name, _first);
+   _first = DEBUG_NEW CifLayer(name, _first, _a, _b);
    return _first;
 }
 

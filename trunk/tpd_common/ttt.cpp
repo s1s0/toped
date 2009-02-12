@@ -33,12 +33,14 @@
 //-----------------------------------------------------------------------------
 // class TP
 //-----------------------------------------------------------------------------
-TP::TP(real x, real y, real scale) {
+TP::TP(real x, real y, real scale)
+{
    _x = (int4b) rint(x * scale);
    _y = (int4b) rint(y * scale);
 }
 
-void TP::roundTO(int4b step) {
+void TP::roundTO(int4b step)
+{
    if (0 == step) step = 1;
    _x = (_x >= 0) ? (int4b) (rint((_x + (step/2)) / step) * step) :
                     (int4b) (rint((_x - (step/2)) / step) * step) ;
@@ -46,16 +48,25 @@ void TP::roundTO(int4b step) {
                     (int4b) (rint((_y - (step/2)) / step) * step) ;
 }
 
-TP TP::operator * (const CTM& op2) const {
+TP TP::operator * (const CTM& op2) const
+{
    return TP((int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx()),
               (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty()));
 }
 
-TP TP::operator *= (const CTM& op2) {
+TP TP::operator *= (const CTM& op2)
+{
    int4b x_new = (int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
    int4b y_new = (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
    _x = x_new; _y = y_new;
   return *this;
+}
+
+TP TP::operator *= (const real factor)
+{
+   _x = (int)((real)_x * factor);
+   _y = (int)((real)_y * factor);
+   return *this;
 }
 
 //TP TP::operator = ( const QPoint& qp) {

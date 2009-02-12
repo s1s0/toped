@@ -2094,7 +2094,7 @@ void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
 	std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
 	wxStringClientData *data= static_cast<wxStringClientData*>(evt.GetClientObject());
 	wxString str = data->GetData();
-	std::string toolName = str.mb_str(wxConvUTF8);
+	std::string toolName(str.mb_str(wxConvUTF8));
 
 	_resourceCenter->deleteTool(toolBarName, toolName);
 }
