@@ -191,27 +191,29 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifLabelLoc : public CifData {
       public:
-                     CifLabelLoc(CifData*, std::string, TP*);
+                     CifLabelLoc(CifData*, std::string, TP*, real size);
          virtual   ~CifLabelLoc();
          CifDataType dataType()                       {return cif_LBL_LOC;}
          std::string text() const                     {return _label;}
          const TP*   location() const                 {return _location;}
+         real        size()                           {return _size;}
 
       protected:
          std::string _label;
          TP*         _location;
+         real        _size;
    };
 
    class CifLabelSig : public CifLabelLoc {
       public:
-                     CifLabelSig(CifData*, std::string, TP*);
+                     CifLabelSig(CifData*, std::string, TP*, real size);
                     ~CifLabelSig() {}
          CifDataType dataType()                       {return cif_LBL_SIG;}
    };
 
    class CifLayer {
       public:
-                        CifLayer(std::string name, CifLayer* last);
+                        CifLayer(std::string name, CifLayer* last, _dbl_word, _dbl_word);
                        ~CifLayer();
          std::string    name()                        {return _name;}
          CifLayer*      last()                        {return _last;}
@@ -225,6 +227,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::string    _name;
          CifLayer*      _last;
          CifData*       _first;
+         _dbl_word      _a;
+         _dbl_word      _b;
    };
    typedef std::list<CifLayer*>     CifLayerList;
 

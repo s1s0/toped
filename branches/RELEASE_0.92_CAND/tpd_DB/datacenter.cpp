@@ -295,6 +295,7 @@ CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtdesign* dst_lib,
       SIMap* cif_layers) : _src_lib (src_lib), _dst_lib(dst_lib),
                                     _cif_layers(cif_layers)
 {
+   _crosscoeff = 1e-8/_dst_lib->DBU();
 }
 
 
@@ -415,10 +416,14 @@ void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string
 {
    pointlist pl;
    pl.reserve(4);
-   pl.push_back(TP( wd->center()->x() - wd->length() / 2, wd->center()->y() - wd->width() / 2 ));
-   pl.push_back(TP( wd->center()->x() + wd->length() / 2, wd->center()->y() - wd->width() / 2 ));
-   pl.push_back(TP( wd->center()->x() + wd->length() / 2, wd->center()->y() + wd->width() / 2 ));
-   pl.push_back(TP( wd->center()->x() - wd->length() / 2, wd->center()->y() + wd->width() / 2 ));
+   TP cpnt1( wd->center()->x() - wd->length() / 2, wd->center()->y() - wd->width() / 2 );
+   cpnt1 *= _crosscoeff; pl.push_back(cpnt1);
+   TP cpnt2( wd->center()->x() + wd->length() / 2, wd->center()->y() - wd->width() / 2 );
+   cpnt2 *= _crosscoeff; pl.push_back(cpnt2);
+   TP cpnt3( wd->center()->x() + wd->length() / 2, wd->center()->y() + wd->width() / 2 );
+   cpnt3 *= _crosscoeff; pl.push_back(cpnt3);
+   TP cpnt4( wd->center()->x() - wd->length() / 2, wd->center()->y() + wd->width() / 2 );
+   cpnt4 *= _crosscoeff; pl.push_back(cpnt4);
    if (NULL != wd->direction())
    {
       CTM tmx;
@@ -445,7 +450,14 @@ void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string
 
 void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::string layname)
 {
-   pointlist pl = *(wd->poly());
+   pointlist pl;
+   pl.reserve(wd->poly()->size());
+   for(pointlist::const_iterator CP = wd->poly()->begin(); CP != wd->poly()->end(); CP++)
+   {
+      TP pnt(*CP);
+      pnt *= _crosscoeff;
+      pl.push_back(pnt);
+   }
    laydata::valid_poly check(pl);
 
    if (!check.valid())
@@ -464,7 +476,14 @@ void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::strin
 
 void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::tdtlayer* wl, std::string layname)
 {
-   pointlist pl = *(wd->poly());
+   pointlist pl;
+   pl.reserve(wd->poly()->size());
+   for(pointlist::const_iterator CP = wd->poly()->begin(); CP != wd->poly()->end(); CP++)
+   {
+      TP pnt(*CP);
+      pnt *= _crosscoeff;
+      pl.push_back(pnt);
+   }
    laydata::valid_wire check(pl, wd->width());
 
    if (!check.valid())
@@ -485,7 +504,7 @@ void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
    {
       laydata::refnamepair striter = _dst_lib->getcellnamepair(cell_name);
       // Absolute magnification, absolute angle should be reflected somehow!!!
-      dst->addcellref(_dst_lib, striter, *(wd->location()), false);
+      dst->addcellref(_dst_lib, striter, (*wd->location())*_crosscoeff, false);
    }
    else
    {
@@ -499,9 +518,11 @@ void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::tdtlayer* wl, std::s
 {
    // CIF doesn't have a concept of texts (as GDS)
    // text size and placement are just the default
+   TP pnt(*(wd->location()));
+   pnt *= _crosscoeff;
    wl->addtext(wd->text(),
-               CTM(*(wd->location()),
-                   1 / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
+               CTM(pnt,
+                   (wd->size() * _crosscoeff) / (/*_dst_lib->UU() **/ OPENGL_FONT_UNIT),
                    0.0,
                    false )
               );
