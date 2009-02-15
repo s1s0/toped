@@ -33,12 +33,14 @@
 //-----------------------------------------------------------------------------
 // class TP
 //-----------------------------------------------------------------------------
-TP::TP(real x, real y, real scale) {
+TP::TP(real x, real y, real scale)
+{
    _x = (int4b) rint(x * scale);
    _y = (int4b) rint(y * scale);
 }
 
-void TP::roundTO(int4b step) {
+void TP::roundTO(int4b step)
+{
    if (0 == step) step = 1;
    _x = (_x >= 0) ? (int4b) (rint((_x + (step/2)) / step) * step) :
                     (int4b) (rint((_x - (step/2)) / step) * step) ;
@@ -46,16 +48,25 @@ void TP::roundTO(int4b step) {
                     (int4b) (rint((_y - (step/2)) / step) * step) ;
 }
 
-TP TP::operator * (const CTM& op2) const {
+TP TP::operator * (const CTM& op2) const
+{
    return TP((int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx()),
               (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty()));
 }
 
-TP TP::operator *= (const CTM& op2) {
+TP TP::operator *= (const CTM& op2)
+{
    int4b x_new = (int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
    int4b y_new = (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
    _x = x_new; _y = y_new;
   return *this;
+}
+
+TP TP::operator *= (const real factor)
+{
+   _x = (int)((real)_x * factor);
+   _y = (int)((real)_y * factor);
+   return *this;
 }
 
 //TP TP::operator = ( const QPoint& qp) {
@@ -459,14 +470,16 @@ CTM CTM::Rotate(const TP& direction) // angle between X axis and the point (CIF)
    return *this;
 }
 
-CTM CTM::Reversed() const {
+CTM CTM::Reversed() const
+{
    real denom = (a() * d()) - (b() * c());
    return CTM(                 d()/denom,                   -b()/denom,// 0.0,
                                -c()/denom,                    a()/denom,// 0.0,
               (ty()*c() - tx()*d())/denom , (tx()*b() - ty()*a())/denom );// 1.0 );
 }
 
-CTM CTM::operator * (const CTM op2) const{
+CTM CTM::operator * (const CTM op2) const
+{
    CTM res;
    res._a  = a()  * op2.a() + b()  * op2.c();
    res._b  = a()  * op2.b() + b()  * op2.d();
@@ -477,7 +490,21 @@ CTM CTM::operator * (const CTM op2) const{
    return res;
 }
 
-CTM CTM::operator = (const CTM op2) {
+/*! Operator is used to multiply only the binding point (tx,ty) with a factor
+    For example in the case of CIF import. Use with caution making sure that
+    the original _tx, _ty were not influenced by the following rotate/scale/flip
+    transformations
+*/
+CTM CTM::operator * (const real factor) const
+{
+   CTM res(*this);
+   res._tx *= factor;
+   res._ty *= factor;
+   return res;
+}
+
+CTM CTM::operator = (const CTM op2)
+{
    _a = op2.a();_b = op2.b();_c = op2.c();_d = op2.d(); 
    _tx = op2.tx();_ty = op2.ty();
    return *this; 

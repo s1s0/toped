@@ -51,6 +51,7 @@ namespace laydata {
       //
       std::string    name()            const {return _name;}
       real           UU()              const {return _UU;}
+      real           DBU()             const {return _DBU;}
       const cellList& cells()          const {return _cells;}
       TDTHierTree*   hiertree()        const {return _hiertree;}
       int            libID()           const {return _libID;}

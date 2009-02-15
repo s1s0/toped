@@ -179,7 +179,8 @@ public:
                           {_a = a; _b = b; _c = c; _d = d; _tx = tx; _ty = ty;};
    CTM  operator =  (const CTM op2);
    CTM  operator *  (const CTM op2) const;
-   CTM  operator *= (const CTM op2)         {return (*this = *this * op2);};
+   CTM  operator *  (const real) const;
+   CTM  operator *= (const CTM op2) {return (*this = *this * op2);};
    real a()        const            {return _a;};
    real b()        const            {return _b;};
    real c()        const            {return _c;};
@@ -201,11 +202,12 @@ public:
    void     info(std::ostringstream&,real) const;
    const int4b    x()  const {return _x;};
    const int4b    y()  const {return _y;};
-   TP operator * ( const CTM& ) const;
+   TP operator *  ( const CTM& ) const;
    TP operator *= ( const CTM& );
-   TP operator = ( const TP& np)        {_x = np.x(); _y = np.y(); return *this;};
-   TP operator - ( const TP& pnt) const {return TP(_x - pnt.x(),_y - pnt.y());};
-   TP operator + ( const TP& pnt) const {return TP(_x + pnt.x(),_y + pnt.y());};
+   TP operator *= ( const real );
+   TP operator =  ( const TP& np)        {_x = np.x(); _y = np.y(); return *this;};
+   TP operator -  ( const TP& pnt) const {return TP(_x - pnt.x(),_y - pnt.y());};
+   TP operator +  ( const TP& pnt) const {return TP(_x + pnt.x(),_y + pnt.y());};
    bool operator == (const TP& np) const{return ((np.x() == _x) && (np.y() == _y));};
    bool operator != (const TP& np) const{return ((np.x() != _x) || (np.y() != _y));};
    void     setX(const int4b x) {_x = x;};

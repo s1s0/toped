@@ -74,7 +74,8 @@ namespace CIFin {
          void                 lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string );
          CIFin::CifFile*      _src_lib;
          laydata::tdtdesign*  _dst_lib;
-         SIMap*                _cif_layers;
+         SIMap*               _cif_layers;
+         real                 _crosscoeff;
    };
 
 }
