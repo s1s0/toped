@@ -496,14 +496,16 @@ CTM CTM::Rotate(const TP& direction) // angle between X axis and the point (CIF)
    return *this;
 }
 
-CTM CTM::Reversed() const {
+CTM CTM::Reversed() const
+{
    real denom = (a() * d()) - (b() * c());
    return CTM(                 d()/denom,                   -b()/denom,// 0.0,
                                -c()/denom,                    a()/denom,// 0.0,
               (ty()*c() - tx()*d())/denom , (tx()*b() - ty()*a())/denom );// 1.0 );
 }
 
-CTM CTM::operator * (const CTM op2) const{
+CTM CTM::operator * (const CTM op2) const
+{
    CTM res;
    res._a  = a()  * op2.a() + b()  * op2.c();
    res._b  = a()  * op2.b() + b()  * op2.d();
@@ -514,7 +516,21 @@ CTM CTM::operator * (const CTM op2) const{
    return res;
 }
 
-CTM CTM::operator = (const CTM op2) {
+/*! Operator is used to multiply only the binding point (tx,ty) with a factor
+    For example in the case of CIF import. Use with caution making sure that
+    the original _tx, _ty were not influenced by the following rotate/scale/flip
+    transformations
+*/
+CTM CTM::operator * (const real factor) const
+{
+   CTM res(*this);
+   res._tx *= factor;
+   res._ty *= factor;
+   return res;
+}
+
+CTM CTM::operator = (const CTM op2)
+{
    _a = op2.a();_b = op2.b();_c = op2.c();_d = op2.d(); 
    _tx = op2.tx();_ty = op2.ty();
    return *this; 
