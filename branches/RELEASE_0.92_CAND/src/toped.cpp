@@ -755,12 +755,12 @@ void tui::TopedFrame::initToolBars()
 
    //_resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_16x16);
   // _resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_32x32);
-   _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
+   _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
    _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
                                           wxDefaultPosition, wxDefaultSize,
                                           wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-   _GLstatus->SetSize(wxSize(-1, 30));
+//   _GLstatus->SetSize(wxSize(-1, 30));
 
    _status->AddControl((wxControl*)_GLstatus);
    _status->Realize();
