@@ -76,16 +76,16 @@ CIFin::CifRef::~CifRef()
    delete _location;
 }
 //=============================================================================
-CIFin::CifLabelLoc::CifLabelLoc(CifData* last, std::string label, TP* location) :
-      CifData(last), _label(label), _location(location) {}
+CIFin::CifLabelLoc::CifLabelLoc(CifData* last, std::string label, TP* location, real size) :
+      CifData(last), _label(label), _location(location), _size(size){}
 
 CIFin::CifLabelLoc::~CifLabelLoc()
 {
    delete _location;
 }
 //=============================================================================
-CIFin::CifLabelSig::CifLabelSig(CifData* last, std::string label, TP* location) :
-      CifLabelLoc(last, label, location) {}
+CIFin::CifLabelSig::CifLabelSig(CifData* last, std::string label, TP* location, real size) :
+      CifLabelLoc(last, label, location, size) {}
 
 //=============================================================================
 CIFin::CifLayer::CifLayer(std::string name, CifLayer* last, _dbl_word a, _dbl_word b):
@@ -131,13 +131,13 @@ void CIFin::CifLayer::addWire(pointlist* poly, _dbl_word width)
 void CIFin::CifLayer::addLabelLoc(std::string label, TP* loc)
 {
    (*loc) *= (real)_a/(real)_b;
-   _first = DEBUG_NEW CifLabelLoc(_first, label, loc);
+   _first = DEBUG_NEW CifLabelLoc(_first, label, loc, (real)_a / (real)_b);
 }
 
 void CIFin::CifLayer::addLabelSig(std::string label, TP* loc)
 {
    (*loc) *= (real)_a/(real)_b;
-   _first = DEBUG_NEW CifLabelSig(_first, label, loc);
+   _first = DEBUG_NEW CifLabelSig(_first, label, loc, (real)_a/(real)_b);
 }
 
 //=============================================================================
@@ -197,6 +197,7 @@ void CIFin::CifStructure::collectLayers(nameList& layList, bool hier)
 
 void CIFin::CifStructure::addRef(_dbl_word cell, CTM* location)
 {
+   (*location) = ((*location)*((real)_a/(real)_b));
    _refirst = DEBUG_NEW CifRef(_refirst, cell, location);
 }
 
