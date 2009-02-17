@@ -77,6 +77,7 @@ namespace CIFin {
          laydata::tdtdesign*  _dst_lib;
          SIMap*               _cif_layers;
          real                 _crosscoeff;
+         real                 _dbucoeff;
    };
 
 }

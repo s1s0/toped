@@ -295,7 +295,7 @@ CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtdesign* dst_lib,
       SIMap* cif_layers) : _src_lib (src_lib), _dst_lib(dst_lib),
                                     _cif_layers(cif_layers)
 {
-   _crosscoeff = 1e-8/_dst_lib->DBU();
+   _dbucoeff = 1e-8/_dst_lib->DBU();
 }
 
 
@@ -372,6 +372,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
 
 void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
 {
+   _crosscoeff = _dbucoeff * src->a() / src->b();
    CIFin::CifLayer* swl = src->firstLayer();
    while( swl ) // loop trough the layers
    {
@@ -414,22 +415,32 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
 
 void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string layname)
 {
-   pointlist pl;
-   pl.reserve(4);
-   TP cpnt1( wd->center()->x() - wd->length() / 2, wd->center()->y() - wd->width() / 2 );
-   cpnt1 *= _crosscoeff; pl.push_back(cpnt1);
-   TP cpnt2( wd->center()->x() + wd->length() / 2, wd->center()->y() - wd->width() / 2 );
-   cpnt2 *= _crosscoeff; pl.push_back(cpnt2);
-   TP cpnt3( wd->center()->x() + wd->length() / 2, wd->center()->y() + wd->width() / 2 );
-   cpnt3 *= _crosscoeff; pl.push_back(cpnt3);
-   TP cpnt4( wd->center()->x() - wd->length() / 2, wd->center()->y() + wd->width() / 2 );
-   cpnt4 *= _crosscoeff; pl.push_back(cpnt4);
+   pointlist pl;   pl.reserve(4);
+   real cX, cY;
+
+   cX = rint(((real)wd->center()->x() - (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() - (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt1( (int4b)cX, (int4b)cY );   pl.push_back(cpnt1);
+
+   cX = rint(((real)wd->center()->x() + (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() - (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt2( (int4b)cX, (int4b)cY );   pl.push_back(cpnt2);
+
+   cX = rint(((real)wd->center()->x() + (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() + (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt3( (int4b)cX, (int4b)cY );   pl.push_back(cpnt3);
+
+   cX = rint(((real)wd->center()->x() - (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() + (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt4( (int4b)cX, (int4b)cY );   pl.push_back(cpnt4);
    if (NULL != wd->direction())
    {
       CTM tmx;
-      tmx.Translate(-wd->center()->x(),-wd->center()->x());
+      cX = (real)wd->center()->x() * _crosscoeff;
+      cY = (real)wd->center()->y() * _crosscoeff;
+      tmx.Translate(-cX,-cY);
       tmx.Rotate(*(wd->direction()));
-      tmx.Translate(-wd->center()->x(),-wd->center()->x());
+      tmx.Translate(cX,cY);
       pl[0] *=  tmx;
       pl[1] *=  tmx;
       pl[2] *=  tmx;
@@ -438,8 +449,13 @@ void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string
 
    laydata::valid_poly check(pl);
 
-   assert(check.valid());
-   pl = check.get_validated() ;
+   if (!check.valid())
+   {
+      std::ostringstream ost; ost << "Layer " << layname;
+      ost << ": Box check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   else pl = check.get_validated() ;
    if (check.box())
    {
       wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
@@ -522,7 +538,7 @@ void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::tdtlayer* wl, std::s
    pnt *= _crosscoeff;
    wl->addtext(wd->text(),
                CTM(pnt,
-                   (wd->size() * _crosscoeff) / (/*_dst_lib->UU() **/ OPENGL_FONT_UNIT),
+                   (_crosscoeff /* * default_size*/ / OPENGL_FONT_UNIT),
                    0.0,
                    false )
               );
