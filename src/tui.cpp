@@ -409,6 +409,10 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
    _recursive->SetValue(true);
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
+   _techno = wxT("1.0");
+   wxTextCtrl* dwtechno = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+         wxTextValidator(wxFILTER_NUMERIC, &_techno));
+
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    CIFin::CifFile* ACIFDB = DATC->lockCIF();
       CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
@@ -439,8 +443,14 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    //
    wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   
+   wxBoxSizer *lsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   lsizer2->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Techno:"), wxDefaultPosition, wxDefaultSize),
+                 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
+   lsizer2->Add(dwtechno, 1, wxEXPAND);
+   lsizer2->Add( _saveMap, 0, wxALL | wxALIGN_RIGHT, 5 );
    lsizer->Add(_layList , 1, wxEXPAND);
-   lsizer->Add( _saveMap, 0, wxALL | wxALIGN_RIGHT, 5 );
+   lsizer->Add( lsizer2, 0, wxALL , 5 );
    //
    // First line up the important things
    wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );

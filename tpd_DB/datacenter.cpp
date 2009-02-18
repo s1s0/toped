@@ -292,8 +292,8 @@ laydata::refnamepair GDSin::Gds2Ted::linkcellref(std::string cellname)
 // class Cif2Ted
 //-----------------------------------------------------------------------------
 CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtdesign* dst_lib,
-      SIMap* cif_layers) : _src_lib (src_lib), _dst_lib(dst_lib),
-                                    _cif_layers(cif_layers)
+      SIMap* cif_layers, real techno) : _src_lib (src_lib), _dst_lib(dst_lib),
+                                    _cif_layers(cif_layers), _techno(techno)
 {
    _dbucoeff = 1e-8/_dst_lib->DBU();
 }
@@ -534,11 +534,12 @@ void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::tdtlayer* wl, std::s
 {
    // CIF doesn't have a concept of texts (as GDS)
    // text size and placement are just the default
+   if (0.0 == _techno) return;
    TP pnt(*(wd->location()));
    pnt *= _crosscoeff;
    wl->addtext(wd->text(),
                CTM(pnt,
-                   (_crosscoeff /* * default_size*/ / OPENGL_FONT_UNIT),
+                   (_techno / OPENGL_FONT_UNIT),
                    0.0,
                    false )
               );
@@ -873,14 +874,14 @@ bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
    }
 }
 
-void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite )
+void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite, real techno )
 {
    // DB shold have been locked at this point (from the tell functions)
    if (NULL == lockCIF())
       tell_log(console::MT_ERROR,"No CIF data in memory. Parse CIF file first");
    else
    {
-      CIFin::Cif2Ted converter(_CIFDB, _TEDLIB(), cifLayers);
+      CIFin::Cif2Ted converter(_CIFDB, _TEDLIB(), cifLayers, techno);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.top_structure(*CN, recur, overwrite);
       _TEDLIB()->modified = true;
