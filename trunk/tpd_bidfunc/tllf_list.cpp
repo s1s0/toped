@@ -55,7 +55,7 @@ int tellstdfunc::lstLENGTH::execute()
 //============================================================================
 int tellstdfunc::stdABS::argsOK(argumentQ* amap)
 {
-   return (!((amap->size() == 1) && ( (*((*amap)[0]))() == telldata::tn_real  ) ||
+   return !((amap->size() == 1) && (( (*((*amap)[0]))() == telldata::tn_real  ) ||
                                     ( (*((*amap)[0]))() == telldata::tn_int   )   ));
 }
 
@@ -77,8 +77,8 @@ int tellstdfunc::stdABS::execute()
 //============================================================================
 int tellstdfunc::stdSIN::argsOK(argumentQ* amap)
 {
-   return (!((amap->size() == 1) && ( (*((*amap)[0]))() == telldata::tn_real  ) ||
-         ( (*((*amap)[0]))() == telldata::tn_int   )   ));
+   return !((amap->size() == 1) && (( (*((*amap)[0]))() == telldata::tn_real  ) ||
+                                    ( (*((*amap)[0]))() == telldata::tn_int   )   ));
 }
 
 nameList* tellstdfunc::stdSIN::callingConv(const telldata::typeMAP*)
@@ -100,8 +100,8 @@ int tellstdfunc::stdSIN::execute()
 //============================================================================
 int tellstdfunc::stdCOS::argsOK(argumentQ* amap)
 {
-   return (!((amap->size() == 1) && ( (*((*amap)[0]))() == telldata::tn_real  ) ||
-         ( (*((*amap)[0]))() == telldata::tn_int   )   ));
+   return !((amap->size() == 1) && (( (*((*amap)[0]))() == telldata::tn_real  ) ||
+                                    ( (*((*amap)[0]))() == telldata::tn_int   )   ));
 }
 
 nameList* tellstdfunc::stdCOS::callingConv(const telldata::typeMAP*)
