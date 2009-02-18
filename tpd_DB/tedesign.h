@@ -140,6 +140,7 @@ namespace laydata {
       quadTree*      targetlayer(word layno);
       bool           securelaydef(word layno) {return _target.securelaydef( layno);}
       void           unselect_all()    const {_target.edit()->unselect_all(false);};
+      void           try_unselect_all()const;
       selectList*    shapesel()        const {return _target.edit()->shapesel();};
       selectList*    copy_selist()     const {return _target.edit()->copy_selist();};
       void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};

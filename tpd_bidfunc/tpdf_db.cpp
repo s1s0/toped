@@ -260,11 +260,11 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::TDTsave::execute() {
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->unselect_all();
-   DATC->unlockDB();
-   DATC->TDTwrite();
-   ATDB = DATC->lockDB(false);
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      ATDB->try_unselect_all();
+//   DATC->unlockDB();
+      DATC->TDTwrite();
+//   ATDB = DATC->lockDB(false);
       TpdTime timec(ATDB->created());
       TpdTime timeu(ATDB->lastUpdated());
    DATC->unlockDB();
@@ -290,21 +290,22 @@ int tellstdfunc::TDTsaveIFF::execute() {
    }
    else
    {
-      laydata::tdtdesign* ATDB = DATC->lockDB();
-         ATDB->unselect_all();
-      DATC->unlockDB();
-      bool stop_ignoring = false;
-      if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
-      {
-         DATC->TDTwrite(DATC->tedfilename().c_str());
-         ATDB = DATC->lockDB(false);
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         ATDB->try_unselect_all();
+//      DATC->unlockDB();
+         bool stop_ignoring = false;
+         if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
+         {
+            DATC->TDTwrite(DATC->tedfilename().c_str());
+   //         ATDB = DATC->lockDB(false);
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
-         DATC->unlockDB();
-         LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
-               timeu() << "\");"; LogFile.flush();
-      }
-      if (stop_ignoring) set_ignoreOnRecovery(false); 
+   //         DATC->unlockDB();
+            LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
+                  timeu() << "\");"; LogFile.flush();
+         }
+      DATC->unlockDB();
+      if (stop_ignoring) set_ignoreOnRecovery(false);
    }
    return EXEC_NEXT;
 }
@@ -320,11 +321,11 @@ int tellstdfunc::TDTsaveas::execute() {
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      laydata::tdtdesign* ATDB = DATC->lockDB();
-         ATDB->unselect_all();
-      DATC->unlockDB();
-      DATC->TDTwrite(filename.c_str());
-      ATDB = DATC->lockDB(false);
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         ATDB->try_unselect_all();
+//      DATC->unlockDB();
+         DATC->TDTwrite(filename.c_str());
+//      ATDB = DATC->lockDB(false);
          TpdTime timec(ATDB->created());
          TpdTime timeu(ATDB->lastUpdated());
       DATC->unlockDB();
