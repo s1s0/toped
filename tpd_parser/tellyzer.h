@@ -130,6 +130,10 @@ namespace  parsercmd {
       int execute();
    };
 
+   class cmdCONCATENATE:public cmdVIRTUAL {
+      int execute();
+   };
+
    class cmdMINUS:public cmdVIRTUAL {
       int execute();
    };
