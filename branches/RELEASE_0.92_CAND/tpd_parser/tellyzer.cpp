@@ -230,6 +230,15 @@ int parsercmd::cmdPLUS::execute() {
 }
 
 //=============================================================================
+int parsercmd::cmdCONCATENATE::execute() {
+   TELL_DEBUG(cmdCONCATENATE);
+   std::string op2 = getStringValue(OPstack);
+   std::string op1 = getStringValue(OPstack);
+   OPstack.push(DEBUG_NEW telldata::ttstring(op1 + op2));
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 int parsercmd::cmdMINUS::execute() {
    TELL_DEBUG(cmdMINUS);
    real value2 = getOpValue();
@@ -1478,9 +1487,9 @@ telldata::typeID parsercmd::UMinus(telldata::typeID op1, TpdYYLtype loc1) {
 //     +/-    |real |point| box |
 //------------+-----+-----+-----+
 //   real     |  x  |  -  |  -  |
-//   point    |shift|shift|  -  |
-//   box      |blow |shift| or  |
-//---------------------------------------
+//   point    |shift|shift|  -  | also:
+//   box      |blow |shift| or  | string + string => concatenation
+//-----------------------------------------------------------------------------
 telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
                                                   TpdYYLtype loc1, TpdYYLtype loc2) {
    switch (op1)   {
@@ -1509,6 +1518,13 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
 //            case tn_poly: // or
                   default: tellerror("unexepected operand type",loc2); break;
          };break;
+      case telldata::tn_string:
+         if (telldata::tn_string == op2) {
+            CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdCONCATENATE());
+            return telldata::tn_string;
+         }
+         else tellerror("unexepected operand type",loc2);
+         break;
       default: tellerror("unexepected operand type",loc1);break;
    }
    return telldata::tn_void;

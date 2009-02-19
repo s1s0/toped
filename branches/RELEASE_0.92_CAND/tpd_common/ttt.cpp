@@ -64,8 +64,8 @@ TP TP::operator *= (const CTM& op2)
 
 TP TP::operator *= (const real factor)
 {
-   _x = (int)((real)_x * factor);
-   _y = (int)((real)_y * factor);
+   _x = (int4b) rint((real)_x * factor);
+   _y = (int4b) rint((real)_y * factor);
    return *this;
 }
 

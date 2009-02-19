@@ -1089,6 +1089,10 @@ void laydata::tdtdesign::check_active() {
    if (NULL == _target.edit()) throw EXPTNactive_cell();
 };
 
+void laydata::tdtdesign::try_unselect_all() const {
+   if (NULL != _target.edit())
+      _target.edit()->unselect_all(false);
+}
 
 laydata::quadTree* laydata::tdtdesign::targetlayer(word layno)
 {

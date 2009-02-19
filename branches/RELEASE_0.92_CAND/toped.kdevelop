@@ -21,15 +21,18 @@
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
-      <mainprogram/>
+      <mainprogram>/local_home/skr/toped/debug</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs/>
       <terminal>true</terminal>
       <autocompile>true</autocompile>
-      <envvars/>
+      <envvars>
+        <envvar value="/home/skr/toped" name="TPD_GLOBAL" />
+        <envvar value="/home/skr/toped" name="TPD_LOCAL" />
+      </envvars>
       <globaldebugarguments/>
-      <globalcwd>/home/skr/toped_public/debug</globalcwd>
+      <globalcwd/>
       <useglobalprogram>false</useglobalprogram>
       <autoinstall>false</autoinstall>
       <autokdesu>false</autokdesu>
@@ -201,8 +204,8 @@
       <root>/usr/lib/qt-3.3</root>
       <includestyle>3</includestyle>
       <designerintegration>EmbeddedKDevDesigner</designerintegration>
-      <qmake>/usr/lib/qt-3.3/bin/qmake</qmake>
-      <designer>/usr/lib64/qt-3.3/bin/designer</designer>
+      <qmake></qmake>
+      <designer></designer>
       <designerpluginpaths/>
     </qt>
     <splitheadersource>
