@@ -78,13 +78,13 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    SetBackgroundColour(wxColour(wxT("LIGHT_GRAY")));
    SetForegroundColour(wxColour(wxT("BLACK")));
    X_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition,wxSize(120,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
    Y_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition, wxSize(120,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
    _dX = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
    _dY = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
 
    _selected = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0"), wxDefaultPosition, wxSize(40,-1),
                                                    wxST_NO_AUTORESIZE | wxALIGN_LEFT);
@@ -1259,7 +1259,7 @@ void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
    wxString ost_int;
    ost_int << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
    wxString ost;
-   ost << wxT("cifimport(") << ost_int << wxT(", getciflaymap(true), true, false );cifclose();");
+   ost << wxT("cifimport(") << ost_int << wxT(", getciflaymap(true), true, false, 0.0 );cifclose();");
    _cmdline->parseCommand(ost);
 //   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
@@ -1406,9 +1406,13 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
       if (NULL != laymap2save)
          USMap2wxString(laymap2save , wxlaymap2save);
       wxString ost;
+      double techno;
+      if (!dlg->getTechno().ToDouble(&techno))
+         techno = 0.0;
       ost << wxT("cifimport(\"") << dlg->getSelectedCell() << wxT("\" , ") << wxlaymap << wxT(",")
           << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(",")
-          << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(");");
+          << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(",")
+          << techno << wxT(");");
       if (NULL != laymap2save)
          ost << wxT("setciflaymap(")
              << wxlaymap2save << wxT(");");
