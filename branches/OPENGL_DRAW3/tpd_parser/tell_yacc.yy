@@ -431,6 +431,7 @@ foreachstatement:
          CMDBlock = CMDBlock->popblk();         
          foreach_command->addBlocks(header_block, body_block);
          CMDBlock->pushcmd(foreach_command);
+         foreach_command = NULL;
       }
 ;
 
@@ -516,6 +517,7 @@ assignment:
    | listinsert '=' argument               {
       $$ = parsercmd::Uninsert(tell_lvalue, $3, listadd_command, @2);
       delete $3;
+      listadd_command = NULL;
    }
 ;
 
@@ -976,13 +978,13 @@ void cleanonabort()
 {
    CMDBlock = CMDBlock->cleaner();
    parsercmd::EOfile();
-   if (tellvar)         {delete tellvar;        tellvar           = NULL;}
-   if (tell_lvalue)     {delete tell_lvalue;    tell_lvalue       = NULL;}
    if (foreach_command) {delete foreach_command;foreach_command   = NULL;}
    if (listadd_command) {delete listadd_command;listadd_command   = NULL;}
    if (tellstruct)      {delete tellstruct;     tellstruct        = NULL;}
    if (argmap)          {delete argmap;         argmap            = NULL;}
    if (cfd)             {delete cfd;            cfd               = NULL;}
+   tell_lvalue       = NULL;
+   tellvar           = NULL;
 }
 
 /*
