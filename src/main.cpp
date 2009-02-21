@@ -26,6 +26,7 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include <GL/glew.h>
 #include <wx/wx.h>
 #include <wx/filefn.h>
 #include <wx/filename.h>
@@ -495,6 +496,36 @@ bool TopedApp::OnInit() {
       //std::string info("Toped can't obtain required GLX Visual. Check your video driver/setup please");
       //tell_log(console::MT_ERROR,info);
       return FALSE;
+   }
+
+   GLenum err = glewInit();
+   if (GLEW_OK != err)
+   {
+      wxString errmessage(wxT("glewInit() returns an error: "));
+      std::string boza((const char*)glewGetErrorString(err));
+      errmessage << wxString(boza.c_str(), wxConvUTF8);
+      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped, errmessage, wxT("Toped"),
+                    wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
+      dlg1->Destroy();
+   }
+   if (!glewIsSupported("GL_VERSION_1_4 GL_EXT_multi_draw_arrays"))
+   {
+      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
+            wxT("openGL version 1.4 is not supported"),
+            wxT("Toped"),
+            wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
+      dlg1->Destroy();
+   }
+   if (!glewIsSupported("GL_EXT_multi_draw_arrays"))
+   {
+      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
+            wxT("glMultiDrawElements / glMultiDrawArrays not supported"),
+            wxT("Toped"),
+            wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
+      dlg1->Destroy();
    }
    if (!LoadFontFile("arial1")) return FALSE;
    Toped->setIconDir(std::string(tpdUIDir.mb_str(wxConvFile)));

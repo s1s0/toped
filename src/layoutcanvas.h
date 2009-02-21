@@ -29,6 +29,7 @@
 #define LAYOUTCANVAS_H
 
 #include <string>
+#include <GL/glew.h>
 #include <wx/glcanvas.h>
 #include <wx/cursor.h>
 #include <wx/image.h>

@@ -29,6 +29,7 @@
 
 #include <string>
 #include <vector>
+#include <GL/glew.h>
 #include <wx/wx.h>
 #include <wx/laywin.h>
 
@@ -247,7 +248,7 @@ namespace tui
 							const std::string &hotKey, 
 							const std::string &helpString,
 							std::string func);
-		/*Don’t call setToolBarSize immediately!!! 
+		/*Donï¿½t call setToolBarSize immediately!!! 
 		It leads to nonsynchronized internal state of object and Setting Menu.
 		Better to use toolbarsize TELL-function.*/
 		void setToolBarSize(bool direction, IconSizes size);

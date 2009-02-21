@@ -30,8 +30,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/glew.h>
 #include "tedstd.h"
 #include "viewprop.h"
 #include "ps_out.h"

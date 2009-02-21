@@ -28,7 +28,7 @@
 #ifndef TENDERER_H
 #define TENDERER_H
 
-#include <GL/glu.h>
+#include <GL/glew.h>
 #include "drawprop.h"
 
 typedef std::list<word> TeselVertices;

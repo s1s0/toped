@@ -26,9 +26,6 @@
 //===========================================================================
 
 #include "tpdph.h"
-#define GL_GLEXT_PROTOTYPES 1
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include "tenderer.h"
 #include "viewprop.h"
 #include "tedat.h"

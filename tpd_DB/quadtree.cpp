@@ -30,8 +30,7 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "../tpd_common/outbox.h"
-
-#include "iostream"
+#include <iostream>
 
 //-----------------------------------------------------------------------------
 // class quadTree

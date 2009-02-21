@@ -217,6 +217,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    ap_trigger = 10;
    glfInit();
 }
+
 void	tui::LayoutCanvas::showInfo()
 {
    std::ostringstream ost1, ost2, ost3;
@@ -250,19 +251,15 @@ void	tui::LayoutCanvas::showInfo()
 
    if((pfd.dwFlags & PFD_GENERIC_FORMAT) && !(pfd.dwFlags & PFD_GENERIC_ACCELERATED))
    {
-      ost<<"Program emulation of OpenGL";
-      tell_log(console::MT_INFO,ost.str());
-      ost<<"Operation can be extremely slow";
-      tell_log(console::MT_INFO,ost.str());
+      tell_log(console::MT_INFO,"Program emulation of OpenGL");
+      tell_log(console::MT_INFO,"Operation can be extremely slow");
    }
 
     // Hardware supports only part of all set of functions ( MCD-driver ).
    if((pfd.dwFlags & PFD_GENERIC_FORMAT) && (pfd.dwFlags & PFD_GENERIC_ACCELERATED))
    {
-      ost<<"Program/hardware emulation of OpenGL";
-      tell_log(console::MT_INFO,ost.str());
-      ost<<"Some operations can not be accelerated";
-      tell_log(console::MT_INFO,ost.str());
+      tell_log(console::MT_INFO,"Program/hardware emulation of OpenGL");
+      tell_log(console::MT_INFO,"Some operations can not be accelerated");
    }
 
    // Full hardware support ( ICD-driver ).
@@ -277,6 +274,9 @@ void	tui::LayoutCanvas::showInfo()
    msg << "GLX version "<< GetGLXVersion();
    tell_log(console::MT_INFO, msg.str());
 #endif
+   std::ostringstream glewmsg;
+   glewmsg << "Using GLEW " << glewGetString(GLEW_VERSION);
+   tell_log(console::MT_INFO, glewmsg.str());
 }
 
 void tui::LayoutCanvas::snapshot(byte*& theImage, word& szW, word& szH)
