@@ -262,9 +262,7 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
 int tellstdfunc::TDTsave::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       ATDB->try_unselect_all();
-//   DATC->unlockDB();
       DATC->TDTwrite();
-//   ATDB = DATC->lockDB(false);
       TpdTime timec(ATDB->created());
       TpdTime timeu(ATDB->lastUpdated());
    DATC->unlockDB();
@@ -292,15 +290,12 @@ int tellstdfunc::TDTsaveIFF::execute() {
    {
       laydata::tdtdesign* ATDB = DATC->lockDB(false);
          ATDB->try_unselect_all();
-//      DATC->unlockDB();
          bool stop_ignoring = false;
          if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
          {
             DATC->TDTwrite(DATC->tedfilename().c_str());
-   //         ATDB = DATC->lockDB(false);
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
-   //         DATC->unlockDB();
             LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
                   timeu() << "\");"; LogFile.flush();
          }
@@ -323,9 +318,7 @@ int tellstdfunc::TDTsaveas::execute() {
    {
       laydata::tdtdesign* ATDB = DATC->lockDB(false);
          ATDB->try_unselect_all();
-//      DATC->unlockDB();
          DATC->TDTwrite(filename.c_str());
-//      ATDB = DATC->lockDB(false);
          TpdTime timec(ATDB->created());
          TpdTime timeu(ATDB->lastUpdated());
       DATC->unlockDB();

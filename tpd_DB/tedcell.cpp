@@ -560,7 +560,7 @@ void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
 
 
 void laydata::tdtcell::CIFwrite(CIFin::CifExportFile& ciff, const cellList& allcells,
-                                const TDTHierTree* root, real UU, bool recur) const
+                                const TDTHierTree* root, real DBU, bool recur) const
 {
    // We going to write the cells in hierarchical order. Children - first!
    if (recur)
@@ -568,20 +568,35 @@ void laydata::tdtcell::CIFwrite(CIFin::CifExportFile& ciff, const cellList& allc
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
-         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child, UU, recur);
+         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child, DBU, recur);
          Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
    if (ciff.checkCellWritten(name())) return;
    //
-   ciff.definitionStart(name());
+   ciff.definitionStart(name(),DBU);
+   // @TODO! See Bug#15242
+   // Currently all coordinates are exported in DBU units and in the DS line of CIF
+   // we put the ratio between DBU and the CIF precision (constant). This makes the
+   // resulting CIF files ineffective, because normally there will be too many
+   // pointless zeros. What we need is the smallest step which is used in each of
+   // the cells. This can be calculated here, but also can be a value precalculated
+   // on the fly when each and every points gets stored in the cell structure.
+   // In practice this should be done in the folowing way
+   // - calculate the reciprocal value of DBU ( (unsigned) 1/ DBU ). Let's name it
+   //   DBUR. Make sure that the conversion error is cleaned-up.
+   // - define the step and assign to it initially DBUR
+   // - get the greatest common denominator between each of the coordinates and DBUR
+   //   and compare it with the current step. If it is smaller - replace the step
+   //   with the new value.
+
    // loop the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
       if ((0!= wl->first) && !ciff.layerSpecification(wl->first)) continue;
-      wl->second->CIFwrite(ciff, UU);
+      wl->second->CIFwrite(ciff);
    }
    ciff.definitionFinish();
 }

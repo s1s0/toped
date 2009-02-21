@@ -633,3 +633,20 @@ real polyarea(const pointlist& shape)
             real(shape[j].x()) * real(shape[i].y());
    return area;
 }
+
+//! Gratest common denominator
+unsigned GCD(unsigned arg1, unsigned arg2)
+{
+   if (arg1 < arg2)
+   {
+      unsigned swap = arg1;
+      arg1 = arg2;
+      arg2 = swap;
+   }
+   unsigned remainder = arg1 % arg2;
+   if (0 == remainder)
+      return arg2;
+   else
+      return GCD(arg2, remainder);
+}
+

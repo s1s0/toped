@@ -464,15 +464,22 @@ void CIFin::CifExportFile::registerCellWritten(std::string cellname)
    _cellmap[cellname] = ++_lastcellnum;
 }
 
-void CIFin::CifExportFile::definitionStart(std::string name)
+void CIFin::CifExportFile::definitionStart(std::string name, real DBU)
 {
    std::string message = "...converting " + name;
+   unsigned dbuu = (unsigned) (1/DBU);
+   // clean the error from the conversion (round to step 10)
+   dbuu = (int4b) (rint((dbuu + (5)) / 10) * 10);
+   unsigned cifu = 100000000;
+   unsigned gcd = GCD(dbuu,cifu); // get the greatest common denominator
+   unsigned bfact = dbuu / gcd;
+   unsigned afact = cifu / gcd;
    tell_log(console::MT_INFO, message);
    registerCellWritten(name);
    if (_verbose)
-      _file << std::endl << "Definition Start #" << _lastcellnum << ";"<< std::endl;
+      _file << std::endl << "Definition Start #" << _lastcellnum << "with a = " << afact << " and b = " << bfact<< ";"<< std::endl;
    else
-      _file << std::endl << "DS " << _lastcellnum << ";" << std::endl;
+      _file << std::endl << "DS " << _lastcellnum << " " << afact << " " << bfact <<";" << std::endl;
    _file << "   9 "<< name << ";"<< std::endl;
 }
 

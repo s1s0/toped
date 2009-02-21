@@ -308,7 +308,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                         CifExportFile(std::string, USMap*, bool);
                        ~CifExportFile();
-         void           definitionStart(std::string);
+         void           definitionStart(std::string, real);
          void           definitionFinish();
          bool           layerSpecification(word);
          void           box(const unsigned, const unsigned, const TP&);

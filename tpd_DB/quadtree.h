@@ -69,7 +69,7 @@ namespace laydata {
       void                 put(tdtdata* shape);
       void                 write(TEDfile* const) const;
       void                 GDSwrite(GDSin::GdsFile&, word const, real UU) const;
-      void                 CIFwrite(CIFin::CifExportFile&, real UU) const;
+      void                 CIFwrite(CIFin::CifExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       void                 select_inBox(DBbox&, dataList*, bool, word /*selmask = laydata::_lmall*/);
       void                 select_fromList(dataList*, dataList*);
