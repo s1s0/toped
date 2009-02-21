@@ -26,8 +26,7 @@
 //===========================================================================
 
 #include "tpdph.h"
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/glew.h>
 #include "drawprop.h"
 #include "viewprop.h"
 

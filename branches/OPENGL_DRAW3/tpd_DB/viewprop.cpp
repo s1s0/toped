@@ -31,8 +31,7 @@
 #include <iostream>
 #include <iomanip>
 #include "../tpd_common/ttt.h"
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/glew.h>
 
 #include "viewprop.h"
 #include "../tpd_common/outbox.h"
