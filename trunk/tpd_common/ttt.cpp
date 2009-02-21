@@ -98,28 +98,25 @@ void DBbox::overlap(const DBbox bx) {
    if (DEFAULT_OVL_BOX == bx) return;
    if (DEFAULT_OVL_BOX == (*this)) {
       if (bx.p1().x() > bx.p2().x()) {
-         _p1._x = bx.p2().x(); _p2._x = bx.p1().x(); }   
+         _p1._x = bx.p2().x(); _p2._x = bx.p1().x(); }
       else {
          _p1._x = bx.p1().x(); _p2._x = bx.p2().x(); }
       if (bx.p1().y() > bx.p2().y()) {
-         _p1._y = bx.p2().y(); _p2._y = bx.p1().y(); }   
+         _p1._y = bx.p2().y(); _p2._y = bx.p1().y(); }
       else {
          _p1._y = bx.p1().y(); _p2._y = bx.p2().y(); }
-   }         
+   }
    else {
       overlap(bx.p1()); overlap(bx.p2());
-   }   
+   }
 }
 
 DBbox DBbox::overlap(const CTM& op2)  const
 {
-   TP np(_p1 * op2);
-   DBbox result(np);
-   np = TP(_p2.x(), _p1.y()) * op2; result.overlap(np);
-   np =                (_p2) * op2; result.overlap(np);
-   np = TP(_p1.x(), _p2.y()) * op2; result.overlap(np);
-//   _p1 = result.p1();
-//   _p2 = result.p2();
+   DBbox result(_p1 * op2);
+   result.overlap(TP(_p2.x(), _p1.y()) * op2);
+   result.overlap(  (      _p2       ) * op2);
+   result.overlap(TP(_p1.x(), _p2.y()) * op2);
    return result;
 }
 
@@ -250,8 +247,8 @@ bool DBbox::visible(const CTM& tmtrx) const
    ptlist.push_back(               (_p2) * tmtrx);
    ptlist.push_back(TP(_p1.x(), _p2.y()) * tmtrx);
 
-   if (abs(polyarea(ptlist)) >= (real)MIN_VISUAL_AREA) return true;
-   else                                                return false;
+   if (fabsf(polyarea(ptlist)) >= (real)MIN_VISUAL_AREA) return true;
+   else                                                  return false;
 }
 
 DBbox DBbox::getcorner(byte corner) {
@@ -629,8 +626,8 @@ real polyarea(const pointlist& shape)
    word size = shape.size();
    word i,j;
    for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
-      area += real(shape[i].x()) * real(shape[j].y()) -
-            real(shape[j].x()) * real(shape[i].y());
+      area += ( (real)shape[i].x() * (real)shape[j].y() ) -
+              ( (real)shape[j].x() * (real)shape[i].y() )   ;
    return area;
 }
 
