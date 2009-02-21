@@ -507,15 +507,15 @@ void laydata::quadTree::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 
 /*! Write the contents of the quadTree in a CIF file.\n
 Nothing special here - effectively the same as other write method*/
-void laydata::quadTree::CIFwrite(CIFin::CifExportFile& ciff, real UU) const
+void laydata::quadTree::CIFwrite(CIFin::CifExportFile& ciff) const
 {
    tdtdata* wdt = _first;
    while(wdt)
    {
-      wdt->CIFwrite(ciff, UU); wdt = wdt->next();
+      wdt->CIFwrite(ciff); wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->CIFwrite(ciff,UU);
+      if (_quads[i]) _quads[i]->CIFwrite(ciff);
 }
 
 /*! Write the contents of the quadTree in a PS file.\n
@@ -612,7 +612,7 @@ void laydata::quadTree::tmp_draw(const layprop::DrawProperties& drawprop,
                                                    ctmqueue& transtack) const {
    if (empty()) return;
    // check the entire holder for clipping...
-   DBbox clip = drawprop.clipRegion();   
+   DBbox clip = drawprop.clipRegion();
    DBbox areal = _overlap.overlap(transtack.front());
    if      (clip.cliparea(areal) == 0        ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;

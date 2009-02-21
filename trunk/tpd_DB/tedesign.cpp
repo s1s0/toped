@@ -200,7 +200,7 @@ void laydata::tdtlibrary::CIFwrite(CIFin::CifExportFile& ciff, tdtcell* top, boo
       ciff.file() << "(         Top Cell :  - );" << std::endl;
       laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
       while (root) {
-         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root, _UU, recur);
+         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root, _DBU, recur);
          root = root->GetNextRoot(TARGETDB_LIB);
       }
    }
@@ -208,7 +208,7 @@ void laydata::tdtlibrary::CIFwrite(CIFin::CifExportFile& ciff, tdtcell* top, boo
    {
       ciff.file() << "(         Top Cell : " << top->name() << ");" << std::endl;
       laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
-      top->CIFwrite(ciff, _cells, root_cell, _UU, recur);
+      top->CIFwrite(ciff, _cells, root_cell, _DBU, recur);
    }
 //   wr = gdsf.setNextRecord(gds_ENDLIB);gdsf.flush(wr);
 }
