@@ -196,15 +196,16 @@ void PSFile::cellref(std::string cellname, const CTM mx)
 
 void PSFile::pspage_header(const DBbox box)
 {
-   double W=(220/25.4)*72;
-   double H=(297/25.4)*72;
-   double w = abs(box.p1().x() - box.p2().x());
-   double h = abs(box.p1().y() - box.p2().y());
-   double sc = (W/H < w/h) ? w/(W-30) : h/(H-30);
-   double tx = ((box.p1().x() + box.p2().x()) - W*sc) / 2;
-   double ty = ((box.p1().y() + box.p2().y()) - H*sc) / 2;
+   double W=((220.0 - 40.0)/25.4)*72.0;
+   double H=((297.0 - 40.0)/25.4)*72.0;
+   double w = fabs(box.p1().x() - box.p2().x());
+   double h = fabs(box.p1().y() - box.p2().y());
+   double sc = (W/H < w/h) ? w/W : h/H;
+   double tx = ((box.p1().x() + box.p2().x()) - ( W   * sc) ) / 2;
+   double ty = ((box.p1().y() + box.p2().y()) - ( H   * sc) ) / 2;
    CTM laymx( sc, 0.0, 0.0, sc, tx, ty);
    CTM psmx(laymx.Reversed());
+   psmx.Translate(20.0 * 72.0 / 25.4, 20.0 * 72.0 / 25.4);
 
    fprintf(_psfh,"%%%%EndProlog\n");
    fprintf(_psfh,"[%G %G %G %G %G %G] concat\n",
