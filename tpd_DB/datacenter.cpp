@@ -933,7 +933,7 @@ laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
 
 void DataCenter::unlockDB() 
 {
-   assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
 }
 
 GDSin::GdsFile* DataCenter::lockGDS(bool throwexception) 
@@ -956,7 +956,7 @@ GDSin::GdsFile* DataCenter::lockGDS(bool throwexception)
 
 void DataCenter::unlockGDS()
 {
-   assert(wxMUTEX_NO_ERROR == GDSLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
 }
 
 CIFin::CifFile* DataCenter::lockCIF(bool throwexception)
@@ -979,7 +979,7 @@ CIFin::CifFile* DataCenter::lockCIF(bool throwexception)
 
 void DataCenter::unlockCIF()
 {
-   assert(wxMUTEX_NO_ERROR == CIFLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == CIFLock.Unlock());
 }
 
 void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
@@ -1096,7 +1096,7 @@ void DataCenter::openGL_draw(const CTM& layCTM) {
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(_properties.drawprop());
-         assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
+         VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
       PROPLock.Unlock();
@@ -1117,7 +1117,7 @@ void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
       _TEDLIB()->tmp_draw(_properties.drawprop(), base, newp);
-      assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
+      VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
    }
 // 
 //   else throw EXPTNactive_DB();      
