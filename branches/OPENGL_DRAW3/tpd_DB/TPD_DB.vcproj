@@ -184,6 +184,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\drawprop.cpp"
+				>
+			</File>
+			<File
 				RelativePath="logicop.cpp"
 				>
 				<FileConfiguration
@@ -308,6 +312,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tenderer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\tpdph.cpp"
 				>
 				<FileConfiguration
@@ -361,6 +369,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\drawprop.h"
+				>
+			</File>
+			<File
 				RelativePath="logicop.h"
 				>
 			</File>
@@ -386,6 +398,10 @@
 			</File>
 			<File
 				RelativePath="tedstd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tenderer.h"
 				>
 			</File>
 			<File
