@@ -130,7 +130,8 @@ void DBbox::normalize() {
    }
 }   
    
-float DBbox::cliparea(const DBbox& bx, bool calculate) {
+float DBbox::cliparea(const DBbox& bx, bool calculate) const
+{
    // returns: -1 - if bx is entirely inside this
    //           0 - if bx is entirely outside this
    //   otherwise - the AND area of the boxes
@@ -556,6 +557,14 @@ void CTM::Decompose(TP& trans, real& rot, real& scale, bool& flipX) const
    // translation
    trans.setX(static_cast<int4b>(_tx));
    trans.setY(static_cast<int4b>(_ty));
+}
+
+void CTM::oglForm(real* const oglm) const
+{
+   oglm[ 0] =   _a; oglm[ 1] =   _b; oglm[ 2] = 0.0f; oglm[ 3] = 0.0f;
+   oglm[ 4] =   _c; oglm[ 5] =   _d; oglm[ 6] = 0.0f; oglm[ 7] = 0.0f;
+   oglm[ 8] = 0.0f; oglm[ 9] = 0.0f; oglm[10] = 1.0f; oglm[11] = 0.0f;
+   oglm[12] =  _tx; oglm[13] =  _ty; oglm[14] = 0.0f; oglm[15] = 1.0f;
 }
 
 #if WIN32

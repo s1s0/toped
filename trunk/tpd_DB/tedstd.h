@@ -137,9 +137,9 @@ namespace laydata {
       bool                 box()             {return (0 != (_status & shp_box));}
       pointlist&           get_validated()   {return _plist;}
       word                 numpoints()       {return _plist.size();}
-      virtual char*       failtype() = 0;
-      virtual tdtdata*    replacement() = 0;
-      virtual            ~validator() {};
+      virtual std::string  failtype() = 0;
+      virtual tdtdata*     replacement() = 0;
+      virtual             ~validator() {};
    protected:
       byte                 _status;
       pointlist            _plist;

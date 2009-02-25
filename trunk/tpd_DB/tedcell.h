@@ -30,6 +30,7 @@
 
 #include <string>
 #include "quadtree.h"
+#include "tenderer.h"
 
 namespace layprop {
    class ViewProperties;
@@ -95,6 +96,7 @@ namespace laydata {
                              tdtdefaultcell(std::string, int , bool );
          virtual            ~tdtdefaultcell() {};
          virtual void        openGL_draw(layprop::DrawProperties&, bool active=false) const;
+         virtual void        openGL_draw(Tenderer&, bool active=false) const;
          virtual void        tmp_draw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
          virtual void        PSwrite(PSFile&, const layprop::DrawProperties&,
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
@@ -130,6 +132,7 @@ namespace laydata {
       virtual             ~tdtcell(); 
       void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
+      void                 openGL_draw(Tenderer&, bool active=false) const;
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;
       quadTree*            securelayer(word layno);

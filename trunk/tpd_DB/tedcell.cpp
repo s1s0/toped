@@ -218,6 +218,10 @@ void laydata::tdtdefaultcell::openGL_draw(layprop::DrawProperties&, bool active)
 {
 }
 
+void laydata::tdtdefaultcell::openGL_draw(Tenderer&, bool active) const
+{
+}
+
 void laydata::tdtdefaultcell::tmp_draw(const layprop::DrawProperties&, ctmqueue&, bool active) const
 {
 }
@@ -358,10 +362,12 @@ bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child)
    return true;
 }
 
-void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool active) const {
+void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool active) const
+{
    // Draw figures
    typedef layerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++) {
+   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   {
 //      if (0 < lay->first)
       word curlayno = lay->first;
       if (!drawprop.layerHidden(curlayno))
@@ -375,6 +381,80 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
          lay->second->openGL_draw(drawprop,dlst->second, fill);
       else
          lay->second->openGL_draw(drawprop, NULL, fill);
+   }
+}
+
+// void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
+// {
+//    atticList* all4drawing = DEBUG_NEW atticList();
+//    SLMap*     numPoints   = DEBUG_NEW SLMap();
+//    shapeList* references  = DEBUG_NEW shapeList();
+//    unsigned long total_references = 0;
+//    for (layerList::const_iterator lay = _layers.begin(); lay != _layers.end(); lay++)
+//    {
+//       word curlayno = lay->first;
+//       if (rend.layerHidden(curlayno)) continue;
+//       if (0 == curlayno)
+//       {
+//          lay->second->visible_shapes(references, rend.clipRegion(), rend.topCTM(), rend.ScrCTM(), total_references );
+//       }
+//       else
+//       {
+//          shapeList* ssl = DEBUG_NEW shapeList();
+//          unsigned long total_points = 0;
+//          lay->second->visible_shapes(ssl, rend.clipRegion(), rend.topCTM(), rend.ScrCTM(), total_points );
+//          if (ssl->empty()) delete ssl;
+//          else
+//          {
+//             (*all4drawing)[curlayno] = ssl;
+//             (*numPoints)[curlayno] = total_points;
+//          }
+//       }
+//    }
+//    if (!all4drawing->empty()) rend.add_data(all4drawing, numPoints);
+//    // clean-up
+//    for (laydata::atticList::const_iterator CL = all4drawing->begin(); CL != all4drawing->end(); CL++)
+//    {
+//       CL->second->clear();
+//       delete (CL->second);
+//    }
+//    delete all4drawing;
+//    delete numPoints;
+//    //now deal with references
+//    if (0 < total_references)
+//    {
+//       for (shapeList::const_iterator CR = references->begin(); CR != references->end(); CR++)
+//       {
+//          laydata::tdtcellref* the_reference = static_cast<laydata::tdtcellref*>(*CR);
+//          laydata::tdtdefaultcell* ccell = the_reference->visible(rend.clipRegion(), rend.topCTM(), rend.ScrCTM());
+//          if (NULL != ccell)
+//          {
+//             CTM newtrans = the_reference->translation() * rend.topCTM();
+//             rend.pushCTM(newtrans);
+//             ccell->openGL_draw(rend, active);
+//             rend.popCTM();
+//          }
+//       }
+//    }
+//    delete references;
+// }
+
+void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
+{
+   // Draw figures
+   typedef layerList::const_iterator LCI;
+   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   {
+      word curlayno = lay->first;
+      if (rend.layerHidden(curlayno)) continue;
+      else rend.setLayer(curlayno);
+      // fancy like this (dlist iterator) , besause a simple
+      // _shapesel[curlayno] complains about loosing qualifiers (const)
+      selectList::const_iterator dlst;
+      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
+         lay->second->openGL_draw(rend, dlst->second/*, fill*/);
+      else
+         lay->second->openGL_draw(rend, NULL/*, fill*/);
    }
 }
 

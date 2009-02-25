@@ -51,14 +51,15 @@ AX_CHECK_GL
    else
       LDFLAGS="$LDFLAGS $GL_LIBS"
        CFLAGS="$CFLAGS $GL_CFLAGS"
-   fi     
-AX_CHECK_GLU   
+   fi
+AX_CHECK_GLU
    if test "$no_glu" == "yes"; then
       AC_MSG_ERROR([(GLU) openGL utility not found])
    else
       LDFLAGS="$LDFLAGS $GLU_LIBS"
        CFLAGS="$CFLAGS $GLU_CFLAGS"
-   fi     
+   fi
+AC_SEARCH_LIBS(glewInit, [GLEW glew32], , AC_MSG_ERROR([Glew library not found. Make sure it's installed]))
 
 #Check wxWidgets
  AM_OPTIONS_WXCONFIG

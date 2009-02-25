@@ -96,6 +96,7 @@ typedef  std::list<word>                  WordList;
 typedef  std::map<word, WordList>         GdsLayers;
 typedef  std::map<std::string, int>       SIMap;       // name
 typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
+typedef  std::map<word, unsigned long>    SLMap;
 
 //=============================================================================
 // Some common constants (instead of #defines)
@@ -175,6 +176,7 @@ public:
    CTM  Rotate(const TP&);
    CTM  Reversed() const;
    void Decompose(TP&, real&, real&, bool&) const;
+   void oglForm(real* const) const;
    void setCTM(real a, real b, real c, real d, real tx, real ty)
                           {_a = a; _b = b; _c = c; _d = d; _tx = tx; _ty = ty;};
    CTM  operator =  (const CTM op2);
@@ -232,7 +234,7 @@ public:
    void  overlap(const DBbox bx);
    DBbox overlap(const CTM&) const;
    void  normalize();
-   float cliparea(const DBbox& bx, bool calculate = false);
+   float cliparea(const DBbox& bx, bool calculate = false) const;
    int   clipbox(DBbox& bx);
    bool  inside(const TP& );
    float area();
@@ -657,7 +659,8 @@ const word MAX_WORD_VALUE = 65535;
 //#define MAX_Y        (int4b)0x7FFFFFFF      //   2 147 483 647
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
 const byte        OPENGL_FONT_UNIT  = 128;
-const byte        MIN_VISUAL_AREA   = 10;   // that would be 10 pixels
+const byte        MIN_VISUAL_AREA   = 40;   // that would be 10 pixels
+const byte        GRID_LIMIT        = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const DBbox       DEFAULT_OVL_BOX   = DBbox(TP(0,0));
 const DBbox       DEFAULT_ZOOM_BOX  = DBbox(TP(-2000,-2000), TP(20000,20000));
 #endif
