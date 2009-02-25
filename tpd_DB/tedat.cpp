@@ -419,6 +419,20 @@ void laydata::tdtbox::openGL_precalc(layprop::DrawProperties& drawprop , pointli
    ptlist.push_back(TP(_p1->x(), _p2->y()) * drawprop.topCTM());
 }
 
+void laydata::tdtbox::draw_request(Tenderer& rend) const
+{
+   rend.box(_p1,_p2);
+}
+// void laydata::tdtbox::tender_gen(pointlist& ptlist) const
+// {
+//    // translate the points using the current CTM
+//    ptlist.reserve(4);
+//    ptlist.push_back(                (*_p1));
+//    ptlist.push_back(TP(_p2->x(), _p1->y()));
+//    ptlist.push_back(                (*_p2));
+//    ptlist.push_back(TP(_p1->x(), _p2->y()));
+// }
+
 void laydata::tdtbox::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    glBegin(GL_LINE_LOOP);
@@ -753,6 +767,18 @@ void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    ptlist.reserve(_plist.size());
    for (unsigned i = 0; i < _plist.size(); i++)
       ptlist.push_back(_plist[i] * drawprop.topCTM());
+}
+
+// void laydata::tdtpoly::tender_gen(pointlist& ptlist) const
+// {
+//    ptlist.reserve(_plist.size());
+//    for (unsigned i = 0; i < _plist.size(); i++)
+//       ptlist.push_back(_plist[i]);
+// }
+
+void laydata::tdtpoly::draw_request(Tenderer& rend) const
+{
+   rend.poly(_plist);
 }
 
 void laydata::tdtpoly::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -1127,7 +1153,8 @@ laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata()
       _plist.push_back(tedfile->getTP());
 }
 
-DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const {
+DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const
+{
    double     w = _width/2;
    double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
    double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
@@ -1137,7 +1164,8 @@ DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const {
    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
    else if (0 == nom  )   {xcorr = 0 ; ycorr = signY * w;} // horizontal |----|
-   else {
+   else
+   {
       double sl   = nom / denom;
       double sqsl = signY*sqrt( sl*sl + 1);
       xcorr = rint(w * (sl / sqsl)); 
@@ -1148,7 +1176,8 @@ DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const {
                           (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
 }
 
-DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const {
+DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
+{
    double    w = _width/2;
    double  x32 = p3.x() - p2.x();
    double  x21 = p2.x() - p1.x();
@@ -1183,6 +1212,30 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       ptlist.push_back(_plist[i] * drawprop.topCTM());
    if (!center_line_only)
       precalc(ptlist, num_points);
+}
+
+// void laydata::tdtwire::tender_gen(pointlist& ptlist) const
+// {
+//    if (_plist.size() < 2) return;
+//    // first check whether to draw only the center line
+// //   DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
+// //   bool center_line_only = !wsquare.visible(drawprop.topCTM() * drawprop.ScrCTM());
+//    unsigned num_points = _plist.size();
+//    bool center_line_only = false;
+//    if (center_line_only)
+//       ptlist.reserve(num_points);
+//    else
+//       ptlist.reserve(3 * num_points);
+//    // translate the points using the current CTM
+//    for (unsigned i = 0; i < num_points; i++)
+//       ptlist.push_back(_plist[i]);
+//    if (!center_line_only)
+//       precalc(ptlist, num_points);
+// }
+
+void laydata::tdtwire::draw_request(Tenderer& rend) const
+{
+   rend.wire(_plist, _width);
 }
 
 void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -1542,10 +1595,12 @@ pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet& pset,
                                                                movedM : stableM;
          seg1 = DEBUG_NEW PSegment((*mlist)[(i  )] * transM, (*mlist)[(i+1)] * transM);
          if (0 == i)
+         {
             if (pset.check(0))
                seg0 = seg1->ortho((*mlist)[i] * movedM);
             else
                seg0 = seg1->ortho((*mlist)[i] * stableM);
+         }
       }
       if (!seg0->empty()) seg1->crossP(*seg0,(*mlist)[i]);
       if (NULL != seg0) delete seg0;
@@ -1583,8 +1638,6 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    if (clip.cliparea(areal) == 0) return;
    // check that the cell area is bigger that the MIN_VISUAL_AREA
    if (!areal.visible(drawprop.ScrCTM())) return;
-//   DBbox minareal = areal * drawprop.ScrCTM();
-//   if (minareal.area() < MIN_VISUAL_AREA) return;
    // If we get here - means that the cell (or part of it) is visible
    ptlist.reserve(4);
    ptlist.push_back(obox.p1() * newtrans);
@@ -1593,8 +1646,58 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);
    drawprop.pushCTM(newtrans);
    // draw the cell mark ...
-//   drawprop.setCurrentColor(0);
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
+}
+
+laydata::tdtdefaultcell* laydata::tdtcellref::visible(const DBbox& clip, const CTM& topCTM, const CTM& scrCTM) const
+{
+   // calculate the current translation matrix
+   CTM newtrans = _translation * topCTM;
+   // get overlapping box of the structure ...
+   DBbox obox(DEFAULT_ZOOM_BOX);
+   if (structure())  obox = structure()->overlap();
+   // ... translate it to the current coordinates ...
+   DBbox areal = obox.overlap(newtrans);
+   // check that the cell (or part of it) is in the visual window
+   if (clip.cliparea(areal) == 0) return NULL;
+   // check that the cell area is bigger that the MIN_VISUAL_AREA
+   if (!areal.visible(scrCTM)) return NULL;
+   return _structure->second;
+}
+
+// void laydata::tdtcellref::tender_gen(pointlist& ptlist) const
+// {
+// }
+void laydata::tdtcellref::draw_request(Tenderer& rend) const
+{
+   // calculate the current translation matrix
+   CTM newtrans = _translation * rend.topCTM();
+   // get overlapping box of the structure ...
+   DBbox obox(DEFAULT_ZOOM_BOX);
+   if (structure())
+      obox = structure()->overlap();
+   // ... translate it to the current coordinates ...
+   DBbox areal = obox.overlap(newtrans);
+   // check that the cell (or part of it) is in the visual window
+   DBbox clip = rend.clipRegion();
+   if (clip.cliparea(areal) == 0) return;
+   // check that the cell area is bigger that the MIN_VISUAL_AREA
+   if (!areal.visible(rend.ScrCTM())) return;
+   // If we get here - means that the cell (or part of it) is visible
+/* @FIXME -> problem is that the cell overlap is dynamically calculated
+//          It must be a variable to fit with the renderer data concept!
+   ptlist.reserve(4);
+   ptlist.push_back(obox.p1() * newtrans);
+   ptlist.push_back(TP(obox.p2().x(), obox.p1().y()) * newtrans);
+   ptlist.push_back(obox.p2() * newtrans);
+   ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);*/
+   rend.pushCTM(newtrans);
+   // draw the cell mark ...
+//   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
+   byte crchain = rend.popref(this);
+   structure()->openGL_draw(rend, crchain == 2);
+   rend.popCTM();
+   if (crchain) rend.pushref(this);
 }
 
 void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -1602,6 +1705,7 @@ void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties& drawprop, con
    if (0 == ptlist.size()) return;
    drawprop.draw_cell_boundary(ptlist);
 }
+
 
 void laydata::tdtcellref::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
@@ -1907,6 +2011,13 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    }
 }
 
+// void laydata::tdtcellaref::tender_gen(pointlist& ptlist) const
+// {
+// }
+void laydata::tdtcellaref::draw_request(Tenderer& rend) const
+{
+}
+
 void laydata::tdtcellaref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
@@ -2166,6 +2277,14 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    }
 }
 
+// void laydata::tdttext::tender_gen(pointlist& ptlist) const
+// {
+// }
+void laydata::tdttext::draw_request(Tenderer& rend) const
+{
+}
+
+
 void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
@@ -2354,7 +2473,7 @@ laydata::tdtdata* laydata::valid_box::replacement()
    else return DEBUG_NEW laydata::tdtpoly(_plist);
 }
 
-char* laydata::valid_box::failtype()
+std::string laydata::valid_box::failtype()
 {
    if      (!(_status & shp_box))  return "Rotated box";
    else return "OK";
@@ -2483,7 +2602,7 @@ void laydata::valid_poly::selfcrossing()
       _status |= laydata::shp_cross;*/
 }
 
-char* laydata::valid_poly::failtype() {
+std::string laydata::valid_poly::failtype() {
    if      (_status & shp_null) return "NULL area polygon";
    else if (_status & shp_cross) return "Self-crossing";
 //   else if (_status & shp_acute) return "Acute angle";
@@ -2576,7 +2695,7 @@ laydata::tdtdata* laydata::valid_wire::replacement() {
    return DEBUG_NEW laydata::tdtwire(_plist, _width);
 }   
 
-char* laydata::valid_wire::failtype() {
+std::string laydata::valid_wire::failtype() {
 //   if (_status & shp_null)  return "Zero area";
    if      (_status & shp_cross) return "Self-crossing";
    else if (_status & shp_null ) return "Unsuficcient points";

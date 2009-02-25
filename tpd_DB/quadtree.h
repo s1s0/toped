@@ -30,6 +30,7 @@
 
 #include "tedstd.h"
 #include "ps_out.h"
+#include "tenderer.h"
 
 namespace laydata {
 
@@ -63,7 +64,9 @@ namespace laydata {
                            quadTree();
                            quadTree(TEDfile* const tedfile);
       virtual             ~quadTree();
-      virtual void         openGL_draw(layprop::DrawProperties&, const dataList*, bool) const;
+      void                 openGL_draw(layprop::DrawProperties&, const dataList*, bool) const;
+      void                 openGL_draw(Tenderer&, const dataList*) const;
+//      void                 visible_shapes(laydata::shapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
       virtual void         tmp_draw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(tdtdata* shape);
       void                 put(tdtdata* shape);

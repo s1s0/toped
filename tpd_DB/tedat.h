@@ -30,11 +30,11 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/glew.h>
 #include "tedstd.h"
 #include "viewprop.h"
 #include "ps_out.h"
+#include "tenderer.h"
 
 namespace laydata {
 //==============================================================================
@@ -68,6 +68,9 @@ namespace laydata {
       virtual   void       openGL_drawsel(const pointlist&, const SGBitSet*) const = 0;
    //! Clean-up the calculated drawing objects
       virtual   void       openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const {ptlist.clear();}
+// Put a reference to the data in the toped renderer (alternative to openGL_* methods)
+//      virtual   void       tender_gen(pointlist&) const = 0;
+      virtual   void       draw_request(Tenderer&) const = 0;
    //! Draw the temporary objects during copy/move and similar operations
       virtual   void       tmp_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet* plst = NULL,
                                          bool under_construct=false) const = 0;
@@ -143,6 +146,8 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
+//      void                 tender_gen(pointlist&) const;
+      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                              SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -184,6 +189,8 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
+//      void                 tender_gen(pointlist&) const;
+      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -225,6 +232,8 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
+//      void                 tender_gen(pointlist&) const;
+      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -274,7 +283,9 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      virtual void        openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
+      virtual void         openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
+//      void                 tender_gen(pointlist&) const;
+      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -283,7 +294,7 @@ namespace laydata {
       void                 GDSwrite(GDSin::GdsFile&, word, real) const;
       void                 CIFwrite(CIFin::CifExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
-      virtual void        ungroup(tdtdesign*, tdtcell*, atticList*);
+      virtual void         ungroup(tdtdesign*, tdtcell*, atticList*);
       std::string          cellname() const {return _structure->first;};
       tdtcell*             cstructure() const;
       tdtdefaultcell*      structure() const {return _structure->second;}
@@ -296,6 +307,7 @@ namespace laydata {
       void                 objRotate() {_translation.Rotate( 90.0);}
       virtual ArrayProperties arrayprops() const {return ArrayProperties();}
       virtual word         ltype() const {return _lmref;}
+      tdtdefaultcell*      visible(const DBbox&, const CTM&, const CTM&) const;
    protected:
       void                 select_points(DBbox&, SGBitSet&) {return;}
       void                 unselect_points(DBbox&, SGBitSet&) {return;}
@@ -324,6 +336,8 @@ namespace laydata {
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
+//      void                 tender_gen(pointlist&) const;
+      void                 draw_request(Tenderer&) const;
 
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
@@ -358,7 +372,9 @@ namespace laydata {
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
       virtual   void       openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
-      
+//      void                 tender_gen(pointlist&) const;
+      void                 draw_request(Tenderer&) const;
+
       void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
                               SGBitSet* plst = NULL, bool under_construct=false) const;
       void                 info(std::ostringstream&, real) const;
@@ -390,7 +406,7 @@ namespace laydata {
    public:
                         valid_box(const TP&, const TP&, const CTM&);
       laydata::tdtdata* replacement();
-      char*             failtype();
+      std::string       failtype();
       real              area() {return _area;}
    private:
       real              _area;
@@ -401,7 +417,7 @@ namespace laydata {
    public:
                         valid_poly(const pointlist&);
       laydata::tdtdata* replacement();
-      char*             failtype();
+      std::string       failtype();
    private:
       void              angles();
       void              normalize();
@@ -413,7 +429,7 @@ namespace laydata {
    public:
                         valid_wire(const pointlist&, word);
       laydata::tdtdata* replacement();
-      char*             failtype();
+      std::string       failtype();
    private:
       void              angles();
       void              selfcrossing();

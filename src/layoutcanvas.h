@@ -29,6 +29,7 @@
 #define LAYOUTCANVAS_H
 
 #include <string>
+#include <GL/glew.h>
 #include <wx/glcanvas.h>
 #include <wx/cursor.h>
 #include <wx/image.h>
@@ -136,7 +137,7 @@ namespace tui {
       bool           reperX;         // Draw a cursor line across the window parallel to the X axis
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       bool           long_cursor;    //
-      bool           _oglThread;
+      bool           _oglThread;     // Run the openGL drawing in a separate thread
 #ifdef __WXGTK__
       XVisualInfo*   x_visual;       //
 #endif

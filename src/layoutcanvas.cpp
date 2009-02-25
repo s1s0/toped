@@ -206,11 +206,18 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    restricted_move = false;
    invalid_window = false;
    reperX = reperY = long_cursor = false;
+   // Running the openGL drawing in a separate thread
+   // This appears to be a bad idea esspecially on some platforms.
+   // Google it for some opinions.
+   // The code is there, but I never got it running reliably if at all
+   // The option stays for the sake of experiment.
+   // DON'T enable it if you're not sure what you're doing!
    _oglThread = false;
    initializeGL();
    ap_trigger = 10;
    glfInit();
 }
+
 void	tui::LayoutCanvas::showInfo()
 {
    std::ostringstream ost1, ost2, ost3;
@@ -244,19 +251,15 @@ void	tui::LayoutCanvas::showInfo()
 
    if((pfd.dwFlags & PFD_GENERIC_FORMAT) && !(pfd.dwFlags & PFD_GENERIC_ACCELERATED))
    {
-      ost<<"Program emulation of OpenGL";
-      tell_log(console::MT_INFO,ost.str());
-      ost<<"Operation can be extremely slow";
-      tell_log(console::MT_INFO,ost.str());
+      tell_log(console::MT_INFO,"Program emulation of OpenGL");
+      tell_log(console::MT_INFO,"Operation can be extremely slow");
    }
 
     // Hardware supports only part of all set of functions ( MCD-driver ).
    if((pfd.dwFlags & PFD_GENERIC_FORMAT) && (pfd.dwFlags & PFD_GENERIC_ACCELERATED))
    {
-      ost<<"Program/hardware emulation of OpenGL";
-      tell_log(console::MT_INFO,ost.str());
-      ost<<"Some operations can not be accelerated";
-      tell_log(console::MT_INFO,ost.str());
+      tell_log(console::MT_INFO,"Program/hardware emulation of OpenGL");
+      tell_log(console::MT_INFO,"Some operations can not be accelerated");
    }
 
    // Full hardware support ( ICD-driver ).
@@ -271,6 +274,9 @@ void	tui::LayoutCanvas::showInfo()
    msg << "GLX version "<< GetGLXVersion();
    tell_log(console::MT_INFO, msg.str());
 #endif
+   std::ostringstream glewmsg;
+   glewmsg << "Using GLEW " << glewGetString(GLEW_VERSION);
+   tell_log(console::MT_INFO, glewmsg.str());
 }
 
 void tui::LayoutCanvas::snapshot(byte*& theImage, word& szW, word& szH)
@@ -407,6 +413,9 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glClear(GL_ACCUM_BUFFER_BIT);
          DATC->openGL_draw(_LayCTM);    // draw data
+         // new Render - under development,
+         // launch it instead of the old one (previous code line)
+//         DATC->openGL_render(_LayCTM); 
          glAccum(GL_LOAD, 1.0);
          invalid_window = false;
          if (rubber_band) rubber_paint();
