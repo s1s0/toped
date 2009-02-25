@@ -317,9 +317,7 @@
                        (packet-name (name->string(caddr layer)))
                        (valid (last layer))
                        (cur-layer (find-in-object-list layer-list layer-name))) 
-                  (if (eq? valid 't)
-                      ((cur-layer 'set-packet!) packet-name) 
-                      null)))
+                  ((cur-layer 'set-packet!) packet-name)))
               layers)
            '())))
 
@@ -407,7 +405,12 @@
    
           (map (lambda(layer)
                  ;Only layers from gds used
-                 (if ((layer 'get-streamed))
+                 (begin
+                   ;(display ((layer 'get-name)))
+                   ;(display "--")
+                   ;(display ((layer 'get-packet)))
+                   ;(newline)
+                   (if ((layer 'get-streamed))
                      (let* ((name ((layer 'get-name)))
                            (packet-name ((layer 'get-packet)))
                            (packet (find-in-object-list packet-list packet-name)))
@@ -418,13 +421,19 @@
                              (list (string-append "layprop(\"" name "\",\t" number ",\t\"" colour "\",\t"
                                                   "\"" stipple "\",\t" "\"selected3\");"))) 
                            (error "can't find packet" packet-name)))
-                     '()))
+                     '())))
                layer-list)
           (list (list "}"))))
+;------------------------
 (define (post-proceed)
   (append (list (list "colorSetup();")
                 (list "fillSetup();")
                 (list "layerSetup();") )))
+;----------------------- 
+(define (debug-output)
+  (map (lambda(packet)
+           ((packet 'get-name)))
+           packet-list))
 
 (define (readlines filename)
   (call-with-input-file filename
@@ -503,7 +512,23 @@
 ;output - non (output write down to tell.tll file
 
 (define (convert input-list)
-  (write-to-file (car input-list) (append (parse (collect-strings (cdr input-list))) (layer-setup) (post-proceed))))
+  (write-to-file (car input-list) (append (parse (collect-strings (cdr input-list))) (layer-setup) (post-proceed) )))
+
+;debug-print-packets
+(define (debug-print-packets file)
+  (begin 
+    (parse (collect-strings (list file)))
+    (map
+     (lambda(packet) ((packet 'get-name)))
+     packet-list)))
+  
+;debug-print-layers
+(define (debug-print-layers file)
+  (begin 
+    (parse (collect-strings (list file)))
+    (map
+     (lambda(layer) ((layer 'get-name)))
+     layer-list)))
   
 ;---------------------------------------------
 ;(define d (foldl (lambda (word result) 
@@ -534,5 +559,7 @@
 ;(define collected-strings (foldl (lambda (word result) 
 ;                   (append result (readlines word))) '() input-list))
 ;(write-to-file "d:\\1\\tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
-  
+  ;(debug-print-packets "d:\\toped\\vanguard\\display.drf")
+  ;(debug-print-layers "d:\\toped\\vanguard\\vis40cb.tf")
+  ; (convert (list "d:\\toped\\vanguard\\tell.tll" "d:\\toped\\vanguard\\display.drf" "d:\\toped\\vanguard\\vis40cb.tf"))
 )
