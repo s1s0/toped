@@ -434,9 +434,6 @@
                      (let* ((name ((layer 'get-name)))
                            (packet-name ((layer 'get-packet)))
                            (packet (find-in-object-list packet-list packet-name)))
-                       (begin
-                         (display ((layer 'get-number)))
-                         (newline)
                          (cond ((eq? ((layer 'get-number)) 0) 
                              (replace-zero-number layer))
                              )
@@ -446,7 +443,7 @@
                                   (stipple ((packet 'get-stipple))))
                              (list (string-append "layprop(\"" name "\",\t" number ",\t\"" colour "\",\t"
                                                   "\"" stipple "\",\t" "\"selected3\");"))) 
-                           (error "can't find packet" packet-name))))
+                           (error "can't find packet" packet-name)))
                      '())))
                layer-list)
           (list (list "}"))))
@@ -588,5 +585,5 @@
 ;(write-to-file "d:\\1\\tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
   ;(debug-print-packets "d:\\toped\\vanguard\\display.drf")
   ;(debug-print-layers "d:\\toped\\vanguard\\vis40cb.tf")
-   (convert (list "d:\\toped\\vanguard\\tell.tll" "d:\\toped\\vanguard\\display.drf" "d:\\toped\\vanguard\\vis40cb.tf"))
+   ;(convert (list "d:\\toped\\vanguard\\tell.tll" "d:\\toped\\vanguard\\display.drf" "d:\\toped\\vanguard\\vis40cb.tf"))
 )
