@@ -423,15 +423,6 @@ void laydata::tdtbox::draw_request(Tenderer& rend) const
 {
    rend.box(_p1,_p2);
 }
-// void laydata::tdtbox::tender_gen(pointlist& ptlist) const
-// {
-//    // translate the points using the current CTM
-//    ptlist.reserve(4);
-//    ptlist.push_back(                (*_p1));
-//    ptlist.push_back(TP(_p2->x(), _p1->y()));
-//    ptlist.push_back(                (*_p2));
-//    ptlist.push_back(TP(_p1->x(), _p2->y()));
-// }
 
 void laydata::tdtbox::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
@@ -479,41 +470,34 @@ void laydata::tdtbox::openGL_drawsel(const pointlist& ptlist, const SGBitSet* ps
    }
 }
 
-void laydata::tdtbox::tmp_draw(const layprop::DrawProperties&, ctmqueue& transtack,
-                              SGBitSet* plst, bool under_construct) const
+void laydata::tdtbox::motion_draw(const layprop::DrawProperties&, ctmqueue& transtack,
+                                                SGBitSet* plst) const
 {
    CTM trans = transtack.front();
-   if (!(_p1)) return;
-   else if (under_construct)
+   if ( (NULL == _p1) || (NULL == _p2) ) return;
+   if (sh_partsel == status())
    {
-      TP pt2 = (*_p1) * trans;
-      glRecti(_p1->x(),_p1->y(),pt2.x(),pt2.y());
+      TP pt1, pt2;
+      CTM strans = transtack.back();
+      assert(plst);
+      pointlist* nshape = movePointsSelected(*plst, trans, strans);
+      pt1 = (*nshape)[0]; pt2 = (*nshape)[2];
+      glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
+      nshape->clear(); delete nshape;
    }
-   else if (_p2){
-      if (sh_partsel == status())
-      {
-         TP pt1, pt2;
-         CTM strans = transtack.back();
-         assert(plst);
-         pointlist* nshape = movePointsSelected(*plst, trans, strans);
-         pt1 = (*nshape)[0]; pt2 = (*nshape)[2];
-         glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
-         nshape->clear(); delete nshape;
-      }
-      else
-      {
-         pointlist ptlist;
-         ptlist.reserve(4);
-         ptlist.push_back(                (*_p1) * trans);
-         ptlist.push_back(TP(_p2->x(), _p1->y()) * trans);
-         ptlist.push_back(                (*_p2) * trans);
-         ptlist.push_back(TP(_p1->x(), _p2->y()) * trans);
-         glBegin(GL_LINE_LOOP);
-         for (unsigned i = 0; i < 4; i++)
-            glVertex2i(ptlist[i].x(), ptlist[i].y());
-         glEnd();
-         ptlist.clear();
-      }
+   else
+   {
+      pointlist ptlist;
+      ptlist.reserve(4);
+      ptlist.push_back(                (*_p1) * trans);
+      ptlist.push_back(TP(_p2->x(), _p1->y()) * trans);
+      ptlist.push_back(                (*_p2) * trans);
+      ptlist.push_back(TP(_p1->x(), _p2->y()) * trans);
+      glBegin(GL_LINE_LOOP);
+      for (unsigned i = 0; i < 4; i++)
+         glVertex2i(ptlist[i].x(), ptlist[i].y());
+      glEnd();
+      ptlist.clear();
    }
 }
 
@@ -632,19 +616,6 @@ DBbox laydata::tdtbox::overlap() const {
    ovl.overlap(*_p2);
    return ovl;
 }
-
-void  laydata::tdtbox::addpoint(TP p) {
-   if (!_p1) _p1 = DEBUG_NEW TP(p);
-   else {
-      if (_p2) delete _p2; // This line seems to be redundant
-      _p2 = DEBUG_NEW TP(p);
-   }
-}
-
-void  laydata::tdtbox::rmpoint(TP& lp) {
-   if (NULL != _p2) {delete _p2; _p2 = NULL;}
-   if (NULL != _p1) {delete _p1; _p1 = NULL;}
-};
 
 const pointlist laydata::tdtbox::shape2poly() const {
   // convert box to polygon
@@ -769,13 +740,6 @@ void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       ptlist.push_back(_plist[i] * drawprop.topCTM());
 }
 
-// void laydata::tdtpoly::tender_gen(pointlist& ptlist) const
-// {
-//    ptlist.reserve(_plist.size());
-//    for (unsigned i = 0; i < _plist.size(); i++)
-//       ptlist.push_back(_plist[i]);
-// }
-
 void laydata::tdtpoly::draw_request(Tenderer& rend) const
 {
    rend.poly(_plist);
@@ -829,50 +793,33 @@ void laydata::tdtpoly::openGL_drawsel(const pointlist& ptlist, const SGBitSet* p
    }
 }
 
-void laydata::tdtpoly::tmp_draw(const layprop::DrawProperties&, ctmqueue& transtack,
-                                 SGBitSet* plst, bool under_construct) const {
+void laydata::tdtpoly::motion_draw(const layprop::DrawProperties&, ctmqueue& transtack,
+                                 SGBitSet* plst) const
+{
    CTM trans = transtack.front();
    _dbl_word numpnts;
-//   trans = transtack.top();
    if ((numpnts = _plist.size()) == 0) return;
-   word i;
-   if (under_construct) {
-      glBegin(GL_LINE_STRIP);
-      for (i = 0; i < numpnts; i++) 
-         glVertex2i(_plist[i].x(), _plist[i].y());
-      TP newp = _plist[numpnts-1] * trans;
-      glVertex2i(newp.x(), newp.y());
-      if ((numpnts > 2) || ((2 == numpnts) && (newp != _plist[numpnts-1])))
-         glVertex2i(_plist[0].x(), _plist[0].y());
-      glEnd();
+   pointlist* ptlist;
+   if (sh_partsel == status())
+   {
+      CTM strans = transtack.back();
+      assert(plst);
+      ptlist = movePointsSelected(*plst, trans, strans);
    }
-   else {
-      pointlist* ptlist;
-      if (sh_partsel == status()) {
-         CTM strans = transtack.back();
-         assert(plst);
-         ptlist = movePointsSelected(*plst, trans, strans);
-      }
-      else {
-         ptlist = DEBUG_NEW pointlist;
-         ptlist->reserve(numpnts);
-         for (i = 0; i < numpnts; i++) 
-            ptlist->push_back(_plist[i] * trans);
-      }
-      glBegin(GL_LINE_LOOP);
-      for (i = 0; i < numpnts; i++) 
-         glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
-      glEnd();
-      ptlist->clear();
-      delete ptlist;
+   else
+   {
+      ptlist = DEBUG_NEW pointlist;
+      ptlist->reserve(numpnts);
+      for (word i = 0; i < numpnts; i++)
+         ptlist->push_back(_plist[i] * trans);
    }
+   glBegin(GL_LINE_LOOP);
+   for (word i = 0; i < numpnts; i++)
+      glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
+   glEnd();
+   ptlist->clear();
+   delete ptlist;
 }
-
-void laydata::tdtpoly::rmpoint(TP& lp) {
-   assert(_plist.size() > 0);
-   _plist.pop_back();
-   if (_plist.size() > 0) lp = _plist.back();
-};
 
 void  laydata::tdtpoly::select_points(DBbox& select_in, SGBitSet& pntlst) {
    for (word i = 0; i < _plist.size(); i++) 
@@ -1214,25 +1161,6 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       precalc(ptlist, num_points);
 }
 
-// void laydata::tdtwire::tender_gen(pointlist& ptlist) const
-// {
-//    if (_plist.size() < 2) return;
-//    // first check whether to draw only the center line
-// //   DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
-// //   bool center_line_only = !wsquare.visible(drawprop.topCTM() * drawprop.ScrCTM());
-//    unsigned num_points = _plist.size();
-//    bool center_line_only = false;
-//    if (center_line_only)
-//       ptlist.reserve(num_points);
-//    else
-//       ptlist.reserve(3 * num_points);
-//    // translate the points using the current CTM
-//    for (unsigned i = 0; i < num_points; i++)
-//       ptlist.push_back(_plist[i]);
-//    if (!center_line_only)
-//       precalc(ptlist, num_points);
-// }
-
 void laydata::tdtwire::draw_request(Tenderer& rend) const
 {
    rend.wire(_plist, _width);
@@ -1320,38 +1248,24 @@ void laydata::tdtwire::openGL_drawsel(const pointlist& ptlist, const SGBitSet* p
    }
 }
 
-void laydata::tdtwire::tmp_draw(const layprop::DrawProperties& drawprop,
-               ctmqueue& transtack, SGBitSet* plst, bool under_construct) const
+void laydata::tdtwire::motion_draw(const layprop::DrawProperties& drawprop,
+               ctmqueue& transtack, SGBitSet* plst) const
 {
    CTM trans = transtack.front();
    pointlist* ptlist;
    _dbl_word num_points = _plist.size();
-   if (under_construct)
+   if (num_points < 2) return;
+   if (sh_partsel == status())
    {
-      if (num_points == 0) return;
-      ptlist = DEBUG_NEW pointlist;
-      ptlist->reserve(3*(num_points + 1));
-      for (unsigned i = 0; i < num_points; i++)
-         ptlist->push_back(_plist[i]);
-      ptlist->push_back(_plist[num_points-1] * trans);
-      num_points++;
+      CTM strans = transtack.back();
+      assert(plst);
+      ptlist = movePointsSelected(*plst, trans, strans);
    }
    else
    {
-      if (num_points < 2) return;
-//      ptlist->reserve(3*num_points);
-      if (sh_partsel == status())
-      {
-         CTM strans = transtack.back();
-         assert(plst);
-         ptlist = movePointsSelected(*plst, trans, strans);
-      }
-      else
-      {
-         ptlist = DEBUG_NEW pointlist;
-         for (unsigned i = 0; i < num_points; i++)
-            ptlist->push_back(_plist[i] * trans);
-      }
+      ptlist = DEBUG_NEW pointlist;
+      for (unsigned i = 0; i < num_points; i++)
+         ptlist->push_back(_plist[i] * trans);
    }
    precalc((*ptlist), num_points);
    openGL_drawline(const_cast<layprop::DrawProperties&>(drawprop), *ptlist);
@@ -1387,12 +1301,6 @@ void laydata::tdtwire::precalc(pointlist& ptlist, _dbl_word num_points) const
    }
    delete ln1;
 }
-
-void  laydata::tdtwire::rmpoint(TP& lp) {
-   assert(_plist.size() > 0);
-   _plist.pop_back();
-   if (_plist.size() > 0) lp = _plist.back();
-};
 
 bool laydata::tdtwire::point_inside(TP pnt)
 {
@@ -1665,9 +1573,6 @@ laydata::tdtdefaultcell* laydata::tdtcellref::visible(const DBbox& clip, const C
    return _structure->second;
 }
 
-// void laydata::tdtcellref::tender_gen(pointlist& ptlist) const
-// {
-// }
 void laydata::tdtcellref::draw_request(Tenderer& rend) const
 {
    // calculate the current translation matrix
@@ -1738,13 +1643,13 @@ void laydata::tdtcellref::openGL_postclean(layprop::DrawProperties& drawprop, po
    drawprop.popCTM();
 }
 
-void laydata::tdtcellref::tmp_draw(const layprop::DrawProperties& drawprop,
-                 ctmqueue& transtack, SGBitSet*, bool under_construct) const
+void laydata::tdtcellref::motion_draw(const layprop::DrawProperties& drawprop,
+                 ctmqueue& transtack, SGBitSet*) const
 {
    if (structure())
    {
       transtack.push_front(_translation * transtack.front());
-      structure()->tmp_draw(drawprop, transtack);
+      structure()->motion_draw(drawprop, transtack);
    }
 }
 
@@ -2011,9 +1916,6 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    }
 }
 
-// void laydata::tdtcellaref::tender_gen(pointlist& ptlist) const
-// {
-// }
 void laydata::tdtcellaref::draw_request(Tenderer& rend) const
 {
 }
@@ -2065,8 +1967,8 @@ void laydata::tdtcellaref::openGL_drawsel(const pointlist& ptlist, const SGBitSe
    }
 }
 
-void laydata::tdtcellaref::tmp_draw(const layprop::DrawProperties& drawprop,
-                 ctmqueue& transtack, SGBitSet*, bool under_construct) const
+void laydata::tdtcellaref::motion_draw(const layprop::DrawProperties& drawprop,
+                 ctmqueue& transtack, SGBitSet*) const
 {
    assert(structure());
    for (int i = 0; i < _arrprops.cols(); i++)
@@ -2078,7 +1980,7 @@ void laydata::tdtcellaref::tmp_draw(const layprop::DrawProperties& drawprop,
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          refCTM *= _translation;
          transtack.push_front(refCTM * transtack.front());
-         structure()->tmp_draw(drawprop, transtack);
+         structure()->motion_draw(drawprop, transtack);
       }
    }
 }
@@ -2206,7 +2108,7 @@ laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata(), _overlap(TP(
    glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
    _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
 }
-   
+
 laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata(), _overlap(TP()) 
 {
    _text = tedfile->getString();
@@ -2277,9 +2179,6 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    }
 }
 
-// void laydata::tdttext::tender_gen(pointlist& ptlist) const
-// {
-// }
 void laydata::tdttext::draw_request(Tenderer& rend) const
 {
 }
@@ -2350,8 +2249,8 @@ void laydata::tdttext::openGL_postclean(layprop::DrawProperties& drawprop, point
    drawprop.popCTM();
 }
 
-void laydata::tdttext::tmp_draw(const layprop::DrawProperties& drawprop,
-               ctmqueue& transtack, SGBitSet*, bool under_construct) const
+void laydata::tdttext::motion_draw(const layprop::DrawProperties& drawprop,
+               ctmqueue& transtack, SGBitSet*) const
 {
    //====================================================================
    // font translation matrix
@@ -2782,3 +2681,246 @@ laydata::tdtdata* laydata::polymerge(const pointlist& _plist0, const pointlist& 
 //    }
 // }
 
+//==============================================================================
+//
+void laydata::tdttmpbox::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
+{
+   CTM trans = transtack.front();
+   if (!(_p1)) return;
+   TP pt2 = (*_p1) * trans;
+   glRecti(_p1->x(),_p1->y(),pt2.x(),pt2.y());
+}
+
+void  laydata::tdttmpbox::addpoint(TP p)
+{
+   if (!_p1) _p1 = DEBUG_NEW TP(p);
+   else
+   {
+      if (_p2) delete _p2; // This line seems to be redundant
+      _p2 = DEBUG_NEW TP(p);
+   }
+}
+
+void  laydata::tdttmpbox::rmpoint(TP& lp)
+{
+   if (NULL != _p2) {delete _p2; _p2 = NULL;}
+   if (NULL != _p1) {delete _p1; _p1 = NULL;}
+};
+
+laydata::tdttmpbox::~tdttmpbox()
+{
+   if (NULL != _p1) delete _p1;
+   if (NULL != _p2) delete _p2;
+}
+
+//==============================================================================
+//
+void laydata::tdttmppoly::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
+{
+   CTM trans = transtack.front();
+   _dbl_word numpnts;
+   if ((numpnts = _plist.size()) == 0) return;
+   word i;
+   glBegin(GL_LINE_STRIP);
+   for (i = 0; i < numpnts; i++)
+      glVertex2i(_plist[i].x(), _plist[i].y());
+   TP newp = _plist[numpnts-1] * trans;
+   glVertex2i(newp.x(), newp.y());
+   if ((numpnts > 2) || ((2 == numpnts) && (newp != _plist[numpnts-1])))
+      glVertex2i(_plist[0].x(), _plist[0].y());
+   glEnd();
+}
+
+void laydata::tdttmppoly::rmpoint(TP& lp)
+{
+   assert(_plist.size() > 0);
+   _plist.pop_back();
+   if (_plist.size() > 0) lp = _plist.back();
+};
+
+//==============================================================================
+//
+void laydata::tdttmpwire::draw(const layprop::DrawProperties& drawprop, ctmqueue& transtack) const
+{
+   CTM trans = transtack.front();
+   pointlist* ptlist;
+   _dbl_word num_points = _plist.size();
+   if (num_points == 0) return;
+   ptlist = DEBUG_NEW pointlist;
+   ptlist->reserve(3*(num_points + 1));
+   for (unsigned i = 0; i < num_points; i++)
+      ptlist->push_back(_plist[i]);
+   ptlist->push_back(_plist[num_points-1] * trans);
+   num_points++;
+   precalc((*ptlist), num_points);
+
+   drawline(*ptlist);
+   ptlist->clear(); delete ptlist;
+}
+
+void  laydata::tdttmpwire::rmpoint(TP& lp)
+{
+   assert(_plist.size() > 0);
+   _plist.pop_back();
+   if (_plist.size() > 0) lp = _plist.back();
+};
+
+void laydata::tdttmpwire::precalc(pointlist& ptlist, _dbl_word num_points) const
+{
+   DBbox* ln1 = endPnts(ptlist[0],ptlist[1], true);
+   if (NULL != ln1)
+   {
+      ptlist.push_back(ln1->p1());
+      ptlist.push_back(ln1->p2());
+   }
+   delete ln1;
+   for (unsigned i = 1; i < num_points - 1; i++)
+   {
+      ln1 = mdlPnts(ptlist[i-1],ptlist[i],ptlist[i+1]);
+      if (NULL != ln1)
+      {
+         ptlist.push_back(ln1->p1());
+         ptlist.push_back(ln1->p2());
+      }
+      delete ln1;
+   }
+   ln1 = endPnts(ptlist[num_points-2],ptlist[num_points-1],false);
+   if (NULL != ln1)
+   {
+      ptlist.push_back(ln1->p1());
+      ptlist.push_back(ln1->p2());
+   }
+   delete ln1;
+}
+
+DBbox* laydata::tdttmpwire::endPnts(const TP& p1, const TP& p2, bool first) const
+{
+   double     w = _width/2;
+   double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
+   double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
+   double xcorr, ycorr; // the corrections
+   if ((0 == nom) && (0 == denom)) return NULL;
+   double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
+   else if (0 == nom  )   {xcorr = 0 ; ycorr = signY * w;} // horizontal |----|
+   else
+   {
+      double sl   = nom / denom;
+      double sqsl = signY*sqrt( sl*sl + 1);
+      xcorr = rint(w * (sl / sqsl));
+      ycorr = rint(w * ( 1 / sqsl));
+   }
+   TP pt = first ? p1 : p2;
+   return DEBUG_NEW DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
+                           (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
+}
+
+DBbox* laydata::tdttmpwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
+{
+   double    w = _width/2;
+   double  x32 = p3.x() - p2.x();
+   double  x21 = p2.x() - p1.x();
+   double  y32 = p3.y() - p2.y();
+   double  y21 = p2.y() - p1.y();
+   double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
+   double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
+   double denom = x32 * y21 - x21 * y32;
+// @FIXME THINK about next two lines!!!    They are wrong !!!
+   if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
+   if (0 == L2) return NULL;
+   // the corrections
+   double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
+   double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
+   return DEBUG_NEW DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
+                           (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
+}
+
+void laydata::tdttmpwire::drawline(const pointlist& ptlist) const
+{
+   _dbl_word num_points = ptlist.size();
+   if (0 == ptlist.size()) return;
+   // to keep MS VC++ happy - define the counter outside the loops
+   _dbl_word i;
+   _dbl_word num_cpoints = (num_points == _plist.size()) ? num_points : num_points / 3;
+   // draw the central line in all cases
+   if (0 == num_cpoints) return;
+   glBegin(GL_LINE_STRIP);
+   for (i = 0; i < num_cpoints; i++)
+      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   glEnd();
+   // now check whether to draw only the center line
+   if (num_cpoints == num_points) return;
+   // draw the wire contour
+   glBegin(GL_LINE_LOOP);
+   for (i = num_cpoints; i < 3 * num_cpoints; i = i + 2)
+      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   for (i = 3 * num_cpoints - 1; i > num_cpoints; i = i - 2)
+      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   glEnd();
+}
+
+//==============================================================================
+//
+void laydata::tdttmpcellref::draw(const layprop::DrawProperties& drawprop, ctmqueue& transtack) const
+{
+   if (_structure->second)
+   {
+      transtack.push_front(_translation * transtack.front());
+      _structure->second->motion_draw(drawprop, transtack);
+   }
+}
+
+//==============================================================================
+//
+void laydata::tdttmpcellaref::draw(const layprop::DrawProperties& drawprop,
+                                       ctmqueue& transtack) const
+{
+   if (_structure->second)
+   {
+      for (int i = 0; i < _arrprops.cols(); i++)
+      {// start/stop rows
+         for(int j = 0; j < _arrprops.rows(); j++)
+         { // start/stop columns
+            // for each of the visual array figures...
+            // ... get the translation matrix ...
+            CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+            refCTM *= _translation;
+            transtack.push_front(refCTM * transtack.front());
+            _structure->second->motion_draw(drawprop, transtack);
+         }
+      }
+   }
+}
+
+//==============================================================================
+//
+laydata::tdttmptext::tdttmptext(std::string text, CTM trans) : _overlap(TP())
+{
+   for (unsigned charnum = 0; charnum < text.length(); charnum++)
+      if (!isprint(text[charnum])) text[charnum] = '?';
+   _text = text;
+   _translation = trans;
+   float minx, miny, maxx, maxy;
+   glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
+   _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
+}
+
+
+void laydata::tdttmptext::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
+{
+   //====================================================================
+   // font translation matrix
+   CTM ftmtrx =  _translation * transtack.front();
+   glPushMatrix();
+   double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
+   ftmtrx.c(), ftmtrx.d(),0,0,
+            0,          0,0,0,
+            ftmtrx.tx(),ftmtrx.ty(),0,1};
+            glMultMatrixd(ori_mtrx);
+            // correction of the glf shift - as explained in the openGL_precalc above
+            glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
+            glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
+            glfDrawWiredString(_text.c_str());
+            glPopMatrix();
+}

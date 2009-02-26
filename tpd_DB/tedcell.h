@@ -97,7 +97,7 @@ namespace laydata {
          virtual            ~tdtdefaultcell() {};
          virtual void        openGL_draw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGL_draw(Tenderer&, bool active=false) const;
-         virtual void        tmp_draw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
+         virtual void        motion_draw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
          virtual void        PSwrite(PSFile&, const layprop::DrawProperties&,
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
          virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell*, cellList*, const tdtlibdir*);
@@ -133,7 +133,7 @@ namespace laydata {
       void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
       void                 openGL_draw(Tenderer&, bool active=false) const;
-      void                 tmp_draw(const layprop::DrawProperties&, ctmqueue&,
+      void                 motion_draw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;
       quadTree*            securelayer(word layno);
       tdtcellref*          addcellref(tdtdesign*, refnamepair str, CTM trans,

@@ -700,7 +700,7 @@ tmp_draw methods of the tdtddata objects. This happens only if
 the current quadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. In a sence this method is the same as openGL_draw
 without fill and not handling selected shapes*/
-void laydata::quadTree::tmp_draw(const layprop::DrawProperties& drawprop,
+void laydata::quadTree::motion_draw(const layprop::DrawProperties& drawprop,
                                                    ctmqueue& transtack) const {
    if (empty()) return;
    // check the entire holder for clipping...
@@ -710,11 +710,11 @@ void laydata::quadTree::tmp_draw(const layprop::DrawProperties& drawprop,
    else if (!areal.visible(drawprop.ScrCTM())) return;
    tdtdata* wdt = _first;
    while(wdt) {
-      wdt->tmp_draw(drawprop, transtack);
+      wdt->motion_draw(drawprop, transtack, NULL);
       wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->tmp_draw(drawprop, transtack);
+      if (_quads[i]) _quads[i]->motion_draw(drawprop, transtack);
 }
 
 /*! Used to copy tdtdata objects from quadTree to a dataList. This is initiated 
@@ -980,7 +980,7 @@ laydata::tdtdata* laydata::tdtlayer::addtext(std::string text,
 /*! A temporary Draw (during move/copy operations) of the container contents
  on the screen using the virtual quadTree::tmp_draw() method of the 
  parent object. */
-void laydata::tdtlayer::tmp_draw(const layprop::DrawProperties& drawprop,
+void laydata::tdtlayer::motion_draw(const layprop::DrawProperties& drawprop,
                                                  ctmqueue& transtack) const {
    // check the entire layer for clipping...
    DBbox clip = drawprop.clipRegion();
@@ -988,5 +988,5 @@ void laydata::tdtlayer::tmp_draw(const layprop::DrawProperties& drawprop,
    DBbox areal = overlap().overlap(transtack.front());
    if      ( clip.cliparea(areal) == 0       ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;
-   quadTree::tmp_draw(drawprop, transtack);
+   quadTree::motion_draw(drawprop, transtack);
 }
