@@ -136,6 +136,7 @@
         (packet #f))
     (define (get-name) layer-name)
     (define (get-number) number)
+    (define (set-number! num) (set! number num))
     (define (get-streamed) streamed)
     (define (set-streamed! bool) (set! streamed bool))
     (define (get-stream-number) stream-number)
@@ -149,6 +150,7 @@
       (let ()
         (cond ((eq? m 'get-name) get-name)
               ((eq? m 'get-number) get-number)
+              ((eq? m 'set-number!) set-number!)
               ((eq? m 'get-streamed) get-streamed)
               ((eq? m 'set-streamed!) set-streamed!)
               ((eq? m 'get-stream-number) get-stream-number)
@@ -178,6 +180,19 @@
 ; Warning - objects must support 'get-name operation
 (define (find-in-object-list lst elem-name)
   (find-in-list (lambda (elem) (string=? ((elem 'get-name)) elem-name)) lst))
+  
+;replace-zero-number  
+;input layer - layer that number is equal 0
+;Warning -function modify global variable layer-list
+;Find unused number begining 0 and replace 0 to finded one
+(define (replace-zero-number layer)
+  (define (find-free-number number)
+    (if (eq? null (find-in-list (lambda (elem) (eq? ((elem 'get-number)) number)) layer-list))
+        number
+        (find-free-number (+ number 1))
+        ))
+
+   ((layer 'set-number!) (find-free-number 100)))
 
 ;****************GLOBAL VARIABLES AND FUNCTIONS*******************
 (define packet-list  '())
@@ -395,6 +410,11 @@
   (lambda (rules)
     (list "/*lxRules"
           "not realized yet*/")))
+  
+  (define compactorRules
+  (lambda (rules)
+    (list "/*compactorRules"
+          "not realized yet*/")))
 
 ;****************TRANSLATOR FUNCTIONS********************************
 (define (layer-setup)
@@ -414,13 +434,19 @@
                      (let* ((name ((layer 'get-name)))
                            (packet-name ((layer 'get-packet)))
                            (packet (find-in-object-list packet-list packet-name)))
-                       (if (not (eq? packet null))
+                       (begin
+                         (display ((layer 'get-number)))
+                         (newline)
+                         (cond ((eq? ((layer 'get-number)) 0) 
+                             (replace-zero-number layer))
+                             )
+                         (if (not (eq? packet null))
                            (let* ((number (number->string((layer 'get-number))))
                                   (colour ((packet 'get-fill)))
                                   (stipple ((packet 'get-stipple))))
                              (list (string-append "layprop(\"" name "\",\t" number ",\t\"" colour "\",\t"
                                                   "\"" stipple "\",\t" "\"selected3\");"))) 
-                           (error "can't find packet" packet-name)))
+                           (error "can't find packet" packet-name))))
                      '())))
                layer-list)
           (list (list "}"))))
@@ -473,6 +499,7 @@
           ((eq? command 'spacingRules) (spacingRules body))
           ((eq? command 'devices) (devices body))
           ((eq? command 'lxRules) (lxRules body))
+          ((eq? command 'compactorRules) (compactorRules body))
           (else (begin
                   (display "mistake in recognition")
                   (newline)
@@ -561,5 +588,5 @@
 ;(write-to-file "d:\\1\\tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
   ;(debug-print-packets "d:\\toped\\vanguard\\display.drf")
   ;(debug-print-layers "d:\\toped\\vanguard\\vis40cb.tf")
-  ; (convert (list "d:\\toped\\vanguard\\tell.tll" "d:\\toped\\vanguard\\display.drf" "d:\\toped\\vanguard\\vis40cb.tf"))
+   (convert (list "d:\\toped\\vanguard\\tell.tll" "d:\\toped\\vanguard\\display.drf" "d:\\toped\\vanguard\\vis40cb.tf"))
 )
