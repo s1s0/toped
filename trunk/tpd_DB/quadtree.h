@@ -67,7 +67,7 @@ namespace laydata {
       void                 openGL_draw(layprop::DrawProperties&, const dataList*, bool) const;
       void                 openGL_draw(Tenderer&, const dataList*) const;
 //      void                 visible_shapes(laydata::shapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
-      virtual void         tmp_draw(const layprop::DrawProperties&, ctmqueue&) const;
+      virtual void         motion_draw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(tdtdata* shape);
       void                 put(tdtdata* shape);
       void                 write(TEDfile* const) const;
@@ -122,7 +122,7 @@ functionality is mostly implemented in the parent class.
                            tdtlayer() : quadTree() {};
                            tdtlayer(TEDfile* const tedfile) : quadTree(tedfile) {};
                           ~tdtlayer() {freememory();};
-      void                 tmp_draw(const layprop::DrawProperties&, ctmqueue& ) const;
+      void                 motion_draw(const layprop::DrawProperties&, ctmqueue& ) const;
       tdtdata*             addbox(TP* p1, TP* p2, bool sortnow = true);
       tdtdata*             addpoly(pointlist& pl, bool sortnow = true);
       tdtdata*             addwire(pointlist& pl,word w, bool sortnow = true);

@@ -106,7 +106,7 @@ namespace laydata {
       void           openGL_draw(layprop::DrawProperties&);
       void           openGL_draw(Tenderer&);
       void           tmp_draw(const layprop::DrawProperties&, TP, TP);
-      void           set_tmpdata(tdtdata* tmpdata) {_tmpdata = tmpdata;}
+      void           set_tmpdata(tdttmpdata* tmpdata) {_tmpdata = tmpdata;}
       void           set_tmpctm(CTM tmpctm)        {_tmpctm  = tmpctm; }
       void           mousePoint(TP p);
       void           mousePointCancel(TP&);
@@ -156,7 +156,7 @@ namespace laydata {
       bool           modified;
       friend         class TEDfile;
    private:
-      tdtdata*       _tmpdata;      // pointer to a data under construction - for view purposes
+      tdttmpdata*    _tmpdata;      // pointer to a data under construction - for view purposes
       editobject     _target;       // edit/view target <- introduced with pedit operations
       CTM            _tmpctm;
    };

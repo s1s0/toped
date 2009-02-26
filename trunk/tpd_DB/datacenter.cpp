@@ -991,15 +991,15 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
       _TEDLIB()->check_active();
       switch (input_type)
       {
-         case console::op_dbox:   _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtbox()  ); break;
-         case console::op_dpoly:  _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtpoly()) ; break;
+         case console::op_dbox:   _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpbox()  ); break;
+         case console::op_dpoly:  _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmppoly()) ; break;
          case console::op_cbind:
          {
             assert ("" != name);
             laydata::refnamepair striter;
             CTM eqm;
             VERIFY(DATC->getCellNamePair(name, striter));
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtcellref(striter, eqm) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellref(striter, eqm) );
             break;
          }
          case console::op_abind:
@@ -1010,7 +1010,7 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             CTM eqm;
             VERIFY(DATC->getCellNamePair(name, striter));
             laydata::ArrayProperties arrprops(stepX, stepY, cols, rows);
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtcellaref(striter, eqm, arrprops) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellaref(striter, eqm, arrprops) );
             break;
          }
          case console::op_tbind:
@@ -1018,14 +1018,14 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             assert ("" != name);
             CTM eqm(trans);
             eqm.Scale(1/(UU()*OPENGL_FONT_UNIT), 1/(UU()*OPENGL_FONT_UNIT));
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttext(name, eqm) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmptext(name, eqm) );
             break;
          }
          case console::op_rotate: _TEDLIB()->set_tmpctm( trans );
          default:
          {
             if (0  < input_type)
-               _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtwire(input_type) );
+               _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpwire(input_type) );
          }
       }
    }

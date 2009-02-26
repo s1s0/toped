@@ -838,7 +838,7 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
    {
       glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.7);
       tmp_stack.push_front(CTM(newp - base,1,0,false));
-      _tmpdata->tmp_draw(drawprop, tmp_stack,NULL,true);
+      _tmpdata->draw(drawprop, tmp_stack);
    }
    else if ((drawprop.currentop() != console::op_none) && _target.checkedit())
    {
@@ -868,7 +868,7 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
          newpos.Translate(newp.x(),newp.y());
          tmp_stack.push_front(newpos);
       }
-      _target.edit()->tmp_draw(drawprop, tmp_stack, true);
+      _target.edit()->motion_draw(drawprop, tmp_stack, true);
       tmp_stack.clear();
    }
    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

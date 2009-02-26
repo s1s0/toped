@@ -222,7 +222,7 @@ void laydata::tdtdefaultcell::openGL_draw(Tenderer&, bool active) const
 {
 }
 
-void laydata::tdtdefaultcell::tmp_draw(const layprop::DrawProperties&, ctmqueue&, bool active) const
+void laydata::tdtdefaultcell::motion_draw(const layprop::DrawProperties&, ctmqueue&, bool active) const
 {
 }
 
@@ -458,9 +458,11 @@ void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
    }
 }
 
-void laydata::tdtcell::tmp_draw(const layprop::DrawProperties& drawprop,
-                                          ctmqueue& transtack, bool active) const {
-   if (active) {
+void laydata::tdtcell::motion_draw(const layprop::DrawProperties& drawprop,
+                                          ctmqueue& transtack, bool active) const
+{
+   if (active)
+   {
       // If this is the active cell, then we will have to visualize the
       // selected shapes in move. Patially selected fellas are processed
       // only if the current operation is move
@@ -472,7 +474,7 @@ void laydata::tdtcell::tmp_draw(const layprop::DrawProperties& drawprop,
          const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst->first);
          for (dlst = llst->second->begin(); dlst != llst->second->end(); dlst++)
             if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
-               dlst->first->tmp_draw(drawprop, transtack, &(dlst->second));
+               dlst->first->motion_draw(drawprop, transtack, &(dlst->second));
       }
    }
    else {
@@ -482,9 +484,10 @@ void laydata::tdtcell::tmp_draw(const layprop::DrawProperties& drawprop,
       // without fill
       typedef layerList::const_iterator LCI;
       for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-         if (!drawprop.layerHidden(lay->first)) {
+         if (!drawprop.layerHidden(lay->first))
+         {
             const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay->first);
-            lay->second->tmp_draw(drawprop, transtack);
+            lay->second->motion_draw(drawprop, transtack);
          }
       transtack.pop_front();
    }
