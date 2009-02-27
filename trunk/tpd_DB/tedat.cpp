@@ -379,10 +379,23 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
 //-----------------------------------------------------------------------------
 // class tdtbox
 //-----------------------------------------------------------------------------
+laydata::tdtbox::tdtbox(const TP& p1, const TP& p2) : tdtdata()
+{
+   _pdata = new int4b[4];
+   _pdata[p1x] = p1.x();_pdata[p1y] = p1.y();
+   _pdata[p2x] = p2.x();_pdata[p2y] = p2.y();
+   SGBitSet dummy;
+   normalize(dummy);
+}
+
 laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata() 
 {
-   _p1 = DEBUG_NEW TP(tedfile->getTP());
-   _p2 = DEBUG_NEW TP(tedfile->getTP());
+   _pdata = new int4b[4];
+   TP point;
+   point = tedfile->getTP();
+   _pdata[p1x] = point.x();_pdata[p1y] = point.y();
+   point = tedfile->getTP();
+   _pdata[p2x] = point.x();_pdata[p2y] = point.y();
    SGBitSet dummy;
    normalize(dummy);
 }
@@ -390,38 +403,39 @@ laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata()
 void laydata::tdtbox::normalize(SGBitSet& psel)
 {
    int4b swap;
-   if (_p1->x() > _p2->x())
+   if (_pdata[p1x] > _pdata[p2x])
    {
-      swap = _p1->x(); _p1->setX(_p2->x()); _p2->setX(swap);
+      swap = _pdata[p1x]; _pdata[p1x] = _pdata[p2x]; _pdata[p2x] = swap;
       if (0 != psel.size())
       {
          psel.swap(0,1);
          psel.swap(2,3);
       }
    }
-   if (_p1->y() > _p2->y()) {
-      swap = _p1->y(); _p1->setY(_p2->y()); _p2->setY(swap);
+   if (_pdata[p1y] > _pdata[p2y])
+   {
+      swap = _pdata[p1y]; _pdata[p1y] = _pdata[p2y]; _pdata[p2y] = swap;
       if (0 != psel.size())
       {
          psel.swap(0,3);
          psel.swap(1,2);
       }
    }
-}   
+}
 
 void laydata::tdtbox::openGL_precalc(layprop::DrawProperties& drawprop , pointlist& ptlist) const
 {
    // translate the points using the current CTM
    ptlist.reserve(4);
-   ptlist.push_back(                (*_p1) * drawprop.topCTM());
-   ptlist.push_back(TP(_p2->x(), _p1->y()) * drawprop.topCTM());
-   ptlist.push_back(                (*_p2) * drawprop.topCTM());
-   ptlist.push_back(TP(_p1->x(), _p2->y()) * drawprop.topCTM());
+   ptlist.push_back(TP(_pdata[p1x], _pdata[p1y]) * drawprop.topCTM());
+   ptlist.push_back(TP(_pdata[p2x], _pdata[p1y]) * drawprop.topCTM());
+   ptlist.push_back(TP(_pdata[p2x], _pdata[p2y]) * drawprop.topCTM());
+   ptlist.push_back(TP(_pdata[p1x], _pdata[p2y]) * drawprop.topCTM());
 }
 
 void laydata::tdtbox::draw_request(Tenderer& rend) const
 {
-   rend.box(_p1,_p2);
+//   rend.box(_p1,_p2);
 }
 
 void laydata::tdtbox::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -474,7 +488,6 @@ void laydata::tdtbox::motion_draw(const layprop::DrawProperties&, ctmqueue& tran
                                                 SGBitSet* plst) const
 {
    CTM trans = transtack.front();
-   if ( (NULL == _p1) || (NULL == _p2) ) return;
    if (sh_partsel == status())
    {
       TP pt1, pt2;
@@ -489,10 +502,10 @@ void laydata::tdtbox::motion_draw(const layprop::DrawProperties&, ctmqueue& tran
    {
       pointlist ptlist;
       ptlist.reserve(4);
-      ptlist.push_back(                (*_p1) * trans);
-      ptlist.push_back(TP(_p2->x(), _p1->y()) * trans);
-      ptlist.push_back(                (*_p2) * trans);
-      ptlist.push_back(TP(_p1->x(), _p2->y()) * trans);
+      ptlist.push_back(TP(_pdata[p1x], _pdata[p1y]) * trans);
+      ptlist.push_back(TP(_pdata[p2x], _pdata[p1y]) * trans);
+      ptlist.push_back(TP(_pdata[p2x], _pdata[p2y]) * trans);
+      ptlist.push_back(TP(_pdata[p1x], _pdata[p2y]) * trans);
       glBegin(GL_LINE_LOOP);
       for (unsigned i = 0; i < 4; i++)
          glVertex2i(ptlist[i].x(), ptlist[i].y());
@@ -502,19 +515,19 @@ void laydata::tdtbox::motion_draw(const layprop::DrawProperties&, ctmqueue& tran
 }
 
 void  laydata::tdtbox::select_points(DBbox& select_in, SGBitSet& pntlst) {
-   if (select_in.inside(*_p1))  pntlst.set(0);
-   if (select_in.inside(TP(_p2->x(), _p1->y())))  pntlst.set(1);
-   if (select_in.inside(*_p2))  pntlst.set(2);
-   if (select_in.inside(TP(_p1->x(), _p2->y())))  pntlst.set(3);
+   if (select_in.inside(TP(_pdata[p1x], _pdata[p1y])))  pntlst.set(0);
+   if (select_in.inside(TP(_pdata[p2x], _pdata[p1y])))  pntlst.set(1);
+   if (select_in.inside(TP(_pdata[p2x], _pdata[p2y])))  pntlst.set(2);
+   if (select_in.inside(TP(_pdata[p1x], _pdata[p2y])))  pntlst.set(3);
    pntlst.check_neighbours_set(false);   
 }
 
 void  laydata::tdtbox::unselect_points(DBbox& select_in, SGBitSet& pntlst) {
    if (sh_selected == _status) pntlst.setall();
-   if (select_in.inside(*_p1))  pntlst.reset(0);
-   if (select_in.inside(TP(_p2->x(), _p1->y())))  pntlst.reset(1);
-   if (select_in.inside(*_p2))  pntlst.reset(2);
-   if (select_in.inside(TP(_p1->x(), _p2->y())))  pntlst.reset(3);
+   if (select_in.inside(TP(_pdata[p1x], _pdata[p1y])))  pntlst.reset(0);
+   if (select_in.inside(TP(_pdata[p2x], _pdata[p1y])))  pntlst.reset(1);
+   if (select_in.inside(TP(_pdata[p2x], _pdata[p2y])))  pntlst.reset(2);
+   if (select_in.inside(TP(_pdata[p1x], _pdata[p2y])))  pntlst.reset(3);
 }
 
 laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet& plst)
@@ -522,14 +535,17 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet& plst)
    if (0 != plst.size())
    {// used for modify
       pointlist* nshape = movePointsSelected(plst, trans);
-      *_p1 = (*nshape)[0]; *_p2 = (*nshape)[2];
+      _pdata[p1x] = (*nshape)[0].x();_pdata[p1y] = (*nshape)[0].y();
+      _pdata[p2x] = (*nshape)[2].x();_pdata[p2y] = (*nshape)[2].y();;
       normalize(plst);
       nshape->clear(); delete nshape;
       return NULL;
    }
    else
    {// used for rotate
-      laydata::valid_box* check = DEBUG_NEW valid_box(*_p1, *_p2 ,trans);
+      TP p1 (_pdata[p1x], _pdata[p1y]);
+      TP p2 (_pdata[p2x], _pdata[p2y]);
+      laydata::valid_box* check = DEBUG_NEW valid_box(p1, p2 ,trans);
       if (laydata::shp_box & check->status())
       {
          // modify the box ONLY if we're going to get a box
@@ -545,30 +561,35 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet& plst)
 }
 
 void laydata::tdtbox::transfer(const CTM& trans) {
-   *_p1 *= trans;
-   *_p2 *= trans;
+   TP p1 = TP(_pdata[p1x], _pdata[p1y]) * trans;
+   TP p2 = TP(_pdata[p2x], _pdata[p2y]) * trans;
+   _pdata[p1x] = p1.x();_pdata[p1y] = p1.y();
+   _pdata[p2x] = p2.x();_pdata[p2y] = p2.y();
    SGBitSet dummy;
    normalize(dummy);
 }
 
-laydata::tdtdata* laydata::tdtbox::copy(const CTM& trans) {
-   TP *cp1 = DEBUG_NEW TP(*_p1 * trans);
-   TP *cp2 = DEBUG_NEW TP(*_p2 * trans);
+laydata::tdtdata* laydata::tdtbox::copy(const CTM& trans)
+{
+   TP cp1(_pdata[p1x], _pdata[p1y]); cp1 *= trans;
+   TP cp2(_pdata[p2x], _pdata[p2y]); cp2 *= trans;
    return DEBUG_NEW tdtbox(cp1, cp2);
 }
 
 void laydata::tdtbox::info(std::ostringstream& ost, real DBU) const {
    ost << "box - {";
-   _p1->info(ost, DBU);
+   TP p1 (_pdata[p1x], _pdata[p1y]);
+   p1.info(ost, DBU);
    ost << " , ";
-   _p2->info(ost, DBU);
+   TP p2 (_pdata[p2x], _pdata[p2y]);
+   p2.info(ost, DBU);
    ost << "};";
 }
 
 void laydata::tdtbox::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_BOX);
-   tedfile->putTP(_p1);
-   tedfile->putTP(_p2);
+   tedfile->put4b(_pdata[p1x]); tedfile->put4b(_pdata[p1y]);
+   tedfile->put4b(_pdata[p2x]); tedfile->put4b(_pdata[p2y]);
 }
 
 void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
@@ -583,11 +604,11 @@ void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
       wr = gdsf.setNextRecord(gds_DATATYPE);
       wr->add_int2b(gds_type);gdsf.flush(wr);
       wr = gdsf.setNextRecord(gds_XY,5);
-      wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
-      wr->add_int4b(_p1->x());wr->add_int4b(_p2->y());
-      wr->add_int4b(_p2->x());wr->add_int4b(_p2->y());
-      wr->add_int4b(_p2->x());wr->add_int4b(_p1->y());
-      wr->add_int4b(_p1->x());wr->add_int4b(_p1->y());
+      wr->add_int4b(_pdata[p1x]);wr->add_int4b(_pdata[p1y]);
+      wr->add_int4b(_pdata[p1x]);wr->add_int4b(_pdata[p2y]);
+      wr->add_int4b(_pdata[p2x]);wr->add_int4b(_pdata[p2y]);
+      wr->add_int4b(_pdata[p2x]);wr->add_int4b(_pdata[p1y]);
+      wr->add_int4b(_pdata[p1x]);wr->add_int4b(_pdata[p1y]);
       gdsf.flush(wr);
       wr = gdsf.setNextRecord(gds_ENDEL);
       gdsf.flush(wr);
@@ -599,9 +620,9 @@ void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 
 void laydata::tdtbox::CIFwrite(CIFin::CifExportFile& ciff) const
 {
-   unsigned int length = abs(_p2->x() - _p1->x());
-   unsigned int width  = abs(_p2->y() - _p1->y());
-   TP center((_p2->x() + _p1->x()) / 2, (_p2->y() + _p1->y()) / 2);
+   unsigned int length = abs(_pdata[p2x] - _pdata[p1x]);
+   unsigned int width  = abs(_pdata[p2y] - _pdata[p1y]);
+   TP center((_pdata[p2x] + _pdata[p1x]) / 2, (_pdata[p2y] + _pdata[p1y]) / 2);
    ciff.box(length, width, center);
 }
 
@@ -612,16 +633,18 @@ void laydata::tdtbox::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) cons
 }
 
 DBbox laydata::tdtbox::overlap() const {
-   DBbox ovl = DBbox(*_p1);
-   ovl.overlap(*_p2);
+   DBbox ovl = DBbox(TP(_pdata[p1x], _pdata[p1y]));
+   ovl.overlap(TP(_pdata[p2x], _pdata[p2y]));
    return ovl;
 }
 
 const pointlist laydata::tdtbox::shape2poly() const {
   // convert box to polygon
    pointlist _plist;
-   _plist.push_back(TP(*_p1));_plist.push_back(TP(_p2->x(), _p1->y()));
-   _plist.push_back(TP(*_p2));_plist.push_back(TP(_p1->x(), _p2->y()));
+   _plist.push_back(TP(_pdata[p1x], _pdata[p1y]));
+   _plist.push_back(TP(_pdata[p2x], _pdata[p1y]));
+   _plist.push_back(TP(_pdata[p2x], _pdata[p2y]));
+   _plist.push_back(TP(_pdata[p1x], _pdata[p2y]));
    return _plist;
 };
 
@@ -661,15 +684,12 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
 
 void laydata::tdtbox::stretch(int bfactor, shapeList** decure)
 {
-   if ( ((_p1->x() - _p2->x()) < 2*bfactor) &&
-        ((_p1->y() - _p2->y()) < 2*bfactor)    )
+   if ( ((_pdata[p1x] - _pdata[p2x]) < 2*bfactor) &&
+        ((_pdata[p1y] - _pdata[p2y]) < 2*bfactor)    )
    {
-      tdtbox* modified = DEBUG_NEW tdtbox(
-                                          DEBUG_NEW TP(_p1->x() - bfactor,
-                                                      _p1->y() - bfactor ),
-                                          DEBUG_NEW TP(_p2->x() + bfactor,
-                                                      _p2->y() + bfactor )
-                                       );
+      TP np1(_pdata[p1x] - bfactor, _pdata[p1y] - bfactor );
+      TP np2(_pdata[p2x] + bfactor, _pdata[p2y] + bfactor );
+      tdtbox* modified = DEBUG_NEW tdtbox(np1, np2);
       decure[1]->push_back(modified);
    }
    decure[0]->push_back(this);
@@ -679,8 +699,10 @@ pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet& pset,
                                     const CTM&  movedM, const CTM& stableM) const {
   // convert box to polygon
    pointlist* mlist = DEBUG_NEW pointlist();
-   mlist->push_back(TP(*_p1));mlist->push_back(TP(_p2->x(), _p1->y()));
-   mlist->push_back(TP(*_p2));mlist->push_back(TP(_p1->x(), _p2->y()));
+   mlist->push_back(TP(_pdata[p1x], _pdata[p1y]));
+   mlist->push_back(TP(_pdata[p2x], _pdata[p1y]));
+   mlist->push_back(TP(_pdata[p2x], _pdata[p2y]));
+   mlist->push_back(TP(_pdata[p1x], _pdata[p2y]));
 
    word size = mlist->size();
    PSegment seg1,seg0;
@@ -716,9 +738,9 @@ pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet& pset,
    return mlist;
 }
 
-laydata::tdtbox::~tdtbox() {
-   if (_p1) delete _p1; 
-   if (_p2) delete _p2;
+laydata::tdtbox::~tdtbox()
+{
+   delete [] _pdata;
 }
 
 //-----------------------------------------------------------------------------
@@ -2365,10 +2387,8 @@ laydata::valid_box::valid_box(const TP& p1, const TP& p2, const CTM& trans) : va
 
 laydata::tdtdata* laydata::valid_box::replacement()
 {
-   if (box()) {
-      TP* p1= DEBUG_NEW TP(_plist[0]); TP* p2= DEBUG_NEW TP(_plist[2]);
-      return DEBUG_NEW laydata::tdtbox(p1, p2);
-   }
+   if (box())
+      return DEBUG_NEW laydata::tdtbox(_plist[0], _plist[2]);
    else return DEBUG_NEW laydata::tdtpoly(_plist);
 }
 
@@ -2393,10 +2413,8 @@ laydata::valid_poly::valid_poly(const pointlist& plist) : validator(plist) {
 
 laydata::tdtdata* laydata::valid_poly::replacement() {
    laydata::tdtdata* newshape;
-   if (box()) {
-      TP* p1= DEBUG_NEW TP(_plist[0]); TP* p2= DEBUG_NEW TP(_plist[2]);
-      newshape = DEBUG_NEW laydata::tdtbox(p1, p2);
-   }
+   if (box())
+      newshape = DEBUG_NEW laydata::tdtbox(_plist[0], _plist[2]);
    else newshape = DEBUG_NEW laydata::tdtpoly(_plist);
    return newshape;
 }
@@ -2636,7 +2654,7 @@ laydata::tdtdata* laydata::createValidShape(pointlist* pl) {
    laydata::tdtdata* newshape;
    pointlist npl = check.get_validated();
    if (check.box())
-      newshape = DEBUG_NEW laydata::tdtbox(DEBUG_NEW TP(npl[2]),DEBUG_NEW TP(npl[0]));
+      newshape = DEBUG_NEW laydata::tdtbox(npl[2], npl[0]);
    else
       newshape = DEBUG_NEW laydata::tdtpoly(npl);
    npl.clear();
