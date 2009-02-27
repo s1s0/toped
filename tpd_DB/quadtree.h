@@ -123,7 +123,7 @@ functionality is mostly implemented in the parent class.
                            tdtlayer(TEDfile* const tedfile) : quadTree(tedfile) {};
                           ~tdtlayer() {freememory();};
       void                 motion_draw(const layprop::DrawProperties&, ctmqueue& ) const;
-      tdtdata*             addbox(TP* p1, TP* p2, bool sortnow = true);
+      tdtdata*             addbox(const TP& p1, const TP& p2, bool sortnow = true);
       tdtdata*             addpoly(pointlist& pl, bool sortnow = true);
       tdtdata*             addwire(pointlist& pl,word w, bool sortnow = true);
       tdtdata*             addtext(std::string text, CTM trans, bool sortnow = true);

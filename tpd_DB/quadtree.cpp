@@ -941,7 +941,7 @@ laydata::quadTree::~quadTree() {
 /*!Create new tdtbox. Depending on sortnow input variable the new shape is 
 just added to the quadTree (using quadTree::put()) without sorting or fit on 
 the proper place (using add() */
-laydata::tdtdata* laydata::tdtlayer::addbox(TP* p1, TP* p2, bool sortnow) {
+laydata::tdtdata* laydata::tdtlayer::addbox(const TP& p1, const TP& p2, bool sortnow) {
    laydata::tdtbox *shape = DEBUG_NEW tdtbox(p1,p2);
    if (sortnow) add(shape);
    else         put(shape);

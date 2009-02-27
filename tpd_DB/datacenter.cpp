@@ -179,11 +179,9 @@ void GDSin::Gds2Ted::box(GDSin::GdsBox* wd, laydata::tdtlayer* wl, int2b layno)
       tell_log(console::MT_ERROR, ost.str());
    }
    else pl = check.get_validated() ;
-   if (check.box())
-   {
-      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
-   }
-   else wl->addpoly(pl,false);
+
+   if (check.box())  wl->addbox(pl[0], pl[2], false);
+   else              wl->addpoly(pl,false);
 
 }
 
@@ -199,11 +197,8 @@ void GDSin::Gds2Ted::poly(GDSin::GdsPolygon* wd, laydata::tdtlayer* wl, int2b la
       tell_log(console::MT_ERROR, ost.str());
    }
    else pl = check.get_validated() ;
-   if (check.box())
-   {
-      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
-   }
-   else wl->addpoly(pl,false);
+   if (check.box())  wl->addbox(pl[0], pl[2], false);
+   else              wl->addpoly(pl,false);
 }
 
 void GDSin::Gds2Ted::wire(GDSin::GDSpath* wd, laydata::tdtlayer* wl, int2b layno)
@@ -456,12 +451,9 @@ void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string
       tell_log(console::MT_ERROR, ost.str());
    }
    else pl = check.get_validated() ;
-   if (check.box())
-   {
-      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
-   }
-   else wl->addpoly(pl,false);
 
+   if (check.box())  wl->addbox(pl[0], pl[2],false);
+   else              wl->addpoly(pl,false);
 }
 
 void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::string layname)
@@ -483,11 +475,9 @@ void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::strin
       tell_log(console::MT_ERROR, ost.str());
    }
    else pl = check.get_validated() ;
-   if (check.box())
-   {
-      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
-   }
-   else wl->addpoly(pl,false);
+
+   if (check.box())  wl->addbox(pl[0], pl[2],false);
+   else              wl->addpoly(pl,false);
 }
 
 void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::tdtlayer* wl, std::string layname)

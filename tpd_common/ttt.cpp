@@ -51,7 +51,7 @@ void TP::roundTO(int4b step)
 TP TP::operator * (const CTM& op2) const
 {
    return TP((int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx()),
-              (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty()));
+             (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty()));
 }
 
 TP TP::operator *= (const CTM& op2)

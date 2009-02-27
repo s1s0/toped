@@ -121,8 +121,7 @@ namespace laydata {
 //==============================================================================
    class tdtbox : public tdtdata   {
    public:
-                           tdtbox(TP* p1, TP* p2) : tdtdata(), _p1(p1),
-                                       _p2(p2) {SGBitSet dummy; normalize(dummy);};
+                           tdtbox(const TP& p1, const TP& p2);
                            tdtbox(TEDfile* const tedfile);
                           ~tdtbox();
       DBbox                overlap() const;
@@ -151,10 +150,10 @@ namespace laydata {
       void                 select_points(DBbox&, SGBitSet&);
       void                 unselect_points(DBbox&, SGBitSet&);
    private:
+      enum {p1x = 0, p1y = 1, p2x = 2, p2y = 3};
       void                 normalize(SGBitSet& psel);
       pointlist*           movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
-      TP*                 _p1;
-      TP*                 _p2;
+      int4b*               _pdata;
    };
 
 //==============================================================================

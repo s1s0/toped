@@ -627,9 +627,9 @@ laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2)
    DBbox old_overlap = _target.edit()->overlap();
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
-   (*p1) *= _target.rARTM();
-   (*p2) *= _target.rARTM();
-   laydata::tdtdata* newshape = actlay->addbox(p1,p2);
+   TP np1((*p1) * _target.rARTM());
+   TP np2((*p2) * _target.rARTM());
+   laydata::tdtdata* newshape = actlay->addbox(np1,np2);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validate_cells());
    return newshape;
@@ -649,8 +649,8 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
    modified = true;
    pointlist vpl = check.get_validated();
    if (check.box()) {
-      TP* p1= DEBUG_NEW TP(vpl[0] *_target.rARTM());
-      TP* p2= DEBUG_NEW TP(vpl[2] *_target.rARTM());
+      TP p1(vpl[0] *_target.rARTM());
+      TP p2(vpl[2] *_target.rARTM());
       newshape = actlay->addbox(p1,p2);
    }
    for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
