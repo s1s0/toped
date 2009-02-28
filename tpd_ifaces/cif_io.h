@@ -312,7 +312,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void           definitionFinish();
          bool           layerSpecification(word);
          void           box(const unsigned, const unsigned, const TP&);
-         void           polygon(const pointlist&);
+         void           polygon(const int4b* const, unsigned);
          void           wire(const unsigned, const pointlist&);
          void           text(const std::string&, const TP&);
          void           call(const std::string& name, const CTM&);

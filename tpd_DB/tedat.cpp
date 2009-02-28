@@ -628,8 +628,7 @@ void laydata::tdtbox::CIFwrite(CIFin::CifExportFile& ciff) const
 
 void laydata::tdtbox::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
-   const pointlist box4 = shape2poly();
-   gdsf.poly(box4, overlap());
+   gdsf.poly(_pdata, 4, overlap());
 }
 
 DBbox laydata::tdtbox::overlap() const {
@@ -638,7 +637,8 @@ DBbox laydata::tdtbox::overlap() const {
    return ovl;
 }
 
-const pointlist laydata::tdtbox::shape2poly() const {
+pointlist laydata::tdtbox::shape2poly() const
+{
   // convert box to polygon
    pointlist _plist;
    _plist.push_back(TP(_pdata[p1x], _pdata[p1y]));
@@ -746,25 +746,47 @@ laydata::tdtbox::~tdtbox()
 //-----------------------------------------------------------------------------
 // class tdtpoly
 //-----------------------------------------------------------------------------
+laydata::tdtpoly::tdtpoly(const pointlist& plst) : tdtdata()
+{
+   _psize = plst.size();
+   assert(_psize);
+   _pdata = new int4b[_psize*2];
+   unsigned index = 0;
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      _pdata[index++] = plst[i].x();
+      _pdata[index++] = plst[i].y();
+   }
+}
+
 laydata::tdtpoly::tdtpoly(TEDfile* const tedfile) : tdtdata()
 {
-   word numpoints = tedfile->getWord();
-   _plist.reserve(numpoints);
-   for (word i = 0 ; i < numpoints; i++) 
-      _plist.push_back(tedfile->getTP());
+   _psize = tedfile->getWord();
+   assert(_psize);
+   _pdata = new int4b[_psize*2];
+   unsigned index = 0;
+   TP wpnt;
+   for (unsigned i = 0 ; i < _psize; i++)
+   {
+      wpnt = tedfile->getTP();
+      _pdata[index++] = wpnt.x();
+      _pdata[index++] = wpnt.y();
+   }
 }
 
 void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // translate the points using the current CTM
-   ptlist.reserve(_plist.size());
-   for (unsigned i = 0; i < _plist.size(); i++)
-      ptlist.push_back(_plist[i] * drawprop.topCTM());
+   ptlist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      ptlist.push_back(TP(_pdata[2*i], _pdata[2*i+1]) * drawprop.topCTM());
+   }
 }
 
 void laydata::tdtpoly::draw_request(Tenderer& rend) const
 {
-   rend.poly(_plist);
+//   rend.poly(_plist);
 }
 
 void laydata::tdtpoly::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -819,8 +841,6 @@ void laydata::tdtpoly::motion_draw(const layprop::DrawProperties&, ctmqueue& tra
                                  SGBitSet* plst) const
 {
    CTM trans = transtack.front();
-   _dbl_word numpnts;
-   if ((numpnts = _plist.size()) == 0) return;
    pointlist* ptlist;
    if (sh_partsel == status())
    {
@@ -831,30 +851,34 @@ void laydata::tdtpoly::motion_draw(const layprop::DrawProperties&, ctmqueue& tra
    else
    {
       ptlist = DEBUG_NEW pointlist;
-      ptlist->reserve(numpnts);
-      for (word i = 0; i < numpnts; i++)
-         ptlist->push_back(_plist[i] * trans);
+      ptlist->reserve(_psize);
+      for (unsigned i = 0; i < _psize; i++)
+      {
+         ptlist->push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans);
+      }
    }
    glBegin(GL_LINE_LOOP);
-   for (word i = 0; i < numpnts; i++)
+   for (unsigned i = 0; i < _psize; i++)
+   {
       glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
+   }
    glEnd();
    ptlist->clear();
    delete ptlist;
 }
 
 void  laydata::tdtpoly::select_points(DBbox& select_in, SGBitSet& pntlst) {
-   for (word i = 0; i < _plist.size(); i++) 
-      if (select_in.inside(_plist[i])) pntlst.set(i);
-   pntlst.check_neighbours_set(false);   
+   for (unsigned i = 0; i < _psize; i++)
+      if ( select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.set(i);
+   pntlst.check_neighbours_set(false);
 }
 
 void laydata::tdtpoly::unselect_points(DBbox& select_in, SGBitSet& pntlst) {
    if (sh_selected == _status)  // the whole shape use to be selected
       pntlst.setall();
-   for (word i = 0; i < _plist.size(); i++) 
-      if (select_in.inside(_plist[i])) pntlst.reset(i);
-   pntlst.check_neighbours_set(false);   
+   for (word i = 0; i < _psize; i++)
+      if ( select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.reset(i);
+   pntlst.check_neighbours_set(false);
 }
 
 laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet& plst)
@@ -866,7 +890,13 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet& plst)
       laydata::valid_poly* check = DEBUG_NEW laydata::valid_poly(*nshape);
       if (laydata::shp_OK == check->status()) {
          // assign the modified pointlist ONLY if the resulting shape is perfect
-         _plist.clear(); _plist = (*nshape);
+         delete [] _pdata;
+         _psize = nshape->size();
+         _pdata = DEBUG_NEW int4b[2 * _psize];
+         for (unsigned i = 0; i < _psize; i++)
+         {
+            _pdata[2*i] = (*nshape)[i].x();_pdata[2*i+1] = (*nshape)[i].y();
+         }
          nshape->clear(); delete nshape;
          delete check;
          return NULL;
@@ -878,7 +908,7 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet& plst)
    }
    else
    {// move when the whole shape is modified should get here.
-      if (_plist.size() > 4)
+      if (_psize > 4)
       {
          transfer(trans);
          return NULL;
@@ -887,16 +917,18 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet& plst)
       {  // The whole gymnastics is because of the Rotate operation (on angles <> 90)
          // Rotated box is converted to polygon. Means that polygon after rotatoin could
          // produce a box
-         pointlist* mlist = DEBUG_NEW pointlist(_plist);
-         for (unsigned i = 0; i < _plist.size(); i++)
-            (*mlist)[i] *= trans;
-         //@TODO: It's a waste of resources to recheck every polygon again. What we need here is
-         // only check for box. Validation classes has to be optimized
+         pointlist *mlist = DEBUG_NEW pointlist();
+         mlist->reserve(_psize);
+         for (unsigned i = 0; i < _psize; i++)
+            mlist->push_back( TP(_pdata[2*i], _pdata[2*i+1] ) * trans );
          laydata::valid_poly* check = DEBUG_NEW laydata::valid_poly(*mlist);
          if (!(laydata::shp_box & check->status()))
          {
             // leave the modified pointlist ONLY if the resulting shape is not a box
-            _plist.clear(); _plist = *mlist;
+            for (unsigned i = 0; i < _psize; i++)
+            {
+               _pdata[2*i] = (*mlist)[i].x();_pdata[2*i+1] = (*mlist)[i].y();
+            }
             delete check; delete mlist;
             return NULL;
          }
@@ -909,30 +941,48 @@ laydata::validator* laydata::tdtpoly::move(const CTM& trans, SGBitSet& plst)
    }
 }
 
-void laydata::tdtpoly::transfer(const CTM& trans) {
-   for (unsigned ii = 0; ii < _plist.size(); ii++) 
-      _plist[ii] *= trans;
-   real area = polyarea(_plist);
+void laydata::tdtpoly::transfer(const CTM& trans)
+{
+   pointlist plist;
+   plist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans );
+   real area = polyarea(plist);
+   unsigned index = 0;
    if (area < 0)
-      std::reverse(_plist.begin(),_plist.end());
+      for (unsigned i = _psize; i > 0; i--)
+      {
+         _pdata[index++] = plist[i-1].x();
+         _pdata[index++] = plist[i-1].y();
+      }
+   else
+      for (unsigned i = 0; i < _psize; i++)
+      {
+         _pdata[index++] = plist[i].x();
+         _pdata[index++] = plist[i].y();
+      }
+   assert(index == (2*_psize));
 }
 
-laydata::tdtdata* laydata::tdtpoly::copy(const CTM& trans) {
+laydata::tdtdata* laydata::tdtpoly::copy(const CTM& trans)
+{
    // copy the points of the polygon
    pointlist ptlist;
-   ptlist.reserve(_plist.size());
-   for (unsigned i = 0; i < _plist.size(); i++) 
-      ptlist.push_back(_plist[i] * trans);
+   ptlist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      ptlist.push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans );
    return DEBUG_NEW tdtpoly(ptlist);
 }
 
-bool laydata::tdtpoly::point_inside(TP pnt) {
+bool laydata::tdtpoly::point_inside(TP pnt)
+{
    TP p0, p1;
    byte cc = 0;
-   unsigned size = _plist.size();
-   for (unsigned i = 0; i < size ; i++) {
-      p0 = _plist[i]; p1 = _plist[(i+1) % size];
-      if (((p0.y() <= pnt.y()) && (p1.y() >  pnt.y())) 
+   for (unsigned i = 0; i < _psize ; i++)
+   {
+      p0 = TP(_pdata[2 *   i             ], _pdata[2 *   i              + 1]);
+      p1 = TP(_pdata[2 * ((i+1) % _psize)], _pdata[2 * ((i+1) % _psize) + 1]);
+      if (((p0.y() <= pnt.y()) && (p1.y() >  pnt.y()))
         ||((p0.y() >  pnt.y()) && (p1.y() <= pnt.y())) ) {
          float tngns = (float) (pnt.y() - p0.y())/(p1.y() - p0.y());
          if (pnt.x() < p0.x() + tngns * (p1.x() - p0.x()))
@@ -942,9 +992,23 @@ bool laydata::tdtpoly::point_inside(TP pnt) {
    return (cc & 0x01) ? true : false;
 }
 
+pointlist laydata::tdtpoly::shape2poly() const
+{
+   pointlist plist;
+   plist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      plist.push_back(TP(_pdata[2*i], _pdata[2*i+1]));
+   return plist;
+};
+
 void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
 {
-   logicop::logic operation(_plist, cutter);
+   pointlist plist;
+   plist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) );
+
+   logicop::logic operation(plist, cutter);
    try
    {
       operation.findCrossingPoints();
@@ -976,7 +1040,12 @@ void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
 
 void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
 {
-   logicop::stretcher sh_resize(_plist, bfactor);
+   pointlist plist;
+   plist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) );
+
+   logicop::stretcher sh_resize(plist, bfactor);
    pointlist* res = sh_resize.execute();
    valid_poly vsh(*res);
    if (vsh.valid() && !(laydata::shp_clock & vsh.status()))
@@ -1020,22 +1089,26 @@ void laydata::tdtpoly::stretch(int bfactor, shapeList** decure)
    delete res;
 }
 
-void laydata::tdtpoly::info(std::ostringstream& ost, real DBU) const {
+void laydata::tdtpoly::info(std::ostringstream& ost, real DBU) const
+{
    ost << "polygon - {";
-   unsigned lstsize = _plist.size();
-   unsigned lastpnt = lstsize-1;
-   for (unsigned i = 0; i < lstsize; i++) {
-      _plist[i].info(ost, DBU);
-      if (i != lastpnt) ost << " , ";
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      TP cpnt(_pdata[2*i], _pdata[2*i+1]);
+      cpnt.info(ost, DBU);
+      if (i != _psize - 1) ost << " , ";
    }
    ost << "};";
 }
 
-void laydata::tdtpoly::write(TEDfile* const tedfile) const {
+void laydata::tdtpoly::write(TEDfile* const tedfile) const
+{
    tedfile->putByte(tedf_POLY);
-   tedfile->putWord(_plist.size());
-   for (word i = 0; i < _plist.size(); i++)
-      tedfile->putTP(&_plist[i]);
+   tedfile->putWord(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      tedfile->put4b(_pdata[2*i]); tedfile->put4b(_pdata[2*i+1]);
+   }
 }
 
 void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
@@ -1049,12 +1122,12 @@ void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
       wr->add_int2b(gds_layer);gdsf.flush(wr);
       wr = gdsf.setNextRecord(gds_DATATYPE);
       wr->add_int2b(gds_type);gdsf.flush(wr);
-      wr = gdsf.setNextRecord(gds_XY,_plist.size()+1);
-      for (word i = 0; i < _plist.size(); i++)
+      wr = gdsf.setNextRecord(gds_XY,_psize+1);
+      for (word i = 0; i < _psize; i++)
       {
-         wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
+         wr->add_int4b(_pdata[2*i]);wr->add_int4b(_pdata[2*i+1]);
       }
-      wr->add_int4b(_plist[0].x());wr->add_int4b(_plist[0].y());
+      wr->add_int4b(_pdata[0]);wr->add_int4b(_pdata[1]);
       gdsf.flush(wr);
       wr = gdsf.setNextRecord(gds_ENDEL);
       gdsf.flush(wr);
@@ -1066,44 +1139,47 @@ void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 
 void laydata::tdtpoly::CIFwrite(CIFin::CifExportFile& ciff) const
 {
-   ciff.polygon(_plist);
+   ciff.polygon(_pdata, _psize);
 }
 
 void laydata::tdtpoly::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
-   gdsf.poly(_plist, overlap());
+   gdsf.poly(_pdata, _psize, overlap());
 }
 
 DBbox laydata::tdtpoly::overlap() const {
-   DBbox ovl = DBbox(_plist[0]);
-   for (word i = 1; i < _plist.size(); i++)
-      ovl.overlap(_plist[i]);
+   DBbox ovl = DBbox( TP(_pdata[0], _pdata[1]) );
+   for (word i = 1; i < _psize; i++)
+      ovl.overlap(TP(_pdata[2*i], _pdata[2*i+1]));
    return ovl;
 }
 
-pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet& pset, 
+pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet& pset,
                                     const CTM&  movedM, const CTM& stableM) const {
-   pointlist* mlist = DEBUG_NEW pointlist(_plist);
-   word size = mlist->size();
+   pointlist* mlist = DEBUG_NEW pointlist();
+   mlist->reserve(_psize);
+   for (unsigned i = 0 ; i < _psize; i++ )
+      mlist->push_back(TP(_pdata[2*i], _pdata[2*i+1]));
+
    PSegment seg1,seg0;
    // See the note about this algo in tdtbox::movePointsSelected above
-   for (unsigned i = 0; i <= size; i++) {
-      if (i == size)
-         if (pset.check(i%size) && pset.check((i+1) % size))
-            seg1 = PSegment((*mlist)[(i  ) % size] * movedM,
-                            (*mlist)[(i+1) % size]         );
+   for (unsigned i = 0; i <= _psize; i++) {
+      if (i == _psize)
+         if (pset.check(i % _psize) && pset.check((i+1) % _psize))
+            seg1 = PSegment((*mlist)[(i  ) % _psize] * movedM,
+                            (*mlist)[(i+1) % _psize]         );
          else
-            seg1 = PSegment((*mlist)[(i  ) % size] * stableM,
-                            (*mlist)[(i+1) % size]          );
+            seg1 = PSegment((*mlist)[(i  ) % _psize] * stableM,
+                            (*mlist)[(i+1) % _psize]         );
       else   
-         if (pset.check(i%size) && pset.check((i+1) % size))
-            seg1 = PSegment((*mlist)[(i  ) % size] * movedM, 
-                            (*mlist)[(i+1) % size] * movedM);
+         if (pset.check(i % _psize) && pset.check((i+1) % _psize))
+            seg1 = PSegment((*mlist)[(i  ) % _psize] * movedM,
+                            (*mlist)[(i+1) % _psize] * movedM);
          else
-            seg1 = PSegment((*mlist)[(i  ) % size] * stableM, 
-                            (*mlist)[(i+1) % size] * stableM);
+            seg1 = PSegment((*mlist)[(i  ) % _psize] * stableM,
+                            (*mlist)[(i+1) % _psize] * stableM);
       if (!seg0.empty()) {
-         seg1.crossP(seg0,(*mlist)[i%size]);
+         seg1.crossP(seg0,(*mlist)[ i % _psize]);
       }
       seg0 = seg1;
    }
