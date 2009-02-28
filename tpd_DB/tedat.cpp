@@ -764,13 +764,12 @@ laydata::tdtpoly::tdtpoly(TEDfile* const tedfile) : tdtdata()
    _psize = tedfile->getWord();
    assert(_psize);
    _pdata = new int4b[_psize*2];
-   unsigned index = 0;
    TP wpnt;
    for (unsigned i = 0 ; i < _psize; i++)
    {
       wpnt = tedfile->getTP();
-      _pdata[index++] = wpnt.x();
-      _pdata[index++] = wpnt.y();
+      _pdata[2*i  ] = wpnt.x();
+      _pdata[2*i+1] = wpnt.y();
    }
 }
 
@@ -1171,7 +1170,7 @@ pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet& pset,
          else
             seg1 = PSegment((*mlist)[(i  ) % _psize] * stableM,
                             (*mlist)[(i+1) % _psize]         );
-      else   
+      else
          if (pset.check(i % _psize) && pset.check((i+1) % _psize))
             seg1 = PSegment((*mlist)[(i  ) % _psize] * movedM,
                             (*mlist)[(i+1) % _psize] * movedM);
@@ -1189,79 +1188,156 @@ pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet& pset,
 //-----------------------------------------------------------------------------
 // class tdtwire
 //-----------------------------------------------------------------------------
-laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata() 
+laydata::tdtwire::tdtwire(pointlist& plst, word width) : tdtdata(), _width(width)
 {
-   word numpoints = tedfile->getWord();
-   _width = tedfile->getWord();
-   _plist.reserve(numpoints);
-   for (word i = 0 ; i < numpoints; i++) 
-      _plist.push_back(tedfile->getTP());
+   _psize = plst.size();
+   assert(_psize);
+   _pdata = new int4b[_psize*2];
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      _pdata[2*i  ] = plst[i].x();
+      _pdata[2*i+1] = plst[i].y();
+   }
 }
 
-DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const
+laydata::tdtwire::tdtwire(const int4b* pdata, unsigned psize, word width) :
+      tdtdata(), _width(width), _psize(psize)
+{
+   assert(_psize);
+   _pdata = new int4b[_psize*2];
+   memcpy(_pdata, pdata, 2*_psize);
+}
+
+laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata()
+{
+   _psize = tedfile->getWord();
+   assert(_psize);
+   _width = tedfile->getWord();
+   _pdata = new int4b[_psize*2];
+   TP wpnt;
+   for (unsigned i = 0 ; i < _psize; i++)
+   {
+      wpnt = tedfile->getTP();
+      _pdata[2*i  ]  = wpnt.x();
+      _pdata[2*i+1]  = wpnt.y();
+   }
+}
+
+DBbox* laydata::tdtwire::endPnts(word i1, word i2, bool first) const
 {
    double     w = _width/2;
-   double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
-   double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
+   i1 *= 2; i2 *= 2;
+   double denom = first ? (_pdata[i2  ] - _pdata[i1  ]) : (_pdata[i1  ] - _pdata[i2  ]);
+   double   nom = first ? (_pdata[i2+1] - _pdata[i1+1]) : (_pdata[i1+1] - _pdata[i2+1]);
    double xcorr, ycorr; // the corrections
-   if ((0 == nom) && (0 == denom)) return NULL;
+   assert((0 != nom) || (0 != denom));
    double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
-   if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
-   else if (0 == nom  )   {xcorr = 0 ; ycorr = signY * w;} // horizontal |----|
+   if      (0 == denom) // vertical
+   {
+      xcorr =signX * w ; ycorr = 0        ;
+   }
+   else if (0 == nom  )// horizontal |----|
+   {
+      xcorr = 0        ; ycorr = signY * w;
+   } 
    else
    {
       double sl   = nom / denom;
       double sqsl = signY*sqrt( sl*sl + 1);
-      xcorr = rint(w * (sl / sqsl)); 
+      xcorr = rint(w * (sl / sqsl));
       ycorr = rint(w * ( 1 / sqsl));
    }
-   TP pt = first ? p1 : p2;
-   return DEBUG_NEW DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
-                          (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
+   word it = first ? i1 : i2;
+   return DEBUG_NEW DBbox((int4b) rint(_pdata[it  ] - xcorr),
+                          (int4b) rint(_pdata[it+1] + ycorr),
+                          (int4b) rint(_pdata[it  ] + xcorr),
+                          (int4b) rint(_pdata[it+1] - ycorr) );
 }
 
-DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
+DBbox* laydata::tdtwire::mdlPnts(word i1, word i2, word i3) const
 {
    double    w = _width/2;
-   double  x32 = p3.x() - p2.x();
-   double  x21 = p2.x() - p1.x();
-   double  y32 = p3.y() - p2.y();
-   double  y21 = p2.y() - p1.y();
+   i1 *= 2; i2 *= 2; i3 *= 2;
+   double  x32 = _pdata[i3  ] - _pdata[i2  ];
+   double  x21 = _pdata[i2  ] - _pdata[i1  ];
+   double  y32 = _pdata[i3+1] - _pdata[i2+1];
+   double  y21 = _pdata[i2+1] - _pdata[i1+1];
    double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
    double denom = x32 * y21 - x21 * y32;
-// @FIXME THINK about next two lines!!!    They are wrong !!!
-   if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
-   if (0 == L2) return NULL;
+   assert (denom);
+   assert (L2);
    // the corrections
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
-   return DEBUG_NEW DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
-                          (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
+   return DEBUG_NEW DBbox((int4b) rint(_pdata[i2  ] - xcorr),
+                          (int4b) rint(_pdata[i2+1] + ycorr),
+                          (int4b) rint(_pdata[i2  ] + xcorr),
+                          (int4b) rint(_pdata[i2+1] - ycorr) );
 }
+// DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const
+// {
+//    double     w = _width/2;
+//    double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
+//    double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
+//    double xcorr, ycorr; // the corrections
+//    if ((0 == nom) && (0 == denom)) return NULL;
+//    double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+//    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+//    if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
+//    else if (0 == nom  )   {xcorr = 0 ; ycorr = signY * w;} // horizontal |----|
+//    else
+//    {
+//       double sl   = nom / denom;
+//       double sqsl = signY*sqrt( sl*sl + 1);
+//       xcorr = rint(w * (sl / sqsl)); 
+//       ycorr = rint(w * ( 1 / sqsl));
+//    }
+//    TP pt = first ? p1 : p2;
+//    return DEBUG_NEW DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
+//                           (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
+// }
+// 
+// DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
+// {
+//    double    w = _width/2;
+//    double  x32 = p3.x() - p2.x();
+//    double  x21 = p2.x() - p1.x();
+//    double  y32 = p3.y() - p2.y();
+//    double  y21 = p2.y() - p1.y();
+//    double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
+//    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
+//    double denom = x32 * y21 - x21 * y32;
+// // @FIXME THINK about next two lines!!!    They are wrong !!!
+//    if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
+//    if (0 == L2) return NULL;
+//    // the corrections
+//    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
+//    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
+//    return DEBUG_NEW DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
+//                           (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
+// }
 
 void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
-   if (_plist.size() < 2) return;
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
    bool center_line_only = !wsquare.visible(drawprop.topCTM() * drawprop.ScrCTM());
-   unsigned num_points = _plist.size();
    if (center_line_only)
-      ptlist.reserve(num_points);
+      ptlist.reserve(_psize);
    else
-      ptlist.reserve(3 * num_points);
+      ptlist.reserve(3 * _psize);
    // translate the points using the current CTM
-   for (unsigned i = 0; i < num_points; i++)
-      ptlist.push_back(_plist[i] * drawprop.topCTM());
+   for (unsigned i = 0; i < _psize; i++)
+      ptlist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * drawprop.topCTM());
    if (!center_line_only)
-      precalc(ptlist, num_points);
+      precalc(ptlist);
 }
 
 void laydata::tdtwire::draw_request(Tenderer& rend) const
 {
-   rend.wire(_plist, _width);
+//   rend.wire(_plist, _width);
 }
 
 void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -1270,7 +1346,7 @@ void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist
    if (0 == ptlist.size()) return;
    // to keep MS VC++ happy - define the counter outside the loops
    _dbl_word i;
-   _dbl_word num_cpoints = (num_points == _plist.size()) ? num_points : num_points / 3;
+   _dbl_word num_cpoints = (num_points == _psize) ? num_points : num_points / 3;
    // draw the central line in all cases
    if (0 == num_cpoints) return;
    glBegin(GL_LINE_STRIP);
@@ -1290,18 +1366,18 @@ void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist
 
 void laydata::tdtwire::openGL_drawfill(layprop::DrawProperties&, const pointlist& ptlist) const
 {
-   if (_plist.size() == ptlist.size()) return;
+   if (_psize == ptlist.size()) return;
    unsigned i;
    // Start tessellation
    gluTessBeginPolygon(tessellObj, NULL);
    GLdouble pv[3];
    pv[2] = 0;
-   for (i = _plist.size(); i < 3*_plist.size(); i = i + 2)
+   for (i = _psize; i < 3*_psize; i = i + 2)
    {
       pv[0] = ptlist[i].x(); pv[1] = ptlist[i].y();
       gluTessVertex(tessellObj,pv,const_cast<TP*>(&ptlist[i]));
    }
-   for (i = 3*_plist.size() - 1; i > _plist.size(); i = i - 2)
+   for (i = 3*_psize - 1; i > _psize; i = i - 2)
    {
       pv[0] = ptlist[i].x(); pv[1] = ptlist[i].y();
       gluTessVertex(tessellObj,pv,const_cast<TP*>(&ptlist[i]));
@@ -1315,32 +1391,31 @@ void laydata::tdtwire::openGL_drawsel(const pointlist& ptlist, const SGBitSet* p
    if (sh_selected == status())
    {
       glBegin(GL_LINE_STRIP);
-      for (unsigned i = 0; i < _plist.size(); i++)
+      for (unsigned i = 0; i < _psize; i++)
          glVertex2i(ptlist[i].x(), ptlist[i].y());
       glEnd();
    }
    else if (sh_partsel == status())
    {
       assert(pslist);
-      unsigned numpoints = _plist.size();
       glBegin(GL_LINES);
-      for (unsigned i = 0; i < numpoints-1; i++)
+      for (unsigned i = 0; i < _psize-1; i++)
       {
-         if (pslist->check(i) && pslist->check((i+1)%numpoints))
+         if (pslist->check(i) && pslist->check((i+1)%_psize))
          {
             glVertex2i(ptlist[i].x(), ptlist[i].y());
-            glVertex2i(ptlist[(i+1)%numpoints].x(), ptlist[(i+1)%numpoints].y());
+            glVertex2i(ptlist[(i+1)%_psize].x(), ptlist[(i+1)%_psize].y());
          }
       }
       if (pslist->check(0))
       {// if only the first is selected
-         glVertex2i(ptlist[numpoints].x(), ptlist[numpoints].y());
-         glVertex2i(ptlist[numpoints+1].x(), ptlist[numpoints+1].y());
+         glVertex2i(ptlist[_psize].x(), ptlist[_psize].y());
+         glVertex2i(ptlist[_psize+1].x(), ptlist[_psize+1].y());
       }
-      if (pslist->check(numpoints-1))
+      if (pslist->check(_psize-1))
       {// if only the last is selected
-         glVertex2i(ptlist[3*numpoints-1].x(), ptlist[3*numpoints-1].y());
-         glVertex2i(ptlist[3*numpoints-2].x(), ptlist[3*numpoints-2].y());
+         glVertex2i(ptlist[3*_psize-1].x(), ptlist[3*_psize-1].y());
+         glVertex2i(ptlist[3*_psize-2].x(), ptlist[3*_psize-2].y());
       }
       glEnd();
    }
@@ -1351,8 +1426,6 @@ void laydata::tdtwire::motion_draw(const layprop::DrawProperties& drawprop,
 {
    CTM trans = transtack.front();
    pointlist* ptlist;
-   _dbl_word num_points = _plist.size();
-   if (num_points < 2) return;
    if (sh_partsel == status())
    {
       CTM strans = transtack.back();
@@ -1362,28 +1435,28 @@ void laydata::tdtwire::motion_draw(const layprop::DrawProperties& drawprop,
    else
    {
       ptlist = DEBUG_NEW pointlist;
-      for (unsigned i = 0; i < num_points; i++)
-         ptlist->push_back(_plist[i] * trans);
+      for (unsigned i = 0; i < _psize; i++)
+         ptlist->push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans );
    }
-   precalc((*ptlist), num_points);
+   precalc(*ptlist);
    openGL_drawline(const_cast<layprop::DrawProperties&>(drawprop), *ptlist);
 //      if (drawprop.getCurrentFill())
 //         openGL_drawfill(ptlist);
    ptlist->clear(); delete ptlist;
 }
 
-void laydata::tdtwire::precalc(pointlist& ptlist, _dbl_word num_points) const
+void laydata::tdtwire::precalc(pointlist& ptlist) const
 {
-   DBbox* ln1 = endPnts(ptlist[0],ptlist[1], true);
+   DBbox* ln1 = endPnts(0,1, true);
    if (NULL != ln1)
    {
       ptlist.push_back(ln1->p1());
       ptlist.push_back(ln1->p2());
    }
    delete ln1;
-   for (unsigned i = 1; i < num_points - 1; i++)
+   for (unsigned i = 1; i < _psize - 1; i++)
    {
-      ln1 = mdlPnts(ptlist[i-1],ptlist[i],ptlist[i+1]);
+      ln1 = mdlPnts(i-1,i,i+1);
       if (NULL != ln1)
       {
          ptlist.push_back(ln1->p1());
@@ -1391,7 +1464,7 @@ void laydata::tdtwire::precalc(pointlist& ptlist, _dbl_word num_points) const
       }
       delete ln1;
    }
-   ln1 = endPnts(ptlist[num_points-2],ptlist[num_points-1],false);
+   ln1 = endPnts(_psize-2,_psize-1,false);
    if (NULL != ln1)
    {
       ptlist.push_back(ln1->p1());
@@ -1403,8 +1476,10 @@ void laydata::tdtwire::precalc(pointlist& ptlist, _dbl_word num_points) const
 bool laydata::tdtwire::point_inside(TP pnt)
 {
    TP p0, p1;
-   for (unsigned i = 0; i < _plist.size() - 1 ; i++) {
-      p0 = _plist[i]; p1 = _plist[i+1];
+   for (unsigned i = 0; i < _psize - 1 ; i++)
+   {
+      p0 = TP(_pdata[2* i   ], _pdata[2* i   +1]);
+      p1 = TP(_pdata[2*(i+1)], _pdata[2*(i+1)+1]);
       float distance = get_distance(p0,p1,pnt);
       if ((distance >= 0) && (distance <= _width/2))
          return true;
@@ -1445,17 +1520,17 @@ float laydata::tdtwire::get_distance(TP p1, TP p2, TP p0)
 
 void  laydata::tdtwire::select_points(DBbox& select_in, SGBitSet& pntlst)
 {
-   for (word i = 0; i < _plist.size(); i++) 
-      if (select_in.inside(_plist[i])) pntlst.set(i);
-   pntlst.check_neighbours_set(true);   
+   for (word i = 0; i < _psize; i++)
+      if (select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.set(i);
+   pntlst.check_neighbours_set(true);
 }
 
 void laydata::tdtwire::unselect_points(DBbox& select_in, SGBitSet& pntlst)
 {
    if (sh_selected == _status) // the whole shape use to be selected
-      pntlst.setall();      
-   for (word i = 0; i < _plist.size(); i++) 
-      if (select_in.inside(_plist[i])) pntlst.reset(i);
+      pntlst.setall();
+   for (word i = 0; i < _psize; i++)
+      if (select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.reset(i);
    pntlst.check_neighbours_set(true);   
 }
 
@@ -1467,7 +1542,13 @@ laydata::validator* laydata::tdtwire::move(const CTM& trans, SGBitSet& plst)
       laydata::valid_wire* check = DEBUG_NEW laydata::valid_wire(*nshape, _width);
       if (laydata::shp_OK == check->status()) {
          // assign the modified pointlist ONLY if the resulting shape is perfect
-         _plist.clear(); _plist = *nshape;
+         delete [] _pdata;
+         _psize = nshape->size();
+         _pdata = DEBUG_NEW int4b[2 * _psize];
+         for (unsigned i = 0; i < _psize; i++)
+         {
+            _pdata[2*i] = (*nshape)[i].x();_pdata[2*i+1] = (*nshape)[i].y();
+         }
          nshape->clear(); delete nshape;
          delete check;
          return NULL;
@@ -1482,16 +1563,21 @@ laydata::validator* laydata::tdtwire::move(const CTM& trans, SGBitSet& plst)
 
 void laydata::tdtwire::transfer(const CTM& trans)
 {
-   for (unsigned i = 0; i < _plist.size(); i++) 
-      _plist[i] *= trans;
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      TP cpnt(_pdata[2*i], _pdata[2*i+1]);
+      cpnt *= trans;
+      _pdata[2*i  ] = cpnt.x();
+      _pdata[2*i+1] = cpnt.y();
+   }
 }
 
 laydata::tdtdata* laydata::tdtwire::copy(const CTM& trans) {
    // copy the points of the wire
    pointlist ptlist;
-   ptlist.reserve(_plist.size());
-   for (unsigned i = 0; i < _plist.size(); i++) 
-      ptlist.push_back(_plist[i] * trans);
+   ptlist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      ptlist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans);
    return DEBUG_NEW tdtwire(ptlist,_width);
 }
 
@@ -1500,29 +1586,33 @@ void laydata::tdtwire::stretch(int bfactor, shapeList** decure)
    //@TODO cut bfactor from both sides
    if ((2*bfactor + _width) > 0)
    {
-      tdtwire* modified = DEBUG_NEW tdtwire(_plist, 2*bfactor + _width);
+      tdtwire* modified = DEBUG_NEW tdtwire(_pdata, _psize, 2*bfactor + _width);
       decure[1]->push_back(modified);
    }
    decure[0]->push_back(this);
 }
 
-void laydata::tdtwire::info(std::ostringstream& ost, real DBU) const {
+void laydata::tdtwire::info(std::ostringstream& ost, real DBU) const
+{
    ost << "wire " << _width/DBU << " - {";
-   unsigned lstsize = _plist.size();
-   unsigned lastpnt = lstsize-1;
-   for (unsigned i = 0; i < lstsize; i++) {
-      _plist[i].info(ost, DBU);
-      if (i != lastpnt) ost << " , ";
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      TP cpnt(_pdata[2*i], _pdata[2*i+1]);
+      cpnt.info(ost, DBU);
+      if (i != _psize - 1) ost << " , ";
    }
    ost << "};";
 }
 
-void laydata::tdtwire::write(TEDfile* const tedfile) const {
+void laydata::tdtwire::write(TEDfile* const tedfile) const
+{
    tedfile->putByte(tedf_WIRE);
-   tedfile->putWord(_plist.size());
+   tedfile->putWord(_psize);
    tedfile->putWord(_width);
-   for (word i = 0; i < _plist.size(); i++)
-      tedfile->putTP(&_plist[i]);
+   for (word i = 0; i < _psize; i++)
+   {
+      tedfile->put4b(_pdata[2*i]); tedfile->put4b(_pdata[2*i+1]);
+   }
 }
 
 void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
@@ -1538,10 +1628,10 @@ void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
       wr->add_int2b(gds_type);gdsf.flush(wr);
       wr = gdsf.setNextRecord(gds_WIDTH);
       wr->add_int4b(_width);gdsf.flush(wr);
-      wr = gdsf.setNextRecord(gds_XY,_plist.size());
-      for (word i = 0; i < _plist.size(); i++)
+      wr = gdsf.setNextRecord(gds_XY,_psize);
+      for (word i = 0; i < _psize; i++)
       {
-         wr->add_int4b(_plist[i].x());wr->add_int4b(_plist[i].y());
+         wr->add_int4b(_pdata[2*i]);wr->add_int4b(_pdata[2*i+1]);
       }
       gdsf.flush(wr);
       wr = gdsf.setNextRecord(gds_ENDEL);
@@ -1554,49 +1644,55 @@ void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 
 void laydata::tdtwire::CIFwrite(CIFin::CifExportFile& ciff) const
 {
-   ciff.wire(_width, _plist);
+   ciff.wire(_pdata, _psize, _width);
 }
 
 void laydata::tdtwire::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
-   gdsf.wire(_plist, _width, overlap());
+   gdsf.wire(_pdata, _psize, _width, overlap());
 }
 
 DBbox laydata::tdtwire::overlap() const 
 {
-   word nump = _plist.size();
-   DBbox* ln1 = endPnts(_plist[0],_plist[1], true);
+   DBbox* ln1 = endPnts(0,1, true);
    DBbox ovl = *ln1;delete ln1;
-   if (nump > 2) 
+   if (_psize > 2) 
    {
       DBbox* ln2 = NULL;
-      for (word i = 1; i < nump - 1; i++) 
+      for (word i = 1; i < _psize - 1; i++)
       {
-         ln2 = mdlPnts(_plist[i-1],_plist[i],_plist[i+1]);
+         ln2 = mdlPnts(i-1,i,i+1);
          ovl.overlap(*ln2);
          delete ln2; 
       }
    }
-   ln1 = endPnts(_plist[nump-2],_plist[nump-1],false);
+   ln1 = endPnts(_psize-2,_psize-1,false);
    ovl.overlap(*ln1);
    delete ln1; 
    return ovl;
 }
 
 pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet& pset, 
-                                    const CTM& movedM, const CTM& stableM) const {
-   pointlist* mlist = DEBUG_NEW pointlist(_plist);
-   word size = mlist->size();
+                                    const CTM& movedM, const CTM& stableM) const
+{
+   pointlist* mlist = DEBUG_NEW pointlist();
+   mlist->reserve(_psize);
+   for (unsigned i = 0 ; i < _psize; i++ )
+      mlist->push_back(TP(_pdata[2*i], _pdata[2*i+1]));
+
    PSegment* seg1 = NULL;
    PSegment* seg0 = NULL;
-   for (int i = 0; i < size; i++) {
-      if ((size-1) == i) {
-         if (pset.check(size-1))
-            seg1 = seg1->ortho((*mlist)[size-1] * movedM);
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      if ((_psize-1) == i)
+      {
+         if (pset.check(_psize-1))
+            seg1 = seg1->ortho((*mlist)[_psize-1] * movedM);
          else
-            seg1 = seg1->ortho((*mlist)[size-1] * stableM);
+            seg1 = seg1->ortho((*mlist)[_psize-1] * stableM);
       }
-      else {
+      else
+      {
          const CTM& transM = ((pset.check(i) && pset.check(i+1))) ? 
                                                                movedM : stableM;
          seg1 = DEBUG_NEW PSegment((*mlist)[(i  )] * transM, (*mlist)[(i+1)] * transM);

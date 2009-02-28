@@ -161,17 +161,17 @@ void PSFile::poly(const int4b* pdata, unsigned psize, const DBbox bbox)
    fprintf(_psfh,"}<00 01 %X 03 0A>}dpl\n",31 + psize);
 }
 
-void PSFile::wire(const pointlist points, word width, DBbox bbox)
+void PSFile::wire(const int4b* const pdata, unsigned psize, word width, DBbox bbox)
 {
    fprintf(_psfh,"      {{%i %i %i %i ", bbox.p1().x(), bbox.p1().y(),
                                             bbox.p2().x(), bbox.p2().y() );
-   for(word i = 0; i < points.size(); i++)
-      fprintf(_psfh,"%i %i ",points[i].x(), points[i].y());
+   for(word i = 0; i < psize; i++)
+      fprintf(_psfh,"%i %i ",pdata[2*i], pdata[2*i+1]);
    //It's possible here to specify the pathtype of GDSII style
    //int pt = (4== pathtype) ? 2 : pathtype;
    // in Toped however we have only one pathtype - which is equivalent to type 2
    // in both - PS and GDSII
-   fprintf(_psfh,"}<00 01 %X 03>} %i %i dp\n",31+points.size(), width, 2/*pt*/);
+   fprintf(_psfh,"}<00 01 %X 03>} %i %i dp\n",31+psize, width, 2/*pt*/);
 }
 
 void PSFile::text(std::string text, const CTM tmtrx)

@@ -529,14 +529,14 @@ void CIFin::CifExportFile::polygon(const int4b* const pdata, unsigned psize)
    _file << ";"<< std::endl;
 }
 
-void CIFin::CifExportFile::wire(unsigned width, const pointlist& plst)
+void CIFin::CifExportFile::wire(const int4b* const pdata, unsigned psize, unsigned width)
 {
    if (_verbose)
       _file <<"      Wire width = " << width << "and points";
    else
       _file <<"      W" << width;
-   for (pointlist::const_iterator CP = plst.begin(); CP != plst.end(); CP++)
-      _file << " " << CP->x() << " " << CP->y();
+   for (unsigned i = 0; i < psize; i++)
+      _file << " " << pdata[2*i] << " " << pdata[2*i+1];
    _file << ";"<< std::endl;
 }
 
