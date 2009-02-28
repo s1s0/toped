@@ -518,14 +518,14 @@ void CIFin::CifExportFile::box(const unsigned length, const unsigned width, cons
             " " << center.y() << ";" << std::endl;
 }
 
-void CIFin::CifExportFile::polygon(const pointlist& plst)
+void CIFin::CifExportFile::polygon(const int4b* const pdata, unsigned psize)
 {
    if (_verbose)
       _file <<"      Polygon with vertices";
    else
       _file <<"      P";
-   for (pointlist::const_iterator CP = plst.begin(); CP != plst.end(); CP++)
-      _file << " " << CP->x() << " " << CP->y();
+   for (unsigned i = 0; i < psize; i++)
+      _file << " " << pdata[2*i] << " " << pdata[2*i+1];
    _file << ";"<< std::endl;
 }
 

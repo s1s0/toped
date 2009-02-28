@@ -88,7 +88,7 @@ namespace laydata {
    //! shrink/stretch
       virtual   void       stretch(int bfactor, shapeList**) = 0;
    //! 
-      virtual  const pointlist  shape2poly() const = 0;
+      virtual  pointlist   shape2poly() const = 0;
    //! A pointer to the OpenGL object tesselator
       static GLUtriangulatorObj *tessellObj; 
    //! The pointer to the user callback function for openGL polygon tessellation
@@ -144,7 +144,7 @@ namespace laydata {
       word                 numpoints() const {return 4;};
       void                 polycut(pointlist&, shapeList**);
       void                 stretch(int bfactor, shapeList**);
-      const pointlist      shape2poly() const;
+      pointlist            shape2poly() const;
       word                 ltype() const {return _lmbox;}
    protected:
       void                 select_points(DBbox&, SGBitSet&);
@@ -160,7 +160,7 @@ namespace laydata {
    class tdtpoly : public tdtdata   {
 
       public:
-                           tdtpoly(pointlist& plist) : tdtdata(), _plist(plist) {};
+                           tdtpoly(const pointlist& plist);
                            tdtpoly(TEDfile* const tedfile);
    //                       ~tdtpoly() {};
          DBbox             overlap() const;
@@ -180,17 +180,18 @@ namespace laydata {
          void              GDSwrite(GDSin::GdsFile&, word, real) const;
          void              CIFwrite(CIFin::CifExportFile&) const;
          void              PSwrite(PSFile&, const layprop::DrawProperties&) const;
-         word              numpoints() const {return _plist.size();};
+         word              numpoints() const {return _psize;}
          bool              point_inside(const TP);
          void              polycut(pointlist&, shapeList**);
          void              stretch(int bfactor, shapeList**);
-         const pointlist   shape2poly() const {return _plist;};
+         pointlist         shape2poly() const;
          word              ltype() const {return _lmpoly;}
       private:
          void              select_points(DBbox&, SGBitSet&);
          void              unselect_points(DBbox&, SGBitSet&);
          pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
-         pointlist         _plist;
+         int4b*            _pdata;
+         unsigned          _psize;
    };
 
 //==============================================================================
@@ -221,7 +222,7 @@ namespace laydata {
       bool                 point_inside(const TP);
       void                 polycut(pointlist&, shapeList**){};
       void                 stretch(int bfactor, shapeList**);
-      const pointlist      shape2poly() const {return pointlist();};
+      pointlist            shape2poly() const {return pointlist(); /*return empty list*/}
       word                 ltype() const {return _lmwire;}
    private:
       void                 precalc(pointlist&, _dbl_word) const;
@@ -270,7 +271,7 @@ namespace laydata {
       CTM                  translation() const {return _translation;};
       void                 polycut(pointlist&, shapeList**) {};
       void                 stretch(int bfactor, shapeList**) {};
-      const pointlist      shape2poly() const {return pointlist();};
+      pointlist            shape2poly() const {return pointlist();/*return empty list*/}
       virtual ArrayProperties arrayprops() const {return ArrayProperties();}
       virtual word         ltype() const {return _lmref;}
       tdtdefaultcell*      visible(const DBbox&, const CTM&, const CTM&) const;
@@ -342,7 +343,7 @@ namespace laydata {
       word                 numpoints() const {return 1;};
       void                 polycut(pointlist&, shapeList**) {};
       void                 stretch(int bfactor, shapeList**) {};
-      const pointlist      shape2poly() const {return pointlist();};
+      pointlist            shape2poly() const {return pointlist();/*return empty list*/}
       word                 ltype() const {return _lmtext;}
       const std::string    text() const {return _text;}
       void                 replace_str(std::string newstr);

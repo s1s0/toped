@@ -152,13 +152,13 @@ void PSFile::propSet(std::string color_name, std::string pattern_name)
    fprintf(_psfh, "      /dpl {dc_%s} bd\n", pattern_name.c_str());
 }
 
-void PSFile::poly(const pointlist points, const DBbox bbox)
+void PSFile::poly(const int4b* pdata, unsigned psize, const DBbox bbox)
 {
    fprintf(_psfh,"      {{%i %i %i %i ", bbox.p1().x(), bbox.p1().y(),
                                             bbox.p2().x(), bbox.p2().y() );
-   for(word i = 0; i < points.size(); i++)
-      fprintf(_psfh,"%i %i ",points[i].x(), points[i].y());
-   fprintf(_psfh,"}<00 01 %X 03 0A>}dpl\n",31+points.size());
+   for(word i = 0; i < psize; i++)
+      fprintf(_psfh,"%i %i ",pdata[2*i], pdata[2*i+1]);
+   fprintf(_psfh,"}<00 01 %X 03 0A>}dpl\n",31 + psize);
 }
 
 void PSFile::wire(const pointlist points, word width, DBbox bbox)

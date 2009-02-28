@@ -42,7 +42,7 @@ public:
    void           propSet(std::string, std::string);
    void           defineColor(std::string, byte, byte, byte);
    void           defineFill(std::string, const byte*);
-   void           poly(const pointlist, const DBbox);
+   void           poly(const int4b*, unsigned,  const DBbox);
    void           wire(const pointlist, word, const DBbox);
    void           text(std::string, const CTM);
    void           cellref(std::string, const CTM);
