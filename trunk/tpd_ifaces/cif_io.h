@@ -313,7 +313,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          bool           layerSpecification(word);
          void           box(const unsigned, const unsigned, const TP&);
          void           polygon(const int4b* const, unsigned);
-         void           wire(const unsigned, const pointlist&);
+         void           wire(const int4b* const, unsigned, unsigned);
          void           text(const std::string&, const TP&);
          void           call(const std::string& name, const CTM&);
          bool           checkCellWritten(std::string) const;

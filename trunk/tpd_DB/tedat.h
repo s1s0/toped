@@ -120,45 +120,44 @@ namespace laydata {
 
 //==============================================================================
    class tdtbox : public tdtdata   {
-   public:
+      public:
                            tdtbox(const TP& p1, const TP& p2);
                            tdtbox(TEDfile* const tedfile);
-                          ~tdtbox();
-      DBbox                overlap() const;
-      validator*           move(const CTM&, SGBitSet& plst);
-      void                 transfer(const CTM&);
-      tdtdata*             copy(const CTM&);
+                           ~tdtbox();
+         DBbox             overlap() const;
+         validator*        move(const CTM&, SGBitSet& plst);
+         void              transfer(const CTM&);
+         tdtdata*          copy(const CTM&);
 
-      void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
-      void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
-      void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
-      void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      void                 draw_request(Tenderer&) const;
-      void                 motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
+         void              openGL_precalc(layprop::DrawProperties&, pointlist&) const;
+         void              openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
+         void              openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
+         void              openGL_drawsel(const pointlist&, const SGBitSet*) const;
+         void              draw_request(Tenderer&) const;
+         void              motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
 
-      void                 info(std::ostringstream&, real) const;
-      void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GdsFile&, word, real) const;
-      void                 CIFwrite(CIFin::CifExportFile&) const;
-      void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
-      word                 numpoints() const {return 4;};
-      void                 polycut(pointlist&, shapeList**);
-      void                 stretch(int bfactor, shapeList**);
-      pointlist            shape2poly() const;
-      word                 ltype() const {return _lmbox;}
-   protected:
-      void                 select_points(DBbox&, SGBitSet&);
-      void                 unselect_points(DBbox&, SGBitSet&);
-   private:
-      enum {p1x = 0, p1y = 1, p2x = 2, p2y = 3};
-      void                 normalize(SGBitSet& psel);
-      pointlist*           movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
-      int4b*               _pdata;
+         void              info(std::ostringstream&, real) const;
+         void              write(TEDfile* const tedfile) const;
+         void              GDSwrite(GDSin::GdsFile&, word, real) const;
+         void              CIFwrite(CIFin::CifExportFile&) const;
+         void              PSwrite(PSFile&, const layprop::DrawProperties&) const;
+         word              numpoints() const {return 4;};
+         void              polycut(pointlist&, shapeList**);
+         void              stretch(int bfactor, shapeList**);
+         pointlist         shape2poly() const;
+         word              ltype() const {return _lmbox;}
+      protected:
+         void              select_points(DBbox&, SGBitSet&);
+         void              unselect_points(DBbox&, SGBitSet&);
+      private:
+         enum {p1x = 0, p1y = 1, p2x = 2, p2y = 3};
+         void              normalize(SGBitSet& psel);
+         pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
+         int4b*            _pdata;
    };
 
 //==============================================================================
    class tdtpoly : public tdtdata   {
-
       public:
                            tdtpoly(const pointlist& plist);
                            tdtpoly(TEDfile* const tedfile);
@@ -196,44 +195,45 @@ namespace laydata {
 
 //==============================================================================
    class tdtwire : public tdtdata   {
-   public:
-                           tdtwire(pointlist& plist, word width) : tdtdata(),
-                                                _plist(plist) , _width(width) {};
+      public:
+                           tdtwire(pointlist&, word);
+                           tdtwire(const int4b*, unsigned, word);
                            tdtwire(TEDfile* const tedfile);
-//                          ~tdtwire() {};
-      DBbox                overlap() const;
-      validator*           move(const CTM&, SGBitSet& plst);
-      void                 transfer(const CTM&);
-      tdtdata*             copy(const CTM&);
+   //                       ~tdtwire() {};
+         DBbox             overlap() const;
+         validator*        move(const CTM&, SGBitSet& plst);
+         void              transfer(const CTM&);
+         tdtdata*          copy(const CTM&);
 
-      void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
-      void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
-      void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
-      void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
-      void                 draw_request(Tenderer&) const;
-      void                 motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
+         void              openGL_precalc(layprop::DrawProperties&, pointlist&) const;
+         void              openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
+         void              openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
+         void              openGL_drawsel(const pointlist&, const SGBitSet*) const;
+         void              draw_request(Tenderer&) const;
+         void              motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
 
-      void                 info(std::ostringstream&, real) const;
-      void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GdsFile&, word, real) const;
-      void                 CIFwrite(CIFin::CifExportFile&) const;
-      void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
-      word                 numpoints() const {return _plist.size();};
-      bool                 point_inside(const TP);
-      void                 polycut(pointlist&, shapeList**){};
-      void                 stretch(int bfactor, shapeList**);
-      pointlist            shape2poly() const {return pointlist(); /*return empty list*/}
-      word                 ltype() const {return _lmwire;}
-   private:
-      void                 precalc(pointlist&, _dbl_word) const;
-      void                 select_points(DBbox&, SGBitSet&);
-      void                 unselect_points(DBbox&, SGBitSet&);
-      pointlist*           movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
-      DBbox*               endPnts(const TP&, const TP&, bool first) const;
-      DBbox*               mdlPnts(const TP&, const TP&, const TP&) const;
-      float                get_distance(TP p1, TP p2, TP p0);
-      pointlist            _plist;
-      word                 _width;
+         void              info(std::ostringstream&, real) const;
+         void              write(TEDfile* const tedfile) const;
+         void              GDSwrite(GDSin::GdsFile&, word, real) const;
+         void              CIFwrite(CIFin::CifExportFile&) const;
+         void              PSwrite(PSFile&, const layprop::DrawProperties&) const;
+         word              numpoints() const {return _psize;}
+         bool              point_inside(const TP);
+         void              polycut(pointlist&, shapeList**){};
+         void              stretch(int bfactor, shapeList**);
+         pointlist         shape2poly() const {return pointlist(); /*return empty list*/}
+         word              ltype() const {return _lmwire;}
+      private:
+         void              precalc(pointlist&) const;
+         void              select_points(DBbox&, SGBitSet&);
+         void              unselect_points(DBbox&, SGBitSet&);
+         pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
+         DBbox*            endPnts(word, word, bool) const;
+         DBbox*            mdlPnts(word, word, const word) const;
+         float             get_distance(TP p1, TP p2, TP p0);
+         word              _width;
+         int4b*            _pdata;
+         unsigned          _psize;
    };
 
 //==============================================================================
