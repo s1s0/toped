@@ -178,7 +178,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib winmm.lib wxregexud.lib wxzlibd.lib wxpngd.lib wxjpegd.lib wxtiffd.lib wxexpatd.lib wxbase28ud.lib wxbase28ud_net.lib wxmsw28ud_core.lib wxmsw28ud_adv.lib wxmsw28ud_html.lib wxbase28ud_xml.lib wxmsw28ud_gl.lib wxmsw28ud_xrc.lib wxmsw28ud_aui.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib winmm.lib wxregexud.lib wxzlibd.lib wxpngd.lib wxjpegd.lib wxtiffd.lib wxexpatd.lib wxbase28ud.lib wxbase28ud_net.lib wxmsw28ud_core.lib wxmsw28ud_adv.lib wxmsw28ud_html.lib wxbase28ud_xml.lib wxmsw28ud_gl.lib wxmsw28ud_xrc.lib wxmsw28ud_aui.lib glew32.lib"
 				OutputFile="../Debug/toped.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
