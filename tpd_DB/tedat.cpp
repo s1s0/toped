@@ -435,7 +435,7 @@ void laydata::tdtbox::openGL_precalc(layprop::DrawProperties& drawprop , pointli
 
 void laydata::tdtbox::draw_request(Tenderer& rend) const
 {
-//   rend.box(_p1,_p2);
+   rend.box(_pdata);
 }
 
 void laydata::tdtbox::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -785,7 +785,7 @@ void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointli
 
 void laydata::tdtpoly::draw_request(Tenderer& rend) const
 {
-//   rend.poly(_plist);
+   rend.poly(_pdata, _psize);
 }
 
 void laydata::tdtpoly::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -1284,7 +1284,7 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
 
 void laydata::tdtwire::draw_request(Tenderer& rend) const
 {
-//   rend.wire(_plist, _width);
+   rend.wire(_pdata, _psize, _width);
 }
 
 void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const

@@ -84,44 +84,19 @@ void TeselTempData::storeChunk()
 }
 
 //=============================================================================
-//
-TenderObj::TenderObj(const TP* p1, const TP* p2)
+// TenderObj
+TenderObj::TenderObj(int4b* pdata)
 {
    _csize = 4;
-   _cdata = new int[8];
-   word index = 0;
-   _cdata[index++] = p1->x();_cdata[index++] = p1->y();
-   _cdata[index++] = p2->x();_cdata[index++] = p1->y();
-   _cdata[index++] = p2->x();_cdata[index++] = p2->y();
-   _cdata[index++] = p1->x();_cdata[index++] = p2->y();
+   _cdata = new int4b[8];
+   _cdata[0] = pdata[0];   _cdata[1] = pdata[1];
+   _cdata[2] = pdata[2];   _cdata[3] = pdata[1];
+   _cdata[4] = pdata[2];   _cdata[5] = pdata[3];
+   _cdata[6] = pdata[0];   _cdata[7] = pdata[3];
 }
 
-TenderObj::TenderObj(const pointlist& plst)
-{
-   _csize = plst.size();
-   if (0 == _csize)
-      _cdata = NULL;
-   else
-   {
-      _cdata = new int[_csize*2];
-      word index = 0;
-      for (unsigned i = 0; i < _csize; i++)
-      {
-         _cdata[index++] = plst[i].x();
-         _cdata[index++] = plst[i].y();
-      }
-   }
-}
 
-TenderObj::~TenderObj()
-{
-   if (_cdata) delete [] _cdata;
-}
 //=============================================================================
-TenderPoly::TenderPoly(const pointlist& plst) : TenderObj(plst)/*,
-                       _fdata(NULL), _fsize(0)*/
-{
-}
 
 void TenderPoly::Tessel(TeselTempData* ptdata)
 {
@@ -165,18 +140,9 @@ TenderPoly::~TenderPoly()
 }
 
 //=============================================================================
-TenderWire::TenderWire(const pointlist& plst, const word width, bool center_line_only) : TenderPoly()
+TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width,
+                       bool center_line_only) : TenderPoly(NULL, 0), _ldata(pdata), _lsize(psize)
 {
-   _lsize = plst.size();
-   assert(0 != _lsize);
-   _ldata = new int[2 * _lsize];
-   word index = 0;
-   for (unsigned i = 0; i < _lsize; i++)
-   {
-      _ldata[index++] = plst[i].x();
-      _ldata[index++] = plst[i].y();
-   }
-   assert(index == 2*_lsize);
    if (!center_line_only)
       precalc(width);
 }
@@ -296,9 +262,9 @@ TenderTV::TenderTV(CTM& translation) : _tmatrix(translation),
     _num_ftss(0)
 {}
 
-void TenderTV::box (const TP* p1, const TP* p2)
+void TenderTV::box (int4b* pdata)
 {
-   TenderObj* cobj = DEBUG_NEW TenderObj(p1,p2);
+   TenderObj* cobj = DEBUG_NEW TenderObj(pdata);
    _contour_data.push_back(cobj);
    _num_contour_points += 4;
    _num_contours++;
@@ -306,9 +272,9 @@ void TenderTV::box (const TP* p1, const TP* p2)
    _num_fqus++;
 }
 
-void TenderTV::poly (const pointlist& plst)
+void TenderTV::poly (int4b* pdata, unsigned psize)
 {
-   TenderPoly* cobj = DEBUG_NEW TenderPoly(plst);
+   TenderPoly* cobj = DEBUG_NEW TenderPoly(pdata, psize);
    _contour_data.push_back(cobj);
    _num_contour_points += cobj->csize();
    _num_contours += 1;
@@ -324,9 +290,9 @@ void TenderTV::poly (const pointlist& plst)
 //   }
 }
 
-void TenderTV::wire (const pointlist& plst, word width, bool center_line_only)
+void TenderTV::wire (int4b* pdata, unsigned psize, word width, bool center_line_only)
 {
-   TenderWire* cobj = DEBUG_NEW TenderWire(plst, width, center_line_only);
+   TenderWire* cobj = DEBUG_NEW TenderWire(pdata, psize, width, center_line_only);
    _line_data.push_back(cobj);
    _num_line_points += cobj->lsize();
    _num_lines += 1;
@@ -360,10 +326,12 @@ void TenderTV::draw_contours()
       assert((*CSH)->csize());
       first_array[szindx] = pntindx/2;
       size_array[szindx++] = (*CSH)->csize();
-      for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
-      { // points in the shape
-         point_array[pntindx++] = (*CSH)->cdata()[ipnt];
-      }
+      memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * (*CSH)->csize());
+      pntindx += 2 * (*CSH)->csize();
+//      for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
+//      { // points in the shape
+//         point_array[pntindx++] = (*CSH)->cdata()[ipnt];
+//      }
    }
    assert(pntindx == arr_size);
    assert(szindx == _num_contours);
@@ -597,12 +565,12 @@ void Tenderer::setLayer(word layer)
    // @TODO! current fill on/off should be determined here!
 }
 
-void Tenderer::wire (const pointlist& plst, word width)
+void Tenderer::wire (int4b* pdata, unsigned psize, word width)
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
    bool center_line_only = !wsquare.visible(topCTM() * ScrCTM());
-   _cslice->wire(plst, width, center_line_only);
+   _cslice->wire(pdata, psize, width, center_line_only);
 }
 
 void Tenderer::Grid(const real step, const std::string color)
