@@ -224,12 +224,12 @@ namespace laydata {
          pointlist         shape2poly() const {return pointlist(); /*return empty list*/}
          word              ltype() const {return _lmwire;}
       private:
-         void              precalc(pointlist&) const;
+         void              precalc(pointlist&, _dbl_word) const;
          void              select_points(DBbox&, SGBitSet&);
          void              unselect_points(DBbox&, SGBitSet&);
          pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
-         DBbox*            endPnts(word, word, bool) const;
-         DBbox*            mdlPnts(word, word, const word) const;
+         DBbox*            endPnts(const TP&, const TP&, bool) const;
+         DBbox*            mdlPnts(const TP&, const TP&, const TP&) const;
          float             get_distance(TP p1, TP p2, TP p0);
          word              _width;
          int4b*            _pdata;

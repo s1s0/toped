@@ -1223,24 +1223,17 @@ laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata()
    }
 }
 
-DBbox* laydata::tdtwire::endPnts(word i1, word i2, bool first) const
+DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const
 {
    double     w = _width/2;
-   i1 *= 2; i2 *= 2;
-   double denom = first ? (_pdata[i2  ] - _pdata[i1  ]) : (_pdata[i1  ] - _pdata[i2  ]);
-   double   nom = first ? (_pdata[i2+1] - _pdata[i1+1]) : (_pdata[i1+1] - _pdata[i2+1]);
+   double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
+   double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
    double xcorr, ycorr; // the corrections
-   assert((0 != nom) || (0 != denom));
+   if ((0 == nom) && (0 == denom)) return NULL;
    double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
-   if      (0 == denom) // vertical
-   {
-      xcorr =signX * w ; ycorr = 0        ;
-   }
-   else if (0 == nom  )// horizontal |----|
-   {
-      xcorr = 0        ; ycorr = signY * w;
-   } 
+   if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
+   else if (0 == nom  )   {xcorr = 0 ; ycorr = signY * w;} // horizontal |----|
    else
    {
       double sl   = nom / denom;
@@ -1248,76 +1241,30 @@ DBbox* laydata::tdtwire::endPnts(word i1, word i2, bool first) const
       xcorr = rint(w * (sl / sqsl));
       ycorr = rint(w * ( 1 / sqsl));
    }
-   word it = first ? i1 : i2;
-   return DEBUG_NEW DBbox((int4b) rint(_pdata[it  ] - xcorr),
-                          (int4b) rint(_pdata[it+1] + ycorr),
-                          (int4b) rint(_pdata[it  ] + xcorr),
-                          (int4b) rint(_pdata[it+1] - ycorr) );
+   TP pt = first ? p1 : p2;
+   return DEBUG_NEW DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
+                          (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
 }
 
-DBbox* laydata::tdtwire::mdlPnts(word i1, word i2, word i3) const
+DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
 {
    double    w = _width/2;
-   i1 *= 2; i2 *= 2; i3 *= 2;
-   double  x32 = _pdata[i3  ] - _pdata[i2  ];
-   double  x21 = _pdata[i2  ] - _pdata[i1  ];
-   double  y32 = _pdata[i3+1] - _pdata[i2+1];
-   double  y21 = _pdata[i2+1] - _pdata[i1+1];
+   double  x32 = p3.x() - p2.x();
+   double  x21 = p2.x() - p1.x();
+   double  y32 = p3.y() - p2.y();
+   double  y21 = p2.y() - p1.y();
    double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
    double denom = x32 * y21 - x21 * y32;
-   assert (denom);
-   assert (L2);
+// @FIXME THINK about next two lines!!!    They are wrong !!!
+   if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
+   if (0 == L2) return NULL;
    // the corrections
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
-   return DEBUG_NEW DBbox((int4b) rint(_pdata[i2  ] - xcorr),
-                          (int4b) rint(_pdata[i2+1] + ycorr),
-                          (int4b) rint(_pdata[i2  ] + xcorr),
-                          (int4b) rint(_pdata[i2+1] - ycorr) );
+   return DEBUG_NEW DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
+                          (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
 }
-// DBbox* laydata::tdtwire::endPnts(const TP& p1, const TP& p2, bool first) const
-// {
-//    double     w = _width/2;
-//    double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
-//    double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
-//    double xcorr, ycorr; // the corrections
-//    if ((0 == nom) && (0 == denom)) return NULL;
-//    double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
-//    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
-//    if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
-//    else if (0 == nom  )   {xcorr = 0 ; ycorr = signY * w;} // horizontal |----|
-//    else
-//    {
-//       double sl   = nom / denom;
-//       double sqsl = signY*sqrt( sl*sl + 1);
-//       xcorr = rint(w * (sl / sqsl)); 
-//       ycorr = rint(w * ( 1 / sqsl));
-//    }
-//    TP pt = first ? p1 : p2;
-//    return DEBUG_NEW DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
-//                           (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
-// }
-// 
-// DBbox* laydata::tdtwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
-// {
-//    double    w = _width/2;
-//    double  x32 = p3.x() - p2.x();
-//    double  x21 = p2.x() - p1.x();
-//    double  y32 = p3.y() - p2.y();
-//    double  y21 = p2.y() - p1.y();
-//    double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
-//    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
-//    double denom = x32 * y21 - x21 * y32;
-// // @FIXME THINK about next two lines!!!    They are wrong !!!
-//    if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
-//    if (0 == L2) return NULL;
-//    // the corrections
-//    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
-//    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
-//    return DEBUG_NEW DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
-//                           (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
-// }
 
 void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
@@ -1331,8 +1278,8 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    // translate the points using the current CTM
    for (unsigned i = 0; i < _psize; i++)
       ptlist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * drawprop.topCTM());
-   if (!center_line_only)
-      precalc(ptlist);
+//   if (!center_line_only)
+//      precalc(ptlist, _psize);
 }
 
 void laydata::tdtwire::draw_request(Tenderer& rend) const
@@ -1438,25 +1385,25 @@ void laydata::tdtwire::motion_draw(const layprop::DrawProperties& drawprop,
       for (unsigned i = 0; i < _psize; i++)
          ptlist->push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans );
    }
-   precalc(*ptlist);
+   precalc(*ptlist, _psize);
    openGL_drawline(const_cast<layprop::DrawProperties&>(drawprop), *ptlist);
 //      if (drawprop.getCurrentFill())
 //         openGL_drawfill(ptlist);
    ptlist->clear(); delete ptlist;
 }
 
-void laydata::tdtwire::precalc(pointlist& ptlist) const
+void laydata::tdtwire::precalc(pointlist& ptlist, _dbl_word num_points) const
 {
-   DBbox* ln1 = endPnts(0,1, true);
+   DBbox* ln1 = endPnts(ptlist[0],ptlist[1], true);
    if (NULL != ln1)
    {
       ptlist.push_back(ln1->p1());
       ptlist.push_back(ln1->p2());
    }
    delete ln1;
-   for (unsigned i = 1; i < _psize - 1; i++)
+   for (unsigned i = 1; i < num_points - 1; i++)
    {
-      ln1 = mdlPnts(i-1,i,i+1);
+      ln1 = mdlPnts(ptlist[i-1],ptlist[i],ptlist[i+1]);
       if (NULL != ln1)
       {
          ptlist.push_back(ln1->p1());
@@ -1464,7 +1411,7 @@ void laydata::tdtwire::precalc(pointlist& ptlist) const
       }
       delete ln1;
    }
-   ln1 = endPnts(_psize-2,_psize-1,false);
+   ln1 = endPnts(ptlist[num_points-2],ptlist[num_points-1],false);
    if (NULL != ln1)
    {
       ptlist.push_back(ln1->p1());
