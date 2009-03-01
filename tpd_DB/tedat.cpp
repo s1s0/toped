@@ -1278,8 +1278,8 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    // translate the points using the current CTM
    for (unsigned i = 0; i < _psize; i++)
       ptlist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * drawprop.topCTM());
-//   if (!center_line_only)
-//      precalc(ptlist, _psize);
+   if (!center_line_only)
+      precalc(ptlist, _psize);
 }
 
 void laydata::tdtwire::draw_request(Tenderer& rend) const
@@ -1601,19 +1601,25 @@ void laydata::tdtwire::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) con
 
 DBbox laydata::tdtwire::overlap() const 
 {
-   DBbox* ln1 = endPnts(0,1, true);
-   DBbox ovl = *ln1;delete ln1;
-   if (_psize > 2) 
+   DBbox* ln1 = endPnts(TP( _pdata[0], _pdata[1]), 
+                        TP( _pdata[2], _pdata[3]), 
+                        true
+                        );
+   DBbox ovl = *ln1; delete ln1;
+   DBbox* ln2 = NULL;
+   for (word i = 1; i < _psize - 1; i++) 
    {
-      DBbox* ln2 = NULL;
-      for (word i = 1; i < _psize - 1; i++)
-      {
-         ln2 = mdlPnts(i-1,i,i+1);
-         ovl.overlap(*ln2);
-         delete ln2; 
-      }
+      ln2 = mdlPnts(TP(_pdata[2*(i-1)], _pdata[2*(i-1) + 1]),
+                    TP(_pdata[2* i   ], _pdata[2* i    + 1]),
+                    TP(_pdata[2*(i+1)], _pdata[2*(i+1) + 1]) 
+                    );
+      ovl.overlap(*ln2);
+      delete ln2; 
    }
-   ln1 = endPnts(_psize-2,_psize-1,false);
+   ln1 = endPnts(TP( _pdata[2*(_psize-2)], _pdata[2*(_psize-2) + 1]), 
+                 TP( _pdata[2*(_psize-1)], _pdata[2*(_psize-1) + 1]), 
+                 false
+                 );
    ovl.overlap(*ln1);
    delete ln1; 
    return ovl;
