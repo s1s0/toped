@@ -77,16 +77,16 @@ class TeselTempData {
 //
 class TenderObj {
    public:
-//                        TenderObj(int4b* pdata) : _cdata(pdata), _csize(4) {}
-                        TenderObj(int4b* pdata);
-                        TenderObj(int4b* pdata, unsigned psize) : _cdata(pdata), _csize(psize) {}
-      virtual          ~TenderObj() {};
-              int4b*    cdata()     {return _cdata;}  // contour data
-              unsigned  csize()     {return _csize;}
+                        TenderObj():_cdata(NULL), _csize(0) {}
+                        TenderObj(const TP*, const TP*);
+      virtual          ~TenderObj();
+      virtual int*      cdata()     {return _cdata;}  // contour data
+      virtual unsigned  csize()     {return _csize;}
       virtual int*      ldata()     {assert(0); return NULL;}
       virtual unsigned  lsize()     {assert(0); return 0   ;}
    protected:
-      int4b*            _cdata;  // contour data
+                        TenderObj(const pointlist&);
+      int*              _cdata;  // contour data
       unsigned          _csize;
 };
 
@@ -96,7 +96,8 @@ class TenderObj {
 // which will be used for the fill
 class TenderPoly : public TenderObj {
    public:
-                        TenderPoly(int4b* pdata, unsigned psize) : TenderObj(pdata, psize) {}
+                        TenderPoly() : TenderObj() {}
+                        TenderPoly(const pointlist&);
       virtual          ~TenderPoly();
       void              Tessel(TeselTempData*);
       TeselChain*       tdata()              {return &_tdata;}
@@ -120,7 +121,7 @@ class TenderPoly : public TenderObj {
 // the original points from tdtwire
 class TenderWire : public TenderPoly {
    public:
-                        TenderWire(int4b*, unsigned, const word, bool);
+                        TenderWire(const pointlist&, const word, bool);
       virtual          ~TenderWire();
       void              Tessel(unsigned);
       virtual int*      ldata()                 {return _ldata;}
@@ -141,9 +142,9 @@ typedef std::list<TenderPoly*> SlicePolygons;
 class TenderTV {
    public:
                         TenderTV(CTM& translation);
-      void              box  (int4b*);
-      void              poly (int4b*, unsigned);
-      void              wire (int4b*, unsigned, word, bool);
+      void              box  (const TP*, const TP*);
+      void              poly (const pointlist&);
+      void              wire (const pointlist&, word, bool);
       const CTM*        tmatrix()            {return &_tmatrix;}
       void              draw_contours();
       void              draw_lines();
@@ -180,9 +181,9 @@ class Tenderer {
       void              setLayer(word);
       void              pushCTM(CTM& trans)                    {_ctrans = trans;_drawprop->pushCTM(trans);}
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
-      void              box  (int4b* pdata)                    {_cslice->box(pdata);}
-      void              poly (int4b* pdata, unsigned psize)    {_cslice->poly(pdata, psize);}
-      void              wire (int4b*, unsigned, word w);
+      void              box (const TP* p1, const TP* p2)       {_cslice->box(p1,p2);}
+      void              poly (const pointlist& plst)           {_cslice->poly(plst);}
+      void              wire (const pointlist& plst, word w);
       void              draw();
       // temporary!
       void              initCTMstack()                {        _drawprop->initCTMstack()        ;}
