@@ -274,6 +274,17 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Generating Calibre drc results scanner ..."
+						CommandLine="flex.exe -Pcalbr -o$(InputName).cpp $(InputFileName)&#x0D;&#x0A;"
+						AdditionalDependencies="calbr_yacc.h"
+						Outputs="calbr_lex.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating Calibre drc results scanner ..."
 						CommandLine="flex.exe -Pcalbr -o$(InputName).cpp $(InputFileName)"
 						AdditionalDependencies="calbr_yacc.h"
 						Outputs="calbr_lex.cpp"
@@ -285,6 +296,16 @@
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating Calibre drc result parser"
+						CommandLine="bison.exe  -p calbr -d -t -v -o $(InputName).cpp $(InputFileName)&#x0D;&#x0A;move $(InputName).hpp $(InputName).h&#x0D;&#x0A;"
+						Outputs="$(InputName).cpp;$(InputName).h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
