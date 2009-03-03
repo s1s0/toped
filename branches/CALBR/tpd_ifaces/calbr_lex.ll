@@ -38,6 +38,7 @@ lexcif_digit    [0-9]
 lexcif_upchar   [A-Z]
 
 %{
+#include "tpdph.h"
 #include "calbr_yacc.h"
 %}
 
