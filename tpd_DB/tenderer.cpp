@@ -235,9 +235,9 @@ DBbox* TenderWire::mdlPnts(const word width, word i1, word i2, word i3)
                           (int4b) rint(_ldata[i2+1] - ycorr) );
 }
 
-/** For wire tessellation we can use the common polygon tessellation procedure
-    is completely. This could be a huge overhead though. The thing is that we've
-    already been trough the precalc procedure and we know that were object is
+/** For wire tessellation we can use the common polygon tessellation procedure.
+    This could be a huge overhead though. The thing is that we've
+    already been trough the precalc procedure and we know that wire object is
     very specific non-convex polygon. Using this knowledge the tessallation
     is getting really trivial. All we have to do is to list the contour points
     indexes in pairs - one from the front, and the other from the back of the
@@ -326,12 +326,8 @@ void TenderTV::draw_contours()
       assert((*CSH)->csize());
       first_array[szindx] = pntindx/2;
       size_array[szindx++] = (*CSH)->csize();
-      memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * (*CSH)->csize());
+      memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * (*CSH)->csize());
       pntindx += 2 * (*CSH)->csize();
-//      for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
-//      { // points in the shape
-//         point_array[pntindx++] = (*CSH)->cdata()[ipnt];
-//      }
    }
    assert(pntindx == arr_size);
    assert(szindx == _num_contours);
@@ -358,10 +354,8 @@ void TenderTV::draw_lines()
       assert((*CSH)->lsize());
       first_array[szindx] = pntindx/2;
       size_array[szindx++] = (*CSH)->lsize();
-      for (word ipnt = 0; ipnt < 2 * (*CSH)->lsize() ; ipnt++)
-      { // points in the shape
-         point_array[pntindx++] = (*CSH)->ldata()[ipnt];
-      }
+      memcpy(&(point_array[pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * (*CSH)->lsize());
+      pntindx += 2 * (*CSH)->lsize();
    }
    assert(pntindx == arr_size);
    assert(szindx == _num_lines);
@@ -388,10 +382,8 @@ void TenderTV::draw_fqus()
       assert((*CSH)->csize());
       first_array[szindx] = pntindx/2;
       size_array[szindx++] = (*CSH)->csize();
-      for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
-      { // points in the shape
-         point_array[pntindx++] = (*CSH)->cdata()[ipnt];
-      }
+      memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * (*CSH)->csize());
+      pntindx += 2 * (*CSH)->csize();
    }
    assert(pntindx == arr_size);
    assert(szindx == _num_fqus);
@@ -482,10 +474,8 @@ void TenderTV::draw_fpolygons()
             default: assert(0);
          }
       }
-      for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
-      { // points in the shape
-         point_array[pntindx++] = (*CSH)->cdata()[ipnt];
-      }
+      memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * (*CSH)->csize());
+      pntindx += 2 * (*CSH)->csize();
    }
    assert(pntindx == arr_size);
    assert(sz_ftrs_indx == _num_ftrs);
