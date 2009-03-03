@@ -14,7 +14,7 @@
 //   This file is a part of Toped project (C) 2001-2009 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//        Created: Sun Jan 11 2008
+//        Created: Sun Jan 11 2009
 //     Originator: Svilen Krustev - skr@toped.org.uk
 //    Description: OpenGL renderer
 //---------------------------------------------------------------------------
@@ -71,13 +71,12 @@ class TeselTempData {
 };
 
 
-//-----------------------------------------------------------------------------
-// holds box representation - The same four points will be used for the
-// contour as well as for the fill
-//
+/**
+*   holds box representation - The same four points will be used for the
+*   contour as well as for the fill
+*/
 class TenderObj {
    public:
-//                        TenderObj(int4b* pdata) : _cdata(pdata), _csize(4) {}
                         TenderObj(int4b* pdata);
                         TenderObj(int4b* pdata, unsigned psize) : _cdata(pdata), _csize(psize) {}
       virtual          ~TenderObj() {};
@@ -90,10 +89,12 @@ class TenderObj {
       unsigned          _csize;
 };
 
-//-----------------------------------------------------------------------------
-// holds polygon representations - the contour will be drawn using the
-// inherited _cdata holder. The _fdata stores the tesselated triangles
-// which will be used for the fill
+/**
+*   holds polygon representations - the contour will be drawn using the
+*   inherited _cdata holder. The chains of point indexes resulting from the
+*   tesselation are stored in _tdata. They will be used together with the _cdata
+*   during the polygon fill
+*/
 class TenderPoly : public TenderObj {
    public:
                         TenderPoly(int4b* pdata, unsigned psize) : TenderObj(pdata, psize) {}
@@ -114,10 +115,11 @@ class TenderPoly : public TenderObj {
       TeselChain        _tdata;
 };
 
-//-----------------------------------------------------------------------------
-// holds wire representation - the contour and the fill - exactly as in the 
-// inherited class. The _ldata stores the central line which is effectively 
-// the original points from tdtwire
+/**
+*   holds wire representation - the contour and the fill - exactly as in the
+*   inherited class. The _ldata stores the central line which is effectively
+*   the original point list from tdtwire
+*/
 class TenderWire : public TenderPoly {
    public:
                         TenderWire(int4b*, unsigned, const word, bool);
@@ -136,8 +138,9 @@ class TenderWire : public TenderPoly {
 typedef std::list<TenderObj*>  SliceObjects;
 typedef std::list<TenderPoly*> SlicePolygons;
 
-//-----------------------------------------------------------------------------
-// translation view - effectively a layer slice of the visible cell data
+/**
+*  translation view - effectively a layer slice of the visible cell data
+*/
 class TenderTV {
    public:
                         TenderTV(CTM& translation);
