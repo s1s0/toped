@@ -177,15 +177,7 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\calbr_lex.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\calbr_reader.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\calbr_yacc.cpp"
 				>
 			</File>
 			<File
@@ -242,10 +234,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\calbr_yacc.h"
-				>
-			</File>
-			<File
 				RelativePath=".\cif_io.h"
 				>
 			</File>
@@ -266,56 +254,56 @@
 			Name="FlexBison Files"
 			>
 			<File
-				RelativePath=".\calbr_lex.ll"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Generating Calibre drc results scanner ..."
-						CommandLine="flex.exe -Pcalbr -o$(InputName).cpp $(InputFileName)&#x0D;&#x0A;"
-						AdditionalDependencies="calbr_yacc.h"
-						Outputs="calbr_lex.cpp"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Generating Calibre drc results scanner ..."
-						CommandLine="flex.exe -Pcalbr -o$(InputName).cpp $(InputFileName)"
-						AdditionalDependencies="calbr_yacc.h"
-						Outputs="calbr_lex.cpp"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\calbr_yacc.yy"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Generating Calibre drc result parser"
-						CommandLine="bison.exe  -p calbr -d -t -v -o $(InputName).cpp $(InputFileName)&#x0D;&#x0A;move $(InputName).hpp $(InputName).h&#x0D;&#x0A;"
-						Outputs="$(InputName).cpp;$(InputName).h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Generating Calibre drc result parser"
-						CommandLine="bison.exe  -p calbr -d -t -v -o $(InputName).cpp $(InputFileName)&#x0D;&#x0A;move $(InputName).hpp $(InputName).h&#x0D;&#x0A;"
-						Outputs="$(InputName).cpp;$(InputName).h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 				RelativePath=".\cif_lex.ll"
 				>
 				<FileConfiguration

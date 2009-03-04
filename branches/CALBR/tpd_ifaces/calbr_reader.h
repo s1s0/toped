@@ -32,10 +32,6 @@
 
 #include <string>
 
-int calbrlex(void);
-int calbrerror (char *s);
-
-
 namespace Calbr
 {
 
