@@ -26,11 +26,12 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include <iostream>
 #include "quadtree.h"
 #include "tedat.h"
 #include "viewprop.h"
+#include "tenderer.h"
 #include "../tpd_common/outbox.h"
-#include <iostream>
 
 //-----------------------------------------------------------------------------
 // class quadTree
