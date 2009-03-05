@@ -29,7 +29,6 @@
 #define QUADTREE_H
 
 #include "tedstd.h"
-#include "ps_out.h"
 
 namespace laydata {
 

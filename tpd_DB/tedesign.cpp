@@ -35,6 +35,7 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "tenderer.h"
+#include "ps_out.h"
 
 //! the stack of all previously edited (opened) cells
 laydata::editcellstack      laydata::editobject::_editstack;

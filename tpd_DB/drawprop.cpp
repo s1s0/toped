@@ -29,6 +29,8 @@
 #include <GL/glew.h>
 #include "drawprop.h"
 #include "viewprop.h"
+#include "ps_out.h"
+
 
 GLubyte cell_mark_bmp[30] = {
    0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x18, 0x18,
