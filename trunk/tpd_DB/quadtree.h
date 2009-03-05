@@ -30,7 +30,6 @@
 
 #include "tedstd.h"
 #include "ps_out.h"
-#include "tenderer.h"
 
 namespace laydata {
 

@@ -34,7 +34,7 @@
 #include "tedstd.h"
 #include "viewprop.h"
 #include "ps_out.h"
-#include "tenderer.h"
+//#include "tenderer.h"
 
 namespace laydata {
 //==============================================================================

@@ -34,6 +34,7 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "ps_out.h"
+#include "tenderer.h"
 
 // Global variables
 DataCenter*               DATC = NULL;

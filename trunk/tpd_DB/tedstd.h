@@ -218,5 +218,5 @@ namespace laydata {
    };
 
 }
-
+class Tenderer;
 #endif

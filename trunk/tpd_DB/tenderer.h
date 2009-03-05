@@ -42,8 +42,8 @@ class TeselChunk {
       word              size()     {return _size;}
       unsigned*         index_seq(){return _index_seq;}
    private:
-      unsigned*         _index_seq; // index sequence
-      word              _size;      // size of the index sequence
+      unsigned*         _index_seq;  // index sequence
+      word              _size;       // size of the index sequence
       GLenum            _type;
 };
 
@@ -163,11 +163,11 @@ class TenderTV {
       unsigned          _num_polygon_points; // non-convex (polygons & wires)
       unsigned          _num_contours;
       unsigned          _num_lines;
-      unsigned          _num_fqus; // fill quad
-      unsigned          _num_fqss; // fill quad strip
-      unsigned          _num_ftrs; // fill triangle
-      unsigned          _num_ftfs; // fill triangle fan
-      unsigned          _num_ftss; // fill triangle strip
+      unsigned          _num_fqus; //! fill quad
+      unsigned          _num_fqss; //! fill quad strip
+      unsigned          _num_ftrs; //! fill triangle
+      unsigned          _num_ftfs; //! fill triangle fan
+      unsigned          _num_ftss; //! fill triangle strip
 };
 
 //-----------------------------------------------------------------------------
