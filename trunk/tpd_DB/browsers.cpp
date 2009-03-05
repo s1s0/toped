@@ -40,6 +40,8 @@
 #include "../ui/cell_normal.xpm"
 #include "../ui/cell_expanded.xpm"
 #include "../ui/nolay.xpm"
+#include "../tpd_ifaces/gds_io.h"
+#include "../tpd_ifaces/cif_io.h"
 
 
 extern DataCenter*               DATC;

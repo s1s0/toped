@@ -219,4 +219,5 @@ namespace laydata {
 
 }
 class Tenderer;
+class PSFile;
 #endif

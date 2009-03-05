@@ -31,7 +31,6 @@
 #include <string>
 #include <math.h>
 #include "tedstd.h"
-#include "ps_out.h"
 
 namespace layprop {
 
