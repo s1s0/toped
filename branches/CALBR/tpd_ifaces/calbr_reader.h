@@ -13,16 +13,16 @@
 //                                                                          =
 //   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
-//           $URL: https://gaitukevich@svn.berlios.de/svnroot/repos/toped/trunk/tpd_DB/browsers.h $
+//           $URL$
 //        Created: Mon Aug 11 2003
-//        $Author: gaitukevich.s $
+//        $Author$
 //    Description: Reader of Mentor Graphics Calibre drc errors files
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
-//      $Revision: 872 $
-//          $Date: 2008-11-23 21:22:48 +0800 (Вс, 23 ноя 2008) $
-//        $Author: s_krustev $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 //      Comments :
 //===========================================================================
@@ -30,10 +30,23 @@
 #if !defined(CALBR_READER_H_INCLUDED)
 #define CALBR_READER_H_INCLUDED
 
+#include <fstream>
 #include <string>
 
 namespace Calbr
 {
+
+
+class drcRuleCheck
+{
+private:
+	long			_curResCount; //current result count
+	long			_origResCount;//original result count
+	std::string _ruleCheckName;
+	std::string _timeStamp;
+	std::string _header;
+
+};
 
 class CalbrFile
 {
@@ -45,6 +58,9 @@ private:
 	std::string    _fileName;
 	std::string    _cellName;
 	long				_precision;
+
+	std::ifstream	_inFile;
+	bool				parse();
 
 };
 }

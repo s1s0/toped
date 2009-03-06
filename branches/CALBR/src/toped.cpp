@@ -43,6 +43,9 @@
 #include "../ui/blue_lamp.xpm"
 #include "../ui/toped32x32.xpm"
 
+	//???Remove after finishing
+#include "../tpd_ifaces/calbr_reader.h"
+
 #ifndef WIN32
    #include "../ui/toped16x16.xpm"
 #endif
@@ -337,6 +340,9 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initMenuBar();
    wxToolTip::Enable(true);
    wxToolTip::SetDelay(3000);
+
+	//???Remove after finishing
+	Calbr::CalbrFile f("D:/drc/test.drc.results");
 }
 
 void tui::TopedFrame::OnClose(wxCloseEvent& event)
