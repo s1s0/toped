@@ -36,15 +36,32 @@
 namespace Calbr
 {
 
+struct cood
+{
+	long x, y;
+};
 
 class drcRuleCheck
 {
+public:
+	drcRuleCheck(const std::string &name);
+
+	std::string ruleCheckName()	const {return _ruleCheckName;}
+	std::string timeStamp()			const {return _timeStamp;}
+	long			curResCount()		const {return  _curResCount;}
+	long			origResCount()		const {return _origResCount;}
+	void			setTimeStamp(const std::string &timeStamp);
+	void			setCurResCount(int curResCount);
+	void			setOrigResCount(int origResCount);
+	void			addDescrString(const std::string & str);
 private:
 	long			_curResCount; //current result count
 	long			_origResCount;//original result count
 	std::string _ruleCheckName;
 	std::string _timeStamp;
 	std::string _header;
+	std::vector <std::string> _descrStrings;
+	//std::vector <> _descrStrings;
 
 };
 
