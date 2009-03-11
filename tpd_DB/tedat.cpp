@@ -1998,13 +1998,7 @@ laydata::tdtcellaref::tdtcellaref(TEDfile* const tedfile) : tdtcellref(tedfile)
 void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // make sure that the referenced structure exists
-   //if (NULL == structure()) return;
    assert(structure());
-   if (0 != drawprop.drawinglayer())
-   {
-      int boza = drawprop.drawinglayer();
-      boza++;
-   }
    // Get the areal of entire matrix, but NOT TRANSLATED !
    DBbox array_overlap = clear_overlap();
    // Calculate the CTM for the array
@@ -2022,15 +2016,12 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
 
    // If we get here - means that the array (or part of it) is visible
    // draw the cell mark ...
-//   drawprop.setCurrentColor(0);
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::array_mark);
    // ... and the overlapping box
-   // If we get here - means that the cell (or part of it) is visible
-   
-   ptlist.reserve(6);
-   ptlist.push_back(array_overlap.p1() * newtrans);
+   ptlist.reserve(6); //0:3 - the overlapping box; 4 - number of columns; 5 - number of rows
+   ptlist.push_back(               array_overlap.p1()                  * newtrans);
    ptlist.push_back(TP(array_overlap.p2().x(), array_overlap.p1().y()) * newtrans);
-   ptlist.push_back(array_overlap.p2() * newtrans);
+   ptlist.push_back(               array_overlap.p2()                  * newtrans);
    ptlist.push_back(TP(array_overlap.p1().x(), array_overlap.p2().y()) * newtrans);
    
    // We are going to draw "something", so push the new translation matrix in the stack
@@ -2238,8 +2229,6 @@ void  laydata::tdtcellaref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, layd
 DBbox laydata::tdtcellaref::overlap() const {
    assert(structure());
    return clear_overlap().overlap(_translation);
-//   else return DBbox(TP(static_cast<int4b>(rint(_translation.tx())),
-//                         static_cast<int4b>(rint(_translation.ty()))));
 }
 
 DBbox laydata::tdtcellaref::clear_overlap() const
@@ -2250,7 +2239,6 @@ DBbox laydata::tdtcellaref::clear_overlap() const
    CTM refCTM(1.0,0.0,0.0,1.0,_arrprops.stepX() * (_arrprops.cols()-1), _arrprops.stepY() * (_arrprops.rows() - 1));
    ovl.overlap(bx * refCTM);
    return ovl;
-//   return structure()->overlap().overlap(refCTM);
 }
 
 //-----------------------------------------------------------------------------
