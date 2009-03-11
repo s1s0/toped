@@ -85,15 +85,6 @@ void TeselTempData::storeChunk()
 
 //=============================================================================
 // TenderObj
-TenderObj::TenderObj(int4b* pdata)
-{
-   _csize = 4;
-   _cdata = new int4b[8];
-   _cdata[0] = pdata[0];   _cdata[1] = pdata[1];
-   _cdata[2] = pdata[2];   _cdata[3] = pdata[1];
-   _cdata[4] = pdata[2];   _cdata[5] = pdata[3];
-   _cdata[6] = pdata[0];   _cdata[7] = pdata[3];
-}
 
 
 //=============================================================================
@@ -264,7 +255,7 @@ TenderTV::TenderTV(CTM& translation) : _tmatrix(translation),
 
 void TenderTV::box (int4b* pdata)
 {
-   TenderObj* cobj = DEBUG_NEW TenderObj(pdata);
+   TenderObj* cobj = DEBUG_NEW TenderObj(pdata, 4);
    _contour_data.push_back(cobj);
    _num_contour_points += 4;
    _num_contours++;
