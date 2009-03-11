@@ -148,7 +148,16 @@ namespace laydata {
          void              select_points(DBbox&, SGBitSet&);
          void              unselect_points(DBbox&, SGBitSet&);
       private:
-         enum {p1x = 0, p1y = 1, p2x = 2, p2y = 3};
+         enum {
+               p1x  = 0,
+               p1y  = 1,
+               p2x2 = 2,// <= p2x
+               p1y2 = 3,// <= p1y
+               p2x  = 4,
+               p2y  = 5,
+               p1x2 = 6,// <= p1x
+               p2y2 = 7 // <= p2y
+         };
          void              normalize(SGBitSet& psel);
          pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
          int4b*            _pdata;

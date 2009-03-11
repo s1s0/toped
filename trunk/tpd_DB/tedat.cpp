@@ -383,21 +383,25 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
 //-----------------------------------------------------------------------------
 laydata::tdtbox::tdtbox(const TP& p1, const TP& p2) : tdtdata()
 {
-   _pdata = new int4b[4];
-   _pdata[p1x] = p1.x();_pdata[p1y] = p1.y();
-   _pdata[p2x] = p2.x();_pdata[p2y] = p2.y();
+   _pdata = new int4b[8];
+   _pdata[p1x ] = p1.x();_pdata[p1y ] = p1.y();
+   _pdata[p2x ] = p2.x();_pdata[p2y ] = p2.y();
+   _pdata[p1x2] = p1.x();_pdata[p1y2] = p1.y();
+   _pdata[p2x2] = p2.x();_pdata[p2y2] = p2.y();
    SGBitSet dummy;
    normalize(dummy);
 }
 
 laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata() 
 {
-   _pdata = new int4b[4];
+   _pdata = new int4b[8];
    TP point;
    point = tedfile->getTP();
-   _pdata[p1x] = point.x();_pdata[p1y] = point.y();
+   _pdata[p1x ] = point.x();_pdata[p1y ] = point.y();
+   _pdata[p1x2] = point.x();_pdata[p1y2] = point.y();
    point = tedfile->getTP();
-   _pdata[p2x] = point.x();_pdata[p2y] = point.y();
+   _pdata[p2x ] = point.x();_pdata[p2y ] = point.y();
+   _pdata[p2x2] = point.x();_pdata[p2y2] = point.y();
    SGBitSet dummy;
    normalize(dummy);
 }
@@ -408,6 +412,7 @@ void laydata::tdtbox::normalize(SGBitSet& psel)
    if (_pdata[p1x] > _pdata[p2x])
    {
       swap = _pdata[p1x]; _pdata[p1x] = _pdata[p2x]; _pdata[p2x] = swap;
+      _pdata[p1x2] = _pdata[p1x]; _pdata[p2x2] = _pdata[p2x];
       if (0 != psel.size())
       {
          psel.swap(0,1);
@@ -417,6 +422,7 @@ void laydata::tdtbox::normalize(SGBitSet& psel)
    if (_pdata[p1y] > _pdata[p2y])
    {
       swap = _pdata[p1y]; _pdata[p1y] = _pdata[p2y]; _pdata[p2y] = swap;
+      _pdata[p1y2] = _pdata[p1y];_pdata[p2y2] = _pdata[p2y];
       if (0 != psel.size())
       {
          psel.swap(0,3);
@@ -429,10 +435,10 @@ void laydata::tdtbox::openGL_precalc(layprop::DrawProperties& drawprop , pointli
 {
    // translate the points using the current CTM
    ptlist.reserve(4);
-   ptlist.push_back(TP(_pdata[p1x], _pdata[p1y]) * drawprop.topCTM());
-   ptlist.push_back(TP(_pdata[p2x], _pdata[p1y]) * drawprop.topCTM());
-   ptlist.push_back(TP(_pdata[p2x], _pdata[p2y]) * drawprop.topCTM());
-   ptlist.push_back(TP(_pdata[p1x], _pdata[p2y]) * drawprop.topCTM());
+   for (unsigned i = 0; i < 4; i++)
+   {
+      ptlist.push_back(TP(_pdata[2*i], _pdata[2*i+1]) * drawprop.topCTM());
+   }
 }
 
 void laydata::tdtbox::draw_request(Tenderer& rend) const
@@ -490,46 +496,44 @@ void laydata::tdtbox::motion_draw(const layprop::DrawProperties&, ctmqueue& tran
                                                 SGBitSet* plst) const
 {
    CTM trans = transtack.front();
+   pointlist* ptlist;
    if (sh_partsel == status())
    {
-      TP pt1, pt2;
       CTM strans = transtack.back();
       assert(plst);
-      pointlist* nshape = movePointsSelected(*plst, trans, strans);
-      pt1 = (*nshape)[0]; pt2 = (*nshape)[2];
-      glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
-      nshape->clear(); delete nshape;
+      ptlist = movePointsSelected(*plst, trans, strans);
    }
    else
    {
-      pointlist ptlist;
-      ptlist.reserve(4);
-      ptlist.push_back(TP(_pdata[p1x], _pdata[p1y]) * trans);
-      ptlist.push_back(TP(_pdata[p2x], _pdata[p1y]) * trans);
-      ptlist.push_back(TP(_pdata[p2x], _pdata[p2y]) * trans);
-      ptlist.push_back(TP(_pdata[p1x], _pdata[p2y]) * trans);
-      glBegin(GL_LINE_LOOP);
+      ptlist = DEBUG_NEW pointlist;
+      ptlist->reserve(4);
       for (unsigned i = 0; i < 4; i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
-      glEnd();
-      ptlist.clear();
+      {
+         ptlist->push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans);
+      }
    }
+   glBegin(GL_LINE_LOOP);
+   for (unsigned i = 0; i < 4; i++)
+   {
+      glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
+   }
+   glEnd();
+   ptlist->clear();
+   delete ptlist;
 }
 
 void  laydata::tdtbox::select_points(DBbox& select_in, SGBitSet& pntlst) {
-   if (select_in.inside(TP(_pdata[p1x], _pdata[p1y])))  pntlst.set(0);
-   if (select_in.inside(TP(_pdata[p2x], _pdata[p1y])))  pntlst.set(1);
-   if (select_in.inside(TP(_pdata[p2x], _pdata[p2y])))  pntlst.set(2);
-   if (select_in.inside(TP(_pdata[p1x], _pdata[p2y])))  pntlst.set(3);
-   pntlst.check_neighbours_set(false);   
+   for (unsigned i = 0; i < 4; i++)
+      if ( select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.set(i);
+   pntlst.check_neighbours_set(false);
 }
 
 void  laydata::tdtbox::unselect_points(DBbox& select_in, SGBitSet& pntlst) {
-   if (sh_selected == _status) pntlst.setall();
-   if (select_in.inside(TP(_pdata[p1x], _pdata[p1y])))  pntlst.reset(0);
-   if (select_in.inside(TP(_pdata[p2x], _pdata[p1y])))  pntlst.reset(1);
-   if (select_in.inside(TP(_pdata[p2x], _pdata[p2y])))  pntlst.reset(2);
-   if (select_in.inside(TP(_pdata[p1x], _pdata[p2y])))  pntlst.reset(3);
+   if (sh_selected == _status)  // the whole shape use to be selected
+      pntlst.setall();
+   for (word i = 0; i < 4; i++)
+      if ( select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.reset(i);
+   pntlst.check_neighbours_set(false);
 }
 
 laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet& plst)
@@ -537,8 +541,10 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet& plst)
    if (0 != plst.size())
    {// used for modify
       pointlist* nshape = movePointsSelected(plst, trans);
-      _pdata[p1x] = (*nshape)[0].x();_pdata[p1y] = (*nshape)[0].y();
+      _pdata[p1x ] = (*nshape)[0].x();_pdata[p1y ] = (*nshape)[0].y();
+      _pdata[p1x2] = _pdata[p1x]     ;_pdata[p1y2] = _pdata[p1y];
       _pdata[p2x] = (*nshape)[2].x();_pdata[p2y] = (*nshape)[2].y();;
+      _pdata[p2x2] = _pdata[p2x]     ;_pdata[p2y2] = _pdata[p2y];
       normalize(plst);
       nshape->clear(); delete nshape;
       return NULL;
@@ -565,8 +571,10 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet& plst)
 void laydata::tdtbox::transfer(const CTM& trans) {
    TP p1 = TP(_pdata[p1x], _pdata[p1y]) * trans;
    TP p2 = TP(_pdata[p2x], _pdata[p2y]) * trans;
-   _pdata[p1x] = p1.x();_pdata[p1y] = p1.y();
+   _pdata[p1x ] = p1.x()     ;_pdata[p1y ] = p1.y();
+   _pdata[p1x2] = _pdata[p1x];_pdata[p1y2] = _pdata[p1y];
    _pdata[p2x] = p2.x();_pdata[p2y] = p2.y();
+   _pdata[p2x2] = _pdata[p2x];_pdata[p2y2] = _pdata[p2y];
    SGBitSet dummy;
    normalize(dummy);
 }
@@ -2237,12 +2245,12 @@ DBbox laydata::tdtcellaref::overlap() const {
 DBbox laydata::tdtcellaref::clear_overlap() const
 {
    assert(structure());
-//   DBbox bx = structure()->overlap();
-//   DBbox ovl = bx;
+   DBbox bx = structure()->overlap();
+   DBbox ovl = bx;
    CTM refCTM(1.0,0.0,0.0,1.0,_arrprops.stepX() * (_arrprops.cols()-1), _arrprops.stepY() * (_arrprops.rows() - 1));
-//   ovl.overlap(bx * refCTM);
-//   return ovl;
-   return structure()->overlap().overlap(refCTM);
+   ovl.overlap(bx * refCTM);
+   return ovl;
+//   return structure()->overlap().overlap(refCTM);
 }
 
 //-----------------------------------------------------------------------------
@@ -2609,7 +2617,8 @@ void laydata::valid_poly::angles()
       _status |= laydata::shp_box;
 }
 
-void laydata::valid_poly::normalize() {
+void laydata::valid_poly::normalize()
+{
    real area = polyarea(_plist);
    if (area == 0) {
       _status |= shp_null; return;

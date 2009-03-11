@@ -77,7 +77,6 @@ class TeselTempData {
 */
 class TenderObj {
    public:
-                        TenderObj(int4b* pdata);
                         TenderObj(int4b* pdata, unsigned psize) : _cdata(pdata), _csize(psize) {}
       virtual          ~TenderObj() {};
               int4b*    cdata()     {return _cdata;}  // contour data
