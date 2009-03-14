@@ -412,10 +412,10 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          glEnable(GL_BLEND);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glClear(GL_ACCUM_BUFFER_BIT);
-//         DATC->openGL_draw(_LayCTM);    // draw data
+         DATC->openGL_draw(_LayCTM);    // draw data
          // new Render - under development,
          // launch it instead of the old one (previous code line)
-         DATC->openGL_render(_LayCTM);
+//         DATC->openGL_render(_LayCTM);
          glAccum(GL_LOAD, 1.0);
          invalid_window = false;
          if (rubber_band) rubber_paint();

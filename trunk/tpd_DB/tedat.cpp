@@ -1938,62 +1938,6 @@ laydata::tdtcellaref::tdtcellaref(TEDfile* const tedfile) : tdtcellref(tedfile)
    _arrprops = ArrayProperties(_stepX, _stepY, _cols, _rows);
 }
 
-// bool laydata::tdtcellaref::aref_visible(layprop::DrawProperties& drawprop, int* stst) const {
-//    // make sure that the referenced structure exists
-//    if (NULL == structure()) return false;
-//    // Get the areal of entire matrix, but NOT TRANSLATED !
-//    DBbox array_overlap = clear_overlap();
-//    // Calculate the CTM for the array
-//    CTM newtrans = _translation * drawprop.topCTM();
-//    // ... get the current visual (clipping) window, and make a REVERSE TRANSLATION
-//    DBbox clip = drawprop.clipRegion() * newtrans.Reversed();
-//    clip.normalize();
-//    // initialize the visual box from the overlap area of the array ...
-//    DBbox visual_box(array_overlap);
-//    // ... and check the visibility of entire array. if mutual_position
-//    // is 1, visual_box will be modified and will contain the visual region
-//    // of the array
-//    int mutual_position = clip.clipbox(visual_box);
-//    // if array is entirely outside the visual window - bail out
-//    if (0 == mutual_position) return false;
-// 
-//    // If we get here - means that the array (or part of it) is visible
-//    // draw the cell mark ...
-//    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::array_mark);
-//    // ... and the overlapping box
-//    draw_overlapping_box(array_overlap, newtrans, 0xf18f);
-//    // now check that a single structure is big enough to be visible
-//    DBbox structure_overlap = structure()->overlap();
-//    DBbox minareal = structure_overlap * drawprop.topCTM() * drawprop.ScrCTM();
-//    if (minareal.area() < MIN_VISUAL_AREA) return false;
-//    // We are going to draw cells, so push the new translation matrix in the stack
-//    drawprop.pushCTM(newtrans);
-//    // now calculate the start/stop values of the visible references in the matrix
-//    if (-1 == mutual_position) {
-//       // entire matrix is visible
-//       stst[0] = 0; stst[1] = _cols;
-//       stst[2] = 0; stst[3] = _rows;
-//    }
-//    else {
-//       real cstepX = (array_overlap.p2().x() - array_overlap.p1().x()) / _cols;
-//       real cstepY = (array_overlap.p2().y() - array_overlap.p1().y()) / _rows;
-//       // matrix is partially visible
-//       stst[0] = array_overlap.p1().x() < clip.p1().x() ?
-//           (int) rint((clip.p1().x() - array_overlap.p1().x()) / cstepX) : 0;
-//       stst[2] = array_overlap.p1().y() < clip.p1().y() ?
-//           (int) rint((clip.p1().y() - array_overlap.p1().y()) / cstepY) : 0;
-//       stst[1] = stst[0] + (int) rint((visual_box.p2().x() - visual_box.p1().x()) / cstepX);
-//       stst[3] = stst[2] + (int) rint((visual_box.p2().y() - visual_box.p1().y()) / cstepY);
-//       // add an extra row/column from both sides to ensure visibility of the`
-//       // border areas
-//       stst[0] -= (0 == stst[0]) ? 0 : 1;
-//       stst[2] -= (0 == stst[2]) ? 0 : 1;
-//       stst[1] += (_cols == stst[1]) ? 0 : 1;
-//       stst[3] += (_rows == stst[3]) ? 0 : 1;
-// 
-//    }
-//    return true;
-// }
 
 void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
@@ -2066,6 +2010,87 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
 
 void laydata::tdtcellaref::draw_request(Tenderer& rend) const
 {
+
+   // make sure that the referenced structure exists
+   assert(structure());
+   // Get the areal of entire matrix, but NOT TRANSLATED !
+   DBbox array_overlap = clear_overlap();
+   // Calculate the CTM for the array
+   CTM newtrans = _translation * rend.topCTM();
+   // ... get the current visual (clipping) window, and make a REVERSE TRANSLATION
+   DBbox clip = rend.clipRegion().overlap(newtrans.Reversed());
+   // initialize the visual box from the overlap area of the array ...
+   DBbox visual_box(array_overlap);
+   // ... and check the visibility of entire array. if mutual_position
+   // is 1, visual_box will be modified and will contain the visual region
+   // of the array
+   int mutual_position = clip.clipbox(visual_box);
+   // if array is entirely outside the visual window - bail out
+   if (0 == mutual_position) return;
+
+   // If we get here - means that the array (or part of it) is visible
+   // draw the cell mark ...
+//   drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::array_mark);
+   // ... and the overlapping box
+//   ptlist.reserve(6); //0:3 - the overlapping box; 4 - start/stop columns; 5 - start/stop rows
+//   ptlist.push_back(               array_overlap.p1()                  * newtrans);
+//   ptlist.push_back(TP(array_overlap.p2().x(), array_overlap.p1().y()) * newtrans);
+//   ptlist.push_back(               array_overlap.p2()                  * newtrans);
+//   ptlist.push_back(TP(array_overlap.p1().x(), array_overlap.p2().y()) * newtrans);
+
+   // We are going to draw something, so push the new translation matrix in the stack
+   rend.pushCTM(newtrans);
+   int col_beg, col_end, row_beg, row_end;
+   if (structure()->overlap().visible(rend.topCTM() * rend.ScrCTM()))
+   {
+      // a single structure is big enough to be visible
+      // now calculate the start/stop values of the visible references in the matrix
+      if (-1 == mutual_position) {
+         // entire matrix is visible
+         col_beg = row_beg = 0;
+         col_end = _arrprops.cols();
+         row_end = _arrprops.rows();
+      }
+      else {
+         real cstepX = (array_overlap.p2().x() - array_overlap.p1().x()) / _arrprops.cols();
+         real cstepY = (array_overlap.p2().y() - array_overlap.p1().y()) / _arrprops.rows();
+         // matrix is partially visible
+         col_beg = array_overlap.p1().x() < clip.p1().x() ?
+               (int) rint((clip.p1().x() - array_overlap.p1().x()) / cstepX) : 0;
+         row_beg = array_overlap.p1().y() < clip.p1().y() ?
+               (int) rint((clip.p1().y() - array_overlap.p1().y()) / cstepY) : 0;
+         col_end = col_beg + (int) rint((visual_box.p2().x() - visual_box.p1().x()) / cstepX);
+         row_end = row_beg + (int) rint((visual_box.p2().y() - visual_box.p1().y()) / cstepY);
+         // add an extra row/column from both sides to ensure visibility of the`
+         // border areas
+         col_beg -= (0 == col_beg) ? 0 : 1;
+         row_beg -= (0 == row_beg) ? 0 : 1;
+         col_end += (_arrprops.cols() == col_end) ? 0 : 1;
+         row_end += (_arrprops.rows() == row_end) ? 0 : 1;
+      }
+   }
+   else
+   {
+      // a single structure is too small
+      col_beg = row_beg = col_end = row_end = 0;
+   }
+
+   // finally - start drawing
+   for (int i = col_beg; i < col_end; i++)
+   {// start/stop rows
+      for(int j = row_beg; j < row_end; j++)
+      { // start/stop columns
+         // for each of the visual array figures...
+         // ... get the translation matrix ...
+         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+         refCTM *= rend.topCTM();
+         // ...draw the structure itself, not forgeting to push/pop the refCTM
+         rend.pushCTM(refCTM);
+         structure()->openGL_draw(rend);
+         rend.popCTM();
+      }
+   }
+   rend.popCTM();
 }
 
 void laydata::tdtcellaref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
