@@ -604,29 +604,6 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
       if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst, fill);
 }
 
-/*void laydata::quadTree::visible_shapes(laydata::shapeList* all4drawing,
-                                       const DBbox& clip, const CTM& topCTM, const CTM& scrCTM, unsigned long& total_points)
-{
-   if (empty()) return;
-   // check the entire holder for clipping...
-   DBbox areal = _overlap.overlap(topCTM);
-   if      ( clip.cliparea(areal) == 0   ) return;
-   else if (!areal.visible(scrCTM)) return;
-
-   tdtdata* wdt = _first;
-   while(wdt)
-   {
-//      if (1 < wdt->numpoints())
-//      {
-         all4drawing->push_back(wdt);
-         total_points += wdt->numpoints();
-//      }
-      wdt = wdt->next();
-   }
-   for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->visible_shapes(all4drawing, clip, topCTM, scrCTM, total_points);
-
-}*/
 void laydata::quadTree::openGL_draw(Tenderer& rend, const dataList* slst) const
 {
    if (empty()) return;
@@ -639,54 +616,32 @@ void laydata::quadTree::openGL_draw(Tenderer& rend, const dataList* slst) const
    // The drawing will be faster like this for the cells without selected shapes
    // that will be the wast majority of the cases. A bit bigger code though.
    // Seems the bargain is worth it.
-/*   if (slst)
+   if (slst)
    {
       while(wdt)
       {
-         pointlist points;
-         // precalculate drawing data
-         wdt->openGL_precalc(rend, points);
-         if (0 != points.size())
+         switch (wdt->status())
          {
-            // draw the shape fill (contents of refs, arefs and texts)
-            if (fill)  wdt->openGL_drawfill(drawprop, points);
-            // draw the outline of the shapes and overlapping boxes
-            wdt->openGL_drawline(drawprop, points);
-            if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
-            {
-               drawprop.setLineProps(true);
-               if       (sh_selected == wdt->status())
-                  wdt->openGL_drawsel(points, NULL);
-               else if  (sh_partsel  == wdt->status())
-               {
-                  dataList::const_iterator SI;
-                  for (SI = slst->begin(); SI != slst->end(); SI++)
-                     if (SI->first == wdt) break;
-                  assert(SI != slst->end());
-                  wdt->openGL_drawsel(points, &(SI->second));
-               }
-               drawprop.setLineProps(false);
+            case sh_selected: wdt->draw_srequest(rend, NULL); break;
+            case sh_partsel : {// partially selected - so find the pin list
+               dataList::const_iterator SI;
+               for (SI = slst->begin(); SI != slst->end(); SI++)
+                  if (SI->first == wdt) break;
+               assert(SI != slst->end());
+               wdt->draw_srequest(rend, &(SI->second));
+               break;
             }
-            wdt->openGL_postclean(drawprop, points);
+            default: wdt->draw_request(rend);
          }
          wdt = wdt->next();
       }
    }
-   else*/
+   else
    {
       // if there are no selected shapes
       while(wdt)
       {
          wdt->draw_request(rend);
-/*         pointlist points;
-         // precalculate drawing data
-         wdt->openGL_precalc(drawprop, points);
-         // draw the shape fill (contents of refs, arefs and texts)
-         if (fill)  wdt->openGL_drawfill(drawprop, points);
-         // draw the outline of the shapes and overlapping boxes
-         wdt->openGL_drawline(drawprop, points);
-         // clean-up
-         wdt->openGL_postclean(drawprop, points);*/
          wdt = wdt->next();
       }
    }

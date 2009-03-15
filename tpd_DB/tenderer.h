@@ -70,7 +70,6 @@ class TeselTempData {
       unsigned          _offset;
 };
 
-
 /**
 *   holds box representation - The same four points will be used for the
 *   contour as well as for the fill
@@ -134,8 +133,47 @@ class TenderWire : public TenderPoly {
       unsigned          _lsize;
 };
 
+/**
+ *   holds the representation of selected objects and segments
+ */
+class TenderLine {
+   public:
+                        TenderLine(TenderObj*, const SGBitSet*);
+                        TenderLine(TenderPoly*, const SGBitSet*);
+                        TenderLine(TenderWire*, const SGBitSet*);
+                       ~TenderLine();
+      int*              ldata()                 {return _ldata;}
+      unsigned          lsize()                 {return _lsize;}
+   private:
+      int4b*            _ldata;
+      unsigned          _lsize;
+      bool              _partial;
+};
+
 typedef std::list<TenderObj*>  SliceObjects;
 typedef std::list<TenderPoly*> SlicePolygons;
+typedef std::list<TenderLine*> SliceLines;
+
+class TenderTVB {
+   public:
+                        TenderTVB(CTM& translation);
+      void              add(TenderObj*, const SGBitSet*);
+      void              add(TenderPoly*, const SGBitSet*);
+      void              add(TenderWire*, const SGBitSet*);
+      void              draw_lloops();
+      void              draw_lines();
+      void              draw_lsegments();
+   private:
+      SliceLines        _ln_data;
+      SliceLines        _ll_data;
+      SliceLines        _ls_data;
+      unsigned          _num_ln_points;
+      unsigned          _num_ll_points;
+      unsigned          _num_ls_points;
+      unsigned          _num_ln; // lines
+      unsigned          _num_ll; // line loop
+      unsigned          _num_ls; // line segment
+};
 
 /**
 *  translation view - effectively a layer slice of the visible cell data
@@ -143,9 +181,9 @@ typedef std::list<TenderPoly*> SlicePolygons;
 class TenderTV {
    public:
                         TenderTV(CTM& translation);
-      void              box  (int4b*);
-      void              poly (int4b*, unsigned);
-      void              wire (int4b*, unsigned, word, bool);
+      TenderObj*        box  (int4b*);
+      TenderPoly*       poly (int4b*, unsigned);
+      TenderWire*       wire (int4b*, unsigned, word, bool);
       const CTM*        tmatrix()            {return &_tmatrix;}
       void              draw_contours();
       void              draw_lines();
@@ -171,8 +209,10 @@ class TenderTV {
 
 //-----------------------------------------------------------------------------
 //
+//! contains all the data across cells on a given layer
 typedef std::list<TenderTV*> TenderLay;
 typedef std::map<word, TenderLay*> DataLay;
+typedef std::map<word, TenderTVB*> DataSel;
 
 class Tenderer {
    public:
@@ -180,11 +220,15 @@ class Tenderer {
 //                     ~Tenderer();
       void              Grid( const real, const std::string );
       void              setLayer(word);
-      void              pushCTM(CTM& trans)                    {_ctrans = trans;_drawprop->pushCTM(trans);}
+      void              setSdataContainer(word);
+      void              pushCTM(CTM&, bool);
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box  (int4b* pdata)                    {_cslice->box(pdata);}
+      void              box  (int4b*, const SGBitSet*);
       void              poly (int4b* pdata, unsigned psize)    {_cslice->poly(pdata, psize);}
-      void              wire (int4b*, unsigned, word w);
+      void              poly (int4b*, unsigned, const SGBitSet*);
+      void              wire (int4b*, unsigned, word);
+      void              wire (int4b*, unsigned, word, const SGBitSet*);
       void              draw();
       // temporary!
       void              initCTMstack()                {        _drawprop->initCTMstack()        ;}
@@ -201,8 +245,11 @@ class Tenderer {
    private:
       layprop::DrawProperties*   _drawprop;
       real              _UU;
-      DataLay           _data;
+      DataLay           _data;      //!All data for drawing
+      DataSel           _sdata;     //!Selected data - to be redrawn on top of the _data
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
+      TenderTVB*        _sslice;
+      CTM               _atrans;    //!The translation of the active cell
       CTM               _ctrans;    //!Working variable storing the current translation
 };
 

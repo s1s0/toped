@@ -446,6 +446,11 @@ void laydata::tdtbox::draw_request(Tenderer& rend) const
    rend.box(_pdata);
 }
 
+void laydata::tdtbox::draw_srequest(Tenderer& rend, const SGBitSet* pslist) const
+{
+   rend.box(_pdata, pslist);
+}
+
 void laydata::tdtbox::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    glBegin(GL_LINE_LOOP);
@@ -796,6 +801,11 @@ void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointli
 void laydata::tdtpoly::draw_request(Tenderer& rend) const
 {
    rend.poly(_pdata, _psize);
+}
+
+void laydata::tdtpoly::draw_srequest(Tenderer& rend, const SGBitSet* pslist) const
+{
+   rend.poly(_pdata, _psize, pslist);
 }
 
 void laydata::tdtpoly::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -1297,6 +1307,11 @@ void laydata::tdtwire::draw_request(Tenderer& rend) const
    rend.wire(_pdata, _psize, _width);
 }
 
+void laydata::tdtwire::draw_srequest(Tenderer& rend, const SGBitSet* pslist) const
+{
+   rend.wire(_pdata, _psize, _width, pslist);
+}
+
 void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    _dbl_word num_points = ptlist.size();
@@ -1753,13 +1768,19 @@ void laydata::tdtcellref::draw_request(Tenderer& rend) const
    ptlist.push_back(TP(obox.p2().x(), obox.p1().y()) * newtrans);
    ptlist.push_back(obox.p2() * newtrans);
    ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);*/
-   rend.pushCTM(newtrans);
    // draw the cell mark ...
 //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    byte crchain = rend.popref(this);
+   rend.pushCTM(newtrans, crchain == 2);
    structure()->openGL_draw(rend, crchain == 2);
    rend.popCTM();
    if (crchain) rend.pushref(this);
+}
+
+void laydata::tdtcellref::draw_srequest(Tenderer& rend, const SGBitSet*) const
+{
+   //@TODO!
+   draw_request(rend);
 }
 
 void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -2039,7 +2060,7 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
 //   ptlist.push_back(TP(array_overlap.p1().x(), array_overlap.p2().y()) * newtrans);
 
    // We are going to draw something, so push the new translation matrix in the stack
-   rend.pushCTM(newtrans);
+   rend.pushCTM(newtrans, false); //@FIXME! Edit in place array of cells!
    int col_beg, col_end, row_beg, row_end;
    if (structure()->overlap().visible(rend.topCTM() * rend.ScrCTM()))
    {
@@ -2085,13 +2106,20 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          refCTM *= rend.topCTM();
          // ...draw the structure itself, not forgeting to push/pop the refCTM
-         rend.pushCTM(refCTM);
+         rend.pushCTM(refCTM, false); //@FIXME! Edit in place array of cells!
          structure()->openGL_draw(rend);
          rend.popCTM();
       }
    }
    rend.popCTM();
 }
+
+void laydata::tdtcellaref::draw_srequest(Tenderer& rend, const SGBitSet*) const
+{
+   //@TODO!
+   draw_request(rend);
+}
+
 
 void laydata::tdtcellaref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
@@ -2351,8 +2379,14 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
 
 void laydata::tdttext::draw_request(Tenderer& rend) const
 {
+   //@TODO!
 }
 
+void laydata::tdttext::draw_srequest(Tenderer& rend, const SGBitSet*) const
+{
+   //@TODO!
+   draw_request(rend);
+}
 
 void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {

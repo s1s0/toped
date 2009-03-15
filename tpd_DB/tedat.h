@@ -67,6 +67,8 @@ namespace laydata {
    //! Clean-up the calculated drawing objects
       virtual   void       openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const {ptlist.clear();}
       virtual   void       draw_request(Tenderer&) const = 0;
+   //! Draw the outlines of the selected objects
+      virtual   void       draw_srequest(Tenderer&, const SGBitSet*) const = 0;
    //! Draw the objects in motion during copy/move and similar operations
       virtual   void       motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const = 0;
    //! Print an object description on the toped console.
@@ -132,6 +134,7 @@ namespace laydata {
          void              openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
          void              openGL_drawsel(const pointlist&, const SGBitSet*) const;
          void              draw_request(Tenderer&) const;
+         void              draw_srequest(Tenderer&, const SGBitSet*) const;
          void              motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
 
          void              info(std::ostringstream&, real) const;
@@ -179,6 +182,7 @@ namespace laydata {
          void              openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
          void              openGL_drawsel(const pointlist&, const SGBitSet*) const;
          void              draw_request(Tenderer&) const;
+         void              draw_srequest(Tenderer&, const SGBitSet*) const;
          void              motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
 
          void              info(std::ostringstream&, real) const;
@@ -217,6 +221,7 @@ namespace laydata {
          void              openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
          void              openGL_drawsel(const pointlist&, const SGBitSet*) const;
          void              draw_request(Tenderer&) const;
+         void              draw_srequest(Tenderer&, const SGBitSet*) const;
          void              motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
 
          void              info(std::ostringstream&, real) const;
@@ -263,6 +268,7 @@ namespace laydata {
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
       virtual void         openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
       void                 draw_request(Tenderer&) const;
+      void                 draw_srequest(Tenderer&, const SGBitSet*) const;
       void                 motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
 
       void                 info(std::ostringstream&, real) const;
@@ -308,6 +314,7 @@ namespace laydata {
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
       void                 draw_request(Tenderer&) const;
+      void                 draw_srequest(Tenderer&, const SGBitSet*) const;
       void                 motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
 
       void                 info(std::ostringstream&, real) const;
@@ -340,6 +347,7 @@ namespace laydata {
       void                 openGL_drawsel(const pointlist&, const SGBitSet*) const;
       virtual   void       openGL_postclean(layprop::DrawProperties&, pointlist& ptlist) const;
       void                 draw_request(Tenderer&) const;
+      void                 draw_srequest(Tenderer&, const SGBitSet*) const;
       void                 motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
 
       void                 info(std::ostringstream&, real) const;
