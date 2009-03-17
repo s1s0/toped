@@ -266,8 +266,8 @@ TenderLine::TenderLine(TenderObj* obj, const SGBitSet* psel)
          _ldata[2*curpoint  ] = obj->cdata()[2*i  ];
          _ldata[2*curpoint+1] = obj->cdata()[2*i+1];
          curpoint++;
-         _ldata[2*curpoint  ] = obj->cdata()[2*(i+1)];
-         _ldata[2*curpoint+1] = obj->cdata()[2*(i+1)+1];
+         _ldata[2*curpoint  ] = obj->cdata()[2*((i+1)%allpoints)  ];
+         _ldata[2*curpoint+1] = obj->cdata()[2*((i+1)%allpoints)+1];
          curpoint++;
       }
       assert(curpoint == _lsize);
@@ -294,14 +294,14 @@ TenderLine::TenderLine(TenderPoly* obj, const SGBitSet* psel)
       word curpoint = 0;
       for (unsigned i = 0; i < allpoints; i++)
          if (psel->check(i) && psel->check((i+1)%allpoints))
-      {
-         _ldata[2*curpoint  ] = obj->cdata()[2*i  ];
-         _ldata[2*curpoint+1] = obj->cdata()[2*i+1];
-         curpoint++;
-         _ldata[2*curpoint  ] = obj->cdata()[2*(i+1)];
-         _ldata[2*curpoint+1] = obj->cdata()[2*(i+1)+1];
-         curpoint++;
-      }
+         {
+            _ldata[2*curpoint  ] = obj->cdata()[2*i  ];
+            _ldata[2*curpoint+1] = obj->cdata()[2*i+1];
+            curpoint++;
+            _ldata[2*curpoint  ] = obj->cdata()[2*((i+1)%allpoints)  ];
+            _ldata[2*curpoint+1] = obj->cdata()[2*((i+1)%allpoints)+1];
+            curpoint++;
+         }
       assert(curpoint == _lsize);
    }
    else
@@ -315,9 +315,46 @@ TenderLine::TenderLine(TenderWire* obj, const SGBitSet* psel)
 {
    _partial = (NULL != psel);
    if (_partial)
-   {
-      //@TODO! part selected wire
-      assert(false);
+   { // shape is partially selected
+      // get the number of selected segments first
+      _lsize = 0;
+      word allpoints = obj->lsize();
+      for (unsigned i = 0; i < allpoints - 1; i++)
+         if (psel->check(i) && psel->check(i+1)) _lsize +=2;
+      if (psel->check(0)            ) _lsize +=2;
+      if (psel->check(allpoints-1)  ) _lsize +=2;
+      // now copy the segment points
+      _ldata = DEBUG_NEW int4b [2*_lsize];
+      word curpoint = 0;
+      for (unsigned i = 0; i < allpoints - 1; i++)
+         if (psel->check(i) && psel->check((i+1)%allpoints))
+         {
+            _ldata[2*curpoint  ] = obj->ldata()[2*i  ];
+            _ldata[2*curpoint+1] = obj->ldata()[2*i+1];
+            curpoint++;
+            _ldata[2*curpoint  ] = obj->ldata()[2*(i+1)  ];
+            _ldata[2*curpoint+1] = obj->ldata()[2*(i+1)+1];
+            curpoint++;
+         }
+      if (psel->check(0)            )
+      {
+         _ldata[2*curpoint  ] = obj->cdata()[0];
+         _ldata[2*curpoint+1] = obj->cdata()[1];
+         curpoint++;
+         _ldata[2*curpoint  ] = obj->cdata()[4*allpoints - 2];
+         _ldata[2*curpoint+1] = obj->cdata()[4*allpoints - 1];
+         curpoint++;
+      }
+      if (psel->check(allpoints-1)  )
+      {
+         _ldata[2*curpoint  ] = obj->cdata()[2*allpoints - 2];
+         _ldata[2*curpoint+1] = obj->cdata()[2*allpoints - 1];
+         curpoint++;
+         _ldata[2*curpoint  ] = obj->cdata()[2*allpoints    ];
+         _ldata[2*curpoint+1] = obj->cdata()[2*allpoints + 1];
+         curpoint++;
+      }
+      assert(curpoint == _lsize);
    }
    else
    {
@@ -450,6 +487,31 @@ void TenderTVB::draw_lines()
 
 void TenderTVB::draw_lsegments()
 {
+   if  (0 == _num_ls) return;
+   unsigned long arr_size = 2 * _num_ls_points;
+   int* point_array = DEBUG_NEW int[arr_size];
+   GLsizei* size_array = DEBUG_NEW int[_num_ls];
+   GLsizei* first_array = DEBUG_NEW int[_num_ls];
+   unsigned long pntindx = 0;
+   unsigned      szindx  = 0;
+
+   for (SliceLines::const_iterator CSH = _ls_data.begin(); CSH != _ls_data.end(); CSH++)
+   {
+      unsigned clsize = (*CSH)->lsize();
+      assert(clsize);
+      first_array[szindx] = pntindx/2;
+      size_array[szindx++] = clsize;
+      memcpy(&(point_array[pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
+      pntindx += 2 * clsize;
+   }
+   assert(pntindx == arr_size);
+   assert(szindx == _num_ls);
+   glVertexPointer(2, GL_INT, 0, point_array);
+   glMultiDrawArrays(GL_LINES, first_array, size_array, szindx);
+
+   delete [] point_array;
+   delete [] size_array;
+   delete [] first_array;
 }
 
 //=============================================================================
