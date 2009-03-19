@@ -87,6 +87,11 @@ class TenderObj {
       unsigned          _csize;
 };
 
+class TenderRefBox : public TenderObj {
+   public:
+                        TenderRefBox(int4b* pdata) : TenderObj(pdata, 4) {}
+      virtual          ~TenderRefBox() {delete [] _cdata;}
+};
 /**
 *   holds polygon representations - the contour will be drawn using the
 *   inherited _cdata holder. The chains of point indexes resulting from the
@@ -184,6 +189,7 @@ class TenderTV {
       TenderObj*        box  (int4b*);
       TenderPoly*       poly (int4b*, unsigned);
       TenderWire*       wire (int4b*, unsigned, word, bool);
+      TenderRefBox*     refbox(DBbox&);
       const CTM*        tmatrix()            {return &_tmatrix;}
       void              draw_contours();
       void              draw_lines();
@@ -221,7 +227,7 @@ class Tenderer {
       void              Grid( const real, const std::string );
       void              setLayer(word);
       void              setSdataContainer(word);
-      void              pushCTM(CTM&, bool);
+//      void              pushCTM(CTM&, bool);
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box  (int4b* pdata)                    {_cslice->box(pdata);}
       void              box  (int4b*, const SGBitSet*);
@@ -229,6 +235,7 @@ class Tenderer {
       void              poly (int4b*, unsigned, const SGBitSet*);
       void              wire (int4b*, unsigned, word);
       void              wire (int4b*, unsigned, word, const SGBitSet*);
+      void              refbox(DBbox& pbox)                    {_cslice->refbox(pbox);}
       void              draw();
       // temporary!
       void              initCTMstack()                {        _drawprop->initCTMstack()        ;}

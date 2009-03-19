@@ -575,6 +575,20 @@ TenderWire* TenderTV::wire (int4b* pdata, unsigned psize, word width, bool cente
    return cobj;
 }
 
+TenderRefBox* TenderTV::refbox (DBbox& rbox)
+{
+   int4b* refb = DEBUG_NEW int4b[8];
+   refb[0] = rbox.p1().x(); refb[1] = rbox.p1().y();
+   refb[2] = rbox.p2().x(); refb[3] = rbox.p1().y();
+   refb[4] = rbox.p2().x(); refb[5] = rbox.p2().y();
+   refb[6] = rbox.p1().x(); refb[7] = rbox.p2().y();
+   TenderRefBox* cobj = DEBUG_NEW TenderRefBox(refb);
+   _contour_data.push_back(cobj);
+   _num_contour_points += 4;
+   _num_contours++;
+   return cobj;
+}
+
 void TenderTV::draw_contours()
 {
    if  (0 == _num_contours) return;
@@ -806,7 +820,6 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
 
 void Tenderer::setLayer(word layer)
 {
-   if (0==layer) return; // @FIXME!, temporaray, until cell overlap is fixed
    TenderLay* laydata = NULL;
    if (_data.end() != _data.find(layer))
    {
@@ -824,18 +837,17 @@ void Tenderer::setLayer(word layer)
 
 void Tenderer::setSdataContainer(word layer)
 {
-   if (0==layer) return; // @FIXME!, temporaray, until cell overlap is fixed
    _sslice = DEBUG_NEW TenderTVB(_ctrans);
    _sdata[layer] = _sslice;
 }
 
-void Tenderer::pushCTM(CTM& trans, bool active)
-{
-   _drawprop->pushCTM(trans);
-   _ctrans = trans;
-   if (active)
-      _atrans = trans;
-}
+// void Tenderer::pushCTM(CTM& trans, bool active)
+// {
+//    _drawprop->pushCTM(trans);
+//    _ctrans = trans;
+//    if (active)
+//       _atrans = trans;
+// }
 
 void Tenderer::box  (int4b* pdata, const SGBitSet* psel)
 {

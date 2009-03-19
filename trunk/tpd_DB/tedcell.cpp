@@ -394,7 +394,7 @@ void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
    {
       word curlayno = lay->first;
       if (rend.layerHidden(curlayno)) continue;
-      else rend.setLayer(curlayno);
+      else if (0 != curlayno) rend.setLayer(curlayno);
       // fancy like this (dlist iterator) , besause a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;

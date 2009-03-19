@@ -1750,28 +1750,13 @@ void laydata::tdtcellref::draw_request(Tenderer& rend) const
    // calculate the current translation matrix
    CTM newtrans = _translation * rend.topCTM();
    // get overlapping box of the structure ...
-   DBbox obox(DEFAULT_ZOOM_BOX);
-   if (structure())
-      obox = structure()->overlap();
-   // ... translate it to the current coordinates ...
-   DBbox areal = obox.overlap(newtrans);
-   // check that the cell (or part of it) is in the visual window
-   DBbox clip = rend.clipRegion();
-   if (clip.cliparea(areal) == 0) return;
-   // check that the cell area is bigger that the MIN_VISUAL_AREA
-   if (!areal.visible(rend.ScrCTM())) return;
-   // If we get here - means that the cell (or part of it) is visible
-/* @FIXME -> problem is that the cell overlap is dynamically calculated
-//          It must be a variable to fit with the renderer data concept!
-   ptlist.reserve(4);
-   ptlist.push_back(obox.p1() * newtrans);
-   ptlist.push_back(TP(obox.p2().x(), obox.p1().y()) * newtrans);
-   ptlist.push_back(obox.p2() * newtrans);
-   ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);*/
+   DBbox obox(structure()->overlap());
    // draw the cell mark ...
 //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    byte crchain = rend.popref(this);
    rend.pushCTM(newtrans, crchain == 2);
+   rend.setLayer(0);
+   rend.refbox(obox);
    structure()->openGL_draw(rend, crchain == 2);
    rend.popCTM();
    if (crchain) rend.pushref(this);
@@ -1944,6 +1929,7 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
 
 DBbox laydata::tdtcellref::overlap() const
 {
+   assert(NULL != structure());
    return structure()->overlap().overlap(_translation);
 }
 
@@ -2051,13 +2037,6 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
 
    // If we get here - means that the array (or part of it) is visible
    // draw the cell mark ...
-//   drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::array_mark);
-   // ... and the overlapping box
-//   ptlist.reserve(6); //0:3 - the overlapping box; 4 - start/stop columns; 5 - start/stop rows
-//   ptlist.push_back(               array_overlap.p1()                  * newtrans);
-//   ptlist.push_back(TP(array_overlap.p2().x(), array_overlap.p1().y()) * newtrans);
-//   ptlist.push_back(               array_overlap.p2()                  * newtrans);
-//   ptlist.push_back(TP(array_overlap.p1().x(), array_overlap.p2().y()) * newtrans);
 
    // We are going to draw something, so push the new translation matrix in the stack
    rend.pushCTM(newtrans, false); //@FIXME! Edit in place array of cells!
@@ -2097,6 +2076,8 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
    }
 
    // finally - start drawing
+   rend.setLayer(0);
+   rend.refbox(array_overlap);
    for (int i = col_beg; i < col_end; i++)
    {// start/stop rows
       for(int j = row_beg; j < row_end; j++)

@@ -637,8 +637,7 @@ void laydata::quadTree::openGL_draw(Tenderer& rend, const dataList* slst) const
       }
    }
    else
-   {
-      // if there are no selected shapes
+   {  // if there are no selected shapes
       while(wdt)
       {
          wdt->draw_request(rend);
