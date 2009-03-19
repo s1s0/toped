@@ -841,13 +841,13 @@ void Tenderer::setSdataContainer(word layer)
    _sdata[layer] = _sslice;
 }
 
-// void Tenderer::pushCTM(CTM& trans, bool active)
-// {
-//    _drawprop->pushCTM(trans);
-//    _ctrans = trans;
-//    if (active)
-//       _atrans = trans;
-// }
+void Tenderer::pushCTM(CTM& trans, bool active)
+{
+   _drawprop->pushCTM(trans);
+   _ctrans = trans;
+   if (active)
+      _atrans = trans;
+}
 
 void Tenderer::box  (int4b* pdata, const SGBitSet* psel)
 {
