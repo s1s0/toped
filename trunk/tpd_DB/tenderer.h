@@ -227,7 +227,7 @@ class Tenderer {
       void              Grid( const real, const std::string );
       void              setLayer(word);
       void              setSdataContainer(word);
-      void              pushCTM(CTM&, bool);
+      void              pushCTM(const CTM&, bool);
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box  (int4b* pdata)                    {_cslice->box(pdata);}
       void              box  (int4b*, const SGBitSet*);
