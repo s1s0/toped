@@ -1747,14 +1747,12 @@ laydata::tdtdefaultcell* laydata::tdtcellref::visible(const DBbox& clip, const C
 
 void laydata::tdtcellref::draw_request(Tenderer& rend) const
 {
-   // calculate the current translation matrix
-   CTM newtrans = _translation * rend.topCTM();
    // get overlapping box of the structure ...
    DBbox obox(structure()->overlap());
    // draw the cell mark ...
 //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    byte crchain = rend.popref(this);
-   rend.pushCTM(newtrans, crchain == 2);
+   rend.pushCTM(_translation, crchain == 2);
    rend.setLayer(0);
    rend.refbox(obox);
    structure()->openGL_draw(rend, crchain == 2);
@@ -2039,7 +2037,7 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
    // draw the cell mark ...
 
    // We are going to draw something, so push the new translation matrix in the stack
-   rend.pushCTM(newtrans, false); //@FIXME! Edit in place array of cells!
+   rend.pushCTM(_translation, false); //@FIXME! Edit in place array of cells!
    int col_beg, col_end, row_beg, row_end;
    if (structure()->overlap().visible(rend.topCTM() * rend.ScrCTM()))
    {
@@ -2085,7 +2083,7 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
          // for each of the visual array figures...
          // ... get the translation matrix ...
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
-         refCTM *= rend.topCTM();
+//         refCTM *= rend.topCTM();
          // ...draw the structure itself, not forgeting to push/pop the refCTM
          rend.pushCTM(refCTM, false); //@FIXME! Edit in place array of cells!
          structure()->openGL_draw(rend);

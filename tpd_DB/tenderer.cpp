@@ -841,10 +841,10 @@ void Tenderer::setSdataContainer(word layer)
    _sdata[layer] = _sslice;
 }
 
-void Tenderer::pushCTM(CTM& trans, bool active)
+void Tenderer::pushCTM(const CTM& trans, bool active)
 {
-   _drawprop->pushCTM(trans);
-   _ctrans = trans;
+   _ctrans = trans * _drawprop->topCTM();
+   _drawprop->pushCTM(_ctrans);
    if (active)
       _atrans = trans;
 }
