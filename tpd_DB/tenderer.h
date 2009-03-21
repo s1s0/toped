@@ -159,9 +159,24 @@ typedef std::list<TenderObj*>  SliceObjects;
 typedef std::list<TenderPoly*> SlicePolygons;
 typedef std::list<TenderLine*> SliceLines;
 
+/**
+ *  Reference boxes
+ */
+class TenderRB {
+   public:
+                        TenderRB(const CTM&, const DBbox&);
+      void              draw();
+   private:
+      CTM               _tmatrix;
+      DBbox             _obox;
+};
+
+/**
+ *  Translation View of the selected shapes
+ */
 class TenderTVB {
    public:
-                        TenderTVB(CTM& translation);
+                        TenderTVB();
       void              add(TenderObj*, const SGBitSet*);
       void              add(TenderPoly*, const SGBitSet*);
       void              add(TenderWire*, const SGBitSet*);
@@ -219,6 +234,7 @@ class TenderTV {
 typedef std::list<TenderTV*> TenderLay;
 typedef std::map<word, TenderLay*> DataLay;
 typedef std::map<word, TenderTVB*> DataSel;
+typedef std::list<TenderRB*> TenderRBL;
 
 class Tenderer {
    public:
@@ -227,7 +243,7 @@ class Tenderer {
       void              Grid( const real, const std::string );
       void              setLayer(word);
       void              setSdataContainer(word);
-      void              pushCTM(const CTM&, bool);
+      void              pushCell(const CTM&, const DBbox&, bool);
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box  (int4b* pdata)                    {_cslice->box(pdata);}
       void              box  (int4b*, const SGBitSet*);
@@ -255,7 +271,8 @@ class Tenderer {
       DataLay           _data;      //!All data for drawing
       DataSel           _sdata;     //!Selected data - to be redrawn on top of the _data
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
-      TenderTVB*        _sslice;
+      TenderTVB*        _sslice;    //!Selected shapes in the active cell
+      TenderRBL         _oboxes;    //!All reference overlapping boxes
       CTM               _atrans;    //!The translation of the active cell
       CTM               _ctrans;    //!Working variable storing the current translation
 };
