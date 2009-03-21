@@ -1752,9 +1752,10 @@ void laydata::tdtcellref::draw_request(Tenderer& rend) const
    // draw the cell mark ...
 //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    byte crchain = rend.popref(this);
-   rend.pushCTM(_translation, crchain == 2);
-   rend.setLayer(0);
-   rend.refbox(obox);
+   rend.pushCell(_translation, obox, crchain == 2);
+//   rend.pushCTM(_translation, crchain == 2);
+//   rend.setLayer(0);
+//   rend.refbox(obox);
    structure()->openGL_draw(rend, crchain == 2);
    rend.popCTM();
    if (crchain) rend.pushref(this);
@@ -2037,9 +2038,11 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
    // draw the cell mark ...
 
    // We are going to draw something, so push the new translation matrix in the stack
-   rend.pushCTM(_translation, false); //@FIXME! Edit in place array of cells!
+//   rend.pushCTM(_translation, false); //@FIXME! Edit in place array of cells!
+   rend.pushCell(_translation, array_overlap, false);
+   DBbox obox(structure()->overlap());
    int col_beg, col_end, row_beg, row_end;
-   if (structure()->overlap().visible(rend.topCTM() * rend.ScrCTM()))
+   if (obox.visible(rend.topCTM() * rend.ScrCTM()))
    {
       // a single structure is big enough to be visible
       // now calculate the start/stop values of the visible references in the matrix
@@ -2085,7 +2088,8 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
 //         refCTM *= rend.topCTM();
          // ...draw the structure itself, not forgeting to push/pop the refCTM
-         rend.pushCTM(refCTM, false); //@FIXME! Edit in place array of cells!
+//         rend.pushCTM(refCTM, false); //@FIXME! Edit in place array of cells!
+         rend.pushCell(refCTM, obox, false);
          structure()->openGL_draw(rend);
          rend.popCTM();
       }

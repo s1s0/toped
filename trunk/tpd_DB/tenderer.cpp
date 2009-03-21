@@ -370,8 +370,26 @@ TenderLine::~TenderLine()
 }
 
 //=============================================================================
+// class TenderRB
+TenderRB::TenderRB(const CTM& tmatrix, const DBbox& obox) : _tmatrix (tmatrix),
+                   _obox(obox)
+{}
+
+void TenderRB::draw()
+{
+   glPushMatrix();
+   real openGLmatrix[16];
+   _tmatrix.oglForm(openGLmatrix);
+   glMultMatrixd(openGLmatrix);
+   //
+   glRecti(_obox.p1().x(), _obox.p1().y(), _obox.p2().x(), _obox.p2().y());
+   //
+   glPopMatrix();
+}
+
+//=============================================================================
 // class TenderTVB
-TenderTVB::TenderTVB(CTM& translation) :
+TenderTVB::TenderTVB() :
    _num_ln_points(0u), _num_ll_points(0u),_num_ls_points(0u),
    _num_ln(0), _num_ll(0), _num_ls(0)
 {}
@@ -820,6 +838,9 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
 
 void Tenderer::setLayer(word layer)
 {
+   // Reference layer is processed differently (pushCell), so make sure
+   // that we haven't got here with layer 0 by accident
+   assert(layer);
    TenderLay* laydata = NULL;
    if (_data.end() != _data.find(layer))
    {
@@ -837,13 +858,14 @@ void Tenderer::setLayer(word layer)
 
 void Tenderer::setSdataContainer(word layer)
 {
-   _sslice = DEBUG_NEW TenderTVB(_ctrans);
+   _sslice = DEBUG_NEW TenderTVB();
    _sdata[layer] = _sslice;
 }
 
-void Tenderer::pushCTM(const CTM& trans, bool active)
+void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active)
 {
    _ctrans = trans * _drawprop->topCTM();
+   _oboxes.push_back(DEBUG_NEW TenderRB(_ctrans, overlap));
    _drawprop->pushCTM(_ctrans);
    if (active)
       _atrans = trans;
@@ -915,6 +937,7 @@ void Tenderer::Grid(const real step, const std::string color)
 void Tenderer::draw()
 {
    glEnableClientState(GL_VERTEX_ARRAY);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
       word curlayno = CLAY->first;
@@ -939,7 +962,15 @@ void Tenderer::draw()
          glPopMatrix();
       }
    }
-   // and now the selected objects
+   // now the overlapping boxes of the cell references
+   _drawprop->setCurrentColor(0);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//   glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
+   for (TenderRBL::const_iterator CBOX = _oboxes.begin(); CBOX != _oboxes.end(); CBOX++)
+   {
+      (*CBOX)->draw();
+   }
+   // and finally -  the selected objects
    glPushMatrix();
    real openGLmatrix[16];
    _atrans.oglForm(openGLmatrix);
