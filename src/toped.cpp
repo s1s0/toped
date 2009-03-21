@@ -43,8 +43,6 @@
 #include "../ui/blue_lamp.xpm"
 #include "../ui/toped32x32.xpm"
 
-	//???Remove after finishing
-#include "../tpd_ifaces/calbr_reader.h"
 
 #ifndef WIN32
    #include "../ui/toped16x16.xpm"
@@ -327,6 +325,8 @@ END_EVENT_TABLE()
 
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
+									 	//???Remove after finishing
+	 ,_DRCFile("D:/drc/test.drc.results")
 {
    SetIcon(wxICON(toped16x16));
    initView();
@@ -340,9 +340,8 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initMenuBar();
    wxToolTip::Enable(true);
    wxToolTip::SetDelay(3000);
+		
 
-	//???Remove after finishing
-	Calbr::CalbrFile f("D:/drc/test.drc.results");
 }
 
 void tui::TopedFrame::OnClose(wxCloseEvent& event)
@@ -639,7 +638,9 @@ void tui::TopedFrame::initMenuBar() {
 //   _resourceCenter->appendMenuSeparator("Other");
 
    _resourceCenter->appendMenu("&Other/Get Snapshot", "", &tui::TopedFrame::OnTDTSnapshot, "Get a snapshot of the canvas on TGA file");
-   //   _resourceCenter->appendMenuSeparator("Other");
+   _resourceCenter->appendMenu("&Other/Load DRC results", "", &tui::TopedFrame::OnDRCResults, "Load DRC results");
+
+	//   _resourceCenter->appendMenuSeparator("Other");
 
    _resourceCenter->appendMenu("&Help/Report Video", "", &tui::TopedFrame::OnCheckHW, "Display OpenGL & video driver information" );
    _resourceCenter->appendMenuSeparator("Help");
@@ -2108,6 +2109,11 @@ void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
 	std::string toolName(str.mb_str(wxConvUTF8));
 
 	_resourceCenter->deleteTool(toolBarName, toolName);
+}
+
+void	tui::TopedFrame::OnDRCResults(wxCommandEvent& evt)
+{
+	_DRCFile.ShowResults();
 }
 
 void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))

@@ -31,6 +31,17 @@
 #include "tpdph.h"
 #include "calbr_reader.h"
 #include "../tpd_common/outbox.h"
+#include "../tpd_parser/ted_prompt.h"
+
+extern console::ted_cmd*	Console;
+
+void Calbr::drcPolygon::addCoord(long x, long y)
+{
+	Calbr::coord crd;
+	crd.x = x;
+	crd.y = y;
+	_coords.push_back(crd);
+}
 
 Calbr::drcRuleCheck::drcRuleCheck(const std::string &name)
 		:_ruleCheckName(name)
@@ -116,6 +127,7 @@ bool Calbr::CalbrFile::parse()
 
 	for(long i= 0; i < resCount; i++)
 	{
+		drcPolygon poly;
 		if (fgets(tempStr, 512, _calbrFile)==NULL) return false;
 		char type;
 		long ordinal;
@@ -124,15 +136,61 @@ bool Calbr::CalbrFile::parse()
 		switch(type)
 		{
 			case 'p'	: 
+
 				for(short j =0; j< numberOfElem; j++)
 				{
+					long x, y;
+					if (fgets(tempStr, 512, _calbrFile)==NULL) return false;
+					sscanf( tempStr, "%ld %ld", &x, &y);
+					poly.addCoord(x, y);
 				}
+				ruleCheck->addPolygon(poly);
 				break;
 						
 			case 'e'	: break;
 			default	: return false;
 		}
 	}
+	_RuleChecks.push_back(ruleCheck);
 	return true;
 
 }
+
+void	Calbr::CalbrFile::ShowResults()
+{
+	std::vector <Calbr::drcRuleCheck*>::const_iterator it;
+	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
+	{
+		std::vector <Calbr::drcPolygon>::iterator it2;
+		std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
+		for(it2 = polys->begin(); it2 < polys->end(); ++it2)
+		{
+			wxString ost;
+			ost << wxT("addpoly({");
+			std::vector <Calbr::coord>::iterator it3;
+			std::vector <Calbr::coord> *poly1 = (*it2).coords();
+			for(it3 = poly1->begin(); it3 < poly1->end(); ++it3)
+			{
+				if (it3 != poly1->begin())
+				{
+					ost<<wxT(",");
+				}
+				long x = (*it3).x;
+				long y = (*it3).y;
+				ost << wxT("{") << x << wxT(",") << y << wxT("}");;
+
+			}
+			ost<<wxT("});");
+			Console->parseCommand(ost);
+		}
+	}
+   //ost << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
+
+
+}
+
+void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)
+{
+	_polygons.push_back(poly);
+}
+

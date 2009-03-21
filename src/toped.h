@@ -38,6 +38,9 @@
 #include "resourcecenter.h"
 #include "../tpd_DB/browsers.h"
 
+//???Remove after finishing
+#include "../tpd_ifaces/calbr_reader.h"
+
 namespace tui {
    //-----------------------------------------------------------------------------
    class CanvasStatus : public wxPanel {
@@ -260,7 +263,12 @@ namespace tui {
 		void		OnToolBarDefine	(wxCommandEvent& evt);
 		void		OnToolBarAddItem	(wxCommandEvent& evt);
 		void		OnToolBarDeleteItem(wxCommandEvent& evt);
-      DECLARE_EVENT_TABLE();
+		void		OnDRCResults(wxCommandEvent& evt);
+
+		//???Remove after finishing
+		Calbr::CalbrFile _DRCFile;
+      
+		DECLARE_EVENT_TABLE();
    };
 
 }
