@@ -36,9 +36,18 @@
 namespace Calbr
 {
 
-struct cood
+struct coord
 {
 	long x, y;
+};
+
+class drcPolygon
+{
+public:
+	void addCoord(long x, long y);
+	std::vector <Calbr::coord>* coords() {return &_coords;};
+private:
+	std::vector <coord>	_coords;
 };
 
 class drcRuleCheck
@@ -50,10 +59,13 @@ public:
 	std::string timeStamp()			const {return _timeStamp;}
 	long			curResCount()		const {return  _curResCount;}
 	long			origResCount()		const {return _origResCount;}
+	std::vector <Calbr::drcPolygon>* polygons() {return &_polygons;};
 	void			setTimeStamp(const std::string &timeStamp);
 	void			setCurResCount(int curResCount);
 	void			setOrigResCount(int origResCount);
 	void			addDescrString(const std::string & str);
+	void			addPolygon(const Calbr::drcPolygon &poly);
+	//void			addEdge(const Calbr::drcPolygon &poly);
 private:
 	long			_curResCount; //current result count
 	long			_origResCount;//original result count
@@ -61,6 +73,9 @@ private:
 	std::string _timeStamp;
 	std::string _header;
 	std::vector <std::string> _descrStrings;
+	std::vector <Calbr::drcPolygon> _polygons;
+	std::vector <Calbr::coord> _edges;
+
 	//std::vector <> _descrStrings;
 
 };
@@ -70,6 +85,7 @@ class CalbrFile
 public:
 	CalbrFile(const std::string &fileName);
 	~CalbrFile();
+	void	ShowResults();
 private:
 	FILE*          _calbrFile;
 	std::string    _fileName;
@@ -78,6 +94,7 @@ private:
 
 	std::ifstream	_inFile;
 	bool				parse();
+	std::vector <Calbr::drcRuleCheck*> _RuleChecks;
 
 };
 }
