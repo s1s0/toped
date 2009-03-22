@@ -41,6 +41,11 @@ struct coord
 	long x, y;
 };
 
+struct edge
+{
+	long x1, y1, x2, y2;
+};
+
 class drcPolygon
 {
 public:
@@ -60,12 +65,13 @@ public:
 	long			curResCount()		const {return  _curResCount;}
 	long			origResCount()		const {return _origResCount;}
 	std::vector <Calbr::drcPolygon>* polygons() {return &_polygons;};
+	std::vector <Calbr::edge>* edges() {return &_edges;};
 	void			setTimeStamp(const std::string &timeStamp);
 	void			setCurResCount(int curResCount);
 	void			setOrigResCount(int origResCount);
 	void			addDescrString(const std::string & str);
 	void			addPolygon(const Calbr::drcPolygon &poly);
-	//void			addEdge(const Calbr::drcPolygon &poly);
+	void			addEdge(const Calbr::edge &theEdge);
 private:
 	long			_curResCount; //current result count
 	long			_origResCount;//original result count
@@ -74,7 +80,7 @@ private:
 	std::string _header;
 	std::vector <std::string> _descrStrings;
 	std::vector <Calbr::drcPolygon> _polygons;
-	std::vector <Calbr::coord> _edges;
+	std::vector <Calbr::edge> _edges;
 
 	//std::vector <> _descrStrings;
 
