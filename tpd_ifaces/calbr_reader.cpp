@@ -147,7 +147,17 @@ bool Calbr::CalbrFile::parse()
 				ruleCheck->addPolygon(poly);
 				break;
 						
-			case 'e'	: break;
+			case 'e'	: 
+				long x1, y1, x2, y2;
+				if (fgets(tempStr, 512, _calbrFile)==NULL) return false;
+				sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2);
+				Calbr::edge theEdge;
+				theEdge.x1 = x1;
+				theEdge.y1 = y1;
+				theEdge.x2 = x2;
+				theEdge.y2 = y2;
+				ruleCheck->addEdge(theEdge);
+				break;
 			default	: return false;
 		}
 	}
@@ -183,14 +193,31 @@ void	Calbr::CalbrFile::ShowResults()
 			ost<<wxT("});");
 			Console->parseCommand(ost);
 		}
+		std::vector <Calbr::edge>::iterator it2edge;
+		std::vector <Calbr::edge> *edges = (*it)->edges();
+		for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
+		{
+			wxString ost;
+			ost << wxT("addpoly({");
+			long x1 = (*it2edge).x1;
+			long y1 = (*it2edge).y1;
+			long x2 = (*it2edge).x2;
+			long y2 = (*it2edge).y2;
+			ost << x1 << wxT(",") << y1 << wxT(",") << x2 << wxT(",") << y2;
+			ost<<wxT("}, 0.1)");
+			Console->parseCommand(ost);
+		}
 	}
-   //ost << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
-
 
 }
 
 void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)
 {
 	_polygons.push_back(poly);
+}
+
+void Calbr::drcRuleCheck::addEdge(const Calbr::edge &theEdge)
+{
+	_edges.push_back(theEdge);
 }
 
