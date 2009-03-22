@@ -111,8 +111,8 @@ namespace laydata {
       virtual             ~tdtdata(){}; 
       virtual word         ltype() const = 0;
    protected:
-      virtual void        select_points(DBbox&, SGBitSet&) = 0;
-      virtual void        unselect_points(DBbox&, SGBitSet&) = 0;
+      virtual void         select_points(DBbox&, SGBitSet&) = 0;
+      virtual void         unselect_points(DBbox&, SGBitSet&) = 0;
       SH_STATUS            _status;
    //! A pointer to the next tdtdata object
       tdtdata*             _next;
@@ -287,7 +287,6 @@ namespace laydata {
       pointlist            shape2poly() const {return pointlist();/*return empty list*/}
       virtual ArrayProperties arrayprops() const {return ArrayProperties();}
       virtual word         ltype() const {return _lmref;}
-      tdtdefaultcell*      visible(const DBbox&, const CTM&, const CTM&) const;
    protected:
       void                 select_points(DBbox&, SGBitSet&) {return;}
       void                 unselect_points(DBbox&, SGBitSet&) {return;}
