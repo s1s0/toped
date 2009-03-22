@@ -29,6 +29,7 @@
 #define TENDERER_H
 
 #include <GL/glew.h>
+#include <sys/time.h>
 #include "drawprop.h"
 
 typedef std::list<word> TeselVertices;
@@ -277,5 +278,14 @@ class Tenderer {
       CTM               _ctrans;    //!Working variable storing the current translation
 };
 
+
+class HiResTimer {
+   public:
+      HiResTimer(){gettimeofday(&_start_time, NULL);}
+      void           report(char*);
+   private:
+      timeval        _start_time;
+      timeval        _end_time;
+};
 
 #endif //TENDERER_H

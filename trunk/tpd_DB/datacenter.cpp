@@ -1059,8 +1059,9 @@ void DataCenter::mouseRotate()
    if (_TEDLIB()) _TEDLIB()->mouseRotate();
 }
 
-void DataCenter::openGL_draw(const CTM& layCTM) {
-   if (_TEDLIB()) 
+void DataCenter::openGL_draw(const CTM& layCTM)
+{
+   if (_TEDLIB())
    {
       // Don't block the drawing if the databases are
       // locked. This will block all redraw activities including UI
@@ -1084,9 +1085,11 @@ void DataCenter::openGL_draw(const CTM& layCTM) {
       }
       else
       {
+         HiResTimer rendTimer;
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(_properties.drawprop());
+         rendTimer.report("Total elapsed rendering time");
          VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
@@ -1127,11 +1130,14 @@ void DataCenter::openGL_render(const CTM& layCTM) {
       }
       else
       {
+         HiResTimer rendTimer;
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(renderer);
+         rendTimer.report("Time elapsed for data traversing and processing");
          renderer.draw();
-         assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
+         rendTimer.report("                   Total elapsed rendering time");
+         VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
       PROPLock.Unlock();
@@ -1423,4 +1429,3 @@ void initDBLib(const std::string &localDir, const std::string &globalDir)
 {
    DATC = DEBUG_NEW DataCenter(localDir, globalDir);
 }
-

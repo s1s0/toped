@@ -625,6 +625,16 @@ void TenderTV::draw_contours()
    delete [] first_array;
 }
 
+// void TenderTV::draw_contours()
+// {
+//    if  (0 == _num_contours) return;
+//    for (SliceObjects::const_iterator CSH = _contour_data.begin(); CSH != _contour_data.end(); CSH++)
+//    { // shapes in the current translation (layer within the cell)
+//       glVertexPointer(2, GL_INT, 0, (*CSH)->cdata());
+//       glDrawArrays(GL_LINE_LOOP, 0 ,(*CSH)->csize());
+//    }
+// }
+
 void TenderTV::draw_lines()
 {
    if  (0 == _num_lines) return;
@@ -987,4 +997,21 @@ void Tenderer::draw()
    glPopMatrix();
 glDisableClientState(GL_VERTEX_ARRAY);
 
+}
+
+void HiResTimer::report(char* message)
+{
+   gettimeofday(&_end_time, NULL);
+   timeval result;
+   result.tv_sec = _end_time.tv_sec - _start_time.tv_sec;
+   result.tv_usec = _end_time.tv_usec - _start_time.tv_usec;
+   if (result.tv_usec < 0)
+   {
+      result.tv_sec -= 1;
+      result.tv_usec += 1000000;
+   }
+
+   char time_message[256];
+   sprintf (time_message, "%s:   %i sec. %06i msec.",message, result.tv_sec, result.tv_usec);
+   tell_log(console::MT_INFO,time_message);
 }
