@@ -1729,33 +1729,17 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
 }
 
-laydata::tdtdefaultcell* laydata::tdtcellref::visible(const DBbox& clip, const CTM& topCTM, const CTM& scrCTM) const
-{
-   // calculate the current translation matrix
-   CTM newtrans = _translation * topCTM;
-   // get overlapping box of the structure ...
-   DBbox obox(DEFAULT_ZOOM_BOX);
-   if (structure())  obox = structure()->overlap();
-   // ... translate it to the current coordinates ...
-   DBbox areal = obox.overlap(newtrans);
-   // check that the cell (or part of it) is in the visual window
-   if (clip.cliparea(areal) == 0) return NULL;
-   // check that the cell area is bigger that the MIN_VISUAL_AREA
-   if (!areal.visible(scrCTM)) return NULL;
-   return _structure->second;
-}
-
 void laydata::tdtcellref::draw_request(Tenderer& rend) const
 {
    // get overlapping box of the structure ...
    DBbox obox(structure()->overlap());
+   // ... translate it to the current coordinates ...
+   DBbox areal = obox.overlap(_translation * rend.topCTM());
+   if (!areal.visible(rend.ScrCTM())) return;
    // draw the cell mark ...
 //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    byte crchain = rend.popref(this);
-   rend.pushCell(_translation, obox, crchain == 2);
-//   rend.pushCTM(_translation, crchain == 2);
-//   rend.setLayer(0);
-//   rend.refbox(obox);
+   rend.pushCell(_translation, obox, crchain == 2, sh_selected == _status);
    structure()->openGL_draw(rend, crchain == 2);
    rend.popCTM();
    if (crchain) rend.pushref(this);
@@ -1763,7 +1747,6 @@ void laydata::tdtcellref::draw_request(Tenderer& rend) const
 
 void laydata::tdtcellref::draw_srequest(Tenderer& rend, const SGBitSet*) const
 {
-   //@TODO!
    draw_request(rend);
 }
 
@@ -2039,7 +2022,7 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
 
    // We are going to draw something, so push the new translation matrix in the stack
 //   rend.pushCTM(_translation, false); //@FIXME! Edit in place array of cells!
-   rend.pushCell(_translation, array_overlap, false);
+   rend.pushCell(_translation, array_overlap, false, sh_selected == _status);
    DBbox obox(structure()->overlap());
    int col_beg, col_end, row_beg, row_end;
    if (obox.visible(rend.topCTM() * rend.ScrCTM()))
@@ -2077,8 +2060,6 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
    }
 
    // finally - start drawing
-   rend.setLayer(0);
-   rend.refbox(array_overlap);
    for (int i = col_beg; i < col_end; i++)
    {// start/stop rows
       for(int j = row_beg; j < row_end; j++)
@@ -2086,10 +2067,8 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
          // for each of the visual array figures...
          // ... get the translation matrix ...
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
-//         refCTM *= rend.topCTM();
-         // ...draw the structure itself, not forgeting to push/pop the refCTM
-//         rend.pushCTM(refCTM, false); //@FIXME! Edit in place array of cells!
-         rend.pushCell(refCTM, obox, false);
+         // ...draw the structure itself
+         rend.pushCell(refCTM, obox, false, false);//@FIXME! Edit in place array of cells!
          structure()->openGL_draw(rend);
          rend.popCTM();
       }
@@ -2099,7 +2078,6 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
 
 void laydata::tdtcellaref::draw_srequest(Tenderer& rend, const SGBitSet*) const
 {
-   //@TODO!
    draw_request(rend);
 }
 

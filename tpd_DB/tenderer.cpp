@@ -534,11 +534,11 @@ void TenderTVB::draw_lsegments()
 
 //=============================================================================
 // class TenderTV
-TenderTV::TenderTV(CTM& translation) : _tmatrix(translation),
+TenderTV::TenderTV(CTM& translation, bool filled) : _tmatrix(translation),
     _num_contour_points (0u), _num_line_points(0u), _num_polygon_points(0u),
     _num_contours(0),         _num_lines(0),        _num_fqus(0),
     _num_fqss(0),             _num_ftrs(0),         _num_ftfs(0),
-    _num_ftss(0)
+    _num_ftss(0),             _filled(filled)
 {}
 
 TenderObj* TenderTV::box (int4b* pdata)
@@ -547,8 +547,11 @@ TenderObj* TenderTV::box (int4b* pdata)
    _contour_data.push_back(cobj);
    _num_contour_points += 4;
    _num_contours++;
-   _fqu_data.push_back(cobj);
-   _num_fqus++;
+   if (_filled)
+   {
+      _fqu_data.push_back(cobj);
+      _num_fqus++;
+   }
    return cobj;
 }
 
@@ -558,8 +561,8 @@ TenderPoly* TenderTV::poly (int4b* pdata, unsigned psize)
    _contour_data.push_back(cobj);
    _num_contour_points += cobj->csize();
    _num_contours++;
-//   if (_fill) //@TODO!
-//   {
+   if (_filled)
+   {
       TeselTempData tdata(_num_polygon_points );
       cobj->Tessel(&tdata);
       _fpolygon_data.push_back(cobj);
@@ -567,7 +570,7 @@ TenderPoly* TenderTV::poly (int4b* pdata, unsigned psize)
       _num_ftrs += tdata.num_ftrs();
       _num_ftfs += tdata.num_ftfs();
       _num_ftss += tdata.num_ftss();
-//   }
+   }
    return cobj;
 }
 
@@ -582,28 +585,14 @@ TenderWire* TenderTV::wire (int4b* pdata, unsigned psize, word width, bool cente
       _contour_data.push_back(cobj);
       _num_contours += 1;
       _num_contour_points += cobj->csize();
-//       if (_fill) //@TODO!
-//       {
+       if (_filled)
+       {
          cobj->Tessel(_num_polygon_points);
          _fpolygon_data.push_back(cobj);
          _num_polygon_points += cobj->csize();
          _num_fqss += 1;
-//       }
+       }
    }
-   return cobj;
-}
-
-TenderRefBox* TenderTV::refbox (DBbox& rbox)
-{
-   int4b* refb = DEBUG_NEW int4b[8];
-   refb[0] = rbox.p1().x(); refb[1] = rbox.p1().y();
-   refb[2] = rbox.p2().x(); refb[3] = rbox.p1().y();
-   refb[4] = rbox.p2().x(); refb[5] = rbox.p2().y();
-   refb[6] = rbox.p1().x(); refb[7] = rbox.p2().y();
-   TenderRefBox* cobj = DEBUG_NEW TenderRefBox(refb);
-   _contour_data.push_back(cobj);
-   _num_contour_points += 4;
-   _num_contours++;
    return cobj;
 }
 
@@ -851,7 +840,7 @@ void Tenderer::setLayer(word layer)
       laydata = DEBUG_NEW TenderLay();
       _data[layer] = laydata;
    }
-   _cslice = DEBUG_NEW TenderTV(_ctrans);
+   _cslice = DEBUG_NEW TenderTV(_ctrans, _drawprop->isFilled(layer));
    laydata->push_back(_cslice);
    // @TODO! current fill on/off should be determined here!
 }
@@ -862,10 +851,12 @@ void Tenderer::setSdataContainer(word layer)
    _sdata[layer] = _sslice;
 }
 
-void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active)
+void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
    _ctrans = trans * _drawprop->topCTM();
    _oboxes.push_back(DEBUG_NEW TenderRB(_ctrans, overlap));
+   if (selected)
+      _osboxes.push_back(DEBUG_NEW TenderRB(_ctrans, overlap));
    _drawprop->pushCTM(_ctrans);
    if (active)
       _atrans = trans;
@@ -970,6 +961,12 @@ void Tenderer::draw()
    {
       (*CBOX)->draw();
    }
+   _drawprop->setLineProps(true);
+   for (TenderRBL::const_iterator CBOX = _osboxes.begin(); CBOX != _osboxes.end(); CBOX++)
+   {
+      (*CBOX)->draw();
+   }
+   _drawprop->setLineProps(false);
    // and finally -  the selected objects
    glPushMatrix();
    real openGLmatrix[16];
@@ -988,6 +985,6 @@ void Tenderer::draw()
       _drawprop->setLineProps(false);
    }
    glPopMatrix();
-   glDisableClientState(GL_VERTEX_ARRAY);
+glDisableClientState(GL_VERTEX_ARRAY);
 
 }

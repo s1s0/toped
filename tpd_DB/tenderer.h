@@ -200,11 +200,10 @@ class TenderTVB {
 */
 class TenderTV {
    public:
-                        TenderTV(CTM& translation);
+                        TenderTV(CTM&, bool);
       TenderObj*        box  (int4b*);
       TenderPoly*       poly (int4b*, unsigned);
       TenderWire*       wire (int4b*, unsigned, word, bool);
-      TenderRefBox*     refbox(DBbox&);
       const CTM*        tmatrix()            {return &_tmatrix;}
       void              draw_contours();
       void              draw_lines();
@@ -226,6 +225,7 @@ class TenderTV {
       unsigned          _num_ftrs; //! fill triangle
       unsigned          _num_ftfs; //! fill triangle fan
       unsigned          _num_ftss; //! fill triangle strip
+      bool              _filled;
 };
 
 //-----------------------------------------------------------------------------
@@ -243,7 +243,7 @@ class Tenderer {
       void              Grid( const real, const std::string );
       void              setLayer(word);
       void              setSdataContainer(word);
-      void              pushCell(const CTM&, const DBbox&, bool);
+      void              pushCell(const CTM&, const DBbox&, bool, bool);
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box  (int4b* pdata)                    {_cslice->box(pdata);}
       void              box  (int4b*, const SGBitSet*);
@@ -251,7 +251,6 @@ class Tenderer {
       void              poly (int4b*, unsigned, const SGBitSet*);
       void              wire (int4b*, unsigned, word);
       void              wire (int4b*, unsigned, word, const SGBitSet*);
-      void              refbox(DBbox& pbox)                    {_cslice->refbox(pbox);}
       void              draw();
       // temporary!
       void              initCTMstack()                {        _drawprop->initCTMstack()        ;}
@@ -273,6 +272,7 @@ class Tenderer {
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
       TenderTVB*        _sslice;    //!Selected shapes in the active cell
       TenderRBL         _oboxes;    //!All reference overlapping boxes
+      TenderRBL         _osboxes;   //!All selected reference overlapping boxes
       CTM               _atrans;    //!The translation of the active cell
       CTM               _ctrans;    //!Working variable storing the current translation
 };

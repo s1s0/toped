@@ -160,6 +160,19 @@ bool layprop::DrawProperties::getCurrentFill() const
    else return false;
 }
 
+bool layprop::DrawProperties::isFilled(word layno) const
+{
+   assert(layno);
+   laySetList::const_iterator ilayset = _layset.find(layno);
+   if ((_layset.end() != ilayset) && !_blockfill)
+   {
+      if (_layfill.end() == _layfill.find(ilayset->second->fill()))
+         return false;
+      else return true;
+   }
+   else return false;
+}
+
 void layprop::DrawProperties::draw_text_boundary(const pointlist& ptlist)
 {
    if (_textbox_hidden) return;
