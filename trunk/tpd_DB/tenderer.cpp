@@ -999,8 +999,34 @@ glDisableClientState(GL_VERTEX_ARRAY);
 
 }
 
+HiResTimer::HiResTimer()
+{
+#ifdef WIN32
+	// Get system frequency (number of ticks per second) of timer
+	if (!QueryPerformanceFrequency(&_freq) || !QueryPerformanceCounter(&_inittime))
+	{
+		tell_log(console::MT_INFO,"Problem with timer");
+	}
+#else
+	gettimeofday(&_start_time, NULL);
+#endif
+}
+
 void HiResTimer::report(char* message)
 {
+	char time_message[256];
+#ifdef WIN32
+	LARGE_INTEGER curtime;
+	if (!QueryPerformanceCounter(&curtime)) 
+		return ;
+  // Convert number of ticks to milliseconds
+   int millisec = (curtime.QuadPart-_inittime.QuadPart) / (_freq.QuadPart / 1000);
+	int sec = millisec / 1000;
+	millisec = millisec - sec * 1000;
+   sprintf (time_message, "%s:   %i sec. %06i msec.",message, sec, millisec);
+
+#else
+
    gettimeofday(&_end_time, NULL);
    timeval result;
    result.tv_sec = _end_time.tv_sec - _start_time.tv_sec;
@@ -1010,8 +1036,7 @@ void HiResTimer::report(char* message)
       result.tv_sec -= 1;
       result.tv_usec += 1000000;
    }
-
-   char time_message[256];
    sprintf (time_message, "%s:   %i sec. %06i msec.",message, result.tv_sec, result.tv_usec);
+#endif
    tell_log(console::MT_INFO,time_message);
 }

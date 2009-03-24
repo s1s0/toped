@@ -29,7 +29,13 @@
 #define TENDERER_H
 
 #include <GL/glew.h>
+
+#ifdef WIN32
+#include <windows.h>
+#else
 #include <sys/time.h>
+#endif
+
 #include "drawprop.h"
 
 typedef std::list<word> TeselVertices;
@@ -281,11 +287,17 @@ class Tenderer {
 
 class HiResTimer {
    public:
-      HiResTimer(){gettimeofday(&_start_time, NULL);}
+      HiResTimer();
       void           report(char*);
    private:
       timeval        _start_time;
       timeval        _end_time;
+#ifdef WIN32
+		// System frequency of timer for Windows.
+		LARGE_INTEGER	_freq;
+		LARGE_INTEGER	_inittime;
+#endif
+
 };
 
 #endif //TENDERER_H
