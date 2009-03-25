@@ -226,6 +226,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CifLayer*      _last;
          CifData*       _first;
    };
+
    typedef std::list<CifLayer*>     CifLayerList;
 
    class CifStructure  {
@@ -243,6 +244,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void           set_traversed(bool trv)       { _traversed = trv;}
          CifLayer*      firstLayer()                  {return _first;}
          CifRef*        refirst()                     {return _refirst;}
+         real           a()                           {return (real)_a;}
+         real           b()                           {return (real)_b;}
          CifLayer*      secureLayer(std::string);
          void           addRef(_dbl_word cell, CTM* location);
          void           collectLayers(nameList&, bool);
@@ -305,12 +308,12 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                         CifExportFile(std::string, USMap*, bool);
                        ~CifExportFile();
-         void           definitionStart(std::string);
+         void           definitionStart(std::string, real);
          void           definitionFinish();
          bool           layerSpecification(word);
          void           box(const unsigned, const unsigned, const TP&);
-         void           polygon(const pointlist&);
-         void           wire(const unsigned, const pointlist&);
+         void           polygon(const int4b* const, unsigned);
+         void           wire(const int4b* const, unsigned, unsigned);
          void           text(const std::string&, const TP&);
          void           call(const std::string& name, const CTM&);
          bool           checkCellWritten(std::string) const;

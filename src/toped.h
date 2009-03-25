@@ -259,6 +259,7 @@ namespace tui {
 		void          OnToolBarSize(wxCommandEvent&);
 		void		OnToolBarDefine	(wxCommandEvent& evt);
 		void		OnToolBarAddItem	(wxCommandEvent& evt);
+		void		OnToolBarDeleteItem(wxCommandEvent& evt);
       DECLARE_EVENT_TABLE();
    };
 

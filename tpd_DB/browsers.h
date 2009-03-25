@@ -38,8 +38,17 @@
 #include <wx/aui/aui.h>
 #include <string>
 #include "tedesign.h"
-#include "../tpd_ifaces/gds_io.h"
-#include "../tpd_ifaces/cif_io.h"
+
+// Forward declarations
+
+namespace GDSin {
+   class GdsStructure;
+   typedef SGHierTree<GdsStructure>       GDSHierTree;
+}
+namespace CIFin {
+   class CifStructure;
+   typedef SGHierTree<CifStructure>       CIFHierTree;
+}
 
 namespace browsers 
 {

@@ -136,6 +136,7 @@
         (packet #f))
     (define (get-name) layer-name)
     (define (get-number) number)
+    (define (set-number! num) (set! number num))
     (define (get-streamed) streamed)
     (define (set-streamed! bool) (set! streamed bool))
     (define (get-stream-number) stream-number)
@@ -149,6 +150,7 @@
       (let ()
         (cond ((eq? m 'get-name) get-name)
               ((eq? m 'get-number) get-number)
+              ((eq? m 'set-number!) set-number!)
               ((eq? m 'get-streamed) get-streamed)
               ((eq? m 'set-streamed!) set-streamed!)
               ((eq? m 'get-stream-number) get-stream-number)
@@ -178,6 +180,19 @@
 ; Warning - objects must support 'get-name operation
 (define (find-in-object-list lst elem-name)
   (find-in-list (lambda (elem) (string=? ((elem 'get-name)) elem-name)) lst))
+  
+;replace-zero-number  
+;input layer - layer that number is equal 0
+;Warning -function modify global variable layer-list
+;Find unused number begining 0 and replace 0 to finded one
+(define (replace-zero-number layer)
+  (define (find-free-number number)
+    (if (eq? null (find-in-list (lambda (elem) (eq? ((elem 'get-number)) number)) layer-list))
+        number
+        (find-free-number (+ number 1))
+        ))
+
+   ((layer 'set-number!) (find-free-number 100)))
 
 ;****************GLOBAL VARIABLES AND FUNCTIONS*******************
 (define packet-list  '())
@@ -317,9 +332,7 @@
                        (packet-name (name->string(caddr layer)))
                        (valid (last layer))
                        (cur-layer (find-in-object-list layer-list layer-name))) 
-                  (if (eq? valid 't)
-                      ((cur-layer 'set-packet!) packet-name) 
-                      null)))
+                  ((cur-layer 'set-packet!) packet-name)))
               layers)
            '())))
 
@@ -397,6 +410,11 @@
   (lambda (rules)
     (list "/*lxRules"
           "not realized yet*/")))
+  
+  (define compactorRules
+  (lambda (rules)
+    (list "/*compactorRules"
+          "not realized yet*/")))
 
 ;****************TRANSLATOR FUNCTIONS********************************
 (define (layer-setup)
@@ -407,24 +425,38 @@
    
           (map (lambda(layer)
                  ;Only layers from gds used
-                 (if ((layer 'get-streamed))
+                 (begin
+                   ;(display ((layer 'get-name)))
+                   ;(display "--")
+                   ;(display ((layer 'get-packet)))
+                   ;(newline)
+                   (if ((layer 'get-streamed))
                      (let* ((name ((layer 'get-name)))
                            (packet-name ((layer 'get-packet)))
                            (packet (find-in-object-list packet-list packet-name)))
-                       (if (not (eq? packet null))
+                         (cond ((eq? ((layer 'get-number)) 0) 
+                             (replace-zero-number layer))
+                             )
+                         (if (not (eq? packet null))
                            (let* ((number (number->string((layer 'get-number))))
                                   (colour ((packet 'get-fill)))
                                   (stipple ((packet 'get-stipple))))
                              (list (string-append "layprop(\"" name "\",\t" number ",\t\"" colour "\",\t"
                                                   "\"" stipple "\",\t" "\"selected3\");"))) 
                            (error "can't find packet" packet-name)))
-                     '()))
+                     '())))
                layer-list)
           (list (list "}"))))
+;------------------------
 (define (post-proceed)
   (append (list (list "colorSetup();")
                 (list "fillSetup();")
                 (list "layerSetup();") )))
+;----------------------- 
+(define (debug-output)
+  (map (lambda(packet)
+           ((packet 'get-name)))
+           packet-list))
 
 (define (readlines filename)
   (call-with-input-file filename
@@ -464,6 +496,7 @@
           ((eq? command 'spacingRules) (spacingRules body))
           ((eq? command 'devices) (devices body))
           ((eq? command 'lxRules) (lxRules body))
+          ((eq? command 'compactorRules) (compactorRules body))
           (else (begin
                   (display "mistake in recognition")
                   (newline)
@@ -503,7 +536,23 @@
 ;output - non (output write down to tell.tll file
 
 (define (convert input-list)
-  (write-to-file (car input-list) (append (parse (collect-strings (cdr input-list))) (layer-setup) (post-proceed))))
+  (write-to-file (car input-list) (append (parse (collect-strings (cdr input-list))) (layer-setup) (post-proceed) )))
+
+;debug-print-packets
+(define (debug-print-packets file)
+  (begin 
+    (parse (collect-strings (list file)))
+    (map
+     (lambda(packet) ((packet 'get-name)))
+     packet-list)))
+  
+;debug-print-layers
+(define (debug-print-layers file)
+  (begin 
+    (parse (collect-strings (list file)))
+    (map
+     (lambda(layer) ((layer 'get-name)))
+     layer-list)))
   
 ;---------------------------------------------
 ;(define d (foldl (lambda (word result) 
@@ -534,5 +583,7 @@
 ;(define collected-strings (foldl (lambda (word result) 
 ;                   (append result (readlines word))) '() input-list))
 ;(write-to-file "d:\\1\\tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
-  
+  ;(debug-print-packets "d:\\toped\\vanguard\\display.drf")
+  ;(debug-print-layers "d:\\toped\\vanguard\\vis40cb.tf")
+   ;(convert (list "d:\\toped\\vanguard\\tell.tll" "d:\\toped\\vanguard\\display.drf" "d:\\toped\\vanguard\\vis40cb.tf"))
 )

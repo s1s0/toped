@@ -26,11 +26,12 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include <iostream>
 #include "quadtree.h"
 #include "tedat.h"
 #include "viewprop.h"
+#include "tenderer.h"
 #include "../tpd_common/outbox.h"
-#include <iostream>
 
 //-----------------------------------------------------------------------------
 // class quadTree
@@ -506,15 +507,15 @@ void laydata::quadTree::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 
 /*! Write the contents of the quadTree in a CIF file.\n
 Nothing special here - effectively the same as other write method*/
-void laydata::quadTree::CIFwrite(CIFin::CifExportFile& ciff, real UU) const
+void laydata::quadTree::CIFwrite(CIFin::CifExportFile& ciff) const
 {
    tdtdata* wdt = _first;
    while(wdt)
    {
-      wdt->CIFwrite(ciff, UU); wdt = wdt->next();
+      wdt->CIFwrite(ciff); wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->CIFwrite(ciff,UU);
+      if (_quads[i]) _quads[i]->CIFwrite(ciff);
 }
 
 /*! Write the contents of the quadTree in a PS file.\n
@@ -603,29 +604,6 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
       if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst, fill);
 }
 
-/*void laydata::quadTree::visible_shapes(laydata::shapeList* all4drawing,
-                                       const DBbox& clip, const CTM& topCTM, const CTM& scrCTM, unsigned long& total_points)
-{
-   if (empty()) return;
-   // check the entire holder for clipping...
-   DBbox areal = _overlap.overlap(topCTM);
-   if      ( clip.cliparea(areal) == 0   ) return;
-   else if (!areal.visible(scrCTM)) return;
-
-   tdtdata* wdt = _first;
-   while(wdt)
-   {
-//      if (1 < wdt->numpoints())
-//      {
-         all4drawing->push_back(wdt);
-         total_points += wdt->numpoints();
-//      }
-      wdt = wdt->next();
-   }
-   for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->visible_shapes(all4drawing, clip, topCTM, scrCTM, total_points);
-
-}*/
 void laydata::quadTree::openGL_draw(Tenderer& rend, const dataList* slst) const
 {
    if (empty()) return;
@@ -638,54 +616,31 @@ void laydata::quadTree::openGL_draw(Tenderer& rend, const dataList* slst) const
    // The drawing will be faster like this for the cells without selected shapes
    // that will be the wast majority of the cases. A bit bigger code though.
    // Seems the bargain is worth it.
-/*   if (slst)
+   if (slst)
    {
       while(wdt)
       {
-         pointlist points;
-         // precalculate drawing data
-         wdt->openGL_precalc(rend, points);
-         if (0 != points.size())
+         switch (wdt->status())
          {
-            // draw the shape fill (contents of refs, arefs and texts)
-            if (fill)  wdt->openGL_drawfill(drawprop, points);
-            // draw the outline of the shapes and overlapping boxes
-            wdt->openGL_drawline(drawprop, points);
-            if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
-            {
-               drawprop.setLineProps(true);
-               if       (sh_selected == wdt->status())
-                  wdt->openGL_drawsel(points, NULL);
-               else if  (sh_partsel  == wdt->status())
-               {
-                  dataList::const_iterator SI;
-                  for (SI = slst->begin(); SI != slst->end(); SI++)
-                     if (SI->first == wdt) break;
-                  assert(SI != slst->end());
-                  wdt->openGL_drawsel(points, &(SI->second));
-               }
-               drawprop.setLineProps(false);
+            case sh_selected: wdt->draw_srequest(rend, NULL); break;
+            case sh_partsel : {// partially selected - so find the pin list
+               dataList::const_iterator SI;
+               for (SI = slst->begin(); SI != slst->end(); SI++)
+                  if (SI->first == wdt) break;
+               assert(SI != slst->end());
+               wdt->draw_srequest(rend, &(SI->second));
+               break;
             }
-            wdt->openGL_postclean(drawprop, points);
+            default: wdt->draw_request(rend);
          }
          wdt = wdt->next();
       }
    }
-   else*/
-   {
-      // if there are no selected shapes
+   else
+   {  // if there are no selected shapes
       while(wdt)
       {
          wdt->draw_request(rend);
-/*         pointlist points;
-         // precalculate drawing data
-         wdt->openGL_precalc(drawprop, points);
-         // draw the shape fill (contents of refs, arefs and texts)
-         if (fill)  wdt->openGL_drawfill(drawprop, points);
-         // draw the outline of the shapes and overlapping boxes
-         wdt->openGL_drawline(drawprop, points);
-         // clean-up
-         wdt->openGL_postclean(drawprop, points);*/
          wdt = wdt->next();
       }
    }
@@ -700,21 +655,21 @@ tmp_draw methods of the tdtddata objects. This happens only if
 the current quadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. In a sence this method is the same as openGL_draw
 without fill and not handling selected shapes*/
-void laydata::quadTree::tmp_draw(const layprop::DrawProperties& drawprop,
+void laydata::quadTree::motion_draw(const layprop::DrawProperties& drawprop,
                                                    ctmqueue& transtack) const {
    if (empty()) return;
    // check the entire holder for clipping...
-   DBbox clip = drawprop.clipRegion();   
+   DBbox clip = drawprop.clipRegion();
    DBbox areal = _overlap.overlap(transtack.front());
    if      (clip.cliparea(areal) == 0        ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;
    tdtdata* wdt = _first;
    while(wdt) {
-      wdt->tmp_draw(drawprop, transtack);
+      wdt->motion_draw(drawprop, transtack, NULL);
       wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->tmp_draw(drawprop, transtack);
+      if (_quads[i]) _quads[i]->motion_draw(drawprop, transtack);
 }
 
 /*! Used to copy tdtdata objects from quadTree to a dataList. This is initiated 
@@ -941,7 +896,7 @@ laydata::quadTree::~quadTree() {
 /*!Create new tdtbox. Depending on sortnow input variable the new shape is 
 just added to the quadTree (using quadTree::put()) without sorting or fit on 
 the proper place (using add() */
-laydata::tdtdata* laydata::tdtlayer::addbox(TP* p1, TP* p2, bool sortnow) {
+laydata::tdtdata* laydata::tdtlayer::addbox(const TP& p1, const TP& p2, bool sortnow) {
    laydata::tdtbox *shape = DEBUG_NEW tdtbox(p1,p2);
    if (sortnow) add(shape);
    else         put(shape);
@@ -980,7 +935,7 @@ laydata::tdtdata* laydata::tdtlayer::addtext(std::string text,
 /*! A temporary Draw (during move/copy operations) of the container contents
  on the screen using the virtual quadTree::tmp_draw() method of the 
  parent object. */
-void laydata::tdtlayer::tmp_draw(const layprop::DrawProperties& drawprop,
+void laydata::tdtlayer::motion_draw(const layprop::DrawProperties& drawprop,
                                                  ctmqueue& transtack) const {
    // check the entire layer for clipping...
    DBbox clip = drawprop.clipRegion();
@@ -988,5 +943,5 @@ void laydata::tdtlayer::tmp_draw(const layprop::DrawProperties& drawprop,
    DBbox areal = overlap().overlap(transtack.front());
    if      ( clip.cliparea(areal) == 0       ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;
-   quadTree::tmp_draw(drawprop, transtack);
+   quadTree::motion_draw(drawprop, transtack);
 }

@@ -63,6 +63,7 @@ extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType			wxEVT_TOOLBARADDITEM;
+extern const wxEventType			wxEVT_TOOLBARDELETEITEM;
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -82,13 +83,13 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    SetBackgroundColour(wxColour(wxT("LIGHT_GRAY")));
    SetForegroundColour(wxColour(wxT("BLACK")));
    X_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition,wxSize(120,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
    Y_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition, wxSize(120,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
    _dX = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
    _dY = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT /*| wxST_ELLIPSIZE_END | */);
+                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
 
    _selected = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0"), wxDefaultPosition, wxSize(40,-1),
                                                    wxST_NO_AUTORESIZE | wxALIGN_LEFT);
@@ -315,6 +316,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,	 wxID_ANY, tui::TopedFrame::OnToolBarDefine)
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM, wxID_ANY, tui::TopedFrame::OnToolBarAddItem)
+	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -694,7 +696,7 @@ void tui::TopedFrame::initToolBars()
 
    //_resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_16x16);
   // _resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_32x32);
-   _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxSize(300, 30), wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
+   _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
    _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
                                           wxDefaultPosition, wxDefaultSize,
@@ -1241,7 +1243,7 @@ void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
    wxString ost_int;
    ost_int << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
    wxString ost;
-   ost << wxT("cifimport(") << ost_int << wxT(", getciflaymap(true), true, false );cifclose();");
+   ost << wxT("cifimport(") << ost_int << wxT(", getciflaymap(true), true, false, 0.0 );cifclose();");
    _cmdline->parseCommand(ost);
 //   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
@@ -1388,9 +1390,13 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
       if (NULL != laymap2save)
          USMap2wxString(laymap2save , wxlaymap2save);
       wxString ost;
+      double techno;
+      if (!dlg->getTechno().ToDouble(&techno))
+         techno = 0.0;
       ost << wxT("cifimport(\"") << dlg->getSelectedCell() << wxT("\" , ") << wxlaymap << wxT(",")
           << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(",")
-          << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(");");
+          << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(",")
+          << techno << wxT(");");
       if (NULL != laymap2save)
          ost << wxT("setciflaymap(")
              << wxlaymap2save << wxT(");");
@@ -2079,13 +2085,23 @@ void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
 {
-	std::string toolBarBame(evt.GetString().mb_str(wxConvUTF8));
+	std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
 	tellstdfunc::StringMapClientData* map = static_cast<tellstdfunc::StringMapClientData*>(evt.GetClientObject());
 	std::string toolName = map->GetKey();
 	std::string toolFunc = map->GetValue();
 
-	_resourceCenter->appendTool(toolBarBame, toolName, toolName,  "", "", toolFunc);
+	_resourceCenter->appendTool(toolBarName, toolName, toolName,  "", "", toolFunc);
 	delete map;
+}
+
+void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
+{
+	std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
+	wxStringClientData *data= static_cast<wxStringClientData*>(evt.GetClientObject());
+	wxString str = data->GetData();
+	std::string toolName(str.mb_str(wxConvUTF8));
+
+	_resourceCenter->deleteTool(toolBarName, toolName);
 }
 
 void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))

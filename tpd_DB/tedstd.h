@@ -107,6 +107,7 @@ namespace laydata {
    
    class TEDfile;
    class tdtdata;
+   class tdttmpdata;
    class editobject;
    class tdtcell;
    class tdtdefaultcell;
@@ -217,5 +218,6 @@ namespace laydata {
    };
 
 }
-
+class Tenderer;
+class PSFile;
 #endif

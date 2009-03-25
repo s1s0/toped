@@ -31,7 +31,6 @@
 #include <string>
 #include <math.h>
 #include "tedstd.h"
-#include "ps_out.h"
 
 namespace layprop {
 
@@ -119,6 +118,7 @@ namespace layprop {
          void                       setCurrentColor(word layno);
          void                       setGridColor(std::string colname) const;
          bool                       getCurrentFill() const;
+         bool                       isFilled(word layno) const;
          void                       setLineProps(bool selected = false) const;
          bool                       layerHidden(word layno) const;
          bool                       layerLocked(word layno) const;

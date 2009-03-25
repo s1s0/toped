@@ -34,6 +34,8 @@
 #include "tedesign.h"
 #include "tedat.h"
 #include "viewprop.h"
+#include "tenderer.h"
+#include "ps_out.h"
 
 //! the stack of all previously edited (opened) cells
 laydata::editcellstack      laydata::editobject::_editstack;
@@ -202,7 +204,7 @@ void laydata::tdtlibrary::CIFwrite(CIFin::CifExportFile& ciff, tdtcell* top, boo
       ciff.file() << "(         Top Cell :  - );" << std::endl;
       laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
       while (root) {
-         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root, _UU, recur);
+         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root, _DBU, recur);
          root = root->GetNextRoot(TARGETDB_LIB);
       }
    }
@@ -210,7 +212,7 @@ void laydata::tdtlibrary::CIFwrite(CIFin::CifExportFile& ciff, tdtcell* top, boo
    {
       ciff.file() << "(         Top Cell : " << top->name() << ");" << std::endl;
       laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
-      top->CIFwrite(ciff, _cells, root_cell, _UU, recur);
+      top->CIFwrite(ciff, _cells, root_cell, _DBU, recur);
    }
 //   wr = gdsf.setNextRecord(gds_ENDLIB);gdsf.flush(wr);
 }
@@ -627,9 +629,9 @@ laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2)
    DBbox old_overlap = _target.edit()->overlap();
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
-   (*p1) *= _target.rARTM();
-   (*p2) *= _target.rARTM();
-   laydata::tdtdata* newshape = actlay->addbox(p1,p2);
+   TP np1((*p1) * _target.rARTM());
+   TP np2((*p2) * _target.rARTM());
+   laydata::tdtdata* newshape = actlay->addbox(np1,np2);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validate_cells());
    return newshape;
@@ -649,8 +651,8 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
    modified = true;
    pointlist vpl = check.get_validated();
    if (check.box()) {
-      TP* p1= DEBUG_NEW TP(vpl[0] *_target.rARTM());
-      TP* p2= DEBUG_NEW TP(vpl[2] *_target.rARTM());
+      TP p1(vpl[0] *_target.rARTM());
+      TP p2(vpl[2] *_target.rARTM());
       newshape = actlay->addbox(p1,p2);
    }
    for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
@@ -838,7 +840,7 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
    {
       glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.7);
       tmp_stack.push_front(CTM(newp - base,1,0,false));
-      _tmpdata->tmp_draw(drawprop, tmp_stack,NULL,true);
+      _tmpdata->draw(drawprop, tmp_stack);
    }
    else if ((drawprop.currentop() != console::op_none) && _target.checkedit())
    {
@@ -868,7 +870,7 @@ void laydata::tdtdesign::tmp_draw(const layprop::DrawProperties& drawprop,
          newpos.Translate(newp.x(),newp.y());
          tmp_stack.push_front(newpos);
       }
-      _target.edit()->tmp_draw(drawprop, tmp_stack, true);
+      _target.edit()->motion_draw(drawprop, tmp_stack, true);
       tmp_stack.clear();
    }
    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1142,6 +1144,10 @@ void laydata::tdtdesign::check_active() {
    if (NULL == _target.edit()) throw EXPTNactive_cell();
 };
 
+void laydata::tdtdesign::try_unselect_all() const {
+   if (NULL != _target.edit())
+      _target.edit()->unselect_all(false);
+}
 
 laydata::quadTree* laydata::tdtdesign::targetlayer(word layno)
 {

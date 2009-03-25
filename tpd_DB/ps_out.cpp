@@ -152,26 +152,26 @@ void PSFile::propSet(std::string color_name, std::string pattern_name)
    fprintf(_psfh, "      /dpl {dc_%s} bd\n", pattern_name.c_str());
 }
 
-void PSFile::poly(const pointlist points, const DBbox bbox)
+void PSFile::poly(const int4b* pdata, unsigned psize, const DBbox bbox)
 {
    fprintf(_psfh,"      {{%i %i %i %i ", bbox.p1().x(), bbox.p1().y(),
                                             bbox.p2().x(), bbox.p2().y() );
-   for(word i = 0; i < points.size(); i++)
-      fprintf(_psfh,"%i %i ",points[i].x(), points[i].y());
-   fprintf(_psfh,"}<00 01 %X 03 0A>}dpl\n",31+points.size());
+   for(word i = 0; i < psize; i++)
+      fprintf(_psfh,"%i %i ",pdata[2*i], pdata[2*i+1]);
+   fprintf(_psfh,"}<00 01 %X 03 0A>}dpl\n",31 + psize);
 }
 
-void PSFile::wire(const pointlist points, word width, DBbox bbox)
+void PSFile::wire(const int4b* const pdata, unsigned psize, word width, DBbox bbox)
 {
    fprintf(_psfh,"      {{%i %i %i %i ", bbox.p1().x(), bbox.p1().y(),
                                             bbox.p2().x(), bbox.p2().y() );
-   for(word i = 0; i < points.size(); i++)
-      fprintf(_psfh,"%i %i ",points[i].x(), points[i].y());
+   for(word i = 0; i < psize; i++)
+      fprintf(_psfh,"%i %i ",pdata[2*i], pdata[2*i+1]);
    //It's possible here to specify the pathtype of GDSII style
    //int pt = (4== pathtype) ? 2 : pathtype;
    // in Toped however we have only one pathtype - which is equivalent to type 2
    // in both - PS and GDSII
-   fprintf(_psfh,"}<00 01 %X 03>} %i %i dp\n",31+points.size(), width, 2/*pt*/);
+   fprintf(_psfh,"}<00 01 %X 03>} %i %i dp\n",31+psize, width, 2/*pt*/);
 }
 
 void PSFile::text(std::string text, const CTM tmtrx)
@@ -196,15 +196,16 @@ void PSFile::cellref(std::string cellname, const CTM mx)
 
 void PSFile::pspage_header(const DBbox box)
 {
-   double W=(220/25.4)*72;
-   double H=(297/25.4)*72;
-   double w = abs(box.p1().x() - box.p2().x());
-   double h = abs(box.p1().y() - box.p2().y());
-   double sc = (W/H < w/h) ? w/(W-30) : h/(H-30);
-   double tx = ((box.p1().x() + box.p2().x()) - W*sc) / 2;
-   double ty = ((box.p1().y() + box.p2().y()) - H*sc) / 2;
+   double W=((220.0 - 40.0)/25.4)*72.0;
+   double H=((297.0 - 40.0)/25.4)*72.0;
+   double w = fabs(double(box.p1().x() - box.p2().x()));
+   double h = fabs(double(box.p1().y() - box.p2().y()));
+   double sc = (W/H < w/h) ? w/W : h/H;
+   double tx = ((box.p1().x() + box.p2().x()) - ( W   * sc) ) / 2;
+   double ty = ((box.p1().y() + box.p2().y()) - ( H   * sc) ) / 2;
    CTM laymx( sc, 0.0, 0.0, sc, tx, ty);
    CTM psmx(laymx.Reversed());
+   psmx.Translate(20.0 * 72.0 / 25.4, 20.0 * 72.0 / 25.4);
 
    fprintf(_psfh,"%%%%EndProlog\n");
    fprintf(_psfh,"[%G %G %G %G %G %G] concat\n",

@@ -29,8 +29,6 @@
 #define QUADTREE_H
 
 #include "tedstd.h"
-#include "ps_out.h"
-#include "tenderer.h"
 
 namespace laydata {
 
@@ -67,12 +65,12 @@ namespace laydata {
       void                 openGL_draw(layprop::DrawProperties&, const dataList*, bool) const;
       void                 openGL_draw(Tenderer&, const dataList*) const;
 //      void                 visible_shapes(laydata::shapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
-      virtual void         tmp_draw(const layprop::DrawProperties&, ctmqueue&) const;
+      virtual void         motion_draw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(tdtdata* shape);
       void                 put(tdtdata* shape);
       void                 write(TEDfile* const) const;
       void                 GDSwrite(GDSin::GdsFile&, word const, real UU) const;
-      void                 CIFwrite(CIFin::CifExportFile&, real UU) const;
+      void                 CIFwrite(CIFin::CifExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       void                 select_inBox(DBbox&, dataList*, bool, word /*selmask = laydata::_lmall*/);
       void                 select_fromList(dataList*, dataList*);
@@ -122,8 +120,8 @@ functionality is mostly implemented in the parent class.
                            tdtlayer() : quadTree() {};
                            tdtlayer(TEDfile* const tedfile) : quadTree(tedfile) {};
                           ~tdtlayer() {freememory();};
-      void                 tmp_draw(const layprop::DrawProperties&, ctmqueue& ) const;
-      tdtdata*             addbox(TP* p1, TP* p2, bool sortnow = true);
+      void                 motion_draw(const layprop::DrawProperties&, ctmqueue& ) const;
+      tdtdata*             addbox(const TP& p1, const TP& p2, bool sortnow = true);
       tdtdata*             addpoly(pointlist& pl, bool sortnow = true);
       tdtdata*             addwire(pointlist& pl,word w, bool sortnow = true);
       tdtdata*             addtext(std::string text, CTM trans, bool sortnow = true);

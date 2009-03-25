@@ -33,6 +33,8 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "tedesign.h"
+#include "tenderer.h"
+#include "ps_out.h"
 #include "../tpd_ifaces/cif_io.h"
 #include "../tpd_ifaces/gds_io.h"
 #include "../tpd_common/outbox.h"
@@ -222,7 +224,7 @@ void laydata::tdtdefaultcell::openGL_draw(Tenderer&, bool active) const
 {
 }
 
-void laydata::tdtdefaultcell::tmp_draw(const layprop::DrawProperties&, ctmqueue&, bool active) const
+void laydata::tdtdefaultcell::motion_draw(const layprop::DrawProperties&, ctmqueue&, bool active) const
 {
 }
 
@@ -384,61 +386,6 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
    }
 }
 
-// void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
-// {
-//    atticList* all4drawing = DEBUG_NEW atticList();
-//    SLMap*     numPoints   = DEBUG_NEW SLMap();
-//    shapeList* references  = DEBUG_NEW shapeList();
-//    unsigned long total_references = 0;
-//    for (layerList::const_iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-//    {
-//       word curlayno = lay->first;
-//       if (rend.layerHidden(curlayno)) continue;
-//       if (0 == curlayno)
-//       {
-//          lay->second->visible_shapes(references, rend.clipRegion(), rend.topCTM(), rend.ScrCTM(), total_references );
-//       }
-//       else
-//       {
-//          shapeList* ssl = DEBUG_NEW shapeList();
-//          unsigned long total_points = 0;
-//          lay->second->visible_shapes(ssl, rend.clipRegion(), rend.topCTM(), rend.ScrCTM(), total_points );
-//          if (ssl->empty()) delete ssl;
-//          else
-//          {
-//             (*all4drawing)[curlayno] = ssl;
-//             (*numPoints)[curlayno] = total_points;
-//          }
-//       }
-//    }
-//    if (!all4drawing->empty()) rend.add_data(all4drawing, numPoints);
-//    // clean-up
-//    for (laydata::atticList::const_iterator CL = all4drawing->begin(); CL != all4drawing->end(); CL++)
-//    {
-//       CL->second->clear();
-//       delete (CL->second);
-//    }
-//    delete all4drawing;
-//    delete numPoints;
-//    //now deal with references
-//    if (0 < total_references)
-//    {
-//       for (shapeList::const_iterator CR = references->begin(); CR != references->end(); CR++)
-//       {
-//          laydata::tdtcellref* the_reference = static_cast<laydata::tdtcellref*>(*CR);
-//          laydata::tdtdefaultcell* ccell = the_reference->visible(rend.clipRegion(), rend.topCTM(), rend.ScrCTM());
-//          if (NULL != ccell)
-//          {
-//             CTM newtrans = the_reference->translation() * rend.topCTM();
-//             rend.pushCTM(newtrans);
-//             ccell->openGL_draw(rend, active);
-//             rend.popCTM();
-//          }
-//       }
-//    }
-//    delete references;
-// }
-
 void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
 {
    // Draw figures
@@ -447,20 +394,25 @@ void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
    {
       word curlayno = lay->first;
       if (rend.layerHidden(curlayno)) continue;
-      else rend.setLayer(curlayno);
+      else if (0 != curlayno) rend.setLayer(curlayno);
       // fancy like this (dlist iterator) , besause a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
-      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
+      if (active && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
+      {
+         rend.setSdataContainer(curlayno);
          lay->second->openGL_draw(rend, dlst->second/*, fill*/);
+      }
       else
          lay->second->openGL_draw(rend, NULL/*, fill*/);
    }
 }
 
-void laydata::tdtcell::tmp_draw(const layprop::DrawProperties& drawprop,
-                                          ctmqueue& transtack, bool active) const {
-   if (active) {
+void laydata::tdtcell::motion_draw(const layprop::DrawProperties& drawprop,
+                                          ctmqueue& transtack, bool active) const
+{
+   if (active)
+   {
       // If this is the active cell, then we will have to visualize the
       // selected shapes in move. Patially selected fellas are processed
       // only if the current operation is move
@@ -472,7 +424,7 @@ void laydata::tdtcell::tmp_draw(const layprop::DrawProperties& drawprop,
          const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst->first);
          for (dlst = llst->second->begin(); dlst != llst->second->end(); dlst++)
             if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
-               dlst->first->tmp_draw(drawprop, transtack, &(dlst->second));
+               dlst->first->motion_draw(drawprop, transtack, &(dlst->second));
       }
    }
    else {
@@ -482,9 +434,10 @@ void laydata::tdtcell::tmp_draw(const layprop::DrawProperties& drawprop,
       // without fill
       typedef layerList::const_iterator LCI;
       for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-         if (!drawprop.layerHidden(lay->first)) {
+         if (!drawprop.layerHidden(lay->first))
+         {
             const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay->first);
-            lay->second->tmp_draw(drawprop, transtack);
+            lay->second->motion_draw(drawprop, transtack);
          }
       transtack.pop_front();
    }
@@ -640,7 +593,7 @@ void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
 
 
 void laydata::tdtcell::CIFwrite(CIFin::CifExportFile& ciff, const cellList& allcells,
-                                const TDTHierTree* root, real UU, bool recur) const
+                                const TDTHierTree* root, real DBU, bool recur) const
 {
    // We going to write the cells in hierarchical order. Children - first!
    if (recur)
@@ -648,20 +601,35 @@ void laydata::tdtcell::CIFwrite(CIFin::CifExportFile& ciff, const cellList& allc
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
-         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child, UU, recur);
+         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child, DBU, recur);
          Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
    if (ciff.checkCellWritten(name())) return;
    //
-   ciff.definitionStart(name());
+   ciff.definitionStart(name(),DBU);
+   // @TODO! See Bug#15242
+   // Currently all coordinates are exported in DBU units and in the DS line of CIF
+   // we put the ratio between DBU and the CIF precision (constant). This makes the
+   // resulting CIF files ineffective, because normally there will be too many
+   // pointless zeros. What we need is the smallest step which is used in each of
+   // the cells. This can be calculated here, but also can be a value precalculated
+   // on the fly when each and every points gets stored in the cell structure.
+   // In practice this should be done in the folowing way
+   // - calculate the reciprocal value of DBU ( (unsigned) 1/ DBU ). Let's name it
+   //   DBUR. Make sure that the conversion error is cleaned-up.
+   // - define the step and assign to it initially DBUR
+   // - get the greatest common denominator between each of the coordinates and DBUR
+   //   and compare it with the current step. If it is smaller - replace the step
+   //   with the new value.
+
    // loop the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
       if ((0!= wl->first) && !ciff.layerSpecification(wl->first)) continue;
-      wl->second->CIFwrite(ciff, UU);
+      wl->second->CIFwrite(ciff);
    }
    ciff.definitionFinish();
 }
