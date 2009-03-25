@@ -260,11 +260,9 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::TDTsave::execute() {
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->unselect_all();
-   DATC->unlockDB();
-   DATC->TDTwrite();
-   ATDB = DATC->lockDB(false);
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      ATDB->try_unselect_all();
+      DATC->TDTwrite();
       TpdTime timec(ATDB->created());
       TpdTime timeu(ATDB->lastUpdated());
    DATC->unlockDB();
@@ -290,21 +288,19 @@ int tellstdfunc::TDTsaveIFF::execute() {
    }
    else
    {
-      laydata::tdtdesign* ATDB = DATC->lockDB();
-         ATDB->unselect_all();
-      DATC->unlockDB();
-      bool stop_ignoring = false;
-      if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
-      {
-         DATC->TDTwrite(DATC->tedfilename().c_str());
-         ATDB = DATC->lockDB(false);
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         ATDB->try_unselect_all();
+         bool stop_ignoring = false;
+         if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
+         {
+            DATC->TDTwrite(DATC->tedfilename().c_str());
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
-         DATC->unlockDB();
-         LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
-               timeu() << "\");"; LogFile.flush();
-      }
-      if (stop_ignoring) set_ignoreOnRecovery(false); 
+            LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
+                  timeu() << "\");"; LogFile.flush();
+         }
+      DATC->unlockDB();
+      if (stop_ignoring) set_ignoreOnRecovery(false);
    }
    return EXEC_NEXT;
 }
@@ -320,11 +316,9 @@ int tellstdfunc::TDTsaveas::execute() {
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      laydata::tdtdesign* ATDB = DATC->lockDB();
-         ATDB->unselect_all();
-      DATC->unlockDB();
-      DATC->TDTwrite(filename.c_str());
-      ATDB = DATC->lockDB(false);
+      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         ATDB->try_unselect_all();
+         DATC->TDTwrite(filename.c_str());
          TpdTime timec(ATDB->created());
          TpdTime timeu(ATDB->lastUpdated());
       DATC->unlockDB();
@@ -945,10 +939,12 @@ tellstdfunc::CIFimportList::CIFimportList(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::CIFimportList::execute()
 {
+   real techno = getOpValue();
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
    SIMap* cifLays = DEBUG_NEW SIMap();
@@ -968,15 +964,16 @@ int tellstdfunc::CIFimportList::execute()
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
    }
    DATC->lockDB(false);
-      DATC->CIFimport(top_cells, cifLays, recur, over);
+      DATC->CIFimport(top_cells, cifLays, recur, over, techno * DATC->DBscale());
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
 
    LogFile << LogFile.getFN() << "(" << *pl << ","
-           << *ll << ","
+           << *ll                   << ","
            << LogFile._2bool(recur) << ","
-           << LogFile._2bool(over ) << ");";
+           << LogFile._2bool(over ) << ","
+           << techno                << ");";
 
    LogFile.flush();
    delete pl;
@@ -993,10 +990,12 @@ tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::CIFimport::execute()
 {
+   real techno = getOpValue();
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
    SIMap* cifLays = DEBUG_NEW SIMap();
@@ -1013,15 +1012,16 @@ int tellstdfunc::CIFimport::execute()
    nameList top_cells;
    top_cells.push_back(name.c_str());
    DATC->lockDB(false);
-      DATC->CIFimport(top_cells, cifLays, recur, over);
+      DATC->CIFimport(top_cells, cifLays, recur, over, techno * DATC->DBscale());
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
 
    LogFile << LogFile.getFN() << "(\"" << name<< "\","
-           << *lll << ","
+           << *lll                  << ","
            << LogFile._2bool(recur) << ","
-           << LogFile._2bool(over) << ");";
+           << LogFile._2bool(over)  << ","
+           << techno                << ");";
    LogFile.flush();
    delete lll;
    cifLays->clear();

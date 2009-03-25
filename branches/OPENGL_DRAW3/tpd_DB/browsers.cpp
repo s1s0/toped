@@ -40,6 +40,8 @@
 #include "../ui/cell_normal.xpm"
 #include "../ui/cell_expanded.xpm"
 #include "../ui/nolay.xpm"
+#include "../tpd_ifaces/gds_io.h"
+#include "../tpd_ifaces/cif_io.h"
 
 
 extern DataCenter*               DATC;
@@ -1627,6 +1629,7 @@ void	browsers::LayerPanel::refresh(void)
 wxString browsers::LayerPanel::getAllSelected()
 {
       //bool multi_selection = _layerlist->GetSelectedItemCount() > 1;
+	if (_buttonMap.empty()) return wxEmptyString;
    wxString layers = wxT("{");
    for(LayerButtonMap::iterator it = _buttonMap.begin(); it != _buttonMap.end(); it++)
    {
@@ -1680,30 +1683,48 @@ browsers::LayerBrowser::~LayerBrowser()
 void browsers::LayerBrowser::onShowAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
-   cmd << wxT("hidelayer(") << getAllSelected() << wxT(", false);");
-   parseCommand(cmd);
+	wxString layers=getAllSelected(); 
+	if (layers != wxEmptyString)
+	{
+		cmd << wxT("hidelayer(") << getAllSelected() << wxT(", false);");
+		parseCommand(cmd);
+	}
 }
 
 void browsers::LayerBrowser::onHideAll(wxCommandEvent& WXUNUSED(event))
 {
-   wxString cmd;
-   cmd << wxT("hidelayer(") << getAllSelected() << wxT(", true);");
-   parseCommand(cmd);
+	wxString cmd;
+	wxString layers=getAllSelected(); 
+	if (layers != wxEmptyString)
+	{
+		cmd << wxT("hidelayer(") << getAllSelected() << wxT(", true);");
+		parseCommand(cmd);
+	}
 }
 
 void browsers::LayerBrowser::onLockAll(wxCommandEvent& WXUNUSED(event))
 {
-   wxString cmd;
-   cmd << wxT("locklayer(") << getAllSelected() << wxT(", true);");
-   parseCommand(cmd);
+	wxString cmd;
+	wxString layers=getAllSelected(); 
+	if (layers != wxEmptyString)
+	{
+		cmd << wxT("locklayer(") << getAllSelected() << wxT(", true);");
+		parseCommand(cmd);
+	}
+
 }
 
 
 void browsers::LayerBrowser::onUnlockAll(wxCommandEvent& WXUNUSED(event))
 {
-   wxString cmd;
-   cmd << wxT("locklayer(") << getAllSelected() << wxT(", false);");
-   parseCommand(cmd);
+	wxString cmd;
+	wxString layers=getAllSelected(); 
+	if (layers != wxEmptyString)
+	{
+		cmd << wxT("locklayer(") << getAllSelected() << wxT(", false);");
+		parseCommand(cmd);
+	}
+
 }
 
 wxString browsers::LayerBrowser::getAllSelected()

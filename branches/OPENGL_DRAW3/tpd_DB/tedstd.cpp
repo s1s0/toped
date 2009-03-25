@@ -305,7 +305,8 @@ void laydata::TEDfile::putRevision()
    putWord(_subrevision);
 }
 
-void laydata::TEDfile::putTP(const TP* p) {
+void laydata::TEDfile::putTP(const TP* p)
+{
    put4b(p->x()); put4b(p->y());
 }
 

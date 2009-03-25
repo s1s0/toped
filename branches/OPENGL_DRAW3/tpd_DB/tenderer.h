@@ -14,7 +14,7 @@
 //   This file is a part of Toped project (C) 2001-2009 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//        Created: Sun Jan 11 2008
+//        Created: Sun Jan 11 2009
 //     Originator: Svilen Krustev - skr@toped.org.uk
 //    Description: OpenGL renderer
 //---------------------------------------------------------------------------
@@ -29,6 +29,13 @@
 #define TENDERER_H
 
 #include <GL/glew.h>
+
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
+
 #include "drawprop.h"
 
 typedef std::list<word> TeselVertices;
@@ -42,8 +49,8 @@ class TeselChunk {
       word              size()     {return _size;}
       unsigned*         index_seq(){return _index_seq;}
    private:
-      unsigned*         _index_seq; // index sequence
-      word              _size;      // size of the index sequence
+      unsigned*         _index_seq;  // index sequence
+      word              _size;       // size of the index sequence
       GLenum            _type;
 };
 
@@ -70,34 +77,37 @@ class TeselTempData {
       unsigned          _offset;
 };
 
-
-//-----------------------------------------------------------------------------
-// holds box representation - The same four points will be used for the
-// contour as well as for the fill
-//
+/**
+*   holds box representation - The same four points will be used for the
+*   contour as well as for the fill
+*/
 class TenderObj {
    public:
-                        TenderObj():_cdata(NULL), _csize(0) {}
-                        TenderObj(const TP*, const TP*);
-      virtual          ~TenderObj();
-      virtual int*      cdata()     {return _cdata;}  // contour data
-      virtual unsigned  csize()     {return _csize;}
+                        TenderObj(int4b* pdata, unsigned psize) : _cdata(pdata), _csize(psize) {}
+      virtual          ~TenderObj() {};
+              int4b*    cdata()     {return _cdata;}  // contour data
+              unsigned  csize()     {return _csize;}
       virtual int*      ldata()     {assert(0); return NULL;}
       virtual unsigned  lsize()     {assert(0); return 0   ;}
    protected:
-                        TenderObj(const pointlist&);
-      int*              _cdata;  // contour data
+      int4b*            _cdata;  // contour data
       unsigned          _csize;
 };
 
-//-----------------------------------------------------------------------------
-// holds polygon representations - the contour will be drawn using the
-// inherited _cdata holder. The _fdata stores the tesselated triangles
-// which will be used for the fill
+class TenderRefBox : public TenderObj {
+   public:
+                        TenderRefBox(int4b* pdata) : TenderObj(pdata, 4) {}
+      virtual          ~TenderRefBox() {delete [] _cdata;}
+};
+/**
+*   holds polygon representations - the contour will be drawn using the
+*   inherited _cdata holder. The chains of point indexes resulting from the
+*   tesselation are stored in _tdata. They will be used together with the _cdata
+*   during the polygon fill
+*/
 class TenderPoly : public TenderObj {
    public:
-                        TenderPoly() : TenderObj() {}
-                        TenderPoly(const pointlist&);
+                        TenderPoly(int4b* pdata, unsigned psize) : TenderObj(pdata, psize) {}
       virtual          ~TenderPoly();
       void              Tessel(TeselTempData*);
       TeselChain*       tdata()              {return &_tdata;}
@@ -115,13 +125,14 @@ class TenderPoly : public TenderObj {
       TeselChain        _tdata;
 };
 
-//-----------------------------------------------------------------------------
-// holds wire representation - the contour and the fill - exactly as in the 
-// inherited class. The _ldata stores the central line which is effectively 
-// the original points from tdtwire
+/**
+*   holds wire representation - the contour and the fill - exactly as in the
+*   inherited class. The _ldata stores the central line which is effectively
+*   the original point list from tdtwire
+*/
 class TenderWire : public TenderPoly {
    public:
-                        TenderWire(const pointlist&, const word, bool);
+                        TenderWire(int4b*, unsigned, const word, bool);
       virtual          ~TenderWire();
       void              Tessel(unsigned);
       virtual int*      ldata()                 {return _ldata;}
@@ -134,17 +145,72 @@ class TenderWire : public TenderPoly {
       unsigned          _lsize;
 };
 
+/**
+ *   holds the representation of selected objects and segments
+ */
+class TenderLine {
+   public:
+                        TenderLine(TenderObj*, const SGBitSet*);
+                        TenderLine(TenderPoly*, const SGBitSet*);
+                        TenderLine(TenderWire*, const SGBitSet*);
+                       ~TenderLine();
+      int*              ldata()                 {return _ldata;}
+      unsigned          lsize()                 {return _lsize;}
+   private:
+      int4b*            _ldata;
+      unsigned          _lsize;
+      bool              _partial;
+};
+
 typedef std::list<TenderObj*>  SliceObjects;
 typedef std::list<TenderPoly*> SlicePolygons;
+typedef std::list<TenderLine*> SliceLines;
 
-//-----------------------------------------------------------------------------
-// translation view - effectively a layer slice of the visible cell data
+/**
+ *  Reference boxes
+ */
+class TenderRB {
+   public:
+                        TenderRB(const CTM&, const DBbox&);
+      void              draw();
+   private:
+      CTM               _tmatrix;
+      DBbox             _obox;
+};
+
+/**
+ *  Translation View of the selected shapes
+ */
+class TenderTVB {
+   public:
+                        TenderTVB();
+      void              add(TenderObj*, const SGBitSet*);
+      void              add(TenderPoly*, const SGBitSet*);
+      void              add(TenderWire*, const SGBitSet*);
+      void              draw_lloops();
+      void              draw_lines();
+      void              draw_lsegments();
+   private:
+      SliceLines        _ln_data;
+      SliceLines        _ll_data;
+      SliceLines        _ls_data;
+      unsigned          _num_ln_points;
+      unsigned          _num_ll_points;
+      unsigned          _num_ls_points;
+      unsigned          _num_ln; // lines
+      unsigned          _num_ll; // line loop
+      unsigned          _num_ls; // line segment
+};
+
+/**
+*  translation view - effectively a layer slice of the visible cell data
+*/
 class TenderTV {
    public:
-                        TenderTV(CTM& translation);
-      void              box  (const TP*, const TP*);
-      void              poly (const pointlist&);
-      void              wire (const pointlist&, word, bool);
+                        TenderTV(CTM&, bool);
+      TenderObj*        box  (int4b*);
+      TenderPoly*       poly (int4b*, unsigned);
+      TenderWire*       wire (int4b*, unsigned, word, bool);
       const CTM*        tmatrix()            {return &_tmatrix;}
       void              draw_contours();
       void              draw_lines();
@@ -161,17 +227,21 @@ class TenderTV {
       unsigned          _num_polygon_points; // non-convex (polygons & wires)
       unsigned          _num_contours;
       unsigned          _num_lines;
-      unsigned          _num_fqus; // fill quad
-      unsigned          _num_fqss; // fill quad strip
-      unsigned          _num_ftrs; // fill triangle
-      unsigned          _num_ftfs; // fill triangle fan
-      unsigned          _num_ftss; // fill triangle strip
+      unsigned          _num_fqus; //! fill quad
+      unsigned          _num_fqss; //! fill quad strip
+      unsigned          _num_ftrs; //! fill triangle
+      unsigned          _num_ftfs; //! fill triangle fan
+      unsigned          _num_ftss; //! fill triangle strip
+      bool              _filled;
 };
 
 //-----------------------------------------------------------------------------
 //
+//! contains all the data across cells on a given layer
 typedef std::list<TenderTV*> TenderLay;
 typedef std::map<word, TenderLay*> DataLay;
+typedef std::map<word, TenderTVB*> DataSel;
+typedef std::list<TenderRB*> TenderRBL;
 
 class Tenderer {
    public:
@@ -179,11 +249,15 @@ class Tenderer {
 //                     ~Tenderer();
       void              Grid( const real, const std::string );
       void              setLayer(word);
-      void              pushCTM(CTM& trans)                    {_ctrans = trans;_drawprop->pushCTM(trans);}
+      void              setSdataContainer(word);
+      void              pushCell(const CTM&, const DBbox&, bool, bool);
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
-      void              box (const TP* p1, const TP* p2)       {_cslice->box(p1,p2);}
-      void              poly (const pointlist& plst)           {_cslice->poly(plst);}
-      void              wire (const pointlist& plst, word w);
+      void              box  (int4b* pdata)                    {_cslice->box(pdata);}
+      void              box  (int4b*, const SGBitSet*);
+      void              poly (int4b* pdata, unsigned psize)    {_cslice->poly(pdata, psize);}
+      void              poly (int4b*, unsigned, const SGBitSet*);
+      void              wire (int4b*, unsigned, word);
+      void              wire (int4b*, unsigned, word, const SGBitSet*);
       void              draw();
       // temporary!
       void              initCTMstack()                {        _drawprop->initCTMstack()        ;}
@@ -200,10 +274,30 @@ class Tenderer {
    private:
       layprop::DrawProperties*   _drawprop;
       real              _UU;
-      DataLay           _data;
+      DataLay           _data;      //!All data for drawing
+      DataSel           _sdata;     //!Selected data - to be redrawn on top of the _data
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
+      TenderTVB*        _sslice;    //!Selected shapes in the active cell
+      TenderRBL         _oboxes;    //!All reference overlapping boxes
+      TenderRBL         _osboxes;   //!All selected reference overlapping boxes
+      CTM               _atrans;    //!The translation of the active cell
       CTM               _ctrans;    //!Working variable storing the current translation
 };
 
+
+class HiResTimer {
+   public:
+      HiResTimer();
+      void           report(char*);
+   private:
+      timeval        _start_time;
+      timeval        _end_time;
+#ifdef WIN32
+		// System frequency of timer for Windows.
+		LARGE_INTEGER	_freq;
+		LARGE_INTEGER	_inittime;
+#endif
+
+};
 
 #endif //TENDERER_H

@@ -57,6 +57,7 @@ namespace laydata {
       //
       std::string    name()            const {return _name;}
       real           UU()              const {return _UU;}
+      real           DBU()             const {return _DBU;}
       const cellList& cells()          const {return _cells;}
       TDTHierTree*   hiertree()        const {return _hiertree;}
       int            libID()           const {return _libID;}
@@ -105,7 +106,7 @@ namespace laydata {
       void           openGL_draw(layprop::DrawProperties&);
       void           openGL_draw(Tenderer&);
       void           tmp_draw(const layprop::DrawProperties&, TP, TP);
-      void           set_tmpdata(tdtdata* tmpdata) {_tmpdata = tmpdata;}
+      void           set_tmpdata(tdttmpdata* tmpdata) {_tmpdata = tmpdata;}
       void           set_tmpctm(CTM tmpctm)        {_tmpctm  = tmpctm; }
       void           mousePoint(TP p);
       void           mousePointCancel(TP&);
@@ -140,6 +141,7 @@ namespace laydata {
       quadTree*      targetlayer(word layno);
       bool           securelaydef(word layno) {return _target.securelaydef( layno);}
       void           unselect_all()    const {_target.edit()->unselect_all(false);};
+      void           try_unselect_all()const;
       selectList*    shapesel()        const {return _target.edit()->shapesel();};
       selectList*    copy_selist()     const {return _target.edit()->copy_selist();};
       void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
@@ -154,7 +156,7 @@ namespace laydata {
       bool           modified;
       friend         class TEDfile;
    private:
-      tdtdata*       _tmpdata;      // pointer to a data under construction - for view purposes
+      tdttmpdata*    _tmpdata;      // pointer to a data under construction - for view purposes
       editobject     _target;       // edit/view target <- introduced with pedit operations
       CTM            _tmpctm;
    };

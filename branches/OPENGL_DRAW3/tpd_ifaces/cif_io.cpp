@@ -85,11 +85,13 @@ CIFin::CifLabelLoc::~CifLabelLoc()
 }
 //=============================================================================
 CIFin::CifLabelSig::CifLabelSig(CifData* last, std::string label, TP* location) :
-      CifLabelLoc(last, label, location) {}
+      CifLabelLoc(last, label, location)
+{}
 
 //=============================================================================
 CIFin::CifLayer::CifLayer(std::string name, CifLayer* last):
-      _name(name), _last(last), _first(NULL) {}
+      _name(name), _last(last), _first(NULL)
+{}
 
 CIFin::CifLayer::~CifLayer()
 {
@@ -186,6 +188,7 @@ void CIFin::CifStructure::collectLayers(nameList& layList, bool hier)
 
 void CIFin::CifStructure::addRef(_dbl_word cell, CTM* location)
 {
+   (*location) = ((*location)*((real)_a/(real)_b));
    _refirst = DEBUG_NEW CifRef(_refirst, cell, location);
 }
 
@@ -461,15 +464,22 @@ void CIFin::CifExportFile::registerCellWritten(std::string cellname)
    _cellmap[cellname] = ++_lastcellnum;
 }
 
-void CIFin::CifExportFile::definitionStart(std::string name)
+void CIFin::CifExportFile::definitionStart(std::string name, real DBU)
 {
    std::string message = "...converting " + name;
+   unsigned dbuu = (unsigned) (1/DBU);
+   // clean the error from the conversion (round to step 10)
+   dbuu = (int4b) (rint((dbuu + (5)) / 10) * 10);
+   unsigned cifu = 100000000;
+   unsigned gcd = GCD(dbuu,cifu); // get the greatest common denominator
+   unsigned bfact = dbuu / gcd;
+   unsigned afact = cifu / gcd;
    tell_log(console::MT_INFO, message);
    registerCellWritten(name);
    if (_verbose)
-      _file << std::endl << "Definition Start #" << _lastcellnum << ";"<< std::endl;
+      _file << std::endl << "Definition Start #" << _lastcellnum << "with a = " << afact << " and b = " << bfact<< ";"<< std::endl;
    else
-      _file << std::endl << "DS " << _lastcellnum << ";" << std::endl;
+      _file << std::endl << "DS " << _lastcellnum << " " << afact << " " << bfact <<";" << std::endl;
    _file << "   9 "<< name << ";"<< std::endl;
 }
 
@@ -508,25 +518,25 @@ void CIFin::CifExportFile::box(const unsigned length, const unsigned width, cons
             " " << center.y() << ";" << std::endl;
 }
 
-void CIFin::CifExportFile::polygon(const pointlist& plst)
+void CIFin::CifExportFile::polygon(const int4b* const pdata, unsigned psize)
 {
    if (_verbose)
       _file <<"      Polygon with vertices";
    else
       _file <<"      P";
-   for (pointlist::const_iterator CP = plst.begin(); CP != plst.end(); CP++)
-      _file << " " << CP->x() << " " << CP->y();
+   for (unsigned i = 0; i < psize; i++)
+      _file << " " << pdata[2*i] << " " << pdata[2*i+1];
    _file << ";"<< std::endl;
 }
 
-void CIFin::CifExportFile::wire(unsigned width, const pointlist& plst)
+void CIFin::CifExportFile::wire(const int4b* const pdata, unsigned psize, unsigned width)
 {
    if (_verbose)
       _file <<"      Wire width = " << width << "and points";
    else
       _file <<"      W" << width;
-   for (pointlist::const_iterator CP = plst.begin(); CP != plst.end(); CP++)
-      _file << " " << CP->x() << " " << CP->y();
+   for (unsigned i = 0; i < psize; i++)
+      _file << " " << pdata[2*i] << " " << pdata[2*i+1];
    _file << ";"<< std::endl;
 }
 

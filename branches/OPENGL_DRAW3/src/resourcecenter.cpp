@@ -40,6 +40,7 @@ extern tui::TopedFrame*          Toped;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType         wxEVT_TOOLBARADDITEM;
+extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 extern const wxEventType         wxEVT_SETINGSMENU;
 
 tui::MenuItemHandler::MenuItemHandler(void)
@@ -491,6 +492,27 @@ void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const
 	}
 }
 
+void	tui::ToolBarHandler::deleteTool(const std::string &toolBarItem)
+{
+	toolList::iterator it;
+	for(it = _tools.begin(); it != _tools.end(); it++)
+	{
+		if ((*it)->name() == toolBarItem)
+		{
+			std::ostringstream ost;
+			ost<<"Tool item "+toolBarItem+" is deleted";
+			tell_log(console::MT_WARNING,ost.str());
+			_toolBar->DeleteTool((*it)->ID());
+			delete (*it);
+			_tools.erase(it);
+			break;
+		}
+	}
+	Toped->getAuiManager()->DetachPane(_toolBar);
+	_toolBar->Realize();
+	attachToAUI();
+}
+
 void	tui::ToolBarHandler::clearTool(const std::string &iconName)
 {
 	toolList::iterator it;
@@ -499,7 +521,7 @@ void	tui::ToolBarHandler::clearTool(const std::string &iconName)
 		if ((*it)->name() == iconName)
 		{
 			std::ostringstream ost;
-			ost<<"Tool bar"+iconName+" is redefined";
+			ost<<"Tool item "+iconName+" is redefined";
 			tell_log(console::MT_WARNING,ost.str());
 				delete (*it);
 			_tools.erase(it);
@@ -892,6 +914,33 @@ void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::
 }
 
 
+void tui::ResourceCenter::deleteTool(const std::string &toolBarName, const std::string &toolBarItem)
+{
+	//find toolbar
+	std::string str = toolBarName;
+	std::transform(str.begin(), str.end(), str.begin(), tolower);
+	toolBarList::const_iterator it;
+	for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+	{
+		if ((*it)->name()==str)
+		{
+			break;
+		}
+	}
+	//if toolbar doesn't exist, create it
+	if (it==_toolBars.end())
+	{
+		std::ostringstream ost;
+		ost<<"toolbardeleteitem: there is no such toolbar";
+		tell_log(console::MT_WARNING,ost.str());
+		return;
+	}
+	else
+	{
+		(*it)->deleteTool(toolBarItem);
+	}
+}
+
 tui::ToolBarHandler* tui::ResourceCenter::proceedTool(const std::string &toolBarName, const std::string &toolBarItem)
 {
 	int ID; 
@@ -1041,8 +1090,48 @@ int tellstdfunc::stdTOOLBARADDITEM::execute()
 		wxPostEvent(Toped, eventToolBarDef);
 
    }
-
    return EXEC_NEXT;
 }
 
 
+//=============================================================================
+tellstdfunc::stdTOOLBARADDITEM_S::stdTOOLBARADDITEM_S(telldata::typeID retype, bool eor) :
+      stdTOOLBARADDITEM(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::tthshstr()));
+}
+
+int tellstdfunc::stdTOOLBARADDITEM_S::execute()
+{
+	telldata::tthshstr* iconCmdMap = static_cast<telldata::tthshstr*>(OPstack.top());OPstack.pop();
+	telldata::ttlist *iconCmdMapList = DEBUG_NEW telldata::ttlist(telldata::tn_hshstr);
+	iconCmdMapList->add(iconCmdMap);
+	OPstack.push(iconCmdMapList);
+
+   return stdTOOLBARADDITEM::execute();
+}
+
+//=============================================================================
+tellstdfunc::stdTOOLBARDELETEITEM::stdTOOLBARDELETEITEM(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::stdTOOLBARDELETEITEM::execute()
+{
+	std::string	itemname	= getStringValue();
+	wxString utfitemname = wxString(itemname.c_str(), wxConvUTF8);
+	std::string	toolbarname	= getStringValue();
+	wxString utftoolbarname = wxString(toolbarname.c_str(), wxConvUTF8);
+
+	wxCommandEvent eventToolBarDelItem(wxEVT_TOOLBARDELETEITEM);
+	eventToolBarDelItem.SetString(utftoolbarname);
+	wxStringClientData *data = DEBUG_NEW wxStringClientData(utfitemname);
+	eventToolBarDelItem.SetClientObject(data);
+	wxPostEvent(Toped, eventToolBarDelItem);
+
+   return EXEC_NEXT;
+}

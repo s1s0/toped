@@ -45,7 +45,7 @@ TeselChunk::TeselChunk(const TeselVertices& data, GLenum type, unsigned offset)
 }
 
 TeselChunk::TeselChunk(const int* data, unsigned size, unsigned offset)
-{
+{ // used for wire tesselation explicitly
    _size = size;
    _type = GL_QUAD_STRIP;
    assert(0 ==(size % 2));
@@ -84,44 +84,10 @@ void TeselTempData::storeChunk()
 }
 
 //=============================================================================
-//
-TenderObj::TenderObj(const TP* p1, const TP* p2)
-{
-   _csize = 4;
-   _cdata = new int[8];
-   word index = 0;
-   _cdata[index++] = p1->x();_cdata[index++] = p1->y();
-   _cdata[index++] = p2->x();_cdata[index++] = p1->y();
-   _cdata[index++] = p2->x();_cdata[index++] = p2->y();
-   _cdata[index++] = p1->x();_cdata[index++] = p2->y();
-}
+// TenderObj
 
-TenderObj::TenderObj(const pointlist& plst)
-{
-   _csize = plst.size();
-   if (0 == _csize)
-      _cdata = NULL;
-   else
-   {
-      _cdata = new int[_csize*2];
-      word index = 0;
-      for (unsigned i = 0; i < _csize; i++)
-      {
-         _cdata[index++] = plst[i].x();
-         _cdata[index++] = plst[i].y();
-      }
-   }
-}
 
-TenderObj::~TenderObj()
-{
-   if (_cdata) delete [] _cdata;
-}
 //=============================================================================
-TenderPoly::TenderPoly(const pointlist& plst) : TenderObj(plst)/*,
-                       _fdata(NULL), _fsize(0)*/
-{
-}
 
 void TenderPoly::Tessel(TeselTempData* ptdata)
 {
@@ -165,18 +131,9 @@ TenderPoly::~TenderPoly()
 }
 
 //=============================================================================
-TenderWire::TenderWire(const pointlist& plst, const word width, bool center_line_only) : TenderPoly()
+TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width,
+                       bool center_line_only) : TenderPoly(NULL, 0), _ldata(pdata), _lsize(psize)
 {
-   _lsize = plst.size();
-   assert(0 != _lsize);
-   _ldata = new int[2 * _lsize];
-   word index = 0;
-   for (unsigned i = 0; i < _lsize; i++)
-   {
-      _ldata[index++] = plst[i].x();
-      _ldata[index++] = plst[i].y();
-   }
-   assert(index == 2*_lsize);
    if (!center_line_only)
       precalc(width);
 }
@@ -269,9 +226,9 @@ DBbox* TenderWire::mdlPnts(const word width, word i1, word i2, word i3)
                           (int4b) rint(_ldata[i2+1] - ycorr) );
 }
 
-/** For wire tessellation we can use the common polygon tessellation procedure
-    is completely. This could be a huge overhead though. The thing is that we've
-    already been trough the precalc procedure and we know that were object is
+/** For wire tessellation we can use the common polygon tessellation procedure.
+    This could be a huge overhead though. The thing is that we've
+    already been trough the precalc procedure and we know that wire object is
     very specific non-convex polygon. Using this knowledge the tessallation
     is getting really trivial. All we have to do is to list the contour points
     indexes in pairs - one from the front, and the other from the back of the
@@ -287,33 +244,325 @@ TenderWire::~TenderWire()
 {
    if (_ldata) delete [] _ldata;
 }
+
+//=============================================================================
+// class TenderLine
+TenderLine::TenderLine(TenderObj* obj, const SGBitSet* psel)
+{
+   _partial = (NULL != psel);
+   if (_partial)
+   { // shape is partially selected
+      // get the number of selected segments first
+      _lsize = 0;
+      word allpoints = obj->csize();
+      for (unsigned i = 0; i < allpoints; i++)
+         if (psel->check(i) && psel->check((i+1)%allpoints)) _lsize +=2;
+      // now copy the segment points
+      _ldata = DEBUG_NEW int4b [2*_lsize];
+      word curpoint = 0;
+      for (unsigned i = 0; i < allpoints; i++)
+         if (psel->check(i) && psel->check((i+1)%allpoints))
+      {
+         _ldata[2*curpoint  ] = obj->cdata()[2*i  ];
+         _ldata[2*curpoint+1] = obj->cdata()[2*i+1];
+         curpoint++;
+         _ldata[2*curpoint  ] = obj->cdata()[2*((i+1)%allpoints)  ];
+         _ldata[2*curpoint+1] = obj->cdata()[2*((i+1)%allpoints)+1];
+         curpoint++;
+      }
+      assert(curpoint == _lsize);
+   }
+   else
+   {
+      _lsize = obj->csize();
+      _ldata = obj->cdata();
+   }
+}
+
+TenderLine::TenderLine(TenderPoly* obj, const SGBitSet* psel)
+{
+   _partial = (NULL != psel);
+   if (_partial)
+   { // shape is partially selected
+      // get the number of selected segments first
+      _lsize = 0;
+      word allpoints = obj->csize();
+      for (unsigned i = 0; i < allpoints; i++)
+         if (psel->check(i) && psel->check((i+1)%allpoints)) _lsize +=2;
+      // now copy the segment points
+      _ldata = DEBUG_NEW int4b [2*_lsize];
+      word curpoint = 0;
+      for (unsigned i = 0; i < allpoints; i++)
+         if (psel->check(i) && psel->check((i+1)%allpoints))
+         {
+            _ldata[2*curpoint  ] = obj->cdata()[2*i  ];
+            _ldata[2*curpoint+1] = obj->cdata()[2*i+1];
+            curpoint++;
+            _ldata[2*curpoint  ] = obj->cdata()[2*((i+1)%allpoints)  ];
+            _ldata[2*curpoint+1] = obj->cdata()[2*((i+1)%allpoints)+1];
+            curpoint++;
+         }
+      assert(curpoint == _lsize);
+   }
+   else
+   {
+      _lsize = obj->csize();
+      _ldata = obj->cdata();
+   }
+}
+
+TenderLine::TenderLine(TenderWire* obj, const SGBitSet* psel)
+{
+   _partial = (NULL != psel);
+   if (_partial)
+   { // shape is partially selected
+      // get the number of selected segments first
+      _lsize = 0;
+      word allpoints = obj->lsize();
+      for (unsigned i = 0; i < allpoints - 1; i++)
+         if (psel->check(i) && psel->check(i+1)) _lsize +=2;
+      if (psel->check(0)            ) _lsize +=2;
+      if (psel->check(allpoints-1)  ) _lsize +=2;
+      // now copy the segment points
+      _ldata = DEBUG_NEW int4b [2*_lsize];
+      word curpoint = 0;
+      for (unsigned i = 0; i < allpoints - 1; i++)
+         if (psel->check(i) && psel->check((i+1)%allpoints))
+         {
+            _ldata[2*curpoint  ] = obj->ldata()[2*i  ];
+            _ldata[2*curpoint+1] = obj->ldata()[2*i+1];
+            curpoint++;
+            _ldata[2*curpoint  ] = obj->ldata()[2*(i+1)  ];
+            _ldata[2*curpoint+1] = obj->ldata()[2*(i+1)+1];
+            curpoint++;
+         }
+      if (psel->check(0)            )
+      {
+         _ldata[2*curpoint  ] = obj->cdata()[0];
+         _ldata[2*curpoint+1] = obj->cdata()[1];
+         curpoint++;
+         _ldata[2*curpoint  ] = obj->cdata()[4*allpoints - 2];
+         _ldata[2*curpoint+1] = obj->cdata()[4*allpoints - 1];
+         curpoint++;
+      }
+      if (psel->check(allpoints-1)  )
+      {
+         _ldata[2*curpoint  ] = obj->cdata()[2*allpoints - 2];
+         _ldata[2*curpoint+1] = obj->cdata()[2*allpoints - 1];
+         curpoint++;
+         _ldata[2*curpoint  ] = obj->cdata()[2*allpoints    ];
+         _ldata[2*curpoint+1] = obj->cdata()[2*allpoints + 1];
+         curpoint++;
+      }
+      assert(curpoint == _lsize);
+   }
+   else
+   {
+      _lsize = obj->lsize();
+      _ldata = obj->ldata();
+   }
+}
+
+TenderLine::~TenderLine()
+{
+   if (_partial)
+      delete []_ldata;
+}
+
+//=============================================================================
+// class TenderRB
+TenderRB::TenderRB(const CTM& tmatrix, const DBbox& obox) : _tmatrix (tmatrix),
+                   _obox(obox)
+{}
+
+void TenderRB::draw()
+{
+   glPushMatrix();
+   real openGLmatrix[16];
+   _tmatrix.oglForm(openGLmatrix);
+   glMultMatrixd(openGLmatrix);
+   //
+   glRecti(_obox.p1().x(), _obox.p1().y(), _obox.p2().x(), _obox.p2().y());
+   //
+   glPopMatrix();
+}
+
+//=============================================================================
+// class TenderTVB
+TenderTVB::TenderTVB() :
+   _num_ln_points(0u), _num_ll_points(0u),_num_ls_points(0u),
+   _num_ln(0), _num_ll(0), _num_ls(0)
+{}
+
+void TenderTVB::add(TenderObj* tobj, const SGBitSet* psel)
+{
+   TenderLine* cline = DEBUG_NEW TenderLine(tobj, psel);
+   if (NULL == psel)
+   {
+      _ll_data.push_back(cline);
+      _num_ll_points += cline->lsize();
+      _num_ll++;
+   }
+   else
+   {
+      _ls_data.push_back(cline);
+      _num_ls_points += cline->lsize();
+      _num_ls++;
+   }
+}
+
+void TenderTVB::add(TenderPoly* tobj, const SGBitSet* psel)
+{
+   TenderLine* cline = DEBUG_NEW TenderLine(tobj, psel);
+   if (NULL == psel)
+   {
+      _ll_data.push_back(cline);
+      _num_ll_points += cline->lsize();
+      _num_ll++;
+   }
+   else
+   {
+      _ls_data.push_back(cline);
+      _num_ls_points += cline->lsize();
+      _num_ls++;
+   }
+}
+
+void TenderTVB::add(TenderWire* tobj, const SGBitSet* psel)
+{
+   TenderLine* cline = DEBUG_NEW TenderLine(tobj, psel);
+   if (NULL == psel)
+   {
+      _ln_data.push_back(cline);
+      _num_ln_points += cline->lsize();
+      _num_ln++;
+   }
+   else
+   {
+      _ls_data.push_back(cline);
+      _num_ls_points += cline->lsize();
+      _num_ls++;
+   }
+}
+
+void TenderTVB::draw_lloops()
+{
+   if  (0 == _num_ll) return;
+   unsigned long arr_size = 2 * _num_ll_points;
+   int* point_array = DEBUG_NEW int[arr_size];
+   GLsizei* size_array = DEBUG_NEW int[_num_ll];
+   GLsizei* first_array = DEBUG_NEW int[_num_ll];
+   unsigned long pntindx = 0;
+   unsigned      szindx  = 0;
+
+   for (SliceLines::const_iterator CSH = _ll_data.begin(); CSH != _ll_data.end(); CSH++)
+   {
+      unsigned clsize = (*CSH)->lsize();
+      assert(clsize);
+      first_array[szindx] = pntindx/2;
+      size_array[szindx++] = clsize;
+      memcpy(&(point_array[pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
+      pntindx += 2 * clsize;
+   }
+   assert(pntindx == arr_size);
+   assert(szindx == _num_ll);
+   glVertexPointer(2, GL_INT, 0, point_array);
+   glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
+
+   delete [] point_array;
+   delete [] size_array;
+   delete [] first_array;
+}
+
+void TenderTVB::draw_lines()
+{
+   if  (0 == _num_ln) return;
+   unsigned long arr_size = 2 * _num_ln_points;
+   int* point_array = DEBUG_NEW int[arr_size];
+   GLsizei* size_array = DEBUG_NEW int[_num_ln];
+   GLsizei* first_array = DEBUG_NEW int[_num_ln];
+   unsigned long pntindx = 0;
+   unsigned      szindx  = 0;
+
+   for (SliceLines::const_iterator CSH = _ln_data.begin(); CSH != _ln_data.end(); CSH++)
+   {
+      unsigned clsize = (*CSH)->lsize();
+      assert(clsize);
+      first_array[szindx] = pntindx/2;
+      size_array[szindx++] = clsize;
+      memcpy(&(point_array[pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
+      pntindx += 2 * clsize;
+   }
+   assert(pntindx == arr_size);
+   assert(szindx == _num_ln);
+   glVertexPointer(2, GL_INT, 0, point_array);
+   glMultiDrawArrays(GL_LINE_STRIP, first_array, size_array, szindx);
+
+   delete [] point_array;
+   delete [] size_array;
+   delete [] first_array;
+}
+
+void TenderTVB::draw_lsegments()
+{
+   if  (0 == _num_ls) return;
+   unsigned long arr_size = 2 * _num_ls_points;
+   int* point_array = DEBUG_NEW int[arr_size];
+   GLsizei* size_array = DEBUG_NEW int[_num_ls];
+   GLsizei* first_array = DEBUG_NEW int[_num_ls];
+   unsigned long pntindx = 0;
+   unsigned      szindx  = 0;
+
+   for (SliceLines::const_iterator CSH = _ls_data.begin(); CSH != _ls_data.end(); CSH++)
+   {
+      unsigned clsize = (*CSH)->lsize();
+      assert(clsize);
+      first_array[szindx] = pntindx/2;
+      size_array[szindx++] = clsize;
+      memcpy(&(point_array[pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
+      pntindx += 2 * clsize;
+   }
+   assert(pntindx == arr_size);
+   assert(szindx == _num_ls);
+   glVertexPointer(2, GL_INT, 0, point_array);
+   glMultiDrawArrays(GL_LINES, first_array, size_array, szindx);
+
+   delete [] point_array;
+   delete [] size_array;
+   delete [] first_array;
+}
+
 //=============================================================================
 // class TenderTV
-TenderTV::TenderTV(CTM& translation) : _tmatrix(translation),
+TenderTV::TenderTV(CTM& translation, bool filled) : _tmatrix(translation),
     _num_contour_points (0u), _num_line_points(0u), _num_polygon_points(0u),
     _num_contours(0),         _num_lines(0),        _num_fqus(0),
     _num_fqss(0),             _num_ftrs(0),         _num_ftfs(0),
-    _num_ftss(0)
+    _num_ftss(0),             _filled(filled)
 {}
 
-void TenderTV::box (const TP* p1, const TP* p2)
+TenderObj* TenderTV::box (int4b* pdata)
 {
-   TenderObj* cobj = DEBUG_NEW TenderObj(p1,p2);
+   TenderObj* cobj = DEBUG_NEW TenderObj(pdata, 4);
    _contour_data.push_back(cobj);
    _num_contour_points += 4;
    _num_contours++;
-   _fqu_data.push_back(cobj);
-   _num_fqus++;
+   if (_filled)
+   {
+      _fqu_data.push_back(cobj);
+      _num_fqus++;
+   }
+   return cobj;
 }
 
-void TenderTV::poly (const pointlist& plst)
+TenderPoly* TenderTV::poly (int4b* pdata, unsigned psize)
 {
-   TenderPoly* cobj = DEBUG_NEW TenderPoly(plst);
+   TenderPoly* cobj = DEBUG_NEW TenderPoly(pdata, psize);
    _contour_data.push_back(cobj);
    _num_contour_points += cobj->csize();
-   _num_contours += 1;
-//   if (_fill) //@TODO!
-//   {
+   _num_contours++;
+   if (_filled)
+   {
       TeselTempData tdata(_num_polygon_points );
       cobj->Tessel(&tdata);
       _fpolygon_data.push_back(cobj);
@@ -321,28 +570,30 @@ void TenderTV::poly (const pointlist& plst)
       _num_ftrs += tdata.num_ftrs();
       _num_ftfs += tdata.num_ftfs();
       _num_ftss += tdata.num_ftss();
-//   }
+   }
+   return cobj;
 }
 
-void TenderTV::wire (const pointlist& plst, word width, bool center_line_only)
+TenderWire* TenderTV::wire (int4b* pdata, unsigned psize, word width, bool center_line_only)
 {
-   TenderWire* cobj = DEBUG_NEW TenderWire(plst, width, center_line_only);
+   TenderWire* cobj = DEBUG_NEW TenderWire(pdata, psize, width, center_line_only);
    _line_data.push_back(cobj);
    _num_line_points += cobj->lsize();
-   _num_lines += 1;
+   _num_lines++;
    if (!center_line_only)
    {
       _contour_data.push_back(cobj);
       _num_contours += 1;
       _num_contour_points += cobj->csize();
-//       if (_fill) //@TODO!
-//       {
+       if (_filled)
+       {
          cobj->Tessel(_num_polygon_points);
          _fpolygon_data.push_back(cobj);
          _num_polygon_points += cobj->csize();
          _num_fqss += 1;
-//       }
+       }
    }
+   return cobj;
 }
 
 void TenderTV::draw_contours()
@@ -357,13 +608,12 @@ void TenderTV::draw_contours()
 
    for (SliceObjects::const_iterator CSH = _contour_data.begin(); CSH != _contour_data.end(); CSH++)
    { // shapes in the current translation (layer within the cell)
-      assert((*CSH)->csize());
+      unsigned clsize = (*CSH)->csize();
+      assert(clsize);
       first_array[szindx] = pntindx/2;
-      size_array[szindx++] = (*CSH)->csize();
-      for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
-      { // points in the shape
-         point_array[pntindx++] = (*CSH)->cdata()[ipnt];
-      }
+      size_array[szindx++] = clsize;
+      memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
+      pntindx += 2 * clsize;
    }
    assert(pntindx == arr_size);
    assert(szindx == _num_contours);
@@ -374,6 +624,16 @@ void TenderTV::draw_contours()
    delete [] size_array;
    delete [] first_array;
 }
+
+// void TenderTV::draw_contours()
+// {
+//    if  (0 == _num_contours) return;
+//    for (SliceObjects::const_iterator CSH = _contour_data.begin(); CSH != _contour_data.end(); CSH++)
+//    { // shapes in the current translation (layer within the cell)
+//       glVertexPointer(2, GL_INT, 0, (*CSH)->cdata());
+//       glDrawArrays(GL_LINE_LOOP, 0 ,(*CSH)->csize());
+//    }
+// }
 
 void TenderTV::draw_lines()
 {
@@ -387,13 +647,12 @@ void TenderTV::draw_lines()
 
    for (SliceObjects::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
    { // shapes in the current translation (layer within the cell)
-      assert((*CSH)->lsize());
+      unsigned clsize = (*CSH)->lsize();
+      assert(clsize);
       first_array[szindx] = pntindx/2;
-      size_array[szindx++] = (*CSH)->lsize();
-      for (word ipnt = 0; ipnt < 2 * (*CSH)->lsize() ; ipnt++)
-      { // points in the shape
-         point_array[pntindx++] = (*CSH)->ldata()[ipnt];
-      }
+      size_array[szindx++] = clsize;
+      memcpy(&(point_array[pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
+      pntindx += 2 * clsize;
    }
    assert(pntindx == arr_size);
    assert(szindx == _num_lines);
@@ -417,13 +676,12 @@ void TenderTV::draw_fqus()
 
    for (SliceObjects::const_iterator CSH = _fqu_data.begin(); CSH != _fqu_data.end(); CSH++)
    { // shapes in the current translation (layer within the cell)
-      assert((*CSH)->csize());
+      unsigned clsize = (*CSH)->csize();
+      assert(clsize);
       first_array[szindx] = pntindx/2;
-      size_array[szindx++] = (*CSH)->csize();
-      for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
-      { // points in the shape
-         point_array[pntindx++] = (*CSH)->cdata()[ipnt];
-      }
+      size_array[szindx++] = clsize;
+      memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
+      pntindx += 2 * clsize;
    }
    assert(pntindx == arr_size);
    assert(szindx == _num_fqus);
@@ -514,10 +772,8 @@ void TenderTV::draw_fpolygons()
             default: assert(0);
          }
       }
-      for (word ipnt = 0; ipnt < 2 * (*CSH)->csize() ; ipnt++)
-      { // points in the shape
-         point_array[pntindx++] = (*CSH)->cdata()[ipnt];
-      }
+      memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * (*CSH)->csize());
+      pntindx += 2 * (*CSH)->csize();
    }
    assert(pntindx == arr_size);
    assert(sz_ftrs_indx == _num_ftrs);
@@ -581,7 +837,9 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
 
 void Tenderer::setLayer(word layer)
 {
-   if (0==layer) return; // @FIXME!, temporaray, until cell overlap is fixed
+   // Reference layer is processed differently (pushCell), so make sure
+   // that we haven't got here with layer 0 by accident
+   assert(layer);
    TenderLay* laydata = NULL;
    if (_data.end() != _data.find(layer))
    {
@@ -592,17 +850,55 @@ void Tenderer::setLayer(word layer)
       laydata = DEBUG_NEW TenderLay();
       _data[layer] = laydata;
    }
-   _cslice = DEBUG_NEW TenderTV(_ctrans);
+   _cslice = DEBUG_NEW TenderTV(_ctrans, _drawprop->isFilled(layer));
    laydata->push_back(_cslice);
    // @TODO! current fill on/off should be determined here!
 }
 
-void Tenderer::wire (const pointlist& plst, word width)
+void Tenderer::setSdataContainer(word layer)
+{
+   _sslice = DEBUG_NEW TenderTVB();
+   _sdata[layer] = _sslice;
+}
+
+void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active, bool selected)
+{
+   _ctrans = trans * _drawprop->topCTM();
+   _oboxes.push_back(DEBUG_NEW TenderRB(_ctrans, overlap));
+   if (selected)
+      _osboxes.push_back(DEBUG_NEW TenderRB(_ctrans, overlap));
+   _drawprop->pushCTM(_ctrans);
+   if (active)
+      _atrans = trans;
+}
+
+void Tenderer::box  (int4b* pdata, const SGBitSet* psel)
+{
+   assert(_sslice);
+   TenderObj* dobj = _cslice->box(pdata);
+   _sslice->add(dobj, psel);
+}
+
+void Tenderer::poly (int4b* pdata, unsigned psize, const SGBitSet* psel)
+{
+   assert(_sslice);
+   TenderPoly* dpoly = _cslice->poly(pdata, psize);
+   _sslice->add(dpoly, psel);
+}
+
+void Tenderer::wire (int4b* pdata, unsigned psize, word width)
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
    bool center_line_only = !wsquare.visible(topCTM() * ScrCTM());
-   _cslice->wire(plst, width, center_line_only);
+   _cslice->wire(pdata, psize, width, center_line_only);
+}
+
+void Tenderer::wire (int4b* pdata, unsigned psize, word width, const SGBitSet* psel)
+{
+   assert(_sslice);
+   TenderWire* dwire = _cslice->wire(pdata, psize, width, false);
+   _sslice->add(dwire, psel);
 }
 
 void Tenderer::Grid(const real step, const std::string color)
@@ -642,6 +938,7 @@ void Tenderer::Grid(const real step, const std::string color)
 void Tenderer::draw()
 {
    glEnableClientState(GL_VERTEX_ARRAY);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
       word curlayno = CLAY->first;
@@ -655,17 +952,91 @@ void Tenderer::draw()
          ctv->tmatrix()->oglForm(openGLmatrix);
          glMultMatrixd(openGLmatrix);
          //
-         (*TLAY)->draw_contours();
-         (*TLAY)->draw_lines();
+         ctv->draw_contours();
+         ctv->draw_lines();
          if (fill)
          {
-            (*TLAY)->draw_fqus();
-            (*TLAY)->draw_fpolygons();
+            ctv->draw_fqus();
+            ctv->draw_fpolygons();
          }
          //
          glPopMatrix();
       }
    }
-   glDisableClientState(GL_VERTEX_ARRAY);
+   // now the overlapping boxes of the cell references
+   _drawprop->setCurrentColor(0);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//   glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
+   for (TenderRBL::const_iterator CBOX = _oboxes.begin(); CBOX != _oboxes.end(); CBOX++)
+   {
+      (*CBOX)->draw();
+   }
+   _drawprop->setLineProps(true);
+   for (TenderRBL::const_iterator CBOX = _osboxes.begin(); CBOX != _osboxes.end(); CBOX++)
+   {
+      (*CBOX)->draw();
+   }
+   _drawprop->setLineProps(false);
+   // and finally -  the selected objects
+   glPushMatrix();
+   real openGLmatrix[16];
+   _atrans.oglForm(openGLmatrix);
+   glMultMatrixd(openGLmatrix);
+   for (DataSel::const_iterator CLAY = _sdata.begin(); CLAY != _sdata.end(); CLAY++)
+   {
+      _drawprop->setCurrentColor(CLAY->first);
+      _drawprop->setLineProps(true);
+      TenderTVB* ctv = CLAY->second;
+      //
+      ctv->draw_lloops();
+      ctv->draw_lines();
+      ctv->draw_lsegments();
+      //
+      _drawprop->setLineProps(false);
+   }
+   glPopMatrix();
+glDisableClientState(GL_VERTEX_ARRAY);
 
+}
+
+HiResTimer::HiResTimer()
+{
+#ifdef WIN32
+	// Get system frequency (number of ticks per second) of timer
+	if (!QueryPerformanceFrequency(&_freq) || !QueryPerformanceCounter(&_inittime))
+	{
+		tell_log(console::MT_INFO,"Problem with timer");
+	}
+#else
+	gettimeofday(&_start_time, NULL);
+#endif
+}
+
+void HiResTimer::report(char* message)
+{
+	char time_message[256];
+#ifdef WIN32
+	LARGE_INTEGER curtime;
+	if (!QueryPerformanceCounter(&curtime)) 
+		return ;
+  // Convert number of ticks to milliseconds
+   int millisec = (curtime.QuadPart-_inittime.QuadPart) / (_freq.QuadPart / 1000);
+	int sec = millisec / 1000;
+	millisec = millisec - sec * 1000;
+   sprintf (time_message, "%s:   %i sec. %06i msec.",message, sec, millisec);
+
+#else
+
+   gettimeofday(&_end_time, NULL);
+   timeval result;
+   result.tv_sec = _end_time.tv_sec - _start_time.tv_sec;
+   result.tv_usec = _end_time.tv_usec - _start_time.tv_usec;
+   if (result.tv_usec < 0)
+   {
+      result.tv_sec -= 1;
+      result.tv_usec += 1000000;
+   }
+   sprintf (time_message, "%s:   %i sec. %06i msec.",message, result.tv_sec, result.tv_usec);
+#endif
+   tell_log(console::MT_INFO,time_message);
 }

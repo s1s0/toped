@@ -323,6 +323,7 @@ namespace tui {
                         getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title,
                                                                   wxPoint pos, wxString init);
       wxString          getSelectedCell() const {return _nameList->GetStringSelection();}
+      wxString          getTechno()       const {return _techno;}
       bool              getOverwrite()    const {return _overwrite->GetValue();}
       bool              getRecursive()    const {return _recursive->GetValue();}
       bool              getSaveMap()      const {return _saveMap->GetValue();}
@@ -334,6 +335,7 @@ namespace tui {
       wxCheckBox*       _saveMap;
       wxListBox*        _nameList;
       nameCboxList*     _layList;
+      wxString          _techno;
    };
 
    //--------------------------------------------------------------------------

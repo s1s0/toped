@@ -34,6 +34,7 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "ps_out.h"
+#include "tenderer.h"
 
 // Global variables
 DataCenter*               DATC = NULL;
@@ -179,11 +180,9 @@ void GDSin::Gds2Ted::box(GDSin::GdsBox* wd, laydata::tdtlayer* wl, int2b layno)
       tell_log(console::MT_ERROR, ost.str());
    }
    else pl = check.get_validated() ;
-   if (check.box())
-   {
-      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
-   }
-   else wl->addpoly(pl,false);
+
+   if (check.box())  wl->addbox(pl[0], pl[2], false);
+   else              wl->addpoly(pl,false);
 
 }
 
@@ -199,11 +198,8 @@ void GDSin::Gds2Ted::poly(GDSin::GdsPolygon* wd, laydata::tdtlayer* wl, int2b la
       tell_log(console::MT_ERROR, ost.str());
    }
    else pl = check.get_validated() ;
-   if (check.box())
-   {
-      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
-   }
-   else wl->addpoly(pl,false);
+   if (check.box())  wl->addbox(pl[0], pl[2], false);
+   else              wl->addpoly(pl,false);
 }
 
 void GDSin::Gds2Ted::wire(GDSin::GDSpath* wd, laydata::tdtlayer* wl, int2b layno)
@@ -292,9 +288,10 @@ laydata::refnamepair GDSin::Gds2Ted::linkcellref(std::string cellname)
 // class Cif2Ted
 //-----------------------------------------------------------------------------
 CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtdesign* dst_lib,
-      SIMap* cif_layers) : _src_lib (src_lib), _dst_lib(dst_lib),
-                                    _cif_layers(cif_layers)
+      SIMap* cif_layers, real techno) : _src_lib (src_lib), _dst_lib(dst_lib),
+                                    _cif_layers(cif_layers), _techno(techno)
 {
+   _dbucoeff = 1e-8/_dst_lib->DBU();
 }
 
 
@@ -371,6 +368,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
 
 void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
 {
+   _crosscoeff = _dbucoeff * src->a() / src->b();
    CIFin::CifLayer* swl = src->firstLayer();
    while( swl ) // loop trough the layers
    {
@@ -413,18 +411,32 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
 
 void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string layname)
 {
-   pointlist pl;
-   pl.reserve(4);
-   pl.push_back(TP( wd->center()->x() - wd->length() / 2, wd->center()->y() - wd->width() / 2 ));
-   pl.push_back(TP( wd->center()->x() + wd->length() / 2, wd->center()->y() - wd->width() / 2 ));
-   pl.push_back(TP( wd->center()->x() + wd->length() / 2, wd->center()->y() + wd->width() / 2 ));
-   pl.push_back(TP( wd->center()->x() - wd->length() / 2, wd->center()->y() + wd->width() / 2 ));
+   pointlist pl;   pl.reserve(4);
+   real cX, cY;
+
+   cX = rint(((real)wd->center()->x() - (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() - (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt1( (int4b)cX, (int4b)cY );   pl.push_back(cpnt1);
+
+   cX = rint(((real)wd->center()->x() + (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() - (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt2( (int4b)cX, (int4b)cY );   pl.push_back(cpnt2);
+
+   cX = rint(((real)wd->center()->x() + (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() + (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt3( (int4b)cX, (int4b)cY );   pl.push_back(cpnt3);
+
+   cX = rint(((real)wd->center()->x() - (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() + (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt4( (int4b)cX, (int4b)cY );   pl.push_back(cpnt4);
    if (NULL != wd->direction())
    {
       CTM tmx;
-      tmx.Translate(-wd->center()->x(),-wd->center()->x());
+      cX = (real)wd->center()->x() * _crosscoeff;
+      cY = (real)wd->center()->y() * _crosscoeff;
+      tmx.Translate(-cX,-cY);
       tmx.Rotate(*(wd->direction()));
-      tmx.Translate(-wd->center()->x(),-wd->center()->x());
+      tmx.Translate(cX,cY);
       pl[0] *=  tmx;
       pl[1] *=  tmx;
       pl[2] *=  tmx;
@@ -433,19 +445,28 @@ void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string
 
    laydata::valid_poly check(pl);
 
-   assert(check.valid());
-   pl = check.get_validated() ;
-   if (check.box())
+   if (!check.valid())
    {
-      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
+      std::ostringstream ost; ost << "Layer " << layname;
+      ost << ": Box check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str());
    }
-   else wl->addpoly(pl,false);
+   else pl = check.get_validated() ;
 
+   if (check.box())  wl->addbox(pl[0], pl[2],false);
+   else              wl->addpoly(pl,false);
 }
 
 void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::string layname)
 {
-   pointlist pl = *(wd->poly());
+   pointlist pl;
+   pl.reserve(wd->poly()->size());
+   for(pointlist::const_iterator CP = wd->poly()->begin(); CP != wd->poly()->end(); CP++)
+   {
+      TP pnt(*CP);
+      pnt *= _crosscoeff;
+      pl.push_back(pnt);
+   }
    laydata::valid_poly check(pl);
 
    if (!check.valid())
@@ -455,16 +476,21 @@ void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::strin
       tell_log(console::MT_ERROR, ost.str());
    }
    else pl = check.get_validated() ;
-   if (check.box())
-   {
-      wl->addbox(DEBUG_NEW TP(pl[0]), DEBUG_NEW TP(pl[2]),false);
-   }
-   else wl->addpoly(pl,false);
+
+   if (check.box())  wl->addbox(pl[0], pl[2],false);
+   else              wl->addpoly(pl,false);
 }
 
 void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::tdtlayer* wl, std::string layname)
 {
-   pointlist pl = *(wd->poly());
+   pointlist pl;
+   pl.reserve(wd->poly()->size());
+   for(pointlist::const_iterator CP = wd->poly()->begin(); CP != wd->poly()->end(); CP++)
+   {
+      TP pnt(*CP);
+      pnt *= _crosscoeff;
+      pl.push_back(pnt);
+   }
    laydata::valid_wire check(pl, wd->width());
 
    if (!check.valid())
@@ -485,7 +511,7 @@ void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
    {
       laydata::refnamepair striter = _dst_lib->getcellnamepair(cell_name);
       // Absolute magnification, absolute angle should be reflected somehow!!!
-      dst->addcellref(_dst_lib, striter, *(wd->location()), false);
+      dst->addcellref(_dst_lib, striter, (*wd->location())*_crosscoeff, false);
    }
    else
    {
@@ -499,9 +525,12 @@ void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::tdtlayer* wl, std::s
 {
    // CIF doesn't have a concept of texts (as GDS)
    // text size and placement are just the default
+   if (0.0 == _techno) return;
+   TP pnt(*(wd->location()));
+   pnt *= _crosscoeff;
    wl->addtext(wd->text(),
-               CTM(*(wd->location()),
-                   1 / (_dst_lib->UU() *  OPENGL_FONT_UNIT),
+               CTM(pnt,
+                   (_techno / OPENGL_FONT_UNIT),
                    0.0,
                    false )
               );
@@ -836,14 +865,14 @@ bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
    }
 }
 
-void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite )
+void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite, real techno )
 {
    // DB shold have been locked at this point (from the tell functions)
    if (NULL == lockCIF())
       tell_log(console::MT_ERROR,"No CIF data in memory. Parse CIF file first");
    else
    {
-      CIFin::Cif2Ted converter(_CIFDB, _TEDLIB(), cifLayers);
+      CIFin::Cif2Ted converter(_CIFDB, _TEDLIB(), cifLayers, techno);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.top_structure(*CN, recur, overwrite);
       _TEDLIB()->modified = true;
@@ -895,7 +924,7 @@ laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
 
 void DataCenter::unlockDB() 
 {
-   assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
 }
 
 GDSin::GdsFile* DataCenter::lockGDS(bool throwexception) 
@@ -918,7 +947,7 @@ GDSin::GdsFile* DataCenter::lockGDS(bool throwexception)
 
 void DataCenter::unlockGDS()
 {
-   assert(wxMUTEX_NO_ERROR == GDSLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
 }
 
 CIFin::CifFile* DataCenter::lockCIF(bool throwexception)
@@ -941,7 +970,7 @@ CIFin::CifFile* DataCenter::lockCIF(bool throwexception)
 
 void DataCenter::unlockCIF()
 {
-   assert(wxMUTEX_NO_ERROR == CIFLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == CIFLock.Unlock());
 }
 
 void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
@@ -953,15 +982,15 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
       _TEDLIB()->check_active();
       switch (input_type)
       {
-         case console::op_dbox:   _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtbox()  ); break;
-         case console::op_dpoly:  _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtpoly()) ; break;
+         case console::op_dbox:   _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpbox()  ); break;
+         case console::op_dpoly:  _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmppoly()) ; break;
          case console::op_cbind:
          {
             assert ("" != name);
             laydata::refnamepair striter;
             CTM eqm;
             VERIFY(DATC->getCellNamePair(name, striter));
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtcellref(striter, eqm) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellref(striter, eqm) );
             break;
          }
          case console::op_abind:
@@ -972,7 +1001,7 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             CTM eqm;
             VERIFY(DATC->getCellNamePair(name, striter));
             laydata::ArrayProperties arrprops(stepX, stepY, cols, rows);
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtcellaref(striter, eqm, arrprops) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellaref(striter, eqm, arrprops) );
             break;
          }
          case console::op_tbind:
@@ -980,14 +1009,14 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             assert ("" != name);
             CTM eqm(trans);
             eqm.Scale(1/(UU()*OPENGL_FONT_UNIT), 1/(UU()*OPENGL_FONT_UNIT));
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttext(name, eqm) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmptext(name, eqm) );
             break;
          }
          case console::op_rotate: _TEDLIB()->set_tmpctm( trans );
          default:
          {
             if (0  < input_type)
-               _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdtwire(input_type) );
+               _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpwire(input_type) );
          }
       }
    }
@@ -1030,8 +1059,9 @@ void DataCenter::mouseRotate()
    if (_TEDLIB()) _TEDLIB()->mouseRotate();
 }
 
-void DataCenter::openGL_draw(const CTM& layCTM) {
-   if (_TEDLIB()) 
+void DataCenter::openGL_draw(const CTM& layCTM)
+{
+   if (_TEDLIB())
    {
       // Don't block the drawing if the databases are
       // locked. This will block all redraw activities including UI
@@ -1055,10 +1085,12 @@ void DataCenter::openGL_draw(const CTM& layCTM) {
       }
       else
       {
+         HiResTimer rendTimer;
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(_properties.drawprop());
-         assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
+         rendTimer.report("Total elapsed rendering time");
+         VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
       PROPLock.Unlock();
@@ -1098,11 +1130,14 @@ void DataCenter::openGL_render(const CTM& layCTM) {
       }
       else
       {
+         HiResTimer rendTimer;
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(renderer);
+         rendTimer.report("Time elapsed for data traversing and processing");
          renderer.draw();
-         assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
+         rendTimer.report("                   Total elapsed rendering time");
+         VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
       PROPLock.Unlock();
@@ -1124,7 +1159,7 @@ void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
       _TEDLIB()->tmp_draw(_properties.drawprop(), base, newp);
-      assert(wxMUTEX_NO_ERROR == DBLock.Unlock());
+      VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
    }
 // 
 //   else throw EXPTNactive_DB();      
@@ -1394,4 +1429,3 @@ void initDBLib(const std::string &localDir, const std::string &globalDir)
 {
    DATC = DEBUG_NEW DataCenter(localDir, globalDir);
 }
-

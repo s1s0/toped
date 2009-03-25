@@ -33,12 +33,14 @@
 //-----------------------------------------------------------------------------
 // class TP
 //-----------------------------------------------------------------------------
-TP::TP(real x, real y, real scale) {
+TP::TP(real x, real y, real scale)
+{
    _x = (int4b) rint(x * scale);
    _y = (int4b) rint(y * scale);
 }
 
-void TP::roundTO(int4b step) {
+void TP::roundTO(int4b step)
+{
    if (0 == step) step = 1;
    _x = (_x >= 0) ? (int4b) (rint((_x + (step/2)) / step) * step) :
                     (int4b) (rint((_x - (step/2)) / step) * step) ;
@@ -46,16 +48,25 @@ void TP::roundTO(int4b step) {
                     (int4b) (rint((_y - (step/2)) / step) * step) ;
 }
 
-TP TP::operator * (const CTM& op2) const {
+TP TP::operator * (const CTM& op2) const
+{
    return TP((int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx()),
-              (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty()));
+             (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty()));
 }
 
-TP TP::operator *= (const CTM& op2) {
+TP TP::operator *= (const CTM& op2)
+{
    int4b x_new = (int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
    int4b y_new = (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
    _x = x_new; _y = y_new;
   return *this;
+}
+
+TP TP::operator *= (const real factor)
+{
+   _x = (int4b) rint((real)_x * factor);
+   _y = (int4b) rint((real)_y * factor);
+   return *this;
 }
 
 //TP TP::operator = ( const QPoint& qp) {
@@ -87,11 +98,11 @@ void DBbox::overlap(const DBbox bx) {
    if (DEFAULT_OVL_BOX == bx) return;
    if (DEFAULT_OVL_BOX == (*this)) {
       if (bx.p1().x() > bx.p2().x()) {
-         _p1._x = bx.p2().x(); _p2._x = bx.p1().x(); }   
+         _p1._x = bx.p2().x(); _p2._x = bx.p1().x(); }
       else {
          _p1._x = bx.p1().x(); _p2._x = bx.p2().x(); }
       if (bx.p1().y() > bx.p2().y()) {
-         _p1._y = bx.p2().y(); _p2._y = bx.p1().y(); }   
+         _p1._y = bx.p2().y(); _p2._y = bx.p1().y(); }
       else {
          _p1._y = bx.p1().y(); _p2._y = bx.p2().y(); }
    }
@@ -102,13 +113,10 @@ void DBbox::overlap(const DBbox bx) {
 
 DBbox DBbox::overlap(const CTM& op2)  const
 {
-   TP np(_p1 * op2);
-   DBbox result(np);
-   np = TP(_p2.x(), _p1.y()) * op2; result.overlap(np);
-   np =                (_p2) * op2; result.overlap(np);
-   np = TP(_p1.x(), _p2.y()) * op2; result.overlap(np);
-//   _p1 = result.p1();
-//   _p2 = result.p2();
+   DBbox result(_p1 * op2);
+   result.overlap(TP(_p2.x(), _p1.y()) * op2);
+   result.overlap(  (      _p2       ) * op2);
+   result.overlap(TP(_p1.x(), _p2.y()) * op2);
    return result;
 }
 
@@ -240,8 +248,8 @@ bool DBbox::visible(const CTM& tmtrx) const
    ptlist.push_back(               (_p2) * tmtrx);
    ptlist.push_back(TP(_p1.x(), _p2.y()) * tmtrx);
 
-   if (abs(polyarea(ptlist)) >= (real)MIN_VISUAL_AREA) return true;
-   else                                                return false;
+   if (fabsf(polyarea(ptlist)) >= (real)MIN_VISUAL_AREA) return true;
+   else                                                  return false;
 }
 
 DBbox DBbox::getcorner(byte corner) {
@@ -486,14 +494,16 @@ CTM CTM::Rotate(const TP& direction) // angle between X axis and the point (CIF)
    return *this;
 }
 
-CTM CTM::Reversed() const {
+CTM CTM::Reversed() const
+{
    real denom = (a() * d()) - (b() * c());
    return CTM(                 d()/denom,                   -b()/denom,// 0.0,
                                -c()/denom,                    a()/denom,// 0.0,
               (ty()*c() - tx()*d())/denom , (tx()*b() - ty()*a())/denom );// 1.0 );
 }
 
-CTM CTM::operator * (const CTM op2) const{
+CTM CTM::operator * (const CTM op2) const
+{
    CTM res;
    res._a  = a()  * op2.a() + b()  * op2.c();
    res._b  = a()  * op2.b() + b()  * op2.d();
@@ -504,7 +514,21 @@ CTM CTM::operator * (const CTM op2) const{
    return res;
 }
 
-CTM CTM::operator = (const CTM op2) {
+/*! Operator is used to multiply only the binding point (tx,ty) with a factor
+    For example in the case of CIF import. Use with caution making sure that
+    the original _tx, _ty were not influenced by the following rotate/scale/flip
+    transformations
+*/
+CTM CTM::operator * (const real factor) const
+{
+   CTM res(*this);
+   res._tx *= factor;
+   res._ty *= factor;
+   return res;
+}
+
+CTM CTM::operator = (const CTM op2)
+{
    _a = op2.a();_b = op2.b();_c = op2.c();_d = op2.d(); 
    _tx = op2.tx();_ty = op2.ty();
    return *this; 
@@ -611,7 +635,24 @@ real polyarea(const pointlist& shape)
    word size = shape.size();
    word i,j;
    for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
-      area += real(shape[i].x()) * real(shape[j].y()) -
-            real(shape[j].x()) * real(shape[i].y());
+      area += ( (real)shape[i].x() * (real)shape[j].y() ) -
+              ( (real)shape[j].x() * (real)shape[i].y() )   ;
    return area;
 }
+
+//! Gratest common denominator
+unsigned GCD(unsigned arg1, unsigned arg2)
+{
+   if (arg1 < arg2)
+   {
+      unsigned swap = arg1;
+      arg1 = arg2;
+      arg2 = swap;
+   }
+   unsigned remainder = arg1 % arg2;
+   if (0 == remainder)
+      return arg2;
+   else
+      return GCD(arg2, remainder);
+}
+
