@@ -1741,7 +1741,7 @@ void laydata::tdtcellref::draw_request(Tenderer& rend) const
    byte crchain = rend.popref(this);
    rend.pushCell(_translation, obox, crchain == 2, sh_selected == _status);
    structure()->openGL_draw(rend, crchain == 2);
-   rend.popCTM();
+   rend.popCell();
    if (crchain) rend.pushref(this);
 }
 
@@ -2070,10 +2070,10 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
          // ...draw the structure itself
          rend.pushCell(refCTM, obox, false, false);//@FIXME! Edit in place array of cells!
          structure()->openGL_draw(rend);
-         rend.popCTM();
+         rend.popCell();
       }
    }
-   rend.popCTM();
+   rend.popCell();
 }
 
 void laydata::tdtcellaref::draw_srequest(Tenderer& rend, const SGBitSet*) const
