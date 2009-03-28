@@ -160,9 +160,9 @@ class TenderLine {
       bool              _partial;
 };
 
-typedef std::list<TenderObj*>  SliceObjects;
-typedef std::list<TenderPoly*> SlicePolygons;
-typedef std::list<TenderLine*> SliceLines;
+//typedef std::list<TenderObj*>  SliceObjects;
+//typedef std::list<TenderPoly*> SlicePolygons;
+//typedef std::list<TenderLine*> SliceLines;
 
 /**
  *  Reference boxes
@@ -292,9 +292,9 @@ class HiResTimer {
       timeval        _start_time;
       timeval        _end_time;
 #ifdef WIN32
-		// System frequency of timer for Windows.
-		LARGE_INTEGER	_freq;
-		LARGE_INTEGER	_inittime;
+      // System frequency of timer for Windows.
+      LARGE_INTEGER	_freq;
+      LARGE_INTEGER	_inittime;
 #endif
 
 };
