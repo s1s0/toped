@@ -177,17 +177,18 @@ void	Calbr::CalbrFile::ShowResults()
 		{
 			wxString ost;
 			ost << wxT("addpoly({");
-			std::vector <Calbr::coord>::iterator it3;
-			std::vector <Calbr::coord> *poly1 = (*it2).coords();
+			CoordsVector::iterator it3;
+			CoordsVector *poly1 = (*it2).coords();
 			for(it3 = poly1->begin(); it3 < poly1->end(); ++it3)
 			{
 				if (it3 != poly1->begin())
 				{
 					ost<<wxT(",");
 				}
-				long x = (*it3).x;
-				long y = (*it3).y;
-				ost << wxT("{") << x << wxT(",") << y << wxT("}");;
+				wxString xstr = convert((*it3).x); 
+				wxString ystr = convert((*it3).y); 
+
+				ost << wxT("{") << convert((*it3).x) << wxT(",") << convert((*it3).y) << wxT("}");;
 
 			}
 			ost<<wxT("});");
@@ -199,16 +200,39 @@ void	Calbr::CalbrFile::ShowResults()
 		{
 			wxString ost;
 			ost << wxT("addpoly({");
-			long x1 = (*it2edge).x1;
-			long y1 = (*it2edge).y1;
-			long x2 = (*it2edge).x2;
-			long y2 = (*it2edge).y2;
-			ost << x1 << wxT(",") << y1 << wxT(",") << x2 << wxT(",") << y2;
-			ost<<wxT("}, 0.1)");
+			long x1int	= (*it2edge).x1 % _precision;
+			long x1frac = (*it2edge).x1 - x1int*_precision;
+			long y1int	= (*it2edge).y1 % _precision;
+			long y1frac	= (*it2edge).y1 - y1int*_precision;
+			long x2int	= (*it2edge).x2 % _precision;
+			long x2frac = (*it2edge).x2 - x2int*_precision;
+			long y2int	= (*it2edge).y2 % _precision;
+			long y2frac = (*it2edge).y2 - y2int*_precision;
+			
+			ost << convert((*it2edge).x1) << wxT(",") 
+				 << convert((*it2edge).y1) << wxT(",") 
+				 << convert((*it2edge).x2) << wxT(",") 
+				 << convert((*it2edge).y2) << ost<<wxT("}, 0.1)");
 			Console->parseCommand(ost);
 		}
 	}
 
+}
+
+wxString Calbr::CalbrFile::convert(int number)
+{
+	float x	= float(number) / _precision;
+	int xint = x;
+	float xfrac = x - xint;
+
+	wxString str1;
+	wxString format = wxT("%");
+	wxString xintstr, xfracstr;
+	xintstr << xint;
+	xfracstr << _precision;
+	format << xintstr.Length() << wxT(".") << xfracstr.Length() << wxT("f");
+	str1.sprintf(format, x); 
+	return str1;
 }
 
 void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)

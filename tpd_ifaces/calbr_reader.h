@@ -46,13 +46,16 @@ struct edge
 	long x1, y1, x2, y2;
 };
 
+typedef std::vector <Calbr::coord> CoordsVector;
+
+
 class drcPolygon
 {
 public:
 	void addCoord(long x, long y);
-	std::vector <Calbr::coord>* coords() {return &_coords;};
+	CoordsVector* coords() {return &_coords;};
 private:
-	std::vector <coord>	_coords;
+	CoordsVector	_coords;
 };
 
 class drcRuleCheck
@@ -81,10 +84,9 @@ private:
 	std::vector <std::string> _descrStrings;
 	std::vector <Calbr::drcPolygon> _polygons;
 	std::vector <Calbr::edge> _edges;
-
-	//std::vector <> _descrStrings;
-
 };
+
+typedef std::vector <Calbr::drcRuleCheck*> RuleChecksVector;
 
 class CalbrFile
 {
@@ -92,6 +94,7 @@ public:
 	CalbrFile(const std::string &fileName);
 	~CalbrFile();
 	void	ShowResults();
+	//ruleChecks() 
 private:
 	FILE*          _calbrFile;
 	std::string    _fileName;
@@ -100,7 +103,8 @@ private:
 
 	std::ifstream	_inFile;
 	bool				parse();
-	std::vector <Calbr::drcRuleCheck*> _RuleChecks;
+	RuleChecksVector _RuleChecks;
+	wxString convert(int number);
 
 };
 }
