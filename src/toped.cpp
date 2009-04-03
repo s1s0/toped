@@ -37,6 +37,7 @@
 #include "toped.h"
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_DB/viewprop.h"
+#include "../tpd_DB/tenderer.h"
 #include "tui.h"
 #include "../ui/red_lamp.xpm"
 #include "../ui/green_lamp.xpm"
@@ -62,12 +63,13 @@ extern const wxEventType         wxEVT_TPDSTATUS;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
-extern const wxEventType			wxEVT_TOOLBARADDITEM;
-extern const wxEventType			wxEVT_TOOLBARDELETEITEM;
+extern const wxEventType         wxEVT_TOOLBARADDITEM;
+extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
 extern parsercmd::cmdBLOCK*      CMDBlock;
+extern GLUtriangulatorObj        *TeselPoly::tenderTesel;
 
 tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    const wxPoint& pos , const wxSize& size , long style)
@@ -776,6 +778,23 @@ void tui::TopedFrame::initView()
                         GL_NONE };
 
    _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, gl_attrib);
+
+   TeselPoly::tenderTesel = gluNewTess();
+#ifndef WIN32
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
+                   (GLvoid(*)())&TeselPoly::teselBegin);
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
+                   (GLvoid(*)())&TeselPoly::teselVertex);
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_END_DATA,
+                   (GLvoid(*)())&TeselPoly::teselEnd);
+#else
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
+                   (GLvoid(__stdcall *)())&TeselPoly::teselBegin);
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
+                   (GLvoid(__stdcall *)())&TeselPoly::teselVertex);
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_END_DATA,
+                   (GLvoid(__stdcall *)())&TeselPoly::teselEnd);
+#endif
    //----------------------------------------------------------------------------
    // The command line
    //----------------------------------------------------------------------------
