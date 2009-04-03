@@ -292,7 +292,7 @@ void tui::LayoutCanvas::snapshot(byte*& theImage, word& szW, word& szH)
    // Calculate the image size in bytes
    unsigned long imageSize = szW * 3 * szH;
    // Get the memory chunk
-   theImage = new byte[imageSize];
+   theImage = DEBUG_NEW byte[imageSize];
    //@TODO! A fairly big piece of memory will be required. Make sure that we have proper protections @new
 
    // Now the interesting part

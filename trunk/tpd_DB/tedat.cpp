@@ -383,7 +383,7 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
 //-----------------------------------------------------------------------------
 laydata::tdtbox::tdtbox(const TP& p1, const TP& p2) : tdtdata()
 {
-   _pdata = new int4b[8];
+   _pdata = DEBUG_NEW int4b[8];
    _pdata[p1x ] = p1.x();_pdata[p1y ] = p1.y();
    _pdata[p2x ] = p2.x();_pdata[p2y ] = p2.y();
    _pdata[p1x2] = p1.x();_pdata[p1y2] = p1.y();
@@ -394,7 +394,7 @@ laydata::tdtbox::tdtbox(const TP& p1, const TP& p2) : tdtdata()
 
 laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata() 
 {
-   _pdata = new int4b[8];
+   _pdata = DEBUG_NEW int4b[8];
    TP point;
    point = tedfile->getTP();
    _pdata[p1x ] = point.x();_pdata[p1y ] = point.y();
@@ -765,7 +765,7 @@ laydata::tdtpoly::tdtpoly(const pointlist& plst) : tdtdata()
 {
    _psize = plst.size();
    assert(_psize);
-   _pdata = new int4b[_psize*2];
+   _pdata = DEBUG_NEW int4b[_psize*2];
    unsigned index = 0;
    for (unsigned i = 0; i < _psize; i++)
    {
@@ -778,7 +778,7 @@ laydata::tdtpoly::tdtpoly(TEDfile* const tedfile) : tdtdata()
 {
    _psize = tedfile->getWord();
    assert(_psize);
-   _pdata = new int4b[_psize*2];
+   _pdata = DEBUG_NEW int4b[_psize*2];
    TP wpnt;
    for (unsigned i = 0 ; i < _psize; i++)
    {
@@ -1205,6 +1205,11 @@ pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet& pset,
    return mlist;
 }
 
+laydata::tdtpoly::~tdtpoly()
+{
+   delete [] _pdata;
+}
+
 //-----------------------------------------------------------------------------
 // class tdtwire
 //-----------------------------------------------------------------------------
@@ -1212,7 +1217,7 @@ laydata::tdtwire::tdtwire(pointlist& plst, word width) : tdtdata(), _width(width
 {
    _psize = plst.size();
    assert(_psize);
-   _pdata = new int4b[_psize*2];
+   _pdata = DEBUG_NEW int4b[_psize*2];
    for (unsigned i = 0; i < _psize; i++)
    {
       _pdata[2*i  ] = plst[i].x();
@@ -1224,7 +1229,7 @@ laydata::tdtwire::tdtwire(const int4b* pdata, unsigned psize, word width) :
       tdtdata(), _width(width), _psize(psize)
 {
    assert(_psize);
-   _pdata = new int4b[_psize*2];
+   _pdata = DEBUG_NEW int4b[_psize*2];
    memcpy(_pdata, pdata, 2*_psize);
 }
 
@@ -1233,7 +1238,7 @@ laydata::tdtwire::tdtwire(TEDfile* const tedfile) : tdtdata()
    _psize = tedfile->getWord();
    assert(_psize);
    _width = tedfile->getWord();
-   _pdata = new int4b[_psize*2];
+   _pdata = DEBUG_NEW int4b[_psize*2];
    TP wpnt;
    for (unsigned i = 0 ; i < _psize; i++)
    {
@@ -1689,6 +1694,12 @@ pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet& pset,
    if (NULL != seg0) delete seg0;
    return mlist;
 }
+
+laydata::tdtwire::~tdtwire()
+{
+   delete [] _pdata;
+}
+
 //-----------------------------------------------------------------------------
 // class tdtcellref
 //-----------------------------------------------------------------------------

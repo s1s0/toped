@@ -37,7 +37,7 @@ GLUtriangulatorObj   *TenderPoly::tenderTesel = NULL;
 TeselChunk::TeselChunk(const TeselVertices& data, GLenum type, unsigned offset)
 {
    _size = data.size();
-   _index_seq = new unsigned[_size];
+   _index_seq = DEBUG_NEW unsigned[_size];
    word li = 0;
    for(TeselVertices::const_iterator CVX = data.begin(); CVX != data.end(); CVX++)
       _index_seq[li++] = *CVX + offset;
@@ -49,7 +49,7 @@ TeselChunk::TeselChunk(const int* data, unsigned size, unsigned offset)
    _size = size;
    _type = GL_QUAD_STRIP;
    assert(0 ==(size % 2));
-   _index_seq = new unsigned[_size];
+   _index_seq = DEBUG_NEW unsigned[_size];
    word findex = 0;
    word bindex = _size;
    for (word i = 0; i < _size / 2; i++)
@@ -917,7 +917,7 @@ void Tenderer::Grid(const real step, const std::string color)
 
       glEnableClientState(GL_VERTEX_ARRAY);
       word arr_size = ( (((tr.x() - X_is + 1) / gridstep) + 1) * (((bl.y() - Y_is + 1) / gridstep) + 1) );
-      int* point_array = new int[arr_size * 2];
+      int* point_array = DEBUG_NEW int[arr_size * 2];
       int index = 0;
       for (int i = X_is; i < tr.x()+1; i += gridstep)
       {
