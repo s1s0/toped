@@ -202,6 +202,7 @@ namespace laydata {
          pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
          int4b*            _pdata;
          unsigned          _psize;
+         TeselPoly*        _teseldata;
    };
 
 //==============================================================================

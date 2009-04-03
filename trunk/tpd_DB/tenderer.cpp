@@ -30,7 +30,8 @@
 #include "viewprop.h"
 #include "tedat.h"
 
-GLUtriangulatorObj   *TenderPoly::tenderTesel = NULL;
+//GLUtriangulatorObj   *TenderPoly::tenderTesel = NULL;
+GLUtriangulatorObj   *TeselPoly::tenderTesel = NULL;
 
 //=============================================================================
 //
@@ -42,6 +43,16 @@ TeselChunk::TeselChunk(const TeselVertices& data, GLenum type, unsigned offset)
    for(TeselVertices::const_iterator CVX = data.begin(); CVX != data.end(); CVX++)
       _index_seq[li++] = *CVX + offset;
    _type = type;
+}
+
+TeselChunk::TeselChunk(const TeselChunk* data, unsigned offset)
+{
+   _size = data->size();
+   _type = data->type();
+   _index_seq = new unsigned[_size];
+   const unsigned* copy_seq = data->index_seq();
+   for(unsigned i = 0; i < _size; i++)
+      _index_seq[i] = copy_seq[i] + offset;
 }
 
 TeselChunk::TeselChunk(const int* data, unsigned size, unsigned offset)
@@ -67,7 +78,11 @@ TeselChunk::~TeselChunk()
 //
 
 TeselTempData::TeselTempData(unsigned offset) :_the_chain(NULL), _cindexes(),
-           _num_ftrs(0)      , _num_ftfs(0)      , _num_ftss(0), _offset(offset)
+           _num_ftrs(0), _num_ftfs(0), _num_ftss(0), _offset(offset)
+{}
+
+TeselTempData::TeselTempData(TeselChain* tc) : _the_chain(tc), _cindexes(),
+           _num_ftrs(0), _num_ftfs(0), _num_ftss(0), _offset(0)
 {}
 
 void TeselTempData::storeChunk()
@@ -84,44 +99,84 @@ void TeselTempData::storeChunk()
 }
 
 //=============================================================================
-// TenderObj
+// TeselPoly
 
-
-//=============================================================================
-
-void TenderPoly::Tessel(TeselTempData* ptdata)
+TeselPoly::TeselPoly(const int4b* pdata, unsigned psize)
 {
-   ptdata->setChainP(&_tdata);
+   TeselTempData ttdata( &_tdata );
    // Start tessellation
-   gluTessBeginPolygon(tenderTesel, ptdata);
+   gluTessBeginPolygon(tenderTesel, &ttdata);
    GLdouble pv[3];
    pv[2] = 0;
-   word* index_arr = DEBUG_NEW word[_csize];
-   for (unsigned i = 0; i < _csize; i++ )
+   word* index_arr = DEBUG_NEW word[psize];
+   for (unsigned i = 0; i < psize; i++ )
    {
-      pv[0] = _cdata[2*i]; pv[1] = _cdata[2*i+1];
+      pv[0] = pdata[2*i]; pv[1] = pdata[2*i+1];
       index_arr[i] = i;
       gluTessVertex(tenderTesel,pv, &(index_arr[i]));
    }
    gluTessEndPolygon(tenderTesel);
+   _num_ftrs = ttdata.num_ftrs();
+   _num_ftfs = ttdata.num_ftfs();
+   _num_ftss = ttdata.num_ftss();
 }
 
-GLvoid TenderPoly::teselBegin(GLenum type, GLvoid* ttmp)
+// void TeselPoly::Tessel(TeselTempData* ptdata)
+// {
+//    ptdata->setChainP(&_tdata);
+//    // Start tessellation
+//    gluTessBeginPolygon(tenderTesel, ptdata);
+//    GLdouble pv[3];
+//    pv[2] = 0;
+//    word* index_arr = DEBUG_NEW word[_csize];
+//    for (unsigned i = 0; i < _csize; i++ )
+//    {
+//       pv[0] = _cdata[2*i]; pv[1] = _cdata[2*i+1];
+//       index_arr[i] = i;
+//       gluTessVertex(tenderTesel,pv, &(index_arr[i]));
+//    }
+//    gluTessEndPolygon(tenderTesel);
+// }
+
+GLvoid TeselPoly::teselBegin(GLenum type, GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->newChunk(type);
 }
 
-GLvoid TenderPoly::teselVertex(GLvoid *pindex, GLvoid* ttmp)
+GLvoid TeselPoly::teselVertex(GLvoid *pindex, GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->newIndex(*(static_cast<word*>(pindex)));
 }
 
-GLvoid TenderPoly::teselEnd(GLvoid* ttmp)
+GLvoid TeselPoly::teselEnd(GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->storeChunk();
+}
+
+
+TeselPoly::~TeselPoly()
+{
+   for (TeselChain::const_iterator CTC = _tdata.begin(); CTC != _tdata.end(); CTC++)
+      delete (*CTC);
+}
+
+//=============================================================================
+// TenderObj
+
+
+//=============================================================================
+
+void TenderPoly::TeselData(TeselChain* tdata, unsigned offset)
+{
+   assert(tdata);
+   for (TeselChain::const_iterator CTC = tdata->begin(); CTC != tdata->end(); CTC++)
+   {
+      TeselChunk* achunk = DEBUG_NEW TeselChunk(*CTC, offset);
+      _tdata.push_back(achunk);
+   }
 }
 
 TenderPoly::~TenderPoly()
@@ -555,7 +610,7 @@ TenderObj* TenderTV::box (int4b* pdata)
    return cobj;
 }
 
-TenderPoly* TenderTV::poly (int4b* pdata, unsigned psize)
+TenderPoly* TenderTV::poly (int4b* pdata, unsigned psize, TeselPoly* tchain)
 {
    TenderPoly* cobj = DEBUG_NEW TenderPoly(pdata, psize);
    _contour_data.push_back(cobj);
@@ -563,13 +618,12 @@ TenderPoly* TenderTV::poly (int4b* pdata, unsigned psize)
    _num_contours++;
    if (_filled)
    {
-      TeselTempData tdata(_num_polygon_points );
-      cobj->Tessel(&tdata);
+      cobj->TeselData(tchain->tdata(), _num_polygon_points);
       _fpolygon_data.push_back(cobj);
       _num_polygon_points += cobj->csize();
-      _num_ftrs += tdata.num_ftrs();
-      _num_ftfs += tdata.num_ftfs();
-      _num_ftss += tdata.num_ftss();
+      _num_ftrs += tchain->num_ftrs();
+      _num_ftfs += tchain->num_ftfs();
+      _num_ftss += tchain->num_ftss();
    }
    return cobj;
 }
@@ -624,16 +678,6 @@ void TenderTV::draw_contours()
    delete [] size_array;
    delete [] first_array;
 }
-
-// void TenderTV::draw_contours()
-// {
-//    if  (0 == _num_contours) return;
-//    for (SliceObjects::const_iterator CSH = _contour_data.begin(); CSH != _contour_data.end(); CSH++)
-//    { // shapes in the current translation (layer within the cell)
-//       glVertexPointer(2, GL_INT, 0, (*CSH)->cdata());
-//       glDrawArrays(GL_LINE_LOOP, 0 ,(*CSH)->csize());
-//    }
-// }
 
 void TenderTV::draw_lines()
 {
@@ -817,22 +861,22 @@ void TenderTV::draw_fpolygons()
 Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
       _drawprop(drawprop), _UU(UU), _cslice(NULL)
 {
-   TenderPoly::tenderTesel = gluNewTess();
+/*   TeselPoly::tenderTesel = gluNewTess();
 #ifndef WIN32
-   gluTessCallback(TenderPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                   (GLvoid(*)())&TenderPoly::teselBegin);
-   gluTessCallback(TenderPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                   (GLvoid(*)())&TenderPoly::teselVertex);
-   gluTessCallback(TenderPoly::tenderTesel, GLU_TESS_END_DATA,
-                   (GLvoid(*)())&TenderPoly::teselEnd);
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
+                   (GLvoid(*)())&TeselPoly::teselBegin);
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
+                   (GLvoid(*)())&TeselPoly::teselVertex);
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_END_DATA,
+                   (GLvoid(*)())&TeselPoly::teselEnd);
 #else
-   gluTessCallback(TenderPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                   (GLvoid(__stdcall *)())&TenderPoly::teselBegin);
-   gluTessCallback(TenderPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                   (GLvoid(__stdcall *)())&TenderPoly::teselVertex);
-   gluTessCallback(TenderPoly::tenderTesel, GLU_TESS_END_DATA,
-                   (GLvoid(__stdcall *)())&TenderPoly::teselEnd);
-#endif
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
+                   (GLvoid(__stdcall *)())&TeselPoly::teselBegin);
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
+                   (GLvoid(__stdcall *)())&TeselPoly::teselVertex);
+   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_END_DATA,
+                   (GLvoid(__stdcall *)())&TeselPoly::teselEnd);
+#endif*/
 }
 
 void Tenderer::setLayer(word layer)
@@ -879,10 +923,10 @@ void Tenderer::box  (int4b* pdata, const SGBitSet* psel)
    _sslice->add(dobj, psel);
 }
 
-void Tenderer::poly (int4b* pdata, unsigned psize, const SGBitSet* psel)
+void Tenderer::poly (int4b* pdata, unsigned psize, TeselPoly* tpoly, const SGBitSet* psel)
 {
    assert(_sslice);
-   TenderPoly* dpoly = _cslice->poly(pdata, psize);
+   TenderPoly* dpoly = _cslice->poly(pdata, psize, tpoly);
    _sslice->add(dpoly, psel);
 }
 

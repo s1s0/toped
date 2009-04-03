@@ -554,7 +554,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    _curlay = 1;
    _drawruler = false;
 }
-   
+
 DataCenter::~DataCenter() {
    laydata::tdtlibrary::clearEntireHierTree();
    if (NULL != _GDSDB) delete _GDSDB;

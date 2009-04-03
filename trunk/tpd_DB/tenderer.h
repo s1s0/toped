@@ -43,11 +43,12 @@ typedef std::list<word> TeselVertices;
 class TeselChunk {
    public:
                         TeselChunk(const TeselVertices&, GLenum, unsigned);
+                        TeselChunk(const TeselChunk*, unsigned);
                         TeselChunk(const int*, unsigned, unsigned);
                        ~TeselChunk();
-      GLenum            type()     {return _type;}
-      word              size()     {return _size;}
-      unsigned*         index_seq(){return _index_seq;}
+      GLenum            type() const      {return _type;}
+      word              size() const      {return _size;}
+      const unsigned*   index_seq() const {return _index_seq;}
    private:
       unsigned*         _index_seq;  // index sequence
       word              _size;       // size of the index sequence
@@ -59,6 +60,7 @@ typedef std::list<TeselChunk*> TeselChain;
 class TeselTempData {
    public:
                         TeselTempData(unsigned);
+                        TeselTempData(TeselChain* tc);
       void              setChainP(TeselChain* tc)  {_the_chain = tc;}
       void              newChunk(GLenum type)      {_ctype = type; _cindexes.clear();}
       void              newIndex(word vx)          {_cindexes.push_back(vx);}
@@ -75,6 +77,31 @@ class TeselTempData {
       word              _num_ftfs;
       word              _num_ftss;
       unsigned          _offset;
+};
+
+class TeselPoly {
+   public:
+                        TeselPoly(const int4b* pdata, unsigned psize);
+                       ~TeselPoly();
+      TeselChain*       tdata()                    { return &_tdata;  }
+      word              num_ftrs()                 { return _num_ftrs;}
+      word              num_ftfs()                 { return _num_ftfs;}
+      word              num_ftss()                 { return _num_ftss;}
+      static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
+#ifdef WIN32
+      static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
+      static GLvoid CALLBACK teselBegin(GLenum, GLvoid *);
+      static GLvoid CALLBACK teselEnd(GLvoid *);
+#else
+      static GLvoid     teselVertex(GLvoid *, GLvoid *);
+      static GLvoid     teselBegin(GLenum, GLvoid *);
+      static GLvoid     teselEnd(GLvoid *);
+#endif
+   private:
+      TeselChain        _tdata;
+      word              _num_ftrs;
+      word              _num_ftfs;
+      word              _num_ftss;
 };
 
 /**
@@ -107,11 +134,12 @@ class TenderRefBox : public TenderObj {
 */
 class TenderPoly : public TenderObj {
    public:
-                        TenderPoly(int4b* pdata, unsigned psize) : TenderObj(pdata, psize) {}
+                        TenderPoly(int4b* pdata, unsigned psize):TenderObj(pdata, psize) {}
+      void              TeselData(TeselChain*, unsigned);
       virtual          ~TenderPoly();
-      void              Tessel(TeselTempData*);
+//      void              Tessel(TeselTempData*);
       TeselChain*       tdata()              {return &_tdata;}
-      static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
+/*      static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
       static GLvoid CALLBACK teselBegin(GLenum, GLvoid *);
@@ -120,9 +148,9 @@ class TenderPoly : public TenderObj {
       static GLvoid     teselVertex(GLvoid *, GLvoid *);
       static GLvoid     teselBegin(GLenum, GLvoid *);
       static GLvoid     teselEnd(GLvoid *);
-#endif
+#endif*/
    protected:
-      TeselChain        _tdata;
+      TeselChain       _tdata;
 };
 
 /**
@@ -209,7 +237,7 @@ class TenderTV {
    public:
                         TenderTV(CTM&, bool);
       TenderObj*        box  (int4b*);
-      TenderPoly*       poly (int4b*, unsigned);
+      TenderPoly*       poly (int4b*, unsigned, TeselPoly*);
       TenderWire*       wire (int4b*, unsigned, word, bool);
       const CTM*        tmatrix()            {return &_tmatrix;}
       void              draw_contours();
@@ -254,8 +282,8 @@ class Tenderer {
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box  (int4b* pdata)                    {_cslice->box(pdata);}
       void              box  (int4b*, const SGBitSet*);
-      void              poly (int4b* pdata, unsigned psize)    {_cslice->poly(pdata, psize);}
-      void              poly (int4b*, unsigned, const SGBitSet*);
+      void              poly (int4b* pdata, unsigned psize, TeselPoly* tpoly)    {_cslice->poly(pdata, psize, tpoly);}
+      void              poly (int4b*, unsigned, TeselPoly* , const SGBitSet*);
       void              wire (int4b*, unsigned, word);
       void              wire (int4b*, unsigned, word, const SGBitSet*);
       void              draw();

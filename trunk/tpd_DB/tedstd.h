@@ -219,5 +219,6 @@ namespace laydata {
 
 }
 class Tenderer;
+class TeselPoly;
 class PSFile;
 #endif

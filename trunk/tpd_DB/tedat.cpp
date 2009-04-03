@@ -772,6 +772,7 @@ laydata::tdtpoly::tdtpoly(const pointlist& plst) : tdtdata()
       _pdata[index++] = plst[i].x();
       _pdata[index++] = plst[i].y();
    }
+   _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
 }
 
 laydata::tdtpoly::tdtpoly(TEDfile* const tedfile) : tdtdata()
@@ -786,6 +787,7 @@ laydata::tdtpoly::tdtpoly(TEDfile* const tedfile) : tdtdata()
       _pdata[2*i  ] = wpnt.x();
       _pdata[2*i+1] = wpnt.y();
    }
+   _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
 }
 
 void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
@@ -800,12 +802,12 @@ void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointli
 
 void laydata::tdtpoly::draw_request(Tenderer& rend) const
 {
-   rend.poly(_pdata, _psize);
+   rend.poly(_pdata, _psize, _teseldata);
 }
 
 void laydata::tdtpoly::draw_srequest(Tenderer& rend, const SGBitSet* pslist) const
 {
-   rend.poly(_pdata, _psize, pslist);
+   rend.poly(_pdata, _psize, _teseldata, pslist);
 }
 
 void laydata::tdtpoly::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
