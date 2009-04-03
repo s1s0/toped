@@ -171,7 +171,7 @@ namespace laydata {
       public:
                            tdtpoly(const pointlist& plist);
                            tdtpoly(TEDfile* const tedfile);
-   //                       ~tdtpoly() {};
+                          ~tdtpoly();
          DBbox             overlap() const;
          validator*        move(const CTM&, SGBitSet& plst);
          void              transfer(const CTM&);
@@ -210,7 +210,7 @@ namespace laydata {
                            tdtwire(pointlist&, word);
                            tdtwire(const int4b*, unsigned, word);
                            tdtwire(TEDfile* const tedfile);
-   //                       ~tdtwire() {};
+                          ~tdtwire();
          DBbox             overlap() const;
          validator*        move(const CTM&, SGBitSet& plst);
          void              transfer(const CTM&);

@@ -72,6 +72,8 @@ int tellstdfunc::stdADDBOX::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB),la);
    DATC->unlockDB();
+   delete (p1DB);
+   delete (p2DB);
    OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
    LogFile << LogFile.getFN() << "("<< *w << "," << la << ");";LogFile.flush();
    delete w;
@@ -189,6 +191,8 @@ int tellstdfunc::stdADDBOXr::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
    DATC->unlockDB();
+   delete (p1DB);
+   delete (p2DB);
    OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
    LogFile << LogFile.getFN() << "("<< *p1 << "," << width << "," << heigth <<
                                               "," << la << ");"; LogFile.flush();
@@ -248,7 +252,9 @@ int tellstdfunc::stdADDBOXp::execute() {
    TP* p2DB = DEBUG_NEW TP(p2->x(), p2->y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
-   DATC->unlockDB();   
+   DATC->unlockDB();
+   delete (p1DB);
+   delete (p2DB);
    OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << "," << la << ");"; 
    LogFile.flush();
