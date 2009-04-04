@@ -137,18 +137,7 @@ class TenderPoly : public TenderObj {
                         TenderPoly(int4b* pdata, unsigned psize):TenderObj(pdata, psize) {}
       void              TeselData(TeselChain*, unsigned);
       virtual          ~TenderPoly();
-//      void              Tessel(TeselTempData*);
       TeselChain*       tdata()              {return &_tdata;}
-/*      static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
-#ifdef WIN32
-      static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
-      static GLvoid CALLBACK teselBegin(GLenum, GLvoid *);
-      static GLvoid CALLBACK teselEnd(GLvoid *);
-#else
-      static GLvoid     teselVertex(GLvoid *, GLvoid *);
-      static GLvoid     teselBegin(GLenum, GLvoid *);
-      static GLvoid     teselEnd(GLvoid *);
-#endif*/
    protected:
       TeselChain       _tdata;
 };
@@ -165,12 +154,14 @@ class TenderWire : public TenderPoly {
       void              Tessel(unsigned);
       virtual int*      ldata()                 {return _ldata;}
       virtual unsigned  lsize()                 {return _lsize;}
+      virtual bool      center_line_only()      {return _center_line_only;}
    protected:
       void              precalc(const word);
       DBbox*            endPnts(const word, word, word, bool);
       DBbox*            mdlPnts(const word, word, word, const word);
       int*              _ldata;  // central line data
       unsigned          _lsize;
+      bool              _center_line_only;
 };
 
 /**
@@ -192,6 +183,7 @@ class TenderLine {
 
 typedef std::list<TenderObj*>  SliceObjects;
 typedef std::list<TenderPoly*> SlicePolygons;
+typedef std::list<TenderWire*> SliceWires;
 typedef std::list<TenderLine*> SliceLines;
 
 /**
@@ -248,7 +240,7 @@ class TenderTV {
    private:
       CTM               _tmatrix;
       SliceObjects      _contour_data;
-      SliceObjects      _line_data;
+      SliceWires        _line_data;
       SliceObjects      _fqu_data;
       SlicePolygons     _fpolygon_data;
       unsigned          _num_contour_points; //

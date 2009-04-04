@@ -172,9 +172,10 @@ TenderPoly::~TenderPoly()
 
 //=============================================================================
 TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width,
-                       bool center_line_only) : TenderPoly(NULL, 0), _ldata(pdata), _lsize(psize)
+                       bool center_line_only) : TenderPoly(NULL, 0), 
+                       _ldata(pdata), _lsize(psize), _center_line_only(center_line_only)
 {
-   if (!center_line_only)
+   if (!_center_line_only)
       precalc(width);
 }
 
@@ -282,7 +283,7 @@ void TenderWire::Tessel(unsigned offset)
 
 TenderWire::~TenderWire()
 {
-   if (_ldata) delete [] _ldata;
+   if (_cdata) delete [] _cdata;
 }
 
 //=============================================================================
@@ -581,12 +582,6 @@ TenderTV::TenderTV(CTM& translation, bool filled) : _tmatrix(translation),
     _num_ftss(0),             _filled(filled)
 {}
 
-TenderTV::~TenderTV()
-{
-   for (SliceObjects::const_iterator CSO = _contour_data.begin(); CSO != _contour_data.end(); CSO++)
-      delete (*CSO);
-}
-
 TenderObj* TenderTV::box (int4b* pdata)
 {
    TenderObj* cobj = DEBUG_NEW TenderObj(pdata, 4);
@@ -680,7 +675,7 @@ void TenderTV::draw_lines()
    unsigned long pntindx = 0;
    unsigned      szindx  = 0;
 
-   for (SliceObjects::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
+   for (SliceWires::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
    { // shapes in the current translation (layer within the cell)
       unsigned clsize = (*CSH)->lsize();
       assert(clsize);
@@ -847,6 +842,15 @@ void TenderTV::draw_fpolygons()
    }
    delete [] point_array;
 }
+
+TenderTV::~TenderTV()
+{
+   for (SliceWires::const_iterator CSO = _line_data.begin(); CSO != _line_data.end(); CSO++)
+      if ((*CSO)->center_line_only()) delete (*CSO);
+   for (SliceObjects::const_iterator CSO = _contour_data.begin(); CSO != _contour_data.end(); CSO++)
+      delete (*CSO);
+}
+
 
 //=============================================================================
 Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
