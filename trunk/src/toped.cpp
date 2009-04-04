@@ -69,7 +69,6 @@ extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
 extern parsercmd::cmdBLOCK*      CMDBlock;
-extern GLUtriangulatorObj        *TeselPoly::tenderTesel;
 
 tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    const wxPoint& pos , const wxSize& size , long style)

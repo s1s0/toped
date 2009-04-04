@@ -236,6 +236,7 @@ class TenderTVB {
 class TenderTV {
    public:
                         TenderTV(CTM&, bool);
+                       ~TenderTV();
       TenderObj*        box  (int4b*);
       TenderPoly*       poly (int4b*, unsigned, TeselPoly*);
       TenderWire*       wire (int4b*, unsigned, word, bool);
@@ -274,7 +275,7 @@ typedef std::list<TenderRB*> TenderRBL;
 class Tenderer {
    public:
                         Tenderer( layprop::DrawProperties* drawprop, real UU );
-//                     ~Tenderer();
+                       ~Tenderer();
       void              Grid( const real, const std::string );
       void              setLayer(word);
       void              setSdataContainer(word);

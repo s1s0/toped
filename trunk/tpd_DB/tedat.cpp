@@ -1210,6 +1210,7 @@ pointlist* laydata::tdtpoly::movePointsSelected(const SGBitSet& pset,
 laydata::tdtpoly::~tdtpoly()
 {
    delete [] _pdata;
+   delete _teseldata;
 }
 
 //-----------------------------------------------------------------------------
