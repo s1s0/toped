@@ -116,27 +116,12 @@ TeselPoly::TeselPoly(const int4b* pdata, unsigned psize)
       gluTessVertex(tenderTesel,pv, &(index_arr[i]));
    }
    gluTessEndPolygon(tenderTesel);
+   delete [] index_arr;
    _num_ftrs = ttdata.num_ftrs();
    _num_ftfs = ttdata.num_ftfs();
    _num_ftss = ttdata.num_ftss();
 }
 
-// void TeselPoly::Tessel(TeselTempData* ptdata)
-// {
-//    ptdata->setChainP(&_tdata);
-//    // Start tessellation
-//    gluTessBeginPolygon(tenderTesel, ptdata);
-//    GLdouble pv[3];
-//    pv[2] = 0;
-//    word* index_arr = DEBUG_NEW word[_csize];
-//    for (unsigned i = 0; i < _csize; i++ )
-//    {
-//       pv[0] = _cdata[2*i]; pv[1] = _cdata[2*i+1];
-//       index_arr[i] = i;
-//       gluTessVertex(tenderTesel,pv, &(index_arr[i]));
-//    }
-//    gluTessEndPolygon(tenderTesel);
-// }
 
 GLvoid TeselPoly::teselBegin(GLenum type, GLvoid* ttmp)
 {
@@ -596,6 +581,12 @@ TenderTV::TenderTV(CTM& translation, bool filled) : _tmatrix(translation),
     _num_ftss(0),             _filled(filled)
 {}
 
+TenderTV::~TenderTV()
+{
+   for (SliceObjects::const_iterator CSO = _contour_data.begin(); CSO != _contour_data.end(); CSO++)
+      delete (*CSO);
+}
+
 TenderObj* TenderTV::box (int4b* pdata)
 {
    TenderObj* cobj = DEBUG_NEW TenderObj(pdata, 4);
@@ -1043,6 +1034,24 @@ glDisableClientState(GL_VERTEX_ARRAY);
 
 }
 
+Tenderer::~Tenderer()
+{
+   for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   {
+      for (TenderLay::const_iterator TLAY = CLAY->second->begin(); TLAY != CLAY->second->end(); TLAY++)
+      {
+         delete (*TLAY);
+      }
+      delete (CLAY->second);
+   }
+
+   for (TenderRBL::const_iterator CRBL = _oboxes.begin(); CRBL != _oboxes.end(); CRBL++)
+      delete (*CRBL);
+}
+
+//=============================================================================
+//
+//
 HiResTimer::HiResTimer()
 {
 #ifdef WIN32
