@@ -95,6 +95,15 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName)
 
 Calbr::CalbrFile::~CalbrFile()
 {
+	std::vector <Calbr::drcRuleCheck*>::const_iterator it;
+	if (!_RuleChecks.empty())
+	{
+	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
+	{
+		if ((*it)!= NULL) delete (*it);
+	}
+	_RuleChecks.clear();
+	}
 	fclose(_calbrFile);
 }
 
