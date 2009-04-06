@@ -30,7 +30,6 @@
 #include "viewprop.h"
 #include "tedat.h"
 
-//GLUtriangulatorObj   *TenderPoly::tenderTesel = NULL;
 GLUtriangulatorObj   *TeselPoly::tenderTesel = NULL;
 
 //=============================================================================
@@ -640,27 +639,36 @@ void TenderTV::draw_contours()
 {
    if  (0 == _num_contours) return;
    unsigned long arr_size = 2 * _num_contour_points;
-   int* point_array = DEBUG_NEW int[arr_size];
+   // Organise the VBO ...
+   GLuint ogl_buffer;
+   glGenBuffers(1, &ogl_buffer);
+   glBindBuffer(GL_ARRAY_BUFFER, ogl_buffer);
+   glBufferData(GL_ARRAY_BUFFER, arr_size * sizeof(int4b), NULL, GL_DYNAMIC_DRAW);
+   // ... and the additional arrays
    GLsizei* size_array = DEBUG_NEW int[_num_contours];
    GLsizei* first_array = DEBUG_NEW int[_num_contours];
+   // initialise the indexing
    unsigned long pntindx = 0;
    unsigned      szindx  = 0;
-
+   // copy all the data in the VBO and in the same time update the
+   // contour size array and the array containg first indexes
    for (SliceObjects::const_iterator CSH = _contour_data.begin(); CSH != _contour_data.end(); CSH++)
    { // shapes in the current translation (layer within the cell)
       unsigned clsize = (*CSH)->csize();
       assert(clsize);
       first_array[szindx] = pntindx/2;
       size_array[szindx++] = clsize;
-      memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
+      glBufferSubData(GL_ARRAY_BUFFER, pntindx * sizeof(int4b), 2 * sizeof(int4b) * clsize, (*CSH)->cdata());
       pntindx += 2 * clsize;
    }
    assert(pntindx == arr_size);
    assert(szindx == _num_contours);
-   glVertexPointer(2, GL_INT, 0, point_array);
+   // Draw the VBO
+   glVertexPointer(2, GL_INT, 0, 0);
    glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
-
-   delete [] point_array;
+   // Release the VBO memory in the GPU
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   // Clean-up the CPU memory
    delete [] size_array;
    delete [] first_array;
 }

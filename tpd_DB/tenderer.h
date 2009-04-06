@@ -114,8 +114,8 @@ class TenderObj {
       virtual          ~TenderObj() {};
               int4b*    cdata()     {return _cdata;}  // contour data
               unsigned  csize()     {return _csize;}
-      virtual int*      ldata()     {assert(0); return NULL;}
-      virtual unsigned  lsize()     {assert(0); return 0   ;}
+//      virtual int*      ldata()     {assert(0); return NULL;}
+//      virtual unsigned  lsize()     {assert(0); return 0   ;}
    protected:
       int4b*            _cdata;  // contour data
       unsigned          _csize;
@@ -152,9 +152,9 @@ class TenderWire : public TenderPoly {
                         TenderWire(int4b*, unsigned, const word, bool);
       virtual          ~TenderWire();
       void              Tessel(unsigned);
-      virtual int*      ldata()                 {return _ldata;}
-      virtual unsigned  lsize()                 {return _lsize;}
-      virtual bool      center_line_only()      {return _center_line_only;}
+      int*              ldata()                 {return _ldata;}
+      unsigned          lsize()                 {return _lsize;}
+      bool              center_line_only()      {return _center_line_only;}
    protected:
       void              precalc(const word);
       DBbox*            endPnts(const word, word, word, bool);
@@ -314,9 +314,9 @@ class HiResTimer {
       timeval        _start_time;
       timeval        _end_time;
 #ifdef WIN32
-		// System frequency of timer for Windows.
-		LARGE_INTEGER	_freq;
-		LARGE_INTEGER	_inittime;
+      // System frequency of timer for Windows.
+      LARGE_INTEGER	_freq;
+      LARGE_INTEGER	_inittime;
 #endif
 
 };
