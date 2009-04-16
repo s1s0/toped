@@ -1034,7 +1034,7 @@ void browsers::browserTAB::onTellClearCifTab()
    if (_cifStruct)
    {
       int _cifPageIndex = GetPageIndex(_cifStruct);
-      assert(wxNOT_FOUND != _gdsPageIndex);
+      assert(wxNOT_FOUND != _cifPageIndex);
       _cifStruct->deleteAllItems();
       DeletePage(_cifPageIndex);
       _cifStruct = NULL;
