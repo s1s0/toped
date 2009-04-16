@@ -67,6 +67,8 @@ namespace browsers
       BT_CLEARGDS_TAB,
       BT_ADDCIF_TAB,
       BT_CLEARCIF_TAB,
+		BT_ADDDRC_TAB,
+		BT_CLEARDRC_TAB,
       BT_CELLS_HIER,
       BT_CELLS_FLAT,
       BT_CELLS_HIER2,
@@ -306,6 +308,13 @@ namespace browsers
          DECLARE_EVENT_TABLE();
    };
 
+	   //===========================================================================
+   class DRCBrowser : public wxPanel {
+	public:
+										DRCBrowser(wxWindow* parent, wxWindowID id);
+		virtual						~DRCBrowser();
+	};
+
    //===========================================================================
    class browserTAB : public wxAuiNotebook {
       public:
@@ -328,9 +337,12 @@ namespace browsers
          void                 onTellClearGdsTab();
          void                 onTellAddCifTab();
          void                 onTellClearCifTab();
+			void                 onTellAddDRCTab();
+         void                 onTellClearDRCTab();
          XdbBrowser*         _gdsStruct;
          XdbBrowser*         _cifStruct;
          TDTbrowser*         _tdtStruct;
+			DRCBrowser*			  _drcStruct;
          int                 _gdsPageIndex;
          int                 _cifPageIndex;
          LayerBrowser*       _layers;
