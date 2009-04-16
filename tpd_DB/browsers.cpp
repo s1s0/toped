@@ -946,8 +946,9 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
 
    _gdsStruct = NULL;
    _cifStruct = NULL;
+	 _drcStruct = NULL;
    _tellParser = NULL;
-
+	onTellAddDRCTab();
    Browsers = this;
 }
 
@@ -984,6 +985,8 @@ void browsers::browserTAB::onCommand(wxCommandEvent& event)
       case BT_CLEARGDS_TAB:onTellClearGdsTab(); break;
       case BT_ADDCIF_TAB:onTellAddCifTab();break;
       case BT_CLEARCIF_TAB:onTellClearCifTab(); break;
+		case BT_ADDDRC_TAB:onTellAddDRCTab();break;
+      case BT_CLEARDRC_TAB:onTellClearDRCTab(); break;
       default: event.Skip();
    }
 }
@@ -1038,6 +1041,28 @@ void browsers::browserTAB::onTellClearCifTab()
       _cifStruct = NULL;
    }
 }
+
+void browsers::browserTAB::onTellAddDRCTab()
+{
+	if (NULL == _drcStruct)
+   {
+      _drcStruct = DEBUG_NEW DRCBrowser(this, tui::ID_DRC_CELLTREE);
+      AddPage(_drcStruct, wxT("DRC results"));
+   }
+}
+
+void browsers::browserTAB::onTellClearDRCTab()
+{
+	if (_drcStruct)
+   {
+     int _drcPageIndex = GetPageIndex(_drcStruct);
+      assert(wxNOT_FOUND != _drcPageIndex);
+     // _drcStruct->deleteAllItems();
+      DeletePage(_drcPageIndex);
+      _drcStruct = NULL;
+   }
+}
+
 //==============================================================================
 void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool status) 
 {
@@ -1730,3 +1755,11 @@ wxString browsers::LayerBrowser::getAllSelected()
    return _layerPanel->getAllSelected();
 }
 
+browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
+	:wxPanel(parent, id, wxDefaultPosition, wxDefaultSize)
+{
+}
+
+browsers::DRCBrowser::~DRCBrowser()
+{
+}

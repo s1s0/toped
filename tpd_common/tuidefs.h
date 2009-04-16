@@ -42,6 +42,7 @@ namespace tui
       ID_TPD_CELLTREE     ,
       ID_GDS_CELLTREE     ,
       ID_CIF_CELLTREE     ,
+		ID_DRC_CELLTREE     ,
       //Warning!!! Do not use IDs between ID_DUMMY_WIN and ID_DUMMY_WIN_END
       ID_DUMMY_WIN = 500  ,
       ID_DUMMY_WIN_END = 600
