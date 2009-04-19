@@ -31,6 +31,7 @@
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_DB/browsers.h"
+#include "../tpd_ifaces/calbr_reader.h"
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
@@ -1225,3 +1226,16 @@ int tellstdfunc::CIFsetlaymap::execute()
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::DRCCalibreimport::execute() {
+   std::string filename = getStringValue();
+	Calbr::CalbrFile DRCFile(filename);
+	DRCFile.ShowResults();
+   return EXEC_NEXT;
+}

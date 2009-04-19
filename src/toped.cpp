@@ -325,8 +325,6 @@ END_EVENT_TABLE()
 
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
-									 	//???Remove after finishing
-	 ,_DRCFile("D:/drc/test.drc.results")
 {
    SetIcon(wxICON(toped16x16));
    initView();
@@ -2113,7 +2111,9 @@ void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
 
 void	tui::TopedFrame::OnDRCResults(wxCommandEvent& evt)
 {
-	_DRCFile.ShowResults();
+	wxString ost;
+   ost << wxT("drccalibreimport(\"D:/drc/test.drc.results\");");
+	_cmdline->parseCommand(ost);
 }
 
 void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))

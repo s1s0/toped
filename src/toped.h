@@ -38,8 +38,6 @@
 #include "resourcecenter.h"
 #include "../tpd_DB/browsers.h"
 
-//???Remove after finishing
-#include "../tpd_ifaces/calbr_reader.h"
 
 namespace tui {
    //-----------------------------------------------------------------------------
@@ -135,7 +133,7 @@ namespace tui {
 		wxMenu*						toolbarHorSizeMenu;
       wxMenu*                 gdsMenu;
       wxMenu*                 helpMenu;
-
+		
       // Sash layout stuff
       //wxControl*    mS_browsers;
 //      wxWindow*     mS_GLstatus;
@@ -265,8 +263,6 @@ namespace tui {
 		void		OnToolBarDeleteItem(wxCommandEvent& evt);
 		void		OnDRCResults(wxCommandEvent& evt);
 
-		//???Remove after finishing
-		Calbr::CalbrFile _DRCFile;
       
 		DECLARE_EVENT_TABLE();
    };
