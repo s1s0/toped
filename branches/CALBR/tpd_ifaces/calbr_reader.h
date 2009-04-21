@@ -93,8 +93,9 @@ class CalbrFile
 public:
 	CalbrFile(const std::string &fileName);
 	~CalbrFile();
-	void	ShowResults();
-	//ruleChecks() 
+
+	void			ShowResults();
+	bool			isOk(void)	{return _ok;}
 private:
 	FILE*          _calbrFile;
 	std::string    _fileName;
@@ -105,6 +106,7 @@ private:
 	bool				parse();
 	RuleChecksVector _RuleChecks;
 	wxString convert(int number);
+	bool				_ok;
 
 };
 }

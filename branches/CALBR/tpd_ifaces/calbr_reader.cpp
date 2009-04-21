@@ -28,10 +28,15 @@
 //===========================================================================
 //      Comments :
 //===========================================================================
+
 #include "tpdph.h"
 #include "calbr_reader.h"
 #include "../tpd_common/outbox.h"
 #include "../tpd_parser/ted_prompt.h"
+#include <sstream>
+
+// Global variables
+Calbr::CalbrFile *DRCData = NULL;
 
 extern console::ted_cmd*	Console;
 
@@ -71,17 +76,28 @@ void	Calbr::drcRuleCheck::addDescrString(const std::string & str)
 
 //-----------------------------------------------------------------------------
 Calbr::CalbrFile::CalbrFile(const std::string &fileName)
+		:_ok(true)
 {
+	std::ostringstream ost;
 	_fileName = fileName;
 	std::string fname(convertString(_fileName));
 	if (!(_calbrFile = fopen(fname.c_str(),"rt"))) // open the input file
    {
+		_ok = false;
+		ost << "Can't open file " << fname;
+		tell_log(console::MT_ERROR,ost.str());
 		return;
    }
 
 	//read header
 	char str[512];
-	if (fgets(str, 512, _calbrFile)==NULL) return;
+	if (fgets(str, 512, _calbrFile)==NULL) 
+	{
+		_ok = false;
+		ost << "Problem of reading file " << fname;
+		tell_log(console::MT_ERROR,ost.str());
+		return;
+	}
 
 	
 	char cellName[512];
@@ -91,6 +107,7 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName)
 	{
 
 	}
+	
 }
 
 Calbr::CalbrFile::~CalbrFile()
@@ -109,10 +126,12 @@ Calbr::CalbrFile::~CalbrFile()
 
 bool Calbr::CalbrFile::parse()
 {
+	std::ostringstream ost;
 	char ruleCheckName[512];
 
 	// get drc Rule Check name
-	if (fgets(ruleCheckName, 512, _calbrFile)==NULL) return false;
+	if (fgets(ruleCheckName, 512, _calbrFile)==NULL)return false;
+
 
 	Calbr::drcRuleCheck *ruleCheck = DEBUG_NEW Calbr::drcRuleCheck(ruleCheckName);
 	char tempStr[512];
@@ -120,7 +139,13 @@ bool Calbr::CalbrFile::parse()
 	long resCount, origResCount, descrStrCount;
 
 	//Get Current Results Count, Orginal Results Count and description strings count
-	if (fgets(tempStr, 512, _calbrFile)==NULL) return false;
+	if (fgets(tempStr, 512, _calbrFile)==NULL) 
+	{
+		_ok = false;
+		ost << "Can't read  rule " << ruleCheckName;
+		tell_log(console::MT_ERROR,ost.str());
+		return false;
+	}
 	sscanf(tempStr, "%ld %ld %ld %[^\n]\n",  &resCount, &origResCount, &descrStrCount, timeStamp);
 	ruleCheck->setCurResCount(resCount);
 	ruleCheck->setOrigResCount(origResCount);
@@ -129,7 +154,13 @@ bool Calbr::CalbrFile::parse()
 	//Get Description Strings
 	for(long i= 0; i < descrStrCount; i++)
 	{
-		if (fgets(tempStr, 512, _calbrFile)==NULL) return false;
+		if (fgets(tempStr, 512, _calbrFile)==NULL) 
+		{
+			_ok = false;
+			ost << "Can't parse  rule " << ruleCheckName;
+			tell_log(console::MT_ERROR,ost.str());
+			return false;
+		}
 		ruleCheck->addDescrString(tempStr);
 	}
 	//Get Results
@@ -137,7 +168,13 @@ bool Calbr::CalbrFile::parse()
 	for(long i= 0; i < resCount; i++)
 	{
 		drcPolygon poly;
-		if (fgets(tempStr, 512, _calbrFile)==NULL) return false;
+		if (fgets(tempStr, 512, _calbrFile)==NULL) 		
+		{
+			_ok = false;
+			ost << "Can't parse  rule " << ruleCheckName;
+			tell_log(console::MT_ERROR,ost.str());
+			return false;
+		}
 		char type;
 		long ordinal;
 		short numberOfElem;
@@ -149,7 +186,13 @@ bool Calbr::CalbrFile::parse()
 				for(short j =0; j< numberOfElem; j++)
 				{
 					long x, y;
-					if (fgets(tempStr, 512, _calbrFile)==NULL) return false;
+					if (fgets(tempStr, 512, _calbrFile)==NULL) 
+					{
+						_ok = false;
+						ost << "Can't parse  rule " << ruleCheckName;
+						tell_log(console::MT_ERROR,ost.str());
+						return false;
+					}
 					sscanf( tempStr, "%ld %ld", &x, &y);
 					poly.addCoord(x, y);
 				}
@@ -158,7 +201,13 @@ bool Calbr::CalbrFile::parse()
 						
 			case 'e'	: 
 				long x1, y1, x2, y2;
-				if (fgets(tempStr, 512, _calbrFile)==NULL) return false;
+				if (fgets(tempStr, 512, _calbrFile)==NULL) 
+				{
+					_ok = false;
+					ost << "Can't parse  rule " << ruleCheckName;
+					tell_log(console::MT_ERROR,ost.str());
+					return false;
+				}
 				sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2);
 				Calbr::edge theEdge;
 				theEdge.x1 = x1;
@@ -167,7 +216,11 @@ bool Calbr::CalbrFile::parse()
 				theEdge.y2 = y2;
 				ruleCheck->addEdge(theEdge);
 				break;
-			default	: return false;
+			default	:
+				_ok = false;
+				ost << "Can't parse  rule " << ruleCheckName;
+				tell_log(console::MT_ERROR,ost.str());
+				return false;
 		}
 	}
 	_RuleChecks.push_back(ruleCheck);
