@@ -35,6 +35,7 @@
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
+extern Calbr::CalbrFile*			DRCData;
 
 //=============================================================================
 tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype, bool eor) :
@@ -1235,7 +1236,21 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute() {
    std::string filename = getStringValue();
-	Calbr::CalbrFile DRCFile(filename);
-	DRCFile.ShowResults();
+	if(DRCData) 
+	{
+	}
+	else
+	{
+		DRCData = DEBUG_NEW Calbr::CalbrFile(filename);
+
+		if(DRCData->isOk())
+		{
+			DRCData->ShowResults();
+		}
+		else
+		{
+			delete DRCData;
+		}
+	}
    return EXEC_NEXT;
 }
