@@ -31,7 +31,7 @@
 #include "tedat.h"
 
 // Themporary - to clarify the possible proper usage of VBO's
-//#define USE_VBOS 
+//#define USE_VBOS
 
 GLUtriangulatorObj   *TeselPoly::tenderTesel = NULL;
 
@@ -648,6 +648,7 @@ void TenderTV::draw_contours()
    glGenBuffers(1, &ogl_buffer);
    glBindBuffer(GL_ARRAY_BUFFER, ogl_buffer);
    glBufferData(GL_ARRAY_BUFFER, arr_size * sizeof(int4b), NULL, GL_DYNAMIC_DRAW);
+   int* point_array = (int*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 #else
    int* point_array = DEBUG_NEW int[arr_size];
 #endif
@@ -665,17 +666,18 @@ void TenderTV::draw_contours()
       assert(clsize);
       first_array[szindx] = pntindx/2;
       size_array[szindx++] = clsize;
-#ifdef USE_VBOS
-      glBufferSubData(GL_ARRAY_BUFFER, pntindx * sizeof(int4b), 2 * sizeof(int4b) * clsize, (*CSH)->cdata());
-#else
+//#ifdef USE_VBOS
+//      glBufferSubData(GL_ARRAY_BUFFER, pntindx * sizeof(int4b), 2 * sizeof(int4b) * clsize, (*CSH)->cdata());
+//#else
       memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
-#endif
+//#endif
       pntindx += 2 * clsize;
    }
    assert(pntindx == arr_size);
    assert(szindx == _num_contours);
 #ifdef USE_VBOS
    // Draw the VBO
+   glUnmapBuffer(GL_ARRAY_BUFFER);
    glVertexPointer(2, GL_INT, 0, 0);
 #else
    glVertexPointer(2, GL_INT, 0, point_array);
@@ -684,6 +686,7 @@ void TenderTV::draw_contours()
    // Release the VBO memory in the GPU
 #ifdef USE_VBOS
    glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glDeleteBuffers(1, &ogl_buffer);
 #else
    delete [] point_array;
 #endif
