@@ -34,6 +34,7 @@
 #include "viewprop.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
+#include "../tpd_ifaces/calbr_reader.h"
 #include "datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
@@ -43,6 +44,7 @@
 
 
 extern DataCenter*               DATC;
+extern Calbr::CalbrFile*			DRCData;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
 
@@ -948,7 +950,7 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    _cifStruct = NULL;
 	 _drcStruct = NULL;
    _tellParser = NULL;
-	onTellAddDRCTab();
+	//onTellAddDRCTab();
    Browsers = this;
 }
 
@@ -1144,6 +1146,14 @@ void browsers::addCIFtab()
    wxPostEvent(Browsers, eventADDTAB);
 }
 
+void browsers::addDRCtab()
+{
+   assert(Browsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(BT_ADDDRC_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
+}
+
 void browsers::clearGDStab() 
 {
    assert(Browsers);
@@ -1160,6 +1170,13 @@ void browsers::clearCIFtab()
    wxPostEvent(Browsers, eventADDTAB);
 }
 
+void browsers::clearDRCtab()
+{
+   assert(Browsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(BT_CLEARDRC_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
+}
 void browsers::celltree_open(const std::string cname) 
 {
    assert(Browsers);
@@ -1755,9 +1772,21 @@ wxString browsers::LayerBrowser::getAllSelected()
    return _layerPanel->getAllSelected();
 }
 
+browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id, 
+                              const wxPoint& pos, 
+                              const wxSize& size,
+										long style):
+							wxTreeCtrl(parent, id, pos, size, style | wxTR_FULL_ROW_HIGHLIGHT )
+{
+}
+
 browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 	:wxPanel(parent, id, wxDefaultPosition, wxDefaultSize)
 {
+		_errorBrowser = DEBUG_NEW ErrorBrowser(this);
+		wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+		thesizer->Add(_errorBrowser, 1, wxEXPAND | wxBOTTOM);
+		SetSizerAndFit(thesizer);
 }
 
 browsers::DRCBrowser::~DRCBrowser()
