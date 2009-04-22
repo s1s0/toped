@@ -307,12 +307,23 @@ namespace browsers
          wxBoxSizer*          _thesizer;
          DECLARE_EVENT_TABLE();
    };
+ //===========================================================================
+   class ErrorBrowser: public wxTreeCtrl 
+	{
+      public:
+                           ErrorBrowser(wxWindow* parent, wxWindowID id = -1, 
+                              const wxPoint& pos = wxDefaultPosition, 
+                              const wxSize& size = wxDefaultSize,
+                              long style = wxTR_DEFAULT_STYLE);
+	};
 
-	   //===========================================================================
+  //===========================================================================
    class DRCBrowser : public wxPanel {
 	public:
 										DRCBrowser(wxWindow* parent, wxWindowID id);
 		virtual						~DRCBrowser();
+	private:
+		ErrorBrowser*				_errorBrowser;
 	};
 
    //===========================================================================
@@ -356,8 +367,10 @@ namespace browsers
    void addTDTtab(bool newthread = false);
    void addGDStab();
    void addCIFtab();
+	void addDRCtab();
    void clearGDStab();
    void clearCIFtab();
+	void clearDRCtab();
    void celltree_open(const std::string);
    void celltree_highlight(const std::string);
    void treeAddMember(const char*, const char*, int action = 0);

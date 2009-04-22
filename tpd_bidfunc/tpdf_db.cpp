@@ -1245,6 +1245,8 @@ int tellstdfunc::DRCCalibreimport::execute() {
 
 		if(DRCData->isOk())
 		{
+			// add CIF tab in the browser
+         browsers::addDRCtab();
 			DRCData->ShowResults();
 		}
 		else
