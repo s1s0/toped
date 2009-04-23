@@ -112,7 +112,7 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName)
 
 Calbr::CalbrFile::~CalbrFile()
 {
-	std::vector <Calbr::drcRuleCheck*>::const_iterator it;
+	RuleChecksVector::const_iterator it;
 	if (!_RuleChecks.empty())
 	{
 	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
@@ -230,7 +230,7 @@ bool Calbr::CalbrFile::parse()
 
 void	Calbr::CalbrFile::ShowResults()
 {
-	std::vector <Calbr::drcRuleCheck*>::const_iterator it;
+	RuleChecksVector::const_iterator it;
 	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
 	{
 		std::vector <Calbr::drcPolygon>::iterator it2;
