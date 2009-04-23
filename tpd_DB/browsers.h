@@ -322,6 +322,7 @@ namespace browsers
 	public:
 										DRCBrowser(wxWindow* parent, wxWindowID id);
 		virtual						~DRCBrowser();
+		void							deleteAllItems(void);
 	private:
 		ErrorBrowser*				_errorBrowser;
 	};

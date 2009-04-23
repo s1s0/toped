@@ -94,8 +94,9 @@ public:
 	CalbrFile(const std::string &fileName);
 	~CalbrFile();
 
-	void			ShowResults();
-	bool			isOk(void)	{return _ok;}
+	void					ShowResults();
+	RuleChecksVector* Results() {return &_RuleChecks;};
+	bool					isOk(void)	{return _ok;}
 private:
 	FILE*          _calbrFile;
 	std::string    _fileName;

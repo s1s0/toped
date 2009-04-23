@@ -950,7 +950,6 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    _cifStruct = NULL;
 	 _drcStruct = NULL;
    _tellParser = NULL;
-	//onTellAddDRCTab();
    Browsers = this;
 }
 
@@ -1059,7 +1058,7 @@ void browsers::browserTAB::onTellClearDRCTab()
    {
      int _drcPageIndex = GetPageIndex(_drcStruct);
       assert(wxNOT_FOUND != _drcPageIndex);
-     // _drcStruct->deleteAllItems();
+      _drcStruct->deleteAllItems();
       DeletePage(_drcPageIndex);
       _drcStruct = NULL;
    }
@@ -1776,7 +1775,7 @@ browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id,
                               const wxPoint& pos, 
                               const wxSize& size,
 										long style):
-							wxTreeCtrl(parent, id, pos, size, style | wxTR_FULL_ROW_HIGHLIGHT )
+							wxTreeCtrl(parent, id, pos, size, style |wxTR_HIDE_ROOT| wxTR_FULL_ROW_HIGHLIGHT )
 {
 }
 
@@ -1787,8 +1786,36 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 		wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
 		thesizer->Add(_errorBrowser, 1, wxEXPAND | wxBOTTOM);
 		SetSizerAndFit(thesizer);
+		Calbr::RuleChecksVector* errors = DRCData->Results();
+		_errorBrowser->AddRoot(wxT("hidden_wxroot"));
+		for(Calbr::RuleChecksVector::const_iterator it = errors->begin();it < errors->end(); ++it)
+		{
+			std::string name = (*it)->ruleCheckName();
+			wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(name.c_str(), wxConvUTF8));
+			std::vector <Calbr::drcPolygon>::iterator it2;
+			std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
+			long sz = polys->size();
+			for(long i = 1; i <= sz; i++)
+			{
+				wxString str;
+				str.Printf(wxT("%d"), i);
+				_errorBrowser->AppendItem(id, str);
+			}
+			//for(it2 = polys->begin(); it2 < polys->end(); ++it2)
+			//{
+			//	(it2
+			//}
+
+
+		}
+		
 }
 
 browsers::DRCBrowser::~DRCBrowser()
 {
+}
+
+void browsers::DRCBrowser::deleteAllItems(void)
+{
+	_errorBrowser->DeleteAllItems();
 }
