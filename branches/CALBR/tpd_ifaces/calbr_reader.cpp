@@ -39,6 +39,7 @@
 Calbr::CalbrFile *DRCData = NULL;
 
 extern console::ted_cmd*	Console;
+long Calbr::drcPolygon::_precision = 0;
 
 void Calbr::drcPolygon::addCoord(long x, long y)
 {
@@ -46,6 +47,28 @@ void Calbr::drcPolygon::addCoord(long x, long y)
 	crd.x = x;
 	crd.y = y;
 	_coords.push_back(crd);
+}
+
+void Calbr::drcPolygon::showError(void)
+{
+	wxString ost;
+	ost << wxT("addpoly({");
+	CoordsVector::iterator it;
+	//CoordsVector *poly1 = (*it).coords();
+	for(it = _coords.begin(); it < _coords.end(); ++it)
+	{
+		if (it != _coords.begin())
+		{
+			ost<<wxT(",");
+		}
+		wxString xstr = convert((*it).x, _precision); 
+		wxString ystr = convert((*it).y, _precision); 
+
+		ost << wxT("{") << convert((*it).x, _precision) << wxT(",") << convert((*it).y, _precision) << wxT("}");;
+
+	}
+	ost<<wxT("});");
+	Console->parseCommand(ost);
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(const std::string &name)
@@ -102,6 +125,8 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName)
 	
 	char cellName[512];
 	sscanf( str, "%s %ud", cellName, &_precision);
+	//initialisation of static member drcPolygon class
+	drcPolygon::_precision = _precision;
 	_cellName = cellName;
 	while(parse())
 	{
@@ -247,10 +272,9 @@ void	Calbr::CalbrFile::ShowResults()
 				{
 					ost<<wxT(",");
 				}
-				wxString xstr = convert((*it3).x); 
-				wxString ystr = convert((*it3).y); 
 
-				ost << wxT("{") << convert((*it3).x) << wxT(",") << convert((*it3).y) << wxT("}");;
+
+				ost << wxT("{") << convert((*it3).x, _precision) << wxT(",") << convert((*it3).y, _precision) << wxT("}");;
 
 			}
 			ost<<wxT("});");
@@ -271,31 +295,17 @@ void	Calbr::CalbrFile::ShowResults()
 			long y2int	= (*it2edge).y2 % _precision;
 			long y2frac = (*it2edge).y2 - y2int*_precision;
 			
-			ost << convert((*it2edge).x1) << wxT(",") 
-				 << convert((*it2edge).y1) << wxT(",") 
-				 << convert((*it2edge).x2) << wxT(",") 
-				 << convert((*it2edge).y2) << ost<<wxT("}, 0.1)");
+			ost << convert((*it2edge).x1, _precision) << wxT(",") 
+				 << convert((*it2edge).y1, _precision) << wxT(",") 
+				 << convert((*it2edge).x2, _precision) << wxT(",") 
+				 << convert((*it2edge).y2, _precision) << ost<<wxT("}, 0.1)");
 			Console->parseCommand(ost);
 		}
 	}
 
 }
 
-wxString Calbr::CalbrFile::convert(int number)
-{
-	float x	= float(number) / _precision;
-	int xint = x;
-	float xfrac = x - xint;
 
-	wxString str1;
-	wxString format = wxT("%");
-	wxString xintstr, xfracstr;
-	xintstr << xint;
-	xfracstr << _precision;
-	format << xintstr.Length() << wxT(".") << xfracstr.Length() << wxT("f");
-	str1.sprintf(format, x); 
-	return str1;
-}
 
 void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)
 {
@@ -307,3 +317,18 @@ void Calbr::drcRuleCheck::addEdge(const Calbr::edge &theEdge)
 	_edges.push_back(theEdge);
 }
 
+wxString Calbr::convert(int number, long precision)
+{
+	float x	= float(number) / precision;
+	int xint = x;
+	float xfrac = x - xint;
+
+	wxString str1;
+	wxString format = wxT("%");
+	wxString xintstr, xfracstr;
+	xintstr << xint;
+	xfracstr << precision;
+	format << xintstr.Length() << wxT(".") << xfracstr.Length() << wxT("f");
+	str1.sprintf(format, x); 
+	return str1;
+}

@@ -34,7 +34,6 @@
 #include "viewprop.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
-#include "../tpd_ifaces/calbr_reader.h"
 #include "datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
@@ -1779,6 +1778,43 @@ browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id,
 {
 }
 
+//====================================================================
+BEGIN_EVENT_TABLE(browsers::ErrorBrowser, wxTreeCtrl)
+   EVT_LEFT_DCLICK(browsers::ErrorBrowser::onLMouseDblClk)
+END_EVENT_TABLE()
+//====================================================================
+void	browsers::ErrorBrowser::saveInfo(const Calbr::drcPolygon &poly)
+{
+	_poly = poly;
+}
+
+void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
+{
+	int flags;
+   wxPoint pt = event.GetPosition();
+   wxTreeItemId id = HitTest(pt, flags);
+   if (id.IsOk() &&(flags & wxTREE_HITTEST_ONITEMLABEL))
+   {
+		if (ItemHasChildren(id))
+		{
+			if(IsExpanded(id)) Expand(id); else Collapse(id);
+		}
+		else
+		{
+			wxString cmd;
+			cmd << wxT("opencell(\"") << GetItemText(id) <<wxT("\");");
+			parseCommand(cmd);
+		}
+   }
+   else
+      event.Skip();
+}
+void	browsers::ErrorBrowser::showError(void)
+{		
+
+}
+
+//====================================================================
 browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 	:wxPanel(parent, id, wxDefaultPosition, wxDefaultSize)
 {
@@ -1800,12 +1836,9 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 				wxString str;
 				str.Printf(wxT("%d"), i);
 				_errorBrowser->AppendItem(id, str);
-			}
-			//for(it2 = polys->begin(); it2 < polys->end(); ++it2)
-			//{
-			//	(it2
-			//}
+				_errorBrowser->saveInfo(polys->at(i-1));
 
+			}
 
 		}
 		

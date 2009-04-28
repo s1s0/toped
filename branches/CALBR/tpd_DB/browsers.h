@@ -38,6 +38,7 @@
 #include <wx/aui/aui.h>
 #include <string>
 #include "tedesign.h"
+#include "../tpd_ifaces/calbr_reader.h"
 #include "../tpd_ifaces/gds_io.h"
 #include "../tpd_ifaces/cif_io.h"
 
@@ -310,11 +311,17 @@ namespace browsers
  //===========================================================================
    class ErrorBrowser: public wxTreeCtrl 
 	{
-      public:
+   public:
                            ErrorBrowser(wxWindow* parent, wxWindowID id = -1, 
                               const wxPoint& pos = wxDefaultPosition, 
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
+									void	saveInfo(const Calbr::drcPolygon &poly);
+		void						onLMouseDblClk(wxMouseEvent&);
+		void						showError(void);
+	private:
+		Calbr::drcPolygon		_poly;
+		DECLARE_EVENT_TABLE();
 	};
 
   //===========================================================================

@@ -52,10 +52,13 @@ typedef std::vector <Calbr::coord> CoordsVector;
 class drcPolygon
 {
 public:
-	void addCoord(long x, long y);
-	CoordsVector* coords() {return &_coords;};
+	void				addCoord(long x, long y);
+	CoordsVector*	coords() {return &_coords;};
+	void				showError(void);
+	static long		_precision;
 private:
 	CoordsVector	_coords;
+
 };
 
 class drcRuleCheck
@@ -106,9 +109,10 @@ private:
 	std::ifstream	_inFile;
 	bool				parse();
 	RuleChecksVector _RuleChecks;
-	wxString convert(int number);
 	bool				_ok;
 
 };
+
+wxString convert(int number, long precision);
 }
 #endif //CALBR_READER_H_INCLUDED
