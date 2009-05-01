@@ -1134,9 +1134,16 @@ void DataCenter::openGL_render(const CTM& layCTM) {
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(renderer);
-         rendTimer.report("Time elapsed for data traversing and processing");
+         rendTimer.report("Time elapsed for data traversing: ");
+         // The version with the central VBO's
+         glEnableClientState(GL_VERTEX_ARRAY);
+         renderer.collect();
+         rendTimer.report("Time elapsed for data copying   : ");
          renderer.draw();
-         rendTimer.report("                   Total elapsed rendering time");
+         glDisableClientState(GL_VERTEX_ARRAY);
+         // more trivial version 
+//         renderer.collectNdraw();
+         rendTimer.report("    Total elapsed rendering time: ");
          VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
