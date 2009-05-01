@@ -65,17 +65,17 @@ class TeselTempData {
       void              newChunk(GLenum type)      {_ctype = type; _cindexes.clear();}
       void              newIndex(word vx)          {_cindexes.push_back(vx);}
       void              storeChunk();
-      word              num_ftrs()                 { return _num_ftrs;}
-      word              num_ftfs()                 { return _num_ftfs;}
-      word              num_ftss()                 { return _num_ftss;}
+      word              num_ftrs()                 { return _all_ftrs;}
+      word              num_ftfs()                 { return _all_ftfs;}
+      word              num_ftss()                 { return _all_ftss;}
 
    private:
       TeselChain*       _the_chain;
       GLenum            _ctype;
       TeselVertices     _cindexes;
-      word              _num_ftrs;
-      word              _num_ftfs;
-      word              _num_ftss;
+      word              _all_ftrs;
+      word              _all_ftfs;
+      word              _all_ftss;
       unsigned          _offset;
 };
 
@@ -84,9 +84,9 @@ class TeselPoly {
                         TeselPoly(const int4b* pdata, unsigned psize);
                        ~TeselPoly();
       TeselChain*       tdata()                    { return &_tdata;  }
-      word              num_ftrs()                 { return _num_ftrs;}
-      word              num_ftfs()                 { return _num_ftfs;}
-      word              num_ftss()                 { return _num_ftss;}
+      word              num_ftrs()                 { return _all_ftrs;}
+      word              num_ftfs()                 { return _all_ftfs;}
+      word              num_ftss()                 { return _all_ftss;}
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
@@ -99,9 +99,9 @@ class TeselPoly {
 #endif
    private:
       TeselChain        _tdata;
-      word              _num_ftrs;
-      word              _num_ftfs;
-      word              _num_ftss;
+      word              _all_ftrs;
+      word              _all_ftfs;
+      word              _all_ftss;
 };
 
 /**
@@ -227,39 +227,85 @@ class TenderTVB {
 */
 class TenderTV {
    public:
-                        TenderTV(CTM&, bool);
+                        TenderTV(CTM&, bool, unsigned);
                        ~TenderTV();
       TenderObj*        box  (int4b*);
       TenderPoly*       poly (int4b*, unsigned, TeselPoly*);
       TenderWire*       wire (int4b*, unsigned, word, bool);
       const CTM*        tmatrix()            {return &_tmatrix;}
-      void              draw_contours();
-      void              draw_lines();
-      void              draw_fqus();
+
+      void              collect(int*);
+      void              draw(GLuint);
+
+      void              collectNdraw_contours();
+      void              collectNdraw_lines();
+      void              collectNdraw_fqus();
       void              draw_fpolygons();
+      unsigned          num_cont_points()   {return _num_cont_points;}
+      unsigned          num_line_points()   {return _num_line_points;}
+      unsigned          num_fqus_points()   {return _all_fqus * 4;}
    private:
       CTM               _tmatrix;
-      SliceObjects      _contour_data;
+      // collected data lists
+      SliceObjects      _cont_data;
       SliceWires        _line_data;
-      SliceObjects      _fqu_data;
+      SliceObjects      _fqus_data;
       SlicePolygons     _fpolygon_data;
-      unsigned          _num_contour_points; //
-      unsigned          _num_line_points;    // central line of wires
+      // total number of poits per object type
+      // Note - fqus has a constant number of points (4),
+      //        so - we keep track of the number of objects only
+      unsigned          _num_cont_points; //
+      unsigned          _num_line_points; // central line of wires
       unsigned          _num_polygon_points; // non-convex (polygons & wires)
-      unsigned          _num_contours;
-      unsigned          _num_lines;
-      unsigned          _num_fqus; //! fill quad
-      unsigned          _num_fqss; //! fill quad strip
-      unsigned          _num_ftrs; //! fill triangle
-      unsigned          _num_ftfs; //! fill triangle fan
-      unsigned          _num_ftss; //! fill triangle strip
+      // object counts
+      unsigned          _all_conts;//! line loop
+      unsigned          _all_lines;//! line strip
+      unsigned          _all_fqus; //! fill quad
+      unsigned          _all_fqss; //! fill quad strip
+      unsigned          _all_ftrs; //! fill triangle
+      unsigned          _all_ftfs; //! fill triangle fan
+      unsigned          _all_ftss; //! fill triangle strip
+      //
       bool              _filled;
+      // offset in the point array
+      unsigned          _array_offset;
+      // object size arrays
+      GLsizei*          _sza_cont;  //! size array for contour points
+      GLsizei*          _sza_line;  //! size array for line points
+      GLsizei*          _sza_fqus;  //! size array for quads
+      // object first point arrays
+      GLsizei*          _fst_cont;  //! first array for contour points
+      GLsizei*          _fst_line;  //! first array for line points
+      GLsizei*          _fst_fqus;  //! first array for quads
+};
+
+class TenderLay {
+   public:
+      typedef std::list<TenderTV*> TenderTVList;
+                        TenderLay(): _cslice(NULL), _num_cont_points(0), _num_line_points(0) , _num_fqus_points(0) {};
+                       ~TenderLay();
+      TenderObj*        box  (int4b* pdata)  {return _cslice->box(pdata);}
+      TenderPoly*       poly (int4b* pdata, unsigned psize, TeselPoly* tpoly) {return _cslice->poly(pdata, psize, tpoly);}
+      TenderWire*       wire (int4b* pdata, unsigned psize, word width, bool center_only) {return _cslice->wire(pdata, psize, width, center_only);}
+
+      void              newSlice(CTM&, bool);
+      void              ppSlice(); //! Post process the slice
+      void              draw(bool, GLuint/*, GLuint, GLuint*/);
+      void              collect(bool, GLuint/*, GLuint, GLuint*/);
+      void              collectNdraw(bool);
+      unsigned          num_cont_points()   {return _num_cont_points;}
+   private:
+      TenderTVList      _layData;
+      TenderTV*         _cslice;    //!Working variable pointing to the current slice
+      unsigned          _num_cont_points; //
+      unsigned          _num_line_points; // central line of wires
+      unsigned          _num_fqus_points; //
 };
 
 //-----------------------------------------------------------------------------
 //
 //! contains all the data across cells on a given layer
-typedef std::list<TenderTV*> TenderLay;
+//typedef std::list<TenderTV*> TenderLay;
 typedef std::map<word, TenderLay*> DataLay;
 typedef std::map<word, TenderTVB*> DataSel;
 typedef std::list<TenderRB*> TenderRBL;
@@ -273,13 +319,16 @@ class Tenderer {
       void              setSdataContainer(word);
       void              pushCell(const CTM&, const DBbox&, bool, bool);
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
-      void              box  (int4b* pdata)                    {_cslice->box(pdata);}
+      void              box  (int4b* pdata)                    {_clayer->box(pdata);}
       void              box  (int4b*, const SGBitSet*);
-      void              poly (int4b* pdata, unsigned psize, TeselPoly* tpoly)    {_cslice->poly(pdata, psize, tpoly);}
+      void              poly (int4b* pdata, unsigned psize, TeselPoly* tpoly)    {_clayer->poly(pdata, psize, tpoly);}
       void              poly (int4b*, unsigned, TeselPoly* , const SGBitSet*);
       void              wire (int4b*, unsigned, word);
       void              wire (int4b*, unsigned, word, const SGBitSet*);
+      void              collectNdraw();
+      void              collect();
       void              draw();
+      
       // temporary!
       void              initCTMstack()                {        _drawprop->initCTMstack()        ;}
       void              clearCTMstack()               {        _drawprop->clearCTMstack()       ;}
@@ -296,13 +345,15 @@ class Tenderer {
       layprop::DrawProperties*   _drawprop;
       real              _UU;
       DataLay           _data;      //!All data for drawing
+      TenderLay*        _clayer;    //!Working variable pointing to the current slice
       DataSel           _sdata;     //!Selected data - to be redrawn on top of the _data
-      TenderTV*         _cslice;    //!Working variable pointing to the current slice
       TenderTVB*        _sslice;    //!Selected shapes in the active cell
       TenderRBL         _oboxes;    //!All reference overlapping boxes
       TenderRBL         _osboxes;   //!All selected reference overlapping boxes
       CTM               _atrans;    //!The translation of the active cell
       CTM               _ctrans;    //!Working variable storing the current translation
+      //
+      GLuint*           _ogl_buffers;
 };
 
 
@@ -315,8 +366,8 @@ class HiResTimer {
       timeval        _end_time;
 #ifdef WIN32
       // System frequency of timer for Windows.
-      LARGE_INTEGER	_freq;
-      LARGE_INTEGER	_inittime;
+      LARGE_INTEGER  _freq;
+      LARGE_INTEGER  _inittime;
 #endif
 
 };

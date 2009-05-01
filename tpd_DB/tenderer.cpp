@@ -80,11 +80,11 @@ TeselChunk::~TeselChunk()
 //
 
 TeselTempData::TeselTempData(unsigned offset) :_the_chain(NULL), _cindexes(),
-           _num_ftrs(0), _num_ftfs(0), _num_ftss(0), _offset(offset)
+           _all_ftrs(0), _all_ftfs(0), _all_ftss(0), _offset(offset)
 {}
 
 TeselTempData::TeselTempData(TeselChain* tc) : _the_chain(tc), _cindexes(),
-           _num_ftrs(0), _num_ftfs(0), _num_ftss(0), _offset(0)
+           _all_ftrs(0), _all_ftfs(0), _all_ftss(0), _offset(0)
 {}
 
 void TeselTempData::storeChunk()
@@ -93,9 +93,9 @@ void TeselTempData::storeChunk()
    _the_chain->push_back(achunk);
    switch (_ctype)
    {
-      case GL_TRIANGLE_FAN   : _num_ftfs++; break;
-      case GL_TRIANGLE_STRIP : _num_ftss++; break;
-      case GL_TRIANGLES      : _num_ftrs++; break;
+      case GL_TRIANGLE_FAN   : _all_ftfs++; break;
+      case GL_TRIANGLE_STRIP : _all_ftss++; break;
+      case GL_TRIANGLES      : _all_ftrs++; break;
       default: assert(0);
    }
 }
@@ -119,9 +119,9 @@ TeselPoly::TeselPoly(const int4b* pdata, unsigned psize)
    }
    gluTessEndPolygon(tenderTesel);
    delete [] index_arr;
-   _num_ftrs = ttdata.num_ftrs();
-   _num_ftfs = ttdata.num_ftfs();
-   _num_ftss = ttdata.num_ftss();
+   _all_ftrs = ttdata.num_ftrs();
+   _all_ftfs = ttdata.num_ftfs();
+   _all_ftss = ttdata.num_ftss();
 }
 
 
@@ -577,23 +577,29 @@ void TenderTVB::draw_lsegments()
 
 //=============================================================================
 // class TenderTV
-TenderTV::TenderTV(CTM& translation, bool filled) : _tmatrix(translation),
-    _num_contour_points (0u), _num_line_points(0u), _num_polygon_points(0u),
-    _num_contours(0),         _num_lines(0),        _num_fqus(0),
-    _num_fqss(0),             _num_ftrs(0),         _num_ftfs(0),
-    _num_ftss(0),             _filled(filled)
+TenderTV::TenderTV(CTM& translation, bool filled, unsigned array_offset) :
+    _tmatrix(translation),
+    _num_cont_points (0u), _num_line_points(0u), _num_polygon_points(0u),
+    _all_conts(0)  , _all_lines(0)  , _all_fqus(0)                ,
+    _all_fqss(0)   , _all_ftrs(0)   , _all_ftfs(0)                ,
+    _all_ftss(0)   , _filled(filled), _array_offset(array_offset) ,
+    _sza_cont(NULL), _sza_line(NULL), _sza_fqus(NULL)             ,
+    _fst_cont(NULL), _fst_line(NULL), _fst_fqus(NULL)
 {}
 
 TenderObj* TenderTV::box (int4b* pdata)
 {
    TenderObj* cobj = DEBUG_NEW TenderObj(pdata, 4);
-   _contour_data.push_back(cobj);
-   _num_contour_points += 4;
-   _num_contours++;
    if (_filled)
    {
-      _fqu_data.push_back(cobj);
-      _num_fqus++;
+      _fqus_data.push_back(cobj);
+      _all_fqus++;
+   }
+   else
+   {
+      _cont_data.push_back(cobj);
+      _num_cont_points += 4;
+      _all_conts++;
    }
    return cobj;
 }
@@ -601,17 +607,17 @@ TenderObj* TenderTV::box (int4b* pdata)
 TenderPoly* TenderTV::poly (int4b* pdata, unsigned psize, TeselPoly* tchain)
 {
    TenderPoly* cobj = DEBUG_NEW TenderPoly(pdata, psize);
-   _contour_data.push_back(cobj);
-   _num_contour_points += cobj->csize();
-   _num_contours++;
+   _cont_data.push_back(cobj);
+   _num_cont_points += cobj->csize();
+   _all_conts++;
    if (_filled)
    {
       cobj->TeselData(tchain->tdata(), _num_polygon_points);
       _fpolygon_data.push_back(cobj);
       _num_polygon_points += cobj->csize();
-      _num_ftrs += tchain->num_ftrs();
-      _num_ftfs += tchain->num_ftfs();
-      _num_ftss += tchain->num_ftss();
+      _all_ftrs += tchain->num_ftrs();
+      _all_ftfs += tchain->num_ftfs();
+      _all_ftss += tchain->num_ftss();
    }
    return cobj;
 }
@@ -621,27 +627,114 @@ TenderWire* TenderTV::wire (int4b* pdata, unsigned psize, word width, bool cente
    TenderWire* cobj = DEBUG_NEW TenderWire(pdata, psize, width, center_line_only);
    _line_data.push_back(cobj);
    _num_line_points += cobj->lsize();
-   _num_lines++;
+   _all_lines++;
    if (!center_line_only)
    {
-      _contour_data.push_back(cobj);
-      _num_contours += 1;
-      _num_contour_points += cobj->csize();
+      _cont_data.push_back(cobj);
+      _all_conts += 1;
+      _num_cont_points += cobj->csize();
        if (_filled)
        {
          cobj->Tessel(_num_polygon_points);
          _fpolygon_data.push_back(cobj);
          _num_polygon_points += cobj->csize();
-         _num_fqss += 1;
+         _all_fqss += 1;
        }
    }
    return cobj;
 }
 
-void TenderTV::draw_contours()
+void TenderTV::collect(int* point_array)
 {
-   if  (0 == _num_contours) return;
-   unsigned long arr_size = 2 * _num_contour_points;
+   unsigned long line_arr_size = 2 * _num_line_points;
+   unsigned long fqus_arr_size = 8 * _all_fqus; //2 * 4
+   unsigned long cont_arr_size = 2 * _num_cont_points;
+   // initialise the indexing
+   unsigned long pntindx = 0;
+   unsigned      szindx  = 0;
+   if  (_all_lines > 0)
+   {
+      _fst_line = DEBUG_NEW int[_all_lines];
+      _sza_line = DEBUG_NEW int[_all_lines];
+      // copy all the data in the VBO and in the same time update the
+      // contour size array and the array containg first indexes
+      for (SliceWires::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
+      { // shapes in the current translation (layer within the cell)
+         unsigned clsize = (*CSH)->lsize();
+         assert(clsize);
+         _fst_line[szindx] = pntindx/2;
+         _sza_line[szindx++] = clsize;
+         memcpy(&(point_array[_array_offset + pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
+         pntindx += 2 * clsize;
+      }
+      assert(pntindx == line_arr_size);
+      assert(szindx  == _all_lines);
+   }
+
+   if  (_all_fqus > 0)
+   {
+      _fst_fqus = DEBUG_NEW int[_all_fqus];
+      _sza_fqus = DEBUG_NEW int[_all_fqus];
+      for (SliceObjects::const_iterator CSH = _fqus_data.begin(); CSH != _fqus_data.end(); CSH++)
+      { // shapes in the current translation (layer within the cell)
+         unsigned clsize = (*CSH)->csize();
+         assert(clsize);
+         _fst_fqus[szindx] = pntindx/2;
+         _sza_fqus[szindx++] = clsize;
+         memcpy(&(point_array[_array_offset + pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
+         pntindx += 2 * clsize;
+      }
+      assert(pntindx == line_arr_size + fqus_arr_size);
+      assert(szindx  == _all_lines    + _all_fqus    );
+   }
+
+   if  (_all_conts > 0)
+   {
+      _fst_cont = DEBUG_NEW int[_all_conts];
+      _sza_cont = DEBUG_NEW int[_all_conts];
+      for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
+      { // shapes in the current translation (layer within the cell)
+         unsigned clsize = (*CSH)->csize();
+         assert(clsize);
+         _fst_cont[szindx] = pntindx/2;
+         _sza_cont[szindx++] = clsize;
+         memcpy(&(point_array[_array_offset + pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
+         pntindx += 2 * clsize;
+      }
+      assert(pntindx == line_arr_size + fqus_arr_size + cont_arr_size);
+      assert(szindx  == _all_lines    + _all_fqus     + _all_conts   );
+   }
+}
+
+void TenderTV::draw(GLuint bufnum)
+{
+   glBindBuffer(GL_ARRAY_BUFFER, bufnum);
+   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _array_offset));
+   if  (_all_lines > 0)
+   {
+      assert(_fst_line);
+      assert(_sza_line);
+      glMultiDrawArrays(GL_LINE_STRIP, _fst_line, _sza_line, _all_lines);
+   }
+   if  (_all_fqus > 0)
+   {
+      assert(_fst_fqus);
+      assert(_sza_fqus);
+      glMultiDrawArrays(GL_LINE_LOOP, _fst_fqus, _sza_fqus, _all_fqus);
+      glMultiDrawArrays(GL_QUADS, _fst_fqus, _sza_fqus, _all_fqus);
+   }
+   if (_all_conts > 0)
+   {
+      assert(_fst_cont);
+      assert(_sza_cont);
+      glMultiDrawArrays(GL_LINE_LOOP, _fst_cont, _sza_cont, _all_conts);
+   }
+}
+
+void TenderTV::collectNdraw_contours()
+{
+   if  (0 == _all_conts) return;
+   unsigned long arr_size = 2 * _num_cont_points;
 #ifdef USE_VBOS
    // Organise the VBO ...
    GLuint ogl_buffer;
@@ -653,14 +746,14 @@ void TenderTV::draw_contours()
    int* point_array = DEBUG_NEW int[arr_size];
 #endif
    // ... and the additional arrays
-   GLsizei* size_array = DEBUG_NEW int[_num_contours];
-   GLsizei* first_array = DEBUG_NEW int[_num_contours];
+   GLsizei* size_array = DEBUG_NEW int[_all_conts];
+   GLsizei* first_array = DEBUG_NEW int[_all_conts];
    // initialise the indexing
    unsigned long pntindx = 0;
    unsigned      szindx  = 0;
    // copy all the data in the VBO and in the same time update the
    // contour size array and the array containg first indexes
-   for (SliceObjects::const_iterator CSH = _contour_data.begin(); CSH != _contour_data.end(); CSH++)
+   for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
    { // shapes in the current translation (layer within the cell)
       unsigned clsize = (*CSH)->csize();
       assert(clsize);
@@ -674,7 +767,7 @@ void TenderTV::draw_contours()
       pntindx += 2 * clsize;
    }
    assert(pntindx == arr_size);
-   assert(szindx == _num_contours);
+   assert(szindx == _all_conts);
 #ifdef USE_VBOS
    // Draw the VBO
    glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -695,13 +788,13 @@ void TenderTV::draw_contours()
    delete [] first_array;
 }
 
-void TenderTV::draw_lines()
+void TenderTV::collectNdraw_lines()
 {
-   if  (0 == _num_lines) return;
+   if  (0 == _all_lines) return;
    unsigned long arr_size = 2 * _num_line_points;
    int* point_array = DEBUG_NEW int[arr_size];
-   GLsizei* size_array = DEBUG_NEW int[_num_lines];
-   GLsizei* first_array = DEBUG_NEW int[_num_lines];
+   GLsizei* size_array = DEBUG_NEW int[_all_lines];
+   GLsizei* first_array = DEBUG_NEW int[_all_lines];
    unsigned long pntindx = 0;
    unsigned      szindx  = 0;
 
@@ -715,7 +808,7 @@ void TenderTV::draw_lines()
       pntindx += 2 * clsize;
    }
    assert(pntindx == arr_size);
-   assert(szindx == _num_lines);
+   assert(szindx == _all_lines);
    glVertexPointer(2, GL_INT, 0, point_array);
    glMultiDrawArrays(GL_LINE_STRIP, first_array, size_array, szindx);
 
@@ -724,17 +817,17 @@ void TenderTV::draw_lines()
    delete [] first_array;
 }
 
-void TenderTV::draw_fqus()
+void TenderTV::collectNdraw_fqus()
 {
-   if  (0 == _num_fqus) return;
-   unsigned long arr_size = 8 * _num_fqus; //2 * 4
+   if  (0 == _all_fqus) return;
+   unsigned long arr_size = 8 * _all_fqus; //2 * 4
    int* point_array = DEBUG_NEW int[arr_size];
-   GLsizei* size_array = DEBUG_NEW int[_num_fqus];
-   GLsizei* first_array = DEBUG_NEW int[_num_fqus];
+   GLsizei* size_array = DEBUG_NEW int[_all_fqus];
+   GLsizei* first_array = DEBUG_NEW int[_all_fqus];
    unsigned long pntindx = 0;
    unsigned      szindx  = 0;
 
-   for (SliceObjects::const_iterator CSH = _fqu_data.begin(); CSH != _fqu_data.end(); CSH++)
+   for (SliceObjects::const_iterator CSH = _fqus_data.begin(); CSH != _fqus_data.end(); CSH++)
    { // shapes in the current translation (layer within the cell)
       unsigned clsize = (*CSH)->csize();
       assert(clsize);
@@ -744,7 +837,7 @@ void TenderTV::draw_fqus()
       pntindx += 2 * clsize;
    }
    assert(pntindx == arr_size);
-   assert(szindx == _num_fqus);
+   assert(szindx == _all_fqus);
    glVertexPointer(2, GL_INT, 0, point_array);
    glMultiDrawArrays(GL_QUADS, first_array, size_array, szindx);
 
@@ -772,25 +865,25 @@ void TenderTV::draw_fpolygons()
    const GLvoid**    ix_fqss_array = NULL;
 
    int* point_array = DEBUG_NEW int[arr_size];
-   if (_num_ftrs)
+   if (_all_ftrs)
    {
-      sz_ftrs_array = DEBUG_NEW       GLsizei[_num_ftrs];
-      ix_ftrs_array = DEBUG_NEW const GLvoid*[_num_ftrs];
+      sz_ftrs_array = DEBUG_NEW       GLsizei[_all_ftrs];
+      ix_ftrs_array = DEBUG_NEW const GLvoid*[_all_ftrs];
    }
-   if (_num_ftfs)
+   if (_all_ftfs)
    {
-      sz_ftfs_array = DEBUG_NEW       GLsizei[_num_ftfs];
-      ix_ftfs_array = DEBUG_NEW const GLvoid*[_num_ftfs];
+      sz_ftfs_array = DEBUG_NEW       GLsizei[_all_ftfs];
+      ix_ftfs_array = DEBUG_NEW const GLvoid*[_all_ftfs];
    }
-   if (_num_ftss)
+   if (_all_ftss)
    {
-      sz_ftss_array = DEBUG_NEW       GLsizei[_num_ftss];
-      ix_ftss_array = DEBUG_NEW const GLvoid*[_num_ftss];
+      sz_ftss_array = DEBUG_NEW       GLsizei[_all_ftss];
+      ix_ftss_array = DEBUG_NEW const GLvoid*[_all_ftss];
    }
-   if (_num_fqss)
+   if (_all_fqss)
    {
-      sz_fqss_array = DEBUG_NEW       GLsizei[_num_fqss];
-      ix_fqss_array = DEBUG_NEW const GLvoid*[_num_fqss];
+      sz_fqss_array = DEBUG_NEW       GLsizei[_all_fqss];
+      ix_fqss_array = DEBUG_NEW const GLvoid*[_all_fqss];
    }
 
    for (SlicePolygons::const_iterator CSH = _fpolygon_data.begin(); CSH != _fpolygon_data.end(); CSH++)
@@ -836,10 +929,10 @@ void TenderTV::draw_fpolygons()
       pntindx += 2 * (*CSH)->csize();
    }
    assert(pntindx == arr_size);
-   assert(sz_ftrs_indx == _num_ftrs);
-   assert(sz_ftfs_indx == _num_ftfs);
-   assert(sz_ftss_indx == _num_ftss);
-   assert(sz_fqss_indx == _num_fqss);
+   assert(sz_ftrs_indx == _all_ftrs);
+   assert(sz_ftfs_indx == _all_ftfs);
+   assert(sz_ftss_indx == _all_ftss);
+   assert(sz_fqss_indx == _all_fqss);
 
    glVertexPointer(2, GL_INT, 0, point_array);
    if (sz_ftrs_indx > 0)
@@ -877,50 +970,133 @@ TenderTV::~TenderTV()
 {
    for (SliceWires::const_iterator CSO = _line_data.begin(); CSO != _line_data.end(); CSO++)
       if ((*CSO)->center_line_only()) delete (*CSO);
-   for (SliceObjects::const_iterator CSO = _contour_data.begin(); CSO != _contour_data.end(); CSO++)
+   for (SliceObjects::const_iterator CSO = _cont_data.begin(); CSO != _cont_data.end(); CSO++)
       delete (*CSO);
+   if (NULL != _sza_cont)
+   {
+      delete [] _sza_cont; _sza_cont = NULL;
+   }
+   if (NULL != _sza_line)
+   {
+      delete [] _sza_line; _sza_line = NULL;
+   }
+   if (NULL != _sza_fqus)
+   {
+      delete [] _sza_fqus; _sza_fqus = NULL;
+   }
+   if (NULL != _fst_cont)
+   {
+      delete [] _fst_cont; _fst_cont = NULL;
+   }
+   if (NULL != _fst_fqus)
+   {
+      delete [] _fst_fqus; _fst_fqus = NULL;
+   }
 }
 
+//=============================================================================
+void TenderLay::newSlice(CTM& ctrans, bool fill)
+{
+   unsigned array_offset = 2 * (_num_cont_points + _num_line_points + _num_fqus_points);
+   _cslice = DEBUG_NEW TenderTV(ctrans, fill, array_offset);
+   _layData.push_back(_cslice);
+}
+
+void TenderLay::ppSlice()
+{
+   if (NULL != _cslice)
+   {
+      _num_cont_points += _cslice->num_cont_points();
+      _num_line_points += _cslice->num_line_points();
+      _num_fqus_points += _cslice->num_fqus_points();
+   }
+}
+
+// void TenderLay::collect(bool fill, GLuint cont_parray, GLuint line_parray, GLuint fqus_parray)
+void TenderLay::collect(bool fill, GLuint parray)
+{
+   int* cpoint_array;
+   // don't forget to post-precess the last slices...
+   ppSlice();
+
+   glBindBuffer(GL_ARRAY_BUFFER, parray);
+   glBufferData(GL_ARRAY_BUFFER,
+                2 * (_num_cont_points + _num_line_points + _num_fqus_points ) * sizeof(int4b),
+                NULL,
+                GL_DYNAMIC_DRAW);
+   cpoint_array = (int*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+   for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+      (*TLAY)->collect(cpoint_array);
+   glUnmapBuffer(GL_ARRAY_BUFFER);
+
+}
+
+// void TenderLay::draw(bool fill, GLuint cont_parray, GLuint line_parray, GLuint fqus_parray)
+void TenderLay::draw(bool fill, GLuint parray)
+{
+   for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+   {
+      TenderTV* ctv = (*TLAY);
+      glPushMatrix();
+      real openGLmatrix[16];
+      ctv->tmatrix()->oglForm(openGLmatrix);
+      glMultMatrixd(openGLmatrix);
+      ctv->draw(parray);
+      glPopMatrix();
+   }
+}
+
+void TenderLay::collectNdraw(bool fill)
+{
+   for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+   {
+      TenderTV* ctv = (*TLAY);
+      glPushMatrix();
+      real openGLmatrix[16];
+      ctv->tmatrix()->oglForm(openGLmatrix);
+      glMultMatrixd(openGLmatrix);
+      //
+      ctv->collectNdraw_contours();
+      ctv->collectNdraw_lines();
+      if (fill)
+      {
+         ctv->collectNdraw_fqus();
+         ctv->draw_fpolygons();
+      }
+      //
+      glPopMatrix();
+   }
+}
+
+TenderLay::~TenderLay()
+{
+   for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+      delete (*TLAY);
+}
 
 //=============================================================================
 Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
-      _drawprop(drawprop), _UU(UU), _cslice(NULL)
-{
-/*   TeselPoly::tenderTesel = gluNewTess();
-#ifndef WIN32
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                   (GLvoid(*)())&TeselPoly::teselBegin);
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                   (GLvoid(*)())&TeselPoly::teselVertex);
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_END_DATA,
-                   (GLvoid(*)())&TeselPoly::teselEnd);
-#else
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                   (GLvoid(__stdcall *)())&TeselPoly::teselBegin);
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                   (GLvoid(__stdcall *)())&TeselPoly::teselVertex);
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_END_DATA,
-                   (GLvoid(__stdcall *)())&TeselPoly::teselEnd);
-#endif*/
-}
+      _drawprop(drawprop), _UU(UU), _clayer(NULL),
+      _ogl_buffers(NULL)
+{}
 
 void Tenderer::setLayer(word layer)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with layer 0 by accident
    assert(layer);
-   TenderLay* laydata = NULL;
+   if (NULL != _clayer)
+      _clayer->ppSlice();
    if (_data.end() != _data.find(layer))
    {
-      laydata = _data[layer];
+      _clayer = _data[layer];
    }
    else
    {
-      laydata = DEBUG_NEW TenderLay();
-      _data[layer] = laydata;
+      _clayer = DEBUG_NEW TenderLay();
+      _data[layer] = _clayer;
    }
-   _cslice = DEBUG_NEW TenderTV(_ctrans, _drawprop->isFilled(layer));
-   laydata->push_back(_cslice);
+   _clayer->newSlice(_ctrans, _drawprop->isFilled(layer));
    // @TODO! current fill on/off should be determined here!
 }
 
@@ -944,14 +1120,14 @@ void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active, boo
 void Tenderer::box  (int4b* pdata, const SGBitSet* psel)
 {
    assert(_sslice);
-   TenderObj* dobj = _cslice->box(pdata);
+   TenderObj* dobj = _clayer->box(pdata);
    _sslice->add(dobj, psel);
 }
 
 void Tenderer::poly (int4b* pdata, unsigned psize, TeselPoly* tpoly, const SGBitSet* psel)
 {
    assert(_sslice);
-   TenderPoly* dpoly = _cslice->poly(pdata, psize, tpoly);
+   TenderPoly* dpoly = _clayer->poly(pdata, psize, tpoly);
    _sslice->add(dpoly, psel);
 }
 
@@ -960,13 +1136,13 @@ void Tenderer::wire (int4b* pdata, unsigned psize, word width)
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
    bool center_line_only = !wsquare.visible(topCTM() * ScrCTM());
-   _cslice->wire(pdata, psize, width, center_line_only);
+   _clayer->wire(pdata, psize, width, center_line_only);
 }
 
 void Tenderer::wire (int4b* pdata, unsigned psize, word width, const SGBitSet* psel)
 {
    assert(_sslice);
-   TenderWire* dwire = _cslice->wire(pdata, psize, width, false);
+   TenderWire* dwire = _clayer->wire(pdata, psize, width, false);
    _sslice->add(dwire, psel);
 }
 
@@ -1004,7 +1180,37 @@ void Tenderer::Grid(const real step, const std::string color)
    }
 }
 
+void Tenderer::collect()
+{
+   // Organise the VBOs ...
+   GLuint num_ogl_buffers = _data.size();
+   _ogl_buffers = new GLuint [num_ogl_buffers];
+   glGenBuffers(num_ogl_buffers, _ogl_buffers);
+   unsigned current_buffer = 0;
+   for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   {
+      CLAY->second->collect(_drawprop->isFilled(CLAY->first),
+                            _ogl_buffers[current_buffer++]);
+   }
+}
+
 void Tenderer::draw()
+{
+   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+   unsigned current_buffer = 0;
+   for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   {
+      word curlayno = CLAY->first;
+      _drawprop->setCurrentColor(curlayno);
+      CLAY->second->draw(_drawprop->getCurrentFill(),
+                         _ogl_buffers[current_buffer++]);
+   }
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   GLuint num_ogl_buffers = _data.size();
+   glDeleteBuffers(num_ogl_buffers, _ogl_buffers);
+}
+
+void Tenderer::collectNdraw()
 {
    glEnableClientState(GL_VERTEX_ARRAY);
    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1012,25 +1218,7 @@ void Tenderer::draw()
    {
       word curlayno = CLAY->first;
       _drawprop->setCurrentColor(curlayno);
-      bool fill = _drawprop->getCurrentFill();
-      for (TenderLay::const_iterator TLAY = CLAY->second->begin(); TLAY != CLAY->second->end(); TLAY++)
-      {
-         TenderTV* ctv = (*TLAY);
-         glPushMatrix();
-         real openGLmatrix[16];
-         ctv->tmatrix()->oglForm(openGLmatrix);
-         glMultMatrixd(openGLmatrix);
-         //
-         ctv->draw_contours();
-         ctv->draw_lines();
-         if (fill)
-         {
-            ctv->draw_fqus();
-            ctv->draw_fpolygons();
-         }
-         //
-         glPopMatrix();
-      }
+      CLAY->second->collectNdraw(_drawprop->getCurrentFill());
    }
    // now the overlapping boxes of the cell references
    _drawprop->setCurrentColor(0);
@@ -1064,20 +1252,13 @@ void Tenderer::draw()
       _drawprop->setLineProps(false);
    }
    glPopMatrix();
-glDisableClientState(GL_VERTEX_ARRAY);
-
+   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 Tenderer::~Tenderer()
 {
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
-   {
-      for (TenderLay::const_iterator TLAY = CLAY->second->begin(); TLAY != CLAY->second->end(); TLAY++)
-      {
-         delete (*TLAY);
-      }
       delete (CLAY->second);
-   }
 
    for (TenderRBL::const_iterator CRBL = _oboxes.begin(); CRBL != _oboxes.end(); CRBL++)
       delete (*CRBL);
@@ -1089,27 +1270,27 @@ Tenderer::~Tenderer()
 HiResTimer::HiResTimer()
 {
 #ifdef WIN32
-	// Get system frequency (number of ticks per second) of timer
-	if (!QueryPerformanceFrequency(&_freq) || !QueryPerformanceCounter(&_inittime))
-	{
-		tell_log(console::MT_INFO,"Problem with timer");
-	}
+   // Get system frequency (number of ticks per second) of timer
+   if (!QueryPerformanceFrequency(&_freq) || !QueryPerformanceCounter(&_inittime))
+   {
+      tell_log(console::MT_INFO,"Problem with timer");
+   }
 #else
-	gettimeofday(&_start_time, NULL);
+   gettimeofday(&_start_time, NULL);
 #endif
 }
 
 void HiResTimer::report(char* message)
 {
-	char time_message[256];
+   char time_message[256];
 #ifdef WIN32
-	LARGE_INTEGER curtime;
-	if (!QueryPerformanceCounter(&curtime)) 
-		return ;
+   LARGE_INTEGER curtime;
+   if (!QueryPerformanceCounter(&curtime)) 
+      return ;
   // Convert number of ticks to milliseconds
    int millisec = (curtime.QuadPart-_inittime.QuadPart) / (_freq.QuadPart / 1000);
-	int sec = millisec / 1000;
-	millisec = millisec - sec * 1000;
+   int sec = millisec / 1000;
+   millisec = millisec - sec * 1000;
    sprintf (time_message, "%s:   %i sec. %06i msec.",message, sec, millisec);
 
 #else
