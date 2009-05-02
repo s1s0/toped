@@ -651,9 +651,9 @@ void TenderTV::collect(int* point_array)
    unsigned long cont_arr_size = 2 * _num_cont_points;
    // initialise the indexing
    unsigned long pntindx = 0;
-   unsigned      szindx  = 0;
    if  (_all_lines > 0)
    {
+      unsigned  szindx  = 0;
       _fst_line = DEBUG_NEW int[_all_lines];
       _sza_line = DEBUG_NEW int[_all_lines];
       // copy all the data in the VBO and in the same time update the
@@ -673,6 +673,7 @@ void TenderTV::collect(int* point_array)
 
    if  (_all_fqus > 0)
    {
+      unsigned  szindx  = 0;
       _fst_fqus = DEBUG_NEW int[_all_fqus];
       _sza_fqus = DEBUG_NEW int[_all_fqus];
       for (SliceObjects::const_iterator CSH = _fqus_data.begin(); CSH != _fqus_data.end(); CSH++)
@@ -685,11 +686,12 @@ void TenderTV::collect(int* point_array)
          pntindx += 2 * clsize;
       }
       assert(pntindx == line_arr_size + fqus_arr_size);
-      assert(szindx  == _all_lines    + _all_fqus    );
+      assert(szindx  == _all_fqus);
    }
 
    if  (_all_conts > 0)
    {
+      unsigned  szindx  = 0;
       _fst_cont = DEBUG_NEW int[_all_conts];
       _sza_cont = DEBUG_NEW int[_all_conts];
       for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
@@ -702,7 +704,7 @@ void TenderTV::collect(int* point_array)
          pntindx += 2 * clsize;
       }
       assert(pntindx == line_arr_size + fqus_arr_size + cont_arr_size);
-      assert(szindx  == _all_lines    + _all_fqus     + _all_conts   );
+      assert(szindx  == _all_conts );
    }
 }
 
