@@ -51,7 +51,7 @@ TeselChunk::TeselChunk(const TeselChunk* data, unsigned offset)
 {
    _size = data->size();
    _type = data->type();
-   _index_seq = new unsigned[_size];
+   _index_seq = DEBUG_NEW unsigned[_size];
    const unsigned* copy_seq = data->index_seq();
    for(unsigned i = 0; i < _size; i++)
       _index_seq[i] = copy_seq[i] + offset;
@@ -972,6 +972,8 @@ TenderTV::~TenderTV()
 {
    for (SliceWires::const_iterator CSO = _line_data.begin(); CSO != _line_data.end(); CSO++)
       if ((*CSO)->center_line_only()) delete (*CSO);
+   for (SliceObjects::const_iterator CSO = _fqus_data.begin(); CSO != _fqus_data.end(); CSO++)
+      delete (*CSO);
    for (SliceObjects::const_iterator CSO = _cont_data.begin(); CSO != _cont_data.end(); CSO++)
       delete (*CSO);
    if (NULL != _sza_cont)
@@ -989,6 +991,10 @@ TenderTV::~TenderTV()
    if (NULL != _fst_cont)
    {
       delete [] _fst_cont; _fst_cont = NULL;
+   }
+   if (NULL != _fst_line)
+   {
+      delete [] _fst_line; _fst_line = NULL;
    }
    if (NULL != _fst_fqus)
    {
@@ -1186,7 +1192,7 @@ void Tenderer::collect()
 {
    // Organise the VBOs ...
    GLuint num_ogl_buffers = _data.size();
-   _ogl_buffers = new GLuint [num_ogl_buffers];
+   _ogl_buffers = DEBUG_NEW GLuint [num_ogl_buffers];
    glGenBuffers(num_ogl_buffers, _ogl_buffers);
    unsigned current_buffer = 0;
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
@@ -1210,6 +1216,8 @@ void Tenderer::draw()
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    GLuint num_ogl_buffers = _data.size();
    glDeleteBuffers(num_ogl_buffers, _ogl_buffers);
+   delete [] _ogl_buffers;
+   _ogl_buffers = NULL;
 }
 
 void Tenderer::collectNdraw()
