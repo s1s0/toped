@@ -24,7 +24,10 @@
 //          $Date$
 //        $Author$
 //===========================================================================
+/*!
+The idea behind the Toped renderer:
 
+*/
 #ifndef TENDERER_H
 #define TENDERER_H
 
@@ -237,30 +240,25 @@ class TenderTV {
       void              collect(int*);
       void              draw(GLuint);
 
-      void              collectNdraw_contours();
-      void              collectNdraw_lines();
-      void              collectNdraw_fqus();
-      void              draw_fpolygons();
-      unsigned          num_cont_points()   {return _num_cont_points;}
-      unsigned          num_line_points()   {return _num_line_points;}
-      unsigned          num_fqus_points()   {return _all_fqus * 4;}
+      unsigned          num_total_points();
    private:
       CTM               _tmatrix;
       // collected data lists
-      SliceObjects      _cont_data;
-      SliceWires        _line_data;
-      SliceObjects      _fqus_data;
-      SlicePolygons     _fpolygon_data;
+      SliceObjects      _cont_data; //! Countour data
+      SliceWires        _line_data; //! Line data
+      SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
+      SlicePolygons     _ncvx_data; //! Non convex data
       // total number of poits per object type
-      // Note - fqus has a constant number of points (4),
+      // Note - cnvx has a constant number of points (4) (see the comment above),
       //        so - we keep track of the number of objects only
-      unsigned          _num_cont_points; //
-      unsigned          _num_line_points; // central line of wires
-      unsigned          _num_polygon_points; // non-convex (polygons & wires)
+      unsigned          _num_cont_points; //! The total number of countour points
+      unsigned          _num_line_points; //! The total number of line polts
+      unsigned          _num_ncvx_points; //! The total number of non-convex polygon points
       // object counts
-      unsigned          _all_conts;//! line loop
-      unsigned          _all_lines;//! line strip
-      unsigned          _all_fqus; //! fill quad
+      unsigned          _all_conts;//! Number of countours. Will be drawn with GL_LINE_LOOP
+      unsigned          _all_lines;//! Number of lines. Will be drawn with GL_LINE_STRIP
+      unsigned          _all_cnvx; //! Number of convex polygons (boxes only at the moment - see _cnvx_data). Will be drawn with GL_QUADS
+      unsigned          _all_ncvx; //! Number of non-convex polygons. Will be drawn according to the tesselation data
       unsigned          _all_fqss; //! fill quad strip
       unsigned          _all_ftrs; //! fill triangle
       unsigned          _all_ftfs; //! fill triangle fan
@@ -272,17 +270,19 @@ class TenderTV {
       // object size arrays
       GLsizei*          _sza_cont;  //! size array for contour points
       GLsizei*          _sza_line;  //! size array for line points
-      GLsizei*          _sza_fqus;  //! size array for quads
+      GLsizei*          _sza_cnvx;  //! size array for convex polygons
+      GLsizei*          _sza_ncvx;  //! size array for non-convex polygons
       // object first point arrays
       GLsizei*          _fst_cont;  //! first array for contour points
       GLsizei*          _fst_line;  //! first array for line points
-      GLsizei*          _fst_fqus;  //! first array for quads
+      GLsizei*          _fst_cnvx;  //! first array for convex polygons
+      GLsizei*          _fst_ncvx;  //! first array for non-convex polygons
 };
 
 class TenderLay {
    public:
       typedef std::list<TenderTV*> TenderTVList;
-                        TenderLay(): _cslice(NULL), _num_cont_points(0), _num_line_points(0) , _num_fqus_points(0) {};
+                        TenderLay(): _cslice(NULL), _num_total_points(0) {};
                        ~TenderLay();
       TenderObj*        box  (int4b* pdata)  {return _cslice->box(pdata);}
       TenderPoly*       poly (int4b* pdata, unsigned psize, TeselPoly* tpoly) {return _cslice->poly(pdata, psize, tpoly);}
@@ -290,22 +290,19 @@ class TenderLay {
 
       void              newSlice(CTM&, bool);
       void              ppSlice(); //! Post process the slice
-      void              draw(bool, GLuint/*, GLuint, GLuint*/);
-      void              collect(bool, GLuint/*, GLuint, GLuint*/);
-      void              collectNdraw(bool);
-      unsigned          num_cont_points()   {return _num_cont_points;}
+      void              draw(bool, GLuint);
+      void              collect(bool, GLuint);
+      unsigned          total_points() {return _num_total_points;}
+
    private:
       TenderTVList      _layData;
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
-      unsigned          _num_cont_points; //
-      unsigned          _num_line_points; // central line of wires
-      unsigned          _num_fqus_points; //
+      unsigned          _num_total_points;
 };
 
 //-----------------------------------------------------------------------------
 //
 //! contains all the data across cells on a given layer
-//typedef std::list<TenderTV*> TenderLay;
 typedef std::map<word, TenderLay*> DataLay;
 typedef std::map<word, TenderTVB*> DataSel;
 typedef std::list<TenderRB*> TenderRBL;
@@ -325,10 +322,9 @@ class Tenderer {
       void              poly (int4b*, unsigned, TeselPoly* , const SGBitSet*);
       void              wire (int4b*, unsigned, word);
       void              wire (int4b*, unsigned, word, const SGBitSet*);
-      void              collectNdraw();
       void              collect();
       void              draw();
-      
+
       // temporary!
       void              initCTMstack()                {        _drawprop->initCTMstack()        ;}
       void              clearCTMstack()               {        _drawprop->clearCTMstack()       ;}
@@ -360,7 +356,7 @@ class Tenderer {
 class HiResTimer {
    public:
       HiResTimer();
-      void           report(char*);
+      void           report(std::string);
    private:
       timeval        _start_time;
       timeval        _end_time;
