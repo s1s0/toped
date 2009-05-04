@@ -318,7 +318,6 @@ namespace browsers
                               long style = wxTR_DEFAULT_STYLE);
 									void	saveInfo(const Calbr::drcPolygon &poly);
 		void						onLMouseDblClk(wxMouseEvent&);
-		void						showError(void);
 	private:
 		Calbr::drcPolygon		_poly;
 		DECLARE_EVENT_TABLE();

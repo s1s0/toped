@@ -1801,18 +1801,13 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 		}
 		else
 		{
-			wxString cmd;
-			cmd << wxT("opencell(\"") << GetItemText(id) <<wxT("\");");
-			parseCommand(cmd);
+			_poly.showError();
 		}
    }
    else
       event.Skip();
 }
-void	browsers::ErrorBrowser::showError(void)
-{		
 
-}
 
 //====================================================================
 browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
