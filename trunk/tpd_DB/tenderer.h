@@ -116,10 +116,8 @@ class TenderObj {
    public:
                         TenderObj(int4b* pdata, unsigned psize) : _cdata(pdata), _csize(psize) {}
       virtual          ~TenderObj() {};
-              int4b*    cdata()     {return _cdata;}  // contour data
-              unsigned  csize()     {return _csize;}
-//      virtual int*      ldata()     {assert(0); return NULL;}
-//      virtual unsigned  lsize()     {assert(0); return 0   ;}
+      int4b*            cdata()     {return _cdata;}
+      unsigned          csize()     {return _csize;}
    protected:
       int4b*            _cdata;  // contour data
       unsigned          _csize;
@@ -140,13 +138,10 @@ class TenderPoly : public TenderObj {
    public:
                         TenderPoly(int4b* pdata, unsigned psize):TenderObj(pdata, psize), _tdata(NULL) {}
       void              setTeselData(TeselPoly* tdata) {_tdata = tdata;}
-//      void              TeselData(TeselChain*, unsigned);
       virtual          ~TenderPoly(){};
-      TeselChain*       tdata()              {return _tdata->tdata();}
+      virtual TeselChain* tdata()              {return _tdata->tdata();}
    private:
-      TeselPoly*       _tdata;
-//   protected:
-//      TeselChain       _tdata;
+      TeselPoly*        _tdata;
 };
 
 /**
@@ -158,17 +153,19 @@ class TenderWire : public TenderPoly {
    public:
                         TenderWire(int4b*, unsigned, const word, bool);
       virtual          ~TenderWire();
-//      void              Tessel(unsigned);
+      void              Tesselate();
       int*              ldata()                 {return _ldata;}
       unsigned          lsize()                 {return _lsize;}
       bool              center_line_only()      {return _center_line_only;}
-   protected:
+      virtual TeselChain* tdata()               {return _tdata;}
+   private:
       void              precalc(const word);
       DBbox*            endPnts(const word, word, word, bool);
       DBbox*            mdlPnts(const word, word, word, const word);
       int*              _ldata;  // central line data
       unsigned          _lsize;
       bool              _center_line_only;
+      TeselChain*       _tdata;
 };
 
 /**
