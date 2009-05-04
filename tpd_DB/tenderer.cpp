@@ -866,7 +866,7 @@ unsigned TenderTV::num_total_indexs()
 //    delete [] point_array;
 // }
 
-void TenderTV::collectIndexs(int* index_array, TeselChain* tdata, unsigned& szi_fqss, unsigned& szi_ftrs, unsigned& szi_ftfs, unsigned& szi_ftss,
+void TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsigned& szi_fqss, unsigned& szi_ftrs, unsigned& szi_ftfs, unsigned& szi_ftss,
                              unsigned& inx_fqss_coffset, unsigned& inx_ftrs_coffset, unsigned& inx_ftfs_coffset, unsigned& inx_ftss_coffset, unsigned cpoint_index)
 {
    for (TeselChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
@@ -886,7 +886,7 @@ void TenderTV::collectIndexs(int* index_array, TeselChain* tdata, unsigned& szi_
          case GL_TRIANGLES      :
          {
             assert(_sza_ftrs);
-            _fst_ftrs[szi_fqss  ] = inx_ftrs_coffset;
+            _fst_ftrs[szi_ftrs  ] = inx_ftrs_coffset;
             _sza_ftrs[szi_ftrs++] = cchunk->size();
             for (unsigned i = 0; i < cchunk->size(); i++)
                index_array[inx_ftrs_coffset++] = cchunk->index_seq()[i] + cpoint_index;
@@ -915,7 +915,7 @@ void TenderTV::collectIndexs(int* index_array, TeselChain* tdata, unsigned& szi_
    }
 }
 
-void TenderTV::collect(int* point_array, int* index_array)
+void TenderTV::collect(int* point_array, unsigned int* index_array)
 {
    unsigned long line_arr_size = 2 * _num_line_points;
    unsigned long fqus_arr_size = 8 * _all_cnvx; //2 * 4
@@ -1075,7 +1075,7 @@ void TenderTV::draw()
       assert(_fst_ncvx);
       assert(_sza_ncvx);
       glMultiDrawArrays(GL_LINE_LOOP, _fst_ncvx, _sza_ncvx, _all_ncvx);
-/*
+
       if (_all_fqss > 0)
       {
          glMultiDrawElements(GL_QUAD_STRIP    , _sza_fqss, GL_UNSIGNED_INT, (const GLvoid**)_fst_fqss, _all_fqss);
@@ -1092,7 +1092,7 @@ void TenderTV::draw()
       {
          glMultiDrawElements(GL_TRIANGLE_STRIP, _sza_ftss, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftss, _all_ftss);
       }
-*/
+
    }
    if (_all_conts > 0)
    {
@@ -1178,7 +1178,7 @@ void TenderLay::ppSlice()
 void TenderLay::collect(bool fill, GLuint pbuf, GLuint ibuf)
 {
    int* cpoint_array = NULL;
-   int* cindex_array = NULL;
+   unsigned int* cindex_array = NULL;
    _pbuffer = pbuf;
    _ibuffer = ibuf;
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
@@ -1194,7 +1194,7 @@ void TenderLay::collect(bool fill, GLuint pbuf, GLuint ibuf)
                    _num_total_indexs * sizeof(int4b) ,
                    NULL                              ,
                    GL_DYNAMIC_DRAW                    );
-      cindex_array = (int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+      cindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
    }
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
       (*TLAY)->collect(cpoint_array, cindex_array);
@@ -1391,6 +1391,7 @@ void Tenderer::draw()
       CLAY->second->draw( _drawprop->getCurrentFill() );
    }
    glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
    glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
    delete [] _ogl_buffers;
    _ogl_buffers = NULL;

@@ -241,13 +241,13 @@ class TenderTV {
       TenderWire*       wire (int4b*, unsigned, word, bool);
       const CTM*        tmatrix()            {return &_tmatrix;}
 
-      void              collect(int*, int*);
+      void              collect(int*, unsigned int*);
       void              draw();
 
       unsigned          num_total_points();
       unsigned          num_total_indexs();
    private:
-      void              collectIndexs(int*, TeselChain*, unsigned&, unsigned&, unsigned&, unsigned&,
+      void              collectIndexs(unsigned int*, TeselChain*, unsigned&, unsigned&, unsigned&, unsigned&,
                                      unsigned&, unsigned&, unsigned&, unsigned&, unsigned);
 
       CTM               _tmatrix;
