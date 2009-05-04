@@ -234,6 +234,7 @@ class TenderTVB {
 */
 class TenderTV {
    public:
+      enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
                         TenderTV(CTM&, bool, unsigned, unsigned);
                        ~TenderTV();
       TenderObj*        box  (int4b*);
@@ -247,8 +248,7 @@ class TenderTV {
       unsigned          num_total_points();
       unsigned          num_total_indexs();
    private:
-      void              collectIndexs(unsigned int*, TeselChain*, unsigned&, unsigned&, unsigned&, unsigned&,
-                                     unsigned&, unsigned&, unsigned&, unsigned&, unsigned);
+      void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
 
       CTM               _tmatrix;
       // collected data lists

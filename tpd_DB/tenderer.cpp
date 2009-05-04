@@ -866,8 +866,8 @@ unsigned TenderTV::num_total_indexs()
 //    delete [] point_array;
 // }
 
-void TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsigned& szi_fqss, unsigned& szi_ftrs, unsigned& szi_ftfs, unsigned& szi_ftss,
-                             unsigned& inx_fqss_coffset, unsigned& inx_ftrs_coffset, unsigned& inx_ftfs_coffset, unsigned& inx_ftss_coffset, unsigned cpoint_index)
+void TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsigned* size_index,
+                             unsigned* index_offset, unsigned cpoint_index)
 {
    for (TeselChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
    {
@@ -877,37 +877,37 @@ void TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsig
          case GL_QUAD_STRIP     :
          {
             assert(_sza_fqss);
-            _fst_fqss[szi_fqss  ] = sizeof(unsigned) * inx_fqss_coffset;
-            _sza_fqss[szi_fqss++] = cchunk->size();
+            _fst_fqss[size_index[fqss]  ] = sizeof(unsigned) * index_offset[fqss];
+            _sza_fqss[size_index[fqss]++] = cchunk->size();
             for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[inx_fqss_coffset++] = cchunk->index_seq()[i] + cpoint_index;
+               index_array[index_offset[fqss]++] = cchunk->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLES      :
          {
             assert(_sza_ftrs);
-            _fst_ftrs[szi_ftrs  ] = sizeof(unsigned) * inx_ftrs_coffset;
-            _sza_ftrs[szi_ftrs++] = cchunk->size();
+            _fst_ftrs[size_index[ftrs]  ] = sizeof(unsigned) * index_offset[ftrs];
+            _sza_ftrs[size_index[ftrs]++] = cchunk->size();
             for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[inx_ftrs_coffset++] = cchunk->index_seq()[i] + cpoint_index;
+               index_array[index_offset[ftrs]++] = cchunk->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLE_FAN   :
          {
             assert(_sza_ftfs);
-            _fst_ftfs[szi_ftfs  ] = sizeof(unsigned) * inx_ftfs_coffset;
-            _sza_ftfs[szi_ftfs++] = cchunk->size();
+            _fst_ftfs[size_index[ftfs]  ] = sizeof(unsigned) * index_offset[ftfs];
+            _sza_ftfs[size_index[ftfs]++] = cchunk->size();
             for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[inx_ftfs_coffset++] = cchunk->index_seq()[i] + cpoint_index;
+               index_array[index_offset[ftfs]++] = cchunk->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLE_STRIP :
          {
             assert(_sza_ftss);
-            _fst_ftss[szi_ftss  ] = sizeof(unsigned) * inx_ftss_coffset;
-            _sza_ftss[szi_ftss++] = cchunk->size();
+            _fst_ftss[size_index[ftss]  ] = sizeof(unsigned) * index_offset[ftss];
+            _sza_ftss[size_index[ftss]++] = cchunk->size();
             for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[inx_ftss_coffset++] = cchunk->index_seq()[i] + cpoint_index;
+               index_array[index_offset[ftss]++] = cchunk->index_seq()[i] + cpoint_index;
             break;
          }
          default: assert(0);
@@ -988,30 +988,23 @@ void TenderTV::collect(int* point_array, unsigned int* index_array)
             _fst_ftss = DEBUG_NEW GLuint[_all_ftss];
          }
       }
-      unsigned szi_fqss = 0u;
-      unsigned szi_ftrs = 0u;
-      unsigned szi_ftfs = 0u;
-      unsigned szi_ftss = 0u;
-      unsigned inx_fqss_coffset = _index_array_offset;
-      unsigned inx_ftrs_coffset = inx_fqss_coffset + _num_fqss_indexs;
-      unsigned inx_ftfs_coffset = inx_ftrs_coffset + _num_ftrs_indexs;
-      unsigned inx_ftss_coffset = inx_ftfs_coffset + _num_ftfs_indexs;
+      unsigned size_index[4];
+      unsigned index_offset[4];
+      size_index[fqss] = size_index[ftrs] = size_index[ftfs] = size_index[ftss] = 0u;
+      index_offset[fqss] = _index_array_offset;
+      index_offset[ftrs] = index_offset[fqss] + _num_fqss_indexs;
+      index_offset[ftfs] = index_offset[ftrs] + _num_ftrs_indexs;
+      index_offset[ftss] = index_offset[ftfs] + _num_ftfs_indexs;
       for (SlicePolygons::const_iterator CSH = _ncvx_data.begin(); CSH != _ncvx_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
          unsigned clsize = (*CSH)->csize();
          assert(clsize);
 
          if (NULL != (*CSH)->tdata())
-            collectIndexs(index_array     ,
-                        (*CSH)->tdata() ,
-                        szi_fqss        ,
-                        szi_ftrs        ,
-                        szi_ftfs        ,
-                        szi_ftss        ,
-                        inx_fqss_coffset,
-                        inx_ftrs_coffset,
-                        inx_ftfs_coffset,
-                        inx_ftss_coffset,
+            collectIndexs(index_array    ,
+                        (*CSH)->tdata()  ,
+                        size_index       ,
+                        index_offset     ,
                         pntindx/2
                         );
 
@@ -1020,14 +1013,14 @@ void TenderTV::collect(int* point_array, unsigned int* index_array)
          memcpy(&(point_array[_point_array_offset + pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
          pntindx += 2 * clsize;
       }
-      assert(szi_fqss == _all_fqss);
-      assert(szi_ftrs == _all_ftrs);
-      assert(szi_ftfs == _all_ftfs);
-      assert(szi_ftss == _all_ftss);
-      assert(inx_fqss_coffset == (_index_array_offset + _num_fqss_indexs));
-      assert(inx_ftrs_coffset == (_index_array_offset + _num_fqss_indexs + _num_ftrs_indexs));
-      assert(inx_ftfs_coffset == (_index_array_offset + _num_fqss_indexs + _num_ftrs_indexs + _num_ftfs_indexs ));
-      assert(inx_ftss_coffset == (_index_array_offset + _num_fqss_indexs + _num_ftrs_indexs + _num_ftfs_indexs + _num_ftss_indexs ));
+      assert(size_index[fqss] == _all_fqss);
+      assert(size_index[ftrs] == _all_ftrs);
+      assert(size_index[ftfs] == _all_ftfs);
+      assert(size_index[ftss] == _all_ftss);
+      assert(index_offset[fqss] == (_index_array_offset + _num_fqss_indexs));
+      assert(index_offset[ftrs] == (_index_array_offset + _num_fqss_indexs + _num_ftrs_indexs));
+      assert(index_offset[ftfs] == (_index_array_offset + _num_fqss_indexs + _num_ftrs_indexs + _num_ftfs_indexs ));
+      assert(index_offset[ftss] == (_index_array_offset + _num_fqss_indexs + _num_ftrs_indexs + _num_ftfs_indexs + _num_ftss_indexs ));
       assert(pntindx == line_arr_size + fqus_arr_size + poly_arr_size);
       assert(szindx  == _all_ncvx);
    }
@@ -1069,9 +1062,6 @@ void TenderTV::draw()
    }
    if  (_all_ncvx > 0)
    {
-      const GLvoid**    index_offset = NULL;
-      index_offset = DEBUG_NEW const GLvoid*[1];
-
       assert(_fst_ncvx);
       assert(_sza_ncvx);
       glMultiDrawArrays(GL_LINE_LOOP, _fst_ncvx, _sza_ncvx, _all_ncvx);
