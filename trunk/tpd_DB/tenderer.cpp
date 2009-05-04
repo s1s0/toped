@@ -877,7 +877,7 @@ void TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsig
          case GL_QUAD_STRIP     :
          {
             assert(_sza_fqss);
-            _fst_fqss[szi_fqss  ] = inx_fqss_coffset;
+            _fst_fqss[szi_fqss  ] = sizeof(unsigned) * inx_fqss_coffset;
             _sza_fqss[szi_fqss++] = cchunk->size();
             for (unsigned i = 0; i < cchunk->size(); i++)
                index_array[inx_fqss_coffset++] = cchunk->index_seq()[i] + cpoint_index;
@@ -886,7 +886,7 @@ void TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsig
          case GL_TRIANGLES      :
          {
             assert(_sza_ftrs);
-            _fst_ftrs[szi_ftrs  ] = inx_ftrs_coffset;
+            _fst_ftrs[szi_ftrs  ] = sizeof(unsigned) * inx_ftrs_coffset;
             _sza_ftrs[szi_ftrs++] = cchunk->size();
             for (unsigned i = 0; i < cchunk->size(); i++)
                index_array[inx_ftrs_coffset++] = cchunk->index_seq()[i] + cpoint_index;
@@ -895,7 +895,7 @@ void TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsig
          case GL_TRIANGLE_FAN   :
          {
             assert(_sza_ftfs);
-            _fst_ftfs[szi_ftfs  ] = inx_ftfs_coffset;
+            _fst_ftfs[szi_ftfs  ] = sizeof(unsigned) * inx_ftfs_coffset;
             _sza_ftfs[szi_ftfs++] = cchunk->size();
             for (unsigned i = 0; i < cchunk->size(); i++)
                index_array[inx_ftfs_coffset++] = cchunk->index_seq()[i] + cpoint_index;
@@ -904,7 +904,7 @@ void TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsig
          case GL_TRIANGLE_STRIP :
          {
             assert(_sza_ftss);
-            _fst_ftss[szi_ftss  ] = inx_ftss_coffset;
+            _fst_ftss[szi_ftss  ] = sizeof(unsigned) * inx_ftss_coffset;
             _sza_ftss[szi_ftss++] = cchunk->size();
             for (unsigned i = 0; i < cchunk->size(); i++)
                index_array[inx_ftss_coffset++] = cchunk->index_seq()[i] + cpoint_index;
