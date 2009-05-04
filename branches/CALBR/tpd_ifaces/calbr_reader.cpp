@@ -40,6 +40,39 @@ Calbr::CalbrFile *DRCData = NULL;
 
 extern console::ted_cmd*	Console;
 long Calbr::drcPolygon::_precision = 0;
+long Calbr::drcEdge::_precision = 0;
+
+void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
+{
+	Calbr::edge crd;
+	crd.x1 = x1;
+	crd.y1 = y1;
+	crd.x2 = x2;
+	crd.y2 = y2;
+	_coords.push_back(crd);
+}
+
+void Calbr::drcEdge::showError(void)
+{
+	wxString ost;
+	ost << wxT("addpoly({");
+	EdgesVector::iterator it;
+	for(it = _coords.begin(); it < _coords.end(); ++it)
+	{
+		if (it != _coords.begin())
+		{
+			ost<<wxT(",");
+		}
+
+
+		ost << wxT("{") << convert((*it).x1, _precision) << wxT(",") << convert((*it).y1, _precision) 
+			<< convert((*it).x2, _precision) << wxT(",") << convert((*it).y2, _precision) << wxT("}");;
+
+	}
+	ost<<wxT("});");
+	Console->parseCommand(ost);
+}
+
 
 void Calbr::drcPolygon::addCoord(long x, long y)
 {
@@ -262,23 +295,7 @@ void	Calbr::CalbrFile::ShowResults()
 		std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
 		for(it2 = polys->begin(); it2 < polys->end(); ++it2)
 		{
-			wxString ost;
-			ost << wxT("addpoly({");
-			CoordsVector::iterator it3;
-			CoordsVector *poly1 = (*it2).coords();
-			for(it3 = poly1->begin(); it3 < poly1->end(); ++it3)
-			{
-				if (it3 != poly1->begin())
-				{
-					ost<<wxT(",");
-				}
-
-
-				ost << wxT("{") << convert((*it3).x, _precision) << wxT(",") << convert((*it3).y, _precision) << wxT("}");;
-
-			}
-			ost<<wxT("});");
-			Console->parseCommand(ost);
+			(*it2).showError();
 		}
 		std::vector <Calbr::edge>::iterator it2edge;
 		std::vector <Calbr::edge> *edges = (*it)->edges();

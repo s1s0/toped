@@ -2112,7 +2112,7 @@ void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
 void	tui::TopedFrame::OnDRCResults(wxCommandEvent& evt)
 {
 	wxString ost;
-   ost << wxT("drccalibreimport(\"D:/drc/test.drc.results\");");
+   ost << wxT("drccalibreimport(\"D:/toped/drc2/ACHIP.drc.results\");");
 	_cmdline->parseCommand(ost);
 }
 

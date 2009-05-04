@@ -47,7 +47,18 @@ struct edge
 };
 
 typedef std::vector <Calbr::coord> CoordsVector;
+typedef std::vector <Calbr::edge> EdgesVector;
 
+class drcEdge
+{
+public:
+	void				addCoord(long x1, long y1, long x2, long y2);
+	EdgesVector*	coords() {return &_coords;};
+	void				showError(void);
+	static long		_precision;
+private:
+	EdgesVector		_coords;
+};
 
 class drcPolygon
 {
