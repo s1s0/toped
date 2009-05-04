@@ -90,6 +90,7 @@ class TeselPoly {
       word              num_ftrs()                 { return _all_ftrs;}
       word              num_ftfs()                 { return _all_ftfs;}
       word              num_ftss()                 { return _all_ftss;}
+      void              num_indexs(unsigned&, unsigned&, unsigned&);
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
@@ -137,12 +138,15 @@ class TenderRefBox : public TenderObj {
 */
 class TenderPoly : public TenderObj {
    public:
-                        TenderPoly(int4b* pdata, unsigned psize):TenderObj(pdata, psize) {}
-      void              TeselData(TeselChain*, unsigned);
-      virtual          ~TenderPoly();
-      TeselChain*       tdata()              {return &_tdata;}
-   protected:
-      TeselChain       _tdata;
+                        TenderPoly(int4b* pdata, unsigned psize):TenderObj(pdata, psize), _tdata(NULL) {}
+      void              setTeselData(TeselPoly* tdata) {_tdata = tdata;}
+//      void              TeselData(TeselChain*, unsigned);
+      virtual          ~TenderPoly(){};
+      TeselChain*       tdata()              {return _tdata->tdata();}
+   private:
+      TeselPoly*       _tdata;
+//   protected:
+//      TeselChain       _tdata;
 };
 
 /**
@@ -154,7 +158,7 @@ class TenderWire : public TenderPoly {
    public:
                         TenderWire(int4b*, unsigned, const word, bool);
       virtual          ~TenderWire();
-      void              Tessel(unsigned);
+//      void              Tessel(unsigned);
       int*              ldata()                 {return _ldata;}
       unsigned          lsize()                 {return _lsize;}
       bool              center_line_only()      {return _center_line_only;}
@@ -230,59 +234,77 @@ class TenderTVB {
 */
 class TenderTV {
    public:
-                        TenderTV(CTM&, bool, unsigned);
+                        TenderTV(CTM&, bool, unsigned, unsigned);
                        ~TenderTV();
       TenderObj*        box  (int4b*);
       TenderPoly*       poly (int4b*, unsigned, TeselPoly*);
       TenderWire*       wire (int4b*, unsigned, word, bool);
       const CTM*        tmatrix()            {return &_tmatrix;}
 
-      void              collect(int*);
-      void              draw(GLuint);
+      void              collect(int*, int*);
+      void              draw();
 
       unsigned          num_total_points();
+      unsigned          num_total_indexs();
    private:
+      void              collectIndexs(int*, TeselChain*, unsigned&, unsigned&, unsigned&, unsigned&,
+                                     unsigned&, unsigned&, unsigned&, unsigned&, unsigned);
+
       CTM               _tmatrix;
       // collected data lists
       SliceObjects      _cont_data; //! Countour data
       SliceWires        _line_data; //! Line data
       SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
       SlicePolygons     _ncvx_data; //! Non convex data
-      // total number of poits per object type
-      // Note - cnvx has a constant number of points (4) (see the comment above),
-      //        so - we keep track of the number of objects only
+      // total number of poits/indexes per object type
       unsigned          _num_cont_points; //! The total number of countour points
       unsigned          _num_line_points; //! The total number of line polts
+      // Note - cnvx has a constant number of points (4) (see the comment above),
+      //        so - we keep track of the number of objects only
       unsigned          _num_ncvx_points; //! The total number of non-convex polygon points
+      //
+      unsigned          _num_fqss_indexs; //! The total number of GL_QUAD_STRIP     indexes
+      unsigned          _num_ftrs_indexs; //! The total number of GL_TRIANGLES      indexes
+      unsigned          _num_ftfs_indexs; //! The total number of GL_TRIANGLE_FAN   indexes
+      unsigned          _num_ftss_indexs; //! The total number of GL_TRIANGLE_STRIP indexes
       // object counts
       unsigned          _all_conts;//! Number of countours. Will be drawn with GL_LINE_LOOP
       unsigned          _all_lines;//! Number of lines. Will be drawn with GL_LINE_STRIP
       unsigned          _all_cnvx; //! Number of convex polygons (boxes only at the moment - see _cnvx_data). Will be drawn with GL_QUADS
       unsigned          _all_ncvx; //! Number of non-convex polygons. Will be drawn according to the tesselation data
-      unsigned          _all_fqss; //! fill quad strip
-      unsigned          _all_ftrs; //! fill triangle
-      unsigned          _all_ftfs; //! fill triangle fan
-      unsigned          _all_ftss; //! fill triangle strip
-      //
-      bool              _filled;
-      // offset in the point array
-      unsigned          _array_offset;
+      unsigned          _all_fqss; //! Number of non-convex polygons which will be filled using GL_QUAD_STRIP
+      unsigned          _all_ftrs; //! Number of non-convex polygons which will be filled using GL_TRIANGLES
+      unsigned          _all_ftfs; //! Number of non-convex polygons which will be filled using GL_TRIANGLE_FAN
+      unsigned          _all_ftss; //! Number of non-convex polygons which will be filled using GL_TRIANGLE_STRIP
+      // offsets in the VBO
+      unsigned          _point_array_offset;
+      unsigned          _index_array_offset;
       // object size arrays
       GLsizei*          _sza_cont;  //! size array for contour points
       GLsizei*          _sza_line;  //! size array for line points
       GLsizei*          _sza_cnvx;  //! size array for convex polygons
       GLsizei*          _sza_ncvx;  //! size array for non-convex polygons
+      GLsizei*          _sza_fqss;  //! size array for GL_QUAD_STRIP     indexes
+      GLsizei*          _sza_ftrs;  //! size array for GL_TRIANGLES      indexes
+      GLsizei*          _sza_ftfs;  //! size array for GL_TRIANGLE_FAN   indexes
+      GLsizei*          _sza_ftss;  //! size array for GL_TRIANGLE_STRIP indexes
       // object first point arrays
       GLsizei*          _fst_cont;  //! first array for contour points
       GLsizei*          _fst_line;  //! first array for line points
       GLsizei*          _fst_cnvx;  //! first array for convex polygons
       GLsizei*          _fst_ncvx;  //! first array for non-convex polygons
+      GLuint*           _fst_fqss;
+      GLuint*           _fst_ftrs;
+      GLuint*           _fst_ftfs;
+      GLuint*           _fst_ftss;
+      //
+      bool              _filled;
 };
 
 class TenderLay {
    public:
       typedef std::list<TenderTV*> TenderTVList;
-                        TenderLay(): _cslice(NULL), _num_total_points(0) {};
+                        TenderLay(): _cslice(NULL), _num_total_points(0u), _num_total_indexs(0u) {};
                        ~TenderLay();
       TenderObj*        box  (int4b* pdata)  {return _cslice->box(pdata);}
       TenderPoly*       poly (int4b* pdata, unsigned psize, TeselPoly* tpoly) {return _cslice->poly(pdata, psize, tpoly);}
@@ -290,14 +312,18 @@ class TenderLay {
 
       void              newSlice(CTM&, bool);
       void              ppSlice(); //! Post process the slice
-      void              draw(bool, GLuint);
-      void              collect(bool, GLuint);
+      void              draw(bool);
+      void              collect(bool, GLuint, GLuint);
       unsigned          total_points() {return _num_total_points;}
+      unsigned          total_indexs() {return _num_total_indexs;}
 
    private:
       TenderTVList      _layData;
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
       unsigned          _num_total_points;
+      unsigned          _num_total_indexs;
+      GLuint            _pbuffer;
+      GLuint            _ibuffer;
 };
 
 //-----------------------------------------------------------------------------
@@ -348,6 +374,7 @@ class Tenderer {
       TenderRBL         _osboxes;   //!All selected reference overlapping boxes
       CTM               _atrans;    //!The translation of the active cell
       CTM               _ctrans;    //!Working variable storing the current translation
+      unsigned          _num_ogl_buffers;
       //
       GLuint*           _ogl_buffers;
 };
