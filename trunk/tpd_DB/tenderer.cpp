@@ -951,7 +951,7 @@ void TenderTV::draw()
       assert(_fst_ncvx);
       assert(_sza_ncvx);
       glMultiDrawArrays(GL_LINE_LOOP, _fst_ncvx, _sza_ncvx, _all_ncvx);
-
+      
       if (_all_fqss > 0)
       {
          assert(_sza_fqss);
@@ -976,6 +976,7 @@ void TenderTV::draw()
          assert(_fst_ftss);
          glMultiDrawElements(GL_TRIANGLE_STRIP, _sza_ftss, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftss, _all_ftss);
       }
+      
 //      glDisableClientState(GL_INDEX_ARRAY);
    }
    if (_all_conts > 0)
@@ -995,38 +996,28 @@ TenderTV::~TenderTV()
       delete (*CSO);
    for (SliceObjects::const_iterator CSO = _cont_data.begin(); CSO != _cont_data.end(); CSO++)
       delete (*CSO);
-   if (NULL != _sza_cont)
-   {
-      delete [] _sza_cont; _sza_cont = NULL;
-   }
-   if (NULL != _sza_line)
-   {
-      delete [] _sza_line; _sza_line = NULL;
-   }
-   if (NULL != _sza_cnvx)
-   {
-      delete [] _sza_cnvx; _sza_cnvx = NULL;
-   }
-   if (NULL != _sza_ncvx)
-   {
-      delete [] _sza_ncvx; _sza_cnvx = NULL;
-   }
-   if (NULL != _fst_cont)
-   {
-      delete [] _fst_cont; _fst_cont = NULL;
-   }
-   if (NULL != _fst_line)
-   {
-      delete [] _fst_line; _fst_line = NULL;
-   }
-   if (NULL != _fst_cnvx)
-   {
-      delete [] _fst_cnvx; _fst_cnvx = NULL;
-   }
-   if (NULL != _fst_ncvx)
-   {
-      delete [] _fst_ncvx; _fst_cnvx = NULL;
-   }
+   for (SlicePolygons::const_iterator CSO = _ncvx_data.begin(); CSO != _ncvx_data.end(); CSO++)
+      delete (*CSO);
+   if (NULL != _sza_cont) delete [] _sza_cont;
+   if (NULL != _sza_line) delete [] _sza_line;
+   if (NULL != _sza_cnvx) delete [] _sza_cnvx;
+   if (NULL != _sza_ncvx) delete [] _sza_ncvx;
+
+   if (NULL != _sza_fqss) delete [] _sza_fqss;
+   if (NULL != _sza_ftrs) delete [] _sza_ftrs;
+   if (NULL != _sza_ftfs) delete [] _sza_ftfs;
+   if (NULL != _sza_ftss) delete [] _sza_ftss;
+
+   if (NULL != _fst_cont) delete [] _fst_cont;
+   if (NULL != _fst_line) delete [] _fst_line;
+   if (NULL != _fst_cnvx) delete [] _fst_cnvx;
+   if (NULL != _fst_ncvx) delete [] _fst_ncvx;
+
+   if (NULL != _fst_fqss) delete [] _fst_fqss;
+   if (NULL != _fst_ftrs) delete [] _fst_ftrs;
+   if (NULL != _fst_ftfs) delete [] _fst_ftfs;
+   if (NULL != _fst_ftss) delete [] _fst_ftss;
+
 }
 
 //=============================================================================
@@ -1242,6 +1233,7 @@ void Tenderer::collect()
          // The implementation below seems to be the cleanest way to do this,
          // although it relies on my understanding of the way "++" operator should
          // be implemented
+         delete (CCLAY->second);
          _data.erase(CCLAY++);
       }
       else
