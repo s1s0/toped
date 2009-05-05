@@ -376,6 +376,7 @@ class Tenderer {
       GLuint*           _ogl_buffers;
 };
 
+void checkOGLError(std::string);
 
 class HiResTimer {
    public:

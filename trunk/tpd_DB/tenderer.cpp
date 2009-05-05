@@ -29,9 +29,7 @@
 #include "tenderer.h"
 #include "viewprop.h"
 #include "tedat.h"
-
-// Themporary - to clarify the possible proper usage of VBO's
-//#define USE_VBOS
+#include <sstream>
 
 GLUtriangulatorObj   *TeselPoly::tenderTesel = NULL;
 
@@ -933,6 +931,7 @@ void TenderTV::collect(int* point_array, unsigned int* index_array)
 void TenderTV::draw()
 {
    glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
+//   glEnableClientState(GL_VERTEX_ARRAY);
    if  (_all_lines > 0)
    {
       assert(_fst_line);
@@ -948,27 +947,36 @@ void TenderTV::draw()
    }
    if  (_all_ncvx > 0)
    {
+//      glEnableClientState(GL_INDEX_ARRAY);
       assert(_fst_ncvx);
       assert(_sza_ncvx);
       glMultiDrawArrays(GL_LINE_LOOP, _fst_ncvx, _sza_ncvx, _all_ncvx);
 
       if (_all_fqss > 0)
       {
+         assert(_sza_fqss);
+         assert(_fst_fqss);
          glMultiDrawElements(GL_QUAD_STRIP    , _sza_fqss, GL_UNSIGNED_INT, (const GLvoid**)_fst_fqss, _all_fqss);
       }
       if (_all_ftrs > 0)
       {
+         assert(_sza_ftrs);
+         assert(_fst_ftrs);
          glMultiDrawElements(GL_TRIANGLES     , _sza_ftrs, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftrs, _all_ftrs);
       }
       if (_all_ftfs > 0)
       {
+         assert(_sza_ftfs);
+         assert(_fst_ftfs);
          glMultiDrawElements(GL_TRIANGLE_FAN  , _sza_ftfs, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftfs, _all_ftfs);
       }
       if (_all_ftss > 0)
       {
+         assert(_sza_ftss);
+         assert(_fst_ftss);
          glMultiDrawElements(GL_TRIANGLE_STRIP, _sza_ftss, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftss, _all_ftss);
       }
-
+//      glDisableClientState(GL_INDEX_ARRAY);
    }
    if (_all_conts > 0)
    {
@@ -976,6 +984,7 @@ void TenderTV::draw()
       assert(_sza_cont);
       glMultiDrawArrays(GL_LINE_LOOP, _fst_cont, _sza_cont, _all_conts);
    }
+//   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 TenderTV::~TenderTV()
@@ -1255,6 +1264,7 @@ void Tenderer::collect()
       GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
       CLAY->second->collect(_drawprop->isFilled(CLAY->first), pbuf, ibuf);
    }
+   checkOGLError("collect");
 }
 
 void Tenderer::draw()
@@ -1271,52 +1281,8 @@ void Tenderer::draw()
    glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
    delete [] _ogl_buffers;
    _ogl_buffers = NULL;
+   checkOGLError("draw");
 }
-
-// void Tenderer::collectNdraw()
-// {
-//    glEnableClientState(GL_VERTEX_ARRAY);
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
-//    {
-//       word curlayno = CLAY->first;
-//       _drawprop->setCurrentColor(curlayno);
-//       CLAY->second->collectNdraw(_drawprop->getCurrentFill());
-//    }
-//    // now the overlapping boxes of the cell references
-//    _drawprop->setCurrentColor(0);
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-// //   glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
-//    for (TenderRBL::const_iterator CBOX = _oboxes.begin(); CBOX != _oboxes.end(); CBOX++)
-//    {
-//       (*CBOX)->draw();
-//    }
-//    _drawprop->setLineProps(true);
-//    for (TenderRBL::const_iterator CBOX = _osboxes.begin(); CBOX != _osboxes.end(); CBOX++)
-//    {
-//       (*CBOX)->draw();
-//    }
-//    _drawprop->setLineProps(false);
-//    // and finally -  the selected objects
-//    glPushMatrix();
-//    real openGLmatrix[16];
-//    _atrans.oglForm(openGLmatrix);
-//    glMultMatrixd(openGLmatrix);
-//    for (DataSel::const_iterator CLAY = _sdata.begin(); CLAY != _sdata.end(); CLAY++)
-//    {
-//       _drawprop->setCurrentColor(CLAY->first);
-//       _drawprop->setLineProps(true);
-//       TenderTVB* ctv = CLAY->second;
-//       //
-//       ctv->draw_lloops();
-//       ctv->draw_lines();
-//       ctv->draw_lsegments();
-//       //
-//       _drawprop->setLineProps(false);
-//    }
-//    glPopMatrix();
-//    glDisableClientState(GL_VERTEX_ARRAY);
-// }
 
 Tenderer::~Tenderer()
 {
@@ -1337,6 +1303,17 @@ Tenderer::~Tenderer()
 
    sprintf (debug_message, "Rendering summary: %i vertexes in %i buffers", all_points_drawn, all_layers);
    tell_log(console::MT_WARNING,debug_message);
+}
+
+void checkOGLError(std::string loc)
+{
+   std::ostringstream boza;
+   GLenum ogle;
+   while ((ogle=glGetError()) != GL_NO_ERROR)
+   {
+      boza  << "Error " << ogle << "at " << loc << std::endl;
+      tell_log(console::MT_ERROR,boza.str());
+   }
 }
 
 //=============================================================================
