@@ -179,7 +179,7 @@ Calbr::CalbrFile::~CalbrFile()
 	}
 	_RuleChecks.clear();
 	}
-	fclose(_calbrFile);
+	if (_calbrFile) fclose(_calbrFile);
 }
 
 bool Calbr::CalbrFile::parse()
