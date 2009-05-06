@@ -931,7 +931,7 @@ void TenderTV::collect(int* point_array, unsigned int* index_array)
 void TenderTV::draw()
 {
    glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
-//   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_VERTEX_ARRAY);
    if  (_all_lines > 0)
    {
       assert(_fst_line);
@@ -947,37 +947,47 @@ void TenderTV::draw()
    }
    if  (_all_ncvx > 0)
    {
-//      glEnableClientState(GL_INDEX_ARRAY);
+      glEnableClientState(GL_INDEX_ARRAY);
       assert(_fst_ncvx);
       assert(_sza_ncvx);
       glMultiDrawArrays(GL_LINE_LOOP, _fst_ncvx, _sza_ncvx, _all_ncvx);
-      
+
       if (_all_fqss > 0)
       {
          assert(_sza_fqss);
          assert(_fst_fqss);
-         glMultiDrawElements(GL_QUAD_STRIP    , _sza_fqss, GL_UNSIGNED_INT, (const GLvoid**)_fst_fqss, _all_fqss);
+         // The line below works on Windows, but doesn't work (hangs) on Linux with nVidia driver.
+         // The suspect is (const GLvoid**)_fst_fqss but it's quite possible that it is a driver bug
+         // Besides - everybody is saying that there is no speed benefit from this operation
+         //glMultiDrawElements(GL_QUAD_STRIP    , _sza_fqss, GL_UNSIGNED_INT, (const GLvoid**)_fst_fqss, _all_fqss);
+         for (unsigned i= 0; i < _all_fqss; i++)
+            glDrawElements(GL_QUAD_STRIP, _sza_fqss[i], GL_UNSIGNED_INT, (const GLvoid*)_fst_fqss[i]);
       }
       if (_all_ftrs > 0)
       {
          assert(_sza_ftrs);
          assert(_fst_ftrs);
-         glMultiDrawElements(GL_TRIANGLES     , _sza_ftrs, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftrs, _all_ftrs);
+         //glMultiDrawElements(GL_TRIANGLES     , _sza_ftrs, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftrs, _all_ftrs);
+         for (unsigned i= 0; i < _all_ftrs; i++)
+            glDrawElements(GL_TRIANGLES, _sza_ftrs[i], GL_UNSIGNED_INT, (const GLvoid*)_fst_ftrs[i]);
       }
       if (_all_ftfs > 0)
       {
          assert(_sza_ftfs);
          assert(_fst_ftfs);
-         glMultiDrawElements(GL_TRIANGLE_FAN  , _sza_ftfs, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftfs, _all_ftfs);
+         //glMultiDrawElements(GL_TRIANGLE_FAN  , _sza_ftfs, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftfs, _all_ftfs);
+         for (unsigned i= 0; i < _all_ftfs; i++)
+            glDrawElements(GL_TRIANGLE_FAN, _sza_ftfs[i], GL_UNSIGNED_INT, (const GLvoid*)_fst_ftfs[i]);
       }
       if (_all_ftss > 0)
       {
          assert(_sza_ftss);
          assert(_fst_ftss);
-         glMultiDrawElements(GL_TRIANGLE_STRIP, _sza_ftss, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftss, _all_ftss);
+         //glMultiDrawElements(GL_TRIANGLE_STRIP, _sza_ftss, GL_UNSIGNED_INT, (const GLvoid**)_fst_ftss, _all_ftss);
+         for (unsigned i= 0; i < _all_ftss; i++)
+            glDrawElements(GL_TRIANGLE_STRIP, _sza_ftss[i], GL_UNSIGNED_INT, (const GLvoid*)_fst_ftss[i]);
       }
-      
-//      glDisableClientState(GL_INDEX_ARRAY);
+      glDisableClientState(GL_INDEX_ARRAY);
    }
    if (_all_conts > 0)
    {
@@ -985,7 +995,7 @@ void TenderTV::draw()
       assert(_sza_cont);
       glMultiDrawArrays(GL_LINE_LOOP, _fst_cont, _sza_cont, _all_conts);
    }
-//   glDisableClientState(GL_VERTEX_ARRAY);
+   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 TenderTV::~TenderTV()
@@ -1067,25 +1077,35 @@ void TenderLay::collect(bool fill, GLuint pbuf, GLuint ibuf)
    {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
-                   _num_total_indexs * sizeof(int4b) ,
+                   _num_total_indexs * sizeof(unsigned) ,
                    NULL                              ,
                    GL_DYNAMIC_DRAW                    );
       cindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
    }
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
       (*TLAY)->collect(cpoint_array, cindex_array);
+   // Unmap the buffers
    glUnmapBuffer(GL_ARRAY_BUFFER);
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
    if (0 != _ibuffer)
+   {
       glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-
+//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   }
 }
 
 void TenderLay::draw(bool fill)
 {
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   // Check the state of the buffer
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   assert(bufferSize == (2 * _num_total_points * sizeof(int4b)));
    if (0 != _ibuffer)
    {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+      glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+      assert(bufferSize == (_num_total_indexs * sizeof(unsigned)));
    }
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
    {
@@ -1097,6 +1117,9 @@ void TenderLay::draw(bool fill)
       ctv->draw();
       glPopMatrix();
    }
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   if (0 != _ibuffer)
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 TenderLay::~TenderLay()
@@ -1268,8 +1291,8 @@ void Tenderer::draw()
       _drawprop->setCurrentColor(curlayno);
       CLAY->second->draw( _drawprop->getCurrentFill() );
    }
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
+//   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
    glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
    delete [] _ogl_buffers;
    _ogl_buffers = NULL;
