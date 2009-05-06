@@ -267,24 +267,27 @@ bool Calbr::CalbrFile::parse()
 				break;
 						
 			case 'e'	: 
-				long x1, y1, x2, y2;
-				if (fgets(tempStr, 512, _calbrFile)==NULL) 
+				for(short j =0; j< numberOfElem; j++)
 				{
-					_ok = false;
-					ost << "Can't parse  rule " << ruleCheckName;
-					tell_log(console::MT_ERROR,ost.str());
-					ost.str("");
-					ost<<"string: " <<tempStr;
-					tell_log(console::MT_ERROR,ost.str());
-					return false;
+					long x1, y1, x2, y2;
+					if (fgets(tempStr, 512, _calbrFile)==NULL) 
+					{
+						_ok = false;
+						ost << "Can't parse  rule " << ruleCheckName;
+						tell_log(console::MT_ERROR,ost.str());
+						ost.str("");
+						ost<<"string: " <<tempStr;
+						tell_log(console::MT_ERROR,ost.str());
+						return false;
+					}
+					sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2);
+					Calbr::edge theEdge;
+					theEdge.x1 = x1;
+					theEdge.y1 = y1;
+					theEdge.x2 = x2;
+					theEdge.y2 = y2;
+					ruleCheck->addEdge(theEdge);
 				}
-				sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2);
-				Calbr::edge theEdge;
-				theEdge.x1 = x1;
-				theEdge.y1 = y1;
-				theEdge.x2 = x2;
-				theEdge.y2 = y2;
-				ruleCheck->addEdge(theEdge);
 				break;
 			default	:
 				_ok = false;
