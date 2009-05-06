@@ -217,6 +217,9 @@ bool Calbr::CalbrFile::parse()
 			_ok = false;
 			ost << "Can't parse  rule " << ruleCheckName;
 			tell_log(console::MT_ERROR,ost.str());
+			ost.str("");
+			ost<<"string: " <<tempStr;
+			tell_log(console::MT_ERROR,ost.str());
 			return false;
 		}
 		ruleCheck->addDescrString(tempStr);
@@ -230,6 +233,9 @@ bool Calbr::CalbrFile::parse()
 		{
 			_ok = false;
 			ost << "Can't parse  rule " << ruleCheckName;
+			tell_log(console::MT_ERROR,ost.str());
+			ost.str("");
+			ost<<"string: " <<tempStr;
 			tell_log(console::MT_ERROR,ost.str());
 			return false;
 		}
@@ -249,6 +255,9 @@ bool Calbr::CalbrFile::parse()
 						_ok = false;
 						ost << "Can't parse  rule " << ruleCheckName;
 						tell_log(console::MT_ERROR,ost.str());
+						ost.str("");
+						ost<<"string: " <<tempStr;
+						tell_log(console::MT_ERROR,ost.str());
 						return false;
 					}
 					sscanf( tempStr, "%ld %ld", &x, &y);
@@ -264,6 +273,9 @@ bool Calbr::CalbrFile::parse()
 					_ok = false;
 					ost << "Can't parse  rule " << ruleCheckName;
 					tell_log(console::MT_ERROR,ost.str());
+					ost.str("");
+					ost<<"string: " <<tempStr;
+					tell_log(console::MT_ERROR,ost.str());
 					return false;
 				}
 				sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2);
@@ -277,6 +289,9 @@ bool Calbr::CalbrFile::parse()
 			default	:
 				_ok = false;
 				ost << "Can't parse  rule " << ruleCheckName;
+				tell_log(console::MT_ERROR,ost.str());
+				ost.str("");
+				ost<<"string: " <<tempStr;
 				tell_log(console::MT_ERROR,ost.str());
 				return false;
 		}
