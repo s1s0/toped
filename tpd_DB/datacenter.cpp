@@ -1136,13 +1136,9 @@ void DataCenter::openGL_render(const CTM& layCTM) {
          _TEDLIB()->openGL_draw(renderer);
          rendTimer.report("Time elapsed for data traversing: ");
          // The version with the central VBO's
-         glEnableClientState(GL_VERTEX_ARRAY);
-         glEnableClientState(GL_INDEX_ARRAY);
          renderer.collect();
          rendTimer.report("Time elapsed for data copying   : ");
          renderer.draw();
-         glDisableClientState(GL_VERTEX_ARRAY);
-         glDisableClientState(GL_INDEX_ARRAY);
          rendTimer.report("    Total elapsed rendering time: ");
          VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
