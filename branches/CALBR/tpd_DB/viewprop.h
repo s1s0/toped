@@ -111,6 +111,8 @@ namespace layprop {
       bool              addlayer(std::string, word);
       bool              addlayer(word);
       word              addlayer(std::string);
+		bool					isLayerExist(word);
+		bool					isLayerExist(std::string);
       void              addUnpublishedLay(word);
       const WordList&   upLayers() {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers() {_uplaylist.clear();}

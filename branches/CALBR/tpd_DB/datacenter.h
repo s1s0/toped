@@ -142,6 +142,8 @@ public:
    bool                       addlayer(std::string, word);
    bool                       addlayer(word layno);
    word                       addlayer(std::string);
+	bool								isLayerExist(word);
+	bool								isLayerExist(std::string);
    void                       addline(std::string, std::string, word, byte, byte);
    void                       addcolor(std::string, byte, byte, byte, byte);
    void                       addfill(std::string, byte*);
