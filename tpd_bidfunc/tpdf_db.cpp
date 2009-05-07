@@ -1245,9 +1245,30 @@ int tellstdfunc::DRCCalibreimport::execute() {
 
 		if(DRCData->isOk())
 		{
+			//Check existance of "drcResults" layer
+			if(!DATC->isLayerExist("drcResults"))
+			{
+				//Find free layer
+				int i;
+				for(i = 10000; i <=20000; i++)
+				{
+					if (!DATC->isLayerExist(i))
+					{
+						DATC->addlayer("drcResults", i);
+						browsers::layer_add("drcResults",i);
+						break;
+					}
+				}
+				if (i>20000)
+				{
+					std::string message = "Can't create drcError layer";
+					tell_log(console::MT_ERROR,message);
+					return EXEC_NEXT;
+				}
+			}
 			// add DRC tab in the browser
          browsers::addDRCtab();
-			DRCData->ShowResults();
+			//DRCData->ShowResults();
 		}
 		else
 		{

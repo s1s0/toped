@@ -306,6 +306,21 @@ word layprop::ViewProperties::addlayer(std::string name)
    return layno;
 }
 
+bool layprop::ViewProperties::isLayerExist(word layno)
+{
+	bool b = (_drawprop._layset.end() != _drawprop._layset.find(layno));
+	return (_drawprop._layset.end() != _drawprop._layset.find(layno));
+}
+
+bool layprop::ViewProperties::isLayerExist(std::string layname)
+{
+	for(laySetList::const_iterator it = _drawprop._layset.begin(); it != _drawprop._layset.end(); ++it)
+	{
+		if((*it).second->name() == layname) return true;
+	}
+	return false;
+}
+
 void layprop::ViewProperties::addUnpublishedLay(word layno)
 {
    _uplaylist.push_back(layno);
