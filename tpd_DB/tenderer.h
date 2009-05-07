@@ -232,6 +232,7 @@ class TenderTVB {
 class TenderTV {
    public:
       enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
+      enum {cont, line, cnvx, ncvx} ObjtTypes;
                         TenderTV(CTM&, bool, unsigned, unsigned);
                        ~TenderTV();
       TenderObj*        box  (int4b*);
@@ -253,47 +254,19 @@ class TenderTV {
       SliceWires        _line_data; //! Line data
       SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
       SlicePolygons     _ncvx_data; //! Non convex data
-      // total number of poits/indexes per object type
-      unsigned          _num_cont_points; //! The total number of countour points
-      unsigned          _num_line_points; //! The total number of line polts
-      // Note - cnvx has a constant number of points (4) (see the comment above),
-      //        so - we keep track of the number of objects only
-      unsigned          _num_ncvx_points; //! The total number of non-convex polygon points
-      //
-      unsigned          _num_fqss_indexs; //! The total number of GL_QUAD_STRIP     indexes
-      unsigned          _num_ftrs_indexs; //! The total number of GL_TRIANGLES      indexes
-      unsigned          _num_ftfs_indexs; //! The total number of GL_TRIANGLE_FAN   indexes
-      unsigned          _num_ftss_indexs; //! The total number of GL_TRIANGLE_STRIP indexes
-      // object counts
-      unsigned          _all_conts;//! Number of countours. Will be drawn with GL_LINE_LOOP
-      unsigned          _all_lines;//! Number of lines. Will be drawn with GL_LINE_STRIP
-      unsigned          _all_cnvx; //! Number of convex polygons (boxes only at the moment - see _cnvx_data). Will be drawn with GL_QUADS
-      unsigned          _all_ncvx; //! Number of non-convex polygons. Will be drawn according to the tesselation data
-      unsigned          _all_fqss; //! Number of non-convex polygons which will be filled using GL_QUAD_STRIP
-      unsigned          _all_ftrs; //! Number of non-convex polygons which will be filled using GL_TRIANGLES
-      unsigned          _all_ftfs; //! Number of non-convex polygons which will be filled using GL_TRIANGLE_FAN
-      unsigned          _all_ftss; //! Number of non-convex polygons which will be filled using GL_TRIANGLE_STRIP
+      // vertex related data
+      unsigned          _alvrtxs[4]; //! array with the total number of vertexes
+      unsigned          _alobjvx[4]; //! array with the total number of objects that will be drawn with vertex related functions
+      GLsizei*          _sizesvx[4]; //! arrays of sizes for vertex sets
+      GLsizei*          _firstvx[4]; //! arrays of first vertexes
+      // index related data
+      unsigned          _alindxs[4]; //! array with the total number of indexes
+      unsigned          _alobjix[4]; //! array with the total number of objects that will be drawn with index related functions
+      GLsizei*          _sizesix[4]; //! arrays of sizes for indexes sets
+      GLuint*           _firstix[4]; //! arrays of first indexes
       // offsets in the VBO
       unsigned          _point_array_offset;
       unsigned          _index_array_offset;
-      // object size arrays
-      GLsizei*          _sza_cont;  //! size array for contour points
-      GLsizei*          _sza_line;  //! size array for line points
-      GLsizei*          _sza_cnvx;  //! size array for convex polygons
-      GLsizei*          _sza_ncvx;  //! size array for non-convex polygons
-      GLsizei*          _sza_fqss;  //! size array for GL_QUAD_STRIP     indexes
-      GLsizei*          _sza_ftrs;  //! size array for GL_TRIANGLES      indexes
-      GLsizei*          _sza_ftfs;  //! size array for GL_TRIANGLE_FAN   indexes
-      GLsizei*          _sza_ftss;  //! size array for GL_TRIANGLE_STRIP indexes
-      // object first point arrays
-      GLsizei*          _fst_cont;  //! first array for contour points
-      GLsizei*          _fst_line;  //! first array for line points
-      GLsizei*          _fst_cnvx;  //! first array for convex polygons
-      GLsizei*          _fst_ncvx;  //! first array for non-convex polygons
-      GLuint*           _fst_fqss;
-      GLuint*           _fst_ftrs;
-      GLuint*           _fst_ftfs;
-      GLuint*           _fst_ftss;
       //
       bool              _filled;
 };
