@@ -399,10 +399,7 @@ void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
       if (active && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
-      {
-         rend.setSdataContainer(curlayno);
          lay->second->openGL_draw(rend, dlst->second/*, fill*/);
-      }
       else
          lay->second->openGL_draw(rend, NULL/*, fill*/);
    }

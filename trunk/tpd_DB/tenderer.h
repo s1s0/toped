@@ -108,19 +108,25 @@ class TeselPoly {
       word              _all_ftss;
 };
 
+typedef enum {lins, llps, lstr, none}       SlctTypes;
+
 /**
 *   holds box representation - The same four points will be used for the
 *   contour as well as for the fill
 */
 class TenderObj {
    public:
-                        TenderObj(int4b* pdata, unsigned psize) : _cdata(pdata), _csize(psize) {}
+                        TenderObj(int4b* pdata, unsigned psize,
+                                  SlctTypes slctd = none, const SGBitSet* splist = NULL) :
+                                 _cdata(pdata), _csize(psize), _slctd(slctd), _splist(splist) {}
       virtual          ~TenderObj() {};
       int4b*            cdata()     {return _cdata;}
       unsigned          csize()     {return _csize;}
    protected:
       int4b*            _cdata;  // contour data
       unsigned          _csize;
+      SlctTypes         _slctd;
+      const SGBitSet*   _splist;
 };
 
 class TenderRefBox : public TenderObj {
@@ -136,7 +142,9 @@ class TenderRefBox : public TenderObj {
 */
 class TenderPoly : public TenderObj {
    public:
-                        TenderPoly(int4b* pdata, unsigned psize):TenderObj(pdata, psize), _tdata(NULL) {}
+                        TenderPoly(int4b* pdata, unsigned psize,
+                                   SlctTypes slctd = none, const SGBitSet* splist = NULL) :
+                                   TenderObj(pdata, psize, slctd, splist), _tdata(NULL) {}
       void              setTeselData(TeselPoly* tdata) {_tdata = tdata;}
       virtual          ~TenderPoly(){};
       virtual TeselChain* tdata()              {return _tdata->tdata();}
@@ -151,7 +159,8 @@ class TenderPoly : public TenderObj {
 */
 class TenderWire : public TenderPoly {
    public:
-                        TenderWire(int4b*, unsigned, const word, bool);
+                        TenderWire(int4b*, unsigned, const word, bool,
+                                   SlctTypes selected = none, const SGBitSet* splist = NULL);
       virtual          ~TenderWire();
       void              Tesselate();
       int*              ldata()                 {return _ldata;}
@@ -205,26 +214,26 @@ class TenderRB {
 /**
  *  Translation View of the selected shapes
  */
-class TenderTVB {
-   public:
-                        TenderTVB();
-      void              add(TenderObj*, const SGBitSet*);
-      void              add(TenderPoly*, const SGBitSet*);
-      void              add(TenderWire*, const SGBitSet*);
-      void              draw_lloops();
-      void              draw_lines();
-      void              draw_lsegments();
-   private:
-      SliceLines        _ln_data;
-      SliceLines        _ll_data;
-      SliceLines        _ls_data;
-      unsigned          _num_ln_points;
-      unsigned          _num_ll_points;
-      unsigned          _num_ls_points;
-      unsigned          _num_ln; // lines
-      unsigned          _num_ll; // line loop
-      unsigned          _num_ls; // line segment
-};
+// class TenderTVB {
+//    public:
+//                         TenderTVB();
+//       void              add(TenderObj*, const SGBitSet*);
+//       void              add(TenderPoly*, const SGBitSet*);
+//       void              add(TenderWire*, const SGBitSet*);
+//       void              draw_lloops();
+//       void              draw_lines();
+//       void              draw_lsegments();
+//    private:
+//       SliceLines        _ln_data;
+//       SliceLines        _ll_data;
+//       SliceLines        _ls_data;
+//       unsigned          _num_ln_points;
+//       unsigned          _num_ll_points;
+//       unsigned          _num_ls_points;
+//       unsigned          _num_ln; // lines
+//       unsigned          _num_ll; // line loop
+//       unsigned          _num_ls; // line segment
+// };
 
 /**
 *  translation view - effectively a layer slice of the visible cell data
@@ -235,9 +244,9 @@ class TenderTV {
       enum {cont, line, cnvx, ncvx} ObjtTypes;
                         TenderTV(CTM&, bool, unsigned, unsigned);
                        ~TenderTV();
-      TenderObj*        box  (int4b*);
-      TenderPoly*       poly (int4b*, unsigned, TeselPoly*);
-      TenderWire*       wire (int4b*, unsigned, word, bool);
+      TenderObj*        box  (int4b*, bool selected = false, const SGBitSet* splist = NULL);
+      TenderPoly*       poly (int4b*, unsigned, TeselPoly*, bool selected = false, const SGBitSet* splist = NULL);
+      TenderWire*       wire (int4b*, unsigned, word, bool, bool selected = false, const SGBitSet* splist = NULL);
       const CTM*        tmatrix()            {return &_tmatrix;}
 
       void              collect(int*, unsigned int*);
@@ -247,6 +256,7 @@ class TenderTV {
       unsigned          num_total_indexs();
    private:
       void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
+      unsigned          numSelectedSegemts(const SGBitSet*, unsigned);
 
       CTM               _tmatrix;
       // collected data lists
@@ -264,6 +274,9 @@ class TenderTV {
       unsigned          _alobjix[4]; //! array with the total number of objects that will be drawn with index related functions
       GLsizei*          _sizesix[4]; //! arrays of sizes for indexes sets
       GLuint*           _firstix[4]; //! arrays of first indexes
+
+      unsigned          _asindxs[3]; //! array with the total number of indexes of selected objects
+      unsigned          _asobjix[3]; //! array with the total number of selected objects
       // offsets in the VBO
       unsigned          _point_array_offset;
       unsigned          _index_array_offset;
@@ -276,9 +289,12 @@ class TenderLay {
       typedef std::list<TenderTV*> TenderTVList;
                         TenderLay(): _cslice(NULL), _num_total_points(0u), _num_total_indexs(0u) {};
                        ~TenderLay();
-      TenderObj*        box  (int4b* pdata)  {return _cslice->box(pdata);}
-      TenderPoly*       poly (int4b* pdata, unsigned psize, TeselPoly* tpoly) {return _cslice->poly(pdata, psize, tpoly);}
-      TenderWire*       wire (int4b* pdata, unsigned psize, word width, bool center_only) {return _cslice->wire(pdata, psize, width, center_only);}
+      TenderObj*        box  (int4b* pdata, bool sel = false, const SGBitSet* ss= NULL)
+                                                      {return _cslice->box(pdata, sel, ss);}
+      TenderPoly*       poly (int4b* pdata, unsigned psize, TeselPoly* tpoly, bool sel = false, const SGBitSet* ss= NULL)
+                                                      {return _cslice->poly(pdata, psize, tpoly, sel, ss);}
+      TenderWire*       wire (int4b* pdata, unsigned psize, word width, bool center_only, bool sel = false, const SGBitSet* ss= NULL)
+                                             {return _cslice->wire(pdata, psize, width, center_only, sel, ss);}
 
       void              newSlice(CTM&, bool);
       void              ppSlice(); //! Post process the slice
@@ -300,7 +316,7 @@ class TenderLay {
 //
 //! contains all the data across cells on a given layer
 typedef std::map<word, TenderLay*> DataLay;
-typedef std::map<word, TenderTVB*> DataSel;
+//typedef std::map<word, TenderTVB*> DataSel;
 typedef std::list<TenderRB*> TenderRBL;
 
 class Tenderer {
@@ -309,13 +325,15 @@ class Tenderer {
                        ~Tenderer();
       void              Grid( const real, const std::string );
       void              setLayer(word);
-      void              setSdataContainer(word);
+//      void              setSdataContainer(word);
       void              pushCell(const CTM&, const DBbox&, bool, bool);
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box  (int4b* pdata)                    {_clayer->box(pdata);}
-      void              box  (int4b*, const SGBitSet*);
-      void              poly (int4b* pdata, unsigned psize, TeselPoly* tpoly)    {_clayer->poly(pdata, psize, tpoly);}
-      void              poly (int4b*, unsigned, TeselPoly* , const SGBitSet*);
+      void              box  (int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, true, ss);}
+      void              poly (int4b* pdata, unsigned psize, TeselPoly* tpoly)
+                                                               {_clayer->poly(pdata, psize, tpoly);}
+      void              poly (int4b* pdata, unsigned psize, TeselPoly* tpoly, const SGBitSet* ss)
+                                                               {_clayer->poly(pdata, psize, tpoly, true, ss);}
       void              wire (int4b*, unsigned, word);
       void              wire (int4b*, unsigned, word, const SGBitSet*);
       void              collect();
@@ -338,8 +356,8 @@ class Tenderer {
       real              _UU;
       DataLay           _data;      //!All data for drawing
       TenderLay*        _clayer;    //!Working variable pointing to the current slice
-      DataSel           _sdata;     //!Selected data - to be redrawn on top of the _data
-      TenderTVB*        _sslice;    //!Selected shapes in the active cell
+//      DataSel           _sdata;     //!Selected data - to be redrawn on top of the _data
+//      TenderTVB*        _sslice;    //!Selected shapes in the active cell
       TenderRBL         _oboxes;    //!All reference overlapping boxes
       TenderRBL         _osboxes;   //!All selected reference overlapping boxes
       CTM               _atrans;    //!The translation of the active cell
