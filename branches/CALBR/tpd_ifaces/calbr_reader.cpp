@@ -32,13 +32,17 @@
 #include "tpdph.h"
 #include "calbr_reader.h"
 #include "../tpd_common/outbox.h"
+#include "../tpd_bidfunc/tpdf_common.h"
 #include "../tpd_parser/ted_prompt.h"
+#include "../tpd_DB/datacenter.h"
 #include <sstream>
 
 // Global variables
 Calbr::CalbrFile *DRCData = NULL;
 
 extern console::ted_cmd*	Console;
+extern DataCenter*         DATC;
+
 long Calbr::drcPolygon::_precision = 0;
 long Calbr::drcEdge::_precision = 0;
 
@@ -88,7 +92,30 @@ void Calbr::drcPolygon::showError(void)
 	ost << wxT("addpoly({");
 	CoordsVector::iterator it;
 	//CoordsVector *poly1 = (*it).coords();
-	for(it = _coords.begin(); it < _coords.end(); ++it)
+	real DBscale = DATC->DBscale();
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+	//Convert drcPolygon to pointlist
+	pointlist *plDB = DEBUG_NEW pointlist();
+   plDB->reserve(_coords.size());
+
+	telldata::ttpnt* pt;
+   for (unsigned i = 0; i < _coords.size(); i++) {
+		wxString xstr = convert(_coords[i].x, _precision); 
+		wxString ystr = convert(_coords[i].y, _precision); 
+		real xx, yy;
+		xstr.ToDouble(&xx);
+		ystr.ToDouble(&yy);
+      //pt = DEBUG_NEW telldata::ttpnt(_coords[i].x, (real)_coords[i].y);//((pl->mlist())[i]);
+		pt = DEBUG_NEW telldata::ttpnt(xx, yy);
+      plDB->push_back(TP(pt->x(), pt->y(), DBscale));
+   }
+
+   //pointlist* plst = t2tpoints(pl,DBscale);
+		ATDB->addpoly(1,plDB);
+      delete plDB;
+   DATC->unlockDB();
+
+	/*for(it = _coords.begin(); it < _coords.end(); ++it)
 	{
 		if (it != _coords.begin())
 		{
@@ -101,7 +128,7 @@ void Calbr::drcPolygon::showError(void)
 
 	}
 	ost<<wxT("});");
-	Console->parseCommand(ost);
+	Console->parseCommand(ost);*/
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(const std::string &name)
@@ -173,11 +200,11 @@ Calbr::CalbrFile::~CalbrFile()
 	RuleChecksVector::const_iterator it;
 	if (!_RuleChecks.empty())
 	{
-	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
-	{
-		if ((*it)!= NULL) delete (*it);
-	}
-	_RuleChecks.clear();
+		for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
+		{
+			if ((*it)!= NULL) delete (*it);
+		}
+		_RuleChecks.clear();
 	}
 	if (_calbrFile) fclose(_calbrFile);
 }
@@ -317,7 +344,7 @@ void	Calbr::CalbrFile::ShowResults()
 		}
 		std::vector <Calbr::edge>::iterator it2edge;
 		std::vector <Calbr::edge> *edges = (*it)->edges();
-		for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
+		/*for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
 		{
 			wxString ost;
 			ost << wxT("addpoly({");
@@ -335,8 +362,9 @@ void	Calbr::CalbrFile::ShowResults()
 				 << convert((*it2edge).x2, _precision) << wxT(",") 
 				 << convert((*it2edge).y2, _precision) << ost<<wxT("}, 0.1)");
 			Console->parseCommand(ost);
-		}
+		}*/
 	}
+	tellstdfunc::RefreshGL();
 
 }
 

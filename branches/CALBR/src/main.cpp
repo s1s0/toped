@@ -38,6 +38,7 @@
 #include "toped.h"
 #include "../tpd_DB/viewprop.h"
 #include "../tpd_DB/datacenter.h"
+#include "../tpd_ifaces/calbr_reader.h"
 #include "../tpd_common/glf.h"
 
 #include "../tpd_bidfunc/tellibin.h"
@@ -56,6 +57,7 @@ extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 extern console::TELLFuncList*    CmdList;
+extern Calbr::CalbrFile*			DRCData;
 
 //-----------------------------------------------------------------------------
 
@@ -596,8 +598,13 @@ bool TopedApp::OnInit() {
 }
 
 int TopedApp::OnExit() {
-   delete CMDBlock; 
+	if (DRCData)
+	{
+		delete DRCData;
+	}
+	delete CMDBlock; 
    delete DATC;
+
    FinishSessionLog();
    glfClose();
    return wxApp::OnExit();
