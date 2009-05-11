@@ -1268,7 +1268,7 @@ int tellstdfunc::DRCCalibreimport::execute() {
 			}
 			// add DRC tab in the browser
          browsers::addDRCtab();
-			//DRCData->ShowResults();
+			DRCData->ShowResults();
 		}
 		else
 		{
