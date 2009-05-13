@@ -53,11 +53,11 @@ class drcEdge
 {
 public:
 	void				addCoord(long x1, long y1, long x2, long y2);
-	EdgesVector*	coords() {return &_coords;};
+	edge*	coords() {return &_coords;};
 	void				showError(void);
 	static long		_precision;
 private:
-	EdgesVector		_coords;
+	edge				_coords;
 };
 
 class drcPolygon
@@ -82,13 +82,13 @@ public:
 	long			curResCount()		const {return  _curResCount;}
 	long			origResCount()		const {return _origResCount;}
 	std::vector <Calbr::drcPolygon>* polygons() {return &_polygons;};
-	std::vector <Calbr::edge>* edges() {return &_edges;};
+	std::vector <Calbr::drcEdge>* edges() {return &_edges;};
 	void			setTimeStamp(const std::string &timeStamp);
 	void			setCurResCount(int curResCount);
 	void			setOrigResCount(int origResCount);
 	void			addDescrString(const std::string & str);
 	void			addPolygon(const Calbr::drcPolygon &poly);
-	void			addEdge(const Calbr::edge &theEdge);
+	void			addEdge(const Calbr::drcEdge &theEdge);
 private:
 	long			_curResCount; //current result count
 	long			_origResCount;//original result count
@@ -97,7 +97,7 @@ private:
 	std::string _header;
 	std::vector <std::string> _descrStrings;
 	std::vector <Calbr::drcPolygon> _polygons;
-	std::vector <Calbr::edge> _edges;
+	std::vector <Calbr::drcEdge> _edges;
 };
 
 typedef std::vector <Calbr::drcRuleCheck*> RuleChecksVector;

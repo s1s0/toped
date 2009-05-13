@@ -48,33 +48,47 @@ long Calbr::drcEdge::_precision = 0;
 
 void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 {
-	Calbr::edge crd;
-	crd.x1 = x1;
-	crd.y1 = y1;
-	crd.x2 = x2;
-	crd.y2 = y2;
-	_coords.push_back(crd);
+	_coords.x1 = x1;
+	_coords.y1 = y1;
+	_coords.x2 = x2;
+	_coords.y2 = y2;
 }
 
 void Calbr::drcEdge::showError(void)
 {
-	wxString ost;
-	ost << wxT("addpoly({");
-	EdgesVector::iterator it;
-	for(it = _coords.begin(); it < _coords.end(); ++it)
-	{
-		if (it != _coords.begin())
-		{
-			ost<<wxT(",");
-		}
+	real DBscale = DATC->DBscale();
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+		//Convert drcEdge to pointlist
+		pointlist *plDB = DEBUG_NEW pointlist();
+		plDB->reserve(2);
 
+		telldata::ttpnt* pt1, *pt2;
 
-		ost << wxT("{") << convert((*it).x1, _precision) << wxT(",") << convert((*it).y1, _precision) 
-			<< convert((*it).x2, _precision) << wxT(",") << convert((*it).y2, _precision) << wxT("}");;
+		real xx, yy;
+		
+		wxString xstr = convert(_coords.x1, _precision); 
+		wxString ystr = convert(_coords.y1, _precision); 
+		xstr.ToDouble(&xx);
+		ystr.ToDouble(&yy);
+		pt1 = DEBUG_NEW telldata::ttpnt(xx, yy);
 
-	}
-	ost<<wxT("});");
-	Console->parseCommand(ost);
+		xstr = convert(_coords.x2, _precision); 
+		ystr = convert(_coords.y2, _precision); 
+		xstr.ToDouble(&xx);
+		ystr.ToDouble(&yy);
+		pt2 = DEBUG_NEW telldata::ttpnt(xx, yy);
+
+		pt2 = DEBUG_NEW telldata::ttpnt(xx, yy);
+		plDB->push_back(TP(pt1->x(), pt1->y(), DBscale));
+		plDB->push_back(TP(pt2->x(), pt2->y(), DBscale));
+		//ATDB->addpoly(1,plDB);
+		real      w = 0.01;
+		 telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(1,plDB,
+                                    static_cast<word>(rint(w * DBscale))), 1);
+		 delete pt1;
+		 delete pt2;
+      delete plDB;
+   DATC->unlockDB();
 }
 
 
@@ -88,47 +102,28 @@ void Calbr::drcPolygon::addCoord(long x, long y)
 
 void Calbr::drcPolygon::showError(void)
 {
-	wxString ost;
-	ost << wxT("addpoly({");
-	CoordsVector::iterator it;
-	//CoordsVector *poly1 = (*it).coords();
+
 	real DBscale = DATC->DBscale();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-	//Convert drcPolygon to pointlist
-	pointlist *plDB = DEBUG_NEW pointlist();
-   plDB->reserve(_coords.size());
+		//Convert drcPolygon to pointlist
+		pointlist *plDB = DEBUG_NEW pointlist();
+		plDB->reserve(_coords.size());
 
-	telldata::ttpnt* pt;
-   for (unsigned i = 0; i < _coords.size(); i++) {
-		wxString xstr = convert(_coords[i].x, _precision); 
-		wxString ystr = convert(_coords[i].y, _precision); 
-		real xx, yy;
-		xstr.ToDouble(&xx);
-		ystr.ToDouble(&yy);
-      //pt = DEBUG_NEW telldata::ttpnt(_coords[i].x, (real)_coords[i].y);//((pl->mlist())[i]);
-		pt = DEBUG_NEW telldata::ttpnt(xx, yy);
-      plDB->push_back(TP(pt->x(), pt->y(), DBscale));
-   }
-
-   //pointlist* plst = t2tpoints(pl,DBscale);
+		telldata::ttpnt* pt;
+		for (unsigned i = 0; i < _coords.size(); i++) 
+		{
+			wxString xstr = convert(_coords[i].x, _precision); 
+			wxString ystr = convert(_coords[i].y, _precision); 
+			real xx, yy;
+			xstr.ToDouble(&xx);
+			ystr.ToDouble(&yy);
+			//pt = DEBUG_NEW telldata::ttpnt(_coords[i].x, (real)_coords[i].y);//((pl->mlist())[i]);
+			pt = DEBUG_NEW telldata::ttpnt(xx, yy);
+			plDB->push_back(TP(pt->x(), pt->y(), DBscale));
+		}
 		ATDB->addpoly(1,plDB);
       delete plDB;
    DATC->unlockDB();
-
-	/*for(it = _coords.begin(); it < _coords.end(); ++it)
-	{
-		if (it != _coords.begin())
-		{
-			ost<<wxT(",");
-		}
-		wxString xstr = convert((*it).x, _precision); 
-		wxString ystr = convert((*it).y, _precision); 
-
-		ost << wxT("{") << convert((*it).x, _precision) << wxT(",") << convert((*it).y, _precision) << wxT("}");;
-
-	}
-	ost<<wxT("});");
-	Console->parseCommand(ost);*/
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(const std::string &name)
@@ -187,6 +182,7 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName)
 	sscanf( str, "%s %ud", cellName, &_precision);
 	//initialisation of static member drcPolygon class
 	drcPolygon::_precision = _precision;
+	drcEdge::_precision = _precision;
 	_cellName = cellName;
 	while(parse())
 	{
@@ -308,11 +304,8 @@ bool Calbr::CalbrFile::parse()
 						return false;
 					}
 					sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2);
-					Calbr::edge theEdge;
-					theEdge.x1 = x1;
-					theEdge.y1 = y1;
-					theEdge.x2 = x2;
-					theEdge.y2 = y2;
+					Calbr::drcEdge theEdge;
+					theEdge.addCoord(x1, y1, x2, y2);
 					ruleCheck->addEdge(theEdge);
 				}
 				break;
@@ -342,8 +335,12 @@ void	Calbr::CalbrFile::ShowResults()
 		{
 			(*it2).showError();
 		}
-		std::vector <Calbr::edge>::iterator it2edge;
-		std::vector <Calbr::edge> *edges = (*it)->edges();
+		std::vector <Calbr::drcEdge>::iterator it2edge;
+		std::vector <Calbr::drcEdge> *edges = (*it)->edges();
+		for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
+		{
+			(*it2edge).showError();
+		}
 		/*for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
 		{
 			wxString ost;
@@ -375,7 +372,7 @@ void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)
 	_polygons.push_back(poly);
 }
 
-void Calbr::drcRuleCheck::addEdge(const Calbr::edge &theEdge)
+void Calbr::drcRuleCheck::addEdge(const Calbr::drcEdge &theEdge)
 {
 	_edges.push_back(theEdge);
 }
