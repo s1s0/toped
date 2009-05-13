@@ -41,6 +41,7 @@ PSegment::PSegment(TP p1,TP p2)
    _A = p2.y() - p1.y();
    _B = p1.x() - p2.x();
    _C = -(_A*p1.x() + _B*p1.y());
+   _angle = 0;
 }
 
 byte PSegment::crossP(PSegment seg, TP& crossp) 

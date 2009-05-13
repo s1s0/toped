@@ -2585,7 +2585,7 @@ void laydata::valid_poly::angles()
 {
    pointlist::iterator cp1 = _plist.end(); cp1--;
    pointlist::iterator cp2 = _plist.begin();
-   real cAngle;
+   real cAngle = 0.0;
    std::stack<real> angle_stack;
    bool prev_cleared = false;
    while ((angle_stack.size() <= _plist.size()) && (2 < _plist.size()))
