@@ -164,9 +164,9 @@ TeselPoly::~TeselPoly()
 
 //=============================================================================
 //
-// TenderCnvx
+// TenderSelected
 //
-TenderSelected::TenderSelected(SlctTypes type, const SGBitSet* slist, unsigned tsize, unsigned offset) :
+/*TenderSelected::TenderSelected(SlctTypes type, const SGBitSet* slist, unsigned tsize, unsigned offset) :
    _type    ( type      ),
    _slist   ( slist     ),
    _offset  ( offset    )
@@ -191,7 +191,7 @@ unsigned TenderSelected::index(unsigned sindex)
    {
       assert( 0 ); //TODO!
    }
-}
+}*/
 // unsigned TenderSelected::numSelectedSegemts(unsigned allpoints)
 // {
 //    assert(NULL != _slist);
@@ -207,8 +207,27 @@ unsigned TenderSelected::index(unsigned sindex)
 
 
 //=============================================================================
+//
 // TenderCnvx
+//
+unsigned TenderCnvx::cDataCopy(int* array, unsigned& pindex)
+{
+   assert(_csize);
+   memcpy(&(array[pindex]), _cdata, 2 * sizeof(int4b) * _csize);
+   pindex += 2 * _csize;
+   return _csize;
+}
 
+unsigned  TenderSCnvx::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex;
+   return TenderCnvx::cDataCopy(array, pindex);
+}
+
+unsigned  TenderSCnvx::sDataCopy(unsigned*, unsigned&)
+{
+   assert(false); // <-- @TODO
+}
 
 //=============================================================================
 
@@ -228,6 +247,16 @@ unsigned TenderSelected::index(unsigned sindex)
 //       delete (*CTC);
 // }
 
+unsigned  TenderSNcvx::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex;
+   return TenderCnvx::cDataCopy(array, pindex);
+}
+
+unsigned  TenderSNcvx::sDataCopy(unsigned*, unsigned&)
+{
+   assert(false); // <-- @TODO
+}
 //=============================================================================
 TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width,
                        bool center_line_only/*, SlctTypes selected, const SGBitSet* splist*/)
@@ -236,6 +265,31 @@ TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width,
 {
    if (!_center_line_only)
       precalc(width);
+}
+
+unsigned TenderWire::lDataCopy(int* array, unsigned& pindex)
+{
+   assert(_lsize);
+   memcpy(&(array[pindex]), _ldata, 2 * sizeof(int4b) * _lsize);
+   pindex += 2 * _lsize;
+   return _lsize;
+}
+
+unsigned TenderSWire::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex;
+   return TenderCnvx::cDataCopy(array, pindex);
+}
+
+unsigned TenderSWire::lDataCopy(int* array, unsigned& pindex)
+{
+   _loffset = pindex;
+   return TenderWire::lDataCopy(array, pindex);
+}
+
+unsigned TenderSWire::sDataCopy(unsigned*, unsigned&)
+{
+   assert(false); // <-- @TODO
 }
 
 void TenderWire::precalc(word width)
@@ -663,9 +717,8 @@ TenderTV::TenderTV(CTM& translation, bool filled, unsigned parray_offset,
    }
 }
 
-void TenderTV::box (int4b* pdata)
+void TenderTV::registerBox (TenderCnvx* cobj)
 {
-   TenderCnvx* cobj = DEBUG_NEW TenderCnvx(pdata, 4);
    unsigned allpoints = cobj->csize();
    if (_filled)
    {
@@ -681,9 +734,8 @@ void TenderTV::box (int4b* pdata)
    }
 }
 
-void TenderTV::poly (int4b* pdata, unsigned psize, TeselPoly* tchain)
+void TenderTV::registerPoly (TenderNcvx* cobj, TeselPoly* tchain)
 {
-   TenderNcvx* cobj = DEBUG_NEW TenderNcvx(pdata, psize);
    unsigned allpoints = cobj->csize();
    if (_filled)
    {
@@ -704,15 +756,13 @@ void TenderTV::poly (int4b* pdata, unsigned psize, TeselPoly* tchain)
    }
 }
 
-void TenderTV::wire (int4b* pdata, unsigned psize, word width,
-                            bool center_line_only)
+void TenderTV::registerWire (TenderWire* cobj)
 {
-   TenderWire* cobj = DEBUG_NEW TenderWire(pdata, psize, width, center_line_only);
    unsigned allpoints = cobj->csize();
    _line_data.push_back(cobj);
    _alvrtxs[line] += cobj->lsize();
    _alobjvx[line]++;
-   if (!center_line_only)
+   if ( !cobj->center_line_only() )
    {
        if (_filled)
        {
@@ -801,51 +851,43 @@ void TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsig
 
 void TenderTV::collect(int* point_array, unsigned int* index_array, unsigned int*)
 {
-   unsigned long line_arr_size = 2 * _alvrtxs[line];
-   unsigned long fqus_arr_size = 2 * _alvrtxs[cnvx];
-   unsigned long cont_arr_size = 2 * _alvrtxs[cont];
-   unsigned long poly_arr_size = 2 * _alvrtxs[ncvx];
+   unsigned line_arr_size = 2 * _alvrtxs[line];
+   unsigned fqus_arr_size = 2 * _alvrtxs[cnvx];
+   unsigned cont_arr_size = 2 * _alvrtxs[cont];
+   unsigned poly_arr_size = 2 * _alvrtxs[ncvx];
    // initialise the indexing
-   unsigned long pntindx = 0;
-   // collect all central lines of the wires
+   unsigned pntindx = 0;
+
    if  (_alobjvx[line] > 0)
-   {
+   {// collect all central lines of the wires
       unsigned  szindx  = 0;
       _firstvx[line] = DEBUG_NEW int[_alobjvx[line]];
       _sizesvx[line] = DEBUG_NEW int[_alobjvx[line]];
       for (SliceWires::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
-         unsigned clsize = (*CSH)->lsize();
-         assert(clsize);
-         _firstvx[line][szindx] = pntindx/2;
-         _sizesvx[line][szindx++] = clsize;
-         memcpy(&(point_array[_point_array_offset + pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
-         pntindx += 2 * clsize;
+         _firstvx[line][szindx  ] = pntindx/2;
+         _sizesvx[line][szindx++] = (*CSH)->lDataCopy(&(point_array[_point_array_offset]), pntindx);
       }
       assert(pntindx == line_arr_size);
       assert(szindx  == _alobjvx[line]);
    }
-   // collect all convex polygons
+
    if  (_alobjvx[cnvx] > 0)
-   {
+   {// collect all convex polygons
       unsigned  szindx  = 0;
       _firstvx[cnvx] = DEBUG_NEW int[_alobjvx[cnvx]];
       _sizesvx[cnvx] = DEBUG_NEW int[_alobjvx[cnvx]];
       for (SliceObjects::const_iterator CSH = _cnvx_data.begin(); CSH != _cnvx_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
-         unsigned clsize = (*CSH)->csize();
-         assert(clsize);
-         _firstvx[cnvx][szindx] = pntindx/2;
-         _sizesvx[cnvx][szindx++] = clsize;
-         memcpy(&(point_array[_point_array_offset + pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
-         pntindx += 2 * clsize;
+         _firstvx[cnvx][szindx  ] = pntindx/2;
+         _sizesvx[cnvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
       }
       assert(pntindx == line_arr_size + fqus_arr_size);
       assert(szindx  == _alobjvx[cnvx]);
    }
-   // collect all non-convex polygons
+
    if  (_alobjvx[ncvx] > 0)
-   {
+   {// collect all non-convex polygons
       unsigned  szindx  = 0;
       _firstvx[ncvx] = DEBUG_NEW int[_alobjvx[ncvx]];
       _sizesvx[ncvx] = DEBUG_NEW int[_alobjvx[ncvx]];
@@ -882,8 +924,6 @@ void TenderTV::collect(int* point_array, unsigned int* index_array, unsigned int
       index_offset[ftss] = index_offset[ftfs] + _alindxs[ftfs];
       for (SlicePolygons::const_iterator CSH = _ncvx_data.begin(); CSH != _ncvx_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
-         unsigned clsize = (*CSH)->csize();
-         assert(clsize);
 
          if (NULL != (*CSH)->tdata())
             collectIndexs(index_array    ,
@@ -892,11 +932,9 @@ void TenderTV::collect(int* point_array, unsigned int* index_array, unsigned int
                         index_offset     ,
                         pntindx/2
                         );
+         _firstvx[ncvx][szindx  ] = pntindx/2;
+         _sizesvx[ncvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
 
-         _firstvx[ncvx][szindx] = pntindx/2;
-         _sizesvx[ncvx][szindx++] = clsize;
-         memcpy(&(point_array[_point_array_offset + pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
-         pntindx += 2 * clsize;
       }
       assert(size_index[fqss] == _alobjix[fqss]);
       assert(size_index[ftrs] == _alobjix[ftrs]);
@@ -909,20 +947,16 @@ void TenderTV::collect(int* point_array, unsigned int* index_array, unsigned int
       assert(pntindx == line_arr_size + fqus_arr_size + poly_arr_size);
       assert(szindx  == _alobjvx[ncvx]);
    }
-   // collect all contours (only non-filled objects here)
+
    if  (_alobjvx[cont] > 0)
-   {
+   {// collect all contours (only non-filled objects here)
       unsigned  szindx  = 0;
       _firstvx[cont] = DEBUG_NEW int[_alobjvx[cont]];
       _sizesvx[cont] = DEBUG_NEW int[_alobjvx[cont]];
       for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
-         unsigned clsize = (*CSH)->csize();
-         assert(clsize);
-         _firstvx[cont][szindx] = pntindx/2;
-         _sizesvx[cont][szindx++] = clsize;
-         memcpy(&(point_array[_point_array_offset + pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
-         pntindx += 2 * clsize;
+         _firstvx[cont][szindx  ] = pntindx/2;
+         _sizesvx[cont][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
       }
       assert(pntindx == line_arr_size + fqus_arr_size + cont_arr_size + poly_arr_size);
       assert(szindx  == _alobjvx[cont] );
@@ -1032,14 +1066,13 @@ TenderTV::~TenderTV()
 
 //=============================================================================
 //
-// class TenderTVS
+// class TenderLay
 //
-TenderTVS::TenderTVS(CTM& translation, bool filled, unsigned parray_offset,
-                              unsigned iarray_offset, unsigned sarray_offset) :
-      TenderTV(translation, filled, parray_offset, iarray_offset),
-      _slctd_array_offset(sarray_offset)
+TenderLay::TenderLay(): _cslice(NULL),
+   _num_total_points(0u), _num_total_indexs(0u),
+   _has_selected(false), _slctd_array_offset(0u)
 {
-   for (int i = lins; i < none; i++)
+   for (int i = lins; i <= lstr; i++)
    {
       _sizslix[i] = NULL;
       _fstslix[i] = NULL;
@@ -1048,171 +1081,6 @@ TenderTVS::TenderTVS(CTM& translation, bool filled, unsigned parray_offset,
    }
 }
 
-unsigned TenderTVS::num_total_slctdx()
-{
-   return ( _asindxs[line] +
-            _asindxs[llps] +
-            _asindxs[lstr]
-          );
-}
-
-void TenderTVS::box (int4b* pdata, SlctTypes seltype, const SGBitSet* splist)
-{
-   if (none != seltype)
-   {
-      unsigned soffset = _point_array_offset + (_filled ? _alvrtxs[cnvx] : _alvrtxs[cont]);
-      TenderSelected* sobj = DEBUG_NEW TenderSelected(seltype, splist, soffset, 4);
-      _slct_data.push_back(sobj);
-      if (NULL == splist)
-      {// object is fully selected
-         _asindxs[llps] += sobj->size();
-         _asobjix[llps]++;
-      }
-      else
-      {// object is partially selected
-         _asobjix[lstr] += sobj->size();
-         _asobjix[lstr]++;
-      }
-   }
-   TenderTV::box(pdata);
-}
-
-void TenderTVS::poly (int4b* pdata, unsigned psize, TeselPoly* tchain,
-                     SlctTypes seltype, const SGBitSet* splist)
-{
-   if (none != seltype)
-   {
-      unsigned soffset = _point_array_offset + (_filled ? _alvrtxs[ncvx] : _alvrtxs[cont]);
-      TenderSelected* sobj = DEBUG_NEW TenderSelected(seltype, splist, soffset, psize);
-      _slct_data.push_back(sobj);
-      if (NULL == splist)
-      {// object is fully selected
-         _asindxs[llps] += sobj->size();
-         _asobjix[llps]++;
-      }
-      else
-      {// object is partially selected
-         _asobjix[lstr] += sobj->size();
-         _asobjix[lstr]++;
-      }
-   }
-   TenderTV::poly(pdata, psize, tchain);
-}
-
-void TenderTVS::wire (int4b* pdata, unsigned psize, word width,
-                     bool center_line_only, SlctTypes seltype, const SGBitSet* splist)
-{
-   if (none != seltype)
-   {
-      unsigned soffset = _point_array_offset + _alvrtxs[line];
-      TenderSelected* sobj = DEBUG_NEW TenderSelected(seltype, splist, soffset, psize);
-      _slct_data.push_back(sobj);
-      if (NULL == splist)
-      {// object is fully selected
-         _asindxs[lins] += sobj->size();
-         _asobjix[lins]++;
-      }
-      else
-      {// object is partially selected
-         _asobjix[lstr] += sobj->size();
-         _asobjix[lstr]++;
-      }
-   }
-   TenderTV::wire(pdata, psize, width, center_line_only);
-}
-
-void TenderTVS::collect(int* point_array, unsigned int* index_array, unsigned int* slctd_array)
-{
-   TenderTV::collect(point_array, index_array, NULL);
-   unsigned      slct_arr_size = _asindxs[lins] + _asindxs[llps] + _asindxs[lstr];
-   if (0 == slct_arr_size) return;
-
-   // initialise the indexing arrays of selected objects
-   if (0 < _asobjix[lins])
-   {
-      _sizslix[lins] = DEBUG_NEW GLsizei[_asobjix[lins]];
-      _fstslix[lins] = DEBUG_NEW GLuint[_asobjix[lins]];
-   }
-   if (0 < _asobjix[llps])
-   {
-      _sizslix[llps] = DEBUG_NEW GLsizei[_asobjix[llps]];
-      _fstslix[llps] = DEBUG_NEW GLuint[_asobjix[llps]];
-   }
-   if (0 < _asobjix[lstr])
-   {
-      _sizslix[lstr] = DEBUG_NEW GLsizei[_asobjix[lstr]];
-      _fstslix[lstr] = DEBUG_NEW GLuint[_asobjix[lstr]];
-   }
-   unsigned size_sindex[3];
-   unsigned index_soffset[3];
-   size_sindex[lins] = size_sindex[llps] = size_sindex[lstr] = 0u;
-   index_soffset[lins] = _slctd_array_offset;
-   index_soffset[llps] = index_soffset[lins] + _asindxs[lins];
-   index_soffset[lstr] = index_soffset[llps] + _alindxs[llps];
-
-
-   for (SliceSelected::const_iterator SSL = _slct_data.begin(); SSL != _slct_data.end(); SSL++)
-   {
-      TenderSelected* cchunk = *SSL;
-      switch (cchunk->type())
-      {
-         case lins :
-         {
-            assert(_sizslix[lins]);
-            _fstslix[lins][size_sindex[lins]  ] = sizeof(unsigned) * index_soffset[lins];
-            _sizslix[lins][size_sindex[lins]++] = cchunk->size();
-//            for (unsigned i = 0; i < cchunk->size(); i++)
-//               slctd_array[index_soffset[lins]++] = cchunk->index(i) + cchunk->offset();
-            break;
-         }
-         case llps      :
-         {
-            assert(_sizslix[llps]);
-            _fstslix[llps][size_sindex[llps]  ] = sizeof(unsigned) * index_soffset[llps];
-            _sizslix[llps][size_sindex[llps]++] = cchunk->size();
-//            for (unsigned i = 0; i < cchunk->size(); i++)
-//               slctd_array[index_soffset[llps]++] = cchunk->index(i) + cchunk->offset();
-            break;
-         }
-         case lstr   :
-         {
-            assert(_sizslix[lstr]);
-            _fstslix[lstr][size_sindex[lstr]  ] = sizeof(unsigned) * index_soffset[lstr];
-            _sizslix[lstr][size_sindex[lstr]++] = cchunk->size();
-//            for (unsigned i = 0; i < cchunk->size(); i++)
-//               slctd_array[index_soffset[lstr]++] = cchunk->index(i) + cchunk->offset();
-            break;
-         }
-         default: assert(false);
-      }
-   }
-   
-/*
-         if (none != (*CSH)->slctd())
-         collectSIndexs( index_sarray    ,
-         (*CSH)           ,
-         size_index       ,
-         index_offset     ,
-         pntindx/2
-                         );*/
-
-}
-
-TenderTVS::~TenderTVS()
-{
-   if (NULL != _sizslix[lins]) delete [] _sizslix[lins];
-   if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
-   if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
-
-   if (NULL != _fstslix[lins]) delete [] _fstslix[lins];
-   if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
-   if (NULL != _fstslix[lstr]) delete [] _fstslix[lstr];
-
-}
-//=============================================================================
-//
-// class TenderLay
-//
 /**
  * Create a new object of TenderTV type which will be reffered to by _cslice
  * @param ctrans Current translation matrix of the new object
@@ -1221,10 +1089,12 @@ TenderTVS::~TenderTVS()
 void TenderLay::newSlice(CTM& ctrans, bool fill, bool has_selected, unsigned slctd_array_offset)
 {
    _has_selected = has_selected;
-   if (_has_selected)
-      _cslice = DEBUG_NEW TenderTVS(ctrans, fill, 2 * _num_total_points, _num_total_indexs, slctd_array_offset);
-   else
-      _cslice = DEBUG_NEW TenderTV(ctrans, fill, 2 * _num_total_points, _num_total_indexs);
+   if (_has_selected = has_selected) // <-- that's not a mistake!
+   {
+      assert( 0 == total_slctdx());
+      _slctd_array_offset = slctd_array_offset;
+   }
+   _cslice = DEBUG_NEW TenderTV(ctrans, fill, 2 * _num_total_points, _num_total_indexs);
 }
 
 /** Add the current slice object (_cslice) to the list of slices _layData but
@@ -1240,8 +1110,6 @@ void TenderLay::ppSlice()
          _layData.push_back(_cslice);
          _num_total_points += num_points;
          _num_total_indexs += _cslice->num_total_indexs();
-         if (_has_selected)
-            _num_total_slctdx += static_cast<TenderTVS*>(_cslice)->num_total_slctdx();
       }
       else
          delete _cslice;
@@ -1253,41 +1121,106 @@ void TenderLay::box  (int4b* pdata, bool sel = false, const SGBitSet* ss= NULL)
 {
    // Make sure that selected shapes don't come unexpected
    assert(_has_selected ? true : !sel);
+   TenderCnvx* cobj = NULL;
    if (sel)
    {
-      SlctTypes seltype = sel ? ((NULL == ss) ? llps : lstr) : none;
-//      static_cast<TenderTVS*>(_cslice)->box(pdata, seltype, ss);
-      _cslice->box(pdata, seltype, ss);
+      TenderSCnvx* sobj = DEBUG_NEW TenderSCnvx(pdata, 4, ss);
+      registerSBox(sobj);
+      cobj = sobj;
    }
    else
-      _cslice->box(pdata);
+   {
+      cobj = DEBUG_NEW TenderCnvx(pdata, 4);
+   }
+   _cslice->registerBox(cobj);
 }
 
 void TenderLay::poly (int4b* pdata, unsigned psize, TeselPoly* tpoly, bool sel = false, const SGBitSet* ss= NULL)
 {
    // Make sure that selected shapes don't come unexpected
    assert(_has_selected ? true : !sel);
+   TenderNcvx* cobj = NULL;
    if (sel)
    {
-      SlctTypes seltype = sel ? ((NULL == ss) ? llps : lstr) : none;
-//      static_cast<TenderTVS*>(_cslice)->poly(pdata, psize, tpoly, seltype, ss);
-      _cslice->poly(pdata, psize, tpoly, seltype, ss);
+      TenderSNcvx* sobj = DEBUG_NEW TenderSNcvx(pdata, psize, ss);
+      registerSPoly(sobj);
+      cobj = sobj;
    }
    else
-      _cslice->poly(pdata, psize, tpoly);
+   {
+      cobj = DEBUG_NEW TenderNcvx(pdata, psize);
+   }
+   _cslice->registerPoly(cobj, tpoly);
 }
 
 void TenderLay::wire (int4b* pdata, unsigned psize, word width, bool center_only, bool sel = false, const SGBitSet* ss= NULL)
 {
    assert(_has_selected ? true : !sel);
+   TenderWire* cobj;
    if (sel)
    {
-      SlctTypes seltype = sel ? ((NULL == ss) ? lins : lstr) : none;
-//      static_cast<TenderTVS*>(_cslice)->wire(pdata, psize, width, center_only, seltype, ss);
-      _cslice->wire(pdata, psize, width, center_only, seltype, ss);
+      TenderSWire* sobj = DEBUG_NEW TenderSWire(pdata, psize, width, center_only, ss);
+      registerSWire(sobj);
+      cobj = sobj;
    }
    else
-      _cslice->wire(pdata, psize, width, center_only);
+   {
+      cobj = DEBUG_NEW TenderWire(pdata, psize, width, center_only);
+   }
+   _cslice->registerWire(cobj);
+}
+
+void TenderLay::registerSBox (TenderSCnvx* sobj)
+{
+   _slct_data.push_back(sobj);
+   if ( 0 < sobj->ssize() )
+   {// object is partially selected
+      _asobjix[lstr] += sobj->ssize();
+      _asobjix[lstr]++;
+   }
+   else
+   {// object is fully selected
+      _asindxs[llps] += sobj->csize();
+      _asobjix[llps]++;
+   }
+}
+
+void TenderLay::registerSPoly (TenderSNcvx* sobj)
+{
+   _slct_data.push_back(sobj);
+   if ( 0 < sobj->ssize() )
+   {// object is partially selected
+      _asobjix[lstr] += sobj->ssize();
+      _asobjix[lstr]++;
+   }
+   else
+   {// object is fully selected
+      _asindxs[llps] += sobj->csize();
+      _asobjix[llps]++;
+   }
+}
+
+void TenderLay::registerSWire (TenderSWire* sobj)
+{
+   _slct_data.push_back(sobj);
+   if ( 0 < sobj->ssize() )
+   {// object is partially selected
+      _asobjix[lstr] += sobj->ssize();
+      _asobjix[lstr]++;
+   }
+   else
+   {// object is fully selected
+      _asindxs[lins] += sobj->lsize();
+      _asobjix[lins]++;
+   }
+}
+
+unsigned TenderLay::total_slctdx()
+{
+   return ( _asindxs[lins] +
+            _asindxs[llps] +
+            _asindxs[lstr]
+          );
 }
 
 void TenderLay::collect(bool fill, GLuint pbuf, GLuint ibuf)
@@ -1323,6 +1256,66 @@ void TenderLay::collect(bool fill, GLuint pbuf, GLuint ibuf)
    }
 }
 
+void TenderLay::collectSelected(unsigned int* slctd_array)
+{
+   unsigned      slct_arr_size = _asindxs[lins] + _asindxs[llps] + _asindxs[lstr];
+   if (0 == slct_arr_size) return;
+
+   // initialise the indexing arrays of selected objects
+   if (0 < _asobjix[lins])
+   {
+      _sizslix[lins] = DEBUG_NEW GLsizei[_asobjix[lins]];
+      _fstslix[lins] = DEBUG_NEW GLuint[_asobjix[lins]];
+   }
+   if (0 < _asobjix[llps])
+   {
+      _sizslix[llps] = DEBUG_NEW GLsizei[_asobjix[llps]];
+      _fstslix[llps] = DEBUG_NEW GLuint[_asobjix[llps]];
+   }
+   if (0 < _asobjix[lstr])
+   {
+      _sizslix[lstr] = DEBUG_NEW GLsizei[_asobjix[lstr]];
+      _fstslix[lstr] = DEBUG_NEW GLuint[_asobjix[lstr]];
+   }
+   unsigned size_sindex[3];
+   unsigned index_soffset[3];
+   size_sindex[lins] = size_sindex[llps] = size_sindex[lstr] = 0u;
+   index_soffset[lins] = _slctd_array_offset;
+   index_soffset[llps] = index_soffset[lins] + _asindxs[lins];
+   index_soffset[lstr] = index_soffset[llps] + _asindxs[llps];
+
+
+   for (SliceSelected::const_iterator SSL = _slct_data.begin(); SSL != _slct_data.end(); SSL++)
+   {
+      TenderSelected* cchunk = *SSL;
+      switch (cchunk->type())
+      {
+         case lins : // LINES
+         {
+            assert(_sizslix[lins]);
+            _fstslix[lins][size_sindex[lins]  ] = sizeof(unsigned) * index_soffset[lins];
+            _sizslix[lins][size_sindex[lins]++] = cchunk->sDataCopy(slctd_array, index_soffset[lins]);
+            break;
+         }
+         case llps      : // LINE_LOOP
+         {
+            assert(_sizslix[llps]);
+            _fstslix[llps][size_sindex[llps]  ] = sizeof(unsigned) * index_soffset[llps];
+            _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
+            break;
+         }
+         case lstr   : // LINE_STRIP
+         {
+            assert(_sizslix[lstr]);
+            _fstslix[lstr][size_sindex[lstr]  ] = sizeof(unsigned) * index_soffset[lstr];
+            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
+            break;
+         }
+         default: assert(false);
+      }
+   }
+}
+
 void TenderLay::draw(bool fill)
 {
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
@@ -1355,6 +1348,14 @@ TenderLay::~TenderLay()
 {
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
       delete (*TLAY);
+
+   if (NULL != _sizslix[lins]) delete [] _sizslix[lins];
+   if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
+   if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
+
+   if (NULL != _fstslix[lins]) delete [] _fstslix[lins];
+   if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
+   if (NULL != _fstslix[lstr]) delete [] _fstslix[lstr];
 }
 
 //=============================================================================
@@ -1386,12 +1387,6 @@ void Tenderer::setLayer(word layer, bool has_selected)
    // @TODO! current fill on/off should be determined here!
 }
 
-// void Tenderer::setSdataContainer(word layer)
-// {
-//    _sslice = DEBUG_NEW TenderTVB();
-//    _sdata[layer] = _sslice;
-// }
-
 void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
    _ctrans = trans * _drawprop->topCTM();
@@ -1402,20 +1397,6 @@ void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active, boo
    if (active)
       _atrans = trans;
 }
-
-// void Tenderer::box  (int4b* pdata, const SGBitSet* psel)
-// {
-//    assert(_sslice);
-//    TenderCnvx* dobj = _clayer->box(pdata);
-//    _sslice->add(dobj, psel);
-// }
-
-// void Tenderer::poly (int4b* pdata, unsigned psize, TeselPoly* tpoly, const SGBitSet* psel)
-// {
-//    assert(_sslice);
-//    TenderNcvx* dpoly = _clayer->poly(pdata, psize, tpoly);
-//    _sslice->add(dpoly, psel);
-// }
 
 void Tenderer::wire (int4b* pdata, unsigned psize, word width)
 {
@@ -1494,12 +1475,15 @@ void Tenderer::collect()
       }
       else
       {
+         _num_total_slctdx += CCLAY->second->total_slctdx();
          _num_ogl_buffers++;
          if (0 < CCLAY->second->total_indexs())
             _num_ogl_buffers++;
          CCLAY++;
       }
    }
+   if (0 < _num_total_slctdx)
+      _num_ogl_buffers++;
 
    // Organise the VBOs ...
    _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
@@ -1511,6 +1495,22 @@ void Tenderer::collect()
       GLuint pbuf = _ogl_buffers[current_buffer++];
       GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
       CLAY->second->collect(_drawprop->isFilled(CLAY->first), pbuf, ibuf);
+   }
+
+   if (0 < _num_total_slctdx)
+   {// selected objects buffer
+      GLuint sbuf = _ogl_buffers[current_buffer++];
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sbuf);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
+                   _num_total_slctdx * sizeof(unsigned) ,
+                                              NULL                              ,
+                                              GL_DYNAMIC_DRAW                    );
+      unsigned int* sindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+      for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+      {
+         if (0 == CCLAY->second->total_slctdx()) continue;
+         CLAY->second->collectSelected(sindex_array);
+      }
    }
    checkOGLError("collect");
 }
