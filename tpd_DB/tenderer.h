@@ -118,21 +118,17 @@ class TeselPoly {
 //
 //
 //=============================================================================
-typedef enum {lins, llps, lstr, none}       SlctTypes;
-
+typedef enum {lins, llps, lstr} SlctTypes;
 class TenderSelected {
    public:
-                        TenderSelected(SlctTypes type, const SGBitSet* slist, unsigned tsize, unsigned offset);
-      SlctTypes         type()            {return _type;}
-      const SGBitSet*   slist()           {return _slist;}
-      unsigned          offset()          {return _offset;}
-      unsigned          size()            {return _size;}
-      unsigned          index(unsigned);
+                        TenderSelected(const SGBitSet* slist) :
+                           _slist(slist), _offset(0) {}
+      unsigned          ssize()  {return (NULL != _slist) ? _slist->size() : 0;}
+      virtual SlctTypes type() = 0;
+      virtual unsigned  sDataCopy(unsigned*, unsigned&) = 0;
    protected:
-      SlctTypes         _type;
       const SGBitSet*   _slist;
       unsigned          _offset;
-      unsigned          _size;
 };
 
 /**
@@ -144,11 +140,20 @@ class TenderCnvx {
                         TenderCnvx(int4b* pdata, unsigned psize) :
                                  _cdata(pdata), _csize(psize){}
       virtual          ~TenderCnvx() {};
-      int4b*            cdata()     {return _cdata;}
+      virtual unsigned  cDataCopy(int*, unsigned&);
       unsigned          csize()     {return _csize;}
    protected:
       int4b*            _cdata;  // contour data
       unsigned          _csize;
+};
+
+class TenderSCnvx : public TenderCnvx, public TenderSelected {
+   public:
+                        TenderSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
+                           TenderCnvx(pdata, psize), TenderSelected(slist) {}
+      virtual unsigned  cDataCopy(int*, unsigned&);
+      virtual unsigned  sDataCopy(unsigned*, unsigned&);
+      virtual SlctTypes type() { return ((NULL == _slist) ? llps : lstr);}
 };
 
 /**
@@ -168,6 +173,15 @@ class TenderNcvx : public TenderCnvx {
       TeselPoly*        _tdata;
 };
 
+class TenderSNcvx : public TenderNcvx, public TenderSelected  {
+   public:
+                        TenderSNcvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
+                           TenderNcvx(pdata, psize), TenderSelected(slist) {}
+      virtual unsigned  cDataCopy(int*, unsigned&);
+      virtual unsigned  sDataCopy(unsigned*, unsigned&);
+      virtual SlctTypes type() { return ((NULL == _slist) ? llps : lstr);}
+};
+
 /**
 *   holds wire representation - the contour and the fill - exactly as in the
 *   inherited class. The _ldata stores the central line which is effectively
@@ -178,7 +192,7 @@ class TenderWire : public TenderNcvx {
                         TenderWire(int4b*, unsigned, const word, bool);
       virtual          ~TenderWire();
       void              Tesselate();
-      int*              ldata()                 {return _ldata;}
+      virtual unsigned  lDataCopy(int*, unsigned&);
       unsigned          lsize()                 {return _lsize;}
       bool              center_line_only()      {return _center_line_only;}
       virtual TeselChain* tdata()               {return _tdata;}
@@ -190,6 +204,18 @@ class TenderWire : public TenderNcvx {
       unsigned          _lsize;
       bool              _center_line_only;
       TeselChain*       _tdata;
+};
+
+class TenderSWire : public TenderWire, public TenderSelected {
+   public:
+                        TenderSWire(int4b* pdata, unsigned psize, const word width, bool clo, const SGBitSet* slist) :
+                           TenderWire(pdata, psize, width, clo), TenderSelected(slist), _loffset(0u) {}
+      virtual unsigned  cDataCopy(int*, unsigned&);
+      virtual unsigned  lDataCopy(int*, unsigned&);
+      virtual unsigned  sDataCopy(unsigned*, unsigned&);
+      virtual SlctTypes type() { return ((NULL == _slist) ? lins : lstr);}
+   private:
+      unsigned          _loffset;
 };
 
 typedef std::list<TenderCnvx*>      SliceObjects;
@@ -217,20 +243,16 @@ class TenderTV {
       enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
       enum {cont, line, cnvx, ncvx} ObjtTypes;
                         TenderTV(CTM&, bool, unsigned, unsigned);
-      virtual          ~TenderTV();
-      virtual void      box  (int4b*,                       SlctTypes, const SGBitSet*) {assert(false);}
-      virtual void      poly (int4b*, unsigned, TeselPoly*, SlctTypes, const SGBitSet*) {assert(false);}
-      virtual void      wire (int4b*, unsigned, word, bool, SlctTypes, const SGBitSet*) {assert(false);}
-      void              box  (int4b*                      );
-      void              poly (int4b*, unsigned, TeselPoly*);
-      void              wire (int4b*, unsigned, word, bool);
+                       ~TenderTV();
+      void              registerBox   (TenderCnvx*);
+      void              registerPoly  (TenderNcvx*, TeselPoly*);
+      void              registerWire  (TenderWire*);
 
-      virtual void      collect(int*, unsigned int*, unsigned int*);
+      void              collect(int*, unsigned int*, unsigned int*);
       void              draw();
 
       unsigned          num_total_points();
       unsigned          num_total_indexs();
-      virtual unsigned  num_total_slctdx()   {return 0;}
       const CTM*        tmatrix()            {return &_tmatrix;}
    protected:
       void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
@@ -258,34 +280,11 @@ class TenderTV {
       bool              _filled;
 };
 
-class TenderTVS : public TenderTV {
-   public:
-                        TenderTVS(CTM&, bool, unsigned, unsigned, unsigned);
-      virtual          ~TenderTVS();
-      virtual void      box  (int4b*,                       SlctTypes, const SGBitSet*);
-      virtual void      poly (int4b*, unsigned, TeselPoly*, SlctTypes, const SGBitSet*);
-      virtual void      wire (int4b*, unsigned, word, bool, SlctTypes, const SGBitSet*);
-
-      virtual void      collect(int*, unsigned int*, unsigned int*);
-
-      virtual unsigned  num_total_slctdx();
-   private:
-      SliceSelected     _slct_data;
-      // index related data for selected objects
-      unsigned          _asindxs[3]; //! array with the total number of indexes of selected objects
-      unsigned          _asobjix[3]; //! array with the total number of selected objects
-      GLsizei*          _sizslix[3]; //! arrays of sizes for indexes sets of selected objects
-      GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
-      // offsets in the VBO
-      unsigned          _slctd_array_offset;
-};
-
 class TenderLay {
    public:
       typedef std::list<TenderTV*> TenderTVList;
-                        TenderLay(): _cslice(NULL),
-                                  _num_total_points(0u), _num_total_indexs(0u), _num_total_slctdx(0u),
-                                        _slctd_array_offset(0u), _has_selected(false) {};
+
+                        TenderLay();
                        ~TenderLay();
       void              box  (int4b*,                       bool, const SGBitSet*);
       void              poly (int4b*, unsigned, TeselPoly*, bool, const SGBitSet*);
@@ -295,20 +294,32 @@ class TenderLay {
       void              ppSlice(); //! Post process the slice
       void              draw(bool);
       void              collect(bool, GLuint, GLuint);
+      void              collectSelected(unsigned int* /*, TeselChain*, unsigned*, unsigned*, unsigned*/);
       unsigned          total_points() {return _num_total_points;}
       unsigned          total_indexs() {return _num_total_indexs;}
-      unsigned          total_slctdx() {return _num_total_slctdx;}
+      unsigned          total_slctdx();
 
    private:
+      void              registerSBox  (TenderSCnvx*);
+      void              registerSPoly (TenderSNcvx*);
+      void              registerSWire (TenderSWire*);
       TenderTVList      _layData;
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
       unsigned          _num_total_points;
       unsigned          _num_total_indexs;
       unsigned          _num_total_slctdx;
-      unsigned          _slctd_array_offset;
       GLuint            _pbuffer;
       GLuint            _ibuffer;
       bool              _has_selected;
+      // Data related to selected objects
+      SliceSelected     _slct_data;
+      // index related data for selected objects
+      unsigned          _asindxs[3]; //! array with the total number of indexes of selected objects
+      unsigned          _asobjix[3]; //! array with the total number of selected objects
+      GLsizei*          _sizslix[3]; //! arrays of sizes for indexes sets of selected objects
+      GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
+      // offsets in the VBO
+      unsigned          _slctd_array_offset;
 };
 
 //-----------------------------------------------------------------------------
