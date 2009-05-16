@@ -118,19 +118,6 @@ class TeselPoly {
 //
 //
 //=============================================================================
-typedef enum {lins, llps, lstr} SlctTypes;
-class TenderSelected {
-   public:
-                        TenderSelected(const SGBitSet* slist) :
-                           _slist(slist), _offset(0) {}
-      unsigned          ssize()  {return (NULL != _slist) ? _slist->size() : 0;}
-      virtual SlctTypes type() = 0;
-      virtual unsigned  sDataCopy(unsigned*, unsigned&) = 0;
-   protected:
-      const SGBitSet*   _slist;
-      unsigned          _offset;
-};
-
 /**
 *   holds box representation - The same points will be used for the
 *   contour as well as for the fill
@@ -145,15 +132,6 @@ class TenderCnvx {
    protected:
       int4b*            _cdata;  // contour data
       unsigned          _csize;
-};
-
-class TenderSCnvx : public TenderCnvx, public TenderSelected {
-   public:
-                        TenderSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
-                           TenderCnvx(pdata, psize), TenderSelected(slist) {}
-      virtual unsigned  cDataCopy(int*, unsigned&);
-      virtual unsigned  sDataCopy(unsigned*, unsigned&);
-      virtual SlctTypes type() { return ((NULL == _slist) ? llps : lstr);}
 };
 
 /**
@@ -173,15 +151,6 @@ class TenderNcvx : public TenderCnvx {
       TeselPoly*        _tdata;
 };
 
-class TenderSNcvx : public TenderNcvx, public TenderSelected  {
-   public:
-                        TenderSNcvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
-                           TenderNcvx(pdata, psize), TenderSelected(slist) {}
-      virtual unsigned  cDataCopy(int*, unsigned&);
-      virtual unsigned  sDataCopy(unsigned*, unsigned&);
-      virtual SlctTypes type() { return ((NULL == _slist) ? llps : lstr);}
-};
-
 /**
 *   holds wire representation - the contour and the fill - exactly as in the
 *   inherited class. The _ldata stores the central line which is effectively
@@ -196,7 +165,7 @@ class TenderWire : public TenderNcvx {
       unsigned          lsize()                 {return _lsize;}
       bool              center_line_only()      {return _center_line_only;}
       virtual TeselChain* tdata()               {return _tdata;}
-   private:
+   protected:
       void              precalc(const word);
       DBbox*            endPnts(const word, word, word, bool);
       DBbox*            mdlPnts(const word, word, word, const word);
@@ -206,14 +175,50 @@ class TenderWire : public TenderNcvx {
       TeselChain*       _tdata;
 };
 
+typedef enum {lins, llps, lstr} SlctTypes;
+
+class TenderSelected {
+   public:
+                        TenderSelected(const SGBitSet* slist) :
+                           _slist(slist), _offset(0) {}
+      bool              partSelected() {return (NULL != _slist);}
+      virtual SlctTypes type() = 0;
+      virtual unsigned  ssize() = 0;
+      virtual unsigned  sDataCopy(unsigned*, unsigned&) = 0;
+   protected:
+      const SGBitSet*   _slist;
+      unsigned          _offset;
+};
+
+class TenderSCnvx : public TenderCnvx, public TenderSelected {
+   public:
+                        TenderSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
+                           TenderCnvx(pdata, psize), TenderSelected(slist) {}
+      virtual unsigned  cDataCopy(int*, unsigned&);
+      virtual SlctTypes type() { return ((NULL == _slist) ? llps : lstr);}
+      virtual unsigned  ssize();
+      virtual unsigned  sDataCopy(unsigned*, unsigned&);
+};
+
+class TenderSNcvx : public TenderNcvx, public TenderSelected  {
+   public:
+                        TenderSNcvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
+                           TenderNcvx(pdata, psize), TenderSelected(slist) {}
+      virtual unsigned  cDataCopy(int*, unsigned&);
+      virtual SlctTypes type() { return ((NULL == _slist) ? llps : lstr);}
+      virtual unsigned  ssize();
+      virtual unsigned  sDataCopy(unsigned*, unsigned&);
+};
+
 class TenderSWire : public TenderWire, public TenderSelected {
    public:
                         TenderSWire(int4b* pdata, unsigned psize, const word width, bool clo, const SGBitSet* slist) :
                            TenderWire(pdata, psize, width, clo), TenderSelected(slist), _loffset(0u) {}
       virtual unsigned  cDataCopy(int*, unsigned&);
       virtual unsigned  lDataCopy(int*, unsigned&);
-      virtual unsigned  sDataCopy(unsigned*, unsigned&);
       virtual SlctTypes type() { return ((NULL == _slist) ? lins : lstr);}
+      virtual unsigned  ssize();
+      virtual unsigned  sDataCopy(unsigned*, unsigned&);
    private:
       unsigned          _loffset;
 };
@@ -293,6 +298,7 @@ class TenderLay {
       void              newSlice(CTM&, bool, bool, unsigned);
       void              ppSlice(); //! Post process the slice
       void              draw(bool);
+      void              drawSelected();
       void              collect(bool, GLuint, GLuint);
       void              collectSelected(unsigned int* /*, TeselChain*, unsigned*, unsigned*, unsigned*/);
       unsigned          total_points() {return _num_total_points;}
@@ -326,7 +332,6 @@ class TenderLay {
 //
 //! contains all the data across cells on a given layer
 typedef std::map<word, TenderLay*> DataLay;
-//typedef std::map<word, TenderTVB*> DataSel;
 typedef std::list<TenderRB*> TenderRBL;
 
 class Tenderer {
@@ -335,7 +340,6 @@ class Tenderer {
                        ~Tenderer();
       void              Grid( const real, const std::string );
       void              setLayer(word, bool);
-//      void              setSdataContainer(word);
       void              pushCell(const CTM&, const DBbox&, bool, bool);
       void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
       void              box  (int4b* pdata)                    {_clayer->box(pdata, false, NULL);}
@@ -366,8 +370,6 @@ class Tenderer {
       real              _UU;
       DataLay           _data;      //!All data for drawing
       TenderLay*        _clayer;    //!Working variable pointing to the current slice
-//      DataSel           _sdata;     //!Selected data - to be redrawn on top of the _data
-//      TenderTVB*        _sslice;    //!Selected shapes in the active cell
       unsigned          _num_total_slctdx;
       TenderRBL         _oboxes;    //!All reference overlapping boxes
       TenderRBL         _osboxes;   //!All selected reference overlapping boxes
@@ -375,7 +377,8 @@ class Tenderer {
       CTM               _ctrans;    //!Working variable storing the current translation
       unsigned          _num_ogl_buffers;
       //
-      GLuint*           _ogl_buffers;
+      GLuint*           _ogl_buffers; //! Array with the "names" of all openGL buffers
+      GLuint            _sbuffer; //! The "name" of the selected index buffer
 };
 
 void checkOGLError(std::string);
@@ -397,26 +400,6 @@ class HiResTimer {
 
 #endif //TENDERER_H
 
-// class TenderTVB {
-//    public:
-//                         TenderTVB();
-//       void              add(TenderCnvx*, const SGBitSet*);
-//       void              add(TenderNcvx*, const SGBitSet*);
-//       void              add(TenderWire*, const SGBitSet*);
-//       void              draw_lloops();
-//       void              draw_lines();
-//       void              draw_lsegments();
-//    private:
-//       SliceLines        _ln_data;
-//       SliceLines        _ll_data;
-//       SliceLines        _ls_data;
-//       unsigned          _num_ln_points;
-//       unsigned          _num_ll_points;
-//       unsigned          _num_ls_points;
-//       unsigned          _num_ln; // lines
-//       unsigned          _num_ll; // line loop
-//       unsigned          _num_ls; // line segment
-// };
 //class TenderRefBox : public TenderCnvx {
 //   public:
 //                        TenderRefBox(int4b* pdata) : TenderCnvx(pdata, 4) {}
