@@ -458,7 +458,7 @@ unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
    else
    {
       for (unsigned i = 0; i < _lsize; i++)
-         array[pindex++] = _offset + i;
+         array[pindex++] = _loffset + i;
    }
    return ssize();
 }
@@ -1096,7 +1096,7 @@ TenderTV::~TenderTV()
 //
 TenderLay::TenderLay(): _cslice(NULL),
    _num_total_points(0u), _num_total_indexs(0u),
-   _has_selected(false), _slctd_array_offset(0u)
+   _has_selected(false), _stv_array_offset(0u), _slctd_array_offset(0u)
 {
    for (int i = lins; i <= lstr; i++)
    {
@@ -1119,6 +1119,7 @@ void TenderLay::newSlice(CTM& ctrans, bool fill, bool has_selected, unsigned slc
    {
       assert( 0 == total_slctdx());
       _slctd_array_offset = slctd_array_offset;
+      _stv_array_offset = 2 * _num_total_points;
    }
    _cslice = DEBUG_NEW TenderTV(ctrans, fill, 2 * _num_total_points, _num_total_indexs);
 }
@@ -1201,7 +1202,7 @@ void TenderLay::registerSBox (TenderSCnvx* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asobjix[lstr] += sobj->ssize();
+      _asindxs[lstr] += sobj->ssize();
       _asobjix[lstr]++;
    }
    else
@@ -1216,7 +1217,7 @@ void TenderLay::registerSPoly (TenderSNcvx* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asobjix[lstr] += sobj->ssize();
+      _asindxs[lstr] += sobj->ssize();
       _asobjix[lstr]++;
    }
    else
@@ -1231,7 +1232,7 @@ void TenderLay::registerSWire (TenderSWire* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asobjix[lstr] += sobj->ssize();
+      _asindxs[lstr] += sobj->ssize();
       _asobjix[lstr]++;
    }
    else
@@ -1334,7 +1335,7 @@ void TenderLay::collectSelected(unsigned int* slctd_array)
          {
             assert(_sizslix[lstr]);
             _fstslix[lstr][size_sindex[lstr]  ] = sizeof(unsigned) * index_soffset[lstr];
-            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
+            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[lstr]);
             break;
          }
          default: assert(false);
@@ -1378,7 +1379,7 @@ void TenderLay::drawSelected()
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
    assert(bufferSize == (2 * _num_total_points * sizeof(int4b)));
 
-//   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
+   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _stv_array_offset));
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_INDEX_ARRAY);
 
@@ -1386,15 +1387,15 @@ void TenderLay::drawSelected()
    {
       assert(_sizslix[lins]);
       assert(_fstslix[lins]);
-      //glMultiDrawElements(GL_LINES    , _sizslix[lins], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lins], _asobjix[lins]);
+      //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lins], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lins], _asobjix[lins]);
       for (unsigned i= 0; i < _asobjix[lins]; i++)
-         glDrawElements(GL_LINES, _sizslix[lins][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lins][i]);
+         glDrawElements(GL_LINE_STRIP, _sizslix[lins][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lins][i]);
    }
    if (_asobjix[llps] > 0)
    {
       assert(_sizslix[llps]);
       assert(_fstslix[llps]);
-         //glMultiDrawElements(GL_TRIANGLES     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
+         //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
       for (unsigned i= 0; i < _asobjix[llps]; i++)
          glDrawElements(GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[llps][i]);
    }
@@ -1402,9 +1403,9 @@ void TenderLay::drawSelected()
    {
       assert(_sizslix[lstr]);
       assert(_fstslix[lstr]);
-         //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _alobjix[lstr]);
+         //glMultiDrawElements(GL_LINES  , _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _alobjix[lstr]);
       for (unsigned i= 0; i < _asobjix[lstr]; i++)
-         glDrawElements(GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lstr][i]);
+         glDrawElements(GL_LINES, _sizslix[lstr][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lstr][i]);
    }
    glDisableClientState(GL_INDEX_ARRAY);
    glDisableClientState(GL_VERTEX_ARRAY);
