@@ -193,7 +193,7 @@ unsigned TenderSCnvx::ssize()
 
 unsigned  TenderSCnvx::cDataCopy(int* array, unsigned& pindex)
 {
-   _offset = pindex;
+   _offset = pindex/2;
    return TenderCnvx::cDataCopy(array, pindex);
 }
 
@@ -238,7 +238,7 @@ unsigned TenderSNcvx::ssize()
 
 unsigned  TenderSNcvx::cDataCopy(int* array, unsigned& pindex)
 {
-   _offset = pindex;
+   _offset = pindex/2;
    return TenderCnvx::cDataCopy(array, pindex);
 }
 
@@ -402,13 +402,13 @@ TenderWire::~TenderWire()
 //
 unsigned TenderSWire::cDataCopy(int* array, unsigned& pindex)
 {
-   _offset = pindex;
+   _offset = pindex/2;
    return TenderCnvx::cDataCopy(array, pindex);
 }
 
 unsigned TenderSWire::lDataCopy(int* array, unsigned& pindex)
 {
-   _loffset = pindex;
+   _loffset = pindex/2;
    return TenderWire::lDataCopy(array, pindex);
 }
 
@@ -1378,6 +1378,8 @@ void TenderLay::drawSelected()
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
    assert(bufferSize == (2 * _num_total_points * sizeof(int4b)));
 
+//   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
+   glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_INDEX_ARRAY);
 
    if (_asobjix[lins] > 0)
@@ -1405,6 +1407,7 @@ void TenderLay::drawSelected()
          glDrawElements(GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lstr][i]);
    }
    glDisableClientState(GL_INDEX_ARRAY);
+   glDisableClientState(GL_VERTEX_ARRAY);
 
 
    glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1427,7 +1430,7 @@ TenderLay::~TenderLay()
 //=============================================================================
 Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
       _drawprop(drawprop), _UU(UU), _clayer(NULL),
-      _num_total_slctdx(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL)
+      _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL)
 {}
 
 void Tenderer::setLayer(word layer, bool has_selected)
@@ -1438,7 +1441,7 @@ void Tenderer::setLayer(word layer, bool has_selected)
    if (NULL != _clayer)
    {
       _clayer->ppSlice();
-      _num_total_slctdx += _clayer->total_slctdx();
+      _cslctd_array_offset += _clayer->total_slctdx();
    }
    if (_data.end() != _data.find(layer))
    {
@@ -1449,7 +1452,7 @@ void Tenderer::setLayer(word layer, bool has_selected)
       _clayer = DEBUG_NEW TenderLay();
       _data[layer] = _clayer;
    }
-   _clayer->newSlice(_ctrans, _drawprop->isFilled(layer), has_selected, _num_total_slctdx);
+   _clayer->newSlice(_ctrans, _drawprop->isFilled(layer), has_selected, _cslctd_array_offset);
    // @TODO! current fill on/off should be determined here!
 }
 
@@ -1521,6 +1524,7 @@ void Tenderer::collect()
    // of required virtual buffers
    //
    DataLay::iterator CCLAY = _data.begin();
+   unsigned num_total_slctdx = 0; // initialise the number of total selected indexes
    while (CCLAY != _data.end())
    {
       CCLAY->second->ppSlice();
@@ -1541,14 +1545,14 @@ void Tenderer::collect()
       }
       else
       {
-         _num_total_slctdx += CCLAY->second->total_slctdx();
+         num_total_slctdx += CCLAY->second->total_slctdx();
          _num_ogl_buffers++;
          if (0 < CCLAY->second->total_indexs())
             _num_ogl_buffers++;
          CCLAY++;
       }
    }
-   if (0 < _num_total_slctdx)
+   if (0 < num_total_slctdx)
       _num_ogl_buffers++;
 
    // Organise the VBOs ...
@@ -1563,18 +1567,19 @@ void Tenderer::collect()
       CLAY->second->collect(_drawprop->isFilled(CLAY->first), pbuf, ibuf);
    }
    // collect the indexes of the selected objects
-   if (0 < _num_total_slctdx)
+   if (0 < num_total_slctdx)
    {// selected objects buffer
       _sbuffer = _ogl_buffers[current_buffer++];
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
-                   _num_total_slctdx * sizeof(unsigned) ,
+                   num_total_slctdx * sizeof(unsigned) ,
                                               NULL                              ,
                                               GL_DYNAMIC_DRAW                    );
       unsigned int* sindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
       for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
-         if (0 == CCLAY->second->total_slctdx()) continue;
+         if (0 == CLAY->second->total_slctdx()) 
+            continue;
          CLAY->second->collectSelected(sindex_array);
       }
       glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);

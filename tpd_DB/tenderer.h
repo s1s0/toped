@@ -370,7 +370,7 @@ class Tenderer {
       real              _UU;
       DataLay           _data;      //!All data for drawing
       TenderLay*        _clayer;    //!Working variable pointing to the current slice
-      unsigned          _num_total_slctdx;
+      unsigned          _cslctd_array_offset; //! Current selected array offset
       TenderRBL         _oboxes;    //!All reference overlapping boxes
       TenderRBL         _osboxes;   //!All selected reference overlapping boxes
       CTM               _atrans;    //!The translation of the active cell
