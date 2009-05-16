@@ -164,50 +164,6 @@ TeselPoly::~TeselPoly()
 
 //=============================================================================
 //
-// TenderSelected
-//
-/*TenderSelected::TenderSelected(SlctTypes type, const SGBitSet* slist, unsigned tsize, unsigned offset) :
-   _type    ( type      ),
-   _slist   ( slist     ),
-   _offset  ( offset    )
-{
-   if (NULL == _slist) _size = tsize;
-   else
-   {
-      _size = 0u;
-      // get the number of selected segments first - don't forget that here
-      // we're using GL_LINE_STRIP which means that we're counting selected
-      // line segments and for each segment we're going to store two indexes
-      word  ssize = _slist->size();
-      for (word i = 0; i < ssize; i++)
-         if (_slist->check(i) && _slist->check((i+1)% ssize )) _size +=2;
-   }
-}
-
-unsigned TenderSelected::index(unsigned sindex)
-{
-   if (NULL == _slist) return sindex;
-   else
-   {
-      assert( 0 ); //TODO!
-   }
-}*/
-// unsigned TenderSelected::numSelectedSegemts(unsigned allpoints)
-// {
-//    assert(NULL != _slist);
-//    // get the number of selected segments first - don't forget that here
-//    // we're using GL_LINE_STRIP which means that we're counting selected
-//    // line segments and for each segment we're going to store two indexes
-//    unsigned ssegs = 0;
-//    word  ssize = _slist->size();
-//    for (word i = 0; i < allpoints; i++)
-//       if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
-//    return ssegs;
-// }
-
-
-//=============================================================================
-//
 // TenderCnvx
 //
 unsigned TenderCnvx::cDataCopy(int* array, unsigned& pindex)
@@ -218,34 +174,67 @@ unsigned TenderCnvx::cDataCopy(int* array, unsigned& pindex)
    return _csize;
 }
 
+//=============================================================================
+//
+// TenderSCnvx
+//
+unsigned TenderSCnvx::ssize()
+{
+   if (NULL == _slist) return _csize;
+   // get the number of selected segments first - don't forget that here
+   // we're using GL_LINE_STRIP which means that we're counting selected
+   // line segments and for each segment we're going to store two indexes
+   unsigned ssegs = 0;
+   word  ssize = _slist->size();
+   for (word i = 0; i < _csize; i++)
+      if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
+   return ssegs;
+}
+
 unsigned  TenderSCnvx::cDataCopy(int* array, unsigned& pindex)
 {
    _offset = pindex;
    return TenderCnvx::cDataCopy(array, pindex);
 }
 
-unsigned  TenderSCnvx::sDataCopy(unsigned*, unsigned&)
+unsigned  TenderSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
 {
-   assert(false); // <-- @TODO
+   if (NULL != _slist)
+   { // shape is partially selected
+      // copy the indexes of the selected segment points
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            array[pindex++] = _offset + i;
+            array[pindex++] = _offset + ((i+1)%_csize);
+         }
+      }
+   }
+   else
+   {
+      for (unsigned i = 0; i < _csize; i++)
+         array[pindex++] = _offset + i;
+   }
+   return ssize();
 }
 
 //=============================================================================
-
-/*void TenderNcvx::TeselData(TeselChain* tdata, unsigned offset)
+//
+// TenderSNcvx
+//
+unsigned TenderSNcvx::ssize()
 {
-   assert(tdata);
-   for (TeselChain::const_iterator CTC = tdata->begin(); CTC != tdata->end(); CTC++)
-   {
-      TeselChunk* achunk = DEBUG_NEW TeselChunk(*CTC, offset);
-      _tdata.push_back(achunk);
-   }
+   if (NULL == _slist) return _csize;
+   // get the number of selected segments first - don't forget that here
+   // we're using GL_LINE_STRIP which means that we're counting selected
+   // line segments and for each segment we're going to store two indexes
+   unsigned ssegs = 0;
+   word  ssize = _slist->size();
+   for (word i = 0; i < _csize; i++)
+      if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
+   return ssegs;
 }
-*/
-// TenderNcvx::~TenderNcvx()
-// {
-//    for (TeselChain::const_iterator CTC = _tdata.begin(); CTC != _tdata.end(); CTC++)
-//       delete (*CTC);
-// }
 
 unsigned  TenderSNcvx::cDataCopy(int* array, unsigned& pindex)
 {
@@ -253,15 +242,34 @@ unsigned  TenderSNcvx::cDataCopy(int* array, unsigned& pindex)
    return TenderCnvx::cDataCopy(array, pindex);
 }
 
-unsigned  TenderSNcvx::sDataCopy(unsigned*, unsigned&)
+unsigned  TenderSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
 {
-   assert(false); // <-- @TODO
+   if (NULL != _slist)
+   { // shape is partially selected
+      // copy the indexes of the selected segment points
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            array[pindex++] = _offset + i;
+            array[pindex++] = _offset + ((i+1)%_csize);
+         }
+      }
+   }
+   else
+   {
+      for (unsigned i = 0; i < _csize; i++)
+         array[pindex++] = _offset + i;
+   }
+   return ssize();
 }
+
 //=============================================================================
-TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width,
-                       bool center_line_only/*, SlctTypes selected, const SGBitSet* splist*/)
-                        : TenderNcvx(NULL, 0/*, selected, splist*/),
-                       _ldata(pdata), _lsize(psize), _center_line_only(center_line_only), _tdata(NULL)
+//
+// TenderWire
+//
+TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width, bool clo)
+   : TenderNcvx(NULL, 0), _ldata(pdata), _lsize(psize), _center_line_only(clo), _tdata(NULL)
 {
    if (!_center_line_only)
       precalc(width);
@@ -273,23 +281,6 @@ unsigned TenderWire::lDataCopy(int* array, unsigned& pindex)
    memcpy(&(array[pindex]), _ldata, 2 * sizeof(int4b) * _lsize);
    pindex += 2 * _lsize;
    return _lsize;
-}
-
-unsigned TenderSWire::cDataCopy(int* array, unsigned& pindex)
-{
-   _offset = pindex;
-   return TenderCnvx::cDataCopy(array, pindex);
-}
-
-unsigned TenderSWire::lDataCopy(int* array, unsigned& pindex)
-{
-   _loffset = pindex;
-   return TenderWire::lDataCopy(array, pindex);
-}
-
-unsigned TenderSWire::sDataCopy(unsigned*, unsigned&)
-{
-   assert(false); // <-- @TODO
 }
 
 void TenderWire::precalc(word width)
@@ -406,39 +397,74 @@ TenderWire::~TenderWire()
 }
 
 //=============================================================================
-// class TenderLine
-/*TenderLine::TenderLine(TenderCnvx* obj, const SGBitSet* psel)
+//
+// TenderSWire
+//
+unsigned TenderSWire::cDataCopy(int* array, unsigned& pindex)
 {
-   _partial = (NULL != psel);
-   if (_partial)
+   _offset = pindex;
+   return TenderCnvx::cDataCopy(array, pindex);
+}
+
+unsigned TenderSWire::lDataCopy(int* array, unsigned& pindex)
+{
+   _loffset = pindex;
+   return TenderWire::lDataCopy(array, pindex);
+}
+
+unsigned TenderSWire::ssize()
+{
+   if (NULL == _slist) return _lsize;
+   // get the number of selected segments first - don't forget that here
+   // we're using GL_LINE_STRIP which means that we're counting selected
+   // line segments and for each segment we're going to store two indexes
+   unsigned ssegs = 0;
+   word  ssize = _slist->size();
+   for (word i = 0; i < _lsize - 1; i++)
+      if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
+   // Don't forget the edge points. This tiny little special case was dictating
+   // the rules when the selected objects were fitted into the whole Tenderer
+   // class hierarchy.
+   if (_slist->check(0)            ) ssegs +=2;
+   if (_slist->check(_lsize-1)  ) ssegs +=2;
+   return ssegs;
+}
+
+unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
+{
+   if (NULL != _slist)
    { // shape is partially selected
-      // get the number of selected segments first
-      _lsize = 0;
-      word allpoints = obj->csize();
-      for (unsigned i = 0; i < allpoints; i++)
-         if (psel->check(i) && psel->check((i+1)%allpoints)) _lsize +=2;
-      // now copy the segment points
-      _ldata = DEBUG_NEW int4b [2*_lsize];
-      word curpoint = 0;
-      for (unsigned i = 0; i < allpoints; i++)
-         if (psel->check(i) && psel->check((i+1)%allpoints))
+      // copy the indexes of the selected segment points
+      for (unsigned i = 0; i < _lsize; i++)
       {
-         _ldata[2*curpoint  ] = obj->cdata()[2*i  ];
-         _ldata[2*curpoint+1] = obj->cdata()[2*i+1];
-         curpoint++;
-         _ldata[2*curpoint  ] = obj->cdata()[2*((i+1)%allpoints)  ];
-         _ldata[2*curpoint+1] = obj->cdata()[2*((i+1)%allpoints)+1];
-         curpoint++;
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            array[pindex++] = _loffset + i;
+            array[pindex++] = _loffset + ((i+1)%_lsize);
+         }
       }
-      assert(curpoint == _lsize);
+      // And the edge points!
+      if (_slist->check(0)       ) // if first point is selected
+      {
+         array[pindex++] = _offset;
+         array[pindex++] = _offset + _csize -1;
+      }
+      if (_slist->check(_lsize-1))// if last point is selected
+      {
+         array[pindex++] = _offset + (_csize/2) -1;
+         array[pindex++] = _offset + (_csize/2);
+      }
    }
    else
    {
-      _lsize = obj->csize();
-      _ldata = obj->cdata();
+      for (unsigned i = 0; i < _lsize; i++)
+         array[pindex++] = _offset + i;
    }
+   return ssize();
 }
-
+//=============================================================================
+// class TenderLine
+/*
 TenderLine::TenderLine(TenderNcvx* obj, const SGBitSet* psel)
 {
    _partial = (NULL != psel);
@@ -1173,13 +1199,13 @@ void TenderLay::wire (int4b* pdata, unsigned psize, word width, bool center_only
 void TenderLay::registerSBox (TenderSCnvx* sobj)
 {
    _slct_data.push_back(sobj);
-   if ( 0 < sobj->ssize() )
-   {// object is partially selected
+   if ( sobj->partSelected() )
+   {
       _asobjix[lstr] += sobj->ssize();
       _asobjix[lstr]++;
    }
    else
-   {// object is fully selected
+   {
       _asindxs[llps] += sobj->csize();
       _asobjix[llps]++;
    }
@@ -1188,13 +1214,13 @@ void TenderLay::registerSBox (TenderSCnvx* sobj)
 void TenderLay::registerSPoly (TenderSNcvx* sobj)
 {
    _slct_data.push_back(sobj);
-   if ( 0 < sobj->ssize() )
-   {// object is partially selected
+   if ( sobj->partSelected() )
+   {
       _asobjix[lstr] += sobj->ssize();
       _asobjix[lstr]++;
    }
    else
-   {// object is fully selected
+   {
       _asindxs[llps] += sobj->csize();
       _asobjix[llps]++;
    }
@@ -1203,13 +1229,13 @@ void TenderLay::registerSPoly (TenderSNcvx* sobj)
 void TenderLay::registerSWire (TenderSWire* sobj)
 {
    _slct_data.push_back(sobj);
-   if ( 0 < sobj->ssize() )
-   {// object is partially selected
+   if ( sobj->partSelected() )
+   {
       _asobjix[lstr] += sobj->ssize();
       _asobjix[lstr]++;
    }
    else
-   {// object is fully selected
+   {
       _asindxs[lins] += sobj->lsize();
       _asobjix[lins]++;
    }
@@ -1342,6 +1368,46 @@ void TenderLay::draw(bool fill)
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    if (0 != _ibuffer)
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void TenderLay::drawSelected()
+{
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   // Check the state of the buffer
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   assert(bufferSize == (2 * _num_total_points * sizeof(int4b)));
+
+   glEnableClientState(GL_INDEX_ARRAY);
+
+   if (_asobjix[lins] > 0)
+   {
+      assert(_sizslix[lins]);
+      assert(_fstslix[lins]);
+      //glMultiDrawElements(GL_LINES    , _sizslix[lins], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lins], _asobjix[lins]);
+      for (unsigned i= 0; i < _asobjix[lins]; i++)
+         glDrawElements(GL_LINES, _sizslix[lins][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lins][i]);
+   }
+   if (_asobjix[llps] > 0)
+   {
+      assert(_sizslix[llps]);
+      assert(_fstslix[llps]);
+         //glMultiDrawElements(GL_TRIANGLES     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
+      for (unsigned i= 0; i < _asobjix[llps]; i++)
+         glDrawElements(GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[llps][i]);
+   }
+   if (_asobjix[lstr] > 0)
+   {
+      assert(_sizslix[lstr]);
+      assert(_fstslix[lstr]);
+         //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _alobjix[lstr]);
+      for (unsigned i= 0; i < _asobjix[lstr]; i++)
+         glDrawElements(GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lstr][i]);
+   }
+   glDisableClientState(GL_INDEX_ARRAY);
+
+
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 TenderLay::~TenderLay()
@@ -1496,11 +1562,11 @@ void Tenderer::collect()
       GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
       CLAY->second->collect(_drawprop->isFilled(CLAY->first), pbuf, ibuf);
    }
-
+   // collect the indexes of the selected objects
    if (0 < _num_total_slctdx)
    {// selected objects buffer
-      GLuint sbuf = _ogl_buffers[current_buffer++];
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sbuf);
+      _sbuffer = _ogl_buffers[current_buffer++];
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
                    _num_total_slctdx * sizeof(unsigned) ,
                                               NULL                              ,
@@ -1511,6 +1577,7 @@ void Tenderer::collect()
          if (0 == CCLAY->second->total_slctdx()) continue;
          CLAY->second->collectSelected(sindex_array);
       }
+      glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
    }
    checkOGLError("collect");
 }
@@ -1523,6 +1590,14 @@ void Tenderer::draw()
       word curlayno = CLAY->first;
       _drawprop->setCurrentColor(curlayno);
       CLAY->second->draw( _drawprop->getCurrentFill() );
+      if (0 != CLAY->second->total_slctdx())
+      {
+         _drawprop->setLineProps(true);
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
+         CLAY->second->drawSelected(  );
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+         _drawprop->setLineProps(false);
+      }
    }
 //   glBindBuffer(GL_ARRAY_BUFFER, 0);
 //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -1608,61 +1683,4 @@ void HiResTimer::report(std::string message)
 #endif
    tell_log(console::MT_INFO,time_message);
 }
-
-// void TenderTV::collectNdraw_contours()
-// {
-//    if  (0 == _alobjvx[cont]) return;
-//    unsigned long arr_size = 2 * _alvrtxs[cont];
-// #ifdef USE_VBOS
-//    // Organise the VBO ...
-//    GLuint ogl_buffer;
-//    glGenBuffers(1, &ogl_buffer);
-//    glBindBuffer(GL_ARRAY_BUFFER, ogl_buffer);
-//    glBufferData(GL_ARRAY_BUFFER, arr_size * sizeof(int4b), NULL, GL_DYNAMIC_DRAW);
-//    int* point_array = (int*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-// #else
-//    int* point_array = DEBUG_NEW int[arr_size];
-// #endif
-//    // ... and the additional arrays
-//    GLsizei* size_array = DEBUG_NEW int[_alobjvx[cont]];
-//    GLsizei* first_array = DEBUG_NEW int[_alobjvx[cont]];
-//    // initialise the indexing
-//    unsigned long pntindx = 0;
-//    unsigned      szindx  = 0;
-//    // copy all the data in the VBO and in the same time update the
-//    // contour size array and the array containg first indexes
-//    for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
-//    { // shapes in the current translation (layer within the cell)
-//       unsigned clsize = (*CSH)->csize();
-//       assert(clsize);
-//       first_array[szindx] = pntindx/2;
-//       size_array[szindx++] = clsize;
-// //#ifdef USE_VBOS
-// //      glBufferSubData(GL_ARRAY_BUFFER, pntindx * sizeof(int4b), 2 * sizeof(int4b) * clsize, (*CSH)->cdata());
-// //#else
-//       memcpy(&(point_array[pntindx]), (*CSH)->cdata(), 2 * sizeof(int4b) * clsize);
-// //#endif
-//       pntindx += 2 * clsize;
-//    }
-//    assert(pntindx == arr_size);
-//    assert(szindx == _alobjvx[cont]);
-// #ifdef USE_VBOS
-//    // Draw the VBO
-//    glUnmapBuffer(GL_ARRAY_BUFFER);
-//    glVertexPointer(2, GL_INT, 0, 0);
-// #else
-//    glVertexPointer(2, GL_INT, 0, point_array);
-// #endif
-//    glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
-//    // Release the VBO memory in the GPU
-// #ifdef USE_VBOS
-//    glBindBuffer(GL_ARRAY_BUFFER, 0);
-//    glDeleteBuffers(1, &ogl_buffer);
-// #else
-//    delete [] point_array;
-// #endif
-//    // Clean-up the CPU memory
-//    delete [] size_array;
-//    delete [] first_array;
-// }
 
