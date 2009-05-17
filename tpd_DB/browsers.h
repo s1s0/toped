@@ -316,7 +316,7 @@ namespace browsers
                               const wxPoint& pos = wxDefaultPosition, 
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-									void	saveInfo(const Calbr::drcPolygon &poly);
+	   void	               saveInfo(const Calbr::drcPolygon &poly);
 		void						onLMouseDblClk(wxMouseEvent&);
 	private:
 		Calbr::drcPolygon		_poly;
