@@ -14,8 +14,8 @@
 //   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//        Created: Mon Aug 11 2003
-//        $Author$
+//        Created: Mon Mar 02 2009
+//     Originator: Sergey Gaitukevich - gaitukevich.s@toped.org.uk
 //    Description: Reader of Mentor Graphics Calibre drc errors files
 //---------------------------------------------------------------------------
 //  Revision info
@@ -32,6 +32,8 @@
 
 #include <fstream>
 #include <string>
+#include <vector>
+#include <wx/wx.h>
 
 namespace Calbr
 {
