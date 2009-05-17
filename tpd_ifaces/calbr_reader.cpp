@@ -14,10 +14,9 @@
 //   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
 //          $URL$
-//        Created: Mon Aug 11 2003
-//     Originator: Svilen Krustev - skr@toped.org.uk
-//    Description: GDSII/TDT hierarchy browser, layer browser, TELL fuction
-//                 definition browser
+//        Created: Mon Mar 02 2009
+//     Originator: Sergey Gaitukevich - gaitukevich.s@toped.org.uk
+//    Description: Reader of Mentor Graphics Calibre drc errors files
 //===========================================================================
 //  Revision info
 //---------------------------------------------------------------------------
@@ -381,7 +380,7 @@ wxString Calbr::convert(int number, long precision)
 {
 	float x	= float(number) / precision;
 	int xint = x;
-	float xfrac = x - xint;
+//	float xfrac = x - xint;
 
 	wxString str1;
 	wxString format = wxT("%");

@@ -254,8 +254,8 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								const std::string &helpString,
 								callbackMethod cbMethod)
 								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
-                        _currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod),
-								_ok(false),	_function("")
+                        _currentSize(ICON_SIZE_16x16), _function(""), _helpString(helpString),
+                        _method(cbMethod), _ok(false)
 {
 	init(bitmapName);
 }
@@ -266,8 +266,8 @@ tui::ToolItem::ToolItem(int toolID, const std::string &name,
 								const std::string &helpString,
 								const std::string func)
 								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
-                        _currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(NULL),
-								_ok(false),	_function(func)
+                        _currentSize(ICON_SIZE_16x16), _function(func), _helpString(helpString),
+								_method(NULL), _ok(false)
 {
 	init(bitmapName);
 }
