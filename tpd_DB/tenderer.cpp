@@ -176,102 +176,12 @@ unsigned TenderCnvx::cDataCopy(int* array, unsigned& pindex)
 
 //=============================================================================
 //
-// TenderSCnvx
-//
-unsigned TenderSCnvx::ssize()
-{
-   if (NULL == _slist) return _csize;
-   // get the number of selected segments first - don't forget that here
-   // we're using GL_LINE_STRIP which means that we're counting selected
-   // line segments and for each segment we're going to store two indexes
-   unsigned ssegs = 0;
-   word  ssize = _slist->size();
-   for (word i = 0; i < _csize; i++)
-      if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
-   return ssegs;
-}
-
-unsigned  TenderSCnvx::cDataCopy(int* array, unsigned& pindex)
-{
-   _offset = pindex/2;
-   return TenderCnvx::cDataCopy(array, pindex);
-}
-
-unsigned  TenderSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
-{
-   if (NULL != _slist)
-   { // shape is partially selected
-      // copy the indexes of the selected segment points
-      for (unsigned i = 0; i < _csize; i++)
-      {
-         if (_slist->check(i) && _slist->check((i+1)%_csize))
-         {
-            array[pindex++] = _offset + i;
-            array[pindex++] = _offset + ((i+1)%_csize);
-         }
-      }
-   }
-   else
-   {
-      for (unsigned i = 0; i < _csize; i++)
-         array[pindex++] = _offset + i;
-   }
-   return ssize();
-}
-
-//=============================================================================
-//
-// TenderSNcvx
-//
-unsigned TenderSNcvx::ssize()
-{
-   if (NULL == _slist) return _csize;
-   // get the number of selected segments first - don't forget that here
-   // we're using GL_LINE_STRIP which means that we're counting selected
-   // line segments and for each segment we're going to store two indexes
-   unsigned ssegs = 0;
-   word  ssize = _slist->size();
-   for (word i = 0; i < _csize; i++)
-      if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
-   return ssegs;
-}
-
-unsigned  TenderSNcvx::cDataCopy(int* array, unsigned& pindex)
-{
-   _offset = pindex/2;
-   return TenderCnvx::cDataCopy(array, pindex);
-}
-
-unsigned  TenderSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
-{
-   if (NULL != _slist)
-   { // shape is partially selected
-      // copy the indexes of the selected segment points
-      for (unsigned i = 0; i < _csize; i++)
-      {
-         if (_slist->check(i) && _slist->check((i+1)%_csize))
-         {
-            array[pindex++] = _offset + i;
-            array[pindex++] = _offset + ((i+1)%_csize);
-         }
-      }
-   }
-   else
-   {
-      for (unsigned i = 0; i < _csize; i++)
-         array[pindex++] = _offset + i;
-   }
-   return ssize();
-}
-
-//=============================================================================
-//
 // TenderWire
 //
 TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width, bool clo)
-   : TenderNcvx(NULL, 0), _ldata(pdata), _lsize(psize), _center_line_only(clo), _tdata(NULL)
+   : TenderNcvx(NULL, 0), _ldata(pdata), _lsize(psize), _celno(clo), _tdata(NULL)
 {
-   if (!_center_line_only)
+   if (!_celno)
       precalc(width);
 }
 
@@ -398,6 +308,96 @@ TenderWire::~TenderWire()
 
 //=============================================================================
 //
+// TenderSCnvx
+//
+unsigned TenderSCnvx::ssize()
+{
+   if (NULL == _slist) return _csize;
+   // get the number of selected segments first - don't forget that here
+   // we're using GL_LINE_STRIP which means that we're counting selected
+   // line segments and for each segment we're going to store two indexes
+   unsigned ssegs = 0;
+   word  ssize = _slist->size();
+   for (word i = 0; i < _csize; i++)
+      if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
+   return ssegs;
+}
+
+unsigned  TenderSCnvx::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex/2;
+   return TenderCnvx::cDataCopy(array, pindex);
+}
+
+unsigned  TenderSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
+{
+   if (NULL != _slist)
+   { // shape is partially selected
+      // copy the indexes of the selected segment points
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            array[pindex++] = _offset + i;
+            array[pindex++] = _offset + ((i+1)%_csize);
+         }
+      }
+   }
+   else
+   {
+      for (unsigned i = 0; i < _csize; i++)
+         array[pindex++] = _offset + i;
+   }
+   return ssize();
+}
+
+//=============================================================================
+//
+// TenderSNcvx
+//
+unsigned TenderSNcvx::ssize()
+{
+   if (NULL == _slist) return _csize;
+   // get the number of selected segments first - don't forget that here
+   // we're using GL_LINE_STRIP which means that we're counting selected
+   // line segments and for each segment we're going to store two indexes
+   unsigned ssegs = 0;
+   word  ssize = _slist->size();
+   for (word i = 0; i < _csize; i++)
+      if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
+   return ssegs;
+}
+
+unsigned  TenderSNcvx::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex/2;
+   return TenderCnvx::cDataCopy(array, pindex);
+}
+
+unsigned  TenderSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
+{
+   if (NULL != _slist)
+   { // shape is partially selected
+      // copy the indexes of the selected segment points
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            array[pindex++] = _offset + i;
+            array[pindex++] = _offset + ((i+1)%_csize);
+         }
+      }
+   }
+   else
+   {
+      for (unsigned i = 0; i < _csize; i++)
+         array[pindex++] = _offset + i;
+   }
+   return ssize();
+}
+
+//=============================================================================
+//
 // TenderSWire
 //
 unsigned TenderSWire::cDataCopy(int* array, unsigned& pindex)
@@ -462,99 +462,7 @@ unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
    }
    return ssize();
 }
-//=============================================================================
-// class TenderLine
-/*
-TenderLine::TenderLine(TenderNcvx* obj, const SGBitSet* psel)
-{
-   _partial = (NULL != psel);
-   if (_partial)
-   { // shape is partially selected
-      // get the number of selected segments first
-      _lsize = 0;
-      word allpoints = obj->csize();
-      for (unsigned i = 0; i < allpoints; i++)
-         if (psel->check(i) && psel->check((i+1)%allpoints)) _lsize +=2;
-      // now copy the segment points
-      _ldata = DEBUG_NEW int4b [2*_lsize];
-      word curpoint = 0;
-      for (unsigned i = 0; i < allpoints; i++)
-         if (psel->check(i) && psel->check((i+1)%allpoints))
-         {
-            _ldata[2*curpoint  ] = obj->cdata()[2*i  ];
-            _ldata[2*curpoint+1] = obj->cdata()[2*i+1];
-            curpoint++;
-            _ldata[2*curpoint  ] = obj->cdata()[2*((i+1)%allpoints)  ];
-            _ldata[2*curpoint+1] = obj->cdata()[2*((i+1)%allpoints)+1];
-            curpoint++;
-         }
-      assert(curpoint == _lsize);
-   }
-   else
-   {
-      _lsize = obj->csize();
-      _ldata = obj->cdata();
-   }
-}
 
-TenderLine::TenderLine(TenderWire* obj, const SGBitSet* psel)
-{
-   _partial = (NULL != psel);
-   if (_partial)
-   { // shape is partially selected
-      // get the number of selected segments first
-      _lsize = 0;
-      word allpoints = obj->lsize();
-      for (unsigned i = 0; i < allpoints - 1; i++)
-         if (psel->check(i) && psel->check(i+1)) _lsize +=2;
-      if (psel->check(0)            ) _lsize +=2;
-      if (psel->check(allpoints-1)  ) _lsize +=2;
-      // now copy the segment points
-      _ldata = DEBUG_NEW int4b [2*_lsize];
-      word curpoint = 0;
-      for (unsigned i = 0; i < allpoints - 1; i++)
-         if (psel->check(i) && psel->check((i+1)%allpoints))
-         {
-            _ldata[2*curpoint  ] = obj->ldata()[2*i  ];
-            _ldata[2*curpoint+1] = obj->ldata()[2*i+1];
-            curpoint++;
-            _ldata[2*curpoint  ] = obj->ldata()[2*(i+1)  ];
-            _ldata[2*curpoint+1] = obj->ldata()[2*(i+1)+1];
-            curpoint++;
-         }
-      if (psel->check(0)            )
-      {
-         _ldata[2*curpoint  ] = obj->cdata()[0];
-         _ldata[2*curpoint+1] = obj->cdata()[1];
-         curpoint++;
-         _ldata[2*curpoint  ] = obj->cdata()[4*allpoints - 2];
-         _ldata[2*curpoint+1] = obj->cdata()[4*allpoints - 1];
-         curpoint++;
-      }
-      if (psel->check(allpoints-1)  )
-      {
-         _ldata[2*curpoint  ] = obj->cdata()[2*allpoints - 2];
-         _ldata[2*curpoint+1] = obj->cdata()[2*allpoints - 1];
-         curpoint++;
-         _ldata[2*curpoint  ] = obj->cdata()[2*allpoints    ];
-         _ldata[2*curpoint+1] = obj->cdata()[2*allpoints + 1];
-         curpoint++;
-      }
-      assert(curpoint == _lsize);
-   }
-   else
-   {
-      _lsize = obj->lsize();
-      _ldata = obj->ldata();
-   }
-}
-
-TenderLine::~TenderLine()
-{
-   if (_partial)
-      delete []_ldata;
-}
-*/
 //=============================================================================
 // class TenderRB
 TenderRB::TenderRB(const CTM& tmatrix, const DBbox& obox) : _tmatrix (tmatrix),
@@ -574,152 +482,9 @@ void TenderRB::draw()
 }
 
 //=============================================================================
-// class TenderTVB
-// TenderTVB::TenderTVB() :
-//    _num_ln_points(0u), _num_ll_points(0u),_num_ls_points(0u),
-//    _num_ln(0), _num_ll(0), _num_ls(0)
-// {}
-// 
-// void TenderTVB::add(TenderCnvx* tobj, const SGBitSet* psel)
-// {
-//    TenderLine* cline = DEBUG_NEW TenderLine(tobj, psel);
-//    if (NULL == psel)
-//    {
-//       _ll_data.push_back(cline);
-//       _num_ll_points += cline->lsize();
-//       _num_ll++;
-//    }
-//    else
-//    {
-//       _ls_data.push_back(cline);
-//       _num_ls_points += cline->lsize();
-//       _num_ls++;
-//    }
-// }
-// 
-// void TenderTVB::add(TenderNcvx* tobj, const SGBitSet* psel)
-// {
-//    TenderLine* cline = DEBUG_NEW TenderLine(tobj, psel);
-//    if (NULL == psel)
-//    {
-//       _ll_data.push_back(cline);
-//       _num_ll_points += cline->lsize();
-//       _num_ll++;
-//    }
-//    else
-//    {
-//       _ls_data.push_back(cline);
-//       _num_ls_points += cline->lsize();
-//       _num_ls++;
-//    }
-// }
-// 
-// void TenderTVB::add(TenderWire* tobj, const SGBitSet* psel)
-// {
-//    TenderLine* cline = DEBUG_NEW TenderLine(tobj, psel);
-//    if (NULL == psel)
-//    {
-//       _ln_data.push_back(cline);
-//       _num_ln_points += cline->lsize();
-//       _num_ln++;
-//    }
-//    else
-//    {
-//       _ls_data.push_back(cline);
-//       _num_ls_points += cline->lsize();
-//       _num_ls++;
-//    }
-// }
-// 
-// void TenderTVB::draw_lloops()
-// {
-//    if  (0 == _num_ll) return;
-//    unsigned long arr_size = 2 * _num_ll_points;
-//    int* point_array = DEBUG_NEW int[arr_size];
-//    GLsizei* size_array = DEBUG_NEW int[_num_ll];
-//    GLsizei* first_array = DEBUG_NEW int[_num_ll];
-//    unsigned long pntindx = 0;
-//    unsigned      szindx  = 0;
-// 
-//    for (SliceLines::const_iterator CSH = _ll_data.begin(); CSH != _ll_data.end(); CSH++)
-//    {
-//       unsigned clsize = (*CSH)->lsize();
-//       assert(clsize);
-//       first_array[szindx] = pntindx/2;
-//       size_array[szindx++] = clsize;
-//       memcpy(&(point_array[pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
-//       pntindx += 2 * clsize;
-//    }
-//    assert(pntindx == arr_size);
-//    assert(szindx == _num_ll);
-//    glVertexPointer(2, GL_INT, 0, point_array);
-//    glMultiDrawArrays(GL_LINE_LOOP, first_array, size_array, szindx);
-// 
-//    delete [] point_array;
-//    delete [] size_array;
-//    delete [] first_array;
-// }
-// 
-// void TenderTVB::draw_lines()
-// {
-//    if  (0 == _num_ln) return;
-//    unsigned long arr_size = 2 * _num_ln_points;
-//    int* point_array = DEBUG_NEW int[arr_size];
-//    GLsizei* size_array = DEBUG_NEW int[_num_ln];
-//    GLsizei* first_array = DEBUG_NEW int[_num_ln];
-//    unsigned long pntindx = 0;
-//    unsigned      szindx  = 0;
-// 
-//    for (SliceLines::const_iterator CSH = _ln_data.begin(); CSH != _ln_data.end(); CSH++)
-//    {
-//       unsigned clsize = (*CSH)->lsize();
-//       assert(clsize);
-//       first_array[szindx] = pntindx/2;
-//       size_array[szindx++] = clsize;
-//       memcpy(&(point_array[pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
-//       pntindx += 2 * clsize;
-//    }
-//    assert(pntindx == arr_size);
-//    assert(szindx == _num_ln);
-//    glVertexPointer(2, GL_INT, 0, point_array);
-//    glMultiDrawArrays(GL_LINE_STRIP, first_array, size_array, szindx);
-// 
-//    delete [] point_array;
-//    delete [] size_array;
-//    delete [] first_array;
-// }
-// 
-// void TenderTVB::draw_lsegments()
-// {
-//    if  (0 == _num_ls) return;
-//    unsigned long arr_size = 2 * _num_ls_points;
-//    int* point_array = DEBUG_NEW int[arr_size];
-//    GLsizei* size_array = DEBUG_NEW int[_num_ls];
-//    GLsizei* first_array = DEBUG_NEW int[_num_ls];
-//    unsigned long pntindx = 0;
-//    unsigned      szindx  = 0;
-// 
-//    for (SliceLines::const_iterator CSH = _ls_data.begin(); CSH != _ls_data.end(); CSH++)
-//    {
-//       unsigned clsize = (*CSH)->lsize();
-//       assert(clsize);
-//       first_array[szindx] = pntindx/2;
-//       size_array[szindx++] = clsize;
-//       memcpy(&(point_array[pntindx]), (*CSH)->ldata(), 2 * sizeof(int4b) * clsize);
-//       pntindx += 2 * clsize;
-//    }
-//    assert(pntindx == arr_size);
-//    assert(szindx == _num_ls);
-//    glVertexPointer(2, GL_INT, 0, point_array);
-//    glMultiDrawArrays(GL_LINES, first_array, size_array, szindx);
-// 
-//    delete [] point_array;
-//    delete [] size_array;
-//    delete [] first_array;
-// }
-
-//=============================================================================
+//
 // class TenderTV
+//
 TenderTV::TenderTV(CTM& translation, bool filled, unsigned parray_offset,
                                                   unsigned iarray_offset) :
    _tmatrix             ( translation     ),
@@ -1098,7 +863,7 @@ TenderLay::TenderLay(): _cslice(NULL),
    _num_total_points(0u), _num_total_indexs(0u),
    _has_selected(false), _stv_array_offset(0u), _slctd_array_offset(0u)
 {
-   for (int i = lins; i <= lstr; i++)
+   for (int i = lstr; i <= lnes; i++)
    {
       _sizslix[i] = NULL;
       _fstslix[i] = NULL;
@@ -1202,8 +967,8 @@ void TenderLay::registerSBox (TenderSCnvx* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asindxs[lstr] += sobj->ssize();
-      _asobjix[lstr]++;
+      _asindxs[lnes] += sobj->ssize();
+      _asobjix[lnes]++;
    }
    else
    {
@@ -1217,8 +982,8 @@ void TenderLay::registerSPoly (TenderSNcvx* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asindxs[lstr] += sobj->ssize();
-      _asobjix[lstr]++;
+      _asindxs[lnes] += sobj->ssize();
+      _asobjix[lnes]++;
    }
    else
    {
@@ -1232,21 +997,21 @@ void TenderLay::registerSWire (TenderSWire* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asindxs[lstr] += sobj->ssize();
-      _asobjix[lstr]++;
+      _asindxs[lnes] += sobj->ssize();
+      _asobjix[lnes]++;
    }
    else
    {
-      _asindxs[lins] += sobj->lsize();
-      _asobjix[lins]++;
+      _asindxs[lstr] += sobj->lsize();
+      _asobjix[lstr]++;
    }
 }
 
 unsigned TenderLay::total_slctdx()
 {
-   return ( _asindxs[lins] +
+   return ( _asindxs[lstr] +
             _asindxs[llps] +
-            _asindxs[lstr]
+            _asindxs[lnes]
           );
 }
 
@@ -1285,31 +1050,31 @@ void TenderLay::collect(bool fill, GLuint pbuf, GLuint ibuf)
 
 void TenderLay::collectSelected(unsigned int* slctd_array)
 {
-   unsigned      slct_arr_size = _asindxs[lins] + _asindxs[llps] + _asindxs[lstr];
+   unsigned      slct_arr_size = _asindxs[lstr] + _asindxs[llps] + _asindxs[lnes];
    if (0 == slct_arr_size) return;
 
    // initialise the indexing arrays of selected objects
-   if (0 < _asobjix[lins])
+   if (0 < _asobjix[lstr])
    {
-      _sizslix[lins] = DEBUG_NEW GLsizei[_asobjix[lins]];
-      _fstslix[lins] = DEBUG_NEW GLuint[_asobjix[lins]];
+      _sizslix[lstr] = DEBUG_NEW GLsizei[_asobjix[lstr]];
+      _fstslix[lstr] = DEBUG_NEW GLuint[_asobjix[lstr]];
    }
    if (0 < _asobjix[llps])
    {
       _sizslix[llps] = DEBUG_NEW GLsizei[_asobjix[llps]];
       _fstslix[llps] = DEBUG_NEW GLuint[_asobjix[llps]];
    }
-   if (0 < _asobjix[lstr])
+   if (0 < _asobjix[lnes])
    {
-      _sizslix[lstr] = DEBUG_NEW GLsizei[_asobjix[lstr]];
-      _fstslix[lstr] = DEBUG_NEW GLuint[_asobjix[lstr]];
+      _sizslix[lnes] = DEBUG_NEW GLsizei[_asobjix[lnes]];
+      _fstslix[lnes] = DEBUG_NEW GLuint[_asobjix[lnes]];
    }
    unsigned size_sindex[3];
    unsigned index_soffset[3];
-   size_sindex[lins] = size_sindex[llps] = size_sindex[lstr] = 0u;
-   index_soffset[lins] = _slctd_array_offset;
-   index_soffset[llps] = index_soffset[lins] + _asindxs[lins];
-   index_soffset[lstr] = index_soffset[llps] + _asindxs[llps];
+   size_sindex[lstr] = size_sindex[llps] = size_sindex[lnes] = 0u;
+   index_soffset[lstr] = _slctd_array_offset;
+   index_soffset[llps] = index_soffset[lstr] + _asindxs[lstr];
+   index_soffset[lnes] = index_soffset[llps] + _asindxs[llps];
 
 
    for (SliceSelected::const_iterator SSL = _slct_data.begin(); SSL != _slct_data.end(); SSL++)
@@ -1317,11 +1082,11 @@ void TenderLay::collectSelected(unsigned int* slctd_array)
       TenderSelected* cchunk = *SSL;
       switch (cchunk->type())
       {
-         case lins : // LINES
+         case lstr : // LINES
          {
-            assert(_sizslix[lins]);
-            _fstslix[lins][size_sindex[lins]  ] = sizeof(unsigned) * index_soffset[lins];
-            _sizslix[lins][size_sindex[lins]++] = cchunk->sDataCopy(slctd_array, index_soffset[lins]);
+            assert(_sizslix[lstr]);
+            _fstslix[lstr][size_sindex[lstr]  ] = sizeof(unsigned) * index_soffset[lstr];
+            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[lstr]);
             break;
          }
          case llps      : // LINE_LOOP
@@ -1331,11 +1096,11 @@ void TenderLay::collectSelected(unsigned int* slctd_array)
             _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
             break;
          }
-         case lstr   : // LINE_STRIP
+         case lnes   : // LINE_STRIP
          {
-            assert(_sizslix[lstr]);
-            _fstslix[lstr][size_sindex[lstr]  ] = sizeof(unsigned) * index_soffset[lstr];
-            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[lstr]);
+            assert(_sizslix[lnes]);
+            _fstslix[lnes][size_sindex[lnes]  ] = sizeof(unsigned) * index_soffset[lnes];
+            _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, index_soffset[lnes]);
             break;
          }
          default: assert(false);
@@ -1383,13 +1148,13 @@ void TenderLay::drawSelected()
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_INDEX_ARRAY);
 
-   if (_asobjix[lins] > 0)
+   if (_asobjix[lstr] > 0)
    {
-      assert(_sizslix[lins]);
-      assert(_fstslix[lins]);
-      //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lins], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lins], _asobjix[lins]);
-      for (unsigned i= 0; i < _asobjix[lins]; i++)
-         glDrawElements(GL_LINE_STRIP, _sizslix[lins][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lins][i]);
+      assert(_sizslix[lstr]);
+      assert(_fstslix[lstr]);
+      //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
+      for (unsigned i= 0; i < _asobjix[lstr]; i++)
+         glDrawElements(GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lstr][i]);
    }
    if (_asobjix[llps] > 0)
    {
@@ -1399,13 +1164,13 @@ void TenderLay::drawSelected()
       for (unsigned i= 0; i < _asobjix[llps]; i++)
          glDrawElements(GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[llps][i]);
    }
-   if (_asobjix[lstr] > 0)
+   if (_asobjix[lnes] > 0)
    {
-      assert(_sizslix[lstr]);
-      assert(_fstslix[lstr]);
-         //glMultiDrawElements(GL_LINES  , _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _alobjix[lstr]);
-      for (unsigned i= 0; i < _asobjix[lstr]; i++)
-         glDrawElements(GL_LINES, _sizslix[lstr][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lstr][i]);
+      assert(_sizslix[lnes]);
+      assert(_fstslix[lnes]);
+         //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
+      for (unsigned i= 0; i < _asobjix[lnes]; i++)
+         glDrawElements(GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, (const GLvoid*)_fstslix[lnes][i]);
    }
    glDisableClientState(GL_INDEX_ARRAY);
    glDisableClientState(GL_VERTEX_ARRAY);
@@ -1419,16 +1184,19 @@ TenderLay::~TenderLay()
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
       delete (*TLAY);
 
-   if (NULL != _sizslix[lins]) delete [] _sizslix[lins];
-   if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
    if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
+   if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
+   if (NULL != _sizslix[lnes]) delete [] _sizslix[lnes];
 
-   if (NULL != _fstslix[lins]) delete [] _fstslix[lins];
-   if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
    if (NULL != _fstslix[lstr]) delete [] _fstslix[lstr];
+   if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
+   if (NULL != _fstslix[lnes]) delete [] _fstslix[lnes];
 }
 
 //=============================================================================
+//
+// class Tenderer
+//
 Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
       _drawprop(drawprop), _UU(UU), _clayer(NULL),
       _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL)
@@ -1647,6 +1415,7 @@ void checkOGLError(std::string loc)
 
 //=============================================================================
 //
+// class HiResTimer (Profiling timer for debugging purposes)
 //
 HiResTimer::HiResTimer()
 {
