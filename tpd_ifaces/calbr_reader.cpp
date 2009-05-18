@@ -63,7 +63,7 @@ void Calbr::drcEdge::showError(void)
    telldata::ttpnt* pt1, *pt2;
 
    real xx, yy;
-   DATC->unlockDB();
+  // DATC->unlockDB();
 
    wxString xstr = convert(_coords.x1, _precision);
    wxString ystr = convert(_coords.y1, _precision);
