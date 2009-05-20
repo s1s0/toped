@@ -24,7 +24,7 @@
 //          $Date$
 //        $Author$
 //===========================================================================
-/**
+/** \file
    Toped is a graphical application and naturally the graphic rendering is a primary
    objective in terms of quality and speed. The Toped rENDERER (TENDERER) is the first
    serious attempt in this project to utilize the power of todays graphic hardware via
@@ -60,8 +60,8 @@
       2. VBO generation - the buffers are created and the sorted data is copied there.
       3. Drawing
 
-                     Layer 1              Layer 2                    Layer N
-                  -------------         --------------              --------------
+                     Layer 1                Layer 2                     Layer N
+                   -------------         --------------              --------------
                   |  TenderLay   |      |  TenderLay   |            |  TenderLay   |
                   |              |      |              |            |              |
                   |  ----------  |      |  ----------  |            |  ----------  |
@@ -75,20 +75,20 @@
                   |  ----------  |      |  ----------  |     |      |  ----------  |
       cell_Z      | | TenderTV | |      | | TenderTV | |     |      | | TenderTV | |
                   |  ----------  |      |  ----------  |            |  ----------  |
-                  --------------        --------------              --------------
-                        v                     v                           v
-                        v                     v                           v
-                  -------------         --------------              --------------
+                   --------------        --------------              --------------
+                          v                     v                           v
+                          v                     v                           v
+                   -------------         --------------              --------------
                   |  ---------  |       |  ----------  |     |      |  ----------  |
                   | |point VBO| |       | | point VBO| |     |      | | point VBO| |
                   |  ---------  |       |  ----------  |            |  ----------  |
                   |  ---------  |       |  ----------  |     |      |  ----------  |
                   | |index VBO| |       | | index VBO| |     |      | | index VBO| |
                   |  ---------  |       |  ----------  |            |  ----------  |
-                  -------------         --------------              --------------
-                  ----------------------------------------------------------------
+                   -------------         --------------              --------------
+                   ----------------------------------------------------------------
                   |                 index of selected objects VBO                  |
-                  ----------------------------------------------------------------
+                   ----------------------------------------------------------------
    Speed:
    The first step is the most time consuming from all tree, but this is mainly the
    Toped DB traversing which is assumed optimal. The last one is the quickest one
@@ -399,11 +399,19 @@ typedef std::list<TenderSelected*>  SliceSelected;
  */
 class TenderRB {
    public:
-                        TenderRB(const CTM&, const DBbox&);
+                        TenderRB(const CTM&, const DBbox&, bool, TenderRB*);
+                        TenderRB();
       void              draw();
+      real* const       translation()  {return _translation;}
+      CTM&              ctm()          {return _ctm;}
+      bool              selected()     {return _selected;}
+      TenderRB*         last()         {return _last;}
    private:
-      CTM               _tmatrix;
+      real              _translation[16];
+      CTM               _ctm;
       DBbox             _obox;
+      bool              _selected;
+      TenderRB*         _last;
 };
 
 /**
@@ -518,7 +526,7 @@ class TenderTV {
    public:
       enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
       enum {cont, line, cnvx, ncvx} ObjtTypes;
-                        TenderTV(CTM&, bool, unsigned, unsigned);
+                        TenderTV(real* const, bool, unsigned, unsigned);
                        ~TenderTV();
       void              registerBox   (TenderCnvx*);
       void              registerPoly  (TenderNcvx*, TeselPoly*);
@@ -529,11 +537,11 @@ class TenderTV {
 
       unsigned          num_total_points();
       unsigned          num_total_indexs();
-      const CTM*        tmatrix()            {return &_tmatrix;}
+      real* const       tmatrix()            {return _tmatrix;}
    protected:
       void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
 
-      CTM               _tmatrix;
+      real*             _tmatrix;
       // collected data lists
       SliceObjects      _cont_data; //! Countour data
       SliceWires        _line_data; //! Line data
@@ -658,7 +666,7 @@ class TenderLay {
       void              poly (int4b*, unsigned, TeselPoly*, bool, const SGBitSet*);
       void              wire (int4b*, unsigned, word, bool, bool, const SGBitSet*);
 
-      void              newSlice(CTM&, bool, bool, unsigned);
+      void              newSlice(real* const, bool, bool, unsigned);
       void              ppSlice();
       void              draw(bool);
       void              drawSelected();
@@ -695,7 +703,7 @@ class TenderLay {
 //-----------------------------------------------------------------------------
 //
 typedef std::map<word, TenderLay*> DataLay;
-typedef std::list<TenderRB*> TenderRBL;
+typedef std::stack<TenderRB*> CellStack;
 
 /**
    Toped RENDERER is the front-end class, the interface to the rest of the world.
@@ -712,7 +720,8 @@ class Tenderer {
       void              Grid( const real, const std::string );
       void              setLayer(word, bool);
       void              pushCell(const CTM&, const DBbox&, bool, bool);
-      void              popCTM()                               {_drawprop->popCTM(); _ctrans = _drawprop->topCTM();}
+      void              popCell()                              {_cellStack.pop();}
+      const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
       void              box  (int4b* pdata)                    {_clayer->box(pdata, false, NULL);}
       void              box  (int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, true, ss);}
       void              poly (int4b* pdata, unsigned psize, TeselPoly* tpoly)
@@ -725,12 +734,8 @@ class Tenderer {
       void              draw();
 
       // temporary!
-      void              initCTMstack()                {        _drawprop->initCTMstack()        ;}
-      void              clearCTMstack()               {        _drawprop->clearCTMstack()       ;}
-      void              setCurrentColor(word layno)   {        _drawprop->setCurrentColor(layno);}
       bool              layerHidden(word layno) const {return  _drawprop->layerHidden(layno)    ;}
       const CTM&        ScrCTM() const                {return  _drawprop->ScrCTM()              ;}
-      const CTM&        topCTM() const                {return  _drawprop->topCTM()              ;}
       const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
       void              pushref(const laydata::tdtcellref* ref)
                                                       {        _drawprop->pushref(ref)          ;}
@@ -741,13 +746,9 @@ class Tenderer {
       real              _UU;
       DataLay           _data;      //!All data for drawing
       TenderLay*        _clayer;    //!Working variable pointing to the current slice
+      TenderRB*         _cBoundary; //!All reference overlapping boxes
+      CellStack         _cellStack; //!Required during data traversing stage
       unsigned          _cslctd_array_offset; //! Current selected array offset
-      //TODO! 
-      TenderRBL         _oboxes;    //!All reference overlapping boxes
-      TenderRBL         _osboxes;   //!All selected reference overlapping boxes
-
-      CTM               _atrans;    //!The translation of the active cell
-      CTM               _ctrans;    //!Working variable storing the current translation
       //
       unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
       GLuint*           _ogl_buffers; //! Array with the "names" of all openGL buffers
