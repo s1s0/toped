@@ -464,17 +464,25 @@ unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
 }
 
 //=============================================================================
+//
 // class TenderRB
-TenderRB::TenderRB(const CTM& tmatrix, const DBbox& obox) : _tmatrix (tmatrix),
-                   _obox(obox)
-{}
+//
+TenderRB::TenderRB(const CTM& ctm, const DBbox& obox, bool selected, TenderRB* last)
+   : _ctm(ctm), _obox(obox), _selected(selected), _last(last)
+{
+   _ctm.oglForm(_translation);
+}
+
+TenderRB::TenderRB()
+   : _ctm(CTM()), _obox(DBbox(TP())), _selected(false), _last(NULL)
+{
+   _ctm.oglForm(_translation);
+}
 
 void TenderRB::draw()
 {
    glPushMatrix();
-   real openGLmatrix[16];
-   _tmatrix.oglForm(openGLmatrix);
-   glMultMatrixd(openGLmatrix);
+   glMultMatrixd(_translation);
    //
    glRecti(_obox.p1().x(), _obox.p1().y(), _obox.p2().x(), _obox.p2().y());
    //
@@ -485,7 +493,7 @@ void TenderRB::draw()
 //
 // class TenderTV
 //
-TenderTV::TenderTV(CTM& translation, bool filled, unsigned parray_offset,
+TenderTV::TenderTV(real* const translation, bool filled, unsigned parray_offset,
                                                   unsigned iarray_offset) :
    _tmatrix             ( translation     ),
    _point_array_offset  ( parray_offset   ),
@@ -853,6 +861,7 @@ TenderTV::~TenderTV()
    if (NULL != _firstix[ftrs]) delete [] _firstix[ftrs];
    if (NULL != _firstix[ftfs]) delete [] _firstix[ftfs];
    if (NULL != _firstix[ftss]) delete [] _firstix[ftss];
+   // Don't delete  _tmatrix. It's only a reference to it here
 }
 
 //=============================================================================
@@ -877,7 +886,7 @@ TenderLay::TenderLay(): _cslice(NULL),
  * @param ctrans Current translation matrix of the new object
  * @param fill Whether to fill the drawing objects
  */
-void TenderLay::newSlice(CTM& ctrans, bool fill, bool has_selected, unsigned slctd_array_offset)
+void TenderLay::newSlice(real* const ctrans, bool fill, bool has_selected, unsigned slctd_array_offset)
 {
    _has_selected = has_selected;
    if (_has_selected = has_selected) // <-- that's not a mistake!
@@ -1125,9 +1134,7 @@ void TenderLay::draw(bool fill)
    {
       TenderTV* ctv = (*TLAY);
       glPushMatrix();
-      real openGLmatrix[16];
-      ctv->tmatrix()->oglForm(openGLmatrix);
-      glMultMatrixd(openGLmatrix);
+      glMultMatrixd(ctv->tmatrix());
       ctv->draw();
       glPopMatrix();
    }
@@ -1198,9 +1205,12 @@ TenderLay::~TenderLay()
 // class Tenderer
 //
 Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
-      _drawprop(drawprop), _UU(UU), _clayer(NULL),
+      _drawprop(drawprop), _UU(UU), _clayer(NULL), _cBoundary(NULL),
       _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL)
-{}
+{
+   // Initialise the cell (CTM) stack
+   _cellStack.push(DEBUG_NEW TenderRB());
+}
 
 void Tenderer::setLayer(word layer, bool has_selected)
 {
@@ -1221,19 +1231,14 @@ void Tenderer::setLayer(word layer, bool has_selected)
       _clayer = DEBUG_NEW TenderLay();
       _data[layer] = _clayer;
    }
-   _clayer->newSlice(_ctrans, _drawprop->isFilled(layer), has_selected, _cslctd_array_offset);
+   _clayer->newSlice(_cellStack.top()->translation(), _drawprop->isFilled(layer), has_selected, _cslctd_array_offset);
    // @TODO! current fill on/off should be determined here!
 }
 
 void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
-   _ctrans = trans * _drawprop->topCTM();
-   _oboxes.push_back(DEBUG_NEW TenderRB(_ctrans, overlap));
-   if (selected)
-      _osboxes.push_back(DEBUG_NEW TenderRB(_ctrans, overlap));
-   _drawprop->pushCTM(_ctrans);
-   if (active)
-      _atrans = trans;
+   _cBoundary = DEBUG_NEW TenderRB(trans * _cellStack.top()->ctm(), overlap, selected, _cBoundary);
+   _cellStack.push(_cBoundary);
 }
 
 void Tenderer::wire (int4b* pdata, unsigned psize, word width)
@@ -1288,6 +1293,8 @@ void Tenderer::Grid(const real step, const std::string color)
 
 void Tenderer::collect()
 {
+   // This stack will not be of any use anymore - so let's clean-it up
+   while (!_cellStack.empty()) _cellStack.pop();
    // First filter-out the layers that doesn't have any objects on them,
    // post process the last slices in the layers and also gather the number
    // of required virtual buffers
@@ -1363,12 +1370,12 @@ void Tenderer::draw()
    {
       word curlayno = CLAY->first;
       _drawprop->setCurrentColor(curlayno);
-      CLAY->second->draw( _drawprop->getCurrentFill() );
+      CLAY->second->draw( _drawprop->getCurrentFill() );// draw everything
       if (0 != CLAY->second->total_slctdx())
       {
          _drawprop->setLineProps(true);
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
-         CLAY->second->drawSelected(  );
+         CLAY->second->drawSelected(  ); // redraw selected contours only
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
          _drawprop->setLineProps(false);
       }
@@ -1379,6 +1386,26 @@ void Tenderer::draw()
    delete [] _ogl_buffers;
    _ogl_buffers = NULL;
    checkOGLError("draw");
+   // Cell overlaps
+   _drawprop->setCurrentColor(0);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   //glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
+   TenderRB* ctrb = _cBoundary;
+   while (ctrb)
+   {
+      ctrb->draw();
+      ctrb = ctrb->last();
+   }
+   ctrb = _cBoundary;
+   _drawprop->setLineProps(true);
+   while (ctrb)
+   {
+      if (ctrb->selected())
+         ctrb->draw();
+      ctrb = ctrb->last();
+   }
+   _drawprop->setLineProps(false);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 Tenderer::~Tenderer()
@@ -1395,8 +1422,12 @@ Tenderer::~Tenderer()
       delete (CLAY->second);
    }
 
-   for (TenderRBL::const_iterator CRBL = _oboxes.begin(); CRBL != _oboxes.end(); CRBL++)
-      delete (*CRBL);
+   while (_cBoundary)
+   {
+      TenderRB* ctrb = _cBoundary->last();
+      delete _cBoundary;
+      _cBoundary = ctrb;
+   }
 
    sprintf (debug_message, "Rendering summary: %i vertexes in %i buffers", all_points_drawn, all_layers);
    tell_log(console::MT_WARNING,debug_message);
