@@ -1801,7 +1801,9 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 		}
 		else
 		{
-			_poly.showError();
+			laydata::tdtdesign* _ATDB = DATC->lockDB();
+				_poly.showError(_ATDB);
+			DATC->unlockDB();
 		}
    }
    else
