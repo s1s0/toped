@@ -345,6 +345,7 @@ void	Calbr::CalbrFile::ShowResults()
 			{
 				(*it2edge).showError(_ATDB);
 			}
+	   }
 	DATC->unlockDB();
 		/*for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
 		{
@@ -365,7 +366,6 @@ void	Calbr::CalbrFile::ShowResults()
 				 << convert((*it2edge).y2, _precision) << ost<<wxT("}, 0.1)");
 			Console->parseCommand(ost);
 		}*/
-	}
 	tellstdfunc::RefreshGL();
 
 }
