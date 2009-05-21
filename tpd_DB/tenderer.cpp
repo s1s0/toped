@@ -467,35 +467,42 @@ unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
 //
 // class TenderRB
 //
-TenderRB::TenderRB(const CTM& ctm, const DBbox& obox, bool selected, TenderRB* last)
-   : _ctm(ctm), _obox(obox), _selected(selected), _last(last)
+TenderRB::TenderRB(const CTM& ctm, const DBbox& obox, word alphaDepth)
+   : _ctm(ctm), _alphaDepth(alphaDepth)
 {
    _ctm.oglForm(_translation);
+   TP tp = TP(obox.p1().x(), obox.p1().y()) * _ctm;
+   _obox[0] = tp.x();_obox[1] = tp.y();
+   tp = TP(obox.p2().x(), obox.p1().y()) * _ctm;
+   _obox[2] = tp.x();_obox[3] = tp.y();
+   tp = TP(obox.p2().x(), obox.p2().y()) * _ctm;
+   _obox[4] = tp.x();_obox[5] = tp.y();
+   tp = TP(obox.p1().x(), obox.p2().y()) * _ctm;
+   _obox[6] = tp.x();_obox[7] = tp.y();
 }
+
 
 TenderRB::TenderRB()
-   : _ctm(CTM()), _obox(DBbox(TP())), _selected(false), _last(NULL)
+   : _ctm(CTM()), _alphaDepth(0)
 {
    _ctm.oglForm(_translation);
+   for (word i = 0; i < 8; _obox[i++] = 0);
 }
 
-void TenderRB::draw()
+unsigned TenderRB::cDataCopy(int* array, unsigned& pindex)
 {
-   glPushMatrix();
-   glMultMatrixd(_translation);
-   //
-   glRecti(_obox.p1().x(), _obox.p1().y(), _obox.p2().x(), _obox.p2().y());
-   //
-   glPopMatrix();
+   memcpy(&(array[pindex]), _obox, sizeof(int4b) * 8);
+   pindex += 8;
+   return 4;
 }
 
 //=============================================================================
 //
 // class TenderTV
 //
-TenderTV::TenderTV(real* const translation, bool filled, unsigned parray_offset,
+TenderTV::TenderTV(TenderRB* const refCell, bool filled, unsigned parray_offset,
                                                   unsigned iarray_offset) :
-   _tmatrix             ( translation     ),
+   _refCell             ( refCell         ),
    _point_array_offset  ( parray_offset   ),
    _index_array_offset  ( iarray_offset   ),
    _filled              ( filled          )
@@ -886,7 +893,7 @@ TenderLay::TenderLay(): _cslice(NULL),
  * @param ctrans Current translation matrix of the new object
  * @param fill Whether to fill the drawing objects
  */
-void TenderLay::newSlice(real* const ctrans, bool fill, bool has_selected, unsigned slctd_array_offset)
+void TenderLay::newSlice(TenderRB* const ctrans, bool fill, bool has_selected, unsigned slctd_array_offset)
 {
    _has_selected = has_selected;
    if (_has_selected = has_selected) // <-- that's not a mistake!
@@ -1199,13 +1206,110 @@ TenderLay::~TenderLay()
    if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
    if (NULL != _fstslix[lnes]) delete [] _fstslix[lnes];
 }
+//=============================================================================
+//
+// class Tender0Lay
+//
+Tender0Lay::Tender0Lay() : 
+   _alvrtxs(0u), _alobjvx(0u), _sizesvx(NULL), _firstvx(NULL),
+   _asindxs(0u), _asobjix(0u), _sizslix(NULL), _fstslix(NULL)
+{
+}
 
+TenderRB* Tender0Lay::addCellRef(const CTM& trans, const DBbox& overlap, bool selected, word alphaDepth)
+{
+   TenderRB* cRefBox = DEBUG_NEW TenderRB(trans, overlap, alphaDepth);
+   if (selected)
+   {
+      _cellSRefBoxes.push_back(cRefBox);
+      _asindxs += 4;
+      _asobjix++;
+   }
+   else
+   {
+      _cellRefBoxes.push_back(cRefBox);
+      _alvrtxs += 4;
+      _alobjvx++;
+   }
+   return cRefBox;
+}
+
+void Tender0Lay::collect(GLuint pbuf, GLuint ibuf)
+{
+   int* cpoint_array = NULL;
+   unsigned int* cindex_array = NULL;
+   _pbuffer = pbuf;
+   _ibuffer = ibuf;
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   glBufferData(GL_ARRAY_BUFFER              ,
+                2 * (_alvrtxs + _asindxs) * sizeof(int4b) ,
+                NULL                         ,
+                GL_DYNAMIC_DRAW               );
+   cpoint_array = (int*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+   if (0 != _ibuffer)
+   {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER     ,
+                   _asindxs * sizeof(unsigned) ,
+                   NULL                        ,
+                   GL_DYNAMIC_DRAW              );
+      cindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+   }
+
+   // initialise the indexing
+   unsigned pntindx = 0;
+   unsigned  szindx  = 0;
+   _firstvx = DEBUG_NEW int[_alobjvx + _asobjix];
+   _sizesvx = DEBUG_NEW int[_alobjvx + _asobjix];
+   for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
+   {
+      _firstvx[szindx  ] = pntindx/2;
+      _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+   }
+   for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
+   {
+      _firstvx[szindx  ] = pntindx/2;
+      _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+   }
+   assert(pntindx == 2 * (_alvrtxs + _asindxs));
+   assert(szindx  == (_alobjvx + _asobjix));
+
+   // Unmap the buffers
+   glUnmapBuffer(GL_ARRAY_BUFFER);
+   if (0 != _ibuffer)
+      glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+}
+
+void Tender0Lay::draw()
+{
+   // Bind the buffer
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   // Check the state of the buffer
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   assert(bufferSize == (2 * (_alvrtxs + _asindxs) * sizeof(int4b)));
+
+   glVertexPointer(2, GL_INT, 0, 0);
+   glEnableClientState(GL_VERTEX_ARRAY);
+   assert(_firstvx);
+   assert(_sizesvx);
+   glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix);
+
+
+//   if (0 < _asindxs)
+//   {
+//      _drawprop->setLineProps(true);
+//      glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix);
+//      _drawprop->setLineProps(false);
+//   }
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
 //=============================================================================
 //
 // class Tenderer
 //
 Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
-      _drawprop(drawprop), _UU(UU), _clayer(NULL), _cBoundary(NULL),
+      _drawprop(drawprop), _UU(UU), _clayer(NULL),
       _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL)
 {
    // Initialise the cell (CTM) stack
@@ -1231,14 +1335,13 @@ void Tenderer::setLayer(word layer, bool has_selected)
       _clayer = DEBUG_NEW TenderLay();
       _data[layer] = _clayer;
    }
-   _clayer->newSlice(_cellStack.top()->translation(), _drawprop->isFilled(layer), has_selected, _cslctd_array_offset);
+   _clayer->newSlice(_cellStack.top(), _drawprop->isFilled(layer), has_selected, _cslctd_array_offset);
    // @TODO! current fill on/off should be determined here!
 }
 
 void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
-   _cBoundary = DEBUG_NEW TenderRB(trans * _cellStack.top()->ctm(), overlap, selected, _cBoundary);
-   _cellStack.push(_cBoundary);
+   _cellStack.push( _0layer.addCellRef(trans * _cellStack.top()->ctm(), overlap, selected, _cellStack.size()) );
 }
 
 void Tenderer::wire (int4b* pdata, unsigned psize, word width)
@@ -1328,6 +1431,13 @@ void Tenderer::collect()
          CCLAY++;
       }
    }
+   // Get the number of buffers for the reference boxes
+   if (0 < _0layer.total_points())
+   {
+      _num_ogl_buffers ++;
+      if (0 < _0layer.total_indexs())
+         _num_ogl_buffers ++;
+   }
    if (0 < num_total_slctdx)
       _num_ogl_buffers++;
 
@@ -1335,6 +1445,7 @@ void Tenderer::collect()
    _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
    glGenBuffers(_num_ogl_buffers, _ogl_buffers);
    unsigned current_buffer = 0;
+   // collect the point arrays
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
       assert (0 != CLAY->second->total_points());
@@ -1360,6 +1471,13 @@ void Tenderer::collect()
       }
       glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
    }
+   // collect the reference boxes
+   if (0 < _0layer.total_points())
+   {
+      GLuint pbuf = _ogl_buffers[current_buffer++];
+      GLuint ibuf = (0 == _0layer.total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
+      _0layer.collect(pbuf, ibuf);
+   }
    checkOGLError("collect");
 }
 
@@ -1380,6 +1498,11 @@ void Tenderer::draw()
          _drawprop->setLineProps(false);
       }
    }
+   if (0 < _0layer.total_points())
+   {
+      _drawprop->setCurrentColor(0);
+      _0layer.draw();
+   }
 //   glBindBuffer(GL_ARRAY_BUFFER, 0);
 //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
    glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
@@ -1387,7 +1510,7 @@ void Tenderer::draw()
    _ogl_buffers = NULL;
    checkOGLError("draw");
    // Cell overlaps
-   _drawprop->setCurrentColor(0);
+/*   _drawprop->setCurrentColor(0);
    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
    //glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
    TenderRB* ctrb = _cBoundary;
@@ -1405,7 +1528,7 @@ void Tenderer::draw()
       ctrb = ctrb->last();
    }
    _drawprop->setLineProps(false);
-   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);*/
 }
 
 Tenderer::~Tenderer()
@@ -1422,12 +1545,12 @@ Tenderer::~Tenderer()
       delete (CLAY->second);
    }
 
-   while (_cBoundary)
-   {
-      TenderRB* ctrb = _cBoundary->last();
-      delete _cBoundary;
-      _cBoundary = ctrb;
-   }
+//    while (_cBoundary)
+//    {
+//       TenderRB* ctrb = _cBoundary->last();
+//       delete _cBoundary;
+//       _cBoundary = ctrb;
+//    }
 
    sprintf (debug_message, "Rendering summary: %i vertexes in %i buffers", all_points_drawn, all_layers);
    tell_log(console::MT_WARNING,debug_message);
