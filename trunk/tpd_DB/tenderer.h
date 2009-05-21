@@ -399,19 +399,17 @@ typedef std::list<TenderSelected*>  SliceSelected;
  */
 class TenderRB {
    public:
-                        TenderRB(const CTM&, const DBbox&, bool, TenderRB*);
+                        TenderRB(const CTM&, const DBbox&, word);
                         TenderRB();
       void              draw();
       real* const       translation()  {return _translation;}
       CTM&              ctm()          {return _ctm;}
-      bool              selected()     {return _selected;}
-      TenderRB*         last()         {return _last;}
+      unsigned          cDataCopy(int*, unsigned&);
    private:
       real              _translation[16];
       CTM               _ctm;
-      DBbox             _obox;
-      bool              _selected;
-      TenderRB*         _last;
+      int4b             _obox[8];
+      word              _alphaDepth;
 };
 
 /**
@@ -526,7 +524,7 @@ class TenderTV {
    public:
       enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
       enum {cont, line, cnvx, ncvx} ObjtTypes;
-                        TenderTV(real* const, bool, unsigned, unsigned);
+                        TenderTV(TenderRB* const, bool, unsigned, unsigned);
                        ~TenderTV();
       void              registerBox   (TenderCnvx*);
       void              registerPoly  (TenderNcvx*, TeselPoly*);
@@ -537,11 +535,11 @@ class TenderTV {
 
       unsigned          num_total_points();
       unsigned          num_total_indexs();
-      real* const       tmatrix()            {return _tmatrix;}
+      real* const       tmatrix()            {return _refCell->translation();}
    protected:
       void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
 
-      real*             _tmatrix;
+      TenderRB*         _refCell;
       // collected data lists
       SliceObjects      _cont_data; //! Countour data
       SliceWires        _line_data; //! Line data
@@ -666,7 +664,7 @@ class TenderLay {
       void              poly (int4b*, unsigned, TeselPoly*, bool, const SGBitSet*);
       void              wire (int4b*, unsigned, word, bool, bool, const SGBitSet*);
 
-      void              newSlice(real* const, bool, bool, unsigned);
+      void              newSlice(TenderRB* const, bool, bool, unsigned);
       void              ppSlice();
       void              draw(bool);
       void              drawSelected();
@@ -698,6 +696,32 @@ class TenderLay {
       // offsets in the VBO
       unsigned          _stv_array_offset; //! first point in the TenderTV with selected objects in this layer
       unsigned          _slctd_array_offset; //! first point in the VBO with selected indexes
+};
+
+class Tender0Lay {
+   public:
+      typedef  std::list<TenderRB*> RefBoxList;
+                        Tender0Lay();
+      TenderRB*         addCellRef(const CTM&, const DBbox&, bool, word);
+      void              collect(GLuint, GLuint);
+      void              draw();
+      unsigned          total_points() {return _alvrtxs;}
+      unsigned          total_indexs() {return _asindxs;}
+   private:
+      RefBoxList        _cellRefBoxes;
+      RefBoxList        _cellSRefBoxes;
+      GLuint            _pbuffer;
+      GLuint            _ibuffer;
+      // vertex related data
+      unsigned          _alvrtxs; //! total number of vertexes
+      unsigned          _alobjvx; //! total number of objects that will be drawn with vertex related functions
+      GLsizei*          _sizesvx; //! array of sizes for vertex sets
+      GLsizei*          _firstvx; //! array of first vertexes
+      // index related data for non-convex polygons
+      unsigned          _asindxs; //! total number of indexes
+      unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
+      GLsizei*          _sizslix; //! array of sizes for indexes sets
+      GLuint*           _fstslix; //! array of first indexes
 };
 
 //-----------------------------------------------------------------------------
@@ -746,7 +770,7 @@ class Tenderer {
       real              _UU;
       DataLay           _data;      //!All data for drawing
       TenderLay*        _clayer;    //!Working variable pointing to the current slice
-      TenderRB*         _cBoundary; //!All reference overlapping boxes
+      Tender0Lay        _0layer;
       CellStack         _cellStack; //!Required during data traversing stage
       unsigned          _cslctd_array_offset; //! Current selected array offset
       //
