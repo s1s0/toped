@@ -35,6 +35,8 @@
 #include <vector>
 #include <wx/wx.h>
 
+#include "../tpd_DB/datacenter.h"
+
 namespace Calbr
 {
 
@@ -56,7 +58,7 @@ class drcEdge
 public:
 	void				addCoord(long x1, long y1, long x2, long y2);
 	edge*	coords() {return &_coords;};
-	void				showError(void);
+	void				showError(laydata::tdtdesign* atdb);
 	static long		_precision;
 private:
 	edge				_coords;
@@ -67,7 +69,7 @@ class drcPolygon
 public:
 	void				addCoord(long x, long y);
 	CoordsVector*	coords() {return &_coords;};
-	void				showError(void);
+	void				showError(laydata::tdtdesign* atdb);
 	static long		_precision;
 private:
 	CoordsVector	_coords;
@@ -123,6 +125,7 @@ private:
 	bool				parse();
 	RuleChecksVector _RuleChecks;
 	bool				_ok;
+	laydata::tdtdesign* _ATDB;
 
 };
 

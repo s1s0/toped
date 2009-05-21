@@ -53,7 +53,7 @@ void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 	_coords.y2 = y2;
 }
 
-void Calbr::drcEdge::showError(void)
+void Calbr::drcEdge::showError(laydata::tdtdesign* atdb)
 {
    real DBscale = DATC->DBscale();
    //Convert drcEdge to pointlist
@@ -84,9 +84,9 @@ void Calbr::drcEdge::showError(void)
    real      w = 0.01;
 //       telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(1,plDB,
 //                                    static_cast<word>(rint(w * DBscale))), 1);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->addwire(1,plDB, static_cast<word>(rint(w * DBscale)));
-   DATC->unlockDB();
+  // laydata::tdtdesign* ATDB = DATC->lockDB();
+   atdb->addwire(1,plDB, static_cast<word>(rint(w * DBscale)));
+   //DATC->unlockDB();
    delete pt1;
    delete pt2;
    delete plDB;
@@ -101,7 +101,7 @@ void Calbr::drcPolygon::addCoord(long x, long y)
 	_coords.push_back(crd);
 }
 
-void Calbr::drcPolygon::showError(void)
+void Calbr::drcPolygon::showError(laydata::tdtdesign* atdb)
 {
 
    real DBscale = DATC->DBscale();
@@ -122,9 +122,9 @@ void Calbr::drcPolygon::showError(void)
       plDB->push_back(TP(pt->x(), pt->y(), DBscale));
    }
 
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->addpoly(1,plDB);
-   DATC->unlockDB();
+   //laydata::tdtdesign* ATDB = DATC->lockDB();
+   atdb->addpoly(1,plDB);
+   //DATC->unlockDB();
    delete plDB;
 }
 
@@ -328,21 +328,24 @@ bool Calbr::CalbrFile::parse()
 
 void	Calbr::CalbrFile::ShowResults()
 {
-	RuleChecksVector::const_iterator it;
-	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
-	{
-		std::vector <Calbr::drcPolygon>::iterator it2;
-		std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
-		for(it2 = polys->begin(); it2 < polys->end(); ++it2)
+	_ATDB = DATC->lockDB();
+
+		RuleChecksVector::const_iterator it;
+		for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
 		{
-			(*it2).showError();
-		}
-		std::vector <Calbr::drcEdge>::iterator it2edge;
-		std::vector <Calbr::drcEdge> *edges = (*it)->edges();
-		for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
-		{
-			(*it2edge).showError();
-		}
+			std::vector <Calbr::drcPolygon>::iterator it2;
+			std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
+			for(it2 = polys->begin(); it2 < polys->end(); ++it2)
+			{
+				(*it2).showError(_ATDB);
+			}
+			std::vector <Calbr::drcEdge>::iterator it2edge;
+			std::vector <Calbr::drcEdge> *edges = (*it)->edges();
+			for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
+			{
+				(*it2edge).showError(_ATDB);
+			}
+	DATC->unlockDB();
 		/*for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
 		{
 			wxString ost;
