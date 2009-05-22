@@ -703,15 +703,13 @@ class Tender0Lay {
       typedef  std::list<TenderRB*> RefBoxList;
                         Tender0Lay();
       TenderRB*         addCellRef(const CTM&, const DBbox&, bool, word);
-      void              collect(GLuint, GLuint);
-      void              draw();
-      unsigned          total_points() {return _alvrtxs;}
-      unsigned          total_indexs() {return _asindxs;}
+      void              collect(GLuint);
+      void              draw(layprop::DrawProperties*);
+      unsigned          total_points() {return (_alvrtxs + _asindxs);}
    private:
       RefBoxList        _cellRefBoxes;
       RefBoxList        _cellSRefBoxes;
       GLuint            _pbuffer;
-      GLuint            _ibuffer;
       // vertex related data
       unsigned          _alvrtxs; //! total number of vertexes
       unsigned          _alobjvx; //! total number of objects that will be drawn with vertex related functions
@@ -721,7 +719,7 @@ class Tender0Lay {
       unsigned          _asindxs; //! total number of indexes
       unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
       GLsizei*          _sizslix; //! array of sizes for indexes sets
-      GLuint*           _fstslix; //! array of first indexes
+      GLsizei*          _fstslix; //! array of first indexes
 };
 
 //-----------------------------------------------------------------------------
