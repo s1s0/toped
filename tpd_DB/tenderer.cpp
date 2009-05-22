@@ -224,7 +224,7 @@ void TenderWire::precalc(word width)
    _cdata[rindex--] = ln1->p2().x();
    delete ln1;
    assert(index == _csize);
-   assert((rindex + 1) == _csize);
+   assert((rindex + 1u) == _csize);
 }
 
 DBbox* TenderWire::endPnts(const word width, word i1, word i2, bool first)
@@ -896,7 +896,7 @@ TenderLay::TenderLay(): _cslice(NULL),
 void TenderLay::newSlice(TenderRB* const ctrans, bool fill, bool has_selected, unsigned slctd_array_offset)
 {
    _has_selected = has_selected;
-   if (_has_selected = has_selected) // <-- that's not a mistake!
+   if ((_has_selected = has_selected)) // <-- that's not a mistake!
    {
       assert( 0 == total_slctdx());
       _slctd_array_offset = slctd_array_offset;
@@ -1130,12 +1130,12 @@ void TenderLay::draw(bool fill)
    // Check the state of the buffer
    GLint bufferSize;
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (2 * _num_total_points * sizeof(int4b)));
+   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(int4b)));
    if (0 != _ibuffer)
    {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
       glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-      assert(bufferSize == (_num_total_indexs * sizeof(unsigned)));
+      assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
    }
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
    {
@@ -1156,7 +1156,7 @@ void TenderLay::drawSelected()
    // Check the state of the buffer
    GLint bufferSize;
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (2 * _num_total_points * sizeof(int4b)));
+   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(int4b)));
 
    glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _stv_array_offset));
    glEnableClientState(GL_VERTEX_ARRAY);
@@ -1234,33 +1234,27 @@ TenderRB* Tender0Lay::addCellRef(const CTM& trans, const DBbox& overlap, bool se
    return cRefBox;
 }
 
-void Tender0Lay::collect(GLuint pbuf, GLuint ibuf)
+void Tender0Lay::collect(GLuint pbuf)
 {
    int* cpoint_array = NULL;
-   unsigned int* cindex_array = NULL;
    _pbuffer = pbuf;
-   _ibuffer = ibuf;
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    glBufferData(GL_ARRAY_BUFFER              ,
                 2 * (_alvrtxs + _asindxs) * sizeof(int4b) ,
                 NULL                         ,
                 GL_DYNAMIC_DRAW               );
    cpoint_array = (int*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-   if (0 != _ibuffer)
-   {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER     ,
-                   _asindxs * sizeof(unsigned) ,
-                   NULL                        ,
-                   GL_DYNAMIC_DRAW              );
-      cindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-   }
 
    // initialise the indexing
    unsigned pntindx = 0;
    unsigned  szindx  = 0;
-   _firstvx = DEBUG_NEW int[_alobjvx + _asobjix];
-   _sizesvx = DEBUG_NEW int[_alobjvx + _asobjix];
+   _firstvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
+   _sizesvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
+   if (0 < _asobjix)
+   {
+      _fstslix = DEBUG_NEW GLsizei[_asobjix];
+      _sizslix = DEBUG_NEW GLsizei[_asobjix];
+   }
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
    {
       _firstvx[szindx  ] = pntindx/2;
@@ -1268,26 +1262,26 @@ void Tender0Lay::collect(GLuint pbuf, GLuint ibuf)
    }
    for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
    {
-      _firstvx[szindx  ] = pntindx/2;
-      _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+      _fstslix[szindx-_alobjvx] = _firstvx[szindx] = pntindx/2;
+      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+      szindx++;
    }
    assert(pntindx == 2 * (_alvrtxs + _asindxs));
    assert(szindx  == (_alobjvx + _asobjix));
 
    // Unmap the buffers
    glUnmapBuffer(GL_ARRAY_BUFFER);
-   if (0 != _ibuffer)
-      glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 }
 
-void Tender0Lay::draw()
+void Tender0Lay::draw(layprop::DrawProperties* drawprop)
 {
+   drawprop->setCurrentColor(0);
    // Bind the buffer
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
    GLint bufferSize;
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (2 * (_alvrtxs + _asindxs) * sizeof(int4b)));
+   assert(bufferSize == (GLint)(2 * (_alvrtxs + _asindxs) * sizeof(int4b)));
 
    glVertexPointer(2, GL_INT, 0, 0);
    glEnableClientState(GL_VERTEX_ARRAY);
@@ -1296,12 +1290,14 @@ void Tender0Lay::draw()
    glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix);
 
 
-//   if (0 < _asindxs)
-//   {
-//      _drawprop->setLineProps(true);
-//      glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix);
-//      _drawprop->setLineProps(false);
-//   }
+   if (0 < _asindxs)
+   {
+      assert(_fstslix);
+      assert(_sizslix);
+      drawprop->setLineProps(true);
+      glMultiDrawArrays(GL_LINE_LOOP, _fstslix, _sizslix, _asobjix);
+      drawprop->setLineProps(false);
+   }
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 //=============================================================================
@@ -1398,6 +1394,7 @@ void Tenderer::collect()
 {
    // This stack will not be of any use anymore - so let's clean-it up
    while (!_cellStack.empty()) _cellStack.pop();
+
    // First filter-out the layers that doesn't have any objects on them,
    // post process the last slices in the layers and also gather the number
    // of required virtual buffers
@@ -1431,20 +1428,15 @@ void Tenderer::collect()
          CCLAY++;
       }
    }
-   // Get the number of buffers for the reference boxes
-   if (0 < _0layer.total_points())
-   {
-      _num_ogl_buffers ++;
-      if (0 < _0layer.total_indexs())
-         _num_ogl_buffers ++;
-   }
-   if (0 < num_total_slctdx)
-      _num_ogl_buffers++;
-
-   // Organise the VBOs ...
+   if (0 < _0layer.total_points())  _num_ogl_buffers ++; // reference boxes
+   if (0 < num_total_slctdx      )  _num_ogl_buffers++;  // selected
+   //--------------------------------------------------------------------------
+   //
+   // generate all VBOs
    _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
    glGenBuffers(_num_ogl_buffers, _ogl_buffers);
    unsigned current_buffer = 0;
+   //
    // collect the point arrays
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
@@ -1453,6 +1445,7 @@ void Tenderer::collect()
       GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
       CLAY->second->collect(_drawprop->isFilled(CLAY->first), pbuf, ibuf);
    }
+   //
    // collect the indexes of the selected objects
    if (0 < num_total_slctdx)
    {// selected objects buffer
@@ -1471,64 +1464,44 @@ void Tenderer::collect()
       }
       glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
    }
+   //
    // collect the reference boxes
    if (0 < _0layer.total_points())
    {
       GLuint pbuf = _ogl_buffers[current_buffer++];
-      GLuint ibuf = (0 == _0layer.total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
-      _0layer.collect(pbuf, ibuf);
+      _0layer.collect(pbuf);
    }
+   //
+   // that's about it...
    checkOGLError("collect");
 }
 
 void Tenderer::draw()
 {
-   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
-   {
-      word curlayno = CLAY->first;
-      _drawprop->setCurrentColor(curlayno);
-      CLAY->second->draw( _drawprop->getCurrentFill() );// draw everything
+   {// for every layer
+      _drawprop->setCurrentColor(CLAY->first);
+      // draw everything
+      CLAY->second->draw( _drawprop->getCurrentFill() );
+
       if (0 != CLAY->second->total_slctdx())
-      {
+      {// redraw selected contours only
          _drawprop->setLineProps(true);
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
-         CLAY->second->drawSelected(  ); // redraw selected contours only
+         CLAY->second->drawSelected(  );
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
          _drawprop->setLineProps(false);
       }
    }
-   if (0 < _0layer.total_points())
-   {
-      _drawprop->setCurrentColor(0);
-      _0layer.draw();
-   }
-//   glBindBuffer(GL_ARRAY_BUFFER, 0);
-//   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   // draw reference boxes
+   if (0 < _0layer.total_points())   _0layer.draw(_drawprop);
+   // Clean-up the buffers
+   //glBindBuffer(GL_ARRAY_BUFFER, 0);
+   //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
    glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
    delete [] _ogl_buffers;
    _ogl_buffers = NULL;
    checkOGLError("draw");
-   // Cell overlaps
-/*   _drawprop->setCurrentColor(0);
-   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-   //glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
-   TenderRB* ctrb = _cBoundary;
-   while (ctrb)
-   {
-      ctrb->draw();
-      ctrb = ctrb->last();
-   }
-   ctrb = _cBoundary;
-   _drawprop->setLineProps(true);
-   while (ctrb)
-   {
-      if (ctrb->selected())
-         ctrb->draw();
-      ctrb = ctrb->last();
-   }
-   _drawprop->setLineProps(false);
-   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);*/
 }
 
 Tenderer::~Tenderer()
@@ -1552,7 +1525,7 @@ Tenderer::~Tenderer()
 //       _cBoundary = ctrb;
 //    }
 
-   sprintf (debug_message, "Rendering summary: %i vertexes in %i buffers", all_points_drawn, all_layers);
+   sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, all_layers);
    tell_log(console::MT_WARNING,debug_message);
 }
 
@@ -1608,7 +1581,7 @@ void HiResTimer::report(std::string message)
       result.tv_sec -= 1;
       result.tv_usec += 1000000;
    }
-   sprintf (time_message, "%s:   %i sec. %06i msec.",message.c_str(), result.tv_sec, result.tv_usec);
+   sprintf (time_message, "%s:   %li sec. %06li msec.",message.c_str(), result.tv_sec, result.tv_usec);
 #endif
    tell_log(console::MT_INFO,time_message);
 }
