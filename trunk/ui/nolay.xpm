@@ -1,5 +1,5 @@
 /* XPM */
-static char * nolay_xpm[] = {
+static const char * nolay_xpm[] = {
 "16 16 17 1",
 " 	c None",
 ".	c #C3330C",
