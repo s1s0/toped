@@ -1300,6 +1300,19 @@ void Tender0Lay::draw(layprop::DrawProperties* drawprop)
    }
    glDisableClientState(GL_VERTEX_ARRAY);
 }
+
+Tender0Lay::~Tender0Lay()
+{
+   if (NULL != _sizesvx) delete [] _sizesvx;
+   if (NULL != _firstvx) delete [] _firstvx;
+   if (NULL != _sizslix) delete [] _sizslix;
+   if (NULL != _fstslix) delete [] _fstslix;
+   for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
+      delete (*CSH);
+   for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
+      delete (*CSH);
+}
+
 //=============================================================================
 //
 // class Tenderer
