@@ -702,6 +702,7 @@ class Tender0Lay {
    public:
       typedef  std::list<TenderRB*> RefBoxList;
                         Tender0Lay();
+                       ~Tender0Lay();
       TenderRB*         addCellRef(const CTM&, const DBbox&, bool, word);
       void              collect(GLuint);
       void              draw(layprop::DrawProperties*);
