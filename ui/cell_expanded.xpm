@@ -1,5 +1,5 @@
 /* XPM */
-static char * cell_expanded[] = {
+static const char * cell_expanded[] = {
 "16 16 110 2",
 "  	c None",
 ". 	c #3274DB",

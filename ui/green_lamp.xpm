@@ -1,5 +1,5 @@
 /* XPM */
-static char *green_lamp[]={
+static const char *green_lamp[]={
 "16 16 6 1",
 ". c None",
 "# c #008000",

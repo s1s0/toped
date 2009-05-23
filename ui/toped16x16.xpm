@@ -1,5 +1,5 @@
 /* XPM */
-static char * toped16x16_xpm[] = {
+static const char * toped16x16_xpm[] = {
 "16 16 121 2",
 "  	c None",
 ". 	c #E6CA15",

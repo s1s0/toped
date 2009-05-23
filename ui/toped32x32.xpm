@@ -1,5 +1,5 @@
 /* XPM */
-static char * toped32x32_xpm[] = {
+static const char * toped32x32_xpm[] = {
 "32 32 322 2",
 "  	c None",
 ". 	c #E6CA14",

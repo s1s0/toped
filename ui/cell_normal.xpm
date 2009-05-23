@@ -1,5 +1,5 @@
 /* XPM */
-static char * cell_normal[] = {
+static const char * cell_normal[] = {
 "16 16 55 1",
 " 	c None",
 ".	c #949494",
