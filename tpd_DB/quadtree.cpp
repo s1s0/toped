@@ -604,14 +604,20 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
       if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst, fill);
 }
 
-void laydata::quadTree::openGL_draw(Tenderer& rend, const dataList* slst) const
+short laydata::quadTree::clip_type(Tenderer& rend) const
 {
-   if (empty()) return;
+   if (empty()) return 0;
    // check the entire holder for clipping...
    DBbox clip = rend.clipRegion();
    DBbox areal = _overlap.overlap(rend.topCTM());
-   if      ( clip.cliparea(areal) == 0       ) return;
-   else if (!areal.visible(rend.ScrCTM())) return;
+   float clip_area = clip.cliparea(areal);
+   if ( ( 0.0 == clip_area ) || (!areal.visible(rend.ScrCTM())) ) return 0;
+   if (0.0 < clip_area) return 1;
+   else return -1;
+}
+
+void laydata::quadTree::openGL_render(Tenderer& rend, const dataList* slst) const
+{
    tdtdata* wdt = _first;
    // The drawing will be faster like this for the cells without selected shapes
    // that will be the wast majority of the cases. A bit bigger code though.
@@ -644,9 +650,10 @@ void laydata::quadTree::openGL_draw(Tenderer& rend, const dataList* slst) const
          wdt = wdt->next();
       }
    }
-
+   // continue traversing down given that the objects exists and are visible
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->openGL_draw(rend, slst);
+      if ( (NULL != _quads[i]) && (0 != _quads[i]->clip_type(rend)) )
+         _quads[i]->openGL_render(rend, slst);
 }
 
 
@@ -893,7 +900,7 @@ laydata::quadTree::~quadTree() {
 //-----------------------------------------------------------------------------
 // class tdtlayer
 //-----------------------------------------------------------------------------
-/*!Create new tdtbox. Depending on sortnow input variable the new shape is 
+/*!Create new tdtbox. Depending on sortnow input variable the new shape is
 just added to the quadTree (using quadTree::put()) without sorting or fit on 
 the proper place (using add() */
 laydata::tdtdata* laydata::tdtlayer::addbox(const TP& p1, const TP& p2, bool sortnow) {

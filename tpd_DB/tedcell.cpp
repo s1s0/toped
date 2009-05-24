@@ -220,7 +220,7 @@ void laydata::tdtdefaultcell::openGL_draw(layprop::DrawProperties&, bool active)
 {
 }
 
-void laydata::tdtdefaultcell::openGL_draw(Tenderer&, bool active) const
+void laydata::tdtdefaultcell::openGL_render(Tenderer&, bool active) const
 {
 }
 
@@ -370,10 +370,8 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-//      if (0 < lay->first)
       word curlayno = lay->first;
-      if (!drawprop.layerHidden(curlayno))
-         drawprop.setCurrentColor(curlayno);
+      if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
       // fancy like this (dlist iterator) , besause a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)
@@ -386,7 +384,7 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
    }
 }
 
-void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
+void laydata::tdtcell::openGL_render(Tenderer& rend, bool active) const
 {
    // Draw figures
    typedef layerList::const_iterator LCI;
@@ -394,19 +392,35 @@ void laydata::tdtcell::openGL_draw(Tenderer& rend, bool active) const
    {
       word curlayno = lay->first;
       if (rend.layerHidden(curlayno)) continue;
-      // fancy like this (dlist iterator) , besause a simple
-      // _shapesel[curlayno] complains about loosing qualifiers (const)
-      selectList::const_iterator dlst;
-      if (active && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
+      // retrieve the selected objects (if they exists)
+      selectList::const_iterator dlsti;
+      const dataList* dlist;
+      if (active && (_shapesel.end() != (dlsti = _shapesel.find(curlayno))))
+         dlist = dlsti->second;
+      else
+         dlist = NULL;
+      // render depending on the area overlap between the layer chunk and
+      // current location of the view port
+      if (0 != curlayno)
       {
-         if (0 != curlayno) rend.setLayer(curlayno, true);
-         lay->second->openGL_draw(rend, dlst->second/*, fill*/);
+         short cltype = lay->second->clip_type(rend);
+         switch (cltype)
+         {
+            case -1: {// full overlap - conditional rendering
+               if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
+                  lay->second->openGL_render(rend, dlist/*, fill*/);
+               break;
+            }
+            case  1: {//partial clip - render always
+               rend.setLayer(curlayno, false, (NULL != dlist));
+               lay->second->openGL_render(rend, dlist/*, fill*/);
+               break;
+            }
+            default: assert(0 == cltype);
+         }
       }
       else
-      {
-         if (0 != curlayno) rend.setLayer(curlayno, false);
-         lay->second->openGL_draw(rend, NULL/*, fill*/);
-      }
+         lay->second->openGL_render(rend, dlist/*, fill*/);
    }
 }
 

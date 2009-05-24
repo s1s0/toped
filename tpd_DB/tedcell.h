@@ -95,7 +95,7 @@ namespace laydata {
                              tdtdefaultcell(std::string, int , bool );
          virtual            ~tdtdefaultcell() {};
          virtual void        openGL_draw(layprop::DrawProperties&, bool active=false) const;
-         virtual void        openGL_draw(Tenderer&, bool active=false) const;
+         virtual void        openGL_render(Tenderer&, bool active=false) const;
          virtual void        motion_draw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
          virtual void        PSwrite(PSFile&, const layprop::DrawProperties&,
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
@@ -118,8 +118,8 @@ namespace laydata {
       protected:
          void                 invalidateParents(tdtlibrary*);
          layerList            _layers;       //! all layers the cell
-      private:
          std::string          _name;         //! cell name
+      private:
          int                  _libID;        //! cell belongs to ... library
    };
 
@@ -131,7 +131,7 @@ namespace laydata {
       virtual             ~tdtcell(); 
       void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
-      void                 openGL_draw(Tenderer&, bool active=false) const;
+      void                 openGL_render(Tenderer&, bool active=false) const;
       void                 motion_draw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;
       quadTree*            securelayer(word layno);
