@@ -1366,7 +1366,8 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
       _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL)
 {
    // Initialise the cell (CTM) stack
-   _cellStack.push(DEBUG_NEW TenderRB());
+   _dummyCS = DEBUG_NEW TenderRB();
+   _cellStack.push(_dummyCS);
 }
 
 bool Tenderer::chunkExists(word layno, bool has_selected)
@@ -1481,9 +1482,6 @@ void Tenderer::Grid(const real step, const std::string color)
 
 void Tenderer::collect()
 {
-   // This stack will not be of any use anymore - so let's clean-it up
-   while (!_cellStack.empty()) _cellStack.pop();
-
    // First filter-out the layers that doesn't have any objects on them,
    // post process the last slices in the layers and also gather the number
    // of required virtual buffers
@@ -1606,16 +1604,11 @@ Tenderer::~Tenderer()
 //      tell_log(console::MT_INFO,debug_message);
       delete (CLAY->second);
    }
-
-//    while (_cBoundary)
-//    {
-//       TenderRB* ctrb = _cBoundary->last();
-//       delete _cBoundary;
-//       _cBoundary = ctrb;
-//    }
-
    sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, all_layers);
    tell_log(console::MT_WARNING,debug_message);
+   // Don't clear the _cellStack contents. All references there are references in
+   // _0layer and will be cleared there. The only exception is the first dummy cell.
+   delete _dummyCS;
 }
 
 void checkOGLError(std::string loc)

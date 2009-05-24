@@ -799,6 +799,7 @@ class Tenderer {
       unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
       GLuint*           _ogl_buffers; //! Array with the "names" of all openGL buffers
       GLuint            _sbuffer; //! The "name" of the selected index buffer
+      TenderRB*         _dummyCS; //! The first (dummy) cell into the cell stack
 };
 
 void checkOGLError(std::string);
