@@ -804,10 +804,10 @@ void laydata::tdtdesign::openGL_draw(layprop::DrawProperties& drawprop)
    }
 }
 
-void laydata::tdtdesign::openGL_draw(Tenderer& rend)
+void laydata::tdtdesign::openGL_render(Tenderer& rend)
 {
    if (_target.checkedit())
-      _target.view()->openGL_draw(rend, _target.iscell());
+      _target.view()->openGL_render(rend, _target.iscell());
 }
 
 

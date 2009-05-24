@@ -1133,7 +1133,7 @@ void DataCenter::openGL_render(const CTM& layCTM) {
          HiResTimer rendTimer;
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
-         _TEDLIB()->openGL_draw(renderer);
+         _TEDLIB()->openGL_render(renderer);
          rendTimer.report("Time elapsed for data traversing: ");
          // The version with the central VBO's
          renderer.collect();

@@ -1753,8 +1753,8 @@ void laydata::tdtcellref::draw_request(Tenderer& rend) const
    // draw the cell mark ...
 //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    byte crchain = rend.popref(this);
-   rend.pushCell(_translation, obox, crchain == 2, sh_selected == _status);
-   structure()->openGL_draw(rend, crchain == 2);
+   rend.pushCell(structure()->name(), _translation, obox, crchain == 2, sh_selected == _status);
+   structure()->openGL_render(rend, crchain == 2);
    rend.popCell();
    if (crchain) rend.pushref(this);
 }
@@ -2035,8 +2035,13 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
    // draw the cell mark ...
 
    // We are going to draw something, so push the new translation matrix in the stack
-//   rend.pushCTM(_translation, false); //@FIXME! Edit in place array of cells!
-   rend.pushCell(_translation, array_overlap, false, sh_selected == _status);
+//   rend.pushCTM(_translation, false);
+   //@FIXME! Edit in place array of cells!
+   // A dirty hack? Empty cell name ?!
+   // The call below is "kind of" using part of the method functionality
+   // This is an exception from the rule - it should be (possibly) another method
+   // to cover this particular case (cellaref) only
+   rend.pushCell("", _translation, array_overlap, false, sh_selected == _status);
    DBbox obox(structure()->overlap());
    int col_beg, col_end, row_beg, row_end;
    if (obox.visible(rend.topCTM() * rend.ScrCTM()))
@@ -2082,8 +2087,8 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
          // ... get the translation matrix ...
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          // ...draw the structure itself
-         rend.pushCell(refCTM, obox, false, false);//@FIXME! Edit in place array of cells!
-         structure()->openGL_draw(rend);
+         rend.pushCell(structure()->name(), refCTM, obox, false, false);//@FIXME! Edit in place array of cells!
+         structure()->openGL_render(rend);
          rend.popCell();
       }
    }

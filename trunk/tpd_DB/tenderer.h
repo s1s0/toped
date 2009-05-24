@@ -399,17 +399,21 @@ typedef std::list<TenderSelected*>  SliceSelected;
  */
 class TenderRB {
    public:
-                        TenderRB(const CTM&, const DBbox&, word);
+                        TenderRB(std::string, const CTM&, const DBbox&, bool, word);
                         TenderRB();
       void              draw();
+      std::string       name()         {return _name;}
       real* const       translation()  {return _translation;}
       CTM&              ctm()          {return _ctm;}
+      bool              active()       {return _active;}
       unsigned          cDataCopy(int*, unsigned&);
    private:
+      std::string       _name;
       real              _translation[16];
       CTM               _ctm;
       int4b             _obox[8];
       word              _alphaDepth;
+      bool              _active;
 };
 
 /**
@@ -524,7 +528,7 @@ class TenderTV {
    public:
       enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
       enum {cont, line, cnvx, ncvx} ObjtTypes;
-                        TenderTV(TenderRB* const, bool, unsigned, unsigned);
+                        TenderTV(TenderRB* const, bool, bool, unsigned, unsigned);
                        ~TenderTV();
       void              registerBox   (TenderCnvx*);
       void              registerPoly  (TenderNcvx*, TeselPoly*);
@@ -532,10 +536,12 @@ class TenderTV {
 
       void              collect(int*, unsigned int*, unsigned int*);
       void              draw();
+      TenderRB*         swapRefCells(TenderRB*);
 
       unsigned          num_total_points();
       unsigned          num_total_indexs();
-      real* const       tmatrix()            {return _refCell->translation();}
+      bool              reusable()        {return _reusable;}
+      std::string       cellName()        {return _refCell->name();}
    protected:
       void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
 
@@ -560,6 +566,17 @@ class TenderTV {
       unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
       //
       bool              _filled;
+      bool              _reusable;
+};
+
+class TenderReTV {
+   public:
+                        TenderReTV(TenderTV* const chunk, TenderRB* const refCell): _chunk(chunk), _refCell(refCell) {}
+      void              draw();
+   private:
+      TenderTV* const   _chunk;
+      TenderRB* const   _refCell;
+
 };
 
 /**
@@ -656,7 +673,9 @@ class TenderTV {
  */
 class TenderLay {
    public:
-      typedef std::list<TenderTV*> TenderTVList;
+      typedef std::list<TenderTV*>     TenderTVList;
+      typedef std::list<TenderReTV*>   TenderReTVList;
+      typedef std::map<std::string, TenderTV*> ReusableTTVMap;
 
                         TenderLay();
                        ~TenderLay();
@@ -664,7 +683,8 @@ class TenderLay {
       void              poly (int4b*, unsigned, TeselPoly*, bool, const SGBitSet*);
       void              wire (int4b*, unsigned, word, bool, bool, const SGBitSet*);
 
-      void              newSlice(TenderRB* const, bool, bool, unsigned);
+      void              newSlice(TenderRB* const, bool, bool, bool, unsigned);
+      bool              chunkExists(TenderRB* const);
       void              ppSlice();
       void              draw(bool);
       void              drawSelected();
@@ -678,7 +698,9 @@ class TenderLay {
       void              registerSBox  (TenderSCnvx*);
       void              registerSPoly (TenderSNcvx*);
       void              registerSWire (TenderSWire*);
+      ReusableTTVMap    _reusableData;
       TenderTVList      _layData;
+      TenderReTVList    _reLayData;
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
       unsigned          _num_total_points;
       unsigned          _num_total_indexs;
@@ -700,10 +722,10 @@ class TenderLay {
 
 class Tender0Lay {
    public:
-      typedef  std::list<TenderRB*> RefBoxList;
+      typedef std::list<TenderRB*> RefBoxList;
                         Tender0Lay();
                        ~Tender0Lay();
-      TenderRB*         addCellRef(const CTM&, const DBbox&, bool, word);
+      TenderRB*         addCellRef(std::string, const CTM&, const DBbox&, bool, bool, word);
       void              collect(GLuint);
       void              draw(layprop::DrawProperties*);
       unsigned          total_points() {return (_alvrtxs + _asindxs);}
@@ -741,8 +763,9 @@ class Tenderer {
                         Tenderer( layprop::DrawProperties* drawprop, real UU );
                        ~Tenderer();
       void              Grid( const real, const std::string );
-      void              setLayer(word, bool);
-      void              pushCell(const CTM&, const DBbox&, bool, bool);
+      void              setLayer(word, bool, bool);
+      bool              chunkExists(word, bool);
+      void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
       void              popCell()                              {_cellStack.pop();}
       const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
       void              box  (int4b* pdata)                    {_clayer->box(pdata, false, NULL);}

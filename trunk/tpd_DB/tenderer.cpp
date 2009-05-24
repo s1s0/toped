@@ -467,8 +467,9 @@ unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
 //
 // class TenderRB
 //
-TenderRB::TenderRB(const CTM& ctm, const DBbox& obox, word alphaDepth)
-   : _ctm(ctm), _alphaDepth(alphaDepth)
+TenderRB::TenderRB(std::string name, const CTM& ctm, const DBbox& obox,
+                   bool active, word alphaDepth)
+   : _name(name), _ctm(ctm), _alphaDepth(alphaDepth), _active(active)
 {
    _ctm.oglForm(_translation);
    TP tp = TP(obox.p1().x(), obox.p1().y()) * _ctm;
@@ -500,12 +501,13 @@ unsigned TenderRB::cDataCopy(int* array, unsigned& pindex)
 //
 // class TenderTV
 //
-TenderTV::TenderTV(TenderRB* const refCell, bool filled, unsigned parray_offset,
-                                                  unsigned iarray_offset) :
+TenderTV::TenderTV(TenderRB* const refCell, bool filled, bool reusable,
+                   unsigned parray_offset, unsigned iarray_offset) :
    _refCell             ( refCell         ),
    _point_array_offset  ( parray_offset   ),
    _index_array_offset  ( iarray_offset   ),
-   _filled              ( filled          )
+   _filled              ( filled          ),
+   _reusable            ( reusable        )
 {
    for (int i = fqss; i <= ftss; i++)
    {
@@ -771,23 +773,29 @@ void TenderTV::collect(int* point_array, unsigned int* index_array, unsigned int
 
 void TenderTV::draw()
 {
+   // First - deal with openGL translation matrix
+   glPushMatrix();
+   glMultMatrixd(_refCell->translation());
+   // Set-up the offset in the binded Vertex buffer
    glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
+   // Switch the vertex buffers ON in the openGL engine ...
    glEnableClientState(GL_VERTEX_ARRAY);
+   // ... and here we go ...
    if  (_alobjvx[line] > 0)
-   {
+   {// Draw the wire center lines
       assert(_firstvx[line]);
       assert(_sizesvx[line]);
       glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
    }
    if  (_alobjvx[cnvx] > 0)
-   {
+   {// Draw convex polygons (TODO replace GL_QUADS to GL_POLY)
       assert(_firstvx[cnvx]);
       assert(_sizesvx[cnvx]);
       glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
       glMultiDrawArrays(GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
    }
    if  (_alobjvx[ncvx] > 0)
-   {
+   {// Draw non-convex polygons
       glEnableClientState(GL_INDEX_ARRAY);
       assert(_firstvx[ncvx]);
       assert(_sizesvx[ncvx]);
@@ -831,12 +839,23 @@ void TenderTV::draw()
       glDisableClientState(GL_INDEX_ARRAY);
    }
    if (_alobjvx[cont] > 0)
-   {
+   {// Draw the remaining non-filled shapes of any kind
       assert(_firstvx[cont]);
       assert(_sizesvx[cont]);
       glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
    }
+   // Switch the vertex buffers OFF in the openGL engine ...
    glDisableClientState(GL_VERTEX_ARRAY);
+   // ... and finally restore the openGL translation matrix
+   glPopMatrix();
+}
+
+
+TenderRB* TenderTV::swapRefCells(TenderRB* newRefCell)
+{
+   TenderRB* the_swap = _refCell;
+   _refCell = newRefCell;
+   return the_swap;
 }
 
 TenderTV::~TenderTV()
@@ -871,6 +890,12 @@ TenderTV::~TenderTV()
    // Don't delete  _tmatrix. It's only a reference to it here
 }
 
+void TenderReTV::draw()
+{
+   TenderRB* sref_cell = _chunk->swapRefCells(_refCell);
+   _chunk->draw();
+   _chunk->swapRefCells(sref_cell);
+}
 //=============================================================================
 //
 // class TenderLay
@@ -893,16 +918,24 @@ TenderLay::TenderLay(): _cslice(NULL),
  * @param ctrans Current translation matrix of the new object
  * @param fill Whether to fill the drawing objects
  */
-void TenderLay::newSlice(TenderRB* const ctrans, bool fill, bool has_selected, unsigned slctd_array_offset)
+void TenderLay::newSlice(TenderRB* const ctrans, bool fill, bool reusable, bool has_selected, unsigned slctd_array_offset)
 {
-   _has_selected = has_selected;
    if ((_has_selected = has_selected)) // <-- that's not a mistake!
    {
       assert( 0 == total_slctdx());
       _slctd_array_offset = slctd_array_offset;
       _stv_array_offset = 2 * _num_total_points;
    }
-   _cslice = DEBUG_NEW TenderTV(ctrans, fill, 2 * _num_total_points, _num_total_indexs);
+   _cslice = DEBUG_NEW TenderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
+}
+
+bool TenderLay::chunkExists(TenderRB* const ctrans)
+{
+   ReusableTTVMap::iterator achunk;
+   if (_reusableData.end() == ( achunk =_reusableData.find(ctrans->name()) ) )
+      return false;
+   _reLayData.push_back(DEBUG_NEW TenderReTV(achunk->second, ctrans));
+   return true;
 }
 
 /** Add the current slice object (_cslice) to the list of slices _layData but
@@ -918,6 +951,11 @@ void TenderLay::ppSlice()
          _layData.push_back(_cslice);
          _num_total_points += num_points;
          _num_total_indexs += _cslice->num_total_indexs();
+         if (_cslice->reusable())
+         {
+            assert(_reusableData.end() == _reusableData.find(_cslice->cellName()));
+            _reusableData[_cslice->cellName()] = _cslice;
+         }
       }
       else
          delete _cslice;
@@ -1139,12 +1177,13 @@ void TenderLay::draw(bool fill)
    }
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
    {
-      TenderTV* ctv = (*TLAY);
-      glPushMatrix();
-      glMultMatrixd(ctv->tmatrix());
-      ctv->draw();
-      glPopMatrix();
+      (*TLAY)->draw();
    }
+   for (TenderReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
+   {
+      (*TLAY)->draw();
+   }
+
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    if (0 != _ibuffer)
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -1152,6 +1191,7 @@ void TenderLay::draw(bool fill)
 
 void TenderLay::drawSelected()
 {
+   //FIXME - Why this works without processing the CTMs? Will it with edit in place?
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
    GLint bufferSize;
@@ -1198,6 +1238,9 @@ TenderLay::~TenderLay()
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
       delete (*TLAY);
 
+   for (TenderReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
+      delete (*TLAY);
+
    if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
    if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
    if (NULL != _sizslix[lnes]) delete [] _sizslix[lnes];
@@ -1216,9 +1259,10 @@ Tender0Lay::Tender0Lay() :
 {
 }
 
-TenderRB* Tender0Lay::addCellRef(const CTM& trans, const DBbox& overlap, bool selected, word alphaDepth)
+TenderRB* Tender0Lay::addCellRef(std::string cname, const CTM& trans,
+                                 const DBbox& overlap, bool selected, bool active, word alphaDepth)
 {
-   TenderRB* cRefBox = DEBUG_NEW TenderRB(trans, overlap, alphaDepth);
+   TenderRB* cRefBox = DEBUG_NEW TenderRB(cname, trans, overlap, active, alphaDepth);
    if (selected)
    {
       _cellSRefBoxes.push_back(cRefBox);
@@ -1325,32 +1369,64 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
    _cellStack.push(DEBUG_NEW TenderRB());
 }
 
-void Tenderer::setLayer(word layer, bool has_selected)
+bool Tenderer::chunkExists(word layno, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with layer 0 by accident
-   assert(layer);
+   assert(layno);
    if (NULL != _clayer)
-   {
+   { // post process the current layer
       _clayer->ppSlice();
       _cslctd_array_offset += _clayer->total_slctdx();
    }
-   if (_data.end() != _data.find(layer))
+   if (_data.end() != _data.find(layno))
    {
-      _clayer = _data[layer];
+      _clayer = _data[layno];
+      if (_clayer->chunkExists(_cellStack.top()) ) return true;
    }
    else
    {
       _clayer = DEBUG_NEW TenderLay();
-      _data[layer] = _clayer;
+      _data[layno] = _clayer;
    }
-   _clayer->newSlice(_cellStack.top(), _drawprop->isFilled(layer), has_selected, _cslctd_array_offset);
+   _clayer->newSlice(_cellStack.top(), _drawprop->isFilled(layno), true, has_selected, _cslctd_array_offset);
+   // @TODO! current fill on/off should be determined here!
+   return false;
+}
+
+void Tenderer::setLayer(word layno, bool reusable, bool has_selected)
+{
+   // Reference layer is processed differently (pushCell), so make sure
+   // that we haven't got here with layer 0 by accident
+   assert(layno);
+   if (NULL != _clayer)
+   { // post process the current layer
+      _clayer->ppSlice();
+      _cslctd_array_offset += _clayer->total_slctdx();
+   }
+   if (_data.end() != _data.find(layno))
+   {
+      _clayer = _data[layno];
+   }
+   else
+   {
+      _clayer = DEBUG_NEW TenderLay();
+      _data[layno] = _clayer;
+   }
+   _clayer->newSlice(_cellStack.top(), _drawprop->isFilled(layno), reusable, has_selected, _cslctd_array_offset);
    // @TODO! current fill on/off should be determined here!
 }
 
-void Tenderer::pushCell(const CTM& trans, const DBbox& overlap, bool active, bool selected)
+void Tenderer::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
-   _cellStack.push( _0layer.addCellRef(trans * _cellStack.top()->ctm(), overlap, selected, _cellStack.size()) );
+   _cellStack.push( _0layer.addCellRef(cname,
+                                       trans * _cellStack.top()->ctm(),
+                                       overlap,
+                                       selected,
+                                       active,
+                                       _cellStack.size()
+                                      )
+                  );
 }
 
 void Tenderer::wire (int4b* pdata, unsigned psize, word width)
