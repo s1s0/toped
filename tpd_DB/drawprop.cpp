@@ -100,18 +100,39 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
 void layprop::DrawProperties::setCurrentColor(word layno)
 {
    _drawinglayer = layno;
-   if (_layset.end() != _layset.find(layno))
+   if (_layset.end() != _layset.find(_drawinglayer))
    {
-      if (_laycolors.end() != _laycolors.find(_layset[layno]->color()))
+      if (_laycolors.end() != _laycolors.find(_layset[_drawinglayer]->color()))
       {
-         tellRGB* gcol = _laycolors[_layset[layno]->color()];
-         if (gcol) {
+         tellRGB* gcol = _laycolors[_layset[_drawinglayer]->color()];
+         if (gcol)
+         {
             glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
             return;
          }
       }
    }
    glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
+}
+
+void layprop::DrawProperties::adjustAlpha(word factor)
+{
+   return;
+   //@TODO! - A tell option(function or variable) to adjust the constant (30 below)
+   // user must know what's going on, otherwise - the rendering result might be confusing
+   // Having done that, the method can be enabled
+/*   if ((0 == factor) || (_layset.end() != _layset.find(_drawinglayer)))
+   {
+      if (_laycolors.end() != _laycolors.find(_layset[_drawinglayer]->color()))
+      {
+         tellRGB* gcol = _laycolors[_layset[_drawinglayer]->color()];
+         if (gcol)
+         {
+            byte alpha = ((factor * 30) > gcol->alpha()) ? 0 : gcol->alpha() - (factor * 30);
+            glColor4ub(gcol->red(), gcol->green(), gcol->blue(), alpha);
+         }
+      }
+   }*/
 }
 
 bool  layprop::DrawProperties::layerHidden(word layno) const

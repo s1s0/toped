@@ -90,7 +90,7 @@
                   |                 index of selected objects VBO                  |
                    ----------------------------------------------------------------
    Speed:
-   The first step is the most time consuming from all tree, but this is mainly the
+   The first step is the most time consuming from all three, but this is mainly the
    Toped DB traversing which is assumed optimal. The last one is the quickest one
    and the speed there can be improved even more if shaders are used. The speed of
    the second step depends entirely on the implementation of the Tenderer.
@@ -405,6 +405,7 @@ class TenderRB {
       std::string       name()         {return _name;}
       real* const       translation()  {return _translation;}
       CTM&              ctm()          {return _ctm;}
+      word              alphaDepth()   {return _alphaDepth;}
       unsigned          cDataCopy(int*, unsigned&);
    private:
       std::string       _name;
@@ -533,7 +534,7 @@ class TenderTV {
       void              registerWire  (TenderWire*);
 
       void              collect(int*, unsigned int*, unsigned int*);
-      void              draw();
+      void              draw(layprop::DrawProperties*);
       TenderRB*         swapRefCells(TenderRB*);
 
       unsigned          num_total_points();
@@ -570,7 +571,7 @@ class TenderTV {
 class TenderReTV {
    public:
                         TenderReTV(TenderTV* const chunk, TenderRB* const refCell): _chunk(chunk), _refCell(refCell) {}
-      void              draw();
+      void              draw(layprop::DrawProperties*);
    private:
       TenderTV* const   _chunk;
       TenderRB* const   _refCell;
@@ -684,7 +685,7 @@ class TenderLay {
       void              newSlice(TenderRB* const, bool, bool, bool, unsigned);
       bool              chunkExists(TenderRB* const);
       void              ppSlice();
-      void              draw();
+      void              draw(layprop::DrawProperties*);
       void              drawSelected();
       void              collect(bool, GLuint, GLuint);
       void              collectSelected(unsigned int*);
