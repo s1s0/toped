@@ -568,6 +568,36 @@ class TenderTV {
       bool              _reusable;
 };
 
+/**
+   Very small class which holds the reusable TenderTV chunks. Here is what it is.
+   The view usually contains relatively small number of cells which are referenced
+   multiply times. They do contain the same data, but it should be visualised
+   using different translation matrices. The simplest case is an array of cells
+   object. It would be really a waste of CPU time to traverse those cells every
+   time they are referenced. This also means that the ammount of processing data
+   will be determined by the number of references, not by the number of unique
+   cells which in turn will slow-down the rendering and will consume much more
+   memory and bandwidth to transfer it to the GPU.
+
+   Here is the alternative approach. Each cell layer (chunk) is checked during
+   the traversing for its location. There can be 3 cases:
+
+      - the chunk is outside the view window - it is then discarded and is not
+        reaching the Tenderer at all.
+      - the chunk is partially inside the view window - it is traversed, but
+        its data is considered unique and no further attempts to reuse it.
+      - the chunk is entirely inside the view window
+
+   The latter case is the interesting one. Before creating a new chunk of data
+   (TenderTV object), Tenderer is checking whether it already exists
+   (TenderLay::chunkExists). If it does - it is registered here, a new TenderReTV
+   object is created and the traversing of the current layer is skipped. If the
+   chunk doesn't exists, then a TenderTV object is created, but it is also
+   registered as "reusable" and the traversing continues as normal.
+
+   This class requires only a draw() method which takes care to replace themporary
+   the translation matrix of the referenced TenderTV and then calls TenderTV::draw()
+*/
 class TenderReTV {
    public:
                         TenderReTV(TenderTV* const chunk, TenderRB* const refCell): _chunk(chunk), _refCell(refCell) {}
@@ -719,6 +749,11 @@ class TenderLay {
       unsigned          _slctd_array_offset; //! first point in the VBO with selected indexes
 };
 
+/**
+   Responsible for visualising the overlap boxes of the references. Relatively
+   trivial class. One object of this class should be created only. All reference
+   boxes are processed in a single VBO. This includes the selected ones.
+*/
 class Tender0Lay {
    public:
       typedef std::list<TenderRB*> RefBoxList;
@@ -738,7 +773,7 @@ class Tender0Lay {
       GLsizei*          _sizesvx; //! array of sizes for vertex sets
       GLsizei*          _firstvx; //! array of first vertexes
       // index related data for non-convex polygons
-      unsigned          _asindxs; //! total number of indexes
+      unsigned          _asindxs; //! total number of selected vertixes
       unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
       GLsizei*          _sizslix; //! array of sizes for indexes sets
       GLsizei*          _fstslix; //! array of first indexes
