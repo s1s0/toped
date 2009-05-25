@@ -771,11 +771,12 @@ void TenderTV::collect(int* point_array, unsigned int* index_array, unsigned int
    }
 }
 
-void TenderTV::draw()
+void TenderTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
    glPushMatrix();
    glMultMatrixd(_refCell->translation());
+   drawprop->adjustAlpha(_refCell->alphaDepth());
    // Set-up the offset in the binded Vertex buffer
    glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
    // Switch the vertex buffers ON in the openGL engine ...
@@ -890,10 +891,10 @@ TenderTV::~TenderTV()
    // Don't delete  _tmatrix. It's only a reference to it here
 }
 
-void TenderReTV::draw()
+void TenderReTV::draw(layprop::DrawProperties* drawprop)
 {
    TenderRB* sref_cell = _chunk->swapRefCells(_refCell);
-   _chunk->draw();
+   _chunk->draw(drawprop);
    _chunk->swapRefCells(sref_cell);
 }
 //=============================================================================
@@ -1162,7 +1163,7 @@ void TenderLay::collectSelected(unsigned int* slctd_array)
    }
 }
 
-void TenderLay::draw()
+void TenderLay::draw(layprop::DrawProperties* drawprop)
 {
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
@@ -1177,11 +1178,11 @@ void TenderLay::draw()
    }
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
    {
-      (*TLAY)->draw();
+      (*TLAY)->draw(drawprop);
    }
    for (TenderReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
    {
-      (*TLAY)->draw();
+      (*TLAY)->draw(drawprop);
    }
 
    glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1422,7 +1423,7 @@ void Tenderer::pushCell(std::string cname, const CTM& trans, const DBbox& overla
                                            trans * _cellStack.top()->ctm(),
                                            overlap,
                                            selected,
-                                           _cellStack.size()
+                                           _cellStack.size() - 1
                                           );
    _cellStack.push(ccellref );
    if (active)
@@ -1572,7 +1573,7 @@ void Tenderer::draw()
       _drawprop->setCurrentColor(CLAY->first);
       _drawprop->setCurrentFill();
       // draw everything
-      CLAY->second->draw();
+      CLAY->second->draw(_drawprop);
 
       if (0 != CLAY->second->total_slctdx())
       {// redraw selected contours only

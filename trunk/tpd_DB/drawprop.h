@@ -113,8 +113,9 @@ namespace layprop {
     */
    class DrawProperties {
       public:
-         DrawProperties();
-         ~DrawProperties();
+                                    DrawProperties();
+                                   ~DrawProperties();
+         void                       adjustAlpha(word factor);
          void                       setCurrentColor(word layno);
          void                       setGridColor(std::string colname) const;
          bool                       getCurrentFill() const;

@@ -1754,13 +1754,23 @@ void laydata::tdtcellref::draw_request(Tenderer& rend) const
 //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    //
    byte crchain = rend.popref(this);
-   structure()->openGL_render(rend, _translation, obox, sh_selected == _status, 2 == crchain);
+   structure()->openGL_render(rend, _translation, obox, false, 2 == crchain);
    if (crchain) rend.pushref(this);
 }
 
 void laydata::tdtcellref::draw_srequest(Tenderer& rend, const SGBitSet*) const
 {
-   draw_request(rend);
+   // get overlapping box of the structure ...
+   DBbox obox(structure()->overlap());
+   // ... translate it to the current coordinates ...
+   DBbox areal = obox.overlap(_translation * rend.topCTM());
+   if (!areal.visible(rend.ScrCTM())) return;
+   // draw the cell mark ...
+//   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
+   //
+   byte crchain = rend.popref(this);
+   structure()->openGL_render(rend, _translation, obox, true, 2 == crchain);
+   if (crchain) rend.pushref(this);
 }
 
 void laydata::tdtcellref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -2086,6 +2096,7 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
 
 void laydata::tdtcellaref::draw_srequest(Tenderer& rend, const SGBitSet*) const
 {
+   //@FIXME! array of cells selected! It will give confusing results in "edit in place"
    draw_request(rend);
 }
 
