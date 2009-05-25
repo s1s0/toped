@@ -399,13 +399,12 @@ typedef std::list<TenderSelected*>  SliceSelected;
  */
 class TenderRB {
    public:
-                        TenderRB(std::string, const CTM&, const DBbox&, bool, word);
+                        TenderRB(std::string, const CTM&, const DBbox&, word);
                         TenderRB();
       void              draw();
       std::string       name()         {return _name;}
       real* const       translation()  {return _translation;}
       CTM&              ctm()          {return _ctm;}
-      bool              active()       {return _active;}
       unsigned          cDataCopy(int*, unsigned&);
    private:
       std::string       _name;
@@ -413,7 +412,6 @@ class TenderRB {
       CTM               _ctm;
       int4b             _obox[8];
       word              _alphaDepth;
-      bool              _active;
 };
 
 /**
@@ -686,7 +684,7 @@ class TenderLay {
       void              newSlice(TenderRB* const, bool, bool, bool, unsigned);
       bool              chunkExists(TenderRB* const);
       void              ppSlice();
-      void              draw(bool);
+      void              draw();
       void              drawSelected();
       void              collect(bool, GLuint, GLuint);
       void              collectSelected(unsigned int*);
@@ -725,7 +723,7 @@ class Tender0Lay {
       typedef std::list<TenderRB*> RefBoxList;
                         Tender0Lay();
                        ~Tender0Lay();
-      TenderRB*         addCellRef(std::string, const CTM&, const DBbox&, bool, bool, word);
+      TenderRB*         addCellRef(std::string, const CTM&, const DBbox&, bool, word);
       void              collect(GLuint);
       void              draw(layprop::DrawProperties*);
       unsigned          total_points() {return (_alvrtxs + _asindxs);}
@@ -763,7 +761,7 @@ class Tenderer {
                         Tenderer( layprop::DrawProperties* drawprop, real UU );
                        ~Tenderer();
       void              Grid( const real, const std::string );
-      void              setLayer(word, bool, bool);
+      void              setLayer(word, bool);
       bool              chunkExists(word, bool);
       void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
       void              popCell()                              {_cellStack.pop();}
@@ -800,6 +798,7 @@ class Tenderer {
       GLuint*           _ogl_buffers; //! Array with the "names" of all openGL buffers
       GLuint            _sbuffer; //! The "name" of the selected index buffer
       TenderRB*         _dummyCS; //! The first (dummy) cell into the cell stack
+      TenderRB*         _activeCS;
 };
 
 void checkOGLError(std::string);

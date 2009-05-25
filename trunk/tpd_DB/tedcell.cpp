@@ -220,9 +220,10 @@ void laydata::tdtdefaultcell::openGL_draw(layprop::DrawProperties&, bool active)
 {
 }
 
-void laydata::tdtdefaultcell::openGL_render(Tenderer&, bool active) const
+void laydata::tdtdefaultcell::openGL_render(Tenderer&, const CTM&, DBbox&, bool, bool) const
 {
 }
+
 
 void laydata::tdtdefaultcell::motion_draw(const layprop::DrawProperties&, ctmqueue&, bool active) const
 {
@@ -384,8 +385,11 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
    }
 }
 
-void laydata::tdtcell::openGL_render(Tenderer& rend, bool active) const
+void laydata::tdtcell::openGL_render(Tenderer& rend, const CTM& trans,
+                                     DBbox& obox, bool selected, bool active) const
 {
+   rend.pushCell(_name, trans, obox, active, selected);
+
    // Draw figures
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
@@ -407,21 +411,27 @@ void laydata::tdtcell::openGL_render(Tenderer& rend, bool active) const
          switch (cltype)
          {
             case -1: {// full overlap - conditional rendering
-               if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
-                  lay->second->openGL_render(rend, dlist/*, fill*/);
+               if (active)
+               {// ... but active cell is getting always VIP treatment
+                  rend.setLayer(curlayno, (NULL != dlist));
+                  lay->second->openGL_render(rend, dlist);
+               }
+               else if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
+                  lay->second->openGL_render(rend, dlist);
                break;
             }
             case  1: {//partial clip - render always
-               rend.setLayer(curlayno, false, (NULL != dlist));
-               lay->second->openGL_render(rend, dlist/*, fill*/);
+               rend.setLayer(curlayno, (NULL != dlist));
+               lay->second->openGL_render(rend, dlist);
                break;
             }
             default: assert(0 == cltype);
          }
       }
       else
-         lay->second->openGL_render(rend, dlist/*, fill*/);
+         lay->second->openGL_render(rend, dlist);
    }
+   rend.popCell();
 }
 
 void laydata::tdtcell::motion_draw(const layprop::DrawProperties& drawprop,

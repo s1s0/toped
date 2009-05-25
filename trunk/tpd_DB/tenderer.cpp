@@ -468,8 +468,8 @@ unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
 // class TenderRB
 //
 TenderRB::TenderRB(std::string name, const CTM& ctm, const DBbox& obox,
-                   bool active, word alphaDepth)
-   : _name(name), _ctm(ctm), _alphaDepth(alphaDepth), _active(active)
+                   word alphaDepth)
+   : _name(name), _ctm(ctm), _alphaDepth(alphaDepth)
 {
    _ctm.oglForm(_translation);
    TP tp = TP(obox.p1().x(), obox.p1().y()) * _ctm;
@@ -484,7 +484,7 @@ TenderRB::TenderRB(std::string name, const CTM& ctm, const DBbox& obox,
 
 
 TenderRB::TenderRB()
-   : _ctm(CTM()), _alphaDepth(0)
+   : _name(""), _ctm(CTM()), _alphaDepth(0)
 {
    _ctm.oglForm(_translation);
    for (word i = 0; i < 8; _obox[i++] = 0);
@@ -1162,7 +1162,7 @@ void TenderLay::collectSelected(unsigned int* slctd_array)
    }
 }
 
-void TenderLay::draw(bool fill)
+void TenderLay::draw()
 {
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
@@ -1191,7 +1191,6 @@ void TenderLay::draw(bool fill)
 
 void TenderLay::drawSelected()
 {
-   //FIXME - Why this works without processing the CTMs? Will it with edit in place?
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
    GLint bufferSize;
@@ -1260,9 +1259,9 @@ Tender0Lay::Tender0Lay() :
 }
 
 TenderRB* Tender0Lay::addCellRef(std::string cname, const CTM& trans,
-                                 const DBbox& overlap, bool selected, bool active, word alphaDepth)
+                                 const DBbox& overlap, bool selected, word alphaDepth)
 {
-   TenderRB* cRefBox = DEBUG_NEW TenderRB(cname, trans, overlap, active, alphaDepth);
+   TenderRB* cRefBox = DEBUG_NEW TenderRB(cname, trans, overlap, alphaDepth);
    if (selected)
    {
       _cellSRefBoxes.push_back(cRefBox);
@@ -1363,7 +1362,8 @@ Tender0Lay::~Tender0Lay()
 //
 Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
       _drawprop(drawprop), _UU(UU), _clayer(NULL),
-      _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL)
+      _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL),
+      _activeCS(NULL)
 {
    // Initialise the cell (CTM) stack
    _dummyCS = DEBUG_NEW TenderRB();
@@ -1391,11 +1391,10 @@ bool Tenderer::chunkExists(word layno, bool has_selected)
       _data[layno] = _clayer;
    }
    _clayer->newSlice(_cellStack.top(), _drawprop->isFilled(layno), true, has_selected, _cslctd_array_offset);
-   // @TODO! current fill on/off should be determined here!
    return false;
 }
 
-void Tenderer::setLayer(word layno, bool reusable, bool has_selected)
+void Tenderer::setLayer(word layno, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with layer 0 by accident
@@ -1414,20 +1413,23 @@ void Tenderer::setLayer(word layno, bool reusable, bool has_selected)
       _clayer = DEBUG_NEW TenderLay();
       _data[layno] = _clayer;
    }
-   _clayer->newSlice(_cellStack.top(), _drawprop->isFilled(layno), reusable, has_selected, _cslctd_array_offset);
-   // @TODO! current fill on/off should be determined here!
+   _clayer->newSlice(_cellStack.top(), _drawprop->isFilled(layno), false, has_selected, _cslctd_array_offset);
 }
 
 void Tenderer::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
-   _cellStack.push( _0layer.addCellRef(cname,
-                                       trans * _cellStack.top()->ctm(),
-                                       overlap,
-                                       selected,
-                                       active,
-                                       _cellStack.size()
-                                      )
-                  );
+   TenderRB* ccellref = _0layer.addCellRef(cname,
+                                           trans * _cellStack.top()->ctm(),
+                                           overlap,
+                                           selected,
+                                           _cellStack.size()
+                                          );
+   _cellStack.push(ccellref );
+   if (active)
+   {
+      assert(NULL == _activeCS);
+      _activeCS = ccellref;
+   }
 }
 
 void Tenderer::wire (int4b* pdata, unsigned psize, word width)
@@ -1568,14 +1570,18 @@ void Tenderer::draw()
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       _drawprop->setCurrentColor(CLAY->first);
+      _drawprop->setCurrentFill();
       // draw everything
-      CLAY->second->draw( _drawprop->getCurrentFill() );
+      CLAY->second->draw();
 
       if (0 != CLAY->second->total_slctdx())
       {// redraw selected contours only
          _drawprop->setLineProps(true);
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
+         glPushMatrix();
+         glMultMatrixd(_activeCS->translation());
          CLAY->second->drawSelected(  );
+         glPopMatrix();
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
          _drawprop->setLineProps(false);
       }
