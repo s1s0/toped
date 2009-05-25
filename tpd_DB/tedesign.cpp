@@ -807,7 +807,12 @@ void laydata::tdtdesign::openGL_draw(layprop::DrawProperties& drawprop)
 void laydata::tdtdesign::openGL_render(Tenderer& rend)
 {
    if (_target.checkedit())
-      _target.view()->openGL_render(rend, _target.iscell());
+   {
+      //@FIXME! Make the overlap() - a value NOT a FUNCTION and get rid of the parameter
+      const CTM boza;
+      DBbox obox(_target.view()->overlap());
+      _target.view()->openGL_render(rend, boza, obox, false, _target.iscell());
+   }
 }
 
 

@@ -173,6 +173,27 @@ bool layprop::DrawProperties::isFilled(word layno) const
    else return false;
 }
 
+void layprop::DrawProperties::setCurrentFill() const
+{
+   if ((0 == _drawinglayer) || (_layset.end() == _layset.find(_drawinglayer)))
+      return;
+   // The 3 lines below are doing effectively
+   // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
+   // but the problem is const stuff (discards qualifiers)
+   // They are ugly, but don't know how to do it better
+   // Similar for layerLocked and layerHidden
+   laySetList::const_iterator ilayset = _layset.find(_drawinglayer);
+   fillMAP::const_iterator ifillset;
+   if (_layfill.end() != (ifillset = _layfill.find(ilayset->second->fill())))
+   {
+      byte* ifill = ifillset->second;
+      glEnable(GL_POLYGON_STIPPLE);
+//         glEnable(GL_POLYGON_SMOOTH); //- for solid fill
+//         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      glPolygonStipple(ifill);
+   }
+}
+
 void layprop::DrawProperties::draw_text_boundary(const pointlist& ptlist)
 {
    if (_textbox_hidden) return;
