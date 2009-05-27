@@ -776,7 +776,7 @@ void TenderTV::draw(layprop::DrawProperties* drawprop)
    // First - deal with openGL translation matrix
    glPushMatrix();
    glMultMatrixd(_refCell->translation());
-   drawprop->adjustAlpha(_refCell->alphaDepth());
+   drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
    // Set-up the offset in the binded Vertex buffer
    glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
    // Switch the vertex buffers ON in the openGL engine ...
@@ -1266,14 +1266,18 @@ TenderRef* Tender0Lay::addCellRef(std::string cname, const CTM& trans,
    if (selected)
    {
       _cellSRefBoxes.push_back(cRefBox);
+      assert(2 == alphaDepth);
       _asindxs += 4;
       _asobjix++;
    }
    else
    {
       _cellRefBoxes.push_back(cRefBox);
-      _alvrtxs += 4;
-      _alobjvx++;
+      if (1 < alphaDepth)
+      {
+         _alvrtxs += 4;
+         _alobjvx++;
+      }
    }
    return cRefBox;
 }
@@ -1301,8 +1305,11 @@ void Tender0Lay::collect(GLuint pbuf)
    }
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
    {
-      _firstvx[szindx  ] = pntindx/2;
-      _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+      if (1 < (*CSH)->alphaDepth())
+      {
+         _firstvx[szindx  ] = pntindx/2;
+         _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+      }
    }
    for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
    {
@@ -1423,7 +1430,7 @@ void Tenderer::pushCell(std::string cname, const CTM& trans, const DBbox& overla
                                            trans * _cellStack.top()->ctm(),
                                            overlap,
                                            selected,
-                                           _cellStack.size() - 1
+                                           _cellStack.size()
                                           );
    _cellStack.push(ccellref );
    if (active)

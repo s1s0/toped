@@ -121,14 +121,16 @@ void layprop::DrawProperties::adjustAlpha(word factor)
    //@TODO! - A tell option(function or variable) to adjust the constant (30 below)
    // user must know what's going on, otherwise - the rendering result might be confusing
    // Having done that, the method can be enabled
-/*   if ((0 == factor) || (_layset.end() != _layset.find(_drawinglayer)))
+/*   if (_layset.end() != _layset.find(_drawinglayer))
    {
       if (_laycolors.end() != _laycolors.find(_layset[_drawinglayer]->color()))
       {
          tellRGB* gcol = _laycolors[_layset[_drawinglayer]->color()];
          if (gcol)
          {
-            byte alpha = ((factor * 30) > gcol->alpha()) ? 0 : gcol->alpha() - (factor * 30);
+            byte alpha = gcol->alpha();
+            if (0 < factor)
+               alpha = ((factor * 50) > gcol->alpha()) ? 0 : gcol->alpha() - (factor * 50);
             glColor4ub(gcol->red(), gcol->green(), gcol->blue(), alpha);
          }
       }
