@@ -1227,9 +1227,9 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
    catch (EXPTN) {return;}
    DATC->unlockDB();
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Stream files |*.gds;*.sf"),
-                     tpdfOPEN);
-   if (wxID_OK != dlg2.ShowModal()) 
+                     wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF|All files(*.*)|*.*"),
+                         tpdfOPEN);
+   if (wxID_OK != dlg2.ShowModal())
    {
       SetStatusText(wxT("Parsing aborted")); return;
    }
