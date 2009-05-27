@@ -465,9 +465,9 @@ unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
 
 //=============================================================================
 //
-// class TenderRB
+// class TenderRef
 //
-TenderRB::TenderRB(std::string name, const CTM& ctm, const DBbox& obox,
+TenderRef::TenderRef(std::string name, const CTM& ctm, const DBbox& obox,
                    word alphaDepth)
    : _name(name), _ctm(ctm), _alphaDepth(alphaDepth)
 {
@@ -483,14 +483,14 @@ TenderRB::TenderRB(std::string name, const CTM& ctm, const DBbox& obox,
 }
 
 
-TenderRB::TenderRB()
+TenderRef::TenderRef()
    : _name(""), _ctm(CTM()), _alphaDepth(0)
 {
    _ctm.oglForm(_translation);
    for (word i = 0; i < 8; _obox[i++] = 0);
 }
 
-unsigned TenderRB::cDataCopy(int* array, unsigned& pindex)
+unsigned TenderRef::cDataCopy(int* array, unsigned& pindex)
 {
    memcpy(&(array[pindex]), _obox, sizeof(int4b) * 8);
    pindex += 8;
@@ -501,7 +501,7 @@ unsigned TenderRB::cDataCopy(int* array, unsigned& pindex)
 //
 // class TenderTV
 //
-TenderTV::TenderTV(TenderRB* const refCell, bool filled, bool reusable,
+TenderTV::TenderTV(TenderRef* const refCell, bool filled, bool reusable,
                    unsigned parray_offset, unsigned iarray_offset) :
    _refCell             ( refCell         ),
    _point_array_offset  ( parray_offset   ),
@@ -852,9 +852,9 @@ void TenderTV::draw(layprop::DrawProperties* drawprop)
 }
 
 
-TenderRB* TenderTV::swapRefCells(TenderRB* newRefCell)
+TenderRef* TenderTV::swapRefCells(TenderRef* newRefCell)
 {
-   TenderRB* the_swap = _refCell;
+   TenderRef* the_swap = _refCell;
    _refCell = newRefCell;
    return the_swap;
 }
@@ -893,7 +893,7 @@ TenderTV::~TenderTV()
 
 void TenderReTV::draw(layprop::DrawProperties* drawprop)
 {
-   TenderRB* sref_cell = _chunk->swapRefCells(_refCell);
+   TenderRef* sref_cell = _chunk->swapRefCells(_refCell);
    _chunk->draw(drawprop);
    _chunk->swapRefCells(sref_cell);
 }
@@ -919,7 +919,7 @@ TenderLay::TenderLay(): _cslice(NULL),
  * @param ctrans Current translation matrix of the new object
  * @param fill Whether to fill the drawing objects
  */
-void TenderLay::newSlice(TenderRB* const ctrans, bool fill, bool reusable, bool has_selected, unsigned slctd_array_offset)
+void TenderLay::newSlice(TenderRef* const ctrans, bool fill, bool reusable, bool has_selected, unsigned slctd_array_offset)
 {
    if ((_has_selected = has_selected)) // <-- that's not a mistake!
    {
@@ -930,7 +930,7 @@ void TenderLay::newSlice(TenderRB* const ctrans, bool fill, bool reusable, bool 
    _cslice = DEBUG_NEW TenderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
-bool TenderLay::chunkExists(TenderRB* const ctrans)
+bool TenderLay::chunkExists(TenderRef* const ctrans)
 {
    ReusableTTVMap::iterator achunk;
    if (_reusableData.end() == ( achunk =_reusableData.find(ctrans->name()) ) )
@@ -1259,10 +1259,10 @@ Tender0Lay::Tender0Lay() :
 {
 }
 
-TenderRB* Tender0Lay::addCellRef(std::string cname, const CTM& trans,
+TenderRef* Tender0Lay::addCellRef(std::string cname, const CTM& trans,
                                  const DBbox& overlap, bool selected, word alphaDepth)
 {
-   TenderRB* cRefBox = DEBUG_NEW TenderRB(cname, trans, overlap, alphaDepth);
+   TenderRef* cRefBox = DEBUG_NEW TenderRef(cname, trans, overlap, alphaDepth);
    if (selected)
    {
       _cellSRefBoxes.push_back(cRefBox);
@@ -1367,7 +1367,7 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
       _activeCS(NULL)
 {
    // Initialise the cell (CTM) stack
-   _dummyCS = DEBUG_NEW TenderRB();
+   _dummyCS = DEBUG_NEW TenderRef();
    _cellStack.push(_dummyCS);
 }
 
@@ -1419,7 +1419,7 @@ void Tenderer::setLayer(word layno, bool has_selected)
 
 void Tenderer::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
-   TenderRB* ccellref = _0layer.addCellRef(cname,
+   TenderRef* ccellref = _0layer.addCellRef(cname,
                                            trans * _cellStack.top()->ctm(),
                                            overlap,
                                            selected,
