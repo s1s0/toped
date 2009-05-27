@@ -397,10 +397,10 @@ typedef std::list<TenderSelected*>  SliceSelected;
 /**
  *  Reference boxes
  */
-class TenderRB {
+class TenderRef {
    public:
-                        TenderRB(std::string, const CTM&, const DBbox&, word);
-                        TenderRB();
+                        TenderRef(std::string, const CTM&, const DBbox&, word);
+                        TenderRef();
       void              draw();
       std::string       name()         {return _name;}
       real* const       translation()  {return _translation;}
@@ -527,7 +527,7 @@ class TenderTV {
    public:
       enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
       enum {cont, line, cnvx, ncvx} ObjtTypes;
-                        TenderTV(TenderRB* const, bool, bool, unsigned, unsigned);
+                        TenderTV(TenderRef* const, bool, bool, unsigned, unsigned);
                        ~TenderTV();
       void              registerBox   (TenderCnvx*);
       void              registerPoly  (TenderNcvx*, TeselPoly*);
@@ -535,7 +535,7 @@ class TenderTV {
 
       void              collect(int*, unsigned int*, unsigned int*);
       void              draw(layprop::DrawProperties*);
-      TenderRB*         swapRefCells(TenderRB*);
+      TenderRef*        swapRefCells(TenderRef*);
 
       unsigned          num_total_points();
       unsigned          num_total_indexs();
@@ -544,7 +544,7 @@ class TenderTV {
    protected:
       void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
 
-      TenderRB*         _refCell;
+      TenderRef*        _refCell;
       // collected data lists
       SliceObjects      _cont_data; //! Countour data
       SliceWires        _line_data; //! Line data
@@ -600,11 +600,12 @@ class TenderTV {
 */
 class TenderReTV {
    public:
-                        TenderReTV(TenderTV* const chunk, TenderRB* const refCell): _chunk(chunk), _refCell(refCell) {}
+                        TenderReTV(TenderTV* const chunk, TenderRef* const refCell):
+                           _chunk(chunk), _refCell(refCell) {}
       void              draw(layprop::DrawProperties*);
    private:
       TenderTV* const   _chunk;
-      TenderRB* const   _refCell;
+      TenderRef* const  _refCell;
 
 };
 
@@ -712,8 +713,8 @@ class TenderLay {
       void              poly (int4b*, unsigned, TeselPoly*, bool, const SGBitSet*);
       void              wire (int4b*, unsigned, word, bool, bool, const SGBitSet*);
 
-      void              newSlice(TenderRB* const, bool, bool, bool, unsigned);
-      bool              chunkExists(TenderRB* const);
+      void              newSlice(TenderRef* const, bool, bool, bool, unsigned);
+      bool              chunkExists(TenderRef* const);
       void              ppSlice();
       void              draw(layprop::DrawProperties*);
       void              drawSelected();
@@ -756,10 +757,10 @@ class TenderLay {
 */
 class Tender0Lay {
    public:
-      typedef std::list<TenderRB*> RefBoxList;
+      typedef std::list<TenderRef*> RefBoxList;
                         Tender0Lay();
                        ~Tender0Lay();
-      TenderRB*         addCellRef(std::string, const CTM&, const DBbox&, bool, word);
+      TenderRef*         addCellRef(std::string, const CTM&, const DBbox&, bool, word);
       void              collect(GLuint);
       void              draw(layprop::DrawProperties*);
       unsigned          total_points() {return (_alvrtxs + _asindxs);}
@@ -782,7 +783,7 @@ class Tender0Lay {
 //-----------------------------------------------------------------------------
 //
 typedef std::map<word, TenderLay*> DataLay;
-typedef std::stack<TenderRB*> CellStack;
+typedef std::stack<TenderRef*> CellStack;
 
 /**
    Toped RENDERER is the front-end class, the interface to the rest of the world.
@@ -833,8 +834,8 @@ class Tenderer {
       unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
       GLuint*           _ogl_buffers; //! Array with the "names" of all openGL buffers
       GLuint            _sbuffer; //! The "name" of the selected index buffer
-      TenderRB*         _dummyCS; //! The first (dummy) cell into the cell stack
-      TenderRB*         _activeCS;
+      TenderRef*        _dummyCS; //! The first (dummy) cell into the cell stack
+      TenderRef*        _activeCS;
 };
 
 void checkOGLError(std::string);
@@ -855,9 +856,3 @@ class HiResTimer {
 };
 
 #endif //TENDERER_H
-
-//class TenderRefBox : public TenderCnvx {
-//   public:
-//                        TenderRefBox(int4b* pdata) : TenderCnvx(pdata, 4) {}
-//      virtual          ~TenderRefBox() {delete [] _cdata;}
-//};
