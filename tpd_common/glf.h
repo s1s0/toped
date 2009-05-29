@@ -47,10 +47,10 @@ extern "C" {
 #define GLF_RIGHT_DOWN       28
 #define GLF_CENTER           24
 
-#define GLF_LEFT			 1
-#define GLF_RIGHT			 2
-#define GLF_UP				 3
-#define GLF_DOWN			 4
+#define GLF_LEFT              1
+#define GLF_RIGHT             2
+#define GLF_UP                3
+#define GLF_DOWN              4
 
 /* Console constants */
 #define GLF_CONSOLE_CURSOR   30
@@ -61,20 +61,20 @@ void glfInit();
 void glfClose();
 
 /* Font loading/unloading functions */
-int	glfLoadFont(const char *font_name);		/* Load Vector font to memory */
-int	glfLoadBMFFont(char *FName);			   /* Load Bitmap font to memory */
-int	glfUnloadFont();						      /* Unload font from memory */
-int   glfUnloadBMFFont();						   /* Unload current BMF font */
-int	glfUnloadFontD(int font_descriptor);	/* Unload font by font_descriptor */
-int	glfUnloadBMFFontD(int bmf_descriptor);	/* Unload BMF font by bmf_descriptor */
+int   glfLoadFont(const char *font_name);      /* Load Vector font to memory */
+int   glfLoadBMFFont(char *FName);            /* Load Bitmap font to memory */
+int   glfUnloadFont();                        /* Unload font from memory */
+int   glfUnloadBMFFont();                     /* Unload current BMF font */
+int   glfUnloadFontD(int font_descriptor);   /* Unload font by font_descriptor */
+int   glfUnloadBMFFontD(int bmf_descriptor);   /* Unload BMF font by bmf_descriptor */
 
 /* Text drawing functions */
 /* --------- Vector Fonts ---------------- */
-void glfDrawWiredSymbol(char s);          /* Draw wired symbol    */
+void glfDrawWiredSymbol(const char s);    /* Draw wired symbol    */
 void glfDrawWiredString(const char *s);   /* Draw wired string    */
 void glfDrawTopedString(const char *s, unsigned char fill);
 //void glfDrawTopedSymbol(char s);
-void glfDrawSolidSymbol(char s);          /* Draw solid symbol    */
+void glfDrawSolidSymbol(const char s);    /* Draw solid symbol    */
 void glfDrawSolidString(const char *s);   /* Draw wired string    */
 void glfDraw3DWiredSymbol(char s);        /* Draw 3D wired symbol */
 void glfDraw3DWiredString(char *s);       /* Draw 3D wired string */
@@ -86,8 +86,8 @@ void glfStartBitmapDrawing();       /* Must be called before bitmap text drawing
 void glfStopBitmapDrawing();        /* Must be called after bitmap text drawing */
 void glfDrawBSymbol(char s);        /* Draw one symbol by bitmapped font */
 void glfDrawBString(char *s);       /* Draw string by bitmapped font */
-void glfDrawBMaskSymbol(char s);	   /* Draw one symbol by bitmapped font (using mask) */
-void glfDrawBMaskString(char *s);	/* Draw string by bitmapped font (using mask) */
+void glfDrawBMaskSymbol(char s);      /* Draw one symbol by bitmapped font (using mask) */
+void glfDrawBMaskString(char *s);   /* Draw string by bitmapped font (using mask) */
 
 
 /* Text drawing functions by specified font */
@@ -112,10 +112,10 @@ float glfGetSpaceSize();             /* Get current space size    */
 void  glfSetSymbolDepth(float dpth); /* Set depth of 3D symbol */
 float glfGetSymbolDepth();           /* Get depth of 3D symbol */
 
-int   glfSetCurrentFont(int Font_Descriptor);		/* Set current font */
-int   glfSetCurrentBMFFont(int Font_Descriptor);	/* Set current bitmap font */
-int   glfGetCurrentFont();							/* Get current font descriptor */
-int   glfGetCurrentBMFFont();		                /* Get current bitmap font descriptor */
+int   glfSetCurrentFont(int Font_Descriptor);      /* Set current font */
+int   glfSetCurrentBMFFont(int Font_Descriptor);   /* Set current bitmap font */
+int   glfGetCurrentFont();                     /* Get current font descriptor */
+int   glfGetCurrentBMFFont();                      /* Get current bitmap font descriptor */
 
 void  glfSetAnchorPoint(int anchp); /* Set symbol anchor point */
 void  glfSetContourColor(float r, float g, float b, float a); /* Contour color */

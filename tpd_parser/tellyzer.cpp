@@ -1458,7 +1458,7 @@ parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {
    pushblk();
 };
 
-void  parsercmd::cmdMAIN::addGlobalType(char* ttypename, telldata::tell_type* ntype) {
+void  parsercmd::cmdMAIN::addGlobalType(std::string ttypename, telldata::tell_type* ntype) {
    assert(TYPElocal.end() == TYPElocal.find(ttypename));
    TYPElocal[ttypename] = ntype;
 }

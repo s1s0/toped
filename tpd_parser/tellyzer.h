@@ -44,7 +44,7 @@
 // Some forward declarations
 //-----------------------------------------------------------------------------
 int telllex(void);
-int tellerror (char *s);
+int tellerror (std::string *s);
 
 namespace  parsercmd {
    class cmdVIRTUAL;
@@ -455,7 +455,7 @@ namespace  parsercmd {
       void           addFUNC(std::string, cmdSTDFUNC*);
       void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       void           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
-      void           addGlobalType(char*, telldata::tell_type*);
+      void           addGlobalType(std::string, telldata::tell_type*);
       void           recoveryDone();
       ~cmdMAIN();
    };
