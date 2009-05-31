@@ -1059,6 +1059,14 @@ void DataCenter::mouseRotate()
    if (_TEDLIB()) _TEDLIB()->mouseRotate();
 }
 
+void DataCenter::render(const CTM& layCTM)
+{
+   if (_properties.renderType())
+      openGL_render(layCTM);
+   else
+      openGL_draw(layCTM);
+}
+
 void DataCenter::openGL_draw(const CTM& layCTM)
 {
    if (_TEDLIB())

@@ -40,7 +40,7 @@
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_DB/tedat.h"
-#include "../tpd_common/glf.h"
+#include "../tpd_DB/tenderer.h"
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -58,97 +58,97 @@ wxMutex          tui::DrawThread::_mutex;
 #include "../ui/crosscursor.xpm"
 
 //tui::CanvasStatus::CanvasStatus(){};
-void tui::StatusLine::update(const int4b width, const CTM& _LayCTM)
-{
-   _sb_BL = TP(0,0)       * _LayCTM;
-   _sb_TR = TP(width, 30) * _LayCTM;
-   
-   DBbox pixelbox = DBbox(TP(),TP(14,14)) * _LayCTM;
-   _scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
-   _cY = TP(width-150, 17) * _LayCTM;
-   _cX = TP(width-300, 17) * _LayCTM;
-   _dY = TP(width-450, 17) * _LayCTM;
-   _dX = TP(width-600, 17) * _LayCTM;
-   _Ycoord = DBbox(TP(width - 130, 28), TP(width -   2, 2)) * _LayCTM;
-   _Xcoord = DBbox(TP(width - 280, 28), TP(width - 162, 2)) * _LayCTM;
-   _wcY = TP(width-120, 16) * _LayCTM;
-   _wcX = TP(width-270, 16) * _LayCTM;
-}
-
-void tui::StatusLine::draw()
-{
-   glColor4f((GLfloat)1,(GLfloat)1,(GLfloat)1,(GLfloat)0.7);
-   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
-   glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
-   glRecti(_sb_TR.x(), _sb_TR.y(), _sb_BL.x(), _sb_BL.y());
-
-   glColor4f(0,0,0,1);
-   glPushMatrix();
-   glTranslatef(_cY.x(), _cY.y(), 0);
-   glScalef(_scaledpix, _scaledpix, 1);
-   glfDrawSolidString("Y:");
-   glPopMatrix();
-   
-   glPushMatrix();
-   glTranslatef(_cX.x(), _cX.y(), 0);
-   glScalef(_scaledpix, _scaledpix, 1);
-   glfDrawSolidString("X:");
-   glPopMatrix();
-
-   glPushMatrix();
-   glTranslatef(_dY.x(), _dY.y(), 0);
-   glScalef(_scaledpix, _scaledpix, 1);
-   glfDrawSolidString("dX:");
-   glPopMatrix();
-   
-   glPushMatrix();
-   glTranslatef(_dX.x(), _dX.y(), 0);
-   glScalef(_scaledpix, _scaledpix, 1);
-   glfDrawSolidString("dX:");
-   glPopMatrix();
-   
-   update_coords(_cp);
-}
+//void tui::StatusLine::update(const int4b width, const CTM& _LayCTM)
+//{
+//   _sb_BL = TP(0,0)       * _LayCTM;
+//   _sb_TR = TP(width, 30) * _LayCTM;
+//   
+//   DBbox pixelbox = DBbox(TP(),TP(14,14)) * _LayCTM;
+//   _scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
+//   _cY = TP(width-150, 17) * _LayCTM;
+//   _cX = TP(width-300, 17) * _LayCTM;
+//   _dY = TP(width-450, 17) * _LayCTM;
+//   _dX = TP(width-600, 17) * _LayCTM;
+//   _Ycoord = DBbox(TP(width - 130, 28), TP(width -   2, 2)) * _LayCTM;
+//   _Xcoord = DBbox(TP(width - 280, 28), TP(width - 162, 2)) * _LayCTM;
+//   _wcY = TP(width-120, 16) * _LayCTM;
+//   _wcX = TP(width-270, 16) * _LayCTM;
+//}
+//
+//void tui::StatusLine::draw()
+//{
+//   glColor4f((GLfloat)1,(GLfloat)1,(GLfloat)1,(GLfloat)0.7);
+//   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
+//   glDisable(GL_POLYGON_STIPPLE);   //- for solid fill
+//   glRecti(_sb_TR.x(), _sb_TR.y(), _sb_BL.x(), _sb_BL.y());
+//
+//   glColor4f(0,0,0,1);
+//   glPushMatrix();
+//   glTranslatef(_cY.x(), _cY.y(), 0);
+//   glScalef(_scaledpix, _scaledpix, 1);
+//   glfDrawSolidString("Y:");
+//   glPopMatrix();
+//   
+//   glPushMatrix();
+//   glTranslatef(_cX.x(), _cX.y(), 0);
+//   glScalef(_scaledpix, _scaledpix, 1);
+//   glfDrawSolidString("X:");
+//   glPopMatrix();
+//
+//   glPushMatrix();
+//   glTranslatef(_dY.x(), _dY.y(), 0);
+//   glScalef(_scaledpix, _scaledpix, 1);
+//   glfDrawSolidString("dX:");
+//   glPopMatrix();
+//   
+//   glPushMatrix();
+//   glTranslatef(_dX.x(), _dX.y(), 0);
+//   glScalef(_scaledpix, _scaledpix, 1);
+//   glfDrawSolidString("dX:");
+//   glPopMatrix();
+//   
+//   update_coords(_cp);
+//}
 //      private:
 //         TP             _sb_BL;
 //         TP             _sb_TR;
 //         real           _scaledpix;
 //   };
 
-void tui::StatusLine::update_coords(const TP& cp)
-{
-   _cp = cp;
-   glColor4f(0,0,0,1);
-   glRecti(_Xcoord.p1().x(), _Xcoord.p1().y(), _Xcoord.p2().x(), _Xcoord.p2().y());
-   glRecti(_Ycoord.p1().x(), _Ycoord.p1().y(), _Ycoord.p2().x(), _Ycoord.p2().y());
-
-//   glScissor( _Xcoord.p1().x(), _Xcoord.p1().y(), _Xcoord.p2().x() - _Xcoord.p1().x(), _Xcoord.p2().y() - _Xcoord.p1().y() );
-//   glEnable(GL_SCISSOR_TEST);
-//   
-   glColor4f(0,1,1,1);
-
-   wxString wsX;
-   wsX.sprintf(wxT("%6d"),_cp.x());
-   wxString wsY;
-   wsY.sprintf(wxT("%6d"),_cp.y());
-
+//void tui::StatusLine::update_coords(const TP& cp)
+//{
+//   _cp = cp;
+//   glColor4f(0,0,0,1);
+//   glRecti(_Xcoord.p1().x(), _Xcoord.p1().y(), _Xcoord.p2().x(), _Xcoord.p2().y());
+//   glRecti(_Ycoord.p1().x(), _Ycoord.p1().y(), _Ycoord.p2().x(), _Ycoord.p2().y());
 //
-//   glClear(GL_COLOR_BUFFER_BIT);
- //  
-   glPushMatrix();
-   glTranslatef(_wcX.x(), _wcX.y(), 0);
-   glScalef(_scaledpix, _scaledpix, 1);
-   glfDrawSolidString(wsX.mb_str());
-   glPopMatrix();
-   
-   glPushMatrix();
-   glTranslatef(_wcY.x(), _wcY.y(), 0);
-   glScalef(_scaledpix, _scaledpix, 1);
-   glfDrawSolidString(wsY.mb_str());
-   glPopMatrix();
-//   glDisable(GL_SCISSOR_TEST);
-   
-}
+////   glScissor( _Xcoord.p1().x(), _Xcoord.p1().y(), _Xcoord.p2().x() - _Xcoord.p1().x(), _Xcoord.p2().y() - _Xcoord.p1().y() );
+////   glEnable(GL_SCISSOR_TEST);
+////   
+//   glColor4f(0,1,1,1);
+//
+//   wxString wsX;
+//   wsX.sprintf(wxT("%6d"),_cp.x());
+//   wxString wsY;
+//   wsY.sprintf(wxT("%6d"),_cp.y());
+//
+////
+////   glClear(GL_COLOR_BUFFER_BIT);
+// //  
+//   glPushMatrix();
+//   glTranslatef(_wcX.x(), _wcX.y(), 0);
+//   glScalef(_scaledpix, _scaledpix, 1);
+//   glfDrawSolidString(wsX.mb_str());
+//   glPopMatrix();
+//   
+//   glPushMatrix();
+//   glTranslatef(_wcY.x(), _wcY.y(), 0);
+//   glScalef(_scaledpix, _scaledpix, 1);
+//   glfDrawSolidString(wsY.mb_str());
+//   glPopMatrix();
+////   glDisable(GL_SCISSOR_TEST);
+//   
+//}
 //=============================================================================
 // class LayoutCanvas
 //=============================================================================
@@ -213,9 +213,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    // The option stays for the sake of experiment.
    // DON'T enable it if you're not sure what you're doing!
    _oglThread = false;
-   initializeGL();
    ap_trigger = 10;
-   glfInit();
 }
 
 void	tui::LayoutCanvas::showInfo()
@@ -333,33 +331,76 @@ void tui::LayoutCanvas::viewshift()
    /*   slide = false;*/
 }
 
-void tui::LayoutCanvas::initializeGL() {
-   // Create a couple of common callback functions
-#ifndef WIN32
-   gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_BEGIN,
-                                   (GLvoid(*)())&glBegin);
-   gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_VERTEX,
-                                   (GLvoid(*)())&laydata::tdtdata::polyVertex);
-   gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
-                                                &glEnd);
-#else 
-   gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_BEGIN,
-                                   (GLvoid(__stdcall *)())&glBegin);
-   gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_VERTEX,
-                                   (GLvoid(__stdcall *)())&laydata::tdtdata::polyVertex);
-   gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
-                                                &glEnd);
-#endif
+bool tui::LayoutCanvas::initializeGL() 
+{
    //@TODO Check somewhere that RGBA mode is available!?
    //@TODO The next call needs to be fitted in some kind of GL descructor
    // gluDeleteTess(tessellObj);
 
+   // Try to find-out which renderer to use on start-up
+   bool VBOrendering;
+   GLenum err = glewInit();
+   if (GLEW_OK != err)
+   {
+      wxString errmessage(wxT("glewInit() returns an error: "));
+      std::string boza((const char*)glewGetErrorString(err));
+      errmessage << wxString(boza.c_str(), wxConvUTF8);
+      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this, errmessage, wxT("Toped"),
+                    wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
+      dlg1->Destroy();
+      VBOrendering = false;
+   }
+   else if (!glewIsSupported("GL_VERSION_1_4 GL_EXT_multi_draw_arrays"))
+   {
+      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this,
+            wxT("openGL version 1.4 is not supported"),
+            wxT("Toped"),
+            wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
+      dlg1->Destroy();
+      VBOrendering = false;
+   }
+   else 
+      VBOrendering = true;
+
+   //--------------------------------------------------------------------------
+   if (VBOrendering)
+   {
+      // setup the renderer - callback function
+      // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGL_render;
+   }
+   else
+   {
+      // setup the renderer - callback function
+      // oGLRender = &DataCenter::openGL_draw;
+
+      // Create a couple of common callback functions
+      #ifndef WIN32
+         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_BEGIN,
+                                         (GLvoid(*)())&glBegin);
+         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_VERTEX,
+                                         (GLvoid(*)())&laydata::tdtdata::polyVertex);
+         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
+                                                      &glEnd);
+      #else 
+         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_BEGIN,
+                                         (GLvoid(__stdcall *)())&glBegin);
+         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_VERTEX,
+                                         (GLvoid(__stdcall *)())&laydata::tdtdata::polyVertex);
+         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
+                                                      &glEnd);
+      #endif
+
+   }
+   return VBOrendering;
    //@NOTE: With the Mesa library updates (first noticed in ver. 6.5) - most of the
    // gl* functions are starting with ASSERT_OUTSIDE_BEGIN_END(...) which in turn
    // will produce a segmentation. Other openGL implementations are more polite,
    // but I don't know the result of those calls will be.
    // So... don't try to put gl stuff here, unless you're sure that it is not
    // causing troubles and that's the proper place for it.
+
 }
 
 void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
@@ -412,10 +453,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          glEnable(GL_BLEND);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glClear(GL_ACCUM_BUFFER_BIT);
-//         DATC->openGL_draw(_LayCTM);    // draw data
-         // new Render - under development,
-         // launch it instead of the old one (previous code line)
-         DATC->openGL_render(_LayCTM);
+         DATC->render(_LayCTM);
          glAccum(GL_LOAD, 1.0);
          invalid_window = false;
          if (rubber_band) rubber_paint();
@@ -1039,7 +1077,7 @@ void* tui::DrawThread::Entry()
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
-      DATC->openGL_draw(_canvas->_LayCTM);    // draw data
+      DATC->render(_canvas->_LayCTM);    // draw data
       glAccum(GL_LOAD, 1.0);
       _canvas->invalid_window = false;
       if (_canvas->rubber_band) _canvas->rubber_paint();

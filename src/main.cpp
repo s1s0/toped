@@ -38,7 +38,6 @@
 #include "toped.h"
 #include "../tpd_DB/viewprop.h"
 #include "../tpd_DB/datacenter.h"
-#include "../tpd_common/glf.h"
 
 #include "../tpd_bidfunc/tellibin.h"
 #include "../tpd_bidfunc/tpdf_db.h"
@@ -50,7 +49,7 @@
 #include "../tpd_bidfunc/tllf_list.h"
 #include "../tpd_bidfunc/tpdf_get.h"
 
-tui::TopedFrame*                  Toped = NULL;
+tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
@@ -268,7 +267,8 @@ class TopedApp : public wxApp
 //      void           set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
    protected:
       bool           GetLogFileName();
-      bool           LoadFontFile(std::string);
+//      bool           LoadFontFile(std::string fontname);
+      std::string    CheckFontFile(std::string);
       bool           CheckCrashLog();
       void           GetLocalDirs();
       void           GetGlobalDirs(); //get directories in TPD_GLOBAL
@@ -411,34 +411,57 @@ bool TopedApp::GetLogFileName()
    return status;
 }
 
-bool TopedApp::LoadFontFile(std::string fontname)
+//bool TopedApp::LoadFontFile(std::string fontname)
+//{
+//   wxString fontFile;
+//   fontFile << tpdFontDir << wxString(fontname.c_str(), wxConvUTF8) << wxT(".glf");
+//   wxFileName fontFN(fontFile);
+//   fontFN.Normalize();
+//   if (!(fontFN.IsOk() && (-1 != glfLoadFont(fontFN.GetFullPath().mb_str(wxConvFile)))))
+//   {
+//      wxString errmsg;
+//      bool wbox_status = true;
+//      errmsg << wxT("Font library \"") << fontFN.GetFullPath() << wxT("\" not found or corrupted. \n") <<
+//                wxT("Toped will be unstable.\n Continue?");
+//      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
+//            errmsg,
+//            wxT("Toped"),
+//            wxYES_NO | wxICON_WARNING);
+//      if (wxID_NO == dlg1->ShowModal())
+//         wbox_status = false;
+//      dlg1->Destroy();
+//      if (wbox_status)
+//      {
+//         std::string info("Font library is not loaded. All text objects will not be properly processed");
+//         tell_log(console::MT_ERROR,info);
+//      }
+//      return wbox_status;
+//   }
+//   else
+//      return true;
+//}
+
+std::string TopedApp::CheckFontFile(std::string fontname)
 {
    wxString fontFile;
    fontFile << tpdFontDir << wxString(fontname.c_str(), wxConvUTF8) << wxT(".glf");
    wxFileName fontFN(fontFile);
    fontFN.Normalize();
-   if (!(fontFN.IsOk() && (-1 != glfLoadFont(fontFN.GetFullPath().mb_str(wxConvFile)))))
+   if (fontFN.IsOk() && fontFN.FileExists())
+      return std::string (std::string(fontFN.GetFullPath().mb_str(wxConvFile)));
+   else
    {
       wxString errmsg;
-      bool wbox_status = true;
-      errmsg << wxT("Font library \"") << fontFN.GetFullPath() << wxT("\" not found or corrupted. \n") <<
-                wxT("Toped will be unstable.\n Continue?");
+      errmsg << wxT("Font not \"") << fontFN.GetFullPath() << wxT("\" not found. \n") <<
+                wxT("Text objects will not be visualised.\n");
       wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
             errmsg,
             wxT("Toped"),
-            wxYES_NO | wxICON_WARNING);
-      if (wxID_NO == dlg1->ShowModal())
-         wbox_status = false;
+            wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
       dlg1->Destroy();
-      if (wbox_status)
-      {
-         std::string info("Font library is not loaded. All text objects will not be properly processed");
-         tell_log(console::MT_ERROR,info);
-      }
-      return wbox_status;
+      return "";
    }
-   else
-      return true;
 }
 
 bool TopedApp::CheckCrashLog()
@@ -499,37 +522,10 @@ bool TopedApp::OnInit() {
       //tell_log(console::MT_ERROR,info);
       return FALSE;
    }
+   bool render_type = Toped->view()->initializeGL();
+   DATC->loadLayoutFonts(CheckFontFile("arial1"), render_type);
+//   if (!LoadFontFile("arial1")) return FALSE;
 
-   GLenum err = glewInit();
-   if (GLEW_OK != err)
-   {
-      wxString errmessage(wxT("glewInit() returns an error: "));
-      std::string boza((const char*)glewGetErrorString(err));
-      errmessage << wxString(boza.c_str(), wxConvUTF8);
-      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped, errmessage, wxT("Toped"),
-                    wxOK | wxICON_ERROR);
-      dlg1->ShowModal();
-      dlg1->Destroy();
-   }
-   if (!glewIsSupported("GL_VERSION_1_4 GL_EXT_multi_draw_arrays"))
-   {
-      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
-            wxT("openGL version 1.4 is not supported"),
-            wxT("Toped"),
-            wxOK | wxICON_ERROR);
-      dlg1->ShowModal();
-      dlg1->Destroy();
-   }
-   if (!glewIsSupported("GL_EXT_multi_draw_arrays"))
-   {
-      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
-            wxT("glMultiDrawElements / glMultiDrawArrays not supported"),
-            wxT("Toped"),
-            wxOK | wxICON_ERROR);
-      dlg1->ShowModal();
-      dlg1->Destroy();
-   }
-   if (!LoadFontFile("arial1")) return FALSE;
    Toped->setIconDir(std::string(tpdUIDir.mb_str(wxConvFile)));
    Toped->initToolBars();
 
@@ -598,7 +594,6 @@ int TopedApp::OnExit() {
    delete CMDBlock; 
    delete DATC;
    FinishSessionLog();
-   glfClose();
    return wxApp::OnExit();
 }
 

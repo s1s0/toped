@@ -85,7 +85,7 @@ namespace CIFin {
 
 class DataCenter {
 public:
-	DataCenter(const std::string&, const std::string &);
+	                           DataCenter(const std::string&, const std::string &);
                              ~DataCenter(); 
    bool                       GDSparse(std::string filename);
    void                       GDSexport(const LayerMapGds&, std::string&, bool);
@@ -122,9 +122,8 @@ public:
    void                       mouseStop();
    void                       mouseFlip();
    void                       mouseRotate();
-   void                       openGL_draw(const CTM&);
-   void                       openGL_render(const CTM&); // alternative to openGL_draw
    void                       tmp_draw(const CTM&, TP, TP);
+   void                       render(const CTM&);
    const laydata::cellList&   cells();
    laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
    laydata::LibCellLists*     getCells(int libID);
@@ -210,6 +209,8 @@ public:
                                                       {_properties.saveProperties(fname);}
 	std::string                globalDir(void) const
                                                       {return _globalDir;}
+   void                       loadLayoutFonts(std::string ffn, bool vbo)
+                                                      {_properties.loadLayoutFonts(ffn, vbo);}
 
 protected:
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
@@ -218,6 +219,8 @@ protected:
    layprop::ViewProperties    _properties;   // properties data base
    std::string                _tedfilename;
    bool                       _neversaved;
+   void                       openGL_draw(const CTM&);
+   void                       openGL_render(const CTM&); // alternative to openGL_draw
 private:
    word                       _curlay;       // current drawing layer
    word                       _curcmdlay;    // layer used during current drawing operation
