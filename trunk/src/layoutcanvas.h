@@ -38,27 +38,27 @@
 
 namespace tui {
    //=============================================================================
-   class StatusLine
-   {
-      public:
-                    StatusLine():_Xcoord(TP()),_Ycoord(TP()) {};
-      void          update(const int4b, const CTM&);
-      void          draw();
-      void          update_coords(const TP&);
-      private:
-         TP             _sb_BL;
-         TP             _sb_TR;
-         double         _scaledpix;
-         TP             _cX;
-         TP             _cY;
-         TP             _dX;
-         TP             _dY;
-         TP             _wcX;
-         TP             _wcY;
-         DBbox          _Xcoord;
-         DBbox          _Ycoord;
-         TP             _cp;
-   };
+   //class StatusLine
+   //{
+   //   public:
+   //                 StatusLine():_Xcoord(TP()),_Ycoord(TP()) {};
+   //   void          update(const int4b, const CTM&);
+   //   void          draw();
+   //   void          update_coords(const TP&);
+   //   private:
+   //      TP             _sb_BL;
+   //      TP             _sb_TR;
+   //      double         _scaledpix;
+   //      TP             _cX;
+   //      TP             _cY;
+   //      TP             _dX;
+   //      TP             _dY;
+   //      TP             _wcX;
+   //      TP             _wcY;
+   //      DBbox          _Xcoord;
+   //      DBbox          _Ycoord;
+   //      TP             _cp;
+   //};
 
    //=============================================================================
    class LayoutCanvas : public wxGLCanvas  {
@@ -70,6 +70,7 @@ namespace tui {
       void           snapshot(byte*&, word&, word&);
       void           showInfo();
       void           setOglThread(bool val) {_oglThread = true;} 
+      bool           initializeGL();
       bool           initStatus() {
 #ifdef __WXGTK__
          return (NULL != x_visual);
@@ -103,7 +104,6 @@ namespace tui {
       void           OnCMRotate(wxCommandEvent&);
       void           OnCursorType(wxCommandEvent&);
       void           OnPanCenter(wxCommandEvent&);
-      void           initializeGL();
       void           viewshift();
    private:
       void           CursorControl(bool, bool);

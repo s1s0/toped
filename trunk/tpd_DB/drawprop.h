@@ -37,6 +37,9 @@ namespace layprop {
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
 
    //=============================================================================
+   //
+   //
+   //
    class tellRGB {
       public:
                         tellRGB(byte red, byte green, byte blue, byte alpha) :
@@ -53,6 +56,9 @@ namespace layprop {
    };
 
    //=============================================================================
+   //
+   //
+   //
    class LineSettings
    {
       public:
@@ -70,6 +76,9 @@ namespace layprop {
    };
 
    //=============================================================================
+   //
+   //
+   //
    class LayerSettings  {
       public:
                         LayerSettings(std::string name, std::string color, std::string filltype, std::string sline):
@@ -90,6 +99,46 @@ namespace layprop {
          bool              _hidden;
          bool              _locked;
    };
+
+   //=============================================================================
+   //
+   //
+   //
+   class TGlfSymbol {
+      public:
+                        TGlfSymbol(FILE*);
+                       ~TGlfSymbol();
+      protected:
+         byte           _alvrtxs;    //! Number of vertexs
+         byte           _alcntrs;    //! Number of contours
+         byte           _alchnks;    //! Number of index (tesselation) chunks
+
+         float*         _vdata;      //! Vertex data
+         byte*          _cdata;      //! Contour data
+         byte*          _idata;      //! Index data
+
+         float          _minX;
+         float          _maxX;
+         float          _minY;
+         float          _maxY;
+   };
+
+   //=============================================================================
+   //
+   //
+   //
+   class TGlfFont {
+      public:
+                        TGlfFont(std::string);
+                       ~TGlfFont();
+      private:
+         typedef std::map<byte, TGlfSymbol*> FontMap;
+         FontMap        _symbols;
+         char           _fname [97];
+         byte           _status;
+         byte           _numSymbols;
+   };
+
 
    //=============================================================================
    typedef  std::map<std::string, tellRGB*      >  colorMAP;
@@ -153,6 +202,8 @@ namespace layprop {
          const LineSettings*        getLine(word layno) const;
          const LineSettings*        getLine(std::string) const;
          void                       PSwrite(PSFile&) const;
+         void                       loadLayoutFonts(std::string, bool);
+         bool                       renderType()         {return _renderType;}
          friend class ViewProperties;
       protected:
          laySetList                 _layset;
@@ -179,6 +230,7 @@ namespace layprop {
          static const tellRGB       _defaultColor;
          static const byte          _defaultFill[128];
          static const LineSettings  _defaultSeline;
+         bool                       _renderType;
    };
 
 }

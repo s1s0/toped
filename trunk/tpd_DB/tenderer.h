@@ -855,40 +855,4 @@ class HiResTimer {
 
 };
 
-//=============================================================================
-//
-//
-//
-
-class TGlfSymbol {
-   public:
-                     TGlfSymbol(FILE*);
-                    ~TGlfSymbol();
-   protected:
-      byte           _alvrtxs;    //! Number of vertexs
-      byte           _alcntrs;    //! Number of contours
-      byte           _alchnks;    //! Number of index (tesselation) chunks
-
-      float*         _vdata;      //! Vertex data
-      byte*          _cdata;      //! Contour data
-      byte*          _idata;      //! Index data
-
-      float          _minX;
-      float          _maxX;
-      float          _minY;
-      float          _maxY;
-};
-
-class TGlfFont {
-   public:
-                     TGlfFont(std::string);
-                    ~TGlfFont();
-   private:
-      typedef std::map<byte, TGlfSymbol*> FontMap;
-      FontMap        _symbols;
-      char           _fname [97];
-      byte           _status;
-      byte           _numSymbols;
-};
-
 #endif //TENDERER_H

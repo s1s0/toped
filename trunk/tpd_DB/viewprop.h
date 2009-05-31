@@ -168,6 +168,9 @@ namespace layprop {
       void              setCifLayMap(USMap* map);
       const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
       const USMap*      getCifLayMap() const             {return _cifLayMap;}
+      void              loadLayoutFonts(std::string fft, bool vbo)
+                                                         {_drawprop.loadLayoutFonts(fft, vbo);}
+      bool              renderType()                     {return _drawprop.renderType();}
       void              all_colors(nameList&) const;
       void              all_fills(nameList&) const;
       void              all_lines(nameList&) const;
