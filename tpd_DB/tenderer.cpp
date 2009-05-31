@@ -1682,3 +1682,83 @@ void HiResTimer::report(std::string message)
    tell_log(console::MT_INFO,time_message);
 }
 
+//=============================================================================
+//
+//
+//
+TGlfSymbol::TGlfSymbol(FILE* ffile)
+{
+   fread(&_alvrtxs, 1, 1, ffile);
+   _vdata = DEBUG_NEW float[2 * _alvrtxs];
+   fread(&_alchnks, 1, 1, ffile);
+   _idata = DEBUG_NEW byte[3 * _alchnks];
+   fread(&_alcntrs, 1, 1, ffile);
+   _cdata = DEBUG_NEW byte[_alcntrs];
+   // init the symbol boundaries
+   _minX = _minY = -10;
+   _maxX = _maxY =  10;
+   // get the vertexes
+   for (byte i = 0; i < _alvrtxs; i++)
+   {
+      float vX, vY;
+      fread(&vX, 4, 1, ffile);
+      fread(&vY, 4, 1, ffile);
+      // update the symbol boundaries
+      if      (vX < _minX) _minX = vX;
+      else if (vX > _maxX) _maxX = vX;
+      if      (vY < _minY) _minY = vY;
+      else if (vY > _maxY) _maxY = vY;
+      _vdata[2*i  ] = vX;
+      _vdata[2*i+1] = vY;
+   }
+   // get index chunks
+   for (byte i = 0; i < _alchnks; i++)
+      fread(&(_idata[i*3]), 3, 1, ffile);
+   // get contour data
+   for (byte i = 0; i < _alcntrs; i++)
+      fread(&(_cdata[i  ]), 1, 1, ffile);
+}
+
+
+//=============================================================================
+//
+//
+//
+TGlfFont::TGlfFont(std::string filename)
+{
+   FILE* ffile = fopen(filename.c_str(), "rb");
+   if (NULL == ffile)
+   {
+      _status = 1;
+      //@ TODO tellerror(...)
+      return;
+   }
+   char fileh[4];
+   fread(fileh, 3, 1, ffile);
+   fileh[3] = 0x0;
+   if (strcmp(fileh, "GLF"))
+   {
+      _status = 2;
+      //@TODO tellerror(..."filename doesn't appear to be a font file");
+   }
+   else
+   {
+      // Get the font name
+      fread(_fname, 96, 1, ffile);
+      _fname[96] = 0x0;
+      // Get the number of symbols
+      fread(&_numSymbols, 1, 1, ffile);
+      // Read the rest  of bytes to 128 (unused)
+      byte unused [28];
+      fread(unused, 28, 1, ffile);
+      // Finally - start parsing the symbol data      
+      for (byte i = 0; i < _numSymbols; i++)
+      {
+         byte asciiCode;
+         fread(&asciiCode, 1, 1, ffile);
+         _symbols[asciiCode] = DEBUG_NEW TGlfSymbol(ffile);
+      }
+      _status = 0;
+   }
+   fclose(ffile);
+}
