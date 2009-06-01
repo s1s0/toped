@@ -1810,14 +1810,29 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
       event.Skip();
 }
 
-
+//====================================================================
+BEGIN_EVENT_TABLE(browsers::DRCBrowser, wxPanel)
+   EVT_BUTTON(BT_DRC_SHOW_ALL, browsers::DRCBrowser::onShowAll)
+   EVT_BUTTON(BT_DRC_HIDE_ALL, browsers::DRCBrowser::onHideAll)
+END_EVENT_TABLE()
+//====================================================================
 //====================================================================
 browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 	:wxPanel(parent, id, wxDefaultPosition, wxDefaultSize)
 {
-		_errorBrowser = DEBUG_NEW ErrorBrowser(this);
-		wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-		thesizer->Add(_errorBrowser, 1, wxEXPAND | wxBOTTOM);
+	wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *sizer1   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   _showAllButton = DEBUG_NEW wxButton( this, BT_DRC_SHOW_ALL, wxT("Show All") );
+   _hideAllButton = DEBUG_NEW wxButton( this, BT_DRC_HIDE_ALL, wxT("Hide All") );
+   //Set bold font for _hierButton
+
+   sizer1->Add(_showAllButton, 1, wxEXPAND|wxBOTTOM, 3);
+   sizer1->Add(_hideAllButton, 1, wxEXPAND|wxBOTTOM, 3);
+	_errorBrowser = DEBUG_NEW ErrorBrowser(this);  
+   thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
+   thesizer->Add(_errorBrowser, 1, wxEXPAND | wxBOTTOM);
+
+
 		SetSizerAndFit(thesizer);
 		Calbr::RuleChecksVector* errors = DRCData->Results();
 		_errorBrowser->AddRoot(wxT("hidden_wxroot"));
@@ -1848,4 +1863,12 @@ browsers::DRCBrowser::~DRCBrowser()
 void browsers::DRCBrowser::deleteAllItems(void)
 {
 	_errorBrowser->DeleteAllItems();
+}
+
+void	browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
+{
+}
+
+void	browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
+{
 }
