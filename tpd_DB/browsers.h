@@ -74,6 +74,8 @@ namespace browsers
       BT_CELLS_FLAT,
       BT_CELLS_HIER2,
       BT_CELLS_FLAT2,
+		BT_DRC_SHOW_ALL,
+		BT_DRC_HIDE_ALL,
       BT_LAYER_SELECT,
       BT_LAYER_SHOW_ALL,
       BT_LAYER_HIDE_ALL,
@@ -329,8 +331,13 @@ namespace browsers
 										DRCBrowser(wxWindow* parent, wxWindowID id);
 		virtual						~DRCBrowser();
 		void							deleteAllItems(void);
+		void							onShowAll(wxCommandEvent&);
+		void							onHideAll(wxCommandEvent&);
 	private:
 		ErrorBrowser*				_errorBrowser;
+		wxButton*					_showAllButton;
+		wxButton*					_hideAllButton;
+		DECLARE_EVENT_TABLE();
 	};
 
    //===========================================================================
