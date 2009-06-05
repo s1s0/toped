@@ -53,7 +53,7 @@ void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 	_coords.y2 = y2;
 }
 
-void Calbr::drcEdge::showError(laydata::tdtdesign* atdb)
+void Calbr::drcEdge::showError(laydata::tdtdesign* atdb, word la)
 {
    real DBscale = DATC->DBscale();
    //Convert drcEdge to pointlist
@@ -85,7 +85,7 @@ void Calbr::drcEdge::showError(laydata::tdtdesign* atdb)
 //       telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(1,plDB,
 //                                    static_cast<word>(rint(w * DBscale))), 1);
   // laydata::tdtdesign* ATDB = DATC->lockDB();
-   atdb->addwire(1,plDB, static_cast<word>(rint(w * DBscale)));
+   atdb->addwire(la, plDB, static_cast<word>(rint(w * DBscale)));
    //DATC->unlockDB();
    delete pt1;
    delete pt2;
@@ -101,7 +101,7 @@ void Calbr::drcPolygon::addCoord(long x, long y)
 	_coords.push_back(crd);
 }
 
-void Calbr::drcPolygon::showError(laydata::tdtdesign* atdb)
+void Calbr::drcPolygon::showError(laydata::tdtdesign* atdb, word la)
 {
 
    real DBscale = DATC->DBscale();
@@ -123,7 +123,7 @@ void Calbr::drcPolygon::showError(laydata::tdtdesign* atdb)
    }
 
    //laydata::tdtdesign* ATDB = DATC->lockDB();
-   atdb->addpoly(1,plDB);
+   atdb->addpoly(la, plDB);
    //DATC->unlockDB();
    delete plDB;
 }
@@ -329,7 +329,8 @@ bool Calbr::CalbrFile::parse()
 void	Calbr::CalbrFile::ShowResults()
 {
 	_ATDB = DATC->lockDB();
-
+		word drcLayer = DATC->getLayerNo("drcResults");
+		assert(drcLayer);
 		RuleChecksVector::const_iterator it;
 		for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
 		{
@@ -337,13 +338,13 @@ void	Calbr::CalbrFile::ShowResults()
 			std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
 			for(it2 = polys->begin(); it2 < polys->end(); ++it2)
 			{
-				(*it2).showError(_ATDB);
+				(*it2).showError(_ATDB, drcLayer);
 			}
 			std::vector <Calbr::drcEdge>::iterator it2edge;
 			std::vector <Calbr::drcEdge> *edges = (*it)->edges();
 			for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
 			{
-				(*it2edge).showError(_ATDB);
+				(*it2edge).showError(_ATDB, drcLayer);
 			}
 	   }
 	DATC->unlockDB();

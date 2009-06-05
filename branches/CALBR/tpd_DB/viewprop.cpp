@@ -375,6 +375,29 @@ void  layprop::ViewProperties::lockLayer(word layno, bool lock) {
    if (_drawprop._layset.end() != _drawprop._layset.find(layno))
       _drawprop._layset[layno]->_locked = lock;
 }
+const WordList layprop::ViewProperties::getLockedLayers(void)
+{
+	//drawprop._layset
+	WordList lockedLayers;
+	laySetList::const_iterator it;
+	for(  it = _drawprop._layset.begin(); it != _drawprop._layset.end(); ++it)
+	{
+		if((*it).second->locked()) lockedLayers.push_back((*it).first);
+	}
+	return lockedLayers;
+}
+
+const WordList layprop::ViewProperties::getAllLayers(void)
+{
+	//drawprop._layset
+	WordList listLayers;
+	laySetList::const_iterator it;
+	for(  it = _drawprop._layset.begin(); it != _drawprop._layset.end(); ++it)
+	{
+		listLayers.push_back((*it).first);
+	}
+	return listLayers;
+}
 
 const layprop::LayoutGrid* layprop::ViewProperties::grid(byte No) const {
    if (_grid.end() != _grid.find(No)) {

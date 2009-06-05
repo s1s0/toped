@@ -121,6 +121,8 @@ namespace layprop {
       void              addline(std::string, std::string, word, byte, byte);
       void              hideLayer(word layno, bool hide);
       void              lockLayer(word layno, bool lock);
+		const WordList		getLockedLayers(void);
+		const WordList		getAllLayers(void);
       bool              selectable(word layno) const;
       void              saveProperties(std::string) const;
       //

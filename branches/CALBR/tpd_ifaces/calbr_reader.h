@@ -58,7 +58,7 @@ class drcEdge
 public:
 	void				addCoord(long x1, long y1, long x2, long y2);
 	edge*	coords() {return &_coords;};
-	void				showError(laydata::tdtdesign* atdb);
+	void				showError(laydata::tdtdesign* atdb, word la);
 	static long		_precision;
 private:
 	edge				_coords;
@@ -69,7 +69,7 @@ class drcPolygon
 public:
 	void				addCoord(long x, long y);
 	CoordsVector*	coords() {return &_coords;};
-	void				showError(laydata::tdtdesign* atdb);
+	void				showError(laydata::tdtdesign* atdb, word la);
 	static long		_precision;
 private:
 	CoordsVector	_coords;
