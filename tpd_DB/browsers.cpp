@@ -35,6 +35,7 @@
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
 #include "datacenter.h"
+#include "../tpd_bidfunc/tpdf_common.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
 #include "../ui/cell_normal.xpm"
@@ -1802,7 +1803,7 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 		else
 		{
 			laydata::tdtdesign* _ATDB = DATC->lockDB();
-				_poly.showError(_ATDB);
+				//_poly.showError(_ATDB);
 			DATC->unlockDB();
 		}
    }
@@ -1867,8 +1868,47 @@ void browsers::DRCBrowser::deleteAllItems(void)
 
 void	browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
 {
+	DRCData->ShowResults();
 }
 
 void	browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 {
+	laydata::tdtdesign* design = DATC->lockDB();
+	WordList lockedLayers = DATC->getLockedLayers();
+	//Lock all layers
+	WordList allLayers = DATC->getAllLayers();
+	for(WordList::const_iterator it = allLayers.begin(); it!= allLayers.end(); ++it)
+	{
+		DATC->lockLayer((*it), true);
+	}
+
+	//unlock only drcResults layer
+	word drcLayerNo = DATC->getLayerNo("drcResults");
+	DATC->lockLayer(drcLayerNo, false);
+   design->select_all();
+
+	//delete selected
+	laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
+
+	design->delete_selected(sh_delist, DATC->TEDLIB());
+	tellstdfunc::clean_atticlist(sh_delist); delete sh_delist;
+
+
+	//UnLock all layers
+	for(WordList::const_iterator it = allLayers.begin(); it!= allLayers.end(); ++it)
+	{
+		DATC->lockLayer((*it), false);
+	}
+
+	//Lock only stored layers
+
+	for(WordList::const_iterator it = lockedLayers.begin(); it!= lockedLayers.end(); ++it)
+	{
+		DATC->lockLayer((*it), true);
+	}
+	tellstdfunc::RefreshGL();
+	//std::string cellName = design->activecellname();
+	//laydata::tdtcell *cell = design->opencell(cellName);
+	//cell->select_inBox(DBbox(0,0,10000,10000), 
+
 }
