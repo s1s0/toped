@@ -32,11 +32,11 @@
 #include <iomanip>
 #include "../tpd_common/ttt.h"
 #include <GL/glew.h>
-
 #include "viewprop.h"
 #include "../tpd_common/outbox.h"
-#include "../tpd_common/glf.h"
 #include "tenderer.h"
+
+extern layprop::FontLibrary* fontLib;
 
 layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
 {
@@ -90,8 +90,9 @@ void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, co
    glTranslatef(central_elevation.p2().x(), central_elevation.p2().y(), 0);
    glScalef(scaledpix, scaledpix, 1);
    glRotatef(_angle, 0, 0, 1);
-   
-   glfDrawSolidString(_value.c_str());
+
+   assert(NULL != fontLib);
+   fontLib->drawSolidString(_value);
 
    glDisable(GL_POLYGON_SMOOTH); //- for solid fill
    glEnable(GL_POLYGON_STIPPLE);

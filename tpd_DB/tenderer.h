@@ -394,6 +394,14 @@ typedef std::list<TenderNcvx*>      SlicePolygons;
 typedef std::list<TenderWire*>      SliceWires;
 typedef std::list<TenderSelected*>  SliceSelected;
 
+class TenderOBox {
+   public:
+                        TenderOBox(const DBbox&, const CTM&);
+      unsigned          cDataCopy(int*, unsigned&);
+   private:
+      int4b             _obox[8];
+};
+
 /**
  *  Reference boxes
  */
@@ -401,7 +409,6 @@ class TenderRef {
    public:
                         TenderRef(std::string, const CTM&, const DBbox&, word);
                         TenderRef();
-      void              draw();
       std::string       name()         {return _name;}
       real* const       translation()  {return _translation;}
       CTM&              ctm()          {return _ctm;}
@@ -415,6 +422,15 @@ class TenderRef {
       word              _alphaDepth;
 };
 
+class TenderTRef {
+   public:
+                        TenderTRef(std::string, const CTM&, const DBbox&, word);
+//      void              draw();
+   private:
+      std::string*      _text;
+      real              _ftm[16]; //! Font translation matrix
+      int4b             _obox[8];
+};
 /**
    TENDERer Translation View - is the most fundamental class of the Tenderer.
    It sorts and stores a layer slice of the cell data. Most of the memory
@@ -712,6 +728,7 @@ class TenderLay {
       void              box  (int4b*,                       bool, const SGBitSet*);
       void              poly (int4b*, unsigned, TeselPoly*, bool, const SGBitSet*);
       void              wire (int4b*, unsigned, word, bool, bool, const SGBitSet*);
+      void              text (const std::string*, const CTM&);
 
       void              newSlice(TenderRef* const, bool, bool, bool, unsigned);
       bool              chunkExists(TenderRef* const);
@@ -758,26 +775,31 @@ class TenderLay {
 class Tender0Lay {
    public:
       typedef std::list<TenderRef*> RefBoxList;
+      typedef std::list<TenderOBox*> RefTxtList;
                         Tender0Lay();
                        ~Tender0Lay();
-      TenderRef*         addCellRef(std::string, const CTM&, const DBbox&, bool, word);
+      TenderRef*        addCellRef(std::string, const CTM&, const DBbox&, bool, word);
+      void              addTextOBox(const DBbox&, const CTM&, bool);
       void              collect(GLuint);
       void              draw(layprop::DrawProperties*);
-      unsigned          total_points() {return (_alvrtxs + _asindxs);}
+      unsigned          total_points();
+      unsigned          total_indexes();
    private:
       RefBoxList        _cellRefBoxes;
       RefBoxList        _cellSRefBoxes;
+      RefTxtList        _textRefBoxes;
+      RefTxtList        _textSRefBoxes;
       GLuint            _pbuffer;
       // vertex related data
-      unsigned          _alvrtxs; //! total number of vertexes
-      unsigned          _alobjvx; //! total number of objects that will be drawn with vertex related functions
-      GLsizei*          _sizesvx; //! array of sizes for vertex sets
-      GLsizei*          _firstvx; //! array of first vertexes
-      // index related data for non-convex polygons
-      unsigned          _asindxs; //! total number of selected vertixes
-      unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
-      GLsizei*          _sizslix; //! array of sizes for indexes sets
-      GLsizei*          _fstslix; //! array of first indexes
+      unsigned          _alvrtxs[2]; //! total number of vertexes
+      unsigned          _alobjvx[2]; //! total number of objects that will be drawn with vertex related functions
+      GLsizei*          _sizesvx[2]; //! array of sizes for vertex sets
+      GLsizei*          _firstvx[2]; //! array of first vertexes
+      // index related data for selected boxes
+      unsigned          _asindxs[2]; //! total number of selected vertixes
+      unsigned          _asobjix[2]; //! total number of objects that will be drawn with index related functions
+      GLsizei*          _sizslix[2]; //! array of sizes for indexes sets
+      GLsizei*          _fstslix[2]; //! array of first indexes
 };
 
 //-----------------------------------------------------------------------------
@@ -811,6 +833,7 @@ class Tenderer {
                                                                {_clayer->poly(pdata, psize, tpoly, true, ss);}
       void              wire (int4b*, unsigned, word);
       void              wire (int4b*, unsigned, word, const SGBitSet*);
+      void              text (const std::string*, const CTM&, const DBbox&, bool);
       void              collect();
       void              draw();
 

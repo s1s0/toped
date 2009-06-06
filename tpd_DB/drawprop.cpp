@@ -74,7 +74,7 @@ const byte                    layprop::DrawProperties::_defaultFill [128] = {
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-
+layprop::FontLibrary* fontLib = NULL;
 //=============================================================================
 //
 //
@@ -112,12 +112,50 @@ layprop::TGlfSymbol::TGlfSymbol(FILE* ffile)
       fread(&(_cdata[i  ]), 1, 1, ffile);
 }
 
+void layprop::TGlfSymbol::dataCopy(GLfloat* vxarray, GLbyte* ixarray)
+{
+   memcpy(vxarray, _vdata, _alvrtxs);
+   memcpy(ixarray, _idata, 3 * _alchnks);
+}
+
+layprop::TGlfSymbol::~TGlfSymbol()
+{
+   delete [] _vdata;
+   delete [] _idata;
+   delete [] _cdata;
+}
 
 //=============================================================================
 //
 //
 //
-layprop::TGlfFont::TGlfFont(std::string filename)
+layprop::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
+{
+   _firstvx = voffset;
+   _firstix = ioffset;
+   _alvrtxs = tsym->_alvrtxs;
+   _alcntrs = tsym->_alcntrs;
+   _alchnks = tsym->_alchnks;
+   //
+   _csize = DEBUG_NEW GLsizei[_alcntrs];
+   for (unsigned i = 0; i < _alcntrs; i++)  _csize[i] = tsym->_cdata[i];
+   //
+   _minX = tsym->_minX;
+   _maxX = tsym->_maxX;
+   _minY = tsym->_minY;
+   _maxY = tsym->_maxY;
+}
+
+layprop::TGlfRSymbol::~TGlfRSymbol()
+{
+   delete [] _csize;
+}
+
+//=============================================================================
+//
+//
+//
+layprop::TGlfFont::TGlfFont(std::string filename) : _pitch(0.1f), _spaceWidth(2.0f)
 {
    FILE* ffile = fopen(filename.c_str(), "rb");
    if (NULL == ffile)
@@ -144,16 +182,162 @@ layprop::TGlfFont::TGlfFont(std::string filename)
       // Read the rest  of bytes to 128 (unused)
       byte unused [28];
       fread(unused, 28, 1, ffile);
-      // Finally - start parsing the symbol data      
+      // Finally - start parsing the symbol data
+      _all_vertexes = 0;
+      _all_indexes = 0;
+      typedef std::map<byte, TGlfSymbol*> TFontMap;
+      TFontMap tsymbols;
       for (byte i = 0; i < _numSymbols; i++)
       {
          byte asciiCode;
          fread(&asciiCode, 1, 1, ffile);
-         _symbols[asciiCode] = DEBUG_NEW TGlfSymbol(ffile);
+         TGlfSymbol* csymbol = DEBUG_NEW TGlfSymbol(ffile);
+         tsymbols[asciiCode] = csymbol;
+         _all_vertexes += csymbol->alvrtxs();
+         _all_indexes  += 3 * csymbol->alchnks(); // only triangles!
       }
+      // Now create the font VBO's ...
+      _vdata = DEBUG_NEW GLfloat[_all_vertexes];
+      _idata = DEBUG_NEW GLbyte [_all_indexes];
+      //... and collect them deleting meanwhile the themporary objects
+      word vrtx_indx = 0;
+      word indx_indx = 0;
+      for (TFontMap::const_iterator CRS = tsymbols.begin(); CRS != tsymbols.end(); CRS++)
+      {
+         TGlfRSymbol* csymbol = DEBUG_NEW TGlfRSymbol(CRS->second, vrtx_indx, indx_indx);
+         CRS->second->dataCopy(&(_vdata[vrtx_indx]), &(_idata[indx_indx]));
+         vrtx_indx += CRS->second->alvrtxs();
+         indx_indx += 3 * CRS->second->alchnks();
+         _symbols[CRS->first] = csymbol;
+         delete CRS->second;
+      }
+      assert(_all_vertexes == vrtx_indx);
+      assert(_all_indexes  == indx_indx);
       _status = 0;
    }
    fclose(ffile);
+}
+
+void layprop::TGlfFont::getStringBounds(std::string text, DBbox* overlap)
+{
+   // initialise the boundaries
+   float top, bottom, left, right;
+   if ((0x20 == text[0]) ||  (_symbols.end() == _symbols.find(text[0])))
+   {
+      left =   0.0f; right  = _spaceWidth;
+      top  = -10.0f; bottom = 10.0f;
+   }
+   else
+   {
+      left   = _symbols[text[0]]->minX();
+      right  = _symbols[text[0]]->maxX();
+      bottom = _symbols[text[0]]->minY();
+      top    = _symbols[text[0]]->maxY();
+   }
+   // traverse the rest of the string
+   for (unsigned i = 1; i < text.length() ; i++)
+   {
+      if (0x20 == text[i]) right += _spaceWidth;
+      else
+      {
+         FontMap::const_iterator CSI = _symbols.find(text[i]);
+         if (_symbols.end() == CSI)
+            right += _spaceWidth;
+         else
+            right += CSI->second->maxX() - CSI->second->minX() + _pitch;
+
+         /* Update top/bottom bounds */
+         if (CSI->second->minY() < bottom) bottom = CSI->second->minY();
+         if (CSI->second->maxY() > top   ) top    = CSI->second->maxY();
+      }
+   }
+   // return directly with the correction
+   (*overlap) = DBbox(TP(0,0), TP(right - left, top - bottom, OPENGL_FONT_UNIT));
+}
+
+layprop::TGlfFont::~TGlfFont()
+{
+   for (FontMap::const_iterator CS = _symbols.begin(); CS != _symbols.end(); CS++)
+      delete (CS->second);
+}
+
+//=============================================================================
+//
+//
+//
+layprop::FontLibrary::FontLibrary(std::string fontfile, bool fti) : _fti(fti)
+{
+   if (_fti)
+      _font = DEBUG_NEW TGlfFont(fontfile);
+   else
+   {
+      glfInit();
+      if ( -1 != glfLoadFont(fontfile.c_str()) )
+      {
+         std::ostringstream ost1;
+         ost1<<"Error loading font file \"" << fontfile << "\". All text objects will not be properly processed";
+         tell_log(console::MT_ERROR,ost1.str());
+      }
+   }
+}
+
+void layprop::FontLibrary::getStringBounds(std::string text, DBbox* overlap)
+{
+   if (_fti)
+   {
+      assert(NULL != _font); // make sure that fonts are initialised
+      _font->getStringBounds(text, overlap);
+   }
+   else
+   {
+      float minx, miny, maxx, maxy;
+      glfGetStringBounds(text.c_str(),&minx, &miny, &maxx, &maxy);
+      (*overlap) = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
+   }
+}
+
+void layprop::FontLibrary::drawString(std::string text, bool fill)
+{
+   if (_fti)
+   {
+      //@TODO
+   }
+   else
+   {
+      glfDrawTopedString(text.c_str(), fill);
+   }
+}
+
+void layprop::FontLibrary::drawWiredString(std::string text)
+{
+   if (_fti)
+   {
+      //@TODO
+   }
+   else
+   {
+      glfDrawWiredString(text.c_str());
+   }
+}
+
+void layprop::FontLibrary::drawSolidString(std::string text)
+{
+   if (_fti)
+   {
+      //@TODO
+   }
+   else
+   {
+      glfDrawSolidString(text.c_str());
+   }
+}
+
+layprop::FontLibrary::~FontLibrary()
+{
+   if (_fti)
+      delete (_font);
+   else
+      glfClose();
 }
 
 //=============================================================================
@@ -172,20 +356,8 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
 
 void layprop::DrawProperties::loadLayoutFonts(std::string fontfile, bool vbo)
 {
-   //--------------------------------------------------------------------------
-   // This should be moved to !_VBOrendering when the new renderer starts to 
-   // handle the fonts itself.
-   // Load font library
    _renderType = vbo;
-   glfInit();
-   if ( -1 != glfLoadFont(fontfile.c_str()) )
-   {
-      std::ostringstream ost1;
-      ost1<<"Error loading font file \"" << fontfile << "\". All text objects will not be properly processed";
-      tell_log(console::MT_ERROR,ost1.str());
-   }
-   if (_renderType)
-      TGlfFont* boza = DEBUG_NEW TGlfFont(fontfile);
+   fontLib = DEBUG_NEW FontLibrary(fontfile, vbo);
 }
 
 void layprop::DrawProperties::setGridColor(std::string colname) const
@@ -681,9 +853,7 @@ layprop::DrawProperties::~DrawProperties() {
    for (lineMAP::iterator LMI = _lineset.begin(); LMI != _lineset.end(); LMI++)
       delete LMI->second;
 //   if (NULL != _refstack) delete _refstack; -> deleted in editobject
-
-//   if (!renderType)
-      glfClose();
+   delete fontLib;
 }
 
 

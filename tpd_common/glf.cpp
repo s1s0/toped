@@ -602,7 +602,7 @@ void glfDrawWiredString(const char *s)
 }
 
 
-void glfDrawTopedString(const char *s, unsigned char fill)
+void glfDrawTopedString(const char *s, bool fill)
 {
 //   DrawString(s, &glfDrawTopedSymbol);
    int i;
