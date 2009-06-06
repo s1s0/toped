@@ -72,7 +72,7 @@ int   glfUnloadBMFFontD(int bmf_descriptor);   /* Unload BMF font by bmf_descrip
 /* --------- Vector Fonts ---------------- */
 void glfDrawWiredSymbol(const char s);    /* Draw wired symbol    */
 void glfDrawWiredString(const char *s);   /* Draw wired string    */
-void glfDrawTopedString(const char *s, unsigned char fill);
+void glfDrawTopedString(const char *s, bool fill);
 //void glfDrawTopedSymbol(char s);
 void glfDrawSolidSymbol(const char s);    /* Draw solid symbol    */
 void glfDrawSolidString(const char *s);   /* Draw wired string    */

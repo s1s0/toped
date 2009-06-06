@@ -43,7 +43,6 @@
 #include "../tpd_ifaces/cif_io.h"
 #include "../tpd_ifaces/gds_io.h"
 #include "../tpd_common/outbox.h"
-#include "../tpd_common/glf.h"
 
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 
@@ -54,6 +53,8 @@
 // Initialize the GLU tessellator static member
 //-----------------------------------------------------------------------------
 GLUtriangulatorObj *laydata::tdtdata::tessellObj = gluNewTess();
+
+extern layprop::FontLibrary* fontLib;
 
 /*===========================================================================
       Select and subsequent operations over the existing tdtdata
@@ -2277,31 +2278,27 @@ DBbox laydata::tdtcellaref::clear_overlap() const
 //-----------------------------------------------------------------------------
 // class tdttext
 //-----------------------------------------------------------------------------
-laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata(), _overlap(TP()) {
+laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata(),
+                          _text(text), _translation(trans), _overlap(TP())
+{
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
-   _text = text;
-   _translation = trans;
-   float minx, miny, maxx, maxy;
-   glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
-   _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
+   assert(NULL != fontLib); // check that font library is initialised
+   fontLib->getStringBounds(_text, &_overlap);
 }
 
-laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata(), _overlap(TP()) 
+laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata(),
+   _text(tedfile->getString()), _translation(tedfile->getCTM()), _overlap(TP())
 {
-   _text = tedfile->getString();
-   _translation = tedfile->getCTM();
-   float minx, miny, maxx, maxy;
-   glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
-   _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
+   assert(NULL != fontLib); // check that font library is initialised
+   fontLib->getStringBounds(_text, &_overlap);
 }
 
 void laydata::tdttext::replace_str(std::string newstr)
 {
    _text = newstr;
-   float minx, miny, maxx, maxy;
-   glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
-   _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
+   assert(NULL != fontLib); // check that font library is initialised
+   fontLib->getStringBounds(_text, &_overlap);
 }
 
 void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
@@ -2359,13 +2356,26 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
 
 void laydata::tdttext::draw_request(Tenderer& rend) const
 {
-   //@TODO!
+   // font translation matrix
+   CTM ftmtrx =  _translation * rend.topCTM();
+   DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
+   if (!wsquare.visible(ftmtrx * rend.ScrCTM()) ) return;
+   // If we get here - means that the text is visible
+   // draw the cell mark ...
+   //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
+   rend.text(&_text, ftmtrx, _overlap, false);
 }
 
 void laydata::tdttext::draw_srequest(Tenderer& rend, const SGBitSet*) const
 {
-   //@TODO!
-   draw_request(rend);
+   // font translation matrix
+   CTM ftmtrx =  _translation * rend.topCTM();
+   DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
+   if (!wsquare.visible(ftmtrx * rend.ScrCTM()) ) return;
+   // If we get here - means that the text is visible
+   // draw the cell mark ...
+   //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
+   rend.text(&_text, ftmtrx, _overlap, true);
 }
 
 void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -2388,7 +2398,9 @@ void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const 
    // keeping the font unit will help to convert the font metrics back to
    // integer coordinates
    glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-   glfDrawTopedString(_text.c_str(),0);
+
+   assert(NULL != fontLib); // check that font library is initialised
+   fontLib->drawString(_text, false);
    glPopMatrix();
 }
 
@@ -2409,7 +2421,7 @@ void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const 
    // keeping the font unit will help to convert the font metrics back to
    // integer coordinates
    glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-   glfDrawTopedString(_text.c_str(),1);
+   fontLib->drawString(_text, true);
    glPopMatrix();
 }
 
@@ -2451,7 +2463,7 @@ void laydata::tdttext::motion_draw(const layprop::DrawProperties& drawprop,
       // correction of the glf shift - as explained in the openGL_precalc above
       glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
       glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-      glfDrawWiredString(_text.c_str());
+      fontLib->drawWiredString(_text);
       glPopMatrix();
    }
 }
@@ -3076,15 +3088,13 @@ void laydata::tdttmpcellaref::draw(const layprop::DrawProperties& drawprop,
 
 //==============================================================================
 //
-laydata::tdttmptext::tdttmptext(std::string text, CTM trans) : _overlap(TP())
+laydata::tdttmptext::tdttmptext(std::string text, CTM trans) : _text(text),
+                                _translation(trans), _overlap(TP())
 {
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
-   _text = text;
-   _translation = trans;
-   float minx, miny, maxx, maxy;
-   glfGetStringBounds(_text.c_str(),&minx, &miny, &maxx, &maxy);
-   _overlap = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
+   assert(NULL != fontLib); // check that font library is initialised
+   fontLib->getStringBounds(_text, &_overlap);
 }
 
 
@@ -3102,6 +3112,6 @@ void laydata::tdttmptext::draw(const layprop::DrawProperties&, ctmqueue& transta
             // correction of the glf shift - as explained in the openGL_precalc above
             glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
             glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-            glfDrawWiredString(_text.c_str());
+            fontLib->drawWiredString(_text);
             glPopMatrix();
 }

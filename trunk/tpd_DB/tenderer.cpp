@@ -465,6 +465,29 @@ unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
 
 //=============================================================================
 //
+// class TenderOBox
+//
+TenderOBox::TenderOBox(const DBbox& obox, const CTM& ctm)
+{
+   TP tp = TP(obox.p1().x(), obox.p1().y()) * ctm;
+   _obox[0] = tp.x();_obox[1] = tp.y();
+   tp = TP(obox.p2().x(), obox.p1().y()) * ctm;
+   _obox[2] = tp.x();_obox[3] = tp.y();
+   tp = TP(obox.p2().x(), obox.p2().y()) * ctm;
+   _obox[4] = tp.x();_obox[5] = tp.y();
+   tp = TP(obox.p1().x(), obox.p2().y()) * ctm;
+   _obox[6] = tp.x();_obox[7] = tp.y();
+}
+
+unsigned TenderOBox::cDataCopy(int* array, unsigned& pindex)
+{
+   memcpy(&(array[pindex]), _obox, sizeof(int4b) * 8);
+   pindex += 8;
+   return 4;
+}
+
+//=============================================================================
+//
 // class TenderRef
 //
 TenderRef::TenderRef(std::string name, const CTM& ctm, const DBbox& obox,
@@ -483,8 +506,7 @@ TenderRef::TenderRef(std::string name, const CTM& ctm, const DBbox& obox,
 }
 
 
-TenderRef::TenderRef()
-   : _name(""), _ctm(CTM()), _alphaDepth(0)
+TenderRef::TenderRef() : _name(""), _ctm(CTM()), _alphaDepth(0)
 {
    _ctm.oglForm(_translation);
    for (word i = 0; i < 8; _obox[i++] = 0);
@@ -1017,6 +1039,12 @@ void TenderLay::wire (int4b* pdata, unsigned psize, word width, bool center_only
    _cslice->registerWire(cobj);
 }
 
+void TenderLay::text (const std::string* txt, const CTM& cmtrx)
+{
+//   assert(_has_selected ? true : !sel);
+   //@TODO Font rendering!
+}
+
 void TenderLay::registerSBox (TenderSCnvx* sobj)
 {
    _slct_data.push_back(sobj);
@@ -1253,10 +1281,16 @@ TenderLay::~TenderLay()
 //
 // class Tender0Lay
 //
-Tender0Lay::Tender0Lay() : 
-   _alvrtxs(0u), _alobjvx(0u), _sizesvx(NULL), _firstvx(NULL),
-   _asindxs(0u), _asobjix(0u), _sizslix(NULL), _fstslix(NULL)
+Tender0Lay::Tender0Lay()
 {
+   _alvrtxs[0] = _alvrtxs[1] = 0u;
+   _alobjvx[0] = _alobjvx[1] = 0u;
+   _asindxs[0] = _asindxs[1] = 0u;
+   _asobjix[0] = _asobjix[1] = 0u;
+   _sizesvx[0] = _sizesvx[1] = NULL;
+   _firstvx[0] = _firstvx[1] = NULL;
+   _sizslix[0] = _sizslix[1] = NULL;
+   _fstslix[0] = _fstslix[1] = NULL;
 }
 
 TenderRef* Tender0Lay::addCellRef(std::string cname, const CTM& trans,
@@ -1267,19 +1301,46 @@ TenderRef* Tender0Lay::addCellRef(std::string cname, const CTM& trans,
    {
       _cellSRefBoxes.push_back(cRefBox);
       assert(2 == alphaDepth);
-      _asindxs += 4;
-      _asobjix++;
+      _asindxs[0] += 4;
+      _asobjix[0]++;
    }
    else
    {
       _cellRefBoxes.push_back(cRefBox);
       if (1 < alphaDepth)
       {
-         _alvrtxs += 4;
-         _alobjvx++;
+         _alvrtxs[0] += 4;
+         _alobjvx[0]++;
       }
    }
    return cRefBox;
+}
+
+void Tender0Lay::addTextOBox(const DBbox& overlap, const CTM& trans, bool selected)
+{
+   TenderOBox* tRefBox = DEBUG_NEW TenderOBox(overlap, trans);
+   if (selected)
+   {
+      _textSRefBoxes.push_back(tRefBox);
+      _asindxs[1] += 4;
+      _asobjix[1]++;
+   }
+   else
+   {
+      _textRefBoxes.push_back(tRefBox);
+      _alvrtxs[1] += 4;
+      _alobjvx[1]++;
+   }
+}
+
+unsigned Tender0Lay::total_points()
+{
+   return (_alvrtxs[0] + _asindxs[0] + _alvrtxs[1] + _asindxs[1]);
+}
+
+unsigned Tender0Lay::total_indexes()
+{
+   return (_alobjvx[0] + _asobjix[0] + _alobjvx[1] + _asobjix[1]);
 }
 
 void Tender0Lay::collect(GLuint pbuf)
@@ -1288,7 +1349,7 @@ void Tender0Lay::collect(GLuint pbuf)
    _pbuffer = pbuf;
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    glBufferData(GL_ARRAY_BUFFER              ,
-                2 * (_alvrtxs + _asindxs) * sizeof(int4b) ,
+                2 * total_points() * sizeof(int4b) ,
                 NULL                         ,
                 GL_DYNAMIC_DRAW               );
    cpoint_array = (int*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
@@ -1296,29 +1357,49 @@ void Tender0Lay::collect(GLuint pbuf)
    // initialise the indexing
    unsigned pntindx = 0;
    unsigned  szindx  = 0;
-   _firstvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
-   _sizesvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
-   if (0 < _asobjix)
+   for (byte i = 0; i < 2; i++)
    {
-      _fstslix = DEBUG_NEW GLsizei[_asobjix];
-      _sizslix = DEBUG_NEW GLsizei[_asobjix];
+      if (0 < (_alvrtxs[i] + _asindxs[i]))
+      {
+         _firstvx[i] = DEBUG_NEW GLsizei[_alobjvx[i] + _asobjix[i]];
+         _sizesvx[i] = DEBUG_NEW GLsizei[_alobjvx[i] + _asobjix[i]];
+         if (0 < _asobjix[i])
+         {
+            _fstslix[i] = DEBUG_NEW GLsizei[_asobjix[i]];
+            _sizslix[i] = DEBUG_NEW GLsizei[_asobjix[i]];
+         }
+      }
    }
+   // first the cells
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
    {
       if (1 < (*CSH)->alphaDepth())
       {
-         _firstvx[szindx  ] = pntindx/2;
-         _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+         _firstvx[0][szindx  ] = pntindx/2;
+         _sizesvx[0][szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
       }
    }
    for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
    {
-      _fstslix[szindx-_alobjvx] = _firstvx[szindx] = pntindx/2;
-      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+      _fstslix[0][szindx-_alobjvx[0]] = _firstvx[0][szindx] = pntindx/2;
+      _sizslix[0][szindx-_alobjvx[0]] = _sizesvx[0][szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
       szindx++;
    }
-   assert(pntindx == 2 * (_alvrtxs + _asindxs));
-   assert(szindx  == (_alobjvx + _asobjix));
+   // now the texts
+   for (RefTxtList::const_iterator CSH = _textRefBoxes.begin(); CSH != _textRefBoxes.end(); CSH++)
+   {
+      _firstvx[1][szindx  ] = pntindx/2;
+      _sizesvx[1][szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+   }
+   for (RefTxtList::const_iterator CSH = _textSRefBoxes.begin(); CSH != _textSRefBoxes.end(); CSH++)
+   {
+      _fstslix[1][szindx-_alobjvx[1]] = _firstvx[1][szindx] = pntindx/2;
+      _sizslix[1][szindx-_alobjvx[1]] = _sizesvx[1][szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+      szindx++;
+   }
+
+   assert(pntindx == 2 * total_points());
+   assert(szindx  == total_indexes());
 
    // Unmap the buffers
    glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -1332,35 +1413,44 @@ void Tender0Lay::draw(layprop::DrawProperties* drawprop)
    // Check the state of the buffer
    GLint bufferSize;
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (GLint)(2 * (_alvrtxs + _asindxs) * sizeof(int4b)));
+   assert(bufferSize == (GLint)(2 * total_points() * sizeof(int4b)));
 
    glVertexPointer(2, GL_INT, 0, 0);
    glEnableClientState(GL_VERTEX_ARRAY);
-   assert(_firstvx);
-   assert(_sizesvx);
-   glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix);
-
-
-   if (0 < _asindxs)
+   for (byte i = 0; i < 2; i++)
    {
-      assert(_fstslix);
-      assert(_sizslix);
-      drawprop->setLineProps(true);
-      glMultiDrawArrays(GL_LINE_LOOP, _fstslix, _sizslix, _asobjix);
-      drawprop->setLineProps(false);
+      if (0 < (_alvrtxs[i] + _asindxs[i]))
+      {
+         assert(_firstvx[i]); assert(_sizesvx[i]);
+         glMultiDrawArrays(GL_LINE_LOOP, _firstvx[i], _sizesvx[i], _alobjvx[i] + _asobjix[i]);
+         if (0 < _asindxs[i])
+         {
+            assert(_fstslix[i]); assert(_sizslix[i]);
+            drawprop->setLineProps(true);
+            glMultiDrawArrays(GL_LINE_LOOP, _fstslix[i], _sizslix[i], _asobjix[i]);
+            drawprop->setLineProps(false);
+         }
+      }
    }
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 Tender0Lay::~Tender0Lay()
 {
-   if (NULL != _sizesvx) delete [] _sizesvx;
-   if (NULL != _firstvx) delete [] _firstvx;
-   if (NULL != _sizslix) delete [] _sizslix;
-   if (NULL != _fstslix) delete [] _fstslix;
+   for (byte i = 0; i < 2; i++)
+   {
+      if (NULL != _sizesvx[i]) delete [] (_sizesvx[i]);
+      if (NULL != _firstvx[i]) delete [] (_firstvx[i]);
+      if (NULL != _sizslix[i]) delete [] (_sizslix[i]);
+      if (NULL != _fstslix[i]) delete [] (_fstslix[i]);
+   }
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
       delete (*CSH);
    for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
+      delete (*CSH);
+   for (RefTxtList::const_iterator CSH = _textRefBoxes.begin(); CSH != _textRefBoxes.end(); CSH++)
+      delete (*CSH);
+   for (RefTxtList::const_iterator CSH = _textSRefBoxes.begin(); CSH != _textSRefBoxes.end(); CSH++)
       delete (*CSH);
 }
 
@@ -1454,6 +1544,12 @@ void Tenderer::wire (int4b* pdata, unsigned psize, word width, const SGBitSet* p
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
    bool center_line_only = !wsquare.visible(topCTM() * ScrCTM());
    _clayer->wire(pdata, psize, width, center_line_only, true, psel);
+}
+
+void Tenderer::text (const std::string* txt, const CTM& cmtrx, const DBbox& ovl, bool sel)
+{
+   _0layer.addTextOBox(ovl, cmtrx, sel);
+   _clayer->text(txt, cmtrx);
 }
 
 void Tenderer::Grid(const real step, const std::string color)

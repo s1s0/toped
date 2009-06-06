@@ -28,6 +28,7 @@
 #ifndef DRAWPROP_H
 #define DRAWPROP_H
 
+#include <GL/glew.h>
 #include <string>
 #include <math.h>
 #include "tedstd.h"
@@ -84,13 +85,13 @@ namespace layprop {
                         LayerSettings(std::string name, std::string color, std::string filltype, std::string sline):
                            _name(name), _color(color), _fill(filltype), _sline(sline),
                                  _hidden(false), _locked(false) {};
-                                 std::string       color()    const {return _color;}
-                                 std::string       fill()     const {return _fill;}
-                                 std::string       name()     const {return _name;}
-                                 std::string       sline()    const {return _sline;}
-                                 bool              hidden()   const {return _hidden;}
-                                 bool              locked()   const {return _locked;}
-                                 friend class ViewProperties;
+         std::string       color()    const {return _color;}
+         std::string       fill()     const {return _fill;}
+         std::string       name()     const {return _name;}
+         std::string       sline()    const {return _sline;}
+         bool              hidden()   const {return _hidden;}
+         bool              locked()   const {return _locked;}
+         friend class ViewProperties;
       private:
          std::string       _name;
          std::string       _color;
@@ -108,6 +109,10 @@ namespace layprop {
       public:
                         TGlfSymbol(FILE*);
                        ~TGlfSymbol();
+         void           dataCopy(GLfloat*, GLbyte*);
+         byte           alvrtxs()   { return _alvrtxs;}
+         byte           alchnks()   { return _alchnks;}
+         friend class TGlfRSymbol;
       protected:
          byte           _alvrtxs;    //! Number of vertexs
          byte           _alcntrs;    //! Number of contours
@@ -127,19 +132,71 @@ namespace layprop {
    //
    //
    //
+   class TGlfRSymbol {
+      public:
+         TGlfRSymbol(TGlfSymbol*, word, word);
+         ~TGlfRSymbol();
+         float          minX() { return _minX; }
+         float          maxX() { return _maxX; }
+         float          minY() { return _minY; }
+         float          maxY() { return _maxY; }
+      private:
+         word           _firstvx;    //! first vertex in the font matrix
+         word           _firstix;    //! first index in the font matrix
+         byte           _alvrtxs;    //! Number of vertexs
+         byte           _alcntrs;    //! Number of contours
+         byte           _alchnks;    //! Number of index (tesselation) chunks
+
+         GLsizei*       _csize;      //! Sizes of the contours
+
+         float          _minX;
+         float          _maxX;
+         float          _minY;
+         float          _maxY;
+   };
+
+   //=============================================================================
+   //
+   //
+   //
    class TGlfFont {
       public:
                         TGlfFont(std::string);
                        ~TGlfFont();
+         void           getStringBounds(std::string, DBbox*);
       private:
-         typedef std::map<byte, TGlfSymbol*> FontMap;
+         typedef std::map<byte, TGlfRSymbol*> FontMap;
          FontMap        _symbols;
+         word           _all_vertexes;
+         word           _all_indexes;
+         GLfloat*       _vdata;      //! Vertex data
+         GLbyte*        _idata;      //! Index data
          char           _fname [97];
          byte           _status;
          byte           _numSymbols;
+         float          _pitch;
+         float          _spaceWidth;
    };
 
 
+   //=============================================================================
+   //
+   // Wrapper to abstract-out the Glf implementation. Should be temporary until
+   // new implementation is up&running
+   //
+   class FontLibrary {
+      public:
+                        FontLibrary(std::string, bool);
+                       ~FontLibrary();
+         void           getStringBounds(std::string, DBbox*);
+         void           drawString(std::string, bool);
+         void           drawWiredString(std::string);
+         void           drawSolidString(std::string);
+      private:
+         TGlfFont*      _font;
+         bool           _fti; // font type implementation ()
+   };
+   
    //=============================================================================
    typedef  std::map<std::string, tellRGB*      >  colorMAP;
    typedef  std::map<std::string, byte*         >  fillMAP;

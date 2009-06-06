@@ -816,9 +816,10 @@ void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, b
              (CF != recfields.end() && CA != _child.end()); CF ++, CA++)
    {
       if ( TLUNKNOWN_TYPE( (**CA)() ) )
+      {
          if (TLISALIST(CF->second))
          {// check the list fields
-            if (TLCOMPOSIT_TYPE(CF->second & ~telldata::tn_listmask))
+            if (TLCOMPOSIT_TYPE((CF->second & (~telldata::tn_listmask))))
                (*CA)->userStructListCheck(*(vartype.findtype(CF->second)), cmdUpdate);
             else
                (*CA)->toList(cmdUpdate, CF->second & ~telldata::tn_listmask);
@@ -826,6 +827,7 @@ void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, b
          else
             // call in recursion the userStructCheck method of the child
             (*CA)->userStructCheck(*(vartype.findtype(CF->second)), cmdUpdate);
+      }
       if (!NUMBER_TYPE( CF->second ))
       {
          // for non-number types there is no internal conversion,
