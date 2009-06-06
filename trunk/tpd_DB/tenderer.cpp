@@ -1385,7 +1385,10 @@ void Tender0Lay::collect(GLuint pbuf)
       _sizslix[0][szindx-_alobjvx[0]] = _sizesvx[0][szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
       szindx++;
    }
+   assert(pntindx == 2 * (_alvrtxs[0] + _asindxs[0]));
+   assert(szindx  ==     (_alobjvx[0] + _asobjix[0]));
    // now the texts
+   szindx  = 0;
    for (RefTxtList::const_iterator CSH = _textRefBoxes.begin(); CSH != _textRefBoxes.end(); CSH++)
    {
       _firstvx[1][szindx  ] = pntindx/2;
@@ -1397,9 +1400,8 @@ void Tender0Lay::collect(GLuint pbuf)
       _sizslix[1][szindx-_alobjvx[1]] = _sizesvx[1][szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
       szindx++;
    }
-
-   assert(pntindx == 2 * total_points());
-   assert(szindx  == total_indexes());
+   assert(pntindx == 2 * (_alvrtxs[0] + _asindxs[0] + _alvrtxs[1] + _asindxs[1]));
+   assert(szindx  ==     (_alobjvx[1] + _asobjix[1]));
 
    // Unmap the buffers
    glUnmapBuffer(GL_ARRAY_BUFFER);
