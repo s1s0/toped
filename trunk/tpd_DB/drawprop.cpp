@@ -158,7 +158,7 @@ layprop::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
 void layprop::TGlfRSymbol::draw()
 {
    glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _csize, _alcntrs);
-   glDrawElements(GL_TRIANGLES, _alchnks, GL_UNSIGNED_INT, (const GLvoid*)(&_firstix));
+   glDrawElements(GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, (const GLvoid*)(_firstix));
 }
 
 layprop::TGlfRSymbol::~TGlfRSymbol()
