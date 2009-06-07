@@ -147,12 +147,7 @@ layprop::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
          _csize[i]   -= (tsym->_cdata[i-1] + 1);
       }
    }
-   _firstix = DEBUG_NEW GLuint[_alchnks];
-   for (unsigned i = 0; i < _alchnks; i++)
-   {
-      _firstix[i] = (ioffset + 3  * i) /* sizeof(int)*/;
-   }
-
+   _firstix = ioffset  * sizeof(unsigned);
    //
    _minX = tsym->_minX;
    _maxX = tsym->_maxX;
@@ -163,14 +158,12 @@ layprop::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
 void layprop::TGlfRSymbol::draw()
 {
    glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _csize, _alcntrs);
-//   glDrawElements(GL_TRIANGLES, _alchnks, GL_UNSIGNED_INT, (const GLvoid*)_firstix);
-
+   glDrawElements(GL_TRIANGLES, _alchnks, GL_UNSIGNED_INT, (const GLvoid*)(&_firstix));
 }
 
 layprop::TGlfRSymbol::~TGlfRSymbol()
 {
    delete [] _firstvx;
-   delete [] _firstix;
    delete [] _csize;
 }
 
@@ -267,7 +260,14 @@ bool layprop::TGlfFont::bindBuffers()
 {
    if ((0 ==_pbuffer) || (0 == _ibuffer)) return false;
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   bufferSize++;
+
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+   glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   bufferSize++;
+
    return true;
 }
 

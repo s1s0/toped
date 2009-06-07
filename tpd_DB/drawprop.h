@@ -143,7 +143,7 @@ namespace layprop {
          float          maxY() { return _maxY; }
       private:
          GLint*         _firstvx;    //! first vertex in the font matrix
-         GLuint*        _firstix;    //! first index in the font matrix
+         GLuint         _firstix;    //! first index in the font matrix
          byte           _alcntrs;    //! Number of contours
          byte           _alchnks;    //! Number of index (tesselation) chunks
 
