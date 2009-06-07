@@ -109,7 +109,7 @@ namespace layprop {
       public:
                         TGlfSymbol(FILE*);
                        ~TGlfSymbol();
-         void           dataCopy(GLfloat*, GLbyte*);
+         void           dataCopy(GLfloat*, GLuint*, word);
          byte           alvrtxs()   { return _alvrtxs;}
          byte           alchnks()   { return _alchnks;}
          friend class TGlfRSymbol;
@@ -134,16 +134,16 @@ namespace layprop {
    //
    class TGlfRSymbol {
       public:
-         TGlfRSymbol(TGlfSymbol*, word, word);
-         ~TGlfRSymbol();
+                        TGlfRSymbol(TGlfSymbol*, word, word);
+                       ~TGlfRSymbol();
+         void           draw();
          float          minX() { return _minX; }
          float          maxX() { return _maxX; }
          float          minY() { return _minY; }
          float          maxY() { return _maxY; }
       private:
-         word           _firstvx;    //! first vertex in the font matrix
-         word           _firstix;    //! first index in the font matrix
-         byte           _alvrtxs;    //! Number of vertexs
+         GLint*         _firstvx;    //! first vertex in the font matrix
+         GLuint*        _firstix;    //! first index in the font matrix
          byte           _alcntrs;    //! Number of contours
          byte           _alchnks;    //! Number of index (tesselation) chunks
 
@@ -163,19 +163,24 @@ namespace layprop {
       public:
                         TGlfFont(std::string);
                        ~TGlfFont();
-         void           getStringBounds(std::string, DBbox*);
+         void           getStringBounds(const std::string*, DBbox*);
+         void           collect(GLuint, GLuint);
+         bool           bindBuffers();
+         void           drawString(const std::string*, bool);
       private:
+         typedef std::map<byte, TGlfSymbol*> TFontMap;
          typedef std::map<byte, TGlfRSymbol*> FontMap;
          FontMap        _symbols;
+         TFontMap       _tsymbols;
          word           _all_vertexes;
          word           _all_indexes;
-         GLfloat*       _vdata;      //! Vertex data
-         GLbyte*        _idata;      //! Index data
          char           _fname [97];
          byte           _status;
          byte           _numSymbols;
          float          _pitch;
          float          _spaceWidth;
+         GLuint         _pbuffer;
+         GLuint         _ibuffer;
    };
 
 
@@ -188,12 +193,16 @@ namespace layprop {
       public:
                         FontLibrary(std::string, bool);
                        ~FontLibrary();
-         void           getStringBounds(std::string, DBbox*);
-         void           drawString(std::string, bool);
+         void           getStringBounds(const std::string*, DBbox*);
+         void           drawString(const std::string*, bool);
          void           drawWiredString(std::string);
          void           drawSolidString(std::string);
+         bool           bindFont();
+         void           unbindFont();
       private:
          TGlfFont*      _font;
+         GLuint*        _ogl_buffers; //! Array with the "names" of all openGL buffers
+         byte           _num_ogl_buffers; //! Number of generated openGL VBOs
          bool           _fti; // font type implementation ()
    };
    

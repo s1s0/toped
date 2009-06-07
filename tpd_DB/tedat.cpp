@@ -2284,21 +2284,21 @@ laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata(),
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
    assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(_text, &_overlap);
+   fontLib->getStringBounds(&_text, &_overlap);
 }
 
 laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata(),
    _text(tedfile->getString()), _translation(tedfile->getCTM()), _overlap(TP())
 {
    assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(_text, &_overlap);
+   fontLib->getStringBounds(&_text, &_overlap);
 }
 
 void laydata::tdttext::replace_str(std::string newstr)
 {
    _text = newstr;
    assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(_text, &_overlap);
+   fontLib->getStringBounds(&_text, &_overlap);
 }
 
 void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
@@ -2400,7 +2400,7 @@ void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const 
    glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
 
    assert(NULL != fontLib); // check that font library is initialised
-   fontLib->drawString(_text, false);
+   fontLib->drawString(&_text, false);
    glPopMatrix();
 }
 
@@ -2421,7 +2421,7 @@ void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const 
    // keeping the font unit will help to convert the font metrics back to
    // integer coordinates
    glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-   fontLib->drawString(_text, true);
+   fontLib->drawString(&_text, true);
    glPopMatrix();
 }
 
@@ -3094,7 +3094,7 @@ laydata::tdttmptext::tdttmptext(std::string text, CTM trans) : _text(text),
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
    assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(_text, &_overlap);
+   fontLib->getStringBounds(&_text, &_overlap);
 }
 
 

@@ -394,6 +394,9 @@ typedef std::list<TenderNcvx*>      SlicePolygons;
 typedef std::list<TenderWire*>      SliceWires;
 typedef std::list<TenderSelected*>  SliceSelected;
 
+/**
+ *  Text reference boxes
+ */
 class TenderOBox {
    public:
                         TenderOBox(const DBbox&, const CTM&);
@@ -403,7 +406,7 @@ class TenderOBox {
 };
 
 /**
- *  Reference boxes
+ *  Cell reference boxes & reference related data
  */
 class TenderRef {
    public:
@@ -422,14 +425,16 @@ class TenderRef {
       word              _alphaDepth;
 };
 
-class TenderTRef {
+/**
+ * Text objects
+ */
+class TenderText {
    public:
-                        TenderTRef(std::string, const CTM&, const DBbox&, word);
-//      void              draw();
+                        TenderText(const std::string*, const CTM&);
+      void              draw(bool);
    private:
-      std::string*      _text;
+      const std::string* _text;
       real              _ftm[16]; //! Font translation matrix
-      int4b             _obox[8];
 };
 /**
    TENDERer Translation View - is the most fundamental class of the Tenderer.
@@ -722,6 +727,7 @@ class TenderLay {
       typedef std::list<TenderTV*>     TenderTVList;
       typedef std::list<TenderReTV*>   TenderReTVList;
       typedef std::map<std::string, TenderTV*> ReusableTTVMap;
+      typedef std::list<TenderText*>   TenderStrings;
 
                         TenderLay();
                        ~TenderLay();
@@ -735,11 +741,13 @@ class TenderLay {
       void              ppSlice();
       void              draw(layprop::DrawProperties*);
       void              drawSelected();
+      void              drawTexts();
       void              collect(bool, GLuint, GLuint);
       void              collectSelected(unsigned int*);
       unsigned          total_points() {return _num_total_points;}
       unsigned          total_indexs() {return _num_total_indexs;}
       unsigned          total_slctdx();
+      unsigned          total_strings(){return _num_total_strings;}
 
    private:
       void              registerSBox  (TenderSCnvx*);
@@ -748,10 +756,12 @@ class TenderLay {
       ReusableTTVMap    _reusableData;
       TenderTVList      _layData;
       TenderReTVList    _reLayData;
+      TenderStrings     _texts;
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
       unsigned          _num_total_points;
       unsigned          _num_total_indexs;
       unsigned          _num_total_slctdx;
+      unsigned          _num_total_strings;
       GLuint            _pbuffer;
       GLuint            _ibuffer;
       bool              _has_selected;
