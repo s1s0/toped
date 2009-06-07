@@ -1656,7 +1656,8 @@ void Tenderer::collect()
    //--------------------------------------------------------------------------
    //
    // generate all VBOs
-//   if (0 == _num_ogl_buffers) return;
+//   if (0 == _num_ogl_buffers)
+//      return;
    _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
    glGenBuffers(_num_ogl_buffers, _ogl_buffers);
    unsigned current_buffer = 0;
