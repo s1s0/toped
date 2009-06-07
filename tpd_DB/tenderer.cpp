@@ -1627,7 +1627,7 @@ void Tenderer::collect()
    while (CCLAY != _data.end())
    {
       CCLAY->second->ppSlice();
-      if (0 == CCLAY->second->total_points())
+      if ((0 == CCLAY->second->total_points()) && (0 == CCLAY->second->total_strings()))
       {
          delete (CCLAY->second);
          // Note! Carefull here with the map iteration and erasing! Erase method
@@ -1642,7 +1642,7 @@ void Tenderer::collect()
          // be implemented
          _data.erase(CCLAY++);
       }
-      else
+      else if (0 != CCLAY->second->total_points())
       {
          num_total_slctdx += CCLAY->second->total_slctdx();
          _num_ogl_buffers++;
@@ -1650,6 +1650,8 @@ void Tenderer::collect()
             _num_ogl_buffers++;
          CCLAY++;
       }
+      else
+         CCLAY++;
    }
    if (0 < _0layer.total_points())  _num_ogl_buffers ++; // reference boxes
    if (0 < num_total_slctdx      )  _num_ogl_buffers++;  // selected
@@ -1665,7 +1667,11 @@ void Tenderer::collect()
    // collect the point arrays
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
-      assert (0 != CLAY->second->total_points());
+      if (0 == CLAY->second->total_points())
+      {
+         assert(0 != CLAY->second->total_strings());
+         continue;
+      }
       GLuint pbuf = _ogl_buffers[current_buffer++];
       GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
       CLAY->second->collect(_drawprop->isFilled(CLAY->first), pbuf, ibuf);
@@ -1708,7 +1714,8 @@ void Tenderer::draw()
       _drawprop->setCurrentColor(CLAY->first);
       _drawprop->setCurrentFill();
       // draw everything
-      CLAY->second->draw(_drawprop);
+      if (0 != CLAY->second->total_points())
+         CLAY->second->draw(_drawprop);
 
       if (0 != CLAY->second->total_slctdx())
       {// redraw selected contours only
