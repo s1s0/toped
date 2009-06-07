@@ -88,8 +88,8 @@ layprop::TGlfSymbol::TGlfSymbol(FILE* ffile)
    fread(&_alcntrs, 1, 1, ffile);
    _cdata = DEBUG_NEW byte[_alcntrs];
    // init the symbol boundaries
-   _minX = _minY = -10;
-   _maxX = _maxY =  10;
+   _minX = _minY =  10;
+   _maxX = _maxY = -10;
    // get the vertexes
    for (byte i = 0; i < _alvrtxs; i++)
    {
@@ -112,10 +112,11 @@ layprop::TGlfSymbol::TGlfSymbol(FILE* ffile)
       fread(&(_cdata[i  ]), 1, 1, ffile);
 }
 
-void layprop::TGlfSymbol::dataCopy(GLfloat* vxarray, GLbyte* ixarray)
+void layprop::TGlfSymbol::dataCopy(GLfloat* vxarray, GLuint* ixarray, word ioffset)
 {
-   memcpy(vxarray, _vdata, _alvrtxs);
-   memcpy(ixarray, _idata, 3 * _alchnks);
+   memcpy(vxarray, _vdata, _alvrtxs * sizeof(float) * 2);
+   for (word i = 0; i < _alchnks * 3; i++)
+      ixarray[i] = _idata[i] + ioffset;
 }
 
 layprop::TGlfSymbol::~TGlfSymbol()
@@ -131,14 +132,27 @@ layprop::TGlfSymbol::~TGlfSymbol()
 //
 layprop::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
 {
-   _firstvx = voffset;
-   _firstix = ioffset;
-   _alvrtxs = tsym->_alvrtxs;
    _alcntrs = tsym->_alcntrs;
    _alchnks = tsym->_alchnks;
    //
    _csize = DEBUG_NEW GLsizei[_alcntrs];
-   for (unsigned i = 0; i < _alcntrs; i++)  _csize[i] = tsym->_cdata[i];
+   _firstvx = DEBUG_NEW GLint[_alcntrs];
+   for (unsigned i = 0; i < _alcntrs; i++)  
+   {
+      _csize[i] = tsym->_cdata[i] + 1;
+      _firstvx[i] = voffset;
+      if (0 != i)
+      {
+         _firstvx[i] += (tsym->_cdata[i-1] + 1);
+         _csize[i]   -= (tsym->_cdata[i-1] + 1);
+      }
+   }
+   _firstix = DEBUG_NEW GLuint[_alchnks];
+   for (unsigned i = 0; i < _alchnks; i++)
+   {
+      _firstix[i] = (ioffset + 3  * i) /* sizeof(int)*/;
+   }
+
    //
    _minX = tsym->_minX;
    _maxX = tsym->_maxX;
@@ -146,8 +160,17 @@ layprop::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
    _maxY = tsym->_maxY;
 }
 
+void layprop::TGlfRSymbol::draw()
+{
+   glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _csize, _alcntrs);
+//   glDrawElements(GL_TRIANGLES, _alchnks, GL_UNSIGNED_INT, (const GLvoid*)_firstix);
+
+}
+
 layprop::TGlfRSymbol::~TGlfRSymbol()
 {
+   delete [] _firstvx;
+   delete [] _firstix;
    delete [] _csize;
 }
 
@@ -158,6 +181,8 @@ layprop::TGlfRSymbol::~TGlfRSymbol()
 layprop::TGlfFont::TGlfFont(std::string filename) : _pitch(0.1f), _spaceWidth(2.0f)
 {
    FILE* ffile = fopen(filename.c_str(), "rb");
+   _pbuffer = 0;
+   _ibuffer = 0;
    if (NULL == ffile)
    {
       _status = 1;
@@ -185,62 +210,90 @@ layprop::TGlfFont::TGlfFont(std::string filename) : _pitch(0.1f), _spaceWidth(2.
       // Finally - start parsing the symbol data
       _all_vertexes = 0;
       _all_indexes = 0;
-      typedef std::map<byte, TGlfSymbol*> TFontMap;
-      TFontMap tsymbols;
       for (byte i = 0; i < _numSymbols; i++)
       {
          byte asciiCode;
          fread(&asciiCode, 1, 1, ffile);
          TGlfSymbol* csymbol = DEBUG_NEW TGlfSymbol(ffile);
-         tsymbols[asciiCode] = csymbol;
+         _tsymbols[asciiCode] = csymbol;
          _all_vertexes += csymbol->alvrtxs();
          _all_indexes  += 3 * csymbol->alchnks(); // only triangles!
       }
-      // Now create the font VBO's ...
-      _vdata = DEBUG_NEW GLfloat[_all_vertexes];
-      _idata = DEBUG_NEW GLbyte [_all_indexes];
-      //... and collect them deleting meanwhile the themporary objects
-      word vrtx_indx = 0;
-      word indx_indx = 0;
-      for (TFontMap::const_iterator CRS = tsymbols.begin(); CRS != tsymbols.end(); CRS++)
-      {
-         TGlfRSymbol* csymbol = DEBUG_NEW TGlfRSymbol(CRS->second, vrtx_indx, indx_indx);
-         CRS->second->dataCopy(&(_vdata[vrtx_indx]), &(_idata[indx_indx]));
-         vrtx_indx += CRS->second->alvrtxs();
-         indx_indx += 3 * CRS->second->alchnks();
-         _symbols[CRS->first] = csymbol;
-         delete CRS->second;
-      }
-      assert(_all_vertexes == vrtx_indx);
-      assert(_all_indexes  == indx_indx);
-      _status = 0;
    }
    fclose(ffile);
 }
 
-void layprop::TGlfFont::getStringBounds(std::string text, DBbox* overlap)
+void layprop::TGlfFont::collect(GLuint pbuf, GLuint ibuf)
+{
+   _pbuffer = pbuf;
+   _ibuffer = ibuf;
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   glBufferData(GL_ARRAY_BUFFER                   ,
+                2 * _all_vertexes * sizeof(float) ,
+                NULL                              ,
+                GL_STATIC_DRAW                     );
+   float* cpoint_array = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER         ,
+                _all_indexes * sizeof(int)      ,
+                NULL                            ,
+                GL_STATIC_DRAW                   );
+   GLuint* cindex_array = (GLuint*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+   //... and collect them deleting meanwhile the themporary objects
+   word vrtx_indx = 0;
+   word indx_indx = 0;
+   for (TFontMap::const_iterator CRS = _tsymbols.begin(); CRS != _tsymbols.end(); CRS++)
+   {
+      TGlfRSymbol* csymbol = DEBUG_NEW TGlfRSymbol(CRS->second, vrtx_indx, indx_indx);
+      CRS->second->dataCopy(&(cpoint_array[2 * vrtx_indx]), &(cindex_array[indx_indx]), vrtx_indx);
+      vrtx_indx += CRS->second->alvrtxs();
+      indx_indx += 3 * CRS->second->alchnks();
+      _symbols[CRS->first] = csymbol;
+      delete CRS->second;
+   }
+   _tsymbols.clear();
+   assert(_all_vertexes == vrtx_indx);
+   assert(_all_indexes  == indx_indx);
+   _status = 0;
+   glUnmapBuffer(GL_ARRAY_BUFFER);
+   glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+bool layprop::TGlfFont::bindBuffers()
+{
+   if ((0 ==_pbuffer) || (0 == _ibuffer)) return false;
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+   return true;
+}
+
+void layprop::TGlfFont::getStringBounds(const std::string* text, DBbox* overlap)
 {
    // initialise the boundaries
    float top, bottom, left, right;
-   if ((0x20 == text[0]) ||  (_symbols.end() == _symbols.find(text[0])))
+   if ((0x20 == (*text)[0]) ||  (_symbols.end() == _symbols.find((*text)[0])))
    {
       left =   0.0f; right  = _spaceWidth;
       top  = -10.0f; bottom = 10.0f;
    }
    else
    {
-      left   = _symbols[text[0]]->minX();
-      right  = _symbols[text[0]]->maxX();
-      bottom = _symbols[text[0]]->minY();
-      top    = _symbols[text[0]]->maxY();
+      left   = _symbols[(*text)[0]]->minX();
+      right  = _symbols[(*text)[0]]->maxX();
+      bottom = _symbols[(*text)[0]]->minY();
+      top    = _symbols[(*text)[0]]->maxY();
    }
    // traverse the rest of the string
-   for (unsigned i = 1; i < text.length() ; i++)
+   for (unsigned i = 1; i < text->length() ; i++)
    {
-      if (0x20 == text[i]) right += _spaceWidth;
+      if (0x20 == (*text)[i]) right += _spaceWidth;
       else
       {
-         FontMap::const_iterator CSI = _symbols.find(text[i]);
+         FontMap::const_iterator CSI = _symbols.find((*text)[i]);
          if (_symbols.end() == CSI)
             right += _spaceWidth;
          else
@@ -255,6 +308,39 @@ void layprop::TGlfFont::getStringBounds(std::string text, DBbox* overlap)
    (*overlap) = DBbox(TP(0,0), TP(right - left, top - bottom, OPENGL_FONT_UNIT));
 }
 
+void layprop::TGlfFont::drawString(const std::string* text, bool fill)
+{
+   glVertexPointer(2, GL_FLOAT, 0, NULL);
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_INDEX_ARRAY);
+   float right_of = 0.0f, left_of = 0.0f;
+   for (unsigned i = 0; i < text->length() ; i++)
+   {
+      FontMap::const_iterator CSI = _symbols.find((*text)[i]);
+      if (i != 0)
+      {
+         // move one _pitch right
+         if ((0x20 == (*text)[i]) || (_symbols.end() == CSI))
+            left_of = 0.0f;
+         else
+            left_of = -CSI->second->minX();
+         glTranslatef(left_of+right_of+_pitch, 0, 0);
+      }
+      if ((0x20 == (*text)[i]) || (_symbols.end() == CSI))
+      {
+         glTranslatef(_spaceWidth, 0, 0);
+         right_of = 0.0f;
+      }
+      else
+      {
+         CSI->second->draw();
+         right_of = CSI->second->maxX();
+      }
+   }
+   glDisableClientState(GL_INDEX_ARRAY);
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 layprop::TGlfFont::~TGlfFont()
 {
    for (FontMap::const_iterator CS = _symbols.begin(); CS != _symbols.end(); CS++)
@@ -267,8 +353,19 @@ layprop::TGlfFont::~TGlfFont()
 //
 layprop::FontLibrary::FontLibrary(std::string fontfile, bool fti) : _fti(fti)
 {
+   _ogl_buffers = NULL;
+   _num_ogl_buffers = 0;
    if (_fti)
+   {
+      //@TODO - list of fonts here!
+      // Parse the font library
       _font = DEBUG_NEW TGlfFont(fontfile);
+      _num_ogl_buffers += 2;
+      // Create the VBO
+      _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
+      glGenBuffers(_num_ogl_buffers, _ogl_buffers);
+      _font->collect(_ogl_buffers[0], _ogl_buffers[1]);
+   }
    else
    {
       glfInit();
@@ -281,7 +378,7 @@ layprop::FontLibrary::FontLibrary(std::string fontfile, bool fti) : _fti(fti)
    }
 }
 
-void layprop::FontLibrary::getStringBounds(std::string text, DBbox* overlap)
+void layprop::FontLibrary::getStringBounds(const std::string* text, DBbox* overlap)
 {
    if (_fti)
    {
@@ -291,20 +388,20 @@ void layprop::FontLibrary::getStringBounds(std::string text, DBbox* overlap)
    else
    {
       float minx, miny, maxx, maxy;
-      glfGetStringBounds(text.c_str(),&minx, &miny, &maxx, &maxy);
+      glfGetStringBounds(text->c_str(),&minx, &miny, &maxx, &maxy);
       (*overlap) = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
    }
 }
 
-void layprop::FontLibrary::drawString(std::string text, bool fill)
+void layprop::FontLibrary::drawString(const std::string* text, bool fill)
 {
    if (_fti)
    {
-      //@TODO
+     _font->drawString(text, fill);
    }
    else
    {
-      glfDrawTopedString(text.c_str(), fill);
+      glfDrawTopedString(text->c_str(), fill);
    }
 }
 
@@ -324,7 +421,8 @@ void layprop::FontLibrary::drawSolidString(std::string text)
 {
    if (_fti)
    {
-      //@TODO
+      bindFont();
+     _font->drawString(&text, true);
    }
    else
    {
@@ -332,10 +430,30 @@ void layprop::FontLibrary::drawSolidString(std::string text)
    }
 }
 
+bool  layprop::FontLibrary::bindFont()
+{
+   assert(_fti);
+   if (NULL != _font)
+      return _font->bindBuffers();
+   else
+      return false;
+}
+
+void  layprop::FontLibrary::unbindFont()
+{
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 layprop::FontLibrary::~FontLibrary()
 {
    if (_fti)
+   {
       delete (_font);
+      glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
+      delete [] _ogl_buffers;
+      _ogl_buffers = NULL;
+   }
    else
       glfClose();
 }

@@ -32,6 +32,7 @@
 #include <sstream>
 
 GLUtriangulatorObj   *TeselPoly::tenderTesel = NULL;
+extern layprop::FontLibrary* fontLib;
 
 //=============================================================================
 //
@@ -521,6 +522,24 @@ unsigned TenderRef::cDataCopy(int* array, unsigned& pindex)
 
 //=============================================================================
 //
+// class TenderText
+//
+TenderText::TenderText(const std::string* text, const CTM& ctm) : _text(text)
+{
+   ctm.oglForm(_ftm);
+}
+
+void TenderText::draw(bool fill)
+{
+   glPushMatrix();
+   glMultMatrixd(_ftm);
+   glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
+   fontLib->drawString(_text, fill);
+   glPopMatrix();
+}
+
+//=============================================================================
+//
 // class TenderTV
 //
 TenderTV::TenderTV(TenderRef* const refCell, bool filled, bool reusable,
@@ -924,7 +943,7 @@ void TenderReTV::draw(layprop::DrawProperties* drawprop)
 // class TenderLay
 //
 TenderLay::TenderLay(): _cslice(NULL),
-   _num_total_points(0u), _num_total_indexs(0u),
+   _num_total_points(0u), _num_total_indexs(0u), _num_total_strings(0u),
    _has_selected(false), _stv_array_offset(0u), _slctd_array_offset(0u)
 {
    for (int i = lstr; i <= lnes; i++)
@@ -1041,8 +1060,8 @@ void TenderLay::wire (int4b* pdata, unsigned psize, word width, bool center_only
 
 void TenderLay::text (const std::string* txt, const CTM& cmtrx)
 {
-//   assert(_has_selected ? true : !sel);
-   //@TODO Font rendering!
+   _texts.push_back(DEBUG_NEW TenderText(txt, cmtrx));
+   _num_total_strings++;
 }
 
 void TenderLay::registerSBox (TenderSCnvx* sobj)
@@ -1261,6 +1280,12 @@ void TenderLay::drawSelected()
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void TenderLay::drawTexts()
+{
+   for (TenderStrings::const_iterator TSTR = _texts.begin(); TSTR != _texts.end(); TSTR++)
+      (*TSTR)->draw(true /*@FIXME*/);
+}
+
 TenderLay::~TenderLay()
 {
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
@@ -1268,6 +1293,9 @@ TenderLay::~TenderLay()
 
    for (TenderReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
       delete (*TLAY);
+
+   for (TenderStrings::const_iterator TSTR = _texts.begin(); TSTR != _texts.end(); TSTR++)
+      delete (*TSTR);
 
    if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
    if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
@@ -1691,15 +1719,18 @@ void Tenderer::draw()
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
          _drawprop->setLineProps(false);
       }
+      // draw texts
+      if (0 != CLAY->second->total_strings())
+      {
+         fontLib->bindFont();
+         CLAY->second->drawTexts();
+      }
    }
    // draw reference boxes
    if (0 < _0layer.total_points())   _0layer.draw(_drawprop);
    // Clean-up the buffers
    //glBindBuffer(GL_ARRAY_BUFFER, 0);
    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-   glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
-   delete [] _ogl_buffers;
-   _ogl_buffers = NULL;
    checkOGLError("draw");
 }
 
@@ -1721,6 +1752,9 @@ Tenderer::~Tenderer()
    // Don't clear the _cellStack contents. All references there are references in
    // _0layer and will be cleared there. The only exception is the first dummy cell.
    delete _dummyCS;
+   glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
+   delete [] _ogl_buffers;
+   _ogl_buffers = NULL;
 }
 
 void checkOGLError(std::string loc)
