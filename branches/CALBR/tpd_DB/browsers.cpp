@@ -35,18 +35,21 @@
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
 #include "datacenter.h"
-#include "../tpd_bidfunc/tpdf_common.h"
+#include "../tpd_common/tuidefs.h"
+#include "../src/toped.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
 #include "../ui/cell_normal.xpm"
 #include "../ui/cell_expanded.xpm"
 #include "../ui/nolay.xpm"
 
-
+extern tui::TopedFrame*          Toped;
 extern DataCenter*               DATC;
 extern Calbr::CalbrFile*			DRCData;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
+extern const wxEventType         wxEVT_CANVAS_ZOOM;
+
 
 browsers::browserTAB*     Browsers = NULL;
 
@@ -1869,6 +1872,10 @@ void browsers::DRCBrowser::deleteAllItems(void)
 void	browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
 {
 	DRCData->ShowResults();
+	//Refresh
+	wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   eventZOOM.SetInt(tui::ZOOM_REFRESH);
+   wxPostEvent( Toped->view(), eventZOOM);
 }
 
 void	browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
@@ -1906,9 +1913,10 @@ void	browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 	{
 		DATC->lockLayer((*it), true);
 	}
-	tellstdfunc::RefreshGL();
-	//std::string cellName = design->activecellname();
-	//laydata::tdtcell *cell = design->opencell(cellName);
-	//cell->select_inBox(DBbox(0,0,10000,10000), 
+
+	//Refresh
+	wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   eventZOOM.SetInt(tui::ZOOM_REFRESH);
+   wxPostEvent( Toped->view(), eventZOOM);
 
 }
