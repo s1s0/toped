@@ -155,9 +155,10 @@ layprop::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
    _maxY = tsym->_maxY;
 }
 
-void layprop::TGlfRSymbol::draw()
+void layprop::TGlfRSymbol::draw(bool fill)
 {
    glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _csize, _alcntrs);
+   if (!fill) return;
    glDrawElements(GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, (const GLvoid*)(_firstix));
 }
 
@@ -305,14 +306,16 @@ void layprop::TGlfFont::getStringBounds(const std::string* text, DBbox* overlap)
       }
    }
    // return directly with the correction
-   (*overlap) = DBbox(TP(0,0), TP(right - left, top - bottom, OPENGL_FONT_UNIT));
+//   (*overlap) = DBbox(TP(0,0), TP(right - left, top - bottom, OPENGL_FONT_UNIT));
+   (*overlap) = DBbox(TP(left, bottom, OPENGL_FONT_UNIT), TP(right, top, OPENGL_FONT_UNIT));
 }
 
 void layprop::TGlfFont::drawString(const std::string* text, bool fill)
 {
    glVertexPointer(2, GL_FLOAT, 0, NULL);
    glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_INDEX_ARRAY);
+   if (fill)
+      glEnableClientState(GL_INDEX_ARRAY);
    float right_of = 0.0f, left_of = 0.0f;
    for (unsigned i = 0; i < text->length() ; i++)
    {
@@ -333,11 +336,12 @@ void layprop::TGlfFont::drawString(const std::string* text, bool fill)
       }
       else
       {
-         CSI->second->draw();
+         CSI->second->draw(fill);
          right_of = CSI->second->maxX();
       }
    }
-   glDisableClientState(GL_INDEX_ARRAY);
+   if (fill)
+      glDisableClientState(GL_INDEX_ARRAY);
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
@@ -409,7 +413,9 @@ void layprop::FontLibrary::drawWiredString(std::string text)
 {
    if (_fti)
    {
-      //@TODO
+      bindFont();
+      _font->drawString(&text, false);
+      unbindFont();
    }
    else
    {
@@ -422,7 +428,8 @@ void layprop::FontLibrary::drawSolidString(std::string text)
    if (_fti)
    {
       bindFont();
-     _font->drawString(&text, true);
+      _font->drawString(&text, true);
+      unbindFont();
    }
    else
    {

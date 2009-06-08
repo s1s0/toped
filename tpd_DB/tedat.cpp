@@ -2284,21 +2284,33 @@ laydata::tdttext::tdttext(std::string text, CTM trans) : tdtdata(),
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
    assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(&_text, &_overlap);
+   DBbox pure_ovl(0,0,0,0);
+   fontLib->getStringBounds(&_text, &pure_ovl);
+   _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
+                                (pure_ovl.p2().y() - pure_ovl.p1().y())) );
+   _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
 }
 
 laydata::tdttext::tdttext(TEDfile* const tedfile) : tdtdata(),
    _text(tedfile->getString()), _translation(tedfile->getCTM()), _overlap(TP())
 {
    assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(&_text, &_overlap);
+   DBbox pure_ovl(0,0,0,0);
+   fontLib->getStringBounds(&_text, &pure_ovl);
+   _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
+                    (pure_ovl.p2().y() - pure_ovl.p1().y())) );
+   _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
 }
 
 void laydata::tdttext::replace_str(std::string newstr)
 {
    _text = newstr;
    assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(&_text, &_overlap);
+   DBbox pure_ovl(0,0,0,0);
+   fontLib->getStringBounds(&_text, &pure_ovl);
+   _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
+                    (pure_ovl.p2().y() - pure_ovl.p1().y())) );
+   _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
 }
 
 void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
@@ -2363,7 +2375,7 @@ void laydata::tdttext::draw_request(Tenderer& rend) const
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
-   rend.text(&_text, ftmtrx, _overlap, false);
+   rend.text(&_text, ftmtrx, _overlap, _correction, false);
 }
 
 void laydata::tdttext::draw_srequest(Tenderer& rend, const SGBitSet*) const
@@ -2375,7 +2387,7 @@ void laydata::tdttext::draw_srequest(Tenderer& rend, const SGBitSet*) const
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
-   rend.text(&_text, ftmtrx, _overlap, true);
+   rend.text(&_text, ftmtrx, _overlap, _correction, true);
 }
 
 void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -2391,7 +2403,7 @@ void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const 
                                  ptlist[4].x(),         ptlist[4].y(),0,1};
    glMultMatrixd(ori_mtrx);
    // correction of the glf shift - as explained in the openGL_precalc above
-   glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
+   glTranslatef(_correction.x(), _correction.y(), 1);
    // The only difference between glut and glf appears to be the size:-
    // glf is not using the font unit, so we need to scale it back up (see below)
    // but... it uses real numbers - that is not what we need. That's why -
@@ -2414,7 +2426,7 @@ void laydata::tdttext::openGL_drawfill(layprop::DrawProperties& drawprop, const 
                                  ptlist[4].x(),         ptlist[4].y(),0,1};
    glMultMatrixd(ori_mtrx);
    // correction of the glf shift - as explained in the openGL_precalc above
-   glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
+   glTranslatef(_correction.x(), _correction.y(), 1);
    // The only difference between glut and glf appears to be the size:-
    // glf is not using the font unit, so we need to scale it back up (see below)
    // but... it uses real numbers - that is not what we need. That's why -
@@ -2461,7 +2473,7 @@ void laydata::tdttext::motion_draw(const layprop::DrawProperties& drawprop,
                            ftmtrx.tx(),ftmtrx.ty(),0,1};
       glMultMatrixd(ori_mtrx);
       // correction of the glf shift - as explained in the openGL_precalc above
-      glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
+      glTranslatef(_correction.x(), _correction.y(), 1);
       glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
       fontLib->drawWiredString(_text);
       glPopMatrix();
