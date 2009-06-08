@@ -136,7 +136,7 @@ namespace layprop {
       public:
                         TGlfRSymbol(TGlfSymbol*, word, word);
                        ~TGlfRSymbol();
-         void           draw();
+         void           draw(bool);
          float          minX() { return _minX; }
          float          maxX() { return _maxX; }
          float          minY() { return _minY; }

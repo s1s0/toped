@@ -365,10 +365,11 @@ namespace laydata {
    protected:
       void                 select_points(DBbox&, SGBitSet&) {return;};
       void                 unselect_points(DBbox&, SGBitSet&) {return;};
-   private:   
+   private:
       std::string         _text;
       CTM                 _translation;
       DBbox               _overlap;
+      TP                  _correction;
    };
 
 //==============================================================================

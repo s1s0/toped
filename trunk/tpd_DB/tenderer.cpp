@@ -1576,10 +1576,12 @@ void Tenderer::wire (int4b* pdata, unsigned psize, word width, const SGBitSet* p
    _clayer->wire(pdata, psize, width, center_line_only, true, psel);
 }
 
-void Tenderer::text (const std::string* txt, const CTM& cmtrx, const DBbox& ovl, bool sel)
+void Tenderer::text (const std::string* txt, const CTM& cmtrx, const DBbox& ovl, const TP& cor, bool sel)
 {
    _0layer.addTextOBox(ovl, cmtrx, sel);
-   _clayer->text(txt, cmtrx);
+   CTM ftm(cmtrx.a(), cmtrx.b(), cmtrx.c(), cmtrx.d(), 0, 0);
+   ftm.Translate(cor * cmtrx);
+   _clayer->text(txt, ftm);
 }
 
 void Tenderer::Grid(const real step, const std::string color)
