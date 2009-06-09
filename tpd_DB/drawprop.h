@@ -270,6 +270,8 @@ namespace layprop {
          void                       PSwrite(PSFile&) const;
          void                       loadLayoutFonts(std::string, bool);
          bool                       renderType()         {return _renderType;}
+         bool                       isTextBoxHidden()    {return _textbox_hidden;}
+         bool                       isCellBoxHidden()    {return _cellbox_hidden;}
          friend class ViewProperties;
       protected:
          laySetList                 _layset;

@@ -1321,10 +1321,8 @@ Tender0Lay::Tender0Lay()
    _fstslix[0] = _fstslix[1] = NULL;
 }
 
-TenderRef* Tender0Lay::addCellRef(std::string cname, const CTM& trans,
-                                 const DBbox& overlap, bool selected, word alphaDepth)
+void Tender0Lay::addCellOBox(TenderRef* cRefBox, word alphaDepth, bool selected)
 {
-   TenderRef* cRefBox = DEBUG_NEW TenderRef(cname, trans, overlap, alphaDepth);
    if (selected)
    {
       _cellSRefBoxes.push_back(cRefBox);
@@ -1341,7 +1339,6 @@ TenderRef* Tender0Lay::addCellRef(std::string cname, const CTM& trans,
          _alobjvx[0]++;
       }
    }
-   return cRefBox;
 }
 
 void Tender0Lay::addTextOBox(const DBbox& overlap, const CTM& trans, bool selected)
@@ -1474,14 +1471,15 @@ Tender0Lay::~Tender0Lay()
       if (NULL != _sizslix[i]) delete [] (_sizslix[i]);
       if (NULL != _fstslix[i]) delete [] (_fstslix[i]);
    }
-   for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
-      delete (*CSH);
-   for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
-      delete (*CSH);
    for (RefTxtList::const_iterator CSH = _textRefBoxes.begin(); CSH != _textRefBoxes.end(); CSH++)
       delete (*CSH);
    for (RefTxtList::const_iterator CSH = _textSRefBoxes.begin(); CSH != _textSRefBoxes.end(); CSH++)
       delete (*CSH);
+   // Don't delete _cellRefBoxes & _cellSRefBoxes. Their contents (TenderRef) is created in this
+   // class (Tender0Lay::addCellRef(...), but not all TenderRef objects are pushed in the lists
+   // because cell reference boxes could be hidden, but we still need the corresponding TenderRef
+   // object during the traversing and collection stages. It's much easier & simpler to delete
+   // them in Tenderer::~Tenderer (_cellStack) - they are all there even those that are hidden
 }
 
 //=============================================================================
@@ -1494,8 +1492,7 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
       _activeCS(NULL)
 {
    // Initialise the cell (CTM) stack
-   _dummyCS = DEBUG_NEW TenderRef();
-   _cellStack.push(_dummyCS);
+   _cellStack.push(DEBUG_NEW TenderRef());
 }
 
 bool Tenderer::chunkExists(word layno, bool has_selected)
@@ -1546,17 +1543,19 @@ void Tenderer::setLayer(word layno, bool has_selected)
 
 void Tenderer::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
-   TenderRef* ccellref = _0layer.addCellRef(cname,
-                                           trans * _cellStack.top()->ctm(),
-                                           overlap,
-                                           selected,
-                                           _cellStack.size()
-                                          );
-   _cellStack.push(ccellref );
+   TenderRef* cRefBox = DEBUG_NEW TenderRef(cname,
+                                            trans * _cellStack.top()->ctm(),
+                                            overlap,
+                                            _cellStack.size()
+                                           );
+   if ((!selected) && (!_drawprop->isCellBoxHidden()))
+      _0layer.addCellOBox(cRefBox, _cellStack.size(), selected);
+
+   _cellStack.push(cRefBox);
    if (active)
    {
       assert(NULL == _activeCS);
-      _activeCS = ccellref;
+      _activeCS = cRefBox;
    }
 }
 
@@ -1578,7 +1577,8 @@ void Tenderer::wire (int4b* pdata, unsigned psize, word width, const SGBitSet* p
 
 void Tenderer::text (const std::string* txt, const CTM& cmtrx, const DBbox& ovl, const TP& cor, bool sel)
 {
-   _0layer.addTextOBox(ovl, cmtrx, sel);
+   if ((!_drawprop->isTextBoxHidden()) && (!sel))
+      _0layer.addTextOBox(ovl, cmtrx, sel);
    CTM ftm(cmtrx.a(), cmtrx.b(), cmtrx.c(), cmtrx.d(), 0, 0);
    ftm.Translate(cor * cmtrx);
    _clayer->text(txt, ftm);
@@ -1758,11 +1758,14 @@ Tenderer::~Tenderer()
 //      tell_log(console::MT_INFO,debug_message);
       delete (CLAY->second);
    }
+   while(0 != _cellStack.size())
+   {
+      delete (_cellStack.top()); _cellStack.pop();
+   }
+   //
    sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, all_layers);
    tell_log(console::MT_WARNING,debug_message);
-   // Don't clear the _cellStack contents. All references there are references in
-   // _0layer and will be cleared there. The only exception is the first dummy cell.
-   delete _dummyCS;
+   // 
    glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
    delete [] _ogl_buffers;
    _ogl_buffers = NULL;

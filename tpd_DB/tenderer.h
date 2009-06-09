@@ -788,7 +788,7 @@ class Tender0Lay {
       typedef std::list<TenderOBox*> RefTxtList;
                         Tender0Lay();
                        ~Tender0Lay();
-      TenderRef*        addCellRef(std::string, const CTM&, const DBbox&, bool, word);
+      void              addCellOBox(TenderRef*, word, bool);
       void              addTextOBox(const DBbox&, const CTM&, bool);
       void              collect(GLuint);
       void              draw(layprop::DrawProperties*);
@@ -858,16 +858,15 @@ class Tenderer {
    private:
       layprop::DrawProperties*   _drawprop;
       real              _UU;
-      DataLay           _data;      //!All data for drawing
-      TenderLay*        _clayer;    //!Working variable pointing to the current slice
+      DataLay           _data;            //!All data for drawing
+      TenderLay*        _clayer;          //!Working variable pointing to the current slice
       Tender0Lay        _0layer;
-      CellStack         _cellStack; //!Required during data traversing stage
+      CellStack         _cellStack;       //!Required during data traversing stage
       unsigned          _cslctd_array_offset; //! Current selected array offset
       //
       unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
-      GLuint*           _ogl_buffers; //! Array with the "names" of all openGL buffers
-      GLuint            _sbuffer; //! The "name" of the selected index buffer
-      TenderRef*        _dummyCS; //! The first (dummy) cell into the cell stack
+      GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
+      GLuint            _sbuffer;         //! The "name" of the selected index buffer
       TenderRef*        _activeCS;
 };
 
