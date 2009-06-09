@@ -172,7 +172,7 @@ layprop::TGlfRSymbol::~TGlfRSymbol()
 //
 //
 //
-layprop::TGlfFont::TGlfFont(std::string filename) : _pitch(0.1f), _spaceWidth(2.0f)
+layprop::TGlfFont::TGlfFont(std::string filename) : _pitch(0.1f), _spaceWidth(0.5f)
 {
    FILE* ffile = fopen(filename.c_str(), "rb");
    _pbuffer = 0;
@@ -279,7 +279,7 @@ void layprop::TGlfFont::getStringBounds(const std::string* text, DBbox* overlap)
    if ((0x20 == (*text)[0]) ||  (_symbols.end() == _symbols.find((*text)[0])))
    {
       left =   0.0f; right  = _spaceWidth;
-      top  = -10.0f; bottom = 10.0f;
+      top  = -_spaceWidth; bottom = _spaceWidth;
    }
    else
    {
@@ -291,22 +291,18 @@ void layprop::TGlfFont::getStringBounds(const std::string* text, DBbox* overlap)
    // traverse the rest of the string
    for (unsigned i = 1; i < text->length() ; i++)
    {
-      if (0x20 == (*text)[i]) right += _spaceWidth;
+      FontMap::const_iterator CSI = _symbols.find((*text)[i]);
+      if ((0x20 == (*text)[i]) || (_symbols.end() == CSI))
+         right += _spaceWidth;
       else
       {
-         FontMap::const_iterator CSI = _symbols.find((*text)[i]);
-         if (_symbols.end() == CSI)
-            right += _spaceWidth;
-         else
-            right += CSI->second->maxX() - CSI->second->minX() + _pitch;
+         right += CSI->second->maxX() - CSI->second->minX() + _pitch;
 
          /* Update top/bottom bounds */
          if (CSI->second->minY() < bottom) bottom = CSI->second->minY();
          if (CSI->second->maxY() > top   ) top    = CSI->second->maxY();
       }
    }
-   // return directly with the correction
-//   (*overlap) = DBbox(TP(0,0), TP(right - left, top - bottom, OPENGL_FONT_UNIT));
    (*overlap) = DBbox(TP(left, bottom, OPENGL_FONT_UNIT), TP(right, top, OPENGL_FONT_UNIT));
 }
 
@@ -326,8 +322,8 @@ void layprop::TGlfFont::drawString(const std::string* text, bool fill)
          if ((0x20 == (*text)[i]) || (_symbols.end() == CSI))
             left_of = 0.0f;
          else
-            left_of = -CSI->second->minX();
-         glTranslatef(left_of+right_of+_pitch, 0, 0);
+            left_of = -CSI->second->minX()+_pitch;
+         glTranslatef(left_of+right_of, 0, 0);
       }
       if ((0x20 == (*text)[i]) || (_symbols.end() == CSI))
       {
