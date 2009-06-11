@@ -1105,7 +1105,8 @@ void DataCenter::openGL_draw(const CTM& layCTM)
    }
 }
 
-void DataCenter::openGL_render(const CTM& layCTM) {
+void DataCenter::openGL_render(const CTM& layCTM) 
+{
    if (_TEDLIB())
    {
       // Don't block the drawing if the databases are
@@ -1144,10 +1145,12 @@ void DataCenter::openGL_render(const CTM& layCTM) {
          _TEDLIB()->openGL_render(renderer);
          rendTimer.report("Time elapsed for data traversing: ");
          // The version with the central VBO's
-         renderer.collect();
-         rendTimer.report("Time elapsed for data copying   : ");
-         renderer.draw();
-         rendTimer.report("    Total elapsed rendering time: ");
+         if (renderer.collect())
+         {
+            rendTimer.report("Time elapsed for data copying   : ");
+            renderer.draw();
+            rendTimer.report("    Total elapsed rendering time: ");
+         }
          VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);

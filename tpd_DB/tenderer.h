@@ -844,7 +844,7 @@ class Tenderer {
       void              wire (int4b*, unsigned, word);
       void              wire (int4b*, unsigned, word, const SGBitSet*);
       void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
-      void              collect();
+      bool              collect();
       void              draw();
 
       // temporary!

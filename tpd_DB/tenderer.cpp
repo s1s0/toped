@@ -1598,7 +1598,6 @@ void Tenderer::Grid(const real step, const std::string color)
       int signY = (tr.y() > 0) ? 1 : -1;
       int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
 
-      glEnableClientState(GL_VERTEX_ARRAY);
       word arr_size = ( (((tr.x() - X_is + 1) / gridstep) + 1) * (((bl.y() - Y_is + 1) / gridstep) + 1) );
       int* point_array = DEBUG_NEW int[arr_size * 2];
       int index = 0;
@@ -1611,14 +1610,15 @@ void Tenderer::Grid(const real step, const std::string color)
          }
       }
       assert(index <= (arr_size*2));
+      glEnableClientState(GL_VERTEX_ARRAY);
       glVertexPointer(2, GL_INT, 0, point_array);
       glDrawArrays(GL_POINTS, 0, arr_size);
-      delete [] point_array;
       glDisableClientState(GL_VERTEX_ARRAY);
+      delete [] point_array;
    }
 }
 
-void Tenderer::collect()
+bool Tenderer::collect()
 {
    // First filter-out the layers that doesn't have any objects on them,
    // post process the last slices in the layers and also gather the number
@@ -1626,9 +1626,11 @@ void Tenderer::collect()
    //
    DataLay::iterator CCLAY = _data.begin();
    unsigned num_total_slctdx = 0; // initialise the number of total selected indexes
+   unsigned num_total_strings = 0;
    while (CCLAY != _data.end())
    {
       CCLAY->second->ppSlice();
+      num_total_strings += CCLAY->second->total_strings();
       if ((0 == CCLAY->second->total_points()) && (0 == CCLAY->second->total_strings()))
       {
          delete (CCLAY->second);
@@ -1657,11 +1659,16 @@ void Tenderer::collect()
    }
    if (0 < _0layer.total_points())  _num_ogl_buffers ++; // reference boxes
    if (0 < num_total_slctdx      )  _num_ogl_buffers++;  // selected
+   // Check whether we have to continue after traversing
+   if (0 == _num_ogl_buffers)
+   {
+      if (0 == num_total_strings)  return false;
+      else                         return true;
+   }
    //--------------------------------------------------------------------------
    //
    // generate all VBOs
-//   if (0 == _num_ogl_buffers)
-//      return;
+   //
    _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
    glGenBuffers(_num_ogl_buffers, _ogl_buffers);
    unsigned current_buffer = 0;
@@ -1707,6 +1714,7 @@ void Tenderer::collect()
    //
    // that's about it...
    checkOGLError("collect");
+   return true;
 }
 
 void Tenderer::draw()
@@ -1740,8 +1748,8 @@ void Tenderer::draw()
    // draw reference boxes
    if (0 < _0layer.total_points())   _0layer.draw(_drawprop);
    // Clean-up the buffers
-   //glBindBuffer(GL_ARRAY_BUFFER, 0);
-   //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
    checkOGLError("draw");
 }
 
@@ -1765,10 +1773,13 @@ Tenderer::~Tenderer()
    //
    sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, all_layers);
    tell_log(console::MT_WARNING,debug_message);
-   // 
-   glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
-   delete [] _ogl_buffers;
-   _ogl_buffers = NULL;
+   //
+   if (NULL != _ogl_buffers)
+   {
+      glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
+      delete [] _ogl_buffers;
+      _ogl_buffers = NULL;
+   }
 }
 
 void checkOGLError(std::string loc)
