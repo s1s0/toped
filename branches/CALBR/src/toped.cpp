@@ -636,7 +636,7 @@ void tui::TopedFrame::initMenuBar() {
 //   _resourceCenter->appendMenuSeparator("Other");
 
    _resourceCenter->appendMenu("&Other/Get Snapshot", "", &tui::TopedFrame::OnTDTSnapshot, "Get a snapshot of the canvas on TGA file");
-   _resourceCenter->appendMenu("&Other/Load DRC results", "", &tui::TopedFrame::OnDRCResults, "Load DRC results");
+   _resourceCenter->appendMenu("&Other/Load DRC results ...", "", &tui::TopedFrame::OnDRCResults, "Load DRC results");
 
 	//   _resourceCenter->appendMenuSeparator("Other");
 
@@ -2111,9 +2111,21 @@ void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
 
 void	tui::TopedFrame::OnDRCResults(wxCommandEvent& evt)
 {
-	wxString ost;
-   ost << wxT("drccalibreimport(\"D:/toped/drc3/drc3.drc.results\");");
-	_cmdline->parseCommand(ost);
+	wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+	wxFileDialog dlg(this, wxT("Select Calibre DRC Results to open"), wxT(""), wxT(""),
+      wxT("DRC file (*.results)|*.results|All files(*.*)|*.*"),
+      tpdfOPEN);
+    if ( dlg.ShowModal() == wxID_OK )
+   {
+		wxString ost;
+		ost << wxT("drccalibreimport(\"") << dlg.GetPath()<< wxT("\");");//\"D:/toped/drc3/drc3.drc.results\");");
+		_cmdline->parseCommand(ost);
+   }
+
+	//wxString ost;
+   //ost << wxT("drccalibreimport(\"D:/toped/drc3/drc3.drc.results\");");
+	//_cmdline->parseCommand(ost);
 }
 
 void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))
@@ -2123,14 +2135,6 @@ void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))
    tui::cadenceConvert dlg(this, -1, wxT("Cadence Converter"), pos);
    if ( dlg.ShowModal() == wxID_OK )
    {
-      wxString ost;
-      /*ost      << wxT("layprop(\"") << dlg.layname()
-               << wxT("\" , ")      << dlg.layno()
-               << wxT(" , \"")      << dlg.color()
-               << wxT("\" , \"")    << dlg.fill()
-               << wxT("\" , \"")    << dlg.line()
-               << wxT("\");");
-      _cmdline->parseCommand(ost);*/
    }
 }
 
