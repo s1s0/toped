@@ -389,11 +389,6 @@ class TenderSWire : public TenderWire, public TenderSelected {
       unsigned          _loffset;
 };
 
-typedef std::list<TenderCnvx*>      SliceObjects;
-typedef std::list<TenderNcvx*>      SlicePolygons;
-typedef std::list<TenderWire*>      SliceWires;
-typedef std::list<TenderSelected*>  SliceSelected;
-
 /**
  *  Text reference boxes
  */
@@ -403,26 +398,6 @@ class TenderOBox {
       unsigned          cDataCopy(int*, unsigned&);
    private:
       int4b             _obox[8];
-};
-
-/**
- *  Cell reference boxes & reference related data
- */
-class TenderRef {
-   public:
-                        TenderRef(std::string, const CTM&, const DBbox&, word);
-                        TenderRef();
-      std::string       name()         {return _name;}
-      real* const       translation()  {return _translation;}
-      CTM&              ctm()          {return _ctm;}
-      word              alphaDepth()   {return _alphaDepth;}
-      unsigned          cDataCopy(int*, unsigned&);
-   private:
-      std::string       _name;
-      real              _translation[16];
-      CTM               _ctm;
-      int4b             _obox[8];
-      word              _alphaDepth;
 };
 
 /**
@@ -436,6 +411,33 @@ class TenderText {
       const std::string* _text;
       real              _ftm[16]; //! Font translation matrix
 };
+
+/**
+ *  Cell reference boxes & reference related data
+ */
+class TenderRef {
+   public:
+      TenderRef(std::string, const CTM&, const DBbox&, word);
+      TenderRef();
+      std::string       name()         {return _name;}
+      real* const       translation()  {return _translation;}
+      CTM&              ctm()          {return _ctm;}
+      word              alphaDepth()   {return _alphaDepth;}
+      unsigned          cDataCopy(int*, unsigned&);
+   private:
+      std::string       _name;
+      real              _translation[16];
+      CTM               _ctm;
+      int4b             _obox[8];
+      word              _alphaDepth;
+};
+
+typedef std::list<TenderCnvx*>      SliceObjects;
+typedef std::list<TenderNcvx*>      SlicePolygons;
+typedef std::list<TenderWire*>      SliceWires;
+typedef std::list<TenderSelected*>  SliceSelected;
+typedef std::list<TenderRef*>       RefBoxList;
+
 /**
    TENDERer Translation View - is the most fundamental class of the Tenderer.
    It sorts and stores a layer slice of the cell data. Most of the memory
@@ -784,7 +786,6 @@ class TenderLay {
 */
 class Tender0Lay {
    public:
-      typedef std::list<TenderRef*> RefBoxList;
       typedef std::list<TenderOBox*> RefTxtList;
                         Tender0Lay();
                        ~Tender0Lay();
@@ -868,6 +869,7 @@ class Tenderer {
       GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
       GLuint            _sbuffer;         //! The "name" of the selected index buffer
       TenderRef*        _activeCS;
+      RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the Tender0Lay structures
 };
 
 void checkOGLError(std::string);

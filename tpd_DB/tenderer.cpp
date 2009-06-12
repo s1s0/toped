@@ -1475,11 +1475,10 @@ Tender0Lay::~Tender0Lay()
       delete (*CSH);
    for (RefTxtList::const_iterator CSH = _textSRefBoxes.begin(); CSH != _textSRefBoxes.end(); CSH++)
       delete (*CSH);
-   // Don't delete _cellRefBoxes & _cellSRefBoxes. Their contents (TenderRef) is created in this
-   // class (Tender0Lay::addCellRef(...), but not all TenderRef objects are pushed in the lists
-   // because cell reference boxes could be hidden, but we still need the corresponding TenderRef
-   // object during the traversing and collection stages. It's much easier & simpler to delete
-   // them in Tenderer::~Tenderer (_cellStack) - they are all there even those that are hidden
+   for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
+      delete (*CSH);
+   for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
+      delete (*CSH);
 }
 
 //=============================================================================
@@ -1548,8 +1547,16 @@ void Tenderer::pushCell(std::string cname, const CTM& trans, const DBbox& overla
                                             overlap,
                                             _cellStack.size()
                                            );
-   if ((!selected) && (!_drawprop->isCellBoxHidden()))
+   if (selected || (!_drawprop->isCellBoxHidden()))
       _0layer.addCellOBox(cRefBox, _cellStack.size(), selected);
+   else
+      // This list is to keep track of the hidden cRefBox - so we can clean
+      // them up. Don't get confused - we need cRefBox during the collecting
+      // and drawing phase so we can't really delete them here or after they're
+      // poped-up from _cellStack. The confusion is comming from the "duality"
+      // of the TenderRef - once as a cell reference with CTM, view depth etc.
+      // and then as a placeholder of the overlapping reference box
+      _hiddenRefBoxes.push_back(cRefBox);
 
    _cellStack.push(cRefBox);
    if (active)
@@ -1577,7 +1584,7 @@ void Tenderer::wire (int4b* pdata, unsigned psize, word width, const SGBitSet* p
 
 void Tenderer::text (const std::string* txt, const CTM& cmtrx, const DBbox& ovl, const TP& cor, bool sel)
 {
-   if ((!_drawprop->isTextBoxHidden()) && (!sel))
+   if ((!_drawprop->isTextBoxHidden()) || sel)
       _0layer.addTextOBox(ovl, cmtrx, sel);
    CTM ftm(cmtrx.a(), cmtrx.b(), cmtrx.c(), cmtrx.d(), 0, 0);
    ftm.Translate(cor * cmtrx);
@@ -1766,10 +1773,12 @@ Tenderer::~Tenderer()
 //      tell_log(console::MT_INFO,debug_message);
       delete (CLAY->second);
    }
-   while(0 != _cellStack.size())
-   {
-      delete (_cellStack.top()); _cellStack.pop();
-   }
+   //
+   assert(1 == _cellStack.size());
+   delete (_cellStack.top()); _cellStack.pop();
+   for (RefBoxList::const_iterator CSH = _hiddenRefBoxes.begin(); CSH != _hiddenRefBoxes.end(); CSH++)
+      delete (*CSH);
+
    //
    sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, all_layers);
    tell_log(console::MT_WARNING,debug_message);
