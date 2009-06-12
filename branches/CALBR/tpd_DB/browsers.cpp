@@ -1778,7 +1778,8 @@ browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id,
                               const wxPoint& pos, 
                               const wxSize& size,
 										long style):
-							wxTreeCtrl(parent, id, pos, size, style |wxTR_HIDE_ROOT| wxTR_FULL_ROW_HIGHLIGHT )
+							wxTreeCtrl(parent, id, pos, size, style |wxTR_HIDE_ROOT| wxTR_FULL_ROW_HIGHLIGHT ),
+								_polyError(false), _edgeError(false)
 {
 }
 
@@ -1790,6 +1791,13 @@ END_EVENT_TABLE()
 void	browsers::ErrorBrowser::saveInfo(const Calbr::drcPolygon &poly)
 {
 	_poly = poly;
+	_polyError = true;
+}
+
+void	browsers::ErrorBrowser::saveInfo(const Calbr::drcEdge &edge)
+{
+	_edge = edge;
+	_edgeError = true;
 }
 
 void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
@@ -1806,7 +1814,19 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 		else
 		{
 			laydata::tdtdesign* _ATDB = DATC->lockDB();
-				//_poly.showError(_ATDB);
+			
+				word drcLayer = DATC->getLayerNo("drcResults");
+				assert(drcLayer);
+				if(_polyError)
+				{
+					_poly.showError(_ATDB, drcLayer);
+				}
+			
+				if(_edgeError)
+				{
+					_edge.showError(_ATDB, drcLayer);
+				}
+				
 			DATC->unlockDB();
 		}
    }
@@ -1846,6 +1866,8 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 			wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(name.c_str(), wxConvUTF8));
 			std::vector <Calbr::drcPolygon>::iterator it2;
 			std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
+
+			//Save polygons
 			long sz = polys->size();
 			for(long i = 1; i <= sz; i++)
 			{
@@ -1853,6 +1875,18 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 				str.Printf(wxT("%d"), i);
 				_errorBrowser->AppendItem(id, str);
 				_errorBrowser->saveInfo(polys->at(i-1));
+
+			}
+
+			//Save Edges
+			std::vector <Calbr::drcEdge> *edges = (*it)->edges();
+			sz = edges->size();
+			for(long i = 1; i <= sz; i++)
+			{
+				wxString str;
+				str.Printf(wxT("%d"), i);
+				_errorBrowser->AppendItem(id, str);
+				_errorBrowser->saveInfo(edges->at(i-1));
 
 			}
 
