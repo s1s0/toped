@@ -47,10 +47,22 @@ long Calbr::drcEdge::_precision = 0;
 
 void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 {
-	_coords.x1 = x1;
-	_coords.y1 = y1;
-	_coords.x2 = x2;
-	_coords.y2 = y2;
+	real xx, yy;
+   wxString xstr = convert(x1, _precision);
+   wxString ystr = convert(y1, _precision);
+   xstr.ToDouble(&xx);
+   ystr.ToDouble(&yy);
+
+	_coords.x1 = xx;
+	_coords.y1 = yy;
+
+   xstr = convert(x2, _precision);
+   ystr = convert(y2, _precision);
+   xstr.ToDouble(&xx);
+   ystr.ToDouble(&yy);
+
+	_coords.x2 = xx;
+	_coords.y2 = yy;
 }
 
 void Calbr::drcEdge::showError(laydata::tdtdesign* atdb, word la)
@@ -62,22 +74,22 @@ void Calbr::drcEdge::showError(laydata::tdtdesign* atdb, word la)
 
    telldata::ttpnt* pt1, *pt2;
 
-   real xx, yy;
+  /* real xx, yy;
   // DATC->unlockDB();
 
    wxString xstr = convert(_coords.x1, _precision);
    wxString ystr = convert(_coords.y1, _precision);
    xstr.ToDouble(&xx);
-   ystr.ToDouble(&yy);
-   pt1 = DEBUG_NEW telldata::ttpnt(xx, yy);
+   ystr.ToDouble(&yy);*/
+   pt1 = DEBUG_NEW telldata::ttpnt(_coords.x1, _coords.y1);
 
-   xstr = convert(_coords.x2, _precision);
+   /*xstr = convert(_coords.x2, _precision);
    ystr = convert(_coords.y2, _precision);
    xstr.ToDouble(&xx);
-   ystr.ToDouble(&yy);
-   pt2 = DEBUG_NEW telldata::ttpnt(xx, yy);
+   ystr.ToDouble(&yy);*/
+   pt2 = DEBUG_NEW telldata::ttpnt(_coords.x2, _coords.y2);
 
-   pt2 = DEBUG_NEW telldata::ttpnt(xx, yy);
+   //pt2 = DEBUG_NEW telldata::ttpnt(xx, yy);
    plDB->push_back(TP(pt1->x(), pt1->y(), DBscale));
    plDB->push_back(TP(pt2->x(), pt2->y(), DBscale));
    //ATDB->addpoly(1,plDB);
@@ -95,16 +107,30 @@ void Calbr::drcEdge::showError(laydata::tdtdesign* atdb, word la)
 
 void Calbr::drcPolygon::addCoord(long x, long y)
 {
-	Calbr::coord crd;
+   real DBscale = DATC->DBscale();
+
+	telldata::ttpnt* pt;
+
+	wxString xstr = convert(x, _precision);
+   wxString ystr = convert(y, _precision);
+      
+	real xx, yy;
+   xstr.ToDouble(&xx);
+   ystr.ToDouble(&yy);
+   pt = DEBUG_NEW telldata::ttpnt(xx, yy);
+   _coords.push_back(TP(pt->x(), pt->y(), DBscale));
+	delete pt;
+
+	/*Calbr::coord crd;
 	crd.x = x;
 	crd.y = y;
-	_coords.push_back(crd);
+	_coords.push_back(crd);*/
 }
 
 void Calbr::drcPolygon::showError(laydata::tdtdesign* atdb, word la)
 {
 
-   real DBscale = DATC->DBscale();
+   /*real DBscale = DATC->DBscale();
    //Convert drcPolygon to pointlist
    pointlist *plDB = DEBUG_NEW pointlist();
    plDB->reserve(_coords.size());
@@ -120,12 +146,14 @@ void Calbr::drcPolygon::showError(laydata::tdtdesign* atdb, word la)
       //pt = DEBUG_NEW telldata::ttpnt(_coords[i].x, (real)_coords[i].y);//((pl->mlist())[i]);
       pt = DEBUG_NEW telldata::ttpnt(xx, yy);
       plDB->push_back(TP(pt->x(), pt->y(), DBscale));
-   }
+		delete pt;
 
+   }
+*/
    //laydata::tdtdesign* ATDB = DATC->lockDB();
-   atdb->addpoly(la, plDB);
+   atdb->addpoly(la, &_coords);
    //DATC->unlockDB();
-   delete plDB;
+   //delete plDB;
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(const std::string &name)

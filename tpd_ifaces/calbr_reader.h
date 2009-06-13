@@ -47,7 +47,7 @@ struct coord
 
 struct edge
 {
-	long x1, y1, x2, y2;
+	real x1, y1, x2, y2;
 };
 
 typedef std::vector <Calbr::coord> CoordsVector;
@@ -68,11 +68,11 @@ class drcPolygon
 {
 public:
 	void				addCoord(long x, long y);
-	CoordsVector*	coords() {return &_coords;};
+	pointlist*	coords() {return &_coords;};
 	void				showError(laydata::tdtdesign* atdb, word la);
 	static long		_precision;
 private:
-	CoordsVector	_coords;
+	pointlist		_coords;
 
 };
 
