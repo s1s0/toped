@@ -1827,6 +1827,16 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 					_edge.showError(_ATDB, drcLayer);
 				}
 				
+				/*telldata::ttpnt *p1;// = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+				telldata::ttpnt *p2;// = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+				real DBscale = DATC->DBscale();
+				DBbox* box = DEBUG_NEW DBbox(TP(p1->x(), p1->y(), DBscale), 
+                          TP(p2->x(), p2->y(), DBscale));
+				wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+				eventZOOM.SetInt(tui::ZOOM_WINDOW);
+				eventZOOM.SetClientData(static_cast<void*>(box));
+				
+				wxPostEvent(Toped->view(), eventZOOM);*/
 			DATC->unlockDB();
 		}
    }
