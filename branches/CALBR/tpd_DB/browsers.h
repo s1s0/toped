@@ -318,14 +318,14 @@ namespace browsers
                               const wxPoint& pos = wxDefaultPosition, 
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-	   void	               saveInfo(const Calbr::drcPolygon &poly);
-		void	               saveInfo(const Calbr::drcEdge &edge);
+//	   void	               saveInfo(const Calbr::drcPolygon &poly);
+//		void	               saveInfo(const Calbr::drcEdge &edge);
 		void						onLMouseDblClk(wxMouseEvent&);
 	private:
-		Calbr::drcPolygon		_poly;
+		/*Calbr::drcPolygon		_poly;
 		bool						_polyError;
 		Calbr::drcEdge 		_edge;
-		bool						_edgeError;
+		bool						_edgeError;*/
 		DECLARE_EVENT_TABLE();
 	};
 
