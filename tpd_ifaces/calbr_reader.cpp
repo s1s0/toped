@@ -30,17 +30,18 @@
 
 #include "tpdph.h"
 #include "calbr_reader.h"
-#include "../tpd_common/outbox.h"
 #include "../tpd_bidfunc/tpdf_common.h"
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_DB/datacenter.h"
+#include "../src/toped.h"
 #include <sstream>
 
 // Global variables
 Calbr::CalbrFile *DRCData = NULL;
-
+extern tui::TopedFrame*    Toped;
 extern console::ted_cmd*	Console;
 extern DataCenter*         DATC;
+extern const wxEventType   wxEVT_CANVAS_ZOOM;
 
 long Calbr::drcPolygon::_precision = 0;
 long Calbr::drcEdge::_precision = 0;
@@ -281,7 +282,6 @@ bool Calbr::CalbrFile::parse()
 
 	for(long i= 0; i < resCount; i++)
 	{
-		drcPolygon poly;
 		if (fgets(tempStr, 512, _calbrFile)==NULL) 		
 		{
 			_ok = false;
@@ -296,10 +296,10 @@ bool Calbr::CalbrFile::parse()
 		long ordinal;
 		short numberOfElem;
 		sscanf( tempStr, "%c %ld %hd", &type, &ordinal, &numberOfElem);
+		drcPolygon poly(ordinal);
 		switch(type)
 		{
 			case 'p'	: 
-
 				for(short j =0; j< numberOfElem; j++)
 				{
 					long x, y;
@@ -334,7 +334,7 @@ bool Calbr::CalbrFile::parse()
 						return false;
 					}
 					sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2);
-					Calbr::drcEdge theEdge;
+					Calbr::drcEdge theEdge(ordinal);
 					theEdge.addCoord(x1, y1, x2, y2);
 					ruleCheck->addEdge(theEdge);
 				}
@@ -399,7 +399,76 @@ void	Calbr::CalbrFile::ShowResults()
 
 }
 
+void	Calbr::CalbrFile::ShowError(const std::string & error, long  number)
+{
+	RuleChecksVector::const_iterator it;
+	for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
+	{
+		if((*it)->ruleCheckName() == error)
+		{
+			drcRuleCheck *rule = (*it);
+			for(std::vector <Calbr::drcPolygon>::iterator it2poly = rule->polygons()->begin(); 
+				it2poly!=  rule->polygons()->end(); ++it2poly)
+			{
+				if (number == (*it2poly).ordinal())
+				{
+					drcPolygon *poly = &(*it2poly);
+						_ATDB = DATC->lockDB();
+							word drcLayer = DATC->getLayerNo("drcResults");
+							assert(drcLayer);
+							poly->showError(_ATDB, drcLayer);
+						DATC->unlockDB();
+					
+					int4b maxx, maxy, minx, miny;
+					maxx = poly->coords()->begin()->x();
+					minx = poly->coords()->begin()->x();
+					maxy = poly->coords()->begin()->y();
+					miny = poly->coords()->begin()->y();
+					for(pointlist::const_iterator it3 = poly->coords()->begin(); it3!= poly->coords()->end(); ++it3)
+					{
+						
+						maxx = std::max((*it3).x(), maxx);
+						maxy = std::max((*it3).y(), maxy);
+						minx = std::min((*it3).x(), minx);
+						miny = std::min((*it3).y(), miny);
+					}
+					DBbox *box = DEBUG_NEW DBbox(TP(minx, miny), TP(maxx, maxy));
+					//DBbox box(TP(minx, miny), TP(maxx, maxy));
+					wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+					eventZOOM.SetInt(tui::ZOOM_WINDOW);
+					eventZOOM.SetClientData(static_cast<void*>(box));
+					wxPostEvent(Toped->view(), eventZOOM);
+					
 
+				}
+			}
+
+			for(std::vector <Calbr::drcEdge>::iterator it2edge = rule->edges()->begin(); 
+				it2edge!=  rule->edges()->end(); ++it2edge)
+			{
+				if (number == (*it2edge).ordinal())
+				{
+						_ATDB = DATC->lockDB();
+							word drcLayer = DATC->getLayerNo("drcResults");
+							assert(drcLayer);
+							(*it2edge).showError(_ATDB, drcLayer);
+						DATC->unlockDB();
+
+						DBbox *box = DEBUG_NEW DBbox(TP((*it2edge).coords()->x1, (*it2edge).coords()->y1), 
+						TP((*it2edge).coords()->x2, (*it2edge).coords()->y2));
+						wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+						eventZOOM.SetInt(tui::ZOOM_WINDOW);
+						eventZOOM.SetClientData(static_cast<void*>(box));
+						wxPostEvent(Toped->view(), eventZOOM);
+
+				}
+			}
+
+
+		}
+	}
+	assert(it == _RuleChecks.end());
+}
 
 void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)
 {

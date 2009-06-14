@@ -35,7 +35,6 @@
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
 #include "datacenter.h"
-#include "../tpd_common/tuidefs.h"
 #include "../src/toped.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
@@ -1774,21 +1773,20 @@ wxString browsers::LayerBrowser::getAllSelected()
    return _layerPanel->getAllSelected();
 }
 
-browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id, 
-                              const wxPoint& pos, 
-                              const wxSize& size,
-										long style):
-							wxTreeCtrl(parent, id, pos, size, style |wxTR_HIDE_ROOT| wxTR_FULL_ROW_HIGHLIGHT ),
-								_polyError(false), _edgeError(false)
-{
-}
-
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::ErrorBrowser, wxTreeCtrl)
    EVT_LEFT_DCLICK(browsers::ErrorBrowser::onLMouseDblClk)
 END_EVENT_TABLE()
 //====================================================================
-void	browsers::ErrorBrowser::saveInfo(const Calbr::drcPolygon &poly)
+browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id, 
+                              const wxPoint& pos, 
+                              const wxSize& size,
+										long style):
+							wxTreeCtrl(parent, id, pos, size, style |wxTR_HIDE_ROOT| wxTR_FULL_ROW_HIGHLIGHT )
+{
+}
+
+/*void	browsers::ErrorBrowser::saveInfo(const Calbr::drcPolygon &poly)
 {
 	_poly = poly;
 	_polyError = true;
@@ -1798,7 +1796,7 @@ void	browsers::ErrorBrowser::saveInfo(const Calbr::drcEdge &edge)
 {
 	_edge = edge;
 	_edgeError = true;
-}
+}*/
 
 void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 {
@@ -1813,20 +1811,57 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 		}
 		else
 		{
-			laydata::tdtdesign* _ATDB = DATC->lockDB();
+			//laydata::tdtdesign* _ATDB = DATC->lockDB();
+				wxString numstr = GetItemText(id);
+				long number;
+				numstr.ToLong(&number);
+
+				wxTreeItemId parent = GetItemParent(id);
+				std::string error = GetItemText(parent).mb_str(wxConvUTF8);
 			
+				DRCData->ShowError(error, number);
 				word drcLayer = DATC->getLayerNo("drcResults");
 				assert(drcLayer);
-				if(_polyError)
+				DBbox* box;
+
+			/*	if(_polyError)
 				{
 					_poly.showError(_ATDB, drcLayer);
+					//define boundary of polygon
+					int4b maxx, maxy, minx, miny;
+					maxx = _poly.coords()->begin()->x();
+					minx = _poly.coords()->begin()->x();
+					maxy = _poly.coords()->begin()->y();
+					miny = _poly.coords()->begin()->y();
+					for(pointlist::const_iterator it = _poly.coords()->begin(); it!= _poly.coords()->end(); ++it)
+					{
+						
+						maxx = std::max((*it).x(), maxx);
+						maxy = std::max((*it).y(), maxy);
+						minx = std::min((*it).x(), minx);
+						miny = std::min((*it).y(), miny);
+					}
+					box = DEBUG_NEW DBbox(TP(minx, miny), TP(maxx, maxy));
 				}
 			
 				if(_edgeError)
 				{
 					_edge.showError(_ATDB, drcLayer);
+					//define boundary of edge
+
+					box = DEBUG_NEW DBbox(TP(_edge.coords()->x1, _edge.coords()->y1), 
+						TP(_edge.coords()->x2, _edge.coords()->y2));
+					
 				}
+				DATC->unlockDB();
+
+				wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+				eventZOOM.SetInt(tui::ZOOM_WINDOW);
+				eventZOOM.SetClientData(static_cast<void*>(box));
 				
+				wxPostEvent(Toped->view(), eventZOOM);
+
+				delete box;*/
 				/*telldata::ttpnt *p1;// = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
 				telldata::ttpnt *p2;// = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
 				real DBscale = DATC->DBscale();
@@ -1837,7 +1872,7 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 				eventZOOM.SetClientData(static_cast<void*>(box));
 				
 				wxPostEvent(Toped->view(), eventZOOM);*/
-			DATC->unlockDB();
+			
 		}
    }
    else
@@ -1884,7 +1919,7 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 				wxString str;
 				str.Printf(wxT("%d"), i);
 				_errorBrowser->AppendItem(id, str);
-				_errorBrowser->saveInfo(polys->at(i-1));
+//				_errorBrowser->saveInfo(polys->at(i-1));
 
 			}
 
@@ -1896,7 +1931,7 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 				wxString str;
 				str.Printf(wxT("%d"), i);
 				_errorBrowser->AppendItem(id, str);
-				_errorBrowser->saveInfo(edges->at(i-1));
+//				_errorBrowser->saveInfo(edges->at(i-1));
 
 			}
 

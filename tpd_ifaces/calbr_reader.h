@@ -56,23 +56,29 @@ typedef std::vector <Calbr::edge> EdgesVector;
 class drcEdge
 {
 public:
+	drcEdge(long ordinal) { _ordinal = ordinal;};
 	void				addCoord(long x1, long y1, long x2, long y2);
-	edge*	coords() {return &_coords;};
+	edge*				coords() {return &_coords;};
+	long				ordinal() {return _ordinal;};
 	void				showError(laydata::tdtdesign* atdb, word la);
 	static long		_precision;
 private:
 	edge				_coords;
+	long				_ordinal;
 };
 
 class drcPolygon
 {
 public:
+	drcPolygon(long ordinal) { _ordinal = ordinal;};
 	void				addCoord(long x, long y);
-	pointlist*	coords() {return &_coords;};
+	pointlist*		coords() {return &_coords;};
+	long				ordinal() {return _ordinal;};
 	void				showError(laydata::tdtdesign* atdb, word la);
 	static long		_precision;
 private:
 	pointlist		_coords;
+	long				_ordinal;
 
 };
 
@@ -113,6 +119,7 @@ public:
 	~CalbrFile();
 
 	void					ShowResults();
+	void					ShowError(const std::string & error, long  number);
 	RuleChecksVector* Results() {return &_RuleChecks;};
 	bool					isOk(void)	{return _ok;}
 private:
