@@ -356,7 +356,14 @@ bool Calbr::CalbrFile::parse()
 
 void	Calbr::CalbrFile::ShowResults()
 {
-	_ATDB = DATC->lockDB();
+   bool dbExists = true;
+   try
+   {
+      _ATDB = DATC->lockDB();
+   }
+   catch (EXPTNactive_DB) {dbExists = false;}
+   if (dbExists)
+   {
 		word drcLayer = DATC->getLayerNo("drcResults");
 		assert(drcLayer);
 		RuleChecksVector::const_iterator it;
@@ -375,28 +382,32 @@ void	Calbr::CalbrFile::ShowResults()
 				(*it2edge).showError(_ATDB, drcLayer);
 			}
 	   }
-	DATC->unlockDB();
-		/*for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
-		{
-			wxString ost;
-			ost << wxT("addpoly({");
-			long x1int	= (*it2edge).x1 % _precision;
-			long x1frac = (*it2edge).x1 - x1int*_precision;
-			long y1int	= (*it2edge).y1 % _precision;
-			long y1frac	= (*it2edge).y1 - y1int*_precision;
-			long x2int	= (*it2edge).x2 % _precision;
-			long x2frac = (*it2edge).x2 - x2int*_precision;
-			long y2int	= (*it2edge).y2 % _precision;
-			long y2frac = (*it2edge).y2 - y2int*_precision;
-			
-			ost << convert((*it2edge).x1, _precision) << wxT(",") 
-				 << convert((*it2edge).y1, _precision) << wxT(",") 
-				 << convert((*it2edge).x2, _precision) << wxT(",") 
-				 << convert((*it2edge).y2, _precision) << ost<<wxT("}, 0.1)");
-			Console->parseCommand(ost);
-		}*/
-	tellstdfunc::RefreshGL();
-
+      /*for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
+      {
+         wxString ost;
+         ost << wxT("addpoly({");
+         long x1int  = (*it2edge).x1 % _precision;
+         long x1frac = (*it2edge).x1 - x1int*_precision;
+         long y1int  = (*it2edge).y1 % _precision;
+         long y1frac = (*it2edge).y1 - y1int*_precision;
+         long x2int  = (*it2edge).x2 % _precision;
+         long x2frac = (*it2edge).x2 - x2int*_precision;
+         long y2int  = (*it2edge).y2 % _precision;
+         long y2frac = (*it2edge).y2 - y2int*_precision;
+            
+         ost << convert((*it2edge).x1, _precision) << wxT(",")
+         << convert((*it2edge).y1, _precision) << wxT(",")
+         << convert((*it2edge).x2, _precision) << wxT(",")
+         << convert((*it2edge).y2, _precision) << ost<<wxT("}, 0.1)");
+         Console->parseCommand(ost);
+      }*/
+      DATC->unlockDB();
+     tellstdfunc::RefreshGL();
+   }
+   else
+   {
+      tell_log(console::MT_ERROR, "No Data base loaded... Sergey, update this string");
+   }
 }
 
 void	Calbr::CalbrFile::ShowError(const std::string & error, long  number)
@@ -410,57 +421,72 @@ void	Calbr::CalbrFile::ShowError(const std::string & error, long  number)
 			for(std::vector <Calbr::drcPolygon>::iterator it2poly = rule->polygons()->begin(); 
 				it2poly!=  rule->polygons()->end(); ++it2poly)
 			{
-				if (number == (*it2poly).ordinal())
+            bool dbExists = true;
+            if (number == (*it2poly).ordinal())
 				{
 					drcPolygon *poly = &(*it2poly);
-						_ATDB = DATC->lockDB();
-							word drcLayer = DATC->getLayerNo("drcResults");
-							assert(drcLayer);
-							poly->showError(_ATDB, drcLayer);
-						DATC->unlockDB();
-					
-					int4b maxx, maxy, minx, miny;
-					maxx = poly->coords()->begin()->x();
-					minx = poly->coords()->begin()->x();
-					maxy = poly->coords()->begin()->y();
-					miny = poly->coords()->begin()->y();
-					for(pointlist::const_iterator it3 = poly->coords()->begin(); it3!= poly->coords()->end(); ++it3)
-					{
-						
-						maxx = std::max((*it3).x(), maxx);
-						maxy = std::max((*it3).y(), maxy);
-						minx = std::min((*it3).x(), minx);
-						miny = std::min((*it3).y(), miny);
-					}
-					DBbox *box = DEBUG_NEW DBbox(TP(minx, miny), TP(maxx, maxy));
-					//DBbox box(TP(minx, miny), TP(maxx, maxy));
-					wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-					eventZOOM.SetInt(tui::ZOOM_WINDOW);
-					eventZOOM.SetClientData(static_cast<void*>(box));
-					wxPostEvent(Toped->view(), eventZOOM);
-					
+               try
+               {
+                  _ATDB = DATC->lockDB();
+               }
+               catch (EXPTNactive_DB) {dbExists = false;}
+               if(dbExists)
+               {
+                  word drcLayer = DATC->getLayerNo("drcResults");
+                  assert(drcLayer);
+                  poly->showError(_ATDB, drcLayer);
+                  DATC->unlockDB();
 
+                  int4b maxx, maxy, minx, miny;
+                  maxx = poly->coords()->begin()->x();
+                  minx = poly->coords()->begin()->x();
+                  maxy = poly->coords()->begin()->y();
+                  miny = poly->coords()->begin()->y();
+                  for(pointlist::const_iterator it3 = poly->coords()->begin(); it3!= poly->coords()->end(); ++it3)
+                  {
+
+                     maxx = std::max((*it3).x(), maxx);
+                     maxy = std::max((*it3).y(), maxy);
+                     minx = std::min((*it3).x(), minx);
+                     miny = std::min((*it3).y(), miny);
+                  }
+                  DBbox *box = DEBUG_NEW DBbox(TP(minx, miny), TP(maxx, maxy));
+                  //DBbox box(TP(minx, miny), TP(maxx, maxy));
+                  wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+                  eventZOOM.SetInt(tui::ZOOM_WINDOW);
+                  eventZOOM.SetClientData(static_cast<void*>(box));
+                  wxPostEvent(Toped->view(), eventZOOM);
+               }
+               else
+                  tell_log(console::MT_ERROR, "No Data base loaded... Sergey, update this string");
 				}
 			}
 
 			for(std::vector <Calbr::drcEdge>::iterator it2edge = rule->edges()->begin(); 
 				it2edge!=  rule->edges()->end(); ++it2edge)
 			{
-				if (number == (*it2edge).ordinal())
+            bool dbExists = true;
+            if (number == (*it2edge).ordinal())
 				{
-						_ATDB = DATC->lockDB();
-							word drcLayer = DATC->getLayerNo("drcResults");
-							assert(drcLayer);
-							(*it2edge).showError(_ATDB, drcLayer);
-						DATC->unlockDB();
+               try
+               {
+                  _ATDB = DATC->lockDB();
+               }
+               catch (EXPTNactive_DB) {dbExists = false;}
+               if (dbExists)
+               {
+                  word drcLayer = DATC->getLayerNo("drcResults");
+                  assert(drcLayer);
+                  (*it2edge).showError(_ATDB, drcLayer);
+                  DATC->unlockDB();
 
-						DBbox *box = DEBUG_NEW DBbox(TP((*it2edge).coords()->x1, (*it2edge).coords()->y1), 
-						TP((*it2edge).coords()->x2, (*it2edge).coords()->y2));
-						wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-						eventZOOM.SetInt(tui::ZOOM_WINDOW);
-						eventZOOM.SetClientData(static_cast<void*>(box));
-						wxPostEvent(Toped->view(), eventZOOM);
-
+                  DBbox *box = DEBUG_NEW DBbox(TP((*it2edge).coords()->x1, (*it2edge).coords()->y1),
+                  TP((*it2edge).coords()->x2, (*it2edge).coords()->y2));
+                  wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+                  eventZOOM.SetInt(tui::ZOOM_WINDOW);
+                  eventZOOM.SetClientData(static_cast<void*>(box));
+                  wxPostEvent(Toped->view(), eventZOOM);
+               }
 				}
 			}
 

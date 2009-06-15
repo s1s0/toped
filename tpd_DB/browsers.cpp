@@ -1817,12 +1817,12 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 				numstr.ToLong(&number);
 
 				wxTreeItemId parent = GetItemParent(id);
-				std::string error = GetItemText(parent).mb_str(wxConvUTF8);
+				std::string error(GetItemText(parent).mb_str(wxConvUTF8));
 			
 				DRCData->ShowError(error, number);
 				word drcLayer = DATC->getLayerNo("drcResults");
 				assert(drcLayer);
-				DBbox* box;
+//				DBbox* box;
 
 			/*	if(_polyError)
 				{
