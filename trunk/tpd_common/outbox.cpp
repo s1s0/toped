@@ -429,6 +429,12 @@ EXPTNreadTDT::EXPTNreadTDT(std::string info) {
    tell_log(console::MT_ERROR,news);
 };
 
+EXPTNreadGDS::EXPTNreadGDS(std::string info) {
+   std::string news = "Error parsing GDS file =>";
+   news += info;
+   tell_log(console::MT_ERROR,news);
+};
+
 EXPTNpolyCross::EXPTNpolyCross(std::string info) {
    std::string news = "Internal error - polygon cross =>";
    news += info;
