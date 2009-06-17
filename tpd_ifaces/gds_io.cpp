@@ -298,7 +298,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
 {
    InFile = this; _hierTree = NULL;_status = false;
    _laymap = NULL;
-   _gdsiiWarnings = _gdsiiErrors = 0;
+   _gdsiiWarnings = 0;
    _fileName = fn;
    _filePos = 0;
 //   prgrs_pos = 0;
@@ -354,18 +354,12 @@ GDSin::GdsFile::GdsFile(std::string fn)
                delete wr;
                return; // go out
             default:   //parse error - not expected record type
-               tell_log(console::MT_ERROR, "GDS header - wrong record type in the current context");
-               InFile->incGdsiiErrors();
                delete wr;
-               return;
+               throw EXPTNreadGDS("GDS header - wrong record type in the current context");
          }
       }
       else
-      {
-         tell_log(console::MT_ERROR, "Unexpected end of file");
-         InFile->incGdsiiErrors();
-         return;
-      }
+         throw EXPTNreadGDS("Unexpected end of file");
    }
    while (true);
 }
@@ -374,7 +368,7 @@ GDSin::GdsFile::GdsFile(std::string fn, const LayerMapGds* laymap, time_t acctim
 {
    InFile = this;_hierTree = NULL;
    _laymap = laymap;
-   _gdsiiWarnings = _gdsiiErrors = 0;
+   _gdsiiWarnings = 0;
    _fileName = fn;//initializing
    _filePos = 0;
    _streamVersion = 3;
@@ -708,17 +702,12 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
             case gds_ENDLIB://end of library, exit form the procedure
                delete cr;return;
             default://parse error - not expected record type
-               tell_log(console::MT_ERROR, "GDS Library - wrong record type in the current context");
-               InFile->incGdsiiErrors();
-               delete cr;return;
+               delete cr;
+               throw EXPTNreadGDS("GDS Library - wrong record type in the current context");
          }
       }
       else
-      {
-         tell_log(console::MT_ERROR, "Unexpected end of file");
-         InFile->incGdsiiErrors();
-         return;
-      }
+         throw EXPTNreadGDS("Unexpected end of file");
    }   
    while (true);
 }
@@ -854,17 +843,12 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
             case gds_ENDSTR:// end of structure, exit point
                delete cr;return;
             default://parse error - not expected record type
-               tell_log(console::MT_ERROR, "GDS structure - wrong record type in the current context");
-               InFile->incGdsiiErrors();
-               delete cr;return;
+               delete cr;
+               throw EXPTNreadGDS("GDS structure - wrong record type in the current context");
          }
       }
       else
-      {
-         tell_log(console::MT_ERROR, "Unexpected end of file");
-         InFile->incGdsiiErrors();
-         return;
-      }
+         throw EXPTNreadGDS("Unexpected end of file");
    }
    while (true);
 }
@@ -1006,20 +990,13 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer) : GdsData()
                }
             case gds_ENDEL://end of element, exit point
                delete cr;return;
-            default:{
-               //parse error - not expected record type
-               tell_log(console::MT_ERROR, "GDS box - wrong record type in the current context");
-               InFile->incGdsiiErrors();
-               delete cr;return;
-            }
+            default: //parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS box - wrong record type in the current context");
          }
       }
       else
-      {
-         tell_log(console::MT_ERROR, "Unexpected end of file");
-         InFile->incGdsiiErrors();
-         return;
-      }
+         throw EXPTNreadGDS("Unexpected end of file");
    }
    while (true);
 }
@@ -1058,17 +1035,12 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer) : GdsData()
             case gds_ENDEL://end of element, exit point
                delete cr;return;
             default://parse error - not expected record type
-               tell_log(console::MT_ERROR, "GDS boundary - wrong record type in the current context");
-               InFile->incGdsiiErrors();
-               delete cr;return;
+               delete cr;
+               throw EXPTNreadGDS("GDS boundary - wrong record type in the current context");
          }
       }
       else
-      {
-         tell_log(console::MT_ERROR, "Unexpected end of file");
-         InFile->incGdsiiErrors();
-         return;
-      }
+         throw EXPTNreadGDS("Unexpected end of file");
    }
    while (true);
 }
@@ -1129,17 +1101,12 @@ GDSin::GDSpath::GDSpath(GdsFile* cf, int2b& layer):GdsData()
                }
                delete cr;return;
             default://parse error - not expected record type
-               tell_log(console::MT_ERROR, "GDS path - wrong record type in the current context");
-               InFile->incGdsiiErrors();
-               delete cr;return;
+               delete cr;
+               throw EXPTNreadGDS("GDS path - wrong record type in the current context");
          }
       }
       else
-      {
-         tell_log(console::MT_ERROR, "Unexpected end of file");
-         InFile->incGdsiiErrors();
-         return;
-      }
+         throw EXPTNreadGDS("Unexpected end of file");
    }
    while (cr->recType() != gds_ENDEL);
 }
@@ -1228,17 +1195,12 @@ GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
             case gds_ENDEL://end of element, exit point
                delete cr;return;
             default://parse error - not expected record type
-               tell_log(console::MT_ERROR, "GDS text - wrong record type in the current context");
-               InFile->incGdsiiErrors();
-               delete cr;return;
+               delete cr;
+               throw EXPTNreadGDS("GDS text - wrong record type in the current context");
          }
       }
       else
-      {
-         tell_log(console::MT_ERROR, "Unexpected end of file");
-         InFile->incGdsiiErrors();
-         return;
-      }
+         throw EXPTNreadGDS("Unexpected end of file");
    }
    while (true);
 }
@@ -1276,7 +1238,8 @@ GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
             case gds_PLEX:   readPlex(cr); // seems that it's not used
                delete cr;break;
             case gds_SNAME:
-               if (cr->recLen() > 32)   _strName[0] = 0x0;
+               if (cr->recLen() > 255)   
+                  _strName[0] = 0x0;
                else cr->retData(&_strName);
                delete cr;break;
             case gds_STRANS:
@@ -1305,17 +1268,12 @@ GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
                InFile->incGdsiiWarnings();
                delete cr; break;
             default://parse error - not expected record type
-               tell_log(console::MT_ERROR, "GDS sref - wrong record type in the current context");
-               InFile->incGdsiiErrors();
-               delete cr;return;
+               delete cr;
+               throw EXPTNreadGDS("GDS sref - wrong record type in the current context");
          }
       }
       else
-      {
-         tell_log(console::MT_ERROR, "Unexpected end of file");
-         InFile->incGdsiiErrors();
-         return;
-      }
+         throw EXPTNreadGDS("Unexpected end of file");
    }
    while (true);
 }
@@ -1383,17 +1341,12 @@ GDSin::GdsARef::GdsARef(GdsFile* cf):GdsRef()
                InFile->incGdsiiWarnings();
                delete cr; break;
             default://parse error - not expected record type
-               tell_log(console::MT_ERROR, "GDS aref - wrong record type in the current context");
-               InFile->incGdsiiErrors();
-               delete cr;return;
+               delete cr;
+               throw EXPTNreadGDS("GDS aref - wrong record type in the current context");
          }
       }
       else
-      {
-         tell_log(console::MT_ERROR, "Unexpected end of file");
-         InFile->incGdsiiErrors();
-         return;
-      }
+         throw EXPTNreadGDS("Unexpected end of file");
    }
    while (true);
 }

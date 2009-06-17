@@ -392,7 +392,7 @@ namespace GDSin {
       double                  _angle;
       word                    _absMagn;
       word                    _absAngl;
-      char                    _strName[33];
+      char                    _strName[256];
    };
 
    /*** GdsARef ******************************************************************
@@ -588,9 +588,7 @@ namespace GDSin {
          std::string          libname() const                  { return _library->name();       }
          void                 hierOut()                        { _hierTree = _library->hierOut();}
          GDSHierTree*         hierTree()                       { return _hierTree;              }
-         int                  gdsiiErrors()                    { return _gdsiiErrors;           }
          int                  gdsiiWarnings()                  { return _gdsiiWarnings;         }
-         int                  incGdsiiErrors()                 { return ++_gdsiiErrors;         }
          int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;       }
          GdsStructure*        getStructures()                  { return _library->fStruct();    }
          void                 closeFile()                      { if (NULL != _gdsFh) {fclose(_gdsFh); _gdsFh = NULL;}}
@@ -608,7 +606,7 @@ namespace GDSin {
          long                 _filePos;
          GDSHierTree*         _hierTree; // Tree of instance hierarchy
          nameList             _childnames;
-         int                  _gdsiiErrors;
+//         int                  _gdsiiErrors;
          int                  _gdsiiWarnings;
          GDStime              _tModif;
          GDStime              _tAccess;

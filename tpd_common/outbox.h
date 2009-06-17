@@ -196,6 +196,12 @@ class EXPTNreadTDT : public EXPTN
       EXPTNreadTDT(std::string);
 };
 
+class EXPTNreadGDS : public EXPTN
+{
+   public:
+      EXPTNreadGDS(std::string);
+};
+
 class EXPTNpolyCross : public EXPTN
 {
    public:

@@ -735,7 +735,7 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapGds& layerMap, 
 
 bool DataCenter::GDSparse(std::string filename)
 {
-   bool status;
+   bool status = true;
    if (lockGDS(false))
    {
       std::string news = "Removing existing GDS data from memory...";
@@ -745,8 +745,12 @@ bool DataCenter::GDSparse(std::string filename)
    }
    // parse the GDS file - don't forget to lock the GDS mutex here!
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
-   _GDSDB = DEBUG_NEW GDSin::GdsFile(filename);
-   status = _GDSDB->status();
+   try
+   {
+      _GDSDB = DEBUG_NEW GDSin::GdsFile(filename);
+   }
+   catch (EXPTNreadGDS) { status = false;}
+//   status = _GDSDB->status();
    if (status)
    {
       // generate the hierarchy tree of cells

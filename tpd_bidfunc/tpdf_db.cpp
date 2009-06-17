@@ -342,7 +342,8 @@ tellstdfunc::GDSread::GDSread(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::GDSread::execute() {
    std::string filename = getStringValue();
-   telldata::ttlist* topcells;
+   telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
+
    if (expandFileName(filename))
    {
       std::list<std::string> top_cell_list;
@@ -360,17 +361,15 @@ int tellstdfunc::GDSread::execute() {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
          DATC->unlockGDS();
-         topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                    CN != top_cell_list.end(); CN ++)
             topcells->add(DEBUG_NEW telldata::ttstring(*CN));
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
-      else
-      {
-         std::string info = "File \"" + filename + "\" doesn't seem to appear a valid GDSII file";
-         tell_log(console::MT_ERROR,info);
-      }
+//      else
+//      {
+//         Error should've been already reported by the parser. 
+//      }
    }
    else
    {
