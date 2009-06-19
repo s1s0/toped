@@ -727,7 +727,7 @@ void GDSin::GdsLibrary::setHierarchy()
          {//means that GdsData type is AREF or SREF 
             std::string strname(((GdsRef*) wd)->strctName());
             GdsStructure* ws2 = _fStruct;
-            while ((ws2) && (strname == ws2->strctName()))
+            while ((ws2) && (strname != ws2->strctName()))
                ws2 = ws2->last();
             ((GdsRef*) wd)->SetStructure(ws2);
             if (ws2)
