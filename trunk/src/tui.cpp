@@ -538,7 +538,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
       GDSin::GdsStructure* gdss = AGDSDB->getStructures();
       while (gdss) 
       {
-         _nameList->Append(wxString(gdss->name(), wxConvUTF8));
+         _nameList->Append(wxString(gdss->strctName().c_str(), wxConvUTF8));
          gdss = gdss->last();
       }
       //-----------------------------------------------------------------------

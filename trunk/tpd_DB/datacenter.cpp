@@ -83,7 +83,7 @@ void GDSin::Gds2Ted::child_structure(const GDSin::GDSHierTree* root, bool overwr
 void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool overwrite)
 {
    GDSin::GdsStructure* src_structure = const_cast<GDSin::GdsStructure*>(item->GetItem());
-   std::string gname = src_structure->name();
+   std::string gname = src_structure->strctName();
    // check that destination structure with this name exists
    laydata::tdtcell* dst_structure = (*_tdt_db)()->checkcell(gname);
    std::ostringstream ost; ost << "GDS import: ";
@@ -233,7 +233,7 @@ void GDSin::Gds2Ted::text(GDSin::GdsText* wd, laydata::tdtlayer* wl)
 void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
 {
    // Absolute magnification, absolute angle should be reflected somehow!!!
-   laydata::refnamepair striter = linkcellref(wd->strName());
+   laydata::refnamepair striter = linkcellref(wd->strctName());
    dst->addcellref(
                     (*_tdt_db)(),
                       striter,
@@ -248,7 +248,7 @@ void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
 void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
 {
    // Absolute magnification, absolute angle should be reflected somehow!!!
-   laydata::refnamepair striter = linkcellref(wd->strName());
+   laydata::refnamepair striter = linkcellref(wd->strctName());
 
    laydata::ArrayProperties arrprops(wd->getXStep(),wd->getYStep(),
                                      static_cast<word>(wd->columns()),

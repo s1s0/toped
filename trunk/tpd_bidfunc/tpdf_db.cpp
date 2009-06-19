@@ -358,7 +358,7 @@ int tellstdfunc::GDSread::execute() {
             assert(root);
             do 
             {
-               top_cell_list.push_back(std::string(root->GetItem()->name()));
+               top_cell_list.push_back(std::string(root->GetItem()->strctName()));
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
          DATC->unlockGDS();
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();

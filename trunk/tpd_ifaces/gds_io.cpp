@@ -133,17 +133,20 @@ bool GDSin::GdsRecord::retData(void* var, word curnum, byte len)
          *(double*)var = gds2ieee(_record);
          break;
       case gdsDT_ASCII:// String
-         rlc = (char*)var;
          if (len > 0)
          {
-            for (word i = 0; i < len; rlc[i] = _record[curnum*len+i], i++);
+            rlc = DEBUG_NEW char[len+1];
+            memcpy(rlc, &(_record[curnum*len]), len);
             rlc[len] = 0x0;
          }
          else
          {
-            for (word i = 0; i < _recLen; rlc[i] = _record[i], i++);
+            rlc = DEBUG_NEW char[_recLen+1];
+            memcpy(rlc, _record, _recLen);
             rlc[_recLen] = 0x0;
          }
+         *((std::string*)var) = rlc;
+         delete [] rlc;
          break;
    }
    return true;
@@ -296,7 +299,7 @@ GDSin::GdsRecord::~GdsRecord()
 //==============================================================================
 GDSin::GdsFile::GdsFile(std::string fn)
 {
-   InFile = this; _hierTree = NULL;_status = false;
+   InFile = this; _hierTree = NULL;
    _laymap = NULL;
    _gdsiiWarnings = 0;
    _fileName = fn;
@@ -349,7 +352,6 @@ GDSin::GdsFile::GdsFile(std::string fn)
                closeFile();// close the input stream
 //               prgrs_pos = file_length;
 //               prgrs->SetPos(prgrs_pos); // fullfill progress indicator
-               _status = true;
                tell_log(console::MT_INFO, "Done");
                delete wr;
                return; // go out
@@ -584,12 +586,12 @@ void GDSin::GdsFile::flush(GdsRecord* wr)
 }
 
 
-GDSin::GdsStructure* GDSin::GdsFile::getStructure(const char* selection)
+GDSin::GdsStructure* GDSin::GdsFile::getStructure(const std::string selection)
 {
    GdsStructure* Wstrct = _library->fStruct();
    while (Wstrct)
    {
-      if (!strcmp(Wstrct->name(),selection)) return Wstrct;
+      if (Wstrct->strctName() == selection) return Wstrct;
       Wstrct = Wstrct->last();
    }
    return NULL;
@@ -651,11 +653,10 @@ GDSin::GdsFile::~GdsFile()
 //==============================================================================
 GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
 {
-   int i;
-   cr->retData(&_name);//Get library name
+   cr->retData(&_libName);//Get library name
    // init section
    _maxver = 3;   _fStruct = NULL;
-   for (i = 0; i < 4; _fonts[i++] = NULL);
+//   for (byte i = 0; i < 4; _fonts[i++] = NULL);
    do
    {//start reading
       cr = cf->getNextRecord();
@@ -684,9 +685,9 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
                InFile->incGdsiiWarnings();
                delete cr;break;
             case gds_FONTS:// Read fonts
-               for(i = 0; i < 4; i++)  {
-                  _fonts[i] = DEBUG_NEW char[45];
-                  cr->retData(_fonts[i],i,44);
+               for(byte i = 0; i < 4; i++)  {
+//                  _fonts[i] = DEBUG_NEW char[45];
+                  cr->retData(&(_allFonts[i]),i,44);
                }
                delete cr;break;
             case gds_GENERATION:   cr->retData(&_maxver);
@@ -697,7 +698,7 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
                delete cr;break;
             case gds_BGNSTR:
                _fStruct = DEBUG_NEW GdsStructure(cf, _fStruct);
-               tell_log(console::MT_INFO,std::string("...") + _fStruct->name());
+               tell_log(console::MT_INFO,std::string("...") + _fStruct->strctName());
                delete cr;break;
             case gds_ENDLIB://end of library, exit form the procedure
                delete cr;return;
@@ -708,7 +709,7 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
       }
       else
          throw EXPTNreadGDS("Unexpected end of file");
-   }   
+   }
    while (true);
 }
 
@@ -724,9 +725,9 @@ void GDSin::GdsLibrary::setHierarchy()
          word dt = wd->gdsDataType();
          if ((gds_SREF == dt) || (gds_AREF == dt))
          {//means that GdsData type is AREF or SREF 
-            char* strname = ((GdsRef*) wd)->strName();
+            std::string strname(((GdsRef*) wd)->strctName());
             GdsStructure* ws2 = _fStruct;
-            while ((ws2) && (strcmp(strname,ws2->name())))
+            while ((ws2) && (strname == ws2->strctName()))
                ws2 = ws2->last();
             ((GdsRef*) wd)->SetStructure(ws2);
             if (ws2)
@@ -738,7 +739,7 @@ void GDSin::GdsLibrary::setHierarchy()
             {//structure is referenced but not defined!
                char wstr[256];
                sprintf(wstr," Structure %s is referenced, but not defined!",
-                       ((GdsRef*)wd)->strName());
+                       ((GdsRef*)wd)->strctName().c_str());
                tell_log(console::MT_WARNING,wstr);
                InFile->incGdsiiWarnings();
                //SGREM probably is a good idea to add default
@@ -767,8 +768,8 @@ GDSin::GDSHierTree* GDSin::GdsLibrary::hierOut()
 
 GDSin::GdsLibrary::~GdsLibrary()
 {
-   for(int i = 0; i < 4; i++)
-      if (_fonts[i]) delete _fonts[i];
+//   for(int i = 0; i < 4; i++)
+//      if (_fonts[i]) delete _fonts[i];
    GdsStructure* Wstruct;
    while (_fStruct)
    {
@@ -812,9 +813,7 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
                InFile->incGdsiiWarnings();// CADANCE internal use only
                delete cr;break;
             case gds_STRNAME:
-               if (cr->recLen() > 64)
-                  _name[0] = 0x0;
-               else cr->retData(&_name);
+               cr->retData(&_strctName);
                delete cr;break;
             case gds_BOX: 
                cData = DEBUG_NEW GdsBox(cf, layer);
@@ -900,7 +899,7 @@ bool GDSin::GdsStructure::registerStructure(GdsStructure* ws)
    for (unsigned i=0; i < _children.size(); i++)
    {
       if (NULL == _children[i]) continue;
-      else if (!strcmp(_children[i]->name(), ws->name()))
+      else if (_children[i]->strctName() == ws->strctName())
          return false;
    }
    _children.push_back(ws);
@@ -1147,7 +1146,7 @@ GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
    _font = 0; _vertJust = 0; _horiJust = 0; _pathType = 0;
    _width = 0; _absMagn = 0; _absAngl = 0; _reflection = 0;
    _magnification = 1.0; _angle = 0.0;
-   _text[0] = 0x0;
+//   _text[0] = 0x0;
    GdsRecord* cr = NULL;
    do
    {//start reading
@@ -1190,7 +1189,7 @@ GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
                delete cr; break;
             case gds_XY: _magnPoint = GDSin::get_TP(cr);
                delete cr;break;
-            case gds_STRING: cr->retData(&_text);
+            case gds_STRING: cr->retData(&_tString);
                delete cr;break;
             case gds_ENDEL://end of element, exit point
                delete cr;return;
@@ -1212,7 +1211,7 @@ GDSin::GdsRef::GdsRef() : GdsData(), _refStr(NULL),
    _reflection(false), _magnPoint(TP()), _magnification(1.0), _angle(0.0),
    _absMagn(false), _absAngl(false)
 {
-   _strName[0] = 0x0;
+//   _strName[0] = 0x0;
 }
 
 GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
@@ -1238,9 +1237,7 @@ GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
             case gds_PLEX:   readPlex(cr); // seems that it's not used
                delete cr;break;
             case gds_SNAME:
-               if (cr->recLen() > 255)   
-                  _strName[0] = 0x0;
-               else cr->retData(&_strName);
+               cr->retData(&_strctName);
                delete cr;break;
             case gds_STRANS:
                cr->retData(&ba,0,16);
@@ -1305,8 +1302,7 @@ GDSin::GdsARef::GdsARef(GdsFile* cf):GdsRef()
             case gds_PLEX:readPlex(cr);// seems that it's not used
                delete cr;break;
             case gds_SNAME:
-               if (cr->recLen() > 32)   _strName[0] = 0x0;
-               else cr->retData(&_strName);
+               cr->retData(&_strctName);
                delete cr;break;
             case gds_STRANS:
                cr->retData(&ba,0,16);
