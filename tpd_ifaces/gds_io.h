@@ -29,6 +29,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <string>
 #include "../tpd_common/ttt.h"
 
 //GDS data types
@@ -324,12 +325,12 @@ namespace GDSin {
       public:
                               GdsText(GdsFile *cf, int2b&);
          byte                 gdsDataType(){return gds_TEXT;};
-         char*                text()                           { return _text;          }
+         std::string          text()                           { return _tString;       }
          word                 reflection()                     { return _reflection;    }
          TP                   magnPoint()                      { return _magnPoint;     }
          double               magnification()                  { return _magnification; }
          double               angle()                          { return _angle;         }
-         virtual            ~GdsText()                        {                         }
+         virtual            ~GdsText()                         {                        }
       protected:
          word                 _font;
          word                 _vertJust;
@@ -338,7 +339,7 @@ namespace GDSin {
          word                 _absMagn;
          word                 _absAngl;
          TP                   _magnPoint;
-         char                 _text[512];
+         std::string          _tString;
          double               _magnification;
          double               _angle;
          int2b                _pathType;
@@ -375,15 +376,15 @@ namespace GDSin {
    public:
                               GdsRef();//default, called by GdsARef::GdsARef
                               GdsRef(GdsFile *cf);
-      void                    SetStructure(GdsStructure* strct){ _refStr = strct;       }
+      void                    SetStructure(GdsStructure* strct){ _refStr = strct;      }
       byte                    gdsDataType()                    { return gds_SREF;      }
-      char*                   strName()                        { return _strName;      }
+      std::string             strctName()                      { return _strctName;    }
       GdsStructure*           refStr()                         { return _refStr;       }
       word                    reflection()                     { return _reflection;   }
       TP                      magnPoint()                      { return _magnPoint;    }
       double                  magnification()                  { return _magnification;}
       double                  angle()                          { return _angle;        }
-      virtual               ~GdsRef()                         {                        }
+      virtual                ~GdsRef()                         {                        }
    protected:
       GdsStructure*           _refStr;
       word                    _reflection;
@@ -392,7 +393,7 @@ namespace GDSin {
       double                  _angle;
       word                    _absMagn;
       word                    _absAngl;
-      char                    _strName[256];
+      std::string              _strctName;
    };
 
    /*** GdsARef ******************************************************************
@@ -475,10 +476,10 @@ namespace GDSin {
          GdsData*             fDataAt(int2b);
          void                 collectLayers(GdsLayers&, bool);
          GdsStructure*        last()                           { return _last;         }
-         const char*          name() const                     { return _name;         }
+         std::string          strctName() const                { return _strctName;    }
          bool                 allLay(byte i)                   { return _allLay[i];    }
          bool                 traversed() const                { return _traversed;    }
-         void                 set_traversed(bool trv)          { _traversed = trv;      }
+         void                 set_traversed(bool trv)          { _traversed = trv;     }
          int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
                              ~GdsStructure();
          bool                 _haveParent;
@@ -487,7 +488,7 @@ namespace GDSin {
          void                 linkDataIn(GdsData*, int2b);
          bool                 _allLay[GDS_MAX_LAYER];
          LayMap               _layers;
-         char                 _name[65];
+         std::string          _strctName;
          GdsStructure*        _last;
          bool                 _traversed;       //! For hierarchy traversing purposes
    };
@@ -521,14 +522,14 @@ namespace GDSin {
                               GdsLibrary(GdsFile* , GdsRecord* );
       void                    setHierarchy();
       GDSHierTree*            hierOut();
-      GdsStructure*           fStruct()                        { return _fStruct;            }
-      double                  dbu()                            { return _dbu;                }
-      double                  uu()                             { return _uu;                 }
-      std::string             name() const                     { return std::string(_name);  }
+      GdsStructure*           fStruct()                        { return _fStruct;    }
+      double                  dbu()                            { return _dbu;        }
+      double                  uu()                             { return _uu;         }
+      std::string             libName() const                  { return _libName;    }
                              ~GdsLibrary();
    protected:
-      char                    _name[256];
-      char*                   _fonts[4];
+      std::string             _libName;
+      std::string             _allFonts[4];
       double                  _dbu;
       double                  _uu;
       int2b                   _maxver;
@@ -582,17 +583,17 @@ namespace GDSin {
          void                 registerCellWritten(std::string);
          void                 flush(GdsRecord*);
          void                 updateLastRecord();
-         GdsStructure*        getStructure(const char*);
+         GdsStructure*        getStructure(const std::string);
          void                 collectLayers(GdsLayers&);
          bool                 getMappedLayType(word& gdslay, word& gdstype, word tdtlay);
-         std::string          libname() const                  { return _library->name();       }
+         std::string          libname() const                  { return _library->libName();       }
          void                 hierOut()                        { _hierTree = _library->hierOut();}
          GDSHierTree*         hierTree()                       { return _hierTree;              }
          int                  gdsiiWarnings()                  { return _gdsiiWarnings;         }
          int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;       }
          GdsStructure*        getStructures()                  { return _library->fStruct();    }
          void                 closeFile()                      { if (NULL != _gdsFh) {fclose(_gdsFh); _gdsFh = NULL;}}
-         bool                 status()                         { return _status;                }
+//         bool                 status()                         { return _status;                }
                               ~GdsFile();
       protected:
          void                 getTimes(GdsRecord* wr);
@@ -600,17 +601,15 @@ namespace GDSin {
          std::string          _fileName;
          int2b                _streamVersion;
          int2b                _libDirSize;
-         char                 _srfName[256];
+         std::string          _srfName;
          GdsLibrary*          _library;
          long                 _fileLength;
          long                 _filePos;
          GDSHierTree*         _hierTree; // Tree of instance hierarchy
          nameList             _childnames;
-//         int                  _gdsiiErrors;
          int                  _gdsiiWarnings;
          GDStime              _tModif;
          GDStime              _tAccess;
-         bool                 _status;
          const LayerMapGds*   _laymap;
    };
 
