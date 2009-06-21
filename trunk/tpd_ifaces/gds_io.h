@@ -239,6 +239,15 @@ namespace GDSin {
          pointlist            _plist;
    };
 
+   class   GdsNode:public GdsData {
+      public:
+                              GdsNode(GdsFile*, int2b&);
+         byte                 gdsDataType()                     { return gds_NODE;}
+         virtual            ~GdsNode()                          {                 }
+      protected:
+         pointlist            _plist;
+   };
+
    /*** GdsPolygon **************************************************************
    >>> Constructor --------------------------------------------------------------
    > Reads a GDSII polygon
