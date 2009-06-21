@@ -654,9 +654,7 @@ GDSin::GdsFile::~GdsFile()
 GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
 {
    cr->retData(&_libName);//Get library name
-   // init section
    _maxver = 3;   _fStruct = NULL;
-//   for (byte i = 0; i < 4; _fonts[i++] = NULL);
    do
    {//start reading
       cr = cf->getNextRecord();
@@ -685,10 +683,8 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
                InFile->incGdsiiWarnings();
                delete cr;break;
             case gds_FONTS:// Read fonts
-               for(byte i = 0; i < 4; i++)  {
-//                  _fonts[i] = DEBUG_NEW char[45];
+               for(byte i = 0; i < 4; i++)
                   cr->retData(&(_allFonts[i]),i,44);
-               }
                delete cr;break;
             case gds_GENERATION:   cr->retData(&_maxver);
                delete cr;break;
@@ -768,8 +764,6 @@ GDSin::GDSHierTree* GDSin::GdsLibrary::hierOut()
 
 GDSin::GdsLibrary::~GdsLibrary()
 {
-//   for(int i = 0; i < 4; i++)
-//      if (_fonts[i]) delete _fonts[i];
    GdsStructure* Wstruct;
    while (_fStruct)
    {
@@ -803,6 +797,7 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
             case gds_NODE:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'NODE' skipped");
                InFile->incGdsiiWarnings();
+               GdsNode(cf,layer);
                delete cr;break;
             case gds_PROPATTR:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
@@ -1001,6 +996,51 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer) : GdsData()
 }
 
 //==============================================================================
+// class GdsNode
+//==============================================================================
+GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer) : GdsData()
+{
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS:readElflags(cr);// seems that it's not used
+               delete cr; break;
+            case gds_PLEX:   readPlex(cr);// seems that it's not used
+               delete cr; break;
+            case gds_LAYER: cr->retData(&layer);
+               delete cr; break;
+            case gds_NODETYPE:cr->retData(&_singleType);
+               delete cr; break;
+            case gds_PROPATTR:
+               InFile->incGdsiiWarnings(); delete cr; break;
+            case gds_PROPVALUE: tell_log(console::MT_WARNING, "GDS node - PROPVALUE record ignored");
+               InFile->incGdsiiWarnings(); delete cr; break;
+            case gds_XY: {
+               word numpoints = (cr->recLen())/8 - 1;
+               // one point less because fist and last point coincide
+               _plist.reserve(numpoints);
+               for(word i = 0; i < numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
+               delete cr; break;
+               }
+            case gds_ENDEL://end of element, exit point
+               delete cr;return;
+            default: //parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS node - wrong record type in the current context");
+         }
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+}
+
+//==============================================================================
 // class GdsPolygon
 //==============================================================================
 GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer) : GdsData()
@@ -1146,7 +1186,6 @@ GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
    _font = 0; _vertJust = 0; _horiJust = 0; _pathType = 0;
    _width = 0; _absMagn = 0; _absAngl = 0; _reflection = 0;
    _magnification = 1.0; _angle = 0.0;
-//   _text[0] = 0x0;
    GdsRecord* cr = NULL;
    do
    {//start reading
@@ -1210,9 +1249,7 @@ GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
 GDSin::GdsRef::GdsRef() : GdsData(), _refStr(NULL),
    _reflection(false), _magnPoint(TP()), _magnification(1.0), _angle(0.0),
    _absMagn(false), _absAngl(false)
-{
-//   _strName[0] = 0x0;
-}
+{}
 
 GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
 {
@@ -1274,10 +1311,6 @@ GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
    }
    while (true);
 }
-
-// laydata::tdtdata* GDSin::GdsRef::toTED() {
-//    return NULL;
-// }
 
 //==============================================================================
 // class GdsARef
