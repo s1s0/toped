@@ -348,7 +348,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
                //Start reading the library structure
                _library = DEBUG_NEW GdsLibrary(this, wr);
                //build the hierarchy tree
-               _library->setHierarchy();
+               _library->linkReferences();
                closeFile();// close the input stream
 //               prgrs_pos = file_length;
 //               prgrs->SetPos(prgrs_pos); // fullfill progress indicator
@@ -585,30 +585,6 @@ void GDSin::GdsFile::flush(GdsRecord* wr)
    _filePos += wr->flush(_gdsFh); delete wr;
 }
 
-
-GDSin::GdsStructure* GDSin::GdsFile::getStructure(const std::string selection)
-{
-   GdsStructure* Wstrct = _library->fStruct();
-   while (Wstrct)
-   {
-      if (Wstrct->strctName() == selection) return Wstrct;
-      Wstrct = Wstrct->last();
-   }
-   return NULL;
-}
-
-void GDSin::GdsFile::collectLayers(GdsLayers& layers)
-{
-   GdsStructure* wstrct = _library->fStruct();
-   while (wstrct)
-   {
-      // There is no point to traverse the hierarchy here if we already have
-      // all the cells listed
-      wstrct->collectLayers(layers, false);
-      wstrct = wstrct->last();
-   }
-}
-
 bool GDSin::GdsFile::getMappedLayType(word& gdslay, word& gdstype, word tdtlay)
 {
    bool result = _laymap->getGdsLayType(gdslay, gdstype, tdtlay);
@@ -654,7 +630,8 @@ GDSin::GdsFile::~GdsFile()
 GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
 {
    cr->retData(&_libName);//Get library name
-   _maxver = 3;   _fStruct = NULL;
+   _maxver = 3;
+   GdsStructure* cstr = NULL;
    do
    {//start reading
       cr = cf->getNextRecord();
@@ -693,8 +670,9 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
                cr->retData(&_dbu,8,8); // database unit in meters
                delete cr;break;
             case gds_BGNSTR:
-               _fStruct = DEBUG_NEW GdsStructure(cf, _fStruct);
-               tell_log(console::MT_INFO,std::string("...") + _fStruct->strctName());
+               cstr = DEBUG_NEW GdsStructure(cf);
+               tell_log(console::MT_INFO,std::string("...") + cstr->strctName());
+               _structures[cstr->strctName()] = cstr;
                delete cr;break;
             case gds_ENDLIB://end of library, exit form the procedure
                delete cr;return;
@@ -709,80 +687,56 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
    while (true);
 }
 
-void GDSin::GdsLibrary::setHierarchy()
+void GDSin::GdsLibrary::linkReferences()
 {
-   GdsStructure* ws = _fStruct;
-   while (ws)
+   for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
    {//for every structure
-      GdsData* wd = ws->fDataAt(0);
-      while (wd)
-      { //for every GdsData of type SREF or AREF
-      //put a pointer to GdsStructure
-         word dt = wd->gdsDataType();
-         if ((gds_SREF == dt) || (gds_AREF == dt))
-         {//means that GdsData type is AREF or SREF 
-            std::string strname(((GdsRef*) wd)->strctName());
-            GdsStructure* ws2 = _fStruct;
-            while ((ws2) && (strname != ws2->strctName()))
-               ws2 = ws2->last();
-            ((GdsRef*) wd)->SetStructure(ws2);
-            if (ws2)
-            {
-               ws->registerStructure(ws2);
-               ws2->_haveParent = true;
-            }
-            else
-            {//structure is referenced but not defined!
-               char wstr[256];
-               sprintf(wstr," Structure %s is referenced, but not defined!",
-                       ((GdsRef*)wd)->strctName().c_str());
-               tell_log(console::MT_WARNING,wstr);
-               InFile->incGdsiiWarnings();
-               //SGREM probably is a good idea to add default
-               //GdsStructure here. Then this structure can be
-               //visualized in the Hierarchy window as disabled
-            }
-         }
-         wd = wd->last();
-      }
-      ws = ws->last();
+      GdsStructure* cur_str = CSTR->second;
+      cur_str->linkReferences(this);
    }
+}
+
+GDSin::GdsStructure* GDSin::GdsLibrary::getStructure(const std::string selection)
+{
+   GDSin::GdsStructure* thestr = NULL;
+   StructureMap::iterator striter;
+   if (_structures.end() != (striter = _structures.find(selection)))
+      return striter->second;
+   else
+      return NULL;
+}
+
+void GDSin::GdsLibrary::collectLayers(GdsLayers& layers)
+{
+   for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
+      CSTR->second->collectLayers(layers, false);
 }
 
 GDSin::GDSHierTree* GDSin::GdsLibrary::hierOut()
 {
-   GdsStructure* ws = _fStruct;
    GDSHierTree* Htree = NULL;
-   while (ws)
-   {
-      if (!ws->_haveParent)  Htree = ws->hierOut(Htree,NULL);
-      ws = ws->last();
-   }
+   for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
+      if (!CSTR->second->haveParent()) 
+         Htree = CSTR->second->hierOut(Htree, NULL);
    return Htree;
 }
 
 
 GDSin::GdsLibrary::~GdsLibrary()
 {
-   GdsStructure* Wstruct;
-   while (_fStruct)
-   {
-      Wstruct = _fStruct->last();
-      delete _fStruct;
-      _fStruct = Wstruct;
-   }
+   for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
+      delete (CSTR->second);
 }
 
 //==============================================================================
 // class GdsStructure
 //==============================================================================
-GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
+GDSin::GdsStructure::GdsStructure(GdsFile *cf)
 {
    _traversed = false;
    int i;
    int2b layer;
    //initializing
-   _last = lst;
    GdsData* cData = NULL;
    _haveParent = false;
    GdsRecord* cr = NULL;
@@ -829,12 +783,16 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, GdsStructure* lst)
             case gds_SREF:
                cData = DEBUG_NEW GdsRef(cf);
                linkDataIn(cData, 0);
+               _childrenNames.push_back(static_cast<GdsRef*>(cData)->strctName());
                delete cr;break;
             case gds_AREF: 
                cData = DEBUG_NEW GdsARef(cf);
                linkDataIn(cData, 0);
+               _childrenNames.push_back(static_cast<GdsARef*>(cData)->strctName());
                delete cr;break;
             case gds_ENDSTR:// end of structure, exit point
+               _childrenNames.sort();
+               _childrenNames.unique();
                delete cr;return;
             default://parse error - not expected record type
                delete cr;
@@ -854,6 +812,30 @@ void GDSin::GdsStructure::linkDataIn(GdsData* data, int2b layer)
    else
       _layers[layer] = data->linkTo(_layers[layer]);
    _allLay[layer] = true;
+}
+
+
+void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
+{
+   for (nameList::const_iterator CRN = _childrenNames.begin(); CRN != _childrenNames.end(); CRN++)
+   {
+      GdsStructure* ws2 = library->getStructure(*CRN);
+      if (ws2)
+      {
+         _children.push_back(ws2);
+         ws2->_haveParent = true;
+      }
+      else
+      {//structure is referenced but not defined!
+         char wstr[256];
+         sprintf(wstr," Structure %s is referenced, but not defined!",(*CRN) );
+         tell_log(console::MT_WARNING,wstr);
+         InFile->incGdsiiWarnings();
+         //SGREM probably is a good idea to add default
+         //GdsStructure here. Then this structure can be
+         //visualized in the Hierarchy window as disabled
+      }
+   }
 }
 
 GDSin::GdsData* GDSin::GdsStructure::fDataAt(int2b layer)
@@ -883,37 +865,27 @@ void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
       layers_map[CL->first] = data_types;
    }
    if (!hier) return;
-   for (unsigned i = 0; i < _children.size(); i++)
-      if (NULL == _children[i]) continue;
+   for (ChildStructure::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
+      if (NULL == (*CSTR)) continue;
    else
-      _children[i]->collectLayers(layers_map, hier);
-}
-
-bool GDSin::GdsStructure::registerStructure(GdsStructure* ws)
-{
-   for (unsigned i=0; i < _children.size(); i++)
-   {
-      if (NULL == _children[i]) continue;
-      else if (_children[i]->strctName() == ws->strctName())
-         return false;
-   }
-   _children.push_back(ws);
-   return true;
+      (*CSTR)->collectLayers(layers_map, hier);
 }
 
 GDSin::GDSHierTree* GDSin::GdsStructure::hierOut(GDSHierTree* Htree, GdsStructure* parent)
 {
    // collecting hierarchical information
    Htree = DEBUG_NEW GDSHierTree(this, parent, Htree);
-   for (unsigned i = 0; i < _children.size(); i++)
-      if (NULL == _children[i]) continue;
+   for (ChildStructure::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
+   {
+      if (NULL == (*CSTR)) continue;
       else
       {
-         Htree = _children[i]->hierOut(Htree,this);
+         Htree = (*CSTR)->hierOut(Htree,this);
          // Collect all used layers here and down in hierarchy
          for(int j = 1 ; j < GDS_MAX_LAYER ; j++)
-            _allLay[j] |= _children[i]->allLay(j);
+            _allLay[j] |= (*CSTR)->allLay(j);
       }
+   }
    return Htree;
 }
 
@@ -936,18 +908,20 @@ GDSin::GdsStructure::~GdsStructure()
 // class GdsData
 //==============================================================================
 GDSin::GdsData::GdsData() :
-   _last(NULL), _plex(0), _elflags(0), _singleType(-1)
+   _last(NULL), _singleType(-1)
 {}
 
-void GDSin::GdsData::readPlex(GdsRecord *cr)
-{
-   cr->retData(&_elflags,0,16);//get two bytes bit-array
-}
+//void GDSin::GdsData::readPlex(GdsRecord *cr)
+//{
+//   word elflags;
+//   cr->retData(&elflags,0,16);//get two bytes bit-array
+//}
 
-void GDSin::GdsData::readElflags(GdsRecord *cr)
-{
-   cr->retData(&_plex);//get two bytes bit-array
-}
+//void GDSin::GdsData::readElflags(GdsRecord *cr)
+//{
+//   int4b plex;
+//   cr->retData(&plex);//get two bytes bit-array
+//}
 
 //==============================================================================
 // class GdsBox
@@ -962,9 +936,9 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer) : GdsData()
       {
          switch (cr->recType())
          {
-            case gds_ELFLAGS:readElflags(cr);// seems that it's not used
+            case gds_ELFLAGS://readElflags(cr);// seems that it's not used
                delete cr; break;
-            case gds_PLEX:   readPlex(cr);// seems that it's not used
+            case gds_PLEX:   //readPlex(cr);// seems that it's not used
                delete cr; break;
             case gds_LAYER: cr->retData(&layer);
                delete cr; break;
@@ -1008,9 +982,9 @@ GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer) : GdsData()
       {
          switch (cr->recType())
          {
-            case gds_ELFLAGS:readElflags(cr);// seems that it's not used
+            case gds_ELFLAGS://readElflags(cr);// seems that it's not used
                delete cr; break;
-            case gds_PLEX:   readPlex(cr);// seems that it's not used
+            case gds_PLEX:   //readPlex(cr);// seems that it's not used
                delete cr; break;
             case gds_LAYER: cr->retData(&layer);
                delete cr; break;
@@ -1054,9 +1028,9 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer) : GdsData()
       {
          switch (cr->recType())
          {
-            case gds_ELFLAGS: readElflags(cr);// seems that it's not used
+            case gds_ELFLAGS: //readElflags(cr);// seems that it's not used
                delete cr;break;
-            case gds_PLEX:   readPlex(cr);// seems that it's not used
+            case gds_PLEX:   //readPlex(cr);// seems that it's not used
                delete cr;break;
             case gds_LAYER: cr->retData(&layer);
                delete cr;break;
@@ -1103,9 +1077,9 @@ GDSin::GDSpath::GDSpath(GdsFile* cf, int2b& layer):GdsData()
       {
          switch (cr->recType())
          {
-            case gds_ELFLAGS: readElflags(cr);// seems that's not used
+            case gds_ELFLAGS: //readElflags(cr);// seems that's not used
                delete cr;break;
-            case gds_PLEX:   readPlex(cr);// seems that's not used
+            case gds_PLEX:   //readPlex(cr);// seems that's not used
                delete cr;break;
             case gds_LAYER: cr->retData(&layer);
                delete cr;break;
@@ -1130,12 +1104,12 @@ GDSin::GDSpath::GDSpath(GdsFile* cf, int2b& layer):GdsData()
             case gds_ENDEL://end of element, exit point
                if (2 == _pathtype)
                {
-                  tell_log(console::MT_INFO,"GDS Pathtype 2 digitized. Will be converted to Pathtype 0");
+//                  tell_log(console::MT_INFO,"GDS Pathtype 2 digitized. Will be converted to Pathtype 0");
                   convert22(_width/2, _width/2);
                }
                else if (4 == _pathtype)
                {
-                  tell_log(console::MT_INFO,"GDS Pathtype 4 digitized. Will be converted to Pathtype 0");
+//                  tell_log(console::MT_INFO,"GDS Pathtype 4 digitized. Will be converted to Pathtype 0");
                   convert22(_bgnextn, _endextn);
                }
                delete cr;return;
@@ -1194,9 +1168,9 @@ GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
       {
          switch (cr->recType())
          {
-            case gds_ELFLAGS: readElflags(cr);// seems that it's not used
+            case gds_ELFLAGS: //readElflags(cr);// seems that it's not used
                delete cr;break;
-            case gds_PLEX:   readPlex(cr);// seems that it's not used
+            case gds_PLEX:   //readPlex(cr);// seems that it's not used
                delete cr;break;
             case gds_LAYER: cr->retData(&layer);
                delete cr;break;
@@ -1246,9 +1220,8 @@ GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
 //==============================================================================
 // class GdsRef
 //==============================================================================
-GDSin::GdsRef::GdsRef() : GdsData(), _refStr(NULL),
-   _reflection(false), _magnPoint(TP()), _magnification(1.0), _angle(0.0),
-   _absMagn(false), _absAngl(false)
+GDSin::GdsRef::GdsRef() : GdsData(), _reflection(false), _magnPoint(TP()), 
+   _magnification(1.0), _angle(0.0), _absMagn(false), _absAngl(false)
 {}
 
 GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
@@ -1256,7 +1229,6 @@ GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
    word ba;
    //initializing
    _absAngl = _absMagn = _reflection = false;
-   _refStr = NULL;
    _magnification = 1.0; _angle = 0.0;
    int tmp; //Dummy variable. Use for gds_PROPATTR
    char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
@@ -1269,9 +1241,9 @@ GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
       {
          switch (cr->recType())
          {
-            case gds_ELFLAGS: readElflags(cr);// seems that it's not used
+            case gds_ELFLAGS: //readElflags(cr);// seems that it's not used
                delete cr;break;
-            case gds_PLEX:   readPlex(cr); // seems that it's not used
+            case gds_PLEX:   //readPlex(cr); // seems that it's not used
                delete cr;break;
             case gds_SNAME:
                cr->retData(&_strctName);
@@ -1289,8 +1261,6 @@ GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
             case gds_XY: _magnPoint = GDSin::get_TP(cr);
                delete cr;break;
             case gds_ENDEL://end of element, exit point
-               // before exiting, init Current Translation Matrix
-//               tmtrx = DEBUG_NEW PSCTM(magn_point,magnification,angle,reflection);
                delete cr;return;
             case gds_PROPATTR://@TODO Not implemented yet+++++
                cr->retData(&tmp);
@@ -1330,9 +1300,9 @@ GDSin::GdsARef::GdsARef(GdsFile* cf):GdsRef()
       {
          switch (cr->recType())
          {
-            case gds_ELFLAGS:readElflags(cr);// seems that it's not used
+            case gds_ELFLAGS://readElflags(cr);// seems that it's not used
                delete cr;break;
-            case gds_PLEX:readPlex(cr);// seems that it's not used
+            case gds_PLEX://readPlex(cr);// seems that it's not used
                delete cr;break;
             case gds_SNAME:
                cr->retData(&_strctName);
