@@ -106,10 +106,12 @@ namespace console {
    public: 
                         ted_log(wxWindow *parent);
       void              OnLOGMessage(wxCommandEvent&);
+      void              OnOverflow(wxCommandEvent&);
    private:
       wxString          cmd_mark;
       wxString          gui_mark;
       wxString          rply_mark;
+      unsigned          curLogSize;
       DECLARE_EVENT_TABLE();
    };
 
