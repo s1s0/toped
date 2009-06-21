@@ -130,7 +130,7 @@ bool GDSin::GdsRecord::retData(void* var, word curnum, byte len)
          break;
       }
       case gdsDT_REAL8B:// 8-byte real
-         *(double*)var = gds2ieee(_record);
+         *(double*)var = gds2ieee(&(_record[curnum]));
          break;
       case gdsDT_ASCII:// String
          if (len > 0)
