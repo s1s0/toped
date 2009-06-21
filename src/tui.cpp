@@ -535,19 +535,18 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-      GDSin::GdsStructure* gdss = AGDSDB->getStructures();
-      while (gdss) 
-      {
-         _nameList->Append(wxString(gdss->strctName().c_str(), wxConvUTF8));
-         gdss = gdss->last();
-      }
-      //-----------------------------------------------------------------------
-//       SIMap inlays;
+//      GDSin::GdsStructure* gdss = AGDSDB->getStructures();
+//      while (gdss) 
+//      {
+//         _nameList->Append(wxString(gdss->strctName().c_str(), wxConvUTF8));
+//         gdss = gdss->last();
+//      }
+//      //-----------------------------------------------------------------------
        GdsLayers gdsLayers;
        DATC->gdsGetLayers(gdsLayers);
 
    DATC->unlockGDS();
-   if (init != wxT("")) _nameList->SetStringSelection(init,true);
+//   if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
    _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300), gdsLayers);
 

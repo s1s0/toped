@@ -121,8 +121,8 @@ namespace GDSin {
    class GdsFile;
    class GdsStructure;
    class GdsRecord;
+   class GdsLibrary;
 
-   typedef std::vector<GdsStructure*>     ChildStructure;
    typedef SGHierTree<GdsStructure>       GDSHierTree;
 
    typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
@@ -179,14 +179,6 @@ namespace GDSin {
          word              _index;
    };
 
-//#define gdsDT_NODATA       0
-//#define gdsDT_BIT          1
-//#define gdsDT_INT2B        2
-//#define gdsDT_INT4B        3
-//#define gdsDT_REAL4B       4
-//#define gdsDT_REAL8B       5
-//#define gdsDT_ASCII        6
-   
    /*** GdsData *****************************************************************
    > This class is inherited by all GDSII data classes
    >>> Constructor --------------------------------------------------------------
@@ -215,17 +207,13 @@ namespace GDSin {
    class   GdsData {
       public:
                            GdsData();
-         void              readPlex(GdsRecord*);
-         void              readElflags(GdsRecord*);
          GdsData*          linkTo(GdsData* lst)                { _last = lst; return this; }
          GdsData*          last()                              { return _last;   }
          int2b             singleType()                        { return _singleType;}
-         virtual         ~GdsData()                           {                  };
+          virtual         ~GdsData()                           {                  };
          virtual byte     gdsDataType() = 0;
       protected:
          GdsData*          _last;
-         int4b             _plex;
-         word              _elflags;
          int2b             _singleType;
    };
 
@@ -234,7 +222,7 @@ namespace GDSin {
                               GdsBox(GdsFile*, int2b&);
          byte                 gdsDataType()                     { return gds_BOX;}
          pointlist&           plist()                           { return _plist; }
-         virtual            ~GdsBox()                          {                 }
+         virtual             ~GdsBox()                          {                }
       protected:
          pointlist            _plist;
    };
@@ -243,7 +231,7 @@ namespace GDSin {
       public:
                               GdsNode(GdsFile*, int2b&);
          byte                 gdsDataType()                     { return gds_NODE;}
-         virtual            ~GdsNode()                          {                 }
+         virtual             ~GdsNode()                         {                 }
       protected:
          pointlist            _plist;
    };
@@ -266,7 +254,7 @@ namespace GDSin {
                               GdsPolygon(GdsFile*, int2b&);
          byte                 gdsDataType()                    { return gds_BOUNDARY;  }
          pointlist&           plist()                          { return _plist;        }
-         virtual            ~GdsPolygon()                     {                        }
+         virtual             ~GdsPolygon()                     {                       }
       protected:
          word                 _numpoints;
          pointlist            _plist;
@@ -295,7 +283,7 @@ namespace GDSin {
          byte                 gdsDataType()                    { return gds_PATH;}
          pointlist&           plist()                          { return _plist;  }
          int4b                width()                          { return _width;  }
-         virtual            ~GDSpath()                        {                  }
+         virtual             ~GDSpath()                        {                 }
       protected:
          void                 convert22(int4b, int4b);
          int2b                _pathtype;
@@ -339,7 +327,7 @@ namespace GDSin {
          TP                   magnPoint()                      { return _magnPoint;     }
          double               magnification()                  { return _magnification; }
          double               angle()                          { return _angle;         }
-         virtual            ~GdsText()                         {                        }
+         virtual             ~GdsText()                        {                        }
       protected:
          word                 _font;
          word                 _vertJust;
@@ -385,24 +373,21 @@ namespace GDSin {
    public:
                               GdsRef();//default, called by GdsARef::GdsARef
                               GdsRef(GdsFile *cf);
-      void                    SetStructure(GdsStructure* strct){ _refStr = strct;      }
       byte                    gdsDataType()                    { return gds_SREF;      }
       std::string             strctName()                      { return _strctName;    }
-      GdsStructure*           refStr()                         { return _refStr;       }
       word                    reflection()                     { return _reflection;   }
       TP                      magnPoint()                      { return _magnPoint;    }
       double                  magnification()                  { return _magnification;}
       double                  angle()                          { return _angle;        }
-      virtual                ~GdsRef()                         {                        }
+      virtual                ~GdsRef()                         {                       }
    protected:
-      GdsStructure*           _refStr;
       word                    _reflection;
       TP                      _magnPoint;
       double                  _magnification;
       double                  _angle;
       word                    _absMagn;
       word                    _absAngl;
-      std::string              _strctName;
+      std::string             _strctName;
    };
 
    /*** GdsARef ******************************************************************
@@ -433,7 +418,7 @@ namespace GDSin {
          byte                 gdsDataType()                    { return gds_AREF;   }
          int2b                columns()                        { return _columns;   }
          int2b                rows()                           { return _rows;      }
-         virtual            ~GdsARef()                        {                     }
+         virtual             ~GdsARef()                        {                    }
       protected:
          TP                   _xStep;
          TP                   _yStep;
@@ -479,27 +464,29 @@ namespace GDSin {
    class   GdsStructure {
       public:
          typedef std::map<int2b, GdsData*> LayMap;
-                              GdsStructure(GdsFile*, GdsStructure*);
-         bool                 registerStructure(GdsStructure* ws);
+         typedef std::list<GdsStructure*>  ChildStructure;
+
+                              GdsStructure(GdsFile*);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          GdsData*             fDataAt(int2b);
          void                 collectLayers(GdsLayers&, bool);
-         GdsStructure*        last()                           { return _last;         }
+         void                 linkReferences(GdsLibrary* const);
          std::string          strctName() const                { return _strctName;    }
          bool                 allLay(byte i)                   { return _allLay[i];    }
          bool                 traversed() const                { return _traversed;    }
          void                 set_traversed(bool trv)          { _traversed = trv;     }
          int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
+         bool                 haveParent() const               { return _haveParent;   }
                              ~GdsStructure();
-         bool                 _haveParent;
-         ChildStructure       _children;
       protected:
          void                 linkDataIn(GdsData*, int2b);
+         bool                 _haveParent;
          bool                 _allLay[GDS_MAX_LAYER];
          LayMap               _layers;
          std::string          _strctName;
-         GdsStructure*        _last;
          bool                 _traversed;       //! For hierarchy traversing purposes
+         nameList             _childrenNames;
+         ChildStructure       _children;
    };
 
    /*** GDSLibrary **************************************************************
@@ -528,10 +515,12 @@ namespace GDSin {
    class   GdsLibrary
    {
    public:
+      typedef std::map<std::string, GdsStructure*> StructureMap;
                               GdsLibrary(GdsFile* , GdsRecord* );
-      void                    setHierarchy();
+      void                    linkReferences();
       GDSHierTree*            hierOut();
-      GdsStructure*           fStruct()                        { return _fStruct;    }
+      GdsStructure*           getStructure(const std::string);
+      void                    collectLayers(GdsLayers&);
       double                  dbu()                            { return _dbu;        }
       double                  uu()                             { return _uu;         }
       std::string             libName() const                  { return _libName;    }
@@ -542,7 +531,7 @@ namespace GDSin {
       double                  _dbu;
       double                  _uu;
       int2b                   _maxver;
-      GdsStructure*           _fStruct;
+      StructureMap            _structures;
    };
 
    /*** GdsFile ***************************************************************
@@ -592,17 +581,15 @@ namespace GDSin {
          void                 registerCellWritten(std::string);
          void                 flush(GdsRecord*);
          void                 updateLastRecord();
-         GdsStructure*        getStructure(const std::string);
-         void                 collectLayers(GdsLayers&);
          bool                 getMappedLayType(word& gdslay, word& gdstype, word tdtlay);
+         GdsStructure*        getStructure(const std::string nm){ return _library->getStructure(nm);}
+         void                 collectLayers(GdsLayers& lays)   { _library->collectLayers(lays);    }
          std::string          libname() const                  { return _library->libName();       }
          void                 hierOut()                        { _hierTree = _library->hierOut();}
          GDSHierTree*         hierTree()                       { return _hierTree;              }
          int                  gdsiiWarnings()                  { return _gdsiiWarnings;         }
          int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;       }
-         GdsStructure*        getStructures()                  { return _library->fStruct();    }
          void                 closeFile()                      { if (NULL != _gdsFh) {fclose(_gdsFh); _gdsFh = NULL;}}
-//         bool                 status()                         { return _status;                }
                               ~GdsFile();
       protected:
          void                 getTimes(GdsRecord* wr);
