@@ -902,6 +902,11 @@ GDSin::GdsStructure::~GdsStructure()
          }
       }
    }
+   for (RefList::iterator CR = _references.begin(); CR != _references.end(); CR++)
+   {
+      delete (*CR);
+   }
+
 }
 
 //==============================================================================
