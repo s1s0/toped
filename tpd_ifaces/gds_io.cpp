@@ -736,6 +736,7 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf)
    _traversed = false;
    int i;
    int2b layer;
+   int2b dtype;
    //initializing
    GdsData* cData = NULL;
    _haveParent = false;
@@ -751,7 +752,7 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf)
             case gds_NODE:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'NODE' skipped");
                InFile->incGdsiiWarnings();
-               GdsNode(cf,layer);
+               GdsNode(cf,layer, dtype);
                delete cr;break;
             case gds_PROPATTR:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
@@ -765,29 +766,29 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf)
                cr->retData(&_strctName);
                delete cr;break;
             case gds_BOX: 
-               cData = DEBUG_NEW GdsBox(cf, layer);
-               linkDataIn(cData, layer);
+               cData = DEBUG_NEW GdsBox(cf, layer, dtype);
+               linkDataIn(cData, layer, dtype);
                delete cr;break;
             case gds_BOUNDARY: 
-               cData = DEBUG_NEW GdsPolygon(cf, layer);
-               linkDataIn(cData, layer);
+               cData = DEBUG_NEW GdsPolygon(cf, layer, dtype);
+               linkDataIn(cData, layer, dtype);
                delete cr;break;
             case gds_PATH: 
-               cData = DEBUG_NEW GDSpath(cf, layer);
-               linkDataIn(cData, layer);
+               cData = DEBUG_NEW GDSpath(cf, layer, dtype);
+               linkDataIn(cData, layer, dtype);
                delete cr;break;
             case gds_TEXT:
-               cData = DEBUG_NEW GdsText(cf, layer);
-               linkDataIn(cData, layer);
+               cData = DEBUG_NEW GdsText(cf, layer, dtype);
+               linkDataIn(cData, layer, dtype);
                delete cr;break;
             case gds_SREF:
                cData = DEBUG_NEW GdsRef(cf);
-               linkDataIn(cData, 0);
+               linkDataIn(static_cast<GdsRef*>(cData));
                _childrenNames.push_back(static_cast<GdsRef*>(cData)->strctName());
                delete cr;break;
             case gds_AREF: 
                cData = DEBUG_NEW GdsARef(cf);
-               linkDataIn(cData, 0);
+               linkDataIn(static_cast<GdsARef*>(cData));
                _childrenNames.push_back(static_cast<GdsARef*>(cData)->strctName());
                delete cr;break;
             case gds_ENDSTR:// end of structure, exit point
@@ -805,15 +806,21 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf)
    while (true);
 }
 
-void GDSin::GdsStructure::linkDataIn(GdsData* data, int2b layer)
+void GDSin::GdsStructure::linkDataIn(GdsData* data, int2b layer, int2b dtype)
 {
-   if (_layers.end() == _layers.find(layer))
-      _layers[layer] = data->linkTo(NULL);
+   LayMap::iterator CMAP = _layers.find(layer);
+   if (_layers.end() == CMAP)
+      _layers[layer][dtype] = data->linkTo(NULL);
    else
-      _layers[layer] = data->linkTo(_layers[layer]);
+   {
+      DataMap::iterator DMAP = _layers[layer].find(dtype);
+      if (_layers[layer].end() == DMAP)
+         _layers[layer][dtype] = data->linkTo(NULL);
+      else
+         _layers[layer][dtype] = data->linkTo(_layers[layer][dtype]);
+   }
    _allLay[layer] = true;
 }
-
 
 void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
 {
@@ -838,27 +845,17 @@ void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
    }
 }
 
-GDSin::GdsData* GDSin::GdsStructure::fDataAt(int2b layer)
-{
-   if (_layers.end() == _layers.find(layer))
-      return NULL;
-   else
-      return _layers[layer];
-}
-
 void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
 {
    for (LayMap::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
    {
-      if (0 == CL->first) continue;
       WordList data_types;
       if (layers_map.end() != layers_map.find(CL->first))
          data_types = layers_map[CL->first];
-      GdsData* wdata = CL->second;
-      while (NULL != wdata)
+
+      for (DataMap::const_iterator DL = CL->second.begin(); DL != CL->second.end(); DL++)
       {
-         data_types.push_back(wdata->singleType());
-         wdata = wdata->last();
+         data_types.push_back(DL->first);
       }
       data_types.sort();
       data_types.unique();
@@ -893,13 +890,16 @@ GDSin::GdsStructure::~GdsStructure()
 {
    for (LayMap::iterator CL = _layers.begin(); CL != _layers.end(); CL++)
    {
-      GdsData* wData  = CL->second;
-      GdsData* wData2;
-      while (wData)
+      for (DataMap::iterator CD = CL->second.begin(); CD != CL->second.end(); CD++)
       {
-         wData2 = wData->last();
-         delete wData;
-         wData = wData2;
+         GdsData* wData  = CD->second;
+         GdsData* wData2;
+         while (wData)
+         {
+            wData2 = wData->last();
+            delete wData;
+            wData = wData2;
+         }
       }
    }
 }
@@ -907,8 +907,7 @@ GDSin::GdsStructure::~GdsStructure()
 //==============================================================================
 // class GdsData
 //==============================================================================
-GDSin::GdsData::GdsData() :
-   _last(NULL), _singleType(-1)
+GDSin::GdsData::GdsData() : _last(NULL)
 {}
 
 //void GDSin::GdsData::readPlex(GdsRecord *cr)
@@ -926,7 +925,7 @@ GDSin::GdsData::GdsData() :
 //==============================================================================
 // class GdsBox
 //==============================================================================
-GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer) : GdsData()
+GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer, int2b& singleType) : GdsData()
 {
    GdsRecord* cr = NULL;
    do
@@ -942,7 +941,7 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer) : GdsData()
                delete cr; break;
             case gds_LAYER: cr->retData(&layer);
                delete cr; break;
-            case gds_BOXTYPE:cr->retData(&_singleType);
+            case gds_BOXTYPE:cr->retData(&singleType);
                delete cr; break;
             case gds_PROPATTR:
                InFile->incGdsiiWarnings(); delete cr; break;
@@ -972,7 +971,7 @@ GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer) : GdsData()
 //==============================================================================
 // class GdsNode
 //==============================================================================
-GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer) : GdsData()
+GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer, int2b& singleType) : GdsData()
 {
    GdsRecord* cr = NULL;
    do
@@ -988,7 +987,7 @@ GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer) : GdsData()
                delete cr; break;
             case gds_LAYER: cr->retData(&layer);
                delete cr; break;
-            case gds_NODETYPE:cr->retData(&_singleType);
+            case gds_NODETYPE:cr->retData(&singleType);
                delete cr; break;
             case gds_PROPATTR:
                InFile->incGdsiiWarnings(); delete cr; break;
@@ -1017,7 +1016,7 @@ GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer) : GdsData()
 //==============================================================================
 // class GdsPolygon
 //==============================================================================
-GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer) : GdsData()
+GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer, int2b& singleType) : GdsData()
 {
    word i;
    GdsRecord* cr = NULL;
@@ -1034,7 +1033,7 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer) : GdsData()
                delete cr;break;
             case gds_LAYER: cr->retData(&layer);
                delete cr;break;
-            case gds_DATATYPE: cr->retData(&_singleType);
+            case gds_DATATYPE: cr->retData(&singleType);
                delete cr;break;
             case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS boundary - PROPATTR record ignored");
                InFile->incGdsiiWarnings(); delete cr;break;
@@ -1065,7 +1064,7 @@ GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer) : GdsData()
 //==============================================================================
 // class GDSpath
 //==============================================================================
-GDSin::GDSpath::GDSpath(GdsFile* cf, int2b& layer):GdsData()
+GDSin::GDSpath::GDSpath(GdsFile* cf, int2b& layer, int2b& singleType) : GdsData()
 {
    word i;
    _pathtype = 0; _bgnextn = 0; _endextn = 0; _width = 0;
@@ -1083,7 +1082,7 @@ GDSin::GDSpath::GDSpath(GdsFile* cf, int2b& layer):GdsData()
                delete cr;break;
             case gds_LAYER: cr->retData(&layer);
                delete cr;break;
-            case gds_DATATYPE: cr->retData(&_singleType);
+            case gds_DATATYPE: cr->retData(&singleType);
                delete cr;break;
             case gds_PATHTYPE: cr->retData(&_pathtype);
                delete cr;break;
@@ -1153,7 +1152,7 @@ void GDSin::GDSpath::convert22(int4b begext, int4b endext)
 //==============================================================================
 // class GdsText
 //==============================================================================
-GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
+GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer, int2b& singleType):GdsData()
 {
    word ba;
    // initializing
@@ -1174,7 +1173,7 @@ GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer):GdsData()
                delete cr;break;
             case gds_LAYER: cr->retData(&layer);
                delete cr;break;
-            case gds_TEXTTYPE: cr->retData(&_singleType);
+            case gds_TEXTTYPE: cr->retData(&singleType);
                delete cr;break;
             case gds_PATHTYPE: cr->retData(&_pathType);// ??? for test ???
                delete cr;break;
