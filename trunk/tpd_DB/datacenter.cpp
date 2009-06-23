@@ -115,39 +115,43 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool overwrite
 
 void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
 {
-   //@FIXME!!! ged rid of this silly loop! GDS database is layer oriented now!
-   for(int2b laynum = 1 ; laynum < GDS_MAX_LAYER ; laynum++)
+   laydata::tdtlayer* dwl = NULL;
+   word tdtcurlaynum = 0;
+   for (GDSin::GdsStructure::LayMap::const_iterator CLAY = src->layers().begin(); 
+                                                    CLAY != src->layers().end(); CLAY++)
    {
-      if (src->allLay(laynum))
-      {// layers
-         GDSin::GdsData *wd = src->fDataAt(laynum);
-         while( wd )
-         {
-            word tdtlaynum;
-            if (_theLayMap.getTdtLay(tdtlaynum, laynum, wd->singleType()) )
+      int2b laynum = CLAY->first;
+      if (0 == laynum) continue;
+      GDSin::GdsData *wd = src->fDataAt(laynum);
+      while( wd )
+      {
+         word tdtlaynum;
+         if (_theLayMap.getTdtLay(tdtlaynum, laynum, wd->singleType()) )
+         {// convert only if layer/data type pair is defined
+            if ((NULL == dwl) || (tdtcurlaynum != tdtlaynum))
             {
-               // convert only if layer/data type pair is defined
-               laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(tdtlaynum));
-               switch( wd->gdsDataType() )
-               {
-                  case      gds_BOX: box (static_cast<GDSin::GdsBox*>(wd)     , dwl, laynum);  break;
-                  case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
-                  case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
-                  case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
-                  default: assert(false); /*Error - unexpected type*/
-               }
+               dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(tdtlaynum));
+               tdtcurlaynum = tdtlaynum;
             }
-            //else
-            //{
-            //   // The message below could be noughty - so put it in place ONLY if the data type
-            //   // is different from default
-            //   std::ostringstream ost;
-            //   ost << "Layer: " << laynum << "; data type: " << wd->singleType() <<
-            //         "; found in GDS database, but not in the conversion map.";
-            //   tell_log(console::MT_INFO,ost.str());
-            //}
-            wd = wd->last();
+            switch( wd->gdsDataType() )
+            {
+               case      gds_BOX: box (static_cast<GDSin::GdsBox*>(wd)     , dwl, laynum);  break;
+               case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
+               case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
+               case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
+               default: assert(false); //Error - unexpected type
+            }
          }
+         //else
+         //{
+         //   // The message below could be noughty - so put it in place ONLY if the data type
+         //   // is different from default
+         //   std::ostringstream ost;
+         //   ost << "Layer: " << laynum << "; data type: " << wd->singleType() <<
+         //         "; found in GDS database, but not in the conversion map.";
+         //   tell_log(console::MT_INFO,ost.str());
+         //}
+         wd = wd->last();
       }
    }
    if (src->allLay(0))
