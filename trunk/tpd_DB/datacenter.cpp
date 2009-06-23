@@ -115,57 +115,54 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool overwrite
 
 void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src, laydata::tdtcell* dst)
 {
-   laydata::tdtlayer* dwl = NULL;
-   word tdtcurlaynum = 0;
    for (GDSin::GdsStructure::LayMap::const_iterator CLAY = src->layers().begin(); 
                                                     CLAY != src->layers().end(); CLAY++)
    {
       int2b laynum = CLAY->first;
-      if (0 == laynum) continue;
-      GDSin::GdsData *wd = src->fDataAt(laynum);
-      while( wd )
+      for (GDSin::GdsStructure::DataMap::const_iterator CDTY = CLAY->second.begin();
+                                                        CDTY != CLAY->second.end(); CDTY++)
       {
+         int2b dataType = CDTY->first;
          word tdtlaynum;
-         if (_theLayMap.getTdtLay(tdtlaynum, laynum, wd->singleType()) )
+         if (_theLayMap.getTdtLay(tdtlaynum, laynum, dataType) )
          {// convert only if layer/data type pair is defined
-            if ((NULL == dwl) || (tdtcurlaynum != tdtlaynum))
+            laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(tdtlaynum));
+            GDSin::GdsData *wd = CDTY->second;
+            while( wd )
             {
-               dwl = static_cast<laydata::tdtlayer*>(dst->securelayer(tdtlaynum));
-               tdtcurlaynum = tdtlaynum;
-            }
-            switch( wd->gdsDataType() )
-            {
-               case      gds_BOX: box (static_cast<GDSin::GdsBox*>(wd)     , dwl, laynum);  break;
-               case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
-               case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
-               case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
-               default: assert(false); //Error - unexpected type
+               switch( wd->gdsDataType() )
+               {
+                  case      gds_BOX: box (static_cast<GDSin::GdsBox*>(wd)     , dwl, laynum);  break;
+                  case gds_BOUNDARY: poly(static_cast<GDSin::GdsPolygon*>(wd) , dwl, laynum);  break;
+                  case     gds_PATH: wire(static_cast<GDSin::GDSpath*>(wd)    , dwl, laynum);  break;
+                  case     gds_TEXT: text(static_cast<GDSin::GdsText*>(wd)    , dwl);  break;
+                  default: assert(false); //Error - unexpected type
+               }
+               wd = wd->last();
             }
          }
-         //else
-         //{
-         //   // The message below could be noughty - so put it in place ONLY if the data type
-         //   // is different from default
-         //   std::ostringstream ost;
-         //   ost << "Layer: " << laynum << "; data type: " << wd->singleType() <<
-         //         "; found in GDS database, but not in the conversion map.";
-         //   tell_log(console::MT_INFO,ost.str());
-         //}
-         wd = wd->last();
+         else
+         {
+            // The message below could be noughty - so put it in place ONLY if the data type
+            // is different from default
+            std::ostringstream ost;
+            ost << "Layer: " << laynum << "; Data type: " << dataType <<
+                  "; Data found in GDS, but not in the conversion map. Will be skipped.";
+            tell_log(console::MT_INFO,ost.str());
+         }
       }
    }
-   if (src->allLay(0))
-   {// references
-      GDSin::GdsData *wd = src->fDataAt(0);
-      while( wd )
+
+   // Process the references now
+   for (GDSin::GdsStructure::RefList::const_iterator CREF = src->references().begin(); 
+                                                     CREF != src->references().end(); CREF++)
+   {
+      GDSin::GdsRef *wd = (*CREF);
+      switch( wd->gdsDataType() )
       {
-         switch( wd->gdsDataType() )
-         {
-            case gds_SREF: ref (static_cast<GDSin::GdsRef*>(wd)   , dst);  break;
-            case gds_AREF: aref(static_cast<GDSin::GdsARef*>(wd)  , dst);  break;
-                  default: assert(false); /*Error - unexpected type*/
-         }
-         wd = wd->last();
+         case gds_SREF: ref (                            (wd)  , dst);  break;
+         case gds_AREF: aref(static_cast<GDSin::GdsARef*>(wd)  , dst);  break;
+               default: assert(false); /*Error - unexpected type*/
       }
    }
    dst->resort();
