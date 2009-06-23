@@ -41,7 +41,7 @@
 #define gdsDT_REAL8B       5
 #define gdsDT_ASCII        6
 ////////////////////////////////
-#define GDS_MAX_LAYER            256
+#define GDS_MAX_LAYER      256
 // GDS record types
 // Described according to "Design Data Translators Reference Manual" - 
 // CADance documentation, September 1994
@@ -477,6 +477,7 @@ namespace GDSin {
          void                 set_traversed(bool trv)          { _traversed = trv;     }
          int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
          bool                 haveParent() const               { return _haveParent;   }
+         const LayMap&        layers() const                   { return _layers;       }
                              ~GdsStructure();
       protected:
          void                 linkDataIn(GdsData*, int2b);

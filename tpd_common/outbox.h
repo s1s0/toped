@@ -104,14 +104,12 @@ namespace console {
    
    class ted_log : public wxTextCtrl  {
    public: 
-                        ted_log(wxWindow *parent);
+                        ted_log(wxWindow *parent, wxWindowID);
       void              OnLOGMessage(wxCommandEvent&);
-      void              OnOverflow(wxCommandEvent&);
    private:
       wxString          cmd_mark;
       wxString          gui_mark;
       wxString          rply_mark;
-      unsigned          curLogSize;
       DECLARE_EVENT_TABLE();
    };
 

@@ -318,6 +318,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,	 wxID_ANY, tui::TopedFrame::OnToolBarDefine)
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM, wxID_ANY, tui::TopedFrame::OnToolBarAddItem)
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
+   EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -749,13 +750,13 @@ void tui::TopedFrame::initView()
    //----------------------------------------------------------------------------
    //the log & lib windows
    //----------------------------------------------------------------------------
-   wxAuiNotebook* logpane = DEBUG_NEW wxAuiNotebook(this, ID_WIN_LOG,
+   wxAuiNotebook* logpane = DEBUG_NEW wxAuiNotebook(this, ID_WIN_LOG_PANE,
          wxDefaultPosition, wxDefaultSize, wxNB_RIGHT|wxNO_BORDER);
          //wxAUI_NB_DEFAULT_STYLE |wxNB_RIGHT| wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
    logpane->SetSize(wxSize(1000, 150));
    logpane->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
 
-   _cmdlog = DEBUG_NEW console::ted_log(logpane);
+   _cmdlog = DEBUG_NEW console::ted_log(logpane, ID_WIN_TXT_LOG);
    logpane->AddPage(_cmdlog, wxT("Log"));
    _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane);
    logpane->AddPage(_cmdbrowser, wxT("Lib"));
@@ -2138,6 +2139,17 @@ void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))
                << wxT("\");");
       _cmdline->parseCommand(ost);*/
    }
+}
+
+void tui::TopedFrame::OnTextLogOverflow(wxCommandEvent& WXUNUSED(event))
+{
+   //@TODO! I can't get this message. In the same time it seems that
+   // wx is getting stuck when bombarded with messages from the 
+   // tell thread (GDS parse/import case). This is observed on
+   // windows. Trincating the text log contents doesn't really help
+//   int boza;
+//   boza++;
+//   int lalal = 2* boza;
 }
 
 void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)

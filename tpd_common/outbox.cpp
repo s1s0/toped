@@ -78,16 +78,14 @@ console::TELLFuncList*           CmdList = NULL;
 // The ted_log event table
 BEGIN_EVENT_TABLE( console::ted_log, wxTextCtrl )
    EVT_TECUSTOM_COMMAND(wxEVT_LOG_ERRMESSAGE, -1, ted_log::OnLOGMessage)
-   EVT_TEXT_MAXLEN(-1, ted_log::OnOverflow)
 END_EVENT_TABLE()
 
-console::ted_log::ted_log(wxWindow *parent): wxTextCtrl( parent, -1, wxT(""),
+console::ted_log::ted_log(wxWindow *parent, wxWindowID id): wxTextCtrl( parent, id, wxT(""),
    wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER|wxTE_RICH)
 {
    cmd_mark = wxT("=> ");
    gui_mark = wxT(">> ");
    rply_mark = wxT("<= ");
-   curLogSize = 0;
 }
 
 void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
@@ -98,54 +96,45 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
       case    MT_INFO:
          *this << rply_mark << evt.GetString() << wxT("\n");
          logColour = *wxBLACK;
-         curLogSize += 4 + evt.GetString().Length();
          break;
       case   MT_ERROR:
          *this << rply_mark << evt.GetString() << wxT("\n");
          logColour = *wxRED;
-         curLogSize += 4 + evt.GetString().Length();
          break;
       case MT_COMMAND:
          *this << cmd_mark << evt.GetString() << wxT("\n");
-         curLogSize += 4 + evt.GetString().Length();
          break;
       case MT_GUIPROMPT:
          *this << gui_mark;
-         curLogSize += 3;
          break;
       case MT_GUIINPUT:
          *this << evt.GetString();
-         curLogSize += evt.GetString().Length();
          break;
       case MT_EOL:
          *this << wxT("\n");
-         curLogSize++;
          break;
       case MT_WARNING:
          *this << rply_mark << evt.GetString() << wxT("\n");
          logColour = *wxBLUE;
-         curLogSize += 4 + evt.GetString().Length();
          break;
       case MT_CELLNAME:
          *this << rply_mark << wxT(" Cell ") << evt.GetString() << wxT("\n");
-         curLogSize += 10 + evt.GetString().Length();
          break;
       case MT_DESIGNNAME:
          *this << rply_mark << wxT(" Design ") << evt.GetString() << wxT("\n");
-         curLogSize += 12 + evt.GetString().Length();
          break;
       default:
          assert(false);/*wxLogTextCtrl::DoLog(evt.GetInt(), evt.GetString(), evt.GetExtraLong());*/
    }
    long int endPos = GetLastPosition();
    SetStyle(startPos,endPos,wxTextAttr(logColour));
-}
-
-void console::ted_log::OnOverflow(wxCommandEvent&)
-{
-   int boza;
-   boza++;
-   int lalal = 2* boza;
+   // Truncate the log window contents from the bottom to avoid 
+   wxTextPos curLogSize = GetLastPosition();
+   if (curLogSize > 0x7800) // 30K
+   {
+      Replace(0, 0x1000, wxT("....truncated....\n"));
+   }
+   evt.Skip();
 }
 
 void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp) {
@@ -153,6 +142,8 @@ void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t ti
    {
       // calling DoLog here directly (most likely) causes troubles with the threads
       // To be investigated.
+      //@FIXME!
+      // "failed with error 0x00000718(not enough quota is available to process this command"
 /*      wxLogTextCtrl::DoLog(level, msg, timestamp);*/
       return;
    }
