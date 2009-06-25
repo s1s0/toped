@@ -206,15 +206,13 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsData {
       public:
-                           GdsData();
-         GdsData*          linkTo(GdsData* lst)                { _last = lst; return this; }
-         GdsData*          last()                              { return _last;   }
-//         int2b             singleType()                        { return _singleType;}
-          virtual         ~GdsData()                           {                  };
-         virtual byte     gdsDataType() = 0;
+                              GdsData();
+         GdsData*             linkTo(GdsData* lst)              { _last = lst; return this; }
+         GdsData*             last()                            { return _last;   }
+         virtual             ~GdsData()                         {                 };
+         virtual byte         gdsDataType() = 0;
       protected:
-         GdsData*          _last;
-//         int2b             _singleType;
+         GdsData*             _last;
    };
 
    class   GdsBox:public GdsData {
@@ -473,7 +471,6 @@ namespace GDSin {
          void                 collectLayers(GdsLayers&, bool);
          void                 linkReferences(GdsLibrary* const);
          std::string          strctName() const                { return _strctName;    }
-         bool                 allLay(byte i)                   { return _allLay[i];    }
          bool                 traversed() const                { return _traversed;    }
          void                 set_traversed(bool trv)          { _traversed = trv;     }
          int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
@@ -485,7 +482,6 @@ namespace GDSin {
          void                 linkDataIn(GdsData*, int2b, int2b);
          void                 linkDataIn(GdsRef* data)         { _references.push_back(data); }
          bool                 _haveParent;
-         bool                 _allLay[GDS_MAX_LAYER];
          LayMap               _layers;
          RefList              _references;
          std::string          _strctName;
@@ -529,6 +525,7 @@ namespace GDSin {
       double                  dbu()                            { return _dbu;        }
       double                  uu()                             { return _uu;         }
       std::string             libName() const                  { return _libName;    }
+      const StructureMap&     structures() const               { return _structures; }
                              ~GdsLibrary();
    protected:
       std::string             _libName;
@@ -595,6 +592,7 @@ namespace GDSin {
          int                  gdsiiWarnings()                  { return _gdsiiWarnings;         }
          int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;       }
          void                 closeFile()                      { if (NULL != _gdsFh) {fclose(_gdsFh); _gdsFh = NULL;}}
+         const GdsLibrary*    library() const                  { return _library;}
                               ~GdsFile();
       protected:
          void                 getTimes(GdsRecord* wr);
