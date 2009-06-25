@@ -691,14 +691,12 @@ void GDSin::GdsLibrary::linkReferences()
 {
    for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
    {//for every structure
-      GdsStructure* cur_str = CSTR->second;
-      cur_str->linkReferences(this);
+      CSTR->second->linkReferences(this);
    }
 }
 
 GDSin::GdsStructure* GDSin::GdsLibrary::getStructure(const std::string selection)
 {
-   GDSin::GdsStructure* thestr = NULL;
    StructureMap::iterator striter;
    if (_structures.end() != (striter = _structures.find(selection)))
       return striter->second;
@@ -734,14 +732,13 @@ GDSin::GdsLibrary::~GdsLibrary()
 GDSin::GdsStructure::GdsStructure(GdsFile *cf)
 {
    _traversed = false;
-   int i;
    int2b layer;
    int2b dtype;
    //initializing
    GdsData* cData = NULL;
    _haveParent = false;
    GdsRecord* cr = NULL;
-   for (i = 0; i < GDS_MAX_LAYER; _allLay[i++] = false);
+//   for (i = 0; i < GDS_MAX_LAYER; _allLay[i++] = false);
    do
    { //start reading
       cr = cf->getNextRecord();
@@ -819,7 +816,7 @@ void GDSin::GdsStructure::linkDataIn(GdsData* data, int2b layer, int2b dtype)
       else
          _layers[layer][dtype] = data->linkTo(_layers[layer][dtype]);
    }
-   _allLay[layer] = true;
+//   _allLay[layer] = true;
 }
 
 void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
@@ -835,7 +832,7 @@ void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
       else
       {//structure is referenced but not defined!
          char wstr[256];
-         sprintf(wstr," Structure %s is referenced, but not defined!",(*CRN) );
+         sprintf(wstr," Structure %s is referenced, but not defined!",CRN->c_str() );
          tell_log(console::MT_WARNING,wstr);
          InFile->incGdsiiWarnings();
          //SGREM probably is a good idea to add default
@@ -879,8 +876,8 @@ GDSin::GDSHierTree* GDSin::GdsStructure::hierOut(GDSHierTree* Htree, GdsStructur
       {
          Htree = (*CSTR)->hierOut(Htree,this);
          // Collect all used layers here and down in hierarchy
-         for(int j = 1 ; j < GDS_MAX_LAYER ; j++)
-            _allLay[j] |= (*CSTR)->allLay(j);
+//         for(int j = 1 ; j < GDS_MAX_LAYER ; j++)
+//            _allLay[j] |= (*CSTR)->allLay(j);
       }
    }
    return Htree;
