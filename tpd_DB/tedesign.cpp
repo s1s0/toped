@@ -223,12 +223,12 @@ void laydata::tdtlibrary::PSwrite(PSFile& psf, const tdtcell* top, const layprop
    if (psf.hier())
    {
       top->PSwrite(psf, drawprop, &_cells, root_cell);
-      psf.pspage_header(top->overlap());
+      psf.pspage_header(top->cellOverlap());
       psf.pspage_footer(top->name());
    }
    else
    {
-      psf.pspage_header(top->overlap());
+      psf.pspage_header(top->cellOverlap());
       top->PSwrite(psf, drawprop, &_cells, root_cell);
       psf.pspage_footer(top->name());
    }
@@ -626,7 +626,7 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel,
 
 laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2)
 {
-   DBbox old_overlap = _target.edit()->overlap();
+   DBbox old_overlap(_target.edit()->cellOverlap());
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    TP np1((*p1) * _target.rARTM());
@@ -646,7 +646,7 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
       return NULL;
    }
    laydata::tdtdata* newshape;
-   DBbox old_overlap = _target.edit()->overlap();
+   DBbox old_overlap(_target.edit()->cellOverlap());
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    pointlist vpl = check.get_validated();
@@ -671,7 +671,7 @@ laydata::tdtdata* laydata::tdtdesign::addwire(word la, const pointlist* pl, word
       tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }
-   DBbox old_overlap = _target.edit()->overlap();
+   DBbox old_overlap(_target.edit()->cellOverlap());
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    pointlist vpl = check.get_validated();
@@ -684,7 +684,7 @@ laydata::tdtdata* laydata::tdtdesign::addwire(word la, const pointlist* pl, word
 }
 
 laydata::tdtdata* laydata::tdtdesign::addtext(word la, std::string& text, CTM& ori) {
-   DBbox old_overlap = _target.edit()->overlap();
+   DBbox old_overlap(_target.edit()->cellOverlap());
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    ori *= _target.rARTM();
@@ -698,7 +698,7 @@ laydata::tdtdata* laydata::tdtdesign::addcellref(laydata::refnamepair striter, C
 {
    modified = true;
    ori *= _target.rARTM();
-   DBbox old_overlap = _target.edit()->overlap();
+   DBbox old_overlap(_target.edit()->cellOverlap());
    tdtdata* ncrf = _target.edit()->addcellref(this, striter, ori);
    if (NULL == ncrf)
    {
@@ -718,7 +718,7 @@ laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori,
       laydata::refnamepair striter = getcellnamepair(name);
       modified = true;
       ori *= _target.rARTM();
-      DBbox old_overlap = _target.edit()->overlap();
+      DBbox old_overlap(_target.edit()->cellOverlap());
       tdtdata* ncrf = _target.edit()->addcellaref(this, striter, ori, arrprops);
       if (NULL == ncrf) {
         tell_log(console::MT_ERROR, "Circular reference is forbidden");
@@ -808,10 +808,8 @@ void laydata::tdtdesign::openGL_render(Tenderer& rend)
 {
    if (_target.checkedit())
    {
-      //@FIXME! Make the overlap() - a value NOT a FUNCTION and get rid of the parameter
       const CTM boza;
-      DBbox obox(_target.view()->overlap());
-      _target.view()->openGL_render(rend, boza, obox, false, _target.iscell());
+      _target.view()->openGL_render(rend, boza, false, _target.iscell());
    }
 }
 
@@ -1073,6 +1071,10 @@ laydata::atticList* laydata::tdtdesign::ungroup_this(laydata::shapeList* cells4u
    for (shapeList::const_iterator CC = cells4u->begin();
                                                      CC != cells4u->end(); CC++)
       static_cast<tdtcellref*>(*CC)->ungroup(this, _target.edit(), shapeUngr);
+   // cell and parent validation should not be required here, because
+   // the initial and final overlap of the cell should not have been
+   // changed by this operation. That's not true for the layers though.
+   // Bottom line - validate only the layers
    _target.edit()->validate_layers();
    return shapeUngr;
 }
@@ -1101,7 +1103,7 @@ laydata::atticList* laydata::tdtdesign::changeref(shapeList* cells4u, std::strin
    assert((!cells4u->empty()));
    laydata::shapeList* cellsUngr = DEBUG_NEW laydata::shapeList();
    laydata::refnamepair striter = getcellnamepair(newref);
-   DBbox old_overlap = _target.edit()->overlap();
+   DBbox old_overlap(_target.edit()->cellOverlap());
 
    for (shapeList::const_iterator CC = cells4u->begin(); CC != cells4u->end(); CC++)
    {

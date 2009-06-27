@@ -1725,7 +1725,7 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    // get overlapping box of the structure ...
    DBbox obox(DEFAULT_ZOOM_BOX);
    if (structure()) 
-      obox = structure()->overlap();
+      obox = structure()->cellOverlap();
    // ... translate it to the current coordinates ...
    DBbox areal = obox.overlap(newtrans);
    // check that the cell (or part of it) is in the visual window
@@ -1747,7 +1747,7 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
 void laydata::tdtcellref::draw_request(Tenderer& rend) const
 {
    // get overlapping box of the structure ...
-   DBbox obox(structure()->overlap());
+   DBbox obox(structure()->cellOverlap());
    // ... translate it to the current coordinates ...
    DBbox areal = obox.overlap(_translation * rend.topCTM());
    if (!areal.visible(rend.ScrCTM())) return;
@@ -1755,14 +1755,14 @@ void laydata::tdtcellref::draw_request(Tenderer& rend) const
 //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    //
    byte crchain = rend.popref(this);
-   structure()->openGL_render(rend, _translation, obox, false, 2 == crchain);
+   structure()->openGL_render(rend, _translation, false, 2 == crchain);
    if (crchain) rend.pushref(this);
 }
 
 void laydata::tdtcellref::draw_srequest(Tenderer& rend, const SGBitSet*) const
 {
    // get overlapping box of the structure ...
-   DBbox obox(structure()->overlap());
+   DBbox obox(structure()->cellOverlap());
    // ... translate it to the current coordinates ...
    DBbox areal = obox.overlap(_translation * rend.topCTM());
    if (!areal.visible(rend.ScrCTM())) return;
@@ -1770,7 +1770,7 @@ void laydata::tdtcellref::draw_srequest(Tenderer& rend, const SGBitSet*) const
 //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
    //
    byte crchain = rend.popref(this);
-   structure()->openGL_render(rend, _translation, obox, true, 2 == crchain);
+   structure()->openGL_render(rend, _translation, true, 2 == crchain);
    if (crchain) rend.pushref(this);
 }
 
@@ -1936,7 +1936,7 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
 DBbox laydata::tdtcellref::overlap() const
 {
    assert(NULL != structure());
-   return structure()->overlap().overlap(_translation);
+   return structure()->cellOverlap().overlap(_translation);
 }
 
 //-----------------------------------------------------------------------------
@@ -1983,7 +1983,7 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    
    // We are going to draw "something", so push the new translation matrix in the stack
    drawprop.pushCTM(newtrans);
-   if (structure()->overlap().visible(drawprop.topCTM() * drawprop.ScrCTM()))
+   if (structure()->cellOverlap().visible(drawprop.topCTM() * drawprop.ScrCTM()))
    {
       // a single structure is big enough to be visible
       // now calculate the start/stop values of the visible references in the matrix
@@ -2045,7 +2045,7 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
    // draw the cell mark ...
 
    //@FIXME! Edit in place array of cells!
-   DBbox obox(structure()->overlap());
+   DBbox obox(structure()->cellOverlap());
    int col_beg, col_end, row_beg, row_end;
    if (obox.visible(rend.topCTM() * rend.ScrCTM()))
    {
@@ -2090,7 +2090,7 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
          // ... get the translation matrix ...
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          // ...draw the structure itself
-         structure()->openGL_render(rend, refCTM * _translation, obox, false, false);
+         structure()->openGL_render(rend, refCTM * _translation, false, false);
       }
    }
 }
@@ -2268,7 +2268,7 @@ DBbox laydata::tdtcellaref::overlap() const {
 DBbox laydata::tdtcellaref::clear_overlap() const
 {
    assert(structure());
-   DBbox bx = structure()->overlap();
+   DBbox bx = structure()->cellOverlap();
    DBbox ovl = bx;
    CTM refCTM(1.0,0.0,0.0,1.0,_arrprops.stepX() * (_arrprops.cols()-1), _arrprops.stepY() * (_arrprops.rows() - 1));
    ovl.overlap(bx * refCTM);

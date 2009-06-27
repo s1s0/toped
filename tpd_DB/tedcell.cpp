@@ -69,7 +69,7 @@ laydata::editobject::editobject(tdtcellref* cref, tdtcell* vcell, cellrefstack* 
 
 DBbox laydata::editobject::overlap() const{
    if (_activecell)
-      return _activecell->overlap().overlap(_ARTM);
+      return _activecell->cellOverlap().overlap(_ARTM);
    else return DEFAULT_OVL_BOX;
 }
 
@@ -219,7 +219,7 @@ void laydata::tdtdefaultcell::openGL_draw(layprop::DrawProperties&, bool active)
 {
 }
 
-void laydata::tdtdefaultcell::openGL_render(Tenderer&, const CTM&, DBbox&, bool, bool) const
+void laydata::tdtdefaultcell::openGL_render(Tenderer&, const CTM&, bool, bool) const
 {
 }
 
@@ -248,7 +248,7 @@ bool laydata::tdtdefaultcell::relink(tdtlibdir*, TDTHierTree*&)
    return false;
 }
 
-DBbox laydata::tdtdefaultcell::overlap() const
+DBbox laydata::tdtdefaultcell::cellOverlap() const
 {
    return DEFAULT_ZOOM_BOX;
 }
@@ -290,11 +290,11 @@ void laydata::tdtdefaultcell::invalidateParents(laydata::tdtlibrary* ATDB)
 // class tdtcell
 //-----------------------------------------------------------------------------
 laydata::tdtcell::tdtcell(std::string name) :
-                               tdtdefaultcell(name, TARGETDB_LIB, true) {}
+         tdtdefaultcell(name, TARGETDB_LIB, true), _cellOverlap(DEFAULT_OVL_BOX) {}
 
 
 laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
-                               tdtdefaultcell(name, lib, true)
+         tdtdefaultcell(name, lib, true), _cellOverlap(DEFAULT_OVL_BOX)
 {
    byte recordtype;
    word  layno;
@@ -312,6 +312,7 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
          default: throw EXPTNreadTDT("LAYER record type expected");
       }
    }
+   getCellOverlap();
 }
 
 laydata::quadTree* laydata::tdtcell::securelayer(word layno) 
@@ -385,9 +386,9 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
 }
 
 void laydata::tdtcell::openGL_render(Tenderer& rend, const CTM& trans,
-                                     DBbox& obox, bool selected, bool active) const
+                                     bool selected, bool active) const
 {
-   rend.pushCell(_name, trans, obox, active, selected);
+   rend.pushCell(_name, trans, _cellOverlap, active, selected);
 
    // Draw figures
    typedef layerList::const_iterator LCI;
@@ -679,7 +680,7 @@ void laydata::tdtcell::PSwrite(PSFile& psf, const layprop::DrawProperties& drawp
       std::string message = "...converting " + name();
       tell_log(console::MT_INFO, message);
    }
-   psf.cellHeader(name(),overlap());
+   psf.cellHeader(name(),_cellOverlap);
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
@@ -724,17 +725,22 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
    return  Htree;
 }
 
-DBbox laydata::tdtcell::overlap() const {
-   DBbox ovlap = DEFAULT_OVL_BOX;
-   typedef layerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++) 
-      ovlap.overlap(lay->second->overlap());
-   return ovlap;
+void laydata::tdtcell::getCellOverlap() 
+{
+   if (0 == _layers.size())
+      _cellOverlap = DEFAULT_OVL_BOX;
+   else
+   {
+      layerList::const_iterator LCI = _layers.begin();
+      _cellOverlap = LCI->second->overlap();
+      while (++LCI != _layers.end())
+         _cellOverlap.overlap(LCI->second->overlap());
+   }
 }   
 
 void laydata::tdtcell::select_inBox(DBbox select_in, layprop::ViewProperties& viewprop, bool pntsel) {
    // check that current cell is within 
-   if (select_in.cliparea(overlap()) != 0) {
+   if (select_in.cliparea(_cellOverlap) != 0) {
       // Select figures within the active layers
       typedef layerList::const_iterator LCI;
       for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
@@ -754,7 +760,7 @@ void laydata::tdtcell::select_inBox(DBbox select_in, layprop::ViewProperties& vi
 void laydata::tdtcell::unselect_inBox(DBbox select_in, bool pntsel, layprop::ViewProperties& viewprop)
 {
    // check that current cell is within 
-   if (select_in.cliparea(overlap()) != 0)
+   if (select_in.cliparea(_cellOverlap) != 0)
    {
       // Unselect figures within the active layers
       typedef layerList::const_iterator LCI;
@@ -854,7 +860,7 @@ void laydata::tdtcell::select_fromList(selectList* slist, layprop::ViewPropertie
 }
 
 bool laydata::tdtcell::copy_selected(laydata::tdtdesign* ATDB, const CTM& trans) {
-   DBbox old_overlap = overlap();
+   DBbox old_overlap(_cellOverlap);
    dataList copyList;
    dataList::iterator DI;
    tdtdata *data_copy;
@@ -888,7 +894,7 @@ bool laydata::tdtcell::copy_selected(laydata::tdtdesign* ATDB, const CTM& trans)
 };
 
 bool laydata::tdtcell::addlist(laydata::tdtdesign* ATDB, atticList* nlst) {
-   DBbox old_overlap = overlap();
+   DBbox old_overlap(_cellOverlap);
    for (atticList::const_iterator CL = nlst->begin();
                                    CL != nlst->end(); CL++) {
       // secure the target layer
@@ -967,7 +973,7 @@ laydata::tdtdata* laydata::tdtcell::checkNreplaceBox(selectDataPair& sel, valida
 
 bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans, selectList** fadead)
 {
-   DBbox old_overlap = overlap();
+   DBbox old_overlap(_cellOverlap);
    validator* checkS = NULL;
    // for every single layer selected
    selectList::iterator CL = _shapesel.begin();
@@ -1033,7 +1039,7 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
 
 bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& trans, selectList** fadead)
 {
-   DBbox old_overlap = overlap();
+   DBbox old_overlap(_cellOverlap);
    validator* checkS = NULL;
    // for every single layer selected
    selectList::iterator CL = _shapesel.begin();
@@ -1095,7 +1101,7 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
 }
 
 bool laydata::tdtcell::transfer_selected(laydata::tdtdesign* ATDB, const CTM& trans) {
-   DBbox old_overlap = overlap();
+   DBbox old_overlap(_cellOverlap);
    // for every single layer selected
    for (selectList::const_iterator CL = _shapesel.begin();
                                                   CL != _shapesel.end(); CL++) {
@@ -1125,7 +1131,7 @@ bool laydata::tdtcell::transfer_selected(laydata::tdtdesign* ATDB, const CTM& tr
 bool laydata::tdtcell::delete_selected(laydata::atticList* fsel, 
                                              laydata::tdtlibdir* libdir )
 {
-   DBbox old_overlap = overlap();
+   DBbox old_overlap(_cellOverlap);
    // for every single layer in the select list
    for (selectList::const_iterator CL = _shapesel.begin(); CL != _shapesel.end(); CL++) 
    {
@@ -1145,7 +1151,6 @@ bool laydata::tdtcell::delete_selected(laydata::atticList* fsel,
    if (fsel) store_inAttic(*fsel);
    else      unselect_all(true);   
    updateHierarchy(libdir);
-   DBbox new_overlap = overlap();
    return overlapChanged(old_overlap, (*libdir)());
 }
 
@@ -1290,7 +1295,7 @@ bool laydata::tdtcell::merge_selected(atticList** dasao) {
 }
 
 bool laydata::tdtcell::destroy_this(laydata::tdtlibdir* libdir, tdtdata* ds, word la) {
-   DBbox old_overlap = overlap();
+   DBbox old_overlap(_cellOverlap);
    laydata::quadTree* lay = (_layers.find(la))->second;
    if (!lay) return false;
    // for layer la
@@ -1660,6 +1665,7 @@ void laydata::tdtcell::resort() {
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
       lay->second->resort();
+   getCellOverlap();
 }
 
 void laydata::tdtcell::store_inAttic(laydata::atticList& _Attic) {
@@ -1691,19 +1697,19 @@ void laydata::tdtcell::store_inAttic(laydata::atticList& _Attic) {
       else CL++;   
    }
 }
+
 bool laydata::tdtcell::overlapChanged(DBbox& old_overlap, laydata::tdtdesign* ATDB)
 {
-   DBbox new_overlap = overlap();
-//   float areaold = old_overlap.area();
-//   float areanew = new_overlap.area();
+   getCellOverlap();
    // Invalidate all parent cells
-   if (old_overlap != new_overlap) {
+   if (old_overlap != _cellOverlap) {
       invalidateParents(ATDB);return true;
    }
    else return false;
 }
 
-bool laydata::tdtcell::validate_cells(laydata::tdtlibrary* ATDB) {
+bool laydata::tdtcell::validate_cells(laydata::tdtlibrary* ATDB) 
+{
    quadTree* wq = (_layers.end() != _layers.find(0)) ? _layers[0] : NULL;
    if (!(wq && wq->invalid())) return false;
    if (wq->full_validate()) {
@@ -1712,15 +1718,15 @@ bool laydata::tdtcell::validate_cells(laydata::tdtlibrary* ATDB) {
    else return false;
 }
 
+/*! Validate all layers*/
 void laydata::tdtcell::validate_layers() {
    typedef layerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++) {
-      if (0 == lay->first) continue;
+   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
       lay->second->validate();
-   }
 }
 
-_dbl_word laydata::tdtcell::getFullySelected(dataList* lslct) const {
+_dbl_word laydata::tdtcell::getFullySelected(dataList* lslct) const 
+{
    _dbl_word numselected = 0;   
    for (dataList::const_iterator CI = lslct->begin(); 
                                                      CI != lslct->end(); CI++)
@@ -1810,7 +1816,7 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
    if (_layers.end() == _layers.find(0)) return false; // nothing to relink
    // if it is not empty get all cell refs/arefs in a list -
    quadTree* refsTree = _layers[0];
-   DBbox old_overlap = overlap();
+   DBbox old_overlap(_cellOverlap);
    dataList *refsList = DEBUG_NEW dataList();
    refsTree->select_all(refsList, laydata::_lmref, false);
    // relink every single cell ref in the list

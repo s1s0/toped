@@ -95,14 +95,14 @@ namespace laydata {
                              tdtdefaultcell(std::string, int , bool );
          virtual            ~tdtdefaultcell() {};
          virtual void        openGL_draw(layprop::DrawProperties&, bool active=false) const;
-         virtual void        openGL_render(Tenderer&, const CTM&, DBbox&, bool, bool) const;
+         virtual void        openGL_render(Tenderer&, const CTM&, bool, bool) const;
          virtual void        motion_draw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
          virtual void        PSwrite(PSFile&, const layprop::DrawProperties&,
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
          virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell*, cellList*, const tdtlibdir*);
          virtual bool        relink(tdtlibdir*, TDTHierTree*&);
          virtual void        updateHierarchy(tdtlibdir*);
-         virtual DBbox       overlap() const;
+         virtual DBbox       cellOverlap() const;
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
          virtual void        GDSwrite(GDSin::GdsFile&, const cellList&, const TDTHierTree*, real, bool) const;
          virtual void        CIFwrite(CIFin::CifExportFile&, const cellList&, const TDTHierTree*, real, bool) const;
@@ -131,7 +131,7 @@ namespace laydata {
       virtual             ~tdtcell(); 
       void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
-      void                 openGL_render(Tenderer&, const CTM&, DBbox&, bool, bool) const;
+      void                 openGL_render(Tenderer&, const CTM&, bool, bool) const;
       void                 motion_draw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;
       quadTree*            securelayer(word layno);
@@ -148,7 +148,7 @@ namespace laydata {
       void                 PSwrite(PSFile&, const layprop::DrawProperties&,
                                    const cellList* = NULL, const TDTHierTree* = NULL) const;
       TDTHierTree*         hierout(TDTHierTree*&, tdtcell*, cellList*, const tdtlibdir*);
-      DBbox                overlap() const;
+      DBbox                cellOverlap() const {return _cellOverlap;}
       void                 select_inBox(DBbox, layprop::ViewProperties&, bool pntsel = false);
 //      void                 select_inside(const TP);
       void                 select_fromList(selectList*, layprop::ViewProperties&);
@@ -189,6 +189,7 @@ namespace laydata {
       bool                 overlapChanged(DBbox&, tdtdesign*);
    private:
       bool                 getshapeover(TP, layprop::ViewProperties&);
+      void                 getCellOverlap();
       void                 store_inAttic(atticList&);
       _dbl_word            getFullySelected(dataList*) const;
       nameList*            rehash_children();
@@ -199,6 +200,7 @@ namespace laydata {
       dataList*            secure_dataList(selectList&, word);
       nameList             _children;     //! for hierarchy list purposes
       selectList           _shapesel;     //! selected shapes
+      DBbox                _cellOverlap;   //! cell overlap
    };
 }
 #endif
