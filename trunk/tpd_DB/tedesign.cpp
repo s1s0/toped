@@ -624,7 +624,7 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel,
    }
 }
 
-laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2)
+laydata::tdtdata* laydata::tdtdesign::addbox(unsigned la, TP* p1, TP* p2)
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
@@ -637,7 +637,7 @@ laydata::tdtdata* laydata::tdtdesign::addbox(word la, TP* p1, TP* p2)
    return newshape;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
+laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, const pointlist* pl) {
    laydata::valid_poly check(*pl);
    if (!check.valid()) {
       std::ostringstream ost;
@@ -663,7 +663,7 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(word la, const pointlist* pl) {
    return newshape;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addwire(word la, const pointlist* pl, word w) {
+laydata::tdtdata* laydata::tdtdesign::addwire(unsigned la, const pointlist* pl, word w) {
    laydata::valid_wire check(*pl,w);
    if (!check.valid()) {
       std::ostringstream ost;
@@ -683,7 +683,7 @@ laydata::tdtdata* laydata::tdtdesign::addwire(word la, const pointlist* pl, word
    return newshape;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addtext(word la, std::string& text, CTM& ori) {
+laydata::tdtdata* laydata::tdtdesign::addtext(unsigned la, std::string& text, CTM& ori) {
    DBbox old_overlap(_target.edit()->cellOverlap());
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
@@ -1005,7 +1005,7 @@ void laydata::tdtdesign::delete_selected(laydata::atticList* fsel,
    }
 }
 
-void laydata::tdtdesign::destroy_this(tdtdata* ds, word la, laydata::tdtlibdir* libdir) 
+void laydata::tdtdesign::destroy_this(tdtdata* ds, unsigned la, laydata::tdtlibdir* libdir)
 {
    if (_target.edit()->destroy_this(libdir, ds,la))
    {
@@ -1150,19 +1150,19 @@ void laydata::tdtdesign::try_unselect_all() const {
       _target.edit()->unselect_all(false);
 }
 
-laydata::quadTree* laydata::tdtdesign::targetlayer(word layno)
+laydata::quadTree* laydata::tdtdesign::targetlayer(unsigned layno)
 {
    securelaydef( layno );
    return _target.edit()->securelayer(layno);
 }
 
-void laydata::tdtdesign::transferLayer(word dst)
+void laydata::tdtdesign::transferLayer(unsigned dst)
 {
    _target.securelaydef( dst );
    _target.edit()->transferLayer(dst);
 }
 
-void laydata::tdtdesign::transferLayer(laydata::selectList* slst, word dst)
+void laydata::tdtdesign::transferLayer(laydata::selectList* slst, unsigned dst)
 {
    _target.securelaydef( dst );
    _target.edit()->transferLayer(slst, dst);

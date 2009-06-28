@@ -47,8 +47,7 @@ extern const wxEventType         wxEVT_SETINGSMENU;
 
 //=============================================================================
 telldata::ttint* tellstdfunc::CurrentLayer() {
-   word cl = 0;
-   cl = DATC->curlay();
+   unsigned cl = DATC->curlay();
    return (DEBUG_NEW telldata::ttint(cl));
 }
 
@@ -167,7 +166,7 @@ telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::atticList* shapesel) {
 //=============================================================================
 laydata::selectList* tellstdfunc::get_ttlaylist(telldata::ttlist* llist) {
    laydata::selectList* shapesel = DEBUG_NEW laydata::selectList();
-   word clayer;
+   unsigned clayer;
    SGBitSet* pntl_o;
    for (word i = 0 ; i < llist->mlist().size(); i++) {
       clayer = static_cast<telldata::ttlayout*>(llist->mlist()[i])->layer();
@@ -186,7 +185,7 @@ laydata::selectList* tellstdfunc::get_ttlaylist(telldata::ttlist* llist) {
 //=============================================================================
 laydata::atticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
    laydata::atticList* shapesel = DEBUG_NEW laydata::atticList();
-   word clayer;
+   unsigned clayer;
    for (word i = 0 ; i < llist->mlist().size(); i++) {
       clayer = static_cast<telldata::ttlayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))

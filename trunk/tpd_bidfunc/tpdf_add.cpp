@@ -637,7 +637,7 @@ void tellstdfunc::stdCELLREF::undo() {
    TEUNDO_DEBUG("cellref(string, point, real, bool, real) UNDO");
    telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(cl->data(),0, DATC->TEDLIB());
+      ATDB->destroy_this(cl->data(),REF_LAY, DATC->TEDLIB());
    DATC->unlockDB();   
    delete (cl);
    RefreshGL();
@@ -660,7 +660,7 @@ int tellstdfunc::stdCELLREF::execute() {
    {
       UNDOcmdQ.push_front(this);
       laydata::tdtdesign* ATDB = DATC->lockDB();
-         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(striter,ori), 0);
+         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(striter,ori), REF_LAY);
       DATC->unlockDB();
       OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
@@ -738,7 +738,7 @@ void tellstdfunc::stdCELLAREF::undo() {
    TEUNDO_DEBUG("cellaref(string, point, real, bool, real) UNDO");
    telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(cl->data(),0, DATC->TEDLIB());
+      ATDB->destroy_this(cl->data(),REF_LAY, DATC->TEDLIB());
    DATC->unlockDB();
    delete (cl);
    RefreshGL();
@@ -765,7 +765,7 @@ int tellstdfunc::stdCELLAREF::execute() {
    laydata::ArrayProperties arrprops(istepX,istepY,col,row);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(
-            ATDB->addcellaref(name,ori,arrprops),0);
+            ATDB->addcellaref(name,ori,arrprops),REF_LAY);
    DATC->unlockDB();
    OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
@@ -878,8 +878,9 @@ tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor)
 
 int tellstdfunc::stdUSINGLAYER_S::execute() {
   std::string layname = getStringValue();
-  word layno = DATC->getLayerNo(layname);
-  if (layno > 0) {
+  unsigned layno = DATC->getLayerNo(layname);
+  if (layno > 0) { //@FIXMEEE! 0 here means that the layer with this name is not found!
+     // which means that layer 0 will be pronounced undefined!
     OPstack.push(DEBUG_NEW telldata::ttint(layno));
     return stdUSINGLAYER::execute();
   }

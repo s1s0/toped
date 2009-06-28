@@ -237,7 +237,7 @@ namespace telldata {
    public:
                            ttlayout(): tell_var(tn_layout), _data(NULL),
                                                       _layer(65535), _selp(NULL) {};
-                           ttlayout(laydata::tdtdata* pdat, word lay, SGBitSet* selp = NULL):
+                           ttlayout(laydata::tdtdata* pdat, unsigned lay, SGBitSet* selp = NULL):
                              tell_var(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
                            ttlayout(const ttlayout& cobj);
       const ttlayout&      operator = (const ttlayout&);
@@ -246,12 +246,12 @@ namespace telldata {
       void                 assign(tell_var*);
       tell_var*            selfcopy() const {return DEBUG_NEW ttlayout(*this);};
       laydata::tdtdata*    data() const     {return _data;};
-      word                 layer() const    {return _layer;};
+      unsigned             layer() const    {return _layer;};
       SGBitSet*            selp() const     {return _selp;};
       virtual             ~ttlayout()       {if (_selp) delete _selp;}
    private:
       laydata::tdtdata*   _data;
-      word                _layer;
+      unsigned            _layer;
       SGBitSet*           _selp; // selected points;
    };
 

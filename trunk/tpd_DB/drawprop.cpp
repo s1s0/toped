@@ -494,7 +494,7 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
    }
 }
 
-void layprop::DrawProperties::setCurrentColor(word layno)
+void layprop::DrawProperties::setCurrentColor(unsigned layno)
 {
    _drawinglayer = layno;
    if (_layset.end() != _layset.find(_drawinglayer))
@@ -534,10 +534,11 @@ void layprop::DrawProperties::adjustAlpha(word factor)
    }*/
 }
 
-bool  layprop::DrawProperties::layerHidden(word layno) const
+bool  layprop::DrawProperties::layerHidden(unsigned layno) const
 {
-   if (0 == layno) return false;
-   if (_layset.end() != _layset.find(layno)) {
+   if (REF_LAY == layno) return false;
+   if (_layset.end() != _layset.find(layno))
+   {
       laySetList::const_iterator ilayset = _layset.find(layno);
       return ilayset->second->hidden();
       //return _layset[layno]->hidden(); - see the comment in getCurrentFill
@@ -545,9 +546,11 @@ bool  layprop::DrawProperties::layerHidden(word layno) const
    return true;
 }
 
-bool  layprop::DrawProperties::layerLocked(word layno) const
+bool  layprop::DrawProperties::layerLocked(unsigned layno) const
 {
-   if (_layset.end() != _layset.find(layno)) {
+   if (REF_LAY == layno) return false;
+   if (_layset.end() != _layset.find(layno))
+   {
       laySetList::const_iterator ilayset = _layset.find(layno);
       return ilayset->second->locked();
       //return _layset[layno]->locked(); - see the comment in getCurrentFill
@@ -580,9 +583,9 @@ bool layprop::DrawProperties::getCurrentFill() const
    else return false;
 }
 
-bool layprop::DrawProperties::isFilled(word layno) const
+bool layprop::DrawProperties::isFilled(unsigned layno) const
 {
-   assert(layno);
+   assert(REF_LAY != layno);
    laySetList::const_iterator ilayset = _layset.find(layno);
    if ((_layset.end() != ilayset) && !_blockfill)
    {
@@ -747,7 +750,7 @@ void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_m
    glBitmap(16,16,7,7,0,0, the_mark);
 }
 
-word layprop::DrawProperties::getLayerNo(std::string name) const
+unsigned layprop::DrawProperties::getLayerNo(std::string name) const
 {
    for (laySetList::const_iterator CL = _layset.begin(); CL != _layset.end(); CL++)
    {
@@ -756,7 +759,7 @@ word layprop::DrawProperties::getLayerNo(std::string name) const
    return 0;
 }
 
-std::string layprop::DrawProperties::getLayerName(word layno) const
+std::string layprop::DrawProperties::getLayerName(unsigned layno) const
 {
    laySetList::const_iterator CL = _layset.find(layno);
    if (_layset.end() != CL)
@@ -766,7 +769,7 @@ std::string layprop::DrawProperties::getLayerName(word layno) const
    else return "";
 }
 
-std::string layprop::DrawProperties::getColorName(word layno) const
+std::string layprop::DrawProperties::getColorName(unsigned layno) const
 {
    laySetList::const_iterator CL = _layset.find(layno);
    if (_layset.end() != CL)
@@ -776,7 +779,7 @@ std::string layprop::DrawProperties::getColorName(word layno) const
    else return "";
 }
 
-std::string layprop::DrawProperties::getFillName(word layno) const
+std::string layprop::DrawProperties::getFillName(unsigned layno) const
 {
    laySetList::const_iterator CL = _layset.find(layno);
    if (_layset.end() != CL)
@@ -786,7 +789,7 @@ std::string layprop::DrawProperties::getFillName(word layno) const
    else return "";
 }
 
-std::string layprop::DrawProperties::getLineName(word layno) const
+std::string layprop::DrawProperties::getLineName(unsigned layno) const
 {
    laySetList::const_iterator CL = _layset.find(layno);
    if (_layset.end() != CL)
@@ -802,7 +805,7 @@ void layprop::DrawProperties::all_layers(nameList& alllays) const
       if (0 != CL->first) alllays.push_back(CL->second->name());
 }
 
-const layprop::LineSettings* layprop::DrawProperties::getLine(word layno) const
+const layprop::LineSettings* layprop::DrawProperties::getLine(unsigned layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
    if (_layset.end() == layer_set) return &_defaultSeline;
@@ -824,7 +827,7 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_n
 // but is safer and preserves constness
 }
 
-const byte* layprop::DrawProperties::getFill(word layno) const
+const byte* layprop::DrawProperties::getFill(unsigned layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
    if (_layset.end() == layer_set) return &_defaultFill[0];
@@ -846,7 +849,7 @@ const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 // but is safer and preserves constness
 }
 
-const layprop::tellRGB& layprop::DrawProperties::getColor(word layno) const
+const layprop::tellRGB& layprop::DrawProperties::getColor(unsigned layno) const
 {
    laySetList::const_iterator layer_set = _layset.find(layno);
    if (_layset.end() == layer_set) return _defaultColor;

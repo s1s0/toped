@@ -40,7 +40,7 @@ namespace laydata {
 //==============================================================================
    class tdtcellref;
    class tdtcellaref;
-   typedef  std::map<word, quadTree*>               layerList;
+   typedef  std::map<unsigned, quadTree*>           layerList;
    typedef  SGHierTree<tdtdefaultcell>              TDTHierTree;
 
 
@@ -67,7 +67,7 @@ namespace laydata {
       bool                       top();
       DBbox                      overlap() const;
       std::string                name() const;
-      bool                       securelaydef(word layno);
+      bool                       securelaydef(unsigned layno);
       tdtcell*                   edit() const      {return _activecell;};
       tdtcell*                   view() const      {return _viewcell;};
       bool                       checkedit() const {return _activecell != NULL;};
@@ -112,12 +112,11 @@ namespace laydata {
          bool                 orphan() const    {return _orphan;};
          std::string          name() const      {return _name;};
          int                  libID() const     {return _libID;}
-         layerList&           layers();      //! all layers the cell
          //@FIXME! the _orphan must be protected!
          bool                 _orphan;       //! cell doesn't have a parent
       protected:
          void                 invalidateParents(tdtlibrary*);
-         layerList            _layers;       //! all layers the cell
+         layerList            _layers;       //! all layers the cell (including the reference layer)
          std::string          _name;         //! cell name
       private:
          int                  _libID;        //! cell belongs to ... library
@@ -134,7 +133,7 @@ namespace laydata {
       void                 openGL_render(Tenderer&, const CTM&, bool, bool) const;
       void                 motion_draw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;
-      quadTree*            securelayer(word layno);
+      quadTree*            securelayer(unsigned layno);
       tdtcellref*          addcellref(tdtdesign*, refnamepair str, CTM trans,
                                                           bool sortnow = true);
       tdtcellaref*         addcellaref(tdtdesign*, refnamepair, CTM,
@@ -155,7 +154,7 @@ namespace laydata {
 //      void                 select_all(bool select_locked = false);
       void                 select_all(layprop::ViewProperties&);
       void                 full_select();
-      void                 select_this(tdtdata*, word);
+      void                 select_this(tdtdata*, unsigned);
       void                 unselect_inBox(DBbox, bool, layprop::ViewProperties&);
       void                 unselect_fromList(selectList*, layprop::ViewProperties&);
       void                 unselect_all(bool destroy=false);
@@ -165,11 +164,11 @@ namespace laydata {
       bool                 rotate_selected(laydata::tdtdesign*, const CTM&, selectList**);
       bool                 transfer_selected(tdtdesign*, const CTM&);
       bool                 delete_selected(atticList*, laydata::tdtlibdir* );
-      bool                 destroy_this(tdtlibdir*, tdtdata* ds, word la);
+      bool                 destroy_this(tdtlibdir*, tdtdata* ds, unsigned la);
       atticList*           groupPrep(tdtlibdir*);
       shapeList*           ungroupPrep(tdtlibdir*);
-      void                 transferLayer(word);
-      void                 transferLayer(selectList*, word);
+      void                 transferLayer(unsigned);
+      void                 transferLayer(selectList*, unsigned);
       void                 resort();
       bool                 validate_cells(tdtlibrary*);
       void                 validate_layers();
@@ -193,11 +192,11 @@ namespace laydata {
       void                 store_inAttic(atticList&);
       _dbl_word            getFullySelected(dataList*) const;
       nameList*            rehash_children();
-      shapeList*           mergeprep(word);
+      shapeList*           mergeprep(unsigned);
       bool                 unselect_pointlist(selectDataPair&, selectDataPair&);
-      tdtdata*             checkNreplacePoly(selectDataPair&, validator*, word, selectList**);
-      tdtdata*             checkNreplaceBox(selectDataPair&, validator*, word, selectList**);
-      dataList*            secure_dataList(selectList&, word);
+      tdtdata*             checkNreplacePoly(selectDataPair&, validator*, unsigned, selectList**);
+      tdtdata*             checkNreplaceBox(selectDataPair&, validator*, unsigned, selectList**);
+      dataList*            secure_dataList(selectList&, unsigned);
       nameList             _children;     //! for hierarchy list purposes
       selectList           _shapesel;     //! selected shapes
       DBbox                _cellOverlap;   //! cell overlap

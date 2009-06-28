@@ -165,7 +165,7 @@ public:
    const int4b                stepDB() const          {return _properties.stepDB();}
    const real                 UU() const              {return _properties.UU();}
    const real                 DBscale() const         {return _properties.DBscale();}
-   word                       getLayerNo(std::string name) const
+   unsigned                   getLayerNo(std::string name) const
                                                       {return _properties.getLayerNo(name);}
    std::string                getLayerName(word layno) const
                                                       {return _properties.getLayerName(layno);}
