@@ -849,7 +849,7 @@ class Tenderer {
       void              draw();
 
       // temporary!
-      bool              layerHidden(word layno) const {return  _drawprop->layerHidden(layno)    ;}
+      bool              layerHidden(unsigned layno) const {return  _drawprop->layerHidden(layno)    ;}
       const CTM&        ScrCTM() const                {return  _drawprop->ScrCTM()              ;}
       const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
       void              pushref(const laydata::tdtcellref* ref)

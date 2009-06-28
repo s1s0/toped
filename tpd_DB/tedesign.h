@@ -91,10 +91,10 @@ namespace laydata {
       int            readLibrary(TEDfile* const);
       tdtcell*       addcell(std::string name);
       bool           removecell(std::string&, laydata::atticList*, laydata::tdtlibdir*);
-      tdtdata*       addbox(word la, TP* p1, TP* p2);
-      tdtdata*       addpoly(word, const pointlist*);
-      tdtdata*       addwire(word, const pointlist*, word);
-      tdtdata*       addtext(word la, std::string& text, CTM& ori);
+      tdtdata*       addbox(unsigned la, TP* p1, TP* p2);
+      tdtdata*       addpoly(unsigned, const pointlist*);
+      tdtdata*       addwire(unsigned, const pointlist*, word);
+      tdtdata*       addtext(unsigned la, std::string& text, CTM& ori);
       tdtdata*       addcellref(laydata::refnamepair striter, CTM& ori);
       tdtdata*       addcellaref(std::string&, CTM&, ArrayProperties&);
       void           addlist(atticList*);
@@ -121,7 +121,7 @@ namespace laydata {
       void           rotate_selected( TP p, real angle, selectList**);
       void           flip_selected( TP p, bool Xaxis);
       void           delete_selected(laydata::atticList*, laydata::tdtlibdir*);
-      void           destroy_this(tdtdata* ds, word la, laydata::tdtlibdir* );
+      void           destroy_this(tdtdata* ds, unsigned la, laydata::tdtlibdir* );
       bool           group_selected(std::string name, laydata::tdtlibdir*);
       shapeList*     ungroup_prep(laydata::tdtlibdir*);
       atticList*     ungroup_this(shapeList*);
@@ -130,16 +130,16 @@ namespace laydata {
       bool           stretch(int bfactor, atticList** dasao) {return _target.edit()->stretch_selected(bfactor, dasao);}
       unsigned int   numselected() const;
       DBbox          activeoverlap();
-      void           transferLayer(word dst);
-      void           transferLayer(laydata::selectList* slst, word dst);
+      void           transferLayer(unsigned dst);
+      void           transferLayer(laydata::selectList* slst, unsigned dst);
       atticList*     changeref(shapeList*, std::string);
       //
       void           check_active();
       bool           checkValidRef(std::string);
       void           select_fromList(selectList* ss) {_target.edit()->select_fromList(ss, _target.viewprop());};
       void           unselect_fromList(selectList* ss) {_target.edit()->unselect_fromList(ss, _target.viewprop());};
-      quadTree*      targetlayer(word layno);
-      bool           securelaydef(word layno) {return _target.securelaydef( layno);}
+      quadTree*      targetlayer(unsigned layno);
+      bool           securelaydef(unsigned layno) {return _target.securelaydef( layno);}
       void           unselect_all()    const {_target.edit()->unselect_all(false);};
       void           try_unselect_all()const;
       selectList*    shapesel()        const {return _target.edit()->shapesel();};

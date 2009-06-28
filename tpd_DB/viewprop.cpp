@@ -240,11 +240,11 @@ layprop::ViewProperties::ViewProperties() {
    _zeroCross = false;
 }
 
-bool layprop::ViewProperties::selectable(word layno) const {
+bool layprop::ViewProperties::selectable(unsigned layno) const {
    return (!_drawprop.layerHidden(layno) && !_drawprop.layerLocked(layno));
 }
 
-bool layprop::ViewProperties::addlayer(std::string name, word layno, std::string col,
+bool layprop::ViewProperties::addlayer(std::string name, unsigned layno, std::string col,
                                        std::string fill, std::string sline)
 {
    if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col)))
@@ -278,7 +278,7 @@ bool layprop::ViewProperties::addlayer(std::string name, word layno, std::string
    return new_layer;
 }
 
-bool layprop::ViewProperties::addlayer(std::string name, word layno)
+bool layprop::ViewProperties::addlayer(std::string name, unsigned layno)
 {
    if (_drawprop._layset.end() == _drawprop._layset.find(layno))
    {
@@ -288,7 +288,7 @@ bool layprop::ViewProperties::addlayer(std::string name, word layno)
    return false;
 }
 
-bool layprop::ViewProperties::addlayer( word layno )
+bool layprop::ViewProperties::addlayer( unsigned layno )
 {
    if (_drawprop._layset.end() == _drawprop._layset.find(layno))
    {
@@ -300,9 +300,9 @@ bool layprop::ViewProperties::addlayer( word layno )
    return false;
 }
 
-word layprop::ViewProperties::addlayer(std::string name)
+unsigned layprop::ViewProperties::addlayer(std::string name)
 {
-   word layno = _drawprop._layset.rbegin()->first;
+   unsigned layno = _drawprop._layset.rbegin()->first;
    while (!addlayer(name, layno)) {layno++;}
    return layno;
 }
@@ -350,13 +350,13 @@ void layprop::ViewProperties::addfill(std::string name, byte* ptrn) {
    _drawprop._layfill[name] = ptrn;
 }
 
-void  layprop::ViewProperties::hideLayer(word layno, bool hide) {
+void  layprop::ViewProperties::hideLayer(unsigned layno, bool hide) {
    // No error messages here, because of possible range use
    if (_drawprop._layset.end() != _drawprop._layset.find(layno))
       _drawprop._layset[layno]->_hidden = hide;
 }
 
-void  layprop::ViewProperties::lockLayer(word layno, bool lock) {
+void  layprop::ViewProperties::lockLayer(unsigned layno, bool lock) {
    // No error messages here, because of possible range use
    if (_drawprop._layset.end() != _drawprop._layset.find(layno))
       _drawprop._layset[layno]->_locked = lock;

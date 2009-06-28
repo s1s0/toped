@@ -107,19 +107,19 @@ namespace layprop {
    public:
                         ViewProperties();
                        ~ViewProperties(); 
-      bool              addlayer(std::string, word, std::string, std::string, std::string);
-      bool              addlayer(std::string, word);
-      bool              addlayer(word);
-      word              addlayer(std::string);
+      bool              addlayer(std::string, unsigned, std::string, std::string, std::string);
+      bool              addlayer(std::string, unsigned);
+      bool              addlayer(unsigned);
+      unsigned          addlayer(std::string);
       void              addUnpublishedLay(word);
       const WordList&   upLayers() {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers() {_uplaylist.clear();}
       void              addcolor(std::string name, byte R, byte G, byte B, byte A);
       void              addfill(std::string name, byte *ptrn);
       void              addline(std::string, std::string, word, byte, byte);
-      void              hideLayer(word layno, bool hide);
-      void              lockLayer(word layno, bool lock);
-      bool              selectable(word layno) const;
+      void              hideLayer(unsigned layno, bool hide);
+      void              lockLayer(unsigned layno, bool lock);
+      bool              selectable(unsigned layno) const;
       void              saveProperties(std::string) const;
       //
       const LayoutGrid* grid(byte) const;
@@ -135,8 +135,8 @@ namespace layprop {
       void              setmarker_angle(byte angle)      {_marker_angle = angle;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
-      word              getLayerNo(std::string name) const {return _drawprop.getLayerNo(name);}
-      std::string       getLayerName(word layno) const   {return _drawprop.getLayerName(layno);}
+      unsigned          getLayerNo(std::string name) const {return _drawprop.getLayerNo(name);}
+      std::string       getLayerName(unsigned layno) const {return _drawprop.getLayerName(layno);}
       real              UU() const                       {return _UU;}
       real              DBscale() const                  {return _DBscale;}
       bool              autopan() const                  {return _autopan;}

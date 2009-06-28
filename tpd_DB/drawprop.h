@@ -210,7 +210,7 @@ namespace layprop {
    typedef  std::map<std::string, tellRGB*      >  colorMAP;
    typedef  std::map<std::string, byte*         >  fillMAP;
    typedef  std::map<std::string, LineSettings* >  lineMAP;
-   typedef  std::map<word       , LayerSettings*>  laySetList;
+   typedef  std::map<unsigned   , LayerSettings*>  laySetList;
 
 
 
@@ -231,14 +231,14 @@ namespace layprop {
                                     DrawProperties();
                                    ~DrawProperties();
          void                       adjustAlpha(word factor);
-         void                       setCurrentColor(word layno);
+         void                       setCurrentColor(unsigned layno);
          void                       setGridColor(std::string colname) const;
          bool                       getCurrentFill() const;
          void                       setCurrentFill() const;
-         bool                       isFilled(word layno) const;
+         bool                       isFilled(unsigned layno) const;
          void                       setLineProps(bool selected = false) const;
-         bool                       layerHidden(word layno) const;
-         bool                       layerLocked(word layno) const;
+         bool                       layerHidden(unsigned layno) const;
+         bool                       layerLocked(unsigned layno) const;
          const CTM&                 ScrCTM() const       {return  _ScrCTM;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
          console::ACTIVE_OP         currentop() const    {return _currentop;}
@@ -254,18 +254,18 @@ namespace layprop {
          void                       draw_reference_marks(const TP&, const binding_marks) const;
          void                       draw_text_boundary(const pointlist& ptlist);
          void                       draw_cell_boundary(const pointlist& ptlist);
-         word                       getLayerNo(std::string name) const;
-         std::string                getLayerName(word layno) const;
-         std::string                getColorName(word layno) const;
-         std::string                getFillName(word layno) const;
-         std::string                getLineName(word layno) const;
+         unsigned                   getLayerNo(std::string name) const;
+         std::string                getLayerName(unsigned layno) const;
+         std::string                getColorName(unsigned layno) const;
+         std::string                getFillName(unsigned layno) const;
+         std::string                getLineName(unsigned layno) const;
          void                       all_layers(nameList&) const;
-         word                       drawinglayer() const {return _drawinglayer;}
-         const byte*                getFill(word layno) const;
+         unsigned                   drawinglayer() const {return _drawinglayer;}
+         const byte*                getFill(unsigned layno) const;
          const byte*                getFill(std::string) const;
-         const tellRGB&             getColor(word layno) const;
+         const tellRGB&             getColor(unsigned layno) const;
          const tellRGB&             getColor(std::string) const;
-         const LineSettings*        getLine(word layno) const;
+         const LineSettings*        getLine(unsigned layno) const;
          const LineSettings*        getLine(std::string) const;
          void                       PSwrite(PSFile&) const;
          void                       loadLayoutFonts(std::string, bool);
@@ -293,7 +293,7 @@ namespace layprop {
          bool                       _blockfill;
          laydata::cellrefstack*     _refstack;
          ctmstack                   _transtack;
-         word                       _drawinglayer;
+         unsigned                   _drawinglayer;
          console::ACTIVE_OP         _currentop;
          static const tellRGB       _defaultColor;
          static const byte          _defaultFill[128];

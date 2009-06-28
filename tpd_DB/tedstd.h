@@ -117,9 +117,9 @@ namespace laydata {
    class tdtlibdir;
    typedef  std::pair<tdtdata*, SGBitSet>           selectDataPair;
    typedef  std::list<selectDataPair>               dataList;
-   typedef  std::map<word, dataList*>               selectList;
+   typedef  std::map<unsigned, dataList*>           selectList;
    typedef  std::list<tdtdata*>                     shapeList;
-   typedef  std::map<word,shapeList*>               atticList;
+   typedef  std::map<unsigned,shapeList*>           atticList;
    typedef  std::map<std::string, tdtdefaultcell*>  cellList;
    typedef  cellList::const_iterator                refnamepair;
    typedef  std::deque<const tdtcellref*>           cellrefstack;
