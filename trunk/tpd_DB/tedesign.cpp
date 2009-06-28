@@ -637,7 +637,8 @@ laydata::tdtdata* laydata::tdtdesign::addbox(unsigned la, TP* p1, TP* p2)
    return newshape;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, const pointlist* pl) {
+laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, const pointlist* pl)
+{
    laydata::valid_poly check(*pl);
    if (!check.valid()) {
       std::ostringstream ost;
@@ -650,14 +651,18 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, const pointlist* pl) 
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    pointlist vpl = check.get_validated();
-   if (check.box()) {
+   if (check.box())
+   {
       TP p1(vpl[0] *_target.rARTM());
       TP p2(vpl[2] *_target.rARTM());
       newshape = actlay->addbox(p1,p2);
    }
-   for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
-      (*PL) *= _target.rARTM();
-   newshape = actlay->addpoly(vpl);
+   else
+   {
+      for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
+         (*PL) *= _target.rARTM();
+      newshape = actlay->addpoly(vpl);
+   }
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validate_cells());
    return newshape;
