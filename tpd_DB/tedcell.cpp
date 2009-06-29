@@ -299,19 +299,41 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
    byte recordtype;
    word  layno;
    // now get the layers
-   while (tedf_CELLEND != (recordtype = tedfile->getByte())) 
+   if       ((0 == tedfile->revision()) && (6 == tedfile->subrevision()))
    {
-      switch (recordtype) 
+      while (tedf_CELLEND != (recordtype = tedfile->getByte()))
       {
-         case    tedf_LAYER: 
-            layno = tedfile->getWord();
-            if (REF_LAY != layno) _layers[layno] = DEBUG_NEW tdtlayer(tedfile);
-            else                  _layers[layno] = DEBUG_NEW quadTree(tedfile);
-            if (REF_LAY == layno) tedfile->get_cellchildnames(&_children);
-            break;
-         default: throw EXPTNreadTDT("LAYER record type expected");
+         switch (recordtype)
+         {
+            case    tedf_LAYER: 
+               layno = tedfile->getWord();
+               if (0 != layno) _layers[layno]   = DEBUG_NEW tdtlayer(tedfile);
+               else            _layers[REF_LAY] = DEBUG_NEW quadTree(tedfile);
+               if (0 == layno) tedfile->get_cellchildnames(&_children);
+               break;
+            default: throw EXPTNreadTDT("LAYER record type expected");
+         }
       }
    }
+   else if ((0 == tedfile->revision()) && (7 == tedfile->subrevision()))
+   {
+      while (tedf_CELLEND != (recordtype = tedfile->getByte()))
+      {
+         switch (recordtype)
+         {
+            case    tedf_LAYER:
+               _layers[tedfile->getWord()] = DEBUG_NEW tdtlayer(tedfile);
+               break;
+            case    tedf_REFS:
+               _layers[REF_LAY] = DEBUG_NEW quadTree(tedfile);
+               tedfile->get_cellchildnames(&_children);
+               break;
+            default: throw EXPTNreadTDT("LAYER record type expected");
+         }
+      }
+   }
+   else throw EXPTNreadTDT("Unexpected values in TDT revision/subrevision fields");
+
    getCellOverlap();
 }
 
@@ -591,11 +613,20 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, c
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      tedfile->putByte(tedf_LAYER);
-      tedfile->putWord(wl->first);
-      wl->second->write(tedfile);
-      tedfile->putByte(tedf_LAYEREND);
-   }   
+      if (REF_LAY == wl->first)
+      {
+         tedfile->putByte(tedf_REFS);
+         wl->second->write(tedfile);
+         tedfile->putByte(tedf_REFSEND);
+      }
+      else if ( LAST_EDITABLE_LAYNUM >= wl->first )
+      {
+         tedfile->putByte(tedf_LAYER);
+         tedfile->putWord(wl->first);
+         wl->second->write(tedfile);
+         tedfile->putByte(tedf_LAYEREND);
+      }
+   }
    tedfile->putByte(tedf_CELLEND);
    tedfile->registercellwritten(name());
 }

@@ -51,18 +51,34 @@ laydata::quadTree::quadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX)
    _quads[0] = _quads[1] = _quads[2] = _quads[3] = NULL;
    _first = NULL;_invalid = false;
    byte recordtype;
-   while (tedf_LAYEREND != (recordtype = tedfile->getByte())) 
-      switch (recordtype) 
+   if       ((0 == tedfile->revision()) && (6 == tedfile->subrevision()))
+   {
+      while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
       {
-         case      tedf_BOX: put(DEBUG_NEW tdtbox(tedfile));break;
-         case     tedf_POLY: put(DEBUG_NEW tdtpoly(tedfile));break;
-         case     tedf_WIRE: put(DEBUG_NEW tdtwire(tedfile));break;
-         case     tedf_TEXT: put(DEBUG_NEW tdttext(tedfile));break;
-         case  tedf_CELLREF: put(DEBUG_NEW tdtcellref(tedfile));break;
-         case tedf_CELLAREF: put(DEBUG_NEW tdtcellaref(tedfile));break;
-         //--------------------------------------------------
-         default: throw EXPTNreadTDT("Unexpected record type");
+         switch (recordtype) 
+         {
+            case  tedf_CELLREF: put(DEBUG_NEW tdtcellref(tedfile));break;
+            case tedf_CELLAREF: put(DEBUG_NEW tdtcellaref(tedfile));break;
+            //--------------------------------------------------
+            default: throw EXPTNreadTDT("Unexpected record type");
+         }
       }
+   }
+   else if ((0 == tedfile->revision()) && (7 == tedfile->subrevision()))
+   {
+      while (tedf_REFSEND != (recordtype = tedfile->getByte()))
+      {
+         switch (recordtype) 
+         {
+            case  tedf_CELLREF: put(DEBUG_NEW tdtcellref(tedfile));break;
+            case tedf_CELLAREF: put(DEBUG_NEW tdtcellaref(tedfile));break;
+            //--------------------------------------------------
+            default: throw EXPTNreadTDT("Unexpected record type");
+         }
+      }
+   }
+   else throw EXPTNreadTDT("Unexpected values in TDT revision/subrevision fields");
+
    resort();
 }
 
@@ -900,6 +916,24 @@ laydata::quadTree::~quadTree() {
 //-----------------------------------------------------------------------------
 // class tdtlayer
 //-----------------------------------------------------------------------------
+laydata::tdtlayer::tdtlayer(TEDfile* const tedfile) : quadTree()
+{
+   byte recordtype;
+   while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
+   {
+      switch (recordtype)
+      {
+         case      tedf_BOX: put(DEBUG_NEW tdtbox(tedfile));break;
+         case     tedf_POLY: put(DEBUG_NEW tdtpoly(tedfile));break;
+         case     tedf_WIRE: put(DEBUG_NEW tdtwire(tedfile));break;
+         case     tedf_TEXT: put(DEBUG_NEW tdttext(tedfile));break;
+         //--------------------------------------------------
+         default: throw EXPTNreadTDT("Unexpected record type");
+      }
+   }
+   resort();
+}
+
 /*!Create new tdtbox. Depending on sortnow input variable the new shape is
 just added to the quadTree (using quadTree::put()) without sorting or fit on 
 the proper place (using add() */

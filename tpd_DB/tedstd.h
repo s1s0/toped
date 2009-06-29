@@ -35,22 +35,26 @@
 //==============================================================================
 // Toped DaTa (TDT) file markers
 //==============================================================================
-#define TED_LEADSTRING     "TED"
-#define tedf_REVISION      0x02
-#define tedf_TIMECREATED   0x03
-#define tedf_TIMEUPDATED   0x04
-#define tedf_DESIGN        0x80
-#define tedf_DESIGNEND     0x81
-#define tedf_CELL          0x82
-#define tedf_CELLEND       0x83
-#define tedf_LAYER         0x84
-#define tedf_CELLREF       0x85
-#define tedf_CELLAREF      0x86
-#define tedf_BOX           0x87
-#define tedf_POLY          0x88
-#define tedf_WIRE          0x89
-#define tedf_TEXT          0x8A
-#define tedf_LAYEREND      0x8B
+#define TED_LEADSTRING        "TED"
+#define tedf_REVISION         0x02
+#define tedf_TIMECREATED      0x03
+#define tedf_TIMEUPDATED      0x04
+#define tedf_DESIGN           0x80
+#define tedf_DESIGNEND        0x81
+#define tedf_CELL             0x82
+#define tedf_CELLEND          0x83
+#define tedf_LAYER            0x84
+#define tedf_CELLREF          0x85
+#define tedf_CELLAREF         0x86
+#define tedf_BOX              0x87
+#define tedf_POLY             0x88
+#define tedf_WIRE             0x89
+#define tedf_TEXT             0x8A
+#define tedf_LAYEREND         0x8B
+#define tedf_REFS             0x8C
+#define tedf_REFSEND          0x8D
+#define TED_CUR_REVISION      0
+#define TED_CUR_SUBREVISION   7
 
 //==============================================================================   
 class PSegment {
@@ -177,7 +181,9 @@ namespace laydata {
       tdtlibrary*          design() const  {return _design;};
       time_t               created() const {return _created;};
       time_t               lastUpdated() const {return _lastUpdated;};
-      const laydata::tdtlibdir* TEDLIB() {return _TEDLIB;}
+      const laydata::tdtlibdir* TEDLIB()   {return _TEDLIB;}
+      word                 revision()      {return _revision;}
+      word                 subrevision()   {return _subrevision;}
    protected:
       bool                 _status;
       word                 _numread;
