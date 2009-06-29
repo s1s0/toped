@@ -134,7 +134,8 @@ void laydata::TEDfile::read(int libRef)
 
 laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib) 
 { //writing
-   _design = (*tedlib)();_revision=0;_subrevision=6;
+   _design = (*tedlib)();
+   _revision=TED_CUR_REVISION;_subrevision=TED_CUR_SUBREVISION;
    _TEDLIB = tedlib;
 	std::string fname(convertString(filename));
    if (NULL == (_file = fopen(fname.c_str(), "wb"))) {
@@ -142,7 +143,7 @@ laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib)
       news += filename.c_str(); news += "\" can not be created";
       tell_log(console::MT_ERROR,news);
       return;
-   }   
+   }
    putString(TED_LEADSTRING);
    putRevision();
    putTime();
@@ -260,6 +261,8 @@ void laydata::TEDfile::getRevision()
    std::ostringstream ost; 
    ost << "TDT format revision: " << _revision << "." << _subrevision;
    tell_log(console::MT_INFO,ost.str());
+   if ((_revision != TED_CUR_REVISION) || (_subrevision > TED_CUR_SUBREVISION))
+      throw EXPTNreadTDT("The TDT revision is not maintained by this version of Toped");
 }
 
 void laydata::TEDfile::putWord(const word data) {
