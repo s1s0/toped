@@ -315,7 +315,7 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
          }
       }
    }
-   else if ((0 == tedfile->revision()) && (7 == tedfile->subrevision()))
+   else
    {
       while (tedf_CELLEND != (recordtype = tedfile->getByte()))
       {
@@ -332,16 +332,12 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
          }
       }
    }
-   else throw EXPTNreadTDT("Unexpected values in TDT revision/subrevision fields");
 
    getCellOverlap();
 }
 
 laydata::quadTree* laydata::tdtcell::securelayer(unsigned layno)
 {
-   //@TEMP_LAY0CHANGE
-   assert(layno);
-   //@TEMP_LAY0CHANGE
    if (_layers.end() == _layers.find(layno))
    {
       if (REF_LAY != layno) _layers[layno] = DEBUG_NEW tdtlayer();
@@ -767,7 +763,7 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
             celldef->hierout(Htree, this, celldefs, libdir);
          else
             // This assert is here on purpose! If you hit it - go fix your
-            // problrm somewhere else. It's not here! See the note above.
+            // problem somewhere else. It's not here! See the note above.
             assert(false);
       }
    }
