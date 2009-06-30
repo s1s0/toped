@@ -1046,7 +1046,7 @@ bool laydata::tdtdesign::group_selected(std::string name, laydata::tdtlibdir* li
       for(shapeList::const_iterator CI = lslct->begin();
                                                      CI != lslct->end(); CI++) {
          wl->put(*CI);
-         if (0 == CL->first) newcell->addchild(this,
+         if (REF_LAY == CL->first) newcell->addchild(this,
                                     static_cast<tdtcellref*>(*CI)->structure());
       }
       lslct->clear();
@@ -1059,7 +1059,7 @@ bool laydata::tdtdesign::group_selected(std::string name, laydata::tdtlibdir* li
                                     getcellnamepair(name),CTM(TP(0,0),1,0,false));
    //select the new cell
    ref->set_status(sh_selected);
-   _target.edit()->select_this(ref,0);
+   _target.edit()->select_this(ref,REF_LAY);
    //Just for the records. No shapes are moved to the Attic during this operation
    //Undo is possible simply by ungrouping the new cell
    return true;

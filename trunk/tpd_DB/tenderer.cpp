@@ -1494,11 +1494,11 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
    _cellStack.push(DEBUG_NEW TenderRef());
 }
 
-bool Tenderer::chunkExists(word layno, bool has_selected)
+bool Tenderer::chunkExists(unsigned layno, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with layer 0 by accident
-   assert(layno);
+   assert(REF_LAY != layno);
    if (NULL != _clayer)
    { // post process the current layer
       _clayer->ppSlice();
@@ -1518,11 +1518,11 @@ bool Tenderer::chunkExists(word layno, bool has_selected)
    return false;
 }
 
-void Tenderer::setLayer(word layno, bool has_selected)
+void Tenderer::setLayer(unsigned layno, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with layer 0 by accident
-   assert(layno);
+   assert(REF_LAY != layno);
    if (NULL != _clayer)
    { // post process the current layer
       _clayer->ppSlice();

@@ -341,8 +341,9 @@ void layerSetup() {
    lmap list cifmap;
    lmap list gdsmap;
 //    	     name    Number  Colour       Fill              Selected
-   layprop("ACTIVE"     ,2  ,"blue"        ,"diagStripeBack" , "selected3" );cifmap[:+] = {{ 2, "ACTI"}};gdsmap[:+] = {{ 2, " 2; 0"}};
    layprop("NWELL"      ,1  ,"yellow"      ,"Dots1"          , "selected3" );cifmap[:+] = {{ 1, "NWLL"}};gdsmap[:+] = {{ 1, " 1; 0"}};
+   layprop("LAYER0"     ,0  ,"past_cyan"   ,"FatDots2"       , "selected3" );cifmap[:+] = {{ 0, "LAY0"}};gdsmap[:+] = {{ 0, " 0; 0"}};
+   layprop("ACTIVE"     ,2  ,"blue"        ,"diagStripeBack" , "selected3" );cifmap[:+] = {{ 2, "ACTI"}};gdsmap[:+] = {{ 2, " 2; 0"}};
    layprop("UNKWN_1"    ,3  ,"darkGray"    ,""               , "selected3" );cifmap[:+] = {{ 3, "UNK1"}};gdsmap[:+] = {{ 3, " 3; 0"}};
    layprop("POLY"       ,4  ,"red"         ,"checkerboards"  , "selected2" );cifmap[:+] = {{ 4, "PLY2"}};gdsmap[:+] = {{ 4, " 4; 0"}};
    layprop("N_IMPL"     ,5  ,"white"       ,""               , "selected3" );cifmap[:+] = {{ 5, "NIMP"}};gdsmap[:+] = {{ 5, " 5; 0"}};

@@ -417,8 +417,8 @@ class TenderText {
  */
 class TenderRef {
    public:
-      TenderRef(std::string, const CTM&, const DBbox&, word);
-      TenderRef();
+                        TenderRef(std::string, const CTM&, const DBbox&, word);
+                        TenderRef();
       std::string       name()         {return _name;}
       real* const       translation()  {return _translation;}
       CTM&              ctm()          {return _ctm;}
@@ -815,7 +815,7 @@ class Tender0Lay {
 
 //-----------------------------------------------------------------------------
 //
-typedef std::map<word, TenderLay*> DataLay;
+typedef std::map<unsigned, TenderLay*> DataLay;
 typedef std::stack<TenderRef*> CellStack;
 
 /**
@@ -831,8 +831,8 @@ class Tenderer {
                         Tenderer( layprop::DrawProperties* drawprop, real UU );
                        ~Tenderer();
       void              Grid( const real, const std::string );
-      void              setLayer(word, bool);
-      bool              chunkExists(word, bool);
+      void              setLayer(unsigned, bool);
+      bool              chunkExists(unsigned, bool);
       void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
       void              popCell()                              {_cellStack.pop();}
       const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}

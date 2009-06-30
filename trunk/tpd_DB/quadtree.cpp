@@ -64,7 +64,7 @@ laydata::quadTree::quadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX)
          }
       }
    }
-   else if ((0 == tedfile->revision()) && (7 == tedfile->subrevision()))
+   else
    {
       while (tedf_REFSEND != (recordtype = tedfile->getByte()))
       {
@@ -77,7 +77,6 @@ laydata::quadTree::quadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX)
          }
       }
    }
-   else throw EXPTNreadTDT("Unexpected values in TDT revision/subrevision fields");
 
    resort();
 }
