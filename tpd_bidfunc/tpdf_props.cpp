@@ -294,7 +294,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
    for (unsigned i = 0; i < sl->size() ; i++)
    {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1))
+      if (LAST_EDITABLE_LAYNUM < laynumber->value())
       {
          std::ostringstream info;
          info << "Layer number "<< i <<" out of range ... ignored";
@@ -586,7 +586,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
    for (unsigned i = 0; i < sl->size() ; i++)
    {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      if (/*(laynumber->value() > MAX_LAYER_VALUE) ||*/ (laynumber->value() < 1))
+      if (LAST_EDITABLE_LAYNUM < laynumber->value())
       {
          std::ostringstream info;
          info << "Layer number "<< i <<" out of range ... ignored";

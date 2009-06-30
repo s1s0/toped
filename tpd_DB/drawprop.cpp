@@ -560,7 +560,7 @@ bool  layprop::DrawProperties::layerLocked(unsigned layno) const
 
 bool layprop::DrawProperties::getCurrentFill() const
 {
-   if (0 == _drawinglayer)
+   if (REF_LAY == _drawinglayer)
       return true;
    if ((_layset.end() != _layset.find(_drawinglayer)) && !_blockfill)
    {
@@ -598,7 +598,7 @@ bool layprop::DrawProperties::isFilled(unsigned layno) const
 
 void layprop::DrawProperties::setCurrentFill() const
 {
-   if ((0 == _drawinglayer) || (_layset.end() == _layset.find(_drawinglayer)))
+   if ((REF_LAY == _drawinglayer) || (_layset.end() == _layset.find(_drawinglayer)))
       return;
    // The 3 lines below are doing effectively
    // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
