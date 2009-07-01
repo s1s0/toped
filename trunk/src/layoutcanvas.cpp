@@ -367,31 +367,15 @@ bool tui::LayoutCanvas::initializeGL()
    //--------------------------------------------------------------------------
    if (VBOrendering)
    {
+      //@TODO - to avoid the "if"
       // setup the renderer - callback function
       // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGL_render;
    }
    else
    {
+      //@TODO - to avoid the "if"
       // setup the renderer - callback function
       // oGLRender = &DataCenter::openGL_draw;
-
-      // Create a couple of common callback functions
-      #ifndef WIN32
-         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_BEGIN,
-                                         (GLvoid(*)())&glBegin);
-         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_VERTEX,
-                                         (GLvoid(*)())&laydata::tdtdata::polyVertex);
-         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
-                                                      &glEnd);
-      #else 
-         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_BEGIN,
-                                         (GLvoid(__stdcall *)())&glBegin);
-         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_VERTEX,
-                                         (GLvoid(__stdcall *)())&laydata::tdtdata::polyVertex);
-         gluTessCallback(laydata::tdtdata::tessellObj, GLU_TESS_END,
-                                                      &glEnd);
-      #endif
-
    }
    return VBOrendering;
    //@NOTE: With the Mesa library updates (first noticed in ver. 6.5) - most of the
