@@ -30,7 +30,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <GL/glew.h>
 #include "tedstd.h"
 #include "viewprop.h"
 
@@ -89,14 +88,6 @@ namespace laydata {
       virtual   void       stretch(int bfactor, shapeList**) = 0;
    //! 
       virtual  pointlist   shape2poly() const = 0;
-   //! A pointer to the OpenGL object tesselator
-      static GLUtriangulatorObj *tessellObj; 
-   //! The pointer to the user callback function for openGL polygon tessellation
-#ifdef WIN32
-      static GLvoid CALLBACK polyVertex(GLvoid *);
-#else
-      static GLvoid polyVertex(GLvoid *);
-#endif
    //! Returns the next tdtdata object ot NULL if it doesn't exists
       tdtdata*             next() const         {return _next;};
    //! Changes the pointer to the next tdtddata object

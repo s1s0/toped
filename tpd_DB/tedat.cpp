@@ -48,12 +48,6 @@
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 
 //                           0x30, 0x18, 0x3F, 0xF8, 0x3F, 0xF8, 0x00, 0x00, 0x00, 0x00};
 
-                           
-//-----------------------------------------------------------------------------
-// Initialize the GLU tessellator static member
-//-----------------------------------------------------------------------------
-GLUtriangulatorObj *laydata::tdtdata::tessellObj = gluNewTess();
-
 extern layprop::FontLibrary* fontLib;
 
 /*===========================================================================
@@ -203,7 +197,7 @@ are several important points to consider here.
    select function. All modifications are executed over the current TOPED list.
    TOPED list of selected components is invalidated after each cell change.
    Thus the mess with the multiply selected lists seems to be sorted. 
-   
+
 */
 
 /*===========================================================================
@@ -212,20 +206,12 @@ are several important points to consider here.
 
                            tdtcell
 tdtlayer tdtlayer etc.
-                      
+
 quadTree                   quadTree
-                           
+
 shapes                     tdtcellref/tdtaref
 
 */
-
-//-----------------------------------------------------------------------------
-// class tdtdata
-//-----------------------------------------------------------------------------
-GLvoid laydata::tdtdata::polyVertex (GLvoid *point) {
-   TP *pnt = (TP *) point;
-   glVertex2i(pnt->x(), pnt->y());
-}
 
 bool laydata::tdtdata::point_inside(const TP pnt) {
    DBbox ovl = overlap();ovl.normalize();
@@ -821,15 +807,16 @@ void laydata::tdtpoly::openGL_drawline(layprop::DrawProperties&, const pointlist
 
 void laydata::tdtpoly::openGL_drawfill(layprop::DrawProperties&, const pointlist& ptlist) const
 {
-   // Start tessellation
-   gluTessBeginPolygon(tessellObj, NULL);
-   GLdouble pv[3];
-   pv[2] = 0;
-   for (unsigned i = 0; i < ptlist.size(); i++) {
-      pv[0] = ptlist[i].x(); pv[1] = ptlist[i].y();
-      gluTessVertex(tessellObj,pv,const_cast<TP*>(&ptlist[i]));
+   for ( TeselChain::const_iterator CCH = _teseldata->tdata()->begin(); CCH != _teseldata->tdata()->end(); CCH++ )
+   {
+      glBegin((*CCH)->type());
+      for(unsigned cindx = 0 ; cindx < (*CCH)->size(); cindx++)
+      {
+         unsigned vindex = (*CCH)->index_seq()[cindx];
+         glVertex2i(ptlist[vindex].x(), ptlist[vindex].y());
+      }
+      glEnd();
    }
-   gluTessEndPolygon(tessellObj);
 }
 
 void laydata::tdtpoly::openGL_drawsel(const pointlist& ptlist, const SGBitSet* pslist) const
@@ -1348,22 +1335,10 @@ void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist
 void laydata::tdtwire::openGL_drawfill(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    if (_psize == ptlist.size()) return;
-   unsigned i;
-   // Start tessellation
-   gluTessBeginPolygon(tessellObj, NULL);
-   GLdouble pv[3];
-   pv[2] = 0;
-   for (i = _psize; i < 3*_psize; i = i + 2)
-   {
-      pv[0] = ptlist[i].x(); pv[1] = ptlist[i].y();
-      gluTessVertex(tessellObj,pv,const_cast<TP*>(&ptlist[i]));
-   }
-   for (i = 3*_psize - 1; i > _psize; i = i - 2)
-   {
-      pv[0] = ptlist[i].x(); pv[1] = ptlist[i].y();
-      gluTessVertex(tessellObj,pv,const_cast<TP*>(&ptlist[i]));
-   }
-   gluTessEndPolygon(tessellObj);
+   glBegin(GL_QUAD_STRIP);
+   for (_dbl_word i = _psize; i < 3 *_psize; i++)
+      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   glEnd();
 }
 
 void laydata::tdtwire::openGL_drawsel(const pointlist& ptlist, const SGBitSet* pslist) const
