@@ -1435,6 +1435,7 @@ void Tender0Lay::collect(GLuint pbuf)
 void Tender0Lay::draw(layprop::DrawProperties* drawprop)
 {
    drawprop->setCurrentColor(REF_LAY);
+   drawprop->setLineProps(false);
    // Bind the buffer
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
@@ -1730,6 +1731,7 @@ void Tenderer::draw()
    {// for every layer
       _drawprop->setCurrentColor(CLAY->first);
       _drawprop->setCurrentFill();
+      _drawprop->setLineProps(false);
       // draw everything
       if (0 != CLAY->second->total_points())
          CLAY->second->draw(_drawprop);

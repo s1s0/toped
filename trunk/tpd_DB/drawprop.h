@@ -233,8 +233,7 @@ namespace layprop {
          void                       adjustAlpha(word factor);
          void                       setCurrentColor(unsigned layno);
          void                       setGridColor(std::string colname) const;
-         bool                       getCurrentFill() const;
-         void                       setCurrentFill() const;
+         bool                       setCurrentFill() const;
          bool                       isFilled(unsigned layno) const;
          void                       setLineProps(bool selected = false) const;
          bool                       layerHidden(unsigned layno) const;

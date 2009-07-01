@@ -497,19 +497,8 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
 void layprop::DrawProperties::setCurrentColor(unsigned layno)
 {
    _drawinglayer = layno;
-   if (_layset.end() != _layset.find(_drawinglayer))
-   {
-      if (_laycolors.end() != _laycolors.find(_layset[_drawinglayer]->color()))
-      {
-         tellRGB* gcol = _laycolors[_layset[_drawinglayer]->color()];
-         if (gcol)
-         {
-            glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
-            return;
-         }
-      }
-   }
-   glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
+   const layprop::tellRGB& theColor = getColor(_drawinglayer);
+   glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
 }
 
 void layprop::DrawProperties::adjustAlpha(word factor)
@@ -537,47 +526,35 @@ void layprop::DrawProperties::adjustAlpha(word factor)
 bool  layprop::DrawProperties::layerHidden(unsigned layno) const
 {
    if (REF_LAY == layno) return false;
-   if (_layset.end() != _layset.find(layno))
-   {
-      laySetList::const_iterator ilayset = _layset.find(layno);
+   laySetList::const_iterator ilayset = _layset.find(layno);
+   if (_layset.end() != ilayset)
       return ilayset->second->hidden();
-      //return _layset[layno]->hidden(); - see the comment in getCurrentFill
-   }
    return true;
 }
 
 bool  layprop::DrawProperties::layerLocked(unsigned layno) const
 {
    if (REF_LAY == layno) return false;
-   if (_layset.end() != _layset.find(layno))
-   {
-      laySetList::const_iterator ilayset = _layset.find(layno);
+   laySetList::const_iterator ilayset = _layset.find(layno);
+   if (_layset.end() != ilayset)
       return ilayset->second->locked();
-      //return _layset[layno]->locked(); - see the comment in getCurrentFill
-   }
    return true;
 }
 
-bool layprop::DrawProperties::getCurrentFill() const
+bool layprop::DrawProperties::setCurrentFill() const
 {
-   if (REF_LAY == _drawinglayer)
-      return true;
-   if ((_layset.end() != _layset.find(_drawinglayer)) && !_blockfill)
+   if (REF_LAY == _drawinglayer) return true;
+   // The lines below are doing effectively
+   // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
+   laySetList::const_iterator ilayset = _layset.find(_drawinglayer);
+   if ((_layset.end() != ilayset) && !_blockfill)
    {
-      // The 3 lines below are doing effectively
-      // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
-      // but the problem is const stuff (discards qualifiers)
-      // They are ugly, but don't know how to do it better
-      // Similar for layerLocked and layerHidden
-      laySetList::const_iterator ilayset = _layset.find(_drawinglayer);
-      fillMAP::const_iterator ifillset;
-      if (_layfill.end() == (ifillset = _layfill.find(ilayset->second->fill())))
-         return false;
-      byte* ifill = ifillset->second;
+      fillMAP::const_iterator ifillset = _layfill.find(ilayset->second->fill());
+      if (_layfill.end() == ifillset) return false;
       glEnable(GL_POLYGON_STIPPLE);
 //      glEnable(GL_POLYGON_SMOOTH); //- for solid fill
 //      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      glPolygonStipple(ifill);
+      glPolygonStipple(ifillset->second);
       return true;
    }
    else return false;
@@ -594,27 +571,6 @@ bool layprop::DrawProperties::isFilled(unsigned layno) const
       else return true;
    }
    else return false;
-}
-
-void layprop::DrawProperties::setCurrentFill() const
-{
-   if ((REF_LAY == _drawinglayer) || (_layset.end() == _layset.find(_drawinglayer)))
-      return;
-   // The 3 lines below are doing effectively
-   // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
-   // but the problem is const stuff (discards qualifiers)
-   // They are ugly, but don't know how to do it better
-   // Similar for layerLocked and layerHidden
-   laySetList::const_iterator ilayset = _layset.find(_drawinglayer);
-   fillMAP::const_iterator ifillset;
-   if (_layfill.end() != (ifillset = _layfill.find(ilayset->second->fill())))
-   {
-      byte* ifill = ifillset->second;
-      glEnable(GL_POLYGON_STIPPLE);
-//         glEnable(GL_POLYGON_SMOOTH); //- for solid fill
-//         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      glPolygonStipple(ifill);
-   }
 }
 
 void layprop::DrawProperties::draw_text_boundary(const pointlist& ptlist)
@@ -651,34 +607,32 @@ void layprop::DrawProperties::draw_cell_boundary(const pointlist& ptlist)
 
 void layprop::DrawProperties::setLineProps(bool selected) const
 {
-   laySetList::const_iterator ilayset;
-   if (selected)
+   if (REF_LAY == _drawinglayer)
    {
-      ilayset = _layset.find(_drawinglayer);
-      lineMAP::const_iterator ilineset = _lineset.find(ilayset->second->sline());
-      const LineSettings* seline;
-      if (_lineset.end() != ilineset)
-         seline = ilineset->second;
+      glEnable(GL_LINE_STIPPLE);
+      glLineStipple(1,0xf18f);
+      if (selected)
+         glLineWidth(3);
       else
-         seline = &_defaultSeline;
-      std::string colorname = seline->color();
-      colorMAP::const_iterator gcol;
-      if (("" != colorname) && (_laycolors.end() != (gcol = _laycolors.find(colorname))))
-         glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
-      glLineWidth(seline->width());/*glEnable(GL_LINE_SMOOTH);*/glEnable(GL_LINE_STIPPLE);
-      glLineStipple(seline->patscale(),seline->pattern());
-      return;
-   }
-   if (_layset.end() != (ilayset = _layset.find(_drawinglayer)))
-   {
-      colorMAP::const_iterator gcol = _laycolors.find(ilayset->second->color());
-      if (gcol != _laycolors.end())
-         glColor4ub(gcol->second->red(), gcol->second->green(), gcol->second->blue(), gcol->second->alpha());
+         glLineWidth(1);
    }
    else
-      glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
-
-   glLineWidth(1);glDisable(GL_LINE_SMOOTH);glDisable(GL_LINE_STIPPLE);
+   {
+      const layprop::LineSettings* theLine = getLine(_drawinglayer);
+      if (selected)
+      {
+         glLineWidth(theLine->width());
+         glEnable(GL_LINE_STIPPLE);
+         /*glEnable(GL_LINE_SMOOTH);*/
+         glLineStipple(theLine->patscale(),theLine->pattern());
+      }
+      else
+      {
+         glLineWidth(1);
+         glDisable(GL_LINE_SMOOTH);
+         glDisable(GL_LINE_STIPPLE);
+      }
+   }
 }
 
 void  layprop::DrawProperties::blockfill(laydata::cellrefstack* refstack)
