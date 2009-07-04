@@ -1816,12 +1816,12 @@ void Tenderer::draw()
 Tenderer::~Tenderer()
 {
    char debug_message[256];
-   unsigned long all_points_drawn = 0;
-   unsigned      all_layers = 0;
+//   unsigned long all_points_drawn = 0;
+//   unsigned      all_layers = 0;
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
-      all_points_drawn += CLAY->second->total_points();
-      all_layers++;
+//      all_points_drawn += CLAY->second->total_points();
+//      all_layers++;
 //      sprintf (debug_message, "Layer %i:  %i points", CLAY->first, CLAY->second->total_points());
 //      tell_log(console::MT_INFO,debug_message);
       delete (CLAY->second);
@@ -1833,8 +1833,8 @@ Tenderer::~Tenderer()
       delete (*CSH);
 
    //
-   sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, all_layers);
-   tell_log(console::MT_WARNING,debug_message);
+//   sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, all_layers);
+//   tell_log(console::MT_WARNING,debug_message);
    //
    if (NULL != _ogl_buffers)
    {
@@ -1859,6 +1859,7 @@ void checkOGLError(std::string loc)
 //
 // class HiResTimer (Profiling timer for debugging purposes)
 //
+#ifdef TIME_PROFILING
 HiResTimer::HiResTimer()
 {
 #ifdef WIN32
@@ -1900,3 +1901,4 @@ void HiResTimer::report(std::string message)
 #endif
    tell_log(console::MT_INFO,time_message);
 }
+#endif //TIME_PROFILING
