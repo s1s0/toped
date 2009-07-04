@@ -309,6 +309,24 @@ TenderWire::~TenderWire()
 
 //=============================================================================
 //
+// TenderSOBox
+//
+unsigned  TenderSOBox::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex/2;
+   return TenderOBox::cDataCopy(array, pindex);
+}
+
+unsigned  TenderSOBox::sDataCopy(unsigned* array, unsigned& pindex)
+{
+   assert (NULL == _slist);
+   for (unsigned i = 0; i < 4; i++)
+      array[pindex++] = _offset + i;
+   return ssize();
+}
+
+//=============================================================================
+//
 // TenderSCnvx
 //
 unsigned TenderSCnvx::ssize()
@@ -470,6 +488,9 @@ unsigned  TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
 //
 TenderOBox::TenderOBox(const DBbox& obox, const CTM& ctm)
 {
+   // Don't get confused here! It's not a stupid code. Think about
+   // boxes rotated to 45 deg for example and you'll see why
+   // obox * ctm is not possible
    TP tp = TP(obox.p1().x(), obox.p1().y()) * ctm;
    _obox[0] = tp.x();_obox[1] = tp.y();
    tp = TP(obox.p2().x(), obox.p1().y()) * ctm;
@@ -625,16 +646,22 @@ void TenderTV::registerWire (TenderWire* cobj)
        else
        {
           _cont_data.push_back(cobj);
-          _alobjvx[cont] += 1;
+          _alobjvx[cont] ++;
           _alvrtxs[cont] += allpoints;
        }
    }
 }
 
-void TenderTV::registerText (TenderText* cobj)
+void TenderTV::registerText (TenderText* cobj, TenderOBox* oobj)
 {
-   _texts.push_back(cobj);
+   _text_data.push_back(cobj);
    _num_total_strings++;
+   if (NULL != oobj)
+   {
+      _txto_data.push_back(oobj);
+      _alvrtxs[cont] += 4;
+      _alobjvx[cont]++;
+   }
 }
 
 unsigned TenderTV::num_total_points()
@@ -813,6 +840,12 @@ void TenderTV::collect(int* point_array, unsigned int* index_array, unsigned int
          _firstvx[cont][szindx  ] = pntindx/2;
          _sizesvx[cont][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
       }
+      //... and text overlapping boxes
+      for (RefTxtList::const_iterator CSH = _txto_data.begin(); CSH != _txto_data.end(); CSH++)
+      { // shapes in the current translation (layer within the cell)
+         _firstvx[cont][szindx  ] = pntindx/2;
+         _sizesvx[cont][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+      }
       assert(pntindx == line_arr_size + fqus_arr_size + cont_arr_size + poly_arr_size);
       assert(szindx  == _alobjvx[cont] );
    }
@@ -904,7 +937,7 @@ void TenderTV::drawTexts(layprop::DrawProperties* drawprop)
    glMultMatrixd(_refCell->translation());
    drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
 
-   for (TenderStrings::const_iterator TSTR = _texts.begin(); TSTR != _texts.end(); TSTR++)
+   for (TenderStrings::const_iterator TSTR = _text_data.begin(); TSTR != _text_data.end(); TSTR++)
       (*TSTR)->draw(_filled);
 
    glPopMatrix();
@@ -927,8 +960,10 @@ TenderTV::~TenderTV()
       delete (*CSO);
    for (SlicePolygons::const_iterator CSO = _ncvx_data.begin(); CSO != _ncvx_data.end(); CSO++)
       delete (*CSO);
-   for (TenderStrings::const_iterator TSTR = _texts.begin(); TSTR != _texts.end(); TSTR++)
-      delete (*TSTR);
+   for (TenderStrings::const_iterator CSO = _text_data.begin(); CSO != _text_data.end(); CSO++)
+      delete (*CSO);
+   for (RefTxtList::const_iterator CSO = _txto_data.begin(); CSO != _txto_data.end(); CSO++)
+      delete (*CSO);
 
    if (NULL != _sizesvx[cont]) delete [] _sizesvx[cont];
    if (NULL != _sizesvx[line]) delete [] _sizesvx[line];
@@ -1092,10 +1127,28 @@ void TenderLay::wire (int4b* pdata, unsigned psize, word width, bool center_only
    _cslice->registerWire(cobj);
 }
 
-void TenderLay::text (const std::string* txt, const CTM& cmtrx)
+void TenderLay::text (const std::string* txt, const CTM& ftmtrx, const DBbox* ovl, const TP& cor, bool sel)
 {
-   _cslice->registerText(DEBUG_NEW TenderText(txt, cmtrx));
+   // Make sure that selected shapes don't come unexpected
+   assert(_has_selected ? true : !sel);
+   TenderOBox* cobj = NULL;
+   if (sel)
+   {
+      assert(ovl);
+      TenderSOBox* sobj = DEBUG_NEW TenderSOBox((*ovl) , ftmtrx);
+      registerSOBox(sobj);
+      cobj = sobj;
+   }
+   else if (ovl)
+   {
+      cobj = DEBUG_NEW TenderOBox((*ovl) , ftmtrx);
+   }
+
+   CTM ftm(ftmtrx.a(), ftmtrx.b(), ftmtrx.c(), ftmtrx.d(), 0, 0);
+   ftm.Translate(cor * ftmtrx);
+   _cslice->registerText(DEBUG_NEW TenderText(txt, ftm), cobj);
 }
+
 
 void TenderLay::registerSBox (TenderSCnvx* sobj)
 {
@@ -1111,6 +1164,14 @@ void TenderLay::registerSBox (TenderSCnvx* sobj)
       _asobjix[llps]++;
    }
 }
+
+void TenderLay::registerSOBox (TenderSOBox* sobj)
+{
+   _slct_data.push_back(sobj);
+   _asindxs[llps] += 4;
+   _asobjix[llps]++;
+}
+
 
 void TenderLay::registerSPoly (TenderSNcvx* sobj)
 {
@@ -1347,14 +1408,14 @@ TenderLay::~TenderLay()
 //
 TenderRefLay::TenderRefLay()
 {
-   _alvrtxs[0] = _alvrtxs[1] = 0u;
-   _alobjvx[0] = _alobjvx[1] = 0u;
-   _asindxs[0] = _asindxs[1] = 0u;
-   _asobjix[0] = _asobjix[1] = 0u;
-   _sizesvx[0] = _sizesvx[1] = NULL;
-   _firstvx[0] = _firstvx[1] = NULL;
-   _sizslix[0] = _sizslix[1] = NULL;
-   _fstslix[0] = _fstslix[1] = NULL;
+   _alvrtxs = 0u;
+   _alobjvx = 0u;
+   _asindxs = 0u;
+   _asobjix = 0u;
+   _sizesvx = NULL;
+   _firstvx = NULL;
+   _sizslix = NULL;
+   _fstslix = NULL;
 }
 
 void TenderRefLay::addCellOBox(TenderRef* cRefBox, word alphaDepth, bool selected)
@@ -1363,45 +1424,28 @@ void TenderRefLay::addCellOBox(TenderRef* cRefBox, word alphaDepth, bool selecte
    {
       _cellSRefBoxes.push_back(cRefBox);
       assert(2 == alphaDepth);
-      _asindxs[0] += 4;
-      _asobjix[0]++;
+      _asindxs += 4;
+      _asobjix++;
    }
    else
    {
       _cellRefBoxes.push_back(cRefBox);
       if (1 < alphaDepth)
       {
-         _alvrtxs[0] += 4;
-         _alobjvx[0]++;
+         _alvrtxs += 4;
+         _alobjvx++;
       }
-   }
-}
-
-void TenderRefLay::addTextOBox(const DBbox& overlap, const CTM& trans, bool selected)
-{
-   TenderOBox* tRefBox = DEBUG_NEW TenderOBox(overlap, trans);
-   if (selected)
-   {
-      _textSRefBoxes.push_back(tRefBox);
-      _asindxs[1] += 4;
-      _asobjix[1]++;
-   }
-   else
-   {
-      _textRefBoxes.push_back(tRefBox);
-      _alvrtxs[1] += 4;
-      _alobjvx[1]++;
    }
 }
 
 unsigned TenderRefLay::total_points()
 {
-   return (_alvrtxs[0] + _asindxs[0] + _alvrtxs[1] + _asindxs[1]);
+   return (_alvrtxs + _asindxs);
 }
 
 unsigned TenderRefLay::total_indexes()
 {
-   return (_alobjvx[0] + _asobjix[0] + _alobjvx[1] + _asobjix[1]);
+   return (_alobjvx + _asobjix);
 }
 
 void TenderRefLay::collect(GLuint pbuf)
@@ -1418,51 +1462,33 @@ void TenderRefLay::collect(GLuint pbuf)
    // initialise the indexing
    unsigned pntindx = 0;
    unsigned  szindx  = 0;
-   for (byte i = 0; i < 2; i++)
+   if (0 < (_alvrtxs + _asindxs))
    {
-      if (0 < (_alvrtxs[i] + _asindxs[i]))
+      _firstvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
+      _sizesvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
+      if (0 < _asobjix)
       {
-         _firstvx[i] = DEBUG_NEW GLsizei[_alobjvx[i] + _asobjix[i]];
-         _sizesvx[i] = DEBUG_NEW GLsizei[_alobjvx[i] + _asobjix[i]];
-         if (0 < _asobjix[i])
-         {
-            _fstslix[i] = DEBUG_NEW GLsizei[_asobjix[i]];
-            _sizslix[i] = DEBUG_NEW GLsizei[_asobjix[i]];
-         }
+         _fstslix = DEBUG_NEW GLsizei[_asobjix];
+         _sizslix = DEBUG_NEW GLsizei[_asobjix];
       }
    }
-   // first the cells
+   // collect the cell overlapping boxes
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
    {
       if (1 < (*CSH)->alphaDepth())
       {
-         _firstvx[0][szindx  ] = pntindx/2;
-         _sizesvx[0][szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+         _firstvx[szindx  ] = pntindx/2;
+         _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
       }
    }
    for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
    {
-      _fstslix[0][szindx-_alobjvx[0]] = _firstvx[0][szindx] = pntindx/2;
-      _sizslix[0][szindx-_alobjvx[0]] = _sizesvx[0][szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+      _fstslix[szindx-_alobjvx] = _firstvx[szindx] = pntindx/2;
+      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
       szindx++;
    }
-   assert(pntindx == 2 * (_alvrtxs[0] + _asindxs[0]));
-   assert(szindx  ==     (_alobjvx[0] + _asobjix[0]));
-   // now the texts
-   szindx  = 0;
-   for (RefTxtList::const_iterator CSH = _textRefBoxes.begin(); CSH != _textRefBoxes.end(); CSH++)
-   {
-      _firstvx[1][szindx  ] = pntindx/2;
-      _sizesvx[1][szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
-   }
-   for (RefTxtList::const_iterator CSH = _textSRefBoxes.begin(); CSH != _textSRefBoxes.end(); CSH++)
-   {
-      _fstslix[1][szindx-_alobjvx[1]] = _firstvx[1][szindx] = pntindx/2;
-      _sizslix[1][szindx-_alobjvx[1]] = _sizesvx[1][szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
-      szindx++;
-   }
-   assert(pntindx == 2 * (_alvrtxs[0] + _asindxs[0] + _alvrtxs[1] + _asindxs[1]));
-   assert(szindx  ==     (_alobjvx[1] + _asobjix[1]));
+   assert(pntindx == 2 * (_alvrtxs + _asindxs));
+   assert(szindx  ==     (_alobjvx + _asobjix));
 
    // Unmap the buffers
    glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -1481,19 +1507,16 @@ void TenderRefLay::draw(layprop::DrawProperties* drawprop)
 
    glVertexPointer(2, GL_INT, 0, 0);
    glEnableClientState(GL_VERTEX_ARRAY);
-   for (byte i = 0; i < 2; i++)
+   if (0 < (_alvrtxs + _asindxs))
    {
-      if (0 < (_alvrtxs[i] + _asindxs[i]))
+      assert(_firstvx); assert(_sizesvx);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix);
+      if (0 < _asindxs)
       {
-         assert(_firstvx[i]); assert(_sizesvx[i]);
-         glMultiDrawArrays(GL_LINE_LOOP, _firstvx[i], _sizesvx[i], _alobjvx[i] + _asobjix[i]);
-         if (0 < _asindxs[i])
-         {
-            assert(_fstslix[i]); assert(_sizslix[i]);
-            drawprop->setLineProps(true);
-            glMultiDrawArrays(GL_LINE_LOOP, _fstslix[i], _sizslix[i], _asobjix[i]);
-            drawprop->setLineProps(false);
-         }
+         assert(_fstslix); assert(_sizslix);
+         drawprop->setLineProps(true);
+         glMultiDrawArrays(GL_LINE_LOOP, _fstslix, _sizslix, _asobjix);
+         drawprop->setLineProps(false);
       }
    }
    glDisableClientState(GL_VERTEX_ARRAY);
@@ -1501,17 +1524,10 @@ void TenderRefLay::draw(layprop::DrawProperties* drawprop)
 
 TenderRefLay::~TenderRefLay()
 {
-   for (byte i = 0; i < 2; i++)
-   {
-      if (NULL != _sizesvx[i]) delete [] (_sizesvx[i]);
-      if (NULL != _firstvx[i]) delete [] (_firstvx[i]);
-      if (NULL != _sizslix[i]) delete [] (_sizslix[i]);
-      if (NULL != _fstslix[i]) delete [] (_fstslix[i]);
-   }
-   for (RefTxtList::const_iterator CSH = _textRefBoxes.begin(); CSH != _textRefBoxes.end(); CSH++)
-      delete (*CSH);
-   for (RefTxtList::const_iterator CSH = _textSRefBoxes.begin(); CSH != _textSRefBoxes.end(); CSH++)
-      delete (*CSH);
+   if (NULL != _sizesvx) delete [] (_sizesvx);
+   if (NULL != _firstvx) delete [] (_firstvx);
+   if (NULL != _sizslix) delete [] (_sizslix);
+   if (NULL != _fstslix) delete [] (_fstslix);
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
       delete (*CSH);
    for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
@@ -1622,10 +1638,9 @@ void Tenderer::wire (int4b* pdata, unsigned psize, word width, const SGBitSet* p
 void Tenderer::text (const std::string* txt, const CTM& ftmtrx, const DBbox& ovl, const TP& cor, bool sel)
 {
    if ((!_drawprop->isTextBoxHidden()) || sel)
-      _refLayer.addTextOBox(ovl, ftmtrx * topCTM(), sel);
-   CTM ftm(ftmtrx.a(), ftmtrx.b(), ftmtrx.c(), ftmtrx.d(), 0, 0);
-   ftm.Translate(cor * ftmtrx);
-   _clayer->text(txt, ftm);
+      _clayer->text(txt, ftmtrx, &ovl, cor, sel);
+   else
+      _clayer->text(txt, ftmtrx, NULL, cor, false);
 }
 
 void Tenderer::Grid(const real step, const std::string color)

@@ -2510,13 +2510,13 @@ void laydata::tdttext::PSwrite(PSFile& gdsf, const layprop::DrawProperties& draw
    gdsf.text(_text, ffmtrx);
 }
 
-DBbox laydata::tdttext::overlap() const {
-   CTM correction;
-   correction.Translate(-_overlap.p1().x(), -_overlap.p1().y());
-   return (_overlap.overlap(correction * _translation));
+DBbox laydata::tdttext::overlap() const
+{
+   return _overlap * _translation;
 }
 
-void laydata::tdttext::info(std::ostringstream& ost, real DBU) const {
+void laydata::tdttext::info(std::ostringstream& ost, real DBU) const
+{
    ost << "text \"" << _text << "\" @ {";
    ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "}";
 }
