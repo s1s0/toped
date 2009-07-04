@@ -550,20 +550,24 @@ class TenderTV {
    public:
       enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
       enum {cont, line, cnvx, ncvx} ObjtTypes;
+      typedef std::list<TenderText*>   TenderStrings;
                         TenderTV(TenderRef* const, bool, bool, unsigned, unsigned);
                        ~TenderTV();
       void              registerBox   (TenderCnvx*);
       void              registerPoly  (TenderNcvx*, TeselPoly*);
       void              registerWire  (TenderWire*);
+      void              registerText  (TenderText*);
 
       void              collect(int*, unsigned int*, unsigned int*);
       void              draw(layprop::DrawProperties*);
+      void              drawTexts(layprop::DrawProperties*);
       TenderRef*        swapRefCells(TenderRef*);
 
       unsigned          num_total_points();
       unsigned          num_total_indexs();
-      bool              reusable()        {return _reusable;}
-      std::string       cellName()        {return _refCell->name();}
+      unsigned          num_total_strings()  {return _num_total_strings;}
+      bool              reusable()           {return _reusable;}
+      std::string       cellName()           {return _refCell->name();}
    protected:
       void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
 
@@ -587,6 +591,8 @@ class TenderTV {
       unsigned          _point_array_offset; //! The offset of this chunk of vertex data in the vertex VBO
       unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
       //
+      unsigned          _num_total_strings;
+      TenderStrings     _texts;
       bool              _filled;
       bool              _reusable;
 };
@@ -626,6 +632,7 @@ class TenderReTV {
                         TenderReTV(TenderTV* const chunk, TenderRef* const refCell):
                            _chunk(chunk), _refCell(refCell) {}
       void              draw(layprop::DrawProperties*);
+      void              drawTexts(layprop::DrawProperties*);
    private:
       TenderTV* const   _chunk;
       TenderRef* const  _refCell;
@@ -729,7 +736,6 @@ class TenderLay {
       typedef std::list<TenderTV*>     TenderTVList;
       typedef std::list<TenderReTV*>   TenderReTVList;
       typedef std::map<std::string, TenderTV*> ReusableTTVMap;
-      typedef std::list<TenderText*>   TenderStrings;
 
                         TenderLay();
                        ~TenderLay();
@@ -743,7 +749,7 @@ class TenderLay {
       void              ppSlice();
       void              draw(layprop::DrawProperties*);
       void              drawSelected();
-      void              drawTexts();
+      void              drawTexts(layprop::DrawProperties*);
       void              collect(bool, GLuint, GLuint);
       void              collectSelected(unsigned int*);
       unsigned          total_points() {return _num_total_points;}
@@ -758,7 +764,6 @@ class TenderLay {
       ReusableTTVMap    _reusableData;
       TenderTVList      _layData;
       TenderReTVList    _reLayData;
-      TenderStrings     _texts;
       TenderTV*         _cslice;    //!Working variable pointing to the current slice
       unsigned          _num_total_points;
       unsigned          _num_total_indexs;
@@ -784,11 +789,11 @@ class TenderLay {
    trivial class. One object of this class should be created only. All reference
    boxes are processed in a single VBO. This includes the selected ones.
 */
-class Tender0Lay {
+class TenderRefLay {
    public:
       typedef std::list<TenderOBox*> RefTxtList;
-                        Tender0Lay();
-                       ~Tender0Lay();
+                        TenderRefLay();
+                       ~TenderRefLay();
       void              addCellOBox(TenderRef*, word, bool);
       void              addTextOBox(const DBbox&, const CTM&, bool);
       void              collect(GLuint);
@@ -861,7 +866,7 @@ class Tenderer {
       real              _UU;
       DataLay           _data;            //!All data for drawing
       TenderLay*        _clayer;          //!Working variable pointing to the current slice
-      Tender0Lay        _0layer;
+      TenderRefLay      _refLayer;
       CellStack         _cellStack;       //!Required during data traversing stage
       unsigned          _cslctd_array_offset; //! Current selected array offset
       //
@@ -869,7 +874,7 @@ class Tenderer {
       GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
       GLuint            _sbuffer;         //! The "name" of the selected index buffer
       TenderRef*        _activeCS;
-      RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the Tender0Lay structures
+      RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TenderRefLay structures
 };
 
 void checkOGLError(std::string);

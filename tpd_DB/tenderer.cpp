@@ -631,6 +631,12 @@ void TenderTV::registerWire (TenderWire* cobj)
    }
 }
 
+void TenderTV::registerText (TenderText* cobj)
+{
+   _texts.push_back(cobj);
+   _num_total_strings++;
+}
+
 unsigned TenderTV::num_total_points()
 {
    return ( _alvrtxs[cont] +
@@ -892,6 +898,17 @@ void TenderTV::draw(layprop::DrawProperties* drawprop)
    glPopMatrix();
 }
 
+void TenderTV::drawTexts(layprop::DrawProperties* drawprop)
+{
+   glPushMatrix();
+   glMultMatrixd(_refCell->translation());
+   drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
+
+   for (TenderStrings::const_iterator TSTR = _texts.begin(); TSTR != _texts.end(); TSTR++)
+      (*TSTR)->draw(_filled);
+
+   glPopMatrix();
+}
 
 TenderRef* TenderTV::swapRefCells(TenderRef* newRefCell)
 {
@@ -910,6 +927,9 @@ TenderTV::~TenderTV()
       delete (*CSO);
    for (SlicePolygons::const_iterator CSO = _ncvx_data.begin(); CSO != _ncvx_data.end(); CSO++)
       delete (*CSO);
+   for (TenderStrings::const_iterator TSTR = _texts.begin(); TSTR != _texts.end(); TSTR++)
+      delete (*TSTR);
+
    if (NULL != _sizesvx[cont]) delete [] _sizesvx[cont];
    if (NULL != _sizesvx[line]) delete [] _sizesvx[line];
    if (NULL != _sizesvx[cnvx]) delete [] _sizesvx[cnvx];
@@ -932,12 +952,24 @@ TenderTV::~TenderTV()
    // Don't delete  _tmatrix. It's only a reference to it here
 }
 
+//=============================================================================
+//
+// class TenderReTV
+//
 void TenderReTV::draw(layprop::DrawProperties* drawprop)
 {
    TenderRef* sref_cell = _chunk->swapRefCells(_refCell);
    _chunk->draw(drawprop);
    _chunk->swapRefCells(sref_cell);
 }
+
+void TenderReTV::drawTexts(layprop::DrawProperties* drawprop)
+{
+   TenderRef* sref_cell = _chunk->swapRefCells(_refCell);
+   _chunk->drawTexts(drawprop);
+   _chunk->swapRefCells(sref_cell);
+}
+
 //=============================================================================
 //
 // class TenderLay
@@ -987,12 +1019,14 @@ void TenderLay::ppSlice()
 {
    if (NULL != _cslice)
    {
-      unsigned num_points = _cslice->num_total_points();
-      if (num_points > 0)
+      unsigned num_points  = _cslice->num_total_points();
+      unsigned num_strings = _cslice->num_total_strings();
+      if ((num_points > 0) || (num_strings > 0))
       {
          _layData.push_back(_cslice);
-         _num_total_points += num_points;
-         _num_total_indexs += _cslice->num_total_indexs();
+         _num_total_points  += num_points;
+         _num_total_strings += num_strings;
+         _num_total_indexs  += _cslice->num_total_indexs();
          if (_cslice->reusable())
          {
             assert(_reusableData.end() == _reusableData.find(_cslice->cellName()));
@@ -1060,8 +1094,7 @@ void TenderLay::wire (int4b* pdata, unsigned psize, word width, bool center_only
 
 void TenderLay::text (const std::string* txt, const CTM& cmtrx)
 {
-   _texts.push_back(DEBUG_NEW TenderText(txt, cmtrx));
-   _num_total_strings++;
+   _cslice->registerText(DEBUG_NEW TenderText(txt, cmtrx));
 }
 
 void TenderLay::registerSBox (TenderSCnvx* sobj)
@@ -1280,10 +1313,16 @@ void TenderLay::drawSelected()
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void TenderLay::drawTexts()
+void TenderLay::drawTexts(layprop::DrawProperties* drawprop)
 {
-   for (TenderStrings::const_iterator TSTR = _texts.begin(); TSTR != _texts.end(); TSTR++)
-      (*TSTR)->draw(true /*@FIXME*/);
+   for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+   {
+      (*TLAY)->drawTexts(drawprop);
+   }
+   for (TenderReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
+   {
+      (*TLAY)->drawTexts(drawprop);
+   }
 }
 
 TenderLay::~TenderLay()
@@ -1293,9 +1332,6 @@ TenderLay::~TenderLay()
 
    for (TenderReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
       delete (*TLAY);
-
-   for (TenderStrings::const_iterator TSTR = _texts.begin(); TSTR != _texts.end(); TSTR++)
-      delete (*TSTR);
 
    if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
    if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
@@ -1307,9 +1343,9 @@ TenderLay::~TenderLay()
 }
 //=============================================================================
 //
-// class Tender0Lay
+// class TenderRefLay
 //
-Tender0Lay::Tender0Lay()
+TenderRefLay::TenderRefLay()
 {
    _alvrtxs[0] = _alvrtxs[1] = 0u;
    _alobjvx[0] = _alobjvx[1] = 0u;
@@ -1321,7 +1357,7 @@ Tender0Lay::Tender0Lay()
    _fstslix[0] = _fstslix[1] = NULL;
 }
 
-void Tender0Lay::addCellOBox(TenderRef* cRefBox, word alphaDepth, bool selected)
+void TenderRefLay::addCellOBox(TenderRef* cRefBox, word alphaDepth, bool selected)
 {
    if (selected)
    {
@@ -1341,7 +1377,7 @@ void Tender0Lay::addCellOBox(TenderRef* cRefBox, word alphaDepth, bool selected)
    }
 }
 
-void Tender0Lay::addTextOBox(const DBbox& overlap, const CTM& trans, bool selected)
+void TenderRefLay::addTextOBox(const DBbox& overlap, const CTM& trans, bool selected)
 {
    TenderOBox* tRefBox = DEBUG_NEW TenderOBox(overlap, trans);
    if (selected)
@@ -1358,17 +1394,17 @@ void Tender0Lay::addTextOBox(const DBbox& overlap, const CTM& trans, bool select
    }
 }
 
-unsigned Tender0Lay::total_points()
+unsigned TenderRefLay::total_points()
 {
    return (_alvrtxs[0] + _asindxs[0] + _alvrtxs[1] + _asindxs[1]);
 }
 
-unsigned Tender0Lay::total_indexes()
+unsigned TenderRefLay::total_indexes()
 {
    return (_alobjvx[0] + _asobjix[0] + _alobjvx[1] + _asobjix[1]);
 }
 
-void Tender0Lay::collect(GLuint pbuf)
+void TenderRefLay::collect(GLuint pbuf)
 {
    int* cpoint_array = NULL;
    _pbuffer = pbuf;
@@ -1432,7 +1468,7 @@ void Tender0Lay::collect(GLuint pbuf)
    glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
-void Tender0Lay::draw(layprop::DrawProperties* drawprop)
+void TenderRefLay::draw(layprop::DrawProperties* drawprop)
 {
    drawprop->setCurrentColor(REF_LAY);
    drawprop->setLineProps(false);
@@ -1463,7 +1499,7 @@ void Tender0Lay::draw(layprop::DrawProperties* drawprop)
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-Tender0Lay::~Tender0Lay()
+TenderRefLay::~TenderRefLay()
 {
    for (byte i = 0; i < 2; i++)
    {
@@ -1498,7 +1534,7 @@ Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
 bool Tenderer::chunkExists(unsigned layno, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
-   // that we haven't got here with layer 0 by accident
+   // that we haven't got here with REF_LAY by accident
    assert(REF_LAY != layno);
    if (NULL != _clayer)
    { // post process the current layer
@@ -1522,7 +1558,7 @@ bool Tenderer::chunkExists(unsigned layno, bool has_selected)
 void Tenderer::setLayer(unsigned layno, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
-   // that we haven't got here with layer 0 by accident
+   // that we haven't got here with REF_LAY by accident
    assert(REF_LAY != layno);
    if (NULL != _clayer)
    { // post process the current layer
@@ -1549,7 +1585,7 @@ void Tenderer::pushCell(std::string cname, const CTM& trans, const DBbox& overla
                                             _cellStack.size()
                                            );
    if (selected || (!_drawprop->isCellBoxHidden()))
-      _0layer.addCellOBox(cRefBox, _cellStack.size(), selected);
+      _refLayer.addCellOBox(cRefBox, _cellStack.size(), selected);
    else
       // This list is to keep track of the hidden cRefBox - so we can clean
       // them up. Don't get confused - we need cRefBox during the collecting
@@ -1583,12 +1619,12 @@ void Tenderer::wire (int4b* pdata, unsigned psize, word width, const SGBitSet* p
    _clayer->wire(pdata, psize, width, center_line_only, true, psel);
 }
 
-void Tenderer::text (const std::string* txt, const CTM& cmtrx, const DBbox& ovl, const TP& cor, bool sel)
+void Tenderer::text (const std::string* txt, const CTM& ftmtrx, const DBbox& ovl, const TP& cor, bool sel)
 {
    if ((!_drawprop->isTextBoxHidden()) || sel)
-      _0layer.addTextOBox(ovl, cmtrx, sel);
-   CTM ftm(cmtrx.a(), cmtrx.b(), cmtrx.c(), cmtrx.d(), 0, 0);
-   ftm.Translate(cor * cmtrx);
+      _refLayer.addTextOBox(ovl, ftmtrx * topCTM(), sel);
+   CTM ftm(ftmtrx.a(), ftmtrx.b(), ftmtrx.c(), ftmtrx.d(), 0, 0);
+   ftm.Translate(cor * ftmtrx);
    _clayer->text(txt, ftm);
 }
 
@@ -1665,7 +1701,7 @@ bool Tenderer::collect()
       else
          CCLAY++;
    }
-   if (0 < _0layer.total_points())  _num_ogl_buffers ++; // reference boxes
+   if (0 < _refLayer.total_points())  _num_ogl_buffers ++; // reference boxes
    if (0 < num_total_slctdx      )  _num_ogl_buffers++;  // selected
    // Check whether we have to continue after traversing
    if (0 == _num_ogl_buffers)
@@ -1714,10 +1750,10 @@ bool Tenderer::collect()
    }
    //
    // collect the reference boxes
-   if (0 < _0layer.total_points())
+   if (0 < _refLayer.total_points())
    {
       GLuint pbuf = _ogl_buffers[current_buffer++];
-      _0layer.collect(pbuf);
+      _refLayer.collect(pbuf);
    }
    //
    // that's about it...
@@ -1751,11 +1787,11 @@ void Tenderer::draw()
       if (0 != CLAY->second->total_strings())
       {
          fontLib->bindFont();
-         CLAY->second->drawTexts();
+         CLAY->second->drawTexts(_drawprop);
       }
    }
    // draw reference boxes
-   if (0 < _0layer.total_points())   _0layer.draw(_drawprop);
+   if (0 < _refLayer.total_points())   _refLayer.draw(_drawprop);
    // Clean-up the buffers
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

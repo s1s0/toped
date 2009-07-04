@@ -2350,7 +2350,7 @@ void laydata::tdttext::draw_request(Tenderer& rend) const
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
-   rend.text(&_text, ftmtrx, _overlap, _correction, false);
+   rend.text(&_text, _translation, _overlap, _correction, false);
 }
 
 void laydata::tdttext::draw_srequest(Tenderer& rend, const SGBitSet*) const
