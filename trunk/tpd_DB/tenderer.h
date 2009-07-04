@@ -211,6 +211,29 @@ class TeselPoly {
 //
 //=============================================================================
 /**
+ *  Text reference boxes
+ */
+class TenderOBox {
+   public:
+                        TenderOBox(const DBbox&, const CTM&);
+      virtual unsigned  cDataCopy(int*, unsigned&);
+   private:
+      int4b             _obox[8];
+};
+
+/**
+ * Text objects
+ */
+class TenderText {
+   public:
+                        TenderText(const std::string*, const CTM&);
+      void              draw(bool);
+   private:
+      const std::string* _text;
+      real              _ftm[16]; //! Font translation matrix
+};
+
+/**
    Represents convex polygons. Those are mainly the boxes from the data base.
    Stores a reference to the vertex array of the original object and its size.
    The only non-trivial method is cDataCopy which transfers the vertex data
@@ -327,6 +350,19 @@ class TenderSelected {
       unsigned          _offset; //! The offset of the first vertex in the point VBO
 };
 
+class TenderSOBox : public TenderOBox, public TenderSelected {
+   public:
+                        TenderSOBox(const DBbox& box, const CTM& mtrx) :
+                           TenderOBox(box, mtrx), TenderSelected(NULL) {}
+      virtual unsigned  cDataCopy(int*, unsigned&);
+      virtual SlctTypes type() { return llps;}
+      virtual unsigned  ssize(){ return 4;}
+      virtual unsigned  sDataCopy(unsigned*, unsigned&);
+   private:
+      int4b             _obox[8];
+};
+
+
 /**
    Holds a selected or partially selected convex polygon. Its primary purpose is
    to generate the indexes for the contour (_cdata) data of its primary parent.
@@ -387,29 +423,6 @@ class TenderSWire : public TenderWire, public TenderSelected {
       virtual unsigned  sDataCopy(unsigned*, unsigned&);
    private:
       unsigned          _loffset;
-};
-
-/**
- *  Text reference boxes
- */
-class TenderOBox {
-   public:
-                        TenderOBox(const DBbox&, const CTM&);
-      unsigned          cDataCopy(int*, unsigned&);
-   private:
-      int4b             _obox[8];
-};
-
-/**
- * Text objects
- */
-class TenderText {
-   public:
-                        TenderText(const std::string*, const CTM&);
-      void              draw(bool);
-   private:
-      const std::string* _text;
-      real              _ftm[16]; //! Font translation matrix
 };
 
 /**
@@ -550,13 +563,14 @@ class TenderTV {
    public:
       enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
       enum {cont, line, cnvx, ncvx} ObjtTypes;
-      typedef std::list<TenderText*>   TenderStrings;
+      typedef std::list<TenderText*> TenderStrings;
+      typedef std::list<TenderOBox*> RefTxtList;
                         TenderTV(TenderRef* const, bool, bool, unsigned, unsigned);
                        ~TenderTV();
       void              registerBox   (TenderCnvx*);
       void              registerPoly  (TenderNcvx*, TeselPoly*);
       void              registerWire  (TenderWire*);
-      void              registerText  (TenderText*);
+      void              registerText  (TenderText*, TenderOBox*);
 
       void              collect(int*, unsigned int*, unsigned int*);
       void              draw(layprop::DrawProperties*);
@@ -577,6 +591,8 @@ class TenderTV {
       SliceWires        _line_data; //! Line data
       SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
       SlicePolygons     _ncvx_data; //! Non convex data
+      TenderStrings     _text_data; //! Text (strings)
+      RefTxtList        _txto_data; //! Text overlapping boxes
       // vertex related data
       unsigned          _alvrtxs[4]; //! array with the total number of vertexes
       unsigned          _alobjvx[4]; //! array with the total number of objects that will be drawn with vertex related functions
@@ -592,7 +608,6 @@ class TenderTV {
       unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
       //
       unsigned          _num_total_strings;
-      TenderStrings     _texts;
       bool              _filled;
       bool              _reusable;
 };
@@ -742,7 +757,7 @@ class TenderLay {
       void              box  (int4b*,                       bool, const SGBitSet*);
       void              poly (int4b*, unsigned, TeselPoly*, bool, const SGBitSet*);
       void              wire (int4b*, unsigned, word, bool, bool, const SGBitSet*);
-      void              text (const std::string*, const CTM&);
+      void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
 
       void              newSlice(TenderRef* const, bool, bool, bool, unsigned);
       bool              chunkExists(TenderRef* const);
@@ -761,6 +776,7 @@ class TenderLay {
       void              registerSBox  (TenderSCnvx*);
       void              registerSPoly (TenderSNcvx*);
       void              registerSWire (TenderSWire*);
+      void              registerSOBox (TenderSOBox*);
       ReusableTTVMap    _reusableData;
       TenderTVList      _layData;
       TenderReTVList    _reLayData;
@@ -791,11 +807,9 @@ class TenderLay {
 */
 class TenderRefLay {
    public:
-      typedef std::list<TenderOBox*> RefTxtList;
                         TenderRefLay();
                        ~TenderRefLay();
       void              addCellOBox(TenderRef*, word, bool);
-      void              addTextOBox(const DBbox&, const CTM&, bool);
       void              collect(GLuint);
       void              draw(layprop::DrawProperties*);
       unsigned          total_points();
@@ -803,19 +817,17 @@ class TenderRefLay {
    private:
       RefBoxList        _cellRefBoxes;
       RefBoxList        _cellSRefBoxes;
-      RefTxtList        _textRefBoxes;
-      RefTxtList        _textSRefBoxes;
       GLuint            _pbuffer;
       // vertex related data
-      unsigned          _alvrtxs[2]; //! total number of vertexes
-      unsigned          _alobjvx[2]; //! total number of objects that will be drawn with vertex related functions
-      GLsizei*          _sizesvx[2]; //! array of sizes for vertex sets
-      GLsizei*          _firstvx[2]; //! array of first vertexes
+      unsigned          _alvrtxs; //! total number of vertexes
+      unsigned          _alobjvx; //! total number of objects that will be drawn with vertex related functions
+      GLsizei*          _sizesvx; //! array of sizes for vertex sets
+      GLsizei*          _firstvx; //! array of first vertexes
       // index related data for selected boxes
-      unsigned          _asindxs[2]; //! total number of selected vertixes
-      unsigned          _asobjix[2]; //! total number of objects that will be drawn with index related functions
-      GLsizei*          _sizslix[2]; //! array of sizes for indexes sets
-      GLsizei*          _fstslix[2]; //! array of first indexes
+      unsigned          _asindxs; //! total number of selected vertixes
+      unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
+      GLsizei*          _sizslix; //! array of sizes for indexes sets
+      GLsizei*          _fstslix; //! array of first indexes
 };
 
 //-----------------------------------------------------------------------------
