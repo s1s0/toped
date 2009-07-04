@@ -891,6 +891,7 @@ class Tenderer {
 
 void checkOGLError(std::string);
 
+#ifdef TIME_PROFILING
 class HiResTimer {
    public:
       HiResTimer();
@@ -903,7 +904,7 @@ class HiResTimer {
       LARGE_INTEGER  _freq;
       LARGE_INTEGER  _inittime;
 #endif
-
 };
+#endif //TIME_PROFILING
 
 #endif //TENDERER_H

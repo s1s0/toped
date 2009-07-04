@@ -1098,11 +1098,15 @@ void DataCenter::openGL_draw(const CTM& layCTM)
       }
       else
       {
+#ifdef TIME_PROFILING
          HiResTimer rendTimer;
+#endif
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(_properties.drawprop());
+#ifdef TIME_PROFILING
          rendTimer.report("Total elapsed rendering time");
+#endif
          VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
@@ -1144,17 +1148,25 @@ void DataCenter::openGL_render(const CTM& layCTM)
       }
       else
       {
+#ifdef TIME_PROFILING
          HiResTimer rendTimer;
+#endif
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_render(renderer);
+#ifdef TIME_PROFILING
          rendTimer.report("Time elapsed for data traversing: ");
+#endif
          // The version with the central VBO's
          if (renderer.collect())
          {
+#ifdef TIME_PROFILING
             rendTimer.report("Time elapsed for data copying   : ");
+#endif
             renderer.draw();
+#ifdef TIME_PROFILING
             rendTimer.report("    Total elapsed rendering time: ");
+#endif
          }
          VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
       }
