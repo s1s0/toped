@@ -428,12 +428,12 @@ void laydata::tdtbox::openGL_precalc(layprop::DrawProperties& drawprop , pointli
    }
 }
 
-void laydata::tdtbox::draw_request(Tenderer& rend) const
+void laydata::tdtbox::draw_request(tenderer::TopRend& rend) const
 {
    rend.box(_pdata);
 }
 
-void laydata::tdtbox::draw_srequest(Tenderer& rend, const SGBitSet* pslist) const
+void laydata::tdtbox::draw_srequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
 {
    rend.box(_pdata, pslist);
 }
@@ -787,12 +787,12 @@ void laydata::tdtpoly::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    }
 }
 
-void laydata::tdtpoly::draw_request(Tenderer& rend) const
+void laydata::tdtpoly::draw_request(tenderer::TopRend& rend) const
 {
    rend.poly(_pdata, _psize, _teseldata);
 }
 
-void laydata::tdtpoly::draw_srequest(Tenderer& rend, const SGBitSet* pslist) const
+void laydata::tdtpoly::draw_srequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
 {
    rend.poly(_pdata, _psize, _teseldata, pslist);
 }
@@ -1298,12 +1298,12 @@ void laydata::tdtwire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       precalc(ptlist, _psize);
 }
 
-void laydata::tdtwire::draw_request(Tenderer& rend) const
+void laydata::tdtwire::draw_request(tenderer::TopRend& rend) const
 {
    rend.wire(_pdata, _psize, _width);
 }
 
-void laydata::tdtwire::draw_srequest(Tenderer& rend, const SGBitSet* pslist) const
+void laydata::tdtwire::draw_srequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
 {
    rend.wire(_pdata, _psize, _width, pslist);
 }
@@ -1719,7 +1719,7 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    drawprop.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
 }
 
-void laydata::tdtcellref::draw_request(Tenderer& rend) const
+void laydata::tdtcellref::draw_request(tenderer::TopRend& rend) const
 {
    // get overlapping box of the structure ...
    DBbox obox(structure()->cellOverlap());
@@ -1734,7 +1734,7 @@ void laydata::tdtcellref::draw_request(Tenderer& rend) const
    if (crchain) rend.pushref(this);
 }
 
-void laydata::tdtcellref::draw_srequest(Tenderer& rend, const SGBitSet*) const
+void laydata::tdtcellref::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
    // get overlapping box of the structure ...
    DBbox obox(structure()->cellOverlap());
@@ -1996,7 +1996,7 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    }
 }
 
-void laydata::tdtcellaref::draw_request(Tenderer& rend) const
+void laydata::tdtcellaref::draw_request(tenderer::TopRend& rend) const
 {
 
    // make sure that the referenced structure exists
@@ -2070,7 +2070,7 @@ void laydata::tdtcellaref::draw_request(Tenderer& rend) const
    }
 }
 
-void laydata::tdtcellaref::draw_srequest(Tenderer& rend, const SGBitSet*) const
+void laydata::tdtcellaref::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
    //@FIXME! array of cells selected! It will give confusing results in "edit in place"
    draw_request(rend);
@@ -2341,7 +2341,7 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    }
 }
 
-void laydata::tdttext::draw_request(Tenderer& rend) const
+void laydata::tdttext::draw_request(tenderer::TopRend& rend) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
@@ -2353,7 +2353,7 @@ void laydata::tdttext::draw_request(Tenderer& rend) const
    rend.text(&_text, _translation, _overlap, _correction, false);
 }
 
-void laydata::tdttext::draw_srequest(Tenderer& rend, const SGBitSet*) const
+void laydata::tdttext::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();

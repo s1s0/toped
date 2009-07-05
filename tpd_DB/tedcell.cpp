@@ -219,7 +219,7 @@ void laydata::tdtdefaultcell::openGL_draw(layprop::DrawProperties&, bool active)
 {
 }
 
-void laydata::tdtdefaultcell::openGL_render(Tenderer&, const CTM&, bool, bool) const
+void laydata::tdtdefaultcell::openGL_render(tenderer::TopRend&, const CTM&, bool, bool) const
 {
 }
 
@@ -406,7 +406,7 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
    }
 }
 
-void laydata::tdtcell::openGL_render(Tenderer& rend, const CTM& trans,
+void laydata::tdtcell::openGL_render(tenderer::TopRend& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
    rend.pushCell(_name, trans, _cellOverlap, active, selected);

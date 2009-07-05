@@ -619,7 +619,7 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
       if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst, fill);
 }
 
-short laydata::quadTree::clip_type(Tenderer& rend) const
+short laydata::quadTree::clip_type(tenderer::TopRend& rend) const
 {
    if (empty()) return 0;
    // check the entire holder for clipping...
@@ -631,7 +631,7 @@ short laydata::quadTree::clip_type(Tenderer& rend) const
    else return -1;
 }
 
-void laydata::quadTree::openGL_render(Tenderer& rend, const dataList* slst) const
+void laydata::quadTree::openGL_render(tenderer::TopRend& rend, const dataList* slst) const
 {
    tdtdata* wdt = _first;
    // The drawing will be faster like this for the cells without selected shapes

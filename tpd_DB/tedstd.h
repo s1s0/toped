@@ -84,6 +84,10 @@ namespace CIFin {
    class CifExportFile;
 }
 
+namespace tenderer {
+   class TopRend;
+}
+
 namespace laydata {
 
    const word _lmnone   = 0x0000;
@@ -224,7 +228,7 @@ namespace laydata {
    };
 
 }
-class Tenderer;
+
 class TeselPoly;
 class PSFile;
 #endif

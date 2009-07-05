@@ -547,7 +547,7 @@ void CIFin::Cif2Ted::lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string )
 DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir) 
 {
    _localDir = localDir;
-	_globalDir = globalDir;
+   _globalDir = globalDir;
    _GDSDB = NULL; _CIFDB = NULL;//_TEDDB = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
@@ -1131,7 +1131,7 @@ void DataCenter::openGL_render(const CTM& layCTM)
          tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
          return;
       }
-      Tenderer renderer( _properties.drawprop_ptr(), _properties.UU());
+      tenderer::TopRend renderer( _properties.drawprop_ptr(), _properties.UU());
       // render the grid
       for (byte gridNo = 0; gridNo < 3; gridNo++)
       {
