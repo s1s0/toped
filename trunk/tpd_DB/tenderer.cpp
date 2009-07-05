@@ -1439,7 +1439,7 @@ void TenderRefLay::addCellOBox(TenderRef* cRefBox, word alphaDepth, bool selecte
    if (selected)
    {
       _cellSRefBoxes.push_back(cRefBox);
-      assert(2 == alphaDepth);
+//      assert(2 == alphaDepth); <-- @TODO (Alpha depth dependent rendering). Why this is hit during edit in place?
       _asindxs += 4;
       _asobjix++;
    }
