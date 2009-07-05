@@ -358,8 +358,6 @@ class TenderSOBox : public TenderOBox, public TenderSelected {
       virtual SlctTypes type() { return llps;}
       virtual unsigned  ssize(){ return 4;}
       virtual unsigned  sDataCopy(unsigned*, unsigned&);
-   private:
-      int4b             _obox[8];
 };
 
 

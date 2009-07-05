@@ -2362,7 +2362,7 @@ void laydata::tdttext::draw_srequest(Tenderer& rend, const SGBitSet*) const
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
-   rend.text(&_text, ftmtrx, _overlap, _correction, true);
+   rend.text(&_text, _translation, _overlap, _correction, true);
 }
 
 void laydata::tdttext::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
