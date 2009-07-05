@@ -391,7 +391,7 @@ void layprop::ViewProperties::drawGrid() const
       p->second->Draw(_drawprop, _UU);
 }
 
-// void layprop::ViewProperties::drawGrid(Tenderer& rend) const
+// void layprop::ViewProperties::drawGrid(TopRend& rend) const
 // {
 //    typedef gridlist::const_iterator CI;
 //    for(CI p = _grid.begin(); p != _grid.end(); p++)

@@ -809,7 +809,7 @@ void laydata::tdtdesign::openGL_draw(layprop::DrawProperties& drawprop)
    }
 }
 
-void laydata::tdtdesign::openGL_render(Tenderer& rend)
+void laydata::tdtdesign::openGL_render(tenderer::TopRend& rend)
 {
    if (_target.checkedit())
    {
