@@ -1038,11 +1038,19 @@ void TenderLay::newSlice(TenderRef* const ctrans, bool fill, bool reusable, bool
    _cslice = DEBUG_NEW TenderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
-bool TenderLay::chunkExists(TenderRef* const ctrans)
+bool TenderLay::chunkExists(TenderRef* const ctrans, bool filled)
 {
    ReusableTTVMap::iterator achunk;
-   if (_reusableData.end() == ( achunk =_reusableData.find(ctrans->name()) ) )
-      return false;
+   if (filled)
+   {
+      if (_reusableFData.end() == ( achunk =_reusableFData.find(ctrans->name()) ) )
+         return false;
+   }
+   else
+   {
+      if (_reusableCData.end() == ( achunk =_reusableCData.find(ctrans->name()) ) )
+         return false;
+   }
    _reLayData.push_back(DEBUG_NEW TenderReTV(achunk->second, ctrans));
    return true;
 }
@@ -1064,8 +1072,16 @@ void TenderLay::ppSlice()
          _num_total_indexs  += _cslice->num_total_indexs();
          if (_cslice->reusable())
          {
-            assert(_reusableData.end() == _reusableData.find(_cslice->cellName()));
-            _reusableData[_cslice->cellName()] = _cslice;
+            if (_cslice->filled())
+            {
+               assert(_reusableFData.end() == _reusableFData.find(_cslice->cellName()));
+               _reusableFData[_cslice->cellName()] = _cslice;
+            }
+            else
+            {
+               assert(_reusableCData.end() == _reusableCData.find(_cslice->cellName()));
+               _reusableCData[_cslice->cellName()] = _cslice;
+            }
          }
       }
       else
@@ -1560,7 +1576,7 @@ bool Tenderer::chunkExists(unsigned layno, bool has_selected)
    if (_data.end() != _data.find(layno))
    {
       _clayer = _data[layno];
-      if (_clayer->chunkExists(_cellStack.top()) ) return true;
+      if (_clayer->chunkExists(_cellStack.top(), _drawprop->isFilled(layno) ) ) return true;
    }
    else
    {
@@ -1781,7 +1797,7 @@ void Tenderer::draw()
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       _drawprop->setCurrentColor(CLAY->first);
-      _drawprop->setCurrentFill();
+      _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
       // draw everything
       if (0 != CLAY->second->total_points())

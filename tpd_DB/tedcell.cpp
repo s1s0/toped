@@ -398,7 +398,7 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
       // fancy like this (dlist iterator) , besause a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       selectList::const_iterator dlst;
-      bool fill = drawprop.setCurrentFill();
+      bool fill = drawprop.setCurrentFill(false);// honour block_fill state)
       if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
          lay->second->openGL_draw(drawprop,dlst->second, fill);
       else
@@ -410,7 +410,6 @@ void laydata::tdtcell::openGL_render(Tenderer& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
    rend.pushCell(_name, trans, _cellOverlap, active, selected);
-
    // Draw figures
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
@@ -424,20 +423,17 @@ void laydata::tdtcell::openGL_render(Tenderer& rend, const CTM& trans,
          dlist = dlsti->second;
       else
          dlist = NULL;
-      // render depending on the area overlap between the layer chunk and
-      // current location of the view port
+      // traversing depends on the area overlap between the layer chunk and
+      // current location of the view port. In other words traverse the
+      // cells only if they are not already traversed. For more info -
+      // see the documentation of tenderer.h::TenderReTV class
       if (REF_LAY != curlayno)
       {
          short cltype = lay->second->clip_type(rend);
          switch (cltype)
          {
             case -1: {// full overlap - conditional rendering
-               if (active)
-               {// ... but active cell is getting always VIP treatment
-                  rend.setLayer(curlayno, (NULL != dlist));
-                  lay->second->openGL_render(rend, dlist);
-               }
-               else if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
+               if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
                   lay->second->openGL_render(rend, dlist);
                break;
             }
