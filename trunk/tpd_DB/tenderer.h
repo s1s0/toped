@@ -580,7 +580,8 @@ class TenderTV {
       unsigned          num_total_points();
       unsigned          num_total_indexs();
       unsigned          num_total_strings()  {return _num_total_strings;}
-      bool              reusable()           {return _reusable;}
+      bool              reusable() const     {return _reusable;}
+      bool              filled() const       {return _filled;}
       std::string       cellName()           {return _refCell->name();}
    protected:
       void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
@@ -760,7 +761,7 @@ class TenderLay {
       void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
 
       void              newSlice(TenderRef* const, bool, bool, bool, unsigned);
-      bool              chunkExists(TenderRef* const);
+      bool              chunkExists(TenderRef* const, bool);
       void              ppSlice();
       void              draw(layprop::DrawProperties*);
       void              drawSelected();
@@ -777,7 +778,8 @@ class TenderLay {
       void              registerSPoly (TenderSNcvx*);
       void              registerSWire (TenderSWire*);
       void              registerSOBox (TenderSOBox*);
-      ReusableTTVMap    _reusableData;
+      ReusableTTVMap    _reusableFData; // reusable filled chunks
+      ReusableTTVMap    _reusableCData; // reusable contour chunks
       TenderTVList      _layData;
       TenderReTVList    _reLayData;
       TenderTV*         _cslice;    //!Working variable pointing to the current slice

@@ -541,13 +541,13 @@ bool  layprop::DrawProperties::layerLocked(unsigned layno) const
    return true;
 }
 
-bool layprop::DrawProperties::setCurrentFill() const
+bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
 {
    if (REF_LAY == _drawinglayer) return true;
    // The lines below are doing effectively
    // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
    laySetList::const_iterator ilayset = _layset.find(_drawinglayer);
-   if ((_layset.end() != ilayset) && !_blockfill)
+   if ((_layset.end() != ilayset) && (!_blockfill || force_fill))
    {
       fillMAP::const_iterator ifillset = _layfill.find(ilayset->second->fill());
       if (_layfill.end() == ifillset) return false;
