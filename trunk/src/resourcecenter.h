@@ -45,22 +45,22 @@
 */
 namespace tui 
 {
-	const word _tuihorizontal	= 0x0000;
-   const word _tuivertical		= 0x0001;
+   const word _tuihorizontal   = 0x0000;
+   const word _tuivertical      = 0x0001;
 
    //forward declarations
    class TopedFrame;
    class MenuItemHandler;
-	class ToolBarHandler;
-	class ToolItem;
+   class ToolBarHandler;
+   class ToolItem;
 
    typedef void (TopedFrame::*callbackMethod)(wxCommandEvent&);
    typedef std::vector <MenuItemHandler*> itemList;
-	typedef std::vector <ToolBarHandler*> toolBarList;
-	typedef std::vector <ToolItem*> toolList;
+   typedef std::vector <ToolBarHandler*> toolBarList;
+   typedef std::vector <ToolItem*> toolList;
 
 //=================================
-//		Everything about menu
+//      Everything about menu
 //=================================
    class MenuItemHandler
    {
@@ -129,100 +129,100 @@ namespace tui
 
 
 //=================================
-//		Everything about toolbar
+//      Everything about toolbar
 //=================================
-	class ToolItem
-	{
-	public:
-		ToolItem(int toolID, const std::string &name,
-					const std::string &bitmapName,
-					const std::string &hotKey, 
-					const std::string &helpString, callbackMethod cbMethod);
-		ToolItem(int toolID, const std::string &name,
-					const std::string &bitmapName,
-					const std::string &hotKey, 
-					const std::string &helpString, 
-					const std::string func);
+   class ToolItem
+   {
+   public:
+      ToolItem(int toolID, const std::string &name,
+               const std::string &bitmapName,
+               const std::string &hotKey,
+               const std::string &helpString, callbackMethod cbMethod);
+      ToolItem(int toolID, const std::string &name,
+               const std::string &bitmapName,
+               const std::string &hotKey,
+               const std::string &helpString,
+               const std::string func);
 
-//		void addIcon(const std::string &bitmapName, int size); 
-		//std::string  hotKey(void)		const		{ return _hotKey;};
-      std::string    function(void)		const    { return _function;};
-		std::string    name(void)			const    { return _name;};
-      std::string    helpString(void)	const		{ return _helpString;};
-		bool				isOk(void)			const		{ return _ok;};
-      callbackMethod method(void)		const    { return _method;};
+//      void addIcon(const std::string &bitmapName, int size);
+      //std::string  hotKey(void)      const      { return _hotKey;};
+      std::string    function(void)      const    { return _function;};
+      std::string    name(void)         const    { return _name;};
+      std::string    helpString(void)   const      { return _helpString;};
+      bool            isOk(void)         const      { return _ok;};
+      callbackMethod method(void)      const    { return _method;};
 
-		virtual ~ToolItem();
-		wxBitmap	bitmap(void)	const {return _bitmaps[_currentSize];};
-		int		ID(void)			const {return _ID;};
-		void		changeToolSize(IconSizes size);
-	private:
-		void				init(const std::string& bitmapName);
-		int				_ID;
-		std::string		_name;
-		wxBitmap			_bitmaps[ICON_SIZE_END];
-		std::string		_bitmapNames[ICON_SIZE_END];
-		IconSizes		_currentSize;
-		
-		//std::string	_hotKey;
-      std::string		_function;	
-      std::string		_helpString;
-      callbackMethod	_method;
-		bool				_ok;
-	};
+      virtual ~ToolItem();
+      wxBitmap   bitmap(void)   const {return _bitmaps[_currentSize];};
+      int      ID(void)         const {return _ID;};
+      void      changeToolSize(IconSizes size);
+   private:
+      void            init(const std::string& bitmapName);
+      int            _ID;
+      std::string      _name;
+      wxBitmap         _bitmaps[ICON_SIZE_END];
+      std::string      _bitmapNames[ICON_SIZE_END];
+      IconSizes      _currentSize;
+   
+      //std::string   _hotKey;
+      std::string      _function;
+      std::string      _helpString;
+      callbackMethod   _method;
+      bool            _ok;
+   };
 
-	class TpdToolBar:public wxToolBar
-	{
-	public:
-		TpdToolBar(int ID, long style, IconSizes iconSize);
-	private:
-		//DECLARE_EVENT_TABLE();
-	};
+   class TpdToolBar:public wxToolBar
+   {
+   public:
+      TpdToolBar(int ID, long style, IconSizes iconSize);
+   private:
+      //DECLARE_EVENT_TABLE();
+   };
 
-	class ToolBarHandler
-	{
-	public:
-		ToolBarHandler(int ID, const std::string& name, int direction);
-		virtual ~ToolBarHandler();
+   class ToolBarHandler
+   {
+   public:
+      ToolBarHandler(int ID, const std::string& name, int direction);
+      virtual ~ToolBarHandler();
 
-		void				addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
-										const std::string &iconFileName, const std::string hotKey, 
-										const std::string &helpString, callbackMethod cbMethod);
-		void				addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
-										const std::string &iconFileName, const std::string hotKey, 
-										const std::string &helpString, const std::string &func);
-		void				deleteTool(const std::string &toolBarItem);
-		void				execute(int ID1);
-		int				direction() const {return _dockDirection;};
-		std::string		name() const {return _name;};
-		void				changeToolSize(IconSizes size);
-	private:
-		void				attachToAUI(void);
-		//Check tool and delete if exist
-		void				clearTool(const std::string &iconName);
-		std::string					_name;
-		int							_ID;
-		TpdToolBar*					_toolBar;
-		toolList						_tools;
-		int							_dockDirection;
-		bool							_floating;
-		wxPoint						_coord;
-		IconSizes					_currentSize;
-	};
+      void            addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
+                              const std::string &iconFileName, const std::string hotKey,
+                              const std::string &helpString, callbackMethod cbMethod);
+      void            addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
+                              const std::string &iconFileName, const std::string hotKey,
+                              const std::string &helpString, const std::string &func);
+      void            deleteTool(const std::string &toolBarItem);
+      void            execute(int ID1);
+      int            direction() const {return _dockDirection;};
+      std::string      name() const {return _name;};
+      void            changeToolSize(IconSizes size);
+   private:
+      void            attachToAUI(void);
+      //Check tool and delete if exist
+      void            clearTool(const std::string &iconName);
+      std::string               _name;
+      int                     _ID;
+      TpdToolBar*               _toolBar;
+      toolList                  _tools;
+      int                     _dockDirection;
+      bool                     _floating;
+      wxPoint                  _coord;
+      IconSizes               _currentSize;
+   };
 
-	bool checkToolSize(IconSizes size);
+   bool checkToolSize(IconSizes size);
 
 //=================================
-//		Resourcecenter is resposible 
-//		for handle of all ui action
-//		currently only menu and toolbar
+//      Resourcecenter is resposible
+//      for handle of all ui action
+//      currently only menu and toolbar
 //=================================
    class ResourceCenter
    {
    public:
-		ResourceCenter(void);
+      ResourceCenter(void);
       ~ResourceCenter(void);
-		void setIconDir(const std::string& dir) {_IconDir = dir;};
+      void setIconDir(const std::string& dir) {_IconDir = dir;};
       //Using for build of complete menu
       void buildMenu(wxMenuBar *menuBar);
       //Insert new menu item
@@ -234,38 +234,38 @@ namespace tui
       void executeMenu(int ID);
       bool checkExistence(const tui::MenuItemHandler & item);
 
-		/*void appendTool(const std::string toolBarName, const std::string &toolBarItem,
-							const std::string &bitmapFileName,
-							const std::string &hotKey, callbackMethod cbMethod, int direction);*/
-		void setDirection(int direction);
-		void defineToolBar(const std::string &toolBarName);
-		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
-							const std::string &iconName,
-							const std::string &hotKey, 
-							const std::string &helpString,
-							callbackMethod cbMethod);
-		void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
-							const std::string &iconName,
-							const std::string &hotKey, 
-							const std::string &helpString,
-							std::string func);
-		void deleteTool(const std::string &toolBarName, const std::string &toolBarItem);
-		/*Don�t call setToolBarSize immediately!!! 
-		It leads to nonsynchronized internal state of object and Setting Menu.
-		Better to use toolbarsize TELL-function.*/
-		void setToolBarSize(bool direction, IconSizes size);
+      /*void appendTool(const std::string toolBarName, const std::string &toolBarItem,
+                     const std::string &bitmapFileName,
+                     const std::string &hotKey, callbackMethod cbMethod, int direction);*/
+      void setDirection(int direction);
+      void defineToolBar(const std::string &toolBarName);
+      void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
+                     const std::string &iconName,
+                     const std::string &hotKey,
+                     const std::string &helpString,
+                     callbackMethod cbMethod);
+      void appendTool(const std::string &toolBarName, const std::string &toolBarItem,
+                     const std::string &iconName,
+                     const std::string &hotKey,
+                     const std::string &helpString,
+                     std::string func);
+      void deleteTool(const std::string &toolBarName, const std::string &toolBarItem);
+      /*Don�t call setToolBarSize immediately!!!
+      It leads to nonsynchronized internal state of object and Setting Menu.
+      Better to use toolbarsize TELL-function.*/
+      void setToolBarSize(bool direction, IconSizes size);
    private:
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
-		//Function to avoid copy-paste in appendTool functions
-		ToolBarHandler* proceedTool(const std::string &toolBarName, const std::string &toolBarItem);
+      //Function to avoid copy-paste in appendTool functions
+      ToolBarHandler* proceedTool(const std::string &toolBarName, const std::string &toolBarItem);
 
-      itemList				_menus;
-		toolBarList			_toolBars;
-      int					_menuCount; //number of menu items
-		int					_toolCount; //number of tool items
-		std::string			_IconDir;	//directory that contains
-		int					_direction;
+      itemList            _menus;
+      toolBarList         _toolBars;
+      int               _menuCount; //number of menu items
+      int               _toolCount; //number of tool items
+      std::string         _IconDir;   //directory that contains
+      int               _direction;
    };
 
 
@@ -273,19 +273,19 @@ namespace tui
 }
 
 namespace tellstdfunc {
-	class StringMapClientData: public wxClientData
-	{
-	public:
-		StringMapClientData():_key(),_value() {};
-		StringMapClientData(const std::string &key, const std::string &value):
-			_key(key), _value(value) {};
-		void SetData(const std::string &key, const std::string &value) {_key = key; _value = value;};
-		const std::string GetKey() const {return _key;};
-		const std::string GetValue() const {return _value;};
-	private:
-		std::string _key;
-		std::string _value;
-	};
+   class StringMapClientData: public wxClientData
+   {
+   public:
+      StringMapClientData():_key(),_value() {};
+      StringMapClientData(const std::string &key, const std::string &value):
+         _key(key), _value(value) {};
+      void SetData(const std::string &key, const std::string &value) {_key = key; _value = value;};
+      const std::string GetKey() const {return _key;};
+      const std::string GetValue() const {return _value;};
+   private:
+      std::string _key;
+      std::string _value;
+   };
 
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
@@ -293,11 +293,11 @@ namespace tellstdfunc {
    using parsercmd::argumentTYPE;
    
    TELL_STDCMD_CLASSA(stdADDMENU       );  //
-	TELL_STDCMD_CLASSA(stdTOOLBARSIZE       );  //
-	TELL_STDCMD_CLASSA(stdDEFINETOOLBAR  );  //
-	TELL_STDCMD_CLASSA(stdTOOLBARADDITEM  );  //
-	TELL_STDCMD_CLASSB(stdTOOLBARADDITEM_S     , stdTOOLBARADDITEM     );  //
-	TELL_STDCMD_CLASSA(stdTOOLBARDELETEITEM  );  //
+   TELL_STDCMD_CLASSA(stdTOOLBARSIZE       );  //
+   TELL_STDCMD_CLASSA(stdDEFINETOOLBAR  );  //
+   TELL_STDCMD_CLASSA(stdTOOLBARADDITEM  );  //
+   TELL_STDCMD_CLASSB(stdTOOLBARADDITEM_S     , stdTOOLBARADDITEM     );  //
+   TELL_STDCMD_CLASSA(stdTOOLBARDELETEITEM  );  //
 }
 
 #endif //RESOURCE_CENTER_INCLUDED
