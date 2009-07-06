@@ -566,14 +566,24 @@ void tellstdfunc::stdADDTEXT::undo() {
 
 int tellstdfunc::stdADDTEXT::execute() {
    // get the parameters from the operand stack
-   UNDOcmdQ.push_front(this);
    real   magn   = getOpValue();
    bool   flip   = getBoolValue();
    real   angle  = getOpValue();
    telldata::ttpnt  *rpnt  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    word      la  = getWordValue();
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    std::string text = getStringValue();
+   if ("" == text)
+   {
+      tell_log(console::MT_ERROR,"Empty string. Operation ignored");
+      return EXEC_ABORT;
+   }
+   if (0.0 == magn)
+   {
+      tell_log(console::MT_ERROR,"Text with size 0. Operation ignored");
+      return EXEC_ABORT;
+   }
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    real DBscale = DATC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale),
                                      magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
@@ -602,6 +612,11 @@ int tellstdfunc::stdADDTEXT_D::execute() {
    std::string name = getStringValue();
    CTM ftrans;
    ftrans.Scale(magn,magn);
+   if ("" == name)
+   {
+      tell_log(console::MT_ERROR,"Empty string. Operation ignored");
+      return EXEC_ABORT;
+   }
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_tbind, &OPstack, name, ftrans)) return EXEC_ABORT;
    // get the data from the stack

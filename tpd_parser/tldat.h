@@ -236,7 +236,7 @@ namespace telldata {
    class ttlayout: public tell_var {
    public:
                            ttlayout(): tell_var(tn_layout), _data(NULL),
-                                                      _layer(65535), _selp(NULL) {};
+                                                      _layer(ERR_LAY), _selp(NULL) {};
                            ttlayout(laydata::tdtdata* pdat, unsigned lay, SGBitSet* selp = NULL):
                              tell_var(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
                            ttlayout(const ttlayout& cobj);

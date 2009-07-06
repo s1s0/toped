@@ -2016,7 +2016,8 @@ void laydata::tdtcell::report_selected(real DBscale) const
       for (dataList::const_iterator DP = CL->second->begin(); DP != CL->second->end(); DP++)
       {
          std::ostringstream ost;
-         ost << "layer " << CL->first << " : ";
+         if (REF_LAY != CL->first)
+            ost << "layer " << CL->first << " : ";
          DP->first->info(ost, DBscale);
          tell_log(console::MT_INFO, ost.str());
       }
