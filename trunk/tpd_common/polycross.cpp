@@ -863,7 +863,7 @@ void polycross::TbEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
    if ((athr->threadAbove() == bthr) || (bthr->threadBelow() == athr))
       throw EXPTNpolyCross("Invalid segment sort in thread begin - bind");
    // action is taken only for points in the second polygon
-   if (1 == _aseg->polyNo() == _bseg->polyNo()) return;
+   if ((1 == _aseg->polyNo()) && (_aseg->polyNo() == _bseg->polyNo())) return;
    // assuming that the polygons are not crossing ...
    if (!((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr)))
       throw EXPTNpolyCross("Crossing input polygons in bind algo - begin");
@@ -940,7 +940,7 @@ void polycross::TeEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
    if ((athr->threadAbove() == bthr) || (bthr->threadBelow() == athr))
       throw EXPTNpolyCross("Invalid segment sort in thread end - bind");
    // action is taken only for points in the second polygon
-   if (2 == _aseg->polyNo() == _bseg->polyNo())
+   if ((2 == _aseg->polyNo()) && (_aseg->polyNo() == _bseg->polyNo()))
    {
       // assuming that the polygons are not crossing ...
       if (!((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr)))
@@ -1025,10 +1025,10 @@ void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
    if (0 == _aseg->threadID())
       EXPTNpolyCross("Sorted segment expected here - bind");
    SegmentThread* thr = sweepline.modifyThread(_aseg->threadID(), _bseg);
-   
+
    // action is taken only for points in the second polygon
-   if (1 == _aseg->polyNo() == _bseg->polyNo()) return;
-   
+   if ( (1 == _aseg->polyNo()) && (_aseg->polyNo() == _bseg->polyNo())) return;
+
    // first for _aseg 
    // if right point is above and the neighbour above is from polygon 1
    if ((_aseg->lP()->y() <= _aseg->rP()->y()) &&

@@ -229,15 +229,22 @@ const telldata::ttlayout& telldata::ttlayout::operator = (const ttlayout& cobj) 
 void telldata::ttlayout::echo(std::string& wstr, real DBU)
 {
    std::ostringstream ost;
-   ost << "layer " << _layer << " :";
-   _data->info(ost, DBU);
+   if (NULL == _data)
+      ost << "< !EMPTY! >";
+   else
+   {
+      if ( LAST_EDITABLE_LAYNUM > _layer)
+         ost << "layer " << _layer << " :";
+      _data->info(ost, DBU);
+   }
    if (_selp) ost << " - partially selected";
    wstr += ost.str();
 }
 
 void telldata::ttlayout::assign(tell_var* data) {
-   _data = static_cast<ttlayout*>(data)->_data;
-   _selp = static_cast<ttlayout*>(data)->_selp;
+   _data  = static_cast<ttlayout*>(data)->_data;
+   _selp  = static_cast<ttlayout*>(data)->_selp;
+   _layer = static_cast<ttlayout*>(data)->_layer;
    update_cstat();
 }
 

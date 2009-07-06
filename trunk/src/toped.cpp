@@ -1600,14 +1600,8 @@ void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
       dlg = DEBUG_NEW tui::getTextdlg(this, -1, wxT("Add text"), pos);
    }
    catch (EXPTN) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK ) {
-/*      wxString ost; ost << wxT("addtext(\"")
-                        << dlg->get_text()                      << wxT("\",")
-                        << DATC->curlay()                       << wxT(",")
-                        << wxT("getpoint(),")
-                        << dlg->get_angle()                     << wxT(",")
-                        << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
-                        << dlg->get_size()                      << wxT(");");*/
+   if ( dlg->ShowModal() == wxID_OK )
+   {
       wxString ost; ost << wxT("addtext(\"")
                         << dlg->get_text()                      << wxT("\",")
                         << dlg->get_size()                      << wxT(");");
