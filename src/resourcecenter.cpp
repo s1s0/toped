@@ -249,99 +249,105 @@ void tui::MenuItemSeparator::create(wxMenuBar *menuBar)
 
 
 tui::ToolItem::ToolItem(int toolID, const std::string &name,
-								const std::string &bitmapName,
-								const std::string &hotKey,
-								const std::string &helpString,
-								callbackMethod cbMethod)
-								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
-                        _currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(cbMethod),
-								_ok(false),	_function("")
+                        const std::string &bitmapName,
+                        const std::string &hotKey,
+                        const std::string &helpString,
+                        callbackMethod cbMethod)
+                        :_ID(toolID), _name(name),/*_hotKey(hotKey),*/
+                        _currentSize(ICON_SIZE_16x16),
+                        _function(""),
+                        _helpString(helpString),
+                        _method(cbMethod),
+                        _ok(false)
 {
-	init(bitmapName);
+   init(bitmapName);
 }
 
 tui::ToolItem::ToolItem(int toolID, const std::string &name,
-								const std::string &bitmapName,
-								const std::string &hotKey,
-								const std::string &helpString,
-								const std::string func)
-								:_ID(toolID), _name(name),/*_hotKey(hotKey),*/ 
-                        _currentSize(ICON_SIZE_16x16), _helpString(helpString), _method(NULL),
-								_ok(false),	_function(func)
+                        const std::string &bitmapName,
+                        const std::string &hotKey,
+                        const std::string &helpString,
+                        const std::string func)
+                        :_ID(toolID), _name(name),/*_hotKey(hotKey),*/
+                        _currentSize(ICON_SIZE_16x16),
+                        _function(func),
+                        _helpString(helpString),
+                        _method(NULL),
+                        _ok(false)
 {
-	init(bitmapName);
+   init(bitmapName);
 }
 
 void tui::ToolItem::init(const std::string& bitmapName)
 {
-	wxImage image[ICON_SIZE_END];
-	wxImage tempImage;
-	std::string tempImageName;
-	IconSizes isz;
-	bool absentFile = false;
-	for(
-		isz = ICON_SIZE_16x16;
-		isz < ICON_SIZE_END;
-		isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
-	{
-		char temp[100];
-		sprintf(temp,"%i", IconSizesValues[isz]);
-		std::string name = bitmapName;
-		name.append(temp);
-		name.append("x");
-		name.append(temp);
-		name.append(".png");
-		(image[isz]).LoadFile(wxString(name.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
-		_bitmapNames[isz] = name;
-		if(image[isz].IsOk())
-		{
-			_bitmaps[isz] = wxBitmap(image[isz]);
-			_ok = true;
-			if(!tempImage.IsOk())
-			{
-				tempImage = image[isz]; //Save temp image for filling of missing icons
-				tempImageName = name;
-			}
-		}
-		else
-		{
-			absentFile = true;
-		}
-	}
+   wxImage image[ICON_SIZE_END];
+   wxImage tempImage;
+   std::string tempImageName;
+   IconSizes isz;
+   bool absentFile = false;
+   for(
+      isz = ICON_SIZE_16x16;
+      isz < ICON_SIZE_END;
+      isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+   {
+      char temp[100];
+      sprintf(temp,"%i", IconSizesValues[isz]);
+      std::string name = bitmapName;
+      name.append(temp);
+      name.append("x");
+      name.append(temp);
+      name.append(".png");
+      (image[isz]).LoadFile(wxString(name.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+      _bitmapNames[isz] = name;
+      if(image[isz].IsOk())
+      {
+         _bitmaps[isz] = wxBitmap(image[isz]);
+         _ok = true;
+         if(!tempImage.IsOk())
+         {
+            tempImage = image[isz]; //Save temp image for filling of missing icons
+            tempImageName = name;
+         }
+      }
+      else
+      {
+         absentFile = true;
+      }
+   }
 
 
-	if(absentFile)
-	{
-		if (tempImage.IsOk())
-		{
-			for(
-				isz = ICON_SIZE_16x16;
-				isz < ICON_SIZE_END;
-				isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
-				{
-					if(!image[isz].IsOk())
-					{
-						//image[isz] = tempImage.Copy();
-						image[isz].LoadFile(wxString(tempImageName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
-						_bitmapNames[isz] = tempImageName;
-						_bitmaps[isz] = wxBitmap(image[isz]);
+   if(absentFile)
+   {
+      if (tempImage.IsOk())
+      {
+         for(
+            isz = ICON_SIZE_16x16;
+            isz < ICON_SIZE_END;
+            isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+            {
+               if(!image[isz].IsOk())
+               {
+                  //image[isz] = tempImage.Copy();
+                  image[isz].LoadFile(wxString(tempImageName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+                  _bitmapNames[isz] = tempImageName;
+                  _bitmaps[isz] = wxBitmap(image[isz]);
 
-						std::ostringstream ost;
-						ost<<"No icon file  "<<_bitmapNames[isz];
-						tell_log(console::MT_WARNING,ost.str());
-						ost.clear();
-						ost<<"Replaced";
-						tell_log(console::MT_WARNING,ost.str());
-					}
-				}
-		}
-		else
-		{
-			std::ostringstream ost;
-			ost<<"No any proper file for "<<bitmapName;
-			tell_log(console::MT_ERROR,ost.str());
-		}
-	}
+                  std::ostringstream ost;
+                  ost<<"No icon file  "<<_bitmapNames[isz];
+                  tell_log(console::MT_WARNING,ost.str());
+                  ost.clear();
+                  ost<<"Replaced";
+                  tell_log(console::MT_WARNING,ost.str());
+               }
+            }
+      }
+      else
+      {
+         std::ostringstream ost;
+         ost<<"No any proper file for "<<bitmapName;
+         tell_log(console::MT_ERROR,ost.str());
+      }
+   }
 
 }
 
@@ -351,219 +357,219 @@ tui::ToolItem::~ToolItem()
 
 void tui::ToolItem::changeToolSize(IconSizes size)
 {
-	if(checkToolSize(size))
-	{
-		_currentSize = size;
-	}
-	else
-	{
-		wxString info;
-		info << wxT("Wrong size for icon was chosen.");
+   if(checkToolSize(size))
+   {
+      _currentSize = size;
+   }
+   else
+   {
+      wxString info;
+      info << wxT("Wrong size for icon was chosen.");
       tell_log(console::MT_ERROR,info);
-	}
+   }
 }
 
 
 tui::TpdToolBar::TpdToolBar(int ID, long style, IconSizes iconSize)
-	:wxToolBar(Toped->getFrame(), ID, wxDefaultPosition,
-		wxSize(1000, 30), wxTB_NODIVIDER|wxTB_FLAT )
+   :wxToolBar(Toped->getFrame(), ID, wxDefaultPosition,
+      wxSize(1000, 30), wxTB_NODIVIDER|wxTB_FLAT )
 {
-	SetWindowStyle(style|GetWindowStyle());
-	int sz = IconSizesValues[iconSize];
-	SetToolBitmapSize(wxSize(sz, sz));
+   SetWindowStyle(style|GetWindowStyle());
+   int sz = IconSizesValues[iconSize];
+   SetToolBitmapSize(wxSize(sz, sz));
 }
 
 tui::ToolBarHandler::ToolBarHandler(int ID, const std::string & name, int direction)
-		:_name(name),_ID(ID), _dockDirection(direction),_floating(false),_coord(-1,-1),
-		_currentSize(ICON_SIZE_16x16)
+      :_name(name),_ID(ID), _dockDirection(direction),_floating(false),_coord(-1,-1),
+      _currentSize(ICON_SIZE_16x16)
 {
-	wxAuiPaneInfo paneInfo;
-	
-	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
-	{
-		_toolBar = DEBUG_NEW TpdToolBar(ID, wxTB_VERTICAL, ICON_SIZE_16x16);
-		paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
-		paneInfo.TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true);
-	}
-	else
-	{
-		_toolBar = DEBUG_NEW TpdToolBar(ID, wxTB_HORIZONTAL, ICON_SIZE_16x16);
-		paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
-		paneInfo.TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
-	}
-	_toolBar->Hide();
-	/*_toolBar->Realize();
-	Toped->getAuiManager()->AddPane(_toolBar, paneInfo.ToolbarPane().
-		Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Floatable(false));
-	Toped->getAuiManager()->Update();*/
+   wxAuiPaneInfo paneInfo;
+   
+   if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
+   {
+      _toolBar = DEBUG_NEW TpdToolBar(ID, wxTB_VERTICAL, ICON_SIZE_16x16);
+      paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
+      paneInfo.TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true);
+   }
+   else
+   {
+      _toolBar = DEBUG_NEW TpdToolBar(ID, wxTB_HORIZONTAL, ICON_SIZE_16x16);
+      paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
+      paneInfo.TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
+   }
+   _toolBar->Hide();
+   /*_toolBar->Realize();
+   Toped->getAuiManager()->AddPane(_toolBar, paneInfo.ToolbarPane().
+      Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Floatable(false));
+   Toped->getAuiManager()->Update();*/
 }
 
 tui::ToolBarHandler::~ToolBarHandler()
 {
-	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
-	{
-		delete (*it);
-	}
-	_tools.clear();
+   for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
+   {
+      delete (*it);
+   }
+   _tools.clear();
 }
 
-void	tui::ToolBarHandler::changeToolSize(IconSizes size)
+void   tui::ToolBarHandler::changeToolSize(IconSizes size)
 {
-	_currentSize = size;
-	wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
-	_floating = paneInfo.IsFloating();
-	if(paneInfo.IsDocked())
-	{
-		_dockDirection = paneInfo.dock_direction;
-	}
-	_coord = paneInfo.floating_pos;
+   _currentSize = size;
+   wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
+   _floating = paneInfo.IsFloating();
+   if(paneInfo.IsDocked())
+   {
+      _dockDirection = paneInfo.dock_direction;
+   }
+   _coord = paneInfo.floating_pos;
 
-	Toped->getAuiManager()->DetachPane(_toolBar);
-	_toolBar->Destroy();
+   Toped->getAuiManager()->DetachPane(_toolBar);
+   _toolBar->Destroy();
 
-	Toped->getAuiManager()->Update();
+   Toped->getAuiManager()->Update();
 
-	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
-	{
-		_toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_VERTICAL, size);
-	}
-	else
-	{
-		_toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_HORIZONTAL, size);
-	}
+   if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
+   {
+      _toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_VERTICAL, size);
+   }
+   else
+   {
+      _toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_HORIZONTAL, size);
+   }
 
-	attachToAUI();
-	for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
-	{
-		(*it)->changeToolSize(_currentSize);
-		_toolBar->AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
-		Toped->getAuiManager()->DetachPane(_toolBar);
-		_toolBar->Realize();
-		attachToAUI();
-	}
+   attachToAUI();
+   for(toolList::iterator it=_tools.begin();it!=_tools.end();it++)
+   {
+      (*it)->changeToolSize(_currentSize);
+      _toolBar->AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), wxString((*it)->helpString().c_str(),wxConvUTF8));
+      Toped->getAuiManager()->DetachPane(_toolBar);
+      _toolBar->Realize();
+      attachToAUI();
+   }
 }
 
 
 void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
-												const std::string &iconFileName,
-												const std::string hotKey,
-												const std::string &helpString,
-												callbackMethod cbMethod)
+                                    const std::string &iconFileName,
+                                    const std::string hotKey,
+                                    const std::string &helpString,
+                                    callbackMethod cbMethod)
 {
-	clearTool(iconName);
-	ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, cbMethod);
-	if (tool->isOk())
-	{
-		tool->changeToolSize(_currentSize);
-		_tools.push_back(tool);
-		_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
+   clearTool(iconName);
+   ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, cbMethod);
+   if (tool->isOk())
+   {
+      tool->changeToolSize(_currentSize);
+      _tools.push_back(tool);
+      _toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
 
-		Toped->getAuiManager()->DetachPane(_toolBar);
-		_toolBar->Realize();
-		attachToAUI();
-	}
-	else 
-	{
-		delete tool;
-	}
+      Toped->getAuiManager()->DetachPane(_toolBar);
+      _toolBar->Realize();
+      attachToAUI();
+   }
+   else
+   {
+      delete tool;
+   }
 }
 
 void tui::ToolBarHandler::addTool(int ID1, const std::string &toolBarItem, const std::string &iconName,
-												const std::string &iconFileName,
-												const std::string hotKey,
-												const std::string &helpString,
-												const std::string &func)
+                                    const std::string &iconFileName,
+                                    const std::string hotKey,
+                                    const std::string &helpString,
+                                    const std::string &func)
 {
-	clearTool(iconName);
-	ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, func);
-	if (tool->isOk())
-	{
-		tool->changeToolSize(_currentSize);
-		_tools.push_back(tool);
-		_toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
+   clearTool(iconName);
+   ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, func);
+   if (tool->isOk())
+   {
+      tool->changeToolSize(_currentSize);
+      _tools.push_back(tool);
+      _toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), wxString(helpString.c_str(), wxConvUTF8));
 
-		Toped->getAuiManager()->DetachPane(_toolBar);
-		_toolBar->Realize();
-		attachToAUI();
-	}
-	else 
-	{
-		delete tool;
-	}
+      Toped->getAuiManager()->DetachPane(_toolBar);
+      _toolBar->Realize();
+      attachToAUI();
+   }
+   else
+   {
+      delete tool;
+   }
 }
 
-void	tui::ToolBarHandler::deleteTool(const std::string &toolBarItem)
+void   tui::ToolBarHandler::deleteTool(const std::string &toolBarItem)
 {
-	toolList::iterator it;
-	for(it = _tools.begin(); it != _tools.end(); it++)
-	{
-		if ((*it)->name() == toolBarItem)
-		{
-			std::ostringstream ost;
-			ost<<"Tool item "+toolBarItem+" is deleted";
-			tell_log(console::MT_WARNING,ost.str());
-			_toolBar->DeleteTool((*it)->ID());
-			delete (*it);
-			_tools.erase(it);
-			break;
-		}
-	}
-	Toped->getAuiManager()->DetachPane(_toolBar);
-	_toolBar->Realize();
-	attachToAUI();
+   toolList::iterator it;
+   for(it = _tools.begin(); it != _tools.end(); it++)
+   {
+      if ((*it)->name() == toolBarItem)
+      {
+         std::ostringstream ost;
+         ost<<"Tool item "+toolBarItem+" is deleted";
+         tell_log(console::MT_WARNING,ost.str());
+         _toolBar->DeleteTool((*it)->ID());
+         delete (*it);
+         _tools.erase(it);
+         break;
+      }
+   }
+   Toped->getAuiManager()->DetachPane(_toolBar);
+   _toolBar->Realize();
+   attachToAUI();
 }
 
-void	tui::ToolBarHandler::clearTool(const std::string &iconName)
+void   tui::ToolBarHandler::clearTool(const std::string &iconName)
 {
-	toolList::iterator it;
-	for(it = _tools.begin(); it != _tools.end(); it++)
-	{
-		if ((*it)->name() == iconName)
-		{
-			std::ostringstream ost;
-			ost<<"Tool item "+iconName+" is redefined";
-			tell_log(console::MT_WARNING,ost.str());
-				delete (*it);
-			_tools.erase(it);
-			break;
-		}
-	}
+   toolList::iterator it;
+   for(it = _tools.begin(); it != _tools.end(); it++)
+   {
+      if ((*it)->name() == iconName)
+      {
+         std::ostringstream ost;
+         ost<<"Tool item "+iconName+" is redefined";
+         tell_log(console::MT_WARNING,ost.str());
+            delete (*it);
+         _tools.erase(it);
+         break;
+      }
+   }
 }
 
 void tui::ToolBarHandler::attachToAUI(void)
 {
-	wxAuiPaneInfo pane;
-	pane=wxAuiPaneInfo().ToolbarPane().Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(false).Floatable(false).
-			TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
-	if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
-	{
-		pane.GripperTop(true).TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true);
-	}
-	else
-	{
-		pane.GripperTop(false).TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
-	}
+   wxAuiPaneInfo pane;
+   pane=wxAuiPaneInfo().ToolbarPane().Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Gripper().GripperTop(false).Floatable(false).
+         TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
+   if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
+   {
+      pane.GripperTop(true).TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true);
+   }
+   else
+   {
+      pane.GripperTop(false).TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
+   }
 
-	if(_floating)
-	{
-		pane.Float().FloatingPosition(_coord);
-	}
-	Toped->getAuiManager()->AddPane(_toolBar,pane);
-	Toped->getAuiManager()->Update();
+   if(_floating)
+   {
+      pane.Float().FloatingPosition(_coord);
+   }
+   Toped->getAuiManager()->AddPane(_toolBar,pane);
+   Toped->getAuiManager()->Update();
 }
 
 
-void	tui::ToolBarHandler::execute(int ID1)
+void   tui::ToolBarHandler::execute(int ID1)
 {
-	for(toolList::iterator it = _tools.begin();it!=_tools.end(); it++)
-	{
-	   if (((*it)->ID())==ID1) 
+   for(toolList::iterator it = _tools.begin();it!=_tools.end(); it++)
+   {
+      if (((*it)->ID())==ID1)
       {
-			//Priority - user defined function
+         //Priority - user defined function
          if (!((*it)->function()).empty())
          {
             Console->parseCommand(wxString(((*it)->function()).c_str(), wxConvUTF8));
-				return;
+            return;
          }
          else
             if ((*it)->method()!=NULL)
@@ -575,11 +581,11 @@ void	tui::ToolBarHandler::execute(int ID1)
                return;
             }
       }
-	}
+   }
 }
 
 tui::ResourceCenter::ResourceCenter(void):
-										_menuCount(0), _toolCount(0), _direction(wxAUI_DOCK_TOP)
+                              _menuCount(0), _toolCount(0), _direction(wxAUI_DOCK_TOP)
 {
 }
 
@@ -591,7 +597,7 @@ tui::ResourceCenter::~ResourceCenter(void)
    }
    _menus.clear();
 
-	for(toolBarList::iterator tItem=_toolBars.begin(); tItem!=_toolBars.end(); tItem++)
+   for(toolBarList::iterator tItem=_toolBars.begin(); tItem!=_toolBars.end(); tItem++)
    {
       delete (*tItem);
    }
@@ -768,7 +774,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
          if (!((*mItem)->function()).empty())
          {
             Console->parseCommand(wxString(((*mItem)->function()).c_str(), wxConvUTF8));
-				return;
+            return;
          }
          else
          {
@@ -782,212 +788,212 @@ void tui::ResourceCenter::executeMenu(int ID1)
             }
          }
       }
-		//???Proceed here toolbars
+      //???Proceed here toolbars
    }
-	for(toolBarList::iterator it=_toolBars.begin(); it!=_toolBars.end(); it++)
-	{
-		(*it)->execute(ID1);
-	}
+   for(toolBarList::iterator it=_toolBars.begin(); it!=_toolBars.end(); it++)
+   {
+      (*it)->execute(ID1);
+   }
 }
 
 /*void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem, 
-												 const std::string &bitmapFileName,
-												 const std::string &hotKey, callbackMethod cbMethod, int direction)
+                                     const std::string &bitmapFileName,
+                                     const std::string &hotKey, callbackMethod cbMethod, int direction)
 {
-	int ID; 
-	std::string str = toolBarName;
+   int ID;
+   std::string str = toolBarName;
 
-	std::transform(str.begin(), str.end(), str.begin(), tolower);
-	toolBarList::const_iterator it;
-	for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-	{
-		if ((*it)->name()==str)
-		{
-			break;
-		}
-	}
-	
-	if (it==_toolBars.end())
-	{
-		ID = TDUMMY_TOOL + _toolCount;
-		//Create new toolbar
-		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, direction);
-		_toolCount++;
+   std::transform(str.begin(), str.end(), str.begin(), tolower);
+   toolBarList::const_iterator it;
+   for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+   {
+      if ((*it)->name()==str)
+      {
+         break;
+      }
+   }
+   
+   if (it==_toolBars.end())
+   {
+      ID = TDUMMY_TOOL + _toolCount;
+      //Create new toolbar
+      ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, direction);
+      _toolCount++;
 
-		ID = TDUMMY_TOOL + _toolCount;
-		ToolItem *tool = DEBUG_NEW ToolItem(ID, toolBarItem, bitmapFileName, hotKey, cbMethod);
-		_toolCount++;
-		toolBar->addTool(tool);
-	}
+      ID = TDUMMY_TOOL + _toolCount;
+      ToolItem *tool = DEBUG_NEW ToolItem(ID, toolBarItem, bitmapFileName, hotKey, cbMethod);
+      _toolCount++;
+      toolBar->addTool(tool);
+   }
  
 }*/
 
 void tui::ResourceCenter::setDirection(int direction)
 {
-	if((direction == wxAUI_DOCK_TOP) || (direction == wxAUI_DOCK_LEFT) ||
-		(direction == wxAUI_DOCK_BOTTOM) || (direction == wxAUI_DOCK_RIGHT))
-		_direction = direction;
+   if((direction == wxAUI_DOCK_TOP) || (direction == wxAUI_DOCK_LEFT) ||
+      (direction == wxAUI_DOCK_BOTTOM) || (direction == wxAUI_DOCK_RIGHT))
+      _direction = direction;
 }
 
 void tui::ResourceCenter::setToolBarSize(bool direction, IconSizes size)
 {
-	if(checkToolSize(size))
-	{
-		toolBarList::const_iterator it;
-		for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-		{
-			int dir = (*it)->direction();
-			if(_tuihorizontal==direction)
-			{
-				if((wxAUI_DOCK_TOP == dir) || (wxAUI_DOCK_BOTTOM == dir)) 
-					(*it)->changeToolSize(size);
-			}
-			else //_tuivertical==direction
-			{
-				if((wxAUI_DOCK_LEFT == dir) || (wxAUI_DOCK_RIGHT == dir)) 
-					(*it)->changeToolSize(size);
-			}
-		}
-	}
+   if(checkToolSize(size))
+   {
+      toolBarList::const_iterator it;
+      for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+      {
+         int dir = (*it)->direction();
+         if(_tuihorizontal==direction)
+         {
+            if((wxAUI_DOCK_TOP == dir) || (wxAUI_DOCK_BOTTOM == dir))
+               (*it)->changeToolSize(size);
+         }
+         else //_tuivertical==direction
+         {
+            if((wxAUI_DOCK_LEFT == dir) || (wxAUI_DOCK_RIGHT == dir))
+               (*it)->changeToolSize(size);
+         }
+      }
+   }
 }
 
 void tui::ResourceCenter::defineToolBar(const std::string &toolBarName)
 {
-	int ID;
-	//find toolbar
-	std::string str = toolBarName;
-	std::transform(str.begin(), str.end(), str.begin(), tolower);
-	toolBarList::const_iterator it;
-	for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-	{
-		if ((*it)->name()==str)
-		{
-			std::ostringstream ost;
-			ost<<"definetoolbar: already defined";
-			tell_log(console::MT_WARNING,ost.str());
-			break;
-		}
-	}
+   int ID;
+   //find toolbar
+   std::string str = toolBarName;
+   std::transform(str.begin(), str.end(), str.begin(), tolower);
+   toolBarList::const_iterator it;
+   for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+   {
+      if ((*it)->name()==str)
+      {
+         std::ostringstream ost;
+         ost<<"definetoolbar: already defined";
+         tell_log(console::MT_WARNING,ost.str());
+         break;
+      }
+   }
 
-	if (it==_toolBars.end())
-	{
-		ID = TDUMMY_TOOL + _toolCount;
-		//Create new toolbar
-		ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, _direction);
-		_toolCount++;
-		_toolBars.push_back(toolBar);
+   if (it==_toolBars.end())
+   {
+      ID = TDUMMY_TOOL + _toolCount;
+      //Create new toolbar
+      ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, _direction);
+      _toolCount++;
+      _toolBars.push_back(toolBar);
 
-	}
+   }
 
 }
 
 void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::string &toolBarItem,
-							const  std::string &iconName, const std::string &hotKey, const std::string &helpString,
-							callbackMethod cbMethod)
+                     const  std::string &iconName, const std::string &hotKey, const std::string &helpString,
+                     callbackMethod cbMethod)
 {
-	int ID;
-	//set correct filename for toolBarItem
-	std::string fullIconName = _IconDir+iconName;
-	//increase counter of toolItems
-	ID = TDUMMY_TOOL + _toolCount;
-	_toolCount++;
+   int ID;
+   //set correct filename for toolBarItem
+   std::string fullIconName = _IconDir+iconName;
+   //increase counter of toolItems
+   ID = TDUMMY_TOOL + _toolCount;
+   _toolCount++;
 
-	ToolBarHandler* toolBar = proceedTool(toolBarName, toolBarItem);
-	toolBar->addTool(ID, toolBarItem, toolBarItem, fullIconName, hotKey, helpString, cbMethod); 
+   ToolBarHandler* toolBar = proceedTool(toolBarName, toolBarItem);
+   toolBar->addTool(ID, toolBarItem, toolBarItem, fullIconName, hotKey, helpString, cbMethod);
 }
 
 void tui::ResourceCenter::appendTool(const std::string &toolBarName, const std::string &toolBarItem,
-							const std::string &iconName,
-							const std::string &hotKey, 
-							const std::string &helpString,
-							std::string func)
+                     const std::string &iconName,
+                     const std::string &hotKey,
+                     const std::string &helpString,
+                     std::string func)
 {
-	int ID;
-	//set correct filename for toolBarItem
-	std::string fullIconName = _IconDir+iconName;
-	//increase counter of toolItems
-	ID = TDUMMY_TOOL + _toolCount;
-	_toolCount++;
+   int ID;
+   //set correct filename for toolBarItem
+   std::string fullIconName = _IconDir+iconName;
+   //increase counter of toolItems
+   ID = TDUMMY_TOOL + _toolCount;
+   _toolCount++;
 
-	ToolBarHandler* toolBar = proceedTool(toolBarName, toolBarItem);
-	toolBar->addTool(ID, toolBarItem, toolBarItem, fullIconName, hotKey, helpString, func); 
+   ToolBarHandler* toolBar = proceedTool(toolBarName, toolBarItem);
+   toolBar->addTool(ID, toolBarItem, toolBarItem, fullIconName, hotKey, helpString, func);
 }
 
 
 void tui::ResourceCenter::deleteTool(const std::string &toolBarName, const std::string &toolBarItem)
 {
-	//find toolbar
-	std::string str = toolBarName;
-	std::transform(str.begin(), str.end(), str.begin(), tolower);
-	toolBarList::const_iterator it;
-	for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-	{
-		if ((*it)->name()==str)
-		{
-			break;
-		}
-	}
-	//if toolbar doesn't exist, create it
-	if (it==_toolBars.end())
-	{
-		std::ostringstream ost;
-		ost<<"toolbardeleteitem: there is no such toolbar";
-		tell_log(console::MT_WARNING,ost.str());
-		return;
-	}
-	else
-	{
-		(*it)->deleteTool(toolBarItem);
-	}
+   //find toolbar
+   std::string str = toolBarName;
+   std::transform(str.begin(), str.end(), str.begin(), tolower);
+   toolBarList::const_iterator it;
+   for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+   {
+      if ((*it)->name()==str)
+      {
+         break;
+      }
+   }
+   //if toolbar doesn't exist, create it
+   if (it==_toolBars.end())
+   {
+      std::ostringstream ost;
+      ost<<"toolbardeleteitem: there is no such toolbar";
+      tell_log(console::MT_WARNING,ost.str());
+      return;
+   }
+   else
+   {
+      (*it)->deleteTool(toolBarItem);
+   }
 }
 
 tui::ToolBarHandler* tui::ResourceCenter::proceedTool(const std::string &toolBarName, const std::string &toolBarItem)
 {
-	int ID; 
-	ToolBarHandler* toolBar;
+   int ID;
+   ToolBarHandler* toolBar;
 
-	//find toolbar
-	std::string str = toolBarName;
-	std::transform(str.begin(), str.end(), str.begin(), tolower);
-	toolBarList::const_iterator it;
-	for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-	{
-		if ((*it)->name()==str)
-		{
-			break;
-		}
-	}
-	//if toolbar doesn't exist, create it
-	if (it==_toolBars.end())
-	{
-		ID = TDUMMY_TOOL + _toolCount;
-		//Create new toolbar
-		toolBar = DEBUG_NEW ToolBarHandler(ID, str, _direction);
-		_toolCount++;
-		_toolBars.push_back(toolBar);
-	}
-	else
-	{
-		toolBar = *it;
-	}
+   //find toolbar
+   std::string str = toolBarName;
+   std::transform(str.begin(), str.end(), str.begin(), tolower);
+   toolBarList::const_iterator it;
+   for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
+   {
+      if ((*it)->name()==str)
+      {
+         break;
+      }
+   }
+   //if toolbar doesn't exist, create it
+   if (it==_toolBars.end())
+   {
+      ID = TDUMMY_TOOL + _toolCount;
+      //Create new toolbar
+      toolBar = DEBUG_NEW ToolBarHandler(ID, str, _direction);
+      _toolCount++;
+      _toolBars.push_back(toolBar);
+   }
+   else
+   {
+      toolBar = *it;
+   }
 
-	return toolBar;
+   return toolBar;
 }
 
 
 bool tui::checkToolSize(IconSizes size)
 {
-	IconSizes isz;
-	for(
-		isz = ICON_SIZE_16x16; 
-		isz < ICON_SIZE_END; 
-		isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
-	{
-		if(size == isz) break;
-	}
-	if(ICON_SIZE_END == size) 
-		return false;
-	else return true;
+   IconSizes isz;
+   for(
+      isz = ICON_SIZE_16x16;
+      isz < ICON_SIZE_END;
+      isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+   {
+      if(size == isz) break;
+   }
+   if(ICON_SIZE_END == size)
+      return false;
+   else return true;
 }
 
 //=============================================================================
@@ -1018,27 +1024,27 @@ tellstdfunc::stdTOOLBARSIZE::stdTOOLBARSIZE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 int tellstdfunc::stdTOOLBARSIZE::execute()
 {
-   int			size	= getWordValue();
-	int		direction= getWordValue();
-	tui::IconSizes sz = static_cast<tui::IconSizes>(size);
-	if(tui::checkToolSize(sz))
-	{
-		wxCommandEvent eventToolBarSize(wxEVT_TOOLBARSIZE);
-		eventToolBarSize.SetExtraLong(direction);
-		eventToolBarSize.SetInt(size);
-		wxPostEvent(Toped, eventToolBarSize);
-	}
-	else
-	{
-		std::ostringstream ost;
-		ost<<"toolbarsize: wrong size value";
+   int         size   = getWordValue();
+   int      direction= getWordValue();
+   tui::IconSizes sz = static_cast<tui::IconSizes>(size);
+   if(tui::checkToolSize(sz))
+   {
+      wxCommandEvent eventToolBarSize(wxEVT_TOOLBARSIZE);
+      eventToolBarSize.SetExtraLong(direction);
+      eventToolBarSize.SetInt(size);
+      wxPostEvent(Toped, eventToolBarSize);
+   }
+   else
+   {
+      std::ostringstream ost;
+      ost<<"toolbarsize: wrong size value";
       tell_log(console::MT_ERROR,ost.str());
-	}
+   }
    return EXEC_NEXT;
 }
 
@@ -1051,11 +1057,11 @@ tellstdfunc::stdDEFINETOOLBAR::stdDEFINETOOLBAR(telldata::typeID retype, bool eo
 
 int tellstdfunc::stdDEFINETOOLBAR::execute()
 {
-	std::string	toolbarname	= getStringValue();
-	wxString str = wxString(toolbarname.c_str(), wxConvUTF8);
-	wxCommandEvent eventToolBarDef(wxEVT_TOOLBARDEF);
-	eventToolBarDef.SetString(str);
-	wxPostEvent(Toped, eventToolBarDef);
+   std::string   toolbarname   = getStringValue();
+   wxString str = wxString(toolbarname.c_str(), wxConvUTF8);
+   wxCommandEvent eventToolBarDef(wxEVT_TOOLBARDEF);
+   eventToolBarDef.SetString(str);
+   wxPostEvent(Toped, eventToolBarDef);
 
    return EXEC_NEXT;
 }
@@ -1065,29 +1071,29 @@ tellstdfunc::stdTOOLBARADDITEM::stdTOOLBARADDITEM(telldata::typeID retype, bool 
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hshstr)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hshstr)));
 }
 
 int tellstdfunc::stdTOOLBARADDITEM::execute()
 {
    telldata::ttlist *iconCmdMapList = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-	std::string toolbarName = getStringValue();
+   std::string toolbarName = getStringValue();
 
-	telldata::tthshstr* iconCmdMap;
+   telldata::tthshstr* iconCmdMap;
    for (unsigned i = 0; i < iconCmdMapList->size(); i++)
    {
       iconCmdMap = static_cast<telldata::tthshstr*>((iconCmdMapList->mlist())[i]);
-		std::string toolName = iconCmdMap->key().value();
-		std::string tellCommand = iconCmdMap->value().value();
-		
-		//WARNING!!! Object data must destroyed in event reciever
-		StringMapClientData *data = DEBUG_NEW StringMapClientData(toolName, tellCommand);
-		
-		wxString str = wxString(toolbarName.c_str(), wxConvUTF8);
-		wxCommandEvent eventToolBarDef(wxEVT_TOOLBARADDITEM);
-		eventToolBarDef.SetClientObject(data);
-		eventToolBarDef.SetString(str);
-		wxPostEvent(Toped, eventToolBarDef);
+      std::string toolName = iconCmdMap->key().value();
+      std::string tellCommand = iconCmdMap->value().value();
+   
+      //WARNING!!! Object data must destroyed in event reciever
+      StringMapClientData *data = DEBUG_NEW StringMapClientData(toolName, tellCommand);
+   
+      wxString str = wxString(toolbarName.c_str(), wxConvUTF8);
+      wxCommandEvent eventToolBarDef(wxEVT_TOOLBARADDITEM);
+      eventToolBarDef.SetClientObject(data);
+      eventToolBarDef.SetString(str);
+      wxPostEvent(Toped, eventToolBarDef);
 
    }
    return EXEC_NEXT;
@@ -1099,15 +1105,15 @@ tellstdfunc::stdTOOLBARADDITEM_S::stdTOOLBARADDITEM_S(telldata::typeID retype, b
       stdTOOLBARADDITEM(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::tthshstr()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::tthshstr()));
 }
 
 int tellstdfunc::stdTOOLBARADDITEM_S::execute()
 {
-	telldata::tthshstr* iconCmdMap = static_cast<telldata::tthshstr*>(OPstack.top());OPstack.pop();
-	telldata::ttlist *iconCmdMapList = DEBUG_NEW telldata::ttlist(telldata::tn_hshstr);
-	iconCmdMapList->add(iconCmdMap);
-	OPstack.push(iconCmdMapList);
+   telldata::tthshstr* iconCmdMap = static_cast<telldata::tthshstr*>(OPstack.top());OPstack.pop();
+   telldata::ttlist *iconCmdMapList = DEBUG_NEW telldata::ttlist(telldata::tn_hshstr);
+   iconCmdMapList->add(iconCmdMap);
+   OPstack.push(iconCmdMapList);
 
    return stdTOOLBARADDITEM::execute();
 }
@@ -1117,21 +1123,21 @@ tellstdfunc::stdTOOLBARDELETEITEM::stdTOOLBARDELETEITEM(telldata::typeID retype,
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdTOOLBARDELETEITEM::execute()
 {
-	std::string	itemname	= getStringValue();
-	wxString utfitemname = wxString(itemname.c_str(), wxConvUTF8);
-	std::string	toolbarname	= getStringValue();
-	wxString utftoolbarname = wxString(toolbarname.c_str(), wxConvUTF8);
+   std::string   itemname   = getStringValue();
+   wxString utfitemname = wxString(itemname.c_str(), wxConvUTF8);
+   std::string   toolbarname   = getStringValue();
+   wxString utftoolbarname = wxString(toolbarname.c_str(), wxConvUTF8);
 
-	wxCommandEvent eventToolBarDelItem(wxEVT_TOOLBARDELETEITEM);
-	eventToolBarDelItem.SetString(utftoolbarname);
-	wxStringClientData *data = DEBUG_NEW wxStringClientData(utfitemname);
-	eventToolBarDelItem.SetClientObject(data);
-	wxPostEvent(Toped, eventToolBarDelItem);
+   wxCommandEvent eventToolBarDelItem(wxEVT_TOOLBARDELETEITEM);
+   eventToolBarDelItem.SetString(utftoolbarname);
+   wxStringClientData *data = DEBUG_NEW wxStringClientData(utfitemname);
+   eventToolBarDelItem.SetClientObject(data);
+   wxPostEvent(Toped, eventToolBarDelItem);
 
    return EXEC_NEXT;
 }
