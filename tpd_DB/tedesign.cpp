@@ -1173,7 +1173,9 @@ void laydata::tdtdesign::transferLayer(laydata::selectList* slst, unsigned dst)
    _target.edit()->transferLayer(slst, dst);
 }
 
-laydata::tdtdesign::~tdtdesign() {
+laydata::tdtdesign::~tdtdesign()
+{
+   _target.reset();
    //clean-up the _target stack
    for( editcellstack::iterator CECS = _target._editstack.begin();
                                 CECS != _target._editstack.end(); CECS++)
