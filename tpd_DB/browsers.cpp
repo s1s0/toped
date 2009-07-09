@@ -419,6 +419,7 @@ void browsers::CellBrowser::tdtCellSpot( const wxTreeItemId& topItem, const wxTr
    _activeStructure = actItem;
    highlightChildren(_topStructure, _editColor);
    SetItemBold(_activeStructure, true);
+   EnsureVisible(_activeStructure);
 }
 
 void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname, int action)

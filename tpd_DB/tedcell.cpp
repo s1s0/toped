@@ -206,6 +206,7 @@ std::string laydata::editobject::name() const
 
 laydata::editobject::~editobject()
 {
+   reset();
    if (_peditchain) delete _peditchain;
 }
 
@@ -1439,7 +1440,7 @@ void laydata::tdtcell::select_this(tdtdata* dat, unsigned lay)
    dat->select_this(_shapesel[lay]);
    //   _shapesel[lay]->push_back(selectDataPair(dat, NULL));
    //dat->set_status(sh_selected);
-}   
+}
 
 void laydata::tdtcell::unselect_all(bool destroy) 
 {

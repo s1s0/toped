@@ -137,12 +137,14 @@ tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-void tellstdfunc::stdOPENCELL::undo_cleanup() {
+void tellstdfunc::stdOPENCELL::undo_cleanup()
+{
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete selected; //ttlist does not have active destructor
 }
 
-void tellstdfunc::stdOPENCELL::undo() {
+void tellstdfunc::stdOPENCELL::undo()
+{
    TEUNDO_DEBUG("opencell( string ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
@@ -185,7 +187,7 @@ int tellstdfunc::stdOPENCELL::execute()
       else
       {
 /*-!-*/  DATC->unlockDB();
-         std::string news = "cell \"";news += nm;
+         std::string news = "Cell \"";news += nm;
          laydata::refnamepair striter;
          if (DATC->TEDLIB()->getLibCellRNP(nm, striter))
             news += "\" is a library cell and can't be edited";
@@ -204,12 +206,14 @@ tellstdfunc::stdEDITPUSH::stdEDITPUSH(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
-void tellstdfunc::stdEDITPUSH::undo_cleanup() {
+void tellstdfunc::stdEDITPUSH::undo_cleanup()
+{
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete selected; //ttlist does not have active destructor
 }
 
-void tellstdfunc::stdEDITPUSH::undo() {
+void tellstdfunc::stdEDITPUSH::undo()
+{
    TEUNDO_DEBUG("editpush( point ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
@@ -217,22 +221,28 @@ void tellstdfunc::stdEDITPUSH::undo() {
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
    DATC->unlockDB();
+   std::string news("Cell "); news += ATDB->activecellname(); news += " is opened";
+   tell_log(console::MT_INFO,news);
    delete selected;
    RefreshGL();
 }
 
-int tellstdfunc::stdEDITPUSH::execute() {
+int tellstdfunc::stdEDITPUSH::execute()
+{
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
    TP p1DB = TP(p1->x(), p1->y(), DBscale);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->editpush(p1DB)) {
+      if (ATDB->editpush(p1DB))
+      {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
          std::string name = ATDB->activecellname();
 /*-!-*/  DATC->unlockDB();
          browsers::celltree_highlight(name);
+         std::string news("Cell "); news += name; news += " is opened";
+         tell_log(console::MT_INFO,news);
          RefreshGL();
          LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
       }
@@ -250,36 +260,45 @@ tellstdfunc::stdEDITPOP::stdEDITPOP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
-void tellstdfunc::stdEDITPOP::undo_cleanup() {
+void tellstdfunc::stdEDITPOP::undo_cleanup()
+{
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete selected; //ttlist does not have active destructor
 }
 
-void tellstdfunc::stdEDITPOP::undo() {
+void tellstdfunc::stdEDITPOP::undo()
+{
    TEUNDO_DEBUG("editpop( ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
       browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
-   DATC->unlockDB();   
+   DATC->unlockDB();
+   std::string news("Cell "); news += ATDB->activecellname(); news += " is opened";
+   tell_log(console::MT_INFO,news);
    delete selected;
    RefreshGL();
 }
 
-int tellstdfunc::stdEDITPOP::execute() {
+int tellstdfunc::stdEDITPOP::execute()
+{
    laydata::tdtdesign* ATDB = DATC->lockDB();
    telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->editpop()) {
+      if (ATDB->editpop())
+      {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
          std::string name = ATDB->activecellname();
 /*-!-*/  DATC->unlockDB();
          browsers::celltree_highlight(name);
+         std::string news("Cell "); news += name; news += " is opened";
+         tell_log(console::MT_INFO,news);
          RefreshGL();
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
-      else {
+      else
+      {
 /*-!-*/  DATC->unlockDB();
          tell_log(console::MT_ERROR,"Already on the top level of the curent hierarchy");
          delete selected;
@@ -292,12 +311,14 @@ tellstdfunc::stdEDITPREV::stdEDITPREV(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
-void tellstdfunc::stdEDITPREV::undo_cleanup() {
+void tellstdfunc::stdEDITPREV::undo_cleanup()
+{
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete selected; //ttlist does not have active destructor
 }
 
-void tellstdfunc::stdEDITPREV::undo() {
+void tellstdfunc::stdEDITPREV::undo()
+{
    TEUNDO_DEBUG("editpop( ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
@@ -305,23 +326,30 @@ void tellstdfunc::stdEDITPREV::undo() {
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
    DATC->unlockDB();
+   std::string news("Cell "); news += ATDB->activecellname(); news += " is opened";
+   tell_log(console::MT_INFO,news);
    delete selected;
    RefreshGL();
 }
 
-int tellstdfunc::stdEDITPREV::execute() {
+int tellstdfunc::stdEDITPREV::execute()
+{
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->editprev(false)) {
+      if (ATDB->editprev(false))
+      {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
          std::string name = ATDB->activecellname();
 /*-!-*/  DATC->unlockDB();
+         std::string news("Cell "); news += name; news += " is opened";
+         tell_log(console::MT_INFO,news);
          browsers::celltree_highlight(name);
          RefreshGL();
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
-      else {
+      else
+      {
 /*-!-*/  DATC->unlockDB();
          tell_log(console::MT_ERROR,"This is the first cell open during this session");
          delete selected;
@@ -334,36 +362,45 @@ tellstdfunc::stdEDITTOP::stdEDITTOP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {}
 
-void tellstdfunc::stdEDITTOP::undo_cleanup() {
+void tellstdfunc::stdEDITTOP::undo_cleanup()
+{
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete selected; //ttlist does not have active destructor
 }
 
-void tellstdfunc::stdEDITTOP::undo() {
+void tellstdfunc::stdEDITTOP::undo()
+{
    TEUNDO_DEBUG("editpop( ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
       browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
-   DATC->unlockDB();   
+   DATC->unlockDB();
+   std::string news("Cell "); news += ATDB->activecellname(); news += " is opened";
+   tell_log(console::MT_INFO,news);
    delete selected;
    RefreshGL();
 }
 
-int tellstdfunc::stdEDITTOP::execute() {
+int tellstdfunc::stdEDITTOP::execute()
+{
    laydata::tdtdesign* ATDB = DATC->lockDB();
       telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->edittop()) {
+      if (ATDB->edittop())
+      {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
          std::string name = ATDB->activecellname();
 /*-!-*/  DATC->unlockDB();
          browsers::celltree_highlight(name);
+         std::string news("Cell "); news += name; news += " is opened";
+         tell_log(console::MT_INFO,news);
          RefreshGL();
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
-      else {
+      else
+      {
 /*-!-*/  DATC->unlockDB();
          tell_log(console::MT_ERROR,"Already on the top level of the curent hierarchy");
          delete selected;
@@ -378,13 +415,15 @@ tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-void tellstdfunc::stdGROUP::undo_cleanup() {
+void tellstdfunc::stdGROUP::undo_cleanup()
+{
    getStringValue(UNDOPstack, false);
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
 }
 
-void tellstdfunc::stdGROUP::undo() {
+void tellstdfunc::stdGROUP::undo()
+{
    TEUNDO_DEBUG("group(string) UNDO");
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    // get the name of the removed cell
@@ -398,7 +437,8 @@ void tellstdfunc::stdGROUP::undo() {
    UpdateLV();
 }
 
-int tellstdfunc::stdGROUP::execute() {
+int tellstdfunc::stdGROUP::execute()
+{
    std::string name = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB();
       bool group_sucessful = ATDB->group_selected(name, DATC->TEDLIB());
@@ -419,14 +459,16 @@ tellstdfunc::stdUNGROUP::stdUNGROUP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
-void tellstdfunc::stdUNGROUP::undo_cleanup() {
+void tellstdfunc::stdUNGROUP::undo_cleanup()
+{
    telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
    delete pl1;
 }
 
-void tellstdfunc::stdUNGROUP::undo() {
+void tellstdfunc::stdUNGROUP::undo()
+{
    TEUNDO_DEBUG("ungroup() UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       // first save the list of all currently selected components
@@ -456,15 +498,18 @@ void tellstdfunc::stdUNGROUP::undo() {
    UpdateLV();
 }
 
-int tellstdfunc::stdUNGROUP::execute() {
+int tellstdfunc::stdUNGROUP::execute()
+{
    laydata::tdtdesign* ATDB = DATC->lockDB();
       laydata::shapeList* cells4u = ATDB->ungroup_prep(DATC->TEDLIB());
    DATC->unlockDB();
-   if (cells4u->empty()) {
+   if (cells4u->empty())
+   {
       tell_log(console::MT_ERROR,"Nothing to ungroup");
       delete cells4u;
    }
-   else {
+   else
+   {
       laydata::atticList* undol = DEBUG_NEW laydata::atticList();
       UNDOcmdQ.push_front(this);
       // Push the list of the cells to be ungroupped first
