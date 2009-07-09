@@ -76,9 +76,9 @@ namespace laydata {
       bool                       iscell() const    {return _activeref == NULL;};
       layprop::ViewProperties&   viewprop() const  {return *_viewprop;}
       void                       init_viewprop(layprop::ViewProperties* viewprop) {_viewprop = viewprop;}
+      void                       reset();
       static editcellstack       _editstack;    //! the stack of all previously edited (opened) cells
    private:
-      void                       reset();
       void                       unblockfill();
       void                       blockfill();
       tdtcell*                   _activecell;   //! the curently active cell

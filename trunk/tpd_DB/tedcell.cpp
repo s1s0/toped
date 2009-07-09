@@ -206,7 +206,6 @@ std::string laydata::editobject::name() const
 
 laydata::editobject::~editobject()
 {
-   reset();
    if (_peditchain) delete _peditchain;
 }
 
