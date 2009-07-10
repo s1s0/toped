@@ -165,7 +165,7 @@ bool laydata::quadTree::fitintree(tdtdata* shape) {
 childrens quadTree. Returns the index of the child quadTree which fits 
 the shape or -1 otherwise.
 */
-int laydata::quadTree::fitsubtree(DBbox shovl, DBbox* maxsubbox ) {
+int laydata::quadTree::fitsubtree(const DBbox& shovl, DBbox* maxsubbox ) {
    float clipedarea[4];
    // check the clipping to see in witch region to place the shape
    for (byte i = 0; i < 4 ; i++) {
@@ -194,12 +194,14 @@ using the existing _overlap variable. For every layout shape fitinsubtree()
 method is called in a try to put the data in the child quadTree. At the end
 the method is called for every of the child structures.
 */
-void laydata::quadTree::sort(dataList inlist) {
+void laydata::quadTree::sort(dataList& inlist)
+{
    // if the input list is empty - nothing to do!
    if (0 == inlist.size()) return;
    dataList::iterator DI = inlist.begin();
    // if the list contains only one component - link it and run away
-   if (1 == inlist.size()) {
+   if (1 == inlist.size())
+   {
       DI->first->nextis(NULL); _first = DI->first;
       return;
    }
@@ -217,23 +219,27 @@ void laydata::quadTree::sort(dataList inlist) {
    int fitinsubbox;
    // initialize the iterator
    float sharea, totalarea = _overlap.area();
-   while (inlist.end() != DI) {
+   while (inlist.end() != DI)
+   {
       // get the overlap of the current shape
       shovl = DI->first->overlap();shovl.normalize();
       sharea = shovl.area();
       // Check it fits in some of the children
       if (totalarea <= 4 * sharea || 
-                        (-1 == (fitinsubbox = fitsubtree(shovl, maxsubbox)))) {
-         // no fit. The shape is sorted in the current tree               
+                        (-1 == (fitinsubbox = fitsubtree(shovl, maxsubbox))))
+      {
+         // no fit. The shape is sorted in the current tree
          DI->first->nextis(_first); _first = DI->first;
       }
-      else {
+      else
+      {
          // fits in sub-tree fitinsubbox
          sublist[fitinsubbox].push_back(*DI);
          // check this child already exists
          if (_quads[fitinsubbox])  // yes ?
             _quads[fitinsubbox]->_overlap.overlap(shovl);
-         else {   
+         else
+         {
             // create the child, initialize the overlapping box
             _quads[fitinsubbox] = DEBUG_NEW quadTree();
             _quads[fitinsubbox]->_overlap = shovl;
@@ -246,9 +252,9 @@ void laydata::quadTree::sort(dataList inlist) {
    // now go and sort the children - if any
    for(i = 0; i < 4; i++)
       if (_quads[i]) _quads[i]->sort(sublist[i]);
-   
-}   
-      
+
+}
+
 /*! Removes marked shapes from the quadtree without deleting them. The removed
     shapes are still listed in the _shapesel container of the current cell.
     The new overlapping box is calculated during this process and the method
@@ -714,9 +720,10 @@ void laydata::quadTree::tmpstore(dataList &store) {
 overlapping box hovl. Used when tree is modified, but there is no need
 to sort the data imediately, but only to maintain the valid overlapping 
 box of the structure*/
-void laydata::quadTree::update_overlap(DBbox hovl) {
+void laydata::quadTree::update_overlap(const DBbox& hovl)
+{
    if (empty())  _overlap = hovl;
-   else         _overlap.overlap(hovl);
+   else          _overlap.overlap(hovl);
 }
 
 /*! Puts the shape into current quadTree object without sorting. Updates 

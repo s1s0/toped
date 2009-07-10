@@ -96,12 +96,12 @@ namespace laydata {
       /*! Return the status of _invalid flag*/
       bool                 invalid() const   {return _invalid;};
    private:
-      void                 sort(dataList);
+      void                 sort(dataList&);
       bool                 fitintree(tdtdata* shape);
-      int                  fitsubtree(DBbox, DBbox*);
-      void                 tmpstore(dataList &store);
+      int                  fitsubtree(const DBbox&, DBbox*);
+      void                 tmpstore(dataList& store);
       byte                 biggest(float* array) const;
-      void                 update_overlap(DBbox hovl);
+      void                 update_overlap(const DBbox& hovl);
       /*! The overlapping box*/
       DBbox               _overlap;
       /*! A pointers to four child quadTree structures*/
