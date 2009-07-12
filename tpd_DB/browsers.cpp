@@ -88,25 +88,52 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 {
    wxMenu menu;
    _rbCellID = id;
-   if ( id.IsOk() && (id != _dbroot))
-   {
-      wxString RBcellname = GetItemText(id);
-      menu.Append(CELLTREEOPENCELL, wxT("Open " + RBcellname));
-      menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
-      menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
-      wxString ost;
-      ost << wxT("export ") << RBcellname << wxT(" to GDS");
-      menu.Append(tui::TMGDS_EXPORTC, ost);
-      ost.Clear();
-      ost << wxT("export ") << RBcellname << wxT(" to CIF");
-      menu.Append(tui::TMCIF_EXPORTC, ost);
-      menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
-   }
-   else
+   if (!id.IsOk()) return;
+   if ( id == _dbroot )
    {
       menu.Append(tui::TMCELL_NEW, wxT("New cell")); // will be catched up in toped.cpp
       menu.Append(tui::TMGDS_EXPORTL, wxT("GDS export"));
       menu.Append(tui::TMCIF_EXPORTL, wxT("CIF export"));
+   }
+   else
+   {
+      // Check whether it's a library root
+      bool libRoot = false;
+      for (LibsRoot::const_iterator CLR = _libsRoot.begin(); CLR !=_libsRoot.end(); CLR++)
+      {
+         if (*CLR == id)
+         {
+            libRoot = true;break;
+         }
+      }
+      if (libRoot)
+      {
+         menu.Append(tui::TMLIB_UNLOAD, wxT("Unload library"));
+      }
+      else
+      {
+         bool targetDBCell =  (BICN_DBCELL_HIER == GetItemImage(id,wxTreeItemIcon_Normal));
+         wxString RBcellname = GetItemText(id);
+         if (targetDBCell)
+         {
+            menu.Append(CELLTREEOPENCELL, wxT("Open " + RBcellname));
+            menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
+            menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
+            wxString ost;
+            ost << wxT("export ") << RBcellname << wxT(" to GDS");
+            menu.Append(tui::TMGDS_EXPORTC, ost);
+            ost.Clear();
+            ost << wxT("export ") << RBcellname << wxT(" to CIF");
+            menu.Append(tui::TMCIF_EXPORTC, ost);
+            menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
+         }
+         else
+         {
+            menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
+            menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
+            menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
+         }
+      }
    }
    PopupMenu(&menu, pt);
 }
@@ -186,7 +213,7 @@ void browsers::CellBrowser::copyItem(const wxTreeItemId item, const wxTreeItemId
    wxTreeItemId child = GetFirstChild(item,cookie);
    while (child.IsOk())
    {
-      copyItem(child, newitem, (1 == normalImage));
+      copyItem(child, newitem, (BICN_DBCELL_HIER == normalImage));
       child = GetNextChild(item,cookie);
    }
 }
@@ -335,10 +362,12 @@ void browsers::CellBrowser::updateHier()
       }
    }
    // traverse the libraries now
+   _libsRoot.clear();
    for(int libID = 1; libID < DATC->TEDLIB()->getLastLibRefNo(); libID++)
    {
       // library name ...
       wxTreeItemId libroot = AppendItem(GetRootItem(),wxString(DATC->getLib(libID)->name().c_str(),  wxConvUTF8));
+      _libsRoot.push_back(libroot);
       SetItemImage(libroot,BICN_LIBRARYDB,wxTreeItemIcon_Normal);
       // ... and the cells
       tdtH = DATC->getLib(libID)->hiertree()->GetFirstRoot(libID);

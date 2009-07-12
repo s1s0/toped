@@ -118,7 +118,7 @@ namespace browsers
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
          virtual          ~CellBrowser()  {};
-         virtual  void    showMenu(wxTreeItemId id, const wxPoint& pt);
+         virtual  void     showMenu(wxTreeItemId id, const wxPoint& pt);
          bool              findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent);
          void              copyItem(const wxTreeItemId, const wxTreeItemId, bool targetLib = true);
          void              highlightChildren(wxTreeItemId, wxColour);
@@ -127,13 +127,14 @@ namespace browsers
          wxString          activeCellName();
          void              statusHighlight(wxString, wxString, wxString);
          wxString          rbCellName();
-         virtual void     collectInfo(bool);
+         virtual void      collectInfo(bool);
       protected:
          wxTreeItemId      _rbCellID;
-         virtual void     onItemRightClick(wxTreeEvent&);
-         virtual void     onBlankRMouseUp(wxMouseEvent&);
-         virtual void     onReportlay(wxCommandEvent& WXUNUSED(event)) {assert(false);}
+         virtual void      onItemRightClick(wxTreeEvent&);
+         virtual void      onBlankRMouseUp(wxMouseEvent&);
+         virtual void      onReportlay(wxCommandEvent& WXUNUSED(event)) {assert(false);}
       private:
+         typedef std::list<wxTreeItemId> LibsRoot;
          void              initialize();
          void              collectChildren(const laydata::TDTHierTree*, int, const wxTreeItemId&);
          void              updateFlat();
@@ -147,6 +148,7 @@ namespace browsers
          wxTreeItemId      _topStructure;
          wxTreeItemId      _activeStructure;
          wxTreeItemId      _dbroot; // The actual Root always invisible (because of the libraries)
+         LibsRoot          _libsRoot;
          bool              _hierarchy_view;
          wxColor           _listColor;
          wxColor           _editColor;
