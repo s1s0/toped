@@ -266,9 +266,9 @@ wxString browsers::CellBrowser::rbCellName()
 
 void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxString selected)
 {
-   if (findItem(top, _topStructure, GetRootItem()))
+   if (findItem(top, _topStructure, _dbroot))
       highlightChildren(_topStructure, _editColor);
-   if (findItem(active, _activeStructure, GetRootItem()))
+   if (findItem(active, _activeStructure, _dbroot))
    {
       SetItemBold(_activeStructure, true);
       EnsureVisible(_activeStructure);
@@ -311,12 +311,8 @@ void browsers::CellBrowser::updateFlat()
          laydata::cellList::const_iterator CL;
          for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
          {
-            wxString cellName = wxString( CL->first.c_str(),  wxConvUTF8);
-            if (!findItem(cellName, temp, GetRootItem()))
-            {
-               wxTreeItemId cellitem = AppendItem(_dbroot, cellName);
-               SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
-            }
+            wxTreeItemId cellitem = AppendItem(_dbroot, wxString( CL->first.c_str(),  wxConvUTF8));
+            SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
          }
       }
       delete cll;
@@ -338,12 +334,8 @@ void browsers::CellBrowser::updateFlat()
          laydata::cellList::const_iterator CL;
          for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
          {
-            wxString cellName = wxString( CL->first.c_str(),  wxConvUTF8);
-            if (!findItem(cellName, temp, GetRootItem()))
-            {
-               wxTreeItemId cellitem = AppendItem(libroot, cellName);
-               SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
-            }
+            wxTreeItemId cellitem = AppendItem(libroot, wxString( CL->first.c_str(),  wxConvUTF8));
+            SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
          }
       }
       delete cll;
@@ -480,13 +472,13 @@ void browsers::CellBrowser::onCommand( wxCommandEvent& event )
    {
       case BT_CELL_OPEN :{
          wxTreeItemId topItem;
-         VERIFY(findItem(event.GetString(), topItem, GetRootItem()));
+         VERIFY(findItem(event.GetString(), topItem, _dbroot));
          tdtCellSpot(topItem, topItem);
          break;
       }
       case BT_CELL_HIGHLIGHT: {
          wxTreeItemId actItem;
-         VERIFY(findItem(event.GetString(), actItem, GetRootItem()));
+         VERIFY(findItem(event.GetString(), actItem, _dbroot));
          tdtCellSpot(_topStructure, actItem);
          break;
       }
