@@ -66,7 +66,7 @@ int tellstdfunc::stdNEWDESIGNd::execute()
       ATDB->btreeAddMember    = &browsers::treeAddMember;
       ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
    DATC->unlockDB();
-   browsers::addTDTtab();
+   browsers::addTDTtab(true, false);
    // reset UNDO buffers;
    UNDOcmdQ.clear();
    while (!UNDOPstack.empty()) {
@@ -95,7 +95,7 @@ int tellstdfunc::TDTread::execute()
             // Initialize call back functions
             ATDB->btreeAddMember    = &browsers::treeAddMember;
             ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-               // time stamps
+            // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
             // Gatering the used layers & update the layer definitions
@@ -108,7 +108,7 @@ int tellstdfunc::TDTread::execute()
             updateLayerDefinitions( DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
-         browsers::addTDTtab(true);
+         browsers::addTDTtab(true, true);
          //
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
@@ -168,7 +168,7 @@ int tellstdfunc::TDTreadIFF::execute()
             updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the cell hierarchy browser
-         browsers::addTDTtab(true);
+         browsers::addTDTtab(true, true);
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -213,7 +213,7 @@ int tellstdfunc::TDTloadlib::execute()
          updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, libID);
          DATC->TEDLIB()->cleanUndefLib();
          // populating cell hierarchy browser
-         browsers::addTDTtab(true);
+         browsers::addTDTtab(false, true);
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
       else
@@ -243,7 +243,7 @@ int tellstdfunc::TDTunloadlib::execute()
    
    if (DATC->TDTunloadlib(libname))
    {
-      browsers::addTDTtab(true);
+      browsers::addTDTtab(false, true);
       LogFile << LogFile.getFN() << "(\""<< libname << "\");"; LogFile.flush();
    }
    else

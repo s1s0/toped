@@ -199,7 +199,7 @@ namespace browsers
                           ~TDTbrowser();
          void              initialize();
          wxString          selectedCellName() const;
-         void              collectInfo()              {_cellBrowser->collectInfo(_hierarchy_view);}
+         void              collectInfo(bool keepAct);
          CellBrowser*      cellBrowser() const        {return _cellBrowser;}
       private:
          void              onReportUsedLayers(wxCommandEvent& WXUNUSED(event));
@@ -342,9 +342,9 @@ namespace browsers
          wxString             tdtSelectedCellName() const   { return _tdtStruct->selectedCellName();}
          wxWindow*            tellParser() const            { return _tellParser;   }
          void                 setTellParser(wxWindow* tp)   { _tellParser = tp;      }
-         private:
+      private:
          void                 onCommand(wxCommandEvent&);
-         void                 onTellAddTdtLib();
+         void                 onTellAddTdtLib(bool);
          void                 onTellAddGdsTab();
          void                 onTellClearGdsTab();
          void                 onTellAddCifTab();
@@ -362,7 +362,7 @@ namespace browsers
    void layer_status(BROWSER_EVT_TYPE, const word, const bool);
    void layer_add(const std::string, const word);
    void layer_default(const word, const word);
-   void addTDTtab(bool newthread = false);
+   void addTDTtab(bool, bool newthread);
    void addGDStab();
    void addCIFtab();
    void clearGDStab();
