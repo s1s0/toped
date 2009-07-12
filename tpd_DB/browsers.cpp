@@ -44,6 +44,7 @@
 #include "../ui/nolay.xpm"
 #include "../ui/librarydb.xpm"
 #include "../ui/targetdb.xpm"
+#include "../ui/cellundef.xpm"
 #include "../tpd_ifaces/gds_io.h"
 #include "../tpd_ifaces/cif_io.h"
 
@@ -354,7 +355,7 @@ void browsers::CellBrowser::updateFlat()
          for(laydata::cellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
          {
             wxTreeItemId cellitem = AppendItem(nrootUndef, wxString( (*it).first.c_str(),  wxConvUTF8));
-            SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);//<--@TODO UNdefined cell icon
+            SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
          }
          SortChildren(nrootUndef);
       }
@@ -422,7 +423,7 @@ void browsers::CellBrowser::updateHier()
          for(laydata::cellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
          {
             wxTreeItemId cellitem = AppendItem(nrootUndef, wxString( (*it).first.c_str(),  wxConvUTF8));
-            SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);//<--@TODO UNdefined cell icon
+            SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
          }
          SortChildren(nrootUndef);
       }
@@ -856,12 +857,13 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
 
    _imageList = DEBUG_NEW wxImageList(16, 16, TRUE);
-   _imageList->Add( wxIcon( cellhg    ) ); //  libcellh  (library cell with hierarchy)
-   _imageList->Add( wxIcon( cellh     ) ); //  dbcellh   (DB      cell with hierarchy)
-   _imageList->Add( wxIcon( cellfg    ) ); //  libcellf  (library cell  w/o hierarchy)
-   _imageList->Add( wxIcon( cellf     ) ); //  dbcellf   (DB      cell  w/o hierarchy)
-   _imageList->Add( wxIcon( librarydb ) ); //  library   (library                    )
-   _imageList->Add( wxIcon( targetdb  ) ); //  targetdb  (DB                         )
+   _imageList->Add( wxIcon( cellhg    ) ); // BICN_LIBCELL_HIER
+   _imageList->Add( wxIcon( cellh     ) ); // BICN_DBCELL_HIER
+   _imageList->Add( wxIcon( cellfg    ) ); // BICN_LIBCELL_FLAT
+   _imageList->Add( wxIcon( cellf     ) ); // BICN_DBCELL_FLAT
+   _imageList->Add( wxIcon( librarydb ) ); // BICN_LIBRARYDB
+   _imageList->Add( wxIcon( targetdb  ) ); // BICN_TARGETDB
+   _imageList->Add( wxIcon( cellundef ) ); // BICN_UNDEFCELL
 
    _cellBrowser->SetImageList(_imageList);
    SetSizerAndFit(thesizer);

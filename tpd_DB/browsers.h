@@ -107,7 +107,8 @@ namespace browsers
       BICN_LIBCELL_FLAT = 2,  // library cell  w/o hierarchy  2
       BICN_DBCELL_FLAT  = 3,  // DB      cell  w/o hierarchy  3
       BICN_LIBRARYDB    = 4,  // library                      4
-      BICN_TARGETDB     = 5   // DB                           5
+      BICN_TARGETDB     = 5,  // DB                           5
+      BICN_UNDEFCELL    = 6
    };
 
    //===========================================================================

@@ -198,7 +198,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    if (NULL == x_visual) return;
 #endif
    crossCur = MakeCursor(crosscursor,16, 16);
-   //crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
+//   crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
    SetCursor(*crossCur);
    tmp_wnd = false;
    mouse_input = false;
