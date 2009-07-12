@@ -976,14 +976,18 @@ void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
 {
+   wxString libName(_browsers->tdtSelectedCellName());
+
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getLibList* dlg = NULL;
-   try {
-      dlg = DEBUG_NEW tui::getLibList(this, -1, wxT("Close Library"), pos, wxT(""));
+   try
+   {
+      dlg = DEBUG_NEW tui::getLibList(this, -1, wxT("Close Library"), pos, libName);
    }
    catch (EXPTN) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK ) {
+   if ( dlg->ShowModal() == wxID_OK )
+   {
       wxString ost;
       ost << wxT("unloadlib(\"") << dlg->get_selected() << wxT("\");");
       _cmdline->parseCommand(ost);
@@ -991,12 +995,14 @@ void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
    delete dlg;
 }
 
-void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
+void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt)
+{
    SetStatusText(wxT("Including command file..."));
    wxFileDialog dlg2(this, wxT("Select a script to run"), wxT(""), wxT(""),
       wxT("Tell files(*.tll)|*.tll|All files(*.*)|*.*"),
       tpdfOPEN);
-   if (wxID_OK == dlg2.ShowModal()) {
+   if (wxID_OK == dlg2.ShowModal())
+   {
       wxString filename = dlg2.GetFilename();
       wxString ost;
       ost << wxT("#include \"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\";");
@@ -1006,11 +1012,13 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt) {
    else SetStatusText(wxT("include aborted"));
 }
 
-void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event)) {
+void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
+{
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
                      wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF|All files(*.*)|*.*"),
       tpdfOPEN);
-   if (wxID_OK == dlg2.ShowModal()) {
+   if (wxID_OK == dlg2.ShowModal())
+   {
       SetStatusText(wxT("Parsing GDS file..."));
       wxString filename = dlg2.GetFilename();
       wxString ost;
