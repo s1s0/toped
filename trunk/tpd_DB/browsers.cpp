@@ -269,17 +269,16 @@ void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxStr
    if (findItem(top, _topStructure, GetRootItem()))
       highlightChildren(_topStructure, _editColor);
    if (findItem(active, _activeStructure, GetRootItem()))
+   {
       SetItemBold(_activeStructure, true);
-
+      EnsureVisible(_activeStructure);
+   }
    wxTreeItemId      item;
    if (findItem(selected, item, GetRootItem()))
-   {
       SelectItem(item);
-      EnsureVisible(item);
-   }
 }
 
-void browsers::CellBrowser::collectInfo( bool hier )
+void browsers::CellBrowser::collectInfo( bool hier)
 {
    initialize();
    _hierarchy_view = hier;
@@ -891,6 +890,18 @@ wxString browsers::TDTbrowser::selectedCellName() const
    return _cellBrowser->selectedCellName();
 }
 
+void browsers::TDTbrowser::collectInfo(bool keepAct)
+{
+   wxString selectedcn(_cellBrowser->selectedCellName());
+   wxString topcn(_cellBrowser->topCellName());
+   wxString activecn(_cellBrowser->activeCellName());
+   _cellBrowser->collectInfo(_hierarchy_view);
+   if (keepAct)
+   {
+      _cellBrowser->statusHighlight(topcn, activecn, selectedcn);
+   }
+}
+
 browsers::TDTbrowser::~TDTbrowser()
 {
    _imageList->RemoveAll();
@@ -1042,7 +1053,7 @@ void browsers::browserTAB::onCommand(wxCommandEvent& event)
    int command = event.GetInt();
    switch (command) 
    {
-      case BT_ADDTDT_LIB:onTellAddTdtLib();break;
+      case BT_ADDTDT_LIB: onTellAddTdtLib(1 == event.GetExtraLong());break;
       case BT_ADDGDS_TAB:onTellAddGdsTab();break;
       case BT_CLEARGDS_TAB:onTellClearGdsTab(); break;
       case BT_ADDCIF_TAB:onTellAddCifTab();break;
@@ -1051,9 +1062,9 @@ void browsers::browserTAB::onCommand(wxCommandEvent& event)
    }
 }
 
-void browsers::browserTAB::onTellAddTdtLib()
+void browsers::browserTAB::onTellAddTdtLib(bool targetDB)
 {
-   _tdtStruct->collectInfo();
+   _tdtStruct->collectInfo(~targetDB);
 }
 
 void browsers::browserTAB::onTellAddGdsTab()
@@ -1142,11 +1153,12 @@ void browsers::layer_default(const word newlay, const word oldlay)
    delete bt;
 }
 
-void browsers::addTDTtab(bool newthread)
+void browsers::addTDTtab(bool targetDB, bool newthread)
 {
    assert(Browsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(BT_ADDTDT_LIB);
+   eventADDTAB.SetExtraLong(targetDB ? 1 : 0);
 //   eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
 //   eventADDTAB.SetExtraLong(traverse_all ? 1 : 0);
    // Note about threads here!
