@@ -37,9 +37,13 @@
 #include "datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
-#include "../ui/cell_normal.xpm"
-#include "../ui/cell_expanded.xpm"
+#include "../ui/cellhg.xpm"
+#include "../ui/cellh.xpm"
+#include "../ui/cellfg.xpm"
+#include "../ui/cellf.xpm"
 #include "../ui/nolay.xpm"
+#include "../ui/librarydb.xpm"
+#include "../ui/targetdb.xpm"
 #include "../tpd_ifaces/gds_io.h"
 #include "../tpd_ifaces/cif_io.h"
 
@@ -160,19 +164,29 @@ bool browsers::CellBrowser::findItem(const wxString name, wxTreeItemId& item, co
    return false;
 }
 
-void browsers::CellBrowser::copyItem(const wxTreeItemId item, const wxTreeItemId newparent) 
+void browsers::CellBrowser::copyItem(const wxTreeItemId item, const wxTreeItemId newparent, bool targetLib) 
 {
    wxTreeItemId newitem = AppendItem(newparent, GetItemText(item));
-   SetItemImage(newitem, GetItemImage(item,wxTreeItemIcon_Normal), wxTreeItemIcon_Normal);
-   SetItemImage(newitem, GetItemImage(item,wxTreeItemIcon_Expanded), wxTreeItemIcon_Expanded);
-   SetItemImage(newparent,0,wxTreeItemIcon_Normal);
-   SetItemImage(newparent,1,wxTreeItemIcon_Expanded);
+   int normalImage   = GetItemImage(item,wxTreeItemIcon_Normal);
+   int expandedImage = GetItemImage(item,wxTreeItemIcon_Expanded);
+   SetItemImage(newitem, normalImage, wxTreeItemIcon_Normal);
+   SetItemImage(newitem, expandedImage, wxTreeItemIcon_Expanded);
+   if (targetLib)
+   {
+      SetItemImage(newparent,BICN_DBCELL_HIER,wxTreeItemIcon_Normal);
+      SetItemImage(newparent,BICN_DBCELL_FLAT,wxTreeItemIcon_Expanded);
+   }
+   else
+   {
+      SetItemImage(newparent,BICN_LIBCELL_HIER,wxTreeItemIcon_Normal);
+      SetItemImage(newparent,BICN_LIBCELL_FLAT,wxTreeItemIcon_Expanded);
+   }
    SetItemTextColour(newitem, GetItemTextColour(newparent));
    wxTreeItemIdValue cookie;
    wxTreeItemId child = GetFirstChild(item,cookie);
    while (child.IsOk())
    {
-      copyItem(child, newitem);
+      copyItem(child, newitem, (1 == normalImage));
       child = GetNextChild(item,cookie);
    }
 }
@@ -309,16 +323,13 @@ void browsers::CellBrowser::updateHier()
    {
       // design name ...
       _dbroot = AppendItem(GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
-      SetItemImage(_dbroot,0,wxTreeItemIcon_Normal);
-      SetItemImage(_dbroot,1,wxTreeItemIcon_Expanded);
+      SetItemImage(_dbroot,BICN_TARGETDB,wxTreeItemIcon_Normal);
       // ... and the cells
       tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
       while (tdtH)
       {
          std::string str = tdtH->GetItem()->name();
          nroot = AppendItem(_dbroot, wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
-         SetItemImage(nroot,0,wxTreeItemIcon_Normal);
-         SetItemImage(nroot,1,wxTreeItemIcon_Expanded);
          collectChildren(tdtH, ALL_LIB, nroot);
          tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
       }
@@ -328,16 +339,13 @@ void browsers::CellBrowser::updateHier()
    {
       // library name ...
       wxTreeItemId libroot = AppendItem(GetRootItem(),wxString(DATC->getLib(libID)->name().c_str(),  wxConvUTF8));
-      SetItemImage(libroot,0,wxTreeItemIcon_Normal);
-      SetItemImage(libroot,1,wxTreeItemIcon_Expanded);
+      SetItemImage(libroot,BICN_LIBRARYDB,wxTreeItemIcon_Normal);
       // ... and the cells
       tdtH = DATC->getLib(libID)->hiertree()->GetFirstRoot(libID);
       while (tdtH)
       {
          std::string str = tdtH->GetItem()->name();
          nroot = AppendItem(libroot, wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
-         SetItemImage(nroot,0,wxTreeItemIcon_Normal);
-         SetItemImage(nroot,1,wxTreeItemIcon_Expanded);
          collectChildren(tdtH, libID, nroot);
          tdtH = tdtH->GetNextRoot(libID);
       }
@@ -349,8 +357,7 @@ void browsers::CellBrowser::updateHier()
    {
       // the type ...
       wxTreeItemId nrootUndef = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
-      SetItemImage(nrootUndef,0,wxTreeItemIcon_Normal);
-      SetItemImage(nrootUndef,1,wxTreeItemIcon_Expanded);
+      SetItemImage(nrootUndef,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
       // ... and the cells
       for(laydata::cellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
          AppendItem(nrootUndef, wxString( (*it).first.c_str(),  wxConvUTF8));
@@ -363,12 +370,31 @@ void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
                                            int libID, const wxTreeItemId& lroot)
 {
    const laydata::TDTHierTree* child= root->GetChild(libID);
+   int rootLibID = root->GetItem()->libID();
+   if (child)
+   {
+      if (rootLibID == TARGETDB_LIB)
+      {
+         SetItemImage(lroot,BICN_DBCELL_HIER,wxTreeItemIcon_Normal);
+         SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Expanded);
+      }
+      else
+      {
+         SetItemImage(lroot,BICN_LIBCELL_HIER,wxTreeItemIcon_Normal);
+         SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Expanded);
+      }
+   }
+   else
+   {
+      if (rootLibID == TARGETDB_LIB)
+         SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+      else
+         SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
+   }
    wxTreeItemId nroot;
    wxTreeItemId temp;
    while (child)
    {
-      SetItemImage(lroot,0,wxTreeItemIcon_Normal);
-      SetItemImage(lroot,1,wxTreeItemIcon_Expanded);
       nroot = AppendItem(lroot, wxString(child->GetItem()->name().c_str(), wxConvUTF8));
       SortChildren(lroot);
       collectChildren(child, libID, nroot);
@@ -434,6 +460,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             VERIFY(findItem(parentname, hnewparent, GetRootItem()));
             item = AppendItem(hnewparent, cellname);
             SetItemTextColour(item,GetItemTextColour(GetRootItem()));
+            SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
             SortChildren(GetRootItem());
          }
          else
@@ -759,13 +786,17 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
 
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
-   _cellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_TPD_CELLTREE, pos, size, style | wxTR_HIDE_ROOT);
+   _cellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_TPD_CELLTREE, pos, size, style | wxTR_HIDE_ROOT | wxTR_NO_BUTTONS | wxTR_LINES_AT_ROOT);
    thesizer->Add(_cellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
 
    _imageList = DEBUG_NEW wxImageList(16, 16, TRUE);
-   _imageList->Add( wxIcon( cell_normal   ) );
-   _imageList->Add( wxIcon( cell_expanded ) );
+   _imageList->Add( wxIcon( cellhg    ) ); //  libcellh  (library cell with hierarchy)
+   _imageList->Add( wxIcon( cellh     ) ); //  dbcellh   (DB      cell with hierarchy)
+   _imageList->Add( wxIcon( cellfg    ) ); //  libcellf  (library cell  w/o hierarchy)
+   _imageList->Add( wxIcon( cellf     ) ); //  dbcellf   (DB      cell  w/o hierarchy)
+   _imageList->Add( wxIcon( librarydb ) ); //  library   (library                    )
+   _imageList->Add( wxIcon( targetdb  ) ); //  targetdb  (DB                         )
 
    _cellBrowser->SetImageList(_imageList);
    SetSizerAndFit(thesizer);
@@ -1389,14 +1420,14 @@ void browsers::LayerButton::onPaint(wxPaintEvent&event)
 
 void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 {
-	//???Warning! Here istemporary solution for right vusulalisation of layer buttons
-	//after resizing
-	LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
-	if(_buttonWidth!=parent->GetClientSize().GetWidth())
-	{
-		parent->refresh();
-	}
-	//???
+   //???Warning! Here istemporary solution for right vusulalisation of layer buttons
+   //after resizing
+   LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
+   if(_buttonWidth!=parent->GetClientSize().GetWidth())
+   {
+      parent->refresh();
+   }
+   //???
 
    if (event.ShiftDown())
    //Lock layer
@@ -1435,14 +1466,14 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 
 void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 {
-	//???Warning! Here istemporary solution for right vusulalisation of layer buttons
-	//after resizing
-	LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
-	if(_buttonWidth!=parent->GetClientSize().GetWidth())
-	{
-		parent->refresh();
-	}
-	//???
+   //???Warning! Here istemporary solution for right vusulalisation of layer buttons
+   //after resizing
+   LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
+   if(_buttonWidth!=parent->GetClientSize().GetWidth())
+   {
+      parent->refresh();
+   }
+   //???
 
    //_locked = !_locked;
    wxString cmd;
@@ -1550,24 +1581,24 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
       case     BT_LAYER_ADD:
          {
             LayerInfo* layer = static_cast<LayerInfo*>(event.GetClientData());
-				addButton(layer);
-				delete (static_cast<LayerInfo*>(layer));
-				break;
+            addButton(layer);
+            delete (static_cast<LayerInfo*>(layer));
+            break;
          }
       default: assert(false);
    }
 }
 
-void	browsers::LayerPanel::addButton(LayerInfo *layer)
+void  browsers::LayerPanel::addButton(LayerInfo *layer)
 {
-	   LayerButton* wbutton;
+      LayerButton* wbutton;
       int szx, szy;
 
       //Remove selection from current button
       if (NULL != _selectedButton) _selectedButton->unselect();
       if ((wbutton = checkDefined( layer->layno() )))
-	   {
-			//Button already exists, replace it
+      {
+         //Button already exists, replace it
          //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
          //wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
          int x, y;
@@ -1582,27 +1613,27 @@ void	browsers::LayerPanel::addButton(LayerInfo *layer)
       }
       else
       {
-			//Button doesn't exist, create new button
+         //Button doesn't exist, create new button
          GetClientSize(&szx, &szy);
          LayerButton* layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
-															wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
-															wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
+                                             wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
+                                             wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
          _buttonMap[layer->layno()] = layerButton;
          _buttonCount++;
          this->SetScrollbars(0, buttonHeight, 0, _buttonCount);
-			//Reorder buttons
-			int number = 0;
-			for(LayerButtonMap::iterator it=_buttonMap.begin() ;it!=_buttonMap.end(); ++it, ++number)
-			{
-				LayerButton* tempButton = (*it).second;
-				wxPoint point = wxPoint(0, number*buttonHeight);
-				tempButton->Move(point);
-			}
+         //Reorder buttons
+         int number = 0;
+         for(LayerButtonMap::iterator it=_buttonMap.begin() ;it!=_buttonMap.end(); ++it, ++number)
+         {
+            LayerButton* tempButton = (*it).second;
+            wxPoint point = wxPoint(0, number*buttonHeight);
+            tempButton->Move(point);
+         }
       }
       //Restore selection
       if ((wbutton = checkDefined( DATC->curlay())))
       {
-			_selectedButton = wbutton;
+         _selectedButton = wbutton;
          _selectedButton->select();
       }
 }
@@ -1617,7 +1648,7 @@ void browsers::LayerPanel::onSize(wxSizeEvent& evt)
    Refresh();
 }
 
-void	browsers::LayerPanel::refresh(void)
+void  browsers::LayerPanel::refresh(void)
 {
    for(LayerButtonMap::const_iterator it = _buttonMap.begin(); it!=_buttonMap.end();++it)
    {
@@ -1630,7 +1661,7 @@ void	browsers::LayerPanel::refresh(void)
 wxString browsers::LayerPanel::getAllSelected()
 {
       //bool multi_selection = _layerlist->GetSelectedItemCount() > 1;
-	if (_buttonMap.empty()) return wxEmptyString;
+   if (_buttonMap.empty()) return wxEmptyString;
    wxString layers = wxT("{");
    for(LayerButtonMap::iterator it = _buttonMap.begin(); it != _buttonMap.end(); it++)
    {
@@ -1684,47 +1715,47 @@ browsers::LayerBrowser::~LayerBrowser()
 void browsers::LayerBrowser::onShowAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
-	wxString layers=getAllSelected(); 
-	if (layers != wxEmptyString)
-	{
-		cmd << wxT("hidelayer(") << getAllSelected() << wxT(", false);");
-		parseCommand(cmd);
-	}
+   wxString layers=getAllSelected(); 
+   if (layers != wxEmptyString)
+   {
+      cmd << wxT("hidelayer(") << getAllSelected() << wxT(", false);");
+      parseCommand(cmd);
+   }
 }
 
 void browsers::LayerBrowser::onHideAll(wxCommandEvent& WXUNUSED(event))
 {
-	wxString cmd;
-	wxString layers=getAllSelected(); 
-	if (layers != wxEmptyString)
-	{
-		cmd << wxT("hidelayer(") << getAllSelected() << wxT(", true);");
-		parseCommand(cmd);
-	}
+   wxString cmd;
+   wxString layers=getAllSelected(); 
+   if (layers != wxEmptyString)
+   {
+      cmd << wxT("hidelayer(") << getAllSelected() << wxT(", true);");
+      parseCommand(cmd);
+   }
 }
 
 void browsers::LayerBrowser::onLockAll(wxCommandEvent& WXUNUSED(event))
 {
-	wxString cmd;
-	wxString layers=getAllSelected(); 
-	if (layers != wxEmptyString)
-	{
-		cmd << wxT("locklayer(") << getAllSelected() << wxT(", true);");
-		parseCommand(cmd);
-	}
+   wxString cmd;
+   wxString layers=getAllSelected(); 
+   if (layers != wxEmptyString)
+   {
+      cmd << wxT("locklayer(") << getAllSelected() << wxT(", true);");
+      parseCommand(cmd);
+   }
 
 }
 
 
 void browsers::LayerBrowser::onUnlockAll(wxCommandEvent& WXUNUSED(event))
 {
-	wxString cmd;
-	wxString layers=getAllSelected(); 
-	if (layers != wxEmptyString)
-	{
-		cmd << wxT("locklayer(") << getAllSelected() << wxT(", false);");
-		parseCommand(cmd);
-	}
+   wxString cmd;
+   wxString layers=getAllSelected(); 
+   if (layers != wxEmptyString)
+   {
+      cmd << wxT("locklayer(") << getAllSelected() << wxT(", false);");
+      parseCommand(cmd);
+   }
 
 }
 

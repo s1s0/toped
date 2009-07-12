@@ -99,18 +99,28 @@ namespace browsers
       LAYERCURRENTSELECTED
    };
 
+   // all browser icons
+   enum
+   {
+      BICN_LIBCELL_HIER = 0,  // library cell with hierarchy  0
+      BICN_DBCELL_HIER  = 1,  // DB      cell with hierarchy  1
+      BICN_LIBCELL_FLAT = 2,  // library cell  w/o hierarchy  2
+      BICN_DBCELL_FLAT  = 3,  // DB      cell  w/o hierarchy  3
+      BICN_LIBRARYDB    = 4,  // library                      4
+      BICN_TARGETDB     = 5   // DB                           5
+   };
 
    //===========================================================================
    class CellBrowser: public wxTreeCtrl {
       public:
-                           CellBrowser(wxWindow* parent, wxWindowID id = -1, 
+                           CellBrowser(wxWindow* parent, wxWindowID id = -1,
                               const wxPoint& pos = wxDefaultPosition, 
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
          virtual          ~CellBrowser()  {};
          virtual  void    showMenu(wxTreeItemId id, const wxPoint& pt);
          bool              findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent);
-         void              copyItem(const wxTreeItemId, const wxTreeItemId);
+         void              copyItem(const wxTreeItemId, const wxTreeItemId, bool targetLib = true);
          void              highlightChildren(wxTreeItemId, wxColour);
          wxString          selectedCellName();
          wxString          topCellName();
@@ -281,16 +291,16 @@ namespace browsers
                                           long style = wxHSCROLL |  wxVSCROLL,
                                           const wxString& name = wxT("LayerPanel"));
 
-         virtual					~LayerPanel();
+         virtual              ~LayerPanel();
          wxString             getAllSelected();
-			void						refresh(void);
+         void                 refresh(void);
 
       private:
          typedef std::map <word, LayerButton*> LayerButtonMap;
 
          void                 onSize(wxSizeEvent&);
          void                 onCommand(wxCommandEvent&);
-			void						addButton(LayerInfo *layer);
+         void                 addButton(LayerInfo *layer);
          LayerButton*         checkDefined(word);
          LayerButtonMap       _buttonMap;
          int                  _buttonCount;
