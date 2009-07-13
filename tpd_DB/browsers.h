@@ -150,6 +150,7 @@ namespace browsers
          wxTreeItemId      _activeStructure;
          wxTreeItemId      _dbroot; // The actual Root always invisible (because of the libraries)
          LibsRoot          _libsRoot;
+         wxTreeItemId      _undefRoot;
          bool              _hierarchy_view;
          wxColor           _listColor;
          wxColor           _editColor;

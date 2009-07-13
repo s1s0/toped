@@ -96,6 +96,10 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(tui::TMGDS_EXPORTL, wxT("GDS export"));
       menu.Append(tui::TMCIF_EXPORTL, wxT("CIF export"));
    }
+   else if ( id == _undefRoot )
+   {
+      return;
+   }
    else
    {
       // Check whether it's a library root
@@ -113,26 +117,31 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
       }
       else
       {
-         bool targetDBCell =  (BICN_DBCELL_HIER == GetItemImage(id,wxTreeItemIcon_Normal));
          wxString RBcellname = GetItemText(id);
-         if (targetDBCell)
+         switch (GetItemImage(id,wxTreeItemIcon_Normal))
          {
-            menu.Append(CELLTREEOPENCELL, wxT("Open " + RBcellname));
-            menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
-            menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
-            wxString ost;
-            ost << wxT("export ") << RBcellname << wxT(" to GDS");
-            menu.Append(tui::TMGDS_EXPORTC, ost);
-            ost.Clear();
-            ost << wxT("export ") << RBcellname << wxT(" to CIF");
-            menu.Append(tui::TMCIF_EXPORTC, ost);
-            menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
-         }
-         else
-         {
-            menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
-            menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
-            menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
+            case BICN_DBCELL_HIER :
+            case BICN_DBCELL_FLAT :
+            {
+               menu.Append(CELLTREEOPENCELL, wxT("Open " + RBcellname));
+               menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
+               menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
+               wxString ost;
+               ost << wxT("export ") << RBcellname << wxT(" to GDS");
+               menu.Append(tui::TMGDS_EXPORTC, ost);
+               ost.Clear();
+               ost << wxT("export ") << RBcellname << wxT(" to CIF");
+               menu.Append(tui::TMCIF_EXPORTC, ost);
+               menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
+               break;
+            }
+            case BICN_LIBCELL_HIER:
+            case BICN_LIBCELL_FLAT:
+               menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
+               menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
+               menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
+               break;
+            default: /*undefined cells*/ return;
          }
       }
    }
@@ -349,15 +358,15 @@ void browsers::CellBrowser::updateFlat()
       if (cellList.size() != 0)
       {
          // the type ...
-         wxTreeItemId nrootUndef = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
-         SetItemImage(nrootUndef,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
+         _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
+         SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
          // ... and the cells
          for(laydata::cellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
          {
-            wxTreeItemId cellitem = AppendItem(nrootUndef, wxString( (*it).first.c_str(),  wxConvUTF8));
+            wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*it).first.c_str(),  wxConvUTF8));
             SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
          }
-         SortChildren(nrootUndef);
+         SortChildren(_undefRoot);
       }
    }
    DATC->unlockDB();
@@ -417,15 +426,15 @@ void browsers::CellBrowser::updateHier()
       if (cellList.size() != 0)
       {
          // the type ...
-         wxTreeItemId nrootUndef = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
-         SetItemImage(nrootUndef,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
+         _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
+         SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
          // ... and the cells
          for(laydata::cellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
          {
-            wxTreeItemId cellitem = AppendItem(nrootUndef, wxString( (*it).first.c_str(),  wxConvUTF8));
+            wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*it).first.c_str(),  wxConvUTF8));
             SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
          }
-         SortChildren(nrootUndef);
+         SortChildren(_undefRoot);
       }
    }
    DATC->unlockDB();
@@ -438,23 +447,33 @@ void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
    int rootLibID = root->GetItem()->libID();
    if (child)
    {
-      if (rootLibID == TARGETDB_LIB)
+      switch (rootLibID)
       {
-         SetItemImage(lroot,BICN_DBCELL_HIER,wxTreeItemIcon_Normal);
-         SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Expanded);
-      }
-      else
-      {
-         SetItemImage(lroot,BICN_LIBCELL_HIER,wxTreeItemIcon_Normal);
-         SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Expanded);
+         case TARGETDB_LIB:
+            SetItemImage(lroot,BICN_DBCELL_HIER,wxTreeItemIcon_Normal);
+            SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Expanded);
+            break;
+         case UNDEFCELL_LIB:
+            SetItemImage(lroot,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
+            break;
+         default:
+            SetItemImage(lroot,BICN_LIBCELL_HIER,wxTreeItemIcon_Normal);
+            SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Expanded);
       }
    }
    else
    {
-      if (rootLibID == TARGETDB_LIB)
-         SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
-      else
-         SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
+      switch (rootLibID)
+      {
+         case TARGETDB_LIB:
+            SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+            break;
+         case UNDEFCELL_LIB:
+            SetItemImage(lroot,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
+            break;
+         default:
+            SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
+      }
    }
    wxTreeItemId nroot;
    wxTreeItemId temp;
@@ -526,7 +545,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             item = AppendItem(hnewparent, cellname);
             SetItemTextColour(item,GetItemTextColour(GetRootItem()));
             SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
-            SortChildren(GetRootItem());
+            SortChildren(_dbroot);
          }
          else
          {
