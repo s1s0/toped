@@ -39,6 +39,8 @@
 #include "../tpd_ifaces/gds_io.h"
 #include "../tpd_common/outbox.h"
 
+extern layprop::FontLibrary* fontLib;
+
 void laydata::editobject::unblockfill()
 {
    _viewprop->drawprop().unblockfill();
@@ -219,8 +221,19 @@ void laydata::tdtdefaultcell::openGL_draw(layprop::DrawProperties&, bool active)
 {
 }
 
-void laydata::tdtdefaultcell::openGL_render(tenderer::TopRend&, const CTM&, bool, bool) const
+void laydata::tdtdefaultcell::openGL_render(tenderer::TopRend& rend, const CTM& trans,
+                                           bool selected, bool) const
 {
+   CTM ftm(TP(), 3000/OPENGL_FONT_UNIT, 45, false);
+   DBbox pure_ovl(0,0,0,0);
+   assert(NULL != fontLib); // check that font library is initialised
+   fontLib->getStringBounds(&_name, &pure_ovl);
+   //
+   rend.pushCell(_name, trans, DEFAULT_ZOOM_BOX, false, selected);
+   rend.setLayer(ERR_LAY, false);
+   rend.text(&_name, ftm, pure_ovl, TP(), false);
+   rend.popCell();
+   //
 }
 
 
