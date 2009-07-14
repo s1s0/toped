@@ -34,7 +34,7 @@ namespace laydata {
    class tdtlibrary {
    public:
                      tdtlibrary(std::string, real, real, int);
-      virtual      ~tdtlibrary();
+      virtual       ~tdtlibrary();
       virtual void   read(TEDfile* const);
       void           GDSwrite(GDSin::GdsFile&, tdtcell*, bool);
       void           CIFwrite(CIFin::CifExportFile&, tdtcell*, bool recur=true);
@@ -89,7 +89,7 @@ namespace laydata {
       void           read(TEDfile* const);
       void           write(TEDfile* const tedfile);
       int            readLibrary(TEDfile* const);
-      tdtcell*       addcell(std::string name);
+      tdtcell*       addcell(std::string name/*, bool*/);
       bool           removecell(std::string&, laydata::atticList*, laydata::tdtlibdir*);
       tdtdata*       addbox(unsigned la, TP* p1, TP* p2);
       tdtdata*       addpoly(unsigned, const pointlist*);
@@ -185,7 +185,6 @@ namespace laydata {
       std::string       getLibName(int);
       void              relink();
       void              reextract_hierarchy();
-//      tdtlibrary*       getLib(std::string);
       int               getLastLibRefNo();
       bool              getLibCellRNP(std::string, refnamepair&, const int libID = TARGETDB_LIB) const;
       tdtdefaultcell*   getLibCellDef(std::string, const int libID = TARGETDB_LIB) const;

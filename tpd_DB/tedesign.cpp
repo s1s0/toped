@@ -464,7 +464,7 @@ libraries it also checks the UNDEFCELL_LIB
  */
 laydata::tdtdefaultcell* laydata::tdtlibdir::getLibCellDef(std::string name, const int libID) const
 {
-   // start searching form the first library after the current 
+   // start searching from the first library after the current
    word first2search = (TARGETDB_LIB == libID) ? 1 : libID + 1;
    for (word i = first2search; i < _libdirectory.size(); i++)
    {
@@ -569,14 +569,19 @@ void laydata::tdtdesign::read(TEDfile* const tedfile)
 
 // !!! Do not forget that the indexing[] operations over std::map can alter the structure !!!
 // use find for searching.
-laydata::tdtcell* laydata::tdtdesign::addcell(std::string name) {
+laydata::tdtcell* laydata::tdtdesign::addcell(std::string name/*, bool updateLocalHierarchy*/)
+{
    if (_cells.end() != _cells.find(name)) return NULL; // cell already exists
-   else {
+   else
+   {
       modified = true;
       tdtcell* ncl = DEBUG_NEW tdtcell(name);
       _cells[name] = ncl;
-      _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
-       btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
+/*      if (updateLocalHierarchy)
+      {*/
+         _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
+         btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
+//      }
       return ncl;
    }
 }
