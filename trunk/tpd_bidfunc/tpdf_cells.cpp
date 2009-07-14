@@ -63,6 +63,12 @@ int tellstdfunc::stdNEWCELL::execute()
    std::string nm = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
    laydata::tdtcell* new_cell = ATDB->addcell(nm);
+   //
+   //@TODO check for the cell with this name in the libraries uncluding UNDEFCELL_LIB
+   // if the cell is found - relink!
+   //
+   laydata::tdtdefaultcell* existingLibCell = DATC->TEDLIB()->getLibCellDef(nm);
+   //
    DATC->unlockDB();
    if (NULL != new_cell)
    {
@@ -73,7 +79,7 @@ int tellstdfunc::stdNEWCELL::execute()
    else
    {
       std::string news = "Cell \"";
-      news += nm; news += "\" already exists";
+      news += nm; news += "\" already exists in the target DB";
       tell_log(console::MT_ERROR,news);
    }
    return EXEC_NEXT;
