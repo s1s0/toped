@@ -374,13 +374,13 @@ tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &titl
                                     wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
 {
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
+   DATC->lockDB(false);
    laydata::tdtlibdir* LDR = DATC->TEDLIB();
 
    for (int curlib = 1; curlib < LDR->getLastLibRefNo(); curlib++)
    {
       _nameList->Append(wxString(LDR->getLibName(curlib).c_str(), wxConvUTF8));
    }
-
    DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout

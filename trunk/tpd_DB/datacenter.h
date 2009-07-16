@@ -41,7 +41,7 @@ namespace GDSin {
       void                 top_structure(std::string, bool, bool);
    protected:
       void                 child_structure(const GDSin::GDSHierTree*, bool);
-      void                 convert_prep(const GDSin::GDSHierTree* item, bool);
+      void                 convert_prep(const GDSin::GDSHierTree*, bool);
       void                 convert(GDSin::GdsStructure*, laydata::tdtcell*);
       void                 box (GDSin::GdsBox*     , laydata::tdtlayer*, int2b);
       void                 poly(GDSin::GdsPolygon* , laydata::tdtlayer*, int2b);
@@ -61,7 +61,7 @@ namespace CIFin {
 
    class Cif2Ted {
       public:
-                              Cif2Ted(CIFin::CifFile*, laydata::tdtdesign*, SIMap*, real);
+                              Cif2Ted(CIFin::CifFile*, laydata::tdtlibdir*, SIMap*, real);
          void                 top_structure(std::string, bool, bool);
       protected:
          void                 child_structure(const CIFin::CIFHierTree*, bool);
@@ -74,7 +74,7 @@ namespace CIFin {
          void                 lbll( CIFin::CifLabelLoc*,laydata::tdtlayer*, std::string );
          void                 lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string );
          CIFin::CifFile*      _src_lib;
-         laydata::tdtdesign*  _dst_lib;
+         laydata::tdtlibdir*  _tdt_db;
          SIMap*               _cif_layers;
          real                 _crosscoeff;
          real                 _dbucoeff;

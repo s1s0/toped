@@ -62,12 +62,12 @@ int tellstdfunc::stdNEWCELL::execute()
 {
    std::string nm = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-   laydata::tdtcell* new_cell = ATDB->addcell(nm);
+   laydata::tdtcell* new_cell = ATDB->addcell(nm, DATC->TEDLIB());
    //
    //@TODO check for the cell with this name in the libraries uncluding UNDEFCELL_LIB
    // if the cell is found - relink!
    //
-   laydata::tdtdefaultcell* existingLibCell = DATC->TEDLIB()->getLibCellDef(nm);
+   //laydata::tdtdefaultcell* existingLibCell = DATC->TEDLIB()->getLibCellDef(nm);
    //
    DATC->unlockDB();
    if (NULL != new_cell)
@@ -108,7 +108,7 @@ void tellstdfunc::stdREMOVECELL::undo()
    std::string  nm = getStringValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
    // first add a cell
-   laydata::tdtcell* restored_cell = ATDB->addcell(nm);
+   laydata::tdtcell* restored_cell = ATDB->addcell(nm, DATC->TEDLIB());
    assert(NULL != restored_cell);
    // add the cell contents back
    // no validation required, because the cell is not referenced
