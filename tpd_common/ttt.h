@@ -329,7 +329,7 @@ public:
    bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    int               addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    int               removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
-   void              replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst);
+//   void              replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst, int libID);
    bool              removeRootItem(const TYPE*comp, SGHierTree*& lst);
    bool              itemRefdIn(int libID) const;
    const TYPE*       GetItem() const           {return component;}
@@ -337,7 +337,7 @@ public:
    const SGHierTree* Getparent() const         {return parent;}
    void              relink(const SGHierTree* comp)  {last = comp->last;}
 private:
-   bool              thisLib(int libID);
+   bool              thisLib(int libID) const;
    bool              thisParent(int libID);
    const TYPE       *component; // points to the component
    SGHierTree*       last;      // last in the linear list of components
@@ -404,7 +404,7 @@ template <class TYPE>
    }
 
 template <class TYPE> 
-      bool   SGHierTree<TYPE>::thisLib(int libID) {
+      bool   SGHierTree<TYPE>::thisLib(int libID) const {
          /*! Any libID < TARGETDB_LIB will make the functions to ignore it.
              Idea is to have a possibility to traverse the entire
              tree no matter where the cell belongs */
@@ -477,8 +477,7 @@ template <class TYPE>
 template <class TYPE> 
    SGHierTree<TYPE>*  SGHierTree<TYPE>::GetMember(const TYPE* comp) {
       SGHierTree* wv = this;
-      while (wv && (wv->component != comp)) 
-         wv = wv->last;
+      while (wv && (wv->component != comp)) wv = wv->last;
       return wv;
    }
 
@@ -608,16 +607,19 @@ int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTr
    return 0;
 }
 
-template <class TYPE>
-void  SGHierTree<TYPE>::replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst)
-{
-   SGHierTree* thechild = lst->GetMember(oldchild);
-   while (thechild)
-   {
-      thechild->component = newchild;
-      thechild = thechild->GetNextMember(oldchild);
-   }
-}
+//template <class TYPE>
+//void  SGHierTree<TYPE>::replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst, int libID)
+//{
+//   SGHierTree* thechild = lst->GetMember(oldchild);
+//   while (thechild)
+//   {
+//      if (thechild->Getparent()->thisLib(libID))
+//      {
+//         thechild->component = newchild;
+//      }
+//      thechild = thechild->GetNextMember(oldchild);
+//   }
+//}
 
 /*! Requires root childless item */
 template <class TYPE>

@@ -302,6 +302,25 @@ void laydata::tdtlibrary::cleanUnreferenced()
    }
 }
 
+/*! removes a cell /cell_name from this library. Updates the hierarchy tree. The
+cell is not deleted, but returned by the function.
+Cell must not be referenced otherwise the _hiertree will assert. Primary usage
+is to clear a default cell from the library of undefined cells when a new cell
+is created in the target DB with the same name. 
+There is no another valid usage, so the function will assert if called for 
+libraries other than UNDEFCELL_LIB.
+*/
+laydata::tdtdefaultcell* laydata::tdtlibrary::displaceCell(const std::string& cell_name)
+{
+   assert(UNDEFCELL_LIB == _libID); // see the function comment above!
+   laydata::cellList::iterator wc = _cells.find(cell_name);
+   if (_cells.end() == wc) return NULL;
+   laydata::tdtdefaultcell* celldef = wc->second;
+   _hiertree->removeRootItem(celldef, _hiertree);
+   _cells.erase(wc);
+   return celldef;
+}
+
 void laydata::tdtlibrary::collect_usedlays(WordList& laylist) const
 {
    for (cellList::const_iterator CC = _cells.begin(); CC != _cells.end(); CC++)
@@ -548,6 +567,11 @@ void  laydata::tdtlibdir::cleanUndefLib()
    _libdirectory[UNDEFCELL_LIB]->second->cleanUnreferenced();
 }
 
+laydata::tdtdefaultcell* laydata::tdtlibdir::displaceUndefinedCell(std::string cell_name)
+{
+   return _libdirectory[UNDEFCELL_LIB]->second->displaceCell(cell_name);
+}
+
 //-----------------------------------------------------------------------------
 // class tdtdesign
 //-----------------------------------------------------------------------------
@@ -569,19 +593,31 @@ void laydata::tdtdesign::read(TEDfile* const tedfile)
 
 // !!! Do not forget that the indexing[] operations over std::map can alter the structure !!!
 // use find for searching.
-laydata::tdtcell* laydata::tdtdesign::addcell(std::string name/*, bool updateLocalHierarchy*/)
+laydata::tdtcell* laydata::tdtdesign::addcell(std::string name, laydata::tdtlibdir* libdir)
 {
-   if (_cells.end() != _cells.find(name)) return NULL; // cell already exists
-   else
+   if (_cells.end() != _cells.find(name)) return NULL; // cell already exists in the target library
+   laydata::tdtdefaultcell* libcell = libdir->getLibCellDef(name);
    {
       modified = true;
       tdtcell* ncl = DEBUG_NEW tdtcell(name);
       _cells[name] = ncl;
-/*      if (updateLocalHierarchy)
-      {*/
-         _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
+      _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
+      if (NULL == libcell)
+      {// Library cell with this name doesn't exists
          btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
-//      }
+      }
+      else
+      {// Library cell with this name exists. the new cell should replace it in all
+       // of its references
+         libdir->relink();
+         // if that cell was undefined - remove it from the library of undefined cells
+         if (UNDEFCELL_LIB == libcell->libID())
+         {
+            laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(name);
+            assert(libcell == libcellX);
+            delete libcell;
+         }
+      }
       return ncl;
    }
 }
@@ -1037,7 +1073,7 @@ bool laydata::tdtdesign::group_selected(std::string name, laydata::tdtlibdir* li
       delete TBgroup; return false;
    }
    //Create a new cell
-   tdtcell* newcell = addcell(name);
+   tdtcell* newcell = addcell(name, libdir);
    assert(newcell);
    //Get the selected shapes from the current cell and add them to the new cell
    for(atticList::const_iterator CL = TBgroup->begin();

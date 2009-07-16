@@ -106,7 +106,7 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool overwrite
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = (*_tdt_db)()->addcell(gname);
+      dst_structure = (*_tdt_db)()->addcell(gname, _tdt_db);
       // finally call the cell converter
       convert(src_structure, dst_structure);
    }
@@ -288,11 +288,11 @@ laydata::refnamepair GDSin::Gds2Ted::linkcellref(std::string cellname)
 //-----------------------------------------------------------------------------
 // class Cif2Ted
 //-----------------------------------------------------------------------------
-CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtdesign* dst_lib,
-      SIMap* cif_layers, real techno) : _src_lib (src_lib), _dst_lib(dst_lib),
+CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtlibdir* tdt_db,
+      SIMap* cif_layers, real techno) : _src_lib (src_lib), _tdt_db(tdt_db),
                                     _cif_layers(cif_layers), _techno(techno)
 {
-   _dbucoeff = 1e-8/_dst_lib->DBU();
+   _dbucoeff = 1e-8/(*_tdt_db)()->DBU();
 }
 
 
@@ -338,7 +338,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
    CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(item->GetItem());
    std::string gname = src_structure->name();
    // check that destination structure with this name exists
-   laydata::tdtcell* dst_structure = _dst_lib->checkcell(gname);
+   laydata::tdtcell* dst_structure = (*_tdt_db)()->checkcell(gname);
    std::ostringstream ost; ost << "CIF import: ";
    if (NULL != dst_structure)
    {
@@ -359,7 +359,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = _dst_lib->addcell(gname);
+      dst_structure = (*_tdt_db)()->addcell(gname, _tdt_db);
       // finally call the cell converter
       convert(src_structure, dst_structure);
    }
@@ -508,11 +508,11 @@ void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
 {
    CifStructure* refd = _src_lib->getStructure(wd->cell());
    std::string cell_name = refd->name();
-   if (NULL != _dst_lib->checkcell(cell_name))
+   if (NULL != (*_tdt_db)()->checkcell(cell_name))
    {
-      laydata::refnamepair striter = _dst_lib->getcellnamepair(cell_name);
+      laydata::refnamepair striter = (*_tdt_db)()->getcellnamepair(cell_name);
       // Absolute magnification, absolute angle should be reflected somehow!!!
-      dst->addcellref(_dst_lib, striter, (*wd->location())*_crosscoeff, false);
+      dst->addcellref((*_tdt_db)(), striter, (*wd->location())*_crosscoeff, false);
    }
    else
    {
@@ -665,7 +665,7 @@ bool DataCenter::TDTunloadlib(std::string libname)
       tberased->clearHierTree();
       // get the new hierarchy
       _TEDLIB.reextract_hierarchy();
-      // after all above - remove the library (TODO! undo)
+      // after all above - remove the library
       delete tberased;
       return true;
    }
@@ -877,7 +877,7 @@ void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool re
       tell_log(console::MT_ERROR,"No CIF data in memory. Parse CIF file first");
    else
    {
-      CIFin::Cif2Ted converter(_CIFDB, _TEDLIB(), cifLayers, techno);
+      CIFin::Cif2Ted converter(_CIFDB, &_TEDLIB, cifLayers, techno);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.top_structure(*CN, recur, overwrite);
       _TEDLIB()->modified = true;

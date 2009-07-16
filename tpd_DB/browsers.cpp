@@ -1122,7 +1122,7 @@ void browsers::browserTAB::onCommand(wxCommandEvent& event)
 
 void browsers::browserTAB::onTellAddTdtLib(bool targetDB)
 {
-   _tdtStruct->collectInfo(~targetDB);
+   _tdtStruct->collectInfo(!targetDB);
 }
 
 void browsers::browserTAB::onTellAddGdsTab()

@@ -335,7 +335,8 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
          switch (recordtype)
          {
             case    tedf_LAYER:
-               _layers[tedfile->getWord()] = DEBUG_NEW tdtlayer(tedfile);
+               layno = tedfile->getWord();
+               _layers[layno] = DEBUG_NEW tdtlayer(tedfile);
                break;
             case    tedf_REFS:
                _layers[REF_LAY] = DEBUG_NEW quadTree(tedfile);

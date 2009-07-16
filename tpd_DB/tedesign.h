@@ -71,6 +71,7 @@ namespace laydata {
       static void    initHierTreePtr() {_hiertree = NULL;}
    protected:
       bool                 validate_cells();
+      tdtdefaultcell*      displaceCell(const std::string&);
       std::string          _name;         // design/library name
       int                  _libID;        // library ID
       real                 _DBU;          // Size of database units in meters
@@ -89,7 +90,7 @@ namespace laydata {
       void           read(TEDfile* const);
       void           write(TEDfile* const tedfile);
       int            readLibrary(TEDfile* const);
-      tdtcell*       addcell(std::string name/*, bool*/);
+      tdtcell*       addcell(std::string name, laydata::tdtlibdir*);
       bool           removecell(std::string&, laydata::atticList*, laydata::tdtlibdir*);
       tdtdata*       addbox(unsigned la, TP* p1, TP* p2);
       tdtdata*       addpoly(unsigned, const pointlist*);
@@ -193,6 +194,7 @@ namespace laydata {
       bool              collect_usedlays(std::string, bool, WordList&) const;
       void              collect_usedlays(int, WordList&) const;
       void              cleanUndefLib();
+      tdtdefaultcell*   displaceUndefinedCell(std::string);
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       void              deleteDB() {delete _TEDDB;}
       void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
