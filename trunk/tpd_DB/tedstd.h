@@ -133,6 +133,7 @@ namespace laydata {
    typedef  std::deque<const tdtcellref*>           cellrefstack;
    typedef  std::deque<editobject*>                 editcellstack;
    typedef  std::list<const cellList*>              LibCellLists;
+   typedef  std::list<tdtdefaultcell*>              CellDefList;
 
    //==============================================================================
    class validator {

@@ -913,7 +913,7 @@ void tellstdfunc::stdCHANGEREF::undo()
       laydata::selectList *savelist = ATDB->copy_selist();
       // now unselect all
       ATDB->unselect_all();
-      // get the list of DEBUG_NEW references from the UNDO stack
+      // get the list of new references from the UNDO stack
       telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // select them ...
       ATDB->select_fromList(get_ttlaylist(pl));
