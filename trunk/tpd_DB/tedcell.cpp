@@ -261,7 +261,7 @@ bool laydata::tdtdefaultcell::relink(tdtlibdir*, TDTHierTree*&)
    return false;
 }
 
-void laydata::tdtdefaultcell::relinkThis(std::string, laydata::refnamepair, laydata::tdtdesign*, TDTHierTree*&)
+void laydata::tdtdefaultcell::relinkThis(std::string, laydata::refnamepair, laydata::tdtdesign*)
 {
 }
 
@@ -1951,7 +1951,7 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
    return overlapChanged(old_overlap, (*libdir)());
 }
 
-void laydata::tdtcell::relinkThis(std::string cname, laydata::refnamepair newcelldef, laydata::tdtdesign* ATDB, TDTHierTree*& _hiertree)
+void laydata::tdtcell::relinkThis(std::string cname, laydata::refnamepair newcelldef, laydata::tdtdesign* ATDB)
 {
    assert( _layers.end() != _layers.find(REF_LAY) );
    DBbox old_overlap(_cellOverlap);
@@ -1966,8 +1966,7 @@ void laydata::tdtcell::relinkThis(std::string cname, laydata::refnamepair newcel
       if (cname == wcl->cellname())
       {
          refsTree->delete_this(wcl);
-         _hiertree->removeParent(wcl->structure(), this, _hiertree);
-         addcellref(ATDB, newcelldef, wcl->translation());
+         addcellref(ATDB, newcelldef, wcl->translation(), false);
       }
    }
    refsList->clear(); delete refsList;
