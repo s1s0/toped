@@ -652,7 +652,7 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel,
          // get the cell by name
          tdtcell* remcl = static_cast<laydata::tdtcell*>(_cells[name]);
          // update the _hiertree
-         remcl->removePrep(this);
+         remcl->removePrep(this, true);
          // remove the cell from the list of all design cells
          _cells.erase(_cells.find(name));
          //empty the contents of the removed cell and return it in atticList
@@ -662,6 +662,66 @@ bool laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel,
          delete remcl;
          return true;
       }
+   }
+}
+
+bool laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, laydata::atticList* fsel, laydata::tdtlibdir* libdir)
+{
+   if ((NULL != _target.edit()) && (_target.edit()->name() == name))
+   {
+      tell_log(console::MT_ERROR,"Active cell can't be removed");
+      return false;
+   }
+   else
+   {
+      modified = true;
+      // We need a replacement cell for the references
+      laydata::refnamepair striter;
+      // search the cell in the libraries first
+      if (!libdir->getLibCellRNP(name, striter, TARGETDB_LIB))
+      {
+         // not found! make a default cell
+         striter = libdir->adddefaultcell(name);
+         _hiertree = DEBUG_NEW TDTHierTree(striter->second, NULL, _hiertree);
+      }
+      // now for every parent cell - relink all the references to cell "name"
+      for (laydata::CellDefList::const_iterator CPS = pcells.begin(); CPS != pcells.end(); CPS++)
+         (*CPS)->relinkThis(name, striter, this, _hiertree);
+      // validate the parent cells
+
+      // OK, now when the references are sorted, proceed with the cell itself
+      // get the cell by name
+      tdtcell* remcl = static_cast<laydata::tdtcell*>(_cells[name]);
+      // update the _hiertree
+      remcl->removePrep(this, false);
+      // remove the cell from the list of all design cells
+      _cells.erase(_cells.find(name));
+      //empty the contents of the removed cell and return it in atticList
+      remcl->full_select();
+      remcl->delete_selected(fsel, libdir); // validation is not required here
+      // finally - delete the cell. Cell is already empty
+      delete remcl;
+      return true;
+   }
+}
+
+/*! Get a list of references to all cells instantiating cell "name" - i.e. all parent cells
+ of cell "name"
+ */
+void laydata::tdtdesign::collectParentCells(std::string& cname, CellDefList& parrentCells)
+{
+   laydata::cellList::const_iterator ccellIter = _cells.find(cname);
+   laydata::tdtdefaultcell* tcell = ccellIter->second;
+   TDTHierTree* ccl = _hiertree->GetMember(tcell);
+   while(ccl)
+   {
+      if (ccl->Getparent())
+      {
+         std::string pname = ccl->Getparent()->GetItem()->name();
+         assert(_cells.end() != _cells.find(pname));
+         parrentCells.push_back( static_cast<laydata::tdtcell*>(_cells[pname]) );
+      }
+      ccl = ccl->GetNextMember(tcell);
    }
 }
 

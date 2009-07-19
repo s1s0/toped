@@ -261,6 +261,10 @@ bool laydata::tdtdefaultcell::relink(tdtlibdir*, TDTHierTree*&)
    return false;
 }
 
+void laydata::tdtdefaultcell::relinkThis(std::string, laydata::refnamepair, laydata::tdtdesign*, TDTHierTree*&)
+{
+}
+
 DBbox laydata::tdtdefaultcell::cellOverlap() const
 {
    return DEFAULT_ZOOM_BOX;
@@ -1947,7 +1951,29 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
    return overlapChanged(old_overlap, (*libdir)());
 }
 
-void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const
+void laydata::tdtcell::relinkThis(std::string cname, laydata::refnamepair newcelldef, laydata::tdtdesign* ATDB, TDTHierTree*& _hiertree)
+{
+   assert( _layers.end() != _layers.find(REF_LAY) );
+   DBbox old_overlap(_cellOverlap);
+   // get all cell references
+   dataList *refsList = DEBUG_NEW dataList();
+   quadTree* refsTree = _layers[REF_LAY];
+   refsTree->select_all(refsList, laydata::_lmref, false);
+   //relink only the references to cname
+   for (dataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
+   {
+      tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
+      if (cname == wcl->cellname())
+      {
+         refsTree->delete_this(wcl);
+         _hiertree->removeParent(wcl->structure(), this, _hiertree);
+         addcellref(ATDB, newcelldef, wcl->translation());
+      }
+   }
+   refsList->clear(); delete refsList;
+}
+
+void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB, bool root) const
 {
    // Check that there are referenced cells
    if (_layers.end() != _layers.find(REF_LAY))
@@ -1962,7 +1988,8 @@ void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB) const
          childref->_orphan = (res > 0);
       }
    }
-   ATDB->dbHierRemoveRoot(this);
+   if (root)
+      ATDB->dbHierRemoveRoot(this);
    // don't clear children, the cell will be moved to Attic
    //_children.clear();
 }

@@ -36,14 +36,15 @@ namespace tellstdfunc {
    using parsercmd::argumentTYPE;
 
    //
-   TELL_STDCMD_CLASSA_UNDO(stdNEWCELL     );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdREMOVECELL  );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdOPENCELL    );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdEDITPUSH    );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdEDITPOP     );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdEDITPREV    );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdEDITTOP     );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdGROUP       );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdUNGROUP     );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdNEWCELL        );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdREMOVECELL     );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdREMOVEREFDCELL );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdOPENCELL       );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdEDITPUSH       );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdEDITPOP        );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdEDITPREV       );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdEDITTOP        );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdGROUP          );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdUNGROUP        );  // undo - implemented
 }
 #endif

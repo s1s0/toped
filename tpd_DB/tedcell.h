@@ -101,6 +101,7 @@ namespace laydata {
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
          virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell*, cellList*, const tdtlibdir*);
          virtual bool        relink(tdtlibdir*, TDTHierTree*&);
+         virtual void        relinkThis(std::string, laydata::refnamepair, tdtdesign*, TDTHierTree*&);
          virtual void        updateHierarchy(tdtlibdir*);
          virtual DBbox       cellOverlap() const;
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
@@ -182,7 +183,8 @@ namespace laydata {
       selectList*          copy_selist() const;
       void                 updateHierarchy(tdtlibdir*);
       bool                 relink(tdtlibdir*, TDTHierTree*&);
-      void                 removePrep(laydata::tdtdesign* ATDB) const;
+      void                 relinkThis(std::string, laydata::refnamepair, tdtdesign*, TDTHierTree*&);
+      void                 removePrep(laydata::tdtdesign*, bool) const;
       void                 report_selected(real) const;
       void                 collect_usedlays(const tdtlibdir*, bool, WordList&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
