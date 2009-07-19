@@ -675,6 +675,8 @@ bool laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
    else
    {
       modified = true;
+      // get the cell by name
+      tdtcell* remcl = static_cast<laydata::tdtcell*>(_cells[name]);
       // We need a replacement cell for the references
       laydata::refnamepair striter;
       // search the cell in the libraries first
@@ -686,21 +688,24 @@ bool laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
       }
       // now for every parent cell - relink all the references to cell "name"
       for (laydata::CellDefList::const_iterator CPS = pcells.begin(); CPS != pcells.end(); CPS++)
-         (*CPS)->relinkThis(name, striter, this, _hiertree);
-      // validate the parent cells
-
+      {
+         (*CPS)->relinkThis(name, striter, this);
+         dbHierRemoveParent(remcl, (*CPS));
+      }
       // OK, now when the references are sorted, proceed with the cell itself
-      // get the cell by name
-      tdtcell* remcl = static_cast<laydata::tdtcell*>(_cells[name]);
       // update the _hiertree
       remcl->removePrep(this, false);
       // remove the cell from the list of all design cells
       _cells.erase(_cells.find(name));
       //empty the contents of the removed cell and return it in atticList
       remcl->full_select();
-      remcl->delete_selected(fsel, libdir); // validation is not required here
-      // finally - delete the cell. Cell is already empty
+      remcl->delete_selected(fsel, libdir);
+      // now - delete the cell. Cell is already empty
       delete remcl;
+
+      // validate the cells
+      do {} while(validate_cells());
+
       return true;
    }
 }
@@ -711,6 +716,7 @@ bool laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
 void laydata::tdtdesign::collectParentCells(std::string& cname, CellDefList& parrentCells)
 {
    laydata::cellList::const_iterator ccellIter = _cells.find(cname);
+   if (_cells.end() == ccellIter) return;
    laydata::tdtdefaultcell* tcell = ccellIter->second;
    TDTHierTree* ccl = _hiertree->GetMember(tcell);
    while(ccl)

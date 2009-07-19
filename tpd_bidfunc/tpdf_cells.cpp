@@ -96,6 +96,7 @@ void tellstdfunc::stdREMOVECELL::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   //@TODO check for leakeages here!
    delete pl;
 }
 
