@@ -1977,7 +1977,7 @@ void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB, bool root) const
    // Check that there are referenced cells
    if (_layers.end() != _layers.find(REF_LAY))
    {
-      tdtcell* childref;
+      tdtdefaultcell* childref;
       assert(!_children.empty());
       // remove all children from the hierarchy tree
       for (nameList::const_iterator CN = _children.begin(); CN != _children.end(); CN++)

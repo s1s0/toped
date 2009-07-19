@@ -157,16 +157,30 @@ int tellstdfunc::stdREMOVEREFDCELL::execute()
 {
    std::string cname = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      laydata::CellDefList parentCells;
-      ATDB->collectParentCells(cname, parentCells);
-      if (parentCells.empty())
+      if (ATDB->checkcell(cname))
       {
-         //@TODO -  fold down to stdREMOVECELL
+         std::string news = "Cell \"";
+         news += cname; news += "\" doesn't exists";
+         tell_log(console::MT_ERROR,news);
+
+      }
+      else if (cname == ATDB->activecellname())
+      {
+         tell_log(console::MT_ERROR,"Active cell can't be removed");
       }
       else
       {
-         laydata::atticList* cell_contents = DEBUG_NEW laydata::atticList();
-         bool removed = ATDB->removeRefdCell(cname, parentCells, cell_contents, DATC->TEDLIB());
+         laydata::CellDefList parentCells;
+         ATDB->collectParentCells(cname, parentCells);
+         if (parentCells.empty())
+         {
+            //@TODO -  fold down to stdREMOVECELL
+         }
+         else
+         {
+            laydata::atticList* cell_contents = DEBUG_NEW laydata::atticList();
+            bool removed = ATDB->removeRefdCell(cname, parentCells, cell_contents, DATC->TEDLIB());
+         }
       }
    DATC->unlockDB();
    //if (removed)

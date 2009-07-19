@@ -85,7 +85,7 @@ void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool overwrite
    GDSin::GdsStructure* src_structure = const_cast<GDSin::GdsStructure*>(item->GetItem());
    std::string gname = src_structure->strctName();
    // check that destination structure with this name exists
-   laydata::tdtcell* dst_structure = (*_tdt_db)()->checkcell(gname);
+   laydata::tdtcell* dst_structure = static_cast<laydata::tdtcell*>((*_tdt_db)()->checkcell(gname));
    std::ostringstream ost; ost << "GDS import: ";
    if (NULL != dst_structure)
    {
@@ -338,7 +338,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
    CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(item->GetItem());
    std::string gname = src_structure->name();
    // check that destination structure with this name exists
-   laydata::tdtcell* dst_structure = (*_tdt_db)()->checkcell(gname);
+   laydata::tdtcell* dst_structure = static_cast<laydata::tdtcell*>((*_tdt_db)()->checkcell(gname));
    std::ostringstream ost; ost << "CIF import: ";
    if (NULL != dst_structure)
    {
