@@ -814,7 +814,7 @@ int tellstdfunc::stdCELLAREF_D::execute() {
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well 
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-   laydata::tdtcell *excell = ATDB->checkcell(name);
+   laydata::tdtcell *excell = static_cast<laydata::tdtcell*>(ATDB->checkcell(name));
    DATC->unlockDB();
    if (NULL == excell)
    {

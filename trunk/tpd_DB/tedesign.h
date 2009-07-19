@@ -39,7 +39,7 @@ namespace laydata {
       void           GDSwrite(GDSin::GdsFile&, tdtcell*, bool);
       void           CIFwrite(CIFin::CifExportFile&, tdtcell*, bool recur=true);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
-      tdtcell*       checkcell(std::string name, bool undeflib = false);
+      tdtdefaultcell* checkcell(std::string name, bool undeflib = false);
       void           recreate_hierarchy(const laydata::tdtlibdir* );
       void           registercellread(std::string, tdtcell*);
       refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};

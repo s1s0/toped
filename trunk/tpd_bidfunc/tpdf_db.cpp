@@ -585,7 +585,7 @@ int tellstdfunc::GDSexportTOP::execute()
    {
       laydata::tdtcell *excell = NULL;
       laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         excell = ATDB->checkcell(cellname);
+         excell = static_cast<laydata::tdtcell*>(ATDB->checkcell(cellname));
 
          if (NULL != excell)
          {
@@ -632,7 +632,7 @@ int tellstdfunc::PSexportTOP::execute()
    {
       laydata::tdtcell *excell = NULL;
       laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         excell = ATDB->checkcell(cellname);
+         excell = static_cast<laydata::tdtcell*>(ATDB->checkcell(cellname));
          if (NULL != excell)
             DATC->PSexport(excell, filename);
       DATC->unlockDB();
@@ -1103,7 +1103,7 @@ int tellstdfunc::CIFexportTOP::execute()
    {
       laydata::tdtcell *excell = NULL;
       laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         excell = ATDB->checkcell(cellname);
+         excell = static_cast<laydata::tdtcell*>(ATDB->checkcell(cellname));
          if (NULL != excell)
          {
             DATC->CIFexport(excell, cifLays, recur, verbose, filename);
