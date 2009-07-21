@@ -1944,7 +1944,8 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
          CTM ori = wcl->translation();
          refsTree->delete_this(wcl);
          addcellref((*libdir)(), newcelldef, ori);
-         _hiertree->removeParent(wcl->structure(), this, _hiertree);
+         if (_hiertree->checkAncestors(wcl->structure(), this, _hiertree))
+            _hiertree->removeParent(wcl->structure(), this, _hiertree);
          CC = refsList->erase(CC);
       }
       else CC++;

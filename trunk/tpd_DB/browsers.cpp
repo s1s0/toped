@@ -171,7 +171,16 @@ void  browsers::CellBrowser::onLMouseDblClk(wxMouseEvent& event)
    int flags;
    wxPoint pt = event.GetPosition();
    wxTreeItemId id = HitTest(pt, flags);
-   if (id.IsOk() && (id != _dbroot) && (flags & wxTREE_HITTEST_ONITEMLABEL))
+   bool libRoot = false;
+   for (LibsRoot::const_iterator CLR = _libsRoot.begin(); CLR !=_libsRoot.end(); CLR++)
+   {
+      if (*CLR == id)
+      {
+         libRoot = true;break;
+      }
+   }
+   bool cellhit = (id != _dbroot) && (id != _undefRoot) && (!libRoot);
+   if (id.IsOk() && cellhit && (flags & wxTREE_HITTEST_ONITEMLABEL))
    {
       wxString cmd;
       cmd << wxT("opencell(\"") << GetItemText(id) <<wxT("\");");
@@ -568,8 +577,8 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             Delete(item);
          }
          break;
-      case 2:
-      case 3:
+      case 2://new parent added
+      case 3://first parrent added for library component
          if (_hierarchy_view)
          {//
             wxTreeItemId newparent;
