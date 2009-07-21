@@ -495,7 +495,7 @@ template <class TYPE>
    //         false -> otherwise
    SGHierTree* wv = lst->GetMember(comp);
    SGHierTree* wvP = lst->GetMember(prnt);
-      // protect yourself - if parent or the component are not in the list 
+   // protect yourself - if parent or the component are not in the list 
    assert(wvP); assert(wv);
    do {
       SGHierTree* wv2 = wv;

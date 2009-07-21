@@ -597,29 +597,27 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name, laydata::tdtlibd
 {
    if (_cells.end() != _cells.find(name)) return NULL; // cell already exists in the target library
    laydata::tdtdefaultcell* libcell = libdir->getLibCellDef(name);
-   {
-      modified = true;
-      tdtcell* ncl = DEBUG_NEW tdtcell(name);
-      _cells[name] = ncl;
-      _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
-      if (NULL == libcell)
-      {// Library cell with this name doesn't exists
-         btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
-      }
-      else
-      {// Library cell with this name exists. the new cell should replace it in all
-       // of its references
-         libdir->relink();
-         // if that cell was undefined - remove it from the library of undefined cells
-         if (UNDEFCELL_LIB == libcell->libID())
-         {
-            laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(name);
-            assert(libcell == libcellX);
-            delete libcell;
-         }
-      }
-      return ncl;
+   modified = true;
+   tdtcell* ncl = DEBUG_NEW tdtcell(name);
+   _cells[name] = ncl;
+   _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
+   if (NULL == libcell)
+   {// Library cell with this name doesn't exists
+      btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
    }
+   else
+   {// Library cell with this name exists. the new cell should replace it in all
+    // of its references
+      libdir->relink();
+      // if that cell was undefined - remove it from the library of undefined cells
+      if (UNDEFCELL_LIB == libcell->libID())
+      {
+         laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(name);
+         assert(libcell == libcellX);
+         delete libcell;
+      }
+   }
+   return ncl;
 }
 /*! Removes unreferenced cell and returns its contents if required
 */
@@ -675,8 +673,8 @@ void laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
    delete remcl;
 }
 
-/*! Get a list of references to all cells instantiating cell "name" - i.e. all parent cells
- of cell "name"
+/*! Get a list of references to all cells in the TARGETDB_LIB instantiating cell "name"
+from TERGETDB_LIB - i.e. all parent cells of cell "name" belonging to the TARGETDB_LIB
  */
 void laydata::tdtdesign::collectParentCells(std::string& cname, CellDefList& parrentCells)
 {
