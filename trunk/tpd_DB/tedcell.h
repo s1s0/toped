@@ -184,7 +184,6 @@ namespace laydata {
       void                 updateHierarchy(tdtlibdir*);
       bool                 relink(tdtlibdir*, TDTHierTree*&);
       void                 relinkThis(std::string, laydata::refnamepair, tdtdesign*);
-      void                 removePrep(laydata::tdtdesign*, bool) const;
       void                 report_selected(real) const;
       void                 collect_usedlays(const tdtlibdir*, bool, WordList&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
