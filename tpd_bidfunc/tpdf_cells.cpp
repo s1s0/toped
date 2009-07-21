@@ -52,9 +52,24 @@ void tellstdfunc::stdNEWCELL::undo_cleanup()
 void tellstdfunc::stdNEWCELL::undo()
 {
    // get the name of the DEBUG_NEW cell
-   std::string  nm = getStringValue(UNDOPstack, true);
+   std::string  cname = getStringValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-      ATDB->removecell(nm,NULL, DATC->TEDLIB());
+       // make sure cname exists ...
+      assert(ATDB->checkcell(cname));
+      // ... and is not active
+      assert(cname != ATDB->activecellname());
+      // gather the parent cells
+      laydata::CellDefList parentCells;
+      ATDB->collectParentCells(cname, parentCells);
+      if (parentCells.empty())
+         // if no parent cells - it means that a simple "newcell" was
+         // executed - so use the conventional remove cell
+         ATDB->removecell(cname,NULL, DATC->TEDLIB());
+      else
+         // parent cells found - so new cell was created on top of an
+         // existing library cell or on top of an undefined, but referenced
+         // cell. Use remove referenced cells
+         ATDB->removeRefdCell(cname, parentCells, NULL, DATC->TEDLIB());
    DATC->unlockDB();
 }
 
@@ -63,12 +78,6 @@ int tellstdfunc::stdNEWCELL::execute()
    std::string nm = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
    laydata::tdtcell* new_cell = ATDB->addcell(nm, DATC->TEDLIB());
-   //
-   //@TODO check for the cell with this name in the libraries uncluding UNDEFCELL_LIB
-   // if the cell is found - relink!
-   //
-   //laydata::tdtdefaultcell* existingLibCell = DATC->TEDLIB()->getLibCellDef(nm);
-   //
    DATC->unlockDB();
    if (NULL != new_cell)
    {
@@ -518,11 +527,26 @@ void tellstdfunc::stdGROUP::undo()
    TEUNDO_DEBUG("group(string) UNDO");
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    // get the name of the removed cell
-   std::string  name = getStringValue(UNDOPstack, true);
+   std::string  cname = getStringValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->select_fromList(get_ttlaylist(pl));
       ATDB->ungroup_this(ATDB->ungroup_prep(DATC->TEDLIB()));
-      ATDB->removecell(name,NULL, DATC->TEDLIB());
+       // make sure cname exists ...
+      assert(ATDB->checkcell(cname));
+      // ... and is not active
+      assert(cname != ATDB->activecellname());
+      // gather the parent cells
+      laydata::CellDefList parentCells;
+      ATDB->collectParentCells(cname, parentCells);
+      if (parentCells.empty())
+         // if no parent cells - it means that a simple "group" was
+         // executed - so use the conventional remove cell
+         ATDB->removecell(cname,NULL, DATC->TEDLIB());
+      else
+         // parent cells found - so new cell was created on top of an
+         // existing library cell or on top of an undefined, but referenced
+         // cell. Use remove referenced cells
+         ATDB->removeRefdCell(cname, parentCells, NULL, DATC->TEDLIB());
    DATC->unlockDB();
    delete pl;
    UpdateLV();
