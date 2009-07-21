@@ -91,8 +91,8 @@ namespace laydata {
       void           write(TEDfile* const tedfile);
       int            readLibrary(TEDfile* const);
       tdtcell*       addcell(std::string name, laydata::tdtlibdir*);
-      bool           removecell(std::string&, laydata::atticList*, laydata::tdtlibdir*);
-      bool           removeRefdCell(std::string&, CellDefList&, laydata::atticList*, laydata::tdtlibdir*);
+      void           removecell(std::string&, laydata::atticList*, laydata::tdtlibdir*);
+      void           removeRefdCell(std::string&, CellDefList&, laydata::atticList*, laydata::tdtlibdir*);
       tdtdata*       addbox(unsigned la, TP* p1, TP* p2);
       tdtdata*       addpoly(unsigned, const pointlist*);
       tdtdata*       addwire(unsigned, const pointlist*, word);

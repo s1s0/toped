@@ -1060,8 +1060,8 @@ bool laydata::tdtcell::move_selected(laydata::tdtdesign* ATDB, const CTM& trans,
       // before all remove the selected and partially shapes 
       // from the data holders ...
       if (_layers[CL->first]->delete_marked(sh_selected, true))
-         // ... and validate quadTrees if needed
-         if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
+         // ... and validate quadTrees
+         _layers[CL->first]->validate();
       // now for every single shape...
 
       dataList* lslct = CL->second;
@@ -1127,7 +1127,7 @@ bool laydata::tdtcell::rotate_selected(laydata::tdtdesign* ATDB, const CTM& tran
       // from the data holders ...
       if (_layers[CL->first]->delete_marked())
          // ... and validate quadTrees if needed
-         if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
+         _layers[CL->first]->validate();
       // now for every single shape...
       dataList* lslct = CL->second;
       dataList::iterator DI = lslct->begin();
@@ -1188,7 +1188,7 @@ bool laydata::tdtcell::transfer_selected(laydata::tdtdesign* ATDB, const CTM& tr
       // before all, remove the selected shapes from the data holders ...
       if (_layers[CL->first]->delete_marked())
          // ... and validate quadTrees if needed
-         if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
+         _layers[CL->first]->validate();
       // now for every single shape...
       for (dataList::iterator DI = CL->second->begin();
                                                 DI != CL->second->end(); DI++)
@@ -1622,7 +1622,8 @@ void laydata::tdtcell::transferLayer(unsigned dst)
          if (_layers[CL->first]->delete_marked())
          {
             // ... and validate quadTrees if needed
-            if (!_layers[CL->first]->empty()) _layers[CL->first]->validate();
+            if (!_layers[CL->first]->empty()) 
+               _layers[CL->first]->validate();
             else
             {//..or remove the source layer if it remained empty
                delete _layers[CL->first];
@@ -1680,7 +1681,8 @@ void laydata::tdtcell::transferLayer(selectList* slst, unsigned dst)
    if (_layers[dst]->delete_marked())
    {
       // ... and validate quadTrees if needed
-      if (!_layers[dst]->empty()) _layers[dst]->validate();
+      if (!_layers[dst]->empty()) 
+         _layers[dst]->validate();
       else
       {//..or remove the source layer if it remained empty
          delete _layers[dst];
@@ -1967,30 +1969,11 @@ void laydata::tdtcell::relinkThis(std::string cname, laydata::refnamepair newcel
       {
          refsTree->delete_this(wcl);
          addcellref(ATDB, newcelldef, wcl->translation(), false);
+         _layers[REF_LAY]->validate();
       }
    }
    refsList->clear(); delete refsList;
-}
-
-void laydata::tdtcell::removePrep(laydata::tdtdesign* ATDB, bool root) const
-{
-   // Check that there are referenced cells
-   if (_layers.end() != _layers.find(REF_LAY))
-   {
-      tdtdefaultcell* childref;
-      assert(!_children.empty());
-      // remove all children from the hierarchy tree
-      for (nameList::const_iterator CN = _children.begin(); CN != _children.end(); CN++)
-      {
-         childref = ATDB->checkcell(*CN);
-         int res = ATDB->dbHierRemoveParent(childref, this);
-         childref->_orphan = (res > 0);
-      }
-   }
-   if (root)
-      ATDB->dbHierRemoveRoot(this);
-   // don't clear children, the cell will be moved to Attic
-   //_children.clear();
+   invalidateParents(ATDB);
 }
 
 unsigned int laydata::tdtcell::numselected()

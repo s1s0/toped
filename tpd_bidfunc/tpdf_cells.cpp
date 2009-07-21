@@ -121,17 +121,43 @@ void tellstdfunc::stdREMOVECELL::undo()
 
 int tellstdfunc::stdREMOVECELL::execute()
 {
-   std::string nm = getStringValue();
+   std::string cname = getStringValue();
+   laydata::atticList* cell_contents = NULL;
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      laydata::atticList* cell_contents = DEBUG_NEW laydata::atticList();
-      bool removed = ATDB->removecell(nm,cell_contents, DATC->TEDLIB());
+      if (!ATDB->checkcell(cname))
+      {
+         std::string news = "Cell \"";
+         news += cname; news += "\" doesn't exists. Nothing to remove";
+         tell_log(console::MT_ERROR,news);
+
+      }
+      else if (cname == ATDB->activecellname())
+      {
+         tell_log(console::MT_ERROR,"Active cell can't be removed");
+      }
+      else
+      {
+         laydata::CellDefList parentCells;
+         ATDB->collectParentCells(cname, parentCells);
+         if (parentCells.empty())
+         {
+            cell_contents = DEBUG_NEW laydata::atticList();
+            ATDB->removecell(cname,cell_contents, DATC->TEDLIB());
+         }
+         else
+         {
+            std::string news = "Cell \"";
+            news += cname; news += "\" is referenced and can't be removed";
+            tell_log(console::MT_ERROR,news);
+         }
+      }
    DATC->unlockDB();
-   if (removed)
+   if (NULL != cell_contents)
    {  // removal has been successfull
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(cname));
       UNDOPstack.push_front(make_ttlaylist(cell_contents));
-      LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+      LogFile << LogFile.getFN() << "(\""<< cname << "\");"; LogFile.flush();
    }
    clean_atticlist(cell_contents, false);
    delete(cell_contents);
@@ -157,10 +183,10 @@ int tellstdfunc::stdREMOVEREFDCELL::execute()
 {
    std::string cname = getStringValue();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      if (ATDB->checkcell(cname))
+      if (!ATDB->checkcell(cname))
       {
          std::string news = "Cell \"";
-         news += cname; news += "\" doesn't exists";
+         news += cname; news += "\" doesn't exists. Nothing to remove";
          tell_log(console::MT_ERROR,news);
 
       }
@@ -179,7 +205,7 @@ int tellstdfunc::stdREMOVEREFDCELL::execute()
          else
          {
             laydata::atticList* cell_contents = DEBUG_NEW laydata::atticList();
-            bool removed = ATDB->removeRefdCell(cname, parentCells, cell_contents, DATC->TEDLIB());
+            ATDB->removeRefdCell(cname, parentCells, cell_contents, DATC->TEDLIB());
          }
       }
    DATC->unlockDB();
@@ -496,7 +522,7 @@ void tellstdfunc::stdGROUP::undo()
    laydata::tdtdesign* ATDB = DATC->lockDB();
       ATDB->select_fromList(get_ttlaylist(pl));
       ATDB->ungroup_this(ATDB->ungroup_prep(DATC->TEDLIB()));
-      VERIFY(ATDB->removecell(name,NULL, DATC->TEDLIB()));
+      ATDB->removecell(name,NULL, DATC->TEDLIB());
    DATC->unlockDB();
    delete pl;
    UpdateLV();
