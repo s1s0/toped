@@ -261,9 +261,9 @@ namespace browsers
                                           const wxString& name = wxT("button"),
                                           LayerInfo *layer = NULL);
                               ~LayerButton();
-         void                 onLeftClick(wxMouseEvent &event);
-         void                 onMiddleClick(wxMouseEvent &event);
-         void                 onPaint(wxPaintEvent&event);
+         void                 onLeftClick(wxMouseEvent&);
+         void                 onMiddleClick(wxMouseEvent&);
+         void                 onPaint(wxPaintEvent&);
          //Call when other button is selected
          void                 unselect();
          void                 select();
@@ -294,15 +294,12 @@ namespace browsers
                                           const wxSize& size = wxDefaultSize,
                                           long style = wxHSCROLL |  wxVSCROLL,
                                           const wxString& name = wxT("LayerPanel"));
-
          virtual              ~LayerPanel();
          wxString             getAllSelected();
-         void                 refresh(void);
-
+         void                 onPaint(wxPaintEvent&);
       private:
          typedef std::map <word, LayerButton*> LayerButtonMap;
 
-         void                 onSize(wxSizeEvent&);
          void                 onCommand(wxCommandEvent&);
          void                 addButton(LayerInfo *layer);
          LayerButton*         checkDefined(word);
