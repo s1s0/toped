@@ -1352,7 +1352,7 @@ browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
 BEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
    //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
    EVT_LEFT_DOWN  (LayerButton::onLeftClick  )
-   EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
+//   EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
    EVT_PAINT      (LayerButton::onPaint      )
 END_EVENT_TABLE()
 //====================================================================
@@ -1531,8 +1531,7 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 {
 //   LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
    if (event.ShiftDown())
-   //Lock layer
-   {
+   {//Hide layer
       //_hidden = !_hidden;
       hideLayer(!_hidden);
       wxString cmd;
@@ -1541,9 +1540,17 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
       else cmd << wxT("false") << wxT(");");
       parseCommand(cmd);
    }
+   else if (event.ControlDown())
+   {// Lock Layer
+      //_locked = !_locked;
+      wxString cmd;
+      cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
+      if (DATC->layerLocked(_layer->layno())) cmd << wxT("false") << wxT(");");
+      else cmd << wxT("true") << wxT(");");
+      parseCommand(cmd);
+   }
    else
-   //Select layer
-   {
+   {//Select layer
       wxString cmd;
       cmd << wxT("usinglayer(") << _layer->layno()<< wxT(");");
       parseCommand(cmd);
@@ -1565,17 +1572,10 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
    }
 }
 
-void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
-{
-//   LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
-   //_locked = !_locked;
-   wxString cmd;
-   cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
-   if (DATC->layerLocked(_layer->layno())) cmd << wxT("false") << wxT(");");
-   else cmd << wxT("true") << wxT(");");
-   parseCommand(cmd);
-
-}
+// void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
+// {
+// 
+// }
 
 
 void browsers::LayerButton::hideLayer(bool hide)
