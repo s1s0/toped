@@ -1348,24 +1348,27 @@ browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
    _fill      = DATC->getFillName(layno);
 };
 
+//====================================================================
 BEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
    //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
-   EVT_LEFT_DOWN(LayerButton::onLeftClick)
+   EVT_LEFT_DOWN  (LayerButton::onLeftClick  )
    EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
-   EVT_PAINT(LayerButton::onPaint)
+   EVT_PAINT      (LayerButton::onPaint      )
 END_EVENT_TABLE()
-
-browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos , 
+//====================================================================
+//
+//
+browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos ,
                                    const wxSize& size, long style , const wxValidator& validator ,
-                                   const wxString& name, LayerInfo *layer)
+                                   const wxString& name, LayerInfo *layer):wxPanel()
 {
-   
+
    _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
    _hidden  = false;
-   
+
    //_locked  = false;  
-   
+
    _picture = DEBUG_NEW wxBitmap(size.GetWidth()-16, size.GetHeight(), -1);
 
    const byte *ifill= DATC->getFill(layer->layno());
@@ -1373,12 +1376,12 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    wxColour color(col.red(), col.green(), col.blue());
 
    if(ifill!=NULL)
-   {     
+   {
       wxBitmap *stipplebrush = DEBUG_NEW wxBitmap((char  *)ifill, 32, 32, 1);
       wxImage image;
       image = stipplebrush->ConvertToImage();
 #ifdef WIN32
- //Change white color for current one
+     //Change white color for current one
       int w = image.GetWidth();
       int h = image.GetHeight();
       for (int i=0; i<w; i++)
@@ -1394,7 +1397,6 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
             }
          }
       delete stipplebrush;
-
       //Recreate bitmap with new color
       stipplebrush = DEBUG_NEW wxBitmap(image, 1);
 #endif
@@ -1411,21 +1413,21 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    }
 
    _pen = DEBUG_NEW wxPen();
-            
+
    //if (col!=NULL)
    //{
       _pen->SetColour(color);
       _brush->SetColour(color);
    //}
-         
+
    Create(parent, id,  pos, size, style, name);
    GetClientSize(&_buttonWidth, &_buttonHeight);
-   //***Draw main picture***   
+   //***Draw main picture***
    preparePicture();
-   
+
    wxString caption(_layer->name().c_str(),wxConvUTF8);
    SetToolTip(caption);
-   
+
 }
 
 void browsers::LayerButton::preparePicture()
@@ -1435,7 +1437,7 @@ void browsers::LayerButton::preparePicture()
    GetParent()->GetClientSize(&sizeX, &sizeY);
    _buttonWidth = sizeX;
    SetSize(_buttonWidth, _buttonHeight);
-   
+
    wxMemoryDC DC;
    wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
    DC.SetFont(font);
@@ -1454,7 +1456,7 @@ void browsers::LayerButton::preparePicture()
 
    DC.Clear();
    int curw = clearence;
-   
+
    char temp[100];
    sprintf(temp, "%3i", _layer->layno());
    wxString layno(temp, wxConvUTF8);
@@ -1462,7 +1464,7 @@ void browsers::LayerButton::preparePicture()
    DC.GetTextExtent(layno, &wno, &hno);
    DC.DrawText(layno, 0, int((_buttonHeight - hno)/2));
    curw += wno + clearence;
-   
+
    wxBrush tempBrush = DC.GetBrush();
    if (_selected)
    {
@@ -1488,7 +1490,7 @@ void browsers::LayerButton::preparePicture()
    curw += clearence;
    DC.DrawText(caption, curw, int(_buttonHeight/2 - hna/2));
    curw += wna;
-   
+
    DC.SetBrush(tempBrush);
    DC.DrawRectangle(curw, clearence, _buttonWidth-curw-16, _buttonHeight-2*clearence);
 
@@ -1500,14 +1502,13 @@ void browsers::LayerButton::preparePicture()
 browsers::LayerButton::~LayerButton()
 {
    delete _picture;
-
    delete _brush;
    delete _pen;
    delete _layer;
 }
 
 
-void browsers::LayerButton::onPaint(wxPaintEvent&event)
+void browsers::LayerButton::onPaint(wxPaintEvent&)
 {
    wxPaintDC dc(this);
    dc.DrawBitmap(*_picture, 0, 0, false);
@@ -1528,15 +1529,7 @@ void browsers::LayerButton::onPaint(wxPaintEvent&event)
 
 void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 {
-   //???Warning! Here istemporary solution for right vusulalisation of layer buttons
-   //after resizing
-   LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
-   if(_buttonWidth!=parent->GetClientSize().GetWidth())
-   {
-      parent->refresh();
-   }
-   //???
-
+//   LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
    if (event.ShiftDown())
    //Lock layer
    {
@@ -1574,15 +1567,7 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 
 void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 {
-   //???Warning! Here istemporary solution for right vusulalisation of layer buttons
-   //after resizing
-   LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
-   if(_buttonWidth!=parent->GetClientSize().GetWidth())
-   {
-      parent->refresh();
-   }
-   //???
-
+//   LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
    //_locked = !_locked;
    wxString cmd;
    cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
@@ -1620,9 +1605,11 @@ void browsers::LayerButton::unselect(void)
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::LayerPanel, wxScrolledWindow)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::LayerPanel::onCommand)
-   EVT_SIZE(browsers::LayerPanel::OnSize)
+   EVT_PAINT(browsers::LayerPanel::onPaint)
 END_EVENT_TABLE()
 //====================================================================
+//
+//
 browsers::LayerPanel::LayerPanel(wxWindow* parent, wxWindowID id, 
                               const wxPoint& pos,
                               const wxSize& size,
@@ -1630,7 +1617,7 @@ browsers::LayerPanel::LayerPanel(wxWindow* parent, wxWindowID id,
                               :wxScrolledWindow(parent, id, pos, size, style, name),
                                _selectedButton(NULL)
 {
-      _buttonCount = 0;
+   _buttonCount = 0;
 }
 
 browsers::LayerPanel::~LayerPanel() 
@@ -1746,24 +1733,11 @@ void  browsers::LayerPanel::addButton(LayerInfo *layer)
       }
 }
 
-void browsers::LayerPanel::onSize(wxSizeEvent& evt)
+void  browsers::LayerPanel::onPaint(wxPaintEvent& evt)
 {
    for(LayerButtonMap::const_iterator it = _buttonMap.begin(); it!=_buttonMap.end();++it)
-   {
-      LayerButton *button = it->second;
-      button->preparePicture();
-   }
-   Refresh();
-}
-
-void  browsers::LayerPanel::refresh(void)
-{
-   for(LayerButtonMap::const_iterator it = _buttonMap.begin(); it!=_buttonMap.end();++it)
-   {
-      LayerButton *button = it->second;
-      button->preparePicture();
-   }
-   Refresh();
+      it->second->preparePicture();
+   evt.Skip();
 }
 
 wxString browsers::LayerPanel::getAllSelected()
