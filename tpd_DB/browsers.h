@@ -262,7 +262,7 @@ namespace browsers
                                           LayerInfo *layer = NULL);
                               ~LayerButton();
          void                 onLeftClick(wxMouseEvent&);
-         void                 onMiddleClick(wxMouseEvent&);
+//         void                 onMiddleClick(wxMouseEvent&);
          void                 onPaint(wxPaintEvent&);
          //Call when other button is selected
          void                 unselect();
