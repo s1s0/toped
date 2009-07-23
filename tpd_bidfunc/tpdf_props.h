@@ -41,6 +41,8 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdCOLORDEF      );  //
    TELL_STDCMD_CLASSA(stdFILLDEF       );  //
    TELL_STDCMD_CLASSA(stdGRIDDEF       );  //
+   TELL_STDCMD_CLASSA(stdSETPARAMETER  );  //
+   TELL_STDCMD_CLASSA(stdSETPARAMETERS );  //
    TELL_STDCMD_CLASSA_UNDO(stdHIDELAYER   );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdHIDELAYERS  );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdHIDECELLMARK);  // undo - implemented
@@ -54,5 +56,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdAUTOPAN     );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdZEROCROSS   );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSHAPEANGLE  );  // undo - implemented
+
+   void analyzeTopedParameters(std::string, std::string);
 }
 #endif

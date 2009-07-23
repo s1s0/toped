@@ -26,13 +26,16 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include <string>
 #include <sstream>
+#include <iostream>
 #include "tpdf_props.h"
 
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_DB/browsers.h"
 
+extern parsercmd::cmdBLOCK*      CMDBlock;
 extern DataCenter*               DATC;
 extern wxWindow*                 TopedCanvasW;
 extern wxFrame*                  TopedMainW;
@@ -169,7 +172,8 @@ tellstdfunc::stdGRIDDEF::stdGRIDDEF(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-int tellstdfunc::stdGRIDDEF::execute() {
+int tellstdfunc::stdGRIDDEF::execute()
+{
    std::string  colname = getStringValue();
    real    step    = getOpValue();
    byte    no      = getByteValue();
@@ -177,6 +181,45 @@ int tellstdfunc::stdGRIDDEF::execute() {
    LogFile << LogFile.getFN() << "(" << no << "," << step << ",\"" <<
                                               colname << "\");";LogFile.flush();
    RefreshGL();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdSETPARAMETER::stdSETPARAMETER(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::tthshstr()));
+}
+
+int tellstdfunc::stdSETPARAMETER::execute()
+{
+   telldata::tthshstr *paramSet = static_cast<telldata::tthshstr*>(OPstack.top());OPstack.pop();
+   std::string paramName  = paramSet->key().value();
+   std::string paramValue = paramSet->value().value();
+   analyzeTopedParameters(paramName, paramValue);
+   delete paramSet;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdSETPARAMETERS::stdSETPARAMETERS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hshstr)));
+}
+
+int tellstdfunc::stdSETPARAMETERS::execute()
+{
+   telldata::ttlist *paramList = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+
+   for (unsigned i = 0; i < paramList->size(); i++)
+   {
+      telldata::tthshstr* paramSet = static_cast<telldata::tthshstr*>((paramList->mlist())[i]);
+      std::string paramName  = paramSet->key().value();
+      std::string paramValue = paramSet->value().value();
+      analyzeTopedParameters(paramName, paramValue);
+   }
+   delete paramList;
    return EXEC_NEXT;
 }
 
@@ -294,7 +337,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
    for (unsigned i = 0; i < sl->size() ; i++)
    {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      if (LAST_EDITABLE_LAYNUM < laynumber->value())
+      if (LAST_EDITABLE_LAYNUM < (unsigned)laynumber->value())
       {
          std::ostringstream info;
          info << "Layer number "<< i <<" out of range ... ignored";
@@ -586,7 +629,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
    for (unsigned i = 0; i < sl->size() ; i++)
    {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      if (LAST_EDITABLE_LAYNUM < laynumber->value())
+      if (LAST_EDITABLE_LAYNUM < (unsigned)laynumber->value())
       {
          std::ostringstream info;
          info << "Layer number "<< i <<" out of range ... ignored";
@@ -800,3 +843,47 @@ int tellstdfunc::stdSHAPEANGLE::execute() {
    return EXEC_NEXT;
 }
 
+
+template <class T>
+   bool from_string(T& t, const std::string& s,
+                                std::ios_base& (*f)(std::ios_base&))
+   {
+      std::istringstream iss(s);
+      return !(iss >> f >> t).fail();
+   }
+
+void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
+{
+   if      ("UNDO_DEPTH"      == name)
+   {
+      word val;
+      if(from_string<word>(val, value, std::dec))
+         CMDBlock->setUndoDepth(val);
+      else
+      {
+         std::ostringstream info;
+         info << "Invalid \""<< name <<"\" value. Expected value is between 0 and 65535";
+         tell_log(console::MT_ERROR,info.str());
+      }
+   }
+   else if ("MIN_VISUAL_AREA" == name)
+   {
+      word val;
+      if ((from_string<word>(val, value, std::dec)) && (val < 256))
+      {
+//         MIN_VISUAL_AREA = val;
+      }
+      else
+      {
+         std::ostringstream info;
+         info << "Invalid \""<< name <<"\" value. Expected value is between 0 and 255";
+         tell_log(console::MT_ERROR,info.str());
+      }
+   }
+   else
+   {
+      std::ostringstream info;
+      info << "Unknown parameter name \""<< name <<"\"";
+      tell_log(console::MT_ERROR,info.str());
+   }
+}
