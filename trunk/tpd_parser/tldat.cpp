@@ -47,7 +47,7 @@ telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
          case tn_box   : nvar = DEBUG_NEW telldata::ttwnd()    ;break;
          case tn_bnd   : nvar = DEBUG_NEW telldata::ttbnd()    ;break;
          case tn_hsh   : nvar = DEBUG_NEW telldata::tthsh()    ;break;
-			case tn_hshstr: nvar = DEBUG_NEW telldata::tthshstr() ;break;
+         case tn_hshstr: nvar = DEBUG_NEW telldata::tthshstr() ;break;
          case tn_layout: nvar = DEBUG_NEW telldata::ttlayout() ;break;
                 default: {
                      assert(_tIDMAP.end() != _tIDMAP.find(ID));
@@ -108,7 +108,7 @@ telldata::hsh_type::hsh_type() : tell_type(telldata::tn_hsh)
 //=============================================================================
 telldata::hshstr_type::hshstr_type() : tell_type(telldata::tn_hshstr)
 {
-   addfield("key"   , telldata::tn_string   , NULL);
+   addfield("key"   , telldata::tn_string, NULL);
    addfield("value" , telldata::tn_string, NULL);
 };
 

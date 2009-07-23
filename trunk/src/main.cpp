@@ -62,17 +62,17 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    //-----------------------------------------------------------------------------------------------------------
    // First the internal types
    //-----------------------------------------------------------------------------------------------------------
-   telldata::point_type*   pntype  = DEBUG_NEW telldata::point_type();
-   telldata::box_type*     bxtype  = DEBUG_NEW telldata::box_type(pntype);
-   telldata::bnd_type*     bndtype = DEBUG_NEW telldata::bnd_type(pntype);
-   telldata::hsh_type*     hshtype = DEBUG_NEW telldata::hsh_type();
-	telldata::hshstr_type*	hshstrtype = DEBUG_NEW telldata::hshstr_type();
+   telldata::point_type*   pntype      = DEBUG_NEW telldata::point_type();
+   telldata::box_type*     bxtype      = DEBUG_NEW telldata::box_type(pntype);
+   telldata::bnd_type*     bndtype     = DEBUG_NEW telldata::bnd_type(pntype);
+   telldata::hsh_type*     hshtype     = DEBUG_NEW telldata::hsh_type();
+	telldata::hshstr_type*  hshstrtype  = DEBUG_NEW telldata::hshstr_type();
 
    mblock->addGlobalType("point"     , pntype);
    mblock->addGlobalType("box"       , bxtype);
    mblock->addGlobalType("bind"      , bndtype);
    mblock->addGlobalType("lmap"      , hshtype);
-	mblock->addGlobalType("strmap"      , hshstrtype);
+	mblock->addGlobalType("strmap"    , hshstrtype);
    //-----------------------------------------------------------------------------------------------------------
    // Internal variables
    //-----------------------------------------------------------------------------------------------------------
@@ -86,13 +86,13 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addconstID("_lmpref"  , DEBUG_NEW telldata::ttint( laydata::_lmpref ), true);
    mblock->addconstID("_lmapref" , DEBUG_NEW telldata::ttint( laydata::_lmapref), true);
 
-	mblock->addconstID("horizontal"	, DEBUG_NEW telldata::ttint( tui::_tuihorizontal), true);
-	mblock->addconstID("vertical"		, DEBUG_NEW telldata::ttint( tui::_tuivertical),	true);
+   mblock->addconstID("horizontal", DEBUG_NEW telldata::ttint( tui::_tuihorizontal), true);
+   mblock->addconstID("vertical"  , DEBUG_NEW telldata::ttint( tui::_tuivertical),	true);
 
-	mblock->addconstID("_iconsize16"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_16x16),true);
-	mblock->addconstID("_iconsize24"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_24x24),true);
-	mblock->addconstID("_iconsize32"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_32x32),true);
-	mblock->addconstID("_iconsize48"	, DEBUG_NEW telldata::ttint( tui::ICON_SIZE_48x48),true);
+   mblock->addconstID("_iconsize16", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_16x16),true);
+   mblock->addconstID("_iconsize24", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_24x24),true);
+   mblock->addconstID("_iconsize32", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_32x32),true);
+   mblock->addconstID("_iconsize48", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_48x48),true);
 
    //-----------------------------------------------------------------------------------------------------------
    // tell build-in functions                                                                              execute on recovery
@@ -250,10 +250,12 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("propsave"         ,(DEBUG_NEW                 tellstdfunc::stdPROPSAVE(telldata::tn_void, true)));
    mblock->addFUNC("addmenu"          ,(DEBUG_NEW                  tellstdfunc::stdADDMENU(telldata::tn_void, true)));
    mblock->addFUNC("toolbarsize"      ,(DEBUG_NEW              tellstdfunc::stdTOOLBARSIZE(telldata::tn_void, true)));
-   mblock->addFUNC("definetoolbar"    ,(DEBUG_NEW              tellstdfunc::stdDEFINETOOLBAR(telldata::tn_void, true)));
-	mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW              tellstdfunc::stdTOOLBARADDITEM(telldata::tn_void, true)));
-	mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW              tellstdfunc::stdTOOLBARADDITEM_S(telldata::tn_void, true)));
-	mblock->addFUNC("toolbardeleteitem",(DEBUG_NEW              tellstdfunc::stdTOOLBARDELETEITEM(telldata::tn_void, true)));
+   mblock->addFUNC("definetoolbar"    ,(DEBUG_NEW            tellstdfunc::stdDEFINETOOLBAR(telldata::tn_void, true)));
+   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW           tellstdfunc::stdTOOLBARADDITEM(telldata::tn_void, true)));
+   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW         tellstdfunc::stdTOOLBARADDITEM_S(telldata::tn_void, true)));
+   mblock->addFUNC("toolbardeleteitem",(DEBUG_NEW        tellstdfunc::stdTOOLBARDELETEITEM(telldata::tn_void, true)));
+   mblock->addFUNC("setparams"        ,(DEBUG_NEW            tellstdfunc::stdSETPARAMETERS(telldata::tn_void, true)));
+   mblock->addFUNC("setparams"        ,(DEBUG_NEW             tellstdfunc::stdSETPARAMETER(telldata::tn_void, true)));
 
    console::TellFnSort();
 }
