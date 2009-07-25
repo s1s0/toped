@@ -49,7 +49,7 @@ namespace GDSin {
       void                 text(GDSin::GdsText*    , laydata::tdtlayer*);
       void                 ref (GDSin::GdsRef*     , laydata::tdtcell* );
       void                 aref(GDSin::GdsARef*    , laydata::tdtcell* );
-      laydata::refnamepair linkcellref(std::string cellname);
+      laydata::CellDefin   linkcellref(std::string cellname);
       GDSin::GdsFile*      _src_lib;
       laydata::tdtlibdir*  _tdt_db;
       const LayerMapGds&   _theLayMap;
@@ -112,7 +112,7 @@ public:
    CIFin::CifFile*            lockCIF(bool throwexception = true);
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
-   bool                       getCellNamePair(std::string name, laydata::refnamepair& striter);
+   bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
    void                       unlockGDS();
    void                       unlockCIF();

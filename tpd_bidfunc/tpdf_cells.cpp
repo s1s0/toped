@@ -288,8 +288,8 @@ int tellstdfunc::stdOPENCELL::execute()
       {
 /*-!-*/  DATC->unlockDB();
          std::string news = "Cell \"";news += nm;
-         laydata::refnamepair striter;
-         if (DATC->TEDLIB()->getLibCellRNP(nm, striter))
+         laydata::CellDefin strdefn;
+         if (DATC->TEDLIB()->getLibCellRNP(nm, strdefn))
             news += "\" is a library cell and can't be edited";
          else
             news += "\" is not defined";

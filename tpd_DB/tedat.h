@@ -243,7 +243,7 @@ namespace laydata {
 //==============================================================================
    class tdtcellref : public tdtdata  {
    public:
-                           tdtcellref(refnamepair str, CTM trans) : tdtdata(), 
+                           tdtcellref(CellDefin str, CTM trans) : tdtdata(), 
                                           _structure(str), _translation(trans) {};
                            tdtcellref(TEDfile* const tedfile);
 //                          ~tdtcellref() {};
@@ -282,7 +282,7 @@ namespace laydata {
    protected:
       void                 select_points(DBbox&, SGBitSet&) {return;}
       void                 unselect_points(DBbox&, SGBitSet&) {return;}
-      refnamepair          _structure; // pair (name - cell) pointer
+      CellDefin            _structure; // pointer to the cell definition
       CTM                  _translation;
 //   private:
 //      bool                 ref_visible(ctmstack&, const layprop::DrawProperties&) const;
@@ -291,7 +291,7 @@ namespace laydata {
 //==============================================================================
    class tdtcellaref : public tdtcellref  {
    public:
-                           tdtcellaref(refnamepair str, CTM trans, ArrayProperties& arrprops) :
+                           tdtcellaref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
                               tdtcellref(str, trans), _arrprops(arrprops) {};
                            tdtcellaref(TEDfile* const tedfile);
 //                          ~tdtcellaref() {};
@@ -469,21 +469,21 @@ namespace laydata {
 //==============================================================================
    class tdttmpcellref : public tdttmpdata {
       public:
-                           tdttmpcellref(refnamepair str, CTM trans) :
+                           tdttmpcellref(CellDefin str, CTM trans) :
                                        _structure(str), _translation(trans) {};
                           ~tdttmpcellref(){};
          virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const;
          void              objFlip()   {_translation.FlipY(0.0)   ;}
          void              objRotate() {_translation.Rotate( 90.0);}
       protected:
-         refnamepair       _structure; // pair (name - cell) pointer
+         CellDefin         _structure; // pair (name - cell) pointer
          CTM               _translation;
    };
 
 //==============================================================================
    class tdttmpcellaref : public tdttmpcellref {
       public:
-                           tdttmpcellaref(refnamepair str, CTM trans, ArrayProperties& arrprops) :
+                           tdttmpcellaref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
                               tdttmpcellref(str, trans), _arrprops(arrprops) {};
                           ~tdttmpcellaref(){};
          virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const;

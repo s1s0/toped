@@ -670,12 +670,12 @@ int tellstdfunc::stdCELLREF::execute() {
    // check that target cell exists - otherwise tmp_draw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well 
-   laydata::refnamepair striter;
-   if (DATC->getCellNamePair(name, striter))
+   laydata::CellDefin strdefn;
+   if (DATC->getCellNamePair(name, strdefn))
    {
       UNDOcmdQ.push_front(this);
       laydata::tdtdesign* ATDB = DATC->lockDB();
-         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(striter,ori), REF_LAY);
+         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(strdefn,ori), REF_LAY);
       DATC->unlockDB();
       OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
@@ -707,8 +707,8 @@ int tellstdfunc::stdCELLREF_D::execute() {
    // check that target cell exists - otherwise tmp_draw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well 
-   laydata::refnamepair striter;
-   if (!DATC->getCellNamePair(name, striter))
+   laydata::CellDefin strdefn;
+   if (!DATC->getCellNamePair(name, strdefn))
    {
       std::string news = "Can't find cell \"";
       news += name; news += "\" ";

@@ -261,7 +261,7 @@ bool laydata::tdtdefaultcell::relink(tdtlibdir*, TDTHierTree*&)
    return false;
 }
 
-void laydata::tdtdefaultcell::relinkThis(std::string, laydata::refnamepair, laydata::tdtdesign*)
+void laydata::tdtdefaultcell::relinkThis(std::string, laydata::CellDefin, laydata::tdtdesign*)
 {
 }
 
@@ -365,7 +365,7 @@ laydata::quadTree* laydata::tdtcell::securelayer(unsigned layno)
 }
 
 laydata::tdtcellref* laydata::tdtcell::addcellref(laydata::tdtdesign* ATDB,
-                                 refnamepair str, CTM trans, bool sortnow)
+                                 CellDefin str, CTM trans, bool sortnow)
 {
    if (!addchild(ATDB, str)) return NULL;
    quadTree *cellreflayer = securelayer(REF_LAY);
@@ -376,7 +376,7 @@ laydata::tdtcellref* laydata::tdtcell::addcellref(laydata::tdtdesign* ATDB,
 }
 
 laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB,
-          refnamepair str, CTM trans, ArrayProperties& arrprops, bool sortnow)
+          CellDefin str, CTM trans, ArrayProperties& arrprops, bool sortnow)
 {
    if (!addchild(ATDB, str)) return NULL;
    quadTree *cellreflayer = securelayer(REF_LAY);
@@ -1938,7 +1938,7 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
    while (CC != refsList->end())
    {
       tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
-      refnamepair newcelldef = libdir->linkcellref(wcl->cellname(), libID(), _hiertree);
+      CellDefin newcelldef = libdir->linkcellref(wcl->cellname(), libID(), _hiertree);
       if (newcelldef != wcl->structure())
       {
          CTM ori = wcl->translation();
@@ -1954,7 +1954,7 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
    return overlapChanged(old_overlap, (*libdir)());
 }
 
-void laydata::tdtcell::relinkThis(std::string cname, laydata::refnamepair newcelldef, laydata::tdtdesign* ATDB)
+void laydata::tdtcell::relinkThis(std::string cname, laydata::CellDefin newcelldef, laydata::tdtdesign* ATDB)
 {
    assert( _layers.end() != _layers.find(REF_LAY) );
    DBbox old_overlap(_cellOverlap);
