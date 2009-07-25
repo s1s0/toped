@@ -1798,32 +1798,37 @@ void laydata::tdtcellref::motion_draw(const layprop::DrawProperties& drawprop,
 }
 
 void laydata::tdtcellref::info(std::ostringstream& ost, real DBU) const {
-   ost << "cell \"" << _structure->first << "\" - reference @ {";
+   ost << "cell \"" << _structure->name() << "\" - reference @ {";
    ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "}";
 }
 
 void laydata::tdtcellref::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_CELLREF);
-   tedfile->putString(_structure->first);
+   tedfile->putString(_structure->name());
    tedfile->putCTM(_translation);
 }
 
 laydata::tdtcell* laydata::tdtcellref::cstructure() const
 {
    laydata::tdtcell* celldef;
-   if (_structure->second->libID())
-      celldef =  static_cast<laydata::tdtcell*>(_structure->second);
+   if (_structure->libID())
+      celldef =  static_cast<laydata::tdtcell*>(_structure);
    else
       celldef = NULL;
    return celldef;
+}
+
+std::string laydata::tdtcellref::cellname() const 
+{
+   return _structure->name();
 }
 
 void laydata::tdtcellref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
    GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_SREF);
    gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_SNAME, _structure->first.size());
-   wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_SNAME, _structure->name().size());
+   wr->add_ascii(_structure->name().c_str());gdsf.flush(wr);
    TP trans;
    real rotation, scale;
    bool flipX;
@@ -1845,15 +1850,15 @@ void laydata::tdtcellref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 
 void laydata::tdtcellref::CIFwrite(CIFin::CifExportFile& ciff) const
 {
-   ciff.call(_structure->first, _translation);
+   ciff.call(_structure->name(), _translation);
 }
 
 void laydata::tdtcellref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
 {
-   psf.cellref(_structure->first, _translation);
+   psf.cellref(_structure->name(), _translation);
    if (!psf.hier())
    {
-     _structure->second->PSwrite(psf, drawprop);
+     _structure->PSwrite(psf, drawprop);
    }
 }
 
@@ -1861,17 +1866,18 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
 {
    tdtdata *data_copy;
    shapeList* ssl;
+   tdtcell* cstr = cstructure();
    // select all the shapes of the referenced tdtcell
-   if (NULL == cstructure())
+   if (NULL == cstr)
    {
       std::ostringstream ost;
       ost << "Cell \"" << structure()->name() << "\" is undefined. Ignored during ungoup.";
       tell_log(console::MT_WARNING, ost.str());
       return;
    }
-   cstructure()->full_select();
-   for (selectList::const_iterator CL = cstructure()->shapesel()->begin();
-                                   CL != cstructure()->shapesel()->end(); CL++)
+   cstr->full_select();
+   for (selectList::const_iterator CL = cstr->shapesel()->begin();
+                                   CL != cstr->shapesel()->end(); CL++)
    {
       // secure the target layer
       quadTree* wl = dst->securelayer(CL->first);
@@ -1905,7 +1911,7 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
       }
       wl->invalidate();
    }
-   cstructure()->unselect_all();
+   cstr->unselect_all();
 }
 
 DBbox laydata::tdtcellref::overlap() const
@@ -2143,7 +2149,7 @@ void laydata::tdtcellaref::motion_draw(const layprop::DrawProperties& drawprop,
 }
 
 void laydata::tdtcellaref::info(std::ostringstream& ost, real DBU) const {
-   ost << "cell \"" << _structure->first << "\" - array reference @ {";
+   ost << "cell \"" << _structure->name() << "\" - array reference @ {";
    ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "} ->";
    ost << " [" << _arrprops.cols() << " x " << _arrprops.stepX() << " , " ;
    ost <<         _arrprops.rows() << " x " << _arrprops.stepY() << "]";
@@ -2151,7 +2157,7 @@ void laydata::tdtcellaref::info(std::ostringstream& ost, real DBU) const {
 
 void laydata::tdtcellaref::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_CELLAREF);
-   tedfile->putString(_structure->first);
+   tedfile->putString(_structure->name());
    tedfile->putCTM(_translation);
    tedfile->put4b(_arrprops.stepX());
    tedfile->put4b(_arrprops.stepY());
@@ -2163,8 +2169,8 @@ void laydata::tdtcellaref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
    GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_AREF);
    gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_SNAME, _structure->first.size());
-   wr->add_ascii(_structure->first.c_str());gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_SNAME, _structure->name().size());
+   wr->add_ascii(_structure->name().c_str());gdsf.flush(wr);
    TP trans;
    real rotation, scale;
    bool flipX;
@@ -2198,7 +2204,7 @@ void laydata::tdtcellaref::CIFwrite(CIFin::CifExportFile& ciff) const
          // ... get the translation matrix ...
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          refCTM *= _translation;
-         ciff.call(_structure->first, refCTM);
+         ciff.call(_structure->name(), refCTM);
       }
    }
 }
@@ -2213,10 +2219,10 @@ void laydata::tdtcellaref::PSwrite(PSFile& psf, const layprop::DrawProperties& d
          // ... get the translation matrix ...
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          refCTM *= _translation;
-         psf.cellref(_structure->first, refCTM);
+         psf.cellref(_structure->name(), refCTM);
          if (!psf.hier())
          {
-            _structure->second->PSwrite(psf, drawprop);
+            _structure->PSwrite(psf, drawprop);
          }
       }
    }
@@ -3044,10 +3050,10 @@ void laydata::tdttmpwire::drawline(const pointlist& ptlist) const
 //
 void laydata::tdttmpcellref::draw(const layprop::DrawProperties& drawprop, ctmqueue& transtack) const
 {
-   if (_structure->second)
+   if (NULL != _structure)
    {
       transtack.push_front(_translation * transtack.front());
-      _structure->second->motion_draw(drawprop, transtack);
+      _structure->motion_draw(drawprop, transtack);
    }
 }
 
@@ -3056,7 +3062,7 @@ void laydata::tdttmpcellref::draw(const layprop::DrawProperties& drawprop, ctmqu
 void laydata::tdttmpcellaref::draw(const layprop::DrawProperties& drawprop,
                                        ctmqueue& transtack) const
 {
-   if (_structure->second)
+   if (NULL != _structure)
    {
       for (int i = 0; i < _arrprops.cols(); i++)
       {// start/stop rows
@@ -3067,7 +3073,7 @@ void laydata::tdttmpcellaref::draw(const layprop::DrawProperties& drawprop,
             CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
             refCTM *= _translation;
             transtack.push_front(refCTM * transtack.front());
-            _structure->second->motion_draw(drawprop, transtack);
+            _structure->motion_draw(drawprop, transtack);
          }
       }
    }

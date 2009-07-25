@@ -42,7 +42,7 @@ namespace laydata {
       tdtdefaultcell* checkcell(std::string name, bool undeflib = false);
       void           recreate_hierarchy(const laydata::tdtlibdir* );
       void           registercellread(std::string, tdtcell*);
-      refnamepair    getcellnamepair(std::string name) const {return _cells.find(name);};
+      refnamepair    getcellnamepair(std::string name) const;
       refnamepair    secure_defaultcell(std::string name);
       void           relink(tdtlibdir*);
       void           clearLib();
