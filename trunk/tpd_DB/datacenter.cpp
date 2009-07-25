@@ -234,10 +234,10 @@ void GDSin::Gds2Ted::text(GDSin::GdsText* wd, laydata::tdtlayer* wl)
 void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
 {
    // Absolute magnification, absolute angle should be reflected somehow!!!
-   laydata::refnamepair striter = linkcellref(wd->strctName());
+   laydata::CellDefin strdefn = linkcellref(wd->strctName());
    dst->addcellref(
                     (*_tdt_db)(),
-                      striter,
+                      strdefn,
                       CTM(wd->magnPoint(),
                          wd->magnification(),
                          wd->angle(),
@@ -249,14 +249,14 @@ void GDSin::Gds2Ted::ref(GDSin::GdsRef* wd, laydata::tdtcell* dst)
 void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
 {
    // Absolute magnification, absolute angle should be reflected somehow!!!
-   laydata::refnamepair striter = linkcellref(wd->strctName());
+   laydata::CellDefin strdefn = linkcellref(wd->strctName());
 
    laydata::ArrayProperties arrprops(wd->getXStep(),wd->getYStep(),
                                      static_cast<word>(wd->columns()),
                                      static_cast<word>(wd->rows()));
    dst->addcellaref(
                      (*_tdt_db)(),
-                       striter,
+                       strdefn,
                        CTM( wd->magnPoint(),
                             wd->magnification(),
                             wd->angle(),
@@ -266,23 +266,23 @@ void GDSin::Gds2Ted::aref(GDSin::GdsARef* wd, laydata::tdtcell* dst)
    );
 }
 
-laydata::refnamepair GDSin::Gds2Ted::linkcellref(std::string cellname)
+laydata::CellDefin GDSin::Gds2Ted::linkcellref(std::string cellname)
 {
-   laydata::refnamepair striter;
+   laydata::CellDefin strdefn;
    if (NULL != (*_tdt_db)()->checkcell(cellname))
    {
-      striter = (*_tdt_db)()->getcellnamepair(cellname);
+      strdefn = (*_tdt_db)()->getcellnamepair(cellname);
    }
    else
    {
       // search the cell in the libraries because it's not in the DB
-      if (!_tdt_db->getLibCellRNP(cellname, striter))
+      if (!_tdt_db->getLibCellRNP(cellname, strdefn))
       {
-         striter = _tdt_db->adddefaultcell(cellname);
-         (*_tdt_db)()->dbHierAdd(striter, NULL);
+         strdefn = _tdt_db->adddefaultcell(cellname);
+         (*_tdt_db)()->dbHierAdd(strdefn, NULL);
       }
    }
-   return striter;
+   return strdefn;
 }
 
 //-----------------------------------------------------------------------------
@@ -510,9 +510,9 @@ void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
    std::string cell_name = refd->name();
    if (NULL != (*_tdt_db)()->checkcell(cell_name))
    {
-      laydata::refnamepair striter = (*_tdt_db)()->getcellnamepair(cell_name);
+      laydata::CellDefin strdefn = (*_tdt_db)()->getcellnamepair(cell_name);
       // Absolute magnification, absolute angle should be reflected somehow!!!
-      dst->addcellref((*_tdt_db)(), striter, (*wd->location())*_crosscoeff, false);
+      dst->addcellref((*_tdt_db)(), strdefn, (*wd->location())*_crosscoeff, false);
    }
    else
    {
@@ -992,21 +992,21 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
          case console::op_cbind:
          {
             assert ("" != name);
-            laydata::refnamepair striter;
+            laydata::CellDefin strdefn;
             CTM eqm;
-            VERIFY(DATC->getCellNamePair(name, striter));
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellref(striter, eqm) );
+            VERIFY(DATC->getCellNamePair(name, strdefn));
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellref(strdefn, eqm) );
             break;
          }
          case console::op_abind:
          {
             assert ("" != name);
             assert(0 != cols);assert(0 != rows);assert(0 != stepX);assert(0 != stepY);
-            laydata::refnamepair striter;
+            laydata::CellDefin strdefn;
             CTM eqm;
-            VERIFY(DATC->getCellNamePair(name, striter));
+            VERIFY(DATC->getCellNamePair(name, strdefn));
             laydata::ArrayProperties arrprops(stepX, stepY, cols, rows);
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellaref(striter, eqm, arrprops) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellaref(strdefn, eqm, arrprops) );
             break;
          }
          case console::op_tbind:
@@ -1333,18 +1333,18 @@ void DataCenter::clearRulers()
    PROPLock.Unlock();
 }
 
-bool DataCenter::getCellNamePair(std::string name, laydata::refnamepair& striter) 
+bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn) 
 {
    laydata::tdtdesign* ATDB = lockDB();
    if (ATDB->checkcell(name))
    {
-      striter = ATDB->getcellnamepair(name);
+      strdefn = ATDB->getcellnamepair(name);
       unlockDB();
       return true;
    }
    unlockDB();
    // search the cell in the libraries because it's not in the DB
-   return _TEDLIB.getLibCellRNP(name, striter);
+   return _TEDLIB.getLibCellRNP(name, strdefn);
 }
 
 

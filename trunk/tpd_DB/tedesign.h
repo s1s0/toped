@@ -42,8 +42,8 @@ namespace laydata {
       tdtdefaultcell* checkcell(std::string name, bool undeflib = false);
       void           recreate_hierarchy(const laydata::tdtlibdir* );
       void           registercellread(std::string, tdtcell*);
-      refnamepair    getcellnamepair(std::string name) const;
-      refnamepair    secure_defaultcell(std::string name);
+      CellDefin      getcellnamepair(std::string name) const;
+      CellDefin      secure_defaultcell(std::string name);
       void           relink(tdtlibdir*);
       void           clearLib();
       void           cleanUnreferenced();
@@ -97,7 +97,7 @@ namespace laydata {
       tdtdata*       addpoly(unsigned, const pointlist*);
       tdtdata*       addwire(unsigned, const pointlist*, word);
       tdtdata*       addtext(unsigned la, std::string& text, CTM& ori);
-      tdtdata*       addcellref(laydata::refnamepair striter, CTM& ori);
+      tdtdata*       addcellref(laydata::CellDefin strdefn, CTM& ori);
       tdtdata*       addcellaref(std::string&, CTM&, ArrayProperties&);
       void           addlist(atticList*);
       tdtcell*       opencell(std::string name);
@@ -189,10 +189,10 @@ namespace laydata {
       void              relink();
       void              reextract_hierarchy();
       int               getLastLibRefNo();
-      bool              getLibCellRNP(std::string, refnamepair&, const int libID = TARGETDB_LIB) const;
+      bool              getLibCellRNP(std::string, CellDefin&, const int libID = TARGETDB_LIB) const;
       tdtdefaultcell*   getLibCellDef(std::string, const int libID = TARGETDB_LIB) const;
-      refnamepair       linkcellref(std::string, int, TDTHierTree*&);
-      refnamepair       adddefaultcell( std::string name );
+      CellDefin         linkcellref(std::string, int, TDTHierTree*&);
+      CellDefin         adddefaultcell( std::string name );
       bool              collect_usedlays(std::string, bool, WordList&) const;
       void              collect_usedlays(int, WordList&) const;
       void              cleanUndefLib();

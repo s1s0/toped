@@ -342,12 +342,12 @@ bool laydata::TEDfile::checkcellwritten(std::string cellname) {
 //   return (_childnames.end() != _childnames.find(cellname));
 }   
 
-laydata::refnamepair laydata::TEDfile::linkcellref(std::string cellname)
+laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.push_back(cellname);
    cellList::const_iterator striter = _design->_cells.find(cellname);
-   laydata::refnamepair celldef = NULL;
+   laydata::CellDefin celldef = NULL;
    // link the cells instances with their definitions
    if (_design->_cells.end() == striter) 
    {

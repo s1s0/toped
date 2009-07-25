@@ -255,17 +255,17 @@ void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
    }
 }
 
-laydata::refnamepair laydata::tdtlibrary::getcellnamepair(std::string name) const 
+laydata::CellDefin laydata::tdtlibrary::getcellnamepair(std::string name) const 
 {
-   cellList::const_iterator celldef = _cells.find(name);
-   if (_cells.end() == celldef)
+   cellList::const_iterator striter = _cells.find(name);
+   if (_cells.end() == striter)
       return NULL;
    else
-      return celldef->second;
+      return striter->second;
 }
 
 
-laydata::refnamepair laydata::tdtlibrary::secure_defaultcell(std::string name)
+laydata::CellDefin laydata::tdtlibrary::secure_defaultcell(std::string name)
 {
    assert(UNDEFCELL_LIB == _libID);
    if (_cells.end() == _cells.find(name))
@@ -467,11 +467,11 @@ void laydata::tdtlibdir::reextract_hierarchy()
       _TEDDB->recreate_hierarchy(this);
 }
 
-/*! Searches the library directory for a cell \a name. Returns true and updates \a striter if
+/*! Searches the library directory for a cell \a name. Returns true and updates \a strdefn if
 the cell is found. Returns false otherwise. The method never searches in the UNDEFCELL_LIB and
 TARGETDB_LIB. It starts searching from the library after \a libID .
 */
-bool laydata::tdtlibdir::getLibCellRNP(std::string name, laydata::refnamepair& striter, const int libID) const
+bool laydata::tdtlibdir::getLibCellRNP(std::string name, laydata::CellDefin& strdefn, const int libID) const
 {
    // start searching form the first library after the current 
    word first2search = (TARGETDB_LIB == libID) ? 1 : libID + 1;
@@ -479,7 +479,7 @@ bool laydata::tdtlibdir::getLibCellRNP(std::string name, laydata::refnamepair& s
    {
       if (NULL != _libdirectory[i]->second->checkcell(name))
       {
-         striter = _libdirectory[i]->second->getcellnamepair(name);
+         strdefn = _libdirectory[i]->second->getcellnamepair(name);
          return true;
       }
    }
@@ -510,7 +510,7 @@ laydata::tdtdefaultcell* laydata::tdtlibdir::getLibCellDef(std::string name, con
    return NULL;
 }
 
-laydata::refnamepair laydata::tdtlibdir::adddefaultcell( std::string name )
+laydata::CellDefin laydata::tdtlibdir::adddefaultcell( std::string name )
 {
    laydata::tdtlibrary* undeflib = _libdirectory[UNDEFCELL_LIB]->second;
    return undeflib->secure_defaultcell(name);
@@ -527,10 +527,10 @@ bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, 
    }
    else
    {
-      laydata::refnamepair striter;
-      if (getLibCellRNP(cellname, striter))
+      laydata::CellDefin strdefn;
+      if (getLibCellRNP(cellname, strdefn))
       {
-         static_cast<laydata::tdtcell*>(striter)->collect_usedlays(this, recursive, laylist);
+         static_cast<laydata::tdtcell*>(strdefn)->collect_usedlays(this, recursive, laylist);
          return true;
       }
       else return false;
@@ -549,32 +549,32 @@ databases (libraries) already loaded in memory. A function with completely the s
 and name is defined in the TEDfile. That one is used to link cell references during tdt parsing
 phase
 */
-laydata::refnamepair laydata::tdtlibdir::linkcellref(std::string cellname, int libID, TDTHierTree*& Htree)
+laydata::CellDefin laydata::tdtlibdir::linkcellref(std::string cellname, int libID, TDTHierTree*& Htree)
 {
    assert(UNDEFCELL_LIB != libID);
    laydata::tdtlibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;
    cellList::const_iterator striter = curlib->_cells.find(cellname);
-   laydata::refnamepair celldef = NULL;
+   laydata::CellDefin strdefn = NULL;
    // link the cells instances with their definitions
    if (curlib->_cells.end() == striter)
    {
       // search the cell in the rest of the libraries because it's not in the current
-      if (!getLibCellRNP(cellname, celldef, libID))
+      if (!getLibCellRNP(cellname, strdefn, libID))
       {
          // not found! make a default cell
-         celldef = adddefaultcell(cellname);
-         Htree = DEBUG_NEW TDTHierTree(celldef, NULL, Htree);
+         strdefn = adddefaultcell(cellname);
+         Htree = DEBUG_NEW TDTHierTree(strdefn, NULL, Htree);
       }
    }
    else
    {
-      celldef = striter->second;
+      strdefn = striter->second;
    }
    // Mark that the cell definition is referenced, i.e. it is not the top 
    // of the tree (orphan flag in the tdtcell)
-   assert(celldef);
-   celldef->parentfound();
-   return celldef;
+   assert(strdefn);
+   strdefn->parentfound();
+   return strdefn;
 }
 
 void  laydata::tdtlibdir::cleanUndefLib()
@@ -660,19 +660,19 @@ void laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
    // get the cell by name
    tdtcell* remcl = static_cast<laydata::tdtcell*>(_cells[name]);
    // We need a replacement cell for the references
-   laydata::refnamepair striter;
+   laydata::CellDefin strdefn;
    // search the cell in the libraries first
-   if (!libdir->getLibCellRNP(name, striter, TARGETDB_LIB))
+   if (!libdir->getLibCellRNP(name, strdefn, TARGETDB_LIB))
    {
       // not found! make a default cell
-      striter = libdir->adddefaultcell(name);
+      strdefn = libdir->adddefaultcell(name);
       // ... and add it to the hierarchy tree
-      _hiertree = DEBUG_NEW TDTHierTree(striter, NULL, _hiertree);
+      _hiertree = DEBUG_NEW TDTHierTree(strdefn, NULL, _hiertree);
    }
    // now for every parent cell - relink all the references to cell "name"
    for (laydata::CellDefList::const_iterator CPS = pcells.begin(); CPS != pcells.end(); CPS++)
    {
-      (*CPS)->relinkThis(name, striter, this);
+      (*CPS)->relinkThis(name, strdefn, this);
       dbHierRemoveParent(remcl, (*CPS));
    }
    // validate the cells
@@ -784,12 +784,12 @@ laydata::tdtdata* laydata::tdtdesign::addtext(unsigned la, std::string& text, CT
    return newshape;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addcellref(laydata::refnamepair striter, CTM& ori)
+laydata::tdtdata* laydata::tdtdesign::addcellref(laydata::CellDefin strdefn, CTM& ori)
 {
    modified = true;
    ori *= _target.rARTM();
    DBbox old_overlap(_target.edit()->cellOverlap());
-   tdtdata* ncrf = _target.edit()->addcellref(this, striter, ori);
+   tdtdata* ncrf = _target.edit()->addcellref(this, strdefn, ori);
    if (NULL == ncrf)
    {
      tell_log(console::MT_ERROR, "Circular reference is forbidden");
@@ -805,11 +805,11 @@ laydata::tdtdata* laydata::tdtdesign::addcellref(laydata::refnamepair striter, C
 laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori,
                              ArrayProperties& arrprops) {
    if (checkcell(name)) {
-      laydata::refnamepair striter = getcellnamepair(name);
+      laydata::CellDefin strdefn = getcellnamepair(name);
       modified = true;
       ori *= _target.rARTM();
       DBbox old_overlap(_target.edit()->cellOverlap());
-      tdtdata* ncrf = _target.edit()->addcellaref(this, striter, ori, arrprops);
+      tdtdata* ncrf = _target.edit()->addcellaref(this, strdefn, ori, arrprops);
       if (NULL == ncrf) {
         tell_log(console::MT_ERROR, "Circular reference is forbidden");
       }
@@ -1192,7 +1192,7 @@ laydata::atticList* laydata::tdtdesign::changeref(shapeList* cells4u, std::strin
    assert(checkcell(newref));
    assert((!cells4u->empty()));
    laydata::shapeList* cellsUngr = DEBUG_NEW laydata::shapeList();
-   laydata::refnamepair striter = getcellnamepair(newref);
+   laydata::CellDefin strdefn = getcellnamepair(newref);
    DBbox old_overlap(_target.edit()->cellOverlap());
 
    for (shapeList::const_iterator CC = cells4u->begin(); CC != cells4u->end(); CC++)
@@ -1201,9 +1201,9 @@ laydata::atticList* laydata::tdtdesign::changeref(shapeList* cells4u, std::strin
       ArrayProperties arrayprops = static_cast<tdtcellref*>(*CC)->arrayprops();
       tdtdata* ncrf;
       if (arrayprops.valid())
-         ncrf = _target.edit()->addcellaref(this, striter, ori, arrayprops);
+         ncrf = _target.edit()->addcellaref(this, strdefn, ori, arrayprops);
       else
-         ncrf = _target.edit()->addcellref(this, striter, ori);
+         ncrf = _target.edit()->addcellref(this, strdefn, ori);
       assert(NULL != ncrf);
       ncrf->set_status(sh_selected);
       _target.edit()->select_this(ncrf,0);

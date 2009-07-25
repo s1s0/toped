@@ -101,7 +101,7 @@ namespace laydata {
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
          virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell*, cellList*, const tdtlibdir*);
          virtual bool        relink(tdtlibdir*, TDTHierTree*&);
-         virtual void        relinkThis(std::string, laydata::refnamepair, tdtdesign*);
+         virtual void        relinkThis(std::string, laydata::CellDefin, tdtdesign*);
          virtual void        updateHierarchy(tdtlibdir*);
          virtual DBbox       cellOverlap() const;
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
@@ -135,9 +135,9 @@ namespace laydata {
       void                 motion_draw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;
       quadTree*            securelayer(unsigned layno);
-      tdtcellref*          addcellref(tdtdesign*, refnamepair str, CTM trans,
+      tdtcellref*          addcellref(tdtdesign*, CellDefin str, CTM trans,
                                                           bool sortnow = true);
-      tdtcellaref*         addcellaref(tdtdesign*, refnamepair, CTM,
+      tdtcellaref*         addcellaref(tdtdesign*, CellDefin, CTM,
                                           ArrayProperties&, bool sortnow = true);
       bool                 addchild(tdtdesign*, tdtdefaultcell*);
       void                 write(TEDfile* const, const cellList&, const TDTHierTree*) const;
@@ -183,7 +183,7 @@ namespace laydata {
       selectList*          copy_selist() const;
       void                 updateHierarchy(tdtlibdir*);
       bool                 relink(tdtlibdir*, TDTHierTree*&);
-      void                 relinkThis(std::string, laydata::refnamepair, tdtdesign*);
+      void                 relinkThis(std::string, laydata::CellDefin, tdtdesign*);
       void                 report_selected(real) const;
       void                 collect_usedlays(const tdtlibdir*, bool, WordList&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
