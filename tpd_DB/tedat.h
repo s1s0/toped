@@ -269,9 +269,9 @@ namespace laydata {
       void                 CIFwrite(CIFin::CifExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       virtual void         ungroup(tdtdesign*, tdtcell*, atticList*);
-      std::string          cellname() const {return _structure->first;};
+      std::string          cellname() const;
       tdtcell*             cstructure() const;
-      tdtdefaultcell*      structure() const {return _structure->second;}
+      tdtdefaultcell*      structure() const {return _structure;}
       word                 numpoints() const {return 1;};
       CTM                  translation() const {return _translation;};
       void                 polycut(pointlist&, shapeList**) {};

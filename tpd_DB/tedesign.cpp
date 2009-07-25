@@ -255,6 +255,16 @@ void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
    }
 }
 
+laydata::refnamepair laydata::tdtlibrary::getcellnamepair(std::string name) const 
+{
+   cellList::const_iterator celldef = _cells.find(name);
+   if (_cells.end() == celldef)
+      return NULL;
+   else
+      return celldef->second;
+}
+
+
 laydata::refnamepair laydata::tdtlibrary::secure_defaultcell(std::string name)
 {
    assert(UNDEFCELL_LIB == _libID);
@@ -262,7 +272,7 @@ laydata::refnamepair laydata::tdtlibrary::secure_defaultcell(std::string name)
    {
       _cells[name] = DEBUG_NEW tdtdefaultcell(name, UNDEFCELL_LIB, true);
    }
-   return _cells.find(name);
+   return _cells.find(name)->second;
 }
 
 bool laydata::tdtlibrary::validate_cells()
@@ -489,13 +499,13 @@ laydata::tdtdefaultcell* laydata::tdtlibdir::getLibCellDef(std::string name, con
    {
       if (NULL != _libdirectory[i]->second->checkcell(name))
       {
-         return _libdirectory[i]->second->getcellnamepair(name)->second;
+         return _libdirectory[i]->second->getcellnamepair(name);
       }
    }
    // not in the libraries - must be in the defaultlib
    if (NULL != _libdirectory[UNDEFCELL_LIB]->second->checkcell(name, true))
    {
-      return _libdirectory[UNDEFCELL_LIB]->second->getcellnamepair(name)->second;
+      return _libdirectory[UNDEFCELL_LIB]->second->getcellnamepair(name);
    }
    return NULL;
 }
@@ -520,7 +530,7 @@ bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, 
       laydata::refnamepair striter;
       if (getLibCellRNP(cellname, striter))
       {
-         static_cast<laydata::tdtcell*>(striter->second)->collect_usedlays(this, recursive, laylist);
+         static_cast<laydata::tdtcell*>(striter)->collect_usedlays(this, recursive, laylist);
          return true;
       }
       else return false;
@@ -543,23 +553,28 @@ laydata::refnamepair laydata::tdtlibdir::linkcellref(std::string cellname, int l
 {
    assert(UNDEFCELL_LIB != libID);
    laydata::tdtlibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;
-   laydata::refnamepair striter = curlib->_cells.find(cellname);
+   cellList::const_iterator striter = curlib->_cells.find(cellname);
+   laydata::refnamepair celldef = NULL;
    // link the cells instances with their definitions
    if (curlib->_cells.end() == striter)
    {
       // search the cell in the rest of the libraries because it's not in the current
-      if (!getLibCellRNP(cellname, striter, libID))
+      if (!getLibCellRNP(cellname, celldef, libID))
       {
          // not found! make a default cell
-         striter = adddefaultcell(cellname);
-         Htree = DEBUG_NEW TDTHierTree(striter->second, NULL, Htree);
+         celldef = adddefaultcell(cellname);
+         Htree = DEBUG_NEW TDTHierTree(celldef, NULL, Htree);
       }
+   }
+   else
+   {
+      celldef = striter->second;
    }
    // Mark that the cell definition is referenced, i.e. it is not the top 
    // of the tree (orphan flag in the tdtcell)
-   assert(striter->second);
-   striter->second->parentfound();
-   return striter;
+   assert(celldef);
+   celldef->parentfound();
+   return celldef;
 }
 
 void  laydata::tdtlibdir::cleanUndefLib()
@@ -652,7 +667,7 @@ void laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
       // not found! make a default cell
       striter = libdir->adddefaultcell(name);
       // ... and add it to the hierarchy tree
-      _hiertree = DEBUG_NEW TDTHierTree(striter->second, NULL, _hiertree);
+      _hiertree = DEBUG_NEW TDTHierTree(striter, NULL, _hiertree);
    }
    // now for every parent cell - relink all the references to cell "name"
    for (laydata::CellDefList::const_iterator CPS = pcells.begin(); CPS != pcells.end(); CPS++)

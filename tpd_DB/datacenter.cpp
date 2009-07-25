@@ -279,7 +279,7 @@ laydata::refnamepair GDSin::Gds2Ted::linkcellref(std::string cellname)
       if (!_tdt_db->getLibCellRNP(cellname, striter))
       {
          striter = _tdt_db->adddefaultcell(cellname);
-         (*_tdt_db)()->dbHierAdd(striter->second, NULL);
+         (*_tdt_db)()->dbHierAdd(striter, NULL);
       }
    }
    return striter;

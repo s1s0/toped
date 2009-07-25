@@ -346,14 +346,15 @@ laydata::refnamepair laydata::TEDfile::linkcellref(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.push_back(cellname);
-   laydata::refnamepair striter = _design->_cells.find(cellname);
+   cellList::const_iterator striter = _design->_cells.find(cellname);
+   laydata::refnamepair celldef = NULL;
    // link the cells instances with their definitions
    if (_design->_cells.end() == striter) 
    {
    //   if (_design->checkcell(name))
    //   {
       // search the cell in the libraries because it's not in the DB
-      if (!_TEDLIB->getLibCellRNP(cellname, striter))
+      if (!_TEDLIB->getLibCellRNP(cellname, celldef))
       {
          // Attention! In this case we've parsed a cell reference, before
          // the cell is defined. This might means:
@@ -367,7 +368,7 @@ laydata::refnamepair laydata::TEDfile::linkcellref(std::string cellname)
          // the entire file is parced the cell references without a proper pointer
          // to the structure need to be flagged as warning in case 1 and as error 
          // in case 2.
-         striter = _TEDLIB->adddefaultcell(cellname);
+         celldef = _TEDLIB->adddefaultcell(cellname);
       }
       else
          striter->second->parentfound();
@@ -380,7 +381,7 @@ laydata::refnamepair laydata::TEDfile::linkcellref(std::string cellname)
       if (NULL != _design->_cells[cellname])
          _design->_cells[cellname]->parentfound();
    }
-   return striter;
+   return celldef;
 }
 
 void laydata::TEDfile::get_cellchildnames(nameList* cnames) {

@@ -367,7 +367,7 @@ laydata::quadTree* laydata::tdtcell::securelayer(unsigned layno)
 laydata::tdtcellref* laydata::tdtcell::addcellref(laydata::tdtdesign* ATDB,
                                  refnamepair str, CTM trans, bool sortnow)
 {
-   if (!addchild(ATDB, str->second)) return NULL;
+   if (!addchild(ATDB, str)) return NULL;
    quadTree *cellreflayer = securelayer(REF_LAY);
    laydata::tdtcellref* cellref = DEBUG_NEW tdtcellref(str, trans);
    if (sortnow) cellreflayer->add(cellref);
@@ -378,7 +378,7 @@ laydata::tdtcellref* laydata::tdtcell::addcellref(laydata::tdtdesign* ATDB,
 laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB,
           refnamepair str, CTM trans, ArrayProperties& arrprops, bool sortnow)
 {
-   if (!addchild(ATDB, str->second)) return NULL;
+   if (!addchild(ATDB, str)) return NULL;
    quadTree *cellreflayer = securelayer(REF_LAY);
    laydata::tdtcellaref* cellaref =
                        DEBUG_NEW tdtcellaref(str, trans, arrprops);
@@ -1939,7 +1939,7 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
    {
       tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
       refnamepair newcelldef = libdir->linkcellref(wcl->cellname(), libID(), _hiertree);
-      if (newcelldef->second != wcl->structure())
+      if (newcelldef != wcl->structure())
       {
          CTM ori = wcl->translation();
          refsTree->delete_this(wcl);
