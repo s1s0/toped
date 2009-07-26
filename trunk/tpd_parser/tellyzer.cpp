@@ -64,6 +64,8 @@ parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
 telldata::operandSTACK        parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
 telldata::UNDOPerandQUEUE     parsercmd::cmdVIRTUAL::UNDOPstack;
+// UNDO utility stack (used for deleted cell definitions)
+parsercmd::undoUQUEUE         parsercmd::cmdVIRTUAL::UNDOUstack;
 // UNDO command queue
 parsercmd::undoQUEUE          parsercmd::cmdVIRTUAL::UNDOcmdQ;
 // Recovery status

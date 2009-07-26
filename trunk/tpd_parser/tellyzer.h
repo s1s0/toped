@@ -87,6 +87,7 @@ namespace  parsercmd {
    typedef  std::deque<cmdBLOCK*>                        blockSTACK;
    typedef  std::deque<cmdVIRTUAL*>                      cmdQUEUE;
    typedef  std::deque<cmdSTDFUNC*>                      undoQUEUE;
+   typedef  std::deque<void*>                            undoUQUEUE;
    typedef  std::pair<std::string,telldata::tell_var*>   argumentTYPE;
    typedef  std::deque<argumentTYPE*>                    argumentLIST;
 
@@ -120,6 +121,7 @@ namespace  parsercmd {
       static telldata::operandSTACK       OPstack;      // Operand stack
       static telldata::UNDOPerandQUEUE    UNDOPstack;   // undo operand stack
       static undoQUEUE                    UNDOcmdQ;     // undo command stack
+      static undoUQUEUE                   UNDOUstack;   // undo utility stack
       bool                                _opstackerr;  // error while extracting operands
    };
 
