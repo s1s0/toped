@@ -591,21 +591,16 @@ tellstdfunc::stdFILLLAYER::stdFILLLAYER(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdFILLLAYER::undo_cleanup() {
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
-  // telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-  // delete pl;
 }
 
 void tellstdfunc::stdFILLLAYER::undo() {
    TEUNDO_DEBUG("filllayer( word , bool ) UNDO");
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   bool        lock  = getBoolValue(UNDOPstack, true);
+   bool        fill  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
    laydata::tdtdesign* ATDB = DATC->lockDB();
-   DATC->lockLayer(layno, lock);
-   ATDB->select_fromList(get_ttlaylist(pl));
+   DATC->fillLayer(layno, fill);
    DATC->unlockDB();
-   delete pl;
-   browsers::layer_status(browsers::BT_LAYER_LOCK, layno, lock);
+   browsers::layer_status(browsers::BT_LAYER_FILL, layno, fill);
    UpdateLV();
 }
 
@@ -615,64 +610,16 @@ int tellstdfunc::stdFILLLAYER::execute()
    word        layno = getWordValue();
 
       laydata::tdtdesign* ATDB = DATC->lockDB();
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
+	      UNDOcmdQ.push_front(this);
+	      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
+	      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
 
-		DATC->fillLayer(layno, fill);
-      /*laydata::selectList *listselected = ATDB->shapesel();
-      laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
-      if (lock && (listselected->end() != listselected->find(layno)))
-      {
-         (*todslct)[layno] = DEBUG_NEW laydata::dataList(*((*listselected)[layno]));
-         UNDOPstack.push_front(make_ttlaylist(todslct));
-         ATDB->unselect_fromList(todslct);
-      }
-      else
-      {
-         UNDOPstack.push_front(make_ttlaylist(todslct));
-         delete todslct;
-      }
-      DATC->lockLayer(layno, lock);
-		*/
+			DATC->fillLayer(layno, fill);
       DATC->unlockDB();
-      browsers::layer_status(browsers::BT_LAYER_LOCK, layno, fill);
+      browsers::layer_status(browsers::BT_LAYER_FILL, layno, fill);
       LogFile << LogFile.getFN() << "("<< layno << "," << 
                  LogFile._2bool(fill) << ");"; LogFile.flush();
       UpdateLV();
-  
-
-/*		   bool        hide  = getBoolValue();
-   word        layno = getWordValue();
-   if (layno != DATC->curlay()) {
-      laydata::tdtdesign* ATDB = DATC->lockDB();
-
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-      laydata::selectList *listselected = ATDB->shapesel();
-      laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
-      if (hide && (listselected->end() != listselected->find(layno)))
-      {
-         (*todslct)[layno] = DEBUG_NEW laydata::dataList(*((*listselected)[layno]));
-         UNDOPstack.push_front(make_ttlaylist(todslct));
-         ATDB->unselect_fromList(todslct);
-      }
-      else
-      {
-         UNDOPstack.push_front(make_ttlaylist(todslct));
-         delete todslct;
-      }
-      DATC->hideLayer(layno, hide);
-      DATC->unlockDB();
-
-      browsers::layer_status(browsers::BT_LAYER_HIDE, layno, hide);
-      LogFile << LogFile.getFN() << "("<< layno << "," << 
-                 LogFile._2bool(hide) << ");"; LogFile.flush();
-      UpdateLV();
-*/
-
-
    return EXEC_NEXT;
 }
 
