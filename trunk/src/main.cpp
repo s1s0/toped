@@ -229,6 +229,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("hidetextmarks"    ,(DEBUG_NEW             tellstdfunc::stdHIDETEXTMARK(telldata::tn_void, true)));
    mblock->addFUNC("hidetextbox"      ,(DEBUG_NEW             tellstdfunc::stdHIDETEXTBOND(telldata::tn_void, true)));
    mblock->addFUNC("locklayer"        ,(DEBUG_NEW                tellstdfunc::stdLOCKLAYER(telldata::tn_void, true)));
+	mblock->addFUNC("filllayer"        ,(DEBUG_NEW                tellstdfunc::stdFILLLAYER(telldata::tn_void, true)));
    mblock->addFUNC("locklayer"        ,(DEBUG_NEW               tellstdfunc::stdLOCKLAYERS(telldata::tn_void, true)));
    mblock->addFUNC("definecolor"      ,(DEBUG_NEW                 tellstdfunc::stdCOLORDEF(telldata::tn_void, true)));
    mblock->addFUNC("definefill"       ,(DEBUG_NEW                  tellstdfunc::stdFILLDEF(telldata::tn_void, true)));

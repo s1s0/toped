@@ -84,13 +84,15 @@ namespace layprop {
       public:
                         LayerSettings(std::string name, std::string color, std::string filltype, std::string sline):
                            _name(name), _color(color), _fill(filltype), _sline(sline),
-                                 _hidden(false), _locked(false) {};
+                                 _hidden(false), _locked(false), _filled(true) {};
          std::string       color()    const {return _color;}
          std::string       fill()     const {return _fill;}
+			bool			      filled()   const {return _filled;}
          std::string       name()     const {return _name;}
          std::string       sline()    const {return _sline;}
          bool              hidden()   const {return _hidden;}
          bool              locked()   const {return _locked;}
+			void					fillLayer(bool filled)  {_filled = filled;};
          friend class ViewProperties;
       private:
          std::string       _name;
@@ -99,6 +101,7 @@ namespace layprop {
          std::string       _sline;
          bool              _hidden;
          bool              _locked;
+			bool					_filled; //define filling visialization
    };
 
    //=============================================================================
