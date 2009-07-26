@@ -62,9 +62,12 @@ void tellstdfunc::stdNEWCELL::undo()
       laydata::CellDefList parentCells;
       ATDB->collectParentCells(cname, parentCells);
       if (parentCells.empty())
+      {
          // if no parent cells - it means that a simple "newcell" was
          // executed - so use the conventional remove cell
-         ATDB->removecell(cname,NULL, DATC->TEDLIB());
+         laydata::tdtcell* rmvdcell = ATDB->removecell(cname,NULL, DATC->TEDLIB());
+         delete (rmvdcell);
+      }
       else
          // parent cells found - so new cell was created on top of an
          // existing library cell or on top of an undefined, but referenced
@@ -105,8 +108,9 @@ void tellstdfunc::stdREMOVECELL::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   //@TODO check for leakeages here!
+   laydata::tdtcell* rmvdcell = static_cast<laydata::tdtcell*>(UNDOUstack.back());UNDOUstack.pop_back();
    delete pl;
+   delete rmvdcell;
 }
 
 void tellstdfunc::stdREMOVECELL::undo()
@@ -116,13 +120,15 @@ void tellstdfunc::stdREMOVECELL::undo()
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    // get the name of the removed cell
    std::string  nm = getStringValue(UNDOPstack, true);
+   // get the removet cell itself (empty)
+   laydata::tdtcell* rmvdcell = static_cast<laydata::tdtcell*>(UNDOUstack.front());UNDOUstack.pop_front();
+
    laydata::tdtdesign* ATDB = DATC->lockDB();
    // first add a cell
-   laydata::tdtcell* restored_cell = ATDB->addcell(nm, DATC->TEDLIB());
-   assert(NULL != restored_cell);
+   ATDB->addthiscell(rmvdcell, DATC->TEDLIB());
    // add the cell contents back
    // no validation required, because the cell is not referenced
-   restored_cell->addlist(ATDB, get_shlaylist(pl));
+   rmvdcell->addlist(ATDB, get_shlaylist(pl));
    DATC->unlockDB();
    // finally - clean-up behind
    delete pl;
@@ -132,6 +138,7 @@ int tellstdfunc::stdREMOVECELL::execute()
 {
    std::string cname = getStringValue();
    laydata::atticList* cell_contents = NULL;
+   laydata::tdtcell*   rmvdcell      = NULL;
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       if (!ATDB->checkcell(cname))
       {
@@ -151,7 +158,7 @@ int tellstdfunc::stdREMOVECELL::execute()
          if (parentCells.empty())
          {
             cell_contents = DEBUG_NEW laydata::atticList();
-            ATDB->removecell(cname,cell_contents, DATC->TEDLIB());
+            rmvdcell = ATDB->removecell(cname,cell_contents, DATC->TEDLIB());
          }
          else
          {
@@ -163,9 +170,11 @@ int tellstdfunc::stdREMOVECELL::execute()
    DATC->unlockDB();
    if (NULL != cell_contents)
    {  // removal has been successfull
+      assert(NULL != rmvdcell);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(cname));
       UNDOPstack.push_front(make_ttlaylist(cell_contents));
+      UNDOUstack.push_front(rmvdcell);
       LogFile << LogFile.getFN() << "(\""<< cname << "\");"; LogFile.flush();
    }
    clean_atticlist(cell_contents, false);
@@ -539,9 +548,12 @@ void tellstdfunc::stdGROUP::undo()
       laydata::CellDefList parentCells;
       ATDB->collectParentCells(cname, parentCells);
       if (parentCells.empty())
+      {
          // if no parent cells - it means that a simple "group" was
          // executed - so use the conventional remove cell
-         ATDB->removecell(cname,NULL, DATC->TEDLIB());
+         laydata::tdtcell* rmvdcell = ATDB->removecell(cname,NULL, DATC->TEDLIB());
+         delete (rmvdcell);
+      }
       else
          // parent cells found - so new cell was created on top of an
          // existing library cell or on top of an undefined, but referenced

@@ -129,7 +129,6 @@ namespace laydata {
    typedef  std::list<tdtdata*>                     shapeList;
    typedef  std::map<unsigned,shapeList*>           atticList;
    typedef  std::map<std::string, tdtdefaultcell*>  cellList;
-//   typedef  cellList::const_iterator                refnamepair;
    typedef  tdtdefaultcell*                         CellDefin;
    typedef  std::deque<const tdtcellref*>           cellrefstack;
    typedef  std::deque<editobject*>                 editcellstack;

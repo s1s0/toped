@@ -634,9 +634,43 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name, laydata::tdtlibd
    }
    return ncl;
 }
+
+/*! A ready created structure of tdtcell type is added to the cell list in the
+TARGETLIB_DB. Function will assert if a structure with this name is already 
+listed in the _cells. Used in removecell undo
+*/
+void laydata::tdtdesign::addthiscell(laydata::tdtcell* strdefn, laydata::tdtlibdir* libdir)
+{
+   // Make sure cell with this name doesn't exists already in the target library
+   std::string cname = strdefn->name();
+   assert(_cells.end() == _cells.find(cname));
+   modified = true;
+   // Check whether structure with this name exists in the libraries or among the
+   // referenced, but undefined cells
+   laydata::tdtdefaultcell* libcell = libdir->getLibCellDef(cname);
+   _cells[cname] = strdefn;
+   _hiertree = DEBUG_NEW TDTHierTree(strdefn, NULL, _hiertree);
+   if (NULL == libcell)
+   {// Library cell with this name doesn't exists
+      btreeAddMember(cname.c_str(), _name.c_str(), 0);
+   }
+   else
+   {// Library cell with this name exists. the new cell should replace it in all
+    // of its references
+      libdir->relink();
+      // if that cell was undefined - remove it from the library of undefined cells
+      if (UNDEFCELL_LIB == libcell->libID())
+      {
+         laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(cname);
+         assert(libcell == libcellX);
+         delete libcell;
+      }
+   }
+}
+
 /*! Removes unreferenced cell and returns its contents if required
 */
-void laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel, laydata::tdtlibdir* libdir)
+laydata::tdtcell* laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel, laydata::tdtlibdir* libdir)
 {
    assert(NULL == _hiertree->GetMember(_cells[name])->Getparent());
 
@@ -649,9 +683,11 @@ void laydata::tdtdesign::removecell(std::string& name, laydata::atticList* fsel,
    _cells.erase(_cells.find(name));
    //empty the contents of the removed cell and return it in atticList
    remcl->full_select();
-   remcl->delete_selected(fsel, libdir); // validation is not required here
-   // finally - delete the cell. Cell is already empty
-   delete remcl;
+   // validation is not required here, because the cell is not supposed to be
+   // referenced if this method is used
+   remcl->delete_selected(fsel, libdir);
+   // finally - return the empty cell. Don't delete it. Will be used for undo!
+   return remcl;
 }
 
 void laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, laydata::atticList* fsel, laydata::tdtlibdir* libdir)
