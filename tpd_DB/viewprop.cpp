@@ -362,6 +362,12 @@ void  layprop::ViewProperties::lockLayer(unsigned layno, bool lock) {
       _drawprop._layset[layno]->_locked = lock;
 }
 
+void  layprop::ViewProperties::fillLayer(unsigned layno, bool fill) {
+   // No error messages here, because of possible range use
+   if (_drawprop._layset.end() != _drawprop._layset.find(layno))
+      _drawprop._layset[layno]->fillLayer(fill);
+}
+
 const layprop::LayoutGrid* layprop::ViewProperties::grid(byte No) const {
    if (_grid.end() != _grid.find(No)) {
       gridlist::const_iterator cg = _grid.find(No);

@@ -119,6 +119,7 @@ namespace layprop {
       void              addline(std::string, std::string, word, byte, byte);
       void              hideLayer(unsigned layno, bool hide);
       void              lockLayer(unsigned layno, bool lock);
+		void              fillLayer(unsigned layno, bool fill);
       bool              selectable(unsigned layno) const;
       void              saveProperties(std::string) const;
       //

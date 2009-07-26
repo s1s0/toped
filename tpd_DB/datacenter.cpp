@@ -1276,6 +1276,13 @@ void DataCenter::lockLayer(word layno, bool lock)
    PROPLock.Unlock();
 }
 
+void DataCenter::fillLayer(word layno, bool fill)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   _properties.fillLayer(layno, fill);
+   PROPLock.Unlock();
+}
+
 void DataCenter::setcellmarks_hidden(bool hide)
 {
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());

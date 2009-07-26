@@ -356,12 +356,12 @@ void layerSetup() {
    layprop("UNKWN_3"    ,12 ,"white"       ,""               , "selected3" );
    layprop("P_FIELD"    ,13 ,"white"       ,""               , "selected3" );cifmap[:+] = {{13, "PFLD"}};gdsmap[:+] = {{13, "13; 0"}};
    layprop("POLY1"      ,14 ,"cyan"        ,"Cross1"         , "selected3" );cifmap[:+] = {{14, "PLY1"}};gdsmap[:+] = {{14, "14; 0"}};
-   layprop("FUSE"       ,15 ,"white"       ,""               , "selected3" );cifmap[:+] = {{15, "FUSE"}};gdsmap[:+] = {{15, "15; 0"}};
-   layprop("VIA12"      ,17 ,"lightGray"   ,""               , "selected3" );cifmap[:+] = {{17, "VA12"}};gdsmap[:+] = {{17, "17; 0"}};
-   layprop("METAL2"     ,18 ,"darkMagenta" ,""               , "selected3" );cifmap[:+] = {{18, "MTL2"}};gdsmap[:+] = {{18, "18; 0"}};
-   layprop("TEXT"       ,60 ,"darkGray"    ,""               , "selected1" );cifmap[:+] = {{60, "TXT1"}};gdsmap[:+] = {{60, "60;20"}};
-   layprop("TEXT"       ,62 ,"yellow"      ,"horiHash"       , "selected2" );cifmap[:+] = {{62, "TXT2"}};gdsmap[:+] = {{62, "60;40"}};
-   layprop("SCRIBE_LANE",63 ,"white"       ,""       	     , "selected3" );cifmap[:+] = {{63, "SRBL"}};gdsmap[:+] = {{63, "60; 0"}};
+//   layprop("FUSE"       ,15 ,"white"       ,""               , "selected3" );cifmap[:+] = {{15, "FUSE"}};gdsmap[:+] = {{15, "15; 0"}};
+//   layprop("VIA12"      ,17 ,"lightGray"   ,""               , "selected3" );cifmap[:+] = {{17, "VA12"}};gdsmap[:+] = {{17, "17; 0"}};
+//   layprop("METAL2"     ,18 ,"darkMagenta" ,""               , "selected3" );cifmap[:+] = {{18, "MTL2"}};gdsmap[:+] = {{18, "18; 0"}};
+//   layprop("TEXT"       ,60 ,"darkGray"    ,""               , "selected1" );cifmap[:+] = {{60, "TXT1"}};gdsmap[:+] = {{60, "60;20"}};
+//   layprop("TEXT"       ,62 ,"yellow"      ,"horiHash"       , "selected2" );cifmap[:+] = {{62, "TXT2"}};gdsmap[:+] = {{62, "60;40"}};
+//   layprop("SCRIBE_LANE",63 ,"white"       ,""       	     , "selected3" );cifmap[:+] = {{63, "SRBL"}};gdsmap[:+] = {{63, "60; 0"}};
 
 //   setciflaymap(cifmap);
 //   setgdslaymap(gdsmap);

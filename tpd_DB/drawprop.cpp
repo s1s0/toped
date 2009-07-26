@@ -547,11 +547,20 @@ bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
    // The lines below are doing effectively
    // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
    laySetList::const_iterator ilayset = _layset.find(_drawinglayer);
-   if ((_layset.end() != ilayset) && (!_blockfill || force_fill))
+	if ((_layset.end() != ilayset) && (!_blockfill || force_fill ) )
    {
       fillMAP::const_iterator ifillset = _layfill.find(ilayset->second->fill());
       if (_layfill.end() == ifillset) return false;
-      glEnable(GL_POLYGON_STIPPLE);
+		if(!(*ilayset).second->filled())
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			return false;
+		}
+		else
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glEnable(GL_POLYGON_STIPPLE);
+		}
 //      glEnable(GL_POLYGON_SMOOTH); //- for solid fill
 //      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       glPolygonStipple(ifillset->second);

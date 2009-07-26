@@ -50,6 +50,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdHIDECELLBOND);  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdHIDETEXTBOND);  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdLOCKLAYER   );  // undo - implemented
+	TELL_STDCMD_CLASSA_UNDO(stdFILLLAYER   );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdLOCKLAYERS  );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGRID        );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSTEP        );  // undo - implemented

@@ -146,6 +146,7 @@ public:
    void                       addfill(std::string, byte*);
    void                       hideLayer(word, bool);
    void                       lockLayer(word, bool);
+	void                       fillLayer(word, bool);
    void                       setcellmarks_hidden(bool);
    void                       settextmarks_hidden(bool);
    void                       setcellbox_hidden(bool);
