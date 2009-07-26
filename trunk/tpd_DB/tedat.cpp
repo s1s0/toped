@@ -282,7 +282,8 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
    }
 }
 
-bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool pselect) {
+bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool pselect) 
+{
    // check the integrity of the select list
    assert((sh_selected == _status) || (sh_partsel == _status));
    float clip;
@@ -299,27 +300,36 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
       return true;// i.e. remove this from the list of selected shapes
    }   
    // if select_in intersects with the overlapping box
-   else if ((clip > 0) && pselect) {
-      if (sh_partsel != _status) // if the shape is already partially selected
+   else if ((clip > 0) && pselect) 
+   {
+      // for cell refernces and texts - dont't unselect if they are
+      // partially covered
+      if (1 == numpoints()) return false;
+      // get all points if the shape has not been already partially selected
+      if (sh_partsel != _status) 
          SI.second = SGBitSet(numpoints());
       // get an alias of the SI.second
       SGBitSet &pntlst = SI.second;
       // finally - go and unselect some points   
       unselect_points(select_in, pntlst);
-      if (pntlst.isallclear()) {//none selected
+      if (pntlst.isallclear()) 
+      {//none selected
          _status = sh_active; 
          pntlst.clear();
          //delete pntlst;SI.second = NULL; 
          return true;
       }
-      else if (pntlst.isallset()) { //all points selected; 
+      else if (pntlst.isallset()) 
+      { //all points selected; 
          _status = sh_selected; 
          pntlst.clear();
          //delete pntlst; SI.second = NULL; 
          return false;
       }   
-      else { // some selected
-         _status = sh_partsel; return false;
+      else 
+      { // some selected
+         _status = sh_partsel; 
+         return false;
       }
    }
    // if pselect is false and the shape is not fully overlapped by 
