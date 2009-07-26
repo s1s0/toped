@@ -1352,7 +1352,7 @@ browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
 BEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
    //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
    EVT_LEFT_DOWN  (LayerButton::onLeftClick  )
-//   EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
+   EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
    EVT_PAINT      (LayerButton::onPaint      )
 END_EVENT_TABLE()
 //====================================================================
@@ -1366,7 +1366,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
    _hidden  = false;
-
+	_filled = true;
    //_locked  = false;  
 
    _picture = DEBUG_NEW wxBitmap(size.GetWidth()-16, size.GetHeight(), -1);
@@ -1449,7 +1449,7 @@ void browsers::LayerButton::preparePicture()
    }
    DC.SelectObject(*_picture);
 
-   DC.SetBrush(*_brush);
+
    DC.SetPen(*_pen);
    DC.SetBackground(*wxBLACK);
    DC.SetTextForeground(*wxWHITE);
@@ -1465,7 +1465,6 @@ void browsers::LayerButton::preparePicture()
    DC.DrawText(layno, 0, int((_buttonHeight - hno)/2));
    curw += wno + clearence;
 
-   wxBrush tempBrush = DC.GetBrush();
    if (_selected)
    {
       DC.SetBrush(*wxWHITE_BRUSH);
@@ -1491,7 +1490,16 @@ void browsers::LayerButton::preparePicture()
    DC.DrawText(caption, curw, int(_buttonHeight/2 - hna/2));
    curw += wna;
 
-   DC.SetBrush(tempBrush);
+	if (_filled)
+	{
+		DC.SetBrush(*_brush);
+	}
+	else
+	{
+		DC.SetBrush(wxNullBrush);
+		DC.SetBrush(*wxBLACK_BRUSH);
+      DC.SetTextForeground(*wxWHITE);
+	}
    DC.DrawRectangle(curw, clearence, _buttonWidth-curw-16, _buttonHeight-2*clearence);
 
    DC.SelectObject(wxNullBitmap);
@@ -1572,10 +1580,14 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
    }
 }
 
-// void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
-// {
-// 
-// }
+void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
+{
+	wxString cmd;
+   cmd << wxT("filllayer(") <<_layer->layno() << wxT(", ");
+   if (_filled) cmd << wxT("false") << wxT(");");
+		else cmd << wxT("true") << wxT(");");
+   parseCommand(cmd);
+}
 
 
 void browsers::LayerButton::hideLayer(bool hide)
@@ -1587,6 +1599,12 @@ void browsers::LayerButton::hideLayer(bool hide)
 void browsers::LayerButton::lockLayer(bool lock)
 {
    //_locked = lock;
+   preparePicture();
+}
+
+void browsers::LayerButton::fillLayer(bool fill)
+{
+   _filled = fill;
    preparePicture();
 }
 
@@ -1665,6 +1683,15 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
             delete (layno);
             break;
          }
+		case    BT_LAYER_FILL:
+         {
+            word *layno = static_cast<word*>(event.GetClientData());
+            bool status = (1 == event.GetExtraLong());
+            if ((wbutton = checkDefined(*layno))) wbutton->fillLayer(status);
+            delete (layno);
+            break;
+         }
+
       case     BT_LAYER_SELECT:
          {
             word layno = event.GetExtraLong();

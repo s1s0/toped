@@ -424,6 +424,7 @@ UNDO/REDO operation - some preliminary thoughts
 |  "layprop"       |  stdLAYPROP       |   OK   |    x   |   x*   |  if redefined only  |
 |  "hidelayer"     |  stdHIDELAYER     |   OK   |    x   |   x    |                     |
 |  "locklayer"     |  stdLOCKLAYER     |   OK   |    x   |   x    |                     |
+|  "filllayer"     |  stdFILLLAYER     |   OK   |    x   |   x    |                     |
 |  "definecolor"   |  stdCOLORDEF      |   OK   |    x   |   x*   |  if redefined only  |
 |  "definefill"    |  stdFILLDEF       |   OK   |    x   |   x*   |  if redefined only  |
 |  "definegrid"    |  stdGRIDDEF       |   OK   |    x   |   x*   |  if redefined only  |

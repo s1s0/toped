@@ -59,6 +59,7 @@ namespace browsers
       BT_LAYER_DEFAULT,
       BT_LAYER_HIDE,
       BT_LAYER_LOCK,
+		BT_LAYER_FILL,
       BT_LAYER_ADD,
       BT_LAYER_ACTION,
       BT_LAYER_DO,
@@ -262,13 +263,14 @@ namespace browsers
                                           LayerInfo *layer = NULL);
                               ~LayerButton();
          void                 onLeftClick(wxMouseEvent&);
-//         void                 onMiddleClick(wxMouseEvent&);
+         void                 onMiddleClick(wxMouseEvent&);
          void                 onPaint(wxPaintEvent&);
          //Call when other button is selected
          void                 unselect();
          void                 select();
          void                 hideLayer(bool);
          void                 lockLayer(bool);
+			void						fillLayer(bool);
          void                 preparePicture();
          word                 getLayNo()          {return _layer->layno();}
 
@@ -282,6 +284,7 @@ namespace browsers
          bool                 _selected;
          bool                 _hidden;
          bool                 _locked;
+			bool                 _filled;
 
       DECLARE_EVENT_TABLE();
    };
