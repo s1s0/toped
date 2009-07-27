@@ -375,11 +375,9 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
    }
    else 
    {
-      // Mark that the cell definition is referenced, i.e. it is not the top 
-      // of the tree (orphan flag in the tdtcell), BUT just in case it is
-      // not empty yet
-      if (NULL != _design->_cells[cellname])
-         _design->_cells[cellname]->parentfound();
+      celldef = striter->second;
+      assert(NULL != celldef);
+      celldef->parentfound();
    }
    return celldef;
 }
