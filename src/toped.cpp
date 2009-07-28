@@ -1144,10 +1144,15 @@ void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent& WXUNUSED(event))
    delete[] theImage;
 }
 
-void tui::TopedFrame::OnCellNew(wxCommandEvent& WXUNUSED(event)) {
+void tui::TopedFrame::OnCellNew(wxCommandEvent& cevent) 
+{
+   wxString defcellname = wxEmptyString;
+   if (0 != cevent.GetId())
+      defcellname = _browsers->tdtSelectedCellName();
    wxTextEntryDialog dlg2(this,
       wxT("Cell name:"),
-      wxT("Create new cell"));
+      wxT("Create new cell"),
+      defcellname);
    wxString cname, ost;
    if ((wxID_OK == dlg2.ShowModal()) && ((cname = dlg2.GetValue()) != wxT(""))) {
       SetStatusText(wxT("Creating new cell..."));

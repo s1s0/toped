@@ -360,12 +360,24 @@ void laydata::tdtlibrary::dbHierAddParent(const laydata::tdtdefaultcell* comp, c
       btreeAddMember(comp->name().c_str(), prnt->name().c_str(), res);
 }
 
-int laydata::tdtlibrary::dbHierRemoveParent(const tdtdefaultcell* comp, const tdtdefaultcell* prnt)
+void laydata::tdtlibrary::dbHierRemoveParent(tdtdefaultcell* comp, const tdtdefaultcell* prnt, laydata::tdtlibdir* libdir)
 {
    assert(comp); assert(prnt);
    int res = _hiertree->removeParent(comp, prnt, _hiertree);
-   btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
-   return res;
+   if ((1 == res) && (UNDEFCELL_LIB == comp->libID()))
+   {
+      // if that cell was undefined - remove it from the library of undefined cells
+      laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(comp->name());
+      assert(comp == libcellX);
+      btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
+      btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), 4);
+      delete libcellX;
+   }
+   else
+   {
+      btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
+      comp->_orphan = (res > 0);
+   }
 }
 
 void laydata::tdtlibrary::dbHierRemoveRoot(const tdtdefaultcell* comp)
@@ -623,14 +635,15 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name, laydata::tdtlibd
    else
    {// Library cell with this name exists. the new cell should replace it in all
     // of its references
+      btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
       libdir->relink();
-      // if that cell was undefined - remove it from the library of undefined cells
-      if (UNDEFCELL_LIB == libcell->libID())
-      {
-         laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(name);
-         assert(libcell == libcellX);
-         delete libcell;
-      }
+      //// if that cell was undefined - remove it from the library of undefined cells
+      //if (UNDEFCELL_LIB == libcell->libID())
+      //{
+      //   laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(name);
+      //   assert(libcell == libcellX);
+      //   delete libcell;
+      //}
    }
    return ncl;
 }
@@ -658,13 +671,13 @@ void laydata::tdtdesign::addthiscell(laydata::tdtcell* strdefn, laydata::tdtlibd
    {// Library cell with this name exists. the new cell should replace it in all
     // of its references
       libdir->relink();
-      // if that cell was undefined - remove it from the library of undefined cells
-      if (UNDEFCELL_LIB == libcell->libID())
-      {
-         laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(cname);
-         assert(libcell == libcellX);
-         delete libcell;
-      }
+      //// if that cell was undefined - remove it from the library of undefined cells
+      //if (UNDEFCELL_LIB == libcell->libID())
+      //{
+      //   laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(cname);
+      //   assert(libcell == libcellX);
+      //   delete libcell;
+      //}
    }
 }
 
@@ -709,7 +722,7 @@ void laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
    for (laydata::CellDefList::const_iterator CPS = pcells.begin(); CPS != pcells.end(); CPS++)
    {
       (*CPS)->relinkThis(name, strdefn, this);
-      dbHierRemoveParent(remcl, (*CPS));
+      dbHierRemoveParent(remcl, (*CPS), libdir);
    }
    // validate the cells
    do {} while(validate_cells());

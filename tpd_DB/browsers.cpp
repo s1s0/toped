@@ -141,6 +141,9 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
                menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
                menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
                break;
+            case BICN_UNDEFCELL:
+               menu.Append(tui::TMCELL_NEW , wxT("Define cell " + RBcellname));
+               break;
             default: /*undefined cells*/ return;
          }
       }
@@ -642,6 +645,17 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          // finally delete the item and it's children
          DeleteChildren(item);
          Delete(item);
+         break;
+      }
+      case 4:// remove undefined cell
+      {
+         wxTreeItemId item;
+         while (findItem(cellname, item, GetRootItem()))
+         {
+            int itemImage = GetItemImage(item, wxTreeItemIcon_Normal);
+            if ( BICN_UNDEFCELL == itemImage)
+               Delete(item);
+         }
          break;
       }
       default: assert(false);
