@@ -234,6 +234,7 @@ namespace tui {
       void		OnVToolBarSize48(wxCommandEvent& WXUNUSED(event));
 
 
+		void OnEditLayer(wxCommandEvent&);
       void OnDefineLayer(wxCommandEvent&);
       void OnDefineColor(wxCommandEvent& WXUNUSED(event));
       void  OnDefineFill(wxCommandEvent& WXUNUSED(event));
@@ -261,6 +262,8 @@ namespace tui {
 		void		OnToolBarDefine	(wxCommandEvent& evt);
 		void		OnToolBarAddItem	(wxCommandEvent& evt);
 		void		OnToolBarDeleteItem(wxCommandEvent& evt);
+
+		void		editLayerDlg(word layno);
       DECLARE_EVENT_TABLE();
    };
 

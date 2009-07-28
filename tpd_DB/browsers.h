@@ -97,7 +97,8 @@ namespace browsers
       LAYERSHOWSELECTED       ,
       LAYERLOCKSELECTED       ,
       LAYERUNLOCKSELECTED     ,
-      LAYERCURRENTSELECTED
+      LAYERCURRENTSELECTED		,
+		LAYERCURRENTEDIT
    };
 
    // all browser icons
@@ -264,13 +265,16 @@ namespace browsers
                               ~LayerButton();
          void                 onLeftClick(wxMouseEvent&);
          void                 onMiddleClick(wxMouseEvent&);
+			void						onRightClick(wxMouseEvent&);
          void                 onPaint(wxPaintEvent&);
+			void						OnEditLayer(wxCommandEvent&);
          //Call when other button is selected
          void                 unselect();
          void                 select();
          void                 hideLayer(bool);
          void                 lockLayer(bool);
 			void						fillLayer(bool);
+			void						editLayer(wxCommandEvent&);
          void                 preparePicture();
          word                 getLayNo()          {return _layer->layno();}
 

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="toped"
 	ProjectGUID="{07EF8990-20F5-4E03-803A-7BC622A4B5E1}"
 	RootNamespace="toped"
-	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -87,8 +86,6 @@
 				IgnoreDefaultLibraryNames="libc.lib,libci.lib "
 				ProgramDatabaseFile=".\Release/toped.pdb"
 				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -110,6 +107,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -187,8 +187,6 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/toped.pdb"
 				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -210,6 +208,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

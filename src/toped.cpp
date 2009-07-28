@@ -65,6 +65,7 @@ extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
+extern const wxEventType         wxEVT_EDITLAYER;
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;
@@ -295,6 +296,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_UNDODEPTH     , tui::TopedFrame::OnUndoDepth   )
 
    EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
+
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
    EVT_MENU( TMSET_DEFFILL       , tui::TopedFrame::OnDefineFill  )
 
@@ -318,6 +320,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,	 wxID_ANY, tui::TopedFrame::OnToolBarDefine)
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM, wxID_ANY, tui::TopedFrame::OnToolBarAddItem)
 	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
+	EVT_TECUSTOM_COMMAND( wxEVT_EDITLAYER,	wxID_ANY, tui::TopedFrame::OnEditLayer )
    EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
 END_EVENT_TABLE()
 
@@ -1828,7 +1831,18 @@ void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
 {
    //word layno = _browsers->TDTSelectedLayNo();
    word layno = DATC->curlay();
-   wxRect wnd = GetRect();
+	editLayerDlg(layno);
+}
+
+void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
+{
+	word layno = evt.GetInt();
+	editLayerDlg(layno);
+}
+
+void	tui::TopedFrame::editLayerDlg(word layno)
+{
+	wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno);
    if ( dlg.ShowModal() == wxID_OK )
