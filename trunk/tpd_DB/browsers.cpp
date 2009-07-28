@@ -35,6 +35,7 @@
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
 #include "datacenter.h"
+#include "../src/toped.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
 #include "../ui/cellhg.xpm"
@@ -50,8 +51,10 @@
 
 
 extern DataCenter*               DATC;
+extern tui::TopedFrame*				Toped;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
+extern const wxEventType         wxEVT_EDITLAYER;
 
 browsers::browserTAB*     Browsers = NULL;
 
@@ -1367,11 +1370,15 @@ BEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
    //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
    EVT_LEFT_DOWN  (LayerButton::onLeftClick  )
    EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
+	EVT_RIGHT_DOWN(LayerButton::onRightClick)
    EVT_PAINT      (LayerButton::onPaint      )
+	EVT_MENU( LAYERCURRENTEDIT				,LayerButton::OnEditLayer )
+
 END_EVENT_TABLE()
 //====================================================================
 //
 //
+
 browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos ,
                                    const wxSize& size, long style , const wxValidator& validator ,
                                    const wxString& name, LayerInfo *layer):wxPanel()
@@ -1601,6 +1608,21 @@ void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
    if (_filled) cmd << wxT("false") << wxT(");");
 		else cmd << wxT("true") << wxT(");");
    parseCommand(cmd);
+}
+
+void	 browsers::LayerButton::onRightClick(wxMouseEvent& evt)
+{
+	wxMenu menu;
+	menu.Append(LAYERCURRENTEDIT, wxT("Edit layer...")); //if selected call LayerButton::OnEditLayer tui::TMLAY_EDIT
+   PopupMenu(&menu);
+}
+
+void			browsers::LayerButton::OnEditLayer(wxCommandEvent&)
+{
+	wxCommandEvent eventEditLayer(wxEVT_EDITLAYER);
+
+	eventEditLayer.SetInt(_layer->layno());
+	wxPostEvent(Toped, eventEditLayer);
 }
 
 
