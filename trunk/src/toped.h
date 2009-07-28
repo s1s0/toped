@@ -173,7 +173,7 @@ namespace tui {
       void      OnResize(wxCommandEvent& WXUNUSED(event));
       void  OnChangeText(wxCommandEvent& WXUNUSED(event));
 
-      void     OnCellNew(wxCommandEvent& WXUNUSED(event));
+      void     OnCellNew(wxCommandEvent&);
       void    OnCellOpen(wxCommandEvent& WXUNUSED(event));
       void    OnCellRemove(wxCommandEvent&);
       void    OnCellPush(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("editpush(getpoint());"));}

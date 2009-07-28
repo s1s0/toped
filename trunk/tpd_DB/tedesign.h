@@ -50,7 +50,7 @@ namespace laydata {
       void           collect_usedlays(WordList&) const;
       void           dbHierAdd(const tdtdefaultcell*, const tdtdefaultcell*);
       void           dbHierAddParent(const tdtdefaultcell*, const tdtdefaultcell*);
-      int            dbHierRemoveParent(const tdtdefaultcell*, const tdtdefaultcell*);
+      void           dbHierRemoveParent(tdtdefaultcell*, const tdtdefaultcell*, laydata::tdtlibdir*);
       void           dbHierRemoveRoot(const tdtdefaultcell*);
       bool           dbHierCheckAncestors(const tdtdefaultcell*, const tdtdefaultcell*);
 

@@ -1891,8 +1891,7 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
             childref = ATDB->checkcell(*CN);
             if (NULL == childref)
                childref = libdir->getLibCellDef(*CN);
-            int res = ATDB->dbHierRemoveParent(childref, this);
-            childref->_orphan = (res > 0);
+            ATDB->dbHierRemoveParent(childref, this, libdir);
          }
          _children.clear();
       }
@@ -1913,8 +1912,7 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
             if (NULL != childref)
             {
                // remove it from the hierarchy
-               int res = ATDB->dbHierRemoveParent(childref, this);
-               childref->_orphan = (res > 0);
+               ATDB->dbHierRemoveParent(childref, this, libdir);
             }
             _children.erase(diff.second);
          }
@@ -1943,9 +1941,11 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
       {
          CTM ori = wcl->translation();
          refsTree->delete_this(wcl);
-         addcellref((*libdir)(), newcelldef, ori);
+         // remove the child-parent link of the old cell reference
          if (_hiertree->checkAncestors(wcl->structure(), this, _hiertree))
-            _hiertree->removeParent(wcl->structure(), this, _hiertree);
+            (*libdir)()->dbHierRemoveParent(wcl->structure(), this, libdir);
+         // introduce the new child
+         addcellref((*libdir)(), newcelldef, ori);
          CC = refsList->erase(CC);
       }
       else CC++;
