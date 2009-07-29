@@ -53,7 +53,7 @@ void tellstdfunc::stdNEWCELL::undo()
 {
    // get the name of the DEBUG_NEW cell
    std::string  cname = getStringValue(UNDOPstack, true);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
        // make sure cname exists ...
       assert(ATDB->checkcell(cname));
       // ... and is not active

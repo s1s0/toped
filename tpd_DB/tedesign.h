@@ -43,7 +43,7 @@ namespace laydata {
       void           recreate_hierarchy(const laydata::tdtlibdir* );
       void           registercellread(std::string, tdtcell*);
       CellDefin      getcellnamepair(std::string name) const;
-      CellDefin      secure_defaultcell(std::string name);
+      CellDefin      secure_defaultcell(std::string name, bool);
       void           relink(tdtlibdir*);
       void           clearLib();
       void           cleanUnreferenced();
@@ -192,8 +192,8 @@ namespace laydata {
       int               getLastLibRefNo();
       bool              getLibCellRNP(std::string, CellDefin&, const int libID = TARGETDB_LIB) const;
       tdtdefaultcell*   getLibCellDef(std::string, const int libID = TARGETDB_LIB) const;
-      CellDefin         linkcellref(std::string, int, TDTHierTree*&);
-      CellDefin         adddefaultcell( std::string name );
+      CellDefin         linkcellref(std::string, int);
+      CellDefin         adddefaultcell( std::string name, bool );
       bool              collect_usedlays(std::string, bool, WordList&) const;
       void              collect_usedlays(int, WordList&) const;
       void              cleanUndefLib();

@@ -278,7 +278,7 @@ laydata::CellDefin GDSin::Gds2Ted::linkcellref(std::string cellname)
       // search the cell in the libraries because it's not in the DB
       if (!_tdt_db->getLibCellRNP(cellname, strdefn))
       {
-         strdefn = _tdt_db->adddefaultcell(cellname);
+         strdefn = _tdt_db->adddefaultcell(cellname, false);
          (*_tdt_db)()->dbHierAdd(strdefn, NULL);
       }
    }

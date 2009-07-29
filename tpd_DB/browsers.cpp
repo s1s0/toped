@@ -556,10 +556,20 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
          if (_hierarchy_view)
          {
             wxTreeItemId hnewparent;
-            VERIFY(findItem(parentname, hnewparent, GetRootItem()));
-            item = AppendItem(hnewparent, cellname);
-            SetItemTextColour(item,GetItemTextColour(GetRootItem()));
-            SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+            if (parentname.empty())
+            {
+               item = AppendItem(_undefRoot, cellname);
+               SetItemTextColour(item,GetItemTextColour(_undefRoot));
+               SetItemImage(item, BICN_UNDEFCELL, wxTreeItemIcon_Normal);
+            }
+            else
+            {
+               // make sure that the parent exists
+               VERIFY(findItem(parentname, hnewparent, GetRootItem()));
+               item = AppendItem(hnewparent, cellname);
+               SetItemTextColour(item,GetItemTextColour(GetRootItem()));
+               SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+            }
             SortChildren(_dbroot);
          }
          else
@@ -584,12 +594,38 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
          }
          break;
       case 2://new parent added
-      case 3://first parrent added for library component
          if (_hierarchy_view)
          {//
             wxTreeItemId newparent;
             VERIFY(findItem(cellname, item, GetRootItem()));
-            while (findItem(parentname, newparent, GetRootItem()))
+            while (findItem(parentname, newparent, _dbroot))
+            {
+               copyItem(item,newparent);
+               SortChildren(newparent);
+            }
+         }
+         break;
+      case 3://first parrent added for library component
+         if (_hierarchy_view)
+         {//
+            wxTreeItemId newparent;
+            bool linkFound = false;
+            // check the libraries first ...
+            for (LibsRoot::const_iterator CLR = _libsRoot.begin(); CLR !=_libsRoot.end(); CLR++)
+            {
+               if (findItem(cellname, item, *CLR))
+               {
+                  linkFound = true;
+                  break;
+               }
+            }
+            // ... and if it's not there - the undefined cells
+            if ( (!linkFound) && findItem(cellname, item, _undefRoot) )
+            {
+               linkFound = true;
+            }
+            assert(linkFound);
+            while (findItem(parentname, newparent, _dbroot))
             {
                copyItem(item,newparent);
                SortChildren(newparent);
@@ -653,11 +689,9 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
       case 4:// remove undefined cell
       {
          wxTreeItemId item;
-         while (findItem(cellname, item, GetRootItem()))
+         while (findItem(cellname, item, _undefRoot))
          {
-            int itemImage = GetItemImage(item, wxTreeItemIcon_Normal);
-            if ( BICN_UNDEFCELL == itemImage)
-               Delete(item);
+            Delete(item);
          }
          break;
       }
