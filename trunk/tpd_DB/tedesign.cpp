@@ -68,7 +68,7 @@ void laydata::tdtlibrary::relink(tdtlibdir* libdir)
    for (wc = _cells.begin(); wc != _cells.end(); wc++)
    {
       assert(wc->second);
-      need_validation |= wc->second->relink(libdir, _hiertree);
+      need_validation |= wc->second->relink(libdir);
    }
    if (need_validation)
       do {} while(validate_cells());
@@ -265,12 +265,15 @@ laydata::CellDefin laydata::tdtlibrary::getcellnamepair(std::string name) const
 }
 
 
-laydata::CellDefin laydata::tdtlibrary::secure_defaultcell(std::string name)
+laydata::CellDefin laydata::tdtlibrary::secure_defaultcell(std::string name, bool updateHier)
 {
    assert(UNDEFCELL_LIB == _libID);
    if (_cells.end() == _cells.find(name))
    {
-      _cells[name] = DEBUG_NEW tdtdefaultcell(name, UNDEFCELL_LIB, true);
+      tdtdefaultcell* newcell = DEBUG_NEW tdtdefaultcell(name, UNDEFCELL_LIB, true);
+      _cells[name] = newcell;
+      if (updateHier)
+         _hiertree = DEBUG_NEW TDTHierTree(newcell, NULL, _hiertree);
    }
    return _cells.find(name)->second;
 }
@@ -347,9 +350,22 @@ void laydata::tdtlibrary::dbHierAdd(const laydata::tdtdefaultcell* comp, const l
 {
    assert(comp);
    _hiertree = DEBUG_NEW TDTHierTree(comp, prnt, _hiertree);
-   //@FIXME! parent name has to be taken from the _hiertree
-   std::string prnt_name = (NULL == prnt) ? _name : prnt->name();
-   btreeAddMember(comp->name().c_str(), prnt_name.c_str(), 0);
+   switch (comp->libID())
+   {
+      case TARGETDB_LIB:
+      {
+         std::string prnt_name = (NULL == prnt) ? _name : prnt->name();
+         btreeAddMember(comp->name().c_str(), prnt_name.c_str(), 0);
+         break;
+      }
+      case UNDEFCELL_LIB:
+      {
+         std::string prnt_name = "";
+         btreeAddMember(comp->name().c_str(), prnt_name.c_str(), 0);
+         break;
+      }
+      default: assert(false);
+   }
 }
 
 void laydata::tdtlibrary::dbHierAddParent(const laydata::tdtdefaultcell* comp, const laydata::tdtdefaultcell* prnt)
@@ -522,10 +538,10 @@ laydata::tdtdefaultcell* laydata::tdtlibdir::getLibCellDef(std::string name, con
    return NULL;
 }
 
-laydata::CellDefin laydata::tdtlibdir::adddefaultcell( std::string name )
+laydata::CellDefin laydata::tdtlibdir::adddefaultcell( std::string name, bool updateHier )
 {
    laydata::tdtlibrary* undeflib = _libdirectory[UNDEFCELL_LIB]->second;
-   return undeflib->secure_defaultcell(name);
+   return undeflib->secure_defaultcell(name, updateHier);
 }
 
 bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, WordList& laylist) const
@@ -561,7 +577,7 @@ databases (libraries) already loaded in memory. A function with completely the s
 and name is defined in the TEDfile. That one is used to link cell references during tdt parsing
 phase
 */
-laydata::CellDefin laydata::tdtlibdir::linkcellref(std::string cellname, int libID, TDTHierTree*& Htree)
+laydata::CellDefin laydata::tdtlibdir::linkcellref(std::string cellname, int libID)
 {
    assert(UNDEFCELL_LIB != libID);
    laydata::tdtlibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;
@@ -574,8 +590,7 @@ laydata::CellDefin laydata::tdtlibdir::linkcellref(std::string cellname, int lib
       if (!getLibCellRNP(cellname, strdefn, libID))
       {
          // not found! make a default cell
-         strdefn = adddefaultcell(cellname);
-         Htree = DEBUG_NEW TDTHierTree(strdefn, NULL, Htree);
+         strdefn = adddefaultcell(cellname, true);
       }
    }
    else
@@ -637,13 +652,6 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name, laydata::tdtlibd
     // of its references
       btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
       libdir->relink();
-      //// if that cell was undefined - remove it from the library of undefined cells
-      //if (UNDEFCELL_LIB == libcell->libID())
-      //{
-      //   laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(name);
-      //   assert(libcell == libcellX);
-      //   delete libcell;
-      //}
    }
    return ncl;
 }
@@ -670,14 +678,8 @@ void laydata::tdtdesign::addthiscell(laydata::tdtcell* strdefn, laydata::tdtlibd
    else
    {// Library cell with this name exists. the new cell should replace it in all
     // of its references
+      btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
       libdir->relink();
-      //// if that cell was undefined - remove it from the library of undefined cells
-      //if (UNDEFCELL_LIB == libcell->libID())
-      //{
-      //   laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(cname);
-      //   assert(libcell == libcellX);
-      //   delete libcell;
-      //}
    }
 }
 
@@ -714,9 +716,9 @@ void laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
    if (!libdir->getLibCellRNP(name, strdefn, TARGETDB_LIB))
    {
       // not found! make a default cell
-      strdefn = libdir->adddefaultcell(name);
+      strdefn = libdir->adddefaultcell(name, false);
       // ... and add it to the hierarchy tree
-      _hiertree = DEBUG_NEW TDTHierTree(strdefn, NULL, _hiertree);
+      dbHierAdd(strdefn, NULL);
    }
    // now for every parent cell - relink all the references to cell "name"
    for (laydata::CellDefList::const_iterator CPS = pcells.begin(); CPS != pcells.end(); CPS++)

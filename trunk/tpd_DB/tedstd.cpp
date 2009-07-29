@@ -368,7 +368,7 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
          // the entire file is parced the cell references without a proper pointer
          // to the structure need to be flagged as warning in case 1 and as error 
          // in case 2.
-         celldef = _TEDLIB->adddefaultcell(cellname);
+         celldef = _TEDLIB->adddefaultcell(cellname, false);
       }
       else
          striter->second->parentfound();

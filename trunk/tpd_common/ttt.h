@@ -326,7 +326,7 @@ public:
    const SGHierTree* GetChild(int libID) const;
    SGHierTree*       GetMember(const TYPE* comp);
    SGHierTree*       GetNextMember(const TYPE* comp);
-   bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
+   bool              checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree* lst) const;
    int               addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
    int               removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst);
 //   void              replaceChild(const TYPE* oldchild, const TYPE* newchild, SGHierTree*& lst, int libID);
@@ -489,7 +489,7 @@ template <class TYPE>
    }
 
 template <class TYPE> 
-   bool SGHierTree<TYPE>::checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst)
+   bool SGHierTree<TYPE>::checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree* lst) const
 {
    // returns true  -> prnt is already an ancestor of the comp
    //         false -> otherwise

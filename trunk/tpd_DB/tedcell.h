@@ -100,7 +100,7 @@ namespace laydata {
          virtual void        PSwrite(PSFile&, const layprop::DrawProperties&,
                                       const cellList* = NULL, const TDTHierTree* = NULL) const;
          virtual TDTHierTree* hierout(TDTHierTree*& Htree, tdtcell*, cellList*, const tdtlibdir*);
-         virtual bool        relink(tdtlibdir*, TDTHierTree*&);
+         virtual bool        relink(tdtlibdir*);
          virtual void        relinkThis(std::string, laydata::CellDefin, tdtdesign*);
          virtual void        updateHierarchy(tdtlibdir*);
          virtual DBbox       cellOverlap() const;
@@ -182,7 +182,7 @@ namespace laydata {
       selectList*          shapesel()        {return &_shapesel;};
       selectList*          copy_selist() const;
       void                 updateHierarchy(tdtlibdir*);
-      bool                 relink(tdtlibdir*, TDTHierTree*&);
+      bool                 relink(tdtlibdir*);
       void                 relinkThis(std::string, laydata::CellDefin, tdtdesign*);
       void                 report_selected(real) const;
       void                 collect_usedlays(const tdtlibdir*, bool, WordList&) const;

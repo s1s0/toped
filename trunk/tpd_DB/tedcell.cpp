@@ -256,7 +256,7 @@ void laydata::tdtdefaultcell::updateHierarchy(tdtlibdir*)
 {
 }
 
-bool laydata::tdtdefaultcell::relink(tdtlibdir*, TDTHierTree*&)
+bool laydata::tdtdefaultcell::relink(tdtlibdir*)
 {
    return false;
 }
@@ -1922,7 +1922,7 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
    }
 }
 
-bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertree)
+bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
 {
    // get the cells layer
    if (_layers.end() == _layers.find(REF_LAY)) return false; // nothing to relink
@@ -1936,14 +1936,13 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir, TDTHierTree*& _hiertre
    while (CC != refsList->end())
    {
       tdtcellref* wcl = static_cast<tdtcellref*>(CC->first);
-      CellDefin newcelldef = libdir->linkcellref(wcl->cellname(), libID(), _hiertree);
+      CellDefin newcelldef = libdir->linkcellref(wcl->cellname(), libID());
       if (newcelldef != wcl->structure())
       {
          CTM ori = wcl->translation();
          refsTree->delete_this(wcl);
          // remove the child-parent link of the old cell reference
-         if (_hiertree->checkAncestors(wcl->structure(), this, _hiertree))
-            (*libdir)()->dbHierRemoveParent(wcl->structure(), this, libdir);
+         (*libdir)()->dbHierRemoveParent(wcl->structure(), this, libdir);
          // introduce the new child
          addcellref((*libdir)(), newcelldef, ori);
          CC = refsList->erase(CC);
