@@ -275,7 +275,7 @@ laydata::CellDefin laydata::tdtlibrary::secure_defaultcell(std::string name, boo
       if (updateHier)
          _hiertree = DEBUG_NEW TDTHierTree(newcell, NULL, _hiertree);
    }
-   return _cells.find(name)->second;
+   return _cells[name];
 }
 
 bool laydata::tdtlibrary::validate_cells()
@@ -729,7 +729,7 @@ void laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
    // validate the cells
    do {} while(validate_cells());
    // OK, now when the references are sorted, proceed with the cell itself
-//   dbHierRemoveRoot(remcl);
+   dbHierRemoveRoot(remcl);
    // remove the cell from the list of all design cells
    _cells.erase(_cells.find(name));
    //empty the contents of the removed cell and return it in atticList
