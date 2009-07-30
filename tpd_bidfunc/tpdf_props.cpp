@@ -581,49 +581,6 @@ int tellstdfunc::stdLOCKLAYER::execute()
 }
 
 //=============================================================================
-tellstdfunc::stdFILLLAYER::stdFILLLAYER(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-}
-
-void tellstdfunc::stdFILLLAYER::undo_cleanup() {
-   getWordValue(UNDOPstack, false);
-   getBoolValue(UNDOPstack, false);
-}
-
-void tellstdfunc::stdFILLLAYER::undo() {
-   TEUNDO_DEBUG("filllayer( word , bool ) UNDO");
-   bool        fill  = getBoolValue(UNDOPstack, true);
-   word        layno = getWordValue(UNDOPstack, true);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-   DATC->fillLayer(layno, fill);
-   DATC->unlockDB();
-   browsers::layer_status(browsers::BT_LAYER_FILL, layno, fill);
-   UpdateLV();
-}
-
-int tellstdfunc::stdFILLLAYER::execute()
-{
-   bool        fill  = getBoolValue();
-   word        layno = getWordValue();
-
-      laydata::tdtdesign* ATDB = DATC->lockDB();
-	      UNDOcmdQ.push_front(this);
-	      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
-	      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
-
-			DATC->fillLayer(layno, fill);
-      DATC->unlockDB();
-      browsers::layer_status(browsers::BT_LAYER_FILL, layno, fill);
-      LogFile << LogFile.getFN() << "("<< layno << "," << 
-                 LogFile._2bool(fill) << ");"; LogFile.flush();
-      UpdateLV();
-   return EXEC_NEXT;
-}
-
-//=============================================================================
 tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
@@ -707,6 +664,108 @@ int tellstdfunc::stdLOCKLAYERS::execute()
                                       LogFile._2bool(lock) << ");"; LogFile.flush();
    delete sl;
    UpdateLV();
+   return EXEC_NEXT;
+}
+
+
+//=============================================================================
+tellstdfunc::stdFILLLAYER::stdFILLLAYER(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+void tellstdfunc::stdFILLLAYER::undo_cleanup() {
+   getWordValue(UNDOPstack, false);
+   getBoolValue(UNDOPstack, false);
+}
+
+void tellstdfunc::stdFILLLAYER::undo() {
+   TEUNDO_DEBUG("filllayer( word , bool ) UNDO");
+   bool        fill  = getBoolValue(UNDOPstack, true);
+   word        layno = getWordValue(UNDOPstack, true);
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+   DATC->fillLayer(layno, fill);
+   DATC->unlockDB();
+   browsers::layer_status(browsers::BT_LAYER_FILL, layno, fill);
+   UpdateLV();
+}
+
+int tellstdfunc::stdFILLLAYER::execute()
+{
+   bool        fill  = getBoolValue();
+   word        layno = getWordValue();
+
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+	      UNDOcmdQ.push_front(this);
+	      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
+	      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
+
+			DATC->fillLayer(layno, fill);
+      DATC->unlockDB();
+      browsers::layer_status(browsers::BT_LAYER_FILL, layno, fill);
+      LogFile << LogFile.getFN() << "("<< layno << "," << 
+                 LogFile._2bool(fill) << ");"; LogFile.flush();
+      UpdateLV();
+   return EXEC_NEXT;
+}
+
+
+//=============================================================================
+tellstdfunc::stdFILLLAYERS::stdFILLLAYERS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_int)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+void tellstdfunc::stdFILLLAYERS::undo_cleanup() {
+   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   getBoolValue(UNDOPstack, false);
+	delete sl;
+}
+
+void tellstdfunc::stdFILLLAYERS::undo() {
+   TEUNDO_DEBUG("filllayer( int list , bool ) UNDO");
+   bool        fill  = getBoolValue(UNDOPstack, true);
+   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+   for (unsigned i = 0; i < sl->size() ; i++) 
+	{
+		telldata::ttint* laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+		word lay = laynumber->value();
+		DATC->fillLayer(lay, fill);
+		browsers::layer_status(browsers::BT_LAYER_FILL, lay, fill);
+	}
+	DATC->unlockDB();
+	delete sl;
+   UpdateLV();
+}
+
+int tellstdfunc::stdFILLLAYERS::execute()
+{
+   bool        fill  = getBoolValue();
+   telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+	      UNDOcmdQ.push_front(this);
+			for (unsigned i = 0; i < sl->size() ; i++)
+			{
+				telldata::ttint* laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+				word lay = laynumber->value();
+				DATC->fillLayer(lay, fill);
+				browsers::layer_status(browsers::BT_LAYER_FILL, lay, fill);
+
+			}
+	      UNDOPstack.push_front(sl);
+	      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
+
+
+      DATC->unlockDB();
+      LogFile << LogFile.getFN() << "("<< *sl << "," << 
+                 LogFile._2bool(fill) << ");"; LogFile.flush();
+      UpdateLV();
    return EXEC_NEXT;
 }
 
