@@ -371,7 +371,7 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
          celldef = _TEDLIB->adddefaultcell(cellname, false);
       }
       else
-         striter->second->parentfound();
+         celldef->parentfound();
    }
    else 
    {

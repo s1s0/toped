@@ -44,6 +44,7 @@ namespace laydata {
       void           registercellread(std::string, tdtcell*);
       CellDefin      getcellnamepair(std::string name) const;
       CellDefin      secure_defaultcell(std::string name, bool);
+      void           addThisUndefCell(laydata::tdtdefaultcell*);
       void           relink(tdtlibdir*);
       void           clearLib();
       void           cleanUnreferenced();
@@ -175,6 +176,29 @@ namespace laydata {
       ALL_LIB
       TARGETDB_LIB
       UNDEFCELL_LIB
+
+   A short memo on UNDEFCELL_LIB which proves to be a pain in the back...
+   The decision to allow undefined structures seemed to be a good idea having in
+   mind the it is legal in GDS to have references to undefined structures. The
+   next argument was the introduction of the libraries. Having an undefined
+   cell structure it would be stupid not to allow simple operations whith it. For 
+   example to define it, or simply to delete the reference to it. Right? (they say
+   that the road to hell is covered with roses). When I've started the 
+   implementation, then I realised that UNDEFCELL_LIB shall have quite different 
+   behaviour from a normal library and from the target DB
+   - New cells have to be generated on request - normally when a reference to them 
+     is added. Unlike the target DB where there is a command for this.
+   - Unreferenced cells should be cleared (you don't want to see rubbish in the cell
+     browser). Unlike the rest of the libraries where they simply come at the top 
+     of the hirerarchy if unreferenced.
+   On top of the above comes the undo. Just a simple example. The last reference to
+   an undefined cell had been deleted. One would think - great - we'll clean-up the
+   definition. Well if you do that - the undo will crash, because the undefined cell
+   reference keeps the pointer to the definition of the undefined cell. It's getting
+   alsomst rediculos, because it appears that to keep the integrity of the undo stack
+   you have to store also the deleted definitions of the undefined cells. The 
+   complications involve the hierarchy tree, the cell browser, and basic tell 
+   functions like addcell, removecell, group, ungroup, delete etc.
    */
    class tdtlibdir {
    public:
@@ -194,10 +218,14 @@ namespace laydata {
       tdtdefaultcell*   getLibCellDef(std::string, const int libID = TARGETDB_LIB) const;
       CellDefin         linkcellref(std::string, int);
       CellDefin         adddefaultcell( std::string name, bool );
+      void              addThisUndefCell(tdtdefaultcell*);
       bool              collect_usedlays(std::string, bool, WordList&) const;
       void              collect_usedlays(int, WordList&) const;
       void              cleanUndefLib();
       tdtdefaultcell*   displaceUndefinedCell(std::string);
+      void              holdUndefinedCell(tdtdefaultcell*);
+      void              deleteHeldCells();
+      void              getHeldCells(cellList*);
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       void              deleteDB() {delete _TEDDB;}
       void              setDB(tdtdesign* newdesign) {_TEDDB = newdesign;}
@@ -205,6 +233,8 @@ namespace laydata {
    private:
       Catalog           _libdirectory;
       tdtdesign*        _TEDDB;        // toped data base
+      //! themporary storage for undefined unreferenced cell (see the comment in the class definition)
+      cellList          _udurCells;    
    };
 
 }

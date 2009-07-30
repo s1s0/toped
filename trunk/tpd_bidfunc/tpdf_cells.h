@@ -38,7 +38,7 @@ namespace tellstdfunc {
    //
    TELL_STDCMD_CLASSA_UNDO(stdNEWCELL        );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdREMOVECELL     );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdREMOVEREFDCELL );  // undo - implemented
+//   TELL_STDCMD_CLASSA_UNDO(stdREMOVEREFDCELL );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdOPENCELL       );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdEDITPUSH       );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdEDITPOP        );  // undo - implemented

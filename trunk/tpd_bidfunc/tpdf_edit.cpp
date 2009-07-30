@@ -465,13 +465,31 @@ void tellstdfunc::stdDELETESEL::undo_cleanup()
    telldata::ttlist* und = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    clean_ttlaylist(und);
    delete und;
+   laydata::cellList* udurcells = static_cast<laydata::cellList*>(UNDOUstack.front());UNDOUstack.pop_front();
+   for (laydata::cellList::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
+   {
+      delete CUDU->second;
+   }
+   udurcells->clear();
+   delete(udurcells);
 }
 
 void tellstdfunc::stdDELETESEL::undo()
 {
    TEUNDO_DEBUG("delete() UNDO");
+   // get the removed undefined cells (if any)
    telldata::ttlist* und = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   laydata::cellList* udurcells = static_cast<laydata::cellList*>(UNDOUstack.front());UNDOUstack.pop_front();
+   std::string prnt_name = "";
    laydata::tdtdesign* ATDB = DATC->lockDB();
+      for (laydata::cellList::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
+      {
+         DATC->TEDLIB()->addThisUndefCell(CUDU->second);
+         ATDB->btreeAddMember(CUDU->second->name().c_str(), prnt_name.c_str(), 0);
+      }
+      udurcells->clear();
+      delete(udurcells);
+   //
       ATDB->addlist(get_shlaylist(und));
       ATDB->select_fromList(get_ttlaylist(und));
    DATC->unlockDB();   
@@ -488,6 +506,9 @@ int tellstdfunc::stdDELETESEL::execute()
    DATC->unlockDB();   
    UNDOPstack.push_front(make_ttlaylist(sh_delist));
    clean_atticlist(sh_delist); delete sh_delist;
+   laydata::cellList* udurCells = DEBUG_NEW laydata::cellList();
+   DATC->TEDLIB()->getHeldCells(udurCells);
+   UNDOUstack.push_front(udurCells);
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
    UpdateLV();   
    return EXEC_NEXT;

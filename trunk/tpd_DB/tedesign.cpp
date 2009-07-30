@@ -278,6 +278,15 @@ laydata::CellDefin laydata::tdtlibrary::secure_defaultcell(std::string name, boo
    return _cells[name];
 }
 
+void laydata::tdtlibrary::addThisUndefCell(laydata::tdtdefaultcell* thecell)
+{
+   assert(UNDEFCELL_LIB == _libID);
+   assert(_cells.end() == _cells.find(thecell->name()));
+   _cells[thecell->name()] = thecell;
+   _hiertree = DEBUG_NEW TDTHierTree(thecell, NULL, _hiertree);
+}
+
+
 bool laydata::tdtlibrary::validate_cells()
 {
    bool invalidParents = false;
@@ -387,7 +396,7 @@ void laydata::tdtlibrary::dbHierRemoveParent(tdtdefaultcell* comp, const tdtdefa
       assert(comp == libcellX);
       btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
       btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), 4);
-      delete libcellX;
+      libdir->holdUndefinedCell(libcellX);
    }
    else
    {
@@ -544,6 +553,12 @@ laydata::CellDefin laydata::tdtlibdir::adddefaultcell( std::string name, bool up
    return undeflib->secure_defaultcell(name, updateHier);
 }
 
+void laydata::tdtlibdir::addThisUndefCell(tdtdefaultcell* rcell)
+{
+   laydata::tdtlibrary* undeflib = _libdirectory[UNDEFCELL_LIB]->second;
+   undeflib->addThisUndefCell(rcell);
+}
+
 bool laydata::tdtlibdir::collect_usedlays(std::string cellname, bool recursive, WordList& laylist) const
 {
    tdtcell* topcell = NULL;
@@ -614,6 +629,38 @@ laydata::tdtdefaultcell* laydata::tdtlibdir::displaceUndefinedCell(std::string c
    return _libdirectory[UNDEFCELL_LIB]->second->displaceCell(cell_name);
 }
 
+/*! Ensures a themporary storage of an undefined cell which has been unlinked 
+(unreferenced).
+*/
+void laydata::tdtlibdir::holdUndefinedCell(tdtdefaultcell* udefrcell)
+{
+   // Make sure - it's a default definition of a missing cell ...
+   assert(UNDEFCELL_LIB == udefrcell->libID());
+   // .. and it's not already in the themporary storage
+   assert(_udurCells.end() == _udurCells.find(udefrcell->name()));
+   // store a pointer to the definition
+   _udurCells[udefrcell->name()] = udefrcell;
+}
+
+void laydata::tdtlibdir::deleteHeldCells()
+{
+   for (cellList::const_iterator CUDU = _udurCells.begin(); CUDU != _udurCells.end(); CUDU++)
+   {
+      delete CUDU->second;
+   }
+   _udurCells.clear();
+}
+
+void laydata::tdtlibdir::getHeldCells(cellList* copyList)
+{
+   for (cellList::const_iterator CUDU = _udurCells.begin(); CUDU != _udurCells.end(); CUDU++)
+   {
+      (*copyList)[CUDU->first] = CUDU->second;
+   }
+   _udurCells.clear();
+}
+
+
 //-----------------------------------------------------------------------------
 // class tdtdesign
 //-----------------------------------------------------------------------------
@@ -652,6 +699,7 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name, laydata::tdtlibd
     // of its references
       btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
       libdir->relink();
+      libdir->deleteHeldCells(); // clean-up the unreferenced undefined cells
    }
    return ncl;
 }
