@@ -558,6 +558,11 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             wxTreeItemId hnewparent;
             if (parentname.empty())
             {
+               if (!_undefRoot.IsOk())
+               {
+                  _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
+                  SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
+               }
                item = AppendItem(_undefRoot, cellname);
                SetItemTextColour(item,GetItemTextColour(_undefRoot));
                SetItemImage(item, BICN_UNDEFCELL, wxTreeItemIcon_Normal);
@@ -658,11 +663,9 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          if (_hierarchy_view)
          {
             wxTreeItemId item;
-            findItem(cellname, item, GetRootItem());
-            copyItem(item, _dbroot);
-            item = wxTreeItemId();
-            VERIFY(findItem(parentname, newparent, GetRootItem()));
+            VERIFY(findItem(parentname, newparent, _dbroot));
             VERIFY(findItem(cellname, item, newparent));
+            copyItem(item, _dbroot);
             DeleteChildren(item);
             Delete(item);
          }
@@ -670,7 +673,9 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
       case 3:// we are removing the cell, not it's reference
       {
          wxTreeItemId item;
-         VERIFY(findItem(cellname, item, GetRootItem()));
+         do {
+            VERIFY(findItem(cellname, item, _dbroot));
+         } while (_dbroot != GetItemParent(item));
          // copy all children
          // This part is "in case". The thing is that children should have been
          // removed already, by tdtcell::removePrep
@@ -692,6 +697,11 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          while (findItem(cellname, item, _undefRoot))
          {
             Delete(item);
+         }
+         if (!ItemHasChildren(_undefRoot))
+         {
+            Delete(_undefRoot);
+            _undefRoot.Unset();
          }
          break;
       }
