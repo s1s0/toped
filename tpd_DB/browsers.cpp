@@ -291,12 +291,15 @@ wxString browsers::CellBrowser::rbCellName()
 
 void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxString selected)
 {
-   if (findItem(top, _topStructure, _dbroot))
-      highlightChildren(_topStructure, _editColor);
-   if (findItem(active, _activeStructure, _dbroot))
+   if (_dbroot.IsOk())
    {
-      SetItemBold(_activeStructure, true);
-      EnsureVisible(_activeStructure);
+      if (findItem(top, _topStructure, _dbroot))
+         highlightChildren(_topStructure, _editColor);
+      if (findItem(active, _activeStructure, _dbroot))
+      {
+         SetItemBold(_activeStructure, true);
+         EnsureVisible(_activeStructure);
+      }
    }
    wxTreeItemId      item;
    if (findItem(selected, item, GetRootItem()))
@@ -342,6 +345,7 @@ void browsers::CellBrowser::updateFlat()
       }
       delete cll;
       SortChildren(_dbroot);
+      DATC->unlockDB();
    }
 
    // traverse the libraries now
@@ -384,7 +388,6 @@ void browsers::CellBrowser::updateFlat()
          SortChildren(_undefRoot);
       }
    }
-   DATC->unlockDB();
 }
 
 void browsers::CellBrowser::updateHier()
@@ -414,6 +417,7 @@ void browsers::CellBrowser::updateHier()
          tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
       }
       SortChildren(_dbroot);
+      DATC->unlockDB();
    }
    // traverse the libraries now
    _libsRoot.clear();
@@ -452,7 +456,6 @@ void browsers::CellBrowser::updateHier()
          SortChildren(_undefRoot);
       }
    }
-   DATC->unlockDB();
 }
 
 void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
@@ -555,7 +558,6 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
       case 0://new cell
          if (_hierarchy_view)
          {
-            wxTreeItemId hnewparent;
             if (parentname.empty())
             {
                if (!_undefRoot.IsOk())
@@ -566,22 +568,41 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
                item = AppendItem(_undefRoot, cellname);
                SetItemTextColour(item,GetItemTextColour(_undefRoot));
                SetItemImage(item, BICN_UNDEFCELL, wxTreeItemIcon_Normal);
+               SortChildren(_undefRoot);
             }
             else
             {
+               wxTreeItemId hnewparent;
                // make sure that the parent exists
                VERIFY(findItem(parentname, hnewparent, GetRootItem()));
                item = AppendItem(hnewparent, cellname);
                SetItemTextColour(item,GetItemTextColour(GetRootItem()));
                SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+               SortChildren(hnewparent);
             }
-            SortChildren(_dbroot);
          }
          else
          {
-            VERIFY(!findItem(cellname, item, GetRootItem()));
-            item = AppendItem(GetRootItem(), cellname);
-            SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+            if (parentname.empty())
+            {
+               if (!_undefRoot.IsOk())
+               {
+                  _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
+                  SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
+               }
+               item = AppendItem(_undefRoot, cellname);
+               SetItemTextColour(item,GetItemTextColour(_undefRoot));
+               SetItemImage(item, BICN_UNDEFCELL, wxTreeItemIcon_Normal);
+               SortChildren(_undefRoot);
+            }
+            else
+            {
+               VERIFY(!findItem(cellname, item, _dbroot));
+               item = AppendItem(_dbroot, cellname);
+               SetItemTextColour(item,GetItemTextColour(GetRootItem()));
+               SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+               SortChildren(_dbroot);
+            }
          }
          break;
       case 1://first reference of existing cell

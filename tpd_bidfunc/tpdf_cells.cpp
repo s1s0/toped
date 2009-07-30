@@ -120,7 +120,7 @@ void tellstdfunc::stdREMOVECELL::undo()
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    // get the name of the removed cell
    std::string  nm = getStringValue(UNDOPstack, true);
-   // get the removet cell itself (empty)
+   // get the removed cell itself (empty)
    laydata::tdtcell* rmvdcell = static_cast<laydata::tdtcell*>(UNDOUstack.front());UNDOUstack.pop_front();
 
    laydata::tdtdesign* ATDB = DATC->lockDB();
@@ -183,61 +183,61 @@ int tellstdfunc::stdREMOVECELL::execute()
 }
 
 //=============================================================================
-tellstdfunc::stdREMOVEREFDCELL::stdREMOVEREFDCELL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-}
-
-void tellstdfunc::stdREMOVEREFDCELL::undo_cleanup()
-{
-}
-
-void tellstdfunc::stdREMOVEREFDCELL::undo()
-{
-}
-
-int tellstdfunc::stdREMOVEREFDCELL::execute()
-{
-   std::string cname = getStringValue();
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      if (!ATDB->checkcell(cname))
-      {
-         std::string news = "Cell \"";
-         news += cname; news += "\" doesn't exists. Nothing to remove";
-         tell_log(console::MT_ERROR,news);
-
-      }
-      else if (cname == ATDB->activecellname())
-      {
-         tell_log(console::MT_ERROR,"Active cell can't be removed");
-      }
-      else
-      {
-         laydata::CellDefList parentCells;
-         ATDB->collectParentCells(cname, parentCells);
-         if (parentCells.empty())
-         {
-            //@TODO -  fold down to stdREMOVECELL
-         }
-         else
-         {
-            laydata::atticList* cell_contents = DEBUG_NEW laydata::atticList();
-            ATDB->removeRefdCell(cname, parentCells, cell_contents, DATC->TEDLIB());
-         }
-      }
-   DATC->unlockDB();
-   //if (removed)
-   //{  // removal has been successfull
-   //   UNDOcmdQ.push_front(this);
-   //   UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
-   //   UNDOPstack.push_front(make_ttlaylist(cell_contents));
-   //   LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
-   //}
-   //clean_atticlist(cell_contents, true);
-   //delete(cell_contents);
-   return EXEC_NEXT;
-}
+//tellstdfunc::stdREMOVEREFDCELL::stdREMOVEREFDCELL(telldata::typeID retype, bool eor) :
+//      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+//{
+//   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+//}
+//
+//void tellstdfunc::stdREMOVEREFDCELL::undo_cleanup()
+//{
+//}
+//
+//void tellstdfunc::stdREMOVEREFDCELL::undo()
+//{
+//}
+//
+//int tellstdfunc::stdREMOVEREFDCELL::execute()
+//{
+//   std::string cname = getStringValue();
+//   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+//      if (!ATDB->checkcell(cname))
+//      {
+//         std::string news = "Cell \"";
+//         news += cname; news += "\" doesn't exists. Nothing to remove";
+//         tell_log(console::MT_ERROR,news);
+//
+//      }
+//      else if (cname == ATDB->activecellname())
+//      {
+//         tell_log(console::MT_ERROR,"Active cell can't be removed");
+//      }
+//      else
+//      {
+//         laydata::CellDefList parentCells;
+//         ATDB->collectParentCells(cname, parentCells);
+//         if (parentCells.empty())
+//         {
+//            //@TODO -  fold down to stdREMOVECELL
+//         }
+//         else
+//         {
+//            laydata::atticList* cell_contents = DEBUG_NEW laydata::atticList();
+//            ATDB->removeRefdCell(cname, parentCells, cell_contents, DATC->TEDLIB());
+//         }
+//      }
+//   DATC->unlockDB();
+//   //if (removed)
+//   //{  // removal has been successfull
+//   //   UNDOcmdQ.push_front(this);
+//   //   UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
+//   //   UNDOPstack.push_front(make_ttlaylist(cell_contents));
+//   //   LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+//   //}
+//   //clean_atticlist(cell_contents, true);
+//   //delete(cell_contents);
+//   return EXEC_NEXT;
+//}
 
 //=============================================================================
 tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype, bool eor) :
