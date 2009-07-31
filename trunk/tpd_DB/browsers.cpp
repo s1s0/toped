@@ -764,6 +764,10 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
 
 bool browsers::CellBrowser::checkCorrupted(bool iresult)
 {
+   if (!_corrupted && !iresult)
+   {
+      tell_log(console::MT_ERROR, "Cell browser lost synchonisation. Press Flat or Hier button to recover. Please report a bug.");
+   }
    _corrupted |= (!iresult);
    return _corrupted;
 }
