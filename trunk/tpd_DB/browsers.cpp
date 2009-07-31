@@ -78,6 +78,7 @@ browsers::CellBrowser::CellBrowser(wxWindow *parent, wxWindowID id,
    _hierarchy_view   = true;
    _listColor        = wxColor(128,128,128);
    _editColor        = *wxBLACK;
+   _corrupted        = false;
 }
 
 void browsers::CellBrowser::initialize()
@@ -86,6 +87,8 @@ void browsers::CellBrowser::initialize()
    AddRoot(wxT("hidden_wxroot"));
    _topStructure.Unset();
    _activeStructure.Unset();
+   _dbroot.Unset();
+   _undefRoot.Unset();
 }
 
 void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
@@ -198,13 +201,14 @@ void  browsers::CellBrowser::onLMouseDblClk(wxMouseEvent& event)
 
 bool browsers::CellBrowser::findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent) 
 {
+   if (!parent.IsOk()) return false;
    wxTreeItemIdValue cookie;
    wxTreeItemId child = GetFirstChild(parent,cookie);
    while (child.IsOk())
    {
       if (item.IsOk())
       {
-         if (child == item) item = wxTreeItemId();
+         if (child == item) item.Unset(); // that's a child we've started from
       }
       else if (name == GetItemText(child))
       {
@@ -309,6 +313,7 @@ void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxStr
 void browsers::CellBrowser::collectInfo( bool hier)
 {
    initialize();
+   _corrupted = false;
    _hierarchy_view = hier;
    if(_hierarchy_view)  updateHier();
    else                 updateFlat();
@@ -574,7 +579,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             {
                wxTreeItemId hnewparent;
                // make sure that the parent exists
-               VERIFY(findItem(parentname, hnewparent, GetRootItem()));
+               if (checkCorrupted(findItem(parentname, hnewparent, GetRootItem()))) return;
                item = AppendItem(hnewparent, cellname);
                SetItemTextColour(item,GetItemTextColour(GetRootItem()));
                SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
@@ -597,7 +602,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             }
             else
             {
-               VERIFY(!findItem(cellname, item, _dbroot));
+               if (checkCorrupted(!findItem(cellname, item, _dbroot))) return;
                item = AppendItem(_dbroot, cellname);
                SetItemTextColour(item,GetItemTextColour(GetRootItem()));
                SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
@@ -609,7 +614,9 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
          if (_hierarchy_view)
          {
             wxTreeItemId newparent;
-            VERIFY(findItem(cellname, item, GetRootItem()));
+            do {
+               if (checkCorrupted(findItem(cellname, item, _dbroot))) return;
+            } while (_dbroot != GetItemParent(item));
             while (findItem(parentname, newparent, GetRootItem()))
             {
                copyItem(item,newparent);
@@ -623,7 +630,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
          if (_hierarchy_view)
          {//
             wxTreeItemId newparent;
-            VERIFY(findItem(cellname, item, GetRootItem()));
+            if (checkCorrupted(findItem(cellname, item, GetRootItem()))) return;
             while (findItem(parentname, newparent, _dbroot))
             {
                copyItem(item,newparent);
@@ -645,12 +652,12 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
                   break;
                }
             }
-            // ... and if it's not there - the undefined cells
+            // ... and if it's not there - the undefined cells            
             if ( (!linkFound) && findItem(cellname, item, _undefRoot) )
             {
                linkFound = true;
             }
-            assert(linkFound);
+            if (checkCorrupted(linkFound)) return;
             while (findItem(parentname, newparent, _dbroot))
             {
                copyItem(item,newparent);
@@ -674,7 +681,9 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
             while (findItem(parentname, newparent, GetRootItem()))
             {
                wxTreeItemId item;
-               VERIFY(findItem(cellname, item, newparent));
+               do {
+                  if (checkCorrupted(findItem(cellname, item, newparent))) return;
+               } while (newparent != GetItemParent(item));
                DeleteChildren(item);
                Delete(item);
             }
@@ -684,18 +693,27 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          if (_hierarchy_view)
          {
             wxTreeItemId item;
-            VERIFY(findItem(parentname, newparent, _dbroot));
-            VERIFY(findItem(cellname, item, newparent));
-            copyItem(item, _dbroot);
-            DeleteChildren(item);
-            Delete(item);
+            bool copied = false;
+            while (findItem(parentname, newparent, GetRootItem()))
+            {
+               do {
+                  if (checkCorrupted(findItem(cellname, item, newparent))) return;
+               } while (newparent != GetItemParent(item));
+               if (!copied)
+               {
+                  copyItem(item, _dbroot);
+                  copied = true;
+               }
+               DeleteChildren(item);
+               Delete(item);
+            }
          }
          break;
       case 3:// we are removing the cell, not it's reference
       {
          wxTreeItemId item;
          do {
-            VERIFY(findItem(cellname, item, _dbroot));
+            if (checkCorrupted(findItem(cellname, item, _dbroot))) return;
          } while (_dbroot != GetItemParent(item));
          // copy all children
          // This part is "in case". The thing is that children should have been
@@ -728,6 +746,12 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
       }
       default: assert(false);
    }
+}
+
+bool browsers::CellBrowser::checkCorrupted(bool iresult)
+{
+   _corrupted |= (!iresult);
+   return _corrupted;
 }
 
 //==============================================================================
@@ -1109,16 +1133,6 @@ browsers::XdbBrowser::XdbBrowser(   wxWindow *parent,
    thesizer->SetSizeHints( this );
 }
 
-wxString browsers::XdbBrowser::selectedCellName() const
-{
-   return _cellBrowser->selectedCellName();
-}
-
-void browsers::XdbBrowser::deleteAllItems(void)
-{
-   _cellBrowser->DeleteAllItems();
-}
-
 void browsers::XdbBrowser::onFlatView(wxCommandEvent& event)
 {
    if (!_hierarchy_view) return;
@@ -1314,7 +1328,7 @@ void browsers::addTDTtab(bool targetDB, bool newthread)
    // Traversing the entire hierarchy tree can not be done in a
    // separate thread. The main reason - when executing a script
    // that contains for example:
-   //    new("a")); addcell("b");
+   //    new("a"); addcell("b");
    // it's quite possible that cell hierarchy will be traversed
    // after the execution of the second function. The latter will
    // send treeAddMember itself - in result the browser window

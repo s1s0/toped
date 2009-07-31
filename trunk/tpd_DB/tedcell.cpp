@@ -261,7 +261,7 @@ bool laydata::tdtdefaultcell::relink(tdtlibdir*)
    return false;
 }
 
-void laydata::tdtdefaultcell::relinkThis(std::string, laydata::CellDefin, laydata::tdtdesign*)
+void laydata::tdtdefaultcell::relinkThis(std::string, laydata::CellDefin, laydata::tdtlibdir* libdir)
 {
 }
 
@@ -1953,7 +1953,7 @@ bool laydata::tdtcell::relink(laydata::tdtlibdir* libdir)
    return overlapChanged(old_overlap, (*libdir)());
 }
 
-void laydata::tdtcell::relinkThis(std::string cname, laydata::CellDefin newcelldef, laydata::tdtdesign* ATDB)
+void laydata::tdtcell::relinkThis(std::string cname, laydata::CellDefin newcelldef, laydata::tdtlibdir* libdir)
 {
    assert( _layers.end() != _layers.find(REF_LAY) );
    DBbox old_overlap(_cellOverlap);
@@ -1968,12 +1968,13 @@ void laydata::tdtcell::relinkThis(std::string cname, laydata::CellDefin newcelld
       if (cname == wcl->cellname())
       {
          refsTree->delete_this(wcl);
-         addcellref(ATDB, newcelldef, wcl->translation(), false);
+         (*libdir)()->dbHierRemoveParent(wcl->structure(), this, libdir);
+         addcellref((*libdir)(), newcelldef, wcl->translation(), false);
          _layers[REF_LAY]->validate();
       }
    }
    refsList->clear(); delete refsList;
-   invalidateParents(ATDB);
+   invalidateParents((*libdir)());
 }
 
 unsigned int laydata::tdtcell::numselected()

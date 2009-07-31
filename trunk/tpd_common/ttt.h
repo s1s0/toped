@@ -551,6 +551,7 @@ int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTr
    // returns 0 -> not much changed (the component has another parent)
    //         1 -> A DB component which is now an orphan
    //         2 -> A library component which is no more referenced in the DB
+   //         3 -> Component not found in the tree
    SGHierTree* citem;
    
    SGHierTree* cparent = lst->GetMember(prnt);
@@ -568,7 +569,7 @@ int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTr
          while ((child->brother) && (child->brother->GetItem() != comp))
             child = child->brother;
          citem = child->brother;
-         assert(citem);
+         if (NULL == citem) return 3; // means that comp is not found
          child->brother = citem->brother;
       }
       // Don't get confused here! check has nothing to do with anything. It is
