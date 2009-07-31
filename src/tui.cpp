@@ -1875,8 +1875,12 @@ USMap* tui::nameCbox3Records::getTheMap()
       else layno = DATC->getLayerNo(layname);
       assert(layno);
       std::ostringstream gdslaytype;
-      gdslaytype <<  std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8)) << ";"
-                 <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8))   ;
+      if (gds_lay_map->end() != gds_lay_map->find(layno))
+         gdslaytype << (*gds_lay_map)[layno] << ","
+                    <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8));
+      else
+         gdslaytype <<  std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8)) << ";"
+                    <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8))   ;
       (*gds_lay_map)[layno] = gdslaytype.str();
    }
    return gds_lay_map;
