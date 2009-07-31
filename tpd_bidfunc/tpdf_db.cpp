@@ -214,6 +214,8 @@ int tellstdfunc::TDTloadlib::execute()
          DATC->TEDLIB()->cleanUndefLib();
          // populating cell hierarchy browser
          browsers::addTDTtab(false, true);
+         // Clean-up eventual remainings in the themporary storage of the undefined cells
+         DATC->TEDLIB()->deleteHeldCells();
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
       else

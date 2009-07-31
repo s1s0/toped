@@ -136,6 +136,8 @@ namespace browsers
          virtual void      onItemRightClick(wxTreeEvent&);
          virtual void      onBlankRMouseUp(wxMouseEvent&);
          virtual void      onReportlay(wxCommandEvent& WXUNUSED(event)) {assert(false);}
+         bool              checkCorrupted(bool);
+         bool              _corrupted;
       private:
          typedef std::list<wxTreeItemId> LibsRoot;
          void              initialize();
@@ -201,7 +203,6 @@ namespace browsers
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
                           ~TDTbrowser();
-         void              initialize();
          wxString          selectedCellName() const;
          void              collectInfo(bool keepAct);
          CellBrowser*      cellBrowser() const        {return _cellBrowser;}
@@ -224,8 +225,8 @@ namespace browsers
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-         wxString          selectedCellName() const;
-         void              deleteAllItems(void);
+         wxString          selectedCellName() const   {return _cellBrowser->selectedCellName();}
+         void              deleteAllItems(void)       {_cellBrowser->DeleteAllItems();}
          void              collectInfo()              {_cellBrowser->collectInfo(_hierarchy_view);}
       private:
          void              onHierView(wxCommandEvent&);

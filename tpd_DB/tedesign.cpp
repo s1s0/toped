@@ -398,7 +398,7 @@ void laydata::tdtlibrary::dbHierRemoveParent(tdtdefaultcell* comp, const tdtdefa
       btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), 4);
       libdir->holdUndefinedCell(libcellX);
    }
-   else
+   else if ( 3 != res)
    {
       btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
       comp->_orphan = (res > 0);
@@ -771,8 +771,7 @@ void laydata::tdtdesign::removeRefdCell(std::string& name, CellDefList& pcells, 
    // now for every parent cell - relink all the references to cell "name"
    for (laydata::CellDefList::const_iterator CPS = pcells.begin(); CPS != pcells.end(); CPS++)
    {
-      (*CPS)->relinkThis(name, strdefn, this);
-      dbHierRemoveParent(remcl, (*CPS), libdir);
+      (*CPS)->relinkThis(name, strdefn, libdir);
    }
    // validate the cells
    do {} while(validate_cells());
