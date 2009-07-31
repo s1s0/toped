@@ -2057,7 +2057,8 @@ void laydata::tdtcell::collect_usedlays(const tdtlibdir* LTDB, bool recursive, W
          LTDB->collect_usedlays(*CC, recursive, laylist);
    // then update with the layers used in this cell
    for(layerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
-      laylist.push_back(CL->first);
+      if (LAST_EDITABLE_LAYNUM > CL->first) 
+         laylist.push_back(CL->first);
 }
 
 laydata::tdtcell::~tdtcell() 

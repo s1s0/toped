@@ -601,7 +601,10 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             {
                wxTreeItemId hnewparent;
                // make sure that the parent exists
-               if (checkCorrupted(findItem(parentname, hnewparent, GetRootItem()))) return;
+               // in this case - the parent must be a library or DB
+               do {
+                  if (checkCorrupted(findItem(parentname, hnewparent, GetRootItem()))) return;
+               } while (!isDbOrLibItem(hnewparent));
                item = AppendItem(hnewparent, cellname);
                SetItemTextColour(item,GetItemTextColour(GetRootItem()));
                SetItemImage(item,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
@@ -639,6 +642,8 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             if (checkCorrupted(findChildItem(cellname, item, _dbroot))) return;
             while (findItem(parentname, newparent, GetRootItem()))
             {
+               // in this case - the parrent should not be a library
+               if (isDbOrLibItem(newparent)) continue;
                copyItem(item,newparent);
                SortChildren(newparent);
             }
@@ -760,6 +765,16 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
       }
       default: assert(false);
    }
+}
+
+bool browsers::CellBrowser::isDbOrLibItem(const wxTreeItemId item)
+{
+   if (_dbroot.IsOk() && (_dbroot == item)) return true;
+   for (LibsRoot::const_iterator CLR = _libsRoot.begin(); CLR !=_libsRoot.end(); CLR++)
+   {
+      if (*CLR == item) return true;
+   }
+   return false;
 }
 
 bool browsers::CellBrowser::checkCorrupted(bool iresult)

@@ -425,6 +425,7 @@ int tellstdfunc::GDSimport::execute()
    {
       GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
       src_structure->collectLayers(*gdsLaysAll,true);
+      std::string gdsDbName = AGDSDB->libname();
       DATC->unlockGDS();
       LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
       if (LayerExpression.status())
@@ -438,7 +439,7 @@ int tellstdfunc::GDSimport::execute()
          {
             // create a default target data base if one is not already existing
             TpdTime timeCreated(time(NULL));
-            DATC->newDesign(name, timeCreated.stdCTime());
+            DATC->newDesign(gdsDbName, timeCreated.stdCTime());
             ATDB = DATC->lockDB(false);
             ATDB->btreeAddMember    = &browsers::treeAddMember;
             ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
@@ -448,7 +449,7 @@ int tellstdfunc::GDSimport::execute()
             while (!UNDOPstack.empty()) {
                delete UNDOPstack.front(); UNDOPstack.pop_front();
             }
-            LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << timeCreated() <<
+            LogFile << LogFile.getFN() << "(\""<< gdsDbName << "\" , \"" << timeCreated() <<
                   "\");"; LogFile.flush();
          }
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
@@ -499,6 +500,7 @@ int tellstdfunc::GDSimportList::execute()
    GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
    GDSin::GdsFile* AGDSDB = DATC->lockGDS();
       AGDSDB->collectLayers(*gdsLaysAll);
+      std::string gdsDbName = AGDSDB->libname();
    DATC->unlockGDS();
    LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
@@ -509,7 +511,7 @@ int tellstdfunc::GDSimportList::execute()
       {
          // create a default target data base if one is not already existing
          TpdTime timeCreated(time(NULL));
-         DATC->newDesign(top_cells.front(), timeCreated.stdCTime());
+         DATC->newDesign(gdsDbName, timeCreated.stdCTime());
          ATDB = DATC->lockDB(false);
          ATDB->btreeAddMember    = &browsers::treeAddMember;
          ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
@@ -519,7 +521,7 @@ int tellstdfunc::GDSimportList::execute()
          while (!UNDOPstack.empty()) {
             delete UNDOPstack.front(); UNDOPstack.pop_front();
          }
-         LogFile << LogFile.getFN() << "(\""<< top_cells.front() << "\" , \"" << timeCreated() <<
+         LogFile << LogFile.getFN() << "(\""<< gdsDbName << "\" , \"" << timeCreated() <<
                "\");"; LogFile.flush();
       }
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
@@ -719,7 +721,7 @@ int tellstdfunc::stdREPORTLAY::execute() {
    bool recursive = getBoolValue();
    std::string cellname = getStringValue();
    WordList ull;
-   DATC->lockDB();
+   DATC->lockDB(false);
       bool success = DATC->TEDLIB()->collect_usedlays(cellname, recursive, ull);
    DATC->unlockDB();
    telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);

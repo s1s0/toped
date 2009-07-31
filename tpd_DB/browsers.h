@@ -151,6 +151,7 @@ namespace browsers
          void              tdtCellSpot(const wxTreeItemId&, const wxTreeItemId&);
          void              onTellAddCell(wxString, wxString, int);
          void              onTellRemoveCell(wxString, wxString, int);
+         bool              isDbOrLibItem(const wxTreeItemId);
          wxTreeItemId      _topStructure;
          wxTreeItemId      _activeStructure;
          wxTreeItemId      _dbroot; // The actual Root always invisible (because of the libraries)
