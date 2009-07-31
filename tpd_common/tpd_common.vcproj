@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="8,00"
 	Name="tpd_common"
 	ProjectGUID="{1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB}"
 	RootNamespace="tpd_common"
-	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
