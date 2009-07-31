@@ -431,7 +431,26 @@ int tellstdfunc::GDSimport::execute()
       {
          nameList top_cells;
          top_cells.push_back(name);
-         DATC->lockDB(false);
+
+         laydata::tdtdesign* ATDB;
+         try {ATDB = DATC->lockDB(false);}
+         catch (EXPTN) 
+         {
+            // create a default target data base if one is not already existing
+            TpdTime timeCreated(time(NULL));
+            DATC->newDesign(name, timeCreated.stdCTime());
+            ATDB = DATC->lockDB(false);
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+            browsers::addTDTtab(true, false);
+            // reset UNDO buffers;
+            UNDOcmdQ.clear();
+            while (!UNDOPstack.empty()) {
+               delete UNDOPstack.front(); UNDOPstack.pop_front();
+            }
+            LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << timeCreated() <<
+                  "\");"; LogFile.flush();
+         }
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
          DATC->unlockDB();
@@ -484,7 +503,25 @@ int tellstdfunc::GDSimportList::execute()
    LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
    {
-      DATC->lockDB(false);
+      laydata::tdtdesign* ATDB;
+      try {ATDB = DATC->lockDB(false);}
+      catch (EXPTN) 
+      {
+         // create a default target data base if one is not already existing
+         TpdTime timeCreated(time(NULL));
+         DATC->newDesign(top_cells.front(), timeCreated.stdCTime());
+         ATDB = DATC->lockDB(false);
+         ATDB->btreeAddMember    = &browsers::treeAddMember;
+         ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+         browsers::addTDTtab(true, false);
+         // reset UNDO buffers;
+         UNDOcmdQ.clear();
+         while (!UNDOPstack.empty()) {
+            delete UNDOPstack.front(); UNDOPstack.pop_front();
+         }
+         LogFile << LogFile.getFN() << "(\""<< top_cells.front() << "\" , \"" << timeCreated() <<
+               "\");"; LogFile.flush();
+      }
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
          updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
       DATC->unlockDB();
