@@ -122,7 +122,8 @@ namespace browsers
                               long style = wxTR_DEFAULT_STYLE);
          virtual          ~CellBrowser()  {};
          virtual  void     showMenu(wxTreeItemId id, const wxPoint& pt);
-         bool              findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent);
+         bool              findItem(const wxString, wxTreeItemId&, const wxTreeItemId);
+         bool              findChildItem(const wxString, wxTreeItemId&, const wxTreeItemId);
          void              copyItem(const wxTreeItemId, const wxTreeItemId, bool targetLib = true);
          void              highlightChildren(wxTreeItemId, wxColour);
          wxString          selectedCellName();

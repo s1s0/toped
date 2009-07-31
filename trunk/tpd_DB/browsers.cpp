@@ -198,7 +198,7 @@ void  browsers::CellBrowser::onLMouseDblClk(wxMouseEvent& event)
    else
       event.Skip();
 }
-
+/*! Search for a tree item &name starting form the &parent. Returns true if the &item is found*/
 bool browsers::CellBrowser::findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent) 
 {
    if (!parent.IsOk()) return false;
@@ -215,6 +215,28 @@ bool browsers::CellBrowser::findItem(const wxString name, wxTreeItemId& item, co
          item = child; return true;
       }
       if (findItem(name, item, child)) return true;
+      child = GetNextChild(parent,cookie);
+   }
+   return false;
+}
+
+/*! Search for a tree item &name which is a child (not grand child!) of the &parent. Returns true
+if such item is found*/
+bool browsers::CellBrowser::findChildItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent) 
+{
+   if (!parent.IsOk()) return false;
+   wxTreeItemIdValue cookie;
+   wxTreeItemId child = GetFirstChild(parent,cookie);
+   while (child.IsOk())
+   {
+      if (item.IsOk())
+      {
+         if (child == item) item.Unset(); // that's a child we've started from
+      }
+      else if (name == GetItemText(child))
+      {
+         item = child; return true;
+      }
       child = GetNextChild(parent,cookie);
    }
    return false;
@@ -614,9 +636,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
          if (_hierarchy_view)
          {
             wxTreeItemId newparent;
-            do {
-               if (checkCorrupted(findItem(cellname, item, _dbroot))) return;
-            } while (_dbroot != GetItemParent(item));
+            if (checkCorrupted(findChildItem(cellname, item, _dbroot))) return;
             while (findItem(parentname, newparent, GetRootItem()))
             {
                copyItem(item,newparent);
@@ -681,9 +701,7 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
             while (findItem(parentname, newparent, GetRootItem()))
             {
                wxTreeItemId item;
-               do {
-                  if (checkCorrupted(findItem(cellname, item, newparent))) return;
-               } while (newparent != GetItemParent(item));
+               if (checkCorrupted(findChildItem(cellname, item, newparent))) return;
                DeleteChildren(item);
                Delete(item);
             }
@@ -696,9 +714,7 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
             bool copied = false;
             while (findItem(parentname, newparent, GetRootItem()))
             {
-               do {
-                  if (checkCorrupted(findItem(cellname, item, newparent))) return;
-               } while (newparent != GetItemParent(item));
+               if (checkCorrupted(findChildItem(cellname, item, newparent))) return;
                if (!copied)
                {
                   copyItem(item, _dbroot);
@@ -712,9 +728,7 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
       case 3:// we are removing the cell, not it's reference
       {
          wxTreeItemId item;
-         do {
-            if (checkCorrupted(findItem(cellname, item, _dbroot))) return;
-         } while (_dbroot != GetItemParent(item));
+         if (checkCorrupted(findChildItem(cellname, item, _dbroot))) return;
          // copy all children
          // This part is "in case". The thing is that children should have been
          // removed already, by tdtcell::removePrep
