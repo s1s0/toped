@@ -1239,10 +1239,6 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
 {
-   // Here - try a hollow lock/unlock the database just to check that it exists
-   try {DATC->lockDB(false);}
-   catch (EXPTN) {return;}
-   DATC->unlockDB();
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
                      wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF|All files(*.*)|*.*"),
                          tpdfOPEN);
