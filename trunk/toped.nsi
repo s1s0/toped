@@ -50,14 +50,24 @@ Section "toped"
   File "authors"
   File "news.txt"
   File "readme.txt"
+  File "glew32.dll"
 
   SetOutPath $INSTDIR\tll
-  File "tll\seed.tll"
-  File "tll\laylogic.tll"
-  File "tll\tcase.tll"
-  ;File "tll\structures.tll"
+  File "tll\arccheck.tll"
   File "tll\checklists.tll"
+  File "tll\cif_reader.tll"
+  File "tll\cif_writer.tll"
+  File "tll\gds_types.tll"
+  File "tll\laylogic.tll"
   File "tll\prop.tll"
+  File "tll\resize.tll"
+  File "tll\seed.tll"
+  ;File "tll\structures.tll"
+  File "tll\tcase.tll"
+
+
+
+
 
   ;icons
   SetOutPath $INSTDIR\icons
@@ -238,13 +248,21 @@ Section "Uninstall"
   Delete $INSTDIR\news.txt
   Delete $INSTDIR\readme.txt
   Delete $INSTDIR\authors
+  Delete $INSTDIR\glew32.dll
 
-  Delete $INSTDIR\tll\seed.tll
-  Delete $INSTDIR\tll\laylogic.tll
-  Delete $INSTDIR\tll\tcase.tll
-  ;Delete $INSTDIR\tll\structures.tll
+  Delete $INSTDIR\tll\arccheck.tll
   Delete $INSTDIR\tll\checklists.tll
+  Delete $INSTDIR\tll\cif_reader.tll
+  Delete $INSTDIR\tll\cif_writer.tll
+  Delete $INSTDIR\tll\gds_types.tll
+  Delete $INSTDIR\tll\laylogic.tll
   Delete $INSTDIR\tll\prop.tll
+  Delete $INSTDIR\tll\resize.tll
+  Delete $INSTDIR\tll\seed.tll
+  ;Delete $INSTDIR\tll\structures.tll
+  Delete $INSTDIR\tll\tcase.tll
+
+
 
   Delete $INSTDIR\fonts\arial1.glf
   Delete $INSTDIR\fonts\courier1.glf
