@@ -603,9 +603,9 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    // actualize the number of points entered
    _numpoints++;
    // If there is nothing else to wait ... call end of mouse input
-   if ( (_numpoints == 1) && ((telldata::tn_pnt == puc->wait4type()) ||
-                              (telldata::tn_bnd == puc->wait4type())   )
-     || (_numpoints == 2) &&  (telldata::tn_box == puc->wait4type())    )
+   if (((_numpoints == 1) && ((telldata::tn_pnt == puc->wait4type()) ||
+                              (telldata::tn_bnd == puc->wait4type())   ))
+   ||  ((_numpoints == 2) &&  (telldata::tn_box == puc->wait4type())   ))
       mouseRB();
 }
 
