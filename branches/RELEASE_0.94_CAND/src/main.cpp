@@ -591,7 +591,7 @@ bool TopedApp::OnInit() {
          }
       }
    }
-   tell_log(console::MT_WARNING,"Please report a bugs to toped-development@lists.berlios.de or bugs@toped.org.uk");
+   tell_log(console::MT_WARNING,"Please submit your bug reports to toped-development@lists.berlios.de or bugs@toped.org.uk");
    return TRUE;
 }
 
