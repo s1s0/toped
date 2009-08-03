@@ -208,6 +208,18 @@ class EXPTNpolyCross : public EXPTN
       EXPTNpolyCross(std::string);
 };
 
+class EXPTNtell_parser : public EXPTN
+{
+   public:
+      EXPTNtell_parser(std::string);
+};
+
+class EXPTNcif_parser : public EXPTN
+{
+   public:
+      EXPTNcif_parser(std::string);
+};
+
 bool        expandFileName(std::string&);
 std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile

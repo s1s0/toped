@@ -234,7 +234,7 @@ namespace tui {
       void		OnVToolBarSize48(wxCommandEvent& WXUNUSED(event));
 
 
-		void OnEditLayer(wxCommandEvent&);
+      void OnEditLayer(wxCommandEvent&);
       void OnDefineLayer(wxCommandEvent&);
       void OnDefineColor(wxCommandEvent& WXUNUSED(event));
       void  OnDefineFill(wxCommandEvent& WXUNUSED(event));

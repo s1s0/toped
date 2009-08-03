@@ -591,7 +591,17 @@ bool TopedApp::OnInit() {
          }
       }
    }
-   tell_log(console::MT_WARNING,"Please report a bugs to toped-development@lists.berlios.de or bugs@toped.org.uk");
+   if (render_type)
+   {
+      tell_log(console::MT_INFO,"...using VBO rendering");
+   }
+   else
+   {
+      tell_log(console::MT_WARNING,"OpenGL version 1.4 is not supported");
+      tell_log(console::MT_INFO,"...Using basic rendering");
+   }
+   tell_log(console::MT_INFO,"Toped loaded.");
+   tell_log(console::MT_WARNING,"Please submit your feedback to feedback@toped.org.uk");
    return TRUE;
 }
 
