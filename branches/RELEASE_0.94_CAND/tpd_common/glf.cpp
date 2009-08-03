@@ -1524,14 +1524,14 @@ int glfLoadBMFFont(char *FName)
    LEndian = LittleEndian();
 
    f = fopen(FName, "rb");
-	if (f == NULL) return {GLF_ERROR; /* Error opening file */}
+	if (f == NULL) return GLF_ERROR; /* Error opening file */
 
    /* Get header */
    fread(Header, 1, 3, f);
    Header[3] = 0;
    if (strcmp(Header, "BMF"))  		
 	{
-		fclose(Header); 
+		fclose(f); 
 		return GLF_ERROR; /* Not BMF format */
 	}
 
