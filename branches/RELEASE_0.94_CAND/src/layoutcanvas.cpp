@@ -343,8 +343,8 @@ bool tui::LayoutCanvas::initializeGL()
    if (GLEW_OK != err)
    {
       wxString errmessage(wxT("glewInit() returns an error: "));
-      std::string boza((const char*)glewGetErrorString(err));
-      errmessage << wxString(boza.c_str(), wxConvUTF8);
+      std::string glewerrstr((const char*)glewGetErrorString(err));
+      errmessage << wxString(glewerrstr.c_str(), wxConvUTF8);
       wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this, errmessage, wxT("Toped"),
                     wxOK | wxICON_ERROR);
       dlg1->ShowModal();
@@ -353,16 +353,20 @@ bool tui::LayoutCanvas::initializeGL()
    }
    else if (!glewIsSupported("GL_VERSION_1_4 GL_EXT_multi_draw_arrays"))
    {
-      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this,
+//      tell_log(console::MT_WARNING,"OpenGL version 1.4 is not supported. Using basic rendering");
+/*      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this,
             wxT("openGL version 1.4 is not supported"),
             wxT("Toped"),
             wxOK | wxICON_ERROR);
       dlg1->ShowModal();
-      dlg1->Destroy();
+      dlg1->Destroy();*/
       VBOrendering = false;
    }
-   else 
+   else
+   {
       VBOrendering = true;
+//      tell_log(console::MT_INFO,"Using VBO rendering.");
+   }
 
    //--------------------------------------------------------------------------
    if (VBOrendering)
