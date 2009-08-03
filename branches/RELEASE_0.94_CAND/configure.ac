@@ -18,6 +18,7 @@ AC_PROG_LEX
 
 CPPFLAGS="$CPPFLAGS -Wall -g -fexceptions"
 CFLAGS="$CFLAGS -Wall -g -fexceptions"
+LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
 # Checks for header files.
 AC_HEADER_STDC

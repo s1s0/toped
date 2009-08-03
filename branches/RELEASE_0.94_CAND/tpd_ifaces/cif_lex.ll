@@ -53,12 +53,14 @@ lexcif_usrsep   [ \t,]+
 #include <stdio.h>
 #include "cif_io.h"
 #include "cif_yacc.h"
+#include "../tpd_common/outbox.h"
 namespace CIFin {
    void     location_step(YYLTYPE *loc);
    void     location_lines(YYLTYPE *loc, int num);
    void     location_comment(YYLTYPE *loc, char* source);
    char*    charcopy(std::string source, bool quotes = false);
    long     getllint(char* source);
+   static void ciflex_fatal(std::string message);
 //   int      includefile(char* name, FILE* &handler);
 //   int      EOfile();
    int      cifsRemDepth = 0; // depth of comments
@@ -66,6 +68,8 @@ namespace CIFin {
 using namespace CIFin;
 extern YYLTYPE ciflloc;
 #define YY_USER_ACTION  ciflloc.last_column += yyleng;
+#define YY_FATAL_ERROR(msg)  ciflex_fatal(msg)
+
 %}
 
 /*%option debug*/
@@ -204,6 +208,12 @@ char* CIFin::charcopy(std::string source, bool quotes)
    newstr[length] = 0x00;
    return newstr;
 }
+
+static void CIFin::ciflex_fatal(std::string message)
+{
+   throw EXPTNcif_parser(message);
+}
+
 /*
       0 x y layer N name;           Set named node on specified layer and position
       0V x1 y1 x2 y2 ... xn yn;     Draw vectors

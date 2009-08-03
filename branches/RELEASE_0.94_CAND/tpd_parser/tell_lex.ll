@@ -50,6 +50,7 @@ extern console::ted_cmd*           Console;
 Function declarations
 *****************************************************************************/
 #define YY_USER_ACTION  telllloc.last_column += yyleng;
+#define YY_FATAL_ERROR(msg)  parsercmd::telllex_fatal(msg)
 namespace parsercmd {
    void     location_step(YYLTYPE *loc);
    void     location_lines(YYLTYPE *loc, int num);
@@ -58,6 +59,7 @@ namespace parsercmd {
    unsigned getllint(char* source);
    int      includefile(char* name, FILE* &handler);
    int      EOfile();
+   static void telllex_fatal(std::string);
 }
 using namespace parsercmd;
 extern YYLTYPE telllloc;
@@ -278,6 +280,12 @@ int parsercmd::EOfile()
    }
   return 0;
 }
+
+static void parsercmd::telllex_fatal(std::string message)
+{
+   throw EXPTNtell_parser(message);
+}
+
 /*
 "."[Pp]"1"               { telllval.parsestr = parsercmd::charcopy("1");return tknFIELD;}
 "."[Pp]"2"               { telllval.parsestr = parsercmd::charcopy("2");return tknFIELD;}

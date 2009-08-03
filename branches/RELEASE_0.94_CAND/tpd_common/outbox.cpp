@@ -50,11 +50,11 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_CURSOR , 10009)
     DECLARE_EVENT_TYPE(wxEVT_CONSOLE_PARSE , 10010)
     DECLARE_EVENT_TYPE(wxEVT_CURRENT_LAYER , 10011)
-	 DECLARE_EVENT_TYPE(wxEVT_TOOLBARSIZE	 , 10012)
-	 DECLARE_EVENT_TYPE(wxEVT_TOOLBARDEF	 , 10013)
-	 DECLARE_EVENT_TYPE(wxEVT_TOOLBARADDITEM, 10014)
-	 DECLARE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM, 10015)
- 	 DECLARE_EVENT_TYPE(wxEVT_EDITLAYER, 10016)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARSIZE	 , 10012)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARDEF	 , 10013)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARADDITEM, 10014)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM, 10015)
+    DECLARE_EVENT_TYPE(wxEVT_EDITLAYER     , 10016)
 
 END_DECLARE_EVENT_TYPES()
 
@@ -451,6 +451,18 @@ EXPTNreadGDS::EXPTNreadGDS(std::string info) {
 
 EXPTNpolyCross::EXPTNpolyCross(std::string info) {
    std::string news = "Internal error - polygon cross =>";
+   news += info;
+   tell_log(console::MT_ERROR,news);
+};
+
+EXPTNtell_parser::EXPTNtell_parser(std::string info) {
+   std::string news = "TELL parser fatal error =>";
+   news += info;
+   tell_log(console::MT_ERROR,news);
+};
+
+EXPTNcif_parser::EXPTNcif_parser(std::string info) {
+   std::string news = "CIF parser fatal error =>";
    news += info;
    tell_log(console::MT_ERROR,news);
 };
