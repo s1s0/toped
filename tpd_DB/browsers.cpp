@@ -51,7 +51,6 @@
 
 
 extern DataCenter*               DATC;
-extern tui::TopedFrame*				Toped;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
 extern const wxEventType         wxEVT_EDITLAYER;
@@ -1482,9 +1481,9 @@ BEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
    //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
    EVT_LEFT_DOWN  (LayerButton::onLeftClick  )
    EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
-	EVT_RIGHT_DOWN(LayerButton::onRightClick)
+   EVT_RIGHT_DOWN(LayerButton::onRightClick)
    EVT_PAINT      (LayerButton::onPaint      )
-	EVT_MENU( LAYERCURRENTEDIT				,LayerButton::OnEditLayer )
+   EVT_MENU( LAYERCURRENTEDIT,LayerButton::OnEditLayer )
 
 END_EVENT_TABLE()
 //====================================================================
@@ -1724,17 +1723,20 @@ void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 
 void	 browsers::LayerButton::onRightClick(wxMouseEvent& evt)
 {
-	wxMenu menu;
-	menu.Append(LAYERCURRENTEDIT, wxT("Edit layer...")); //if selected call LayerButton::OnEditLayer tui::TMLAY_EDIT
+   wxMenu menu;
+   menu.Append(LAYERCURRENTEDIT, wxT("Edit layer...")); //if selected call LayerButton::OnEditLayer tui::TMLAY_EDIT
    PopupMenu(&menu);
 }
 
-void			browsers::LayerButton::OnEditLayer(wxCommandEvent&)
+void  browsers::LayerButton::OnEditLayer(wxCommandEvent&)
 {
-	wxCommandEvent eventEditLayer(wxEVT_EDITLAYER);
+   wxCommandEvent eventEditLayer(wxEVT_EDITLAYER);
 
-	eventEditLayer.SetInt(_layer->layno());
-	wxPostEvent(Toped, eventEditLayer);
+   eventEditLayer.SetInt(_layer->layno());
+   // This is supposed to work according to the wx documentation, but compiler
+   // says ... not a member of wxWindow ...
+   //ProcessWindowEvent(eventEditLayer);
+   GetEventHandler()->ProcessEvent(eventEditLayer);
 }
 
 

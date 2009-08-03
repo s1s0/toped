@@ -256,8 +256,20 @@ CIFin::CifFile::CifFile(std::string filename)
    ciflloc.first_column = ciflloc.first_line = 1;
    ciflloc.last_column  = ciflloc.last_line  = 1;
 /*   cifdebug = 1;*/
-   cifparse();
-   delete_cif_lex_buffer( b );
+   try {
+      // Note! the EXPTNcif_parser exception can be thrown from the
+      // lexer, but only after a call from the parser
+      cifparse();
+      delete_cif_lex_buffer( b );
+   }
+   catch (EXPTNcif_parser)
+   {
+      // Not sure we can make something here.flex has thrown an exception
+      // but it could be the file system or dynamic memory
+      //@TODO check for available dynamic memory
+      // see the same comment ted_prompt:307
+      cifnerrs++;
+   }
    if (cifnerrs > 0) _status = cfs_ERR;
    else              _status = cfs_POK;
    closeFile();
