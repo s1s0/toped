@@ -215,6 +215,7 @@ static int ReadFont(const char *font_name, struct glf_font *glff)
    {
       /* If header is not "GLF" */
       if (console_msg) printf("Error reading font file: incorrect file format\n");
+		fclose(fontf);
       return GLF_ERROR;
    }
 
@@ -242,6 +243,7 @@ static int ReadFont(const char *font_name, struct glf_font *glff)
       if (glff->symbols[code] != NULL)
       {
          if (console_msg) printf("Error reading font file: encountered symbols in font\n");
+			fclose(fontf);
          return GLF_ERROR;
       }
 
@@ -1522,12 +1524,16 @@ int glfLoadBMFFont(char *FName)
    LEndian = LittleEndian();
 
    f = fopen(FName, "rb");
-   if (f == NULL) return GLF_ERROR; /* Error opening file */
+	if (f == NULL) return {GLF_ERROR; /* Error opening file */}
 
    /* Get header */
    fread(Header, 1, 3, f);
    Header[3] = 0;
-   if (strcmp(Header, "BMF")) return GLF_ERROR; /* Not BMF format */
+   if (strcmp(Header, "BMF"))  		
+	{
+		fclose(Header); 
+		return GLF_ERROR; /* Not BMF format */
+	}
 
    /* Get font name */
    fread(FontName, 1, 96, f);
