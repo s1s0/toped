@@ -1142,8 +1142,8 @@ void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent& WXUNUSED(event))
       //Save first the targa header and then - the data
       fwrite(&tHdr, sizeof(TargaHeader), 1, tFile);
       fwrite(theImage, imgSize, 1, tFile);
-      fclose(tFile);
    }
+	fclose(tFile);
    delete[] theImage;
 }
 
