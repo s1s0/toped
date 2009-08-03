@@ -1,0 +1,18 @@
+
+TOPED - VLSI Layout Editor
+-------------------------------
+
+Toped is a cross-platform open source project licensed under the GNU General Public License
+
+usage:
+
+   toped <tll_command_file>
+
+For further information:
+http://www.toped.org.uk
+https://developer.berlios.de/projects/toped/
+
+Mailing list: toped-development@lists.berlios.de (requires subscription)
+Mail: skr@toped.org.uk
+
+
