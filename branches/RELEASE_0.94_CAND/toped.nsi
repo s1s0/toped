@@ -12,7 +12,7 @@
 Name "toped"
 
 ; The file to write
-OutFile "toped_install-09RC.exe"
+OutFile "toped_install-0.94RC.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\toped
@@ -51,6 +51,7 @@ Section "toped"
   File "news.txt"
   File "readme.txt"
   File "glew32.dll"
+  File "virtuoso2tll.exe"
 
   SetOutPath $INSTDIR\tll
   File "tll\arccheck.tll"
@@ -249,6 +250,7 @@ Section "Uninstall"
   Delete $INSTDIR\readme.txt
   Delete $INSTDIR\authors
   Delete $INSTDIR\glew32.dll
+  Delete $INSTDIR\virtuoso2tll.exe
 
   Delete $INSTDIR\tll\arccheck.tll
   Delete $INSTDIR\tll\checklists.tll

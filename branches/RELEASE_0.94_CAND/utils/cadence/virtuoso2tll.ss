@@ -1,5 +1,5 @@
 (module virtuoso2tll scheme
-  (require "cadence.ss")
+  (require "cadence.ss" )
   (define input-list (vector->list (current-command-line-arguments)))
   (cond ((or (empty? input-list)
              (< (length input-list) 3)) (begin
@@ -9,5 +9,5 @@
                                (newline)))
         (else (convert input-list)))
   
- 
+  (read-char)
   )
