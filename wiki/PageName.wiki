@@ -6,7 +6,7 @@
 ----
 =Toped CIF interface= 
 
-[http://en.wikipedia.org/wiki/Caltech_Intermediate_Form Caltech Intermediate form] (CIF) is a low level graphics language for specifying the geometry of integrated circuits. Toped CIF interface is written to comply with CIF 2.0 definition as described in "[http://ai.eecs.umich.edu/people/conway/VLSI/ImplGuide2/ImplGuide2ndEd.html A Guide to LSI implementation, Second Edition]" by Robert W. Hon and Carlo H.Sequin. The format seem to be naturally exposed to different interpretation and user expansion which could be a reason for bitter troubles with the data transfers between the tools. This page describes in more details the CIF parser and generator as implemented in [http://www.toped.org.uk/trm_ifaces.html#CIF Toped]. The [http://svn.berlios.de/wsvn/toped/trunk/tpd_ifaces/#_trunk_tpd_ifaces_ latest source code] itself can be browsed online using WebSVN interface.
+[http://en.wikipedia.org/wiki/Caltech_Intermediate_Form Caltech Intermediate form] (CIF) is a low level graphics language for specifying the geometry of integrated circuits. Toped CIF interface is written to comply with CIF 2.0 definition as described in "[http://ai.eecs.umich.edu/people/conway/VLSI/ImplGuide2/ImplGuide2ndEd.html A Guide to LSI implementation, Second Edition]" by Robert W. Hon and Carlo H.Sequin. The format seem to be naturally exposed to different interpretation and user expansion which could be a reason for bitter troubles with the data transfers between the tools. This page describes in more details the CIF parser and generator as implemented in [http://www.toped.org.uk/trm_ifaces.html#CIF Toped]. The [http://code.google.com/p/toped/source/browse/trunk/tpd_ifaces/cif_io.cpp latest source code] itself can be browsed on-line.
 ----
 
 ==The CIF parser== 
@@ -78,7 +78,7 @@ Note that user extensions are the only possibility to transfer text objects. Thi
 
 ===Translations=== 
 The translation of the most of the data is trivial. Here are the exceptions.
- * Cells - If the cell name is not stated using the user extension command, the cell name is generated using the simple scheme 'cell<ID>'
+ * Cells - If the cell name is not stated using the user extension command, the cell name is generated using the simple scheme cell`<ID>`
  * Layers - [http://www.toped.org.uk/trm_ifaces.html#getciflaymap Layer maps] has to be used during the translation in both directions
 <span style="display: block; color: rgb(175, 248, 182); background-color: rgb(33, 28, 28); text-align: center;"> </span>
 ===What is not translated=== 
