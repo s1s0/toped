@@ -1,9 +1,8 @@
-<span style="color: rgb(77, 77, 77);"> </span>
-<span style="color: rgb(77, 77, 77); text-align: right; display: block;">**Disclaimer:** All quoted or linked documents below are (c) Copyright of their respective owners. This article is not an authoritative description neither of the CIF format nor of its user extensions
+<p align=right>*Disclaimer:* All quoted or linked documents below are (c) Copyright of their respective owners. This article is not an authoritative description neither of the CIF format nor of its user extensions
+</p>
 
-</span>
-===<span style="color: rgb(77, 77, 77); text-align: right; display: block;"> </span><span style="text-align: right; display: block;">09/11/2008</span>=== 
-<span style="background-color: rgb(217, 217, 217);"> </span>
+<p align=right> *09/11/2008* </p>
+
 ----
 =Toped CIF interface= 
 
@@ -79,7 +78,7 @@ Note that user extensions are the only possibility to transfer text objects. Thi
 
 ===Translations=== 
 The translation of the most of the data is trivial. Here are the exceptions.
- * Cells - If the cell name is not stated using the user extension command, the cell name is generated using the simple scheme cell\<ID\>
+ * Cells - If the cell name is not stated using the user extension command, the cell name is generated using the simple scheme 'cell<ID>'
  * Layers - [http://www.toped.org.uk/trm_ifaces.html#getciflaymap Layer maps] has to be used during the translation in both directions
 <span style="display: block; color: rgb(175, 248, 182); background-color: rgb(33, 28, 28); text-align: center;"> </span>
 ===What is not translated=== 
