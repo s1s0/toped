@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(toped, 0.9.x)
+AC_INIT(toped, 0.9.4)
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.cpp])
@@ -18,6 +18,7 @@ AC_PROG_LEX
 
 CPPFLAGS="$CPPFLAGS -Wall -g -fexceptions"
 CFLAGS="$CFLAGS -Wall -g -fexceptions"
+LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
 # Checks for header files.
 AC_HEADER_STDC

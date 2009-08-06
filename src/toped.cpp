@@ -317,10 +317,10 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)
    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
-	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,	 wxID_ANY, tui::TopedFrame::OnToolBarDefine)
-	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM, wxID_ANY, tui::TopedFrame::OnToolBarAddItem)
-	EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
-	EVT_TECUSTOM_COMMAND( wxEVT_EDITLAYER,	wxID_ANY, tui::TopedFrame::OnEditLayer )
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,	 wxID_ANY, tui::TopedFrame::OnToolBarDefine)
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM, wxID_ANY, tui::TopedFrame::OnToolBarAddItem)
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
+   EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER, wxID_ANY, tui::TopedFrame::OnEditLayer )
    EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
 END_EVENT_TABLE()
 
@@ -858,11 +858,11 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutDialogInfo info;
     info.SetName(wxT("Toped"));
-    info.SetVersion(wxT("0.9.x"));
+    info.SetVersion(wxT("0.9.4"));
     info.SetIcon(wxIcon( toped32x32_xpm ));
     info.SetWebSite(wxT("www.toped.org.uk"));
     info.SetDescription(wxT("Open source IC layout editor"));
-    info.SetCopyright(wxT("(C) 2001-2008 Toped developers"));
+    info.SetCopyright(wxT("(C) 2001-2009 Toped developers"));
 
     wxAboutBox(info);
 }
@@ -1142,8 +1142,8 @@ void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent& WXUNUSED(event))
       //Save first the targa header and then - the data
       fwrite(&tHdr, sizeof(TargaHeader), 1, tFile);
       fwrite(theImage, imgSize, 1, tFile);
-      fclose(tFile);
    }
+	fclose(tFile);
    delete[] theImage;
 }
 

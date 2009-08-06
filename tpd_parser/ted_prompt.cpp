@@ -296,10 +296,18 @@ void* console::parse_thread::Entry()
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
-   void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
    StatusBusy(command);
-   tellparse();
-   delete_tell_lex_buffer( b );
+   try {
+      void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
+      tellparse();
+      delete_tell_lex_buffer( b );
+   }
+   catch (EXPTNtell_parser)
+   {
+      // Not sure we can make something here.flex has thrown an exception
+      // but it could be the file system or dynamic memory
+      //@TODO check for available dynamic memory 
+   }
 
    _mutex.Unlock();
    if (Console->canvas_invalid())
@@ -390,9 +398,18 @@ void console::ted_cmd::getCommand(bool thread)
          telllloc.first_column = telllloc.first_line = 1;
          telllloc.last_column  = telllloc.last_line  = 1;
          telllloc.filename = NULL;
-         void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
-         tellparse();
-         delete_tell_lex_buffer( b );
+         try {
+            void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
+            tellparse();
+            delete_tell_lex_buffer( b );
+         }
+         catch (EXPTNtell_parser)
+         {
+            // Not sure we can make something here.flex has thrown an exception
+            // but it could be the file system or dynamic memory
+            //@TODO check for available dynamic memory
+            // see the same comment @line 307
+         }
       }
       else
          spawnParseThread(command);
@@ -603,9 +620,9 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    // actualize the number of points entered
    _numpoints++;
    // If there is nothing else to wait ... call end of mouse input
-   if ( (_numpoints == 1) && ((telldata::tn_pnt == puc->wait4type()) ||
-                              (telldata::tn_bnd == puc->wait4type())   )
-     || (_numpoints == 2) &&  (telldata::tn_box == puc->wait4type())    )
+   if (((_numpoints == 1) && ((telldata::tn_pnt == puc->wait4type()) ||
+                              (telldata::tn_bnd == puc->wait4type())   ))
+   ||  ((_numpoints == 2) &&  (telldata::tn_box == puc->wait4type())   ))
       mouseRB();
 }
 

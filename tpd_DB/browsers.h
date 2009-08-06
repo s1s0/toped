@@ -97,8 +97,8 @@ namespace browsers
       LAYERSHOWSELECTED       ,
       LAYERLOCKSELECTED       ,
       LAYERUNLOCKSELECTED     ,
-      LAYERCURRENTSELECTED		,
-		LAYERCURRENTEDIT
+      LAYERCURRENTSELECTED    ,
+      LAYERCURRENTEDIT
    };
 
    // all browser icons
