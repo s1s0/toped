@@ -11,13 +11,13 @@
 ----
 
 ==The CIF parser== 
-The parser is implemented using [[http://dinosaur.compilertools.net/flex/index.html|flex]] and [[http://www.gnu.org/software/bison/bison.html|bison]]. The formal syntax in //Wirt// notation as given in the quoted paper is given below. Some important features of the CIF syntax:
+The parser is implemented using [http://dinosaur.compilertools.net/flex/index.html flex] and [http://www.gnu.org/software/bison/bison.html bison]. The formal syntax in //Wirt// notation as given in the quoted paper is given below. Some important features of the CIF syntax:
 * CIF uses **key characters** instead of key words
 * CIF doesn't define a separator, it defines **blank** instead. In more relaxed terms **blank** is everything that is not a key character or meaningful token in the current context. This is one of the features that effectively introduces //CIF slangs//. As defined in the paper //" ... syntax allows blanks before and after commands, and blanks or other kinds of separators (almost any character) before integers etc."//
 * As an opposite to GDSII, CIF defines layer identificators as strings and cell identificators as unsigned integers.
 
 ===Formal syntax=== 
-[[code]]
+{{{
 cifFile              = {{blank} [command] semi} endCommand {blank}.
 
 command              = primCommand | defDeleteCommand |
@@ -60,7 +60,7 @@ userChar             = any ASCII character except ";".
 commentChar          = any ASCII character except "(" or ")".
 
 
-[[code]]
+}}}
 
 ===CIF user extensions=== 
 I couldn't find an authoritative description of the CIF user extensions. The [[http://en.wikipedia.org/wiki/Caltech_Intermediate_Form|wikipedia]] describes informally some of them. Generally the same description can be found also [[http://www.rulabinsky.com/cavd/text/chapb.html|here]]. Some of the user extensions are used effectively in all foreign CIF files. The user extensions implemented currently in Toped are formally described below in the same terms as the original syntax.
