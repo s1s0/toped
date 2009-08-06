@@ -62,11 +62,11 @@ void glfClose();
 
 /* Font loading/unloading functions */
 int   glfLoadFont(const char *font_name);      /* Load Vector font to memory */
-int   glfLoadBMFFont(char *FName);            /* Load Bitmap font to memory */
+//int   glfLoadBMFFont(char *FName);            /* Load Bitmap font to memory */
 int   glfUnloadFont();                        /* Unload font from memory */
-int   glfUnloadBMFFont();                     /* Unload current BMF font */
+//int   glfUnloadBMFFont();                     /* Unload current BMF font */
 int   glfUnloadFontD(int font_descriptor);   /* Unload font by font_descriptor */
-int   glfUnloadBMFFontD(int bmf_descriptor);   /* Unload BMF font by bmf_descriptor */
+//int   glfUnloadBMFFontD(int bmf_descriptor);   /* Unload BMF font by bmf_descriptor */
 
 /* Text drawing functions */
 /* --------- Vector Fonts ---------------- */
@@ -82,12 +82,12 @@ void glfDraw3DSolidSymbol(char s);        /* Draw 3D solid symbol */
 void glfDraw3DSolidString(char *s);       /* Draw 3D solid string */
 
 /* --------- Bitmap Fonts ---------------- */
-void glfStartBitmapDrawing();       /* Must be called before bitmap text drawing */
-void glfStopBitmapDrawing();        /* Must be called after bitmap text drawing */
-void glfDrawBSymbol(char s);        /* Draw one symbol by bitmapped font */
-void glfDrawBString(char *s);       /* Draw string by bitmapped font */
-void glfDrawBMaskSymbol(char s);      /* Draw one symbol by bitmapped font (using mask) */
-void glfDrawBMaskString(char *s);   /* Draw string by bitmapped font (using mask) */
+// void glfStartBitmapDrawing();       /* Must be called before bitmap text drawing */
+// void glfStopBitmapDrawing();        /* Must be called after bitmap text drawing */
+// void glfDrawBSymbol(char s);        /* Draw one symbol by bitmapped font */
+// void glfDrawBString(char *s);       /* Draw string by bitmapped font */
+// void glfDrawBMaskSymbol(char s);      /* Draw one symbol by bitmapped font (using mask) */
+// void glfDrawBMaskString(char *s);   /* Draw string by bitmapped font (using mask) */
 
 
 /* Text drawing functions by specified font */
@@ -113,9 +113,9 @@ void  glfSetSymbolDepth(float dpth); /* Set depth of 3D symbol */
 float glfGetSymbolDepth();           /* Get depth of 3D symbol */
 
 int   glfSetCurrentFont(int Font_Descriptor);      /* Set current font */
-int   glfSetCurrentBMFFont(int Font_Descriptor);   /* Set current bitmap font */
+//int   glfSetCurrentBMFFont(int Font_Descriptor);   /* Set current bitmap font */
 int   glfGetCurrentFont();                     /* Get current font descriptor */
-int   glfGetCurrentBMFFont();                      /* Get current bitmap font descriptor */
+//int   glfGetCurrentBMFFont();                      /* Get current bitmap font descriptor */
 
 void  glfSetAnchorPoint(int anchp); /* Set symbol anchor point */
 void  glfSetContourColor(float r, float g, float b, float a); /* Contour color */
