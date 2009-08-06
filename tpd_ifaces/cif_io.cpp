@@ -458,7 +458,7 @@ CIFin::CifExportFile::CifExportFile(std::string fn, USMap* laymap, bool verbose)
    TpdTime timec(time(NULL));
 
    _file << "(              CIF   2.0       );"    << std::endl;
-   _file << "(        generator : Toped 0.9.4 );"  << std::endl;
+   _file << "(        generator : Toped 0.9.x );"  << std::endl;
    _file << "(             user : tbd );"          << std::endl;
    _file << "(          machine : tbd );"          << std::endl;
    _file << "(       time stamp : " << timec() << ");" << std::endl;
