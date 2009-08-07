@@ -1,3 +1,5 @@
+#summary Formal description of the CIF interface implemented in Toped
+
 <p align=right>*Disclaimer:* All quoted or linked documents below are (c) Copyright of their respective owners. This article is not an authoritative description neither of the CIF format nor of its user extensions
 </p>
 
