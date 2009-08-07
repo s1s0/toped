@@ -1,4 +1,4 @@
-#Troubles with the stipple patterns in Mesa & some ATI
+#summary Troubles with the stipple patterns in Mesa & some ATI
 
 ==Stipple Patterns using Mesa==
 
