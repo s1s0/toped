@@ -1,0 +1,7 @@
+==Stipple Patterns using Mesa==
+
+It was reported that under Linux Toped fill patterns doesn't work with ATI graphic cards of [http://en.wikipedia.org/wiki/Radeon_R300 R300] family. The problem was identified to be in the [http://dri.freedesktop.org/wiki/R300 DRI] driver and [http://www.mail-archive.com/dri-devel@lists.sourceforge.net/msg36502.html reported] to the developers. Unfortunately it is highly unlikely that this driver functionality will be implemented as it was explained [http://www.mail-archive.com/dri-devel@lists.sourceforge.net/msg36508.html here].
+
+The alternative is to use [http://ati.amd.com/support/drivers/linux/linux-radeon.html ATI driver].
+
+The list of potentially affected graphic cards can be found [http://en.wikipedia.org/wiki/Comparison_of_ATI_Graphics_Processing_Units#Radeon_R300_.289xxx.2C_X10xx.29_series here]
