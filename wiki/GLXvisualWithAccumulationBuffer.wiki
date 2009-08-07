@@ -1,7 +1,8 @@
 #summary GLX visual with accumulation buffers on Fedora 9
 
  
-<p align=right>08/10/2008</p>
+<p align=right> *08/10/2008*
+</p>
 ----
 =Toped on Fedora 9= 
 
