@@ -181,18 +181,6 @@
 (define (find-in-object-list lst elem-name)
   (find-in-list (lambda (elem) (string=? ((elem 'get-name)) elem-name)) lst))
   
-;replace-zero-number  
-;input layer - layer that number is equal 0
-;Warning -function modify global variable layer-list
-;Find unused number begining 0 and replace 0 to finded one
-(define (replace-zero-number layer)
-  (define (find-free-number number)
-    (if (eq? null (find-in-list (lambda (elem) (eq? ((elem 'get-number)) number)) layer-list))
-        number
-        (find-free-number (+ number 1))
-        ))
-
-   ((layer 'set-number!) (find-free-number 100)))
 
 ;****************GLOBAL VARIABLES AND FUNCTIONS*******************
 (define packet-list  '())
@@ -434,10 +422,7 @@
                      (let* ((name ((layer 'get-name)))
                            (packet-name ((layer 'get-packet)))
                            (packet (find-in-object-list packet-list packet-name)))
-                         (cond ((eq? ((layer 'get-number)) 0) 
-                             (replace-zero-number layer))
-                             )
-                         (if (not (eq? packet null))
+                       (if (not (eq? packet null))
                            (let* ((number (number->string((layer 'get-number))))
                                   (colour ((packet 'get-fill)))
                                   (stipple ((packet 'get-stipple))))
