@@ -2281,7 +2281,7 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
 		str.Append(wxT("virtuoso2tll.exe "));
 #else
       str.Append(wxT("utils/cadence/"));
-      str.Append(wxT("virtuoso2tll.exe "));
+      str.Append(wxT("virtuoso2tll.ss "));
 #endif
 
 		//prepare command line arguments 
