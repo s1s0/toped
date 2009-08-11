@@ -307,6 +307,21 @@ unsigned layprop::ViewProperties::addlayer(std::string name)
    return layno;
 }
 
+bool layprop::ViewProperties::isLayerExist(word layno)
+{
+	bool b = (_drawprop._layset.end() != _drawprop._layset.find(layno));
+	return (_drawprop._layset.end() != _drawprop._layset.find(layno));
+}
+
+bool layprop::ViewProperties::isLayerExist(std::string layname)
+{
+	for(laySetList::const_iterator it = _drawprop._layset.begin(); it != _drawprop._layset.end(); ++it)
+	{
+		if((*it).second->name() == layname) return true;
+	}
+	return false;
+}
+
 void layprop::ViewProperties::addUnpublishedLay(word layno)
 {
    _uplaylist.push_back(layno);
@@ -361,11 +376,34 @@ void  layprop::ViewProperties::lockLayer(unsigned layno, bool lock) {
    if (_drawprop._layset.end() != _drawprop._layset.find(layno))
       _drawprop._layset[layno]->_locked = lock;
 }
+const WordList layprop::ViewProperties::getLockedLayers(void)
+{
+	//drawprop._layset
+	WordList lockedLayers;
+	laySetList::const_iterator it;
+	for(  it = _drawprop._layset.begin(); it != _drawprop._layset.end(); ++it)
+	{
+		if((*it).second->locked()) lockedLayers.push_back((*it).first);
+	}
+	return lockedLayers;
+}
 
 void  layprop::ViewProperties::fillLayer(unsigned layno, bool fill) {
    // No error messages here, because of possible range use
    if (_drawprop._layset.end() != _drawprop._layset.find(layno))
       _drawprop._layset[layno]->fillLayer(fill);
+}
+
+const WordList layprop::ViewProperties::getAllLayers(void)
+{
+	//drawprop._layset
+	WordList listLayers;
+	laySetList::const_iterator it;
+	for(  it = _drawprop._layset.begin(); it != _drawprop._layset.end(); ++it)
+	{
+		listLayers.push_back((*it).first);
+	}
+	return listLayers;
 }
 
 const layprop::LayoutGrid* layprop::ViewProperties::grid(byte No) const {

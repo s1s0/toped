@@ -31,9 +31,11 @@
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_DB/browsers.h"
+#include "../tpd_ifaces/calbr_reader.h"
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
+extern Calbr::CalbrFile*			DRCData;
 
 //=============================================================================
 tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype, bool eor) :
@@ -1265,3 +1267,53 @@ int tellstdfunc::CIFsetlaymap::execute()
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::DRCCalibreimport::execute() {
+   std::string filename = getStringValue();
+	if(DRCData) 
+	{
+	}
+	else
+	{
+		DRCData = DEBUG_NEW Calbr::CalbrFile(filename);
+
+		if(DRCData->isOk())
+		{
+			//Check existance of "drcResults" layer
+			if(!DATC->isLayerExist("drcResults"))
+			{
+				//Find free layer
+				int i;
+				for(i = 10000; i <=20000; i++)
+				{
+					if (!DATC->isLayerExist(i))
+					{
+						DATC->addlayer("drcResults", i);
+						browsers::layer_add("drcResults",i);
+						break;
+					}
+				}
+				if (i>20000)
+				{
+					std::string message = "Can't create drcError layer";
+					tell_log(console::MT_ERROR,message);
+					return EXEC_NEXT;
+				}
+			}
+			//DRCData->ShowResults();
+			// add DRC tab in the browser
+         browsers::addDRCtab();
+		}
+		else
+		{
+			delete DRCData;
+		}
+	}
+   return EXEC_NEXT;
+}

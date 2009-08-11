@@ -49,11 +49,14 @@
 #include "../tpd_ifaces/gds_io.h"
 #include "../tpd_ifaces/cif_io.h"
 
-
+extern tui::TopedFrame*          Toped;
 extern DataCenter*               DATC;
+extern Calbr::CalbrFile*			DRCData;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
 extern const wxEventType         wxEVT_EDITLAYER;
+extern const wxEventType         wxEVT_CANVAS_ZOOM;
+
 
 browsers::browserTAB*     Browsers = NULL;
 
@@ -1215,8 +1218,8 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
 
    _gdsStruct = NULL;
    _cifStruct = NULL;
+	 _drcStruct = NULL;
    _tellParser = NULL;
-
    Browsers = this;
 }
 
@@ -1253,6 +1256,8 @@ void browsers::browserTAB::onCommand(wxCommandEvent& event)
       case BT_CLEARGDS_TAB:onTellClearGdsTab(); break;
       case BT_ADDCIF_TAB:onTellAddCifTab();break;
       case BT_CLEARCIF_TAB:onTellClearCifTab(); break;
+		case BT_ADDDRC_TAB:onTellAddDRCTab();break;
+      case BT_CLEARDRC_TAB:onTellClearDRCTab(); break;
       default: event.Skip();
    }
 }
@@ -1307,6 +1312,28 @@ void browsers::browserTAB::onTellClearCifTab()
       _cifStruct = NULL;
    }
 }
+
+void browsers::browserTAB::onTellAddDRCTab()
+{
+	if (NULL == _drcStruct)
+   {
+      _drcStruct = DEBUG_NEW DRCBrowser(this, tui::ID_DRC_CELLTREE);
+      AddPage(_drcStruct, wxT("DRC results"));
+   }
+}
+
+void browsers::browserTAB::onTellClearDRCTab()
+{
+	if (_drcStruct)
+   {
+     int _drcPageIndex = GetPageIndex(_drcStruct);
+      assert(wxNOT_FOUND != _drcPageIndex);
+      _drcStruct->deleteAllItems();
+      DeletePage(_drcPageIndex);
+      _drcStruct = NULL;
+   }
+}
+
 //==============================================================================
 void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool status) 
 {
@@ -1389,6 +1416,14 @@ void browsers::addCIFtab()
    wxPostEvent(Browsers, eventADDTAB);
 }
 
+void browsers::addDRCtab()
+{
+   assert(Browsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(BT_ADDDRC_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
+}
+
 void browsers::clearGDStab() 
 {
    assert(Browsers);
@@ -1405,6 +1440,13 @@ void browsers::clearCIFtab()
    wxPostEvent(Browsers, eventADDTAB);
 }
 
+void browsers::clearDRCtab()
+{
+   assert(Browsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(BT_CLEARDRC_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
+}
 void browsers::celltree_open(const std::string cname) 
 {
    assert(Browsers);
@@ -2023,3 +2065,229 @@ wxString browsers::LayerBrowser::getAllSelected()
    return _layerPanel->getAllSelected();
 }
 
+//====================================================================
+BEGIN_EVENT_TABLE(browsers::ErrorBrowser, wxTreeCtrl)
+   EVT_LEFT_DCLICK(browsers::ErrorBrowser::onLMouseDblClk)
+END_EVENT_TABLE()
+//====================================================================
+browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id, 
+                              const wxPoint& pos, 
+                              const wxSize& size,
+										long style):
+							wxTreeCtrl(parent, id, pos, size, style |wxTR_HIDE_ROOT| wxTR_FULL_ROW_HIGHLIGHT )
+{
+}
+
+/*void	browsers::ErrorBrowser::saveInfo(const Calbr::drcPolygon &poly)
+{
+	_poly = poly;
+	_polyError = true;
+}
+
+void	browsers::ErrorBrowser::saveInfo(const Calbr::drcEdge &edge)
+{
+	_edge = edge;
+	_edgeError = true;
+}*/
+
+void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
+{
+	int flags;
+   wxPoint pt = event.GetPosition();
+   wxTreeItemId id = HitTest(pt, flags);
+   if (id.IsOk() &&(flags & wxTREE_HITTEST_ONITEMLABEL))
+   {
+		if (ItemHasChildren(id))
+		{
+			if(IsExpanded(id)) Expand(id); else Collapse(id);
+		}
+		else
+		{
+			//laydata::tdtdesign* _ATDB = DATC->lockDB();
+				wxString numstr = GetItemText(id);
+				long number;
+				numstr.ToLong(&number);
+
+				wxTreeItemId parent = GetItemParent(id);
+				std::string error(GetItemText(parent).mb_str(wxConvUTF8));
+			
+				DRCData->ShowError(error, number);
+				word drcLayer = DATC->getLayerNo("drcResults");
+				assert(drcLayer);
+//				DBbox* box;
+
+			/*	if(_polyError)
+				{
+					_poly.showError(_ATDB, drcLayer);
+					//define boundary of polygon
+					int4b maxx, maxy, minx, miny;
+					maxx = _poly.coords()->begin()->x();
+					minx = _poly.coords()->begin()->x();
+					maxy = _poly.coords()->begin()->y();
+					miny = _poly.coords()->begin()->y();
+					for(pointlist::const_iterator it = _poly.coords()->begin(); it!= _poly.coords()->end(); ++it)
+					{
+						
+						maxx = std::max((*it).x(), maxx);
+						maxy = std::max((*it).y(), maxy);
+						minx = std::min((*it).x(), minx);
+						miny = std::min((*it).y(), miny);
+					}
+					box = DEBUG_NEW DBbox(TP(minx, miny), TP(maxx, maxy));
+				}
+			
+				if(_edgeError)
+				{
+					_edge.showError(_ATDB, drcLayer);
+					//define boundary of edge
+
+					box = DEBUG_NEW DBbox(TP(_edge.coords()->x1, _edge.coords()->y1), 
+						TP(_edge.coords()->x2, _edge.coords()->y2));
+					
+				}
+				DATC->unlockDB();
+
+				wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+				eventZOOM.SetInt(tui::ZOOM_WINDOW);
+				eventZOOM.SetClientData(static_cast<void*>(box));
+				
+				wxPostEvent(Toped->view(), eventZOOM);
+
+				delete box;*/
+				/*telldata::ttpnt *p1;// = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+				telldata::ttpnt *p2;// = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+				real DBscale = DATC->DBscale();
+				DBbox* box = DEBUG_NEW DBbox(TP(p1->x(), p1->y(), DBscale), 
+                          TP(p2->x(), p2->y(), DBscale));
+				wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+				eventZOOM.SetInt(tui::ZOOM_WINDOW);
+				eventZOOM.SetClientData(static_cast<void*>(box));
+				
+				wxPostEvent(Toped->view(), eventZOOM);*/
+			
+		}
+   }
+   else
+      event.Skip();
+}
+
+//====================================================================
+BEGIN_EVENT_TABLE(browsers::DRCBrowser, wxPanel)
+   EVT_BUTTON(BT_DRC_SHOW_ALL, browsers::DRCBrowser::onShowAll)
+   EVT_BUTTON(BT_DRC_HIDE_ALL, browsers::DRCBrowser::onHideAll)
+END_EVENT_TABLE()
+//====================================================================
+//====================================================================
+browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
+	:wxPanel(parent, id, wxDefaultPosition, wxDefaultSize)
+{
+	wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *sizer1   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   _showAllButton = DEBUG_NEW wxButton( this, BT_DRC_SHOW_ALL, wxT("Show All") );
+   _hideAllButton = DEBUG_NEW wxButton( this, BT_DRC_HIDE_ALL, wxT("Hide All") );
+   //Set bold font for _hierButton
+
+   sizer1->Add(_showAllButton, 1, wxEXPAND|wxBOTTOM, 3);
+   sizer1->Add(_hideAllButton, 1, wxEXPAND|wxBOTTOM, 3);
+	_errorBrowser = DEBUG_NEW ErrorBrowser(this);  
+   thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
+   thesizer->Add(_errorBrowser, 1, wxEXPAND | wxBOTTOM);
+
+
+		SetSizerAndFit(thesizer);
+		Calbr::RuleChecksVector* errors = DRCData->Results();
+		_errorBrowser->AddRoot(wxT("hidden_wxroot"));
+		for(Calbr::RuleChecksVector::const_iterator it = errors->begin();it < errors->end(); ++it)
+		{
+			std::string name = (*it)->ruleCheckName();
+			wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(name.c_str(), wxConvUTF8));
+			std::vector <Calbr::drcPolygon>::iterator it2;
+			std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
+
+			//Save polygons
+			long sz = polys->size();
+			for(long i = 1; i <= sz; i++)
+			{
+				wxString str;
+				str.Printf(wxT("%d"), i);
+				_errorBrowser->AppendItem(id, str);
+//				_errorBrowser->saveInfo(polys->at(i-1));
+
+			}
+
+			//Save Edges
+			std::vector <Calbr::drcEdge> *edges = (*it)->edges();
+			sz = edges->size();
+			for(long i = 1; i <= sz; i++)
+			{
+				wxString str;
+				str.Printf(wxT("%d"), i);
+				_errorBrowser->AppendItem(id, str);
+//				_errorBrowser->saveInfo(edges->at(i-1));
+
+			}
+
+		}
+		
+}
+
+browsers::DRCBrowser::~DRCBrowser()
+{
+}
+
+void browsers::DRCBrowser::deleteAllItems(void)
+{
+	_errorBrowser->DeleteAllItems();
+}
+
+void	browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
+{
+	DRCData->ShowResults();
+	//Refresh
+	wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   eventZOOM.SetInt(tui::ZOOM_REFRESH);
+   wxPostEvent( Toped->view(), eventZOOM);
+}
+
+void	browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
+{
+	laydata::tdtdesign* design = DATC->lockDB();
+	WordList lockedLayers = DATC->getLockedLayers();
+	//Lock all layers
+	WordList allLayers = DATC->getAllLayers();
+	for(WordList::const_iterator it = allLayers.begin(); it!= allLayers.end(); ++it)
+	{
+		DATC->lockLayer((*it), true);
+	}
+
+	//unlock only drcResults layer
+	word drcLayerNo = DATC->getLayerNo("drcResults");
+	DATC->lockLayer(drcLayerNo, false);
+   design->select_all();
+
+	//delete selected
+	laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
+
+	design->delete_selected(sh_delist, DATC->TEDLIB());
+	tellstdfunc::clean_atticlist(sh_delist); delete sh_delist;
+
+
+	//UnLock all layers
+	for(WordList::const_iterator it = allLayers.begin(); it!= allLayers.end(); ++it)
+	{
+		DATC->lockLayer((*it), false);
+	}
+
+	//Lock only stored layers
+
+	for(WordList::const_iterator it = lockedLayers.begin(); it!= lockedLayers.end(); ++it)
+	{
+		DATC->lockLayer((*it), true);
+	}
+
+	//Refresh
+	wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   eventZOOM.SetInt(tui::ZOOM_REFRESH);
+   wxPostEvent( Toped->view(), eventZOOM);
+
+}
