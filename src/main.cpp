@@ -610,11 +610,11 @@ bool TopedApp::OnInit() {
 }
 
 int TopedApp::OnExit() {
-	if (DRCData)
-	{
-		delete DRCData;
-	}
-	delete CMDBlock; 
+   if (DRCData)
+   {
+      delete DRCData;
+   }
+   delete CMDBlock; 
    delete DATC;
 
    FinishSessionLog();
