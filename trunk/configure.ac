@@ -93,5 +93,6 @@ AC_CONFIG_FILES([
    ui/Makefile
    icons/Makefile
 ])
+#   utils/cadence/Makefile
 
 AC_OUTPUT
