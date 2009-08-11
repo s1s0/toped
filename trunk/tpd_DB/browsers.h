@@ -38,6 +38,9 @@
 #include <wx/aui/aui.h>
 #include <string>
 #include "tedesign.h"
+#include "../tpd_ifaces/calbr_reader.h"
+#include "../tpd_ifaces/gds_io.h"
+#include "../tpd_ifaces/cif_io.h"
 
 // Forward declarations
 
@@ -77,10 +80,14 @@ namespace browsers
       BT_CLEARGDS_TAB,
       BT_ADDCIF_TAB,
       BT_CLEARCIF_TAB,
+		BT_ADDDRC_TAB,
+		BT_CLEARDRC_TAB,
       BT_CELLS_HIER,
       BT_CELLS_FLAT,
       BT_CELLS_HIER2,
       BT_CELLS_FLAT2,
+		BT_DRC_SHOW_ALL,
+		BT_DRC_HIDE_ALL,
       BT_LAYER_SELECT,
       BT_LAYER_SHOW_ALL,
       BT_LAYER_HIDE_ALL,
@@ -335,6 +342,39 @@ namespace browsers
          wxBoxSizer*          _thesizer;
          DECLARE_EVENT_TABLE();
    };
+ //===========================================================================
+   class ErrorBrowser: public wxTreeCtrl 
+	{
+   public:
+                           ErrorBrowser(wxWindow* parent, wxWindowID id = -1, 
+                              const wxPoint& pos = wxDefaultPosition, 
+                              const wxSize& size = wxDefaultSize,
+                              long style = wxTR_DEFAULT_STYLE);
+//	   void	               saveInfo(const Calbr::drcPolygon &poly);
+//		void	               saveInfo(const Calbr::drcEdge &edge);
+		void						onLMouseDblClk(wxMouseEvent&);
+	private:
+		/*Calbr::drcPolygon		_poly;
+		bool						_polyError;
+		Calbr::drcEdge 		_edge;
+		bool						_edgeError;*/
+		DECLARE_EVENT_TABLE();
+	};
+
+  //===========================================================================
+   class DRCBrowser : public wxPanel {
+	public:
+										DRCBrowser(wxWindow* parent, wxWindowID id);
+		virtual						~DRCBrowser();
+		void							deleteAllItems(void);
+		void							onShowAll(wxCommandEvent&);
+		void							onHideAll(wxCommandEvent&);
+	private:
+		ErrorBrowser*				_errorBrowser;
+		wxButton*					_showAllButton;
+		wxButton*					_hideAllButton;
+		DECLARE_EVENT_TABLE();
+	};
 
    //===========================================================================
    class browserTAB : public wxAuiNotebook {
@@ -358,9 +398,12 @@ namespace browsers
          void                 onTellClearGdsTab();
          void                 onTellAddCifTab();
          void                 onTellClearCifTab();
+			void                 onTellAddDRCTab();
+         void                 onTellClearDRCTab();
          XdbBrowser*         _gdsStruct;
          XdbBrowser*         _cifStruct;
          TDTbrowser*         _tdtStruct;
+			DRCBrowser*			  _drcStruct;
          int                 _gdsPageIndex;
          int                 _cifPageIndex;
          LayerBrowser*       _layers;
@@ -374,8 +417,10 @@ namespace browsers
    void addTDTtab(bool, bool newthread);
    void addGDStab();
    void addCIFtab();
+	void addDRCtab();
    void clearGDStab();
    void clearCIFtab();
+	void clearDRCtab();
    void celltree_open(const std::string);
    void celltree_highlight(const std::string);
    void treeAddMember(const char*, const char*, int action = 0);

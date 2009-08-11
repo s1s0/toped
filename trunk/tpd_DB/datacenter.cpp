@@ -1239,6 +1239,14 @@ word DataCenter::addlayer(std::string name)
    PROPLock.Unlock();
    return layno;
 }
+bool	DataCenter::isLayerExist(word layno)
+{
+	return _properties.isLayerExist(layno);
+}
+bool	DataCenter::isLayerExist(std::string layname)
+{
+	return _properties.isLayerExist(layname);
+}
 
 void DataCenter::addline(std::string name, std::string col, word pattern,
                                       byte patscale, byte width)

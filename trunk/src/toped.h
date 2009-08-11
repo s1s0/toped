@@ -38,6 +38,7 @@
 #include "resourcecenter.h"
 #include "../tpd_DB/browsers.h"
 
+
 namespace tui {
    //-----------------------------------------------------------------------------
    class CanvasStatus : public wxPanel {
@@ -132,7 +133,7 @@ namespace tui {
 		wxMenu*						toolbarHorSizeMenu;
       wxMenu*                 gdsMenu;
       wxMenu*                 helpMenu;
-
+		
       // Sash layout stuff
       //wxControl*    mS_browsers;
 //      wxWindow*     mS_GLstatus;
@@ -262,9 +263,9 @@ namespace tui {
 		void		OnToolBarDefine	(wxCommandEvent& evt);
 		void		OnToolBarAddItem	(wxCommandEvent& evt);
 		void		OnToolBarDeleteItem(wxCommandEvent& evt);
-
 		void		editLayerDlg(word layno);
-      DECLARE_EVENT_TABLE();
+		void		OnDRCResults(wxCommandEvent& evt);
+		DECLARE_EVENT_TABLE();
    };
 
 }

@@ -640,7 +640,7 @@ real polyarea(const pointlist& shape)
    return area;
 }
 
-//! Gratest common denominator
+//! Greatest common denominator
 unsigned GCD(unsigned arg1, unsigned arg2)
 {
    if (arg1 < arg2)

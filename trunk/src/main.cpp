@@ -38,6 +38,8 @@
 #include "toped.h"
 #include "../tpd_DB/viewprop.h"
 #include "../tpd_DB/datacenter.h"
+#include "../tpd_ifaces/calbr_reader.h"
+#include "../tpd_common/glf.h"
 
 #include "../tpd_bidfunc/tellibin.h"
 #include "../tpd_bidfunc/tpdf_db.h"
@@ -55,6 +57,7 @@ extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 extern console::TELLFuncList*    CmdList;
+extern Calbr::CalbrFile*			DRCData;
 
 //-----------------------------------------------------------------------------
 
@@ -140,6 +143,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("gdsclose"         ,(DEBUG_NEW                    tellstdfunc::GDSclose(telldata::tn_void, true)));
    mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW        tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_hsh), true)));
    mblock->addFUNC("setgdslaymap"     ,(DEBUG_NEW                tellstdfunc::GDSsetlaymap(telldata::tn_void, true)));
+   mblock->addFUNC("drccalibreimport" ,(DEBUG_NEW          tellstdfunc::DRCCalibreimport(telldata::tn_string, true)));
    mblock->addFUNC("psexport"         ,(DEBUG_NEW                 tellstdfunc::PSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                     tellstdfunc::TDTread(telldata::tn_void, true)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                  tellstdfunc::TDTreadIFF(telldata::tn_void, true)));
@@ -606,8 +610,13 @@ bool TopedApp::OnInit() {
 }
 
 int TopedApp::OnExit() {
-   delete CMDBlock; 
+	if (DRCData)
+	{
+		delete DRCData;
+	}
+	delete CMDBlock; 
    delete DATC;
+
    FinishSessionLog();
    return wxApp::OnExit();
 }

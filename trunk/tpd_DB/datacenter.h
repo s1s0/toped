@@ -141,6 +141,8 @@ public:
    bool                       addlayer(std::string, word);
    bool                       addlayer(word layno);
    word                       addlayer(std::string);
+	bool								isLayerExist(word);
+	bool								isLayerExist(std::string);
    void                       addline(std::string, std::string, word, byte, byte);
    void                       addcolor(std::string, byte, byte, byte, byte);
    void                       addfill(std::string, byte*);
@@ -173,6 +175,8 @@ public:
    byte                       marker_angle() const    {return _properties.marker_angle();}
    bool                       layerHidden(word layno) {return _properties.drawprop().layerHidden(layno);}
    bool                       layerLocked(word layno) {return _properties.drawprop().layerLocked(layno);}
+	const WordList					getAllLayers(void)		{return _properties.getAllLayers();};
+	const WordList					getLockedLayers(void)	{return _properties.getLockedLayers();};
    bool                       grid_visual(word no)    {return grid(no)->visual();}
    void                       setautopan(bool status) {_properties.setautopan(status);}
    void                       setZeroCross(bool status) {_properties.setZeroCross(status);}
