@@ -92,6 +92,7 @@ AC_CONFIG_FILES([
    fonts/Makefile
    ui/Makefile
    icons/Makefile
+   utils/cadence/Makefile
 ])
 
 AC_OUTPUT
