@@ -77,7 +77,7 @@ AC_SEARCH_LIBS(glewInit, [GLEW glew32], , AC_MSG_ERROR([Glew library not found. 
  fi
 
 #Check for wx gl library and for wx threads
-#...
+#
 
 
 AC_CONFIG_FILES([
@@ -92,7 +92,6 @@ AC_CONFIG_FILES([
    fonts/Makefile
    ui/Makefile
    icons/Makefile
+   utils/cadence/Makefile
 ])
-#   utils/cadence/Makefile
-
 AC_OUTPUT

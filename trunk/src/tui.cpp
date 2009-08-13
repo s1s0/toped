@@ -2281,18 +2281,18 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
 		str.Append(wxT("virtuoso2tll.exe "));
 #else
       str.Append(wxT("utils/cadence/"));
-      str.Append(wxT("virtuoso2tll.exe "));
+      str.Append(wxT("virtuoso2tll.ss "));
 #endif
 
 		//prepare command line arguments 
-		wxString strtemp = _outputFile->GetValue();
-		str.Append(strtemp);
-		str.Append(wxT(" "));
-		str.Append(_displayList->GetValue());
-		str.Append(wxT(" "));
-		str.Append(_techList->GetValue());
-		//Replace all slashes to double slashes
-		str.Replace(wxT("\\") , wxT("\\\\"), true);
+      wxString strtemp = _outputFile->GetValue();
+      str.Append(strtemp);
+      str.Append(wxT(" "));
+      str.Append(_displayList->GetValue());
+      str.Append(wxT(" "));
+      str.Append(_techList->GetValue());
+      //Replace all slashes to double slashes
+      str.Replace(wxT("\\") , wxT("\\\\"), true);
       tell_log(console::MT_INFO, str);
       wxExecute(str);
 	}
