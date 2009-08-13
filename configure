@@ -19483,7 +19483,7 @@ $as_echo "$as_me: error:
 #...
 
 
-ac_config_files="$ac_config_files Makefile tpd_common/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile tpd_DB/Makefile tpd_ifaces/Makefile src/Makefile tll/Makefile fonts/Makefile ui/Makefile icons/Makefile"
+ac_config_files="$ac_config_files Makefile tpd_common/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile tpd_DB/Makefile tpd_ifaces/Makefile src/Makefile tll/Makefile fonts/Makefile ui/Makefile icons/Makefile utils/cadence/Makefile"
 
 #   utils/cadence/Makefile
 
@@ -20500,6 +20500,7 @@ do
     "fonts/Makefile") CONFIG_FILES="$CONFIG_FILES fonts/Makefile" ;;
     "ui/Makefile") CONFIG_FILES="$CONFIG_FILES ui/Makefile" ;;
     "icons/Makefile") CONFIG_FILES="$CONFIG_FILES icons/Makefile" ;;
+    "utils/cadence/Makefile") CONFIG_FILES="$CONFIG_FILES utils/cadence/Makefile" ;;
 
   *) { { $as_echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 $as_echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
