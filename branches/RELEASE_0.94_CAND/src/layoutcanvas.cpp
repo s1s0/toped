@@ -395,6 +395,7 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 //   // this is also necessary to update the context on some platforms
 //   wxGLCanvas::OnSize(event);
 //    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
+   if (!GetContext()) return;
    int w, h;
    GetClientSize(&w, &h);
 //   #ifndef __WXMOTIF__
@@ -412,9 +413,7 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 
 void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) 
 {
-   #ifndef __WXMOTIF__
-      if (!GetContext()) return;
-   #endif
+   if (!GetContext()) return;
    // invalid_window indicates zooming or refreshing after a tell operation.
    if (invalid_window)
    {
