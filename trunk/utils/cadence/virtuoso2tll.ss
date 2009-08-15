@@ -10,5 +10,5 @@
                                (newline)))
         (else (convert input-list)))
   
-  (read-char)
+  ;(read-char)
   )

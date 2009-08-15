@@ -2262,6 +2262,18 @@ void	tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
    }
 }
 
+void ShowOutput(const wxString& cmd,
+                         const wxArrayString& output,
+                         const wxString& title)
+{
+    size_t count = output.GetCount();
+    if ( !count )
+        return;
+    for ( size_t n = 0; n < count; n++ )
+    {
+		 tell_log(console::MT_INFO, output[n]);
+    }
+}
 void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
 {
 	if (_displayList->IsEmpty() || _techList->IsEmpty())
@@ -2294,6 +2306,13 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
       //Replace all slashes to double slashes
       str.Replace(wxT("\\") , wxT("\\\\"), true);
       tell_log(console::MT_INFO, str);
-      wxExecute(str);
+
+		wxArrayString output, errors;
+      int code = wxExecute(str, output, errors);
+      if ( code != -1 )
+      {
+			ShowOutput(str, output, _T("Output"));
+         ShowOutput(str, errors, _T("Errors"));
+      }
 	}
 }
