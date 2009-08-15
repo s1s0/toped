@@ -578,4 +578,10 @@ namespace tui {
    };
 
 }
+
+//Print output of external functions
+//to Toped console
+void ShowOutput(const wxString& cmd,
+                         const wxArrayString& output,
+                         const wxString& title);
 #endif
