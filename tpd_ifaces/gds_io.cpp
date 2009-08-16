@@ -36,13 +36,13 @@
 
 static GDSin::GdsFile*        InFile    = NULL;
 //==============================================================================
-GDSin::GdsRecord::GdsRecord(FILE* Gf, word rl, byte rt, byte dt)
+GDSin::GdsRecord::GdsRecord(wxFFile& Gf, word rl, byte rt, byte dt)
 {
    _recLen = rl; _recType = rt; _dataType = dt;
    if (rl)
    {
       _record = DEBUG_NEW byte[_recLen];
-      _numread = fread(_record, 1, _recLen, Gf);
+      _numread = Gf.Read(_record, _recLen);
       _valid = (_numread == _recLen) ? true : false;
    }
    else
@@ -65,10 +65,10 @@ GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl)
    _record[_index++] = _dataType;
 }
 
-word GDSin::GdsRecord::flush(FILE* Gf)
+size_t GDSin::GdsRecord::flush(wxFFile& Gf)
 {
    assert(_index == _recLen);
-   word bytes_written = fwrite(_record, 1, _recLen, Gf);
+   size_t bytes_written = Gf.Write(_record, _recLen);
    /*TODO !!! Error correction HERE instead of assertetion */
    assert(bytes_written == _recLen);
    return bytes_written;
@@ -307,23 +307,23 @@ GDSin::GdsFile::GdsFile(std::string fn)
    _prgrs_pos = 0;
    _library = NULL;
    tell_log(console::MT_INFO, std::string("GDSII input file: \"") + fn + std::string("\""));
-   std::string fname(convertString(_fileName));
-   if (!(_gdsFh = fopen(fname.c_str(),"rb")))
+   wxString wxfname(_fileName.c_str(), wxConvUTF8 );
+   _gdsFh.Open(wxfname.c_str(),wxT("rb"));
+   if (!(_gdsFh.IsOpened()))
    {// open the input file
       std::ostringstream info;
       info << "File "<< fn <<" can NOT be opened";
       tell_log(console::MT_ERROR,info.str());
       return;
    }
-//   file_length = _filelength(_gdsFh->_file);
+   wxFileOffset _fileLength = _gdsFh.Length();
    // The size of GDSII files is originaly multiple by 2048. This is
    // coming from the acient years when this format was supposed to be written 
    // on the magnetic tapes. In order to keep the tradition it's a good idea 
    // to check the file size and to issue a warning if it is not multiple on 2048.
 //   div_t divi = div(file_length,2048);
 //   if (divi.rem != 0) AddLog('W',"File size is not multiple of 2048");
-//   prgrs->SetRange32(0,file_length);// initializes progress indicator control
-//   prgrs->SetStep(1);
+   toped_status(console::TSTS_PRGRSBARON, _fileLength);
    GdsRecord* wr = NULL;
 
    do
@@ -349,8 +349,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
                //build the hierarchy tree
                _library->linkReferences();
                closeFile();// close the input stream
-//               _prgrs_pos = file_length;
-//               prgrs->SetPos(prgrs_pos); // fullfill progress indicator
+               toped_status(console::TSTS_PRGRSBAROFF);
                tell_log(console::MT_INFO, "Done");
                delete wr;
                return; // go out
@@ -365,6 +364,12 @@ GDSin::GdsFile::GdsFile(std::string fn)
    while (true);
 }
 
+void GDSin::GdsFile::closeFile()
+{
+   if (_gdsFh.IsOpened())
+      _gdsFh.Close();
+}
+
 GDSin::GdsFile::GdsFile(std::string fn, const LayerMapGds* laymap, time_t acctime)
 {
    InFile = this;_hierTree = NULL;
@@ -375,8 +380,10 @@ GDSin::GdsFile::GdsFile(std::string fn, const LayerMapGds* laymap, time_t acctim
    _streamVersion = 3;
    _library = NULL;
    _prgrs_pos = 0;
-   std::string fname(convertString(_fileName));
-   if (!(_gdsFh = fopen(fname.c_str(),"wb")))
+
+   wxString wxfname(_fileName.c_str(), wxConvUTF8 );
+   _gdsFh.Open(wxfname.c_str(),wxT("wb"));
+   if (!(_gdsFh.IsOpened()))
    {// open the output file
       std::ostringstream info;
       info << "File "<< fn <<" can NOT be opened";
@@ -458,7 +465,7 @@ void GDSin::GdsFile::setTimes(GdsRecord* wr) {
 GDSin::GdsRecord* GDSin::GdsFile::getNextRecord()
 {
    char recheader[4]; // record header
-   unsigned numread = fread(&recheader,1,4,_gdsFh);// read record header
+   size_t numread = _gdsFh.Read(&recheader,4);// read record header
    if (numread != 4)
       return NULL;// error during read in
    char rl[2];
@@ -470,6 +477,7 @@ GDSin::GdsRecord* GDSin::GdsFile::getNextRecord()
    if (2048 < (_filePos - _prgrs_pos))
    {
       _prgrs_pos = _filePos;
+      toped_status(console::TSTS_PROGRESS, _prgrs_pos);
 //      prgrs->SetPos(prgrs_pos); // update progress indicator
    }
    if (retrec->valid()) return retrec;
@@ -605,7 +613,7 @@ void GDSin::GdsFile::updateLastRecord()
 {
    word num_zeroes = 2048 - (_filePos % 2048);
    byte record = 0x00;
-   word bytes_written = fwrite(&record,1, num_zeroes, _gdsFh);
+   size_t bytes_written = _gdsFh.Write(&record, num_zeroes);
    assert(bytes_written == num_zeroes);
    _filePos += bytes_written;
 }

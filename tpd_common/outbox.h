@@ -58,6 +58,7 @@ namespace console {
       TSTS_THREADWAIT   ,
       TSTS_THREADOFF    ,
       TSTS_PRGRSBARON   ,
+      TSTS_PROGRESS     ,
       TSTS_PRGRSBAROFF
    }TOPEDSTATUS_TYPE;
 
@@ -152,20 +153,20 @@ namespace console {
    void TellFnSort();
 
    //===========================================================================
-   class TopedStatus : public wxStatusBar
-   {
+   class TopedStatus : public wxStatusBar {
    public:
                            TopedStatus(wxWindow*);
       virtual             ~TopedStatus(){};
 
       // event handlers
-      void OnTopedStatus(wxCommandEvent& evt);
-      void OnThreadON(wxString);
-      void OnThreadWait();
-      void OnThreadOFF();
-      void OnSize(wxSizeEvent& event);
-      void OnInitGauge();
-
+      void                 OnTopedStatus(wxCommandEvent& evt);
+      void                 OnThreadON(wxString);
+      void                 OnThreadWait();
+      void                 OnThreadOFF();
+      void                 OnSize(wxSizeEvent& event);
+      void                 OnInitGauge(long int);
+      void                 OnGaugeRun(long int);
+      void                 OnCloseGauge();
    private:
       wxStaticBitmap*      _lamp;
       wxGauge*             _progress;

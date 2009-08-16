@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
+#include <wx/ffile.h>
 #include "../tpd_common/ttt.h"
 
 //GDS data types
@@ -154,10 +155,10 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsRecord {
       public:
-                           GdsRecord(FILE* Gf, word rl, byte rt, byte dt);
+                           GdsRecord(wxFFile& Gf, word rl, byte rt, byte dt);
                            GdsRecord(byte rt, byte dt, word rl);
          bool              retData(void* var, word curnum = 0, byte len = 0);
-         word              flush(FILE* Gf);
+         size_t            flush(wxFFile& Gf);
          void              add_int2b(const word);
          void              add_int4b(const int4b);
          void              add_real8b(const real);
@@ -175,7 +176,7 @@ namespace GDSin {
          byte              _recType;
          byte              _dataType;
          byte*             _record;
-         word              _numread;
+         size_t            _numread;
          word              _index;
    };
 
@@ -583,6 +584,7 @@ namespace GDSin {
          void                 flush(GdsRecord*);
          void                 updateLastRecord();
          bool                 getMappedLayType(word& gdslay, word& gdstype, word tdtlay);
+         void                 closeFile();
          GdsStructure*        getStructure(const std::string nm){ return _library->getStructure(nm);}
          void                 collectLayers(GdsLayers& lays)   { _library->collectLayers(lays);    }
          std::string          libname() const                  { return _library->libName();       }
@@ -590,19 +592,17 @@ namespace GDSin {
          GDSHierTree*         hierTree()                       { return _hierTree;              }
          int                  gdsiiWarnings()                  { return _gdsiiWarnings;         }
          int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;       }
-         void                 closeFile()                      { if (NULL != _gdsFh) {fclose(_gdsFh); _gdsFh = NULL;}}
          const GdsLibrary*    library() const                  { return _library;}
                               ~GdsFile();
       protected:
          void                 getTimes(GdsRecord* wr);
-         FILE*                _gdsFh;
+         wxFFile              _gdsFh;
          std::string          _fileName;
          int2b                _streamVersion;
          int2b                _libDirSize;
          std::string          _srfName;
          GdsLibrary*          _library;
-         long                 _fileLength;
-         long                 _filePos;
+         wxFileOffset         _filePos;
          GDSHierTree*         _hierTree; // Tree of instance hierarchy
          nameList             _childnames;
          int                  _gdsiiWarnings;
