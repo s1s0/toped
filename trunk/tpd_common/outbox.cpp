@@ -194,7 +194,9 @@ console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, wxID_A
 void console::TopedStatus::OnTopedStatus(wxCommandEvent& evt)
 {
    switch (evt.GetInt()) {
-      case console::TSTS_PRGRSBARON  : OnInitGauge(); break;
+      case console::TSTS_PRGRSBARON  : OnInitGauge(evt.GetExtraLong()); break;
+      case console::TSTS_PROGRESS    : OnGaugeRun(evt.GetExtraLong()); break;
+      case console::TSTS_PRGRSBAROFF : OnCloseGauge(); break;
       case console::TSTS_THREADON    : OnThreadON(evt.GetString()); break;
       case console::TSTS_THREADWAIT  : OnThreadWait(); break;
       case console::TSTS_THREADOFF   : OnThreadOFF(); break;
@@ -217,20 +219,29 @@ void console::TopedStatus::OnThreadWait()
 
 void console::TopedStatus::OnThreadOFF()
 {
+   SetStatusText(wxT("Ready..."),1);
+   _lamp->SetBitmap(wxIcon(green_lamp));
+}
+
+void console::TopedStatus::OnInitGauge(long int init_val)
+{
+    wxRect rect;
+    GetFieldRect(1, rect);
+   _progress = DEBUG_NEW wxGauge(this, wxID_ANY, init_val, wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
+}
+
+void console::TopedStatus::OnGaugeRun(long int position)
+{
+   _progress->SetValue(position);
+}
+
+void console::TopedStatus::OnCloseGauge()
+{
    if (NULL != _progress)
    {
       delete (_progress);
       _progress = NULL;
    }
-   SetStatusText(wxT("Ready..."),1);
-   _lamp->SetBitmap(wxIcon(green_lamp));
-}
-
-void console::TopedStatus::OnInitGauge()
-{
-    wxRect rect;
-    GetFieldRect(1, rect);
-   _progress = DEBUG_NEW wxGauge(this, wxID_ANY, 100, wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
 }
 
 void console::TopedStatus::OnSize(wxSizeEvent& event)
@@ -249,14 +260,6 @@ void console::TopedStatus::OnSize(wxSizeEvent& event)
 
     event.Skip();
 }
-
-// void /*DataCenter::*/initProgressBar(wxWindow* wid)
-// {
-//    wxCommandEvent eventPRGRSUPDT(wxEVT_TPDSTATUS);
-//    eventPRGRSUPDT.SetInt(console::TSTS_PRGRSBARON);
-// //   eventSTATUSUPD.SetString(wxString(sts_cmd.c_str(), wxConvUTF8));
-//    wxPostEvent(wid, eventPRGRSUPDT);
-// }
 
 void toped_status(console::TOPEDSTATUS_TYPE tstatus)
 {

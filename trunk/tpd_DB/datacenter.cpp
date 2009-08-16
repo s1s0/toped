@@ -750,7 +750,11 @@ bool DataCenter::GDSparse(std::string filename)
    {
       _GDSDB = DEBUG_NEW GDSin::GdsFile(filename);
    }
-   catch (EXPTNreadGDS) { status = false;}
+   catch (EXPTNreadGDS)
+   {
+      toped_status(console::TSTS_PRGRSBAROFF);
+      status = false;
+   }
 //   status = _GDSDB->status();
    if (status)
    {
