@@ -440,9 +440,6 @@ int tellstdfunc::GDSimport::execute()
             // create a default target data base if one is not already existing
             TpdTime timeCreated(time(NULL));
             DATC->newDesign(gdsDbName, timeCreated.stdCTime());
-            ATDB = DATC->lockDB(false);
-            ATDB->btreeAddMember    = &browsers::treeAddMember;
-            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
             browsers::addTDTtab(true, false);
             // reset UNDO buffers;
             UNDOcmdQ.clear();
@@ -451,6 +448,9 @@ int tellstdfunc::GDSimport::execute()
             }
             LogFile << LogFile.getFN() << "(\""<< gdsDbName << "\" , \"" << timeCreated() <<
                   "\");"; LogFile.flush();
+            ATDB = DATC->lockDB(false);
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
          }
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
@@ -512,9 +512,6 @@ int tellstdfunc::GDSimportList::execute()
          // create a default target data base if one is not already existing
          TpdTime timeCreated(time(NULL));
          DATC->newDesign(gdsDbName, timeCreated.stdCTime());
-         ATDB = DATC->lockDB(false);
-         ATDB->btreeAddMember    = &browsers::treeAddMember;
-         ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
          browsers::addTDTtab(true, false);
          // reset UNDO buffers;
          UNDOcmdQ.clear();
@@ -523,6 +520,9 @@ int tellstdfunc::GDSimportList::execute()
          }
          LogFile << LogFile.getFN() << "(\""<< gdsDbName << "\" , \"" << timeCreated() <<
                "\");"; LogFile.flush();
+         ATDB = DATC->lockDB(false);
+         ATDB->btreeAddMember    = &browsers::treeAddMember;
+         ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
       }
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
          updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
