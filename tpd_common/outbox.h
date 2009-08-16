@@ -54,6 +54,14 @@ namespace console {
    } LOG_TYPE;
 
    typedef enum {
+      TSTS_THREADON     ,
+      TSTS_THREADWAIT   ,
+      TSTS_THREADOFF    ,
+      TSTS_PRGRSBARON   ,
+      TSTS_PRGRSBAROFF
+   }TOPEDSTATUS_TYPE;
+
+   typedef enum {
       FT_FUNCTION_ADD  ,
       FT_FUNCTION_SORT
    } FUNCTION_BROWSER_TYPE;
@@ -101,7 +109,8 @@ namespace console {
       op_dbox           ,
       op_dwire
    } ACTIVE_OP;
-   
+
+   //===========================================================================
    class ted_log : public wxTextCtrl  {
    public: 
                         ted_log(wxWindow *parent, wxWindowID);
@@ -113,6 +122,7 @@ namespace console {
       DECLARE_EVENT_TABLE();
    };
 
+   //===========================================================================
    class ted_log_ctrl : public wxLogTextCtrl {
    public:
       ted_log_ctrl(wxTextCtrl *pTextCtrl) : wxLogTextCtrl(pTextCtrl),
@@ -141,12 +151,38 @@ namespace console {
    void TellFnAdd(const std::string, void*);
    void TellFnSort();
 
+   //===========================================================================
+   class TopedStatus : public wxStatusBar
+   {
+   public:
+                           TopedStatus(wxWindow*);
+      virtual             ~TopedStatus(){};
+
+      // event handlers
+      void OnTopedStatus(wxCommandEvent& evt);
+      void OnThreadON(wxString);
+      void OnThreadWait();
+      void OnThreadOFF();
+      void OnSize(wxSizeEvent& event);
+      void OnInitGauge();
+
+   private:
+      wxStaticBitmap*      _lamp;
+      wxGauge*             _progress;
+      DECLARE_EVENT_TABLE();
+   };
 }
 
-   void tell_log(console::LOG_TYPE, const char* = NULL);
-   void tell_log(console::LOG_TYPE, const std::string&);
-   void tell_log(console::LOG_TYPE, const wxString&);
+//===========================================================================
+void tell_log(console::LOG_TYPE, const char* = NULL);
+void tell_log(console::LOG_TYPE, const std::string&);
+void tell_log(console::LOG_TYPE, const wxString&);
+void toped_status(console::TOPEDSTATUS_TYPE);
+void toped_status(console::TOPEDSTATUS_TYPE, long int);
+void toped_status(console::TOPEDSTATUS_TYPE, std::string);
+void toped_status(console::TOPEDSTATUS_TYPE, wxString);
 
+//===========================================================================
 class  TpdTime
 {
    public:
@@ -165,7 +201,7 @@ class  TpdTime
 };
 
 class EXPTN {};
- 
+
 class EXPTNactive_cell : public EXPTN
 {
    public:

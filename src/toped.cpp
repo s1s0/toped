@@ -39,9 +39,6 @@
 #include "../tpd_DB/viewprop.h"
 #include "../tpd_DB/tenderer.h"
 #include "tui.h"
-#include "../ui/red_lamp.xpm"
-#include "../ui/green_lamp.xpm"
-#include "../ui/blue_lamp.xpm"
 #include "../ui/toped32x32.xpm"
 
 
@@ -60,7 +57,6 @@ extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_SETINGSMENU;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
-extern const wxEventType         wxEVT_TPDSTATUS;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
@@ -147,51 +143,6 @@ void tui::CanvasStatus::setdYpos(wxString coordY){
 void tui::CanvasStatus::setSelected(wxString numsel) {
    _selected->SetLabel(numsel);
 }
-//-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tui::TopedStatus, wxStatusBar)
-    EVT_SIZE(tui::TopedStatus::OnSize)
-END_EVENT_TABLE()
-
-tui::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, wxID_ANY)
-{
-   const unsigned Field_Max = 3;
-   static const int widths[Field_Max] = { -1, -1, 32 };
-
-    SetFieldsCount(Field_Max);
-    SetStatusWidths(Field_Max, widths);
-    _lamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
-}
-
-void tui::TopedStatus::OnThreadON(wxString cmd)
-{
-   SetStatusText(cmd,1);
-   _lamp->SetBitmap(wxIcon(red_lamp));
-}
-
-void tui::TopedStatus::OnThreadWait()
-{
-//   SetStatusText(wxT("Ready..."),1);
-   _lamp->SetBitmap(wxIcon(blue_lamp));
-}
-
-void tui::TopedStatus::OnThreadOFF()
-{
-   SetStatusText(wxT("Ready..."),1);
-   _lamp->SetBitmap(wxIcon(green_lamp));
-}
-
-void tui::TopedStatus::OnSize(wxSizeEvent& event)
-{
-    wxRect rect;
-    GetFieldRect(2, rect);
-    wxSize size = _lamp->GetSize();
-
-    _lamp->Move(rect.x + (rect.width - size.x) / 2,
-                rect.y + (rect.height - size.y) / 2);
-
-    event.Skip();
-}
-
 //-----------------------------------------------------------------------------
 // The TopedFrame event table (TOPED main event table)
 BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
@@ -283,7 +234,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
    EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
    EVT_MENU( TMSET_CURLONG       , tui::TopedFrame::OnLongCursor  )
-   
+
    EVT_MENU( TMSET_HTOOLSIZE16   , tui::TopedFrame::OnHToolBarSize16   )
    EVT_MENU( TMSET_HTOOLSIZE24   , tui::TopedFrame::OnHToolBarSize24   )
    EVT_MENU( TMSET_HTOOLSIZE32   , tui::TopedFrame::OnHToolBarSize32   )
@@ -293,7 +244,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_VTOOLSIZE24   , tui::TopedFrame::OnVToolBarSize24   )
    EVT_MENU( TMSET_VTOOLSIZE32   , tui::TopedFrame::OnVToolBarSize32   )
    EVT_MENU( TMSET_VTOOLSIZE48   , tui::TopedFrame::OnVToolBarSize48   )
-   
+
    EVT_MENU( TMSET_UNDODEPTH     , tui::TopedFrame::OnUndoDepth   )
 
    EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
@@ -311,7 +262,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
    EVT_CLOSE(tui::TopedFrame::OnClose)
 //   EVT_SIZE( TopedFrame::OnSize )
-   EVT_TECUSTOM_COMMAND(wxEVT_TPDSTATUS  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
+//   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_SETINGSMENU, wxID_ANY, tui::TopedFrame::OnUpdateSettingsMenu)
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
@@ -335,8 +286,7 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initView();
    wxCommandEvent dummy;
    OnzoomEmpty(dummy);
-   _toped_status = DEBUG_NEW TopedStatus(this);
-   SetStatusBar(_toped_status);
+   SetStatusBar(DEBUG_NEW console::TopedStatus(this));
    _resourceCenter = DEBUG_NEW ResourceCenter;
    SetStatusText( wxT( "Toped loaded..." ) );
    //Put initMenuBar() at the end because in Windows it crashes
@@ -896,15 +846,15 @@ void tui::TopedFrame::OnCanvasStatus(wxCommandEvent& evt)
    }   
 }
 
-void tui::TopedFrame::OnTopedStatus(wxCommandEvent& evt)
-{
-   switch (evt.GetInt()) {
-      case console::TSTS_THREADON    : _toped_status->OnThreadON(evt.GetString()); break;
-      case console::TSTS_THREADWAIT  : _toped_status->OnThreadWait(); break;
-      case console::TSTS_THREADOFF   : _toped_status->OnThreadOFF(); break;
-      default: assert(false);
-   }
-}
+// void tui::TopedFrame::OnTopedStatus(wxCommandEvent& evt)
+// {
+//    switch (evt.GetInt()) {
+//       case console::TSTS_THREADON    : _toped_status->OnThreadON(evt.GetString()); break;
+//       case console::TSTS_THREADWAIT  : _toped_status->OnThreadWait(); break;
+//       case console::TSTS_THREADOFF   : _toped_status->OnThreadOFF(); break;
+//       default: assert(false);
+//    }
+// }
 
 void tui::TopedFrame::OnNewDesign(wxCommandEvent& evt) {
    if (DATC->modified()) {

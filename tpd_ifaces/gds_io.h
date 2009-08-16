@@ -548,7 +548,6 @@ namespace GDSin {
    > file_length  - length of the input GDS file
    > file_pos      - current position of the input GDS file during read in
    > library      - pointer to GdsLibrary structure
-   > prgrs         - pointer to the progress indicator control
    > prgrs_pos      - current position of the progress indicator control
    > logwin         - pointer to the error log edit control
    > StreamVerion   - GDS specific data - see gds_HEADER
@@ -610,6 +609,7 @@ namespace GDSin {
          GDStime              _tModif;
          GDStime              _tAccess;
          const LayerMapGds*   _laymap;
+         int                  _prgrs_pos;
    };
 
    // Function definition

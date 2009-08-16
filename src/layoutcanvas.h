@@ -154,8 +154,6 @@ namespace tui {
       void*                    Entry();
       tui::LayoutCanvas*       _canvas;
       static wxMutex           _mutex;
-   //      void                    StatusBusy(wxString&);
-   //      void                    StatusReady();
    };
 
    wxCursor* MakeCursor(const char * pXpm[36],  int HotX, int HotY );
