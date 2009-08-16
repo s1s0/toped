@@ -35,7 +35,6 @@
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_common/outbox.h"
 #include "datacenter.h"
-#include "../src/toped.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
 #include "../ui/cellhg.xpm"
@@ -48,8 +47,8 @@
 #include "../ui/cellundef.xpm"
 #include "../tpd_ifaces/gds_io.h"
 #include "../tpd_ifaces/cif_io.h"
+#include "../tpd_bidfunc/tpdf_common.h"
 
-extern tui::TopedFrame*          Toped;
 extern DataCenter*               DATC;
 extern Calbr::CalbrFile*			DRCData;
 extern const wxEventType         wxEVT_CMD_BROWSER;
@@ -2246,7 +2245,7 @@ void	browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
 	//Refresh
 	wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_REFRESH);
-   wxPostEvent( Toped->view(), eventZOOM);
+   GetEventHandler()->ProcessEvent(eventZOOM);
 }
 
 void	browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
@@ -2288,6 +2287,6 @@ void	browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 	//Refresh
 	wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_REFRESH);
-   wxPostEvent( Toped->view(), eventZOOM);
+	GetEventHandler()->ProcessEvent(eventZOOM);
 
 }
