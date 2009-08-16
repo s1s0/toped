@@ -85,9 +85,9 @@ namespace CIFin {
 
 class DataCenter {
 public:
-	                           DataCenter(const std::string&, const std::string &);
+                              DataCenter(const std::string&, const std::string &);
                              ~DataCenter(); 
-   bool                       GDSparse(std::string filename);
+   bool                       GDSparse(std::string);
    void                       GDSexport(const LayerMapGds&, std::string&, bool);
    void                       GDSexport(laydata::tdtcell*, const LayerMapGds&, bool, std::string&, bool);
    void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
@@ -141,14 +141,14 @@ public:
    bool                       addlayer(std::string, word);
    bool                       addlayer(word layno);
    word                       addlayer(std::string);
-	bool								isLayerExist(word);
-	bool								isLayerExist(std::string);
+   bool                       isLayerExist(word);
+   bool                       isLayerExist(std::string);
    void                       addline(std::string, std::string, word, byte, byte);
    void                       addcolor(std::string, byte, byte, byte, byte);
    void                       addfill(std::string, byte*);
    void                       hideLayer(word, bool);
    void                       lockLayer(word, bool);
-	void                       fillLayer(word, bool);
+   void                       fillLayer(word, bool);
    void                       setcellmarks_hidden(bool);
    void                       settextmarks_hidden(bool);
    void                       setcellbox_hidden(bool);
@@ -175,8 +175,8 @@ public:
    byte                       marker_angle() const    {return _properties.marker_angle();}
    bool                       layerHidden(word layno) {return _properties.drawprop().layerHidden(layno);}
    bool                       layerLocked(word layno) {return _properties.drawprop().layerLocked(layno);}
-	const WordList					getAllLayers(void)		{return _properties.getAllLayers();};
-	const WordList					getLockedLayers(void)	{return _properties.getLockedLayers();};
+   const WordList             getAllLayers(void)      {return _properties.getAllLayers();};
+   const WordList             getLockedLayers(void)   {return _properties.getLockedLayers();};
    bool                       grid_visual(word no)    {return grid(no)->visual();}
    void                       setautopan(bool status) {_properties.setautopan(status);}
    void                       setZeroCross(bool status) {_properties.setZeroCross(status);}
@@ -231,7 +231,7 @@ private:
    word                       _curcmdlay;    // layer used during current drawing operation
    bool                       _drawruler;    // draw a ruler while coposing a shape interactively
    std::string                _localDir;
-	std::string                _globalDir;
+   std::string                _globalDir;
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
    wxMutex                    CIFLock;

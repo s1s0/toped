@@ -30,12 +30,12 @@
 #include <time.h>
 #include <string>
 #include <sstream>
-#include <wx/wx.h>
-#include <wx/log.h>
 #include <wx/regex.h>
-#include <wx/filefn.h>
 #include <wx/filename.h>
 #include "outbox.h"
+#include "../ui/red_lamp.xpm"
+#include "../ui/green_lamp.xpm"
+#include "../ui/blue_lamp.xpm"
 
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_STATUS , 10000)
@@ -77,6 +77,7 @@ DEFINE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM)
 DEFINE_EVENT_TYPE(wxEVT_EDITLAYER)
 
 console::TELLFuncList*           CmdList = NULL;
+console::TopedStatus*            StatusBar = NULL;
 //==============================================================================
 // The ted_log event table
 BEGIN_EVENT_TABLE( console::ted_log, wxTextCtrl )
@@ -170,6 +171,126 @@ void tell_log(console::LOG_TYPE lt, const std::string& msg)
 void tell_log(console::LOG_TYPE lt, const wxString& msg)
 {
    wxLog::OnLog(lt, msg, time(NULL));
+}
+
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(console::TopedStatus, wxStatusBar)
+   EVT_SIZE(console::TopedStatus::OnSize)
+   EVT_TECUSTOM_COMMAND(wxEVT_TPDSTATUS  , wxID_ANY, console::TopedStatus::OnTopedStatus)
+END_EVENT_TABLE()
+
+console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, wxID_ANY)
+{
+   const unsigned Field_Max = 3;
+   static const int widths[Field_Max] = { -1, -1, 32 };
+
+    SetFieldsCount(Field_Max);
+    SetStatusWidths(Field_Max, widths);
+    _lamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
+    StatusBar = this;
+    _progress = NULL;
+}
+
+void console::TopedStatus::OnTopedStatus(wxCommandEvent& evt)
+{
+   switch (evt.GetInt()) {
+      case console::TSTS_PRGRSBARON  : OnInitGauge(); break;
+      case console::TSTS_THREADON    : OnThreadON(evt.GetString()); break;
+      case console::TSTS_THREADWAIT  : OnThreadWait(); break;
+      case console::TSTS_THREADOFF   : OnThreadOFF(); break;
+      default: assert(false);
+   }
+}
+
+
+void console::TopedStatus::OnThreadON(wxString cmd)
+{
+   SetStatusText(cmd,1);
+   _lamp->SetBitmap(wxIcon(red_lamp));
+}
+
+void console::TopedStatus::OnThreadWait()
+{
+//   SetStatusText(wxT("Ready..."),1);
+   _lamp->SetBitmap(wxIcon(blue_lamp));
+}
+
+void console::TopedStatus::OnThreadOFF()
+{
+   if (NULL != _progress)
+   {
+      delete (_progress);
+      _progress = NULL;
+   }
+   SetStatusText(wxT("Ready..."),1);
+   _lamp->SetBitmap(wxIcon(green_lamp));
+}
+
+void console::TopedStatus::OnInitGauge()
+{
+    wxRect rect;
+    GetFieldRect(1, rect);
+   _progress = DEBUG_NEW wxGauge(this, wxID_ANY, 100, wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
+}
+
+void console::TopedStatus::OnSize(wxSizeEvent& event)
+{
+   wxRect rect;
+   if (NULL != _progress)
+   {
+      GetFieldRect(1, rect);
+      _progress->SetSize(rect);
+   }
+
+   GetFieldRect(2, rect);
+   wxSize size = _lamp->GetSize();
+   _lamp->Move(rect.x + (rect.width - size.x) / 2,
+                rect.y + (rect.height - size.y) / 2);
+
+    event.Skip();
+}
+
+// void /*DataCenter::*/initProgressBar(wxWindow* wid)
+// {
+//    wxCommandEvent eventPRGRSUPDT(wxEVT_TPDSTATUS);
+//    eventPRGRSUPDT.SetInt(console::TSTS_PRGRSBARON);
+// //   eventSTATUSUPD.SetString(wxString(sts_cmd.c_str(), wxConvUTF8));
+//    wxPostEvent(wid, eventPRGRSUPDT);
+// }
+
+void toped_status(console::TOPEDSTATUS_TYPE tstatus)
+{
+   if (NULL == StatusBar) return;
+   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   eventSTATUSUPD.SetInt(tstatus);
+   wxPostEvent(StatusBar, eventSTATUSUPD);
+}
+
+void toped_status(console::TOPEDSTATUS_TYPE tstatus, long int indx)
+{
+   if (NULL == StatusBar) return;
+   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   eventSTATUSUPD.SetInt(tstatus);
+   eventSTATUSUPD.SetExtraLong(indx);
+   wxPostEvent(StatusBar, eventSTATUSUPD);
+}
+
+void toped_status(console::TOPEDSTATUS_TYPE tstatus, std::string sts_cmd)
+{
+   if (NULL == StatusBar) return;
+   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   eventSTATUSUPD.SetInt(tstatus);
+   eventSTATUSUPD.SetString(wxString(sts_cmd.c_str(), wxConvUTF8));
+   wxPostEvent(StatusBar, eventSTATUSUPD);
+}
+
+void toped_status(console::TOPEDSTATUS_TYPE tstatus, wxString sts_cmd)
+{
+   if (NULL == StatusBar) return;
+   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   eventSTATUSUPD.SetInt(tstatus);
+   eventSTATUSUPD.SetString(sts_cmd);
+   wxPostEvent(StatusBar, eventSTATUSUPD);
 }
 
 //==============================================================================
@@ -383,7 +504,7 @@ bool TpdTime::getStdCTime(wxString& exp) {
 
 bool expandFileName( std::string& filename)
 {
-	wxFileName fName(wxString(filename.c_str(), wxConvFile ));
+   wxFileName fName(wxString(filename.c_str(), wxConvFile ));
    fName.Normalize();
    if (fName.IsOk())
    {

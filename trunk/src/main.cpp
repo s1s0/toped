@@ -57,7 +57,8 @@ extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 extern console::TELLFuncList*    CmdList;
-extern Calbr::CalbrFile*			DRCData;
+extern Calbr::CalbrFile*         DRCData;
+extern console::TopedStatus*     StatusBar;
 
 //-----------------------------------------------------------------------------
 

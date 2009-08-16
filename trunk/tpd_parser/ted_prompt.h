@@ -35,11 +35,6 @@
 #include "../tpd_common/outbox.h"
 
 namespace console {
-   typedef enum {
-      TSTS_THREADON     ,
-      TSTS_THREADWAIT   ,
-      TSTS_THREADOFF
-   }TOPEDSTATUS_TYPE;
 
    typedef std::list<std::string>   stringList;
    const wxString real_tmpl      = wxT("[-+]?([[:digit:]]+(\\.[[:digit:]]*)?|(\\.[[:digit:]]+))");
@@ -100,7 +95,6 @@ namespace console {
       wxString                _guinput;
       stringList              _cmd_history;
       stringList::const_iterator _history_position;
-      wxWindow*               _parent;
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
       DECLARE_EVENT_TABLE();
@@ -109,16 +103,13 @@ namespace console {
    class parse_thread : public wxThread
    {
    public:
-      parse_thread(wxString& cmd, wxWindow* status_wnd, wxWindow* canvas_wnd, wxThreadKind kind=wxTHREAD_DETACHED):
-                  wxThread(kind),command(cmd), _status_wnd(status_wnd), _canvas_wnd(canvas_wnd){};
+      parse_thread(wxString& cmd, wxWindow* canvas_wnd, wxThreadKind kind=wxTHREAD_DETACHED):
+                  wxThread(kind),command(cmd), _canvas_wnd(canvas_wnd){};
       friend ted_cmd::ted_cmd( wxWindow*, wxWindow*);
       friend void ted_cmd::spawnParseThread(wxString);
    protected:
       void*                   Entry();
-      void                    StatusBusy(wxString&);
-      void                    StatusReady();
       wxString                command;
-      wxWindow*               _status_wnd;
       wxWindow*               _canvas_wnd;
       static wxMutex          _mutex;
    };

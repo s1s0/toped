@@ -60,23 +60,6 @@ namespace tui {
       wxStaticText*        _dY;
       wxStaticText*        _selected;
    };
-   //-----------------------------------------------------------------------------
-   class TopedStatus : public wxStatusBar
-   {
-   public:
-                           TopedStatus(wxWindow*);
-      virtual             ~TopedStatus(){};
-
-      // event handlers
-      void OnThreadON(wxString);
-      void OnThreadWait();
-      void OnThreadOFF();
-      void OnSize(wxSizeEvent& event);
-
-   private:
-      wxStaticBitmap*      _lamp;
-      DECLARE_EVENT_TABLE();
-   };
 
    //-----------------------------------------------------------------------------
    class TopedFrame : public wxFrame {
@@ -113,7 +96,6 @@ namespace tui {
       console::ted_cmd*       _cmdline;      // tell command input window
       //LayoutCanvas*           _laycanvas;
       CanvasStatus*           _GLstatus;
-      TopedStatus*            _toped_status;
       browsers::browserTAB*   _browsers;  // TDT/GDS/layer browsers
       ResourceCenter*         _resourceCenter;
       LayoutCanvas*           _canvas;
@@ -253,19 +235,18 @@ namespace tui {
       void  OnUpdateSettingsMenu(wxCommandEvent&);
       void          OnMouseAccel(wxCommandEvent&);
       void        OnCanvasStatus(wxCommandEvent&);
-      void         OnTopedStatus(wxCommandEvent&);
       // additional
       void    CellRef(wxString);
       void   CellARef(wxString);
       // The declaration of the associated event table
-		void OnUncapturedMouseClick(wxCommandEvent&);
-		void          OnToolBarSize(wxCommandEvent&);
-		void		OnToolBarDefine	(wxCommandEvent& evt);
-		void		OnToolBarAddItem	(wxCommandEvent& evt);
-		void		OnToolBarDeleteItem(wxCommandEvent& evt);
-		void		editLayerDlg(word layno);
-		void		OnDRCResults(wxCommandEvent& evt);
-		DECLARE_EVENT_TABLE();
+      void OnUncapturedMouseClick(wxCommandEvent&);
+      void          OnToolBarSize(wxCommandEvent&);
+      void     OnToolBarDefine	(wxCommandEvent& evt);
+      void     OnToolBarAddItem	(wxCommandEvent& evt);
+      void     OnToolBarDeleteItem(wxCommandEvent& evt);
+      void     editLayerDlg(word layno);
+      void     OnDRCResults(wxCommandEvent& evt);
+      DECLARE_EVENT_TABLE();
    };
 
 }

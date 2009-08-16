@@ -304,9 +304,8 @@ GDSin::GdsFile::GdsFile(std::string fn)
    _gdsiiWarnings = 0;
    _fileName = fn;
    _filePos = 0;
-//   prgrs_pos = 0;
+   _prgrs_pos = 0;
    _library = NULL;
-//   prgrs = progrind;
    tell_log(console::MT_INFO, std::string("GDSII input file: \"") + fn + std::string("\""));
    std::string fname(convertString(_fileName));
    if (!(_gdsFh = fopen(fname.c_str(),"rb")))
@@ -350,7 +349,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
                //build the hierarchy tree
                _library->linkReferences();
                closeFile();// close the input stream
-//               prgrs_pos = file_length;
+//               _prgrs_pos = file_length;
 //               prgrs->SetPos(prgrs_pos); // fullfill progress indicator
                tell_log(console::MT_INFO, "Done");
                delete wr;
@@ -375,8 +374,7 @@ GDSin::GdsFile::GdsFile(std::string fn, const LayerMapGds* laymap, time_t acctim
    _filePos = 0;
    _streamVersion = 3;
    _library = NULL;
-//   prgrs_pos = 0;
-//   prgrs = progrind;
+   _prgrs_pos = 0;
    std::string fname(convertString(_fileName));
    if (!(_gdsFh = fopen(fname.c_str(),"wb")))
    {// open the output file
@@ -469,11 +467,11 @@ GDSin::GdsRecord* GDSin::GdsFile::getNextRecord()
    word reclen = *(word*)rl - 4; // record lenght
    GdsRecord* retrec = DEBUG_NEW GdsRecord(_gdsFh, reclen, recheader[2],recheader[3]);
    _filePos += reclen + 4;    // update file position
-//   if (2048 < (file_pos - prgrs_pos))
-//   {
-//      prgrs_pos = file_pos;
+   if (2048 < (_filePos - _prgrs_pos))
+   {
+      _prgrs_pos = _filePos;
 //      prgrs->SetPos(prgrs_pos); // update progress indicator
-//   }
+   }
    if (retrec->valid()) return retrec;
    else return NULL;// error during read in
 }

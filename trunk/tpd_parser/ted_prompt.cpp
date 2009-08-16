@@ -68,7 +68,6 @@ extern YYLTYPE telllloc; // parser current location - global variable, defined i
 
 //extern const wxEventType    wxEVT_LOG_ERRMESSAGE;
 console::ted_cmd*           Console = NULL;
-extern const wxEventType    wxEVT_TPDSTATUS;
 extern const wxEventType    wxEVT_CONSOLE_PARSE;
 extern const wxEventType    wxEVT_CANVAS_ZOOM;
 
@@ -296,7 +295,7 @@ void* console::parse_thread::Entry()
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
-   StatusBusy(command);
+   toped_status(TSTS_THREADON, command);
    try {
       void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
       tellparse();
@@ -317,25 +316,12 @@ void* console::parse_thread::Entry()
       wxPostEvent(_canvas_wnd, eventZOOM);
       Console->set_canvas_invalid(false);
    }
-   StatusReady();
+   toped_status(TSTS_THREADOFF);
 //   wxLogMessage(_T("Mutex unlocked"));
    return NULL;
 };
 
-void console::parse_thread::StatusBusy(wxString& sts_cmd)
-{
-   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
-   eventSTATUSUPD.SetInt(TSTS_THREADON);
-   eventSTATUSUPD.SetString(wxString(sts_cmd.c_str(), wxConvUTF8));
-   wxPostEvent(_status_wnd, eventSTATUSUPD);
-}
 
-void console::parse_thread::StatusReady()
-{
-   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
-   eventSTATUSUPD.SetInt(TSTS_THREADOFF);
-   wxPostEvent(_status_wnd, eventSTATUSUPD);
-}
 //==============================================================================
 // The ted_cmd event table
 BEGIN_EVENT_TABLE( console::ted_cmd, wxTextCtrl )
@@ -349,7 +335,6 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
       wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
                   wxTE_PROCESS_ENTER | wxNO_BORDER), puc(NULL), _numpoints(0)
 {
-   _parent = parent;
    _canvas = canvas;
    threadWaits4 = DEBUG_NEW wxCondition(parse_thread::_mutex);
    VERIFY(threadWaits4->IsOk());
@@ -445,7 +430,7 @@ void console::ted_cmd::spawnParseThread(wxString command)
    // a single mutex? This part I don't understand.
    //
 
-   parse_thread *pthrd = DEBUG_NEW parse_thread(command,_parent,_canvas);
+   parse_thread *pthrd = DEBUG_NEW parse_thread(command, _canvas);
    wxThreadError result = pthrd->Create();
    if (wxTHREAD_NO_ERROR == result)
       pthrd->Run();
@@ -525,9 +510,7 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
            (wxObjectEventFunction) (wxEventFunction)
            (wxCommandEventFunction)&ted_cmd::onGUInput);
 
-   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
-   eventSTATUSUPD.SetInt(TSTS_THREADWAIT);
-   wxPostEvent(_parent, eventSTATUSUPD);
+   toped_status(TSTS_THREADWAIT);
 }
 
 void console::ted_cmd::getGUInput(bool from_keyboard) {
