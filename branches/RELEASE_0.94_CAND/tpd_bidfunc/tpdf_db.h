@@ -67,5 +67,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(CIFsetlaymap     );
 
    TELL_STDCMD_CLASSA(PSexportTOP      );
+
+   void createDefaultTDT(std::string, TpdTime&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&);
 }
 #endif
