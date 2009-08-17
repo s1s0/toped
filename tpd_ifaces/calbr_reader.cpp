@@ -98,7 +98,7 @@ void Calbr::drcEdge::showError(laydata::tdtdesign* atdb, word la)
 //       telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(1,plDB,
 //                                    static_cast<word>(rint(w * DBscale))), 1);
   // laydata::tdtdesign* ATDB = DATC->lockDB();
-   atdb->addwire(la, plDB, static_cast<word>(rint(w * DBscale)));
+   atdb->addwire(la, plDB, static_cast<word>(rint(w * DBscale)), false);
    //DATC->unlockDB();
    delete pt1;
    delete pt2;
@@ -152,7 +152,7 @@ void Calbr::drcPolygon::showError(laydata::tdtdesign* atdb, word la)
    }
 */
    //laydata::tdtdesign* ATDB = DATC->lockDB();
-   atdb->addpoly(la, &_coords);
+   atdb->addpoly(la, &_coords, false);
    //DATC->unlockDB();
    //delete plDB;
 }
@@ -435,6 +435,7 @@ void	Calbr::CalbrFile::ShowError(const std::string & error, long  number)
                   word drcLayer = DATC->getLayerNo("drcResults");
                   assert(drcLayer);
                   poly->showError(_ATDB, drcLayer);
+						_ATDB->resortlayer(drcLayer);
                   DATC->unlockDB();
 
                   int4b maxx, maxy, minx, miny;
@@ -478,6 +479,7 @@ void	Calbr::CalbrFile::ShowError(const std::string & error, long  number)
                   word drcLayer = DATC->getLayerNo("drcResults");
                   assert(drcLayer);
                   (*it2edge).showError(_ATDB, drcLayer);
+						_ATDB->resortlayer(drcLayer);
                   DATC->unlockDB();
 
                   DBbox *box = DEBUG_NEW DBbox(TP((*it2edge).coords()->x1, (*it2edge).coords()->y1),
