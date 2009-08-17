@@ -807,20 +807,20 @@ void laydata::tdtdesign::collectParentCells(std::string& cname, CellDefList& par
    }
 }
 
-laydata::tdtdata* laydata::tdtdesign::addbox(unsigned la, TP* p1, TP* p2)
+laydata::tdtdata* laydata::tdtdesign::addbox(unsigned la, TP* p1, TP* p2, bool sortnow )
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
    tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
    modified = true;
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
-   laydata::tdtdata* newshape = actlay->addbox(np1,np2);
+   laydata::tdtdata* newshape = actlay->addbox(np1,np2, sortnow);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validate_cells());
    return newshape;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, const pointlist* pl)
+laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, const pointlist* pl,bool sortnow)
 {
    laydata::valid_poly check(*pl);
    if (!check.valid()) {
@@ -838,20 +838,21 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, const pointlist* pl)
    {
       TP p1(vpl[0] *_target.rARTM());
       TP p2(vpl[2] *_target.rARTM());
-      newshape = actlay->addbox(p1,p2);
+      newshape = actlay->addbox(p1,p2, sortnow);
    }
    else
    {
       for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
          (*PL) *= _target.rARTM();
-      newshape = actlay->addpoly(vpl);
+      newshape = actlay->addpoly(vpl, sortnow);
    }
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validate_cells());
    return newshape;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addwire(unsigned la, const pointlist* pl, word w) {
+laydata::tdtdata* laydata::tdtdesign::addwire(unsigned la, const pointlist* pl, word w, bool sortnow)
+{
    laydata::valid_wire check(*pl,w);
    if (!check.valid()) {
       std::ostringstream ost;
@@ -865,7 +866,7 @@ laydata::tdtdata* laydata::tdtdesign::addwire(unsigned la, const pointlist* pl, 
    pointlist vpl = check.get_validated();
    for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
-   laydata::tdtdata* newshape = actlay->addwire(vpl,w);
+   laydata::tdtdata* newshape = actlay->addwire(vpl,w, sortnow);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validate_cells());
    return newshape;
@@ -924,6 +925,13 @@ laydata::tdtdata* laydata::tdtdesign::addcellaref(std::string& name, CTM& ori,
       tell_log(console::MT_ERROR,news);
       return NULL;
    }
+}
+
+//use this procedure after calling addbox, addpoly etc with sortnow == false
+void laydata::tdtdesign::resortlayer(unsigned la)
+{
+	tdtlayer *actlay = static_cast<tdtlayer*>(targetlayer(la));
+	actlay->resort();
 }
 
 void laydata::tdtdesign::addlist(atticList* nlst)
