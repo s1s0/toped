@@ -61,19 +61,7 @@ int tellstdfunc::stdNEWDESIGNd::execute()
 {
    TpdTime timeCreated(getStringValue());
    std::string nm = getStringValue();
-   DATC->newDesign(nm, timeCreated.stdCTime());
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      ATDB->btreeAddMember    = &browsers::treeAddMember;
-      ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
-   DATC->unlockDB();
-   browsers::addTDTtab(true, false);
-   // reset UNDO buffers;
-   UNDOcmdQ.clear();
-   while (!UNDOPstack.empty()) {
-      delete UNDOPstack.front(); UNDOPstack.pop_front();
-   }
-   LogFile << LogFile.getFN() << "(\""<< nm << "\" , \"" << timeCreated() <<
-         "\");"; LogFile.flush();
+   createDefaultTDT(nm, timeCreated, UNDOcmdQ, UNDOPstack);
    return EXEC_NEXT;
 }
 
@@ -261,7 +249,8 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
-int tellstdfunc::TDTsave::execute() {
+int tellstdfunc::TDTsave::execute()
+{
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
       ATDB->try_unselect_all();
       DATC->TDTwrite();
@@ -314,7 +303,8 @@ tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-int tellstdfunc::TDTsaveas::execute() {
+int tellstdfunc::TDTsaveas::execute()
+{
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
@@ -433,24 +423,13 @@ int tellstdfunc::GDSimport::execute()
          nameList top_cells;
          top_cells.push_back(name);
 
-         laydata::tdtdesign* ATDB;
-         try {ATDB = DATC->lockDB(false);}
+         try {DATC->lockDB(false);}
          catch (EXPTN) 
          {
             // create a default target data base if one is not already existing
             TpdTime timeCreated(time(NULL));
-            DATC->newDesign(gdsDbName, timeCreated.stdCTime());
-            browsers::addTDTtab(true, false);
-            // reset UNDO buffers;
-            UNDOcmdQ.clear();
-            while (!UNDOPstack.empty()) {
-               delete UNDOPstack.front(); UNDOPstack.pop_front();
-            }
-            LogFile << LogFile.getFN() << "(\""<< gdsDbName << "\" , \"" << timeCreated() <<
-                  "\");"; LogFile.flush();
-            ATDB = DATC->lockDB(false);
-            ATDB->btreeAddMember    = &browsers::treeAddMember;
-            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+            createDefaultTDT(gdsDbName, timeCreated, UNDOcmdQ, UNDOPstack);
+            DATC->lockDB(false);
          }
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
@@ -505,27 +484,16 @@ int tellstdfunc::GDSimportList::execute()
    LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
    {
-      laydata::tdtdesign* ATDB;
-      try {ATDB = DATC->lockDB(false);}
+      try {DATC->lockDB(false);}
       catch (EXPTN) 
       {
          // create a default target data base if one is not already existing
          TpdTime timeCreated(time(NULL));
-         DATC->newDesign(gdsDbName, timeCreated.stdCTime());
-         browsers::addTDTtab(true, false);
-         // reset UNDO buffers;
-         UNDOcmdQ.clear();
-         while (!UNDOPstack.empty()) {
-            delete UNDOPstack.front(); UNDOPstack.pop_front();
-         }
-         LogFile << LogFile.getFN() << "(\""<< gdsDbName << "\" , \"" << timeCreated() <<
-               "\");"; LogFile.flush();
-         ATDB = DATC->lockDB(false);
-         ATDB->btreeAddMember    = &browsers::treeAddMember;
-         ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+         createDefaultTDT(gdsDbName, timeCreated, UNDOcmdQ, UNDOPstack);
+         DATC->lockDB(false);
       }
-         DATC->importGDScell(top_cells, LayerExpression, recur, over);
-         updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      DATC->importGDScell(top_cells, LayerExpression, recur, over);
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
       DATC->unlockDB();
       // Don't refresh the tree browser here. 
       // - First - it has been updated during the conversion
@@ -1003,9 +971,16 @@ int tellstdfunc::CIFimportList::execute()
    {
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
    }
-   DATC->lockDB(false);
-      DATC->CIFimport(top_cells, cifLays, recur, over, techno * DATC->DBscale());
-      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+   try {DATC->lockDB(false);}
+   catch (EXPTN)
+   {
+      // create a default target data base if one is not already existing
+      TpdTime timeCreated(time(NULL));
+      createDefaultTDT("CIF_default", timeCreated, UNDOcmdQ, UNDOPstack);
+      DATC->lockDB(false);
+   }
+   DATC->CIFimport(top_cells, cifLays, recur, over, techno * DATC->DBscale());
+   updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
 
@@ -1051,9 +1026,16 @@ int tellstdfunc::CIFimport::execute()
    // Convert top structure list
    nameList top_cells;
    top_cells.push_back(name.c_str());
-   DATC->lockDB(false);
-      DATC->CIFimport(top_cells, cifLays, recur, over, techno * DATC->DBscale());
-      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+   try {DATC->lockDB(false);}
+   catch (EXPTN)
+   {
+      // create a default target data base if one is not already existing
+      TpdTime timeCreated(time(NULL));
+      createDefaultTDT("CIF_default", timeCreated, UNDOcmdQ, UNDOPstack);
+      DATC->lockDB(false);
+   }
+   DATC->CIFimport(top_cells, cifLays, recur, over, techno * DATC->DBscale());
+   updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
 
@@ -1264,4 +1246,25 @@ int tellstdfunc::CIFsetlaymap::execute()
    delete lll;
    return EXEC_NEXT;
 }
+
+//=============================================================================
+void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
+                                   parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
+{
+   DATC->newDesign(dbname, timeCreated.stdCTime());
+   browsers::addTDTtab(true, false);
+   // reset UNDO buffers;
+   undstack.clear();
+   while (!undopstack.empty())
+   {
+      delete undopstack.front(); undopstack.pop_front();
+   }
+   LogFile << "newdesign(\""<< dbname << "\" , \"" << timeCreated() <<
+         "\");"; LogFile.flush();
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   ATDB->btreeAddMember    = &browsers::treeAddMember;
+   ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+   DATC->unlockDB();
+}
+
 
