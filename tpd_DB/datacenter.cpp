@@ -737,12 +737,11 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapGds& layerMap, 
 bool DataCenter::GDSparse(std::string filename)
 {
    bool status = true;
-   if (lockGDS(false))
+   if (NULL != _GDSDB)
    {
       std::string news = "Removing existing GDS data from memory...";
       tell_log(console::MT_WARNING,news);
       GDSclose();
-      unlockGDS();
    }
    // parse the GDS file - don't forget to lock the GDS mutex here!
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
@@ -794,18 +793,24 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& lay
 
 void DataCenter::GDSclose()
 {
-   lockGDS();
+   GDSin::GdsFile* gfile = lockGDS(false);
+   if (NULL != gfile)
+   {
       delete _GDSDB;
       _GDSDB = NULL;
-   unlockGDS();
+      unlockGDS();
+   }
 }
 
 void DataCenter::CIFclose()
 {
-   lockCIF();
-   delete _CIFDB;
-   _CIFDB = NULL;
-   unlockCIF();
+   CIFin::CifFile* cfile = lockCIF(false);
+   if (NULL != cfile)
+   {
+      delete _CIFDB;
+      _CIFDB = NULL;
+      unlockCIF();
+   }
 }
 
 CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
