@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
+#include <set>
 #include <wx/ffile.h>
 #include "../tpd_common/ttt.h"
 
@@ -467,7 +468,9 @@ namespace GDSin {
          typedef std::map<int2b, DataMap>  LayMap;
          typedef std::list<GdsStructure*>  ChildStructure;
 
+         typedef std::set<std::string> NameSet;
                               GdsStructure(GdsFile*);
+         void                 Read(GdsFile*);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          void                 collectLayers(GdsLayers&, bool);
          void                 linkReferences(GdsLibrary* const);
@@ -480,14 +483,23 @@ namespace GDSin {
          const RefList&       references() const               { return _references;   }
                              ~GdsStructure();
       protected:
-         void                 linkDataIn(GdsData*, int2b, int2b);
-         void                 linkDataIn(GdsRef* data)         { _references.push_back(data); }
+//         void                 linkDataIn(GdsData*, int2b, int2b);
+//         void                 linkDataIn(GdsRef* data)         { _references.push_back(data); }
+         void                 skimBox(GdsFile*);
+         void                 skimBoundary(GdsFile*);
+         void                 skimPath(GdsFile*);
+         void                 skimText(GdsFile*);
+         void                 skimSRef(GdsFile*);
+         void                 skimARef(GdsFile*);
+         void                 updateContents(int2b, int2b);
+         GdsLayers            _contSummary; // contents summary
          bool                 _haveParent;
          LayMap               _layers;
          RefList              _references;
          std::string          _strctName;
          bool                 _traversed;       //! For hierarchy traversing purposes
-         nameList             _childrenNames;
+//         nameList             _childrenNames;
+         NameSet              _referenceNames;
          ChildStructure       _children;
    };
 
@@ -609,7 +621,7 @@ namespace GDSin {
          GDStime              _tModif;
          GDStime              _tAccess;
          const LayerMapGds*   _laymap;
-         int                  _prgrs_pos;
+         wxFileOffset         _prgrs_pos;
    };
 
    // Function definition
