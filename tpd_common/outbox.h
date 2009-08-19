@@ -170,6 +170,7 @@ namespace console {
    private:
       wxStaticBitmap*      _lamp;
       wxGauge*             _progress;
+      real                 _progressAdj;
       DECLARE_EVENT_TABLE();
    };
 }
