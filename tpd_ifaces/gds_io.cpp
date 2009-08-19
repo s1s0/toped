@@ -735,16 +735,87 @@ GDSin::GdsLibrary::~GdsLibrary()
 //==============================================================================
 // class GdsStructure
 //==============================================================================
+// void GDSin::GdsStructure::Read(GdsFile *cf)
+// {
+//    _traversed = false;
+//    int2b layer;
+//    int2b dtype;
+//    //initializing
+//    GdsData* cData = NULL;
+//    _haveParent = false;
+//    GdsRecord* cr = NULL;
+//    do
+//    { //start reading
+//       cr = cf->getNextRecord();
+//       if (cr)
+//       {
+//          switch (cr->recType())
+//          {
+//             case gds_NODE:// skipped record !!!
+//                tell_log(console::MT_WARNING, " GDSII record type 'NODE' skipped");
+//                InFile->incGdsiiWarnings();
+//                GdsNode(cf,layer, dtype);
+//                delete cr;break;
+//             case gds_PROPATTR:// skipped record !!!
+//                tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
+//                InFile->incGdsiiWarnings();
+//                delete cr;break;
+//             case gds_STRCLASS:// skipped record !!!
+//                tell_log(console::MT_WARNING, " GDSII record type 'STRCLASS' skipped");
+//                InFile->incGdsiiWarnings();// CADANCE internal use only
+//                delete cr;break;
+//             case gds_STRNAME:
+//                cr->retData(&_strctName);
+//                delete cr;break;
+//             case gds_BOX:
+//                cData = DEBUG_NEW GdsBox(cf, layer, dtype);
+//                linkDataIn(cData, layer, dtype);
+//                delete cr;break;
+//             case gds_BOUNDARY: 
+//                cData = DEBUG_NEW GdsPolygon(cf, layer, dtype);
+//                linkDataIn(cData, layer, dtype);
+//                delete cr;break;
+//             case gds_PATH: 
+//                cData = DEBUG_NEW GDSpath(cf, layer, dtype);
+//                linkDataIn(cData, layer, dtype);
+//                delete cr;break;
+//             case gds_TEXT:
+//                cData = DEBUG_NEW GdsText(cf, layer, dtype);
+//                linkDataIn(cData, layer, dtype);
+//                delete cr;break;
+//             case gds_SREF:
+//                cData = DEBUG_NEW GdsRef(cf);
+//                linkDataIn(static_cast<GdsRef*>(cData));
+//                _childrenNames.push_back(static_cast<GdsRef*>(cData)->strctName());
+//                delete cr;break;
+//             case gds_AREF: 
+//                cData = DEBUG_NEW GdsARef(cf);
+//                linkDataIn(static_cast<GdsARef*>(cData));
+//                _childrenNames.push_back(static_cast<GdsARef*>(cData)->strctName());
+//                delete cr;break;
+//             case gds_ENDSTR:// end of structure, exit point
+//                _childrenNames.sort();
+//                _childrenNames.unique();
+//                delete cr;return;
+//             default://parse error - not expected record type
+//                delete cr;
+//                throw EXPTNreadGDS("GDS structure - wrong record type in the current context");
+//          }
+//       }
+//       else
+//          throw EXPTNreadGDS("Unexpected end of file");
+//    }
+//    while (true);
+// }
+
 GDSin::GdsStructure::GdsStructure(GdsFile *cf)
 {
    _traversed = false;
    int2b layer;
    int2b dtype;
    //initializing
-   GdsData* cData = NULL;
    _haveParent = false;
    GdsRecord* cr = NULL;
-//   for (i = 0; i < GDS_MAX_LAYER; _allLay[i++] = false);
    do
    { //start reading
       cr = cf->getNextRecord();
@@ -768,35 +839,13 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf)
             case gds_STRNAME:
                cr->retData(&_strctName);
                delete cr;break;
-            case gds_BOX: 
-               cData = DEBUG_NEW GdsBox(cf, layer, dtype);
-               linkDataIn(cData, layer, dtype);
-               delete cr;break;
-            case gds_BOUNDARY: 
-               cData = DEBUG_NEW GdsPolygon(cf, layer, dtype);
-               linkDataIn(cData, layer, dtype);
-               delete cr;break;
-            case gds_PATH: 
-               cData = DEBUG_NEW GDSpath(cf, layer, dtype);
-               linkDataIn(cData, layer, dtype);
-               delete cr;break;
-            case gds_TEXT:
-               cData = DEBUG_NEW GdsText(cf, layer, dtype);
-               linkDataIn(cData, layer, dtype);
-               delete cr;break;
-            case gds_SREF:
-               cData = DEBUG_NEW GdsRef(cf);
-               linkDataIn(static_cast<GdsRef*>(cData));
-               _childrenNames.push_back(static_cast<GdsRef*>(cData)->strctName());
-               delete cr;break;
-            case gds_AREF: 
-               cData = DEBUG_NEW GdsARef(cf);
-               linkDataIn(static_cast<GdsARef*>(cData));
-               _childrenNames.push_back(static_cast<GdsARef*>(cData)->strctName());
-               delete cr;break;
-            case gds_ENDSTR:// end of structure, exit point
-               _childrenNames.sort();
-               _childrenNames.unique();
+            case gds_BOX      : skimBox(cf)     ; delete cr; break;
+            case gds_BOUNDARY : skimBoundary(cf); delete cr; break;
+            case gds_PATH     : skimPath(cf)    ; delete cr; break;
+            case gds_TEXT     : skimText(cf)    ; delete cr; break;
+            case gds_SREF     : skimSRef(cf)    ; delete cr; break;
+            case gds_AREF     : skimARef(cf)    ; delete cr; break;
+            case gds_ENDSTR   :// end of structure, exit point
                delete cr;return;
             default://parse error - not expected record type
                delete cr;
@@ -809,25 +858,33 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf)
    while (true);
 }
 
-void GDSin::GdsStructure::linkDataIn(GdsData* data, int2b layer, int2b dtype)
+// void GDSin::GdsStructure::linkDataIn(GdsData* data, int2b layer, int2b dtype)
+// {
+//    LayMap::iterator CMAP = _layers.find(layer);
+//    if (_layers.end() == CMAP)
+//       _layers[layer][dtype] = data->linkTo(NULL);
+//    else
+//    {
+//       DataMap::iterator DMAP = _layers[layer].find(dtype);
+//       if (_layers[layer].end() == DMAP)
+//          _layers[layer][dtype] = data->linkTo(NULL);
+//       else
+//          _layers[layer][dtype] = data->linkTo(_layers[layer][dtype]);
+//    }
+// //   _allLay[layer] = true;
+// }
+
+void GDSin::GdsStructure::updateContents(int2b layer, int2b dtype)
 {
-   LayMap::iterator CMAP = _layers.find(layer);
-   if (_layers.end() == CMAP)
-      _layers[layer][dtype] = data->linkTo(NULL);
-   else
-   {
-      DataMap::iterator DMAP = _layers[layer].find(dtype);
-      if (_layers[layer].end() == DMAP)
-         _layers[layer][dtype] = data->linkTo(NULL);
-      else
-         _layers[layer][dtype] = data->linkTo(_layers[layer][dtype]);
-   }
-//   _allLay[layer] = true;
+   _contSummary[layer].push_back(dtype);
+   _contSummary[layer].sort();
+   _contSummary[layer].unique();
 }
+
 
 void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
 {
-   for (nameList::const_iterator CRN = _childrenNames.begin(); CRN != _childrenNames.end(); CRN++)
+   for (NameSet::const_iterator CRN = _referenceNames.begin(); CRN != _referenceNames.end(); CRN++)
    {
       GdsStructure* ws2 = library->getStructure(*CRN);
       if (ws2)
@@ -848,17 +905,40 @@ void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
    }
 }
 
+// void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
+// {
+//    for (nameList::const_iterator CRN = _childrenNames.begin(); CRN != _childrenNames.end(); CRN++)
+//    {
+//       GdsStructure* ws2 = library->getStructure(*CRN);
+//       if (ws2)
+//       {
+//          _children.push_back(ws2);
+//          ws2->_haveParent = true;
+//       }
+//       else
+//       {//structure is referenced but not defined!
+//          char wstr[256];
+//          sprintf(wstr," Structure %s is referenced, but not defined!",CRN->c_str() );
+//          tell_log(console::MT_WARNING,wstr);
+//          InFile->incGdsiiWarnings();
+//          //SGREM probably is a good idea to add default
+//          //GdsStructure here. Then this structure can be
+//          //visualized in the Hierarchy window as disabled
+//       }
+//    }
+// }
+
 void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
 {
-   for (LayMap::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
+   for (GdsLayers::const_iterator CL = _contSummary.begin(); CL != _contSummary.end(); CL++)
    {
       WordList data_types;
       if (layers_map.end() != layers_map.find(CL->first))
          data_types = layers_map[CL->first];
 
-      for (DataMap::const_iterator DL = CL->second.begin(); DL != CL->second.end(); DL++)
+      for (WordList::const_iterator DL = CL->second.begin(); DL != CL->second.end(); DL++)
       {
-         data_types.push_back(DL->first);
+         data_types.push_back(*DL);
       }
       data_types.sort();
       data_types.unique();
@@ -871,6 +951,29 @@ void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
       (*CSTR)->collectLayers(layers_map, hier);
 }
 
+// void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
+// {
+//    for (LayMap::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
+//    {
+//       WordList data_types;
+//       if (layers_map.end() != layers_map.find(CL->first))
+//          data_types = layers_map[CL->first];
+// 
+//       for (DataMap::const_iterator DL = CL->second.begin(); DL != CL->second.end(); DL++)
+//       {
+//          data_types.push_back(DL->first);
+//       }
+//       data_types.sort();
+//       data_types.unique();
+//       layers_map[CL->first] = data_types;
+//    }
+//    if (!hier) return;
+//    for (ChildStructure::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
+//       if (NULL == (*CSTR)) continue;
+//    else
+//       (*CSTR)->collectLayers(layers_map, hier);
+// }
+
 GDSin::GDSHierTree* GDSin::GdsStructure::hierOut(GDSHierTree* Htree, GdsStructure* parent)
 {
    // collecting hierarchical information
@@ -881,12 +984,233 @@ GDSin::GDSHierTree* GDSin::GdsStructure::hierOut(GDSHierTree* Htree, GdsStructur
       else
       {
          Htree = (*CSTR)->hierOut(Htree,this);
-         // Collect all used layers here and down in hierarchy
-//         for(int j = 1 ; j < GDS_MAX_LAYER ; j++)
-//            _allLay[j] |= (*CSTR)->allLay(j);
       }
    }
    return Htree;
+}
+
+void GDSin::GdsStructure::skimBox(GdsFile* cf)
+{
+   int2b layer;
+   int2b singleType;
+
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_LAYER    : cr->retData(&layer); break;
+            case gds_BOXTYPE  : cr->retData(&singleType);break;
+            case gds_ELFLAGS  :
+            case gds_PLEX     :
+            case gds_PROPATTR :
+            case gds_PROPVALUE:
+            case gds_XY       : break;
+            case gds_ENDEL://end of element, exit point
+               updateContents(layer, singleType);
+               delete cr;return;
+            default: //parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS box - wrong record type in the current context");
+         }
+         delete cr;
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+}
+
+void GDSin::GdsStructure::skimBoundary(GdsFile* cf)
+{
+   int2b layer;
+   int2b singleType;
+
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_LAYER    : cr->retData(&layer);break;
+            case gds_DATATYPE : cr->retData(&singleType);break;
+            case gds_ELFLAGS  :
+            case gds_PLEX     :
+            case gds_PROPATTR :
+            case gds_PROPVALUE:
+            case gds_XY       : break;
+            case gds_ENDEL    ://end of element, exit point
+               updateContents(layer, singleType);
+               delete cr;return;
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS boundary - wrong record type in the current context");
+         }
+         delete cr;
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+}
+
+void GDSin::GdsStructure::skimPath(GdsFile* cf)
+{
+   int2b layer;
+   int2b singleType;
+
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_LAYER    : cr->retData(&layer); break;
+            case gds_DATATYPE : cr->retData(&singleType); break;
+            case gds_ELFLAGS  :
+            case gds_PLEX     :
+            case gds_PATHTYPE :
+            case gds_WIDTH    :
+            case gds_BGNEXTN  :
+            case gds_ENDEXTN  :
+            case gds_PROPATTR :
+            case gds_PROPVALUE:
+            case gds_XY       : break;
+            case gds_ENDEL://end of element, exit point
+               updateContents(layer, singleType);
+               delete cr;return;
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS path - wrong record type in the current context");
+         }
+         delete cr;
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (cr->recType() != gds_ENDEL);
+}
+
+void GDSin::GdsStructure::skimText(GdsFile* cf)
+{
+   int2b layer;
+   int2b singleType;
+
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_LAYER    : cr->retData(&layer); break;
+            case gds_TEXTTYPE : cr->retData(&singleType); break;
+            case gds_ELFLAGS  :
+            case gds_PLEX     :
+            case gds_PATHTYPE :
+            case gds_WIDTH    :
+            case gds_PROPATTR :
+            case gds_PROPVALUE:
+            case gds_PRESENTATION:
+            case gds_STRANS   :
+            case gds_MAG      :
+            case gds_ANGLE    :
+            case gds_XY       :
+            case gds_STRING   : break;
+            case gds_ENDEL://end of element, exit point
+               updateContents(layer, singleType);
+               delete cr;return;
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS text - wrong record type in the current context");
+         }
+         delete cr;
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+}
+
+void GDSin::GdsStructure::skimSRef(GdsFile* cf)
+{
+   std::string strctName;
+
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_SNAME    : cr->retData(&strctName);break;
+            case gds_ELFLAGS  :
+            case gds_PLEX     :
+            case gds_STRANS   :
+            case gds_MAG      :
+            case gds_ANGLE    :
+            case gds_XY       :
+            case gds_PROPATTR :
+            case gds_PROPVALUE: break;
+            case gds_ENDEL://end of element, exit point
+               _referenceNames.insert(strctName);
+               delete cr;return;
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS sref - wrong record type in the current context");
+         }
+         delete cr;
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+}
+
+void GDSin::GdsStructure::skimARef(GdsFile* cf)
+{
+   std::string strctName;
+
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_SNAME:cr->retData(&strctName); break;
+            case gds_ELFLAGS  :
+            case gds_PLEX     :
+            case gds_STRANS   :
+            case gds_MAG      :
+            case gds_ANGLE    :
+            case gds_XY       :
+            case gds_COLROW   :
+            case gds_PROPATTR :
+            case gds_PROPVALUE: break;
+            case gds_ENDEL://end of element, exit point
+               _referenceNames.insert(strctName);
+               delete cr;return;
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS aref - wrong record type in the current context");
+         }
+         delete cr;
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
 }
 
 GDSin::GdsStructure::~GdsStructure()
