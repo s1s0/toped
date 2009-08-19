@@ -189,6 +189,7 @@ console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, wxID_A
     _lamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
     StatusBar = this;
     _progress = NULL;
+    _progressAdj = 1.0;
 }
 
 void console::TopedStatus::OnTopedStatus(wxCommandEvent& evt)
@@ -227,12 +228,19 @@ void console::TopedStatus::OnInitGauge(long int init_val)
 {
     wxRect rect;
     GetFieldRect(1, rect);
-   _progress = DEBUG_NEW wxGauge(this, wxID_ANY, init_val, wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
+    if (init_val > ((long) 0x7FFFFFF))
+    {
+      _progressAdj = (real) ((long) 0x7ffffff) / ((real)init_val);
+      _progress = DEBUG_NEW wxGauge(this, wxID_ANY, ((int) 0x7ffffff), wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
+    }
+    else
+      _progress = DEBUG_NEW wxGauge(this, wxID_ANY, init_val, wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
 }
 
 void console::TopedStatus::OnGaugeRun(long int position)
 {
-   _progress->SetValue(position);
+   int adj_position = (int)((real)position * _progressAdj);
+   _progress->SetValue(adj_position);
 }
 
 void console::TopedStatus::OnCloseGauge()
@@ -241,6 +249,7 @@ void console::TopedStatus::OnCloseGauge()
    {
       delete (_progress);
       _progress = NULL;
+      _progressAdj = 1.0;
    }
 }
 
