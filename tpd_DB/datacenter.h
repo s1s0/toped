@@ -42,14 +42,6 @@ namespace GDSin {
    protected:
       void                 child_structure(const GDSin::GDSHierTree*, bool);
       void                 convert_prep(const GDSin::GDSHierTree*, bool);
-//       void                 convert(GDSin::GdsStructure*, laydata::tdtcell*);
-//       void                 box (GDSin::GdsBox*     , laydata::tdtlayer*, int2b);
-//       void                 poly(GDSin::GdsPolygon* , laydata::tdtlayer*, int2b);
-//       void                 wire(GDSin::GDSpath*    , laydata::tdtlayer*, int2b);
-//       void                 text(GDSin::GdsText*    , laydata::tdtlayer*);
-//       void                 ref (GDSin::GdsRef*     , laydata::tdtcell* );
-//       void                 aref(GDSin::GdsARef*    , laydata::tdtcell* );
-//       laydata::CellDefin   linkcellref(std::string cellname);
       GDSin::GdsFile*      _src_lib;
       laydata::tdtlibdir*  _tdt_db;
       const LayerMapGds&   _theLayMap;
