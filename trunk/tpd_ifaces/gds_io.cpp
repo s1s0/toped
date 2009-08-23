@@ -1264,9 +1264,9 @@ void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, co
                   for(word i = 0; i < numpoints; i++)
                      pointlist.push_back(GDSin::get_TP(cr, i));
                   if (2 == pathtype)
-                     pathConvert(pointlist, width/2, width/2, numpoints);
+                     pathConvert(pointlist, numpoints, width/2, width/2);
                   else if (4 == pathtype)
-                     pathConvert(pointlist, bgnextn, endextn, numpoints);
+                     pathConvert(pointlist, numpoints, bgnextn, endextn);
 
                   laydata::valid_wire check(pointlist, width);
 

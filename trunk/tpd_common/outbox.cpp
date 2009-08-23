@@ -36,7 +36,11 @@
 #include "../ui/red_lamp.xpm"
 #include "../ui/green_lamp.xpm"
 #include "../ui/blue_lamp.xpm"
-
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_STATUS , 10000)
     DECLARE_EVENT_TYPE(wxEVT_SETINGSMENU   , 10001)
@@ -930,3 +934,51 @@ USMap* LayerMapCif::updateMap(SIMap* update)
    }
    return DEBUG_NEW USMap(_theEmap);
 }
+
+//=============================================================================
+//
+// class HiResTimer (Profiling timer for debugging purposes)
+//
+#ifdef TIME_PROFILING
+HiResTimer::HiResTimer()
+{
+#ifdef WIN32
+   // Get system frequency (number of ticks per second) of timer
+   if (!QueryPerformanceFrequency(&_freq) || !QueryPerformanceCounter(&_inittime))
+   {
+      tell_log(console::MT_INFO,"Problem with timer");
+   }
+#else
+   gettimeofday(&_start_time, NULL);
+#endif
+}
+
+void HiResTimer::report(std::string message)
+{
+   char time_message[256];
+#ifdef WIN32
+   LARGE_INTEGER curtime;
+   if (!QueryPerformanceCounter(&curtime))
+      return ;
+  // Convert number of ticks to milliseconds
+   int millisec = (curtime.QuadPart-_inittime.QuadPart) / (_freq.QuadPart / 1000);
+   int sec = millisec / 1000;
+   millisec = millisec - sec * 1000;
+   sprintf (time_message, "%s:   %i sec. %06i msec.",message.c_str(), sec, millisec);
+
+#else
+
+   gettimeofday(&_end_time, NULL);
+   timeval result;
+   result.tv_sec = _end_time.tv_sec - _start_time.tv_sec;
+   result.tv_usec = _end_time.tv_usec - _start_time.tv_usec;
+   if (result.tv_usec < 0)
+   {
+      result.tv_sec -= 1;
+      result.tv_usec += 1000000;
+   }
+   sprintf (time_message, "%s:   %li sec. %06li msec.",message.c_str(), result.tv_sec, result.tv_usec);
+#endif
+   tell_log(console::MT_INFO,time_message);
+}
+#endif //TIME_PROFILING

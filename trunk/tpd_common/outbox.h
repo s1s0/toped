@@ -40,6 +40,17 @@
         (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
         (wxObject *) NULL \
     ),
+
+//#define RENDER_PROFILING
+#define GDSCONVERT_PROFILING
+
+#ifdef RENDER_PROFILING
+#define TIME_PROFILING
+#endif
+#ifdef GDSCONVERT_PROFILING
+#define TIME_PROFILING
+#endif
+
 namespace console {
    typedef enum {
       MT_INFO = wxLOG_User + 1,
@@ -304,6 +315,23 @@ class LayerMapCif {
       USMap                _theEmap;
       SIMap                _theImap;
 };
+
+
+#ifdef TIME_PROFILING
+class HiResTimer {
+   public:
+      HiResTimer();
+      void           report(std::string);
+   private:
+      timeval        _start_time;
+      timeval        _end_time;
+#ifdef WIN32
+      // System frequency of timer for Windows.
+      LARGE_INTEGER  _freq;
+      LARGE_INTEGER  _inittime;
+#endif
+};
+#endif //TIME_PROFILING
 
 
 #endif
