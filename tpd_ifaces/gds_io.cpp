@@ -33,6 +33,10 @@
 #include "gds_io.h"
 #include "../tpd_common/ttt.h"
 #include "../tpd_common/outbox.h"
+#include "../tpd_DB/tedat.h"
+#include "../tpd_DB/quadtree.h"
+#include "../tpd_DB/tedcell.h"
+#include "../tpd_DB/tedesign.h"
 
 static GDSin::GdsFile*        InFile    = NULL;
 //==============================================================================
@@ -312,7 +316,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
    if (!(_gdsFh.IsOpened()))
    {// open the input file
       std::ostringstream info;
-      info << "File "<< fn <<" can NOT be opened";
+      info << "File "<< _fileName <<" can NOT be opened";
       tell_log(console::MT_ERROR,info.str());
       return;
    }
@@ -364,10 +368,33 @@ GDSin::GdsFile::GdsFile(std::string fn)
    while (true);
 }
 
+bool GDSin::GdsFile::reopenFile()
+{
+   InFile = this;
+   _gdsiiWarnings = 0;
+   _filePos = 0;
+   _prgrs_pos = 0;
+   wxString wxfname(_fileName.c_str(), wxConvUTF8 );
+   _gdsFh.Open(wxfname.c_str(),wxT("rb"));
+   if (!(_gdsFh.IsOpened()))
+   {// open the input file
+      std::ostringstream info;
+      info << "File "<< _fileName <<" can NOT be reopened";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+   return true;
+}
+
 void GDSin::GdsFile::closeFile()
 {
    if (_gdsFh.IsOpened())
       _gdsFh.Close();
+}
+
+void GDSin::GdsFile::setPosition(wxFileOffset filePos)
+{
+   _gdsFh.Seek(filePos, wxFromStart);
 }
 
 GDSin::GdsFile::GdsFile(std::string fn, const LayerMapGds* laymap, time_t acctime)
@@ -735,82 +762,76 @@ GDSin::GdsLibrary::~GdsLibrary()
 //==============================================================================
 // class GdsStructure
 //==============================================================================
-// void GDSin::GdsStructure::Read(GdsFile *cf)
-// {
-//    _traversed = false;
-//    int2b layer;
-//    int2b dtype;
-//    //initializing
-//    GdsData* cData = NULL;
-//    _haveParent = false;
-//    GdsRecord* cr = NULL;
-//    do
-//    { //start reading
-//       cr = cf->getNextRecord();
-//       if (cr)
-//       {
-//          switch (cr->recType())
-//          {
-//             case gds_NODE:// skipped record !!!
-//                tell_log(console::MT_WARNING, " GDSII record type 'NODE' skipped");
-//                InFile->incGdsiiWarnings();
-//                GdsNode(cf,layer, dtype);
-//                delete cr;break;
-//             case gds_PROPATTR:// skipped record !!!
-//                tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
-//                InFile->incGdsiiWarnings();
-//                delete cr;break;
-//             case gds_STRCLASS:// skipped record !!!
-//                tell_log(console::MT_WARNING, " GDSII record type 'STRCLASS' skipped");
-//                InFile->incGdsiiWarnings();// CADANCE internal use only
-//                delete cr;break;
-//             case gds_STRNAME:
-//                cr->retData(&_strctName);
-//                delete cr;break;
-//             case gds_BOX:
-//                cData = DEBUG_NEW GdsBox(cf, layer, dtype);
-//                linkDataIn(cData, layer, dtype);
-//                delete cr;break;
-//             case gds_BOUNDARY: 
-//                cData = DEBUG_NEW GdsPolygon(cf, layer, dtype);
-//                linkDataIn(cData, layer, dtype);
-//                delete cr;break;
-//             case gds_PATH: 
-//                cData = DEBUG_NEW GDSpath(cf, layer, dtype);
-//                linkDataIn(cData, layer, dtype);
-//                delete cr;break;
-//             case gds_TEXT:
-//                cData = DEBUG_NEW GdsText(cf, layer, dtype);
-//                linkDataIn(cData, layer, dtype);
-//                delete cr;break;
-//             case gds_SREF:
-//                cData = DEBUG_NEW GdsRef(cf);
-//                linkDataIn(static_cast<GdsRef*>(cData));
-//                _childrenNames.push_back(static_cast<GdsRef*>(cData)->strctName());
-//                delete cr;break;
-//             case gds_AREF: 
-//                cData = DEBUG_NEW GdsARef(cf);
-//                linkDataIn(static_cast<GdsARef*>(cData));
-//                _childrenNames.push_back(static_cast<GdsARef*>(cData)->strctName());
-//                delete cr;break;
-//             case gds_ENDSTR:// end of structure, exit point
-//                _childrenNames.sort();
-//                _childrenNames.unique();
-//                delete cr;return;
-//             default://parse error - not expected record type
-//                delete cr;
-//                throw EXPTNreadGDS("GDS structure - wrong record type in the current context");
-//          }
-//       }
-//       else
-//          throw EXPTNreadGDS("Unexpected end of file");
-//    }
-//    while (true);
-// }
+void GDSin::GdsStructure::import(GdsFile *cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds& _theLayMap)
+{
+   int2b layer;
+   int2b dtype;
+   std::string strctName;
+   //initializing
+//   GdsData* cData = NULL;
+   GdsRecord* cr = NULL;
+   cf->setPosition(_filePos);
+   do
+   { //start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_NODE:// skipped record !!!
+               tell_log(console::MT_WARNING, " GDSII record type 'NODE' skipped");
+               InFile->incGdsiiWarnings();
+               GdsNode(cf,layer, dtype);
+               delete cr;break;
+            case gds_PROPATTR:// skipped record !!!
+               tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
+               InFile->incGdsiiWarnings();
+               delete cr;break;
+            case gds_STRCLASS:// skipped record !!!
+               tell_log(console::MT_WARNING, " GDSII record type 'STRCLASS' skipped");
+               InFile->incGdsiiWarnings();// CADANCE internal use only
+               delete cr;break;
+            case gds_STRNAME:
+               cr->retData(&strctName);
+               assert(strctName == _strctName); // @TODO - throw an exception HERE!
+               delete cr;break;
+            case gds_BOX:
+               importBox(cf, dst_cell, _theLayMap);
+               delete cr;break;
+            case gds_BOUNDARY:
+               importPoly(cf, dst_cell, _theLayMap);
+               delete cr;break;
+            case gds_PATH:
+               importPath(cf, dst_cell, _theLayMap);
+               delete cr;break;
+            case gds_TEXT:
+               importText(cf, dst_cell, (*tdt_db)()->UU(), _theLayMap);
+               delete cr;break;
+            case gds_SREF:
+               importSref(cf, dst_cell, tdt_db, _theLayMap);
+               delete cr;break;
+            case gds_AREF:
+               importAref(cf, dst_cell, tdt_db, _theLayMap);
+               delete cr;break;
+            case gds_ENDSTR:// end of structure, exit point
+               dst_cell->resort();
+               _traversed = true;
+               delete cr;return;
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS structure - wrong record type in the current context");
+         }
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+}
 
 GDSin::GdsStructure::GdsStructure(GdsFile *cf)
 {
    _traversed = false;
+   _filePos = cf->filePos();
    int2b layer;
    int2b dtype;
    //initializing
@@ -846,7 +867,9 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf)
             case gds_SREF     : skimSRef(cf)    ; delete cr; break;
             case gds_AREF     : skimARef(cf)    ; delete cr; break;
             case gds_ENDSTR   :// end of structure, exit point
-               delete cr;return;
+               delete cr;
+               _strSize = cf->filePos() - _filePos;
+               return;
             default://parse error - not expected record type
                delete cr;
                throw EXPTNreadGDS("GDS structure - wrong record type in the current context");
@@ -1024,6 +1047,74 @@ void GDSin::GdsStructure::skimBox(GdsFile* cf)
    while (true);
 }
 
+void GDSin::GdsStructure::importBox(GdsFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+{
+   int2b       layer;
+   int2b       singleType;
+   pointlist   plist;
+   word        tdtlaynum;
+
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS://readElflags(cr);// seems that it's not used
+               delete cr; break;
+            case gds_PLEX:   //readPlex(cr);// seems that it's not used
+               delete cr; break;
+            case gds_LAYER: cr->retData(&layer);
+               delete cr; break;
+            case gds_BOXTYPE:cr->retData(&singleType);
+               delete cr; break;
+            case gds_PROPATTR:
+               InFile->incGdsiiWarnings(); delete cr; break;
+            case gds_PROPVALUE: tell_log(console::MT_WARNING, "GDS box - PROPVALUE record ignored");
+               InFile->incGdsiiWarnings(); delete cr; break;
+            case gds_XY:
+               if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
+               {
+                  //one point less because fist and last point coincide
+                  word numpoints = (cr->recLen())/8 - 1;
+                  assert(numpoints == 4);
+                  plist.reserve(numpoints);
+                  for(word i = 0; i < numpoints; i++)
+                     plist.push_back(GDSin::get_TP(cr, i));
+
+                  laydata::valid_poly check(plist);
+
+                  if (!check.valid())
+                  {
+                     std::ostringstream ost;
+                     ost << "Box check fails - {" << check.failtype()
+                         << " Layer: " << layer
+                         << " Data type: " << singleType
+                         << " }";
+                     tell_log(console::MT_ERROR, ost.str());
+                  }
+                  else plist = check.get_validated();
+                  laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+                  if (check.box())  dwl->addbox(plist[0], plist[2], false);
+                  else              dwl->addpoly(plist,false);
+               }
+               delete cr; break;
+            case gds_ENDEL://end of element, exit point
+               delete cr;return;
+            default: //parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS box - wrong record type in the current context");
+         }
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+
+}
+
 void GDSin::GdsStructure::skimBoundary(GdsFile* cf)
 {
    int2b layer;
@@ -1058,6 +1149,73 @@ void GDSin::GdsStructure::skimBoundary(GdsFile* cf)
    }
    while (true);
 }
+
+void GDSin::GdsStructure::importPoly(GdsFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+{
+   int2b       layer;
+   int2b       singleType;
+   pointlist   plist;
+   word        numpoints;
+   word        tdtlaynum;
+   GdsRecord*  cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS: //readElflags(cr);// seems that it's not used
+               delete cr;break;
+            case gds_PLEX:   //readPlex(cr);// seems that it's not used
+               delete cr;break;
+            case gds_LAYER: cr->retData(&layer);
+               delete cr;break;
+            case gds_DATATYPE: cr->retData(&singleType);
+               delete cr;break;
+            case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS boundary - PROPATTR record ignored");
+               InFile->incGdsiiWarnings(); delete cr;break;
+            case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS boundary - PROPVALUE record ignored");
+               InFile->incGdsiiWarnings(); delete cr;break;
+            case gds_XY:
+               if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
+               {
+                  //one point less because fist and last point coincide
+                  numpoints = (cr->recLen())/8 - 1;
+                  plist.reserve(numpoints);
+                  for(word i = 0; i < numpoints; i++)
+                     plist.push_back(GDSin::get_TP(cr, i));
+
+                  laydata::valid_poly check(plist);
+
+                  if (!check.valid())
+                  {
+                     std::ostringstream ost;
+                     ost << "Polygon check fails - {" << check.failtype()
+                         << " Layer: " << layer
+                         << " Data type: " << singleType
+                         << " }";
+                     tell_log(console::MT_ERROR, ost.str());
+                  }
+                  else plist = check.get_validated();
+                  laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+                  if (check.box())  dwl->addbox(plist[0], plist[2], false);
+                  else              dwl->addpoly(plist,false);
+               }
+               delete cr; break;
+            case gds_ENDEL://end of element, exit point
+               delete cr;return;
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS boundary - wrong record type in the current context");
+         }
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+}
+
 
 void GDSin::GdsStructure::skimPath(GdsFile* cf)
 {
@@ -1097,6 +1255,87 @@ void GDSin::GdsStructure::skimPath(GdsFile* cf)
    }
    while (cr->recType() != gds_ENDEL);
 }
+
+void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+{
+   int2b layer;
+   int2b singleType;
+   int2b pathtype  = 0;
+   int4b width     = 0;
+   int4b bgnextn   = 0;
+   int4b endextn   = 0;
+   word  numpoints = 0;
+   word  tdtlaynum;
+   GdsRecord* cr = NULL;
+   pointlist   pointlist;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS: //readElflags(cr);// seems that's not used
+               delete cr;break;
+            case gds_PLEX:   //readPlex(cr);// seems that's not used
+               delete cr;break;
+            case gds_LAYER: cr->retData(&layer);
+               delete cr;break;
+            case gds_DATATYPE: cr->retData(&singleType);
+               delete cr;break;
+            case gds_PATHTYPE: cr->retData(&pathtype);
+               delete cr;break;
+            case gds_WIDTH: cr->retData(&width);
+               delete cr;break;
+            case gds_BGNEXTN:   cr->retData(&bgnextn);
+               delete cr;break;
+            case gds_ENDEXTN:   cr->retData(&endextn);
+               delete cr;break;
+            case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS path - PROPATTR record ignored");
+               InFile->incGdsiiWarnings(); delete cr;break;
+            case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS path - PROPVALUE record ignored");
+               InFile->incGdsiiWarnings(); delete cr;break;
+            case gds_XY:
+               if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
+               {
+                  numpoints = (cr->recLen())/8;
+                  pointlist.reserve(numpoints);
+                  for(word i = 0; i < numpoints; i++)
+                     pointlist.push_back(GDSin::get_TP(cr, i));
+                  if (2 == pathtype)
+                     pathConvert(pointlist, width/2, width/2, numpoints);
+                  else if (4 == pathtype)
+                     pathConvert(pointlist, bgnextn, endextn, numpoints);
+
+                  laydata::valid_wire check(pointlist, width);
+
+                  if (!check.valid())
+                  {
+                     std::ostringstream ost;
+                     ost << "Layer check fails - {" << check.failtype()
+                           << " Layer: " << layer
+                           << " Data type: " << singleType
+                           << " }";
+                     tell_log(console::MT_ERROR, ost.str());
+                  }
+                  else pointlist = check.get_validated() ;
+                  laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+                  dwl->addwire(pointlist, width,false);
+               }
+               delete cr;break;
+            case gds_ENDEL://end of element, exit point
+               delete cr;return;
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS path - wrong record type in the current context");
+         }
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (cr->recType() != gds_ENDEL);
+}
+
 
 void GDSin::GdsStructure::skimText(GdsFile* cf)
 {
@@ -1140,6 +1379,95 @@ void GDSin::GdsStructure::skimText(GdsFile* cf)
    while (true);
 }
 
+void GDSin::GdsStructure::importText(GdsFile* cf, laydata::tdtcell* dst_cell, real dbuu, const LayerMapGds& theLayMap)
+{
+   int2b       layer;
+   int2b       singleType;
+   word        ba;
+   // initializing
+   word        font           = 0;
+   word        vertJust       = 0;
+   word        horiJust       = 0;
+   word        reflection     = 0;
+   word        absMagn        = 0;
+   word        absAngl        = 0;
+   int2b       pathType       = 0;
+   int4b       width          = 0;
+   double      magnification  = 1.0;
+   double      angle          = 0.0;
+   TP          magnPoint;
+   std::string tString;
+   word        tdtlaynum;
+
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS: //readElflags(cr);// seems that it's not used
+               delete cr;break;
+            case gds_PLEX:   //readPlex(cr);// seems that it's not used
+               delete cr;break;
+            case gds_LAYER: cr->retData(&layer);
+               delete cr;break;
+            case gds_TEXTTYPE: cr->retData(&singleType);
+               delete cr;break;
+            case gds_PATHTYPE: cr->retData(&pathType);// ??? for test ???
+               delete cr;break;
+            case gds_WIDTH: cr->retData(&width);// seems not to be used
+               delete cr;break;
+            case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS text - PROPATTR record ignored");
+               InFile->incGdsiiWarnings(); delete cr;break;
+            case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS text - PROPVALUE record ignored");
+               InFile->incGdsiiWarnings(); delete cr;break;
+            case gds_PRESENTATION:
+               cr->retData(&ba,0,16);
+               font = ba & 0x0030; font >>= 4;
+               vertJust = ba & 0x000C; vertJust >>= 2;
+               horiJust = ba & 0x0003;
+               delete cr;break;
+            case gds_STRANS:
+               cr->retData(&ba,0,16);
+               reflection = ba & 0x8000; reflection >>= 15;//bit 0
+               absMagn    = ba & 0x0004; absMagn    >>= 2; //bit 13
+               absAngl    = ba & 0x0002; absAngl    >>= 1; //bit 14
+               delete cr; break;
+            case gds_MAG: cr->retData(&magnification);
+               delete cr; break;
+            case gds_ANGLE: cr->retData(&angle);
+               delete cr; break;
+            case gds_XY: magnPoint = GDSin::get_TP(cr);
+               delete cr;break;
+            case gds_STRING: cr->retData(&tString);
+               delete cr;break;
+            case gds_ENDEL://end of element, exit point
+               if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
+               {
+                  laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+                  // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
+                  dwl->addtext(tString,
+                              CTM( magnPoint,
+                                    magnification / (dbuu *  OPENGL_FONT_UNIT),
+                                    angle,
+                                 (0 != reflection)
+                                 )
+                              );
+               }
+               delete cr;return;
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS text - wrong record type in the current context");
+         }
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+}
+
 void GDSin::GdsStructure::skimSRef(GdsFile* cf)
 {
    std::string strctName;
@@ -1169,6 +1497,80 @@ void GDSin::GdsStructure::skimSRef(GdsFile* cf)
                throw EXPTNreadGDS("GDS sref - wrong record type in the current context");
          }
          delete cr;
+      }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
+   }
+   while (true);
+}
+
+void GDSin::GdsStructure::importSref(GdsFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds&)
+{
+   word           reflection     = 0;
+   word           absMagn        = 0;
+   word           absAngl        = 0;
+   double         magnification  = 1.0;
+   double         angle          = 0.0;
+   TP             magnPoint;
+   std::string    strctName;
+   word           ba;
+   int tmp; //Dummy variable. Use for gds_PROPATTR
+   char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
+   std::ostringstream ost;
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
+      {
+         switch (cr->recType())
+         {
+            case gds_ELFLAGS: //readElflags(cr);// seems that it's not used
+               delete cr;break;
+            case gds_PLEX:   //readPlex(cr); // seems that it's not used
+               delete cr;break;
+            case gds_SNAME:
+               cr->retData(&strctName);
+               delete cr;break;
+            case gds_STRANS:
+               cr->retData(&ba,0,16);
+               reflection  = ba & 0x8000;//mask all bits except 0
+               absMagn     = ba & 0x0004;//mask all bits except 13
+               absAngl     = ba & 0x0002;//mask all bits except 14
+               delete cr; break;
+            case gds_MAG: cr->retData(&magnification);
+               delete cr; break;
+            case gds_ANGLE: cr->retData(&angle);
+               delete cr; break;
+            case gds_XY: magnPoint = GDSin::get_TP(cr);
+               delete cr;break;
+            case gds_PROPATTR://@TODO Not implemented yet+++++
+               cr->retData(&tmp);
+               delete cr; break;
+            case gds_PROPVALUE: //@TODO Not implemented yet+++++
+               cr->retData(&tmp2);
+               ost << "Property attribute  " << tmp << " with value \"" << tmp2 << "\" ignored" ; break;
+               tell_log(console::MT_WARNING, ost.str());
+               InFile->incGdsiiWarnings();
+               delete cr; break;
+            case gds_ENDEL:{//end of element, exit point
+               // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
+               laydata::CellDefin strdefn = tdt_db->linkcellref(strctName, TARGETDB_LIB);
+               dst_cell->addcellref( (*tdt_db)(),
+                                     strdefn,
+                                     CTM(magnPoint,
+                                         magnification,
+                                         angle,
+                                         (0 != reflection)
+                                        ),
+                                    false
+                                   );
+               delete cr;return;
+            }
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS sref - wrong record type in the current context");
+         }
       }
       else
          throw EXPTNreadGDS("Unexpected end of file");
@@ -1213,34 +1615,153 @@ void GDSin::GdsStructure::skimARef(GdsFile* cf)
    while (true);
 }
 
-GDSin::GdsStructure::~GdsStructure()
+void GDSin::GdsStructure::importAref(GdsFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds&)
 {
-   for (LayMap::iterator CL = _layers.begin(); CL != _layers.end(); CL++)
-   {
-      for (DataMap::iterator CD = CL->second.begin(); CD != CL->second.end(); CD++)
+   word           reflection     = 0;
+   word           absMagn        = 0;
+   word           absAngl        = 0;
+   double         magnification  = 1.0;
+   double         angle          = 0.0;
+   int2b          columns        = 0;
+   int2b          rows           = 0;
+   TP             magnPoint;
+   TP             xStep;
+   TP             yStep;
+   std::string    strctName;
+   word ba;
+   int tmp; //Dummy variable. Use for gds_PROPATTR
+   char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
+   std::ostringstream ost;
+   //initializing
+   GdsRecord* cr = NULL;
+   do
+   {//start reading
+      cr = cf->getNextRecord();
+      if (cr)
       {
-         GdsData* wData  = CD->second;
-         GdsData* wData2;
-         while (wData)
+         switch (cr->recType())
          {
-            wData2 = wData->last();
-            delete wData;
-            wData = wData2;
+            case gds_ELFLAGS://readElflags(cr);// seems that it's not used
+               delete cr;break;
+            case gds_PLEX://readPlex(cr);// seems that it's not used
+               delete cr;break;
+            case gds_SNAME:
+               cr->retData(&strctName);
+               delete cr;break;
+            case gds_STRANS:
+               cr->retData(&ba,0,16);
+               reflection  = ba & 0x8000;//mask all bits except 0
+               absMagn     = ba & 0x0004;//mask all bita except 13
+               absAngl     = ba & 0x0002;//mask all bita except 14
+               delete cr; break;
+            case gds_MAG: cr->retData(&magnification);
+               delete cr; break;
+            case gds_ANGLE: cr->retData(&angle);
+               delete cr; break;
+            case gds_XY:
+               magnPoint = GDSin::get_TP(cr,0);
+               xStep     = GDSin::get_TP(cr,1);
+               yStep     = GDSin::get_TP(cr,2);
+               delete cr;break;
+            case gds_COLROW://return number of columns & rows in the array
+               cr->retData(&columns  );
+               cr->retData(&rows   ,2);
+               delete cr;break;
+            case gds_PROPATTR://TODO not implemented yet+++++
+               cr->retData(&tmp);
+               delete cr; break;
+            case gds_PROPVALUE://TODO not implemented yet+++++
+               cr->retData(&tmp2);
+               ost << "Property attribute  " << tmp << " with value \"" << tmp2 << "\" ignored" ; break;
+               tell_log(console::MT_WARNING, ost.str());
+               InFile->incGdsiiWarnings();
+               delete cr; break;
+            case gds_ENDEL:{//end of element, exit point
+               // Absolute magnification, absolute angle should be reflected somehow!!!
+               laydata::CellDefin strdefn = tdt_db->linkcellref(strctName, TARGETDB_LIB);
+
+               laydata::ArrayProperties arrprops(arrGetStep(xStep, magnPoint, columns),
+                                                 arrGetStep(yStep, magnPoint, rows   ),
+                                                 static_cast<word>(columns),
+                                                 static_cast<word>(rows)
+                                                );
+               dst_cell->addcellaref( (*tdt_db)(),
+                                      strdefn,
+                                      CTM( magnPoint,
+                                           magnification,
+                                           angle,
+                                           (0 != reflection)
+                                         ),
+                                      arrprops,
+                                      false
+                                    );
+               delete cr;return;
+            }
+            default://parse error - not expected record type
+               delete cr;
+               throw EXPTNreadGDS("GDS aref - wrong record type in the current context");
          }
       }
+      else
+         throw EXPTNreadGDS("Unexpected end of file");
    }
-   for (RefList::iterator CR = _references.begin(); CR != _references.end(); CR++)
-   {
-      delete (*CR);
-   }
+   while (true);
+}
+
+void GDSin::GdsStructure::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b endext )
+{
+   TP P1 = plist[0];
+   TP P2 = plist[1];
+   double sdX = P2.x() - P1.x();
+   double sdY = P2.y() - P1.y();
+   // The sign - a bit funny way - described in layout canvas
+   int sign = ((sdX * sdY) >= 0) ? 1 : -1;
+   double length = sqrt(sdY*sdY + sdX*sdX);
+   int4b y0 = (int4b) rint(P1.y() - sign*((begext*sdY)/length));
+   int4b x0 = (int4b) rint(P1.x() - sign*((begext*sdX)/length));
+//
+   P1 = plist[numpoints-2];
+   P2 = plist[numpoints-1];
+   sdX = P2.x() - P1.x();
+   sdY = P2.y() - P1.y();
+   sign = ((sdX * sdY) >= 0) ? 1 : -1;
+   length = sqrt(sdY*sdY + sdX*sdX);
+   int4b yn = (int4b) rint(P2.y() + sign*((endext*sdY)/length));
+   int4b xn = (int4b) rint(P2.x() + sign*((endext*sdX)/length));
+   plist[0].setX(x0);
+   plist[0].setY(y0);
+   plist[numpoints-1].setX(xn);
+   plist[numpoints-1].setY(yn);
+}
+
+// int GDSin::GdsStructure::getXStep(TP& xStep, TP& magnPoint, int2b columns)
+// {
+//    return ret = (int) sqrt(pow(float((xStep.x() - magnPoint.x())),2) +
+//                            pow(float((xStep.y() - magnPoint.y())),2)   ) / columns;
+// }
+// 
+// int GDSin::GdsStructure::getYStep(TP& yStep, TP& magnPoint, int2b rows)
+// {
+//    return ret = (int) sqrt(pow(float((yStep.x() - magnPoint.x())),2) +
+//                            pow(float((yStep.y() - magnPoint.y())),2)   ) / rows;
+// }
+
+int GDSin::GdsStructure::arrGetStep(TP& Step, TP& magnPoint, int2b colrows)
+{
+   return (int) sqrt(pow(float((Step.x() - magnPoint.x())),2) +
+                     pow(float((Step.y() - magnPoint.y())),2)   ) / colrows;
+}
+
+GDSin::GdsStructure::~GdsStructure()
+{
 
 }
 
 //==============================================================================
 // class GdsData
 //==============================================================================
-GDSin::GdsData::GdsData() : _last(NULL)
-{}
+// GDSin::GdsData::GdsData() : _last(NULL)
+// {}
 
 //void GDSin::GdsData::readPlex(GdsRecord *cr)
 //{
@@ -1257,53 +1778,11 @@ GDSin::GdsData::GdsData() : _last(NULL)
 //==============================================================================
 // class GdsBox
 //==============================================================================
-GDSin::GdsBox::GdsBox(GdsFile* cf, int2b& layer, int2b& singleType) : GdsData()
-{
-   GdsRecord* cr = NULL;
-   do
-   {//start reading
-      cr = cf->getNextRecord();
-      if (cr)
-      {
-         switch (cr->recType())
-         {
-            case gds_ELFLAGS://readElflags(cr);// seems that it's not used
-               delete cr; break;
-            case gds_PLEX:   //readPlex(cr);// seems that it's not used
-               delete cr; break;
-            case gds_LAYER: cr->retData(&layer);
-               delete cr; break;
-            case gds_BOXTYPE:cr->retData(&singleType);
-               delete cr; break;
-            case gds_PROPATTR:
-               InFile->incGdsiiWarnings(); delete cr; break;
-            case gds_PROPVALUE: tell_log(console::MT_WARNING, "GDS box - PROPVALUE record ignored");
-               InFile->incGdsiiWarnings(); delete cr; break;
-            case gds_XY: {
-               word numpoints = (cr->recLen())/8 - 1;
-               // one point less because fist and last point coincide
-               assert(numpoints == 4);
-               _plist.reserve(numpoints);
-               for(word i = 0; i < numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
-               delete cr; break;
-               }
-            case gds_ENDEL://end of element, exit point
-               delete cr;return;
-            default: //parse error - not expected record type
-               delete cr;
-               throw EXPTNreadGDS("GDS box - wrong record type in the current context");
-         }
-      }
-      else
-         throw EXPTNreadGDS("Unexpected end of file");
-   }
-   while (true);
-}
 
 //==============================================================================
 // class GdsNode
 //==============================================================================
-GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer, int2b& singleType) : GdsData()
+GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer, int2b& singleType)/* : GdsData()*/
 {
    GdsRecord* cr = NULL;
    do
@@ -1345,355 +1824,24 @@ GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer, int2b& singleType) : GdsData(
    while (true);
 }
 
-//==============================================================================
-// class GdsPolygon
-//==============================================================================
-GDSin::GdsPolygon::GdsPolygon(GdsFile* cf, int2b& layer, int2b& singleType) : GdsData()
-{
-   word i;
-   GdsRecord* cr = NULL;
-   do
-   {//start reading
-      cr = cf->getNextRecord();
-      if (cr)
-      {
-         switch (cr->recType())
-         {
-            case gds_ELFLAGS: //readElflags(cr);// seems that it's not used
-               delete cr;break;
-            case gds_PLEX:   //readPlex(cr);// seems that it's not used
-               delete cr;break;
-            case gds_LAYER: cr->retData(&layer);
-               delete cr;break;
-            case gds_DATATYPE: cr->retData(&singleType);
-               delete cr;break;
-            case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS boundary - PROPATTR record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
-            case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS boundary - PROPVALUE record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
-            case gds_XY: _numpoints = (cr->recLen())/8 - 1;
-               // one point less because fist and last point coincide
-               _plist.reserve(_numpoints);
-               for(i = 0; i < _numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
-               delete cr; break;
-            case gds_ENDEL://end of element, exit point
-               delete cr;return;
-            default://parse error - not expected record type
-               delete cr;
-               throw EXPTNreadGDS("GDS boundary - wrong record type in the current context");
-         }
-      }
-      else
-         throw EXPTNreadGDS("Unexpected end of file");
-   }
-   while (true);
-}
-
-// laydata::tdtdata* GDSin::GdsPolygon::toTED() {
-//    return NULL;
-// }
-
-//==============================================================================
-// class GDSpath
-//==============================================================================
-GDSin::GDSpath::GDSpath(GdsFile* cf, int2b& layer, int2b& singleType) : GdsData()
-{
-   word i;
-   _pathtype = 0; _bgnextn = 0; _endextn = 0; _width = 0;
-   GdsRecord* cr = NULL;
-   do
-   {//start reading
-      cr = cf->getNextRecord();
-      if (cr)
-      {
-         switch (cr->recType())
-         {
-            case gds_ELFLAGS: //readElflags(cr);// seems that's not used
-               delete cr;break;
-            case gds_PLEX:   //readPlex(cr);// seems that's not used
-               delete cr;break;
-            case gds_LAYER: cr->retData(&layer);
-               delete cr;break;
-            case gds_DATATYPE: cr->retData(&singleType);
-               delete cr;break;
-            case gds_PATHTYPE: cr->retData(&_pathtype);
-               delete cr;break;
-            case gds_WIDTH: cr->retData(&_width);
-               delete cr;break;
-            case gds_BGNEXTN:   cr->retData(&_bgnextn);
-               delete cr;break;
-            case gds_ENDEXTN:   cr->retData(&_endextn);
-               delete cr;break;
-            case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS path - PROPATTR record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
-            case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS path - PROPVALUE record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
-            case gds_XY:_numpoints = (cr->recLen())/8;
-               _plist.reserve(_numpoints);
-               for(i = 0; i < _numpoints; i++)  _plist.push_back(GDSin::get_TP(cr, i));
-               delete cr;break;
-            case gds_ENDEL://end of element, exit point
-               if (2 == _pathtype)
-               {
-//                  tell_log(console::MT_INFO,"GDS Pathtype 2 digitized. Will be converted to Pathtype 0");
-                  convert22(_width/2, _width/2);
-               }
-               else if (4 == _pathtype)
-               {
-//                  tell_log(console::MT_INFO,"GDS Pathtype 4 digitized. Will be converted to Pathtype 0");
-                  convert22(_bgnextn, _endextn);
-               }
-               delete cr;return;
-            default://parse error - not expected record type
-               delete cr;
-               throw EXPTNreadGDS("GDS path - wrong record type in the current context");
-         }
-      }
-      else
-         throw EXPTNreadGDS("Unexpected end of file");
-   }
-   while (cr->recType() != gds_ENDEL);
-}
-
-void GDSin::GDSpath::convert22(int4b begext, int4b endext)
-{
-   TP P1 = _plist[0];
-   TP P2 = _plist[1];
-   double sdX = P2.x() - P1.x();
-   double sdY = P2.y() - P1.y();
-   // The sign - a bit funny way - described in layout canvas
-   int sign = ((sdX * sdY) >= 0) ? 1 : -1;
-   double length = sqrt(sdY*sdY + sdX*sdX);
-   int4b y0 = (int4b) rint(P1.y() - sign*((begext*sdY)/length));
-   int4b x0 = (int4b) rint(P1.x() - sign*((begext*sdX)/length));
-//
-   P1 = _plist[_numpoints-2];
-   P2 = _plist[_numpoints-1];
-   sdX = P2.x() - P1.x();
-   sdY = P2.y() - P1.y();
-   sign = ((sdX * sdY) >= 0) ? 1 : -1;
-   length = sqrt(sdY*sdY + sdX*sdX);
-   int4b yn = (int4b) rint(P2.y() + sign*((endext*sdY)/length));
-   int4b xn = (int4b) rint(P2.x() + sign*((endext*sdX)/length));
-   _plist[0].setX(x0);
-   _plist[0].setY(y0);
-   _plist[_numpoints-1].setX(xn);
-   _plist[_numpoints-1].setY(yn);
-}
-
-//==============================================================================
-// class GdsText
-//==============================================================================
-GDSin::GdsText::GdsText(GdsFile* cf, int2b& layer, int2b& singleType):GdsData()
-{
-   word ba;
-   // initializing
-   _font = 0; _vertJust = 0; _horiJust = 0; _pathType = 0;
-   _width = 0; _absMagn = 0; _absAngl = 0; _reflection = 0;
-   _magnification = 1.0; _angle = 0.0;
-   GdsRecord* cr = NULL;
-   do
-   {//start reading
-      cr = cf->getNextRecord();
-      if (cr)
-      {
-         switch (cr->recType())
-         {
-            case gds_ELFLAGS: //readElflags(cr);// seems that it's not used
-               delete cr;break;
-            case gds_PLEX:   //readPlex(cr);// seems that it's not used
-               delete cr;break;
-            case gds_LAYER: cr->retData(&layer);
-               delete cr;break;
-            case gds_TEXTTYPE: cr->retData(&singleType);
-               delete cr;break;
-            case gds_PATHTYPE: cr->retData(&_pathType);// ??? for test ???
-               delete cr;break;
-            case gds_WIDTH: cr->retData(&_width);// seems not to be used
-               delete cr;break;
-            case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS text - PROPATTR record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
-            case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS text - PROPVALUE record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
-            case gds_PRESENTATION:
-               cr->retData(&ba,0,16);
-               _font = ba & 0x0030; _font >>= 4;
-               _vertJust = ba & 0x000C;_vertJust >>= 2;
-               _horiJust = ba & 0x0003;
-               delete cr;break;
-            case gds_STRANS:
-               cr->retData(&ba,0,16);
-               _reflection = ba & 0x8000; _reflection >>= 15;//bit 0
-               _absMagn = ba & 0x0004; _absMagn >>= 2; //bit 13
-               _absAngl = ba & 0x0002; _absAngl >>= 1; //bit 14
-               delete cr; break;
-            case gds_MAG: cr->retData(&_magnification);
-               delete cr; break;
-            case gds_ANGLE: cr->retData(&_angle);
-               delete cr; break;
-            case gds_XY: _magnPoint = GDSin::get_TP(cr);
-               delete cr;break;
-            case gds_STRING: cr->retData(&_tString);
-               delete cr;break;
-            case gds_ENDEL://end of element, exit point
-               delete cr;return;
-            default://parse error - not expected record type
-               delete cr;
-               throw EXPTNreadGDS("GDS text - wrong record type in the current context");
-         }
-      }
-      else
-         throw EXPTNreadGDS("Unexpected end of file");
-   }
-   while (true);
-}
-
-//==============================================================================
-// class GdsRef
-//==============================================================================
-GDSin::GdsRef::GdsRef() : GdsData(), _reflection(false), _magnPoint(TP()), 
-   _magnification(1.0), _angle(0.0), _absMagn(false), _absAngl(false)
-{}
-
-GDSin::GdsRef::GdsRef(GdsFile* cf) : GdsData()
-{
-   word ba;
-   //initializing
-   _absAngl = _absMagn = _reflection = false;
-   _magnification = 1.0; _angle = 0.0;
-   int tmp; //Dummy variable. Use for gds_PROPATTR
-   char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
-   std::ostringstream ost;
-   GdsRecord* cr = NULL;
-   do
-   {//start reading
-      cr = cf->getNextRecord();
-      if (cr)
-      {
-         switch (cr->recType())
-         {
-            case gds_ELFLAGS: //readElflags(cr);// seems that it's not used
-               delete cr;break;
-            case gds_PLEX:   //readPlex(cr); // seems that it's not used
-               delete cr;break;
-            case gds_SNAME:
-               cr->retData(&_strctName);
-               delete cr;break;
-            case gds_STRANS:
-               cr->retData(&ba,0,16);
-               _reflection = ba & 0x8000;//mask all bits except 0
-               _absMagn = ba & 0x0004;//mask all bits except 13
-               _absAngl = ba & 0x0002;//mask all bits except 14
-               delete cr; break;
-            case gds_MAG: cr->retData(&_magnification);
-               delete cr; break;
-            case gds_ANGLE: cr->retData(&_angle);
-               delete cr; break;
-            case gds_XY: _magnPoint = GDSin::get_TP(cr);
-               delete cr;break;
-            case gds_ENDEL://end of element, exit point
-               delete cr;return;
-            case gds_PROPATTR://@TODO Not implemented yet+++++
-               cr->retData(&tmp);
-               delete cr; break;
-            case gds_PROPVALUE: //@TODO Not implemented yet+++++
-               cr->retData(&tmp2);
-               ost << "Property attribute  " << tmp << " with value \"" << tmp2 << "\" ignored" ; break;
-               tell_log(console::MT_WARNING, ost.str());
-               InFile->incGdsiiWarnings();
-               delete cr; break;
-            default://parse error - not expected record type
-               delete cr;
-               throw EXPTNreadGDS("GDS sref - wrong record type in the current context");
-         }
-      }
-      else
-         throw EXPTNreadGDS("Unexpected end of file");
-   }
-   while (true);
-}
 
 //==============================================================================
 // class GdsARef
 //==============================================================================
-GDSin::GdsARef::GdsARef(GdsFile* cf):GdsRef()
-{
-   word ba;
-   int tmp; //Dummy variable. Use for gds_PROPATTR
-   char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
-   std::ostringstream ost;
-   //initializing
-   GdsRecord* cr = NULL;
-   do
-   {//start reading
-      cr = cf->getNextRecord();
-      if (cr)
-      {
-         switch (cr->recType())
-         {
-            case gds_ELFLAGS://readElflags(cr);// seems that it's not used
-               delete cr;break;
-            case gds_PLEX://readPlex(cr);// seems that it's not used
-               delete cr;break;
-            case gds_SNAME:
-               cr->retData(&_strctName);
-               delete cr;break;
-            case gds_STRANS:
-               cr->retData(&ba,0,16);
-               _reflection = ba & 0x8000;//mask all bits except 0
-               _absMagn = ba & 0x0004;//mask all bita except 13
-               _absAngl = ba & 0x0002;//mask all bita except 14
-               delete cr; break;
-            case gds_MAG: cr->retData(&_magnification);
-               delete cr; break;
-            case gds_ANGLE: cr->retData(&_angle);
-               delete cr; break;
-            case gds_XY:
-               _magnPoint = GDSin::get_TP(cr,0);
-               _xStep = GDSin::get_TP(cr,1);
-               _yStep = GDSin::get_TP(cr,2);
-               delete cr;break;
-            case gds_COLROW://return number of columns & rows in the array 
-               cr->retData(&_columns);
-               cr->retData(&_rows,2);
-               delete cr;break;
-            case gds_ENDEL://end of element, exit point
-               // before exiting, init Current Translation Matrix
-//               tmtrx = DEBUG_NEW PSCTM(magn_point,magnification,angle,reflection);
-               delete cr;return;
-            case gds_PROPATTR://TODO not implemented yet+++++
-               cr->retData(&tmp);
-               delete cr; break;
-            case gds_PROPVALUE://TODO not implemented yet+++++
-               cr->retData(&tmp2);
-               ost << "Property attribute  " << tmp << " with value \"" << tmp2 << "\" ignored" ; break;
-               tell_log(console::MT_WARNING, ost.str());
-               InFile->incGdsiiWarnings();
-               delete cr; break;
-            default://parse error - not expected record type
-               delete cr;
-               throw EXPTNreadGDS("GDS aref - wrong record type in the current context");
-         }
-      }
-      else
-         throw EXPTNreadGDS("Unexpected end of file");
-   }
-   while (true);
-}
-
-int GDSin::GdsARef::getXStep()
-{
-   int ret = (int) sqrt(pow(float((_xStep.x() - _magnPoint.x())),2) +
-                        pow(float((_xStep.y() - _magnPoint.y())),2)   ) / _columns;
-   return ret;
-}
-
-int GDSin::GdsARef::getYStep()
-{
-   int ret = (int) sqrt(pow(float((_yStep.x() - _magnPoint.x())),2) +
-                        pow(float((_yStep.y() - _magnPoint.y())),2)   ) / _rows;
-   return ret;
-}
+//
+// int GDSin::GdsARef::getXStep()
+// {
+//    int ret = (int) sqrt(pow(float((_xStep.x() - _magnPoint.x())),2) +
+//                         pow(float((_xStep.y() - _magnPoint.y())),2)   ) / _columns;
+//    return ret;
+// }
+// 
+// int GDSin::GdsARef::getYStep()
+// {
+//    int ret = (int) sqrt(pow(float((_yStep.x() - _magnPoint.x())),2) +
+//                         pow(float((_yStep.y() - _magnPoint.y())),2)   ) / _rows;
+//    return ret;
+// }
 
 //-----------------------------------------------------------------------------
 /*void GDSin::PrintChildren(GDSin::GDSHierTree* parent, std::string* tabnum){
