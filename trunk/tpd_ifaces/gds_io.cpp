@@ -881,22 +881,6 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf)
    while (true);
 }
 
-// void GDSin::GdsStructure::linkDataIn(GdsData* data, int2b layer, int2b dtype)
-// {
-//    LayMap::iterator CMAP = _layers.find(layer);
-//    if (_layers.end() == CMAP)
-//       _layers[layer][dtype] = data->linkTo(NULL);
-//    else
-//    {
-//       DataMap::iterator DMAP = _layers[layer].find(dtype);
-//       if (_layers[layer].end() == DMAP)
-//          _layers[layer][dtype] = data->linkTo(NULL);
-//       else
-//          _layers[layer][dtype] = data->linkTo(_layers[layer][dtype]);
-//    }
-// //   _allLay[layer] = true;
-// }
-
 void GDSin::GdsStructure::updateContents(int2b layer, int2b dtype)
 {
    _contSummary[layer].push_back(dtype);
@@ -927,29 +911,6 @@ void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
       }
    }
 }
-
-// void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
-// {
-//    for (nameList::const_iterator CRN = _childrenNames.begin(); CRN != _childrenNames.end(); CRN++)
-//    {
-//       GdsStructure* ws2 = library->getStructure(*CRN);
-//       if (ws2)
-//       {
-//          _children.push_back(ws2);
-//          ws2->_haveParent = true;
-//       }
-//       else
-//       {//structure is referenced but not defined!
-//          char wstr[256];
-//          sprintf(wstr," Structure %s is referenced, but not defined!",CRN->c_str() );
-//          tell_log(console::MT_WARNING,wstr);
-//          InFile->incGdsiiWarnings();
-//          //SGREM probably is a good idea to add default
-//          //GdsStructure here. Then this structure can be
-//          //visualized in the Hierarchy window as disabled
-//       }
-//    }
-// }
 
 void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
 {
@@ -1734,18 +1695,6 @@ void GDSin::GdsStructure::pathConvert(pointlist& plist, word numpoints, int4b be
    plist[numpoints-1].setY(yn);
 }
 
-// int GDSin::GdsStructure::getXStep(TP& xStep, TP& magnPoint, int2b columns)
-// {
-//    return ret = (int) sqrt(pow(float((xStep.x() - magnPoint.x())),2) +
-//                            pow(float((xStep.y() - magnPoint.y())),2)   ) / columns;
-// }
-// 
-// int GDSin::GdsStructure::getYStep(TP& yStep, TP& magnPoint, int2b rows)
-// {
-//    return ret = (int) sqrt(pow(float((yStep.x() - magnPoint.x())),2) +
-//                            pow(float((yStep.y() - magnPoint.y())),2)   ) / rows;
-// }
-
 int GDSin::GdsStructure::arrGetStep(TP& Step, TP& magnPoint, int2b colrows)
 {
    return (int) sqrt(pow(float((Step.x() - magnPoint.x())),2) +
@@ -1756,28 +1705,6 @@ GDSin::GdsStructure::~GdsStructure()
 {
 
 }
-
-//==============================================================================
-// class GdsData
-//==============================================================================
-// GDSin::GdsData::GdsData() : _last(NULL)
-// {}
-
-//void GDSin::GdsData::readPlex(GdsRecord *cr)
-//{
-//   word elflags;
-//   cr->retData(&elflags,0,16);//get two bytes bit-array
-//}
-
-//void GDSin::GdsData::readElflags(GdsRecord *cr)
-//{
-//   int4b plex;
-//   cr->retData(&plex);//get two bytes bit-array
-//}
-
-//==============================================================================
-// class GdsBox
-//==============================================================================
 
 //==============================================================================
 // class GdsNode
@@ -1824,44 +1751,6 @@ GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer, int2b& singleType)/* : GdsDat
    while (true);
 }
 
-
-//==============================================================================
-// class GdsARef
-//==============================================================================
-//
-// int GDSin::GdsARef::getXStep()
-// {
-//    int ret = (int) sqrt(pow(float((_xStep.x() - _magnPoint.x())),2) +
-//                         pow(float((_xStep.y() - _magnPoint.y())),2)   ) / _columns;
-//    return ret;
-// }
-// 
-// int GDSin::GdsARef::getYStep()
-// {
-//    int ret = (int) sqrt(pow(float((_yStep.x() - _magnPoint.x())),2) +
-//                         pow(float((_yStep.y() - _magnPoint.y())),2)   ) / _rows;
-//    return ret;
-// }
-
-//-----------------------------------------------------------------------------
-/*void GDSin::PrintChildren(GDSin::GDSHierTree* parent, std::string* tabnum){
-   GdsStructure* cs = parent->GetItem();
-   std::string mytab(*tabnum);
-   std::string outname(mytab);
-   outname += cs->Get_StrName();
-   AddLog('A', outname.c_str());
-   // Go down and print children first
-   GDSHierTree* Child= parent->GetChild();
-   if (Child) {
-//      mytab.ReplaceChar('_',' ');
-      mytab += "|__";
-   }
-   while (Child) {
-      PrintChildren(Child, &mytab);
-      Child = Child->GetBrother();
-   }
-}
-*/
 //-----------------------------------------------------------------------------
 TP GDSin::get_TP(GDSin::GdsRecord *cr, word curnum, byte len)
 {
