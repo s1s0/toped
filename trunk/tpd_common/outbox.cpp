@@ -239,6 +239,7 @@ void console::TopedStatus::OnInitGauge(long int init_val)
 
 void console::TopedStatus::OnGaugeRun(long int position)
 {
+   if (NULL == _progress) return;
    int adj_position = (int)((real)position * _progressAdj);
    _progress->SetValue(adj_position);
 }
