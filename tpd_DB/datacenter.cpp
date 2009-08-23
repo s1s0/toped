@@ -608,6 +608,9 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& lay
    }
    else
    {
+#ifdef GDSCONVERT_PROFILING
+         HiResTimer rendTimer;
+#endif
       // Lock the DB here manually. Otherwise the cell browser is going mad
       if (_GDSDB->reopenFile())
       {
@@ -619,6 +622,9 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& lay
          _GDSDB->closeFile();
          tell_log(console::MT_INFO,"Done");
       }
+#ifdef GDSCONVERT_PROFILING
+      rendTimer.report("Time elapsed for GDS conversion: ");
+#endif
    }
 }
 
@@ -938,13 +944,13 @@ void DataCenter::openGL_draw(const CTM& layCTM)
       }
       else
       {
-#ifdef TIME_PROFILING
+#ifdef RENDER_PROFILING
          HiResTimer rendTimer;
 #endif
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(_properties.drawprop());
-#ifdef TIME_PROFILING
+#ifdef RENDER_PROFILING
          rendTimer.report("Total elapsed rendering time");
 #endif
          VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
@@ -988,23 +994,23 @@ void DataCenter::openGL_render(const CTM& layCTM)
       }
       else
       {
-#ifdef TIME_PROFILING
+#ifdef RENDER_PROFILING
          HiResTimer rendTimer;
 #endif
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_render(renderer);
-#ifdef TIME_PROFILING
+#ifdef RENDER_PROFILING
          rendTimer.report("Time elapsed for data traversing: ");
 #endif
          // The version with the central VBO's
          if (renderer.collect())
          {
-#ifdef TIME_PROFILING
+#ifdef RENDER_PROFILING
             rendTimer.report("Time elapsed for data copying   : ");
 #endif
             renderer.draw();
-#ifdef TIME_PROFILING
+#ifdef RENDER_PROFILING
             rendTimer.report("    Total elapsed rendering time: ");
 #endif
          }

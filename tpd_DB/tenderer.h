@@ -124,13 +124,6 @@
 #define TENDERER_H
 
 #include <GL/glew.h>
-
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <sys/time.h>
-#endif
-
 #include "drawprop.h"
 
 //=============================================================================
@@ -892,21 +885,5 @@ namespace tenderer {
 
    void checkOGLError(std::string);
 }
-
-#ifdef TIME_PROFILING
-class HiResTimer {
-   public:
-      HiResTimer();
-      void           report(std::string);
-   private:
-      timeval        _start_time;
-      timeval        _end_time;
-#ifdef WIN32
-      // System frequency of timer for Windows.
-      LARGE_INTEGER  _freq;
-      LARGE_INTEGER  _inittime;
-#endif
-};
-#endif //TIME_PROFILING
 
 #endif //TENDERER_H
