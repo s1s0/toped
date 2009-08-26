@@ -574,7 +574,13 @@ bool DataCenter::GDSparse(std::string filename)
    while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    try
    {
+#ifdef GDSCONVERT_PROFILING
+         HiResTimer profTimer;
+#endif
       _GDSDB = DEBUG_NEW GDSin::GdsFile(filename);
+#ifdef GDSCONVERT_PROFILING
+      profTimer.report("Time elapsed for GDS parse: ");
+#endif
    }
    catch (EXPTNreadGDS)
    {
@@ -609,7 +615,7 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& lay
    else
    {
 #ifdef GDSCONVERT_PROFILING
-         HiResTimer rendTimer;
+         HiResTimer profTimer;
 #endif
       // Lock the DB here manually. Otherwise the cell browser is going mad
       if (_GDSDB->reopenFile())
@@ -618,12 +624,12 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& lay
          for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
             converter.top_structure(CN->c_str(), recur, over);
          _TEDLIB()->modified = true;
-         unlockGDS();
          _GDSDB->closeFile();
          tell_log(console::MT_INFO,"Done");
       }
+      unlockGDS();
 #ifdef GDSCONVERT_PROFILING
-      rendTimer.report("Time elapsed for GDS conversion: ");
+      profTimer.report("Time elapsed for GDS conversion: ");
 #endif
    }
 }

@@ -96,8 +96,8 @@ namespace laydata {
       tdtcell*       removecell(std::string&, laydata::atticList*, laydata::tdtlibdir*);
       void           removeRefdCell(std::string&, CellDefList&, laydata::atticList*, laydata::tdtlibdir*);
       tdtdata*       addbox(unsigned la, TP* p1, TP* p2, bool sortnow = true);
-      tdtdata*       addpoly(unsigned, const pointlist*, bool sortnow = true);
-      tdtdata*       addwire(unsigned, const pointlist*, word, bool sortnow = true);
+      tdtdata*       addpoly(unsigned, pointlist*, bool sortnow = true);
+      tdtdata*       addwire(unsigned, pointlist*, word, bool sortnow = true);
       void           resortlayer(unsigned);
       tdtdata*       addtext(unsigned la, std::string& text, CTM& ori);
       tdtdata*       addcellref(laydata::CellDefin strdefn, CTM& ori);

@@ -124,6 +124,7 @@ functionality is mostly implemented in the parent class.
       void                 motion_draw(const layprop::DrawProperties&, ctmqueue& ) const;
       tdtdata*             addbox(const TP& p1, const TP& p2, bool sortnow = true);
       tdtdata*             addpoly(pointlist& pl, bool sortnow = true);
+      tdtdata*             addpoly(int4b* pl, unsigned psize, bool sortnow = true);
       tdtdata*             addwire(pointlist& pl,word w, bool sortnow = true);
       tdtdata*             addtext(std::string text, CTM trans, bool sortnow = true);
    };

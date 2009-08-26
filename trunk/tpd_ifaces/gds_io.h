@@ -399,6 +399,7 @@ namespace GDSin {
 
    // Function definition
      TP   get_TP(GdsRecord* cr, word curnum = 0, byte len=4);
+     int4b* getCoordinateArray(GdsRecord* cr, word len);
 //     void PrintChildren(GDSin::GDSHierTree*, std::string*);
 }   
 #endif // !defined(GDSIO_H_INCLUDED)

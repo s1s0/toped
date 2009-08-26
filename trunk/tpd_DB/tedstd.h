@@ -138,9 +138,8 @@ namespace laydata {
    //==============================================================================
    class validator {
    public:
-                           validator(const pointlist& plist) : _status(shp_OK), 
+                           validator(pointlist& plist) : _status(shp_OK),
                                                             _plist(plist) {};
-                           validator() : _status(shp_OK) {};
       bool                 valid()           {return _status < shp_cross;}
       bool                 recoverable()     {return _status < shp_null;}
       byte                 status()          {return _status;}
@@ -152,7 +151,7 @@ namespace laydata {
       virtual             ~validator() {};
    protected:
       byte                 _status;
-      pointlist            _plist;
+      pointlist&           _plist;
    };
    
 //==============================================================================

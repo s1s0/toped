@@ -958,6 +958,14 @@ laydata::tdtdata* laydata::tdtlayer::addpoly(pointlist& pl, bool sortnow) {
    else         put(shape);
    return shape;
 }
+
+laydata::tdtdata* laydata::tdtlayer::addpoly(int4b* pl, unsigned psize, bool sortnow) {
+   laydata::tdtpoly *shape = DEBUG_NEW tdtpoly(pl, psize);
+   if (sortnow) add(shape);
+   else         put(shape);
+   return shape;
+}
+
 /*!Create new tdtwire. Depending on sortnow input variable the new shape is 
 just added to the quadTree (using quadTree::put()) without sorting or fit on 
 the proper place (using add() */
