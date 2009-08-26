@@ -228,8 +228,8 @@ void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscal
 }
 
 //=============================================================================
-layprop::ViewProperties::ViewProperties() {
-   addlayer(std::string("_$teLayer_cell"),0,"","","");
+layprop::ViewProperties::ViewProperties()
+{
    _step = 1;
    setUU(1);
    _marker_angle = 0;
