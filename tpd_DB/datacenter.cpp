@@ -514,7 +514,6 @@ bool DataCenter::GDSparse(std::string filename)
       toped_status(console::TSTS_PRGRSBAROFF);
       status = false;
    }
-//   status = _GDSDB->status();
    if (status)
    {
       // generate the hierarchy tree of cells
@@ -534,6 +533,7 @@ bool DataCenter::GDSparse(std::string filename)
 
 void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
 {
+   // Lock the DB here manually. Otherwise the cell browser is going mad
    if (NULL == lockGDS())
    {
       std::string news = "No GDS data in memory. Parse GDS file first";
@@ -542,19 +542,11 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& lay
    else
    {
 #ifdef GDSCONVERT_PROFILING
-         HiResTimer profTimer;
+      HiResTimer profTimer;
 #endif
-      // Lock the DB here manually. Otherwise the cell browser is going mad
-      if (_GDSDB->reopenFile())
-      {
-         GDSin::Gds2Ted converter(_GDSDB, &_TEDLIB, laymap);
-         converter.run(top_names, recur, over);
-//         for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
-//            converter.top_structure(CN->c_str(), recur, over);
-         _TEDLIB()->modified = true;
-         _GDSDB->closeFile();
-         tell_log(console::MT_INFO,"Done");
-      }
+      GDSin::Gds2Ted converter(_GDSDB, &_TEDLIB, laymap);
+      converter.run(top_names, recur, over);
+      _TEDLIB()->modified = true;
       unlockGDS();
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS conversion: ");

@@ -411,6 +411,7 @@ namespace GDSin {
       const LayerMapGds&   _theLayMap;
       real                 _coeff; // DBU difference
       StructureList        _convertList;
+      wxFileOffset         _conversionLength;
    };
 
 
