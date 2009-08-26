@@ -243,6 +243,7 @@ namespace GDSin {
          void                 linkReferences(GdsLibrary* const);
          std::string          strctName() const                { return _strctName;    }
          bool                 traversed() const                { return _traversed;    }
+         void                 set_traversed(bool tf)           { _traversed = tf;      }
          int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
          bool                 haveParent() const               { return _haveParent;   }
          wxFileOffset         strSize() const                  { return _strSize;      }
@@ -396,6 +397,22 @@ namespace GDSin {
          const LayerMapGds*   _laymap;
          wxFileOffset         _prgrs_pos;
    };
+
+   class Gds2Ted {
+   public:
+      typedef std::list<GDSin::GdsStructure*> StructureList;
+                           Gds2Ted(GDSin::GdsFile*, laydata::tdtlibdir*, const LayerMapGds&);
+      void                 run(const nameList&, bool, bool);
+   protected:
+      void                 preTraverseChildren(const GDSin::GDSHierTree*, bool);
+      void                 convert(GDSin::GdsStructure*, bool);
+      GDSin::GdsFile*      _src_lib;
+      laydata::tdtlibdir*  _tdt_db;
+      const LayerMapGds&   _theLayMap;
+      real                 _coeff; // DBU difference
+      StructureList        _convertList;
+   };
+
 
    // Function definition
      TP   get_TP(GdsRecord* cr, word curnum = 0, byte len=4);

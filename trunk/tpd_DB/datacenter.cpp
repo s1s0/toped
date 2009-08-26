@@ -40,79 +40,6 @@
 DataCenter*               DATC = NULL;
 
 //-----------------------------------------------------------------------------
-// class Gds2Ted
-//-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap) :
-      _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap), _coeff((*_tdt_db)()->UU() / src_lib->libUnits())
-{}
-
-void GDSin::Gds2Ted::top_structure(std::string top_str, bool recursive, bool overwrite)
-{
-   assert(_src_lib->hierTree());
-   GDSin::GdsStructure *src_structure = _src_lib->getStructure(top_str.c_str());
-   if (NULL != src_structure)
-   {
-      GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
-      if (recursive) child_structure(root, overwrite);
-      convert_prep(root, overwrite);
-      root = root->GetNextRoot(TARGETDB_LIB);
-   }
-   else
-   {
-      std::ostringstream ost; ost << "GDS import: ";
-      ost << "Structure \""<< top_str << "\" not found in the GDS DB in memory.";
-      tell_log(console::MT_WARNING,ost.str());
-   }
-}
-
-void GDSin::Gds2Ted::child_structure(const GDSin::GDSHierTree* root, bool overwrite)
-{
-   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
-   while (Child)
-   {
-      if ( !Child->GetItem()->traversed() )
-      {
-         // traverse children first
-         child_structure(Child, overwrite);
-         convert_prep(Child, overwrite);
-      }
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
-void GDSin::Gds2Ted::convert_prep(const GDSin::GDSHierTree* item, bool overwrite)
-{
-   GDSin::GdsStructure* src_structure = const_cast<GDSin::GdsStructure*>(item->GetItem());
-   std::string gname = src_structure->strctName();
-   // check that destination structure with this name exists
-   laydata::tdtcell* dst_structure = static_cast<laydata::tdtcell*>((*_tdt_db)()->checkcell(gname));
-   std::ostringstream ost; ost << "GDS import: ";
-   if (NULL != dst_structure)
-   {
-      if (overwrite)
-      {
-         /*@TODO Erase the existing structure and convert*/
-         ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
-         tell_log(console::MT_WARNING,ost.str());
-      }
-      else
-      {
-         ost << "Structure "<< gname << " already exists. Omitted";
-         tell_log(console::MT_INFO,ost.str());
-      }
-   }
-   else
-   {
-      ost << "Importing structure " << gname << "...";
-      tell_log(console::MT_INFO,ost.str());
-      // first create a new cell
-      dst_structure = (*_tdt_db)()->addcell(gname, _tdt_db);
-      // finally call the cell converter
-      src_structure->import(_src_lib, dst_structure, _tdt_db, _theLayMap);
-   }
-}
-
-//-----------------------------------------------------------------------------
 // class Cif2Ted
 //-----------------------------------------------------------------------------
 CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtlibdir* tdt_db,
@@ -621,8 +548,9 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& lay
       if (_GDSDB->reopenFile())
       {
          GDSin::Gds2Ted converter(_GDSDB, &_TEDLIB, laymap);
-         for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
-            converter.top_structure(CN->c_str(), recur, over);
+         converter.run(top_names, recur, over);
+//         for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
+//            converter.top_structure(CN->c_str(), recur, over);
          _TEDLIB()->modified = true;
          _GDSDB->closeFile();
          tell_log(console::MT_INFO,"Done");

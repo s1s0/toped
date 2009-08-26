@@ -33,7 +33,7 @@
 #include "viewprop.h"
 
 
-namespace GDSin {
+/*namespace GDSin {
 
    class Gds2Ted {
    public:
@@ -48,7 +48,7 @@ namespace GDSin {
       real                 _coeff; // DBU difference
    };
 }
-
+*/
 namespace CIFin {
 
    class Cif2Ted {
