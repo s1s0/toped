@@ -1728,6 +1728,93 @@ GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer, int2b& singleType)/* : GdsDat
 }
 
 //-----------------------------------------------------------------------------
+// class Gds2Ted
+//-----------------------------------------------------------------------------
+GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap) :
+      _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap), _coeff((*_tdt_db)()->UU() / src_lib->libUnits())
+{}
+
+void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool overwrite)
+{
+   assert(_src_lib->hierTree());
+
+   for (nameList::const_iterator CN = top_str_names.begin(); CN != top_str_names.end(); CN++)
+   {
+      GDSin::GdsStructure *src_structure = _src_lib->getStructure(*CN);
+      if (NULL != src_structure)
+      {
+         GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
+         if (recursive) preTraverseChildren(root, overwrite);
+         if (!src_structure->traversed())
+         {
+            _convertList.push_back(src_structure);
+            src_structure->set_traversed(true);
+         }
+      }
+      else
+      {
+         std::ostringstream ost; ost << "GDS import: ";
+         ost << "Structure \""<< *CN << "\" not found in the GDS DB.";
+         tell_log(console::MT_WARNING,ost.str());
+      }
+   }
+   for (StructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
+      convert(*CS, overwrite);
+
+}
+
+void GDSin::Gds2Ted::preTraverseChildren(const GDSin::GDSHierTree* root, bool overwrite)
+{
+   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
+   while (Child)
+   {
+      if ( !Child->GetItem()->traversed() )
+      {
+         // traverse children first
+         preTraverseChildren(Child, overwrite);
+         GDSin::GdsStructure* sstr = const_cast<GDSin::GdsStructure*>(Child->GetItem());
+         if (!sstr->traversed())
+         {
+            _convertList.push_back(sstr);
+            sstr->set_traversed(true);
+         }
+      }
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
+void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
+{
+   std::string gname = src_structure->strctName();
+   // check that destination structure with this name exists
+   laydata::tdtcell* dst_structure = static_cast<laydata::tdtcell*>((*_tdt_db)()->checkcell(gname));
+   std::ostringstream ost; ost << "GDS import: ";
+   if (NULL != dst_structure)
+   {
+      if (overwrite)
+      {
+         /*@TODO Erase the existing structure and convert*/
+         ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
+         tell_log(console::MT_WARNING,ost.str());
+      }
+      else
+      {
+         ost << "Structure "<< gname << " already exists. Skipped";
+         tell_log(console::MT_INFO,ost.str());
+      }
+   }
+   else
+   {
+      ost << "Importing structure " << gname << "...";
+      tell_log(console::MT_INFO,ost.str());
+      // first create a new cell
+      dst_structure = (*_tdt_db)()->addcell(gname, _tdt_db);
+      // finally call the cell converter
+      src_structure->import(_src_lib, dst_structure, _tdt_db, _theLayMap);
+   }
+}
+
+//-----------------------------------------------------------------------------
 TP GDSin::get_TP(GDSin::GdsRecord *cr, word curnum, byte len)
 {
    int4b GDS_X, GDS_Y;
