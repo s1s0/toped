@@ -1731,7 +1731,8 @@ GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer, int2b& singleType)/* : GdsDat
 // class Gds2Ted
 //-----------------------------------------------------------------------------
 GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap) :
-      _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap), _coeff((*_tdt_db)()->UU() / src_lib->libUnits())
+      _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap),
+               _coeff((*_tdt_db)()->UU() / src_lib->libUnits()), _conversionLength(0)
 {}
 
 void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool overwrite)
@@ -1749,6 +1750,7 @@ void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool ove
          {
             _convertList.push_back(src_structure);
             src_structure->set_traversed(true);
+            _conversionLength += src_structure->strSize();
          }
       }
       else
@@ -1758,9 +1760,22 @@ void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool ove
          tell_log(console::MT_WARNING,ost.str());
       }
    }
-   for (StructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
-      convert(*CS, overwrite);
-
+   if (_src_lib->reopenFile())
+   {
+      toped_status(console::TSTS_PRGRSBARON, _conversionLength);
+      try
+      {
+         for (StructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
+         {
+            convert(*CS, overwrite);
+            (*CS)->set_traversed(false); // restore the state for eventual second conversion
+         }
+         tell_log(console::MT_INFO, "Done");
+      }
+      catch (EXPTNreadGDS) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
+      toped_status(console::TSTS_PRGRSBAROFF);
+      _src_lib->closeFile();
+   }
 }
 
 void GDSin::Gds2Ted::preTraverseChildren(const GDSin::GDSHierTree* root, bool overwrite)
@@ -1777,6 +1792,7 @@ void GDSin::Gds2Ted::preTraverseChildren(const GDSin::GDSHierTree* root, bool ov
          {
             _convertList.push_back(sstr);
             sstr->set_traversed(true);
+            _conversionLength += sstr->strSize();
          }
       }
       Child = Child->GetBrother(TARGETDB_LIB);
