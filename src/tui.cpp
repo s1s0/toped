@@ -1873,7 +1873,6 @@ USMap* tui::nameCbox3Records::getTheMap()
          layno = lint;
       }
       else layno = DATC->getLayerNo(layname);
-      assert(layno);
       std::ostringstream gdslaytype;
       if (gds_lay_map->end() != gds_lay_map->find(layno))
          gdslaytype << (*gds_lay_map)[layno] << ","
