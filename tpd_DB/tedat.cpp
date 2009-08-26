@@ -553,9 +553,13 @@ laydata::validator* laydata::tdtbox::move(const CTM& trans, SGBitSet& plst)
    }
    else
    {// used for rotate
-      TP p1 (_pdata[p1x], _pdata[p1y]);
-      TP p2 (_pdata[p2x], _pdata[p2y]);
-      laydata::valid_box* check = DEBUG_NEW valid_box(p1, p2 ,trans);
+      pointlist plist;
+      plist.reserve(4);
+      plist.push_back(TP(_pdata[p1x], _pdata[p1y])*trans);
+      plist.push_back(TP(_pdata[p2x], _pdata[p1y])*trans);
+      plist.push_back(TP(_pdata[p2x], _pdata[p2y])*trans);
+      plist.push_back(TP(_pdata[p1x], _pdata[p2y])*trans);
+      laydata::valid_box* check = DEBUG_NEW valid_box(plist);
       if (laydata::shp_box & check->status())
       {
          // modify the box ONLY if we're going to get a box
@@ -769,6 +773,11 @@ laydata::tdtpoly::tdtpoly(const pointlist& plst) : tdtdata()
       _pdata[index++] = plst[i].x();
       _pdata[index++] = plst[i].y();
    }
+   _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
+}
+
+laydata::tdtpoly::tdtpoly(int4b* pdata, unsigned psize) : _pdata(pdata), _psize(psize)
+{
    _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
 }
 
@@ -2540,12 +2549,8 @@ void laydata::tdttext::info(std::ostringstream& ost, real DBU) const
 //-----------------------------------------------------------------------------
 // class valid_box
 //-----------------------------------------------------------------------------
-laydata::valid_box::valid_box(const TP& p1, const TP& p2, const CTM& trans) : validator()
+laydata::valid_box::valid_box(pointlist& plist) : validator(plist)
 {
-   _plist.push_back(p1*trans);
-   _plist.push_back(TP(p2.x(), p1.y())*trans);
-   _plist.push_back(p2*trans);
-   _plist.push_back(TP(p1.x(), p2.y())*trans);
    word i,j;
    _area = 0;
    for (i = 0, j = 1; i < 4; i++, j = (j+1) % 4)
@@ -2578,7 +2583,7 @@ std::string laydata::valid_box::failtype()
 //-----------------------------------------------------------------------------
 // class valid_poly
 //-----------------------------------------------------------------------------
-laydata::valid_poly::valid_poly(const pointlist& plist) : validator(plist) { 
+laydata::valid_poly::valid_poly(pointlist& plist) : validator(plist) {
    angles();
    if (_status > 0x10) return;
    //reorder the chain (if needed) to get the points in anticlockwise order
@@ -2707,7 +2712,7 @@ std::string laydata::valid_poly::failtype() {
 //-----------------------------------------------------------------------------
 // class valid_wire
 //-----------------------------------------------------------------------------
-laydata::valid_wire::valid_wire(const pointlist& plist, word width) : 
+laydata::valid_wire::valid_wire(pointlist& plist, word width) :
                                      validator(plist), _width(width) { 
    angles();
    if (_status > 0x10) return;

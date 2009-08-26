@@ -935,29 +935,6 @@ void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
       (*CSTR)->collectLayers(layers_map, hier);
 }
 
-// void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
-// {
-//    for (LayMap::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
-//    {
-//       WordList data_types;
-//       if (layers_map.end() != layers_map.find(CL->first))
-//          data_types = layers_map[CL->first];
-// 
-//       for (DataMap::const_iterator DL = CL->second.begin(); DL != CL->second.end(); DL++)
-//       {
-//          data_types.push_back(DL->first);
-//       }
-//       data_types.sort();
-//       data_types.unique();
-//       layers_map[CL->first] = data_types;
-//    }
-//    if (!hier) return;
-//    for (ChildStructure::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
-//       if (NULL == (*CSTR)) continue;
-//    else
-//       (*CSTR)->collectLayers(layers_map, hier);
-// }
-
 GDSin::GDSHierTree* GDSin::GdsStructure::hierOut(GDSHierTree* Htree, GdsStructure* parent)
 {
    // collecting hierarchical information
@@ -1012,7 +989,6 @@ void GDSin::GdsStructure::importBox(GdsFile* cf, laydata::tdtcell* dst_cell, con
 {
    int2b       layer;
    int2b       singleType;
-   pointlist   plist;
    word        tdtlaynum;
 
    GdsRecord* cr = NULL;
@@ -1041,6 +1017,7 @@ void GDSin::GdsStructure::importBox(GdsFile* cf, laydata::tdtcell* dst_cell, con
                   //one point less because fist and last point coincide
                   word numpoints = (cr->recLen())/8 - 1;
                   assert(numpoints == 4);
+                  pointlist   plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
@@ -1115,8 +1092,6 @@ void GDSin::GdsStructure::importPoly(GdsFile* cf, laydata::tdtcell* dst_cell, co
 {
    int2b       layer;
    int2b       singleType;
-   pointlist   plist;
-   word        numpoints;
    word        tdtlaynum;
    GdsRecord*  cr = NULL;
    do
@@ -1142,7 +1117,9 @@ void GDSin::GdsStructure::importPoly(GdsFile* cf, laydata::tdtcell* dst_cell, co
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
                   //one point less because fist and last point coincide
-                  numpoints = (cr->recLen())/8 - 1;
+                  word numpoints = (cr->recLen())/8 - 1;
+//                  int4b* plist = getCoordinateArray(cr, numpoints);
+                  pointlist plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
@@ -1225,10 +1202,8 @@ void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, co
    int4b width     = 0;
    int4b bgnextn   = 0;
    int4b endextn   = 0;
-   word  numpoints = 0;
    word  tdtlaynum;
    GdsRecord* cr = NULL;
-   pointlist   pointlist;
    do
    {//start reading
       cr = cf->getNextRecord();
@@ -1259,7 +1234,8 @@ void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, co
             case gds_XY:
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
-                  numpoints = (cr->recLen())/8;
+                  word numpoints = (cr->recLen())/8;
+                  pointlist   pointlist;
                   pointlist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      pointlist.push_back(GDSin::get_TP(cr, i));
@@ -1273,7 +1249,7 @@ void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, co
                   if (!check.valid())
                   {
                      std::ostringstream ost;
-                     ost << "Layer check fails - {" << check.failtype()
+                     ost << "Wire check fails - {" << check.failtype()
                            << " Layer: " << layer
                            << " Data type: " << singleType
                            << " }";
@@ -1759,3 +1735,12 @@ TP GDSin::get_TP(GDSin::GdsRecord *cr, word curnum, byte len)
    cr->retData(&GDS_Y, curnum*len*2+len, len);
    return TP(GDS_X,GDS_Y);
 }
+
+int4b* GDSin::getCoordinateArray(GdsRecord* cr, word len)
+{
+   int4b* carr = DEBUG_NEW int4b[len*2];
+   for (word i = 0; i < 2*len; i++)
+      cr->retData(&(carr[i]),i*4, 4);
+   return carr;
+}
+

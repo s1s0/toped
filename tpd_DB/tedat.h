@@ -161,6 +161,7 @@ namespace laydata {
    class tdtpoly : public tdtdata   {
       public:
                            tdtpoly(const pointlist& plist);
+                           tdtpoly(int4b* plist, unsigned psize);
                            tdtpoly(TEDfile* const tedfile);
                           ~tdtpoly();
          DBbox             overlap() const;
@@ -367,7 +368,7 @@ namespace laydata {
 
    class valid_box  : public validator {
    public:
-                        valid_box(const TP&, const TP&, const CTM&);
+                        valid_box(pointlist&);
       laydata::tdtdata* replacement();
       std::string       failtype();
       real              area() {return _area;}
@@ -378,7 +379,7 @@ namespace laydata {
    //===========================================================================
    class valid_poly : public validator {
    public:
-                        valid_poly(const pointlist&);
+                        valid_poly(pointlist&);
       laydata::tdtdata* replacement();
       std::string       failtype();
    private:
@@ -390,7 +391,7 @@ namespace laydata {
    //===========================================================================
    class valid_wire : public validator {
    public:
-                        valid_wire(const pointlist&, word);
+                        valid_wire(pointlist&, word);
       laydata::tdtdata* replacement();
       std::string       failtype();
    private:

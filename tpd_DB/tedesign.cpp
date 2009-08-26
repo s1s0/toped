@@ -820,7 +820,7 @@ laydata::tdtdata* laydata::tdtdesign::addbox(unsigned la, TP* p1, TP* p2, bool s
    return newshape;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, const pointlist* pl,bool sortnow)
+laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, pointlist* pl,bool sortnow)
 {
    laydata::valid_poly check(*pl);
    if (!check.valid()) {
@@ -851,7 +851,7 @@ laydata::tdtdata* laydata::tdtdesign::addpoly(unsigned la, const pointlist* pl,b
    return newshape;
 }
 
-laydata::tdtdata* laydata::tdtdesign::addwire(unsigned la, const pointlist* pl, word w, bool sortnow)
+laydata::tdtdata* laydata::tdtdesign::addwire(unsigned la, pointlist* pl, word w, bool sortnow)
 {
    laydata::valid_wire check(*pl,w);
    if (!check.valid()) {
