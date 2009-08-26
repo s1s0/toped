@@ -46,6 +46,116 @@ extern const wxEventType   wxEVT_CANVAS_ZOOM;
 long Calbr::drcPolygon::_precision = 0;
 long Calbr::drcEdge::_precision = 0;
 
+Calbr::drcRenderer::drcRenderer():
+	_ATDB(NULL)
+{
+
+}
+
+Calbr::drcRenderer::~drcRenderer()
+{
+}
+
+void Calbr::drcRenderer::drawBegin()
+{
+	_startDrawing = true;
+	try
+   {
+      _ATDB = DATC->lockDB();
+		_drcLayer = DATC->getLayerNo("drcResults");
+		assert(_drcLayer);
+   }
+   catch (EXPTNactive_DB) 
+	{
+		tell_log(console::MT_ERROR, "No Data base loaded");
+	}
+}
+
+void Calbr::drcRenderer::drawPoly(const CoordsVector	&coords)
+{
+	if (_startDrawing)
+	{
+		_startDrawing = false;
+		_maxx = coords.begin()->x;
+      _minx = coords.begin()->x;
+      _maxy = coords.begin()->y;
+      _miny = coords.begin()->y;
+	}
+
+	if (_ATDB)
+	{
+		real DBscale = DATC->DBscale();
+		pointlist *plDB = DEBUG_NEW pointlist();
+		plDB->reserve(coords.size());
+
+		for(CoordsVector::const_iterator it = coords.begin(); it!= coords.end(); ++it)
+      {
+			_maxx = std::max((*it).x, _maxx);
+         _maxy = std::max((*it).y, _maxy);
+         _minx = std::min((*it).x, _minx);
+         _miny = std::min((*it).y, _miny);
+			telldata::ttpnt* pt1 = DEBUG_NEW telldata::ttpnt((*it).x, (*it).y);
+			plDB->push_back(TP(pt1->x(), pt1->y(), DBscale));
+			delete pt1;
+      }
+		_ATDB->addpoly(_drcLayer, plDB, false);
+	}
+}
+
+void Calbr::drcRenderer::drawLine(const edge &edge)
+{
+	if (_startDrawing)
+	{
+		_maxx = std::max(edge.x1, edge.x2);
+		_maxy = std::max(edge.y1, edge.y2);
+		_minx = std::min(edge.x1, edge.x2);
+		_miny = std::min(edge.y1, edge.y2);
+	}
+	else
+	{
+		_maxx = std::max(_maxx, std::max(edge.x1, edge.x2));
+		_maxy = std::max(_maxy, std::max(edge.y1, edge.y2));
+		_minx = std::min(_minx, std::min(edge.x1, edge.x2));
+		_miny = std::min(_miny, std::min(edge.y1, edge.y2));
+	}
+
+	real DBscale = DATC->DBscale();
+   //Convert drcEdge to pointlist
+   pointlist *plDB = DEBUG_NEW pointlist();
+   plDB->reserve(2);
+
+   telldata::ttpnt* pt1, *pt2;
+
+   pt1 = DEBUG_NEW telldata::ttpnt(edge.x1, edge.y1);
+   pt2 = DEBUG_NEW telldata::ttpnt(edge.x2, edge.y2);
+
+	plDB->push_back(TP(pt1->x(), pt1->y(), DBscale));
+	plDB->push_back(TP(pt2->x(), pt2->y(), DBscale));
+
+	real      w = 0.01;   //width of line
+
+   _ATDB->addwire(_drcLayer, plDB, static_cast<word>(rint(w * DBscale)), false);
+
+   delete pt1;
+   delete pt2;
+   delete plDB;
+}
+
+void Calbr::drcRenderer::drawEnd()
+{
+	DATC->unlockDB();
+	
+	real DBscale = DATC->DBscale();
+
+	DBbox *box = DEBUG_NEW DBbox(TP(_minx, _miny, DBscale), TP(_maxx, _maxy, DBscale));
+	wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+	eventZOOM.SetInt(tui::ZOOM_WINDOW);
+	eventZOOM.SetClientData(static_cast<void*>(box));
+	wxPostEvent(Toped->view(), eventZOOM);
+
+	tellstdfunc::RefreshGL();
+}
+
 void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 {
 	real xx, yy;
@@ -68,41 +178,7 @@ void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 
 void Calbr::drcEdge::showError(laydata::tdtdesign* atdb, word la)
 {
-   real DBscale = DATC->DBscale();
-   //Convert drcEdge to pointlist
-   pointlist *plDB = DEBUG_NEW pointlist();
-   plDB->reserve(2);
-
-   telldata::ttpnt* pt1, *pt2;
-
-  /* real xx, yy;
-  // DATC->unlockDB();
-
-   wxString xstr = convert(_coords.x1, _precision);
-   wxString ystr = convert(_coords.y1, _precision);
-   xstr.ToDouble(&xx);
-   ystr.ToDouble(&yy);*/
-   pt1 = DEBUG_NEW telldata::ttpnt(_coords.x1, _coords.y1);
-
-   /*xstr = convert(_coords.x2, _precision);
-   ystr = convert(_coords.y2, _precision);
-   xstr.ToDouble(&xx);
-   ystr.ToDouble(&yy);*/
-   pt2 = DEBUG_NEW telldata::ttpnt(_coords.x2, _coords.y2);
-
-   //pt2 = DEBUG_NEW telldata::ttpnt(xx, yy);
-   plDB->push_back(TP(pt1->x(), pt1->y(), DBscale));
-   plDB->push_back(TP(pt2->x(), pt2->y(), DBscale));
-   //ATDB->addpoly(1,plDB);
-   real      w = 0.01;
-//       telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(1,plDB,
-//                                    static_cast<word>(rint(w * DBscale))), 1);
-  // laydata::tdtdesign* ATDB = DATC->lockDB();
-   atdb->addwire(la, plDB, static_cast<word>(rint(w * DBscale)), false);
-   //DATC->unlockDB();
-   delete pt1;
-   delete pt2;
-   delete plDB;
+	_render->drawLine(_coords);
 }
 
 
@@ -110,51 +186,22 @@ void Calbr::drcPolygon::addCoord(long x, long y)
 {
    real DBscale = DATC->DBscale();
 
-	telldata::ttpnt* pt;
-
 	wxString xstr = convert(x, _precision);
    wxString ystr = convert(y, _precision);
       
 	real xx, yy;
    xstr.ToDouble(&xx);
    ystr.ToDouble(&yy);
-   pt = DEBUG_NEW telldata::ttpnt(xx, yy);
-   _coords.push_back(TP(pt->x(), pt->y(), DBscale));
-	delete pt;
 
-	/*Calbr::coord crd;
-	crd.x = x;
-	crd.y = y;
-	_coords.push_back(crd);*/
+	Calbr::coord pt;
+	pt.x = xx;
+	pt.y = yy;
+   _coords.push_back(pt);
 }
 
 void Calbr::drcPolygon::showError(laydata::tdtdesign* atdb, word la)
 {
-
-   /*real DBscale = DATC->DBscale();
-   //Convert drcPolygon to pointlist
-   pointlist *plDB = DEBUG_NEW pointlist();
-   plDB->reserve(_coords.size());
-
-   telldata::ttpnt* pt;
-   for (unsigned i = 0; i < _coords.size(); i++)
-   {
-      wxString xstr = convert(_coords[i].x, _precision);
-      wxString ystr = convert(_coords[i].y, _precision);
-      real xx, yy;
-      xstr.ToDouble(&xx);
-      ystr.ToDouble(&yy);
-      //pt = DEBUG_NEW telldata::ttpnt(_coords[i].x, (real)_coords[i].y);//((pl->mlist())[i]);
-      pt = DEBUG_NEW telldata::ttpnt(xx, yy);
-      plDB->push_back(TP(pt->x(), pt->y(), DBscale));
-		delete pt;
-
-   }
-*/
-   //laydata::tdtdesign* ATDB = DATC->lockDB();
-   atdb->addpoly(la, &_coords, false);
-   //DATC->unlockDB();
-   //delete plDB;
+	_render->drawPoly(_coords);
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(const std::string &name)
@@ -185,7 +232,7 @@ void	Calbr::drcRuleCheck::addDescrString(const std::string & str)
 
 //-----------------------------------------------------------------------------
 Calbr::CalbrFile::CalbrFile(const std::string &fileName)
-		:_ok(true)
+		:_ok(true),_render(new drcRenderer)
 {
 	std::ostringstream ost;
 	_fileName = fileName;
@@ -296,7 +343,7 @@ bool Calbr::CalbrFile::parse()
 		long ordinal;
 		short numberOfElem;
 		sscanf( tempStr, "%c %ld %hd", &type, &ordinal, &numberOfElem);
-		drcPolygon poly(ordinal);
+		drcPolygon poly(ordinal, _render);
 		switch(type)
 		{
 			case 'p'	: 
@@ -334,7 +381,7 @@ bool Calbr::CalbrFile::parse()
 						return false;
 					}
 					sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2);
-					Calbr::drcEdge theEdge(ordinal);
+					Calbr::drcEdge theEdge(ordinal, _render);
 					theEdge.addCoord(x1, y1, x2, y2);
 					ruleCheck->addEdge(theEdge);
 				}
@@ -356,58 +403,25 @@ bool Calbr::CalbrFile::parse()
 
 void	Calbr::CalbrFile::ShowResults()
 {
-   bool dbExists = true;
-   try
-   {
-      _ATDB = DATC->lockDB();
-   }
-   catch (EXPTNactive_DB) {dbExists = false;}
-   if (dbExists)
-   {
-		word drcLayer = DATC->getLayerNo("drcResults");
-		assert(drcLayer);
-		RuleChecksVector::const_iterator it;
-		for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
+
+	_render->drawBegin();
+	RuleChecksVector::const_iterator it;
+	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
+	{
+		std::vector <Calbr::drcPolygon>::iterator it2;
+		std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
+		for(it2 = polys->begin(); it2 < polys->end(); ++it2)
 		{
-			std::vector <Calbr::drcPolygon>::iterator it2;
-			std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
-			for(it2 = polys->begin(); it2 < polys->end(); ++it2)
-			{
-				(*it2).showError(_ATDB, drcLayer);
-			}
-			std::vector <Calbr::drcEdge>::iterator it2edge;
-			std::vector <Calbr::drcEdge> *edges = (*it)->edges();
-			for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
-			{
-				(*it2edge).showError(_ATDB, drcLayer);
-			}
-	   }
-      /*for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
-      {
-         wxString ost;
-         ost << wxT("addpoly({");
-         long x1int  = (*it2edge).x1 % _precision;
-         long x1frac = (*it2edge).x1 - x1int*_precision;
-         long y1int  = (*it2edge).y1 % _precision;
-         long y1frac = (*it2edge).y1 - y1int*_precision;
-         long x2int  = (*it2edge).x2 % _precision;
-         long x2frac = (*it2edge).x2 - x2int*_precision;
-         long y2int  = (*it2edge).y2 % _precision;
-         long y2frac = (*it2edge).y2 - y2int*_precision;
-            
-         ost << convert((*it2edge).x1, _precision) << wxT(",")
-         << convert((*it2edge).y1, _precision) << wxT(",")
-         << convert((*it2edge).x2, _precision) << wxT(",")
-         << convert((*it2edge).y2, _precision) << ost<<wxT("}, 0.1)");
-         Console->parseCommand(ost);
-      }*/
-      DATC->unlockDB();
-     tellstdfunc::RefreshGL();
-   }
-   else
-   {
-      tell_log(console::MT_ERROR, "No Data base loaded... Sergey, update this string");
-   }
+			(*it2).showError(_ATDB, 0);
+		}
+		std::vector <Calbr::drcEdge>::iterator it2edge;
+		std::vector <Calbr::drcEdge> *edges = (*it)->edges();
+		for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
+		{
+			(*it2edge).showError(_ATDB, 0);
+		}
+	}
+	_render->drawEnd();
 }
 
 void	Calbr::CalbrFile::ShowError(const std::string & error, long  number)
@@ -421,78 +435,28 @@ void	Calbr::CalbrFile::ShowError(const std::string & error, long  number)
 			for(std::vector <Calbr::drcPolygon>::iterator it2poly = rule->polygons()->begin(); 
 				it2poly!=  rule->polygons()->end(); ++it2poly)
 			{
-            bool dbExists = true;
-            if (number == (*it2poly).ordinal())
+	         if (number == (*it2poly).ordinal())
 				{
 					drcPolygon *poly = &(*it2poly);
-               try
-               {
-                  _ATDB = DATC->lockDB();
-               }
-               catch (EXPTNactive_DB) {dbExists = false;}
-               if(dbExists)
-               {
-                  word drcLayer = DATC->getLayerNo("drcResults");
-                  assert(drcLayer);
-                  poly->showError(_ATDB, drcLayer);
-						_ATDB->resortlayer(drcLayer);
-                  DATC->unlockDB();
 
-                  int4b maxx, maxy, minx, miny;
-                  maxx = poly->coords()->begin()->x();
-                  minx = poly->coords()->begin()->x();
-                  maxy = poly->coords()->begin()->y();
-                  miny = poly->coords()->begin()->y();
-                  for(pointlist::const_iterator it3 = poly->coords()->begin(); it3!= poly->coords()->end(); ++it3)
-                  {
-
-                     maxx = std::max((*it3).x(), maxx);
-                     maxy = std::max((*it3).y(), maxy);
-                     minx = std::min((*it3).x(), minx);
-                     miny = std::min((*it3).y(), miny);
-                  }
-                  DBbox *box = DEBUG_NEW DBbox(TP(minx, miny), TP(maxx, maxy));
-                  //DBbox box(TP(minx, miny), TP(maxx, maxy));
-                  wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-                  eventZOOM.SetInt(tui::ZOOM_WINDOW);
-                  eventZOOM.SetClientData(static_cast<void*>(box));
-                  wxPostEvent(Toped->view(), eventZOOM);
-               }
-               else
-                  tell_log(console::MT_ERROR, "No Data base loaded... Sergey, update this string");
-				}
+					_render->drawBegin();
+						poly->showError(_ATDB, 0);
+					_render->drawEnd();
+            }
 			}
 
 			for(std::vector <Calbr::drcEdge>::iterator it2edge = rule->edges()->begin(); 
 				it2edge!=  rule->edges()->end(); ++it2edge)
 			{
-            bool dbExists = true;
             if (number == (*it2edge).ordinal())
 				{
-               try
-               {
-                  _ATDB = DATC->lockDB();
-               }
-               catch (EXPTNactive_DB) {dbExists = false;}
-               if (dbExists)
-               {
-                  word drcLayer = DATC->getLayerNo("drcResults");
-                  assert(drcLayer);
-                  (*it2edge).showError(_ATDB, drcLayer);
-						_ATDB->resortlayer(drcLayer);
-                  DATC->unlockDB();
-
-                  DBbox *box = DEBUG_NEW DBbox(TP((*it2edge).coords()->x1, (*it2edge).coords()->y1),
-                  TP((*it2edge).coords()->x2, (*it2edge).coords()->y2));
-                  wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-                  eventZOOM.SetInt(tui::ZOOM_WINDOW);
-                  eventZOOM.SetClientData(static_cast<void*>(box));
-                  wxPostEvent(Toped->view(), eventZOOM);
-               }
+					word drcLayer = DATC->getLayerNo("drcResults");
+               assert(drcLayer);
+					_render->drawBegin();
+						(*it2edge).showError(_ATDB, 0);
+					_render->drawEnd();
 				}
 			}
-
-
 		}
 	}
 	assert(it == _RuleChecks.end());
@@ -512,8 +476,6 @@ wxString Calbr::convert(int number, long precision)
 {
 	float x	= float(number) / precision;
 	int xint = x;
-//	float xfrac = x - xint;
-
 	wxString str1;
 	wxString format = wxT("%");
 	wxString xintstr, xfracstr;

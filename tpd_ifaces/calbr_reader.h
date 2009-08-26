@@ -42,7 +42,7 @@ namespace Calbr
 
 struct coord
 {
-	long x, y;
+	real x, y;
 };
 
 struct edge
@@ -51,12 +51,31 @@ struct edge
 };
 
 typedef std::vector <Calbr::coord> CoordsVector;
-typedef std::vector <Calbr::edge> EdgesVector;
+
+
+class drcRenderer
+{
+public:
+	drcRenderer();
+	~drcRenderer();
+	void drawBegin();
+	void drawPoly(const CoordsVector	&coords);
+	void drawLine(const edge &edge);
+	void drawEnd();
+private:
+	laydata::tdtdesign*	_ATDB;
+	word						_drcLayer;
+	double					_maxx;
+	double					_maxy;
+	double					_minx;
+	double					_miny;
+	bool						_startDrawing; //use for initial setting of _minx, maxy etc 
+};
 
 class drcEdge
 {
 public:
-	drcEdge(long ordinal) { _ordinal = ordinal;};
+	drcEdge(long ordinal, drcRenderer*	render) { _ordinal = ordinal; _render = render;};
 	void				addCoord(long x1, long y1, long x2, long y2);
 	edge*				coords() {return &_coords;};
 	long				ordinal() {return _ordinal;};
@@ -65,20 +84,22 @@ public:
 private:
 	edge				_coords;
 	long				_ordinal;
+	drcRenderer*	_render;
 };
 
 class drcPolygon
 {
 public:
-	drcPolygon(long ordinal) { _ordinal = ordinal;};
+	drcPolygon(long ordinal, drcRenderer*	render) { _ordinal = ordinal; _render = render;};
 	void				addCoord(long x, long y);
-	pointlist*		coords() {return &_coords;};
+	CoordsVector*	coords() {return &_coords;};
 	long				ordinal() {return _ordinal;};
 	void				showError(laydata::tdtdesign* atdb, word la);
 	static long		_precision;
 private:
-	pointlist		_coords;
+	CoordsVector	_coords;
 	long				_ordinal;
+	drcRenderer*	_render;
 
 };
 
@@ -133,6 +154,8 @@ private:
 	RuleChecksVector _RuleChecks;
 	bool				_ok;
 	laydata::tdtdesign* _ATDB;
+	drcRenderer*	_render;
+
 
 };
 
