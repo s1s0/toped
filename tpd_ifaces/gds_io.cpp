@@ -1648,23 +1648,41 @@ void GDSin::GdsStructure::importAref(GdsFile* cf, laydata::tdtcell* dst_cell, la
 void GDSin::GdsStructure::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b endext )
 {
    TP P1 = plist[0];
-   TP P2 = plist[1];
+   // find the first neighbouring point which is not equivaqlent to P1
+   int fnbr = 1;
+   while ((P1 == plist[fnbr]) && (fnbr < numpoints))
+      fnbr++;
+   // get out with error, because the wire has effectively a single point and there is
+   // no way on earth to find out in which direction it should be expanded
+   if (fnbr == numpoints) return;
+   TP P2 = plist[fnbr];
+
    double sdX = P2.x() - P1.x();
    double sdY = P2.y() - P1.y();
    // The sign - a bit funny way - described in layout canvas
    int sign = ((sdX * sdY) >= 0) ? 1 : -1;
    double length = sqrt(sdY*sdY + sdX*sdX);
+   assert(length);
    int4b y0 = (int4b) rint(P1.y() - sign*((begext*sdY)/length));
    int4b x0 = (int4b) rint(P1.x() - sign*((begext*sdX)/length));
 //
-   P1 = plist[numpoints-2];
    P2 = plist[numpoints-1];
+   // find the first neighbouring point which is not equivaqlent to P1
+   fnbr = numpoints - 2;
+   while ((P2 == plist[fnbr]) && (fnbr > 0))
+      fnbr--;
+   // assert, because if it was found above, it should exists!
+   assert(fnbr >= 0);
+   P1 = plist[fnbr];
+
+   P1 = plist[numpoints-2];
    sdX = P2.x() - P1.x();
    sdY = P2.y() - P1.y();
    sign = ((sdX * sdY) >= 0) ? 1 : -1;
    length = sqrt(sdY*sdY + sdX*sdX);
    int4b yn = (int4b) rint(P2.y() + sign*((endext*sdY)/length));
    int4b xn = (int4b) rint(P2.x() + sign*((endext*sdX)/length));
+
    plist[0].setX(x0);
    plist[0].setY(y0);
    plist[numpoints-1].setX(xn);
