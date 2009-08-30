@@ -55,6 +55,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(GDSreportlay     );
    TELL_STDCMD_CLASSA(GDSgetlaymap     );
    TELL_STDCMD_CLASSA(GDSsetlaymap     );
+   TELL_STDCMD_CLASSA(GDSsplit         );
 
    TELL_STDCMD_CLASSA(CIFread          );
    TELL_STDCMD_CLASSA(CIFimport        );

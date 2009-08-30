@@ -349,11 +349,14 @@ int tellstdfunc::GDSread::execute() {
          GDSin::GdsFile* AGDSDB = DATC->lockGDS();
 
             GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-            assert(root);
-            do 
+            if (root)
             {
-               top_cell_list.push_back(std::string(root->GetItem()->strctName()));
-            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+               do 
+               {
+                  top_cell_list.push_back(std::string(root->GetItem()->strctName()));
+               } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+            }
+            //else ->it's possible to have an empty GDS file
          DATC->unlockGDS();
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                    CN != top_cell_list.end(); CN ++)
@@ -627,6 +630,50 @@ int tellstdfunc::GDSexportTOP::execute()
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::GDSsplit::GDSsplit(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+int tellstdfunc::GDSsplit::execute()
+{
+   bool  recur = getBoolValue();
+   std::string filename = getStringValue();
+   std::string cellname = getStringValue();
+
+   if (expandFileName(filename))
+   {
+
+      GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(cellname.c_str());
+      std::ostringstream ost;
+      if (!src_structure)
+      {
+         ost << "GDS structure named \"" << cellname << "\" does not exists";
+         tell_log(console::MT_ERROR,ost.str());
+      }
+      else
+      {
+         DATC->GDSsplit(src_structure, filename, recur);
+         LogFile  << LogFile.getFN()
+                  << "(\""<< cellname << "\","
+                  << "\"" << filename << "\","
+                  << LogFile._2bool(recur) << ");";
+         LogFile.flush();
+      }
+      DATC->unlockGDS();
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
+   }
+   return EXEC_NEXT;
+}
 //=============================================================================
 tellstdfunc::PSexportTOP::PSexportTOP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
