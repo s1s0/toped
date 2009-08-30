@@ -170,10 +170,11 @@ namespace GDSin {
          void              add_int4b(const int4b);
          void              add_real8b(const real);
          void              add_ascii(const char*);
-         byte              recType() const                     { return _recType;}
-         byte*             record() const                      { return _record;}
-         word              recLen() const                      { return _recLen;}
-         bool              valid() const                       { return _valid;}
+         byte              recType() const                     { return _recType ;}
+         byte*             record() const                      { return _record  ;}
+         word              recLen() const                      { return _recLen  ;}
+         bool              valid() const                       { return _valid   ;}
+         byte              dataType() const                    { return _dataType;}
                           ~GdsRecord();
       private:
          byte*             ieee2gds(double);
@@ -236,11 +237,12 @@ namespace GDSin {
          typedef std::list<GdsStructure*>  ChildStructure;
 
          typedef std::set<std::string> NameSet;
-                              GdsStructure(GdsFile*);
+                              GdsStructure(GdsFile*, word);
          void                 import(GdsFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          void                 collectLayers(GdsLayers&, bool);
          void                 linkReferences(GdsLibrary* const);
+         void                 split(GdsFile*, GdsFile*);
          std::string          strctName() const                { return _strctName;    }
          bool                 traversed() const                { return _traversed;    }
          void                 set_traversed(bool tf)           { _traversed = tf;      }
@@ -272,6 +274,7 @@ namespace GDSin {
          ChildStructure       _children;
          wxFileOffset         _filePos;
          wxFileOffset         _strSize;
+         word                 _beginRecLength; //! used in split function only
    };
 
    /*** GDSLibrary **************************************************************
@@ -306,8 +309,8 @@ namespace GDSin {
       GDSHierTree*            hierOut();
       GdsStructure*           getStructure(const std::string);
       void                    collectLayers(GdsLayers&);
-      double                  dbu()                            { return _dbu;        }
-      double                  uu()                             { return _uu;         }
+      double                  dbu() const                      { return _dbu;        }
+      double                  uu()  const                      { return _uu;         }
       std::string             libName() const                  { return _libName;    }
       const StructureMap&     structures() const               { return _structures; }
                              ~GdsLibrary();
@@ -359,6 +362,7 @@ namespace GDSin {
                               GdsFile(std::string, const LayerMapGds*, time_t);
          bool                 reopenFile();
          GdsRecord*           getNextRecord();
+         void                 putRecord(GdsRecord*);
          GdsRecord*           setNextRecord(byte, word reclen = 0);
          double               libUnits();
          double               userUnits();
@@ -404,7 +408,7 @@ namespace GDSin {
                            Gds2Ted(GDSin::GdsFile*, laydata::tdtlibdir*, const LayerMapGds&);
       void                 run(const nameList&, bool, bool);
    protected:
-      void                 preTraverseChildren(const GDSin::GDSHierTree*, bool);
+      void                 preTraverseChildren(const GDSin::GDSHierTree*);
       void                 convert(GDSin::GdsStructure*, bool);
       GDSin::GdsFile*      _src_lib;
       laydata::tdtlibdir*  _tdt_db;
@@ -414,6 +418,19 @@ namespace GDSin {
       wxFileOffset         _conversionLength;
    };
 
+   class GdsSplit {
+   public:
+      typedef std::list<GDSin::GdsStructure*> StructureList;
+                           GdsSplit(GDSin::GdsFile*, std::string);
+      void                 run(GDSin::GdsStructure*, bool);
+   protected:
+      void                 preTraverseChildren(const GDSin::GDSHierTree*);
+      void                 split(GDSin::GdsStructure*);
+      GDSin::GdsFile*      _src_lib;
+      GDSin::GdsFile*      _dst_lib;
+      StructureList        _convertList;
+//      wxFileOffset         _conversionLength;
+   };
 
    // Function definition
      TP   get_TP(GdsRecord* cr, word curnum = 0, byte len=4);

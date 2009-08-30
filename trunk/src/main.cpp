@@ -141,6 +141,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("gdsimport"        ,(DEBUG_NEW                   tellstdfunc::GDSimport(telldata::tn_void, true)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportLIB(telldata::tn_void,false)));
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportTOP(telldata::tn_void,false)));
+   mblock->addFUNC("gdssplit"         ,(DEBUG_NEW                    tellstdfunc::GDSsplit(telldata::tn_void,false)));
    mblock->addFUNC("gdsclose"         ,(DEBUG_NEW                    tellstdfunc::GDSclose(telldata::tn_void, true)));
    mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW        tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_hsh), true)));
    mblock->addFUNC("setgdslaymap"     ,(DEBUG_NEW                tellstdfunc::GDSsetlaymap(telldata::tn_void, true)));

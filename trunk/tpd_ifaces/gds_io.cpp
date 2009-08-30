@@ -349,7 +349,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
                delete wr;break;
             case gds_LIBNAME:   // down in the hierarchy. 
                //Start reading the library structure
-               _library = DEBUG_NEW GdsLibrary(this, wr);
+              _library = DEBUG_NEW GdsLibrary(this, wr);
                //build the hierarchy tree
                _library->linkReferences();
                closeFile();// close the input stream
@@ -618,6 +618,26 @@ void GDSin::GdsFile::flush(GdsRecord* wr)
    _filePos += wr->flush(_gdsFh); delete wr;
 }
 
+void GDSin::GdsFile::putRecord(GdsRecord* wr)
+{
+   word length = wr->recLen() + 4;
+   byte  record[4];
+   record[0] = ((byte*)&length)[1];
+   record[1] = ((byte*)&length)[0];
+   record[2] = wr->recType();
+   record[3] = wr->dataType();
+
+   size_t bytes_written = _gdsFh.Write(record, 4);
+   _filePos += bytes_written;
+   if (wr->recLen() > 0)
+   {
+      bytes_written = _gdsFh.Write(wr->record(), wr->recLen());
+      _filePos += bytes_written;
+   }
+   delete wr;
+}
+
+
 bool GDSin::GdsFile::getMappedLayType(word& gdslay, word& gdstype, word tdtlay)
 {
    bool result = _laymap->getGdsLayType(gdslay, gdstype, tdtlay);
@@ -703,7 +723,7 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
                cr->retData(&_dbu,8,8); // database unit in meters
                delete cr;break;
             case gds_BGNSTR:
-               cstr = DEBUG_NEW GdsStructure(cf);
+               cstr = DEBUG_NEW GdsStructure(cf, cr->recLen());
                tell_log(console::MT_INFO,std::string("...") + cstr->strctName());
                _structures[cstr->strctName()] = cstr;
                delete cr;break;
@@ -762,13 +782,13 @@ GDSin::GdsLibrary::~GdsLibrary()
 //==============================================================================
 // class GdsStructure
 //==============================================================================
-void GDSin::GdsStructure::import(GdsFile *cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds& _theLayMap)
+void GDSin::GdsStructure::import(GdsFile *cf, laydata::tdtcell* dst_cell,
+                                 laydata::tdtlibdir* tdt_db, const LayerMapGds& _theLayMap)
 {
    int2b layer;
    int2b dtype;
    std::string strctName;
    //initializing
-//   GdsData* cData = NULL;
    GdsRecord* cr = NULL;
    cf->setPosition(_filePos);
    do
@@ -828,10 +848,11 @@ void GDSin::GdsStructure::import(GdsFile *cf, laydata::tdtcell* dst_cell, laydat
    while (true);
 }
 
-GDSin::GdsStructure::GdsStructure(GdsFile *cf)
+GDSin::GdsStructure::GdsStructure(GdsFile *cf, word bgnRecLength)
 {
    _traversed = false;
    _filePos = cf->filePos();
+   _beginRecLength = bgnRecLength + 4;
    int2b layer;
    int2b dtype;
    //initializing
@@ -1695,6 +1716,18 @@ int GDSin::GdsStructure::arrGetStep(TP& Step, TP& magnPoint, int2b colrows)
                      pow(float((Step.y() - magnPoint.y())),2)   ) / colrows;
 }
 
+void GDSin::GdsStructure::split(GdsFile* src_file, GdsFile* dst_file)
+{
+   GdsRecord* cr = NULL;
+   src_file->setPosition(_filePos - _beginRecLength);
+   wxFileOffset endPosition = dst_file->filePos() + _strSize + _beginRecLength;
+   do
+   { //start reading
+      cr = src_file->getNextRecord();
+      dst_file->putRecord(cr);
+   } while (dst_file->filePos() < endPosition);
+}
+
 GDSin::GdsStructure::~GdsStructure()
 {
 
@@ -1763,7 +1796,7 @@ void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool ove
       if (NULL != src_structure)
       {
          GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
-         if (recursive) preTraverseChildren(root, overwrite);
+         if (recursive) preTraverseChildren(root);
          if (!src_structure->traversed())
          {
             _convertList.push_back(src_structure);
@@ -1796,7 +1829,7 @@ void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool ove
    }
 }
 
-void GDSin::Gds2Ted::preTraverseChildren(const GDSin::GDSHierTree* root, bool overwrite)
+void GDSin::Gds2Ted::preTraverseChildren(const GDSin::GDSHierTree* root)
 {
    const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
    while (Child)
@@ -1804,7 +1837,7 @@ void GDSin::Gds2Ted::preTraverseChildren(const GDSin::GDSHierTree* root, bool ov
       if ( !Child->GetItem()->traversed() )
       {
          // traverse children first
-         preTraverseChildren(Child, overwrite);
+         preTraverseChildren(Child);
          GDSin::GdsStructure* sstr = const_cast<GDSin::GdsStructure*>(Child->GetItem());
          if (!sstr->traversed())
          {
@@ -1846,6 +1879,77 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
       // finally call the cell converter
       src_structure->import(_src_lib, dst_structure, _tdt_db, _theLayMap);
    }
+}
+//-----------------------------------------------------------------------------
+GDSin::GdsSplit::GdsSplit(GDSin::GdsFile* src_lib, std::string dst_file_name) : _src_lib(src_lib)
+{
+   _dst_lib = DEBUG_NEW GDSin::GdsFile(dst_file_name, NULL, time(NULL));
+//   gdsex.closeFile();
+}
+
+void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
+{
+   assert(_src_lib->hierTree());
+   assert(src_structure);
+
+   GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
+   if (recursive) preTraverseChildren(root);
+   if (!src_structure->traversed())
+   {
+      _convertList.push_back(src_structure);
+      src_structure->set_traversed(true);
+   }
+
+   if (_src_lib->reopenFile())
+   {
+      GDSin::GdsRecord* wr = _dst_lib->setNextRecord(gds_LIBNAME, src_structure->strctName().size());
+      wr->add_ascii(src_structure->strctName().c_str()); _dst_lib->flush(wr);
+
+      wr = _dst_lib->setNextRecord(gds_UNITS);
+      wr->add_real8b(_src_lib->library()->uu()); wr->add_real8b(_src_lib->library()->dbu());
+      _dst_lib->flush(wr);
+
+      for (StructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
+      {
+         split(*CS);
+         (*CS)->set_traversed(false); // restore the state for eventual second conversion
+      }
+
+      wr = _dst_lib->setNextRecord(gds_ENDLIB);_dst_lib->flush(wr);
+
+      tell_log(console::MT_INFO, "Done");
+      _src_lib->closeFile();
+   }
+   _dst_lib->closeFile();
+}
+
+void GDSin::GdsSplit::preTraverseChildren(const GDSin::GDSHierTree* root)
+{
+   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
+   while (Child)
+   {
+      if ( !Child->GetItem()->traversed() )
+      {
+         // traverse children first
+         preTraverseChildren(Child);
+         GDSin::GdsStructure* sstr = const_cast<GDSin::GdsStructure*>(Child->GetItem());
+         if (!sstr->traversed())
+         {
+            _convertList.push_back(sstr);
+            sstr->set_traversed(true);
+         }
+      }
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
+void GDSin::GdsSplit::split(GDSin::GdsStructure* src_structure)
+{
+   std::string gname = src_structure->strctName();
+   std::ostringstream ost; ost << "GDS split: Writing structure " << gname << "...";
+   tell_log(console::MT_INFO,ost.str());
+   // finally call the split writer
+   src_structure->split(_src_lib, _dst_lib);
 }
 
 //-----------------------------------------------------------------------------

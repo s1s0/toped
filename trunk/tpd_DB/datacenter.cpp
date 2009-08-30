@@ -531,6 +531,15 @@ bool DataCenter::GDSparse(std::string filename)
    return status;
 }
 
+void DataCenter::GDSsplit(GDSin::GdsStructure* gdsstr, const std::string filename, bool recur)
+{
+   assert (NULL != _GDSDB);
+
+   GDSin::GdsSplit gdssplit(_GDSDB, filename);
+   gdssplit.run(gdsstr, recur);
+
+}
+
 void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
 {
    // Lock the DB here manually. Otherwise the cell browser is going mad

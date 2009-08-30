@@ -33,22 +33,6 @@
 #include "viewprop.h"
 
 
-/*namespace GDSin {
-
-   class Gds2Ted {
-   public:
-                           Gds2Ted(GDSin::GdsFile*, laydata::tdtlibdir*, const LayerMapGds&);
-      void                 top_structure(std::string, bool, bool);
-   protected:
-      void                 child_structure(const GDSin::GDSHierTree*, bool);
-      void                 convert_prep(const GDSin::GDSHierTree*, bool);
-      GDSin::GdsFile*      _src_lib;
-      laydata::tdtlibdir*  _tdt_db;
-      const LayerMapGds&   _theLayMap;
-      real                 _coeff; // DBU difference
-   };
-}
-*/
 namespace CIFin {
 
    class Cif2Ted {
@@ -82,6 +66,7 @@ public:
    bool                       GDSparse(std::string);
    void                       GDSexport(const LayerMapGds&, std::string&, bool);
    void                       GDSexport(laydata::tdtcell*, const LayerMapGds&, bool, std::string&, bool);
+   void                       GDSsplit(GDSin::GdsStructure*, const std::string filename, bool recur);
    void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
