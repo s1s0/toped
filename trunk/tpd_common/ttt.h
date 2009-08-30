@@ -234,10 +234,10 @@ public:
    void  overlap(const DBbox bx);
    DBbox overlap(const CTM&) const;
    void  normalize();
-   float cliparea(const DBbox& bx, bool calculate = false) const;
+   real  cliparea(const DBbox& bx, bool calculate = false) const;
    int   clipbox(DBbox& bx);
    bool  inside(const TP& );
-   float area();
+   real  area() const;
    bool  visible(const CTM&) const;
    DBbox getcorner(byte corner);
    const TP&    p1()  const {return _p1;};

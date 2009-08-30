@@ -243,11 +243,11 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
 {
    // if shape is already fully selected, nothing to do here
    if (sh_selected == _status) return;
-   float clip;
+   real clip;
    // get the clip area and if it is 0 - run away
-   if (0 == (clip = select_in.cliparea(overlap()))) return;
-   if (-1 == clip) select_this(selist); // entire shape is in
-   else if ((clip > 0) && pselect)
+   if (0.0 == (clip = select_in.cliparea(overlap()))) return;
+   if (-1.0 == clip) select_this(selist); // entire shape is in
+   else if ((clip > 0.0) && pselect)
    { // shape partially is in the select box
       if (sh_partsel == _status)
       {
@@ -286,11 +286,11 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
 {
    // check the integrity of the select list
    assert((sh_selected == _status) || (sh_partsel == _status));
-   float clip;
+   real clip;
    // get the clip area and if it is 0 - run away
-   if (0 == (clip = select_in.cliparea(overlap()))) return false;
+   if (0.0 == (clip = select_in.cliparea(overlap()))) return false;
    // if select_in overlaps the entire shape
-   if (-1 == clip) {
+   if (-1.0 == clip) {
       if (0 != SI.second.size()) {
          //remove the list of selected points if it exists ...
          //delete (SI.second); SI.second = NULL;
@@ -300,7 +300,7 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
       return true;// i.e. remove this from the list of selected shapes
    }   
    // if select_in intersects with the overlapping box
-   else if ((clip > 0) && pselect) 
+   else if ((clip > 0.0) && pselect) 
    {
       // for cell refernces and texts - dont't unselect if they are
       // partially covered
@@ -1724,7 +1724,7 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    DBbox areal = obox.overlap(newtrans);
    // check that the cell (or part of it) is in the visual window
    DBbox clip = drawprop.clipRegion();
-   if (clip.cliparea(areal) == 0) return;
+   if (0.0 == clip.cliparea(areal)) return;
    // check that the cell area is bigger that the MIN_VISUAL_AREA
    if (!areal.visible(drawprop.ScrCTM())) return;
    // If we get here - means that the cell (or part of it) is visible

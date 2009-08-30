@@ -100,7 +100,7 @@ namespace laydata {
       bool                 fitintree(tdtdata* shape);
       int                  fitsubtree(const DBbox&, DBbox*);
       void                 tmpstore(dataList& store);
-      byte                 biggest(float* array) const;
+      byte                 biggest(real* array) const;
       void                 update_overlap(const DBbox& hovl);
       /*! The overlapping box*/
       DBbox               _overlap;
