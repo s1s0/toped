@@ -800,7 +800,7 @@ void laydata::tdtcell::getCellOverlap()
 void laydata::tdtcell::select_inBox(DBbox select_in, layprop::ViewProperties& viewprop, bool pntsel)
 {
    // check that current cell is within 
-   if (select_in.cliparea(_cellOverlap) != 0)
+   if (0.0 != select_in.cliparea(_cellOverlap))
    {
       // Select figures within the active layers
       typedef layerList::const_iterator LCI;
@@ -824,7 +824,7 @@ void laydata::tdtcell::select_inBox(DBbox select_in, layprop::ViewProperties& vi
 void laydata::tdtcell::unselect_inBox(DBbox select_in, bool pntsel, layprop::ViewProperties& viewprop)
 {
    // check that current cell is within 
-   if (select_in.cliparea(_cellOverlap) != 0)
+   if (0.0 != select_in.cliparea(_cellOverlap))
    {
       // Unselect figures within the active layers
       typedef layerList::const_iterator LCI;

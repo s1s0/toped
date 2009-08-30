@@ -130,7 +130,7 @@ void DBbox::normalize() {
    }
 }   
    
-float DBbox::cliparea(const DBbox& bx, bool calculate) const
+real DBbox::cliparea(const DBbox& bx, bool calculate) const
 {
    // returns: -1 - if bx is entirely inside this
    //           0 - if bx is entirely outside this
@@ -171,7 +171,8 @@ float DBbox::cliparea(const DBbox& bx, bool calculate) const
       case 0x0A: Bprim = DEBUG_NEW TP(_p2);break;
       default: assert(false);
    }
-   float area =  fabsf((Aprim->x() - Bprim->x()) * (Aprim->y() - Bprim->y()));
+   real area =  fabs(((real)Aprim->x() - (real)Bprim->x()) * 
+                     ((real)Aprim->y() - (real)Bprim->y())   );
    delete Aprim; delete Bprim;
    return area;
 }
@@ -234,8 +235,10 @@ bool DBbox::inside(const TP& pnt) {
    else              return true;
 }
 
-float DBbox::area() {
-   return fabsf((_p1.x() - _p2.x()) * (_p1.y() - _p2.y()));
+real DBbox::area() const
+{
+   return fabs(((real)_p2.x() - (real)_p1.x()) * 
+               ((real)_p2.y() - (real)_p1.y())   );
 }
 
 bool DBbox::visible(const CTM& tmtrx) const
@@ -248,8 +251,8 @@ bool DBbox::visible(const CTM& tmtrx) const
    ptlist.push_back(               (_p2) * tmtrx);
    ptlist.push_back(TP(_p1.x(), _p2.y()) * tmtrx);
 
-   if (fabsf(polyarea(ptlist)) >= (real)MIN_VISUAL_AREA) return true;
-   else                                                  return false;
+   if (fabs(polyarea(ptlist)) >= (real)MIN_VISUAL_AREA) return true;
+   else                                                 return false;
 }
 
 DBbox DBbox::getcorner(byte corner) {

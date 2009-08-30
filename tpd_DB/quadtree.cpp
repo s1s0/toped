@@ -104,8 +104,8 @@ void laydata::quadTree::add(tdtdata* shape) {
       DBbox oldovl = _overlap;
       // calculate the new container overlap
       _overlap.overlap(shovl);
-      float areaold = oldovl.area();
-      float areanew = _overlap.area();
+      real areaold = oldovl.area();
+      real areanew = _overlap.area();
 // The equation below produce problems with severe consequences.
 // It seems to be because of the type of the conversion
 //      if (oldovl.area() == _overlap->area()) {
@@ -133,12 +133,12 @@ The method might be called recursively via the add() method.
 */
 bool laydata::quadTree::fitintree(tdtdata* shape) {
    DBbox shovl = shape->overlap();
-   float clipedarea[4];
+   real clipedarea[4];
    // check the clipping to see in witch region to place the shape
    for (byte i = 0; i < 4 ; i++) {
       DBbox subbox = _overlap.getcorner(i);
       clipedarea[i] = subbox.cliparea(shovl,true);
-      if (-1 == clipedarea[i]) {//entirely inside the area
+      if (-1.0 == clipedarea[i]) {//entirely inside the area
          if (!_quads[i]) _quads[i] = DEBUG_NEW quadTree();
          _quads[i]->add(shape);
          return true;
@@ -166,14 +166,15 @@ childrens quadTree. Returns the index of the child quadTree which fits
 the shape or -1 otherwise.
 */
 int laydata::quadTree::fitsubtree(const DBbox& shovl, DBbox* maxsubbox ) {
-   float clipedarea[4];
+   real clipedarea[4];
    // check the clipping to see in witch region to place the shape
    for (byte i = 0; i < 4 ; i++) {
       clipedarea[i] = maxsubbox[i].cliparea(shovl,true);
-      if (-1 == clipedarea[i]) {//entirely inside the area
+      if (-1.0 == clipedarea[i]) {//entirely inside the area
          return i;
       }
    }
+//   assert(shovl.area() == (clipedarea[0] + clipedarea[1] + clipedarea[3] + clipedarea[3]));
    // if we got to this point - means that the shape does not fit
    // entirely inside neither of the four sub-areas. 
    // It is a decision time then
@@ -218,7 +219,7 @@ void laydata::quadTree::sort(dataList& inlist)
    // which is the child where current shape fits 
    int fitinsubbox;
    // initialize the iterator
-   float sharea, totalarea = _overlap.area();
+   real sharea, totalarea = _overlap.area();
    while (inlist.end() != DI)
    {
       // get the overlap of the current shape
@@ -318,8 +319,8 @@ bool laydata::quadTree::delete_marked(SH_STATUS stat, bool partselect) {
    else {
       //Now if the overlapping rectangles differ, then invalidate 
       //the current quadTree
-      float areaold = oldovl.area();
-      float areanew = _overlap.area();
+      real areaold = oldovl.area();
+      real areanew = _overlap.area();
       if (areaold != areanew) _invalid = true;
    }
    return _2B_sorted |= _invalid;
@@ -333,13 +334,13 @@ on the shapes that overlap somehow with the cutting polygon */
 void laydata::quadTree::cutpoly_selected(pointlist& plst, DBbox& cut_overlap, 
                                                            shapeList** decure) {
    // check the entire holder for clipping...
-   if (cut_overlap.cliparea(_overlap) == 0) return;
+   if (0.0 == cut_overlap.cliparea(_overlap)) return;
    // now start traversing the shapes in the current horlder one by one
    tdtdata* wdt = _first;
    while(wdt) {
       // for fully selected shpes if they overlap with the cutting polygon
       if ((sh_selected == wdt->status()) && 
-                                    (cut_overlap.cliparea(wdt->overlap()) != 0))
+                                    (0.0 != cut_overlap.cliparea(wdt->overlap())))
          // go and clip it
          wdt->polycut(plst, decure);
       wdt = wdt->next();
@@ -354,7 +355,7 @@ laydata::tdtdata* laydata::quadTree::merge_selected(tdtdata*& shapeRef) {
    laydata::tdtdata* mergeres = NULL;
    DBbox overlapRef = shapeRef->overlap();
    // check the entire holder for clipping...
-   if (overlapRef.cliparea(_overlap) == 0) return NULL;
+   if (0.0 == overlapRef.cliparea(_overlap)) return NULL;
    // now start traversing the shapes in the current horlder one by one
    tdtdata* wdt = _first;
    while(wdt) {
@@ -362,7 +363,7 @@ laydata::tdtdata* laydata::quadTree::merge_selected(tdtdata*& shapeRef) {
       // and this is not the same shape as the reference
       if ((wdt != shapeRef) && 
           ((sh_selected == wdt->status()) || (sh_merged == wdt->status())) && 
-          (overlapRef.cliparea(wdt->overlap()) != 0)) {
+          (0.0 != overlapRef.cliparea(wdt->overlap()))) {
          // go and merge it
          mergeres = polymerge(wdt->shape2poly(), shapeRef->shape2poly());
          if (NULL != mergeres) {
@@ -428,8 +429,8 @@ bool laydata::quadTree::delete_this(laydata::tdtdata* object) {
    else {
       //Now if the overlapping rectangles differ, then invalidate 
       //the current quadTree
-      float areaold = oldovl.area();
-      float areanew = _overlap.area();
+      real areaold = oldovl.area();
+      real areanew = _overlap.area();
       if (areaold != areanew) _invalid = true;
    }
    return _2B_sorted |= _invalid;
@@ -491,8 +492,8 @@ Called by fitintree(), fitsubtree() methods when a decision has to be made which
 of the possible four child areas is most suitable to refuge the current layout 
 object (10% decision)
 */
-byte laydata::quadTree::biggest(float* array) const {
-   float max = 0;
+byte laydata::quadTree::biggest(real* array) const {
+   real max = 0;
    byte i;
    for(i = 0; i < 4; i++) 
       if (max < array[i]) max = array[i];
@@ -564,7 +565,7 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
    DBbox areal = _overlap.overlap(drawprop.topCTM()); 
-   if      ( clip.cliparea(areal) == 0       ) return;
+   if      ( 0.0 == clip.cliparea(areal)     ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;
    tdtdata* wdt = _first;
    // The drawing will be faster like this for the cells without selected shapes
@@ -631,7 +632,7 @@ short laydata::quadTree::clip_type(tenderer::TopRend& rend) const
    // check the entire holder for clipping...
    DBbox clip = rend.clipRegion();
    DBbox areal = _overlap.overlap(rend.topCTM());
-   float clip_area = clip.cliparea(areal);
+   real clip_area = clip.cliparea(areal);
    if ( ( 0.0 == clip_area ) || (!areal.visible(rend.ScrCTM())) ) return 0;
    if (0.0 < clip_area) return 1;
    else return -1;
@@ -689,7 +690,7 @@ void laydata::quadTree::motion_draw(const layprop::DrawProperties& drawprop,
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
    DBbox areal = _overlap.overlap(transtack.front());
-   if      (clip.cliparea(areal) == 0        ) return;
+   if      (0.0 == clip.cliparea(areal)      ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;
    tdtdata* wdt = _first;
    while(wdt) {
@@ -741,7 +742,7 @@ void laydata::quadTree::select_inBox(DBbox& select_in, dataList* selist,
                                                   bool pselect, word selmask)
 {
    // check the entire holder for clipping...
-   if ((laydata::_lmnone == selmask) || (select_in.cliparea(_overlap) == 0)) return;
+   if ((laydata::_lmnone == selmask) || (0.0 == select_in.cliparea(_overlap))) return;
    // now start selecting one by one
    tdtdata* wdt = _first;
    while(wdt)
@@ -762,7 +763,7 @@ unselect methods of the parent structures in the data base - tdtlayer and tdtcel
 void laydata::quadTree::unselect_inBox(DBbox& unselect_in, dataList* unselist, 
                                                                  bool pselect) {
    // check the entire holder for clipping...
-   if (unselect_in.cliparea(_overlap) == 0) return;
+   if (0.0 == unselect_in.cliparea(_overlap)) return;
    tdtdata* wdt = _first;
    while (wdt) {
       // now start unselecting from the list
@@ -996,7 +997,7 @@ void laydata::tdtlayer::motion_draw(const layprop::DrawProperties& drawprop,
    DBbox clip = drawprop.clipRegion();
    if (empty()) return;
    DBbox areal = overlap().overlap(transtack.front());
-   if      ( clip.cliparea(areal) == 0       ) return;
+   if      ( 0.0 == clip.cliparea(areal)     ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;
    quadTree::motion_draw(drawprop, transtack);
 }
