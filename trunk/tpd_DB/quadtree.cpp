@@ -180,7 +180,7 @@ int laydata::quadTree::fitsubtree(const DBbox& shovl, DBbox* maxsubbox ) {
    // It is a decision time then
    byte candidate = biggest(clipedarea);
    // now calculate the eventual new overlaping box
-   DBbox newovl = maxsubbox[candidate];
+   DBbox newovl(maxsubbox[candidate]);
    newovl.overlap(shovl);
    // if the max area of the candidate does not blow more than 10% - 
    // then seems to be OK to get it
@@ -195,15 +195,15 @@ using the existing _overlap variable. For every layout shape fitinsubtree()
 method is called in a try to put the data in the child quadTree. At the end
 the method is called for every of the child structures.
 */
-void laydata::quadTree::sort(dataList& inlist)
+void laydata::quadTree::sort(shapeList& inlist)
 {
    // if the input list is empty - nothing to do!
    if (0 == inlist.size()) return;
-   dataList::iterator DI = inlist.begin();
+   shapeList::iterator DI = inlist.begin();
    // if the list contains only one component - link it and run away
    if (1 == inlist.size())
    {
-      DI->first->nextis(NULL); _first = DI->first;
+      (*DI)->nextis(NULL); _first = *DI;
       return;
    }
    byte i;
@@ -215,7 +215,7 @@ void laydata::quadTree::sort(dataList& inlist)
                          DEFAULT_OVL_BOX, DEFAULT_OVL_BOX};
    for (i = 0; i < 4; i++) maxsubbox[i] = _overlap.getcorner(i);
    // the sub-lists data will be sorted in
-   dataList sublist[4];
+   shapeList sublist[4];
    // which is the child where current shape fits 
    int fitinsubbox;
    // initialize the iterator
@@ -223,14 +223,14 @@ void laydata::quadTree::sort(dataList& inlist)
    while (inlist.end() != DI)
    {
       // get the overlap of the current shape
-      shovl = DI->first->overlap();shovl.normalize();
+      shovl = (*DI)->overlap();shovl.normalize();
       sharea = shovl.area();
       // Check it fits in some of the children
       if (totalarea <= 4 * sharea || 
                         (-1 == (fitinsubbox = fitsubtree(shovl, maxsubbox))))
       {
          // no fit. The shape is sorted in the current tree
-         DI->first->nextis(_first); _first = DI->first;
+         (*DI)->nextis(_first); _first = *DI;
       }
       else
       {
@@ -459,12 +459,12 @@ re-evaluated before the sort() method is called.
 */
 bool laydata::quadTree::full_validate() {
    if (_invalid) {
-      dataList store;
+      shapeList store;
       tmpstore(store);
       DBbox oldovl = _overlap;
       _overlap = DEFAULT_OVL_BOX;
-      for (dataList::const_iterator DI = store.begin(); DI != store.end(); DI++)
-         update_overlap(DI->first->overlap());
+      for (shapeList::const_iterator DI = store.begin(); DI != store.end(); DI++)
+         update_overlap((*DI)->overlap());
       sort(store);
       _invalid = false;
       return (oldovl != _overlap);
@@ -479,7 +479,7 @@ re-evaluating the _overlap variable, but is using it as is
 */
 void laydata::quadTree::resort() {
    // first save the existing data in a temporary store
-   dataList store;
+   shapeList store;
    tmpstore(store);
    sort(store);
 }
@@ -704,9 +704,9 @@ void laydata::quadTree::motion_draw(const layprop::DrawProperties& drawprop,
 /*! Used to copy tdtdata objects from quadTree to a dataList. This is initiated 
 by resort() or full_validate() when current quadTree needs to be rebuild
 */
-void laydata::quadTree::tmpstore(dataList &store) {
+void laydata::quadTree::tmpstore(shapeList &store) {
    while (_first) {
-      store.push_back(selectDataPair(_first,SGBitSet()));
+      store.push_back(_first);
       _first = _first->next();
    }
    for (byte i = 0; i < 4; i++)

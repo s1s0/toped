@@ -18,7 +18,7 @@
   <kdevautoproject>
     <general>
       <activetarget>src/toped</activetarget>
-      <useconfiguration>debug</useconfiguration>
+      <useconfiguration>optimized</useconfiguration>
     </general>
     <run>
       <mainprogram>/local_home/skr/toped/debug</mainprogram>
@@ -27,7 +27,10 @@
       <programargs/>
       <terminal>true</terminal>
       <autocompile>true</autocompile>
-      <envvars/>
+      <envvars>
+        <envvar value="/home/skr/toped_public" name="TPD_GLOBAL" />
+        <envvar value="/home/skr/toped_public" name="TPD_LOCAL" />
+      </envvars>
       <globaldebugarguments/>
       <globalcwd>/local_home/skr/toped/debug</globalcwd>
       <useglobalprogram>false</useglobalprogram>
