@@ -86,7 +86,7 @@ DBbox::DBbox(int4b x1, int4b y1, int4b x2, int4b y2) {
    _p2 = TP(x2,y2);
 }
 
-void DBbox::overlap(const TP p) {
+void DBbox::overlap(const TP& p) {
    // p1 is min; p2 is max
    if (_p1.x() > p.x()) _p1._x = p.x();
    if (_p2.x() < p.x()) _p2._x = p.x();
@@ -94,7 +94,7 @@ void DBbox::overlap(const TP p) {
    if (_p2.y() < p.y()) _p2._y = p.y();
 }
 
-void DBbox::overlap(const DBbox bx) {
+void DBbox::overlap(const DBbox& bx) {
    if (DEFAULT_OVL_BOX == bx) return;
    if (DEFAULT_OVL_BOX == (*this)) {
       if (bx.p1().x() > bx.p2().x()) {
@@ -463,7 +463,8 @@ SGBitSet::~SGBitSet()
 //-----------------------------------------------------------------------------
 // class CTM
 //-----------------------------------------------------------------------------
-CTM::CTM(TP dp, real scale, real rotation,bool reflX) {
+CTM::CTM(const TP& dp, real scale, real rotation, bool reflX)
+{
    Initialize();
    if (reflX)          FlipX();
    if (0 != rotation)  Rotate(rotation);
@@ -471,7 +472,7 @@ CTM::CTM(TP dp, real scale, real rotation,bool reflX) {
    Translate((real) dp.x(),(real) dp.y());
 }
 
-CTM CTM::Translate( const TP pnt)
+CTM CTM::Translate( const TP& pnt )
 {
    return (*this *= CTM(1,0,0,1,pnt.x(),pnt.y()));
 }
@@ -505,7 +506,7 @@ CTM CTM::Reversed() const
               (ty()*c() - tx()*d())/denom , (tx()*b() - ty()*a())/denom );// 1.0 );
 }
 
-CTM CTM::operator * (const CTM op2) const
+CTM CTM::operator * (const CTM& op2) const
 {
    CTM res;
    res._a  = a()  * op2.a() + b()  * op2.c();
@@ -530,7 +531,7 @@ CTM CTM::operator * (const real factor) const
    return res;
 }
 
-CTM CTM::operator = (const CTM op2)
+CTM CTM::operator = (const CTM& op2)
 {
    _a = op2.a();_b = op2.b();_c = op2.c();_d = op2.d(); 
    _tx = op2.tx();_ty = op2.ty();
