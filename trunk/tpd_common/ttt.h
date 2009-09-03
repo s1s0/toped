@@ -227,9 +227,11 @@ private:
 class DBbox {
 public:
    DBbox(const TP& p) :        _p1(p)       , _p2(p)    {};
+   DBbox(int4b x1, int4b y1) : _p1(x1,y1) , _p2(x1,y1)  {};
+   DBbox(int4b x1, int4b y1, int4b x2, int4b y2) : _p1(x1,y1) , _p2(x2,y2)  {};
    DBbox(const DBbox& bx) :    _p1(bx.p1()) , _p2(bx.p2())    {};
    DBbox(const TP& p1, const TP& p2): _p1(p1)      , _p2(p2)   {};
-   DBbox(int4b, int4b, int4b, int4b);
+   void  overlap(int4b, int4b);
    void  overlap(const TP& p);
    void  overlap(const DBbox& bx);
    DBbox overlap(const CTM&) const;

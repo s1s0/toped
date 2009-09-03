@@ -92,8 +92,9 @@ bigger that the existing one, then the layout object is linked to the current qu
 after what the current quadTree as well as its successors has to be rebuild using 
 resort().\n The method might be called recursively via fitintree() method.
 */
-void laydata::quadTree::add(tdtdata* shape) {
-   DBbox shovl = shape->overlap();shovl.normalize();
+void laydata::quadTree::add(tdtdata* shape)
+{
+   DBbox shovl(shape->overlap());
    if (empty()) {
    // first shape in the container
       _overlap = shovl;
@@ -131,7 +132,8 @@ overlaping area not more than 10%. Returns false if the shape does not fit
 anywhere - means it should be placed higher into the quadTree structure.\n
 The method might be called recursively via the add() method.
 */
-bool laydata::quadTree::fitintree(tdtdata* shape) {
+bool laydata::quadTree::fitintree(tdtdata* shape)
+{
    DBbox shovl = shape->overlap();
    real clipedarea[4];
    // check the clipping to see in witch region to place the shape
@@ -165,7 +167,8 @@ bool laydata::quadTree::fitintree(tdtdata* shape) {
 childrens quadTree. Returns the index of the child quadTree which fits 
 the shape or -1 otherwise.
 */
-int laydata::quadTree::fitsubtree(const DBbox& shovl, DBbox* maxsubbox ) {
+int laydata::quadTree::fitsubtree(const DBbox& shovl, DBbox* maxsubbox )
+{
    real clipedarea[4];
    // check the clipping to see in witch region to place the shape
    for (byte i = 0; i < 4 ; i++) {
@@ -223,7 +226,7 @@ void laydata::quadTree::sort(shapeList& inlist)
    while (inlist.end() != DI)
    {
       // get the overlap of the current shape
-      shovl = (*DI)->overlap();shovl.normalize();
+      shovl = (*DI)->overlap();
       sharea = shovl.area();
       // Check it fits in some of the children
       if (totalarea <= 4 * sharea || 
@@ -730,8 +733,7 @@ void laydata::quadTree::update_overlap(const DBbox& hovl)
 /*! Puts the shape into current quadTree object without sorting. Updates 
 the overlapping box though. */
 void laydata::quadTree::put(tdtdata* shape) {
-   DBbox ovl(shape->overlap());ovl.normalize();
-   update_overlap(ovl);
+   update_overlap(shape->overlap());
    shape->nextis(_first); _first = shape;
 }
 

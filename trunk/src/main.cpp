@@ -580,7 +580,8 @@ bool TopedApp::OnInit() {
    else
    {
       LogFile.init(std::string(logFileName.mb_str(wxConvFile )));
-      wxLog::AddTraceMask(wxT("thread"));
+//      wxLog::AddTraceMask(wxT("thread"));
+//      wxLog::AddTraceMask(wxTRACE_MemAlloc);
       if (1 < argc) 
       {
          for (int i=1; i<argc; i++)

@@ -647,10 +647,9 @@ void laydata::tdtbox::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) cons
    gdsf.poly(_pdata, 4, overlap());
 }
 
-DBbox laydata::tdtbox::overlap() const {
-   DBbox ovl = DBbox(TP(_pdata[p1x], _pdata[p1y]));
-   ovl.overlap(TP(_pdata[p2x], _pdata[p2y]));
-   return ovl;
+DBbox laydata::tdtbox::overlap() const
+{
+   return DBbox(_pdata[p1x], _pdata[p1y], _pdata[p2x], _pdata[p2y]);
 }
 
 pointlist laydata::tdtbox::shape2poly() const
@@ -1175,10 +1174,11 @@ void laydata::tdtpoly::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) con
    gdsf.poly(_pdata, _psize, overlap());
 }
 
-DBbox laydata::tdtpoly::overlap() const {
-   DBbox ovl = DBbox( TP(_pdata[0], _pdata[1]) );
+DBbox laydata::tdtpoly::overlap() const
+{
+   DBbox ovl(_pdata[0], _pdata[1]) ;
    for (word i = 1; i < _psize; i++)
-      ovl.overlap(TP(_pdata[2*i], _pdata[2*i+1]));
+      ovl.overlap(_pdata[2*i], _pdata[2*i+1]);
    return ovl;
 }
 
@@ -1629,8 +1629,8 @@ void laydata::tdtwire::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) con
 
 DBbox laydata::tdtwire::overlap() const 
 {
-   DBbox* ln1 = endPnts(TP( _pdata[0], _pdata[1]), 
-                        TP( _pdata[2], _pdata[3]), 
+   DBbox* ln1 = endPnts(TP( _pdata[0], _pdata[1]),
+                        TP( _pdata[2], _pdata[3]),
                         true
                         );
    DBbox ovl = *ln1; delete ln1;
@@ -1936,7 +1936,9 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
 DBbox laydata::tdtcellref::overlap() const
 {
    assert(NULL != structure());
-   return structure()->cellOverlap().overlap(_translation);
+   DBbox ovl(structure()->cellOverlap().overlap(_translation));
+   ovl.normalize();
+   return ovl;
 }
 
 //-----------------------------------------------------------------------------
@@ -2260,18 +2262,22 @@ void  laydata::tdtcellaref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, layd
       }
 }
 
-DBbox laydata::tdtcellaref::overlap() const {
+DBbox laydata::tdtcellaref::overlap() const
+{
    assert(structure());
-   return clear_overlap().overlap(_translation);
+   DBbox ovl(clear_overlap().overlap(_translation));
+   ovl.normalize();
+   return ovl;
 }
 
 DBbox laydata::tdtcellaref::clear_overlap() const
 {
    assert(structure());
-   DBbox bx = structure()->cellOverlap();
-   DBbox ovl = bx;
+   DBbox bx(structure()->cellOverlap());
+   DBbox ovl(bx);
    CTM refCTM(1.0,0.0,0.0,1.0,_arrprops.stepX() * (_arrprops.cols()-1), _arrprops.stepY() * (_arrprops.rows() - 1));
-   ovl.overlap(bx * refCTM);
+   bx = bx * refCTM; bx.normalize();
+   ovl.overlap(bx);
    return ovl;
 }
 
