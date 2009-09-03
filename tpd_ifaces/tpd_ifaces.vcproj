@@ -209,6 +209,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\drc_tenderer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\gds_io.cpp"
 				>
 			</File>
@@ -242,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\drc_tenderer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\gds_io.h"
 				>
 			</File>
@@ -254,56 +262,6 @@
 			Name="FlexBison Files"
 			>
 			<File
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 				RelativePath=".\cif_lex.ll"
 				>
 				<FileConfiguration

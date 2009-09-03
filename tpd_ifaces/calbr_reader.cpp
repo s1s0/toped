@@ -30,130 +30,14 @@
 
 #include "tpdph.h"
 #include "calbr_reader.h"
-#include "../tpd_bidfunc/tpdf_common.h"
-#include "../tpd_parser/ted_prompt.h"
-#include "../src/toped.h"
 #include <sstream>
 
-// Global variables
-Calbr::CalbrFile *DRCData = NULL;
-extern tui::TopedFrame*    Toped;
-extern console::ted_cmd*	Console;
-extern DataCenter*         DATC;
-extern const wxEventType   wxEVT_CANVAS_ZOOM;
+
 
 long Calbr::drcPolygon::_precision = 0;
 long Calbr::drcEdge::_precision = 0;
 
-Calbr::drcRenderer::drcRenderer():
-	_ATDB(NULL)
-{
 
-}
-
-Calbr::drcRenderer::~drcRenderer()
-{
-}
-
-void Calbr::drcRenderer::drawBegin()
-{
-	_startDrawing = true;
-	try
-   {
-      _ATDB = DATC->lockDB();
-		_drcLayer = DATC->getLayerNo("drcResults");
-		assert(_drcLayer);
-   }
-   catch (EXPTNactive_DB) 
-	{
-		tell_log(console::MT_ERROR, "No Data base loaded");
-	}
-}
-
-void Calbr::drcRenderer::drawPoly(const CoordsVector	&coords)
-{
-	if (_startDrawing)
-	{
-		_startDrawing = false;
-		_maxx = coords.begin()->x;
-      _minx = coords.begin()->x;
-      _maxy = coords.begin()->y;
-      _miny = coords.begin()->y;
-	}
-
-	if (_ATDB)
-	{
-		real DBscale = DATC->DBscale();
-		pointlist *plDB = DEBUG_NEW pointlist();
-		plDB->reserve(coords.size());
-
-		for(CoordsVector::const_iterator it = coords.begin(); it!= coords.end(); ++it)
-      {
-			_maxx = std::max((*it).x, _maxx);
-         _maxy = std::max((*it).y, _maxy);
-         _minx = std::min((*it).x, _minx);
-         _miny = std::min((*it).y, _miny);
-			telldata::ttpnt* pt1 = DEBUG_NEW telldata::ttpnt((*it).x, (*it).y);
-			plDB->push_back(TP(pt1->x(), pt1->y(), DBscale));
-			delete pt1;
-      }
-		_ATDB->addpoly(_drcLayer, plDB, false);
-	}
-}
-
-void Calbr::drcRenderer::drawLine(const edge &edge)
-{
-	if (_startDrawing)
-	{
-		_maxx = std::max(edge.x1, edge.x2);
-		_maxy = std::max(edge.y1, edge.y2);
-		_minx = std::min(edge.x1, edge.x2);
-		_miny = std::min(edge.y1, edge.y2);
-	}
-	else
-	{
-		_maxx = std::max(_maxx, std::max(edge.x1, edge.x2));
-		_maxy = std::max(_maxy, std::max(edge.y1, edge.y2));
-		_minx = std::min(_minx, std::min(edge.x1, edge.x2));
-		_miny = std::min(_miny, std::min(edge.y1, edge.y2));
-	}
-
-	real DBscale = DATC->DBscale();
-   //Convert drcEdge to pointlist
-   pointlist *plDB = DEBUG_NEW pointlist();
-   plDB->reserve(2);
-
-   telldata::ttpnt* pt1, *pt2;
-
-   pt1 = DEBUG_NEW telldata::ttpnt(edge.x1, edge.y1);
-   pt2 = DEBUG_NEW telldata::ttpnt(edge.x2, edge.y2);
-
-	plDB->push_back(TP(pt1->x(), pt1->y(), DBscale));
-	plDB->push_back(TP(pt2->x(), pt2->y(), DBscale));
-
-	real      w = 0.01;   //width of line
-
-   _ATDB->addwire(_drcLayer, plDB, static_cast<word>(rint(w * DBscale)), false);
-
-   delete pt1;
-   delete pt2;
-   delete plDB;
-}
-
-void Calbr::drcRenderer::drawEnd()
-{
-	DATC->unlockDB();
-	
-	real DBscale = DATC->DBscale();
-
-	DBbox *box = DEBUG_NEW DBbox(TP(_minx, _miny, DBscale), TP(_maxx, _maxy, DBscale));
-	wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-	eventZOOM.SetInt(tui::ZOOM_WINDOW);
-	eventZOOM.SetClientData(static_cast<void*>(box));
-	wxPostEvent(Toped->view(), eventZOOM);
-
-	tellstdfunc::RefreshGL();
-}
 
 void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 {
@@ -183,8 +67,6 @@ void Calbr::drcEdge::showError(laydata::tdtdesign* atdb, word la)
 
 void Calbr::drcPolygon::addCoord(long x, long y)
 {
-   real DBscale = DATC->DBscale();
-
 	wxString xstr = convert(x, _precision);
    wxString ystr = convert(y, _precision);
       
@@ -230,8 +112,8 @@ void	Calbr::drcRuleCheck::addDescrString(const std::string & str)
 
 
 //-----------------------------------------------------------------------------
-Calbr::CalbrFile::CalbrFile(const std::string &fileName)
-		:_ok(true),_render(new drcRenderer)
+Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
+		:_ok(true),_render(render)
 {
 	std::ostringstream ost;
 	_fileName = fileName;
@@ -449,8 +331,6 @@ void	Calbr::CalbrFile::ShowError(const std::string & error, long  number)
 			{
             if (number == (*it2edge).ordinal())
 				{
-					word drcLayer = DATC->getLayerNo("drcResults");
-               assert(drcLayer);
 					_render->drawBegin();
 						(*it2edge).showError(_ATDB, 0);
 					_render->drawEnd();

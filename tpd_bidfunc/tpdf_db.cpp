@@ -32,6 +32,8 @@
 #include "../tpd_common/tuidefs.h"
 #include "../tpd_DB/browsers.h"
 #include "../tpd_ifaces/calbr_reader.h"
+#include "../tpd_ifaces/drc_tenderer.h"
+
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
@@ -1311,7 +1313,7 @@ int tellstdfunc::DRCCalibreimport::execute()
    }
    else
    {
-      DRCData = DEBUG_NEW Calbr::CalbrFile(filename);
+      DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer);
 
       if(DRCData->isOk())
       {

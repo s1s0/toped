@@ -56,21 +56,15 @@ typedef std::vector <Calbr::coord> CoordsVector;
 class drcRenderer
 {
 public:
-	drcRenderer();
-	~drcRenderer();
-	void drawBegin();
-	void drawPoly(const CoordsVector	&coords);
-	void drawLine(const edge &edge);
-	void drawEnd();
-private:
-	laydata::tdtdesign*	_ATDB;
-	word						_drcLayer;
-	double					_maxx;
-	double					_maxy;
-	double					_minx;
-	double					_miny;
-	bool						_startDrawing; //use for initial setting of _minx, maxy etc 
+	drcRenderer() {};
+	~drcRenderer() {};
+	virtual void drawBegin()=0;
+	virtual void drawPoly(const CoordsVector	&coords)=0;
+	virtual void drawLine(const edge &edge)=0;
+	virtual void drawEnd()=0;
 };
+
+
 
 class drcEdge
 {
@@ -136,7 +130,7 @@ typedef std::vector <Calbr::drcRuleCheck*> RuleChecksVector;
 class CalbrFile
 {
 public:
-	CalbrFile(const std::string &fileName);
+	CalbrFile(const std::string &fileName, drcRenderer *render);
 	~CalbrFile();
 
 	void					ShowResults();
