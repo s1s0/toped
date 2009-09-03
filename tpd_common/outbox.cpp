@@ -131,8 +131,10 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
       case MT_DESIGNNAME:
          *this << rply_mark << wxT(" Design ") << evt.GetString() << wxT("\n");
          break;
-      default:
-         assert(false);/*wxLogTextCtrl::DoLog(evt.GetInt(), evt.GetString(), evt.GetExtraLong());*/
+      default: //wx Messages
+         *this <<wxT("WX MESSAGE Level:") << evt.GetInt() << wxT(" \"") << evt.GetString() << wxT("\"\n");
+         logColour = *wxLIGHT_GREY;
+         break;
    }
    long int endPos = GetLastPosition();
    SetStyle(startPos,endPos,wxTextAttr(logColour));
@@ -146,15 +148,6 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
 }
 
 void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp) {
-   if (level < wxLOG_User)
-   {
-      // calling DoLog here directly (most likely) causes troubles with the threads
-      // To be investigated.
-      //@FIXME!
-      // "failed with error 0x00000718(not enough quota is available to process this command"
-/*      wxLogTextCtrl::DoLog(level, msg, timestamp);*/
-      return;
-   }
    wxCommandEvent eventLOG(wxEVT_LOG_ERRMESSAGE);
    eventLOG.SetString(msg);
    eventLOG.SetInt(level);

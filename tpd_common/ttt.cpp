@@ -81,17 +81,22 @@ void TP::info(std::ostringstream& ost, real DBU) const {
 //-----------------------------------------------------------------------------
 // class DBbox
 //-----------------------------------------------------------------------------
-DBbox::DBbox(int4b x1, int4b y1, int4b x2, int4b y2) {
-   _p1 = TP(x1,y1);
-   _p2 = TP(x2,y2);
-}
-
-void DBbox::overlap(const TP& p) {
+void DBbox::overlap(const TP& p)
+{
    // p1 is min; p2 is max
    if (_p1.x() > p.x()) _p1._x = p.x();
    if (_p2.x() < p.x()) _p2._x = p.x();
    if (_p1.y() > p.y()) _p1._y = p.y();
    if (_p2.y() < p.y()) _p2._y = p.y();
+}
+
+void DBbox::overlap(int4b x, int4b y)
+{
+   // p1 is min; p2 is max
+   if (_p1.x() > x) _p1._x = x;
+   if (_p2.x() < x) _p2._x = x;
+   if (_p1.y() > y) _p1._y = y;
+   if (_p2.y() < y) _p2._y = y;
 }
 
 void DBbox::overlap(const DBbox& bx) {

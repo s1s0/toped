@@ -724,7 +724,6 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
                delete cr;break;
             case gds_BGNSTR:
                cstr = DEBUG_NEW GdsStructure(cf, cr->recLen());
-               tell_log(console::MT_INFO,std::string("...") + cstr->strctName());
                _structures[cstr->strctName()] = cstr;
                delete cr;break;
             case gds_ENDLIB://end of library, exit form the procedure
@@ -880,6 +879,7 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, word bgnRecLength)
                delete cr;break;
             case gds_STRNAME:
                cr->retData(&_strctName);
+               tell_log(console::MT_INFO,std::string("...") + _strctName);
                delete cr;break;
             case gds_BOX      : skimBox(cf)     ; delete cr; break;
             case gds_BOUNDARY : skimBoundary(cf); delete cr; break;
@@ -1041,7 +1041,12 @@ void GDSin::GdsStructure::importBox(GdsFile* cf, laydata::tdtcell* dst_cell, con
                   pointlist   plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
-                     plist.push_back(GDSin::get_TP(cr, i));
+                  {
+                     int4b GDS_X, GDS_Y;
+                     cr->retData(&GDS_X, i*8  , 4);
+                     cr->retData(&GDS_Y, i*8+4, 4);
+                     plist.push_back(TP(GDS_X, GDS_Y));
+                  }
 
                   laydata::valid_poly check(plist);
 
@@ -1054,7 +1059,6 @@ void GDSin::GdsStructure::importBox(GdsFile* cf, laydata::tdtcell* dst_cell, con
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  else plist = check.get_validated();
                   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
                   if (check.box())  dwl->addbox(plist[0], plist[2], false);
                   else              dwl->addpoly(plist,false);
@@ -1143,7 +1147,12 @@ void GDSin::GdsStructure::importPoly(GdsFile* cf, laydata::tdtcell* dst_cell, co
                   pointlist plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
-                     plist.push_back(GDSin::get_TP(cr, i));
+                  {
+                     int4b GDS_X, GDS_Y;
+                     cr->retData(&GDS_X, i*8  , 4);
+                     cr->retData(&GDS_Y, i*8+4, 4);
+                     plist.push_back(TP(GDS_X, GDS_Y));
+                  }
 
                   laydata::valid_poly check(plist);
 
@@ -1156,7 +1165,6 @@ void GDSin::GdsStructure::importPoly(GdsFile* cf, laydata::tdtcell* dst_cell, co
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  else plist = check.get_validated();
                   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
                   if (check.box())  dwl->addbox(plist[0], plist[2], false);
                   else              dwl->addpoly(plist,false);
@@ -1256,16 +1264,21 @@ void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, co
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
                   word numpoints = (cr->recLen())/8;
-                  pointlist   pointlist;
-                  pointlist.reserve(numpoints);
+                  pointlist plist;
+                  plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
-                     pointlist.push_back(GDSin::get_TP(cr, i));
+                  {
+                     int4b GDS_X, GDS_Y;
+                     cr->retData(&GDS_X, i*8  , 4);
+                     cr->retData(&GDS_Y, i*8+4, 4);
+                     plist.push_back(TP(GDS_X, GDS_Y));
+                  }
                   if (2 == pathtype)
-                     pathConvert(pointlist, numpoints, width/2, width/2);
+                     pathConvert(plist, numpoints, width/2, width/2);
                   else if (4 == pathtype)
-                     pathConvert(pointlist, numpoints, bgnextn, endextn);
+                     pathConvert(plist, numpoints, bgnextn, endextn);
 
-                  laydata::valid_wire check(pointlist, width);
+                  laydata::valid_wire check(plist, width);
 
                   if (!check.valid())
                   {
@@ -1276,9 +1289,8 @@ void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, co
                            << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  else pointlist = check.get_validated() ;
                   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
-                  dwl->addwire(pointlist, width,false);
+                  dwl->addwire(plist, width,false);
                }
                delete cr;break;
             case gds_ENDEL://end of element, exit point
