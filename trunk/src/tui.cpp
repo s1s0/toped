@@ -1837,7 +1837,7 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    {
       wxString sGdsLay;
       sGdsLay << CNM->first;
-      for (WordList::const_iterator CTP = CNM->second.begin(); CTP != CNM->second.end(); CTP++)
+      for (WordSet::const_iterator CTP = CNM->second.begin(); CTP != CNM->second.end(); CTP++)
       {
          wxString sGdsDtype;
          sGdsDtype << *CTP;

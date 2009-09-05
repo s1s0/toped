@@ -904,9 +904,7 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, word bgnRecLength)
 
 void GDSin::GdsStructure::updateContents(int2b layer, int2b dtype)
 {
-   _contSummary[layer].push_back(dtype);
-   _contSummary[layer].sort();
-   _contSummary[layer].unique();
+   _contSummary[layer].insert(dtype);
 }
 
 
@@ -937,17 +935,8 @@ void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
 {
    for (GdsLayers::const_iterator CL = _contSummary.begin(); CL != _contSummary.end(); CL++)
    {
-      WordList data_types;
-      if (layers_map.end() != layers_map.find(CL->first))
-         data_types = layers_map[CL->first];
-
-      for (WordList::const_iterator DL = CL->second.begin(); DL != CL->second.end(); DL++)
-      {
-         data_types.push_back(*DL);
-      }
-      data_types.sort();
-      data_types.unique();
-      layers_map[CL->first] = data_types;
+      WordSet& data_types = layers_map[CL->first];
+      data_types.insert(CL->second.begin(), CL->second.end());
    }
    if (!hier) return;
    for (ChildStructure::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
