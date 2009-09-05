@@ -1962,7 +1962,7 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
    _laypanel = DEBUG_NEW tui::nameCbox3Records(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height);
    SetTargetWindow(_laypanel); // target scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
-      SetScrollbars(  0, (line_height+5),  0, inlays.size() );
+      SetScrollbars(  0, (line_height+5),  0, _laypanel->getNumRows() + 1 );
 }
 
 void tui::nameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
