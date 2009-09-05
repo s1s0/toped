@@ -314,7 +314,8 @@ void laydata::TEDfile::putTP(const TP* p)
    put4b(p->x()); put4b(p->y());
 }
 
-void laydata::TEDfile::putCTM(const CTM matrix) {
+void laydata::TEDfile::putCTM(const CTM matrix)
+{
    putReal(matrix.a());
    putReal(matrix.b());
    putReal(matrix.c());
@@ -323,29 +324,31 @@ void laydata::TEDfile::putCTM(const CTM matrix) {
    putReal(matrix.ty());
 }
 
-void laydata::TEDfile::putString(std::string str) {
+void laydata::TEDfile::putString(std::string str)
+{
 //   byte len = str.length();
 //   fwrite(&len, 1,1, _file);
    putByte(str.length());
    fputs(str.c_str(), _file);
 }
 
-void laydata::TEDfile::registercellwritten(std::string cellname) {
-   _childnames.push_back(cellname);
-}   
+void laydata::TEDfile::registercellwritten(std::string cellname)
+{
+   _childnames.insert(cellname);
+}
 
-bool laydata::TEDfile::checkcellwritten(std::string cellname) {
-   for (nameList::const_iterator i = _childnames.begin();
-                                 i != _childnames.end(); i++)
-      if (cellname == *i) return true;
-   return false;      
-//   return (_childnames.end() != _childnames.find(cellname));
-}   
+bool laydata::TEDfile::checkcellwritten(std::string cellname)
+{
+   if (_childnames.end() == _childnames.find(cellname))
+      return false;
+   else
+      return true;
+}
 
 laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
-   _childnames.push_back(cellname);
+   _childnames.insert(cellname);
    cellList::const_iterator striter = _design->_cells.find(cellname);
    laydata::CellDefin celldef = NULL;
    // link the cells instances with their definitions
@@ -366,7 +369,7 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
          // parsed yet. That is why we are assigning a default cell to the 
          // referenced structure here in order to continue the parsing, and when 
          // the entire file is parced the cell references without a proper pointer
-         // to the structure need to be flagged as warning in case 1 and as error 
+         // to the structure need to be flaged as warning in case 1 and as error
          // in case 2.
          celldef = _TEDLIB->adddefaultcell(cellname, false);
       }
@@ -382,14 +385,12 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
    return celldef;
 }
 
-void laydata::TEDfile::get_cellchildnames(nameList* cnames) {
-   // leave only the unique names in the children's list
-   _childnames.sort(); _childnames.unique();
-   // Be very very careful with the copy constructors and assignment of the 
+void laydata::TEDfile::get_cellchildnames(NameSet& cnames) {
+   // Be very very careful with the copy constructors and assignment of the
    // standard C++ lib containers. Here it seems OK.
-   *cnames = _childnames;
-   //for (nameList::const_iterator CN = _childnames.begin(); 
+   cnames = _childnames;
+   //for (NameSet::const_iterator CN = _childnames.begin();
    //                              CN != _childnames.end() ; CN++)
-   //   cnames->push_back(*CN);
+   //   cnames->instert(*CN);
    _childnames.clear();
 }

@@ -179,7 +179,7 @@ namespace laydata {
       void                 registercellwritten(std::string);
       bool                 checkcellwritten(std::string);
       CellDefin            linkcellref(std::string cellname);
-      void                 get_cellchildnames(nameList*);
+      void                 get_cellchildnames(NameSet&);
       bool                 status() const  {return _status;};
       word                 numread() const {return _numread;};
       tdtlibrary*          design() const  {return _design;};
@@ -204,7 +204,7 @@ namespace laydata {
       time_t               _created;
       time_t               _lastUpdated;
       tdtlibrary*          _design;
-      nameList             _childnames;
+      NameSet              _childnames;
       laydata::tdtlibdir*  _TEDLIB;       // catalog of available TDT libraries
 
    };

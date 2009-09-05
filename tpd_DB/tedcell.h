@@ -192,13 +192,13 @@ namespace laydata {
       void                 getCellOverlap();
       void                 store_inAttic(atticList&);
       _dbl_word            getFullySelected(dataList*) const;
-      nameList*            rehash_children();
+      NameSet*             rehash_children();
       shapeList*           mergeprep(unsigned);
       bool                 unselect_pointlist(selectDataPair&, selectDataPair&);
       tdtdata*             checkNreplacePoly(selectDataPair&, validator*, unsigned, selectList**);
       tdtdata*             checkNreplaceBox(selectDataPair&, validator*, unsigned, selectList**);
       dataList*            secure_dataList(selectList&, unsigned);
-      nameList             _children;     //! for hierarchy list purposes
+      NameSet              _children;     //! for hierarchy list purposes
       selectList           _shapesel;     //! selected shapes
       DBbox                _cellOverlap;   //! cell overlap
    };

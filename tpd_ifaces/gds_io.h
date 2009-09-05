@@ -28,9 +28,6 @@
 #define GDSIO_H_INCLUDED
 
 #include <stdio.h>
-#include <vector>
-#include <string>
-#include <set>
 #include <wx/ffile.h>
 #include "../tpd_common/ttt.h"
 
@@ -236,7 +233,6 @@ namespace GDSin {
       public:
          typedef std::list<GdsStructure*>  ChildStructure;
 
-         typedef std::set<std::string> NameSet;
                               GdsStructure(GdsFile*, word);
          void                 import(GdsFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
