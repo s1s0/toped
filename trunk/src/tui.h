@@ -214,6 +214,7 @@ namespace tui {
                              ~nameCbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
+         word                 getNumRows() const {return _allRecords.size();}
       private:
          class LayerRecord {
             public:
