@@ -326,7 +326,7 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
                layno = tedfile->getWord();
                if (0 != layno) _layers[layno]   = DEBUG_NEW tdtlayer(tedfile);
                else            _layers[REF_LAY] = DEBUG_NEW quadTree(tedfile);
-               if (0 == layno) tedfile->get_cellchildnames(&_children);
+               if (0 == layno) tedfile->get_cellchildnames(_children);
                break;
             default: throw EXPTNreadTDT("LAYER record type expected");
          }
@@ -344,7 +344,7 @@ laydata::tdtcell::tdtcell(TEDfile* const tedfile, std::string name, int lib) :
                break;
             case    tedf_REFS:
                _layers[REF_LAY] = DEBUG_NEW quadTree(tedfile);
-               tedfile->get_cellchildnames(&_children);
+               tedfile->get_cellchildnames(_children);
                break;
             default: throw EXPTNreadTDT("LAYER record type expected");
          }
@@ -396,9 +396,7 @@ bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child)
    //leave a mark that child is not orphan
    child->parentfound();
    // update the list of children of the current cell
-   _children.push_back(child->name());
-   _children.sort();
-   _children.unique();
+   _children.insert(child->name());
    // update the hierarchical tree
    ATDB->dbHierAddParent(child, this);
    return true;
@@ -765,7 +763,7 @@ laydata::TDTHierTree* laydata::tdtcell::hierout(laydata::TDTHierTree*& Htree,
    // Not to to alter it or update it! It's important to keep that rule, in order
    // to make cell instance tracking and cell hierarchy manageable.
    Htree = DEBUG_NEW TDTHierTree(this, parent, Htree);
-   nameList::const_iterator wn;
+   NameSet::const_iterator wn;
    for (wn = _children.begin(); wn != _children.end(); wn++)
    {
       if (celldefs->end() != celldefs->find(*wn) )
@@ -1849,10 +1847,10 @@ _dbl_word laydata::tdtcell::getFullySelected(dataList* lslct) const
    return numselected;      
 }
 
-nameList* laydata::tdtcell::rehash_children()
+NameSet* laydata::tdtcell::rehash_children()
 {
    // the actual list of names of the referenced cells
-   nameList *cellnames = DEBUG_NEW nameList();
+   NameSet *cellnames = DEBUG_NEW NameSet();
    // get the cells layer
    quadTree* refsTree = _layers[REF_LAY];
    tdtcellref* wcl;
@@ -1866,10 +1864,8 @@ nameList* laydata::tdtcell::rehash_children()
                                      CC != refsList->end(); CC++)
       {
          wcl = static_cast<tdtcellref*>(CC->first);
-         cellnames->push_back(wcl->cellname());
+         cellnames->insert(wcl->cellname());
       }
-      cellnames->sort();
-      cellnames->unique();
       refsList->clear(); delete refsList;
    }
    return cellnames;
@@ -1885,8 +1881,8 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
       {
          // Means that all child references has been wiped out by the last 
          // operation, so remove all children from the hierarchy tree
-         for (nameList::const_iterator CN = _children.begin(); 
-                                       CN != _children.end(); CN++)
+         for (NameSet::const_iterator CN = _children.begin();
+                                      CN != _children.end(); CN++)
          {
             childref = ATDB->checkcell(*CN);
             if (NULL == childref)
@@ -1899,8 +1895,8 @@ void laydata::tdtcell::updateHierarchy(laydata::tdtlibdir* libdir)
    else
    {
       // Recollect the children.
-      nameList *children_upd = rehash_children();
-      std::pair<nameList::iterator,nameList::iterator> diff;
+      NameSet *children_upd = rehash_children();
+      std::pair<NameSet::iterator,NameSet::iterator> diff;
       while (true) 
       {
          diff = std::mismatch(children_upd->begin(), children_upd->end(), _children.begin());
@@ -2053,7 +2049,7 @@ void laydata::tdtcell::collect_usedlays(const tdtlibdir* LTDB, bool recursive, W
    // first call recursively the method on all children cells
    assert(recursive ? NULL != LTDB : true);
    if (recursive)
-      for (nameList::const_iterator CC = _children.begin(); CC != _children.end(); CC++)
+      for (NameSet::const_iterator CC = _children.begin(); CC != _children.end(); CC++)
          LTDB->collect_usedlays(*CC, recursive, laylist);
    // then update with the layers used in this cell
    for(layerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)

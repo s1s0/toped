@@ -18,7 +18,7 @@
   <kdevautoproject>
     <general>
       <activetarget>src/toped</activetarget>
-      <useconfiguration>debug</useconfiguration>
+      <useconfiguration>optimized</useconfiguration>
     </general>
     <run>
       <mainprogram>/local_home/skr/toped/debug</mainprogram>
@@ -61,7 +61,7 @@
         <ccompiler>kdevgccoptions</ccompiler>
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevpgf77options</f77compiler>
-        <cxxflags>-O0 -Wall -g3</cxxflags>
+        <cxxflags>-O0 -Wall -g3 -pg</cxxflags>
         <envvars/>
         <topsourcedir/>
         <cppflags/>

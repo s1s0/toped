@@ -33,6 +33,7 @@
 #include <map>
 #include <stack>
 #include <list>
+#include <set>
 #include <assert.h>
 
 #if WIN32
@@ -92,6 +93,7 @@ typedef     _sg_int32   int4b;
 typedef        double   real;
 
 typedef  std::list<std::string>           nameList;
+typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
 typedef  std::map<word, WordList>         GdsLayers;
 typedef  std::map<std::string, int>       SIMap;       // name
