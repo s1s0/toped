@@ -1193,7 +1193,7 @@ LayerMapGds* DataCenter::secureGdsLayMap(bool import)
          {
             std::ostringstream dtypestr;
             dtypestr << CGL->first << ";";
-            for ( WordList::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
+            for ( WordSet::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
             {
                if ( CDT != CGL->second.begin() ) dtypestr << ", ";
                dtypestr << *CDT;

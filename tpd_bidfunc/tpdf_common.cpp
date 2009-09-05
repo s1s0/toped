@@ -317,8 +317,8 @@ void tellstdfunc::makeGdsLays(GdsLayers& gdsLays)
    DATC->all_layers(allls);
    for (nameList::const_iterator CL = allls.begin(); CL != allls.end(); CL++)
    {
-      WordList data_types;
-      data_types.push_back(0);
+      WordSet data_types;
+      data_types.insert(0);
       gdsLays[DATC->getLayerNo(*CL)] = data_types;
    }
 }

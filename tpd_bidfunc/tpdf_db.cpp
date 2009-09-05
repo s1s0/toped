@@ -805,7 +805,7 @@ int tellstdfunc::GDSreportlay::execute()
          for (GdsLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
          {
             ost << "{" << NLI->first << " ; ";
-            for (WordList::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
+            for (WordSet::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
                ost << *NTI << " ";
             ost << "}"<< std::endl;
          }
@@ -847,7 +847,7 @@ int tellstdfunc::GDSgetlaymap::execute()
       {
          std::ostringstream dtypestr;
          dtypestr << CGL->first << ";";
-         for ( WordList::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
+         for ( WordSet::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
          {
             if ( CDT != CGL->second.begin() ) dtypestr << ", ";
             dtypestr << *CDT;
