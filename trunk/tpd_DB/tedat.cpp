@@ -245,7 +245,7 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
    if (sh_selected == _status) return;
    real clip;
    // get the clip area and if it is 0 - run away
-   if (0.0 == (clip = select_in.cliparea(overlap()))) return;
+   if (0ll == (clip = select_in.cliparea(overlap()))) return;
    if (-1.0 == clip) select_this(selist); // entire shape is in
    else if ((clip > 0.0) && pselect)
    { // shape partially is in the select box
@@ -288,7 +288,7 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
    assert((sh_selected == _status) || (sh_partsel == _status));
    real clip;
    // get the clip area and if it is 0 - run away
-   if (0.0 == (clip = select_in.cliparea(overlap()))) return false;
+   if (0ll == (clip = select_in.cliparea(overlap()))) return false;
    // if select_in overlaps the entire shape
    if (-1.0 == clip) {
       if (0 != SI.second.size()) {
@@ -974,9 +974,9 @@ void laydata::tdtpoly::transfer(const CTM& trans)
    plist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans );
-   real area = polyarea(plist);
+   int8b area = polyarea(plist);
    unsigned index = 0;
-   if (area < 0)
+   if (area < 0ll)
       for (unsigned i = _psize; i > 0; i--)
       {
          _pdata[index++] = plist[i-1].x();
@@ -1724,7 +1724,7 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    DBbox areal = obox.overlap(newtrans);
    // check that the cell (or part of it) is in the visual window
    DBbox clip = drawprop.clipRegion();
-   if (0.0 == clip.cliparea(areal)) return;
+   if (0ll == clip.cliparea(areal)) return;
    // check that the cell area is bigger that the MIN_VISUAL_AREA
    if (!areal.visible(drawprop.ScrCTM())) return;
    // If we get here - means that the cell (or part of it) is visible
@@ -2672,11 +2672,13 @@ void laydata::valid_poly::angles()
 
 void laydata::valid_poly::normalize()
 {
-   real area = polyarea(_plist);
-   if (area == 0) {
+   int8b area = polyarea(_plist);
+   if (area == 0ll)
+   {
       _status |= shp_null; return;
    }
-   else if (area < 0)  {
+   else if (area < 0ll)
+   {
       std::reverse(_plist.begin(),_plist.end());
       _status |= laydata::shp_clock;
    }

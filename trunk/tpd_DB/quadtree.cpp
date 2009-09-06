@@ -105,15 +105,17 @@ void laydata::quadTree::add(tdtdata* shape)
       DBbox oldovl = _overlap;
       // calculate the new container overlap
       _overlap.overlap(shovl);
-      real areaold = oldovl.area();
-      real areanew = _overlap.area();
+      int8b areaold = oldovl.boxarea();
+      int8b areanew = _overlap.boxarea();
 // The equation below produce problems with severe consequences.
 // It seems to be because of the type of the conversion
 //      if (oldovl.area() == _overlap->area()) {
-      if (areaold == areanew) {
+      if (areaold == areanew)
+      {
          // if the overlapping box hasn't changed,
          // try to fit the shape into subtree
-         if ((areanew <= 4 * shovl.area()) || !fitintree(shape)) {
+         if ((areanew <= 4ll * shovl.boxarea()) || !fitintree(shape))
+         {
             // shape doesn't fit into the subtree, so place it here
             shape->nextis(_first); _first = shape;
          }
@@ -121,7 +123,7 @@ void laydata::quadTree::add(tdtdata* shape)
       else { // the overlapping box has had blown-up
          shape->nextis(_first); _first = shape;
          resort(); // re-sort the entire tree
-      }   
+      }
    }
 }
 
@@ -135,12 +137,12 @@ The method might be called recursively via the add() method.
 bool laydata::quadTree::fitintree(tdtdata* shape)
 {
    DBbox shovl = shape->overlap();
-   real clipedarea[4];
+   int8b clipedarea[4];
    // check the clipping to see in witch region to place the shape
    for (byte i = 0; i < 4 ; i++) {
       DBbox subbox = _overlap.getcorner(i);
       clipedarea[i] = subbox.cliparea(shovl,true);
-      if (-1.0 == clipedarea[i]) {//entirely inside the area
+      if (-1ll == clipedarea[i]) {//entirely inside the area
          if (!_quads[i]) _quads[i] = DEBUG_NEW quadTree();
          _quads[i]->add(shape);
          return true;
@@ -155,7 +157,8 @@ bool laydata::quadTree::fitintree(tdtdata* shape)
    newovl.overlap(shovl);
    // if the max area of the candidate does not blow more than 10% - 
    // then seems to be OK to get it
-   if (newovl.area() < 1.1 * (_overlap.area() / 4)) {
+   if ((40ll * newovl.boxarea()) < (11ll * _overlap.boxarea()))
+   {
       if (!_quads[candidate]) _quads[candidate] = DEBUG_NEW quadTree();
       _quads[candidate]->add(shape);
       return true;
@@ -169,11 +172,11 @@ the shape or -1 otherwise.
 */
 int laydata::quadTree::fitsubtree(const DBbox& shovl, DBbox* maxsubbox )
 {
-   real clipedarea[4];
+   int8b clipedarea[4];
    // check the clipping to see in witch region to place the shape
    for (byte i = 0; i < 4 ; i++) {
       clipedarea[i] = maxsubbox[i].cliparea(shovl,true);
-      if (-1.0 == clipedarea[i]) {//entirely inside the area
+      if (-1ll == clipedarea[i]) {//entirely inside the area
          return i;
       }
    }
@@ -187,7 +190,8 @@ int laydata::quadTree::fitsubtree(const DBbox& shovl, DBbox* maxsubbox )
    newovl.overlap(shovl);
    // if the max area of the candidate does not blow more than 10% - 
    // then seems to be OK to get it
-   if (newovl.area() < 1.1 * (_overlap.area() / 4)) {
+   if ((40ll * newovl.boxarea()) < (11ll * _overlap.boxarea()))
+   {
       return candidate;
    }
    return -1; // shape can not be fit into any subtree
@@ -222,14 +226,14 @@ void laydata::quadTree::sort(shapeList& inlist)
    // which is the child where current shape fits 
    int fitinsubbox;
    // initialize the iterator
-   real sharea, totalarea = _overlap.area();
+   int8b sharea, totalarea = _overlap.boxarea();
    while (inlist.end() != DI)
    {
       // get the overlap of the current shape
       shovl = (*DI)->overlap();
-      sharea = shovl.area();
+      sharea = shovl.boxarea();
       // Check it fits in some of the children
-      if (totalarea <= 4 * sharea || 
+      if ((totalarea <= 4ll * sharea) || 
                         (-1 == (fitinsubbox = fitsubtree(shovl, maxsubbox))))
       {
          // no fit. The shape is sorted in the current tree
@@ -319,11 +323,12 @@ bool laydata::quadTree::delete_marked(SH_STATUS stat, bool partselect) {
    // If _overlap is still NULL here -> means the placeholder is empty. Will
    // be deleted by the parent
    if (empty()) _invalid = true;
-   else {
+   else
+   {
       //Now if the overlapping rectangles differ, then invalidate 
       //the current quadTree
-      real areaold = oldovl.area();
-      real areanew = _overlap.area();
+      int8b areaold = oldovl.boxarea();
+      int8b areanew = _overlap.boxarea();
       if (areaold != areanew) _invalid = true;
    }
    return _2B_sorted |= _invalid;
@@ -337,13 +342,13 @@ on the shapes that overlap somehow with the cutting polygon */
 void laydata::quadTree::cutpoly_selected(pointlist& plst, DBbox& cut_overlap, 
                                                            shapeList** decure) {
    // check the entire holder for clipping...
-   if (0.0 == cut_overlap.cliparea(_overlap)) return;
+   if (0ll == cut_overlap.cliparea(_overlap)) return;
    // now start traversing the shapes in the current horlder one by one
    tdtdata* wdt = _first;
    while(wdt) {
       // for fully selected shpes if they overlap with the cutting polygon
       if ((sh_selected == wdt->status()) && 
-                                    (0.0 != cut_overlap.cliparea(wdt->overlap())))
+                                    (0ll != cut_overlap.cliparea(wdt->overlap())))
          // go and clip it
          wdt->polycut(plst, decure);
       wdt = wdt->next();
@@ -358,7 +363,7 @@ laydata::tdtdata* laydata::quadTree::merge_selected(tdtdata*& shapeRef) {
    laydata::tdtdata* mergeres = NULL;
    DBbox overlapRef = shapeRef->overlap();
    // check the entire holder for clipping...
-   if (0.0 == overlapRef.cliparea(_overlap)) return NULL;
+   if (0ll == overlapRef.cliparea(_overlap)) return NULL;
    // now start traversing the shapes in the current horlder one by one
    tdtdata* wdt = _first;
    while(wdt) {
@@ -366,7 +371,7 @@ laydata::tdtdata* laydata::quadTree::merge_selected(tdtdata*& shapeRef) {
       // and this is not the same shape as the reference
       if ((wdt != shapeRef) && 
           ((sh_selected == wdt->status()) || (sh_merged == wdt->status())) && 
-          (0.0 != overlapRef.cliparea(wdt->overlap()))) {
+          (0ll != overlapRef.cliparea(wdt->overlap()))) {
          // go and merge it
          mergeres = polymerge(wdt->shape2poly(), shapeRef->shape2poly());
          if (NULL != mergeres) {
@@ -432,8 +437,8 @@ bool laydata::quadTree::delete_this(laydata::tdtdata* object) {
    else {
       //Now if the overlapping rectangles differ, then invalidate 
       //the current quadTree
-      real areaold = oldovl.area();
-      real areanew = _overlap.area();
+      int8b areaold = oldovl.boxarea();
+      int8b areanew = _overlap.boxarea();
       if (areaold != areanew) _invalid = true;
    }
    return _2B_sorted |= _invalid;
@@ -495,15 +500,14 @@ Called by fitintree(), fitsubtree() methods when a decision has to be made which
 of the possible four child areas is most suitable to refuge the current layout 
 object (10% decision)
 */
-byte laydata::quadTree::biggest(real* array) const {
-   real max = 0;
-   byte i;
-   for(i = 0; i < 4; i++) 
-      if (max < array[i]) max = array[i];
-   for(i = 0; i < 4; i++) 
-      if (max == array[i]) break;
-   return i;
-}      
+byte laydata::quadTree::biggest(int8b* array) const
+{
+   byte curmaxindx = 0;
+   for (byte i = 1; i < 4; i++)
+      if (array[curmaxindx] < array[i]) curmaxindx = i;
+   return curmaxindx;
+}
+
 /*! Write the contents of the quadTree in a TDT file.\n
 The idea about store a sorted data does not seems to be appropriate for TDT
 format. It is TOPED internal affair. Format might be used by somebody else - 
@@ -568,7 +572,7 @@ void laydata::quadTree::openGL_draw(layprop::DrawProperties& drawprop,
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
    DBbox areal = _overlap.overlap(drawprop.topCTM()); 
-   if      ( 0.0 == clip.cliparea(areal)     ) return;
+   if      ( 0ll == clip.cliparea(areal)     ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;
    tdtdata* wdt = _first;
    // The drawing will be faster like this for the cells without selected shapes
@@ -635,9 +639,9 @@ short laydata::quadTree::clip_type(tenderer::TopRend& rend) const
    // check the entire holder for clipping...
    DBbox clip = rend.clipRegion();
    DBbox areal = _overlap.overlap(rend.topCTM());
-   real clip_area = clip.cliparea(areal);
-   if ( ( 0.0 == clip_area ) || (!areal.visible(rend.ScrCTM())) ) return 0;
-   if (0.0 < clip_area) return 1;
+   int8b clip_area = clip.cliparea(areal);
+   if ( ( 0ll == clip_area ) || (!areal.visible(rend.ScrCTM())) ) return 0;
+   if (0ll < clip_area) return 1;
    else return -1;
 }
 
@@ -693,7 +697,7 @@ void laydata::quadTree::motion_draw(const layprop::DrawProperties& drawprop,
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
    DBbox areal = _overlap.overlap(transtack.front());
-   if      (0.0 == clip.cliparea(areal)      ) return;
+   if      (0ll == clip.cliparea(areal)      ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;
    tdtdata* wdt = _first;
    while(wdt) {
@@ -744,7 +748,7 @@ void laydata::quadTree::select_inBox(DBbox& select_in, dataList* selist,
                                                   bool pselect, word selmask)
 {
    // check the entire holder for clipping...
-   if ((laydata::_lmnone == selmask) || (0.0 == select_in.cliparea(_overlap))) return;
+   if ((laydata::_lmnone == selmask) || (0ll == select_in.cliparea(_overlap))) return;
    // now start selecting one by one
    tdtdata* wdt = _first;
    while(wdt)
@@ -765,7 +769,7 @@ unselect methods of the parent structures in the data base - tdtlayer and tdtcel
 void laydata::quadTree::unselect_inBox(DBbox& unselect_in, dataList* unselist, 
                                                                  bool pselect) {
    // check the entire holder for clipping...
-   if (0.0 == unselect_in.cliparea(_overlap)) return;
+   if (0ll == unselect_in.cliparea(_overlap)) return;
    tdtdata* wdt = _first;
    while (wdt) {
       // now start unselecting from the list
@@ -999,7 +1003,7 @@ void laydata::tdtlayer::motion_draw(const layprop::DrawProperties& drawprop,
    DBbox clip = drawprop.clipRegion();
    if (empty()) return;
    DBbox areal = overlap().overlap(transtack.front());
-   if      ( 0.0 == clip.cliparea(areal)     ) return;
+   if      ( 0ll == clip.cliparea(areal)     ) return;
    else if (!areal.visible(drawprop.ScrCTM())) return;
    quadTree::motion_draw(drawprop, transtack);
 }
