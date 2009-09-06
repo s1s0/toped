@@ -633,7 +633,7 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
       logicop::pcollection::iterator CI = plycol.begin();
       while (CI != plycol.end())
       {
-         if (0 >= polyarea(**CI))
+         if (0ll >= polyarea(**CI))
          {
             delete (*CI);
             CI = plycol.erase(CI);
@@ -649,10 +649,10 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
       // overlap entirely all the rest
       word the_one = -1;
       word current = 0;
-      real biggest_area = 0;
+      int8b biggest_area = 0ll;
       for (logicop::pcollection::const_iterator CI = plycol.begin(); CI != plycol.end(); CI++)
       {
-         real cur_area = polyarea(**CI);
+         int8b cur_area = polyarea(**CI);
          if (biggest_area < cur_area)
          {
             biggest_area = cur_area;

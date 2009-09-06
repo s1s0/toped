@@ -134,8 +134,8 @@ void DBbox::normalize() {
       swap = _p1.y(); _p1._y = _p2.y(); _p2._y = swap;
    }
 }   
-   
-real DBbox::cliparea(const DBbox& bx, bool calculate) const
+
+int8b DBbox::cliparea(const DBbox& bx, bool calculate) const
 {
    // returns: -1 - if bx is entirely inside this
    //           0 - if bx is entirely outside this
@@ -176,8 +176,8 @@ real DBbox::cliparea(const DBbox& bx, bool calculate) const
       case 0x0A: Bprim = DEBUG_NEW TP(_p2);break;
       default: assert(false);
    }
-   real area =  fabs(((real)Aprim->x() - (real)Bprim->x()) * 
-                     ((real)Aprim->y() - (real)Bprim->y())   );
+   int8b area =  llabs(((int8b)Aprim->x() - (int8b)Bprim->x()) *
+                       ((int8b)Aprim->y() - (int8b)Bprim->y())   );
    delete Aprim; delete Bprim;
    return area;
 }
@@ -240,10 +240,10 @@ bool DBbox::inside(const TP& pnt) {
    else              return true;
 }
 
-real DBbox::area() const
+int8b DBbox::boxarea() const
 {
-   return fabs(((real)_p2.x() - (real)_p1.x()) * 
-               ((real)_p2.y() - (real)_p1.y())   );
+   return llabs(((int8b)_p2.x() - (int8b)_p1.x()) *
+                ((int8b)_p2.y() - (int8b)_p1.y())   );
 }
 
 bool DBbox::visible(const CTM& tmtrx) const
@@ -256,8 +256,8 @@ bool DBbox::visible(const CTM& tmtrx) const
    ptlist.push_back(               (_p2) * tmtrx);
    ptlist.push_back(TP(_p1.x(), _p2.y()) * tmtrx);
 
-   if (fabs(polyarea(ptlist)) >= (real)MIN_VISUAL_AREA) return true;
-   else                                                 return false;
+   if (llabs(polyarea(ptlist)) >= (int8b)MIN_VISUAL_AREA) return true;
+   else                                                   return false;
 }
 
 DBbox DBbox::getcorner(byte corner) {
@@ -638,14 +638,14 @@ std::vector<std::string> split (const std::string& str, char delim)
    return ret;
 }
 
-real polyarea(const pointlist& shape)
+int8b polyarea(const pointlist& shape)
 {
-   real area = 0;
+   int8b area = 0ll;
    word size = shape.size();
    word i,j;
    for (i = 0, j = 1; i < size; i++, j = (j+1) % size)
-      area += ( (real)shape[i].x() * (real)shape[j].y() ) -
-              ( (real)shape[j].x() * (real)shape[i].y() )   ;
+      area += ( (int8b)shape[i].x() * (int8b)shape[j].y() ) -
+              ( (int8b)shape[j].x() * (int8b)shape[i].y() )   ;
    return area;
 }
 

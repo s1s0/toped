@@ -84,6 +84,7 @@
 typedef          char   _sg_int8;	// 1 byte
 typedef         short   _sg_int16;	// 2 bytes
 typedef           int   _sg_int32;	// 4 bytes
+typedef long long int   _sg_int64;  // 8 bytes
 
 typedef unsigned char   byte;
 typedef unsigned short  word;
@@ -91,6 +92,7 @@ typedef unsigned long   _dbl_word;
 typedef     _sg_int16   int2b;
 typedef     _sg_int32   int4b;
 typedef        double   real;
+typedef long long int   int8b;
 
 typedef  std::list<std::string>           nameList;
 typedef  std::set<std::string>            NameSet;
@@ -239,10 +241,10 @@ public:
    void  overlap(const DBbox& bx);
    DBbox overlap(const CTM&) const;
    void  normalize();
-   real  cliparea(const DBbox& bx, bool calculate = false) const;
+   int8b cliparea(const DBbox& bx, bool calculate = false) const;
    int   clipbox(DBbox& bx);
    bool  inside(const TP& );
-   real  area() const;
+   int8b boxarea() const;
    bool  visible(const CTM&) const;
    DBbox getcorner(byte corner);
    const TP&    p1()  const {return _p1;};
@@ -284,7 +286,7 @@ struct TpdYYLtype {
 };
 
 std::vector<std::string> split (const std::string& str, char delim);
-real polyarea(const pointlist& shape);
+int8b polyarea(const pointlist& shape);
 unsigned GCD(unsigned arg1, unsigned arg2);
 
 //=============================================================================
