@@ -1239,9 +1239,20 @@ void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 
 polycross::EventVertex::~EventVertex()
 {
-   for( int cetype = _endE; cetype <= _crossE; cetype++)
+//   for( int cetype = _endE; cetype <= _crossE; cetype++)
+//   {
+//      Events& simEvents = _events[cetype];
+//      while (!simEvents.empty())
+//      {
+//         TEvent* cevent = simEvents.front(); simEvents.pop_front();
+//         delete cevent;
+//      }
+//   }
+//   delete _evertex;
+
+   for (polycross::EventVertex::AllEvents::iterator CE = _events.begin(); CE != _events.end(); CE++)
    {
-      Events& simEvents = _events[cetype];
+      Events& simEvents = CE->second;
       while (!simEvents.empty())
       {
          TEvent* cevent = simEvents.front(); simEvents.pop_front();
