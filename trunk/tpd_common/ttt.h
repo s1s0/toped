@@ -39,7 +39,8 @@
 #if WIN32
    #include <windows.h>
    double round(double x);
-   #define rint round
+   #define rint  round
+   #define llabs _abs64
    //#define round floor
    #define remainder fmod
    #define M_PI   3.1415926535897932384626433832795
