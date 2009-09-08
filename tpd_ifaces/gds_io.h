@@ -237,7 +237,7 @@ namespace GDSin {
          void                 import(GdsFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          void                 collectLayers(GdsLayers&, bool);
-         void                 linkReferences(GdsLibrary* const);
+         void                 linkReferences(GdsFile* const, GdsLibrary* const);
          void                 split(GdsFile*, GdsFile*);
          std::string          strctName() const                { return _strctName;    }
          bool                 traversed() const                { return _traversed;    }
@@ -300,8 +300,8 @@ namespace GDSin {
    {
    public:
       typedef std::map<std::string, GdsStructure*> StructureMap;
-                              GdsLibrary(GdsFile* , GdsRecord* );
-      void                    linkReferences();
+                              GdsLibrary(GdsFile* , std::string);
+      void                    linkReferences(GdsFile* const);
       GDSHierTree*            hierOut();
       GdsStructure*           getStructure(const std::string);
       void                    collectLayers(GdsLayers&);
