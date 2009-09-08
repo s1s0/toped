@@ -38,7 +38,6 @@
 #include "../tpd_DB/tedcell.h"
 #include "../tpd_DB/tedesign.h"
 
-static GDSin::GdsFile*        InFile    = NULL;
 //==============================================================================
 GDSin::GdsRecord::GdsRecord(wxFFile& Gf, word rl, byte rt, byte dt)
 {
@@ -303,7 +302,7 @@ GDSin::GdsRecord::~GdsRecord()
 //==============================================================================
 GDSin::GdsFile::GdsFile(std::string fn)
 {
-   InFile = this; _hierTree = NULL;
+   _hierTree = NULL;
    _laymap = NULL;
    _gdsiiWarnings = 0;
    _fileName = fn;
@@ -347,16 +346,19 @@ GDSin::GdsFile::GdsFile(std::string fn)
                delete wr;break;
             case gds_LIBSECUR:// I don't need this info. Does anybody need it?
                delete wr;break;
-            case gds_LIBNAME:   // down in the hierarchy. 
+            case gds_LIBNAME: {  // down in the hierarchy.
+               std::string libname;
+               wr->retData(&libname);
                //Start reading the library structure
-              _library = DEBUG_NEW GdsLibrary(this, wr);
+              _library = DEBUG_NEW GdsLibrary(this, libname);
                //build the hierarchy tree
-               _library->linkReferences();
+               _library->linkReferences(this);
                closeFile();// close the input stream
                toped_status(console::TSTS_PRGRSBAROFF);
                tell_log(console::MT_INFO, "Done");
                delete wr;
                return; // go out
+            }
             default:   //parse error - not expected record type
                delete wr;
                throw EXPTNreadGDS("GDS header - wrong record type in the current context");
@@ -370,7 +372,6 @@ GDSin::GdsFile::GdsFile(std::string fn)
 
 bool GDSin::GdsFile::reopenFile()
 {
-   InFile = this;
    _gdsiiWarnings = 0;
    _filePos = 0;
    _prgrs_pos = 0;
@@ -399,7 +400,7 @@ void GDSin::GdsFile::setPosition(wxFileOffset filePos)
 
 GDSin::GdsFile::GdsFile(std::string fn, const LayerMapGds* laymap, time_t acctime)
 {
-   InFile = this;_hierTree = NULL;
+   _hierTree = NULL;
    _laymap = laymap;
    _gdsiiWarnings = 0;
    _fileName = fn;//initializing
@@ -505,7 +506,6 @@ GDSin::GdsRecord* GDSin::GdsFile::getNextRecord()
    {
       _prgrs_pos = _filePos;
       toped_status(console::TSTS_PROGRESS, _prgrs_pos);
-//      prgrs->SetPos(prgrs_pos); // update progress indicator
    }
    if (retrec->valid()) return retrec;
    else return NULL;// error during read in
@@ -680,11 +680,12 @@ GDSin::GdsFile::~GdsFile()
 //==============================================================================
 // class GdsLibrary
 //==============================================================================
-GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
+GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, std::string libName)
 {
-   cr->retData(&_libName);//Get library name
+   _libName = libName;
    _maxver = 3;
    GdsStructure* cstr = NULL;
+   GdsRecord* cr = NULL;
    do
    {//start reading
       cr = cf->getNextRecord();
@@ -694,23 +695,23 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
          {
             case gds_FORMAT:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'FORMAT' skipped");
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                delete cr;break;
             case gds_MASK:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'MASK' skipped");
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                delete cr;break;
             case gds_ENDMASKS:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'ENDMASKS' skipped");
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                delete cr;break;
             case gds_REFLIBS:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'REFLIBS' skipped");
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                delete cr;break;
             case gds_ATTRTABLE:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'ATTRTABLE' skipped");
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                delete cr;break;
             case gds_FONTS:// Read fonts
                for(byte i = 0; i < 4; i++)
@@ -739,11 +740,11 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, GdsRecord* cr)
    while (true);
 }
 
-void GDSin::GdsLibrary::linkReferences()
+void GDSin::GdsLibrary::linkReferences(GdsFile* const cf)
 {
    for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
    {//for every structure
-      CSTR->second->linkReferences(this);
+      CSTR->second->linkReferences(cf, this);
    }
 }
 
@@ -799,16 +800,16 @@ void GDSin::GdsStructure::import(GdsFile *cf, laydata::tdtcell* dst_cell,
          {
             case gds_NODE:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'NODE' skipped");
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                GdsNode(cf,layer, dtype);
                delete cr;break;
             case gds_PROPATTR:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                delete cr;break;
             case gds_STRCLASS:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'STRCLASS' skipped");
-               InFile->incGdsiiWarnings();// CADANCE internal use only
+               cf->incGdsiiWarnings();// CADANCE internal use only
                delete cr;break;
             case gds_STRNAME:
                cr->retData(&strctName);
@@ -866,16 +867,16 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, word bgnRecLength)
          {
             case gds_NODE:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'NODE' skipped");
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                GdsNode(cf,layer, dtype);
                delete cr;break;
             case gds_PROPATTR:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                delete cr;break;
             case gds_STRCLASS:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'STRCLASS' skipped");
-               InFile->incGdsiiWarnings();// CADANCE internal use only
+               cf->incGdsiiWarnings();// CADANCE internal use only
                delete cr;break;
             case gds_STRNAME:
                cr->retData(&_strctName);
@@ -908,7 +909,7 @@ void GDSin::GdsStructure::updateContents(int2b layer, int2b dtype)
 }
 
 
-void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
+void GDSin::GdsStructure::linkReferences(GdsFile* const cf, GdsLibrary* const library)
 {
    for (NameSet::const_iterator CRN = _referenceNames.begin(); CRN != _referenceNames.end(); CRN++)
    {
@@ -923,7 +924,7 @@ void GDSin::GdsStructure::linkReferences(GdsLibrary* const library)
          char wstr[256];
          sprintf(wstr," Structure %s is referenced, but not defined!",CRN->c_str() );
          tell_log(console::MT_WARNING,wstr);
-         InFile->incGdsiiWarnings();
+         cf->incGdsiiWarnings();
          //SGREM probably is a good idea to add default
          //GdsStructure here. Then this structure can be
          //visualized in the Hierarchy window as disabled
@@ -1018,9 +1019,9 @@ void GDSin::GdsStructure::importBox(GdsFile* cf, laydata::tdtcell* dst_cell, con
             case gds_BOXTYPE:cr->retData(&singleType);
                delete cr; break;
             case gds_PROPATTR:
-               InFile->incGdsiiWarnings(); delete cr; break;
+               cf->incGdsiiWarnings(); delete cr; break;
             case gds_PROPVALUE: tell_log(console::MT_WARNING, "GDS box - PROPVALUE record ignored");
-               InFile->incGdsiiWarnings(); delete cr; break;
+               cf->incGdsiiWarnings(); delete cr; break;
             case gds_XY:
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
@@ -1124,9 +1125,9 @@ void GDSin::GdsStructure::importPoly(GdsFile* cf, laydata::tdtcell* dst_cell, co
             case gds_DATATYPE: cr->retData(&singleType);
                delete cr;break;
             case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS boundary - PROPATTR record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
+               cf->incGdsiiWarnings(); delete cr;break;
             case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS boundary - PROPVALUE record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
+               cf->incGdsiiWarnings(); delete cr;break;
             case gds_XY:
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
@@ -1246,9 +1247,9 @@ void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, co
             case gds_ENDEXTN:   cr->retData(&endextn);
                delete cr;break;
             case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS path - PROPATTR record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
+               cf->incGdsiiWarnings(); delete cr;break;
             case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS path - PROPVALUE record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
+               cf->incGdsiiWarnings(); delete cr;break;
             case gds_XY:
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
@@ -1379,9 +1380,9 @@ void GDSin::GdsStructure::importText(GdsFile* cf, laydata::tdtcell* dst_cell, re
             case gds_WIDTH: cr->retData(&width);// seems not to be used
                delete cr;break;
             case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS text - PROPATTR record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
+               cf->incGdsiiWarnings(); delete cr;break;
             case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS text - PROPVALUE record ignored");
-               InFile->incGdsiiWarnings(); delete cr;break;
+               cf->incGdsiiWarnings(); delete cr;break;
             case gds_PRESENTATION:
                cr->retData(&ba,0,16);
                font = ba & 0x0030; font >>= 4;
@@ -1510,7 +1511,7 @@ void GDSin::GdsStructure::importSref(GdsFile* cf, laydata::tdtcell* dst_cell, la
                cr->retData(&tmp2);
                ost << "Property attribute  " << tmp << " with value \"" << tmp2 << "\" ignored" ; break;
                tell_log(console::MT_WARNING, ost.str());
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                delete cr; break;
             case gds_ENDEL:{//end of element, exit point
                // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
@@ -1633,7 +1634,7 @@ void GDSin::GdsStructure::importAref(GdsFile* cf, laydata::tdtcell* dst_cell, la
                cr->retData(&tmp2);
                ost << "Property attribute  " << tmp << " with value \"" << tmp2 << "\" ignored" ; break;
                tell_log(console::MT_WARNING, ost.str());
-               InFile->incGdsiiWarnings();
+               cf->incGdsiiWarnings();
                delete cr; break;
             case gds_ENDEL:{//end of element, exit point
                // Absolute magnification, absolute angle should be reflected somehow!!!
@@ -1756,9 +1757,9 @@ GDSin::GdsNode::GdsNode(GdsFile* cf, int2b& layer, int2b& singleType)/* : GdsDat
             case gds_NODETYPE:cr->retData(&singleType);
                delete cr; break;
             case gds_PROPATTR:
-               InFile->incGdsiiWarnings(); delete cr; break;
+               cf->incGdsiiWarnings(); delete cr; break;
             case gds_PROPVALUE: tell_log(console::MT_WARNING, "GDS node - PROPVALUE record ignored");
-               InFile->incGdsiiWarnings(); delete cr; break;
+               cf->incGdsiiWarnings(); delete cr; break;
             case gds_XY: {
                word numpoints = (cr->recLen())/8 - 1;
                // one point less because fist and last point coincide
