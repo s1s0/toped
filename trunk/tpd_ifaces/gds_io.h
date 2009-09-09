@@ -159,9 +159,11 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsRecord {
       public:
-                           GdsRecord(wxFFile& Gf, word rl, byte rt, byte dt);
+//                           GdsRecord(wxFFile& Gf, word rl, byte rt, byte dt);
+                           GdsRecord();
                            GdsRecord(byte rt, byte dt, word rl);
-         bool              retData(void* var, word curnum = 0, byte len = 0);
+         void              getNextRecord(wxFFile& Gf, word rl, byte rt, byte dt);
+         bool              retData(void* var, word curnum = 0, byte len = 0) const;
          size_t            flush(wxFFile& Gf);
          void              add_int2b(const word);
          void              add_int4b(const int4b);
@@ -175,7 +177,7 @@ namespace GDSin {
                           ~GdsRecord();
       private:
          byte*             ieee2gds(double);
-         double            gds2ieee(byte*);
+         double            gds2ieee(byte*) const;
          bool              _valid;
          word              _recLen;
          byte              _recType;
@@ -357,8 +359,10 @@ namespace GDSin {
                               GdsFile(std::string);
                               GdsFile(std::string, const LayerMapGds*, time_t);
          bool                 reopenFile();
-         GdsRecord*           getNextRecord();
-         void                 putRecord(GdsRecord*);
+//         GdsRecord*           getNextRecord();
+         bool                 getNextRecord();
+         const GdsRecord*     cRecord() const                  { return _cRecord;                     }
+         void                 putRecord(const GdsRecord*);
          GdsRecord*           setNextRecord(byte, word reclen = 0);
          double               libUnits();
          double               userUnits();
@@ -396,6 +400,7 @@ namespace GDSin {
          GDStime              _tAccess;
          const LayerMapGds*   _laymap;
          wxFileOffset         _prgrs_pos;
+         GdsRecord*           _cRecord;
    };
 
    class Gds2Ted {
@@ -429,7 +434,7 @@ namespace GDSin {
    };
 
    // Function definition
-     TP   get_TP(GdsRecord* cr, word curnum = 0, byte len=4);
+     TP   get_TP(const GdsRecord* cr, word curnum = 0, byte len=4);
      int4b* getCoordinateArray(GdsRecord* cr, word len);
 //     void PrintChildren(GDSin::GDSHierTree*, std::string*);
 }   
