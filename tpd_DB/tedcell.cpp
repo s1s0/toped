@@ -375,6 +375,13 @@ laydata::tdtcellref* laydata::tdtcell::addcellref(laydata::tdtdesign* ATDB,
    return cellref;
 }
 
+void laydata::tdtcell::registerCellRef(CellDefin str, CTM trans)
+{
+   quadTree *cellreflayer = securelayer(REF_LAY);
+   cellreflayer->put(DEBUG_NEW tdtcellref(str, trans));
+   _children.insert(str->name());
+}
+
 laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB,
           CellDefin str, CTM trans, ArrayProperties& arrprops, bool sortnow)
 {
@@ -387,7 +394,14 @@ laydata::tdtcellaref* laydata::tdtcell::addcellaref(laydata::tdtdesign* ATDB,
    return cellaref;
 }
 
-bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child) 
+void laydata::tdtcell::registerCellARef(CellDefin str, CTM trans, ArrayProperties& arrprops)
+{
+   quadTree *cellreflayer = securelayer(REF_LAY);
+   cellreflayer->put(DEBUG_NEW tdtcellaref(str, trans, arrprops));
+  _children.insert(str->name());
+}
+
+bool laydata::tdtcell::addchild(laydata::tdtdesign* ATDB, tdtdefaultcell* child)
 {
    // check for circular reference, i.e. the child is a father of some of its ancestors
    if (ATDB->dbHierCheckAncestors(this, child))

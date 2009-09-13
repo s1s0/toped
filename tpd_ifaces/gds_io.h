@@ -129,7 +129,7 @@ namespace GDSin {
    class GdsLibrary;
 
    typedef SGHierTree<GdsStructure>       GDSHierTree;
-
+   typedef std::list<GDSin::GdsStructure*> GDSStructureList;
    typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
 
    /*** GdsRecord ***************************************************************
@@ -405,7 +405,6 @@ namespace GDSin {
 
    class Gds2Ted {
    public:
-      typedef std::list<GDSin::GdsStructure*> StructureList;
                            Gds2Ted(GDSin::GdsFile*, laydata::tdtlibdir*, const LayerMapGds&);
       void                 run(const nameList&, bool, bool);
    protected:
@@ -415,13 +414,12 @@ namespace GDSin {
       laydata::tdtlibdir*  _tdt_db;
       const LayerMapGds&   _theLayMap;
       real                 _coeff; // DBU difference
-      StructureList        _convertList;
+      GDSStructureList     _convertList;
       wxFileOffset         _conversionLength;
    };
 
    class GdsSplit {
    public:
-      typedef std::list<GDSin::GdsStructure*> StructureList;
                            GdsSplit(GDSin::GdsFile*, std::string);
       void                 run(GDSin::GdsStructure*, bool);
    protected:
@@ -429,7 +427,7 @@ namespace GDSin {
       void                 split(GDSin::GdsStructure*);
       GDSin::GdsFile*      _src_lib;
       GDSin::GdsFile*      _dst_lib;
-      StructureList        _convertList;
+      GDSStructureList     _convertList;
 //      wxFileOffset         _conversionLength;
    };
 
