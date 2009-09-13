@@ -1496,15 +1496,13 @@ void GDSin::GdsStructure::importSref(GdsFile* cf, laydata::tdtcell* dst_cell, la
             case gds_ENDEL:{//end of element, exit point
                // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
                laydata::CellDefin strdefn = tdt_db->linkcellref(strctName, TARGETDB_LIB);
-               dst_cell->addcellref( (*tdt_db)(),
-                                     strdefn,
-                                     CTM(magnPoint,
-                                         magnification,
-                                         angle,
-                                         (0 != reflection)
-                                        ),
-                                    false
-                                   );
+               dst_cell->registerCellRef( strdefn,
+                                          CTM(magnPoint,
+                                              magnification,
+                                              angle,
+                                              (0 != reflection)
+                                             )
+                                        );
                return;
             }
             default://parse error - not expected record type
@@ -1620,16 +1618,14 @@ void GDSin::GdsStructure::importAref(GdsFile* cf, laydata::tdtcell* dst_cell, la
                                                  static_cast<word>(columns),
                                                  static_cast<word>(rows)
                                                 );
-               dst_cell->addcellaref( (*tdt_db)(),
-                                      strdefn,
-                                      CTM( magnPoint,
-                                           magnification,
-                                           angle,
-                                           (0 != reflection)
-                                         ),
-                                      arrprops,
-                                      false
-                                    );
+               dst_cell->registerCellARef( strdefn,
+                                           CTM( magnPoint,
+                                                magnification,
+                                                angle,
+                                                (0 != reflection)
+                                              ),
+                                           arrprops
+                                         );
                return;
             }
             default://parse error - not expected record type
@@ -1790,7 +1786,7 @@ void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool ove
       toped_status(console::TSTS_PRGRSBARON, _conversionLength);
       try
       {
-         for (StructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
+         for (GDSStructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
          {
             convert(*CS, overwrite);
             (*CS)->set_traversed(false); // restore the state for eventual second conversion
@@ -1800,6 +1796,7 @@ void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool ove
       catch (EXPTNreadGDS) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
       toped_status(console::TSTS_PRGRSBAROFF);
       _src_lib->closeFile();
+      (*_tdt_db)()->recreate_hierarchy(_tdt_db);
    }
 }
 
@@ -1846,12 +1843,14 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
    }
    else
    {
-      ost << "Importing structure " << gname << "...";
+      ost << "Structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = (*_tdt_db)()->addcell(gname, _tdt_db);
-      // finally call the cell converter
+      dst_structure = DEBUG_NEW laydata::tdtcell(gname);
+      // call the cell converter
       src_structure->import(_src_lib, dst_structure, _tdt_db, _theLayMap);
+      // and finally - register the cell
+      (*_tdt_db)()->registercellread(gname, dst_structure);
    }
 }
 //-----------------------------------------------------------------------------
@@ -1883,7 +1882,7 @@ void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
       wr->add_real8b(_src_lib->library()->uu()); wr->add_real8b(_src_lib->library()->dbu());
       _dst_lib->flush(wr);
 
-      for (StructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
+      for (GDSStructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
       {
          split(*CS);
          (*CS)->set_traversed(false); // restore the state for eventual second conversion

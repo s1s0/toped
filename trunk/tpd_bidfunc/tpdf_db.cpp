@@ -441,6 +441,8 @@ int tellstdfunc::GDSimport::execute()
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
          DATC->unlockDB();
+         // populate the hierarchy browser
+         browsers::addTDTtab(true, true);
          LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*lll) << "," << LogFile._2bool(recur)
                << "," << LogFile._2bool(over) << ");"; LogFile.flush();
       }
@@ -502,15 +504,8 @@ int tellstdfunc::GDSimportList::execute()
       DATC->importGDScell(top_cells, LayerExpression, recur, over);
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
       DATC->unlockDB();
-      // Don't refresh the tree browser here. 
-      // - First - it has been updated during the conversion
-      // - Second - addTDTtab is running in the same thread as the caller. It must
-      // make sure that there is nothing left in the PostEvent queue in the main thread
-      // which was filled-up during the conversion.
-      // bottom line - don't do that, or you'll suffer ...
-      // @TODO Check whether is not a good idea to skip the cell browser update
-      // during GDS import. The calling addTDTtab() at the end should be safe
-      //browsers::addTDTtab();
+      // populate the hierarchy browser
+      browsers::addTDTtab(true, true);
       LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
             << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    }

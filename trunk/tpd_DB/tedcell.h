@@ -137,8 +137,10 @@ namespace laydata {
       quadTree*            securelayer(unsigned layno);
       tdtcellref*          addcellref(tdtdesign*, CellDefin str, CTM trans,
                                                           bool sortnow = true);
+      void                 registerCellRef(CellDefin str, CTM trans);
       tdtcellaref*         addcellaref(tdtdesign*, CellDefin, CTM,
                                           ArrayProperties&, bool sortnow = true);
+      void                 registerCellARef(CellDefin str, CTM trans, ArrayProperties&);
       bool                 addchild(tdtdesign*, tdtdefaultcell*);
       void                 write(TEDfile* const, const cellList&, const TDTHierTree*) const;
       void                 GDSwrite(GDSin::GdsFile&, const cellList&,
