@@ -78,7 +78,7 @@ size_t GDSin::GdsRecord::flush(wxFFile& Gf)
 {
    assert(_index == _recLen);
    size_t bytes_written = Gf.Write(_record, _recLen);
-   /*TODO !!! Error correction HERE instead of assertetion */
+   /*@TODO !!! Error correction HERE instead of assertetion */
    assert(bytes_written == _recLen);
    return bytes_written;
 }
@@ -824,11 +824,11 @@ void GDSin::GdsStructure::import(GdsFile *cf, laydata::tdtcell* dst_cell,
                cr->retData(&strctName);
                assert(strctName == _strctName); // @TODO - throw an exception HERE!
                break;
-            case gds_PROPATTR:// skipped record !!!
+            case gds_PROPATTR:
                tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
                cf->incGdsiiWarnings();
                break;
-            case gds_STRCLASS:// skipped record !!!
+            case gds_STRCLASS:
                tell_log(console::MT_WARNING, " GDSII record type 'STRCLASS' skipped");
                cf->incGdsiiWarnings();// CADANCE internal use only
                break;
@@ -883,12 +883,12 @@ GDSin::GdsStructure::GdsStructure(GdsFile *cf, word bgnRecLength)
       {
          switch (cr->recType())
          {
-            case gds_NODE:// skipped record !!!
+            case gds_NODE:
                tell_log(console::MT_WARNING, " GDSII record type 'NODE' skipped");
                cf->incGdsiiWarnings();
                skimNode(cf);
                break;
-            case gds_PROPATTR:// skipped record !!!
+            case gds_PROPATTR:
                tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
                cf->incGdsiiWarnings();
                break;
@@ -1512,8 +1512,8 @@ void GDSin::GdsStructure::importSref(GdsFile* cf, laydata::tdtcell* dst_cell, la
    TP             magnPoint;
    std::string    strctName;
    word           ba;
-   int tmp; //Dummy variable. Use for gds_PROPATTR
-   char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
+   int            tmp; //Dummy variable. Use for gds_PROPATTR
+   char           tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
    std::ostringstream ost;
    const GdsRecord* cr = cf->cRecord();
    do
@@ -1541,10 +1541,10 @@ void GDSin::GdsStructure::importSref(GdsFile* cf, laydata::tdtcell* dst_cell, la
                break;
             case gds_XY: magnPoint = GDSin::get_TP(cr);
                break;
-            case gds_PROPATTR://@TODO Not implemented yet+++++
+            case gds_PROPATTR:
                cr->retData(&tmp);
                break;
-            case gds_PROPVALUE: //@TODO Not implemented yet+++++
+            case gds_PROPVALUE:
                cr->retData(&tmp2);
                ost << "Property attribute  " << tmp << " with value \"" << tmp2 << "\" ignored" ; break;
                tell_log(console::MT_WARNING, ost.str());
@@ -1623,10 +1623,10 @@ void GDSin::GdsStructure::importAref(GdsFile* cf, laydata::tdtcell* dst_cell, la
                cr->retData(&columns  );
                cr->retData(&rows   ,2);
                break;
-            case gds_PROPATTR://TODO not implemented yet+++++
+            case gds_PROPATTR:
                cr->retData(&tmp);
                break;
-            case gds_PROPVALUE://TODO not implemented yet+++++
+            case gds_PROPVALUE:
                cr->retData(&tmp2);
                ost << "Property attribute  " << tmp << " with value \"" << tmp2 << "\" ignored" ; break;
                tell_log(console::MT_WARNING, ost.str());
