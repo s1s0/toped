@@ -123,14 +123,11 @@ namespace laydata {
 }
 
 namespace GDSin {
-   class GdsFile;
    class GdsStructure;
-   class GdsRecord;
    class GdsLibrary;
 
-   typedef SGHierTree<GdsStructure>       GDSHierTree;
+   typedef SGHierTree<GdsStructure>        GDSHierTree;
    typedef std::list<GDSin::GdsStructure*> GDSStructureList;
-   typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
 
    /*** GdsRecord ***************************************************************
    >>> Constructor --------------------------------------------------------------
@@ -159,7 +156,6 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsRecord {
       public:
-//                           GdsRecord(wxFFile& Gf, word rl, byte rt, byte dt);
                            GdsRecord();
                            GdsRecord(byte rt, byte dt, word rl);
          void              getNextRecord(wxFFile& Gf, word rl, byte rt, byte dt);
@@ -187,14 +183,89 @@ namespace GDSin {
          word              _index;
    };
 
-   class   GdsNode/*:public GdsData*/ {
+   /*** GdsFile ***************************************************************
+   >>> Constructor --------------------------------------------------------------
+   > Opens the input GDS file and start reading it. Initializes all data fields
+   >> input parameters ->   fn - GDSII file name for reading
+   >                  progind - pointer to progress indicator control
+   >                       lw - pointer to Log window control
+   >>> Data fields --------------------------------------------------------------
+   > GDSfh         - GDS input file handler
+   > filename      - GDS input file name
+   > file_length  - length of the input GDS file
+   > file_pos      - current position of the input GDS file during read in
+   > library      - pointer to GdsLibrary structure
+   > prgrs_pos      - current position of the progress indicator control
+   > logwin         - pointer to the error log edit control
+   > StreamVerion   - GDS specific data - see gds_HEADER
+   > libdirsize   - GDS specific data - see gds_LIBDIRSIZE
+   > srfname      - GDS specific data - see gds_SRFNAME
+   > t_access      - Date&time of last access to the GDSII file
+   > t_modif      - Date&time of last modification of the GDSII file
+                    Last two parameters not used anywhere
+   >>> Methods ------------------------------------------------------------------
+   > getNextRecord()      - Reads next record from the input stream. Retuns NULL if
+   >                       error ocures during read in. This is the only function
+   >                      used for reading of the input GDS file. Calls
+   >                      'GdsRecord' constructor
+   > libUnits()      - |Return library units
+   > userUnits()    - |Return user units
+                          |->Both methods call corresponding methods in GdsLibrary
+   > GetStructure()      - Returns the pointer to GDSII structure with a given name
+   > HierOut()            - Call corresponding method in GdsLibrary
+   > GetReadErrors()      - Returns the number of errors during GDSII file reading
+   > GetTimes()         - Reads values of t_access and t_modiff (see above)
+   ******************************************************************************/
+   class   GdsFile   {
       public:
-                              GdsNode(GdsFile*, int2b&, int2b&);
-         byte                 gdsDataType()                     { return gds_NODE;}
-         virtual             ~GdsNode()                         {                 }
+                              GdsFile(std::string);
+                              GdsFile(std::string, const LayerMapGds*, time_t);
+         bool                 reopenFile();
+         bool                 getNextRecord();
+         void                 putRecord(const GdsRecord*);
+         GdsRecord*           setNextRecord(byte, word reclen = 0);
+         double               libUnits();
+         double               userUnits();
+         void                 setTimes(GdsRecord*);
+         bool                 checkCellWritten(std::string);
+         void                 registerCellWritten(std::string);
+         void                 flush(GdsRecord*);
+         void                 updateLastRecord();
+         bool                 getMappedLayType(word&, word&, word);
+         void                 setPosition(wxFileOffset);
+         void                 closeFile();
+         GdsStructure*        getStructure(const std::string);
+         void                 collectLayers(GdsLayers&);
+         std::string          libname() const;
+         void                 hierOut();
+         const GdsRecord*     cRecord() const                  { return _cRecord;                     }
+         GDSHierTree*         hierTree()                       { return _hierTree;                    }
+         int                  gdsiiWarnings()                  { return _gdsiiWarnings;               }
+         int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;             }
+         const GdsLibrary*    library() const                  { return _library;                     }
+         wxFileOffset         filePos() const                  { return _filePos;                     }
+                              ~GdsFile();
       protected:
-         pointlist            _plist;
+                              typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
+
+         void                 getTimes(GdsRecord* wr);
+         wxFFile              _gdsFh;
+         std::string          _fileName;
+         int2b                _streamVersion;
+         int2b                _libDirSize;
+         std::string          _srfName;
+         GdsLibrary*          _library;
+         wxFileOffset         _filePos;
+         GDSHierTree*         _hierTree; // Tree of instance hierarchy
+         nameList             _childnames;
+         int                  _gdsiiWarnings;
+         GDStime              _tModif;
+         GDStime              _tAccess;
+         const LayerMapGds*   _laymap;
+         wxFileOffset         _prgrs_pos;
+         GdsRecord*           _cRecord;
    };
+
 
    /*** GdsStructure ************************************************************
    >>> Constructor --------------------------------------------------------------
@@ -261,6 +332,7 @@ namespace GDSin {
          void                 skimText(GdsFile*);
          void                 skimSRef(GdsFile*);
          void                 skimARef(GdsFile*);
+         void                 skimNode(GdsFile*);
          void                 updateContents(int2b, int2b);
          void                 pathConvert(pointlist&, word, int4b, int4b );
          int                  arrGetStep(TP&, TP&, int2b);
@@ -321,119 +393,35 @@ namespace GDSin {
       StructureMap            _structures;
    };
 
-   /*** GdsFile ***************************************************************
-   >>> Constructor --------------------------------------------------------------
-   > Opens the input GDS file and start reading it. Initializes all data fields
-   >> input parameters ->   fn - GDSII file name for reading
-   >                  progind - pointer to progress indicator control
-   >                       lw - pointer to Log window control
-   >>> Data fields --------------------------------------------------------------
-   > GDSfh         - GDS input file handler
-   > filename      - GDS input file name
-   > file_length  - length of the input GDS file
-   > file_pos      - current position of the input GDS file during read in
-   > library      - pointer to GdsLibrary structure
-   > prgrs_pos      - current position of the progress indicator control
-   > logwin         - pointer to the error log edit control
-   > StreamVerion   - GDS specific data - see gds_HEADER
-   > libdirsize   - GDS specific data - see gds_LIBDIRSIZE
-   > srfname      - GDS specific data - see gds_SRFNAME
-   > t_access      - Date&time of last access to the GDSII file
-   > t_modif      - Date&time of last modification of the GDSII file
-                    Last two parameters not used anywhere
-   >>> Methods ------------------------------------------------------------------
-   > getNextRecord()      - Reads next record from the input stream. Retuns NULL if
-   >                       error ocures during read in. This is the only function
-   >                      used for reading of the input GDS file. Calls
-   >                      'GdsRecord' constructor
-   > libUnits()      - |Return library units
-   > userUnits()    - |Return user units
-                          |->Both methods call corresponding methods in GdsLibrary
-   > GetStructure()      - Returns the pointer to GDSII structure with a given name
-   > HierOut()            - Call corresponding method in GdsLibrary
-   > GetReadErrors()      - Returns the number of errors during GDSII file reading
-   > GetTimes()         - Reads values of t_access and t_modiff (see above)
-   ******************************************************************************/
-   class   GdsFile   {
-      public:
-                              GdsFile(std::string);
-                              GdsFile(std::string, const LayerMapGds*, time_t);
-         bool                 reopenFile();
-//         GdsRecord*           getNextRecord();
-         bool                 getNextRecord();
-         const GdsRecord*     cRecord() const                  { return _cRecord;                     }
-         void                 putRecord(const GdsRecord*);
-         GdsRecord*           setNextRecord(byte, word reclen = 0);
-         double               libUnits();
-         double               userUnits();
-         void                 setTimes(GdsRecord*);
-         bool                 checkCellWritten(std::string);
-         void                 registerCellWritten(std::string);
-         void                 flush(GdsRecord*);
-         void                 updateLastRecord();
-         bool                 getMappedLayType(word& gdslay, word& gdstype, word tdtlay);
-         void                 setPosition(wxFileOffset);
-         void                 closeFile();
-         GdsStructure*        getStructure(const std::string nm){ return _library->getStructure(nm);  }
-         void                 collectLayers(GdsLayers& lays)   { _library->collectLayers(lays);       }
-         std::string          libname() const                  { return _library->libName();          }
-         void                 hierOut()                        { _hierTree = _library->hierOut();     }
-         GDSHierTree*         hierTree()                       { return _hierTree;                    }
-         int                  gdsiiWarnings()                  { return _gdsiiWarnings;               }
-         int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;             }
-         const GdsLibrary*    library() const                  { return _library;                     }
-         wxFileOffset         filePos() const                  { return _filePos;                     }
-                              ~GdsFile();
-      protected:
-         void                 getTimes(GdsRecord* wr);
-         wxFFile              _gdsFh;
-         std::string          _fileName;
-         int2b                _streamVersion;
-         int2b                _libDirSize;
-         std::string          _srfName;
-         GdsLibrary*          _library;
-         wxFileOffset         _filePos;
-         GDSHierTree*         _hierTree; // Tree of instance hierarchy
-         nameList             _childnames;
-         int                  _gdsiiWarnings;
-         GDStime              _tModif;
-         GDStime              _tAccess;
-         const LayerMapGds*   _laymap;
-         wxFileOffset         _prgrs_pos;
-         GdsRecord*           _cRecord;
-   };
-
    class Gds2Ted {
    public:
-                           Gds2Ted(GDSin::GdsFile*, laydata::tdtlibdir*, const LayerMapGds&);
-      void                 run(const nameList&, bool, bool);
+                              Gds2Ted(GDSin::GdsFile*, laydata::tdtlibdir*, const LayerMapGds&);
+      void                    run(const nameList&, bool, bool);
    protected:
-      void                 preTraverseChildren(const GDSin::GDSHierTree*);
-      void                 convert(GDSin::GdsStructure*, bool);
-      GDSin::GdsFile*      _src_lib;
-      laydata::tdtlibdir*  _tdt_db;
-      const LayerMapGds&   _theLayMap;
-      real                 _coeff; // DBU difference
-      GDSStructureList     _convertList;
-      wxFileOffset         _conversionLength;
+      void                    preTraverseChildren(const GDSin::GDSHierTree*);
+      void                    convert(GDSin::GdsStructure*, bool);
+      GDSin::GdsFile*         _src_lib;
+      laydata::tdtlibdir*     _tdt_db;
+      const LayerMapGds&      _theLayMap;
+      real                    _coeff; // DBU difference
+      GDSStructureList        _convertList;
+      wxFileOffset            _conversionLength;
    };
 
    class GdsSplit {
    public:
-                           GdsSplit(GDSin::GdsFile*, std::string);
-      void                 run(GDSin::GdsStructure*, bool);
+                              GdsSplit(GDSin::GdsFile*, std::string);
+      void                    run(GDSin::GdsStructure*, bool);
    protected:
-      void                 preTraverseChildren(const GDSin::GDSHierTree*);
-      void                 split(GDSin::GdsStructure*);
-      GDSin::GdsFile*      _src_lib;
-      GDSin::GdsFile*      _dst_lib;
-      GDSStructureList     _convertList;
-//      wxFileOffset         _conversionLength;
+      void                    preTraverseChildren(const GDSin::GDSHierTree*);
+      void                    split(GDSin::GdsStructure*);
+      GDSin::GdsFile*         _src_lib;
+      GDSin::GdsFile*         _dst_lib;
+      GDSStructureList        _convertList;
    };
 
    // Function definition
-     TP   get_TP(const GdsRecord* cr, word curnum = 0, byte len=4);
-     int4b* getCoordinateArray(GdsRecord* cr, word len);
-//     void PrintChildren(GDSin::GDSHierTree*, std::string*);
-}   
+   TP get_TP(const GdsRecord* cr, word curnum = 0, byte len=4);
+
+}
 #endif // !defined(GDSIO_H_INCLUDED)
