@@ -445,10 +445,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          invalid_window = false;
          if (rubber_band) rubber_paint();
          if (reperX || reperY) longCursor();
-			if (!GetContext()) 
-			{
-				return;
-			}
          SwapBuffers();
       }
    }
