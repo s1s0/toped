@@ -2039,7 +2039,7 @@ parsercmd::FuncDeclaration::~FuncDeclaration()
 
 void console::toped_logfile::init(const std::string logFileName, bool append)
 {
-//	char *locale=setlocale(LC_ALL, "");
+	char *locale=setlocale(LC_ALL, "");
    if (append)
    {
       _file.open(logFileName.c_str(), std::ios::out | std::ios::app);
