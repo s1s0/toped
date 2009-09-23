@@ -1501,20 +1501,17 @@ void browsers::parseCommand(const wxString cmd)
    wxPostEvent(Browsers->tellParser(), eventPARSE);
 }
 
+//====================================================================
 browsers::LayerInfo::LayerInfo(const LayerInfo& lay)
 {
-   _name = lay._name;
+   _name  = lay._name;
    _layno = lay._layno;
-   _col = lay._col;
-   _fill = lay._fill;
 }
 
 browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
 {
-   _name    = name;
-   _layno   = layno;
-   _col      = DATC->getColorName(layno);
-   _fill      = DATC->getFillName(layno);
+   _name  = name;
+   _layno = layno;
 };
 
 //====================================================================
@@ -1539,59 +1536,16 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
    _hidden  = false;
-	_filled = true;
-   //_locked  = false;  
-
-   _picture = DEBUG_NEW wxBitmap(size.GetWidth()-16, size.GetHeight(), -1);
-
-   const byte *ifill= DATC->getFill(layer->layno());
-   const layprop::tellRGB col = DATC->getColor(layer->layno());
+   _filled  = DATC->isFilled(_layer->layno());
+   _picture = NULL;
+   makeBrush();
+   const layprop::tellRGB col   = DATC->getColor(_layer->layno());
    wxColour color(col.red(), col.green(), col.blue());
-
-   if(ifill!=NULL)
-   {
-      wxBitmap *stipplebrush = DEBUG_NEW wxBitmap((char  *)ifill, 32, 32, 1);
-      wxImage image;
-      image = stipplebrush->ConvertToImage();
-#ifdef WIN32
-     //Change white color for current one
-      int w = image.GetWidth();
-      int h = image.GetHeight();
-      for (int i=0; i<w; i++)
-         for (int j=0; j<h; j++)
-         {
-            if((image.GetRed(i,j)==0)&& (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
-            {
-               image.SetRGB(i, j, col.red(), col.green(), col.blue());
-            }
-            else
-            {
-               image.SetRGB(i, j, 0, 0, 0);
-            }
-         }
-      delete stipplebrush;
-      //Recreate bitmap with new color
-      stipplebrush = DEBUG_NEW wxBitmap(image, 1);
-#endif
-      _brush = DEBUG_NEW wxBrush(   *stipplebrush);
-      delete stipplebrush;
-   }
-   else
-   {
-     //???Warning!!!
-      //if (NULL != col)
-     //    _brush = DEBUG_NEW wxBrush(color, wxTRANSPARENT);
-     // else
-         _brush = DEBUG_NEW wxBrush(*wxLIGHT_GREY, wxTRANSPARENT);
-   }
 
    _pen = DEBUG_NEW wxPen();
 
-   //if (col!=NULL)
-   //{
-      _pen->SetColour(color);
-      _brush->SetColour(color);
-   //}
+   _pen->SetColour(color);
+   _brush->SetColour(color);
 
    Create(parent, id,  pos, size, style, name);
    GetClientSize(&_buttonWidth, &_buttonHeight);
@@ -1601,6 +1555,36 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    wxString caption(_layer->name().c_str(),wxConvUTF8);
    SetToolTip(caption);
 
+}
+
+void browsers::LayerButton::makeBrush()
+{
+   const byte* ifill = DATC->getFill(_layer->layno());
+   wxBitmap *stipplebrush = DEBUG_NEW wxBitmap((char  *)ifill, 32, 32, 1);
+   wxImage image;
+   image = stipplebrush->ConvertToImage();
+#ifdef WIN32
+   //Change white color for current one
+   int w = image.GetWidth();
+   int h = image.GetHeight();
+   for (int i=0; i<w; i++)
+      for (int j=0; j<h; j++)
+      {
+         if((image.GetRed(i,j)==0) && (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
+         {
+            image.SetRGB(i, j, col.red(), col.green(), col.blue());
+         }
+         else
+         {
+            image.SetRGB(i, j, 0, 0, 0);
+         }
+      }
+   delete stipplebrush;
+   //Recreate bitmap with new color
+   stipplebrush = DEBUG_NEW wxBitmap(image, 1);
+#endif
+   _brush = DEBUG_NEW wxBrush(   *stipplebrush);
+   delete stipplebrush;
 }
 
 void browsers::LayerButton::preparePicture()
@@ -1615,11 +1599,8 @@ void browsers::LayerButton::preparePicture()
    wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
    DC.SetFont(font);
    //pict.SetWidth(_buttonWidth);
-   if (_picture)
-   {
-      delete _picture;
-      _picture = DEBUG_NEW wxBitmap(_buttonWidth-16, _buttonHeight, -1);
-   }
+   if (_picture)  delete _picture;
+   _picture = DEBUG_NEW wxBitmap(_buttonWidth-16, _buttonHeight, -1);
    DC.SelectObject(*_picture);
 
 
@@ -1663,16 +1644,16 @@ void browsers::LayerButton::preparePicture()
    DC.DrawText(caption, curw, int(_buttonHeight/2 - hna/2));
    curw += wna;
 
-	if (_filled)
-	{
-		DC.SetBrush(*_brush);
-	}
-	else
-	{
-		DC.SetBrush(wxNullBrush);
-		DC.SetBrush(*wxBLACK_BRUSH);
+   if (_filled)
+   {
+      DC.SetBrush(*_brush);
+   }
+   else
+   {
+      DC.SetBrush(wxNullBrush);
+      DC.SetBrush(*wxBLACK_BRUSH);
       DC.SetTextForeground(*wxWHITE);
-	}
+   }
    DC.DrawRectangle(curw, clearence, _buttonWidth-curw-16, _buttonHeight-2*clearence);
 
    DC.SelectObject(wxNullBitmap);
@@ -1755,10 +1736,10 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 
 void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 {
-	wxString cmd;
+   wxString cmd;
    cmd << wxT("filllayer(") <<_layer->layno() << wxT(", ");
    if (_filled) cmd << wxT("false") << wxT(");");
-		else cmd << wxT("true") << wxT(");");
+      else cmd << wxT("true") << wxT(");");
    parseCommand(cmd);
 }
 
@@ -1874,7 +1855,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
             delete (layno);
             break;
          }
-		case    BT_LAYER_FILL:
+      case    BT_LAYER_FILL:
          {
             word *layno = static_cast<word*>(event.GetClientData());
             bool status = (1 == event.GetExtraLong());
