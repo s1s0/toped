@@ -62,7 +62,7 @@ namespace browsers
       BT_LAYER_DEFAULT,
       BT_LAYER_HIDE,
       BT_LAYER_LOCK,
-		BT_LAYER_FILL,
+      BT_LAYER_FILL,
       BT_LAYER_ADD,
       BT_LAYER_ACTION,
       BT_LAYER_DO,
@@ -80,14 +80,14 @@ namespace browsers
       BT_CLEARGDS_TAB,
       BT_ADDCIF_TAB,
       BT_CLEARCIF_TAB,
-		BT_ADDDRC_TAB,
-		BT_CLEARDRC_TAB,
+      BT_ADDDRC_TAB,
+      BT_CLEARDRC_TAB,
       BT_CELLS_HIER,
       BT_CELLS_FLAT,
       BT_CELLS_HIER2,
       BT_CELLS_FLAT2,
-		BT_DRC_SHOW_ALL,
-		BT_DRC_HIDE_ALL,
+      BT_DRC_SHOW_ALL,
+      BT_DRC_HIDE_ALL,
       BT_LAYER_SELECT,
       BT_LAYER_SHOW_ALL,
       BT_LAYER_HIDE_ALL,
@@ -252,14 +252,11 @@ namespace browsers
       public:
                               LayerInfo(const LayerInfo& lay);
                               LayerInfo(const std::string &name, const word layno);
-                              ~LayerInfo()         {                 }
          std::string          name()               { return _name;  }
          word                 layno()              { return _layno; }
       private:
          std::string          _name;
          word                 _layno;
-         std::string          _col;
-         std::string          _fill;
    };
 
    //===========================================================================
@@ -275,20 +272,21 @@ namespace browsers
                               ~LayerButton();
          void                 onLeftClick(wxMouseEvent&);
          void                 onMiddleClick(wxMouseEvent&);
-			void						onRightClick(wxMouseEvent&);
+         void                 onRightClick(wxMouseEvent&);
          void                 onPaint(wxPaintEvent&);
-			void						OnEditLayer(wxCommandEvent&);
+         void                 OnEditLayer(wxCommandEvent&);
          //Call when other button is selected
          void                 unselect();
          void                 select();
          void                 hideLayer(bool);
          void                 lockLayer(bool);
-			void						fillLayer(bool);
-			void						editLayer(wxCommandEvent&);
+         void                 fillLayer(bool);
+         void                 editLayer(wxCommandEvent&);
          void                 preparePicture();
          word                 getLayNo()          {return _layer->layno();}
 
       private:
+         void                 makeBrush();
          int                  _buttonWidth;
          int                  _buttonHeight;
          LayerInfo*           _layer;
@@ -298,7 +296,7 @@ namespace browsers
          bool                 _selected;
          bool                 _hidden;
          bool                 _locked;
-			bool                 _filled;
+         bool                 _filled;
 
       DECLARE_EVENT_TABLE();
    };
@@ -330,7 +328,7 @@ namespace browsers
    class LayerBrowser : public wxPanel {
       public:
                               LayerBrowser(wxWindow* parent, wxWindowID id);
-         virtual            ~LayerBrowser();
+         virtual             ~LayerBrowser();
          LayerPanel*          getLayerPanel() {return _layerPanel;};
       private:
          void                 onShowAll(wxCommandEvent& WXUNUSED(event));
@@ -344,37 +342,37 @@ namespace browsers
    };
  //===========================================================================
    class ErrorBrowser: public wxTreeCtrl 
-	{
+   {
    public:
-                           ErrorBrowser(wxWindow* parent, wxWindowID id = -1, 
-                              const wxPoint& pos = wxDefaultPosition, 
+                             ErrorBrowser(wxWindow* parent, wxWindowID id = -1,
+                              const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-//	   void	               saveInfo(const Calbr::drcPolygon &poly);
-//		void	               saveInfo(const Calbr::drcEdge &edge);
-		void						onLMouseDblClk(wxMouseEvent&);
-	private:
-		/*Calbr::drcPolygon		_poly;
-		bool						_polyError;
-		Calbr::drcEdge 		_edge;
-		bool						_edgeError;*/
-		DECLARE_EVENT_TABLE();
-	};
+//      void                  saveInfo(const Calbr::drcPolygon &poly);
+//      void                  saveInfo(const Calbr::drcEdge &edge);
+      void                   onLMouseDblClk(wxMouseEvent&);
+   private:
+      /*Calbr::drcPolygon      _poly;
+      bool                  _polyError;
+      Calbr::drcEdge       _edge;
+      bool                  _edgeError;*/
+      DECLARE_EVENT_TABLE();
+   };
 
   //===========================================================================
    class DRCBrowser : public wxPanel {
-	public:
-										DRCBrowser(wxWindow* parent, wxWindowID id);
-		virtual						~DRCBrowser();
-		void							deleteAllItems(void);
-		void							onShowAll(wxCommandEvent&);
-		void							onHideAll(wxCommandEvent&);
-	private:
-		ErrorBrowser*				_errorBrowser;
-		wxButton*					_showAllButton;
-		wxButton*					_hideAllButton;
-		DECLARE_EVENT_TABLE();
-	};
+   public:
+                              DRCBrowser(wxWindow* parent, wxWindowID id);
+      virtual                ~DRCBrowser();
+      void                    deleteAllItems(void);
+      void                    onShowAll(wxCommandEvent&);
+      void                    onHideAll(wxCommandEvent&);
+   private:
+      ErrorBrowser*           _errorBrowser;
+      wxButton*               _showAllButton;
+      wxButton*               _hideAllButton;
+      DECLARE_EVENT_TABLE();
+   };
 
    //===========================================================================
    class browserTAB : public wxAuiNotebook {
@@ -398,12 +396,12 @@ namespace browsers
          void                 onTellClearGdsTab();
          void                 onTellAddCifTab();
          void                 onTellClearCifTab();
-			void                 onTellAddDRCTab();
+         void                 onTellAddDRCTab();
          void                 onTellClearDRCTab();
          XdbBrowser*         _gdsStruct;
          XdbBrowser*         _cifStruct;
          TDTbrowser*         _tdtStruct;
-			DRCBrowser*			  _drcStruct;
+         DRCBrowser*           _drcStruct;
          int                 _gdsPageIndex;
          int                 _cifPageIndex;
          LayerBrowser*       _layers;
@@ -417,10 +415,10 @@ namespace browsers
    void addTDTtab(bool, bool newthread);
    void addGDStab();
    void addCIFtab();
-	void addDRCtab();
+   void addDRCtab();
    void clearGDStab();
    void clearCIFtab();
-	void clearDRCtab();
+   void clearDRCtab();
    void celltree_open(const std::string);
    void celltree_highlight(const std::string);
    void treeAddMember(const char*, const char*, int action = 0);

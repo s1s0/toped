@@ -170,6 +170,7 @@ public:
    void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
    void                       all_fills(nameList& filist)   const {_properties.all_fills(filist);  }
    void                       all_lines(nameList& linelist) const {_properties.all_lines(linelist);}
+   bool                       isFilled(unsigned layno) {return _properties.drawprop().isFilled(layno);}
    const byte*                getFill(word layno) {return _properties.drawprop().getFill(layno);}
    const byte*                getFill(std::string fill_name) {return _properties.drawprop().getFill(fill_name);}
    const layprop::tellRGB&    getColor(word layno) {return _properties.drawprop().getColor(layno);}
@@ -189,7 +190,7 @@ public:
    const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
    void                       saveProperties(std::string fname)
                                                       {_properties.saveProperties(fname);}
-	std::string                globalDir(void) const
+   std::string                globalDir(void) const
                                                       {return _globalDir;}
    void                       loadLayoutFonts(std::string ffn, bool vbo)
                                                       {_properties.loadLayoutFonts(ffn, vbo);}
