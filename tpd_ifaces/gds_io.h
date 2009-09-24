@@ -334,7 +334,7 @@ namespace GDSin {
          void                 skimARef(GdsFile*);
          void                 skimNode(GdsFile*);
          void                 updateContents(int2b, int2b);
-         void                 pathConvert(pointlist&, word, int4b, int4b );
+         bool                 pathConvert(pointlist&, word, int4b, int4b );
          int                  arrGetStep(TP&, TP&, int2b);
          GdsLayers            _contSummary; // contents summary
          bool                 _haveParent;

@@ -1379,28 +1379,40 @@ void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, co
                {
                   word numpoints = (cr->recLen())/8;
                   pointlist plist;
+                  bool pathConvertResult = true;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
 
                   if (2 == pathtype)
-                     pathConvert(plist, numpoints, width/2, width/2);
+                     pathConvertResult = pathConvert(plist, numpoints, width/2, width/2);
                   else if (4 == pathtype)
-                     pathConvert(plist, numpoints, bgnextn, endextn);
+                     pathConvertResult = pathConvert(plist, numpoints, bgnextn, endextn);
 
-                  laydata::valid_wire check(plist, width);
+                  if (pathConvertResult)
+                  {
+                     laydata::valid_wire check(plist, width);
 
-                  if (!check.valid())
+                     if (!check.valid())
+                     {
+                        std::ostringstream ost;
+                        ost << "Wire check fails - {" << check.failtype()
+                              << " Layer: " << layer
+                              << " Data type: " << singleType
+                              << " }";
+                        tell_log(console::MT_ERROR, ost.str());
+                     }
+                     laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+                     dwl->addwire(plist, width,false);
+                  }
+                  else
                   {
                      std::ostringstream ost;
-                     ost << "Wire check fails - {" << check.failtype()
-                           << " Layer: " << layer
+                     ost << "Invalid single point path - { Layer: " << layer
                            << " Data type: " << singleType
                            << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
-                  dwl->addwire(plist, width,false);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1661,7 +1673,7 @@ void GDSin::GdsStructure::importAref(GdsFile* cf, laydata::tdtcell* dst_cell, la
    while (true);
 }
 
-void GDSin::GdsStructure::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b endext )
+bool GDSin::GdsStructure::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b endext )
 {
    TP P1 = plist[0];
    // find the first neighbouring point which is not equivaqlent to P1
@@ -1670,7 +1682,7 @@ void GDSin::GdsStructure::pathConvert(pointlist& plist, word numpoints, int4b be
       fnbr++;
    // get out with error, because the wire has effectively a single point and there is
    // no way on earth to find out in which direction it should be expanded
-   if (fnbr == numpoints) return;
+   if (fnbr == numpoints) return false;
    TP P2 = plist[fnbr];
 
    double sdX = P2.x() - P1.x();
@@ -1703,6 +1715,8 @@ void GDSin::GdsStructure::pathConvert(pointlist& plist, word numpoints, int4b be
    plist[0].setY(y0);
    plist[numpoints-1].setX(xn);
    plist[numpoints-1].setY(yn);
+
+   return true;
 }
 
 int GDSin::GdsStructure::arrGetStep(TP& Step, TP& magnPoint, int2b colrows)
