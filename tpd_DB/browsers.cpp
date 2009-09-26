@@ -857,9 +857,9 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
             root = root->GetNextRoot(TARGETDB_LIB);
          }
       }
+      SortChildren(GetRootItem());
+      DATC->unlockGDS();
    }
-   DATC->unlockGDS();
-   SortChildren(GetRootItem());
 }
 
 void browsers::GDSCellBrowser::collectChildren(const GDSin::GDSHierTree* root,
@@ -960,9 +960,9 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
             root = root->GetNextRoot(TARGETDB_LIB);
          }
       }
+      SortChildren(GetRootItem());
+      DATC->unlockCIF();
    }
-   DATC->unlockCIF();
-   SortChildren(GetRootItem());
 }
 
 void browsers::CIFCellBrowser::collectChildren(const CIFin::CIFHierTree* root,
