@@ -543,7 +543,7 @@ void DataCenter::GDSsplit(GDSin::GdsStructure* gdsstr, const std::string filenam
 void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
 {
    // Lock the DB here manually. Otherwise the cell browser is going mad
-   if (NULL == lockGDS())
+   if (NULL == lockGDS(false))
    {
       std::string news = "No GDS data in memory. Parse GDS file first";
       tell_log(console::MT_ERROR,news);
@@ -654,7 +654,7 @@ bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
 void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite, real techno )
 {
    // DB shold have been locked at this point (from the tell functions)
-   if (NULL == lockCIF())
+   if (NULL == lockCIF(false))
       tell_log(console::MT_ERROR,"No CIF data in memory. Parse CIF file first");
    else
    {
