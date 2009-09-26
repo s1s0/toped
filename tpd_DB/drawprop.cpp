@@ -725,7 +725,7 @@ unsigned layprop::DrawProperties::getLayerNo(std::string name) const
    {
       if (name == CL->second->name()) return CL->first;
    }
-   return 0;
+   return ERR_LAY;
 }
 
 std::string layprop::DrawProperties::getLayerName(unsigned layno) const

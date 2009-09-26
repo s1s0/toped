@@ -114,10 +114,10 @@ public:
    bool                       modified() const        {return _TEDLIB.modified();};
 
    //------------------------------------------------------------------------------------------------
-   bool                       addlayer(std::string, word, std::string, std::string, std::string);
-   bool                       addlayer(std::string, word);
-   bool                       addlayer(word layno);
-   word                       addlayer(std::string);
+   bool                       addlayer(std::string, unsigned, std::string, std::string, std::string);
+   bool                       addlayer(std::string, unsigned);
+   bool                       addlayer(unsigned layno);
+   unsigned                   addlayer(std::string);
    bool                       isLayerExist(word);
    bool                       isLayerExist(std::string);
    void                       addline(std::string, std::string, word, byte, byte);

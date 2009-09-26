@@ -2092,8 +2092,8 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 				std::string error(GetItemText(parent).mb_str(wxConvUTF8));
 			
 				DRCData->ShowError(error, number);
-				word drcLayer = DATC->getLayerNo("drcResults");
-				assert(drcLayer);
+				unsigned drcLayer = DATC->getLayerNo("drcResults");
+				assert(ERR_LAY != drcLayer);
 //				DBbox* box;
 
 			/*	if(_polyError)
@@ -2241,7 +2241,7 @@ void	browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 	}
 
 	//unlock only drcResults layer
-	word drcLayerNo = DATC->getLayerNo("drcResults");
+	unsigned drcLayerNo = DATC->getLayerNo("drcResults");
 	DATC->lockLayer(drcLayerNo, false);
    design->select_all();
 

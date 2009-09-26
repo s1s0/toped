@@ -977,9 +977,8 @@ const laydata::cellList& DataCenter::cells() {
 };
 
 
-bool DataCenter::addlayer(std::string name, word layno, std::string col,
+bool DataCenter::addlayer(std::string name, unsigned layno, std::string col,
                                        std::string fill, std::string sline)
-
 {
    bool status;
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
@@ -988,7 +987,7 @@ bool DataCenter::addlayer(std::string name, word layno, std::string col,
    return status;
 }
 
-bool DataCenter::addlayer(std::string name, word layno)
+bool DataCenter::addlayer(std::string name, unsigned layno)
 {
    bool status;
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
@@ -997,7 +996,7 @@ bool DataCenter::addlayer(std::string name, word layno)
    return status;
 }
 
-bool DataCenter::addlayer(word layno)
+bool DataCenter::addlayer(unsigned layno)
 {
    bool status;
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
@@ -1006,21 +1005,23 @@ bool DataCenter::addlayer(word layno)
    return status;
 }
 
-word DataCenter::addlayer(std::string name)
+unsigned DataCenter::addlayer(std::string name)
 {
-   word layno;
+   unsigned layno;
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
    layno = _properties.addlayer(name);
    PROPLock.Unlock();
    return layno;
 }
-bool	DataCenter::isLayerExist(word layno)
+
+bool  DataCenter::isLayerExist(word layno)
 {
-	return _properties.isLayerExist(layno);
+   return _properties.isLayerExist(layno);
 }
-bool	DataCenter::isLayerExist(std::string layname)
+
+bool  DataCenter::isLayerExist(std::string layname)
 {
-	return _properties.isLayerExist(layname);
+   return _properties.isLayerExist(layname);
 }
 
 void DataCenter::addline(std::string name, std::string col, word pattern,
@@ -1159,7 +1160,7 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
-         word layno = getLayerNo( *CDL );
+         unsigned layno = getLayerNo( *CDL );
          ciflayname << "L" << layno;
          (*theMap)[layno] = ciflayname.str();
       }

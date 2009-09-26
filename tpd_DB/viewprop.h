@@ -111,8 +111,8 @@ namespace layprop {
       bool              addlayer(std::string, unsigned);
       bool              addlayer(unsigned);
       unsigned          addlayer(std::string);
-		bool					isLayerExist(word);
-		bool					isLayerExist(std::string);
+      bool              isLayerExist(word);
+      bool              isLayerExist(std::string);
       void              addUnpublishedLay(word);
       const WordList&   upLayers() {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers() {_uplaylist.clear();}
@@ -121,10 +121,10 @@ namespace layprop {
       void              addline(std::string, std::string, word, byte, byte);
       void              hideLayer(unsigned layno, bool hide);
       void              lockLayer(unsigned layno, bool lock);
-		void              fillLayer(unsigned layno, bool fill);
+      void              fillLayer(unsigned layno, bool fill);
       bool              selectable(unsigned layno) const;
-		const WordList		getLockedLayers(void);
-		const WordList		getAllLayers(void);
+      const WordList    getLockedLayers(void);
+      const WordList    getAllLayers(void);
       bool              selectable(word layno) const;
       void              saveProperties(std::string) const;
       //
