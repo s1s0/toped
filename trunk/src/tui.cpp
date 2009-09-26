@@ -1810,8 +1810,8 @@ SIMap* tui::nameCboxRecords::getTheMap()
       // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
       if ("" == layname)
          layname = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
-      word layno = DATC->getLayerNo(layname);
-      if (0 == layno)
+      unsigned layno = DATC->getLayerNo(layname);
+      if (ERR_LAY == layno)
       {
          layno = DATC->addlayer(layname);
          browsers::layer_add(layname, layno);
@@ -1867,7 +1867,7 @@ USMap* tui::nameCbox3Records::getTheMap()
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_gdslay->GetValue()) continue;
-      word layno = 0;
+      unsigned layno;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       if ("" == layname)
       {
@@ -2018,7 +2018,7 @@ USMap* tui::nameEboxRecords::getTheMap()
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      word layno = DATC->getLayerNo(layname);
+      unsigned layno = DATC->getLayerNo(layname);
       assert(layno);
       (*cif_lay_map)[layno] = std::string(CNM->_ciflay->GetValue().mb_str(wxConvUTF8));
    }
@@ -2116,7 +2116,7 @@ USMap* tui::nameEbox3Records::getTheMap()
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      word layno = DATC->getLayerNo(layname);
+      unsigned layno = DATC->getLayerNo(layname);
       assert(layno);
       std::ostringstream gdslaytype;
       gdslaytype <<  std::string(CNM->_gdslay->GetValue().mb_str(wxConvUTF8)) << ";"

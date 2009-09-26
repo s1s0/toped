@@ -21,7 +21,7 @@
 //  Revision info
 //---------------------------------------------------------------------------
 //      $Revision: 1204 $
-//          $Date: 2009-08-26 23:20:02 +0800 (Ñð, 26 àâã 2009) $
+//          $Date: 2009-08-26 23:20:02 +0800 (ï¿½ï¿½, 26 ï¿½ï¿½ï¿½ 2009) $
 //        $Author: gaitukevich.s $
 //===========================================================================
 //      Comments :
@@ -46,7 +46,7 @@ class drcTenderer: public drcRenderer
 	void drawEnd();
 private:
 	laydata::tdtdesign*	_ATDB;
-	word						_drcLayer;
+	unsigned 				_drcLayer;
 	double					_maxx;
 	double					_maxy;
 	double					_minx;

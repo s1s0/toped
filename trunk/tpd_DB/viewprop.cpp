@@ -302,7 +302,10 @@ bool layprop::ViewProperties::addlayer( unsigned layno )
 
 unsigned layprop::ViewProperties::addlayer(std::string name)
 {
-   unsigned layno = _drawprop._layset.rbegin()->first;
+   unsigned layno = 1;
+   laySetList::reverse_iterator lastLayNo = _drawprop._layset.rbegin();
+   if (_drawprop._layset.rend() != lastLayNo)
+      layno = lastLayNo->first;
    while (!addlayer(name, layno)) {layno++;}
    return layno;
 }

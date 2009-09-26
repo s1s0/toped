@@ -891,11 +891,12 @@ tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor)
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-int tellstdfunc::stdUSINGLAYER_S::execute() {
+int tellstdfunc::stdUSINGLAYER_S::execute()
+{
   std::string layname = getStringValue();
   unsigned layno = DATC->getLayerNo(layname);
-  if (layno > 0) { //@FIXMEEE! 0 here means that the layer with this name is not found!
-     // which means that layer 0 will be pronounced undefined!
+  if (ERR_LAY != layno)
+  {
     OPstack.push(DEBUG_NEW telldata::ttint(layno));
     return stdUSINGLAYER::execute();
   }

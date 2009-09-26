@@ -21,7 +21,7 @@
 //  Revision info
 //---------------------------------------------------------------------------
 //      $Revision: 1204 $
-//          $Date: 2009-08-26 23:20:02 +0800 (Ñð, 26 àâã 2009) $
+//          $Date: 2009-08-26 23:20:02 +0800 (ï¿½ï¿½, 26 ï¿½ï¿½ï¿½ 2009) $
 //        $Author: gaitukevich.s $
 //===========================================================================
 //      Comments :
@@ -57,7 +57,7 @@ void Calbr::drcTenderer::drawBegin()
    {
       _ATDB = DATC->lockDB();
 		_drcLayer = DATC->getLayerNo("drcResults");
-		assert(_drcLayer);
+		assert(ERR_LAY != _drcLayer);
    }
    catch (EXPTNactive_DB) 
 	{
