@@ -414,7 +414,9 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
          wxTextValidator(wxFILTER_NUMERIC, &_techno));
 
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   CIFin::CifFile* ACIFDB = DATC->lockCIF();
+   CIFin::CifFile* ACIFDB = NULL;
+   if (DATC->lockCif(ACIFDB))
+   {
       CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
       while (cifs) 
       {
@@ -422,18 +424,19 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
          cifs = cifs->last();
       }
       _nameList->Append(wxString(ACIFDB->getTopStructure()->name().c_str(), wxConvUTF8));
-      //-----------------------------------------------------------------------
-      SIMap inlays;
-      nameList cifLayers;
-      if (DATC->CIFgetLay(cifLayers))
+   }
+   DATC->unlockCif(ACIFDB, true);
+   //-----------------------------------------------------------------------
+   SIMap inlays;
+   nameList cifLayers;
+   if (DATC->CIFgetLay(cifLayers))
+   {
+      word laynum = 1;
+      for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
       {
-         word laynum = 1;
-         for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
-         {
-            inlays[*NLI] = laynum++;
-         }
+         inlays[*NLI] = laynum++;
       }
-   DATC->unlockCIF();
+   }
 
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 

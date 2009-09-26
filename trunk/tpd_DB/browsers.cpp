@@ -944,8 +944,8 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
 {
    DeleteAllItems();
 
-   CIFin::CifFile* ACIFDB = DATC->lockCIF(false);
-   if (NULL != ACIFDB)
+   CIFin::CifFile* ACIFDB = NULL;
+   if (DATC->lockCif(ACIFDB))
    {
       AddRoot(wxString((ACIFDB->Get_libname()).c_str(), wxConvUTF8));
 
@@ -961,8 +961,8 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
          }
       }
       SortChildren(GetRootItem());
-      DATC->unlockCIF();
    }
+   DATC->unlockCif(ACIFDB);
 }
 
 void browsers::CIFCellBrowser::collectChildren(const CIFin::CIFHierTree* root,
