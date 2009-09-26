@@ -903,7 +903,8 @@ tellstdfunc::CIFread::CIFread(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-int tellstdfunc::CIFread::execute() {
+int tellstdfunc::CIFread::execute()
+{
    std::string filename = getStringValue();
    telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
    if (expandFileName(filename))
@@ -916,13 +917,21 @@ int tellstdfunc::CIFread::execute() {
             browsers::addCIFtab();
             // Collect the top structures
             std::list<std::string> top_cell_list;
-            CIFin::CifFile* ACIFDB = DATC->lockCIF();
-            CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-            assert(root);
-            do
-               top_cell_list.push_back(std::string(root->GetItem()->name()));
-            while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            DATC->unlockCIF();
+            CIFin::CifFile* ACIFDB = NULL;
+            if (DATC->lockCif(ACIFDB))
+            {
+               CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+               assert(root);
+               do
+                  top_cell_list.push_back(std::string(root->GetItem()->name()));
+               while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+            }
+            else
+            {
+               // The CUFDB mist exists here, because CIFparse returned cfs_POK
+               assert(NULL != ACIFDB);
+            }
+            DATC->unlockCif(ACIFDB);
             // Convert the string list to TLISTOF(telldata::tn_string)
             std::list<std::string>::const_iterator CN;
             for (CN = top_cell_list.begin(); CN != top_cell_list.end(); CN ++)
@@ -961,27 +970,32 @@ tellstdfunc::CIFreportlay::CIFreportlay(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-int tellstdfunc::CIFreportlay::execute() {
+int tellstdfunc::CIFreportlay::execute()
+{
 
    std::string name = getStringValue();
-   CIFin::CifFile* ACIFDB = DATC->lockCIF();
-   CIFin::CifStructure *src_structure = ACIFDB->getStructure(name.c_str());
-   std::ostringstream ost;
-   if (!src_structure) {
-      ost << "CIF structure named \"" << name << "\" does not exists";
-      tell_log(console::MT_ERROR,ost.str());
-   }
-   else
+   CIFin::CifFile* ACIFDB = NULL;
+   if (DATC->lockCif(ACIFDB))
    {
-      nameList cifLayers;
-      src_structure->collectLayers(cifLayers,true);
-      ost << "CIF layers found in \"" << name <<"\"" << std::endl;
-      for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
-         ost << *NLI << std::endl;
-      tell_log(console::MT_INFO,ost.str());
-      LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+      CIFin::CifStructure *src_structure = ACIFDB->getStructure(name.c_str());
+      std::ostringstream ost;
+      if (!src_structure)
+      {
+         ost << "CIF structure named \"" << name << "\" does not exists";
+         tell_log(console::MT_ERROR,ost.str());
+      }
+      else
+      {
+         nameList cifLayers;
+         src_structure->collectLayers(cifLayers,true);
+         ost << "CIF layers found in \"" << name <<"\"" << std::endl;
+         for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
+            ost << *NLI << std::endl;
+         tell_log(console::MT_INFO,ost.str());
+         LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+      }
    }
-   DATC->unlockCIF();
+   DATC->unlockCif(ACIFDB, true);
    return EXEC_NEXT;
 }
 
@@ -1237,10 +1251,8 @@ int tellstdfunc::CIFgetlaymap::execute()
    }
    else if (import)
    { // generate default import CIF layer map
-      DATC->lockCIF();
       nameList cifLayers;
       DATC->CIFgetLay(cifLayers);
-      DATC->unlockCIF();
       word laynum = 1;
       for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
       {

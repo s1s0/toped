@@ -576,43 +576,42 @@ void DataCenter::GDSclose()
 
 void DataCenter::CIFclose()
 {
-   CIFin::CifFile* cfile = lockCIF(false);
-   if (NULL != cfile)
+   CIFin::CifFile* cfile = NULL;
+   if (lockCif(cfile))
    {
-      delete _CIFDB;
-      _CIFDB = NULL;
-      unlockCIF();
+      delete cfile;
+      cfile = NULL;
    }
+   unlockCif(cfile);
 }
 
 CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
 {
-   if (NULL != _CIFDB)
+   CIFin::CifFile* ACIFDB = NULL;
+   if (lockCif(ACIFDB))
    {
       std::string news = "Removing existing CIF data from memory...";
       tell_log(console::MT_WARNING,news);
-      CIFclose();
+      delete ACIFDB;
    }
-   // parse the CIF file - don't forget to lock the CIF mutex here!
-   while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
-   _CIFDB = DEBUG_NEW CIFin::CifFile(filename);
+   ACIFDB = DEBUG_NEW CIFin::CifFile(filename);
 
-   CIFin::CifStatusType status = _CIFDB->status();
+   CIFin::CifStatusType status = ACIFDB->status();
    if (CIFin::cfs_POK == status)
    {
       // generate the hierarchy tree of cells
-      _CIFDB->hierPrep();
-      _CIFDB->hierOut();
+      ACIFDB->hierPrep();
+      ACIFDB->hierOut();
    }
    else
    {
-      if (NULL != _CIFDB)
+      if (NULL != ACIFDB)
       {
-         delete _CIFDB;
-         _CIFDB = NULL;
+         delete ACIFDB;
+         ACIFDB = NULL;
       }
    }
-   unlockCIF();
+   unlockCif(ACIFDB);
    return status;
 }
 
@@ -633,12 +632,15 @@ void DataCenter::CIFexport(laydata::tdtcell* topcell, USMap* laymap, bool recur,
 
 bool DataCenter::CIFgetLay(nameList& cifLayers)
 {
-   if (NULL == _CIFDB) return false;
-   else 
+   bool ret_value = false;
+   CIFin::CifFile* ACIFDB = NULL;
+   if (lockCif(ACIFDB))
    {
-      _CIFDB->collectLayers(cifLayers);
-      return true;
+      ACIFDB->collectLayers(cifLayers);
+      ret_value = true;
    }
+   unlockCif(ACIFDB);
+   return ret_value;
 }
 
 bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
@@ -654,17 +656,16 @@ bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
 void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite, real techno )
 {
    // DB shold have been locked at this point (from the tell functions)
-   if (NULL == lockCIF(false))
-      tell_log(console::MT_ERROR,"No CIF data in memory. Parse CIF file first");
-   else
+   CIFin::CifFile* ACIFDB = NULL;
+   if (lockCif(ACIFDB))
    {
-      CIFin::Cif2Ted converter(_CIFDB, &_TEDLIB, cifLayers, techno);
+      CIFin::Cif2Ted converter(ACIFDB, &_TEDLIB, cifLayers, techno);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.top_structure(*CN, recur, overwrite);
       _TEDLIB()->modified = true;
-      unlockCIF();
       tell_log(console::MT_INFO,"Done");
    }
+   unlockCif(ACIFDB, true);
 }
 
 void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
@@ -736,27 +737,20 @@ void DataCenter::unlockGDS()
    VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
 }
 
-CIFin::CifFile* DataCenter::lockCIF(bool throwexception)
+bool DataCenter::lockCif(CIFin::CifFile*& cif_db)
 {
-   // Carefull HERE! When CIF is locked form the main thread
-   // (CIF browser), then there is no catch pending -i.e.
-   // throwing an exception will make the things worse
-   // When it is locked from the parser command - then exception
-   // is fine 
-   if (_CIFDB)
-   {
-      while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
-      return _CIFDB;
-   }
-   else {
-      if (throwexception) throw EXPTNactive_CIF();
-      else return NULL;
-   }
+   while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
+   cif_db = _CIFDB;
+   return (NULL != _CIFDB);
 }
 
-void DataCenter::unlockCIF()
+void DataCenter::unlockCif(CIFin::CifFile*& cif_db, bool throwexception)
 {
+   _CIFDB = cif_db;
    VERIFY(wxMUTEX_NO_ERROR == CIFLock.Unlock());
+   if (throwexception && (NULL == cif_db))
+      throw EXPTNactive_CIF();
+   cif_db = NULL;
 }
 
 void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
@@ -1151,10 +1145,8 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
    USMap* theMap = DEBUG_NEW USMap();
    if (import)
    {// Generate the default CIF layer map for import
-      lockCIF();
       nameList cifLayers;
       CIFgetLay(cifLayers);
-      unlockCIF();
       word laynum = 1;
       for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
          (*theMap)[laynum] = *CCL;

@@ -86,13 +86,13 @@ public:
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    GDSin::GdsFile*            lockGDS(bool throwexception = true);
-   CIFin::CifFile*            lockCIF(bool throwexception = true);
+   bool                       lockCif(CIFin::CifFile*&);
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
    void                       unlockGDS();
-   void                       unlockCIF();
+   void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
    void                       mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
@@ -196,10 +196,6 @@ public:
                                                       {_properties.loadLayoutFonts(ffn, vbo);}
 
 protected:
-   laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
-   GDSin::GdsFile*            _GDSDB;        // GDS parsed data
-   CIFin::CifFile*            _CIFDB;        // CIF parsed data
-   layprop::ViewProperties    _properties;   // properties data base
    std::string                _tedfilename;
    bool                       _neversaved;
    void                       openGL_draw(const CTM&);
@@ -210,6 +206,10 @@ private:
    bool                       _drawruler;    // draw a ruler while coposing a shape interactively
    std::string                _localDir;
    std::string                _globalDir;
+   laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
+   GDSin::GdsFile*            _GDSDB;        // GDS parsed data
+   CIFin::CifFile*            _CIFDB;        // CIF parsed data
+   layprop::ViewProperties    _properties;   // properties data base
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
    wxMutex                    CIFLock;
