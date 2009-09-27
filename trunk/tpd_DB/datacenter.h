@@ -73,7 +73,7 @@ public:
    CIFin::CifStatusType       CIFparse(std::string filename);
    void                       CIFexport(USMap*, bool, std::string&);
    void                       CIFexport(laydata::tdtcell*, USMap*, bool, bool, std::string&);
-   bool                       CIFgetLay(nameList&);
+   bool                       cifGetLayers(nameList&);
    bool                       gdsGetLayers(GdsLayers&);
    void                       CIFimport(const nameList&, SIMap*, bool, bool, real);
    void                       PSexport(laydata::tdtcell*, std::string&);
@@ -85,13 +85,13 @@ public:
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
-   GDSin::GdsFile*            lockGDS(bool throwexception = true);
+   bool                       lockGds(GDSin::GdsFile*&);
    bool                       lockCif(CIFin::CifFile*&);
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
-   void                       unlockGDS();
+   void                       unlockGds(GDSin::GdsFile*&, bool throwexception = false);
    void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
    void                       mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
    void                       mousePointCancel(TP&);
