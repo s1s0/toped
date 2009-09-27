@@ -1565,6 +1565,8 @@ void browsers::LayerButton::makeBrush()
    image = stipplebrush->ConvertToImage();
 #ifdef WIN32
    //Change white color for current one
+   const layprop::tellRGB col   = DATC->getColor(_layer->layno());
+
    int w = image.GetWidth();
    int h = image.GetHeight();
    for (int i=0; i<w; i++)
@@ -2058,17 +2060,6 @@ browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id,
 {
 }
 
-/*void	browsers::ErrorBrowser::saveInfo(const Calbr::drcPolygon &poly)
-{
-	_poly = poly;
-	_polyError = true;
-}
-
-void	browsers::ErrorBrowser::saveInfo(const Calbr::drcEdge &edge)
-{
-	_edge = edge;
-	_edgeError = true;
-}*/
 
 void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 {
@@ -2090,8 +2081,10 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 
 				wxTreeItemId parent = GetItemParent(id);
 				std::string error(GetItemText(parent).mb_str(wxConvUTF8));
-			
-				DRCData->ShowError(error, number);
+				wxString s = GetItemText(parent);
+				wxString cmd;
+				cmd << wxT("drcshowerror(\"") <<  wxString(error.c_str(), wxConvUTF8) << wxT("\", ") << numstr << wxT("  );");
+				parseCommand(cmd);
 				unsigned drcLayer = DATC->getLayerNo("drcResults");
 				assert(ERR_LAY != drcLayer);
 //				DBbox* box;
