@@ -50,7 +50,7 @@
 #include "../tpd_bidfunc/tpdf_common.h"
 
 extern DataCenter*               DATC;
-extern Calbr::CalbrFile*			DRCData;
+extern Calbr::CalbrFile*         DRCData;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
 extern const wxEventType         wxEVT_EDITLAYER;
@@ -1397,22 +1397,6 @@ void browsers::addTDTtab(bool targetDB, bool newthread)
       Browsers->GetEventHandler()->ProcessEvent( eventADDTAB );
    // the alternative is to call the function directly
 //   Browsers->OnTELLaddTDTlib(tdtLib, traverse_all);
-}
-
-void browsers::addGDStab() 
-{
-   assert(Browsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(BT_ADDGDS_TAB);
-   wxPostEvent(Browsers, eventADDTAB);
-}
-
-void browsers::addCIFtab()
-{
-   assert(Browsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(BT_ADDCIF_TAB);
-   wxPostEvent(Browsers, eventADDTAB);
 }
 
 void browsers::addDRCtab()
