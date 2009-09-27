@@ -491,20 +491,20 @@ void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapGds& layerMap, 
 bool DataCenter::GDSparse(std::string filename)
 {
    bool status = true;
-   if (NULL != _GDSDB)
+
+   GDSin::GdsFile* AGDSDB = NULL;
+   if (lockGds(AGDSDB))
    {
       std::string news = "Removing existing GDS data from memory...";
       tell_log(console::MT_WARNING,news);
-      GDSclose();
+      delete AGDSDB;
    }
-   // parse the GDS file - don't forget to lock the GDS mutex here!
-   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
    try
    {
 #ifdef GDSCONVERT_PROFILING
-         HiResTimer profTimer;
+      HiResTimer profTimer;
 #endif
-      _GDSDB = DEBUG_NEW GDSin::GdsFile(filename);
+      AGDSDB = DEBUG_NEW GDSin::GdsFile(filename);
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS parse: ");
 #endif
@@ -515,19 +515,13 @@ bool DataCenter::GDSparse(std::string filename)
       status = false;
    }
    if (status)
+      AGDSDB->hierOut();// generate the hierarchy tree of cells
+   else if (NULL != AGDSDB)
    {
-      // generate the hierarchy tree of cells
-      _GDSDB->hierOut();
+      delete AGDSDB;
+      AGDSDB = NULL;
    }
-   else
-   {
-      if (NULL != _GDSDB) 
-      {
-         delete _GDSDB;
-         _GDSDB = NULL;
-      }
-   }
-   unlockGDS();
+   unlockGds(AGDSDB);
    return status;
 }
 
@@ -542,47 +536,42 @@ void DataCenter::GDSsplit(GDSin::GdsStructure* gdsstr, const std::string filenam
 
 void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
 {
-   // Lock the DB here manually. Otherwise the cell browser is going mad
-   if (NULL == lockGDS(false))
-   {
-      std::string news = "No GDS data in memory. Parse GDS file first";
-      tell_log(console::MT_ERROR,news);
-   }
-   else
+   GDSin::GdsFile* AGDSDB = NULL;
+   if (lockGds(AGDSDB))
    {
 #ifdef GDSCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      GDSin::Gds2Ted converter(_GDSDB, &_TEDLIB, laymap);
+      GDSin::Gds2Ted converter(AGDSDB, &_TEDLIB, laymap);
       converter.run(top_names, recur, over);
       _TEDLIB()->modified = true;
-      unlockGDS();
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS conversion: ");
 #endif
    }
+   unlockGds(AGDSDB, true);
 }
 
 void DataCenter::GDSclose()
 {
-   GDSin::GdsFile* gfile = lockGDS(false);
-   if (NULL != gfile)
+   GDSin::GdsFile* AGDSDB = NULL;
+   if (lockGds(AGDSDB))
    {
-      delete _GDSDB;
-      _GDSDB = NULL;
-      unlockGDS();
+      delete AGDSDB;
+      AGDSDB = NULL;
    }
+   unlockGds(AGDSDB);
 }
 
 void DataCenter::CIFclose()
 {
-   CIFin::CifFile* cfile = NULL;
-   if (lockCif(cfile))
+   CIFin::CifFile* ACIFDB = NULL;
+   if (lockCif(ACIFDB))
    {
-      delete cfile;
-      cfile = NULL;
+      delete ACIFDB;
+      ACIFDB = NULL;
    }
-   unlockCif(cfile);
+   unlockCif(ACIFDB);
 }
 
 CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
@@ -630,7 +619,7 @@ void DataCenter::CIFexport(laydata::tdtcell* topcell, USMap* laymap, bool recur,
 }
 
 
-bool DataCenter::CIFgetLay(nameList& cifLayers)
+bool DataCenter::cifGetLayers(nameList& cifLayers)
 {
    bool ret_value = false;
    CIFin::CifFile* ACIFDB = NULL;
@@ -645,12 +634,15 @@ bool DataCenter::CIFgetLay(nameList& cifLayers)
 
 bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
 {
-   if (NULL == _GDSDB) return false;
-   else
+   bool ret_value = false;
+   GDSin::GdsFile* AGDSDB = NULL;
+   if (lockGds(AGDSDB))
    {
-      _GDSDB->collectLayers(gdsLayers);
-      return true;
+      AGDSDB->collectLayers(gdsLayers);
+      ret_value = true;
    }
+   unlockGds(AGDSDB);
+   return ret_value;
 }
 
 void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite, real techno )
@@ -714,34 +706,27 @@ void DataCenter::unlockDB()
    VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
 }
 
-GDSin::GdsFile* DataCenter::lockGDS(bool throwexception) 
+bool DataCenter::lockGds(GDSin::GdsFile*& gds_db)
 {
-   // Carefull HERE! When GDS is locked form the main thread
-   // (GDS browser), then there is no catch pending -i.e.
-   // throwing an exception will make the things worse
-   // When it is locked from the parser command - then exception
-   // is fine 
-   if (_GDSDB) 
-   {
-      while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
-      return _GDSDB;
-   }
-   else {
-      if (throwexception) throw EXPTNactive_GDS();
-      else return NULL;
-   }
+   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
+   gds_db = _GDSDB;
+   return (NULL != gds_db);
 }
 
-void DataCenter::unlockGDS()
+void DataCenter::unlockGds(GDSin::GdsFile*& gds_db, bool throwexception)
 {
+   _GDSDB = gds_db;
    VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
+   if (throwexception && (NULL == gds_db))
+      throw EXPTNactive_GDS();
+   gds_db = NULL;
 }
 
 bool DataCenter::lockCif(CIFin::CifFile*& cif_db)
 {
    while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
    cif_db = _CIFDB;
-   return (NULL != _CIFDB);
+   return (NULL != cif_db);
 }
 
 void DataCenter::unlockCif(CIFin::CifFile*& cif_db, bool throwexception)
@@ -1147,7 +1132,7 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
    if (import)
    {// Generate the default CIF layer map for import
       nameList cifLayers;
-      CIFgetLay(cifLayers);
+      cifGetLayers(cifLayers);
       word laynum = 1;
       for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
          (*theMap)[laynum] = *CCL;
@@ -1178,10 +1163,8 @@ LayerMapGds* DataCenter::secureGdsLayMap(bool import)
       USMap theMap;
       if (import)
       { // generate default import GDS layer map
-         lockGDS();
          GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
          gdsGetLayers(*gdsLayers);
-         unlockGDS();
          for ( GdsLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
          {
             std::ostringstream dtypestr;
@@ -1214,10 +1197,8 @@ LayerMapGds* DataCenter::secureGdsLayMap(bool import)
    {
       if (import)
       {
-         lockGDS();
          GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
          gdsGetLayers(*gdsLayers);
-         unlockGDS();
          theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, gdsLayers);
       }
       else

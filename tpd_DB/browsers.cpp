@@ -841,8 +841,8 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
 {
    DeleteAllItems();
 
-   GDSin::GdsFile* AGDSDB = DATC->lockGDS(false);
-   if (NULL != AGDSDB)
+   GDSin::GdsFile* AGDSDB = NULL;
+   if (DATC->lockGds(AGDSDB))
    {
       AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
 
@@ -858,8 +858,8 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
          }
       }
       SortChildren(GetRootItem());
-      DATC->unlockGDS();
    }
+   DATC->unlockGds(AGDSDB);
 }
 
 void browsers::GDSCellBrowser::collectChildren(const GDSin::GDSHierTree* root,

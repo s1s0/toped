@@ -348,8 +348,9 @@ int tellstdfunc::GDSread::execute() {
          // add GDS tab in the browser
          browsers::addGDStab();
          //
-         GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-
+         GDSin::GdsFile* AGDSDB = NULL;
+         if (DATC->lockGds(AGDSDB))
+         {
             GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
             if (root)
             {
@@ -359,7 +360,13 @@ int tellstdfunc::GDSread::execute() {
                } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
             }
             //else ->it's possible to have an empty GDS file
-         DATC->unlockGDS();
+         }
+         else
+         {
+            // The AGDSDB mist exists here, because GDSparse returned true
+            assert(false);
+         }
+         DATC->unlockGds(AGDSDB);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                    CN != top_cell_list.end(); CN ++)
             topcells->add(DEBUG_NEW telldata::ttstring(*CN));
@@ -399,7 +406,6 @@ int tellstdfunc::GDSimport::execute()
    bool  recur = getBoolValue();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
-
    // Convert layer map
    telldata::tthsh* nameh;
    USMap gdsLaysStrList;
@@ -408,22 +414,25 @@ int tellstdfunc::GDSimport::execute()
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
-
-   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-   GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
+   // Prep: We need all used layers, and the name of the GDS DB
    std::ostringstream ost;
-   if (!src_structure)
+   std::string gdsDbName = "NonameDB";
+   GdsLayers* gdsLaysAll = NULL;
+   GDSin::GdsFile* AGDSDB = NULL;
+   if (DATC->lockGds(AGDSDB))
    {
-      ost << "GDS structure named \"" << name << "\" does not exists";
-      tell_log(console::MT_ERROR,ost.str());
-      DATC->unlockGDS();
+      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
+      if (src_structure)
+      {
+         gdsLaysAll = DEBUG_NEW GdsLayers();
+         src_structure->collectLayers(*gdsLaysAll,true);
+         gdsDbName = AGDSDB->libname();
+      }
    }
-   else
-   {
-      GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
-      src_structure->collectLayers(*gdsLaysAll,true);
-      std::string gdsDbName = AGDSDB->libname();
-      DATC->unlockGDS();
+   DATC->unlockGds(AGDSDB, true);
+   //OK, here we go....
+   if (NULL != gdsLaysAll)
+   { // i.e. top structure is found and layers extracted
       LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
       if (LayerExpression.status())
       {
@@ -431,9 +440,8 @@ int tellstdfunc::GDSimport::execute()
          top_cells.push_back(name);
 
          try {DATC->lockDB(false);}
-         catch (EXPTN) 
-         {
-            // create a default target data base if one is not already existing
+         catch (EXPTN)
+         {  // create a default target data base if one is not already existing
             TpdTime timeCreated(time(NULL));
             createDefaultTDT(gdsDbName, timeCreated, UNDOcmdQ, UNDOPstack);
             DATC->lockDB(false);
@@ -451,6 +459,11 @@ int tellstdfunc::GDSimport::execute()
          ost << "Can't execute GDS import - error in the layer map";
          tell_log(console::MT_ERROR,ost.str());
       }
+   }
+   else
+   {
+      ost << "GDS structure named \"" << name << "\" does not exists";
+      tell_log(console::MT_ERROR,ost.str());
    }
    delete lll;
    return EXEC_NEXT;
@@ -486,10 +499,14 @@ int tellstdfunc::GDSimportList::execute()
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
-   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+   std::string gdsDbName = "NonameDB";
+   GDSin::GdsFile* AGDSDB = NULL;
+   if (DATC->lockGds(AGDSDB))
+   {
       AGDSDB->collectLayers(*gdsLaysAll);
-      std::string gdsDbName = AGDSDB->libname();
-   DATC->unlockGDS();
+      gdsDbName = AGDSDB->libname();
+   }
+   DATC->unlockGds(AGDSDB, true);
    LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
    {
@@ -645,24 +662,27 @@ int tellstdfunc::GDSsplit::execute()
    if (expandFileName(filename))
    {
 
-      GDSin::GdsFile* AGDSDB = DATC->lockGDS();
-      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(cellname.c_str());
-      std::ostringstream ost;
-      if (!src_structure)
+      GDSin::GdsFile* AGDSDB = NULL;
+      if (DATC->lockGds(AGDSDB))
       {
-         ost << "GDS structure named \"" << cellname << "\" does not exists";
-         tell_log(console::MT_ERROR,ost.str());
+         GDSin::GdsStructure *src_structure = AGDSDB->getStructure(cellname.c_str());
+         std::ostringstream ost;
+         if (!src_structure)
+         {
+            ost << "GDS structure named \"" << cellname << "\" does not exists";
+            tell_log(console::MT_ERROR,ost.str());
+         }
+         else
+         {
+            DATC->GDSsplit(src_structure, filename, recur);
+            LogFile  << LogFile.getFN()
+                     << "(\""<< cellname << "\","
+                     << "\"" << filename << "\","
+                     << LogFile._2bool(recur) << ");";
+            LogFile.flush();
+         }
       }
-      else
-      {
-         DATC->GDSsplit(src_structure, filename, recur);
-         LogFile  << LogFile.getFN()
-                  << "(\""<< cellname << "\","
-                  << "\"" << filename << "\","
-                  << LogFile._2bool(recur) << ");";
-         LogFile.flush();
-      }
-      DATC->unlockGDS();
+      DATC->unlockGds(AGDSDB, true);
    }
    else
    {
@@ -785,7 +805,9 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
 int tellstdfunc::GDSreportlay::execute()
 {
    std::string name = getStringValue();
-   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+   GDSin::GdsFile* AGDSDB = NULL;
+   if(DATC->lockGds(AGDSDB))
+   {
       GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
       std::ostringstream ost; 
       if (!src_structure) {
@@ -807,7 +829,8 @@ int tellstdfunc::GDSreportlay::execute()
          tell_log(console::MT_INFO,ost.str());
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
       }
-   DATC->unlockGDS();
+   }
+   DATC->unlockGds(AGDSDB, true);
    return EXEC_NEXT;
 }
 
@@ -834,10 +857,8 @@ int tellstdfunc::GDSgetlaymap::execute()
    }
    else if (import)
    { // generate default import GDS layer map
-      DATC->lockGDS();
       GdsLayers gdsLayers;
       DATC->gdsGetLayers(gdsLayers);
-      DATC->unlockGDS();
       for ( GdsLayers::const_iterator CGL = gdsLayers.begin(); CGL != gdsLayers.end(); CGL++ )
       {
          std::ostringstream dtypestr;
@@ -928,8 +949,8 @@ int tellstdfunc::CIFread::execute()
             }
             else
             {
-               // The CUFDB mist exists here, because CIFparse returned cfs_POK
-               assert(NULL != ACIFDB);
+               // The ACIFDB mist exists here, because CIFparse returned cfs_POK
+               assert(false);
             }
             DATC->unlockCif(ACIFDB);
             // Convert the string list to TLISTOF(telldata::tn_string)
@@ -1252,7 +1273,7 @@ int tellstdfunc::CIFgetlaymap::execute()
    else if (import)
    { // generate default import CIF layer map
       nameList cifLayers;
-      DATC->CIFgetLay(cifLayers);
+      DATC->cifGetLayers(cifLayers);
       word laynum = 1;
       for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
       {

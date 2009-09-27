@@ -429,7 +429,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    //-----------------------------------------------------------------------
    SIMap inlays;
    nameList cifLayers;
-   if (DATC->CIFgetLay(cifLayers))
+   if (DATC->cifGetLayers(cifLayers))
    {
       word laynum = 1;
       for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
@@ -537,7 +537,10 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   GDSin::GdsFile* AGDSDB = DATC->lockGDS();
+   GdsLayers gdsLayers;
+   GDSin::GdsFile* AGDSDB = NULL;
+   if (DATC->lockGds(AGDSDB))
+   {
       //-----------------------------------------------------------------------
       // So ugly - even scary, but it's the price to pay for not including wx
       // in the tpd_interfaces
@@ -545,10 +548,9 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
                                                            CSTR != AGDSDB->library()->structures().end(); CSTR++)
          _nameList->Append(wxString(CSTR->first.c_str(), wxConvUTF8));
        //-----------------------------------------------------------------------
-       GdsLayers gdsLayers;
-       DATC->gdsGetLayers(gdsLayers);
-
-   DATC->unlockGDS();
+   }
+   DATC->unlockGds(AGDSDB, true);
+   DATC->gdsGetLayers(gdsLayers);
    if (init != wxT(""))
    {
       _nameList->SetStringSelection(init,true);
