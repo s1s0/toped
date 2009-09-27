@@ -401,7 +401,7 @@ namespace browsers
          XdbBrowser*         _gdsStruct;
          XdbBrowser*         _cifStruct;
          TDTbrowser*         _tdtStruct;
-         DRCBrowser*           _drcStruct;
+         DRCBrowser*         _drcStruct;
          int                 _gdsPageIndex;
          int                 _cifPageIndex;
          LayerBrowser*       _layers;
@@ -413,8 +413,6 @@ namespace browsers
    void layer_add(const std::string, const word);
    void layer_default(const word, const word);
    void addTDTtab(bool, bool newthread);
-   void addGDStab();
-   void addCIFtab();
    void addDRCtab();
    void clearGDStab();
    void clearCIFtab();

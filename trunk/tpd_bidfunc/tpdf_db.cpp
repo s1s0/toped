@@ -346,7 +346,7 @@ int tellstdfunc::GDSread::execute() {
       if (DATC->GDSparse(filename))
       {
          // add GDS tab in the browser
-         browsers::addGDStab();
+         DATC->bpAddGdsTab();
          //
          GDSin::GdsFile* AGDSDB = NULL;
          if (DATC->lockGds(AGDSDB))
@@ -935,7 +935,7 @@ int tellstdfunc::CIFread::execute()
          case CIFin::cfs_POK:
          {
             // add CIF tab in the browser
-            browsers::addCIFtab();
+            DATC->bpAddCifTab();
             // Collect the top structures
             std::list<std::string> top_cell_list;
             CIFin::CifFile* ACIFDB = NULL;

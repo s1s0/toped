@@ -87,6 +87,8 @@ public:
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    bool                       lockGds(GDSin::GdsFile*&);
    bool                       lockCif(CIFin::CifFile*&);
+   void                       bpAddGdsTab();
+   void                       bpAddCifTab();
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
@@ -214,8 +216,129 @@ private:
    wxMutex                    GDSLock;
    wxMutex                    CIFLock;
    wxMutex                    PROPLock;
+   wxCondition*               _bpSync;       // Synchroniosation for cell browser panels
 
 };
+
+//=============================================================================
+//             External DB mutexes (CIF/GDS etc.) explained
+//                                  or
+//          How to keep the main thread alive during conversions
+//=============================================================================
+//
+// This memo relates to the following fields of the DataCenter class:
+//   GDSin::GdsFile* _GDSDB
+//   CIFin::CifFile* _CIFDB
+//   wxMutex         GDSLock
+//   wxMutex         CIFLock
+//   wxCondition*    _bpSync;
+// and associated methods:
+//   bool lockGds(GDSin::GdsFile*& gds_db);
+//   bool lockCif(CIFin::CifFile*& cif_db);
+//   void unlockGds(GDSin::GdsFile*& gds_db, bool throwexception = false);
+//   void unlockCif(CIFin::CifFile*& cif_db, bool throwexception = false);
+//   void bpAddGdsTab();
+//   void bpAddCifTab();
+//
+//-----------------------------------------------------------------------------
+//   An external database is normally processed in the secondary (parser)
+//   thread, but there is also a cell browser panel which should be kept
+//   updated so that the user can see the structure of the DB and can request
+//   partial conversions. The cell browser panel is updated due to a message
+//   posted from the parser thread to the main one which contains the user
+//   event wxEVT_CMD_BROWSER. The browser traverses the DB from the main
+//   thread - so we need the corresponding mutex which shall guarantee the
+//   integrity. Some of the operations (the conversions) require an existing
+//   DB in the memory. Below is the required set of operations:
+//   - in order to work with the DB we need to obtain a valid pointer to it
+//     and lock the corresponding mutex.
+//   - check whether a DB exists in memory and in some cases throw an
+//     exception if it doesn't.
+//   - when operation with the DB is done, unlock the mutex and invalidate
+//     the used pointer.
+//   - post a message to the main thread to get the browser panel updated
+//   We have to keep in mind also the environment in which those operations
+//   are executed to asses the complexity of the task. Normally we would
+//   have to use those DBs with the main DB (import/export) and the latter
+//   has its own mutex. Here is the list of the possible troubles:
+//   - Work with the DB when the mutex is not locked. This leads to
+//     intermittent crashes/hangs which are very very hard to diagnose. Nothing
+//     really helps in such a situation, maybe only meditation...
+//   - Deadlocks - this kind of situation in any of the mutexes will almost
+//     certainly stall one of the threads and Toped will be as good as crashed.
+//   - Long waiting time to lock a mutex from the main thread. This will
+//     stall the main thread which means that the message queue will not
+//     be processed, the window will not be refreshed. All this creates
+//     a feeling that the whole program hangs which often annoys the user.
+//   - Message queue (between the threads) is out of sync. For example -
+//     the main thread is trying to create a GDS browser tab while the parser
+//     thread already converted the DB and deleted it. This is possibly the
+//     smallest of all the evils, but just if the browsers are coded in a
+//     highly defensive manner.
+//
+// To address all the above some rules must be obeyed. Also - every DB has
+// 3 corresponding methods which must be explicitly used when an external
+// database is to be processed.
+// 1. NEVER use the _GDSDB/_CIFDB fields directly. Use the corresponding
+//    lock method to obtain the pointer to them and unlock method to
+//    invalidate it.
+// 2. If the DB is not in the memory the lock method will return false
+//    and the pointer to the DB (the function parameter) will be set to NULL.
+//    Do not check _GDSDB/_CIFDB directly even for existence(NULL or not).
+//    (See p.1)
+// 3. When done with the DB, call unlock methods and use the same variable
+//    which was used in the corresponding lock call as a parameter. The unlock
+//    will release the mutex and will set the variable to NULL, so that it can
+//    not be used after the unlock (Toped will crash if this is attempted, but
+//    that's easy to diagnose and fix).
+// 4. Even when the DB is about to be created (new) do not assign to the
+//    _GDSDB/_CIFDB directly. Call the lock, assign to the obtained pointer,
+//    and then return the new pointer to the unlock. Same is valid when the
+//    DB is about to be destroyed (delete).
+// 5. To prevent deadlocks the exceptions will be thrown eventually by the
+//    unlock, not by the lock.
+// 6. Use the pointer obtained by the lock method only if the method itself
+//    returns true.
+//
+// Here is the code template to be followed:
+//
+//   GDSin::GdsFile* AGDSDB = NULL;
+//   if (lockGds(AGDSDB))
+//   { // DB exists, AGDSDB contains a valid pointer to it
+//     //
+//     // ... processing here
+//     //
+//     //    you can even do:
+//     // delete AGDSDB; AGDSDB = NULL;
+//     //    or
+//     // AGDSDB = new GDSin::GdsFile(...);
+//     //    or a combination of the above
+//   }
+//   else
+//   { //    DB doesn't exists, AGDSDB = NULL
+//     // or deadlock has been flagged. AGDSDB is unknown
+//     // in any case - do not use AGDSDB by any means
+//   }
+//   // when done unlock must be called with the same variable
+//   // which was used when the corresponding lock was called.
+//   unlockGds(AGDSDB);
+//   // or alternatively call
+//   // unlockGds(AGDSDB, true)
+//   // which will throw EXPTNactive_GDS exception if AGDSDB == NULL
+//   // AGDSDB is invalid (NULL) from this point on
+//
+// And the last but not least! bpAdd???Tab() must be used from the
+// parser thread to update the browser. The method will put the parser
+// thread in sleep until the main thread finishes with the DB. This will
+// prevent the main thread from eventual long waits to lock the mutex which
+// in turn will keep the main window active and the message queue in sync.
+// See the comments in the bpAdd???Tab() function
+//
+// For more info - see:
+// http://docs.wxwidgets.org/stable/wx_wxmutex.html#wxmutex
+// http://docs.wxwidgets.org/stable/wx_wxcondition.html#wxcondition
+// http://docs.wxwidgets.org/stable/wx_wxthread.html#wxthread
+//=============================================================================
 
 void initDBLib(const std::string&, const std::string&);
 

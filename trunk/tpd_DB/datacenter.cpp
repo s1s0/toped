@@ -35,9 +35,12 @@
 #include "viewprop.h"
 #include "ps_out.h"
 #include "tenderer.h"
+#include "browsers.h"
 
 // Global variables
-DataCenter*               DATC = NULL;
+DataCenter*                      DATC = NULL;
+extern browsers::browserTAB*     Browsers;
+extern const wxEventType         wxEVT_CMD_BROWSER;
 
 //-----------------------------------------------------------------------------
 // class Cif2Ted
@@ -303,6 +306,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    _localDir = localDir;
    _globalDir = globalDir;
    _GDSDB = NULL; _CIFDB = NULL;//_TEDDB = NULL;
+   _bpSync = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
    _tedfilename = "unnamed";
@@ -708,34 +712,102 @@ void DataCenter::unlockDB()
 
 bool DataCenter::lockGds(GDSin::GdsFile*& gds_db)
 {
-   while (wxMUTEX_NO_ERROR != GDSLock.TryLock());
-   gds_db = _GDSDB;
-   return (NULL != gds_db);
+   if (wxMUTEX_DEAD_LOCK == GDSLock.Lock())
+   {
+      tell_log(console::MT_ERROR,"GDS Mutex deadlocked!");
+      gds_db = _GDSDB;
+      return false;
+   }
+   else
+   {
+      gds_db = _GDSDB;
+      return (NULL != gds_db);
+   }
 }
 
 void DataCenter::unlockGds(GDSin::GdsFile*& gds_db, bool throwexception)
 {
    _GDSDB = gds_db;
    VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
-   if (throwexception && (NULL == gds_db))
+   if(NULL != _bpSync)
+      _bpSync->Signal();
+   else if (throwexception && (NULL == gds_db))
       throw EXPTNactive_GDS();
    gds_db = NULL;
 }
 
 bool DataCenter::lockCif(CIFin::CifFile*& cif_db)
 {
-   while (wxMUTEX_NO_ERROR != CIFLock.TryLock());
-   cif_db = _CIFDB;
-   return (NULL != cif_db);
+   if (wxMUTEX_DEAD_LOCK == CIFLock.Lock())
+   {
+      tell_log(console::MT_ERROR,"CIF Mutex deadlocked!");
+      cif_db = _CIFDB;
+      return false;
+   }
+   else
+   {
+      cif_db = _CIFDB;
+      return (NULL != cif_db);
+   }
 }
 
 void DataCenter::unlockCif(CIFin::CifFile*& cif_db, bool throwexception)
 {
    _CIFDB = cif_db;
    VERIFY(wxMUTEX_NO_ERROR == CIFLock.Unlock());
-   if (throwexception && (NULL == cif_db))
+   if (NULL != _bpSync)
+      _bpSync->Signal();
+   else if (throwexception && (NULL == cif_db))
       throw EXPTNactive_CIF();
    cif_db = NULL;
+}
+
+void DataCenter::bpAddGdsTab()
+{
+   // Lock the Mutex
+   if (wxMUTEX_DEAD_LOCK == GDSLock.Lock())
+   {
+      tell_log(console::MT_ERROR,"GDS Mutex deadlocked!");
+      return;
+   }
+   // initialise the thread condition with the locked Mutex
+   _bpSync = new wxCondition(GDSLock);
+   // post a message to the main thread
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(browsers::BT_ADDGDS_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
+   // Go to sleep and wait untill the main thread finished
+   // updating the browser panel
+   _bpSync->Wait();
+   // Wake-up & uplock the mutex
+   VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
+   // clean-up behind & prepare for the consequent use
+   delete _bpSync;
+   _bpSync = NULL;
+}
+
+void DataCenter::bpAddCifTab()
+{
+   // Lock the Mutex
+   if (wxMUTEX_DEAD_LOCK == CIFLock.Lock())
+   {
+      tell_log(console::MT_ERROR,"CIF Mutex deadlocked!");
+      return;
+   }
+   // initialise the thread condition with the locked Mutex
+   _bpSync = new wxCondition(CIFLock);
+   // post a message to the main thread
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(browsers::BT_ADDCIF_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
+   // Go to sleep and wait untill the main thread finished
+   // updating the browser panel
+   _bpSync->Wait();
+   // Wake-up & uplock the mutex
+   VERIFY(wxMUTEX_NO_ERROR == CIFLock.Unlock());
+   // clean-up behind & prepare for the consequent use
+   delete _bpSync;
+   _bpSync = NULL;
 }
 
 void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
