@@ -172,8 +172,8 @@ bool Calbr::CalbrFile::parse()
 	// get drc Rule Check name
 	if (fgets(ruleCheckName, 512, _calbrFile)==NULL)return false;
 
-
-	Calbr::drcRuleCheck *ruleCheck = DEBUG_NEW Calbr::drcRuleCheck(ruleCheckName);
+	//Remove LF from  ruleCheckName befor creating ruleCheck
+	Calbr::drcRuleCheck *ruleCheck = DEBUG_NEW Calbr::drcRuleCheck(std::string(ruleCheckName, strlen(ruleCheckName)-1));
 	char tempStr[512];
 	char timeStamp[512];
 	long resCount, origResCount, descrStrCount;
@@ -310,6 +310,7 @@ void	Calbr::CalbrFile::ShowError(const std::string & error, long  number)
 	RuleChecksVector::const_iterator it;
 	for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
 	{
+		std::string x = (*it)->ruleCheckName();
 		if((*it)->ruleCheckName() == error)
 		{
 			drcRuleCheck *rule = (*it);

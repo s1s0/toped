@@ -1379,6 +1379,23 @@ int tellstdfunc::DRCCalibreimport::execute()
 }
 
 //=============================================================================
+tellstdfunc::DRCshowerror::DRCshowerror(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+}
+
+int tellstdfunc::DRCshowerror::execute()
+{
+	long errorNumber = getWordValue();
+	std::string errorName = getStringValue();
+	DRCData->ShowError(errorName, errorNumber);
+   return EXEC_NEXT;
+}
+
+
+//=============================================================================
 void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
                                    parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
 {

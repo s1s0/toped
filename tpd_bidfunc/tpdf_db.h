@@ -68,6 +68,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(CIFsetlaymap     );
 
 	TELL_STDCMD_CLASSA(DRCCalibreimport          );
+	TELL_STDCMD_CLASSA(DRCshowerror		);
 
    TELL_STDCMD_CLASSA(PSexportTOP      );
 
