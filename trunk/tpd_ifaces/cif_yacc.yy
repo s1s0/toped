@@ -106,7 +106,7 @@ primCommand:
    | UEC_cellOverlap                       {}
    | UEC_labelLoc                          {}
    | UEC_labelSig                          {}
-   | commentCommand                        {delete $1;  }
+   | commentCommand                        {}
 ;
 
 defDefineCommand:
@@ -239,8 +239,8 @@ commentText:
 ;
 
 commentCommand:
-     tknPremB commentText tknPremE         { $$ = $2; }
-   | tknPremB commentText commentCommand commentText tknPremE      { $$ = $3; }
+     tknPremB commentText tknPremE         { delete $2; }
+   | tknPremB commentText commentCommand commentText tknPremE      { delete $2; delete $4; }
 ;
 
 cifPoint:
