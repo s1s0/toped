@@ -2543,7 +2543,9 @@ void laydata::tdttext::PSwrite(PSFile& gdsf, const layprop::DrawProperties& draw
 
 DBbox laydata::tdttext::overlap() const
 {
-   return _overlap * _translation;
+   DBbox ovl(_overlap.overlap(_translation));
+   ovl.normalize();
+   return ovl;
 }
 
 void laydata::tdttext::info(std::ostringstream& ost, real DBU) const
