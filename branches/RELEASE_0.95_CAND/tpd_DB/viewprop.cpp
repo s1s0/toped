@@ -67,8 +67,7 @@ void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, co
 
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
    glDisable(GL_POLYGON_STIPPLE);
-//   glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
-   glBegin(GL_LINES);glLineWidth(2);
+   glBegin(GL_LINES);
    // draw the nonius ...
    for (LineList::const_iterator CL = noni_list.begin(); CL != noni_list.end(); CL++)
    {
@@ -79,7 +78,6 @@ void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, co
    glVertex2i(_ln.p1().x(), _ln.p1().y());
    glVertex2i(_ln.p2().x(), _ln.p2().y());
    glEnd();
-   glLineWidth(1);
 
    CTM tmtrx;
    tmtrx.Rotate(_angle);
@@ -313,7 +311,7 @@ unsigned layprop::ViewProperties::addlayer(std::string name)
 bool layprop::ViewProperties::isLayerExist(word layno)
 {
 	bool b = (_drawprop._layset.end() != _drawprop._layset.find(layno));
-	return (_drawprop._layset.end() != _drawprop._layset.find(layno));
+	return b;
 }
 
 bool layprop::ViewProperties::isLayerExist(std::string layname)
