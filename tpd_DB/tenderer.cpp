@@ -1862,11 +1862,12 @@ tenderer::TopRend::~TopRend()
 
 void tenderer::checkOGLError(std::string loc)
 {
-   std::ostringstream boza;
+   std::ostringstream ost;
    GLenum ogle;
    while ((ogle=glGetError()) != GL_NO_ERROR)
    {
-      boza  << "Error " << ogle << "at " << loc << std::endl;
-      tell_log(console::MT_ERROR,boza.str());
+      ost << "OpenGL Error: \"" << gluErrorString(ogle)
+          << "\" during " << loc;
+      tell_log(console::MT_ERROR,ost.str());
    }
 }

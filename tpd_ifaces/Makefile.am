@@ -1,4 +1,4 @@
-noinst_HEADERS = cif_io.h drc_tenderer.h gds_io.h tpdph.h
+noinst_HEADERS = cif_io.h drc_tenderer.h gds_io.h tpdph.h calbr_reader.h
 BUILT_SOURCES = cif_yacc.h
 AM_YFLAGS = -p cif -d -y -v
 AM_LFLAGS = -Pcif

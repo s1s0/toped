@@ -1,14 +1,6 @@
 Short Term
 ------------
- - report_ciflayer() - has to be implemented. use CIFreportlay - its
-   current implementation is not used anymore.
- - CIF conversion (in both directions) needs scaling facilities. It 
-   ussually works properly, because TDT data bases (by default) are
-   created 1e-6/1e-9 (UU/DBU) and that's the CIF measurements
- - Some of the known CIF data types are parsed, but not converted
-   This has to be at least documented
  - Browser window needs search facilities. For big designs
- - Depth of UNDO must be a menu parameter (or a TELL function ?)
  - bitwise logical operations. Require unsigned.
  - avoid using #defines where possible. Use const instead
 
@@ -17,8 +9,6 @@ General
   * Text resize
   * interactive rotate might be confusing - needs to be discussed
   * cut/merge doesn't work with wire
-  * (0,0) has to be marked somehow on the screen
-  * Cell hierarchy window needs different icons - library cell, DB cell, DB, library
   * Parser needs well defined error recovery policy
   * select edge with double click - needs algo for edge proximity. The same algo
     can be used for editpush selecting (optional?)
@@ -38,10 +28,6 @@ General
   * return statements when there are multiply paths
   * logical operations between figures in TELL! (maybe Toped engine should be used here)
   * Introduce default parameter values. Think about callback functions
-  * Error messages and YYERROR and error recovery - esspecialy from
-    tellyzer block. May be something like a error report structure
-    will be appropriate? Error numbers with error messages etc. -
-    It will be much easier to document them eventually in the future!
 
 
   Graphics
@@ -66,7 +52,6 @@ Documentation
    _iconsize32
    _iconsize48
 
-
 Global options of the editor
 ============================
   * lock/hide layer unselects the shapes on the layer. If not all modify 
@@ -75,19 +60,3 @@ Global options of the editor
   * Reference point when groupping -> current (0,0), or bottom left point 
     of the selected shapes
   * ref/aref select - overlapping the reference point only or the entire area  
-
-
-Things to remember
-==================
-All sort related operations work with normalized overlapping boxes.
-If this is not the case, the sorting algorithm is screwed up which results 
-in an infinite loop of the finction calls that overflow the stack. The 
-debugger is not very good in handling this problem, that in turn makes
-the debugging to look like a suicide.
-As a rule - every overlap call in the sorting algorithm must be followed 
-by a normalize one. The alternative is to make all overlap functions to 
-return a normalized result. That is NOT the case at the moment and the reason
-is to save some operations and CPU time (to gain speed) during the drawing, 
-because ussually overlap call is followed by a CTM multiplication and the 
-normalization is needed after this.
-
