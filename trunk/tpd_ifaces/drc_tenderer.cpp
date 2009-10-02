@@ -31,14 +31,11 @@
 #include "drc_tenderer.h"
 #include "../tpd_bidfunc/tpdf_common.h"
 #include "../tpd_parser/ted_prompt.h"
-#include "../src/toped.h"
 
 // Global variables
 Calbr::CalbrFile *DRCData = NULL;
-extern tui::TopedFrame*    Toped;
 extern console::ted_cmd*	Console;
 extern DataCenter*         DATC;
-extern const wxEventType   wxEVT_CANVAS_ZOOM;
 
 Calbr::drcTenderer::drcTenderer():
 	_ATDB(NULL)
@@ -142,10 +139,6 @@ void Calbr::drcTenderer::drawEnd()
 	real DBscale = DATC->DBscale();
 
 	DBbox *box = DEBUG_NEW DBbox(TP(_minx, _miny, DBscale), TP(_maxx, _maxy, DBscale));
-	wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-	eventZOOM.SetInt(tui::ZOOM_WINDOW);
-	eventZOOM.SetClientData(static_cast<void*>(box));
-	wxPostEvent(Toped->view(), eventZOOM);
-
+	
 	tellstdfunc::RefreshGL();
 }

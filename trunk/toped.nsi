@@ -12,7 +12,7 @@
 Name "toped"
 
 ; The file to write
-OutFile "toped_install-0.94RC.exe"
+OutFile "toped_install-0.95RC.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\toped
