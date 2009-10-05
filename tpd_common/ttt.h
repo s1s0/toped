@@ -82,9 +82,9 @@
 //=============================================================================
 // General type declations (compatability)
 //=============================================================================
-typedef          char   _sg_int8;	// 1 byte
-typedef         short   _sg_int16;	// 2 bytes
-typedef           int   _sg_int32;	// 4 bytes
+typedef          char   _sg_int8;   // 1 byte
+typedef         short   _sg_int16;  // 2 bytes
+typedef           int   _sg_int32;  // 4 bytes
 typedef long long int   _sg_int64;  // 8 bytes
 
 typedef unsigned char   byte;
@@ -157,10 +157,10 @@ private:
 > FlipY()         - flip the image towards given Y line
 > Reverse()       - return 1/matrix (not sure about the proper terminology)
 >>> Operators ----------------------------------------------------------------
-> PSCTM	operator *  (PSCTM op2) Multiplication CTM = CTM1*CTM2
-> PSCTM	operator *= (PSCTM op2) Multiplication assignemt CTM *= CTM1
-> PSP		operator *  (GP* op1)   Multiplication PSP = CTM*GP
-> PSP		operator *  (PSP* op1)  Multiplication PSP = CTM*PSP
+> PSCTM   operator *  (PSCTM op2) Multiplication CTM = CTM1*CTM2
+> PSCTM   operator *= (PSCTM op2) Multiplication assignemt CTM *= CTM1
+> PSP     operator *  (GP* op1)   Multiplication PSP = CTM*GP
+> PSP     operator *  (PSP* op1)  Multiplication PSP = CTM*PSP
 ******************************************************************************/
 class TP;
 class   CTM

@@ -29,7 +29,7 @@
 
 #include <stdio.h>
 #include <wx/ffile.h>
-#include "../tpd_common/ttt.h"
+#include "ttt.h"
 
 //GDS data types
 #define gdsDT_NODATA       0

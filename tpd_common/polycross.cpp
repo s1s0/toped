@@ -1346,9 +1346,9 @@ polycross::SegmentThread* polycross::YQ::endThread(unsigned threadID)
       EXPTNpolyCross("Unable to remove the segment thread properly");
    prevT->set_threadAbove(thread->threadAbove());
    // erase it
-	delete(threadP->second);
+   delete(threadP->second);
    _cthreads.erase(threadP);
-   
+
    return prevT;
 }
 

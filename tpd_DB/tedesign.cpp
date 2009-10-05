@@ -27,8 +27,8 @@
 
 #include "tpdph.h"
 #include <sstream>
-#include "../tpd_common/ttt.h"
-#include "../tpd_common/outbox.h"
+#include "ttt.h"
+#include "outbox.h"
 #include "../tpd_ifaces/cif_io.h"
 #include "../tpd_ifaces/gds_io.h"
 #include "tedesign.h"

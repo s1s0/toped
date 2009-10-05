@@ -31,7 +31,7 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "tenderer.h"
-#include "../tpd_common/outbox.h"
+#include "outbox.h"
 
 //-----------------------------------------------------------------------------
 // class quadTree

@@ -29,8 +29,8 @@
 #define TEDSTD_H_INCLUDED
 
 #include <string>
-#include "../tpd_common/ttt.h"
-#include "../tpd_common/outbox.h"
+#include "ttt.h"
+#include "outbox.h"
 
 //==============================================================================
 // Toped DaTa (TDT) file markers
