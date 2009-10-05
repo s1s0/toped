@@ -28,7 +28,6 @@
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
-#include "../tpd_ifaces/gds_io.h"
 #include "../tpd_ifaces/cif_io.h"
 #include "viewprop.h"
 
@@ -66,7 +65,6 @@ public:
    bool                       GDSparse(std::string);
    void                       GDSexport(const LayerMapGds&, std::string&, bool);
    void                       GDSexport(laydata::tdtcell*, const LayerMapGds&, bool, std::string&, bool);
-   void                       GDSsplit(GDSin::GdsStructure*, const std::string filename, bool recur);
    void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();

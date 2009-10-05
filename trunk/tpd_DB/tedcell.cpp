@@ -37,7 +37,7 @@
 #include "ps_out.h"
 #include "../tpd_ifaces/cif_io.h"
 #include "../tpd_ifaces/gds_io.h"
-#include "../tpd_common/outbox.h"
+#include "outbox.h"
 
 extern layprop::FontLibrary* fontLib;
 

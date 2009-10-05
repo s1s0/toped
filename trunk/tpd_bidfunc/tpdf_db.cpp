@@ -674,7 +674,8 @@ int tellstdfunc::GDSsplit::execute()
          }
          else
          {
-            DATC->GDSsplit(src_structure, filename, recur);
+            GDSin::GdsSplit gdssplit(AGDSDB, filename);
+            gdssplit.run(src_structure, recur);
             LogFile  << LogFile.getFN()
                      << "(\""<< cellname << "\","
                      << "\"" << filename << "\","

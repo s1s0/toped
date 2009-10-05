@@ -32,7 +32,7 @@
 #include "drawprop.h"
 #include "viewprop.h"
 #include "ps_out.h"
-#include "../tpd_common/glf.h"
+#include "glf.h"
 
 
 GLubyte cell_mark_bmp[30] = {

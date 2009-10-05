@@ -28,7 +28,7 @@
 #include "tpdph.h"
 #include <string>
 #include <sstream>
-#include "../tpd_common/outbox.h"
+#include "outbox.h"
 #include "ps_out.h"
 
 PSFile::PSFile(std::string fname)

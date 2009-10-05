@@ -29,7 +29,7 @@
 
 #include <string>
 #include <fstream>
-#include "../tpd_common/ttt.h"
+#include "ttt.h"
 
 int ciflex(void);
 int ciferror (char *s);

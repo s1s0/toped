@@ -32,8 +32,8 @@
 #include <wx/tooltip.h>
 #include "browsers.h"
 #include "viewprop.h"
-#include "../tpd_common/tuidefs.h"
-#include "../tpd_common/outbox.h"
+#include "tuidefs.h"
+#include "outbox.h"
 #include "datacenter.h"
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"

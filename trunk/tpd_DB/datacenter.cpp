@@ -30,7 +30,7 @@
 #include <wx/regex.h>
 #include <sstream>
 #include "datacenter.h"
-#include "../tpd_common/outbox.h"
+#include "outbox.h"
 #include "tedat.h"
 #include "viewprop.h"
 #include "ps_out.h"
@@ -527,15 +527,6 @@ bool DataCenter::GDSparse(std::string filename)
    }
    unlockGds(AGDSDB);
    return status;
-}
-
-void DataCenter::GDSsplit(GDSin::GdsStructure* gdsstr, const std::string filename, bool recur)
-{
-   assert (NULL != _GDSDB);
-
-   GDSin::GdsSplit gdssplit(_GDSDB, filename);
-   gdssplit.run(gdsstr, recur);
-
 }
 
 void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)

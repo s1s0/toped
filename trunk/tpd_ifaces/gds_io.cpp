@@ -31,7 +31,7 @@
 #include <string>
 #include <time.h>
 #include "gds_io.h"
-#include "../tpd_common/outbox.h"
+#include "outbox.h"
 #include "../tpd_DB/tedat.h"
 #include "../tpd_DB/tedesign.h"
 

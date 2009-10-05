@@ -30,10 +30,10 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
-#include "../tpd_common/ttt.h"
+#include "ttt.h"
 #include <GL/glew.h>
 #include "viewprop.h"
-#include "../tpd_common/outbox.h"
+#include "outbox.h"
 #include "tenderer.h"
 
 extern layprop::FontLibrary* fontLib;

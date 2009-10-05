@@ -29,7 +29,7 @@
 #include <sstream>
 #include "cif_io.h"
 #include "cif_yacc.h"
-#include "../tpd_common/outbox.h"
+#include "outbox.h"
 
 
 CIFin::CifFile* CIFInFile = NULL;

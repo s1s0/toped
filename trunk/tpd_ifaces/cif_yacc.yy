@@ -30,8 +30,8 @@
 %{
 #include "tpdph.h"
 #include <sstream>
-#include "../tpd_common/outbox.h"
-#include "../tpd_common/ttt.h"
+#include "outbox.h"
+#include "ttt.h"
 #include "cif_io.h"
 /* Switch on verbose error reporting messages*/
 #define YYERROR_VERBOSE 1
