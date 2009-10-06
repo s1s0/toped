@@ -106,7 +106,7 @@ namespace laydata {
          virtual DBbox       cellOverlap() const;
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
          virtual void        GDSwrite(GDSin::GdsFile&, const cellList&, const TDTHierTree*, real, bool) const;
-         virtual void        CIFwrite(CIFin::CifExportFile&, const cellList&, const TDTHierTree*, real, bool) const;
+         virtual void        CIFwrite(DbExportFile&, const cellList&, const TDTHierTree*, real) const;
          virtual void        collect_usedlays(const tdtlibdir*, bool, WordList&) const;
 
          void                 parentfound()     {_orphan = false;};
@@ -145,8 +145,8 @@ namespace laydata {
       void                 write(TEDfile* const, const cellList&, const TDTHierTree*) const;
       void                 GDSwrite(GDSin::GdsFile&, const cellList&,
                                                  const TDTHierTree*, real, bool) const;
-      void                 CIFwrite(CIFin::CifExportFile&, const cellList&,
-                                    const TDTHierTree*, real, bool) const;
+      void                 CIFwrite(DbExportFile&, const cellList&,
+                                    const TDTHierTree*, real) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&,
                                    const cellList* = NULL, const TDTHierTree* = NULL) const;
       TDTHierTree*         hierout(TDTHierTree*&, tdtcell*, cellList*, const tdtlibdir*);

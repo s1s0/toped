@@ -30,6 +30,7 @@
 #include <string>
 #include <fstream>
 #include "ttt.h"
+#include "../tpd_DB/tedstd.h"
 
 int ciflex(void);
 int ciferror (char *s);
@@ -304,25 +305,25 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::string    _fileName;        //! Input CIF file - including the path
    };
 
-   class CifExportFile {
+   class CifExportFile : public DbExportFile {
       public:
-                        CifExportFile(std::string, USMap*, bool);
-                       ~CifExportFile();
-         void           definitionStart(std::string, real);
-         void           definitionFinish();
-         bool           layerSpecification(word);
-         void           box(const unsigned, const unsigned, const TP&);
-         void           polygon(const int4b* const, unsigned);
-         void           wire(const int4b* const, unsigned, unsigned);
-         void           text(const std::string&, const TP&);
-         void           call(const std::string& name, const CTM&);
-         bool           checkCellWritten(std::string) const;
-         void           registerCellWritten(std::string);
-         std::fstream&  file()               {return _file;}
+                        CifExportFile(std::string, laydata::tdtcell*, USMap*, bool, bool);
+         virtual       ~CifExportFile();
+         virtual void   definitionStart(std::string, real);
+         virtual void   definitionFinish();
+         virtual void   libraryStart(std::string, TpdTime&);
+         virtual void   libraryFinish();
+         virtual bool   layerSpecification(word);
+         virtual void   box(const unsigned, const unsigned, const TP&);
+         virtual void   polygon(const int4b* const, unsigned);
+         virtual void   wire(const int4b* const, unsigned, unsigned);
+         virtual void   text(const std::string&, const TP&);
+         virtual void   ref(const std::string& name, const CTM&);
+         virtual bool   checkCellWritten(std::string) const;
+         virtual void   registerCellWritten(std::string);
       private:
          USMap*         _laymap;          //! Toped-CIF layer map
          SIMap          _cellmap;         //! tdt-cif map of all exported cells
-         std::string    _fileName;        //! Output CIF file name - including the path
          std::fstream   _file;            //! Output file handler
          bool           _verbose;         //! CIF output type
          unsigned       _lastcellnum;     //! The number of the last written cell

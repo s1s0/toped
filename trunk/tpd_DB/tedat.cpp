@@ -634,7 +634,7 @@ void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    //}
 }
 
-void laydata::tdtbox::CIFwrite(CIFin::CifExportFile& ciff) const
+void laydata::tdtbox::CIFwrite(DbExportFile& ciff) const
 {
    unsigned int length = abs(_pdata[p2x] - _pdata[p1x]);
    unsigned int width  = abs(_pdata[p2y] - _pdata[p1y]);
@@ -1164,7 +1164,7 @@ void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    //}
 }
 
-void laydata::tdtpoly::CIFwrite(CIFin::CifExportFile& ciff) const
+void laydata::tdtpoly::CIFwrite(DbExportFile& ciff) const
 {
    ciff.polygon(_pdata, _psize);
 }
@@ -1617,7 +1617,7 @@ void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    //}
 }
 
-void laydata::tdtwire::CIFwrite(CIFin::CifExportFile& ciff) const
+void laydata::tdtwire::CIFwrite(DbExportFile& ciff) const
 {
    ciff.wire(_pdata, _psize, _width);
 }
@@ -1867,9 +1867,9 @@ void laydata::tdtcellref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
-void laydata::tdtcellref::CIFwrite(CIFin::CifExportFile& ciff) const
+void laydata::tdtcellref::CIFwrite(DbExportFile& ciff) const
 {
-   ciff.call(_structure->name(), _translation);
+   ciff.ref(_structure->name(), _translation);
 }
 
 void laydata::tdtcellref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
@@ -2216,7 +2216,7 @@ void laydata::tdtcellaref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
    gdsf.flush(wr);
 }
 
-void laydata::tdtcellaref::CIFwrite(CIFin::CifExportFile& ciff) const
+void laydata::tdtcellaref::CIFwrite(DbExportFile& ciff) const
 {
    for (int i = 0; i < _arrprops.cols(); i++)
    {// start/stop rows
@@ -2225,7 +2225,7 @@ void laydata::tdtcellaref::CIFwrite(CIFin::CifExportFile& ciff) const
          // ... get the translation matrix ...
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          refCTM *= _translation;
-         ciff.call(_structure->name(), refCTM);
+         ciff.ref(_structure->name(), refCTM);
       }
    }
 }
@@ -2528,7 +2528,7 @@ void laydata::tdttext::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
    //}
 }
 
-void laydata::tdttext::CIFwrite(CIFin::CifExportFile& ciff) const
+void laydata::tdttext::CIFwrite(DbExportFile& ciff) const
 {
    ciff.text(_text, TP(_translation.tx(), _translation.ty()));
 }

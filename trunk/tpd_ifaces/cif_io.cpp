@@ -30,6 +30,7 @@
 #include "cif_io.h"
 #include "cif_yacc.h"
 #include "outbox.h"
+#include "../tpd_DB/tedcell.h"
 
 
 CIFin::CifFile* CIFInFile = NULL;
@@ -445,12 +446,10 @@ void CIFin::CifFile::closeFile()
 }
 
 //=============================================================================
-CIFin::CifExportFile::CifExportFile(std::string fn, USMap* laymap, bool verbose)
+CIFin::CifExportFile::CifExportFile(std::string fn, laydata::tdtcell* topcell,
+   USMap* laymap, bool recur, bool verbose) :  DbExportFile(fn, topcell, recur),
+      _laymap(laymap), _verbose(verbose), _lastcellnum(0)
 {
-   _fileName = fn;
-   _laymap = laymap;
-   _verbose = verbose;
-   _lastcellnum = 0;
    std::string fname(convertString(_fileName));
    _file.open(_fileName.c_str(), std::ios::out);
    //@TODO how to check for an error ?
@@ -501,6 +500,27 @@ void CIFin::CifExportFile::definitionFinish()
       _file << "Definition Finish;" << std::endl;
    else
       _file << "DF;" << std::endl;
+}
+
+void CIFin::CifExportFile::libraryStart(std::string libname, TpdTime& libtime)
+{
+   _file << "(       TDT source : " << libname << ");" << std::endl;
+   _file << "(    Last Modified : " << libtime() << ");" << std::endl;
+
+   if (NULL == _topcell)
+   {
+      _file << "(         Top Cell :  - );" << std::endl;
+   }
+   else
+   {
+      _file << "(         Top Cell : " << _topcell->name() << ");" << std::endl;
+   }
+}
+
+void CIFin::CifExportFile::libraryFinish()
+{
+   // nothing to do for CIF export
+   assert(false);
 }
 
 bool CIFin::CifExportFile::layerSpecification(word layno)
@@ -564,7 +584,7 @@ void CIFin::CifExportFile::text(const std::string& label, const TP& center)
 
 }
 
-void CIFin::CifExportFile::call(const std::string& cellname, const CTM& tmatrix)
+void CIFin::CifExportFile::ref(const std::string& cellname, const CTM& tmatrix)
 {
    assert(_cellmap.end() != _cellmap.find(cellname));
 

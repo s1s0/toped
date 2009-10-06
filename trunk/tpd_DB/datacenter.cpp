@@ -602,15 +602,14 @@ CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
 void DataCenter::CIFexport(USMap* laymap, bool verbose, std::string& filename)
 {
    std::string nfn;
-   CIFin::CifExportFile cifex(filename, laymap, verbose);
-   _TEDLIB()->CIFwrite(cifex, NULL);
+   CIFin::CifExportFile cifex(filename, NULL, laymap, true, verbose);
+   _TEDLIB()->CIFwrite(cifex);
 }
 
 void DataCenter::CIFexport(laydata::tdtcell* topcell, USMap* laymap, bool recur, bool verbose, std::string& filename)
 {
-   std::string nfn;
-   CIFin::CifExportFile cifex(filename, laymap, verbose);
-   _TEDLIB()->CIFwrite(cifex, topcell, recur);
+   CIFin::CifExportFile cifex(filename, topcell, laymap, recur, verbose);
+   _TEDLIB()->CIFwrite(cifex);
 }
 
 

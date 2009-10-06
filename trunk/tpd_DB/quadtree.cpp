@@ -536,7 +536,7 @@ void laydata::quadTree::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 
 /*! Write the contents of the quadTree in a CIF file.\n
 Nothing special here - effectively the same as other write method*/
-void laydata::quadTree::CIFwrite(CIFin::CifExportFile& ciff) const
+void laydata::quadTree::CIFwrite(DbExportFile& ciff) const
 {
    tdtdata* wdt = _first;
    while(wdt)

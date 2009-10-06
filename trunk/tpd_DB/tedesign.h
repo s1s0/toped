@@ -37,7 +37,7 @@ namespace laydata {
       virtual       ~tdtlibrary();
       virtual void   read(TEDfile* const);
       void           GDSwrite(GDSin::GdsFile&, tdtcell*, bool);
-      void           CIFwrite(CIFin::CifExportFile&, tdtcell*, bool recur=true);
+      void           CIFwrite(DbExportFile&);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
       tdtdefaultcell* checkcell(std::string name, bool undeflib = false);
       void           recreate_hierarchy(const laydata::tdtlibdir* );
