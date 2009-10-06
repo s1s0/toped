@@ -185,36 +185,24 @@ void laydata::tdtlibrary::GDSwrite(GDSin::GdsFile& gdsf, tdtcell* top, bool recu
    wr = gdsf.setNextRecord(gds_ENDLIB);gdsf.flush(wr);
 }
 
-void laydata::tdtlibrary::CIFwrite(CIFin::CifExportFile& ciff, tdtcell* top, bool recur)
+void laydata::tdtlibrary::CIFwrite(DbExportFile& ciff)
 {
-/*   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_LIBNAME, _name.size());
-   wr->add_ascii(_name.c_str()); gdsf.flush(wr);
-
-   wr = gdsf.setNextRecord(gds_UNITS);
-   wr->add_real8b(_UU); wr->add_real8b(_DBU);
-   gdsf.flush(wr);
-   */
-
    TpdTime timelu(_lastUpdated);
-   ciff.file() << "(       TDT source : " << name() << ");" << std::endl;
-   ciff.file() << "(    Last Modified : " << timelu() << ");" << std::endl;
-
-   if (NULL == top)
+   ciff.libraryStart(name(),timelu);
+   if (NULL == ciff.topcell())
    {
-      ciff.file() << "(         Top Cell :  - );" << std::endl;
       laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
-      while (root) {
-         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root, _DBU, recur);
+      while (root)
+      {
+         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root, _DBU);
          root = root->GetNextRoot(TARGETDB_LIB);
       }
    }
    else
    {
-      ciff.file() << "(         Top Cell : " << top->name() << ");" << std::endl;
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
-      top->CIFwrite(ciff, _cells, root_cell, _DBU, recur);
+      laydata::TDTHierTree* root_cell = _hiertree->GetMember(ciff.topcell());
+      ciff.topcell()->CIFwrite(ciff, _cells, root_cell, _DBU);
    }
-//   wr = gdsf.setNextRecord(gds_ENDLIB);gdsf.flush(wr);
 }
 
 void laydata::tdtlibrary::PSwrite(PSFile& psf, const tdtcell* top, const layprop::DrawProperties& drawprop)

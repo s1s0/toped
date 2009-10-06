@@ -280,7 +280,7 @@ void laydata::tdtdefaultcell::GDSwrite(GDSin::GdsFile&, const cellList&, const T
    assert(false);
 }
 
-void laydata::tdtdefaultcell::CIFwrite(CIFin::CifExportFile&, const cellList&, const TDTHierTree*, real, bool) const
+void laydata::tdtdefaultcell::CIFwrite(DbExportFile&, const cellList&, const TDTHierTree*, real) const
 {
    assert(false);
 }
@@ -689,16 +689,16 @@ void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
 }
 
 
-void laydata::tdtcell::CIFwrite(CIFin::CifExportFile& ciff, const cellList& allcells,
-                                const TDTHierTree* root, real DBU, bool recur) const
+void laydata::tdtcell::CIFwrite(DbExportFile& ciff, const cellList& allcells,
+                                const TDTHierTree* root, real DBU) const
 {
    // We going to write the cells in hierarchical order. Children - first!
-   if (recur)
+   if (ciff.recur())
    {
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
-         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child, DBU, recur);
+         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child, DBU);
          Child = Child->GetBrother(TARGETDB_LIB);
       }
    }

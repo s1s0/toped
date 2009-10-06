@@ -80,10 +80,6 @@ namespace GDSin {
    class GdsFile;
 }
 
-namespace CIFin {
-   class CifExportFile;
-}
-
 namespace tenderer {
    class TopRend;
 }
@@ -112,7 +108,7 @@ namespace laydata {
       shp_cross      = 0x40, // self crossing sequence
       shp_null       = 0x80, // 0 area - points are not forming a polygon
    } shape_status;
-   
+
    class TEDfile;
    class tdtdata;
    class tdttmpdata;
@@ -226,8 +222,33 @@ namespace laydata {
          word                _cols;
          word                _rows;
    };
-
 }
+
+class DbExportFile {
+   public:
+                              DbExportFile(std::string fn, laydata::tdtcell* topcell, bool recur) :
+                                 _fileName(fn), _topcell(topcell), _recur(recur) {};
+      virtual                ~DbExportFile() {};
+      virtual void            definitionStart(std::string, real) = 0;
+      virtual void            definitionFinish() = 0;
+      virtual void            libraryStart(std::string, TpdTime&) = 0;
+      virtual void            libraryFinish() = 0;
+      virtual bool            layerSpecification(word) = 0;
+      virtual void            box(const unsigned, const unsigned, const TP&) = 0;
+      virtual void            polygon(const int4b* const, unsigned) = 0;
+      virtual void            wire(const int4b* const, unsigned, unsigned) = 0;
+      virtual void            text(const std::string&, const TP&) = 0;
+      virtual void            ref(const std::string& name, const CTM&) = 0;
+      virtual bool            checkCellWritten(std::string) const = 0;
+      virtual void            registerCellWritten(std::string) = 0;
+      const laydata::tdtcell* topcell() const   {return _topcell; }
+      bool                    recur() const     {return _recur;   }
+   protected:
+      std::string             _fileName;  //! Output file name - including the path
+      laydata::tdtcell*       _topcell;
+      bool                    _recur;
+
+};
 
 class TeselPoly;
 class PSFile;
