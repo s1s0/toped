@@ -36,7 +36,7 @@ namespace laydata {
                      tdtlibrary(std::string, real, real, int);
       virtual       ~tdtlibrary();
       virtual void   read(TEDfile* const);
-      void           GDSwrite(GDSin::GdsFile&, tdtcell*, bool);
+      void           GDSwrite(DbExportFile&);
       void           CIFwrite(DbExportFile&);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
       tdtdefaultcell* checkcell(std::string name, bool undeflib = false);

@@ -35,8 +35,6 @@
 #include "tedesign.h"
 #include "tenderer.h"
 #include "ps_out.h"
-#include "../tpd_ifaces/cif_io.h"
-#include "../tpd_ifaces/gds_io.h"
 #include "outbox.h"
 
 extern layprop::FontLibrary* fontLib;
@@ -275,12 +273,12 @@ void laydata::tdtdefaultcell::write(TEDfile* const, const cellList&, const TDTHi
    assert(false);
 }
 
-void laydata::tdtdefaultcell::GDSwrite(GDSin::GdsFile&, const cellList&, const TDTHierTree*, real, bool) const
+void laydata::tdtdefaultcell::GDSwrite(DbExportFile&, const cellList&, const TDTHierTree*) const
 {
    assert(false);
 }
 
-void laydata::tdtdefaultcell::CIFwrite(DbExportFile&, const cellList&, const TDTHierTree*, real) const
+void laydata::tdtdefaultcell::CIFwrite(DbExportFile&, const cellList&, const TDTHierTree*) const
 {
    assert(false);
 }
@@ -653,44 +651,36 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, c
    tedfile->registercellwritten(name());
 }
 
-void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
-                                 const TDTHierTree* root, real UU, bool recur) const
+void laydata::tdtcell::GDSwrite(DbExportFile& gdsf, const cellList& allcells,
+                                 const TDTHierTree* root) const
 {
    // We are going to write the cells in hierarchical order. Children - first!
-   if (recur)
+   if (gdsf.recur())
    {
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
-         allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child, UU, recur);
+         allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child);
          Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
    if (gdsf.checkCellWritten(name())) return;
    //
-   std::string message = "...converting " + name();
-   tell_log(console::MT_INFO, message);
-   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BGNSTR);
-   gdsf.setTimes(wr);gdsf.flush(wr);
-   wr = gdsf.setNextRecord(gds_STRNAME, name().size());
-   wr->add_ascii(name().c_str()); gdsf.flush(wr);
+   gdsf.definitionStart(name());
+
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      word dummy_lay, dummy_type;
-      if ((REF_LAY != wl->first) && !gdsf.getMappedLayType(dummy_lay, dummy_type, wl->first) )
-         continue;
-      wl->second->GDSwrite(gdsf, wl->first, UU);
+      if ((REF_LAY != wl->first) && !gdsf.layerSpecification(wl->first)) continue;
+      wl->second->GDSwrite(gdsf);
    }
-   wr = gdsf.setNextRecord(gds_ENDSTR);gdsf.flush(wr);
-   gdsf.registerCellWritten(name());
+   gdsf.definitionFinish();
 }
 
-
 void laydata::tdtcell::CIFwrite(DbExportFile& ciff, const cellList& allcells,
-                                const TDTHierTree* root, real DBU) const
+                                const TDTHierTree* root) const
 {
    // We going to write the cells in hierarchical order. Children - first!
    if (ciff.recur())
@@ -698,14 +688,14 @@ void laydata::tdtcell::CIFwrite(DbExportFile& ciff, const cellList& allcells,
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
-         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child, DBU);
+         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child);
          Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
    if (ciff.checkCellWritten(name())) return;
    //
-   ciff.definitionStart(name(),DBU);
+   ciff.definitionStart(name());
    // @TODO! See Bug#15242
    // Currently all coordinates are exported in DBU units and in the DS line of CIF
    // we put the ratio between DBU and the CIF precision (constant). This makes the

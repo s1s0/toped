@@ -309,16 +309,17 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                         CifExportFile(std::string, laydata::tdtcell*, USMap*, bool, bool);
          virtual       ~CifExportFile();
-         virtual void   definitionStart(std::string, real);
+         virtual void   definitionStart(std::string);
          virtual void   definitionFinish();
-         virtual void   libraryStart(std::string, TpdTime&);
+         virtual void   libraryStart(std::string, TpdTime&, real, real);
          virtual void   libraryFinish();
-         virtual bool   layerSpecification(word);
-         virtual void   box(const unsigned, const unsigned, const TP&);
+         virtual bool   layerSpecification(unsigned);
+         virtual void   box(const int4b* const);
          virtual void   polygon(const int4b* const, unsigned);
          virtual void   wire(const int4b* const, unsigned, unsigned);
-         virtual void   text(const std::string&, const TP&);
-         virtual void   ref(const std::string& name, const CTM&);
+         virtual void   text(const std::string&, const CTM&);
+         virtual void   ref(const std::string&, const CTM&);
+         virtual void   aref(const std::string&, const CTM&, const laydata::ArrayProperties&);
          virtual bool   checkCellWritten(std::string) const;
          virtual void   registerCellWritten(std::string);
       private:

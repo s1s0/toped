@@ -29,8 +29,6 @@
 #include <sstream>
 #include "ttt.h"
 #include "outbox.h"
-#include "../tpd_ifaces/cif_io.h"
-#include "../tpd_ifaces/gds_io.h"
 #include "tedesign.h"
 #include "tedat.h"
 #include "viewprop.h"
@@ -160,48 +158,45 @@ void laydata::tdtlibrary::registercellread(std::string cellname, tdtcell* cell) 
    _cells[cellname] = cell;
 }
 
-void laydata::tdtlibrary::GDSwrite(GDSin::GdsFile& gdsf, tdtcell* top, bool recur)
+void laydata::tdtlibrary::GDSwrite(DbExportFile& gdsf)
 {
-   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_LIBNAME, _name.size());
-   wr->add_ascii(_name.c_str()); gdsf.flush(wr);
-
-   wr = gdsf.setNextRecord(gds_UNITS);
-   wr->add_real8b(_UU); wr->add_real8b(_DBU);
-   gdsf.flush(wr);
+   TpdTime timelu(_lastUpdated);
+   gdsf.libraryStart(name(), timelu, DBU(), UU());
    //
-   if (NULL == top)
+   if (NULL == gdsf.topcell())
    {
-      laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
-      while (root) {
-         _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root, _UU, recur);
-         root = root->GetNextRoot(TARGETDB_LIB);
+      laydata::TDTHierTree* root_cell = _hiertree->GetFirstRoot(TARGETDB_LIB);
+      while (root_cell)
+      {
+         _cells[root_cell->GetItem()->name()]->GDSwrite(gdsf, _cells, root_cell);
+         root_cell = root_cell->GetNextRoot(TARGETDB_LIB);
       }
    }
    else
    {
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
-      top->GDSwrite(gdsf, _cells, root_cell, _UU, recur);
+      laydata::TDTHierTree* root_cell = _hiertree->GetMember(gdsf.topcell());
+      gdsf.topcell()->GDSwrite(gdsf, _cells, root_cell);
    }
-   wr = gdsf.setNextRecord(gds_ENDLIB);gdsf.flush(wr);
+   gdsf.libraryFinish();
 }
 
 void laydata::tdtlibrary::CIFwrite(DbExportFile& ciff)
 {
    TpdTime timelu(_lastUpdated);
-   ciff.libraryStart(name(),timelu);
+   ciff.libraryStart(name(), timelu, DBU(), UU());
    if (NULL == ciff.topcell())
    {
       laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
       while (root)
       {
-         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root, _DBU);
+         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root);
          root = root->GetNextRoot(TARGETDB_LIB);
       }
    }
    else
    {
       laydata::TDTHierTree* root_cell = _hiertree->GetMember(ciff.topcell());
-      ciff.topcell()->CIFwrite(ciff, _cells, root_cell, _DBU);
+      ciff.topcell()->CIFwrite(ciff, _cells, root_cell);
    }
 }
 
