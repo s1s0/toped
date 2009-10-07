@@ -75,7 +75,7 @@ namespace laydata {
    //! Write the tdtdata object in TDT file.
       virtual   void       write(TEDfile* const tedfile) const = 0;
    //! Write the tdtdata object in GDS file.
-      virtual   void       GDSwrite(GDSin::GdsFile&, word, real) const = 0;
+      virtual   void       GDSwrite(DbExportFile&) const = 0;
    //! Write the tdtdata object in CIF file.
       virtual   void       CIFwrite(DbExportFile&) const = 0;
    //! Write the tdtdata object in PS file.
@@ -130,7 +130,7 @@ namespace laydata {
 
          void              info(std::ostringstream&, real) const;
          void              write(TEDfile* const tedfile) const;
-         void              GDSwrite(GDSin::GdsFile&, word, real) const;
+         void              GDSwrite(DbExportFile&) const;
          void              CIFwrite(DbExportFile&) const;
          void              PSwrite(PSFile&, const layprop::DrawProperties&) const;
          word              numpoints() const {return 4;};
@@ -179,7 +179,7 @@ namespace laydata {
 
          void              info(std::ostringstream&, real) const;
          void              write(TEDfile* const tedfile) const;
-         void              GDSwrite(GDSin::GdsFile&, word, real) const;
+         void              GDSwrite(DbExportFile&) const;
          void              CIFwrite(DbExportFile&) const;
          void              PSwrite(PSFile&, const layprop::DrawProperties&) const;
          word              numpoints() const {return _psize;}
@@ -219,7 +219,7 @@ namespace laydata {
 
          void              info(std::ostringstream&, real) const;
          void              write(TEDfile* const tedfile) const;
-         void              GDSwrite(GDSin::GdsFile&, word, real) const;
+         void              GDSwrite(DbExportFile&) const;
          void              CIFwrite(DbExportFile&) const;
          void              PSwrite(PSFile&, const layprop::DrawProperties&) const;
          word              numpoints() const {return _psize;}
@@ -266,7 +266,7 @@ namespace laydata {
 
       void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GdsFile&, word, real) const;
+      void                 GDSwrite(DbExportFile&) const;
       void                 CIFwrite(DbExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       virtual void         ungroup(tdtdesign*, tdtcell*, atticList*);
@@ -311,7 +311,7 @@ namespace laydata {
 
       void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GdsFile&, word, real) const;
+      void                 GDSwrite(DbExportFile&) const;
       void                 CIFwrite(DbExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       void                 ungroup(tdtdesign*, tdtcell*, atticList*);
@@ -344,7 +344,7 @@ namespace laydata {
 
       void                 info(std::ostringstream&, real) const;
       void                 write(TEDfile* const tedfile) const;
-      void                 GDSwrite(GDSin::GdsFile&, word, real) const;
+      void                 GDSwrite(DbExportFile&) const;
       void                 CIFwrite(DbExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       word                 numpoints() const {return 1;};

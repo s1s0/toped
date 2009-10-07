@@ -29,6 +29,7 @@
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
 #include "../tpd_ifaces/cif_io.h"
+#include "../tpd_ifaces/gds_io.h"
 #include "viewprop.h"
 
 

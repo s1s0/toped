@@ -523,15 +523,15 @@ void laydata::quadTree::write(TEDfile* const tedfile) const {
 
 /*! Write the contents of the quadTree in a GDS file.\n
 Nothing special here - effectively the same as write method*/
-void laydata::quadTree::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
+void laydata::quadTree::GDSwrite(DbExportFile& gdsf) const
 {
    tdtdata* wdt = _first;
    while(wdt)
    {
-      wdt->GDSwrite(gdsf,lay, UU); wdt = wdt->next();
+      wdt->GDSwrite(gdsf); wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->GDSwrite(gdsf,lay, UU);
+      if (_quads[i]) _quads[i]->GDSwrite(gdsf);
 }
 
 /*! Write the contents of the quadTree in a CIF file.\n

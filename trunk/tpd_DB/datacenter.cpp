@@ -474,22 +474,14 @@ bool DataCenter::TDTwrite(const char* filename)
 
 void DataCenter::GDSexport(const LayerMapGds& layerMap, std::string& filename, bool x2048)
 {
-   std::string nfn;
-   //Get actual time
-   GDSin::GdsFile gdsex(filename, &layerMap, time(NULL));
-   _TEDLIB()->GDSwrite(gdsex, NULL, true);
-   if (x2048) gdsex.updateLastRecord();
-   gdsex.closeFile();
+   GDSin::GdsExportFile gdsex(filename, NULL, layerMap, true);
+   _TEDLIB()->GDSwrite(gdsex);
 }
 
 void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapGds& layerMap, bool recur, std::string& filename, bool x2048)
 {
-   std::string nfn;
-   //Get actual time
-   GDSin::GdsFile gdsex(filename, &layerMap, time(NULL));
-   _TEDLIB()->GDSwrite(gdsex, cell, recur);
-   if (x2048) gdsex.updateLastRecord();
-   gdsex.closeFile();
+   GDSin::GdsExportFile gdsex(filename, cell, layerMap, recur);
+   _TEDLIB()->GDSwrite(gdsex);
 }
 
 bool DataCenter::GDSparse(std::string filename)
@@ -601,7 +593,6 @@ CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
 
 void DataCenter::CIFexport(USMap* laymap, bool verbose, std::string& filename)
 {
-   std::string nfn;
    CIFin::CifExportFile cifex(filename, NULL, laymap, true, verbose);
    _TEDLIB()->CIFwrite(cifex);
 }

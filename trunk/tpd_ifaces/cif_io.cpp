@@ -475,10 +475,10 @@ void CIFin::CifExportFile::registerCellWritten(std::string cellname)
    _cellmap[cellname] = ++_lastcellnum;
 }
 
-void CIFin::CifExportFile::definitionStart(std::string name, real DBU)
+void CIFin::CifExportFile::definitionStart(std::string name)
 {
    std::string message = "...converting " + name;
-   unsigned dbuu = (unsigned) (1/DBU);
+   unsigned dbuu = (unsigned) (1/_DBU);
    // clean the error from the conversion (round to step 10)
    dbuu = (int4b) (rint((dbuu + (5)) / 10) * 10);
    unsigned cifu = 100000000;
@@ -502,7 +502,7 @@ void CIFin::CifExportFile::definitionFinish()
       _file << "DF;" << std::endl;
 }
 
-void CIFin::CifExportFile::libraryStart(std::string libname, TpdTime& libtime)
+void CIFin::CifExportFile::libraryStart(std::string libname, TpdTime& libtime, real DBU, real UU)
 {
    _file << "(       TDT source : " << libname << ");" << std::endl;
    _file << "(    Last Modified : " << libtime() << ");" << std::endl;
@@ -515,6 +515,8 @@ void CIFin::CifExportFile::libraryStart(std::string libname, TpdTime& libtime)
    {
       _file << "(         Top Cell : " << _topcell->name() << ");" << std::endl;
    }
+   _DBU = DBU;
+   _UU = UU;
 }
 
 void CIFin::CifExportFile::libraryFinish()
@@ -523,9 +525,9 @@ void CIFin::CifExportFile::libraryFinish()
    assert(false);
 }
 
-bool CIFin::CifExportFile::layerSpecification(word layno)
+bool CIFin::CifExportFile::layerSpecification(unsigned layno)
 {
-   if (0 == layno) return true;
+   if (REF_LAY == layno) return true;
    if (_laymap->end() == _laymap->find(layno))
    {
       //std::stringstream message;
@@ -540,8 +542,12 @@ bool CIFin::CifExportFile::layerSpecification(word layno)
    return true;
 }
 
-void CIFin::CifExportFile::box(const unsigned length, const unsigned width, const TP& center)
+void CIFin::CifExportFile::box(const int4b* const pdata)
 {
+   unsigned int length = abs(pdata[4] - pdata[0]);
+   unsigned int width  = abs(pdata[5] - pdata[1]);
+   TP center((pdata[4] + pdata[0]) / 2, (pdata[5] + pdata[1]) / 2);
+
    if (_verbose)
       _file << "      Box length = "<< length << " width = "<< width <<
             " and center = " << center.x() << "," << center.y() << ";" << std::endl;
@@ -572,14 +578,14 @@ void CIFin::CifExportFile::wire(const int4b* const pdata, unsigned psize, unsign
    _file << ";"<< std::endl;
 }
 
-void CIFin::CifExportFile::text(const std::string& label, const TP& center)
+void CIFin::CifExportFile::text(const std::string& label, const CTM& trans)
 {
    int loc;
    std::string labelr(label);
    while ((loc = labelr.find(' ')) >= 0 )
       labelr.replace(loc, 1, "_"); //@FIXME - this should be an option or ...?
 
-   _file << "      94 "<< labelr << " "<< center.x() << " " << center.y() << ";" << std::endl;
+   _file << "      94 "<< labelr << " "<< trans.tx() << " " << trans.ty() << ";" << std::endl;
 
 
 }
@@ -624,6 +630,21 @@ void CIFin::CifExportFile::ref(const std::string& cellname, const CTM& tmatrix)
       _file << " T" << trans.x() << " " << trans.y();
    }
    _file << ";"<< std::endl;
+}
+
+void CIFin::CifExportFile::aref(const std::string& name,
+                                const CTM& translation, const laydata::ArrayProperties& arrprops)
+{
+   for (int i = 0; i < arrprops.cols(); i++)
+   {// start/stop rows
+      for(int j = 0; j < arrprops.rows(); j++)
+      { // start/stop columns
+         // ... get the translation matrix ...
+         CTM refCTM(TP(arrprops.stepX() * i , arrprops.stepY() * j ), 1, 0, false);
+         refCTM *= translation;
+         ref(name, refCTM);
+      }
+   }
 }
 
 CIFin::CifExportFile::~CifExportFile()

@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <wx/ffile.h>
 #include "ttt.h"
+#include "../tpd_DB/tedstd.h"
 
 //GDS data types
 #define gdsDT_NODATA       0
@@ -117,17 +118,13 @@
 
 class LayerMapGds;
 
-namespace laydata {
-   class tdtcell;
-   class tdtlibdir;
-}
-
 namespace GDSin {
    class GdsStructure;
    class GdsLibrary;
 
    typedef SGHierTree<GdsStructure>        GDSHierTree;
    typedef std::list<GDSin::GdsStructure*> GDSStructureList;
+   typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
 
    /*** GdsRecord ***************************************************************
    >>> Constructor --------------------------------------------------------------
@@ -219,19 +216,12 @@ namespace GDSin {
    class   GdsFile   {
       public:
                               GdsFile(std::string);
-                              GdsFile(std::string, const LayerMapGds*, time_t);
          bool                 reopenFile();
          bool                 getNextRecord();
          void                 putRecord(const GdsRecord*);
-         GdsRecord*           setNextRecord(byte, word reclen = 0);
          double               libUnits();
          double               userUnits();
-         void                 setTimes(GdsRecord*);
-         bool                 checkCellWritten(std::string);
-         void                 registerCellWritten(std::string);
-         void                 flush(GdsRecord*);
          void                 updateLastRecord();
-         bool                 getMappedLayType(word&, word&, word);
          void                 setPosition(wxFileOffset);
          void                 closeFile();
          GdsStructure*        getStructure(const std::string);
@@ -246,8 +236,6 @@ namespace GDSin {
          wxFileOffset         filePos() const                  { return _filePos;                     }
                               ~GdsFile();
       protected:
-                              typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
-
          void                 getTimes(GdsRecord* wr);
          wxFFile              _gdsFh;
          std::string          _fileName;
@@ -257,11 +245,9 @@ namespace GDSin {
          GdsLibrary*          _library;
          wxFileOffset         _filePos;
          GDSHierTree*         _hierTree; // Tree of instance hierarchy
-         nameList             _childnames;
          int                  _gdsiiWarnings;
          GDStime              _tModif;
          GDStime              _tAccess;
-         const LayerMapGds*   _laymap;
          wxFileOffset         _prgrs_pos;
          GdsRecord*           _cRecord;
    };
@@ -423,5 +409,37 @@ namespace GDSin {
    // Function definition
    TP get_TP(const GdsRecord* cr, word curnum = 0, byte len=4);
 
+   class GdsExportFile : public DbExportFile {
+      public:
+                        GdsExportFile(std::string, laydata::tdtcell*, const LayerMapGds&, bool);
+         virtual       ~GdsExportFile();
+         virtual void   definitionStart(std::string);
+         virtual void   definitionFinish();
+         virtual void   libraryStart(std::string, TpdTime&, real, real);
+         virtual void   libraryFinish();
+         virtual bool   layerSpecification(unsigned);
+         virtual void   box(const int4b* const);
+         virtual void   polygon(const int4b* const, unsigned);
+         virtual void   wire(const int4b* const, unsigned, unsigned);
+         virtual void   text(const std::string&, const CTM&);
+         virtual void   ref(const std::string&, const CTM&);
+         virtual void   aref(const std::string&, const CTM&, const laydata::ArrayProperties&);
+         virtual bool   checkCellWritten(std::string) const;
+         virtual void   registerCellWritten(std::string);
+      private:
+         GdsRecord*           setNextRecord(byte, word reclen = 0);
+         void                 flush(GdsRecord*);
+         void                 setTimes(GdsRecord*);
+         bool                 getMappedLayType(word&, word&, word);
+         const LayerMapGds&   _laymap;
+         wxFFile              _gdsFh;
+         GDStime              _tModif;
+         GDStime              _tAccess;
+         int2b                _streamVersion;
+         std::string          _ccname;
+         nameList             _childnames;
+         word                 _cGdsLayer;
+         word                 _cGdsType;
+   };
 }
 #endif // !defined(GDSIO_H_INCLUDED)

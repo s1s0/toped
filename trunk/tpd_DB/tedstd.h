@@ -76,10 +76,6 @@ namespace layprop {
    class DrawProperties;
 }
 
-namespace GDSin {
-   class GdsFile;
-}
-
 namespace tenderer {
    class TopRend;
 }
@@ -149,7 +145,7 @@ namespace laydata {
       byte                 _status;
       pointlist&           _plist;
    };
-   
+
 //==============================================================================
    class   TEDfile {
    public:
@@ -227,27 +223,31 @@ namespace laydata {
 class DbExportFile {
    public:
                               DbExportFile(std::string fn, laydata::tdtcell* topcell, bool recur) :
-                                 _fileName(fn), _topcell(topcell), _recur(recur) {};
+                                 _fileName(fn), _topcell(topcell), _recur(recur), _DBU(1.0), _UU(1.0) {};
       virtual                ~DbExportFile() {};
-      virtual void            definitionStart(std::string, real) = 0;
+      virtual void            definitionStart(std::string) = 0;
       virtual void            definitionFinish() = 0;
-      virtual void            libraryStart(std::string, TpdTime&) = 0;
+      virtual void            libraryStart(std::string, TpdTime&, real, real) = 0;
       virtual void            libraryFinish() = 0;
-      virtual bool            layerSpecification(word) = 0;
-      virtual void            box(const unsigned, const unsigned, const TP&) = 0;
+      virtual bool            layerSpecification(unsigned) = 0;
+      virtual void            box(const int4b* const) = 0;
       virtual void            polygon(const int4b* const, unsigned) = 0;
       virtual void            wire(const int4b* const, unsigned, unsigned) = 0;
-      virtual void            text(const std::string&, const TP&) = 0;
-      virtual void            ref(const std::string& name, const CTM&) = 0;
+      virtual void            text(const std::string&, const CTM&) = 0;
+      virtual void            ref(const std::string&, const CTM&) = 0;
+      virtual void            aref(const std::string&, const CTM&, const laydata::ArrayProperties&) = 0;
       virtual bool            checkCellWritten(std::string) const = 0;
       virtual void            registerCellWritten(std::string) = 0;
       const laydata::tdtcell* topcell() const   {return _topcell; }
       bool                    recur() const     {return _recur;   }
+      real                    DBU() const       {return _DBU;     }
+      real                    UU() const        {return _UU;      }
    protected:
       std::string             _fileName;  //! Output file name - including the path
       laydata::tdtcell*       _topcell;
       bool                    _recur;
-
+      real                    _DBU;
+      real                    _UU;
 };
 
 class TeselPoly;
