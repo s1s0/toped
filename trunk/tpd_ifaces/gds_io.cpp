@@ -332,7 +332,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
    // to check the file size and to issue a warning if it is not multiple on 2048.
 //   div_t divi = div(file_length,2048);
 //   if (divi.rem != 0) AddLog('W',"File size is not multiple of 2048");
-   toped_status(console::TSTS_PRGRSBARON, _fileLength);
+   TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
 
    do
    {// start reading
@@ -358,7 +358,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
                //build the hierarchy tree
                _library->linkReferences(this);
                closeFile();// close the input stream
-               toped_status(console::TSTS_PRGRSBAROFF);
+               TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
                tell_log(console::MT_INFO, "Done");
                return; // go out
             }
@@ -463,7 +463,7 @@ bool GDSin::GdsFile::getNextRecord()
    if (2048 < (_filePos - _prgrs_pos))
    {
       _prgrs_pos = _filePos;
-      toped_status(console::TSTS_PROGRESS, _prgrs_pos);
+      TpdPost::toped_status(console::TSTS_PROGRESS, _prgrs_pos);
    }
    if (_cRecord->valid()) return true;
    else return false;// error during read in
@@ -1592,7 +1592,7 @@ void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool ove
    }
    if (_src_lib->reopenFile())
    {
-      toped_status(console::TSTS_PRGRSBARON, _conversionLength);
+      TpdPost::toped_status(console::TSTS_PRGRSBARON, _conversionLength);
       try
       {
          for (GDSStructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
@@ -1603,7 +1603,7 @@ void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool ove
          tell_log(console::MT_INFO, "Done");
       }
       catch (EXPTNreadGDS) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
-      toped_status(console::TSTS_PRGRSBAROFF);
+      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       _src_lib->closeFile();
       (*_tdt_db)()->recreate_hierarchy(_tdt_db);
    }

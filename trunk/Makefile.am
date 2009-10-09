@@ -1,11 +1,2 @@
-SUBDIRS = tll           \
-          utils/cadence \
-          ui            \
-          icons         \
-          fonts         \
-          tpd_common    \
-          tpd_parser    \
-          tpd_ifaces    \
-          tpd_DB        \
-          tpd_bidfunc   \
-          src
+SUBDIRS = tpd_common tpd_DB tpd_ifaces tpd_bidfunc tpd_parser src utils/cadence \
+	ui tll fonts icons

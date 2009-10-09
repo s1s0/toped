@@ -36,7 +36,7 @@
 #include "layoutcanvas.h"
 #include "tui.h"
 #include "resourcecenter.h"
-#include "../tpd_DB/browsers.h"
+#include "browsers.h"
 
 
 namespace tui {

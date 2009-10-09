@@ -190,10 +190,37 @@ namespace console {
 void tell_log(console::LOG_TYPE, const char* = NULL);
 void tell_log(console::LOG_TYPE, const std::string&);
 void tell_log(console::LOG_TYPE, const wxString&);
-void toped_status(console::TOPEDSTATUS_TYPE);
-void toped_status(console::TOPEDSTATUS_TYPE, long int);
-void toped_status(console::TOPEDSTATUS_TYPE, std::string);
-void toped_status(console::TOPEDSTATUS_TYPE, wxString);
+
+class TpdPost {
+   public:
+                  TpdPost(wxWindow*);
+      static void toped_status(console::TOPEDSTATUS_TYPE);
+      static void toped_status(console::TOPEDSTATUS_TYPE, long int);
+      static void toped_status(console::TOPEDSTATUS_TYPE, std::string);
+      static void toped_status(console::TOPEDSTATUS_TYPE, wxString);
+      static void addTDTtab(bool, bool newthread);
+      static void addGDStab();
+      static void addCIFtab();
+      static void addDRCtab();
+      static void clearGDStab();
+      static void clearCIFtab();
+      static void clearDRCtab();
+      static void layer_status(int, const word, const bool);
+      static void layer_add(const std::string, const word);
+      static void layer_default(const word, const word);
+      static void layer_select(const unsigned);
+      static void celltree_open(const std::string);
+      static void celltree_highlight(const std::string);
+      static void treeAddMember(const char*, const char*, int action = 0);
+      static void treeRemoveMember(const char*, const char*, int orphan);
+      static void parseCommand(const wxString);
+   private:
+      static wxWindow* _statusBar;
+      static wxWindow* _topBrowsers;
+      static wxWindow* _layBrowser;
+      static wxWindow* _cllBrowser;
+      static wxWindow* _cmdLine;
+};
 
 //===========================================================================
 class  TpdTime

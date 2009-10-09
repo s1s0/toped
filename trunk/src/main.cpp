@@ -58,7 +58,6 @@ extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 extern console::TELLFuncList*    CmdList;
 extern Calbr::CalbrFile*         DRCData;
-extern console::TopedStatus*     StatusBar;
 
 //-----------------------------------------------------------------------------
 
@@ -290,8 +289,9 @@ class TopedApp : public wxApp
       wxString       tpdLogDir;
       wxString       tpdFontDir;
       wxString       tpdUIDir;
-		wxString			globalDir;
+      wxString       globalDir;
       wxString       localDir;
+      TpdPost*       _tPost;
 //      bool           _ignoreOnRecovery;
 };
 
@@ -552,6 +552,7 @@ bool TopedApp::OnInit() {
 
    SetTopWindow(Toped);
    Toped->Show(TRUE);
+   _tPost = DEBUG_NEW TpdPost(Toped);
 
    if (!GetLogFileName()) return FALSE;
    bool recovery_mode = false;
@@ -622,6 +623,7 @@ int TopedApp::OnExit() {
    delete DATC;
 
    FinishSessionLog();
+   delete _tPost;
    return wxApp::OnExit();
 }
 

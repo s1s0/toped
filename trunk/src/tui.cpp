@@ -35,7 +35,7 @@
 #include <wx/filename.h>
 #include "tui.h"
 #include "../tpd_DB/datacenter.h"
-#include "../tpd_DB/browsers.h"
+#include "browsers.h"
 
 extern DataCenter*                DATC;
 
@@ -1816,7 +1816,7 @@ SIMap* tui::nameCboxRecords::getTheMap()
       if (ERR_LAY == layno)
       {
          layno = DATC->addlayer(layname);
-         browsers::layer_add(layname, layno);
+         TpdPost::layer_add(layname, layno);
       }
       (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
    }

@@ -45,9 +45,9 @@
 #include "../ui/librarydb.xpm"
 #include "../ui/targetdb.xpm"
 #include "../ui/cellundef.xpm"
-#include "../tpd_ifaces/gds_io.h"
-#include "../tpd_ifaces/cif_io.h"
-#include "../tpd_bidfunc/tpdf_common.h"
+#include "gds_io.h"
+#include "cif_io.h"
+#include "tpdf_common.h"
 
 extern DataCenter*               DATC;
 extern Calbr::CalbrFile*         DRCData;
@@ -55,9 +55,6 @@ extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
 extern const wxEventType         wxEVT_EDITLAYER;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
-
-
-browsers::browserTAB*     Browsers = NULL;
 
 //==============================================================================
 //
@@ -162,7 +159,7 @@ void browsers::CellBrowser::onWxOpenCell(wxCommandEvent& event)
 {
    wxString cmd;
    cmd << wxT("opencell(\"") << GetItemText(_rbCellID) <<wxT("\");");
-   parseCommand(cmd);
+   TpdPost::parseCommand(cmd);
 }
 
 void browsers::CellBrowser::onItemRightClick(wxTreeEvent& event)
@@ -194,7 +191,7 @@ void  browsers::CellBrowser::onLMouseDblClk(wxMouseEvent& event)
    {
       wxString cmd;
       cmd << wxT("opencell(\"") << GetItemText(id) <<wxT("\");");
-      parseCommand(cmd);
+      TpdPost::parseCommand(cmd);
    }
    else
       event.Skip();
@@ -536,25 +533,25 @@ void browsers::CellBrowser::onCommand( wxCommandEvent& event )
 {
    switch ( event.GetInt() )
    {
-      case BT_CELL_OPEN :{
+      case tui::BT_CELL_OPEN :{
          wxTreeItemId topItem;
          VERIFY(findItem(event.GetString(), topItem, _dbroot));
          tdtCellSpot(topItem, topItem);
          break;
       }
-      case BT_CELL_HIGHLIGHT: {
+      case tui::BT_CELL_HIGHLIGHT: {
          wxTreeItemId actItem;
          VERIFY(findItem(event.GetString(), actItem, _dbroot));
          tdtCellSpot(_topStructure, actItem);
          break;
       }
-      case BT_CELL_ADD :
+      case tui::BT_CELL_ADD :
          onTellAddCell(event.GetString(),
                        *(static_cast<wxString*>(event.GetClientData())),
                          static_cast<int>(event.GetExtraLong()));
          delete (static_cast<wxString*>(event.GetClientData()));
          break;
-      case BT_CELL_REMOVE:
+      case tui::BT_CELL_REMOVE:
          onTellRemoveCell(event.GetString(),
                           *(static_cast<wxString*>(event.GetClientData())),
                             static_cast<int>(event.GetExtraLong()));
@@ -819,7 +816,7 @@ void browsers::GDSCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("report_gdslayers(\"") << GetItemText(_rbCellID) <<wxT("\");");
-   parseCommand(cmd);
+   TpdPost::parseCommand(cmd);
 }
 
 void browsers::GDSCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
@@ -920,7 +917,7 @@ void browsers::CIFCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("report_ciflayers(\"") << GetItemText(_rbCellID) <<wxT("\");");
-   parseCommand(cmd);
+   TpdPost::parseCommand(cmd);
 }
 
 void browsers::CIFCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
@@ -1000,8 +997,8 @@ void browsers::CIFCellBrowser::collectChildren(const CIFin::CIFHierTree* root,
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::TDTbrowser, wxPanel)
    EVT_MENU(tui::TMCELL_REPORTLAY, browsers::TDTbrowser::onReportUsedLayers)
-   EVT_BUTTON(BT_CELLS_HIER, browsers::TDTbrowser::onHierView)
-   EVT_BUTTON(BT_CELLS_FLAT, browsers::TDTbrowser::onFlatView)
+   EVT_BUTTON(tui::BT_CELLS_HIER, browsers::TDTbrowser::onHierView)
+   EVT_BUTTON(tui::BT_CELLS_FLAT, browsers::TDTbrowser::onFlatView)
 END_EVENT_TABLE()
 
 browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
@@ -1011,8 +1008,8 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    _hierarchy_view = true;
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    wxBoxSizer *sizer1   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   _hierButton = DEBUG_NEW wxButton( this, BT_CELLS_HIER, wxT("Hier") );
-   _flatButton = DEBUG_NEW wxButton( this, BT_CELLS_FLAT, wxT("Flat") );
+   _hierButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_HIER, wxT("Hier") );
+   _flatButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_FLAT, wxT("Flat") );
    //Set bold font for _hierButton
    wxFont font = _hierButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
@@ -1020,7 +1017,7 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
 
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
-   _cellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_TPD_CELLTREE, pos, size, style | wxTR_HIDE_ROOT | wxTR_NO_BUTTONS | wxTR_LINES_AT_ROOT);
+   _cellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_PNL_CELLS, pos, size, style | wxTR_HIDE_ROOT | wxTR_NO_BUTTONS | wxTR_LINES_AT_ROOT);
    thesizer->Add(_cellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
 
@@ -1089,7 +1086,7 @@ void browsers::TDTbrowser::onReportUsedLayers(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
    cmd << wxT("report_layers(\"") << selectedCellName() << wxT("\" , true);");
-   parseCommand(cmd);
+   TpdPost::parseCommand(cmd);
 }
 
 wxString browsers::TDTbrowser::selectedCellName() const
@@ -1123,8 +1120,8 @@ browsers::TDTbrowser::~TDTbrowser()
 //
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::XdbBrowser, wxPanel)
-   EVT_BUTTON(BT_CELLS_HIER2, browsers::XdbBrowser::onHierView)
-   EVT_BUTTON(BT_CELLS_FLAT2, browsers::XdbBrowser::onFlatView)
+   EVT_BUTTON(tui::BT_CELLS_HIER2, browsers::XdbBrowser::onHierView)
+   EVT_BUTTON(tui::BT_CELLS_FLAT2, browsers::XdbBrowser::onFlatView)
 END_EVENT_TABLE()
 //==============================================================================
 browsers::XdbBrowser::XdbBrowser(   wxWindow *parent,
@@ -1149,13 +1146,13 @@ browsers::XdbBrowser::XdbBrowser(   wxWindow *parent,
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
 
    wxBoxSizer *sizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   _hierButton = DEBUG_NEW wxButton( this, BT_CELLS_HIER2, wxT("Hier") );
+   _hierButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_HIER2, wxT("Hier") );
    //Set bold font for _hierButton
    wxFont font = _hierButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
    _hierButton->SetFont(font);
 
-   _flatButton = DEBUG_NEW wxButton( this, BT_CELLS_FLAT2, wxT("Flat") );
+   _flatButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_FLAT2, wxT("Flat") );
 
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
@@ -1217,9 +1214,7 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
 
    _gdsStruct = NULL;
    _cifStruct = NULL;
-	 _drcStruct = NULL;
-   _tellParser = NULL;
-   Browsers = this;
+   _drcStruct = NULL;
 }
 
 browsers::browserTAB::~browserTAB() 
@@ -1250,13 +1245,13 @@ void browsers::browserTAB::onCommand(wxCommandEvent& event)
    int command = event.GetInt();
    switch (command) 
    {
-      case BT_ADDTDT_LIB: onTellAddTdtLib(1 == event.GetExtraLong());break;
-      case BT_ADDGDS_TAB:onTellAddGdsTab();break;
-      case BT_CLEARGDS_TAB:onTellClearGdsTab(); break;
-      case BT_ADDCIF_TAB:onTellAddCifTab();break;
-      case BT_CLEARCIF_TAB:onTellClearCifTab(); break;
-		case BT_ADDDRC_TAB:onTellAddDRCTab();break;
-      case BT_CLEARDRC_TAB:onTellClearDRCTab(); break;
+      case tui::BT_ADDTDT_LIB: onTellAddTdtLib(1 == event.GetExtraLong());break;
+      case tui::BT_ADDGDS_TAB:onTellAddGdsTab();break;
+      case tui::BT_CLEARGDS_TAB:onTellClearGdsTab(); break;
+      case tui::BT_ADDCIF_TAB:onTellAddCifTab();break;
+      case tui::BT_CLEARCIF_TAB:onTellClearCifTab(); break;
+		case tui::BT_ADDDRC_TAB:onTellAddDRCTab();break;
+      case tui::BT_CLEARDRC_TAB:onTellClearDRCTab(); break;
       default: event.Skip();
    }
 }
@@ -1331,158 +1326,6 @@ void browsers::browserTAB::onTellClearDRCTab()
       DeletePage(_drcPageIndex);
       _drcStruct = NULL;
    }
-}
-
-//==============================================================================
-void browsers::layer_status(BROWSER_EVT_TYPE btype, const word layno, const bool status) 
-{
-   assert(Browsers);
-   int* bt1 = DEBUG_NEW int(btype);
-   wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
-   eventLAYER_STATUS.SetExtraLong(status);
-   eventLAYER_STATUS.SetInt(*bt1);
-   word *laynotemp = DEBUG_NEW word(layno);
-   eventLAYER_STATUS.SetClientData(static_cast<void*> (laynotemp));
-   wxPostEvent(Browsers->tdtLayers()->getLayerPanel(), eventLAYER_STATUS);
-   delete bt1;
-}
-
-void browsers::layer_add(const std::string name, const word layno) 
-{
-   assert(Browsers);
-   wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
-   LayerInfo *layer = DEBUG_NEW LayerInfo(name, layno);
-   int* bt = DEBUG_NEW int(BT_LAYER_ADD);
-   eventLAYER_ADD.SetClientData(static_cast<void*> (layer));
-   eventLAYER_ADD.SetInt(*bt);
-
-   wxPostEvent(Browsers->tdtLayers()->getLayerPanel(), eventLAYER_ADD);
-   delete bt;
-}
-
-void browsers::layer_default(const word newlay, const word oldlay) 
-{
-   assert(Browsers);
-   wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
-   int*bt = DEBUG_NEW int(BT_LAYER_DEFAULT);
-   eventLAYER_DEF.SetExtraLong(newlay);
-   word *laynotemp = DEBUG_NEW word(oldlay);
-   eventLAYER_DEF.SetClientData(static_cast<void*> (laynotemp));
-   eventLAYER_DEF.SetInt(*bt);
-   
-   wxPostEvent(Browsers->tdtLayers()->getLayerPanel(), eventLAYER_DEF);
-   delete bt;
-}
-
-void browsers::addTDTtab(bool targetDB, bool newthread)
-{
-   assert(Browsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(BT_ADDTDT_LIB);
-   eventADDTAB.SetExtraLong(targetDB ? 1 : 0);
-//   eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
-//   eventADDTAB.SetExtraLong(traverse_all ? 1 : 0);
-   // Note about threads here!
-   // Traversing the entire hierarchy tree can not be done in a
-   // separate thread. The main reason - when executing a script
-   // that contains for example:
-   //    new("a"); addcell("b");
-   // it's quite possible that cell hierarchy will be traversed
-   // after the execution of the second function. The latter will
-   // send treeAddMember itself - in result the browser window
-   // will get cell b twice. Bottom line: don't use PostEvent here!
-   if (newthread)
-      wxPostEvent( Browsers, eventADDTAB );
-   else
-      Browsers->GetEventHandler()->ProcessEvent( eventADDTAB );
-   // the alternative is to call the function directly
-//   Browsers->OnTELLaddTDTlib(tdtLib, traverse_all);
-}
-
-void browsers::addDRCtab()
-{
-   assert(Browsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(BT_ADDDRC_TAB);
-   wxPostEvent(Browsers, eventADDTAB);
-}
-
-void browsers::clearGDStab() 
-{
-   assert(Browsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(BT_CLEARGDS_TAB);
-   wxPostEvent(Browsers, eventADDTAB);
-}
-
-void browsers::clearCIFtab()
-{
-   assert(Browsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(BT_CLEARCIF_TAB);
-   wxPostEvent(Browsers, eventADDTAB);
-}
-
-void browsers::clearDRCtab()
-{
-   assert(Browsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(BT_CLEARDRC_TAB);
-   wxPostEvent(Browsers, eventADDTAB);
-}
-void browsers::celltree_open(const std::string cname) 
-{
-   assert(Browsers);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(BT_CELL_OPEN);
-   eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
-   wxPostEvent(Browsers->tdtCellBrowser(), eventCELLTREE);
-}
-
-void browsers::celltree_highlight(const std::string cname) 
-{
-   assert(Browsers);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(BT_CELL_HIGHLIGHT);
-   eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
-   wxPostEvent(Browsers->tdtCellBrowser(), eventCELLTREE);
-}
-
-void browsers::treeAddMember(const char* cell, const char* parent, int action) 
-{
-   assert(Browsers);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(BT_CELL_ADD);
-   eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
-   eventCELLTREE.SetExtraLong(action);
-   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
-   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
-   wxPostEvent(Browsers->tdtCellBrowser(), eventCELLTREE);
-}
-
-void browsers::treeRemoveMember(const char* cell, const char* parent, int action) 
-{
-   assert(Browsers);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(BT_CELL_REMOVE);
-   eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
-   eventCELLTREE.SetExtraLong(action);
-   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
-   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
-   wxPostEvent(Browsers->tdtCellBrowser(), eventCELLTREE);
-}
-
-void browsers::parseCommand(const wxString cmd)
-{
-   // Note! The use of wxPostEvent here is not enforced by a thread safety
-   // reasons. This function as well as its callers and the event destination -
-   // all of them are running in the main thread and parser can be called directly.
-   // This simply avoids unnesessary links between the modules using the "magic"
-   // of the wx event system
-   assert(Browsers && Browsers->tellParser());
-   wxCommandEvent eventPARSE(wxEVT_CONSOLE_PARSE);
-   eventPARSE.SetString(cmd);
-   wxPostEvent(Browsers->tellParser(), eventPARSE);
 }
 
 //====================================================================
@@ -1686,7 +1529,7 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
       cmd << wxT("hidelayer(") <<_layer->layno() << wxT(", ");
       if (_hidden) cmd << wxT("true") << wxT(");");
       else cmd << wxT("false") << wxT(");");
-      parseCommand(cmd);
+      TpdPost::parseCommand(cmd);
    }
    else if (event.ControlDown())
    {// Lock Layer
@@ -1695,27 +1538,18 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
       cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
       if (DATC->layerLocked(_layer->layno())) cmd << wxT("false") << wxT(");");
       else cmd << wxT("true") << wxT(");");
-      parseCommand(cmd);
+      TpdPost::parseCommand(cmd);
    }
    else
    {//Select layer
       wxString cmd;
       cmd << wxT("usinglayer(") << _layer->layno()<< wxT(");");
-      parseCommand(cmd);
+      TpdPost::parseCommand(cmd);
 
       if (!_selected)
       {
          select();
-
-         //Next block uses for unselect previous button
-         int bt = BT_LAYER_SELECT;
-         wxCommandEvent eventLAYER_SELECT(wxEVT_CMD_BROWSER);
-
-         eventLAYER_SELECT.SetExtraLong(_layer->layno());
-
-         eventLAYER_SELECT.SetInt(bt);
-         assert(Browsers && Browsers->tdtLayers());
-         wxPostEvent(Browsers->tdtLayers()->getLayerPanel(), eventLAYER_SELECT);
+         TpdPost::layer_select(_layer->layno());
       }
    }
 }
@@ -1726,7 +1560,7 @@ void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
    cmd << wxT("filllayer(") <<_layer->layno() << wxT(", ");
    if (_filled) cmd << wxT("false") << wxT(");");
       else cmd << wxT("true") << wxT(");");
-   parseCommand(cmd);
+   TpdPost::parseCommand(cmd);
 }
 
 void	 browsers::LayerButton::onRightClick(wxMouseEvent& evt)
@@ -1813,7 +1647,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
    switch (command) 
    {
 
-      case BT_LAYER_DEFAULT:
+      case tui::BT_LAYER_DEFAULT:
          {
             word *oldlay = static_cast<word*>(event.GetClientData());
             word layno = event.GetExtraLong();
@@ -1823,7 +1657,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
             delete (oldlay);
             break;
          }
-      case    BT_LAYER_HIDE:
+      case    tui::BT_LAYER_HIDE:
          {
             word *layno = static_cast<word*>(event.GetClientData());
             bool status = (1 == event.GetExtraLong());
@@ -1832,7 +1666,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
             break;
          }
          //_layerlist->hideLayer((word)event.GetExtraLong(),event.IsChecked());break;
-      case    BT_LAYER_LOCK:
+      case    tui::BT_LAYER_LOCK:
          {
             //_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());
             word *layno = static_cast<word*>(event.GetClientData());
@@ -1841,7 +1675,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
             delete (layno);
             break;
          }
-      case    BT_LAYER_FILL:
+      case    tui::BT_LAYER_FILL:
          {
             word *layno = static_cast<word*>(event.GetClientData());
             bool status = (1 == event.GetExtraLong());
@@ -1850,7 +1684,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
             break;
          }
 
-      case     BT_LAYER_SELECT:
+      case     tui::BT_LAYER_SELECT:
          {
             word layno = event.GetExtraLong();
             if (NULL != _selectedButton) _selectedButton->unselect();
@@ -1858,11 +1692,13 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
             break;
          }
 
-      case     BT_LAYER_ADD:
+      case     tui::BT_LAYER_ADD:
          {
-            LayerInfo* layer = static_cast<LayerInfo*>(event.GetClientData());
+            word *layno = static_cast<word*>(event.GetClientData());
+            std::string name = std::string(event.GetString().mb_str(wxConvFile ));
+            LayerInfo *layer = DEBUG_NEW LayerInfo(name, *layno);
             addButton(layer);
-            delete (static_cast<LayerInfo*>(layer));
+            delete (layno);
             break;
          }
       default: assert(false);
@@ -1942,10 +1778,10 @@ wxString browsers::LayerPanel::getAllSelected()
 
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::LayerBrowser, wxPanel)
-   EVT_BUTTON(BT_LAYER_SHOW_ALL, browsers::LayerBrowser::onShowAll)
-   EVT_BUTTON(BT_LAYER_HIDE_ALL, browsers::LayerBrowser::onHideAll)
-   EVT_BUTTON(BT_LAYER_LOCK_ALL, browsers::LayerBrowser::onLockAll)
-   EVT_BUTTON(BT_LAYER_UNLOCK_ALL, browsers::LayerBrowser::onUnlockAll)
+   EVT_BUTTON(tui::BT_LAYER_SHOW_ALL, browsers::LayerBrowser::onShowAll)
+   EVT_BUTTON(tui::BT_LAYER_HIDE_ALL, browsers::LayerBrowser::onHideAll)
+   EVT_BUTTON(tui::BT_LAYER_LOCK_ALL, browsers::LayerBrowser::onLockAll)
+   EVT_BUTTON(tui::BT_LAYER_UNLOCK_ALL, browsers::LayerBrowser::onUnlockAll)
    EVT_SIZE(browsers::LayerBrowser::OnSize)
 END_EVENT_TABLE()
 //====================================================================
@@ -1959,16 +1795,16 @@ browsers::LayerBrowser::LayerBrowser(wxWindow* parent, wxWindowID id)
    _thesizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
 
    wxBoxSizer *sizer1 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-   sizer1->Add(DEBUG_NEW wxButton(this, BT_LAYER_SHOW_ALL, wxT("Show All")), 1, wxTOP, 3);
-   sizer1->Add(DEBUG_NEW wxButton(this, BT_LAYER_HIDE_ALL, wxT("Hide All")), 1, wxTOP, 3);
+   sizer1->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_SHOW_ALL, wxT("Show All")), 1, wxTOP, 3);
+   sizer1->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_HIDE_ALL, wxT("Hide All")), 1, wxTOP, 3);
    _thesizer->Add(sizer1, 0, wxTOP);
 
    wxBoxSizer *sizer2 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-   sizer2->Add(DEBUG_NEW wxButton(this, BT_LAYER_LOCK_ALL, wxT("Lock All")), 1, wxTOP, 3);
-   sizer2->Add(DEBUG_NEW wxButton(this, BT_LAYER_UNLOCK_ALL, wxT("Unlock All")), 1, wxTOP, 3);
+   sizer2->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_LOCK_ALL, wxT("Lock All")), 1, wxTOP, 3);
+   sizer2->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_UNLOCK_ALL, wxT("Unlock All")), 1, wxTOP, 3);
    _thesizer->Add(sizer2, 0, wxTOP);
 
-   _layerPanel = DEBUG_NEW LayerPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
+   _layerPanel = DEBUG_NEW LayerPanel(this, tui::ID_PNL_LAYERS, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
    _thesizer->Add(_layerPanel, 3, wxEXPAND|wxALL);
    SetSizerAndFit(_thesizer);
    _thesizer->SetSizeHints( this );
@@ -1986,7 +1822,7 @@ void browsers::LayerBrowser::onShowAll(wxCommandEvent& WXUNUSED(event))
    if (layers != wxEmptyString)
    {
       cmd << wxT("hidelayer(") << getAllSelected() << wxT(", false);");
-      parseCommand(cmd);
+      TpdPost::parseCommand(cmd);
    }
 }
 
@@ -1997,7 +1833,7 @@ void browsers::LayerBrowser::onHideAll(wxCommandEvent& WXUNUSED(event))
    if (layers != wxEmptyString)
    {
       cmd << wxT("hidelayer(") << getAllSelected() << wxT(", true);");
-      parseCommand(cmd);
+      TpdPost::parseCommand(cmd);
    }
 }
 
@@ -2008,7 +1844,7 @@ void browsers::LayerBrowser::onLockAll(wxCommandEvent& WXUNUSED(event))
    if (layers != wxEmptyString)
    {
       cmd << wxT("locklayer(") << getAllSelected() << wxT(", true);");
-      parseCommand(cmd);
+      TpdPost::parseCommand(cmd);
    }
 
 }
@@ -2021,7 +1857,7 @@ void browsers::LayerBrowser::onUnlockAll(wxCommandEvent& WXUNUSED(event))
    if (layers != wxEmptyString)
    {
       cmd << wxT("locklayer(") << getAllSelected() << wxT(", false);");
-      parseCommand(cmd);
+      TpdPost::parseCommand(cmd);
    }
 
 }
@@ -2068,7 +1904,7 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 				wxString s = GetItemText(parent);
 				wxString cmd;
 				cmd << wxT("drcshowerror(\"") <<  wxString(error.c_str(), wxConvUTF8) << wxT("\", ") << numstr << wxT("  );");
-				parseCommand(cmd);
+				TpdPost::parseCommand(cmd);
 				unsigned drcLayer = DATC->getLayerNo("drcResults");
 				assert(ERR_LAY != drcLayer);
 //				DBbox* box;
@@ -2130,8 +1966,8 @@ void	browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::DRCBrowser, wxPanel)
-   EVT_BUTTON(BT_DRC_SHOW_ALL, browsers::DRCBrowser::onShowAll)
-   EVT_BUTTON(BT_DRC_HIDE_ALL, browsers::DRCBrowser::onHideAll)
+   EVT_BUTTON(tui::BT_DRC_SHOW_ALL, browsers::DRCBrowser::onShowAll)
+   EVT_BUTTON(tui::BT_DRC_HIDE_ALL, browsers::DRCBrowser::onHideAll)
 END_EVENT_TABLE()
 //====================================================================
 //====================================================================
@@ -2140,8 +1976,8 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 {
 	wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    wxBoxSizer *sizer1   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   _showAllButton = DEBUG_NEW wxButton( this, BT_DRC_SHOW_ALL, wxT("Show All") );
-   _hideAllButton = DEBUG_NEW wxButton( this, BT_DRC_HIDE_ALL, wxT("Hide All") );
+   _showAllButton = DEBUG_NEW wxButton( this, tui::BT_DRC_SHOW_ALL, wxT("Show All") );
+   _hideAllButton = DEBUG_NEW wxButton( this, tui::BT_DRC_HIDE_ALL, wxT("Hide All") );
    //Set bold font for _hierButton
 
    sizer1->Add(_showAllButton, 1, wxEXPAND|wxBOTTOM, 3);

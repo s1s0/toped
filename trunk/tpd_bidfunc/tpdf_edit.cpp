@@ -485,7 +485,7 @@ void tellstdfunc::stdDELETESEL::undo()
       for (laydata::cellList::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
       {
          DATC->TEDLIB()->addThisUndefCell(CUDU->second);
-         ATDB->btreeAddMember(CUDU->second->name().c_str(), prnt_name.c_str(), 0);
+         TpdPost::treeAddMember(CUDU->second->name().c_str(), prnt_name.c_str(), 0);
       }
       udurcells->clear();
       delete(udurcells);

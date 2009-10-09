@@ -38,9 +38,9 @@
 #include <wx/aui/aui.h>
 #include <string>
 #include "tedesign.h"
-#include "../tpd_ifaces/calbr_reader.h"
-#include "../tpd_ifaces/gds_io.h"
-#include "../tpd_ifaces/cif_io.h"
+#include "calbr_reader.h"
+#include "gds_io.h"
+#include "cif_io.h"
 
 // Forward declarations
 
@@ -57,45 +57,7 @@ namespace browsers
 {
    const int buttonHeight = 30;
 
-   typedef enum
-   {
-      BT_LAYER_DEFAULT,
-      BT_LAYER_HIDE,
-      BT_LAYER_LOCK,
-      BT_LAYER_FILL,
-      BT_LAYER_ADD,
-      BT_LAYER_ACTION,
-      BT_LAYER_DO,
-      BT_LAYER_SELECTWILD,
-      BT_LAYER_ACTIONWILD,
-      BT_CELL_OPEN,
-      BT_CELL_HIGHLIGHT,
-      BT_CELL_REF,
-      BT_CELL_AREF,
-      BT_CELL_ADD,
-      BT_CELL_REMOVE,
-      BT_ADDTDT_LIB,
-      BT_NEWTDTDB,
-      BT_ADDGDS_TAB,
-      BT_CLEARGDS_TAB,
-      BT_ADDCIF_TAB,
-      BT_CLEARCIF_TAB,
-      BT_ADDDRC_TAB,
-      BT_CLEARDRC_TAB,
-      BT_CELLS_HIER,
-      BT_CELLS_FLAT,
-      BT_CELLS_HIER2,
-      BT_CELLS_FLAT2,
-      BT_DRC_SHOW_ALL,
-      BT_DRC_HIDE_ALL,
-      BT_LAYER_SELECT,
-      BT_LAYER_SHOW_ALL,
-      BT_LAYER_HIDE_ALL,
-      BT_LAYER_LOCK_ALL,
-      BT_LAYER_UNLOCK_ALL
-   } BROWSER_EVT_TYPE;
-
-   enum 
+   enum
    {
       CELLTREEOPENCELL  = 1000,
       GDSTREEREPORTLAY        ,
@@ -384,11 +346,7 @@ namespace browsers
          virtual            ~browserTAB();
          wxString             tdtSelectedGdsName() const;
          wxString             tdtSelectedCifName() const;
-         LayerBrowser*        tdtLayers() const             { return _layers;       }
-         CellBrowser*         tdtCellBrowser() const        { return _tdtStruct->cellBrowser(); }
          wxString             tdtSelectedCellName() const   { return _tdtStruct->selectedCellName();}
-         wxWindow*            tellParser() const            { return _tellParser;   }
-         void                 setTellParser(wxWindow* tp)   { _tellParser = tp;      }
       private:
          void                 onCommand(wxCommandEvent&);
          void                 onTellAddTdtLib(bool);
@@ -405,23 +363,9 @@ namespace browsers
          int                 _gdsPageIndex;
          int                 _cifPageIndex;
          LayerBrowser*       _layers;
-         wxWindow*           _tellParser;
+//         wxWindow*           _tellParser;
          DECLARE_EVENT_TABLE();
    };
- 
-   void layer_status(BROWSER_EVT_TYPE, const word, const bool);
-   void layer_add(const std::string, const word);
-   void layer_default(const word, const word);
-   void addTDTtab(bool, bool newthread);
-   void addDRCtab();
-   void clearGDStab();
-   void clearCIFtab();
-   void clearDRCtab();
-   void celltree_open(const std::string);
-   void celltree_highlight(const std::string);
-   void treeAddMember(const char*, const char*, int action = 0);
-   void treeRemoveMember(const char*, const char*, int orphan);
-   void parseCommand(const wxString);
-}
+ }
 
 #endif //BROWSERS_H_INCLUDED
