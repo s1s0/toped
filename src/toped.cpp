@@ -760,8 +760,6 @@ void tui::TopedFrame::initView()
    _cmdline->SetSize(wxSize(wxSize(1000, 30)));
 // _cmdline->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
 
-   _browsers->setTellParser( _cmdline ) ;
-
    _winManager.AddPane(_browsers,   wxAuiPaneInfo().
                                     Left().
                                     BestSize(wxSize(180,1000)).

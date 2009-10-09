@@ -30,7 +30,6 @@
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_parser/ted_prompt.h"
 #include "../tpd_common/tuidefs.h"
-#include "../tpd_DB/browsers.h"
 #include "../tpd_DB/tedat.h"
 
 
@@ -267,7 +266,7 @@ void tellstdfunc::RefreshGL()
    {
       const WordList freshlays = DATC->upLayers();
       for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-         browsers::layer_add(DATC->getLayerName(*CUL), *CUL);
+         TpdPost::layer_add(DATC->getLayerName(*CUL), *CUL);
       DATC->clearUnpublishedLayers();
    }
    Console->set_canvas_invalid(true);
@@ -299,7 +298,7 @@ void tellstdfunc::updateLayerDefinitions(laydata::tdtlibdir* LIBDIR, nameList& t
    {
       if (0 == *CUL) continue;
       if (DATC->addlayer(*CUL))
-         browsers::layer_add(DATC->getLayerName(*CUL), *CUL);
+         TpdPost::layer_add(DATC->getLayerName(*CUL), *CUL);
    }
 }
 

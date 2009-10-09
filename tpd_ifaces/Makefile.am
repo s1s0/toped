@@ -8,5 +8,5 @@ libtpd_ifaces_la_SOURCES = calbr_reader.cpp cif_io.cpp cif_lex.ll cif_yacc.yy \
 	drc_tenderer.cpp gds_io.cpp
 LEX_OUTPUT_ROOT = lex.cif
 libtpd_ifaces_la_LIBADD = ../tpd_common/libtpd_common.la
-INCLUDES = -I$(top_srcdir)/tpd_common
+INCLUDES = -I$(top_srcdir)/tpd_DB -I$(top_srcdir)/tpd_common
 METASOURCES = AUTO

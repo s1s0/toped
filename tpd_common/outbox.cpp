@@ -33,6 +33,7 @@
 #include <wx/regex.h>
 #include <wx/filename.h>
 #include "outbox.h"
+#include "tuidefs.h"
 #include "../ui/red_lamp.xpm"
 #include "../ui/green_lamp.xpm"
 #include "../ui/blue_lamp.xpm"
@@ -80,8 +81,14 @@ DEFINE_EVENT_TYPE(wxEVT_TOOLBARADDITEM)
 DEFINE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM)
 DEFINE_EVENT_TYPE(wxEVT_EDITLAYER)
 
-console::TELLFuncList*           CmdList = NULL;
-console::TopedStatus*            StatusBar = NULL;
+console::TELLFuncList*  CmdList = NULL;
+
+wxWindow*               TpdPost::_statusBar     = NULL;
+wxWindow*               TpdPost::_topBrowsers   = NULL;
+wxWindow*               TpdPost::_layBrowser    = NULL;
+wxWindow*               TpdPost::_cllBrowser    = NULL;
+wxWindow*               TpdPost::_cmdLine       = NULL;
+
 //==============================================================================
 // The ted_log event table
 BEGIN_EVENT_TABLE( console::ted_log, wxTextCtrl )
@@ -176,7 +183,7 @@ BEGIN_EVENT_TABLE(console::TopedStatus, wxStatusBar)
    EVT_TECUSTOM_COMMAND(wxEVT_TPDSTATUS  , wxID_ANY, console::TopedStatus::OnTopedStatus)
 END_EVENT_TABLE()
 
-console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, wxID_ANY)
+console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, tui::ID_TPD_STATUS)
 {
    const unsigned Field_Max = 3;
    static const int widths[Field_Max] = { -1, -1, 32 };
@@ -184,7 +191,6 @@ console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, wxID_A
     SetFieldsCount(Field_Max);
     SetStatusWidths(Field_Max, widths);
     _lamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
-    StatusBar = this;
     _progress = NULL;
     _progressAdj = 1.0;
 }
@@ -268,40 +274,218 @@ void console::TopedStatus::OnSize(wxSizeEvent& event)
     event.Skip();
 }
 
-void toped_status(console::TOPEDSTATUS_TYPE tstatus)
+//==============================================================================
+
+TpdPost::TpdPost(wxWindow* mainWindow)
 {
-   if (NULL == StatusBar) return;
-   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
-   eventSTATUSUPD.SetInt(tstatus);
-   wxPostEvent(StatusBar, eventSTATUSUPD);
+   _statusBar   = mainWindow->FindWindow(tui::ID_TPD_STATUS);
+   _topBrowsers = mainWindow->FindWindow(tui::ID_WIN_BROWSERS);
+   _layBrowser  = mainWindow->FindWindow(tui::ID_PNL_LAYERS);
+   _cllBrowser  = mainWindow->FindWindow(tui::ID_PNL_CELLS);
+   _cmdLine     = mainWindow->FindWindow(tui::ID_CMD_LINE);
 }
 
-void toped_status(console::TOPEDSTATUS_TYPE tstatus, long int indx)
+void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus)
 {
-   if (NULL == StatusBar) return;
+   if (NULL == _statusBar) return;
+   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   eventSTATUSUPD.SetInt(tstatus);
+   wxPostEvent(_statusBar, eventSTATUSUPD);
+}
+
+void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, long int indx)
+{
+   if (NULL == _statusBar) return;
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetExtraLong(indx);
-   wxPostEvent(StatusBar, eventSTATUSUPD);
+   wxPostEvent(_statusBar, eventSTATUSUPD);
 }
 
-void toped_status(console::TOPEDSTATUS_TYPE tstatus, std::string sts_cmd)
+void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, std::string sts_cmd)
 {
-   if (NULL == StatusBar) return;
+   if (NULL == _statusBar) return;
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetString(wxString(sts_cmd.c_str(), wxConvUTF8));
-   wxPostEvent(StatusBar, eventSTATUSUPD);
+   wxPostEvent(_statusBar, eventSTATUSUPD);
 }
 
-void toped_status(console::TOPEDSTATUS_TYPE tstatus, wxString sts_cmd)
+void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, wxString sts_cmd)
 {
-   if (NULL == StatusBar) return;
+   if (NULL == _statusBar) return;
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetString(sts_cmd);
-   wxPostEvent(StatusBar, eventSTATUSUPD);
+   wxPostEvent(_statusBar, eventSTATUSUPD);
 }
+
+void TpdPost::addTDTtab(bool targetDB, bool newthread)
+{
+   assert(_topBrowsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(tui::BT_ADDTDT_LIB);
+   eventADDTAB.SetExtraLong(targetDB ? 1 : 0);
+//   eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
+//   eventADDTAB.SetExtraLong(traverse_all ? 1 : 0);
+   // Note about threads here!
+   // Traversing the entire hierarchy tree can not be done in a
+   // separate thread. The main reason - when executing a script
+   // that contains for example:
+   //    new("a"); addcell("b");
+   // it's quite possible that cell hierarchy will be traversed
+   // after the execution of the second function. The latter will
+   // send treeAddMember itself - in result the browser window
+   // will get cell b twice. Bottom line: don't use PostEvent here!
+   if (newthread)
+      wxPostEvent( _topBrowsers, eventADDTAB );
+   else
+      _topBrowsers->GetEventHandler()->ProcessEvent( eventADDTAB );
+   // the alternative is to call the function directly
+//   Browsers->OnTELLaddTDTlib(tdtLib, traverse_all);
+}
+
+
+void TpdPost::addGDStab()
+{
+   assert(_topBrowsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(tui::BT_ADDGDS_TAB);
+   wxPostEvent(_topBrowsers, eventADDTAB);
+}
+
+void TpdPost::addCIFtab()
+{
+   assert(_topBrowsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(tui::BT_ADDCIF_TAB);
+   wxPostEvent(_topBrowsers, eventADDTAB);
+}
+
+void TpdPost::addDRCtab()
+{
+   assert(_topBrowsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(tui::BT_ADDDRC_TAB);
+   wxPostEvent(_topBrowsers, eventADDTAB);
+}
+
+void TpdPost::clearGDStab()
+{
+   assert(_topBrowsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(tui::BT_CLEARGDS_TAB);
+   wxPostEvent(_topBrowsers, eventADDTAB);
+}
+
+void TpdPost::clearCIFtab()
+{
+   assert(_topBrowsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(tui::BT_CLEARCIF_TAB);
+   wxPostEvent(_topBrowsers, eventADDTAB);
+}
+
+void TpdPost::clearDRCtab()
+{
+   assert(_topBrowsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(tui::BT_CLEARDRC_TAB);
+   wxPostEvent(_topBrowsers, eventADDTAB);
+}
+
+void TpdPost::layer_status(int btype, const word layno, const bool status)
+{
+   assert(_layBrowser);
+   wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
+   eventLAYER_STATUS.SetExtraLong(status);
+   eventLAYER_STATUS.SetInt(btype);
+   word *laynotemp = DEBUG_NEW word(layno);
+   eventLAYER_STATUS.SetClientData(static_cast<void*> (laynotemp));
+   wxPostEvent(_layBrowser, eventLAYER_STATUS);
+}
+
+void TpdPost::layer_add(const std::string name, const word layno)
+{
+   assert(_layBrowser);
+   wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
+   word *laynotemp = DEBUG_NEW word(layno);
+   eventLAYER_ADD.SetClientData(static_cast<void*> (laynotemp));
+   eventLAYER_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
+   eventLAYER_ADD.SetInt(tui::BT_LAYER_ADD);
+   wxPostEvent(_layBrowser, eventLAYER_ADD);
+}
+
+void TpdPost::layer_default(const word newlay, const word oldlay)
+{
+   assert(_layBrowser);
+   wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
+   eventLAYER_DEF.SetExtraLong(newlay);
+   word *laynotemp = DEBUG_NEW word(oldlay);
+   eventLAYER_DEF.SetClientData(static_cast<void*> (laynotemp));
+   eventLAYER_DEF.SetInt(tui::BT_LAYER_DEFAULT);
+   wxPostEvent(_layBrowser, eventLAYER_DEF);
+}
+
+void TpdPost::layer_select(const unsigned lay)
+{
+   assert(_layBrowser);
+   wxCommandEvent eventLAYER_SELECT(wxEVT_CMD_BROWSER);
+   eventLAYER_SELECT.SetExtraLong(lay);
+   eventLAYER_SELECT.SetInt(tui::BT_LAYER_SELECT);
+   wxPostEvent(_layBrowser, eventLAYER_SELECT);
+}
+
+void TpdPost::celltree_open(const std::string cname)
+{
+   assert(_cllBrowser);
+   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   eventCELLTREE.SetInt(tui::BT_CELL_OPEN);
+   eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
+   wxPostEvent(_cllBrowser, eventCELLTREE);
+}
+
+void TpdPost::celltree_highlight(const std::string cname)
+{
+   assert(_cllBrowser);
+   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   eventCELLTREE.SetInt(tui::BT_CELL_HIGHLIGHT);
+   eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
+   wxPostEvent(_cllBrowser, eventCELLTREE);
+}
+
+void TpdPost::treeAddMember(const char* cell, const char* parent, int action)
+{
+   assert(_cllBrowser);
+   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   eventCELLTREE.SetInt(tui::BT_CELL_ADD);
+   eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
+   eventCELLTREE.SetExtraLong(action);
+   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
+   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
+   wxPostEvent(_cllBrowser, eventCELLTREE);
+}
+
+void TpdPost::treeRemoveMember(const char* cell, const char* parent, int action)
+{
+   assert(_cllBrowser);
+   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   eventCELLTREE.SetInt(tui::BT_CELL_REMOVE);
+   eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
+   eventCELLTREE.SetExtraLong(action);
+   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
+   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
+   wxPostEvent(_cllBrowser, eventCELLTREE);
+}
+
+void TpdPost::parseCommand(const wxString cmd)
+{
+   assert(_cmdLine);
+   wxCommandEvent eventPARSE(wxEVT_CONSOLE_PARSE);
+   eventPARSE.SetString(cmd);
+   wxPostEvent(_cmdLine, eventPARSE);
+}
+
 
 //==============================================================================
 static int wxCALLBACK wxListCompareFunction(long item1, long item2, long sortData)

@@ -62,9 +62,6 @@ namespace laydata {
       const cellList& cells()          const {return _cells;}
       TDTHierTree*   hiertree()        const {return _hiertree;}
       int            libID()           const {return _libID;}
-      // callbacks
-      void          (*btreeAddMember)(const char*, const char*, int action);
-      void          (*btreeRemoveMember)(const char*, const char*, int action);
       friend         class tdtlibdir;
       friend         class TEDfile;
       void           clearHierTree();

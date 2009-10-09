@@ -35,11 +35,9 @@
 #include "viewprop.h"
 #include "ps_out.h"
 #include "tenderer.h"
-#include "browsers.h"
 
 // Global variables
 DataCenter*                      DATC = NULL;
-extern browsers::browserTAB*     Browsers;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 
 //-----------------------------------------------------------------------------
@@ -507,7 +505,7 @@ bool DataCenter::GDSparse(std::string filename)
    }
    catch (EXPTNreadGDS)
    {
-      toped_status(console::TSTS_PRGRSBAROFF);
+      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       status = false;
    }
    if (status)
@@ -754,10 +752,8 @@ void DataCenter::bpAddGdsTab()
    // initialise the thread condition with the locked Mutex
    _bpSync = new wxCondition(GDSLock);
    // post a message to the main thread
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(browsers::BT_ADDGDS_TAB);
-   wxPostEvent(Browsers, eventADDTAB);
-   // Go to sleep and wait untill the main thread finished
+   TpdPost::addGDStab();
+   // Go to sleep and wait until the main thread finished
    // updating the browser panel
    _bpSync->Wait();
    // Wake-up & uplock the mutex
@@ -778,9 +774,7 @@ void DataCenter::bpAddCifTab()
    // initialise the thread condition with the locked Mutex
    _bpSync = new wxCondition(CIFLock);
    // post a message to the main thread
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(browsers::BT_ADDCIF_TAB);
-   wxPostEvent(Browsers, eventADDTAB);
+   TpdPost::addCIFtab();
    // Go to sleep and wait untill the main thread finished
    // updating the browser panel
    _bpSync->Wait();

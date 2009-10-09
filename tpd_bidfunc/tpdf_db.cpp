@@ -30,7 +30,6 @@
 #include <sstream>
 #include "../tpd_DB/datacenter.h"
 #include "../tpd_common/tuidefs.h"
-#include "../tpd_DB/browsers.h"
 #include "../tpd_ifaces/calbr_reader.h"
 #include "../tpd_ifaces/drc_tenderer.h"
 
@@ -84,9 +83,6 @@ int tellstdfunc::TDTread::execute()
       if (DATC->TDTread(filename))
       {
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
-            // Initialize call back functions
-            ATDB->btreeAddMember    = &browsers::treeAddMember;
-            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
             // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
@@ -100,7 +96,7 @@ int tellstdfunc::TDTread::execute()
             updateLayerDefinitions( DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
-         browsers::addTDTtab(true, true);
+         TpdPost::addTDTtab(true, true);
          //
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
@@ -144,9 +140,6 @@ int tellstdfunc::TDTreadIFF::execute()
       {
          DATC->TDTread(filename);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
-            // Initialize call back functions
-            ATDB->btreeAddMember    = &browsers::treeAddMember;
-            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
             // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
@@ -160,7 +153,7 @@ int tellstdfunc::TDTreadIFF::execute()
             updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the cell hierarchy browser
-         browsers::addTDTtab(true, true);
+         TpdPost::addTDTtab(true, true);
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -205,7 +198,7 @@ int tellstdfunc::TDTloadlib::execute()
          updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, libID);
          DATC->TEDLIB()->cleanUndefLib();
          // populating cell hierarchy browser
-         browsers::addTDTtab(false, true);
+         TpdPost::addTDTtab(false, true);
          // Clean-up eventual remainings in the themporary storage of the undefined cells
          DATC->TEDLIB()->deleteHeldCells();
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
@@ -237,7 +230,7 @@ int tellstdfunc::TDTunloadlib::execute()
    
    if (DATC->TDTunloadlib(libname))
    {
-      browsers::addTDTtab(false, true);
+      TpdPost::addTDTtab(false, true);
       LogFile << LogFile.getFN() << "(\""<< libname << "\");"; LogFile.flush();
    }
    else
@@ -450,7 +443,7 @@ int tellstdfunc::GDSimport::execute()
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
-         browsers::addTDTtab(true, true);
+         TpdPost::addTDTtab(true, true);
          LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*lll) << "," << LogFile._2bool(recur)
                << "," << LogFile._2bool(over) << ");"; LogFile.flush();
       }
@@ -522,7 +515,7 @@ int tellstdfunc::GDSimportList::execute()
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
       DATC->unlockDB();
       // populate the hierarchy browser
-      browsers::addTDTtab(true, true);
+      TpdPost::addTDTtab(true, true);
       LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
             << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    }
@@ -738,7 +731,7 @@ tellstdfunc::GDSclose::GDSclose(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::GDSclose::execute() {
-   browsers::clearGDStab();
+   TpdPost::clearGDStab();
    DATC->GDSclose();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
    return EXEC_NEXT;
@@ -1244,7 +1237,7 @@ tellstdfunc::CIFclose::CIFclose(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::CIFclose::execute() {
-   browsers::clearCIFtab();
+   TpdPost::clearCIFtab();
    DATC->CIFclose();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
    return EXEC_NEXT;
@@ -1356,7 +1349,7 @@ int tellstdfunc::DRCCalibreimport::execute()
                if (!DATC->isLayerExist(i))
                {
                   DATC->addlayer("drcResults", i);
-                  browsers::layer_add("drcResults",i);
+                  TpdPost::layer_add("drcResults",i);
                   break;
                }
             }
@@ -1369,7 +1362,7 @@ int tellstdfunc::DRCCalibreimport::execute()
          }
          //DRCData->ShowResults();
          // add DRC tab in the browser
-         browsers::addDRCtab();
+         TpdPost::addDRCtab();
       }
       else
       {
@@ -1401,7 +1394,7 @@ void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
                                    parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
 {
    DATC->newDesign(dbname, timeCreated.stdCTime());
-   browsers::addTDTtab(true, false);
+   TpdPost::addTDTtab(true, false);
    // reset UNDO buffers;
    undstack.clear();
    while (!undopstack.empty())
@@ -1411,7 +1404,5 @@ void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
    LogFile << "newdesign(\""<< dbname << "\" , \"" << timeCreated() <<
          "\");"; LogFile.flush();
    laydata::tdtdesign* ATDB = DATC->lockDB(false);
-   ATDB->btreeAddMember    = &browsers::treeAddMember;
-   ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
    DATC->unlockDB();
 }

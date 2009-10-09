@@ -1,5 +1,6 @@
 # these are the headers for the project
-noinst_HEADERS = layoutcanvas.h toped.h tui.h resourcecenter.h tpdph.h
+noinst_HEADERS = browsers.h layoutcanvas.h resourcecenter.h toped.h tpdph.h \
+	tui.h
 
 #BUILT_SOURCES = tell_yacc.h
 #AM_YFLAGS = -p tell -d -y -v
@@ -13,7 +14,8 @@ noinst_HEADERS = layoutcanvas.h toped.h tui.h resourcecenter.h tpdph.h
 bin_PROGRAMS = toped
 
 # the application source, library search path, and link libraries
-toped_SOURCES = layoutcanvas.cpp  resourcecenter.cpp tui.cpp toped.cpp main.cpp
+toped_SOURCES = browsers.cpp layoutcanvas.cpp main.cpp resourcecenter.cpp \
+	toped.cpp tui.cpp
 
 #########################################################################
 # EXTRAS
