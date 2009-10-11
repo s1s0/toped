@@ -64,7 +64,7 @@ toolbaradditem("main",{"redo","redo();"});
 
 Now near the save button a new button will appear. How does it it work? The toolbaritem function looks for icon files in $TPD_GLOBAL/icons directory. Files with names “redo16x16.png”, “redo24x24.png”, “redo32x32.png”, “redo48x48.png” will be loaded. If there is no file for particular icon size, Toped will use the nearest one.
 
-The second form of the *toolbaradditem* function allows set several icons at once.
+The second form of the *toolbaradditem* function allows to set several icons at once.
 {{{
 toolbaradditem("my",{{"redo","redo();"},
       {“undo”, “undo()”},
