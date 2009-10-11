@@ -225,6 +225,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\browsers.cpp"
+				>
+			</File>
+			<File
 				RelativePath="layoutcanvas.cpp"
 				>
 				<FileConfiguration
@@ -341,6 +345,10 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath=".\browsers.h"
+				>
+			</File>
 			<File
 				RelativePath="layoutcanvas.h"
 				>
