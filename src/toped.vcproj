@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="toped"
 	ProjectGUID="{07EF8990-20F5-4E03-803A-7BC622A4B5E1}"
 	RootNamespace="toped"
@@ -50,7 +50,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="c:\wxWindows\include,c:\wxWindows\contrib\include"
+				AdditionalIncludeDirectories="c:\wxWindows\include;c:\wxWindows\contrib\include;..\tpd_common;..\tpd_DB;..\tpd_ifaces;..\tpd_parser;..\tpd_bidfunc"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WINDOWS__;__WXMSW__;__WIN95__;__WIN32__;WINVER=0x0400;STRICT;_UNICODE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -149,7 +149,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="c:\wxWindows\include,c:\wxWindows\contrib\include"
+				AdditionalIncludeDirectories="c:\wxWindows\include;c:\wxWindows\contrib\include;..\tpd_common;..\tpd_DB;..\tpd_ifaces;..\tpd_parser;..\tpd_bidfunc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WINDOWS__;__WXMSW__;__WXDEBUG__;WXDEBUG=1;__WIN95__;__WIN32__;WINVER=0x0400;STRICT;_UNICODE"
 				MinimalRebuild="true"
 				RuntimeLibrary="3"

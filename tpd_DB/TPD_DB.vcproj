@@ -44,6 +44,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="../tpd_common"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_UNICODE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -119,6 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="../tpd_common"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -175,14 +177,6 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
-			<File
-				RelativePath=".\browsers.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\datacenter.cpp"
-				>
-			</File>
 			<File
 				RelativePath=".\drawprop.cpp"
 				>
@@ -360,14 +354,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
-			<File
-				RelativePath=".\browsers.h"
-				>
-			</File>
-			<File
-				RelativePath=".\datacenter.h"
-				>
-			</File>
 			<File
 				RelativePath=".\drawprop.h"
 				>

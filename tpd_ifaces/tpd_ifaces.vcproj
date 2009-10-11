@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="tpd_ifaces"
 	ProjectGUID="{BA923FBF-9C73-4ACF-900B-FEEF9DC0D4E2}"
 	RootNamespace="tpd_ifaces"
@@ -44,6 +44,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_UNICODE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -119,6 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
