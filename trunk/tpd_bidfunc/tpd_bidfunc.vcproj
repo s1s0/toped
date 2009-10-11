@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="tpd_bidfunc"
 	ProjectGUID="{7B327037-492B-48F9-B3D7-127E213900AE}"
 	RootNamespace="tpd_bidfunc"
@@ -40,6 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB; ../tpd_parser; ../tpd_ifaces"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -108,6 +109,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB; ../tpd_parser; ../tpd_ifaces"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_UNICODE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
