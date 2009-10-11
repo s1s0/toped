@@ -42,7 +42,7 @@
 #include <sstream>
 #include "tellyzer.h"
 #include "ted_prompt.h"
-#include "../tpd_common/outbox.h"
+#include "outbox.h"
 /* Switch on verbose error reporting messages*/
 #define YYERROR_VERBOSE 1
 /*Current command block - defined in tellyzer.cpp*/

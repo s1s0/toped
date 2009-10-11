@@ -32,7 +32,7 @@
 #include <wx/glcanvas.h>
 #include <wx/laywin.h>
 #include <wx/aui/aui.h>
-#include "../tpd_parser/ted_prompt.h"
+#include "ted_prompt.h"
 #include "layoutcanvas.h"
 #include "tui.h"
 #include "resourcecenter.h"

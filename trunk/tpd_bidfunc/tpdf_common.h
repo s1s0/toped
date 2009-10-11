@@ -28,8 +28,8 @@
 #ifndef  TPDF_COMMON_H
 #define  TPDF_COMMON_H
 
-#include "../tpd_DB/tedstd.h"
-#include "../tpd_parser/tellyzer.h"
+#include "tedstd.h"
+#include "tellyzer.h"
 
 
 //-----------------------------------------------------------------------------

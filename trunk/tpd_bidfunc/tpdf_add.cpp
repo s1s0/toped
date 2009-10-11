@@ -29,7 +29,7 @@
 #include <sstream>
 #include "tpdf_add.h"
 #include "tuidefs.h"
-#include "../tpd_DB/datacenter.h"
+#include "datacenter.h"
 
 
 extern DataCenter*               DATC;

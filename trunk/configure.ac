@@ -82,16 +82,16 @@ AC_SEARCH_LIBS(glewInit, [GLEW glew32], , AC_MSG_ERROR([Glew library not found. 
 
 AC_CONFIG_FILES([
    Makefile
+   ui/Makefile
    tpd_common/Makefile
-   tpd_parser/Makefile
-   tpd_bidfunc/Makefile
    tpd_DB/Makefile
    tpd_ifaces/Makefile
+   tpd_parser/Makefile
+   tpd_bidfunc/Makefile
    src/Makefile
-   tll/Makefile
    fonts/Makefile
-   ui/Makefile
    icons/Makefile
+   tll/Makefile
    utils/cadence/Makefile
 ])
 AC_OUTPUT

@@ -35,9 +35,9 @@
 #include <wx/tooltip.h>
 #include <math.h>
 #include "toped.h"
-#include "../tpd_DB/datacenter.h"
-#include "../tpd_DB/viewprop.h"
-#include "../tpd_DB/tenderer.h"
+#include "datacenter.h"
+#include "viewprop.h"
+#include "tenderer.h"
 #include "tui.h"
 #include "../ui/toped32x32.xpm"
 

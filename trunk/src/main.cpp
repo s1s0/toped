@@ -36,20 +36,20 @@
 #endif
 
 #include "toped.h"
-#include "../tpd_DB/viewprop.h"
-#include "../tpd_DB/datacenter.h"
-#include "../tpd_ifaces/calbr_reader.h"
-#include "../tpd_common/glf.h"
+#include "viewprop.h"
+#include "datacenter.h"
+#include "calbr_reader.h"
+#include "glf.h"
 
-#include "../tpd_bidfunc/tellibin.h"
-#include "../tpd_bidfunc/tpdf_db.h"
-#include "../tpd_bidfunc/tpdf_props.h"
-#include "../tpd_bidfunc/tpdf_cells.h"
-#include "../tpd_bidfunc/tpdf_edit.h"
-#include "../tpd_bidfunc/tpdf_add.h"
-#include "../tpd_bidfunc/tpdf_select.h"
-#include "../tpd_bidfunc/tllf_list.h"
-#include "../tpd_bidfunc/tpdf_get.h"
+#include "tellibin.h"
+#include "tpdf_db.h"
+#include "tpdf_props.h"
+#include "tpdf_cells.h"
+#include "tpdf_edit.h"
+#include "tpdf_add.h"
+#include "tpdf_select.h"
+#include "tllf_list.h"
+#include "tpdf_get.h"
 
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
@@ -69,13 +69,13 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    telldata::box_type*     bxtype      = DEBUG_NEW telldata::box_type(pntype);
    telldata::bnd_type*     bndtype     = DEBUG_NEW telldata::bnd_type(pntype);
    telldata::hsh_type*     hshtype     = DEBUG_NEW telldata::hsh_type();
-	telldata::hshstr_type*  hshstrtype  = DEBUG_NEW telldata::hshstr_type();
+   telldata::hshstr_type*  hshstrtype  = DEBUG_NEW telldata::hshstr_type();
 
    mblock->addGlobalType("point"     , pntype);
    mblock->addGlobalType("box"       , bxtype);
    mblock->addGlobalType("bind"      , bndtype);
    mblock->addGlobalType("lmap"      , hshtype);
-	mblock->addGlobalType("strmap"    , hshstrtype);
+   mblock->addGlobalType("strmap"    , hshstrtype);
    //-----------------------------------------------------------------------------------------------------------
    // Internal variables
    //-----------------------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addconstID("_lmapref" , DEBUG_NEW telldata::ttint( laydata::_lmapref), true);
 
    mblock->addconstID("horizontal", DEBUG_NEW telldata::ttint( tui::_tuihorizontal), true);
-   mblock->addconstID("vertical"  , DEBUG_NEW telldata::ttint( tui::_tuivertical),	true);
+   mblock->addconstID("vertical"  , DEBUG_NEW telldata::ttint( tui::_tuivertical),   true);
 
    mblock->addconstID("_iconsize16", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_16x16),true);
    mblock->addconstID("_iconsize24", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_24x24),true);
@@ -144,8 +144,8 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("gdsclose"         ,(DEBUG_NEW                    tellstdfunc::GDSclose(telldata::tn_void, true)));
    mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW        tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_hsh), true)));
    mblock->addFUNC("setgdslaymap"     ,(DEBUG_NEW                tellstdfunc::GDSsetlaymap(telldata::tn_void, true)));
-   mblock->addFUNC("drccalibreimport" ,(DEBUG_NEW          tellstdfunc::DRCCalibreimport(telldata::tn_void, true)));
-   mblock->addFUNC("drcshowerror"	  ,(DEBUG_NEW					tellstdfunc::DRCshowerror(telldata::tn_void, true)));
+   mblock->addFUNC("drccalibreimport" ,(DEBUG_NEW            tellstdfunc::DRCCalibreimport(telldata::tn_void, true)));
+   mblock->addFUNC("drcshowerror"     ,(DEBUG_NEW               tellstdfunc::DRCshowerror(telldata::tn_void, true)));
    mblock->addFUNC("psexport"         ,(DEBUG_NEW                 tellstdfunc::PSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                     tellstdfunc::TDTread(telldata::tn_void, true)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                  tellstdfunc::TDTreadIFF(telldata::tn_void, true)));
@@ -352,7 +352,7 @@ void TopedApp::GetGlobalDirs()
    bool undefined = dirName.Matches(wxT("*$TPD_GLOBAL*"));
    if (!undefined)
    {
-		globalDir = UIDir->GetFullPath();
+      globalDir = UIDir->GetFullPath();
       fontsDIR->AppendDir(wxT("fonts"));
       fontsDIR->Normalize();
       UIDir->AppendDir(wxT("icons"));

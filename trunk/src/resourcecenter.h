@@ -32,8 +32,7 @@
 #include <GL/glew.h>
 #include <wx/wx.h>
 #include <wx/laywin.h>
-
-#include "../tpd_bidfunc/tpdf_common.h"
+#include "tpdf_common.h"
 #include "tui.h"
 
 /*WARNING!!!

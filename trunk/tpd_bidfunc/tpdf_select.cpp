@@ -27,8 +27,7 @@
 
 #include "tpdph.h"
 #include "tpdf_select.h"
-
-#include "../tpd_DB/datacenter.h"
+#include "datacenter.h"
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
