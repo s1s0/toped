@@ -36,11 +36,11 @@
 
 #include "layoutcanvas.h"
 #include "toped.h"
-#include "../tpd_DB/viewprop.h"
-#include "../tpd_DB/datacenter.h"
-#include "../tpd_parser/ted_prompt.h"
-#include "../tpd_DB/tedat.h"
-#include "../tpd_DB/tenderer.h"
+#include "viewprop.h"
+#include "datacenter.h"
+#include "ted_prompt.h"
+#include "tedat.h"
+#include "tenderer.h"
 
 extern DataCenter*               DATC;
 extern console::ted_cmd*         Console;

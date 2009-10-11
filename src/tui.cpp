@@ -34,7 +34,7 @@
 #include <wx/regex.h>
 #include <wx/filename.h>
 #include "tui.h"
-#include "../tpd_DB/datacenter.h"
+#include "datacenter.h"
 #include "browsers.h"
 
 extern DataCenter*                DATC;

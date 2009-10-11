@@ -32,8 +32,8 @@
 
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
-#include "../tpd_common/ttt.h"
-#include "../tpd_DB/viewprop.h"
+#include "ttt.h"
+#include "viewprop.h"
 
 namespace tui {
 

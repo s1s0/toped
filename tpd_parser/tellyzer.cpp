@@ -30,7 +30,7 @@
 #include <algorithm>
 #include "tellyzer.h"
 #include "tldat.h"
-#include "../tpd_common/outbox.h"
+#include "outbox.h"
 
 //-----------------------------------------------------------------------------
 // Definition of tell debug macros

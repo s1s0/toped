@@ -27,10 +27,10 @@
 
 #include "tpdph.h"
 #include "tpdf_common.h"
-#include "../tpd_DB/datacenter.h"
-#include "../tpd_parser/ted_prompt.h"
-#include "../tpd_common/tuidefs.h"
-#include "../tpd_DB/tedat.h"
+#include "tuidefs.h"
+#include "datacenter.h"
+#include "ted_prompt.h"
+#include "tedat.h"
 
 
 wxFrame*                         TopedMainW;

@@ -26,10 +26,10 @@
 //===========================================================================
 
 #include "tpdph.h"
-#include "../tpd_common/tuidefs.h"
 #include <string>
-#include "ted_prompt.h"
 #include <wx/regex.h>
+#include "tuidefs.h"
+#include "ted_prompt.h"
 #include "tell_yacc.h"
 
 //-----------------------------------------------------------------------------

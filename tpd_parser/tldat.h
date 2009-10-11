@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include "../tpd_common/ttt.h"
+#include "ttt.h"
 
 #define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool) && !(op & telldata::tn_listmask))
 #define TLISTOF(op) (op | telldata::tn_listmask)

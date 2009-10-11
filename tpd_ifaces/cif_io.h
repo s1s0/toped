@@ -30,7 +30,8 @@
 #include <string>
 #include <fstream>
 #include "ttt.h"
-#include "../tpd_DB/tedstd.h"
+#include "quadtree.h"
+//#include "tedstd.h"
 
 int ciflex(void);
 int ciferror (char *s);
@@ -328,6 +329,28 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::fstream   _file;            //! Output file handler
          bool           _verbose;         //! CIF output type
          unsigned       _lastcellnum;     //! The number of the last written cell
+   };
+
+   class Cif2Ted {
+      public:
+                              Cif2Ted(CifFile*, laydata::tdtlibdir*, SIMap*, real);
+         void                 top_structure(std::string, bool, bool);
+      protected:
+         void                 child_structure(const CIFHierTree*, bool);
+         void                 convert_prep(const CIFHierTree* item, bool);
+         void                 convert(CifStructure*, laydata::tdtcell*);
+         void                 box ( CifBox*     ,laydata::tdtlayer*, std::string );
+         void                 poly( CifPoly*    ,laydata::tdtlayer*, std::string );
+         void                 wire( CifWire*    ,laydata::tdtlayer*, std::string );
+         void                 ref ( CifRef*     ,laydata::tdtcell*);
+         void                 lbll( CifLabelLoc*,laydata::tdtlayer*, std::string );
+         void                 lbls( CifLabelSig*,laydata::tdtlayer*, std::string );
+         CifFile*             _src_lib;
+         laydata::tdtlibdir*  _tdt_db;
+         SIMap*               _cif_layers;
+         real                 _crosscoeff;
+         real                 _dbucoeff;
+         real                 _techno;
    };
 
 }

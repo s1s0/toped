@@ -30,8 +30,8 @@
 #include <sstream>
 #include <iostream>
 #include "tpdf_props.h"
-#include "../tpd_DB/datacenter.h"
-#include "../tpd_common/tuidefs.h"
+#include "datacenter.h"
+#include "tuidefs.h"
 
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern DataCenter*               DATC;

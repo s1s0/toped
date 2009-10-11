@@ -28,15 +28,15 @@
 #include "tpdph.h"
 #include "tpdf_db.h"
 #include <sstream>
-#include "../tpd_DB/datacenter.h"
-#include "../tpd_common/tuidefs.h"
-#include "../tpd_ifaces/calbr_reader.h"
-#include "../tpd_ifaces/drc_tenderer.h"
+#include "datacenter.h"
+#include "tuidefs.h"
+#include "calbr_reader.h"
+#include "drc_tenderer.h"
 
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
-extern Calbr::CalbrFile*			DRCData;
+extern Calbr::CalbrFile*         DRCData;
 
 //=============================================================================
 tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype, bool eor) :
@@ -1382,9 +1382,9 @@ tellstdfunc::DRCshowerror::DRCshowerror(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::DRCshowerror::execute()
 {
-	long errorNumber = getWordValue();
-	std::string errorName = getStringValue();
-	DRCData->ShowError(errorName, errorNumber);
+   long errorNumber = getWordValue();
+   std::string errorName = getStringValue();
+   DRCData->ShowError(errorName, errorNumber);
    return EXEC_NEXT;
 }
 

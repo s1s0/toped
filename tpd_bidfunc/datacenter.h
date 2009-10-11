@@ -28,36 +28,9 @@
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
-#include "../tpd_ifaces/cif_io.h"
-#include "../tpd_ifaces/gds_io.h"
+#include "cif_io.h"
+#include "gds_io.h"
 #include "viewprop.h"
-
-
-namespace CIFin {
-
-   class Cif2Ted {
-      public:
-                              Cif2Ted(CIFin::CifFile*, laydata::tdtlibdir*, SIMap*, real);
-         void                 top_structure(std::string, bool, bool);
-      protected:
-         void                 child_structure(const CIFin::CIFHierTree*, bool);
-         void                 convert_prep(const CIFin::CIFHierTree* item, bool);
-         void                 convert(CIFin::CifStructure*, laydata::tdtcell*);
-         void                 box ( CIFin::CifBox*     ,laydata::tdtlayer*, std::string );
-         void                 poly( CIFin::CifPoly*    ,laydata::tdtlayer*, std::string );
-         void                 wire( CIFin::CifWire*    ,laydata::tdtlayer*, std::string );
-         void                 ref ( CIFin::CifRef*     ,laydata::tdtcell*);
-         void                 lbll( CIFin::CifLabelLoc*,laydata::tdtlayer*, std::string );
-         void                 lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string );
-         CIFin::CifFile*      _src_lib;
-         laydata::tdtlibdir*  _tdt_db;
-         SIMap*               _cif_layers;
-         real                 _crosscoeff;
-         real                 _dbucoeff;
-         real                 _techno;
-   };
-
-}
 
 class DataCenter {
 public:
