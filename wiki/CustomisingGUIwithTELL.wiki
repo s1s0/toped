@@ -11,7 +11,7 @@ Like other EDA Toped allows different aspects of user interface to be customised
 
 addmenu function
 
-This function provides possibility to mix build-in and user-define menus.
+This function provides possibility to mix build-in and user-defined menus.
 
 Lets consider typical use cases:
 {{{
@@ -28,7 +28,7 @@ It is not necessary to create a tell-function every time when we want to add a n
 addmenu("Draw/MyBox", "CTRL-W", "addbox({0,0}, {10,10});");
 }}}
 
-Having a "Draw" menu existing, “MyBox” item will be added, with "control-w" hot-key.
+Having a "Draw" menu existing, "MyBox" item will be added, with "control-w" hot-key.
 
  
 
@@ -44,7 +44,7 @@ All icons must be in png format.
 
  
 
-Every toolbar in toped has a name. Currently we have “main” toolbar that contains “new cell”, “open cell”, “save design” items, and “edit” toolbar with “undo”, “add box” etc. Function toolbaradditem allows to add new item to an existing toolbar or (in case there is no such name) to a new one.
+Every toolbar in toped has a name. Currently we have “main” toolbar that contains “new cell”, “open cell”, “save design” items, and “edit” toolbar with “undo”, “add box” etc. Function *toolbaradditem* allows to add new item to an existing toolbar or (in case there is no such name) to a new one.
 
 There are two forms of this function
 
@@ -64,7 +64,7 @@ toolbaradditem("main",{"redo","redo();"});
 
 Now near the save button a new button will appear. How does it it work? The toolbaritem function looks for icon files in $TPD_GLOBAL/icons directory. Files with names “redo16x16.png”, “redo24x24.png”, “redo32x32.png”, “redo48x48.png” will be loaded. If there is no file for particular icon size, Toped will use the nearest one.
 
-Another form of toolbaradditem allows set several icons at once.
+The second form of the *toolbaradditem* function allows set several icons at once.
 {{{
 toolbaradditem("my",{{"redo","redo();"},
       {“undo”, “undo()”},
