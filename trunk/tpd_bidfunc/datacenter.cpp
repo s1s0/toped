@@ -230,7 +230,7 @@ bool DataCenter::GDSparse(std::string filename)
 {
    bool status = true;
 
-   GDSin::GdsFile* AGDSDB = NULL;
+   GDSin::GdsInFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       std::string news = "Removing existing GDS data from memory...";
@@ -242,7 +242,7 @@ bool DataCenter::GDSparse(std::string filename)
 #ifdef GDSCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      AGDSDB = DEBUG_NEW GDSin::GdsFile(filename);
+      AGDSDB = DEBUG_NEW GDSin::GdsInFile(filename);
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS parse: ");
 #endif
@@ -265,7 +265,7 @@ bool DataCenter::GDSparse(std::string filename)
 
 void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
 {
-   GDSin::GdsFile* AGDSDB = NULL;
+   GDSin::GdsInFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
 #ifdef GDSCONVERT_PROFILING
@@ -283,7 +283,7 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& lay
 
 void DataCenter::GDSclose()
 {
-   GDSin::GdsFile* AGDSDB = NULL;
+   GDSin::GdsInFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       delete AGDSDB;
@@ -362,7 +362,7 @@ bool DataCenter::cifGetLayers(nameList& cifLayers)
 bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
 {
    bool ret_value = false;
-   GDSin::GdsFile* AGDSDB = NULL;
+   GDSin::GdsInFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(gdsLayers);
@@ -433,7 +433,7 @@ void DataCenter::unlockDB()
    VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
 }
 
-bool DataCenter::lockGds(GDSin::GdsFile*& gds_db)
+bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
 {
    if (wxMUTEX_DEAD_LOCK == GDSLock.Lock())
    {
@@ -448,7 +448,7 @@ bool DataCenter::lockGds(GDSin::GdsFile*& gds_db)
    }
 }
 
-void DataCenter::unlockGds(GDSin::GdsFile*& gds_db, bool throwexception)
+void DataCenter::unlockGds(GDSin::GdsInFile*& gds_db, bool throwexception)
 {
    _GDSDB = gds_db;
    VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
