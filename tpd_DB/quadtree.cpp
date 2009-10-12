@@ -28,7 +28,6 @@
 #include "tpdph.h"
 #include <iostream>
 #include "quadtree.h"
-#include "tedat.h"
 #include "viewprop.h"
 #include "tenderer.h"
 #include "outbox.h"

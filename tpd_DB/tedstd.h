@@ -72,14 +72,6 @@ private:
    int         _angle;
 };
 
-namespace layprop {
-   class DrawProperties;
-}
-
-namespace tenderer {
-   class TopRend;
-}
-
 namespace laydata {
 
    const word _lmnone   = 0x0000;
@@ -105,9 +97,7 @@ namespace laydata {
       shp_null       = 0x80, // 0 area - points are not forming a polygon
    } shape_status;
 
-   class TEDfile;
    class tdtdata;
-   class tdttmpdata;
    class editobject;
    class tdtcell;
    class tdtdefaultcell;

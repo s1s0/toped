@@ -31,6 +31,7 @@
 #include <map>
 #include <vector>
 #include "tedstd.h"
+#include "tenderer.h"
 #include "viewprop.h"
 
 namespace laydata {
