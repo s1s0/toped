@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <wx/ffile.h>
 #include "ttt.h"
-#include "../tpd_DB/tedstd.h"
+#include "tedstd.h"
 
 //GDS data types
 #define gdsDT_NODATA       0

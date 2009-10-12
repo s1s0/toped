@@ -28,7 +28,7 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
 
-#include "tedstd.h"
+#include "tedat.h"
 
 namespace laydata {
 

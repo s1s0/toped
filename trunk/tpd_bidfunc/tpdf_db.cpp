@@ -1403,6 +1403,4 @@ void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
    }
    LogFile << "newdesign(\""<< dbname << "\" , \"" << timeCreated() <<
          "\");"; LogFile.flush();
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
-   DATC->unlockDB();
 }
