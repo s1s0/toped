@@ -121,6 +121,7 @@ class LayerMapGds;
 namespace GDSin {
    class GdsStructure;
    class GdsLibrary;
+   class GdsExportFile;
 
    typedef SGHierTree<GdsStructure>        GDSHierTree;
    typedef std::list<GDSin::GdsStructure*> GDSStructureList;
@@ -218,10 +219,8 @@ namespace GDSin {
                               GdsFile(std::string);
          bool                 reopenFile();
          bool                 getNextRecord();
-         void                 putRecord(const GdsRecord*);
          double               libUnits();
          double               userUnits();
-         void                 updateLastRecord();
          void                 setPosition(wxFileOffset);
          void                 closeFile();
          GdsStructure*        getStructure(const std::string);
@@ -297,7 +296,7 @@ namespace GDSin {
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          void                 collectLayers(GdsLayers&, bool);
          void                 linkReferences(GdsFile* const, GdsLibrary* const);
-         void                 split(GdsFile*, GdsFile*);
+         void                 split(GdsFile*, GdsExportFile*);
          std::string          strctName() const                { return _strctName;    }
          bool                 traversed() const                { return _traversed;    }
          void                 set_traversed(bool tf)           { _traversed = tf;      }
@@ -394,43 +393,34 @@ namespace GDSin {
       wxFileOffset            _conversionLength;
    };
 
-   class GdsSplit {
-   public:
-                              GdsSplit(GDSin::GdsFile*, std::string);
-      void                    run(GDSin::GdsStructure*, bool);
-   protected:
-      void                    preTraverseChildren(const GDSin::GDSHierTree*);
-      void                    split(GDSin::GdsStructure*);
-      GDSin::GdsFile*         _src_lib;
-      GDSin::GdsFile*         _dst_lib;
-      GDSStructureList        _convertList;
-   };
-
    // Function definition
    TP get_TP(const GdsRecord* cr, word curnum = 0, byte len=4);
 
    class GdsExportFile : public DbExportFile {
       public:
-                        GdsExportFile(std::string, laydata::tdtcell*, const LayerMapGds&, bool);
-         virtual       ~GdsExportFile();
-         virtual void   definitionStart(std::string);
-         virtual void   definitionFinish();
-         virtual void   libraryStart(std::string, TpdTime&, real, real);
-         virtual void   libraryFinish();
-         virtual bool   layerSpecification(unsigned);
-         virtual void   box(const int4b* const);
-         virtual void   polygon(const int4b* const, unsigned);
-         virtual void   wire(const int4b* const, unsigned, unsigned);
-         virtual void   text(const std::string&, const CTM&);
-         virtual void   ref(const std::string&, const CTM&);
-         virtual void   aref(const std::string&, const CTM&, const laydata::ArrayProperties&);
-         virtual bool   checkCellWritten(std::string) const;
-         virtual void   registerCellWritten(std::string);
-      private:
+                              GdsExportFile(std::string, laydata::tdtcell*, const LayerMapGds&, bool);
+         virtual             ~GdsExportFile();
+         virtual void         definitionStart(std::string);
+         virtual void         definitionFinish();
+         virtual void         libraryStart(std::string, TpdTime&, real, real);
+         virtual void         libraryFinish();
+         virtual bool         layerSpecification(unsigned);
+         virtual void         box(const int4b* const);
+         virtual void         polygon(const int4b* const, unsigned);
+         virtual void         wire(const int4b* const, unsigned, unsigned);
+         virtual void         text(const std::string&, const CTM&);
+         virtual void         ref(const std::string&, const CTM&);
+         virtual void         aref(const std::string&, const CTM&, const laydata::ArrayProperties&);
+         virtual bool         checkCellWritten(std::string) const;
+         virtual void         registerCellWritten(std::string);
          GdsRecord*           setNextRecord(byte, word reclen = 0);
          void                 flush(GdsRecord*);
+         void                 putRecord(const GdsRecord*);
+         wxFileOffset         filePos() const                  { return _filePos;                     }
+      private:
          void                 setTimes(GdsRecord*);
          bool                 getMappedLayType(word&, word&, word);
+         void                 updateLastRecord();
          const LayerMapGds&   _laymap;
          wxFFile              _gdsFh;
          GDStime              _tModif;
@@ -440,6 +430,22 @@ namespace GDSin {
          nameList             _childnames;
          word                 _cGdsLayer;
          word                 _cGdsType;
+         wxFileOffset         _filePos;
    };
+
+   class GdsSplit {
+   public:
+                              GdsSplit(GDSin::GdsFile*, std::string, const LayerMapGds&);
+                             ~GdsSplit();
+      void                    run(GDSin::GdsStructure*, bool);
+   protected:
+      void                    preTraverseChildren(const GDSin::GDSHierTree*);
+      void                    split(GDSin::GdsStructure*);
+      GdsFile*                _src_lib;
+      GdsExportFile*          _dst_lib;
+      GDSStructureList        _convertList;
+   };
+
+
 }
 #endif // !defined(GDSIO_H_INCLUDED)

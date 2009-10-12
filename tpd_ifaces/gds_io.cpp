@@ -469,25 +469,6 @@ bool GDSin::GdsFile::getNextRecord()
    else return false;// error during read in
 }
 
-void GDSin::GdsFile::putRecord(const GdsRecord* wr)
-{
-   word length = wr->recLen() + 4;
-   byte  record[4];
-   record[0] = ((byte*)&length)[1];
-   record[1] = ((byte*)&length)[0];
-   record[2] = wr->recType();
-   record[3] = wr->dataType();
-
-   size_t bytes_written = _gdsFh.Write(record, 4);
-   _filePos += bytes_written;
-   if (wr->recLen() > 0)
-   {
-      bytes_written = _gdsFh.Write(wr->record(), wr->recLen());
-      _filePos += bytes_written;
-   }
-   delete wr;
-}
-
 double GDSin::GdsFile::libUnits()
 {
    return _library->dbu()/_library->uu();
@@ -498,16 +479,7 @@ double GDSin::GdsFile::userUnits()
    return _library->uu();
 }
 
-void GDSin::GdsFile::updateLastRecord()
-{
-   word num_zeroes = 2048 - (_filePos % 2048);
-   byte record = 0x00;
-   size_t bytes_written = _gdsFh.Write(&record, num_zeroes);
-   assert(bytes_written == num_zeroes);
-   _filePos += bytes_written;
-}
-
-GDSin::GdsFile::~GdsFile() 
+GDSin::GdsFile::~GdsFile()
 {
    delete _library;
    // get rid of the hierarchy tree
@@ -1540,7 +1512,7 @@ int GDSin::GdsStructure::arrGetStep(TP& Step, TP& magnPoint, int2b colrows)
                      pow(float((Step.y() - magnPoint.y())),2)   ) / colrows;
 }
 
-void GDSin::GdsStructure::split(GdsFile* src_file, GdsFile* dst_file)
+void GDSin::GdsStructure::split(GdsFile* src_file, GdsExportFile* dst_file)
 {
    const GdsRecord* cr = src_file->cRecord();
    src_file->setPosition(_filePos - _beginRecLength);
@@ -1663,10 +1635,10 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
    }
 }
 //-----------------------------------------------------------------------------
-GDSin::GdsSplit::GdsSplit(GDSin::GdsFile* src_lib, std::string dst_file_name) : _src_lib(src_lib)
+GDSin::GdsSplit::GdsSplit(GDSin::GdsFile* src_lib, std::string dst_file_name,
+                          const LayerMapGds& lmap) : _src_lib(src_lib)
 {
-//@FIXME!!!   _dst_lib = DEBUG_NEW GDSin::GdsFile(dst_file_name, NULL, time(NULL));
-//   gdsex.closeFile();
+   _dst_lib = DEBUG_NEW GDSin::GdsExportFile(dst_file_name, NULL, lmap, false);
 }
 
 void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
@@ -1684,26 +1656,24 @@ void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
 
    if (_src_lib->reopenFile())
    {
-//@FIXME!!! Find a new way to implement the paragraph below
-//       GDSin::GdsRecord* wr = _dst_lib->setNextRecord(gds_LIBNAME, src_structure->strctName().size());
-//       wr->add_ascii(src_structure->strctName().c_str()); _dst_lib->flush(wr);
-// 
-//       wr = _dst_lib->setNextRecord(gds_UNITS);
-//       wr->add_real8b(_src_lib->library()->uu()); wr->add_real8b(_src_lib->library()->dbu());
-//       _dst_lib->flush(wr);
-// 
-//       for (GDSStructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
-//       {
-//          split(*CS);
-//          (*CS)->set_traversed(false); // restore the state for eventual second conversion
-//       }
-// 
-//       wr = _dst_lib->setNextRecord(gds_ENDLIB);_dst_lib->flush(wr);
+      GDSin::GdsRecord* wr = _dst_lib->setNextRecord(gds_LIBNAME, src_structure->strctName().size());
+      wr->add_ascii(src_structure->strctName().c_str()); _dst_lib->flush(wr);
+
+      wr = _dst_lib->setNextRecord(gds_UNITS);
+      wr->add_real8b(_src_lib->library()->uu()); wr->add_real8b(_src_lib->library()->dbu());
+      _dst_lib->flush(wr);
+
+      for (GDSStructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
+      {
+         split(*CS);
+         (*CS)->set_traversed(false); // restore the state for eventual second conversion
+      }
+
+      wr = _dst_lib->setNextRecord(gds_ENDLIB);_dst_lib->flush(wr);
 
       tell_log(console::MT_INFO, "Done");
       _src_lib->closeFile();
    }
-   _dst_lib->closeFile();
 }
 
 void GDSin::GdsSplit::preTraverseChildren(const GDSin::GDSHierTree* root)
@@ -1735,6 +1705,11 @@ void GDSin::GdsSplit::split(GDSin::GdsStructure* src_structure)
    src_structure->split(_src_lib, _dst_lib);
 }
 
+GDSin::GdsSplit::~GdsSplit()
+{
+   delete _dst_lib;
+}
+
 //-----------------------------------------------------------------------------
 TP GDSin::get_TP(const GDSin::GdsRecord *cr, word curnum, byte len)
 {
@@ -1749,6 +1724,7 @@ TP GDSin::get_TP(const GDSin::GdsRecord *cr, word curnum, byte len)
 GDSin::GdsExportFile::GdsExportFile(std::string fn, laydata::tdtcell* tcell,
    const LayerMapGds& lmap, bool recur) : DbExportFile(fn, tcell, recur), _laymap(lmap)
 {
+   _filePos = 0;
    _streamVersion = 3;
    wxString wxfname(_fileName.c_str(), wxConvUTF8 );
    _gdsFh.Open(wxfname.c_str(),wxT("wb"));
@@ -2105,6 +2081,34 @@ bool GDSin::GdsExportFile::getMappedLayType(word& gdslay, word& gdstype, word td
    return result;
    //It should not be a problem if the tdtlay is not listed in the map. Then
    // we take the default mapping which is gdslay = tdtlay; gdstype = 0
+}
+
+void GDSin::GdsExportFile::putRecord(const GdsRecord* wr)
+{
+   word length = wr->recLen() + 4;
+   byte  record[4];
+   record[0] = ((byte*)&length)[1];
+   record[1] = ((byte*)&length)[0];
+   record[2] = wr->recType();
+   record[3] = wr->dataType();
+
+   size_t bytes_written = _gdsFh.Write(record, 4);
+   _filePos += bytes_written;
+   if (wr->recLen() > 0)
+   {
+      bytes_written = _gdsFh.Write(wr->record(), wr->recLen());
+      _filePos += bytes_written;
+   }
+   delete wr;
+}
+
+void GDSin::GdsExportFile::updateLastRecord()
+{
+   word num_zeroes = 2048 - (_filePos % 2048);
+   byte record = 0x00;
+   size_t bytes_written = _gdsFh.Write(&record, num_zeroes);
+   assert(bytes_written == num_zeroes);
+   _filePos += bytes_written;
 }
 
 GDSin::GdsExportFile::~GdsExportFile()

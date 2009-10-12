@@ -667,7 +667,9 @@ int tellstdfunc::GDSsplit::execute()
          }
          else
          {
-            GDSin::GdsSplit gdssplit(AGDSDB, filename);
+            USMap gdsLays;
+            LayerMapGds default_map(gdsLays, NULL);
+            GDSin::GdsSplit gdssplit(AGDSDB, filename, default_map);
             gdssplit.run(src_structure, recur);
             LogFile  << LogFile.getFN()
                      << "(\""<< cellname << "\","
