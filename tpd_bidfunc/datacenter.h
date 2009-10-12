@@ -57,7 +57,7 @@ public:
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
-   bool                       lockGds(GDSin::GdsFile*&);
+   bool                       lockGds(GDSin::GdsInFile*&);
    bool                       lockCif(CIFin::CifFile*&);
    void                       bpAddGdsTab();
    void                       bpAddCifTab();
@@ -65,7 +65,7 @@ public:
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
-   void                       unlockGds(GDSin::GdsFile*&, bool throwexception = false);
+   void                       unlockGds(GDSin::GdsInFile*&, bool throwexception = false);
    void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
    void                       mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
    void                       mousePointCancel(TP&);
@@ -181,7 +181,7 @@ private:
    std::string                _localDir;
    std::string                _globalDir;
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
-   GDSin::GdsFile*            _GDSDB;        // GDS parsed data
+   GDSin::GdsInFile*            _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
    layprop::ViewProperties    _properties;   // properties data base
    wxMutex                    DBLock;
@@ -199,15 +199,15 @@ private:
 //=============================================================================
 //
 // This memo relates to the following fields of the DataCenter class:
-//   GDSin::GdsFile* _GDSDB
+//   GDSin::GdsInFile* _GDSDB
 //   CIFin::CifFile* _CIFDB
 //   wxMutex         GDSLock
 //   wxMutex         CIFLock
 //   wxCondition*    _bpSync;
 // and associated methods:
-//   bool lockGds(GDSin::GdsFile*& gds_db);
+//   bool lockGds(GDSin::GdsInFile*& gds_db);
 //   bool lockCif(CIFin::CifFile*& cif_db);
-//   void unlockGds(GDSin::GdsFile*& gds_db, bool throwexception = false);
+//   void unlockGds(GDSin::GdsInFile*& gds_db, bool throwexception = false);
 //   void unlockCif(CIFin::CifFile*& cif_db, bool throwexception = false);
 //   void bpAddGdsTab();
 //   void bpAddCifTab();
@@ -274,7 +274,7 @@ private:
 //
 // Here is the code template to be followed:
 //
-//   GDSin::GdsFile* AGDSDB = NULL;
+//   GDSin::GdsInFile* AGDSDB = NULL;
 //   if (lockGds(AGDSDB))
 //   { // DB exists, AGDSDB contains a valid pointer to it
 //     //
@@ -283,7 +283,7 @@ private:
 //     //    you can even do:
 //     // delete AGDSDB; AGDSDB = NULL;
 //     //    or
-//     // AGDSDB = new GDSin::GdsFile(...);
+//     // AGDSDB = new GDSin::GdsInFile(...);
 //     //    or a combination of the above
 //   }
 //   else

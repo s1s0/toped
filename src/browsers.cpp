@@ -838,7 +838,7 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
 {
    DeleteAllItems();
 
-   GDSin::GdsFile* AGDSDB = NULL;
+   GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));

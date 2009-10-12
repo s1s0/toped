@@ -304,9 +304,9 @@ GDSin::GdsRecord::~GdsRecord()
 }
 
 //==============================================================================
-// class GdsFile
+// class GdsInFile
 //==============================================================================
-GDSin::GdsFile::GdsFile(std::string fn)
+GDSin::GdsInFile::GdsInFile(std::string fn)
 {
    _hierTree = NULL;
    _gdsiiWarnings = 0;
@@ -372,7 +372,7 @@ GDSin::GdsFile::GdsFile(std::string fn)
    while (true);
 }
 
-bool GDSin::GdsFile::reopenFile()
+bool GDSin::GdsInFile::reopenFile()
 {
    _gdsiiWarnings = 0;
    _filePos = 0;
@@ -390,7 +390,7 @@ bool GDSin::GdsFile::reopenFile()
    return true;
 }
 
-void GDSin::GdsFile::closeFile()
+void GDSin::GdsInFile::closeFile()
 {
    if (_gdsFh.IsOpened())
       _gdsFh.Close();
@@ -398,32 +398,32 @@ void GDSin::GdsFile::closeFile()
       delete _cRecord;
 }
 
-GDSin::GdsStructure* GDSin::GdsFile::getStructure(const std::string nm)
+GDSin::GdsStructure* GDSin::GdsInFile::getStructure(const std::string nm)
 {
    return _library->getStructure(nm);
 }
 
-void GDSin::GdsFile::collectLayers(GdsLayers& lays)
+void GDSin::GdsInFile::collectLayers(GdsLayers& lays)
 {
    _library->collectLayers(lays);
 }
 
-std::string GDSin::GdsFile::libname() const
+std::string GDSin::GdsInFile::libname() const
 {
    return _library->libName();
 }
 
-void GDSin::GdsFile::hierOut()
+void GDSin::GdsInFile::hierOut()
 {
    _hierTree = _library->hierOut();
 }
 
-void GDSin::GdsFile::setPosition(wxFileOffset filePos)
+void GDSin::GdsInFile::setPosition(wxFileOffset filePos)
 {
    _gdsFh.Seek(filePos, wxFromStart);
 }
 
-void GDSin::GdsFile::getTimes(GdsRecord *wr)
+void GDSin::GdsInFile::getTimes(GdsRecord *wr)
 {
    word cw;
    for (int i = 0; i<wr->recLen()/2; i++)
@@ -447,7 +447,7 @@ void GDSin::GdsFile::getTimes(GdsRecord *wr)
    }
 }
 
-bool GDSin::GdsFile::getNextRecord()
+bool GDSin::GdsInFile::getNextRecord()
 {
    char recheader[4]; // record header
    size_t numread = _gdsFh.Read(&recheader,4);// read record header
@@ -469,17 +469,17 @@ bool GDSin::GdsFile::getNextRecord()
    else return false;// error during read in
 }
 
-double GDSin::GdsFile::libUnits()
+double GDSin::GdsInFile::libUnits()
 {
    return _library->dbu()/_library->uu();
 }
 
-double GDSin::GdsFile::userUnits()
+double GDSin::GdsInFile::userUnits()
 {
    return _library->uu();
 }
 
-GDSin::GdsFile::~GdsFile()
+GDSin::GdsInFile::~GdsInFile()
 {
    delete _library;
    // get rid of the hierarchy tree
@@ -494,7 +494,7 @@ GDSin::GdsFile::~GdsFile()
 //==============================================================================
 // class GdsLibrary
 //==============================================================================
-GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, std::string libName)
+GDSin::GdsLibrary::GdsLibrary(GdsInFile* cf, std::string libName)
 {
    _libName = libName;
    _maxver = 3;
@@ -552,7 +552,7 @@ GDSin::GdsLibrary::GdsLibrary(GdsFile* cf, std::string libName)
    while (true);
 }
 
-void GDSin::GdsLibrary::linkReferences(GdsFile* const cf)
+void GDSin::GdsLibrary::linkReferences(GdsInFile* const cf)
 {
    for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
    {//for every structure
@@ -594,7 +594,7 @@ GDSin::GdsLibrary::~GdsLibrary()
 //==============================================================================
 // class GdsStructure
 //==============================================================================
-void GDSin::GdsStructure::import(GdsFile *cf, laydata::tdtcell* dst_cell,
+void GDSin::GdsStructure::import(GdsInFile *cf, laydata::tdtcell* dst_cell,
                                  laydata::tdtlibdir* tdt_db, const LayerMapGds& _theLayMap)
 {
    std::string strctName;
@@ -656,7 +656,7 @@ void GDSin::GdsStructure::import(GdsFile *cf, laydata::tdtcell* dst_cell,
    while (true);
 }
 
-GDSin::GdsStructure::GdsStructure(GdsFile *cf, word bgnRecLength)
+GDSin::GdsStructure::GdsStructure(GdsInFile *cf, word bgnRecLength)
 {
    _traversed = false;
    _filePos = cf->filePos();
@@ -712,7 +712,7 @@ void GDSin::GdsStructure::updateContents(int2b layer, int2b dtype)
 }
 
 
-void GDSin::GdsStructure::linkReferences(GdsFile* const cf, GdsLibrary* const library)
+void GDSin::GdsStructure::linkReferences(GdsInFile* const cf, GdsLibrary* const library)
 {
    for (NameSet::const_iterator CRN = _referenceNames.begin(); CRN != _referenceNames.end(); CRN++)
    {
@@ -761,7 +761,7 @@ GDSin::GDSHierTree* GDSin::GdsStructure::hierOut(GDSHierTree* Htree, GdsStructur
    return Htree;
 }
 
-void GDSin::GdsStructure::skimBox(GdsFile* cf)
+void GDSin::GdsStructure::skimBox(GdsInFile* cf)
 {
    int2b layer;
    int2b singleType;
@@ -793,7 +793,7 @@ void GDSin::GdsStructure::skimBox(GdsFile* cf)
    while (true);
 }
 
-void GDSin::GdsStructure::skimBoundary(GdsFile* cf)
+void GDSin::GdsStructure::skimBoundary(GdsInFile* cf)
 {
    int2b layer;
    int2b singleType;
@@ -825,7 +825,7 @@ void GDSin::GdsStructure::skimBoundary(GdsFile* cf)
    while (true);
 }
 
-void GDSin::GdsStructure::skimPath(GdsFile* cf)
+void GDSin::GdsStructure::skimPath(GdsInFile* cf)
 {
    int2b layer;
    int2b singleType;
@@ -861,7 +861,7 @@ void GDSin::GdsStructure::skimPath(GdsFile* cf)
    while (cr->recType() != gds_ENDEL);
 }
 
-void GDSin::GdsStructure::skimSRef(GdsFile* cf)
+void GDSin::GdsStructure::skimSRef(GdsInFile* cf)
 {
    std::string strctName;
 
@@ -894,7 +894,7 @@ void GDSin::GdsStructure::skimSRef(GdsFile* cf)
    while (true);
 }
 
-void GDSin::GdsStructure::skimARef(GdsFile* cf)
+void GDSin::GdsStructure::skimARef(GdsInFile* cf)
 {
    std::string strctName;
 
@@ -928,7 +928,7 @@ void GDSin::GdsStructure::skimARef(GdsFile* cf)
    while (true);
 }
 
-void GDSin::GdsStructure::skimText(GdsFile* cf)
+void GDSin::GdsStructure::skimText(GdsInFile* cf)
 {
    int2b layer;
    int2b singleType;
@@ -967,7 +967,7 @@ void GDSin::GdsStructure::skimText(GdsFile* cf)
    while (true);
 }
 
-void GDSin::GdsStructure::skimNode(GdsFile* cf)
+void GDSin::GdsStructure::skimNode(GdsInFile* cf)
 {
    int2b layer, singleType;
    const GdsRecord* cr = cf->cRecord();
@@ -998,7 +998,7 @@ void GDSin::GdsStructure::skimNode(GdsFile* cf)
    while (true);
 }
 
-void GDSin::GdsStructure::importBox(GdsFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
 {
    int2b       layer;
    int2b       singleType;
@@ -1063,7 +1063,7 @@ void GDSin::GdsStructure::importBox(GdsFile* cf, laydata::tdtcell* dst_cell, con
 
 }
 
-void GDSin::GdsStructure::importPoly(GdsFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
 {
    int2b       layer;
    int2b       singleType;
@@ -1125,7 +1125,7 @@ void GDSin::GdsStructure::importPoly(GdsFile* cf, laydata::tdtcell* dst_cell, co
    while (true);
 }
 
-void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
 {
    int2b layer;
    int2b singleType;
@@ -1214,7 +1214,7 @@ void GDSin::GdsStructure::importPath(GdsFile* cf, laydata::tdtcell* dst_cell, co
    while (cr->recType() != gds_ENDEL);
 }
 
-void GDSin::GdsStructure::importText(GdsFile* cf, laydata::tdtcell* dst_cell, real dbuu, const LayerMapGds& theLayMap)
+void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::tdtcell* dst_cell, real dbuu, const LayerMapGds& theLayMap)
 {
    int2b       layer;
    int2b       singleType;
@@ -1301,7 +1301,7 @@ void GDSin::GdsStructure::importText(GdsFile* cf, laydata::tdtcell* dst_cell, re
    while (true);
 }
 
-void GDSin::GdsStructure::importSref(GdsFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds&)
+void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds&)
 {
    word           reflection     = 0;
    word           absMagn        = 0;
@@ -1371,7 +1371,7 @@ void GDSin::GdsStructure::importSref(GdsFile* cf, laydata::tdtcell* dst_cell, la
    while (true);
 }
 
-void GDSin::GdsStructure::importAref(GdsFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds&)
+void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds&)
 {
    word           reflection     = 0;
    word           absMagn        = 0;
@@ -1512,7 +1512,7 @@ int GDSin::GdsStructure::arrGetStep(TP& Step, TP& magnPoint, int2b colrows)
                      pow(float((Step.y() - magnPoint.y())),2)   ) / colrows;
 }
 
-void GDSin::GdsStructure::split(GdsFile* src_file, GdsExportFile* dst_file)
+void GDSin::GdsStructure::split(GdsInFile* src_file, GdsOutFile* dst_file)
 {
    const GdsRecord* cr = src_file->cRecord();
    src_file->setPosition(_filePos - _beginRecLength);
@@ -1532,7 +1532,7 @@ GDSin::GdsStructure::~GdsStructure()
 //-----------------------------------------------------------------------------
 // class Gds2Ted
 //-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GdsFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap) :
+GDSin::Gds2Ted::Gds2Ted(GDSin::GdsInFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap) :
       _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap),
                _coeff((*_tdt_db)()->UU() / src_lib->libUnits()), _conversionLength(0)
 {}
@@ -1634,104 +1634,21 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
       (*_tdt_db)()->registercellread(gname, dst_structure);
    }
 }
-//-----------------------------------------------------------------------------
-GDSin::GdsSplit::GdsSplit(GDSin::GdsFile* src_lib, std::string dst_file_name,
-                          const LayerMapGds& lmap) : _src_lib(src_lib)
-{
-   _dst_lib = DEBUG_NEW GDSin::GdsExportFile(dst_file_name, NULL, lmap, false);
-}
-
-void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
-{
-   assert(_src_lib->hierTree());
-   assert(src_structure);
-
-   GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
-   if (recursive) preTraverseChildren(root);
-   if (!src_structure->traversed())
-   {
-      _convertList.push_back(src_structure);
-      src_structure->set_traversed(true);
-   }
-
-   if (_src_lib->reopenFile())
-   {
-      GDSin::GdsRecord* wr = _dst_lib->setNextRecord(gds_LIBNAME, src_structure->strctName().size());
-      wr->add_ascii(src_structure->strctName().c_str()); _dst_lib->flush(wr);
-
-      wr = _dst_lib->setNextRecord(gds_UNITS);
-      wr->add_real8b(_src_lib->library()->uu()); wr->add_real8b(_src_lib->library()->dbu());
-      _dst_lib->flush(wr);
-
-      for (GDSStructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
-      {
-         split(*CS);
-         (*CS)->set_traversed(false); // restore the state for eventual second conversion
-      }
-
-      wr = _dst_lib->setNextRecord(gds_ENDLIB);_dst_lib->flush(wr);
-
-      tell_log(console::MT_INFO, "Done");
-      _src_lib->closeFile();
-   }
-}
-
-void GDSin::GdsSplit::preTraverseChildren(const GDSin::GDSHierTree* root)
-{
-   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
-   while (Child)
-   {
-      if ( !Child->GetItem()->traversed() )
-      {
-         // traverse children first
-         preTraverseChildren(Child);
-         GDSin::GdsStructure* sstr = const_cast<GDSin::GdsStructure*>(Child->GetItem());
-         if (!sstr->traversed())
-         {
-            _convertList.push_back(sstr);
-            sstr->set_traversed(true);
-         }
-      }
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
-void GDSin::GdsSplit::split(GDSin::GdsStructure* src_structure)
-{
-   std::string gname = src_structure->strctName();
-   std::ostringstream ost; ost << "GDS split: Writing structure " << gname << "...";
-   tell_log(console::MT_INFO,ost.str());
-   // finally call the split writer
-   src_structure->split(_src_lib, _dst_lib);
-}
-
-GDSin::GdsSplit::~GdsSplit()
-{
-   delete _dst_lib;
-}
 
 //-----------------------------------------------------------------------------
-TP GDSin::get_TP(const GDSin::GdsRecord *cr, word curnum, byte len)
-{
-   int4b GDS_X, GDS_Y;
-   cr->retData(&GDS_X, curnum*len*2, len);
-   cr->retData(&GDS_Y, curnum*len*2+len, len);
-   return TP(GDS_X,GDS_Y);
-}
-
+// class GdsOutFile
 //-----------------------------------------------------------------------------
 
-GDSin::GdsExportFile::GdsExportFile(std::string fn, laydata::tdtcell* tcell,
-   const LayerMapGds& lmap, bool recur) : DbExportFile(fn, tcell, recur), _laymap(lmap)
+GDSin::GdsOutFile::GdsOutFile(std::string fileName)
 {
    _filePos = 0;
    _streamVersion = 3;
-   wxString wxfname(_fileName.c_str(), wxConvUTF8 );
+   wxString wxfname(fileName.c_str(), wxConvUTF8 );
    _gdsFh.Open(wxfname.c_str(),wxT("wb"));
    if (!(_gdsFh.IsOpened()))
    {// open the output file
       std::ostringstream info;
-      info << "File "<< fn <<" can NOT be opened";
+      info << "File "<< fileName <<" can NOT be opened";
       tell_log(console::MT_ERROR,info.str());
       //@TODO: Exception Here
       return;
@@ -1743,7 +1660,122 @@ GDSin::GdsExportFile::GdsExportFile(std::string fn, laydata::tdtcell* tcell,
    flush(wr);
 }
 
-void GDSin::GdsExportFile::libraryStart(std::string libname, TpdTime& libtime, real DBU, real UU)
+GDSin::GdsOutFile::~GdsOutFile()
+{
+   if (_gdsFh.IsOpened())
+      _gdsFh.Close();
+}
+
+GDSin::GdsRecord* GDSin::GdsOutFile::setNextRecord(byte rectype, word reclen)
+{
+   byte datatype;
+   switch (rectype)
+   {
+      case gds_HEADER         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
+      case gds_BGNLIB         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 24        );
+      case gds_ENDLIB         :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_LIBNAME        :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
+      case gds_UNITS          :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 16        );
+      case gds_BGNSTR         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 24        );
+      case gds_STRNAME        :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
+      case gds_ENDSTR         :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_BOUNDARY       :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_PATH           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_SREF           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_AREF           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_TEXT           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_LAYER          :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
+      case gds_DATATYPE       :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
+      case gds_XY             :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT4B   , 8*reclen  );
+      case gds_WIDTH          :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT4B   , 4         );
+      case gds_ENDEL          :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
+      case gds_SNAME          :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
+      case gds_COLROW         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 4         );
+      case gds_TEXTTYPE       :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
+      case gds_STRING         :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
+      case gds_STRANS         :return DEBUG_NEW GdsRecord(rectype, gdsDT_BIT     , 2         );
+      case gds_MAG            :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 8         );
+      case gds_ANGLE          :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 8         );
+      case gds_PROPATTR       :datatype = gdsDT_INT2B;break;
+      case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;
+                       default: assert(false); //the rest should not be used
+//----------------------------------------------------------------------------------
+// The record types below are not used currently in GDS export
+//       case gds_NODE           :datatype = gdsDT_NODATA;break;
+//       case gds_PRESENTATION   :datatype = gdsDT_BIT;break;
+//       case gds_REFLIBS        :datatype = gdsDT_ASCII;break;
+//       case gds_FONTS          :datatype = gdsDT_ASCII;break;
+//       case gds_PATHTYPE       :datatype = gdsDT_INT2B;break;
+//       case gds_GENERATION     :datatype = gdsDT_INT2B;break;
+//       case gds_ATTRTABLE      :datatype = gdsDT_ASCII;break;
+//       case gds_ELFLAGS        :datatype = gdsDT_BIT;break;
+//       case gds_NODETYPE       :datatype = gdsDT_INT2B;break;
+//       case gds_PROPATTR       :datatype = gdsDT_INT2B;break;//
+//       case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;//
+//       case gds_FORMAT         :datatype = gdsDT_INT2B;break;
+//       case gds_BORDER         :datatype = gdsDT_NODATA;break;
+//       case gds_SOFTFENCE      :datatype = gdsDT_NODATA;break;
+//       case gds_HARDFENCE      :datatype = gdsDT_NODATA;break;
+//       case gds_SOFTWIRE       :datatype = gdsDT_NODATA;break;
+//       case gds_HARDWIRE       :datatype = gdsDT_NODATA;break;
+//       case gds_PATHPORT       :datatype = gdsDT_NODATA;break;
+//       case gds_NODEPORT       :datatype = gdsDT_NODATA;break;
+//       case gds_USERCONSTRAINT :datatype = gdsDT_NODATA;break;
+//       case gds_SPACER_ERROR   :datatype = gdsDT_NODATA;break;
+//       case gds_CONTACT        :datatype = gdsDT_NODATA;break;
+
+
+//      deprecated, should not be used for export
+//      case gds_BOX            :datatype = gdsDT_NODATA;break;
+//      case gds_BOXTYPE        :datatype = gdsDT_INT2B;break;
+//      case gds_PLEX           :datatype = gdsDT_INT4B;break;
+//      case gds_BGNEXTN        :datatype = gdsDT_INT4B;break;
+//      case gds_ENDEXTN        :datatype = gdsDT_INT4B;break;
+//      case gds_MASK           :datatype = gdsDT_ASCII;break;
+//      case gds_ENDMASKS       :datatype = gdsDT_NODATA;break;
+//      case gds_LIBSECUR       :datatype = gdsDT_INT2B;break;
+//      case gds_SRFNAME        :datatype = gdsDT_ASCII;break;
+//      case gds_LIBDIRSIZE     :datatype = gdsDT_INT2B;break;
+//      case gds_TEXTNODE       :datatype = gdsDT_NODATA;break;
+//      case gds_STYPTABLE      :datatype = gdsDT_ASCII;break;
+//      case gds_STRTYPE        :datatype = gdsDT_INT2B;break;
+//      case gds_ELKEY          :datatype = gdsDT_INT4B;break;
+//      case gds_STRCLASS       :datatype = gdsDT_BIT;break;
+//      case gds_RESERVED       :datatype = gdsDT_INT4B;break;
+//      case gds_TAPENUM        :datatype = gdsDT_INT2B;break;
+//      case gds_TAPECODE       :datatype = gdsDT_INT2B;break;
+//      case gds_SPACING:
+//      case gds_UINTEGER:
+//      case gds_USTRING:
+//      case gds_LINKTYPE:
+//      case gds_LINKKEYS:
+
+   }
+   return DEBUG_NEW GdsRecord(rectype, datatype,0);
+}
+
+void GDSin::GdsOutFile::flush(GdsRecord* wr)
+{
+   wr->flush(_gdsFh); delete wr;
+}
+
+void GDSin::GdsOutFile::setTimes(GdsRecord* wr)
+{
+   wr->add_int2b(_tModif.Year);
+   wr->add_int2b(_tModif.Month);
+   wr->add_int2b(_tModif.Day);
+   wr->add_int2b(_tModif.Hour);
+   wr->add_int2b(_tModif.Min);
+   wr->add_int2b(_tModif.Sec);
+   wr->add_int2b(_tAccess.Year);
+   wr->add_int2b(_tAccess.Month);
+   wr->add_int2b(_tAccess.Day);
+   wr->add_int2b(_tAccess.Hour);
+   wr->add_int2b(_tAccess.Min);
+   wr->add_int2b(_tAccess.Sec);
+}
+
+void GDSin::GdsOutFile::timeSetup(const TpdTime& libtime)
 {
    time_t acctim_N = libtime.stdCTime();
    tm* broken_time = localtime(&acctim_N);
@@ -1760,13 +1792,54 @@ void GDSin::GdsExportFile::libraryStart(std::string libname, TpdTime& libtime, r
    _tAccess.Min   = broken_time->tm_min;
    _tAccess.Sec   = broken_time->tm_sec;
    time_t cur_time = time(NULL);
-   broken_time = localtime(&cur_time);
-   _tModif.Year  = broken_time->tm_year;
-   _tModif.Month = broken_time->tm_mon+1;
-   _tModif.Day   = broken_time->tm_mday;
-   _tModif.Hour  = broken_time->tm_hour;
-   _tModif.Min   = broken_time->tm_min;
-   _tModif.Sec   = broken_time->tm_sec;
+   broken_time   = localtime(&cur_time);
+   _tModif.Year   = broken_time->tm_year;
+   _tModif.Month  = broken_time->tm_mon+1;
+   _tModif.Day    = broken_time->tm_mday;
+   _tModif.Hour   = broken_time->tm_hour;
+   _tModif.Min    = broken_time->tm_min;
+   _tModif.Sec    = broken_time->tm_sec;
+}
+
+void GDSin::GdsOutFile::putRecord(const GdsRecord* wr)
+{
+   word length = wr->recLen() + 4;
+   byte  record[4];
+   record[0] = ((byte*)&length)[1];
+   record[1] = ((byte*)&length)[0];
+   record[2] = wr->recType();
+   record[3] = wr->dataType();
+
+   size_t bytes_written = _gdsFh.Write(record, 4);
+   _filePos += bytes_written;
+   if (wr->recLen() > 0)
+   {
+      bytes_written = _gdsFh.Write(wr->record(), wr->recLen());
+      _filePos += bytes_written;
+   }
+   delete wr;
+}
+
+void GDSin::GdsOutFile::updateLastRecord()
+{
+   word num_zeroes = 2048 - (_filePos % 2048);
+   byte record = 0x00;
+   size_t bytes_written = _gdsFh.Write(&record, num_zeroes);
+   assert(bytes_written == num_zeroes);
+   _filePos += bytes_written;
+}
+
+//-----------------------------------------------------------------------------
+// class GdsExportFile
+//-----------------------------------------------------------------------------
+GDSin::GdsExportFile::GdsExportFile(std::string fn, laydata::tdtcell* tcell,
+   const LayerMapGds& lmap, bool recur) : DbExportFile(fn, tcell, recur), GdsOutFile(fn), _laymap(lmap)
+{
+}
+
+void GDSin::GdsExportFile::libraryStart(std::string libname, TpdTime& libtime, real DBU, real UU)
+{
+   timeSetup(libtime);
    //write BGNLIB record
    GdsRecord* wr = setNextRecord(gds_BGNLIB);
    setTimes(wr); flush(wr);
@@ -1966,115 +2039,6 @@ void GDSin::GdsExportFile::registerCellWritten(std::string cellname)
    _childnames.push_back(cellname);
 }
 
-GDSin::GdsRecord* GDSin::GdsExportFile::setNextRecord(byte rectype, word reclen)
-{
-   byte datatype;
-   switch (rectype)
-   {
-      case gds_HEADER         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
-      case gds_BGNLIB         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 24        );
-      case gds_ENDLIB         :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_LIBNAME        :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
-      case gds_UNITS          :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 16        );
-      case gds_BGNSTR         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 24        );
-      case gds_STRNAME        :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
-      case gds_ENDSTR         :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_BOUNDARY       :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_PATH           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_SREF           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_AREF           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_TEXT           :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_LAYER          :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
-      case gds_DATATYPE       :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
-      case gds_XY             :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT4B   , 8*reclen  );
-      case gds_WIDTH          :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT4B   , 4         );
-      case gds_ENDEL          :return DEBUG_NEW GdsRecord(rectype, gdsDT_NODATA  , 0         );
-      case gds_SNAME          :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
-      case gds_COLROW         :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 4         );
-      case gds_TEXTTYPE       :return DEBUG_NEW GdsRecord(rectype, gdsDT_INT2B   , 2         );
-      case gds_STRING         :return DEBUG_NEW GdsRecord(rectype, gdsDT_ASCII   , reclen    );
-      case gds_STRANS         :return DEBUG_NEW GdsRecord(rectype, gdsDT_BIT     , 2         );
-      case gds_MAG            :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 8         );
-      case gds_ANGLE          :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 8         );
-      case gds_PROPATTR       :datatype = gdsDT_INT2B;break;
-      case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;
-                       default: assert(false); //the rest should not be used
-//----------------------------------------------------------------------------------
-// The record types below are not used currently in GDS export
-//       case gds_NODE           :datatype = gdsDT_NODATA;break;
-//       case gds_PRESENTATION   :datatype = gdsDT_BIT;break;
-//       case gds_REFLIBS        :datatype = gdsDT_ASCII;break;
-//       case gds_FONTS          :datatype = gdsDT_ASCII;break;
-//       case gds_PATHTYPE       :datatype = gdsDT_INT2B;break;
-//       case gds_GENERATION     :datatype = gdsDT_INT2B;break;
-//       case gds_ATTRTABLE      :datatype = gdsDT_ASCII;break;
-//       case gds_ELFLAGS        :datatype = gdsDT_BIT;break;
-//       case gds_NODETYPE       :datatype = gdsDT_INT2B;break;
-//       case gds_PROPATTR       :datatype = gdsDT_INT2B;break;//
-//       case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;//
-//       case gds_FORMAT         :datatype = gdsDT_INT2B;break;
-//       case gds_BORDER         :datatype = gdsDT_NODATA;break;
-//       case gds_SOFTFENCE      :datatype = gdsDT_NODATA;break;
-//       case gds_HARDFENCE      :datatype = gdsDT_NODATA;break;
-//       case gds_SOFTWIRE       :datatype = gdsDT_NODATA;break;
-//       case gds_HARDWIRE       :datatype = gdsDT_NODATA;break;
-//       case gds_PATHPORT       :datatype = gdsDT_NODATA;break;
-//       case gds_NODEPORT       :datatype = gdsDT_NODATA;break;
-//       case gds_USERCONSTRAINT :datatype = gdsDT_NODATA;break;
-//       case gds_SPACER_ERROR   :datatype = gdsDT_NODATA;break;
-//       case gds_CONTACT        :datatype = gdsDT_NODATA;break;
-
-
-//      deprecated, should not be used for export
-//      case gds_BOX            :datatype = gdsDT_NODATA;break;
-//      case gds_BOXTYPE        :datatype = gdsDT_INT2B;break;
-//      case gds_PLEX           :datatype = gdsDT_INT4B;break;
-//      case gds_BGNEXTN        :datatype = gdsDT_INT4B;break;
-//      case gds_ENDEXTN        :datatype = gdsDT_INT4B;break;
-//      case gds_MASK           :datatype = gdsDT_ASCII;break;
-//      case gds_ENDMASKS       :datatype = gdsDT_NODATA;break;
-//      case gds_LIBSECUR       :datatype = gdsDT_INT2B;break;
-//      case gds_SRFNAME        :datatype = gdsDT_ASCII;break;
-//      case gds_LIBDIRSIZE     :datatype = gdsDT_INT2B;break;
-//      case gds_TEXTNODE       :datatype = gdsDT_NODATA;break;
-//      case gds_STYPTABLE      :datatype = gdsDT_ASCII;break;
-//      case gds_STRTYPE        :datatype = gdsDT_INT2B;break;
-//      case gds_ELKEY          :datatype = gdsDT_INT4B;break;
-//      case gds_STRCLASS       :datatype = gdsDT_BIT;break;
-//      case gds_RESERVED       :datatype = gdsDT_INT4B;break;
-//      case gds_TAPENUM        :datatype = gdsDT_INT2B;break;
-//      case gds_TAPECODE       :datatype = gdsDT_INT2B;break;
-//      case gds_SPACING:
-//      case gds_UINTEGER:
-//      case gds_USTRING:
-//      case gds_LINKTYPE:
-//      case gds_LINKKEYS:
-
-   }
-   return DEBUG_NEW GdsRecord(rectype, datatype,0);
-}
-
-void GDSin::GdsExportFile::flush(GdsRecord* wr)
-{
-   wr->flush(_gdsFh); delete wr;
-}
-
-void GDSin::GdsExportFile::setTimes(GdsRecord* wr)
-{
-   wr->add_int2b(_tModif.Year);
-   wr->add_int2b(_tModif.Month);
-   wr->add_int2b(_tModif.Day);
-   wr->add_int2b(_tModif.Hour);
-   wr->add_int2b(_tModif.Min);
-   wr->add_int2b(_tModif.Sec);
-   wr->add_int2b(_tAccess.Year);
-   wr->add_int2b(_tAccess.Month);
-   wr->add_int2b(_tAccess.Day);
-   wr->add_int2b(_tAccess.Hour);
-   wr->add_int2b(_tAccess.Min);
-   wr->add_int2b(_tAccess.Sec);
-}
-
 bool GDSin::GdsExportFile::getMappedLayType(word& gdslay, word& gdstype, word tdtlay)
 {
    bool result = _laymap.getGdsLayType(gdslay, gdstype, tdtlay);
@@ -2083,37 +2047,91 @@ bool GDSin::GdsExportFile::getMappedLayType(word& gdslay, word& gdstype, word td
    // we take the default mapping which is gdslay = tdtlay; gdstype = 0
 }
 
-void GDSin::GdsExportFile::putRecord(const GdsRecord* wr)
-{
-   word length = wr->recLen() + 4;
-   byte  record[4];
-   record[0] = ((byte*)&length)[1];
-   record[1] = ((byte*)&length)[0];
-   record[2] = wr->recType();
-   record[3] = wr->dataType();
-
-   size_t bytes_written = _gdsFh.Write(record, 4);
-   _filePos += bytes_written;
-   if (wr->recLen() > 0)
-   {
-      bytes_written = _gdsFh.Write(wr->record(), wr->recLen());
-      _filePos += bytes_written;
-   }
-   delete wr;
-}
-
-void GDSin::GdsExportFile::updateLastRecord()
-{
-   word num_zeroes = 2048 - (_filePos % 2048);
-   byte record = 0x00;
-   size_t bytes_written = _gdsFh.Write(&record, num_zeroes);
-   assert(bytes_written == num_zeroes);
-   _filePos += bytes_written;
-}
-
 GDSin::GdsExportFile::~GdsExportFile()
 {
-   if (_gdsFh.IsOpened())
-      _gdsFh.Close();
+}
+
+//-----------------------------------------------------------------------------
+GDSin::GdsSplit::GdsSplit(GDSin::GdsInFile* src_lib, std::string dst_file_name) : _src_lib(src_lib)
+{
+   _dst_lib = DEBUG_NEW GDSin::GdsOutFile(dst_file_name);
+}
+
+void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
+{
+   assert(_src_lib->hierTree());
+   assert(src_structure);
+
+   GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
+   if (recursive) preTraverseChildren(root);
+   if (!src_structure->traversed())
+   {
+      _convertList.push_back(src_structure);
+      src_structure->set_traversed(true);
+   }
+
+   if (_src_lib->reopenFile())
+   {
+      GDSin::GdsRecord* wr = _dst_lib->setNextRecord(gds_LIBNAME, src_structure->strctName().size());
+      wr->add_ascii(src_structure->strctName().c_str()); _dst_lib->flush(wr);
+
+      wr = _dst_lib->setNextRecord(gds_UNITS);
+      wr->add_real8b(_src_lib->library()->uu()); wr->add_real8b(_src_lib->library()->dbu());
+      _dst_lib->flush(wr);
+
+      for (GDSStructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
+      {
+         split(*CS);
+         (*CS)->set_traversed(false); // restore the state for eventual second conversion
+      }
+
+      wr = _dst_lib->setNextRecord(gds_ENDLIB);_dst_lib->flush(wr);
+
+      tell_log(console::MT_INFO, "Done");
+      _src_lib->closeFile();
+   }
+}
+
+void GDSin::GdsSplit::preTraverseChildren(const GDSin::GDSHierTree* root)
+{
+   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
+   while (Child)
+   {
+      if ( !Child->GetItem()->traversed() )
+      {
+         // traverse children first
+         preTraverseChildren(Child);
+         GDSin::GdsStructure* sstr = const_cast<GDSin::GdsStructure*>(Child->GetItem());
+         if (!sstr->traversed())
+         {
+            _convertList.push_back(sstr);
+            sstr->set_traversed(true);
+         }
+      }
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
+void GDSin::GdsSplit::split(GDSin::GdsStructure* src_structure)
+{
+   std::string gname = src_structure->strctName();
+   std::ostringstream ost; ost << "GDS split: Writing structure " << gname << "...";
+   tell_log(console::MT_INFO,ost.str());
+   // finally call the split writer
+   src_structure->split(_src_lib, _dst_lib);
+}
+
+GDSin::GdsSplit::~GdsSplit()
+{
+   delete _dst_lib;
+}
+
+//-----------------------------------------------------------------------------
+TP GDSin::get_TP(const GDSin::GdsRecord *cr, word curnum, byte len)
+{
+   int4b GDS_X, GDS_Y;
+   cr->retData(&GDS_X, curnum*len*2, len);
+   cr->retData(&GDS_Y, curnum*len*2+len, len);
+   return TP(GDS_X,GDS_Y);
 }
 

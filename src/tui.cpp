@@ -538,7 +538,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    GdsLayers gdsLayers;
-   GDSin::GdsFile* AGDSDB = NULL;
+   GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       //-----------------------------------------------------------------------
@@ -2184,85 +2184,85 @@ void tui::nameEbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 BEGIN_EVENT_TABLE(tui::cadenceConvert, wxDialog)
    EVT_BUTTON(ID_BTNDISPLAYADD, tui::cadenceConvert::onDisplayAdd)
    EVT_BUTTON(ID_BTNTECHADD, tui::cadenceConvert::onTechAdd)
-	EVT_BUTTON(ID_BTNOUTFILE, tui::cadenceConvert::onOutputFile)
-	EVT_BUTTON(ID_BTNCONVERT, tui::cadenceConvert::onConvert)
+   EVT_BUTTON(ID_BTNOUTFILE, tui::cadenceConvert::onOutputFile)
+   EVT_BUTTON(ID_BTNCONVERT, tui::cadenceConvert::onConvert)
 END_EVENT_TABLE()
 
 tui::cadenceConvert::cadenceConvert(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos):
-	wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+   wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
-	_displayList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
-	_techList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
-	_outputFile = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
+   _displayList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
+   _techList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
+   _outputFile = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
 
-	wxBoxSizer *topSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-		wxBoxSizer *vertSizer = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("") );
-			wxBoxSizer *displaySizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-				displaySizer->Add(10,10,0);
-				displaySizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Display file:	")), 0, 0, 0);
-				displaySizer->Add(_displayList, 1, wxEXPAND, 10);
-				displaySizer->Add(DEBUG_NEW wxButton(this, ID_BTNDISPLAYADD, _T("Add ...")), 0, 0, 0);
-				displaySizer->Add(10,10,0);
-			wxBoxSizer *techSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-				techSizer->Add(10,10,0);
-				techSizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Tech file:		")), 0, 0, 0);
-				techSizer->Add(_techList, 1, wxEXPAND, 10 );
-				techSizer->Add(DEBUG_NEW wxButton( this, ID_BTNTECHADD, wxT("Add ...") ), 0, 0, 0 );
-				techSizer->Add(10,10,0);
-			wxBoxSizer *outputSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-				outputSizer->Add(10,10,0);
-				outputSizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Output file:	")), 0, 0, 0);
-				outputSizer->Add(_outputFile, 1, wxEXPAND, 10 );
-				outputSizer->Add(DEBUG_NEW wxButton( this, ID_BTNOUTFILE, wxT("Add ...") ), 0, 0, 0 );
-				outputSizer->Add(10,10,0);
-		vertSizer->Add(displaySizer, 0, wxEXPAND ); // no border and centre horizontally
-		vertSizer->Add(techSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
-		vertSizer->Add(outputSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
-	
-	topSizer->Add(vertSizer, 0, wxEXPAND);
-	topSizer->Add(10,10,0);
-	topSizer->Add(DEBUG_NEW wxButton( this, ID_BTNCONVERT, wxT("Convert") ), 0, wxALIGN_CENTER , 0 );
-	topSizer->Add(10,10,0);
+   wxBoxSizer *topSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+      wxBoxSizer *vertSizer = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("") );
+         wxBoxSizer *displaySizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+            displaySizer->Add(10,10,0);
+            displaySizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Display file: ")), 0, 0, 0);
+            displaySizer->Add(_displayList, 1, wxEXPAND, 10);
+            displaySizer->Add(DEBUG_NEW wxButton(this, ID_BTNDISPLAYADD, _T("Add ...")), 0, 0, 0);
+            displaySizer->Add(10,10,0);
+         wxBoxSizer *techSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+            techSizer->Add(10,10,0);
+            techSizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Tech file:    ")), 0, 0, 0);
+            techSizer->Add(_techList, 1, wxEXPAND, 10 );
+            techSizer->Add(DEBUG_NEW wxButton( this, ID_BTNTECHADD, wxT("Add ...") ), 0, 0, 0 );
+            techSizer->Add(10,10,0);
+         wxBoxSizer *outputSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+            outputSizer->Add(10,10,0);
+            outputSizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Output file:   ")), 0, 0, 0);
+            outputSizer->Add(_outputFile, 1, wxEXPAND, 10 );
+            outputSizer->Add(DEBUG_NEW wxButton( this, ID_BTNOUTFILE, wxT("Add ...") ), 0, 0, 0 );
+            outputSizer->Add(10,10,0);
+      vertSizer->Add(displaySizer, 0, wxEXPAND ); // no border and centre horizontally
+      vertSizer->Add(techSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
+      vertSizer->Add(outputSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
+   
+   topSizer->Add(vertSizer, 0, wxEXPAND);
+   topSizer->Add(10,10,0);
+   topSizer->Add(DEBUG_NEW wxButton( this, ID_BTNCONVERT, wxT("Convert") ), 0, wxALIGN_CENTER , 0 );
+   topSizer->Add(10,10,0);
    SetSizer( topSizer );
    topSizer->SetSizeHints( this );
 }
 
-void	tui::cadenceConvert::onDisplayAdd(wxCommandEvent& evt)
+void  tui::cadenceConvert::onDisplayAdd(wxCommandEvent& evt)
 {
-	wxFileDialog dlg(this, wxT("Select a display file"), wxT(""), wxT(""),
+   wxFileDialog dlg(this, wxT("Select a display file"), wxT(""), wxT(""),
       wxT("Display files (*.drf)|*.drf|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg.ShowModal()) 
    {
       wxString filename = dlg.GetPath();
       wxString ost;
-		_displayList->SetValue(filename);
+      _displayList->SetValue(filename);
    }
 }
 
-void	tui::cadenceConvert::onTechAdd(wxCommandEvent& evt)
+void  tui::cadenceConvert::onTechAdd(wxCommandEvent& evt)
 {
-	wxFileDialog dlg(this, wxT("Select a tech file"), wxT(""), wxT(""),
+   wxFileDialog dlg(this, wxT("Select a tech file"), wxT(""), wxT(""),
       wxT("All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg.ShowModal()) 
    {
       wxString filename = dlg.GetPath();
       wxString ost;
-		_techList->SetValue(filename);
+      _techList->SetValue(filename);
    }
 }
 
-void	tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
+void  tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
 {
-	wxFileDialog dlg(this, wxT("Select output tell file"), wxT(""), wxT(""),
+   wxFileDialog dlg(this, wxT("Select output tell file"), wxT(""), wxT(""),
       wxT("tell files (*.tll)|*.tll|All files(*.*)|*.*"),
       tpdfSAVE|wxFD_OVERWRITE_PROMPT);
    if (wxID_OK == dlg.ShowModal()) 
    {
       wxString filename = dlg.GetPath();
       wxString ost;
-		_outputFile->SetValue(filename);
+      _outputFile->SetValue(filename);
    }
 }
 
@@ -2275,32 +2275,32 @@ void ShowOutput(const wxString& cmd,
         return;
     for ( size_t n = 0; n < count; n++ )
     {
-		 tell_log(console::MT_INFO, output[n]);
+       tell_log(console::MT_INFO, output[n]);
     }
 }
 void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
 {
-	if (_displayList->IsEmpty() || _techList->IsEmpty())
-	{
-		wxMessageDialog dlg(this, wxT("Please add display and tech files"), wxT("Warning!"));
-		dlg.ShowModal();
-	}
-	else
-	{
-		wxString str;
-		//Looking for $TPD_GLOBAL/virtuoso2tll
-		str.Append(wxString(DATC->globalDir().c_str(),wxConvFile));
+   if (_displayList->IsEmpty() || _techList->IsEmpty())
+   {
+      wxMessageDialog dlg(this, wxT("Please add display and tech files"), wxT("Warning!"));
+      dlg.ShowModal();
+   }
+   else
+   {
+      wxString str;
+      //Looking for $TPD_GLOBAL/virtuoso2tll
+      str.Append(wxString(DATC->globalDir().c_str(),wxConvFile));
 #ifdef WIN32
-		//For windows full path need to be replace to short one(Program Files->Progra~1)
-		wxFileName filename=wxFileName(str);
-		str=filename.GetShortPath();
-		str.Append(wxT("virtuoso2tll.exe "));
+      //For windows full path need to be replace to short one(Program Files->Progra~1)
+      wxFileName filename=wxFileName(str);
+      str=filename.GetShortPath();
+      str.Append(wxT("virtuoso2tll.exe "));
 #else
       str.Append(wxT("utils/cadence/"));
       str.Append(wxT("virtuoso2tll.ss "));
 #endif
 
-		//prepare command line arguments 
+      //prepare command line arguments 
       wxString strtemp = _outputFile->GetValue();
       str.Append(strtemp);
       str.Append(wxT(" "));
@@ -2311,12 +2311,12 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
       str.Replace(wxT("\\") , wxT("\\\\"), true);
       tell_log(console::MT_INFO, str);
 
-		wxArrayString output, errors;
+      wxArrayString output, errors;
       int code = wxExecute(str, output, errors);
       if ( code != -1 )
       {
-			ShowOutput(str, output, _T("Output"));
+         ShowOutput(str, output, _T("Output"));
          ShowOutput(str, errors, _T("Errors"));
       }
-	}
+   }
 }

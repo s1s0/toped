@@ -341,7 +341,7 @@ int tellstdfunc::GDSread::execute() {
          // add GDS tab in the browser
          DATC->bpAddGdsTab();
          //
-         GDSin::GdsFile* AGDSDB = NULL;
+         GDSin::GdsInFile* AGDSDB = NULL;
          if (DATC->lockGds(AGDSDB))
          {
             GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
@@ -411,7 +411,7 @@ int tellstdfunc::GDSimport::execute()
    std::ostringstream ost;
    std::string gdsDbName = "NonameDB";
    GdsLayers* gdsLaysAll = NULL;
-   GDSin::GdsFile* AGDSDB = NULL;
+   GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
@@ -493,7 +493,7 @@ int tellstdfunc::GDSimportList::execute()
    }
    GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
    std::string gdsDbName = "NonameDB";
-   GDSin::GdsFile* AGDSDB = NULL;
+   GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(*gdsLaysAll);
@@ -655,7 +655,7 @@ int tellstdfunc::GDSsplit::execute()
    if (expandFileName(filename))
    {
 
-      GDSin::GdsFile* AGDSDB = NULL;
+      GDSin::GdsInFile* AGDSDB = NULL;
       if (DATC->lockGds(AGDSDB))
       {
          GDSin::GdsStructure *src_structure = AGDSDB->getStructure(cellname.c_str());
@@ -667,9 +667,7 @@ int tellstdfunc::GDSsplit::execute()
          }
          else
          {
-            USMap gdsLays;
-            LayerMapGds default_map(gdsLays, NULL);
-            GDSin::GdsSplit gdssplit(AGDSDB, filename, default_map);
+            GDSin::GdsSplit gdssplit(AGDSDB, filename);
             gdssplit.run(src_structure, recur);
             LogFile  << LogFile.getFN()
                      << "(\""<< cellname << "\","
@@ -801,7 +799,7 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
 int tellstdfunc::GDSreportlay::execute()
 {
    std::string name = getStringValue();
-   GDSin::GdsFile* AGDSDB = NULL;
+   GDSin::GdsInFile* AGDSDB = NULL;
    if(DATC->lockGds(AGDSDB))
    {
       GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
@@ -1379,7 +1377,7 @@ tellstdfunc::DRCshowerror::DRCshowerror(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 int tellstdfunc::DRCshowerror::execute()
