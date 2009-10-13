@@ -1879,7 +1879,6 @@ void GDSin::GdsExportFile::definitionFinish()
 
 bool GDSin::GdsExportFile::layerSpecification(unsigned layno)
 {
-   word _cGdsLayer, _cGdsType;
    return (getMappedLayType(_cGdsLayer, _cGdsType, layno));
 }
 
