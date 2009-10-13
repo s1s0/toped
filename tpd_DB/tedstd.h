@@ -213,7 +213,7 @@ namespace laydata {
 class DbExportFile {
    public:
                               DbExportFile(std::string fn, laydata::tdtcell* topcell, bool recur) :
-                                 _fileName(fn), _topcell(topcell), _recur(recur), _DBU(1.0), _UU(1.0) {};
+                                 _fileName(fn), _topcell(topcell), _recur(recur), _DBU(1e-9), _UU(1e-3) {};
       virtual                ~DbExportFile() {};
       virtual void            definitionStart(std::string) = 0;
       virtual void            definitionFinish() = 0;
