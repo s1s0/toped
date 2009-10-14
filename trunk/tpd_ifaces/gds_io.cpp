@@ -1785,7 +1785,7 @@ void GDSin::GdsOutFile::timeSetup(const TpdTime& libtime)
       info << "Error during defining time";
       tell_log(console::MT_ERROR,info.str());
    }
-   _tAccess.Year  = broken_time->tm_year;
+   _tAccess.Year  = broken_time->tm_year + 1900;
    _tAccess.Month = broken_time->tm_mon+1;
    _tAccess.Day   = broken_time->tm_mday;
    _tAccess.Hour  = broken_time->tm_hour;
@@ -1793,7 +1793,7 @@ void GDSin::GdsOutFile::timeSetup(const TpdTime& libtime)
    _tAccess.Sec   = broken_time->tm_sec;
    time_t cur_time = time(NULL);
    broken_time   = localtime(&cur_time);
-   _tModif.Year   = broken_time->tm_year;
+   _tModif.Year   = broken_time->tm_year + 1900;
    _tModif.Month  = broken_time->tm_mon+1;
    _tModif.Day    = broken_time->tm_mday;
    _tModif.Hour   = broken_time->tm_hour;
