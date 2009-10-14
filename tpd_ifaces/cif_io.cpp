@@ -190,7 +190,6 @@ void CIFin::CifStructure::collectLayers(nameList& layList, bool hier)
 
 void CIFin::CifStructure::addRef(_dbl_word cell, CTM* location)
 {
-   (*location) = ((*location)*((real)_a/(real)_b));
    _refirst = DEBUG_NEW CifRef(_refirst, cell, location);
 }
 
@@ -479,7 +478,7 @@ void CIFin::CifExportFile::registerCellWritten(std::string cellname)
 void CIFin::CifExportFile::definitionStart(std::string name)
 {
    std::string message = "...converting " + name;
-   unsigned dbuu = (unsigned) (1/_DBU);
+   unsigned dbuu = (unsigned) (1.0/_DBU);
    // clean the error from the conversion (round to step 10)
    dbuu = (int4b) (rint((dbuu + (5)) / 10) * 10);
    unsigned cifu = 100000000;
@@ -586,7 +585,7 @@ void CIFin::CifExportFile::text(const std::string& label, const CTM& trans)
    while ((loc = labelr.find(' ')) >= 0 )
       labelr.replace(loc, 1, "_"); //@FIXME - this should be an option or ...?
 
-   _file << "      94 "<< labelr << " "<< trans.tx() << " " << trans.ty() << ";" << std::endl;
+   _file << "      94 "<< labelr << " "<< (int)trans.tx() << " " << (int)trans.ty() << ";" << std::endl;
 
 
 }
@@ -901,7 +900,7 @@ void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::tdtlayer* wl, std::s
    pnt *= _crosscoeff;
    wl->addtext(wd->text(),
                CTM(pnt,
-                   (_techno / OPENGL_FONT_UNIT),
+                   (_techno / (/*(*_tdt_db)()->UU() * */ OPENGL_FONT_UNIT)),
                    0.0,
                    false )
               );

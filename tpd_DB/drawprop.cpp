@@ -771,7 +771,7 @@ std::string layprop::DrawProperties::getLineName(unsigned layno) const
 void layprop::DrawProperties::all_layers(nameList& alllays) const
 {
    for (laySetList::const_iterator CL = _layset.begin(); CL != _layset.end(); CL++)
-      if (0 != CL->first) alllays.push_back(CL->second->name());
+      if (REF_LAY != CL->first) alllays.push_back(CL->second->name());
 }
 
 const layprop::LineSettings* layprop::DrawProperties::getLine(unsigned layno) const
