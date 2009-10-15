@@ -226,7 +226,9 @@ class TpdPost {
 class  TpdTime
 {
    public:
-      TpdTime(time_t stdCTime) : _stdCTime(stdCTime){};
+      TpdTime() : _stdCTime(0), _status(false) {};
+      TpdTime(time_t stdCTime) : _stdCTime(stdCTime), _status(true){};
+      TpdTime(tm&);
       TpdTime(std::string);
       std::string operator () ();
       bool operator == (TpdTime& arg1) const {return _stdCTime == arg1._stdCTime;}

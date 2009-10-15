@@ -318,9 +318,9 @@ GDSin::GdsInFile::GdsInFile(std::string fn)
    tell_log(console::MT_INFO, std::string("GDSII input file: \"") + fn + std::string("\""));
    wxString wxfname(_fileName.c_str(), wxConvUTF8 );
    _gdsFh.Open(wxfname.c_str(),wxT("rb"));
+   std::ostringstream info;
    if (!(_gdsFh.IsOpened()))
    {// open the input file
-      std::ostringstream info;
       info << "File "<< _fileName <<" can NOT be opened";
       tell_log(console::MT_ERROR,info.str());
       return;
@@ -341,6 +341,9 @@ GDSin::GdsInFile::GdsInFile(std::string fn)
          switch (_cRecord->recType())
          {
             case gds_HEADER:      _cRecord->retData(&_streamVersion);
+               info.clear();
+               info << "Stream version: " << _streamVersion;
+               tell_log(console::MT_INFO, info.str());
                break;
             case gds_BGNLIB:      getTimes(_cRecord);
                break;
@@ -425,25 +428,51 @@ void GDSin::GdsInFile::setPosition(wxFileOffset filePos)
 
 void GDSin::GdsInFile::getTimes(GdsRecord *wr)
 {
+   tm tmodif_bt;
+   tm taccess_bt;
    word cw;
    for (int i = 0; i<wr->recLen()/2; i++)
    {
       wr->retData(&cw,2*i);
       switch (i)
       {
-         case 0 :_tModif.Year   = cw;break;
-         case 1 :_tModif.Month  = cw;break;
-         case 2 :_tModif.Day    = cw;break;
-         case 3 :_tModif.Hour   = cw;break;
-         case 4 :_tModif.Min    = cw;break;
-         case 5 :_tModif.Sec    = cw;break;
-         case 6 :_tAccess.Year  = cw;break;
-         case 7 :_tAccess.Month = cw;break;
-         case 8 :_tAccess.Day   = cw;break;
-         case 9 :_tAccess.Hour  = cw;break;
-         case 10:_tAccess.Min   = cw;break;
-         case 11:_tAccess.Sec   = cw;break;
+         case 0 :tmodif_bt.tm_year   = cw - 1900;break;
+         case 1 :tmodif_bt.tm_mon    = cw - 1;break;
+         case 2 :tmodif_bt.tm_mday   = cw;break;
+         case 3 :tmodif_bt.tm_hour   = cw;break;
+         case 4 :tmodif_bt.tm_min    = cw;break;
+         case 5 :tmodif_bt.tm_sec    = cw;break;
+         case 6 :taccess_bt.tm_year  = cw - 1900;break;
+         case 7 :taccess_bt.tm_mon   = cw - 1;break;
+         case 8 :taccess_bt.tm_mday  = cw;break;
+         case 9 :taccess_bt.tm_hour  = cw;break;
+         case 10:taccess_bt.tm_min   = cw;break;
+         case 11:taccess_bt.tm_sec   = cw;break;
       }
+   }
+   _tModif  = TpdTime(tmodif_bt );
+   _tAccess = TpdTime(taccess_bt);
+   std::stringstream info;
+   if (_tModif.status())
+   {
+      info << "Library was last modified: " << _tModif();
+      tell_log(console::MT_INFO, info.str());
+   }
+   else
+   {
+      info << "Library modification time stamp is invalid";
+      tell_log(console::MT_WARNING, info.str());
+   }
+   info.str("");
+   if (_tAccess.status())
+   {
+      info << "Library was last accessed: " << _tAccess();
+      tell_log(console::MT_INFO, info.str());
+   }
+   else
+   {
+      info << "Library access time stamp is invalid";
+      tell_log(console::MT_WARNING, info.str());
    }
 }
 
@@ -2133,4 +2162,3 @@ TP GDSin::get_TP(const GDSin::GdsRecord *cr, word curnum, byte len)
    cr->retData(&GDS_Y, curnum*len*2+len, len);
    return TP(GDS_X,GDS_Y);
 }
-

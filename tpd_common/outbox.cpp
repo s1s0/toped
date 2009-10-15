@@ -605,6 +605,12 @@ TpdTime::TpdTime(std::string str_time)
    _status = getStdCTime(wxstr_time);
 }
 
+TpdTime::TpdTime(tm& brokenTime)
+{
+   _stdCTime = mktime(&brokenTime);
+   _status = (_stdCTime >= 0);
+}
+
 void TpdTime::patternNormalize(wxString& str) {
    wxRegEx regex;
    // replace tabs with spaces
