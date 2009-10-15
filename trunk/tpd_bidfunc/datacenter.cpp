@@ -410,7 +410,7 @@ void DataCenter::newDesign(std::string name, time_t created)
       _TEDLIB()->clearHierTree();
       _TEDLIB.deleteDB();
    }
-   _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, 0));
+   _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, created));
    _TEDLIB()->assign_properties(_properties);
    _tedfilename = _localDir + name + ".tdt";
    _neversaved = true;

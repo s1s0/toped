@@ -125,7 +125,6 @@ namespace GDSin {
 
    typedef SGHierTree<GdsStructure>        GDSHierTree;
    typedef std::list<GDSin::GdsStructure*> GDSStructureList;
-   typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
 
    /*** GdsRecord ***************************************************************
    >>> Constructor --------------------------------------------------------------
@@ -245,8 +244,8 @@ namespace GDSin {
          wxFileOffset         _filePos;
          GDSHierTree*         _hierTree; // Tree of instance hierarchy
          int                  _gdsiiWarnings;
-         GDStime              _tModif;
-         GDStime              _tAccess;
+         TpdTime              _tModif;
+         TpdTime              _tAccess;
          wxFileOffset         _prgrs_pos;
          GdsRecord*           _cRecord;
    };
@@ -407,6 +406,7 @@ namespace GDSin {
          void                 setTimes(GdsRecord*);
          void                 timeSetup(const TpdTime& libtime);
       private:
+         typedef struct {word Year,Month,Day,Hour,Min,Sec;} GDStime;
          void                 updateLastRecord();
          wxFileOffset         _filePos;
          wxFFile              _gdsFh;
