@@ -449,7 +449,7 @@ namespace GDSin {
    protected:
       void                    preTraverseChildren(const GDSin::GDSHierTree*);
       void                    split(GDSin::GdsStructure*);
-      GdsInFile*                _src_lib;
+      GdsInFile*              _src_lib;
       GdsOutFile*             _dst_lib;
       GDSStructureList        _convertList;
    };

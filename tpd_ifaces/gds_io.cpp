@@ -1846,7 +1846,6 @@ void GDSin::GdsOutFile::putRecord(const GdsRecord* wr)
       bytes_written = _gdsFh.Write(wr->record(), wr->recLen());
       _filePos += bytes_written;
    }
-   delete wr;
 }
 
 void GDSin::GdsOutFile::updateLastRecord()
@@ -2100,7 +2099,11 @@ void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
 
    if (_src_lib->reopenFile())
    {
-      GDSin::GdsRecord* wr = _dst_lib->setNextRecord(gds_LIBNAME, src_structure->strctName().size());
+      _dst_lib->timeSetup(time(NULL));
+      GDSin::GdsRecord* wr = _dst_lib->setNextRecord(gds_BGNLIB);
+      _dst_lib->setTimes(wr); _dst_lib->flush(wr);
+
+      wr = _dst_lib->setNextRecord(gds_LIBNAME, src_structure->strctName().size());
       wr->add_ascii(src_structure->strctName().c_str()); _dst_lib->flush(wr);
 
       wr = _dst_lib->setNextRecord(gds_UNITS);
