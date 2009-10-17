@@ -30,6 +30,7 @@
 #include "tedesign.h"
 #include "cif_io.h"
 #include "gds_io.h"
+#include "oasis_io.h"
 #include "viewprop.h"
 
 class DataCenter {
@@ -48,6 +49,7 @@ public:
    bool                       cifGetLayers(nameList&);
    bool                       gdsGetLayers(GdsLayers&);
    void                       CIFimport(const nameList&, SIMap*, bool, bool, real);
+   bool                       OasisParse(std::string);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);
@@ -59,6 +61,7 @@ public:
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
    bool                       lockGds(GDSin::GdsInFile*&);
    bool                       lockCif(CIFin::CifFile*&);
+   bool                       lockOasis(Oasis::OasisInFile*&);
    void                       bpAddGdsTab();
    void                       bpAddCifTab();
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
@@ -67,6 +70,7 @@ public:
    void                       unlockDB();
    void                       unlockGds(GDSin::GdsInFile*&, bool throwexception = false);
    void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
+   void                       unlockOasis(Oasis::OasisInFile*& oasis_db, bool throwexception = false);
    void                       mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
@@ -181,12 +185,14 @@ private:
    std::string                _localDir;
    std::string                _globalDir;
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
-   GDSin::GdsInFile*            _GDSDB;        // GDS parsed data
+   GDSin::GdsInFile*          _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
+   Oasis::OasisInFile*        _OASISDB;      // OASIS parsed data
    layprop::ViewProperties    _properties;   // properties data base
    wxMutex                    DBLock;
    wxMutex                    GDSLock;
    wxMutex                    CIFLock;
+   wxMutex                    OASISLock;
    wxMutex                    PROPLock;
    wxCondition*               _bpSync;       // Synchroniosation for cell browser panels
 

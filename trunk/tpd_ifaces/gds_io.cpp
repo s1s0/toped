@@ -32,8 +32,8 @@
 #include <time.h>
 #include "gds_io.h"
 #include "outbox.h"
-#include "../tpd_DB/tedat.h"
-#include "../tpd_DB/tedesign.h"
+#include "tedat.h"
+#include "tedesign.h"
 
 //==============================================================================
 GDSin::GdsRecord::GdsRecord()
@@ -45,6 +45,18 @@ GDSin::GdsRecord::GdsRecord()
    _dataType = gdsDT_NODATA;
    _numread = 0;
    _index = 0;
+}
+
+GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl)
+{
+   _recType = rt; _dataType = dt;
+   _recLen = rl+4; _index = 0;
+   // compensation for odd length ASCII string
+   if ((gdsDT_ASCII == _dataType) && (rl % 2)) _recLen++;
+   _record = DEBUG_NEW byte[_recLen];
+   add_int2b(_recLen);
+   _record[_index++] = _recType;
+   _record[_index++] = _dataType;
 }
 
 void GDSin::GdsRecord::getNextRecord(wxFFile& Gf, word rl, byte rt, byte dt)
@@ -60,18 +72,6 @@ void GDSin::GdsRecord::getNextRecord(wxFFile& Gf, word rl, byte rt, byte dt)
       _numread = 0;
       _valid = true;
    }
-}
-
-GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl)
-{
-   _recType = rt; _dataType = dt;
-   _recLen = rl+4; _index = 0;
-   // compensation for odd length ASCII string
-   if ((gdsDT_ASCII == _dataType) && (rl % 2)) _recLen++;
-   _record = DEBUG_NEW byte[_recLen];
-   add_int2b(_recLen);
-   _record[_index++] = _recType;
-   _record[_index++] = _dataType;
 }
 
 size_t GDSin::GdsRecord::flush(wxFFile& Gf)
@@ -127,9 +127,9 @@ bool GDSin::GdsRecord::retData(void* var, word curnum, byte len) const
       case gdsDT_REAL4B:// 4-bit real
       {
          // WARNING!!! not used and never checked !!!!
-         _sg_int8 sign = (0x80 & _record[curnum])? -1:1; //sign
+         char sign = (0x80 & _record[curnum])? -1:1; //sign
          byte exponent = 0x7f & _record[curnum]; // exponent
-         _sg_int32 mantissa = 0; // mantissa
+         int4b mantissa = 0; // mantissa
          byte* mant = (byte*)&mantissa;// take the memory possition
          mant[3] = 0x0;
          for (int i = 0; i < 3; i++)
@@ -481,7 +481,7 @@ bool GDSin::GdsInFile::getNextRecord()
    char recheader[4]; // record header
    size_t numread = _gdsFh.Read(&recheader,4);// read record header
    if (numread != 4)
-      return NULL;// error during read in
+      return false;// error during read in
    char rl[2];
    rl[0] = recheader[1];
    rl[1] = recheader[0];

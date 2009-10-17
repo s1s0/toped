@@ -47,7 +47,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
 {
    _localDir = localDir;
    _globalDir = globalDir;
-   _GDSDB = NULL; _CIFDB = NULL;//_TEDDB = NULL;
+   _GDSDB = NULL; _CIFDB = NULL;_OASISDB = NULL;//_TEDDB = NULL;
    _bpSync = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
@@ -387,6 +387,40 @@ void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool re
    unlockCif(ACIFDB, true);
 }
 
+bool DataCenter::OasisParse(std::string filename)
+{
+   bool status = true;
+
+   Oasis::OasisInFile* AOASISDB = NULL;
+   if (lockOasis(AOASISDB))
+   {
+      std::string news = "Removing existing OASIS data from memory...";
+      tell_log(console::MT_WARNING,news);
+      delete AOASISDB;
+   }
+   try
+   {
+      AOASISDB = DEBUG_NEW Oasis::OasisInFile(filename);
+      status = AOASISDB->status();
+      if (status)
+         AOASISDB->read();
+   }
+   catch (EXPTNreadOASIS)
+   {
+      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+      status = false;
+   }
+   if (status)
+      AOASISDB->hierOut();// generate the hierarchy tree of cells
+   else if (NULL != AOASISDB)
+   {
+      delete AOASISDB;
+      AOASISDB = NULL;
+   }
+   unlockOasis(AOASISDB);
+   return status;
+}
+
 void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
 {
    //Get actual time
@@ -483,6 +517,32 @@ void DataCenter::unlockCif(CIFin::CifFile*& cif_db, bool throwexception)
    else if (throwexception && (NULL == cif_db))
       throw EXPTNactive_CIF();
    cif_db = NULL;
+}
+
+bool DataCenter::lockOasis(Oasis::OasisInFile*& oasis_db)
+{
+   if (wxMUTEX_DEAD_LOCK == OASISLock.Lock())
+   {
+      tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
+      oasis_db = _OASISDB;
+      return false;
+   }
+   else
+   {
+      oasis_db = _OASISDB;
+      return (NULL != oasis_db);
+   }
+}
+
+void DataCenter::unlockOasis(Oasis::OasisInFile*& oasis_db, bool throwexception)
+{
+   _OASISDB = oasis_db;
+   VERIFY(wxMUTEX_NO_ERROR == OASISLock.Unlock());
+   if (NULL != _bpSync)
+      _bpSync->Signal();
+   else if (throwexception && (NULL == oasis_db))
+      throw EXPTNactive_OASIS();
+   oasis_db = NULL;
 }
 
 void DataCenter::bpAddGdsTab()
