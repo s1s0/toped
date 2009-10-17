@@ -935,7 +935,7 @@ bool laydata::tdtcell::copy_selected(laydata::tdtdesign* ATDB, const CTM& trans)
    dataList copyList;
    dataList::iterator DI;
    tdtdata *data_copy;
-   _dbl_word numshapes;
+   dword numshapes;
    selectList::iterator CL = _shapesel.begin(); 
    while (CL != _shapesel.end())
    {
@@ -1841,9 +1841,9 @@ void laydata::tdtcell::validate_layers()
       lay->second->validate();
 }
 
-_dbl_word laydata::tdtcell::getFullySelected(dataList* lslct) const 
+dword laydata::tdtcell::getFullySelected(dataList* lslct) const 
 {
-   _dbl_word numselected = 0;
+   dword numselected = 0;
    for (dataList::const_iterator CI = lslct->begin(); 
                                                      CI != lslct->end(); CI++)
       // cont the fully selected shapes

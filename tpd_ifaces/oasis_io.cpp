@@ -47,7 +47,7 @@ void  Oasis::Table::getTableRecord(OasisInFile& ofn, TableMode ieMode)
    else if (_ieMode != ieMode)
       throw EXPTNreadOASIS("Uncompatible record types encountered in \"NAME\" records (15.5,16.4,17.4,18.4)");
    std::string value = ofn.getString();
-   _dbl_word index;
+   dword index;
    switch (_ieMode)
    {
       case tblm_implicit: index = _nextIndex++; break;
@@ -105,7 +105,7 @@ Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings
 void Oasis::OasisInFile::read()
 {
    // get oas_START
-   _dbl_word recordType;
+   dword recordType;
 
    recordType = getUnsignedInt();
    if (oas_START != recordType) throw EXPTNreadOASIS("\"START\" record expected here (13.10)");
@@ -162,12 +162,12 @@ void Oasis::OasisInFile::readStartRecord()
    }
 }
 
-_dbl_word Oasis::OasisInFile::getUnsignedInt()
+dword Oasis::OasisInFile::getUnsignedInt()
 {
    byte        cmask       = 0x7f; // masks the MSB of the byte
    byte        bytecounter = 0   ; // how many bytes were read
    byte        bytein            ; // last byte read from the file stream
-   _dbl_word   result      = 0   ; // the result
+   dword   result      = 0   ; // the result
    // the result in array of bytes representation
    byte       *btres       = (byte*)&result; 
    do
@@ -196,8 +196,8 @@ _dbl_word Oasis::OasisInFile::getUnsignedInt()
 
 real Oasis::OasisInFile::getReal()
 {
-   _dbl_word      numerator   = 0;
-   _dbl_word      denominator = 1;
+   dword      numerator   = 0;
+   dword      denominator = 1;
    bool           sign        = false;
    float          fres;
    double         dres;
@@ -223,7 +223,7 @@ real Oasis::OasisInFile::getReal()
 
 std::string Oasis::OasisInFile::getString()
 {
-   _dbl_word   length  = getUnsignedInt() ; //string length
+   dword   length  = getUnsignedInt() ; //string length
    char*       theString = DEBUG_NEW char[length+1];
 
    if (length != _oasisFh.Read(theString,length))

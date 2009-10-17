@@ -131,9 +131,9 @@ word parsercmd::cmdVIRTUAL::getWordValue(telldata::UNDOPerandQUEUE& OPs, bool fr
    return value;
 }
 
-_dbl_word parsercmd::cmdVIRTUAL::getIndexValue(telldata::operandSTACK& OPs)
+dword parsercmd::cmdVIRTUAL::getIndexValue(telldata::operandSTACK& OPs)
 {
-   _dbl_word value = 0;
+   dword value = 0;
    telldata::tell_var *op = OPs.top();OPs.pop();
    if (op->get_type() == telldata::tn_real)
    {
@@ -143,7 +143,7 @@ _dbl_word parsercmd::cmdVIRTUAL::getIndexValue(telldata::operandSTACK& OPs)
          _opstackerr = true;
       }
       else
-         value = (_dbl_word) rint(realvalue);
+         value = (dword) rint(realvalue);
    }
    else if (op->get_type() == telldata::tn_int)
    {
@@ -521,7 +521,7 @@ int parsercmd::cmdASSIGN::execute()
    {
       if (_indexed)
       {
-         _dbl_word idx = getIndexValue();
+         dword idx = getIndexValue();
          _var = static_cast<telldata::ttlist*>(_var)->index_var(idx);
          if ((NULL != _var) && (!_opstackerr))
          {
@@ -559,7 +559,7 @@ int parsercmd::cmdLISTADD::execute()
       tellerror("Bad or unsupported type in assign statement");
    else
    {
-      _dbl_word idx = getIndex();
+      dword idx = getIndex();
       if ((!_opstackerr) && (_empty_list) && (0 == idx))
       {
          _listarg->insert(op);
@@ -581,9 +581,9 @@ int parsercmd::cmdLISTADD::execute()
 }
 
 
-_dbl_word parsercmd::cmdLISTADD::getIndex()
+dword parsercmd::cmdLISTADD::getIndex()
 {
-   _dbl_word idx;
+   dword idx;
    _empty_list = (0 == _listarg->size());
    // find the index
    if      (((!_index) && ( _prefix)) || _empty_list) // first in the list
@@ -610,7 +610,7 @@ int parsercmd::cmdLISTUNION::execute()
       tellerror("Bad or unsupported type in list union statement");
    else
    {
-      _dbl_word idx = getIndex();
+      dword idx = getIndex();
       if ((!_opstackerr) && (_empty_list) && (0 == idx))
       {
          _listarg->lunion(op);
@@ -635,7 +635,7 @@ int parsercmd::cmdLISTUNION::execute()
 int parsercmd::cmdLISTSUB::execute()
 {
    TELL_DEBUG(cmdLISTSUB);
-   _dbl_word idx;
+   dword idx;
    // find the index
    if      ((!_index) && ( _prefix)) // first in the list
       idx = 0;
@@ -660,7 +660,7 @@ int parsercmd::cmdLISTSUB::execute()
 int parsercmd::cmdLISTSLICE::execute()
 {
    TELL_DEBUG(cmdLISTSLICE);
-   _dbl_word idxB, idxE, size;
+   dword idxB, idxE, size;
    bool idxerrors = false;
    // find the index
    if ( _prefix )
@@ -729,7 +729,7 @@ int parsercmd::cmdPUSH::execute()
       // another class cmdLISTINDEX could be appropriate instead of the logical
       // branch below. It looks to me that it is quite the same as above, apart
       // from the index checks
-      _dbl_word idx = getIndexValue();
+      dword idx = getIndexValue();
       telldata::tell_var *listcomp = static_cast<telldata::ttlist*>(_var)->index_var(idx);
       if ((NULL != listcomp) && (!_opstackerr))
       {
