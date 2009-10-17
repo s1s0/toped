@@ -1321,6 +1321,67 @@ int tellstdfunc::CIFsetlaymap::execute()
 }
 
 //=============================================================================
+tellstdfunc::OASISread::OASISread(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::OASISread::execute() {
+   std::string filename = getStringValue();
+   telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
+
+   if (expandFileName(filename))
+   {
+      std::list<std::string> top_cell_list;
+      if (DATC->OasisParse(filename))
+      {
+//         // add OASIS tab in the browser
+//         DATC->bpAddOasisTab();
+//         //
+//         Oasis::OasisInFile* AOASISDB = NULL;
+//         if (DATC->lockGds(AOASISDB))
+//         {
+//            Oasis::OasisHierTree* root = AOASISDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+//            if (root)
+//            {
+//               do 
+//               {
+//                  top_cell_list.push_back(std::string(root->GetItem()->strctName()));
+//               } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+//            }
+//            //else ->it's possible to have an empty GDS file
+//         }
+//         else
+//         {
+//            // The AOASISDB mist exists here, because OASISparse returned true
+//            assert(false);
+//         }
+//         DATC->unlockOasis(AOASISDB);
+//         for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
+//                                                   CN != top_cell_list.end(); CN ++)
+//            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
+         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+      }
+//      else
+//      {
+//         Error should've been already reported by the parser. 
+//      }
+   }
+   else
+   {
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
+   }
+   // Make sure you always return what you have to return - a list in this case even if
+   // it's empty. Otherwise the following tell function will crash, because it can't
+   // retrieve from the operand stack the required number of parameters. Empty list
+   // is still a list and everybody should deal with them
+   OPstack.push(topcells);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {

@@ -82,18 +82,14 @@
 //=============================================================================
 // General type declations (compatability)
 //=============================================================================
-typedef          char   _sg_int8;   // 1 byte
-typedef         short   _sg_int16;  // 2 bytes
-typedef           int   _sg_int32;  // 4 bytes
-typedef long long int   _sg_int64;  // 8 bytes
-
-typedef unsigned char   byte;
-typedef unsigned short  word;
-typedef unsigned long   _dbl_word;
-typedef     _sg_int16   int2b;
-typedef     _sg_int32   int4b;
-typedef        double   real;
-typedef long long int   int8b;
+typedef unsigned char            byte     ; // 1 byte
+typedef unsigned short           word     ; // 2 bytes
+typedef unsigned int             _dbl_word; // 4 bytes
+typedef unsigned long long int   qword    ; // 8 bytes
+typedef short    int             int2b    ; // 2 bytes
+typedef          int             int4b    ; // 4 bytes
+typedef long long int            int8b    ; // 8 bytes
+typedef          double          real     ; // 8 bytes
 
 typedef  std::list<std::string>           nameList;
 typedef  std::set<std::string>            NameSet;

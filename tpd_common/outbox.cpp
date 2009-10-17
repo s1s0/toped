@@ -758,6 +758,11 @@ EXPTNactive_CIF::EXPTNactive_CIF() {
    tell_log(console::MT_ERROR,news);
 };
 
+EXPTNactive_OASIS::EXPTNactive_OASIS() {
+   std::string news = "No OASIS structure in memory. Parse first";
+   tell_log(console::MT_ERROR,news);
+};
+
 EXPTNreadTDT::EXPTNreadTDT(std::string info) {
    std::string news = "Error parsing TDT file =>";
    news += info;
@@ -766,6 +771,12 @@ EXPTNreadTDT::EXPTNreadTDT(std::string info) {
 
 EXPTNreadGDS::EXPTNreadGDS(std::string info) {
    std::string news = "Error parsing GDS file =>";
+   news += info;
+   tell_log(console::MT_ERROR,news);
+};
+
+EXPTNreadOASIS::EXPTNreadOASIS(std::string info) {
+   std::string news = "Error parsing OASIS file =>";
    news += info;
    tell_log(console::MT_ERROR,news);
 };

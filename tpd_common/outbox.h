@@ -268,6 +268,12 @@ class EXPTNactive_CIF : public EXPTN
       EXPTNactive_CIF();
 };
 
+class EXPTNactive_OASIS : public EXPTN
+{
+   public:
+      EXPTNactive_OASIS();
+};
+
 class EXPTNreadTDT : public EXPTN
 {
    public:
@@ -278,6 +284,12 @@ class EXPTNreadGDS : public EXPTN
 {
    public:
       EXPTNreadGDS(std::string);
+};
+
+class EXPTNreadOASIS : public EXPTN
+{
+   public:
+      EXPTNreadOASIS(std::string);
 };
 
 class EXPTNpolyCross : public EXPTN
