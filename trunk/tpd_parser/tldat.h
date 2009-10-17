@@ -271,14 +271,14 @@ namespace telldata {
       void                 reserve(unsigned num) {_mlist.reserve(num);};
       void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());};
       unsigned             size() const      {return _mlist.size();};
-      tell_var*            index_var(_dbl_word);
-      bool                 validIndex(_dbl_word);
-      void                 insert(telldata::tell_var*, _dbl_word);
+      tell_var*            index_var(dword);
+      bool                 validIndex(dword);
+      void                 insert(telldata::tell_var*, dword);
       void                 insert(telldata::tell_var*);
-      void                 lunion(telldata::ttlist*, _dbl_word);
+      void                 lunion(telldata::ttlist*, dword);
       void                 lunion(telldata::ttlist*);
-      tell_var*            erase(_dbl_word);
-      tell_var*            erase(_dbl_word, _dbl_word);
+      tell_var*            erase(dword);
+      tell_var*            erase(dword, dword);
       virtual             ~ttlist();
    private:
       memlist             _mlist;    // the list itself

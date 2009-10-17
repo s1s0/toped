@@ -84,7 +84,7 @@
 //=============================================================================
 typedef unsigned char            byte     ; // 1 byte
 typedef unsigned short           word     ; // 2 bytes
-typedef unsigned int             _dbl_word; // 4 bytes
+typedef unsigned int             dword    ; // 4 bytes
 typedef unsigned long long int   qword    ; // 8 bytes
 typedef short    int             int2b    ; // 2 bytes
 typedef          int             int4b    ; // 4 bytes

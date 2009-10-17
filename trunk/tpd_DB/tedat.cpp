@@ -1282,11 +1282,11 @@ void laydata::tdtwire::draw_srequest(tenderer::TopRend& rend, const SGBitSet* ps
 
 void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
-   _dbl_word num_points = ptlist.size();
+   dword num_points = ptlist.size();
    if (0 == ptlist.size()) return;
    // to keep MS VC++ happy - define the counter outside the loops
-   _dbl_word i;
-   _dbl_word num_cpoints = (num_points == _psize) ? num_points : num_points / 3;
+   dword i;
+   dword num_cpoints = (num_points == _psize) ? num_points : num_points / 3;
    // draw the central line in all cases
    if (0 == num_cpoints) return;
    glBegin(GL_LINE_STRIP);
@@ -1308,7 +1308,7 @@ void laydata::tdtwire::openGL_drawfill(layprop::DrawProperties&, const pointlist
 {
    if (_psize == ptlist.size()) return;
    glBegin(GL_QUAD_STRIP);
-   for (_dbl_word i = _psize; i < 3 *_psize; i++)
+   for (dword i = _psize; i < 3 *_psize; i++)
       glVertex2i(ptlist[i].x(), ptlist[i].y());
    glEnd();
 }
@@ -1373,7 +1373,7 @@ void laydata::tdtwire::motion_draw(const layprop::DrawProperties& drawprop,
    ptlist->clear(); delete ptlist;
 }
 
-void laydata::tdtwire::precalc(pointlist& ptlist, _dbl_word num_points) const
+void laydata::tdtwire::precalc(pointlist& ptlist, dword num_points) const
 {
    DBbox* ln1 = endPnts(ptlist[0],ptlist[1], true);
    if (NULL != ln1)
@@ -2775,7 +2775,7 @@ laydata::tdttmpbox::~tdttmpbox()
 void laydata::tdttmppoly::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
 {
    CTM trans = transtack.front();
-   _dbl_word numpnts;
+   dword numpnts;
    if ((numpnts = _plist.size()) == 0) return;
    word i;
    glBegin(GL_LINE_STRIP);
@@ -2801,7 +2801,7 @@ void laydata::tdttmpwire::draw(const layprop::DrawProperties& drawprop, ctmqueue
 {
    CTM trans = transtack.front();
    pointlist* ptlist;
-   _dbl_word num_points = _plist.size();
+   dword num_points = _plist.size();
    if (num_points == 0) return;
    ptlist = DEBUG_NEW pointlist;
    ptlist->reserve(3*(num_points + 1));
@@ -2822,7 +2822,7 @@ void  laydata::tdttmpwire::rmpoint(TP& lp)
    if (_plist.size() > 0) lp = _plist.back();
 };
 
-void laydata::tdttmpwire::precalc(pointlist& ptlist, _dbl_word num_points) const
+void laydata::tdttmpwire::precalc(pointlist& ptlist, dword num_points) const
 {
    DBbox* ln1 = endPnts(ptlist[0],ptlist[1], true);
    if (NULL != ln1)
@@ -2895,11 +2895,11 @@ DBbox* laydata::tdttmpwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) co
 
 void laydata::tdttmpwire::drawline(const pointlist& ptlist) const
 {
-   _dbl_word num_points = ptlist.size();
+   dword num_points = ptlist.size();
    if (0 == ptlist.size()) return;
    // to keep MS VC++ happy - define the counter outside the loops
-   _dbl_word i;
-   _dbl_word num_cpoints = (num_points == _plist.size()) ? num_points : num_points / 3;
+   dword i;
+   dword num_cpoints = (num_points == _plist.size()) ? num_points : num_points / 3;
    // draw the central line in all cases
    if (0 == num_cpoints) return;
    glBegin(GL_LINE_STRIP);

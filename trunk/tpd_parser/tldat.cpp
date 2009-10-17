@@ -300,15 +300,15 @@ void telldata::ttlist::assign(tell_var* rt) {
    this->operator = (*(static_cast<ttlist*>(rt)));
 }
 
-telldata::tell_var* telldata::ttlist::index_var(_dbl_word index)
+telldata::tell_var* telldata::ttlist::index_var(dword index)
 {
    if (_mlist.empty() || (index > (_mlist.size() - 1))) return NULL;
    else return _mlist[index];
 }
 
-bool telldata::ttlist::validIndex(_dbl_word index)
+bool telldata::ttlist::validIndex(dword index)
 {
-   _dbl_word cursize = _mlist.size();
+   dword cursize = _mlist.size();
    if ((0 == cursize) || (index > (cursize - 1))) return false;
    else return true;
 }
@@ -318,7 +318,7 @@ void telldata::ttlist::insert(telldata::tell_var* newval)
    _mlist.push_back(newval->selfcopy());
 }
 
-void telldata::ttlist::insert(telldata::tell_var* newval, _dbl_word index)
+void telldata::ttlist::insert(telldata::tell_var* newval, dword index)
 {
    assert(index >=0); assert(index <= _mlist.size());
    if (index == _mlist.size())
@@ -347,7 +347,7 @@ void telldata::ttlist::lunion(telldata::ttlist* inlist)
       _mlist.push_back((*CI)->selfcopy());
 }
 
-void telldata::ttlist::lunion(telldata::ttlist* inlist, _dbl_word index)
+void telldata::ttlist::lunion(telldata::ttlist* inlist, dword index)
 {
    assert(index >=0); assert(index <= _mlist.size());
    if (index == _mlist.size())
@@ -369,7 +369,7 @@ void telldata::ttlist::lunion(telldata::ttlist* inlist, _dbl_word index)
    }
 }
 
-telldata::tell_var* telldata::ttlist::erase(_dbl_word index)
+telldata::tell_var* telldata::ttlist::erase(dword index)
 {
    assert(index >=0); assert(index < _mlist.size());
    telldata::tell_var* erased = _mlist[index];
@@ -392,7 +392,7 @@ telldata::tell_var* telldata::ttlist::erase(_dbl_word index)
    return erased;
 }
 
-telldata::tell_var* telldata::ttlist::erase(_dbl_word idxB, _dbl_word idxE)
+telldata::tell_var* telldata::ttlist::erase(dword idxB, dword idxE)
 {
    assert(idxB >=0); assert(idxB < _mlist.size());
    assert(idxE >=0); assert(idxE < _mlist.size());

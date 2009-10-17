@@ -230,7 +230,7 @@ namespace laydata {
          pointlist         shape2poly() const {return pointlist(); /*return empty list*/}
          word              ltype() const {return _lmwire;}
       private:
-         void              precalc(pointlist&, _dbl_word) const;
+         void              precalc(pointlist&, dword) const;
          void              select_points(DBbox&, SGBitSet&);
          void              unselect_points(DBbox&, SGBitSet&);
          pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
@@ -460,7 +460,7 @@ namespace laydata {
          virtual void      addpoint(TP p) {_plist.push_back(p);}
          virtual void      rmpoint(TP&);
       private:
-         void              precalc(pointlist&, _dbl_word) const;
+         void              precalc(pointlist&, dword) const;
          DBbox*            endPnts(const TP&, const TP&, bool first) const;
          DBbox*            mdlPnts(const TP&, const TP&, const TP&) const;
          void              drawline(const pointlist& ptlist) const;

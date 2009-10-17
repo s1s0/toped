@@ -82,7 +82,7 @@ namespace Oasis {
          void              getTableRecord(OasisInFile&, TableMode);
       private:
          qword             _offset;
-         _dbl_word         _nextIndex;
+         dword             _nextIndex;
          bool              _strictMode;
          TableMode         _ieMode; //implicit/explicit mode
       
@@ -95,7 +95,7 @@ namespace Oasis {
          void              read();
          bool              status ()         {return _status;}
          void              hierOut ()        {/*@TODO!*/}
-         _dbl_word         getUnsignedInt();
+         dword             getUnsignedInt();
          real              getReal();
          std::string       getString();
       private:

@@ -44,7 +44,7 @@ extern int     cifnerrs;
 
 
 //=============================================================================
-CIFin::CifBox::CifBox(CifData* last, _dbl_word length, _dbl_word width, TP* center, TP* direction) :
+CIFin::CifBox::CifBox(CifData* last, dword length, dword width, TP* center, TP* direction) :
                            CifData(last), _length(length), _width(width), _center(center),
                                    _direction(direction) {}
 
@@ -62,7 +62,7 @@ CIFin::CifPoly::~CifPoly()
    delete _poly;
 }
 //=============================================================================
-CIFin::CifWire::CifWire(CifData* last, pointlist* poly, _dbl_word width) :
+CIFin::CifWire::CifWire(CifData* last, pointlist* poly, dword width) :
       CifData(last), _poly(poly), _width(width) {}
 
 CIFin::CifWire::~CifWire()
@@ -70,7 +70,7 @@ CIFin::CifWire::~CifWire()
    delete _poly;
 }
 //=============================================================================
-CIFin::CifRef::CifRef(CifData* last, _dbl_word cell, CTM* location) :
+CIFin::CifRef::CifRef(CifData* last, dword cell, CTM* location) :
       CifData(last), _cell(cell), _location(location) {}
 
 CIFin::CifRef::~CifRef()
@@ -108,7 +108,7 @@ CIFin::CifLayer::~CifLayer()
 }
 
 
-void CIFin::CifLayer::addBox(_dbl_word length,_dbl_word width ,TP* center, TP* direction)
+void CIFin::CifLayer::addBox(dword length,dword width ,TP* center, TP* direction)
 {
    _first = DEBUG_NEW CifBox(_first, length, width, center, direction);
 }
@@ -118,7 +118,7 @@ void CIFin::CifLayer::addPoly(pointlist* poly)
    _first = DEBUG_NEW CifPoly(_first, poly);
 }
 
-void CIFin::CifLayer::addWire(pointlist* poly, _dbl_word width)
+void CIFin::CifLayer::addWire(pointlist* poly, dword width)
 {
    _first = DEBUG_NEW CifWire(_first, poly, width);
 }
@@ -134,7 +134,7 @@ void CIFin::CifLayer::addLabelSig(std::string label, TP* loc)
 }
 
 //=============================================================================
-CIFin::CifStructure::CifStructure(_dbl_word ID, CifStructure* last, _dbl_word a, _dbl_word b) :
+CIFin::CifStructure::CifStructure(dword ID, CifStructure* last, dword a, dword b) :
       _ID(ID), _last(last), _a(a), _b(b), _name(""), _first(NULL),
           _refirst(NULL), _overlap(TP()), _orphan(true), _traversed(false) {}
 
@@ -188,7 +188,7 @@ void CIFin::CifStructure::collectLayers(nameList& layList, bool hier)
       (*CCS)->collectLayers(layList, hier);
 }
 
-void CIFin::CifStructure::addRef(_dbl_word cell, CTM* location)
+void CIFin::CifStructure::addRef(dword cell, CTM* location)
 {
    _refirst = DEBUG_NEW CifRef(_refirst, cell, location);
 }
@@ -301,7 +301,7 @@ CIFin::CifFile::~CifFile()
    closeFile();
 }
 
-void CIFin::CifFile::addStructure(_dbl_word ID, _dbl_word a, _dbl_word b)
+void CIFin::CifFile::addStructure(dword ID, dword a, dword b)
 {
    _first = DEBUG_NEW CifStructure(ID,_first, a,b);
    _current = _first;
@@ -339,7 +339,7 @@ void CIFin::CifFile::curCellOverlap(TP* bl, TP* tr)
    else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
 }
 
-void CIFin::CifFile::addBox(_dbl_word length, _dbl_word width ,TP* center, TP* direction)
+void CIFin::CifFile::addBox(dword length, dword width ,TP* center, TP* direction)
 {
    _curLay->addBox(length, width, center, direction);
 }
@@ -349,12 +349,12 @@ void CIFin::CifFile::addPoly(pointlist* poly)
    _curLay->addPoly(poly);
 }
 
-void CIFin::CifFile::addWire(pointlist* poly, _dbl_word width)
+void CIFin::CifFile::addWire(pointlist* poly, dword width)
 {
    _curLay->addWire(poly, width);
 }
 
-void CIFin::CifFile::addRef(_dbl_word cell, CTM* location)
+void CIFin::CifFile::addRef(dword cell, CTM* location)
 {
    _current->addRef(cell, location);
 }
@@ -386,7 +386,7 @@ void CIFin::CifFile::collectLayers(nameList& cifLayers)
    cifLayers.unique();
 }
 
-CIFin::CifStructure* CIFin::CifFile::getStructure(_dbl_word cellno)
+CIFin::CifStructure* CIFin::CifFile::getStructure(dword cellno)
 {
    CifStructure* local = _first;
    while (NULL != local)
