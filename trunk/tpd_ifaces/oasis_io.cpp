@@ -364,7 +364,7 @@ void Oasis::Cell::skimRectangle(OasisInFile& ofn)
    byte info = ofn.getByte();
 
    if ((info & Smask) && (info & Hmask))
-      throw EXPTNreadOASIS("S&H masks are on simultaneously in rectangle info byte (25.7)");
+      throw EXPTNreadOASIS("S&H masks are ON simultaneously in rectangle info byte (25.7)");
    dword layno  = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
    word  dtype  = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    dword width  = (info & Wmask) ? (_mod_gwidth   = ofn.getUnsignedInt(4)) : _mod_gwidth();
@@ -383,15 +383,142 @@ void Oasis::Cell::skimPolygon(OasisInFile& ofn)
 {
    byte info = ofn.getByte();
 
-   dword layno  = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
-   word  dtype  = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
-   //@ TODO ! Get the point list!
-   int8b p1x    = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
-   int8b p1y    = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   dword     layno = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word      dtype = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   PointList plist = (info & Pmask) ? (_mod_pplist   = skimPointList(ofn)   ) : _mod_pplist();
+   int8b     p1x   = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
+   int8b     p1y   = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
    if (info & Rmask)
    {
       assert(false); //@TODO - parse repetition records!
    }
+}
+
+//------------------------------------------------------------------------------
+Oasis::PointList Oasis::Cell::skimPointList(OasisInFile& ofn)
+{
+   byte pltu = ofn.getUnsignedInt(1);
+   if (pltu >= dt_unknown)
+      throw EXPTNreadOASIS("Bad point list type (7.7.8)");
+   else
+      return PointList(ofn, (PointListType)pltu);
+}
+
+//==============================================================================
+Oasis::PointList::PointList(OasisInFile& ofn, PointListType pltype) : _pltype(pltype)
+{
+   _vcount = ofn.getUnsignedInt(4);
+   _delarr = DEBUG_NEW int4b[2*_vcount];
+   switch (_pltype)
+   {
+      case dt_manhattanH : readManhattanH(ofn) ; break;
+      case dt_manhattanV : readManhattanV(ofn) ; break;
+      case dt_mamhattanE : readManhattanE(ofn) ; break;
+      case dt_octangular : readOctangular(ofn) ; break;
+      case dt_allangle   : readAllAngle(ofn)   ; break;
+      case dt_doubledelta: readDoubleDelta(ofn); break;
+      default: assert(false);
+   }
+}
+
+void Oasis::PointList::readManhattanH(OasisInFile& ofb)
+{
+   for (dword ccrd = 0; ccrd < _vcount; ccrd++)
+   {
+      if (ccrd % 2) {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
+      else          {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
+   }
+}
+
+void Oasis::PointList::readManhattanV(OasisInFile& ofb)
+{
+   for (dword ccrd = 0; ccrd < _vcount; ccrd++)
+   {
+      if (ccrd % 2) {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
+      else          {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
+   }
+}
+
+void Oasis::PointList::readManhattanE(OasisInFile& ofb)
+{
+   qword             data;
+   DeltaDirections   direction;
+   byte*             bdata = (byte*)&data;
+   for (dword ccrd = 0; ccrd < _vcount; ccrd++)
+   {
+      data      = ofb.getUnsignedInt(8);
+      direction = (DeltaDirections)(bdata[0] & 0x03);
+      switch (direction)
+      {
+         case dr_east : _delarr[2*ccrd] = (data >> 2); _delarr[2*ccrd+1] = 0          ; break;
+         case dr_north: _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] = (data >> 2); break;
+         case dr_west : _delarr[2*ccrd] =-(data >> 2); _delarr[2*ccrd+1] = 0          ; break;
+         case dr_south: _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] =-(data >> 2); break;
+         default: assert(false);
+      }
+   }
+}
+
+void Oasis::PointList::readOctangular(OasisInFile& ofb)
+{
+   qword             data;
+   DeltaDirections   direction;
+   byte*             bdata = (byte*)&data;
+   for (dword ccrd = 0; ccrd < _vcount; ccrd++)
+   {
+      data      = ofb.getUnsignedInt(8);
+      direction = (DeltaDirections)(bdata[0] & 0x07);
+      switch (direction)
+      {
+         case dr_east     : _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] = 0          ; break;
+         case dr_north    : _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] = (data >> 3); break;
+         case dr_west     : _delarr[2*ccrd] =-(data >> 3); _delarr[2*ccrd+1] = 0          ; break;
+         case dr_south    : _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] =-(data >> 3); break;
+         case dr_northeast: _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] = (data >> 3); break;
+         case dr_northwest: _delarr[2*ccrd] =-(data >> 3); _delarr[2*ccrd+1] = (data >> 3); break;
+         case dr_southeast: _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] =-(data >> 3); break;
+         case dr_southwest: _delarr[2*ccrd] =-(data >> 3); _delarr[2*ccrd+1] =-(data >> 3); break;
+         default: assert(false);
+      }
+   }
+}
+
+void Oasis::PointList::readAllAngle(OasisInFile& ofb)
+{
+   qword             data;
+   DeltaDirections   direction;
+   byte*             bdata = (byte*)&data;
+   for (dword ccrd = 0; ccrd < _vcount; ccrd++)
+   {
+      data      = ofb.getUnsignedInt(8);
+      if (bdata[0] & 0x01)
+      { // g delta 2
+         if (bdata[0] & 0x02) _delarr[2*ccrd] =-(data >> 2);
+         else                 _delarr[2*ccrd] = (data >> 2);
+         _delarr[2*ccrd+1] = ofb.getInt(8);
+      }
+      else
+      { //g delta 1
+         direction = (DeltaDirections)((bdata[0] & 0x0e) >> 1);
+         switch (direction)
+         {
+            case dr_east     : _delarr[2*ccrd] = (data >> 4); _delarr[2*ccrd+1] = 0          ; break;
+            case dr_north    : _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] = (data >> 4); break;
+            case dr_west     : _delarr[2*ccrd] =-(data >> 4); _delarr[2*ccrd+1] = 0          ; break;
+            case dr_south    : _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] =-(data >> 4); break;
+            case dr_northeast: _delarr[2*ccrd] = (data >> 4); _delarr[2*ccrd+1] = (data >> 4); break;
+            case dr_northwest: _delarr[2*ccrd] =-(data >> 4); _delarr[2*ccrd+1] = (data >> 4); break;
+            case dr_southeast: _delarr[2*ccrd] = (data >> 4); _delarr[2*ccrd+1] =-(data >> 4); break;
+            case dr_southwest: _delarr[2*ccrd] =-(data >> 4); _delarr[2*ccrd+1] =-(data >> 4); break;
+            default: assert(false);
+         }
+      }
+   }
+}
+
+void Oasis::PointList::readDoubleDelta(OasisInFile& ofb)
+{
+   /*@TODO*/assert(false);
 }
 
 //oasisread("/home/skr/toped/library/oasis/FOLL2.OAS");
