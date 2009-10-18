@@ -78,7 +78,25 @@ namespace Oasis {
    const byte Lmask                 = 0b00000001;
    const byte Emask                 = Smask;
    const byte Pmask                 = Hmask;
-   
+
+   // Types of point lists
+   typedef enum { dt_manhattanH    = 0 ,
+                  dt_manhattanV    = 1 ,
+                  dt_mamhattanE    = 2 ,
+                  dt_octangular    = 3 ,
+                  dt_allangle      = 4 ,
+                  dt_doubledelta   = 5 ,
+                  dt_unknown       = 6  } PointListType;
+
+   typedef enum { dr_east          = 0 ,
+                  dr_north         = 1 ,
+                  dr_west          = 2 ,
+                  dr_south         = 3 ,
+                  dr_northeast     = 4 ,
+                  dr_northwest     = 5 ,
+                  dr_southeast     = 6 ,
+                  dr_southwest     = 7  } DeltaDirections;
+
    class OasisInFile;
    
 //   class Record {
@@ -115,6 +133,23 @@ namespace Oasis {
          TYPE              _value;
    };
 
+
+   class PointList {/*@FIXME! Needs a deep copy constructor to be handled properly by ModalVar*/
+      public:
+                           PointList() : _pltype(dt_unknown), _vcount(0), _delarr(NULL) {}
+                           PointList(OasisInFile&, PointListType);
+      private:
+         void              readManhattanH(OasisInFile&);
+         void              readManhattanV(OasisInFile&);
+         void              readManhattanE(OasisInFile&);
+         void              readOctangular(OasisInFile&);
+         void              readAllAngle(OasisInFile&);
+         void              readDoubleDelta(OasisInFile&);
+         PointListType     _pltype; //! Oasis point list type
+         dword             _vcount; //! Number of vertexes in the list
+         int4b*            _delarr; //! Delta sequence in XYXY... array
+   };
+   
    class Cell {
       public:
                            Cell();
@@ -122,12 +157,15 @@ namespace Oasis {
       private:
          void              skimRectangle(OasisInFile&);
          void              skimPolygon(OasisInFile&);
+         PointList         skimPointList(OasisInFile&);
          ModalVar<dword>   _mod_layer     ; //! OASIS modal variable layer
          ModalVar< word>   _mod_datatype  ; //! OASIS modal variable datatype
          ModalVar<dword>   _mod_gwidth    ; //! OASIS modal variable geometry-w
          ModalVar<dword>   _mod_gheight   ; //! OASIS modal variable geometry-h
          ModalVar<int4b>   _mod_gx        ; //! OASIS modal variable geometry-x
          ModalVar<int4b>   _mod_gy        ; //! OASIS modal variable geometry-y
+         ModalVar<PointList> _mod_pplist  ; //! OASIS modal variable polygon point list
+         ModalVar<PointList> _mod_wplist  ; //! OASIS modal variable path point list
    };
    
    class OasisInFile {
