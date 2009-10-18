@@ -26,15 +26,14 @@
 //===========================================================================
 #include "tpdph.h"
 #include "oasis_io.h"
-#include "outbox.h"
 #include <sstream>
 
 
 //===========================================================================
 Oasis::Table::Table(OasisInFile& ofh)
 {
-   _strictMode   = ofh.getUnsignedInt();
-   _offset       = ofh.getUnsignedInt();
+   _strictMode   = ofh.getUnsignedInt(1);
+   _offset       = ofh.getUnsignedInt(8);
    _ieMode       = tblm_unknown;
    _nextIndex    = 0;
 }
@@ -51,7 +50,7 @@ void  Oasis::Table::getTableRecord(OasisInFile& ofn, TableMode ieMode)
    switch (_ieMode)
    {
       case tblm_implicit: index = _nextIndex++; break;
-      case tblm_explicit: index = ofn.getUnsignedInt(); break;
+      case tblm_explicit: index = ofn.getUnsignedInt(4); break;
       default: assert(false);
    }
    // add a record to the hash table
@@ -102,41 +101,9 @@ Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings
    }
 }
 
-void Oasis::OasisInFile::read()
-{
-   // get oas_START
-   dword recordType;
-
-   recordType = getUnsignedInt();
-   if (oas_START != recordType) throw EXPTNreadOASIS("\"START\" record expected here (13.10)");
-   readStartRecord();
-   do {
-      switch (getUnsignedInt())
-      {  
-         case oas_PAD: break;
-//         case oas_PROPERTY_1  :
-//         case oas_PROPERTY_2  :
-//         case oas_CELL_1      :
-//         case oas_CELL_2      :
-         case oas_CELLNAME_1  : _cellNames->getTableRecord(*this, tblm_implicit)   ; break;
-         case oas_TEXTSTRING_1: _textStrings->getTableRecord(*this, tblm_implicit) ; break;
-         case oas_PROPNAME_1  : _propNames->getTableRecord(*this, tblm_implicit)   ; break;
-         case oas_LAYERNAME_1 : _layerNames->getTableRecord(*this, tblm_implicit)  ; break;
-         case oas_PROPSTRING_1: _propStrings->getTableRecord(*this, tblm_implicit) ; break;
-         case oas_CELLNAME_2  : _cellNames->getTableRecord(*this, tblm_explicit)   ; break;
-         case oas_TEXTSTRING_2: _textStrings->getTableRecord(*this, tblm_explicit) ; break;
-         case oas_PROPNAME_2  : _propNames->getTableRecord(*this, tblm_explicit)   ; break;
-         case oas_LAYERNAME_2 : _layerNames->getTableRecord(*this, tblm_explicit)  ; break;
-         case oas_PROPSTRING_2: _propStrings->getTableRecord(*this, tblm_explicit) ; break;
-//         case oas_XNAME_1     :
-//         case oas_XNAME_2     :
-//         case oas_CBLOCK      :
-         case oas_END : /*readEndRecord(); */return;
-         default: throw EXPTNreadOASIS("Unexpected record in the current context");
-      }
-   } while (true);
-}
-
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void Oasis::OasisInFile::readStartRecord()
 {
    std::ostringstream info;
@@ -145,7 +112,7 @@ void Oasis::OasisInFile::readStartRecord()
    tell_log(console::MT_INFO, info.str());
    _unit = getReal();
    if (0 > _unit) throw EXPTNreadOASIS("Unacceptable \"unit\" value (13.10)");
-   bool offsetFlag = getUnsignedInt();
+   bool offsetFlag = getUnsignedInt(1);
    if (!offsetFlag)
    {
       // table offset structure is stored in the START record (here)
@@ -162,12 +129,62 @@ void Oasis::OasisInFile::readStartRecord()
    }
 }
 
-dword Oasis::OasisInFile::getUnsignedInt()
+void Oasis::OasisInFile::readLibrary()
 {
+   // get oas_START
+   byte recType = getUnsignedInt(1);
+   if (oas_START != recType) throw EXPTNreadOASIS("\"START\" record expected here (13.10)");
+   readStartRecord();
+   // Some sequences (CELL) does not have an explicit end record. So they end when a record
+   // which can not be a member of the difinition appears. The trouble is that the last byte
+   // read from (say) readCell should be reused in the loop here
+   bool rlb = false;// reuse last byte
+   Cell* curCell = NULL;
+   do {
+      if (!rlb) recType = getUnsignedInt(1);
+      switch (recType)
+      {  
+         case oas_PAD         : rlb = false; break;
+         case oas_PROPERTY_1  : /*@TODO*/ rlb = false; break;
+         case oas_PROPERTY_2  : /*@TODO*/ rlb = false; break;
+         case oas_CELL_1      : curCell = DEBUG_NEW Cell(); recType = curCell->readCell(*this, true) ; rlb = true; break;
+         case oas_CELL_2      : curCell = DEBUG_NEW Cell(); recType = curCell->readCell(*this, false); rlb = true; break;
+         case oas_CBLOCK      : /*@TODO*/ rlb = false; break;
+         // <name> records
+         case oas_CELLNAME_1  : _cellNames->getTableRecord(*this, tblm_implicit)   ; rlb = false; break;
+         case oas_TEXTSTRING_1: _textStrings->getTableRecord(*this, tblm_implicit) ; rlb = false; break;
+         case oas_PROPNAME_1  : _propNames->getTableRecord(*this, tblm_implicit)   ; rlb = false; break;
+         case oas_LAYERNAME_1 : _layerNames->getTableRecord(*this, tblm_implicit)  ; rlb = false; break;
+         case oas_PROPSTRING_1: _propStrings->getTableRecord(*this, tblm_implicit) ; rlb = false; break;
+         case oas_CELLNAME_2  : _cellNames->getTableRecord(*this, tblm_explicit)   ; rlb = false; break;
+         case oas_TEXTSTRING_2: _textStrings->getTableRecord(*this, tblm_explicit) ; rlb = false; break;
+         case oas_PROPNAME_2  : _propNames->getTableRecord(*this, tblm_explicit)   ; rlb = false; break;
+         case oas_LAYERNAME_2 : _layerNames->getTableRecord(*this, tblm_explicit)  ; rlb = false; break;
+         case oas_PROPSTRING_2: _propStrings->getTableRecord(*this, tblm_explicit) ; rlb = false; break;
+         case oas_XNAME_1     : /*@TODO*/ rlb = false; break;
+         case oas_XNAME_2     : /*@TODO*/ rlb = false; break;
+         case oas_END         : /*@TODO readEndRecord(); */return;
+         default: throw EXPTNreadOASIS("Unexpected record in the current context");
+      }
+   } while (true);
+}
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+byte Oasis::OasisInFile::getByte()
+{
+   byte        bytein            ; // last byte read from the file stream
+   if (1 != _oasisFh.Read(&bytein,1))
+      throw EXPTNreadOASIS("I/O error during read-in");
+   return bytein;
+}
+qword Oasis::OasisInFile::getUnsignedInt(byte length)
+{
+   assert((length > 0) && (length < 9));
    byte        cmask       = 0x7f; // masks the MSB of the byte
    byte        bytecounter = 0   ; // how many bytes were read
    byte        bytein            ; // last byte read from the file stream
-   dword   result      = 0   ; // the result
+   qword       result      = 0   ; // the result
    // the result in array of bytes representation
    byte       *btres       = (byte*)&result; 
    do
@@ -178,22 +195,62 @@ dword Oasis::OasisInFile::getUnsignedInt()
       {
          case 0: btres[0]  = bytein & cmask; 
                  break;
-         case 1: btres[0] |= bytein << 7;
-                 btres[1]  = (bytein & cmask) >> 1;
-                 break;
-         case 2: btres[1] |= bytein << 6;
-                 btres[2]  = (bytein & cmask) >> 2;
-                 break;
-         case 3: btres[2] |= bytein << 5;
-                 btres[3]  = (bytein & cmask) >> 3;
+         case 1:
+         case 2:
+         case 3:
+         case 4:
+         case 5:
+         case 6:
+         case 7: btres[bytecounter-1] |= bytein << (8-bytecounter);
+                 btres[bytecounter  ]  = (bytein & cmask) >> bytecounter;
                  break;
          default: throw EXPTNreadOASIS("Integer is too big (7.2.3)");
       }
       bytecounter++;
    } while (bytein & (~cmask));
+   if (bytecounter > length)
+      throw EXPTNreadOASIS("Unsigned integer with unexpected length(7.2.3)");
    return result;
 }
 
+int8b Oasis::OasisInFile::getInt(byte length)
+{
+   assert((length > 0) && (length < 9));
+   const byte  cmask       = 0x7f; // masks the MSB of the byte
+   byte        bytecounter = 0   ; // how many bytes were read
+   byte        bytein            ; // last byte read from the file stream
+   byte        sign              ;
+   int8b       result      = 0   ; // the result
+   // the result in array of bytes representation
+   byte       *btres       = (byte*)&result; 
+   do
+   {
+      if (1 != _oasisFh.Read(&bytein,1))
+         throw EXPTNreadOASIS("I/O error during read-in");
+      switch (bytecounter)
+      {
+         case 0: btres[0]  = (bytein & cmask) >> 1;
+                 sign      = bytein << 7;
+                 break;
+         case 1:
+         case 2:
+         case 3:
+         case 4:
+         case 5:
+         case 6: btres[bytecounter-1] |= bytein << (7-bytecounter);
+                 btres[bytecounter  ]  = (bytein & cmask) >> (bytecounter + 1);
+                 break;
+         case 7: btres[bytecounter-1] |= bytein;
+         default: throw EXPTNreadOASIS("Integer is too big (7.2.3)");
+      }
+      bytecounter++;
+   } while (bytein & (~cmask));
+   if (bytecounter > length)
+      throw EXPTNreadOASIS("Unsigned integer with unexpected length(7.2.3)");
+   btres[7] = sign;
+   return result;
+}
+//------------------------------------------------------------------------------
 real Oasis::OasisInFile::getReal()
 {
    dword      numerator   = 0;
@@ -201,14 +258,14 @@ real Oasis::OasisInFile::getReal()
    bool           sign        = false;
    float          fres;
    double         dres;
-   switch (getUnsignedInt())
+   switch (getUnsignedInt(1))
    {
-      case 0: numerator   = getUnsignedInt(); break;
-      case 1: numerator   = getUnsignedInt(); sign = true; break;
-      case 2: denominator = getUnsignedInt(); break;
-      case 3: denominator = getUnsignedInt(); sign = true; break;
-      case 4: numerator   = getUnsignedInt(); denominator = getUnsignedInt(); break;
-      case 5: numerator   = getUnsignedInt(); denominator = getUnsignedInt(); sign = true; break;
+      case 0: numerator   = getUnsignedInt(4); break;
+      case 1: numerator   = getUnsignedInt(4); sign = true; break;
+      case 2: denominator = getUnsignedInt(4); break;
+      case 3: denominator = getUnsignedInt(4); sign = true; break;
+      case 4: numerator   = getUnsignedInt(4); denominator = getUnsignedInt(4); break;
+      case 5: numerator   = getUnsignedInt(4); denominator = getUnsignedInt(4); sign = true; break;
       case 6: if (4 != _oasisFh.Read(&fres,4)) throw EXPTNreadOASIS("I/O error during read-in");
               return fres;
       case 7: if (8 != _oasisFh.Read(&dres,8)) throw EXPTNreadOASIS("I/O error during read-in");
@@ -221,9 +278,10 @@ real Oasis::OasisInFile::getReal()
    return result;
 }
 
+//------------------------------------------------------------------------------
 std::string Oasis::OasisInFile::getString()
 {
-   dword   length  = getUnsignedInt() ; //string length
+   dword   length  = getUnsignedInt(2) ; //string length
    char*       theString = DEBUG_NEW char[length+1];
 
    if (length != _oasisFh.Read(theString,length))
@@ -234,6 +292,8 @@ std::string Oasis::OasisInFile::getString()
    return result;
 }
 
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 Oasis::OasisInFile::~OasisInFile()
 {
    if ( _cellNames  ) delete _cellNames;
@@ -243,4 +303,95 @@ Oasis::OasisInFile::~OasisInFile()
    if ( _layerNames ) delete _layerNames;
    if ( _xNames     ) delete _xNames;
 }
+
+
+//==============================================================================
+Oasis::Cell::Cell()
+{
+   // See spec chap.10 (page 11). The modal variables below have to be 
+   // initialised to 0
+   _mod_gx = 0;
+   _mod_gy = 0;
+   
+}
+
+byte Oasis::Cell::readCell(OasisInFile& ofn, bool refnum)
+{
+   std::string cellName;
+   if (refnum)
+   {
+      dword cellRefNum = ofn.getUnsignedInt(4);
+      // find the cell name in the _cellName hash table by the ref number
+   }
+   else
+   {
+      cellName = ofn.getString();
+   }
+   do
+   {
+      byte recType = ofn.getUnsignedInt(1);
+      switch (recType)
+      {
+         case oas_PAD         : break;
+         case oas_PROPERTY_1  : /*@TODO*/assert(false);break;
+         case oas_PROPERTY_2  : /*@TODO*/assert(false);break;
+         case oas_XYRELATIVE  : /*@TODO*/assert(false);break;
+         case oas_XYABSOLUTE  : /*@TODO*/assert(false);break;
+         case oas_CBLOCK      : /*@TODO*/assert(false);break;
+         // <element> records
+         case oas_PLACEMENT_1 : /*@TODO*/assert(false);break;
+         case oas_PLACEMENT_2 : /*@TODO*/assert(false);break;
+         case oas_TEXT        : /*@TODO*/assert(false);break;
+         case oas_XELEMENT    : /*@TODO*/assert(false);break;
+         // <geometry> records
+         case oas_RECTANGLE   : skimRectangle(ofn); break;
+         case oas_POLYGON     : skimPolygon(ofn);break;
+         case oas_PATH        : /*@TODO*/assert(false);break;
+         case oas_TRAPEZOID_1 : /*@TODO*/assert(false);break;
+         case oas_TRAPEZOID_2 : /*@TODO*/assert(false);break;
+         case oas_TRAPEZOID_3 : /*@TODO*/assert(false);break;
+         case oas_CTRAPEZOID  : /*@TODO*/assert(false);break;
+         case oas_CIRCLE      : /*@TODO*/assert(false);break;
+         default: return recType;
+      }
+   } while (true);
+}
+
+
+//------------------------------------------------------------------------------
+void Oasis::Cell::skimRectangle(OasisInFile& ofn)
+{
+   byte info = ofn.getByte();
+
+   if ((info & Smask) && (info & Hmask))
+      throw EXPTNreadOASIS("S&H masks are on simultaneously in rectangle info byte (25.7)");
+   dword layno  = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word  dtype  = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   dword width  = (info & Wmask) ? (_mod_gwidth   = ofn.getUnsignedInt(4)) : _mod_gwidth();
+   dword height = (info & Hmask) ? (_mod_gheight  = ofn.getUnsignedInt(4)) : 
+                  (info & Smask) ? (_mod_gheight  = width                ) : _mod_gheight();
+   int8b p1x    = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
+   int8b p1y    = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   if (info & Rmask)
+   {
+      assert(false); //@TODO - parse repetition records!
+   }
+}
+
+//------------------------------------------------------------------------------
+void Oasis::Cell::skimPolygon(OasisInFile& ofn)
+{
+   byte info = ofn.getByte();
+
+   dword layno  = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word  dtype  = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   //@ TODO ! Get the point list!
+   int8b p1x    = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
+   int8b p1y    = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   if (info & Rmask)
+   {
+      assert(false); //@TODO - parse repetition records!
+   }
+}
+
 //oasisread("/home/skr/toped/library/oasis/FOLL2.OAS");

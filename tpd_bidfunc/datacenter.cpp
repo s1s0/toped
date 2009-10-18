@@ -403,7 +403,7 @@ bool DataCenter::OasisParse(std::string filename)
       AOASISDB = DEBUG_NEW Oasis::OasisInFile(filename);
       status = AOASISDB->status();
       if (status)
-         AOASISDB->read();
+         AOASISDB->readLibrary();
    }
    catch (EXPTNreadOASIS)
    {

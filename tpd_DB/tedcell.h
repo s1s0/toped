@@ -191,7 +191,7 @@ namespace laydata {
       bool                 getshapeover(TP, layprop::ViewProperties&);
       void                 getCellOverlap();
       void                 store_inAttic(atticList&);
-      dword            getFullySelected(dataList*) const;
+      dword                getFullySelected(dataList*) const;
       NameSet*             rehash_children();
       shapeList*           mergeprep(unsigned);
       bool                 unselect_pointlist(selectDataPair&, selectDataPair&);
