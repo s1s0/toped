@@ -28,7 +28,7 @@
 #define OASIS_H_INCLUDED
 
 #include <wx/ffile.h>
-#include "ttt.h"
+#include "outbox.h"
 
 namespace Oasis {
    const byte oas_PAD              =  0;
@@ -46,8 +46,8 @@ namespace Oasis {
    const byte oas_LAYERNAME_2      = 12;
    const byte oas_CELL_1           = 13;
    const byte oas_CELL_2           = 14;
-   const byte oas_XABSOLUTE        = 15;
-   const byte oas_XRELATIVE        = 16;
+   const byte oas_XYABSOLUTE       = 15;
+   const byte oas_XYRELATIVE       = 16;
    const byte oas_PLACEMENT_1      = 17;
    const byte oas_PLACEMENT_2      = 18;
    const byte oas_TEXT             = 19;
@@ -67,7 +67,18 @@ namespace Oasis {
    const byte oas_XGEOMETRY        = 33;
    const byte oas_CBLOCK           = 34;
    const byte oas_MagicBytes[]     = {0x25, 0x53, 0x45, 0x4d, 0x49, 0x2D, 0x4F, 0x41, 0x53, 0x49, 0x53, 0x0D, 0x0A};
-
+   // info-byte masks
+   const byte Smask                 = 0b10000000;
+   const byte Wmask                 = 0b01000000;
+   const byte Hmask                 = 0b00100000;
+   const byte Xmask                 = 0b00010000;
+   const byte Ymask                 = 0b00001000;
+   const byte Rmask                 = 0b00000100;
+   const byte Dmask                 = 0b00000010;
+   const byte Lmask                 = 0b00000001;
+   const byte Emask                 = Smask;
+   const byte Pmask                 = Hmask;
+   
    class OasisInFile;
    
 //   class Record {
@@ -76,6 +87,7 @@ namespace Oasis {
 //         
 //   };
    typedef enum {tblm_unknown, tblm_implicit, tblm_explicit} TableMode;
+   
    class Table {
       public:
                            Table(OasisInFile&);
@@ -87,15 +99,47 @@ namespace Oasis {
          TableMode         _ieMode; //implicit/explicit mode
       
    };
+
+   template <class TYPE> class ModalVar {
+      public:
+                           ModalVar()                    {_status = false;}
+         void              reset()                       {_status = false;}
+         bool              status()                      {return _status;}
+         TYPE              operator = (const TYPE value) {_value = value; _status = true; return _value;}
+         TYPE              operator() ()                 {if (!_status) 
+                                                             throw EXPTNreadOASIS("Uninitialised modal variable referenced (10.3)");
+                                                          else 
+                                                             return _value;}
+      private:
+         bool              _status;
+         TYPE              _value;
+   };
+
+   class Cell {
+      public:
+                           Cell();
+         byte              readCell(OasisInFile&, bool);
+      private:
+         void              skimRectangle(OasisInFile&);
+         void              skimPolygon(OasisInFile&);
+         ModalVar<dword>   _mod_layer     ; //! OASIS modal variable layer
+         ModalVar< word>   _mod_datatype  ; //! OASIS modal variable datatype
+         ModalVar<dword>   _mod_gwidth    ; //! OASIS modal variable geometry-w
+         ModalVar<dword>   _mod_gheight   ; //! OASIS modal variable geometry-h
+         ModalVar<int4b>   _mod_gx        ; //! OASIS modal variable geometry-x
+         ModalVar<int4b>   _mod_gy        ; //! OASIS modal variable geometry-y
+   };
    
    class OasisInFile {
       public:
                            OasisInFile(std::string);
                           ~OasisInFile();
-         void              read();
+         void              readLibrary();
          bool              status ()         {return _status;}
          void              hierOut ()        {/*@TODO!*/}
-         dword             getUnsignedInt();
+         byte              getByte();
+         qword             getUnsignedInt(byte);
+         int8b             getInt(byte);
          real              getReal();
          std::string       getString();
       private:
