@@ -68,14 +68,14 @@ namespace Oasis {
    const byte oas_CBLOCK           = 34;
    const byte oas_MagicBytes[]     = {0x25, 0x53, 0x45, 0x4d, 0x49, 0x2D, 0x4F, 0x41, 0x53, 0x49, 0x53, 0x0D, 0x0A};
    // info-byte masks
-   const byte Smask                 = 0b10000000;
-   const byte Wmask                 = 0b01000000;
-   const byte Hmask                 = 0b00100000;
-   const byte Xmask                 = 0b00010000;
-   const byte Ymask                 = 0b00001000;
-   const byte Rmask                 = 0b00000100;
-   const byte Dmask                 = 0b00000010;
-   const byte Lmask                 = 0b00000001;
+   const byte Smask                 = 0x80;
+   const byte Wmask                 = 0x40;
+   const byte Hmask                 = 0x20;
+   const byte Xmask                 = 0x10;
+   const byte Ymask                 = 0x8;
+   const byte Rmask                 = 0x4;
+   const byte Dmask                 = 0x2;
+   const byte Lmask                 = 0x1;
    const byte Emask                 = Smask;
    const byte Pmask                 = Hmask;
 
