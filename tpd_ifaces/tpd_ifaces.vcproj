@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="tpd_ifaces"
 	ProjectGUID="{BA923FBF-9C73-4ACF-900B-FEEF9DC0D4E2}"
 	RootNamespace="tpd_ifaces"
@@ -219,6 +219,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\oasis_io.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\tpdph.cpp"
 				>
 				<FileConfiguration
@@ -253,6 +257,10 @@
 			</File>
 			<File
 				RelativePath=".\gds_io.h"
+				>
+			</File>
+			<File
+				RelativePath=".\oasis_io.h"
 				>
 			</File>
 			<File
