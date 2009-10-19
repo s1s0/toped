@@ -72,10 +72,10 @@ namespace Oasis {
    const byte Wmask                 = 0x40;
    const byte Hmask                 = 0x20;
    const byte Xmask                 = 0x10;
-   const byte Ymask                 = 0x8;
-   const byte Rmask                 = 0x4;
-   const byte Dmask                 = 0x2;
-   const byte Lmask                 = 0x1;
+   const byte Ymask                 = 0x08;
+   const byte Rmask                 = 0x04;
+   const byte Dmask                 = 0x02;
+   const byte Lmask                 = 0x01;
    const byte Emask                 = Smask;
    const byte Pmask                 = Hmask;
 
@@ -97,6 +97,20 @@ namespace Oasis {
                   dr_southeast     = 6 ,
                   dr_southwest     = 7  } DeltaDirections;
 
+   typedef enum { rp_reuse         = 0 ,
+                  rp_regXY         = 1 ,
+                  rp_regX          = 2 ,
+                  rp_regY          = 3 ,
+                  rp_varX          = 4 ,
+                  rp_varXxG        = 5 ,
+                  rp_varY          = 6 ,
+                  rp_varYxG        = 7 ,
+                  rp_regDia2D      = 8 ,
+                  rp_regDia1D      = 9 ,
+                  rp_varAny        =10 ,
+                  rp_varAnyG       =11 ,
+                  rp_unknown       =12  } RepetitionTypes;
+                  
    class OasisInFile;
    
 //   class Record {
@@ -134,7 +148,7 @@ namespace Oasis {
    };
 
 
-   class PointList {/*@FIXME! Needs a deep copy constructor to be handled properly by ModalVar*/
+   class PointList {/*@FIXME! Needs an operator = to be handled properly by ModalVar*/
       public:
                            PointList() : _pltype(dt_unknown), _vcount(0), _delarr(NULL) {}
                            PointList(OasisInFile&, PointListType);
@@ -149,6 +163,27 @@ namespace Oasis {
          dword             _vcount; //! Number of vertexes in the list
          int4b*            _delarr; //! Delta sequence in XYXY... array
    };
+
+   class Repetitions {/*@FIXME! Needs an operator = to be handled properly by ModalVar*/
+      public:
+                           Repetitions() : _rptype(rp_unknown), _bcount(0), _lcarray(NULL) {}
+                           Repetitions(OasisInFile&, RepetitionTypes);
+      private:
+         void              readregXY(OasisInFile&);
+         void              readregX(OasisInFile&);
+         void              readregY(OasisInFile&);
+         void              readvarX(OasisInFile&);
+         void              readvarXxG(OasisInFile&);
+         void              readvarY(OasisInFile&);
+         void              readvarYxG(OasisInFile&);
+         void              readregDia2D(OasisInFile&);
+         void              readregDia1D(OasisInFile&);
+         void              readvarAny(OasisInFile&);
+         void              readvarAnyG(OasisInFile&);
+         RepetitionTypes   _rptype;  //! Oasis repetition type
+         dword             _bcount;  //! Number of binding points in the sequence
+         int4b*            _lcarray; //! Location sequence in XYXY ... array
+   };
    
    class Cell {
       public:
@@ -158,14 +193,16 @@ namespace Oasis {
          void              skimRectangle(OasisInFile&);
          void              skimPolygon(OasisInFile&);
          PointList         skimPointList(OasisInFile&);
-         ModalVar<dword>   _mod_layer     ; //! OASIS modal variable layer
-         ModalVar< word>   _mod_datatype  ; //! OASIS modal variable datatype
-         ModalVar<dword>   _mod_gwidth    ; //! OASIS modal variable geometry-w
-         ModalVar<dword>   _mod_gheight   ; //! OASIS modal variable geometry-h
-         ModalVar<int4b>   _mod_gx        ; //! OASIS modal variable geometry-x
-         ModalVar<int4b>   _mod_gy        ; //! OASIS modal variable geometry-y
-         ModalVar<PointList> _mod_pplist  ; //! OASIS modal variable polygon point list
-         ModalVar<PointList> _mod_wplist  ; //! OASIS modal variable path point list
+         Repetitions       skimRepetitions(OasisInFile&);
+         ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer
+         ModalVar< word>   _mod_datatype    ; //! OASIS modal variable datatype
+         ModalVar<dword>   _mod_gwidth      ; //! OASIS modal variable geometry-w
+         ModalVar<dword>   _mod_gheight     ; //! OASIS modal variable geometry-h
+         ModalVar<int4b>   _mod_gx          ; //! OASIS modal variable geometry-x
+         ModalVar<int4b>   _mod_gy          ; //! OASIS modal variable geometry-y
+         ModalVar<PointList>     _mod_pplist; //! OASIS modal variable polygon point list
+         ModalVar<PointList>     _mod_wplist; //! OASIS modal variable path point list
+         ModalVar<Repetitions>   _mod_repete; //! OASIS modal variable repetition
    };
    
    class OasisInFile {

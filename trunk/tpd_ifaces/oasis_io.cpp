@@ -372,10 +372,9 @@ void Oasis::Cell::skimRectangle(OasisInFile& ofn)
                   (info & Smask) ? (_mod_gheight  = width                ) : _mod_gheight();
    int8b p1x    = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b p1y    = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   Repetitions rpt;
    if (info & Rmask)
-   {
-      assert(false); //@TODO - parse repetition records!
-   }
+      rpt = skimRepetitions(ofn);
 }
 
 //------------------------------------------------------------------------------
@@ -388,20 +387,32 @@ void Oasis::Cell::skimPolygon(OasisInFile& ofn)
    PointList plist = (info & Pmask) ? (_mod_pplist   = skimPointList(ofn)   ) : _mod_pplist();
    int8b     p1x   = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y   = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   Repetitions rpt;
    if (info & Rmask)
-   {
-      assert(false); //@TODO - parse repetition records!
-   }
+      rpt = skimRepetitions(ofn);
 }
 
 //------------------------------------------------------------------------------
 Oasis::PointList Oasis::Cell::skimPointList(OasisInFile& ofn)
 {
-   byte pltu = ofn.getUnsignedInt(1);
-   if (pltu >= dt_unknown)
+   byte plty = ofn.getUnsignedInt(1);
+   if (plty >= dt_unknown)
       throw EXPTNreadOASIS("Bad point list type (7.7.8)");
    else
-      return PointList(ofn, (PointListType)pltu);
+      return PointList(ofn, (PointListType)plty);
+}
+
+//------------------------------------------------------------------------------
+Oasis::Repetitions Oasis::Cell::skimRepetitions(OasisInFile& ofn)
+{
+   byte rpty = ofn.getUnsignedInt(1);
+   if (rpty >= rp_unknown)
+      throw EXPTNreadOASIS("Bad repetition type (7.6.14)");
+   else if (0 != rpty)
+   {
+      _mod_repete = Repetitions(ofn, (RepetitionTypes)rpty);
+   }
+   return _mod_repete();
 }
 
 //==============================================================================
@@ -518,6 +529,133 @@ void Oasis::PointList::readAllAngle(OasisInFile& ofb)
 
 void Oasis::PointList::readDoubleDelta(OasisInFile& ofb)
 {
+   /*@TODO*/assert(false);
+}
+
+//==============================================================================
+Oasis::Repetitions::Repetitions(OasisInFile& ofn, RepetitionTypes rptype) : _rptype(rptype)
+{
+   switch (_rptype)
+   {
+      case rp_regXY   : readregXY(ofn)    ; break;
+      case rp_regX    : readregX(ofn)     ; break;
+      case rp_regY    : readregY(ofn)     ; break;
+      case rp_varX    : readvarX(ofn)     ; break;
+      case rp_varXxG  : readvarXxG(ofn)   ; break;
+      case rp_varY    : readvarY(ofn)     ; break;
+      case rp_varYxG  : readvarYxG(ofn)   ; break;
+      case rp_regDia2D: readregDia2D(ofn) ; break;
+      case rp_regDia1D: readregDia1D(ofn) ; break;
+      case rp_varAny  : readvarAny(ofn)   ; break;
+      case rp_varAnyG : readvarAnyG(ofn)  ; break;
+      default: assert(false);
+   }
+}
+
+void Oasis::Repetitions::readregXY(OasisInFile& oas)
+{//type 1
+   dword countx = oas.getUnsignedInt(4) + 2;
+   dword county = oas.getUnsignedInt(4) + 2;
+   dword stepx  = oas.getUnsignedInt(4);
+   dword stepy  = oas.getUnsignedInt(4);
+   _bcount  = countx*county;
+   _lcarray = DEBUG_NEW int4b[2*_bcount];
+   dword p1y = 0;
+   for (dword yi = 0; yi < county; yi++)
+   {
+      dword p1x = 0;
+      for (dword xi = 0; xi < countx; xi++)
+      {
+         _lcarray[yi*countx+xi  ] = (p1x += stepx);
+         _lcarray[yi*countx+xi+1] =  p1y;
+      }
+      p1y += stepy;
+   }
+}
+
+void Oasis::Repetitions::readregX(OasisInFile& oas)
+{//type 2
+   dword countx = oas.getUnsignedInt(4) + 2;
+   dword stepx  = oas.getUnsignedInt(4);
+   _bcount  = countx;
+   _lcarray = DEBUG_NEW int4b[2*_bcount];
+   dword p1y = 0;
+   dword p1x = 0;
+   for (dword xi = 0; xi < countx; xi++)
+   {
+      _lcarray[xi  ] = (p1x += stepx);
+      _lcarray[xi+1] =  p1y;
+   }
+}
+
+void Oasis::Repetitions::readregY(OasisInFile& oas)
+{//type 3
+   dword county = oas.getUnsignedInt(4) + 2;
+   dword stepy  = oas.getUnsignedInt(4);
+   _bcount  = county;
+   _lcarray = DEBUG_NEW int4b[2*_bcount];
+   dword p1y = 0;
+   dword p1x = 0;
+   for (dword yi = 0; yi < county; yi++)
+   {
+      _lcarray[yi  ] =  p1x;
+      _lcarray[yi+1] = (p1y += stepy);
+   }
+}
+
+void Oasis::Repetitions::readvarX(OasisInFile&)
+{//type 4
+   /*@TODO*/assert(false);
+}
+
+void Oasis::Repetitions::readvarXxG(OasisInFile&)
+{//type 5
+   /*@TODO*/assert(false);
+}
+
+void Oasis::Repetitions::readvarY(OasisInFile&)
+{//type 6
+   /*@TODO*/assert(false);
+}
+
+void Oasis::Repetitions::readvarYxG(OasisInFile&)
+{//type 7
+   /*@TODO*/assert(false);
+}
+
+void Oasis::Repetitions::readregDia2D(OasisInFile&)
+{//type 8
+   dword countn = oas.getUnsignedInt(4) + 2;
+   dword countm = oas.getUnsignedInt(4) + 2;
+   //~ dword stepx  = oas.getUnsignedInt(4);
+   //~ dword stepy  = oas.getUnsignedInt(4);
+   //~ _bcount  = countx*county;
+   //~ _lcarray = DEBUG_NEW int4b[2*_bcount];
+   //~ dword p1y = 0;
+   //~ for (dword yi = 0; yi < county; yi++)
+   //~ {
+      //~ dword p1x = 0;
+      //~ for (dword xi = 0; xi < countx; xi++)
+      //~ {
+         //~ _lcarray[yi*countx+xi  ] = (p1x += stepx);
+         //~ _lcarray[yi*countx+xi+1] =  p1y;
+      //~ }
+      //~ p1y += stepy;
+   //~ }
+}
+
+void Oasis::Repetitions::readregDia1D(OasisInFile&)
+{//type 9
+   /*@TODO*/assert(false);
+}
+
+void Oasis::Repetitions::readvarAny(OasisInFile&)
+{//type 10
+   /*@TODO*/assert(false);
+}
+
+void Oasis::Repetitions::readvarAnyG(OasisInFile&)
+{//type 11
    /*@TODO*/assert(false);
 }
 
