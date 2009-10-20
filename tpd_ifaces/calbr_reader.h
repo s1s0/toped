@@ -74,7 +74,7 @@ public:
    void            addCoord(long x1, long y1, long x2, long y2);
    edge*           coords() {return &_coords;};
    long            ordinal() {return _ordinal;};
-   void            showError(/*laydata::tdtdesign* atdb, */word la);
+   void            showError(word la);
    static long     _precision;
 private:
    edge            _coords;
@@ -89,7 +89,7 @@ public:
    void            addCoord(long x, long y);
    CoordsVector*   coords() {return &_coords;};
    long            ordinal() {return _ordinal;};
-   void            showError(/*laydata::tdtdesign* atdb, */word la);
+   void            showError(word la);
    static long     _precision;
 private:
    CoordsVector    _coords;
@@ -138,6 +138,7 @@ public:
    void              ShowError(const std::string & error, long  number);
    RuleChecksVector* Results() {return &_RuleChecks;};
    bool              isOk(void)   {return _ok;}
+	drcRenderer*		render() const {return _render;};
 private:
    FILE*             _calbrFile;
    std::string       _fileName;
@@ -148,7 +149,6 @@ private:
    bool              parse();
    RuleChecksVector  _RuleChecks;
    bool              _ok;
-//    laydata::tdtdesign* _ATDB;
    drcRenderer*      _render;
 
 

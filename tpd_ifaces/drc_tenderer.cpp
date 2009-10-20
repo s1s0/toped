@@ -34,10 +34,10 @@
 Calbr::CalbrFile *DRCData = NULL;
 
 
-Calbr::drcTenderer::drcTenderer():
-   _ATDB(NULL)
+Calbr::drcTenderer::drcTenderer(unsigned drcLayer, real DBU, real UU):
+   _drcLayer(drcLayer)
 {
-
+	_ATDB = DEBUG_NEW laydata::tdtdesign("drc_temp", 0, 0, DBU, UU);
 }
 
 Calbr::drcTenderer::~drcTenderer()
@@ -47,7 +47,7 @@ Calbr::drcTenderer::~drcTenderer()
 void Calbr::drcTenderer::drawBegin()
 {
    _startDrawing = true;
-   try
+   /*try
    {
 //      _ATDB = DATC->lockDB();
 //      _drcLayer = DATC->getLayerNo("drcResults");
@@ -56,7 +56,7 @@ void Calbr::drcTenderer::drawBegin()
    catch (EXPTNactive_DB) 
    {
       tell_log(console::MT_ERROR, "No Data base loaded");
-   }
+   }*/
 }
 
 void Calbr::drcTenderer::drawPoly(const CoordsVector   &coords)
