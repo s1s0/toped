@@ -67,17 +67,6 @@ namespace Oasis {
    const byte oas_XGEOMETRY        = 33;
    const byte oas_CBLOCK           = 34;
    const byte oas_MagicBytes[]     = {0x25, 0x53, 0x45, 0x4d, 0x49, 0x2D, 0x4F, 0x41, 0x53, 0x49, 0x53, 0x0D, 0x0A};
-   // info-byte masks
-   const byte Smask                 = 0x80;
-   const byte Wmask                 = 0x40;
-   const byte Hmask                 = 0x20;
-   const byte Xmask                 = 0x10;
-   const byte Ymask                 = 0x08;
-   const byte Rmask                 = 0x04;
-   const byte Dmask                 = 0x02;
-   const byte Lmask                 = 0x01;
-   const byte Emask                 = Smask;
-   const byte Pmask                 = Hmask;
 
    // Types of point lists
    typedef enum { dt_manhattanH    = 0 ,
@@ -87,7 +76,7 @@ namespace Oasis {
                   dt_allangle      = 4 ,
                   dt_doubledelta   = 5 ,
                   dt_unknown       = 6  } PointListType;
-
+   // Types of coordinate deltas
    typedef enum { dr_east          = 0 ,
                   dr_north         = 1 ,
                   dr_west          = 2 ,
@@ -96,7 +85,7 @@ namespace Oasis {
                   dr_northwest     = 5 ,
                   dr_southeast     = 6 ,
                   dr_southwest     = 7  } DeltaDirections;
-
+   // Types of geometry repetitions
    typedef enum { rp_reuse         = 0 ,
                   rp_regXY         = 1 ,
                   rp_regX          = 2 ,
@@ -110,26 +99,33 @@ namespace Oasis {
                   rp_varAny        =10 ,
                   rp_varAnyG       =11 ,
                   rp_unknown       =12  } RepetitionTypes;
-                  
+   // Types of path extensions
+   typedef enum { ex_reuse         = 0 ,
+                  ex_flush         = 1 ,
+                  ex_hwidth        = 2 ,
+                  ex_explicit      = 3 ,
+                  ex_unknown       = 4  } ExtensionTypes;
+   
+   typedef enum { tblm_unknown         , 
+                  tblm_implicit        , 
+                  tblm_explicit         } TableMode;
+
    class OasisInFile;
    
-//   class Record {
-//      public:
-//         Record();
-//         
-//   };
-   typedef enum {tblm_unknown, tblm_implicit, tblm_explicit} TableMode;
    
    class Table {
       public:
                            Table(OasisInFile&);
          void              getTableRecord(OasisInFile&, TableMode);
+         std::string       getName(dword);
       private:
+         typedef std::map<dword, std::string> NameTable;
          qword             _offset;
          dword             _nextIndex;
          bool              _strictMode;
          TableMode         _ieMode; //implicit/explicit mode
-      
+         NameTable         _table;
+         
    };
 
    template <class TYPE> class ModalVar {
@@ -146,7 +142,6 @@ namespace Oasis {
          bool              _status;
          TYPE              _value;
    };
-
 
    class PointList {/*@FIXME! Needs an operator = to be handled properly by ModalVar*/
       public:
@@ -184,6 +179,15 @@ namespace Oasis {
          dword             _bcount;  //! Number of binding points in the sequence
          int4b*            _lcarray; //! Location sequence in XYXY ... array
    };
+
+   class PathExtensions {
+      public:
+                           PathExtensions() : _extype(ex_unknown), _exex(0) {}
+                           PathExtensions(OasisInFile&, ExtensionTypes);
+      private:
+         ExtensionTypes    _extype; //! Oasis path extension type
+         int4b             _exex;   //! Explicit extension
+   };
    
    class Cell {
       public:
@@ -192,17 +196,26 @@ namespace Oasis {
       private:
          void              skimRectangle(OasisInFile&);
          void              skimPolygon(OasisInFile&);
+         void              skimPath(OasisInFile&);
+         void              skimText(OasisInFile&);
+         void              skimReference(OasisInFile&, bool);
          PointList         skimPointList(OasisInFile&);
          Repetitions       skimRepetitions(OasisInFile&);
+         void              skimExtensions(OasisInFile&, PathExtensions&, PathExtensions&);
          ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer
          ModalVar< word>   _mod_datatype    ; //! OASIS modal variable datatype
          ModalVar<dword>   _mod_gwidth      ; //! OASIS modal variable geometry-w
          ModalVar<dword>   _mod_gheight     ; //! OASIS modal variable geometry-h
+         ModalVar< word>   _mod_pathhw      ; //! OASIS modal variable path-halfwidth
          ModalVar<int4b>   _mod_gx          ; //! OASIS modal variable geometry-x
          ModalVar<int4b>   _mod_gy          ; //! OASIS modal variable geometry-y
+         ModalVar<std::string>   _mod_text  ; //! OASIS modal variable text-string
+         ModalVar<std::string>   _mod_cellref;//! OASIS modal variable placement-cell
          ModalVar<PointList>     _mod_pplist; //! OASIS modal variable polygon point list
          ModalVar<PointList>     _mod_wplist; //! OASIS modal variable path point list
          ModalVar<Repetitions>   _mod_repete; //! OASIS modal variable repetition
+         ModalVar<PathExtensions> _mod_exs  ; //! OASIS modal variable path-start-extention
+         ModalVar<PathExtensions> _mod_exe  ; //! OASIS modal variable path-end-extention
    };
    
    class OasisInFile {
@@ -217,9 +230,12 @@ namespace Oasis {
          int8b             getInt(byte);
          real              getReal();
          std::string       getString();
+         std::string       getTextRefName(bool);
+         std::string       getCellRefName(bool);
       private:
          
          void              readStartRecord();
+         void              readEndRecord();
          // Oasis tables
          Table*            _cellNames;
          Table*            _textStrings;
@@ -228,6 +244,7 @@ namespace Oasis {
          Table*            _layerNames;
          Table*            _xNames;
          //
+         bool              _offsetFlag;
          std::string       _fileName;
          wxFileOffset      _fileLength;
          wxFFile           _oasisFh;
@@ -235,6 +252,8 @@ namespace Oasis {
          real              _unit;
          bool              _status;
    };
+
+   void readDelta(OasisInFile&, int4b&, int4b&);
 }
 
 #endif //OASIS_H_INCLUDED
