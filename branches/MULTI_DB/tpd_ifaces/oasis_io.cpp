@@ -623,7 +623,7 @@ void Oasis::Repetitions::readvarYxG(OasisInFile&)
    /*@TODO*/assert(false);
 }
 
-void Oasis::Repetitions::readregDia2D(OasisInFile&)
+void Oasis::Repetitions::readregDia2D(OasisInFile& oas)
 {//type 8
    dword countn = oas.getUnsignedInt(4) + 2;
    dword countm = oas.getUnsignedInt(4) + 2;

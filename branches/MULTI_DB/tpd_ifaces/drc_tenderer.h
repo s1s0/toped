@@ -37,7 +37,7 @@ namespace Calbr
 class drcTenderer: public drcRenderer
 {
    public:
-   drcTenderer();
+   drcTenderer(unsigned drcLayer, real DBU, real UU);
    ~drcTenderer();
    void drawBegin();
    void drawPoly(const CoordsVector   &coords);
