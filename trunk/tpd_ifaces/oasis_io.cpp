@@ -197,13 +197,13 @@ void Oasis::OasisInFile::readLibrary()
          case oas_PROPERTY_2  : assert(false);/*@TODO*/ rlb = false; break;
          case oas_CELL_1      : 
             curCell = DEBUG_NEW Cell(); 
-            recType = curCell->readCell(*this, true) ; 
+            recType = curCell->skimCell(*this, true) ; 
             rlb = true; 
 /*TMP*/     delete curCell;
             break;
          case oas_CELL_2      : 
             curCell = DEBUG_NEW Cell(); 
-            recType = curCell->readCell(*this, false); 
+            recType = curCell->skimCell(*this, false); 
             rlb = true; 
 /*TMP*/     delete curCell;
             break;
@@ -392,7 +392,7 @@ Oasis::Cell::Cell()
    
 }
 
-byte Oasis::Cell::readCell(OasisInFile& ofn, bool refnum)
+byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
 {
    std::string cellName = ofn.getCellRefName(refnum);
    std::ostringstream info;
@@ -410,14 +410,14 @@ byte Oasis::Cell::readCell(OasisInFile& ofn, bool refnum)
          case oas_XYABSOLUTE  : /*@TODO*/assert(false);break;
          case oas_CBLOCK      : /*@TODO*/assert(false);break;
          // <element> records
-         case oas_PLACEMENT_1 : skimReference(ofn, false);break;
-         case oas_PLACEMENT_2 : skimReference(ofn, true );break;
-         case oas_TEXT        : skimText(ofn);break;
+         case oas_PLACEMENT_1 : readReference(ofn, false);break;
+         case oas_PLACEMENT_2 : readReference(ofn, true );break;
+         case oas_TEXT        : readText(ofn);break;
          case oas_XELEMENT    : /*@TODO*/assert(false);break;
          // <geometry> records
-         case oas_RECTANGLE   : skimRectangle(ofn); break;
-         case oas_POLYGON     : skimPolygon(ofn);break;
-         case oas_PATH        : skimPath(ofn);break;
+         case oas_RECTANGLE   : readRectangle(ofn); break;
+         case oas_POLYGON     : readPolygon(ofn);break;
+         case oas_PATH        : readPath(ofn);break;
          case oas_TRAPEZOID_1 : /*@TODO*/assert(false);break;
          case oas_TRAPEZOID_2 : /*@TODO*/assert(false);break;
          case oas_TRAPEZOID_3 : /*@TODO*/assert(false);break;
@@ -430,7 +430,7 @@ byte Oasis::Cell::readCell(OasisInFile& ofn, bool refnum)
 
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::skimRectangle(OasisInFile& ofn)
+void Oasis::Cell::readRectangle(OasisInFile& ofn)
 {
    const byte Smask   = 0x80;
    const byte Wmask   = 0x40;
@@ -452,12 +452,12 @@ void Oasis::Cell::skimRectangle(OasisInFile& ofn)
                        (info & Smask) ? (_mod_gheight  = width                ) : _mod_gheight();
    int8b p1x         = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b p1y         = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   if (info & Rmask) skimRepetitions(ofn);
+   if (info & Rmask) readRepetitions(ofn);
 //   Repetitions rpt = _mod_repete();
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::skimPolygon(OasisInFile& ofn)
+void Oasis::Cell::readPolygon(OasisInFile& ofn)
 {
    const byte Pmask   = 0x20;
    const byte Xmask   = 0x10;
@@ -470,15 +470,15 @@ void Oasis::Cell::skimPolygon(OasisInFile& ofn)
 
    dword     layno   = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
    word      dtype   = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
-   PointList plist   = (info & Pmask) ? (_mod_pplist   = skimPointList(ofn)   ) : _mod_pplist();
+   PointList plist   = (info & Pmask) ? (_mod_pplist   = readPointList(ofn)   ) : _mod_pplist();
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   if (info & Rmask) skimRepetitions(ofn);
+   if (info & Rmask) readRepetitions(ofn);
 //   Repetitions rpt = _mod_repete();
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::skimPath(OasisInFile& ofn)
+void Oasis::Cell::readPath(OasisInFile& ofn)
 {
    const byte Emask   = 0x80;
    const byte Wmask   = 0x40;
@@ -497,22 +497,22 @@ void Oasis::Cell::skimPath(OasisInFile& ofn)
    PathExtensions exs,exe;
    if (info & Emask)
    {
-      skimExtensions(ofn, exs, exe);
+      readExtensions(ofn, exs, exe);
    }
    else
    {
       exs = _mod_exs();
       exe = _mod_exe();
    }
-   PointList plist   = (info & Pmask) ? (_mod_wplist   = skimPointList(ofn)   ) : _mod_wplist();
+   PointList plist   = (info & Pmask) ? (_mod_wplist   = readPointList(ofn)   ) : _mod_wplist();
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   if (info & Rmask) skimRepetitions(ofn);
+   if (info & Rmask) readRepetitions(ofn);
 //   Repetitions rpt = _mod_repete();
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::skimText(OasisInFile& ofn)
+void Oasis::Cell::readText(OasisInFile& ofn)
 {
    const byte Cmask   = 0x40;
    const byte Nmask   = 0x20;
@@ -529,11 +529,11 @@ void Oasis::Cell::skimText(OasisInFile& ofn)
    word      dtype   = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   if (info & Rmask) skimRepetitions(ofn);
+   if (info & Rmask) readRepetitions(ofn);
 //   Repetitions rpt = _mod_repete();
 }
 
-void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
+void Oasis::Cell::readReference(OasisInFile& ofn, bool exma)
 {
    const byte Cmask   = 0x80;
    const byte Nmask   = 0x40;
@@ -564,26 +564,147 @@ void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
 
-   if (info & Rmask) skimRepetitions(ofn);
+   if (info & Rmask) readRepetitions(ofn);
+//   Repetitions rpt = _mod_repete();
+//   _referenceNames.insert(name);
+}
+
+//------------------------------------------------------------------------------
+void Oasis::Cell::skimRectangle(OasisInFile& ofn)
+{
+   const byte Smask   = 0x80;
+   const byte Wmask   = 0x40;
+   const byte Hmask   = 0x20;
+   const byte Xmask   = 0x10;
+   const byte Ymask   = 0x08;
+   const byte Rmask   = 0x04;
+   const byte Dmask   = 0x02;
+   const byte Lmask   = 0x01;
+
+   byte info = ofn.getByte();
+
+   if ((info & Smask) && (info & Hmask))
+      throw EXPTNreadOASIS("S&H masks are ON simultaneously in rectangle info byte (25.7)");
+   if (info & Lmask) ofn.getUnsignedInt(4);
+   if (info & Dmask) ofn.getUnsignedInt(2);
+   if (info & Wmask) ofn.getUnsignedInt(4);
+   if (info & Hmask) ofn.getUnsignedInt(4);
+   if (info & Xmask) ofn.getInt(8);
+   if (info & Ymask) ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
+}
+
+//------------------------------------------------------------------------------
+void Oasis::Cell::skimPolygon(OasisInFile& ofn)
+{
+   const byte Pmask   = 0x20;
+   const byte Xmask   = 0x10;
+   const byte Ymask   = 0x08;
+   const byte Rmask   = 0x04;
+   const byte Dmask   = 0x02;
+   const byte Lmask   = 0x01;
+
+   byte info = ofn.getByte();
+
+   if (info & Lmask) ofn.getUnsignedInt(4);
+   if (info & Dmask) ofn.getUnsignedInt(2);
+   if (info & Pmask) readPointList(ofn);
+   if (info & Xmask) ofn.getInt(8);
+   if (info & Ymask) ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
+}
+
+//------------------------------------------------------------------------------
+void Oasis::Cell::skimPath(OasisInFile& ofn)
+{
+   const byte Emask   = 0x80;
+   const byte Wmask   = 0x40;
+   const byte Pmask   = 0x20;
+   const byte Xmask   = 0x10;
+   const byte Ymask   = 0x08;
+   const byte Rmask   = 0x04;
+   const byte Dmask   = 0x02;
+   const byte Lmask   = 0x01;
+
+   byte info = ofn.getByte();
+
+   if (info & Lmask) ofn.getUnsignedInt(4);
+   if (info & Dmask) ofn.getUnsignedInt(2);
+   if (info & Wmask) ofn.getUnsignedInt(2);
+   if (info & Emask)
+   {
+      PathExtensions exs,exe;
+      readExtensions(ofn, exs, exe);
+   }
+   if (info & Pmask) readPointList(ofn);
+   if (info & Xmask) ofn.getInt(8);
+   if (info & Ymask) ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
 //   Repetitions rpt = _mod_repete();
 }
 
 //------------------------------------------------------------------------------
-Oasis::PointList Oasis::Cell::skimPointList(OasisInFile& ofn)
+void Oasis::Cell::skimText(OasisInFile& ofn)
+{
+   const byte Cmask   = 0x40;
+   const byte Nmask   = 0x20;
+   const byte Xmask   = 0x10;
+   const byte Ymask   = 0x08;
+   const byte Rmask   = 0x04;
+   const byte Dmask   = 0x02; // In the standard is T, but it looks like a typo
+   const byte Lmask   = 0x01;
+
+   byte info = ofn.getByte();
+   if (info & Cmask) ofn.getTextRefName(info & Nmask);
+   if (info & Lmask) ofn.getUnsignedInt(4);
+   if (info & Dmask) ofn.getUnsignedInt(2);
+   if (info & Xmask) ofn.getInt(8);
+   if (info & Ymask) ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
+}
+
+void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
+{
+   const byte Cmask   = 0x80;
+   const byte Nmask   = 0x40;
+   const byte Xmask   = 0x20;
+   const byte Ymask   = 0x10;
+   const byte Rmask   = 0x08;
+   const byte Mmask   = 0x04;
+   const byte Amask   = 0x02;
+   const byte Fmask   = 0x01;
+
+   byte info = ofn.getByte();
+
+   std::string name  = (info & Cmask) ? (_mod_cellref  = ofn.getCellRefName(info & Nmask)) :
+                                                                                  _mod_cellref();
+   if (exma)
+   { 
+      if (info & Amask) ofn.getReal();
+      if (info & Mmask) ofn.getReal();
+   }
+   if (info & Xmask) ofn.getInt(8);
+   if (info & Ymask) ofn.getInt(8);
+
+   if (info & Rmask) readRepetitions(ofn);
+   _referenceNames.insert(name);
+}
+
+//------------------------------------------------------------------------------
+Oasis::PointList Oasis::Cell::readPointList(OasisInFile& ofn)
 {
    byte plty = ofn.getByte();
    if (plty >= dt_unknown)
       throw EXPTNreadOASIS("Bad point list type (7.7.8)");
    else
-      return PointList(ofn, (PointListType)plty);
-//   {
-//      PointList* result = DEBUG_NEW PointList(ofn, (PointListType)plty);
-//      return *result;
-//   }
+   {
+      PointList result(ofn, (PointListType)plty);
+      return result;
+   }
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::skimRepetitions(OasisInFile& ofn)
+void Oasis::Cell::readRepetitions(OasisInFile& ofn)
 {
    byte rpty = ofn.getByte();
    if (rpty >= rp_unknown)
@@ -595,7 +716,7 @@ void Oasis::Cell::skimRepetitions(OasisInFile& ofn)
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::skimExtensions(OasisInFile& ofn, PathExtensions& exs, PathExtensions& exe)
+void Oasis::Cell::readExtensions(OasisInFile& ofn, PathExtensions& exs, PathExtensions& exe)
 {
    byte scheme = ofn.getByte();
    if (scheme & 0xF0)

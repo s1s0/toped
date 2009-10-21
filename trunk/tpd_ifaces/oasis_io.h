@@ -197,16 +197,21 @@ namespace Oasis {
    class Cell {
       public:
                            Cell();
-         byte              readCell(OasisInFile&, bool);
+         byte              skimCell(OasisInFile&, bool);
       private:
          void              skimRectangle(OasisInFile&);
          void              skimPolygon(OasisInFile&);
          void              skimPath(OasisInFile&);
          void              skimText(OasisInFile&);
          void              skimReference(OasisInFile&, bool);
-         PointList         skimPointList(OasisInFile&);
-         void              skimRepetitions(OasisInFile&);
-         void              skimExtensions(OasisInFile&, PathExtensions&, PathExtensions&);
+         void              readRectangle(OasisInFile&);
+         void              readPolygon(OasisInFile&);
+         void              readPath(OasisInFile&);
+         void              readText(OasisInFile&);
+         void              readReference(OasisInFile&, bool);
+         PointList         readPointList(OasisInFile&);
+         void              readRepetitions(OasisInFile&);
+         void              readExtensions(OasisInFile&, PathExtensions&, PathExtensions&);
          ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer
          ModalVar< word>   _mod_datatype    ; //! OASIS modal variable datatype
          ModalVar<dword>   _mod_gwidth      ; //! OASIS modal variable geometry-w
@@ -221,6 +226,7 @@ namespace Oasis {
          ModalVar<Repetitions>   _mod_repete; //! OASIS modal variable repetition
          ModalVar<PathExtensions> _mod_exs  ; //! OASIS modal variable path-start-extention
          ModalVar<PathExtensions> _mod_exe  ; //! OASIS modal variable path-end-extention
+         NameSet           _referenceNames  ; //! All structures referenced here
    };
    
    class OasisInFile {
