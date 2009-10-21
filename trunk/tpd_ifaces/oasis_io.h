@@ -115,11 +115,11 @@ namespace Oasis {
    
    class Table {
       public:
+         typedef std::map<dword, std::string> NameTable;
                            Table(OasisInFile&);
          void              getTableRecord(OasisInFile&, TableMode);
          std::string       getName(dword);
       private:
-         typedef std::map<dword, std::string> NameTable;
          qword             _offset;
          dword             _nextIndex;
          bool              _strictMode;
@@ -133,8 +133,8 @@ namespace Oasis {
                            ModalVar()                    {_status = false;}
          void              reset()                       {_status = false;}
          bool              status()                      {return _status;}
-         TYPE              operator = (const TYPE value) {_value = value; _status = true; return _value;}
-         TYPE              operator() ()                 {if (!_status) 
+         TYPE&             operator = (const TYPE& value) {_value = value; _status = true; return _value;}
+         TYPE&             operator() ()                 {if (!_status) 
                                                              throw EXPTNreadOASIS("Uninitialised modal variable referenced (10.3)");
                                                           else 
                                                              return _value;}
@@ -143,10 +143,13 @@ namespace Oasis {
          TYPE              _value;
    };
 
-   class PointList {/*@FIXME! Needs an operator = to be handled properly by ModalVar*/
+   class PointList {
       public:
                            PointList() : _pltype(dt_unknown), _vcount(0), _delarr(NULL) {}
+                           PointList(PointList&);
                            PointList(OasisInFile&, PointListType);
+                          ~PointList();
+         PointList&        operator = (const PointList&);
       private:
          void              readManhattanH(OasisInFile&);
          void              readManhattanV(OasisInFile&);
@@ -159,10 +162,12 @@ namespace Oasis {
          int4b*            _delarr; //! Delta sequence in XYXY... array
    };
 
-   class Repetitions {/*@FIXME! Needs an operator = to be handled properly by ModalVar*/
+   class Repetitions {
       public:
                            Repetitions() : _rptype(rp_unknown), _bcount(0), _lcarray(NULL) {}
                            Repetitions(OasisInFile&, RepetitionTypes);
+                          ~Repetitions();
+         Repetitions&      operator = (const Repetitions&);
       private:
          void              readregXY(OasisInFile&);
          void              readregX(OasisInFile&);
@@ -200,7 +205,7 @@ namespace Oasis {
          void              skimText(OasisInFile&);
          void              skimReference(OasisInFile&, bool);
          PointList         skimPointList(OasisInFile&);
-         Repetitions       skimRepetitions(OasisInFile&);
+         void              skimRepetitions(OasisInFile&);
          void              skimExtensions(OasisInFile&, PathExtensions&, PathExtensions&);
          ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer
          ModalVar< word>   _mod_datatype    ; //! OASIS modal variable datatype
