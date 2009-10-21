@@ -170,10 +170,11 @@ void Oasis::OasisInFile::readEndRecord()
       sigbyte[1] = getByte();
       sigbyte[0] = getByte();
       if (1 == valid_scheme)
-         info << "OASIS file: CRC3232 validation signature is "<< signature;
+         info << "OASIS file: CRC32 validation signature is "<< signature;
       else
          info << "OASIS file: CHECKSUM32 validation signature" << signature;
    }
+   tell_log(console::MT_INFO, info.str());
 }
 
 void Oasis::OasisInFile::readLibrary()
@@ -194,8 +195,18 @@ void Oasis::OasisInFile::readLibrary()
          case oas_PAD         : rlb = false; break;
          case oas_PROPERTY_1  : assert(false);/*@TODO*/ rlb = false; break;
          case oas_PROPERTY_2  : assert(false);/*@TODO*/ rlb = false; break;
-         case oas_CELL_1      : curCell = DEBUG_NEW Cell(); recType = curCell->readCell(*this, true) ; rlb = true; break;
-         case oas_CELL_2      : curCell = DEBUG_NEW Cell(); recType = curCell->readCell(*this, false); rlb = true; break;
+         case oas_CELL_1      : 
+            curCell = DEBUG_NEW Cell(); 
+            recType = curCell->readCell(*this, true) ; 
+            rlb = true; 
+/*TMP*/     delete curCell;
+            break;
+         case oas_CELL_2      : 
+            curCell = DEBUG_NEW Cell(); 
+            recType = curCell->readCell(*this, false); 
+            rlb = true; 
+/*TMP*/     delete curCell;
+            break;
          case oas_CBLOCK      : assert(false);/*@TODO*/rlb = false; break;
          // <name> records
          case oas_CELLNAME_1  : _cellNames->getTableRecord(*this, tblm_implicit)   ; rlb = false; break;
@@ -441,9 +452,8 @@ void Oasis::Cell::skimRectangle(OasisInFile& ofn)
                        (info & Smask) ? (_mod_gheight  = width                ) : _mod_gheight();
    int8b p1x         = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b p1y         = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   Repetitions rpt;
-   if (info & Rmask)
-      rpt = skimRepetitions(ofn);
+   if (info & Rmask) skimRepetitions(ofn);
+//   Repetitions rpt = _mod_repete();
 }
 
 //------------------------------------------------------------------------------
@@ -463,9 +473,8 @@ void Oasis::Cell::skimPolygon(OasisInFile& ofn)
    PointList plist   = (info & Pmask) ? (_mod_pplist   = skimPointList(ofn)   ) : _mod_pplist();
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   Repetitions rpt;
-   if (info & Rmask)
-      rpt = skimRepetitions(ofn);
+   if (info & Rmask) skimRepetitions(ofn);
+//   Repetitions rpt = _mod_repete();
 }
 
 //------------------------------------------------------------------------------
@@ -495,12 +504,11 @@ void Oasis::Cell::skimPath(OasisInFile& ofn)
       exs = _mod_exs();
       exe = _mod_exe();
    }
-   PointList plist   = (info & Pmask) ? (_mod_pplist   = skimPointList(ofn)   ) : _mod_pplist();
+   PointList plist   = (info & Pmask) ? (_mod_wplist   = skimPointList(ofn)   ) : _mod_wplist();
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   Repetitions rpt;
-   if (info & Rmask)
-      rpt = skimRepetitions(ofn);
+   if (info & Rmask) skimRepetitions(ofn);
+//   Repetitions rpt = _mod_repete();
 }
 
 //------------------------------------------------------------------------------
@@ -521,9 +529,8 @@ void Oasis::Cell::skimText(OasisInFile& ofn)
    word      dtype   = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   Repetitions rpt;
-   if (info & Rmask)
-      rpt = skimRepetitions(ofn);
+   if (info & Rmask) skimRepetitions(ofn);
+//   Repetitions rpt = _mod_repete();
 }
 
 void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
@@ -556,9 +563,9 @@ void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
          throw EXPTNreadOASIS("Bad magnification value (22.10)");
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   Repetitions rpt;
-   if (info & Rmask)
-      rpt = skimRepetitions(ofn);
+
+   if (info & Rmask) skimRepetitions(ofn);
+//   Repetitions rpt = _mod_repete();
 }
 
 //------------------------------------------------------------------------------
@@ -569,10 +576,14 @@ Oasis::PointList Oasis::Cell::skimPointList(OasisInFile& ofn)
       throw EXPTNreadOASIS("Bad point list type (7.7.8)");
    else
       return PointList(ofn, (PointListType)plty);
+//   {
+//      PointList* result = DEBUG_NEW PointList(ofn, (PointListType)plty);
+//      return *result;
+//   }
 }
 
 //------------------------------------------------------------------------------
-Oasis::Repetitions Oasis::Cell::skimRepetitions(OasisInFile& ofn)
+void Oasis::Cell::skimRepetitions(OasisInFile& ofn)
 {
    byte rpty = ofn.getByte();
    if (rpty >= rp_unknown)
@@ -581,7 +592,6 @@ Oasis::Repetitions Oasis::Cell::skimRepetitions(OasisInFile& ofn)
    {
       _mod_repete = Repetitions(ofn, (RepetitionTypes)rpty);
    }
-   return _mod_repete();
 }
 
 //------------------------------------------------------------------------------
@@ -621,6 +631,31 @@ Oasis::PointList::PointList(OasisInFile& ofn, PointListType pltype) : _pltype(pl
       case dt_doubledelta: readDoubleDelta(ofn); break;
       default: assert(false);
    }
+}
+
+Oasis::PointList::PointList(PointList& plst)
+{
+   _pltype = plst._pltype;
+   _vcount = plst._vcount;
+   _delarr = DEBUG_NEW int4b[2*_vcount];
+   for (dword cpnt = 0; cpnt < 2*_vcount; cpnt++)
+      _delarr[cpnt] = plst._delarr[cpnt];
+}
+
+Oasis::PointList::~PointList()
+{
+   if (NULL != _delarr) delete [] _delarr;
+}
+
+Oasis::PointList& Oasis::PointList::operator = (const PointList& plst)
+{
+   if (NULL != _delarr) delete [] _delarr;
+   _pltype = plst._pltype;
+   _vcount = plst._vcount;
+   _delarr = DEBUG_NEW int4b[2*_vcount];
+   for (dword cpnt = 0; cpnt < 2*_vcount; cpnt++)
+      _delarr[cpnt] = plst._delarr[cpnt];
+   return *this;
 }
 
 void Oasis::PointList::readManhattanH(OasisInFile& ofb)
@@ -699,7 +734,8 @@ void Oasis::PointList::readDoubleDelta(OasisInFile& ofb)
 }
 
 //==============================================================================
-Oasis::Repetitions::Repetitions(OasisInFile& ofn, RepetitionTypes rptype) : _rptype(rptype)
+Oasis::Repetitions::Repetitions(OasisInFile& ofn, RepetitionTypes rptype) : 
+                                    _rptype(rptype), _bcount(0), _lcarray(NULL)
 {
    switch (_rptype)
    {
@@ -716,6 +752,23 @@ Oasis::Repetitions::Repetitions(OasisInFile& ofn, RepetitionTypes rptype) : _rpt
       case rp_varAnyG : readvarAnyG(ofn)  ; break;
       default: assert(false);
    }
+}
+
+Oasis::Repetitions::~Repetitions()
+{
+   if (NULL !=_lcarray)
+      delete [] _lcarray;
+}
+
+Oasis::Repetitions& Oasis::Repetitions::operator = (const Repetitions& rpts)
+{
+   if (NULL != _lcarray) delete [] _lcarray;
+   _rptype  = rpts._rptype;
+   _bcount  = rpts._bcount;
+   _lcarray = DEBUG_NEW int4b[2*_bcount];
+   for (dword crpt = 0; crpt < 2*_bcount; crpt++)
+      _lcarray[crpt] = rpts._lcarray[crpt];
+   return *this;
 }
 
 void Oasis::Repetitions::readregXY(OasisInFile& ofn)
@@ -809,8 +862,8 @@ void Oasis::Repetitions::readregDia2D(OasisInFile& ofn)
       int4b p1y = s1y;
       for (dword nj = 0; nj < countn; nj++)
       {
-         _lcarray[mi*countm + nj    ] = p1x;
-         _lcarray[mi*countm + nj + 1] = p1y;
+         _lcarray[mi*countn + nj    ] = p1x;
+         _lcarray[mi*countn + nj + 1] = p1y;
          p1x += nx; p1y += ny;
       }
       s1x += mx; s1y += my;
@@ -899,3 +952,5 @@ void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
 }
 //oasisread("/home/skr/toped/library/oasis/FOLL2.OAS");
 //oasisread("/home/skr/toped/library/oasis/FOLL.oas");
+//oasisread("C:\Users\skr\Development\toped\FOLL2.OAS");
+//oasisread("C:\Users\skr\Development\toped\FOLL.oas");
