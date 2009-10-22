@@ -42,11 +42,11 @@ Oasis::Table::Table(OasisInFile& ofh)
 /*! Reads a single NAME record and adds it to the corresponding name table*/
 void  Oasis::Table::getTableRecord(OasisInFile& ofn, TableMode ieMode)
 {
-   if (_strictMode) throw EXPTNreadOASIS("A stray \"NAME\" record encountered in strict mode (13.10)");
+   if (_strictMode) ofn.exception("A stray \"NAME\" record encountered in strict mode (13.10)");
    if (tblm_unknown == _ieMode)
       _ieMode = ieMode;
    else if (_ieMode != ieMode)
-      throw EXPTNreadOASIS("Uncompatible record types encountered in \"NAME\" records (15.5,16.4,17.4,18.4)");
+      ofn.exception("Uncompatible record types encountered in \"NAME\" records (15.5,16.4,17.4,18.4)");
    std::string value = ofn.getString();
    dword index;
    switch (_ieMode)
@@ -56,7 +56,7 @@ void  Oasis::Table::getTableRecord(OasisInFile& ofn, TableMode ieMode)
       default: assert(false);
    }
    if (_table.end() != _table.find(index))
-      throw EXPTNreadOASIS("Name record with this index already exists (15.5,16.4,17.4,18.4)");
+      ofn.exception("Name record with this index already exists (15.5,16.4,17.4,18.4)");
    else
       _table[index] = value;
 }
@@ -72,7 +72,7 @@ std::string Oasis::Table::getName(dword index)
 //===========================================================================
 Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings(NULL), 
    _propNames(NULL), _propStrings(NULL), _layerNames(NULL), _xNames(NULL), _offsetFlag(false),
-   _fileName(fn)
+   _fileName(fn), _fileLength(0), _filePos(0), _progresPos(0)
 {
    std::ostringstream info;
    info << "OASIS input file: \"" << _fileName << "\"";
@@ -110,10 +110,18 @@ Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings
    {
       // initialise the progress bar
       _fileLength = _oasisFh.Length();
-//   TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
+      TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
    }
 }
 
+void Oasis::OasisInFile::closeFile()
+{
+   if (_status)
+   {
+      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+      _oasisFh.Close();
+   }
+}
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -124,7 +132,7 @@ void Oasis::OasisInFile::readStartRecord()
    info << "OASIS version: \"" << _version << "\"";
    tell_log(console::MT_INFO, info.str());
    _unit = getReal();
-   if (0 > _unit) throw EXPTNreadOASIS("Unacceptable \"unit\" value (13.10)");
+   if (0 > _unit) exception("Unacceptable \"unit\" value (13.10)");
    _offsetFlag = getUnsignedInt(1);
    if (!_offsetFlag)
    {
@@ -158,7 +166,7 @@ void Oasis::OasisInFile::readEndRecord()
    std::ostringstream info;
    byte valid_scheme = getByte();
    if (2 < valid_scheme)
-      throw EXPTNreadOASIS("Unexpected validation scheme type ( not explicitly specified)");
+      exception("Unexpected validation scheme type ( not explicitly specified)");
    else if (0 == valid_scheme)
       info << "OASIS file has no validation signature";
    else
@@ -181,7 +189,7 @@ void Oasis::OasisInFile::readLibrary()
 {
    // get oas_START
    byte recType = getUnsignedInt(1);
-   if (oas_START != recType) throw EXPTNreadOASIS("\"START\" record expected here (13.10)");
+   if (oas_START != recType) exception("\"START\" record expected here (13.10)");
    readStartRecord();
    // Some sequences (CELL) does not have an explicit end record. So they end when a record
    // which can not be a member of the definition appears. The trouble is that the last byte
@@ -221,8 +229,11 @@ void Oasis::OasisInFile::readLibrary()
          case oas_PROPSTRING_2: _propStrings->getTableRecord(*this, tblm_explicit) ; rlb = false; break;
          case oas_XNAME_1     : assert(false);/*@TODO*/ rlb = false; break;
          case oas_XNAME_2     : assert(false);/*@TODO*/ rlb = false; break;
-         case oas_END         : readEndRecord(); return;
-         default: throw EXPTNreadOASIS("Unexpected record in the current context");
+         case oas_END         : 
+            readEndRecord();
+            closeFile();
+            return;
+         default: exception("Unexpected record in the current context");
       }
    } while (true);
 }
@@ -233,9 +244,65 @@ byte Oasis::OasisInFile::getByte()
 {
    byte        bytein            ; // last byte read from the file stream
    if (1 != _oasisFh.Read(&bytein,1))
-      throw EXPTNreadOASIS("I/O error during read-in");
+      exception("I/O error during read-in");
+   else _filePos++;
+   if (2048 < (_filePos - _progresPos))
+   {
+      _progresPos = _filePos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+   }
    return bytein;
 }
+
+float Oasis::OasisInFile::getFloat()
+{
+   float        floatin          ; // last 4 bytes read from the file stream
+   if (4 != _oasisFh.Read(&floatin,4))
+      exception("I/O error during read-in");
+   else _filePos += 4;
+   if (2048 < (_filePos - _progresPos))
+   {
+      _progresPos = _filePos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+   }
+   return floatin;
+}
+
+double Oasis::OasisInFile::getDouble()
+{
+   double        doublein         ; // last 8 bytes read from the file stream
+   if (8 != _oasisFh.Read(&doublein,8))
+      exception("I/O error during read-in");
+   else _filePos += 8;
+   if (2048 < (_filePos - _progresPos))
+   {
+      _progresPos = _filePos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+   }
+   return doublein;
+}
+
+//------------------------------------------------------------------------------
+std::string Oasis::OasisInFile::getString(/*Oasis string type check*/)
+{
+   dword   length  = getUnsignedInt(2) ; //string length
+   char* theString = DEBUG_NEW char[length+1];
+
+   if (length != _oasisFh.Read(theString,length))
+      exception("I/O error during read-in");
+   else _filePos += length;
+   theString[length] = 0x00;
+   std::string result(theString);
+   delete [] theString;
+   if (2048 < (_filePos - _progresPos))
+   {
+      _progresPos = _filePos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+   }
+   return result;
+}
+
+//------------------------------------------------------------------------------
 qword Oasis::OasisInFile::getUnsignedInt(byte length)
 {
    assert((length > 0) && (length < 9));
@@ -247,8 +314,7 @@ qword Oasis::OasisInFile::getUnsignedInt(byte length)
    byte       *btres       = (byte*)&result; 
    do
    {
-      if (1 != _oasisFh.Read(&bytein,1))
-         throw EXPTNreadOASIS("I/O error during read-in");
+      bytein = getByte();
       switch (bytecounter)
       {
          case 0: btres[0]  = bytein & cmask; 
@@ -262,12 +328,12 @@ qword Oasis::OasisInFile::getUnsignedInt(byte length)
          case 7: btres[bytecounter-1] |= bytein << (8-bytecounter);
                  btres[bytecounter  ]  = (bytein & cmask) >> bytecounter;
                  break;
-         default: throw EXPTNreadOASIS("Integer is too big (7.2.3)");
+         default: exception("Integer is too big (7.2.3)");
       }
       bytecounter++;
    } while (bytein & (~cmask));
    if (bytecounter > length)
-      throw EXPTNreadOASIS("Unsigned integer with unexpected length(7.2.3)");
+      exception("Unsigned integer with unexpected length(7.2.3)");
    return result;
 }
 
@@ -283,8 +349,7 @@ int8b Oasis::OasisInFile::getInt(byte length)
    byte       *btres       = (byte*)&result; 
    do
    {
-      if (1 != _oasisFh.Read(&bytein,1))
-         throw EXPTNreadOASIS("I/O error during read-in");
+      bytein = getByte();
       switch (bytecounter)
       {
          case 0: btres[0]  = (bytein & cmask) >> 1;
@@ -299,12 +364,12 @@ int8b Oasis::OasisInFile::getInt(byte length)
                  btres[bytecounter  ]  = (bytein & cmask) >> (bytecounter + 1);
                  break;
          case 7: btres[bytecounter-1] |= bytein;
-         default: throw EXPTNreadOASIS("Integer is too big (7.2.3)");
+         default: exception("Integer is too big (7.2.3)");
       }
       bytecounter++;
    } while (bytein & (~cmask));
    if (bytecounter > length)
-      throw EXPTNreadOASIS("Unsigned integer with unexpected length(7.2.3)");
+      exception("Unsigned integer with unexpected length(7.2.3)");
    btres[7] = sign;
    return result;
 }
@@ -313,9 +378,7 @@ real Oasis::OasisInFile::getReal()
 {
    dword      numerator   = 0;
    dword      denominator = 1;
-   bool           sign        = false;
-   float          fres;
-   double         dres;
+   bool       sign        = false;
    switch (getUnsignedInt(1))
    {
       case 0: numerator   = getUnsignedInt(4); break;
@@ -324,32 +387,17 @@ real Oasis::OasisInFile::getReal()
       case 3: denominator = getUnsignedInt(4); sign = true; break;
       case 4: numerator   = getUnsignedInt(4); denominator = getUnsignedInt(4); break;
       case 5: numerator   = getUnsignedInt(4); denominator = getUnsignedInt(4); sign = true; break;
-      case 6: if (4 != _oasisFh.Read(&fres,4)) throw EXPTNreadOASIS("I/O error during read-in");
-              return fres;
-      case 7: if (8 != _oasisFh.Read(&dres,8)) throw EXPTNreadOASIS("I/O error during read-in");
-              return dres;
-      default: throw EXPTNreadOASIS("Unexpected \"real\" type.(7.3.3)");
+      case 6: return getFloat();
+      case 7: return getDouble();
+      default: exception("Unexpected \"real\" type.(7.3.3)");
    }
-   if (0 == denominator) throw EXPTNreadOASIS("Denominator is 0 in \"real\" representation (7.3.3)");
+   if (0 == denominator) exception("Denominator is 0 in \"real\" representation (7.3.3)");
    real result = (sign) ? - ((real) numerator / (real) denominator) :
-                            ((real) numerator / (real) denominator)   ;
+                            ((real) numerator / (real) denominator)  ;
    return result;
 }
 
 //------------------------------------------------------------------------------
-std::string Oasis::OasisInFile::getString()
-{
-   dword   length  = getUnsignedInt(2) ; //string length
-   char*       theString = DEBUG_NEW char[length+1];
-
-   if (length != _oasisFh.Read(theString,length))
-      throw EXPTNreadOASIS("I/O error during read-in");
-   theString[length] = 0x00;
-   std::string result(theString);
-   delete [] theString;
-   return result;
-}
-
 std::string Oasis::OasisInFile::getTextRefName(bool ref)
 {
    if (ref)
@@ -369,8 +417,16 @@ std::string Oasis::OasisInFile::getCellRefName(bool ref)
    }
    else return getString();
 }
+
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
+void Oasis::OasisInFile::exception(std::string message)
+{
+   std::ostringstream info;
+   info << message << " @ position " << _filePos;
+   throw EXPTNreadOASIS(info.str());
+}
+
 Oasis::OasisInFile::~OasisInFile()
 {
    if ( _cellNames  ) delete _cellNames;
@@ -379,6 +435,7 @@ Oasis::OasisInFile::~OasisInFile()
    if ( _propStrings) delete _propStrings;
    if ( _layerNames ) delete _layerNames;
    if ( _xNames     ) delete _xNames;
+   closeFile();
 }
 
 
@@ -389,7 +446,6 @@ Oasis::Cell::Cell()
    // initialised to 0
    _mod_gx = 0;
    _mod_gy = 0;
-   
 }
 
 byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
@@ -444,7 +500,7 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn)
    byte info = ofn.getByte();
 
    if ((info & Smask) && (info & Hmask))
-      throw EXPTNreadOASIS("S&H masks are ON simultaneously in rectangle info byte (25.7)");
+      ofn.exception("S&H masks are ON simultaneously in rectangle info byte (25.7)");
    dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
    word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    dword width       = (info & Wmask) ? (_mod_gwidth   = ofn.getUnsignedInt(4)) : _mod_gwidth();
@@ -560,7 +616,7 @@ void Oasis::Cell::readReference(OasisInFile& ofn, bool exma)
       magnification = 1.0;
    }
    if (magnification <= 0)
-         throw EXPTNreadOASIS("Bad magnification value (22.10)");
+         ofn.exception("Bad magnification value (22.10)");
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
 
@@ -584,7 +640,7 @@ void Oasis::Cell::skimRectangle(OasisInFile& ofn)
    byte info = ofn.getByte();
 
    if ((info & Smask) && (info & Hmask))
-      throw EXPTNreadOASIS("S&H masks are ON simultaneously in rectangle info byte (25.7)");
+      ofn.exception("S&H masks are ON simultaneously in rectangle info byte (25.7)");
    if (info & Lmask) ofn.getUnsignedInt(4);
    if (info & Dmask) ofn.getUnsignedInt(2);
    if (info & Wmask) ofn.getUnsignedInt(4);
@@ -695,7 +751,7 @@ Oasis::PointList Oasis::Cell::readPointList(OasisInFile& ofn)
 {
    byte plty = ofn.getByte();
    if (plty >= dt_unknown)
-      throw EXPTNreadOASIS("Bad point list type (7.7.8)");
+      ofn.exception("Bad point list type (7.7.8)");
    else
    {
       PointList result(ofn, (PointListType)plty);
@@ -708,7 +764,7 @@ void Oasis::Cell::readRepetitions(OasisInFile& ofn)
 {
    byte rpty = ofn.getByte();
    if (rpty >= rp_unknown)
-      throw EXPTNreadOASIS("Bad repetition type (7.6.14)");
+      ofn.exception("Bad repetition type (7.6.14)");
    else if (0 != rpty)
    {
       _mod_repete = Repetitions(ofn, (RepetitionTypes)rpty);
@@ -720,7 +776,7 @@ void Oasis::Cell::readExtensions(OasisInFile& ofn, PathExtensions& exs, PathExte
 {
    byte scheme = ofn.getByte();
    if (scheme & 0xF0)
-      throw EXPTNreadOASIS("Bad extention type (27.? - not explicitly ruled-out)");
+      ofn.exception("Bad extention type (27.? - not explicitly ruled-out)");
    // deal with the start extenstion
    byte extype = (scheme & 0x0c) >> 2;
    if (0 != extype)
