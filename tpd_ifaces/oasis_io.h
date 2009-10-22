@@ -243,10 +243,13 @@ namespace Oasis {
          std::string       getString();
          std::string       getTextRefName(bool);
          std::string       getCellRefName(bool);
+         void              exception(std::string);
       private:
-         
+         float             getFloat();
+         double            getDouble();
          void              readStartRecord();
          void              readEndRecord();
+         void              closeFile();
          // Oasis tables
          Table*            _cellNames;
          Table*            _textStrings;
@@ -258,6 +261,8 @@ namespace Oasis {
          bool              _offsetFlag;
          std::string       _fileName;
          wxFileOffset      _fileLength;
+         wxFileOffset      _filePos;
+         wxFileOffset      _progresPos;
          wxFFile           _oasisFh;
          std::string       _version;
          real              _unit;
