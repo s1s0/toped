@@ -151,9 +151,9 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
    EVT_MENU( TMLIB_LOAD          , tui::TopedFrame::OnTDTLoadLib  )
    EVT_MENU( TMLIB_UNLOAD        , tui::TopedFrame::OnTDTUnloadLib)
+   
    EVT_MENU( TMGDS_OPEN          , tui::TopedFrame::OnGDSRead     )
    EVT_MENU( TMGDS_IMPORT        , tui::TopedFrame::OnGDSimport   )
-
    EVT_MENU( TMGDS_TRANSLATE     , tui::TopedFrame::OnGDStranslate)
    EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnGDSexportLIB)
    EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
@@ -161,12 +161,18 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    
    EVT_MENU( TMCIF_EXPORTL       , tui::TopedFrame::OnCIFexportLIB)
 //   EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFimport   )
-   
    EVT_MENU( TMCIF_OPEN          , tui::TopedFrame::OnCIFRead     )
    EVT_MENU( TMCIF_TRANSLATE     , tui::TopedFrame::OnCIFtranslate)
    EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFexportCELL)
    EVT_MENU( TMCIF_CLOSE         , tui::TopedFrame::OnCIFclose    )
    
+   EVT_MENU( TMOAS_OPEN          , tui::TopedFrame::OnOASRead     )
+   EVT_MENU( TMOAS_IMPORT        , tui::TopedFrame::OnOASimport   )
+   EVT_MENU( TMOAS_TRANSLATE     , tui::TopedFrame::OnOAStranslate)
+   EVT_MENU( TMOAS_EXPORTL       , tui::TopedFrame::OnOASexportLIB)
+   EVT_MENU( TMOAS_EXPORTC       , tui::TopedFrame::OnOASexportCELL)
+   EVT_MENU( TMOAS_CLOSE         , tui::TopedFrame::OnOASclose    )
+
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
    EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
@@ -387,6 +393,17 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&File/More CIF .../Translate","", &tui::TopedFrame::OnCIFtranslate, "Import CIF structure" );
    _resourceCenter->appendMenu("&File/More CIF .../Export Cell", "", &tui::TopedFrame::OnCIFexportCELL, "Export cell to CIF" );
    _resourceCenter->appendMenu("&File/More CIF .../Close","", &tui::TopedFrame::OnCIFclose, "Clear the parsed CIF file from memory" );
+
+   
+   _resourceCenter->appendMenuSeparator("&File");
+   _resourceCenter->appendMenu("&File/Export to Oasis","",  &tui::TopedFrame::OnOASexportLIB, "Export DB to Oasis using default layer map");
+   _resourceCenter->appendMenu("&File/Import Oasis","",  &tui::TopedFrame::OnOASimport, "Import Oasis file using default layer map" );
+
+   _resourceCenter->appendMenu("&File/More Oasis .../Parse","", &tui::TopedFrame::OnOASRead, "Parse Oasis file" );
+   _resourceCenter->appendMenu("&File/More Oasis .../Translate","", &tui::TopedFrame::OnOAStranslate, "Import Oasis structure" );
+   _resourceCenter->appendMenu("&File/More Oasis .../Export Cell", "", &tui::TopedFrame::OnOASexportCELL, "Export cell to Oasis" );
+   _resourceCenter->appendMenu("&File/More Oasis .../Close","", &tui::TopedFrame::OnOASclose, "Clear the parsed Oasis file from memory" );
+
 
    _resourceCenter->appendMenuSeparator("&File");
    _resourceCenter->appendMenu("&File/Save",       "CTRL-S",  &tui::TopedFrame::OnTDTSave,  "Save the database");
@@ -1458,6 +1475,41 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
    if (NULL != laymap2save) delete laymap2save;
 }
 
+void tui::TopedFrame::OnOASRead(wxCommandEvent& WXUNUSED(event))
+{
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+                     wxT("Oasis files(*.oas)|*.oas;*.OAS|All files(*.*)|*.*"),
+                     tpdfOPEN);
+   if (wxID_OK == dlg2.ShowModal())
+   {
+      SetStatusText(wxT("Parsing Oasis file..."));
+      wxString filename = dlg2.GetFilename();
+      wxString ost;
+      ost << wxT("oasisread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
+      _cmdline->parseCommand(ost);
+   }
+   else SetStatusText(wxT("Parsing aborted"));
+}
+
+void tui::TopedFrame::OnOASimport(wxCommandEvent& WXUNUSED(event))
+{
+   //@TODO
+}
+
+void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
+{
+   //@TODO
+}
+
+void tui::TopedFrame::OnOASexportLIB(wxCommandEvent& WXUNUSED(event))
+{
+   //@TODO
+}
+
+void tui::TopedFrame::OnOASexportCELL(wxCommandEvent& WXUNUSED(event))
+{
+   //@TODO
+}
 
 
 void tui::TopedFrame::OnCellRef_B(wxCommandEvent& WXUNUSED(event)) {

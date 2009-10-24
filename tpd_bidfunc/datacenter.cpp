@@ -304,6 +304,17 @@ void DataCenter::CIFclose()
    unlockCif(ACIFDB);
 }
 
+void DataCenter::OASclose()
+{
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (lockOasis(AOASDB))
+   {
+      delete AOASDB;
+      AOASDB = NULL;
+   }
+   unlockOasis(AOASDB);
+}
+
 CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
 {
    CIFin::CifFile* ACIFDB = NULL;
@@ -585,6 +596,28 @@ void DataCenter::bpAddCifTab()
    _bpSync->Wait();
    // Wake-up & uplock the mutex
    VERIFY(wxMUTEX_NO_ERROR == CIFLock.Unlock());
+   // clean-up behind & prepare for the consequent use
+   delete _bpSync;
+   _bpSync = NULL;
+}
+
+void DataCenter::bpAddOasTab()
+{
+   // Lock the Mutex
+   if (wxMUTEX_DEAD_LOCK == OASISLock.Lock())
+   {
+      tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
+      return;
+   }
+   // initialise the thread condition with the locked Mutex
+   _bpSync = new wxCondition(OASISLock);
+   // post a message to the main thread
+   TpdPost::addOAStab();
+   // Go to sleep and wait until the main thread finished
+   // updating the browser panel
+   _bpSync->Wait();
+   // Wake-up & uplock the mutex
+   VERIFY(wxMUTEX_NO_ERROR == OASISLock.Unlock());
    // clean-up behind & prepare for the consequent use
    delete _bpSync;
    _bpSync = NULL;

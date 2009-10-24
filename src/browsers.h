@@ -41,6 +41,7 @@
 #include "calbr_reader.h"
 #include "gds_io.h"
 #include "cif_io.h"
+#include "oasis_io.h"
 
 // Forward declarations
 
@@ -62,6 +63,7 @@ namespace browsers
       CELLTREEOPENCELL  = 1000,
       GDSTREEREPORTLAY        ,
       CIFTREEREPORTLAY        ,
+      OASTREEREPORTLAY        ,
       LAYERHIDESELECTED       ,
       LAYERSHOWSELECTED       ,
       LAYERLOCKSELECTED       ,
@@ -166,6 +168,23 @@ namespace browsers
          DECLARE_EVENT_TABLE();
    };
 
+   //===========================================================================
+   class OASCellBrowser:public CellBrowser {
+      public:
+                           OASCellBrowser(wxWindow* parent, wxWindowID id = -1,
+                              const wxPoint& pos = wxDefaultPosition,
+                              const wxSize& size = wxDefaultSize,
+                              long style = wxTR_DEFAULT_STYLE);
+         void              showMenu(wxTreeItemId id, const wxPoint& pt);
+         void              collectInfo(bool);
+      private:
+         void              collectChildren(const Oasis::OASHierTree*, const wxTreeItemId&, bool);
+         void              onItemRightClick(wxTreeEvent&);
+         void              onBlankRMouseUp(wxMouseEvent&);
+         void              onReportlay(wxCommandEvent& WXUNUSED(event));
+         DECLARE_EVENT_TABLE();
+   };
+   
    //===========================================================================
    class TDTbrowser : public wxPanel {
       public:
@@ -354,10 +373,13 @@ namespace browsers
          void                 onTellClearGdsTab();
          void                 onTellAddCifTab();
          void                 onTellClearCifTab();
+         void                 onTellAddOasTab();
+         void                 onTellClearOasTab();
          void                 onTellAddDRCTab();
          void                 onTellClearDRCTab();
          XdbBrowser*         _gdsStruct;
          XdbBrowser*         _cifStruct;
+         XdbBrowser*         _oasStruct;
          TDTbrowser*         _tdtStruct;
          DRCBrowser*         _drcStruct;
          int                 _gdsPageIndex;

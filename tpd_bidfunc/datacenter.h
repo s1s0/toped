@@ -43,6 +43,7 @@ public:
    void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
+   void                       OASclose();
    CIFin::CifStatusType       CIFparse(std::string filename);
    void                       CIFexport(USMap*, bool, std::string&);
    void                       CIFexport(laydata::tdtcell*, USMap*, bool, bool, std::string&);
@@ -64,6 +65,7 @@ public:
    bool                       lockOasis(Oasis::OasisInFile*&);
    void                       bpAddGdsTab();
    void                       bpAddCifTab();
+   void                       bpAddOasTab();
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
