@@ -288,8 +288,6 @@ namespace GDSin {
 
    class   GdsStructure {
       public:
-         typedef std::list<GdsStructure*>  ChildStructure;
-
                               GdsStructure(GdsInFile*, word);
          void                 import(GdsInFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
@@ -325,7 +323,7 @@ namespace GDSin {
          std::string          _strctName;
          bool                 _traversed;       //! For hierarchy traversing purposes
          NameSet              _referenceNames;
-         ChildStructure       _children;
+         GDSStructureList     _children;
          wxFileOffset         _filePos;
          wxFileOffset         _strSize;
          word                 _beginRecLength; //! used in split function only
@@ -384,7 +382,7 @@ namespace GDSin {
    protected:
       void                    preTraverseChildren(const GDSin::GDSHierTree*);
       void                    convert(GDSin::GdsStructure*, bool);
-      GDSin::GdsInFile*         _src_lib;
+      GDSin::GdsInFile*       _src_lib;
       laydata::tdtlibdir*     _tdt_db;
       const LayerMapGds&      _theLayMap;
       real                    _coeff; // DBU difference

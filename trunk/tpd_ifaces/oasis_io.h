@@ -29,6 +29,7 @@
 
 #include <wx/ffile.h>
 #include "outbox.h"
+#include "tedstd.h"
 
 namespace Oasis {
    const byte oas_PAD              =  0;
@@ -114,6 +115,7 @@ namespace Oasis {
    class Cell;
 
    typedef SGHierTree<Cell>        OASHierTree;
+   typedef std::list<Cell*>        OasisCellList;
 
    class Table {
       public:
@@ -201,11 +203,15 @@ namespace Oasis {
          byte              skimCell(OasisInFile&, bool);
          void              linkReferences(OasisInFile&);
          OASHierTree*      hierOut(OASHierTree*, Cell*);
-         std::string       name() const         {return _name;}
-         bool              haveParent() const   {return _haveParent;}
-         int               libID() const        {return TARGETDB_LIB;} // to cover the requirements of the hierarchy template
+         void              import(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir* /*, const LayerMapGds&*/);
+
+         std::string       name() const            { return _name;         }
+         bool              haveParent() const      { return _haveParent;   }
+         bool              traversed() const       { return _traversed;    }
+         void              set_traversed(bool tf)  { _traversed = tf;      }
+         wxFileOffset      cellSize()              { return _cellSize;     }
+         int               libID() const           { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
       private:
-         typedef std::list<Cell*>  ChildCells;
          void              skimRectangle(OasisInFile&);
          void              skimPolygon(OasisInFile&);
          void              skimPath(OasisInFile&);
@@ -237,22 +243,26 @@ namespace Oasis {
          //
          std::string       _name            ; //! The Cell name
          NameSet           _referenceNames  ; //! All names of the structures referenced in this cell
-         ChildCells        _children        ; //! Pointers to all Cell structures referenced in this cell
+         OasisCellList     _children        ; //! Pointers to all Cell structures referenced in this cell
          wxFileOffset      _filePos         ; //! The position of the corresponding CELL record in the file
          wxFileOffset      _cellSize        ; //! The size (in bytes) of this cell definition in the OASIS file
          bool              _haveParent      ; //! Flags that the cell is referenced
+         bool              _traversed       ; //! For hierarchy traversing purposes
    };
 
    class OasisInFile {
       public:
                            OasisInFile(std::string);
                           ~OasisInFile();
+         bool              reopenFile();
          void              readLibrary();
          void              hierOut();
-         bool              status()          {return _status;}
-         wxFileOffset      filePos()         {return _filePos;}
+         void              setPosition(wxFileOffset);
+         bool              status()          {return _status;  }
+         wxFileOffset      filePos()         {return _filePos; }
          OASHierTree*      hierTree()        {return _hierTree;}
-         std::string       getLibName()      {return "boza";}//@FIXME put the file name here without the path!
+         real              libUnits()        {return _unit;    }
+         std::string       getLibName()      {return "boza";   }//@FIXME put the file name here without the path!
          byte              getByte();
          qword             getUnsignedInt(byte);
          int8b             getInt(byte);
@@ -262,13 +272,13 @@ namespace Oasis {
          std::string       getCellRefName(bool);
          void              exception(std::string);
          Cell*             getCell(const std::string);
+         void              closeFile();
       private:
          typedef std::map<std::string, Cell*> DefinitionMap;
          float             getFloat();
          double            getDouble();
          void              readStartRecord();
          void              readEndRecord();
-         void              closeFile();
          //
          void              linkReferences();
          // Oasis tables
@@ -295,6 +305,23 @@ namespace Oasis {
          //! Used only in the constructor if the file can't be opened for whatever reason
          bool              _status;
    };
+
+
+   class Oas2Ted {
+   public:
+                              Oas2Ted(OasisInFile*, laydata::tdtlibdir*/*, const LayerMapGds&*/);
+      void                    run(const nameList&, bool, bool);
+   protected:
+      void                    preTraverseChildren(const OASHierTree*);
+      void                    convert(Cell*, bool);
+      OasisInFile*            _src_lib;
+      laydata::tdtlibdir*     _tdt_db;
+//      const LayerMapGds&      _theLayMap;
+      real                    _coeff; // DBU difference
+      OasisCellList           _convertList;
+      wxFileOffset            _conversionLength;
+   };
+
 
    void readDelta(OasisInFile&, int4b&, int4b&);
 }

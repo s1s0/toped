@@ -769,7 +769,7 @@ void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
       data_types.insert(CL->second.begin(), CL->second.end());
    }
    if (!hier) return;
-   for (ChildStructure::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
+   for (GDSStructureList::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
       if (NULL == (*CSTR)) continue;
    else
       (*CSTR)->collectLayers(layers_map, hier);
@@ -779,7 +779,7 @@ GDSin::GDSHierTree* GDSin::GdsStructure::hierOut(GDSHierTree* Htree, GdsStructur
 {
    // collecting hierarchical information
    Htree = DEBUG_NEW GDSHierTree(this, parent, Htree);
-   for (ChildStructure::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
+   for (GDSStructureList::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
    {
       if (NULL == (*CSTR)) continue;
       else

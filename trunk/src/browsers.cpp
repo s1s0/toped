@@ -1046,7 +1046,7 @@ void browsers::OASCellBrowser::collectInfo(bool hier)
    DeleteAllItems();
 
    Oasis::OasisInFile* AOASDB = NULL;
-   if (DATC->lockOasis(AOASDB))
+   if (DATC->lockOas(AOASDB))
    {
       AddRoot(wxString((AOASDB->getLibName()).c_str(), wxConvUTF8));
 
@@ -1063,7 +1063,7 @@ void browsers::OASCellBrowser::collectInfo(bool hier)
       }
       SortChildren(GetRootItem());
    }
-   DATC->unlockOasis(AOASDB);
+   DATC->unlockOas(AOASDB);
 }
 
 void browsers::OASCellBrowser::collectChildren(const Oasis::OASHierTree* root,

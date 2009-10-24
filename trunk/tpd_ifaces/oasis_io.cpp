@@ -26,6 +26,7 @@
 //===========================================================================
 #include "tpdph.h"
 #include "oasis_io.h"
+#include "tedesign.h"
 #include <sstream>
 
 
@@ -112,6 +113,28 @@ Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings
       _fileLength = _oasisFh.Length();
       TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
    }
+}
+
+bool Oasis::OasisInFile::reopenFile()
+{
+//   _gdsiiWarnings = 0;
+   _filePos = 0;
+   _progresPos = 0;
+   wxString wxfname(_fileName.c_str(), wxConvUTF8 );
+   _oasisFh.Open(wxfname.c_str(),wxT("rb"));
+   if (!(_oasisFh.IsOpened()))
+   {// open the input file
+      std::ostringstream info;
+      info << "File "<< _fileName <<" can NOT be reopened";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+   return true;
+}
+
+void Oasis::OasisInFile::setPosition(wxFileOffset filePos)
+{
+   _oasisFh.Seek(filePos, wxFromStart);
 }
 
 void Oasis::OasisInFile::closeFile()
@@ -477,8 +500,8 @@ Oasis::Cell::Cell()
 
 byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
 {
-   _filePos = ofn.filePos();
    _name = ofn.getCellRefName(refnum);
+   _filePos = ofn.filePos();
    std::ostringstream info;
    info << "OASIS : Reading cell \"" << _name << "\"";
    tell_log(console::MT_INFO, info.str());
@@ -515,6 +538,45 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
    } while (true);
 }
 
+void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
+                           laydata::tdtlibdir* tdt_db/*, const LayerMapGds&*/)
+{
+   ofn.setPosition(_filePos);
+   std::ostringstream info;
+   info << "OASIS : Importing cell \"" << _name << "\"";
+   tell_log(console::MT_INFO, info.str());
+   do
+   {
+      byte recType = ofn.getUnsignedInt(1);
+      switch (recType)
+      {
+         case oas_PAD         : break;
+         case oas_PROPERTY_1  : /*@TODO*/assert(false);break;
+         case oas_PROPERTY_2  : /*@TODO*/assert(false);break;
+         case oas_XYRELATIVE  : /*@TODO*/assert(false);break;
+         case oas_XYABSOLUTE  : /*@TODO*/assert(false);break;
+         case oas_CBLOCK      : /*@TODO*/assert(false);break;
+         // <element> records
+         case oas_PLACEMENT_1 : readReference(ofn, false);break;
+         case oas_PLACEMENT_2 : readReference(ofn, true );break;
+         case oas_TEXT        : readText(ofn);break;
+         case oas_XELEMENT    : /*@TODO*/assert(false);break;
+         // <geometry> records
+         case oas_RECTANGLE   : readRectangle(ofn); break;
+         case oas_POLYGON     : readPolygon(ofn);break;
+         case oas_PATH        : readPath(ofn);break;
+         case oas_TRAPEZOID_1 : /*@TODO*/assert(false);break;
+         case oas_TRAPEZOID_2 : /*@TODO*/assert(false);break;
+         case oas_TRAPEZOID_3 : /*@TODO*/assert(false);break;
+         case oas_CTRAPEZOID  : /*@TODO*/assert(false);break;
+         case oas_CIRCLE      : /*@TODO*/assert(false);break;
+         default:
+            // check that the cell size is the same as obtained by skim function
+            assert(_cellSize == (ofn.filePos() - _filePos - 1));
+            return;
+      }
+   } while (true);
+}
 //------------------------------------------------------------------------------
 void Oasis::Cell::readRectangle(OasisInFile& ofn)
 {
@@ -845,7 +907,7 @@ Oasis::OASHierTree* Oasis::Cell::hierOut(OASHierTree* Htree, Cell* parent)
 {
    // collecting hierarchical information
    Htree = DEBUG_NEW OASHierTree(this, parent, Htree);
-   for (ChildCells::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
+   for (OasisCellList::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
    {
       if (NULL == (*CSTR)) continue;
       else
@@ -1190,7 +1252,110 @@ void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
       }
    }
 }
-//oasisread("/home/skr/toped/library/oasis/FOLL2.OAS");
-//oasisread("/home/skr/toped/library/oasis/FOLL.oas");
-//oasisread("C:\Users\skr\Development\toped\FOLL2.OAS");
-//oasisread("C:\Users\skr\Development\toped\FOLL.oas");
+
+
+//-----------------------------------------------------------------------------
+// class Oas2Ted
+//-----------------------------------------------------------------------------
+Oasis::Oas2Ted::Oas2Ted(OasisInFile* src_lib, laydata::tdtlibdir* tdt_db/*, const LayerMapGds& theLayMap*/) :
+      _src_lib(src_lib), _tdt_db(tdt_db),/* _theLayMap(theLayMap),*/
+               _coeff((*_tdt_db)()->UU() / src_lib->libUnits()), _conversionLength(0)
+{}
+
+void Oasis::Oas2Ted::run(const nameList& top_str_names, bool recursive, bool overwrite)
+{
+   assert(_src_lib->hierTree());
+
+   for (nameList::const_iterator CN = top_str_names.begin(); CN != top_str_names.end(); CN++)
+   {
+      Cell* src_structure = _src_lib->getCell(*CN);
+      if (NULL != src_structure)
+      {
+         Oasis::OASHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
+         if (recursive) preTraverseChildren(root);
+         if (!src_structure->traversed())
+         {
+            _convertList.push_back(src_structure);
+            src_structure->set_traversed(true);
+            _conversionLength += src_structure->cellSize();
+         }
+      }
+      else
+      {
+         std::ostringstream ost; ost << "OASIS import: ";
+         ost << "Structure \""<< *CN << "\" not found in the OASIS DB.";
+         tell_log(console::MT_WARNING,ost.str());
+      }
+   }
+   if (_src_lib->reopenFile())
+   {
+      TpdPost::toped_status(console::TSTS_PRGRSBARON, _conversionLength);
+      try
+      {
+         for (OasisCellList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
+         {
+            convert(*CS, overwrite);
+            (*CS)->set_traversed(false); // restore the state for eventual second conversion
+         }
+         tell_log(console::MT_INFO, "Done");
+      }
+      catch (EXPTNreadOASIS) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
+      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+      _src_lib->closeFile();
+      (*_tdt_db)()->recreate_hierarchy(_tdt_db);
+   }
+}
+
+void Oasis::Oas2Ted::preTraverseChildren(const Oasis::OASHierTree* root)
+{
+   const Oasis::OASHierTree* Child = root->GetChild(TARGETDB_LIB);
+   while (Child)
+   {
+      if ( !Child->GetItem()->traversed() )
+      {
+         // traverse children first
+         preTraverseChildren(Child);
+         Oasis::Cell* sstr = const_cast<Oasis::Cell*>(Child->GetItem());
+         if (!sstr->traversed())
+         {
+            _convertList.push_back(sstr);
+            sstr->set_traversed(true);
+            _conversionLength += sstr->cellSize();
+         }
+      }
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
+void Oasis::Oas2Ted::convert(Oasis::Cell* src_structure, bool overwrite)
+{
+   std::string gname = src_structure->name();
+   // check that destination structure with this name exists
+   laydata::tdtcell* dst_structure = static_cast<laydata::tdtcell*>((*_tdt_db)()->checkcell(gname));
+   std::ostringstream ost; ost << "OASIS import: ";
+   if (NULL != dst_structure)
+   {
+      if (overwrite)
+      {
+         /*@TODO Erase the existing structure and convert*/
+         ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
+         tell_log(console::MT_WARNING,ost.str());
+      }
+      else
+      {
+         ost << "Structure "<< gname << " already exists. Skipped";
+         tell_log(console::MT_INFO,ost.str());
+      }
+   }
+   else
+   {
+      ost << "Structure " << gname << "...";
+      tell_log(console::MT_INFO,ost.str());
+      // first create a new cell
+      dst_structure = DEBUG_NEW laydata::tdtcell(gname);
+      // call the cell converter
+      src_structure->import(*_src_lib, dst_structure, _tdt_db/*, _theLayMap*/);
+      // and finally - register the cell
+      (*_tdt_db)()->registercellread(gname, dst_structure);
+   }
+}
