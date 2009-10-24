@@ -1320,6 +1320,7 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    _gdsStruct = NULL;
    _cifStruct = NULL;
    _drcStruct = NULL;
+   _oasStruct = NULL;
 }
 
 browsers::browserTAB::~browserTAB() 

@@ -496,6 +496,7 @@ Oasis::Cell::Cell()
    _mod_gx = 0;
    _mod_gy = 0;
    _haveParent = false;
+   _traversed  = false;
 }
 
 byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
@@ -1359,3 +1360,4 @@ void Oasis::Oas2Ted::convert(Oasis::Cell* src_structure, bool overwrite)
       (*_tdt_db)()->registercellread(gname, dst_structure);
    }
 }
+// oasisimport("AMODUL", true, false);
