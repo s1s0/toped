@@ -145,6 +145,7 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW        tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_hsh), true)));
    mblock->addFUNC("setgdslaymap"     ,(DEBUG_NEW                tellstdfunc::GDSsetlaymap(telldata::tn_void, true)));
    mblock->addFUNC("oasisread"        ,(DEBUG_NEW        tellstdfunc::OASISread(TLISTOF(telldata::tn_string), true)));
+   mblock->addFUNC("oasisclose"       ,(DEBUG_NEW                  tellstdfunc::OASISclose(telldata::tn_void, true)));
    mblock->addFUNC("drccalibreimport" ,(DEBUG_NEW            tellstdfunc::DRCCalibreimport(telldata::tn_void, true)));
    mblock->addFUNC("drcshowerror"     ,(DEBUG_NEW               tellstdfunc::DRCshowerror(telldata::tn_void, true)));
    mblock->addFUNC("psexport"         ,(DEBUG_NEW                 tellstdfunc::PSexportTOP(telldata::tn_void,false)));

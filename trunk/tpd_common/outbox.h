@@ -201,9 +201,11 @@ class TpdPost {
       static void addTDTtab(bool, bool newthread);
       static void addGDStab();
       static void addCIFtab();
+      static void addOAStab();
       static void addDRCtab();
       static void clearGDStab();
       static void clearCIFtab();
+      static void clearOAStab();
       static void clearDRCtab();
       static void layer_status(int, const word, const bool);
       static void layer_add(const std::string, const word);

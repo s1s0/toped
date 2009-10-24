@@ -992,6 +992,108 @@ void browsers::CIFCellBrowser::collectChildren(const CIFin::CIFHierTree* root,
 
 //==============================================================================
 //
+// OASCellBrowser
+//
+//==============================================================================
+BEGIN_EVENT_TABLE(browsers::OASCellBrowser, wxTreeCtrl)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_OAS_CELLTREE, browsers::OASCellBrowser::onItemRightClick)
+   EVT_RIGHT_UP(browsers::OASCellBrowser::onBlankRMouseUp)
+   EVT_MENU(OASTREEREPORTLAY, browsers::OASCellBrowser::onReportlay)
+END_EVENT_TABLE()
+
+browsers::OASCellBrowser::OASCellBrowser(wxWindow *parent, wxWindowID id,
+   const wxPoint& pos, const wxSize& size, long style) :
+      CellBrowser(parent, id, pos, size, style )
+{ }
+
+void browsers::OASCellBrowser::onItemRightClick(wxTreeEvent& event)
+{
+   showMenu(event.GetItem(), event.GetPoint());
+}
+
+void browsers::OASCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
+{
+   wxPoint pt = event.GetPosition();
+   showMenu(HitTest(pt), pt);
+}
+
+void browsers::OASCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
+{
+   wxString cmd;
+   cmd << wxT("report_oasislayers(\"") << GetItemText(_rbCellID) <<wxT("\");");
+   TpdPost::parseCommand(cmd);
+}
+
+void browsers::OASCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
+{
+   wxMenu menu;
+   _rbCellID = id;
+   if ( id.IsOk() && (id != GetRootItem()) )
+   {
+      wxString RBcellname = GetItemText(id);
+      menu.Append(tui::TMOAS_TRANSLATE, wxT("Translate " + RBcellname));
+      menu.Append(OASTREEREPORTLAY, wxT("Report layers used in " + RBcellname));
+   }
+   else
+   {
+      menu.Append(tui::TMOAS_CLOSE, wxT("Close Oasis")); // will be catched up in toped.cpp
+   }
+   PopupMenu(&menu, pt);
+}
+
+void browsers::OASCellBrowser::collectInfo(bool hier)
+{
+   DeleteAllItems();
+
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (DATC->lockOasis(AOASDB))
+   {
+      AddRoot(wxString((AOASDB->getLibName()).c_str(), wxConvUTF8));
+
+      if (NULL != AOASDB->hierTree())
+      {
+         Oasis::OASHierTree* root = AOASDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+         wxTreeItemId nroot;
+         while (root)
+         {
+            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
+            collectChildren(root, nroot, hier);
+            root = root->GetNextRoot(TARGETDB_LIB);
+         }
+      }
+      SortChildren(GetRootItem());
+   }
+   DATC->unlockOasis(AOASDB);
+}
+
+void browsers::OASCellBrowser::collectChildren(const Oasis::OASHierTree* root,
+                                               const wxTreeItemId& lroot, bool _hierarchy_view)
+{
+   const Oasis::OASHierTree* Child= root->GetChild(TARGETDB_LIB);
+   wxTreeItemId nroot;
+   wxTreeItemId temp;
+
+   while (Child)
+   {
+      if (_hierarchy_view)
+      {
+         nroot = AppendItem(lroot, wxString(Child->GetItem()->name().c_str(), wxConvUTF8));
+         collectChildren(Child, nroot, _hierarchy_view);
+      }
+      else
+      {
+         if (!findItem(wxString(Child->GetItem()->name().c_str(), wxConvUTF8), temp, GetRootItem()))
+         {
+            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->name().c_str(), wxConvUTF8));
+            collectChildren(Child, nroot, _hierarchy_view);
+         }
+      }
+      SortChildren(lroot);
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+//==============================================================================
+//
 // TDTbrowser
 //
 //==============================================================================
@@ -1134,11 +1236,14 @@ browsers::XdbBrowser::XdbBrowser(   wxWindow *parent,
    _hierarchy_view = true;
    switch (id)
    {
+      case tui::ID_GDS_CELLTREE:
+         _cellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_GDS_CELLTREE, pos, size, style);
+         break;
       case tui::ID_CIF_CELLTREE:
          _cellBrowser = DEBUG_NEW CIFCellBrowser(this, tui::ID_CIF_CELLTREE, pos, size, style);
          break;
-      case tui::ID_GDS_CELLTREE:
-         _cellBrowser = DEBUG_NEW GDSCellBrowser(this, tui::ID_GDS_CELLTREE, pos, size, style);
+      case tui::ID_OAS_CELLTREE:
+         _cellBrowser = DEBUG_NEW OASCellBrowser(this, tui::ID_OAS_CELLTREE, pos, size, style);
          break;
       default: assert(false);
    }
@@ -1250,6 +1355,8 @@ void browsers::browserTAB::onCommand(wxCommandEvent& event)
       case tui::BT_CLEARGDS_TAB:onTellClearGdsTab(); break;
       case tui::BT_ADDCIF_TAB:onTellAddCifTab();break;
       case tui::BT_CLEARCIF_TAB:onTellClearCifTab(); break;
+      case tui::BT_ADDOAS_TAB:onTellAddOasTab();break;
+      case tui::BT_CLEAROAS_TAB:onTellClearOasTab(); break;
       case tui::BT_ADDDRC_TAB:onTellAddDRCTab();break;
       case tui::BT_CLEARDRC_TAB:onTellClearDRCTab(); break;
       default: event.Skip();
@@ -1304,6 +1411,29 @@ void browsers::browserTAB::onTellClearCifTab()
       _cifStruct->deleteAllItems();
       DeletePage(_cifPageIndex);
       _cifStruct = NULL;
+   }
+}
+
+void browsers::browserTAB::onTellAddOasTab()
+{
+   if (NULL == _oasStruct)
+   {
+      _oasStruct = DEBUG_NEW XdbBrowser(this, tui::ID_OAS_CELLTREE);
+      AddPage(_oasStruct, wxT("Oasis"));
+   }
+   // don't bother to clean-up existing DB. It's done in the function called
+   _oasStruct->collectInfo();
+}
+
+void browsers::browserTAB::onTellClearOasTab()
+{
+   if (_oasStruct)
+   {
+      int _oasPageIndex = GetPageIndex(_oasStruct);
+      assert(wxNOT_FOUND != _oasPageIndex);
+      _oasStruct->deleteAllItems();
+      DeletePage(_oasPageIndex);
+      _oasStruct = NULL;
    }
 }
 

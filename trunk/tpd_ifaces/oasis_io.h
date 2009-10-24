@@ -111,8 +111,10 @@ namespace Oasis {
                   tblm_explicit         } TableMode;
 
    class OasisInFile;
-   
-   
+   class Cell;
+
+   typedef SGHierTree<Cell>        OASHierTree;
+
    class Table {
       public:
          typedef std::map<dword, std::string> NameTable;
@@ -125,7 +127,6 @@ namespace Oasis {
          bool              _strictMode;
          TableMode         _ieMode; //implicit/explicit mode
          NameTable         _table;
-         
    };
 
    template <class TYPE> class ModalVar {
@@ -198,7 +199,13 @@ namespace Oasis {
       public:
                            Cell();
          byte              skimCell(OasisInFile&, bool);
+         void              linkReferences(OasisInFile&);
+         OASHierTree*      hierOut(OASHierTree*, Cell*);
+         std::string       name() const         {return _name;}
+         bool              haveParent() const   {return _haveParent;}
+         int               libID() const        {return TARGETDB_LIB;} // to cover the requirements of the hierarchy template
       private:
+         typedef std::list<Cell*>  ChildCells;
          void              skimRectangle(OasisInFile&);
          void              skimPolygon(OasisInFile&);
          void              skimPath(OasisInFile&);
@@ -212,6 +219,7 @@ namespace Oasis {
          PointList         readPointList(OasisInFile&);
          void              readRepetitions(OasisInFile&);
          void              readExtensions(OasisInFile&, PathExtensions&, PathExtensions&);
+         //
          ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer
          ModalVar< word>   _mod_datatype    ; //! OASIS modal variable datatype
          ModalVar<dword>   _mod_gwidth      ; //! OASIS modal variable geometry-w
@@ -226,16 +234,25 @@ namespace Oasis {
          ModalVar<Repetitions>   _mod_repete; //! OASIS modal variable repetition
          ModalVar<PathExtensions> _mod_exs  ; //! OASIS modal variable path-start-extention
          ModalVar<PathExtensions> _mod_exe  ; //! OASIS modal variable path-end-extention
-         NameSet           _referenceNames  ; //! All structures referenced here
+         //
+         std::string       _name            ; //! The Cell name
+         NameSet           _referenceNames  ; //! All names of the structures referenced in this cell
+         ChildCells        _children        ; //! Pointers to all Cell structures referenced in this cell
+         wxFileOffset      _filePos         ; //! The position of the corresponding CELL record in the file
+         wxFileOffset      _cellSize        ; //! The size (in bytes) of this cell definition in the OASIS file
+         bool              _haveParent      ; //! Flags that the cell is referenced
    };
-   
+
    class OasisInFile {
       public:
                            OasisInFile(std::string);
                           ~OasisInFile();
          void              readLibrary();
-         bool              status ()         {return _status;}
-         void              hierOut ()        {/*@TODO!*/}
+         void              hierOut();
+         bool              status()          {return _status;}
+         wxFileOffset      filePos()         {return _filePos;}
+         OASHierTree*      hierTree()        {return _hierTree;}
+         std::string       getLibName()      {return "boza";}//@FIXME put the file name here without the path!
          byte              getByte();
          qword             getUnsignedInt(byte);
          int8b             getInt(byte);
@@ -244,12 +261,16 @@ namespace Oasis {
          std::string       getTextRefName(bool);
          std::string       getCellRefName(bool);
          void              exception(std::string);
+         Cell*             getCell(const std::string);
       private:
+         typedef std::map<std::string, Cell*> DefinitionMap;
          float             getFloat();
          double            getDouble();
          void              readStartRecord();
          void              readEndRecord();
          void              closeFile();
+         //
+         void              linkReferences();
          // Oasis tables
          Table*            _cellNames;
          Table*            _textStrings;
@@ -258,14 +279,20 @@ namespace Oasis {
          Table*            _layerNames;
          Table*            _xNames;
          //
+         //! All Cells defined in the file with a pointer to the respective Cell object
+         DefinitionMap     _definedCells;
+         //
+         //! Position of the table offset fields. (false) - in the START record; (true) in the END record
          bool              _offsetFlag;
-         std::string       _fileName;
-         wxFileOffset      _fileLength;
-         wxFileOffset      _filePos;
-         wxFileOffset      _progresPos;
-         wxFFile           _oasisFh;
-         std::string       _version;
-         real              _unit;
+         std::string       _fileName;  //! A fully validated name of the OASIS file. Path,extension, everything
+         wxFileOffset      _fileLength;//! The length of the OASIS file in bytes
+         wxFileOffset      _filePos;   //! Current position in the OASIS file
+         wxFileOffset      _progresPos;//! Current position on the progress bar (Toped status line)
+         wxFFile           _oasisFh;   //! The file handle of the opened OASIS file
+         std::string       _version;   //! OASIS version record retrieved from the file
+         real              _unit;      //! OASIS unit (DBU) retrieved from the file
+         OASHierTree*      _hierTree;  //! The tree of reference hierarchy
+         //! Used only in the constructor if the file can't be opened for whatever reason
          bool              _status;
    };
 

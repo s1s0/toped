@@ -362,6 +362,14 @@ void TpdPost::addCIFtab()
    wxPostEvent(_topBrowsers, eventADDTAB);
 }
 
+void TpdPost::addOAStab()
+{
+   assert(_topBrowsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(tui::BT_ADDOAS_TAB);
+   wxPostEvent(_topBrowsers, eventADDTAB);
+}
+
 void TpdPost::addDRCtab()
 {
    assert(_topBrowsers);
@@ -383,6 +391,14 @@ void TpdPost::clearCIFtab()
    assert(_topBrowsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_CLEARCIF_TAB);
+   wxPostEvent(_topBrowsers, eventADDTAB);
+}
+
+void TpdPost::clearOAStab()
+{
+   assert(_topBrowsers);
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(tui::BT_CLEAROAS_TAB);
    wxPostEvent(_topBrowsers, eventADDTAB);
 }
 

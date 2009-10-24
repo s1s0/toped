@@ -206,14 +206,14 @@ void Oasis::OasisInFile::readLibrary()
          case oas_CELL_1      : 
             curCell = DEBUG_NEW Cell(); 
             recType = curCell->skimCell(*this, true) ; 
-            rlb = true; 
-/*TMP*/     delete curCell;
+            rlb = true;
+            _definedCells[curCell->name()] = curCell;
             break;
          case oas_CELL_2      : 
             curCell = DEBUG_NEW Cell(); 
             recType = curCell->skimCell(*this, false); 
             rlb = true; 
-/*TMP*/     delete curCell;
+            _definedCells[curCell->name()] = curCell;
             break;
          case oas_CBLOCK      : assert(false);/*@TODO*/rlb = false; break;
          // <name> records
@@ -232,6 +232,7 @@ void Oasis::OasisInFile::readLibrary()
          case oas_END         : 
             readEndRecord();
             closeFile();
+            linkReferences();
             return;
          default: exception("Unexpected record in the current context");
       }
@@ -427,6 +428,31 @@ void Oasis::OasisInFile::exception(std::string message)
    throw EXPTNreadOASIS(info.str());
 }
 
+void Oasis::OasisInFile::linkReferences()
+{
+   for (DefinitionMap::const_iterator CSTR = _definedCells.begin(); CSTR != _definedCells.end(); CSTR++)
+   {//for every structure
+      CSTR->second->linkReferences(*this);
+   }
+}
+
+Oasis::Cell* Oasis::OasisInFile::getCell(const std::string selection)
+{
+   DefinitionMap::iterator striter;
+   if (_definedCells.end() != (striter = _definedCells.find(selection)))
+      return striter->second;
+   else
+      return NULL;
+}
+
+void Oasis::OasisInFile::hierOut()
+{
+   _hierTree = NULL;
+   for (DefinitionMap::const_iterator CSTR = _definedCells.begin(); CSTR != _definedCells.end(); CSTR++)
+      if (!CSTR->second->haveParent())
+         _hierTree = CSTR->second->hierOut(_hierTree, NULL);
+}
+
 Oasis::OasisInFile::~OasisInFile()
 {
    if ( _cellNames  ) delete _cellNames;
@@ -446,13 +472,15 @@ Oasis::Cell::Cell()
    // initialised to 0
    _mod_gx = 0;
    _mod_gy = 0;
+   _haveParent = false;
 }
 
 byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
 {
-   std::string cellName = ofn.getCellRefName(refnum);
+   _filePos = ofn.filePos();
+   _name = ofn.getCellRefName(refnum);
    std::ostringstream info;
-   info << "OASIS : Reading cell \"" << cellName << "\"";
+   info << "OASIS : Reading cell \"" << _name << "\"";
    tell_log(console::MT_INFO, info.str());
    do
    {
@@ -466,24 +494,26 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
          case oas_XYABSOLUTE  : /*@TODO*/assert(false);break;
          case oas_CBLOCK      : /*@TODO*/assert(false);break;
          // <element> records
-         case oas_PLACEMENT_1 : readReference(ofn, false);break;
-         case oas_PLACEMENT_2 : readReference(ofn, true );break;
-         case oas_TEXT        : readText(ofn);break;
+         case oas_PLACEMENT_1 : skimReference(ofn, false);break;
+         case oas_PLACEMENT_2 : skimReference(ofn, true );break;
+         case oas_TEXT        : skimText(ofn);break;
          case oas_XELEMENT    : /*@TODO*/assert(false);break;
          // <geometry> records
-         case oas_RECTANGLE   : readRectangle(ofn); break;
-         case oas_POLYGON     : readPolygon(ofn);break;
-         case oas_PATH        : readPath(ofn);break;
+         case oas_RECTANGLE   : skimRectangle(ofn); break;
+         case oas_POLYGON     : skimPolygon(ofn);break;
+         case oas_PATH        : skimPath(ofn);break;
          case oas_TRAPEZOID_1 : /*@TODO*/assert(false);break;
          case oas_TRAPEZOID_2 : /*@TODO*/assert(false);break;
          case oas_TRAPEZOID_3 : /*@TODO*/assert(false);break;
          case oas_CTRAPEZOID  : /*@TODO*/assert(false);break;
          case oas_CIRCLE      : /*@TODO*/assert(false);break;
-         default: return recType;
+         default:
+            // last byte from the stream doesn't belong to this cell definition
+            _cellSize = ofn.filePos() - _filePos - 1;
+            return recType;
       }
    } while (true);
 }
-
 
 //------------------------------------------------------------------------------
 void Oasis::Cell::readRectangle(OasisInFile& ofn)
@@ -622,7 +652,6 @@ void Oasis::Cell::readReference(OasisInFile& ofn, bool exma)
 
    if (info & Rmask) readRepetitions(ofn);
 //   Repetitions rpt = _mod_repete();
-//   _referenceNames.insert(name);
 }
 
 //------------------------------------------------------------------------------
@@ -791,6 +820,40 @@ void Oasis::Cell::readExtensions(OasisInFile& ofn, PathExtensions& exs, PathExte
       _mod_exe = PathExtensions(ofn, (ExtensionTypes)extype);
    }
    exe = _mod_exe();
+}
+
+void Oasis::Cell::linkReferences(OasisInFile& ofn)
+{
+   for (NameSet::const_iterator CRN = _referenceNames.begin(); CRN != _referenceNames.end(); CRN++)
+   {
+      Cell* ws2 = ofn.getCell(*CRN);
+      if (ws2)
+      {
+         _children.push_back(ws2);
+         ws2->_haveParent = true;
+      }
+      else
+      {
+         char wstr[256];
+         sprintf(wstr," Structure %s is referenced, but not defined!",CRN->c_str() );
+         tell_log(console::MT_WARNING,wstr);
+      }
+   }
+}
+
+Oasis::OASHierTree* Oasis::Cell::hierOut(OASHierTree* Htree, Cell* parent)
+{
+   // collecting hierarchical information
+   Htree = DEBUG_NEW OASHierTree(this, parent, Htree);
+   for (ChildCells::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
+   {
+      if (NULL == (*CSTR)) continue;
+      else
+      {
+         Htree = (*CSTR)->hierOut(Htree,this);
+      }
+   }
+   return Htree;
 }
 
 //==============================================================================
