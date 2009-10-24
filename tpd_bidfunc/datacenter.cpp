@@ -47,7 +47,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
 {
    _localDir = localDir;
    _globalDir = globalDir;
-   _GDSDB = NULL; _CIFDB = NULL;_OASISDB = NULL;//_TEDDB = NULL;
+   _GDSDB = NULL; _CIFDB = NULL;_OASDB = NULL;//_TEDDB = NULL;
    _bpSync = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
@@ -60,7 +60,7 @@ DataCenter::~DataCenter() {
    laydata::tdtlibrary::clearEntireHierTree();
    if (NULL != _GDSDB) delete _GDSDB;
    if (NULL != _CIFDB) delete _CIFDB;
-   if (NULL != _OASISDB) delete _OASISDB;
+   if (NULL != _OASDB) delete _OASDB;
    // _TEDLIB will be cleared automatically (not a pointer)
 }
 bool DataCenter::TDTcheckread(const std::string filename,
@@ -307,12 +307,12 @@ void DataCenter::CIFclose()
 void DataCenter::OASclose()
 {
    Oasis::OasisInFile* AOASDB = NULL;
-   if (lockOasis(AOASDB))
+   if (lockOas(AOASDB))
    {
       delete AOASDB;
       AOASDB = NULL;
    }
-   unlockOasis(AOASDB);
+   unlockOas(AOASDB);
 }
 
 CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
@@ -399,23 +399,23 @@ void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool re
    unlockCif(ACIFDB, true);
 }
 
-bool DataCenter::OasisParse(std::string filename)
+bool DataCenter::OASParse(std::string filename)
 {
    bool status = true;
 
-   Oasis::OasisInFile* AOASISDB = NULL;
-   if (lockOasis(AOASISDB))
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (lockOas(AOASDB))
    {
       std::string news = "Removing existing OASIS data from memory...";
       tell_log(console::MT_WARNING,news);
-      delete AOASISDB;
+      delete AOASDB;
    }
    try
    {
-      AOASISDB = DEBUG_NEW Oasis::OasisInFile(filename);
-      status = AOASISDB->status();
+      AOASDB = DEBUG_NEW Oasis::OasisInFile(filename);
+      status = AOASDB->status();
       if (status)
-         AOASISDB->readLibrary();
+         AOASDB->readLibrary();
    }
    catch (EXPTNreadOASIS)
    {
@@ -423,15 +423,34 @@ bool DataCenter::OasisParse(std::string filename)
       status = false;
    }
    if (status)
-      AOASISDB->hierOut();// generate the hierarchy tree of cells
-   else if (NULL != AOASISDB)
+      AOASDB->hierOut();// generate the hierarchy tree of cells
+   else if (NULL != AOASDB)
    {
-      delete AOASISDB;
-      AOASISDB = NULL;
+      delete AOASDB;
+      AOASDB = NULL;
    }
-   unlockOasis(AOASISDB);
+   unlockOas(AOASDB);
    return status;
 }
+
+void DataCenter::importOAScell(const nameList& top_names, /*const LayerMapGds& laymap, */bool recur, bool over)
+{
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (lockOas(AOASDB))
+   {
+#ifdef OASCONVERT_PROFILING
+      HiResTimer profTimer;
+#endif
+      Oasis::Oas2Ted converter(AOASDB, &_TEDLIB/*, laymap*/);
+      converter.run(top_names, recur, over);
+      _TEDLIB()->modified = true;
+#ifdef OASCONVERT_PROFILING
+      profTimer.report("Time elapsed for OASIS conversion: ");
+#endif
+   }
+   unlockOas(AOASDB, true);
+}
+
 
 void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
 {
@@ -531,25 +550,25 @@ void DataCenter::unlockCif(CIFin::CifFile*& cif_db, bool throwexception)
    cif_db = NULL;
 }
 
-bool DataCenter::lockOasis(Oasis::OasisInFile*& oasis_db)
+bool DataCenter::lockOas(Oasis::OasisInFile*& oasis_db)
 {
-   if (wxMUTEX_DEAD_LOCK == OASISLock.Lock())
+   if (wxMUTEX_DEAD_LOCK == OASLock.Lock())
    {
       tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
-      oasis_db = _OASISDB;
+      oasis_db = _OASDB;
       return false;
    }
    else
    {
-      oasis_db = _OASISDB;
+      oasis_db = _OASDB;
       return (NULL != oasis_db);
    }
 }
 
-void DataCenter::unlockOasis(Oasis::OasisInFile*& oasis_db, bool throwexception)
+void DataCenter::unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception)
 {
-   _OASISDB = oasis_db;
-   VERIFY(wxMUTEX_NO_ERROR == OASISLock.Unlock());
+   _OASDB = oasis_db;
+   VERIFY(wxMUTEX_NO_ERROR == OASLock.Unlock());
    if (NULL != _bpSync)
       _bpSync->Signal();
    else if (throwexception && (NULL == oasis_db))
@@ -604,20 +623,20 @@ void DataCenter::bpAddCifTab()
 void DataCenter::bpAddOasTab()
 {
    // Lock the Mutex
-   if (wxMUTEX_DEAD_LOCK == OASISLock.Lock())
+   if (wxMUTEX_DEAD_LOCK == OASLock.Lock())
    {
       tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
       return;
    }
    // initialise the thread condition with the locked Mutex
-   _bpSync = new wxCondition(OASISLock);
+   _bpSync = new wxCondition(OASLock);
    // post a message to the main thread
    TpdPost::addOAStab();
    // Go to sleep and wait until the main thread finished
    // updating the browser panel
    _bpSync->Wait();
    // Wake-up & uplock the mutex
-   VERIFY(wxMUTEX_NO_ERROR == OASISLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == OASLock.Unlock());
    // clean-up behind & prepare for the consequent use
    delete _bpSync;
    _bpSync = NULL;

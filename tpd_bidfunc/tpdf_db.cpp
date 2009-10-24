@@ -1321,28 +1321,28 @@ int tellstdfunc::CIFsetlaymap::execute()
 }
 
 //=============================================================================
-tellstdfunc::OASISread::OASISread(telldata::typeID retype, bool eor) :
+tellstdfunc::OASread::OASread(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-int tellstdfunc::OASISread::execute() {
+int tellstdfunc::OASread::execute() {
    std::string filename = getStringValue();
    telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
 
    if (expandFileName(filename))
    {
       std::list<std::string> top_cell_list;
-      if (DATC->OasisParse(filename))
+      if (DATC->OASParse(filename))
       {
          // add OASIS tab in the browser
          DATC->bpAddOasTab();
          //
-         Oasis::OasisInFile* AOASISDB = NULL;
-         if (DATC->lockOasis(AOASISDB))
+         Oasis::OasisInFile* AOASDB = NULL;
+         if (DATC->lockOas(AOASDB))
          {
-            Oasis::OASHierTree* root = AOASISDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+            Oasis::OASHierTree* root = AOASDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
             if (root)
             {
                do
@@ -1354,10 +1354,10 @@ int tellstdfunc::OASISread::execute() {
          }
          else
          {
-            // The AOASISDB mist exists here, because OASISparse returned true
+            // The AOASDB mist exists here, because OASISparse returned true
             assert(false);
          }
-         DATC->unlockOasis(AOASISDB);
+         DATC->unlockOas(AOASDB);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                    CN != top_cell_list.end(); CN ++)
             topcells->add(DEBUG_NEW telldata::ttstring(*CN));
@@ -1382,11 +1382,89 @@ int tellstdfunc::OASISread::execute() {
 }
 
 //=============================================================================
-tellstdfunc::OASISclose::OASISclose(telldata::typeID retype, bool eor) :
+tellstdfunc::OASimport::OASimport(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+//   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+int tellstdfunc::OASimport::execute()
+{
+   bool  over  = getBoolValue();
+   bool  recur = getBoolValue();
+//   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   std::string name = getStringValue();
+   // Convert layer map
+//    telldata::tthsh* nameh;
+//    USMap gdsLaysStrList;
+//    for (unsigned i = 0; i < lll->size(); i++)
+//    {
+//       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+//       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
+//    }
+   //Prep: We need all used layers, and the name of the GDS DB
+   std::ostringstream ost;
+   std::string oasDbName = "NonameDB";
+//   GdsLayers* oasLaysAll = NULL;
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (DATC->lockOas(AOASDB))
+   {
+      Oasis::Cell *src_structure = AOASDB->getCell(name.c_str());
+      if (src_structure)
+      {
+//         gdsLaysAll = DEBUG_NEW GdsLayers();
+//         src_structure->collectLayers(*oasLaysAll,true);
+         oasDbName = AOASDB->getLibName();
+      }
+   }
+   DATC->unlockOas(AOASDB, true);
+   //OK, here we go....
+//   if (NULL != oasLaysAll)
+//   { // i.e. top structure is found and layers extracted
+//      LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+//      if (LayerExpression.status())
+//      {
+         nameList top_cells;
+         top_cells.push_back(name);
+
+         try {DATC->lockDB(false);}
+         catch (EXPTN)
+         {  // create a default target data base if one is not already existing
+            TpdTime timeCreated(time(NULL));
+            createDefaultTDT(oasDbName, timeCreated, UNDOcmdQ, UNDOPstack);
+            DATC->lockDB(false);
+         }
+         DATC->importOAScell(top_cells, /*LayerExpression, */recur, over);
+            updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+         DATC->unlockDB();
+         // populate the hierarchy browser
+         TpdPost::addTDTtab(true, true);
+         LogFile << LogFile.getFN() << "(\""<< name << "\"," << /*(*lll) << "," <<*/ LogFile._2bool(recur)
+               << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+//      }
+//      else
+//      {
+//         ost << "Can't execute GDS import - error in the layer map";
+//         tell_log(console::MT_ERROR,ost.str());
+//      }
+//   }
+//   else
+//   {
+//      ost << "GDS structure named \"" << name << "\" does not exists";
+//      tell_log(console::MT_ERROR,ost.str());
+//   }
+//   delete lll;
+   return EXEC_NEXT;
+}
+//=============================================================================
+tellstdfunc::OASclose::OASclose(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
-int tellstdfunc::OASISclose::execute() {
+int tellstdfunc::OASclose::execute() {
    TpdPost::clearOAStab();
    DATC->OASclose();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();

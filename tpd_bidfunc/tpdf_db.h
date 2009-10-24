@@ -67,8 +67,9 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(CIFgetlaymap     );
    TELL_STDCMD_CLASSA(CIFsetlaymap     );
 
-   TELL_STDCMD_CLASSA(OASISread        );
-   TELL_STDCMD_CLASSA(OASISclose       );
+   TELL_STDCMD_CLASSA(OASread          );
+   TELL_STDCMD_CLASSA(OASimport        );
+   TELL_STDCMD_CLASSA(OASclose         );
    
    TELL_STDCMD_CLASSA(DRCCalibreimport );
    TELL_STDCMD_CLASSA(DRCshowerror     );
