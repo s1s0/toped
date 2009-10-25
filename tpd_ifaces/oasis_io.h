@@ -152,6 +152,8 @@ namespace Oasis {
                            PointList(PointList&);
                            PointList(OasisInFile&, PointListType);
                           ~PointList();
+         dword             vcount()          {return _vcount;}
+         int4b*            delarr()          {return _delarr;}
          PointList&        operator = (const PointList&);
       private:
          void              readManhattanH(OasisInFile&);
@@ -170,6 +172,8 @@ namespace Oasis {
                            Repetitions() : _rptype(rp_unknown), _bcount(0), _lcarray(NULL) {}
                            Repetitions(OasisInFile&, RepetitionTypes);
                           ~Repetitions();
+         dword             bcount()                { return _bcount;    }
+         int4b*            lcarray()               { return _lcarray;   }
          Repetitions&      operator = (const Repetitions&);
       private:
          void              readregXY(OasisInFile&);
@@ -217,11 +221,11 @@ namespace Oasis {
          void              skimPath(OasisInFile&);
          void              skimText(OasisInFile&);
          void              skimReference(OasisInFile&, bool);
-         void              readRectangle(OasisInFile&);
-         void              readPolygon(OasisInFile&);
-         void              readPath(OasisInFile&);
+         void              readRectangle(OasisInFile&, laydata::tdtcell*);
+         void              readPolygon(OasisInFile&, laydata::tdtcell*);
+         void              readPath(OasisInFile&, laydata::tdtcell*);
          void              readText(OasisInFile&);
-         void              readReference(OasisInFile&, bool);
+         void              readReference(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, bool);
          PointList         readPointList(OasisInFile&);
          void              readRepetitions(OasisInFile&);
          void              readExtensions(OasisInFile&, PathExtensions&, PathExtensions&);
