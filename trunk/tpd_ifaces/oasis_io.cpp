@@ -93,6 +93,7 @@ Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings
       word numread = _oasisFh.Read(&magicBytes, 13);
       if (13 == numread)
       {
+         _filePos = 13;
          _status = true;
          for(byte strindex = 0; strindex < 13; strindex++)
             if (magicBytes[strindex] != Oasis::oas_MagicBytes[strindex])
@@ -117,7 +118,6 @@ Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings
 
 bool Oasis::OasisInFile::reopenFile()
 {
-//   _gdsiiWarnings = 0;
    _filePos = 0;
    _progresPos = 0;
    wxString wxfname(_fileName.c_str(), wxConvUTF8 );
@@ -135,15 +135,13 @@ bool Oasis::OasisInFile::reopenFile()
 void Oasis::OasisInFile::setPosition(wxFileOffset filePos)
 {
    _oasisFh.Seek(filePos, wxFromStart);
+   _filePos = filePos;
 }
 
 void Oasis::OasisInFile::closeFile()
 {
    if (_status)
-   {
-      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       _oasisFh.Close();
-   }
 }
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -255,6 +253,7 @@ void Oasis::OasisInFile::readLibrary()
          case oas_END         : 
             readEndRecord();
             closeFile();
+            TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
             linkReferences();
             return;
          default: exception("Unexpected record in the current context");
@@ -558,14 +557,14 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          case oas_XYABSOLUTE  : /*@TODO*/assert(false);break;
          case oas_CBLOCK      : /*@TODO*/assert(false);break;
          // <element> records
-         case oas_PLACEMENT_1 : readReference(ofn, false);break;
-         case oas_PLACEMENT_2 : readReference(ofn, true );break;
+         case oas_PLACEMENT_1 : readReference(ofn, dst_cell, tdt_db, false);break;
+         case oas_PLACEMENT_2 : readReference(ofn, dst_cell, tdt_db, true );break;
          case oas_TEXT        : readText(ofn);break;
          case oas_XELEMENT    : /*@TODO*/assert(false);break;
          // <geometry> records
-         case oas_RECTANGLE   : readRectangle(ofn); break;
-         case oas_POLYGON     : readPolygon(ofn);break;
-         case oas_PATH        : readPath(ofn);break;
+         case oas_RECTANGLE   : readRectangle(ofn, dst_cell); break;
+         case oas_POLYGON     : readPolygon(ofn, dst_cell);break;
+         case oas_PATH        : readPath(ofn, dst_cell);break;
          case oas_TRAPEZOID_1 : /*@TODO*/assert(false);break;
          case oas_TRAPEZOID_2 : /*@TODO*/assert(false);break;
          case oas_TRAPEZOID_3 : /*@TODO*/assert(false);break;
@@ -574,12 +573,13 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          default:
             // check that the cell size is the same as obtained by skim function
             assert(_cellSize == (ofn.filePos() - _filePos - 1));
+            dst_cell->resort();
             return;
       }
    } while (true);
 }
 //------------------------------------------------------------------------------
-void Oasis::Cell::readRectangle(OasisInFile& ofn)
+void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell)
 {
    const byte Smask   = 0x80;
    const byte Wmask   = 0x40;
@@ -601,12 +601,31 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn)
                        (info & Smask) ? (_mod_gheight  = width                ) : _mod_gheight();
    int8b p1x         = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b p1y         = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   if (info & Rmask) readRepetitions(ofn);
-//   Repetitions rpt = _mod_repete();
+
+   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
+   if (info & Rmask) 
+   {
+      //read the repetition record from the input stream
+      readRepetitions(ofn);
+      int4b* rptpnt = _mod_repete().lcarray();
+      assert(rptpnt);
+      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt+=2)
+      {
+         TP p1(p1x+rptpnt[rcnt],p1y+rptpnt[rcnt+1]);
+         TP p2(p1x+rptpnt[rcnt]+width,p1y+rptpnt[rcnt+1]+height);
+         dwl->addbox(p1, p2, false);
+      }
+   }
+   else
+   {
+      TP p1(p1x,p1y);
+      TP p2(p1x+width, p1y+height);
+      dwl->addbox(p1, p2, false);
+   }
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readPolygon(OasisInFile& ofn)
+void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell)
 {
    const byte Pmask   = 0x20;
    const byte Xmask   = 0x10;
@@ -627,7 +646,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn)
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readPath(OasisInFile& ofn)
+void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell)
 {
    const byte Emask   = 0x80;
    const byte Wmask   = 0x40;
@@ -682,7 +701,8 @@ void Oasis::Cell::readText(OasisInFile& ofn)
 //   Repetitions rpt = _mod_repete();
 }
 
-void Oasis::Cell::readReference(OasisInFile& ofn, bool exma)
+void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell, 
+                                laydata::tdtlibdir* tdt_db, bool exma)
 {
    const byte Cmask   = 0x80;
    const byte Nmask   = 0x40;
@@ -705,16 +725,44 @@ void Oasis::Cell::readReference(OasisInFile& ofn, bool exma)
    }
    else
    {
-      byte angle = 90.0 * (real)((info & (Mmask | Amask)) >> 1);
+      angle = 90.0 * (real)((info & (Mmask | Amask)) >> 1);
       magnification = 1.0;
    }
    if (magnification <= 0)
          ofn.exception("Bad magnification value (22.10)");
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-
-   if (info & Rmask) readRepetitions(ofn);
-//   Repetitions rpt = _mod_repete();
+   //
+   laydata::CellDefin strdefn = tdt_db->linkcellref(name, TARGETDB_LIB);
+   if (info & Rmask) 
+   {
+      //read the repetition record from the input stream
+      readRepetitions(ofn);
+      int4b* rptpnt = _mod_repete().lcarray();
+      assert(rptpnt);
+      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt+=2)
+      {
+         TP p1(p1x+rptpnt[rcnt],p1y+rptpnt[rcnt+1]);
+         dst_cell->registerCellRef( strdefn,
+                                    CTM(p1,
+                                        magnification,
+                                        angle,
+                                        flip
+                                       )
+                                  );
+      }
+   }
+   else
+   {
+      TP p1(p1x,p1y);
+      dst_cell->registerCellRef( strdefn,
+                                 CTM(p1,
+                                     magnification,
+                                     angle,
+                                     flip
+                                    )
+                               );
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -992,8 +1040,8 @@ void Oasis::PointList::readManhattanE(OasisInFile& ofb)
       {
          case dr_east : _delarr[2*ccrd] = (data >> 2); _delarr[2*ccrd+1] = 0          ; break;
          case dr_north: _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] = (data >> 2); break;
-         case dr_west : _delarr[2*ccrd] =-(data >> 2); _delarr[2*ccrd+1] = 0          ; break;
-         case dr_south: _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] =-(data >> 2); break;
+         case dr_west : _delarr[2*ccrd] =-(int4b)(data >> 2); _delarr[2*ccrd+1] = 0          ; break;
+         case dr_south: _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] =-(int4b)(data >> 2); break;
          default: assert(false);
       }
    }
@@ -1012,12 +1060,12 @@ void Oasis::PointList::readOctangular(OasisInFile& ofb)
       {
          case dr_east     : _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] = 0          ; break;
          case dr_north    : _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] = (data >> 3); break;
-         case dr_west     : _delarr[2*ccrd] =-(data >> 3); _delarr[2*ccrd+1] = 0          ; break;
-         case dr_south    : _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] =-(data >> 3); break;
+         case dr_west     : _delarr[2*ccrd] =-(int4b)(data >> 3); _delarr[2*ccrd+1] = 0          ; break;
+         case dr_south    : _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] =-(int4b)(data >> 3); break;
          case dr_northeast: _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] = (data >> 3); break;
-         case dr_northwest: _delarr[2*ccrd] =-(data >> 3); _delarr[2*ccrd+1] = (data >> 3); break;
-         case dr_southeast: _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] =-(data >> 3); break;
-         case dr_southwest: _delarr[2*ccrd] =-(data >> 3); _delarr[2*ccrd+1] =-(data >> 3); break;
+         case dr_northwest: _delarr[2*ccrd] =-(int4b)(data >> 3); _delarr[2*ccrd+1] = (data >> 3); break;
+         case dr_southeast: _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] =-(int4b)(data >> 3); break;
+         case dr_southwest: _delarr[2*ccrd] =-(int4b)(data >> 3); _delarr[2*ccrd+1] =-(int4b)(data >> 3); break;
          default: assert(false);
       }
    }
@@ -1232,7 +1280,7 @@ void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
    byte*             bdata = (byte*)&data;
    if (bdata[0] & 0x01)
    { // g delta 2
-      if (bdata[0] & 0x02) deltaX =-(data >> 2);
+      if (bdata[0] & 0x02) deltaX =-(int4b)(data >> 2);
       else                 deltaX = (data >> 2);
       deltaY = ofb.getInt(8);
    }
@@ -1243,12 +1291,12 @@ void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
       {
          case dr_east     : deltaX = (data >> 4); deltaY = 0          ; break;
          case dr_north    : deltaX = 0          ; deltaY = (data >> 4); break;
-         case dr_west     : deltaX =-(data >> 4); deltaY = 0          ; break;
-         case dr_south    : deltaX = 0          ; deltaY =-(data >> 4); break;
+         case dr_west     : deltaX =-(int4b)(data >> 4); deltaY = 0          ; break;
+         case dr_south    : deltaX = 0          ; deltaY =-(int4b)(data >> 4); break;
          case dr_northeast: deltaX = (data >> 4); deltaY = (data >> 4); break;
-         case dr_northwest: deltaX =-(data >> 4); deltaY = (data >> 4); break;
-         case dr_southeast: deltaX = (data >> 4); deltaY =-(data >> 4); break;
-         case dr_southwest: deltaX =-(data >> 4); deltaY =-(data >> 4); break;
+         case dr_northwest: deltaX =-(int4b)(data >> 4); deltaY = (data >> 4); break;
+         case dr_southeast: deltaX = (data >> 4); deltaY =-(int4b)(data >> 4); break;
+         case dr_southwest: deltaX =-(int4b)(data >> 4); deltaY =-(int4b)(data >> 4); break;
          default: assert(false);
       }
    }
@@ -1303,6 +1351,7 @@ void Oasis::Oas2Ted::run(const nameList& top_str_names, bool recursive, bool ove
       catch (EXPTNreadOASIS) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
       TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       _src_lib->closeFile();
+      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       (*_tdt_db)()->recreate_hierarchy(_tdt_db);
    }
 }
