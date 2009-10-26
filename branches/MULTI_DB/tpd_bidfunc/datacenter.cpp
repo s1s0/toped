@@ -47,7 +47,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
 {
    _localDir = localDir;
    _globalDir = globalDir;
-   _GDSDB = NULL; _CIFDB = NULL;_OASISDB = NULL;//_TEDDB = NULL;
+	_GDSDB = NULL; _CIFDB = NULL;_OASISDB = NULL; _DRCDB = NULL;//_TEDDB = NULL;
    _bpSync = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
@@ -462,6 +462,17 @@ laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
    else throw EXPTNactive_DB();
 }
 
+laydata::tdtdesign*  DataCenter::lockDRC(void) 
+{
+	if (!_TEDLIB()) throw EXPTNactive_DB();
+   if (!_DRCDB) 
+   {
+		_DRCDB = DEBUG_NEW laydata::tdtdesign("drc", 0, _TEDLIB()->DBU(), _TEDLIB()->UU());
+   }
+	while (wxMUTEX_NO_ERROR != DRCLock.TryLock());
+   return _DRCDB;
+}
+
 void DataCenter::unlockDB() 
 {
    VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
@@ -715,6 +726,7 @@ void DataCenter::openGL_draw(const CTM& layCTM)
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(_properties.drawprop());
+			_DRCDB->openGL_draw(_properties.drawprop());
 #ifdef RENDER_PROFILING
          rendTimer.report("Total elapsed rendering time");
 #endif

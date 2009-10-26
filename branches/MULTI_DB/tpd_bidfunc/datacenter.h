@@ -59,6 +59,7 @@ public:
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
+	laydata::tdtdesign*        lockDRC(void);
    bool                       lockGds(GDSin::GdsInFile*&);
    bool                       lockCif(CIFin::CifFile*&);
    bool                       lockOasis(Oasis::OasisInFile*&);
@@ -185,11 +186,13 @@ private:
    std::string                _localDir;
    std::string                _globalDir;
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
+	laydata::tdtdesign*        _DRCDB;		//DRC data
    GDSin::GdsInFile*          _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
    Oasis::OasisInFile*        _OASISDB;      // OASIS parsed data
    layprop::ViewProperties    _properties;   // properties data base
    wxMutex                    DBLock;
+	wxMutex                    DRCLock;
    wxMutex                    GDSLock;
    wxMutex                    CIFLock;
    wxMutex                    OASISLock;

@@ -1390,40 +1390,46 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute()
 {
+	//Check existance of "drcResults" layer
+   if(!DATC->isLayerExist("drcResults"))
+	{
+		//Find free layer
+      int i;
+      for(i = 10000; i <=20000; i++)
+		{
+			if (!DATC->isLayerExist(i))
+         {
+				DATC->addlayer("drcResults", i);
+            TpdPost::layer_add("drcResults",i);
+            break;
+         }
+      }
+      if (i>20000)
+      {
+			std::string message = "Can't create drcError layer";
+         tell_log(console::MT_ERROR,message);
+         return EXEC_NEXT;
+      }
+   }
+
    std::string filename = getStringValue();
    if(DRCData)
    {
    }
    else
    {
-      DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer);
+		DRCData = DEBUG_NEW Calbr::CalbrFile(filename, 
+			new Calbr::drcTenderer(DATC->getLayerNo("drcResults"),DATC->DBscale(), DATC->UU()));
 
       if(DRCData->isOk())
       {
-         //Check existance of "drcResults" layer
-         if(!DATC->isLayerExist("drcResults"))
-         {
-            //Find free layer
-            int i;
-            for(i = 10000; i <=20000; i++)
-            {
-               if (!DATC->isLayerExist(i))
-               {
-                  DATC->addlayer("drcResults", i);
-                  TpdPost::layer_add("drcResults",i);
-                  break;
-               }
-            }
-            if (i>20000)
-            {
-               std::string message = "Can't create drcError layer";
-               tell_log(console::MT_ERROR,message);
-               return EXEC_NEXT;
-            }
-         }
-         //DRCData->ShowResults();
-         // add DRC tab in the browser
-         TpdPost::addDRCtab();
+			TpdPost::addDRCtab();
+			laydata::tdtdesign* drcDesign = DATC->lockDRC();
+			laydata::tdtcell* dst_structure = DEBUG_NEW laydata::tdtcell("drc");
+		
+			laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_structure->securelayer(1));
+			dwl->addbox(TP(0,0), TP(100000,1000000), true);
+			drcDesign->registercellread("drc", dst_structure);
       }
       else
       {
