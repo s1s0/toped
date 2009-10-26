@@ -43,6 +43,7 @@
 #include "tenderer.h"
 
 extern DataCenter*               DATC;
+extern DataCenter*               DRCDATC;
 extern console::ted_cmd*         Console;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_CURSOR;
