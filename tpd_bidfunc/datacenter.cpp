@@ -726,7 +726,14 @@ void DataCenter::openGL_draw(const CTM& layCTM)
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(_properties.drawprop());
-			_DRCDB->openGL_draw(_properties.drawprop());
+			if(_DRCDB)
+			{
+				laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
+				if (dst_structure)
+				{
+					dst_structure->openGL_draw(_properties.drawprop());
+				}
+			}
 #ifdef RENDER_PROFILING
          rendTimer.report("Total elapsed rendering time");
 #endif
@@ -777,6 +784,15 @@ void DataCenter::openGL_render(const CTM& layCTM)
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_render(renderer);
+			if(_DRCDB)
+			{
+				laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
+				if (dst_structure)
+				{
+					dst_structure->openGL_draw(_properties.drawprop());
+				}
+			}
+			//_DRCDB->openGL_draw(_properties.drawprop());
 #ifdef RENDER_PROFILING
          rendTimer.report("Time elapsed for data traversing: ");
 #endif
