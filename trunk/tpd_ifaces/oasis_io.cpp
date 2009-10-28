@@ -168,6 +168,15 @@ void Oasis::OasisInFile::readStartRecord()
    else
    {
       // table offset structure is stored in the END record
+      wxFileOffset savedPos = _filePos;
+      setPosition(_fileLength - 255);
+      _cellNames   = DEBUG_NEW Table(*this);
+      _textStrings = DEBUG_NEW Table(*this);
+      _propNames   = DEBUG_NEW Table(*this);
+      _propStrings = DEBUG_NEW Table(*this);
+      _layerNames  = DEBUG_NEW Table(*this);
+      _xNames      = DEBUG_NEW Table(*this);
+      setPosition(savedPos);
    }
 }
 
@@ -641,8 +650,33 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell)
    PointList plist   = (info & Pmask) ? (_mod_pplist   = readPointList(ofn)   ) : _mod_pplist();
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   if (info & Rmask) readRepetitions(ofn);
-//   Repetitions rpt = _mod_repete();
+
+   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
+   if (info & Rmask) 
+   {
+      //read the repetition record from the input stream
+      readRepetitions(ofn);
+      int4b* rptpnt = _mod_repete().lcarray();
+      assert(rptpnt);
+/*      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt+=2)
+      {
+         TP p1(p1x+rptpnt[rcnt],p1y+rptpnt[rcnt+1]);
+         TP p2(p1x+rptpnt[rcnt]+width,p1y+rptpnt[rcnt+1]+height);
+         dwl->addbox(p1, p2, false);
+      }*/
+   }
+   else
+   {
+      pointlist laypl;
+      plist.calcPoints(laypl, p1x,p1y);
+//      laypl.reserve(plist.vcount());
+//      for (dword curp = 0; curp < plist.vcount(); curp++)
+//      {
+//         TP pnt(p1x+(plist.delarr())[2*curp], p1y+(plist.delarr())[2*curp+1]);
+//         laypl.push_back(pnt);
+//      }
+      dwl->addpoly(laypl, false);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -974,12 +1008,12 @@ Oasis::PointList::PointList(OasisInFile& ofn, PointListType pltype) : _pltype(pl
    _delarr = DEBUG_NEW int4b[2*_vcount];
    switch (_pltype)
    {
-      case dt_manhattanH : readManhattanH(ofn) ; break;
-      case dt_manhattanV : readManhattanV(ofn) ; break;
-      case dt_mamhattanE : readManhattanE(ofn) ; break;
-      case dt_octangular : readOctangular(ofn) ; break;
-      case dt_allangle   : readAllAngle(ofn)   ; break;
-      case dt_doubledelta: readDoubleDelta(ofn); break;
+      case dt_manhattanH : readManhattanH(ofn) ; break;//+2
+      case dt_manhattanV : readManhattanV(ofn) ; break;//+2
+      case dt_mamhattanE : readManhattanE(ofn) ; break;//+1
+      case dt_octangular : readOctangular(ofn) ; break;//+1
+      case dt_allangle   : readAllAngle(ofn)   ; break;//+1
+      case dt_doubledelta: readDoubleDelta(ofn); break;//+1
       default: assert(false);
    }
 }
@@ -1013,8 +1047,8 @@ void Oasis::PointList::readManhattanH(OasisInFile& ofb)
 {
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
-      if (ccrd % 2) {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
-      else          {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
+      if (ccrd % 2) {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
+      else          {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
    }
 }
 
@@ -1022,8 +1056,8 @@ void Oasis::PointList::readManhattanV(OasisInFile& ofb)
 {
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
-      if (ccrd % 2) {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
-      else          {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
+      if (ccrd % 2) {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
+      else          {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
    }
 }
 
@@ -1034,14 +1068,15 @@ void Oasis::PointList::readManhattanE(OasisInFile& ofb)
    byte*             bdata = (byte*)&data;
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
-      data      = ofb.getUnsignedInt(8);
-      direction = (DeltaDirections)(bdata[0] & 0x03);
+      data        = ofb.getUnsignedInt(8);
+      int4b idata = (data >> 2);
+      direction   = (DeltaDirections)(bdata[0] & 0x03);
       switch (direction)
       {
-         case dr_east : _delarr[2*ccrd] = (data >> 2); _delarr[2*ccrd+1] = 0          ; break;
-         case dr_north: _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] = (data >> 2); break;
-         case dr_west : _delarr[2*ccrd] =-(int4b)(data >> 2); _delarr[2*ccrd+1] = 0          ; break;
-         case dr_south: _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] =-(int4b)(data >> 2); break;
+         case dr_east : _delarr[2*ccrd] = idata; _delarr[2*ccrd+1] = 0    ; break;
+         case dr_north: _delarr[2*ccrd] = 0    ; _delarr[2*ccrd+1] = idata; break;
+         case dr_west : _delarr[2*ccrd] =-idata; _delarr[2*ccrd+1] = 0    ; break;
+         case dr_south: _delarr[2*ccrd] = 0    ; _delarr[2*ccrd+1] =-idata; break;
          default: assert(false);
       }
    }
@@ -1054,18 +1089,19 @@ void Oasis::PointList::readOctangular(OasisInFile& ofb)
    byte*             bdata = (byte*)&data;
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
-      data      = ofb.getUnsignedInt(8);
-      direction = (DeltaDirections)(bdata[0] & 0x07);
+      data        = ofb.getUnsignedInt(8);
+      int4b idata = (data >> 3);
+      direction   = (DeltaDirections)(bdata[0] & 0x07);
       switch (direction)
       {
-         case dr_east     : _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] = 0          ; break;
-         case dr_north    : _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] = (data >> 3); break;
-         case dr_west     : _delarr[2*ccrd] =-(int4b)(data >> 3); _delarr[2*ccrd+1] = 0          ; break;
-         case dr_south    : _delarr[2*ccrd] = 0          ; _delarr[2*ccrd+1] =-(int4b)(data >> 3); break;
-         case dr_northeast: _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] = (data >> 3); break;
-         case dr_northwest: _delarr[2*ccrd] =-(int4b)(data >> 3); _delarr[2*ccrd+1] = (data >> 3); break;
-         case dr_southeast: _delarr[2*ccrd] = (data >> 3); _delarr[2*ccrd+1] =-(int4b)(data >> 3); break;
-         case dr_southwest: _delarr[2*ccrd] =-(int4b)(data >> 3); _delarr[2*ccrd+1] =-(int4b)(data >> 3); break;
+         case dr_east     : _delarr[2*ccrd] = idata; _delarr[2*ccrd+1] = 0    ; break;
+         case dr_north    : _delarr[2*ccrd] = 0    ; _delarr[2*ccrd+1] = idata; break;
+         case dr_west     : _delarr[2*ccrd] =-idata; _delarr[2*ccrd+1] = 0    ; break;
+         case dr_south    : _delarr[2*ccrd] = 0    ; _delarr[2*ccrd+1] =-idata; break;
+         case dr_northeast: _delarr[2*ccrd] = idata; _delarr[2*ccrd+1] = idata; break;
+         case dr_northwest: _delarr[2*ccrd] =-idata; _delarr[2*ccrd+1] = idata; break;
+         case dr_southeast: _delarr[2*ccrd] = idata; _delarr[2*ccrd+1] =-idata; break;
+         case dr_southwest: _delarr[2*ccrd] =-idata; _delarr[2*ccrd+1] =-idata; break;
          default: assert(false);
       }
    }
@@ -1075,11 +1111,107 @@ void Oasis::PointList::readAllAngle(OasisInFile& ofb)
 {
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
-      readDelta(ofb, _delarr[2*ccrd], _delarr[2*ccrd+1]);
+      readDelta(ofb, _delarr[2*ccrd  ], _delarr[2*ccrd+1]);
    }
 }
 
 void Oasis::PointList::readDoubleDelta(OasisInFile& ofb)
+{
+   /*@TODO*/assert(false);
+}
+
+void Oasis::PointList::calcPoints(pointlist& plst, int4b p1x, int4b p1y)
+{
+   switch (_pltype)
+   {
+      case dt_manhattanH : calcManhattanH(plst, p1x, p1y) ; break;
+      case dt_manhattanV : calcManhattanV(plst, p1x, p1y) ; break;
+      case dt_mamhattanE : calcManhattanE(plst, p1x, p1y) ; break;
+      case dt_octangular : calcOctangular(plst, p1x, p1y) ; break;
+      case dt_allangle   : calcAllAngle(plst, p1x, p1y)   ; break;//+1
+      case dt_doubledelta: calcDoubleDelta(plst, p1x, p1y); break;//+1
+      default: assert(false);
+   }
+
+}
+
+void Oasis::PointList::calcManhattanH(pointlist& plst, int4b p1x, int4b p1y)
+{
+   plst.reserve(_vcount + 2);
+   TP cpnt(p1x,p1y);
+   plst.push_back(cpnt);
+   dword curp;
+   for (curp = 0; curp < _vcount; curp++)
+   {
+      if (curp % 2) cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
+      else          cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
+      plst.push_back(cpnt);
+   }
+   if (curp % 2) cpnt.setX(p1x);
+   else          cpnt.setY(p1y);
+   plst.push_back(cpnt);
+}
+
+void Oasis::PointList::calcManhattanV(pointlist& plst, int4b p1x, int4b p1y)
+{
+   plst.reserve(_vcount + 2);
+   TP cpnt(p1x,p1y);
+   plst.push_back(cpnt);
+   dword curp;
+   for (curp = 0; curp < _vcount; curp++)
+   {
+      if (curp % 2) cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
+      else          cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
+      plst.push_back(cpnt);
+   }
+   if (curp % 2) cpnt.setY(p1y);
+   else          cpnt.setX(p1x);
+   plst.push_back(cpnt);
+}
+
+void Oasis::PointList::calcManhattanE(pointlist& plst, int4b p1x, int4b p1y)
+{
+   plst.reserve(_vcount + 1);
+   TP cpnt(p1x,p1y);
+   plst.push_back(cpnt);
+   dword curp;
+   for (curp = 0; curp < _vcount; curp++)
+   {
+      cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
+      cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
+      plst.push_back(cpnt);
+   }
+}
+
+void Oasis::PointList::calcOctangular(pointlist& plst, int4b p1x, int4b p1y)
+{
+   plst.reserve(_vcount + 1);
+   TP cpnt(p1x,p1y);
+   plst.push_back(cpnt);
+   dword curp;
+   for (curp = 0; curp < _vcount; curp++)
+   {
+      cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
+      cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
+      plst.push_back(cpnt);
+   }
+}
+
+void Oasis::PointList::calcAllAngle(pointlist& plst, int4b p1x, int4b p1y)
+{
+   plst.reserve(_vcount + 1);
+   TP cpnt(p1x,p1y);
+   plst.push_back(cpnt);
+   dword curp;
+   for (curp = 0; curp < _vcount; curp++)
+   {
+      cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
+      cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
+      plst.push_back(cpnt);
+   }
+}
+
+void Oasis::PointList::calcDoubleDelta(pointlist& plst, int4b p1x, int4b p1y)
 {
    /*@TODO*/assert(false);
 }
