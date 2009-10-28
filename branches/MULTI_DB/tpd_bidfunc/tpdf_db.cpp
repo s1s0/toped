@@ -1424,11 +1424,12 @@ int tellstdfunc::DRCCalibreimport::execute()
       if(DRCData->isOk())
       {
 			TpdPost::addDRCtab();
-			laydata::tdtdesign* drcDesign = DATC->lockDRC();
+			laydata::tdtlibrary* drcDesign = DATC->lockDRC();
 			laydata::tdtcell* dst_structure = DEBUG_NEW laydata::tdtcell("drc");
 		
 			laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_structure->securelayer(1));
 			dwl->addbox(TP(0,0), TP(100000,1000000), true);
+			dst_structure->resort();
 			drcDesign->registercellread("drc", dst_structure);
       }
       else
