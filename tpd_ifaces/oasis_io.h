@@ -152,6 +152,7 @@ namespace Oasis {
                            PointList(PointList&);
                            PointList(OasisInFile&, PointListType);
                           ~PointList();
+         void              calcPoints(pointlist&, int4b, int4b);
          dword             vcount()          {return _vcount;}
          int4b*            delarr()          {return _delarr;}
          PointList&        operator = (const PointList&);
@@ -162,6 +163,12 @@ namespace Oasis {
          void              readOctangular(OasisInFile&);
          void              readAllAngle(OasisInFile&);
          void              readDoubleDelta(OasisInFile&);
+         void              calcManhattanH(pointlist&, int4b, int4b);
+         void              calcManhattanV(pointlist&, int4b, int4b);
+         void              calcManhattanE(pointlist&, int4b, int4b);
+         void              calcOctangular(pointlist&, int4b, int4b);
+         void              calcAllAngle(pointlist&, int4b, int4b);
+         void              calcDoubleDelta(pointlist&, int4b, int4b);
          PointListType     _pltype; //! Oasis point list type
          dword             _vcount; //! Number of vertexes in the list
          int4b*            _delarr; //! Delta sequence in XYXY... array
