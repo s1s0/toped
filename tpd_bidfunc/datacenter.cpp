@@ -462,7 +462,7 @@ laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
    else throw EXPTNactive_DB();
 }
 
-laydata::tdtdesign*  DataCenter::lockDRC(void) 
+laydata::tdtlibrary*  DataCenter::lockDRC(void) 
 {
 	if (!_TEDLIB()) throw EXPTNactive_DB();
    if (!_DRCDB) 
