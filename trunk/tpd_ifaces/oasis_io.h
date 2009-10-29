@@ -111,6 +111,10 @@ namespace Oasis {
                   tblm_implicit        , 
                   tblm_explicit         } TableMode;
 
+   typedef enum { pc_file              ,
+                  pc_cell              ,
+                  pc_element            } PropertyContext;
+
    class OasisInFile;
    class Cell;
 
@@ -121,11 +125,15 @@ namespace Oasis {
       public:
          typedef std::map<dword, std::string> NameTable;
                            Table(OasisInFile&);
-         void              getTableRecord(OasisInFile&, TableMode);
-         std::string       getName(dword);
+         void              getCellNameTable(OasisInFile&);
+         void              getPropNameTable(OasisInFile&);
+         void              getPropStringTable(OasisInFile&);
+         void              getTableRecord(OasisInFile&, TableMode, bool tableRec = false);
+         std::string       getName(dword) const;
       private:
          qword             _offset;
          dword             _nextIndex;
+         dword             _index;
          bool              _strictMode;
          TableMode         _ieMode; //implicit/explicit mode
          NameTable         _table;
@@ -199,6 +207,32 @@ namespace Oasis {
          int4b*            _lcarray; //! Location sequence in XYXY ... array
    };
 
+   class StdProperties {
+      public:
+                           StdProperties() : _context(pc_file) {}
+         void              setContext(PropertyContext context) { _context = _context;}
+         void              getProperty(OasisInFile&);
+      private:
+         PropertyContext   _context;
+         ModalVar<std::string>  _propName;
+//         ModalVar<>        _propValue;
+   };
+//   -- File level standard properties
+//   SMAX_SIGNED_INTEGER_WIDTH           - getUnsignedInt
+//   SMAX_UNSIGNED_INTEGER_WIDTH         - getUnsignedInt
+//   SMAX_STRING_LENGTH                  - getUnsignedInt
+//   S_POLYGON_MAX_VERTICES              - getUnsignedInt
+//   S_PATH_MAX_VERTICES                 - getUnsignedInt
+//   S_TOP_CELL                          - getUnsignedInt
+//   S_BOUNDING_BOX_AVAILABLE            - getUnsignedInt
+//
+//   -- Cell level standard properties
+//   S_BOUNDING_BOX                      - getUnsignedInt; getInt x 2; getUnsignedInt x 2
+//   S_CELL_OFFSET                       - getUnsignedInt;
+//
+//   -- Element level Properties
+//   S_GDS_PROPERTY                      - getUnsignedInt; getString
+   
    class PathExtensions {
       public:
                            PathExtensions() : _extype(ex_unknown), _exex(0) {}
@@ -274,15 +308,25 @@ namespace Oasis {
          OASHierTree*      hierTree()        {return _hierTree;}
          real              libUnits()        {return _unit;    }
          std::string       getLibName()      {return "boza";   }//@FIXME put the file name here without the path!
+         void              setPropContext(PropertyContext context)
+                                             {_properties.setContext(context);}
+         const Table*      cellNames() const  { return _cellNames;}
+         const Table*      textStrings() const{ return _textStrings;}
+         const Table*      propNames() const  { return _propNames;}
+         const Table*      propStrings() const{ return _propStrings;}
+         const Table*      layerNames() const { return _layerNames;}
+         const Table*      xNames() const     { return _xNames;}
+
          byte              getByte();
          qword             getUnsignedInt(byte);
          int8b             getInt(byte);
-         real              getReal();
+         real              getReal(char type = -1);
          std::string       getString();
          std::string       getTextRefName(bool);
          std::string       getCellRefName(bool);
          void              exception(std::string);
          Cell*             getCell(const std::string);
+         void              getProperty()     { _properties.getProperty(*this);}
          void              closeFile();
       private:
          typedef std::map<std::string, Cell*> DefinitionMap;
@@ -300,6 +344,7 @@ namespace Oasis {
          Table*            _layerNames;
          Table*            _xNames;
          //
+         StdProperties     _properties;
          //! All Cells defined in the file with a pointer to the respective Cell object
          DefinitionMap     _definedCells;
          //
