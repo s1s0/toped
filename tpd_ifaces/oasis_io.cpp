@@ -37,37 +37,101 @@ Oasis::Table::Table(OasisInFile& ofh)
    _offset       = ofh.getUnsignedInt(8);
    _ieMode       = tblm_unknown;
    _nextIndex    = 0;
+   _index        = 0;
 }
 
+void Oasis::Table::getCellNameTable(OasisInFile& ofh)
+{
+   if (0 != _offset)
+   {
+      wxFileOffset savedPos = ofh.filePos();
+      ofh.setPosition(_offset);
+      ofh.setPropContext(pc_cell);
+      byte recType;
+      do
+      {
+         recType = ofh.getUnsignedInt(1);
+         switch(recType)
+         {
+            case oas_PROPERTY_1 : ofh.getProperty(); break;
+            case oas_PROPERTY_2 : assert(false); //ofn.getProperty(); break;
+            case oas_CELLNAME_1 : getTableRecord(ofh, tblm_implicit, true); break;
+            case oas_CELLNAME_2 : getTableRecord(ofh, tblm_explicit, true); break;
+            default : ofh.setPosition(savedPos); return;
+         }
+      } while (true);
+   }
+}
+
+void Oasis::Table::getPropNameTable(OasisInFile& ofh)
+{
+   if (0 != _offset)
+   {
+      wxFileOffset savedPos = ofh.filePos();
+      ofh.setPosition(_offset);
+      byte recType;
+      do
+      {
+         recType = ofh.getUnsignedInt(1);
+         switch(recType)
+         {
+            case oas_PROPNAME_1 : getTableRecord(ofh, tblm_implicit, true); break;
+            case oas_PROPNAME_2 : getTableRecord(ofh, tblm_explicit, true); break;
+            default : ofh.setPosition(savedPos); return;
+         }
+      } while (true);
+   }
+}
+
+void Oasis::Table::getPropStringTable(OasisInFile& ofh)
+{
+   if (0 != _offset)
+   {
+      wxFileOffset savedPos = ofh.filePos();
+      ofh.setPosition(_offset);
+      byte recType;
+      do
+      {
+         recType = ofh.getUnsignedInt(1);
+         switch(recType)
+         {
+            case oas_PROPSTRING_1 : getTableRecord(ofh, tblm_implicit, true); break;
+            case oas_PROPSTRING_2 : getTableRecord(ofh, tblm_explicit, true); break;
+            default : ofh.setPosition(savedPos); return;
+         }
+      } while (true);
+   }
+}
 
 /*! Reads a single NAME record and adds it to the corresponding name table*/
-void  Oasis::Table::getTableRecord(OasisInFile& ofn, TableMode ieMode)
+void  Oasis::Table::getTableRecord(OasisInFile& ofn, TableMode ieMode, bool tableRec)
 {
-   if (_strictMode) ofn.exception("A stray \"NAME\" record encountered in strict mode (13.10)");
+   if (!tableRec && _strictMode)
+      ofn.exception("A stray \"NAME\" record encountered in strict mode (13.10)");
    if (tblm_unknown == _ieMode)
       _ieMode = ieMode;
    else if (_ieMode != ieMode)
       ofn.exception("Uncompatible record types encountered in \"NAME\" records (15.5,16.4,17.4,18.4)");
    std::string value = ofn.getString();
-   dword index;
    switch (_ieMode)
    {
-      case tblm_implicit: index = _nextIndex++; break;
-      case tblm_explicit: index = ofn.getUnsignedInt(4); break;
+      case tblm_implicit: _index = _nextIndex++; break;
+      case tblm_explicit: _index = ofn.getUnsignedInt(4); break;
       default: assert(false);
    }
-   if (_table.end() != _table.find(index))
+   if (_table.end() != _table.find(_index))
       ofn.exception("Name record with this index already exists (15.5,16.4,17.4,18.4)");
    else
-      _table[index] = value;
+      _table[_index] = value;
 }
 
-std::string Oasis::Table::getName(dword index)
+std::string Oasis::Table::getName(dword index) const
 {
-   if (_table.end() == _table.find(index))
+   NameTable::const_iterator record;
+   if (_table.end() == (record = _table.find(index)))
       throw EXPTNreadOASIS("Name not found in the corresponding table (20.4,...)");
    else
-      return _table[index];
+      return record->second;
 }
 
 //===========================================================================
@@ -178,6 +242,9 @@ void Oasis::OasisInFile::readStartRecord()
       _xNames      = DEBUG_NEW Table(*this);
       setPosition(savedPos);
    }
+   _propNames->getPropNameTable(*this);
+   _propStrings->getPropStringTable(*this);
+   _cellNames->getCellNameTable(*this);
 }
 
 void Oasis::OasisInFile::readEndRecord()
@@ -185,12 +252,13 @@ void Oasis::OasisInFile::readEndRecord()
    if (_offsetFlag)
    {
       // table offset structure is stored in the END record (here)
-      _cellNames   = DEBUG_NEW Table(*this);
-      _textStrings = DEBUG_NEW Table(*this);
-      _propNames   = DEBUG_NEW Table(*this);
-      _propStrings = DEBUG_NEW Table(*this);
-      _layerNames  = DEBUG_NEW Table(*this);
-      _xNames      = DEBUG_NEW Table(*this);
+      // skim them over. They should've been already read by
+      // readStartRecord()
+      for (byte curec = 0; curec < 6; curec++)
+      {
+         getUnsignedInt(1);
+         getUnsignedInt(8);
+      }
    }
    getString(); // <-- padding string
    std::ostringstream info;
@@ -406,12 +474,17 @@ int8b Oasis::OasisInFile::getInt(byte length)
    return result;
 }
 //------------------------------------------------------------------------------
-real Oasis::OasisInFile::getReal()
+real Oasis::OasisInFile::getReal(char type)
 {
    dword      numerator   = 0;
    dword      denominator = 1;
    bool       sign        = false;
-   switch (getUnsignedInt(1))
+   byte       realType    = 8;
+   if ( 0 > type)
+      realType = getUnsignedInt(1);
+   else
+      realType = type;
+   switch (realType)
    {
       case 0: numerator   = getUnsignedInt(4); break;
       case 1: numerator   = getUnsignedInt(4); sign = true; break;
@@ -1389,6 +1462,58 @@ void Oasis::Repetitions::readvarAnyG(OasisInFile& ofn)
       readDelta(ofn, p1x, p1y);
       _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ] + p1x * grid;
       _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1] + p1y * grid;
+   }
+}
+
+//==============================================================================
+void Oasis::StdProperties::getProperty(OasisInFile& ofn)
+{
+   const byte Umask   = 0xf0;
+   const byte Vmask   = 0x08;
+   const byte Cmask   = 0x04;
+   const byte Nmask   = 0x02;
+   const byte Smask   = 0x01;
+
+   byte info = ofn.getByte();
+
+   std::string pname = (info & Cmask) ?
+                       (info & Nmask) ? (_propName     = ofn.propNames()->getName(ofn.getUnsignedInt(4))) :
+                                        (_propName     = ofn.getString()                                ) :
+                                         _propName();
+   dword numValues   = 0;
+   if (info & Vmask)
+   {
+      if (info & Umask)
+         ofn.exception("Bad property value-count (31.5 - UUUU must be 0)");
+   }
+   else
+   {
+      if (15 == (numValues = ((info & Umask) >> 4)))
+         numValues = ofn.getUnsignedInt(2);
+   }
+   for (word i = 0; i < numValues; i++)
+   {
+      byte propValueType = ofn.getUnsignedInt(1);
+      if (15 < propValueType)
+         ofn.exception("Bad property value type (7.8.2)");
+      switch (propValueType)
+      {
+         case  8: ofn.getUnsignedInt(8); break;
+         case  9: ofn.getInt(8); break;
+         case 10: ofn.getString(); break;// a-string
+         case 11: ofn.getString(); break;// b-string
+         case 12: ofn.getString(); break;// n-string
+         case 13: ofn.propStrings()->getName(ofn.getUnsignedInt(4)); break;// a-string
+         case 14: ofn.propStrings()->getName(ofn.getUnsignedInt(4)); break;// b-string
+         case 15: ofn.propStrings()->getName(ofn.getUnsignedInt(4)); break;// n-string
+         default: ofn.getReal(propValueType);
+      }
+   }
+   if (info & Smask)
+   {
+   }
+   else
+   {
    }
 }
 
