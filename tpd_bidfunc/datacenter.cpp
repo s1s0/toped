@@ -789,7 +789,7 @@ void DataCenter::openGL_render(const CTM& layCTM)
 				laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
 				if (dst_structure)
 				{
-					dst_structure->openGL_draw(_properties.drawprop());
+					dst_structure->openGL_render(renderer, CTM(), false, false);
 				}
 			}
 			//_DRCDB->openGL_draw(_properties.drawprop());
