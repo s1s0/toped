@@ -34,7 +34,8 @@
 Oasis::Table::Table(OasisInFile& ofh)
 {
    _strictMode   = ofh.getUnsignedInt(1);
-   _offset       = ofh.getUnsignedInt(8);
+   _offsetStart  = ofh.getUnsignedInt(8);
+   _offsetEnd    = 0;
    _ieMode       = tblm_unknown;
    _nextIndex    = 0;
    _index        = 0;
@@ -42,10 +43,10 @@ Oasis::Table::Table(OasisInFile& ofh)
 
 void Oasis::Table::getCellNameTable(OasisInFile& ofh)
 {
-   if (0 != _offset)
+   if (0 != _offsetStart)
    {
       wxFileOffset savedPos = ofh.filePos();
-      ofh.setPosition(_offset);
+      ofh.setPosition(_offsetStart);
       ofh.setPropContext(pc_cell);
       byte recType;
       do
@@ -57,7 +58,7 @@ void Oasis::Table::getCellNameTable(OasisInFile& ofh)
             case oas_PROPERTY_2 : assert(false); //ofn.getProperty(); break;
             case oas_CELLNAME_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_CELLNAME_2 : getTableRecord(ofh, tblm_explicit, true); break;
-            default : ofh.setPosition(savedPos); return;
+            default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
          }
       } while (true);
    }
@@ -65,10 +66,10 @@ void Oasis::Table::getCellNameTable(OasisInFile& ofh)
 
 void Oasis::Table::getPropNameTable(OasisInFile& ofh)
 {
-   if (0 != _offset)
+   if (0 != _offsetStart)
    {
       wxFileOffset savedPos = ofh.filePos();
-      ofh.setPosition(_offset);
+      ofh.setPosition(_offsetStart);
       byte recType;
       do
       {
@@ -77,7 +78,7 @@ void Oasis::Table::getPropNameTable(OasisInFile& ofh)
          {
             case oas_PROPNAME_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_PROPNAME_2 : getTableRecord(ofh, tblm_explicit, true); break;
-            default : ofh.setPosition(savedPos); return;
+            default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
          }
       } while (true);
    }
@@ -85,10 +86,10 @@ void Oasis::Table::getPropNameTable(OasisInFile& ofh)
 
 void Oasis::Table::getPropStringTable(OasisInFile& ofh)
 {
-   if (0 != _offset)
+   if (0 != _offsetStart)
    {
       wxFileOffset savedPos = ofh.filePos();
-      ofh.setPosition(_offset);
+      ofh.setPosition(_offsetStart);
       byte recType;
       do
       {
@@ -97,7 +98,7 @@ void Oasis::Table::getPropStringTable(OasisInFile& ofh)
          {
             case oas_PROPSTRING_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_PROPSTRING_2 : getTableRecord(ofh, tblm_explicit, true); break;
-            default : ofh.setPosition(savedPos); return;
+            default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
          }
       } while (true);
    }
@@ -106,6 +107,14 @@ void Oasis::Table::getPropStringTable(OasisInFile& ofh)
 /*! Reads a single NAME record and adds it to the corresponding name table*/
 void  Oasis::Table::getTableRecord(OasisInFile& ofn, TableMode ieMode, bool tableRec)
 {
+   // check whether we've stepped into the Table space without really trying to read
+   // the Table contents (it has already been parsed)
+   if (!tableRec && (ofn.filePos() >= _offsetStart) && (ofn.filePos() <= _offsetEnd))
+   {
+      // move the current file pointer at the end of the table
+      ofn.setPosition(_offsetEnd); return;
+   }
+   // now check for stray records in strict mode
    if (!tableRec && _strictMode)
       ofn.exception("A stray \"NAME\" record encountered in strict mode (13.10)");
    if (tblm_unknown == _ieMode)
@@ -441,6 +450,7 @@ int8b Oasis::OasisInFile::getInt(byte length)
 {
    assert((length > 0) && (length < 9));
    const byte  cmask       = 0x7f; // masks the MSB of the byte
+   const byte  smask       = 0x01; // highlights the sign
    byte        bytecounter = 0   ; // how many bytes were read
    byte        bytein            ; // last byte read from the file stream
    byte        sign              ;
@@ -453,7 +463,7 @@ int8b Oasis::OasisInFile::getInt(byte length)
       switch (bytecounter)
       {
          case 0: btres[0]  = (bytein & cmask) >> 1;
-                 sign      = bytein << 7;
+                 sign      =  bytein & smask;
                  break;
          case 1:
          case 2:
@@ -470,8 +480,8 @@ int8b Oasis::OasisInFile::getInt(byte length)
    } while (bytein & (~cmask));
    if (bytecounter > length)
       exception("Unsigned integer with unexpected length(7.2.3)");
-   btres[7] = sign;
-   return result;
+   if (sign) return -result;
+   else      return  result;
 }
 //------------------------------------------------------------------------------
 real Oasis::OasisInFile::getReal(char type)
@@ -1120,8 +1130,8 @@ void Oasis::PointList::readManhattanH(OasisInFile& ofb)
 {
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
-      if (ccrd % 2) {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
-      else          {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
+      if (ccrd % 2) {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
+      else          {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
    }
 }
 
@@ -1129,8 +1139,8 @@ void Oasis::PointList::readManhattanV(OasisInFile& ofb)
 {
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
-      if (ccrd % 2) {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
-      else          {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
+      if (ccrd % 2) {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
+      else          {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
    }
 }
 
@@ -1216,12 +1226,12 @@ void Oasis::PointList::calcManhattanH(pointlist& plst, int4b p1x, int4b p1y)
    dword curp;
    for (curp = 0; curp < _vcount; curp++)
    {
-      if (curp % 2) cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
-      else          cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
+      if (curp % 2) cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
+      else          cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
       plst.push_back(cpnt);
    }
-   if (curp % 2) cpnt.setX(p1x);
-   else          cpnt.setY(p1y);
+   if (curp % 2) cpnt.setY(p1y);
+   else          cpnt.setX(p1x);
    plst.push_back(cpnt);
 }
 
@@ -1233,12 +1243,12 @@ void Oasis::PointList::calcManhattanV(pointlist& plst, int4b p1x, int4b p1y)
    dword curp;
    for (curp = 0; curp < _vcount; curp++)
    {
-      if (curp % 2) cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
-      else          cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
+      if (curp % 2) cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
+      else          cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
       plst.push_back(cpnt);
    }
-   if (curp % 2) cpnt.setY(p1y);
-   else          cpnt.setX(p1x);
+   if (curp % 2) cpnt.setX(p1x);
+   else          cpnt.setY(p1y);
    plst.push_back(cpnt);
 }
 

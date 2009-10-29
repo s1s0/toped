@@ -131,7 +131,8 @@ namespace Oasis {
          void              getTableRecord(OasisInFile&, TableMode, bool tableRec = false);
          std::string       getName(dword) const;
       private:
-         qword             _offset;
+         qword             _offsetStart;
+         qword             _offsetEnd;
          dword             _nextIndex;
          dword             _index;
          bool              _strictMode;
