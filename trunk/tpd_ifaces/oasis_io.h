@@ -128,6 +128,7 @@ namespace Oasis {
          void              getCellNameTable(OasisInFile&);
          void              getPropNameTable(OasisInFile&);
          void              getPropStringTable(OasisInFile&);
+         void              getTextStringTable(OasisInFile&);
          void              getTableRecord(OasisInFile&, TableMode, bool tableRec = false);
          std::string       getName(dword) const;
       private:
@@ -212,7 +213,8 @@ namespace Oasis {
       public:
                            StdProperties() : _context(pc_file) {}
          void              setContext(PropertyContext context) { _context = _context;}
-         void              getProperty(OasisInFile&);
+         void              getProperty1(OasisInFile&);
+         void              getProperty2(OasisInFile&) {/*@TODO!*/ };
       private:
          PropertyContext   _context;
          ModalVar<std::string>  _propName;
@@ -327,7 +329,8 @@ namespace Oasis {
          std::string       getCellRefName(bool);
          void              exception(std::string);
          Cell*             getCell(const std::string);
-         void              getProperty()     { _properties.getProperty(*this);}
+         void              getProperty1()     { _properties.getProperty1(*this);}
+         void              getProperty2()     { _properties.getProperty2(*this);}
          void              closeFile();
       private:
          typedef std::map<std::string, Cell*> DefinitionMap;
