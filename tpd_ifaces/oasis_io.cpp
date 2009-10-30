@@ -54,8 +54,8 @@ void Oasis::Table::getCellNameTable(OasisInFile& ofh)
          recType = ofh.getUnsignedInt(1);
          switch(recType)
          {
-            case oas_PROPERTY_1 : ofh.getProperty(); break;
-            case oas_PROPERTY_2 : assert(false); //ofn.getProperty(); break;
+            case oas_PROPERTY_1 : ofh.getProperty1(); break;
+            case oas_PROPERTY_2 : ofh.getProperty2(); break;
             case oas_CELLNAME_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_CELLNAME_2 : getTableRecord(ofh, tblm_explicit, true); break;
             default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
@@ -98,6 +98,26 @@ void Oasis::Table::getPropStringTable(OasisInFile& ofh)
          {
             case oas_PROPSTRING_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_PROPSTRING_2 : getTableRecord(ofh, tblm_explicit, true); break;
+            default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
+         }
+      } while (true);
+   }
+}
+
+void Oasis::Table::getTextStringTable(OasisInFile& ofh)
+{
+   if (0 != _offsetStart)
+   {
+      wxFileOffset savedPos = ofh.filePos();
+      ofh.setPosition(_offsetStart);
+      byte recType;
+      do
+      {
+         recType = ofh.getUnsignedInt(1);
+         switch(recType)
+         {
+            case oas_TEXTSTRING_1 : getTableRecord(ofh, tblm_implicit, true); break;
+            case oas_TEXTSTRING_2 : getTableRecord(ofh, tblm_explicit, true); break;
             default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
          }
       } while (true);
@@ -254,6 +274,7 @@ void Oasis::OasisInFile::readStartRecord()
    _propNames->getPropNameTable(*this);
    _propStrings->getPropStringTable(*this);
    _cellNames->getCellNameTable(*this);
+   _textStrings->getTextStringTable(*this);
 }
 
 void Oasis::OasisInFile::readEndRecord()
@@ -597,14 +618,15 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
    std::ostringstream info;
    info << "OASIS : Reading cell \"" << _name << "\"";
    tell_log(console::MT_INFO, info.str());
+   ofn.setPropContext(pc_cell);
    do
    {
       byte recType = ofn.getUnsignedInt(1);
       switch (recType)
       {
          case oas_PAD         : break;
-         case oas_PROPERTY_1  : /*@TODO*/assert(false);break;
-         case oas_PROPERTY_2  : /*@TODO*/assert(false);break;
+         case oas_PROPERTY_1  : ofn.getProperty1();break;
+         case oas_PROPERTY_2  : ofn.getProperty2();break;
          case oas_XYRELATIVE  : /*@TODO*/assert(false);break;
          case oas_XYABSOLUTE  : /*@TODO*/assert(false);break;
          case oas_CBLOCK      : /*@TODO*/assert(false);break;
@@ -637,14 +659,15 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
    std::ostringstream info;
    info << "OASIS : Importing cell \"" << _name << "\"";
    tell_log(console::MT_INFO, info.str());
+   ofn.setPropContext(pc_cell);
    do
    {
       byte recType = ofn.getUnsignedInt(1);
       switch (recType)
       {
          case oas_PAD         : break;
-         case oas_PROPERTY_1  : /*@TODO*/assert(false);break;
-         case oas_PROPERTY_2  : /*@TODO*/assert(false);break;
+         case oas_PROPERTY_1  : ofn.getProperty1();break;
+         case oas_PROPERTY_2  : ofn.getProperty2();break;
          case oas_XYRELATIVE  : /*@TODO*/assert(false);break;
          case oas_XYABSOLUTE  : /*@TODO*/assert(false);break;
          case oas_CBLOCK      : /*@TODO*/assert(false);break;
@@ -701,10 +724,10 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell)
       readRepetitions(ofn);
       int4b* rptpnt = _mod_repete().lcarray();
       assert(rptpnt);
-      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt+=2)
+      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
       {
-         TP p1(p1x+rptpnt[rcnt],p1y+rptpnt[rcnt+1]);
-         TP p2(p1x+rptpnt[rcnt]+width,p1y+rptpnt[rcnt+1]+height);
+         TP p1(p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
+         TP p2(p1x+rptpnt[2*rcnt]+width,p1y+rptpnt[2*rcnt+1]+height);
          dwl->addbox(p1, p2, false);
       }
    }
@@ -1476,7 +1499,7 @@ void Oasis::Repetitions::readvarAnyG(OasisInFile& ofn)
 }
 
 //==============================================================================
-void Oasis::StdProperties::getProperty(OasisInFile& ofn)
+void Oasis::StdProperties::getProperty1(OasisInFile& ofn)
 {
    const byte Umask   = 0xf0;
    const byte Vmask   = 0x08;
