@@ -283,8 +283,10 @@ void   Calbr::CalbrFile::ShowResults()
 
    _render->drawBegin();
    RuleChecksVector::const_iterator it;
+	unsigned int num = 1;
    for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
    {
+		_render->setError(num);
       std::vector <Calbr::drcPolygon>::iterator it2;
       std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
       for(it2 = polys->begin(); it2 < polys->end(); ++it2)
@@ -297,6 +299,7 @@ void   Calbr::CalbrFile::ShowResults()
       {
          (*it2edge).showError(0);
       }
+		num++;
    }
    _render->drawEnd();
 }

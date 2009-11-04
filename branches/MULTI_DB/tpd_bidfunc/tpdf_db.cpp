@@ -1418,24 +1418,21 @@ int tellstdfunc::DRCCalibreimport::execute()
    }
    else
    {
+		laydata::tdtlibrary* drcDesign = DATC->lockDRC();
 		DRCData = DEBUG_NEW Calbr::CalbrFile(filename, 
-			new Calbr::drcTenderer(DATC->getLayerNo("drcResults"),DATC->DBscale(), DATC->UU()));
+			new Calbr::drcTenderer(drcDesign, DATC->getLayerNo("drcResults"),DATC->DBscale(), DATC->UU()));
 
       if(DRCData->isOk())
       {
 			TpdPost::addDRCtab();
-			laydata::tdtlibrary* drcDesign = DATC->lockDRC();
-			laydata::tdtcell* dst_structure = DEBUG_NEW laydata::tdtcell("drc");
-		
-			laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_structure->securelayer(10000));
-			dwl->addbox(TP(0,0), TP(100000,1000000), true);
-			dst_structure->resort();
-			drcDesign->registercellread("drc", dst_structure);
+
+			DRCData->ShowResults();
       }
       else
       {
          delete DRCData;
       }
+		DATC->unlockDRC();
    }
    return EXEC_NEXT;
 }

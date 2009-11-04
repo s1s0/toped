@@ -37,14 +37,17 @@ namespace Calbr
 class drcTenderer: public drcRenderer
 {
    public:
-   drcTenderer(unsigned drcLayer, real DBU, real UU);
+   drcTenderer(laydata::tdtlibrary* library,unsigned drcLayer, real DBU, real UU);
    ~drcTenderer();
+	void setError(unsigned int numError);
    void drawBegin();
    void drawPoly(const CoordsVector   &coords);
    void drawLine(const edge &edge);
    void drawEnd();
 private:
-   laydata::tdtdesign*  _ATDB;
+   laydata::tdtlibrary* _ATDB;
+	laydata::tdtcell*		_DRCCell;
+	unsigned int			_numError;
    unsigned             _drcLayer;
    double               _maxx;
    double               _maxy;

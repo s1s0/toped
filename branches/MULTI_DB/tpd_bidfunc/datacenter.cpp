@@ -478,6 +478,11 @@ void DataCenter::unlockDB()
    VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
 }
 
+void DataCenter::unlockDRC() 
+{
+   VERIFY(wxMUTEX_NO_ERROR == DRCLock.Unlock());
+}
+
 bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
 {
    if (wxMUTEX_DEAD_LOCK == GDSLock.Lock())
