@@ -69,6 +69,7 @@ public:
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
+	void                       unlockDRC();
    void                       unlockGds(GDSin::GdsInFile*&, bool throwexception = false);
    void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
    void                       unlockOasis(Oasis::OasisInFile*& oasis_db, bool throwexception = false);

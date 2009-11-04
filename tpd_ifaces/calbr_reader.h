@@ -60,6 +60,7 @@ public:
    drcRenderer() {};
    ~drcRenderer() {};
    virtual void drawBegin()=0;
+	virtual void setError(unsigned int numError) {};
    virtual void drawPoly(const CoordsVector   &coords)=0;
    virtual void drawLine(const edge &edge)=0;
    virtual void drawEnd()=0;
