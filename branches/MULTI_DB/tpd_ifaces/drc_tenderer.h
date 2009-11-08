@@ -37,7 +37,7 @@ namespace Calbr
 class drcTenderer: public drcRenderer
 {
    public:
-   drcTenderer(laydata::tdtlibrary* library,unsigned drcLayer, real DBU, real UU);
+   drcTenderer(laydata::tdtlibrary* library);
    ~drcTenderer();
 	void setError(unsigned int numError);
    void drawBegin();
