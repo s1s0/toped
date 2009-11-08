@@ -235,6 +235,25 @@ namespace laydata {
       cellList          _udurCells;    
    };
 
+
+
+   class drclibrary {
+   public:
+                     drclibrary(std::string name, real DBU, real UU);
+      virtual       ~drclibrary();
+      tdtdefaultcell* checkcell(std::string name);
+		void           registercellread(std::string, tdtcell*);
+      std::string    name()            const {return _name;}
+      real           UU()              const {return _UU;}
+      real           DBU()             const {return _DBU;}
+   protected:
+
+      std::string          _name;         // design/library name
+      real                 _DBU;          // Size of database units in meters
+      real                 _UU;           // size of user unit in DBU
+      cellList             _cells;        // list of cells in the design
+   };
+
 }
 
 #endif //TEDESIGN_H_INCLUDED

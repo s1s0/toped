@@ -462,12 +462,12 @@ laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
    else throw EXPTNactive_DB();
 }
 
-laydata::tdtlibrary*  DataCenter::lockDRC(void) 
+laydata::drclibrary*  DataCenter::lockDRC(void) 
 {
 	if (!_TEDLIB()) throw EXPTNactive_DB();
    if (!_DRCDB) 
    {
-		_DRCDB = DEBUG_NEW laydata::tdtdesign("drc", 0, _TEDLIB()->DBU(), _TEDLIB()->UU());
+		_DRCDB = DEBUG_NEW laydata::drclibrary("drc", _TEDLIB()->DBU(), _TEDLIB()->UU());
    }
 	while (wxMUTEX_NO_ERROR != DRCLock.TryLock());
    return _DRCDB;
