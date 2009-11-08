@@ -48,7 +48,6 @@ private:
    laydata::tdtlibrary* _ATDB;
 	laydata::tdtcell*		_DRCCell;
 	unsigned int			_numError;
-   unsigned             _drcLayer;
    double               _maxx;
    double               _maxy;
    double               _minx;
