@@ -1418,7 +1418,7 @@ int tellstdfunc::DRCCalibreimport::execute()
    }
    else
    {
-		laydata::tdtlibrary* drcDesign = DATC->lockDRC();
+		laydata::drclibrary* drcDesign = DATC->lockDRC();
 		DRCData = DEBUG_NEW Calbr::CalbrFile(filename, 
 			new Calbr::drcTenderer(drcDesign));
 

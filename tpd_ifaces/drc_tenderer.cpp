@@ -34,7 +34,7 @@
 Calbr::CalbrFile *DRCData = NULL;
 
 
-Calbr::drcTenderer::drcTenderer(laydata::tdtlibrary* library)
+Calbr::drcTenderer::drcTenderer(laydata::drclibrary* library)
 {
 	_ATDB = library;
 }

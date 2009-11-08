@@ -37,7 +37,7 @@ namespace Calbr
 class drcTenderer: public drcRenderer
 {
    public:
-   drcTenderer(laydata::tdtlibrary* library);
+   drcTenderer(laydata::drclibrary* library);
    ~drcTenderer();
 	void setError(unsigned int numError);
    void drawBegin();
@@ -45,7 +45,7 @@ class drcTenderer: public drcRenderer
    void drawLine(const edge &edge);
    void drawEnd();
 private:
-   laydata::tdtlibrary* _ATDB;
+   laydata::drclibrary* _ATDB;
 	laydata::tdtcell*		_DRCCell;
 	unsigned int			_numError;
    double               _maxx;
