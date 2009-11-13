@@ -764,23 +764,17 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell)
       readRepetitions(ofn);
       int4b* rptpnt = _mod_repete().lcarray();
       assert(rptpnt);
-/*      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt+=2)
+      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
       {
-         TP p1(p1x+rptpnt[rcnt],p1y+rptpnt[rcnt+1]);
-         TP p2(p1x+rptpnt[rcnt]+width,p1y+rptpnt[rcnt+1]+height);
-         dwl->addbox(p1, p2, false);
-      }*/
+         pointlist laypl;
+         plist.calcPoints(laypl, p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
+         dwl->addpoly(laypl, false);
+      }
    }
    else
    {
       pointlist laypl;
       plist.calcPoints(laypl, p1x,p1y);
-//      laypl.reserve(plist.vcount());
-//      for (dword curp = 0; curp < plist.vcount(); curp++)
-//      {
-//         TP pnt(p1x+(plist.delarr())[2*curp], p1y+(plist.delarr())[2*curp+1]);
-//         laypl.push_back(pnt);
-//      }
       dwl->addpoly(laypl, false);
    }
 }
@@ -815,8 +809,27 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell)
    PointList plist   = (info & Pmask) ? (_mod_wplist   = readPointList(ofn)   ) : _mod_wplist();
    int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
    int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
-   if (info & Rmask) readRepetitions(ofn);
-//   Repetitions rpt = _mod_repete();
+
+   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
+   if (info & Rmask) 
+   {
+      //read the repetition record from the input stream
+      readRepetitions(ofn);
+      int4b* rptpnt = _mod_repete().lcarray();
+      assert(rptpnt);
+      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+      {
+         pointlist laypl;
+         plist.calcPoints(laypl, p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
+         dwl->addwire(laypl, hwidth, false);
+      }
+   }
+   else
+   {
+      pointlist laypl;
+      plist.calcPoints(laypl, p1x,p1y);
+      dwl->addwire(laypl, hwidth, false);
+   }
 }
 
 //------------------------------------------------------------------------------
