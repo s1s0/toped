@@ -84,8 +84,8 @@ namespace Oasis {
                   dr_south         = 3 ,
                   dr_northeast     = 4 ,
                   dr_northwest     = 5 ,
-                  dr_southeast     = 6 ,
-                  dr_southwest     = 7  } DeltaDirections;
+                  dr_southwest     = 6 ,
+                  dr_southeast     = 7  } DeltaDirections;
    // Types of geometry repetitions
    typedef enum { rp_reuse         = 0 ,
                   rp_regXY         = 1 ,
