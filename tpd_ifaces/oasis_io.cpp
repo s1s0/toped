@@ -801,7 +801,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell)
 
    dword     layno   = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
    word      dtype   = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
-   word      hwidth  = (info & Wmask) ? (_mod_pathhw   = ofn.getUnsignedInt(2)) : _mod_pathhw();
+   word      hwidth  = (info & Wmask) ? (_mod_pathhw   = ofn.getUnsignedInt(4)) : _mod_pathhw();
    PathExtensions exs,exe;
    if (info & Emask)
    {
@@ -880,9 +880,9 @@ void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell,
       readRepetitions(ofn);
       int4b* rptpnt = _mod_repete().lcarray();
       assert(rptpnt);
-      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt+=2)
+      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
       {
-         TP p1(p1x+rptpnt[rcnt],p1y+rptpnt[rcnt+1]);
+         TP p1(p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
          dst_cell->registerCellRef( strdefn,
                                     CTM(p1,
                                         magnification,
@@ -966,7 +966,7 @@ void Oasis::Cell::skimPath(OasisInFile& ofn)
 
    if (info & Lmask) ofn.getUnsignedInt(4);
    if (info & Dmask) ofn.getUnsignedInt(2);
-   if (info & Wmask) ofn.getUnsignedInt(2);
+   if (info & Wmask) ofn.getUnsignedInt(4);
    if (info & Emask)
    {
       PathExtensions exs,exe;
@@ -1374,8 +1374,8 @@ void Oasis::Repetitions::readregXY(OasisInFile& ofn)
       dword p1x = 0;
       for (dword xi = 0; xi < countx; xi++)
       {
-         _lcarray[yi*countx+xi  ] = p1x;
-         _lcarray[yi*countx+xi+1] = p1y;
+         _lcarray[2*(yi*countx+xi)  ] = p1x;
+         _lcarray[2*(yi*countx+xi)+1] = p1y;
          p1x += stepx;
       }
       p1y += stepy;
@@ -1392,8 +1392,8 @@ void Oasis::Repetitions::readregX(OasisInFile& ofn)
    dword p1x = 0;
    for (dword xi = 0; xi < countx; xi++)
    {
-      _lcarray[xi  ] = p1x;
-      _lcarray[xi+1] = p1y;
+      _lcarray[2*xi  ] = p1x;
+      _lcarray[2*xi+1] = p1y;
       p1x += stepx;
    }
 }
@@ -1408,8 +1408,8 @@ void Oasis::Repetitions::readregY(OasisInFile& ofn)
    dword p1x = 0;
    for (dword yi = 0; yi < county; yi++)
    {
-      _lcarray[yi  ] = p1x;
-      _lcarray[yi+1] = p1y;
+      _lcarray[2*yi  ] = p1x;
+      _lcarray[2*yi+1] = p1y;
       p1y += stepy;
    }
 }
@@ -1451,8 +1451,8 @@ void Oasis::Repetitions::readregDia2D(OasisInFile& ofn)
       int4b p1y = s1y;
       for (dword nj = 0; nj < countn; nj++)
       {
-         _lcarray[mi*countn + nj    ] = p1x;
-         _lcarray[mi*countn + nj + 1] = p1y;
+         _lcarray[2*(mi*countn + nj)    ] = p1x;
+         _lcarray[2*(mi*countn + nj) + 1] = p1y;
          p1x += nx; p1y += ny;
       }
       s1x += mx; s1y += my;
@@ -1460,9 +1460,20 @@ void Oasis::Repetitions::readregDia2D(OasisInFile& ofn)
    
 }
 
-void Oasis::Repetitions::readregDia1D(OasisInFile&)
+void Oasis::Repetitions::readregDia1D(OasisInFile& ofn)
 {//type 9
-   /*@TODO*/assert(false);
+   _bcount = ofn.getUnsignedInt(4) + 2;
+   _lcarray = DEBUG_NEW int4b[2*_bcount];
+   int4b p1x = 0;
+   int4b p1y = 0;
+   _lcarray[0] = p1x;
+   _lcarray[1] = p1y;
+   readDelta(ofn, p1x, p1y);
+   for (dword pj = 1; pj < _bcount; pj++)
+   {
+      _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ] + p1x;
+      _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1] + p1y;
+   }
 }
 
 void Oasis::Repetitions::readvarAny(OasisInFile& ofn)
