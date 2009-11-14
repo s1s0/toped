@@ -1829,6 +1829,11 @@ void tenderer::TopRend::draw()
    checkOGLError("draw");
 }
 
+unsigned tenderer::TopRend::getTenderLay(unsigned layno)
+{
+	return _drawprop->getTenderLay(layno);
+}
+
 tenderer::TopRend::~TopRend()
 {
 //   char debug_message[256];

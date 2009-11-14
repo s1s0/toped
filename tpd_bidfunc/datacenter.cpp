@@ -791,11 +791,13 @@ void DataCenter::openGL_render(const CTM& layCTM)
          _TEDLIB()->openGL_render(renderer);
 			if(_DRCDB)
 			{
+				renderer.setState(layprop::DRC);
 				laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
 				if (dst_structure)
 				{
 					dst_structure->openGL_render(renderer, CTM(), false, false);
 				}
+				renderer.setState(layprop::DB);
 			}
 			//_DRCDB->openGL_draw(_properties.drawprop());
 #ifdef RENDER_PROFILING

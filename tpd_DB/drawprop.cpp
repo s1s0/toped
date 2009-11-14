@@ -473,6 +473,7 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
    _textbox_hidden = true;
    _refstack = NULL;
    _renderType = false;
+	_state = DB;
 }
 
 void layprop::DrawProperties::loadLayoutFonts(std::string fontfile, bool vbo)
@@ -766,6 +767,16 @@ std::string layprop::DrawProperties::getLineName(unsigned layno) const
       return CL->second->sline();
    }
    else return "";
+}
+
+unsigned layprop::DrawProperties::getTenderLay(unsigned layno) const
+{
+   switch (_state)
+	{
+		case DB: return layno;
+		case DRC: return DRC_LAY;
+		default: return layno;
+	}
 }
 
 void layprop::DrawProperties::all_layers(nameList& alllays) const
