@@ -162,7 +162,7 @@ namespace Oasis {
                            PointList(PointList&);
                            PointList(OasisInFile&, PointListType);
                           ~PointList();
-         void              calcPoints(pointlist&, int4b, int4b);
+         void              calcPoints(pointlist&, int4b, int4b, bool poly=true);
          dword             vcount()          {return _vcount;}
          int4b*            delarr()          {return _delarr;}
          PointList&        operator = (const PointList&);
@@ -173,8 +173,8 @@ namespace Oasis {
          void              readOctangular(OasisInFile&);
          void              readAllAngle(OasisInFile&);
          void              readDoubleDelta(OasisInFile&);
-         void              calcManhattanH(pointlist&, int4b, int4b);
-         void              calcManhattanV(pointlist&, int4b, int4b);
+         void              calcManhattanH(pointlist&, int4b, int4b, bool);
+         void              calcManhattanV(pointlist&, int4b, int4b, bool);
          void              calcManhattanE(pointlist&, int4b, int4b);
          void              calcOctangular(pointlist&, int4b, int4b);
          void              calcAllAngle(pointlist&, int4b, int4b);
@@ -273,6 +273,7 @@ namespace Oasis {
          PointList         readPointList(OasisInFile&);
          void              readRepetitions(OasisInFile&);
          void              readExtensions(OasisInFile&, PathExtensions&, PathExtensions&);
+         void              initModals();
          //
          ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer
          ModalVar< word>   _mod_datatype    ; //! OASIS modal variable datatype
@@ -283,6 +284,10 @@ namespace Oasis {
          ModalVar<int4b>   _mod_gy          ; //! OASIS modal variable geometry-y
          ModalVar<std::string>   _mod_text  ; //! OASIS modal variable text-string
          ModalVar<std::string>   _mod_cellref;//! OASIS modal variable placement-cell
+         ModalVar<int4b>   _mod_px          ; //! OASIS modal variable placement-x
+         ModalVar<int4b>   _mod_py          ; //! OASIS modal variable placement-y
+         ModalVar<int4b>   _mod_tx          ; //! OASIS modal variable text-x
+         ModalVar<int4b>   _mod_ty          ; //! OASIS modal variable text-y
          ModalVar<PointList>     _mod_pplist; //! OASIS modal variable polygon point list
          ModalVar<PointList>     _mod_wplist; //! OASIS modal variable path point list
          ModalVar<Repetitions>   _mod_repete; //! OASIS modal variable repetition
