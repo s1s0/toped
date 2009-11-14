@@ -677,7 +677,7 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          // <element> records
          case oas_PLACEMENT_1 : readReference(ofn, dst_cell, tdt_db, false);break;
          case oas_PLACEMENT_2 : readReference(ofn, dst_cell, tdt_db, true );break;
-         case oas_TEXT        : readText(ofn);break;
+         case oas_TEXT        : readText(ofn, dst_cell);break;
          case oas_XELEMENT    : /*@TODO*/assert(false);break;
          // <geometry> records
          case oas_RECTANGLE   : readRectangle(ofn, dst_cell); break;
@@ -836,25 +836,53 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell)
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readText(OasisInFile& ofn)
+void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell)
 {
    const byte Cmask   = 0x40;
    const byte Nmask   = 0x20;
    const byte Xmask   = 0x10;
    const byte Ymask   = 0x08;
    const byte Rmask   = 0x04;
-   const byte Dmask   = 0x02; // In the standard is T, but it looks like a typo
+   const byte Tmask   = 0x02; // In the standard is T, but it looks like a typo
    const byte Lmask   = 0x01;
 
    byte info = ofn.getByte();
    std::string text  = (info & Cmask) ? (_mod_text     = ofn.getTextRefName(info & Nmask)) :
                                                                                   _mod_text();
-   dword     layno   = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
-   word      dtype   = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   dword     layno   = (info & Lmask) ? (_mod_tlayer   = ofn.getUnsignedInt(4)) : _mod_tlayer();
+   word      dtype   = (info & Tmask) ? (_mod_tdatatype = ofn.getUnsignedInt(2)) : _mod_tdatatype();
    int8b     p1x     = (info & Xmask) ? (_mod_tx       = ofn.getInt(8)        ) : _mod_tx();
    int8b     p1y     = (info & Ymask) ? (_mod_ty       = ofn.getInt(8)        ) : _mod_ty();
-   if (info & Rmask) readRepetitions(ofn);
-//   Repetitions rpt = _mod_repete();
+   //
+   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
+   if (info & Rmask) 
+   {
+      //read the repetition record from the input stream
+      readRepetitions(ofn);
+      int4b* rptpnt = _mod_repete().lcarray();
+      assert(rptpnt);
+      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+      {
+         TP p1(p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
+         dwl->addtext( text,CTM( p1  ,
+                                 1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
+                                 0.0 ,
+                                 false
+                              )
+                           );
+      }
+   }
+   else
+   {
+      TP p1(p1x,p1y);
+      dwl->addtext( text,CTM( p1,
+                              1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
+                              0.0 ,
+                              false
+                             )
+                        );
+   }
+
 }
 
 void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell, 
@@ -1133,11 +1161,13 @@ void Oasis::Cell::initModals()
    _mod_gx = 0;
    _mod_gy = 0;
    _mod_text.reset();
+   _mod_tlayer.reset();
+   _mod_tdatatype.reset();
+   _mod_tx = 0;
+   _mod_ty = 0;
    _mod_cellref.reset();
    _mod_px = 0;
    _mod_py = 0;
-   _mod_tx = 0;
-   _mod_ty = 0;
    _mod_pplist.reset();
    _mod_wplist.reset();
    _mod_repete.reset();
