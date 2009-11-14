@@ -1399,8 +1399,9 @@ int tellstdfunc::DRCCalibreimport::execute()
 		{
 			if (!DATC->isLayerExist(i))
          {
-				DATC->addlayer("drcResults", i);
+				//DATC->addlayer("drcResults", i);
             TpdPost::layer_add("drcResults",i);
+				DATC->addlayer(DRC_LAY);
             break;
          }
       }

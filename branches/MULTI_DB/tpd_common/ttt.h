@@ -667,6 +667,7 @@ const word MAX_WORD_VALUE = 65535;
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
 const unsigned    REF_LAY              = 0xffffffff;
 const unsigned    ERR_LAY              = 0xfffffffe;
+const unsigned		DRC_LAY					= 0xfffffffd;
 const unsigned    LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        MIN_VISUAL_AREA      = 40;   // that would be 40 pixels
