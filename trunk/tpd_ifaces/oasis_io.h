@@ -268,7 +268,7 @@ namespace Oasis {
          void              readRectangle(OasisInFile&, laydata::tdtcell*);
          void              readPolygon(OasisInFile&, laydata::tdtcell*);
          void              readPath(OasisInFile&, laydata::tdtcell*);
-         void              readText(OasisInFile&);
+         void              readText(OasisInFile&, laydata::tdtcell*);
          void              readReference(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, bool);
          PointList         readPointList(OasisInFile&);
          void              readRepetitions(OasisInFile&);
@@ -282,12 +282,15 @@ namespace Oasis {
          ModalVar< word>   _mod_pathhw      ; //! OASIS modal variable path-halfwidth
          ModalVar<int4b>   _mod_gx          ; //! OASIS modal variable geometry-x
          ModalVar<int4b>   _mod_gy          ; //! OASIS modal variable geometry-y
-         ModalVar<std::string>   _mod_text  ; //! OASIS modal variable text-string
          ModalVar<std::string>   _mod_cellref;//! OASIS modal variable placement-cell
          ModalVar<int4b>   _mod_px          ; //! OASIS modal variable placement-x
          ModalVar<int4b>   _mod_py          ; //! OASIS modal variable placement-y
+         ModalVar<std::string>   _mod_text  ; //! OASIS modal variable text-string
+         ModalVar<dword>   _mod_tlayer      ; //! OASIS modal variable textlayer
+         ModalVar< word>   _mod_tdatatype   ; //! OASIS modal variable texttype
          ModalVar<int4b>   _mod_tx          ; //! OASIS modal variable text-x
          ModalVar<int4b>   _mod_ty          ; //! OASIS modal variable text-y
+
          ModalVar<PointList>     _mod_pplist; //! OASIS modal variable polygon point list
          ModalVar<PointList>     _mod_wplist; //! OASIS modal variable path point list
          ModalVar<Repetitions>   _mod_repete; //! OASIS modal variable repetition
@@ -374,7 +377,7 @@ namespace Oasis {
 
    class Oas2Ted {
    public:
-                              Oas2Ted(OasisInFile*, laydata::tdtlibdir*/*, const LayerMapGds&*/);
+                              Oas2Ted(OasisInFile*, laydata::tdtlibdir* /*, const LayerMapGds&*/);
       void                    run(const nameList&, bool, bool);
    protected:
       void                    preTraverseChildren(const OASHierTree*);
