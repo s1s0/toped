@@ -607,6 +607,8 @@ Oasis::Cell::Cell()
    // initialised to 0
    _mod_gx = 0;
    _mod_gy = 0;
+   _mod_px = 0;
+   _mod_py = 0;
    _haveParent = false;
    _traversed  = false;
 }
@@ -656,6 +658,7 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
                            laydata::tdtlibdir* tdt_db/*, const LayerMapGds&*/)
 {
    ofn.setPosition(_filePos);
+   initModals();
    std::ostringstream info;
    info << "OASIS : Importing cell \"" << _name << "\"";
    tell_log(console::MT_INFO, info.str());
@@ -820,15 +823,15 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell)
       for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
       {
          pointlist laypl;
-         plist.calcPoints(laypl, p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
-         dwl->addwire(laypl, hwidth, false);
+         plist.calcPoints(laypl, p1x+rptpnt[2*rcnt], p1y+rptpnt[2*rcnt+1], false);
+         dwl->addwire(laypl, 2*hwidth, false);
       }
    }
    else
    {
       pointlist laypl;
-      plist.calcPoints(laypl, p1x,p1y);
-      dwl->addwire(laypl, hwidth, false);
+      plist.calcPoints(laypl, p1x, p1y, false);
+      dwl->addwire(laypl, 2*hwidth, false);
    }
 }
 
@@ -848,8 +851,8 @@ void Oasis::Cell::readText(OasisInFile& ofn)
                                                                                   _mod_text();
    dword     layno   = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
    word      dtype   = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
-   int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
-   int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   int8b     p1x     = (info & Xmask) ? (_mod_tx       = ofn.getInt(8)        ) : _mod_tx();
+   int8b     p1y     = (info & Ymask) ? (_mod_ty       = ofn.getInt(8)        ) : _mod_ty();
    if (info & Rmask) readRepetitions(ofn);
 //   Repetitions rpt = _mod_repete();
 }
@@ -883,8 +886,8 @@ void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell,
    }
    if (magnification <= 0)
          ofn.exception("Bad magnification value (22.10)");
-   int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
-   int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   int8b     p1x     = (info & Xmask) ? (_mod_px       = ofn.getInt(8)        ) : _mod_px();
+   int8b     p1y     = (info & Ymask) ? (_mod_py       = ofn.getInt(8)        ) : _mod_py();
    //
    laydata::CellDefin strdefn = tdt_db->linkcellref(name, TARGETDB_LIB);
    if (info & Rmask) 
@@ -1120,6 +1123,28 @@ Oasis::OASHierTree* Oasis::Cell::hierOut(OASHierTree* Htree, Cell* parent)
    return Htree;
 }
 
+void Oasis::Cell::initModals()
+{
+   _mod_layer.reset();
+   _mod_datatype.reset();
+   _mod_gwidth.reset();
+   _mod_gheight.reset();
+   _mod_pathhw.reset();
+   _mod_gx = 0;
+   _mod_gy = 0;
+   _mod_text.reset();
+   _mod_cellref.reset();
+   _mod_px = 0;
+   _mod_py = 0;
+   _mod_tx = 0;
+   _mod_ty = 0;
+   _mod_pplist.reset();
+   _mod_wplist.reset();
+   _mod_repete.reset();
+   _mod_exs.reset();
+   _mod_exe.reset();
+}
+
 //==============================================================================
 Oasis::PointList::PointList(OasisInFile& ofn, PointListType pltype) : _pltype(pltype)
 {
@@ -1239,24 +1264,24 @@ void Oasis::PointList::readDoubleDelta(OasisInFile& ofb)
    /*@TODO*/assert(false);
 }
 
-void Oasis::PointList::calcPoints(pointlist& plst, int4b p1x, int4b p1y)
+void Oasis::PointList::calcPoints(pointlist& plst, int4b p1x, int4b p1y, bool polyp)
 {
    switch (_pltype)
    {
-      case dt_manhattanH : calcManhattanH(plst, p1x, p1y) ; break;
-      case dt_manhattanV : calcManhattanV(plst, p1x, p1y) ; break;
+      case dt_manhattanH : calcManhattanH(plst, p1x, p1y, polyp) ; break;
+      case dt_manhattanV : calcManhattanV(plst, p1x, p1y, polyp) ; break;
       case dt_mamhattanE : calcManhattanE(plst, p1x, p1y) ; break;
       case dt_octangular : calcOctangular(plst, p1x, p1y) ; break;
       case dt_allangle   : calcAllAngle(plst, p1x, p1y)   ; break;//+1
       case dt_doubledelta: calcDoubleDelta(plst, p1x, p1y); break;//+1
       default: assert(false);
    }
-
 }
 
-void Oasis::PointList::calcManhattanH(pointlist& plst, int4b p1x, int4b p1y)
+void Oasis::PointList::calcManhattanH(pointlist& plst, int4b p1x, int4b p1y, bool polyp)
 {
-   plst.reserve(_vcount + 2);
+   dword numpoints = (polyp ? _vcount + 2 : _vcount + 1);
+   plst.reserve(numpoints);
    TP cpnt(p1x,p1y);
    plst.push_back(cpnt);
    dword curp;
@@ -1266,14 +1291,18 @@ void Oasis::PointList::calcManhattanH(pointlist& plst, int4b p1x, int4b p1y)
       else          cpnt.setX(cpnt.x() + _delarr[2*curp  ]);
       plst.push_back(cpnt);
    }
-   if (curp % 2) cpnt.setY(p1y);
-   else          cpnt.setX(p1x);
-   plst.push_back(cpnt);
+   if (polyp)
+   {
+      if (curp % 2) cpnt.setY(p1y);
+      else          cpnt.setX(p1x);
+      plst.push_back(cpnt);
+   }
 }
 
-void Oasis::PointList::calcManhattanV(pointlist& plst, int4b p1x, int4b p1y)
+void Oasis::PointList::calcManhattanV(pointlist& plst, int4b p1x, int4b p1y, bool polyp)
 {
-   plst.reserve(_vcount + 2);
+   dword numpoints = (polyp ? _vcount + 2 : _vcount + 1);
+   plst.reserve(numpoints);
    TP cpnt(p1x,p1y);
    plst.push_back(cpnt);
    dword curp;
@@ -1283,9 +1312,12 @@ void Oasis::PointList::calcManhattanV(pointlist& plst, int4b p1x, int4b p1y)
       else          cpnt.setY(cpnt.y() + _delarr[2*curp+1]);
       plst.push_back(cpnt);
    }
-   if (curp % 2) cpnt.setX(p1x);
-   else          cpnt.setY(p1y);
-   plst.push_back(cpnt);
+   if (polyp)
+   {
+      if (curp % 2) cpnt.setX(p1x);
+      else          cpnt.setY(p1y);
+      plst.push_back(cpnt);
+   }
 }
 
 void Oasis::PointList::calcManhattanE(pointlist& plst, int4b p1x, int4b p1y)
