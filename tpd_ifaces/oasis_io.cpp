@@ -818,16 +818,19 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell)
    {
       //read the repetition record from the input stream
       readRepetitions(ofn);
-      int4b* rptpnt = _mod_repete().lcarray();
-      assert(rptpnt);
-      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+      if (0 != hwidth)
       {
-         pointlist laypl;
-         plist.calcPoints(laypl, p1x+rptpnt[2*rcnt], p1y+rptpnt[2*rcnt+1], false);
-         dwl->addwire(laypl, 2*hwidth, false);
+         int4b* rptpnt = _mod_repete().lcarray();
+         assert(rptpnt);
+         for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+         {
+            pointlist laypl;
+            plist.calcPoints(laypl, p1x+rptpnt[2*rcnt], p1y+rptpnt[2*rcnt+1], false);
+            dwl->addwire(laypl, 2*hwidth, false);
+         }
       }
    }
-   else
+   else if (0 != hwidth)
    {
       pointlist laypl;
       plist.calcPoints(laypl, p1x, p1y, false);
