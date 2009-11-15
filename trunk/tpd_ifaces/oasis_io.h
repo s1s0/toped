@@ -31,7 +31,9 @@
 #include "outbox.h"
 #include "tedstd.h"
 
+//! Contains all class & type definitions related to SEMI P39-0308 (OASIS)
 namespace Oasis {
+
    const byte oas_PAD              =  0;
    const byte oas_START            =  1;
    const byte oas_END              =  2;
@@ -69,7 +71,12 @@ namespace Oasis {
    const byte oas_CBLOCK           = 34;
    const byte oas_MagicBytes[]     = {0x25, 0x53, 0x45, 0x4d, 0x49, 0x2D, 0x4F, 0x41, 0x53, 0x49, 0x53, 0x0D, 0x0A};
 
-   // Types of point lists
+   /*! The enum values correspond to the Point List Types as defined in the standard
+       (7.7, Table 7). The last member 'dt_unknown' is added for maintaining proper
+       state in the Oasis::PointList which in turn is used as a base class of
+       Cell::_mod_pplist /polygon-point-list/ and Cell::_mod_wplist /path-point-list/
+       modal variables
+   */
    typedef enum { dt_manhattanH    = 0 ,
                   dt_manhattanV    = 1 ,
                   dt_mamhattanE    = 2 ,
@@ -77,7 +84,10 @@ namespace Oasis {
                   dt_allangle      = 4 ,
                   dt_doubledelta   = 5 ,
                   dt_unknown       = 6  } PointListType;
-   // Types of coordinate deltas
+
+   /*! The enum values correspond to the delta directions as defined in the standard
+       for 1-delta (7.5.2), 2-delta(7.5.3) and 3-delta(7.5.4) primitives
+   */
    typedef enum { dr_east          = 0 ,
                   dr_north         = 1 ,
                   dr_west          = 2 ,
@@ -86,7 +96,12 @@ namespace Oasis {
                   dr_northwest     = 5 ,
                   dr_southwest     = 6 ,
                   dr_southeast     = 7  } DeltaDirections;
-   // Types of geometry repetitions
+
+   /*! The enum values correspond to the Repetition Types as defined in the standard
+       (7.6, Table 6). The last member 'rp_unknown' is added for maintaining proper
+       state in the Oasis::Repetitions which in turn is used as a base class of
+       Cell::_mod_repete /repetition modal variable/
+   */
    typedef enum { rp_reuse         = 0 ,
                   rp_regXY         = 1 ,
                   rp_regX          = 2 ,
@@ -100,17 +115,32 @@ namespace Oasis {
                   rp_varAny        =10 ,
                   rp_varAnyG       =11 ,
                   rp_unknown       =12  } RepetitionTypes;
-   // Types of path extensions
+   
+   /*! The enum values correspond to the Path Extenstion Shemes as defined in the
+       standard for SS and EE bits (27.8, Table 15) The last member ex_unknown is
+       added to maintain proper state in the Oasis::PathExtensions which in turn
+       is used as a base class of Cell::_mod_exs /path-start-extention/ and 
+       Cell::_mod_exe /path-end-extention/ modal variables
+   */
    typedef enum { ex_reuse         = 0 ,
                   ex_flush         = 1 ,
                   ex_hwidth        = 2 ,
                   ex_explicit      = 3 ,
                   ex_unknown       = 4  } ExtensionTypes;
-   
-   typedef enum { tblm_unknown         , 
-                  tblm_implicit        , 
+
+   /*! Defines the mode of each of the 6 OASIS tables. According to the standard
+       implicit (records oas_CELLNAME_1, oas_TEXTSTRING_1 etc.) and explicit
+       (records oas_CELLNAME_2, oas_TEXTSTRING_2 etc.) records should not be mixed in.
+       The first enum value 'tblm_unknown' is introduced for convinience to maintain
+       properly the table mode.
+   */
+   typedef enum { tblm_unknown         ,
+                  tblm_implicit        ,
                   tblm_explicit         } TableMode;
 
+   /*! OASIS Standard Properties (Appendix 2) depend on the context they appear in.
+       This enum values define all possible contexts for the property records.
+   */
    typedef enum { pc_file              ,
                   pc_cell              ,
                   pc_element            } PropertyContext;
@@ -121,6 +151,8 @@ namespace Oasis {
    typedef SGHierTree<Cell>        OASHierTree;
    typedef std::list<Cell*>        OasisCellList;
 
+   /*! Declares the OASIS name tables.
+   */
    class Table {
       public:
          typedef std::map<dword, std::string> NameTable;
@@ -141,6 +173,15 @@ namespace Oasis {
          NameTable         _table;
    };
 
+   /*! Represents all OASIS modal variables. Each class used as a TYPE argument of
+       this template has to define a proper copy constructor and '=' operator. The
+       template takes care about handling the state of the modal variables derived
+       form it. ModalVar::_status field contains this state. Defines equal '='
+       operator which should be used to assign (set) a value to the modal variable
+       and a functor '()' which should be used to read the value of the modal variable.
+       An exception will be thrown if the value of the modal variable is
+       requiested without being previously set.
+   */
    template <class TYPE> class ModalVar {
       public:
                            ModalVar()                    {_status = false;}
@@ -156,6 +197,13 @@ namespace Oasis {
          TYPE              _value;
    };
 
+   /*! The class represents OASIS Point Lists (7.7). Contains dedicated methods for
+       parsing all Pont List types and also for the corresponding coordinate calculation
+       All parsed delta values are stored in the PointList::_delarr. The calculated
+       coodinates are returned in the corresponding parameters of the calc* methods.
+       Defines also a copy constructor and assign operator required by the
+       Oasis::ModalVar template to define the corresponding modal variables
+   */
    class PointList {
       public:
                            PointList() : _pltype(dt_unknown), _vcount(0), _delarr(NULL) {}
@@ -184,6 +232,12 @@ namespace Oasis {
          int4b*            _delarr; //! Delta sequence in XYXY... array
    };
 
+   /*! The class represents OASIS Repetitions (7.6 and Table 6). Contains dedicated
+       methods for parsing all Repetition types. The parsed repetition sequences
+       are stored in the array Repetitions::_lcarray
+       Defines also a copy constructor and assign operator required by the
+       Oasis::ModalVar template to define the corresponding modal variables
+   */
    class Repetitions {
       public:
                            Repetitions() : _rptype(rp_unknown), _bcount(0), _lcarray(NULL) {}
@@ -193,17 +247,17 @@ namespace Oasis {
          int4b*            lcarray()               { return _lcarray;   }
          Repetitions&      operator = (const Repetitions&);
       private:
-         void              readregXY(OasisInFile&);
-         void              readregX(OasisInFile&);
-         void              readregY(OasisInFile&);
-         void              readvarX(OasisInFile&);
-         void              readvarXxG(OasisInFile&);
-         void              readvarY(OasisInFile&);
-         void              readvarYxG(OasisInFile&);
-         void              readregDia2D(OasisInFile&);
-         void              readregDia1D(OasisInFile&);
-         void              readvarAny(OasisInFile&);
-         void              readvarAnyG(OasisInFile&);
+         void              readregXY(OasisInFile&);      //! Parces OASIS Repetition type 1
+         void              readregX(OasisInFile&);       //! Parces OASIS Repetition type 2
+         void              readregY(OasisInFile&);       //! Parces OASIS Repetition type 3
+         void              readvarX(OasisInFile&);       //! Parces OASIS Repetition type 4
+         void              readvarXxG(OasisInFile&);     //! Parces OASIS Repetition type 5
+         void              readvarY(OasisInFile&);       //! Parces OASIS Repetition type 6
+         void              readvarYxG(OasisInFile&);     //! Parces OASIS Repetition type 7
+         void              readregDia2D(OasisInFile&);   //! Parces OASIS Repetition type 8
+         void              readregDia1D(OasisInFile&);   //! Parces OASIS Repetition type 9
+         void              readvarAny(OasisInFile&);     //! Parces OASIS Repetition type 10
+         void              readvarAnyG(OasisInFile&);    //! Parces OASIS Repetition type 11
          RepetitionTypes   _rptype;  //! Oasis repetition type
          dword             _bcount;  //! Number of binding points in the sequence
          int4b*            _lcarray; //! Location sequence in XYXY ... array
@@ -235,7 +289,7 @@ namespace Oasis {
 //
 //   -- Element level Properties
 //   S_GDS_PROPERTY                      - getUnsignedInt; getString
-   
+
    class PathExtensions {
       public:
                            PathExtensions() : _extype(ex_unknown), _exex(0) {}
@@ -244,7 +298,7 @@ namespace Oasis {
          ExtensionTypes    _extype; //! Oasis path extension type
          int4b             _exex;   //! Explicit extension
    };
-   
+
    class Cell {
       public:
                            Cell();
@@ -263,6 +317,7 @@ namespace Oasis {
          void              skimRectangle(OasisInFile&);
          void              skimPolygon(OasisInFile&);
          void              skimPath(OasisInFile&);
+         void              skimTrapezoid(OasisInFile&, byte);
          void              skimText(OasisInFile&);
          void              skimReference(OasisInFile&, bool);
          void              readRectangle(OasisInFile&, laydata::tdtcell*);
@@ -297,6 +352,11 @@ namespace Oasis {
          ModalVar<PathExtensions> _mod_exs  ; //! OASIS modal variable path-start-extention
          ModalVar<PathExtensions> _mod_exe  ; //! OASIS modal variable path-end-extention
          //
+         //OASIS modal variable xy-mode
+         //OASIS modal variable ctrapezoid-type
+         //OASIS modal variable circle-radius
+         //OASIS modal variable last-property-name
+         //OASIS modal variable last-value-list
          std::string       _name            ; //! The Cell name
          NameSet           _referenceNames  ; //! All names of the structures referenced in this cell
          OasisCellList     _children        ; //! Pointers to all Cell structures referenced in this cell

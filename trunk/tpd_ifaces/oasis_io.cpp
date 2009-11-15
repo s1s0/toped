@@ -641,9 +641,9 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
          case oas_RECTANGLE   : skimRectangle(ofn); break;
          case oas_POLYGON     : skimPolygon(ofn);break;
          case oas_PATH        : skimPath(ofn);break;
-         case oas_TRAPEZOID_1 : /*@TODO*/assert(false);break;
-         case oas_TRAPEZOID_2 : /*@TODO*/assert(false);break;
-         case oas_TRAPEZOID_3 : /*@TODO*/assert(false);break;
+         case oas_TRAPEZOID_1 : skimTrapezoid(ofn, 1);break;
+         case oas_TRAPEZOID_2 : skimTrapezoid(ofn, 2);break;
+         case oas_TRAPEZOID_3 : skimTrapezoid(ofn, 3);break;
          case oas_CTRAPEZOID  : /*@TODO*/assert(false);break;
          case oas_CIRCLE      : /*@TODO*/assert(false);break;
          default:
@@ -1024,6 +1024,36 @@ void Oasis::Cell::skimPath(OasisInFile& ofn)
    if (info & Ymask) ofn.getInt(8);
    if (info & Rmask) readRepetitions(ofn);
 //   Repetitions rpt = _mod_repete();
+}
+
+//------------------------------------------------------------------------------
+void Oasis::Cell::skimTrapezoid(OasisInFile& ofn, byte type)
+{
+   const byte Omask   = 0x80;
+   const byte Wmask   = 0x40;
+   const byte Hmask   = 0x20;
+   const byte Xmask   = 0x10;
+   const byte Ymask   = 0x08;
+   const byte Rmask   = 0x04;
+   const byte Dmask   = 0x02;
+   const byte Lmask   = 0x01;
+
+   byte info = ofn.getByte();
+
+   if (info & Lmask) ofn.getUnsignedInt(4);
+   if (info & Dmask) ofn.getUnsignedInt(2);
+   if (info & Wmask) ofn.getUnsignedInt(4);
+   if (info & Hmask) ofn.getUnsignedInt(4);
+   switch (type)
+   {
+      case 1: ofn.getUnsignedInt(4);ofn.getUnsignedInt(4);break;
+      case 2: ofn.getUnsignedInt(4);break;
+      case 3: ofn.getUnsignedInt(4);break;
+      default: assert(false);
+   }
+   if (info & Xmask) ofn.getInt(8);
+   if (info & Ymask) ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
 }
 
 //------------------------------------------------------------------------------
@@ -1492,24 +1522,70 @@ void Oasis::Repetitions::readregY(OasisInFile& ofn)
    }
 }
 
-void Oasis::Repetitions::readvarX(OasisInFile&)
+void Oasis::Repetitions::readvarX(OasisInFile& ofn)
 {//type 4
-   /*@TODO*/assert(false);
+   _bcount = ofn.getUnsignedInt(4) + 2;
+   _lcarray = DEBUG_NEW int4b[2*_bcount];
+   int4b p1x = 0;
+   int4b p1y = 0;
+   _lcarray[0] = p1x;
+   _lcarray[1] = p1y;
+   for (dword pj = 1; pj < _bcount; pj++)
+   {
+      p1x = ofn.getUnsignedInt(4);
+      _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ] + p1x;
+      _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1];
+   }
 }
 
-void Oasis::Repetitions::readvarXxG(OasisInFile&)
+void Oasis::Repetitions::readvarXxG(OasisInFile& ofn)
 {//type 5
-   /*@TODO*/assert(false);
+   _bcount = ofn.getUnsignedInt(4) + 2;
+   _lcarray = DEBUG_NEW int4b[2*_bcount];
+   dword grid   = ofn.getUnsignedInt(4);
+   int4b p1x = 0;
+   int4b p1y = 0;
+   _lcarray[0] = p1x;
+   _lcarray[1] = p1y;
+   for (dword pj = 1; pj < _bcount; pj++)
+   {
+      p1x = ofn.getUnsignedInt(4);
+      _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ] + p1x * grid;
+      _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1];
+   }
 }
 
-void Oasis::Repetitions::readvarY(OasisInFile&)
+void Oasis::Repetitions::readvarY(OasisInFile& ofn)
 {//type 6
-   /*@TODO*/assert(false);
+   _bcount = ofn.getUnsignedInt(4) + 2;
+   _lcarray = DEBUG_NEW int4b[2*_bcount];
+   int4b p1x = 0;
+   int4b p1y = 0;
+   _lcarray[0] = p1x;
+   _lcarray[1] = p1y;
+   for (dword pj = 1; pj < _bcount; pj++)
+   {
+      p1y = ofn.getUnsignedInt(4);
+      _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ];
+      _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1] + p1y;
+   }
 }
 
-void Oasis::Repetitions::readvarYxG(OasisInFile&)
+void Oasis::Repetitions::readvarYxG(OasisInFile& ofn)
 {//type 7
-   /*@TODO*/assert(false);
+   _bcount = ofn.getUnsignedInt(4) + 2;
+   _lcarray = DEBUG_NEW int4b[2*_bcount];
+   dword grid   = ofn.getUnsignedInt(4);
+   int4b p1x = 0;
+   int4b p1y = 0;
+   _lcarray[0] = p1x;
+   _lcarray[1] = p1y;
+   for (dword pj = 1; pj < _bcount; pj++)
+   {
+      p1y = ofn.getUnsignedInt(4);
+      _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ];
+      _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1] + p1y * grid;
+   }
 }
 
 void Oasis::Repetitions::readregDia2D(OasisInFile& ofn)
@@ -1644,9 +1720,9 @@ Oasis::PathExtensions::PathExtensions(OasisInFile& ofn, ExtensionTypes extype) :
 {
    switch (_extype)
    {
-      case ex_flush     : 
+      case ex_flush     :
       case ex_hwidth    : break;
-      case ex_explicit  : _exex = ofn.getInt(2);
+      case ex_explicit  : _exex = ofn.getInt(2); break;
       default: assert(false);
    }
 }
