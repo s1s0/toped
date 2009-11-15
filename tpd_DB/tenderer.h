@@ -59,7 +59,7 @@
          references gathered which will be used during the following steps
       2. VBO generation - the buffers are created and the sorted data is copied there.
       3. Drawing
-
+   \verbatim
                      Layer 1                Layer 2                     Layer N
                    -------------         --------------              --------------
                   |  TenderLay   |      |  TenderLay   |            |  TenderLay   |
@@ -89,6 +89,7 @@
                    ----------------------------------------------------------------
                   |                 index of selected objects VBO                  |
                    ----------------------------------------------------------------
+   \endverbatim
    Speed:
    The first step is the most time consuming from all three, but this is mainly the
    Toped DB traversing which is assumed optimal. The last one is the quickest one
@@ -456,9 +457,9 @@ namespace tenderer {
       object is sorted in exactly one bin depending whether it's going to be filled
       or not. The exception as always is the wire object which also goes to the
       line bin because of its cetral line.
-
-      --------------------------------------------------------------
-      | TopRend  |    not filled      |        filled      |        |
+      \verbatim
+      ---------------------------------------------------------------
+      | TopRend   |    not filled      |        filled      |        |
       |   data    |--------------------|--------------------|  enum  |
       | (vertexes)|  box | poly | wire |  box | poly | wire |        |
       |-----------|------|------|------|------|------|------|--------|
@@ -467,6 +468,7 @@ namespace tenderer {
       | convex    |      |      |      |  x   |      |      |  cnvx  |
       | non-convex|      |      |      |      |  x   |  x   |  ncvx  |
       --------------------------------------------------------------
+      \endverbatim
 
       The sorting step gathers also essential data staticstics which will be used
       later to constitute the virtual buffers, to copy the data into the
@@ -493,6 +495,7 @@ namespace tenderer {
       chunk and it is always from one and the same type.  The table below summarises
       the indexing.
 
+      \verbatim
       -----------------------------------------------------------------
       | Tesselation    | non convex object  |        |      openGL      |
       |         data   |--------------------|  enum  |     drawing      |
@@ -503,25 +506,30 @@ namespace tenderer {
       | triangle strip |     x    |         |  ftss  | GL_TRIANGLE_STRIP|
       | quadratic strip|          |    x    |  fqss  | GL_QUAD_STRIP    |
       -----------------------------------------------------------------
+      \endverbatim
 
       The collect() method implements the second step of the processing namely
       data collection (copy). It puts all vertex data in the linear vertex buffer
       structured in the following way
 
+      \verbatim
       -------------------------------------------------------------------------
       ... || cont | line  | cnvx | ncvx || cont | line  | cnvx | ncvx || ...
       ... ||----------------------------||----------------------------|| ...
       ... || this TenderTV object data  ||  next TenderTV object data || ...
       -------------------------------------------------------------------------
+      \endverbatim
 
       and the corresponding index data in another index buffer with the following
       structure
 
+      \verbatim
       -------------------------------------------------------------------------
       ... || ftrs | ftfs  | ftss | fqss || ftrs | ftfs  | ftss | fqss || ...
       ... ||----------------------------||----------------------------|| ...
       ... ||  this TenderTV index data  ||  next TenderTV index data  || ...
       -------------------------------------------------------------------------
+      \endverbatim
 
       The index data relates to the ncvx bin only and if the latter is not existing
       the corresponding portion of the index buffer will be with the length 0
@@ -532,6 +540,7 @@ namespace tenderer {
       the VBOs using also as additional parameters the same additional data
       gathered during the traversing and sorting step.
 
+      \verbatim
       -------------------------------------------------------------------
       |      |                                           |       VBO      |
       | data |            openGL function                |----------------|
@@ -550,6 +559,7 @@ namespace tenderer {
       |      | glMultiDrawElements(GL_TRIANGLE_STRIP...) |    x   |   x   |
       |      | glMultiDrawElements(GL_QUAD_STRIP    ...) |    x   |   x   |
       -------------------------------------------------------------------
+      \endverbatim
    */
    class TenderTV {
       public:
@@ -685,8 +695,9 @@ namespace tenderer {
       highlight them. An object can be fully or partially selected and depending
       on this it shall be rendered using the corresponding data strucutre:
 
-      --------------------------------------------------------------
-      | TopRend  |  fully selected    | partially selected |        |
+      \verbatim
+       --------------------------------------------------------------
+      |  TopRend  |  fully selected    | partially selected |        |
       |    data   |--------------------|--------------------|  enum  |
       | (indexes) |  box | poly | wire |  box | poly | wire |        |
       |-----------|------|------|------|------|------|------|--------|
@@ -694,6 +705,7 @@ namespace tenderer {
       | contours  |  x   |  x   |      |      |      |      |  llps  |
       |   lines   |      |      |  x   |      |      |      |  lnes  |
       --------------------------------------------------------------
+      \endverbatim
 
       In the manner similar to TenderTV class, TenderLay sorts the selected objects
       in three "bins" and gathers some statistics about each of them. One position
@@ -714,11 +726,13 @@ namespace tenderer {
       previously. collectSelected() puts all index data in the linear vertex buffer
       structured in the following way:
 
+      \verbatim
       -------------------------------------------------------------------------
       ... ||   lstr  |   llps  |  lnes  ||   lstr  |   llps  |  lnes  || ...
       ... ||----------------------------||----------------------------|| ...
       ... ||  this TenderLay index data ||  next TenderLay index data || ...
       -------------------------------------------------------------------------
+      \endverbatim
 
       The drawing of the corresponding portion of the selected data buffer is done
       also in this class by the drawSelected() method. For this we need the vertex
