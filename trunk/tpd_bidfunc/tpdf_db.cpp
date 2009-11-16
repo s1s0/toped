@@ -426,7 +426,7 @@ int tellstdfunc::GDSimport::execute()
    //OK, here we go....
    if (NULL != gdsLaysAll)
    { // i.e. top structure is found and layers extracted
-      LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+      LayerMapExt LayerExpression(gdsLaysStrList, gdsLaysAll);
       if (LayerExpression.status())
       {
          nameList top_cells;
@@ -500,7 +500,7 @@ int tellstdfunc::GDSimportList::execute()
       gdsDbName = AGDSDB->libname();
    }
    DATC->unlockGds(AGDSDB, true);
-   LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
+   LayerMapExt LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
    {
       try {DATC->lockDB(false);}
@@ -557,7 +557,7 @@ int tellstdfunc::GDSexportLIB::execute()
    if (expandFileName(filename))
    {
       DATC->lockDB(false);
-         LayerMapGds default_map(gdsLays, NULL);
+         LayerMapExt default_map(gdsLays, NULL);
          DATC->GDSexport(default_map, filename, x2048);
       DATC->unlockDB();
       LogFile << LogFile.getFN() << "( "
@@ -610,7 +610,7 @@ int tellstdfunc::GDSexportTOP::execute()
 
          if (NULL != excell)
          {
-            LayerMapGds default_map(gdsLays, NULL);
+            LayerMapExt default_map(gdsLays, NULL);
 
             DATC->GDSexport(excell, default_map, recur, filename, x2048);
             LogFile  << LogFile.getFN() 
@@ -1424,7 +1424,7 @@ int tellstdfunc::OASimport::execute()
    //OK, here we go....
    if (NULL != oasLaysAll)
    { // i.e. top structure is found and layers extracted
-      LayerMapGds LayerExpression(gdsLaysStrList, oasLaysAll);
+      LayerMapExt LayerExpression(gdsLaysStrList, oasLaysAll);
       if (LayerExpression.status())
       {
          nameList top_cells;

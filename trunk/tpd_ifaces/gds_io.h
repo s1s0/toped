@@ -116,7 +116,7 @@
 #define gds_SPACER_ERROR   0x44
 #define gds_CONTACT        0x45
 
-class LayerMapGds;
+class LayerMapExt;
 
 namespace GDSin {
    class GdsStructure;
@@ -289,7 +289,7 @@ namespace GDSin {
    class   GdsStructure {
       public:
                               GdsStructure(GdsInFile*, word);
-         void                 import(GdsInFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
+         void                 import(GdsInFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapExt&);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          void                 collectLayers(ExtLayers&, bool);
          void                 linkReferences(GdsInFile* const, GdsLibrary* const);
@@ -302,12 +302,12 @@ namespace GDSin {
          wxFileOffset         strSize() const                  { return _strSize;      }
                              ~GdsStructure();
       protected:
-         void                 importBox(GdsInFile*, laydata::tdtcell*, const LayerMapGds&);
-         void                 importPoly(GdsInFile*, laydata::tdtcell*, const LayerMapGds&);
-         void                 importPath(GdsInFile*, laydata::tdtcell*, const LayerMapGds&);
-         void                 importText(GdsInFile*, laydata::tdtcell*, real, const LayerMapGds&);
-         void                 importSref(GdsInFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
-         void                 importAref(GdsInFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
+         void                 importBox(GdsInFile*, laydata::tdtcell*, const LayerMapExt&);
+         void                 importPoly(GdsInFile*, laydata::tdtcell*, const LayerMapExt&);
+         void                 importPath(GdsInFile*, laydata::tdtcell*, const LayerMapExt&);
+         void                 importText(GdsInFile*, laydata::tdtcell*, real, const LayerMapExt&);
+         void                 importSref(GdsInFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapExt&);
+         void                 importAref(GdsInFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapExt&);
          void                 skimBox(GdsInFile*);
          void                 skimBoundary(GdsInFile*);
          void                 skimPath(GdsInFile*);
@@ -377,14 +377,14 @@ namespace GDSin {
 
    class Gds2Ted {
    public:
-                              Gds2Ted(GDSin::GdsInFile*, laydata::tdtlibdir*, const LayerMapGds&);
+                              Gds2Ted(GDSin::GdsInFile*, laydata::tdtlibdir*, const LayerMapExt&);
       void                    run(const nameList&, bool, bool);
    protected:
       void                    preTraverseChildren(const GDSin::GDSHierTree*);
       void                    convert(GDSin::GdsStructure*, bool);
       GDSin::GdsInFile*       _src_lib;
       laydata::tdtlibdir*     _tdt_db;
-      const LayerMapGds&      _theLayMap;
+      const LayerMapExt&      _theLayMap;
       real                    _coeff; // DBU difference
       GDSStructureList        _convertList;
       wxFileOffset            _conversionLength;
@@ -415,7 +415,7 @@ namespace GDSin {
 
    class GdsExportFile : public DbExportFile, public  GdsOutFile {
       public:
-                              GdsExportFile(std::string, laydata::tdtcell*, const LayerMapGds&, bool);
+                              GdsExportFile(std::string, laydata::tdtcell*, const LayerMapExt&, bool);
          virtual             ~GdsExportFile();
          virtual void         definitionStart(std::string);
          virtual void         definitionFinish();
@@ -432,7 +432,7 @@ namespace GDSin {
          virtual void         registerCellWritten(std::string);
       private:
          bool                 getMappedLayType(word&, word&, word);
-         const LayerMapGds&   _laymap;
+         const LayerMapExt&   _laymap;
          std::string          _ccname;
          nameList             _childnames;
          word                 _cGdsLayer;

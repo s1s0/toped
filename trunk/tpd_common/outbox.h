@@ -317,20 +317,20 @@ std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile
 std::string convertString(const std::string &str);
 
-/** The LayerMapGds is used for GDS/TDT layer correspondence in both directions.
+/** The LayerMapExt is used for GDS/OASIS - TDT layer correspondence in both directions.
       - If the class is constructed with ExtLayers == NULL, then _import will be
-        set to false and only the getGdsLayType() method should be used.
+        set to false and only the getExtLayType() method should be used.
       - If the class is constructed with ExtLayers != NULL, then _import will be
         set to true and only the getTdtLay() method should be used
 
    To ensure this policy some asserts are in place. Don't remove them!
  */
-class LayerMapGds {
+class LayerMapExt {
    public:
-                           LayerMapGds(const USMap&, ExtLayers*);
-                          ~LayerMapGds();
+                           LayerMapExt(const USMap&, ExtLayers*);
+                          ~LayerMapExt();
       bool                 getTdtLay(word&, word, word) const;
-      bool                 getGdsLayType(word&, word&, word) const;
+      bool                 getExtLayType(word&, word&, word) const;
       bool                 status() {return _status;}
       USMap*               updateMap(USMap*, bool);
    private:
