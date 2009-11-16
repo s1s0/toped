@@ -38,9 +38,9 @@ public:
                               DataCenter(const std::string&, const std::string &);
                              ~DataCenter(); 
    bool                       GDSparse(std::string);
-   void                       GDSexport(const LayerMapGds&, std::string&, bool);
-   void                       GDSexport(laydata::tdtcell*, const LayerMapGds&, bool, std::string&, bool);
-   void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
+   void                       GDSexport(const LayerMapExt&, std::string&, bool);
+   void                       GDSexport(laydata::tdtcell*, const LayerMapExt&, bool, std::string&, bool);
+   void                       importGDScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
    void                       OASclose();
@@ -52,7 +52,7 @@ public:
    bool                       oasGetLayers(ExtLayers&);
    void                       CIFimport(const nameList&, SIMap*, bool, bool, real);
    bool                       OASParse(std::string);
-   void                       importOAScell(const nameList&, const LayerMapGds&, bool recur, bool over);
+   void                       importOAScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);
@@ -118,7 +118,7 @@ public:
    void                       clearRulers();
    void                       switch_drawruler(bool st) {_drawruler = st;}
    bool                       drawruler() {return _drawruler;}
-   LayerMapGds*               secureGdsLayMap(bool);
+   LayerMapExt*               secureGdsLayMap(bool);
    LayerMapCif*               secureCifLayMap(bool);
    bool                       autopan() const         {return _properties.autopan();}
    bool                       zeroCross() const       {return _properties.zeroCross();}

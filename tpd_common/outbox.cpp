@@ -816,7 +816,7 @@ EXPTNcif_parser::EXPTNcif_parser(std::string info) {
 };
 
 //=============================================================================
-LayerMapGds::LayerMapGds(const USMap& inlist, ExtLayers* alist)
+LayerMapExt::LayerMapExt(const USMap& inlist, ExtLayers* alist)
    : _theMap(), _status(true), _alist(alist)
 {
    _import = (NULL != _alist);
@@ -828,12 +828,12 @@ LayerMapGds::LayerMapGds(const USMap& inlist, ExtLayers* alist)
    }
 }
 
-LayerMapGds::~LayerMapGds()
+LayerMapExt::~LayerMapExt()
 {
    if (NULL != _alist) delete _alist;
 }
 
-bool LayerMapGds::parseLayTypeString(wxString exp, word tdtLay)
+bool LayerMapExt::parseLayTypeString(wxString exp, word tdtLay)
 {
    wxString lay_exp, type_exp;
    if (!separateQuickLists(exp, lay_exp, type_exp)) return false;
@@ -907,7 +907,7 @@ bool LayerMapGds::parseLayTypeString(wxString exp, word tdtLay)
    return true;
 }
 
-bool LayerMapGds::separateQuickLists(wxString exp, wxString& lay_exp, wxString& type_exp)
+bool LayerMapExt::separateQuickLists(wxString exp, wxString& lay_exp, wxString& type_exp)
 {
    const wxString tmplLayNumbers    = wxT("[[:digit:]\\,\\-]*");
    const wxString tmplTypeNumbers   = wxT("[[:digit:]\\,\\-]*|\\*");
@@ -936,7 +936,7 @@ bool LayerMapGds::separateQuickLists(wxString exp, wxString& lay_exp, wxString& 
    return true;
 }
 
-void LayerMapGds::patternNormalize(wxString& str)
+void LayerMapExt::patternNormalize(wxString& str)
 {
    wxRegEx regex;
    // replace tabs with spaces
@@ -961,7 +961,7 @@ void LayerMapGds::patternNormalize(wxString& str)
 
 }
 
-void LayerMapGds::getList(wxString exp, WordList& data)
+void LayerMapExt::getList(wxString exp, WordList& data)
 {
    wxRegEx number_tmpl(wxT("[[:digit:]]*"));
    wxRegEx separ_tmpl(wxT("[\\,\\-]{1,1}"));
@@ -1001,7 +1001,7 @@ void LayerMapGds::getList(wxString exp, WordList& data)
 
 }
 
-bool LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
+bool LayerMapExt::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
 {
    assert(_import); // If you hit this - see the comment in the class declaration
    // All that this function is doing is:
@@ -1016,7 +1016,7 @@ bool LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
    return true;
 }
 
-bool LayerMapGds::getGdsLayType(word& gdslay, word& gdstype, word tdtlay) const
+bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, word tdtlay) const
 {
    assert(!_import); // If you hit this - see the comment in the class declaration
    gdslay  = tdtlay; // the default value
@@ -1029,7 +1029,7 @@ bool LayerMapGds::getGdsLayType(word& gdslay, word& gdstype, word tdtlay) const
    return true;
 }
 
-USMap* LayerMapGds::generateAMap()
+USMap* LayerMapExt::generateAMap()
 {
    USMap* wMap = new USMap();
    if (_import)
@@ -1059,7 +1059,7 @@ USMap* LayerMapGds::generateAMap()
    return wMap;
 }
 
-USMap* LayerMapGds::updateMap(USMap* update, bool import)
+USMap* LayerMapExt::updateMap(USMap* update, bool import)
 {
    assert(_import == import);
    // first generate the output from the current map

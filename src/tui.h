@@ -226,7 +226,7 @@ namespace tui {
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords              _allRecords;
-         LayerMapGds*            _gdsLayMap;
+         LayerMapExt*            _gdsLayMap;
    };
 
    //==========================================================================
@@ -267,7 +267,7 @@ namespace tui {
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords           _allRecords;
-         LayerMapGds*         _gdsLayMap;
+         LayerMapExt*         _gdsLayMap;
    };
 
    //--------------------------------------------------------------------------

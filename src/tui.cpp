@@ -2146,7 +2146,7 @@ tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word wGdsLay, wGdsType;
-      if (!_gdsLayMap->getGdsLayType(wGdsLay, wGdsType, *CNM))
+      if (!_gdsLayMap->getExtLayType(wGdsLay, wGdsType, *CNM))
       {
          wGdsLay  = *CNM;
          wGdsType = 0;

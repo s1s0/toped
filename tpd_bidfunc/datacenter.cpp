@@ -215,13 +215,13 @@ bool DataCenter::TDTwrite(const char* filename)
    return true;
 }
 
-void DataCenter::GDSexport(const LayerMapGds& layerMap, std::string& filename, bool x2048)
+void DataCenter::GDSexport(const LayerMapExt& layerMap, std::string& filename, bool x2048)
 {
    GDSin::GdsExportFile gdsex(filename, NULL, layerMap, true);
    _TEDLIB()->GDSwrite(gdsex);
 }
 
-void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapGds& layerMap, bool recur, std::string& filename, bool x2048)
+void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapExt& layerMap, bool recur, std::string& filename, bool x2048)
 {
    GDSin::GdsExportFile gdsex(filename, cell, layerMap, recur);
    _TEDLIB()->GDSwrite(gdsex);
@@ -264,7 +264,7 @@ bool DataCenter::GDSparse(std::string filename)
    return status;
 }
 
-void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
+void DataCenter::importGDScell(const nameList& top_names, const LayerMapExt& laymap, bool recur, bool over)
 {
    GDSin::GdsInFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
@@ -446,7 +446,7 @@ bool DataCenter::OASParse(std::string filename)
    return status;
 }
 
-void DataCenter::importOAScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
+void DataCenter::importOAScell(const nameList& top_names, const LayerMapExt& laymap, bool recur, bool over)
 {
    Oasis::OasisInFile* AOASDB = NULL;
    if (lockOas(AOASDB))
@@ -1071,10 +1071,10 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
    return DEBUG_NEW LayerMapCif(*theMap);
 }
 
-LayerMapGds* DataCenter::secureGdsLayMap(bool import)
+LayerMapExt* DataCenter::secureGdsLayMap(bool import)
 {
    const USMap* savedMap = _properties.getGdsLayMap();
-   LayerMapGds* theGdsMap;
+   LayerMapExt* theGdsMap;
    if (NULL == savedMap)
    {
       USMap theMap;
@@ -1093,7 +1093,7 @@ LayerMapGds* DataCenter::secureGdsLayMap(bool import)
             }
             theMap[CGL->first] = dtypestr.str();
          }
-         theGdsMap = DEBUG_NEW LayerMapGds(theMap, gdsLayers);
+         theGdsMap = DEBUG_NEW LayerMapExt(theMap, gdsLayers);
       }
       else
       { // generate default export GDS layer map
@@ -1107,7 +1107,7 @@ LayerMapGds* DataCenter::secureGdsLayMap(bool import)
             theMap[DATC->getLayerNo( *CDL )] = dtypestr.str();
          }
          DATC->unlockDB();
-         theGdsMap = DEBUG_NEW LayerMapGds(theMap, NULL);
+         theGdsMap = DEBUG_NEW LayerMapExt(theMap, NULL);
       }
    }
    else
@@ -1116,10 +1116,10 @@ LayerMapGds* DataCenter::secureGdsLayMap(bool import)
       {
          ExtLayers* gdsLayers = DEBUG_NEW ExtLayers();
          gdsGetLayers(*gdsLayers);
-         theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, gdsLayers);
+         theGdsMap = DEBUG_NEW LayerMapExt(*savedMap, gdsLayers);
       }
       else
-         theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, NULL);
+         theGdsMap = DEBUG_NEW LayerMapExt(*savedMap, NULL);
    }
    return theGdsMap;
 }

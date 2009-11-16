@@ -624,7 +624,7 @@ GDSin::GdsLibrary::~GdsLibrary()
 // class GdsStructure
 //==============================================================================
 void GDSin::GdsStructure::import(GdsInFile *cf, laydata::tdtcell* dst_cell,
-                                 laydata::tdtlibdir* tdt_db, const LayerMapGds& _theLayMap)
+                                 laydata::tdtlibdir* tdt_db, const LayerMapExt& _theLayMap)
 {
    std::string strctName;
    //initializing
@@ -1027,7 +1027,7 @@ void GDSin::GdsStructure::skimNode(GdsInFile* cf)
    while (true);
 }
 
-void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
 {
    int2b       layer;
    int2b       singleType;
@@ -1092,7 +1092,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::tdtcell* dst_cell, c
 
 }
 
-void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
 {
    int2b       layer;
    int2b       singleType;
@@ -1154,7 +1154,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::tdtcell* dst_cell, 
    while (true);
 }
 
-void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
 {
    int2b layer;
    int2b singleType;
@@ -1243,7 +1243,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::tdtcell* dst_cell, 
    while (cr->recType() != gds_ENDEL);
 }
 
-void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::tdtcell* dst_cell, real dbuu, const LayerMapGds& theLayMap)
+void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::tdtcell* dst_cell, real dbuu, const LayerMapExt& theLayMap)
 {
    int2b       layer;
    int2b       singleType;
@@ -1330,7 +1330,7 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::tdtcell* dst_cell, 
    while (true);
 }
 
-void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds&)
+void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapExt&)
 {
    word           reflection     = 0;
    word           absMagn        = 0;
@@ -1400,7 +1400,7 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::tdtcell* dst_cell, 
    while (true);
 }
 
-void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapGds&)
+void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapExt&)
 {
    word           reflection     = 0;
    word           absMagn        = 0;
@@ -1561,7 +1561,7 @@ GDSin::GdsStructure::~GdsStructure()
 //-----------------------------------------------------------------------------
 // class Gds2Ted
 //-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GdsInFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap) :
+GDSin::Gds2Ted::Gds2Ted(GDSin::GdsInFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapExt& theLayMap) :
       _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap),
                _coeff((*_tdt_db)()->UU() / src_lib->libUnits()), _conversionLength(0)
 {}
@@ -1861,7 +1861,7 @@ void GDSin::GdsOutFile::updateLastRecord()
 // class GdsExportFile
 //-----------------------------------------------------------------------------
 GDSin::GdsExportFile::GdsExportFile(std::string fn, laydata::tdtcell* tcell,
-   const LayerMapGds& lmap, bool recur) : DbExportFile(fn, tcell, recur), GdsOutFile(fn), _laymap(lmap)
+   const LayerMapExt& lmap, bool recur) : DbExportFile(fn, tcell, recur), GdsOutFile(fn), _laymap(lmap)
 {
 }
 
@@ -2068,7 +2068,7 @@ void GDSin::GdsExportFile::registerCellWritten(std::string cellname)
 
 bool GDSin::GdsExportFile::getMappedLayType(word& gdslay, word& gdstype, word tdtlay)
 {
-   bool result = _laymap.getGdsLayType(gdslay, gdstype, tdtlay);
+   bool result = _laymap.getExtLayType(gdslay, gdstype, tdtlay);
    return result;
    //It should not be a problem if the tdtlay is not listed in the map. Then
    // we take the default mapping which is gdslay = tdtlay; gdstype = 0

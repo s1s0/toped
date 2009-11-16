@@ -661,7 +661,7 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
 }
 
 void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
-                           laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap)
+                           laydata::tdtlibdir* tdt_db, const LayerMapExt& theLayMap)
 {
    ofn.setPosition(_filePos);
    initModals();
@@ -718,7 +718,7 @@ void Oasis::Cell::collectLayers(ExtLayers& layers_map, bool hier)
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
 {
    const byte Smask   = 0x80;
    const byte Wmask   = 0x40;
@@ -764,7 +764,7 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
 {
    const byte Pmask   = 0x20;
    const byte Xmask   = 0x10;
@@ -804,7 +804,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
 {
    const byte Emask   = 0x80;
    const byte Wmask   = 0x40;
@@ -859,7 +859,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    }
 }
 
-void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap, byte type)
+void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap, byte type)
 {
    const byte Omask   = 0x80;
    const byte Wmask   = 0x40;
@@ -942,7 +942,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
+void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
 {
    const byte Cmask   = 0x40;
    const byte Nmask   = 0x20;
@@ -1874,7 +1874,7 @@ void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
 //-----------------------------------------------------------------------------
 // class Oas2Ted
 //-----------------------------------------------------------------------------
-Oasis::Oas2Ted::Oas2Ted(OasisInFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap) :
+Oasis::Oas2Ted::Oas2Ted(OasisInFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapExt& theLayMap) :
       _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap),
                _coeff((*_tdt_db)()->UU() / src_lib->libUnits()), _conversionLength(0)
 {}
