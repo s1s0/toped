@@ -384,6 +384,19 @@ bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
    return ret_value;
 }
 
+bool DataCenter::oasGetLayers(GdsLayers& oasLayers)
+{
+   bool ret_value = false;
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (lockOas(AOASDB))
+   {
+      AOASDB->collectLayers(oasLayers);
+      ret_value = true;
+   }
+   unlockOas(AOASDB);
+   return ret_value;
+}
+
 void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite, real techno )
 {
    // DB shold have been locked at this point (from the tell functions)
@@ -433,7 +446,7 @@ bool DataCenter::OASParse(std::string filename)
    return status;
 }
 
-void DataCenter::importOAScell(const nameList& top_names, /*const LayerMapGds& laymap, */bool recur, bool over)
+void DataCenter::importOAScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
 {
    Oasis::OasisInFile* AOASDB = NULL;
    if (lockOas(AOASDB))
@@ -441,7 +454,7 @@ void DataCenter::importOAScell(const nameList& top_names, /*const LayerMapGds& l
 #ifdef OASCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      Oasis::Oas2Ted converter(AOASDB, &_TEDLIB/*, laymap*/);
+      Oasis::Oas2Ted converter(AOASDB, &_TEDLIB, laymap);
       converter.run(top_names, recur, over);
       _TEDLIB()->modified = true;
 #ifdef OASCONVERT_PROFILING

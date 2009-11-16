@@ -1498,7 +1498,42 @@ void tui::TopedFrame::OnOASimport(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
 {
-   //@TODO
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   tui::getOASimport* dlg = NULL;
+   USMap* laymap;
+   try {
+      dlg = DEBUG_NEW tui::getOASimport(this, -1, wxT("Import OASIS structure"), pos,
+                                          _browsers->tdtSelectedOasName());
+   }
+   catch (EXPTN) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK )
+   {
+      laymap = dlg->getOasLayerMap();
+      USMap* laymap2save = NULL;
+      if (dlg->getSaveMap()) laymap2save = dlg->getFullOasLayerMap();
+
+      wxString wxlaymap, wxlaymap2save;
+      USMap2wxString(laymap      , wxlaymap     );
+      if (NULL != laymap2save)
+         USMap2wxString(laymap2save , wxlaymap2save);
+
+
+      wxString ost;
+      ost << wxT("oasisimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
+          << wxlaymap << wxT(", ")
+          << (dlg->get_recursive() ? wxT("true") : wxT("false"))   << wxT(" , ")
+          << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
+      if (NULL != laymap2save)
+         ost << wxT("setoasislaymap(")
+             << wxlaymap2save << wxT(");");
+
+      _cmdline->parseCommand(ost);
+
+      delete laymap;
+      if (NULL != laymap2save) delete laymap2save;
+   }
+   delete dlg;
 }
 
 void tui::TopedFrame::OnOASexportLIB(wxCommandEvent& WXUNUSED(event))

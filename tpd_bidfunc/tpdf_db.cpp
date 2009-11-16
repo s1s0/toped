@@ -1386,7 +1386,7 @@ tellstdfunc::OASimport::OASimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-//   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
@@ -1395,38 +1395,38 @@ int tellstdfunc::OASimport::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
-//   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    // Convert layer map
-//    telldata::tthsh* nameh;
-//    USMap gdsLaysStrList;
-//    for (unsigned i = 0; i < lll->size(); i++)
-//    {
-//       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
-//       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
-//    }
+    telldata::tthsh* nameh;
+    USMap gdsLaysStrList;
+    for (unsigned i = 0; i < lll->size(); i++)
+    {
+       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
+    }
    //Prep: We need all used layers, and the name of the GDS DB
    std::ostringstream ost;
    std::string oasDbName = "NonameDB";
-//   GdsLayers* oasLaysAll = NULL;
+   GdsLayers* oasLaysAll = NULL;
    Oasis::OasisInFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       Oasis::Cell *src_structure = AOASDB->getCell(name.c_str());
       if (src_structure)
       {
-//         gdsLaysAll = DEBUG_NEW GdsLayers();
-//         src_structure->collectLayers(*oasLaysAll,true);
+         oasLaysAll = DEBUG_NEW GdsLayers();
+         src_structure->collectLayers(*oasLaysAll,true);
          oasDbName = AOASDB->getLibName();
       }
    }
    DATC->unlockOas(AOASDB, true);
    //OK, here we go....
-//   if (NULL != oasLaysAll)
-//   { // i.e. top structure is found and layers extracted
-//      LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
-//      if (LayerExpression.status())
-//      {
+   if (NULL != oasLaysAll)
+   { // i.e. top structure is found and layers extracted
+      LayerMapGds LayerExpression(gdsLaysStrList, oasLaysAll);
+      if (LayerExpression.status())
+      {
          nameList top_cells;
          top_cells.push_back(name);
 
@@ -1437,26 +1437,26 @@ int tellstdfunc::OASimport::execute()
             createDefaultTDT(oasDbName, timeCreated, UNDOcmdQ, UNDOPstack);
             DATC->lockDB(false);
          }
-         DATC->importOAScell(top_cells, /*LayerExpression, */recur, over);
+         DATC->importOAScell(top_cells, LayerExpression, recur, over);
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
          TpdPost::addTDTtab(true, true);
          LogFile << LogFile.getFN() << "(\""<< name << "\"," << /*(*lll) << "," <<*/ LogFile._2bool(recur)
                << "," << LogFile._2bool(over) << ");"; LogFile.flush();
-//      }
-//      else
-//      {
-//         ost << "Can't execute GDS import - error in the layer map";
-//         tell_log(console::MT_ERROR,ost.str());
-//      }
-//   }
-//   else
-//   {
-//      ost << "GDS structure named \"" << name << "\" does not exists";
-//      tell_log(console::MT_ERROR,ost.str());
-//   }
-//   delete lll;
+      }
+      else
+      {
+         ost << "Can't execute OASIS import - error in the layer map";
+         tell_log(console::MT_ERROR,ost.str());
+      }
+   }
+   else
+   {
+      ost << "OASIS structure named \"" << name << "\" does not exists";
+      tell_log(console::MT_ERROR,ost.str());
+   }
+   delete lll;
    return EXEC_NEXT;
 }
 //=============================================================================

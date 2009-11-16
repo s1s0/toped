@@ -580,6 +580,12 @@ Oasis::Cell* Oasis::OasisInFile::getCell(const std::string selection)
       return NULL;
 }
 
+void Oasis::OasisInFile::collectLayers(GdsLayers& layers)
+{
+   for (DefinitionMap::const_iterator CSTR = _definedCells.begin(); CSTR != _definedCells.end(); CSTR++)
+      CSTR->second->collectLayers(layers, false);
+}
+
 void Oasis::OasisInFile::hierOut()
 {
    _hierTree = NULL;
@@ -655,7 +661,7 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
 }
 
 void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
-                           laydata::tdtlibdir* tdt_db/*, const LayerMapGds&*/)
+                           laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap)
 {
    ofn.setPosition(_filePos);
    initModals();
@@ -677,15 +683,15 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          // <element> records
          case oas_PLACEMENT_1 : readReference(ofn, dst_cell, tdt_db, false);break;
          case oas_PLACEMENT_2 : readReference(ofn, dst_cell, tdt_db, true );break;
-         case oas_TEXT        : readText(ofn, dst_cell);break;
+         case oas_TEXT        : readText(ofn, dst_cell, theLayMap);break;
          case oas_XELEMENT    : /*@TODO*/assert(false);break;
          // <geometry> records
-         case oas_RECTANGLE   : readRectangle(ofn, dst_cell); break;
-         case oas_POLYGON     : readPolygon(ofn, dst_cell);break;
-         case oas_PATH        : readPath(ofn, dst_cell);break;
-         case oas_TRAPEZOID_1 : readTrapezoid(ofn, dst_cell, 1);break;
-         case oas_TRAPEZOID_2 : readTrapezoid(ofn, dst_cell, 2);break;
-         case oas_TRAPEZOID_3 : readTrapezoid(ofn, dst_cell, 3);break;
+         case oas_RECTANGLE   : readRectangle(ofn, dst_cell, theLayMap); break;
+         case oas_POLYGON     : readPolygon(ofn, dst_cell, theLayMap);break;
+         case oas_PATH        : readPath(ofn, dst_cell, theLayMap);break;
+         case oas_TRAPEZOID_1 : readTrapezoid(ofn, dst_cell, theLayMap, 1);break;
+         case oas_TRAPEZOID_2 : readTrapezoid(ofn, dst_cell, theLayMap, 2);break;
+         case oas_TRAPEZOID_3 : readTrapezoid(ofn, dst_cell, theLayMap, 3);break;
          case oas_CTRAPEZOID  : /*@TODO*/assert(false);break;
          case oas_CIRCLE      : /*@TODO*/assert(false);break;
          default:
@@ -696,8 +702,23 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
       }
    } while (true);
 }
+
+void Oasis::Cell::collectLayers(GdsLayers& layers_map, bool hier)
+{
+   for (GdsLayers::const_iterator CL = _contSummary.begin(); CL != _contSummary.end(); CL++)
+   {
+      WordSet& data_types = layers_map[CL->first];
+      data_types.insert(CL->second.begin(), CL->second.end());
+   }
+   if (!hier) return;
+   for (OasisCellList::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
+      if (NULL == (*CSTR)) continue;
+   else
+      (*CSTR)->collectLayers(layers_map, hier);
+}
+
 //------------------------------------------------------------------------------
-void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell)
+void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
 {
    const byte Smask   = 0x80;
    const byte Wmask   = 0x40;
@@ -743,7 +764,7 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell)
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell)
+void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
 {
    const byte Pmask   = 0x20;
    const byte Xmask   = 0x10;
@@ -783,7 +804,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell)
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell)
+void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
 {
    const byte Emask   = 0x80;
    const byte Wmask   = 0x40;
@@ -838,7 +859,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell)
    }
 }
 
-void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, byte type)
+void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap, byte type)
 {
    const byte Omask   = 0x80;
    const byte Wmask   = 0x40;
@@ -921,7 +942,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, by
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell)
+void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapGds& theLayMap)
 {
    const byte Cmask   = 0x40;
    const byte Nmask   = 0x20;
@@ -1050,8 +1071,9 @@ void Oasis::Cell::skimRectangle(OasisInFile& ofn)
 
    if ((info & Smask) && (info & Hmask))
       ofn.exception("S&H masks are ON simultaneously in rectangle info byte (25.7)");
-   if (info & Lmask) ofn.getUnsignedInt(4);
-   if (info & Dmask) ofn.getUnsignedInt(2);
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   updateContents(layno, dtype);
    if (info & Wmask) ofn.getUnsignedInt(4);
    if (info & Hmask) ofn.getUnsignedInt(4);
    if (info & Xmask) ofn.getInt(8);
@@ -1071,8 +1093,9 @@ void Oasis::Cell::skimPolygon(OasisInFile& ofn)
 
    byte info = ofn.getByte();
 
-   if (info & Lmask) ofn.getUnsignedInt(4);
-   if (info & Dmask) ofn.getUnsignedInt(2);
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   updateContents(layno, dtype);
    if (info & Pmask) readPointList(ofn);
    if (info & Xmask) ofn.getInt(8);
    if (info & Ymask) ofn.getInt(8);
@@ -1093,8 +1116,9 @@ void Oasis::Cell::skimPath(OasisInFile& ofn)
 
    byte info = ofn.getByte();
 
-   if (info & Lmask) ofn.getUnsignedInt(4);
-   if (info & Dmask) ofn.getUnsignedInt(2);
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   updateContents(layno, dtype);
    if (info & Wmask) ofn.getUnsignedInt(4);
    if (info & Emask)
    {
@@ -1122,8 +1146,9 @@ void Oasis::Cell::skimTrapezoid(OasisInFile& ofn, byte type)
 
    byte info = ofn.getByte();
 
-   if (info & Lmask) ofn.getUnsignedInt(4);
-   if (info & Dmask) ofn.getUnsignedInt(2);
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   updateContents(layno, dtype);
    if (info & Wmask) ofn.getUnsignedInt(4);
    if (info & Hmask) ofn.getUnsignedInt(4);
    switch (type)
@@ -1151,8 +1176,9 @@ void Oasis::Cell::skimText(OasisInFile& ofn)
 
    byte info = ofn.getByte();
    if (info & Cmask) ofn.getTextRefName(info & Nmask);
-   if (info & Lmask) ofn.getUnsignedInt(4);
-   if (info & Dmask) ofn.getUnsignedInt(2);
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   updateContents(layno, dtype);
    if (info & Xmask) ofn.getInt(8);
    if (info & Ymask) ofn.getInt(8);
    if (info & Rmask) readRepetitions(ofn);
@@ -1288,6 +1314,11 @@ void Oasis::Cell::initModals()
    _mod_repete.reset();
    _mod_exs.reset();
    _mod_exe.reset();
+}
+
+void Oasis::Cell::updateContents(int2b layer, int2b dtype)
+{
+   _contSummary[layer].insert(dtype);
 }
 
 //==============================================================================
@@ -1843,8 +1874,8 @@ void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
 //-----------------------------------------------------------------------------
 // class Oas2Ted
 //-----------------------------------------------------------------------------
-Oasis::Oas2Ted::Oas2Ted(OasisInFile* src_lib, laydata::tdtlibdir* tdt_db/*, const LayerMapGds& theLayMap*/) :
-      _src_lib(src_lib), _tdt_db(tdt_db),/* _theLayMap(theLayMap),*/
+Oasis::Oas2Ted::Oas2Ted(OasisInFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapGds& theLayMap) :
+      _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap),
                _coeff((*_tdt_db)()->UU() / src_lib->libUnits()), _conversionLength(0)
 {}
 
@@ -1941,7 +1972,7 @@ void Oasis::Oas2Ted::convert(Oasis::Cell* src_structure, bool overwrite)
       // first create a new cell
       dst_structure = DEBUG_NEW laydata::tdtcell(gname);
       // call the cell converter
-      src_structure->import(*_src_lib, dst_structure, _tdt_db/*, _theLayMap*/);
+      src_structure->import(*_src_lib, dst_structure, _tdt_db, _theLayMap);
       // and finally - register the cell
       (*_tdt_db)()->registercellread(gname, dst_structure);
    }

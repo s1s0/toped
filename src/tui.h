@@ -378,6 +378,25 @@ namespace tui {
    };
 
    //--------------------------------------------------------------------------
+   class getOASimport : public wxDialog {
+   public:
+                        getOASimport(wxFrame *parent, wxWindowID id, const wxString &title,
+                                                                  wxPoint pos, wxString init);
+      wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
+      bool              get_overwrite()    const {return _overwrite->GetValue();};
+      bool              get_recursive()    const {return _recursive->GetValue();};
+      bool              getSaveMap()       const {return _saveMap->GetValue();}
+      USMap*            getOasLayerMap()         {return _layList->getTheMap();}
+      USMap*            getFullOasLayerMap()     {return _layList->getTheFullMap();}
+   private:
+      wxCheckBox*       _overwrite;
+      wxCheckBox*       _recursive;
+      wxCheckBox*       _saveMap;
+      wxListBox*        _nameList;
+      nameCbox3List*    _layList;
+   };
+   
+   //--------------------------------------------------------------------------
    class getGDSexport : public wxDialog {
    public:
                         getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title,

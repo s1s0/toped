@@ -586,6 +586,64 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
 }
 
 //==============================================================================
+tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+      wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+{
+   _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
+   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
+   _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
+   _recursive->SetValue(true);
+   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
+   GdsLayers oasLayers;
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (DATC->lockOas(AOASDB))
+   {
+      //-----------------------------------------------------------------------
+      // So ugly - even scary, but it's the price to pay for not including wx
+      // in the tpd_interfaces
+      for (Oasis::OasisInFile::DefinitionMap::const_iterator CSTR  = AOASDB->definitions().begin();
+                                                             CSTR != AOASDB->definitions().end(); CSTR++)
+         _nameList->Append(wxString(CSTR->first.c_str(), wxConvUTF8));
+       //-----------------------------------------------------------------------
+   }
+   DATC->unlockOas(AOASDB, true);
+   DATC->oasGetLayers(oasLayers);
+   if (init != wxT(""))
+   {
+      _nameList->SetStringSelection(init,true);
+      _nameList->SetFirstItem(init);
+   }
+
+   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300), oasLayers);
+
+   // The window layout
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   //
+   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   lsizer->Add(_layList , 1, wxEXPAND);
+   lsizer->Add( _saveMap, 0, wxALL | wxALIGN_RIGHT, 5 );
+   //
+   wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   lists_sizer->Add(_nameList, 1, wxEXPAND );
+   lists_sizer->Add(lsizer, 0, wxEXPAND);
+   // Buttons
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
+   button_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
+   button_sizer->Add(0,0,1); // 
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
+   // TOP sizer
+   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+
+   SetSizer( topsizer );      // use the sizer for layout
+
+   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+}
+
+//==============================================================================
 tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
