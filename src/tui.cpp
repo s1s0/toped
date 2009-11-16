@@ -537,7 +537,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   GdsLayers gdsLayers;
+   ExtLayers gdsLayers;
    GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
@@ -595,7 +595,7 @@ tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   GdsLayers oasLayers;
+   ExtLayers oasLayers;
    Oasis::OasisInFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
@@ -1891,12 +1891,12 @@ USMap* tui::nameCboxRecords::getTheFullMap()
 
 //==========================================================================
 tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz, 
-            const GdsLayers& inlays, wxArrayString& all_strings, int row_height) 
+            const ExtLayers& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
    _gdsLayMap = DATC->secureGdsLayMap(true);
    word rowno = 0;
-   for (GdsLayers::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   for (ExtLayers::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString sGdsLay;
       sGdsLay << CNM->first;
@@ -2004,7 +2004,7 @@ BEGIN_EVENT_TABLE(tui::nameCbox3List, wxScrolledWindow)
       EVT_SIZE( tui::nameCbox3List::OnSize )
 END_EVENT_TABLE()
 
-tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const GdsLayers& inlays) :
+tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const ExtLayers& inlays) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers

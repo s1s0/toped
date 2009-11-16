@@ -816,7 +816,7 @@ EXPTNcif_parser::EXPTNcif_parser(std::string info) {
 };
 
 //=============================================================================
-LayerMapGds::LayerMapGds(const USMap& inlist, GdsLayers* alist)
+LayerMapGds::LayerMapGds(const USMap& inlist, ExtLayers* alist)
    : _theMap(), _status(true), _alist(alist)
 {
    _import = (NULL != _alist);

@@ -580,7 +580,7 @@ Oasis::Cell* Oasis::OasisInFile::getCell(const std::string selection)
       return NULL;
 }
 
-void Oasis::OasisInFile::collectLayers(GdsLayers& layers)
+void Oasis::OasisInFile::collectLayers(ExtLayers& layers)
 {
    for (DefinitionMap::const_iterator CSTR = _definedCells.begin(); CSTR != _definedCells.end(); CSTR++)
       CSTR->second->collectLayers(layers, false);
@@ -703,9 +703,9 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
    } while (true);
 }
 
-void Oasis::Cell::collectLayers(GdsLayers& layers_map, bool hier)
+void Oasis::Cell::collectLayers(ExtLayers& layers_map, bool hier)
 {
-   for (GdsLayers::const_iterator CL = _contSummary.begin(); CL != _contSummary.end(); CL++)
+   for (ExtLayers::const_iterator CL = _contSummary.begin(); CL != _contSummary.end(); CL++)
    {
       WordSet& data_types = layers_map[CL->first];
       data_types.insert(CL->second.begin(), CL->second.end());

@@ -406,7 +406,7 @@ GDSin::GdsStructure* GDSin::GdsInFile::getStructure(const std::string nm)
    return _library->getStructure(nm);
 }
 
-void GDSin::GdsInFile::collectLayers(GdsLayers& lays)
+void GDSin::GdsInFile::collectLayers(ExtLayers& lays)
 {
    _library->collectLayers(lays);
 }
@@ -598,7 +598,7 @@ GDSin::GdsStructure* GDSin::GdsLibrary::getStructure(const std::string selection
       return NULL;
 }
 
-void GDSin::GdsLibrary::collectLayers(GdsLayers& layers)
+void GDSin::GdsLibrary::collectLayers(ExtLayers& layers)
 {
    for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
       CSTR->second->collectLayers(layers, false);
@@ -761,9 +761,9 @@ void GDSin::GdsStructure::linkReferences(GdsInFile* const cf, GdsLibrary* const 
    }
 }
 
-void GDSin::GdsStructure::collectLayers(GdsLayers& layers_map, bool hier)
+void GDSin::GdsStructure::collectLayers(ExtLayers& layers_map, bool hier)
 {
-   for (GdsLayers::const_iterator CL = _contSummary.begin(); CL != _contSummary.end(); CL++)
+   for (ExtLayers::const_iterator CL = _contSummary.begin(); CL != _contSummary.end(); CL++)
    {
       WordSet& data_types = layers_map[CL->first];
       data_types.insert(CL->second.begin(), CL->second.end());

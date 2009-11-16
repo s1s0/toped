@@ -310,14 +310,14 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
 }
 
 //=============================================================================
-void tellstdfunc::makeGdsLays(GdsLayers& gdsLays)
-{
-   nameList allls;
-   DATC->all_layers(allls);
-   for (nameList::const_iterator CL = allls.begin(); CL != allls.end(); CL++)
-   {
-      WordSet data_types;
-      data_types.insert(0);
-      gdsLays[DATC->getLayerNo(*CL)] = data_types;
-   }
-}
+// void tellstdfunc::makeGdsLays(ExtLayers& gdsLays)
+// {
+//    nameList allls;
+//    DATC->all_layers(allls);
+//    for (nameList::const_iterator CL = allls.begin(); CL != allls.end(); CL++)
+//    {
+//       WordSet data_types;
+//       data_types.insert(0);
+//       gdsLays[DATC->getLayerNo(*CL)] = data_types;
+//    }
+// }

@@ -371,7 +371,7 @@ bool DataCenter::cifGetLayers(nameList& cifLayers)
    return ret_value;
 }
 
-bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
+bool DataCenter::gdsGetLayers(ExtLayers& gdsLayers)
 {
    bool ret_value = false;
    GDSin::GdsInFile* AGDSDB = NULL;
@@ -384,7 +384,7 @@ bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
    return ret_value;
 }
 
-bool DataCenter::oasGetLayers(GdsLayers& oasLayers)
+bool DataCenter::oasGetLayers(ExtLayers& oasLayers)
 {
    bool ret_value = false;
    Oasis::OasisInFile* AOASDB = NULL;
@@ -1080,9 +1080,9 @@ LayerMapGds* DataCenter::secureGdsLayMap(bool import)
       USMap theMap;
       if (import)
       { // generate default import GDS layer map
-         GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
+         ExtLayers* gdsLayers = DEBUG_NEW ExtLayers();
          gdsGetLayers(*gdsLayers);
-         for ( GdsLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
+         for ( ExtLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
          {
             std::ostringstream dtypestr;
             dtypestr << CGL->first << ";";
@@ -1114,7 +1114,7 @@ LayerMapGds* DataCenter::secureGdsLayMap(bool import)
    {
       if (import)
       {
-         GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
+         ExtLayers* gdsLayers = DEBUG_NEW ExtLayers();
          gdsGetLayers(*gdsLayers);
          theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, gdsLayers);
       }
