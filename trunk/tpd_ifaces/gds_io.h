@@ -223,7 +223,7 @@ namespace GDSin {
          void                 setPosition(wxFileOffset);
          void                 closeFile();
          GdsStructure*        getStructure(const std::string);
-         void                 collectLayers(GdsLayers&);
+         void                 collectLayers(ExtLayers&);
          std::string          libname() const;
          void                 hierOut();
          const GdsRecord*     cRecord() const                  { return _cRecord;                     }
@@ -291,7 +291,7 @@ namespace GDSin {
                               GdsStructure(GdsInFile*, word);
          void                 import(GdsInFile*, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
-         void                 collectLayers(GdsLayers&, bool);
+         void                 collectLayers(ExtLayers&, bool);
          void                 linkReferences(GdsInFile* const, GdsLibrary* const);
          void                 split(GdsInFile*, GdsOutFile*);
          std::string          strctName() const                { return _strctName;    }
@@ -318,7 +318,7 @@ namespace GDSin {
          void                 updateContents(int2b, int2b);
          bool                 pathConvert(pointlist&, word, int4b, int4b );
          int                  arrGetStep(TP&, TP&, int2b);
-         GdsLayers            _contSummary; // contents summary
+         ExtLayers            _contSummary; // contents summary
          bool                 _haveParent;
          std::string          _strctName;
          bool                 _traversed;       //! For hierarchy traversing purposes
@@ -360,7 +360,7 @@ namespace GDSin {
       void                    linkReferences(GdsInFile* const);
       GDSHierTree*            hierOut();
       GdsStructure*           getStructure(const std::string);
-      void                    collectLayers(GdsLayers&);
+      void                    collectLayers(ExtLayers&);
       double                  dbu() const                      { return _dbu;        }
       double                  uu()  const                      { return _uu;         }
       std::string             libName() const                  { return _libName;    }

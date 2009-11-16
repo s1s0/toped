@@ -410,14 +410,14 @@ int tellstdfunc::GDSimport::execute()
    // Prep: We need all used layers, and the name of the GDS DB
    std::ostringstream ost;
    std::string gdsDbName = "NonameDB";
-   GdsLayers* gdsLaysAll = NULL;
+   ExtLayers* gdsLaysAll = NULL;
    GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
       if (src_structure)
       {
-         gdsLaysAll = DEBUG_NEW GdsLayers();
+         gdsLaysAll = DEBUG_NEW ExtLayers();
          src_structure->collectLayers(*gdsLaysAll,true);
          gdsDbName = AGDSDB->libname();
       }
@@ -491,7 +491,7 @@ int tellstdfunc::GDSimportList::execute()
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
-   GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
+   ExtLayers* gdsLaysAll = DEBUG_NEW ExtLayers();
    std::string gdsDbName = "NonameDB";
    GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
@@ -810,10 +810,10 @@ int tellstdfunc::GDSreportlay::execute()
       }
       else 
       {
-         GdsLayers gdsLayers;
+         ExtLayers gdsLayers;
          src_structure->collectLayers(gdsLayers,true);
          ost << "GDS layers found in \"" << name <<"\" { <layer_number> ; <data_type> }" << std::endl;
-         for (GdsLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
+         for (ExtLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
          {
             ost << "{" << NLI->first << " ; ";
             for (WordSet::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
@@ -851,9 +851,9 @@ int tellstdfunc::GDSgetlaymap::execute()
    }
    else if (import)
    { // generate default import GDS layer map
-      GdsLayers gdsLayers;
+      ExtLayers gdsLayers;
       DATC->gdsGetLayers(gdsLayers);
-      for ( GdsLayers::const_iterator CGL = gdsLayers.begin(); CGL != gdsLayers.end(); CGL++ )
+      for ( ExtLayers::const_iterator CGL = gdsLayers.begin(); CGL != gdsLayers.end(); CGL++ )
       {
          std::ostringstream dtypestr;
          dtypestr << CGL->first << ";";
@@ -1408,14 +1408,14 @@ int tellstdfunc::OASimport::execute()
    //Prep: We need all used layers, and the name of the GDS DB
    std::ostringstream ost;
    std::string oasDbName = "NonameDB";
-   GdsLayers* oasLaysAll = NULL;
+   ExtLayers* oasLaysAll = NULL;
    Oasis::OasisInFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       Oasis::Cell *src_structure = AOASDB->getCell(name.c_str());
       if (src_structure)
       {
-         oasLaysAll = DEBUG_NEW GdsLayers();
+         oasLaysAll = DEBUG_NEW ExtLayers();
          src_structure->collectLayers(*oasLaysAll,true);
          oasDbName = AOASDB->getLibName();
       }

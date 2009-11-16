@@ -306,7 +306,7 @@ namespace Oasis {
          void              linkReferences(OasisInFile&);
          OASHierTree*      hierOut(OASHierTree*, Cell*);
          void              import(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
-         void              collectLayers(GdsLayers&, bool);
+         void              collectLayers(ExtLayers&, bool);
 
          std::string       name() const            { return _name;         }
          bool              haveParent() const      { return _haveParent;   }
@@ -367,7 +367,7 @@ namespace Oasis {
          wxFileOffset      _cellSize        ; //! The size (in bytes) of this cell definition in the OASIS file
          bool              _haveParent      ; //! Flags that the cell is referenced
          bool              _traversed       ; //! For hierarchy traversing purposes
-         GdsLayers         _contSummary     ; //! Layer contents summary
+         ExtLayers         _contSummary     ; //! Layer contents summary
    };
 
    class OasisInFile {
@@ -404,7 +404,7 @@ namespace Oasis {
          std::string       getCellRefName(bool);
          void              exception(std::string);
          Cell*             getCell(const std::string);
-         void              collectLayers(GdsLayers&);
+         void              collectLayers(ExtLayers&);
          void              getProperty1()     { _properties.getProperty1(*this);}
          void              getProperty2()     { _properties.getProperty2(*this);}
          void              closeFile();

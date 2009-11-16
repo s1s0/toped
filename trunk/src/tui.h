@@ -56,11 +56,11 @@ namespace tui {
       ID_CBDEFCOLOR     ,
       ID_CBDEFPATTERN   ,
       ID_CBDEFLINE      ,
-      ID_SAVELAYMAP		,
-		ID_BTNDISPLAYADD	,
-		ID_BTNTECHADD		,
-		ID_BTNOUTFILE		,
-		ID_BTNCONVERT
+      ID_SAVELAYMAP     ,
+      ID_BTNDISPLAYADD  ,
+      ID_BTNTECHADD     ,
+      ID_BTNOUTFILE     ,
+      ID_BTNCONVERT
    };
 
    typedef enum
@@ -210,7 +210,7 @@ namespace tui {
    //==========================================================================
    class nameCbox3Records : public wxPanel {
       public:
-                              nameCbox3Records(wxWindow*, wxPoint, wxSize, const GdsLayers&, wxArrayString&, int);
+                              nameCbox3Records(wxWindow*, wxPoint, wxSize, const ExtLayers&, wxArrayString&, int);
                              ~nameCbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
@@ -285,7 +285,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameCbox3List : public wxScrolledWindow {
       public:
-                              nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const GdsLayers&);
+                              nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const ExtLayers&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
@@ -580,21 +580,21 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
-	   //--------------------------------------------------------------------------
+      //--------------------------------------------------------------------------
    class cadenceConvert : public wxDialog 
-	{
+   {
    public:
       cadenceConvert(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos);
    protected:   
       wxTextCtrl* _displayList;
       wxTextCtrl* _techList;
-		wxTextCtrl* _outputFile;
-	private:
-		void	onDisplayAdd(wxCommandEvent&);
-		void	onTechAdd(wxCommandEvent&);
-		void	onOutputFile(wxCommandEvent&);
-		void	onConvert(wxCommandEvent&);
-		DECLARE_EVENT_TABLE();
+      wxTextCtrl* _outputFile;
+   private:
+      void  onDisplayAdd(wxCommandEvent&);
+      void  onTechAdd(wxCommandEvent&);
+      void  onOutputFile(wxCommandEvent&);
+      void  onConvert(wxCommandEvent&);
+      DECLARE_EVENT_TABLE();
    };
 
 }
