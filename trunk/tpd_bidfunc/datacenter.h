@@ -49,9 +49,10 @@ public:
    void                       CIFexport(laydata::tdtcell*, USMap*, bool, bool, std::string&);
    bool                       cifGetLayers(nameList&);
    bool                       gdsGetLayers(GdsLayers&);
+   bool                       oasGetLayers(GdsLayers&);
    void                       CIFimport(const nameList&, SIMap*, bool, bool, real);
    bool                       OASParse(std::string);
-   void                       importOAScell(const nameList&, /*const LayerMapGds&, */bool recur, bool over);
+   void                       importOAScell(const nameList&, const LayerMapGds&, bool recur, bool over);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);

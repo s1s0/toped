@@ -365,6 +365,7 @@ namespace browsers
          virtual            ~browserTAB();
          wxString             tdtSelectedGdsName() const;
          wxString             tdtSelectedCifName() const;
+         wxString             tdtSelectedOasName() const;
          wxString             tdtSelectedCellName() const   { return _tdtStruct->selectedCellName();}
       private:
          void                 onCommand(wxCommandEvent&);

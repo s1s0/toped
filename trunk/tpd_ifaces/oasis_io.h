@@ -305,7 +305,8 @@ namespace Oasis {
          byte              skimCell(OasisInFile&, bool);
          void              linkReferences(OasisInFile&);
          OASHierTree*      hierOut(OASHierTree*, Cell*);
-         void              import(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir* /*, const LayerMapGds&*/);
+         void              import(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapGds&);
+         void              collectLayers(GdsLayers&, bool);
 
          std::string       name() const            { return _name;         }
          bool              haveParent() const      { return _haveParent;   }
@@ -320,15 +321,16 @@ namespace Oasis {
          void              skimTrapezoid(OasisInFile&, byte);
          void              skimText(OasisInFile&);
          void              skimReference(OasisInFile&, bool);
-         void              readRectangle(OasisInFile&, laydata::tdtcell*);
-         void              readPolygon(OasisInFile&, laydata::tdtcell*);
-         void              readPath(OasisInFile&, laydata::tdtcell*);
-         void              readTrapezoid(OasisInFile&, laydata::tdtcell*, byte);
-         void              readText(OasisInFile&, laydata::tdtcell*);
+         void              readRectangle(OasisInFile&, laydata::tdtcell*, const LayerMapGds&);
+         void              readPolygon(OasisInFile&, laydata::tdtcell*, const LayerMapGds&);
+         void              readPath(OasisInFile&, laydata::tdtcell*, const LayerMapGds&);
+         void              readTrapezoid(OasisInFile&, laydata::tdtcell*, const LayerMapGds&, byte);
+         void              readText(OasisInFile&, laydata::tdtcell*, const LayerMapGds&);
          void              readReference(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, bool);
          PointList         readPointList(OasisInFile&);
          void              readRepetitions(OasisInFile&);
          void              readExtensions(OasisInFile&, PathExtensions&, PathExtensions&);
+         void              updateContents(int2b, int2b);
          void              initModals();
          //
          ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer
@@ -365,10 +367,12 @@ namespace Oasis {
          wxFileOffset      _cellSize        ; //! The size (in bytes) of this cell definition in the OASIS file
          bool              _haveParent      ; //! Flags that the cell is referenced
          bool              _traversed       ; //! For hierarchy traversing purposes
+         GdsLayers         _contSummary     ; //! Layer contents summary
    };
 
    class OasisInFile {
       public:
+         typedef std::map<std::string, Cell*> DefinitionMap;
                            OasisInFile(std::string);
                           ~OasisInFile();
          bool              reopenFile();
@@ -388,6 +392,8 @@ namespace Oasis {
          const Table*      propStrings() const{ return _propStrings;}
          const Table*      layerNames() const { return _layerNames;}
          const Table*      xNames() const     { return _xNames;}
+         const DefinitionMap& definitions() const { return _definedCells; }
+
 
          byte              getByte();
          qword             getUnsignedInt(byte);
@@ -398,11 +404,11 @@ namespace Oasis {
          std::string       getCellRefName(bool);
          void              exception(std::string);
          Cell*             getCell(const std::string);
+         void              collectLayers(GdsLayers&);
          void              getProperty1()     { _properties.getProperty1(*this);}
          void              getProperty2()     { _properties.getProperty2(*this);}
          void              closeFile();
       private:
-         typedef std::map<std::string, Cell*> DefinitionMap;
          float             getFloat();
          double            getDouble();
          void              readStartRecord();
@@ -438,14 +444,14 @@ namespace Oasis {
 
    class Oas2Ted {
    public:
-                              Oas2Ted(OasisInFile*, laydata::tdtlibdir* /*, const LayerMapGds&*/);
+                              Oas2Ted(OasisInFile*, laydata::tdtlibdir* , const LayerMapGds&);
       void                    run(const nameList&, bool, bool);
    protected:
       void                    preTraverseChildren(const OASHierTree*);
       void                    convert(Cell*, bool);
       OasisInFile*            _src_lib;
       laydata::tdtlibdir*     _tdt_db;
-//      const LayerMapGds&      _theLayMap;
+      const LayerMapGds&      _theLayMap;
       real                    _coeff; // DBU difference
       OasisCellList           _convertList;
       wxFileOffset            _conversionLength;

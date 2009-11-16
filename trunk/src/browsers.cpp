@@ -1346,6 +1346,13 @@ wxString browsers::browserTAB::tdtSelectedCifName() const
       return wxT("");
 }
 
+wxString browsers::browserTAB::tdtSelectedOasName() const
+{
+   if (NULL != _oasStruct)
+      return _oasStruct->selectedCellName();
+   else return wxT("");
+}
+
 void browsers::browserTAB::onCommand(wxCommandEvent& event)
 {
    int command = event.GetInt();
