@@ -323,6 +323,7 @@ namespace Oasis {
          void              readRectangle(OasisInFile&, laydata::tdtcell*);
          void              readPolygon(OasisInFile&, laydata::tdtcell*);
          void              readPath(OasisInFile&, laydata::tdtcell*);
+         void              readTrapezoid(OasisInFile&, laydata::tdtcell*, byte);
          void              readText(OasisInFile&, laydata::tdtcell*);
          void              readReference(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, bool);
          PointList         readPointList(OasisInFile&);
