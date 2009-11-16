@@ -683,9 +683,9 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          case oas_RECTANGLE   : readRectangle(ofn, dst_cell); break;
          case oas_POLYGON     : readPolygon(ofn, dst_cell);break;
          case oas_PATH        : readPath(ofn, dst_cell);break;
-         case oas_TRAPEZOID_1 : /*@TODO*/assert(false);break;
-         case oas_TRAPEZOID_2 : /*@TODO*/assert(false);break;
-         case oas_TRAPEZOID_3 : /*@TODO*/assert(false);break;
+         case oas_TRAPEZOID_1 : readTrapezoid(ofn, dst_cell, 1);break;
+         case oas_TRAPEZOID_2 : readTrapezoid(ofn, dst_cell, 2);break;
+         case oas_TRAPEZOID_3 : readTrapezoid(ofn, dst_cell, 3);break;
          case oas_CTRAPEZOID  : /*@TODO*/assert(false);break;
          case oas_CIRCLE      : /*@TODO*/assert(false);break;
          default:
@@ -836,6 +836,88 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell)
       plist.calcPoints(laypl, p1x, p1y, false);
       dwl->addwire(laypl, 2*hwidth, false);
    }
+}
+
+void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, byte type)
+{
+   const byte Omask   = 0x80;
+   const byte Wmask   = 0x40;
+   const byte Hmask   = 0x20;
+   const byte Xmask   = 0x10;
+   const byte Ymask   = 0x08;
+   const byte Rmask   = 0x04;
+   const byte Dmask   = 0x02;
+   const byte Lmask   = 0x01;
+
+   byte info = ofn.getByte();
+
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   dword width       = (info & Wmask) ? (_mod_gwidth   = ofn.getUnsignedInt(4)) : _mod_gwidth();
+   dword height      = (info & Hmask) ? (_mod_gheight  = ofn.getUnsignedInt(4)) : _mod_gheight();
+   dword deltaA = 0;
+   dword deltaB = 0;
+   switch (type)
+   {
+      case 1: deltaA = ofn.getUnsignedInt(4);
+              deltaB = ofn.getUnsignedInt(4);break;
+      case 2: deltaA = ofn.getUnsignedInt(4);break;
+      case 3: deltaB = ofn.getUnsignedInt(4);break;
+      default: assert(false);
+   }
+   int8b p1x         = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
+   int8b p1y         = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+
+   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
+
+   if (info & Rmask)
+   {
+      //read the repetition record from the input stream
+      readRepetitions(ofn);
+      int4b* rptpnt = _mod_repete().lcarray();
+      assert(rptpnt);
+      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+      {
+         pointlist laypl;
+         int8b p1xr = p1x + rptpnt[2*rcnt];
+         int8b p1yr = p1y + rptpnt[2*rcnt+1];
+         if (info & Omask)
+         {// verticaly oriented
+            TP p_pnt(p1xr         , p1yr                  ); laypl.push_back(p_pnt);
+            TP q_pnt(p1xr         , p1yr + height         ); laypl.push_back(q_pnt);
+            TP s_pnt(p1xr + width , p1yr + height - deltaB); laypl.push_back(s_pnt);
+            TP r_pnt(p1xr + width , p1yr          - deltaA); laypl.push_back(r_pnt);
+         }
+         else
+         { // horizontaly oriented
+            TP p_pnt(p1xr                 , p1yr + height); laypl.push_back(p_pnt);
+            TP q_pnt(p1xr + width         , p1yr + height); laypl.push_back(q_pnt);
+            TP s_pnt(p1xr + width - deltaB, p1yr         ); laypl.push_back(s_pnt);
+            TP r_pnt(p1xr         - deltaA, p1yr         ); laypl.push_back(r_pnt);
+         }
+         dwl->addpoly(laypl, false);
+      }
+   }
+   else
+   {
+      pointlist laypl;
+      if (info & Omask)
+      {// verticaly oriented
+         TP p_pnt(p1x         , p1y                  ); laypl.push_back(p_pnt);
+         TP q_pnt(p1x         , p1y + height         ); laypl.push_back(q_pnt);
+         TP s_pnt(p1x + width , p1y + height - deltaB); laypl.push_back(s_pnt);
+         TP r_pnt(p1x + width , p1y          - deltaA); laypl.push_back(r_pnt);
+      }
+      else
+      { // horizontaly oriented
+         TP p_pnt(p1x                 , p1y + height); laypl.push_back(p_pnt);
+         TP q_pnt(p1x + width         , p1y + height); laypl.push_back(q_pnt);
+         TP s_pnt(p1x + width - deltaB, p1y         ); laypl.push_back(s_pnt);
+         TP r_pnt(p1x         - deltaA, p1y         ); laypl.push_back(r_pnt);
+      }
+      dwl->addpoly(laypl, false);
+   }
+
 }
 
 //------------------------------------------------------------------------------
