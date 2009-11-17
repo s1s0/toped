@@ -728,38 +728,42 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
    const byte Rmask   = 0x04;
    const byte Dmask   = 0x02;
    const byte Lmask   = 0x01;
+   word       tdtlaynum;
 
    byte info = ofn.getByte();
 
    if ((info & Smask) && (info & Hmask))
       ofn.exception("S&H masks are ON simultaneously in rectangle info byte (25.7)");
-   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
-   word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
-   dword width       = (info & Wmask) ? (_mod_gwidth   = ofn.getUnsignedInt(4)) : _mod_gwidth();
-   dword height      = (info & Hmask) ? (_mod_gheight  = ofn.getUnsignedInt(4)) : 
-                       (info & Smask) ? (_mod_gheight  = width                ) : _mod_gheight();
-   int8b p1x         = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
-   int8b p1y         = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
+   if (info & Wmask) _mod_gwidth   = ofn.getUnsignedInt(4);
+   if (info & Hmask) _mod_gheight  = ofn.getUnsignedInt(4);
+   else if (info & Smask) _mod_gheight  = _mod_gwidth();
+   if (info & Xmask) _mod_gx       = ofn.getInt(8);
+   if (info & Ymask) _mod_gy       = ofn.getInt(8);
+   //read the repetition record from the input stream
+   if (info & Rmask) readRepetitions(ofn);
 
-   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
-   if (info & Rmask) 
+   if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      //read the repetition record from the input stream
-      readRepetitions(ofn);
-      int4b* rptpnt = _mod_repete().lcarray();
-      assert(rptpnt);
-      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      if (info & Rmask)
       {
-         TP p1(p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
-         TP p2(p1x+rptpnt[2*rcnt]+width,p1y+rptpnt[2*rcnt+1]+height);
+         int4b* rptpnt = _mod_repete().lcarray();
+         assert(rptpnt);
+         for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+         {
+            TP p1(_mod_gx()+rptpnt[2*rcnt]              ,_mod_gy()+rptpnt[2*rcnt+1]               );
+            TP p2(_mod_gx()+rptpnt[2*rcnt]+_mod_gwidth(),_mod_gy()+rptpnt[2*rcnt+1]+_mod_gheight());
+            dwl->addbox(p1, p2, false);
+         }
+      }
+      else
+      {
+         TP p1(_mod_gx()              , _mod_gy()               );
+         TP p2(_mod_gx()+_mod_gwidth(), _mod_gy()+_mod_gheight());
          dwl->addbox(p1, p2, false);
       }
-   }
-   else
-   {
-      TP p1(p1x,p1y);
-      TP p2(p1x+width, p1y+height);
-      dwl->addbox(p1, p2, false);
    }
 }
 
@@ -772,34 +776,38 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
    const byte Rmask   = 0x04;
    const byte Dmask   = 0x02;
    const byte Lmask   = 0x01;
+   word       tdtlaynum;
 
    byte info = ofn.getByte();
 
-   dword     layno   = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
-   word      dtype   = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
-   PointList plist   = (info & Pmask) ? (_mod_pplist   = readPointList(ofn)   ) : _mod_pplist();
-   int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
-   int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
+   if (info & Pmask) _mod_pplist   = readPointList(ofn);
+   if (info & Xmask) _mod_gx       = ofn.getInt(8);
+   if (info & Ymask) _mod_gy       = ofn.getInt(8);
+   if (info & Rmask)  readRepetitions(ofn);
 
-   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
-   if (info & Rmask) 
+   if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      //read the repetition record from the input stream
-      readRepetitions(ofn);
-      int4b* rptpnt = _mod_repete().lcarray();
-      assert(rptpnt);
-      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      if (info & Rmask)
+      {
+         //read the repetition record from the input stream
+         int4b* rptpnt = _mod_repete().lcarray();
+         assert(rptpnt);
+         for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+         {
+            pointlist laypl;
+            _mod_pplist().calcPoints(laypl, _mod_gx()+rptpnt[2*rcnt],_mod_gy()+rptpnt[2*rcnt+1]);
+            dwl->addpoly(laypl, false);
+         }
+      }
+      else
       {
          pointlist laypl;
-         plist.calcPoints(laypl, p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
+         _mod_pplist().calcPoints(laypl, _mod_gx(),_mod_gy());
          dwl->addpoly(laypl, false);
       }
-   }
-   else
-   {
-      pointlist laypl;
-      plist.calcPoints(laypl, p1x,p1y);
-      dwl->addpoly(laypl, false);
    }
 }
 
@@ -814,48 +822,44 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    const byte Rmask   = 0x04;
    const byte Dmask   = 0x02;
    const byte Lmask   = 0x01;
+   word       tdtlaynum;
+   PathExtensions exs,exe;
 
    byte info = ofn.getByte();
 
-   dword     layno   = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
-   word      dtype   = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
-   word      hwidth  = (info & Wmask) ? (_mod_pathhw   = ofn.getUnsignedInt(4)) : _mod_pathhw();
-   PathExtensions exs,exe;
-   if (info & Emask)
-   {
-      readExtensions(ofn, exs, exe);
-   }
-   else
-   {
-      exs = _mod_exs();
-      exe = _mod_exe();
-   }
-   PointList plist   = (info & Pmask) ? (_mod_wplist   = readPointList(ofn)   ) : _mod_wplist();
-   int8b     p1x     = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
-   int8b     p1y     = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
+   if (info & Wmask) _mod_pathhw   = ofn.getUnsignedInt(4);
+   if (info & Emask) readExtensions(ofn, exs, exe);
+   else              { exs = _mod_exs(); exe = _mod_exe();}
+   if (info & Pmask) _mod_wplist   = readPointList(ofn);
+   if (info & Xmask) _mod_gx       = ofn.getInt(8);
+   if (info & Ymask) _mod_gy       = ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
 
-   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
-   if (info & Rmask) 
+   if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      //read the repetition record from the input stream
-      readRepetitions(ofn);
-      if (0 != hwidth)
+      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      if (info & Rmask) 
       {
-         int4b* rptpnt = _mod_repete().lcarray();
-         assert(rptpnt);
-         for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+         if (0 != _mod_pathhw())
          {
-            pointlist laypl;
-            plist.calcPoints(laypl, p1x+rptpnt[2*rcnt], p1y+rptpnt[2*rcnt+1], false);
-            dwl->addwire(laypl, 2*hwidth, false);
+            int4b* rptpnt = _mod_repete().lcarray();
+            assert(rptpnt);
+            for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+            {
+               pointlist laypl;
+               _mod_wplist().calcPoints(laypl, _mod_gx()+rptpnt[2*rcnt], _mod_gy()+rptpnt[2*rcnt+1], false);
+               dwl->addwire(laypl, 2*_mod_pathhw(), false);
+            }
          }
       }
-   }
-   else if (0 != hwidth)
-   {
-      pointlist laypl;
-      plist.calcPoints(laypl, p1x, p1y, false);
-      dwl->addwire(laypl, 2*hwidth, false);
+      else if (0 != _mod_pathhw())
+      {
+         pointlist laypl;
+         _mod_wplist().calcPoints(laypl, _mod_gx(), _mod_gy(), false);
+         dwl->addwire(laypl, 2*_mod_pathhw(), false);
+      }
    }
 }
 
@@ -869,15 +873,16 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
    const byte Rmask   = 0x04;
    const byte Dmask   = 0x02;
    const byte Lmask   = 0x01;
+   word       tdtlaynum;
+   dword      deltaA  = 0;
+   dword      deltaB  = 0;
 
    byte info = ofn.getByte();
 
-   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
-   word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
-   dword width       = (info & Wmask) ? (_mod_gwidth   = ofn.getUnsignedInt(4)) : _mod_gwidth();
-   dword height      = (info & Hmask) ? (_mod_gheight  = ofn.getUnsignedInt(4)) : _mod_gheight();
-   dword deltaA = 0;
-   dword deltaB = 0;
+   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
+   if (info & Wmask) _mod_gwidth   = ofn.getUnsignedInt(4);
+   if (info & Hmask) _mod_gheight  = ofn.getUnsignedInt(4);
    switch (type)
    {
       case 1: deltaA = ofn.getUnsignedInt(4);
@@ -886,59 +891,60 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
       case 3: deltaB = ofn.getUnsignedInt(4);break;
       default: assert(false);
    }
-   int8b p1x         = (info & Xmask) ? (_mod_gx       = ofn.getInt(8)        ) : _mod_gx();
-   int8b p1y         = (info & Ymask) ? (_mod_gy       = ofn.getInt(8)        ) : _mod_gy();
+   if (info & Xmask) _mod_gx       = ofn.getInt(8);
+   if (info & Ymask) _mod_gy       = ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
 
-   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
-
-   if (info & Rmask)
+   if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      //read the repetition record from the input stream
-      readRepetitions(ofn);
-      int4b* rptpnt = _mod_repete().lcarray();
-      assert(rptpnt);
-      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      if (info & Rmask)
+      {
+         //read the repetition record from the input stream
+         int4b* rptpnt = _mod_repete().lcarray();
+         assert(rptpnt);
+         for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+         {
+            pointlist laypl;
+            int8b p1xr = _mod_gx() + rptpnt[2*rcnt];
+            int8b p1yr = _mod_gy() + rptpnt[2*rcnt+1];
+            if (info & Omask)
+            {// verticaly oriented
+               laypl.push_back(TP(p1xr                 , p1yr                          )); // P
+               laypl.push_back(TP(p1xr                 , p1yr + _mod_gheight()         )); // Q
+               laypl.push_back(TP(p1xr + _mod_gwidth() , p1yr + _mod_gheight() - deltaB)); // S
+               laypl.push_back(TP(p1xr + _mod_gwidth() , p1yr                  - deltaA)); // R
+            }
+            else
+            { // horizontaly oriented
+               laypl.push_back(TP(p1xr                         , p1yr + _mod_gheight())); // P
+               laypl.push_back(TP(p1xr + _mod_gwidth()         , p1yr + _mod_gheight())); // Q
+               laypl.push_back(TP(p1xr + _mod_gwidth() - deltaB, p1yr                 )); // S
+               laypl.push_back(TP(p1xr                 - deltaA, p1yr                 )); // R
+            }
+            dwl->addpoly(laypl, false);
+         }
+      }
+      else
       {
          pointlist laypl;
-         int8b p1xr = p1x + rptpnt[2*rcnt];
-         int8b p1yr = p1y + rptpnt[2*rcnt+1];
          if (info & Omask)
          {// verticaly oriented
-            TP p_pnt(p1xr         , p1yr                  ); laypl.push_back(p_pnt);
-            TP q_pnt(p1xr         , p1yr + height         ); laypl.push_back(q_pnt);
-            TP s_pnt(p1xr + width , p1yr + height - deltaB); laypl.push_back(s_pnt);
-            TP r_pnt(p1xr + width , p1yr          - deltaA); laypl.push_back(r_pnt);
+            laypl.push_back(TP(_mod_gx()                , _mod_gy()                          )); // P
+            laypl.push_back(TP(_mod_gx()                , _mod_gy() + _mod_gheight()         )); // Q
+            laypl.push_back(TP(_mod_gx() + _mod_gwidth(), _mod_gy() + _mod_gheight() - deltaB)); // S
+            laypl.push_back(TP(_mod_gx() + _mod_gwidth(), _mod_gy()                  - deltaA)); // R
          }
          else
          { // horizontaly oriented
-            TP p_pnt(p1xr                 , p1yr + height); laypl.push_back(p_pnt);
-            TP q_pnt(p1xr + width         , p1yr + height); laypl.push_back(q_pnt);
-            TP s_pnt(p1xr + width - deltaB, p1yr         ); laypl.push_back(s_pnt);
-            TP r_pnt(p1xr         - deltaA, p1yr         ); laypl.push_back(r_pnt);
+            laypl.push_back(TP(_mod_gx()                         , _mod_gy() + _mod_gheight())); // P
+            laypl.push_back(TP(_mod_gx() + _mod_gwidth()         , _mod_gy() + _mod_gheight())); // Q
+            laypl.push_back(TP(_mod_gx() + _mod_gwidth() - deltaB, _mod_gy()                 )); // S
+            laypl.push_back(TP(_mod_gx()                 - deltaA, _mod_gy()                 )); // R
          }
          dwl->addpoly(laypl, false);
       }
    }
-   else
-   {
-      pointlist laypl;
-      if (info & Omask)
-      {// verticaly oriented
-         TP p_pnt(p1x         , p1y                  ); laypl.push_back(p_pnt);
-         TP q_pnt(p1x         , p1y + height         ); laypl.push_back(q_pnt);
-         TP s_pnt(p1x + width , p1y + height - deltaB); laypl.push_back(s_pnt);
-         TP r_pnt(p1x + width , p1y          - deltaA); laypl.push_back(r_pnt);
-      }
-      else
-      { // horizontaly oriented
-         TP p_pnt(p1x                 , p1y + height); laypl.push_back(p_pnt);
-         TP q_pnt(p1x + width         , p1y + height); laypl.push_back(q_pnt);
-         TP s_pnt(p1x + width - deltaB, p1y         ); laypl.push_back(s_pnt);
-         TP r_pnt(p1x         - deltaA, p1y         ); laypl.push_back(r_pnt);
-      }
-      dwl->addpoly(laypl, false);
-   }
-
 }
 
 //------------------------------------------------------------------------------
@@ -951,44 +957,45 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    const byte Rmask   = 0x04;
    const byte Tmask   = 0x02; // In the standard is T, but it looks like a typo
    const byte Lmask   = 0x01;
+   word       tdtlaynum;
 
    byte info = ofn.getByte();
-   std::string text  = (info & Cmask) ? (_mod_text     = ofn.getTextRefName(info & Nmask)) :
-                                                                                  _mod_text();
-   dword     layno   = (info & Lmask) ? (_mod_tlayer   = ofn.getUnsignedInt(4)) : _mod_tlayer();
-   word      dtype   = (info & Tmask) ? (_mod_tdatatype = ofn.getUnsignedInt(2)) : _mod_tdatatype();
-   int8b     p1x     = (info & Xmask) ? (_mod_tx       = ofn.getInt(8)        ) : _mod_tx();
-   int8b     p1y     = (info & Ymask) ? (_mod_ty       = ofn.getInt(8)        ) : _mod_ty();
+   if (info & Cmask) _mod_text      = ofn.getTextRefName(info & Nmask);
+   if (info & Lmask) _mod_tlayer    = ofn.getUnsignedInt(4);
+   if (info & Tmask) _mod_tdatatype = ofn.getUnsignedInt(2);
+   if (info & Xmask) _mod_tx        = ofn.getInt(8);
+   if (info & Ymask) _mod_ty        = ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
    //
-   laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(layno));
-   if (info & Rmask) 
+   if ( theLayMap.getTdtLay(tdtlaynum, _mod_tlayer(), _mod_tdatatype() ) )
    {
-      //read the repetition record from the input stream
-      readRepetitions(ofn);
-      int4b* rptpnt = _mod_repete().lcarray();
-      assert(rptpnt);
-      for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      if (info & Rmask)
       {
-         TP p1(p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
-         dwl->addtext( text,CTM( p1  ,
-                                 1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
-                                 0.0 ,
-                                 false
-                              )
-                           );
+         int4b* rptpnt = _mod_repete().lcarray();
+         assert(rptpnt);
+         for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+         {
+            TP p1(_mod_tx()+rptpnt[2*rcnt],_mod_ty()+rptpnt[2*rcnt+1]);
+            dwl->addtext( _mod_text(),CTM( p1  ,
+                                           1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
+                                           0.0 ,
+                                           false
+                                         )
+                        );
+         }
+      }
+      else
+      {
+         TP p1(_mod_tx(),_mod_ty());
+         dwl->addtext( _mod_text(),CTM( p1,
+                                        1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
+                                        0.0 ,
+                                        false
+                                      )
+                     );
       }
    }
-   else
-   {
-      TP p1(p1x,p1y);
-      dwl->addtext( text,CTM( p1,
-                              1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
-                              0.0 ,
-                              false
-                             )
-                        );
-   }
-
 }
 
 void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell, 
@@ -1002,54 +1009,52 @@ void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell,
    const byte Mmask   = 0x04;
    const byte Amask   = 0x02;
    const byte Fmask   = 0x01;
+   real       angle, magnification;
 
    byte info = ofn.getByte();
-   std::string name  = (info & Cmask) ? (_mod_cellref  = ofn.getCellRefName(info & Nmask)) :
-                                                                                  _mod_cellref();
-   bool flip = (info & Fmask);
-   real angle, magnification;
+
+   if (info & Cmask) _mod_cellref  = ofn.getCellRefName(info & Nmask);
    if (exma)
-   { 
-      angle = (info & Amask) ? ofn.getReal() : 0.0;
+   {
+      angle         = (info & Amask) ? ofn.getReal() : 0.0;
       magnification = (info & Mmask) ? ofn.getReal() : 1.0;
    }
    else
    {
-      angle = 90.0 * (real)((info & (Mmask | Amask)) >> 1);
+      angle         = 90.0 * (real)((info & (Mmask | Amask)) >> 1);
       magnification = 1.0;
    }
    if (magnification <= 0)
          ofn.exception("Bad magnification value (22.10)");
-   int8b     p1x     = (info & Xmask) ? (_mod_px       = ofn.getInt(8)        ) : _mod_px();
-   int8b     p1y     = (info & Ymask) ? (_mod_py       = ofn.getInt(8)        ) : _mod_py();
+   if (info & Xmask) _mod_px       = ofn.getInt(8);
+   if (info & Ymask) _mod_py       = ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
    //
-   laydata::CellDefin strdefn = tdt_db->linkcellref(name, TARGETDB_LIB);
-   if (info & Rmask) 
+   laydata::CellDefin strdefn = tdt_db->linkcellref(_mod_cellref(), TARGETDB_LIB);
+   if (info & Rmask)
    {
-      //read the repetition record from the input stream
-      readRepetitions(ofn);
       int4b* rptpnt = _mod_repete().lcarray();
       assert(rptpnt);
       for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
       {
-         TP p1(p1x+rptpnt[2*rcnt],p1y+rptpnt[2*rcnt+1]);
+         TP p1(_mod_px()+rptpnt[2*rcnt],_mod_py()+rptpnt[2*rcnt+1]);
          dst_cell->registerCellRef( strdefn,
                                     CTM(p1,
                                         magnification,
                                         angle,
-                                        flip
+                                        (info & Fmask)
                                        )
                                   );
       }
    }
    else
    {
-      TP p1(p1x,p1y);
+      TP p1(_mod_px(),_mod_py());
       dst_cell->registerCellRef( strdefn,
                                  CTM(p1,
                                      magnification,
                                      angle,
-                                     flip
+                                     (info & Fmask)
                                     )
                                );
    }
@@ -1135,7 +1140,7 @@ void Oasis::Cell::skimPath(OasisInFile& ofn)
 //------------------------------------------------------------------------------
 void Oasis::Cell::skimTrapezoid(OasisInFile& ofn, byte type)
 {
-   const byte Omask   = 0x80;
+// const byte Omask   = 0x80;
    const byte Wmask   = 0x40;
    const byte Hmask   = 0x20;
    const byte Xmask   = 0x10;
@@ -1193,7 +1198,7 @@ void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
    const byte Rmask   = 0x08;
    const byte Mmask   = 0x04;
    const byte Amask   = 0x02;
-   const byte Fmask   = 0x01;
+// const byte Fmask   = 0x01;
 
    byte info = ofn.getByte();
 
