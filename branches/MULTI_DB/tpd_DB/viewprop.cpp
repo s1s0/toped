@@ -264,35 +264,62 @@ bool layprop::ViewProperties::addlayer(std::string name, unsigned layno, std::st
       tell_log(console::MT_WARNING, ost.str());
    }
    bool new_layer = true;
-   if (_drawprop._layset.end() != _drawprop._layset.find(layno))
-   {
-      new_layer = false;
-      delete _drawprop._layset[layno];
-      std::ostringstream ost;
-      ost << "Warning! Layer "<<layno<<" redefined";
-      tell_log(console::MT_WARNING, ost.str());
-   }   
-   _drawprop._layset[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
-   return new_layer;
+	switch(_drawprop._state)
+	{
+		case DB:
+			if (_drawprop._laysetDB.end() != _drawprop._laysetDB.find(layno))
+			{
+				new_layer = false;
+				delete _drawprop._laysetDB[layno];
+				std::ostringstream ost;
+				ost << "Warning! Layer "<<layno<<" redefined";
+				tell_log(console::MT_WARNING, ost.str());
+			}   
+			_drawprop._laysetDB[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
+			return new_layer;
+		case DRC:
+
+		default:
+			std::ostringstream ost;
+			ost << "Error! Attemption to redefine layer in uncertain state";
+			tell_log(console::MT_ERROR, ost.str());
+			return false;
+	}
 }
 
 bool layprop::ViewProperties::addlayer(std::string name, unsigned layno)
 {
-   if (_drawprop._layset.end() == _drawprop._layset.find(layno))
-   {
-      _drawprop._layset[layno] = DEBUG_NEW LayerSettings(name,"","","");
-      return true;
-   }
-   return false;
+	switch(_drawprop._state)
+	{
+		case DB: 
+			 if (_drawprop._laysetDB.end() == _drawprop._laysetDB.find(layno))
+			{
+				_drawprop._laysetDB[layno] = DEBUG_NEW LayerSettings(name,"","","");
+				return true;
+			}
+			return false;
+		case DRC:
+			if (_drawprop._laysetDRC.end() == _drawprop._laysetDRC.find(layno))
+			{
+				_drawprop._laysetDRC[layno] = DEBUG_NEW LayerSettings(name,"","","");
+				return true;
+			}
+			return false;
+		default:
+			std::ostringstream ost;
+			ost << "Error! Attemption to redefine layer in uncertain state";
+			tell_log(console::MT_ERROR, ost.str());
+			return false;
+	}
 }
 
 bool layprop::ViewProperties::addlayer( unsigned layno )
 {
-   if (_drawprop._layset.end() == _drawprop._layset.find(layno))
+   if (_drawprop.getCurSetList()->end() == _drawprop.getCurSetList1()->find(layno))
    {
       std::ostringstream lname;
       lname << "_UNDEF" << layno;
-      _drawprop._layset[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
+      (*_drawprop.getCurSetList1())[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
       return true;
    }
    return false;
@@ -301,8 +328,8 @@ bool layprop::ViewProperties::addlayer( unsigned layno )
 unsigned layprop::ViewProperties::addlayer(std::string name)
 {
    unsigned layno = 1;
-   laySetList::reverse_iterator lastLayNo = _drawprop._layset.rbegin();
-   if (_drawprop._layset.rend() != lastLayNo)
+   laySetList::reverse_iterator lastLayNo = _drawprop.getCurSetList()->rbegin();
+   if (_drawprop.getCurSetList()->rend() != lastLayNo)
       layno = lastLayNo->first;
    while (!addlayer(name, layno)) {layno++;}
    return layno;
@@ -310,13 +337,13 @@ unsigned layprop::ViewProperties::addlayer(std::string name)
 
 bool layprop::ViewProperties::isLayerExist(word layno)
 {
-	bool b = (_drawprop._layset.end() != _drawprop._layset.find(layno));
+	bool b = (_drawprop.getCurSetList()->end() != _drawprop.getCurSetList()->find(layno));
 	return b;
 }
 
 bool layprop::ViewProperties::isLayerExist(std::string layname)
 {
-	for(laySetList::const_iterator it = _drawprop._layset.begin(); it != _drawprop._layset.end(); ++it)
+	for(laySetList::const_iterator it = _drawprop.getConstCurSetList()->begin(); it != _drawprop.getConstCurSetList()->end(); ++it)
 	{
 		if((*it).second->name() == layname) return true;
 	}
@@ -368,21 +395,21 @@ void layprop::ViewProperties::addfill(std::string name, byte* ptrn) {
 
 void  layprop::ViewProperties::hideLayer(unsigned layno, bool hide) {
    // No error messages here, because of possible range use
-   if (_drawprop._layset.end() != _drawprop._layset.find(layno))
-      _drawprop._layset[layno]->_hidden = hide;
+   if (_drawprop.getCurSetList()->end() != _drawprop.getCurSetList()->find(layno))
+      (*_drawprop.getCurSetList())[layno]->_hidden = hide;
 }
 
 void  layprop::ViewProperties::lockLayer(unsigned layno, bool lock) {
    // No error messages here, because of possible range use
-   if (_drawprop._layset.end() != _drawprop._layset.find(layno))
-      _drawprop._layset[layno]->_locked = lock;
+   if (_drawprop.getCurSetList()->end() != _drawprop.getCurSetList()->find(layno))
+      (*_drawprop.getCurSetList())[layno]->_locked = lock;
 }
 const WordList layprop::ViewProperties::getLockedLayers(void)
 {
 	//drawprop._layset
 	WordList lockedLayers;
 	laySetList::const_iterator it;
-	for(  it = _drawprop._layset.begin(); it != _drawprop._layset.end(); ++it)
+	for(  it = _drawprop.getCurSetList()->begin(); it != _drawprop.getCurSetList()->end(); ++it)
 	{
 		if((*it).second->locked()) lockedLayers.push_back((*it).first);
 	}
@@ -391,8 +418,8 @@ const WordList layprop::ViewProperties::getLockedLayers(void)
 
 void  layprop::ViewProperties::fillLayer(unsigned layno, bool fill) {
    // No error messages here, because of possible range use
-   if (_drawprop._layset.end() != _drawprop._layset.find(layno))
-      _drawprop._layset[layno]->fillLayer(fill);
+   if (_drawprop.getCurSetList()->end() != _drawprop.getCurSetList()->find(layno))
+      (*_drawprop.getCurSetList())[layno]->fillLayer(fill);
 }
 
 const WordList layprop::ViewProperties::getAllLayers(void)
@@ -400,7 +427,7 @@ const WordList layprop::ViewProperties::getAllLayers(void)
 	//drawprop._layset
 	WordList listLayers;
 	laySetList::const_iterator it;
-	for(  it = _drawprop._layset.begin(); it != _drawprop._layset.end(); ++it)
+	for(  it = _drawprop.getConstCurSetList()->begin(); it != _drawprop.getConstCurSetList()->end(); ++it)
 	{
 		listLayers.push_back((*it).first);
 	}
