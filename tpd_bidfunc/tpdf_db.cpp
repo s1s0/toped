@@ -1390,30 +1390,8 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute()
 {
-	//Check existance of "drcResults" layer
-   if(!DATC->isLayerExist("drcResults"))
-	{
-		//Find free layer
-      int i;
-      for(i = 10000; i <=20000; i++)
-		{
-			if (!DATC->isLayerExist(i))
-         {
-				//DATC->addlayer("drcResults", i);
-            TpdPost::layer_add("drcResults",i);
-				DATC->addlayer(DRC_LAY);
-            break;
-         }
-      }
-      if (i>20000)
-      {
-			std::string message = "Can't create drcError layer";
-         tell_log(console::MT_ERROR,message);
-         return EXEC_NEXT;
-      }
-   }
-
-   std::string filename = getStringValue();
+	DATC->addlayer(DRC_LAY);
+	std::string filename = getStringValue();
    if(DRCData)
    {
    }

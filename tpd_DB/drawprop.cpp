@@ -527,17 +527,30 @@ void layprop::DrawProperties::adjustAlpha(word factor)
 bool  layprop::DrawProperties::layerHidden(unsigned layno) const
 {
    if (REF_LAY == layno) return false;
-   laySetList::const_iterator ilayset = _layset.find(layno);
-   if (_layset.end() != ilayset)
-      return ilayset->second->hidden();
+   laySetList::const_iterator ilayset;
+
+	switch(_state)
+	{
+		case DB: ilayset = _laysetDB.find(layno);
+			 if (_laysetDB.end() != ilayset)
+				return ilayset->second->hidden();
+			break;
+		case DRC: ilayset = _laysetDRC.find(layno);
+			 if (_laysetDRC.end() != ilayset)
+				return ilayset->second->hidden();
+			break;
+		default: return false;
+	}
+
+	
    return true;
 }
 
 bool  layprop::DrawProperties::layerLocked(unsigned layno) const
 {
    if (REF_LAY == layno) return false;
-   laySetList::const_iterator ilayset = _layset.find(layno);
-   if (_layset.end() != ilayset)
+   laySetList::const_iterator ilayset = getConstCurSetList()->find(layno);
+   if (getConstCurSetList()->end() != ilayset)
       return ilayset->second->locked();
    return true;
 }
@@ -547,8 +560,8 @@ bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
    if (REF_LAY == _drawinglayer) return true;
    // The lines below are doing effectively
    // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
-   laySetList::const_iterator ilayset = _layset.find(_drawinglayer);
-   if ((_layset.end() != ilayset) && (!_blockfill || force_fill ) )
+   laySetList::const_iterator ilayset = getConstCurSetList()->find(_drawinglayer);
+   if ((getConstCurSetList()->end() != ilayset) && (!_blockfill || force_fill ) )
    {
       if((*ilayset).second->filled())
       { // layer is filled
@@ -579,8 +592,8 @@ bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
 bool layprop::DrawProperties::isFilled(unsigned layno) const
 {
    assert(REF_LAY != layno);
-   laySetList::const_iterator ilayset = _layset.find(layno);
-   if ((_layset.end() != ilayset) && !_blockfill)
+   laySetList::const_iterator ilayset = getConstCurSetList()->find(layno);
+   if ((getConstCurSetList()->end() != ilayset) && !_blockfill)
    {
       if((*ilayset).second->filled())
          return true;
@@ -722,7 +735,7 @@ void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_m
 
 unsigned layprop::DrawProperties::getLayerNo(std::string name) const
 {
-   for (laySetList::const_iterator CL = _layset.begin(); CL != _layset.end(); CL++)
+   for (laySetList::const_iterator CL = getConstCurSetList()->begin(); CL != getConstCurSetList()->end(); CL++)
    {
       if (name == CL->second->name()) return CL->first;
    }
@@ -731,8 +744,8 @@ unsigned layprop::DrawProperties::getLayerNo(std::string name) const
 
 std::string layprop::DrawProperties::getLayerName(unsigned layno) const
 {
-   laySetList::const_iterator CL = _layset.find(layno);
-   if (_layset.end() != CL)
+   laySetList::const_iterator CL = getConstCurSetList()->find(layno);
+   if (getConstCurSetList()->end() != CL)
    {
       return CL->second->name();
    }
@@ -741,8 +754,8 @@ std::string layprop::DrawProperties::getLayerName(unsigned layno) const
 
 std::string layprop::DrawProperties::getColorName(unsigned layno) const
 {
-   laySetList::const_iterator CL = _layset.find(layno);
-   if (_layset.end() != CL)
+   laySetList::const_iterator CL = getConstCurSetList()->find(layno);
+   if (getConstCurSetList()->end() != CL)
    {
       return CL->second->color();
    }
@@ -751,8 +764,8 @@ std::string layprop::DrawProperties::getColorName(unsigned layno) const
 
 std::string layprop::DrawProperties::getFillName(unsigned layno) const
 {
-   laySetList::const_iterator CL = _layset.find(layno);
-   if (_layset.end() != CL)
+   laySetList::const_iterator CL = getConstCurSetList()->find(layno);
+   if (getConstCurSetList()->end() != CL)
    {
       return CL->second->fill();
    }
@@ -761,8 +774,8 @@ std::string layprop::DrawProperties::getFillName(unsigned layno) const
 
 std::string layprop::DrawProperties::getLineName(unsigned layno) const
 {
-   laySetList::const_iterator CL = _layset.find(layno);
-   if (_layset.end() != CL)
+   laySetList::const_iterator CL = getConstCurSetList()->find(layno);
+   if (getConstCurSetList()->end() != CL)
    {
       return CL->second->sline();
    }
@@ -781,14 +794,14 @@ unsigned layprop::DrawProperties::getTenderLay(unsigned layno) const
 
 void layprop::DrawProperties::all_layers(nameList& alllays) const
 {
-   for (laySetList::const_iterator CL = _layset.begin(); CL != _layset.end(); CL++)
+   for (laySetList::const_iterator CL = getConstCurSetList()->begin(); CL != getConstCurSetList()->end(); CL++)
       if (REF_LAY != CL->first) alllays.push_back(CL->second->name());
 }
 
 const layprop::LineSettings* layprop::DrawProperties::getLine(unsigned layno) const
 {
-   laySetList::const_iterator layer_set = _layset.find(layno);
-   if (_layset.end() == layer_set) return &_defaultSeline;
+   laySetList::const_iterator layer_set = getConstCurSetList()->find(layno);
+   if (getConstCurSetList()->end() == layer_set) return &_defaultSeline;
    lineMAP::const_iterator line = _lineset.find(layer_set->second->sline());
    if (_lineset.end() == line) return &_defaultSeline;
    return line->second;
@@ -809,8 +822,8 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_n
 
 const byte* layprop::DrawProperties::getFill(unsigned layno) const
 {
-   laySetList::const_iterator layer_set = _layset.find(layno);
-   if (_layset.end() == layer_set) return &_defaultFill[0];
+   laySetList::const_iterator layer_set = getConstCurSetList()->find(layno);
+   if (getConstCurSetList()->end() == layer_set) return &_defaultFill[0];
    fillMAP::const_iterator fill_set = _layfill.find(layer_set->second->fill());
    if (_layfill.end() == fill_set) return &_defaultFill[0];
    return fill_set->second;
@@ -831,8 +844,8 @@ const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 
 const layprop::tellRGB& layprop::DrawProperties::getColor(unsigned layno) const
 {
-   laySetList::const_iterator layer_set = _layset.find(layno);
-   if (_layset.end() == layer_set) return _defaultColor;
+   laySetList::const_iterator layer_set = getConstCurSetList()->find(layno);
+   if (getConstCurSetList()->end() == layer_set) return _defaultColor;
    colorMAP::const_iterator col_set = _laycolors.find(layer_set->second->color());
    if (_laycolors.end() == col_set) return _defaultColor;
    return *(col_set->second);
@@ -903,7 +916,7 @@ void layprop::DrawProperties::saveLayers(FILE* prop_file) const
    laySetList::const_iterator CI;
    fprintf(prop_file, "void  layerSetup() {\n");
    fprintf(prop_file, "   colorSetup(); fillSetup(); lineSetup();\n");
-   for( CI = _layset.begin(); CI != _layset.end(); CI++)
+   for( CI = getConstCurSetList()->begin(); CI != getConstCurSetList()->end(); CI++)
    {
       if (0 == CI->first) continue;
       LayerSettings* the_layer = CI->second;
@@ -934,6 +947,48 @@ void layprop::DrawProperties::saveLines(FILE* prop_file) const
    fprintf(prop_file, "}\n\n");
 }
 
+const layprop::laySetList* layprop::DrawProperties::getConstCurSetList() const
+{
+	switch (_state)
+	{
+	case DB: return &_laysetDB;
+	case DRC: return &_laysetDRC;
+	default:
+			std::ostringstream ost;
+			ost << "Error! Attemption to redefine layer in uncertain state";
+			tell_log(console::MT_ERROR, ost.str());
+			return NULL;
+	}
+}
+
+layprop::laySetList* layprop::DrawProperties::getCurSetList() 
+{
+	switch (_state)
+	{
+	case DB: return &_laysetDB;
+	case DRC: return &_laysetDRC;
+	default:
+			std::ostringstream ost;
+			ost << "Error! Attemption to redefine layer in uncertain state";
+			tell_log(console::MT_ERROR, ost.str());
+			return NULL;
+	}
+}
+
+layprop::laySetList* layprop::DrawProperties::getCurSetList1() 
+{
+	switch (_state)
+	{
+	case DB: return &_laysetDB;
+	case DRC: return &_laysetDRC;
+	default:
+			std::ostringstream ost;
+			ost << "Error! Attemption to redefine layer in uncertain state";
+			tell_log(console::MT_ERROR, ost.str());
+			return NULL;
+	}
+}
+
 void layprop::DrawProperties::PSwrite(PSFile& psf) const
 {
    for(colorMAP::const_iterator CI = _laycolors.begin(); CI != _laycolors.end(); CI++)
@@ -948,7 +1003,7 @@ void layprop::DrawProperties::PSwrite(PSFile& psf) const
 }
 
 layprop::DrawProperties::~DrawProperties() {
-   for (laySetList::iterator LSI = _layset.begin(); LSI != _layset.end(); LSI++)
+   for (laySetList::const_iterator LSI = getCurSetList()->begin(); LSI != getCurSetList()->end(); LSI++)
       delete LSI->second;
    for (colorMAP::iterator CMI = _laycolors.begin(); CMI != _laycolors.end(); CMI++)
       delete CMI->second;
@@ -956,7 +1011,7 @@ layprop::DrawProperties::~DrawProperties() {
       delete [] FMI->second;
    for (lineMAP::iterator LMI = _lineset.begin(); LMI != _lineset.end(); LMI++)
       delete LMI->second;
-//   if (NULL != _refstack) delete _refstack; -> deleted in editobject
+//   if (NULL != _refstack) d elete _refstack; -> deleted in editobject
    delete fontLib;
 }
 

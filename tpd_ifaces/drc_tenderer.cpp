@@ -113,7 +113,6 @@ void Calbr::drcTenderer::drawLine(const edge &edge)
 
 	laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(_DRCCell->securelayer(_numError));
 	dwl->addwire(*plDB, static_cast<word>(rint(w * DBscale)), false);
-
    delete plDB;
 }
 

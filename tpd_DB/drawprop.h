@@ -281,7 +281,8 @@ namespace layprop {
          bool                       isCellBoxHidden()    {return _cellbox_hidden;}
          friend class ViewProperties;
       protected:
-         laySetList                 _layset;
+         laySetList                 _laysetDB;
+			laySetList                 _laysetDRC;
          colorMAP                   _laycolors;
          fillMAP                    _layfill;
          lineMAP                    _lineset;
@@ -295,6 +296,9 @@ namespace layprop {
          void                       saveColors(FILE*) const;
          void                       saveLayers(FILE*) const;
          void                       saveLines(FILE*) const;
+			const laySetList*				getConstCurSetList() const;
+			laySetList*						getCurSetList();
+			laySetList*				getCurSetList1() ;
 
       private:
          bool                       _blockfill;
