@@ -263,9 +263,9 @@ namespace layprop {
          std::string                getFillName(unsigned layno) const;
          std::string                getLineName(unsigned layno) const;
 
-			//return layno if _state == DB or predefined layer in other case 
-			unsigned							getTenderLay(unsigned layno) const; 
-			void								setState (drawprop_state state) {_state = state;};
+         //return layno if _state == DB or predefined layer in other case 
+         unsigned                   getTenderLay(unsigned layno) const; 
+         void                       setState (drawprop_state state) {_state = state;};
          void                       all_layers(nameList&) const;
          unsigned                   drawinglayer() const {return _drawinglayer;}
          const byte*                getFill(unsigned layno) const;
@@ -282,7 +282,7 @@ namespace layprop {
          friend class ViewProperties;
       protected:
          laySetList                 _laysetDB;
-			laySetList                 _laysetDRC;
+         laySetList                 _laysetDRC;
          colorMAP                   _laycolors;
          fillMAP                    _layfill;
          lineMAP                    _lineset;
@@ -296,10 +296,8 @@ namespace layprop {
          void                       saveColors(FILE*) const;
          void                       saveLayers(FILE*) const;
          void                       saveLines(FILE*) const;
-			const laySetList*				getConstCurSetList() const;
-			laySetList*						getCurSetList();
-			laySetList*				getCurSetList1() ;
-
+         const laySetList&          getCurSetList() const;
+         const LayerSettings*       findLayerSettings(unsigned) const;
       private:
          bool                       _blockfill;
          laydata::cellrefstack*     _refstack;
@@ -310,7 +308,7 @@ namespace layprop {
          static const byte          _defaultFill[128];
          static const LineSettings  _defaultSeline;
          bool                       _renderType;
-			drawprop_state					_state; //type of drawing
+         drawprop_state             _state; //type of drawing
    };
 
 }
