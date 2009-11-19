@@ -295,7 +295,7 @@ bool layprop::ViewProperties::addlayer(std::string name, unsigned layno, std::st
          }   
          _drawprop._laysetDB[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
          return new_layer;
-      case DRC:/*@FIXME - Here what? do we expect to get here at all? Is the lack of break statement intentional?*/
+      case DRC: //User can't call DRC database directly
       default: assert(false);
    }
 }

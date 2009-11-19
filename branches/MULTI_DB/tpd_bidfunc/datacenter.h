@@ -145,6 +145,7 @@ public:
    void                       setScrCTM(CTM ScrCTM)   {_properties.setScrCTM(ScrCTM);}
    void                       setCurrentOp(console::ACTIVE_OP op)
                                                       {_properties.setCurrentOp(op);}
+	void								setState(layprop::drawprop_state state) {_properties.drawprop().setState(state);};
    const console::ACTIVE_OP   currentop() const       {return _properties.currentop();}
    void                       all_layers(nameList& laylist) const {_properties.all_layers(laylist);}
    void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
