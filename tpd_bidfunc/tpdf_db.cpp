@@ -1390,7 +1390,9 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute()
 {
-	DATC->addlayer(DRC_LAY);
+	DATC->setState(layprop::DRC);
+		DATC->addlayer(DRC_LAY);
+	DATC->setState(layprop::DB);
 	std::string filename = getStringValue();
    if(DRCData)
    {
