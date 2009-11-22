@@ -62,6 +62,7 @@ public:
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
+	laydata::drclibrary*       lockDRC(void);
    bool                       lockGds(GDSin::GdsInFile*&);
    bool                       lockCif(CIFin::CifFile*&);
    bool                       lockOas(Oasis::OasisInFile*&);
@@ -72,6 +73,7 @@ public:
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
+	void                       unlockDRC();
    void                       unlockGds(GDSin::GdsInFile*&, bool throwexception = false);
    void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
    void                       unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception = false);
@@ -147,6 +149,7 @@ public:
    void                       setScrCTM(CTM ScrCTM)   {_properties.setScrCTM(ScrCTM);}
    void                       setCurrentOp(console::ACTIVE_OP op)
                                                       {_properties.setCurrentOp(op);}
+	void								setState(layprop::drawprop_state state) {_properties.drawprop().setState(state);};
    const console::ACTIVE_OP   currentop() const       {return _properties.currentop();}
    void                       all_layers(nameList& laylist) const {_properties.all_layers(laylist);}
    void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
@@ -189,11 +192,13 @@ private:
    std::string                _localDir;
    std::string                _globalDir;
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
+	laydata::drclibrary*       _DRCDB;		//DRC data
    GDSin::GdsInFile*          _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
    Oasis::OasisInFile*        _OASDB;        // OASIS parsed data
    layprop::ViewProperties    _properties;   // properties data base
    wxMutex                    DBLock;
+	wxMutex                    DRCLock;
    wxMutex                    GDSLock;
    wxMutex                    CIFLock;
    wxMutex                    OASLock;

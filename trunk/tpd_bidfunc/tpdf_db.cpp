@@ -1481,45 +1481,30 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute()
 {
-   std::string filename = getStringValue();
+	DATC->setState(layprop::DRC);
+		DATC->addlayer(DRC_LAY);
+	DATC->setState(layprop::DB);
+	std::string filename = getStringValue();
    if(DRCData)
    {
    }
    else
    {
-      DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer);
+		laydata::drclibrary* drcDesign = DATC->lockDRC();
+		DRCData = DEBUG_NEW Calbr::CalbrFile(filename, 
+			new Calbr::drcTenderer(drcDesign));
 
       if(DRCData->isOk())
       {
-         //Check existance of "drcResults" layer
-         if(!DATC->isLayerExist("drcResults"))
-         {
-            //Find free layer
-            int i;
-            for(i = 10000; i <=20000; i++)
-            {
-               if (!DATC->isLayerExist(i))
-               {
-                  DATC->addlayer("drcResults", i);
-                  TpdPost::layer_add("drcResults",i);
-                  break;
-               }
-            }
-            if (i>20000)
-            {
-               std::string message = "Can't create drcError layer";
-               tell_log(console::MT_ERROR,message);
-               return EXEC_NEXT;
-            }
-         }
-         //DRCData->ShowResults();
-         // add DRC tab in the browser
-         TpdPost::addDRCtab();
+			TpdPost::addDRCtab();
+
+			DRCData->ShowResults();
       }
       else
       {
          delete DRCData;
       }
+		DATC->unlockDRC();
    }
    return EXEC_NEXT;
 }
