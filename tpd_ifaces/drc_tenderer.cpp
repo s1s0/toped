@@ -34,29 +34,24 @@
 Calbr::CalbrFile *DRCData = NULL;
 
 
-Calbr::drcTenderer::drcTenderer():
-   _ATDB(NULL)
+Calbr::drcTenderer::drcTenderer(laydata::drclibrary* library)
 {
-
+	_ATDB = library;
 }
 
 Calbr::drcTenderer::~drcTenderer()
 {
 }
 
+void Calbr::drcTenderer::setError(unsigned int numError)
+{
+	_numError = numError;
+}
+
 void Calbr::drcTenderer::drawBegin()
 {
    _startDrawing = true;
-   try
-   {
-//      _ATDB = DATC->lockDB();
-//      _drcLayer = DATC->getLayerNo("drcResults");
-      assert(ERR_LAY != _drcLayer);
-   }
-   catch (EXPTNactive_DB) 
-   {
-      tell_log(console::MT_ERROR, "No Data base loaded");
-   }
+	_DRCCell = DEBUG_NEW laydata::tdtcell("drc");
 }
 
 void Calbr::drcTenderer::drawPoly(const CoordsVector   &coords)
@@ -84,7 +79,8 @@ void Calbr::drcTenderer::drawPoly(const CoordsVector   &coords)
          _miny = std::min(it->y, _miny);
          plDB->push_back(TP(it->x, it->y, DBscale));
       }
-      _ATDB->addpoly(_drcLayer, plDB, false);
+		laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(_DRCCell->securelayer(_numError));
+		dwl->addpoly(*plDB, false);
    }
 }
 
@@ -115,18 +111,12 @@ void Calbr::drcTenderer::drawLine(const edge &edge)
 
    real      w = 0.01;   //width of line
 
-   _ATDB->addwire(_drcLayer, plDB, static_cast<word>(rint(w * DBscale)), false);
-
+	laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(_DRCCell->securelayer(_numError));
+	dwl->addwire(*plDB, static_cast<word>(rint(w * DBscale)), false);
    delete plDB;
 }
 
 void Calbr::drcTenderer::drawEnd()
 {
-//   DATC->unlockDB();
-
-//   real DBscale = DATC->DBscale();
-
-//   DBbox *box = DEBUG_NEW DBbox(TP(_minx, _miny, DBscale), TP(_maxx, _maxy, DBscale));
-
-//   tellstdfunc::RefreshGL();
+		_ATDB->registercellread("drc", _DRCCell);
 }

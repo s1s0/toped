@@ -283,20 +283,23 @@ void   Calbr::CalbrFile::ShowResults()
 
    _render->drawBegin();
    RuleChecksVector::const_iterator it;
+	unsigned int num = 1;
    for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
    {
+		_render->setError(num);
       std::vector <Calbr::drcPolygon>::iterator it2;
       std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
       for(it2 = polys->begin(); it2 < polys->end(); ++it2)
       {
-         (*it2).showError(/*_ATDB, */0);
+         (*it2).showError(0);
       }
       std::vector <Calbr::drcEdge>::iterator it2edge;
       std::vector <Calbr::drcEdge> *edges = (*it)->edges();
       for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
       {
-         (*it2edge).showError(/*_ATDB, */0);
+         (*it2edge).showError(0);
       }
+		num++;
    }
    _render->drawEnd();
 }
@@ -318,7 +321,7 @@ void   Calbr::CalbrFile::ShowError(const std::string & error, long  number)
                drcPolygon *poly = &(*it2poly);
 
                _render->drawBegin();
-                  poly->showError(/*_ATDB, */0);
+                  poly->showError(0);
                _render->drawEnd();
             }
          }
@@ -329,7 +332,7 @@ void   Calbr::CalbrFile::ShowError(const std::string & error, long  number)
             if (number == (*it2edge).ordinal())
             {
                _render->drawBegin();
-                  (*it2edge).showError(/*_ATDB, */0);
+                  (*it2edge).showError(0);
                _render->drawEnd();
             }
          }

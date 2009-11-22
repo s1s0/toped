@@ -873,6 +873,10 @@ namespace tenderer {
          bool              collect();
          void              draw();
 
+			//return layno if _state == DB or predefined layer in other case 
+			unsigned				getTenderLay(unsigned layno); 
+			//set state of DrawProperties
+			void					setState(layprop::drawprop_state state) {_drawprop->setState(state);};
          // temporary!
          bool              layerHidden(unsigned layno) const {return  _drawprop->layerHidden(layno)    ;}
          const CTM&        ScrCTM() const                {return  _drawprop->ScrCTM()              ;}

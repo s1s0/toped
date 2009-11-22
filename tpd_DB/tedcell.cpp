@@ -420,7 +420,7 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      unsigned curlayno = lay->first;
+      unsigned curlayno = drawprop.getTenderLay(lay->first);
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
       // fancy like this (dlist iterator) , besause a simple
@@ -442,7 +442,7 @@ void laydata::tdtcell::openGL_render(tenderer::TopRend& rend, const CTM& trans,
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      unsigned curlayno = lay->first;
+      unsigned curlayno = rend.getTenderLay(lay->first);
       if (rend.layerHidden(curlayno)) continue;
       // retrieve the selected objects (if they exists)
       selectList::const_iterator dlsti;
