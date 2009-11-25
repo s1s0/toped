@@ -81,8 +81,8 @@ void Calbr::drcPolygon::showError(/*laydata::tdtdesign* atdb, */word la)
    _render->drawPoly(_coords);
 }
 
-Calbr::drcRuleCheck::drcRuleCheck(const std::string &name)
-      :_ruleCheckName(name)
+Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
+      :_num(num), _ruleCheckName(name)
 {
 }
 
@@ -139,9 +139,10 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
    drcPolygon::_precision = _precision;
    drcEdge::_precision = _precision;
    _cellName = cellName;
-   while(parse())
+	unsigned int num = 1;
+   while(parse(num))
    {
-
+		num++;
    }
    
 }
@@ -160,7 +161,7 @@ Calbr::CalbrFile::~CalbrFile()
    if (_calbrFile) fclose(_calbrFile);
 }
 
-bool Calbr::CalbrFile::parse()
+bool Calbr::CalbrFile::parse(unsigned int num)
 {
    std::ostringstream ost;
    char ruleCheckName[512];
@@ -169,7 +170,7 @@ bool Calbr::CalbrFile::parse()
    if (fgets(ruleCheckName, 512, _calbrFile)==NULL)return false;
 
    //Remove LF from  ruleCheckName befor creating ruleCheck
-   Calbr::drcRuleCheck *ruleCheck = DEBUG_NEW Calbr::drcRuleCheck(std::string(ruleCheckName, strlen(ruleCheckName)-1));
+   Calbr::drcRuleCheck *ruleCheck = DEBUG_NEW Calbr::drcRuleCheck(num, std::string(ruleCheckName, strlen(ruleCheckName)-1));
    char tempStr[512];
    char timeStamp[512];
    long resCount, origResCount, descrStrCount;
@@ -283,10 +284,9 @@ void   Calbr::CalbrFile::ShowResults()
 
    _render->drawBegin();
    RuleChecksVector::const_iterator it;
-	unsigned int num = 1;
-   for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
+	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
    {
-		_render->setError(num);
+		_render->setError((*it)->num());
       std::vector <Calbr::drcPolygon>::iterator it2;
       std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
       for(it2 = polys->begin(); it2 < polys->end(); ++it2)
@@ -299,7 +299,6 @@ void   Calbr::CalbrFile::ShowResults()
       {
          (*it2edge).showError(0);
       }
-		num++;
    }
    _render->drawEnd();
 }
@@ -312,7 +311,7 @@ void   Calbr::CalbrFile::ShowError(const std::string & error, long  number)
       std::string x = (*it)->ruleCheckName();
       if((*it)->ruleCheckName() == error)
       {
-         drcRuleCheck *rule = (*it);
+         /*drcRuleCheck *rule = (*it);
          for(std::vector <Calbr::drcPolygon>::iterator it2poly = rule->polygons()->begin();
             it2poly!=  rule->polygons()->end(); ++it2poly)
          {
@@ -335,10 +334,15 @@ void   Calbr::CalbrFile::ShowError(const std::string & error, long  number)
                   (*it2edge).showError(0);
                _render->drawEnd();
             }
-         }
+         }*/
+			_render->hideAll();
+			_render->showError((*it)->num());
       }
    }
    assert(it == _RuleChecks.end());
+
+//	_render->hideAll();
+//	_render->showError(number);
 }
 
 void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)

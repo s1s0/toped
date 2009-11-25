@@ -179,10 +179,6 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\calbr_reader.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\cif_io.cpp"
 				>
 			</File>
@@ -211,10 +207,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\drc_tenderer.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\gds_io.cpp"
 				>
 			</File>
@@ -240,19 +232,11 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath=".\calbr_reader.h"
-				>
-			</File>
-			<File
 				RelativePath=".\cif_io.h"
 				>
 			</File>
 			<File
 				RelativePath=".\cif_yacc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\drc_tenderer.h"
 				>
 			</File>
 			<File

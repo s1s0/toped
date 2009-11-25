@@ -1498,7 +1498,7 @@ int tellstdfunc::DRCCalibreimport::execute()
       {
 			TpdPost::addDRCtab();
 
-			DRCData->ShowResults();
+			//DRCData->ShowResults();
       }
       else
       {

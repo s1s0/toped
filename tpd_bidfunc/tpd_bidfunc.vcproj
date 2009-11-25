@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="tpd_bidfunc"
 	ProjectGUID="{7B327037-492B-48F9-B3D7-127E213900AE}"
 	RootNamespace="tpd_bidfunc"
@@ -155,7 +155,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\calbr_reader.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\datacenter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\drc_tenderer.cpp"
 				>
 			</File>
 			<File
@@ -225,7 +233,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\calbr_reader.h"
+				>
+			</File>
+			<File
 				RelativePath=".\datacenter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\drc_tenderer.h"
 				>
 			</File>
 			<File

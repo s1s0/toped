@@ -61,6 +61,8 @@ public:
    ~drcRenderer() {};
    virtual void drawBegin()=0;
 	virtual void setError(unsigned int numError) {};
+	virtual void showError(unsigned int numError) {};
+	virtual void hideAll() {};
    virtual void drawPoly(const CoordsVector   &coords)=0;
    virtual void drawLine(const edge &edge)=0;
    virtual void drawEnd()=0;
@@ -102,8 +104,9 @@ private:
 class drcRuleCheck
 {
 public:
-   drcRuleCheck(const std::string &name);
+   drcRuleCheck(unsigned int num, const std::string &name);
 
+	unsigned int num(void) const {return _num;};
    std::string ruleCheckName()   const {return _ruleCheckName;}
    std::string timeStamp()       const {return _timeStamp;}
    long         curResCount()    const {return  _curResCount;}
@@ -117,6 +120,7 @@ public:
    void         addPolygon(const Calbr::drcPolygon &poly);
    void         addEdge(const Calbr::drcEdge &theEdge);
 private:
+	unsigned int _num;
    long         _curResCount; //current result count
    long         _origResCount;//original result count
    std::string  _ruleCheckName;
@@ -147,7 +151,7 @@ private:
    long              _precision;
 
    std::ifstream     _inFile;
-   bool              parse();
+   bool              parse(unsigned int num);
    RuleChecksVector  _RuleChecks;
    bool              _ok;
    drcRenderer*      _render;
