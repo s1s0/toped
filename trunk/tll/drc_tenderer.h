@@ -43,6 +43,8 @@ class drcTenderer: public drcRenderer
    void drawBegin();
    void drawPoly(const CoordsVector   &coords);
    void drawLine(const edge &edge);
+	void hideAll(void);
+	void showError(unsigned int numError);
    void drawEnd();
 private:
    laydata::drclibrary* _ATDB;

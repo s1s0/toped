@@ -29,10 +29,11 @@
 
 #include "tpdph.h"
 #include "drc_tenderer.h"
+#include "datacenter.h"
 
 // Global variables
 Calbr::CalbrFile *DRCData = NULL;
-
+extern DataCenter*               DATC;
 
 Calbr::drcTenderer::drcTenderer(laydata::drclibrary* library)
 {
@@ -114,6 +115,24 @@ void Calbr::drcTenderer::drawLine(const edge &edge)
 	laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(_DRCCell->securelayer(_numError));
 	dwl->addwire(*plDB, static_cast<word>(rint(w * DBscale)), false);
    delete plDB;
+}
+
+void Calbr::drcTenderer::hideAll(void)
+{
+	DATC->setState(layprop::DRC);
+		WordList lays = DATC->getAllLayers();
+		for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+		{
+			DATC->hideLayer((*it), true);
+		}
+	DATC->setState(layprop::DB);	
+}
+
+void Calbr::drcTenderer::showError(unsigned int numError)
+{
+	DATC->setState(layprop::DRC);
+		DATC->hideLayer(numError, false);
+	DATC->setState(layprop::DB);
 }
 
 void Calbr::drcTenderer::drawEnd()

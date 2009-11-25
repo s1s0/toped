@@ -2043,8 +2043,8 @@ void browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
             wxString cmd;
             cmd << wxT("drcshowerror(\"") <<  wxString(error.c_str(), wxConvUTF8) << wxT("\", ") << numstr << wxT("  );");
             TpdPost::parseCommand(cmd);
-            unsigned drcLayer = DATC->getLayerNo("drcResults");
-            assert(ERR_LAY != drcLayer);
+            //unsigned drcLayer = DATC->getLayerNo("drcResults");
+            //assert(ERR_LAY != drcLayer);
 //            DBbox* box;
 
          /*   if(_polyError)
