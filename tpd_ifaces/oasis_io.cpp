@@ -329,8 +329,8 @@ void Oasis::OasisInFile::readLibrary()
       switch (recType)
       {
          case oas_PAD         : rlb = false; break;
-         case oas_PROPERTY_1  : assert(false);/*@TODO*/ rlb = false; break;
-         case oas_PROPERTY_2  : assert(false);/*@TODO*/ rlb = false; break;
+         case oas_PROPERTY_1  : assert(false);/*@TODO oas_PROPERTY_1*/ rlb = false; break;
+         case oas_PROPERTY_2  : assert(false);/*@TODO oas_PROPERTY_2*/ rlb = false; break;
          case oas_CELL_1      :
             curCell = DEBUG_NEW Cell();
             recType = curCell->skimCell(*this, true) ;
@@ -343,7 +343,7 @@ void Oasis::OasisInFile::readLibrary()
             rlb = true;
             _definedCells[curCell->name()] = curCell;
             break;
-         case oas_CBLOCK      : assert(false);/*@TODO*/rlb = false; break;
+         case oas_CBLOCK      : assert(false);/*@TODO oas_CBLOCK*/rlb = false; break;
          // <name> records
          case oas_CELLNAME_1  : _cellNames->getTableRecord(*this, tblm_implicit)   ; rlb = false; break;
          case oas_TEXTSTRING_1: _textStrings->getTableRecord(*this, tblm_implicit) ; rlb = false; break;
@@ -355,8 +355,8 @@ void Oasis::OasisInFile::readLibrary()
          case oas_PROPNAME_2  : _propNames->getTableRecord(*this, tblm_explicit)   ; rlb = false; break;
          case oas_LAYERNAME_2 : _layerNames->getTableRecord(*this, tblm_explicit)  ; rlb = false; break;
          case oas_PROPSTRING_2: _propStrings->getTableRecord(*this, tblm_explicit) ; rlb = false; break;
-         case oas_XNAME_1     : assert(false);/*@TODO*/ rlb = false; break;
-         case oas_XNAME_2     : assert(false);/*@TODO*/ rlb = false; break;
+         case oas_XNAME_1     : assert(false);/*@TODO oas_XNAME_1*/ rlb = false; break;
+         case oas_XNAME_2     : assert(false);/*@TODO oas_XNAME_1*/ rlb = false; break;
          case oas_END         :
             readEndRecord();
             closeFile();
@@ -635,14 +635,14 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
          case oas_PAD         : break;
          case oas_PROPERTY_1  : ofn.getProperty1();break;
          case oas_PROPERTY_2  : ofn.getProperty2();break;
-         case oas_XYRELATIVE  : /*@TODO*/assert(false);break;
-         case oas_XYABSOLUTE  : /*@TODO*/assert(false);break;
-         case oas_CBLOCK      : /*@TODO*/assert(false);break;
+         case oas_XYRELATIVE  : /*@TODO oas_XYRELATIVE*/assert(false);break;
+         case oas_XYABSOLUTE  : /*@TODO oas_XYABSOLUTE*/assert(false);break;
+         case oas_CBLOCK      : /*@TODO oas_CBLOCK*/assert(false);break;
          // <element> records
          case oas_PLACEMENT_1 : skimReference(ofn, false);break;
          case oas_PLACEMENT_2 : skimReference(ofn, true );break;
          case oas_TEXT        : skimText(ofn);break;
-         case oas_XELEMENT    : /*@TODO*/assert(false);break;
+         case oas_XELEMENT    : /*@TODO oas_XELEMENT*/assert(false);break;
          // <geometry> records
          case oas_RECTANGLE   : skimRectangle(ofn); break;
          case oas_POLYGON     : skimPolygon(ofn);break;
@@ -650,8 +650,8 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
          case oas_TRAPEZOID_1 : skimTrapezoid(ofn, 1);break;
          case oas_TRAPEZOID_2 : skimTrapezoid(ofn, 2);break;
          case oas_TRAPEZOID_3 : skimTrapezoid(ofn, 3);break;
-         case oas_CTRAPEZOID  : /*@TODO*/assert(false);break;
-         case oas_CIRCLE      : /*@TODO*/assert(false);break;
+         case oas_CTRAPEZOID  : /*@TODO oas_CTRAPEZOID*/assert(false);break;
+         case oas_CIRCLE      : /*@TODO oas_CIRCLE*/assert(false);break;
          default:
             // last byte from the stream doesn't belong to this cell definition
             _cellSize = ofn.filePos() - _filePos - 1;
@@ -677,14 +677,14 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          case oas_PAD         : break;
          case oas_PROPERTY_1  : ofn.getProperty1();break;
          case oas_PROPERTY_2  : ofn.getProperty2();break;
-         case oas_XYRELATIVE  : /*@TODO*/assert(false);break;
-         case oas_XYABSOLUTE  : /*@TODO*/assert(false);break;
-         case oas_CBLOCK      : /*@TODO*/assert(false);break;
+         case oas_XYRELATIVE  : /*@TODO oas_XYRELATIVE*/assert(false);break;
+         case oas_XYABSOLUTE  : /*@TODO oas_XYABSOLUTE*/assert(false);break;
+         case oas_CBLOCK      : /*@TODO oas_CBLOCK*/assert(false);break;
          // <element> records
          case oas_PLACEMENT_1 : readReference(ofn, dst_cell, tdt_db, false);break;
          case oas_PLACEMENT_2 : readReference(ofn, dst_cell, tdt_db, true );break;
          case oas_TEXT        : readText(ofn, dst_cell, theLayMap);break;
-         case oas_XELEMENT    : /*@TODO*/assert(false);break;
+         case oas_XELEMENT    : /*@TODO oas_XELEMENT*/assert(false);break;
          // <geometry> records
          case oas_RECTANGLE   : readRectangle(ofn, dst_cell, theLayMap); break;
          case oas_POLYGON     : readPolygon(ofn, dst_cell, theLayMap);break;
@@ -692,8 +692,8 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          case oas_TRAPEZOID_1 : readTrapezoid(ofn, dst_cell, theLayMap, 1);break;
          case oas_TRAPEZOID_2 : readTrapezoid(ofn, dst_cell, theLayMap, 2);break;
          case oas_TRAPEZOID_3 : readTrapezoid(ofn, dst_cell, theLayMap, 3);break;
-         case oas_CTRAPEZOID  : /*@TODO*/assert(false);break;
-         case oas_CIRCLE      : /*@TODO*/assert(false);break;
+         case oas_CTRAPEZOID  : /*@TODO oas_CTRAPEZOID*/assert(false);break;
+         case oas_CIRCLE      : /*@TODO oas_CIRCLE*/assert(false);break;
          default:
             // check that the cell size is the same as obtained by skim function
             assert(_cellSize == (ofn.filePos() - _filePos - 1));
@@ -1524,7 +1524,7 @@ void Oasis::PointList::readAllAngle(OasisInFile& ofb)
 
 void Oasis::PointList::readDoubleDelta(OasisInFile& ofb)
 {
-   /*@TODO*/assert(false);
+   /*@TODO readDoubleDelta*/assert(false);
 }
 
 void Oasis::PointList::calcPoints(pointlist& plst, int4b p1x, int4b p1y, bool polyp)
@@ -1627,7 +1627,7 @@ void Oasis::PointList::calcAllAngle(pointlist& plst, int4b p1x, int4b p1y)
 
 void Oasis::PointList::calcDoubleDelta(pointlist& plst, int4b p1x, int4b p1y)
 {
-   /*@TODO*/assert(false);
+   /*@TODO calcDoubleDelta*/assert(false);
 }
 
 //==============================================================================

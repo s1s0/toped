@@ -268,7 +268,7 @@ namespace Oasis {
                            StdProperties() : _context(pc_file) {}
          void              setContext(PropertyContext context) { _context = _context;}
          void              getProperty1(OasisInFile&);
-         void              getProperty2(OasisInFile&) {/*@TODO!*/ };
+         void              getProperty2(OasisInFile&) {/*@TODO - getProperty2*/ assert(false);}
       private:
          PropertyContext   _context;
          ModalVar<std::string>  _propName;
