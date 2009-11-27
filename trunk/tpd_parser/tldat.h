@@ -79,7 +79,7 @@ namespace telldata {
    typedef std::deque<argumentID*>           argumentQ;
    typedef std::stack<telldata::tell_var*>   operandSTACK;
    typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
-   
+
 
    //==============================================================================
    /*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the
