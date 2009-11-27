@@ -56,7 +56,7 @@
 #define TED_CUR_REVISION      0
 #define TED_CUR_SUBREVISION   7
 
-//==============================================================================   
+//==============================================================================
 class PSegment {
 public:
                PSegment() : _A(0), _B(0), _C(0), _angle(0) {};
@@ -208,6 +208,9 @@ namespace laydata {
          word                _cols;
          word                _rows;
    };
+
+   bool pathConvert(pointlist&, word, int4b, int4b );
+
 }
 
 class DbExportFile {
