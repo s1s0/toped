@@ -145,6 +145,10 @@ namespace Oasis {
                   pc_cell              ,
                   pc_element            } PropertyContext;
 
+
+   typedef enum { md_absolute          ,
+                  md_relative           } XYMode;
+
    class OasisInFile;
    class Cell;
 
@@ -268,7 +272,7 @@ namespace Oasis {
                            StdProperties() : _context(pc_file) {}
          void              setContext(PropertyContext context) { _context = _context;}
          void              getProperty1(OasisInFile&);
-         void              getProperty2(OasisInFile&) {/*@TODO - getProperty2*/ assert(false);}
+         void              getProperty2(OasisInFile&) {/*@TODO - getProperty2*/}
       private:
          PropertyContext   _context;
          ModalVar<std::string>  _propName;
@@ -341,7 +345,7 @@ namespace Oasis {
          ModalVar< word>   _mod_pathhw      ; //! OASIS modal variable path-halfwidth
          ModalVar<int4b>   _mod_gx          ; //! OASIS modal variable geometry-x
          ModalVar<int4b>   _mod_gy          ; //! OASIS modal variable geometry-y
-         ModalVar<std::string>   _mod_cellref;//! OASIS modal variable placement-cell
+         ModalVar<std::string> _mod_cellref ;//! OASIS modal variable placement-cell
          ModalVar<int4b>   _mod_px          ; //! OASIS modal variable placement-x
          ModalVar<int4b>   _mod_py          ; //! OASIS modal variable placement-y
          ModalVar<std::string>   _mod_text  ; //! OASIS modal variable text-string
@@ -349,6 +353,7 @@ namespace Oasis {
          ModalVar< word>   _mod_tdatatype   ; //! OASIS modal variable texttype
          ModalVar<int4b>   _mod_tx          ; //! OASIS modal variable text-x
          ModalVar<int4b>   _mod_ty          ; //! OASIS modal variable text-y
+         ModalVar<XYMode>  _mod_xymode      ; //! OASIS modal variable xy-mode
 
          ModalVar<PointList>     _mod_pplist; //! OASIS modal variable polygon point list
          ModalVar<PointList>     _mod_wplist; //! OASIS modal variable path point list
@@ -356,11 +361,10 @@ namespace Oasis {
          ModalVar<PathExtensions> _mod_exs  ; //! OASIS modal variable path-start-extention
          ModalVar<PathExtensions> _mod_exe  ; //! OASIS modal variable path-end-extention
          //
-         //OASIS modal variable xy-mode
-         //OASIS modal variable ctrapezoid-type
-         //OASIS modal variable circle-radius
-         //OASIS modal variable last-property-name
-         //OASIS modal variable last-value-list
+         //TODO - OASIS modal variable ctrapezoid-type
+         //TODO - OASIS modal variable circle-radius
+         //TODO - OASIS modal variable last-property-name
+         //TODO - OASIS modal variable last-value-list
          std::string       _name            ; //! The Cell name
          NameSet           _referenceNames  ; //! All names of the structures referenced in this cell
          OasisCellList     _children        ; //! Pointers to all Cell structures referenced in this cell

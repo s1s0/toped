@@ -611,10 +611,13 @@ Oasis::Cell::Cell()
 {
    // See spec chap.10 (page 11). The modal variables below have to be
    // initialised to 0
-   _mod_gx = 0;
-   _mod_gy = 0;
-   _mod_px = 0;
-   _mod_py = 0;
+   _mod_gx     = 0;
+   _mod_gy     = 0;
+   _mod_px     = 0;
+   _mod_py     = 0;
+   _mod_tx     = 0;
+   _mod_ty     = 0;
+   _mod_xymode = md_absolute;
    _haveParent = false;
    _traversed  = false;
 }
@@ -634,9 +637,9 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
       {
          case oas_PAD         : break;
          case oas_PROPERTY_1  : ofn.getProperty1();break;
-         case oas_PROPERTY_2  : ofn.getProperty2();break;
-         case oas_XYRELATIVE  : /*@TODO oas_XYRELATIVE*/assert(false);break;
-         case oas_XYABSOLUTE  : /*@TODO oas_XYABSOLUTE*/assert(false);break;
+         case oas_PROPERTY_2  : /*nothing more to do*/;break;
+         case oas_XYRELATIVE  : _mod_xymode = md_relative;break;
+         case oas_XYABSOLUTE  : _mod_xymode = md_absolute;break;
          case oas_CBLOCK      : /*@TODO oas_CBLOCK*/assert(false);break;
          // <element> records
          case oas_PLACEMENT_1 : skimReference(ofn, false);break;
@@ -677,8 +680,8 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          case oas_PAD         : break;
          case oas_PROPERTY_1  : ofn.getProperty1();break;
          case oas_PROPERTY_2  : ofn.getProperty2();break;
-         case oas_XYRELATIVE  : /*@TODO oas_XYRELATIVE*/assert(false);break;
-         case oas_XYABSOLUTE  : /*@TODO oas_XYABSOLUTE*/assert(false);break;
+         case oas_XYRELATIVE  : _mod_xymode = md_relative;break;
+         case oas_XYABSOLUTE  : _mod_xymode = md_absolute;break;
          case oas_CBLOCK      : /*@TODO oas_CBLOCK*/assert(false);break;
          // <element> records
          case oas_PLACEMENT_1 : readReference(ofn, dst_cell, tdt_db, false);break;
@@ -739,8 +742,16 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
    if (info & Wmask) _mod_gwidth   = ofn.getUnsignedInt(4);
    if (info & Hmask) _mod_gheight  = ofn.getUnsignedInt(4);
    else if (info & Smask) _mod_gheight  = _mod_gwidth();
-   if (info & Xmask) _mod_gx       = ofn.getInt(8);
-   if (info & Ymask) _mod_gy       = ofn.getInt(8);
+   if (info & Xmask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
+      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+   }
+   if (info & Ymask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
+      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+   }
    //read the repetition record from the input stream
    if (info & Rmask) readRepetitions(ofn);
 
@@ -789,8 +800,16 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
    if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
    if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
    if (info & Pmask) _mod_pplist   = readPointList(ofn);
-   if (info & Xmask) _mod_gx       = ofn.getInt(8);
-   if (info & Ymask) _mod_gy       = ofn.getInt(8);
+   if (info & Xmask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
+      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+   }
+   if (info & Ymask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
+      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+   }
    if (info & Rmask)  readRepetitions(ofn);
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
@@ -857,8 +876,16 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    if (info & Wmask) _mod_pathhw   = ofn.getUnsignedInt(4);
    if (info & Emask) readExtensions(ofn);
    if (info & Pmask) _mod_wplist   = readPointList(ofn);
-   if (info & Xmask) _mod_gx       = ofn.getInt(8);
-   if (info & Ymask) _mod_gy       = ofn.getInt(8);
+   if (info & Xmask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
+      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+   }
+   if (info & Ymask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
+      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+   }
    if (info & Rmask) readRepetitions(ofn);
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
@@ -979,8 +1006,16 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
       case 3: deltaB = ofn.getUnsignedInt(4);break;
       default: assert(false);
    }
-   if (info & Xmask) _mod_gx       = ofn.getInt(8);
-   if (info & Ymask) _mod_gy       = ofn.getInt(8);
+   if (info & Xmask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
+      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+   }
+   if (info & Ymask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
+      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+   }
    if (info & Rmask) readRepetitions(ofn);
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
@@ -1051,8 +1086,16 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    if (info & Cmask) _mod_text      = ofn.getTextRefName(info & Nmask);
    if (info & Lmask) _mod_tlayer    = ofn.getUnsignedInt(4);
    if (info & Tmask) _mod_tdatatype = ofn.getUnsignedInt(2);
-   if (info & Xmask) _mod_tx        = ofn.getInt(8);
-   if (info & Ymask) _mod_ty        = ofn.getInt(8);
+   if (info & Xmask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_tx = ofn.getInt(8);
+      else /*md_relative*/              _mod_tx = ofn.getInt(8) + _mod_tx();
+   }
+   if (info & Ymask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_ty = ofn.getInt(8);
+      else /*md_relative*/              _mod_ty = ofn.getInt(8) + _mod_ty();
+   }
    if (info & Rmask) readRepetitions(ofn);
    //
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_tlayer(), _mod_tdatatype() ) )
@@ -1114,8 +1157,17 @@ void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell,
    }
    if (magnification <= 0)
          ofn.exception("Bad magnification value (22.10)");
-   if (info & Xmask) _mod_px       = ofn.getInt(8);
-   if (info & Ymask) _mod_py       = ofn.getInt(8);
+   if (info & Xmask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_px = ofn.getInt(8);
+      else /*md_relative*/              _mod_px = ofn.getInt(8) + _mod_px();
+   }
+   if (info & Ymask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_py = ofn.getInt(8);
+      else /*md_relative*/              _mod_py = ofn.getInt(8) + _mod_py();
+   }
+
    if (info & Rmask) readRepetitions(ofn);
    //
    laydata::CellDefin strdefn = tdt_db->linkcellref(_mod_cellref(), TARGETDB_LIB);
@@ -1401,6 +1453,7 @@ void Oasis::Cell::initModals()
    _mod_repete.reset();
    _mod_exs.reset();
    _mod_exe.reset();
+   _mod_xymode = md_absolute;
 }
 
 void Oasis::Cell::updateContents(int2b layer, int2b dtype)

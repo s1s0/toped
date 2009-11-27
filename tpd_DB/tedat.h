@@ -36,12 +36,12 @@
 
 namespace laydata {
 //==============================================================================
-   /*! Abstract class - the base of all layout objects.\n To optimize the RAM 
-       usage having in mind the huge potential number of objects, we must have 
-       only the absolute minimum of data fields here or none at all. It was 
-       decided not to use the standard C++ containers for the layout objects. 
-       The main reason for this is the clipping algorithm and as a consequence 
-       the quadTree class as a main data holder. In bref the tdtdata object 
+   /*! Abstract class - the base of all layout objects.\n To optimize the RAM
+       usage having in mind the huge potential number of objects, we must have
+       only the absolute minimum of data fields here or none at all. It was
+       decided not to use the standard C++ containers for the layout objects.
+       The main reason for this is the clipping algorithm and as a consequence
+       the quadTree class as a main data holder. In bref the tdtdata object
        doesn't know neither about the layer it belongs to nor the quadTree it
        is sorted in. */
    class tdtdata  {
@@ -54,7 +54,7 @@ namespace laydata {
       virtual   validator* move(const CTM&, SGBitSet& plst) = 0;
    //! Rotate or flip (transfer the object using input CTM
       virtual   void       transfer(const CTM&) = 0;
-   //! Copy the object and move it using the input CTM  
+   //! Copy the object and move it using the input CTM
       virtual   tdtdata*   copy(const CTM&) = 0;
    //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
       virtual   void       openGL_precalc(layprop::DrawProperties&, pointlist&) const = 0;
@@ -87,7 +87,7 @@ namespace laydata {
       virtual   void       polycut(pointlist&, shapeList**) = 0;
    //! shrink/stretch
       virtual   void       stretch(int bfactor, shapeList**) = 0;
-   //! 
+   //!
       virtual  pointlist   shape2poly() const = 0;
    //! Returns the next tdtdata object ot NULL if it doesn't exists
       tdtdata*             next() const         {return _next;};
@@ -100,7 +100,7 @@ namespace laydata {
       void                 set_status(SH_STATUS s) {_status = s;};
       SH_STATUS            status() const {return _status;};
       virtual word         numpoints() const = 0;
-      virtual             ~tdtdata(){}; 
+      virtual             ~tdtdata(){};
       virtual word         ltype() const = 0;
    protected:
       virtual void         select_points(DBbox&, SGBitSet&) = 0;
@@ -245,7 +245,7 @@ namespace laydata {
 //==============================================================================
    class tdtcellref : public tdtdata  {
    public:
-                           tdtcellref(CellDefin str, CTM trans) : tdtdata(), 
+                           tdtcellref(CellDefin str, CTM trans) : tdtdata(),
                                           _structure(str), _translation(trans) {};
                            tdtcellref(TEDfile* const tedfile);
 //                          ~tdtcellref() {};
@@ -402,7 +402,7 @@ namespace laydata {
    };
    //===========================================================================
    int            xangle(const TP&, const TP&);
-   
+
 //   void draw_select_marks(const DBbox&, const CTM&);
 //   void draw_select_mark(const TP&);
 //   void draw_overlapping_box(const DBbox&, const CTM&, const GLushort);
