@@ -43,7 +43,7 @@
 ////////////////////////////////
 #define GDS_MAX_LAYER      256
 // GDS record types
-// Described according to "Design Data Translators Reference Manual" - 
+// Described according to "Design Data Translators Reference Manual" -
 // CADance documentation, September 1994
 #define gds_HEADER         0x00
 #define gds_BGNLIB         0x01
@@ -316,7 +316,6 @@ namespace GDSin {
          void                 skimARef(GdsInFile*);
          void                 skimNode(GdsInFile*);
          void                 updateContents(int2b, int2b);
-         bool                 pathConvert(pointlist&, word, int4b, int4b );
          int                  arrGetStep(TP&, TP&, int2b);
          ExtLayers            _contSummary; // contents summary
          bool                 _haveParent;

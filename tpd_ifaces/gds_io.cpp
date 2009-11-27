@@ -186,7 +186,7 @@ double GDSin::GdsRecord::gds2ieee(byte* gds) const
    // compensate the difference in the excess notation
    expc -= 0x10;
    // Now normalize the mantissa - shift left until first 1 drops-out
-   // The last byte will get some rubbish in it's LSBits, but it 
+   // The last byte will get some rubbish in it's LSBits, but it
    // shouldn't matter because last four buts of the mantissa will be
    // chopped-out
    byte carry;
@@ -239,23 +239,23 @@ byte* GDSin::GdsRecord::ieee2gds(double inval)
    // the exponent are 00. First shift should introduce 1 on the leftmost
    // position of the manissa to take in mind the explicit 1 in the ieee
    // notation
-   gds[0] = 0x01; 
+   gds[0] = 0x01;
    do {
       for (byte i = 7; i > 0; i--) {
          gds[i] >>= 1;
          gds[i] |= (gds[i-1] << 7); //carry
       }
-      gds[0] = 0x00; 
+      gds[0] = 0x00;
       expc += 0x10;
    } while (0 != (expc & 0x0030));
-   //make sure we are not trying to convert a number bigger than the one 
+   //make sure we are not trying to convert a number bigger than the one
    //that GDS notation can cope with
    // copy the excess bit
    if (!(0x4000 & expc)) expc &= 0xEFFF;
    else                  expc |= 0x1000;
    // now multiply the exponent by 4 to convert in the 16x GDS exponent
    // here we are loosing silently the two most significant bits from the
-   // ieee exponent. 
+   // ieee exponent.
    expc <<= 2;
    // copy the sign bit
    if   (0x80 & ieee[7])  expc |= 0x8000;
@@ -327,8 +327,8 @@ GDSin::GdsInFile::GdsInFile(std::string fn)
    }
    wxFileOffset _fileLength = _gdsFh.Length();
    // The size of GDSII files is originaly multiple by 2048. This is
-   // coming from the acient years when this format was supposed to be written 
-   // on the magnetic tapes. In order to keep the tradition it's a good idea 
+   // coming from the acient years when this format was supposed to be written
+   // on the magnetic tapes. In order to keep the tradition it's a good idea
    // to check the file size and to issue a warning if it is not multiple on 2048.
 //   div_t divi = div(file_length,2048);
 //   if (divi.rem != 0) AddLog('W',"File size is not multiple of 2048");
@@ -561,7 +561,7 @@ GDSin::GdsLibrary::GdsLibrary(GdsInFile* cf, std::string libName)
                break;
             case gds_GENERATION:   cr->retData(&_maxver);
                break;
-            case gds_UNITS:   
+            case gds_UNITS:
                cr->retData(&_uu,0,8); // database units in one user unit
                cr->retData(&_dbu,8,8); // database unit in meters
                break;
@@ -608,7 +608,7 @@ GDSin::GDSHierTree* GDSin::GdsLibrary::hierOut()
 {
    GDSHierTree* Htree = NULL;
    for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
-      if (!CSTR->second->haveParent()) 
+      if (!CSTR->second->haveParent())
          Htree = CSTR->second->hierOut(Htree, NULL);
    return Htree;
 }
@@ -1201,9 +1201,9 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::tdtcell* dst_cell, 
                      plist.push_back(GDSin::get_TP(cr, i));
 
                   if (2 == pathtype)
-                     pathConvertResult = pathConvert(plist, numpoints, width/2, width/2);
+                     pathConvertResult = laydata::pathConvert(plist, numpoints, width/2, width/2);
                   else if (4 == pathtype)
-                     pathConvertResult = pathConvert(plist, numpoints, bgnextn, endextn);
+                     pathConvertResult = laydata::pathConvert(plist, numpoints, bgnextn, endextn);
 
                   if (pathConvertResult)
                   {
@@ -1487,52 +1487,6 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::tdtcell* dst_cell, 
          throw EXPTNreadGDS("Unexpected end of file");
    }
    while (true);
-}
-
-bool GDSin::GdsStructure::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b endext )
-{
-   TP P1 = plist[0];
-   // find the first neighbouring point which is not equivaqlent to P1
-   int fnbr = 1;
-   while ((P1 == plist[fnbr]) && (fnbr < numpoints))
-      fnbr++;
-   // get out with error, because the wire has effectively a single point and there is
-   // no way on earth to find out in which direction it should be expanded
-   if (fnbr == numpoints) return false;
-   TP P2 = plist[fnbr];
-
-   double sdX = P2.x() - P1.x();
-   double sdY = P2.y() - P1.y();
-   // The sign - a bit funny way - described in layout canvas
-   int sign = ((sdX * sdY) >= 0) ? 1 : -1;
-   double length = sqrt(sdY*sdY + sdX*sdX);
-   assert(length);
-   int4b y0 = (int4b) rint(P1.y() - sign*((begext*sdY)/length));
-   int4b x0 = (int4b) rint(P1.x() - sign*((begext*sdX)/length));
-//
-   P2 = plist[numpoints-1];
-   // find the first neighbouring point which is not equivaqlent to P1
-   fnbr = numpoints - 2;
-   while ((P2 == plist[fnbr]) && (fnbr > 0))
-      fnbr--;
-   // assert, because if it was found above, it should exists!
-   assert(fnbr >= 0);
-   P1 = plist[fnbr];
-
-   P1 = plist[numpoints-2];
-   sdX = P2.x() - P1.x();
-   sdY = P2.y() - P1.y();
-   sign = ((sdX * sdY) >= 0) ? 1 : -1;
-   length = sqrt(sdY*sdY + sdX*sdX);
-   int4b yn = (int4b) rint(P2.y() + sign*((endext*sdY)/length));
-   int4b xn = (int4b) rint(P2.x() + sign*((endext*sdX)/length));
-
-   plist[0].setX(x0);
-   plist[0].setY(y0);
-   plist[numpoints-1].setX(xn);
-   plist[numpoints-1].setY(yn);
-
-   return true;
 }
 
 int GDSin::GdsStructure::arrGetStep(TP& Step, TP& magnPoint, int2b colrows)

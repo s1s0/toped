@@ -164,7 +164,7 @@ std::string Oasis::Table::getName(dword index) const
 }
 
 //===========================================================================
-Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings(NULL), 
+Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings(NULL),
    _propNames(NULL), _propStrings(NULL), _layerNames(NULL), _xNames(NULL), _offsetFlag(false),
    _fileName(fn), _fileLength(0), _filePos(0), _progresPos(0)
 {
@@ -190,7 +190,7 @@ Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings
          _status = true;
          for(byte strindex = 0; strindex < 13; strindex++)
             if (magicBytes[strindex] != Oasis::oas_MagicBytes[strindex])
-            { 
+            {
                _status = false; break;
             }
       }
@@ -327,20 +327,20 @@ void Oasis::OasisInFile::readLibrary()
    do {
       if (!rlb) recType = getUnsignedInt(1);
       switch (recType)
-      {  
+      {
          case oas_PAD         : rlb = false; break;
          case oas_PROPERTY_1  : assert(false);/*@TODO*/ rlb = false; break;
          case oas_PROPERTY_2  : assert(false);/*@TODO*/ rlb = false; break;
-         case oas_CELL_1      : 
-            curCell = DEBUG_NEW Cell(); 
-            recType = curCell->skimCell(*this, true) ; 
+         case oas_CELL_1      :
+            curCell = DEBUG_NEW Cell();
+            recType = curCell->skimCell(*this, true) ;
             rlb = true;
             _definedCells[curCell->name()] = curCell;
             break;
-         case oas_CELL_2      : 
-            curCell = DEBUG_NEW Cell(); 
-            recType = curCell->skimCell(*this, false); 
-            rlb = true; 
+         case oas_CELL_2      :
+            curCell = DEBUG_NEW Cell();
+            recType = curCell->skimCell(*this, false);
+            rlb = true;
             _definedCells[curCell->name()] = curCell;
             break;
          case oas_CBLOCK      : assert(false);/*@TODO*/rlb = false; break;
@@ -357,7 +357,7 @@ void Oasis::OasisInFile::readLibrary()
          case oas_PROPSTRING_2: _propStrings->getTableRecord(*this, tblm_explicit) ; rlb = false; break;
          case oas_XNAME_1     : assert(false);/*@TODO*/ rlb = false; break;
          case oas_XNAME_2     : assert(false);/*@TODO*/ rlb = false; break;
-         case oas_END         : 
+         case oas_END         :
             readEndRecord();
             closeFile();
             TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
@@ -441,13 +441,13 @@ qword Oasis::OasisInFile::getUnsignedInt(byte length)
    byte        bytein            ; // last byte read from the file stream
    qword       result      = 0   ; // the result
    // the result in array of bytes representation
-   byte       *btres       = (byte*)&result; 
+   byte       *btres       = (byte*)&result;
    do
    {
       bytein = getByte();
       switch (bytecounter)
       {
-         case 0: btres[0]  = bytein & cmask; 
+         case 0: btres[0]  = bytein & cmask;
                  break;
          case 1:
          case 2:
@@ -477,7 +477,7 @@ int8b Oasis::OasisInFile::getInt(byte length)
    byte        sign              ;
    int8b       result      = 0   ; // the result
    // the result in array of bytes representation
-   byte       *btres       = (byte*)&result; 
+   byte       *btres       = (byte*)&result;
    do
    {
       bytein = getByte();
@@ -609,7 +609,7 @@ Oasis::OasisInFile::~OasisInFile()
 //==============================================================================
 Oasis::Cell::Cell()
 {
-   // See spec chap.10 (page 11). The modal variables below have to be 
+   // See spec chap.10 (page 11). The modal variables below have to be
    // initialised to 0
    _mod_gx = 0;
    _mod_gy = 0;
@@ -747,7 +747,13 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
       laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
-      if (info & Rmask)
+      if ((0 == _mod_gwidth()) || (0 == _mod_gheight()))
+      {
+         std::ostringstream winfo;
+         winfo << "OASIS : Rectangle with zero area encountered. Skipped ...";
+         tell_log(console::MT_WARNING, winfo.str());
+      }
+      else if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
          assert(rptpnt);
@@ -799,6 +805,16 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
          {
             pointlist laypl;
             _mod_pplist().calcPoints(laypl, _mod_gx()+rptpnt[2*rcnt],_mod_gy()+rptpnt[2*rcnt+1]);
+            laydata::valid_poly check(laypl);
+            if (!check.valid())
+            {
+               std::ostringstream ost;
+               ost << "Polygon check fails - {" << check.failtype()
+                   << " Layer: " << _mod_layer()
+                   << " Data type: " << _mod_datatype()
+                   << " }";
+               tell_log(console::MT_ERROR, ost.str());
+            }
             dwl->addpoly(laypl, false);
          }
       }
@@ -806,6 +822,16 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
       {
          pointlist laypl;
          _mod_pplist().calcPoints(laypl, _mod_gx(),_mod_gy());
+         laydata::valid_poly check(laypl);
+         if (!check.valid())
+         {
+            std::ostringstream ost;
+            ost << "Polygon check fails - {" << check.failtype()
+                << " Layer: " << _mod_layer()
+                << " Data type: " << _mod_datatype()
+                << " }";
+            tell_log(console::MT_ERROR, ost.str());
+         }
          dwl->addpoly(laypl, false);
       }
    }
@@ -823,15 +849,13 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    const byte Dmask   = 0x02;
    const byte Lmask   = 0x01;
    word       tdtlaynum;
-   PathExtensions exs,exe;
 
    byte info = ofn.getByte();
 
    if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
    if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
    if (info & Wmask) _mod_pathhw   = ofn.getUnsignedInt(4);
-   if (info & Emask) readExtensions(ofn, exs, exe);
-   else              { exs = _mod_exs(); exe = _mod_exe();}
+   if (info & Emask) readExtensions(ofn);
    if (info & Pmask) _mod_wplist   = readPointList(ofn);
    if (info & Xmask) _mod_gx       = ofn.getInt(8);
    if (info & Ymask) _mod_gy       = ofn.getInt(8);
@@ -840,7 +864,13 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
       laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
-      if (info & Rmask) 
+      if (0 == _mod_pathhw())
+      {
+         std::ostringstream winfo;
+         winfo << "OASIS : Path with zero width encountered. Skipped ...";
+         tell_log(console::MT_WARNING, winfo.str());
+      }
+      else if (info & Rmask)
       {
          if (0 != _mod_pathhw())
          {
@@ -850,15 +880,73 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
             {
                pointlist laypl;
                _mod_wplist().calcPoints(laypl, _mod_gx()+rptpnt[2*rcnt], _mod_gy()+rptpnt[2*rcnt+1], false);
-               dwl->addwire(laypl, 2*_mod_pathhw(), false);
+               bool pathConvertResult = true;
+               if (info & Emask)
+               {
+                  int4b exts = _mod_exs().getExtension(_mod_pathhw());
+                  int4b exte = _mod_exe().getExtension(_mod_pathhw());
+                  if ( (0 != exts) || (0 != exte) )
+                     pathConvertResult = laydata::pathConvert(laypl, laypl.size(), exts, exte);
+               }
+               if (pathConvertResult)
+               {
+                  laydata::valid_wire check(laypl, 2*_mod_pathhw());
+                  if (!check.valid())
+                  {
+                     std::ostringstream ost;
+                     ost << "Wire check fails - {" << check.failtype()
+                           << " Layer: " << _mod_layer()
+                           << " Data type: " << _mod_datatype()
+                           << " }";
+                     tell_log(console::MT_ERROR, ost.str());
+                  }
+                  dwl->addwire(laypl, 2*_mod_pathhw(), false);
+               }
+               else
+               {
+                  std::ostringstream ost;
+                  ost << "Invalid single point path - { Layer: " << _mod_layer()
+                        << " Data type: " << _mod_datatype()
+                        << " }";
+                  tell_log(console::MT_ERROR, ost.str());
+               }
             }
          }
       }
-      else if (0 != _mod_pathhw())
+      else
       {
          pointlist laypl;
          _mod_wplist().calcPoints(laypl, _mod_gx(), _mod_gy(), false);
-         dwl->addwire(laypl, 2*_mod_pathhw(), false);
+         bool pathConvertResult = true;
+         if (info & Emask)
+         {
+            int4b exts = _mod_exs().getExtension(_mod_pathhw());
+            int4b exte = _mod_exe().getExtension(_mod_pathhw());
+            if ( (0 != exts) || (0 != exte) )
+               pathConvertResult = laydata::pathConvert(laypl, laypl.size(), exts, exte);
+         }
+         if (pathConvertResult)
+         {
+            laydata::valid_wire check(laypl, 2*_mod_pathhw());
+            if (!check.valid())
+            {
+               std::ostringstream ost;
+               ost << "Wire check fails - {" << check.failtype()
+                     << " Layer: " << _mod_layer()
+                     << " Data type: " << _mod_datatype()
+                     << " }";
+               tell_log(console::MT_ERROR, ost.str());
+            }
+            dwl->addwire(laypl, 2*_mod_pathhw(), false);
+         }
+         else
+         {
+            std::ostringstream ost;
+            ost << "Invalid single point path - { Layer: " << _mod_layer()
+                  << " Data type: " << _mod_datatype()
+                  << " }";
+            tell_log(console::MT_ERROR, ost.str());
+         }
       }
    }
 }
@@ -998,7 +1086,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    }
 }
 
-void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell, 
+void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell,
                                 laydata::tdtlibdir* tdt_db, bool exma)
 {
    const byte Cmask   = 0x80;
@@ -1125,11 +1213,7 @@ void Oasis::Cell::skimPath(OasisInFile& ofn)
    word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    updateContents(layno, dtype);
    if (info & Wmask) ofn.getUnsignedInt(4);
-   if (info & Emask)
-   {
-      PathExtensions exs,exe;
-      readExtensions(ofn, exs, exe);
-   }
+   if (info & Emask) readExtensions(ofn);
    if (info & Pmask) readPointList(ofn);
    if (info & Xmask) ofn.getInt(8);
    if (info & Ymask) ofn.getInt(8);
@@ -1205,7 +1289,7 @@ void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
    std::string name  = (info & Cmask) ? (_mod_cellref  = ofn.getCellRefName(info & Nmask)) :
                                                                                   _mod_cellref();
    if (exma)
-   { 
+   {
       if (info & Amask) ofn.getReal();
       if (info & Mmask) ofn.getReal();
    }
@@ -1242,7 +1326,7 @@ void Oasis::Cell::readRepetitions(OasisInFile& ofn)
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readExtensions(OasisInFile& ofn, PathExtensions& exs, PathExtensions& exe)
+void Oasis::Cell::readExtensions(OasisInFile& ofn)
 {
    byte scheme = ofn.getByte();
    if (scheme & 0xF0)
@@ -1253,14 +1337,12 @@ void Oasis::Cell::readExtensions(OasisInFile& ofn, PathExtensions& exs, PathExte
    {
       _mod_exs = PathExtensions(ofn, (ExtensionTypes)extype);
    }
-   exs = _mod_exs();
    // deal with the end extenstion
    extype = (scheme & 0x03);
    if (0 != extype)
    {
       _mod_exe = PathExtensions(ofn, (ExtensionTypes)extype);
    }
-   exe = _mod_exe();
 }
 
 void Oasis::Cell::linkReferences(OasisInFile& ofn)
@@ -1549,7 +1631,7 @@ void Oasis::PointList::calcDoubleDelta(pointlist& plst, int4b p1x, int4b p1y)
 }
 
 //==============================================================================
-Oasis::Repetitions::Repetitions(OasisInFile& ofn, RepetitionTypes rptype) : 
+Oasis::Repetitions::Repetitions(OasisInFile& ofn, RepetitionTypes rptype) :
                                     _rptype(rptype), _bcount(0), _lcarray(NULL)
 {
    switch (_rptype)
@@ -1729,7 +1811,7 @@ void Oasis::Repetitions::readregDia2D(OasisInFile& ofn)
       }
       s1x += mx; s1y += my;
    }
-   
+
 }
 
 void Oasis::Repetitions::readregDia1D(OasisInFile& ofn)
@@ -1834,17 +1916,28 @@ void Oasis::StdProperties::getProperty1(OasisInFile& ofn)
 }
 
 //==============================================================================
-Oasis::PathExtensions::PathExtensions(OasisInFile& ofn, ExtensionTypes extype) : _extype(extype)
+Oasis::PathExtensions::PathExtensions(OasisInFile& ofn, ExtensionTypes exType) : _exType(exType)
 {
-   switch (_extype)
+   switch (_exType)
    {
       case ex_flush     :
       case ex_hwidth    : break;
-      case ex_explicit  : _exex = ofn.getInt(2); break;
+      case ex_explicit  : _exEx = ofn.getInt(2); break;
       default: assert(false);
    }
 }
 
+int4b Oasis::PathExtensions::getExtension(int4b hwidth) const
+{
+   switch (_exType)
+   {
+      case ex_flush     : return 0;
+      case ex_hwidth    : return hwidth;
+      case ex_explicit  : return _exEx;
+      default: assert(false);
+   }
+   return 0; // dummy statement
+}
 //==============================================================================
 void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
 {

@@ -115,11 +115,11 @@ namespace Oasis {
                   rp_varAny        =10 ,
                   rp_varAnyG       =11 ,
                   rp_unknown       =12  } RepetitionTypes;
-   
+
    /*! The enum values correspond to the Path Extenstion Shemes as defined in the
        standard for SS and EE bits (27.8, Table 15) The last member ex_unknown is
        added to maintain proper state in the Oasis::PathExtensions which in turn
-       is used as a base class of Cell::_mod_exs /path-start-extention/ and 
+       is used as a base class of Cell::_mod_exs /path-start-extention/ and
        Cell::_mod_exe /path-end-extention/ modal variables
    */
    typedef enum { ex_reuse         = 0 ,
@@ -188,9 +188,9 @@ namespace Oasis {
          void              reset()                       {_status = false;}
          bool              status()                      {return _status;}
          TYPE&             operator = (const TYPE& value) {_value = value; _status = true; return _value;}
-         TYPE&             operator() ()                 {if (!_status) 
+         TYPE&             operator() ()                 {if (!_status)
                                                              throw EXPTNreadOASIS("Uninitialised modal variable referenced (10.3)");
-                                                          else 
+                                                          else
                                                              return _value;}
       private:
          bool              _status;
@@ -292,11 +292,12 @@ namespace Oasis {
 
    class PathExtensions {
       public:
-                           PathExtensions() : _extype(ex_unknown), _exex(0) {}
+                           PathExtensions() : _exType(ex_unknown), _exEx(0) {}
                            PathExtensions(OasisInFile&, ExtensionTypes);
+         int4b             getExtension(int4b) const;
       private:
-         ExtensionTypes    _extype; //! Oasis path extension type
-         int4b             _exex;   //! Explicit extension
+         ExtensionTypes    _exType; //! Oasis path extension type
+         int4b             _exEx;   //! Explicit extension
    };
 
    class Cell {
@@ -329,7 +330,7 @@ namespace Oasis {
          void              readReference(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, bool);
          PointList         readPointList(OasisInFile&);
          void              readRepetitions(OasisInFile&);
-         void              readExtensions(OasisInFile&, PathExtensions&, PathExtensions&);
+         void              readExtensions(OasisInFile&);
          void              updateContents(int2b, int2b);
          void              initModals();
          //
