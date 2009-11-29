@@ -28,6 +28,7 @@
 #define OASIS_H_INCLUDED
 
 #include <wx/ffile.h>
+#include <zlib.h>
 #include "outbox.h"
 #include "tedstd.h"
 
@@ -184,7 +185,7 @@ namespace Oasis {
        operator which should be used to assign (set) a value to the modal variable
        and a functor '()' which should be used to read the value of the modal variable.
        An exception will be thrown if the value of the modal variable is
-       requiested without being previously set.
+       requested without being previously set.
    */
    template <class TYPE> class ModalVar {
       public:
@@ -202,9 +203,9 @@ namespace Oasis {
    };
 
    /*! The class represents OASIS Point Lists (7.7). Contains dedicated methods for
-       parsing all Pont List types and also for the corresponding coordinate calculation
+       parsing all Point List types and also for the corresponding coordinate calculation
        All parsed delta values are stored in the PointList::_delarr. The calculated
-       coodinates are returned in the corresponding parameters of the calc* methods.
+       coordinates are returned in the corresponding parameters of the calc* methods.
        Defines also a copy constructor and assign operator required by the
        Oasis::ModalVar template to define the corresponding modal variables
    */
@@ -358,8 +359,8 @@ namespace Oasis {
          ModalVar<PointList>     _mod_pplist; //! OASIS modal variable polygon point list
          ModalVar<PointList>     _mod_wplist; //! OASIS modal variable path point list
          ModalVar<Repetitions>   _mod_repete; //! OASIS modal variable repetition
-         ModalVar<PathExtensions> _mod_exs  ; //! OASIS modal variable path-start-extention
-         ModalVar<PathExtensions> _mod_exe  ; //! OASIS modal variable path-end-extention
+         ModalVar<PathExtensions> _mod_exs  ; //! OASIS modal variable path-start-extension
+         ModalVar<PathExtensions> _mod_exe  ; //! OASIS modal variable path-end-extension
          //
          //TODO - OASIS modal variable ctrapezoid-type
          //TODO - OASIS modal variable circle-radius
@@ -375,6 +376,21 @@ namespace Oasis {
          ExtLayers         _contSummary     ; //! Layer contents summary
    };
 
+   class CBlockInflate : public z_stream {
+      public:
+                           CBlockInflate(wxFFile*, wxFileOffset, dword, dword);
+         void              readUncompressedBuffer(void *pBuf, size_t nCount);
+         bool              endOfBuffer() const  {return _bufOffset == _bufSize;}
+         wxFileOffset      startPosInFile() const {return _startPosInFile;}
+         virtual          ~CBlockInflate();
+      private:
+         byte*             _output_buffer;
+         int               _state;
+         wxFileOffset      _bufOffset;
+         wxFileOffset      _bufSize;
+         wxFileOffset      _startPosInFile;
+   };
+
    class OasisInFile {
       public:
          typedef std::map<std::string, Cell*> DefinitionMap;
@@ -383,8 +399,8 @@ namespace Oasis {
          bool              reopenFile();
          void              readLibrary();
          void              hierOut();
-         void              setPosition(wxFileOffset);
-         void              deflateCBlock();
+         wxFileOffset      setPosition(wxFileOffset);
+         void              inflateCBlock();
          bool              status()          {return _status;  }
          wxFileOffset      filePos()         {return _filePos; }
          OASHierTree*      hierTree()        {return _hierTree;}
@@ -418,6 +434,7 @@ namespace Oasis {
          double            getDouble();
          void              readStartRecord();
          void              readEndRecord();
+         size_t            rawRead(void *pBuf, size_t nCount);
          //
          void              linkReferences();
          // Oasis tables
@@ -442,6 +459,7 @@ namespace Oasis {
          std::string       _version;   //! OASIS version record retrieved from the file
          real              _unit;      //! OASIS unit (DBU) retrieved from the file
          OASHierTree*      _hierTree;  //! The tree of reference hierarchy
+         CBlockInflate*    _curCBlock; //! Current uncompressed CBLOCK
          //! Used only in the constructor if the file can't be opened for whatever reason
          bool              _status;
    };
