@@ -384,6 +384,7 @@ namespace Oasis {
          void              readLibrary();
          void              hierOut();
          void              setPosition(wxFileOffset);
+         void              deflateCBlock();
          bool              status()          {return _status;  }
          wxFileOffset      filePos()         {return _filePos; }
          OASHierTree*      hierTree()        {return _hierTree;}
@@ -398,8 +399,7 @@ namespace Oasis {
          const Table*      layerNames() const { return _layerNames;}
          const Table*      xNames() const     { return _xNames;}
          const DefinitionMap& definitions() const { return _definedCells; }
-
-
+         //----------------------------------------------------------------------
          byte              getByte();
          qword             getUnsignedInt(byte);
          int8b             getInt(byte);

@@ -58,6 +58,7 @@ void Oasis::Table::getCellNameTable(OasisInFile& ofh)
             case oas_PROPERTY_2 : ofh.getProperty2(); break;
             case oas_CELLNAME_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_CELLNAME_2 : getTableRecord(ofh, tblm_explicit, true); break;
+            case oas_CBLOCK     : ofh.deflateCBlock();
             default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
          }
       } while (true);
@@ -78,6 +79,7 @@ void Oasis::Table::getPropNameTable(OasisInFile& ofh)
          {
             case oas_PROPNAME_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_PROPNAME_2 : getTableRecord(ofh, tblm_explicit, true); break;
+            case oas_CBLOCK     : ofh.deflateCBlock();
             default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
          }
       } while (true);
@@ -98,6 +100,7 @@ void Oasis::Table::getPropStringTable(OasisInFile& ofh)
          {
             case oas_PROPSTRING_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_PROPSTRING_2 : getTableRecord(ofh, tblm_explicit, true); break;
+            case oas_CBLOCK     : ofh.deflateCBlock();
             default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
          }
       } while (true);
@@ -118,6 +121,7 @@ void Oasis::Table::getTextStringTable(OasisInFile& ofh)
          {
             case oas_TEXTSTRING_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_TEXTSTRING_2 : getTableRecord(ofh, tblm_explicit, true); break;
+            case oas_CBLOCK     : ofh.deflateCBlock();
             default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
          }
       } while (true);
@@ -236,6 +240,17 @@ void Oasis::OasisInFile::closeFile()
    if (_status)
       _oasisFh.Close();
 }
+
+void Oasis::OasisInFile::deflateCBlock()
+{
+   byte compression_type = getUnsignedInt(2);
+   if (0 != compression_type)
+      exception("Unknown compression type in the CBLOCK (35.3)");
+   qword size_uncompressed = getUnsignedInt(8);
+   qword size_compressed   = getUnsignedInt(8);
+   // Temporary!
+   setPosition(_filePos + size_compressed);
+}
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -321,7 +336,7 @@ void Oasis::OasisInFile::readLibrary()
    readStartRecord();
    // Some sequences (CELL) does not have an explicit end record. So they end when a record
    // which can not be a member of the definition appears. The trouble is that the last byte
-   // read from ine input stream should be reused in the loop here
+   // read from the input stream should be reused in the loop here
    bool rlb = false;// reuse last byte
    Cell* curCell = NULL;
    do {
@@ -445,25 +460,28 @@ qword Oasis::OasisInFile::getUnsignedInt(byte length)
    do
    {
       bytein = getByte();
-      switch (bytecounter)
+      if (bytein & cmask)
       {
-         case 0: btres[0]  = bytein & cmask;
-                 break;
-         case 1:
-         case 2:
-         case 3:
-         case 4:
-         case 5:
-         case 6:
-         case 7: btres[bytecounter-1] |= bytein << (8-bytecounter);
-                 btres[bytecounter  ]  = (bytein & cmask) >> bytecounter;
-                 break;
-         default: exception("Integer is too big (7.2.3)");
+         switch (bytecounter)
+         {
+            case 0: btres[0]  = bytein & cmask;
+                    break;
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7: btres[bytecounter-1] |= bytein << (8-bytecounter);
+                    btres[bytecounter  ]  = (bytein & cmask) >> bytecounter;
+                    break;
+            default: exception("Integer is too big (7.2.3)");
+         }
+         if (bytecounter > length)
+            exception("Unsigned integer with unexpected length(7.2.3)");
       }
       bytecounter++;
    } while (bytein & (~cmask));
-   if (bytecounter > length)
-      exception("Unsigned integer with unexpected length(7.2.3)");
    return result;
 }
 
@@ -481,26 +499,29 @@ int8b Oasis::OasisInFile::getInt(byte length)
    do
    {
       bytein = getByte();
-      switch (bytecounter)
+      if ((0 == bytecounter) || (bytein & cmask))
       {
-         case 0: btres[0]  = (bytein & cmask) >> 1;
-                 sign      =  bytein & smask;
-                 break;
-         case 1:
-         case 2:
-         case 3:
-         case 4:
-         case 5:
-         case 6: btres[bytecounter-1] |= bytein << (7-bytecounter);
-                 btres[bytecounter  ]  = (bytein & cmask) >> (bytecounter + 1);
-                 break;
-         case 7: btres[bytecounter-1] |= bytein;
-         default: exception("Integer is too big (7.2.3)");
+         switch (bytecounter)
+         {
+            case 0: btres[0]  = (bytein & cmask) >> 1;
+                    sign      =  bytein & smask;
+                    break;
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6: btres[bytecounter-1] |= bytein << (7-bytecounter);
+                    btres[bytecounter  ]  = (bytein & cmask) >> (bytecounter + 1);
+                    break;
+            case 7: btres[bytecounter-1] |= bytein;
+            default: exception("Integer is too big (7.2.3)");
+         }
+         if (bytecounter > length)
+            exception("Unsigned integer with unexpected length(7.2.3)");
       }
       bytecounter++;
    } while (bytein & (~cmask));
-   if (bytecounter > length)
-      exception("Unsigned integer with unexpected length(7.2.3)");
    if (sign) return -result;
    else      return  result;
 }
