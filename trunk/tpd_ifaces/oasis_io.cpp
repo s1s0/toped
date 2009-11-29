@@ -58,8 +58,8 @@ void Oasis::Table::getCellNameTable(OasisInFile& ofh)
             case oas_PROPERTY_2 : ofh.getProperty2(); break;
             case oas_CELLNAME_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_CELLNAME_2 : getTableRecord(ofh, tblm_explicit, true); break;
-            case oas_CBLOCK     : ofh.deflateCBlock();
-            default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
+            case oas_CBLOCK     : ofh.inflateCBlock(); break;
+            default : _offsetEnd = ofh.setPosition(savedPos); return;
          }
       } while (true);
    }
@@ -79,8 +79,8 @@ void Oasis::Table::getPropNameTable(OasisInFile& ofh)
          {
             case oas_PROPNAME_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_PROPNAME_2 : getTableRecord(ofh, tblm_explicit, true); break;
-            case oas_CBLOCK     : ofh.deflateCBlock();
-            default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
+            case oas_CBLOCK     : ofh.inflateCBlock();break;
+            default : _offsetEnd = ofh.setPosition(savedPos); return;
          }
       } while (true);
    }
@@ -100,8 +100,8 @@ void Oasis::Table::getPropStringTable(OasisInFile& ofh)
          {
             case oas_PROPSTRING_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_PROPSTRING_2 : getTableRecord(ofh, tblm_explicit, true); break;
-            case oas_CBLOCK     : ofh.deflateCBlock();
-            default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
+            case oas_CBLOCK     : ofh.inflateCBlock(); break;
+            default : _offsetEnd = ofh.setPosition(savedPos); return;
          }
       } while (true);
    }
@@ -121,8 +121,8 @@ void Oasis::Table::getTextStringTable(OasisInFile& ofh)
          {
             case oas_TEXTSTRING_1 : getTableRecord(ofh, tblm_implicit, true); break;
             case oas_TEXTSTRING_2 : getTableRecord(ofh, tblm_explicit, true); break;
-            case oas_CBLOCK     : ofh.deflateCBlock();
-            default : _offsetEnd = ofh.filePos() - 1; ofh.setPosition(savedPos); return;
+            case oas_CBLOCK     : ofh.inflateCBlock(); break;
+            default : _offsetEnd = ofh.setPosition(savedPos); return;
          }
       } while (true);
    }
@@ -166,11 +166,51 @@ std::string Oasis::Table::getName(dword index) const
    else
       return record->second;
 }
+//===========================================================================
+Oasis::CBlockInflate::CBlockInflate(wxFFile* ifn, wxFileOffset fofset, dword size_deflated, dword size_inflated)
+{
+   // initialize z_stream members
+   zalloc       = 0;
+   zfree        = 0;
+   opaque       = 0;
+   next_in      = DEBUG_NEW byte[size_deflated];
+   next_out     = _output_buffer = DEBUG_NEW byte[size_inflated];
+   avail_in     = ifn->Read(next_in, size_deflated);
+   assert(avail_in = size_deflated);
+   avail_out    = size_inflated;
+   //
+   _startPosInFile = fofset;
+   if (Z_OK != (_state = inflateInit2(this, -15) ))
+      throw EXPTNreadOASIS(msg);
+   if (Z_STREAM_END != (_state = inflate(this,Z_NO_FLUSH)))
+      throw EXPTNreadOASIS(msg);
+   if (Z_OK != (_state = inflateEnd(this)))
+      throw EXPTNreadOASIS(msg);
+   _bufOffset = 0;
+   _bufSize   = size_inflated;
+//   delete [] next_in;
+}
+
+void Oasis::CBlockInflate::readUncompressedBuffer(void *pBuf, size_t nCount)
+{
+   if ((_bufOffset + nCount) > _bufSize)
+      throw EXPTNreadOASIS("Read past the end of current CBLOCK (internal error)");
+   else
+   {
+      for (size_t i = 0; i < nCount; i++, _bufOffset++)
+         ((byte*)pBuf)[i] = _output_buffer[_bufOffset];
+   }
+}
+
+Oasis::CBlockInflate::~CBlockInflate()
+{
+   delete [] _output_buffer;
+}
 
 //===========================================================================
 Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings(NULL),
    _propNames(NULL), _propStrings(NULL), _layerNames(NULL), _xNames(NULL), _offsetFlag(false),
-   _fileName(fn), _fileLength(0), _filePos(0), _progresPos(0)
+   _fileName(fn), _fileLength(0), _filePos(0), _progresPos(0), _curCBlock(NULL)
 {
    std::ostringstream info;
    info << "OASIS input file: \"" << _fileName << "\"";
@@ -207,7 +247,7 @@ Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings
    }
    if (_status)
    {
-      // initialise the progress bar
+      // Initialize the progress bar
       _fileLength = _oasisFh.Length();
       TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
    }
@@ -217,6 +257,7 @@ bool Oasis::OasisInFile::reopenFile()
 {
    _filePos = 0;
    _progresPos = 0;
+   _curCBlock = NULL;
    wxString wxfname(_fileName.c_str(), wxConvUTF8 );
    _oasisFh.Open(wxfname.c_str(),wxT("rb"));
    if (!(_oasisFh.IsOpened()))
@@ -229,10 +270,20 @@ bool Oasis::OasisInFile::reopenFile()
    return true;
 }
 
-void Oasis::OasisInFile::setPosition(wxFileOffset filePos)
+wxFileOffset Oasis::OasisInFile::setPosition(wxFileOffset filePos)
 {
+   wxFileOffset coffset;
+   if (NULL != _curCBlock)
+   {
+      coffset = _curCBlock->startPosInFile() - 1;
+      delete _curCBlock;
+      _curCBlock = NULL;
+   }
+   else
+      coffset = _filePos - 1;
    _oasisFh.Seek(filePos, wxFromStart);
    _filePos = filePos;
+   return coffset;
 }
 
 void Oasis::OasisInFile::closeFile()
@@ -241,15 +292,21 @@ void Oasis::OasisInFile::closeFile()
       _oasisFh.Close();
 }
 
-void Oasis::OasisInFile::deflateCBlock()
+void Oasis::OasisInFile::inflateCBlock()
 {
+   wxFileOffset cblockfPos = _filePos;
    byte compression_type = getUnsignedInt(2);
    if (0 != compression_type)
       exception("Unknown compression type in the CBLOCK (35.3)");
-   qword size_uncompressed = getUnsignedInt(8);
-   qword size_compressed   = getUnsignedInt(8);
-   // Temporary!
-   setPosition(_filePos + size_compressed);
+   dword size_uncompressed = getUnsignedInt(4);
+   dword size_compressed   = getUnsignedInt(4);
+   _curCBlock = DEBUG_NEW CBlockInflate(&_oasisFh , cblockfPos, size_compressed, size_uncompressed);
+   _filePos += size_compressed;
+   if (2048 < (_filePos - _progresPos))
+   {
+      _progresPos = _filePos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+   }
 }
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -358,7 +415,7 @@ void Oasis::OasisInFile::readLibrary()
             rlb = true;
             _definedCells[curCell->name()] = curCell;
             break;
-         case oas_CBLOCK      : assert(false);/*@TODO oas_CBLOCK*/rlb = false; break;
+         case oas_CBLOCK      : inflateCBlock(); rlb = false; break;
          // <name> records
          case oas_CELLNAME_1  : _cellNames->getTableRecord(*this, tblm_implicit)   ; rlb = false; break;
          case oas_TEXTSTRING_1: _textStrings->getTableRecord(*this, tblm_implicit) ; rlb = false; break;
@@ -388,42 +445,21 @@ void Oasis::OasisInFile::readLibrary()
 byte Oasis::OasisInFile::getByte()
 {
    byte        bytein            ; // last byte read from the file stream
-   if (1 != _oasisFh.Read(&bytein,1))
-      exception("I/O error during read-in");
-   else _filePos++;
-   if (2048 < (_filePos - _progresPos))
-   {
-      _progresPos = _filePos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
-   }
+   rawRead(&bytein,1);
    return bytein;
 }
 
 float Oasis::OasisInFile::getFloat()
 {
    float        floatin          ; // last 4 bytes read from the file stream
-   if (4 != _oasisFh.Read(&floatin,4))
-      exception("I/O error during read-in");
-   else _filePos += 4;
-   if (2048 < (_filePos - _progresPos))
-   {
-      _progresPos = _filePos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
-   }
+   rawRead(&floatin,4);
    return floatin;
 }
 
 double Oasis::OasisInFile::getDouble()
 {
    double        doublein         ; // last 8 bytes read from the file stream
-   if (8 != _oasisFh.Read(&doublein,8))
-      exception("I/O error during read-in");
-   else _filePos += 8;
-   if (2048 < (_filePos - _progresPos))
-   {
-      _progresPos = _filePos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
-   }
+   rawRead(&doublein,8);
    return doublein;
 }
 
@@ -433,17 +469,10 @@ std::string Oasis::OasisInFile::getString(/*Oasis string type check*/)
    dword   length  = getUnsignedInt(2) ; //string length
    char* theString = DEBUG_NEW char[length+1];
 
-   if (length != _oasisFh.Read(theString,length))
-      exception("I/O error during read-in");
-   else _filePos += length;
+   rawRead(theString,length);
    theString[length] = 0x00;
    std::string result(theString);
    delete [] theString;
-   if (2048 < (_filePos - _progresPos))
-   {
-      _progresPos = _filePos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
-   }
    return result;
 }
 
@@ -615,6 +644,32 @@ void Oasis::OasisInFile::hierOut()
          _hierTree = CSTR->second->hierOut(_hierTree, NULL);
 }
 
+size_t Oasis::OasisInFile::rawRead(void *pBuf, size_t nCount)
+{
+   if (NULL == _curCBlock)
+   {
+      if (nCount != _oasisFh.Read(pBuf,nCount))
+         exception("I/O error during read-in");
+      else _filePos += nCount;
+      if (2048 < (_filePos - _progresPos))
+      {
+         _progresPos = _filePos;
+         TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+      }
+      return nCount;
+   }
+   else
+   {
+      _curCBlock->readUncompressedBuffer(pBuf, nCount);
+      if ( _curCBlock->endOfBuffer() )
+      {
+         delete _curCBlock;
+         _curCBlock = NULL;
+      }
+      return nCount;
+   }
+}
+
 Oasis::OasisInFile::~OasisInFile()
 {
    if ( _cellNames  ) delete _cellNames;
@@ -661,7 +716,7 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
          case oas_PROPERTY_2  : /*nothing more to do*/;break;
          case oas_XYRELATIVE  : _mod_xymode = md_relative;break;
          case oas_XYABSOLUTE  : _mod_xymode = md_absolute;break;
-         case oas_CBLOCK      : /*@TODO oas_CBLOCK*/assert(false);break;
+         case oas_CBLOCK      : ofn.inflateCBlock(); break;
          // <element> records
          case oas_PLACEMENT_1 : skimReference(ofn, false);break;
          case oas_PLACEMENT_2 : skimReference(ofn, true );break;
@@ -703,7 +758,7 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          case oas_PROPERTY_2  : ofn.getProperty2();break;
          case oas_XYRELATIVE  : _mod_xymode = md_relative;break;
          case oas_XYABSOLUTE  : _mod_xymode = md_absolute;break;
-         case oas_CBLOCK      : /*@TODO oas_CBLOCK*/assert(false);break;
+         case oas_CBLOCK      : ofn.inflateCBlock(); break;
          // <element> records
          case oas_PLACEMENT_1 : readReference(ofn, dst_cell, tdt_db, false);break;
          case oas_PLACEMENT_2 : readReference(ofn, dst_cell, tdt_db, true );break;

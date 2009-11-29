@@ -145,7 +145,7 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
    }
    long int endPos = GetLastPosition();
    SetStyle(startPos,endPos,wxTextAttr(logColour));
-   // Truncate the log window contents from the bottom to avoid 
+   // Truncate the log window contents from the bottom to avoid
    wxTextPos curLogSize = GetLastPosition();
    if (curLogSize > 0x7800) // 30K
    {
@@ -660,7 +660,7 @@ bool TpdTime::getStdCTime(wxString& exp) {
    VERIFY(src_tmpl.IsValid());
    long conversion;
    // search the entire pattern
-   if (!src_tmpl.Matches(exp)) 
+   if (!src_tmpl.Matches(exp))
    {
       std::string news = "Can't recognise the time format. Recovery will be unreliable ";
       tell_log(console::MT_ERROR,news);
@@ -690,7 +690,7 @@ bool TpdTime::getStdCTime(wxString& exp) {
    VERIFY(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
    VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
-   broken_time.tm_hour = conversion; 
+   broken_time.tm_hour = conversion;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // minutes
    src_tmpl.Matches(exp);
@@ -707,7 +707,7 @@ bool TpdTime::getStdCTime(wxString& exp) {
    if (src_tmpl.Matches(exp))
    {
       wxString ampm = src_tmpl.GetMatch(exp);
-      assert(0 != ampm.Len()); 
+      assert(0 != ampm.Len());
       if ( wxT("PM") == ampm )
          broken_time.tm_hour += 12;
       src_tmpl.ReplaceFirst(&exp,wxT(""));

@@ -61,6 +61,9 @@ AX_CHECK_GLU
        CFLAGS="$CFLAGS $GLU_CFLAGS"
    fi
 AC_SEARCH_LIBS(glewInit, [GLEW glew32], , AC_MSG_ERROR([Glew library not found. Make sure it's installed]))
+AC_CHECK_LIB(z, gzsetparams,
+             [AC_CHECK_HEADER(zlib.h,,[AC_MSG_ERROR(zlib headers not found)])],
+             [AC_MSG_ERROR(zlib library not found)])
 
 #Check wxWidgets
  AM_OPTIONS_WXCONFIG

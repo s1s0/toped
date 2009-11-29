@@ -77,7 +77,7 @@ namespace console {
       FT_FUNCTION_ADD  ,
       FT_FUNCTION_SORT
    } FUNCTION_BROWSER_TYPE;
-   
+
 /* Maybe the only place to describe the parameter dictating the behaviour during user input:
    op_dwire  >  0 -> wire where input type is the width. List of points expected.
                      Rubber band wire will be shown.
@@ -124,7 +124,7 @@ namespace console {
 
    //===========================================================================
    class ted_log : public wxTextCtrl  {
-   public: 
+   public:
                         ted_log(wxWindow *parent, wxWindowID);
       void              OnLOGMessage(wxCommandEvent&);
    private:
@@ -358,7 +358,6 @@ class LayerMapCif {
       USMap                _theEmap;
       SIMap                _theImap;
 };
-
 
 #ifdef TIME_PROFILING
 class HiResTimer {
