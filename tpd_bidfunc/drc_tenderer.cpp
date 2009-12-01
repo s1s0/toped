@@ -81,6 +81,7 @@ void Calbr::drcTenderer::drawPoly(const CoordsVector   &coords)
          plDB->push_back(TP(it->x, it->y, DBscale));
       }
 		laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(_DRCCell->securelayer(_numError));
+		DATC->addUnpublishedLay(_numError);
 		dwl->addpoly(*plDB, false);
    }
 }
@@ -113,6 +114,7 @@ void Calbr::drcTenderer::drawLine(const edge &edge)
    real      w = 0.01;   //width of line
 
 	laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(_DRCCell->securelayer(_numError));
+	DATC->addUnpublishedLay(_numError);
 	dwl->addwire(*plDB, static_cast<word>(rint(w * DBscale)), false);
    delete plDB;
 }
@@ -137,5 +139,15 @@ void Calbr::drcTenderer::showError(unsigned int numError)
 
 void Calbr::drcTenderer::drawEnd()
 {
+	DATC->setState(layprop::DRC);
+		if (!DATC->upLayers().empty())
+	   {
+			const WordList freshlays = DATC->upLayers();
+			for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+				DATC->addlayer((*CUL));
+			DATC->clearUnpublishedLayers();
+		}
+
 		_ATDB->registercellread("drc", _DRCCell);
+	DATC->setState(layprop::DB);
 }

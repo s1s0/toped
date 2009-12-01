@@ -102,6 +102,7 @@ public:
    bool                       addlayer(std::string, unsigned);
    bool                       addlayer(unsigned layno);
    unsigned                   addlayer(std::string);
+   void                       addUnpublishedLay(word no) {_properties.addUnpublishedLay(no);};
    bool                       isLayerExist(word);
    bool                       isLayerExist(std::string);
    void                       addline(std::string, std::string, word, byte, byte);
