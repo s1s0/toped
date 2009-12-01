@@ -2182,7 +2182,10 @@ void   browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
 
 void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 {
-   laydata::tdtdesign* design = DATC->lockDB();
+	laydata::drclibrary* drc = DATC->lockDRC();
+		DRCData->render()->hideAll();
+	DATC->unlockDRC();
+   /*laydata::tdtdesign* design = DATC->lockDB();
    WordList lockedLayers = DATC->getLockedLayers();
    //Lock all layers
    WordList allLayers = DATC->getAllLayers();
@@ -2220,5 +2223,5 @@ void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_REFRESH);
    GetEventHandler()->ProcessEvent(eventZOOM);
-
+*/
 }

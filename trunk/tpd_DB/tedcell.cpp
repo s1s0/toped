@@ -442,8 +442,12 @@ void laydata::tdtcell::openGL_render(tenderer::TopRend& rend, const CTM& trans,
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
+      //first to check visibility for layer
+      if (rend.layerHidden(lay->first)) continue;
+      //second to get fake number for layer. 
+      //For regular database it is equal of real number of layer
+      //For drc database it is common for all layers
       unsigned curlayno = rend.getTenderLay(lay->first);
-      if (rend.layerHidden(curlayno)) continue;
       // retrieve the selected objects (if they exists)
       selectList::const_iterator dlsti;
       const dataList* dlist;
