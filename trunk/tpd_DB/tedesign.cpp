@@ -1364,7 +1364,10 @@ laydata::drclibrary::drclibrary(std::string name, real DBU, real UU) :
 
 laydata::drclibrary::~drclibrary()
 {
-   //clearLib();
+   laydata::cellList::const_iterator wc;
+   for (wc = _cells.begin(); wc != _cells.end(); wc++)
+      delete wc->second;
+   _cells.clear();
 }
 
 void laydata::drclibrary::registercellread(std::string cellname, tdtcell* cell) {

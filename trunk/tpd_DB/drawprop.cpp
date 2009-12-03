@@ -964,8 +964,14 @@ void layprop::DrawProperties::PSwrite(PSFile& psf) const
 }
 
 layprop::DrawProperties::~DrawProperties() {
+	//clear all databases
+	setState(layprop::DRC);
    for (laySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
       delete LSI->second;
+	setState(layprop::DB);
+	for (laySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
+      delete LSI->second;
+
    for (colorMAP::iterator CMI = _laycolors.begin(); CMI != _laycolors.end(); CMI++)
       delete CMI->second;
    for (fillMAP::iterator FMI = _layfill.begin(); FMI != _layfill.end(); FMI++)

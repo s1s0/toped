@@ -179,6 +179,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\calbr_reader.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\cif_io.cpp"
 				>
 			</File>
@@ -231,6 +235,10 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath=".\calbr_reader.h"
+				>
+			</File>
 			<File
 				RelativePath=".\cif_io.h"
 				>

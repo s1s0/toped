@@ -49,13 +49,14 @@ void Calbr::drcTenderer::setError(unsigned int numError)
 	_numError = numError;
 }
 
-void Calbr::drcTenderer::drawBegin()
+void Calbr::drcTenderer::startWriting()
 {
    _startDrawing = true;
 	_DRCCell = DEBUG_NEW laydata::tdtcell("drc");
+	DATC->setState(layprop::DB);	
 }
 
-void Calbr::drcTenderer::drawPoly(const CoordsVector   &coords)
+void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
 {
    if (_startDrawing)
    {
@@ -83,10 +84,11 @@ void Calbr::drcTenderer::drawPoly(const CoordsVector   &coords)
 		laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(_DRCCell->securelayer(_numError));
 		DATC->addUnpublishedLay(_numError);
 		dwl->addpoly(*plDB, false);
+		delete plDB;
    }
 }
 
-void Calbr::drcTenderer::drawLine(const edge &edge)
+void Calbr::drcTenderer::addLine(const edge &edge)
 {
    if (_startDrawing)
    {
@@ -137,7 +139,13 @@ void Calbr::drcTenderer::showError(unsigned int numError)
 	DATC->setState(layprop::DB);
 }
 
-void Calbr::drcTenderer::drawEnd()
+void Calbr::drcTenderer::zoom(const edge &edge)
+{
+	
+}
+
+
+void Calbr::drcTenderer::endWriting()
 {
 	DATC->setState(layprop::DRC);
 		if (!DATC->upLayers().empty())
