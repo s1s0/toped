@@ -55,9 +55,9 @@ void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
    _coords.y2 = yy;
 }
 
-void Calbr::drcEdge::showError(/*laydata::tdtdesign* atdb, */word la)
+void Calbr::drcEdge::addError(/*laydata::tdtdesign* atdb, */word la)
 {
-   _render->drawLine(_coords);
+   _render->addLine(_coords);
 }
 
 
@@ -76,9 +76,9 @@ void Calbr::drcPolygon::addCoord(long x, long y)
    _coords.push_back(pt);
 }
 
-void Calbr::drcPolygon::showError(/*laydata::tdtdesign* atdb, */word la)
+void Calbr::drcPolygon::addError(/*laydata::tdtdesign* atdb, */word la)
 {
-   _render->drawPoly(_coords);
+   _render->addPoly(_coords);
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
@@ -144,7 +144,7 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
    {
 		num++;
    }
-   
+   addResults();
 }
 
 Calbr::CalbrFile::~CalbrFile()
@@ -279,10 +279,10 @@ bool Calbr::CalbrFile::parse(unsigned int num)
 
 }
 
-void   Calbr::CalbrFile::ShowResults()
+void   Calbr::CalbrFile::addResults()
 {
 
-   _render->drawBegin();
+   _render->startWriting();
    RuleChecksVector::const_iterator it;
 	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
    {
@@ -291,19 +291,20 @@ void   Calbr::CalbrFile::ShowResults()
       std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
       for(it2 = polys->begin(); it2 < polys->end(); ++it2)
       {
-         (*it2).showError(0);
+         (*it2).addError(0);
       }
       std::vector <Calbr::drcEdge>::iterator it2edge;
       std::vector <Calbr::drcEdge> *edges = (*it)->edges();
       for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
       {
-         (*it2edge).showError(0);
+         (*it2edge).addError(0);
       }
    }
-   _render->drawEnd();
+   _render->endWriting();
+	_render->hideAll();
 }
 
-void   Calbr::CalbrFile::ShowError(const std::string & error, long  number)
+void   Calbr::CalbrFile::showError(const std::string & error, long  number)
 {
    RuleChecksVector::const_iterator it;
    for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
@@ -343,6 +344,15 @@ void   Calbr::CalbrFile::ShowError(const std::string & error, long  number)
 
 //	_render->hideAll();
 //	_render->showError(number);
+}
+
+void   Calbr::CalbrFile::showAllErrors(void)
+{
+	RuleChecksVector::const_iterator it;
+   for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
+   {
+		_render->showError((*it)->num());
+   }
 }
 
 void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)

@@ -1497,8 +1497,6 @@ int tellstdfunc::DRCCalibreimport::execute()
       if(DRCData->isOk())
       {
 			TpdPost::addDRCtab();
-
-			//DRCData->ShowResults();
       }
       else
       {
@@ -1521,7 +1519,7 @@ int tellstdfunc::DRCshowerror::execute()
 {
    long errorNumber = getWordValue();
    std::string errorName = getStringValue();
-   DRCData->ShowError(errorName, errorNumber);
+   DRCData->showError(errorName, errorNumber);
    return EXEC_NEXT;
 }
 

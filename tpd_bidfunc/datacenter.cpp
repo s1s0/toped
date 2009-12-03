@@ -61,6 +61,7 @@ DataCenter::~DataCenter() {
    if (NULL != _GDSDB) delete _GDSDB;
    if (NULL != _CIFDB) delete _CIFDB;
    if (NULL != _OASDB) delete _OASDB;
+	if (NULL != _DRCDB) delete _DRCDB;
    // _TEDLIB will be cleared automatically (not a pointer)
 }
 bool DataCenter::TDTcheckread(const std::string filename,

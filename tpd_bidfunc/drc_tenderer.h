@@ -40,12 +40,13 @@ class drcTenderer: public drcRenderer
    drcTenderer(laydata::drclibrary* library);
    ~drcTenderer();
 	void setError(unsigned int numError);
-   void drawBegin();
-   void drawPoly(const CoordsVector   &coords);
-   void drawLine(const edge &edge);
+   void startWriting();
+   void addPoly(const CoordsVector   &coords);
+   void addLine(const edge &edge);
 	void hideAll(void);
 	void showError(unsigned int numError);
-   void drawEnd();
+   void zoom(const edge &edge);
+   void endWriting();
 private:
    laydata::drclibrary* _ATDB;
 	laydata::tdtcell*		_DRCCell;

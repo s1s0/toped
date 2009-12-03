@@ -2126,7 +2126,7 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 
 
       SetSizerAndFit(thesizer);
-      Calbr::RuleChecksVector* errors = DRCData->Results();
+      Calbr::RuleChecksVector* errors = DRCData->results();
       _errorBrowser->AddRoot(wxT("hidden_wxroot"));
       for(Calbr::RuleChecksVector::const_iterator it = errors->begin();it < errors->end(); ++it)
       {
@@ -2142,8 +2142,6 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
             wxString str;
             str.Printf(wxT("%d"), i);
             _errorBrowser->AppendItem(id, str);
-//            _errorBrowser->saveInfo(polys->at(i-1));
-
          }
 
          //Save Edges
@@ -2154,8 +2152,6 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
             wxString str;
             str.Printf(wxT("%d"), i);
             _errorBrowser->AppendItem(id, str);
-//            _errorBrowser->saveInfo(edges->at(i-1));
-
          }
 
       }
@@ -2173,7 +2169,7 @@ void browsers::DRCBrowser::deleteAllItems(void)
 
 void   browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
 {
-   DRCData->ShowResults();
+   DRCData->showAllErrors();
    //Refresh
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_REFRESH);

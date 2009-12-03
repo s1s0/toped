@@ -59,13 +59,14 @@ class drcRenderer
 public:
    drcRenderer() {};
    ~drcRenderer() {};
-   virtual void drawBegin()=0;
+   virtual void startWriting()=0;
 	virtual void setError(unsigned int numError) {};
 	virtual void showError(unsigned int numError) {};
 	virtual void hideAll() {};
-   virtual void drawPoly(const CoordsVector   &coords)=0;
-   virtual void drawLine(const edge &edge)=0;
-   virtual void drawEnd()=0;
+   virtual void addPoly(const CoordsVector   &coords)=0;
+   virtual void addLine(const edge &edge)=0;
+   virtual void endWriting()=0;
+	virtual void zoom(const edge &edge)=0;
 };
 
 
@@ -77,7 +78,7 @@ public:
    void            addCoord(long x1, long y1, long x2, long y2);
    edge*           coords() {return &_coords;};
    long            ordinal() {return _ordinal;};
-   void            showError(word la);
+   void            addError(word la);
    static long     _precision;
 private:
    edge            _coords;
@@ -92,7 +93,7 @@ public:
    void            addCoord(long x, long y);
    CoordsVector*   coords() {return &_coords;};
    long            ordinal() {return _ordinal;};
-   void            showError(word la);
+   void            addError(word la);
    static long     _precision;
 private:
    CoordsVector    _coords;
@@ -139,9 +140,10 @@ public:
    CalbrFile(const std::string &fileName, drcRenderer *render);
    ~CalbrFile();
 
-   void              ShowResults();
-   void              ShowError(const std::string & error, long  number);
-   RuleChecksVector* Results() {return &_RuleChecks;};
+   void              addResults();
+   void              showError(const std::string & error, long  number);
+	void              showAllErrors(void);
+   RuleChecksVector* results() {return &_RuleChecks;};
    bool              isOk(void)   {return _ok;}
 	drcRenderer*		render() const {return _render;};
 private:
