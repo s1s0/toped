@@ -63,7 +63,7 @@ wxMutex          tui::DrawThread::_mutex;
 //{
 //   _sb_BL = TP(0,0)       * _LayCTM;
 //   _sb_TR = TP(width, 30) * _LayCTM;
-//   
+//
 //   DBbox pixelbox = DBbox(TP(),TP(14,14)) * _LayCTM;
 //   _scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
 //   _cY = TP(width-150, 17) * _LayCTM;
@@ -89,7 +89,7 @@ wxMutex          tui::DrawThread::_mutex;
 //   glScalef(_scaledpix, _scaledpix, 1);
 //   glfDrawSolidString("Y:");
 //   glPopMatrix();
-//   
+//
 //   glPushMatrix();
 //   glTranslatef(_cX.x(), _cX.y(), 0);
 //   glScalef(_scaledpix, _scaledpix, 1);
@@ -101,13 +101,13 @@ wxMutex          tui::DrawThread::_mutex;
 //   glScalef(_scaledpix, _scaledpix, 1);
 //   glfDrawSolidString("dX:");
 //   glPopMatrix();
-//   
+//
 //   glPushMatrix();
 //   glTranslatef(_dX.x(), _dX.y(), 0);
 //   glScalef(_scaledpix, _scaledpix, 1);
 //   glfDrawSolidString("dX:");
 //   glPopMatrix();
-//   
+//
 //   update_coords(_cp);
 //}
 //      private:
@@ -125,7 +125,7 @@ wxMutex          tui::DrawThread::_mutex;
 //
 ////   glScissor( _Xcoord.p1().x(), _Xcoord.p1().y(), _Xcoord.p2().x() - _Xcoord.p1().x(), _Xcoord.p2().y() - _Xcoord.p1().y() );
 ////   glEnable(GL_SCISSOR_TEST);
-////   
+////
 //   glColor4f(0,1,1,1);
 //
 //   wxString wsX;
@@ -135,20 +135,20 @@ wxMutex          tui::DrawThread::_mutex;
 //
 ////
 ////   glClear(GL_COLOR_BUFFER_BIT);
-// //  
+// //
 //   glPushMatrix();
 //   glTranslatef(_wcX.x(), _wcX.y(), 0);
 //   glScalef(_scaledpix, _scaledpix, 1);
 //   glfDrawSolidString(wsX.mb_str());
 //   glPopMatrix();
-//   
+//
 //   glPushMatrix();
 //   glTranslatef(_wcY.x(), _wcY.y(), 0);
 //   glScalef(_scaledpix, _scaledpix, 1);
 //   glfDrawSolidString(wsY.mb_str());
 //   glPopMatrix();
 ////   glDisable(GL_SCISSOR_TEST);
-//   
+//
 //}
 //=============================================================================
 // class LayoutCanvas
@@ -185,8 +185,8 @@ END_EVENT_TABLE()
 //   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
 //   EVT_LEFT_DOWN        ( tui::LayoutCanvas::OnMouseLeftDown   )
 
-tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, 
-     const wxSize& size, int* attribList): 
+tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
+     const wxSize& size, int* attribList):
  wxGLCanvas(parent, ID_TPD_CANVAS, pos, size, 0,wxT("LayoutCanvas"), attribList)
 {
 //   if (!wxGLCanvas::IsDisplaySupported(attribList)) return;
@@ -236,17 +236,17 @@ void	tui::LayoutCanvas::showInfo()
    HDC hdc =  ::GetDC((HWND) GetHWND());
    std::ostringstream ost;
 
-   PIXELFORMATDESCRIPTOR  pfd; 
-   //HDC  hdc; 
-   int  iPixelFormat; 
- 
-   iPixelFormat = 1; 
-   
+   PIXELFORMATDESCRIPTOR  pfd;
+   //HDC  hdc;
+   int  iPixelFormat;
 
-   // obtain detailed information about 
-   // the device context's first pixel format 
-   DescribePixelFormat(hdc, iPixelFormat,  
-        sizeof(PIXELFORMATDESCRIPTOR), &pfd); 
+   iPixelFormat = 1;
+
+
+   // obtain detailed information about
+   // the device context's first pixel format
+   DescribePixelFormat(hdc, iPixelFormat,
+        sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
    if((pfd.dwFlags & PFD_GENERIC_FORMAT) && !(pfd.dwFlags & PFD_GENERIC_ACCELERATED))
    {
@@ -332,7 +332,7 @@ void tui::LayoutCanvas::viewshift()
    /*   slide = false;*/
 }
 
-bool tui::LayoutCanvas::initializeGL() 
+bool tui::LayoutCanvas::initializeGL()
 {
    //@TODO Check somewhere that RGBA mode is available!?
    //@TODO The next call needs to be fitted in some kind of GL descructor
@@ -352,35 +352,19 @@ bool tui::LayoutCanvas::initializeGL()
       dlg1->Destroy();
       VBOrendering = false;
    }
-   else if (!glewIsSupported("GL_VERSION_1_4 GL_EXT_multi_draw_arrays"))
+   else if (!glewIsSupported("GL_VERSION_1_5 GL_EXT_multi_draw_arrays" /* GL_ARB_vertex_buffer_object"*/))
    {
-//      tell_log(console::MT_WARNING,"OpenGL version 1.4 is not supported. Using basic rendering");
-/*      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this,
-            wxT("openGL version 1.4 is not supported"),
-            wxT("Toped"),
-            wxOK | wxICON_ERROR);
-      dlg1->ShowModal();
-      dlg1->Destroy();*/
       VBOrendering = false;
+      //@TODO - to avoid the "if"
+      // setup the renderer - callback function
+      // oGLRender = &DataCenter::openGL_draw;
    }
    else
    {
       VBOrendering = true;
-//      tell_log(console::MT_INFO,"Using VBO rendering.");
-   }
-
-   //--------------------------------------------------------------------------
-   if (VBOrendering)
-   {
       //@TODO - to avoid the "if"
       // setup the renderer - callback function
       // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGL_render;
-   }
-   else
-   {
-      //@TODO - to avoid the "if"
-      // setup the renderer - callback function
-      // oGLRender = &DataCenter::openGL_draw;
    }
    return VBOrendering;
    //@NOTE: With the Mesa library updates (first noticed in ver. 6.5) - most of the
@@ -412,7 +396,7 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 }
 
 
-void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event) 
+void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
 {
    if (!GetContext()) return;
    // invalid_window indicates zooming or refreshing after a tell operation.
@@ -509,7 +493,7 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
    if (ctl || !(rubber_band && (restricted_move || shift))) {
       n_ScrMARK = ScrMARK; n_ScrMARKold = ScrMARKold;
       return;
-   }   
+   }
    n_ScrMARKold = n_ScrMARK;
    int sdX = ScrMARK.x() - releasepoint.x();
    int sdY = ScrMARK.y() - releasepoint.y();
@@ -523,7 +507,7 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
       if (_45deg && (dX < 2*dY)) n_ScrMARK.setY( sign*sdX + releasepoint.y() );
       else                       n_ScrMARK.setY( releasepoint.y() );
       n_ScrMARK.setX(ScrMARK.x() );
-   }   
+   }
    else {
       if (_45deg && (dY < 2*dX)) n_ScrMARK.setX( sign*sdY + releasepoint.x() );
       else                      n_ScrMARK.setX( releasepoint.x() );
@@ -567,16 +551,16 @@ void tui::LayoutCanvas::PointUpdate(int nX, int nY)
    ScrMARK = TP(nX,nY) * _LayCTM;
    int4b stepDB = DATC->stepDB();
    ScrMARK.roundTO(stepDB);
-   
+
    // update movement indicators
    int deltaX = abs(ScrMARKold.x() - ScrMARK.x());
    int deltaY = abs(ScrMARKold.y() - ScrMARK.y());
    if (!(deltaX || deltaY)) return;
    //
    CursorControl(false, false);
-   if (deltaX > 0) 
+   if (deltaX > 0)
       UpdateCoordWin(ScrMARK.x(), CNVS_POS_X, (n_ScrMARK.x() - releasepoint.x()), CNVS_DEL_X);
-   if (deltaY > 0) 
+   if (deltaY > 0)
       UpdateCoordWin(ScrMARK.y(), CNVS_POS_Y, (n_ScrMARK.y() - releasepoint.y()), CNVS_DEL_Y);
 }
 
@@ -633,9 +617,9 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
    if (!(deltaX || deltaY)) return;
    //
    CursorControl(event.ShiftDown(), event.ControlDown());
-   if (deltaX > 0) 
+   if (deltaX > 0)
       UpdateCoordWin(ScrMARK.x(), CNVS_POS_X, (n_ScrMARK.x() - releasepoint.x()), CNVS_DEL_X);
-   if (deltaY > 0) 
+   if (deltaY > 0)
       UpdateCoordWin(ScrMARK.y(), CNVS_POS_Y, (n_ScrMARK.y() - releasepoint.y()), CNVS_DEL_Y);
 
 //   drawInterim(ScrMARK);
@@ -757,7 +741,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
 void tui::LayoutCanvas::OnMouseLeftDown(wxMouseEvent& WXUNUSED(event)) {
 //   presspoint = ScrMARK;
 //   mouseIN(true);
-}   
+}
 
 void tui::LayoutCanvas::OnMouseLeftUp(wxMouseEvent& WXUNUSED(event)) {
 //   if ((abs(presspoint.x() - ScrMARK.x())  > step) or
@@ -770,7 +754,7 @@ void tui::LayoutCanvas::OnMouseLeftUp(wxMouseEvent& WXUNUSED(event)) {
       releasepoint = n_ScrMARK;
       if (mouse_input)  rubber_band = true;
       EventMouseClick(0);
-//   }   
+//   }
 }
 
 void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event)
@@ -1090,7 +1074,7 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
    wxCursor * pCursor;
    const int HotAdjust =0;
 
-   wxImage Image = wxImage(wxBitmap(pXpm).ConvertToImage());   
+   wxImage Image = wxImage(wxBitmap(pXpm).ConvertToImage());
    Image.SetMaskColour(255,0,0);
    Image.SetMask();// Enable mask.
 
@@ -1108,7 +1092,7 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
    int w = Image.GetWidth() ;
    int h = Image.GetHeight();
    int imagebitcount = (w*h)/8;
-   
+
    unsigned char *bits = DEBUG_NEW unsigned char [imagebitcount];
    unsigned char *maskBits = DEBUG_NEW unsigned char [imagebitcount];
 
@@ -1151,7 +1135,7 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY ) {
    delete [] maskBits;
    delete col_black;
    delete col_white;
-#else 
+#else
    Image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_X, HotX-HotAdjust );
    Image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_Y, HotY-HotAdjust );
    pCursor = DEBUG_NEW wxCursor( Image );

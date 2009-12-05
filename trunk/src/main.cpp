@@ -31,7 +31,7 @@
 #include <wx/filefn.h>
 #include <wx/filename.h>
 #include <sstream>
-#if WIN32 
+#if WIN32
 #include <crtdbg.h>
 #endif
 
@@ -519,11 +519,34 @@ void TopedApp::FinishSessionLog()
 
 bool TopedApp::OnInit() {
 //   DATC = DEBUG_NEW DataCenter();
+   wxString inputfile;
+   bool force_basic_rendering = false;
+   bool render_type = false;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    GetLocalDirs();
    GetGlobalDirs();
    initDBLib(std::string(localDir.mb_str(wxConvFile)), std::string(globalDir.mb_str(wxConvFile)));
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
+
+   if (1 < argc)
+   {
+      for (int i=1; i<argc; i++)
+      {
+         wxString curar(argv[i]);
+//            if (wxT("-ogltrd") == curar) Toped->setOglThread(true);
+         if (wxT("-ogl_safe") == curar) force_basic_rendering = true;
+         else if (!(0 == curar.Find('-')))
+         {
+            inputfile.Clear();
+            inputfile << wxT("#include \"") << curar << wxT("\"");
+         }
+         else
+         {
+            std::string invalid_argument(curar.mb_str(wxConvUTF8));
+            std::cout << "Unknown command line option \"" << invalid_argument <<"\". Ignored" << std::endl ;
+         }
+      }
+   }
 
    if (!Toped->view()->initStatus())
    {
@@ -537,7 +560,8 @@ bool TopedApp::OnInit() {
       //tell_log(console::MT_ERROR,info);
       return FALSE;
    }
-   bool render_type = Toped->view()->initializeGL();
+   if (!force_basic_rendering)
+      render_type = Toped->view()->initializeGL();
    DATC->loadLayoutFonts(CheckFontFile("arial1"), render_type);
 //   if (!LoadFontFile("arial1")) return FALSE;
 
@@ -587,29 +611,21 @@ bool TopedApp::OnInit() {
       LogFile.init(std::string(logFileName.mb_str(wxConvFile )));
 //      wxLog::AddTraceMask(wxT("thread"));
 //      wxLog::AddTraceMask(wxTRACE_MemAlloc);
-      if (1 < argc) 
-      {
-         for (int i=1; i<argc; i++)
-         {
-            wxString curar(argv[i]);
-            if (wxT("-ogltrd") == curar) Toped->setOglThread(true);
-            else if (!(1 == curar.Find('-')))
-            {
-               wxString inputfile;
-               inputfile.Clear();
-               inputfile << wxT("#include \"") << curar << wxT("\"");
-               Console->parseCommand(inputfile);
-            }
-         }
-      }
+      if ( !inputfile.IsEmpty() )
+         Console->parseCommand(inputfile);
+
    }
    if (render_type)
    {
       tell_log(console::MT_INFO,"...using VBO rendering");
    }
+   else if (force_basic_rendering)
+   {
+      tell_log(console::MT_INFO,"...basic rendering forced from the command line");
+   }
    else
    {
-      tell_log(console::MT_WARNING,"OpenGL version 1.4 is not supported");
+      tell_log(console::MT_WARNING,"OpenGL version 1.5 is not supported");
       tell_log(console::MT_INFO,"...Using basic rendering");
    }
    tell_log(console::MT_INFO,"Toped loaded.");
@@ -622,7 +638,7 @@ int TopedApp::OnExit() {
    {
       delete DRCData;
    }
-   delete CMDBlock; 
+   delete CMDBlock;
    delete DATC;
 
    FinishSessionLog();
