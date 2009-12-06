@@ -358,6 +358,7 @@ namespace laydata {
    protected:
       void                 select_points(DBbox&, SGBitSet&) {return;};
       void                 unselect_points(DBbox&, SGBitSet&) {return;};
+      CTM                  renderingAdjustment(const CTM&) const;
    private:
       std::string         _text;
       CTM                 _translation;
