@@ -2245,12 +2245,14 @@ void laydata::tdttext::draw_request(tenderer::TopRend& rend) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
+   // Calculate the visual adjustment to make the texts easy to read
+   CTM adjmtrx = renderingAdjustment(ftmtrx);
    DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
    if (!wsquare.visible(ftmtrx * rend.ScrCTM()) ) return;
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
-   rend.text(&_text, _translation, _overlap, _correction, false);
+   rend.text(&_text, adjmtrx/*_translation*/, _overlap, _correction, false);
 }
 
 void laydata::tdttext::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
@@ -2390,6 +2392,41 @@ void laydata::tdttext::info(std::ostringstream& ost, real DBU) const
 {
    ost << "text \"" << _text << "\" @ {";
    ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "}";
+}
+
+CTM laydata::tdttext::renderingAdjustment(const CTM& mtrx) const
+{
+   TP trans;
+   real rotation;
+   real scale;
+   bool flipX;
+   DBbox adjoverlap = _overlap * _translation;
+   int4b centerX = (adjoverlap.p1().x() + adjoverlap.p2().x()) / 2;
+   int4b centerY = (adjoverlap.p1().y() + adjoverlap.p2().y()) / 2;
+   mtrx.Decompose(trans, rotation, scale, flipX);
+   if (0 > rotation) rotation += 360;
+   bool non90 = (0 < (static_cast<word>(rint(rotation)) % 90));
+   byte rsegment = static_cast<word>(rint(rotation)) / 90;
+   if (non90) rsegment++;
+   if (3 < rsegment) rsegment = 0;
+   CTM adjmatrix(_translation);
+   switch (rsegment)
+   {
+      case 0: if ( flipX) adjmatrix.FlipX(centerY);
+              break;
+      case 1: if ( flipX) adjmatrix.FlipY(centerX);
+              break;
+      case 2: if (!flipX) adjmatrix.FlipX(centerY);
+              adjmatrix.FlipY(centerX);
+              break;
+      case 3: if (!flipX) adjmatrix.FlipY(centerX);
+              adjmatrix.FlipX(centerY);
+              break;
+      default: assert(false);
+   }
+   if (flipX & non90)
+      adjmatrix.Rotate(270, TP(centerX, centerY));
+   return adjmatrix;
 }
 
 //-----------------------------------------------------------------------------
