@@ -209,7 +209,7 @@ namespace layprop {
          byte           _num_ogl_buffers; //! Number of generated openGL VBOs
          bool           _fti; // font type implementation ()
    };
-   
+
    //=============================================================================
    typedef  std::map<std::string, tellRGB*      >  colorMAP;
    typedef  std::map<std::string, byte*         >  fillMAP;
@@ -263,8 +263,8 @@ namespace layprop {
          std::string                getFillName(unsigned layno) const;
          std::string                getLineName(unsigned layno) const;
 
-         //return layno if _state == DB or predefined layer in other case 
-         unsigned                   getTenderLay(unsigned layno) const; 
+         //return layno if _state == DB or predefined layer in other case
+         unsigned                   getTenderLay(unsigned layno) const;
          void                       setState (drawprop_state state) {_state = state;};
          void                       all_layers(nameList&) const;
          unsigned                   drawinglayer() const {return _drawinglayer;}
@@ -279,6 +279,8 @@ namespace layprop {
          bool                       renderType()         {return _renderType;}
          bool                       isTextBoxHidden()    {return _textbox_hidden;}
          bool                       isCellBoxHidden()    {return _cellbox_hidden;}
+         bool                       adjustTextOrientation() const
+                                                         {return _adjustTextOrientation;}
          friend class ViewProperties;
       protected:
          laySetList                 _laysetDB;
@@ -292,6 +294,7 @@ namespace layprop {
          bool                       _cellbox_hidden;
          bool                       _textmarks_hidden;
          bool                       _textbox_hidden;
+         bool                       _adjustTextOrientation;
          void                       savePatterns(FILE*) const;
          void                       saveColors(FILE*) const;
          void                       saveLayers(FILE*) const;

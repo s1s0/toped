@@ -74,7 +74,7 @@ int tellstdfunc::stdLAYPROP::execute() {
    // error message - included in the method
    DATC->addlayer(name, gdsN, col, fill, sline);
    TpdPost::layer_add(name,gdsN);
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" << 
+   LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" <<
          col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
    return EXEC_NEXT;
 }
@@ -121,7 +121,7 @@ int tellstdfunc::stdCOLORDEF::execute() {
    std::string  name = getStringValue();
    // error message - included in the method
    DATC->addcolor(name, colR, colG, colB, sat);
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," << 
+   LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," <<
                        colG << "," << colB << "," << sat << ");";LogFile.flush();
    return EXEC_NEXT;
 }
@@ -276,7 +276,7 @@ int tellstdfunc::stdHIDELAYER::execute() {
       DATC->unlockDB();
 
       TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
-      LogFile << LogFile.getFN() << "("<< layno << "," << 
+      LogFile << LogFile.getFN() << "("<< layno << "," <<
                  LogFile._2bool(hide) << ");"; LogFile.flush();
       UpdateLV();
    }
@@ -567,14 +567,14 @@ int tellstdfunc::stdLOCKLAYER::execute()
       DATC->lockLayer(layno, lock);
       DATC->unlockDB();
       TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
-      LogFile << LogFile.getFN() << "("<< layno << "," << 
+      LogFile << LogFile.getFN() << "("<< layno << "," <<
                  LogFile._2bool(lock) << ");"; LogFile.flush();
       UpdateLV();
    }
    else
    {
       tell_log(console::MT_ERROR,"Layer above is the current. Can't be locked.");
-   }   
+   }
    return EXEC_NEXT;
 }
 
@@ -699,7 +699,7 @@ int tellstdfunc::stdFILLLAYER::execute()
 
       DATC->fillLayer(layno, fill);
       TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
-      LogFile << LogFile.getFN() << "("<< layno << "," << 
+      LogFile << LogFile.getFN() << "("<< layno << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
       UpdateLV();
    return EXEC_NEXT;
@@ -969,6 +969,20 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
       {
          std::ostringstream info;
          info << "Invalid \""<< name <<"\" value. Expected value is between 0 and 255";
+         tell_log(console::MT_ERROR,info.str());
+      }
+   }
+   else if ("ADJUST_TEXT_ORIENTATION == name")
+   {//setparams({"ADJUST_TEXT_ORIENTATION", "true"});
+      bool val;
+      if (from_string<bool>(val, value, std::boolalpha))
+      {
+         DATC->setAdjustTextOrientation(val);
+      }
+      else
+      {
+         std::ostringstream info;
+         info << "Invalid \""<< name <<"\" value. Expected \"true\" or \"false\"";
          tell_log(console::MT_ERROR,info.str());
       }
    }

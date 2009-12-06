@@ -36,7 +36,7 @@
 class DataCenter {
 public:
                               DataCenter(const std::string&, const std::string &);
-                             ~DataCenter(); 
+                             ~DataCenter();
    bool                       GDSparse(std::string);
    void                       GDSexport(const LayerMapExt&, std::string&, bool);
    void                       GDSexport(laydata::tdtcell*, const LayerMapExt&, bool, std::string&, bool);
@@ -58,8 +58,8 @@ public:
    int                        TDTloadlib(std::string);
    bool                       TDTunloadlib(std::string);
    bool                       TDTwrite(const char* filename = NULL);
-   bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&); 
-   bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
+   bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
+   bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&);
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
 	laydata::drclibrary*       lockDRC(void);
@@ -94,7 +94,7 @@ public:
    word                       curlay() const          {return _curlay;}
    word                       curcmdlay() const       {return _curcmdlay;}
    std::string                tedfilename() const     {return _tedfilename;};
-   bool                       neversaved()  const     {return _neversaved;}; 
+   bool                       neversaved()  const     {return _neversaved;};
    bool                       modified() const        {return _TEDLIB.modified();};
 
    //------------------------------------------------------------------------------------------------
@@ -180,6 +180,8 @@ public:
                                                       {return _globalDir;}
    void                       loadLayoutFonts(std::string ffn, bool vbo)
                                                       {_properties.loadLayoutFonts(ffn, vbo);}
+   void                       setAdjustTextOrientation(bool ori)
+                                                      {_properties.setAdjustTextOrientation(ori);}
 
 protected:
    std::string                _tedfilename;
