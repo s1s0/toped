@@ -478,7 +478,7 @@ namespace tenderer {
       One position per bin is allocated in each of those arrays (_alvrtxs[4],
       _alobjvx[4], _sizesvx[4], _firstvx[4]) indicating the overall number of
       vertexes, the total number of objects, the size of each object in terms of
-      vertexes, and the offset of each first object vertex in the buffer 
+      vertexes, and the offset of each first object vertex in the buffer
 
       If the non-convex data is to be filled, it is sorted further in another four
       index bins. The data statistics is also split further into four to accomodate
@@ -873,8 +873,8 @@ namespace tenderer {
          bool              collect();
          void              draw();
 
-			//return layno if _state == DB or predefined layer in other case 
-			unsigned				getTenderLay(unsigned layno); 
+			//return layno if _state == DB or predefined layer in other case
+			unsigned				getTenderLay(unsigned layno);
 			//set state of DrawProperties
 			void					setState(layprop::drawprop_state state) {_drawprop->setState(state);};
          // temporary!
@@ -885,6 +885,7 @@ namespace tenderer {
                                                          {        _drawprop->pushref(ref)          ;}
          byte              popref(const laydata::tdtcellref* ref)
                                                          {return  _drawprop->popref(ref)           ;}
+         bool              adjustTextOrientation() const {return  _drawprop->adjustTextOrientation();}
       private:
          layprop::DrawProperties*   _drawprop;
          real              _UU;

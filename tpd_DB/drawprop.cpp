@@ -137,7 +137,7 @@ layprop::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
    //
    _csize = DEBUG_NEW GLsizei[_alcntrs];
    _firstvx = DEBUG_NEW GLint[_alcntrs];
-   for (unsigned i = 0; i < _alcntrs; i++)  
+   for (unsigned i = 0; i < _alcntrs; i++)
    {
       _csize[i] = tsym->_cdata[i] + 1;
       _firstvx[i] = voffset;
@@ -473,7 +473,8 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
    _textbox_hidden = true;
    _refstack = NULL;
    _renderType = false;
-	_state = DB;
+   _state = DB;
+   _adjustTextOrientation = false;
 }
 
 void layprop::DrawProperties::loadLayoutFonts(std::string fontfile, bool vbo)
@@ -786,7 +787,7 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(unsigned layno) co
    lineMAP::const_iterator line = _lineset.find(ilayset->sline());
    if (_lineset.end() == line) return &_defaultSeline;
    return line->second;
-// All the stuff above is equivalent to 
+// All the stuff above is equivalent to
 //   return _layfill[_layset[layno]->sline()];
 // but is safer and preserves constness
 }
@@ -796,7 +797,7 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_n
    lineMAP::const_iterator line = _lineset.find(line_name);
    if (_lineset.end() == line) return &_defaultSeline;
    return line->second;
-// All the stuff above is equivalent to 
+// All the stuff above is equivalent to
 //   return _layfill[_layset[layno]->sline()];
 // but is safer and preserves constness
 }
@@ -808,7 +809,7 @@ const byte* layprop::DrawProperties::getFill(unsigned layno) const
    fillMAP::const_iterator fill_set = _layfill.find(ilayset->fill());
    if (_layfill.end() == fill_set) return &_defaultFill[0];
    return fill_set->second;
-// All the stuff above is equivalent to 
+// All the stuff above is equivalent to
 //   return _layfill[_layset[layno]->fill()];
 // but is safer and preserves constness
 }
@@ -818,7 +819,7 @@ const byte* layprop::DrawProperties::getFill(std::string fill_name) const
    fillMAP::const_iterator fill_set = _layfill.find(fill_name);
    if (_layfill.end() == fill_set) return &_defaultFill[0];
    return fill_set->second;
-// All the stuff above is equivalent to 
+// All the stuff above is equivalent to
 //   return _layfill[fill_name];
 // but is safer and preserves constness
 }
@@ -830,7 +831,7 @@ const layprop::tellRGB& layprop::DrawProperties::getColor(unsigned layno) const
    colorMAP::const_iterator col_set = _laycolors.find(ilayset->color());
    if (_laycolors.end() == col_set) return _defaultColor;
    return *(col_set->second);
-// All the stuff above is equivalent to 
+// All the stuff above is equivalent to
 //   return _laycolors[_layset[layno]->color()];
 // but is safer and preserves constness
 }
@@ -840,7 +841,7 @@ const layprop::tellRGB& layprop::DrawProperties::getColor(std::string color_name
    colorMAP::const_iterator col_set = _laycolors.find(color_name);
    if (_laycolors.end() == col_set) return _defaultColor;
    return *(col_set->second);
-// All the stuff above is equivalent to 
+// All the stuff above is equivalent to
 //   return _laycolors[color_name];
 // but is safer and preserves constness
 }

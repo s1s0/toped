@@ -2208,16 +2208,12 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    // the font to DBU's I need to multiply it by DBU and divide it to 119.05
    // This is done in the tellibin - int tellstdfunc::stdADDTEXT::execute()
    // Things to consider ...
-   // Independently of the orientation (and flip) font matrix
-   // can be trimmed always so that texts to appear either left-to-right
-   // or bottom-to top (Remember Catena?). In order to compensate the text
-   // placement, the binding point (justification) can be compensated
    // And the last, but not the least...
    // GDSII text justification
    //====================================================================
    // the correction is needed to fix the bottom left corner of the
    // text overlapping box to the binding point. glf library normally
-   // draws the first symbol centerd around the bounding point
+   // draws the first symbol centered around the bounding point
    CTM correction;
    correction.Translate(-_overlap.p1().x(), -_overlap.p1().y());
    DBbox _over = _overlap.overlap(correction);
@@ -2226,6 +2222,8 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
    if ( wsquare.visible(ftmtrx * drawprop.ScrCTM()) )
    {
+      CTM adjTranslation = (drawprop.adjustTextOrientation()) ?
+                            renderingAdjustment(ftmtrx) : _translation;
       // If we get here - means that the text is visible
       // get the text overlapping box ...
       ptlist.reserve(5);
@@ -2234,10 +2232,10 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       ptlist.push_back(_over.p2() * ftmtrx);
       ptlist.push_back(TP(_over.p1().x(), _over.p2().y()) * ftmtrx);
       // ... and text bounding point (see the comment above)
-      ptlist.push_back(TP(static_cast<int4b>(_translation.tx()),
-                       static_cast<int4b>(_translation.ty()))  * drawprop.topCTM());
+      ptlist.push_back(TP(static_cast<int4b>(adjTranslation.tx()),
+                          static_cast<int4b>(adjTranslation.ty()))  * drawprop.topCTM());
       // push the font matrix - will be used for text drawing
-      drawprop.pushCTM(ftmtrx);
+      drawprop.pushCTM(adjTranslation);
    }
 }
 
@@ -2245,14 +2243,16 @@ void laydata::tdttext::draw_request(tenderer::TopRend& rend) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
-   // Calculate the visual adjustment to make the texts easy to read
-   CTM adjmtrx = renderingAdjustment(ftmtrx);
    DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
    if (!wsquare.visible(ftmtrx * rend.ScrCTM()) ) return;
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
-   rend.text(&_text, adjmtrx/*_translation*/, _overlap, _correction, false);
+   // Calculate the visual adjustment to make the texts easy to read
+   if (rend.adjustTextOrientation())
+      rend.text(&_text, renderingAdjustment(ftmtrx), _overlap, _correction, false);
+   else
+      rend.text(&_text, _translation, _overlap, _correction, false);
 }
 
 void laydata::tdttext::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
