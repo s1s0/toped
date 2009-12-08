@@ -2032,7 +2032,6 @@ void browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
       }
       else
       {
-         //laydata::tdtdesign* _ATDB = DATC->lockDB();
             wxString numstr = GetItemText(id);
             long number;
             numstr.ToLong(&number);
@@ -2043,59 +2042,6 @@ void browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
             wxString cmd;
             cmd << wxT("drcshowerror(\"") <<  wxString(error.c_str(), wxConvUTF8) << wxT("\", ") << numstr << wxT("  );");
             TpdPost::parseCommand(cmd);
-            //unsigned drcLayer = DATC->getLayerNo("drcResults");
-            //assert(ERR_LAY != drcLayer);
-//            DBbox* box;
-
-         /*   if(_polyError)
-            {
-               _poly.showError(_ATDB, drcLayer);
-               //define boundary of polygon
-               int4b maxx, maxy, minx, miny;
-               maxx = _poly.coords()->begin()->x();
-               minx = _poly.coords()->begin()->x();
-               maxy = _poly.coords()->begin()->y();
-               miny = _poly.coords()->begin()->y();
-               for(pointlist::const_iterator it = _poly.coords()->begin(); it!= _poly.coords()->end(); ++it)
-               {
-   
-                  maxx = std::max((*it).x(), maxx);
-                  maxy = std::max((*it).y(), maxy);
-                  minx = std::min((*it).x(), minx);
-                  miny = std::min((*it).y(), miny);
-               }
-               box = DEBUG_NEW DBbox(TP(minx, miny), TP(maxx, maxy));
-            }
-   
-            if(_edgeError)
-            {
-               _edge.showError(_ATDB, drcLayer);
-               //define boundary of edge
-
-               box = DEBUG_NEW DBbox(TP(_edge.coords()->x1, _edge.coords()->y1),
-                  TP(_edge.coords()->x2, _edge.coords()->y2));
-   
-            }
-            DATC->unlockDB();
-
-            wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-            eventZOOM.SetInt(tui::ZOOM_WINDOW);
-            eventZOOM.SetClientData(static_cast<void*>(box));
-   
-            wxPostEvent(Toped->view(), eventZOOM);
-
-            delete box;*/
-            /*telldata::ttpnt *p1;// = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-            telldata::ttpnt *p2;// = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-            real DBscale = DATC->DBscale();
-            DBbox* box = DEBUG_NEW DBbox(TP(p1->x(), p1->y(), DBscale),
-                          TP(p2->x(), p2->y(), DBscale));
-            wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-            eventZOOM.SetInt(tui::ZOOM_WINDOW);
-            eventZOOM.SetClientData(static_cast<void*>(box));
-   
-            wxPostEvent(Toped->view(), eventZOOM);*/
-   
       }
    }
    else
@@ -2181,43 +2127,4 @@ void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 	laydata::drclibrary* drc = DATC->lockDRC();
 		DRCData->render()->hideAll();
 	DATC->unlockDRC();
-   /*laydata::tdtdesign* design = DATC->lockDB();
-   WordList lockedLayers = DATC->getLockedLayers();
-   //Lock all layers
-   WordList allLayers = DATC->getAllLayers();
-   for(WordList::const_iterator it = allLayers.begin(); it!= allLayers.end(); ++it)
-   {
-      DATC->lockLayer((*it), true);
-   }
-
-   //unlock only drcResults layer
-   unsigned drcLayerNo = DATC->getLayerNo("drcResults");
-   DATC->lockLayer(drcLayerNo, false);
-   design->select_all();
-
-   //delete selected
-   laydata::atticList* sh_delist = DEBUG_NEW laydata::atticList();
-
-   design->delete_selected(sh_delist, DATC->TEDLIB());
-   tellstdfunc::clean_atticlist(sh_delist); delete sh_delist;
-
-
-   //UnLock all layers
-   for(WordList::const_iterator it = allLayers.begin(); it!= allLayers.end(); ++it)
-   {
-      DATC->lockLayer((*it), false);
-   }
-
-   //Lock only stored layers
-
-   for(WordList::const_iterator it = lockedLayers.begin(); it!= lockedLayers.end(); ++it)
-   {
-      DATC->lockLayer((*it), true);
-   }
-
-   //Refresh
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-   eventZOOM.SetInt(tui::ZOOM_REFRESH);
-   GetEventHandler()->ProcessEvent(eventZOOM);
-*/
-}
+ }

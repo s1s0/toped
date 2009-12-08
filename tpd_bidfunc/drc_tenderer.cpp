@@ -30,10 +30,16 @@
 #include "tpdph.h"
 #include "drc_tenderer.h"
 #include "datacenter.h"
+#include "tuidefs.h"
+#include "tpdf_common.h"
 
 // Global variables
 Calbr::CalbrFile *DRCData = NULL;
 extern DataCenter*               DATC;
+extern wxWindow*                 TopedCanvasW;
+
+
+extern const wxEventType         wxEVT_CANVAS_ZOOM;
 
 Calbr::drcTenderer::drcTenderer(laydata::drclibrary* library)
 {
@@ -130,6 +136,7 @@ void Calbr::drcTenderer::hideAll(void)
 			DATC->hideLayer((*it), true);
 		}
 	DATC->setState(layprop::DB);	
+	tellstdfunc::RefreshGL();
 }
 
 void Calbr::drcTenderer::showError(unsigned int numError)
@@ -137,11 +144,18 @@ void Calbr::drcTenderer::showError(unsigned int numError)
 	DATC->setState(layprop::DRC);
 		DATC->hideLayer(numError, false);
 	DATC->setState(layprop::DB);
+	tellstdfunc::RefreshGL();
 }
 
 void Calbr::drcTenderer::zoom(const edge &edge)
 {
-	
+   real DBscale = DATC->DBscale();
+   DBbox* box = DEBUG_NEW DBbox(TP(edge.x1, edge.y1, DBscale), 
+                          TP(edge.x2, edge.y2, DBscale));
+   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   eventZOOM.SetInt(tui::ZOOM_WINDOW);
+   eventZOOM.SetClientData(static_cast<void*>(box));
+   wxPostEvent(TopedCanvasW, eventZOOM);
 }
 
 
