@@ -2394,38 +2394,50 @@ void laydata::tdttext::info(std::ostringstream& ost, real DBU) const
    ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "}";
 }
 
+/*!Adjusts the text object during the rendering in such a way that it is
+ * always lined-up form left to right or from bottom to top. The function
+ * returns the adjusted translation matrix which should be used instead of
+ * the original one (_translation) during the drawing.
+ * The mats behind this method: The input parameter mtrx contains the final
+ * CTM that will be used to draw the text. It is decomposed and if the resulting
+ * rotation is in the range of 90 - 270 degrees - the text is rotated on 180
+ * degrees around its central point. Simple, but a number of complications:
+ * - When the text is fliped it needs to be un-flipped and this must be done
+ *   using only local placement parameters. This in turn means that the local
+ *   _translation matrix must be decomposed as well in order to extract the
+ *   rotation of the text itself. It seems to be the only way to un-flip
+ *   properly the text. It must be done before the main operation
+ * - The rotation point are very important.
+ *
+ * The method introduces additional calculations executed during rendering which
+ * might slow down the graphics.
+ */
 CTM laydata::tdttext::renderingAdjustment(const CTM& mtrx) const
 {
-   TP trans;
-   real rotation;
-   real scale;
-   bool flipX;
+   TP    trans   ; // dummy, not used here
+   real  scale   ; // dummy, not used here
+   real  rotation; // the final text rotation (after all CTM operations)
+   bool  flipX   ; // the final text flip (after all CTM operations)
    DBbox adjoverlap = _overlap * _translation;
    int4b centerX = (adjoverlap.p1().x() + adjoverlap.p2().x()) / 2;
    int4b centerY = (adjoverlap.p1().y() + adjoverlap.p2().y()) / 2;
+   TP    textCenter(centerX, centerY);
    mtrx.Decompose(trans, rotation, scale, flipX);
-   if (0 > rotation) rotation += 360;
-   bool non90 = (0 < (static_cast<word>(rint(rotation)) % 90));
-   byte rsegment = static_cast<word>(rint(rotation)) / 90;
-   if (non90) rsegment++;
-   if (3 < rsegment) rsegment = 0;
    CTM adjmatrix(_translation);
-   switch (rsegment)
+   if (flipX)
    {
-      case 0: if ( flipX) adjmatrix.FlipX(centerY);
-              break;
-      case 1: if ( flipX) adjmatrix.FlipY(centerX);
-              break;
-      case 2: if (!flipX) adjmatrix.FlipX(centerY);
-              adjmatrix.FlipY(centerX);
-              break;
-      case 3: if (!flipX) adjmatrix.FlipY(centerX);
-              adjmatrix.FlipX(centerY);
-              break;
-      default: assert(false);
+      real lrotation;
+      bool lflipX;
+      _translation.Decompose(trans, lrotation, scale, lflipX);
+      adjmatrix.Rotate(-lrotation, textCenter);
+      adjmatrix.FlipX(centerY);
+      adjmatrix.Rotate( lrotation, textCenter);
    }
-   if (flipX & non90)
-      adjmatrix.Rotate(270, TP(centerX, centerY));
+   if (0 > rotation) rotation += 360.0;
+   if ((90.0 < rotation) && (rotation <= 270.0))
+   {
+      adjmatrix.Rotate(180, textCenter);
+   }
    return adjmatrix;
 }
 
