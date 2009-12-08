@@ -77,7 +77,8 @@ public:
    drcEdge(long ordinal, drcRenderer*   render) { _ordinal = ordinal; _render = render;};
    void            addCoord(long x1, long y1, long x2, long y2);
    edge*           coords() {return &_coords;};
-   long            ordinal() {return _ordinal;};
+	edge            getZoom() const;
+   long            ordinal() const {return _ordinal;};
    void            addError(word la);
    static long     _precision;
 private:
@@ -92,7 +93,8 @@ public:
    drcPolygon(long ordinal, drcRenderer*   render) { _ordinal = ordinal; _render = render;};
    void            addCoord(long x, long y);
    CoordsVector*   coords() {return &_coords;};
-   long            ordinal() {return _ordinal;};
+	edge            getZoom()  const;
+   long            ordinal() const {return _ordinal;};
    void            addError(word la);
    static long     _precision;
 private:
@@ -120,6 +122,7 @@ public:
    void         addDescrString(const std::string & str);
    void         addPolygon(const Calbr::drcPolygon &poly);
    void         addEdge(const Calbr::drcEdge &theEdge);
+	edge         getZoom(long ordinal);
 private:
 	unsigned int _num;
    long         _curResCount; //current result count

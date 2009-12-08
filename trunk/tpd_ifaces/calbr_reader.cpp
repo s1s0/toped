@@ -55,6 +55,16 @@ void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
    _coords.y2 = yy;
 }
 
+Calbr::edge Calbr::drcEdge::getZoom() const
+{
+	edge ret;
+	ret.x1 = std::min(_coords.x1, _coords.x2);
+	ret.y1 = std::min(_coords.y1, _coords.y2);
+	ret.x2 = std::max(_coords.x1, _coords.x2);
+	ret.y2 = std::max(_coords.y1, _coords.y2);
+	return ret;
+}
+
 void Calbr::drcEdge::addError(/*laydata::tdtdesign* atdb, */word la)
 {
    _render->addLine(_coords);
@@ -79,6 +89,28 @@ void Calbr::drcPolygon::addCoord(long x, long y)
 void Calbr::drcPolygon::addError(/*laydata::tdtdesign* atdb, */word la)
 {
    _render->addPoly(_coords);
+}
+
+Calbr::edge Calbr::drcPolygon::getZoom() const
+{
+	CoordsVector::const_iterator it = _coords.begin();
+	real minx = (*it).x;
+	real miny = (*it).y;
+	real maxx = (*it).x;
+	real maxy = (*it).y;
+	for(CoordsVector::const_iterator it = _coords.begin(); it != _coords.end(); ++it)
+	{
+		if ((*it).x < minx ) minx = (*it).x;
+		if ((*it).y < miny ) miny = (*it).y;
+		if ((*it).x > maxx ) maxx = (*it).x;
+		if ((*it).y > maxy ) maxy = (*it).y;
+	};
+	edge ret;
+	ret.x1 = minx;
+	ret.y1 = miny;
+	ret.x2 = maxx;
+	ret.y2 = maxy;
+	return ret;
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
@@ -106,6 +138,28 @@ void Calbr::drcRuleCheck::addDescrString(const std::string & str)
    _descrStrings.push_back(str);
 }
 
+Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
+{
+	edge ret;
+	for(std::vector <Calbr::drcPolygon>::const_iterator it = _polygons.begin(); it != _polygons.end(); ++it)
+	{
+		if (ordinal == (*it).ordinal()) 
+		{
+			ret = (*it).getZoom();
+			return ret;
+		}
+	}
+
+	for(std::vector <Calbr::drcEdge>::const_iterator it = _edges.begin(); it != _edges.end(); ++it)
+	{
+		if (ordinal == (*it).ordinal()) 
+		{
+			ret = (*it).getZoom();
+			return ret;
+		}
+	}
+	return ret;
+}
 
 //-----------------------------------------------------------------------------
 Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
@@ -312,38 +366,13 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
       std::string x = (*it)->ruleCheckName();
       if((*it)->ruleCheckName() == error)
       {
-         /*drcRuleCheck *rule = (*it);
-         for(std::vector <Calbr::drcPolygon>::iterator it2poly = rule->polygons()->begin();
-            it2poly!=  rule->polygons()->end(); ++it2poly)
-         {
-            if (number == (*it2poly).ordinal())
-            {
-               drcPolygon *poly = &(*it2poly);
-
-               _render->drawBegin();
-                  poly->showError(0);
-               _render->drawEnd();
-            }
-         }
-
-         for(std::vector <Calbr::drcEdge>::iterator it2edge = rule->edges()->begin();
-            it2edge!=  rule->edges()->end(); ++it2edge)
-         {
-            if (number == (*it2edge).ordinal())
-            {
-               _render->drawBegin();
-                  (*it2edge).showError(0);
-               _render->drawEnd();
-            }
-         }*/
-			_render->hideAll();
-			_render->showError((*it)->num());
+         _render->hideAll();
+         _render->showError((*it)->num());
+         edge zoom = (*it)->getZoom(number);
+         _render->zoom(zoom);
       }
    }
    assert(it == _RuleChecks.end());
-
-//	_render->hideAll();
-//	_render->showError(number);
 }
 
 void   Calbr::CalbrFile::showAllErrors(void)
