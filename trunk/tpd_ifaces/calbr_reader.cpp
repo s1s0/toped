@@ -158,6 +158,7 @@ Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
 			return ret;
 		}
 	}
+   throw EXPTNdrc_reader("Can't zoom to chosen element");
 	return ret;
 }
 
@@ -360,6 +361,7 @@ void   Calbr::CalbrFile::addResults()
 
 void   Calbr::CalbrFile::showError(const std::string & error, long  number)
 {
+   edge zoom;
    RuleChecksVector::const_iterator it;
    for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
    {
@@ -368,7 +370,14 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
       {
          _render->hideAll();
          _render->showError((*it)->num());
-         edge zoom = (*it)->getZoom(number);
+         try 
+         {
+            zoom = (*it)->getZoom(number);
+         }
+         catch (EXPTNdrc_reader)
+         {
+            return;
+         }
          _render->zoom(zoom);
       }
    }
@@ -377,11 +386,12 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
 
 void   Calbr::CalbrFile::showAllErrors(void)
 {
-	RuleChecksVector::const_iterator it;
-   for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
-   {
-		_render->showError((*it)->num());
-   }
+   _render->showAll();
+}
+
+void   Calbr::CalbrFile::hideAllErrors(void)
+{
+   _render->hideAll();
 }
 
 void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)
