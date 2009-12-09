@@ -351,7 +351,7 @@ bool tui::LayoutCanvas::initializeGL()
       dlg1->Destroy();
       VBOrendering = false;
    }
-   else if (!glewIsSupported("GL_VERSION_1_5 GL_EXT_multi_draw_arrays" /* GL_ARB_vertex_buffer_object"*/))
+   else if (!glewIsSupported("GL_VERSION_1_5" /*GL_EXT_multi_draw_arrays GL_ARB_vertex_buffer_object"*/))
    {
       VBOrendering = false;
       //@TODO - to avoid the "if"

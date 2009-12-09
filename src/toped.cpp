@@ -75,8 +75,8 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    wxFont fontX = GetFont();
    fontX.SetWeight(wxBOLD);
    fontX.SetPointSize(9);
-   //fontX.SetFamily(wxFONTFAMILY_MODERN); 
-   
+   //fontX.SetFamily(wxFONTFAMILY_MODERN);
+
    SetFont(fontX);
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    SetBackgroundColour(wxColour(wxT("LIGHT_GRAY")));
@@ -139,7 +139,7 @@ void tui::CanvasStatus::setdYpos(wxString coordY){
    _dY->SetLabel(coordY);
    _dY->Refresh();
 }
-   
+
 void tui::CanvasStatus::setSelected(wxString numsel) {
    _selected->SetLabel(numsel);
 }
@@ -158,15 +158,15 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnGDSexportLIB)
    EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
    EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
-   
+
    EVT_MENU( TMCIF_EXPORTL       , tui::TopedFrame::OnCIFexportLIB)
    EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFimport   )
-   
+
    EVT_MENU( TMCIF_OPEN          , tui::TopedFrame::OnCIFRead     )
    EVT_MENU( TMCIF_TRANSLATE     , tui::TopedFrame::OnCIFtranslate)
    EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFexportCELL)
    EVT_MENU( TMCIF_CLOSE         , tui::TopedFrame::OnCIFclose    )
-   
+
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
    EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
@@ -279,7 +279,7 @@ END_EVENT_TABLE()
 // See the FIXME note in the bootom of browsers.cpp
 //   EVT_COMMAND(wxID_ANY, wxEVT_INIT_DIALOG , tui::TopedFrame::OnDefineLayer )
 
-tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos, 
+tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
 {
    SetIcon(wxICON(toped16x16));
@@ -293,7 +293,7 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initMenuBar();
    wxToolTip::Enable(true);
    wxToolTip::SetDelay(3000);
-		
+
 
 }
 
@@ -345,7 +345,7 @@ void tui::TopedFrame::initMenuBar() {
    gdsMenu->Append(TMGDS_EXPORTC, wxT("export cell") , wxT("Export cell to GDS"));
    gdsMenu->Append(TMGDS_CLOSE  , wxT("close")  , wxT("Clear the parsed GDS file from memory"));
    */
-   
+
 
    /*fileMenu=DEBUG_NEW wxMenu();
    fileMenu->Append(TMFILE_NEW   , wxT("New ...\tCTRL-N")    , wxT("Create DEBUG_NEW design"));
@@ -506,7 +506,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Draw/Polygon",  "CTRL-L", &tui::TopedFrame::OnDrawPoly, "Create new polygon on the current layer" );
    _resourceCenter->appendMenu("&Draw/Wire ...", "CTRL-W", &tui::TopedFrame::OnDrawWire, "Create new wire on the current layer" );
    _resourceCenter->appendMenu("&Draw/Text ...", "CTRL-T", &tui::TopedFrame::OnDrawText, "Add text on the current layer" );
-   
+
 
    //---------------------------------------------------------------------------
    // menuBar entry Modify
@@ -613,9 +613,9 @@ void tui::TopedFrame::initMenuBar() {
    //settingsMenu->Check(TMSET_CELLMARK,true);
    //settingsMenu->Check(TMSET_TEXTMARK,true);
    _resourceCenter->buildMenu(menuBar);
-  
+
    menuBar->Insert(menuBar->GetMenuCount()-1,settingsMenu  , wxT("Se&ttings"));
-  
+
 }
 
 void tui::TopedFrame::setIconDir(const std::string& uiDir)
@@ -623,7 +623,7 @@ void tui::TopedFrame::setIconDir(const std::string& uiDir)
    if (_resourceCenter) _resourceCenter->setIconDir(uiDir);
 }
 
-void tui::TopedFrame::initToolBars() 
+void tui::TopedFrame::initToolBars()
 {
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
    _resourceCenter->appendTool("main", "new", "new", "", "new cell", &tui::TopedFrame::OnCellNew);
@@ -672,9 +672,9 @@ void tui::TopedFrame::initToolBars()
 
    getAuiManager()->Update();
 /*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
-   X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
+   X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition,
    id   wxSize(100,32), wxST_NO_AUTORESIZE);
-   Y_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition, 
+   Y_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition,
                               wxSize(100,32), wxST_NO_AUTORESIZE);
 //wxSIMPLE_BORDER | wxALIGN_RIGHT  |
    wxFont fontX = X_pos->GetFont();
@@ -721,7 +721,7 @@ void tui::TopedFrame::initView()
 
    //----------------------------------------------------------------------------
    // the openGL window - the canvas
-   //---------------------------------------------------------------------------- 
+   //----------------------------------------------------------------------------
    int gl_attrib[] = {
                         WX_GL_RGBA             ,
                         WX_GL_MIN_RED          , 8,
@@ -813,7 +813,7 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutDialogInfo info;
     info.SetName(wxT("Toped"));
-    info.SetVersion(wxT("0.9.5"));
+    info.SetVersion(wxT("0.9.51"));
     info.SetIcon(wxIcon( toped32x32_xpm ));
     info.SetWebSite(wxT("www.toped.org.uk"));
     info.SetDescription(wxT("Open source IC layout editor"));
@@ -843,7 +843,7 @@ void tui::TopedFrame::OnCanvasStatus(wxCommandEvent& evt)
       case CNVS_DEL_Y       : _GLstatus->setdYpos(evt.GetString()); break;
       case CNVS_SELECTED    : _GLstatus->setSelected(evt.GetString());break;
       default: assert(false);
-   }   
+   }
 }
 
 // void tui::TopedFrame::OnTopedStatus(wxCommandEvent& evt)
@@ -881,15 +881,15 @@ void tui::TopedFrame::OnNewDesign(wxCommandEvent& evt) {
    else SetStatusText(wxT("New file not created"));
 }
 
-void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt) 
+void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
 {
-   if (DATC->modified()) 
+   if (DATC->modified())
    {
       wxMessageDialog dlg1(this,
          wxT("Current design contains unsaved data"),
          wxT("Save the current design before creating a new one?"),
          wxYES_NO | wxCANCEL | wxICON_QUESTION);
-      switch (dlg1.ShowModal()) 
+      switch (dlg1.ShowModal())
       {
          case wxID_YES:OnTDTSave(evt);
          case wxID_NO: break;
@@ -900,7 +900,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
    wxFileDialog dlg2(this, wxT("Select a design to open"), wxT(""), wxT(""),
       wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
       tpdfOPEN);
-   if (wxID_OK == dlg2.ShowModal()) 
+   if (wxID_OK == dlg2.ShowModal())
    {
       wxString filename = dlg2.GetFilename();
       wxString ost;
@@ -914,13 +914,13 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
    else SetStatusText(wxT("Opening aborted"));
 }
 
-void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt) 
+void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt)
 {
    SetStatusText(wxT("Loading library..."));
    wxFileDialog dlg2(this, wxT("Select a library to open"), wxT(""), wxT(""),
       wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
       tpdfOPEN);
-   if (wxID_OK == dlg2.ShowModal()) 
+   if (wxID_OK == dlg2.ShowModal())
    {
       wxString filename = dlg2.GetFilename();
       wxString ost;
@@ -990,7 +990,7 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
 }
 
 void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
-   wxString ost; 
+   wxString ost;
    ost << wxT("tdtsave();");
    SetStatusText(wxT("Saving file..."));
    wxString wxfilename(DATC->tedfilename().c_str(), wxConvFile);
@@ -1027,11 +1027,11 @@ void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
       ost << wxT("tdtsaveas(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
       _cmdline->parseCommand(ost);
 //      SetStatusText(wxT("Design saved in file: ")+dlg2.GetFilename());
-   }   
+   }
    else SetStatusText(wxT("Saving aborted"));
 }
 
-void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event)) 
+void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event))
 {
    SetStatusText(wxT("Saving layout properties ..."));
    wxFileDialog dlg2(this, wxT("Save properties"), wxT(""), wxT(""),
@@ -1102,7 +1102,7 @@ void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent& WXUNUSED(event))
    delete[] theImage;
 }
 
-void tui::TopedFrame::OnCellNew(wxCommandEvent& cevent) 
+void tui::TopedFrame::OnCellNew(wxCommandEvent& cevent)
 {
    wxString defcellname = wxEmptyString;
    if (0 != cevent.GetId())
@@ -1320,8 +1320,8 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
             USMap2wxString(laymap2save , wxlaymap2save);
 
          wxString ost;
-         ost << wxT("gdsexport(\"") 
-            << cellname.c_str() << wxT("\" , ") 
+         ost << wxT("gdsexport(\"")
+            << cellname.c_str() << wxT("\" , ")
             << (recur ? wxT("true") : wxT("false")) << wxT(",")
             << wxlaymap << wxT(", \"")
             << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str()
@@ -1395,7 +1395,7 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
    delete dlg;
 }
 
-void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event)) 
+void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
 {
    SetStatusText(wxT("Exporting a cell to CIF file..."));
    wxRect wnd = GetRect();
@@ -1441,7 +1441,7 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
 
          wxString ost;
 
-         ost << wxT("cifexport(\"") 
+         ost << wxT("cifexport(\"")
             << cellname << wxT("\", ")
             << (recur ? wxT("true") : wxT("false")) << wxT(", ")
             << wxlaymap << wxT(", \"")
@@ -1485,11 +1485,11 @@ void tui::TopedFrame::CellRef(wxString clname) {
    try {
       dlg = DEBUG_NEW tui::getCellRef(this, -1, wxT("Cell Reference"), pos, clname);
    }
-   catch (EXPTN) {delete dlg;return;}   
+   catch (EXPTN) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
-/*      ost << wxT("cellref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),") 
-          <<                     dlg->get_angle() << wxT(",") 
+/*      ost << wxT("cellref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),")
+          <<                     dlg->get_angle() << wxT(",")
           << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
           <<                                wxT("1")  << wxT(");");*/
       ost << wxT("cellref(\"") << dlg->get_selectedcell() << wxT("\");");
@@ -1505,21 +1505,21 @@ void tui::TopedFrame::CellARef(wxString clname) {
    try {
       dlg = DEBUG_NEW tui::getCellARef(this, -1, wxT("Array of References"), pos, clname);
    }
-   catch (EXPTN) {delete dlg; return;}   
+   catch (EXPTN) {delete dlg; return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
-/*      ost << wxT("cellaref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),") 
-          <<                     dlg->get_angle() << wxT(",") 
+/*      ost << wxT("cellaref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),")
+          <<                     dlg->get_angle() << wxT(",")
           << (dlg->get_flip() ? wxT("true") : wxT("false")) << wxT(",")
           <<                                 wxT("1")  << wxT(",")
-          <<                       dlg->get_col() << wxT(",") 
-          <<                       dlg->get_row() << wxT(",") 
-          <<                     dlg->get_stepX() << wxT(",") 
+          <<                       dlg->get_col() << wxT(",")
+          <<                       dlg->get_row() << wxT(",")
+          <<                     dlg->get_stepX() << wxT(",")
           <<                     dlg->get_stepY() << wxT(");");*/
       ost << wxT("cellaref(\"") << dlg->get_selectedcell() << wxT("\",")
           <<                       dlg->get_col() << wxT(",")
-          <<                       dlg->get_row() << wxT(",") 
-          <<                     dlg->get_stepX() << wxT(",") 
+          <<                       dlg->get_row() << wxT(",")
+          <<                     dlg->get_stepX() << wxT(",")
           <<                     dlg->get_stepY() << wxT(");");
       _cmdline->parseCommand(ost);
    }
@@ -1529,7 +1529,7 @@ void tui::TopedFrame::CellARef(wxString clname) {
 void tui::TopedFrame::OnCellGroup(wxCommandEvent& WXUNUSED(event)) {
    // Here - try a hollow lock/unlock the database just to check that it exists
    try {DATC->lockDB();}
-   catch (EXPTN) {return;}   
+   catch (EXPTN) {return;}
    DATC->unlockDB();
    //
    wxTextEntryDialog dlg2(this,
@@ -1561,7 +1561,7 @@ void tui::TopedFrame::OnDrawWire(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
    wxRect wnd = GetRect();
-   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);   
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getTextdlg* dlg = NULL;
    try {
       dlg = DEBUG_NEW tui::getTextdlg(this, -1, wxT("Add text"), pos);
@@ -1631,7 +1631,7 @@ void tui::TopedFrame::OnGridDefine(wxCommandEvent& WXUNUSED(event)) {
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::getGrid dlg(this, -1, wxT("Grid size"), pos, grid[0], grid[1], grid[2]);
    if ( dlg.ShowModal() == wxID_OK ) {
-      wxString ost; 
+      wxString ost;
       ost << wxT("definegrid(0,")<<dlg.grid0()<<wxT(",\"white\");");
       ost << wxT("definegrid(1,")<<dlg.grid1()<<wxT(",\"white\");");
       ost << wxT("definegrid(2,")<<dlg.grid2()<<wxT(",\"white\");");
@@ -1642,13 +1642,13 @@ void tui::TopedFrame::OnGridDefine(wxCommandEvent& WXUNUSED(event)) {
 void tui::TopedFrame::OnGrid0(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
    ost << wxT("grid(0,") << (settingsMenu->IsChecked(TMSET_GRID0) ? wxT("true") : wxT("false")) << wxT(");");
-   _cmdline->parseCommand(ost);   
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnGrid1(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
    ost << wxT("grid(1,") << (settingsMenu->IsChecked(TMSET_GRID1) ? wxT("true") : wxT("false")) << wxT(");");
-   _cmdline->parseCommand(ost);   
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnGrid2(wxCommandEvent& WXUNUSED(event)){
@@ -1751,31 +1751,31 @@ void tui::TopedFrame::OnTextBox(wxCommandEvent& WXUNUSED(event)){
 void tui::TopedFrame::OnAutopan(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
    ost << wxT("autopan(")<< (settingsMenu->IsChecked(TMSET_AUTOPAN) ? wxT("true") : wxT("false")) << wxT(");");
-   _cmdline->parseCommand(ost);   
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnZeroCross(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
    ost << wxT("zerocross(")<< (settingsMenu->IsChecked(TMSET_ZEROCROSS) ? wxT("true") : wxT("false")) << wxT(");");
-   _cmdline->parseCommand(ost);   
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnMarker0(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
    ost << wxT("shapeangle(0);");
-   _cmdline->parseCommand(ost);   
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnMarker45(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
    ost << wxT("shapeangle(45);");
-   _cmdline->parseCommand(ost);   
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
    ost << wxT("shapeangle(90);");
-   _cmdline->parseCommand(ost);   
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
@@ -1863,8 +1863,8 @@ void tui::TopedFrame::OnChangeRef( wxCommandEvent& WXUNUSED( event ))
    try {
       dlg = DEBUG_NEW tui::getCellRef(this, -1, wxT("Change Cell Reference"), pos, wxT(""));
    }
-   catch (EXPTN) {delete dlg;return;}   
-   if ( dlg->ShowModal() == wxID_OK ) 
+   catch (EXPTN) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK )
    {
       wxString ost;
       ost << wxT("changeref(\"") << dlg->get_selectedcell() << wxT("\");");
@@ -1877,7 +1877,7 @@ void tui::TopedFrame::OnChangeText( wxCommandEvent& WXUNUSED( event ))
 {
    wxTextEntryDialog dlg(this, wxT("New string:"), wxT("Change text string"));
    wxString cname, ost;
-   if ((wxID_OK == dlg.ShowModal()) && ((cname = dlg.GetValue()) != wxT(""))) 
+   if ((wxID_OK == dlg.ShowModal()) && ((cname = dlg.GetValue()) != wxT("")))
    {
       SetStatusText(wxT("Change text string ..."));
       wxString ost;
@@ -1979,8 +1979,8 @@ void  tui::TopedFrame::OnMouseAccel(wxCommandEvent& evt) {
    else if (1 == evt.GetInt())
       ost << wxT("select(");
    else return;
-   ost << evt.GetString() << wxT(");");   
-   _cmdline->parseCommand(ost);   
+   ost << evt.GetString() << wxT(");");
+   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnzoomIn(wxCommandEvent& WXUNUSED(event)) {
@@ -2052,7 +2052,7 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
    int size = evt.GetInt();
    bool direction = static_cast<bool>(evt.GetExtraLong());
    tui::IconSizes sz = static_cast<tui::IconSizes>(size);
-   
+
    _resourceCenter->setToolBarSize(direction, sz);
    wxCommandEvent eventTB_MENU_UPD(wxEVT_SETINGSMENU);
    if (tui::_tuihorizontal == direction)
@@ -2127,7 +2127,7 @@ void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))
 void tui::TopedFrame::OnTextLogOverflow(wxCommandEvent& WXUNUSED(event))
 {
    //@TODO! I can't get this message. In the same time it seems that
-   // wx is getting stuck when bombarded with messages from the 
+   // wx is getting stuck when bombarded with messages from the
    // tell thread (GDS parse/import case). This is observed on
    // windows. Trincating the text log contents doesn't really help
 //   int boza;
