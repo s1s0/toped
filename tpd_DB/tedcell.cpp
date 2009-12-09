@@ -35,7 +35,9 @@
 #include "tedesign.h"
 #include "tenderer.h"
 #include "ps_out.h"
-#include "outbox.h"
+#include "../tpd_ifaces/cif_io.h"
+#include "../tpd_ifaces/gds_io.h"
+#include "../tpd_common/outbox.h"
 
 extern layprop::FontLibrary* fontLib;
 
@@ -273,12 +275,12 @@ void laydata::tdtdefaultcell::write(TEDfile* const, const cellList&, const TDTHi
    assert(false);
 }
 
-void laydata::tdtdefaultcell::GDSwrite(DbExportFile&, const cellList&, const TDTHierTree*) const
+void laydata::tdtdefaultcell::GDSwrite(GDSin::GdsFile&, const cellList&, const TDTHierTree*, real, bool) const
 {
    assert(false);
 }
 
-void laydata::tdtdefaultcell::CIFwrite(DbExportFile&, const cellList&, const TDTHierTree*) const
+void laydata::tdtdefaultcell::CIFwrite(CIFin::CifExportFile&, const cellList&, const TDTHierTree*, real, bool) const
 {
    assert(false);
 }
@@ -420,7 +422,7 @@ void laydata::tdtcell::openGL_draw(layprop::DrawProperties& drawprop, bool activ
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      unsigned curlayno = drawprop.getTenderLay(lay->first);
+      unsigned curlayno = lay->first;
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
       // fancy like this (dlist iterator) , besause a simple
@@ -442,12 +444,8 @@ void laydata::tdtcell::openGL_render(tenderer::TopRend& rend, const CTM& trans,
    typedef layerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      //first to check visibility for layer
-      if (rend.layerHidden(lay->first)) continue;
-      //second to get fake number for layer. 
-      //For regular database it is equal of real number of layer
-      //For drc database it is common for all layers
-      unsigned curlayno = rend.getTenderLay(lay->first);
+      unsigned curlayno = lay->first;
+      if (rend.layerHidden(curlayno)) continue;
       // retrieve the selected objects (if they exists)
       selectList::const_iterator dlsti;
       const dataList* dlist;
@@ -655,51 +653,59 @@ void laydata::tdtcell::write(TEDfile* const tedfile, const cellList& allcells, c
    tedfile->registercellwritten(name());
 }
 
-void laydata::tdtcell::GDSwrite(DbExportFile& gdsf, const cellList& allcells,
-                                 const TDTHierTree* root) const
+void laydata::tdtcell::GDSwrite(GDSin::GdsFile& gdsf, const cellList& allcells,
+                                 const TDTHierTree* root, real UU, bool recur) const
 {
    // We are going to write the cells in hierarchical order. Children - first!
-   if (gdsf.recur())
+   if (recur)
    {
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
-         allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child);
+         allcells.find(Child->GetItem()->name())->second->GDSwrite(gdsf, allcells, Child, UU, recur);
          Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
    if (gdsf.checkCellWritten(name())) return;
    //
-   gdsf.definitionStart(name());
-
+   std::string message = "...converting " + name();
+   tell_log(console::MT_INFO, message);
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BGNSTR);
+   gdsf.setTimes(wr);gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_STRNAME, name().size());
+   wr->add_ascii(name().c_str()); gdsf.flush(wr);
    // and now the layers
    laydata::layerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      if ((REF_LAY != wl->first) && !gdsf.layerSpecification(wl->first)) continue;
-      wl->second->GDSwrite(gdsf);
+      word dummy_lay, dummy_type;
+      if ((REF_LAY != wl->first) && !gdsf.getMappedLayType(dummy_lay, dummy_type, wl->first) )
+         continue;
+      wl->second->GDSwrite(gdsf, wl->first, UU);
    }
-   gdsf.definitionFinish();
+   wr = gdsf.setNextRecord(gds_ENDSTR);gdsf.flush(wr);
+   gdsf.registerCellWritten(name());
 }
 
-void laydata::tdtcell::CIFwrite(DbExportFile& ciff, const cellList& allcells,
-                                const TDTHierTree* root) const
+
+void laydata::tdtcell::CIFwrite(CIFin::CifExportFile& ciff, const cellList& allcells,
+                                const TDTHierTree* root, real DBU, bool recur) const
 {
    // We going to write the cells in hierarchical order. Children - first!
-   if (ciff.recur())
+   if (recur)
    {
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
-         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child);
+         allcells.find(Child->GetItem()->name())->second->CIFwrite(ciff, allcells, Child, DBU, recur);
          Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
    if (ciff.checkCellWritten(name())) return;
    //
-   ciff.definitionStart(name());
+   ciff.definitionStart(name(),DBU);
    // @TODO! See Bug#15242
    // Currently all coordinates are exported in DBU units and in the DS line of CIF
    // we put the ratio between DBU and the CIF precision (constant). This makes the
@@ -939,7 +945,7 @@ bool laydata::tdtcell::copy_selected(laydata::tdtdesign* ATDB, const CTM& trans)
    dataList copyList;
    dataList::iterator DI;
    tdtdata *data_copy;
-   dword numshapes;
+   _dbl_word numshapes;
    selectList::iterator CL = _shapesel.begin(); 
    while (CL != _shapesel.end())
    {
@@ -1845,9 +1851,9 @@ void laydata::tdtcell::validate_layers()
       lay->second->validate();
 }
 
-dword laydata::tdtcell::getFullySelected(dataList* lslct) const 
+_dbl_word laydata::tdtcell::getFullySelected(dataList* lslct) const 
 {
-   dword numselected = 0;
+   _dbl_word numselected = 0;
    for (dataList::const_iterator CI = lslct->begin(); 
                                                      CI != lslct->end(); CI++)
       // cont the fully selected shapes

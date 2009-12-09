@@ -29,7 +29,7 @@
 #ifdef WIN32
 //For GUI application with glf we need "windows.h"
 #include <windows.h>
-#endif
+#endif 
 
 #include <sstream>
 #include <iostream>
@@ -40,10 +40,12 @@
 #include "logicop.h"
 #include "tenderer.h"
 #include "ps_out.h"
-#include "outbox.h"
+#include "../tpd_ifaces/cif_io.h"
+#include "../tpd_ifaces/gds_io.h"
+#include "../tpd_common/outbox.h"
 
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
-//                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18,
+//                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 
 //                           0x30, 0x18, 0x3F, 0xF8, 0x3F, 0xF8, 0x00, 0x00, 0x00, 0x00};
 
 extern layprop::FontLibrary* fontLib;
@@ -56,86 +58,86 @@ are several important points to consider here.
    - On first place of course fitting this operatoins within the existing
      data base structure and esspecially make quadTree trasparent to them.
      The latter appears to be quite important, because this structure is
-     not existing for the user, yet plays a major role in the database
-     integrity. The other thing of a significant importance is that the
-     selected structures have to be drawn differently - i.e. they need to be
+     not existing for the user, yet plays a major role in the database 
+     integrity. The other thing of a significant importance is that the 
+     selected structures have to be drawn differently - i.e. they need to be 
      easyly distinguishable on the screen from the other shapes.
    - Minimization of the database. As now the database is build strictly
      on a hierarchical and "conspirative" principles so that every part of
-     it holds the absolute minimum of data. For example the layer structure
-     does not now shit about the cell it belongs to, it even doesn't know
+     it holds the absolute minimum of data. For example the layer structure 
+     does not now shit about the cell it belongs to, it even doesn't know 
      what is its layer number. Similarly the shape doesn't know neither it's
      placeholder nor its layer or cell. Everything is on kind of "need to know
      basis". Lower levels of the database are unaware of the hier levels.
-     Furthermore on certain hierarchical level every component knows only about
-     the neithboring component on the right (next one), but nothing about the
+     Furthermore on certain hierarchical level every component knows only about 
+     the neithboring component on the right (next one), but nothing about the 
      one on the left (previous one)
-   - Select operation assumes however that an operation like move/delete/copy
+   - Select operation assumes however that an operation like move/delete/copy 
      etc. is about to follow, i.e. the selected shapes will be accessed shortly
-     and this access has to be swift and reliable. Certainly we need some short
-     way to access the already selected structures.
-     There are generally two possible ways to do this
-     -> mark every selected figure
+     and this access has to be swift and reliable. Certainly we need some short 
+     way to access the already selected structures. 
+     There are generally two possible ways to do this 
+     -> mark every selected figure 
      -> create a list that contains a pointers to the selected figures
      The irony here is that both possibilities suffer from the "conspirative"
-     principle on which database is build. In other words it appears that it
+     principle on which database is build. In other words it appears that it 
      is not enough to know what is the selected shape. Why?
-     How on earth you are going to delete a shape if you know only its next of
-     kin? As a matter of fact it is possible ;), the only detail is that
+     How on earth you are going to delete a shape if you know only its next of 
+     kin? As a matter of fact it is possible ;), the only detail is that 
      "Segmentatoin fault" will follow inevitably.
      Appparently you need to know what is the structure in the upper level
-     of the hierarchy (it's father if you want).
-   - The vast majority  of the shapes (may be all of them in the near feature)
+     of the hierarchy (it's father if you want). 
+   - The vast majority  of the shapes (may be all of them in the near feature) 
      are placed in a quadTree. The objects of this class however "by nature"
-     are like moving sands. They might change dramatically potentially with
+     are like moving sands. They might change dramatically potentially with 
      every little change in the data base. This effectively means that the
      pointer to the shape placeholder is not that reliable as one would wish to.
      It is OK as long as data base hasn't changed after the select operation.
-   - By definition TELL should be able to operate with TOPED shapes (or list of
+   - By definition TELL should be able to operate with TOPED shapes (or list of 
      them). Select operation should be able to return to TELL a reliable list
-     of TOPED shapes, that can be used in any moment. A "small detail" here is
-     the modify or info operation on a TOPED shape. We certainly need to know the
-     layer, shape is placed on, and maybe the cell. TELL doesn't know (and doesn't
+     of TOPED shapes, that can be used in any moment. A "small detail" here is 
+     the modify or info operation on a TOPED shape. We certainly need to know the 
+     layer, shape is placed on, and maybe the cell. TELL doesn't know (and doesn't 
      want to know) about the TOPED database structure, quadTree's etc. shit.
-   - Undo list - this is not started yet, but seems obvoius that in order to
-     execute undelete for example quadTree pointers will not be very helpfull,
-     because they migh be gone already. Instead a layer number will be
+   - Undo list - this is not started yet, but seems obvoius that in order to 
+     execute undelete for example quadTree pointers will not be very helpfull, 
+     because they migh be gone already. Instead a layer number will be 
      appreciated. All this in case the shape itself is not deleted, but just moved
      in the Attic.
    ----------------------------------------------------------------------------
    In short:
-   - It doesn't seems a good idea to sacrifice the database (in terms of size
-     and speed of drawing) for select operations. Means I don't want to add
+   - It doesn't seems a good idea to sacrifice the database (in terms of size 
+     and speed of drawing) for select operations. Means I don't want to add 
      more data to every single shape object.
    - The TELL operations with TOPED shapes on second though seem not to be so
      convinient and required "by definition" (see the paragraph below)
-   - Pointer to a quadTree as a parent object to the selected shape seems to
+   - Pointer to a quadTree as a parent object to the selected shape seems to 
      be inevitable despite the unstable nature of teh quadTree - otherwise every
      subsequent operation on the selected objects will require searching of the
-     marked components one by one troughout entire cell or at least layer. This
-     might take more time than the select itself, which doesn't seems to be very
+     marked components one by one troughout entire cell or at least layer. This 
+     might take more time than the select itself, which doesn't seems to be very 
      wise.
-   - For undo purposes we will need separate list type for selected components
+   - For undo purposes we will need separate list type for selected components 
      that will contain layer number instead of quadTree.
    -----------------------------------------------------------------------------
    Now about TELL operations over TOPED shapes.
    What we need in TELL without doubt is;
    -> select TOPED objects
    -> move/copy/delete etc. selected objects.
-   -> modify selected object - that is the same as previous, but also - change
+   -> modify selected object - that is the same as previous, but also - change 
       the contents and size of text data, change the cell in ref/aref data etc.
    Do we need to be able to keep more than one set of selected objects?
    This is quite tempting. A lot I would say. So what it will give to TELL?
    Ability to keep a list of TOPED objects in a variable, that can be used
-   later... and to make a big mess !!!
-   - Object selection in TOPED is done ALWAYS withing a cell. Having a TELL
+   later... and to make a big mess !!! 
+   - Object selection in TOPED is done ALWAYS withing a cell. Having a TELL 
      variable stored somewhere, how the parser will control where the selection
      is from and what is the active cell at the moment?
    - Even if you want to copy or move some group of shapes from one cell to
      another there is still a way: opencell<source>->select->group<new_cell>
      ->opencell<destination>->addref<new_cell>
    - What happens if the TOPED components listed in the TELL variable or part
-     of them are deleted or moved subsequently? That will just confuse the
+     of them are deleted or moved subsequently? That will just confuse the 
      TELL user. (Who the fuck is messing with my list?)
    - I can not think of a case when two or more separate lists of TOPED shapes,
      will be needed in the same time. We don't have TELL operation that works
@@ -148,24 +150,24 @@ are several important points to consider here.
    this doen't seem to harm the abilities of the language.
    -----------------------------------------------------------------------------
    Then here are the rules:
-   - There is ONE select list in TOPED and in TELL. That will be internal TELL
+   - There is ONE select list in TOPED and in TELL. That will be internal TELL 
      variable(the first one). We should think about a convention for internal
-     variables - $selected is the first idea. The variable will be updated
-     automatically as long as it will point to the list of the selected
-     components in the active cell (oops - here it is the way to maintain more
+     variables - $selected is the first idea. The variable will be updated 
+     automatically as long as it will point to the list of the selected 
+     components in the active cell (oops - here it is the way to maintain more 
      than one list - per cell basis!)
    - The only placeholder type is quadTree. This means that ref/arefs should be
-     placed in a quadTree instead of a C++ standard container
+     placed in a quadTree instead of a C++ standard container  
    - No tdtdata is deleted during the session. Delete operation will move
      the shape in a different placeholder (Attic), or alternatively will mark it
      as deleted. This is to make undo operations possible. It seems appropriate,
      every cell to have an attic where the rubbish will be stored.
    - Select list contains a pointer to the lowest quadTree placeholder that
      contains seleted shapes.
-   - tdtdata contains a field that will indicate the status of the shape -
-     selected or not. The same field might be used to indicate the shape is
+   - tdtdata contains a field that will indicate the status of the shape - 
+     selected or not. The same field might be used to indicate the shape is 
      deleted or any other status. This adds a byte to the every single component.
-     It seems however that it will pay-back when drawing a large amount of
+     It seems however that it will pay-back when drawing a large amount of 
      selected data. As usual - speed first!
    - The select list is invalidated with every cell change. The new shape might
      be selected.
@@ -173,17 +175,17 @@ are several important points to consider here.
    Now when already the only placeholder is quadTree ...
    -----------------------------------------------------------------------------
    Having a possibility to keep the list of components in TELL still seems
-   quite tempting. It still seems that this might speed-up a lot of TELL
-   operations, although it is not clear at the moment how exactly. In the same
-   time all written above about the possible mess is absolutely true.
-   It looks however that there is bright way out of the situation so that
+   quite tempting. It still seems that this might speed-up a lot of TELL 
+   operations, although it is not clear at the moment how exactly. In the same 
+   time all written above about the possible mess is absolutely true. 
+   It looks however that there is bright way out of the situation so that 
    "the wolf is happy and the sheep is alive". Here it is:
    - All of the above rules are still in place EXCEPT the first one
-   - TOPED has still ONE active list of selected components. It is stored in
+   - TOPED has still ONE active list of selected components. It is stored in 
      the active cell structure and can be obtained from TELL using the internal
      variable $seleted(or similar).
    - All select operatoins return a list of ttlayout that can be stored in
-     a TELL variable of the same type. It is not possible to use this variables
+     a TELL variable of the same type. It is not possible to use this variables 
      directly as a parameter for any modification operations (copy/move/delete
      etc.)
    - All modification related operations work with the TOPED list of selected
@@ -194,7 +196,7 @@ are several important points to consider here.
    TELL has an oportunity to reselect a certain list of shapes using a dedicated
    select function. All modifications are executed over the current TOPED list.
    TOPED list of selected components is invalidated after each cell change.
-   Thus the mess with the multiply selected lists seems to be sorted.
+   Thus the mess with the multiply selected lists seems to be sorted. 
 
 */
 
@@ -234,7 +236,7 @@ void laydata::tdtdata::select_this(dataList* selist)
    else
       // otherwise - simply add it to the list
       selist->push_back(selectDataPair(this,SGBitSet()));
-   _status = sh_selected;
+   _status = sh_selected; 
 }
 
 void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pselect)
@@ -258,7 +260,7 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
          // select some more points using shape specific procedures
          select_points(select_in, SI->second);
          // check that after the selection shape doesn't end up fully selected
-         if (SI->second.isallset())
+         if (SI->second.isallset()) 
          {
             _status = sh_selected;
             SI->second.clear();
@@ -270,7 +272,7 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
          SGBitSet pntlst(numpoints());
          // select some more points using shape specific procedures
          select_points(select_in, pntlst);
-         // and check
+         // and check 
          if (!pntlst.isallclear()) {
             _status = sh_partsel;
             selist->push_back(selectDataPair(this, SGBitSet(pntlst)));
@@ -280,7 +282,7 @@ void laydata::tdtdata::select_inBox(DBbox& select_in, dataList* selist, bool pse
    }
 }
 
-bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool pselect)
+bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool pselect) 
 {
    // check the integrity of the select list
    assert((sh_selected == _status) || (sh_partsel == _status));
@@ -296,41 +298,41 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
       }
       _status = sh_active;
       return true;// i.e. remove this from the list of selected shapes
-   }
+   }   
    // if select_in intersects with the overlapping box
-   else if ((clip > 0.0) && pselect)
+   else if ((clip > 0.0) && pselect) 
    {
       // for cell refernces and texts - dont't unselect if they are
       // partially covered
       if (1 == numpoints()) return false;
       // get all points if the shape has not been already partially selected
-      if (sh_partsel != _status)
+      if (sh_partsel != _status) 
          SI.second = SGBitSet(numpoints());
       // get an alias of the SI.second
       SGBitSet &pntlst = SI.second;
-      // finally - go and unselect some points
+      // finally - go and unselect some points   
       unselect_points(select_in, pntlst);
-      if (pntlst.isallclear())
+      if (pntlst.isallclear()) 
       {//none selected
-         _status = sh_active;
+         _status = sh_active; 
          pntlst.clear();
-         //delete pntlst;SI.second = NULL;
+         //delete pntlst;SI.second = NULL; 
          return true;
       }
-      else if (pntlst.isallset())
-      { //all points selected;
-         _status = sh_selected;
+      else if (pntlst.isallset()) 
+      { //all points selected; 
+         _status = sh_selected; 
          pntlst.clear();
-         //delete pntlst; SI.second = NULL;
+         //delete pntlst; SI.second = NULL; 
          return false;
-      }
-      else
+      }   
+      else 
       { // some selected
-         _status = sh_partsel;
+         _status = sh_partsel; 
          return false;
       }
    }
-   // if pselect is false and the shape is not fully overlapped by
+   // if pselect is false and the shape is not fully overlapped by 
    // the select_in - do nothing
    return false;
 }
@@ -355,12 +357,12 @@ bool  laydata::tdtdata::unselect(DBbox& select_in, selectDataPair& SI, bool psel
    // Here data processing is done twice. To avoid this - we have to
    // code glf procedures that follow the rule 1 - i.e. to calculate first
    // the entire string in terms of polygons and then to draw the lines
-   // and the fill as appripriate using the new data.
+   // and the fill as appripriate using the new data. 
    //
    // The second objective seems to be a problem as well
    // - drawing color as a rule is the same for the entire layer.
    //   -- this means that the reference marks and overlapping boxes of the
-   //      texts shold be drawn in the color of the layer (not in gray)
+   //      texts shold be drawn in the color of the layer (not in gray) 
    //   -- for the reference marks of the cell references as well as for
    //      their overlapping boxes this will be a problem because we'll
    //      have to change the color for one box only (and one mark)
@@ -387,7 +389,7 @@ laydata::tdtbox::tdtbox(const TP& p1, const TP& p2) : tdtdata()
    normalize(dummy);
 }
 
-laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata()
+laydata::tdtbox::tdtbox(TEDfile* const tedfile) : tdtdata() 
 {
    _pdata = DEBUG_NEW int4b[8];
    TP point;
@@ -606,14 +608,38 @@ void laydata::tdtbox::write(TEDfile* const tedfile) const {
    tedfile->put4b(_pdata[p2x]); tedfile->put4b(_pdata[p2y]);
 }
 
-void laydata::tdtbox::GDSwrite(DbExportFile& gdsf) const
+void laydata::tdtbox::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   gdsf.box(_pdata);
+   word gds_layer, gds_type;
+   if (gdsf.getMappedLayType(gds_layer, gds_type, lay))
+   {
+      GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_LAYER);
+      wr->add_int2b(gds_layer);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_DATATYPE);
+      wr->add_int2b(gds_type);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_XY,5);
+      wr->add_int4b(_pdata[p1x]);wr->add_int4b(_pdata[p1y]);
+      wr->add_int4b(_pdata[p1x]);wr->add_int4b(_pdata[p2y]);
+      wr->add_int4b(_pdata[p2x]);wr->add_int4b(_pdata[p2y]);
+      wr->add_int4b(_pdata[p2x]);wr->add_int4b(_pdata[p1y]);
+      wr->add_int4b(_pdata[p1x]);wr->add_int4b(_pdata[p1y]);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ENDEL);
+      gdsf.flush(wr);
+   }
+   //else
+   //{ No warning to the user here!. There can be millions of them!
+   //}
 }
 
-void laydata::tdtbox::CIFwrite(DbExportFile& ciff) const
+void laydata::tdtbox::CIFwrite(CIFin::CifExportFile& ciff) const
 {
-   ciff.box(_pdata);
+   unsigned int length = abs(_pdata[p2x] - _pdata[p1x]);
+   unsigned int width  = abs(_pdata[p2y] - _pdata[p1y]);
+   TP center((_pdata[p2x] + _pdata[p1x]) / 2, (_pdata[p2y] + _pdata[p1y]) / 2);
+   ciff.box(length, width, center);
 }
 
 void laydata::tdtbox::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
@@ -653,7 +679,7 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
    {
       logicop::pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut shapeList
-      for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
+      for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++) 
          if (NULL != (newshape = createValidShape(*CI)))
             decure[1]->push_back(newshape);
       cut_shapes.clear();
@@ -662,7 +688,7 @@ void laydata::tdtbox::polycut(pointlist& cutter, shapeList** decure)
       logicop::pcollection rest_shapes;
       if (operation.ANDNOT(rest_shapes))
          // add the resulting cut remainings to the_rest shapeList
-         for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++)
+         for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++) 
             if (NULL != (newshape = createValidShape(*CI)))
                decure[2]->push_back(newshape);
       rest_shapes.clear();
@@ -684,7 +710,7 @@ void laydata::tdtbox::stretch(int bfactor, shapeList** decure)
    decure[0]->push_back(this);
 }
 
-pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet& pset,
+pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet& pset, 
                                     const CTM&  movedM, const CTM& stableM) const {
   // convert box to polygon
    pointlist* mlist = DEBUG_NEW pointlist();
@@ -701,11 +727,11 @@ pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet& pset,
    // recalculated because seg0 at that moment is empty. On pass 1 (i == 1),
    // point mlist[1] is recalculated etc. The catch comes on the last pass
    // (i == size) when constructing the seg1, we need mlist[0] and mlist[1], but
-   // mlist[1] has been already recalculated and multiplying it with CTM
+   // mlist[1] has been already recalculated and multiplying it with CTM 
    // matrix again has pretty funny effect.
    // That's why another condition is introduced -> if (i == size)
    for (unsigned i = 0; i <= size; i++) {
-      if (i == size)
+      if (i == size) 
          if (pset.check(i%size) && pset.check((i+1) % size))
             seg1 = PSegment((*mlist)[(i  ) % size] * movedM,
                             (*mlist)[(i+1) % size]         );
@@ -714,10 +740,10 @@ pointlist* laydata::tdtbox::movePointsSelected(const SGBitSet& pset,
                             (*mlist)[(i+1) % size]          );
       else
          if (pset.check(i%size) && pset.check((i+1) % size))
-            seg1 = PSegment((*mlist)[(i  ) % size] * movedM,
+            seg1 = PSegment((*mlist)[(i  ) % size] * movedM, 
                             (*mlist)[(i+1) % size] * movedM);
          else
-            seg1 = PSegment((*mlist)[(i  ) % size] * stableM,
+            seg1 = PSegment((*mlist)[(i  ) % size] * stableM, 
                             (*mlist)[(i+1) % size] * stableM);
       if (!seg0.empty()) {
          seg1.crossP(seg0,(*mlist)[i%size]);
@@ -1030,7 +1056,7 @@ void laydata::tdtpoly::polycut(pointlist& cutter, shapeList** decure)
       logicop::pcollection rest_shapes;
       if (operation.ANDNOT(rest_shapes))
          // add the resulting cut remainings to the_rest shapeList
-         for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++)
+         for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++) 
             if (NULL != (newshape = createValidShape(*CI)))
                decure[2]->push_back(newshape);
       rest_shapes.clear();
@@ -1112,12 +1138,33 @@ void laydata::tdtpoly::write(TEDfile* const tedfile) const
    }
 }
 
-void laydata::tdtpoly::GDSwrite(DbExportFile& gdsf) const
+void laydata::tdtpoly::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   gdsf.polygon(_pdata, _psize);
+   word gds_layer, gds_type;
+   if (gdsf.getMappedLayType(gds_layer, gds_type, lay))
+   {
+      GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_BOUNDARY);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_LAYER);
+      wr->add_int2b(gds_layer);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_DATATYPE);
+      wr->add_int2b(gds_type);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_XY,_psize+1);
+      for (word i = 0; i < _psize; i++)
+      {
+         wr->add_int4b(_pdata[2*i]);wr->add_int4b(_pdata[2*i+1]);
+      }
+      wr->add_int4b(_pdata[0]);wr->add_int4b(_pdata[1]);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ENDEL);
+      gdsf.flush(wr);
+   }
+   //else
+   //{ No warning to the user here!. There can be millions of them!
+   //}
 }
 
-void laydata::tdtpoly::CIFwrite(DbExportFile& ciff) const
+void laydata::tdtpoly::CIFwrite(CIFin::CifExportFile& ciff) const
 {
    ciff.polygon(_pdata, _psize);
 }
@@ -1282,11 +1329,11 @@ void laydata::tdtwire::draw_srequest(tenderer::TopRend& rend, const SGBitSet* ps
 
 void laydata::tdtwire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
 {
-   dword num_points = ptlist.size();
+   _dbl_word num_points = ptlist.size();
    if (0 == ptlist.size()) return;
    // to keep MS VC++ happy - define the counter outside the loops
-   dword i;
-   dword num_cpoints = (num_points == _psize) ? num_points : num_points / 3;
+   _dbl_word i;
+   _dbl_word num_cpoints = (num_points == _psize) ? num_points : num_points / 3;
    // draw the central line in all cases
    if (0 == num_cpoints) return;
    glBegin(GL_LINE_STRIP);
@@ -1308,7 +1355,7 @@ void laydata::tdtwire::openGL_drawfill(layprop::DrawProperties&, const pointlist
 {
    if (_psize == ptlist.size()) return;
    glBegin(GL_QUAD_STRIP);
-   for (dword i = _psize; i < 3 *_psize; i++)
+   for (_dbl_word i = _psize; i < 3 *_psize; i++)
       glVertex2i(ptlist[i].x(), ptlist[i].y());
    glEnd();
 }
@@ -1373,7 +1420,7 @@ void laydata::tdtwire::motion_draw(const layprop::DrawProperties& drawprop,
    ptlist->clear(); delete ptlist;
 }
 
-void laydata::tdtwire::precalc(pointlist& ptlist, dword num_points) const
+void laydata::tdtwire::precalc(pointlist& ptlist, _dbl_word num_points) const
 {
    DBbox* ln1 = endPnts(ptlist[0],ptlist[1], true);
    if (NULL != ln1)
@@ -1419,13 +1466,13 @@ float laydata::tdtwire::get_distance(TP p1, TP p2, TP p0)
 {
    if (p1.x() == p2.x())
       // if the segment is parallel to Y axis
-      if ( ((p0.y() >= p1.y()) && (p0.y() <= p2.y()))
+      if ( ((p0.y() >= p1.y()) && (p0.y() <= p2.y())) 
          ||((p0.y() <= p1.y()) && (p0.y() >= p2.y())) )
          return fabsf(p0.x() - p1.x());
       else return -1;
    else if (p1.y() == p2.y())
       // if the segment is parallel to X axis
-      if ( ((p0.x() >= p1.x()) && (p0.x() <= p2.x()))
+      if ( ((p0.x() >= p1.x()) && (p0.x() <= p2.x())) 
          ||((p0.x() <= p1.x()) && (p0.x() >= p2.x())) )
          return fabsf(p0.y() - p1.y());
       else return -1;
@@ -1442,7 +1489,7 @@ float laydata::tdtwire::get_distance(TP p1, TP p2, TP p0)
       if ((((Y >= p1.y()) && (Y <= p2.y()))||((Y <= p1.y()) && (Y >= p2.y()))) &&
           (((X >= p1.x()) && (X <= p2.x()))||((X <= p1.x()) && (X >= p2.x())))   )
          return fabsf(Cn / sqrt(dist));
-      else return -1;
+      else return -1;          
    }
 }
 
@@ -1459,12 +1506,12 @@ void laydata::tdtwire::unselect_points(DBbox& select_in, SGBitSet& pntlst)
       pntlst.setall();
    for (word i = 0; i < _psize; i++)
       if (select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.reset(i);
-   pntlst.check_neighbours_set(true);
+   pntlst.check_neighbours_set(true);   
 }
 
 laydata::validator* laydata::tdtwire::move(const CTM& trans, SGBitSet& plst)
 {
-   if (0 != plst.size())
+   if (0 != plst.size()) 
    {
       pointlist* nshape = movePointsSelected(plst, trans);
       laydata::valid_wire* check = DEBUG_NEW laydata::valid_wire(*nshape, _width);
@@ -1543,12 +1590,34 @@ void laydata::tdtwire::write(TEDfile* const tedfile) const
    }
 }
 
-void laydata::tdtwire::GDSwrite(DbExportFile& gdsf) const
+void laydata::tdtwire::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   gdsf.wire(_pdata, _psize, _width);
+   word gds_layer, gds_type;
+   if (gdsf.getMappedLayType(gds_layer, gds_type, lay))
+   {
+      GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_PATH);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_LAYER);
+      wr->add_int2b(gds_layer);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_DATATYPE);
+      wr->add_int2b(gds_type);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_WIDTH);
+      wr->add_int4b(_width);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_XY,_psize);
+      for (word i = 0; i < _psize; i++)
+      {
+         wr->add_int4b(_pdata[2*i]);wr->add_int4b(_pdata[2*i+1]);
+      }
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ENDEL);
+      gdsf.flush(wr);
+   }
+   //else
+   //{ No warning to the user here!. There can be millions of them!
+   //}
 }
 
-void laydata::tdtwire::CIFwrite(DbExportFile& ciff) const
+void laydata::tdtwire::CIFwrite(CIFin::CifExportFile& ciff) const
 {
    ciff.wire(_pdata, _psize, _width);
 }
@@ -1558,7 +1627,7 @@ void laydata::tdtwire::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) con
    gdsf.wire(_pdata, _psize, _width, overlap());
 }
 
-DBbox laydata::tdtwire::overlap() const
+DBbox laydata::tdtwire::overlap() const 
 {
    DBbox* ln1 = endPnts(TP( _pdata[0], _pdata[1]),
                         TP( _pdata[2], _pdata[3]),
@@ -1566,25 +1635,25 @@ DBbox laydata::tdtwire::overlap() const
                         );
    DBbox ovl = *ln1; delete ln1;
    DBbox* ln2 = NULL;
-   for (word i = 1; i < _psize - 1; i++)
+   for (word i = 1; i < _psize - 1; i++) 
    {
       ln2 = mdlPnts(TP(_pdata[2*(i-1)], _pdata[2*(i-1) + 1]),
                     TP(_pdata[2* i   ], _pdata[2* i    + 1]),
-                    TP(_pdata[2*(i+1)], _pdata[2*(i+1) + 1])
+                    TP(_pdata[2*(i+1)], _pdata[2*(i+1) + 1]) 
                     );
       ovl.overlap(*ln2);
-      delete ln2;
+      delete ln2; 
    }
-   ln1 = endPnts(TP( _pdata[2*(_psize-2)], _pdata[2*(_psize-2) + 1]),
-                 TP( _pdata[2*(_psize-1)], _pdata[2*(_psize-1) + 1]),
+   ln1 = endPnts(TP( _pdata[2*(_psize-2)], _pdata[2*(_psize-2) + 1]), 
+                 TP( _pdata[2*(_psize-1)], _pdata[2*(_psize-1) + 1]), 
                  false
                  );
    ovl.overlap(*ln1);
-   delete ln1;
+   delete ln1; 
    return ovl;
 }
 
-pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet& pset,
+pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet& pset, 
                                     const CTM& movedM, const CTM& stableM) const
 {
    pointlist* mlist = DEBUG_NEW pointlist();
@@ -1605,7 +1674,7 @@ pointlist* laydata::tdtwire::movePointsSelected(const SGBitSet& pset,
       }
       else
       {
-         const CTM& transM = ((pset.check(i) && pset.check(i+1))) ?
+         const CTM& transM = ((pset.check(i) && pset.check(i+1))) ? 
                                                                movedM : stableM;
          seg1 = DEBUG_NEW PSegment((*mlist)[(i  )] * transM, (*mlist)[(i+1)] * transM);
          if (0 == i)
@@ -1636,10 +1705,10 @@ laydata::tdtcellref::tdtcellref(TEDfile* const tedfile)
 {
    // read the name of the referenced cell
    std::string cellrefname = tedfile->getString();
-   // get the cell definition pointer and register the cellrefname as a child
+   // get the cell definition pointer and register the cellrefname as a child 
    // to the currently parsed cell
    _structure = tedfile->linkcellref(cellrefname);
-   // get the translation
+   // get the translation   
    _translation = tedfile->getCTM();
 }
 
@@ -1649,7 +1718,7 @@ void laydata::tdtcellref::openGL_precalc(layprop::DrawProperties& drawprop, poin
    CTM newtrans = _translation * drawprop.topCTM();
    // get overlapping box of the structure ...
    DBbox obox(DEFAULT_ZOOM_BOX);
-   if (structure())
+   if (structure()) 
       obox = structure()->cellOverlap();
    // ... translate it to the current coordinates ...
    DBbox areal = obox.overlap(newtrans);
@@ -1768,19 +1837,39 @@ laydata::tdtcell* laydata::tdtcellref::cstructure() const
    return celldef;
 }
 
-std::string laydata::tdtcellref::cellname() const
+std::string laydata::tdtcellref::cellname() const 
 {
    return _structure->name();
 }
 
-void laydata::tdtcellref::GDSwrite(DbExportFile& gdsf) const
+void laydata::tdtcellref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   gdsf.ref(_structure->name(), _translation);
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_SREF);
+   gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_SNAME, _structure->name().size());
+   wr->add_ascii(_structure->name().c_str());gdsf.flush(wr);
+   TP trans;
+   real rotation, scale;
+   bool flipX;
+   _translation.Decompose(trans,rotation,scale,flipX);
+   wr = gdsf.setNextRecord(gds_STRANS);
+   if (flipX) wr->add_int2b(0x8000);
+   else       wr->add_int2b(0x0000);
+   gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_MAG);
+   wr->add_real8b(scale);gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_ANGLE);
+   wr->add_real8b(rotation);gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_XY,1);
+   wr->add_int4b(trans.x());wr->add_int4b(trans.y());
+   gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_ENDEL);
+   gdsf.flush(wr);
 }
 
-void laydata::tdtcellref::CIFwrite(DbExportFile& ciff) const
+void laydata::tdtcellref::CIFwrite(CIFin::CifExportFile& ciff) const
 {
-   ciff.ref(_structure->name(), _translation);
+   ciff.call(_structure->name(), _translation);
 }
 
 void laydata::tdtcellref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
@@ -1817,12 +1906,12 @@ void laydata::tdtcellref::ungroup(laydata::tdtdesign* ATDB, tdtcell* dst, atticL
       // used here - something else should be done
       // ATDB->securelaydef( CL->first );
       // secure the select layer (for undo)
-      if (nshp->end() != nshp->find(CL->first))
+      if (nshp->end() != nshp->find(CL->first))  
          ssl = (*nshp)[CL->first];
       else {
          ssl = DEBUG_NEW shapeList();
          (*nshp)[CL->first] = ssl;
-      }
+      }   
       // for every single shape on the layer
       for (dataList::const_iterator DI = CL->second->begin();
                                     DI != CL->second->end(); DI++)
@@ -1893,7 +1982,7 @@ void laydata::tdtcellaref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    ptlist.push_back(TP(array_overlap.p2().x(), array_overlap.p1().y()) * newtrans);
    ptlist.push_back(               array_overlap.p2()                  * newtrans);
    ptlist.push_back(TP(array_overlap.p1().x(), array_overlap.p2().y()) * newtrans);
-
+   
    // We are going to draw "something", so push the new translation matrix in the stack
    drawprop.pushCTM(newtrans);
    if (structure()->cellOverlap().visible(drawprop.topCTM() * drawprop.ScrCTM()))
@@ -2018,7 +2107,15 @@ void laydata::tdtcellaref::draw_srequest(tenderer::TopRend& rend, const SGBitSet
 void laydata::tdtcellaref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
-   drawprop.draw_cell_boundary(ptlist);
+   // draw the overlapping box
+   glColor4f(1.0, 1.0, 1.0, 0.5);
+   glLineStipple(1,0xf18f);
+   glEnable(GL_LINE_STIPPLE);
+   glBegin(GL_LINE_LOOP);
+   for (unsigned i = 0; i < 4; i++)
+      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   glEnd();
+   glDisable(GL_LINE_STIPPLE);
 }
 
 void laydata::tdtcellaref::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -2032,7 +2129,7 @@ void laydata::tdtcellaref::openGL_drawfill(layprop::DrawProperties& drawprop, co
          // ... get the translation matrix ...
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          refCTM *= drawprop.topCTM();
-         // ...draw the structure itself, not forgetting to push/pop the refCTM
+         // ...draw the structure itself, not forgeting to push/pop the refCTM
          drawprop.pushCTM(refCTM);
          structure()->openGL_draw(drawprop);
          drawprop.popCTM();
@@ -2089,14 +2186,48 @@ void laydata::tdtcellaref::write(TEDfile* const tedfile) const {
    tedfile->putWord(_arrprops.cols());
 }
 
-void laydata::tdtcellaref::GDSwrite(DbExportFile& gdsf) const
+void laydata::tdtcellaref::GDSwrite(GDSin::GdsFile& gdsf, word lay, real) const
 {
-   gdsf.aref(_structure->name(), _translation, _arrprops);
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_AREF);
+   gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_SNAME, _structure->name().size());
+   wr->add_ascii(_structure->name().c_str());gdsf.flush(wr);
+   TP trans;
+   real rotation, scale;
+   bool flipX;
+   _translation.Decompose(trans,rotation,scale,flipX);
+   wr = gdsf.setNextRecord(gds_STRANS);
+   if (flipX) wr->add_int2b(0x8000);
+   else       wr->add_int2b(0x0000);
+   gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_MAG);
+   wr->add_real8b(scale);gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_ANGLE);
+   wr->add_real8b(rotation);gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_COLROW);
+   wr->add_int2b(_arrprops.cols());wr->add_int2b(_arrprops.rows());
+   gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_XY,3);
+   wr->add_int4b(trans.x());wr->add_int4b(trans.y());
+   wr->add_int4b(trans.x() + _arrprops.cols() * _arrprops.stepX());wr->add_int4b(trans.y());
+   wr->add_int4b(trans.x());wr->add_int4b(trans.y() + _arrprops.rows() * _arrprops.stepY());
+   gdsf.flush(wr);
+   wr = gdsf.setNextRecord(gds_ENDEL);
+   gdsf.flush(wr);
 }
 
-void laydata::tdtcellaref::CIFwrite(DbExportFile& ciff) const
+void laydata::tdtcellaref::CIFwrite(CIFin::CifExportFile& ciff) const
 {
-   ciff.aref(_structure->name(), _translation, _arrprops);
+   for (int i = 0; i < _arrprops.cols(); i++)
+   {// start/stop rows
+      for(int j = 0; j < _arrprops.rows(); j++)
+      { // start/stop columns
+         // ... get the translation matrix ...
+         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+         refCTM *= _translation;
+         ciff.call(_structure->name(), refCTM);
+      }
+   }
 }
 
 void laydata::tdtcellaref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
@@ -2193,7 +2324,7 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    //  Things to remember...
    // Font has to be translated using its own matrix in which
    // tx/ty are forced to zero. Below they are not used (and not zeroed)
-   // because of the conversion to the openGL matrix.
+   // because of the conversion to the openGL matrix. 
    // The text binding point is multiplied ALONE with the current
    // translation matrix, but NEVER with the font matrix.
    // All this as far as I remember is described in the PS manual
@@ -2204,16 +2335,20 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    // 119.05 units down to 33.33 units. It is not quite clear however
    // how big (in pixels say) is one unit. After a lot of experiments
    // it appears that if you draw a character with font scale = 1, then
-   // you will get a font with height 119.05 units. In order to translate
+   // you will get a font with height 119.05 units. In order to translate 
    // the font to DBU's I need to multiply it by DBU and divide it to 119.05
    // This is done in the tellibin - int tellstdfunc::stdADDTEXT::execute()
    // Things to consider ...
+   // Independently of the orientation (and flip) font matrix 
+   // can be trimmed always so that texts to appear either left-to-right
+   // or bottom-to top (Remember Catena?). In order to compensate the text 
+   // placement, the binding point (justification) can be compensated
    // And the last, but not the least...
    // GDSII text justification
    //====================================================================
    // the correction is needed to fix the bottom left corner of the
    // text overlapping box to the binding point. glf library normally
-   // draws the first symbol centered around the bounding point
+   // draws the first symbol centerd around the bounding point
    CTM correction;
    correction.Translate(-_overlap.p1().x(), -_overlap.p1().y());
    DBbox _over = _overlap.overlap(correction);
@@ -2223,10 +2358,6 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    if ( wsquare.visible(ftmtrx * drawprop.ScrCTM()) )
    {
       // If we get here - means that the text is visible
-      CTM adjTranslation = (drawprop.adjustTextOrientation()) ?
-                            renderingAdjustment(ftmtrx) : _translation;
-      CTM adj_ftmtrx     = (drawprop.adjustTextOrientation()) ?
-                            adjTranslation * drawprop.topCTM() : ftmtrx;
       // get the text overlapping box ...
       ptlist.reserve(5);
       ptlist.push_back(_over.p1() * ftmtrx);
@@ -2234,10 +2365,10 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       ptlist.push_back(_over.p2() * ftmtrx);
       ptlist.push_back(TP(_over.p1().x(), _over.p2().y()) * ftmtrx);
       // ... and text bounding point (see the comment above)
-      ptlist.push_back(TP(static_cast<int4b>(adjTranslation.tx()),
-                          static_cast<int4b>(adjTranslation.ty()))  * drawprop.topCTM());
+      ptlist.push_back(TP(static_cast<int4b>(_translation.tx()),
+                       static_cast<int4b>(_translation.ty()))  * drawprop.topCTM());
       // push the font matrix - will be used for text drawing
-      drawprop.pushCTM(adj_ftmtrx);
+      drawprop.pushCTM(ftmtrx);
    }
 }
 
@@ -2250,11 +2381,7 @@ void laydata::tdttext::draw_request(tenderer::TopRend& rend) const
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.draw_reference_marks(TP(0,0) * newtrans, layprop::cell_mark);
-   // Calculate the visual adjustment to make the texts easy to read
-   if (rend.adjustTextOrientation())
-      rend.text(&_text, renderingAdjustment(ftmtrx), _overlap, _correction, false);
-   else
-      rend.text(&_text, _translation, _overlap, _correction, false);
+   rend.text(&_text, _translation, _overlap, _correction, false);
 }
 
 void laydata::tdttext::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
@@ -2345,8 +2472,6 @@ void laydata::tdttext::motion_draw(const layprop::DrawProperties& drawprop,
    DBbox wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
    if (wsquare.visible(ftmtrx * drawprop.ScrCTM()))
    {
-      if (drawprop.adjustTextOrientation())
-         ftmtrx = renderingAdjustment(ftmtrx) * transtack.front();
       glPushMatrix();
       double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
                             ftmtrx.c(), ftmtrx.d(),0,0,
@@ -2367,14 +2492,45 @@ void laydata::tdttext::write(TEDfile* const tedfile) const {
    tedfile->putCTM(_translation);
 }
 
-void laydata::tdttext::GDSwrite(DbExportFile& gdsf) const
+void laydata::tdttext::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 {
-   gdsf.text(_text, _translation);
+   word gds_layer, gds_type;
+   if (gdsf.getMappedLayType(gds_layer, gds_type, lay))
+   {
+      GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_TEXT);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_LAYER);
+      wr->add_int2b(gds_layer);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_TEXTTYPE);
+      wr->add_int2b(gds_type);gdsf.flush(wr);
+      TP trans;
+      real rotation, scale;
+      bool flipX;
+      _translation.Decompose(trans,rotation,scale,flipX);
+      wr = gdsf.setNextRecord(gds_STRANS);
+      if (flipX) wr->add_int2b(0x8000);
+      else       wr->add_int2b(0x0000);
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_MAG);
+      wr->add_real8b(scale * OPENGL_FONT_UNIT * UU);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ANGLE);
+      wr->add_real8b(rotation);gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_XY,1);
+      wr->add_int4b(trans.x());wr->add_int4b(trans.y());
+      gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_STRING, _text.size());
+      wr->add_ascii(_text.c_str());gdsf.flush(wr);
+      wr = gdsf.setNextRecord(gds_ENDEL);
+      gdsf.flush(wr);
+   }
+   //else
+   //{ No warning to the user here!. There can be millions of them!
+   //}
 }
 
-void laydata::tdttext::CIFwrite(DbExportFile& ciff) const
+void laydata::tdttext::CIFwrite(CIFin::CifExportFile& ciff) const
 {
-   ciff.text(_text, _translation);
+   ciff.text(_text, TP(_translation.tx(), _translation.ty()));
 }
 
 void laydata::tdttext::PSwrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
@@ -2396,53 +2552,6 @@ void laydata::tdttext::info(std::ostringstream& ost, real DBU) const
 {
    ost << "text \"" << _text << "\" @ {";
    ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "}";
-}
-
-/*!Adjusts the text object during the rendering in such a way that it is
- * always lined-up form left to right or from bottom to top. The function
- * returns the adjusted translation matrix which should be used instead of
- * the original one (_translation) during the drawing.
- * The mats behind this method: The input parameter mtrx contains the final
- * CTM that will be used to draw the text. It is decomposed and if the resulting
- * rotation is in the range of 90 - 270 degrees - the text is rotated on 180
- * degrees around its central point. Simple, but a number of complications:
- * - When the text is fliped it needs to be un-flipped and this must be done
- *   using only local placement parameters. This in turn means that the local
- *   _translation matrix must be decomposed as well in order to extract the
- *   rotation of the text itself. It seems to be the only way to un-flip
- *   properly the text. It must be done before the main operation
- * - The rotation point are very important.
- *
- * The method introduces additional calculations executed during rendering which
- * might slow down the graphics.
- */
-CTM laydata::tdttext::renderingAdjustment(const CTM& mtrx) const
-{
-   TP    trans   ; // dummy, not used here
-   real  scale   ; // dummy, not used here
-   real  rotation; // the final text rotation (after all CTM operations)
-   bool  flipX   ; // the final text flip (after all CTM operations)
-   DBbox adjoverlap = _overlap * _translation;
-   int4b centerX = (adjoverlap.p1().x() + adjoverlap.p2().x()) / 2;
-   int4b centerY = (adjoverlap.p1().y() + adjoverlap.p2().y()) / 2;
-   TP    textCenter(centerX, centerY);
-   mtrx.Decompose(trans, rotation, scale, flipX);
-   CTM adjmatrix(_translation);
-   if (flipX)
-   {
-      real lrotation;
-      bool lflipX;
-      _translation.Decompose(trans, lrotation, scale, lflipX);
-      adjmatrix.Rotate(-lrotation, textCenter);
-      adjmatrix.FlipX(centerY);
-      adjmatrix.Rotate( lrotation, textCenter);
-   }
-   if (0 > rotation) rotation += 360.0;
-   if ((90.0 < rotation) && (rotation <= 270.0))
-   {
-      adjmatrix.Rotate(180, textCenter);
-   }
-   return adjmatrix;
 }
 
 //-----------------------------------------------------------------------------
@@ -2537,7 +2646,7 @@ void laydata::valid_poly::angles()
       if (eraseP1)
       {
          cp2 = _plist.erase(cp1);
-         cp1 = cp2;
+         cp1 = cp2; 
          if (cp2 == _plist.begin()) cp1 = _plist.end();
          cp1--;
          angle_stack.pop();
@@ -2580,7 +2689,7 @@ void laydata::valid_poly::normalize()
 /*! Implements  algorithm to check that the polygon is not
 self crossing. Alters the laydata::shp_cross bit of _status if the polygon
 is selfcrossing
-*/
+*/ 
 void laydata::valid_poly::selfcrossing()
 {
    //using BO modified
@@ -2608,13 +2717,13 @@ std::string laydata::valid_poly::failtype() {
    else if (_status & shp_cross) return "Self-crossing";
 //   else if (_status & shp_acute) return "Acute angle";
    else return "OK";
-}
+}   
 
 //-----------------------------------------------------------------------------
 // class valid_wire
 //-----------------------------------------------------------------------------
 laydata::valid_wire::valid_wire(pointlist& plist, word width) :
-                                     validator(plist), _width(width) {
+                                     validator(plist), _width(width) { 
    angles();
    if (_status > 0x10) return;
    if (numpoints() > 3)
@@ -2670,11 +2779,11 @@ void laydata::valid_wire::angles()
 }
 
 
-/*! Implements  algorithm to check that the wire is not simple crossing.
+/*! Implements  algorithm to check that the wire is not simple crossing. 
 Alters the laydata::shp_cross bit of _status if the wire is selfcrossing
-*/
+*/ 
 void laydata::valid_wire::selfcrossing() {
-
+   
    //using BO modified
    logicop::CrossFix fixingpoly(_plist, false);
    try
@@ -2688,20 +2797,20 @@ void laydata::valid_wire::selfcrossing() {
 /*   tedop::segmentlist segs(_plist, true);
    tedop::EventQueue Eq(segs); // initialize the event queue
    tedop::SweepLine  SL(_plist); // initialize the sweep line
-   if (!Eq.check_valid(SL))
+   if (!Eq.check_valid(SL)) 
       _status |= laydata::shp_cross;*/
 }
 
 laydata::tdtdata* laydata::valid_wire::replacement() {
    return DEBUG_NEW laydata::tdtwire(_plist, _width);
-}
+}   
 
 std::string laydata::valid_wire::failtype() {
 //   if (_status & shp_null)  return "Zero area";
    if      (_status & shp_cross) return "Self-crossing";
    else if (_status & shp_null ) return "Unsuficcient points";
    else return "OK";
-}
+}   
 
 //-----------------------------------------------------------------------------
 /*! Returns the angle between the line and the X axis
@@ -2718,7 +2827,7 @@ int laydata::xangle(const TP& p1, const TP& p2) {
    else if (p1.y() == p2.y()) { // horizontal line
       if (p2.x() > p1.x()) return 0;
       else                 return 180;
-   }
+   }   
    else
       return (int)rint(180*atan2(double(p2.y() - p1.y()), p2.x() - p1.x())/Pi);
 }
@@ -2820,7 +2929,7 @@ laydata::tdttmpbox::~tdttmpbox()
 void laydata::tdttmppoly::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
 {
    CTM trans = transtack.front();
-   dword numpnts;
+   _dbl_word numpnts;
    if ((numpnts = _plist.size()) == 0) return;
    word i;
    glBegin(GL_LINE_STRIP);
@@ -2846,7 +2955,7 @@ void laydata::tdttmpwire::draw(const layprop::DrawProperties& drawprop, ctmqueue
 {
    CTM trans = transtack.front();
    pointlist* ptlist;
-   dword num_points = _plist.size();
+   _dbl_word num_points = _plist.size();
    if (num_points == 0) return;
    ptlist = DEBUG_NEW pointlist;
    ptlist->reserve(3*(num_points + 1));
@@ -2867,7 +2976,7 @@ void  laydata::tdttmpwire::rmpoint(TP& lp)
    if (_plist.size() > 0) lp = _plist.back();
 };
 
-void laydata::tdttmpwire::precalc(pointlist& ptlist, dword num_points) const
+void laydata::tdttmpwire::precalc(pointlist& ptlist, _dbl_word num_points) const
 {
    DBbox* ln1 = endPnts(ptlist[0],ptlist[1], true);
    if (NULL != ln1)
@@ -2940,11 +3049,11 @@ DBbox* laydata::tdttmpwire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) co
 
 void laydata::tdttmpwire::drawline(const pointlist& ptlist) const
 {
-   dword num_points = ptlist.size();
+   _dbl_word num_points = ptlist.size();
    if (0 == ptlist.size()) return;
    // to keep MS VC++ happy - define the counter outside the loops
-   dword i;
-   dword num_cpoints = (num_points == _plist.size()) ? num_points : num_points / 3;
+   _dbl_word i;
+   _dbl_word num_cpoints = (num_points == _plist.size()) ? num_points : num_points / 3;
    // draw the central line in all cases
    if (0 == num_cpoints) return;
    glBegin(GL_LINE_STRIP);

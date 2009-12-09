@@ -82,20 +82,24 @@
 //=============================================================================
 // General type declations (compatability)
 //=============================================================================
-typedef unsigned char            byte     ; // 1 byte
-typedef unsigned short           word     ; // 2 bytes
-typedef unsigned int             dword    ; // 4 bytes
-typedef unsigned long long int   qword    ; // 8 bytes
-typedef short    int             int2b    ; // 2 bytes
-typedef          int             int4b    ; // 4 bytes
-typedef long long int            int8b    ; // 8 bytes
-typedef          double          real     ; // 8 bytes
+typedef          char   _sg_int8;	// 1 byte
+typedef         short   _sg_int16;	// 2 bytes
+typedef           int   _sg_int32;	// 4 bytes
+typedef long long int   _sg_int64;  // 8 bytes
+
+typedef unsigned char   byte;
+typedef unsigned short  word;
+typedef unsigned long   _dbl_word;
+typedef     _sg_int16   int2b;
+typedef     _sg_int32   int4b;
+typedef        double   real;
+typedef long long int   int8b;
 
 typedef  std::list<std::string>           nameList;
 typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
 typedef  std::set<word>                   WordSet;
-typedef  std::map<word, WordSet>          ExtLayers;
+typedef  std::map<word, WordSet>          GdsLayers;
 typedef  std::map<std::string, int>       SIMap;       // name
 typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
 typedef  std::map<word, unsigned long>    SLMap;
@@ -153,10 +157,10 @@ private:
 > FlipY()         - flip the image towards given Y line
 > Reverse()       - return 1/matrix (not sure about the proper terminology)
 >>> Operators ----------------------------------------------------------------
-> PSCTM   operator *  (PSCTM op2) Multiplication CTM = CTM1*CTM2
-> PSCTM   operator *= (PSCTM op2) Multiplication assignemt CTM *= CTM1
-> PSP     operator *  (GP* op1)   Multiplication PSP = CTM*GP
-> PSP     operator *  (PSP* op1)  Multiplication PSP = CTM*PSP
+> PSCTM	operator *  (PSCTM op2) Multiplication CTM = CTM1*CTM2
+> PSCTM	operator *= (PSCTM op2) Multiplication assignemt CTM *= CTM1
+> PSP		operator *  (GP* op1)   Multiplication PSP = CTM*GP
+> PSP		operator *  (PSP* op1)  Multiplication PSP = CTM*PSP
 ******************************************************************************/
 class TP;
 class   CTM
@@ -667,7 +671,6 @@ const word MAX_WORD_VALUE = 65535;
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
 const unsigned    REF_LAY              = 0xffffffff;
 const unsigned    ERR_LAY              = 0xfffffffe;
-const unsigned		DRC_LAY					= 0xfffffffd;
 const unsigned    LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        MIN_VISUAL_AREA      = 40;   // that would be 40 pixels

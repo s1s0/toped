@@ -30,8 +30,8 @@
 #include <sstream>
 #include "logicop.h"
 #include "tedat.h"
-#include "ttt.h"
-#include "outbox.h"
+#include "../tpd_common/ttt.h"
+#include "../tpd_common/outbox.h"
 
 //#define POLYFIX_DEBUG
 #ifdef POLYFIX_DEBUG

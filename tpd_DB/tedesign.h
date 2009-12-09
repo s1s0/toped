@@ -36,8 +36,8 @@ namespace laydata {
                      tdtlibrary(std::string, real, real, int);
       virtual       ~tdtlibrary();
       virtual void   read(TEDfile* const);
-      void           GDSwrite(DbExportFile&);
-      void           CIFwrite(DbExportFile&);
+      void           GDSwrite(GDSin::GdsFile&, tdtcell*, bool);
+      void           CIFwrite(CIFin::CifExportFile&, tdtcell*, bool recur=true);
       void           PSwrite(PSFile&, const tdtcell*, const layprop::DrawProperties&);
       tdtdefaultcell* checkcell(std::string name, bool undeflib = false);
       void           recreate_hierarchy(const laydata::tdtlibdir* );
@@ -62,6 +62,9 @@ namespace laydata {
       const cellList& cells()          const {return _cells;}
       TDTHierTree*   hiertree()        const {return _hiertree;}
       int            libID()           const {return _libID;}
+      // callbacks
+      void          (*btreeAddMember)(const char*, const char*, int action);
+      void          (*btreeRemoveMember)(const char*, const char*, int action);
       friend         class tdtlibdir;
       friend         class TEDfile;
       void           clearHierTree();
@@ -233,25 +236,6 @@ namespace laydata {
       tdtdesign*        _TEDDB;        // toped data base
       //! themporary storage for undefined unreferenced cell (see the comment in the class definition)
       cellList          _udurCells;    
-   };
-
-
-
-   class drclibrary {
-   public:
-                     drclibrary(std::string name, real DBU, real UU);
-      virtual       ~drclibrary();
-      tdtdefaultcell* checkcell(std::string name);
-		void           registercellread(std::string, tdtcell*);
-      std::string    name()            const {return _name;}
-      real           UU()              const {return _UU;}
-      real           DBU()             const {return _DBU;}
-   protected:
-
-      std::string          _name;         // design/library name
-      real                 _DBU;          // Size of database units in meters
-      real                 _UU;           // size of user unit in DBU
-      cellList             _cells;        // list of cells in the design
    };
 
 }

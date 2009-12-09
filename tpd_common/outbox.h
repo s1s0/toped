@@ -77,7 +77,7 @@ namespace console {
       FT_FUNCTION_ADD  ,
       FT_FUNCTION_SORT
    } FUNCTION_BROWSER_TYPE;
-
+   
 /* Maybe the only place to describe the parameter dictating the behaviour during user input:
    op_dwire  >  0 -> wire where input type is the width. List of points expected.
                      Rubber band wire will be shown.
@@ -124,7 +124,7 @@ namespace console {
 
    //===========================================================================
    class ted_log : public wxTextCtrl  {
-   public:
+   public: 
                         ted_log(wxWindow *parent, wxWindowID);
       void              OnLOGMessage(wxCommandEvent&);
    private:
@@ -190,47 +190,16 @@ namespace console {
 void tell_log(console::LOG_TYPE, const char* = NULL);
 void tell_log(console::LOG_TYPE, const std::string&);
 void tell_log(console::LOG_TYPE, const wxString&);
-
-class TpdPost {
-   public:
-                  TpdPost(wxWindow*);
-      static void toped_status(console::TOPEDSTATUS_TYPE);
-      static void toped_status(console::TOPEDSTATUS_TYPE, long int);
-      static void toped_status(console::TOPEDSTATUS_TYPE, std::string);
-      static void toped_status(console::TOPEDSTATUS_TYPE, wxString);
-      static void addTDTtab(bool, bool newthread);
-      static void addGDStab();
-      static void addCIFtab();
-      static void addOAStab();
-      static void addDRCtab();
-      static void clearGDStab();
-      static void clearCIFtab();
-      static void clearOAStab();
-      static void clearDRCtab();
-      static void layer_status(int, const word, const bool);
-      static void layer_add(const std::string, const word);
-      static void layer_default(const word, const word);
-      static void layer_select(const unsigned);
-      static void celltree_open(const std::string);
-      static void celltree_highlight(const std::string);
-      static void treeAddMember(const char*, const char*, int action = 0);
-      static void treeRemoveMember(const char*, const char*, int orphan);
-      static void parseCommand(const wxString);
-   private:
-      static wxWindow* _statusBar;
-      static wxWindow* _topBrowsers;
-      static wxWindow* _layBrowser;
-      static wxWindow* _cllBrowser;
-      static wxWindow* _cmdLine;
-};
+void toped_status(console::TOPEDSTATUS_TYPE);
+void toped_status(console::TOPEDSTATUS_TYPE, long int);
+void toped_status(console::TOPEDSTATUS_TYPE, std::string);
+void toped_status(console::TOPEDSTATUS_TYPE, wxString);
 
 //===========================================================================
 class  TpdTime
 {
    public:
-      TpdTime() : _stdCTime(0), _status(false) {};
-      TpdTime(time_t stdCTime) : _stdCTime(stdCTime), _status(true){};
-      TpdTime(tm&);
+      TpdTime(time_t stdCTime) : _stdCTime(stdCTime){};
       TpdTime(std::string);
       std::string operator () ();
       bool operator == (TpdTime& arg1) const {return _stdCTime == arg1._stdCTime;}
@@ -270,12 +239,6 @@ class EXPTNactive_CIF : public EXPTN
       EXPTNactive_CIF();
 };
 
-class EXPTNactive_OASIS : public EXPTN
-{
-   public:
-      EXPTNactive_OASIS();
-};
-
 class EXPTNreadTDT : public EXPTN
 {
    public:
@@ -286,12 +249,6 @@ class EXPTNreadGDS : public EXPTN
 {
    public:
       EXPTNreadGDS(std::string);
-};
-
-class EXPTNreadOASIS : public EXPTN
-{
-   public:
-      EXPTNreadOASIS(std::string);
 };
 
 class EXPTNpolyCross : public EXPTN
@@ -312,31 +269,25 @@ class EXPTNcif_parser : public EXPTN
       EXPTNcif_parser(std::string);
 };
 
-class EXPTNdrc_reader : public EXPTN
-{
-   public:
-      EXPTNdrc_reader(std::string);
-};
-
 bool        expandFileName(std::string&);
 std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile
 std::string convertString(const std::string &str);
 
-/** The LayerMapExt is used for GDS/OASIS - TDT layer correspondence in both directions.
-      - If the class is constructed with ExtLayers == NULL, then _import will be
-        set to false and only the getExtLayType() method should be used.
-      - If the class is constructed with ExtLayers != NULL, then _import will be
+/** The LayerMapGds is used for GDS/TDT layer correspondence in both directions.
+      - If the class is constructed with GdsLayers == NULL, then _import will be
+        set to false and only the getGdsLayType() method should be used.
+      - If the class is constructed with GdsLayers != NULL, then _import will be
         set to true and only the getTdtLay() method should be used
 
    To ensure this policy some asserts are in place. Don't remove them!
  */
-class LayerMapExt {
+class LayerMapGds {
    public:
-                           LayerMapExt(const USMap&, ExtLayers*);
-                          ~LayerMapExt();
+                           LayerMapGds(const USMap&, GdsLayers*);
+                          ~LayerMapGds();
       bool                 getTdtLay(word&, word, word) const;
-      bool                 getExtLayType(word&, word&, word) const;
+      bool                 getGdsLayType(word&, word&, word) const;
       bool                 status() {return _status;}
       USMap*               updateMap(USMap*, bool);
    private:
@@ -350,7 +301,7 @@ class LayerMapExt {
       GlMap                _theMap;
       bool                 _status;
       bool                 _import;
-      ExtLayers*           _alist; // all available GDS layers with their data types
+      GdsLayers*           _alist; // all available GDS layers with their data types
 };
 
 class LayerMapCif {
@@ -364,6 +315,7 @@ class LayerMapCif {
       USMap                _theEmap;
       SIMap                _theImap;
 };
+
 
 #ifdef TIME_PROFILING
 class HiResTimer {

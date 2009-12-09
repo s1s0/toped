@@ -29,11 +29,12 @@
 #include <math.h>
 #include <sstream>
 #include "tellibin.h"
-#include "ted_prompt.h"
-#include "tedat.h"
-#include "datacenter.h"
-#include "viewprop.h"
-#include "tuidefs.h"
+#include "../tpd_parser/ted_prompt.h"
+#include "../tpd_DB/tedat.h"
+#include "../tpd_DB/datacenter.h"
+#include "../tpd_DB/browsers.h"
+#include "../tpd_DB/viewprop.h"
+#include "../tpd_common/tuidefs.h"
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;

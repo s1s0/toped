@@ -7,16 +7,13 @@ AM_LFLAGS = -Ptell
 
 lib_LTLIBRARIES = libtpd_parser.la
 #libtpd_parser_la_LDFLAGS = -no-undefined
-libtpd_parser_la_SOURCES = ted_prompt.cpp tell_lex.ll tell_yacc.yy tellyzer.cpp \
-	tldat.cpp tpdph.cpp
+libtpd_parser_la_SOURCES = ted_prompt.cpp tellyzer.cpp \
+		tell_lex.ll tell_yacc.yy tldat.cpp
 #########################################################################
 # EXTRAS
 #########################################################################
 LEX_OUTPUT_ROOT = lex.tell
 
-INCLUDES = -I$(top_srcdir)/tpd_common   \
-           -I$(top_srcdir)/tpd_DB
-libtpd_parser_la_LIBADD = $(top_builddir)/tpd_common/libtpd_common.la  \
-                          $(top_builddir)/tpd_DB/libtpd_DB.la
-
+INCLUDES = -I$(top_srcdir)/tpd_DB -I$(top_srcdir)/tpd_common
+libtpd_parser_la_LIBADD = ../tpd_common/libtpd_common.la
 METASOURCES = AUTO

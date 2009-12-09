@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include "ttt.h"
+#include "../tpd_common/ttt.h"
 
 #define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool) && !(op & telldata::tn_listmask))
 #define TLISTOF(op) (op | telldata::tn_listmask)
@@ -79,7 +79,7 @@ namespace telldata {
    typedef std::deque<argumentID*>           argumentQ;
    typedef std::stack<telldata::tell_var*>   operandSTACK;
    typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
-
+   
 
    //==============================================================================
    /*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the
@@ -271,14 +271,14 @@ namespace telldata {
       void                 reserve(unsigned num) {_mlist.reserve(num);};
       void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());};
       unsigned             size() const      {return _mlist.size();};
-      tell_var*            index_var(dword);
-      bool                 validIndex(dword);
-      void                 insert(telldata::tell_var*, dword);
+      tell_var*            index_var(_dbl_word);
+      bool                 validIndex(_dbl_word);
+      void                 insert(telldata::tell_var*, _dbl_word);
       void                 insert(telldata::tell_var*);
-      void                 lunion(telldata::ttlist*, dword);
+      void                 lunion(telldata::ttlist*, _dbl_word);
       void                 lunion(telldata::ttlist*);
-      tell_var*            erase(dword);
-      tell_var*            erase(dword, dword);
+      tell_var*            erase(_dbl_word);
+      tell_var*            erase(_dbl_word, _dbl_word);
       virtual             ~ttlist();
    private:
       memlist             _mlist;    // the list itself

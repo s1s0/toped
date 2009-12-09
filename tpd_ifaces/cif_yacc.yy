@@ -30,8 +30,8 @@
 %{
 #include "tpdph.h"
 #include <sstream>
-#include "outbox.h"
-#include "ttt.h"
+#include "../tpd_common/outbox.h"
+#include "../tpd_common/ttt.h"
 #include "cif_io.h"
 /* Switch on verbose error reporting messages*/
 #define YYERROR_VERBOSE 1
@@ -219,23 +219,9 @@ UEC_labelLoc:
       CIFInFile->addLabelLoc($2, $4);
       delete $2;
    }
-   | tknP94 tknTint tknTblank  cifPoint {
-      /* This version and the last one is to make the scaner's life easier.
-      It's difficult to distinguish at this point between the text
-      coordinate and the text itself esspecially if the text is a number */
-      char i2s[256];
-      sprintf(i2s, "%ld", $2);
-      CIFInFile->addLabelLoc(i2s, $4);
-   }
    | tknP94 tknTuserid tknTblank cifPoint tknTblank tknTuserid {
       CIFInFile->addLabelLoc($2, $4, $6);
       delete $2;
-      delete $6;
-   }
-   | tknP94 tknTint tknTblank cifPoint tknTblank tknTuserid {
-      char i2s[256];
-      sprintf(i2s, "%ld", $2);
-      CIFInFile->addLabelLoc(i2s, $4, $6);
       delete $6;
    }
 ;

@@ -36,7 +36,6 @@
 namespace layprop {
 
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
-	typedef enum {DB, DRC} drawprop_state;
 
    //=============================================================================
    //
@@ -209,7 +208,7 @@ namespace layprop {
          byte           _num_ogl_buffers; //! Number of generated openGL VBOs
          bool           _fti; // font type implementation ()
    };
-
+   
    //=============================================================================
    typedef  std::map<std::string, tellRGB*      >  colorMAP;
    typedef  std::map<std::string, byte*         >  fillMAP;
@@ -262,10 +261,6 @@ namespace layprop {
          std::string                getColorName(unsigned layno) const;
          std::string                getFillName(unsigned layno) const;
          std::string                getLineName(unsigned layno) const;
-
-         //return layno if _state == DB or predefined layer in other case
-         unsigned                   getTenderLay(unsigned layno) const;
-         void                       setState (drawprop_state state) {_state = state;};
          void                       all_layers(nameList&) const;
          unsigned                   drawinglayer() const {return _drawinglayer;}
          const byte*                getFill(unsigned layno) const;
@@ -279,12 +274,9 @@ namespace layprop {
          bool                       renderType()         {return _renderType;}
          bool                       isTextBoxHidden()    {return _textbox_hidden;}
          bool                       isCellBoxHidden()    {return _cellbox_hidden;}
-         bool                       adjustTextOrientation() const
-                                                         {return _adjustTextOrientation;}
          friend class ViewProperties;
       protected:
-         laySetList                 _laysetDB;
-         laySetList                 _laysetDRC;
+         laySetList                 _layset;
          colorMAP                   _laycolors;
          fillMAP                    _layfill;
          lineMAP                    _lineset;
@@ -294,13 +286,11 @@ namespace layprop {
          bool                       _cellbox_hidden;
          bool                       _textmarks_hidden;
          bool                       _textbox_hidden;
-         bool                       _adjustTextOrientation;
          void                       savePatterns(FILE*) const;
          void                       saveColors(FILE*) const;
          void                       saveLayers(FILE*) const;
          void                       saveLines(FILE*) const;
-         const laySetList&          getCurSetList() const;
-         const LayerSettings*       findLayerSettings(unsigned) const;
+
       private:
          bool                       _blockfill;
          laydata::cellrefstack*     _refstack;
@@ -311,7 +301,6 @@ namespace layprop {
          static const byte          _defaultFill[128];
          static const LineSettings  _defaultSeline;
          bool                       _renderType;
-         drawprop_state             _state; //type of drawing
    };
 
 }

@@ -33,7 +33,6 @@
 #include <wx/regex.h>
 #include <wx/filename.h>
 #include "outbox.h"
-#include "tuidefs.h"
 #include "../ui/red_lamp.xpm"
 #include "../ui/green_lamp.xpm"
 #include "../ui/blue_lamp.xpm"
@@ -55,8 +54,8 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_CURSOR , 10009)
     DECLARE_EVENT_TYPE(wxEVT_CONSOLE_PARSE , 10010)
     DECLARE_EVENT_TYPE(wxEVT_CURRENT_LAYER , 10011)
-    DECLARE_EVENT_TYPE(wxEVT_TOOLBARSIZE   , 10012)
-    DECLARE_EVENT_TYPE(wxEVT_TOOLBARDEF    , 10013)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARSIZE	 , 10012)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARDEF	 , 10013)
     DECLARE_EVENT_TYPE(wxEVT_TOOLBARADDITEM, 10014)
     DECLARE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM, 10015)
     DECLARE_EVENT_TYPE(wxEVT_EDITLAYER     , 10016)
@@ -81,14 +80,8 @@ DEFINE_EVENT_TYPE(wxEVT_TOOLBARADDITEM)
 DEFINE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM)
 DEFINE_EVENT_TYPE(wxEVT_EDITLAYER)
 
-console::TELLFuncList*  CmdList = NULL;
-
-wxWindow*               TpdPost::_statusBar     = NULL;
-wxWindow*               TpdPost::_topBrowsers   = NULL;
-wxWindow*               TpdPost::_layBrowser    = NULL;
-wxWindow*               TpdPost::_cllBrowser    = NULL;
-wxWindow*               TpdPost::_cmdLine       = NULL;
-
+console::TELLFuncList*           CmdList = NULL;
+console::TopedStatus*            StatusBar = NULL;
 //==============================================================================
 // The ted_log event table
 BEGIN_EVENT_TABLE( console::ted_log, wxTextCtrl )
@@ -145,7 +138,7 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
    }
    long int endPos = GetLastPosition();
    SetStyle(startPos,endPos,wxTextAttr(logColour));
-   // Truncate the log window contents from the bottom to avoid
+   // Truncate the log window contents from the bottom to avoid 
    wxTextPos curLogSize = GetLastPosition();
    if (curLogSize > 0x7800) // 30K
    {
@@ -183,7 +176,7 @@ BEGIN_EVENT_TABLE(console::TopedStatus, wxStatusBar)
    EVT_TECUSTOM_COMMAND(wxEVT_TPDSTATUS  , wxID_ANY, console::TopedStatus::OnTopedStatus)
 END_EVENT_TABLE()
 
-console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, tui::ID_TPD_STATUS)
+console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, wxID_ANY)
 {
    const unsigned Field_Max = 3;
    static const int widths[Field_Max] = { -1, -1, 32 };
@@ -191,6 +184,7 @@ console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, tui::I
     SetFieldsCount(Field_Max);
     SetStatusWidths(Field_Max, widths);
     _lamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
+    StatusBar = this;
     _progress = NULL;
     _progressAdj = 1.0;
 }
@@ -274,234 +268,40 @@ void console::TopedStatus::OnSize(wxSizeEvent& event)
     event.Skip();
 }
 
-//==============================================================================
-
-TpdPost::TpdPost(wxWindow* mainWindow)
+void toped_status(console::TOPEDSTATUS_TYPE tstatus)
 {
-   _statusBar   = mainWindow->FindWindow(tui::ID_TPD_STATUS);
-   _topBrowsers = mainWindow->FindWindow(tui::ID_WIN_BROWSERS);
-   _layBrowser  = mainWindow->FindWindow(tui::ID_PNL_LAYERS);
-   _cllBrowser  = mainWindow->FindWindow(tui::ID_PNL_CELLS);
-   _cmdLine     = mainWindow->FindWindow(tui::ID_CMD_LINE);
-}
-
-void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus)
-{
-   if (NULL == _statusBar) return;
+   if (NULL == StatusBar) return;
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
-   wxPostEvent(_statusBar, eventSTATUSUPD);
+   wxPostEvent(StatusBar, eventSTATUSUPD);
 }
 
-void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, long int indx)
+void toped_status(console::TOPEDSTATUS_TYPE tstatus, long int indx)
 {
-   if (NULL == _statusBar) return;
+   if (NULL == StatusBar) return;
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetExtraLong(indx);
-   wxPostEvent(_statusBar, eventSTATUSUPD);
+   wxPostEvent(StatusBar, eventSTATUSUPD);
 }
 
-void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, std::string sts_cmd)
+void toped_status(console::TOPEDSTATUS_TYPE tstatus, std::string sts_cmd)
 {
-   if (NULL == _statusBar) return;
+   if (NULL == StatusBar) return;
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetString(wxString(sts_cmd.c_str(), wxConvUTF8));
-   wxPostEvent(_statusBar, eventSTATUSUPD);
+   wxPostEvent(StatusBar, eventSTATUSUPD);
 }
 
-void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, wxString sts_cmd)
+void toped_status(console::TOPEDSTATUS_TYPE tstatus, wxString sts_cmd)
 {
-   if (NULL == _statusBar) return;
+   if (NULL == StatusBar) return;
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetString(sts_cmd);
-   wxPostEvent(_statusBar, eventSTATUSUPD);
+   wxPostEvent(StatusBar, eventSTATUSUPD);
 }
-
-void TpdPost::addTDTtab(bool targetDB, bool newthread)
-{
-   assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(tui::BT_ADDTDT_LIB);
-   eventADDTAB.SetExtraLong(targetDB ? 1 : 0);
-//   eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
-//   eventADDTAB.SetExtraLong(traverse_all ? 1 : 0);
-   // Note about threads here!
-   // Traversing the entire hierarchy tree can not be done in a
-   // separate thread. The main reason - when executing a script
-   // that contains for example:
-   //    new("a"); addcell("b");
-   // it's quite possible that cell hierarchy will be traversed
-   // after the execution of the second function. The latter will
-   // send treeAddMember itself - in result the browser window
-   // will get cell b twice. Bottom line: don't use PostEvent here!
-   if (newthread)
-      wxPostEvent( _topBrowsers, eventADDTAB );
-   else
-      _topBrowsers->GetEventHandler()->ProcessEvent( eventADDTAB );
-   // the alternative is to call the function directly
-//   Browsers->OnTELLaddTDTlib(tdtLib, traverse_all);
-}
-
-
-void TpdPost::addGDStab()
-{
-   assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(tui::BT_ADDGDS_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
-}
-
-void TpdPost::addCIFtab()
-{
-   assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(tui::BT_ADDCIF_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
-}
-
-void TpdPost::addOAStab()
-{
-   assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(tui::BT_ADDOAS_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
-}
-
-void TpdPost::addDRCtab()
-{
-   assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(tui::BT_ADDDRC_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
-}
-
-void TpdPost::clearGDStab()
-{
-   assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(tui::BT_CLEARGDS_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
-}
-
-void TpdPost::clearCIFtab()
-{
-   assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(tui::BT_CLEARCIF_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
-}
-
-void TpdPost::clearOAStab()
-{
-   assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(tui::BT_CLEAROAS_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
-}
-
-void TpdPost::clearDRCtab()
-{
-   assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
-   eventADDTAB.SetInt(tui::BT_CLEARDRC_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
-}
-
-void TpdPost::layer_status(int btype, const word layno, const bool status)
-{
-   assert(_layBrowser);
-   wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
-   eventLAYER_STATUS.SetExtraLong(status);
-   eventLAYER_STATUS.SetInt(btype);
-   word *laynotemp = DEBUG_NEW word(layno);
-   eventLAYER_STATUS.SetClientData(static_cast<void*> (laynotemp));
-   wxPostEvent(_layBrowser, eventLAYER_STATUS);
-}
-
-void TpdPost::layer_add(const std::string name, const word layno)
-{
-   assert(_layBrowser);
-   wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
-   word *laynotemp = DEBUG_NEW word(layno);
-   eventLAYER_ADD.SetClientData(static_cast<void*> (laynotemp));
-   eventLAYER_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
-   eventLAYER_ADD.SetInt(tui::BT_LAYER_ADD);
-   wxPostEvent(_layBrowser, eventLAYER_ADD);
-}
-
-void TpdPost::layer_default(const word newlay, const word oldlay)
-{
-   assert(_layBrowser);
-   wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
-   eventLAYER_DEF.SetExtraLong(newlay);
-   word *laynotemp = DEBUG_NEW word(oldlay);
-   eventLAYER_DEF.SetClientData(static_cast<void*> (laynotemp));
-   eventLAYER_DEF.SetInt(tui::BT_LAYER_DEFAULT);
-   wxPostEvent(_layBrowser, eventLAYER_DEF);
-}
-
-void TpdPost::layer_select(const unsigned lay)
-{
-   assert(_layBrowser);
-   wxCommandEvent eventLAYER_SELECT(wxEVT_CMD_BROWSER);
-   eventLAYER_SELECT.SetExtraLong(lay);
-   eventLAYER_SELECT.SetInt(tui::BT_LAYER_SELECT);
-   wxPostEvent(_layBrowser, eventLAYER_SELECT);
-}
-
-void TpdPost::celltree_open(const std::string cname)
-{
-   assert(_cllBrowser);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(tui::BT_CELL_OPEN);
-   eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
-   wxPostEvent(_cllBrowser, eventCELLTREE);
-}
-
-void TpdPost::celltree_highlight(const std::string cname)
-{
-   assert(_cllBrowser);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(tui::BT_CELL_HIGHLIGHT);
-   eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
-   wxPostEvent(_cllBrowser, eventCELLTREE);
-}
-
-void TpdPost::treeAddMember(const char* cell, const char* parent, int action)
-{
-   assert(_cllBrowser);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(tui::BT_CELL_ADD);
-   eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
-   eventCELLTREE.SetExtraLong(action);
-   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
-   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
-   wxPostEvent(_cllBrowser, eventCELLTREE);
-}
-
-void TpdPost::treeRemoveMember(const char* cell, const char* parent, int action)
-{
-   assert(_cllBrowser);
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
-   eventCELLTREE.SetInt(tui::BT_CELL_REMOVE);
-   eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
-   eventCELLTREE.SetExtraLong(action);
-   wxString* prnt = DEBUG_NEW wxString(parent, wxConvUTF8);
-   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
-   wxPostEvent(_cllBrowser, eventCELLTREE);
-}
-
-void TpdPost::parseCommand(const wxString cmd)
-{
-   assert(_cmdLine);
-   wxCommandEvent eventPARSE(wxEVT_CONSOLE_PARSE);
-   eventPARSE.SetString(cmd);
-   wxPostEvent(_cmdLine, eventPARSE);
-}
-
 
 //==============================================================================
 static int wxCALLBACK wxListCompareFunction(long item1, long item2, long sortData)
@@ -621,12 +421,6 @@ TpdTime::TpdTime(std::string str_time)
    _status = getStdCTime(wxstr_time);
 }
 
-TpdTime::TpdTime(tm& brokenTime)
-{
-   _stdCTime = mktime(&brokenTime);
-   _status = (_stdCTime >= 0);
-}
-
 void TpdTime::patternNormalize(wxString& str) {
    wxRegEx regex;
    // replace tabs with spaces
@@ -660,7 +454,7 @@ bool TpdTime::getStdCTime(wxString& exp) {
    VERIFY(src_tmpl.IsValid());
    long conversion;
    // search the entire pattern
-   if (!src_tmpl.Matches(exp))
+   if (!src_tmpl.Matches(exp)) 
    {
       std::string news = "Can't recognise the time format. Recovery will be unreliable ";
       tell_log(console::MT_ERROR,news);
@@ -690,7 +484,7 @@ bool TpdTime::getStdCTime(wxString& exp) {
    VERIFY(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
    VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
-   broken_time.tm_hour = conversion;
+   broken_time.tm_hour = conversion; 
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // minutes
    src_tmpl.Matches(exp);
@@ -707,7 +501,7 @@ bool TpdTime::getStdCTime(wxString& exp) {
    if (src_tmpl.Matches(exp))
    {
       wxString ampm = src_tmpl.GetMatch(exp);
-      assert(0 != ampm.Len());
+      assert(0 != ampm.Len()); 
       if ( wxT("PM") == ampm )
          broken_time.tm_hour += 12;
       src_tmpl.ReplaceFirst(&exp,wxT(""));
@@ -774,11 +568,6 @@ EXPTNactive_CIF::EXPTNactive_CIF() {
    tell_log(console::MT_ERROR,news);
 };
 
-EXPTNactive_OASIS::EXPTNactive_OASIS() {
-   std::string news = "No OASIS structure in memory. Parse first";
-   tell_log(console::MT_ERROR,news);
-};
-
 EXPTNreadTDT::EXPTNreadTDT(std::string info) {
    std::string news = "Error parsing TDT file =>";
    news += info;
@@ -787,12 +576,6 @@ EXPTNreadTDT::EXPTNreadTDT(std::string info) {
 
 EXPTNreadGDS::EXPTNreadGDS(std::string info) {
    std::string news = "Error parsing GDS file =>";
-   news += info;
-   tell_log(console::MT_ERROR,news);
-};
-
-EXPTNreadOASIS::EXPTNreadOASIS(std::string info) {
-   std::string news = "Error parsing OASIS file =>";
    news += info;
    tell_log(console::MT_ERROR,news);
 };
@@ -815,15 +598,8 @@ EXPTNcif_parser::EXPTNcif_parser(std::string info) {
    tell_log(console::MT_ERROR,news);
 };
 
-EXPTNdrc_reader::EXPTNdrc_reader(std::string info)
-{
-   std::string news = "Error in drc reader =>";
-   news += info;
-   tell_log(console::MT_ERROR,news);
-};
-      
 //=============================================================================
-LayerMapExt::LayerMapExt(const USMap& inlist, ExtLayers* alist)
+LayerMapGds::LayerMapGds(const USMap& inlist, GdsLayers* alist)
    : _theMap(), _status(true), _alist(alist)
 {
    _import = (NULL != _alist);
@@ -835,12 +611,12 @@ LayerMapExt::LayerMapExt(const USMap& inlist, ExtLayers* alist)
    }
 }
 
-LayerMapExt::~LayerMapExt()
+LayerMapGds::~LayerMapGds()
 {
    if (NULL != _alist) delete _alist;
 }
 
-bool LayerMapExt::parseLayTypeString(wxString exp, word tdtLay)
+bool LayerMapGds::parseLayTypeString(wxString exp, word tdtLay)
 {
    wxString lay_exp, type_exp;
    if (!separateQuickLists(exp, lay_exp, type_exp)) return false;
@@ -914,7 +690,7 @@ bool LayerMapExt::parseLayTypeString(wxString exp, word tdtLay)
    return true;
 }
 
-bool LayerMapExt::separateQuickLists(wxString exp, wxString& lay_exp, wxString& type_exp)
+bool LayerMapGds::separateQuickLists(wxString exp, wxString& lay_exp, wxString& type_exp)
 {
    const wxString tmplLayNumbers    = wxT("[[:digit:]\\,\\-]*");
    const wxString tmplTypeNumbers   = wxT("[[:digit:]\\,\\-]*|\\*");
@@ -943,7 +719,7 @@ bool LayerMapExt::separateQuickLists(wxString exp, wxString& lay_exp, wxString& 
    return true;
 }
 
-void LayerMapExt::patternNormalize(wxString& str)
+void LayerMapGds::patternNormalize(wxString& str)
 {
    wxRegEx regex;
    // replace tabs with spaces
@@ -968,7 +744,7 @@ void LayerMapExt::patternNormalize(wxString& str)
 
 }
 
-void LayerMapExt::getList(wxString exp, WordList& data)
+void LayerMapGds::getList(wxString exp, WordList& data)
 {
    wxRegEx number_tmpl(wxT("[[:digit:]]*"));
    wxRegEx separ_tmpl(wxT("[\\,\\-]{1,1}"));
@@ -1008,7 +784,7 @@ void LayerMapExt::getList(wxString exp, WordList& data)
 
 }
 
-bool LayerMapExt::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
+bool LayerMapGds::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
 {
    assert(_import); // If you hit this - see the comment in the class declaration
    // All that this function is doing is:
@@ -1023,7 +799,7 @@ bool LayerMapExt::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
    return true;
 }
 
-bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, word tdtlay) const
+bool LayerMapGds::getGdsLayType(word& gdslay, word& gdstype, word tdtlay) const
 {
    assert(!_import); // If you hit this - see the comment in the class declaration
    gdslay  = tdtlay; // the default value
@@ -1036,7 +812,7 @@ bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, word tdtlay) const
    return true;
 }
 
-USMap* LayerMapExt::generateAMap()
+USMap* LayerMapGds::generateAMap()
 {
    USMap* wMap = new USMap();
    if (_import)
@@ -1066,7 +842,7 @@ USMap* LayerMapExt::generateAMap()
    return wMap;
 }
 
-USMap* LayerMapExt::updateMap(USMap* update, bool import)
+USMap* LayerMapGds::updateMap(USMap* update, bool import)
 {
    assert(_import == import);
    // first generate the output from the current map

@@ -27,8 +27,10 @@
 
 #include "tpdph.h"
 #include "tpdf_cells.h"
-#include "tuidefs.h"
-#include "datacenter.h"
+
+#include "../tpd_DB/datacenter.h"
+#include "../tpd_common/tuidefs.h"
+#include "../tpd_DB/browsers.h"
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
@@ -255,7 +257,7 @@ void tellstdfunc::stdOPENCELL::undo()
    TEUNDO_DEBUG("opencell( string ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
       DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
@@ -284,7 +286,7 @@ int tellstdfunc::stdOPENCELL::execute()
          DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
 /*-!-*/  DATC->unlockDB();
          if (*ovl == DEFAULT_OVL_BOX) *ovl = DEFAULT_ZOOM_BOX;
-         TpdPost::celltree_open(nm);
+         browsers::celltree_open(nm);
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(tui::ZOOM_WINDOW);
          eventZOOM.SetClientData(static_cast<void*>(ovl));
@@ -324,7 +326,7 @@ void tellstdfunc::stdEDITPUSH::undo()
    TEUNDO_DEBUG("editpush( point ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
    DATC->unlockDB();
@@ -347,7 +349,7 @@ int tellstdfunc::stdEDITPUSH::execute()
          UNDOPstack.push_front(selected);
          std::string name = ATDB->activecellname();
 /*-!-*/  DATC->unlockDB();
-         TpdPost::celltree_highlight(name);
+         browsers::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
          RefreshGL();
@@ -378,7 +380,7 @@ void tellstdfunc::stdEDITPOP::undo()
    TEUNDO_DEBUG("editpop( ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
    DATC->unlockDB();
@@ -398,7 +400,7 @@ int tellstdfunc::stdEDITPOP::execute()
          UNDOPstack.push_front(selected);
          std::string name = ATDB->activecellname();
 /*-!-*/  DATC->unlockDB();
-         TpdPost::celltree_highlight(name);
+         browsers::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
          RefreshGL();
@@ -429,7 +431,7 @@ void tellstdfunc::stdEDITPREV::undo()
    TEUNDO_DEBUG("editpop( ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
    DATC->unlockDB();
@@ -451,7 +453,7 @@ int tellstdfunc::stdEDITPREV::execute()
 /*-!-*/  DATC->unlockDB();
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
-         TpdPost::celltree_highlight(name);
+         browsers::celltree_highlight(name);
          RefreshGL();
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
@@ -480,7 +482,7 @@ void tellstdfunc::stdEDITTOP::undo()
    TEUNDO_DEBUG("editpop( ) UNDO");
    laydata::tdtdesign* ATDB = DATC->lockDB();
       VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      browsers::celltree_open(ATDB->activecellname());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->select_fromList(get_ttlaylist(selected));
    DATC->unlockDB();
@@ -500,7 +502,7 @@ int tellstdfunc::stdEDITTOP::execute()
          UNDOPstack.push_front(selected);
          std::string name = ATDB->activecellname();
 /*-!-*/  DATC->unlockDB();
-         TpdPost::celltree_highlight(name);
+         browsers::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
          RefreshGL();

@@ -33,8 +33,8 @@
 #include <wx/glcanvas.h>
 #include <wx/cursor.h>
 #include <wx/image.h>
-#include "ttt.h"
-#include "tuidefs.h"
+#include "../tpd_common/ttt.h"
+#include "../tpd_common/tuidefs.h"
 
 namespace tui {
    //=============================================================================

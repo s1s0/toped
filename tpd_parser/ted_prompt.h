@@ -32,7 +32,7 @@
 #include <wx/thread.h>
 #include <wx/string.h>
 #include "tellyzer.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 
 namespace console {
 

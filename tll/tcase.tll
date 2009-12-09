@@ -184,23 +184,23 @@ void testcellrefs() {
 void testtexts() {
    newcell("textrefs");
    opencell("textrefs");
-   addtext("Text   0 deg -- test", 4, {10,10},   0, false, 2);
-   addtext("Text  90 deg -- test", 4, {10,10},  90, false, 2);
-   addtext("text 180 deg -- test", 4, {10,10}, 180, false, 2);
-   addtext("Text 270 deg -- test", 4, {10,10}, 270, false, 2);
-   addtext("Text   0 deg fx test", 4, {50,15},   0,  true, 2);
-   addtext("Text  90 deg fx test", 4, {50,15},  90,  true, 2);
-   addtext("Text 180 deg fx test", 4, {50,15}, 180,  true, 2);
-   addtext("Text 270 deg fx test", 4, {50,15}, 270,  true, 2);
+   addtext("Toped text test", 4, {10,10},   0, false, 2);
+   addtext("Toped text test", 4, {10,10},  90, false, 2);
+   addtext("Toped text test", 4, {10,10}, 180, false, 2);
+   addtext("Toped text test", 4, {10,10}, 270, false, 2);
+   addtext("Toped text test", 4, {40,15},   0,  true, 2);
+   addtext("Toped text test", 4, {40,15},  90,  true, 2);
+   addtext("Toped text test", 4, {40,15}, 180,  true, 2);
+   addtext("Toped text test", 4, {40,15}, 270,  true, 2);
 
-   addtext("Text  45 deg -- test", 4, {10,65},  45, false, 2);
-   addtext("Text 135 deg -- test", 4, {10,65}, 135, false, 2);
-   addtext("Text 225 deg -- test", 4, {10,65}, 225, false, 2);
-   addtext("Text 315 deg -- test", 4, {10,65}, 315, false, 2);
-   addtext("Text  45 deg fx test", 4, {50,65},  45,  true, 2);
-   addtext("Text 135 deg fx test", 4, {50,65}, 135,  true, 2);
-   addtext("Text 225 deg fx test", 4, {50,65}, 225,  true, 2);
-   addtext("Text 315 deg fx test", 4, {50,65}, 315,  true, 2);
+   addtext("Toped text test", 4, {10,40},  45, false, 2);
+   addtext("Toped text test", 4, {10,40}, 135, false, 2);
+   addtext("Toped text test", 4, {10,40}, 225, false, 2);
+   addtext("Toped text test", 4, {10,40}, 315, false, 2);
+   addtext("Toped text test", 4, {40,40},  45,  true, 2);
+   addtext("Toped text test", 4, {40,40}, 135,  true, 2);
+   addtext("Toped text test", 4, {40,40}, 225,  true, 2);
+   addtext("Toped text test", 4, {40,40}, 315,  true, 2);
 
    addtext("Toped", 4, { 0, 90},   0, false, 20);
 }
@@ -360,13 +360,15 @@ Invertor({0,0},10,3,30,3);
 Invertor({30,0},20,2,60,2);
 cellref("Fcell", {60,30}, 270,  true, 1.0);
 opencell("crop");
-cellref("cellrefs",{10,100},0,false,1);
+//cellref("cellrefs",{10,100},0,false,1);
 
 cellref("textrefs",{140,-70},0,false,1);
-cellref("cell_1",{120,  0},180,true ,1);
-cellref("cell_1",{  0,  0},  0,false,1);
-cellref("cell_1",{120,-20},/*inserted comment*/  180,false ,1);
-cellref("cell_1",{  0,-20},  0,true ,1);
+//cellref("cell_1",{120,  0},180,true ,1);
+//cellref("cell_1",{  0,  0},  0,false,1);
+//cellref("cell_1",{120,-20},/*inserted comment*/  180,false ,1);
+//cellref("cell_1",{  0,-20},  0,true ,1);
+setparams({"ADJUST_TEXT_ORIENTATION", "true"});
+zoomall();
 /*
 echo("Error below must be reported @ line 375 col 8");
 test   

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="TPD_DB"
 	ProjectGUID="{7CC90726-FAE0-415A-B2E4-552D1070B4F0}"
 	RootNamespace="TPD_DB"
@@ -44,7 +44,6 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../tpd_common"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_UNICODE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -120,7 +119,6 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../tpd_common"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -177,6 +175,14 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
+			<File
+				RelativePath=".\browsers.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\datacenter.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\drawprop.cpp"
 				>
@@ -354,6 +360,14 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath=".\browsers.h"
+				>
+			</File>
+			<File
+				RelativePath=".\datacenter.h"
+				>
+			</File>
 			<File
 				RelativePath=".\drawprop.h"
 				>

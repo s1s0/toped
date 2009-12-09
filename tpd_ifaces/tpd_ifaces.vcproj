@@ -44,7 +44,6 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_UNICODE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -120,7 +119,6 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -211,11 +209,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\gds_io.cpp"
+				RelativePath=".\drc_tenderer.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\oasis_io.cpp"
+				RelativePath=".\gds_io.cpp"
 				>
 			</File>
 			<File
@@ -248,11 +246,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gds_io.h"
+				RelativePath=".\drc_tenderer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\oasis_io.h"
+				RelativePath=".\gds_io.h"
 				>
 			</File>
 			<File

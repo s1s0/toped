@@ -30,15 +30,273 @@
 #include <wx/regex.h>
 #include <sstream>
 #include "datacenter.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 #include "tedat.h"
 #include "viewprop.h"
 #include "ps_out.h"
 #include "tenderer.h"
+#include "browsers.h"
 
 // Global variables
 DataCenter*                      DATC = NULL;
+extern browsers::browserTAB*     Browsers;
 extern const wxEventType         wxEVT_CMD_BROWSER;
+
+//-----------------------------------------------------------------------------
+// class Cif2Ted
+//-----------------------------------------------------------------------------
+CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtlibdir* tdt_db,
+      SIMap* cif_layers, real techno) : _src_lib (src_lib), _tdt_db(tdt_db),
+                                    _cif_layers(cif_layers), _techno(techno)
+{
+   _dbucoeff = 1e-8/(*_tdt_db)()->DBU();
+}
+
+
+void CIFin::Cif2Ted::top_structure(std::string top_str, bool recursive, bool overwrite)
+{
+   assert(_src_lib->hiertree());
+   CIFin::CifStructure *src_structure = _src_lib->getStructure(top_str);
+   if (NULL != src_structure)
+   {
+      CIFin::CIFHierTree* root = _src_lib->hiertree()->GetMember(src_structure);
+      if (recursive) child_structure(root, overwrite);
+      convert_prep(root, overwrite);
+      root = root->GetNextRoot(TARGETDB_LIB);
+   }
+   else
+   {
+      std::ostringstream ost; ost << "CIF import: ";
+      ost << "Structure \""<< top_str << "\" not found in the CIF DB in memory.";
+      tell_log(console::MT_WARNING,ost.str());
+   }
+   // Convert the top structure
+   //   hCellBrowser->AddRoot(wxString((_src_lib->Get_libname()).c_str(), wxConvUTF8));
+
+}
+
+void CIFin::Cif2Ted::child_structure(const CIFin::CIFHierTree* root, bool overwrite)
+{
+   const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
+   while (Child)
+   {
+      if ( !Child->GetItem()->traversed() )
+      {
+         // traverse children first
+         child_structure(Child, overwrite);
+         convert_prep(Child, overwrite);
+      }
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
+void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite)
+{
+   CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(item->GetItem());
+   std::string gname = src_structure->name();
+   // check that destination structure with this name exists
+   laydata::tdtcell* dst_structure = static_cast<laydata::tdtcell*>((*_tdt_db)()->checkcell(gname));
+   std::ostringstream ost; ost << "CIF import: ";
+   if (NULL != dst_structure)
+   {
+      if (overwrite)
+      {
+         /*@TODO Erase the existing structure and convert*/
+         ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
+         tell_log(console::MT_WARNING,ost.str());
+      }
+      else
+      {
+         ost << "Structure "<< gname << " already exists. Omitted";
+         tell_log(console::MT_INFO,ost.str());
+      }
+   }
+   else
+   {
+      ost << "Importing structure " << gname << "...";
+      tell_log(console::MT_INFO,ost.str());
+      // first create a new cell
+      dst_structure = (*_tdt_db)()->addcell(gname, _tdt_db);
+      // finally call the cell converter
+      convert(src_structure, dst_structure);
+   }
+   src_structure->set_traversed(true);
+}
+
+
+void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
+{
+   _crosscoeff = _dbucoeff * src->a() / src->b();
+   CIFin::CifLayer* swl = src->firstLayer();
+   while( swl ) // loop trough the layers
+   {
+      if (_cif_layers->end() != _cif_layers->find(swl->name()))
+      {
+         laydata::tdtlayer* dwl =
+               static_cast<laydata::tdtlayer*>(dst->securelayer((*_cif_layers)[swl->name()]));
+         CIFin::CifData* wd = swl->firstData();
+         while ( wd ) // loop trough data
+         {
+            switch (wd->dataType())
+            {
+               case cif_BOX     : box ( static_cast<CIFin::CifBox*     >(wd), dwl, swl->name() );break;
+               case cif_POLY    : poly( static_cast<CIFin::CifPoly*    >(wd), dwl, swl->name() );break;
+               case cif_WIRE    : wire( static_cast<CIFin::CifWire*    >(wd), dwl, swl->name() );break;
+               case cif_LBL_LOC : lbll( static_cast<CIFin::CifLabelLoc*>(wd), dwl, swl->name() );break;
+               case cif_LBL_SIG : lbls( static_cast<CIFin::CifLabelSig*>(wd), dwl, swl->name() );break;
+               default    : assert(false);
+            }
+            wd = wd->last();
+         }
+      }
+      //else
+      //{
+      //   std::ostringstream ost;
+      //   ost << "CIF Layer name \"" << swl->name() << "\" is not defined in the function input parameter. Will be omitted";
+      //   tell_log(console::MT_INFO,ost.str());
+      //}
+      swl = swl->last();
+   }
+
+   CIFin::CifRef* swr = src->refirst();
+   while ( swr )
+   {
+      ref(swr,dst);
+      swr = swr->last();
+   }
+   dst->resort();
+}
+
+void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string layname)
+{
+   pointlist pl;   pl.reserve(4);
+   real cX, cY;
+
+   cX = rint(((real)wd->center()->x() - (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() - (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt1( (int4b)cX, (int4b)cY );   pl.push_back(cpnt1);
+
+   cX = rint(((real)wd->center()->x() + (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() - (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt2( (int4b)cX, (int4b)cY );   pl.push_back(cpnt2);
+
+   cX = rint(((real)wd->center()->x() + (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() + (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt3( (int4b)cX, (int4b)cY );   pl.push_back(cpnt3);
+
+   cX = rint(((real)wd->center()->x() - (real)wd->length()/ 2.0f) * _crosscoeff );
+   cY = rint(((real)wd->center()->y() + (real)wd->width() / 2.0f) * _crosscoeff );
+   TP cpnt4( (int4b)cX, (int4b)cY );   pl.push_back(cpnt4);
+   if (NULL != wd->direction())
+   {
+      CTM tmx;
+      cX = (real)wd->center()->x() * _crosscoeff;
+      cY = (real)wd->center()->y() * _crosscoeff;
+      tmx.Translate(-cX,-cY);
+      tmx.Rotate(*(wd->direction()));
+      tmx.Translate(cX,cY);
+      pl[0] *=  tmx;
+      pl[1] *=  tmx;
+      pl[2] *=  tmx;
+      pl[3] *=  tmx;
+   }
+
+   laydata::valid_poly check(pl);
+
+   if (!check.valid())
+   {
+      std::ostringstream ost; ost << "Layer " << layname;
+      ost << ": Box check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   else pl = check.get_validated() ;
+
+   if (check.box())  wl->addbox(pl[0], pl[2],false);
+   else              wl->addpoly(pl,false);
+}
+
+void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::string layname)
+{
+   pointlist pl;
+   pl.reserve(wd->poly()->size());
+   for(pointlist::const_iterator CP = wd->poly()->begin(); CP != wd->poly()->end(); CP++)
+   {
+      TP pnt(*CP);
+      pnt *= _crosscoeff;
+      pl.push_back(pnt);
+   }
+   laydata::valid_poly check(pl);
+
+   if (!check.valid())
+   {
+      std::ostringstream ost; ost << "Layer " << layname;
+      ost << ": Polygon check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   else pl = check.get_validated() ;
+
+   if (check.box())  wl->addbox(pl[0], pl[2],false);
+   else              wl->addpoly(pl,false);
+}
+
+void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::tdtlayer* wl, std::string layname)
+{
+   pointlist pl;
+   pl.reserve(wd->poly()->size());
+   for(pointlist::const_iterator CP = wd->poly()->begin(); CP != wd->poly()->end(); CP++)
+   {
+      TP pnt(*CP);
+      pnt *= _crosscoeff;
+      pl.push_back(pnt);
+   }
+   laydata::valid_wire check(pl, wd->width());
+
+   if (!check.valid())
+   {
+      std::ostringstream ost; ost << "Layer " << layname;
+      ost << ": Wire check fails - " << check.failtype();
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   else pl = check.get_validated() ;
+   wl->addwire(pl, wd->width(),false);
+}
+
+void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
+{
+   CifStructure* refd = _src_lib->getStructure(wd->cell());
+   std::string cell_name = refd->name();
+   if (NULL != (*_tdt_db)()->checkcell(cell_name))
+   {
+      laydata::CellDefin strdefn = (*_tdt_db)()->getcellnamepair(cell_name);
+      // Absolute magnification, absolute angle should be reflected somehow!!!
+      dst->addcellref((*_tdt_db)(), strdefn, (*wd->location())*_crosscoeff, false);
+   }
+   else
+   {
+      std::string news = "Referenced structure \"";
+      news += cell_name; news += "\" not found. Reference ignored";
+      tell_log(console::MT_ERROR,news);
+   }
+}
+
+void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::tdtlayer* wl, std::string )
+{
+   // CIF doesn't have a concept of texts (as GDS)
+   // text size and placement are just the default
+   if (0.0 == _techno) return;
+   TP pnt(*(wd->location()));
+   pnt *= _crosscoeff;
+   wl->addtext(wd->text(),
+               CTM(pnt,
+                   (_techno / OPENGL_FONT_UNIT),
+                   0.0,
+                   false )
+              );
+}
+
+void CIFin::Cif2Ted::lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string )
+{
+}
 
 //-----------------------------------------------------------------------------
 // class DataCenter
@@ -47,7 +305,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
 {
    _localDir = localDir;
    _globalDir = globalDir;
-	_GDSDB = NULL; _CIFDB = NULL;_OASDB = NULL; _DRCDB = NULL;//_TEDDB = NULL;
+   _GDSDB = NULL; _CIFDB = NULL;//_TEDDB = NULL;
    _bpSync = NULL;
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
@@ -60,8 +318,6 @@ DataCenter::~DataCenter() {
    laydata::tdtlibrary::clearEntireHierTree();
    if (NULL != _GDSDB) delete _GDSDB;
    if (NULL != _CIFDB) delete _CIFDB;
-   if (NULL != _OASDB) delete _OASDB;
-	if (NULL != _DRCDB) delete _DRCDB;
    // _TEDLIB will be cleared automatically (not a pointer)
 }
 bool DataCenter::TDTcheckread(const std::string filename,
@@ -216,23 +472,31 @@ bool DataCenter::TDTwrite(const char* filename)
    return true;
 }
 
-void DataCenter::GDSexport(const LayerMapExt& layerMap, std::string& filename, bool x2048)
+void DataCenter::GDSexport(const LayerMapGds& layerMap, std::string& filename, bool x2048)
 {
-   GDSin::GdsExportFile gdsex(filename, NULL, layerMap, true);
-   _TEDLIB()->GDSwrite(gdsex);
+   std::string nfn;
+   //Get actual time
+   GDSin::GdsFile gdsex(filename, &layerMap, time(NULL));
+   _TEDLIB()->GDSwrite(gdsex, NULL, true);
+   if (x2048) gdsex.updateLastRecord();
+   gdsex.closeFile();
 }
 
-void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapExt& layerMap, bool recur, std::string& filename, bool x2048)
+void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapGds& layerMap, bool recur, std::string& filename, bool x2048)
 {
-   GDSin::GdsExportFile gdsex(filename, cell, layerMap, recur);
-   _TEDLIB()->GDSwrite(gdsex);
+   std::string nfn;
+   //Get actual time
+   GDSin::GdsFile gdsex(filename, &layerMap, time(NULL));
+   _TEDLIB()->GDSwrite(gdsex, cell, recur);
+   if (x2048) gdsex.updateLastRecord();
+   gdsex.closeFile();
 }
 
 bool DataCenter::GDSparse(std::string filename)
 {
    bool status = true;
 
-   GDSin::GdsInFile* AGDSDB = NULL;
+   GDSin::GdsFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       std::string news = "Removing existing GDS data from memory...";
@@ -244,14 +508,14 @@ bool DataCenter::GDSparse(std::string filename)
 #ifdef GDSCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      AGDSDB = DEBUG_NEW GDSin::GdsInFile(filename);
+      AGDSDB = DEBUG_NEW GDSin::GdsFile(filename);
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS parse: ");
 #endif
    }
    catch (EXPTNreadGDS)
    {
-      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+      toped_status(console::TSTS_PRGRSBAROFF);
       status = false;
    }
    if (status)
@@ -265,9 +529,18 @@ bool DataCenter::GDSparse(std::string filename)
    return status;
 }
 
-void DataCenter::importGDScell(const nameList& top_names, const LayerMapExt& laymap, bool recur, bool over)
+void DataCenter::GDSsplit(GDSin::GdsStructure* gdsstr, const std::string filename, bool recur)
 {
-   GDSin::GdsInFile* AGDSDB = NULL;
+   assert (NULL != _GDSDB);
+
+   GDSin::GdsSplit gdssplit(_GDSDB, filename);
+   gdssplit.run(gdsstr, recur);
+
+}
+
+void DataCenter::importGDScell(const nameList& top_names, const LayerMapGds& laymap, bool recur, bool over)
+{
+   GDSin::GdsFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
 #ifdef GDSCONVERT_PROFILING
@@ -285,7 +558,7 @@ void DataCenter::importGDScell(const nameList& top_names, const LayerMapExt& lay
 
 void DataCenter::GDSclose()
 {
-   GDSin::GdsInFile* AGDSDB = NULL;
+   GDSin::GdsFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       delete AGDSDB;
@@ -303,17 +576,6 @@ void DataCenter::CIFclose()
       ACIFDB = NULL;
    }
    unlockCif(ACIFDB);
-}
-
-void DataCenter::OASclose()
-{
-   Oasis::OasisInFile* AOASDB = NULL;
-   if (lockOas(AOASDB))
-   {
-      delete AOASDB;
-      AOASDB = NULL;
-   }
-   unlockOas(AOASDB);
 }
 
 CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
@@ -348,14 +610,16 @@ CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
 
 void DataCenter::CIFexport(USMap* laymap, bool verbose, std::string& filename)
 {
-   CIFin::CifExportFile cifex(filename, NULL, laymap, true, verbose);
-   _TEDLIB()->CIFwrite(cifex);
+   std::string nfn;
+   CIFin::CifExportFile cifex(filename, laymap, verbose);
+   _TEDLIB()->CIFwrite(cifex, NULL);
 }
 
 void DataCenter::CIFexport(laydata::tdtcell* topcell, USMap* laymap, bool recur, bool verbose, std::string& filename)
 {
-   CIFin::CifExportFile cifex(filename, topcell, laymap, recur, verbose);
-   _TEDLIB()->CIFwrite(cifex);
+   std::string nfn;
+   CIFin::CifExportFile cifex(filename, laymap, verbose);
+   _TEDLIB()->CIFwrite(cifex, topcell, recur);
 }
 
 
@@ -372,29 +636,16 @@ bool DataCenter::cifGetLayers(nameList& cifLayers)
    return ret_value;
 }
 
-bool DataCenter::gdsGetLayers(ExtLayers& gdsLayers)
+bool DataCenter::gdsGetLayers(GdsLayers& gdsLayers)
 {
    bool ret_value = false;
-   GDSin::GdsInFile* AGDSDB = NULL;
+   GDSin::GdsFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(gdsLayers);
       ret_value = true;
    }
    unlockGds(AGDSDB);
-   return ret_value;
-}
-
-bool DataCenter::oasGetLayers(ExtLayers& oasLayers)
-{
-   bool ret_value = false;
-   Oasis::OasisInFile* AOASDB = NULL;
-   if (lockOas(AOASDB))
-   {
-      AOASDB->collectLayers(oasLayers);
-      ret_value = true;
-   }
-   unlockOas(AOASDB);
    return ret_value;
 }
 
@@ -412,59 +663,6 @@ void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool re
    }
    unlockCif(ACIFDB, true);
 }
-
-bool DataCenter::OASParse(std::string filename)
-{
-   bool status = true;
-
-   Oasis::OasisInFile* AOASDB = NULL;
-   if (lockOas(AOASDB))
-   {
-      std::string news = "Removing existing OASIS data from memory...";
-      tell_log(console::MT_WARNING,news);
-      delete AOASDB;
-   }
-   try
-   {
-      AOASDB = DEBUG_NEW Oasis::OasisInFile(filename);
-      status = AOASDB->status();
-      if (status)
-         AOASDB->readLibrary();
-   }
-   catch (EXPTNreadOASIS)
-   {
-      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
-      status = false;
-   }
-   if (status)
-      AOASDB->hierOut();// generate the hierarchy tree of cells
-   else if (NULL != AOASDB)
-   {
-      delete AOASDB;
-      AOASDB = NULL;
-   }
-   unlockOas(AOASDB);
-   return status;
-}
-
-void DataCenter::importOAScell(const nameList& top_names, const LayerMapExt& laymap, bool recur, bool over)
-{
-   Oasis::OasisInFile* AOASDB = NULL;
-   if (lockOas(AOASDB))
-   {
-#ifdef OASCONVERT_PROFILING
-      HiResTimer profTimer;
-#endif
-      Oasis::Oas2Ted converter(AOASDB, &_TEDLIB, laymap);
-      converter.run(top_names, recur, over);
-      _TEDLIB()->modified = true;
-#ifdef OASCONVERT_PROFILING
-      profTimer.report("Time elapsed for OASIS conversion: ");
-#endif
-   }
-   unlockOas(AOASDB, true);
-}
-
 
 void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
 {
@@ -489,7 +687,7 @@ void DataCenter::newDesign(std::string name, time_t created)
       _TEDLIB()->clearHierTree();
       _TEDLIB.deleteDB();
    }
-   _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, created));
+   _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, 0));
    _TEDLIB()->assign_properties(_properties);
    _tedfilename = _localDir + name + ".tdt";
    _neversaved = true;
@@ -507,28 +705,12 @@ laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
    else throw EXPTNactive_DB();
 }
 
-laydata::drclibrary*  DataCenter::lockDRC(void) 
-{
-	if (!_TEDLIB()) throw EXPTNactive_DB();
-   if (!_DRCDB) 
-   {
-		_DRCDB = DEBUG_NEW laydata::drclibrary("drc", _TEDLIB()->DBU(), _TEDLIB()->UU());
-   }
-	while (wxMUTEX_NO_ERROR != DRCLock.TryLock());
-   return _DRCDB;
-}
-
 void DataCenter::unlockDB() 
 {
    VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
 }
 
-void DataCenter::unlockDRC() 
-{
-   VERIFY(wxMUTEX_NO_ERROR == DRCLock.Unlock());
-}
-
-bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
+bool DataCenter::lockGds(GDSin::GdsFile*& gds_db)
 {
    if (wxMUTEX_DEAD_LOCK == GDSLock.Lock())
    {
@@ -543,7 +725,7 @@ bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
    }
 }
 
-void DataCenter::unlockGds(GDSin::GdsInFile*& gds_db, bool throwexception)
+void DataCenter::unlockGds(GDSin::GdsFile*& gds_db, bool throwexception)
 {
    _GDSDB = gds_db;
    VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
@@ -580,32 +762,6 @@ void DataCenter::unlockCif(CIFin::CifFile*& cif_db, bool throwexception)
    cif_db = NULL;
 }
 
-bool DataCenter::lockOas(Oasis::OasisInFile*& oasis_db)
-{
-   if (wxMUTEX_DEAD_LOCK == OASLock.Lock())
-   {
-      tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
-      oasis_db = _OASDB;
-      return false;
-   }
-   else
-   {
-      oasis_db = _OASDB;
-      return (NULL != oasis_db);
-   }
-}
-
-void DataCenter::unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception)
-{
-   _OASDB = oasis_db;
-   VERIFY(wxMUTEX_NO_ERROR == OASLock.Unlock());
-   if (NULL != _bpSync)
-      _bpSync->Signal();
-   else if (throwexception && (NULL == oasis_db))
-      throw EXPTNactive_OASIS();
-   oasis_db = NULL;
-}
-
 void DataCenter::bpAddGdsTab()
 {
    // Lock the Mutex
@@ -617,8 +773,10 @@ void DataCenter::bpAddGdsTab()
    // initialise the thread condition with the locked Mutex
    _bpSync = new wxCondition(GDSLock);
    // post a message to the main thread
-   TpdPost::addGDStab();
-   // Go to sleep and wait until the main thread finished
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(browsers::BT_ADDGDS_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
+   // Go to sleep and wait untill the main thread finished
    // updating the browser panel
    _bpSync->Wait();
    // Wake-up & uplock the mutex
@@ -639,34 +797,14 @@ void DataCenter::bpAddCifTab()
    // initialise the thread condition with the locked Mutex
    _bpSync = new wxCondition(CIFLock);
    // post a message to the main thread
-   TpdPost::addCIFtab();
+   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   eventADDTAB.SetInt(browsers::BT_ADDCIF_TAB);
+   wxPostEvent(Browsers, eventADDTAB);
    // Go to sleep and wait untill the main thread finished
    // updating the browser panel
    _bpSync->Wait();
    // Wake-up & uplock the mutex
    VERIFY(wxMUTEX_NO_ERROR == CIFLock.Unlock());
-   // clean-up behind & prepare for the consequent use
-   delete _bpSync;
-   _bpSync = NULL;
-}
-
-void DataCenter::bpAddOasTab()
-{
-   // Lock the Mutex
-   if (wxMUTEX_DEAD_LOCK == OASLock.Lock())
-   {
-      tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
-      return;
-   }
-   // initialise the thread condition with the locked Mutex
-   _bpSync = new wxCondition(OASLock);
-   // post a message to the main thread
-   TpdPost::addOAStab();
-   // Go to sleep and wait until the main thread finished
-   // updating the browser panel
-   _bpSync->Wait();
-   // Wake-up & uplock the mutex
-   VERIFY(wxMUTEX_NO_ERROR == OASLock.Unlock());
    // clean-up behind & prepare for the consequent use
    delete _bpSync;
    _bpSync = NULL;
@@ -798,14 +936,6 @@ void DataCenter::openGL_draw(const CTM& layCTM)
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(_properties.drawprop());
-			if(_DRCDB)
-			{
-				laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
-				if (dst_structure)
-				{
-					dst_structure->openGL_draw(_properties.drawprop());
-				}
-			}
 #ifdef RENDER_PROFILING
          rendTimer.report("Total elapsed rendering time");
 #endif
@@ -856,17 +986,6 @@ void DataCenter::openGL_render(const CTM& layCTM)
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_render(renderer);
-			if(_DRCDB)
-			{
-				renderer.setState(layprop::DRC);
-				laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
-				if (dst_structure)
-				{
-					dst_structure->openGL_render(renderer, CTM(), false, false);
-				}
-				renderer.setState(layprop::DB);
-			}
-			//_DRCDB->openGL_draw(_properties.drawprop());
 #ifdef RENDER_PROFILING
          rendTimer.report("Time elapsed for data traversing: ");
 #endif
@@ -1107,18 +1226,18 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
    return DEBUG_NEW LayerMapCif(*theMap);
 }
 
-LayerMapExt* DataCenter::secureGdsLayMap(bool import)
+LayerMapGds* DataCenter::secureGdsLayMap(bool import)
 {
    const USMap* savedMap = _properties.getGdsLayMap();
-   LayerMapExt* theGdsMap;
+   LayerMapGds* theGdsMap;
    if (NULL == savedMap)
    {
       USMap theMap;
       if (import)
       { // generate default import GDS layer map
-         ExtLayers* gdsLayers = DEBUG_NEW ExtLayers();
+         GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
          gdsGetLayers(*gdsLayers);
-         for ( ExtLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
+         for ( GdsLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
          {
             std::ostringstream dtypestr;
             dtypestr << CGL->first << ";";
@@ -1129,7 +1248,7 @@ LayerMapExt* DataCenter::secureGdsLayMap(bool import)
             }
             theMap[CGL->first] = dtypestr.str();
          }
-         theGdsMap = DEBUG_NEW LayerMapExt(theMap, gdsLayers);
+         theGdsMap = DEBUG_NEW LayerMapGds(theMap, gdsLayers);
       }
       else
       { // generate default export GDS layer map
@@ -1143,19 +1262,19 @@ LayerMapExt* DataCenter::secureGdsLayMap(bool import)
             theMap[DATC->getLayerNo( *CDL )] = dtypestr.str();
          }
          DATC->unlockDB();
-         theGdsMap = DEBUG_NEW LayerMapExt(theMap, NULL);
+         theGdsMap = DEBUG_NEW LayerMapGds(theMap, NULL);
       }
    }
    else
    {
       if (import)
       {
-         ExtLayers* gdsLayers = DEBUG_NEW ExtLayers();
+         GdsLayers* gdsLayers = DEBUG_NEW GdsLayers();
          gdsGetLayers(*gdsLayers);
-         theGdsMap = DEBUG_NEW LayerMapExt(*savedMap, gdsLayers);
+         theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, gdsLayers);
       }
       else
-         theGdsMap = DEBUG_NEW LayerMapExt(*savedMap, NULL);
+         theGdsMap = DEBUG_NEW LayerMapGds(*savedMap, NULL);
    }
    return theGdsMap;
 }

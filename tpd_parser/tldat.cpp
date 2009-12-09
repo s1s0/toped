@@ -31,12 +31,12 @@
 #include "tldat.h"
 #include "tellyzer.h"
 
-#include "tedat.h" //<< Must find a way to remove this from here. See line 238 - it's all about it!
+#include "../tpd_DB/tedat.h" //<< Must find a way to remove this from here. See line 224 - it's all about it!
 //=============================================================================
 telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
    telldata::tell_var* nvar;
    if (ID & telldata::tn_listmask) nvar = DEBUG_NEW telldata::ttlist(ID & ~telldata::tn_listmask);
-   else
+   else 
       switch(ID & ~telldata::tn_listmask) {
          case tn_void  : assert(false);
          case tn_int   : nvar = DEBUG_NEW telldata::ttint()    ;break;
@@ -174,7 +174,7 @@ const telldata::ttint& telldata::ttint::operator = (const ttreal& a) {
    // if a.value outside the limits -> send a runtime error message
 //   real  rval = a.value();
 //   int4b ival = (int4b)rval;
-//   _value =
+//   _value = 
    _value = (int4b)a.value();
    return *this;
 }
@@ -253,19 +253,19 @@ telldata::ttlist::ttlist(const telldata::ttlist& cobj) : tell_var(cobj.get_type(
    // copy constructor
    unsigned count = cobj._mlist.size();
    _mlist.reserve(count);
-   for (unsigned i = 0; i < count; i++)
+   for (unsigned i = 0; i < count; i++) 
      _mlist.push_back(cobj._mlist[i]->selfcopy());
 }
 
 const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cobj) {
    unsigned count = _mlist.size();
    unsigned i;
-   for (i = 0; i < count; i++)
+   for (i = 0; i < count; i++) 
       delete _mlist[i];
-   _mlist.clear();
+   _mlist.clear();   
    count = cobj._mlist.size();
    _mlist.reserve(count);
-   for (i = 0; i < count; i++)
+   for (i = 0; i < count; i++) 
       _mlist.push_back(cobj._mlist[i]->selfcopy());
    return *this;
 }
@@ -300,15 +300,15 @@ void telldata::ttlist::assign(tell_var* rt) {
    this->operator = (*(static_cast<ttlist*>(rt)));
 }
 
-telldata::tell_var* telldata::ttlist::index_var(dword index)
+telldata::tell_var* telldata::ttlist::index_var(_dbl_word index)
 {
    if (_mlist.empty() || (index > (_mlist.size() - 1))) return NULL;
    else return _mlist[index];
 }
 
-bool telldata::ttlist::validIndex(dword index)
+bool telldata::ttlist::validIndex(_dbl_word index)
 {
-   dword cursize = _mlist.size();
+   _dbl_word cursize = _mlist.size();
    if ((0 == cursize) || (index > (cursize - 1))) return false;
    else return true;
 }
@@ -318,7 +318,7 @@ void telldata::ttlist::insert(telldata::tell_var* newval)
    _mlist.push_back(newval->selfcopy());
 }
 
-void telldata::ttlist::insert(telldata::tell_var* newval, dword index)
+void telldata::ttlist::insert(telldata::tell_var* newval, _dbl_word index)
 {
    assert(index >=0); assert(index <= _mlist.size());
    if (index == _mlist.size())
@@ -347,7 +347,7 @@ void telldata::ttlist::lunion(telldata::ttlist* inlist)
       _mlist.push_back((*CI)->selfcopy());
 }
 
-void telldata::ttlist::lunion(telldata::ttlist* inlist, dword index)
+void telldata::ttlist::lunion(telldata::ttlist* inlist, _dbl_word index)
 {
    assert(index >=0); assert(index <= _mlist.size());
    if (index == _mlist.size())
@@ -369,7 +369,7 @@ void telldata::ttlist::lunion(telldata::ttlist* inlist, dword index)
    }
 }
 
-telldata::tell_var* telldata::ttlist::erase(dword index)
+telldata::tell_var* telldata::ttlist::erase(_dbl_word index)
 {
    assert(index >=0); assert(index < _mlist.size());
    telldata::tell_var* erased = _mlist[index];
@@ -392,7 +392,7 @@ telldata::tell_var* telldata::ttlist::erase(dword index)
    return erased;
 }
 
-telldata::tell_var* telldata::ttlist::erase(dword idxB, dword idxE)
+telldata::tell_var* telldata::ttlist::erase(_dbl_word idxB, _dbl_word idxE)
 {
    assert(idxB >=0); assert(idxB < _mlist.size());
    assert(idxE >=0); assert(idxE < _mlist.size());
@@ -431,11 +431,11 @@ telldata::user_struct::user_struct(const tell_type* tltypedef) : tell_var(tltype
 }
 
 telldata::user_struct::user_struct(const tell_type* tltypedef, operandSTACK& OPstack) :
-                                                                tell_var(tltypedef->ID())
+                                                                tell_var(tltypedef->ID()) 
 {
    assert(NULL != tltypedef);
    const recfieldsID& typefields = tltypedef->fields();
-   for (recfieldsID::const_reverse_iterator CI = typefields.rbegin(); CI != typefields.rend(); CI++)
+   for (recfieldsID::const_reverse_iterator CI = typefields.rbegin(); CI != typefields.rend(); CI++) 
    {// for every member of the structure
       assert(OPstack.top()->get_type() == CI->second);
       _fieldList.push_back(structRECNAME(CI->first,OPstack.top()->selfcopy()));
@@ -497,13 +497,13 @@ telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
 
 //=============================================================================
 telldata::ttpnt::ttpnt (real x, real y) : user_struct(telldata::tn_pnt),
-                                         _x(DEBUG_NEW ttreal(x)), _y(DEBUG_NEW ttreal(y))
+                                         _x(DEBUG_NEW ttreal(x)), _y(DEBUG_NEW ttreal(y)) 
 {
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
 
-telldata::ttpnt::ttpnt(operandSTACK& OPstack) : user_struct(telldata::tn_pnt)
+telldata::ttpnt::ttpnt(operandSTACK& OPstack) : user_struct(telldata::tn_pnt) 
 {
    _y = DEBUG_NEW telldata::ttreal(); _y->assign(OPstack.top());
    delete OPstack.top(); OPstack.pop();
@@ -514,26 +514,26 @@ telldata::ttpnt::ttpnt(operandSTACK& OPstack) : user_struct(telldata::tn_pnt)
 }
 
 telldata::ttpnt::ttpnt(const ttpnt& invar) : user_struct(telldata::tn_pnt) ,
-                         _x(DEBUG_NEW ttreal(invar.x())), _y(DEBUG_NEW ttreal(invar.y()))
+                         _x(DEBUG_NEW ttreal(invar.x())), _y(DEBUG_NEW ttreal(invar.y())) 
 {
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
 
-void telldata::ttpnt::assign(tell_var* rt)
+void telldata::ttpnt::assign(tell_var* rt) 
 {
    _x->_value = static_cast<ttpnt*>(rt)->x();
    _y->_value = static_cast<ttpnt*>(rt)->y();
 }
 
-void telldata::ttpnt::echo(std::string& wstr, real)
+void telldata::ttpnt::echo(std::string& wstr, real) 
 {
    std::ostringstream ost;
    ost << "{X = " << x() << ", Y = " << y() << "}";
    wstr += ost.str();
 }
 
-const telldata::ttpnt& telldata::ttpnt::operator = (const ttpnt& a)
+const telldata::ttpnt& telldata::ttpnt::operator = (const ttpnt& a) 
 {
    _x->_value = a.x(); _y->_value = a.y();
    return *this;
@@ -561,7 +561,7 @@ telldata::ttwnd::ttwnd(const ttwnd& cobj) : user_struct(tn_box),
 }
 
 
-telldata::ttwnd::ttwnd(operandSTACK& OPstack) : user_struct(telldata::tn_box)
+telldata::ttwnd::ttwnd(operandSTACK& OPstack) : user_struct(telldata::tn_box) 
 {
    // Here - just get the pointer to the points in the stack...
     _p2 = static_cast<telldata::ttpnt*>(OPstack.top());
@@ -851,9 +851,9 @@ void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, b
       static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
 }
 
-void telldata::argumentID::userStructListCheck(const telldata::tell_type& vartype, bool cmdUpdate)
+void telldata::argumentID::userStructListCheck(const telldata::tell_type& vartype, bool cmdUpdate) 
 {
-   for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++)
+   for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++) 
       if ( TLUNKNOWN_TYPE( (**CA)() ) ) (*CA)->userStructCheck(vartype, cmdUpdate);
 
    toList(cmdUpdate, vartype.ID());

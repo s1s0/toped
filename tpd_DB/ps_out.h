@@ -28,7 +28,7 @@
 #ifndef PS_OUT_H_DEFINED
 #define PS_OUT_H_DEFINED
 
-#include "ttt.h"
+#include "../tpd_common/ttt.h"
 
       //namespace ...
 

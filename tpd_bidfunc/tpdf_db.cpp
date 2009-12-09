@@ -28,15 +28,16 @@
 #include "tpdph.h"
 #include "tpdf_db.h"
 #include <sstream>
-#include "datacenter.h"
-#include "tuidefs.h"
-#include "calbr_reader.h"
-#include "drc_tenderer.h"
+#include "../tpd_DB/datacenter.h"
+#include "../tpd_common/tuidefs.h"
+#include "../tpd_DB/browsers.h"
+#include "../tpd_ifaces/calbr_reader.h"
+#include "../tpd_ifaces/drc_tenderer.h"
 
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
-extern Calbr::CalbrFile*         DRCData;
+extern Calbr::CalbrFile*			DRCData;
 
 //=============================================================================
 tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype, bool eor) :
@@ -83,6 +84,9 @@ int tellstdfunc::TDTread::execute()
       if (DATC->TDTread(filename))
       {
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
+            // Initialize call back functions
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
             // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
@@ -96,7 +100,7 @@ int tellstdfunc::TDTread::execute()
             updateLayerDefinitions( DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
-         TpdPost::addTDTtab(true, true);
+         browsers::addTDTtab(true, true);
          //
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
@@ -140,6 +144,9 @@ int tellstdfunc::TDTreadIFF::execute()
       {
          DATC->TDTread(filename);
          laydata::tdtdesign* ATDB = DATC->lockDB(false);
+            // Initialize call back functions
+            ATDB->btreeAddMember    = &browsers::treeAddMember;
+            ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
             // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
@@ -153,7 +160,7 @@ int tellstdfunc::TDTreadIFF::execute()
             updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the cell hierarchy browser
-         TpdPost::addTDTtab(true, true);
+         browsers::addTDTtab(true, true);
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -198,7 +205,7 @@ int tellstdfunc::TDTloadlib::execute()
          updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, libID);
          DATC->TEDLIB()->cleanUndefLib();
          // populating cell hierarchy browser
-         TpdPost::addTDTtab(false, true);
+         browsers::addTDTtab(false, true);
          // Clean-up eventual remainings in the themporary storage of the undefined cells
          DATC->TEDLIB()->deleteHeldCells();
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
@@ -230,7 +237,7 @@ int tellstdfunc::TDTunloadlib::execute()
    
    if (DATC->TDTunloadlib(libname))
    {
-      TpdPost::addTDTtab(false, true);
+      browsers::addTDTtab(false, true);
       LogFile << LogFile.getFN() << "(\""<< libname << "\");"; LogFile.flush();
    }
    else
@@ -341,7 +348,7 @@ int tellstdfunc::GDSread::execute() {
          // add GDS tab in the browser
          DATC->bpAddGdsTab();
          //
-         GDSin::GdsInFile* AGDSDB = NULL;
+         GDSin::GdsFile* AGDSDB = NULL;
          if (DATC->lockGds(AGDSDB))
          {
             GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
@@ -410,14 +417,14 @@ int tellstdfunc::GDSimport::execute()
    // Prep: We need all used layers, and the name of the GDS DB
    std::ostringstream ost;
    std::string gdsDbName = "NonameDB";
-   ExtLayers* gdsLaysAll = NULL;
-   GDSin::GdsInFile* AGDSDB = NULL;
+   GdsLayers* gdsLaysAll = NULL;
+   GDSin::GdsFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
       if (src_structure)
       {
-         gdsLaysAll = DEBUG_NEW ExtLayers();
+         gdsLaysAll = DEBUG_NEW GdsLayers();
          src_structure->collectLayers(*gdsLaysAll,true);
          gdsDbName = AGDSDB->libname();
       }
@@ -426,7 +433,7 @@ int tellstdfunc::GDSimport::execute()
    //OK, here we go....
    if (NULL != gdsLaysAll)
    { // i.e. top structure is found and layers extracted
-      LayerMapExt LayerExpression(gdsLaysStrList, gdsLaysAll);
+      LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
       if (LayerExpression.status())
       {
          nameList top_cells;
@@ -443,7 +450,7 @@ int tellstdfunc::GDSimport::execute()
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
-         TpdPost::addTDTtab(true, true);
+         browsers::addTDTtab(true, true);
          LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*lll) << "," << LogFile._2bool(recur)
                << "," << LogFile._2bool(over) << ");"; LogFile.flush();
       }
@@ -491,16 +498,16 @@ int tellstdfunc::GDSimportList::execute()
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
-   ExtLayers* gdsLaysAll = DEBUG_NEW ExtLayers();
+   GdsLayers* gdsLaysAll = DEBUG_NEW GdsLayers();
    std::string gdsDbName = "NonameDB";
-   GDSin::GdsInFile* AGDSDB = NULL;
+   GDSin::GdsFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(*gdsLaysAll);
       gdsDbName = AGDSDB->libname();
    }
    DATC->unlockGds(AGDSDB, true);
-   LayerMapExt LayerExpression(gdsLaysStrList, gdsLaysAll);
+   LayerMapGds LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
    {
       try {DATC->lockDB(false);}
@@ -515,7 +522,7 @@ int tellstdfunc::GDSimportList::execute()
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
       DATC->unlockDB();
       // populate the hierarchy browser
-      TpdPost::addTDTtab(true, true);
+      browsers::addTDTtab(true, true);
       LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
             << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    }
@@ -557,7 +564,7 @@ int tellstdfunc::GDSexportLIB::execute()
    if (expandFileName(filename))
    {
       DATC->lockDB(false);
-         LayerMapExt default_map(gdsLays, NULL);
+         LayerMapGds default_map(gdsLays, NULL);
          DATC->GDSexport(default_map, filename, x2048);
       DATC->unlockDB();
       LogFile << LogFile.getFN() << "( "
@@ -610,7 +617,7 @@ int tellstdfunc::GDSexportTOP::execute()
 
          if (NULL != excell)
          {
-            LayerMapExt default_map(gdsLays, NULL);
+            LayerMapGds default_map(gdsLays, NULL);
 
             DATC->GDSexport(excell, default_map, recur, filename, x2048);
             LogFile  << LogFile.getFN() 
@@ -655,7 +662,7 @@ int tellstdfunc::GDSsplit::execute()
    if (expandFileName(filename))
    {
 
-      GDSin::GdsInFile* AGDSDB = NULL;
+      GDSin::GdsFile* AGDSDB = NULL;
       if (DATC->lockGds(AGDSDB))
       {
          GDSin::GdsStructure *src_structure = AGDSDB->getStructure(cellname.c_str());
@@ -667,8 +674,7 @@ int tellstdfunc::GDSsplit::execute()
          }
          else
          {
-            GDSin::GdsSplit gdssplit(AGDSDB, filename);
-            gdssplit.run(src_structure, recur);
+            DATC->GDSsplit(src_structure, filename, recur);
             LogFile  << LogFile.getFN()
                      << "(\""<< cellname << "\","
                      << "\"" << filename << "\","
@@ -731,7 +737,7 @@ tellstdfunc::GDSclose::GDSclose(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::GDSclose::execute() {
-   TpdPost::clearGDStab();
+   browsers::clearGDStab();
    DATC->GDSclose();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
    return EXEC_NEXT;
@@ -799,7 +805,7 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
 int tellstdfunc::GDSreportlay::execute()
 {
    std::string name = getStringValue();
-   GDSin::GdsInFile* AGDSDB = NULL;
+   GDSin::GdsFile* AGDSDB = NULL;
    if(DATC->lockGds(AGDSDB))
    {
       GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
@@ -810,10 +816,10 @@ int tellstdfunc::GDSreportlay::execute()
       }
       else 
       {
-         ExtLayers gdsLayers;
+         GdsLayers gdsLayers;
          src_structure->collectLayers(gdsLayers,true);
          ost << "GDS layers found in \"" << name <<"\" { <layer_number> ; <data_type> }" << std::endl;
-         for (ExtLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
+         for (GdsLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
          {
             ost << "{" << NLI->first << " ; ";
             for (WordSet::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
@@ -851,9 +857,9 @@ int tellstdfunc::GDSgetlaymap::execute()
    }
    else if (import)
    { // generate default import GDS layer map
-      ExtLayers gdsLayers;
+      GdsLayers gdsLayers;
       DATC->gdsGetLayers(gdsLayers);
-      for ( ExtLayers::const_iterator CGL = gdsLayers.begin(); CGL != gdsLayers.end(); CGL++ )
+      for ( GdsLayers::const_iterator CGL = gdsLayers.begin(); CGL != gdsLayers.end(); CGL++ )
       {
          std::ostringstream dtypestr;
          dtypestr << CGL->first << ";";
@@ -1237,7 +1243,7 @@ tellstdfunc::CIFclose::CIFclose(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::CIFclose::execute() {
-   TpdPost::clearCIFtab();
+   browsers::clearCIFtab();
    DATC->CIFclose();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
    return EXEC_NEXT;
@@ -1321,158 +1327,6 @@ int tellstdfunc::CIFsetlaymap::execute()
 }
 
 //=============================================================================
-tellstdfunc::OASread::OASread(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-}
-
-int tellstdfunc::OASread::execute() {
-   std::string filename = getStringValue();
-   telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
-
-   if (expandFileName(filename))
-   {
-      std::list<std::string> top_cell_list;
-      if (DATC->OASParse(filename))
-      {
-         // add OASIS tab in the browser
-         DATC->bpAddOasTab();
-         //
-         Oasis::OasisInFile* AOASDB = NULL;
-         if (DATC->lockOas(AOASDB))
-         {
-            Oasis::OASHierTree* root = AOASDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-            if (root)
-            {
-               do
-               {
-                  top_cell_list.push_back(std::string(root->GetItem()->name()));
-               } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            }
-            //else ->it's possible to have an empty OASIS file
-         }
-         else
-         {
-            // The AOASDB mist exists here, because OASISparse returned true
-            assert(false);
-         }
-         DATC->unlockOas(AOASDB);
-         for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
-                                                   CN != top_cell_list.end(); CN ++)
-            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
-         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
-      }
-      else
-      {
-         //Error should've been already reported by the parser.
-      }
-   }
-   else
-   {
-      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
-      tell_log(console::MT_ERROR,info);
-   }
-   // Make sure you always return what you have to return - a list in this case even if
-   // it's empty. Otherwise the following tell function will crash, because it can't
-   // retrieve from the operand stack the required number of parameters. Empty list
-   // is still a list and everybody should deal with them
-   OPstack.push(topcells);
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-tellstdfunc::OASimport::OASimport(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
-}
-
-int tellstdfunc::OASimport::execute()
-{
-   bool  over  = getBoolValue();
-   bool  recur = getBoolValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   std::string name = getStringValue();
-   // Convert layer map
-    telldata::tthsh* nameh;
-    USMap gdsLaysStrList;
-    for (unsigned i = 0; i < lll->size(); i++)
-    {
-       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
-       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
-    }
-   //Prep: We need all used layers, and the name of the GDS DB
-   std::ostringstream ost;
-   std::string oasDbName = "NonameDB";
-   ExtLayers* oasLaysAll = NULL;
-   Oasis::OasisInFile* AOASDB = NULL;
-   if (DATC->lockOas(AOASDB))
-   {
-      Oasis::Cell *src_structure = AOASDB->getCell(name.c_str());
-      if (src_structure)
-      {
-         oasLaysAll = DEBUG_NEW ExtLayers();
-         src_structure->collectLayers(*oasLaysAll,true);
-         oasDbName = AOASDB->getLibName();
-      }
-   }
-   DATC->unlockOas(AOASDB, true);
-   //OK, here we go....
-   if (NULL != oasLaysAll)
-   { // i.e. top structure is found and layers extracted
-      LayerMapExt LayerExpression(gdsLaysStrList, oasLaysAll);
-      if (LayerExpression.status())
-      {
-         nameList top_cells;
-         top_cells.push_back(name);
-
-         try {DATC->lockDB(false);}
-         catch (EXPTN)
-         {  // create a default target data base if one is not already existing
-            TpdTime timeCreated(time(NULL));
-            createDefaultTDT(oasDbName, timeCreated, UNDOcmdQ, UNDOPstack);
-            DATC->lockDB(false);
-         }
-         DATC->importOAScell(top_cells, LayerExpression, recur, over);
-            updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-         DATC->unlockDB();
-         // populate the hierarchy browser
-         TpdPost::addTDTtab(true, true);
-         LogFile << LogFile.getFN() << "(\""<< name << "\"," << /*(*lll) << "," <<*/ LogFile._2bool(recur)
-               << "," << LogFile._2bool(over) << ");"; LogFile.flush();
-      }
-      else
-      {
-         ost << "Can't execute OASIS import - error in the layer map";
-         tell_log(console::MT_ERROR,ost.str());
-      }
-   }
-   else
-   {
-      ost << "OASIS structure named \"" << name << "\" does not exists";
-      tell_log(console::MT_ERROR,ost.str());
-   }
-   delete lll;
-   return EXEC_NEXT;
-}
-//=============================================================================
-tellstdfunc::OASclose::OASclose(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
-{}
-
-int tellstdfunc::OASclose::execute() {
-   TpdPost::clearOAStab();
-   DATC->OASclose();
-   LogFile << LogFile.getFN() << "();"; LogFile.flush();
-   return EXEC_NEXT;
-}
-
-
-//=============================================================================
 tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
@@ -1481,28 +1335,45 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute()
 {
-	DATC->setState(layprop::DRC);
-		DATC->addlayer(DRC_LAY);
-	DATC->setState(layprop::DB);
-	std::string filename = getStringValue();
+   std::string filename = getStringValue();
    if(DRCData)
    {
    }
    else
    {
-		laydata::drclibrary* drcDesign = DATC->lockDRC();
-		DRCData = DEBUG_NEW Calbr::CalbrFile(filename, 
-			new Calbr::drcTenderer(drcDesign));
+      DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer);
 
       if(DRCData->isOk())
       {
-			TpdPost::addDRCtab();
+         //Check existance of "drcResults" layer
+         if(!DATC->isLayerExist("drcResults"))
+         {
+            //Find free layer
+            int i;
+            for(i = 10000; i <=20000; i++)
+            {
+               if (!DATC->isLayerExist(i))
+               {
+                  DATC->addlayer("drcResults", i);
+                  browsers::layer_add("drcResults",i);
+                  break;
+               }
+            }
+            if (i>20000)
+            {
+               std::string message = "Can't create drcError layer";
+               tell_log(console::MT_ERROR,message);
+               return EXEC_NEXT;
+            }
+         }
+         //DRCData->ShowResults();
+         // add DRC tab in the browser
+         browsers::addDRCtab();
       }
       else
       {
          delete DRCData;
       }
-		DATC->unlockDRC();
    }
    return EXEC_NEXT;
 }
@@ -1512,68 +1383,24 @@ tellstdfunc::DRCshowerror::DRCshowerror(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+	arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 int tellstdfunc::DRCshowerror::execute()
 {
-   long errorNumber = getWordValue();
-   std::string errorName = getStringValue();
-   DRCData->showError(errorName, errorNumber);
+	long errorNumber = getWordValue();
+	std::string errorName = getStringValue();
+	DRCData->ShowError(errorName, errorNumber);
    return EXEC_NEXT;
 }
 
-
-//=============================================================================
-tellstdfunc::DRCshowallerrors::DRCshowallerrors(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
-{
-}
-
-int tellstdfunc::DRCshowallerrors::execute()
-{
-	if(DRCData)
-	{
-	   DRCData->showAllErrors();
-	}
-   else
-   {
-      std::ostringstream ost;
-      ost << "DRC database is not loaded";
-      tell_log(console::MT_ERROR,ost.str());
- 
-   }
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-tellstdfunc::DRChideallerrors::DRChideallerrors(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
-{
-}
-
-int tellstdfunc::DRChideallerrors::execute()
-{
-	if(DRCData)
-	{
-	   DRCData->hideAllErrors();
-	}
-   else
-   {
-      std::ostringstream ost;
-      ost << "DRC database is not loaded";
-      tell_log(console::MT_ERROR,ost.str());
- 
-   }
-   return EXEC_NEXT;
-}
 
 //=============================================================================
 void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
                                    parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
 {
    DATC->newDesign(dbname, timeCreated.stdCTime());
-   TpdPost::addTDTtab(true, false);
+   browsers::addTDTtab(true, false);
    // reset UNDO buffers;
    undstack.clear();
    while (!undopstack.empty())
@@ -1582,4 +1409,8 @@ void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
    }
    LogFile << "newdesign(\""<< dbname << "\" , \"" << timeCreated() <<
          "\");"; LogFile.flush();
+   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   ATDB->btreeAddMember    = &browsers::treeAddMember;
+   ATDB->btreeRemoveMember = &browsers::treeRemoveMember;
+   DATC->unlockDB();
 }

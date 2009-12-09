@@ -28,55 +28,73 @@
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
-#include "cif_io.h"
-#include "gds_io.h"
-#include "oasis_io.h"
+#include "../tpd_ifaces/gds_io.h"
+#include "../tpd_ifaces/cif_io.h"
 #include "viewprop.h"
+
+
+namespace CIFin {
+
+   class Cif2Ted {
+      public:
+                              Cif2Ted(CIFin::CifFile*, laydata::tdtlibdir*, SIMap*, real);
+         void                 top_structure(std::string, bool, bool);
+      protected:
+         void                 child_structure(const CIFin::CIFHierTree*, bool);
+         void                 convert_prep(const CIFin::CIFHierTree* item, bool);
+         void                 convert(CIFin::CifStructure*, laydata::tdtcell*);
+         void                 box ( CIFin::CifBox*     ,laydata::tdtlayer*, std::string );
+         void                 poly( CIFin::CifPoly*    ,laydata::tdtlayer*, std::string );
+         void                 wire( CIFin::CifWire*    ,laydata::tdtlayer*, std::string );
+         void                 ref ( CIFin::CifRef*     ,laydata::tdtcell*);
+         void                 lbll( CIFin::CifLabelLoc*,laydata::tdtlayer*, std::string );
+         void                 lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string );
+         CIFin::CifFile*      _src_lib;
+         laydata::tdtlibdir*  _tdt_db;
+         SIMap*               _cif_layers;
+         real                 _crosscoeff;
+         real                 _dbucoeff;
+         real                 _techno;
+   };
+
+}
 
 class DataCenter {
 public:
                               DataCenter(const std::string&, const std::string &);
-                             ~DataCenter();
+                             ~DataCenter(); 
    bool                       GDSparse(std::string);
-   void                       GDSexport(const LayerMapExt&, std::string&, bool);
-   void                       GDSexport(laydata::tdtcell*, const LayerMapExt&, bool, std::string&, bool);
-   void                       importGDScell(const nameList&, const LayerMapExt&, bool recur, bool over);
+   void                       GDSexport(const LayerMapGds&, std::string&, bool);
+   void                       GDSexport(laydata::tdtcell*, const LayerMapGds&, bool, std::string&, bool);
+   void                       GDSsplit(GDSin::GdsStructure*, const std::string filename, bool recur);
+   void                       importGDScell(const nameList&, const LayerMapGds&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
-   void                       OASclose();
    CIFin::CifStatusType       CIFparse(std::string filename);
    void                       CIFexport(USMap*, bool, std::string&);
    void                       CIFexport(laydata::tdtcell*, USMap*, bool, bool, std::string&);
    bool                       cifGetLayers(nameList&);
-   bool                       gdsGetLayers(ExtLayers&);
-   bool                       oasGetLayers(ExtLayers&);
+   bool                       gdsGetLayers(GdsLayers&);
    void                       CIFimport(const nameList&, SIMap*, bool, bool, real);
-   bool                       OASParse(std::string);
-   void                       importOAScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       PSexport(laydata::tdtcell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);
    bool                       TDTunloadlib(std::string);
    bool                       TDTwrite(const char* filename = NULL);
-   bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
-   bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&);
+   bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&); 
+   bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&); 
    void                       newDesign(std::string, time_t);
    laydata::tdtdesign*        lockDB(bool checkACTcell = true);
-	laydata::drclibrary*       lockDRC(void);
-   bool                       lockGds(GDSin::GdsInFile*&);
+   bool                       lockGds(GDSin::GdsFile*&);
    bool                       lockCif(CIFin::CifFile*&);
-   bool                       lockOas(Oasis::OasisInFile*&);
    void                       bpAddGdsTab();
    void                       bpAddCifTab();
-   void                       bpAddOasTab();
    laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
-	void                       unlockDRC();
-   void                       unlockGds(GDSin::GdsInFile*&, bool throwexception = false);
+   void                       unlockGds(GDSin::GdsFile*&, bool throwexception = false);
    void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
-   void                       unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception = false);
    void                       mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
@@ -94,7 +112,7 @@ public:
    word                       curlay() const          {return _curlay;}
    word                       curcmdlay() const       {return _curcmdlay;}
    std::string                tedfilename() const     {return _tedfilename;};
-   bool                       neversaved()  const     {return _neversaved;};
+   bool                       neversaved()  const     {return _neversaved;}; 
    bool                       modified() const        {return _TEDLIB.modified();};
 
    //------------------------------------------------------------------------------------------------
@@ -102,7 +120,6 @@ public:
    bool                       addlayer(std::string, unsigned);
    bool                       addlayer(unsigned layno);
    unsigned                   addlayer(std::string);
-   void                       addUnpublishedLay(word no) {_properties.addUnpublishedLay(no);};
    bool                       isLayerExist(word);
    bool                       isLayerExist(std::string);
    void                       addline(std::string, std::string, word, byte, byte);
@@ -121,7 +138,7 @@ public:
    void                       clearRulers();
    void                       switch_drawruler(bool st) {_drawruler = st;}
    bool                       drawruler() {return _drawruler;}
-   LayerMapExt*               secureGdsLayMap(bool);
+   LayerMapGds*               secureGdsLayMap(bool);
    LayerMapCif*               secureCifLayMap(bool);
    bool                       autopan() const         {return _properties.autopan();}
    bool                       zeroCross() const       {return _properties.zeroCross();}
@@ -150,7 +167,6 @@ public:
    void                       setScrCTM(CTM ScrCTM)   {_properties.setScrCTM(ScrCTM);}
    void                       setCurrentOp(console::ACTIVE_OP op)
                                                       {_properties.setCurrentOp(op);}
-	void								setState(layprop::drawprop_state state) {_properties.drawprop().setState(state);};
    const console::ACTIVE_OP   currentop() const       {return _properties.currentop();}
    void                       all_layers(nameList& laylist) const {_properties.all_layers(laylist);}
    void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
@@ -180,8 +196,6 @@ public:
                                                       {return _globalDir;}
    void                       loadLayoutFonts(std::string ffn, bool vbo)
                                                       {_properties.loadLayoutFonts(ffn, vbo);}
-   void                       setAdjustTextOrientation(bool ori)
-                                                      {_properties.setAdjustTextOrientation(ori);}
 
 protected:
    std::string                _tedfilename;
@@ -195,16 +209,12 @@ private:
    std::string                _localDir;
    std::string                _globalDir;
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
-	laydata::drclibrary*       _DRCDB;		//DRC data
-   GDSin::GdsInFile*          _GDSDB;        // GDS parsed data
+   GDSin::GdsFile*            _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
-   Oasis::OasisInFile*        _OASDB;        // OASIS parsed data
    layprop::ViewProperties    _properties;   // properties data base
    wxMutex                    DBLock;
-	wxMutex                    DRCLock;
    wxMutex                    GDSLock;
    wxMutex                    CIFLock;
-   wxMutex                    OASLock;
    wxMutex                    PROPLock;
    wxCondition*               _bpSync;       // Synchroniosation for cell browser panels
 
@@ -217,15 +227,15 @@ private:
 //=============================================================================
 //
 // This memo relates to the following fields of the DataCenter class:
-//   GDSin::GdsInFile* _GDSDB
+//   GDSin::GdsFile* _GDSDB
 //   CIFin::CifFile* _CIFDB
 //   wxMutex         GDSLock
 //   wxMutex         CIFLock
 //   wxCondition*    _bpSync;
 // and associated methods:
-//   bool lockGds(GDSin::GdsInFile*& gds_db);
+//   bool lockGds(GDSin::GdsFile*& gds_db);
 //   bool lockCif(CIFin::CifFile*& cif_db);
-//   void unlockGds(GDSin::GdsInFile*& gds_db, bool throwexception = false);
+//   void unlockGds(GDSin::GdsFile*& gds_db, bool throwexception = false);
 //   void unlockCif(CIFin::CifFile*& cif_db, bool throwexception = false);
 //   void bpAddGdsTab();
 //   void bpAddCifTab();
@@ -292,7 +302,7 @@ private:
 //
 // Here is the code template to be followed:
 //
-//   GDSin::GdsInFile* AGDSDB = NULL;
+//   GDSin::GdsFile* AGDSDB = NULL;
 //   if (lockGds(AGDSDB))
 //   { // DB exists, AGDSDB contains a valid pointer to it
 //     //
@@ -301,7 +311,7 @@ private:
 //     //    you can even do:
 //     // delete AGDSDB; AGDSDB = NULL;
 //     //    or
-//     // AGDSDB = new GDSin::GdsInFile(...);
+//     // AGDSDB = new GDSin::GdsFile(...);
 //     //    or a combination of the above
 //   }
 //   else

@@ -32,8 +32,8 @@
 
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
-#include "ttt.h"
-#include "viewprop.h"
+#include "../tpd_common/ttt.h"
+#include "../tpd_DB/viewprop.h"
 
 namespace tui {
 
@@ -56,11 +56,11 @@ namespace tui {
       ID_CBDEFCOLOR     ,
       ID_CBDEFPATTERN   ,
       ID_CBDEFLINE      ,
-      ID_SAVELAYMAP     ,
-      ID_BTNDISPLAYADD  ,
-      ID_BTNTECHADD     ,
-      ID_BTNOUTFILE     ,
-      ID_BTNCONVERT
+      ID_SAVELAYMAP		,
+		ID_BTNDISPLAYADD	,
+		ID_BTNTECHADD		,
+		ID_BTNOUTFILE		,
+		ID_BTNCONVERT
    };
 
    typedef enum
@@ -210,7 +210,7 @@ namespace tui {
    //==========================================================================
    class nameCbox3Records : public wxPanel {
       public:
-                              nameCbox3Records(wxWindow*, wxPoint, wxSize, const ExtLayers&, wxArrayString&, int);
+                              nameCbox3Records(wxWindow*, wxPoint, wxSize, const GdsLayers&, wxArrayString&, int);
                              ~nameCbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
@@ -226,7 +226,7 @@ namespace tui {
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords              _allRecords;
-         LayerMapExt*            _gdsLayMap;
+         LayerMapGds*            _gdsLayMap;
    };
 
    //==========================================================================
@@ -267,7 +267,7 @@ namespace tui {
          };
          typedef std::list<LayerRecord> AllRecords;
          AllRecords           _allRecords;
-         LayerMapExt*         _gdsLayMap;
+         LayerMapGds*         _gdsLayMap;
    };
 
    //--------------------------------------------------------------------------
@@ -285,7 +285,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameCbox3List : public wxScrolledWindow {
       public:
-                              nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const ExtLayers&);
+                              nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const GdsLayers&);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
@@ -377,25 +377,6 @@ namespace tui {
       nameCbox3List*    _layList;
    };
 
-   //--------------------------------------------------------------------------
-   class getOASimport : public wxDialog {
-   public:
-                        getOASimport(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos, wxString init);
-      wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
-      bool              get_overwrite()    const {return _overwrite->GetValue();};
-      bool              get_recursive()    const {return _recursive->GetValue();};
-      bool              getSaveMap()       const {return _saveMap->GetValue();}
-      USMap*            getOasLayerMap()         {return _layList->getTheMap();}
-      USMap*            getFullOasLayerMap()     {return _layList->getTheFullMap();}
-   private:
-      wxCheckBox*       _overwrite;
-      wxCheckBox*       _recursive;
-      wxCheckBox*       _saveMap;
-      wxListBox*        _nameList;
-      nameCbox3List*    _layList;
-   };
-   
    //--------------------------------------------------------------------------
    class getGDSexport : public wxDialog {
    public:
@@ -580,21 +561,21 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
-      //--------------------------------------------------------------------------
+	   //--------------------------------------------------------------------------
    class cadenceConvert : public wxDialog 
-   {
+	{
    public:
       cadenceConvert(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos);
    protected:   
       wxTextCtrl* _displayList;
       wxTextCtrl* _techList;
-      wxTextCtrl* _outputFile;
-   private:
-      void  onDisplayAdd(wxCommandEvent&);
-      void  onTechAdd(wxCommandEvent&);
-      void  onOutputFile(wxCommandEvent&);
-      void  onConvert(wxCommandEvent&);
-      DECLARE_EVENT_TABLE();
+		wxTextCtrl* _outputFile;
+	private:
+		void	onDisplayAdd(wxCommandEvent&);
+		void	onTechAdd(wxCommandEvent&);
+		void	onOutputFile(wxCommandEvent&);
+		void	onConvert(wxCommandEvent&);
+		DECLARE_EVENT_TABLE();
    };
 
 }

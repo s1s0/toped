@@ -30,8 +30,10 @@
 #include <sstream>
 #include <iostream>
 #include "tpdf_props.h"
-#include "datacenter.h"
-#include "tuidefs.h"
+
+#include "../tpd_DB/datacenter.h"
+#include "../tpd_common/tuidefs.h"
+#include "../tpd_DB/browsers.h"
 
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern DataCenter*               DATC;
@@ -73,8 +75,8 @@ int tellstdfunc::stdLAYPROP::execute() {
    std::string name  = getStringValue();
    // error message - included in the method
    DATC->addlayer(name, gdsN, col, fill, sline);
-   TpdPost::layer_add(name,gdsN);
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" <<
+   browsers::layer_add(name,gdsN);
+   LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" << 
          col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
    return EXEC_NEXT;
 }
@@ -121,7 +123,7 @@ int tellstdfunc::stdCOLORDEF::execute() {
    std::string  name = getStringValue();
    // error message - included in the method
    DATC->addcolor(name, colR, colG, colB, sat);
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," <<
+   LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," << 
                        colG << "," << colB << "," << sat << ");";LogFile.flush();
    return EXEC_NEXT;
 }
@@ -246,7 +248,7 @@ void tellstdfunc::stdHIDELAYER::undo() {
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
    delete pl;
-   TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
+   browsers::layer_status(browsers::BT_LAYER_HIDE, layno, hide);
    UpdateLV();
 }
 
@@ -275,8 +277,8 @@ int tellstdfunc::stdHIDELAYER::execute() {
       DATC->hideLayer(layno, hide);
       DATC->unlockDB();
 
-      TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
-      LogFile << LogFile.getFN() << "("<< layno << "," <<
+      browsers::layer_status(browsers::BT_LAYER_HIDE, layno, hide);
+      LogFile << LogFile.getFN() << "("<< layno << "," << 
                  LogFile._2bool(hide) << ");"; LogFile.flush();
       UpdateLV();
    }
@@ -312,7 +314,7 @@ void tellstdfunc::stdHIDELAYERS::undo() {
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       DATC->hideLayer(laynumber->value(), hide);
-      TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
+      browsers::layer_status(browsers::BT_LAYER_HIDE, laynumber->value(), hide);
    }
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
@@ -349,7 +351,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
       {
          if (hide && (listselected->end() != listselected->find(laynumber->value())))
             (*todslct)[laynumber->value()] = DEBUG_NEW laydata::dataList(*((*listselected)[laynumber->value()]));
-         TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
+         browsers::layer_status(browsers::BT_LAYER_HIDE, laynumber->value(), hide);
          undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
       }
    }
@@ -537,7 +539,7 @@ void tellstdfunc::stdLOCKLAYER::undo() {
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
    delete pl;
-   TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
+   browsers::layer_status(browsers::BT_LAYER_LOCK, layno, lock);
    UpdateLV();
 }
 
@@ -566,15 +568,15 @@ int tellstdfunc::stdLOCKLAYER::execute()
       }
       DATC->lockLayer(layno, lock);
       DATC->unlockDB();
-      TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
-      LogFile << LogFile.getFN() << "("<< layno << "," <<
+      browsers::layer_status(browsers::BT_LAYER_LOCK, layno, lock);
+      LogFile << LogFile.getFN() << "("<< layno << "," << 
                  LogFile._2bool(lock) << ");"; LogFile.flush();
       UpdateLV();
    }
    else
    {
       tell_log(console::MT_ERROR,"Layer above is the current. Can't be locked.");
-   }
+   }   
    return EXEC_NEXT;
 }
 
@@ -604,7 +606,7 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       DATC->lockLayer(laynumber->value(), lock);
-      TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
+      browsers::layer_status(browsers::BT_LAYER_LOCK, laynumber->value(), lock);
    }
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
@@ -641,7 +643,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
       {
          if (lock && (listselected->end() != listselected->find(laynumber->value())))
             (*todslct)[laynumber->value()] = DEBUG_NEW laydata::dataList(*((*listselected)[laynumber->value()]));
-         TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
+         browsers::layer_status(browsers::BT_LAYER_LOCK, laynumber->value(), lock);
          undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
       }
    }
@@ -684,7 +686,7 @@ void tellstdfunc::stdFILLLAYER::undo() {
    bool        fill  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
    DATC->fillLayer(layno, fill);
-   TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
+   browsers::layer_status(browsers::BT_LAYER_FILL, layno, fill);
    UpdateLV();
 }
 
@@ -698,8 +700,8 @@ int tellstdfunc::stdFILLLAYER::execute()
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
 
       DATC->fillLayer(layno, fill);
-      TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
-      LogFile << LogFile.getFN() << "("<< layno << "," <<
+      browsers::layer_status(browsers::BT_LAYER_FILL, layno, fill);
+      LogFile << LogFile.getFN() << "("<< layno << "," << 
                  LogFile._2bool(fill) << ");"; LogFile.flush();
       UpdateLV();
    return EXEC_NEXT;
@@ -729,7 +731,7 @@ void tellstdfunc::stdFILLLAYERS::undo() {
       telldata::ttint* laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       word lay = laynumber->value();
       DATC->fillLayer(lay, fill);
-      TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
+      browsers::layer_status(browsers::BT_LAYER_FILL, lay, fill);
    }
    delete sl;
    UpdateLV();
@@ -746,7 +748,7 @@ int tellstdfunc::stdFILLLAYERS::execute()
          telldata::ttint* laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
          word lay = laynumber->value();
          DATC->fillLayer(lay, fill);
-         TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
+         browsers::layer_status(browsers::BT_LAYER_FILL, lay, fill);
 
       }
       UNDOPstack.push_front(sl);
@@ -969,20 +971,6 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
       {
          std::ostringstream info;
          info << "Invalid \""<< name <<"\" value. Expected value is between 0 and 255";
-         tell_log(console::MT_ERROR,info.str());
-      }
-   }
-   else if ("ADJUST_TEXT_ORIENTATION == name")
-   {//setparams({"ADJUST_TEXT_ORIENTATION", "true"});
-      bool val;
-      if (from_string<bool>(val, value, std::boolalpha))
-      {
-         DATC->setAdjustTextOrientation(val);
-      }
-      else
-      {
-         std::ostringstream info;
-         info << "Invalid \""<< name <<"\" value. Expected \"true\" or \"false\"";
          tell_log(console::MT_ERROR,info.str());
       }
    }

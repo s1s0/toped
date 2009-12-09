@@ -32,11 +32,11 @@
 #include <wx/glcanvas.h>
 #include <wx/laywin.h>
 #include <wx/aui/aui.h>
-#include "ted_prompt.h"
+#include "../tpd_parser/ted_prompt.h"
 #include "layoutcanvas.h"
 #include "tui.h"
 #include "resourcecenter.h"
-#include "browsers.h"
+#include "../tpd_DB/browsers.h"
 
 
 namespace tui {
@@ -140,14 +140,6 @@ namespace tui {
       void   OnCIFtranslate(wxCommandEvent& WXUNUSED(event));
       void   OnCIFexportCELL(wxCommandEvent& WXUNUSED(event));
       void    OnCIFclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("cifclose();"));}
-
-      void     OnOASRead(wxCommandEvent& WXUNUSED(event));
-      void   OnOASimport(wxCommandEvent& WXUNUSED(event));
-      void   OnOAStranslate(wxCommandEvent& WXUNUSED(event));
-      void   OnOASexportLIB(wxCommandEvent& WXUNUSED(event));
-      void   OnOASexportCELL(wxCommandEvent& WXUNUSED(event));
-      void    OnOASclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("oasisclose();"));}
-
       void     OnTDTSave(wxCommandEvent& WXUNUSED(event));
       void   OnTDTSaveAs(wxCommandEvent& WXUNUSED(event));
       void   OnPropSave(wxCommandEvent& WXUNUSED(event));

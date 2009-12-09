@@ -31,32 +31,27 @@
 #define DRC_TENDERER_H_INCLUDED
 
 #include "calbr_reader.h"
+#include "../tpd_DB/datacenter.h"
 
 namespace Calbr
 {
 class drcTenderer: public drcRenderer
 {
-   public:
-   drcTenderer(laydata::drclibrary* library);
-   ~drcTenderer();
-	void setError(unsigned int numError);
-   void startWriting();
-   void addPoly(const CoordsVector   &coords);
-   void addLine(const edge &edge);
-   void showAll(void);
-	void hideAll(void);
-	void showError(unsigned int numError);
-   void zoom(const edge &edge);
-   void endWriting();
+	public:
+	drcTenderer();
+	~drcTenderer();
+	void drawBegin();
+	void drawPoly(const CoordsVector	&coords);
+	void drawLine(const edge &edge);
+	void drawEnd();
 private:
-   laydata::drclibrary* _ATDB;
-	laydata::tdtcell*		_DRCCell;
-	unsigned int			_numError;
-   double               _maxx;
-   double               _maxy;
-   double               _minx;
-   double               _miny;
-   bool                 _startDrawing; //use for initial setting of _minx, maxy etc
+	laydata::tdtdesign*	_ATDB;
+	unsigned 				_drcLayer;
+	double					_maxx;
+	double					_maxy;
+	double					_minx;
+	double					_miny;
+	bool						_startDrawing; //use for initial setting of _minx, maxy etc 
 };
 
 }

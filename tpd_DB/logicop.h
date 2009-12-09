@@ -27,8 +27,8 @@
 #ifndef LOGICOP_H_INCLUDED
 #define LOGICOP_H_INCLUDED
 
-#include "ttt.h"
-#include "polycross.h"
+#include "../tpd_common/ttt.h"
+#include "../tpd_common/polycross.h"
 #include "tedstd.h"
 
 namespace logicop {

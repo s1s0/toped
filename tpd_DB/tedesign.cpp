@@ -27,8 +27,10 @@
 
 #include "tpdph.h"
 #include <sstream>
-#include "ttt.h"
-#include "outbox.h"
+#include "../tpd_common/ttt.h"
+#include "../tpd_common/outbox.h"
+#include "../tpd_ifaces/cif_io.h"
+#include "../tpd_ifaces/gds_io.h"
 #include "tedesign.h"
 #include "tedat.h"
 #include "viewprop.h"
@@ -158,46 +160,61 @@ void laydata::tdtlibrary::registercellread(std::string cellname, tdtcell* cell) 
    _cells[cellname] = cell;
 }
 
-void laydata::tdtlibrary::GDSwrite(DbExportFile& gdsf)
+void laydata::tdtlibrary::GDSwrite(GDSin::GdsFile& gdsf, tdtcell* top, bool recur)
 {
-   TpdTime timelu(_lastUpdated);
-   gdsf.libraryStart(name(), timelu, DBU(), UU());
-   //
-   if (NULL == gdsf.topcell())
-   {
-      laydata::TDTHierTree* root_cell = _hiertree->GetFirstRoot(TARGETDB_LIB);
-      while (root_cell)
-      {
-         _cells[root_cell->GetItem()->name()]->GDSwrite(gdsf, _cells, root_cell);
-         root_cell = root_cell->GetNextRoot(TARGETDB_LIB);
-      }
-   }
-   else
-   {
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(gdsf.topcell());
-      gdsf.topcell()->GDSwrite(gdsf, _cells, root_cell);
-   }
-   gdsf.libraryFinish();
-}
+   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_LIBNAME, _name.size());
+   wr->add_ascii(_name.c_str()); gdsf.flush(wr);
 
-void laydata::tdtlibrary::CIFwrite(DbExportFile& ciff)
-{
-   TpdTime timelu(_lastUpdated);
-   ciff.libraryStart(name(), timelu, DBU(), UU());
-   if (NULL == ciff.topcell())
+   wr = gdsf.setNextRecord(gds_UNITS);
+   wr->add_real8b(_UU); wr->add_real8b(_DBU);
+   gdsf.flush(wr);
+   //
+   if (NULL == top)
    {
       laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
-      while (root)
-      {
-         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root);
+      while (root) {
+         _cells[root->GetItem()->name()]->GDSwrite(gdsf, _cells, root, _UU, recur);
          root = root->GetNextRoot(TARGETDB_LIB);
       }
    }
    else
    {
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(ciff.topcell());
-      ciff.topcell()->CIFwrite(ciff, _cells, root_cell);
+      laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
+      top->GDSwrite(gdsf, _cells, root_cell, _UU, recur);
    }
+   wr = gdsf.setNextRecord(gds_ENDLIB);gdsf.flush(wr);
+}
+
+void laydata::tdtlibrary::CIFwrite(CIFin::CifExportFile& ciff, tdtcell* top, bool recur)
+{
+/*   GDSin::GdsRecord* wr = gdsf.setNextRecord(gds_LIBNAME, _name.size());
+   wr->add_ascii(_name.c_str()); gdsf.flush(wr);
+
+   wr = gdsf.setNextRecord(gds_UNITS);
+   wr->add_real8b(_UU); wr->add_real8b(_DBU);
+   gdsf.flush(wr);
+   */
+
+   TpdTime timelu(_lastUpdated);
+   ciff.file() << "(       TDT source : " << name() << ");" << std::endl;
+   ciff.file() << "(    Last Modified : " << timelu() << ");" << std::endl;
+
+   if (NULL == top)
+   {
+      ciff.file() << "(         Top Cell :  - );" << std::endl;
+      laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
+      while (root) {
+         _cells[root->GetItem()->name()]->CIFwrite(ciff, _cells, root, _DBU, recur);
+         root = root->GetNextRoot(TARGETDB_LIB);
+      }
+   }
+   else
+   {
+      ciff.file() << "(         Top Cell : " << top->name() << ");" << std::endl;
+      laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
+      top->CIFwrite(ciff, _cells, root_cell, _DBU, recur);
+   }
+//   wr = gdsf.setNextRecord(gds_ENDLIB);gdsf.flush(wr);
 }
 
 void laydata::tdtlibrary::PSwrite(PSFile& psf, const tdtcell* top, const layprop::DrawProperties& drawprop)
@@ -347,13 +364,13 @@ void laydata::tdtlibrary::dbHierAdd(const laydata::tdtdefaultcell* comp, const l
       case TARGETDB_LIB:
       {
          std::string prnt_name = (NULL == prnt) ? _name : prnt->name();
-         TpdPost::treeAddMember(comp->name().c_str(), prnt_name.c_str(), 0);
+         btreeAddMember(comp->name().c_str(), prnt_name.c_str(), 0);
          break;
       }
       case UNDEFCELL_LIB:
       {
          std::string prnt_name = "";
-         TpdPost::treeAddMember(comp->name().c_str(), prnt_name.c_str(), 0);
+         btreeAddMember(comp->name().c_str(), prnt_name.c_str(), 0);
          break;
       }
       default: assert(false);
@@ -365,7 +382,7 @@ void laydata::tdtlibrary::dbHierAddParent(const laydata::tdtdefaultcell* comp, c
    assert(comp); assert(prnt);
    int res = _hiertree->addParent(comp, prnt, _hiertree);
    if (res > 0)
-      TpdPost::treeAddMember(comp->name().c_str(), prnt->name().c_str(), res);
+      btreeAddMember(comp->name().c_str(), prnt->name().c_str(), res);
 }
 
 void laydata::tdtlibrary::dbHierRemoveParent(tdtdefaultcell* comp, const tdtdefaultcell* prnt, laydata::tdtlibdir* libdir)
@@ -377,13 +394,13 @@ void laydata::tdtlibrary::dbHierRemoveParent(tdtdefaultcell* comp, const tdtdefa
       // if that cell was undefined - remove it from the library of undefined cells
       laydata::tdtdefaultcell* libcellX = libdir->displaceUndefinedCell(comp->name());
       assert(comp == libcellX);
-      TpdPost::treeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
-      TpdPost::treeRemoveMember(comp->name().c_str(), prnt->name().c_str(), 4);
+      btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
+      btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), 4);
       libdir->holdUndefinedCell(libcellX);
    }
    else if ( 3 != res)
    {
-      TpdPost::treeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
+      btreeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
       comp->_orphan = (res > 0);
    }
 }
@@ -392,7 +409,7 @@ void laydata::tdtlibrary::dbHierRemoveRoot(const tdtdefaultcell* comp)
 {
    assert(comp);
    _hiertree->removeRootItem(comp, _hiertree);
-   TpdPost::treeRemoveMember(comp->name().c_str(), NULL, 3);
+   btreeRemoveMember(comp->name().c_str(), NULL, 3);
 }
 
 bool laydata::tdtlibrary::dbHierCheckAncestors(const tdtdefaultcell* comp, const tdtdefaultcell* child)
@@ -675,12 +692,12 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name, laydata::tdtlibd
    _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
    if (NULL == libcell)
    {// Library cell with this name doesn't exists
-      TpdPost::treeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
+      btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
    }
    else
    {// Library cell with this name exists. the new cell should replace it in all
     // of its references
-      TpdPost::treeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
+      btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
       libdir->relink();
       libdir->deleteHeldCells(); // clean-up the unreferenced undefined cells
    }
@@ -704,12 +721,12 @@ void laydata::tdtdesign::addthiscell(laydata::tdtcell* strdefn, laydata::tdtlibd
    _hiertree = DEBUG_NEW TDTHierTree(strdefn, NULL, _hiertree);
    if (NULL == libcell)
    {// Library cell with this name doesn't exists
-      TpdPost::treeAddMember(cname.c_str(), _name.c_str(), 0);
+      btreeAddMember(cname.c_str(), _name.c_str(), 0);
    }
    else
    {// Library cell with this name exists. the new cell should replace it in all
     // of its references
-      TpdPost::treeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
+      btreeAddMember(_hiertree->GetItem()->name().c_str(), _name.c_str(), 0);
       libdir->relink();
    }
 }
@@ -1358,51 +1375,3 @@ laydata::tdtdesign::~tdtdesign()
 }
 //
 //
-
-laydata::drclibrary::drclibrary(std::string name, real DBU, real UU) :
-   _name(name), _DBU(DBU), _UU(UU) {}
-
-laydata::drclibrary::~drclibrary()
-{
-   laydata::cellList::const_iterator wc;
-   for (wc = _cells.begin(); wc != _cells.end(); wc++)
-      delete wc->second;
-   _cells.clear();
-}
-
-void laydata::drclibrary::registercellread(std::string cellname, tdtcell* cell) {
-   if (_cells.end() != _cells.find(cellname))
-   {
-   // There are several possiblirities here:
-   // 1. Cell has been referenced before the definition takes place
-   // 2. The same case 1, but the reason is circular reference. 
-   // 3. Cell is defined more than once
-   // Case 3 seems to be just theoretical and we should abort the reading 
-   // and retun with error in this case.
-   // Case 2 is really dangerous and once again theoretically we need to 
-   // break the circularity. This might happen however once the whole file
-   // is parced
-   // Case 1 is quite OK, although, the write sequence should use the 
-   // cell structure tree and start the writing from the leaf cells. At the 
-   // moment writing is in kind of alphabetical order and case 1 is more
-   // than possible. In the future it might me appropriate to issue a warning
-   // for possible circular reference.
-      if (NULL == _cells[cellname]) {
-         // case 1 or case 2 -> can't be distiguised in this moment
-         //_cells[cellname] = cell;
-         // cell has been referenced already, so it's not an orphan
-         cell->parentfound();
-      }
-      else {
-         //@FIXME case 3 -> parsing should be stopped !
-      }
-   }
-   _cells[cellname] = cell;
-}
-
-laydata::tdtdefaultcell* laydata::drclibrary::checkcell(std::string name)
-{
-   if (_cells.end() == _cells.find(name))
-      return NULL;
-   else return _cells[name];
-}

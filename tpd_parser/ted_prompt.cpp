@@ -26,10 +26,10 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include "../tpd_common/tuidefs.h"
 #include <string>
-#include <wx/regex.h>
-#include "tuidefs.h"
 #include "ted_prompt.h"
+#include <wx/regex.h>
 #include "tell_yacc.h"
 
 //-----------------------------------------------------------------------------
@@ -295,7 +295,7 @@ void* console::parse_thread::Entry()
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
-   TpdPost::toped_status(TSTS_THREADON, command);
+   toped_status(TSTS_THREADON, command);
    try {
       void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
       tellparse();
@@ -316,7 +316,7 @@ void* console::parse_thread::Entry()
       wxPostEvent(_canvas_wnd, eventZOOM);
       Console->set_canvas_invalid(false);
    }
-   TpdPost::toped_status(TSTS_THREADOFF);
+   toped_status(TSTS_THREADOFF);
 //   wxLogMessage(_T("Mutex unlocked"));
    return NULL;
 };
@@ -332,7 +332,7 @@ END_EVENT_TABLE()
 
 //==============================================================================
 console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
-      wxTextCtrl( parent, tui::ID_CMD_LINE, wxT(""), wxDefaultPosition, wxDefaultSize,
+      wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
                   wxTE_PROCESS_ENTER | wxNO_BORDER), puc(NULL), _numpoints(0)
 {
    _canvas = canvas;
@@ -510,7 +510,7 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
            (wxObjectEventFunction) (wxEventFunction)
            (wxCommandEventFunction)&ted_cmd::onGUInput);
 
-   TpdPost::toped_status(TSTS_THREADWAIT);
+   toped_status(TSTS_THREADWAIT);
 }
 
 void console::ted_cmd::getGUInput(bool from_keyboard) {

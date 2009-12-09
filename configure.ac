@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(toped, 0.9.5)
+AC_INIT(toped, 0.9.51)
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.cpp])
@@ -61,9 +61,6 @@ AX_CHECK_GLU
        CFLAGS="$CFLAGS $GLU_CFLAGS"
    fi
 AC_SEARCH_LIBS(glewInit, [GLEW glew32], , AC_MSG_ERROR([Glew library not found. Make sure it's installed]))
-AC_CHECK_LIB(z, gzsetparams,
-             [AC_CHECK_HEADER(zlib.h,,[AC_MSG_ERROR(zlib headers not found)])],
-             [AC_MSG_ERROR(zlib library not found)])
 
 #Check wxWidgets
  AM_OPTIONS_WXCONFIG
@@ -85,16 +82,16 @@ AC_CHECK_LIB(z, gzsetparams,
 
 AC_CONFIG_FILES([
    Makefile
-   ui/Makefile
    tpd_common/Makefile
-   tpd_DB/Makefile
-   tpd_ifaces/Makefile
    tpd_parser/Makefile
    tpd_bidfunc/Makefile
+   tpd_DB/Makefile
+   tpd_ifaces/Makefile
    src/Makefile
-   fonts/Makefile
-   icons/Makefile
    tll/Makefile
+   fonts/Makefile
+   ui/Makefile
+   icons/Makefile
    utils/cadence/Makefile
 ])
 AC_OUTPUT

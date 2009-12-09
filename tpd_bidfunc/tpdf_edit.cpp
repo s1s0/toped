@@ -28,8 +28,8 @@
 #include "tpdph.h"
 #include <sstream>
 #include "tpdf_edit.h"
-#include "tedat.h"
-#include "datacenter.h"
+#include "../tpd_DB/tedat.h"
+#include "../tpd_DB/datacenter.h"
 
 extern DataCenter*               DATC;
 extern console::toped_logfile    LogFile;
@@ -485,7 +485,7 @@ void tellstdfunc::stdDELETESEL::undo()
       for (laydata::cellList::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
       {
          DATC->TEDLIB()->addThisUndefCell(CUDU->second);
-         TpdPost::treeAddMember(CUDU->second->name().c_str(), prnt_name.c_str(), 0);
+         ATDB->btreeAddMember(CUDU->second->name().c_str(), prnt_name.c_str(), 0);
       }
       udurcells->clear();
       delete(udurcells);

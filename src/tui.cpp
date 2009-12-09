@@ -34,8 +34,8 @@
 #include <wx/regex.h>
 #include <wx/filename.h>
 #include "tui.h"
-#include "datacenter.h"
-#include "browsers.h"
+#include "../tpd_DB/datacenter.h"
+#include "../tpd_DB/browsers.h"
 
 extern DataCenter*                DATC;
 
@@ -537,8 +537,8 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   ExtLayers gdsLayers;
-   GDSin::GdsInFile* AGDSDB = NULL;
+   GdsLayers gdsLayers;
+   GDSin::GdsFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       //-----------------------------------------------------------------------
@@ -558,64 +558,6 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    }
 
    _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300), gdsLayers);
-
-   // The window layout
-   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-   //
-   wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-   lsizer->Add(_layList , 1, wxEXPAND);
-   lsizer->Add( _saveMap, 0, wxALL | wxALIGN_RIGHT, 5 );
-   //
-   wxBoxSizer *lists_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   lists_sizer->Add(_nameList, 1, wxEXPAND );
-   lists_sizer->Add(lsizer, 0, wxEXPAND);
-   // Buttons
-   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
-   button_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
-   button_sizer->Add(0,0,1); // 
-   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
-   // TOP sizer
-   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
-
-   SetSizer( topsizer );      // use the sizer for layout
-
-   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
-}
-
-//==============================================================================
-tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
-      wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
-                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
-{
-   _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
-   _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
-   _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
-   _recursive->SetValue(true);
-   _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   ExtLayers oasLayers;
-   Oasis::OasisInFile* AOASDB = NULL;
-   if (DATC->lockOas(AOASDB))
-   {
-      //-----------------------------------------------------------------------
-      // So ugly - even scary, but it's the price to pay for not including wx
-      // in the tpd_interfaces
-      for (Oasis::OasisInFile::DefinitionMap::const_iterator CSTR  = AOASDB->definitions().begin();
-                                                             CSTR != AOASDB->definitions().end(); CSTR++)
-         _nameList->Append(wxString(CSTR->first.c_str(), wxConvUTF8));
-       //-----------------------------------------------------------------------
-   }
-   DATC->unlockOas(AOASDB, true);
-   DATC->oasGetLayers(oasLayers);
-   if (init != wxT(""))
-   {
-      _nameList->SetStringSelection(init,true);
-      _nameList->SetFirstItem(init);
-   }
-
-   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300), oasLayers);
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -1874,7 +1816,7 @@ SIMap* tui::nameCboxRecords::getTheMap()
       if (ERR_LAY == layno)
       {
          layno = DATC->addlayer(layname);
-         TpdPost::layer_add(layname, layno);
+         browsers::layer_add(layname, layno);
       }
       (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
    }
@@ -1891,12 +1833,12 @@ USMap* tui::nameCboxRecords::getTheFullMap()
 
 //==========================================================================
 tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz, 
-            const ExtLayers& inlays, wxArrayString& all_strings, int row_height) 
+            const GdsLayers& inlays, wxArrayString& all_strings, int row_height) 
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
    _gdsLayMap = DATC->secureGdsLayMap(true);
    word rowno = 0;
-   for (ExtLayers::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   for (GdsLayers::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString sGdsLay;
       sGdsLay << CNM->first;
@@ -2004,7 +1946,7 @@ BEGIN_EVENT_TABLE(tui::nameCbox3List, wxScrolledWindow)
       EVT_SIZE( tui::nameCbox3List::OnSize )
 END_EVENT_TABLE()
 
-tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const ExtLayers& inlays) :
+tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const GdsLayers& inlays) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
@@ -2146,7 +2088,7 @@ tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word wGdsLay, wGdsType;
-      if (!_gdsLayMap->getExtLayType(wGdsLay, wGdsType, *CNM))
+      if (!_gdsLayMap->getGdsLayType(wGdsLay, wGdsType, *CNM))
       {
          wGdsLay  = *CNM;
          wGdsType = 0;
@@ -2242,85 +2184,85 @@ void tui::nameEbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 BEGIN_EVENT_TABLE(tui::cadenceConvert, wxDialog)
    EVT_BUTTON(ID_BTNDISPLAYADD, tui::cadenceConvert::onDisplayAdd)
    EVT_BUTTON(ID_BTNTECHADD, tui::cadenceConvert::onTechAdd)
-   EVT_BUTTON(ID_BTNOUTFILE, tui::cadenceConvert::onOutputFile)
-   EVT_BUTTON(ID_BTNCONVERT, tui::cadenceConvert::onConvert)
+	EVT_BUTTON(ID_BTNOUTFILE, tui::cadenceConvert::onOutputFile)
+	EVT_BUTTON(ID_BTNCONVERT, tui::cadenceConvert::onConvert)
 END_EVENT_TABLE()
 
 tui::cadenceConvert::cadenceConvert(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos):
-   wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+	wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
-   _displayList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
-   _techList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
-   _outputFile = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
+	_displayList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
+	_techList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
+	_outputFile = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
 
-   wxBoxSizer *topSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-      wxBoxSizer *vertSizer = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("") );
-         wxBoxSizer *displaySizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-            displaySizer->Add(10,10,0);
-            displaySizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Display file: ")), 0, 0, 0);
-            displaySizer->Add(_displayList, 1, wxEXPAND, 10);
-            displaySizer->Add(DEBUG_NEW wxButton(this, ID_BTNDISPLAYADD, _T("Add ...")), 0, 0, 0);
-            displaySizer->Add(10,10,0);
-         wxBoxSizer *techSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-            techSizer->Add(10,10,0);
-            techSizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Tech file:    ")), 0, 0, 0);
-            techSizer->Add(_techList, 1, wxEXPAND, 10 );
-            techSizer->Add(DEBUG_NEW wxButton( this, ID_BTNTECHADD, wxT("Add ...") ), 0, 0, 0 );
-            techSizer->Add(10,10,0);
-         wxBoxSizer *outputSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-            outputSizer->Add(10,10,0);
-            outputSizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Output file:   ")), 0, 0, 0);
-            outputSizer->Add(_outputFile, 1, wxEXPAND, 10 );
-            outputSizer->Add(DEBUG_NEW wxButton( this, ID_BTNOUTFILE, wxT("Add ...") ), 0, 0, 0 );
-            outputSizer->Add(10,10,0);
-      vertSizer->Add(displaySizer, 0, wxEXPAND ); // no border and centre horizontally
-      vertSizer->Add(techSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
-      vertSizer->Add(outputSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
-   
-   topSizer->Add(vertSizer, 0, wxEXPAND);
-   topSizer->Add(10,10,0);
-   topSizer->Add(DEBUG_NEW wxButton( this, ID_BTNCONVERT, wxT("Convert") ), 0, wxALIGN_CENTER , 0 );
-   topSizer->Add(10,10,0);
+	wxBoxSizer *topSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+		wxBoxSizer *vertSizer = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("") );
+			wxBoxSizer *displaySizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+				displaySizer->Add(10,10,0);
+				displaySizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Display file:	")), 0, 0, 0);
+				displaySizer->Add(_displayList, 1, wxEXPAND, 10);
+				displaySizer->Add(DEBUG_NEW wxButton(this, ID_BTNDISPLAYADD, _T("Add ...")), 0, 0, 0);
+				displaySizer->Add(10,10,0);
+			wxBoxSizer *techSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+				techSizer->Add(10,10,0);
+				techSizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Tech file:		")), 0, 0, 0);
+				techSizer->Add(_techList, 1, wxEXPAND, 10 );
+				techSizer->Add(DEBUG_NEW wxButton( this, ID_BTNTECHADD, wxT("Add ...") ), 0, 0, 0 );
+				techSizer->Add(10,10,0);
+			wxBoxSizer *outputSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+				outputSizer->Add(10,10,0);
+				outputSizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, _T("Output file:	")), 0, 0, 0);
+				outputSizer->Add(_outputFile, 1, wxEXPAND, 10 );
+				outputSizer->Add(DEBUG_NEW wxButton( this, ID_BTNOUTFILE, wxT("Add ...") ), 0, 0, 0 );
+				outputSizer->Add(10,10,0);
+		vertSizer->Add(displaySizer, 0, wxEXPAND ); // no border and centre horizontally
+		vertSizer->Add(techSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
+		vertSizer->Add(outputSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
+	
+	topSizer->Add(vertSizer, 0, wxEXPAND);
+	topSizer->Add(10,10,0);
+	topSizer->Add(DEBUG_NEW wxButton( this, ID_BTNCONVERT, wxT("Convert") ), 0, wxALIGN_CENTER , 0 );
+	topSizer->Add(10,10,0);
    SetSizer( topSizer );
    topSizer->SetSizeHints( this );
 }
 
-void  tui::cadenceConvert::onDisplayAdd(wxCommandEvent& evt)
+void	tui::cadenceConvert::onDisplayAdd(wxCommandEvent& evt)
 {
-   wxFileDialog dlg(this, wxT("Select a display file"), wxT(""), wxT(""),
+	wxFileDialog dlg(this, wxT("Select a display file"), wxT(""), wxT(""),
       wxT("Display files (*.drf)|*.drf|All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg.ShowModal()) 
    {
       wxString filename = dlg.GetPath();
       wxString ost;
-      _displayList->SetValue(filename);
+		_displayList->SetValue(filename);
    }
 }
 
-void  tui::cadenceConvert::onTechAdd(wxCommandEvent& evt)
+void	tui::cadenceConvert::onTechAdd(wxCommandEvent& evt)
 {
-   wxFileDialog dlg(this, wxT("Select a tech file"), wxT(""), wxT(""),
+	wxFileDialog dlg(this, wxT("Select a tech file"), wxT(""), wxT(""),
       wxT("All files(*.*)|*.*"),
       tpdfOPEN);
    if (wxID_OK == dlg.ShowModal()) 
    {
       wxString filename = dlg.GetPath();
       wxString ost;
-      _techList->SetValue(filename);
+		_techList->SetValue(filename);
    }
 }
 
-void  tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
+void	tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
 {
-   wxFileDialog dlg(this, wxT("Select output tell file"), wxT(""), wxT(""),
+	wxFileDialog dlg(this, wxT("Select output tell file"), wxT(""), wxT(""),
       wxT("tell files (*.tll)|*.tll|All files(*.*)|*.*"),
       tpdfSAVE|wxFD_OVERWRITE_PROMPT);
    if (wxID_OK == dlg.ShowModal()) 
    {
       wxString filename = dlg.GetPath();
       wxString ost;
-      _outputFile->SetValue(filename);
+		_outputFile->SetValue(filename);
    }
 }
 
@@ -2333,32 +2275,32 @@ void ShowOutput(const wxString& cmd,
         return;
     for ( size_t n = 0; n < count; n++ )
     {
-       tell_log(console::MT_INFO, output[n]);
+		 tell_log(console::MT_INFO, output[n]);
     }
 }
 void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
 {
-   if (_displayList->IsEmpty() || _techList->IsEmpty())
-   {
-      wxMessageDialog dlg(this, wxT("Please add display and tech files"), wxT("Warning!"));
-      dlg.ShowModal();
-   }
-   else
-   {
-      wxString str;
-      //Looking for $TPD_GLOBAL/virtuoso2tll
-      str.Append(wxString(DATC->globalDir().c_str(),wxConvFile));
+	if (_displayList->IsEmpty() || _techList->IsEmpty())
+	{
+		wxMessageDialog dlg(this, wxT("Please add display and tech files"), wxT("Warning!"));
+		dlg.ShowModal();
+	}
+	else
+	{
+		wxString str;
+		//Looking for $TPD_GLOBAL/virtuoso2tll
+		str.Append(wxString(DATC->globalDir().c_str(),wxConvFile));
 #ifdef WIN32
-      //For windows full path need to be replace to short one(Program Files->Progra~1)
-      wxFileName filename=wxFileName(str);
-      str=filename.GetShortPath();
-      str.Append(wxT("virtuoso2tll.exe "));
+		//For windows full path need to be replace to short one(Program Files->Progra~1)
+		wxFileName filename=wxFileName(str);
+		str=filename.GetShortPath();
+		str.Append(wxT("virtuoso2tll.exe "));
 #else
       str.Append(wxT("utils/cadence/"));
       str.Append(wxT("virtuoso2tll.ss "));
 #endif
 
-      //prepare command line arguments 
+		//prepare command line arguments 
       wxString strtemp = _outputFile->GetValue();
       str.Append(strtemp);
       str.Append(wxT(" "));
@@ -2369,12 +2311,12 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
       str.Replace(wxT("\\") , wxT("\\\\"), true);
       tell_log(console::MT_INFO, str);
 
-      wxArrayString output, errors;
+		wxArrayString output, errors;
       int code = wxExecute(str, output, errors);
       if ( code != -1 )
       {
-         ShowOutput(str, output, _T("Output"));
+			ShowOutput(str, output, _T("Output"));
          ShowOutput(str, errors, _T("Errors"));
       }
-   }
+	}
 }

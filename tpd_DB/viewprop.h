@@ -69,7 +69,7 @@ namespace layprop {
    //=============================================================================
    class LayoutGrid {
    public:
-                        LayoutGrid(real st, std::string cl) :_step(st), _color(cl),
+                        LayoutGrid(real st, std::string cl) :_step(st), _color(cl), 
                                                                   _visual(false) {};
       void              Init(real st, std::string cl) {_step = st; _color = cl;}
       void              Draw(const DrawProperties&, const real);
@@ -94,19 +94,19 @@ namespace layprop {
    rules and restrictions etc.
    - DrawProperties is the placeholder for design related properties - colors, fill patterns,
    layout layers.
-
+   
    The idea behind this split is that DrawProperties is used as a read-only property holder
    during drawing of the database, while ViewProperties fields are used by the layoutcanvas
    only. \n
    In the same time, to keep the properties thread safe DrawProperties does not posses with
-   methods to change its own fields. Indeed, Toped has only one object of this class and the
-   only way to reach it is via ViewProperties. The latter has methods that can change the
+   methods to change its own fields. Indeed, Toped has only one object of this class and the 
+   only way to reach it is via ViewProperties. The latter has methods that can change the 
    fields of DrawProperties, but they are called in a thread safe manner.
    */
    class ViewProperties {
    public:
                         ViewProperties();
-                       ~ViewProperties();
+                       ~ViewProperties(); 
       bool              addlayer(std::string, unsigned, std::string, std::string, std::string);
       bool              addlayer(std::string, unsigned);
       bool              addlayer(unsigned);
@@ -160,8 +160,6 @@ namespace layprop {
       void              setClipRegion(DBbox clipR)       {_drawprop._clipRegion = clipR;}
       void              setCurrentOp(console::ACTIVE_OP actop)
                                                          {_drawprop._currentop = actop;}
-      void              setAdjustTextOrientation(bool ori)
-                                                         {_drawprop._adjustTextOrientation = ori;}
 
       void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2,_UU);}
       void              clearRulers()                    {_supp_data.clearRulers();}
@@ -191,7 +189,7 @@ namespace layprop {
       void                 saveLayerMaps(FILE*) const;
       real                 _DBscale;
       real                 _UU;           // The scale of the data base. It is mirrored here, on order
-                                          // not to read it with every mouse move
+                                          // not to read it with every mouse move  
       gridlist             _grid;         // the list of grids as defined by the tell command
       real                 _step;         // current marker step
       bool                 _autopan;      // view window moves automatically during shape drawing

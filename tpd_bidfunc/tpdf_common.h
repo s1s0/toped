@@ -28,8 +28,8 @@
 #ifndef  TPDF_COMMON_H
 #define  TPDF_COMMON_H
 
-#include "tedstd.h"
-#include "tellyzer.h"
+#include "../tpd_DB/tedstd.h"
+#include "../tpd_parser/tellyzer.h"
 
 
 //-----------------------------------------------------------------------------
@@ -157,7 +157,7 @@ namespace tellstdfunc {
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::selectList* filter_selist(const laydata::selectList*, word mask);
    laydata::atticList*  replace_str(laydata::atticList*, std::string);
-//   void                 makeGdsLays(ExtLayers&);
+   void                 makeGdsLays(GdsLayers&);
 
 }
 

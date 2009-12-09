@@ -27,10 +27,11 @@
 
 #include "tpdph.h"
 #include "tpdf_common.h"
-#include "tuidefs.h"
-#include "datacenter.h"
-#include "ted_prompt.h"
-#include "tedat.h"
+#include "../tpd_DB/datacenter.h"
+#include "../tpd_parser/ted_prompt.h"
+#include "../tpd_common/tuidefs.h"
+#include "../tpd_DB/browsers.h"
+#include "../tpd_DB/tedat.h"
 
 
 wxFrame*                         TopedMainW;
@@ -266,7 +267,7 @@ void tellstdfunc::RefreshGL()
    {
       const WordList freshlays = DATC->upLayers();
       for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-         TpdPost::layer_add(DATC->getLayerName(*CUL), *CUL);
+         browsers::layer_add(DATC->getLayerName(*CUL), *CUL);
       DATC->clearUnpublishedLayers();
    }
    Console->set_canvas_invalid(true);
@@ -298,7 +299,7 @@ void tellstdfunc::updateLayerDefinitions(laydata::tdtlibdir* LIBDIR, nameList& t
    {
       if (0 == *CUL) continue;
       if (DATC->addlayer(*CUL))
-         TpdPost::layer_add(DATC->getLayerName(*CUL), *CUL);
+         browsers::layer_add(DATC->getLayerName(*CUL), *CUL);
    }
 }
 
@@ -310,14 +311,14 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
 }
 
 //=============================================================================
-// void tellstdfunc::makeGdsLays(ExtLayers& gdsLays)
-// {
-//    nameList allls;
-//    DATC->all_layers(allls);
-//    for (nameList::const_iterator CL = allls.begin(); CL != allls.end(); CL++)
-//    {
-//       WordSet data_types;
-//       data_types.insert(0);
-//       gdsLays[DATC->getLayerNo(*CL)] = data_types;
-//    }
-// }
+void tellstdfunc::makeGdsLays(GdsLayers& gdsLays)
+{
+   nameList allls;
+   DATC->all_layers(allls);
+   for (nameList::const_iterator CL = allls.begin(); CL != allls.end(); CL++)
+   {
+      WordSet data_types;
+      data_types.insert(0);
+      gdsLays[DATC->getLayerNo(*CL)] = data_types;
+   }
+}

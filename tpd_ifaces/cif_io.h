@@ -29,9 +29,7 @@
 
 #include <string>
 #include <fstream>
-#include "ttt.h"
-#include "quadtree.h"
-//#include "tedstd.h"
+#include "../tpd_common/ttt.h"
 
 int ciflex(void);
 int ciferror (char *s);
@@ -142,16 +140,16 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifBox : public CifData {
       public:
-                     CifBox(CifData*, dword, dword, TP*, TP*);
+                     CifBox(CifData*, _dbl_word, _dbl_word, TP*, TP*);
                     ~CifBox();
          CifDataType dataType()     {return cif_BOX;}
-         dword       length()       {return _length;}
-         dword       width()        {return _width;}
+         _dbl_word   length()       {return _length;}
+         _dbl_word   width()        {return _width;}
          TP*         center()       {return _center;}
          TP*         direction()    {return _direction;}
       protected:
-         dword       _length;
-         dword       _width;
+         _dbl_word   _length;
+         _dbl_word   _width;
          TP*         _center;
          TP*         _direction;
    };
@@ -168,26 +166,26 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifWire : public CifData {
       public:
-                     CifWire(CifData* last, pointlist*, dword);
+                     CifWire(CifData* last, pointlist*, _dbl_word);
                     ~CifWire();
          CifDataType dataType()     {return cif_WIRE;}
          pointlist*  poly()         {return _poly;}
-         dword       width()        {return _width;}
+         _dbl_word   width()        {return _width;}
       protected:
          pointlist*  _poly;
-         dword       _width;
+         _dbl_word   _width;
    };
 
    class CifRef : public CifData {
       public:
-                     CifRef(CifData* last, dword, CTM*);
+                     CifRef(CifData* last, _dbl_word, CTM*);
                     ~CifRef();
          CifRef*     last()                           {return static_cast<CifRef*>(CifData::last());}
-         dword       cell()                           {return  _cell;}
+         _dbl_word   cell()                           {return  _cell;}
          CTM*        location()                       {return  _location;}
          CifDataType dataType()                       {return  cif_REF;}
       protected:
-         dword       _cell;
+         _dbl_word   _cell;
          CTM*        _location;
    };
 
@@ -218,9 +216,9 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::string    name()                        {return _name;}
          CifLayer*      last()                        {return _last;}
          CifData*       firstData()                   {return _first;}
-         void           addBox(dword, dword, TP*, TP* direction = NULL);
+         void           addBox(_dbl_word, _dbl_word, TP*, TP* direction = NULL);
          void           addPoly(pointlist* poly);
-         void           addWire(pointlist* poly, dword width);
+         void           addWire(pointlist* poly, _dbl_word width);
          void           addLabelLoc(std::string, TP*);
          void           addLabelSig(std::string, TP*);
       private:
@@ -233,12 +231,12 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifStructure  {
       public:
-                        CifStructure(dword, CifStructure*, dword=1, dword=1);
+                        CifStructure(_dbl_word, CifStructure*, _dbl_word=1,_dbl_word=1);
                        ~CifStructure();
          void           cellNameIs(std::string name)  {_name = name;}
          void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
          CifStructure*  last() const                  {return _last;}
-         dword          ID() const                    {return _ID;}
+         _dbl_word      ID() const                    {return _ID;}
          std::string    name() const                  {return _name;}
          void           parentFound()                 {_orphan = false;}
          bool           orphan()                      {return _orphan;}
@@ -249,17 +247,17 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          real           a()                           {return (real)_a;}
          real           b()                           {return (real)_b;}
          CifLayer*      secureLayer(std::string);
-         void           addRef(dword cell, CTM* location);
+         void           addRef(_dbl_word cell, CTM* location);
          void           collectLayers(nameList&, bool);
          void           hierPrep(CifFile&);
          CIFHierTree*   hierOut(CIFHierTree*, CifStructure*);
       // to cover the requirements of the hierarchy template
          int            libID() const                 {return TARGETDB_LIB;}
       private:
-         dword          _ID;
+         _dbl_word      _ID;
          CifStructure*  _last;
-         dword          _a;
-         dword          _b;
+         _dbl_word      _a;
+         _dbl_word      _b;
          std::string    _name;
          CifLayer*      _first;
          CifRef*        _refirst;
@@ -274,19 +272,19 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
                         CifFile(std::string);
                         ~CifFile();
          CifStatusType  status() {return _status;}
-         void           addStructure(dword, dword = 1, dword = 1);
+         void           addStructure(_dbl_word, _dbl_word = 1, _dbl_word = 1);
          void           doneStructure();
-         void           addBox(dword, dword, TP*, TP* direction = NULL);
+         void           addBox(_dbl_word, _dbl_word, TP*, TP* direction = NULL);
          void           addPoly(pointlist*);
-         void           addWire(pointlist*, dword);
-         void           addRef(dword, CTM*);
+         void           addWire(pointlist*, _dbl_word);
+         void           addRef(_dbl_word, CTM*);
          void           addLabelLoc(char*, TP*, char* layname = NULL);
          void           addLabelSig(char*, TP*);
          void           secureLayer(char*);
          void           curCellName(char*);
          void           curCellOverlap(TP*, TP*);
          void           collectLayers(nameList&);
-         CifStructure*  getStructure(dword);
+         CifStructure*  getStructure(_dbl_word);
          CifStructure*  getStructure(std::string);
          void           hierPrep();
          void           hierOut();
@@ -306,51 +304,28 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::string    _fileName;        //! Input CIF file - including the path
    };
 
-   class CifExportFile : public DbExportFile {
+   class CifExportFile {
       public:
-                        CifExportFile(std::string, laydata::tdtcell*, USMap*, bool, bool);
-         virtual       ~CifExportFile();
-         virtual void   definitionStart(std::string);
-         virtual void   definitionFinish();
-         virtual void   libraryStart(std::string, TpdTime&, real, real);
-         virtual void   libraryFinish();
-         virtual bool   layerSpecification(unsigned);
-         virtual void   box(const int4b* const);
-         virtual void   polygon(const int4b* const, unsigned);
-         virtual void   wire(const int4b* const, unsigned, unsigned);
-         virtual void   text(const std::string&, const CTM&);
-         virtual void   ref(const std::string&, const CTM&);
-         virtual void   aref(const std::string&, const CTM&, const laydata::ArrayProperties&);
-         virtual bool   checkCellWritten(std::string) const;
-         virtual void   registerCellWritten(std::string);
+                        CifExportFile(std::string, USMap*, bool);
+                       ~CifExportFile();
+         void           definitionStart(std::string, real);
+         void           definitionFinish();
+         bool           layerSpecification(word);
+         void           box(const unsigned, const unsigned, const TP&);
+         void           polygon(const int4b* const, unsigned);
+         void           wire(const int4b* const, unsigned, unsigned);
+         void           text(const std::string&, const TP&);
+         void           call(const std::string& name, const CTM&);
+         bool           checkCellWritten(std::string) const;
+         void           registerCellWritten(std::string);
+         std::fstream&  file()               {return _file;}
       private:
          USMap*         _laymap;          //! Toped-CIF layer map
          SIMap          _cellmap;         //! tdt-cif map of all exported cells
+         std::string    _fileName;        //! Output CIF file name - including the path
          std::fstream   _file;            //! Output file handler
          bool           _verbose;         //! CIF output type
          unsigned       _lastcellnum;     //! The number of the last written cell
-   };
-
-   class Cif2Ted {
-      public:
-                              Cif2Ted(CifFile*, laydata::tdtlibdir*, SIMap*, real);
-         void                 top_structure(std::string, bool, bool);
-      protected:
-         void                 child_structure(const CIFHierTree*, bool);
-         void                 convert_prep(const CIFHierTree* item, bool);
-         void                 convert(CifStructure*, laydata::tdtcell*);
-         void                 box ( CifBox*     ,laydata::tdtlayer*, std::string );
-         void                 poly( CifPoly*    ,laydata::tdtlayer*, std::string );
-         void                 wire( CifWire*    ,laydata::tdtlayer*, std::string );
-         void                 ref ( CifRef*     ,laydata::tdtcell*);
-         void                 lbll( CifLabelLoc*,laydata::tdtlayer*, std::string );
-         void                 lbls( CifLabelSig*,laydata::tdtlayer*, std::string );
-         CifFile*             _src_lib;
-         laydata::tdtlibdir*  _tdt_db;
-         SIMap*               _cif_layers;
-         real                 _crosscoeff;
-         real                 _dbucoeff;
-         real                 _techno;
    };
 
 }

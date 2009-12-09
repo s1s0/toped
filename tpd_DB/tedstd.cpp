@@ -29,14 +29,14 @@
 #include <math.h>
 #include <sstream>
 #include "tedstd.h"
-#include "ttt.h"
-#include "outbox.h"
+#include "../tpd_common/ttt.h"
+#include "../tpd_common/outbox.h"
 #include "tedesign.h"
 
 //-----------------------------------------------------------------------------
 // class PSegment
 //-----------------------------------------------------------------------------
-PSegment::PSegment(TP p1,TP p2)
+PSegment::PSegment(TP p1,TP p2) 
 {
    _A = p2.y() - p1.y();
    _B = p1.x() - p2.x();
@@ -44,7 +44,7 @@ PSegment::PSegment(TP p1,TP p2)
    _angle = 0;
 }
 
-byte PSegment::crossP(PSegment seg, TP& crossp)
+byte PSegment::crossP(PSegment seg, TP& crossp) 
 {
    // segments will coinside if    A1/A2 == B1/B2 == C1/C2
    // segments will be parallel if A1/A2 == B1/B2 != C1/C2
@@ -53,7 +53,7 @@ byte PSegment::crossP(PSegment seg, TP& crossp)
    if ((0 != _A) && (0 != seg._B)) {
       X = - ((_C - (_B/seg._B) * seg._C) / (_A - (_B/seg._B) * seg._A));
       Y = - ((seg._C - (seg._A/_A) * _C) / (seg._B - (seg._A/_A) * _B));
-   }
+   }   
    else if ((0 != _B) && (0 != seg._A)) {
       X = - (seg._C - (seg._B/_B) * _C) / (seg._A - (seg._B/_B) * _A);
       Y = - (_C - (_A/seg._A) * seg._C) / (_B - (_A/seg._A) * seg._B);
@@ -63,14 +63,14 @@ byte PSegment::crossP(PSegment seg, TP& crossp)
    crossp.setY((int4b)rint(Y));
    return 0;
 }
-
-PSegment* PSegment::ortho(TP p)
+   
+PSegment* PSegment::ortho(TP p) 
 {
    PSegment* seg = DEBUG_NEW PSegment(-_B, _A, _B*p.x() - _A*p.y());
    return seg;
 }
 
-PSegment* PSegment::parallel(TP p)
+PSegment* PSegment::parallel(TP p) 
 {
    PSegment* seg = DEBUG_NEW PSegment( _A, _B, -_A*p.x() - _B*p.y());
    return seg;
@@ -106,7 +106,7 @@ laydata::TEDfile::TEDfile(const char* filename, laydata::tdtlibdir* tedlib)  // 
 
 void laydata::TEDfile::getFHeader()
 {
-   // Get the leading string
+   // Get the leading string 
    std::string _leadstr = getString();
    if (TED_LEADSTRING != _leadstr) throw EXPTNreadTDT("Bad leading record");
    // Get format revision
@@ -116,7 +116,7 @@ void laydata::TEDfile::getFHeader()
 //   checkIntegrity();
 }
 
-void laydata::TEDfile::read(int libRef)
+void laydata::TEDfile::read(int libRef) 
 {
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
@@ -129,17 +129,17 @@ void laydata::TEDfile::read(int libRef)
       _design = DEBUG_NEW tdtdesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in tdtdesign so don't search it here
-   //byte designend = getByte();
+   //byte designend = getByte(); 
 }
 
-laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib)
+laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib) 
 { //writing
    _design = (*tedlib)();
    _revision=TED_CUR_REVISION;_subrevision=TED_CUR_SUBREVISION;
    _TEDLIB = tedlib;
 	std::string fname(convertString(filename));
    if (NULL == (_file = fopen(fname.c_str(), "wb"))) {
-      std::string news = "File \"";
+      std::string news = "File \""; 
       news += filename.c_str(); news += "\" can not be created";
       tell_log(console::MT_ERROR,news);
       return;
@@ -151,12 +151,12 @@ laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib)
    fclose(_file);
 }
 
-void laydata::TEDfile::cleanup()
+void laydata::TEDfile::cleanup() 
 {
    if (NULL != _design) delete _design;
 }
 
-byte laydata::TEDfile::getByte()
+byte laydata::TEDfile::getByte() 
 {
    byte result;
    byte length = sizeof(byte);
@@ -166,7 +166,7 @@ byte laydata::TEDfile::getByte()
    return result;
 }
 
-word laydata::TEDfile::getWord()
+word laydata::TEDfile::getWord() 
 {
    word result;
    byte length = sizeof(word);
@@ -176,7 +176,7 @@ word laydata::TEDfile::getWord()
    return result;
 }
 
-int4b laydata::TEDfile::get4b()
+int4b laydata::TEDfile::get4b() 
 {
    int4b result;
    byte length = sizeof(int4b);
@@ -195,14 +195,14 @@ real laydata::TEDfile::getReal() {
    return result;
 }
 
-std::string laydata::TEDfile::getString()
+std::string laydata::TEDfile::getString() 
 {
    std::string str;
    byte length = getByte();
    char* strc = DEBUG_NEW char[length+1];
    _numread = fread(strc, length, 1, _file);
    strc[length] = 0x00;
-   if (_numread != 1)
+   if (_numread != 1) 
    {
       delete[] strc;
       throw EXPTNreadTDT("Wrong number of bytes read");
@@ -212,14 +212,14 @@ std::string laydata::TEDfile::getString()
    return str;
 }
 
-TP laydata::TEDfile::getTP()
+TP laydata::TEDfile::getTP() 
 {
    int4b x = get4b();
    int4b y = get4b();
    return TP(x,y);
 }
 
-CTM laydata::TEDfile::getCTM()
+CTM laydata::TEDfile::getCTM() 
 {
    real _a  = getReal();
    real _b  = getReal();
@@ -258,7 +258,7 @@ void laydata::TEDfile::getRevision()
    if (tedf_REVISION  != getByte()) throw EXPTNreadTDT("Expecting REVISION record");
    _revision = getWord();
    _subrevision = getWord();
-   std::ostringstream ost;
+   std::ostringstream ost; 
    ost << "TDT format revision: " << _revision << "." << _subrevision;
    tell_log(console::MT_INFO,ost.str());
    if ((_revision != TED_CUR_REVISION) || (_subrevision > TED_CUR_SUBREVISION))
@@ -278,7 +278,7 @@ void laydata::TEDfile::putReal(const real data) {
 }
 
 
-void laydata::TEDfile::putTime()
+void laydata::TEDfile::putTime() 
 {
    time_t ctime = static_cast<laydata::tdtdesign*>(_design)->created();
    tm* broken_time = localtime(&ctime);
@@ -302,7 +302,7 @@ void laydata::TEDfile::putTime()
    put4b(broken_time->tm_sec);
 }
 
-void laydata::TEDfile::putRevision()
+void laydata::TEDfile::putRevision() 
 {
    putByte(tedf_REVISION);
    putWord(_revision);
@@ -352,7 +352,7 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
    cellList::const_iterator striter = _design->_cells.find(cellname);
    laydata::CellDefin celldef = NULL;
    // link the cells instances with their definitions
-   if (_design->_cells.end() == striter)
+   if (_design->_cells.end() == striter) 
    {
    //   if (_design->checkcell(name))
    //   {
@@ -361,13 +361,13 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
       {
          // Attention! In this case we've parsed a cell reference, before
          // the cell is defined. This might means:
-         //   1. Cell is referenced, but not defined - i.e. library cell, but
+         //   1. Cell is referenced, but not defined - i.e. library cell, but 
          //      library is not loaded
          //   2. Circular reference ! Cell1 contains a reference of Cell2,
          //      that in turn contains a reference of Cell1. This is not allowed
          // We can not make a decision yet, because the entire file has not been
-         // parsed yet. That is why we are assigning a default cell to the
-         // referenced structure here in order to continue the parsing, and when
+         // parsed yet. That is why we are assigning a default cell to the 
+         // referenced structure here in order to continue the parsing, and when 
          // the entire file is parced the cell references without a proper pointer
          // to the structure need to be flaged as warning in case 1 and as error
          // in case 2.
@@ -376,7 +376,7 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
       else
          celldef->parentfound();
    }
-   else
+   else 
    {
       celldef = striter->second;
       assert(NULL != celldef);
@@ -393,50 +393,4 @@ void laydata::TEDfile::get_cellchildnames(NameSet& cnames) {
    //                              CN != _childnames.end() ; CN++)
    //   cnames->instert(*CN);
    _childnames.clear();
-}
-
-bool laydata::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b endext )
-{
-   TP P1 = plist[0];
-   // find the first neighboring point which is not equivalent to P1
-   int fnbr = 1;
-   while ((P1 == plist[fnbr]) && (fnbr < numpoints))
-      fnbr++;
-   // get out with error, because the wire has effectively a single point and there is
-   // no way on earth to find out in which direction it should be expanded
-   if (fnbr == numpoints) return false;
-   TP P2 = plist[fnbr];
-
-   double sdX = P2.x() - P1.x();
-   double sdY = P2.y() - P1.y();
-   // The sign - a bit funny way - described in layout canvas
-   int sign = ((sdX * sdY) >= 0) ? 1 : -1;
-   double length = sqrt(sdY*sdY + sdX*sdX);
-   assert(length);
-   int4b y0 = (int4b) rint(P1.y() - sign*((begext*sdY)/length));
-   int4b x0 = (int4b) rint(P1.x() - sign*((begext*sdX)/length));
-//
-   P2 = plist[numpoints-1];
-   // find the first neighboring point which is not equivalent to P1
-   fnbr = numpoints - 2;
-   while ((P2 == plist[fnbr]) && (fnbr > 0))
-      fnbr--;
-   // assert, because if it was found above, it should exists!
-   assert(fnbr >= 0);
-   P1 = plist[fnbr];
-
-   P1 = plist[numpoints-2];
-   sdX = P2.x() - P1.x();
-   sdY = P2.y() - P1.y();
-   sign = ((sdX * sdY) >= 0) ? 1 : -1;
-   length = sqrt(sdY*sdY + sdX*sdX);
-   int4b yn = (int4b) rint(P2.y() + sign*((endext*sdY)/length));
-   int4b xn = (int4b) rint(P2.x() + sign*((endext*sdX)/length));
-
-   plist[0].setX(x0);
-   plist[0].setY(y0);
-   plist[numpoints-1].setX(xn);
-   plist[numpoints-1].setY(yn);
-
-   return true;
 }

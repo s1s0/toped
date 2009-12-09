@@ -110,7 +110,7 @@ namespace  parsercmd {
               byte getByteValue(telldata::operandSTACK& OPs = OPstack);
        std::string getStringValue(telldata::operandSTACK& OPs = OPstack);
               bool getBoolValue(telldata::operandSTACK& OPs = OPstack);
-             dword getIndexValue(telldata::operandSTACK& OPs = OPstack);
+         _dbl_word getIndexValue(telldata::operandSTACK& OPs = OPstack);
               real getOpValue(telldata::UNDOPerandQUEUE&, bool);
               word getWordValue(telldata::UNDOPerandQUEUE&, bool);
               byte getByteValue(telldata::UNDOPerandQUEUE&, bool);
@@ -322,7 +322,7 @@ namespace  parsercmd {
    protected:
       cmdLISTADD(cmdLISTADD* indxcmd) :
          _listarg(indxcmd->_listarg),_prefix(indxcmd->_prefix), _index(indxcmd->_index) {};
-      dword                 getIndex();
+      _dbl_word              getIndex();
       // don't delete this and don't get confused. It's only a pointer to a variable, 
       // that normally should be in the operand stack. List operations are an exception - 
       // see the comments in the parser (tell_yacc.yy)

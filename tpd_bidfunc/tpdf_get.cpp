@@ -26,9 +26,9 @@
 //===========================================================================
 
 #include "tpdph.h"
-#include <sstream>
 #include "tpdf_get.h"
-#include "tedat.h"
+#include "../tpd_DB/tedat.h"
+#include <sstream>
 
 extern void tellerror(std::string s);
 

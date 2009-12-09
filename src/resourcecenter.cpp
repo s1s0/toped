@@ -29,10 +29,10 @@
 #include <sstream>
 #include "resourcecenter.h"
 
-#include "ted_prompt.h"
-#include "ttt.h"
-#include "tuidefs.h"
-#include "toped.h"
+#include "../tpd_parser/ted_prompt.h"
+#include "../tpd_common/ttt.h"
+#include "../tpd_common/tuidefs.h"
+#include "../src/toped.h"
 
 extern console::ted_cmd*         Console;
 extern tui::TopedFrame*          Toped;

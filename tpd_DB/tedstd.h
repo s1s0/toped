@@ -29,8 +29,8 @@
 #define TEDSTD_H_INCLUDED
 
 #include <string>
-#include "ttt.h"
-#include "outbox.h"
+#include "../tpd_common/ttt.h"
+#include "../tpd_common/outbox.h"
 
 //==============================================================================
 // Toped DaTa (TDT) file markers
@@ -56,7 +56,7 @@
 #define TED_CUR_REVISION      0
 #define TED_CUR_SUBREVISION   7
 
-//==============================================================================
+//==============================================================================   
 class PSegment {
 public:
                PSegment() : _A(0), _B(0), _C(0), _angle(0) {};
@@ -71,6 +71,22 @@ private:
    real        _A, _B, _C;
    int         _angle;
 };
+
+namespace layprop {
+   class DrawProperties;
+}
+
+namespace GDSin {
+   class GdsFile;
+}
+
+namespace CIFin {
+   class CifExportFile;
+}
+
+namespace tenderer {
+   class TopRend;
+}
 
 namespace laydata {
 
@@ -96,8 +112,10 @@ namespace laydata {
       shp_cross      = 0x40, // self crossing sequence
       shp_null       = 0x80, // 0 area - points are not forming a polygon
    } shape_status;
-
+   
+   class TEDfile;
    class tdtdata;
+   class tdttmpdata;
    class editobject;
    class tdtcell;
    class tdtdefaultcell;
@@ -135,7 +153,7 @@ namespace laydata {
       byte                 _status;
       pointlist&           _plist;
    };
-
+   
 //==============================================================================
    class   TEDfile {
    public:
@@ -209,39 +227,7 @@ namespace laydata {
          word                _rows;
    };
 
-   bool pathConvert(pointlist&, word, int4b, int4b );
-
 }
-
-class DbExportFile {
-   public:
-                              DbExportFile(std::string fn, laydata::tdtcell* topcell, bool recur) :
-                                 _fileName(fn), _topcell(topcell), _recur(recur), _DBU(1e-9), _UU(1e-3) {};
-      virtual                ~DbExportFile() {};
-      virtual void            definitionStart(std::string) = 0;
-      virtual void            definitionFinish() = 0;
-      virtual void            libraryStart(std::string, TpdTime&, real, real) = 0;
-      virtual void            libraryFinish() = 0;
-      virtual bool            layerSpecification(unsigned) = 0;
-      virtual void            box(const int4b* const) = 0;
-      virtual void            polygon(const int4b* const, unsigned) = 0;
-      virtual void            wire(const int4b* const, unsigned, unsigned) = 0;
-      virtual void            text(const std::string&, const CTM&) = 0;
-      virtual void            ref(const std::string&, const CTM&) = 0;
-      virtual void            aref(const std::string&, const CTM&, const laydata::ArrayProperties&) = 0;
-      virtual bool            checkCellWritten(std::string) const = 0;
-      virtual void            registerCellWritten(std::string) = 0;
-      const laydata::tdtcell* topcell() const   {return _topcell; }
-      bool                    recur() const     {return _recur;   }
-      real                    DBU() const       {return _DBU;     }
-      real                    UU() const        {return _UU;      }
-   protected:
-      std::string             _fileName;  //! Output file name - including the path
-      laydata::tdtcell*       _topcell;
-      bool                    _recur;
-      real                    _DBU;
-      real                    _UU;
-};
 
 class TeselPoly;
 class PSFile;

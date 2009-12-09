@@ -594,7 +594,7 @@ double round(double x)
 //space requires for split function
 bool space(char c)
 {
-   return (0 != isspace(c));
+	return (0 != isspace(c));
 }
 
 //Return false, if argument - space or equivalent; 

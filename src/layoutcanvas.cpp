@@ -36,14 +36,13 @@
 
 #include "layoutcanvas.h"
 #include "toped.h"
-#include "viewprop.h"
-#include "datacenter.h"
-#include "ted_prompt.h"
-#include "tedat.h"
-#include "tenderer.h"
+#include "../tpd_DB/viewprop.h"
+#include "../tpd_DB/datacenter.h"
+#include "../tpd_parser/ted_prompt.h"
+#include "../tpd_DB/tedat.h"
+#include "../tpd_DB/tenderer.h"
 
 extern DataCenter*               DATC;
-extern DataCenter*               DRCDATC;
 extern console::ted_cmd*         Console;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_CURSOR;
@@ -352,7 +351,7 @@ bool tui::LayoutCanvas::initializeGL()
       dlg1->Destroy();
       VBOrendering = false;
    }
-   else if (!glewIsSupported("GL_VERSION_1_5 GL_EXT_multi_draw_arrays" /* GL_ARB_vertex_buffer_object"*/))
+   else if (!glewIsSupported("GL_VERSION_1_5" /*GL_EXT_multi_draw_arrays GL_ARB_vertex_buffer_object"*/))
    {
       VBOrendering = false;
       //@TODO - to avoid the "if"

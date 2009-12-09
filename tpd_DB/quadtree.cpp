@@ -28,9 +28,10 @@
 #include "tpdph.h"
 #include <iostream>
 #include "quadtree.h"
+#include "tedat.h"
 #include "viewprop.h"
 #include "tenderer.h"
-#include "outbox.h"
+#include "../tpd_common/outbox.h"
 
 //-----------------------------------------------------------------------------
 // class quadTree
@@ -522,20 +523,20 @@ void laydata::quadTree::write(TEDfile* const tedfile) const {
 
 /*! Write the contents of the quadTree in a GDS file.\n
 Nothing special here - effectively the same as write method*/
-void laydata::quadTree::GDSwrite(DbExportFile& gdsf) const
+void laydata::quadTree::GDSwrite(GDSin::GdsFile& gdsf, word lay, real UU) const
 {
    tdtdata* wdt = _first;
    while(wdt)
    {
-      wdt->GDSwrite(gdsf); wdt = wdt->next();
+      wdt->GDSwrite(gdsf,lay, UU); wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++) 
-      if (_quads[i]) _quads[i]->GDSwrite(gdsf);
+      if (_quads[i]) _quads[i]->GDSwrite(gdsf,lay, UU);
 }
 
 /*! Write the contents of the quadTree in a CIF file.\n
 Nothing special here - effectively the same as other write method*/
-void laydata::quadTree::CIFwrite(DbExportFile& ciff) const
+void laydata::quadTree::CIFwrite(CIFin::CifExportFile& ciff) const
 {
    tdtdata* wdt = _first;
    while(wdt)
