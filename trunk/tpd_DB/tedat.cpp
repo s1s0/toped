@@ -2222,9 +2222,11 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
    if ( wsquare.visible(ftmtrx * drawprop.ScrCTM()) )
    {
+      // If we get here - means that the text is visible
       CTM adjTranslation = (drawprop.adjustTextOrientation()) ?
                             renderingAdjustment(ftmtrx) : _translation;
-      // If we get here - means that the text is visible
+      CTM adj_ftmtrx     = (drawprop.adjustTextOrientation()) ?
+                            adjTranslation * drawprop.topCTM() : ftmtrx;
       // get the text overlapping box ...
       ptlist.reserve(5);
       ptlist.push_back(_over.p1() * ftmtrx);
@@ -2235,7 +2237,7 @@ void laydata::tdttext::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       ptlist.push_back(TP(static_cast<int4b>(adjTranslation.tx()),
                           static_cast<int4b>(adjTranslation.ty()))  * drawprop.topCTM());
       // push the font matrix - will be used for text drawing
-      drawprop.pushCTM(adjTranslation);
+      drawprop.pushCTM(adj_ftmtrx);
    }
 }
 
