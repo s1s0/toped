@@ -2345,6 +2345,8 @@ void laydata::tdttext::motion_draw(const layprop::DrawProperties& drawprop,
    DBbox wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
    if (wsquare.visible(ftmtrx * drawprop.ScrCTM()))
    {
+      if (drawprop.adjustTextOrientation())
+         ftmtrx = renderingAdjustment(ftmtrx) * transtack.front();
       glPushMatrix();
       double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
                             ftmtrx.c(), ftmtrx.d(),0,0,
