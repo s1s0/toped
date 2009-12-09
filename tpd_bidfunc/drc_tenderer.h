@@ -43,6 +43,7 @@ class drcTenderer: public drcRenderer
    void startWriting();
    void addPoly(const CoordsVector   &coords);
    void addLine(const edge &edge);
+   void showAll(void);
 	void hideAll(void);
 	void showError(unsigned int numError);
    void zoom(const edge &edge);

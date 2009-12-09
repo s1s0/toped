@@ -1525,6 +1525,50 @@ int tellstdfunc::DRCshowerror::execute()
 
 
 //=============================================================================
+tellstdfunc::DRCshowallerrors::DRCshowallerrors(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+}
+
+int tellstdfunc::DRCshowallerrors::execute()
+{
+	if(DRCData)
+	{
+	   DRCData->showAllErrors();
+	}
+   else
+   {
+      std::ostringstream ost;
+      ost << "DRC database is not loaded";
+      tell_log(console::MT_ERROR,ost.str());
+ 
+   }
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::DRChideallerrors::DRChideallerrors(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+}
+
+int tellstdfunc::DRChideallerrors::execute()
+{
+	if(DRCData)
+	{
+	   DRCData->hideAllErrors();
+	}
+   else
+   {
+      std::ostringstream ost;
+      ost << "DRC database is not loaded";
+      tell_log(console::MT_ERROR,ost.str());
+ 
+   }
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
                                    parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
 {

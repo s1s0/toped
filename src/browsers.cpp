@@ -2115,16 +2115,14 @@ void browsers::DRCBrowser::deleteAllItems(void)
 
 void   browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
 {
-   DRCData->showAllErrors();
-   //Refresh
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-   eventZOOM.SetInt(tui::ZOOM_REFRESH);
-   GetEventHandler()->ProcessEvent(eventZOOM);
+   wxString cmd;
+   cmd << wxT("drcshowallerrors();");
+   TpdPost::parseCommand(cmd);
 }
 
 void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 {
-	laydata::drclibrary* drc = DATC->lockDRC();
-		DRCData->render()->hideAll();
-	DATC->unlockDRC();
+   wxString cmd;
+   cmd << wxT("drchideallerrors();");
+   TpdPost::parseCommand(cmd);
  }

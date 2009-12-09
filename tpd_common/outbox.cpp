@@ -815,6 +815,13 @@ EXPTNcif_parser::EXPTNcif_parser(std::string info) {
    tell_log(console::MT_ERROR,news);
 };
 
+EXPTNdrc_reader::EXPTNdrc_reader(std::string info)
+{
+   std::string news = "Error in drc reader =>";
+   news += info;
+   tell_log(console::MT_ERROR,news);
+};
+      
 //=============================================================================
 LayerMapExt::LayerMapExt(const USMap& inlist, ExtLayers* alist)
    : _theMap(), _status(true), _alist(alist)

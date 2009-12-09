@@ -62,6 +62,7 @@ public:
    virtual void startWriting()=0;
 	virtual void setError(unsigned int numError) {};
 	virtual void showError(unsigned int numError) {};
+   virtual void showAll() {};
 	virtual void hideAll() {};
    virtual void addPoly(const CoordsVector   &coords)=0;
    virtual void addLine(const edge &edge)=0;
@@ -146,6 +147,7 @@ public:
    void              addResults();
    void              showError(const std::string & error, long  number);
 	void              showAllErrors(void);
+   void              hideAllErrors(void);
    RuleChecksVector* results() {return &_RuleChecks;};
    bool              isOk(void)   {return _ok;}
 	drcRenderer*		render() const {return _render;};

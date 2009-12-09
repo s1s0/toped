@@ -127,6 +127,18 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    delete plDB;
 }
 
+void Calbr::drcTenderer::showAll(void)
+{
+	DATC->setState(layprop::DRC);
+		WordList lays = DATC->getAllLayers();
+		for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+		{
+			DATC->hideLayer((*it), false);
+		}
+	DATC->setState(layprop::DB);	
+	tellstdfunc::RefreshGL();
+}
+
 void Calbr::drcTenderer::hideAll(void)
 {
 	DATC->setState(layprop::DRC);

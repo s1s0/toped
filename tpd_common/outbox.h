@@ -312,6 +312,12 @@ class EXPTNcif_parser : public EXPTN
       EXPTNcif_parser(std::string);
 };
 
+class EXPTNdrc_reader : public EXPTN
+{
+   public:
+      EXPTNdrc_reader(std::string);
+};
+
 bool        expandFileName(std::string&);
 std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile
