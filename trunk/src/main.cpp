@@ -243,6 +243,9 @@ void InitInternalFunctions(parsercmd::cmdMAIN* mblock) {
    mblock->addFUNC("locklayer"        ,(DEBUG_NEW               tellstdfunc::stdLOCKLAYERS(telldata::tn_void, true)));
    mblock->addFUNC("filllayer"        ,(DEBUG_NEW                tellstdfunc::stdFILLLAYER(telldata::tn_void, true)));
    mblock->addFUNC("filllayer"        ,(DEBUG_NEW               tellstdfunc::stdFILLLAYERS(telldata::tn_void, true)));
+   mblock->addFUNC("savelaystatus"    ,(DEBUG_NEW               tellstdfunc::stdSAVELAYSTAT(telldata::tn_void, true)));
+   mblock->addFUNC("loadlaystatus"    ,(DEBUG_NEW               tellstdfunc::stdLOADLAYSTAT(telldata::tn_void, true)));
+   mblock->addFUNC("deletelaystatus"  ,(DEBUG_NEW                tellstdfunc::stdDELLAYSTAT(telldata::tn_void, true)));
    mblock->addFUNC("definecolor"      ,(DEBUG_NEW                 tellstdfunc::stdCOLORDEF(telldata::tn_void, true)));
    mblock->addFUNC("definefill"       ,(DEBUG_NEW                  tellstdfunc::stdFILLDEF(telldata::tn_void, true)));
    mblock->addFUNC("defineline"       ,(DEBUG_NEW                  tellstdfunc::stdLINEDEF(telldata::tn_void, true)));

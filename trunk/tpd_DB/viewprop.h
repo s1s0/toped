@@ -83,8 +83,6 @@ namespace layprop {
       bool              _visual;
    };
 
-   typedef  std::map<byte       , LayoutGrid*   >  gridlist;
-
    //==============================================================================
    /*! The most important facet of this class is that the only way to change \b any
    drawing properties in Toped is to call a method of ViewProperties. It is important
@@ -92,7 +90,7 @@ namespace layprop {
    Toped have fields in this class. Those properties are split actually over two classes
    - ViewProperties holds the fields related to the layoutcanvas - list of grids, marker
    rules and restrictions etc.
-   - DrawProperties is the placeholder for design related properties - colors, fill patterns,
+   - DrawProperties is the place holder for design related properties - colors, fill patterns,
    layout layers.
 
    The idea behind this split is that DrawProperties is used as a read-only property holder
@@ -105,6 +103,7 @@ namespace layprop {
    */
    class ViewProperties {
    public:
+      typedef  std::map<byte       , LayoutGrid*   >  gridlist;
                         ViewProperties();
                        ~ViewProperties();
       bool              addlayer(std::string, unsigned, std::string, std::string, std::string);
@@ -135,6 +134,12 @@ namespace layprop {
 //      void              drawGrid(TopRend&) const;
       void              drawZeroCross() const;
       void              setUU(real);
+      void              pushLayerStatus();
+      void              popLayerStatus();
+      void              popBackLayerStatus();
+      bool              saveLayerStatus(const std::string&);
+      bool              loadLayerStatus(const std::string&);
+      bool              deleteLayerStatus(const std::string&);
       void              setstep(real st)                 {_step = st;}
       void              setautopan(bool status)          {_autopan = status;}
       void              setZeroCross(bool status)        {_zeroCross = status;}
@@ -183,10 +188,10 @@ namespace layprop {
       void              all_fills(nameList&) const;
       void              all_lines(nameList&) const;
 
-      //
-   protected:
-      DrawProperties       _drawprop;
    private:
+      typedef std::deque<LayStateList>  LayStateHistory;
+      typedef std::map<std::string, LayStateList> LayStateMap;
+      DrawProperties       _drawprop;
       void                 saveScreenProps(FILE*) const;
       void                 saveLayerMaps(FILE*) const;
       real                 _DBscale;
@@ -202,6 +207,8 @@ namespace layprop {
       word                 _layselmask;   // layout shape type selection mask
       USMap*               _gdsLayMap;    //
       USMap*               _cifLayMap;    //
+      LayStateMap          _layStateMap;  //
+      LayStateHistory      _layStateHistory; //! for undo purposes of layer status related TELL function
    };
 
    void USMap2String(USMap*, std::string&);

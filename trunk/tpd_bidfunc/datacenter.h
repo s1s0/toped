@@ -111,6 +111,9 @@ public:
    void                       hideLayer(word, bool);
    void                       lockLayer(word, bool);
    void                       fillLayer(word, bool);
+   bool                       saveLayerStatus(const std::string&);
+   bool                       loadLayerStatus(const std::string&);
+   bool                       deleteLayerStatus(const std::string&);
    void                       setcellmarks_hidden(bool);
    void                       settextmarks_hidden(bool);
    void                       setcellbox_hidden(bool);
@@ -195,13 +198,13 @@ private:
    std::string                _localDir;
    std::string                _globalDir;
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
-	laydata::drclibrary*       _DRCDB;		//DRC data
+   laydata::drclibrary*       _DRCDB;		//DRC data
    GDSin::GdsInFile*          _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
    Oasis::OasisInFile*        _OASDB;        // OASIS parsed data
    layprop::ViewProperties    _properties;   // properties data base
    wxMutex                    DBLock;
-	wxMutex                    DRCLock;
+   wxMutex                    DRCLock;
    wxMutex                    GDSLock;
    wxMutex                    CIFLock;
    wxMutex                    OASLock;

@@ -102,7 +102,26 @@ namespace layprop {
          std::string       _sline;
          bool              _hidden;
          bool              _locked;
-         bool              _filled; //define filling visialization
+         bool              _filled; //define filling visualization
+   };
+
+   //=============================================================================
+   //
+   //
+   //
+   class LayerState {
+   public:
+                        LayerState(unsigned num, const LayerSettings& lset) : _number(num),
+                        _hidden(lset.hidden()), _locked(lset.locked()), _filled(lset.filled()){}
+      unsigned            number() const              {return _number;}
+      bool                hidden() const              {return _hidden;}
+      bool                locked() const              {return _locked;}
+      bool                filled() const              {return _filled;}
+   private:
+      unsigned            _number;
+      bool                _hidden;
+      bool                _locked;
+      bool                _filled;
    };
 
    //=============================================================================
@@ -215,11 +234,10 @@ namespace layprop {
    typedef  std::map<std::string, byte*         >  fillMAP;
    typedef  std::map<std::string, LineSettings* >  lineMAP;
    typedef  std::map<unsigned   , LayerSettings*>  laySetList;
-
-
+   typedef  std::list<LayerState>                  LayStateList;
 
    //==============================================================================
-   /*! This class serves as a carying case for all drawing properties during the
+   /*! This class serves as a carrying case for all drawing properties during the
    drawing of the database. The fields of DrawProperties can be split logically
    on two parts:
    - locked properties - these are the properties that stay constant during the
@@ -227,8 +245,8 @@ namespace layprop {
    those properties, despite the fact that these are fields of its own. Instead
    a friend class ViewProperties is doing this. The reason for this is primarily
    thread safety.
-   - changable properties - these are changed during the drawing process - for
-   example current drawing layer, colours etc.
+   - Changeable properties - these are changed during the drawing process - for
+   example current drawing layer, colors etc.
     */
    class DrawProperties {
       public:
