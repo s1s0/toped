@@ -821,7 +821,7 @@ EXPTNdrc_reader::EXPTNdrc_reader(std::string info)
    news += info;
    tell_log(console::MT_ERROR,news);
 };
-      
+
 //=============================================================================
 LayerMapExt::LayerMapExt(const USMap& inlist, ExtLayers* alist)
    : _theMap(), _status(true), _alist(alist)
@@ -925,7 +925,7 @@ bool LayerMapExt::separateQuickLists(wxString exp, wxString& lay_exp, wxString& 
    if (!src_tmpl.Matches(exp))
    {
       wxString wxmsg;
-      wxmsg << wxT("Can't make sence from the string \"") << exp << wxT("\"");
+      wxmsg << wxT("Can't make sense from the string \"") << exp << wxT("\"");
       std::string msg(wxmsg.mb_str(wxConvUTF8));
       tell_log(console::MT_ERROR,msg);
       return false;
@@ -949,7 +949,7 @@ void LayerMapExt::patternNormalize(wxString& str)
    // replace tabs with spaces
    VERIFY(regex.Compile(wxT("\t")));
    regex.ReplaceAll(&str,wxT(" "));
-   // remove continious spaces
+   // remove continuous spaces
    VERIFY(regex.Compile(wxT("[[:space:]]{2,}")));
    regex.ReplaceAll(&str,wxT(""));
    //remove leading spaces
@@ -961,7 +961,6 @@ void LayerMapExt::patternNormalize(wxString& str)
    //remove spaces before separators
    VERIFY(regex.Compile(wxT("([[:space:]])([\\-\\;\\,])")));
    regex.ReplaceAll(&str,wxT("\\2"));
-
    // remove spaces after separators
    VERIFY(regex.Compile(wxT("([\\-\\;\\,])([[:space:]])")));
    regex.ReplaceAll(&str,wxT("\\1"));

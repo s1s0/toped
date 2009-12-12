@@ -356,7 +356,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
    UNDOPstack.push_front(undolaylist);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
    UNDOPstack.push_front(make_ttlaylist(todslct));
-   // Now unselect the shapes in the taret layers
+   // Now unselect the shapes in the target layers
    ATDB->unselect_fromList(todslct);
    // ... and at last - lock the layers. Here we're using the list collected for undo
    // otherwise we have to either maintain another list or to do agai all the checks above
@@ -648,10 +648,10 @@ int tellstdfunc::stdLOCKLAYERS::execute()
    UNDOPstack.push_front(undolaylist);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
    UNDOPstack.push_front(make_ttlaylist(todslct));
-   // Now unselect the shapes in the taret layers
+   // Now unselect the shapes in the target layers
    ATDB->unselect_fromList(todslct);
    // ... and at last - lock the layers. Here we're using the list collected for undo
-   // otherwise we have to either maintain another list or to do agai all the checks above
+   // otherwise we have to either maintain another list or to do again all the checks above
    for (unsigned i = 0; i < undolaylist->size(); i++)
    {
       telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
@@ -759,6 +759,103 @@ int tellstdfunc::stdFILLLAYERS::execute()
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::stdSAVELAYSTAT::stdSAVELAYSTAT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+void tellstdfunc::stdSAVELAYSTAT::undo_cleanup() {
+   std::string sname  = getStringValue(UNDOPstack, true);
+}
+
+void tellstdfunc::stdSAVELAYSTAT::undo() {
+   TEUNDO_DEBUG("savelaystat( string ) UNDO");
+   std::string sname  = getStringValue(UNDOPstack, true);
+   VERIFY(DATC->deleteLayerStatus(sname));
+}
+
+int tellstdfunc::stdSAVELAYSTAT::execute()
+{
+   std::string   sname  = getStringValue();
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+   if (!DATC->saveLayerStatus(sname))
+   {
+      std::stringstream info;
+      info << "Layer set \\" << sname << "\" was redefined";
+      tell_log(console::MT_INFO, info.str());
+   }
+   LogFile << LogFile.getFN() << "("<< sname << ");"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdLOADLAYSTAT::stdLOADLAYSTAT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+void tellstdfunc::stdLOADLAYSTAT::undo_cleanup() {
+   std::string sname  = getStringValue(UNDOPstack, true);
+   //TODO
+}
+
+void tellstdfunc::stdLOADLAYSTAT::undo() {
+   TEUNDO_DEBUG("savelaystat( string ) UNDO");
+   std::string sname  = getStringValue(UNDOPstack, true);
+//TODO   VERIFY(DATC->deleteLayerStatus(sname));
+}
+
+int tellstdfunc::stdLOADLAYSTAT::execute()
+{
+   std::string   sname  = getStringValue();
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+   if (!DATC->loadLayerStatus(sname))
+   {
+      std::stringstream info;
+      info << "Layer set \\" << sname << "\" is not defined";
+      tell_log(console::MT_WARNING, info.str());
+   }
+   LogFile << LogFile.getFN() << "("<< sname << ");"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdDELLAYSTAT::stdDELLAYSTAT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+void tellstdfunc::stdDELLAYSTAT::undo_cleanup() {
+   std::string sname  = getStringValue(UNDOPstack, true);
+   //TODO
+}
+
+void tellstdfunc::stdDELLAYSTAT::undo() {
+   TEUNDO_DEBUG("savelaystat( string ) UNDO");
+   std::string sname  = getStringValue(UNDOPstack, true);
+   //TODO   VERIFY(DATC->deleteLayerStatus(sname));
+}
+
+int tellstdfunc::stdDELLAYSTAT::execute()
+{
+   std::string   sname  = getStringValue();
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+   if (!DATC->deleteLayerStatus(sname))
+   {
+      std::stringstream info;
+      info << "Layer set \\" << sname << "\" is not defined";
+      tell_log(console::MT_WARNING, info.str());
+   }
+   LogFile << LogFile.getFN() << "("<< sname << ");"; LogFile.flush();
+   return EXEC_NEXT;
+}
 //=============================================================================
 tellstdfunc::stdGRID::stdGRID(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)

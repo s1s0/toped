@@ -53,6 +53,9 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdLOCKLAYERS  );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdFILLLAYER   );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdFILLLAYERS  );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdSAVELAYSTAT );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdLOADLAYSTAT );  // undo - implemented
+   TELL_STDCMD_CLASSA_UNDO(stdDELLAYSTAT  );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGRID        );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdSTEP        );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdAUTOPAN     );  // undo - implemented

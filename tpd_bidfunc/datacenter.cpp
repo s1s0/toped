@@ -43,7 +43,7 @@ extern const wxEventType         wxEVT_CMD_BROWSER;
 //-----------------------------------------------------------------------------
 // class DataCenter
 //-----------------------------------------------------------------------------
-DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir) 
+DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir)
 {
    _localDir = localDir;
    _globalDir = globalDir;
@@ -105,7 +105,7 @@ bool DataCenter::TDTcheckread(const std::string filename,
    }
    tempin.closeF();
    return retval;
-} 
+}
 
 bool DataCenter::TDTread(std::string filename)
 {
@@ -163,7 +163,7 @@ bool DataCenter::TDTunloadlib(std::string libname)
    {
       // Relink everything
       _TEDLIB.relink();
-      // remove tberased cells from hierarchy tree 
+      // remove tberased cells from hierarchy tree
       tberased->clearHierTree();
       // get the new hierarchy
       _TEDLIB.reextract_hierarchy();
@@ -200,7 +200,7 @@ bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSa
       stop_ignoring = true;
    else
    {
-      // database in memory is exactly the same as the file. The save 
+      // database in memory is exactly the same as the file. The save
       // is going to be spared, ignore on recovery though has to stop
       stop_ignoring = true;
       return false;
@@ -475,12 +475,12 @@ void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
 //   gdsex.closeFile();
 }
 
-void DataCenter::newDesign(std::string name, time_t created) 
+void DataCenter::newDesign(std::string name, time_t created)
 {
-   if (_TEDLIB()) 
+   if (_TEDLIB())
    {
-      // Checks before closing(save?) available only when the command is launched 
-      // via GUI(void TopedFrame::OnNewDesign(). If the command is typed directly 
+      // Checks before closing(save?) available only when the command is launched
+      // via GUI(void TopedFrame::OnNewDesign(). If the command is typed directly
       // on the command line, or parsed from file - no checks are executed.
       // In other words if we are already here we will destroy the current design
       // without much talking.
@@ -496,9 +496,9 @@ void DataCenter::newDesign(std::string name, time_t created)
    _properties.setUU(_TEDLIB()->UU());
 }
 
-laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell) 
+laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
 {
-   if (_TEDLIB()) 
+   if (_TEDLIB())
    {
       if (checkACTcell) _TEDLIB()->check_active();
       while (wxMUTEX_NO_ERROR != DBLock.TryLock());
@@ -507,10 +507,10 @@ laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
    else throw EXPTNactive_DB();
 }
 
-laydata::drclibrary*  DataCenter::lockDRC(void) 
+laydata::drclibrary*  DataCenter::lockDRC(void)
 {
 	if (!_TEDLIB()) throw EXPTNactive_DB();
-   if (!_DRCDB) 
+   if (!_DRCDB)
    {
 		_DRCDB = DEBUG_NEW laydata::drclibrary("drc", _TEDLIB()->DBU(), _TEDLIB()->UU());
    }
@@ -518,12 +518,12 @@ laydata::drclibrary*  DataCenter::lockDRC(void)
    return _DRCDB;
 }
 
-void DataCenter::unlockDB() 
+void DataCenter::unlockDB()
 {
    VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
 }
 
-void DataCenter::unlockDRC() 
+void DataCenter::unlockDRC()
 {
    VERIFY(wxMUTEX_NO_ERROR == DRCLock.Unlock());
 }
@@ -728,7 +728,7 @@ void DataCenter::mousePoint(TP p)
       _properties.mousePoint(p);
    if ((NULL != _TEDLIB()) && (console::op_cbind != currentop())
                            && (console::op_abind != currentop())
-                           && (console::op_tbind != currentop()) 
+                           && (console::op_tbind != currentop())
                            && (console::op_line  != currentop()) )
       _TEDLIB()->mousePoint(p);
 }
@@ -816,7 +816,7 @@ void DataCenter::openGL_draw(const CTM& layCTM)
    }
 }
 
-void DataCenter::openGL_render(const CTM& layCTM) 
+void DataCenter::openGL_render(const CTM& layCTM)
 {
    if (_TEDLIB())
    {
@@ -889,7 +889,7 @@ void DataCenter::openGL_render(const CTM& layCTM)
 }
 
 
-void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp) 
+void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
 {
    if ((console::op_line == currentop()) || _drawruler)
    {
@@ -905,8 +905,8 @@ void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
       _TEDLIB()->tmp_draw(_properties.drawprop(), base, newp);
       VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
    }
-// 
-//   else throw EXPTNactive_DB();      
+//
+//   else throw EXPTNactive_DB();
 }
 
 const laydata::cellList& DataCenter::cells() {
@@ -1005,6 +1005,24 @@ void DataCenter::fillLayer(word layno, bool fill)
    PROPLock.Unlock();
 }
 
+bool DataCenter::saveLayerStatus(const std::string& sname)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   return _properties.saveLayerStatus(sname);
+}
+
+bool DataCenter::loadLayerStatus(const std::string& sname)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   return _properties.loadLayerStatus(sname);
+}
+
+bool DataCenter::deleteLayerStatus(const std::string& sname)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   return _properties.deleteLayerStatus(sname);
+}
+
 void DataCenter::setcellmarks_hidden(bool hide)
 {
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
@@ -1062,7 +1080,7 @@ void DataCenter::clearRulers()
    PROPLock.Unlock();
 }
 
-bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn) 
+bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
 {
    laydata::tdtdesign* ATDB = lockDB();
    if (ATDB->checkcell(name))
@@ -1174,7 +1192,7 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
       all_cells->push_back(&(_TEDLIB()->cells()));
    else if (libID == UNDEFCELL_LIB)
       all_cells->push_back(&(_TEDLIB.getUndefinedCells()));
-   else if (libID < _TEDLIB.getLastLibRefNo()) 
+   else if (libID < _TEDLIB.getLastLibRefNo())
       all_cells->push_back(&(_TEDLIB.getLib(libID)->cells()));
    return all_cells;
 }

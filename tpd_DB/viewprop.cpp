@@ -71,7 +71,7 @@ void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, co
    // draw the nonius ...
    for (LineList::const_iterator CL = noni_list.begin(); CL != noni_list.end(); CL++)
    {
-      glVertex2i(CL->p1().x(),CL->p1().y()); 
+      glVertex2i(CL->p1().x(),CL->p1().y());
       glVertex2i(CL->p2().x(),CL->p2().y());
    }
    // ... and the ruler itself
@@ -170,19 +170,19 @@ void layprop::SupplementaryData::getConsts(const CTM& LayCTM, DBline& long_mark,
    DBline tick_sample = DBline(TP(0,0),TP(0,7,ico)) * LayCTM;
    double tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
    long_mark = DBline(TP(0,-tick_size, dco),TP(0,tick_size, dco));
-   
+
    tick_sample = DBline(TP(0,0),TP(0,3,ico)) * LayCTM;
    tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
    short_mark = DBline(TP(0,-tick_size, dco),TP(0,tick_size, dco));
-   
+
    tick_sample = DBline(TP(0,0),TP(0,20,ico)) * LayCTM;
    tick_size = ((double)(tick_sample.p1().y()-tick_sample.p2().y()));
    text_bp = DBline(TP(0,0),TP(0,tick_size, dco));
-   
+
    // now prepare to draw the size
    DBbox pixelbox = DBbox(TP(),TP(15,15)) * LayCTM;
    scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
-   
+
 }
 void layprop::SupplementaryData::mousePoint(const TP& bp)
 {
@@ -292,7 +292,7 @@ bool layprop::ViewProperties::addlayer(std::string name, unsigned layno, std::st
             std::ostringstream ost;
             ost << "Warning! Layer "<<layno<<" redefined";
             tell_log(console::MT_WARNING, ost.str());
-         }   
+         }
          _drawprop._laysetDB[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
          return new_layer;
       case DRC: //User can't call DRC database directly
@@ -304,7 +304,7 @@ bool layprop::ViewProperties::addlayer(std::string name, unsigned layno)
 {
    switch(_drawprop._state)
    {
-      case DB: 
+      case DB:
          if (_drawprop._laysetDB.end() != _drawprop._laysetDB.find(layno)) return false;
          _drawprop._laysetDB[layno] = DEBUG_NEW LayerSettings(name,"","","");
          return true;
@@ -473,9 +473,9 @@ void layprop::ViewProperties::drawZeroCross() const
    glBegin(GL_LINES);
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
    glVertex2i(0, _drawprop.clipRegion().p1().y());
-   glVertex2i(0, _drawprop.clipRegion().p2().y()); 
+   glVertex2i(0, _drawprop.clipRegion().p2().y());
    glVertex2i(_drawprop.clipRegion().p1().x(), 0);
-   glVertex2i(_drawprop.clipRegion().p2().x(), 0); 
+   glVertex2i(_drawprop.clipRegion().p2().x(), 0);
    glEnd();
    glDisable(GL_LINE_STIPPLE);
 }
@@ -581,7 +581,91 @@ void layprop::ViewProperties::setCifLayMap(USMap* map)
    _cifLayMap = map;
 }
 
-layprop::ViewProperties::~ViewProperties() 
+/*! Shall be called by the execute method of loadlaystatus TELL function.
+ * Stores the current state of the defined layers in a _layStateHistory
+ * WARNING! This function is only for undo purposes. Should not be used
+ * to store/change/delete the layer state
+ */
+void layprop::ViewProperties::pushLayerStatus()
+{
+   _layStateHistory.push_front(LayStateList());
+   LayStateList& clist = _layStateHistory.front();
+   for (laySetList::const_iterator CL = _drawprop._laysetDB.begin(); CL != _drawprop._laysetDB.end(); CL++)
+   {
+      clist.push_back(LayerState(CL->first, *(CL->second)));
+   }
+}
+
+/*! Shall be called by the undo method of loadlaystatus TELL function.
+ * Restores the loch/hide/fill state of the defined layers in a _drawprop._laysetDB
+ * WARNING! This function is only for undo purposes. Should not be used
+ * to store/change/delete the layer state
+ */
+void layprop::ViewProperties::popLayerStatus()
+{
+   LayStateList& clist = _layStateHistory.front();
+   for (LayStateList::const_iterator CL = clist.begin(); CL != clist.end(); CL++)
+   {
+      laySetList::iterator clay;
+      if (_drawprop._laysetDB.end() != (clay = _drawprop._laysetDB.find(CL->number())))
+      {
+         clay->second->_fill = CL->filled();
+         clay->second->_hidden = CL->hidden();
+         clay->second->_locked = CL->locked();
+      }
+   }
+   _layStateHistory.pop_front();
+}
+
+/*!
+ * Removes the oldest saved state in the _layStateHistory. Should be called
+ * by undo_cleanup methods of the related tell functions.
+ * WARNING! This function is only for undo purposes. Should not be used
+ * to store/change/delete the layer state
+ */
+void layprop::ViewProperties::popBackLayerStatus()
+{
+   _layStateHistory.pop_back();
+}
+
+bool layprop::ViewProperties::saveLayerStatus(const std::string& sname)
+{
+   LayStateList clist;
+   bool status = true;
+   for (laySetList::const_iterator CL = _drawprop._laysetDB.begin(); CL != _drawprop._laysetDB.end(); CL++)
+   {
+      clist.push_back(LayerState(CL->first, *(CL->second)));
+   }
+   if (_layStateMap.end() == _layStateMap.find(sname)) status = false;
+   _layStateMap[sname] = clist;
+   return status;
+}
+
+bool layprop::ViewProperties::loadLayerStatus(const std::string& sname)
+{
+   if (_layStateMap.end() == _layStateMap.find(sname)) return false;
+   LayStateList clist = _layStateMap[sname];
+   for (LayStateList::const_iterator CL = clist.begin(); CL != clist.end(); CL++)
+   {
+      laySetList::iterator clay;
+      if (_drawprop._laysetDB.end() != (clay = _drawprop._laysetDB.find(CL->number())))
+      {
+         clay->second->_fill = CL->filled();
+         clay->second->_hidden = CL->hidden();
+         clay->second->_locked = CL->locked();
+      }
+   }
+   return true;
+}
+
+bool layprop::ViewProperties::deleteLayerStatus(const std::string& sname)
+{
+   if (_layStateMap.end() == _layStateMap.find(sname)) return false;
+   _layStateMap.erase(sname);
+   return true;
+}
+
+layprop::ViewProperties::~ViewProperties()
 {
    for(gridlist::iterator GI = _grid.begin(); GI != _grid.end(); GI++)
       delete GI->second;
