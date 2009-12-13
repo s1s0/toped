@@ -121,6 +121,8 @@ namespace layprop {
       void              hideLayer(unsigned layno, bool hide);
       void              lockLayer(unsigned layno, bool lock);
       void              fillLayer(unsigned layno, bool fill);
+      void              defaultLayer(word layno)  {_curlay = layno;}
+      word              curLay() const            {return _curlay;}
       bool              selectable(unsigned layno) const;
       const WordList    getLockedLayers(void);
       const WordList    getAllLayers(void);
@@ -138,10 +140,10 @@ namespace layprop {
       void              popLayerStatus();
       void              popBackLayerStatus();
       bool              saveLaysetStatus(const std::string&);
-      bool              saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&);
+      bool              saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&, unsigned);
       bool              loadLaysetStatus(const std::string&);
       bool              deleteLaysetStatus(const std::string&);
-      bool              getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&);
+      bool              getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
       void              setstep(real st)                 {_step = st;}
       void              setautopan(bool status)          {_autopan = status;}
       void              setZeroCross(bool status)        {_zeroCross = status;}
@@ -191,7 +193,7 @@ namespace layprop {
       void              all_lines(nameList&) const;
 
    private:
-      typedef std::deque<LayStateList>  LayStateHistory;
+      typedef std::deque<LayStateList>            LayStateHistory;
       typedef std::map<std::string, LayStateList> LayStateMap;
       DrawProperties       _drawprop;
       void                 saveScreenProps(FILE*) const;
@@ -199,6 +201,7 @@ namespace layprop {
       real                 _DBscale;
       real                 _UU;           // The scale of the data base. It is mirrored here, on order
                                           // not to read it with every mouse move
+      word                 _curlay;       // current drawing layer
       gridlist             _grid;         // the list of grids as defined by the tell command
       real                 _step;         // current marker step
       bool                 _autopan;      // view window moves automatically during shape drawing

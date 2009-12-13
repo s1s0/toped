@@ -232,11 +232,11 @@ namespace layprop {
    };
 
    //=============================================================================
-   typedef  std::map<std::string, tellRGB*      >  colorMAP;
-   typedef  std::map<std::string, byte*         >  fillMAP;
-   typedef  std::map<std::string, LineSettings* >  lineMAP;
-   typedef  std::map<unsigned   , LayerSettings*>  laySetList;
-   typedef  std::list<LayerState>                  LayStateList;
+   typedef  std::map<std::string, tellRGB*      >        colorMAP;
+   typedef  std::map<std::string, byte*         >        fillMAP;
+   typedef  std::map<std::string, LineSettings* >        lineMAP;
+   typedef  std::map<unsigned   , LayerSettings*>        laySetList;
+   typedef  std::pair <unsigned, std::list<LayerState> > LayStateList;
 
    //==============================================================================
    /*! This class serves as a carrying case for all drawing properties during the
