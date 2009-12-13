@@ -766,14 +766,15 @@ tellstdfunc::stdSAVELAYSTAT::stdSAVELAYSTAT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-void tellstdfunc::stdSAVELAYSTAT::undo_cleanup() {
-   std::string sname  = getStringValue(UNDOPstack, true);
+void tellstdfunc::stdSAVELAYSTAT::undo_cleanup()
+{
+   getStringValue(UNDOPstack, false);
 }
 
 void tellstdfunc::stdSAVELAYSTAT::undo() {
    TEUNDO_DEBUG("savelaystat( string ) UNDO");
    std::string sname  = getStringValue(UNDOPstack, true);
-   VERIFY(DATC->deleteLayerStatus(sname));
+   VERIFY(DATC->deleteLaysetStatus(sname));
 }
 
 int tellstdfunc::stdSAVELAYSTAT::execute()
@@ -781,13 +782,13 @@ int tellstdfunc::stdSAVELAYSTAT::execute()
    std::string   sname  = getStringValue();
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
-   if (!DATC->saveLayerStatus(sname))
+   if (!DATC->saveLaysetStatus(sname))
    {
       std::stringstream info;
-      info << "Layer set \\" << sname << "\" was redefined";
+      info << "Layer set \"" << sname << "\" was redefined";
       tell_log(console::MT_INFO, info.str());
    }
-   LogFile << LogFile.getFN() << "("<< sname << ");"; LogFile.flush();
+   LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
    return EXEC_NEXT;
 }
 
@@ -798,29 +799,63 @@ tellstdfunc::stdLOADLAYSTAT::stdLOADLAYSTAT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-void tellstdfunc::stdLOADLAYSTAT::undo_cleanup() {
-   std::string sname  = getStringValue(UNDOPstack, true);
-   //TODO
+void tellstdfunc::stdLOADLAYSTAT::undo_cleanup()
+{
+   getStringValue(UNDOPstack, false);
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   DATC->popBackLayerStatus();
+   delete pl;
 }
 
 void tellstdfunc::stdLOADLAYSTAT::undo() {
-   TEUNDO_DEBUG("savelaystat( string ) UNDO");
+   TEUNDO_DEBUG("loadlaystat( string ) UNDO");
+   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    std::string sname  = getStringValue(UNDOPstack, true);
-//TODO   VERIFY(DATC->deleteLayerStatus(sname));
+   DATC->popLayerStatus();
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+   ATDB->select_fromList(get_ttlaylist(pl));
+   DATC->unlockDB();
+   delete pl;
+   UpdateLV();
 }
 
 int tellstdfunc::stdLOADLAYSTAT::execute()
 {
    std::string   sname  = getStringValue();
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
-   if (!DATC->loadLayerStatus(sname))
+   WordSet hidel, lockl, filll;
+   if (DATC->getLaysetStatus(sname, hidel, lockl, filll))
+   {
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+      // the list containing all deselected shapes
+      laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
+      WordSet hll(hidel); // combined locked and hidden layers
+      hll.insert(lockl.begin(), lockl.end());
+
+      laydata::tdtdesign* ATDB = DATC->lockDB();
+         laydata::selectList *listselected = ATDB->shapesel();
+         // first thing is to pick-up the selected shapes of the layers which
+         // will be locked or hidden
+         for (WordSet::const_iterator CL = hll.begin(); CL != hll.end(); CL++)
+         {
+            if (listselected->end() != listselected->find(*CL))
+               (*todslct)[*CL] = DEBUG_NEW laydata::dataList(*((*listselected)[*CL]));
+         }
+         UNDOPstack.push_front(make_ttlaylist(todslct));
+         // Now unselect the shapes in the target layers
+         ATDB->unselect_fromList(todslct);
+      DATC->unlockDB();
+      DATC->pushLayerStatus();
+      DATC->loadLaysetStatus(sname);
+      LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
+   }
+   else
    {
       std::stringstream info;
-      info << "Layer set \\" << sname << "\" is not defined";
-      tell_log(console::MT_WARNING, info.str());
+      info << "Layer set \"" << sname << "\" is not defined";
+      tell_log(console::MT_ERROR, info.str());
    }
-   LogFile << LogFile.getFN() << "("<< sname << ");"; LogFile.flush();
+   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -831,29 +866,73 @@ tellstdfunc::stdDELLAYSTAT::stdDELLAYSTAT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-void tellstdfunc::stdDELLAYSTAT::undo_cleanup() {
-   std::string sname  = getStringValue(UNDOPstack, true);
-   //TODO
+void tellstdfunc::stdDELLAYSTAT::undo_cleanup()
+{
+   getStringValue(UNDOPstack, false);
+   telldata::ttlist* undohidel = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::ttlist* undolockl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::ttlist* undofilll = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete undofilll;
+   delete undolockl;
+   delete undohidel;
 }
 
 void tellstdfunc::stdDELLAYSTAT::undo() {
-   TEUNDO_DEBUG("savelaystat( string ) UNDO");
+   TEUNDO_DEBUG("deletelaystat( string ) UNDO");
+   // get the layer lists from the undo stack ...
+   telldata::ttlist* undofilll = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::ttlist* undolockl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::ttlist* undohidel = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   // ...get the layer set name from the undo stack ...
    std::string sname  = getStringValue(UNDOPstack, true);
-   //TODO   VERIFY(DATC->deleteLayerStatus(sname));
+   // ...convert the layer lists
+   WordSet filll;
+   for (unsigned i = 0; i < undofilll->size() ; i++)
+      filll.insert(filll.begin(), (static_cast<telldata::ttint*>((undofilll->mlist())[i]))->value());
+   WordSet lockl;
+   for (unsigned i = 0; i < undolockl->size() ; i++)
+      lockl.insert(lockl.begin(), (static_cast<telldata::ttint*>((undolockl->mlist())[i]))->value());
+   WordSet hidel;
+   for (unsigned i = 0; i < undohidel->size() ; i++)
+      hidel.insert(hidel.begin(), (static_cast<telldata::ttint*>((undohidel->mlist())[i]))->value());
+   // ... restore the layer set ...
+   DATC->saveLaysetStatus(sname, hidel, lockl, filll);
+   // ... and finally - clean-up
+   delete undofilll;
+   delete undolockl;
+   delete undohidel;
 }
 
 int tellstdfunc::stdDELLAYSTAT::execute()
 {
    std::string   sname  = getStringValue();
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
-   if (!DATC->deleteLayerStatus(sname))
+   WordSet hidel, lockl, filll;
+   if (DATC->getLaysetStatus(sname, hidel, lockl, filll))
+   {
+      VERIFY(DATC->deleteLaysetStatus(sname));
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+      // Push the layer lists in tell form for undo
+      telldata::ttlist* undohidel = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+      for (WordSet::const_iterator CL = hidel.begin(); CL != hidel.end(); CL++)
+         undohidel->add(DEBUG_NEW telldata::ttint(*CL));
+      UNDOPstack.push_front(undohidel);
+      telldata::ttlist* undolockl = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+      for (WordSet::const_iterator CL = lockl.begin(); CL != lockl.end(); CL++)
+         undolockl->add(DEBUG_NEW telldata::ttint(*CL));
+      UNDOPstack.push_front(undolockl);
+      telldata::ttlist* undofilll = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+      for (WordSet::const_iterator CL = filll.begin(); CL != filll.end(); CL++)
+         undofilll->add(DEBUG_NEW telldata::ttint(*CL));
+      UNDOPstack.push_front(undofilll);
+      LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
+   }
+   else
    {
       std::stringstream info;
-      info << "Layer set \\" << sname << "\" is not defined";
-      tell_log(console::MT_WARNING, info.str());
+      info << "Layer set \"" << sname << "\" is not defined";
+      tell_log(console::MT_ERROR, info.str());
    }
-   LogFile << LogFile.getFN() << "("<< sname << ");"; LogFile.flush();
    return EXEC_NEXT;
 }
 //=============================================================================

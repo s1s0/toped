@@ -137,9 +137,11 @@ namespace layprop {
       void              pushLayerStatus();
       void              popLayerStatus();
       void              popBackLayerStatus();
-      bool              saveLayerStatus(const std::string&);
-      bool              loadLayerStatus(const std::string&);
-      bool              deleteLayerStatus(const std::string&);
+      bool              saveLaysetStatus(const std::string&);
+      bool              saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&);
+      bool              loadLaysetStatus(const std::string&);
+      bool              deleteLaysetStatus(const std::string&);
+      bool              getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&);
       void              setstep(real st)                 {_step = st;}
       void              setautopan(bool status)          {_autopan = status;}
       void              setZeroCross(bool status)        {_zeroCross = status;}

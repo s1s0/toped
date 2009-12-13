@@ -111,9 +111,14 @@ public:
    void                       hideLayer(word, bool);
    void                       lockLayer(word, bool);
    void                       fillLayer(word, bool);
-   bool                       saveLayerStatus(const std::string&);
-   bool                       loadLayerStatus(const std::string&);
-   bool                       deleteLayerStatus(const std::string&);
+   void                       pushLayerStatus();
+   void                       popLayerStatus();
+   void                       popBackLayerStatus();
+   bool                       saveLaysetStatus(const std::string&);
+   bool                       saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&);
+   bool                       loadLaysetStatus(const std::string&);
+   bool                       deleteLaysetStatus(const std::string&);
+   bool                       getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&);
    void                       setcellmarks_hidden(bool);
    void                       settextmarks_hidden(bool);
    void                       setcellbox_hidden(bool);
@@ -209,7 +214,7 @@ private:
    wxMutex                    CIFLock;
    wxMutex                    OASLock;
    wxMutex                    PROPLock;
-   wxCondition*               _bpSync;       // Synchroniosation for cell browser panels
+   wxCondition*               _bpSync;       // Synchronization for cell browser panels
 
 };
 

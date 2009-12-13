@@ -35,6 +35,7 @@
 #include "viewprop.h"
 #include "outbox.h"
 #include "tenderer.h"
+#include "tuidefs.h"
 
 extern layprop::FontLibrary* fontLib;
 
@@ -611,7 +612,9 @@ void layprop::ViewProperties::popLayerStatus()
       {
          clay->second->_fill = CL->filled();
          clay->second->_hidden = CL->hidden();
+         TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
          clay->second->_locked = CL->locked();
+         TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
       }
    }
    _layStateHistory.pop_front();
@@ -628,7 +631,7 @@ void layprop::ViewProperties::popBackLayerStatus()
    _layStateHistory.pop_back();
 }
 
-bool layprop::ViewProperties::saveLayerStatus(const std::string& sname)
+bool layprop::ViewProperties::saveLaysetStatus(const std::string& sname)
 {
    LayStateList clist;
    bool status = true;
@@ -636,12 +639,29 @@ bool layprop::ViewProperties::saveLayerStatus(const std::string& sname)
    {
       clist.push_back(LayerState(CL->first, *(CL->second)));
    }
+   if (_layStateMap.end() != _layStateMap.find(sname)) status = false;
+   _layStateMap[sname] = clist;
+   return status;
+}
+
+bool layprop::ViewProperties::saveLaysetStatus(const std::string& sname, const WordSet& hidel,
+      const WordSet& lockl, const WordSet& filll)
+{
+   LayStateList clist;
+   bool status = true;
+   for (laySetList::const_iterator CL = _drawprop._laysetDB.begin(); CL != _drawprop._laysetDB.end(); CL++)
+   {
+      bool hiden  = (hidel.end() != hidel.find(CL->first));
+      bool locked = (lockl.end() != lockl.find(CL->first));
+      bool filled = (filll.end() != filll.find(CL->first));
+      clist.push_back(LayerState(CL->first, hiden, locked, filled));
+   }
    if (_layStateMap.end() == _layStateMap.find(sname)) status = false;
    _layStateMap[sname] = clist;
    return status;
 }
 
-bool layprop::ViewProperties::loadLayerStatus(const std::string& sname)
+bool layprop::ViewProperties::loadLaysetStatus(const std::string& sname)
 {
    if (_layStateMap.end() == _layStateMap.find(sname)) return false;
    LayStateList clist = _layStateMap[sname];
@@ -652,16 +672,32 @@ bool layprop::ViewProperties::loadLayerStatus(const std::string& sname)
       {
          clay->second->_fill = CL->filled();
          clay->second->_hidden = CL->hidden();
+         TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
          clay->second->_locked = CL->locked();
+         TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
       }
    }
    return true;
 }
 
-bool layprop::ViewProperties::deleteLayerStatus(const std::string& sname)
+bool layprop::ViewProperties::deleteLaysetStatus(const std::string& sname)
 {
    if (_layStateMap.end() == _layStateMap.find(sname)) return false;
    _layStateMap.erase(sname);
+   return true;
+}
+
+bool layprop::ViewProperties::getLaysetStatus(const std::string& sname, WordSet& hidel,
+      WordSet& lockl, WordSet& filll)
+{
+   if (_layStateMap.end() == _layStateMap.find(sname)) return false;
+   LayStateList clist = _layStateMap[sname];
+   for (LayStateList::const_iterator CL = clist.begin(); CL != clist.end(); CL++)
+   {
+      if (CL->hidden()) hidel.insert(hidel.begin(),CL->number());
+      if (CL->locked()) lockl.insert(lockl.begin(),CL->number());
+      if (CL->filled()) filll.insert(filll.begin(),CL->number());
+   }
    return true;
 }
 
