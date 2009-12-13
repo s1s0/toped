@@ -1005,22 +1005,65 @@ void DataCenter::fillLayer(word layno, bool fill)
    PROPLock.Unlock();
 }
 
-bool DataCenter::saveLayerStatus(const std::string& sname)
+void DataCenter::pushLayerStatus()
 {
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
-   return _properties.saveLayerStatus(sname);
+   _properties.pushLayerStatus();
+   PROPLock.Unlock();
 }
 
-bool DataCenter::loadLayerStatus(const std::string& sname)
+void DataCenter::popLayerStatus()
 {
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
-   return _properties.loadLayerStatus(sname);
+   _properties.popLayerStatus();
+   PROPLock.Unlock();
 }
 
-bool DataCenter::deleteLayerStatus(const std::string& sname)
+void DataCenter::popBackLayerStatus()
 {
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
-   return _properties.deleteLayerStatus(sname);
+   _properties.popBackLayerStatus();
+   PROPLock.Unlock();
+}
+
+bool DataCenter::saveLaysetStatus(const std::string& sname)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   bool stat = _properties.saveLaysetStatus(sname);
+   PROPLock.Unlock();
+   return stat;
+}
+
+bool DataCenter::saveLaysetStatus(const std::string& sname, const WordSet& hl, const WordSet& ll, const WordSet& fl)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   bool stat = _properties.saveLaysetStatus(sname, hl, ll, fl);
+   PROPLock.Unlock();
+   return stat;
+}
+
+bool DataCenter::loadLaysetStatus(const std::string& sname)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   bool stat = _properties.loadLaysetStatus(sname);
+   PROPLock.Unlock();
+   return stat;
+}
+
+bool DataCenter::deleteLaysetStatus(const std::string& sname)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   bool stat = _properties.deleteLaysetStatus(sname);
+   PROPLock.Unlock();
+   return stat;
+}
+
+bool DataCenter::getLaysetStatus(const std::string& sname, WordSet& hl, WordSet& ll, WordSet& fl)
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   bool stat = _properties.getLaysetStatus(sname, hl, ll, fl);
+   PROPLock.Unlock();
+   return stat;
 }
 
 void DataCenter::setcellmarks_hidden(bool hide)

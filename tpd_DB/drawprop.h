@@ -83,7 +83,7 @@ namespace layprop {
    //
    class LayerSettings  {
       public:
-                        LayerSettings(std::string name, std::string color, std::string filltype, std::string sline):
+                           LayerSettings(std::string name, std::string color, std::string filltype, std::string sline):
                            _name(name), _color(color), _fill(filltype), _sline(sline),
                                  _hidden(false), _locked(false), _filled(filltype != "") {};
          std::string       color()    const {return _color;}
@@ -111,8 +111,10 @@ namespace layprop {
    //
    class LayerState {
    public:
-                        LayerState(unsigned num, const LayerSettings& lset) : _number(num),
-                        _hidden(lset.hidden()), _locked(lset.locked()), _filled(lset.filled()){}
+                          LayerState(unsigned num, bool sh, bool sl, bool sf) : _number(num), _hidden(sh),
+                             _locked(sl), _filled(sf) {};
+                          LayerState(unsigned num, const LayerSettings& lset) : _number(num),
+                             _hidden(lset.hidden()), _locked(lset.locked()), _filled(lset.filled()){}
       unsigned            number() const              {return _number;}
       bool                hidden() const              {return _hidden;}
       bool                locked() const              {return _locked;}
