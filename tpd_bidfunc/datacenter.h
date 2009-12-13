@@ -89,9 +89,9 @@ public:
    laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
    laydata::LibCellLists*     getCells(int libID);
    unsigned int               numselected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numselected() : 0 ;}
-   void                       defaultlayer(word layno){_curlay = layno;}
+   void                       defaultlayer(word layno){_properties.defaultLayer(layno);}
    void                       setcmdlayer(word layno) {_curcmdlay = layno;}
-   word                       curlay() const          {return _curlay;}
+   word                       curlay() const          {return _properties.curLay();}
    word                       curcmdlay() const       {return _curcmdlay;}
    std::string                tedfilename() const     {return _tedfilename;};
    bool                       neversaved()  const     {return _neversaved;};
@@ -115,10 +115,10 @@ public:
    void                       popLayerStatus();
    void                       popBackLayerStatus();
    bool                       saveLaysetStatus(const std::string&);
-   bool                       saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&);
+   bool                       saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&, unsigned);
    bool                       loadLaysetStatus(const std::string&);
    bool                       deleteLaysetStatus(const std::string&);
-   bool                       getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&);
+   bool                       getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
    void                       setcellmarks_hidden(bool);
    void                       settextmarks_hidden(bool);
    void                       setcellbox_hidden(bool);
@@ -197,9 +197,8 @@ protected:
    void                       openGL_draw(const CTM&);
    void                       openGL_render(const CTM&); // alternative to openGL_draw
 private:
-   word                       _curlay;       // current drawing layer
    word                       _curcmdlay;    // layer used during current drawing operation
-   bool                       _drawruler;    // draw a ruler while coposing a shape interactively
+   bool                       _drawruler;    // draw a ruler while composing a shape interactively
    std::string                _localDir;
    std::string                _globalDir;
    laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries

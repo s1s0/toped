@@ -52,7 +52,6 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    // initializing the static cell hierarchy tree
    laydata::tdtlibrary::initHierTreePtr();
    _tedfilename = "unnamed";
-   _curlay = 1;
    _drawruler = false;
 }
 
@@ -1034,10 +1033,10 @@ bool DataCenter::saveLaysetStatus(const std::string& sname)
    return stat;
 }
 
-bool DataCenter::saveLaysetStatus(const std::string& sname, const WordSet& hl, const WordSet& ll, const WordSet& fl)
+bool DataCenter::saveLaysetStatus(const std::string& sname, const WordSet& hl, const WordSet& ll, const WordSet& fl, unsigned al)
 {
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
-   bool stat = _properties.saveLaysetStatus(sname, hl, ll, fl);
+   bool stat = _properties.saveLaysetStatus(sname, hl, ll, fl, al);
    PROPLock.Unlock();
    return stat;
 }
@@ -1058,10 +1057,10 @@ bool DataCenter::deleteLaysetStatus(const std::string& sname)
    return stat;
 }
 
-bool DataCenter::getLaysetStatus(const std::string& sname, WordSet& hl, WordSet& ll, WordSet& fl)
+bool DataCenter::getLaysetStatus(const std::string& sname, WordSet& hl, WordSet& ll, WordSet& fl, unsigned al)
 {
    while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
-   bool stat = _properties.getLaysetStatus(sname, hl, ll, fl);
+   bool stat = _properties.getLaysetStatus(sname, hl, ll, fl, al);
    PROPLock.Unlock();
    return stat;
 }

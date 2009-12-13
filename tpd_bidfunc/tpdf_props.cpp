@@ -823,7 +823,8 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
 {
    std::string   sname  = getStringValue();
    WordSet hidel, lockl, filll;
-   if (DATC->getLaysetStatus(sname, hidel, lockl, filll))
+   unsigned activel = 0;
+   if (DATC->getLaysetStatus(sname, hidel, lockl, filll, activel))
    {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
@@ -880,6 +881,7 @@ void tellstdfunc::stdDELLAYSTAT::undo_cleanup()
 void tellstdfunc::stdDELLAYSTAT::undo() {
    TEUNDO_DEBUG("deletelaystat( string ) UNDO");
    // get the layer lists from the undo stack ...
+   word activel = getWordValue(UNDOPstack, true);
    telldata::ttlist* undofilll = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttlist* undolockl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttlist* undohidel = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
@@ -896,7 +898,7 @@ void tellstdfunc::stdDELLAYSTAT::undo() {
    for (unsigned i = 0; i < undohidel->size() ; i++)
       hidel.insert(hidel.begin(), (static_cast<telldata::ttint*>((undohidel->mlist())[i]))->value());
    // ... restore the layer set ...
-   DATC->saveLaysetStatus(sname, hidel, lockl, filll);
+   DATC->saveLaysetStatus(sname, hidel, lockl, filll, activel);
    // ... and finally - clean-up
    delete undofilll;
    delete undolockl;
@@ -907,7 +909,8 @@ int tellstdfunc::stdDELLAYSTAT::execute()
 {
    std::string   sname  = getStringValue();
    WordSet hidel, lockl, filll;
-   if (DATC->getLaysetStatus(sname, hidel, lockl, filll))
+   unsigned activel = 0;
+   if (DATC->getLaysetStatus(sname, hidel, lockl, filll, activel))
    {
       VERIFY(DATC->deleteLaysetStatus(sname));
       UNDOcmdQ.push_front(this);
@@ -925,6 +928,7 @@ int tellstdfunc::stdDELLAYSTAT::execute()
       for (WordSet::const_iterator CL = filll.begin(); CL != filll.end(); CL++)
          undofilll->add(DEBUG_NEW telldata::ttint(*CL));
       UNDOPstack.push_front(undofilll);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(activel));
       LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
    }
    else

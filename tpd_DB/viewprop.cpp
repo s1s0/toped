@@ -231,6 +231,7 @@ layprop::ViewProperties::ViewProperties()
 {
    _step = 1;
    setUU(1);
+   _curlay = 1;
    _marker_angle = 0;
    _autopan = false;
    _layselmask = laydata::_lmall;
@@ -593,8 +594,9 @@ void layprop::ViewProperties::pushLayerStatus()
    LayStateList& clist = _layStateHistory.front();
    for (laySetList::const_iterator CL = _drawprop._laysetDB.begin(); CL != _drawprop._laysetDB.end(); CL++)
    {
-      clist.push_back(LayerState(CL->first, *(CL->second)));
+      clist.second.push_back(LayerState(CL->first, *(CL->second)));
    }
+   clist.first = _curlay;
 }
 
 /*! Shall be called by the undo method of loadlaystatus TELL function.
@@ -605,17 +607,20 @@ void layprop::ViewProperties::pushLayerStatus()
 void layprop::ViewProperties::popLayerStatus()
 {
    LayStateList& clist = _layStateHistory.front();
-   for (LayStateList::const_iterator CL = clist.begin(); CL != clist.end(); CL++)
+   for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
    {
       laySetList::iterator clay;
       if (_drawprop._laysetDB.end() != (clay = _drawprop._laysetDB.find(CL->number())))
       {
-         clay->second->_fill = CL->filled();
+         clay->second->_filled = CL->filled();
+         TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
          clay->second->_hidden = CL->hidden();
          TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
          clay->second->_locked = CL->locked();
          TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
       }
+      TpdPost::layer_default(clist.first, _curlay);
+      _curlay = clist.first;
    }
    _layStateHistory.pop_front();
 }
@@ -637,15 +642,16 @@ bool layprop::ViewProperties::saveLaysetStatus(const std::string& sname)
    bool status = true;
    for (laySetList::const_iterator CL = _drawprop._laysetDB.begin(); CL != _drawprop._laysetDB.end(); CL++)
    {
-      clist.push_back(LayerState(CL->first, *(CL->second)));
+      clist.second.push_back(LayerState(CL->first, *(CL->second)));
    }
+   clist.first = _curlay;
    if (_layStateMap.end() != _layStateMap.find(sname)) status = false;
    _layStateMap[sname] = clist;
    return status;
 }
 
 bool layprop::ViewProperties::saveLaysetStatus(const std::string& sname, const WordSet& hidel,
-      const WordSet& lockl, const WordSet& filll)
+      const WordSet& lockl, const WordSet& filll, unsigned alay)
 {
    LayStateList clist;
    bool status = true;
@@ -654,8 +660,9 @@ bool layprop::ViewProperties::saveLaysetStatus(const std::string& sname, const W
       bool hiden  = (hidel.end() != hidel.find(CL->first));
       bool locked = (lockl.end() != lockl.find(CL->first));
       bool filled = (filll.end() != filll.find(CL->first));
-      clist.push_back(LayerState(CL->first, hiden, locked, filled));
+      clist.second.push_back(LayerState(CL->first, hiden, locked, filled));
    }
+   clist.first = alay;
    if (_layStateMap.end() == _layStateMap.find(sname)) status = false;
    _layStateMap[sname] = clist;
    return status;
@@ -665,18 +672,21 @@ bool layprop::ViewProperties::loadLaysetStatus(const std::string& sname)
 {
    if (_layStateMap.end() == _layStateMap.find(sname)) return false;
    LayStateList clist = _layStateMap[sname];
-   for (LayStateList::const_iterator CL = clist.begin(); CL != clist.end(); CL++)
+   for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
    {
       laySetList::iterator clay;
       if (_drawprop._laysetDB.end() != (clay = _drawprop._laysetDB.find(CL->number())))
       {
-         clay->second->_fill = CL->filled();
+         clay->second->_filled = CL->filled();
+         TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
          clay->second->_hidden = CL->hidden();
          TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
          clay->second->_locked = CL->locked();
          TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
       }
    }
+   TpdPost::layer_default(clist.first, _curlay);
+   _curlay = clist.first;
    return true;
 }
 
@@ -688,16 +698,17 @@ bool layprop::ViewProperties::deleteLaysetStatus(const std::string& sname)
 }
 
 bool layprop::ViewProperties::getLaysetStatus(const std::string& sname, WordSet& hidel,
-      WordSet& lockl, WordSet& filll)
+      WordSet& lockl, WordSet& filll, unsigned activel)
 {
    if (_layStateMap.end() == _layStateMap.find(sname)) return false;
    LayStateList clist = _layStateMap[sname];
-   for (LayStateList::const_iterator CL = clist.begin(); CL != clist.end(); CL++)
+   for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
    {
       if (CL->hidden()) hidel.insert(hidel.begin(),CL->number());
       if (CL->locked()) lockl.insert(lockl.begin(),CL->number());
       if (CL->filled()) filll.insert(filll.begin(),CL->number());
    }
+   activel = clist.first;
    return true;
 }
 
