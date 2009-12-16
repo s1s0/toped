@@ -194,7 +194,7 @@ namespace Oasis {
          bool              status()                      {return _status;}
          TYPE&             operator = (const TYPE& value) {_value = value; _status = true; return _value;}
          TYPE&             operator() ()                 {if (!_status)
-                                                             throw EXPTNreadOASIS("Uninitialised modal variable referenced (10.3)");
+                                                             throw EXPTNreadOASIS("Uninitialized modal variable referenced (10.3)");
                                                           else
                                                              return _value;}
       private:
@@ -325,18 +325,21 @@ namespace Oasis {
          void              skimPolygon(OasisInFile&);
          void              skimPath(OasisInFile&);
          void              skimTrapezoid(OasisInFile&, byte);
+         void              skimCTrapezoid(OasisInFile&);
          void              skimText(OasisInFile&);
          void              skimReference(OasisInFile&, bool);
          void              readRectangle(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
          void              readPolygon(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
          void              readPath(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
          void              readTrapezoid(OasisInFile&, laydata::tdtcell*, const LayerMapExt&, byte);
+         void              readCTrapezoid(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
          void              readText(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
          void              readReference(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, bool);
          PointList         readPointList(OasisInFile&);
          void              readRepetitions(OasisInFile&);
          void              readExtensions(OasisInFile&);
          void              updateContents(int2b, int2b);
+         void              genCTrapezoids(OasisInFile&, pointlist&, int4b, int4b, int4b, int4b, word);
          void              initModals();
          //
          ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer
@@ -355,6 +358,7 @@ namespace Oasis {
          ModalVar<int4b>   _mod_tx          ; //! OASIS modal variable text-x
          ModalVar<int4b>   _mod_ty          ; //! OASIS modal variable text-y
          ModalVar<XYMode>  _mod_xymode      ; //! OASIS modal variable xy-mode
+         ModalVar<word>    _mod_trpztype    ; //! OASIS modal variable ctrapezoid-type
 
          ModalVar<PointList>     _mod_pplist; //! OASIS modal variable polygon point list
          ModalVar<PointList>     _mod_wplist; //! OASIS modal variable path point list
@@ -362,7 +366,6 @@ namespace Oasis {
          ModalVar<PathExtensions> _mod_exs  ; //! OASIS modal variable path-start-extension
          ModalVar<PathExtensions> _mod_exe  ; //! OASIS modal variable path-end-extension
          //
-         //TODO - OASIS modal variable ctrapezoid-type
          //TODO - OASIS modal variable circle-radius
          //TODO - OASIS modal variable last-property-name
          //TODO - OASIS modal variable last-value-list
