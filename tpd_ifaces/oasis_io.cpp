@@ -1157,14 +1157,35 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, c
    const byte Dmask   = 0x02;
    const byte Lmask   = 0x01;
    word       tdtlaynum;
+   std::ostringstream error;
 
    byte info = ofn.getByte();
 
    if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
    if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
    if (info & Tmask) _mod_trpztype = ofn.getUnsignedInt(4);
-   if (info & Wmask) _mod_gwidth   = ofn.getUnsignedInt(4);
-   if (info & Hmask) _mod_gheight  = ofn.getUnsignedInt(4);
+   if (info & Wmask)
+   {
+      _mod_gwidth   = ofn.getUnsignedInt(4);
+      if ( (20 == _mod_trpztype())                             ||
+           (21 == _mod_trpztype())                               )
+      {
+         error << "W flag is 1 for CTRAPEZOID of type"  << _mod_trpztype() << " (28.8)";
+         ofn.exception(error.str());
+      }
+   }
+   if (info & Hmask)
+   {
+      _mod_gheight  = ofn.getUnsignedInt(4);
+      if ( ((16 <= _mod_trpztype()) && (_mod_trpztype() <= 19)) ||
+            (22 == _mod_trpztype())                             ||
+            (23 == _mod_trpztype())                             ||
+            (25 == _mod_trpztype())                               )
+      {
+         error << "H flag is 1 for CTRAPEZOID of type"  << _mod_trpztype() << " (28.8)";
+         ofn.exception(error.str());
+      }
+   }
    if (info & Xmask)
    {
       if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
@@ -1191,8 +1212,8 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, c
             genCTrapezoids(ofn, laypl,
                            _mod_gx()+ rptpnt[2*rcnt]  ,
                            _mod_gy()+ rptpnt[2*rcnt+1],
-                           _mod_gwidth()              ,
-                           _mod_gheight()             ,
+                           (info & Wmask) ? _mod_gwidth()  : 0,
+                           (info & Hmask) ? _mod_gheight() : 0,
                            _mod_trpztype()             );
             dwl->addpoly(laypl, false);
          }
@@ -1204,8 +1225,8 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, c
          genCTrapezoids(ofn, laypl      ,
                         _mod_gx()       ,
                         _mod_gy()       ,
-                        _mod_gwidth()   ,
-                        _mod_gheight()  ,
+                        (info & Wmask) ? _mod_gwidth()  : 0,
+                        (info & Hmask) ? _mod_gheight() : 0,
                         _mod_trpztype()  );
          dwl->addpoly(laypl, false);
       }
@@ -1531,41 +1552,44 @@ void Oasis::Cell::genCTrapezoids(OasisInFile& ofn, pointlist& laypl,
       case  6:
       case  7: if (width < height)
                {
-                  info << "w < h in CTRAPEZOID of type"  << ctype << "(28.8)";
+                  info << "(w < h) in CTRAPEZOID of type "  << ctype << " (28.8)";
                   ofn.exception(info.str());
                }
                else
                   delta = width - height;
+               break;
       case  4:
       case  5: if (width < 2 * height)
                {
-                  info << "w < 2*h in CTRAPEZOID of type"  << ctype << "(28.8)";
+                  info << "(w < 2*h) in CTRAPEZOID of type "  << ctype << " (28.8)";
                   ofn.exception(info.str());
                }
                else
                   delta = width/2 - height;
+               break;
       case  8:
       case  9:
       case 10:
       case 11:
       case 14:
-      case 15: if (width < height)
+      case 15: if (height < width)
               {
-                 info << "h < w in CTRAPEZOID of type"  << ctype << "(28.8)";
+                 info << "(h < w) in CTRAPEZOID of type "  << ctype << " (28.8)";
                  ofn.exception(info.str());
               }
               else
                  delta = height - width;
+              break;
       case 12:
       case 13: if (height < 2 * width)
                {
-                  info << "h < 2*w in CTRAPEZOID of type"  << ctype << "(28.8)";
+                  info << "(h < 2*w) in CTRAPEZOID of type "  << ctype << " (28.8)";
                   ofn.exception(info.str());
                }
                else
                   delta = height/2 - width;
-      default: assert(false);
    }
+
    switch (ctype)
    {
       case  0:
@@ -1664,8 +1688,63 @@ void Oasis::Cell::genCTrapezoids(OasisInFile& ofn, pointlist& laypl,
          laypl.push_back(TP(gx + width        , gy + height -delta ));
          laypl.push_back(TP(gx + width        , gy                 ));
          break;
-   //         case 16: break;
-      default: assert(false);
+      //------------------------------------------------ triangles -----
+      case 16:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + width         ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case 17:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + width         ));
+         laypl.push_back(TP(gx + width        , gy + width         ));
+         break;
+      case 18:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx + width        , gy + width         ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case 19:
+         laypl.push_back(TP(gx                , gy + width         ));
+         laypl.push_back(TP(gx + width        , gy + width         ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case 20:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx + height       , gy + height        ));
+         laypl.push_back(TP(gx + height * 2   , gy                 ));
+         break;
+      case 21:
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + height * 2   , gy + height        ));
+         laypl.push_back(TP(gx + height       , gy                 ));
+         break;
+      case 22:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + width*2       ));
+         laypl.push_back(TP(gx + width        , gy + width         ));
+         break;
+      case 23:
+         laypl.push_back(TP(gx                , gy + width         ));
+         laypl.push_back(TP(gx + width        , gy + width*2       ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      //------------------------------------------------- boxes -------
+      case 24:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case 25:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + width         ));
+         laypl.push_back(TP(gx + width        , gy + width         ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      default:
+         info << "Illegal CTRAPEZOID type "  << ctype << " (28.8)";
+         ofn.exception(info.str());
    }
 }
 //------------------------------------------------------------------------------
