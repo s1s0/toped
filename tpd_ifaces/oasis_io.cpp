@@ -401,8 +401,11 @@ void Oasis::OasisInFile::readLibrary()
       switch (recType)
       {
          case oas_PAD         : rlb = false; break;
-         case oas_PROPERTY_1  : assert(false);/*@TODO oas_PROPERTY_1*/ rlb = false; break;
-         case oas_PROPERTY_2  : assert(false);/*@TODO oas_PROPERTY_2*/ rlb = false; break;
+         case oas_PROPERTY_1  :
+            setPropContext(pc_file);
+            getProperty1();
+            rlb = false; break;
+         case oas_PROPERTY_2  : /*There is nothing to do*/rlb = false; break;
          case oas_CELL_1      :
             curCell = DEBUG_NEW Cell();
             recType = curCell->skimCell(*this, true) ;
@@ -729,7 +732,7 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
          case oas_TRAPEZOID_1 : skimTrapezoid(ofn, 1);break;
          case oas_TRAPEZOID_2 : skimTrapezoid(ofn, 2);break;
          case oas_TRAPEZOID_3 : skimTrapezoid(ofn, 3);break;
-         case oas_CTRAPEZOID  : /*@TODO oas_CTRAPEZOID*/assert(false);break;
+         case oas_CTRAPEZOID  : skimCTrapezoid(ofn);break;
          case oas_CIRCLE      : /*@TODO oas_CIRCLE*/assert(false);break;
          default:
             // last byte from the stream doesn't belong to this cell definition
@@ -771,7 +774,7 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
          case oas_TRAPEZOID_1 : readTrapezoid(ofn, dst_cell, theLayMap, 1);break;
          case oas_TRAPEZOID_2 : readTrapezoid(ofn, dst_cell, theLayMap, 2);break;
          case oas_TRAPEZOID_3 : readTrapezoid(ofn, dst_cell, theLayMap, 3);break;
-         case oas_CTRAPEZOID  : /*@TODO oas_CTRAPEZOID*/assert(false);break;
+         case oas_CTRAPEZOID  : readCTrapezoid(ofn, dst_cell, theLayMap);break;
          case oas_CIRCLE      : /*@TODO oas_CIRCLE*/assert(false);break;
          default:
             // check that the cell size is the same as obtained by skim function
@@ -828,7 +831,6 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
       if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
       else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
    }
-   //read the repetition record from the input stream
    if (info & Rmask) readRepetitions(ofn);
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
@@ -893,7 +895,6 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
       laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
       if (info & Rmask)
       {
-         //read the repetition record from the input stream
          int4b* rptpnt = _mod_repete().lcarray();
          assert(rptpnt);
          for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
@@ -1099,7 +1100,6 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
       laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
       if (info & Rmask)
       {
-         //read the repetition record from the input stream
          int4b* rptpnt = _mod_repete().lcarray();
          assert(rptpnt);
          for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
@@ -1146,6 +1146,71 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
    }
 }
 
+void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
+{
+   const byte Tmask   = 0x80;
+   const byte Wmask   = 0x40;
+   const byte Hmask   = 0x20;
+   const byte Xmask   = 0x10;
+   const byte Ymask   = 0x08;
+   const byte Rmask   = 0x04;
+   const byte Dmask   = 0x02;
+   const byte Lmask   = 0x01;
+   word       tdtlaynum;
+
+   byte info = ofn.getByte();
+
+   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
+   if (info & Tmask) _mod_trpztype = ofn.getUnsignedInt(4);
+   if (info & Wmask) _mod_gwidth   = ofn.getUnsignedInt(4);
+   if (info & Hmask) _mod_gheight  = ofn.getUnsignedInt(4);
+   if (info & Xmask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
+      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+   }
+   if (info & Ymask)
+   {
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
+      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+   }
+   if (info & Rmask) readRepetitions(ofn);
+
+   if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
+   {
+      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      if (info & Rmask)
+      {
+         //read the repetition record from the input stream
+         int4b* rptpnt = _mod_repete().lcarray();
+         assert(rptpnt);
+         for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
+         {
+            pointlist laypl;
+            genCTrapezoids(ofn, laypl,
+                           _mod_gx()+ rptpnt[2*rcnt]  ,
+                           _mod_gy()+ rptpnt[2*rcnt+1],
+                           _mod_gwidth()              ,
+                           _mod_gheight()             ,
+                           _mod_trpztype()             );
+            dwl->addpoly(laypl, false);
+         }
+
+      }
+      else
+      {
+         pointlist laypl;
+         genCTrapezoids(ofn, laypl      ,
+                        _mod_gx()       ,
+                        _mod_gy()       ,
+                        _mod_gwidth()   ,
+                        _mod_gheight()  ,
+                        _mod_trpztype()  );
+         dwl->addpoly(laypl, false);
+      }
+   }
+}
 //------------------------------------------------------------------------------
 void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
 {
@@ -1346,7 +1411,6 @@ void Oasis::Cell::skimPath(OasisInFile& ofn)
    if (info & Xmask) ofn.getInt(8);
    if (info & Ymask) ofn.getInt(8);
    if (info & Rmask) readRepetitions(ofn);
-//   Repetitions rpt = _mod_repete();
 }
 
 //------------------------------------------------------------------------------
@@ -1380,6 +1444,30 @@ void Oasis::Cell::skimTrapezoid(OasisInFile& ofn, byte type)
    if (info & Rmask) readRepetitions(ofn);
 }
 
+//------------------------------------------------------------------------------
+void Oasis::Cell::skimCTrapezoid(OasisInFile& ofn)
+{
+   const byte Tmask   = 0x80;
+   const byte Wmask   = 0x40;
+   const byte Hmask   = 0x20;
+   const byte Xmask   = 0x10;
+   const byte Ymask   = 0x08;
+   const byte Rmask   = 0x04;
+   const byte Dmask   = 0x02;
+   const byte Lmask   = 0x01;
+
+   byte info = ofn.getByte();
+
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
+   updateContents(layno, dtype);
+   if (info & Tmask) ofn.getUnsignedInt(4);
+   if (info & Wmask) ofn.getUnsignedInt(4);
+   if (info & Hmask) ofn.getUnsignedInt(4);
+   if (info & Xmask) ofn.getInt(8);
+   if (info & Ymask) ofn.getInt(8);
+   if (info & Rmask) readRepetitions(ofn);
+}
 //------------------------------------------------------------------------------
 void Oasis::Cell::skimText(OasisInFile& ofn)
 {
@@ -1428,6 +1516,158 @@ void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
    _referenceNames.insert(name);
 }
 
+//------------------------------------------------------------------------------
+void Oasis::Cell::genCTrapezoids(OasisInFile& ofn, pointlist& laypl,
+      int4b gx, int4b gy, int4b width, int4b height, word ctype)
+{
+   dword      delta  = 0;
+   std::ostringstream info;
+   switch (ctype)
+   {
+      case  0:
+      case  1:
+      case  2:
+      case  3:
+      case  6:
+      case  7: if (width < height)
+               {
+                  info << "w < h in CTRAPEZOID of type"  << ctype << "(28.8)";
+                  ofn.exception(info.str());
+               }
+               else
+                  delta = width - height;
+      case  4:
+      case  5: if (width < 2 * height)
+               {
+                  info << "w < 2*h in CTRAPEZOID of type"  << ctype << "(28.8)";
+                  ofn.exception(info.str());
+               }
+               else
+                  delta = width/2 - height;
+      case  8:
+      case  9:
+      case 10:
+      case 11:
+      case 14:
+      case 15: if (width < height)
+              {
+                 info << "h < w in CTRAPEZOID of type"  << ctype << "(28.8)";
+                 ofn.exception(info.str());
+              }
+              else
+                 delta = height - width;
+      case 12:
+      case 13: if (height < 2 * width)
+               {
+                  info << "h < 2*w in CTRAPEZOID of type"  << ctype << "(28.8)";
+                  ofn.exception(info.str());
+               }
+               else
+                  delta = height/2 - width;
+      default: assert(false);
+   }
+   switch (ctype)
+   {
+      case  0:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width -delta , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case  1:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width -delta , gy                 ));
+         break;
+      case  2:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx         +delta , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case  3:
+         laypl.push_back(TP(gx         +delta , gy                 ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case  4:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx         +delta , gy + height        ));
+         laypl.push_back(TP(gx + width -delta , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case  5:
+         laypl.push_back(TP(gx         +delta , gy                 ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width -delta , gy                 ));
+         break;
+      case  6:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx         +delta , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width -delta , gy                 ));
+         break;
+      case  7:
+         laypl.push_back(TP(gx         +delta , gy                 ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width -delta , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case  8:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height -delta ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case  9:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + height -delta ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case 10:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy          +delta ));
+         break;
+      case 11:
+         laypl.push_back(TP(gx                , gy          +delta ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case 12:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height -delta ));
+         laypl.push_back(TP(gx + width        , gy          +delta ));
+         break;
+      case 13:
+         laypl.push_back(TP(gx                , gy          +delta ));
+         laypl.push_back(TP(gx                , gy + height -delta ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+      case 14:
+         laypl.push_back(TP(gx                , gy                 ));
+         laypl.push_back(TP(gx                , gy + height -delta ));
+         laypl.push_back(TP(gx + width        , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy          +delta ));
+         break;
+      case 15:
+         laypl.push_back(TP(gx                , gy          +delta ));
+         laypl.push_back(TP(gx                , gy + height        ));
+         laypl.push_back(TP(gx + width        , gy + height -delta ));
+         laypl.push_back(TP(gx + width        , gy                 ));
+         break;
+   //         case 16: break;
+      default: assert(false);
+   }
+}
 //------------------------------------------------------------------------------
 Oasis::PointList Oasis::Cell::readPointList(OasisInFile& ofn)
 {
@@ -1530,6 +1770,7 @@ void Oasis::Cell::initModals()
    _mod_exs.reset();
    _mod_exe.reset();
    _mod_xymode = md_absolute;
+   _mod_trpztype.reset();
 }
 
 void Oasis::Cell::updateContents(int2b layer, int2b dtype)
