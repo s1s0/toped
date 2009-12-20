@@ -203,17 +203,17 @@ private:
    std::string                _localDir;
    std::string                _globalDir;
    laydata::TdtLibDir         _TEDLIB;       // catalog of available TDT libraries
-   laydata::DrcLibrary*       _DRCDB;		//DRC data
+   laydata::DrcLibrary*       _DRCDB;        //DRC data
    GDSin::GdsInFile*          _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
    Oasis::OasisInFile*        _OASDB;        // OASIS parsed data
    layprop::ViewProperties    _properties;   // properties data base
-   wxMutex                    DBLock;
-   wxMutex                    DRCLock;
-   wxMutex                    GDSLock;
-   wxMutex                    CIFLock;
-   wxMutex                    OASLock;
-   wxMutex                    PROPLock;
+   wxMutex                    _DBLock;
+   wxMutex                    _DRCLock;
+   wxMutex                    _GDSLock;
+   wxMutex                    _CIFLock;
+   wxMutex                    _OASLock;
+   wxMutex                    _PROPLock;
    wxCondition*               _bpSync;       // Synchronization for cell browser panels
 
 };
@@ -227,8 +227,8 @@ private:
 // This memo relates to the following fields of the DataCenter class:
 //   GDSin::GdsInFile* _GDSDB
 //   CIFin::CifFile* _CIFDB
-//   wxMutex         GDSLock
-//   wxMutex         CIFLock
+//   wxMutex         _GDSLock
+//   wxMutex         _CIFLock
 //   wxCondition*    _bpSync;
 // and associated methods:
 //   bool lockGds(GDSin::GdsInFile*& gds_db);
